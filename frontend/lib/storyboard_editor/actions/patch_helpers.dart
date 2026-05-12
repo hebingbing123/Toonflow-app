@@ -2,6 +2,7 @@ part of '../../home_page.dart';
 
 extension _StoryboardWorkbenchPatchActions on _StoryboardWorkbenchPanelState {
   Future<void> _openPatchRegenerationDialog() async {
+    final l10n = AppLocalizations.of(context)!;
     final scopeCtrl = TextEditingController(text: 'storyboard_item');
     final idsCtrl = TextEditingController(
       text: widget.storyNumericId.toString(),
@@ -9,7 +10,7 @@ extension _StoryboardWorkbenchPatchActions on _StoryboardWorkbenchPanelState {
     final reasonCtrl = TextEditingController(
       text: widget.scriptStoryboard.reason?.trim().isNotEmpty == true
           ? widget.scriptStoryboard.reason!.trim()
-          : '请修复当前分镜的内容质量、连续性或情绪表达问题',
+          : l10n.storyboardPatchDefaultReason,
     );
     final modelTierCtrl = TextEditingController(text: 'high');
     final scopeOptions = <String>[
@@ -31,7 +32,7 @@ extension _StoryboardWorkbenchPatchActions on _StoryboardWorkbenchPanelState {
           return StatefulBuilder(
             builder: (ctx, setDialogState) {
               return AlertDialog(
-                title: const Text('局部返工面板'),
+                title: Text(l10n.storyboardPatchDialogTitle),
                 content: SizedBox(
                   width: 620,
                   child: SingleChildScrollView(
@@ -41,10 +42,9 @@ extension _StoryboardWorkbenchPatchActions on _StoryboardWorkbenchPanelState {
                       children: [
                         DropdownButtonFormField<String>(
                           initialValue: scopeCtrl.text,
-                          decoration: const InputDecoration(
-                            labelText: 'scope',
-                            helperText:
-                                'episode / scene / storyboard_item / video_prompt / derive_asset',
+                          decoration: InputDecoration(
+                            labelText: l10n.storyboardPatchScopeLabel,
+                            helperText: l10n.storyboardPatchScopeHelper,
                           ),
                           items: scopeOptions
                               .map(
@@ -64,9 +64,9 @@ extension _StoryboardWorkbenchPatchActions on _StoryboardWorkbenchPanelState {
                         const SizedBox(height: 8),
                         DropdownButtonFormField<String>(
                           initialValue: modelTierCtrl.text,
-                          decoration: const InputDecoration(
-                            labelText: 'model tier',
-                            helperText: 'low 用于格式修复，high 用于内容质量修复',
+                          decoration: InputDecoration(
+                            labelText: l10n.storyboardPatchModelTierLabel,
+                            helperText: l10n.storyboardPatchModelTierHelper,
                           ),
                           items: modelTierOptions
                               .map(
@@ -86,9 +86,9 @@ extension _StoryboardWorkbenchPatchActions on _StoryboardWorkbenchPanelState {
                         const SizedBox(height: 8),
                         TextField(
                           controller: idsCtrl,
-                          decoration: const InputDecoration(
-                            labelText: 'target ids',
-                            helperText: '逗号分隔。默认带当前 storyboard numeric ID。',
+                          decoration: InputDecoration(
+                            labelText: l10n.storyboardPatchTargetIdsLabel,
+                            helperText: l10n.storyboardPatchTargetIdsHelper,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -96,15 +96,15 @@ extension _StoryboardWorkbenchPatchActions on _StoryboardWorkbenchPanelState {
                           controller: reasonCtrl,
                           minLines: 3,
                           maxLines: 5,
-                          decoration: const InputDecoration(
-                            labelText: '返工原因',
-                            helperText: '建议明确写出人物、情绪、镜头、连续性、台词或视觉穿帮问题。',
+                          decoration: InputDecoration(
+                            labelText: l10n.storyboardPatchReasonLabel,
+                            helperText: l10n.storyboardPatchReasonHelper,
                             alignLabelWithHint: true,
                           ),
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          '提示：优先选择最小 scope；如果只是当前分镜的表演、镜头或提示词问题，先用 storyboard_item / video_prompt，不要直接放大到整集。',
+                          l10n.storyboardPatchScopeHint,
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(
                                 color: Theme.of(context).colorScheme.outline,
@@ -120,7 +120,7 @@ extension _StoryboardWorkbenchPatchActions on _StoryboardWorkbenchPanelState {
                         if (attributionSummary != null) ...[
                           const SizedBox(height: 8),
                           Text(
-                            'attribution mode: $attributionSummary',
+                            '${l10n.storyboardPatchAttributionLabel} $attributionSummary',
                             style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(
                                   color: Theme.of(context).colorScheme.error,
@@ -130,7 +130,7 @@ extension _StoryboardWorkbenchPatchActions on _StoryboardWorkbenchPanelState {
                         if (repairPriority.isNotEmpty) ...[
                           const SizedBox(height: 8),
                           Text(
-                            '返工优先级：',
+                            l10n.storyboardPatchRepairPriorityHeading,
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                           const SizedBox(height: 4),
@@ -157,7 +157,7 @@ extension _StoryboardWorkbenchPatchActions on _StoryboardWorkbenchPanelState {
                     onPressed: submitting
                         ? null
                         : () => Navigator.of(ctx).pop(),
-                    child: const Text('关闭'),
+                    child: Text(l10n.projectEditorScriptsWorkbenchDialogClose),
                   ),
                   FilledButton(
                     onPressed: submitting
@@ -170,15 +170,17 @@ extension _StoryboardWorkbenchPatchActions on _StoryboardWorkbenchPanelState {
                                 .toList(growable: false);
                             if (ids.isEmpty) {
                               ScaffoldMessenger.of(ctx).showSnackBar(
-                                const SnackBar(
-                                  content: Text('请至少填写一个合法 target id'),
+                                SnackBar(
+                                  content: Text(l10n.storyboardPatchSnackNeedTargetId),
                                 ),
                               );
                               return;
                             }
                             if (reasonCtrl.text.trim().isEmpty) {
                               ScaffoldMessenger.of(ctx).showSnackBar(
-                                const SnackBar(content: Text('请填写返工原因')),
+                                SnackBar(
+                                  content: Text(l10n.storyboardPatchSnackNeedReason),
+                                ),
                               );
                               return;
                             }
@@ -209,11 +211,21 @@ extension _StoryboardWorkbenchPatchActions on _StoryboardWorkbenchPanelState {
                                   ? response.patchId.substring(0, 8)
                                   : response.patchId;
                               setDialogState(() {
-                                submitSummary =
-                                    '已提交 patch #$shortPatchId · scope=${response.scope} · ids=${response.processedIds.join(",")} · model=${response.modelTier} · status=${response.status} · 连续失败 ${response.consecutiveFailures} 次 · 预计节省 ${response.savedTokenEstimate} token${response.memoryWritten ? " · 已写入归因记忆" : ""}';
+                                submitSummary = l10n.storyboardPatchSubmitLine(
+                                  shortPatchId,
+                                  response.scope,
+                                  response.processedIds.join(','),
+                                  response.modelTier,
+                                  response.status,
+                                  response.consecutiveFailures,
+                                  response.savedTokenEstimate,
+                                  response.memoryWritten
+                                      ? l10n.storyboardPatchMemoryWrittenSuffix
+                                      : '',
+                                );
                                 attributionSummary = response.attributionMode
                                     ? (response.attributionSummary ??
-                                          '当前请求已进入问题归因模式，请先处理上游原因。')
+                                          l10n.storyboardPatchAttributionUpstreamHint)
                                     : null;
                                 repairPriority = response.repairPriority;
                                 submitting = false;
@@ -221,8 +233,8 @@ extension _StoryboardWorkbenchPatchActions on _StoryboardWorkbenchPanelState {
                               _applyWorkbenchState(() {
                                 _setWorkbenchFollowUp(
                                   response.attributionMode
-                                      ? '局部返工已提交，并进入 attribution mode。优先按面板里的 P1/P2 顺序处理，不要直接整段重跑。'
-                                      : '局部返工已提交，当前按最小范围排队处理。',
+                                      ? l10n.storyboardPatchFollowUpAttribution
+                                      : l10n.storyboardPatchFollowUpQueued,
                                 );
                               });
                             } on RustApiException catch (e) {
@@ -239,7 +251,11 @@ extension _StoryboardWorkbenchPatchActions on _StoryboardWorkbenchPanelState {
                               );
                             }
                           },
-                    child: Text(submitting ? '提交中…' : '提交返工'),
+                    child: Text(
+                      submitting
+                          ? l10n.storyboardPatchSubmitting
+                          : l10n.storyboardPatchSubmit,
+                    ),
                   ),
                 ],
               );

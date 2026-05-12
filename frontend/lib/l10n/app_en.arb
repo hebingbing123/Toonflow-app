@@ -6057,11 +6057,11 @@
     }
   },
   "storyboardWorkbenchProductionMetaLoadedEmpty": "Production view loaded",
-  "storyboardEditorDialogTitle": "Storyboard #{numericId}",
+  "storyboardEditorDialogTitle": "分镜编辑器 {title}",
   "@storyboardEditorDialogTitle": {
     "placeholders": {
-      "numericId": {
-        "type": "int"
+      "title": {
+        "type": "String"
       }
     }
   },
@@ -6071,10 +6071,10 @@
   "storyboardEditorSbIndexLabelClearEmpty": "Shot index (leave empty to clear)",
   "storyboardEditorShouldGenerateImageLabelClearEmpty": "Generate image flag (leave empty to clear)",
   "storyboardEditorDeleteConfirmTitle": "Delete this storyboard?",
-  "storyboardEditorDeleteConfirmBody": "This will delete storyboard #{numericId}.",
+  "storyboardEditorDeleteConfirmBody": "确定要删除分镜 {id} 吗？",
   "@storyboardEditorDeleteConfirmBody": {
     "placeholders": {
-      "numericId": {
+      "id": {
         "type": "int"
       }
     }
@@ -6090,7 +6090,7 @@
   "storyboardVideoWorkbenchTitle": "Video workbench",
   "storyboardVideoWorkbenchTrackIdLabel": "Track ID",
   "storyboardVideoWorkbenchTrackIdHelperNoTracks": "No known tracks yet—you can create one first.",
-  "storyboardVideoWorkbenchTrackIdHelperKnown": "Known tracks: {ids}",
+  "storyboardVideoWorkbenchTrackIdHelperKnown": "已知轨道 ID：{ids}",
   "@storyboardVideoWorkbenchTrackIdHelperKnown": {
     "placeholders": {
       "ids": {
@@ -6243,6 +6243,406 @@
       }
     }
   },
+  "storyboardActionFollowUpPreviewMissing": "This shot has no readable preview image yet.",
+  "storyboardActionFollowUpPreviewRead": "Loaded preview for this shot.",
+  "storyboardActionErrImageUrlRequired": "Image URL cannot be empty.",
+  "storyboardActionFollowUpImageUrlSaved": "Saved current image URL.",
+  "storyboardActionFollowUpLiveActionCleared": "Cleared live-action reference shots and performance constraints.",
+  "storyboardActionFollowUpLiveActionSaved": "Saved {count} live-action reference shot(s) and synced performance/delivery constraints.",
+  "@storyboardActionFollowUpLiveActionSaved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardActionFollowUpFrameCleared": "Cleared current shot frame.",
+  "storyboardActionErrTrackNameRequired": "Track name cannot be empty.",
+  "storyboardActionFollowUpTrackAdded": "Added track #{trackId}.",
+  "@storyboardActionFollowUpTrackAdded": {
+    "placeholders": {
+      "trackId": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardActionErrTrackIdInvalid": "Enter a valid track ID.",
+  "storyboardActionFollowUpTrackDeleted": "Deleted track #{trackId}.",
+  "@storyboardActionFollowUpTrackDeleted": {
+    "placeholders": {
+      "trackId": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardActionFollowUpVideoSelectedBase": "Set this candidate as the shot video.",
+  "storyboardActionFollowUpVideoDeletedBase": "Removed the selected shot video.",
+  "storyboardActionFollowUpTrackReady": "Current track ID is ready for video generation.",
+  "storyboardActionFollowUpTrackBackfilled": "Filled track {trackId}; continue confirming video settings.",
+  "@storyboardActionFollowUpTrackBackfilled": {
+    "placeholders": {
+      "trackId": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardActionFollowUpTrackNamePrefilled": "Shot {storyId} video track",
+  "@storyboardActionFollowUpTrackNamePrefilled": {
+    "placeholders": {
+      "storyId": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardActionFollowUpTrackNameHint": "Prefilled a new track name—you can add the track next.",
+  "storyboardActionFollowUpSyncProduction": "Synced production data for this shot.",
+  "storyboardActionFollowUpRefreshVideo": "Refreshed video data for this shot.",
+  "storyboardMemorySelectedPerfDistilled": "Distilled private performance memory for this shot.",
+  "storyboardMemorySelectedPrivateParts": "Distilled private memory: {parts}.",
+  "@storyboardMemorySelectedPrivateParts": {
+    "placeholders": {
+      "parts": {
+        "type": "String"
+      }
+    }
+  },
+  "storyboardMemoryPrivateScopeFooter": "Scoped to the current user, project, and script—reused preferentially without leaking to other shorts.",
+  "storyboardMemoryRejectedHeadEmpty": "Wrote private bad-case constraints for this shot.",
+  "storyboardMemoryRejectedHeadAvoid": "Wrote private bad-case constraints: {avoid}.",
+  "@storyboardMemoryRejectedHeadAvoid": {
+    "placeholders": {
+      "avoid": {
+        "type": "String"
+      }
+    }
+  },
+  "storyboardMemoryRejectedFailures": "failures stacked {count} times",
+  "@storyboardMemoryRejectedFailures": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardMemoryRejectedRisks": "risk focus {tags}",
+  "@storyboardMemoryRejectedRisks": {
+    "placeholders": {
+      "tags": {
+        "type": "String"
+      }
+    }
+  },
+  "storyboardMemoryRejectedNegativeFooter": "Later generations will prefer negative memory scoped to this user, project, and script.",
+  "storyboardAutoNegativeSourceReview": "Auto-negative from latest review bad cases.",
+  "storyboardAutoNegativeSourceRejectedMemory": "Auto-negative from private bad-case memory.",
+  "storyboardAutoNegativeSourceBoth": "Auto-negative uses both review bad cases and private memory.",
+  "storyboardAutoNegativeSourcePendingObservation": "Auto-negative from latest reject observation fallback.",
+  "storyboardAutoNegativeSourcePendingNoteOnly": "No formal negative lines yet—pending observation note only.",
+  "storyboardAutoNegativeSourceNone": "No extra automatic negative sources.",
+  "storyboardMemoryScopeProject": "project {count}",
+  "@storyboardMemoryScopeProject": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardMemoryScopeScript": "script {count}",
+  "@storyboardMemoryScopeScript": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardMemoryScopeRole": "role {count}",
+  "@storyboardMemoryScopeRole": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardPromptGenDefaultFilledDuration": "Generated default video prompt and filled duration.",
+  "storyboardPromptGenHitMemory": "Matched {scope} memory.",
+  "@storyboardPromptGenHitMemory": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "storyboardPromptGenNegativeTrimmed": "Trimmed {fragCount} negative constraint(s) / {chars} chars.",
+  "@storyboardPromptGenNegativeTrimmed": {
+    "placeholders": {
+      "fragCount": {
+        "type": "int"
+      },
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardPromptSourceMemorySlim": "Memory slim -{rows} rows (low-signal {low} / dup {dup} / visual {visual})",
+  "@storyboardPromptSourceMemorySlim": {
+    "placeholders": {
+      "rows": {
+        "type": "int"
+      },
+      "low": {
+        "type": "int"
+      },
+      "dup": {
+        "type": "int"
+      },
+      "visual": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardPromptSourceNegativeSlim": "Negative slim {fragCount} / {chars} chars",
+  "@storyboardPromptSourceNegativeSlim": {
+    "placeholders": {
+      "fragCount": {
+        "type": "int"
+      },
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardPromptSourceReviewFrags": "Review fragments {count}",
+  "@storyboardPromptSourceReviewFrags": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardPromptSourceMemoryFrags": "Memory fragments {count}",
+  "@storyboardPromptSourceMemoryFrags": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardPromptAnchorRole": "Role anchors {count}",
+  "@storyboardPromptAnchorRole": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardPromptAnchorScene": "Scene anchors {count}",
+  "@storyboardPromptAnchorScene": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardPromptAnchorTool": "Prop anchors {count}",
+  "@storyboardPromptAnchorTool": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardPromptAnchorStyle": "Style anchors {count}",
+  "@storyboardPromptAnchorStyle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardPromptAnchorPrivateMemory": "Private memory {count}",
+  "@storyboardPromptAnchorPrivateMemory": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardPromptAnchorContinuity": "Continuity notes {count}",
+  "@storyboardPromptAnchorContinuity": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardPromptAnchorReferenceFrame": "Reference frame attached",
+  "storyboardPromptAnchorEmpty": "No extra anchors or memory matched yet.",
+  "storyboardActionRepairAppliedSummary": "Applied current pre-generation suggestions.",
+  "storyboardActionRepairNoChangeSummary": "Suggestions are already applied; nothing else to trim.",
+  "storyboardActionRepairDetailTrimmed": "Removed {promptRemoved} low-value prompt fragment(s) and {negRemoved} duplicate negative fragment(s).",
+  "@storyboardActionRepairDetailTrimmed": {
+    "placeholders": {
+      "promptRemoved": {
+        "type": "int"
+      },
+      "negRemoved": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardActionRepairDetailLean": "Prompt / negative prompt is already lean—continue generation.",
+  "storyboardActionOperationFailedSummary": "Shot action failed.",
+  "storyboardActionOperationFailedDetail": "Finish the recommended step, then retry.",
+  "storyboardActionErrNeedSourceImageOrPreview": "Provide an image URL or a current preview before generating video.",
+  "storyboardActionErrTrackIdRequired": "Enter a valid track ID before generating video.",
+  "storyboardActionErrDurationPositiveInteger": "Duration must be a positive integer.",
+  "storyboardActionErrVideoPromptEmpty": "Video prompt cannot be empty.",
+  "storyboardActionVideoJobsSubmittedTotalOnly": "Submitted {total} video job(s).",
+  "@storyboardActionVideoJobsSubmittedTotalOnly": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardActionVideoJobsSubmittedRepairOnly": "Submitted {total} video job(s); auto-trimmed {pRm} low-value prompt fragment(s) and {nRm} duplicate negative fragment(s) before submit.",
+  "@storyboardActionVideoJobsSubmittedRepairOnly": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "pRm": {
+        "type": "int"
+      },
+      "nRm": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardActionVideoJobsSubmittedDedupeOnly": "Submitted {total} video job(s); deduped {deduped} duplicate negative fragment(s).",
+  "@storyboardActionVideoJobsSubmittedDedupeOnly": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "deduped": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardActionVideoJobsSubmittedRepairFinal": "Submitted {total} video job(s); trimmed {pRm} prompt fragment(s) and {nRm} negative fragment(s) before submit; final negative prompt filled back.",
+  "@storyboardActionVideoJobsSubmittedRepairFinal": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "pRm": {
+        "type": "int"
+      },
+      "nRm": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardActionVideoJobsSubmittedDedupeFinal": "Submitted {total} video job(s); deduped {deduped} negative fragment(s); final negative prompt filled back.",
+  "@storyboardActionVideoJobsSubmittedDedupeFinal": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "deduped": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardActionVideoJobsSubmittedFinalOnly": "Submitted {total} video job(s); final negative prompt filled back.",
+  "@storyboardActionVideoJobsSubmittedFinalOnly": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardActionVoiceoverJobsSubmitted": "Submitted {total} voiceover job(s); refresh production data later for status.",
+  "@storyboardActionVoiceoverJobsSubmitted": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardActionVoiceoverJobsSubmittedWithJob": "Submitted {total} voiceover job(s) (job={jobId}); refresh production data later for status.",
+  "@storyboardActionVoiceoverJobsSubmittedWithJob": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "jobId": {
+        "type": "String"
+      }
+    }
+  },
+  "storyboardActionVideoDescCleared": "Cleared subtitle/voiceover text—export falls back to shot prompt.",
+  "storyboardActionVideoDescSaved": "Saved subtitle/voiceover text—default video prompt and export captions prefer it.",
+  "storyboardActionErrNoExportableVideoUrl": "No exportable selected or candidate video URL for this shot.",
+  "storyboardActionExportJobEnqueued": "Video export job submitted (job={jobId}). URL will write back when complete—refresh production data later.",
+  "@storyboardActionExportJobEnqueued": {
+    "placeholders": {
+      "jobId": {
+        "type": "String"
+      }
+    }
+  },
+  "storyboardPatchDialogTitle": "Partial rework",
+  "storyboardPatchScopeLabel": "scope",
+  "storyboardPatchScopeHelper": "episode / scene / storyboard_item / video_prompt / derive_asset",
+  "storyboardPatchModelTierLabel": "model tier",
+  "storyboardPatchModelTierHelper": "low for format fixes; high for content-quality fixes",
+  "storyboardPatchTargetIdsLabel": "target ids",
+  "storyboardPatchTargetIdsHelper": "Comma-separated. Defaults to current storyboard numeric ID.",
+  "storyboardPatchReasonLabel": "Reason",
+  "storyboardPatchReasonHelper": "Spell out character, emotion, shot, continuity, lines, or visible continuity breaks.",
+  "storyboardPatchScopeHint": "Prefer the smallest scope; for performance, lens, or prompt issues on this shot only, use storyboard_item / video_prompt before escalating to the whole episode.",
+  "storyboardPatchAttributionLabel": "attribution mode:",
+  "storyboardPatchRepairPriorityHeading": "Rework priority:",
+  "storyboardPatchSnackNeedTargetId": "Enter at least one valid target id.",
+  "storyboardPatchSnackNeedReason": "Enter a rework reason.",
+  "storyboardPatchSubmitLine": "Submitted patch #{patchId} · scope={scope} · ids={ids} · model={modelTier} · status={status} · consecutive failures {failures} · est. saved {tokens} tokens{memorySuffix}",
+  "@storyboardPatchSubmitLine": {
+    "placeholders": {
+      "patchId": {
+        "type": "String"
+      },
+      "scope": {
+        "type": "String"
+      },
+      "ids": {
+        "type": "String"
+      },
+      "modelTier": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      },
+      "failures": {
+        "type": "int"
+      },
+      "tokens": {
+        "type": "int"
+      },
+      "memorySuffix": {
+        "type": "String"
+      }
+    }
+  },
+  "storyboardPatchMemoryWrittenSuffix": " · attribution memory saved",
+  "storyboardPatchAttributionUpstreamHint": "This request entered attribution mode—fix upstream causes first.",
+  "storyboardPatchFollowUpAttribution": "Partial rework submitted—attribution mode on. Follow P1/P2 order in the panel; don’t rerun the whole timeline.",
+  "storyboardPatchFollowUpQueued": "Partial rework submitted—queued at minimal scope.",
+  "storyboardPatchSubmitting": "Submitting…",
+  "storyboardPatchSubmit": "Submit rework",
+  "storyboardPatchDefaultReason": "Fix content quality, continuity, or emotional delivery for this shot.",
   "shortVideoReadinessNoPayloadHeadline": "Shot readiness data is not available yet.",
   "shortVideoReadinessEmptyProjectHeadline": "This project has no storyboard rows yet; split shots on the script side first to see the rollup.",
   "shortVideoReadinessRollupHeadline": "{ready}/{total} shots ready; {blocked} blocked.",
@@ -7861,45 +8261,45 @@
   "accountExportCreate": "Account export create",
   "accountExportIncludeAuditLogs": "Account export include audit logs",
   "accountExportIncludeNotifications": "Account export include notifications",
-  "accountExportActiveCount": "Account export active count",
+  "accountExportActiveCount": "进行中 {count}",
   "accountExportCopyLastSavedPath": "Account export copy last saved path",
   "accountExportEmpty": "Account export empty",
-  "accountExportDefaultFileName": "Account export default file name",
-  "accountExportTaskLine": "Account export task line",
-  "accountExportSizeLine": "Account export size line",
-  "accountExportSavedSnack": "Account export saved snack",
+  "accountExportDefaultFileName": "账户导出 #{numericTaskId}",
+  "accountExportTaskLine": "任务 #{numericTaskId}",
+  "accountExportSizeLine": "大小 {size}",
+  "accountExportSavedSnack": "已保存到 {path}",
   "accountExportDownload": "Account export download",
   "accountExportCopyFileName": "Account export copy file name",
   "accountDeleteTitle": "Account delete title",
   "accountDeleteDescription": "Account delete description",
   "accountDeleteConfirmLabel": "Account delete confirm label",
   "accountDeleteIrreversibleAck": "Account delete irreversible ack",
-  "accountDeleteLastResponse": "Account delete last response",
+  "accountDeleteLastResponse": "已删除 {count} 个作业",
   "accountDeleteButton": "Account delete button",
   "accountExportStatusQueued": "Account export status queued",
   "accountExportStatusRunning": "Account export status running",
   "accountExportStatusSucceeded": "Account export status succeeded",
   "accountExportStatusFailed": "Account export status failed",
-  "adminConsoleMembershipItem": "Admin console membership item",
-  "adminConsoleRecentJobItem": "Admin console recent job item",
-  "adminConsoleAuditListItem": "Admin console audit list item",
-  "adminConsoleDailyQuotaLabel": "Admin console daily quota label",
-  "adminConsoleChipMember": "Admin console chip member",
+  "adminConsoleMembershipItem": "成员 {detail}",
+  "adminConsoleRecentJobItem": "作业 {detail}",
+  "adminConsoleAuditListItem": "审计 {detail}",
+  "adminConsoleDailyQuotaLabel": "每日配额 {detail}",
+  "adminConsoleChipMember": "成员 {count}",
   "adminConsoleArchivedLabel": "Admin console archived label",
-  "adminConsoleMemberListItem": "Admin console member list item",
-  "adminConsoleRecentProjectItem": "Admin console recent project item",
-  "adminConsoleChipScript": "Admin console chip script",
-  "adminConsoleChipAsset": "Admin console chip asset",
-  "adminConsoleChipJob": "Admin console chip job",
-  "adminConsoleAclMemberItem": "Admin console acl member item",
-  "adminConsoleWorkspaceCandidateItem": "Admin console workspace candidate item",
-  "adminConsoleProjectRecentJobItem": "Admin console project recent job item",
-  "adminConsoleAuditUserSummary": "Admin console audit user summary",
-  "adminConsoleAuditWorkspaceMembership": "Admin console audit workspace membership",
-  "adminConsoleAuditOwnerTransfer": "Admin console audit owner transfer",
-  "adminConsoleAuditArchiveNote": "Admin console audit archive note",
-  "adminConsoleAuditProjectOwnerTransfer": "Admin console audit project owner transfer",
-  "adminConsoleFieldUserId": "Admin console field user id",
+  "adminConsoleMemberListItem": "成员 {detail}",
+  "adminConsoleRecentProjectItem": "项目 {detail}",
+  "adminConsoleChipScript": "剧本 {count}",
+  "adminConsoleChipAsset": "资产 {count}",
+  "adminConsoleChipJob": "作业 {count}",
+  "adminConsoleAclMemberItem": "成员 {detail}",
+  "adminConsoleWorkspaceCandidateItem": "候选 {detail}",
+  "adminConsoleProjectRecentJobItem": "作业 {detail}",
+  "adminConsoleAuditUserSummary": "用户审计 {detail}",
+  "adminConsoleAuditWorkspaceMembership": "工作区成员审计 {detail}",
+  "adminConsoleAuditOwnerTransfer": "所有权转移 {detail}",
+  "adminConsoleAuditArchiveNote": "归档备注 {detail}",
+  "adminConsoleAuditProjectOwnerTransfer": "项目所有权转移 {detail}",
+  "adminConsoleFieldUserId": "用户 ID {detail}",
   "adminConsoleFieldCreatedAt": "Admin console field created at",
   "adminConsoleFieldUpdatedAt": "Admin console field updated at",
   "adminConsoleFieldOperationalStatus": "Admin console field operational status",
@@ -7932,14 +8332,14 @@
   "agentWorkspaceProductionWritebackToolResult": "Agent workspace production writeback tool result",
   "agentWorkspaceProductionArgumentTemplates": "Agent workspace production argument templates",
   "agentWorkspaceProductionCurrentCandidateArgs": "Agent workspace production current candidate args",
-  "agentWorkspaceProductionCandidateIds": "Agent workspace production candidate ids",
+  "agentWorkspaceProductionCandidateIds": "候选 {count} 项",
   "agentWorkspaceProductionPromptPreviewTitle": "Agent workspace production prompt preview title",
   "agentWorkspaceProductionStagesTitle": "Agent workspace production stages title",
-  "agentWorkspaceProductionFlowChip": "Agent workspace production flow chip",
+  "agentWorkspaceProductionFlowChip": "flow={flowKey}",
   "agentWorkspaceProductionApplyStage": "Agent workspace production apply stage",
   "agentWorkspaceProductionDiagnosisTitle": "Agent workspace production diagnosis title",
-  "agentWorkspaceProductionToolChip": "Agent workspace production tool chip",
-  "agentWorkspaceProductionAgentChip": "Agent workspace production agent chip",
+  "agentWorkspaceProductionToolChip": "tool={tool}",
+  "agentWorkspaceProductionAgentChip": "agent={agent}",
   "agentWorkspaceProductionApplySuggestion": "Agent workspace production apply suggestion",
   "agentWorkspaceProductionStepPullAssetsFlow": "Agent workspace production step pull assets flow",
   "agentWorkspaceProductionStepRunAssetsSubAgent": "Agent workspace production step run assets sub agent",
@@ -7948,64 +8348,64 @@
   "agentWorkspaceProductionStepRunStoryboardSubAgent": "Agent workspace production step run storyboard sub agent",
   "agentWorkspaceProductionStepRunDirectorPlanSubAgent": "Agent workspace production step run director plan sub agent",
   "agentWorkspaceProductionPromptFlowDown": "Agent workspace production prompt flow down",
-  "agentWorkspaceProductionPromptRewriteFocus": "Agent workspace production prompt rewrite focus",
-  "agentWorkspaceProductionPromptVisualPacing": "Agent workspace production prompt visual pacing",
-  "agentWorkspaceProductionPromptExtraConstraint": "Agent workspace production prompt extra constraint",
-  "agentWorkspaceProductionPromptAssetFocus": "Agent workspace production prompt asset focus",
+  "agentWorkspaceProductionPromptRewriteFocus": "改写焦点：{focus}",
+  "agentWorkspaceProductionPromptVisualPacing": "视觉节奏：{pacing}",
+  "agentWorkspaceProductionPromptExtraConstraint": "额外约束：{constraint}",
+  "agentWorkspaceProductionPromptAssetFocus": "资产焦点：{scope}",
   "agentWorkspaceProductionPromptExecutionOrder": "Agent workspace production prompt execution order",
   "agentWorkspaceProductionStoryboardPriorityMissing": "Agent workspace production storyboard priority missing",
-  "agentWorkspaceProductionCollapsedRows": "Agent workspace production collapsed rows",
-  "agentWorkspaceProductionReviewTarget": "Agent workspace production review target",
-  "agentWorkspaceProductionReviewGrade": "Agent workspace production review grade",
-  "agentWorkspaceProductionReviewIssues": "Agent workspace production review issues",
-  "agentWorkspaceProductionReviewNextStep": "Agent workspace production review next step",
-  "agentWorkspaceProductionReviewAssetIds": "Agent workspace production review asset ids",
-  "agentWorkspaceProductionReviewAssetScope": "Agent workspace production review asset scope",
-  "agentWorkspaceProductionReviewStoryboardIds": "Agent workspace production review storyboard ids",
-  "agentWorkspaceProductionReviewSummary": "Agent workspace production review summary",
-  "agentWorkspaceProductionShotLabel": "Agent workspace production shot label",
-  "agentWorkspaceProductionSceneLabel": "Agent workspace production scene label",
-  "agentWorkspaceProductionDurationLabel": "Agent workspace production duration label",
-  "agentWorkspaceProductionAssetsLabel": "Agent workspace production assets label",
-  "agentWorkspaceProductionStateLabel": "Agent workspace production state label",
+  "agentWorkspaceProductionCollapsedRows": "已折叠 {count} 行",
+  "agentWorkspaceProductionReviewTarget": "目标：{target}",
+  "agentWorkspaceProductionReviewGrade": "等级：{grade}",
+  "agentWorkspaceProductionReviewIssues": "问题：{issues}",
+  "agentWorkspaceProductionReviewNextStep": "下一步：{nextAction}",
+  "agentWorkspaceProductionReviewAssetIds": "资产：{assetIds}",
+  "agentWorkspaceProductionReviewAssetScope": "资产范围：{scope}",
+  "agentWorkspaceProductionReviewStoryboardIds": "镜头：{ids}",
+  "agentWorkspaceProductionReviewSummary": "结论：{summary}",
+  "agentWorkspaceProductionShotLabel": "镜头 {id}",
+  "agentWorkspaceProductionSceneLabel": "场景 {scene}",
+  "agentWorkspaceProductionDurationLabel": "时长 {duration}",
+  "agentWorkspaceProductionAssetsLabel": "资产 {assets}",
+  "agentWorkspaceProductionStateLabel": "状态 {state}",
   "agentWorkspaceProductionModeTextOnly": "Agent workspace production mode text only",
   "agentWorkspaceProductionResultHasImage": "Agent workspace production result has image",
-  "agentWorkspaceProductionResultMissingImage": "Agent workspace production result missing image",
-  "agentWorkspaceProductionContextFromTool": "Agent workspace production context from tool",
+  "agentWorkspaceProductionResultMissingImage": "缺少图片 {assets}",
+  "agentWorkspaceProductionContextFromTool": "来自工具 {toolName}",
   "agentWorkspaceProductionContextDerivedRewrite": "Agent workspace production context derived rewrite",
   "agentWorkspaceProductionContextDerivedRewriteSubtitle": "Agent workspace production context derived rewrite subtitle",
   "agentWorkspaceProductionContextReturnList": "Agent workspace production context return list",
   "agentWorkspaceProductionContextToolText": "Agent workspace production context tool text",
   "agentWorkspaceProductionContextReviewSummary": "Agent workspace production context review summary",
   "agentWorkspaceProductionContextSnapshotTitle": "Agent workspace production context snapshot title",
-  "agentWorkspaceSummaryReturnedList": "Agent workspace summary returned list",
-  "agentWorkspaceSummaryReturnedText": "Agent workspace summary returned text",
-  "agentWorkspaceProductionSummaryItems": "Agent workspace production summary items",
-  "agentWorkspaceProductionSummaryReviewHeadline": "Agent workspace production summary review headline",
-  "agentWorkspaceProductionSummaryIssueBreakdown": "Agent workspace production summary issue breakdown",
+  "agentWorkspaceSummaryReturnedList": "返回列表 {count} 项",
+  "agentWorkspaceSummaryReturnedText": "返回文本 {chars} 字",
+  "agentWorkspaceProductionSummaryItems": "返回 items {count} 项",
+  "agentWorkspaceProductionSummaryReviewHeadline": "聚焦资产 {count} 项",
+  "agentWorkspaceProductionSummaryIssueBreakdown": "问题分布 {count} 项",
   "agentWorkspaceProductionSummaryFocusedAssets": "Agent workspace production summary focused assets",
-  "agentWorkspaceProductionSummaryFocusedAssetScope": "Agent workspace production summary focused asset scope",
-  "agentWorkspaceProductionSummaryFocusedShots": "Agent workspace production summary focused shots",
-  "agentWorkspaceSummaryReturnedObjectKeys": "Agent workspace summary returned object keys",
+  "agentWorkspaceProductionSummaryFocusedAssetScope": "聚焦资产范围 {scope}",
+  "agentWorkspaceProductionSummaryFocusedShots": "聚焦镜头 {count} 项",
+  "agentWorkspaceSummaryReturnedObjectKeys": "返回对象 keys={keys}",
   "agentWorkspaceProductionSummaryFlowEmpty": "Agent workspace production summary flow empty",
   "agentWorkspaceProductionSummaryFlowEmptyString": "Agent workspace production summary flow empty string",
-  "agentWorkspaceProductionSummaryTextChars": "Agent workspace production summary text chars",
-  "agentWorkspaceProductionSummaryLineCount": "Agent workspace production summary line count",
-  "agentWorkspaceProductionSummaryPlanSections": "Agent workspace production summary plan sections",
+  "agentWorkspaceProductionSummaryTextChars": "文本 {chars} 字",
+  "agentWorkspaceProductionSummaryLineCount": "行数 {count}",
+  "agentWorkspaceProductionSummaryPlanSections": "计划章节 {count}",
   "agentWorkspaceProductionSummaryRewriteInherited": "Agent workspace production summary rewrite inherited",
-  "agentWorkspaceProductionSummaryStoryboardRows": "Agent workspace production summary storyboard rows",
-  "agentWorkspaceProductionSummaryLinkedAssets": "Agent workspace production summary linked assets",
-  "agentWorkspaceProductionSummaryListCount": "Agent workspace production summary list count",
-  "agentWorkspaceProductionSummaryPrompts": "Agent workspace production summary prompts",
-  "agentWorkspaceProductionSummaryMediaUrls": "Agent workspace production summary media urls",
-  "agentWorkspaceProductionSummaryNeedImages": "Agent workspace production summary need images",
+  "agentWorkspaceProductionSummaryStoryboardRows": "分镜 {count} 条",
+  "agentWorkspaceProductionSummaryLinkedAssets": "关联资产 {count}",
+  "agentWorkspaceProductionSummaryListCount": "列表 {count} 项",
+  "agentWorkspaceProductionSummaryPrompts": "提示词 {count}",
+  "agentWorkspaceProductionSummaryMediaUrls": "媒体 URL {count}",
+  "agentWorkspaceProductionSummaryNeedImages": "需要图片 {count}",
   "agentWorkspaceProductionSummaryMissingFrames": "Agent workspace production summary missing frames",
-  "agentWorkspaceProductionSummaryTextOnlyCount": "Agent workspace production summary text only count",
-  "agentWorkspaceProductionSummaryStateTypes": "Agent workspace production summary state types",
-  "agentWorkspaceProductionSummaryObjectKeyCount": "Agent workspace production summary object key count",
-  "agentWorkspaceProductionSummaryObjectListEntry": "Agent workspace production summary object list entry",
-  "agentWorkspaceProductionSummaryObjectTextEntry": "Agent workspace production summary object text entry",
-  "agentWorkspaceProductionSummaryReturnedType": "Agent workspace production summary returned type",
+  "agentWorkspaceProductionSummaryTextOnlyCount": "纯文本 {count}",
+  "agentWorkspaceProductionSummaryStateTypes": "状态类型 {states}",
+  "agentWorkspaceProductionSummaryObjectKeyCount": "对象 keys={count} 个",
+  "agentWorkspaceProductionSummaryObjectListEntry": "列表 {count} 项",
+  "agentWorkspaceProductionSummaryObjectTextEntry": "文本 {chars} 字",
+  "agentWorkspaceProductionSummaryReturnedType": "返回 {type}",
   "agentWorkspaceProductionIdleHint": "Agent workspace production idle hint",
   "agentWorkspaceProductionLatestToolResult": "Agent workspace production latest tool result",
   "agentWorkspaceProductionResultSummary": "Agent workspace production result summary",
@@ -8031,11 +8431,11 @@
   "agentWorkspaceScriptApplyStage": "Agent workspace script apply stage",
   "agentWorkspaceScriptAdvanceStage": "Agent workspace script advance stage",
   "agentWorkspaceScriptDiagnosisTitle": "Agent workspace script diagnosis title",
-  "agentWorkspaceScriptToolChip": "Agent workspace script tool chip",
-  "agentWorkspaceScriptAgentChip": "Agent workspace script agent chip",
+  "agentWorkspaceScriptToolChip": "tool={tool}",
+  "agentWorkspaceScriptAgentChip": "agent={agent}",
   "agentWorkspaceScriptApplySuggestion": "Agent workspace script apply suggestion",
-  "agentWorkspaceScriptContextSkeletonFocus": "Agent workspace script context skeleton focus",
-  "agentWorkspaceScriptContextAdaptationFocus": "Agent workspace script context adaptation focus",
+  "agentWorkspaceScriptContextSkeletonFocus": "骨架焦点：{focus}",
+  "agentWorkspaceScriptContextAdaptationFocus": "改编焦点：{focus}",
   "agentWorkspaceScriptContextExecutionOrder": "Agent workspace script context execution order",
   "agentWorkspaceScriptContextDialogueConstraint": "Agent workspace script context dialogue constraint",
   "agentWorkspaceScriptContextStorySkeleton": "Agent workspace script context story skeleton",
@@ -8050,7 +8450,7 @@
   "agentWorkspaceScriptContextCurrentScriptBody": "Agent workspace script context current script body",
   "agentWorkspaceScriptContextFromScriptContent": "Agent workspace script context from script content",
   "agentWorkspaceScriptContextUntitledChapter": "Agent workspace script context untitled chapter",
-  "agentWorkspaceScriptContextChapterPrefix": "Agent workspace script context chapter prefix",
+  "agentWorkspaceScriptContextChapterPrefix": "第 {chapter} 章",
   "agentWorkspaceScriptContextNovelChapters": "Agent workspace script context novel chapters",
   "agentWorkspaceScriptContextNovelChaptersSubtitle": "Agent workspace script context novel chapters subtitle",
   "agentWorkspaceScriptContextUntitledEvent": "Agent workspace script context untitled event",
@@ -8060,19 +8460,19 @@
   "agentWorkspaceScriptLatestAssistantResult": "Agent workspace script latest assistant result",
   "agentWorkspaceScriptWritebackSource": "Agent workspace script writeback source",
   "agentWorkspaceScriptSummaryReviewReturned": "Agent workspace script summary review returned",
-  "agentWorkspaceScriptSummaryReviewLine": "Agent workspace script summary review line",
+  "agentWorkspaceScriptSummaryReviewLine": "审核 {detail}",
   "agentWorkspaceScriptSummaryPlanDataMissing": "Agent workspace script summary plan data missing",
   "agentWorkspaceScriptSummaryStorySkeletonReady": "Agent workspace script summary story skeleton ready",
   "agentWorkspaceScriptSummaryAdaptationReady": "Agent workspace script summary adaptation ready",
-  "agentWorkspaceScriptSummaryPlanScripts": "Agent workspace script summary plan scripts",
+  "agentWorkspaceScriptSummaryPlanScripts": "计划剧本 {count} 条",
   "agentWorkspaceScriptSummaryRewriteReady": "Agent workspace script summary rewrite ready",
   "agentWorkspaceScriptSummaryPlanDataReturned": "Agent workspace script summary plan data returned",
-  "agentWorkspaceScriptSummaryScriptEmpty": "Agent workspace script summary script empty",
-  "agentWorkspaceScriptSummaryScriptChars": "Agent workspace script summary script chars",
-  "agentWorkspaceScriptSummaryNovelTextEmpty": "Agent workspace script summary novel text empty",
-  "agentWorkspaceScriptSummaryNovelTextCount": "Agent workspace script summary novel text count",
-  "agentWorkspaceScriptSummaryNovelEventsEmpty": "Agent workspace script summary novel events empty",
-  "agentWorkspaceScriptSummaryNovelEventsCount": "Agent workspace script summary novel events count",
+  "agentWorkspaceScriptSummaryScriptEmpty": "剧本正文 {chars} 字",
+  "agentWorkspaceScriptSummaryScriptChars": "剧本正文 {chars} 字",
+  "agentWorkspaceScriptSummaryNovelTextEmpty": "章节材料 {count} 条",
+  "agentWorkspaceScriptSummaryNovelTextCount": "章节材料 {count} 条",
+  "agentWorkspaceScriptSummaryNovelEventsEmpty": "小说事件 {count} 条",
+  "agentWorkspaceScriptSummaryNovelEventsCount": "小说事件 {count} 条",
   "agentWorkspaceScopeProjectIdLabel": "Agent workspace scope project id label",
   "agentWorkspaceScopeScriptIdLabel": "Agent workspace scope script id label",
   "agentWorkspaceScopeProjectUuidLabel": "Agent workspace scope project uuid label",
@@ -8082,15 +8482,15 @@
   "agentWorkspacePaneProduction": "Agent workspace pane production",
   "agentWorkspacePaneActivity": "Agent workspace pane activity",
   "agentWorkspaceActivityTitle": "Agent workspace activity title",
-  "agentWorkspaceActivityLatest": "Agent workspace activity latest",
+  "agentWorkspaceActivityLatest": "最新：{eventType}",
   "agentWorkspaceActivityLatestToolResult": "Agent workspace activity latest tool result",
   "agentWorkspaceActivityLatestAssistantText": "Agent workspace activity latest assistant text",
   "agentWorkspaceActivityNoWsEvents": "Agent workspace activity no ws events",
   "agentWorkspaceProductionCardTitle": "Agent workspace production card title",
   "agentWorkspaceGuidedTasksTitle": "Agent workspace guided tasks title",
   "agentWorkspaceScriptWritebackSourceAssistant": "Agent workspace script writeback source assistant",
-  "agentWorkspaceScriptPlanHint": "Agent workspace script plan hint",
-  "agentWorkspaceScriptPlanWritebackReady": "Agent workspace script plan writeback ready",
+  "agentWorkspaceScriptPlanHint": "计划 {pid}",
+  "agentWorkspaceScriptPlanWritebackReady": "计划回写就绪：{planHint}，{scriptCount} 条剧本",
   "agentWorkspaceScriptRunningWorkflow": "Agent workspace script running workflow",
   "agentWorkspaceScriptRunningReadContext": "Agent workspace script running read context",
   "agentWorkspaceScriptRunningSubAgent": "Agent workspace script running sub agent",
@@ -8121,29 +8521,29 @@
   "contentComplianceStatusClaimed": "Content compliance status claimed",
   "contentComplianceStatusResolved": "Content compliance status resolved",
   "contentComplianceStatusDismissed": "Content compliance status dismissed",
-  "contentComplianceSlaOpenOver24h": "Content compliance sla open over24h",
-  "contentComplianceSlaOpenOver72h": "Content compliance sla open over72h",
-  "contentComplianceSlaClaimedOver24h": "Content compliance sla claimed over24h",
+  "contentComplianceSlaOpenOver24h": "open>24h {count}",
+  "contentComplianceSlaOpenOver72h": "open>72h {count}",
+  "contentComplianceSlaClaimedOver24h": "claimed>24h {count}",
   "contentComplianceFieldTargetType": "Content compliance field target type",
   "contentComplianceFieldCategory": "Content compliance field category",
   "contentComplianceFieldSeverity": "Content compliance field severity",
   "contentComplianceFieldTargetUuid": "Content compliance field target uuid",
   "contentComplianceFieldStatus": "Content compliance field status",
-  "contentComplianceSlaChip": "Content compliance sla chip",
-  "contentComplianceMetricPending": "Content compliance metric pending",
-  "contentComplianceMetricClaimed": "Content compliance metric claimed",
+  "contentComplianceSlaChip": "SLA: {bucket}",
+  "contentComplianceMetricPending": "待处理 {count}",
+  "contentComplianceMetricClaimed": "已认领 {count}",
   "contentComplianceMetricResolved": "Content compliance metric resolved",
   "contentComplianceMetricDismissed": "Content compliance metric dismissed",
   "contentComplianceMetricCritical": "Content compliance metric critical",
-  "contentComplianceMetricHigh": "Content compliance metric high",
-  "contentComplianceOldestHours": "Content compliance oldest hours",
-  "contentComplianceCapacityPerReviewer": "Content compliance capacity per reviewer",
-  "contentComplianceOwnerCounts": "Content compliance owner counts",
-  "contentComplianceOwnerDetail": "Content compliance owner detail",
-  "contentComplianceWorkspaceCounts": "Content compliance workspace counts",
-  "contentComplianceWorkspaceDetail": "Content compliance workspace detail",
-  "contentComplianceReportInfo": "Content compliance report info",
-  "contentComplianceResolutionLine": "Content compliance resolution line",
+  "contentComplianceMetricHigh": "高优先级 {count}",
+  "contentComplianceOldestHours": "最旧 {hours}h",
+  "contentComplianceCapacityPerReviewer": "容量 {capacity}/reviewer",
+  "contentComplianceOwnerCounts": "待处理 {pending} · 已认领 {claimed}",
+  "contentComplianceOwnerDetail": "详情 {detail}",
+  "contentComplianceWorkspaceCounts": "open {open} · pending {pending} · claimed {claimed}",
+  "contentComplianceWorkspaceDetail": "critical {critical} · high {high}",
+  "contentComplianceReportInfo": "reporter {reporter}",
+  "contentComplianceResolutionLine": "resolution: {note}",
   "contentComplianceActionClaim": "Content compliance action claim",
   "contentComplianceActionResolve": "Content compliance action resolve",
   "contentComplianceActionDismiss": "Content compliance action dismiss",
@@ -8157,8 +8557,8 @@
   "jobsStatusCountEntry": "Jobs status count entry",
   "jobsIdempotencyMismatch": "Jobs idempotency mismatch",
   "jobsUpdatedAt": "Jobs updated at",
-  "jobsClaimedBy": "Jobs claimed by",
-  "jobsFailedReason": "Jobs failed reason",
+  "jobsClaimedBy": "认领者：{claimedBy}",
+  "jobsFailedReason": "失败原因：{reason}",
   "jobsTitle": "Jobs title",
   "jobsPrefsTooltip": "Jobs prefs tooltip",
   "jobsSubtitle": "Jobs subtitle",
@@ -8175,11 +8575,11 @@
   "jobsCreateProbeJob": "Jobs create probe job",
   "jobsJobIdLabel": "Jobs job id label",
   "jobsFetchDetail": "Jobs fetch detail",
-  "jobsDetailLabel": "Jobs detail label",
-  "jobsKindsLabel": "Jobs kinds label",
-  "jobsKindSummaryLabel": "Jobs kind summary label",
-  "jobsStatusSummaryLabel": "Jobs status summary label",
-  "jobsCountLabel": "Jobs count label",
+  "jobsDetailLabel": "作业详情：{detail}",
+  "jobsKindsLabel": "作业类型：{kinds}",
+  "jobsKindSummaryLabel": "类型汇总：{summary}",
+  "jobsStatusSummaryLabel": "状态汇总：{summary}",
+  "jobsCountLabel": "{count} 条作业",
   "jobsRetry": "Jobs retry",
   "jobsCancel": "Jobs cancel",
   "notificationsRealtimeDisconnected": "Notifications realtime disconnected",
@@ -8198,12 +8598,12 @@
   "notificationsImportJsonObjectRequired": "Notifications import json object required",
   "notificationsImportJsonParseFailed": "Notifications import json parse failed",
   "notificationsUnknownTemplate": "Notifications unknown template",
-  "platformStatusChipLabel": "Platform status chip label",
-  "opsWhActivityEntryTitle": "Ops wh activity entry title",
-  "opsWhFieldId": "Ops wh field id",
-  "opsWhFieldCreatedAt": "Ops wh field created at",
-  "opsWhFieldUpdatedAt": "Ops wh field updated at",
-  "opsWhApiEventTypes": "Ops wh api event types",
+  "platformStatusChipLabel": "{title}: {value}",
+  "opsWhActivityEntryTitle": "{action} · {webhookId}",
+  "opsWhFieldId": "ID: {id}",
+  "opsWhFieldCreatedAt": "创建时间: {createdAt}",
+  "opsWhFieldUpdatedAt": "更新时间: {updatedAt}",
+  "opsWhApiEventTypes": "API: {eventTypes}",
   "billingAuditEventTypeLabel": "Billing audit event type label",
   "billingAuditProviderEventIdLabel": "Billing audit provider event id label",
   "billingAuditRawEventIdLabel": "Billing audit raw event id label",
@@ -8212,5 +8612,854 @@
   "billingAuditEventCreatedFromLabel": "Billing audit event created from label",
   "billingAuditEventCreatedToLabel": "Billing audit event created to label",
   "billingAuditCreatedFromLabel": "Billing audit created from label",
-  "billingAuditCreatedToLabel": "Billing audit created to label"
+  "billingAuditCreatedToLabel": "Billing audit created to label",
+  "@accountExportActiveCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@accountExportDefaultFileName": {
+    "placeholders": {
+      "numericTaskId": {
+        "type": "int"
+      }
+    }
+  },
+  "@accountExportSizeLine": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "@accountExportSavedSnack": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "@accountExportTaskLine": {
+    "placeholders": {
+      "numericTaskId": {
+        "type": "int"
+      }
+    }
+  },
+  "@accountDeleteLastResponse": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@adminConsoleMembershipItem": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@adminConsoleRecentJobItem": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@adminConsoleAuditListItem": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@adminConsoleMemberListItem": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@adminConsoleRecentProjectItem": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@adminConsoleChipMember": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@adminConsoleChipScript": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@adminConsoleChipAsset": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@adminConsoleChipJob": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@adminConsoleAclMemberItem": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@adminConsoleWorkspaceCandidateItem": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@adminConsoleProjectRecentJobItem": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@adminConsoleAuditUserSummary": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@adminConsoleAuditWorkspaceMembership": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@adminConsoleAuditOwnerTransfer": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@adminConsoleAuditArchiveNote": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@adminConsoleAuditProjectOwnerTransfer": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@adminConsoleFieldUserId": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@adminConsoleDailyQuotaLabel": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionFlowChip": {
+    "placeholders": {
+      "flowKey": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionToolChip": {
+    "placeholders": {
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionAgentChip": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionPromptRewriteFocus": {
+    "placeholders": {
+      "focus": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionPromptVisualPacing": {
+    "placeholders": {
+      "pacing": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionPromptExtraConstraint": {
+    "placeholders": {
+      "constraint": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionPromptAssetFocus": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionCollapsedRows": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionReviewTarget": {
+    "placeholders": {
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionReviewGrade": {
+    "placeholders": {
+      "grade": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionReviewNextStep": {
+    "placeholders": {
+      "nextAction": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionReviewAssetIds": {
+    "placeholders": {
+      "assetIds": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionReviewSummary": {
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionReviewIssues": {
+    "placeholders": {
+      "issues": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionReviewAssetScope": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionReviewStoryboardIds": {
+    "placeholders": {
+      "ids": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionShotLabel": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSceneLabel": {
+    "placeholders": {
+      "scene": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionDurationLabel": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionAssetsLabel": {
+    "placeholders": {
+      "assets": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionStateLabel": {
+    "placeholders": {
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionContextFromTool": {
+    "placeholders": {
+      "toolName": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionCandidateIds": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionResultMissingImage": {
+    "placeholders": {
+      "assets": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceSummaryReturnedList": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceSummaryReturnedText": {
+    "placeholders": {
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceSummaryReturnedObjectKeys": {
+    "placeholders": {
+      "keys": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryTextChars": {
+    "placeholders": {
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryLineCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryPlanSections": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryStoryboardRows": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryLinkedAssets": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryListCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryPrompts": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryMediaUrls": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryNeedImages": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryTextOnlyCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryStateTypes": {
+    "placeholders": {
+      "states": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryObjectKeyCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryObjectListEntry": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryObjectTextEntry": {
+    "placeholders": {
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryReturnedType": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryReviewHeadline": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryIssueBreakdown": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryFocusedAssetScope": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryFocusedShots": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceScriptToolChip": {
+    "placeholders": {
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceScriptAgentChip": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceScriptContextChapterPrefix": {
+    "placeholders": {
+      "chapter": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceScriptSummaryReviewLine": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceScriptSummaryPlanScripts": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceScriptSummaryScriptEmpty": {
+    "placeholders": {
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceScriptSummaryScriptChars": {
+    "placeholders": {
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceScriptSummaryNovelTextEmpty": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceScriptSummaryNovelTextCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceScriptSummaryNovelEventsEmpty": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceScriptSummaryNovelEventsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceScriptContextSkeletonFocus": {
+    "placeholders": {
+      "focus": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceScriptContextAdaptationFocus": {
+    "placeholders": {
+      "focus": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceActivityLatest": {
+    "placeholders": {
+      "eventType": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceScriptPlanHint": {
+    "placeholders": {
+      "pid": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceScriptPlanWritebackReady": {
+    "placeholders": {
+      "planHint": {
+        "type": "String"
+      },
+      "scriptCount": {
+        "type": "int"
+      }
+    }
+  },
+  "@contentComplianceSlaOpenOver24h": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@contentComplianceSlaOpenOver72h": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@contentComplianceSlaClaimedOver24h": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@contentComplianceSlaChip": {
+    "placeholders": {
+      "bucket": {
+        "type": "String"
+      }
+    }
+  },
+  "@contentComplianceMetricPending": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@contentComplianceMetricClaimed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@contentComplianceMetricHigh": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@contentComplianceOldestHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "@contentComplianceCapacityPerReviewer": {
+    "placeholders": {
+      "capacity": {
+        "type": "int"
+      }
+    }
+  },
+  "@contentComplianceOwnerCounts": {
+    "placeholders": {
+      "pending": {
+        "type": "int"
+      },
+      "claimed": {
+        "type": "int"
+      }
+    }
+  },
+  "@contentComplianceOwnerDetail": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@contentComplianceWorkspaceCounts": {
+    "placeholders": {
+      "open": {
+        "type": "int"
+      },
+      "pending": {
+        "type": "int"
+      },
+      "claimed": {
+        "type": "int"
+      }
+    }
+  },
+  "@contentComplianceWorkspaceDetail": {
+    "placeholders": {
+      "critical": {
+        "type": "int"
+      },
+      "high": {
+        "type": "int"
+      }
+    }
+  },
+  "@contentComplianceReportInfo": {
+    "placeholders": {
+      "reporter": {
+        "type": "String"
+      }
+    }
+  },
+  "@contentComplianceResolutionLine": {
+    "placeholders": {
+      "note": {
+        "type": "String"
+      }
+    }
+  },
+  "@jobsDetailLabel": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@jobsKindsLabel": {
+    "placeholders": {
+      "kinds": {
+        "type": "String"
+      }
+    }
+  },
+  "@jobsKindSummaryLabel": {
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "@jobsStatusSummaryLabel": {
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "@jobsCountLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@jobsFailedReason": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "@jobsClaimedBy": {
+    "placeholders": {
+      "claimedBy": {
+        "type": "String"
+      }
+    }
+  },
+  "@opsWhActivityEntryTitle": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      },
+      "webhookId": {
+        "type": "String"
+      }
+    }
+  },
+  "@opsWhFieldId": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "@opsWhFieldCreatedAt": {
+    "placeholders": {
+      "createdAt": {
+        "type": "String"
+      }
+    }
+  },
+  "@opsWhFieldUpdatedAt": {
+    "placeholders": {
+      "updatedAt": {
+        "type": "String"
+      }
+    }
+  },
+  "@opsWhApiEventTypes": {
+    "placeholders": {
+      "eventTypes": {
+        "type": "String"
+      }
+    }
+  },
+  "@platformStatusChipLabel": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsFilterCount": "筛选 {count}",
+  "@notificationsFilterCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notificationsUnreadCount": "未读 {count}",
+  "@notificationsUnreadCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

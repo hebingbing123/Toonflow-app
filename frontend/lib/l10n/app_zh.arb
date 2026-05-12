@@ -6057,11 +6057,11 @@
     }
   },
   "storyboardWorkbenchProductionMetaLoadedEmpty": "制作视图已加载",
-  "storyboardEditorDialogTitle": "分镜 #{numericId}",
+  "storyboardEditorDialogTitle": "分镜编辑器 {title}",
   "@storyboardEditorDialogTitle": {
     "placeholders": {
-      "numericId": {
-        "type": "int"
+      "title": {
+        "type": "String"
       }
     }
   },
@@ -6071,10 +6071,10 @@
   "storyboardEditorSbIndexLabelClearEmpty": "分镜序号（留空则清空）",
   "storyboardEditorShouldGenerateImageLabelClearEmpty": "是否需要出图（留空则清空）",
   "storyboardEditorDeleteConfirmTitle": "删除分镜？",
-  "storyboardEditorDeleteConfirmBody": "将删除 storyboard #{numericId}。",
+  "storyboardEditorDeleteConfirmBody": "确定要删除分镜 {id} 吗？",
   "@storyboardEditorDeleteConfirmBody": {
     "placeholders": {
-      "numericId": {
+      "id": {
         "type": "int"
       }
     }
@@ -6090,7 +6090,7 @@
   "storyboardVideoWorkbenchTitle": "视频工作台",
   "storyboardVideoWorkbenchTrackIdLabel": "轨道 ID",
   "storyboardVideoWorkbenchTrackIdHelperNoTracks": "当前还没有已知轨道，可先新建。",
-  "storyboardVideoWorkbenchTrackIdHelperKnown": "已发现轨道：{ids}",
+  "storyboardVideoWorkbenchTrackIdHelperKnown": "已知轨道 ID：{ids}",
   "@storyboardVideoWorkbenchTrackIdHelperKnown": {
     "placeholders": {
       "ids": {
@@ -6243,6 +6243,406 @@
       }
     }
   },
+  "storyboardActionFollowUpPreviewMissing": "当前分镜还没有可读取的预览图。",
+  "storyboardActionFollowUpPreviewRead": "已读取当前分镜预览。",
+  "storyboardActionErrImageUrlRequired": "图片 URL 不能为空",
+  "storyboardActionFollowUpImageUrlSaved": "已保存当前图片 URL。",
+  "storyboardActionFollowUpLiveActionCleared": "已清空真人参考镜头与表演约束。",
+  "storyboardActionFollowUpLiveActionSaved": "已保存 {count} 条真人参考镜头，并同步表演/口播约束。",
+  "@storyboardActionFollowUpLiveActionSaved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardActionFollowUpFrameCleared": "已清空当前分镜画面。",
+  "storyboardActionErrTrackNameRequired": "轨道名称不能为空",
+  "storyboardActionFollowUpTrackAdded": "已新增轨道 #{trackId}。",
+  "@storyboardActionFollowUpTrackAdded": {
+    "placeholders": {
+      "trackId": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardActionErrTrackIdInvalid": "请填写有效轨道 ID",
+  "storyboardActionFollowUpTrackDeleted": "已删除轨道 #{trackId}。",
+  "@storyboardActionFollowUpTrackDeleted": {
+    "placeholders": {
+      "trackId": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardActionFollowUpVideoSelectedBase": "已将当前候选视频设为分镜视频。",
+  "storyboardActionFollowUpVideoDeletedBase": "已删除当前分镜已选视频。",
+  "storyboardActionFollowUpTrackReady": "当前轨道 ID 已可直接用于视频生成。",
+  "storyboardActionFollowUpTrackBackfilled": "已回填轨道 {trackId}，可继续确认视频参数。",
+  "@storyboardActionFollowUpTrackBackfilled": {
+    "placeholders": {
+      "trackId": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardActionFollowUpTrackNamePrefilled": "分镜 {storyId} 视频轨",
+  "@storyboardActionFollowUpTrackNamePrefilled": {
+    "placeholders": {
+      "storyId": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardActionFollowUpTrackNameHint": "已预填新轨道名称，下一步可直接新增轨道。",
+  "storyboardActionFollowUpSyncProduction": "已同步当前分镜制作数据。",
+  "storyboardActionFollowUpRefreshVideo": "已刷新当前分镜的视频数据。",
+  "storyboardMemorySelectedPerfDistilled": "已提炼当前分镜的私有表演记忆。",
+  "storyboardMemorySelectedPrivateParts": "已提炼私有记忆：{parts}。",
+  "@storyboardMemorySelectedPrivateParts": {
+    "placeholders": {
+      "parts": {
+        "type": "String"
+      }
+    }
+  },
+  "storyboardMemoryPrivateScopeFooter": "仅作用于当前用户、项目、剧本，后续会优先复用而不串别的短剧。",
+  "storyboardMemoryRejectedHeadEmpty": "已回写当前分镜的私有坏例约束。",
+  "storyboardMemoryRejectedHeadAvoid": "已回写私有坏例约束：{avoid}。",
+  "@storyboardMemoryRejectedHeadAvoid": {
+    "placeholders": {
+      "avoid": {
+        "type": "String"
+      }
+    }
+  },
+  "storyboardMemoryRejectedFailures": "累计失败 {count} 次",
+  "@storyboardMemoryRejectedFailures": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardMemoryRejectedRisks": "重点风险 {tags}",
+  "@storyboardMemoryRejectedRisks": {
+    "placeholders": {
+      "tags": {
+        "type": "String"
+      }
+    }
+  },
+  "storyboardMemoryRejectedNegativeFooter": "后续生成会优先复用当前用户、项目、剧本下的负向记忆。",
+  "storyboardAutoNegativeSourceReview": "自动负向来自最近评审坏例",
+  "storyboardAutoNegativeSourceRejectedMemory": "自动负向来自私有坏例记忆",
+  "storyboardAutoNegativeSourceBoth": "自动负向同时用了评审坏例和私有记忆",
+  "storyboardAutoNegativeSourcePendingObservation": "自动负向来自最近一次 reject 观察兜底",
+  "storyboardAutoNegativeSourcePendingNoteOnly": "当前还没正式负向词，只回带待观察失败提示",
+  "storyboardAutoNegativeSourceNone": "当前没有额外自动负向来源。",
+  "storyboardMemoryScopeProject": "项目 {count}",
+  "@storyboardMemoryScopeProject": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardMemoryScopeScript": "剧本 {count}",
+  "@storyboardMemoryScopeScript": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardMemoryScopeRole": "角色 {count}",
+  "@storyboardMemoryScopeRole": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardPromptGenDefaultFilledDuration": "已生成默认视频提示词并回填时长",
+  "storyboardPromptGenHitMemory": "命中{scope}记忆",
+  "@storyboardPromptGenHitMemory": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "storyboardPromptGenNegativeTrimmed": "自动精简 {fragCount} 条负向约束 / {chars} chars",
+  "@storyboardPromptGenNegativeTrimmed": {
+    "placeholders": {
+      "fragCount": {
+        "type": "int"
+      },
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardPromptSourceMemorySlim": "自动瘦身 {rows} 条（低信号 {low} / 重复 {dup} / 纯视觉 {visual}）",
+  "@storyboardPromptSourceMemorySlim": {
+    "placeholders": {
+      "rows": {
+        "type": "int"
+      },
+      "low": {
+        "type": "int"
+      },
+      "dup": {
+        "type": "int"
+      },
+      "visual": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardPromptSourceNegativeSlim": "负向精简 {fragCount} 条 / {chars} chars",
+  "@storyboardPromptSourceNegativeSlim": {
+    "placeholders": {
+      "fragCount": {
+        "type": "int"
+      },
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardPromptSourceReviewFrags": "评审 {count} 条",
+  "@storyboardPromptSourceReviewFrags": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardPromptSourceMemoryFrags": "记忆 {count} 条",
+  "@storyboardPromptSourceMemoryFrags": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardPromptAnchorRole": "角色锚点 {count}",
+  "@storyboardPromptAnchorRole": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardPromptAnchorScene": "场景锚点 {count}",
+  "@storyboardPromptAnchorScene": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardPromptAnchorTool": "道具锚点 {count}",
+  "@storyboardPromptAnchorTool": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardPromptAnchorStyle": "风格锚点 {count}",
+  "@storyboardPromptAnchorStyle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardPromptAnchorPrivateMemory": "私有记忆 {count}",
+  "@storyboardPromptAnchorPrivateMemory": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardPromptAnchorContinuity": "连续性记忆 {count}",
+  "@storyboardPromptAnchorContinuity": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardPromptAnchorReferenceFrame": "已引用当前画面",
+  "storyboardPromptAnchorEmpty": "当前提示词未命中额外锚点或记忆。",
+  "storyboardActionRepairAppliedSummary": "已应用当前生成前建议。",
+  "storyboardActionRepairNoChangeSummary": "当前建议已经基本落实，无需再裁剪。",
+  "storyboardActionRepairDetailTrimmed": "本次精简了 {promptRemoved} 条低收益提示词片段，并去掉 {negRemoved} 条重复负向约束。",
+  "@storyboardActionRepairDetailTrimmed": {
+    "placeholders": {
+      "promptRemoved": {
+        "type": "int"
+      },
+      "negRemoved": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardActionRepairDetailLean": "当前分镜的 prompt/negative prompt 已经比较精简，可直接继续生成。",
+  "storyboardActionOperationFailedSummary": "当前分镜操作失败。",
+  "storyboardActionOperationFailedDetail": "建议先完成当前推荐步骤后再重试。",
+  "storyboardActionErrNeedSourceImageOrPreview": "生成视频前需要先提供图片 URL 或当前预览图",
+  "storyboardActionErrTrackIdRequired": "生成视频前请填写有效轨道 ID",
+  "storyboardActionErrDurationPositiveInteger": "视频时长必须是正整数",
+  "storyboardActionErrVideoPromptEmpty": "视频提示词不能为空",
+  "storyboardActionVideoJobsSubmittedTotalOnly": "已提交 {total} 条视频任务。",
+  "@storyboardActionVideoJobsSubmittedTotalOnly": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardActionVideoJobsSubmittedRepairOnly": "已提交 {total} 条视频任务，并在提交前自动精简 {pRm} 条低收益 prompt 片段与 {nRm} 条重复负向约束。",
+  "@storyboardActionVideoJobsSubmittedRepairOnly": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "pRm": {
+        "type": "int"
+      },
+      "nRm": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardActionVideoJobsSubmittedDedupeOnly": "已提交 {total} 条视频任务，并自动剔除 {deduped} 条重复负向约束。",
+  "@storyboardActionVideoJobsSubmittedDedupeOnly": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "deduped": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardActionVideoJobsSubmittedRepairFinal": "已提交 {total} 条视频任务，提交前自动精简了 {pRm} 条低收益 prompt 片段、{nRm} 条重复负向约束，并回填最终负向提示词。",
+  "@storyboardActionVideoJobsSubmittedRepairFinal": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "pRm": {
+        "type": "int"
+      },
+      "nRm": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardActionVideoJobsSubmittedDedupeFinal": "已提交 {total} 条视频任务，自动剔除 {deduped} 条重复负向约束，并回填最终负向提示词。",
+  "@storyboardActionVideoJobsSubmittedDedupeFinal": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "deduped": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardActionVideoJobsSubmittedFinalOnly": "已提交 {total} 条视频任务，并回填最终负向提示词。",
+  "@storyboardActionVideoJobsSubmittedFinalOnly": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardActionVoiceoverJobsSubmitted": "已提交 {total} 条配音任务，可稍后刷新制作数据查看状态。",
+  "@storyboardActionVoiceoverJobsSubmitted": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardActionVoiceoverJobsSubmittedWithJob": "已提交 {total} 条配音任务（job={jobId}），可稍后刷新制作数据查看状态。",
+  "@storyboardActionVoiceoverJobsSubmittedWithJob": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "jobId": {
+        "type": "String"
+      }
+    }
+  },
+  "storyboardActionVideoDescCleared": "已清空字幕/旁白文案，导出时会回退到分镜提示词。",
+  "storyboardActionVideoDescSaved": "已保存字幕/旁白文案，后续默认视频提示词和导出字幕会优先使用它。",
+  "storyboardActionErrNoExportableVideoUrl": "当前分镜还没有可导出的已选视频或候选视频 URL",
+  "storyboardActionExportJobEnqueued": "已提交视频导出任务（job={jobId}）。完成后会写回当前分镜视频 URL，可稍后刷新制作数据查看。",
+  "@storyboardActionExportJobEnqueued": {
+    "placeholders": {
+      "jobId": {
+        "type": "String"
+      }
+    }
+  },
+  "storyboardPatchDialogTitle": "局部返工面板",
+  "storyboardPatchScopeLabel": "scope",
+  "storyboardPatchScopeHelper": "episode / scene / storyboard_item / video_prompt / derive_asset",
+  "storyboardPatchModelTierLabel": "model tier",
+  "storyboardPatchModelTierHelper": "low 用于格式修复，high 用于内容质量修复",
+  "storyboardPatchTargetIdsLabel": "target ids",
+  "storyboardPatchTargetIdsHelper": "逗号分隔。默认带当前 storyboard numeric ID。",
+  "storyboardPatchReasonLabel": "返工原因",
+  "storyboardPatchReasonHelper": "建议明确写出人物、情绪、镜头、连续性、台词或视觉穿帮问题。",
+  "storyboardPatchScopeHint": "提示：优先选择最小 scope；如果只是当前分镜的表演、镜头或提示词问题，先用 storyboard_item / video_prompt，不要直接放大到整集。",
+  "storyboardPatchAttributionLabel": "attribution mode:",
+  "storyboardPatchRepairPriorityHeading": "返工优先级：",
+  "storyboardPatchSnackNeedTargetId": "请至少填写一个合法 target id",
+  "storyboardPatchSnackNeedReason": "请填写返工原因",
+  "storyboardPatchSubmitLine": "已提交 patch #{patchId} · scope={scope} · ids={ids} · model={modelTier} · status={status} · 连续失败 {failures} 次 · 预计节省 {tokens} token{memorySuffix}",
+  "@storyboardPatchSubmitLine": {
+    "placeholders": {
+      "patchId": {
+        "type": "String"
+      },
+      "scope": {
+        "type": "String"
+      },
+      "ids": {
+        "type": "String"
+      },
+      "modelTier": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      },
+      "failures": {
+        "type": "int"
+      },
+      "tokens": {
+        "type": "int"
+      },
+      "memorySuffix": {
+        "type": "String"
+      }
+    }
+  },
+  "storyboardPatchMemoryWrittenSuffix": " · 已写入归因记忆",
+  "storyboardPatchAttributionUpstreamHint": "当前请求已进入问题归因模式，请先处理上游原因。",
+  "storyboardPatchFollowUpAttribution": "局部返工已提交，并进入 attribution mode。优先按面板里的 P1/P2 顺序处理，不要直接整段重跑。",
+  "storyboardPatchFollowUpQueued": "局部返工已提交，当前按最小范围排队处理。",
+  "storyboardPatchSubmitting": "提交中…",
+  "storyboardPatchSubmit": "提交返工",
+  "storyboardPatchDefaultReason": "请修复当前分镜的内容质量、连续性或情绪表达问题",
   "shortVideoReadinessNoPayloadHeadline": "还没有读取到分镜就绪数据。",
   "shortVideoReadinessEmptyProjectHeadline": "当前项目还没有分镜行，可先在脚本侧拆镜后再看聚合。",
   "shortVideoReadinessRollupHeadline": "就绪 {ready}/{total} 条分镜；阻塞 {blocked} 条。",
@@ -7547,45 +7947,45 @@
   "accountExportCreate": "创建导出包",
   "accountExportIncludeAuditLogs": "包含审计日志",
   "accountExportIncludeNotifications": "包含通知记录",
-  "accountExportActiveCount": "包含通知记录",
+  "accountExportActiveCount": "进行中 {count}",
   "accountExportCopyLastSavedPath": "复制最近保存路径",
   "accountExportEmpty": "还没有账户导出记录。",
-  "accountExportDefaultFileName": "账户导出 #...",
-  "accountExportTaskLine": "任务 #... · ...",
-  "accountExportSizeLine": "大小 ...",
-  "accountExportSavedSnack": "已保存导出包：$path",
+  "accountExportDefaultFileName": "账户导出 #{numericTaskId}",
+  "accountExportTaskLine": "任务 #{numericTaskId}",
+  "accountExportSizeLine": "大小 {size}",
+  "accountExportSavedSnack": "已保存到 {path}",
   "accountExportDownload": "下载到本机",
   "accountExportCopyFileName": "复制文件名",
   "accountDeleteTitle": "删除账号",
   "accountDeleteDescription": "删号会删除当前用户、其 owner workspace、个人项目、任务、通知和本地导出/媒体目录。共享 workspace 中的成员关系也会移除。",
   "accountDeleteConfirmLabel": "输入 DELETE MY ACCOUNT 以确认",
   "accountDeleteIrreversibleAck": "我确认这是不可逆操作，并接受相关 workspace / project 级联删除。",
-  "accountDeleteLastResponse": "job ...",
+  "accountDeleteLastResponse": "已删除 {count} 个作业",
   "accountDeleteButton": "永久删除当前账号",
   "accountExportStatusQueued": "生成中",
   "accountExportStatusRunning": "可下载",
   "accountExportStatusSucceeded": "可下载",
   "accountExportStatusFailed": "可下载",
-  "adminConsoleMembershipItem": "...",
-  "adminConsoleRecentJobItem": "... · ... · project ...",
-  "adminConsoleAuditListItem": "... · ... · ...",
-  "adminConsoleDailyQuotaLabel": "dailyJobQuota",
-  "adminConsoleChipMember": "archived",
+  "adminConsoleMembershipItem": "成员 {detail}",
+  "adminConsoleRecentJobItem": "作业 {detail}",
+  "adminConsoleAuditListItem": "审计 {detail}",
+  "adminConsoleDailyQuotaLabel": "每日配额 {detail}",
+  "adminConsoleChipMember": "成员 {count}",
   "adminConsoleArchivedLabel": "archived",
-  "adminConsoleMemberListItem": "... · ... · joined ...",
-  "adminConsoleRecentProjectItem": "#... ...",
-  "adminConsoleChipScript": "active job ...",
-  "adminConsoleChipAsset": "active job ...",
-  "adminConsoleChipJob": "active job ...",
-  "adminConsoleAclMemberItem": "... · workspace ... · project ... · ...",
-  "adminConsoleWorkspaceCandidateItem": "... · ... · explicit ...",
-  "adminConsoleProjectRecentJobItem": "... · ... · ... · ...",
-  "adminConsoleAuditUserSummary": "status=$nextStatus · quota=...",
-  "adminConsoleAuditWorkspaceMembership": "action=$action · user=...",
-  "adminConsoleAuditOwnerTransfer": "owner=...",
-  "adminConsoleAuditArchiveNote": "archivedAt=$nextArchived · opsNote=...",
-  "adminConsoleAuditProjectOwnerTransfer": "owner=...",
-  "adminConsoleFieldUserId": "archivedAt=$nextArchived · opsNote=...",
+  "adminConsoleMemberListItem": "成员 {detail}",
+  "adminConsoleRecentProjectItem": "项目 {detail}",
+  "adminConsoleChipScript": "剧本 {count}",
+  "adminConsoleChipAsset": "资产 {count}",
+  "adminConsoleChipJob": "作业 {count}",
+  "adminConsoleAclMemberItem": "成员 {detail}",
+  "adminConsoleWorkspaceCandidateItem": "候选 {detail}",
+  "adminConsoleProjectRecentJobItem": "作业 {detail}",
+  "adminConsoleAuditUserSummary": "用户审计 {detail}",
+  "adminConsoleAuditWorkspaceMembership": "工作区成员审计 {detail}",
+  "adminConsoleAuditOwnerTransfer": "所有权转移 {detail}",
+  "adminConsoleAuditArchiveNote": "归档备注 {detail}",
+  "adminConsoleAuditProjectOwnerTransfer": "项目所有权转移 {detail}",
+  "adminConsoleFieldUserId": "用户 ID {detail}",
   "adminConsoleFieldCreatedAt": "admin console field created at",
   "adminConsoleFieldUpdatedAt": "admin console field updated at",
   "adminConsoleFieldOperationalStatus": "admin console field operational status",
@@ -7618,14 +8018,14 @@
   "agentWorkspaceProductionWritebackToolResult": "写回工具结果",
   "agentWorkspaceProductionArgumentTemplates": "参数模板",
   "agentWorkspaceProductionCurrentCandidateArgs": "当前结果候选参数",
-  "agentWorkspaceProductionCandidateIds": "候选 ... 项：......",
+  "agentWorkspaceProductionCandidateIds": "候选 {count} 项",
   "agentWorkspaceProductionPromptPreviewTitle": "执行提示",
   "agentWorkspaceProductionStagesTitle": "执行阶段",
-  "agentWorkspaceProductionFlowChip": "flow=...",
+  "agentWorkspaceProductionFlowChip": "flow={flowKey}",
   "agentWorkspaceProductionApplyStage": "应用阶段",
   "agentWorkspaceProductionDiagnosisTitle": "下一步建议",
-  "agentWorkspaceProductionToolChip": "tool=...",
-  "agentWorkspaceProductionAgentChip": "agent=...",
+  "agentWorkspaceProductionToolChip": "tool={tool}",
+  "agentWorkspaceProductionAgentChip": "agent={agent}",
   "agentWorkspaceProductionApplySuggestion": "应用建议",
   "agentWorkspaceProductionStepPullAssetsFlow": "1) 拉取资产 flow",
   "agentWorkspaceProductionStepRunAssetsSubAgent": "2) 运行资产子代理",
@@ -7634,64 +8034,64 @@
   "agentWorkspaceProductionStepRunStoryboardSubAgent": "5) 运行分镜子代理",
   "agentWorkspaceProductionStepRunDirectorPlanSubAgent": "6) 运行导演计划子代理",
   "agentWorkspaceProductionPromptFlowDown": "执行顺序：先核对导演计划点名资产，再补分镜表和镜头结果。",
-  "agentWorkspaceProductionPromptRewriteFocus": "执行顺序：先核对导演计划点名资产，再补分镜表和镜头结果。",
-  "agentWorkspaceProductionPromptVisualPacing": "执行顺序：先核对导演计划点名资产，再补分镜表和镜头结果。",
-  "agentWorkspaceProductionPromptExtraConstraint": "执行顺序：先核对导演计划点名资产，再补分镜表和镜头结果。",
-  "agentWorkspaceProductionPromptAssetFocus": "执行顺序：先核对导演计划点名资产，再补分镜表和镜头结果。",
+  "agentWorkspaceProductionPromptRewriteFocus": "改写焦点：{focus}",
+  "agentWorkspaceProductionPromptVisualPacing": "视觉节奏：{pacing}",
+  "agentWorkspaceProductionPromptExtraConstraint": "额外约束：{constraint}",
+  "agentWorkspaceProductionPromptAssetFocus": "资产焦点：{scope}",
   "agentWorkspaceProductionPromptExecutionOrder": "执行顺序：先核对导演计划点名资产，再补分镜表和镜头结果。",
   "agentWorkspaceProductionStoryboardPriorityMissing": "其余 $hiddenCount 行已折叠",
-  "agentWorkspaceProductionCollapsedRows": "其余 $hiddenCount 行已折叠",
-  "agentWorkspaceProductionReviewTarget": "聚焦资产: ...",
-  "agentWorkspaceProductionReviewGrade": "聚焦资产: ...",
-  "agentWorkspaceProductionReviewIssues": "聚焦资产: ...",
-  "agentWorkspaceProductionReviewNextStep": "聚焦资产: ...",
-  "agentWorkspaceProductionReviewAssetIds": "聚焦资产范围: ...",
-  "agentWorkspaceProductionReviewAssetScope": "聚焦资产范围: ...",
-  "agentWorkspaceProductionReviewStoryboardIds": "结论: ...",
-  "agentWorkspaceProductionReviewSummary": "结论: ...",
-  "agentWorkspaceProductionShotLabel": "时长: $duration",
-  "agentWorkspaceProductionSceneLabel": "时长: $duration",
-  "agentWorkspaceProductionDurationLabel": "资产: ...",
-  "agentWorkspaceProductionAssetsLabel": "资产: ...",
-  "agentWorkspaceProductionStateLabel": "模式: 纯文本",
+  "agentWorkspaceProductionCollapsedRows": "已折叠 {count} 行",
+  "agentWorkspaceProductionReviewTarget": "目标：{target}",
+  "agentWorkspaceProductionReviewGrade": "等级：{grade}",
+  "agentWorkspaceProductionReviewIssues": "问题：{issues}",
+  "agentWorkspaceProductionReviewNextStep": "下一步：{nextAction}",
+  "agentWorkspaceProductionReviewAssetIds": "资产：{assetIds}",
+  "agentWorkspaceProductionReviewAssetScope": "资产范围：{scope}",
+  "agentWorkspaceProductionReviewStoryboardIds": "镜头：{ids}",
+  "agentWorkspaceProductionReviewSummary": "结论：{summary}",
+  "agentWorkspaceProductionShotLabel": "镜头 {id}",
+  "agentWorkspaceProductionSceneLabel": "场景 {scene}",
+  "agentWorkspaceProductionDurationLabel": "时长 {duration}",
+  "agentWorkspaceProductionAssetsLabel": "资产 {assets}",
+  "agentWorkspaceProductionStateLabel": "状态 {state}",
   "agentWorkspaceProductionModeTextOnly": "结果: 已有画面",
   "agentWorkspaceProductionResultHasImage": "结果: 缺帧待补图",
-  "agentWorkspaceProductionResultMissingImage": "资产: ...",
-  "agentWorkspaceProductionContextFromTool": "来自 $toolName",
+  "agentWorkspaceProductionResultMissingImage": "缺少图片 {assets}",
+  "agentWorkspaceProductionContextFromTool": "来自工具 {toolName}",
   "agentWorkspaceProductionContextDerivedRewrite": "由 scriptPlan 派生的 production 执行提示",
   "agentWorkspaceProductionContextDerivedRewriteSubtitle": "由 scriptPlan 派生的 production 执行提示",
   "agentWorkspaceProductionContextReturnList": "来自 $toolName",
   "agentWorkspaceProductionContextToolText": "工具返回文本",
   "agentWorkspaceProductionContextReviewSummary": "来自 $toolName",
   "agentWorkspaceProductionContextSnapshotTitle": "上下文快照",
-  "agentWorkspaceSummaryReturnedList": "返回列表 ... 项",
-  "agentWorkspaceSummaryReturnedText": "返回文本 ... 字",
-  "agentWorkspaceProductionSummaryItems": "返回 items ... 项",
-  "agentWorkspaceProductionSummaryReviewHeadline": "聚焦资产 ... 项",
-  "agentWorkspaceProductionSummaryIssueBreakdown": "聚焦资产 ... 项",
+  "agentWorkspaceSummaryReturnedList": "返回列表 {count} 项",
+  "agentWorkspaceSummaryReturnedText": "返回文本 {chars} 字",
+  "agentWorkspaceProductionSummaryItems": "返回 items {count} 项",
+  "agentWorkspaceProductionSummaryReviewHeadline": "聚焦资产 {count} 项",
+  "agentWorkspaceProductionSummaryIssueBreakdown": "问题分布 {count} 项",
   "agentWorkspaceProductionSummaryFocusedAssets": "agent workspace production summary focused assets",
-  "agentWorkspaceProductionSummaryFocusedAssetScope": "聚焦资产范围 ...",
-  "agentWorkspaceProductionSummaryFocusedShots": "聚焦镜头 ... 项",
-  "agentWorkspaceSummaryReturnedObjectKeys": "返回对象 keys=...",
+  "agentWorkspaceProductionSummaryFocusedAssetScope": "聚焦资产范围 {scope}",
+  "agentWorkspaceProductionSummaryFocusedShots": "聚焦镜头 {count} 项",
+  "agentWorkspaceSummaryReturnedObjectKeys": "返回对象 keys={keys}",
   "agentWorkspaceProductionSummaryFlowEmpty": "当前 flow 为空",
   "agentWorkspaceProductionSummaryFlowEmptyString": "当前 flow 为空字符串",
-  "agentWorkspaceProductionSummaryTextChars": "已承接改写约束",
-  "agentWorkspaceProductionSummaryLineCount": "已承接改写约束",
-  "agentWorkspaceProductionSummaryPlanSections": "已承接改写约束",
+  "agentWorkspaceProductionSummaryTextChars": "文本 {chars} 字",
+  "agentWorkspaceProductionSummaryLineCount": "行数 {count}",
+  "agentWorkspaceProductionSummaryPlanSections": "计划章节 {count}",
   "agentWorkspaceProductionSummaryRewriteInherited": "已承接改写约束",
-  "agentWorkspaceProductionSummaryStoryboardRows": "关联资产 $assetCount 项",
-  "agentWorkspaceProductionSummaryLinkedAssets": "关联资产 $assetCount 项",
-  "agentWorkspaceProductionSummaryListCount": "含媒体地址 $withUrl 项",
-  "agentWorkspaceProductionSummaryPrompts": "含媒体地址 $withUrl 项",
-  "agentWorkspaceProductionSummaryMediaUrls": "含媒体地址 $withUrl 项",
-  "agentWorkspaceProductionSummaryNeedImages": "纯文本 $skippedCount 项",
+  "agentWorkspaceProductionSummaryStoryboardRows": "分镜 {count} 条",
+  "agentWorkspaceProductionSummaryLinkedAssets": "关联资产 {count}",
+  "agentWorkspaceProductionSummaryListCount": "列表 {count} 项",
+  "agentWorkspaceProductionSummaryPrompts": "提示词 {count}",
+  "agentWorkspaceProductionSummaryMediaUrls": "媒体 URL {count}",
+  "agentWorkspaceProductionSummaryNeedImages": "需要图片 {count}",
   "agentWorkspaceProductionSummaryMissingFrames": "纯文本 $skippedCount 项",
-  "agentWorkspaceProductionSummaryTextOnlyCount": "agent workspace production summary text only count",
-  "agentWorkspaceProductionSummaryStateTypes": "状态种类 $states 个",
-  "agentWorkspaceProductionSummaryObjectKeyCount": "对象 keys=... 个",
-  "agentWorkspaceProductionSummaryObjectListEntry": "...: ... 项",
-  "agentWorkspaceProductionSummaryObjectTextEntry": "...: ... 字",
-  "agentWorkspaceProductionSummaryReturnedType": "返回 ...",
+  "agentWorkspaceProductionSummaryTextOnlyCount": "纯文本 {count}",
+  "agentWorkspaceProductionSummaryStateTypes": "状态类型 {states}",
+  "agentWorkspaceProductionSummaryObjectKeyCount": "对象 keys={count} 个",
+  "agentWorkspaceProductionSummaryObjectListEntry": "列表 {count} 项",
+  "agentWorkspaceProductionSummaryObjectTextEntry": "文本 {chars} 字",
+  "agentWorkspaceProductionSummaryReturnedType": "返回 {type}",
   "agentWorkspaceProductionIdleHint": "等待执行：可直接用引导任务或表单按钮。",
   "agentWorkspaceProductionLatestToolResult": "最新工具结果：$workspaceLastToolResultLine",
   "agentWorkspaceProductionResultSummary": "结果摘要",
@@ -7717,11 +8117,11 @@
   "agentWorkspaceScriptApplyStage": "应用阶段",
   "agentWorkspaceScriptAdvanceStage": "推进阶段",
   "agentWorkspaceScriptDiagnosisTitle": "下一步建议",
-  "agentWorkspaceScriptToolChip": "tool=...",
-  "agentWorkspaceScriptAgentChip": "agent=...",
+  "agentWorkspaceScriptToolChip": "tool={tool}",
+  "agentWorkspaceScriptAgentChip": "agent={agent}",
   "agentWorkspaceScriptApplySuggestion": "应用建议",
-  "agentWorkspaceScriptContextSkeletonFocus": "骨架重点：$skeletonHint",
-  "agentWorkspaceScriptContextAdaptationFocus": "改编口径：$strategyHint",
+  "agentWorkspaceScriptContextSkeletonFocus": "骨架焦点：{focus}",
+  "agentWorkspaceScriptContextAdaptationFocus": "改编焦点：{focus}",
   "agentWorkspaceScriptContextExecutionOrder": "对白约束：避免解释剧情，优先口语化冲突表达和情绪推进。",
   "agentWorkspaceScriptContextDialogueConstraint": "对白约束：避免解释剧情，优先口语化冲突表达和情绪推进。",
   "agentWorkspaceScriptContextStorySkeleton": "来自 get_planData",
@@ -7736,7 +8136,7 @@
   "agentWorkspaceScriptContextCurrentScriptBody": "来自 get_script_content",
   "agentWorkspaceScriptContextFromScriptContent": "来自 get_script_content",
   "agentWorkspaceScriptContextUntitledChapter": "chapter",
-  "agentWorkspaceScriptContextChapterPrefix": "第 ... 章 · $chapter",
+  "agentWorkspaceScriptContextChapterPrefix": "第 {chapter} 章",
   "agentWorkspaceScriptContextNovelChapters": "来自 get_novel_text，最多展示前 4 条",
   "agentWorkspaceScriptContextNovelChaptersSubtitle": "来自 get_novel_text，最多展示前 4 条",
   "agentWorkspaceScriptContextUntitledEvent": "未命名事件",
@@ -7746,19 +8146,19 @@
   "agentWorkspaceScriptLatestAssistantResult": "最新助手结果",
   "agentWorkspaceScriptWritebackSource": "写回来源：$scriptWritebackSourceLine",
   "agentWorkspaceScriptSummaryReviewReturned": "审核结果已返回",
-  "agentWorkspaceScriptSummaryReviewLine": "审核 ...：... 级，问题 $issueCount 项$summary",
+  "agentWorkspaceScriptSummaryReviewLine": "审核 {detail}",
   "agentWorkspaceScriptSummaryPlanDataMissing": "planData 缺少 data",
   "agentWorkspaceScriptSummaryStorySkeletonReady": "故事骨架已就绪",
   "agentWorkspaceScriptSummaryAdaptationReady": "改编策略已就绪",
-  "agentWorkspaceScriptSummaryPlanScripts": "计划剧本 ... 条",
+  "agentWorkspaceScriptSummaryPlanScripts": "计划剧本 {count} 条",
   "agentWorkspaceScriptSummaryRewriteReady": "改写约束已可下游消费",
   "agentWorkspaceScriptSummaryPlanDataReturned": "planData 已返回",
-  "agentWorkspaceScriptSummaryScriptEmpty": "剧本正文 ... 字",
-  "agentWorkspaceScriptSummaryScriptChars": "剧本正文 ... 字",
-  "agentWorkspaceScriptSummaryNovelTextEmpty": "章节材料 ... 条",
-  "agentWorkspaceScriptSummaryNovelTextCount": "章节材料 ... 条",
-  "agentWorkspaceScriptSummaryNovelEventsEmpty": "小说事件 ... 条",
-  "agentWorkspaceScriptSummaryNovelEventsCount": "小说事件 ... 条",
+  "agentWorkspaceScriptSummaryScriptEmpty": "剧本正文 {chars} 字",
+  "agentWorkspaceScriptSummaryScriptChars": "剧本正文 {chars} 字",
+  "agentWorkspaceScriptSummaryNovelTextEmpty": "章节材料 {count} 条",
+  "agentWorkspaceScriptSummaryNovelTextCount": "章节材料 {count} 条",
+  "agentWorkspaceScriptSummaryNovelEventsEmpty": "小说事件 {count} 条",
+  "agentWorkspaceScriptSummaryNovelEventsCount": "小说事件 {count} 条",
   "agentWorkspaceScopeProjectIdLabel": "项目 ID（numeric）",
   "agentWorkspaceScopeScriptIdLabel": "剧本 ID（numeric）",
   "agentWorkspaceScopeProjectUuidLabel": "项目 UUID（可选，与 WS projectUuid 对齐）",
@@ -7768,15 +8168,15 @@
   "agentWorkspacePaneProduction": "执行动态",
   "agentWorkspacePaneActivity": "执行动态",
   "agentWorkspaceActivityTitle": "执行动态",
-  "agentWorkspaceActivityLatest": "latest: $eventType",
+  "agentWorkspaceActivityLatest": "最新：{eventType}",
   "agentWorkspaceActivityLatestToolResult": "最新工具结果：$workspaceLastToolResultLine",
   "agentWorkspaceActivityLatestAssistantText": "最新助手文本",
   "agentWorkspaceActivityNoWsEvents": "暂无 WS 事件。",
   "agentWorkspaceProductionCardTitle": "制作工作区",
   "agentWorkspaceGuidedTasksTitle": "引导任务",
   "agentWorkspaceScriptWritebackSourceAssistant": "assistant stream",
-  "agentWorkspaceScriptPlanHint": "PlanData source ready:$planHint story/adaptation + script rows=$scriptCount",
-  "agentWorkspaceScriptPlanWritebackReady": "PlanData source ready:$planHint story/adaptation + script rows=$scriptCount",
+  "agentWorkspaceScriptPlanHint": "计划 {pid}",
+  "agentWorkspaceScriptPlanWritebackReady": "计划回写就绪：{planHint}，{scriptCount} 条剧本",
   "agentWorkspaceScriptRunningWorkflow": "执行中：写回计划数据",
   "agentWorkspaceScriptRunningReadContext": "执行中：写回计划数据",
   "agentWorkspaceScriptRunningSubAgent": "执行中：写回计划数据",
@@ -7807,29 +8207,29 @@
   "contentComplianceStatusClaimed": "content compliance status claimed",
   "contentComplianceStatusResolved": "content compliance status resolved",
   "contentComplianceStatusDismissed": "content compliance status dismissed",
-  "contentComplianceSlaOpenOver24h": "content compliance sla open over24h",
-  "contentComplianceSlaOpenOver72h": "content compliance sla open over72h",
-  "contentComplianceSlaClaimedOver24h": "claimed>24h ...",
+  "contentComplianceSlaOpenOver24h": "open>24h {count}",
+  "contentComplianceSlaOpenOver72h": "open>72h {count}",
+  "contentComplianceSlaClaimedOver24h": "claimed>24h {count}",
   "contentComplianceFieldTargetType": "storyboard",
   "contentComplianceFieldCategory": "violence",
   "contentComplianceFieldSeverity": "critical",
   "contentComplianceFieldTargetUuid": "target UUID",
   "contentComplianceFieldStatus": "resolved",
-  "contentComplianceSlaChip": "SLA: ...",
-  "contentComplianceMetricPending": "high ...",
-  "contentComplianceMetricClaimed": "high ...",
+  "contentComplianceSlaChip": "SLA: {bucket}",
+  "contentComplianceMetricPending": "待处理 {count}",
+  "contentComplianceMetricClaimed": "已认领 {count}",
   "contentComplianceMetricResolved": "content compliance metric resolved",
   "contentComplianceMetricDismissed": "content compliance metric dismissed",
   "contentComplianceMetricCritical": "content compliance metric critical",
-  "contentComplianceMetricHigh": "content compliance metric high",
-  "contentComplianceOldestHours": "oldest ...h",
-  "contentComplianceCapacityPerReviewer": "capacity .../reviewer",
-  "contentComplianceOwnerCounts": "pending ... · claimed ...",
-  "contentComplianceOwnerDetail": "...",
-  "contentComplianceWorkspaceCounts": "open ... · pending ... · claimed ...",
-  "contentComplianceWorkspaceDetail": "critical ... · high ... · SLA ... · oldest ...h",
-  "contentComplianceReportInfo": "reporter ...",
-  "contentComplianceResolutionLine": "resolution: ...",
+  "contentComplianceMetricHigh": "高优先级 {count}",
+  "contentComplianceOldestHours": "最旧 {hours}h",
+  "contentComplianceCapacityPerReviewer": "容量 {capacity}/reviewer",
+  "contentComplianceOwnerCounts": "待处理 {pending} · 已认领 {claimed}",
+  "contentComplianceOwnerDetail": "详情 {detail}",
+  "contentComplianceWorkspaceCounts": "open {open} · pending {pending} · claimed {claimed}",
+  "contentComplianceWorkspaceDetail": "critical {critical} · high {high}",
+  "contentComplianceReportInfo": "reporter {reporter}",
+  "contentComplianceResolutionLine": "resolution: {note}",
   "contentComplianceActionClaim": "content compliance action claim",
   "contentComplianceActionResolve": "resolve",
   "contentComplianceActionDismiss": "dismiss",
@@ -7843,8 +8243,8 @@
   "jobsStatusCountEntry": "jobs status count entry",
   "jobsIdempotencyMismatch": "jobs idempotency mismatch",
   "jobsUpdatedAt": "jobs updated at",
-  "jobsClaimedBy": "jobs claimed by",
-  "jobsFailedReason": "jobs failed reason",
+  "jobsClaimedBy": "认领者：{claimedBy}",
+  "jobsFailedReason": "失败原因：{reason}",
   "jobsTitle": "任务作业",
   "jobsPrefsTooltip": "本机客户端偏好",
   "jobsSubtitle": "查看作业列表、状态汇总，并按 ID 打开单条执行记录。",
@@ -7861,11 +8261,11 @@
   "jobsCreateProbeJob": "创建 probe 作业",
   "jobsJobIdLabel": "作业 ID（点下方列表可自动填入）",
   "jobsFetchDetail": "查看作业详情",
-  "jobsDetailLabel": "作业详情：...",
-  "jobsKindsLabel": "作业类型：...",
-  "jobsKindSummaryLabel": "类型汇总：...",
-  "jobsStatusSummaryLabel": "状态汇总：...",
-  "jobsCountLabel": "... 条作业",
+  "jobsDetailLabel": "作业详情：{detail}",
+  "jobsKindsLabel": "作业类型：{kinds}",
+  "jobsKindSummaryLabel": "类型汇总：{summary}",
+  "jobsStatusSummaryLabel": "状态汇总：{summary}",
+  "jobsCountLabel": "{count} 条作业",
   "jobsRetry": "jobs retry",
   "jobsCancel": "jobs cancel",
   "notificationsRealtimeDisconnected": "notifications realtime disconnected",
@@ -7884,12 +8284,12 @@
   "notificationsImportJsonObjectRequired": "notifications import json object required",
   "notificationsImportJsonParseFailed": "notifications import json parse failed",
   "notificationsUnknownTemplate": "notifications unknown template",
-  "platformStatusChipLabel": "$title: $value",
-  "opsWhActivityEntryTitle": "... · ...",
-  "opsWhFieldId": "updatedAt: ...",
-  "opsWhFieldCreatedAt": "updatedAt: ...",
-  "opsWhFieldUpdatedAt": "updatedAt: ...",
-  "opsWhApiEventTypes": "API: ...",
+  "platformStatusChipLabel": "{title}: {value}",
+  "opsWhActivityEntryTitle": "{action} · {webhookId}",
+  "opsWhFieldId": "ID: {id}",
+  "opsWhFieldCreatedAt": "创建时间: {createdAt}",
+  "opsWhFieldUpdatedAt": "更新时间: {updatedAt}",
+  "opsWhApiEventTypes": "API: {eventTypes}",
   "billingAuditEventTypeLabel": "event_type",
   "billingAuditProviderEventIdLabel": "provider_event_id",
   "billingAuditRawEventIdLabel": "raw_event_id",
@@ -7898,5 +8298,854 @@
   "billingAuditEventCreatedFromLabel": "event_created_from",
   "billingAuditEventCreatedToLabel": "event_created_to",
   "billingAuditCreatedFromLabel": "created_from",
-  "billingAuditCreatedToLabel": "created_to"
+  "billingAuditCreatedToLabel": "created_to",
+  "@accountExportActiveCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@accountExportDefaultFileName": {
+    "placeholders": {
+      "numericTaskId": {
+        "type": "int"
+      }
+    }
+  },
+  "@accountExportSizeLine": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "@accountExportSavedSnack": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "@accountExportTaskLine": {
+    "placeholders": {
+      "numericTaskId": {
+        "type": "int"
+      }
+    }
+  },
+  "@accountDeleteLastResponse": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@adminConsoleMembershipItem": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@adminConsoleRecentJobItem": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@adminConsoleAuditListItem": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@adminConsoleMemberListItem": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@adminConsoleRecentProjectItem": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@adminConsoleChipMember": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@adminConsoleChipScript": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@adminConsoleChipAsset": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@adminConsoleChipJob": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@adminConsoleAclMemberItem": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@adminConsoleWorkspaceCandidateItem": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@adminConsoleProjectRecentJobItem": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@adminConsoleAuditUserSummary": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@adminConsoleAuditWorkspaceMembership": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@adminConsoleAuditOwnerTransfer": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@adminConsoleAuditArchiveNote": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@adminConsoleAuditProjectOwnerTransfer": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@adminConsoleFieldUserId": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@adminConsoleDailyQuotaLabel": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionFlowChip": {
+    "placeholders": {
+      "flowKey": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionToolChip": {
+    "placeholders": {
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionAgentChip": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionPromptRewriteFocus": {
+    "placeholders": {
+      "focus": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionPromptVisualPacing": {
+    "placeholders": {
+      "pacing": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionPromptExtraConstraint": {
+    "placeholders": {
+      "constraint": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionPromptAssetFocus": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionCollapsedRows": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionReviewTarget": {
+    "placeholders": {
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionReviewGrade": {
+    "placeholders": {
+      "grade": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionReviewNextStep": {
+    "placeholders": {
+      "nextAction": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionReviewAssetIds": {
+    "placeholders": {
+      "assetIds": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionReviewSummary": {
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionReviewIssues": {
+    "placeholders": {
+      "issues": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionReviewAssetScope": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionReviewStoryboardIds": {
+    "placeholders": {
+      "ids": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionShotLabel": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSceneLabel": {
+    "placeholders": {
+      "scene": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionDurationLabel": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionAssetsLabel": {
+    "placeholders": {
+      "assets": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionStateLabel": {
+    "placeholders": {
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionContextFromTool": {
+    "placeholders": {
+      "toolName": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionCandidateIds": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionResultMissingImage": {
+    "placeholders": {
+      "assets": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceSummaryReturnedList": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceSummaryReturnedText": {
+    "placeholders": {
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceSummaryReturnedObjectKeys": {
+    "placeholders": {
+      "keys": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryTextChars": {
+    "placeholders": {
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryLineCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryPlanSections": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryStoryboardRows": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryLinkedAssets": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryListCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryPrompts": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryMediaUrls": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryNeedImages": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryTextOnlyCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryStateTypes": {
+    "placeholders": {
+      "states": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryObjectKeyCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryObjectListEntry": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryObjectTextEntry": {
+    "placeholders": {
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryReturnedType": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryReviewHeadline": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryIssueBreakdown": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryFocusedAssetScope": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryFocusedShots": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceScriptToolChip": {
+    "placeholders": {
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceScriptAgentChip": {
+    "placeholders": {
+      "agent": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceScriptContextChapterPrefix": {
+    "placeholders": {
+      "chapter": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceScriptSummaryReviewLine": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceScriptSummaryPlanScripts": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceScriptSummaryScriptEmpty": {
+    "placeholders": {
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceScriptSummaryScriptChars": {
+    "placeholders": {
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceScriptSummaryNovelTextEmpty": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceScriptSummaryNovelTextCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceScriptSummaryNovelEventsEmpty": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceScriptSummaryNovelEventsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceScriptContextSkeletonFocus": {
+    "placeholders": {
+      "focus": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceScriptContextAdaptationFocus": {
+    "placeholders": {
+      "focus": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceActivityLatest": {
+    "placeholders": {
+      "eventType": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceScriptPlanHint": {
+    "placeholders": {
+      "pid": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceScriptPlanWritebackReady": {
+    "placeholders": {
+      "planHint": {
+        "type": "String"
+      },
+      "scriptCount": {
+        "type": "int"
+      }
+    }
+  },
+  "@contentComplianceSlaOpenOver24h": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@contentComplianceSlaOpenOver72h": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@contentComplianceSlaClaimedOver24h": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@contentComplianceSlaChip": {
+    "placeholders": {
+      "bucket": {
+        "type": "String"
+      }
+    }
+  },
+  "@contentComplianceMetricPending": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@contentComplianceMetricClaimed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@contentComplianceMetricHigh": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@contentComplianceOldestHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "@contentComplianceCapacityPerReviewer": {
+    "placeholders": {
+      "capacity": {
+        "type": "int"
+      }
+    }
+  },
+  "@contentComplianceOwnerCounts": {
+    "placeholders": {
+      "pending": {
+        "type": "int"
+      },
+      "claimed": {
+        "type": "int"
+      }
+    }
+  },
+  "@contentComplianceOwnerDetail": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@contentComplianceWorkspaceCounts": {
+    "placeholders": {
+      "open": {
+        "type": "int"
+      },
+      "pending": {
+        "type": "int"
+      },
+      "claimed": {
+        "type": "int"
+      }
+    }
+  },
+  "@contentComplianceWorkspaceDetail": {
+    "placeholders": {
+      "critical": {
+        "type": "int"
+      },
+      "high": {
+        "type": "int"
+      }
+    }
+  },
+  "@contentComplianceReportInfo": {
+    "placeholders": {
+      "reporter": {
+        "type": "String"
+      }
+    }
+  },
+  "@contentComplianceResolutionLine": {
+    "placeholders": {
+      "note": {
+        "type": "String"
+      }
+    }
+  },
+  "@jobsDetailLabel": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@jobsKindsLabel": {
+    "placeholders": {
+      "kinds": {
+        "type": "String"
+      }
+    }
+  },
+  "@jobsKindSummaryLabel": {
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "@jobsStatusSummaryLabel": {
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "@jobsCountLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@jobsFailedReason": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "@jobsClaimedBy": {
+    "placeholders": {
+      "claimedBy": {
+        "type": "String"
+      }
+    }
+  },
+  "@opsWhActivityEntryTitle": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      },
+      "webhookId": {
+        "type": "String"
+      }
+    }
+  },
+  "@opsWhFieldId": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "@opsWhFieldCreatedAt": {
+    "placeholders": {
+      "createdAt": {
+        "type": "String"
+      }
+    }
+  },
+  "@opsWhFieldUpdatedAt": {
+    "placeholders": {
+      "updatedAt": {
+        "type": "String"
+      }
+    }
+  },
+  "@opsWhApiEventTypes": {
+    "placeholders": {
+      "eventTypes": {
+        "type": "String"
+      }
+    }
+  },
+  "@platformStatusChipLabel": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsFilterCount": "筛选 {count}",
+  "@notificationsFilterCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notificationsUnreadCount": "未读 {count}",
+  "@notificationsUnreadCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

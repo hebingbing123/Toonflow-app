@@ -12816,8 +12816,8 @@ abstract class AppLocalizations {
   /// No description provided for @storyboardEditorDialogTitle.
   ///
   /// In en, this message translates to:
-  /// **'Storyboard #{numericId}'**
-  String storyboardEditorDialogTitle(int numericId);
+  /// **'分镜编辑器 {title}'**
+  String storyboardEditorDialogTitle(String title);
 
   /// No description provided for @storyboardEditorPromptLabelClearEmpty.
   ///
@@ -12858,8 +12858,8 @@ abstract class AppLocalizations {
   /// No description provided for @storyboardEditorDeleteConfirmBody.
   ///
   /// In en, this message translates to:
-  /// **'This will delete storyboard #{numericId}.'**
-  String storyboardEditorDeleteConfirmBody(int numericId);
+  /// **'确定要删除分镜 {id} 吗？'**
+  String storyboardEditorDeleteConfirmBody(int id);
 
   /// No description provided for @storyboardEditorDialogCancel.
   ///
@@ -12930,7 +12930,7 @@ abstract class AppLocalizations {
   /// No description provided for @storyboardVideoWorkbenchTrackIdHelperKnown.
   ///
   /// In en, this message translates to:
-  /// **'Known tracks: {ids}'**
+  /// **'已知轨道 ID：{ids}'**
   String storyboardVideoWorkbenchTrackIdHelperKnown(String ids);
 
   /// No description provided for @storyboardVideoWorkbenchNewTrackNameLabel.
@@ -13335,6 +13335,598 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Status {status} · {updatedAt}'**
   String storyboardVideoWorkbenchJobSubtitle(String status, String updatedAt);
+
+  /// No description provided for @storyboardActionFollowUpPreviewMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'This shot has no readable preview image yet.'**
+  String get storyboardActionFollowUpPreviewMissing;
+
+  /// No description provided for @storyboardActionFollowUpPreviewRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Loaded preview for this shot.'**
+  String get storyboardActionFollowUpPreviewRead;
+
+  /// No description provided for @storyboardActionErrImageUrlRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Image URL cannot be empty.'**
+  String get storyboardActionErrImageUrlRequired;
+
+  /// No description provided for @storyboardActionFollowUpImageUrlSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved current image URL.'**
+  String get storyboardActionFollowUpImageUrlSaved;
+
+  /// No description provided for @storyboardActionFollowUpLiveActionCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleared live-action reference shots and performance constraints.'**
+  String get storyboardActionFollowUpLiveActionCleared;
+
+  /// No description provided for @storyboardActionFollowUpLiveActionSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved {count} live-action reference shot(s) and synced performance/delivery constraints.'**
+  String storyboardActionFollowUpLiveActionSaved(int count);
+
+  /// No description provided for @storyboardActionFollowUpFrameCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleared current shot frame.'**
+  String get storyboardActionFollowUpFrameCleared;
+
+  /// No description provided for @storyboardActionErrTrackNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Track name cannot be empty.'**
+  String get storyboardActionErrTrackNameRequired;
+
+  /// No description provided for @storyboardActionFollowUpTrackAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Added track #{trackId}.'**
+  String storyboardActionFollowUpTrackAdded(int trackId);
+
+  /// No description provided for @storyboardActionErrTrackIdInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid track ID.'**
+  String get storyboardActionErrTrackIdInvalid;
+
+  /// No description provided for @storyboardActionFollowUpTrackDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted track #{trackId}.'**
+  String storyboardActionFollowUpTrackDeleted(int trackId);
+
+  /// No description provided for @storyboardActionFollowUpVideoSelectedBase.
+  ///
+  /// In en, this message translates to:
+  /// **'Set this candidate as the shot video.'**
+  String get storyboardActionFollowUpVideoSelectedBase;
+
+  /// No description provided for @storyboardActionFollowUpVideoDeletedBase.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed the selected shot video.'**
+  String get storyboardActionFollowUpVideoDeletedBase;
+
+  /// No description provided for @storyboardActionFollowUpTrackReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Current track ID is ready for video generation.'**
+  String get storyboardActionFollowUpTrackReady;
+
+  /// No description provided for @storyboardActionFollowUpTrackBackfilled.
+  ///
+  /// In en, this message translates to:
+  /// **'Filled track {trackId}; continue confirming video settings.'**
+  String storyboardActionFollowUpTrackBackfilled(int trackId);
+
+  /// No description provided for @storyboardActionFollowUpTrackNamePrefilled.
+  ///
+  /// In en, this message translates to:
+  /// **'Shot {storyId} video track'**
+  String storyboardActionFollowUpTrackNamePrefilled(int storyId);
+
+  /// No description provided for @storyboardActionFollowUpTrackNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Prefilled a new track name—you can add the track next.'**
+  String get storyboardActionFollowUpTrackNameHint;
+
+  /// No description provided for @storyboardActionFollowUpSyncProduction.
+  ///
+  /// In en, this message translates to:
+  /// **'Synced production data for this shot.'**
+  String get storyboardActionFollowUpSyncProduction;
+
+  /// No description provided for @storyboardActionFollowUpRefreshVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Refreshed video data for this shot.'**
+  String get storyboardActionFollowUpRefreshVideo;
+
+  /// No description provided for @storyboardMemorySelectedPerfDistilled.
+  ///
+  /// In en, this message translates to:
+  /// **'Distilled private performance memory for this shot.'**
+  String get storyboardMemorySelectedPerfDistilled;
+
+  /// No description provided for @storyboardMemorySelectedPrivateParts.
+  ///
+  /// In en, this message translates to:
+  /// **'Distilled private memory: {parts}.'**
+  String storyboardMemorySelectedPrivateParts(String parts);
+
+  /// No description provided for @storyboardMemoryPrivateScopeFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'Scoped to the current user, project, and script—reused preferentially without leaking to other shorts.'**
+  String get storyboardMemoryPrivateScopeFooter;
+
+  /// No description provided for @storyboardMemoryRejectedHeadEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrote private bad-case constraints for this shot.'**
+  String get storyboardMemoryRejectedHeadEmpty;
+
+  /// No description provided for @storyboardMemoryRejectedHeadAvoid.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrote private bad-case constraints: {avoid}.'**
+  String storyboardMemoryRejectedHeadAvoid(String avoid);
+
+  /// No description provided for @storyboardMemoryRejectedFailures.
+  ///
+  /// In en, this message translates to:
+  /// **'failures stacked {count} times'**
+  String storyboardMemoryRejectedFailures(int count);
+
+  /// No description provided for @storyboardMemoryRejectedRisks.
+  ///
+  /// In en, this message translates to:
+  /// **'risk focus {tags}'**
+  String storyboardMemoryRejectedRisks(String tags);
+
+  /// No description provided for @storyboardMemoryRejectedNegativeFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'Later generations will prefer negative memory scoped to this user, project, and script.'**
+  String get storyboardMemoryRejectedNegativeFooter;
+
+  /// No description provided for @storyboardAutoNegativeSourceReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-negative from latest review bad cases.'**
+  String get storyboardAutoNegativeSourceReview;
+
+  /// No description provided for @storyboardAutoNegativeSourceRejectedMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-negative from private bad-case memory.'**
+  String get storyboardAutoNegativeSourceRejectedMemory;
+
+  /// No description provided for @storyboardAutoNegativeSourceBoth.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-negative uses both review bad cases and private memory.'**
+  String get storyboardAutoNegativeSourceBoth;
+
+  /// No description provided for @storyboardAutoNegativeSourcePendingObservation.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-negative from latest reject observation fallback.'**
+  String get storyboardAutoNegativeSourcePendingObservation;
+
+  /// No description provided for @storyboardAutoNegativeSourcePendingNoteOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'No formal negative lines yet—pending observation note only.'**
+  String get storyboardAutoNegativeSourcePendingNoteOnly;
+
+  /// No description provided for @storyboardAutoNegativeSourceNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No extra automatic negative sources.'**
+  String get storyboardAutoNegativeSourceNone;
+
+  /// No description provided for @storyboardMemoryScopeProject.
+  ///
+  /// In en, this message translates to:
+  /// **'project {count}'**
+  String storyboardMemoryScopeProject(int count);
+
+  /// No description provided for @storyboardMemoryScopeScript.
+  ///
+  /// In en, this message translates to:
+  /// **'script {count}'**
+  String storyboardMemoryScopeScript(int count);
+
+  /// No description provided for @storyboardMemoryScopeRole.
+  ///
+  /// In en, this message translates to:
+  /// **'role {count}'**
+  String storyboardMemoryScopeRole(int count);
+
+  /// No description provided for @storyboardPromptGenDefaultFilledDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Generated default video prompt and filled duration.'**
+  String get storyboardPromptGenDefaultFilledDuration;
+
+  /// No description provided for @storyboardPromptGenHitMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'Matched {scope} memory.'**
+  String storyboardPromptGenHitMemory(String scope);
+
+  /// No description provided for @storyboardPromptGenNegativeTrimmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Trimmed {fragCount} negative constraint(s) / {chars} chars.'**
+  String storyboardPromptGenNegativeTrimmed(int fragCount, int chars);
+
+  /// No description provided for @storyboardPromptSourceMemorySlim.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory slim -{rows} rows (low-signal {low} / dup {dup} / visual {visual})'**
+  String storyboardPromptSourceMemorySlim(
+    int rows,
+    int low,
+    int dup,
+    int visual,
+  );
+
+  /// No description provided for @storyboardPromptSourceNegativeSlim.
+  ///
+  /// In en, this message translates to:
+  /// **'Negative slim {fragCount} / {chars} chars'**
+  String storyboardPromptSourceNegativeSlim(int fragCount, int chars);
+
+  /// No description provided for @storyboardPromptSourceReviewFrags.
+  ///
+  /// In en, this message translates to:
+  /// **'Review fragments {count}'**
+  String storyboardPromptSourceReviewFrags(int count);
+
+  /// No description provided for @storyboardPromptSourceMemoryFrags.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory fragments {count}'**
+  String storyboardPromptSourceMemoryFrags(int count);
+
+  /// No description provided for @storyboardPromptAnchorRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Role anchors {count}'**
+  String storyboardPromptAnchorRole(int count);
+
+  /// No description provided for @storyboardPromptAnchorScene.
+  ///
+  /// In en, this message translates to:
+  /// **'Scene anchors {count}'**
+  String storyboardPromptAnchorScene(int count);
+
+  /// No description provided for @storyboardPromptAnchorTool.
+  ///
+  /// In en, this message translates to:
+  /// **'Prop anchors {count}'**
+  String storyboardPromptAnchorTool(int count);
+
+  /// No description provided for @storyboardPromptAnchorStyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Style anchors {count}'**
+  String storyboardPromptAnchorStyle(int count);
+
+  /// No description provided for @storyboardPromptAnchorPrivateMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'Private memory {count}'**
+  String storyboardPromptAnchorPrivateMemory(int count);
+
+  /// No description provided for @storyboardPromptAnchorContinuity.
+  ///
+  /// In en, this message translates to:
+  /// **'Continuity notes {count}'**
+  String storyboardPromptAnchorContinuity(int count);
+
+  /// No description provided for @storyboardPromptAnchorReferenceFrame.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference frame attached'**
+  String get storyboardPromptAnchorReferenceFrame;
+
+  /// No description provided for @storyboardPromptAnchorEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No extra anchors or memory matched yet.'**
+  String get storyboardPromptAnchorEmpty;
+
+  /// No description provided for @storyboardActionRepairAppliedSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Applied current pre-generation suggestions.'**
+  String get storyboardActionRepairAppliedSummary;
+
+  /// No description provided for @storyboardActionRepairNoChangeSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggestions are already applied; nothing else to trim.'**
+  String get storyboardActionRepairNoChangeSummary;
+
+  /// No description provided for @storyboardActionRepairDetailTrimmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed {promptRemoved} low-value prompt fragment(s) and {negRemoved} duplicate negative fragment(s).'**
+  String storyboardActionRepairDetailTrimmed(int promptRemoved, int negRemoved);
+
+  /// No description provided for @storyboardActionRepairDetailLean.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt / negative prompt is already lean—continue generation.'**
+  String get storyboardActionRepairDetailLean;
+
+  /// No description provided for @storyboardActionOperationFailedSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Shot action failed.'**
+  String get storyboardActionOperationFailedSummary;
+
+  /// No description provided for @storyboardActionOperationFailedDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish the recommended step, then retry.'**
+  String get storyboardActionOperationFailedDetail;
+
+  /// No description provided for @storyboardActionErrNeedSourceImageOrPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Provide an image URL or a current preview before generating video.'**
+  String get storyboardActionErrNeedSourceImageOrPreview;
+
+  /// No description provided for @storyboardActionErrTrackIdRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid track ID before generating video.'**
+  String get storyboardActionErrTrackIdRequired;
+
+  /// No description provided for @storyboardActionErrDurationPositiveInteger.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration must be a positive integer.'**
+  String get storyboardActionErrDurationPositiveInteger;
+
+  /// No description provided for @storyboardActionErrVideoPromptEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Video prompt cannot be empty.'**
+  String get storyboardActionErrVideoPromptEmpty;
+
+  /// No description provided for @storyboardActionVideoJobsSubmittedTotalOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted {total} video job(s).'**
+  String storyboardActionVideoJobsSubmittedTotalOnly(int total);
+
+  /// No description provided for @storyboardActionVideoJobsSubmittedRepairOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted {total} video job(s); auto-trimmed {pRm} low-value prompt fragment(s) and {nRm} duplicate negative fragment(s) before submit.'**
+  String storyboardActionVideoJobsSubmittedRepairOnly(
+    int total,
+    int pRm,
+    int nRm,
+  );
+
+  /// No description provided for @storyboardActionVideoJobsSubmittedDedupeOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted {total} video job(s); deduped {deduped} duplicate negative fragment(s).'**
+  String storyboardActionVideoJobsSubmittedDedupeOnly(int total, int deduped);
+
+  /// No description provided for @storyboardActionVideoJobsSubmittedRepairFinal.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted {total} video job(s); trimmed {pRm} prompt fragment(s) and {nRm} negative fragment(s) before submit; final negative prompt filled back.'**
+  String storyboardActionVideoJobsSubmittedRepairFinal(
+    int total,
+    int pRm,
+    int nRm,
+  );
+
+  /// No description provided for @storyboardActionVideoJobsSubmittedDedupeFinal.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted {total} video job(s); deduped {deduped} negative fragment(s); final negative prompt filled back.'**
+  String storyboardActionVideoJobsSubmittedDedupeFinal(int total, int deduped);
+
+  /// No description provided for @storyboardActionVideoJobsSubmittedFinalOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted {total} video job(s); final negative prompt filled back.'**
+  String storyboardActionVideoJobsSubmittedFinalOnly(int total);
+
+  /// No description provided for @storyboardActionVoiceoverJobsSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted {total} voiceover job(s); refresh production data later for status.'**
+  String storyboardActionVoiceoverJobsSubmitted(int total);
+
+  /// No description provided for @storyboardActionVoiceoverJobsSubmittedWithJob.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted {total} voiceover job(s) (job={jobId}); refresh production data later for status.'**
+  String storyboardActionVoiceoverJobsSubmittedWithJob(int total, String jobId);
+
+  /// No description provided for @storyboardActionVideoDescCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleared subtitle/voiceover text—export falls back to shot prompt.'**
+  String get storyboardActionVideoDescCleared;
+
+  /// No description provided for @storyboardActionVideoDescSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved subtitle/voiceover text—default video prompt and export captions prefer it.'**
+  String get storyboardActionVideoDescSaved;
+
+  /// No description provided for @storyboardActionErrNoExportableVideoUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'No exportable selected or candidate video URL for this shot.'**
+  String get storyboardActionErrNoExportableVideoUrl;
+
+  /// No description provided for @storyboardActionExportJobEnqueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Video export job submitted (job={jobId}). URL will write back when complete—refresh production data later.'**
+  String storyboardActionExportJobEnqueued(String jobId);
+
+  /// No description provided for @storyboardPatchDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Partial rework'**
+  String get storyboardPatchDialogTitle;
+
+  /// No description provided for @storyboardPatchScopeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'scope'**
+  String get storyboardPatchScopeLabel;
+
+  /// No description provided for @storyboardPatchScopeHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'episode / scene / storyboard_item / video_prompt / derive_asset'**
+  String get storyboardPatchScopeHelper;
+
+  /// No description provided for @storyboardPatchModelTierLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'model tier'**
+  String get storyboardPatchModelTierLabel;
+
+  /// No description provided for @storyboardPatchModelTierHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'low for format fixes; high for content-quality fixes'**
+  String get storyboardPatchModelTierHelper;
+
+  /// No description provided for @storyboardPatchTargetIdsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'target ids'**
+  String get storyboardPatchTargetIdsLabel;
+
+  /// No description provided for @storyboardPatchTargetIdsHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Comma-separated. Defaults to current storyboard numeric ID.'**
+  String get storyboardPatchTargetIdsHelper;
+
+  /// No description provided for @storyboardPatchReasonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get storyboardPatchReasonLabel;
+
+  /// No description provided for @storyboardPatchReasonHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Spell out character, emotion, shot, continuity, lines, or visible continuity breaks.'**
+  String get storyboardPatchReasonHelper;
+
+  /// No description provided for @storyboardPatchScopeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Prefer the smallest scope; for performance, lens, or prompt issues on this shot only, use storyboard_item / video_prompt before escalating to the whole episode.'**
+  String get storyboardPatchScopeHint;
+
+  /// No description provided for @storyboardPatchAttributionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'attribution mode:'**
+  String get storyboardPatchAttributionLabel;
+
+  /// No description provided for @storyboardPatchRepairPriorityHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Rework priority:'**
+  String get storyboardPatchRepairPriorityHeading;
+
+  /// No description provided for @storyboardPatchSnackNeedTargetId.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter at least one valid target id.'**
+  String get storyboardPatchSnackNeedTargetId;
+
+  /// No description provided for @storyboardPatchSnackNeedReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a rework reason.'**
+  String get storyboardPatchSnackNeedReason;
+
+  /// No description provided for @storyboardPatchSubmitLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted patch #{patchId} · scope={scope} · ids={ids} · model={modelTier} · status={status} · consecutive failures {failures} · est. saved {tokens} tokens{memorySuffix}'**
+  String storyboardPatchSubmitLine(
+    String patchId,
+    String scope,
+    String ids,
+    String modelTier,
+    String status,
+    int failures,
+    int tokens,
+    String memorySuffix,
+  );
+
+  /// No description provided for @storyboardPatchMemoryWrittenSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **' · attribution memory saved'**
+  String get storyboardPatchMemoryWrittenSuffix;
+
+  /// No description provided for @storyboardPatchAttributionUpstreamHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This request entered attribution mode—fix upstream causes first.'**
+  String get storyboardPatchAttributionUpstreamHint;
+
+  /// No description provided for @storyboardPatchFollowUpAttribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Partial rework submitted—attribution mode on. Follow P1/P2 order in the panel; don’t rerun the whole timeline.'**
+  String get storyboardPatchFollowUpAttribution;
+
+  /// No description provided for @storyboardPatchFollowUpQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Partial rework submitted—queued at minimal scope.'**
+  String get storyboardPatchFollowUpQueued;
+
+  /// No description provided for @storyboardPatchSubmitting.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitting…'**
+  String get storyboardPatchSubmitting;
+
+  /// No description provided for @storyboardPatchSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit rework'**
+  String get storyboardPatchSubmit;
+
+  /// No description provided for @storyboardPatchDefaultReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix content quality, continuity, or emotional delivery for this shot.'**
+  String get storyboardPatchDefaultReason;
 
   /// No description provided for @shortVideoReadinessNoPayloadHeadline.
   ///
@@ -16107,8 +16699,8 @@ abstract class AppLocalizations {
   /// No description provided for @accountExportActiveCount.
   ///
   /// In en, this message translates to:
-  /// **'Account export active count'**
-  String get accountExportActiveCount;
+  /// **'进行中 {count}'**
+  String accountExportActiveCount(int count);
 
   /// No description provided for @accountExportCopyLastSavedPath.
   ///
@@ -16125,26 +16717,26 @@ abstract class AppLocalizations {
   /// No description provided for @accountExportDefaultFileName.
   ///
   /// In en, this message translates to:
-  /// **'Account export default file name'**
-  String get accountExportDefaultFileName;
+  /// **'账户导出 #{numericTaskId}'**
+  String accountExportDefaultFileName(int numericTaskId);
 
   /// No description provided for @accountExportTaskLine.
   ///
   /// In en, this message translates to:
-  /// **'Account export task line'**
-  String get accountExportTaskLine;
+  /// **'任务 #{numericTaskId}'**
+  String accountExportTaskLine(int numericTaskId);
 
   /// No description provided for @accountExportSizeLine.
   ///
   /// In en, this message translates to:
-  /// **'Account export size line'**
-  String get accountExportSizeLine;
+  /// **'大小 {size}'**
+  String accountExportSizeLine(String size);
 
   /// No description provided for @accountExportSavedSnack.
   ///
   /// In en, this message translates to:
-  /// **'Account export saved snack'**
-  String get accountExportSavedSnack;
+  /// **'已保存到 {path}'**
+  String accountExportSavedSnack(String path);
 
   /// No description provided for @accountExportDownload.
   ///
@@ -16185,8 +16777,8 @@ abstract class AppLocalizations {
   /// No description provided for @accountDeleteLastResponse.
   ///
   /// In en, this message translates to:
-  /// **'Account delete last response'**
-  String get accountDeleteLastResponse;
+  /// **'已删除 {count} 个作业'**
+  String accountDeleteLastResponse(int count);
 
   /// No description provided for @accountDeleteButton.
   ///
@@ -16221,32 +16813,32 @@ abstract class AppLocalizations {
   /// No description provided for @adminConsoleMembershipItem.
   ///
   /// In en, this message translates to:
-  /// **'Admin console membership item'**
-  String get adminConsoleMembershipItem;
+  /// **'成员 {detail}'**
+  String adminConsoleMembershipItem(String detail);
 
   /// No description provided for @adminConsoleRecentJobItem.
   ///
   /// In en, this message translates to:
-  /// **'Admin console recent job item'**
-  String get adminConsoleRecentJobItem;
+  /// **'作业 {detail}'**
+  String adminConsoleRecentJobItem(String detail);
 
   /// No description provided for @adminConsoleAuditListItem.
   ///
   /// In en, this message translates to:
-  /// **'Admin console audit list item'**
-  String get adminConsoleAuditListItem;
+  /// **'审计 {detail}'**
+  String adminConsoleAuditListItem(String detail);
 
   /// No description provided for @adminConsoleDailyQuotaLabel.
   ///
   /// In en, this message translates to:
-  /// **'Admin console daily quota label'**
-  String get adminConsoleDailyQuotaLabel;
+  /// **'每日配额 {detail}'**
+  String adminConsoleDailyQuotaLabel(String detail);
 
   /// No description provided for @adminConsoleChipMember.
   ///
   /// In en, this message translates to:
-  /// **'Admin console chip member'**
-  String get adminConsoleChipMember;
+  /// **'成员 {count}'**
+  String adminConsoleChipMember(int count);
 
   /// No description provided for @adminConsoleArchivedLabel.
   ///
@@ -16257,86 +16849,86 @@ abstract class AppLocalizations {
   /// No description provided for @adminConsoleMemberListItem.
   ///
   /// In en, this message translates to:
-  /// **'Admin console member list item'**
-  String get adminConsoleMemberListItem;
+  /// **'成员 {detail}'**
+  String adminConsoleMemberListItem(String detail);
 
   /// No description provided for @adminConsoleRecentProjectItem.
   ///
   /// In en, this message translates to:
-  /// **'Admin console recent project item'**
-  String get adminConsoleRecentProjectItem;
+  /// **'项目 {detail}'**
+  String adminConsoleRecentProjectItem(String detail);
 
   /// No description provided for @adminConsoleChipScript.
   ///
   /// In en, this message translates to:
-  /// **'Admin console chip script'**
-  String get adminConsoleChipScript;
+  /// **'剧本 {count}'**
+  String adminConsoleChipScript(int count);
 
   /// No description provided for @adminConsoleChipAsset.
   ///
   /// In en, this message translates to:
-  /// **'Admin console chip asset'**
-  String get adminConsoleChipAsset;
+  /// **'资产 {count}'**
+  String adminConsoleChipAsset(int count);
 
   /// No description provided for @adminConsoleChipJob.
   ///
   /// In en, this message translates to:
-  /// **'Admin console chip job'**
-  String get adminConsoleChipJob;
+  /// **'作业 {count}'**
+  String adminConsoleChipJob(int count);
 
   /// No description provided for @adminConsoleAclMemberItem.
   ///
   /// In en, this message translates to:
-  /// **'Admin console acl member item'**
-  String get adminConsoleAclMemberItem;
+  /// **'成员 {detail}'**
+  String adminConsoleAclMemberItem(String detail);
 
   /// No description provided for @adminConsoleWorkspaceCandidateItem.
   ///
   /// In en, this message translates to:
-  /// **'Admin console workspace candidate item'**
-  String get adminConsoleWorkspaceCandidateItem;
+  /// **'候选 {detail}'**
+  String adminConsoleWorkspaceCandidateItem(String detail);
 
   /// No description provided for @adminConsoleProjectRecentJobItem.
   ///
   /// In en, this message translates to:
-  /// **'Admin console project recent job item'**
-  String get adminConsoleProjectRecentJobItem;
+  /// **'作业 {detail}'**
+  String adminConsoleProjectRecentJobItem(String detail);
 
   /// No description provided for @adminConsoleAuditUserSummary.
   ///
   /// In en, this message translates to:
-  /// **'Admin console audit user summary'**
-  String get adminConsoleAuditUserSummary;
+  /// **'用户审计 {detail}'**
+  String adminConsoleAuditUserSummary(String detail);
 
   /// No description provided for @adminConsoleAuditWorkspaceMembership.
   ///
   /// In en, this message translates to:
-  /// **'Admin console audit workspace membership'**
-  String get adminConsoleAuditWorkspaceMembership;
+  /// **'工作区成员审计 {detail}'**
+  String adminConsoleAuditWorkspaceMembership(String detail);
 
   /// No description provided for @adminConsoleAuditOwnerTransfer.
   ///
   /// In en, this message translates to:
-  /// **'Admin console audit owner transfer'**
-  String get adminConsoleAuditOwnerTransfer;
+  /// **'所有权转移 {detail}'**
+  String adminConsoleAuditOwnerTransfer(String detail);
 
   /// No description provided for @adminConsoleAuditArchiveNote.
   ///
   /// In en, this message translates to:
-  /// **'Admin console audit archive note'**
-  String get adminConsoleAuditArchiveNote;
+  /// **'归档备注 {detail}'**
+  String adminConsoleAuditArchiveNote(String detail);
 
   /// No description provided for @adminConsoleAuditProjectOwnerTransfer.
   ///
   /// In en, this message translates to:
-  /// **'Admin console audit project owner transfer'**
-  String get adminConsoleAuditProjectOwnerTransfer;
+  /// **'项目所有权转移 {detail}'**
+  String adminConsoleAuditProjectOwnerTransfer(String detail);
 
   /// No description provided for @adminConsoleFieldUserId.
   ///
   /// In en, this message translates to:
-  /// **'Admin console field user id'**
-  String get adminConsoleFieldUserId;
+  /// **'用户 ID {detail}'**
+  String adminConsoleFieldUserId(String detail);
 
   /// No description provided for @adminConsoleFieldCreatedAt.
   ///
@@ -16533,8 +17125,8 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionCandidateIds.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production candidate ids'**
-  String get agentWorkspaceProductionCandidateIds;
+  /// **'候选 {count} 项'**
+  String agentWorkspaceProductionCandidateIds(int count);
 
   /// No description provided for @agentWorkspaceProductionPromptPreviewTitle.
   ///
@@ -16551,8 +17143,8 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionFlowChip.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production flow chip'**
-  String get agentWorkspaceProductionFlowChip;
+  /// **'flow={flowKey}'**
+  String agentWorkspaceProductionFlowChip(String flowKey);
 
   /// No description provided for @agentWorkspaceProductionApplyStage.
   ///
@@ -16569,14 +17161,14 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionToolChip.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production tool chip'**
-  String get agentWorkspaceProductionToolChip;
+  /// **'tool={tool}'**
+  String agentWorkspaceProductionToolChip(String tool);
 
   /// No description provided for @agentWorkspaceProductionAgentChip.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production agent chip'**
-  String get agentWorkspaceProductionAgentChip;
+  /// **'agent={agent}'**
+  String agentWorkspaceProductionAgentChip(String agent);
 
   /// No description provided for @agentWorkspaceProductionApplySuggestion.
   ///
@@ -16629,26 +17221,26 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionPromptRewriteFocus.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production prompt rewrite focus'**
-  String get agentWorkspaceProductionPromptRewriteFocus;
+  /// **'改写焦点：{focus}'**
+  String agentWorkspaceProductionPromptRewriteFocus(String focus);
 
   /// No description provided for @agentWorkspaceProductionPromptVisualPacing.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production prompt visual pacing'**
-  String get agentWorkspaceProductionPromptVisualPacing;
+  /// **'视觉节奏：{pacing}'**
+  String agentWorkspaceProductionPromptVisualPacing(String pacing);
 
   /// No description provided for @agentWorkspaceProductionPromptExtraConstraint.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production prompt extra constraint'**
-  String get agentWorkspaceProductionPromptExtraConstraint;
+  /// **'额外约束：{constraint}'**
+  String agentWorkspaceProductionPromptExtraConstraint(String constraint);
 
   /// No description provided for @agentWorkspaceProductionPromptAssetFocus.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production prompt asset focus'**
-  String get agentWorkspaceProductionPromptAssetFocus;
+  /// **'资产焦点：{scope}'**
+  String agentWorkspaceProductionPromptAssetFocus(String scope);
 
   /// No description provided for @agentWorkspaceProductionPromptExecutionOrder.
   ///
@@ -16665,86 +17257,86 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionCollapsedRows.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production collapsed rows'**
-  String get agentWorkspaceProductionCollapsedRows;
+  /// **'已折叠 {count} 行'**
+  String agentWorkspaceProductionCollapsedRows(int count);
 
   /// No description provided for @agentWorkspaceProductionReviewTarget.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production review target'**
-  String get agentWorkspaceProductionReviewTarget;
+  /// **'目标：{target}'**
+  String agentWorkspaceProductionReviewTarget(String target);
 
   /// No description provided for @agentWorkspaceProductionReviewGrade.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production review grade'**
-  String get agentWorkspaceProductionReviewGrade;
+  /// **'等级：{grade}'**
+  String agentWorkspaceProductionReviewGrade(String grade);
 
   /// No description provided for @agentWorkspaceProductionReviewIssues.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production review issues'**
-  String get agentWorkspaceProductionReviewIssues;
+  /// **'问题：{issues}'**
+  String agentWorkspaceProductionReviewIssues(String issues);
 
   /// No description provided for @agentWorkspaceProductionReviewNextStep.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production review next step'**
-  String get agentWorkspaceProductionReviewNextStep;
+  /// **'下一步：{nextAction}'**
+  String agentWorkspaceProductionReviewNextStep(String nextAction);
 
   /// No description provided for @agentWorkspaceProductionReviewAssetIds.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production review asset ids'**
-  String get agentWorkspaceProductionReviewAssetIds;
+  /// **'资产：{assetIds}'**
+  String agentWorkspaceProductionReviewAssetIds(String assetIds);
 
   /// No description provided for @agentWorkspaceProductionReviewAssetScope.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production review asset scope'**
-  String get agentWorkspaceProductionReviewAssetScope;
+  /// **'资产范围：{scope}'**
+  String agentWorkspaceProductionReviewAssetScope(String scope);
 
   /// No description provided for @agentWorkspaceProductionReviewStoryboardIds.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production review storyboard ids'**
-  String get agentWorkspaceProductionReviewStoryboardIds;
+  /// **'镜头：{ids}'**
+  String agentWorkspaceProductionReviewStoryboardIds(String ids);
 
   /// No description provided for @agentWorkspaceProductionReviewSummary.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production review summary'**
-  String get agentWorkspaceProductionReviewSummary;
+  /// **'结论：{summary}'**
+  String agentWorkspaceProductionReviewSummary(String summary);
 
   /// No description provided for @agentWorkspaceProductionShotLabel.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production shot label'**
-  String get agentWorkspaceProductionShotLabel;
+  /// **'镜头 {id}'**
+  String agentWorkspaceProductionShotLabel(int id);
 
   /// No description provided for @agentWorkspaceProductionSceneLabel.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production scene label'**
-  String get agentWorkspaceProductionSceneLabel;
+  /// **'场景 {scene}'**
+  String agentWorkspaceProductionSceneLabel(String scene);
 
   /// No description provided for @agentWorkspaceProductionDurationLabel.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production duration label'**
-  String get agentWorkspaceProductionDurationLabel;
+  /// **'时长 {duration}'**
+  String agentWorkspaceProductionDurationLabel(String duration);
 
   /// No description provided for @agentWorkspaceProductionAssetsLabel.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production assets label'**
-  String get agentWorkspaceProductionAssetsLabel;
+  /// **'资产 {assets}'**
+  String agentWorkspaceProductionAssetsLabel(String assets);
 
   /// No description provided for @agentWorkspaceProductionStateLabel.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production state label'**
-  String get agentWorkspaceProductionStateLabel;
+  /// **'状态 {state}'**
+  String agentWorkspaceProductionStateLabel(String state);
 
   /// No description provided for @agentWorkspaceProductionModeTextOnly.
   ///
@@ -16761,14 +17353,14 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionResultMissingImage.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production result missing image'**
-  String get agentWorkspaceProductionResultMissingImage;
+  /// **'缺少图片 {assets}'**
+  String agentWorkspaceProductionResultMissingImage(String assets);
 
   /// No description provided for @agentWorkspaceProductionContextFromTool.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production context from tool'**
-  String get agentWorkspaceProductionContextFromTool;
+  /// **'来自工具 {toolName}'**
+  String agentWorkspaceProductionContextFromTool(String toolName);
 
   /// No description provided for @agentWorkspaceProductionContextDerivedRewrite.
   ///
@@ -16809,32 +17401,32 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceSummaryReturnedList.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace summary returned list'**
-  String get agentWorkspaceSummaryReturnedList;
+  /// **'返回列表 {count} 项'**
+  String agentWorkspaceSummaryReturnedList(int count);
 
   /// No description provided for @agentWorkspaceSummaryReturnedText.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace summary returned text'**
-  String get agentWorkspaceSummaryReturnedText;
+  /// **'返回文本 {chars} 字'**
+  String agentWorkspaceSummaryReturnedText(int chars);
 
   /// No description provided for @agentWorkspaceProductionSummaryItems.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production summary items'**
-  String get agentWorkspaceProductionSummaryItems;
+  /// **'返回 items {count} 项'**
+  String agentWorkspaceProductionSummaryItems(int count);
 
   /// No description provided for @agentWorkspaceProductionSummaryReviewHeadline.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production summary review headline'**
-  String get agentWorkspaceProductionSummaryReviewHeadline;
+  /// **'聚焦资产 {count} 项'**
+  String agentWorkspaceProductionSummaryReviewHeadline(int count);
 
   /// No description provided for @agentWorkspaceProductionSummaryIssueBreakdown.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production summary issue breakdown'**
-  String get agentWorkspaceProductionSummaryIssueBreakdown;
+  /// **'问题分布 {count} 项'**
+  String agentWorkspaceProductionSummaryIssueBreakdown(int count);
 
   /// No description provided for @agentWorkspaceProductionSummaryFocusedAssets.
   ///
@@ -16845,20 +17437,20 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionSummaryFocusedAssetScope.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production summary focused asset scope'**
-  String get agentWorkspaceProductionSummaryFocusedAssetScope;
+  /// **'聚焦资产范围 {scope}'**
+  String agentWorkspaceProductionSummaryFocusedAssetScope(String scope);
 
   /// No description provided for @agentWorkspaceProductionSummaryFocusedShots.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production summary focused shots'**
-  String get agentWorkspaceProductionSummaryFocusedShots;
+  /// **'聚焦镜头 {count} 项'**
+  String agentWorkspaceProductionSummaryFocusedShots(int count);
 
   /// No description provided for @agentWorkspaceSummaryReturnedObjectKeys.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace summary returned object keys'**
-  String get agentWorkspaceSummaryReturnedObjectKeys;
+  /// **'返回对象 keys={keys}'**
+  String agentWorkspaceSummaryReturnedObjectKeys(String keys);
 
   /// No description provided for @agentWorkspaceProductionSummaryFlowEmpty.
   ///
@@ -16875,20 +17467,20 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionSummaryTextChars.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production summary text chars'**
-  String get agentWorkspaceProductionSummaryTextChars;
+  /// **'文本 {chars} 字'**
+  String agentWorkspaceProductionSummaryTextChars(int chars);
 
   /// No description provided for @agentWorkspaceProductionSummaryLineCount.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production summary line count'**
-  String get agentWorkspaceProductionSummaryLineCount;
+  /// **'行数 {count}'**
+  String agentWorkspaceProductionSummaryLineCount(int count);
 
   /// No description provided for @agentWorkspaceProductionSummaryPlanSections.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production summary plan sections'**
-  String get agentWorkspaceProductionSummaryPlanSections;
+  /// **'计划章节 {count}'**
+  String agentWorkspaceProductionSummaryPlanSections(int count);
 
   /// No description provided for @agentWorkspaceProductionSummaryRewriteInherited.
   ///
@@ -16899,38 +17491,38 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionSummaryStoryboardRows.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production summary storyboard rows'**
-  String get agentWorkspaceProductionSummaryStoryboardRows;
+  /// **'分镜 {count} 条'**
+  String agentWorkspaceProductionSummaryStoryboardRows(int count);
 
   /// No description provided for @agentWorkspaceProductionSummaryLinkedAssets.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production summary linked assets'**
-  String get agentWorkspaceProductionSummaryLinkedAssets;
+  /// **'关联资产 {count}'**
+  String agentWorkspaceProductionSummaryLinkedAssets(int count);
 
   /// No description provided for @agentWorkspaceProductionSummaryListCount.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production summary list count'**
-  String get agentWorkspaceProductionSummaryListCount;
+  /// **'列表 {count} 项'**
+  String agentWorkspaceProductionSummaryListCount(int count);
 
   /// No description provided for @agentWorkspaceProductionSummaryPrompts.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production summary prompts'**
-  String get agentWorkspaceProductionSummaryPrompts;
+  /// **'提示词 {count}'**
+  String agentWorkspaceProductionSummaryPrompts(int count);
 
   /// No description provided for @agentWorkspaceProductionSummaryMediaUrls.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production summary media urls'**
-  String get agentWorkspaceProductionSummaryMediaUrls;
+  /// **'媒体 URL {count}'**
+  String agentWorkspaceProductionSummaryMediaUrls(int count);
 
   /// No description provided for @agentWorkspaceProductionSummaryNeedImages.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production summary need images'**
-  String get agentWorkspaceProductionSummaryNeedImages;
+  /// **'需要图片 {count}'**
+  String agentWorkspaceProductionSummaryNeedImages(int count);
 
   /// No description provided for @agentWorkspaceProductionSummaryMissingFrames.
   ///
@@ -16941,38 +17533,38 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionSummaryTextOnlyCount.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production summary text only count'**
-  String get agentWorkspaceProductionSummaryTextOnlyCount;
+  /// **'纯文本 {count}'**
+  String agentWorkspaceProductionSummaryTextOnlyCount(int count);
 
   /// No description provided for @agentWorkspaceProductionSummaryStateTypes.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production summary state types'**
-  String get agentWorkspaceProductionSummaryStateTypes;
+  /// **'状态类型 {states}'**
+  String agentWorkspaceProductionSummaryStateTypes(String states);
 
   /// No description provided for @agentWorkspaceProductionSummaryObjectKeyCount.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production summary object key count'**
-  String get agentWorkspaceProductionSummaryObjectKeyCount;
+  /// **'对象 keys={count} 个'**
+  String agentWorkspaceProductionSummaryObjectKeyCount(int count);
 
   /// No description provided for @agentWorkspaceProductionSummaryObjectListEntry.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production summary object list entry'**
-  String get agentWorkspaceProductionSummaryObjectListEntry;
+  /// **'列表 {count} 项'**
+  String agentWorkspaceProductionSummaryObjectListEntry(int count);
 
   /// No description provided for @agentWorkspaceProductionSummaryObjectTextEntry.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production summary object text entry'**
-  String get agentWorkspaceProductionSummaryObjectTextEntry;
+  /// **'文本 {chars} 字'**
+  String agentWorkspaceProductionSummaryObjectTextEntry(int chars);
 
   /// No description provided for @agentWorkspaceProductionSummaryReturnedType.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production summary returned type'**
-  String get agentWorkspaceProductionSummaryReturnedType;
+  /// **'返回 {type}'**
+  String agentWorkspaceProductionSummaryReturnedType(String type);
 
   /// No description provided for @agentWorkspaceProductionIdleHint.
   ///
@@ -17127,14 +17719,14 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceScriptToolChip.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script tool chip'**
-  String get agentWorkspaceScriptToolChip;
+  /// **'tool={tool}'**
+  String agentWorkspaceScriptToolChip(String tool);
 
   /// No description provided for @agentWorkspaceScriptAgentChip.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script agent chip'**
-  String get agentWorkspaceScriptAgentChip;
+  /// **'agent={agent}'**
+  String agentWorkspaceScriptAgentChip(String agent);
 
   /// No description provided for @agentWorkspaceScriptApplySuggestion.
   ///
@@ -17145,14 +17737,14 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceScriptContextSkeletonFocus.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script context skeleton focus'**
-  String get agentWorkspaceScriptContextSkeletonFocus;
+  /// **'骨架焦点：{focus}'**
+  String agentWorkspaceScriptContextSkeletonFocus(String focus);
 
   /// No description provided for @agentWorkspaceScriptContextAdaptationFocus.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script context adaptation focus'**
-  String get agentWorkspaceScriptContextAdaptationFocus;
+  /// **'改编焦点：{focus}'**
+  String agentWorkspaceScriptContextAdaptationFocus(String focus);
 
   /// No description provided for @agentWorkspaceScriptContextExecutionOrder.
   ///
@@ -17241,8 +17833,8 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceScriptContextChapterPrefix.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script context chapter prefix'**
-  String get agentWorkspaceScriptContextChapterPrefix;
+  /// **'第 {chapter} 章'**
+  String agentWorkspaceScriptContextChapterPrefix(String chapter);
 
   /// No description provided for @agentWorkspaceScriptContextNovelChapters.
   ///
@@ -17301,8 +17893,8 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceScriptSummaryReviewLine.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script summary review line'**
-  String get agentWorkspaceScriptSummaryReviewLine;
+  /// **'审核 {detail}'**
+  String agentWorkspaceScriptSummaryReviewLine(String detail);
 
   /// No description provided for @agentWorkspaceScriptSummaryPlanDataMissing.
   ///
@@ -17325,8 +17917,8 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceScriptSummaryPlanScripts.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script summary plan scripts'**
-  String get agentWorkspaceScriptSummaryPlanScripts;
+  /// **'计划剧本 {count} 条'**
+  String agentWorkspaceScriptSummaryPlanScripts(int count);
 
   /// No description provided for @agentWorkspaceScriptSummaryRewriteReady.
   ///
@@ -17343,38 +17935,38 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceScriptSummaryScriptEmpty.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script summary script empty'**
-  String get agentWorkspaceScriptSummaryScriptEmpty;
+  /// **'剧本正文 {chars} 字'**
+  String agentWorkspaceScriptSummaryScriptEmpty(int chars);
 
   /// No description provided for @agentWorkspaceScriptSummaryScriptChars.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script summary script chars'**
-  String get agentWorkspaceScriptSummaryScriptChars;
+  /// **'剧本正文 {chars} 字'**
+  String agentWorkspaceScriptSummaryScriptChars(int chars);
 
   /// No description provided for @agentWorkspaceScriptSummaryNovelTextEmpty.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script summary novel text empty'**
-  String get agentWorkspaceScriptSummaryNovelTextEmpty;
+  /// **'章节材料 {count} 条'**
+  String agentWorkspaceScriptSummaryNovelTextEmpty(int count);
 
   /// No description provided for @agentWorkspaceScriptSummaryNovelTextCount.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script summary novel text count'**
-  String get agentWorkspaceScriptSummaryNovelTextCount;
+  /// **'章节材料 {count} 条'**
+  String agentWorkspaceScriptSummaryNovelTextCount(int count);
 
   /// No description provided for @agentWorkspaceScriptSummaryNovelEventsEmpty.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script summary novel events empty'**
-  String get agentWorkspaceScriptSummaryNovelEventsEmpty;
+  /// **'小说事件 {count} 条'**
+  String agentWorkspaceScriptSummaryNovelEventsEmpty(int count);
 
   /// No description provided for @agentWorkspaceScriptSummaryNovelEventsCount.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script summary novel events count'**
-  String get agentWorkspaceScriptSummaryNovelEventsCount;
+  /// **'小说事件 {count} 条'**
+  String agentWorkspaceScriptSummaryNovelEventsCount(int count);
 
   /// No description provided for @agentWorkspaceScopeProjectIdLabel.
   ///
@@ -17433,8 +18025,8 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceActivityLatest.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace activity latest'**
-  String get agentWorkspaceActivityLatest;
+  /// **'最新：{eventType}'**
+  String agentWorkspaceActivityLatest(String eventType);
 
   /// No description provided for @agentWorkspaceActivityLatestToolResult.
   ///
@@ -17475,14 +18067,17 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceScriptPlanHint.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script plan hint'**
-  String get agentWorkspaceScriptPlanHint;
+  /// **'计划 {pid}'**
+  String agentWorkspaceScriptPlanHint(String pid);
 
   /// No description provided for @agentWorkspaceScriptPlanWritebackReady.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script plan writeback ready'**
-  String get agentWorkspaceScriptPlanWritebackReady;
+  /// **'计划回写就绪：{planHint}，{scriptCount} 条剧本'**
+  String agentWorkspaceScriptPlanWritebackReady(
+    String planHint,
+    int scriptCount,
+  );
 
   /// No description provided for @agentWorkspaceScriptRunningWorkflow.
   ///
@@ -17667,20 +18262,20 @@ abstract class AppLocalizations {
   /// No description provided for @contentComplianceSlaOpenOver24h.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance sla open over24h'**
-  String get contentComplianceSlaOpenOver24h;
+  /// **'open>24h {count}'**
+  String contentComplianceSlaOpenOver24h(int count);
 
   /// No description provided for @contentComplianceSlaOpenOver72h.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance sla open over72h'**
-  String get contentComplianceSlaOpenOver72h;
+  /// **'open>72h {count}'**
+  String contentComplianceSlaOpenOver72h(int count);
 
   /// No description provided for @contentComplianceSlaClaimedOver24h.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance sla claimed over24h'**
-  String get contentComplianceSlaClaimedOver24h;
+  /// **'claimed>24h {count}'**
+  String contentComplianceSlaClaimedOver24h(int count);
 
   /// No description provided for @contentComplianceFieldTargetType.
   ///
@@ -17715,20 +18310,20 @@ abstract class AppLocalizations {
   /// No description provided for @contentComplianceSlaChip.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance sla chip'**
-  String get contentComplianceSlaChip;
+  /// **'SLA: {bucket}'**
+  String contentComplianceSlaChip(String bucket);
 
   /// No description provided for @contentComplianceMetricPending.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance metric pending'**
-  String get contentComplianceMetricPending;
+  /// **'待处理 {count}'**
+  String contentComplianceMetricPending(int count);
 
   /// No description provided for @contentComplianceMetricClaimed.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance metric claimed'**
-  String get contentComplianceMetricClaimed;
+  /// **'已认领 {count}'**
+  String contentComplianceMetricClaimed(int count);
 
   /// No description provided for @contentComplianceMetricResolved.
   ///
@@ -17751,56 +18346,56 @@ abstract class AppLocalizations {
   /// No description provided for @contentComplianceMetricHigh.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance metric high'**
-  String get contentComplianceMetricHigh;
+  /// **'高优先级 {count}'**
+  String contentComplianceMetricHigh(int count);
 
   /// No description provided for @contentComplianceOldestHours.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance oldest hours'**
-  String get contentComplianceOldestHours;
+  /// **'最旧 {hours}h'**
+  String contentComplianceOldestHours(int hours);
 
   /// No description provided for @contentComplianceCapacityPerReviewer.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance capacity per reviewer'**
-  String get contentComplianceCapacityPerReviewer;
+  /// **'容量 {capacity}/reviewer'**
+  String contentComplianceCapacityPerReviewer(int capacity);
 
   /// No description provided for @contentComplianceOwnerCounts.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance owner counts'**
-  String get contentComplianceOwnerCounts;
+  /// **'待处理 {pending} · 已认领 {claimed}'**
+  String contentComplianceOwnerCounts(int pending, int claimed);
 
   /// No description provided for @contentComplianceOwnerDetail.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance owner detail'**
-  String get contentComplianceOwnerDetail;
+  /// **'详情 {detail}'**
+  String contentComplianceOwnerDetail(String detail);
 
   /// No description provided for @contentComplianceWorkspaceCounts.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance workspace counts'**
-  String get contentComplianceWorkspaceCounts;
+  /// **'open {open} · pending {pending} · claimed {claimed}'**
+  String contentComplianceWorkspaceCounts(int open, int pending, int claimed);
 
   /// No description provided for @contentComplianceWorkspaceDetail.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance workspace detail'**
-  String get contentComplianceWorkspaceDetail;
+  /// **'critical {critical} · high {high}'**
+  String contentComplianceWorkspaceDetail(int critical, int high);
 
   /// No description provided for @contentComplianceReportInfo.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance report info'**
-  String get contentComplianceReportInfo;
+  /// **'reporter {reporter}'**
+  String contentComplianceReportInfo(String reporter);
 
   /// No description provided for @contentComplianceResolutionLine.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance resolution line'**
-  String get contentComplianceResolutionLine;
+  /// **'resolution: {note}'**
+  String contentComplianceResolutionLine(String note);
 
   /// No description provided for @contentComplianceActionClaim.
   ///
@@ -17883,14 +18478,14 @@ abstract class AppLocalizations {
   /// No description provided for @jobsClaimedBy.
   ///
   /// In en, this message translates to:
-  /// **'Jobs claimed by'**
-  String get jobsClaimedBy;
+  /// **'认领者：{claimedBy}'**
+  String jobsClaimedBy(String claimedBy);
 
   /// No description provided for @jobsFailedReason.
   ///
   /// In en, this message translates to:
-  /// **'Jobs failed reason'**
-  String get jobsFailedReason;
+  /// **'失败原因：{reason}'**
+  String jobsFailedReason(String reason);
 
   /// No description provided for @jobsTitle.
   ///
@@ -17991,32 +18586,32 @@ abstract class AppLocalizations {
   /// No description provided for @jobsDetailLabel.
   ///
   /// In en, this message translates to:
-  /// **'Jobs detail label'**
-  String get jobsDetailLabel;
+  /// **'作业详情：{detail}'**
+  String jobsDetailLabel(String detail);
 
   /// No description provided for @jobsKindsLabel.
   ///
   /// In en, this message translates to:
-  /// **'Jobs kinds label'**
-  String get jobsKindsLabel;
+  /// **'作业类型：{kinds}'**
+  String jobsKindsLabel(String kinds);
 
   /// No description provided for @jobsKindSummaryLabel.
   ///
   /// In en, this message translates to:
-  /// **'Jobs kind summary label'**
-  String get jobsKindSummaryLabel;
+  /// **'类型汇总：{summary}'**
+  String jobsKindSummaryLabel(String summary);
 
   /// No description provided for @jobsStatusSummaryLabel.
   ///
   /// In en, this message translates to:
-  /// **'Jobs status summary label'**
-  String get jobsStatusSummaryLabel;
+  /// **'状态汇总：{summary}'**
+  String jobsStatusSummaryLabel(String summary);
 
   /// No description provided for @jobsCountLabel.
   ///
   /// In en, this message translates to:
-  /// **'Jobs count label'**
-  String get jobsCountLabel;
+  /// **'{count} 条作业'**
+  String jobsCountLabel(int count);
 
   /// No description provided for @jobsRetry.
   ///
@@ -18129,38 +18724,38 @@ abstract class AppLocalizations {
   /// No description provided for @platformStatusChipLabel.
   ///
   /// In en, this message translates to:
-  /// **'Platform status chip label'**
-  String get platformStatusChipLabel;
+  /// **'{title}: {value}'**
+  String platformStatusChipLabel(String title, String value);
 
   /// No description provided for @opsWhActivityEntryTitle.
   ///
   /// In en, this message translates to:
-  /// **'Ops wh activity entry title'**
-  String get opsWhActivityEntryTitle;
+  /// **'{action} · {webhookId}'**
+  String opsWhActivityEntryTitle(String action, String webhookId);
 
   /// No description provided for @opsWhFieldId.
   ///
   /// In en, this message translates to:
-  /// **'Ops wh field id'**
-  String get opsWhFieldId;
+  /// **'ID: {id}'**
+  String opsWhFieldId(String id);
 
   /// No description provided for @opsWhFieldCreatedAt.
   ///
   /// In en, this message translates to:
-  /// **'Ops wh field created at'**
-  String get opsWhFieldCreatedAt;
+  /// **'创建时间: {createdAt}'**
+  String opsWhFieldCreatedAt(String createdAt);
 
   /// No description provided for @opsWhFieldUpdatedAt.
   ///
   /// In en, this message translates to:
-  /// **'Ops wh field updated at'**
-  String get opsWhFieldUpdatedAt;
+  /// **'更新时间: {updatedAt}'**
+  String opsWhFieldUpdatedAt(String updatedAt);
 
   /// No description provided for @opsWhApiEventTypes.
   ///
   /// In en, this message translates to:
-  /// **'Ops wh api event types'**
-  String get opsWhApiEventTypes;
+  /// **'API: {eventTypes}'**
+  String opsWhApiEventTypes(String eventTypes);
 
   /// No description provided for @billingAuditEventTypeLabel.
   ///
@@ -18215,6 +18810,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Billing audit created to label'**
   String get billingAuditCreatedToLabel;
+
+  /// No description provided for @notificationsFilterCount.
+  ///
+  /// In en, this message translates to:
+  /// **'筛选 {count}'**
+  String notificationsFilterCount(int count);
+
+  /// No description provided for @notificationsUnreadCount.
+  ///
+  /// In en, this message translates to:
+  /// **'未读 {count}'**
+  String notificationsUnreadCount(int count);
 }
 
 class _AppLocalizationsDelegate

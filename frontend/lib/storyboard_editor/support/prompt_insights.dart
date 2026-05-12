@@ -264,6 +264,7 @@ String buildStoryboardVideoPromptDiagnosticsLine(
 }
 
 String describeStoryboardSelectedMemoryFeedback(
+  AppLocalizations l10n,
   WorkbenchVideoMemoryFeedback feedback,
 ) {
   final parts = <String>[];
@@ -280,64 +281,72 @@ String describeStoryboardSelectedMemoryFeedback(
     parts.add(note);
   }
   final summary = parts.isEmpty
-      ? '已提炼当前分镜的私有表演记忆。'
-      : '已提炼私有记忆：${parts.join(' / ')}。';
-  return '$summary 仅作用于当前用户、项目、剧本，后续会优先复用而不串别的短剧。';
+      ? l10n.storyboardMemorySelectedPerfDistilled
+      : l10n.storyboardMemorySelectedPrivateParts(parts.join(' / '));
+  return '$summary ${l10n.storyboardMemoryPrivateScopeFooter}';
 }
 
 String describeStoryboardRejectedMemoryFeedback(
+  AppLocalizations l10n,
   WorkbenchVideoMemoryFeedback feedback,
 ) {
   final avoid = feedback.avoid?.trim();
   final rejectionCount = feedback.rejectionCount;
   final riskTags = feedback.riskTags;
   final head = (avoid == null || avoid.isEmpty)
-      ? '已回写当前分镜的私有坏例约束。'
-      : '已回写私有坏例约束：$avoid。';
-  final tail = <String>[
-    if (rejectionCount != null && rejectionCount > 1) '累计失败 $rejectionCount 次',
-    if (riskTags.isNotEmpty) '重点风险 ${riskTags.join(" / ")}',
-  ].join('，');
-  return tail.isEmpty
-      ? '$head 后续生成会优先复用当前用户、项目、剧本下的负向记忆。'
-      : '$head $tail；后续生成会优先复用当前用户、项目、剧本下的负向记忆。';
+      ? l10n.storyboardMemoryRejectedHeadEmpty
+      : l10n.storyboardMemoryRejectedHeadAvoid(avoid);
+  final tailParts = <String>[
+    if (rejectionCount != null && rejectionCount > 1)
+      l10n.storyboardMemoryRejectedFailures(rejectionCount),
+    if (riskTags.isNotEmpty)
+      l10n.storyboardMemoryRejectedRisks(riskTags.join(' / ')),
+  ];
+  final tail = tailParts.join(' · ');
+  final footer = l10n.storyboardMemoryRejectedNegativeFooter;
+  return tail.isEmpty ? '$head $footer' : '$head $tail；$footer';
 }
 
 String describeStoryboardAutoNegativeSource(
+  AppLocalizations l10n,
   GenerateVideoPromptDiagnostics diagnostics,
 ) {
   switch (diagnostics.autoNegativeSource) {
     case 'review':
-      return '自动负向来自最近评审坏例';
+      return l10n.storyboardAutoNegativeSourceReview;
     case 'rejected_memory':
-      return '自动负向来自私有坏例记忆';
+      return l10n.storyboardAutoNegativeSourceRejectedMemory;
     case 'review+rejected_memory':
-      return '自动负向同时用了评审坏例和私有记忆';
+      return l10n.storyboardAutoNegativeSourceBoth;
     case 'pending_rejected_observation':
-      return '自动负向来自最近一次 reject 观察兜底';
+      return l10n.storyboardAutoNegativeSourcePendingObservation;
     case 'pending_observation_note':
-      return '当前还没正式负向词，只回带待观察失败提示';
+      return l10n.storyboardAutoNegativeSourcePendingNoteOnly;
     default:
-      return '当前没有额外自动负向来源。';
+      return l10n.storyboardAutoNegativeSourceNone;
   }
 }
 
 String buildStoryboardPromptGenerationFollowUp(
+  AppLocalizations l10n,
   GenerateVideoPromptDiagnostics diagnostics, {
   String? observationNote,
 }) {
   final parts = <String>[
-    '已生成默认视频提示词并回填时长',
-    describeStoryboardAutoNegativeSource(diagnostics),
+    l10n.storyboardPromptGenDefaultFilledDuration,
+    describeStoryboardAutoNegativeSource(l10n, diagnostics),
   ];
-  final scopeSummary = _describeStoryboardMemoryScopeRowsIfAny(diagnostics);
+  final scopeSummary = _describeStoryboardMemoryScopeRowsIfAny(l10n, diagnostics);
   if (scopeSummary != null) {
-    parts.add('命中$scopeSummary记忆');
+    parts.add(l10n.storyboardPromptGenHitMemory(scopeSummary));
   }
   if (diagnostics.negativeSavedChars > 0 ||
       diagnostics.negativeSavedFragmentCount > 0) {
     parts.add(
-      '自动精简 ${diagnostics.negativeSavedFragmentCount} 条负向约束 / ${diagnostics.negativeSavedChars} chars',
+      l10n.storyboardPromptGenNegativeTrimmed(
+        diagnostics.negativeSavedFragmentCount,
+        diagnostics.negativeSavedChars,
+      ),
     );
   }
   final note = observationNote?.trim();
@@ -348,53 +357,79 @@ String buildStoryboardPromptGenerationFollowUp(
 }
 
 String buildStoryboardVideoPromptSourceSummary(
+  AppLocalizations l10n,
   GenerateVideoPromptDiagnostics diagnostics,
 ) {
-  final parts = <String>[describeStoryboardAutoNegativeSource(diagnostics)];
+  final parts = <String>[
+    describeStoryboardAutoNegativeSource(l10n, diagnostics),
+  ];
   if (diagnostics.memoryOptimizationApplied &&
       diagnostics.memoryOptimizationRemovedRows > 0) {
     parts.add(
-      '自动瘦身 ${diagnostics.memoryOptimizationRemovedRows} 条'
-      '（低信号 ${diagnostics.memoryOptimizationRemovedLowValueRows}'
-      ' / 重复 ${diagnostics.memoryOptimizationRemovedDuplicateRows}'
-      ' / 纯视觉 ${diagnostics.memoryOptimizationRemovedVisualRows}）',
+      l10n.storyboardPromptSourceMemorySlim(
+        diagnostics.memoryOptimizationRemovedRows,
+        diagnostics.memoryOptimizationRemovedLowValueRows,
+        diagnostics.memoryOptimizationRemovedDuplicateRows,
+        diagnostics.memoryOptimizationRemovedVisualRows,
+      ),
     );
   }
   if (diagnostics.negativeSavedFragmentCount > 0 ||
       diagnostics.negativeSavedChars > 0) {
     parts.add(
-      '负向精简 ${diagnostics.negativeSavedFragmentCount} 条'
-      ' / ${diagnostics.negativeSavedChars} chars',
+      l10n.storyboardPromptSourceNegativeSlim(
+        diagnostics.negativeSavedFragmentCount,
+        diagnostics.negativeSavedChars,
+      ),
     );
   }
   if (diagnostics.autoNegativeReviewFragmentCount > 0) {
-    parts.add('评审 ${diagnostics.autoNegativeReviewFragmentCount} 条');
+    parts.add(
+      l10n.storyboardPromptSourceReviewFrags(
+        diagnostics.autoNegativeReviewFragmentCount,
+      ),
+    );
   }
   if (diagnostics.autoNegativeMemoryFragmentCount > 0) {
-    parts.add('记忆 ${diagnostics.autoNegativeMemoryFragmentCount} 条');
+    parts.add(
+      l10n.storyboardPromptSourceMemoryFrags(
+        diagnostics.autoNegativeMemoryFragmentCount,
+      ),
+    );
   }
   return parts.join(' · ');
 }
 
 String buildStoryboardVideoPromptAnchorSummary(
+  AppLocalizations l10n,
   GenerateVideoPromptDiagnostics diagnostics,
 ) {
+  final scopeRows = _hasScopedMemoryRows(diagnostics)
+      ? _describeStoryboardMemoryScopeRows(l10n, diagnostics)
+      : null;
   final parts = <String>[
-    if (diagnostics.roleAnchorCount > 0) '角色锚点 ${diagnostics.roleAnchorCount}',
+    if (diagnostics.roleAnchorCount > 0)
+      l10n.storyboardPromptAnchorRole(diagnostics.roleAnchorCount),
     if (diagnostics.sceneAnchorCount > 0)
-      '场景锚点 ${diagnostics.sceneAnchorCount}',
-    if (diagnostics.toolAnchorCount > 0) '道具锚点 ${diagnostics.toolAnchorCount}',
+      l10n.storyboardPromptAnchorScene(diagnostics.sceneAnchorCount),
+    if (diagnostics.toolAnchorCount > 0)
+      l10n.storyboardPromptAnchorTool(diagnostics.toolAnchorCount),
     if (diagnostics.styleAnchorCount > 0)
-      '风格锚点 ${diagnostics.styleAnchorCount}',
+      l10n.storyboardPromptAnchorStyle(diagnostics.styleAnchorCount),
     if (diagnostics.memoryStyleAnchorCount > 0)
-      '私有记忆 ${diagnostics.memoryStyleAnchorCount}',
-    if (_hasScopedMemoryRows(diagnostics))
-      '记忆命中 ${_describeStoryboardMemoryScopeRows(diagnostics)}',
+      l10n.storyboardPromptAnchorPrivateMemory(
+        diagnostics.memoryStyleAnchorCount,
+      ),
+    if (scopeRows != null && scopeRows.isNotEmpty)
+      l10n.storyboardPromptGenHitMemory(scopeRows),
     if (diagnostics.continuityNoteCount > 0)
-      '连续性记忆 ${diagnostics.continuityNoteCount}',
-    if (diagnostics.usesReferenceFrame) '已引用当前画面',
+      l10n.storyboardPromptAnchorContinuity(diagnostics.continuityNoteCount),
+    if (diagnostics.usesReferenceFrame)
+      l10n.storyboardPromptAnchorReferenceFrame,
   ];
-  return parts.isEmpty ? '当前提示词未命中额外锚点或记忆。' : parts.join(' · ');
+  return parts.isEmpty
+      ? l10n.storyboardPromptAnchorEmpty
+      : parts.join(' · ');
 }
 
 String buildStoryboardVideoPromptBudgetHint(
@@ -557,24 +592,26 @@ bool _hasScopedMemoryRows(GenerateVideoPromptDiagnostics diagnostics) {
 }
 
 String? _describeStoryboardMemoryScopeRowsIfAny(
+  AppLocalizations l10n,
   GenerateVideoPromptDiagnostics diagnostics,
 ) {
   if (!_hasScopedMemoryRows(diagnostics)) {
     return null;
   }
-  return _describeStoryboardMemoryScopeRows(diagnostics);
+  return _describeStoryboardMemoryScopeRows(l10n, diagnostics);
 }
 
 String _describeStoryboardMemoryScopeRows(
+  AppLocalizations l10n,
   GenerateVideoPromptDiagnostics diagnostics,
 ) {
   final parts = <String>[
     if (diagnostics.memoryProjectScopeRowCount > 0)
-      '项目 ${diagnostics.memoryProjectScopeRowCount}',
+      l10n.storyboardMemoryScopeProject(diagnostics.memoryProjectScopeRowCount),
     if (diagnostics.memoryScriptScopeRowCount > 0)
-      '剧本 ${diagnostics.memoryScriptScopeRowCount}',
+      l10n.storyboardMemoryScopeScript(diagnostics.memoryScriptScopeRowCount),
     if (diagnostics.memoryRoleScopeRowCount > 0)
-      '角色 ${diagnostics.memoryRoleScopeRowCount}',
+      l10n.storyboardMemoryScopeRole(diagnostics.memoryRoleScopeRowCount),
   ];
   return parts.join(' / ');
 }

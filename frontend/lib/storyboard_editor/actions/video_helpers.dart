@@ -88,18 +88,24 @@ extension _StoryboardWorkbenchVideoActions on _StoryboardWorkbenchPanelState {
   }
 
   void _applyPromptRepairSuggestions() {
+    final l10n = AppLocalizations.of(context)!;
     final repaired = _repairCurrentPromptFromDiagnostics();
     if (repaired == null) {
       return;
     }
     _applyWorkbenchState(() {
       _setWorkbenchActionNotice(
-        actionSummary: repaired.changed ? '已应用当前生成前建议。' : '当前建议已经基本落实，无需再裁剪。',
+        actionSummary: repaired.changed
+            ? l10n.storyboardActionRepairAppliedSummary
+            : l10n.storyboardActionRepairNoChangeSummary,
         recommendedAction:
             StoryboardWorkbenchRecommendedAction.submitVideoGeneration,
         detail: repaired.changed
-            ? '本次精简了 ${repaired.removedPromptFragmentCount} 条低收益提示词片段，并去掉 ${repaired.removedNegativeFragmentCount} 条重复负向约束。'
-            : '当前分镜的 prompt/negative prompt 已经比较精简，可直接继续生成。',
+            ? l10n.storyboardActionRepairDetailTrimmed(
+                repaired.removedPromptFragmentCount,
+                repaired.removedNegativeFragmentCount,
+              )
+            : l10n.storyboardActionRepairDetailLean,
       );
     });
   }
@@ -136,16 +142,17 @@ extension _StoryboardWorkbenchVideoActions on _StoryboardWorkbenchPanelState {
   }
 
   Future<void> _runDialogAction(Future<void> Function() action) async {
+    final l10n = AppLocalizations.of(context)!;
     _applyWorkbenchState(() => _saving = true);
     try {
       await action();
     } on RustApiException catch (e) {
       if (!mounted) return;
       _showWorkbenchFailureSnackBar(
-        actionSummary: '当前分镜操作失败。',
+        actionSummary: l10n.storyboardActionOperationFailedSummary,
         recommendedAction: _currentDiagnosis().recommendedAction,
         error: e,
-        fallbackDetail: '建议先完成当前推荐步骤后再重试。',
+        fallbackDetail: l10n.storyboardActionOperationFailedDetail,
       );
     } on FormatException catch (e) {
       if (!mounted) return;
@@ -155,10 +162,10 @@ extension _StoryboardWorkbenchVideoActions on _StoryboardWorkbenchPanelState {
     } catch (e) {
       if (!mounted) return;
       _showWorkbenchFailureSnackBar(
-        actionSummary: '当前分镜操作失败。',
+        actionSummary: l10n.storyboardActionOperationFailedSummary,
         recommendedAction: _currentDiagnosis().recommendedAction,
         error: e,
-        fallbackDetail: '建议先完成当前推荐步骤后再重试。',
+        fallbackDetail: l10n.storyboardActionOperationFailedDetail,
       );
     } finally {
       if (mounted) {
@@ -168,9 +175,10 @@ extension _StoryboardWorkbenchVideoActions on _StoryboardWorkbenchPanelState {
   }
 
   Future<void> _submitVideoGeneration() async {
+    final l10n = AppLocalizations.of(context)!;
     final sourceImage = _currentStoryboardSourceImage();
     if (sourceImage == null) {
-      throw const FormatException('生成视频前需要先提供图片 URL 或当前预览图');
+      throw FormatException(l10n.storyboardActionErrNeedSourceImageOrPreview);
     }
     var trackId = int.tryParse(_trackIdCtrl.text.trim());
     if (trackId == null || trackId <= 0) {
@@ -181,17 +189,17 @@ extension _StoryboardWorkbenchVideoActions on _StoryboardWorkbenchPanelState {
       }
     }
     if (trackId == null || trackId <= 0) {
-      throw const FormatException('生成视频前请填写有效轨道 ID');
+      throw FormatException(l10n.storyboardActionErrTrackIdRequired);
     }
     final duration = int.tryParse(_videoDurationCtrl.text.trim());
     if (duration == null || duration <= 0) {
-      throw const FormatException('视频时长必须是正整数');
+      throw FormatException(l10n.storyboardActionErrDurationPositiveInteger);
     }
     await _refreshVideoPromptBeforeSubmitIfNeeded();
     final repairedBeforeSubmit = _repairCurrentPromptFromDiagnostics();
     final prompt = _videoPromptCtrl.text.trim();
     if (prompt.isEmpty) {
-      throw const FormatException('视频提示词不能为空');
+      throw FormatException(l10n.storyboardActionErrVideoPromptEmpty);
     }
     final rawNegativePrompt = _negativeVideoPromptCtrl.text.trim();
     final compactedManualNegative = compactStoryboardManualNegativePrompt(
@@ -223,25 +231,45 @@ extension _StoryboardWorkbenchVideoActions on _StoryboardWorkbenchPanelState {
     if (!mounted) return;
     await _refreshWorkbenchData();
     if (!mounted) return;
+    final repaired = repairedBeforeSubmit;
+    final repairedCh = repaired != null && repaired.changed;
+    final promptRm = repaired?.removedPromptFragmentCount ?? 0;
+    final negRm = repaired?.removedNegativeFragmentCount ?? 0;
+    final dedupe = compactedManualNegative.removedFragmentCount;
+    final emptyNeg = appliedNegativePrompt.isEmpty;
     _applyWorkbenchState(() {
-      _setWorkbenchFollowUp(
-        appliedNegativePrompt.isEmpty
-            ? repairedBeforeSubmit != null && repairedBeforeSubmit.changed
-                  ? '已提交 ${response.total} 条视频任务，并在提交前自动精简 ${repairedBeforeSubmit.removedPromptFragmentCount} 条低收益 prompt 片段与 ${repairedBeforeSubmit.removedNegativeFragmentCount} 条重复负向约束。'
-                  : compactedManualNegative.removedFragmentCount > 0
-                  ? '已提交 ${response.total} 条视频任务，并自动剔除 ${compactedManualNegative.removedFragmentCount} 条重复负向约束。'
-                  : '已提交 ${response.total} 条视频任务。'
-            : repairedBeforeSubmit != null && repairedBeforeSubmit.changed
-            ? '已提交 ${response.total} 条视频任务，提交前自动精简了 ${repairedBeforeSubmit.removedPromptFragmentCount} 条低收益 prompt 片段、${repairedBeforeSubmit.removedNegativeFragmentCount} 条重复负向约束，并回填最终负向提示词。'
-            : compactedManualNegative.removedFragmentCount > 0
-            ? '已提交 ${response.total} 条视频任务，自动剔除 ${compactedManualNegative.removedFragmentCount} 条重复负向约束，并回填最终负向提示词。'
-            : '已提交 ${response.total} 条视频任务，并回填最终负向提示词。',
-      );
+      final msg = emptyNeg
+          ? repairedCh
+                ? l10n.storyboardActionVideoJobsSubmittedRepairOnly(
+                    response.total,
+                    promptRm,
+                    negRm,
+                  )
+                : dedupe > 0
+                ? l10n.storyboardActionVideoJobsSubmittedDedupeOnly(
+                    response.total,
+                    dedupe,
+                  )
+                : l10n.storyboardActionVideoJobsSubmittedTotalOnly(response.total)
+          : repairedCh
+          ? l10n.storyboardActionVideoJobsSubmittedRepairFinal(
+              response.total,
+              promptRm,
+              negRm,
+            )
+          : dedupe > 0
+          ? l10n.storyboardActionVideoJobsSubmittedDedupeFinal(
+              response.total,
+              dedupe,
+            )
+          : l10n.storyboardActionVideoJobsSubmittedFinalOnly(response.total);
+      _setWorkbenchFollowUp(msg);
     });
     await _notifyStoryboardMutated();
   }
 
   Future<void> _generateVoiceover() async {
+    final l10n = AppLocalizations.of(context)!;
     final response = await postWorkbenchGenerateVoiceoverV1(
       widget.token,
       projectUuid: widget.projectId,
@@ -254,14 +282,18 @@ extension _StoryboardWorkbenchVideoActions on _StoryboardWorkbenchPanelState {
     _applyWorkbenchState(() {
       _setWorkbenchFollowUp(
         queuedIds.isEmpty
-            ? '已提交 ${response.total} 条配音任务，可稍后刷新制作数据查看状态。'
-            : '已提交 ${response.total} 条配音任务（job=${queuedIds.first}），可稍后刷新制作数据查看状态。',
+            ? l10n.storyboardActionVoiceoverJobsSubmitted(response.total)
+            : l10n.storyboardActionVoiceoverJobsSubmittedWithJob(
+                response.total,
+                queuedIds.first,
+              ),
       );
     });
     await _notifyStoryboardMutated();
   }
 
   Future<void> _saveVideoDescription() async {
+    final l10n = AppLocalizations.of(context)!;
     final response = await updateStoryboardByProjectAndNumericId(
       widget.token,
       widget.projectId,
@@ -278,14 +310,15 @@ extension _StoryboardWorkbenchVideoActions on _StoryboardWorkbenchPanelState {
     _applyWorkbenchState(() {
       _setWorkbenchFollowUp(
         widget.videoDescriptionCtrl.text.trim().isEmpty
-            ? '已清空字幕/旁白文案，导出时会回退到分镜提示词。'
-            : '已保存字幕/旁白文案，后续默认视频提示词和导出字幕会优先使用它。',
+            ? l10n.storyboardActionVideoDescCleared
+            : l10n.storyboardActionVideoDescSaved,
       );
     });
     await _notifyStoryboardMutated();
   }
 
   Future<void> _exportCurrentVideoJob() async {
+    final l10n = AppLocalizations.of(context)!;
     final candidates = _storyboardVideos();
     final selected = widget.scriptStoryboard.filePath;
     final sourceUrl = (selected ?? '').trim().isNotEmpty
@@ -296,7 +329,7 @@ extension _StoryboardWorkbenchVideoActions on _StoryboardWorkbenchPanelState {
               .map((s) => s.trim())
               .firstWhere((s) => s.isNotEmpty, orElse: () => ''));
     if (sourceUrl.isEmpty) {
-      throw const FormatException('当前分镜还没有可导出的已选视频或候选视频 URL');
+      throw FormatException(l10n.storyboardActionErrNoExportableVideoUrl);
     }
     final media = await postWorkbenchStoryboardMediaOpV1(
       widget.token,
@@ -318,7 +351,7 @@ extension _StoryboardWorkbenchVideoActions on _StoryboardWorkbenchPanelState {
       _latestExportJob = job;
       _latestExportWritebackSynced = false;
       _setWorkbenchFollowUp(
-        '已提交视频导出任务（job=${job.id}）。完成后会写回当前分镜视频 URL，可稍后刷新制作数据查看。',
+        l10n.storyboardActionExportJobEnqueued(job.id),
       );
     });
   }

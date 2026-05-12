@@ -10,6 +10,7 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
   }
 
   Future<void> _readCurrentPreview() async {
+    final l10n = AppLocalizations.of(context)!;
     final preview = await postStoryboardPreviewImageV1(
       widget.token,
       projectUuid: widget.projectId,
@@ -21,15 +22,18 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
     if (!mounted) return;
     _applyWorkbenchState(() {
       _setWorkbenchFollowUp(
-        preview.imageUrl == null ? '当前分镜还没有可读取的预览图。' : '已读取当前分镜预览。',
+        preview.imageUrl == null
+            ? l10n.storyboardActionFollowUpPreviewMissing
+            : l10n.storyboardActionFollowUpPreviewRead,
       );
     });
   }
 
   Future<void> _saveImageUrl() async {
+    final l10n = AppLocalizations.of(context)!;
     final imageUrl = _imageUrlCtrl.text.trim();
     if (imageUrl.isEmpty) {
-      throw const FormatException('图片 URL 不能为空');
+      throw FormatException(l10n.storyboardActionErrImageUrlRequired);
     }
     final response = await postStoryboardUpdateUrlV1(
       widget.token,
@@ -42,12 +46,13 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
     await _refreshProductionData();
     if (!mounted) return;
     _applyWorkbenchState(() {
-      _setWorkbenchFollowUp('已保存当前图片 URL。');
+      _setWorkbenchFollowUp(l10n.storyboardActionFollowUpImageUrlSaved);
     });
     await _notifyStoryboardMutated();
   }
 
   Future<void> _saveLiveActionReference() async {
+    final l10n = AppLocalizations.of(context)!;
     final referenceShotUrls = _liveActionReferenceShotsCtrl.text
         .split(RegExp(r'[\n,]'))
         .map((value) => value.trim())
@@ -71,14 +76,15 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
       final count = response.referenceShotUrls.length;
       _setWorkbenchFollowUp(
         count <= 0
-            ? '已清空真人参考镜头与表演约束。'
-            : '已保存 $count 条真人参考镜头，并同步表演/口播约束。',
+            ? l10n.storyboardActionFollowUpLiveActionCleared
+            : l10n.storyboardActionFollowUpLiveActionSaved(count),
       );
     });
     await _notifyStoryboardMutated();
   }
 
   Future<void> _clearCurrentFrame() async {
+    final l10n = AppLocalizations.of(context)!;
     await postStoryboardRemoveFrameV1(
       widget.token,
       projectUuid: widget.projectId,
@@ -89,14 +95,17 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
     await _refreshProductionData();
     if (!mounted) return;
     _applyWorkbenchState(() {
-      _setWorkbenchFollowUp('已清空当前分镜画面。');
+      _setWorkbenchFollowUp(l10n.storyboardActionFollowUpFrameCleared);
     });
     await _notifyStoryboardMutated();
   }
 
   Future<void> _addTrack() async {
+    final l10n = AppLocalizations.of(context)!;
     final name = _trackNameCtrl.text.trim();
-    if (name.isEmpty) throw const FormatException('轨道名称不能为空');
+    if (name.isEmpty) {
+      throw FormatException(l10n.storyboardActionErrTrackNameRequired);
+    }
     final response = await postWorkbenchAddTrackV1(
       widget.token,
       projectUuid: widget.projectId,
@@ -108,15 +117,18 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
     await _refreshAll(syncTrackId: true);
     if (!mounted) return;
     _applyWorkbenchState(
-      () => _setWorkbenchFollowUp('已新增轨道 #${response.trackId}。'),
+      () => _setWorkbenchFollowUp(
+        l10n.storyboardActionFollowUpTrackAdded(response.trackId),
+      ),
     );
     await _notifyStoryboardMutated();
   }
 
   Future<void> _deleteTrack() async {
+    final l10n = AppLocalizations.of(context)!;
     final trackId = int.tryParse(_trackIdCtrl.text.trim());
     if (trackId == null || trackId <= 0) {
-      throw const FormatException('请填写有效轨道 ID');
+      throw FormatException(l10n.storyboardActionErrTrackIdInvalid);
     }
     await postWorkbenchDeleteTrackV1(
       widget.token,
@@ -127,11 +139,16 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
     if (_productionRow?.trackId == trackId) _trackIdCtrl.clear();
     await _refreshAll(syncTrackId: true);
     if (!mounted) return;
-    _applyWorkbenchState(() => _setWorkbenchFollowUp('已删除轨道 #$trackId。'));
+    _applyWorkbenchState(
+      () => _setWorkbenchFollowUp(
+        l10n.storyboardActionFollowUpTrackDeleted(trackId),
+      ),
+    );
     await _notifyStoryboardMutated();
   }
 
   Future<void> _generateVideoPrompt() async {
+    final l10n = AppLocalizations.of(context)!;
     final request = _buildCurrentVideoPromptRequest();
     final imageUrl = _currentStoryboardSourceImage();
     final generated = await postWorkbenchGenerateVideoPromptV1(
@@ -153,6 +170,7 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
     );
     if (!mounted) return;
     final followUp = buildStoryboardPromptGenerationFollowUp(
+      l10n,
       generated.diagnostics,
       observationNote: generated.observationNote,
     );
@@ -160,6 +178,7 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
   }
 
   Future<void> _selectVideo(VideoItem video) async {
+    final l10n = AppLocalizations.of(context)!;
     final media = await postWorkbenchStoryboardMediaOpV1(
       widget.token,
       buildStoryboardMediaOpBodyV1(
@@ -176,13 +195,14 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
     await _refreshProductionData(syncTrackId: true);
     if (!mounted) return;
     final memorySummary = response.selectedMemory == null
-        ? '已将当前候选视频设为分镜视频。'
-        : '已将当前候选视频设为分镜视频。${describeStoryboardSelectedMemoryFeedback(response.selectedMemory!)}';
+        ? l10n.storyboardActionFollowUpVideoSelectedBase
+        : '${l10n.storyboardActionFollowUpVideoSelectedBase}${describeStoryboardSelectedMemoryFeedback(l10n, response.selectedMemory!)}';
     _applyWorkbenchState(() => _setWorkbenchFollowUp(memorySummary));
     await _notifyStoryboardMutated();
   }
 
   Future<void> _deleteCurrentVideo() async {
+    final l10n = AppLocalizations.of(context)!;
     final response = await postWorkbenchDeleteVideoV1(
       widget.token,
       projectUuid: widget.projectId,
@@ -193,44 +213,51 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
     await _refreshWorkbenchData();
     if (!mounted) return;
     final followUp = response.negativeMemory == null
-        ? '已删除当前分镜已选视频。'
-        : '已删除当前分镜已选视频。${describeStoryboardRejectedMemoryFeedback(response.negativeMemory!)}';
+        ? l10n.storyboardActionFollowUpVideoDeletedBase
+        : '${l10n.storyboardActionFollowUpVideoDeletedBase}${describeStoryboardRejectedMemoryFeedback(l10n, response.negativeMemory!)}';
     _applyWorkbenchState(() => _setWorkbenchFollowUp(followUp));
     await _notifyStoryboardMutated();
   }
 
   void _prepareVideoTrack(List<int> knownTrackIds) {
+    final l10n = AppLocalizations.of(context)!;
     _applyWorkbenchState(() {
       final currentTrackId = int.tryParse(_trackIdCtrl.text.trim());
       if (currentTrackId != null && currentTrackId > 0) {
-        _setWorkbenchFollowUp('当前轨道 ID 已可直接用于视频生成。');
+        _setWorkbenchFollowUp(l10n.storyboardActionFollowUpTrackReady);
         return;
       }
       if (knownTrackIds.isNotEmpty) {
         _trackIdCtrl.text = knownTrackIds.first.toString();
-        _setWorkbenchFollowUp('已回填轨道 ${knownTrackIds.first}，可继续确认视频参数。');
+        _setWorkbenchFollowUp(
+          l10n.storyboardActionFollowUpTrackBackfilled(knownTrackIds.first),
+        );
         return;
       }
       if (_trackNameCtrl.text.trim().isEmpty) {
-        _trackNameCtrl.text = '分镜 ${widget.storyNumericId} 视频轨';
+        _trackNameCtrl.text = l10n.storyboardActionFollowUpTrackNamePrefilled(
+          widget.storyNumericId,
+        );
       }
-      _setWorkbenchFollowUp('已预填新轨道名称，下一步可直接新增轨道。');
+      _setWorkbenchFollowUp(l10n.storyboardActionFollowUpTrackNameHint);
     });
   }
 
   Future<void> _syncProductionDataAction() async {
+    final l10n = AppLocalizations.of(context)!;
     await _refreshProductionData(syncImageUrl: true, syncTrackId: true);
     if (!mounted) return;
     _applyWorkbenchState(() {
-      _setWorkbenchFollowUp('已同步当前分镜制作数据。');
+      _setWorkbenchFollowUp(l10n.storyboardActionFollowUpSyncProduction);
     });
   }
 
   Future<void> _refreshVideoDataAction() async {
+    final l10n = AppLocalizations.of(context)!;
     await _refreshWorkbenchData();
     if (!mounted) return;
     _applyWorkbenchState(() {
-      _setWorkbenchFollowUp('已刷新当前分镜的视频数据。');
+      _setWorkbenchFollowUp(l10n.storyboardActionFollowUpRefreshVideo);
     });
   }
 

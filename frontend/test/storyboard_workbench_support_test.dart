@@ -84,16 +84,16 @@ void main() {
       contains('Negative slim -34'),
     );
     expect(
-      buildStoryboardVideoPromptSourceSummary(diagnostics),
+      buildStoryboardVideoPromptSourceSummary(_zh, diagnostics),
       contains('自动瘦身 2 条（低信号 0 / 重复 1 / 纯视觉 1）'),
     );
     expect(
-      buildStoryboardVideoPromptSourceSummary(diagnostics),
+      buildStoryboardVideoPromptSourceSummary(_zh, diagnostics),
       contains('负向精简 2 条 / 34 chars'),
     );
     expect(
-      buildStoryboardVideoPromptAnchorSummary(diagnostics),
-      contains('记忆命中 项目 2 / 剧本 1 / 角色 1'),
+      buildStoryboardVideoPromptAnchorSummary(_zh, diagnostics),
+      contains('命中项目 2 / 剧本 1 / 角色 1记忆'),
     );
     expect(
       buildStoryboardVideoPromptBudgetHint(diagnostics),
@@ -101,6 +101,7 @@ void main() {
     );
     expect(
       buildStoryboardPromptGenerationFollowUp(
+        _zh,
         diagnostics,
         observationNote: '观察到上一轮嘴型偏僵',
       ),
@@ -153,6 +154,7 @@ void main() {
     'describeStoryboardSelectedMemoryFeedback explains isolated reusable memory',
     () {
       final line = describeStoryboardSelectedMemoryFeedback(
+        _zh,
         const WorkbenchVideoMemoryFeedback(
           kind: 'selected',
           scope: 'user-project-script',
@@ -172,6 +174,7 @@ void main() {
     'describeStoryboardRejectedMemoryFeedback explains isolated negative reuse',
     () {
       final line = describeStoryboardRejectedMemoryFeedback(
+        _zh,
         const WorkbenchVideoMemoryFeedback(
           kind: 'rejected',
           scope: 'user-project-script',
@@ -503,7 +506,7 @@ void main() {
       'Prompt 318 chars · Negative 64 (expanded) · Observation 22 · Memory 36 · Memory tier expanded',
     );
     expect(
-      buildStoryboardVideoPromptAnchorSummary(diagnostics),
+      buildStoryboardVideoPromptAnchorSummary(_zh, diagnostics),
       '角色锚点 1 · 场景锚点 2 · 道具锚点 1 · 风格锚点 2 · 私有记忆 1 · 连续性记忆 1 · 已引用当前画面',
     );
   });
@@ -537,8 +540,8 @@ void main() {
     );
 
     expect(
-      buildStoryboardVideoPromptAnchorSummary(diagnostics),
-      '当前提示词未命中额外锚点或记忆。',
+      buildStoryboardVideoPromptAnchorSummary(_zh, diagnostics),
+      _zh.storyboardPromptAnchorEmpty,
     );
     expect(
       buildStoryboardVideoPromptBudgetHint(diagnostics),

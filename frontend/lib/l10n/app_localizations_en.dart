@@ -8091,8 +8091,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'Production view loaded';
 
   @override
-  String storyboardEditorDialogTitle(int numericId) {
-    return 'Storyboard #$numericId';
+  String storyboardEditorDialogTitle(String title) {
+    return '分镜编辑器 $title';
   }
 
   @override
@@ -8119,8 +8119,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get storyboardEditorDeleteConfirmTitle => 'Delete this storyboard?';
 
   @override
-  String storyboardEditorDeleteConfirmBody(int numericId) {
-    return 'This will delete storyboard #$numericId.';
+  String storyboardEditorDeleteConfirmBody(int id) {
+    return '确定要删除分镜 $id 吗？';
   }
 
   @override
@@ -8161,7 +8161,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String storyboardVideoWorkbenchTrackIdHelperKnown(String ids) {
-    return 'Known tracks: $ids';
+    return '已知轨道 ID：$ids';
   }
 
   @override
@@ -8422,6 +8422,436 @@ class AppLocalizationsEn extends AppLocalizations {
   String storyboardVideoWorkbenchJobSubtitle(String status, String updatedAt) {
     return 'Status $status · $updatedAt';
   }
+
+  @override
+  String get storyboardActionFollowUpPreviewMissing =>
+      'This shot has no readable preview image yet.';
+
+  @override
+  String get storyboardActionFollowUpPreviewRead =>
+      'Loaded preview for this shot.';
+
+  @override
+  String get storyboardActionErrImageUrlRequired =>
+      'Image URL cannot be empty.';
+
+  @override
+  String get storyboardActionFollowUpImageUrlSaved =>
+      'Saved current image URL.';
+
+  @override
+  String get storyboardActionFollowUpLiveActionCleared =>
+      'Cleared live-action reference shots and performance constraints.';
+
+  @override
+  String storyboardActionFollowUpLiveActionSaved(int count) {
+    return 'Saved $count live-action reference shot(s) and synced performance/delivery constraints.';
+  }
+
+  @override
+  String get storyboardActionFollowUpFrameCleared =>
+      'Cleared current shot frame.';
+
+  @override
+  String get storyboardActionErrTrackNameRequired =>
+      'Track name cannot be empty.';
+
+  @override
+  String storyboardActionFollowUpTrackAdded(int trackId) {
+    return 'Added track #$trackId.';
+  }
+
+  @override
+  String get storyboardActionErrTrackIdInvalid => 'Enter a valid track ID.';
+
+  @override
+  String storyboardActionFollowUpTrackDeleted(int trackId) {
+    return 'Deleted track #$trackId.';
+  }
+
+  @override
+  String get storyboardActionFollowUpVideoSelectedBase =>
+      'Set this candidate as the shot video.';
+
+  @override
+  String get storyboardActionFollowUpVideoDeletedBase =>
+      'Removed the selected shot video.';
+
+  @override
+  String get storyboardActionFollowUpTrackReady =>
+      'Current track ID is ready for video generation.';
+
+  @override
+  String storyboardActionFollowUpTrackBackfilled(int trackId) {
+    return 'Filled track $trackId; continue confirming video settings.';
+  }
+
+  @override
+  String storyboardActionFollowUpTrackNamePrefilled(int storyId) {
+    return 'Shot $storyId video track';
+  }
+
+  @override
+  String get storyboardActionFollowUpTrackNameHint =>
+      'Prefilled a new track name—you can add the track next.';
+
+  @override
+  String get storyboardActionFollowUpSyncProduction =>
+      'Synced production data for this shot.';
+
+  @override
+  String get storyboardActionFollowUpRefreshVideo =>
+      'Refreshed video data for this shot.';
+
+  @override
+  String get storyboardMemorySelectedPerfDistilled =>
+      'Distilled private performance memory for this shot.';
+
+  @override
+  String storyboardMemorySelectedPrivateParts(String parts) {
+    return 'Distilled private memory: $parts.';
+  }
+
+  @override
+  String get storyboardMemoryPrivateScopeFooter =>
+      'Scoped to the current user, project, and script—reused preferentially without leaking to other shorts.';
+
+  @override
+  String get storyboardMemoryRejectedHeadEmpty =>
+      'Wrote private bad-case constraints for this shot.';
+
+  @override
+  String storyboardMemoryRejectedHeadAvoid(String avoid) {
+    return 'Wrote private bad-case constraints: $avoid.';
+  }
+
+  @override
+  String storyboardMemoryRejectedFailures(int count) {
+    return 'failures stacked $count times';
+  }
+
+  @override
+  String storyboardMemoryRejectedRisks(String tags) {
+    return 'risk focus $tags';
+  }
+
+  @override
+  String get storyboardMemoryRejectedNegativeFooter =>
+      'Later generations will prefer negative memory scoped to this user, project, and script.';
+
+  @override
+  String get storyboardAutoNegativeSourceReview =>
+      'Auto-negative from latest review bad cases.';
+
+  @override
+  String get storyboardAutoNegativeSourceRejectedMemory =>
+      'Auto-negative from private bad-case memory.';
+
+  @override
+  String get storyboardAutoNegativeSourceBoth =>
+      'Auto-negative uses both review bad cases and private memory.';
+
+  @override
+  String get storyboardAutoNegativeSourcePendingObservation =>
+      'Auto-negative from latest reject observation fallback.';
+
+  @override
+  String get storyboardAutoNegativeSourcePendingNoteOnly =>
+      'No formal negative lines yet—pending observation note only.';
+
+  @override
+  String get storyboardAutoNegativeSourceNone =>
+      'No extra automatic negative sources.';
+
+  @override
+  String storyboardMemoryScopeProject(int count) {
+    return 'project $count';
+  }
+
+  @override
+  String storyboardMemoryScopeScript(int count) {
+    return 'script $count';
+  }
+
+  @override
+  String storyboardMemoryScopeRole(int count) {
+    return 'role $count';
+  }
+
+  @override
+  String get storyboardPromptGenDefaultFilledDuration =>
+      'Generated default video prompt and filled duration.';
+
+  @override
+  String storyboardPromptGenHitMemory(String scope) {
+    return 'Matched $scope memory.';
+  }
+
+  @override
+  String storyboardPromptGenNegativeTrimmed(int fragCount, int chars) {
+    return 'Trimmed $fragCount negative constraint(s) / $chars chars.';
+  }
+
+  @override
+  String storyboardPromptSourceMemorySlim(
+    int rows,
+    int low,
+    int dup,
+    int visual,
+  ) {
+    return 'Memory slim -$rows rows (low-signal $low / dup $dup / visual $visual)';
+  }
+
+  @override
+  String storyboardPromptSourceNegativeSlim(int fragCount, int chars) {
+    return 'Negative slim $fragCount / $chars chars';
+  }
+
+  @override
+  String storyboardPromptSourceReviewFrags(int count) {
+    return 'Review fragments $count';
+  }
+
+  @override
+  String storyboardPromptSourceMemoryFrags(int count) {
+    return 'Memory fragments $count';
+  }
+
+  @override
+  String storyboardPromptAnchorRole(int count) {
+    return 'Role anchors $count';
+  }
+
+  @override
+  String storyboardPromptAnchorScene(int count) {
+    return 'Scene anchors $count';
+  }
+
+  @override
+  String storyboardPromptAnchorTool(int count) {
+    return 'Prop anchors $count';
+  }
+
+  @override
+  String storyboardPromptAnchorStyle(int count) {
+    return 'Style anchors $count';
+  }
+
+  @override
+  String storyboardPromptAnchorPrivateMemory(int count) {
+    return 'Private memory $count';
+  }
+
+  @override
+  String storyboardPromptAnchorContinuity(int count) {
+    return 'Continuity notes $count';
+  }
+
+  @override
+  String get storyboardPromptAnchorReferenceFrame => 'Reference frame attached';
+
+  @override
+  String get storyboardPromptAnchorEmpty =>
+      'No extra anchors or memory matched yet.';
+
+  @override
+  String get storyboardActionRepairAppliedSummary =>
+      'Applied current pre-generation suggestions.';
+
+  @override
+  String get storyboardActionRepairNoChangeSummary =>
+      'Suggestions are already applied; nothing else to trim.';
+
+  @override
+  String storyboardActionRepairDetailTrimmed(
+    int promptRemoved,
+    int negRemoved,
+  ) {
+    return 'Removed $promptRemoved low-value prompt fragment(s) and $negRemoved duplicate negative fragment(s).';
+  }
+
+  @override
+  String get storyboardActionRepairDetailLean =>
+      'Prompt / negative prompt is already lean—continue generation.';
+
+  @override
+  String get storyboardActionOperationFailedSummary => 'Shot action failed.';
+
+  @override
+  String get storyboardActionOperationFailedDetail =>
+      'Finish the recommended step, then retry.';
+
+  @override
+  String get storyboardActionErrNeedSourceImageOrPreview =>
+      'Provide an image URL or a current preview before generating video.';
+
+  @override
+  String get storyboardActionErrTrackIdRequired =>
+      'Enter a valid track ID before generating video.';
+
+  @override
+  String get storyboardActionErrDurationPositiveInteger =>
+      'Duration must be a positive integer.';
+
+  @override
+  String get storyboardActionErrVideoPromptEmpty =>
+      'Video prompt cannot be empty.';
+
+  @override
+  String storyboardActionVideoJobsSubmittedTotalOnly(int total) {
+    return 'Submitted $total video job(s).';
+  }
+
+  @override
+  String storyboardActionVideoJobsSubmittedRepairOnly(
+    int total,
+    int pRm,
+    int nRm,
+  ) {
+    return 'Submitted $total video job(s); auto-trimmed $pRm low-value prompt fragment(s) and $nRm duplicate negative fragment(s) before submit.';
+  }
+
+  @override
+  String storyboardActionVideoJobsSubmittedDedupeOnly(int total, int deduped) {
+    return 'Submitted $total video job(s); deduped $deduped duplicate negative fragment(s).';
+  }
+
+  @override
+  String storyboardActionVideoJobsSubmittedRepairFinal(
+    int total,
+    int pRm,
+    int nRm,
+  ) {
+    return 'Submitted $total video job(s); trimmed $pRm prompt fragment(s) and $nRm negative fragment(s) before submit; final negative prompt filled back.';
+  }
+
+  @override
+  String storyboardActionVideoJobsSubmittedDedupeFinal(int total, int deduped) {
+    return 'Submitted $total video job(s); deduped $deduped negative fragment(s); final negative prompt filled back.';
+  }
+
+  @override
+  String storyboardActionVideoJobsSubmittedFinalOnly(int total) {
+    return 'Submitted $total video job(s); final negative prompt filled back.';
+  }
+
+  @override
+  String storyboardActionVoiceoverJobsSubmitted(int total) {
+    return 'Submitted $total voiceover job(s); refresh production data later for status.';
+  }
+
+  @override
+  String storyboardActionVoiceoverJobsSubmittedWithJob(
+    int total,
+    String jobId,
+  ) {
+    return 'Submitted $total voiceover job(s) (job=$jobId); refresh production data later for status.';
+  }
+
+  @override
+  String get storyboardActionVideoDescCleared =>
+      'Cleared subtitle/voiceover text—export falls back to shot prompt.';
+
+  @override
+  String get storyboardActionVideoDescSaved =>
+      'Saved subtitle/voiceover text—default video prompt and export captions prefer it.';
+
+  @override
+  String get storyboardActionErrNoExportableVideoUrl =>
+      'No exportable selected or candidate video URL for this shot.';
+
+  @override
+  String storyboardActionExportJobEnqueued(String jobId) {
+    return 'Video export job submitted (job=$jobId). URL will write back when complete—refresh production data later.';
+  }
+
+  @override
+  String get storyboardPatchDialogTitle => 'Partial rework';
+
+  @override
+  String get storyboardPatchScopeLabel => 'scope';
+
+  @override
+  String get storyboardPatchScopeHelper =>
+      'episode / scene / storyboard_item / video_prompt / derive_asset';
+
+  @override
+  String get storyboardPatchModelTierLabel => 'model tier';
+
+  @override
+  String get storyboardPatchModelTierHelper =>
+      'low for format fixes; high for content-quality fixes';
+
+  @override
+  String get storyboardPatchTargetIdsLabel => 'target ids';
+
+  @override
+  String get storyboardPatchTargetIdsHelper =>
+      'Comma-separated. Defaults to current storyboard numeric ID.';
+
+  @override
+  String get storyboardPatchReasonLabel => 'Reason';
+
+  @override
+  String get storyboardPatchReasonHelper =>
+      'Spell out character, emotion, shot, continuity, lines, or visible continuity breaks.';
+
+  @override
+  String get storyboardPatchScopeHint =>
+      'Prefer the smallest scope; for performance, lens, or prompt issues on this shot only, use storyboard_item / video_prompt before escalating to the whole episode.';
+
+  @override
+  String get storyboardPatchAttributionLabel => 'attribution mode:';
+
+  @override
+  String get storyboardPatchRepairPriorityHeading => 'Rework priority:';
+
+  @override
+  String get storyboardPatchSnackNeedTargetId =>
+      'Enter at least one valid target id.';
+
+  @override
+  String get storyboardPatchSnackNeedReason => 'Enter a rework reason.';
+
+  @override
+  String storyboardPatchSubmitLine(
+    String patchId,
+    String scope,
+    String ids,
+    String modelTier,
+    String status,
+    int failures,
+    int tokens,
+    String memorySuffix,
+  ) {
+    return 'Submitted patch #$patchId · scope=$scope · ids=$ids · model=$modelTier · status=$status · consecutive failures $failures · est. saved $tokens tokens$memorySuffix';
+  }
+
+  @override
+  String get storyboardPatchMemoryWrittenSuffix =>
+      ' · attribution memory saved';
+
+  @override
+  String get storyboardPatchAttributionUpstreamHint =>
+      'This request entered attribution mode—fix upstream causes first.';
+
+  @override
+  String get storyboardPatchFollowUpAttribution =>
+      'Partial rework submitted—attribution mode on. Follow P1/P2 order in the panel; don’t rerun the whole timeline.';
+
+  @override
+  String get storyboardPatchFollowUpQueued =>
+      'Partial rework submitted—queued at minimal scope.';
+
+  @override
+  String get storyboardPatchSubmitting => 'Submitting…';
+
+  @override
+  String get storyboardPatchSubmit => 'Submit rework';
+
+  @override
+  String get storyboardPatchDefaultReason =>
+      'Fix content quality, continuity, or emotional delivery for this shot.';
 
   @override
   String get shortVideoReadinessNoPayloadHeadline =>
@@ -10376,7 +10806,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Account export include notifications';
 
   @override
-  String get accountExportActiveCount => 'Account export active count';
+  String accountExportActiveCount(int count) {
+    return '进行中 $count';
+  }
 
   @override
   String get accountExportCopyLastSavedPath =>
@@ -10386,16 +10818,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountExportEmpty => 'Account export empty';
 
   @override
-  String get accountExportDefaultFileName => 'Account export default file name';
+  String accountExportDefaultFileName(int numericTaskId) {
+    return '账户导出 #$numericTaskId';
+  }
 
   @override
-  String get accountExportTaskLine => 'Account export task line';
+  String accountExportTaskLine(int numericTaskId) {
+    return '任务 #$numericTaskId';
+  }
 
   @override
-  String get accountExportSizeLine => 'Account export size line';
+  String accountExportSizeLine(String size) {
+    return '大小 $size';
+  }
 
   @override
-  String get accountExportSavedSnack => 'Account export saved snack';
+  String accountExportSavedSnack(String path) {
+    return '已保存到 $path';
+  }
 
   @override
   String get accountExportDownload => 'Account export download';
@@ -10416,7 +10856,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountDeleteIrreversibleAck => 'Account delete irreversible ack';
 
   @override
-  String get accountDeleteLastResponse => 'Account delete last response';
+  String accountDeleteLastResponse(int count) {
+    return '已删除 $count 个作业';
+  }
 
   @override
   String get accountDeleteButton => 'Account delete button';
@@ -10434,70 +10876,102 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountExportStatusFailed => 'Account export status failed';
 
   @override
-  String get adminConsoleMembershipItem => 'Admin console membership item';
+  String adminConsoleMembershipItem(String detail) {
+    return '成员 $detail';
+  }
 
   @override
-  String get adminConsoleRecentJobItem => 'Admin console recent job item';
+  String adminConsoleRecentJobItem(String detail) {
+    return '作业 $detail';
+  }
 
   @override
-  String get adminConsoleAuditListItem => 'Admin console audit list item';
+  String adminConsoleAuditListItem(String detail) {
+    return '审计 $detail';
+  }
 
   @override
-  String get adminConsoleDailyQuotaLabel => 'Admin console daily quota label';
+  String adminConsoleDailyQuotaLabel(String detail) {
+    return '每日配额 $detail';
+  }
 
   @override
-  String get adminConsoleChipMember => 'Admin console chip member';
+  String adminConsoleChipMember(int count) {
+    return '成员 $count';
+  }
 
   @override
   String get adminConsoleArchivedLabel => 'Admin console archived label';
 
   @override
-  String get adminConsoleMemberListItem => 'Admin console member list item';
+  String adminConsoleMemberListItem(String detail) {
+    return '成员 $detail';
+  }
 
   @override
-  String get adminConsoleRecentProjectItem =>
-      'Admin console recent project item';
+  String adminConsoleRecentProjectItem(String detail) {
+    return '项目 $detail';
+  }
 
   @override
-  String get adminConsoleChipScript => 'Admin console chip script';
+  String adminConsoleChipScript(int count) {
+    return '剧本 $count';
+  }
 
   @override
-  String get adminConsoleChipAsset => 'Admin console chip asset';
+  String adminConsoleChipAsset(int count) {
+    return '资产 $count';
+  }
 
   @override
-  String get adminConsoleChipJob => 'Admin console chip job';
+  String adminConsoleChipJob(int count) {
+    return '作业 $count';
+  }
 
   @override
-  String get adminConsoleAclMemberItem => 'Admin console acl member item';
+  String adminConsoleAclMemberItem(String detail) {
+    return '成员 $detail';
+  }
 
   @override
-  String get adminConsoleWorkspaceCandidateItem =>
-      'Admin console workspace candidate item';
+  String adminConsoleWorkspaceCandidateItem(String detail) {
+    return '候选 $detail';
+  }
 
   @override
-  String get adminConsoleProjectRecentJobItem =>
-      'Admin console project recent job item';
+  String adminConsoleProjectRecentJobItem(String detail) {
+    return '作业 $detail';
+  }
 
   @override
-  String get adminConsoleAuditUserSummary => 'Admin console audit user summary';
+  String adminConsoleAuditUserSummary(String detail) {
+    return '用户审计 $detail';
+  }
 
   @override
-  String get adminConsoleAuditWorkspaceMembership =>
-      'Admin console audit workspace membership';
+  String adminConsoleAuditWorkspaceMembership(String detail) {
+    return '工作区成员审计 $detail';
+  }
 
   @override
-  String get adminConsoleAuditOwnerTransfer =>
-      'Admin console audit owner transfer';
+  String adminConsoleAuditOwnerTransfer(String detail) {
+    return '所有权转移 $detail';
+  }
 
   @override
-  String get adminConsoleAuditArchiveNote => 'Admin console audit archive note';
+  String adminConsoleAuditArchiveNote(String detail) {
+    return '归档备注 $detail';
+  }
 
   @override
-  String get adminConsoleAuditProjectOwnerTransfer =>
-      'Admin console audit project owner transfer';
+  String adminConsoleAuditProjectOwnerTransfer(String detail) {
+    return '项目所有权转移 $detail';
+  }
 
   @override
-  String get adminConsoleFieldUserId => 'Admin console field user id';
+  String adminConsoleFieldUserId(String detail) {
+    return '用户 ID $detail';
+  }
 
   @override
   String get adminConsoleFieldCreatedAt => 'Admin console field created at';
@@ -10617,8 +11091,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Agent workspace production current candidate args';
 
   @override
-  String get agentWorkspaceProductionCandidateIds =>
-      'Agent workspace production candidate ids';
+  String agentWorkspaceProductionCandidateIds(int count) {
+    return '候选 $count 项';
+  }
 
   @override
   String get agentWorkspaceProductionPromptPreviewTitle =>
@@ -10629,8 +11104,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Agent workspace production stages title';
 
   @override
-  String get agentWorkspaceProductionFlowChip =>
-      'Agent workspace production flow chip';
+  String agentWorkspaceProductionFlowChip(String flowKey) {
+    return 'flow=$flowKey';
+  }
 
   @override
   String get agentWorkspaceProductionApplyStage =>
@@ -10641,12 +11117,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'Agent workspace production diagnosis title';
 
   @override
-  String get agentWorkspaceProductionToolChip =>
-      'Agent workspace production tool chip';
+  String agentWorkspaceProductionToolChip(String tool) {
+    return 'tool=$tool';
+  }
 
   @override
-  String get agentWorkspaceProductionAgentChip =>
-      'Agent workspace production agent chip';
+  String agentWorkspaceProductionAgentChip(String agent) {
+    return 'agent=$agent';
+  }
 
   @override
   String get agentWorkspaceProductionApplySuggestion =>
@@ -10681,20 +11159,24 @@ class AppLocalizationsEn extends AppLocalizations {
       'Agent workspace production prompt flow down';
 
   @override
-  String get agentWorkspaceProductionPromptRewriteFocus =>
-      'Agent workspace production prompt rewrite focus';
+  String agentWorkspaceProductionPromptRewriteFocus(String focus) {
+    return '改写焦点：$focus';
+  }
 
   @override
-  String get agentWorkspaceProductionPromptVisualPacing =>
-      'Agent workspace production prompt visual pacing';
+  String agentWorkspaceProductionPromptVisualPacing(String pacing) {
+    return '视觉节奏：$pacing';
+  }
 
   @override
-  String get agentWorkspaceProductionPromptExtraConstraint =>
-      'Agent workspace production prompt extra constraint';
+  String agentWorkspaceProductionPromptExtraConstraint(String constraint) {
+    return '额外约束：$constraint';
+  }
 
   @override
-  String get agentWorkspaceProductionPromptAssetFocus =>
-      'Agent workspace production prompt asset focus';
+  String agentWorkspaceProductionPromptAssetFocus(String scope) {
+    return '资产焦点：$scope';
+  }
 
   @override
   String get agentWorkspaceProductionPromptExecutionOrder =>
@@ -10705,60 +11187,74 @@ class AppLocalizationsEn extends AppLocalizations {
       'Agent workspace production storyboard priority missing';
 
   @override
-  String get agentWorkspaceProductionCollapsedRows =>
-      'Agent workspace production collapsed rows';
+  String agentWorkspaceProductionCollapsedRows(int count) {
+    return '已折叠 $count 行';
+  }
 
   @override
-  String get agentWorkspaceProductionReviewTarget =>
-      'Agent workspace production review target';
+  String agentWorkspaceProductionReviewTarget(String target) {
+    return '目标：$target';
+  }
 
   @override
-  String get agentWorkspaceProductionReviewGrade =>
-      'Agent workspace production review grade';
+  String agentWorkspaceProductionReviewGrade(String grade) {
+    return '等级：$grade';
+  }
 
   @override
-  String get agentWorkspaceProductionReviewIssues =>
-      'Agent workspace production review issues';
+  String agentWorkspaceProductionReviewIssues(String issues) {
+    return '问题：$issues';
+  }
 
   @override
-  String get agentWorkspaceProductionReviewNextStep =>
-      'Agent workspace production review next step';
+  String agentWorkspaceProductionReviewNextStep(String nextAction) {
+    return '下一步：$nextAction';
+  }
 
   @override
-  String get agentWorkspaceProductionReviewAssetIds =>
-      'Agent workspace production review asset ids';
+  String agentWorkspaceProductionReviewAssetIds(String assetIds) {
+    return '资产：$assetIds';
+  }
 
   @override
-  String get agentWorkspaceProductionReviewAssetScope =>
-      'Agent workspace production review asset scope';
+  String agentWorkspaceProductionReviewAssetScope(String scope) {
+    return '资产范围：$scope';
+  }
 
   @override
-  String get agentWorkspaceProductionReviewStoryboardIds =>
-      'Agent workspace production review storyboard ids';
+  String agentWorkspaceProductionReviewStoryboardIds(String ids) {
+    return '镜头：$ids';
+  }
 
   @override
-  String get agentWorkspaceProductionReviewSummary =>
-      'Agent workspace production review summary';
+  String agentWorkspaceProductionReviewSummary(String summary) {
+    return '结论：$summary';
+  }
 
   @override
-  String get agentWorkspaceProductionShotLabel =>
-      'Agent workspace production shot label';
+  String agentWorkspaceProductionShotLabel(int id) {
+    return '镜头 $id';
+  }
 
   @override
-  String get agentWorkspaceProductionSceneLabel =>
-      'Agent workspace production scene label';
+  String agentWorkspaceProductionSceneLabel(String scene) {
+    return '场景 $scene';
+  }
 
   @override
-  String get agentWorkspaceProductionDurationLabel =>
-      'Agent workspace production duration label';
+  String agentWorkspaceProductionDurationLabel(String duration) {
+    return '时长 $duration';
+  }
 
   @override
-  String get agentWorkspaceProductionAssetsLabel =>
-      'Agent workspace production assets label';
+  String agentWorkspaceProductionAssetsLabel(String assets) {
+    return '资产 $assets';
+  }
 
   @override
-  String get agentWorkspaceProductionStateLabel =>
-      'Agent workspace production state label';
+  String agentWorkspaceProductionStateLabel(String state) {
+    return '状态 $state';
+  }
 
   @override
   String get agentWorkspaceProductionModeTextOnly =>
@@ -10769,12 +11265,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'Agent workspace production result has image';
 
   @override
-  String get agentWorkspaceProductionResultMissingImage =>
-      'Agent workspace production result missing image';
+  String agentWorkspaceProductionResultMissingImage(String assets) {
+    return '缺少图片 $assets';
+  }
 
   @override
-  String get agentWorkspaceProductionContextFromTool =>
-      'Agent workspace production context from tool';
+  String agentWorkspaceProductionContextFromTool(String toolName) {
+    return '来自工具 $toolName';
+  }
 
   @override
   String get agentWorkspaceProductionContextDerivedRewrite =>
@@ -10801,40 +11299,48 @@ class AppLocalizationsEn extends AppLocalizations {
       'Agent workspace production context snapshot title';
 
   @override
-  String get agentWorkspaceSummaryReturnedList =>
-      'Agent workspace summary returned list';
+  String agentWorkspaceSummaryReturnedList(int count) {
+    return '返回列表 $count 项';
+  }
 
   @override
-  String get agentWorkspaceSummaryReturnedText =>
-      'Agent workspace summary returned text';
+  String agentWorkspaceSummaryReturnedText(int chars) {
+    return '返回文本 $chars 字';
+  }
 
   @override
-  String get agentWorkspaceProductionSummaryItems =>
-      'Agent workspace production summary items';
+  String agentWorkspaceProductionSummaryItems(int count) {
+    return '返回 items $count 项';
+  }
 
   @override
-  String get agentWorkspaceProductionSummaryReviewHeadline =>
-      'Agent workspace production summary review headline';
+  String agentWorkspaceProductionSummaryReviewHeadline(int count) {
+    return '聚焦资产 $count 项';
+  }
 
   @override
-  String get agentWorkspaceProductionSummaryIssueBreakdown =>
-      'Agent workspace production summary issue breakdown';
+  String agentWorkspaceProductionSummaryIssueBreakdown(int count) {
+    return '问题分布 $count 项';
+  }
 
   @override
   String get agentWorkspaceProductionSummaryFocusedAssets =>
       'Agent workspace production summary focused assets';
 
   @override
-  String get agentWorkspaceProductionSummaryFocusedAssetScope =>
-      'Agent workspace production summary focused asset scope';
+  String agentWorkspaceProductionSummaryFocusedAssetScope(String scope) {
+    return '聚焦资产范围 $scope';
+  }
 
   @override
-  String get agentWorkspaceProductionSummaryFocusedShots =>
-      'Agent workspace production summary focused shots';
+  String agentWorkspaceProductionSummaryFocusedShots(int count) {
+    return '聚焦镜头 $count 项';
+  }
 
   @override
-  String get agentWorkspaceSummaryReturnedObjectKeys =>
-      'Agent workspace summary returned object keys';
+  String agentWorkspaceSummaryReturnedObjectKeys(String keys) {
+    return '返回对象 keys=$keys';
+  }
 
   @override
   String get agentWorkspaceProductionSummaryFlowEmpty =>
@@ -10845,72 +11351,87 @@ class AppLocalizationsEn extends AppLocalizations {
       'Agent workspace production summary flow empty string';
 
   @override
-  String get agentWorkspaceProductionSummaryTextChars =>
-      'Agent workspace production summary text chars';
+  String agentWorkspaceProductionSummaryTextChars(int chars) {
+    return '文本 $chars 字';
+  }
 
   @override
-  String get agentWorkspaceProductionSummaryLineCount =>
-      'Agent workspace production summary line count';
+  String agentWorkspaceProductionSummaryLineCount(int count) {
+    return '行数 $count';
+  }
 
   @override
-  String get agentWorkspaceProductionSummaryPlanSections =>
-      'Agent workspace production summary plan sections';
+  String agentWorkspaceProductionSummaryPlanSections(int count) {
+    return '计划章节 $count';
+  }
 
   @override
   String get agentWorkspaceProductionSummaryRewriteInherited =>
       'Agent workspace production summary rewrite inherited';
 
   @override
-  String get agentWorkspaceProductionSummaryStoryboardRows =>
-      'Agent workspace production summary storyboard rows';
+  String agentWorkspaceProductionSummaryStoryboardRows(int count) {
+    return '分镜 $count 条';
+  }
 
   @override
-  String get agentWorkspaceProductionSummaryLinkedAssets =>
-      'Agent workspace production summary linked assets';
+  String agentWorkspaceProductionSummaryLinkedAssets(int count) {
+    return '关联资产 $count';
+  }
 
   @override
-  String get agentWorkspaceProductionSummaryListCount =>
-      'Agent workspace production summary list count';
+  String agentWorkspaceProductionSummaryListCount(int count) {
+    return '列表 $count 项';
+  }
 
   @override
-  String get agentWorkspaceProductionSummaryPrompts =>
-      'Agent workspace production summary prompts';
+  String agentWorkspaceProductionSummaryPrompts(int count) {
+    return '提示词 $count';
+  }
 
   @override
-  String get agentWorkspaceProductionSummaryMediaUrls =>
-      'Agent workspace production summary media urls';
+  String agentWorkspaceProductionSummaryMediaUrls(int count) {
+    return '媒体 URL $count';
+  }
 
   @override
-  String get agentWorkspaceProductionSummaryNeedImages =>
-      'Agent workspace production summary need images';
+  String agentWorkspaceProductionSummaryNeedImages(int count) {
+    return '需要图片 $count';
+  }
 
   @override
   String get agentWorkspaceProductionSummaryMissingFrames =>
       'Agent workspace production summary missing frames';
 
   @override
-  String get agentWorkspaceProductionSummaryTextOnlyCount =>
-      'Agent workspace production summary text only count';
+  String agentWorkspaceProductionSummaryTextOnlyCount(int count) {
+    return '纯文本 $count';
+  }
 
   @override
-  String get agentWorkspaceProductionSummaryStateTypes =>
-      'Agent workspace production summary state types';
+  String agentWorkspaceProductionSummaryStateTypes(String states) {
+    return '状态类型 $states';
+  }
 
   @override
-  String get agentWorkspaceProductionSummaryObjectKeyCount =>
-      'Agent workspace production summary object key count';
+  String agentWorkspaceProductionSummaryObjectKeyCount(int count) {
+    return '对象 keys=$count 个';
+  }
 
   @override
-  String get agentWorkspaceProductionSummaryObjectListEntry =>
-      'Agent workspace production summary object list entry';
+  String agentWorkspaceProductionSummaryObjectListEntry(int count) {
+    return '列表 $count 项';
+  }
 
   @override
-  String get agentWorkspaceProductionSummaryObjectTextEntry =>
-      'Agent workspace production summary object text entry';
+  String agentWorkspaceProductionSummaryObjectTextEntry(int chars) {
+    return '文本 $chars 字';
+  }
 
   @override
-  String get agentWorkspaceProductionSummaryReturnedType =>
-      'Agent workspace production summary returned type';
+  String agentWorkspaceProductionSummaryReturnedType(String type) {
+    return '返回 $type';
+  }
 
   @override
   String get agentWorkspaceProductionIdleHint =>
@@ -11013,23 +11534,28 @@ class AppLocalizationsEn extends AppLocalizations {
       'Agent workspace script diagnosis title';
 
   @override
-  String get agentWorkspaceScriptToolChip => 'Agent workspace script tool chip';
+  String agentWorkspaceScriptToolChip(String tool) {
+    return 'tool=$tool';
+  }
 
   @override
-  String get agentWorkspaceScriptAgentChip =>
-      'Agent workspace script agent chip';
+  String agentWorkspaceScriptAgentChip(String agent) {
+    return 'agent=$agent';
+  }
 
   @override
   String get agentWorkspaceScriptApplySuggestion =>
       'Agent workspace script apply suggestion';
 
   @override
-  String get agentWorkspaceScriptContextSkeletonFocus =>
-      'Agent workspace script context skeleton focus';
+  String agentWorkspaceScriptContextSkeletonFocus(String focus) {
+    return '骨架焦点：$focus';
+  }
 
   @override
-  String get agentWorkspaceScriptContextAdaptationFocus =>
-      'Agent workspace script context adaptation focus';
+  String agentWorkspaceScriptContextAdaptationFocus(String focus) {
+    return '改编焦点：$focus';
+  }
 
   @override
   String get agentWorkspaceScriptContextExecutionOrder =>
@@ -11088,8 +11614,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Agent workspace script context untitled chapter';
 
   @override
-  String get agentWorkspaceScriptContextChapterPrefix =>
-      'Agent workspace script context chapter prefix';
+  String agentWorkspaceScriptContextChapterPrefix(String chapter) {
+    return '第 $chapter 章';
+  }
 
   @override
   String get agentWorkspaceScriptContextNovelChapters =>
@@ -11128,8 +11655,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Agent workspace script summary review returned';
 
   @override
-  String get agentWorkspaceScriptSummaryReviewLine =>
-      'Agent workspace script summary review line';
+  String agentWorkspaceScriptSummaryReviewLine(String detail) {
+    return '审核 $detail';
+  }
 
   @override
   String get agentWorkspaceScriptSummaryPlanDataMissing =>
@@ -11144,8 +11672,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Agent workspace script summary adaptation ready';
 
   @override
-  String get agentWorkspaceScriptSummaryPlanScripts =>
-      'Agent workspace script summary plan scripts';
+  String agentWorkspaceScriptSummaryPlanScripts(int count) {
+    return '计划剧本 $count 条';
+  }
 
   @override
   String get agentWorkspaceScriptSummaryRewriteReady =>
@@ -11156,28 +11685,34 @@ class AppLocalizationsEn extends AppLocalizations {
       'Agent workspace script summary plan data returned';
 
   @override
-  String get agentWorkspaceScriptSummaryScriptEmpty =>
-      'Agent workspace script summary script empty';
+  String agentWorkspaceScriptSummaryScriptEmpty(int chars) {
+    return '剧本正文 $chars 字';
+  }
 
   @override
-  String get agentWorkspaceScriptSummaryScriptChars =>
-      'Agent workspace script summary script chars';
+  String agentWorkspaceScriptSummaryScriptChars(int chars) {
+    return '剧本正文 $chars 字';
+  }
 
   @override
-  String get agentWorkspaceScriptSummaryNovelTextEmpty =>
-      'Agent workspace script summary novel text empty';
+  String agentWorkspaceScriptSummaryNovelTextEmpty(int count) {
+    return '章节材料 $count 条';
+  }
 
   @override
-  String get agentWorkspaceScriptSummaryNovelTextCount =>
-      'Agent workspace script summary novel text count';
+  String agentWorkspaceScriptSummaryNovelTextCount(int count) {
+    return '章节材料 $count 条';
+  }
 
   @override
-  String get agentWorkspaceScriptSummaryNovelEventsEmpty =>
-      'Agent workspace script summary novel events empty';
+  String agentWorkspaceScriptSummaryNovelEventsEmpty(int count) {
+    return '小说事件 $count 条';
+  }
 
   @override
-  String get agentWorkspaceScriptSummaryNovelEventsCount =>
-      'Agent workspace script summary novel events count';
+  String agentWorkspaceScriptSummaryNovelEventsCount(int count) {
+    return '小说事件 $count 条';
+  }
 
   @override
   String get agentWorkspaceScopeProjectIdLabel =>
@@ -11212,7 +11747,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get agentWorkspaceActivityTitle => 'Agent workspace activity title';
 
   @override
-  String get agentWorkspaceActivityLatest => 'Agent workspace activity latest';
+  String agentWorkspaceActivityLatest(String eventType) {
+    return '最新：$eventType';
+  }
 
   @override
   String get agentWorkspaceActivityLatestToolResult =>
@@ -11239,11 +11776,17 @@ class AppLocalizationsEn extends AppLocalizations {
       'Agent workspace script writeback source assistant';
 
   @override
-  String get agentWorkspaceScriptPlanHint => 'Agent workspace script plan hint';
+  String agentWorkspaceScriptPlanHint(String pid) {
+    return '计划 $pid';
+  }
 
   @override
-  String get agentWorkspaceScriptPlanWritebackReady =>
-      'Agent workspace script plan writeback ready';
+  String agentWorkspaceScriptPlanWritebackReady(
+    String planHint,
+    int scriptCount,
+  ) {
+    return '计划回写就绪：$planHint，$scriptCount 条剧本';
+  }
 
   @override
   String get agentWorkspaceScriptRunningWorkflow =>
@@ -11360,16 +11903,19 @@ class AppLocalizationsEn extends AppLocalizations {
       'Content compliance status dismissed';
 
   @override
-  String get contentComplianceSlaOpenOver24h =>
-      'Content compliance sla open over24h';
+  String contentComplianceSlaOpenOver24h(int count) {
+    return 'open>24h $count';
+  }
 
   @override
-  String get contentComplianceSlaOpenOver72h =>
-      'Content compliance sla open over72h';
+  String contentComplianceSlaOpenOver72h(int count) {
+    return 'open>72h $count';
+  }
 
   @override
-  String get contentComplianceSlaClaimedOver24h =>
-      'Content compliance sla claimed over24h';
+  String contentComplianceSlaClaimedOver24h(int count) {
+    return 'claimed>24h $count';
+  }
 
   @override
   String get contentComplianceFieldTargetType =>
@@ -11391,15 +11937,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get contentComplianceFieldStatus => 'Content compliance field status';
 
   @override
-  String get contentComplianceSlaChip => 'Content compliance sla chip';
+  String contentComplianceSlaChip(String bucket) {
+    return 'SLA: $bucket';
+  }
 
   @override
-  String get contentComplianceMetricPending =>
-      'Content compliance metric pending';
+  String contentComplianceMetricPending(int count) {
+    return '待处理 $count';
+  }
 
   @override
-  String get contentComplianceMetricClaimed =>
-      'Content compliance metric claimed';
+  String contentComplianceMetricClaimed(int count) {
+    return '已认领 $count';
+  }
 
   @override
   String get contentComplianceMetricResolved =>
@@ -11414,35 +11964,49 @@ class AppLocalizationsEn extends AppLocalizations {
       'Content compliance metric critical';
 
   @override
-  String get contentComplianceMetricHigh => 'Content compliance metric high';
+  String contentComplianceMetricHigh(int count) {
+    return '高优先级 $count';
+  }
 
   @override
-  String get contentComplianceOldestHours => 'Content compliance oldest hours';
+  String contentComplianceOldestHours(int hours) {
+    return '最旧 ${hours}h';
+  }
 
   @override
-  String get contentComplianceCapacityPerReviewer =>
-      'Content compliance capacity per reviewer';
+  String contentComplianceCapacityPerReviewer(int capacity) {
+    return '容量 $capacity/reviewer';
+  }
 
   @override
-  String get contentComplianceOwnerCounts => 'Content compliance owner counts';
+  String contentComplianceOwnerCounts(int pending, int claimed) {
+    return '待处理 $pending · 已认领 $claimed';
+  }
 
   @override
-  String get contentComplianceOwnerDetail => 'Content compliance owner detail';
+  String contentComplianceOwnerDetail(String detail) {
+    return '详情 $detail';
+  }
 
   @override
-  String get contentComplianceWorkspaceCounts =>
-      'Content compliance workspace counts';
+  String contentComplianceWorkspaceCounts(int open, int pending, int claimed) {
+    return 'open $open · pending $pending · claimed $claimed';
+  }
 
   @override
-  String get contentComplianceWorkspaceDetail =>
-      'Content compliance workspace detail';
+  String contentComplianceWorkspaceDetail(int critical, int high) {
+    return 'critical $critical · high $high';
+  }
 
   @override
-  String get contentComplianceReportInfo => 'Content compliance report info';
+  String contentComplianceReportInfo(String reporter) {
+    return 'reporter $reporter';
+  }
 
   @override
-  String get contentComplianceResolutionLine =>
-      'Content compliance resolution line';
+  String contentComplianceResolutionLine(String note) {
+    return 'resolution: $note';
+  }
 
   @override
   String get contentComplianceActionClaim => 'Content compliance action claim';
@@ -11491,10 +12055,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get jobsUpdatedAt => 'Jobs updated at';
 
   @override
-  String get jobsClaimedBy => 'Jobs claimed by';
+  String jobsClaimedBy(String claimedBy) {
+    return '认领者：$claimedBy';
+  }
 
   @override
-  String get jobsFailedReason => 'Jobs failed reason';
+  String jobsFailedReason(String reason) {
+    return '失败原因：$reason';
+  }
 
   @override
   String get jobsTitle => 'Jobs title';
@@ -11545,19 +12113,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get jobsFetchDetail => 'Jobs fetch detail';
 
   @override
-  String get jobsDetailLabel => 'Jobs detail label';
+  String jobsDetailLabel(String detail) {
+    return '作业详情：$detail';
+  }
 
   @override
-  String get jobsKindsLabel => 'Jobs kinds label';
+  String jobsKindsLabel(String kinds) {
+    return '作业类型：$kinds';
+  }
 
   @override
-  String get jobsKindSummaryLabel => 'Jobs kind summary label';
+  String jobsKindSummaryLabel(String summary) {
+    return '类型汇总：$summary';
+  }
 
   @override
-  String get jobsStatusSummaryLabel => 'Jobs status summary label';
+  String jobsStatusSummaryLabel(String summary) {
+    return '状态汇总：$summary';
+  }
 
   @override
-  String get jobsCountLabel => 'Jobs count label';
+  String jobsCountLabel(int count) {
+    return '$count 条作业';
+  }
 
   @override
   String get jobsRetry => 'Jobs retry';
@@ -11629,22 +12207,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notificationsUnknownTemplate => 'Notifications unknown template';
 
   @override
-  String get platformStatusChipLabel => 'Platform status chip label';
+  String platformStatusChipLabel(String title, String value) {
+    return '$title: $value';
+  }
 
   @override
-  String get opsWhActivityEntryTitle => 'Ops wh activity entry title';
+  String opsWhActivityEntryTitle(String action, String webhookId) {
+    return '$action · $webhookId';
+  }
 
   @override
-  String get opsWhFieldId => 'Ops wh field id';
+  String opsWhFieldId(String id) {
+    return 'ID: $id';
+  }
 
   @override
-  String get opsWhFieldCreatedAt => 'Ops wh field created at';
+  String opsWhFieldCreatedAt(String createdAt) {
+    return '创建时间: $createdAt';
+  }
 
   @override
-  String get opsWhFieldUpdatedAt => 'Ops wh field updated at';
+  String opsWhFieldUpdatedAt(String updatedAt) {
+    return '更新时间: $updatedAt';
+  }
 
   @override
-  String get opsWhApiEventTypes => 'Ops wh api event types';
+  String opsWhApiEventTypes(String eventTypes) {
+    return 'API: $eventTypes';
+  }
 
   @override
   String get billingAuditEventTypeLabel => 'Billing audit event type label';
@@ -11677,4 +12267,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get billingAuditCreatedToLabel => 'Billing audit created to label';
+
+  @override
+  String notificationsFilterCount(int count) {
+    return '筛选 $count';
+  }
+
+  @override
+  String notificationsUnreadCount(int count) {
+    return '未读 $count';
+  }
 }
