@@ -242,23 +242,30 @@ const List<String> _storyboardGenericTrimKeywords = <String>[
 ];
 
 String buildStoryboardVideoPromptDiagnosticsLine(
+  AppLocalizations l10n,
   GenerateVideoPromptDiagnostics diagnostics,
 ) {
   final parts = <String>[
-    'Prompt ${diagnostics.promptChars} chars',
+    l10n.storyboardDiagPromptChars(diagnostics.promptChars),
     if (diagnostics.negativePromptChars > 0)
-      'Negative ${diagnostics.negativePromptChars} (${diagnostics.negativeBudgetTier})',
+      l10n.storyboardDiagNegativeLine(
+        diagnostics.negativePromptChars,
+        diagnostics.negativeBudgetTier,
+      ),
     if (diagnostics.observationNoteChars > 0)
-      'Observation ${diagnostics.observationNoteChars}',
+      l10n.storyboardDiagObservation(diagnostics.observationNoteChars),
     if (diagnostics.memoryStyleChars > 0)
-      'Memory ${diagnostics.memoryStyleChars}',
+      l10n.storyboardDiagMemoryStyle(diagnostics.memoryStyleChars),
     if (diagnostics.negativeSavedChars > 0)
-      'Negative slim -${diagnostics.negativeSavedChars}',
+      l10n.storyboardDiagNegativeSlimSaved(diagnostics.negativeSavedChars),
     if (diagnostics.memoryOptimizationApplied &&
         diagnostics.memoryOptimizationRemovedChars > 0)
-      'Memory slim -${diagnostics.memoryOptimizationRemovedChars}',
-    if (diagnostics.memoryDeliveryPriorityApplied) 'Delivery-priority ✅',
-    'Memory tier ${diagnostics.memoryBudgetTier}',
+      l10n.storyboardDiagMemorySlimRemoved(
+        diagnostics.memoryOptimizationRemovedChars,
+      ),
+    if (diagnostics.memoryDeliveryPriorityApplied)
+      l10n.storyboardDiagDeliveryPriority,
+    l10n.storyboardDiagMemoryTier(diagnostics.memoryBudgetTier),
   ];
   return parts.join(' · ');
 }
@@ -433,33 +440,34 @@ String buildStoryboardVideoPromptAnchorSummary(
 }
 
 String buildStoryboardVideoPromptBudgetHint(
+  AppLocalizations l10n,
   GenerateVideoPromptDiagnostics diagnostics,
 ) {
   if (!diagnostics.usesReferenceFrame) {
-    return '当前提示词未绑定当前画面，先补参考帧再继续压缩，更稳。';
+    return l10n.storyboardBudgetHintNoReferenceFrame;
   }
   if (diagnostics.memoryOptimizationApplied &&
       diagnostics.memoryOptimizationRemovedRows > 0 &&
       diagnostics.memoryDeliveryChars > 0) {
-    return '本次生成前已自动清掉重复/纯视觉私有记忆，优先保住了表演和语气锚点；继续补词时先别把这些省下来的预算又填回泛风格句。';
+    return l10n.storyboardBudgetHintOptimizationKeptDelivery;
   }
   if (_hasScopedMemoryRows(diagnostics) &&
       diagnostics.memoryProjectScopeRowCount > 0 &&
       diagnostics.memoryScriptScopeRowCount == 0 &&
       diagnostics.memoryRoleScopeRowCount == 0 &&
       diagnostics.memoryStyleChars >= 48) {
-    return '这次主要命中项目级记忆，先把通用风格句收短一点，预算优先留给人物表演和当前镜头连续性。';
+    return l10n.storyboardBudgetHintProjectMemoryHeavy;
   }
   if (diagnostics.memoryRoleScopeRowCount > 0 &&
       diagnostics.memoryDeliveryChars > 0 &&
       diagnostics.memoryProjectScopeRowCount >
           diagnostics.memoryRoleScopeRowCount) {
-    return '角色级记忆已经命中，继续压缩时先动项目级泛化描述，别把角色表演和情绪锚点一起删掉。';
+    return l10n.storyboardBudgetHintRoleVsProject;
   }
   if (diagnostics.memoryDeliveryPriorityApplied &&
       diagnostics.memoryDeliveryChars > 0 &&
       diagnostics.memoryBudgetTier == 'expanded') {
-    return '已命中表演/语气优先记忆，先别删这段；优先压缩重复的场景/风格与连续性泛句，避免又回到“读稿腔”。';
+    return l10n.storyboardBudgetHintDeliveryExpanded;
   }
   final topSuppressedBucket = _topStoryboardBucket(
     diagnostics.memorySuppressedBucketCounts,
@@ -467,49 +475,49 @@ String buildStoryboardVideoPromptBudgetHint(
   if (topSuppressedBucket != null &&
       diagnostics.promptChars >= 380 &&
       diagnostics.memoryStyleChars >= 48) {
-    return '当前私有记忆里已压掉较多$topSuppressedBucket类重复片段，继续先收这类泛句，别先删角色表演记忆。';
+    return l10n.storyboardBudgetHintSuppressedBucket(topSuppressedBucket);
   }
   final anchorCount =
       diagnostics.roleAnchorCount +
       diagnostics.sceneAnchorCount +
       diagnostics.toolAnchorCount;
   if (diagnostics.promptChars >= 520) {
-    return '当前提示词偏长，优先删重复场景/风格描述，先别动角色和关键道具锚点。';
+    return l10n.storyboardBudgetHintPromptLong;
   }
   if (diagnostics.promptChars >= 380 && diagnostics.memoryStyleChars >= 48) {
-    return '当前提示词里的私有记忆占比已经不低，优先合并泛化风格句，别先删角色表演记忆。';
+    return l10n.storyboardBudgetHintPrivateMemoryHeavy;
   }
   if (diagnostics.memoryBudgetTier == 'expanded' &&
       diagnostics.memoryStyleChars <= 40 &&
       diagnostics.continuityNoteChars <= 40) {
-    return '当前镜头被判定为高风险，先保留角色表演和连续性记忆，再压其他泛化描述。';
+    return l10n.storyboardBudgetHintRiskyShotExpanded;
   }
   if (diagnostics.promptChars >= 380 &&
       diagnostics.styleAnchorCount + diagnostics.continuityNoteCount >= 3) {
-    return '当前提示词已接近长 prompt，继续补充前先检查风格锚点和连续性记忆是否重复。';
+    return l10n.storyboardBudgetHintNearLongPrompt;
   }
   if (diagnostics.continuityNoteChars >= 48) {
-    return '连续性记忆已经偏长，先把重复的衔接描述压成更短的动作或表演锚点。';
+    return l10n.storyboardBudgetHintContinuityLong;
   }
   if (diagnostics.negativeBudgetTier == 'expanded' &&
       diagnostics.negativeConstraintCount >= 3) {
-    return '当前镜头的防穿帮约束已切到 expanded，先保留人物一致性和镜头连续性，再压泛化负面词。';
+    return l10n.storyboardBudgetHintNegativeExpanded;
   }
   if (diagnostics.negativeBudgetTier == 'lean' &&
       diagnostics.negativePromptChars >= 56) {
-    return '当前负向约束已经偏长，优先合并重复的情绪/光影警告，别先删身份一致性约束。';
+    return l10n.storyboardBudgetHintNegativeLeanLong;
   }
   if (diagnostics.autoNegativeSource == 'review+rejected_memory' &&
       diagnostics.autoNegativeMemoryFragmentCount >= 2) {
-    return '当前负向词已经自动带入评审和私有坏例，手动补词前先检查是否只是重复表达。';
+    return l10n.storyboardBudgetHintAutoNegativeDup;
   }
   if (diagnostics.autoNegativeSource == 'pending_rejected_observation') {
-    return '这次已经自动继承最近失败观察，先看重试结果，别急着再补一串同义负面词。';
+    return l10n.storyboardBudgetHintPendingObservation;
   }
   if (anchorCount == 0 && diagnostics.styleAnchorCount == 0) {
-    return '当前提示词主要依赖分镜文案，缺少角色/场景锚点，画面更容易漂。';
+    return l10n.storyboardBudgetHintNoAnchors;
   }
-  return '当前提示词预算仍可控，可继续优先保留人物表演、关键道具和情绪信息。';
+  return l10n.storyboardBudgetHintHealthy;
 }
 
 String? _topStoryboardBucket(Map<String, int> counts) {
@@ -520,6 +528,7 @@ String? _topStoryboardBucket(Map<String, int> counts) {
 }
 
 List<String> buildStoryboardVideoPromptRepairSuggestions(
+  AppLocalizations l10n,
   GenerateVideoPromptDiagnostics diagnostics,
 ) {
   final suggestions = <String>[];
@@ -538,49 +547,49 @@ List<String> buildStoryboardVideoPromptRepairSuggestions(
   };
 
   if (!diagnostics.usesReferenceFrame) {
-    addTagged('reference_frame', '先补当前参考帧，再压词；人物脸、服化道和站位会更稳。');
+    addTagged('reference_frame', l10n.storyboardRepairSuggestReferenceFrame);
   }
   if (diagnostics.continuityNoteCount > 0 &&
       diagnostics.continuityNoteChars >= 48) {
-    addTagged('continuity', '连续性约束改成 1-2 条硬规则，只留机位、服化道和角色位置。');
+    addTagged('continuity', l10n.storyboardRepairSuggestContinuity);
   }
   if (diagnostics.memoryDeliveryPriorityApplied ||
       hitBuckets.contains('表演') ||
       hitBuckets.contains('语气') ||
       diagnostics.memoryDeliveryChars >= 24) {
-    addTagged('delivery', '保留表演/语气记忆，把情绪写成可演动作，别退回成读稿腔。');
+    addTagged('delivery', l10n.storyboardRepairSuggestDelivery);
   }
   if (diagnostics.promptChars >= 520 ||
       diagnostics.memoryStyleChars >= 96 ||
       topSuppressedBucket == '动作' ||
       topSuppressedBucket == '光影') {
-    addTagged('trim_generic', '优先删动作/光影泛句，把预算让给口型、微表情和人物一致性。');
+    addTagged('trim_generic', l10n.storyboardRepairSuggestTrimGeneric);
   }
   if (diagnostics.negativePromptChars > 0 &&
       diagnostics.autoNegativeSource != null) {
-    addTagged('negative_reuse', '沿用自动坏例负向约束，手动补词前先去重，避免同义词重复烧 token。');
+    addTagged('negative_reuse', l10n.storyboardRepairSuggestNegativeReuse);
   }
   if (diagnostics.autoNegativeSource == 'review+rejected_memory' &&
       diagnostics.autoNegativeMemoryFragmentCount >= 2) {
-    addTagged('memory_reuse', '这次已经命中项目/剧本私有坏例记忆，先复用它，别再堆一层共享长记忆。');
+    addTagged('memory_reuse', l10n.storyboardRepairSuggestMemoryReuse);
   }
   if (diagnostics.memoryProjectScopeRowCount > 0 &&
       diagnostics.memoryScriptScopeRowCount == 0 &&
       diagnostics.memoryRoleScopeRowCount == 0 &&
       diagnostics.memoryStyleChars >= 48) {
-    addTagged('project_memory_trim', '这轮主要靠项目级通用记忆在撑，继续压词时优先缩短泛风格句。');
+    addTagged('project_memory_trim', l10n.storyboardRepairSuggestProjectMemoryTrim);
   }
   if (diagnostics.memoryRoleScopeRowCount > 0 &&
       diagnostics.memoryDeliveryChars > 0) {
-    addTagged('role_memory_keep', '已经命中角色级私有记忆，优先保住角色情绪和口型，别被项目级描述盖掉。');
+    addTagged('role_memory_keep', l10n.storyboardRepairSuggestRoleMemoryKeep);
   }
   if (diagnostics.roleAnchorCount == 0 &&
       diagnostics.sceneAnchorCount == 0 &&
       diagnostics.styleAnchorCount == 0) {
-    addTagged('anchors', '补角色、场景或关键道具锚点，不然画面更容易漂和穿帮。');
+    addTagged('anchors', l10n.storyboardRepairSuggestAnchors);
   }
   if (suggestions.isEmpty) {
-    addTagged('healthy', '当前预算可控，继续保留人物表演、关键道具和情绪细节。');
+    addTagged('healthy', l10n.storyboardRepairSuggestHealthy);
   }
   return suggestions;
 }

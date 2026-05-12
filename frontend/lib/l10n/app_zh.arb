@@ -6477,6 +6477,100 @@
   },
   "storyboardPromptAnchorReferenceFrame": "已引用当前画面",
   "storyboardPromptAnchorEmpty": "当前提示词未命中额外锚点或记忆。",
+  "storyboardDiagPromptChars": "提示词 {chars} 字符",
+  "@storyboardDiagPromptChars": {
+    "placeholders": {
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardDiagNegativeLine": "负向 {chars}（{tier}）",
+  "@storyboardDiagNegativeLine": {
+    "placeholders": {
+      "chars": {
+        "type": "int"
+      },
+      "tier": {
+        "type": "String"
+      }
+    }
+  },
+  "storyboardDiagObservation": "观察 {chars}",
+  "@storyboardDiagObservation": {
+    "placeholders": {
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardDiagMemoryStyle": "记忆 {chars}",
+  "@storyboardDiagMemoryStyle": {
+    "placeholders": {
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardDiagNegativeSlimSaved": "负向精简 -{chars}",
+  "@storyboardDiagNegativeSlimSaved": {
+    "placeholders": {
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardDiagMemorySlimRemoved": "记忆精简 -{chars}",
+  "@storyboardDiagMemorySlimRemoved": {
+    "placeholders": {
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardDiagDeliveryPriority": "优先交付 ✅",
+  "storyboardDiagMemoryTier": "记忆档位 {tier}",
+  "@storyboardDiagMemoryTier": {
+    "placeholders": {
+      "tier": {
+        "type": "String"
+      }
+    }
+  },
+  "storyboardBudgetHintNoReferenceFrame": "当前提示词未绑定当前画面，先补参考帧再继续压缩，更稳。",
+  "storyboardBudgetHintOptimizationKeptDelivery": "本次生成前已自动清掉重复/纯视觉私有记忆，优先保住了表演和语气锚点；继续补词时先别把这些省下来的预算又填回泛风格句。",
+  "storyboardBudgetHintProjectMemoryHeavy": "这次主要命中项目级记忆，先把通用风格句收短一点，预算优先留给人物表演和当前镜头连续性。",
+  "storyboardBudgetHintRoleVsProject": "角色级记忆已经命中，继续压缩时先动项目级泛化描述，别把角色表演和情绪锚点一起删掉。",
+  "storyboardBudgetHintDeliveryExpanded": "已命中表演/语气优先记忆，先别删这段；优先压缩重复的场景/风格与连续性泛句，避免又回到“读稿腔”。",
+  "storyboardBudgetHintSuppressedBucket": "当前私有记忆里已压掉较多{bucket}类重复片段，继续先收这类泛句，别先删角色表演记忆。",
+  "@storyboardBudgetHintSuppressedBucket": {
+    "placeholders": {
+      "bucket": {
+        "type": "String"
+      }
+    }
+  },
+  "storyboardBudgetHintPromptLong": "当前提示词偏长，优先删重复场景/风格描述，先别动角色和关键道具锚点。",
+  "storyboardBudgetHintPrivateMemoryHeavy": "当前提示词里的私有记忆占比已经不低，优先合并泛化风格句，别先删角色表演记忆。",
+  "storyboardBudgetHintRiskyShotExpanded": "当前镜头被判定为高风险，先保留角色表演和连续性记忆，再压其他泛化描述。",
+  "storyboardBudgetHintNearLongPrompt": "当前提示词已接近长 prompt，继续补充前先检查风格锚点和连续性记忆是否重复。",
+  "storyboardBudgetHintContinuityLong": "连续性记忆已经偏长，先把重复的衔接描述压成更短的动作或表演锚点。",
+  "storyboardBudgetHintNegativeExpanded": "当前镜头的防穿帮约束已切到 expanded，先保留人物一致性和镜头连续性，再压泛化负面词。",
+  "storyboardBudgetHintNegativeLeanLong": "当前负向约束已经偏长，优先合并重复的情绪/光影警告，别先删身份一致性约束。",
+  "storyboardBudgetHintAutoNegativeDup": "当前负向词已经自动带入评审和私有坏例，手动补词前先检查是否只是重复表达。",
+  "storyboardBudgetHintPendingObservation": "这次已经自动继承最近失败观察，先看重试结果，别急着再补一串同义负面词。",
+  "storyboardBudgetHintNoAnchors": "当前提示词主要依赖分镜文案，缺少角色/场景锚点，画面更容易漂。",
+  "storyboardBudgetHintHealthy": "当前提示词预算仍可控，可继续优先保留人物表演、关键道具和情绪信息。",
+  "storyboardRepairSuggestReferenceFrame": "先补当前参考帧，再压词；人物脸、服化道和站位会更稳。",
+  "storyboardRepairSuggestContinuity": "连续性约束改成 1-2 条硬规则，只留机位、服化道和角色位置。",
+  "storyboardRepairSuggestDelivery": "保留表演/语气记忆，把情绪写成可演动作，别退回成读稿腔。",
+  "storyboardRepairSuggestTrimGeneric": "优先删动作/光影泛句，把预算让给口型、微表情和人物一致性。",
+  "storyboardRepairSuggestNegativeReuse": "沿用自动坏例负向约束，手动补词前先去重，避免同义词重复烧 token。",
+  "storyboardRepairSuggestMemoryReuse": "这次已经命中项目/剧本私有坏例记忆，先复用它，别再堆一层共享长记忆。",
+  "storyboardRepairSuggestProjectMemoryTrim": "这轮主要靠项目级通用记忆在撑，继续压词时优先缩短泛风格句。",
+  "storyboardRepairSuggestRoleMemoryKeep": "已经命中角色级私有记忆，优先保住角色情绪和口型，别被项目级描述盖掉。",
+  "storyboardRepairSuggestAnchors": "补角色、场景或关键道具锚点，不然画面更容易漂和穿帮。",
+  "storyboardRepairSuggestHealthy": "当前预算可控，继续保留人物表演、关键道具和情绪细节。",
   "storyboardActionRepairAppliedSummary": "已应用当前生成前建议。",
   "storyboardActionRepairNoChangeSummary": "当前建议已经基本落实，无需再裁剪。",
   "storyboardActionRepairDetailTrimmed": "本次精简了 {promptRemoved} 条低收益提示词片段，并去掉 {negRemoved} 条重复负向约束。",
@@ -7951,7 +8045,7 @@
   "accountExportCopyLastSavedPath": "复制最近保存路径",
   "accountExportEmpty": "还没有账户导出记录。",
   "accountExportDefaultFileName": "账户导出 #{numericTaskId}",
-  "accountExportTaskLine": "任务 #{numericTaskId}",
+  "accountExportTaskLine": "任务 #{numericTaskId} · {createdAt}",
   "accountExportSizeLine": "大小 {size}",
   "accountExportSavedSnack": "已保存到 {path}",
   "accountExportDownload": "下载到本机",
@@ -7960,31 +8054,31 @@
   "accountDeleteDescription": "删号会删除当前用户、其 owner workspace、个人项目、任务、通知和本地导出/媒体目录。共享 workspace 中的成员关系也会移除。",
   "accountDeleteConfirmLabel": "输入 DELETE MY ACCOUNT 以确认",
   "accountDeleteIrreversibleAck": "我确认这是不可逆操作，并接受相关 workspace / project 级联删除。",
-  "accountDeleteLastResponse": "已删除 {count} 个作业",
+  "accountDeleteLastResponse": "已删除账户：{workspaceCount} 个工作区，{projectCount} 个项目，{jobCount} 个作业",
   "accountDeleteButton": "永久删除当前账号",
   "accountExportStatusQueued": "生成中",
   "accountExportStatusRunning": "可下载",
   "accountExportStatusSucceeded": "可下载",
   "accountExportStatusFailed": "可下载",
-  "adminConsoleMembershipItem": "成员 {detail}",
-  "adminConsoleRecentJobItem": "作业 {detail}",
-  "adminConsoleAuditListItem": "审计 {detail}",
+  "adminConsoleMembershipItem": "{workspaceName} · {workspaceType} · {role}{archivedSuffix}",
+  "adminConsoleRecentJobItem": "{kind} · {status} · 项目 {projectId} · {ownerEmail}",
+  "adminConsoleAuditListItem": "{createdAt} · {actorLabel} · {summary}",
   "adminConsoleDailyQuotaLabel": "每日配额 {detail}",
   "adminConsoleChipMember": "成员 {count}",
   "adminConsoleArchivedLabel": "archived",
-  "adminConsoleMemberListItem": "成员 {detail}",
-  "adminConsoleRecentProjectItem": "项目 {detail}",
+  "adminConsoleMemberListItem": "{email} · {role} · 加入 {joinedAt}",
+  "adminConsoleRecentProjectItem": "#{numericId} {name} · {detail}",
   "adminConsoleChipScript": "剧本 {count}",
   "adminConsoleChipAsset": "资产 {count}",
   "adminConsoleChipJob": "作业 {count}",
-  "adminConsoleAclMemberItem": "成员 {detail}",
-  "adminConsoleWorkspaceCandidateItem": "候选 {detail}",
-  "adminConsoleProjectRecentJobItem": "作业 {detail}",
-  "adminConsoleAuditUserSummary": "用户审计 {detail}",
-  "adminConsoleAuditWorkspaceMembership": "工作区成员审计 {detail}",
-  "adminConsoleAuditOwnerTransfer": "所有权转移 {detail}",
-  "adminConsoleAuditArchiveNote": "归档备注 {detail}",
-  "adminConsoleAuditProjectOwnerTransfer": "项目所有权转移 {detail}",
+  "adminConsoleAclMemberItem": "{email} · 工作区 {workspaceRole} · 项目 {projectRole}",
+  "adminConsoleWorkspaceCandidateItem": "{email} · {workspaceRole} · 显式 {explicitProjectCount}",
+  "adminConsoleProjectRecentJobItem": "{kind} · {status} · {ownerEmail} · {createdAt}",
+  "adminConsoleAuditUserSummary": "状态={status} · 配额={quota}",
+  "adminConsoleAuditWorkspaceMembership": "操作={action} · 用户={userId} · 角色={role} · 工作区={workspaceId}",
+  "adminConsoleAuditOwnerTransfer": "所有权转移：{previousOwner} → {newOwner}",
+  "adminConsoleAuditArchiveNote": "归档 {archivedAt} · 备注 {note}",
+  "adminConsoleAuditProjectOwnerTransfer": "项目所有权转移：{previousOwner} → {newOwner} · {projectId}",
   "adminConsoleFieldUserId": "用户 ID {detail}",
   "adminConsoleFieldCreatedAt": "admin console field created at",
   "adminConsoleFieldUpdatedAt": "admin console field updated at",
@@ -8018,7 +8112,7 @@
   "agentWorkspaceProductionWritebackToolResult": "写回工具结果",
   "agentWorkspaceProductionArgumentTemplates": "参数模板",
   "agentWorkspaceProductionCurrentCandidateArgs": "当前结果候选参数",
-  "agentWorkspaceProductionCandidateIds": "候选 {count} 项",
+  "agentWorkspaceProductionCandidateIds": "候选 {count} 项：{preview}",
   "agentWorkspaceProductionPromptPreviewTitle": "执行提示",
   "agentWorkspaceProductionStagesTitle": "执行阶段",
   "agentWorkspaceProductionFlowChip": "flow={flowKey}",
@@ -8043,7 +8137,7 @@
   "agentWorkspaceProductionCollapsedRows": "已折叠 {count} 行",
   "agentWorkspaceProductionReviewTarget": "目标：{target}",
   "agentWorkspaceProductionReviewGrade": "等级：{grade}",
-  "agentWorkspaceProductionReviewIssues": "问题：{issues}",
+  "agentWorkspaceProductionReviewIssues": "问题 {count} 项：{issues}",
   "agentWorkspaceProductionReviewNextStep": "下一步：{nextAction}",
   "agentWorkspaceProductionReviewAssetIds": "资产：{assetIds}",
   "agentWorkspaceProductionReviewAssetScope": "资产范围：{scope}",
@@ -8067,8 +8161,8 @@
   "agentWorkspaceSummaryReturnedList": "返回列表 {count} 项",
   "agentWorkspaceSummaryReturnedText": "返回文本 {chars} 字",
   "agentWorkspaceProductionSummaryItems": "返回 items {count} 项",
-  "agentWorkspaceProductionSummaryReviewHeadline": "聚焦资产 {count} 项",
-  "agentWorkspaceProductionSummaryIssueBreakdown": "问题分布 {count} 项",
+  "agentWorkspaceProductionSummaryReviewHeadline": "聚焦资产 {count} 项：{scope}",
+  "agentWorkspaceProductionSummaryIssueBreakdown": "问题分布 {count} 项：{breakdown}",
   "agentWorkspaceProductionSummaryFocusedAssets": "agent workspace production summary focused assets",
   "agentWorkspaceProductionSummaryFocusedAssetScope": "聚焦资产范围 {scope}",
   "agentWorkspaceProductionSummaryFocusedShots": "聚焦镜头 {count} 项",
@@ -8089,8 +8183,8 @@
   "agentWorkspaceProductionSummaryTextOnlyCount": "纯文本 {count}",
   "agentWorkspaceProductionSummaryStateTypes": "状态类型 {states}",
   "agentWorkspaceProductionSummaryObjectKeyCount": "对象 keys={count} 个",
-  "agentWorkspaceProductionSummaryObjectListEntry": "列表 {count} 项",
-  "agentWorkspaceProductionSummaryObjectTextEntry": "文本 {chars} 字",
+  "agentWorkspaceProductionSummaryObjectListEntry": "{key}: {count} 项",
+  "agentWorkspaceProductionSummaryObjectTextEntry": "{key}: {chars} 字",
   "agentWorkspaceProductionSummaryReturnedType": "返回 {type}",
   "agentWorkspaceProductionIdleHint": "等待执行：可直接用引导任务或表单按钮。",
   "agentWorkspaceProductionLatestToolResult": "最新工具结果：$workspaceLastToolResultLine",
@@ -8136,7 +8230,7 @@
   "agentWorkspaceScriptContextCurrentScriptBody": "来自 get_script_content",
   "agentWorkspaceScriptContextFromScriptContent": "来自 get_script_content",
   "agentWorkspaceScriptContextUntitledChapter": "chapter",
-  "agentWorkspaceScriptContextChapterPrefix": "第 {chapter} 章",
+  "agentWorkspaceScriptContextChapterPrefix": "第 {chapterIndex} 章 · {chapter}",
   "agentWorkspaceScriptContextNovelChapters": "来自 get_novel_text，最多展示前 4 条",
   "agentWorkspaceScriptContextNovelChaptersSubtitle": "来自 get_novel_text，最多展示前 4 条",
   "agentWorkspaceScriptContextUntitledEvent": "未命名事件",
@@ -8146,7 +8240,7 @@
   "agentWorkspaceScriptLatestAssistantResult": "最新助手结果",
   "agentWorkspaceScriptWritebackSource": "写回来源：$scriptWritebackSourceLine",
   "agentWorkspaceScriptSummaryReviewReturned": "审核结果已返回",
-  "agentWorkspaceScriptSummaryReviewLine": "审核 {detail}",
+  "agentWorkspaceScriptSummaryReviewLine": "审核 {target}：{grade} 级，问题 {issueCount} 项{summary}",
   "agentWorkspaceScriptSummaryPlanDataMissing": "planData 缺少 data",
   "agentWorkspaceScriptSummaryStorySkeletonReady": "故事骨架已就绪",
   "agentWorkspaceScriptSummaryAdaptationReady": "改编策略已就绪",
@@ -8228,7 +8322,7 @@
   "contentComplianceOwnerDetail": "详情 {detail}",
   "contentComplianceWorkspaceCounts": "open {open} · pending {pending} · claimed {claimed}",
   "contentComplianceWorkspaceDetail": "critical {critical} · high {high}",
-  "contentComplianceReportInfo": "reporter {reporter}",
+  "contentComplianceReportInfo": "reporter {reporter} · {reportedAt}",
   "contentComplianceResolutionLine": "resolution: {note}",
   "contentComplianceActionClaim": "content compliance action claim",
   "contentComplianceActionResolve": "resolve",
@@ -8331,46 +8425,91 @@
     "placeholders": {
       "numericTaskId": {
         "type": "int"
+      },
+      "createdAt": {
+        "type": "String"
       }
     }
   },
   "@accountDeleteLastResponse": {
     "placeholders": {
-      "count": {
+      "workspaceCount": {
+        "type": "int"
+      },
+      "projectCount": {
+        "type": "int"
+      },
+      "jobCount": {
         "type": "int"
       }
     }
   },
   "@adminConsoleMembershipItem": {
     "placeholders": {
-      "detail": {
+      "workspaceName": {
+        "type": "String"
+      },
+      "workspaceType": {
+        "type": "String"
+      },
+      "role": {
+        "type": "String"
+      },
+      "archivedSuffix": {
         "type": "String"
       }
     }
   },
   "@adminConsoleRecentJobItem": {
     "placeholders": {
-      "detail": {
+      "kind": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      },
+      "projectId": {
+        "type": "String"
+      },
+      "ownerEmail": {
         "type": "String"
       }
     }
   },
   "@adminConsoleAuditListItem": {
     "placeholders": {
-      "detail": {
+      "createdAt": {
+        "type": "String"
+      },
+      "actorLabel": {
+        "type": "String"
+      },
+      "summary": {
         "type": "String"
       }
     }
   },
   "@adminConsoleMemberListItem": {
     "placeholders": {
-      "detail": {
+      "email": {
+        "type": "String"
+      },
+      "role": {
+        "type": "String"
+      },
+      "joinedAt": {
         "type": "String"
       }
     }
   },
   "@adminConsoleRecentProjectItem": {
     "placeholders": {
+      "numericId": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      },
       "detail": {
         "type": "String"
       }
@@ -8406,56 +8545,101 @@
   },
   "@adminConsoleAclMemberItem": {
     "placeholders": {
-      "detail": {
+      "email": {
+        "type": "String"
+      },
+      "workspaceRole": {
+        "type": "String"
+      },
+      "projectRole": {
         "type": "String"
       }
     }
   },
   "@adminConsoleWorkspaceCandidateItem": {
     "placeholders": {
-      "detail": {
+      "email": {
         "type": "String"
+      },
+      "workspaceRole": {
+        "type": "String"
+      },
+      "explicitProjectCount": {
+        "type": "int"
       }
     }
   },
   "@adminConsoleProjectRecentJobItem": {
     "placeholders": {
-      "detail": {
+      "kind": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      },
+      "ownerEmail": {
+        "type": "String"
+      },
+      "createdAt": {
         "type": "String"
       }
     }
   },
   "@adminConsoleAuditUserSummary": {
     "placeholders": {
-      "detail": {
+      "status": {
+        "type": "String"
+      },
+      "quota": {
         "type": "String"
       }
     }
   },
   "@adminConsoleAuditWorkspaceMembership": {
     "placeholders": {
-      "detail": {
+      "action": {
+        "type": "String"
+      },
+      "userId": {
+        "type": "String"
+      },
+      "role": {
+        "type": "String"
+      },
+      "workspaceId": {
         "type": "String"
       }
     }
   },
   "@adminConsoleAuditOwnerTransfer": {
     "placeholders": {
-      "detail": {
+      "previousOwner": {
+        "type": "String"
+      },
+      "newOwner": {
         "type": "String"
       }
     }
   },
   "@adminConsoleAuditArchiveNote": {
     "placeholders": {
-      "detail": {
+      "archivedAt": {
+        "type": "String"
+      },
+      "note": {
         "type": "String"
       }
     }
   },
   "@adminConsoleAuditProjectOwnerTransfer": {
     "placeholders": {
-      "detail": {
+      "previousOwner": {
+        "type": "String"
+      },
+      "newOwner": {
+        "type": "String"
+      },
+      "projectId": {
         "type": "String"
       }
     }
@@ -8567,6 +8751,9 @@
   },
   "@agentWorkspaceProductionReviewIssues": {
     "placeholders": {
+      "count": {
+        "type": "int"
+      },
       "issues": {
         "type": "String"
       }
@@ -8632,6 +8819,9 @@
     "placeholders": {
       "count": {
         "type": "int"
+      },
+      "preview": {
+        "type": "String"
       }
     }
   },
@@ -8756,6 +8946,9 @@
   },
   "@agentWorkspaceProductionSummaryObjectListEntry": {
     "placeholders": {
+      "key": {
+        "type": "String"
+      },
       "count": {
         "type": "int"
       }
@@ -8763,6 +8956,9 @@
   },
   "@agentWorkspaceProductionSummaryObjectTextEntry": {
     "placeholders": {
+      "key": {
+        "type": "String"
+      },
       "chars": {
         "type": "int"
       }
@@ -8779,6 +8975,9 @@
     "placeholders": {
       "count": {
         "type": "int"
+      },
+      "scope": {
+        "type": "String"
       }
     }
   },
@@ -8786,6 +8985,9 @@
     "placeholders": {
       "count": {
         "type": "int"
+      },
+      "breakdown": {
+        "type": "String"
       }
     }
   },
@@ -8819,6 +9021,9 @@
   },
   "@agentWorkspaceScriptContextChapterPrefix": {
     "placeholders": {
+      "chapterIndex": {
+        "type": "int"
+      },
       "chapter": {
         "type": "String"
       }
@@ -8826,7 +9031,16 @@
   },
   "@agentWorkspaceScriptSummaryReviewLine": {
     "placeholders": {
-      "detail": {
+      "target": {
+        "type": "String"
+      },
+      "grade": {
+        "type": "String"
+      },
+      "issueCount": {
+        "type": "int"
+      },
+      "summary": {
         "type": "String"
       }
     }
@@ -9024,6 +9238,9 @@
   "@contentComplianceReportInfo": {
     "placeholders": {
       "reporter": {
+        "type": "String"
+      },
+      "reportedAt": {
         "type": "String"
       }
     }

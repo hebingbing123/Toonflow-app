@@ -76,12 +76,12 @@ void main() {
     );
 
     expect(
-      buildStoryboardVideoPromptDiagnosticsLine(diagnostics),
-      contains('Memory slim -88'),
+      buildStoryboardVideoPromptDiagnosticsLine(_zh, diagnostics),
+      contains('记忆精简 -88'),
     );
     expect(
-      buildStoryboardVideoPromptDiagnosticsLine(diagnostics),
-      contains('Negative slim -34'),
+      buildStoryboardVideoPromptDiagnosticsLine(_zh, diagnostics),
+      contains('负向精简 -34'),
     );
     expect(
       buildStoryboardVideoPromptSourceSummary(_zh, diagnostics),
@@ -96,7 +96,7 @@ void main() {
       contains('命中项目 2 / 剧本 1 / 角色 1记忆'),
     );
     expect(
-      buildStoryboardVideoPromptBudgetHint(diagnostics),
+      buildStoryboardVideoPromptBudgetHint(_zh, diagnostics),
       contains('已自动清掉重复/纯视觉私有记忆'),
     );
     expect(
@@ -141,10 +141,10 @@ void main() {
       );
 
       expect(
-        buildStoryboardVideoPromptBudgetHint(diagnostics),
+        buildStoryboardVideoPromptBudgetHint(_zh, diagnostics),
         '这次主要命中项目级记忆，先把通用风格句收短一点，预算优先留给人物表演和当前镜头连续性。',
       );
-      expect(buildStoryboardVideoPromptRepairSuggestions(diagnostics), [
+      expect(buildStoryboardVideoPromptRepairSuggestions(_zh, diagnostics), [
         '这轮主要靠项目级通用记忆在撑，继续压词时优先缩短泛风格句。',
       ]);
     },
@@ -502,8 +502,8 @@ void main() {
     );
 
     expect(
-      buildStoryboardVideoPromptDiagnosticsLine(diagnostics),
-      'Prompt 318 chars · Negative 64 (expanded) · Observation 22 · Memory 36 · Memory tier expanded',
+      buildStoryboardVideoPromptDiagnosticsLine(_zh, diagnostics),
+      '提示词 318 字符 · 负向 64（expanded） · 观察 22 · 记忆 36 · 记忆档位 expanded',
     );
     expect(
       buildStoryboardVideoPromptAnchorSummary(_zh, diagnostics),
@@ -544,7 +544,7 @@ void main() {
       _zh.storyboardPromptAnchorEmpty,
     );
     expect(
-      buildStoryboardVideoPromptBudgetHint(diagnostics),
+      buildStoryboardVideoPromptBudgetHint(_zh, diagnostics),
       '当前提示词未绑定当前画面，先补参考帧再继续压缩，更稳。',
     );
   });
@@ -578,7 +578,7 @@ void main() {
     );
 
     expect(
-      buildStoryboardVideoPromptBudgetHint(diagnostics),
+      buildStoryboardVideoPromptBudgetHint(_zh, diagnostics),
       '当前提示词偏长，优先删重复场景/风格描述，先别动角色和关键道具锚点。',
     );
   });
@@ -614,7 +614,7 @@ void main() {
       );
 
       expect(
-        buildStoryboardVideoPromptBudgetHint(diagnostics),
+        buildStoryboardVideoPromptBudgetHint(_zh, diagnostics),
         '当前提示词主要依赖分镜文案，缺少角色/场景锚点，画面更容易漂。',
       );
     },
@@ -651,7 +651,7 @@ void main() {
       );
 
       expect(
-        buildStoryboardVideoPromptBudgetHint(diagnostics),
+        buildStoryboardVideoPromptBudgetHint(_zh, diagnostics),
         '当前提示词预算仍可控，可继续优先保留人物表演、关键道具和情绪信息。',
       );
     },
@@ -688,7 +688,7 @@ void main() {
       );
 
       expect(
-        buildStoryboardVideoPromptBudgetHint(diagnostics),
+        buildStoryboardVideoPromptBudgetHint(_zh, diagnostics),
         '已命中表演/语气优先记忆，先别删这段；优先压缩重复的场景/风格与连续性泛句，避免又回到“读稿腔”。',
       );
     },
@@ -726,7 +726,7 @@ void main() {
       );
 
       expect(
-        buildStoryboardVideoPromptBudgetHint(diagnostics),
+        buildStoryboardVideoPromptBudgetHint(_zh, diagnostics),
         '当前私有记忆里已压掉较多动作类重复片段，继续先收这类泛句，别先删角色表演记忆。',
       );
     },
@@ -764,7 +764,7 @@ void main() {
         memoryBudgetTier: 'expanded',
       );
 
-      expect(buildStoryboardVideoPromptRepairSuggestions(diagnostics), [
+      expect(buildStoryboardVideoPromptRepairSuggestions(_zh, diagnostics), [
         '先补当前参考帧，再压词；人物脸、服化道和站位会更稳。',
         '保留表演/语气记忆，把情绪写成可演动作，别退回成读稿腔。',
         '优先删动作/光影泛句，把预算让给口型、微表情和人物一致性。',
@@ -804,7 +804,7 @@ void main() {
         memoryBudgetTier: 'lean',
       );
 
-      expect(buildStoryboardVideoPromptRepairSuggestions(diagnostics), [
+      expect(buildStoryboardVideoPromptRepairSuggestions(_zh, diagnostics), [
         '当前预算可控，继续保留人物表演、关键道具和情绪细节。',
       ]);
     },
@@ -934,7 +934,7 @@ void main() {
       );
 
       expect(
-        buildStoryboardVideoPromptBudgetHint(diagnostics),
+        buildStoryboardVideoPromptBudgetHint(_zh, diagnostics),
         '当前镜头被判定为高风险，先保留角色表演和连续性记忆，再压其他泛化描述。',
       );
     },
@@ -971,7 +971,7 @@ void main() {
       );
 
       expect(
-        buildStoryboardVideoPromptBudgetHint(diagnostics),
+        buildStoryboardVideoPromptBudgetHint(_zh, diagnostics),
         '当前镜头的防穿帮约束已切到 expanded，先保留人物一致性和镜头连续性，再压泛化负面词。',
       );
     },

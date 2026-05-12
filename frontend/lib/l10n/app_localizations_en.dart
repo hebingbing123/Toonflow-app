@@ -8655,6 +8655,153 @@ class AppLocalizationsEn extends AppLocalizations {
       'No extra anchors or memory matched yet.';
 
   @override
+  String storyboardDiagPromptChars(int chars) {
+    return 'Prompt $chars chars';
+  }
+
+  @override
+  String storyboardDiagNegativeLine(int chars, String tier) {
+    return 'Negative $chars ($tier)';
+  }
+
+  @override
+  String storyboardDiagObservation(int chars) {
+    return 'Observation $chars';
+  }
+
+  @override
+  String storyboardDiagMemoryStyle(int chars) {
+    return 'Memory $chars';
+  }
+
+  @override
+  String storyboardDiagNegativeSlimSaved(int chars) {
+    return 'Negative slim -$chars';
+  }
+
+  @override
+  String storyboardDiagMemorySlimRemoved(int chars) {
+    return 'Memory slim -$chars';
+  }
+
+  @override
+  String get storyboardDiagDeliveryPriority => 'Delivery-priority ✅';
+
+  @override
+  String storyboardDiagMemoryTier(String tier) {
+    return 'Memory tier $tier';
+  }
+
+  @override
+  String get storyboardBudgetHintNoReferenceFrame =>
+      'The prompt is not bound to the current frame yet—attach a reference frame before trimming further; more stable results.';
+
+  @override
+  String get storyboardBudgetHintOptimizationKeptDelivery =>
+      'Before this run we removed duplicate/visual-only private memory and kept performance & tone anchors; when adding more text, don\'t refill the saved budget with generic style filler.';
+
+  @override
+  String get storyboardBudgetHintProjectMemoryHeavy =>
+      'This shot mainly hit project-level memory—shorten generic style lines first and reserve budget for performance and shot continuity.';
+
+  @override
+  String get storyboardBudgetHintRoleVsProject =>
+      'Role-level memory is active—when compressing, trim project-level generic text first; don\'t delete role performance and emotion anchors together.';
+
+  @override
+  String get storyboardBudgetHintDeliveryExpanded =>
+      'Performance/tone priority memory is locked in—don\'t delete it first; trim repeated scene/style and continuity fluff first to avoid monotone delivery.';
+
+  @override
+  String storyboardBudgetHintSuppressedBucket(String bucket) {
+    return 'Private memory already suppressed many repeated $bucket-type fragments—trim those generics first before touching role performance memory.';
+  }
+
+  @override
+  String get storyboardBudgetHintPromptLong =>
+      'The prompt is quite long—remove duplicate scene/style lines first; keep role and key prop anchors.';
+
+  @override
+  String get storyboardBudgetHintPrivateMemoryHeavy =>
+      'Private memory already takes a large share—merge generic style lines first; don\'t delete role performance memory first.';
+
+  @override
+  String get storyboardBudgetHintRiskyShotExpanded =>
+      'This shot is flagged high-risk—keep role performance and continuity memory before trimming other generics.';
+
+  @override
+  String get storyboardBudgetHintNearLongPrompt =>
+      'The prompt is approaching long-prompt territory—check whether style anchors and continuity notes duplicate before adding more.';
+
+  @override
+  String get storyboardBudgetHintContinuityLong =>
+      'Continuity memory is already long—compress repeated bridge text into shorter action or performance anchors.';
+
+  @override
+  String get storyboardBudgetHintNegativeExpanded =>
+      'Continuity constraints switched to expanded—keep identity and shot continuity before trimming generic negatives.';
+
+  @override
+  String get storyboardBudgetHintNegativeLeanLong =>
+      'Negative constraints are already long—merge repeated mood/lighting warnings first; keep identity consistency constraints.';
+
+  @override
+  String get storyboardBudgetHintAutoNegativeDup =>
+      'Negatives already include review + private bad cases—check for redundant wording before adding manually.';
+
+  @override
+  String get storyboardBudgetHintPendingObservation =>
+      'Latest failure observation was inherited automatically—wait for retry results before stacking more synonymous negatives.';
+
+  @override
+  String get storyboardBudgetHintNoAnchors =>
+      'The prompt relies mostly on storyboard text without role/scene anchors—visuals may drift.';
+
+  @override
+  String get storyboardBudgetHintHealthy =>
+      'Prompt budget still healthy—keep prioritizing performance, key props, and emotion.';
+
+  @override
+  String get storyboardRepairSuggestReferenceFrame =>
+      'Attach the current reference frame before trimming—faces, wardrobe, and blocking stay steadier.';
+
+  @override
+  String get storyboardRepairSuggestContinuity =>
+      'Reduce continuity to 1–2 hard rules: camera, wardrobe, and character placement only.';
+
+  @override
+  String get storyboardRepairSuggestDelivery =>
+      'Keep performance/tone memory—write emotion as playable action, not monotone read-through.';
+
+  @override
+  String get storyboardRepairSuggestTrimGeneric =>
+      'Trim motion/lighting fluff first and budget for lip sync, micro-expressions, and identity consistency.';
+
+  @override
+  String get storyboardRepairSuggestNegativeReuse =>
+      'Reuse auto bad-case negatives—dedupe before manual additions to avoid burning tokens on synonyms.';
+
+  @override
+  String get storyboardRepairSuggestMemoryReuse =>
+      'Private bad-case memory already matched—reuse it instead of stacking another long shared memory layer.';
+
+  @override
+  String get storyboardRepairSuggestProjectMemoryTrim =>
+      'Project-level generic memory is doing most of the work—shorten generic style lines when trimming further.';
+
+  @override
+  String get storyboardRepairSuggestRoleMemoryKeep =>
+      'Role-level private memory matched—protect emotion and lip sync from being buried by project-wide text.';
+
+  @override
+  String get storyboardRepairSuggestAnchors =>
+      'Add role, scene, or key prop anchors—otherwise shots drift and continuity breaks.';
+
+  @override
+  String get storyboardRepairSuggestHealthy =>
+      'Budget still healthy—keep performance, key props, and emotional detail.';
+
+  @override
   String get storyboardActionRepairAppliedSummary =>
       'Applied current pre-generation suggestions.';
 
@@ -10823,8 +10970,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String accountExportTaskLine(int numericTaskId) {
-    return '任务 #$numericTaskId';
+  String accountExportTaskLine(int numericTaskId, String createdAt) {
+    return 'Task #$numericTaskId · $createdAt';
   }
 
   @override
@@ -10856,8 +11003,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountDeleteIrreversibleAck => 'Account delete irreversible ack';
 
   @override
-  String accountDeleteLastResponse(int count) {
-    return '已删除 $count 个作业';
+  String accountDeleteLastResponse(
+    int workspaceCount,
+    int projectCount,
+    int jobCount,
+  ) {
+    return 'Account deleted: $workspaceCount workspaces, $projectCount projects, $jobCount jobs';
   }
 
   @override
@@ -10876,18 +11027,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountExportStatusFailed => 'Account export status failed';
 
   @override
-  String adminConsoleMembershipItem(String detail) {
-    return '成员 $detail';
+  String adminConsoleMembershipItem(
+    String workspaceName,
+    String workspaceType,
+    String role,
+    String archivedSuffix,
+  ) {
+    return '$workspaceName · $workspaceType · $role$archivedSuffix';
   }
 
   @override
-  String adminConsoleRecentJobItem(String detail) {
-    return '作业 $detail';
+  String adminConsoleRecentJobItem(
+    String kind,
+    String status,
+    String projectId,
+    String ownerEmail,
+  ) {
+    return '$kind · $status · project $projectId · $ownerEmail';
   }
 
   @override
-  String adminConsoleAuditListItem(String detail) {
-    return '审计 $detail';
+  String adminConsoleAuditListItem(
+    String createdAt,
+    String actorLabel,
+    String summary,
+  ) {
+    return '$createdAt · $actorLabel · $summary';
   }
 
   @override
@@ -10904,13 +11069,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminConsoleArchivedLabel => 'Admin console archived label';
 
   @override
-  String adminConsoleMemberListItem(String detail) {
-    return '成员 $detail';
+  String adminConsoleMemberListItem(
+    String email,
+    String role,
+    String joinedAt,
+  ) {
+    return '$email · $role · joined $joinedAt';
   }
 
   @override
-  String adminConsoleRecentProjectItem(String detail) {
-    return '项目 $detail';
+  String adminConsoleRecentProjectItem(
+    int numericId,
+    String name,
+    String detail,
+  ) {
+    return '#$numericId $name · $detail';
   }
 
   @override
@@ -10929,43 +11102,65 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String adminConsoleAclMemberItem(String detail) {
-    return '成员 $detail';
+  String adminConsoleAclMemberItem(
+    String email,
+    String workspaceRole,
+    String projectRole,
+  ) {
+    return '$email · workspace $workspaceRole · project $projectRole';
   }
 
   @override
-  String adminConsoleWorkspaceCandidateItem(String detail) {
-    return '候选 $detail';
+  String adminConsoleWorkspaceCandidateItem(
+    String email,
+    String workspaceRole,
+    int explicitProjectCount,
+  ) {
+    return '$email · $workspaceRole · explicit $explicitProjectCount';
   }
 
   @override
-  String adminConsoleProjectRecentJobItem(String detail) {
-    return '作业 $detail';
+  String adminConsoleProjectRecentJobItem(
+    String kind,
+    String status,
+    String ownerEmail,
+    String createdAt,
+  ) {
+    return '$kind · $status · $ownerEmail · $createdAt';
   }
 
   @override
-  String adminConsoleAuditUserSummary(String detail) {
-    return '用户审计 $detail';
+  String adminConsoleAuditUserSummary(String status, String quota) {
+    return 'status=$status · quota=$quota';
   }
 
   @override
-  String adminConsoleAuditWorkspaceMembership(String detail) {
-    return '工作区成员审计 $detail';
+  String adminConsoleAuditWorkspaceMembership(
+    String action,
+    String userId,
+    String role,
+    String workspaceId,
+  ) {
+    return 'action=$action · user=$userId · role=$role · workspace=$workspaceId';
   }
 
   @override
-  String adminConsoleAuditOwnerTransfer(String detail) {
-    return '所有权转移 $detail';
+  String adminConsoleAuditOwnerTransfer(String previousOwner, String newOwner) {
+    return 'owner transfer: $previousOwner → $newOwner';
   }
 
   @override
-  String adminConsoleAuditArchiveNote(String detail) {
-    return '归档备注 $detail';
+  String adminConsoleAuditArchiveNote(String archivedAt, String note) {
+    return 'archived $archivedAt · note $note';
   }
 
   @override
-  String adminConsoleAuditProjectOwnerTransfer(String detail) {
-    return '项目所有权转移 $detail';
+  String adminConsoleAuditProjectOwnerTransfer(
+    String previousOwner,
+    String newOwner,
+    String projectId,
+  ) {
+    return 'project owner transfer: $previousOwner → $newOwner · $projectId';
   }
 
   @override
@@ -11091,8 +11286,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'Agent workspace production current candidate args';
 
   @override
-  String agentWorkspaceProductionCandidateIds(int count) {
-    return '候选 $count 项';
+  String agentWorkspaceProductionCandidateIds(int count, String preview) {
+    return 'candidates $count: $preview';
   }
 
   @override
@@ -11202,8 +11397,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String agentWorkspaceProductionReviewIssues(String issues) {
-    return '问题：$issues';
+  String agentWorkspaceProductionReviewIssues(int count, String issues) {
+    return 'issues $count: $issues';
   }
 
   @override
@@ -11314,13 +11509,19 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String agentWorkspaceProductionSummaryReviewHeadline(int count) {
-    return '聚焦资产 $count 项';
+  String agentWorkspaceProductionSummaryReviewHeadline(
+    int count,
+    String scope,
+  ) {
+    return 'focused assets $count: $scope';
   }
 
   @override
-  String agentWorkspaceProductionSummaryIssueBreakdown(int count) {
-    return '问题分布 $count 项';
+  String agentWorkspaceProductionSummaryIssueBreakdown(
+    int count,
+    String breakdown,
+  ) {
+    return 'issue breakdown $count: $breakdown';
   }
 
   @override
@@ -11419,13 +11620,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String agentWorkspaceProductionSummaryObjectListEntry(int count) {
-    return '列表 $count 项';
+  String agentWorkspaceProductionSummaryObjectListEntry(String key, int count) {
+    return '$key: $count items';
   }
 
   @override
-  String agentWorkspaceProductionSummaryObjectTextEntry(int chars) {
-    return '文本 $chars 字';
+  String agentWorkspaceProductionSummaryObjectTextEntry(String key, int chars) {
+    return '$key: $chars chars';
   }
 
   @override
@@ -11614,8 +11815,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Agent workspace script context untitled chapter';
 
   @override
-  String agentWorkspaceScriptContextChapterPrefix(String chapter) {
-    return '第 $chapter 章';
+  String agentWorkspaceScriptContextChapterPrefix(
+    int chapterIndex,
+    String chapter,
+  ) {
+    return 'Chapter $chapterIndex · $chapter';
   }
 
   @override
@@ -11655,8 +11859,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Agent workspace script summary review returned';
 
   @override
-  String agentWorkspaceScriptSummaryReviewLine(String detail) {
-    return '审核 $detail';
+  String agentWorkspaceScriptSummaryReviewLine(
+    String target,
+    String grade,
+    int issueCount,
+    String summary,
+  ) {
+    return 'review $target: grade $grade, $issueCount issues$summary';
   }
 
   @override
@@ -11999,8 +12208,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String contentComplianceReportInfo(String reporter) {
-    return 'reporter $reporter';
+  String contentComplianceReportInfo(String reporter, String reportedAt) {
+    return 'reporter $reporter · $reportedAt';
   }
 
   @override

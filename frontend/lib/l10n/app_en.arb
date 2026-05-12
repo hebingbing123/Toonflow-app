@@ -6477,6 +6477,100 @@
   },
   "storyboardPromptAnchorReferenceFrame": "Reference frame attached",
   "storyboardPromptAnchorEmpty": "No extra anchors or memory matched yet.",
+  "storyboardDiagPromptChars": "Prompt {chars} chars",
+  "@storyboardDiagPromptChars": {
+    "placeholders": {
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardDiagNegativeLine": "Negative {chars} ({tier})",
+  "@storyboardDiagNegativeLine": {
+    "placeholders": {
+      "chars": {
+        "type": "int"
+      },
+      "tier": {
+        "type": "String"
+      }
+    }
+  },
+  "storyboardDiagObservation": "Observation {chars}",
+  "@storyboardDiagObservation": {
+    "placeholders": {
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardDiagMemoryStyle": "Memory {chars}",
+  "@storyboardDiagMemoryStyle": {
+    "placeholders": {
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardDiagNegativeSlimSaved": "Negative slim -{chars}",
+  "@storyboardDiagNegativeSlimSaved": {
+    "placeholders": {
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardDiagMemorySlimRemoved": "Memory slim -{chars}",
+  "@storyboardDiagMemorySlimRemoved": {
+    "placeholders": {
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardDiagDeliveryPriority": "Delivery-priority ✅",
+  "storyboardDiagMemoryTier": "Memory tier {tier}",
+  "@storyboardDiagMemoryTier": {
+    "placeholders": {
+      "tier": {
+        "type": "String"
+      }
+    }
+  },
+  "storyboardBudgetHintNoReferenceFrame": "The prompt is not bound to the current frame yet—attach a reference frame before trimming further; more stable results.",
+  "storyboardBudgetHintOptimizationKeptDelivery": "Before this run we removed duplicate/visual-only private memory and kept performance & tone anchors; when adding more text, don't refill the saved budget with generic style filler.",
+  "storyboardBudgetHintProjectMemoryHeavy": "This shot mainly hit project-level memory—shorten generic style lines first and reserve budget for performance and shot continuity.",
+  "storyboardBudgetHintRoleVsProject": "Role-level memory is active—when compressing, trim project-level generic text first; don't delete role performance and emotion anchors together.",
+  "storyboardBudgetHintDeliveryExpanded": "Performance/tone priority memory is locked in—don't delete it first; trim repeated scene/style and continuity fluff first to avoid monotone delivery.",
+  "storyboardBudgetHintSuppressedBucket": "Private memory already suppressed many repeated {bucket}-type fragments—trim those generics first before touching role performance memory.",
+  "@storyboardBudgetHintSuppressedBucket": {
+    "placeholders": {
+      "bucket": {
+        "type": "String"
+      }
+    }
+  },
+  "storyboardBudgetHintPromptLong": "The prompt is quite long—remove duplicate scene/style lines first; keep role and key prop anchors.",
+  "storyboardBudgetHintPrivateMemoryHeavy": "Private memory already takes a large share—merge generic style lines first; don't delete role performance memory first.",
+  "storyboardBudgetHintRiskyShotExpanded": "This shot is flagged high-risk—keep role performance and continuity memory before trimming other generics.",
+  "storyboardBudgetHintNearLongPrompt": "The prompt is approaching long-prompt territory—check whether style anchors and continuity notes duplicate before adding more.",
+  "storyboardBudgetHintContinuityLong": "Continuity memory is already long—compress repeated bridge text into shorter action or performance anchors.",
+  "storyboardBudgetHintNegativeExpanded": "Continuity constraints switched to expanded—keep identity and shot continuity before trimming generic negatives.",
+  "storyboardBudgetHintNegativeLeanLong": "Negative constraints are already long—merge repeated mood/lighting warnings first; keep identity consistency constraints.",
+  "storyboardBudgetHintAutoNegativeDup": "Negatives already include review + private bad cases—check for redundant wording before adding manually.",
+  "storyboardBudgetHintPendingObservation": "Latest failure observation was inherited automatically—wait for retry results before stacking more synonymous negatives.",
+  "storyboardBudgetHintNoAnchors": "The prompt relies mostly on storyboard text without role/scene anchors—visuals may drift.",
+  "storyboardBudgetHintHealthy": "Prompt budget still healthy—keep prioritizing performance, key props, and emotion.",
+  "storyboardRepairSuggestReferenceFrame": "Attach the current reference frame before trimming—faces, wardrobe, and blocking stay steadier.",
+  "storyboardRepairSuggestContinuity": "Reduce continuity to 1–2 hard rules: camera, wardrobe, and character placement only.",
+  "storyboardRepairSuggestDelivery": "Keep performance/tone memory—write emotion as playable action, not monotone read-through.",
+  "storyboardRepairSuggestTrimGeneric": "Trim motion/lighting fluff first and budget for lip sync, micro-expressions, and identity consistency.",
+  "storyboardRepairSuggestNegativeReuse": "Reuse auto bad-case negatives—dedupe before manual additions to avoid burning tokens on synonyms.",
+  "storyboardRepairSuggestMemoryReuse": "Private bad-case memory already matched—reuse it instead of stacking another long shared memory layer.",
+  "storyboardRepairSuggestProjectMemoryTrim": "Project-level generic memory is doing most of the work—shorten generic style lines when trimming further.",
+  "storyboardRepairSuggestRoleMemoryKeep": "Role-level private memory matched—protect emotion and lip sync from being buried by project-wide text.",
+  "storyboardRepairSuggestAnchors": "Add role, scene, or key prop anchors—otherwise shots drift and continuity breaks.",
+  "storyboardRepairSuggestHealthy": "Budget still healthy—keep performance, key props, and emotional detail.",
   "storyboardActionRepairAppliedSummary": "Applied current pre-generation suggestions.",
   "storyboardActionRepairNoChangeSummary": "Suggestions are already applied; nothing else to trim.",
   "storyboardActionRepairDetailTrimmed": "Removed {promptRemoved} low-value prompt fragment(s) and {negRemoved} duplicate negative fragment(s).",
@@ -8265,7 +8359,7 @@
   "accountExportCopyLastSavedPath": "Account export copy last saved path",
   "accountExportEmpty": "Account export empty",
   "accountExportDefaultFileName": "账户导出 #{numericTaskId}",
-  "accountExportTaskLine": "任务 #{numericTaskId}",
+  "accountExportTaskLine": "Task #{numericTaskId} · {createdAt}",
   "accountExportSizeLine": "大小 {size}",
   "accountExportSavedSnack": "已保存到 {path}",
   "accountExportDownload": "Account export download",
@@ -8274,31 +8368,31 @@
   "accountDeleteDescription": "Account delete description",
   "accountDeleteConfirmLabel": "Account delete confirm label",
   "accountDeleteIrreversibleAck": "Account delete irreversible ack",
-  "accountDeleteLastResponse": "已删除 {count} 个作业",
+  "accountDeleteLastResponse": "Account deleted: {workspaceCount} workspaces, {projectCount} projects, {jobCount} jobs",
   "accountDeleteButton": "Account delete button",
   "accountExportStatusQueued": "Account export status queued",
   "accountExportStatusRunning": "Account export status running",
   "accountExportStatusSucceeded": "Account export status succeeded",
   "accountExportStatusFailed": "Account export status failed",
-  "adminConsoleMembershipItem": "成员 {detail}",
-  "adminConsoleRecentJobItem": "作业 {detail}",
-  "adminConsoleAuditListItem": "审计 {detail}",
+  "adminConsoleMembershipItem": "{workspaceName} · {workspaceType} · {role}{archivedSuffix}",
+  "adminConsoleRecentJobItem": "{kind} · {status} · project {projectId} · {ownerEmail}",
+  "adminConsoleAuditListItem": "{createdAt} · {actorLabel} · {summary}",
   "adminConsoleDailyQuotaLabel": "每日配额 {detail}",
   "adminConsoleChipMember": "成员 {count}",
   "adminConsoleArchivedLabel": "Admin console archived label",
-  "adminConsoleMemberListItem": "成员 {detail}",
-  "adminConsoleRecentProjectItem": "项目 {detail}",
+  "adminConsoleMemberListItem": "{email} · {role} · joined {joinedAt}",
+  "adminConsoleRecentProjectItem": "#{numericId} {name} · {detail}",
   "adminConsoleChipScript": "剧本 {count}",
   "adminConsoleChipAsset": "资产 {count}",
   "adminConsoleChipJob": "作业 {count}",
-  "adminConsoleAclMemberItem": "成员 {detail}",
-  "adminConsoleWorkspaceCandidateItem": "候选 {detail}",
-  "adminConsoleProjectRecentJobItem": "作业 {detail}",
-  "adminConsoleAuditUserSummary": "用户审计 {detail}",
-  "adminConsoleAuditWorkspaceMembership": "工作区成员审计 {detail}",
-  "adminConsoleAuditOwnerTransfer": "所有权转移 {detail}",
-  "adminConsoleAuditArchiveNote": "归档备注 {detail}",
-  "adminConsoleAuditProjectOwnerTransfer": "项目所有权转移 {detail}",
+  "adminConsoleAclMemberItem": "{email} · workspace {workspaceRole} · project {projectRole}",
+  "adminConsoleWorkspaceCandidateItem": "{email} · {workspaceRole} · explicit {explicitProjectCount}",
+  "adminConsoleProjectRecentJobItem": "{kind} · {status} · {ownerEmail} · {createdAt}",
+  "adminConsoleAuditUserSummary": "status={status} · quota={quota}",
+  "adminConsoleAuditWorkspaceMembership": "action={action} · user={userId} · role={role} · workspace={workspaceId}",
+  "adminConsoleAuditOwnerTransfer": "owner transfer: {previousOwner} → {newOwner}",
+  "adminConsoleAuditArchiveNote": "archived {archivedAt} · note {note}",
+  "adminConsoleAuditProjectOwnerTransfer": "project owner transfer: {previousOwner} → {newOwner} · {projectId}",
   "adminConsoleFieldUserId": "用户 ID {detail}",
   "adminConsoleFieldCreatedAt": "Admin console field created at",
   "adminConsoleFieldUpdatedAt": "Admin console field updated at",
@@ -8332,7 +8426,7 @@
   "agentWorkspaceProductionWritebackToolResult": "Agent workspace production writeback tool result",
   "agentWorkspaceProductionArgumentTemplates": "Agent workspace production argument templates",
   "agentWorkspaceProductionCurrentCandidateArgs": "Agent workspace production current candidate args",
-  "agentWorkspaceProductionCandidateIds": "候选 {count} 项",
+  "agentWorkspaceProductionCandidateIds": "candidates {count}: {preview}",
   "agentWorkspaceProductionPromptPreviewTitle": "Agent workspace production prompt preview title",
   "agentWorkspaceProductionStagesTitle": "Agent workspace production stages title",
   "agentWorkspaceProductionFlowChip": "flow={flowKey}",
@@ -8357,7 +8451,7 @@
   "agentWorkspaceProductionCollapsedRows": "已折叠 {count} 行",
   "agentWorkspaceProductionReviewTarget": "目标：{target}",
   "agentWorkspaceProductionReviewGrade": "等级：{grade}",
-  "agentWorkspaceProductionReviewIssues": "问题：{issues}",
+  "agentWorkspaceProductionReviewIssues": "issues {count}: {issues}",
   "agentWorkspaceProductionReviewNextStep": "下一步：{nextAction}",
   "agentWorkspaceProductionReviewAssetIds": "资产：{assetIds}",
   "agentWorkspaceProductionReviewAssetScope": "资产范围：{scope}",
@@ -8381,8 +8475,8 @@
   "agentWorkspaceSummaryReturnedList": "返回列表 {count} 项",
   "agentWorkspaceSummaryReturnedText": "返回文本 {chars} 字",
   "agentWorkspaceProductionSummaryItems": "返回 items {count} 项",
-  "agentWorkspaceProductionSummaryReviewHeadline": "聚焦资产 {count} 项",
-  "agentWorkspaceProductionSummaryIssueBreakdown": "问题分布 {count} 项",
+  "agentWorkspaceProductionSummaryReviewHeadline": "focused assets {count}: {scope}",
+  "agentWorkspaceProductionSummaryIssueBreakdown": "issue breakdown {count}: {breakdown}",
   "agentWorkspaceProductionSummaryFocusedAssets": "Agent workspace production summary focused assets",
   "agentWorkspaceProductionSummaryFocusedAssetScope": "聚焦资产范围 {scope}",
   "agentWorkspaceProductionSummaryFocusedShots": "聚焦镜头 {count} 项",
@@ -8403,8 +8497,8 @@
   "agentWorkspaceProductionSummaryTextOnlyCount": "纯文本 {count}",
   "agentWorkspaceProductionSummaryStateTypes": "状态类型 {states}",
   "agentWorkspaceProductionSummaryObjectKeyCount": "对象 keys={count} 个",
-  "agentWorkspaceProductionSummaryObjectListEntry": "列表 {count} 项",
-  "agentWorkspaceProductionSummaryObjectTextEntry": "文本 {chars} 字",
+  "agentWorkspaceProductionSummaryObjectListEntry": "{key}: {count} items",
+  "agentWorkspaceProductionSummaryObjectTextEntry": "{key}: {chars} chars",
   "agentWorkspaceProductionSummaryReturnedType": "返回 {type}",
   "agentWorkspaceProductionIdleHint": "Agent workspace production idle hint",
   "agentWorkspaceProductionLatestToolResult": "Agent workspace production latest tool result",
@@ -8450,7 +8544,7 @@
   "agentWorkspaceScriptContextCurrentScriptBody": "Agent workspace script context current script body",
   "agentWorkspaceScriptContextFromScriptContent": "Agent workspace script context from script content",
   "agentWorkspaceScriptContextUntitledChapter": "Agent workspace script context untitled chapter",
-  "agentWorkspaceScriptContextChapterPrefix": "第 {chapter} 章",
+  "agentWorkspaceScriptContextChapterPrefix": "Chapter {chapterIndex} · {chapter}",
   "agentWorkspaceScriptContextNovelChapters": "Agent workspace script context novel chapters",
   "agentWorkspaceScriptContextNovelChaptersSubtitle": "Agent workspace script context novel chapters subtitle",
   "agentWorkspaceScriptContextUntitledEvent": "Agent workspace script context untitled event",
@@ -8460,7 +8554,7 @@
   "agentWorkspaceScriptLatestAssistantResult": "Agent workspace script latest assistant result",
   "agentWorkspaceScriptWritebackSource": "Agent workspace script writeback source",
   "agentWorkspaceScriptSummaryReviewReturned": "Agent workspace script summary review returned",
-  "agentWorkspaceScriptSummaryReviewLine": "审核 {detail}",
+  "agentWorkspaceScriptSummaryReviewLine": "review {target}: grade {grade}, {issueCount} issues{summary}",
   "agentWorkspaceScriptSummaryPlanDataMissing": "Agent workspace script summary plan data missing",
   "agentWorkspaceScriptSummaryStorySkeletonReady": "Agent workspace script summary story skeleton ready",
   "agentWorkspaceScriptSummaryAdaptationReady": "Agent workspace script summary adaptation ready",
@@ -8542,7 +8636,7 @@
   "contentComplianceOwnerDetail": "详情 {detail}",
   "contentComplianceWorkspaceCounts": "open {open} · pending {pending} · claimed {claimed}",
   "contentComplianceWorkspaceDetail": "critical {critical} · high {high}",
-  "contentComplianceReportInfo": "reporter {reporter}",
+  "contentComplianceReportInfo": "reporter {reporter} · {reportedAt}",
   "contentComplianceResolutionLine": "resolution: {note}",
   "contentComplianceActionClaim": "Content compliance action claim",
   "contentComplianceActionResolve": "Content compliance action resolve",
@@ -8645,46 +8739,91 @@
     "placeholders": {
       "numericTaskId": {
         "type": "int"
+      },
+      "createdAt": {
+        "type": "String"
       }
     }
   },
   "@accountDeleteLastResponse": {
     "placeholders": {
-      "count": {
+      "workspaceCount": {
+        "type": "int"
+      },
+      "projectCount": {
+        "type": "int"
+      },
+      "jobCount": {
         "type": "int"
       }
     }
   },
   "@adminConsoleMembershipItem": {
     "placeholders": {
-      "detail": {
+      "workspaceName": {
+        "type": "String"
+      },
+      "workspaceType": {
+        "type": "String"
+      },
+      "role": {
+        "type": "String"
+      },
+      "archivedSuffix": {
         "type": "String"
       }
     }
   },
   "@adminConsoleRecentJobItem": {
     "placeholders": {
-      "detail": {
+      "kind": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      },
+      "projectId": {
+        "type": "String"
+      },
+      "ownerEmail": {
         "type": "String"
       }
     }
   },
   "@adminConsoleAuditListItem": {
     "placeholders": {
-      "detail": {
+      "createdAt": {
+        "type": "String"
+      },
+      "actorLabel": {
+        "type": "String"
+      },
+      "summary": {
         "type": "String"
       }
     }
   },
   "@adminConsoleMemberListItem": {
     "placeholders": {
-      "detail": {
+      "email": {
+        "type": "String"
+      },
+      "role": {
+        "type": "String"
+      },
+      "joinedAt": {
         "type": "String"
       }
     }
   },
   "@adminConsoleRecentProjectItem": {
     "placeholders": {
+      "numericId": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      },
       "detail": {
         "type": "String"
       }
@@ -8720,56 +8859,101 @@
   },
   "@adminConsoleAclMemberItem": {
     "placeholders": {
-      "detail": {
+      "email": {
+        "type": "String"
+      },
+      "workspaceRole": {
+        "type": "String"
+      },
+      "projectRole": {
         "type": "String"
       }
     }
   },
   "@adminConsoleWorkspaceCandidateItem": {
     "placeholders": {
-      "detail": {
+      "email": {
         "type": "String"
+      },
+      "workspaceRole": {
+        "type": "String"
+      },
+      "explicitProjectCount": {
+        "type": "int"
       }
     }
   },
   "@adminConsoleProjectRecentJobItem": {
     "placeholders": {
-      "detail": {
+      "kind": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      },
+      "ownerEmail": {
+        "type": "String"
+      },
+      "createdAt": {
         "type": "String"
       }
     }
   },
   "@adminConsoleAuditUserSummary": {
     "placeholders": {
-      "detail": {
+      "status": {
+        "type": "String"
+      },
+      "quota": {
         "type": "String"
       }
     }
   },
   "@adminConsoleAuditWorkspaceMembership": {
     "placeholders": {
-      "detail": {
+      "action": {
+        "type": "String"
+      },
+      "userId": {
+        "type": "String"
+      },
+      "role": {
+        "type": "String"
+      },
+      "workspaceId": {
         "type": "String"
       }
     }
   },
   "@adminConsoleAuditOwnerTransfer": {
     "placeholders": {
-      "detail": {
+      "previousOwner": {
+        "type": "String"
+      },
+      "newOwner": {
         "type": "String"
       }
     }
   },
   "@adminConsoleAuditArchiveNote": {
     "placeholders": {
-      "detail": {
+      "archivedAt": {
+        "type": "String"
+      },
+      "note": {
         "type": "String"
       }
     }
   },
   "@adminConsoleAuditProjectOwnerTransfer": {
     "placeholders": {
-      "detail": {
+      "previousOwner": {
+        "type": "String"
+      },
+      "newOwner": {
+        "type": "String"
+      },
+      "projectId": {
         "type": "String"
       }
     }
@@ -8881,6 +9065,9 @@
   },
   "@agentWorkspaceProductionReviewIssues": {
     "placeholders": {
+      "count": {
+        "type": "int"
+      },
       "issues": {
         "type": "String"
       }
@@ -8946,6 +9133,9 @@
     "placeholders": {
       "count": {
         "type": "int"
+      },
+      "preview": {
+        "type": "String"
       }
     }
   },
@@ -9070,6 +9260,9 @@
   },
   "@agentWorkspaceProductionSummaryObjectListEntry": {
     "placeholders": {
+      "key": {
+        "type": "String"
+      },
       "count": {
         "type": "int"
       }
@@ -9077,6 +9270,9 @@
   },
   "@agentWorkspaceProductionSummaryObjectTextEntry": {
     "placeholders": {
+      "key": {
+        "type": "String"
+      },
       "chars": {
         "type": "int"
       }
@@ -9093,6 +9289,9 @@
     "placeholders": {
       "count": {
         "type": "int"
+      },
+      "scope": {
+        "type": "String"
       }
     }
   },
@@ -9100,6 +9299,9 @@
     "placeholders": {
       "count": {
         "type": "int"
+      },
+      "breakdown": {
+        "type": "String"
       }
     }
   },
@@ -9133,6 +9335,9 @@
   },
   "@agentWorkspaceScriptContextChapterPrefix": {
     "placeholders": {
+      "chapterIndex": {
+        "type": "int"
+      },
       "chapter": {
         "type": "String"
       }
@@ -9140,7 +9345,16 @@
   },
   "@agentWorkspaceScriptSummaryReviewLine": {
     "placeholders": {
-      "detail": {
+      "target": {
+        "type": "String"
+      },
+      "grade": {
+        "type": "String"
+      },
+      "issueCount": {
+        "type": "int"
+      },
+      "summary": {
         "type": "String"
       }
     }
@@ -9338,6 +9552,9 @@
   "@contentComplianceReportInfo": {
     "placeholders": {
       "reporter": {
+        "type": "String"
+      },
+      "reportedAt": {
         "type": "String"
       }
     }

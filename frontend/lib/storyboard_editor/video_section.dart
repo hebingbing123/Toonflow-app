@@ -102,7 +102,10 @@ class _StoryboardVideoSection extends StatelessWidget {
         : null;
     final repairSuggestions = promptDiagnostics == null
         ? const <String>[]
-        : buildStoryboardVideoPromptRepairSuggestions(promptDiagnostics!);
+        : buildStoryboardVideoPromptRepairSuggestions(
+            l10n,
+            promptDiagnostics!,
+          );
     final selectedVideoUrl = currentSelectedVideoUrl?.trim() ?? '';
     final hasSelectedVideo = selectedVideoUrl.isNotEmpty;
     return Column(
@@ -275,7 +278,10 @@ class _StoryboardVideoSection extends StatelessWidget {
         if (promptDiagnostics != null) ...[
           const SizedBox(height: 6),
           Text(
-            buildStoryboardVideoPromptDiagnosticsLine(promptDiagnostics!),
+            buildStoryboardVideoPromptDiagnosticsLine(
+              l10n,
+              promptDiagnostics!,
+            ),
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: 2),
@@ -300,7 +306,7 @@ class _StoryboardVideoSection extends StatelessWidget {
           ),
           const SizedBox(height: 2),
           Text(
-            buildStoryboardVideoPromptBudgetHint(promptDiagnostics!),
+            buildStoryboardVideoPromptBudgetHint(l10n, promptDiagnostics!),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: Theme.of(context).colorScheme.primary,
             ),

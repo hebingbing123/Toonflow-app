@@ -8260,6 +8260,148 @@ class AppLocalizationsZh extends AppLocalizations {
   String get storyboardPromptAnchorEmpty => '当前提示词未命中额外锚点或记忆。';
 
   @override
+  String storyboardDiagPromptChars(int chars) {
+    return '提示词 $chars 字符';
+  }
+
+  @override
+  String storyboardDiagNegativeLine(int chars, String tier) {
+    return '负向 $chars（$tier）';
+  }
+
+  @override
+  String storyboardDiagObservation(int chars) {
+    return '观察 $chars';
+  }
+
+  @override
+  String storyboardDiagMemoryStyle(int chars) {
+    return '记忆 $chars';
+  }
+
+  @override
+  String storyboardDiagNegativeSlimSaved(int chars) {
+    return '负向精简 -$chars';
+  }
+
+  @override
+  String storyboardDiagMemorySlimRemoved(int chars) {
+    return '记忆精简 -$chars';
+  }
+
+  @override
+  String get storyboardDiagDeliveryPriority => '优先交付 ✅';
+
+  @override
+  String storyboardDiagMemoryTier(String tier) {
+    return '记忆档位 $tier';
+  }
+
+  @override
+  String get storyboardBudgetHintNoReferenceFrame =>
+      '当前提示词未绑定当前画面，先补参考帧再继续压缩，更稳。';
+
+  @override
+  String get storyboardBudgetHintOptimizationKeptDelivery =>
+      '本次生成前已自动清掉重复/纯视觉私有记忆，优先保住了表演和语气锚点；继续补词时先别把这些省下来的预算又填回泛风格句。';
+
+  @override
+  String get storyboardBudgetHintProjectMemoryHeavy =>
+      '这次主要命中项目级记忆，先把通用风格句收短一点，预算优先留给人物表演和当前镜头连续性。';
+
+  @override
+  String get storyboardBudgetHintRoleVsProject =>
+      '角色级记忆已经命中，继续压缩时先动项目级泛化描述，别把角色表演和情绪锚点一起删掉。';
+
+  @override
+  String get storyboardBudgetHintDeliveryExpanded =>
+      '已命中表演/语气优先记忆，先别删这段；优先压缩重复的场景/风格与连续性泛句，避免又回到“读稿腔”。';
+
+  @override
+  String storyboardBudgetHintSuppressedBucket(String bucket) {
+    return '当前私有记忆里已压掉较多$bucket类重复片段，继续先收这类泛句，别先删角色表演记忆。';
+  }
+
+  @override
+  String get storyboardBudgetHintPromptLong =>
+      '当前提示词偏长，优先删重复场景/风格描述，先别动角色和关键道具锚点。';
+
+  @override
+  String get storyboardBudgetHintPrivateMemoryHeavy =>
+      '当前提示词里的私有记忆占比已经不低，优先合并泛化风格句，别先删角色表演记忆。';
+
+  @override
+  String get storyboardBudgetHintRiskyShotExpanded =>
+      '当前镜头被判定为高风险，先保留角色表演和连续性记忆，再压其他泛化描述。';
+
+  @override
+  String get storyboardBudgetHintNearLongPrompt =>
+      '当前提示词已接近长 prompt，继续补充前先检查风格锚点和连续性记忆是否重复。';
+
+  @override
+  String get storyboardBudgetHintContinuityLong =>
+      '连续性记忆已经偏长，先把重复的衔接描述压成更短的动作或表演锚点。';
+
+  @override
+  String get storyboardBudgetHintNegativeExpanded =>
+      '当前镜头的防穿帮约束已切到 expanded，先保留人物一致性和镜头连续性，再压泛化负面词。';
+
+  @override
+  String get storyboardBudgetHintNegativeLeanLong =>
+      '当前负向约束已经偏长，优先合并重复的情绪/光影警告，别先删身份一致性约束。';
+
+  @override
+  String get storyboardBudgetHintAutoNegativeDup =>
+      '当前负向词已经自动带入评审和私有坏例，手动补词前先检查是否只是重复表达。';
+
+  @override
+  String get storyboardBudgetHintPendingObservation =>
+      '这次已经自动继承最近失败观察，先看重试结果，别急着再补一串同义负面词。';
+
+  @override
+  String get storyboardBudgetHintNoAnchors => '当前提示词主要依赖分镜文案，缺少角色/场景锚点，画面更容易漂。';
+
+  @override
+  String get storyboardBudgetHintHealthy => '当前提示词预算仍可控，可继续优先保留人物表演、关键道具和情绪信息。';
+
+  @override
+  String get storyboardRepairSuggestReferenceFrame =>
+      '先补当前参考帧，再压词；人物脸、服化道和站位会更稳。';
+
+  @override
+  String get storyboardRepairSuggestContinuity =>
+      '连续性约束改成 1-2 条硬规则，只留机位、服化道和角色位置。';
+
+  @override
+  String get storyboardRepairSuggestDelivery => '保留表演/语气记忆，把情绪写成可演动作，别退回成读稿腔。';
+
+  @override
+  String get storyboardRepairSuggestTrimGeneric =>
+      '优先删动作/光影泛句，把预算让给口型、微表情和人物一致性。';
+
+  @override
+  String get storyboardRepairSuggestNegativeReuse =>
+      '沿用自动坏例负向约束，手动补词前先去重，避免同义词重复烧 token。';
+
+  @override
+  String get storyboardRepairSuggestMemoryReuse =>
+      '这次已经命中项目/剧本私有坏例记忆，先复用它，别再堆一层共享长记忆。';
+
+  @override
+  String get storyboardRepairSuggestProjectMemoryTrim =>
+      '这轮主要靠项目级通用记忆在撑，继续压词时优先缩短泛风格句。';
+
+  @override
+  String get storyboardRepairSuggestRoleMemoryKeep =>
+      '已经命中角色级私有记忆，优先保住角色情绪和口型，别被项目级描述盖掉。';
+
+  @override
+  String get storyboardRepairSuggestAnchors => '补角色、场景或关键道具锚点，不然画面更容易漂和穿帮。';
+
+  @override
+  String get storyboardRepairSuggestHealthy => '当前预算可控，继续保留人物表演、关键道具和情绪细节。';
+
+  @override
   String get storyboardActionRepairAppliedSummary => '已应用当前生成前建议。';
 
   @override
@@ -10331,8 +10473,8 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String accountExportTaskLine(int numericTaskId) {
-    return '任务 #$numericTaskId';
+  String accountExportTaskLine(int numericTaskId, String createdAt) {
+    return '任务 #$numericTaskId · $createdAt';
   }
 
   @override
@@ -10366,8 +10508,12 @@ class AppLocalizationsZh extends AppLocalizations {
       '我确认这是不可逆操作，并接受相关 workspace / project 级联删除。';
 
   @override
-  String accountDeleteLastResponse(int count) {
-    return '已删除 $count 个作业';
+  String accountDeleteLastResponse(
+    int workspaceCount,
+    int projectCount,
+    int jobCount,
+  ) {
+    return '已删除账户：$workspaceCount 个工作区，$projectCount 个项目，$jobCount 个作业';
   }
 
   @override
@@ -10386,18 +10532,32 @@ class AppLocalizationsZh extends AppLocalizations {
   String get accountExportStatusFailed => '可下载';
 
   @override
-  String adminConsoleMembershipItem(String detail) {
-    return '成员 $detail';
+  String adminConsoleMembershipItem(
+    String workspaceName,
+    String workspaceType,
+    String role,
+    String archivedSuffix,
+  ) {
+    return '$workspaceName · $workspaceType · $role$archivedSuffix';
   }
 
   @override
-  String adminConsoleRecentJobItem(String detail) {
-    return '作业 $detail';
+  String adminConsoleRecentJobItem(
+    String kind,
+    String status,
+    String projectId,
+    String ownerEmail,
+  ) {
+    return '$kind · $status · 项目 $projectId · $ownerEmail';
   }
 
   @override
-  String adminConsoleAuditListItem(String detail) {
-    return '审计 $detail';
+  String adminConsoleAuditListItem(
+    String createdAt,
+    String actorLabel,
+    String summary,
+  ) {
+    return '$createdAt · $actorLabel · $summary';
   }
 
   @override
@@ -10414,13 +10574,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String get adminConsoleArchivedLabel => 'archived';
 
   @override
-  String adminConsoleMemberListItem(String detail) {
-    return '成员 $detail';
+  String adminConsoleMemberListItem(
+    String email,
+    String role,
+    String joinedAt,
+  ) {
+    return '$email · $role · 加入 $joinedAt';
   }
 
   @override
-  String adminConsoleRecentProjectItem(String detail) {
-    return '项目 $detail';
+  String adminConsoleRecentProjectItem(
+    int numericId,
+    String name,
+    String detail,
+  ) {
+    return '#$numericId $name · $detail';
   }
 
   @override
@@ -10439,43 +10607,65 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String adminConsoleAclMemberItem(String detail) {
-    return '成员 $detail';
+  String adminConsoleAclMemberItem(
+    String email,
+    String workspaceRole,
+    String projectRole,
+  ) {
+    return '$email · 工作区 $workspaceRole · 项目 $projectRole';
   }
 
   @override
-  String adminConsoleWorkspaceCandidateItem(String detail) {
-    return '候选 $detail';
+  String adminConsoleWorkspaceCandidateItem(
+    String email,
+    String workspaceRole,
+    int explicitProjectCount,
+  ) {
+    return '$email · $workspaceRole · 显式 $explicitProjectCount';
   }
 
   @override
-  String adminConsoleProjectRecentJobItem(String detail) {
-    return '作业 $detail';
+  String adminConsoleProjectRecentJobItem(
+    String kind,
+    String status,
+    String ownerEmail,
+    String createdAt,
+  ) {
+    return '$kind · $status · $ownerEmail · $createdAt';
   }
 
   @override
-  String adminConsoleAuditUserSummary(String detail) {
-    return '用户审计 $detail';
+  String adminConsoleAuditUserSummary(String status, String quota) {
+    return '状态=$status · 配额=$quota';
   }
 
   @override
-  String adminConsoleAuditWorkspaceMembership(String detail) {
-    return '工作区成员审计 $detail';
+  String adminConsoleAuditWorkspaceMembership(
+    String action,
+    String userId,
+    String role,
+    String workspaceId,
+  ) {
+    return '操作=$action · 用户=$userId · 角色=$role · 工作区=$workspaceId';
   }
 
   @override
-  String adminConsoleAuditOwnerTransfer(String detail) {
-    return '所有权转移 $detail';
+  String adminConsoleAuditOwnerTransfer(String previousOwner, String newOwner) {
+    return '所有权转移：$previousOwner → $newOwner';
   }
 
   @override
-  String adminConsoleAuditArchiveNote(String detail) {
-    return '归档备注 $detail';
+  String adminConsoleAuditArchiveNote(String archivedAt, String note) {
+    return '归档 $archivedAt · 备注 $note';
   }
 
   @override
-  String adminConsoleAuditProjectOwnerTransfer(String detail) {
-    return '项目所有权转移 $detail';
+  String adminConsoleAuditProjectOwnerTransfer(
+    String previousOwner,
+    String newOwner,
+    String projectId,
+  ) {
+    return '项目所有权转移：$previousOwner → $newOwner · $projectId';
   }
 
   @override
@@ -10591,8 +10781,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get agentWorkspaceProductionCurrentCandidateArgs => '当前结果候选参数';
 
   @override
-  String agentWorkspaceProductionCandidateIds(int count) {
-    return '候选 $count 项';
+  String agentWorkspaceProductionCandidateIds(int count, String preview) {
+    return '候选 $count 项：$preview';
   }
 
   @override
@@ -10692,8 +10882,8 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String agentWorkspaceProductionReviewIssues(String issues) {
-    return '问题：$issues';
+  String agentWorkspaceProductionReviewIssues(int count, String issues) {
+    return '问题 $count 项：$issues';
   }
 
   @override
@@ -10798,13 +10988,19 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String agentWorkspaceProductionSummaryReviewHeadline(int count) {
-    return '聚焦资产 $count 项';
+  String agentWorkspaceProductionSummaryReviewHeadline(
+    int count,
+    String scope,
+  ) {
+    return '聚焦资产 $count 项：$scope';
   }
 
   @override
-  String agentWorkspaceProductionSummaryIssueBreakdown(int count) {
-    return '问题分布 $count 项';
+  String agentWorkspaceProductionSummaryIssueBreakdown(
+    int count,
+    String breakdown,
+  ) {
+    return '问题分布 $count 项：$breakdown';
   }
 
   @override
@@ -10900,13 +11096,13 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String agentWorkspaceProductionSummaryObjectListEntry(int count) {
-    return '列表 $count 项';
+  String agentWorkspaceProductionSummaryObjectListEntry(String key, int count) {
+    return '$key: $count 项';
   }
 
   @override
-  String agentWorkspaceProductionSummaryObjectTextEntry(int chars) {
-    return '文本 $chars 字';
+  String agentWorkspaceProductionSummaryObjectTextEntry(String key, int chars) {
+    return '$key: $chars 字';
   }
 
   @override
@@ -11065,8 +11261,11 @@ class AppLocalizationsZh extends AppLocalizations {
   String get agentWorkspaceScriptContextUntitledChapter => 'chapter';
 
   @override
-  String agentWorkspaceScriptContextChapterPrefix(String chapter) {
-    return '第 $chapter 章';
+  String agentWorkspaceScriptContextChapterPrefix(
+    int chapterIndex,
+    String chapter,
+  ) {
+    return '第 $chapterIndex 章 · $chapter';
   }
 
   @override
@@ -11102,8 +11301,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get agentWorkspaceScriptSummaryReviewReturned => '审核结果已返回';
 
   @override
-  String agentWorkspaceScriptSummaryReviewLine(String detail) {
-    return '审核 $detail';
+  String agentWorkspaceScriptSummaryReviewLine(
+    String target,
+    String grade,
+    int issueCount,
+    String summary,
+  ) {
+    return '审核 $target：$grade 级，问题 $issueCount 项$summary';
   }
 
   @override
@@ -11425,8 +11629,8 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String contentComplianceReportInfo(String reporter) {
-    return 'reporter $reporter';
+  String contentComplianceReportInfo(String reporter, String reportedAt) {
+    return 'reporter $reporter · $reportedAt';
   }
 
   @override

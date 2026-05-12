@@ -13647,6 +13647,216 @@ abstract class AppLocalizations {
   /// **'No extra anchors or memory matched yet.'**
   String get storyboardPromptAnchorEmpty;
 
+  /// No description provided for @storyboardDiagPromptChars.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt {chars} chars'**
+  String storyboardDiagPromptChars(int chars);
+
+  /// No description provided for @storyboardDiagNegativeLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Negative {chars} ({tier})'**
+  String storyboardDiagNegativeLine(int chars, String tier);
+
+  /// No description provided for @storyboardDiagObservation.
+  ///
+  /// In en, this message translates to:
+  /// **'Observation {chars}'**
+  String storyboardDiagObservation(int chars);
+
+  /// No description provided for @storyboardDiagMemoryStyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory {chars}'**
+  String storyboardDiagMemoryStyle(int chars);
+
+  /// No description provided for @storyboardDiagNegativeSlimSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Negative slim -{chars}'**
+  String storyboardDiagNegativeSlimSaved(int chars);
+
+  /// No description provided for @storyboardDiagMemorySlimRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory slim -{chars}'**
+  String storyboardDiagMemorySlimRemoved(int chars);
+
+  /// No description provided for @storyboardDiagDeliveryPriority.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery-priority ✅'**
+  String get storyboardDiagDeliveryPriority;
+
+  /// No description provided for @storyboardDiagMemoryTier.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory tier {tier}'**
+  String storyboardDiagMemoryTier(String tier);
+
+  /// No description provided for @storyboardBudgetHintNoReferenceFrame.
+  ///
+  /// In en, this message translates to:
+  /// **'The prompt is not bound to the current frame yet—attach a reference frame before trimming further; more stable results.'**
+  String get storyboardBudgetHintNoReferenceFrame;
+
+  /// No description provided for @storyboardBudgetHintOptimizationKeptDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Before this run we removed duplicate/visual-only private memory and kept performance & tone anchors; when adding more text, don\'t refill the saved budget with generic style filler.'**
+  String get storyboardBudgetHintOptimizationKeptDelivery;
+
+  /// No description provided for @storyboardBudgetHintProjectMemoryHeavy.
+  ///
+  /// In en, this message translates to:
+  /// **'This shot mainly hit project-level memory—shorten generic style lines first and reserve budget for performance and shot continuity.'**
+  String get storyboardBudgetHintProjectMemoryHeavy;
+
+  /// No description provided for @storyboardBudgetHintRoleVsProject.
+  ///
+  /// In en, this message translates to:
+  /// **'Role-level memory is active—when compressing, trim project-level generic text first; don\'t delete role performance and emotion anchors together.'**
+  String get storyboardBudgetHintRoleVsProject;
+
+  /// No description provided for @storyboardBudgetHintDeliveryExpanded.
+  ///
+  /// In en, this message translates to:
+  /// **'Performance/tone priority memory is locked in—don\'t delete it first; trim repeated scene/style and continuity fluff first to avoid monotone delivery.'**
+  String get storyboardBudgetHintDeliveryExpanded;
+
+  /// No description provided for @storyboardBudgetHintSuppressedBucket.
+  ///
+  /// In en, this message translates to:
+  /// **'Private memory already suppressed many repeated {bucket}-type fragments—trim those generics first before touching role performance memory.'**
+  String storyboardBudgetHintSuppressedBucket(String bucket);
+
+  /// No description provided for @storyboardBudgetHintPromptLong.
+  ///
+  /// In en, this message translates to:
+  /// **'The prompt is quite long—remove duplicate scene/style lines first; keep role and key prop anchors.'**
+  String get storyboardBudgetHintPromptLong;
+
+  /// No description provided for @storyboardBudgetHintPrivateMemoryHeavy.
+  ///
+  /// In en, this message translates to:
+  /// **'Private memory already takes a large share—merge generic style lines first; don\'t delete role performance memory first.'**
+  String get storyboardBudgetHintPrivateMemoryHeavy;
+
+  /// No description provided for @storyboardBudgetHintRiskyShotExpanded.
+  ///
+  /// In en, this message translates to:
+  /// **'This shot is flagged high-risk—keep role performance and continuity memory before trimming other generics.'**
+  String get storyboardBudgetHintRiskyShotExpanded;
+
+  /// No description provided for @storyboardBudgetHintNearLongPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'The prompt is approaching long-prompt territory—check whether style anchors and continuity notes duplicate before adding more.'**
+  String get storyboardBudgetHintNearLongPrompt;
+
+  /// No description provided for @storyboardBudgetHintContinuityLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Continuity memory is already long—compress repeated bridge text into shorter action or performance anchors.'**
+  String get storyboardBudgetHintContinuityLong;
+
+  /// No description provided for @storyboardBudgetHintNegativeExpanded.
+  ///
+  /// In en, this message translates to:
+  /// **'Continuity constraints switched to expanded—keep identity and shot continuity before trimming generic negatives.'**
+  String get storyboardBudgetHintNegativeExpanded;
+
+  /// No description provided for @storyboardBudgetHintNegativeLeanLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Negative constraints are already long—merge repeated mood/lighting warnings first; keep identity consistency constraints.'**
+  String get storyboardBudgetHintNegativeLeanLong;
+
+  /// No description provided for @storyboardBudgetHintAutoNegativeDup.
+  ///
+  /// In en, this message translates to:
+  /// **'Negatives already include review + private bad cases—check for redundant wording before adding manually.'**
+  String get storyboardBudgetHintAutoNegativeDup;
+
+  /// No description provided for @storyboardBudgetHintPendingObservation.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest failure observation was inherited automatically—wait for retry results before stacking more synonymous negatives.'**
+  String get storyboardBudgetHintPendingObservation;
+
+  /// No description provided for @storyboardBudgetHintNoAnchors.
+  ///
+  /// In en, this message translates to:
+  /// **'The prompt relies mostly on storyboard text without role/scene anchors—visuals may drift.'**
+  String get storyboardBudgetHintNoAnchors;
+
+  /// No description provided for @storyboardBudgetHintHealthy.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt budget still healthy—keep prioritizing performance, key props, and emotion.'**
+  String get storyboardBudgetHintHealthy;
+
+  /// No description provided for @storyboardRepairSuggestReferenceFrame.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach the current reference frame before trimming—faces, wardrobe, and blocking stay steadier.'**
+  String get storyboardRepairSuggestReferenceFrame;
+
+  /// No description provided for @storyboardRepairSuggestContinuity.
+  ///
+  /// In en, this message translates to:
+  /// **'Reduce continuity to 1–2 hard rules: camera, wardrobe, and character placement only.'**
+  String get storyboardRepairSuggestContinuity;
+
+  /// No description provided for @storyboardRepairSuggestDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep performance/tone memory—write emotion as playable action, not monotone read-through.'**
+  String get storyboardRepairSuggestDelivery;
+
+  /// No description provided for @storyboardRepairSuggestTrimGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Trim motion/lighting fluff first and budget for lip sync, micro-expressions, and identity consistency.'**
+  String get storyboardRepairSuggestTrimGeneric;
+
+  /// No description provided for @storyboardRepairSuggestNegativeReuse.
+  ///
+  /// In en, this message translates to:
+  /// **'Reuse auto bad-case negatives—dedupe before manual additions to avoid burning tokens on synonyms.'**
+  String get storyboardRepairSuggestNegativeReuse;
+
+  /// No description provided for @storyboardRepairSuggestMemoryReuse.
+  ///
+  /// In en, this message translates to:
+  /// **'Private bad-case memory already matched—reuse it instead of stacking another long shared memory layer.'**
+  String get storyboardRepairSuggestMemoryReuse;
+
+  /// No description provided for @storyboardRepairSuggestProjectMemoryTrim.
+  ///
+  /// In en, this message translates to:
+  /// **'Project-level generic memory is doing most of the work—shorten generic style lines when trimming further.'**
+  String get storyboardRepairSuggestProjectMemoryTrim;
+
+  /// No description provided for @storyboardRepairSuggestRoleMemoryKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Role-level private memory matched—protect emotion and lip sync from being buried by project-wide text.'**
+  String get storyboardRepairSuggestRoleMemoryKeep;
+
+  /// No description provided for @storyboardRepairSuggestAnchors.
+  ///
+  /// In en, this message translates to:
+  /// **'Add role, scene, or key prop anchors—otherwise shots drift and continuity breaks.'**
+  String get storyboardRepairSuggestAnchors;
+
+  /// No description provided for @storyboardRepairSuggestHealthy.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget still healthy—keep performance, key props, and emotional detail.'**
+  String get storyboardRepairSuggestHealthy;
+
   /// No description provided for @storyboardActionRepairAppliedSummary.
   ///
   /// In en, this message translates to:
@@ -16723,8 +16933,8 @@ abstract class AppLocalizations {
   /// No description provided for @accountExportTaskLine.
   ///
   /// In en, this message translates to:
-  /// **'任务 #{numericTaskId}'**
-  String accountExportTaskLine(int numericTaskId);
+  /// **'Task #{numericTaskId} · {createdAt}'**
+  String accountExportTaskLine(int numericTaskId, String createdAt);
 
   /// No description provided for @accountExportSizeLine.
   ///
@@ -16777,8 +16987,12 @@ abstract class AppLocalizations {
   /// No description provided for @accountDeleteLastResponse.
   ///
   /// In en, this message translates to:
-  /// **'已删除 {count} 个作业'**
-  String accountDeleteLastResponse(int count);
+  /// **'Account deleted: {workspaceCount} workspaces, {projectCount} projects, {jobCount} jobs'**
+  String accountDeleteLastResponse(
+    int workspaceCount,
+    int projectCount,
+    int jobCount,
+  );
 
   /// No description provided for @accountDeleteButton.
   ///
@@ -16813,20 +17027,34 @@ abstract class AppLocalizations {
   /// No description provided for @adminConsoleMembershipItem.
   ///
   /// In en, this message translates to:
-  /// **'成员 {detail}'**
-  String adminConsoleMembershipItem(String detail);
+  /// **'{workspaceName} · {workspaceType} · {role}{archivedSuffix}'**
+  String adminConsoleMembershipItem(
+    String workspaceName,
+    String workspaceType,
+    String role,
+    String archivedSuffix,
+  );
 
   /// No description provided for @adminConsoleRecentJobItem.
   ///
   /// In en, this message translates to:
-  /// **'作业 {detail}'**
-  String adminConsoleRecentJobItem(String detail);
+  /// **'{kind} · {status} · project {projectId} · {ownerEmail}'**
+  String adminConsoleRecentJobItem(
+    String kind,
+    String status,
+    String projectId,
+    String ownerEmail,
+  );
 
   /// No description provided for @adminConsoleAuditListItem.
   ///
   /// In en, this message translates to:
-  /// **'审计 {detail}'**
-  String adminConsoleAuditListItem(String detail);
+  /// **'{createdAt} · {actorLabel} · {summary}'**
+  String adminConsoleAuditListItem(
+    String createdAt,
+    String actorLabel,
+    String summary,
+  );
 
   /// No description provided for @adminConsoleDailyQuotaLabel.
   ///
@@ -16849,14 +17077,18 @@ abstract class AppLocalizations {
   /// No description provided for @adminConsoleMemberListItem.
   ///
   /// In en, this message translates to:
-  /// **'成员 {detail}'**
-  String adminConsoleMemberListItem(String detail);
+  /// **'{email} · {role} · joined {joinedAt}'**
+  String adminConsoleMemberListItem(String email, String role, String joinedAt);
 
   /// No description provided for @adminConsoleRecentProjectItem.
   ///
   /// In en, this message translates to:
-  /// **'项目 {detail}'**
-  String adminConsoleRecentProjectItem(String detail);
+  /// **'#{numericId} {name} · {detail}'**
+  String adminConsoleRecentProjectItem(
+    int numericId,
+    String name,
+    String detail,
+  );
 
   /// No description provided for @adminConsoleChipScript.
   ///
@@ -16879,50 +17111,72 @@ abstract class AppLocalizations {
   /// No description provided for @adminConsoleAclMemberItem.
   ///
   /// In en, this message translates to:
-  /// **'成员 {detail}'**
-  String adminConsoleAclMemberItem(String detail);
+  /// **'{email} · workspace {workspaceRole} · project {projectRole}'**
+  String adminConsoleAclMemberItem(
+    String email,
+    String workspaceRole,
+    String projectRole,
+  );
 
   /// No description provided for @adminConsoleWorkspaceCandidateItem.
   ///
   /// In en, this message translates to:
-  /// **'候选 {detail}'**
-  String adminConsoleWorkspaceCandidateItem(String detail);
+  /// **'{email} · {workspaceRole} · explicit {explicitProjectCount}'**
+  String adminConsoleWorkspaceCandidateItem(
+    String email,
+    String workspaceRole,
+    int explicitProjectCount,
+  );
 
   /// No description provided for @adminConsoleProjectRecentJobItem.
   ///
   /// In en, this message translates to:
-  /// **'作业 {detail}'**
-  String adminConsoleProjectRecentJobItem(String detail);
+  /// **'{kind} · {status} · {ownerEmail} · {createdAt}'**
+  String adminConsoleProjectRecentJobItem(
+    String kind,
+    String status,
+    String ownerEmail,
+    String createdAt,
+  );
 
   /// No description provided for @adminConsoleAuditUserSummary.
   ///
   /// In en, this message translates to:
-  /// **'用户审计 {detail}'**
-  String adminConsoleAuditUserSummary(String detail);
+  /// **'status={status} · quota={quota}'**
+  String adminConsoleAuditUserSummary(String status, String quota);
 
   /// No description provided for @adminConsoleAuditWorkspaceMembership.
   ///
   /// In en, this message translates to:
-  /// **'工作区成员审计 {detail}'**
-  String adminConsoleAuditWorkspaceMembership(String detail);
+  /// **'action={action} · user={userId} · role={role} · workspace={workspaceId}'**
+  String adminConsoleAuditWorkspaceMembership(
+    String action,
+    String userId,
+    String role,
+    String workspaceId,
+  );
 
   /// No description provided for @adminConsoleAuditOwnerTransfer.
   ///
   /// In en, this message translates to:
-  /// **'所有权转移 {detail}'**
-  String adminConsoleAuditOwnerTransfer(String detail);
+  /// **'owner transfer: {previousOwner} → {newOwner}'**
+  String adminConsoleAuditOwnerTransfer(String previousOwner, String newOwner);
 
   /// No description provided for @adminConsoleAuditArchiveNote.
   ///
   /// In en, this message translates to:
-  /// **'归档备注 {detail}'**
-  String adminConsoleAuditArchiveNote(String detail);
+  /// **'archived {archivedAt} · note {note}'**
+  String adminConsoleAuditArchiveNote(String archivedAt, String note);
 
   /// No description provided for @adminConsoleAuditProjectOwnerTransfer.
   ///
   /// In en, this message translates to:
-  /// **'项目所有权转移 {detail}'**
-  String adminConsoleAuditProjectOwnerTransfer(String detail);
+  /// **'project owner transfer: {previousOwner} → {newOwner} · {projectId}'**
+  String adminConsoleAuditProjectOwnerTransfer(
+    String previousOwner,
+    String newOwner,
+    String projectId,
+  );
 
   /// No description provided for @adminConsoleFieldUserId.
   ///
@@ -17125,8 +17379,8 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionCandidateIds.
   ///
   /// In en, this message translates to:
-  /// **'候选 {count} 项'**
-  String agentWorkspaceProductionCandidateIds(int count);
+  /// **'candidates {count}: {preview}'**
+  String agentWorkspaceProductionCandidateIds(int count, String preview);
 
   /// No description provided for @agentWorkspaceProductionPromptPreviewTitle.
   ///
@@ -17275,8 +17529,8 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionReviewIssues.
   ///
   /// In en, this message translates to:
-  /// **'问题：{issues}'**
-  String agentWorkspaceProductionReviewIssues(String issues);
+  /// **'issues {count}: {issues}'**
+  String agentWorkspaceProductionReviewIssues(int count, String issues);
 
   /// No description provided for @agentWorkspaceProductionReviewNextStep.
   ///
@@ -17419,14 +17673,17 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionSummaryReviewHeadline.
   ///
   /// In en, this message translates to:
-  /// **'聚焦资产 {count} 项'**
-  String agentWorkspaceProductionSummaryReviewHeadline(int count);
+  /// **'focused assets {count}: {scope}'**
+  String agentWorkspaceProductionSummaryReviewHeadline(int count, String scope);
 
   /// No description provided for @agentWorkspaceProductionSummaryIssueBreakdown.
   ///
   /// In en, this message translates to:
-  /// **'问题分布 {count} 项'**
-  String agentWorkspaceProductionSummaryIssueBreakdown(int count);
+  /// **'issue breakdown {count}: {breakdown}'**
+  String agentWorkspaceProductionSummaryIssueBreakdown(
+    int count,
+    String breakdown,
+  );
 
   /// No description provided for @agentWorkspaceProductionSummaryFocusedAssets.
   ///
@@ -17551,14 +17808,14 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionSummaryObjectListEntry.
   ///
   /// In en, this message translates to:
-  /// **'列表 {count} 项'**
-  String agentWorkspaceProductionSummaryObjectListEntry(int count);
+  /// **'{key}: {count} items'**
+  String agentWorkspaceProductionSummaryObjectListEntry(String key, int count);
 
   /// No description provided for @agentWorkspaceProductionSummaryObjectTextEntry.
   ///
   /// In en, this message translates to:
-  /// **'文本 {chars} 字'**
-  String agentWorkspaceProductionSummaryObjectTextEntry(int chars);
+  /// **'{key}: {chars} chars'**
+  String agentWorkspaceProductionSummaryObjectTextEntry(String key, int chars);
 
   /// No description provided for @agentWorkspaceProductionSummaryReturnedType.
   ///
@@ -17833,8 +18090,11 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceScriptContextChapterPrefix.
   ///
   /// In en, this message translates to:
-  /// **'第 {chapter} 章'**
-  String agentWorkspaceScriptContextChapterPrefix(String chapter);
+  /// **'Chapter {chapterIndex} · {chapter}'**
+  String agentWorkspaceScriptContextChapterPrefix(
+    int chapterIndex,
+    String chapter,
+  );
 
   /// No description provided for @agentWorkspaceScriptContextNovelChapters.
   ///
@@ -17893,8 +18153,13 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceScriptSummaryReviewLine.
   ///
   /// In en, this message translates to:
-  /// **'审核 {detail}'**
-  String agentWorkspaceScriptSummaryReviewLine(String detail);
+  /// **'review {target}: grade {grade}, {issueCount} issues{summary}'**
+  String agentWorkspaceScriptSummaryReviewLine(
+    String target,
+    String grade,
+    int issueCount,
+    String summary,
+  );
 
   /// No description provided for @agentWorkspaceScriptSummaryPlanDataMissing.
   ///
@@ -18388,8 +18653,8 @@ abstract class AppLocalizations {
   /// No description provided for @contentComplianceReportInfo.
   ///
   /// In en, this message translates to:
-  /// **'reporter {reporter}'**
-  String contentComplianceReportInfo(String reporter);
+  /// **'reporter {reporter} · {reportedAt}'**
+  String contentComplianceReportInfo(String reporter, String reportedAt);
 
   /// No description provided for @contentComplianceResolutionLine.
   ///
