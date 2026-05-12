@@ -78,6 +78,137 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get shortVideoSpaceCannotSaveNoProject => '无法保存：未选择项目或未登录';
+
+  @override
+  String get shortVideoSpaceSavingInProgress => '正在保存中，请稍候...';
+
+  @override
+  String get shortVideoSpaceSelectAllAvailable =>
+      '全选快捷键 (Ctrl+A / Cmd+A) 在镜头操作面板中可用';
+
+  @override
+  String get shortVideoSpaceSearchFocused => '已聚焦搜索框';
+
+  @override
+  String get shortVideoSpaceSearchNotAvailable => '搜索框不可用（请先打开镜头操作面板）';
+
+  @override
+  String get shortVideoSpaceSaveProjectConfig => '保存项目配置';
+
+  @override
+  String get shortVideoSpaceSelectAllShots => '全选镜头（在批量操作模式下）';
+
+  @override
+  String get shortVideoSpaceFocusSearch => '聚焦搜索框';
+
+  @override
+  String get shortVideoSpaceUndoOperation => '撤销上一步操作';
+
+  @override
+  String get shortVideoSpaceRedoOperation => '重做上一步操作';
+
+  @override
+  String get shortVideoSpaceFileOperations => '文件操作';
+
+  @override
+  String get shortVideoSpaceSelectionOperations => '选择操作';
+
+  @override
+  String get shortVideoSpaceNavigation => '导航';
+
+  @override
+  String get shortVideoSpaceEditOperations => '编辑操作';
+
+  @override
+  String get shortVideoSpaceKeyboardShortcuts => '键盘快捷键';
+
+  @override
+  String get shortVideoSpaceClose => '关闭';
+
+  @override
+  String get shortVideoSpaceCurrentProjectOverview => '当前项目概览';
+
+  @override
+  String get shortVideoSpaceRecentBadCaseTrends => '最近坏例倾向';
+
+  @override
+  String get shortVideoSpaceRecentTaskFlow => '最近任务流';
+
+  @override
+  String get shortVideoSpaceAssetsOverview => '资产总览';
+
+  @override
+  String get shortVideoSpaceAssemblySnapshot => '成片装配快照';
+
+  @override
+  String get shortVideoSpaceQualityReview => '成片候选验收（质量评审）';
+
+  @override
+  String get shortVideoSpaceMultiTrackExportDecision => '受限多轨导出决策（K5）';
+
+  @override
+  String get shortVideoSpaceOpenProductionWorkspace => '打开制作工作区';
+
+  @override
+  String get shortVideoSpaceBasicShotOperations => '镜头基础操作';
+
+  @override
+  String get shortVideoSpaceAssemblyStyleAdjustment => '成片样式调整';
+
+  @override
+  String get shortVideoSpaceExportPreCheck => '导出前检查';
+
+  @override
+  String get shortVideoSpaceQualityGateBlockingReasons => '质量门禁阻断原因';
+
+  @override
+  String get shortVideoSpaceBlockingItems => '阻塞项（按接口顺序节选）';
+
+  @override
+  String get shortVideoSpaceWarningItems => '警告项（按接口顺序节选）';
+
+  @override
+  String get shortVideoSpaceExporting => '导出中…';
+
+  @override
+  String get shortVideoSpaceStartExport => '开始导出';
+
+  @override
+  String get shortVideoSpaceExportHistory => '导出历史';
+
+  @override
+  String get shortVideoSpacePublishJobs => '发布作业';
+
+  @override
+  String get shortVideoSpaceScheduleCalendar => '排程月历（按本地日历日计数；点选某日批量写入定时）';
+
+  @override
+  String get shortVideoSpaceTargetConfiguration => '短视频目标配置';
+
+  @override
+  String get shortVideoSpaceConfigurationDescription =>
+      '把创作模式和画幅直接写回项目,后面的脚本与制作流程就能基于同一份项目配置继续工作。';
+
+  @override
+  String get shortVideoSpaceTargetProject => '目标项目';
+
+  @override
+  String get shortVideoSpaceLoading => '读取中';
+
+  @override
+  String get shortVideoSpaceRefreshProjects => '刷新项目';
+
+  @override
+  String get shortVideoSpaceRestoreRiskyConfirmation => '恢复高风险确认提示';
+
+  @override
+  String get shortVideoSpacePortrait916 => '竖屏 9:16';
+
+  @override
+  String get shortVideoSpaceLandscape169 => '横屏 16:9';
+
+  @override
   String get notificationsCenterTitle => '通知中心';
 
   @override
@@ -1438,6 +1569,221 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get projectsDialogSectionBrand => '品牌圣经';
+
+  @override
+  String shortVideoSpaceErrorTimeout(String context) {
+    return '请求超时$context，请检查网络连接后重试。';
+  }
+
+  @override
+  String shortVideoSpaceErrorOperationFailed(String context, String error) {
+    return '操作失败$context：$error';
+  }
+
+  @override
+  String shortVideoSpaceErrorConcurrentLimitExceeded(String context) {
+    return '同时进行的工作区审计导出已达上限，请等待已有任务完成或结束后再试$context。';
+  }
+
+  @override
+  String shortVideoSpaceErrorRateLimitWithWait(
+    String context,
+    String waitText,
+  ) {
+    return '请求过于频繁$context，$waitText。';
+  }
+
+  @override
+  String shortVideoSpaceErrorNotFound(String context) {
+    return '未找到对应记录$context。';
+  }
+
+  @override
+  String shortVideoSpaceErrorPermissionDenied(String context) {
+    return '权限不足$context，请检查登录状态。';
+  }
+
+  @override
+  String get shortVideoSpaceErrorBadRequest => '请求参数错误';
+
+  @override
+  String shortVideoSpaceErrorBadRequestWithContext(
+    String message,
+    String context,
+  ) {
+    return '$message$context';
+  }
+
+  @override
+  String shortVideoSpaceErrorServerError(String context) {
+    return '服务器错误$context，请稍后重试。';
+  }
+
+  @override
+  String shortVideoSpaceErrorDetailedMessage(String message, String context) {
+    return '$message$context';
+  }
+
+  @override
+  String shortVideoSpaceErrorDefaultMessage(String context, String error) {
+    return '操作失败$context：$error';
+  }
+
+  @override
+  String get shortVideoSpaceErrorRetryButton => '重试';
+
+  @override
+  String get shortVideoSpaceDialogExportHistoryTitle => '导出历史';
+
+  @override
+  String get shortVideoSpaceDialogExportHistoryRefresh => '刷新';
+
+  @override
+  String get shortVideoSpaceDialogExportHistoryStatusLabel => '状态';
+
+  @override
+  String get shortVideoSpaceDialogExportHistoryTimeLabel => '时间';
+
+  @override
+  String get shortVideoSpaceDialogExportHistoryClose => '关闭';
+
+  @override
+  String get shortVideoSpaceDialogExportHistoryRetry => '重试';
+
+  @override
+  String get shortVideoSpaceDialogExportHistoryNoRecords => '暂无导出记录';
+
+  @override
+  String get shortVideoSpaceDialogExportHistoryNoRecordsHint =>
+      '导出视频后，记录将显示在这里';
+
+  @override
+  String get shortVideoSpaceDialogExportHistoryDownload => '下载';
+
+  @override
+  String get shortVideoSpaceDialogExportHistoryDownloading => '下载中...';
+
+  @override
+  String get shortVideoSpaceDialogExportHistoryTimeFilterAll => '全部时间';
+
+  @override
+  String get shortVideoSpaceDialogExportHistoryTimeFilterToday => '今天';
+
+  @override
+  String get shortVideoSpaceDialogExportHistoryTimeFilterWeek => '最近一周';
+
+  @override
+  String get shortVideoSpaceDialogExportHistoryTimeFilterMonth => '最近一月';
+
+  @override
+  String get shortVideoSpaceDialogExportHistoryStatusFilterAll => '全部状态';
+
+  @override
+  String get shortVideoSpaceDialogExportHistoryStatusFilterCompleted => '已完成';
+
+  @override
+  String get shortVideoSpaceDialogExportHistoryStatusFilterFailed => '失败';
+
+  @override
+  String get shortVideoSpaceDialogExportHistoryStatusFilterCancelled => '已取消';
+
+  @override
+  String get shortVideoSpaceDialogExportHistoryFileSizeUnknown => '未知';
+
+  @override
+  String shortVideoSpaceDialogExportHistoryFileSizeKB(String size) {
+    return '$size KB';
+  }
+
+  @override
+  String shortVideoSpaceDialogExportHistoryFileSizeMB(String size) {
+    return '$size MB';
+  }
+
+  @override
+  String shortVideoSpaceDialogExportHistoryFileSizeGB(String size) {
+    return '$size GB';
+  }
+
+  @override
+  String shortVideoSpaceDialogExportHistoryDurationSeconds(int seconds) {
+    return '$seconds 秒';
+  }
+
+  @override
+  String shortVideoSpaceDialogExportHistoryDurationMinutes(int minutes) {
+    return '$minutes 分钟';
+  }
+
+  @override
+  String shortVideoSpaceDialogExportHistoryDurationHours(
+    int hours,
+    int minutes,
+  ) {
+    return '$hours 小时 $minutes 分钟';
+  }
+
+  @override
+  String shortVideoSpaceDialogExportHistoryCreatedAt(String time) {
+    return '创建时间: $time';
+  }
+
+  @override
+  String shortVideoSpaceDialogExportHistoryCompletedAt(
+    String time,
+    String duration,
+  ) {
+    return '完成时间: $time · 耗时: $duration';
+  }
+
+  @override
+  String shortVideoSpaceDialogExportHistoryFileSize(String size) {
+    return '文件大小: $size';
+  }
+
+  @override
+  String shortVideoSpaceDialogExportHistorySettings(
+    String bitrate,
+    int framerate,
+  ) {
+    return '设置: $bitrate · $framerate FPS';
+  }
+
+  @override
+  String shortVideoSpaceDialogExportHistoryLoadError(String error) {
+    return '加载导出历史失败: $error';
+  }
+
+  @override
+  String get shortVideoSpaceDialogExportHistorySessionExpired => '会话已失效，请重新登录';
+
+  @override
+  String shortVideoSpaceDialogExportHistoryDownloadLinkCopied(String format) {
+    return '已复制下载链接（$format）';
+  }
+
+  @override
+  String shortVideoSpaceDialogExportHistoryDownloadFailed(String error) {
+    return '下载失败: $error';
+  }
+
+  @override
+  String get shortVideoSpaceDialogExportHistoryTimeJustNow => '刚刚';
+
+  @override
+  String shortVideoSpaceDialogExportHistoryTimeMinutesAgo(int minutes) {
+    return '$minutes 分钟前';
+  }
+
+  @override
+  String shortVideoSpaceDialogExportHistoryTimeHoursAgo(int hours) {
+    return '$hours 小时前';
+  }
+
+  @override
+  String shortVideoSpaceDialogExportHistoryTimeDaysAgo(int days) {
+    return '$days 天前';
+  }
 
   @override
   String get projectsDialogFieldBrandName => 'Brand name';
@@ -5213,5 +5559,1521 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String qualityReviewsScopeSeedLine(String line) {
     return '范围种子：$line';
+  }
+
+  @override
+  String get projectEditorAssetHistoryTitle => '资产历史图工作台';
+
+  @override
+  String get projectEditorAssetHistoryTypeFilterLabel => '类型过滤（可选）';
+
+  @override
+  String get projectEditorAssetHistoryTypeFilterHelper =>
+      '逗号分隔，例如 role,clip,props；留空表示全部';
+
+  @override
+  String get projectEditorAssetHistoryLoading => '加载中…';
+
+  @override
+  String get projectEditorAssetHistoryQueryButton => '查询历史图资产';
+
+  @override
+  String get projectEditorAssetHistoryClearFilter => '清空类型过滤';
+
+  @override
+  String get projectEditorAssetHistoryLoadingAssets => '正在加载历史图资产…';
+
+  @override
+  String get projectEditorAssetHistoryEmptyState => '暂无数据，点击「查询历史图资产」开始。';
+
+  @override
+  String get projectEditorAssetHistoryImageDropdownLabel => '历史图片';
+
+  @override
+  String get projectEditorAssetHistoryNoImages => '该资产暂无历史图片';
+
+  @override
+  String projectEditorAssetHistoryCurrentImage(int sortIndex, String state) {
+    return '当前图片：sort=$sortIndex · state=$state';
+  }
+
+  @override
+  String get projectEditorAssetHistoryNoPreview =>
+      '当前图片没有可用预览（可能仅存路径占位或远程资源暂不可达）';
+
+  @override
+  String get projectEditorAssetHistoryClose => '关闭';
+
+  @override
+  String get projectEditorAssetGenerationTitle => '资产出图工作台';
+
+  @override
+  String get projectEditorAssetGenerationDescription =>
+      '把 production 资产摘要、批量出图、状态轮询、衍生图清理和封面 URL 更新收口到项目资产主流程，不再只依赖 system probe。';
+
+  @override
+  String get projectEditorAssetGenerationClose => '关闭';
+
+  @override
+  String get projectEditorScriptsBatchAddTitle => '批量新增剧本';
+
+  @override
+  String get projectEditorScriptsBatchAddCountLabel => '数量（1-20）';
+
+  @override
+  String get projectEditorScriptsBatchAddCountHelper => '单次最多创建 20 条，避免误操作。';
+
+  @override
+  String get projectEditorScriptsBatchAddNamePrefixLabel => '名称前缀';
+
+  @override
+  String get projectEditorScriptsBatchAddContentLabel => '剧本默认内容';
+
+  @override
+  String get projectEditorScriptsBatchAddCancel => '取消';
+
+  @override
+  String get projectEditorScriptsBatchAddCreate => '创建';
+
+  @override
+  String get projectEditorScriptsBatchAddCountError => '数量必须是 1-20 的整数';
+
+  @override
+  String get projectEditorScriptsBatchAddDefaultPrefix => '新剧本';
+
+  @override
+  String get projectEditorScriptsBatchAddDefaultContent => '剧情梗概待补充。';
+
+  @override
+  String projectEditorScriptsBatchAddSuccess(int count) {
+    return '已批量创建 $count 条剧本';
+  }
+
+  @override
+  String get projectEditorProbeTasksZeroItems => '0 项';
+
+  @override
+  String get projectEditorProbeTasksZeroClasses => '0 类';
+
+  @override
+  String projectEditorProbeTasksCompatGetTaskApi(int total, int count) {
+    return 'compat get-task-api（GET jobs/page）：total=$total · $count 条本页';
+  }
+
+  @override
+  String get projectEditorProbeProjectsZeroItems => '0 项';
+
+  @override
+  String projectEditorProbeProjectsCompatList(String line) {
+    return 'GET …/projects（compat 列表）：$line';
+  }
+
+  @override
+  String get projectEditorProbeScriptsZeroItems => '0 条';
+
+  @override
+  String get projectEditorProbeScriptsEmpty => '（empty：均在提取中或 idle）';
+
+  @override
+  String get projectEditorProbeScriptsGetFirstScript =>
+      'GET projects/…/scripts (首条)';
+
+  @override
+  String get projectEditorProbeScriptsLoading => 'script…';
+
+  @override
+  String projectEditorProbeScriptsPostGetScriptApi(
+    int count,
+    String sample,
+    Object id,
+  ) {
+    return 'POST …/projects/$id/scripts/get-script-api：$count 条 · $sample';
+  }
+
+  @override
+  String get projectEditorAssetSummaryProductionEmpty => 'production 资产数据为空';
+
+  @override
+  String projectEditorAssetSummaryProductionLine(
+    int total,
+    String typesLine,
+    String sampleLine,
+  ) {
+    return 'production 资产 $total 条 · $typesLine · 示例：$sampleLine';
+  }
+
+  @override
+  String projectEditorAssetSummaryTypeCount(String type, int count) {
+    return '$type $count 条';
+  }
+
+  @override
+  String get projectEditorAssetSummaryPollingEmpty => '未返回选中资产的图片状态';
+
+  @override
+  String projectEditorAssetSummaryPollingLine(
+    int count,
+    String stateLine,
+    String sampleLine,
+  ) {
+    return '已轮询 $count 条资产 · $stateLine · 示例：$sampleLine';
+  }
+
+  @override
+  String projectEditorAssetSummaryStateCount(String state, int count) {
+    return '$state $count 条';
+  }
+
+  @override
+  String projectEditorAssetSummaryImageCount(int assetId, int count) {
+    return '#$assetId: $count 张';
+  }
+
+  @override
+  String projectEditorAssetSummaryMaterialContext(
+    int imageCount,
+    int videoCount,
+  ) {
+    return '素材上下文 $imageCount 条图片素材 · $videoCount 条视频素材';
+  }
+
+  @override
+  String get projectEditorAssetSummaryBatchEmpty => '批量候选为空';
+
+  @override
+  String projectEditorAssetSummaryBatchLine(
+    int count,
+    int total,
+    String sampleLine,
+  ) {
+    return '批量候选 $count/$total 条 · 示例：$sampleLine';
+  }
+
+  @override
+  String get projectEditorAssetSummaryPromptEmpty => '未返回 prompt 状态';
+
+  @override
+  String projectEditorAssetSummaryPromptLine(int count, String stateLine) {
+    return 'prompt 轮询 $count 条 · $stateLine';
+  }
+
+  @override
+  String get projectEditorAssetSummarySelectionNone => '当前未选择资产';
+
+  @override
+  String projectEditorAssetSummarySelectionSingle(int id, String name) {
+    return '当前选择 #$id $name';
+  }
+
+  @override
+  String projectEditorAssetSummarySelectionMultiple(int count, String sample) {
+    return '当前选择 $count 条资产：$sample';
+  }
+
+  @override
+  String get authSupabaseNotConfigured =>
+      '未配置：运行示例\nflutter run --dart-define=SUPABASE_URL=... --dart-define=SUPABASE_ANON_KEY=...';
+
+  @override
+  String get authSignIn => '登录';
+
+  @override
+  String get authSignUp => '注册';
+
+  @override
+  String get authSignOut => '退出';
+
+  @override
+  String authSignedInUser(String userId) {
+    return '已登录 user: $userId';
+  }
+
+  @override
+  String get authRequestInProgress => '请求中…';
+
+  @override
+  String get authGetMeBearer => 'GET /api/v1/me (Bearer)';
+
+  @override
+  String authMeResponse(String response) {
+    return '/me: $response';
+  }
+
+  @override
+  String get authDevSwitchProbe =>
+      'GET+PUT /api/v1/settings/dev/switch-ai-tool';
+
+  @override
+  String authDevSwitchResponse(String response) {
+    return 'dev switch: $response';
+  }
+
+  @override
+  String get authMemoryConfigProbe =>
+      'memory-config GET+POST + clear-agent-memories';
+
+  @override
+  String authMemoryConfigResponse(String response) {
+    return 'memory-config: $response';
+  }
+
+  @override
+  String get authAboutProbe =>
+      'POST …/settings/about/check-update + download-app';
+
+  @override
+  String authAboutResponse(String response) {
+    return 'about: $response';
+  }
+
+  @override
+  String get authUsageSummary => 'GET /api/v1/usage/summary';
+
+  @override
+  String authUsageResponse(String response) {
+    return 'usage: $response';
+  }
+
+  @override
+  String get authPromptsProbe => 'GET /api/v1/prompts + GET/1 + PATCH/1';
+
+  @override
+  String authPromptsResponse(String response) {
+    return 'prompts: $response';
+  }
+
+  @override
+  String get authVisualManualProbe => 'GET+POST /api/v1/visual-manual';
+
+  @override
+  String authVisualManualResponse(String response) {
+    return 'visual-manual: $response';
+  }
+
+  @override
+  String get authDirectorManualProbe => 'POST …/project/query-director-manual';
+
+  @override
+  String authDirectorManualResponse(String response) {
+    return 'director-manual: $response';
+  }
+
+  @override
+  String get authSkillsBinaryProbe => 'GET /api/v1/skills/binary (_smoke PNG)';
+
+  @override
+  String authSkillsBinaryResponse(String response) {
+    return 'skills/binary: $response';
+  }
+
+  @override
+  String get authModelsCatalogProbe =>
+      'models + vendors + vendor-add + danger + production + agent-deploy + model-test + script-agent + assets-gen';
+
+  @override
+  String get authTextModelDefaultProbe =>
+      'GET+PATCH /api/v1/models/text-default';
+
+  @override
+  String get authModelDetailProbe =>
+      'GET /api/v1/models/detail (1:gpt-4o-mini)';
+
+  @override
+  String authModelsResponse(String response) {
+    return 'models: $response';
+  }
+
+  @override
+  String authTextDefaultResponse(String response) {
+    return 'text-default: $response';
+  }
+
+  @override
+  String authModelDetailResponse(String response) {
+    return 'model detail: $response';
+  }
+
+  @override
+  String get shortVideoSpaceDialogExportProgressTitle => '导出进度';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressStatusQueued => '排队中';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressStatusProcessing => '处理中';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressStatusCompleted => '已完成';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressStatusFailed => '失败';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressStatusCancelled => '已取消';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressStageInitializing => '初始化';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressStageLoadingAssets => '加载素材';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressStageEncoding => '编码视频';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressStageUploading => '上传文件';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressStageFinalizing => '完成处理';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressLoadingStatus => '正在获取导出状态...';
+
+  @override
+  String shortVideoSpaceDialogExportProgressFetchError(String error) {
+    return '获取进度失败: $error';
+  }
+
+  @override
+  String get shortVideoSpaceDialogExportProgressSessionExpired => '会话已失效，请重新登录';
+
+  @override
+  String shortVideoSpaceDialogExportProgressCancelFailed(String error) {
+    return '取消失败: $error';
+  }
+
+  @override
+  String shortVideoSpaceDialogExportProgressTaskId(String taskId) {
+    return '任务 ID: $taskId';
+  }
+
+  @override
+  String get shortVideoSpaceDialogExportProgressCancelButton => '取消导出';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressCloseButton => '关闭';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressMessageQueued =>
+      '导出任务已加入队列，等待处理...';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressMessageInitializing =>
+      '正在初始化导出任务...';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressMessageLoadingAssets =>
+      '正在加载视频素材和音频文件...';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressMessageEncoding =>
+      '正在编码视频，这可能需要几分钟...';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressMessageUploading =>
+      '正在上传导出的视频文件...';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressMessageFinalizing =>
+      '正在完成最后的处理步骤...';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressMessageProcessing =>
+      '正在处理导出任务...';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressMessageCompleted =>
+      '导出成功完成！视频已准备好下载。';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressMessageFailed =>
+      '导出失败，请重试或联系支持。';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressMessageCancelled => '导出已被取消。';
+
+  @override
+  String get shortVideoSpaceDialogConfirmDeleteVersionTitle => '确认删除';
+
+  @override
+  String shortVideoSpaceDialogConfirmDeleteVersionMessage(String versionName) {
+    return '确定要删除版本 \"$versionName\" 吗？\n\n此操作无法撤销。';
+  }
+
+  @override
+  String get shortVideoSpaceDialogConfirmDeleteVersionDontShow => '不再提示';
+
+  @override
+  String get shortVideoSpaceDialogConfirmDeleteVersionCancel => '取消';
+
+  @override
+  String get shortVideoSpaceDialogConfirmDeleteVersionConfirm => '删除';
+
+  @override
+  String get shortVideoSpaceDialogConfirmBatchDisableTitle => '确认批量禁用';
+
+  @override
+  String shortVideoSpaceDialogConfirmBatchDisableMessage(int shotCount) {
+    return '确定要禁用选中的 $shotCount 个镜头吗？\n\n禁用后的镜头将不会出现在最终视频中。';
+  }
+
+  @override
+  String get shortVideoSpaceDialogConfirmBatchDisableConfirm => '确认禁用';
+
+  @override
+  String get shortVideoSpaceDialogConfirmRestoreDraftTitle => '确认恢复草稿';
+
+  @override
+  String shortVideoSpaceDialogConfirmRestoreDraftMessage(String draftName) {
+    return '确定要恢复草稿 \"$draftName\" 吗？\n\n当前未保存的编辑状态将会丢失。';
+  }
+
+  @override
+  String get shortVideoSpaceDialogConfirmRestoreDraftConfirm => '恢复';
+
+  @override
+  String get shortVideoSpaceDialogConfirmCancelExportTitle => '取消导出';
+
+  @override
+  String get shortVideoSpaceDialogConfirmCancelExportMessage =>
+      '确定要取消导出吗？已处理的内容将会丢失。';
+
+  @override
+  String get shortVideoSpaceDialogConfirmCancelExportContinue => '继续导出';
+
+  @override
+  String get shortVideoSpaceDialogConfirmCancelExportConfirm => '确认取消';
+
+  @override
+  String get shortVideoSpaceDialogConfirmBatchArchiveTitle => '批量归档确认';
+
+  @override
+  String shortVideoSpaceDialogConfirmBatchArchiveMessage(int draftCount) {
+    return '确定要归档 $draftCount 张发布草稿吗？归档后将从待发布队列中移除（视后端策略可能可恢复）。';
+  }
+
+  @override
+  String get shortVideoSpaceDialogConfirmBatchArchiveConfirm => '确认归档';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsTitle => '配音参数设置';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsProviderLabel => 'TTS 供应商';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsProviderOpenAI =>
+      'OpenAI TTS';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsProviderAzure => 'Azure TTS';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsProviderGoogle =>
+      'Google TTS';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsVoiceLabel => '声线';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsVoiceAlloy => 'Alloy (中性)';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsVoiceEcho => 'Echo (男性)';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsVoiceFable => 'Fable (英式)';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsVoiceOnyx => 'Onyx (深沉)';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsVoiceNova => 'Nova (女性)';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsVoiceShimmer =>
+      'Shimmer (柔和)';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsEmotionLabel => '情绪';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsEmotionNeutral =>
+      '中性 (Neutral)';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsEmotionHappy => '愉悦 (Happy)';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsEmotionSad => '悲伤 (Sad)';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsEmotionAngry => '愤怒 (Angry)';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsSpeedLabel => '语速';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsSpeedRange =>
+      '调整范围：0.5x (慢速) - 2.0x (快速)';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsInfoMessage =>
+      '保存后将应用到新生成的配音。已生成的配音需要重新生成才能应用新参数。';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsCancel => '取消';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsSave => '保存';
+
+  @override
+  String get shortVideoSpacePublishQualityStageUnlabeled => '未标注阶段';
+
+  @override
+  String get shortVideoSpacePublishQualityStageStorySkeleton => '故事骨架';
+
+  @override
+  String get shortVideoSpacePublishQualityStageAdaptationStrategy => '改编策略';
+
+  @override
+  String get shortVideoSpacePublishQualityStageDirectorPlanning => '导演规划';
+
+  @override
+  String get shortVideoSpacePublishQualityStageStoryboardTable => '分镜表';
+
+  @override
+  String get shortVideoSpacePublishQualityStageStoryboardPanel => '分镜面板';
+
+  @override
+  String get shortVideoSpacePublishQualityStageVideoPrompt => '视频提示 / 成片';
+
+  @override
+  String get shortVideoSpacePublishExportIssueCandidatePending => '候选待确认';
+
+  @override
+  String get shortVideoSpacePublishExportIssueMissingSelectedMedia => '未选成片媒体';
+
+  @override
+  String get shortVideoSpacePublishExportIssueSelectedMediaNotVideo =>
+      '所选媒体非视频';
+
+  @override
+  String get shortVideoSpacePublishExportIssueSubtitlePlaceholder =>
+      '字幕 / 口播文案缺失';
+
+  @override
+  String get shortVideoSpacePublishExportIssueSubtitleEmpty => '字幕为空';
+
+  @override
+  String get shortVideoSpacePublishExportIssueVoiceoverFailed => '旁白生成失败';
+
+  @override
+  String get shortVideoSpacePublishExportIssueVoiceoverAudioMissing =>
+      '旁白音频未就绪';
+
+  @override
+  String get shortVideoSpacePublishExportIssueVoiceoverNotReady => '配音未就绪';
+
+  @override
+  String get shortVideoSpacePublishExportIssueDurationNotExplicit =>
+      '时长未标明（导出默认）';
+
+  @override
+  String get shortVideoSpacePublishExportIssueDurationNotSet => '时长未设定';
+
+  @override
+  String get shortVideoSpacePublishExportIssueDurationUnparsable => '时长格式异常';
+
+  @override
+  String get shortVideoSpacePublishExportIssueCompletionUncertain =>
+      '成片状态未标「已完成」';
+
+  @override
+  String get shortVideoSpacePublishAssemblyLoadingHeadline => '正在读取成片装配快照…';
+
+  @override
+  String get shortVideoSpacePublishAssemblyLoadingDetail =>
+      '数据来自 GET …/short-video-assembly（按剧本顺序汇总分镜与成片要素）。';
+
+  @override
+  String get shortVideoSpacePublishAssemblyUnavailableHeadline => '成片装配快照暂不可用。';
+
+  @override
+  String get shortVideoSpacePublishAssemblyUnavailableDetail =>
+      '可稍后刷新，或在制作工作区确认分镜与时间线后再试。';
+
+  @override
+  String get shortVideoSpacePublishAssemblyNoScriptsHeadline =>
+      '当前尚无剧本 / 分镜装配数据。';
+
+  @override
+  String shortVideoSpacePublishAssemblyHeadlineScripts(
+    int count,
+    int shots,
+    int seconds,
+    String formatted,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个剧本',
+      one: '1 个剧本',
+    );
+    return '$_temp0 · $shots 条分镜（导出路径快照）\n成片总时长：$seconds秒 ($formatted)';
+  }
+
+  @override
+  String get shortVideoSpacePublishAssemblyVoiceProfileNotSet => '配音档案：未写';
+
+  @override
+  String shortVideoSpacePublishAssemblyVoiceProfile(String profile) {
+    return '配音档案：$profile';
+  }
+
+  @override
+  String get shortVideoSpacePublishAssemblySubtitleDefault => '字幕：默认';
+
+  @override
+  String shortVideoSpacePublishAssemblySubtitle(String style) {
+    return '字幕：$style';
+  }
+
+  @override
+  String get shortVideoSpacePublishAssemblyBgmNotSpecified => 'BGM：未指定';
+
+  @override
+  String shortVideoSpacePublishAssemblyBgm(String strategy) {
+    return 'BGM：$strategy';
+  }
+
+  @override
+  String shortVideoSpacePublishAssemblyEffectiveTts(String voice) {
+    return '生效 TTS（入队/worker）：$voice';
+  }
+
+  @override
+  String shortVideoSpacePublishAssemblyScriptTitle(int id) {
+    return '剧本 #$id';
+  }
+
+  @override
+  String shortVideoSpacePublishAssemblyScriptTitleNamed(int id, String name) {
+    return '剧本 #$id · $name';
+  }
+
+  @override
+  String shortVideoSpacePublishAssemblyScriptSummary(
+    String title,
+    int shots,
+    int withMedia,
+    int voReady,
+  ) {
+    return '$title · $shots 镜 · 已选成片 $withMedia · 旁白就绪 $voReady';
+  }
+
+  @override
+  String get shortVideoSpacePublishAssemblyShotPreviewYes => '预览✓';
+
+  @override
+  String get shortVideoSpacePublishAssemblyShotPreviewNo => '预览×';
+
+  @override
+  String get shortVideoSpacePublishAssemblyShotDurationUnknown => '时长?';
+
+  @override
+  String get shortVideoSpacePublishAssemblyShotSubtitleYes => '字幕✓';
+
+  @override
+  String get shortVideoSpacePublishAssemblyShotSubtitleNo => '字幕×';
+
+  @override
+  String get shortVideoSpacePublishAssemblyShotVoiceoverYes => '旁白✓';
+
+  @override
+  String get shortVideoSpacePublishAssemblyShotVoiceoverNo => '旁白×';
+
+  @override
+  String get shortVideoSpacePublishAssemblyShotBgmDefault => '默认';
+
+  @override
+  String shortVideoSpacePublishAssemblyShotDetail(
+    String order,
+    String preview,
+    String duration,
+    String subtitle,
+    String voiceover,
+    String bgm,
+  ) {
+    return '镜头[$order] · $preview · $duration · $subtitle · $voiceover · BGM $bgm';
+  }
+
+  @override
+  String shortVideoSpacePublishAssemblyMoreShots(int count) {
+    return '…其余 $count 镜请在制作工作区时间线查看';
+  }
+
+  @override
+  String shortVideoSpacePublishAssemblyQualityProjectBadCase(int count) {
+    return '项目级待验收坏例：$count（与生产概览同源）';
+  }
+
+  @override
+  String shortVideoSpacePublishAssemblyQualityAssemblyReviews(
+    int total,
+    int badCase,
+    int shots,
+  ) {
+    return '当前装配分镜上的评审：$total 条 · 坏例 $badCase · 涉及分镜 $shots';
+  }
+
+  @override
+  String shortVideoSpacePublishAssemblyQualityLateStageBadCase(int count) {
+    return '贴近成片阶段坏例（分镜面板/视频提示）：$count';
+  }
+
+  @override
+  String shortVideoSpacePublishAssemblyQualityByStage(String stages) {
+    return '按阶段：$stages';
+  }
+
+  @override
+  String shortVideoSpacePublishAssemblyQualityStageBadCase(
+    String stage,
+    int count,
+  ) {
+    return '$stage · 坏例 $count';
+  }
+
+  @override
+  String get shortVideoSpacePublishAssemblyQualityTaskCenterHint =>
+      '在任务中心侧可按项目筛选质量评审列表，分镜级 target 与装配一致。';
+
+  @override
+  String shortVideoSpacePublishAssemblyMultiTrackEstimate(
+    int subtitle,
+    int voiceover,
+    int bgm,
+    int total,
+  ) {
+    return '轨道占用估算：视频 1 + 字幕 $subtitle + 旁白 $voiceover + BGM $bgm = $total 轨。';
+  }
+
+  @override
+  String shortVideoSpacePublishAssemblyMaterialReady(
+    int video,
+    int subtitle,
+    int voiceover,
+    int totalShots,
+  ) {
+    return '素材就绪：视频镜头 $video/$totalShots，字幕镜头 $subtitle/$totalShots，旁白镜头 $voiceover/$totalShots。';
+  }
+
+  @override
+  String shortVideoSpacePublishAssemblyDurationEstimate(
+    int known,
+    int total,
+    String minutes,
+  ) {
+    return '时长估算：已识别 $known/$total 镜，总时长约 $minutes 分钟。';
+  }
+
+  @override
+  String get shortVideoSpacePublishAssemblyExportDecisionProfessional =>
+      '导出决策：当前超出受限多轨边界（>4 轨或时长复杂），建议转专业台（需求 8.2）处理。';
+
+  @override
+  String get shortVideoSpacePublishAssemblyExportDecisionLimited =>
+      '导出决策：维持受限多轨（<=4 轨）路径，可继续在当前链路导出。';
+
+  @override
+  String get shortVideoSpacePublishAssemblyBoundaryNote =>
+      '边界说明：Space 仅覆盖\"视频 + 单字幕轨 + 旁白 + BGM\"受限混排，不替代专业 NLE。';
+
+  @override
+  String get shortVideoSpacePublishAssemblyDetail =>
+      '只读剪辑台：展示镜头顺序、时长、字幕、旁白、BGM 与预览就绪摘要；导出阻塞结论见下方「导出前检查」。';
+
+  @override
+  String get shortVideoSpacePublishExportCheckLoadingHeadline => '正在读取导出前检查…';
+
+  @override
+  String get shortVideoSpacePublishExportCheckLoadingDetail =>
+      '聚合分镜阻塞与提醒；质量门禁观测字段仅占位展示。';
+
+  @override
+  String get shortVideoSpacePublishExportCheckUnavailableHeadline =>
+      '导出前检查暂不可用。';
+
+  @override
+  String get shortVideoSpacePublishExportCheckUnavailableDetail =>
+      '可稍后刷新页面，或在制作工作区确认分镜后再试。';
+
+  @override
+  String get shortVideoSpacePublishExportCheckReadyHeadline =>
+      '服务端未发现阻塞级问题（仍需在制作侧确认成片）。';
+
+  @override
+  String get shortVideoSpacePublishExportCheckBlockingHeadline =>
+      '存在阻塞项：建议先在制作工作区补齐后再导出 / 成片。';
+
+  @override
+  String get shortVideoSpacePublishExportCheckMetricStoryboards => '分镜';
+
+  @override
+  String get shortVideoSpacePublishExportCheckMetricBlocking => '阻塞';
+
+  @override
+  String get shortVideoSpacePublishExportCheckMetricWarning => '提醒';
+
+  @override
+  String get shortVideoSpacePublishExportCheckMetricExportable => '可导出';
+
+  @override
+  String get shortVideoSpacePublishExportCheckMetricYes => '是';
+
+  @override
+  String get shortVideoSpacePublishExportCheckMetricNo => '否';
+
+  @override
+  String get shortVideoSpacePublishExportCheckQualityGateOff =>
+      '质量门禁：已关闭（不检查质量问题）。';
+
+  @override
+  String get shortVideoSpacePublishExportCheckQualityGateWarnNoBadCase =>
+      '质量门禁：警告模式 - 暂无待复核坏例（允许导出）。';
+
+  @override
+  String shortVideoSpacePublishExportCheckQualityGateWarnWithBadCase(
+    int count,
+  ) {
+    return '质量门禁：警告模式 - 待复核坏例 $count 条（允许导出但建议修复）。';
+  }
+
+  @override
+  String shortVideoSpacePublishExportCheckQualityGateBlockEnforcedWithBadCase(
+    int count,
+  ) {
+    return '质量门禁：阻断模式 - 待复核坏例 $count 条（阻止导出，需先修复）。';
+  }
+
+  @override
+  String
+  shortVideoSpacePublishExportCheckQualityGateBlockNotEnforcedWithBadCase(
+    int count,
+  ) {
+    return '质量门禁：阻断模式 - 待复核坏例 $count 条（暂未强制执行）。';
+  }
+
+  @override
+  String get shortVideoSpacePublishExportCheckQualityGateBlockNoBadCase =>
+      '质量门禁：阻断模式 - 暂无待复核坏例（允许导出）。';
+
+  @override
+  String shortVideoSpacePublishExportCheckQualityGateUnknown(String strategy) {
+    return '质量门禁：未知策略 \"$strategy\"。';
+  }
+
+  @override
+  String shortVideoSpacePublishExportCheckBlockingIssue(
+    int scriptId,
+    int sbId,
+    String sbIndex,
+    String label,
+    String detail,
+  ) {
+    return '剧本 #$scriptId · 分镜 #$sbId$sbIndex · $label · $detail';
+  }
+
+  @override
+  String get shortVideoSpacePublishExportCheckDetailReady =>
+      '阻塞计数为 0 时表示服务端聚合路径上暂无硬阻塞（仍以实际导出管线为准）。';
+
+  @override
+  String get shortVideoSpacePublishExportCheckDetailBlocking =>
+      '下方列出部分阻塞项；完整列表请在制作工作区逐镜核对。';
+
+  @override
+  String get shortVideoSpacePublishCandidateLoadingHeadline => '正在读取项目资产…';
+
+  @override
+  String get shortVideoSpacePublishCandidateLoadingDetail =>
+      '用于统计候选 workflow：pending / linked / ignored（与 PATCH 资产一致）。';
+
+  @override
+  String get shortVideoSpacePublishCandidateUnavailableHeadline =>
+      '候选资产摘要暂不可用。';
+
+  @override
+  String get shortVideoSpacePublishCandidateUnavailableDetail =>
+      '可稍后刷新页面，或直接去项目区查看并编辑资产。';
+
+  @override
+  String get shortVideoSpacePublishCandidateNoTrackedHeadline =>
+      '尚未标记 pending / linked / ignored；可在项目区对镜头候选等资产 PATCH candidate_status。';
+
+  @override
+  String get shortVideoSpacePublishCandidateTrackedHeadline =>
+      '候选状态已按项目全量聚合（下方计数含未标记）：';
+
+  @override
+  String shortVideoSpacePublishCandidateDetail(int total) {
+    return '项目资产共 $total 条；计数由服务端一次性聚合（不分页）。在项目区可通过 PATCH candidate_status 更新。';
+  }
+
+  @override
+  String get shortVideoSpacePublishPanelLoadingHeadline => '正在读取导出检查与发布域…';
+
+  @override
+  String get shortVideoSpacePublishPanelLoadingDetail =>
+      '后端路径：`/api/v1/projects/:id/publish/*`（profiles / drafts / jobs）。';
+
+  @override
+  String get shortVideoSpacePublishPanelUnavailableHeadline =>
+      '发布域接口暂不可用（可能尚未执行数据库迁移）。';
+
+  @override
+  String get shortVideoSpacePublishPanelUnavailableExportGateMissing =>
+      '导出检查数据缺失，发布面板仅提示占位。';
+
+  @override
+  String get shortVideoSpacePublishPanelUnavailableExportGateNoBlocking =>
+      '导出检查：当前无阻塞项。';
+
+  @override
+  String shortVideoSpacePublishPanelUnavailableExportGateBlocking(int count) {
+    return '导出检查：仍有 $count 条阻塞项。';
+  }
+
+  @override
+  String get shortVideoSpacePublishPanelUnavailableDetail =>
+      '确认 Supabase 已应用 `app_publish_*` 迁移后再试；Rust worker 会在后台消化发布作业队列。';
+
+  @override
+  String get shortVideoSpacePublishPanelExportGateUnavailable =>
+      '导出检查数据暂不可用；仍可试着创建发布草稿并校验。';
+
+  @override
+  String get shortVideoSpacePublishPanelExportGateReady =>
+      '导出检查：无阻塞项（**E13**：可从成片链路进入发布准备）。';
+
+  @override
+  String shortVideoSpacePublishPanelExportGateBlocking(int count) {
+    return '导出检查：仍有 $count 条阻塞项；可先补齐字段再投递作业。';
+  }
+
+  @override
+  String shortVideoSpacePublishPanelHeadline(int drafts, int jobs) {
+    return '已连接发布 API：$drafts 张草稿 · $jobs 条作业。';
+  }
+
+  @override
+  String shortVideoSpacePublishPanelCurrentDraft(String title) {
+    return '当前草稿：$title';
+  }
+
+  @override
+  String get shortVideoSpacePublishPanelCurrentDraftUntitled => '当前草稿：（无标题）';
+
+  @override
+  String get shortVideoSpacePublishPanelSelectDraftWarning =>
+      '⚠️ 请明确选择草稿（不再自动使用第一条）';
+
+  @override
+  String get shortVideoSpacePublishPanelPrepareCheckOk =>
+      '校验：✓ 当前草稿满足占位规则（仍需真实成片引用才能实际上线）。';
+
+  @override
+  String get shortVideoSpacePublishPanelPrepareCheckMultipleDrafts =>
+      '多张草稿时请先在「当前操作草稿」中选择一张，再显示 prepare-check。';
+
+  @override
+  String get shortVideoSpacePublishPanelPrepareCheckSelectFirst =>
+      '选择草稿后将显示 prepare-check 校验结果。';
+
+  @override
+  String get shortVideoSpacePublishPanelPrepareCheckNoDraft =>
+      '尚无草稿或未完成 prepare-check。';
+
+  @override
+  String get shortVideoSpacePublishPanelDraftNoTitle => '（无标题）';
+
+  @override
+  String get shortVideoSpacePublishPanelDraftMissingVideo => ' · 缺 video 引用';
+
+  @override
+  String shortVideoSpacePublishPanelDraftScheduled(String time) {
+    return ' · 定时 $time';
+  }
+
+  @override
+  String shortVideoSpacePublishPanelJobShortId(String id) {
+    return '$id…';
+  }
+
+  @override
+  String shortVideoSpacePublishPanelJobError(String error) {
+    return ' · $error';
+  }
+
+  @override
+  String shortVideoSpacePublishPanelOverviewSucceeded(int count) {
+    return '成功作业：$count';
+  }
+
+  @override
+  String shortVideoSpacePublishPanelOverviewFailed(int count) {
+    return '失败/部分失败：$count';
+  }
+
+  @override
+  String shortVideoSpacePublishPanelOverviewAwaiting(int count) {
+    return '待确认：$count';
+  }
+
+  @override
+  String shortVideoSpacePublishPanelOverviewScheduled(
+    int scheduled,
+    int total,
+  ) {
+    return '已定时草稿：$scheduled/$total';
+  }
+
+  @override
+  String shortVideoSpacePublishPanelOverviewDeliveryModes(String modes) {
+    return '投递模式：$modes';
+  }
+
+  @override
+  String shortVideoSpacePublishPanelOverviewPerformanceAlerts(int count) {
+    return '低表现预警：$count 条（建议进入任务中心排障并改写文案）';
+  }
+
+  @override
+  String shortVideoSpacePublishPanelOverviewPerformanceAlert(
+    String platform,
+    int views,
+    String rate,
+  ) {
+    return '$platform · 播放 $views · 完播 $rate%';
+  }
+
+  @override
+  String shortVideoSpacePublishPanelOverviewAudit(
+    String platform,
+    String status,
+    String mode,
+  ) {
+    return '审计：$platform · $status · mode=$mode';
+  }
+
+  @override
+  String shortVideoSpacePublishPanelOverviewTargetAutomation(String modes) {
+    return '目标自动化：$modes';
+  }
+
+  @override
+  String get shortVideoSpacePublishPanelDetail =>
+      '半自动作业在 `awaiting_confirmation` 时需点「确认」；worker 骨架会写入 `publish_attempts` 占位成功记录。';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyExportCompleted =>
+      'Export completed.';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyExportNotCompleted =>
+      'Export not completed or cancelled.';
+
+  @override
+  String shortVideoSpaceProductionAssemblyExportStartFailed(String error) {
+    return 'Export start failed: $error';
+  }
+
+  @override
+  String get shortVideoSpaceProductionAssemblyReplaceVideoTitle =>
+      'Replace current video version';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyVideoUrlLabel => 'Video URL';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyVideoUrlHint => 'https://...';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyCancel => 'Cancel';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyWriteBackVersion =>
+      'Write back current version';
+
+  @override
+  String shortVideoSpaceProductionAssemblyShotDisabled(int storyboardId) {
+    return 'Shot #$storyboardId paused (cleared current video).';
+  }
+
+  @override
+  String shortVideoSpaceProductionAssemblyDisableFailed(String error) {
+    return 'Pause failed: $error';
+  }
+
+  @override
+  String get shortVideoSpaceProductionAssemblyNoVideoUrl =>
+      'No available video URL, please enter replacement address first.';
+
+  @override
+  String shortVideoSpaceProductionAssemblyShotWriteBack(int storyboardId) {
+    return 'Shot #$storyboardId wrote back current video version.';
+  }
+
+  @override
+  String shortVideoSpaceProductionAssemblyWriteBackFailed(String error) {
+    return 'Write back failed: $error';
+  }
+
+  @override
+  String get shortVideoSpaceProductionAssemblyReorderPersisted =>
+      'Persisted shot reorder (wrote back timeline and shot numbers by script).';
+
+  @override
+  String shortVideoSpaceProductionAssemblyReorderFailed(String error) {
+    return 'Reorder persistence failed: $error';
+  }
+
+  @override
+  String shortVideoSpaceProductionAssemblyShotAligned(
+    int storyboardId,
+    int duration,
+  ) {
+    return 'Shot #$storyboardId aligned to ${duration}s.';
+  }
+
+  @override
+  String shortVideoSpaceProductionAssemblyAlignFailed(String error) {
+    return 'Duration alignment failed: $error';
+  }
+
+  @override
+  String get shortVideoSpaceProductionAssemblySubtitleExistsDurationMissing =>
+      'Subtitle exists, but duration not explicit (suggest aligning duration first).';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyDurationSetSubtitleEmpty =>
+      'Duration is set, but subtitle is empty (possible subtitle track gap).';
+
+  @override
+  String get shortVideoSpaceProductionAssemblySubtitleExistsDurationAbnormal =>
+      'Subtitle exists, but duration is abnormal (<=0).';
+
+  @override
+  String get shortVideoSpaceProductionAssemblySubtitleDurationNoMismatch =>
+      'No obvious subtitle-duration mismatch.';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyBasicOpsTitle =>
+      'Basic shot operations';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyBasicOpsDescription =>
+      'Supports basic reordering (this panel view), enable/disable, and replace current video version.';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyBasicOpsNote =>
+      'Enable/disable/replace writes back directly to J media slot; reorder is for this troubleshooting view only.';
+
+  @override
+  String shortVideoSpaceProductionAssemblyTotalDuration(
+    int seconds,
+    String formatted,
+  ) {
+    return 'Total finished duration: ${seconds}s ($formatted)';
+  }
+
+  @override
+  String get shortVideoSpaceProductionAssemblySaveReorder => 'Save reorder';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyUndoToOpen => 'Undo to open time';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyVoiceoverTasks =>
+      'Voiceover tasks';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyClose => 'Close';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyNoShotsFiltered =>
+      'No shots under current filter conditions, try clearing search or relaxing criteria.';
+
+  @override
+  String shortVideoSpaceProductionAssemblyScriptShotOrder(
+    int scriptId,
+    int storyboardId,
+    int order,
+  ) {
+    return 'Script #$scriptId · Shot #$storyboardId · Order $order';
+  }
+
+  @override
+  String get shortVideoSpaceProductionAssemblyStatusPaused => 'Status: Paused';
+
+  @override
+  String shortVideoSpaceProductionAssemblyStatusEnabled(String kind) {
+    return 'Status: Enabled ($kind)';
+  }
+
+  @override
+  String get shortVideoSpaceProductionAssemblyDurationLabel => 'Duration:';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyDurationNotSet => 'Not set';
+
+  @override
+  String get shortVideoSpaceProductionAssemblySubtitleLabel => 'Subtitle:';
+
+  @override
+  String get shortVideoSpaceProductionAssemblySubtitleEmpty => 'Empty';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyVoiceoverScriptReady =>
+      'Voiceover script: ✓ Ready';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyVoiceoverScriptNotReady =>
+      'Voiceover script: ✗ Not ready';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyVoiceoverAssetReady =>
+      'Voiceover asset: ✓ Ready';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyVoiceoverAssetNotReady =>
+      'Voiceover asset: ✗ Not ready';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyVoiceoverStatusLabel =>
+      'Voiceover status:';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyVoiceoverAudioLabel =>
+      'Voiceover audio:';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyVoiceoverErrorLabel =>
+      'Voiceover error:';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyMismatchCheckLabel =>
+      'Mismatch check:';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyMoveUp => 'Move up';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyMoveDown => 'Move down';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyEnable => 'Enable';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyPause => 'Pause';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyAlignDuration => 'Align duration';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyReplaceVersion =>
+      'Replace current version';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyGenerateVoiceover =>
+      'Generate voiceover';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyPreviewVoiceover =>
+      'Preview voiceover';
+
+  @override
+  String get shortVideoSpaceProductionAssemblySingleShotDurationTitle =>
+      'Single shot duration alignment';
+
+  @override
+  String get shortVideoSpaceProductionAssemblySingleShotDurationLabel =>
+      'Duration (seconds)';
+
+  @override
+  String get shortVideoSpaceProductionAssemblySingleShotDurationHint =>
+      'Enter 1~300';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyAlignAndWriteBack =>
+      'Align and write back';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyAssemblyStyleTitle =>
+      'Assembly-level style adjustment';
+
+  @override
+  String get shortVideoSpaceProductionAssemblySubtitleStyleLabel =>
+      'Subtitle style subtitle_style';
+
+  @override
+  String get shortVideoSpaceProductionAssemblySubtitleStyleHint =>
+      'e.g. cinematic_cn_v2 (leave empty to fall back to default)';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyBgmStrategyLabel =>
+      'BGM strategy bgm_strategy';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyBgmStrategyHint =>
+      'e.g. pulse_light (leave empty to fall back to default)';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyStyleNote =>
+      'After saving, will write back D7 default configuration and refresh effective values in assembly snapshot.';
+
+  @override
+  String get shortVideoSpaceProductionAssemblySaveAndRefresh =>
+      'Save and refresh';
+
+  @override
+  String shortVideoSpaceProductionAssemblyStyleUpdated(
+    String subtitle,
+    String bgm,
+  ) {
+    return 'Updated assembly-level defaults: subtitle $subtitle · BGM $bgm';
+  }
+
+  @override
+  String get shortVideoSpaceProductionAssemblyStyleDefault => 'default';
+
+  @override
+  String shortVideoSpaceProductionAssemblyStyleWriteBackFailed(String error) {
+    return 'Assembly style write back failed: $error';
+  }
+
+  @override
+  String get shortVideoSpaceProductionAssemblyVoiceoverTaskCenterTitle =>
+      'Voiceover task center';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyAllStatus => 'All status';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyRefresh => 'Refresh';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyGroupByShot => 'Group by shot';
+
+  @override
+  String shortVideoSpaceProductionAssemblyBatchRetryFailed(int count) {
+    return 'Batch retry failed ($count)';
+  }
+
+  @override
+  String get shortVideoSpaceProductionAssemblyFilterTaskIdScriptShot =>
+      'Filter: Task ID / Script # / Shot #';
+
+  @override
+  String shortVideoSpaceProductionAssemblyTaskSummary(
+    int total,
+    int queued,
+    int running,
+    int succeeded,
+    int failed,
+    int cancelled,
+    int filtered,
+    int visible,
+  ) {
+    return 'Total $total · queued $queued · running $running · succeeded $succeeded · failed $failed · cancelled $cancelled · Showing $filtered/$visible';
+  }
+
+  @override
+  String get shortVideoSpaceProductionAssemblyNoVoiceoverTasks =>
+      'No voiceover tasks yet';
+
+  @override
+  String shortVideoSpaceProductionAssemblyTaskEntry(
+    String prefix,
+    String taskId,
+    String status,
+  ) {
+    return '$prefix $taskId · Status $status';
+  }
+
+  @override
+  String get shortVideoSpaceProductionAssemblyLatestTask => 'Latest task';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyTask => 'Task';
+
+  @override
+  String shortVideoSpaceProductionAssemblyTaskSubtitle(
+    String scriptId,
+    String shotId,
+    String audio,
+    String error,
+  ) {
+    return 'Script #$scriptId · Shot #$shotId$audio$error';
+  }
+
+  @override
+  String get shortVideoSpaceProductionAssemblyTaskSubtitleAudioReady =>
+      ' · Audio ready';
+
+  @override
+  String shortVideoSpaceProductionAssemblyTaskSubtitleError(String error) {
+    return ' · Error: $error';
+  }
+
+  @override
+  String get shortVideoSpaceProductionAssemblyPreviewAudio => 'Preview audio';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyCopyAudioLink =>
+      'Copy audio link';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyAudioLinkCopied =>
+      'Audio link copied';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyCancelTask => 'Cancel';
+
+  @override
+  String shortVideoSpaceProductionAssemblyTaskCancelled(String taskId) {
+    return 'Cancelled voiceover task $taskId';
+  }
+
+  @override
+  String shortVideoSpaceProductionAssemblyCancelFailed(String error) {
+    return 'Cancel failed: $error';
+  }
+
+  @override
+  String get shortVideoSpaceProductionAssemblyRetryTask => 'Retry';
+
+  @override
+  String shortVideoSpaceProductionAssemblyTaskRetried(String taskId) {
+    return 'Retried, task $taskId queued';
+  }
+
+  @override
+  String shortVideoSpaceProductionAssemblyRetryFailed(String error) {
+    return 'Retry failed: $error';
+  }
+
+  @override
+  String shortVideoSpaceProductionAssemblyBatchRetryCompleted(
+    int succeeded,
+    int failed,
+  ) {
+    return 'Batch retry completed: succeeded $succeeded, failed $failed';
+  }
+
+  @override
+  String shortVideoSpaceProductionAssemblyLoadFailed(String error) {
+    return 'Load failed: $error';
   }
 }

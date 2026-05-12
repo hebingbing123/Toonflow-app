@@ -48,6 +48,49 @@
       }
     }
   },
+  "shortVideoSpaceCannotSaveNoProject": "Cannot save: no project selected or not logged in",
+  "shortVideoSpaceSavingInProgress": "Saving in progress, please wait...",
+  "shortVideoSpaceSelectAllAvailable": "Select all shortcut (Ctrl+A / Cmd+A) is available in the shot operation panel",
+  "shortVideoSpaceSearchFocused": "Search box focused",
+  "shortVideoSpaceSearchNotAvailable": "Search box not available (please open shot operation panel first)",
+  "shortVideoSpaceSaveProjectConfig": "Save project configuration",
+  "shortVideoSpaceSelectAllShots": "Select all shots (in batch operation mode)",
+  "shortVideoSpaceFocusSearch": "Focus search box",
+  "shortVideoSpaceUndoOperation": "Undo last operation",
+  "shortVideoSpaceRedoOperation": "Redo last operation",
+  "shortVideoSpaceFileOperations": "File Operations",
+  "shortVideoSpaceSelectionOperations": "Selection Operations",
+  "shortVideoSpaceNavigation": "Navigation",
+  "shortVideoSpaceEditOperations": "Edit Operations",
+  "shortVideoSpaceKeyboardShortcuts": "Keyboard Shortcuts",
+  "shortVideoSpaceClose": "Close",
+  "shortVideoSpaceCurrentProjectOverview": "Current Project Overview",
+  "shortVideoSpaceRecentBadCaseTrends": "Recent Bad Case Trends",
+  "shortVideoSpaceRecentTaskFlow": "Recent Task Flow",
+  "shortVideoSpaceAssetsOverview": "Assets Overview",
+  "shortVideoSpaceAssemblySnapshot": "Assembly Snapshot",
+  "shortVideoSpaceQualityReview": "Quality Review (Quality Acceptance)",
+  "shortVideoSpaceMultiTrackExportDecision": "Limited Multi-track Export Decision (K5)",
+  "shortVideoSpaceOpenProductionWorkspace": "Open Production Workspace",
+  "shortVideoSpaceBasicShotOperations": "Basic Shot Operations",
+  "shortVideoSpaceAssemblyStyleAdjustment": "Assembly Style Adjustment",
+  "shortVideoSpaceExportPreCheck": "Export Pre-check",
+  "shortVideoSpaceQualityGateBlockingReasons": "Quality Gate Blocking Reasons",
+  "shortVideoSpaceBlockingItems": "Blocking Items (Selected by Interface Order)",
+  "shortVideoSpaceWarningItems": "Warning Items (Selected by Interface Order)",
+  "shortVideoSpaceExporting": "Exporting...",
+  "shortVideoSpaceStartExport": "Start Export",
+  "shortVideoSpaceExportHistory": "Export History",
+  "shortVideoSpacePublishJobs": "Publish Jobs",
+  "shortVideoSpaceScheduleCalendar": "Schedule Calendar (counted by local calendar days; click a day to batch write timing)",
+  "shortVideoSpaceTargetConfiguration": "Short Video Target Configuration",
+  "shortVideoSpaceConfigurationDescription": "Write the creation mode and aspect ratio directly back to the project, so that subsequent scripts and production processes can continue to work based on the same project configuration.",
+  "shortVideoSpaceTargetProject": "Target Project",
+  "shortVideoSpaceLoading": "Loading",
+  "shortVideoSpaceRefreshProjects": "Refresh Projects",
+  "shortVideoSpaceRestoreRiskyConfirmation": "Restore High-Risk Confirmation Prompts",
+  "shortVideoSpacePortrait916": "Portrait 9:16",
+  "shortVideoSpaceLandscape169": "Landscape 16:9",
   "notificationsCenterTitle": "Notifications",
   "notificationsCenterSubtitle": "Aggregates job completion, workspace invites, skill changes, and read state.",
   "notificationsMarkAllRead": "Mark all read",
@@ -829,6 +872,261 @@
   "projectsDialogFieldCoreHook": "Core hook",
   "projectsDialogFieldVisualDirection": "Visual direction",
   "projectsDialogSectionBrand": "Brand bible",
+  "shortVideoSpaceErrorTimeout": "Request timeout{context}, please check network connection and retry.",
+  "@shortVideoSpaceErrorTimeout": {
+    "placeholders": {
+      "context": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceErrorOperationFailed": "Operation failed{context}: {error}",
+  "@shortVideoSpaceErrorOperationFailed": {
+    "placeholders": {
+      "context": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceErrorConcurrentLimitExceeded": "Concurrent workspace audit export limit reached, please wait for existing tasks to complete{context}.",
+  "@shortVideoSpaceErrorConcurrentLimitExceeded": {
+    "placeholders": {
+      "context": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceErrorRateLimitWithWait": "Too many requests{context}, {waitText}.",
+  "@shortVideoSpaceErrorRateLimitWithWait": {
+    "placeholders": {
+      "context": {
+        "type": "String"
+      },
+      "waitText": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceErrorNotFound": "Record not found{context}.",
+  "@shortVideoSpaceErrorNotFound": {
+    "placeholders": {
+      "context": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceErrorPermissionDenied": "Permission denied{context}, please check login status.",
+  "@shortVideoSpaceErrorPermissionDenied": {
+    "placeholders": {
+      "context": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceErrorBadRequest": "Bad request parameters",
+  "shortVideoSpaceErrorBadRequestWithContext": "{message}{context}",
+  "@shortVideoSpaceErrorBadRequestWithContext": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      },
+      "context": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceErrorServerError": "Server error{context}, please retry later.",
+  "@shortVideoSpaceErrorServerError": {
+    "placeholders": {
+      "context": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceErrorDetailedMessage": "{message}{context}",
+  "@shortVideoSpaceErrorDetailedMessage": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      },
+      "context": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceErrorDefaultMessage": "Operation failed{context}: {error}",
+  "@shortVideoSpaceErrorDefaultMessage": {
+    "placeholders": {
+      "context": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceErrorRetryButton": "Retry",
+  "shortVideoSpaceDialogExportHistoryTitle": "Export History",
+  "shortVideoSpaceDialogExportHistoryRefresh": "Refresh",
+  "shortVideoSpaceDialogExportHistoryStatusLabel": "Status",
+  "shortVideoSpaceDialogExportHistoryTimeLabel": "Time",
+  "shortVideoSpaceDialogExportHistoryClose": "Close",
+  "shortVideoSpaceDialogExportHistoryRetry": "Retry",
+  "shortVideoSpaceDialogExportHistoryNoRecords": "No export records",
+  "shortVideoSpaceDialogExportHistoryNoRecordsHint": "Export records will appear here after exporting videos",
+  "shortVideoSpaceDialogExportHistoryDownload": "Download",
+  "shortVideoSpaceDialogExportHistoryDownloading": "Downloading...",
+  "shortVideoSpaceDialogExportHistoryTimeFilterAll": "All time",
+  "shortVideoSpaceDialogExportHistoryTimeFilterToday": "Today",
+  "shortVideoSpaceDialogExportHistoryTimeFilterWeek": "Last week",
+  "shortVideoSpaceDialogExportHistoryTimeFilterMonth": "Last month",
+  "shortVideoSpaceDialogExportHistoryStatusFilterAll": "All status",
+  "shortVideoSpaceDialogExportHistoryStatusFilterCompleted": "Completed",
+  "shortVideoSpaceDialogExportHistoryStatusFilterFailed": "Failed",
+  "shortVideoSpaceDialogExportHistoryStatusFilterCancelled": "Cancelled",
+  "shortVideoSpaceDialogExportHistoryFileSizeUnknown": "Unknown",
+  "shortVideoSpaceDialogExportHistoryFileSizeKB": "{size} KB",
+  "@shortVideoSpaceDialogExportHistoryFileSizeKB": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceDialogExportHistoryFileSizeMB": "{size} MB",
+  "@shortVideoSpaceDialogExportHistoryFileSizeMB": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceDialogExportHistoryFileSizeGB": "{size} GB",
+  "@shortVideoSpaceDialogExportHistoryFileSizeGB": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceDialogExportHistoryDurationSeconds": "{seconds} seconds",
+  "@shortVideoSpaceDialogExportHistoryDurationSeconds": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoSpaceDialogExportHistoryDurationMinutes": "{minutes} minutes",
+  "@shortVideoSpaceDialogExportHistoryDurationMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoSpaceDialogExportHistoryDurationHours": "{hours} hours {minutes} minutes",
+  "@shortVideoSpaceDialogExportHistoryDurationHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoSpaceDialogExportHistoryCreatedAt": "Created: {time}",
+  "@shortVideoSpaceDialogExportHistoryCreatedAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceDialogExportHistoryCompletedAt": "Completed: {time} · Duration: {duration}",
+  "@shortVideoSpaceDialogExportHistoryCompletedAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceDialogExportHistoryFileSize": "File size: {size}",
+  "@shortVideoSpaceDialogExportHistoryFileSize": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceDialogExportHistorySettings": "Settings: {bitrate} · {framerate} FPS",
+  "@shortVideoSpaceDialogExportHistorySettings": {
+    "placeholders": {
+      "bitrate": {
+        "type": "String"
+      },
+      "framerate": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoSpaceDialogExportHistoryLoadError": "Failed to load export history: {error}",
+  "@shortVideoSpaceDialogExportHistoryLoadError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceDialogExportHistorySessionExpired": "Session expired, please login again",
+  "shortVideoSpaceDialogExportHistoryDownloadLinkCopied": "Download link copied ({format})",
+  "@shortVideoSpaceDialogExportHistoryDownloadLinkCopied": {
+    "placeholders": {
+      "format": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceDialogExportHistoryDownloadFailed": "Download failed: {error}",
+  "@shortVideoSpaceDialogExportHistoryDownloadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceDialogExportHistoryTimeJustNow": "Just now",
+  "shortVideoSpaceDialogExportHistoryTimeMinutesAgo": "{minutes} minutes ago",
+  "@shortVideoSpaceDialogExportHistoryTimeMinutesAgo": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoSpaceDialogExportHistoryTimeHoursAgo": "{hours} hours ago",
+  "@shortVideoSpaceDialogExportHistoryTimeHoursAgo": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoSpaceDialogExportHistoryTimeDaysAgo": "{days} days ago",
+  "@shortVideoSpaceDialogExportHistoryTimeDaysAgo": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "projectsDialogFieldBrandName": "Brand name",
   "projectsDialogFieldBrandPromise": "Brand promise",
   "projectsDialogFieldVisualMotifsMultiline": "Visual motifs (one per line)",
@@ -3917,5 +4215,1032 @@
         "type": "String"
       }
     }
+  },
+  "projectEditorAssetHistoryTitle": "Asset History Workbench",
+  "projectEditorAssetHistoryTypeFilterLabel": "Type filter (optional)",
+  "projectEditorAssetHistoryTypeFilterHelper": "Comma-separated, e.g. role,clip,props; leave empty for all",
+  "projectEditorAssetHistoryLoading": "Loading…",
+  "projectEditorAssetHistoryQueryButton": "Query history assets",
+  "projectEditorAssetHistoryClearFilter": "Clear type filter",
+  "projectEditorAssetHistoryLoadingAssets": "Loading history assets…",
+  "projectEditorAssetHistoryEmptyState": "No data, click \"Query history assets\" to start.",
+  "projectEditorAssetHistoryImageDropdownLabel": "History image",
+  "projectEditorAssetHistoryNoImages": "This asset has no history images",
+  "projectEditorAssetHistoryCurrentImage": "Current image: sort={sortIndex} · state={state}",
+  "@projectEditorAssetHistoryCurrentImage": {
+    "placeholders": {
+      "sortIndex": {
+        "type": "int"
+      },
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetHistoryNoPreview": "Current image has no available preview (may be path placeholder or remote resource temporarily unavailable)",
+  "projectEditorAssetHistoryClose": "Close",
+  "projectEditorAssetGenerationTitle": "Asset Generation Workbench",
+  "projectEditorAssetGenerationDescription": "Consolidates production asset summary, batch generation, status polling, derivative cleanup, and cover URL updates into the main project asset workflow, no longer relying solely on system probes.",
+  "projectEditorAssetGenerationClose": "Close",
+  "projectEditorScriptsBatchAddTitle": "Batch Add Scripts",
+  "projectEditorScriptsBatchAddCountLabel": "Count (1-20)",
+  "projectEditorScriptsBatchAddCountHelper": "Maximum 20 per batch to avoid accidental operations.",
+  "projectEditorScriptsBatchAddNamePrefixLabel": "Name prefix",
+  "projectEditorScriptsBatchAddContentLabel": "Default script content",
+  "projectEditorScriptsBatchAddCancel": "Cancel",
+  "projectEditorScriptsBatchAddCreate": "Create",
+  "projectEditorScriptsBatchAddCountError": "Count must be an integer between 1-20",
+  "projectEditorScriptsBatchAddDefaultPrefix": "New Script",
+  "projectEditorScriptsBatchAddDefaultContent": "Plot synopsis to be added.",
+  "projectEditorScriptsBatchAddSuccess": "Created {count} scripts in batch",
+  "@projectEditorScriptsBatchAddSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorProbeTasksZeroItems": "0 items",
+  "projectEditorProbeTasksZeroClasses": "0 classes",
+  "projectEditorProbeTasksCompatGetTaskApi": "compat get-task-api (GET jobs/page): total={total} · {count} items on this page",
+  "@projectEditorProbeTasksCompatGetTaskApi": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorProbeProjectsZeroItems": "0 items",
+  "projectEditorProbeProjectsCompatList": "GET …/projects (compat list): {line}",
+  "@projectEditorProbeProjectsCompatList": {
+    "placeholders": {
+      "line": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorProbeScriptsZeroItems": "0 items",
+  "projectEditorProbeScriptsEmpty": "(empty: all extracting or idle)",
+  "projectEditorProbeScriptsGetFirstScript": "GET projects/…/scripts (first)",
+  "projectEditorProbeScriptsLoading": "script…",
+  "projectEditorProbeScriptsPostGetScriptApi": "POST …/projects/{id}/scripts/get-script-api: {count} items · {sample}",
+  "@projectEditorProbeScriptsPostGetScriptApi": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "sample": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetSummaryProductionEmpty": "Production asset data is empty",
+  "projectEditorAssetSummaryProductionLine": "Production assets {total} items · {typesLine} · Sample: {sampleLine}",
+  "@projectEditorAssetSummaryProductionLine": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "typesLine": {
+        "type": "String"
+      },
+      "sampleLine": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetSummaryTypeCount": "{type} {count} items",
+  "@projectEditorAssetSummaryTypeCount": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorAssetSummaryPollingEmpty": "No image status returned for selected assets",
+  "projectEditorAssetSummaryPollingLine": "Polled {count} assets · {stateLine} · Sample: {sampleLine}",
+  "@projectEditorAssetSummaryPollingLine": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "stateLine": {
+        "type": "String"
+      },
+      "sampleLine": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetSummaryStateCount": "{state} {count} items",
+  "@projectEditorAssetSummaryStateCount": {
+    "placeholders": {
+      "state": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorAssetSummaryImageCount": "#{assetId}: {count} images",
+  "@projectEditorAssetSummaryImageCount": {
+    "placeholders": {
+      "assetId": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorAssetSummaryMaterialContext": "Material context {imageCount} image materials · {videoCount} video materials",
+  "@projectEditorAssetSummaryMaterialContext": {
+    "placeholders": {
+      "imageCount": {
+        "type": "int"
+      },
+      "videoCount": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorAssetSummaryBatchEmpty": "Batch candidates are empty",
+  "projectEditorAssetSummaryBatchLine": "Batch candidates {count}/{total} items · Sample: {sampleLine}",
+  "@projectEditorAssetSummaryBatchLine": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "sampleLine": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetSummaryPromptEmpty": "No prompt status returned",
+  "projectEditorAssetSummaryPromptLine": "Prompt polling {count} items · {stateLine}",
+  "@projectEditorAssetSummaryPromptLine": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "stateLine": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetSummarySelectionNone": "No assets currently selected",
+  "projectEditorAssetSummarySelectionSingle": "Currently selected #{id} {name}",
+  "@projectEditorAssetSummarySelectionSingle": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetSummarySelectionMultiple": "Currently selected {count} assets: {sample}",
+  "@projectEditorAssetSummarySelectionMultiple": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "sample": {
+        "type": "String"
+      }
+    }
+  },
+  "authSupabaseNotConfigured": "Not configured: run example\nflutter run --dart-define=SUPABASE_URL=... --dart-define=SUPABASE_ANON_KEY=...",
+  "authSignIn": "Sign In",
+  "authSignUp": "Sign Up",
+  "authSignOut": "Sign Out",
+  "authSignedInUser": "Signed in user: {userId}",
+  "@authSignedInUser": {
+    "placeholders": {
+      "userId": {
+        "type": "String"
+      }
+    }
+  },
+  "authRequestInProgress": "Requesting…",
+  "authGetMeBearer": "GET /api/v1/me (Bearer)",
+  "authMeResponse": "/me: {response}",
+  "@authMeResponse": {
+    "placeholders": {
+      "response": {
+        "type": "String"
+      }
+    }
+  },
+  "authDevSwitchProbe": "GET+PUT /api/v1/settings/dev/switch-ai-tool",
+  "authDevSwitchResponse": "dev switch: {response}",
+  "@authDevSwitchResponse": {
+    "placeholders": {
+      "response": {
+        "type": "String"
+      }
+    }
+  },
+  "authMemoryConfigProbe": "memory-config GET+POST + clear-agent-memories",
+  "authMemoryConfigResponse": "memory-config: {response}",
+  "@authMemoryConfigResponse": {
+    "placeholders": {
+      "response": {
+        "type": "String"
+      }
+    }
+  },
+  "authAboutProbe": "POST …/settings/about/check-update + download-app",
+  "authAboutResponse": "about: {response}",
+  "@authAboutResponse": {
+    "placeholders": {
+      "response": {
+        "type": "String"
+      }
+    }
+  },
+  "authUsageSummary": "GET /api/v1/usage/summary",
+  "authUsageResponse": "usage: {response}",
+  "@authUsageResponse": {
+    "placeholders": {
+      "response": {
+        "type": "String"
+      }
+    }
+  },
+  "authPromptsProbe": "GET /api/v1/prompts + GET/1 + PATCH/1",
+  "authPromptsResponse": "prompts: {response}",
+  "@authPromptsResponse": {
+    "placeholders": {
+      "response": {
+        "type": "String"
+      }
+    }
+  },
+  "authVisualManualProbe": "GET+POST /api/v1/visual-manual",
+  "authVisualManualResponse": "visual-manual: {response}",
+  "@authVisualManualResponse": {
+    "placeholders": {
+      "response": {
+        "type": "String"
+      }
+    }
+  },
+  "authDirectorManualProbe": "POST …/project/query-director-manual",
+  "authDirectorManualResponse": "director-manual: {response}",
+  "@authDirectorManualResponse": {
+    "placeholders": {
+      "response": {
+        "type": "String"
+      }
+    }
+  },
+  "authSkillsBinaryProbe": "GET /api/v1/skills/binary (_smoke PNG)",
+  "authSkillsBinaryResponse": "skills/binary: {response}",
+  "@authSkillsBinaryResponse": {
+    "placeholders": {
+      "response": {
+        "type": "String"
+      }
+    }
+  },
+  "authModelsCatalogProbe": "models + vendors + vendor-add + danger + production + agent-deploy + model-test + script-agent + assets-gen",
+  "authTextModelDefaultProbe": "GET+PATCH /api/v1/models/text-default",
+  "authModelDetailProbe": "GET /api/v1/models/detail (1:gpt-4o-mini)",
+  "authModelsResponse": "models: {response}",
+  "@authModelsResponse": {
+    "placeholders": {
+      "response": {
+        "type": "String"
+      }
+    }
+  },
+  "authTextDefaultResponse": "text-default: {response}",
+  "@authTextDefaultResponse": {
+    "placeholders": {
+      "response": {
+        "type": "String"
+      }
+    }
+  },
+  "authModelDetailResponse": "model detail: {response}",
+  "@authModelDetailResponse": {
+    "placeholders": {
+      "response": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceDialogExportProgressTitle": "Export Progress",
+  "shortVideoSpaceDialogExportProgressStatusQueued": "Queued",
+  "shortVideoSpaceDialogExportProgressStatusProcessing": "Processing",
+  "shortVideoSpaceDialogExportProgressStatusCompleted": "Completed",
+  "shortVideoSpaceDialogExportProgressStatusFailed": "Failed",
+  "shortVideoSpaceDialogExportProgressStatusCancelled": "Cancelled",
+  "shortVideoSpaceDialogExportProgressStageInitializing": "Initializing",
+  "shortVideoSpaceDialogExportProgressStageLoadingAssets": "Loading Assets",
+  "shortVideoSpaceDialogExportProgressStageEncoding": "Encoding Video",
+  "shortVideoSpaceDialogExportProgressStageUploading": "Uploading File",
+  "shortVideoSpaceDialogExportProgressStageFinalizing": "Finalizing",
+  "shortVideoSpaceDialogExportProgressLoadingStatus": "Fetching export status...",
+  "shortVideoSpaceDialogExportProgressFetchError": "Failed to fetch progress: {error}",
+  "@shortVideoSpaceDialogExportProgressFetchError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceDialogExportProgressSessionExpired": "Session expired, please login again",
+  "shortVideoSpaceDialogExportProgressCancelFailed": "Cancel failed: {error}",
+  "@shortVideoSpaceDialogExportProgressCancelFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceDialogExportProgressTaskId": "Task ID: {taskId}",
+  "@shortVideoSpaceDialogExportProgressTaskId": {
+    "placeholders": {
+      "taskId": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceDialogExportProgressCancelButton": "Cancel Export",
+  "shortVideoSpaceDialogExportProgressCloseButton": "Close",
+  "shortVideoSpaceDialogExportProgressMessageQueued": "Export task queued, waiting for processing...",
+  "shortVideoSpaceDialogExportProgressMessageInitializing": "Initializing export task...",
+  "shortVideoSpaceDialogExportProgressMessageLoadingAssets": "Loading video assets and audio files...",
+  "shortVideoSpaceDialogExportProgressMessageEncoding": "Encoding video, this may take a few minutes...",
+  "shortVideoSpaceDialogExportProgressMessageUploading": "Uploading exported video file...",
+  "shortVideoSpaceDialogExportProgressMessageFinalizing": "Completing final processing steps...",
+  "shortVideoSpaceDialogExportProgressMessageProcessing": "Processing export task...",
+  "shortVideoSpaceDialogExportProgressMessageCompleted": "Export completed successfully! Video is ready for download.",
+  "shortVideoSpaceDialogExportProgressMessageFailed": "Export failed, please retry or contact support.",
+  "shortVideoSpaceDialogExportProgressMessageCancelled": "Export has been cancelled.",
+  "shortVideoSpaceDialogConfirmDeleteVersionTitle": "Confirm Delete",
+  "shortVideoSpaceDialogConfirmDeleteVersionMessage": "Are you sure you want to delete version \"{versionName}\"?\n\nThis action cannot be undone.",
+  "@shortVideoSpaceDialogConfirmDeleteVersionMessage": {
+    "placeholders": {
+      "versionName": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceDialogConfirmDeleteVersionDontShow": "Don't show again",
+  "shortVideoSpaceDialogConfirmDeleteVersionCancel": "Cancel",
+  "shortVideoSpaceDialogConfirmDeleteVersionConfirm": "Delete",
+  "shortVideoSpaceDialogConfirmBatchDisableTitle": "Confirm Batch Disable",
+  "shortVideoSpaceDialogConfirmBatchDisableMessage": "Are you sure you want to disable {shotCount} selected shots?\n\nDisabled shots will not appear in the final video.",
+  "@shortVideoSpaceDialogConfirmBatchDisableMessage": {
+    "placeholders": {
+      "shotCount": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoSpaceDialogConfirmBatchDisableConfirm": "Confirm Disable",
+  "shortVideoSpaceDialogConfirmRestoreDraftTitle": "Confirm Restore Draft",
+  "shortVideoSpaceDialogConfirmRestoreDraftMessage": "Are you sure you want to restore draft \"{draftName}\"?\n\nCurrent unsaved edits will be lost.",
+  "@shortVideoSpaceDialogConfirmRestoreDraftMessage": {
+    "placeholders": {
+      "draftName": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceDialogConfirmRestoreDraftConfirm": "Restore",
+  "shortVideoSpaceDialogConfirmCancelExportTitle": "Cancel Export",
+  "shortVideoSpaceDialogConfirmCancelExportMessage": "Are you sure you want to cancel the export? Processed content will be lost.",
+  "shortVideoSpaceDialogConfirmCancelExportContinue": "Continue Export",
+  "shortVideoSpaceDialogConfirmCancelExportConfirm": "Confirm Cancel",
+  "shortVideoSpaceDialogConfirmBatchArchiveTitle": "Confirm Batch Archive",
+  "shortVideoSpaceDialogConfirmBatchArchiveMessage": "Are you sure you want to archive {draftCount} publish drafts? They will be removed from the publish queue (may be recoverable depending on backend policy).",
+  "@shortVideoSpaceDialogConfirmBatchArchiveMessage": {
+    "placeholders": {
+      "draftCount": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoSpaceDialogConfirmBatchArchiveConfirm": "Confirm Archive",
+  "shortVideoSpaceDialogVoiceoverSettingsTitle": "Voiceover Settings",
+  "shortVideoSpaceDialogVoiceoverSettingsProviderLabel": "TTS Provider",
+  "shortVideoSpaceDialogVoiceoverSettingsProviderOpenAI": "OpenAI TTS",
+  "shortVideoSpaceDialogVoiceoverSettingsProviderAzure": "Azure TTS",
+  "shortVideoSpaceDialogVoiceoverSettingsProviderGoogle": "Google TTS",
+  "shortVideoSpaceDialogVoiceoverSettingsVoiceLabel": "Voice",
+  "shortVideoSpaceDialogVoiceoverSettingsVoiceAlloy": "Alloy (Neutral)",
+  "shortVideoSpaceDialogVoiceoverSettingsVoiceEcho": "Echo (Male)",
+  "shortVideoSpaceDialogVoiceoverSettingsVoiceFable": "Fable (British)",
+  "shortVideoSpaceDialogVoiceoverSettingsVoiceOnyx": "Onyx (Deep)",
+  "shortVideoSpaceDialogVoiceoverSettingsVoiceNova": "Nova (Female)",
+  "shortVideoSpaceDialogVoiceoverSettingsVoiceShimmer": "Shimmer (Soft)",
+  "shortVideoSpaceDialogVoiceoverSettingsEmotionLabel": "Emotion",
+  "shortVideoSpaceDialogVoiceoverSettingsEmotionNeutral": "Neutral",
+  "shortVideoSpaceDialogVoiceoverSettingsEmotionHappy": "Happy",
+  "shortVideoSpaceDialogVoiceoverSettingsEmotionSad": "Sad",
+  "shortVideoSpaceDialogVoiceoverSettingsEmotionAngry": "Angry",
+  "shortVideoSpaceDialogVoiceoverSettingsSpeedLabel": "Speed",
+  "shortVideoSpaceDialogVoiceoverSettingsSpeedRange": "Range: 0.5x (slow) - 2.0x (fast)",
+  "shortVideoSpaceDialogVoiceoverSettingsInfoMessage": "Settings will apply to newly generated voiceovers. Existing voiceovers need to be regenerated to apply new parameters.",
+  "shortVideoSpaceDialogVoiceoverSettingsCancel": "Cancel",
+  "shortVideoSpaceDialogVoiceoverSettingsSave": "Save",
+  "shortVideoSpacePublishQualityStageUnlabeled": "Unlabeled stage",
+  "shortVideoSpacePublishQualityStageStorySkeleton": "Story skeleton",
+  "shortVideoSpacePublishQualityStageAdaptationStrategy": "Adaptation strategy",
+  "shortVideoSpacePublishQualityStageDirectorPlanning": "Director planning",
+  "shortVideoSpacePublishQualityStageStoryboardTable": "Storyboard table",
+  "shortVideoSpacePublishQualityStageStoryboardPanel": "Storyboard panel",
+  "shortVideoSpacePublishQualityStageVideoPrompt": "Video prompt / Final",
+  "shortVideoSpacePublishExportIssueCandidatePending": "Candidate pending confirmation",
+  "shortVideoSpacePublishExportIssueMissingSelectedMedia": "Missing final media",
+  "shortVideoSpacePublishExportIssueSelectedMediaNotVideo": "Selected media is not video",
+  "shortVideoSpacePublishExportIssueSubtitlePlaceholder": "Subtitle / voiceover text missing",
+  "shortVideoSpacePublishExportIssueSubtitleEmpty": "Subtitle is empty",
+  "shortVideoSpacePublishExportIssueVoiceoverFailed": "Voiceover generation failed",
+  "shortVideoSpacePublishExportIssueVoiceoverAudioMissing": "Voiceover audio not ready",
+  "shortVideoSpacePublishExportIssueVoiceoverNotReady": "Voiceover not ready",
+  "shortVideoSpacePublishExportIssueDurationNotExplicit": "Duration not specified (export default)",
+  "shortVideoSpacePublishExportIssueDurationNotSet": "Duration not set",
+  "shortVideoSpacePublishExportIssueDurationUnparsable": "Duration format error",
+  "shortVideoSpacePublishExportIssueCompletionUncertain": "Final status not marked as completed",
+  "shortVideoSpacePublishAssemblyLoadingHeadline": "Loading final assembly snapshot…",
+  "shortVideoSpacePublishAssemblyLoadingDetail": "Data from GET …/short-video-assembly (aggregates storyboards and final elements by script order).",
+  "shortVideoSpacePublishAssemblyUnavailableHeadline": "Final assembly snapshot unavailable.",
+  "shortVideoSpacePublishAssemblyUnavailableDetail": "Please refresh later, or confirm storyboards and timeline in production workspace.",
+  "shortVideoSpacePublishAssemblyNoScriptsHeadline": "No script / storyboard assembly data yet.",
+  "shortVideoSpacePublishAssemblyHeadlineScripts": "{count, plural, =1{1 script} other{{count} scripts}} · {shots} shots (export path snapshot)\nTotal duration: {seconds}s ({formatted})",
+  "@shortVideoSpacePublishAssemblyHeadlineScripts": {
+    "placeholders": {
+      "count": {"type": "int"},
+      "shots": {"type": "int"},
+      "seconds": {"type": "int"},
+      "formatted": {"type": "String"}
+    }
+  },
+  "shortVideoSpacePublishAssemblyVoiceProfileNotSet": "Voice profile: Not set",
+  "shortVideoSpacePublishAssemblyVoiceProfile": "Voice profile: {profile}",
+  "@shortVideoSpacePublishAssemblyVoiceProfile": {
+    "placeholders": {
+      "profile": {"type": "String"}
+    }
+  },
+  "shortVideoSpacePublishAssemblySubtitleDefault": "Subtitle: Default",
+  "shortVideoSpacePublishAssemblySubtitle": "Subtitle: {style}",
+  "@shortVideoSpacePublishAssemblySubtitle": {
+    "placeholders": {
+      "style": {"type": "String"}
+    }
+  },
+  "shortVideoSpacePublishAssemblyBgmNotSpecified": "BGM: Not specified",
+  "shortVideoSpacePublishAssemblyBgm": "BGM: {strategy}",
+  "@shortVideoSpacePublishAssemblyBgm": {
+    "placeholders": {
+      "strategy": {"type": "String"}
+    }
+  },
+  "shortVideoSpacePublishAssemblyEffectiveTts": "Effective TTS (queue/worker): {voice}",
+  "@shortVideoSpacePublishAssemblyEffectiveTts": {
+    "placeholders": {
+      "voice": {"type": "String"}
+    }
+  },
+  "shortVideoSpacePublishAssemblyScriptTitle": "Script #{id}",
+  "@shortVideoSpacePublishAssemblyScriptTitle": {
+    "placeholders": {
+      "id": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishAssemblyScriptTitleNamed": "Script #{id} · {name}",
+  "@shortVideoSpacePublishAssemblyScriptTitleNamed": {
+    "placeholders": {
+      "id": {"type": "int"},
+      "name": {"type": "String"}
+    }
+  },
+  "shortVideoSpacePublishAssemblyScriptSummary": "{title} · {shots} shots · Final selected {withMedia} · Voiceover ready {voReady}",
+  "@shortVideoSpacePublishAssemblyScriptSummary": {
+    "placeholders": {
+      "title": {"type": "String"},
+      "shots": {"type": "int"},
+      "withMedia": {"type": "int"},
+      "voReady": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishAssemblyShotPreviewYes": "Preview✓",
+  "shortVideoSpacePublishAssemblyShotPreviewNo": "Preview×",
+  "shortVideoSpacePublishAssemblyShotDurationUnknown": "Duration?",
+  "shortVideoSpacePublishAssemblyShotSubtitleYes": "Subtitle✓",
+  "shortVideoSpacePublishAssemblyShotSubtitleNo": "Subtitle×",
+  "shortVideoSpacePublishAssemblyShotVoiceoverYes": "Voiceover✓",
+  "shortVideoSpacePublishAssemblyShotVoiceoverNo": "Voiceover×",
+  "shortVideoSpacePublishAssemblyShotBgmDefault": "Default",
+  "shortVideoSpacePublishAssemblyShotDetail": "Shot[{order}] · {preview} · {duration} · {subtitle} · {voiceover} · BGM {bgm}",
+  "@shortVideoSpacePublishAssemblyShotDetail": {
+    "placeholders": {
+      "order": {"type": "String"},
+      "preview": {"type": "String"},
+      "duration": {"type": "String"},
+      "subtitle": {"type": "String"},
+      "voiceover": {"type": "String"},
+      "bgm": {"type": "String"}
+    }
+  },
+  "shortVideoSpacePublishAssemblyMoreShots": "…{count} more shots, view in production workspace timeline",
+  "@shortVideoSpacePublishAssemblyMoreShots": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishAssemblyQualityProjectBadCase": "Project-level bad cases pending review: {count} (same source as production overview)",
+  "@shortVideoSpacePublishAssemblyQualityProjectBadCase": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishAssemblyQualityAssemblyReviews": "Reviews on current assembly storyboards: {total} · Bad cases {badCase} · Affected storyboards {shots}",
+  "@shortVideoSpacePublishAssemblyQualityAssemblyReviews": {
+    "placeholders": {
+      "total": {"type": "int"},
+      "badCase": {"type": "int"},
+      "shots": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishAssemblyQualityLateStageBadCase": "Late-stage bad cases (storyboard panel/video prompt): {count}",
+  "@shortVideoSpacePublishAssemblyQualityLateStageBadCase": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishAssemblyQualityByStage": "By stage: {stages}",
+  "@shortVideoSpacePublishAssemblyQualityByStage": {
+    "placeholders": {
+      "stages": {"type": "String"}
+    }
+  },
+  "shortVideoSpacePublishAssemblyQualityStageBadCase": "{stage} · Bad cases {count}",
+  "@shortVideoSpacePublishAssemblyQualityStageBadCase": {
+    "placeholders": {
+      "stage": {"type": "String"},
+      "count": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishAssemblyQualityTaskCenterHint": "In task center, you can filter quality review list by project; storyboard-level targets match assembly.",
+  "shortVideoSpacePublishAssemblyMultiTrackEstimate": "Track usage estimate: Video 1 + Subtitle {subtitle} + Voiceover {voiceover} + BGM {bgm} = {total} tracks.",
+  "@shortVideoSpacePublishAssemblyMultiTrackEstimate": {
+    "placeholders": {
+      "subtitle": {"type": "int"},
+      "voiceover": {"type": "int"},
+      "bgm": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishAssemblyMaterialReady": "Materials ready: Video shots {video}/{totalShots}, Subtitle shots {subtitle}/{totalShots}, Voiceover shots {voiceover}/{totalShots}.",
+  "@shortVideoSpacePublishAssemblyMaterialReady": {
+    "placeholders": {
+      "video": {"type": "int"},
+      "subtitle": {"type": "int"},
+      "voiceover": {"type": "int"},
+      "totalShots": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishAssemblyDurationEstimate": "Duration estimate: Identified {known}/{total} shots, total duration ~{minutes} minutes.",
+  "@shortVideoSpacePublishAssemblyDurationEstimate": {
+    "placeholders": {
+      "known": {"type": "int"},
+      "total": {"type": "int"},
+      "minutes": {"type": "String"}
+    }
+  },
+  "shortVideoSpacePublishAssemblyExportDecisionProfessional": "Export decision: Exceeds limited multi-track boundary (>4 tracks or complex duration), recommend professional platform (Requirement 8.2).",
+  "shortVideoSpacePublishAssemblyExportDecisionLimited": "Export decision: Maintain limited multi-track (<=4 tracks) path, can continue export in current pipeline.",
+  "shortVideoSpacePublishAssemblyBoundaryNote": "Boundary note: Space only covers \"video + single subtitle track + voiceover + BGM\" limited mixing, not a replacement for professional NLE.",
+  "shortVideoSpacePublishAssemblyDetail": "Read-only editing desk: Shows shot order, duration, subtitle, voiceover, BGM and preview readiness summary; export blocking conclusions see \"Export Pre-check\" below.",
+  "shortVideoSpacePublishExportCheckLoadingHeadline": "Loading export pre-check…",
+  "shortVideoSpacePublishExportCheckLoadingDetail": "Aggregates storyboard blocking and warnings; quality gate observation fields are placeholder display only.",
+  "shortVideoSpacePublishExportCheckUnavailableHeadline": "Export pre-check unavailable.",
+  "shortVideoSpacePublishExportCheckUnavailableDetail": "Please refresh page later, or confirm storyboards in production workspace.",
+  "shortVideoSpacePublishExportCheckReadyHeadline": "Server found no blocking issues (still need to confirm final in production).",
+  "shortVideoSpacePublishExportCheckBlockingHeadline": "Blocking items exist: Recommend completing fields in production workspace before export / final.",
+  "shortVideoSpacePublishExportCheckMetricStoryboards": "Storyboards",
+  "shortVideoSpacePublishExportCheckMetricBlocking": "Blocking",
+  "shortVideoSpacePublishExportCheckMetricWarning": "Warning",
+  "shortVideoSpacePublishExportCheckMetricExportable": "Exportable",
+  "shortVideoSpacePublishExportCheckMetricYes": "Yes",
+  "shortVideoSpacePublishExportCheckMetricNo": "No",
+  "shortVideoSpacePublishExportCheckQualityGateOff": "Quality gate: Off (no quality check).",
+  "shortVideoSpacePublishExportCheckQualityGateWarnNoBadCase": "Quality gate: Warn mode - No pending review bad cases (export allowed).",
+  "shortVideoSpacePublishExportCheckQualityGateWarnWithBadCase": "Quality gate: Warn mode - {count} pending review bad cases (export allowed but recommend fixing).",
+  "@shortVideoSpacePublishExportCheckQualityGateWarnWithBadCase": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishExportCheckQualityGateBlockEnforcedWithBadCase": "Quality gate: Block mode - {count} pending review bad cases (blocks export, must fix first).",
+  "@shortVideoSpacePublishExportCheckQualityGateBlockEnforcedWithBadCase": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishExportCheckQualityGateBlockNotEnforcedWithBadCase": "Quality gate: Block mode - {count} pending review bad cases (not enforced yet).",
+  "@shortVideoSpacePublishExportCheckQualityGateBlockNotEnforcedWithBadCase": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishExportCheckQualityGateBlockNoBadCase": "Quality gate: Block mode - No pending review bad cases (export allowed).",
+  "shortVideoSpacePublishExportCheckQualityGateUnknown": "Quality gate: Unknown strategy \"{strategy}\".",
+  "@shortVideoSpacePublishExportCheckQualityGateUnknown": {
+    "placeholders": {
+      "strategy": {"type": "String"}
+    }
+  },
+  "shortVideoSpacePublishExportCheckBlockingIssue": "Script #{scriptId} · Storyboard #{sbId}{sbIndex} · {label} · {detail}",
+  "@shortVideoSpacePublishExportCheckBlockingIssue": {
+    "placeholders": {
+      "scriptId": {"type": "int"},
+      "sbId": {"type": "int"},
+      "sbIndex": {"type": "String"},
+      "label": {"type": "String"},
+      "detail": {"type": "String"}
+    }
+  },
+  "shortVideoSpacePublishExportCheckDetailReady": "Blocking count is 0, indicating no hard blocking on server aggregation path (still subject to actual export pipeline).",
+  "shortVideoSpacePublishExportCheckDetailBlocking": "Below lists some blocking items; for complete list, check each shot in production workspace.",
+  "shortVideoSpacePublishCandidateLoadingHeadline": "Loading project assets…",
+  "shortVideoSpacePublishCandidateLoadingDetail": "Used to count candidate workflow: pending / linked / ignored (consistent with PATCH asset).",
+  "shortVideoSpacePublishCandidateUnavailableHeadline": "Candidate asset summary unavailable.",
+  "shortVideoSpacePublishCandidateUnavailableDetail": "Please refresh page later, or go to project area to view and edit assets.",
+  "shortVideoSpacePublishCandidateNoTrackedHeadline": "No pending / linked / ignored marked yet; can PATCH candidate_status on shot candidates and other assets in project area.",
+  "shortVideoSpacePublishCandidateTrackedHeadline": "Candidate status aggregated by project (counts below include unmarked):",
+  "shortVideoSpacePublishCandidateDetail": "Project has {total} assets; counts aggregated by server in one go (no pagination). Can update via PATCH candidate_status in project area.",
+  "@shortVideoSpacePublishCandidateDetail": {
+    "placeholders": {
+      "total": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishPanelLoadingHeadline": "Loading export check and publish domain…",
+  "shortVideoSpacePublishPanelLoadingDetail": "Backend path: `/api/v1/projects/:id/publish/*` (profiles / drafts / jobs).",
+  "shortVideoSpacePublishPanelUnavailableHeadline": "Publish domain interface unavailable (database migration may not be executed yet).",
+  "shortVideoSpacePublishPanelUnavailableExportGateMissing": "Export check data missing, publish panel shows placeholder only.",
+  "shortVideoSpacePublishPanelUnavailableExportGateNoBlocking": "Export check: Currently no blocking items.",
+  "shortVideoSpacePublishPanelUnavailableExportGateBlocking": "Export check: Still {count} blocking items.",
+  "@shortVideoSpacePublishPanelUnavailableExportGateBlocking": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishPanelUnavailableDetail": "Confirm Supabase has applied `app_publish_*` migrations then retry; Rust worker will digest publish job queue in background.",
+  "shortVideoSpacePublishPanelExportGateUnavailable": "Export check data unavailable; can still try creating publish draft and validate.",
+  "shortVideoSpacePublishPanelExportGateReady": "Export check: No blocking items (**E13**: Can enter publish preparation from final pipeline).",
+  "shortVideoSpacePublishPanelExportGateBlocking": "Export check: Still {count} blocking items; can complete fields first then submit job.",
+  "@shortVideoSpacePublishPanelExportGateBlocking": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishPanelHeadline": "Connected to publish API: {drafts} drafts · {jobs} jobs.",
+  "@shortVideoSpacePublishPanelHeadline": {
+    "placeholders": {
+      "drafts": {"type": "int"},
+      "jobs": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishPanelCurrentDraft": "Current draft: {title}",
+  "@shortVideoSpacePublishPanelCurrentDraft": {
+    "placeholders": {
+      "title": {"type": "String"}
+    }
+  },
+  "shortVideoSpacePublishPanelCurrentDraftUntitled": "Current draft: (Untitled)",
+  "shortVideoSpacePublishPanelSelectDraftWarning": "⚠️ Please explicitly select draft (no longer auto-use first one)",
+  "shortVideoSpacePublishPanelPrepareCheckOk": "Validation: ✓ Current draft meets placeholder rules (still needs real final reference to actually go live).",
+  "shortVideoSpacePublishPanelPrepareCheckMultipleDrafts": "When multiple drafts exist, please select one in \"Current Operation Draft\" first, then show prepare-check.",
+  "shortVideoSpacePublishPanelPrepareCheckSelectFirst": "After selecting draft, will show prepare-check validation result.",
+  "shortVideoSpacePublishPanelPrepareCheckNoDraft": "No draft yet or prepare-check not completed.",
+  "shortVideoSpacePublishPanelDraftNoTitle": "(Untitled)",
+  "shortVideoSpacePublishPanelDraftMissingVideo": " · Missing video reference",
+  "shortVideoSpacePublishPanelDraftScheduled": " · Scheduled {time}",
+  "@shortVideoSpacePublishPanelDraftScheduled": {
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "shortVideoSpacePublishPanelJobShortId": "{id}…",
+  "@shortVideoSpacePublishPanelJobShortId": {
+    "placeholders": {
+      "id": {"type": "String"}
+    }
+  },
+  "shortVideoSpacePublishPanelJobError": " · {error}",
+  "@shortVideoSpacePublishPanelJobError": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "shortVideoSpacePublishPanelOverviewSucceeded": "Succeeded jobs: {count}",
+  "@shortVideoSpacePublishPanelOverviewSucceeded": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishPanelOverviewFailed": "Failed/Partial failed: {count}",
+  "@shortVideoSpacePublishPanelOverviewFailed": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishPanelOverviewAwaiting": "Awaiting confirmation: {count}",
+  "@shortVideoSpacePublishPanelOverviewAwaiting": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishPanelOverviewScheduled": "Scheduled drafts: {scheduled}/{total}",
+  "@shortVideoSpacePublishPanelOverviewScheduled": {
+    "placeholders": {
+      "scheduled": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishPanelOverviewDeliveryModes": "Delivery modes: {modes}",
+  "@shortVideoSpacePublishPanelOverviewDeliveryModes": {
+    "placeholders": {
+      "modes": {"type": "String"}
+    }
+  },
+  "shortVideoSpacePublishPanelOverviewPerformanceAlerts": "Low performance alerts: {count} (recommend troubleshooting in task center and rewriting copy)",
+  "@shortVideoSpacePublishPanelOverviewPerformanceAlerts": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishPanelOverviewPerformanceAlert": "{platform} · Views {views} · Completion {rate}%",
+  "@shortVideoSpacePublishPanelOverviewPerformanceAlert": {
+    "placeholders": {
+      "platform": {"type": "String"},
+      "views": {"type": "int"},
+      "rate": {"type": "String"}
+    }
+  },
+  "shortVideoSpacePublishPanelOverviewAudit": "Audit: {platform} · {status} · mode={mode}",
+  "@shortVideoSpacePublishPanelOverviewAudit": {
+    "placeholders": {
+      "platform": {"type": "String"},
+      "status": {"type": "String"},
+      "mode": {"type": "String"}
+    }
+  },
+  "shortVideoSpacePublishPanelOverviewTargetAutomation": "Target automation: {modes}",
+  "@shortVideoSpacePublishPanelOverviewTargetAutomation": {
+    "placeholders": {
+      "modes": {"type": "String"}
+    }
+  },
+  "shortVideoSpacePublishPanelDetail": "Semi-auto jobs need \"Confirm\" when in `awaiting_confirmation`; worker skeleton will write `publish_attempts` placeholder success records.",
+  "shortVideoSpaceProductionAssemblyExportCompleted": "Export completed.",
+  "shortVideoSpaceProductionAssemblyExportNotCompleted": "Export not completed or cancelled.",
+  "shortVideoSpaceProductionAssemblyExportStartFailed": "Export start failed: {error}",
+  "@shortVideoSpaceProductionAssemblyExportStartFailed": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "shortVideoSpaceProductionAssemblyReplaceVideoTitle": "Replace current video version",
+  "shortVideoSpaceProductionAssemblyVideoUrlLabel": "Video URL",
+  "shortVideoSpaceProductionAssemblyVideoUrlHint": "https://...",
+  "shortVideoSpaceProductionAssemblyCancel": "Cancel",
+  "shortVideoSpaceProductionAssemblyWriteBackVersion": "Write back current version",
+  "shortVideoSpaceProductionAssemblyShotDisabled": "Shot #{storyboardId} paused (cleared current video).",
+  "@shortVideoSpaceProductionAssemblyShotDisabled": {
+    "placeholders": {
+      "storyboardId": {"type": "int"}
+    }
+  },
+  "shortVideoSpaceProductionAssemblyDisableFailed": "Pause failed: {error}",
+  "@shortVideoSpaceProductionAssemblyDisableFailed": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "shortVideoSpaceProductionAssemblyNoVideoUrl": "No available video URL, please enter replacement address first.",
+  "shortVideoSpaceProductionAssemblyShotWriteBack": "Shot #{storyboardId} wrote back current video version.",
+  "@shortVideoSpaceProductionAssemblyShotWriteBack": {
+    "placeholders": {
+      "storyboardId": {"type": "int"}
+    }
+  },
+  "shortVideoSpaceProductionAssemblyWriteBackFailed": "Write back failed: {error}",
+  "@shortVideoSpaceProductionAssemblyWriteBackFailed": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "shortVideoSpaceProductionAssemblyReorderPersisted": "Persisted shot reorder (wrote back timeline and shot numbers by script).",
+  "shortVideoSpaceProductionAssemblyReorderFailed": "Reorder persistence failed: {error}",
+  "@shortVideoSpaceProductionAssemblyReorderFailed": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "shortVideoSpaceProductionAssemblyShotAligned": "Shot #{storyboardId} aligned to {duration}s.",
+  "@shortVideoSpaceProductionAssemblyShotAligned": {
+    "placeholders": {
+      "storyboardId": {"type": "int"},
+      "duration": {"type": "int"}
+    }
+  },
+  "shortVideoSpaceProductionAssemblyAlignFailed": "Duration alignment failed: {error}",
+  "@shortVideoSpaceProductionAssemblyAlignFailed": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "shortVideoSpaceProductionAssemblySubtitleExistsDurationMissing": "Subtitle exists, but duration not explicit (suggest aligning duration first).",
+  "shortVideoSpaceProductionAssemblyDurationSetSubtitleEmpty": "Duration is set, but subtitle is empty (possible subtitle track gap).",
+  "shortVideoSpaceProductionAssemblySubtitleExistsDurationAbnormal": "Subtitle exists, but duration is abnormal (<=0).",
+  "shortVideoSpaceProductionAssemblySubtitleDurationNoMismatch": "No obvious subtitle-duration mismatch.",
+  "shortVideoSpaceProductionAssemblyBasicOpsTitle": "Basic shot operations",
+  "shortVideoSpaceProductionAssemblyBasicOpsDescription": "Supports basic reordering (this panel view), enable/disable, and replace current video version.",
+  "shortVideoSpaceProductionAssemblyBasicOpsNote": "Enable/disable/replace writes back directly to J media slot; reorder is for this troubleshooting view only.",
+  "shortVideoSpaceProductionAssemblyTotalDuration": "Total finished duration: {seconds}s ({formatted})",
+  "@shortVideoSpaceProductionAssemblyTotalDuration": {
+    "placeholders": {
+      "seconds": {"type": "int"},
+      "formatted": {"type": "String"}
+    }
+  },
+  "shortVideoSpaceProductionAssemblySaveReorder": "Save reorder",
+  "shortVideoSpaceProductionAssemblyUndoToOpen": "Undo to open time",
+  "shortVideoSpaceProductionAssemblyVoiceoverTasks": "Voiceover tasks",
+  "shortVideoSpaceProductionAssemblyClose": "Close",
+  "shortVideoSpaceProductionAssemblyNoShotsFiltered": "No shots under current filter conditions, try clearing search or relaxing criteria.",
+  "shortVideoSpaceProductionAssemblyScriptShotOrder": "Script #{scriptId} · Shot #{storyboardId} · Order {order}",
+  "@shortVideoSpaceProductionAssemblyScriptShotOrder": {
+    "placeholders": {
+      "scriptId": {"type": "int"},
+      "storyboardId": {"type": "int"},
+      "order": {"type": "int"}
+    }
+  },
+  "shortVideoSpaceProductionAssemblyStatusPaused": "Status: Paused",
+  "shortVideoSpaceProductionAssemblyStatusEnabled": "Status: Enabled ({kind})",
+  "@shortVideoSpaceProductionAssemblyStatusEnabled": {
+    "placeholders": {
+      "kind": {"type": "String"}
+    }
+  },
+  "shortVideoSpaceProductionAssemblyDurationLabel": "Duration:",
+  "shortVideoSpaceProductionAssemblyDurationNotSet": "Not set",
+  "shortVideoSpaceProductionAssemblySubtitleLabel": "Subtitle:",
+  "shortVideoSpaceProductionAssemblySubtitleEmpty": "Empty",
+  "shortVideoSpaceProductionAssemblyVoiceoverScriptReady": "Voiceover script: ✓ Ready",
+  "shortVideoSpaceProductionAssemblyVoiceoverScriptNotReady": "Voiceover script: ✗ Not ready",
+  "shortVideoSpaceProductionAssemblyVoiceoverAssetReady": "Voiceover asset: ✓ Ready",
+  "shortVideoSpaceProductionAssemblyVoiceoverAssetNotReady": "Voiceover asset: ✗ Not ready",
+  "shortVideoSpaceProductionAssemblyVoiceoverStatusLabel": "Voiceover status:",
+  "shortVideoSpaceProductionAssemblyVoiceoverAudioLabel": "Voiceover audio:",
+  "shortVideoSpaceProductionAssemblyVoiceoverErrorLabel": "Voiceover error:",
+  "shortVideoSpaceProductionAssemblyMismatchCheckLabel": "Mismatch check:",
+  "shortVideoSpaceProductionAssemblyMoveUp": "Move up",
+  "shortVideoSpaceProductionAssemblyMoveDown": "Move down",
+  "shortVideoSpaceProductionAssemblyEnable": "Enable",
+  "shortVideoSpaceProductionAssemblyPause": "Pause",
+  "shortVideoSpaceProductionAssemblyAlignDuration": "Align duration",
+  "shortVideoSpaceProductionAssemblyReplaceVersion": "Replace current version",
+  "shortVideoSpaceProductionAssemblyGenerateVoiceover": "Generate voiceover",
+  "shortVideoSpaceProductionAssemblyPreviewVoiceover": "Preview voiceover",
+  "shortVideoSpaceProductionAssemblySingleShotDurationTitle": "Single shot duration alignment",
+  "shortVideoSpaceProductionAssemblySingleShotDurationLabel": "Duration (seconds)",
+  "shortVideoSpaceProductionAssemblySingleShotDurationHint": "Enter 1~300",
+  "shortVideoSpaceProductionAssemblyAlignAndWriteBack": "Align and write back",
+  "shortVideoSpaceProductionAssemblyAssemblyStyleTitle": "Assembly-level style adjustment",
+  "shortVideoSpaceProductionAssemblySubtitleStyleLabel": "Subtitle style subtitle_style",
+  "shortVideoSpaceProductionAssemblySubtitleStyleHint": "e.g. cinematic_cn_v2 (leave empty to fall back to default)",
+  "shortVideoSpaceProductionAssemblyBgmStrategyLabel": "BGM strategy bgm_strategy",
+  "shortVideoSpaceProductionAssemblyBgmStrategyHint": "e.g. pulse_light (leave empty to fall back to default)",
+  "shortVideoSpaceProductionAssemblyStyleNote": "After saving, will write back D7 default configuration and refresh effective values in assembly snapshot.",
+  "shortVideoSpaceProductionAssemblySaveAndRefresh": "Save and refresh",
+  "shortVideoSpaceProductionAssemblyStyleUpdated": "Updated assembly-level defaults: subtitle {subtitle} · BGM {bgm}",
+  "@shortVideoSpaceProductionAssemblyStyleUpdated": {
+    "placeholders": {
+      "subtitle": {"type": "String"},
+      "bgm": {"type": "String"}
+    }
+  },
+  "shortVideoSpaceProductionAssemblyStyleDefault": "default",
+  "shortVideoSpaceProductionAssemblyStyleWriteBackFailed": "Assembly style write back failed: {error}",
+  "@shortVideoSpaceProductionAssemblyStyleWriteBackFailed": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "shortVideoSpaceProductionAssemblyVoiceoverTaskCenterTitle": "Voiceover task center",
+  "shortVideoSpaceProductionAssemblyAllStatus": "All status",
+  "shortVideoSpaceProductionAssemblyRefresh": "Refresh",
+  "shortVideoSpaceProductionAssemblyGroupByShot": "Group by shot",
+  "shortVideoSpaceProductionAssemblyBatchRetryFailed": "Batch retry failed ({count})",
+  "@shortVideoSpaceProductionAssemblyBatchRetryFailed": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "shortVideoSpaceProductionAssemblyFilterTaskIdScriptShot": "Filter: Task ID / Script # / Shot #",
+  "shortVideoSpaceProductionAssemblyTaskSummary": "Total {total} · queued {queued} · running {running} · succeeded {succeeded} · failed {failed} · cancelled {cancelled} · Showing {filtered}/{visible}",
+  "@shortVideoSpaceProductionAssemblyTaskSummary": {
+    "placeholders": {
+      "total": {"type": "int"},
+      "queued": {"type": "int"},
+      "running": {"type": "int"},
+      "succeeded": {"type": "int"},
+      "failed": {"type": "int"},
+      "cancelled": {"type": "int"},
+      "filtered": {"type": "int"},
+      "visible": {"type": "int"}
+    }
+  },
+  "shortVideoSpaceProductionAssemblyNoVoiceoverTasks": "No voiceover tasks yet",
+  "shortVideoSpaceProductionAssemblyTaskEntry": "{prefix} {taskId} · Status {status}",
+  "@shortVideoSpaceProductionAssemblyTaskEntry": {
+    "placeholders": {
+      "prefix": {"type": "String"},
+      "taskId": {"type": "String"},
+      "status": {"type": "String"}
+    }
+  },
+  "shortVideoSpaceProductionAssemblyLatestTask": "Latest task",
+  "shortVideoSpaceProductionAssemblyTask": "Task",
+  "shortVideoSpaceProductionAssemblyTaskSubtitle": "Script #{scriptId} · Shot #{shotId}{audio}{error}",
+  "@shortVideoSpaceProductionAssemblyTaskSubtitle": {
+    "placeholders": {
+      "scriptId": {"type": "String"},
+      "shotId": {"type": "String"},
+      "audio": {"type": "String"},
+      "error": {"type": "String"}
+    }
+  },
+  "shortVideoSpaceProductionAssemblyTaskSubtitleAudioReady": " · Audio ready",
+  "shortVideoSpaceProductionAssemblyTaskSubtitleError": " · Error: {error}",
+  "@shortVideoSpaceProductionAssemblyTaskSubtitleError": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "shortVideoSpaceProductionAssemblyPreviewAudio": "Preview audio",
+  "shortVideoSpaceProductionAssemblyCopyAudioLink": "Copy audio link",
+  "shortVideoSpaceProductionAssemblyAudioLinkCopied": "Audio link copied",
+  "shortVideoSpaceProductionAssemblyCancelTask": "Cancel",
+  "shortVideoSpaceProductionAssemblyTaskCancelled": "Cancelled voiceover task {taskId}",
+  "@shortVideoSpaceProductionAssemblyTaskCancelled": {
+    "placeholders": {
+      "taskId": {"type": "String"}
+    }
+  },
+  "shortVideoSpaceProductionAssemblyCancelFailed": "Cancel failed: {error}",
+  "@shortVideoSpaceProductionAssemblyCancelFailed": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "shortVideoSpaceProductionAssemblyRetryTask": "Retry",
+  "shortVideoSpaceProductionAssemblyTaskRetried": "Retried, task {taskId} queued",
+  "@shortVideoSpaceProductionAssemblyTaskRetried": {
+    "placeholders": {
+      "taskId": {"type": "String"}
+    }
+  },
+  "shortVideoSpaceProductionAssemblyRetryFailed": "Retry failed: {error}",
+  "@shortVideoSpaceProductionAssemblyRetryFailed": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "shortVideoSpaceProductionAssemblyBatchRetryCompleted": "Batch retry completed: succeeded {succeeded}, failed {failed}",
+  "@shortVideoSpaceProductionAssemblyBatchRetryCompleted": {
+    "placeholders": {
+      "succeeded": {"type": "int"},
+      "failed": {"type": "int"}
+    }
+  },
+  "shortVideoSpaceProductionAssemblyLoadFailed": "Load failed: {error}",
+  "@shortVideoSpaceProductionAssemblyLoadFailed": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
   }
 }
+

@@ -218,6 +218,264 @@ abstract class AppLocalizations {
   /// **'{percent}% used'**
   String workspaceBillingPercentUsed(String percent);
 
+  /// No description provided for @shortVideoSpaceCannotSaveNoProject.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot save: no project selected or not logged in'**
+  String get shortVideoSpaceCannotSaveNoProject;
+
+  /// No description provided for @shortVideoSpaceSavingInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving in progress, please wait...'**
+  String get shortVideoSpaceSavingInProgress;
+
+  /// No description provided for @shortVideoSpaceSelectAllAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Select all shortcut (Ctrl+A / Cmd+A) is available in the shot operation panel'**
+  String get shortVideoSpaceSelectAllAvailable;
+
+  /// No description provided for @shortVideoSpaceSearchFocused.
+  ///
+  /// In en, this message translates to:
+  /// **'Search box focused'**
+  String get shortVideoSpaceSearchFocused;
+
+  /// No description provided for @shortVideoSpaceSearchNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Search box not available (please open shot operation panel first)'**
+  String get shortVideoSpaceSearchNotAvailable;
+
+  /// No description provided for @shortVideoSpaceSaveProjectConfig.
+  ///
+  /// In en, this message translates to:
+  /// **'Save project configuration'**
+  String get shortVideoSpaceSaveProjectConfig;
+
+  /// No description provided for @shortVideoSpaceSelectAllShots.
+  ///
+  /// In en, this message translates to:
+  /// **'Select all shots (in batch operation mode)'**
+  String get shortVideoSpaceSelectAllShots;
+
+  /// No description provided for @shortVideoSpaceFocusSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus search box'**
+  String get shortVideoSpaceFocusSearch;
+
+  /// No description provided for @shortVideoSpaceUndoOperation.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo last operation'**
+  String get shortVideoSpaceUndoOperation;
+
+  /// No description provided for @shortVideoSpaceRedoOperation.
+  ///
+  /// In en, this message translates to:
+  /// **'Redo last operation'**
+  String get shortVideoSpaceRedoOperation;
+
+  /// No description provided for @shortVideoSpaceFileOperations.
+  ///
+  /// In en, this message translates to:
+  /// **'File Operations'**
+  String get shortVideoSpaceFileOperations;
+
+  /// No description provided for @shortVideoSpaceSelectionOperations.
+  ///
+  /// In en, this message translates to:
+  /// **'Selection Operations'**
+  String get shortVideoSpaceSelectionOperations;
+
+  /// No description provided for @shortVideoSpaceNavigation.
+  ///
+  /// In en, this message translates to:
+  /// **'Navigation'**
+  String get shortVideoSpaceNavigation;
+
+  /// No description provided for @shortVideoSpaceEditOperations.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Operations'**
+  String get shortVideoSpaceEditOperations;
+
+  /// No description provided for @shortVideoSpaceKeyboardShortcuts.
+  ///
+  /// In en, this message translates to:
+  /// **'Keyboard Shortcuts'**
+  String get shortVideoSpaceKeyboardShortcuts;
+
+  /// No description provided for @shortVideoSpaceClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get shortVideoSpaceClose;
+
+  /// No description provided for @shortVideoSpaceCurrentProjectOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Project Overview'**
+  String get shortVideoSpaceCurrentProjectOverview;
+
+  /// No description provided for @shortVideoSpaceRecentBadCaseTrends.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Bad Case Trends'**
+  String get shortVideoSpaceRecentBadCaseTrends;
+
+  /// No description provided for @shortVideoSpaceRecentTaskFlow.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Task Flow'**
+  String get shortVideoSpaceRecentTaskFlow;
+
+  /// No description provided for @shortVideoSpaceAssetsOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Assets Overview'**
+  String get shortVideoSpaceAssetsOverview;
+
+  /// No description provided for @shortVideoSpaceAssemblySnapshot.
+  ///
+  /// In en, this message translates to:
+  /// **'Assembly Snapshot'**
+  String get shortVideoSpaceAssemblySnapshot;
+
+  /// No description provided for @shortVideoSpaceQualityReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality Review (Quality Acceptance)'**
+  String get shortVideoSpaceQualityReview;
+
+  /// No description provided for @shortVideoSpaceMultiTrackExportDecision.
+  ///
+  /// In en, this message translates to:
+  /// **'Limited Multi-track Export Decision (K5)'**
+  String get shortVideoSpaceMultiTrackExportDecision;
+
+  /// No description provided for @shortVideoSpaceOpenProductionWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Production Workspace'**
+  String get shortVideoSpaceOpenProductionWorkspace;
+
+  /// No description provided for @shortVideoSpaceBasicShotOperations.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic Shot Operations'**
+  String get shortVideoSpaceBasicShotOperations;
+
+  /// No description provided for @shortVideoSpaceAssemblyStyleAdjustment.
+  ///
+  /// In en, this message translates to:
+  /// **'Assembly Style Adjustment'**
+  String get shortVideoSpaceAssemblyStyleAdjustment;
+
+  /// No description provided for @shortVideoSpaceExportPreCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Pre-check'**
+  String get shortVideoSpaceExportPreCheck;
+
+  /// No description provided for @shortVideoSpaceQualityGateBlockingReasons.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality Gate Blocking Reasons'**
+  String get shortVideoSpaceQualityGateBlockingReasons;
+
+  /// No description provided for @shortVideoSpaceBlockingItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocking Items (Selected by Interface Order)'**
+  String get shortVideoSpaceBlockingItems;
+
+  /// No description provided for @shortVideoSpaceWarningItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Warning Items (Selected by Interface Order)'**
+  String get shortVideoSpaceWarningItems;
+
+  /// No description provided for @shortVideoSpaceExporting.
+  ///
+  /// In en, this message translates to:
+  /// **'Exporting...'**
+  String get shortVideoSpaceExporting;
+
+  /// No description provided for @shortVideoSpaceStartExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Export'**
+  String get shortVideoSpaceStartExport;
+
+  /// No description provided for @shortVideoSpaceExportHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Export History'**
+  String get shortVideoSpaceExportHistory;
+
+  /// No description provided for @shortVideoSpacePublishJobs.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish Jobs'**
+  String get shortVideoSpacePublishJobs;
+
+  /// No description provided for @shortVideoSpaceScheduleCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule Calendar (counted by local calendar days; click a day to batch write timing)'**
+  String get shortVideoSpaceScheduleCalendar;
+
+  /// No description provided for @shortVideoSpaceTargetConfiguration.
+  ///
+  /// In en, this message translates to:
+  /// **'Short Video Target Configuration'**
+  String get shortVideoSpaceTargetConfiguration;
+
+  /// No description provided for @shortVideoSpaceConfigurationDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Write the creation mode and aspect ratio directly back to the project, so that subsequent scripts and production processes can continue to work based on the same project configuration.'**
+  String get shortVideoSpaceConfigurationDescription;
+
+  /// No description provided for @shortVideoSpaceTargetProject.
+  ///
+  /// In en, this message translates to:
+  /// **'Target Project'**
+  String get shortVideoSpaceTargetProject;
+
+  /// No description provided for @shortVideoSpaceLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading'**
+  String get shortVideoSpaceLoading;
+
+  /// No description provided for @shortVideoSpaceRefreshProjects.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh Projects'**
+  String get shortVideoSpaceRefreshProjects;
+
+  /// No description provided for @shortVideoSpaceRestoreRiskyConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore High-Risk Confirmation Prompts'**
+  String get shortVideoSpaceRestoreRiskyConfirmation;
+
+  /// No description provided for @shortVideoSpacePortrait916.
+  ///
+  /// In en, this message translates to:
+  /// **'Portrait 9:16'**
+  String get shortVideoSpacePortrait916;
+
+  /// No description provided for @shortVideoSpaceLandscape169.
+  ///
+  /// In en, this message translates to:
+  /// **'Landscape 16:9'**
+  String get shortVideoSpaceLandscape169;
+
   /// No description provided for @notificationsCenterTitle.
   ///
   /// In en, this message translates to:
@@ -2663,6 +2921,312 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Brand bible'**
   String get projectsDialogSectionBrand;
+
+  /// No description provided for @shortVideoSpaceErrorTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'Request timeout{context}, please check network connection and retry.'**
+  String shortVideoSpaceErrorTimeout(String context);
+
+  /// No description provided for @shortVideoSpaceErrorOperationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Operation failed{context}: {error}'**
+  String shortVideoSpaceErrorOperationFailed(String context, String error);
+
+  /// No description provided for @shortVideoSpaceErrorConcurrentLimitExceeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Concurrent workspace audit export limit reached, please wait for existing tasks to complete{context}.'**
+  String shortVideoSpaceErrorConcurrentLimitExceeded(String context);
+
+  /// No description provided for @shortVideoSpaceErrorRateLimitWithWait.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many requests{context}, {waitText}.'**
+  String shortVideoSpaceErrorRateLimitWithWait(String context, String waitText);
+
+  /// No description provided for @shortVideoSpaceErrorNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Record not found{context}.'**
+  String shortVideoSpaceErrorNotFound(String context);
+
+  /// No description provided for @shortVideoSpaceErrorPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Permission denied{context}, please check login status.'**
+  String shortVideoSpaceErrorPermissionDenied(String context);
+
+  /// No description provided for @shortVideoSpaceErrorBadRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Bad request parameters'**
+  String get shortVideoSpaceErrorBadRequest;
+
+  /// No description provided for @shortVideoSpaceErrorBadRequestWithContext.
+  ///
+  /// In en, this message translates to:
+  /// **'{message}{context}'**
+  String shortVideoSpaceErrorBadRequestWithContext(
+    String message,
+    String context,
+  );
+
+  /// No description provided for @shortVideoSpaceErrorServerError.
+  ///
+  /// In en, this message translates to:
+  /// **'Server error{context}, please retry later.'**
+  String shortVideoSpaceErrorServerError(String context);
+
+  /// No description provided for @shortVideoSpaceErrorDetailedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{message}{context}'**
+  String shortVideoSpaceErrorDetailedMessage(String message, String context);
+
+  /// No description provided for @shortVideoSpaceErrorDefaultMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Operation failed{context}: {error}'**
+  String shortVideoSpaceErrorDefaultMessage(String context, String error);
+
+  /// No description provided for @shortVideoSpaceErrorRetryButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get shortVideoSpaceErrorRetryButton;
+
+  /// No description provided for @shortVideoSpaceDialogExportHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Export History'**
+  String get shortVideoSpaceDialogExportHistoryTitle;
+
+  /// No description provided for @shortVideoSpaceDialogExportHistoryRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get shortVideoSpaceDialogExportHistoryRefresh;
+
+  /// No description provided for @shortVideoSpaceDialogExportHistoryStatusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get shortVideoSpaceDialogExportHistoryStatusLabel;
+
+  /// No description provided for @shortVideoSpaceDialogExportHistoryTimeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get shortVideoSpaceDialogExportHistoryTimeLabel;
+
+  /// No description provided for @shortVideoSpaceDialogExportHistoryClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get shortVideoSpaceDialogExportHistoryClose;
+
+  /// No description provided for @shortVideoSpaceDialogExportHistoryRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get shortVideoSpaceDialogExportHistoryRetry;
+
+  /// No description provided for @shortVideoSpaceDialogExportHistoryNoRecords.
+  ///
+  /// In en, this message translates to:
+  /// **'No export records'**
+  String get shortVideoSpaceDialogExportHistoryNoRecords;
+
+  /// No description provided for @shortVideoSpaceDialogExportHistoryNoRecordsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Export records will appear here after exporting videos'**
+  String get shortVideoSpaceDialogExportHistoryNoRecordsHint;
+
+  /// No description provided for @shortVideoSpaceDialogExportHistoryDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get shortVideoSpaceDialogExportHistoryDownload;
+
+  /// No description provided for @shortVideoSpaceDialogExportHistoryDownloading.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading...'**
+  String get shortVideoSpaceDialogExportHistoryDownloading;
+
+  /// No description provided for @shortVideoSpaceDialogExportHistoryTimeFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All time'**
+  String get shortVideoSpaceDialogExportHistoryTimeFilterAll;
+
+  /// No description provided for @shortVideoSpaceDialogExportHistoryTimeFilterToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get shortVideoSpaceDialogExportHistoryTimeFilterToday;
+
+  /// No description provided for @shortVideoSpaceDialogExportHistoryTimeFilterWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Last week'**
+  String get shortVideoSpaceDialogExportHistoryTimeFilterWeek;
+
+  /// No description provided for @shortVideoSpaceDialogExportHistoryTimeFilterMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Last month'**
+  String get shortVideoSpaceDialogExportHistoryTimeFilterMonth;
+
+  /// No description provided for @shortVideoSpaceDialogExportHistoryStatusFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All status'**
+  String get shortVideoSpaceDialogExportHistoryStatusFilterAll;
+
+  /// No description provided for @shortVideoSpaceDialogExportHistoryStatusFilterCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get shortVideoSpaceDialogExportHistoryStatusFilterCompleted;
+
+  /// No description provided for @shortVideoSpaceDialogExportHistoryStatusFilterFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get shortVideoSpaceDialogExportHistoryStatusFilterFailed;
+
+  /// No description provided for @shortVideoSpaceDialogExportHistoryStatusFilterCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get shortVideoSpaceDialogExportHistoryStatusFilterCancelled;
+
+  /// No description provided for @shortVideoSpaceDialogExportHistoryFileSizeUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get shortVideoSpaceDialogExportHistoryFileSizeUnknown;
+
+  /// No description provided for @shortVideoSpaceDialogExportHistoryFileSizeKB.
+  ///
+  /// In en, this message translates to:
+  /// **'{size} KB'**
+  String shortVideoSpaceDialogExportHistoryFileSizeKB(String size);
+
+  /// No description provided for @shortVideoSpaceDialogExportHistoryFileSizeMB.
+  ///
+  /// In en, this message translates to:
+  /// **'{size} MB'**
+  String shortVideoSpaceDialogExportHistoryFileSizeMB(String size);
+
+  /// No description provided for @shortVideoSpaceDialogExportHistoryFileSizeGB.
+  ///
+  /// In en, this message translates to:
+  /// **'{size} GB'**
+  String shortVideoSpaceDialogExportHistoryFileSizeGB(String size);
+
+  /// No description provided for @shortVideoSpaceDialogExportHistoryDurationSeconds.
+  ///
+  /// In en, this message translates to:
+  /// **'{seconds} seconds'**
+  String shortVideoSpaceDialogExportHistoryDurationSeconds(int seconds);
+
+  /// No description provided for @shortVideoSpaceDialogExportHistoryDurationMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} minutes'**
+  String shortVideoSpaceDialogExportHistoryDurationMinutes(int minutes);
+
+  /// No description provided for @shortVideoSpaceDialogExportHistoryDurationHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} hours {minutes} minutes'**
+  String shortVideoSpaceDialogExportHistoryDurationHours(
+    int hours,
+    int minutes,
+  );
+
+  /// No description provided for @shortVideoSpaceDialogExportHistoryCreatedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Created: {time}'**
+  String shortVideoSpaceDialogExportHistoryCreatedAt(String time);
+
+  /// No description provided for @shortVideoSpaceDialogExportHistoryCompletedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed: {time} · Duration: {duration}'**
+  String shortVideoSpaceDialogExportHistoryCompletedAt(
+    String time,
+    String duration,
+  );
+
+  /// No description provided for @shortVideoSpaceDialogExportHistoryFileSize.
+  ///
+  /// In en, this message translates to:
+  /// **'File size: {size}'**
+  String shortVideoSpaceDialogExportHistoryFileSize(String size);
+
+  /// No description provided for @shortVideoSpaceDialogExportHistorySettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings: {bitrate} · {framerate} FPS'**
+  String shortVideoSpaceDialogExportHistorySettings(
+    String bitrate,
+    int framerate,
+  );
+
+  /// No description provided for @shortVideoSpaceDialogExportHistoryLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load export history: {error}'**
+  String shortVideoSpaceDialogExportHistoryLoadError(String error);
+
+  /// No description provided for @shortVideoSpaceDialogExportHistorySessionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired, please login again'**
+  String get shortVideoSpaceDialogExportHistorySessionExpired;
+
+  /// No description provided for @shortVideoSpaceDialogExportHistoryDownloadLinkCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Download link copied ({format})'**
+  String shortVideoSpaceDialogExportHistoryDownloadLinkCopied(String format);
+
+  /// No description provided for @shortVideoSpaceDialogExportHistoryDownloadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Download failed: {error}'**
+  String shortVideoSpaceDialogExportHistoryDownloadFailed(String error);
+
+  /// No description provided for @shortVideoSpaceDialogExportHistoryTimeJustNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Just now'**
+  String get shortVideoSpaceDialogExportHistoryTimeJustNow;
+
+  /// No description provided for @shortVideoSpaceDialogExportHistoryTimeMinutesAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} minutes ago'**
+  String shortVideoSpaceDialogExportHistoryTimeMinutesAgo(int minutes);
+
+  /// No description provided for @shortVideoSpaceDialogExportHistoryTimeHoursAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} hours ago'**
+  String shortVideoSpaceDialogExportHistoryTimeHoursAgo(int hours);
+
+  /// No description provided for @shortVideoSpaceDialogExportHistoryTimeDaysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days ago'**
+  String shortVideoSpaceDialogExportHistoryTimeDaysAgo(int days);
 
   /// No description provided for @projectsDialogFieldBrandName.
   ///
@@ -8950,6 +9514,2288 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Scope seed: {line}'**
   String qualityReviewsScopeSeedLine(String line);
+
+  /// No description provided for @projectEditorAssetHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Asset History Workbench'**
+  String get projectEditorAssetHistoryTitle;
+
+  /// No description provided for @projectEditorAssetHistoryTypeFilterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Type filter (optional)'**
+  String get projectEditorAssetHistoryTypeFilterLabel;
+
+  /// No description provided for @projectEditorAssetHistoryTypeFilterHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Comma-separated, e.g. role,clip,props; leave empty for all'**
+  String get projectEditorAssetHistoryTypeFilterHelper;
+
+  /// No description provided for @projectEditorAssetHistoryLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading…'**
+  String get projectEditorAssetHistoryLoading;
+
+  /// No description provided for @projectEditorAssetHistoryQueryButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Query history assets'**
+  String get projectEditorAssetHistoryQueryButton;
+
+  /// No description provided for @projectEditorAssetHistoryClearFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear type filter'**
+  String get projectEditorAssetHistoryClearFilter;
+
+  /// No description provided for @projectEditorAssetHistoryLoadingAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading history assets…'**
+  String get projectEditorAssetHistoryLoadingAssets;
+
+  /// No description provided for @projectEditorAssetHistoryEmptyState.
+  ///
+  /// In en, this message translates to:
+  /// **'No data, click \"Query history assets\" to start.'**
+  String get projectEditorAssetHistoryEmptyState;
+
+  /// No description provided for @projectEditorAssetHistoryImageDropdownLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'History image'**
+  String get projectEditorAssetHistoryImageDropdownLabel;
+
+  /// No description provided for @projectEditorAssetHistoryNoImages.
+  ///
+  /// In en, this message translates to:
+  /// **'This asset has no history images'**
+  String get projectEditorAssetHistoryNoImages;
+
+  /// No description provided for @projectEditorAssetHistoryCurrentImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Current image: sort={sortIndex} · state={state}'**
+  String projectEditorAssetHistoryCurrentImage(int sortIndex, String state);
+
+  /// No description provided for @projectEditorAssetHistoryNoPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Current image has no available preview (may be path placeholder or remote resource temporarily unavailable)'**
+  String get projectEditorAssetHistoryNoPreview;
+
+  /// No description provided for @projectEditorAssetHistoryClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get projectEditorAssetHistoryClose;
+
+  /// No description provided for @projectEditorAssetGenerationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Asset Generation Workbench'**
+  String get projectEditorAssetGenerationTitle;
+
+  /// No description provided for @projectEditorAssetGenerationDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Consolidates production asset summary, batch generation, status polling, derivative cleanup, and cover URL updates into the main project asset workflow, no longer relying solely on system probes.'**
+  String get projectEditorAssetGenerationDescription;
+
+  /// No description provided for @projectEditorAssetGenerationClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get projectEditorAssetGenerationClose;
+
+  /// No description provided for @projectEditorScriptsBatchAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch Add Scripts'**
+  String get projectEditorScriptsBatchAddTitle;
+
+  /// No description provided for @projectEditorScriptsBatchAddCountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Count (1-20)'**
+  String get projectEditorScriptsBatchAddCountLabel;
+
+  /// No description provided for @projectEditorScriptsBatchAddCountHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum 20 per batch to avoid accidental operations.'**
+  String get projectEditorScriptsBatchAddCountHelper;
+
+  /// No description provided for @projectEditorScriptsBatchAddNamePrefixLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Name prefix'**
+  String get projectEditorScriptsBatchAddNamePrefixLabel;
+
+  /// No description provided for @projectEditorScriptsBatchAddContentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Default script content'**
+  String get projectEditorScriptsBatchAddContentLabel;
+
+  /// No description provided for @projectEditorScriptsBatchAddCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get projectEditorScriptsBatchAddCancel;
+
+  /// No description provided for @projectEditorScriptsBatchAddCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get projectEditorScriptsBatchAddCreate;
+
+  /// No description provided for @projectEditorScriptsBatchAddCountError.
+  ///
+  /// In en, this message translates to:
+  /// **'Count must be an integer between 1-20'**
+  String get projectEditorScriptsBatchAddCountError;
+
+  /// No description provided for @projectEditorScriptsBatchAddDefaultPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'New Script'**
+  String get projectEditorScriptsBatchAddDefaultPrefix;
+
+  /// No description provided for @projectEditorScriptsBatchAddDefaultContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Plot synopsis to be added.'**
+  String get projectEditorScriptsBatchAddDefaultContent;
+
+  /// No description provided for @projectEditorScriptsBatchAddSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Created {count} scripts in batch'**
+  String projectEditorScriptsBatchAddSuccess(int count);
+
+  /// No description provided for @projectEditorProbeTasksZeroItems.
+  ///
+  /// In en, this message translates to:
+  /// **'0 items'**
+  String get projectEditorProbeTasksZeroItems;
+
+  /// No description provided for @projectEditorProbeTasksZeroClasses.
+  ///
+  /// In en, this message translates to:
+  /// **'0 classes'**
+  String get projectEditorProbeTasksZeroClasses;
+
+  /// No description provided for @projectEditorProbeTasksCompatGetTaskApi.
+  ///
+  /// In en, this message translates to:
+  /// **'compat get-task-api (GET jobs/page): total={total} · {count} items on this page'**
+  String projectEditorProbeTasksCompatGetTaskApi(int total, int count);
+
+  /// No description provided for @projectEditorProbeProjectsZeroItems.
+  ///
+  /// In en, this message translates to:
+  /// **'0 items'**
+  String get projectEditorProbeProjectsZeroItems;
+
+  /// No description provided for @projectEditorProbeProjectsCompatList.
+  ///
+  /// In en, this message translates to:
+  /// **'GET …/projects (compat list): {line}'**
+  String projectEditorProbeProjectsCompatList(String line);
+
+  /// No description provided for @projectEditorProbeScriptsZeroItems.
+  ///
+  /// In en, this message translates to:
+  /// **'0 items'**
+  String get projectEditorProbeScriptsZeroItems;
+
+  /// No description provided for @projectEditorProbeScriptsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'(empty: all extracting or idle)'**
+  String get projectEditorProbeScriptsEmpty;
+
+  /// No description provided for @projectEditorProbeScriptsGetFirstScript.
+  ///
+  /// In en, this message translates to:
+  /// **'GET projects/…/scripts (first)'**
+  String get projectEditorProbeScriptsGetFirstScript;
+
+  /// No description provided for @projectEditorProbeScriptsLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'script…'**
+  String get projectEditorProbeScriptsLoading;
+
+  /// No description provided for @projectEditorProbeScriptsPostGetScriptApi.
+  ///
+  /// In en, this message translates to:
+  /// **'POST …/projects/{id}/scripts/get-script-api: {count} items · {sample}'**
+  String projectEditorProbeScriptsPostGetScriptApi(
+    int count,
+    String sample,
+    Object id,
+  );
+
+  /// No description provided for @projectEditorAssetSummaryProductionEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Production asset data is empty'**
+  String get projectEditorAssetSummaryProductionEmpty;
+
+  /// No description provided for @projectEditorAssetSummaryProductionLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Production assets {total} items · {typesLine} · Sample: {sampleLine}'**
+  String projectEditorAssetSummaryProductionLine(
+    int total,
+    String typesLine,
+    String sampleLine,
+  );
+
+  /// No description provided for @projectEditorAssetSummaryTypeCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{type} {count} items'**
+  String projectEditorAssetSummaryTypeCount(String type, int count);
+
+  /// No description provided for @projectEditorAssetSummaryPollingEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No image status returned for selected assets'**
+  String get projectEditorAssetSummaryPollingEmpty;
+
+  /// No description provided for @projectEditorAssetSummaryPollingLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Polled {count} assets · {stateLine} · Sample: {sampleLine}'**
+  String projectEditorAssetSummaryPollingLine(
+    int count,
+    String stateLine,
+    String sampleLine,
+  );
+
+  /// No description provided for @projectEditorAssetSummaryStateCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{state} {count} items'**
+  String projectEditorAssetSummaryStateCount(String state, int count);
+
+  /// No description provided for @projectEditorAssetSummaryImageCount.
+  ///
+  /// In en, this message translates to:
+  /// **'#{assetId}: {count} images'**
+  String projectEditorAssetSummaryImageCount(int assetId, int count);
+
+  /// No description provided for @projectEditorAssetSummaryMaterialContext.
+  ///
+  /// In en, this message translates to:
+  /// **'Material context {imageCount} image materials · {videoCount} video materials'**
+  String projectEditorAssetSummaryMaterialContext(
+    int imageCount,
+    int videoCount,
+  );
+
+  /// No description provided for @projectEditorAssetSummaryBatchEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch candidates are empty'**
+  String get projectEditorAssetSummaryBatchEmpty;
+
+  /// No description provided for @projectEditorAssetSummaryBatchLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch candidates {count}/{total} items · Sample: {sampleLine}'**
+  String projectEditorAssetSummaryBatchLine(
+    int count,
+    int total,
+    String sampleLine,
+  );
+
+  /// No description provided for @projectEditorAssetSummaryPromptEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No prompt status returned'**
+  String get projectEditorAssetSummaryPromptEmpty;
+
+  /// No description provided for @projectEditorAssetSummaryPromptLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt polling {count} items · {stateLine}'**
+  String projectEditorAssetSummaryPromptLine(int count, String stateLine);
+
+  /// No description provided for @projectEditorAssetSummarySelectionNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No assets currently selected'**
+  String get projectEditorAssetSummarySelectionNone;
+
+  /// No description provided for @projectEditorAssetSummarySelectionSingle.
+  ///
+  /// In en, this message translates to:
+  /// **'Currently selected #{id} {name}'**
+  String projectEditorAssetSummarySelectionSingle(int id, String name);
+
+  /// No description provided for @projectEditorAssetSummarySelectionMultiple.
+  ///
+  /// In en, this message translates to:
+  /// **'Currently selected {count} assets: {sample}'**
+  String projectEditorAssetSummarySelectionMultiple(int count, String sample);
+
+  /// No description provided for @authSupabaseNotConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'Not configured: run example\nflutter run --dart-define=SUPABASE_URL=... --dart-define=SUPABASE_ANON_KEY=...'**
+  String get authSupabaseNotConfigured;
+
+  /// No description provided for @authSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign In'**
+  String get authSignIn;
+
+  /// No description provided for @authSignUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign Up'**
+  String get authSignUp;
+
+  /// No description provided for @authSignOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign Out'**
+  String get authSignOut;
+
+  /// No description provided for @authSignedInUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in user: {userId}'**
+  String authSignedInUser(String userId);
+
+  /// No description provided for @authRequestInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Requesting…'**
+  String get authRequestInProgress;
+
+  /// No description provided for @authGetMeBearer.
+  ///
+  /// In en, this message translates to:
+  /// **'GET /api/v1/me (Bearer)'**
+  String get authGetMeBearer;
+
+  /// No description provided for @authMeResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'/me: {response}'**
+  String authMeResponse(String response);
+
+  /// No description provided for @authDevSwitchProbe.
+  ///
+  /// In en, this message translates to:
+  /// **'GET+PUT /api/v1/settings/dev/switch-ai-tool'**
+  String get authDevSwitchProbe;
+
+  /// No description provided for @authDevSwitchResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'dev switch: {response}'**
+  String authDevSwitchResponse(String response);
+
+  /// No description provided for @authMemoryConfigProbe.
+  ///
+  /// In en, this message translates to:
+  /// **'memory-config GET+POST + clear-agent-memories'**
+  String get authMemoryConfigProbe;
+
+  /// No description provided for @authMemoryConfigResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'memory-config: {response}'**
+  String authMemoryConfigResponse(String response);
+
+  /// No description provided for @authAboutProbe.
+  ///
+  /// In en, this message translates to:
+  /// **'POST …/settings/about/check-update + download-app'**
+  String get authAboutProbe;
+
+  /// No description provided for @authAboutResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'about: {response}'**
+  String authAboutResponse(String response);
+
+  /// No description provided for @authUsageSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'GET /api/v1/usage/summary'**
+  String get authUsageSummary;
+
+  /// No description provided for @authUsageResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'usage: {response}'**
+  String authUsageResponse(String response);
+
+  /// No description provided for @authPromptsProbe.
+  ///
+  /// In en, this message translates to:
+  /// **'GET /api/v1/prompts + GET/1 + PATCH/1'**
+  String get authPromptsProbe;
+
+  /// No description provided for @authPromptsResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'prompts: {response}'**
+  String authPromptsResponse(String response);
+
+  /// No description provided for @authVisualManualProbe.
+  ///
+  /// In en, this message translates to:
+  /// **'GET+POST /api/v1/visual-manual'**
+  String get authVisualManualProbe;
+
+  /// No description provided for @authVisualManualResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'visual-manual: {response}'**
+  String authVisualManualResponse(String response);
+
+  /// No description provided for @authDirectorManualProbe.
+  ///
+  /// In en, this message translates to:
+  /// **'POST …/project/query-director-manual'**
+  String get authDirectorManualProbe;
+
+  /// No description provided for @authDirectorManualResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'director-manual: {response}'**
+  String authDirectorManualResponse(String response);
+
+  /// No description provided for @authSkillsBinaryProbe.
+  ///
+  /// In en, this message translates to:
+  /// **'GET /api/v1/skills/binary (_smoke PNG)'**
+  String get authSkillsBinaryProbe;
+
+  /// No description provided for @authSkillsBinaryResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'skills/binary: {response}'**
+  String authSkillsBinaryResponse(String response);
+
+  /// No description provided for @authModelsCatalogProbe.
+  ///
+  /// In en, this message translates to:
+  /// **'models + vendors + vendor-add + danger + production + agent-deploy + model-test + script-agent + assets-gen'**
+  String get authModelsCatalogProbe;
+
+  /// No description provided for @authTextModelDefaultProbe.
+  ///
+  /// In en, this message translates to:
+  /// **'GET+PATCH /api/v1/models/text-default'**
+  String get authTextModelDefaultProbe;
+
+  /// No description provided for @authModelDetailProbe.
+  ///
+  /// In en, this message translates to:
+  /// **'GET /api/v1/models/detail (1:gpt-4o-mini)'**
+  String get authModelDetailProbe;
+
+  /// No description provided for @authModelsResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'models: {response}'**
+  String authModelsResponse(String response);
+
+  /// No description provided for @authTextDefaultResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'text-default: {response}'**
+  String authTextDefaultResponse(String response);
+
+  /// No description provided for @authModelDetailResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'model detail: {response}'**
+  String authModelDetailResponse(String response);
+
+  /// No description provided for @shortVideoSpaceDialogExportProgressTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Progress'**
+  String get shortVideoSpaceDialogExportProgressTitle;
+
+  /// No description provided for @shortVideoSpaceDialogExportProgressStatusQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Queued'**
+  String get shortVideoSpaceDialogExportProgressStatusQueued;
+
+  /// No description provided for @shortVideoSpaceDialogExportProgressStatusProcessing.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing'**
+  String get shortVideoSpaceDialogExportProgressStatusProcessing;
+
+  /// No description provided for @shortVideoSpaceDialogExportProgressStatusCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get shortVideoSpaceDialogExportProgressStatusCompleted;
+
+  /// No description provided for @shortVideoSpaceDialogExportProgressStatusFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get shortVideoSpaceDialogExportProgressStatusFailed;
+
+  /// No description provided for @shortVideoSpaceDialogExportProgressStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get shortVideoSpaceDialogExportProgressStatusCancelled;
+
+  /// No description provided for @shortVideoSpaceDialogExportProgressStageInitializing.
+  ///
+  /// In en, this message translates to:
+  /// **'Initializing'**
+  String get shortVideoSpaceDialogExportProgressStageInitializing;
+
+  /// No description provided for @shortVideoSpaceDialogExportProgressStageLoadingAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading Assets'**
+  String get shortVideoSpaceDialogExportProgressStageLoadingAssets;
+
+  /// No description provided for @shortVideoSpaceDialogExportProgressStageEncoding.
+  ///
+  /// In en, this message translates to:
+  /// **'Encoding Video'**
+  String get shortVideoSpaceDialogExportProgressStageEncoding;
+
+  /// No description provided for @shortVideoSpaceDialogExportProgressStageUploading.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading File'**
+  String get shortVideoSpaceDialogExportProgressStageUploading;
+
+  /// No description provided for @shortVideoSpaceDialogExportProgressStageFinalizing.
+  ///
+  /// In en, this message translates to:
+  /// **'Finalizing'**
+  String get shortVideoSpaceDialogExportProgressStageFinalizing;
+
+  /// No description provided for @shortVideoSpaceDialogExportProgressLoadingStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching export status...'**
+  String get shortVideoSpaceDialogExportProgressLoadingStatus;
+
+  /// No description provided for @shortVideoSpaceDialogExportProgressFetchError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to fetch progress: {error}'**
+  String shortVideoSpaceDialogExportProgressFetchError(String error);
+
+  /// No description provided for @shortVideoSpaceDialogExportProgressSessionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired, please login again'**
+  String get shortVideoSpaceDialogExportProgressSessionExpired;
+
+  /// No description provided for @shortVideoSpaceDialogExportProgressCancelFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel failed: {error}'**
+  String shortVideoSpaceDialogExportProgressCancelFailed(String error);
+
+  /// No description provided for @shortVideoSpaceDialogExportProgressTaskId.
+  ///
+  /// In en, this message translates to:
+  /// **'Task ID: {taskId}'**
+  String shortVideoSpaceDialogExportProgressTaskId(String taskId);
+
+  /// No description provided for @shortVideoSpaceDialogExportProgressCancelButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel Export'**
+  String get shortVideoSpaceDialogExportProgressCancelButton;
+
+  /// No description provided for @shortVideoSpaceDialogExportProgressCloseButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get shortVideoSpaceDialogExportProgressCloseButton;
+
+  /// No description provided for @shortVideoSpaceDialogExportProgressMessageQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Export task queued, waiting for processing...'**
+  String get shortVideoSpaceDialogExportProgressMessageQueued;
+
+  /// No description provided for @shortVideoSpaceDialogExportProgressMessageInitializing.
+  ///
+  /// In en, this message translates to:
+  /// **'Initializing export task...'**
+  String get shortVideoSpaceDialogExportProgressMessageInitializing;
+
+  /// No description provided for @shortVideoSpaceDialogExportProgressMessageLoadingAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading video assets and audio files...'**
+  String get shortVideoSpaceDialogExportProgressMessageLoadingAssets;
+
+  /// No description provided for @shortVideoSpaceDialogExportProgressMessageEncoding.
+  ///
+  /// In en, this message translates to:
+  /// **'Encoding video, this may take a few minutes...'**
+  String get shortVideoSpaceDialogExportProgressMessageEncoding;
+
+  /// No description provided for @shortVideoSpaceDialogExportProgressMessageUploading.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading exported video file...'**
+  String get shortVideoSpaceDialogExportProgressMessageUploading;
+
+  /// No description provided for @shortVideoSpaceDialogExportProgressMessageFinalizing.
+  ///
+  /// In en, this message translates to:
+  /// **'Completing final processing steps...'**
+  String get shortVideoSpaceDialogExportProgressMessageFinalizing;
+
+  /// No description provided for @shortVideoSpaceDialogExportProgressMessageProcessing.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing export task...'**
+  String get shortVideoSpaceDialogExportProgressMessageProcessing;
+
+  /// No description provided for @shortVideoSpaceDialogExportProgressMessageCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Export completed successfully! Video is ready for download.'**
+  String get shortVideoSpaceDialogExportProgressMessageCompleted;
+
+  /// No description provided for @shortVideoSpaceDialogExportProgressMessageFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Export failed, please retry or contact support.'**
+  String get shortVideoSpaceDialogExportProgressMessageFailed;
+
+  /// No description provided for @shortVideoSpaceDialogExportProgressMessageCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Export has been cancelled.'**
+  String get shortVideoSpaceDialogExportProgressMessageCancelled;
+
+  /// No description provided for @shortVideoSpaceDialogConfirmDeleteVersionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Delete'**
+  String get shortVideoSpaceDialogConfirmDeleteVersionTitle;
+
+  /// No description provided for @shortVideoSpaceDialogConfirmDeleteVersionMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete version \"{versionName}\"?\n\nThis action cannot be undone.'**
+  String shortVideoSpaceDialogConfirmDeleteVersionMessage(String versionName);
+
+  /// No description provided for @shortVideoSpaceDialogConfirmDeleteVersionDontShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t show again'**
+  String get shortVideoSpaceDialogConfirmDeleteVersionDontShow;
+
+  /// No description provided for @shortVideoSpaceDialogConfirmDeleteVersionCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get shortVideoSpaceDialogConfirmDeleteVersionCancel;
+
+  /// No description provided for @shortVideoSpaceDialogConfirmDeleteVersionConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get shortVideoSpaceDialogConfirmDeleteVersionConfirm;
+
+  /// No description provided for @shortVideoSpaceDialogConfirmBatchDisableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Batch Disable'**
+  String get shortVideoSpaceDialogConfirmBatchDisableTitle;
+
+  /// No description provided for @shortVideoSpaceDialogConfirmBatchDisableMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to disable {shotCount} selected shots?\n\nDisabled shots will not appear in the final video.'**
+  String shortVideoSpaceDialogConfirmBatchDisableMessage(int shotCount);
+
+  /// No description provided for @shortVideoSpaceDialogConfirmBatchDisableConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Disable'**
+  String get shortVideoSpaceDialogConfirmBatchDisableConfirm;
+
+  /// No description provided for @shortVideoSpaceDialogConfirmRestoreDraftTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Restore Draft'**
+  String get shortVideoSpaceDialogConfirmRestoreDraftTitle;
+
+  /// No description provided for @shortVideoSpaceDialogConfirmRestoreDraftMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to restore draft \"{draftName}\"?\n\nCurrent unsaved edits will be lost.'**
+  String shortVideoSpaceDialogConfirmRestoreDraftMessage(String draftName);
+
+  /// No description provided for @shortVideoSpaceDialogConfirmRestoreDraftConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get shortVideoSpaceDialogConfirmRestoreDraftConfirm;
+
+  /// No description provided for @shortVideoSpaceDialogConfirmCancelExportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel Export'**
+  String get shortVideoSpaceDialogConfirmCancelExportTitle;
+
+  /// No description provided for @shortVideoSpaceDialogConfirmCancelExportMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to cancel the export? Processed content will be lost.'**
+  String get shortVideoSpaceDialogConfirmCancelExportMessage;
+
+  /// No description provided for @shortVideoSpaceDialogConfirmCancelExportContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue Export'**
+  String get shortVideoSpaceDialogConfirmCancelExportContinue;
+
+  /// No description provided for @shortVideoSpaceDialogConfirmCancelExportConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Cancel'**
+  String get shortVideoSpaceDialogConfirmCancelExportConfirm;
+
+  /// No description provided for @shortVideoSpaceDialogConfirmBatchArchiveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Batch Archive'**
+  String get shortVideoSpaceDialogConfirmBatchArchiveTitle;
+
+  /// No description provided for @shortVideoSpaceDialogConfirmBatchArchiveMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to archive {draftCount} publish drafts? They will be removed from the publish queue (may be recoverable depending on backend policy).'**
+  String shortVideoSpaceDialogConfirmBatchArchiveMessage(int draftCount);
+
+  /// No description provided for @shortVideoSpaceDialogConfirmBatchArchiveConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Archive'**
+  String get shortVideoSpaceDialogConfirmBatchArchiveConfirm;
+
+  /// No description provided for @shortVideoSpaceDialogVoiceoverSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Voiceover Settings'**
+  String get shortVideoSpaceDialogVoiceoverSettingsTitle;
+
+  /// No description provided for @shortVideoSpaceDialogVoiceoverSettingsProviderLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'TTS Provider'**
+  String get shortVideoSpaceDialogVoiceoverSettingsProviderLabel;
+
+  /// No description provided for @shortVideoSpaceDialogVoiceoverSettingsProviderOpenAI.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenAI TTS'**
+  String get shortVideoSpaceDialogVoiceoverSettingsProviderOpenAI;
+
+  /// No description provided for @shortVideoSpaceDialogVoiceoverSettingsProviderAzure.
+  ///
+  /// In en, this message translates to:
+  /// **'Azure TTS'**
+  String get shortVideoSpaceDialogVoiceoverSettingsProviderAzure;
+
+  /// No description provided for @shortVideoSpaceDialogVoiceoverSettingsProviderGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Google TTS'**
+  String get shortVideoSpaceDialogVoiceoverSettingsProviderGoogle;
+
+  /// No description provided for @shortVideoSpaceDialogVoiceoverSettingsVoiceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice'**
+  String get shortVideoSpaceDialogVoiceoverSettingsVoiceLabel;
+
+  /// No description provided for @shortVideoSpaceDialogVoiceoverSettingsVoiceAlloy.
+  ///
+  /// In en, this message translates to:
+  /// **'Alloy (Neutral)'**
+  String get shortVideoSpaceDialogVoiceoverSettingsVoiceAlloy;
+
+  /// No description provided for @shortVideoSpaceDialogVoiceoverSettingsVoiceEcho.
+  ///
+  /// In en, this message translates to:
+  /// **'Echo (Male)'**
+  String get shortVideoSpaceDialogVoiceoverSettingsVoiceEcho;
+
+  /// No description provided for @shortVideoSpaceDialogVoiceoverSettingsVoiceFable.
+  ///
+  /// In en, this message translates to:
+  /// **'Fable (British)'**
+  String get shortVideoSpaceDialogVoiceoverSettingsVoiceFable;
+
+  /// No description provided for @shortVideoSpaceDialogVoiceoverSettingsVoiceOnyx.
+  ///
+  /// In en, this message translates to:
+  /// **'Onyx (Deep)'**
+  String get shortVideoSpaceDialogVoiceoverSettingsVoiceOnyx;
+
+  /// No description provided for @shortVideoSpaceDialogVoiceoverSettingsVoiceNova.
+  ///
+  /// In en, this message translates to:
+  /// **'Nova (Female)'**
+  String get shortVideoSpaceDialogVoiceoverSettingsVoiceNova;
+
+  /// No description provided for @shortVideoSpaceDialogVoiceoverSettingsVoiceShimmer.
+  ///
+  /// In en, this message translates to:
+  /// **'Shimmer (Soft)'**
+  String get shortVideoSpaceDialogVoiceoverSettingsVoiceShimmer;
+
+  /// No description provided for @shortVideoSpaceDialogVoiceoverSettingsEmotionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Emotion'**
+  String get shortVideoSpaceDialogVoiceoverSettingsEmotionLabel;
+
+  /// No description provided for @shortVideoSpaceDialogVoiceoverSettingsEmotionNeutral.
+  ///
+  /// In en, this message translates to:
+  /// **'Neutral'**
+  String get shortVideoSpaceDialogVoiceoverSettingsEmotionNeutral;
+
+  /// No description provided for @shortVideoSpaceDialogVoiceoverSettingsEmotionHappy.
+  ///
+  /// In en, this message translates to:
+  /// **'Happy'**
+  String get shortVideoSpaceDialogVoiceoverSettingsEmotionHappy;
+
+  /// No description provided for @shortVideoSpaceDialogVoiceoverSettingsEmotionSad.
+  ///
+  /// In en, this message translates to:
+  /// **'Sad'**
+  String get shortVideoSpaceDialogVoiceoverSettingsEmotionSad;
+
+  /// No description provided for @shortVideoSpaceDialogVoiceoverSettingsEmotionAngry.
+  ///
+  /// In en, this message translates to:
+  /// **'Angry'**
+  String get shortVideoSpaceDialogVoiceoverSettingsEmotionAngry;
+
+  /// No description provided for @shortVideoSpaceDialogVoiceoverSettingsSpeedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Speed'**
+  String get shortVideoSpaceDialogVoiceoverSettingsSpeedLabel;
+
+  /// No description provided for @shortVideoSpaceDialogVoiceoverSettingsSpeedRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Range: 0.5x (slow) - 2.0x (fast)'**
+  String get shortVideoSpaceDialogVoiceoverSettingsSpeedRange;
+
+  /// No description provided for @shortVideoSpaceDialogVoiceoverSettingsInfoMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings will apply to newly generated voiceovers. Existing voiceovers need to be regenerated to apply new parameters.'**
+  String get shortVideoSpaceDialogVoiceoverSettingsInfoMessage;
+
+  /// No description provided for @shortVideoSpaceDialogVoiceoverSettingsCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get shortVideoSpaceDialogVoiceoverSettingsCancel;
+
+  /// No description provided for @shortVideoSpaceDialogVoiceoverSettingsSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get shortVideoSpaceDialogVoiceoverSettingsSave;
+
+  /// No description provided for @shortVideoSpacePublishQualityStageUnlabeled.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlabeled stage'**
+  String get shortVideoSpacePublishQualityStageUnlabeled;
+
+  /// No description provided for @shortVideoSpacePublishQualityStageStorySkeleton.
+  ///
+  /// In en, this message translates to:
+  /// **'Story skeleton'**
+  String get shortVideoSpacePublishQualityStageStorySkeleton;
+
+  /// No description provided for @shortVideoSpacePublishQualityStageAdaptationStrategy.
+  ///
+  /// In en, this message translates to:
+  /// **'Adaptation strategy'**
+  String get shortVideoSpacePublishQualityStageAdaptationStrategy;
+
+  /// No description provided for @shortVideoSpacePublishQualityStageDirectorPlanning.
+  ///
+  /// In en, this message translates to:
+  /// **'Director planning'**
+  String get shortVideoSpacePublishQualityStageDirectorPlanning;
+
+  /// No description provided for @shortVideoSpacePublishQualityStageStoryboardTable.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard table'**
+  String get shortVideoSpacePublishQualityStageStoryboardTable;
+
+  /// No description provided for @shortVideoSpacePublishQualityStageStoryboardPanel.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard panel'**
+  String get shortVideoSpacePublishQualityStageStoryboardPanel;
+
+  /// No description provided for @shortVideoSpacePublishQualityStageVideoPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Video prompt / Final'**
+  String get shortVideoSpacePublishQualityStageVideoPrompt;
+
+  /// No description provided for @shortVideoSpacePublishExportIssueCandidatePending.
+  ///
+  /// In en, this message translates to:
+  /// **'Candidate pending confirmation'**
+  String get shortVideoSpacePublishExportIssueCandidatePending;
+
+  /// No description provided for @shortVideoSpacePublishExportIssueMissingSelectedMedia.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing final media'**
+  String get shortVideoSpacePublishExportIssueMissingSelectedMedia;
+
+  /// No description provided for @shortVideoSpacePublishExportIssueSelectedMediaNotVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected media is not video'**
+  String get shortVideoSpacePublishExportIssueSelectedMediaNotVideo;
+
+  /// No description provided for @shortVideoSpacePublishExportIssueSubtitlePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtitle / voiceover text missing'**
+  String get shortVideoSpacePublishExportIssueSubtitlePlaceholder;
+
+  /// No description provided for @shortVideoSpacePublishExportIssueSubtitleEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtitle is empty'**
+  String get shortVideoSpacePublishExportIssueSubtitleEmpty;
+
+  /// No description provided for @shortVideoSpacePublishExportIssueVoiceoverFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Voiceover generation failed'**
+  String get shortVideoSpacePublishExportIssueVoiceoverFailed;
+
+  /// No description provided for @shortVideoSpacePublishExportIssueVoiceoverAudioMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Voiceover audio not ready'**
+  String get shortVideoSpacePublishExportIssueVoiceoverAudioMissing;
+
+  /// No description provided for @shortVideoSpacePublishExportIssueVoiceoverNotReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Voiceover not ready'**
+  String get shortVideoSpacePublishExportIssueVoiceoverNotReady;
+
+  /// No description provided for @shortVideoSpacePublishExportIssueDurationNotExplicit.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration not specified (export default)'**
+  String get shortVideoSpacePublishExportIssueDurationNotExplicit;
+
+  /// No description provided for @shortVideoSpacePublishExportIssueDurationNotSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration not set'**
+  String get shortVideoSpacePublishExportIssueDurationNotSet;
+
+  /// No description provided for @shortVideoSpacePublishExportIssueDurationUnparsable.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration format error'**
+  String get shortVideoSpacePublishExportIssueDurationUnparsable;
+
+  /// No description provided for @shortVideoSpacePublishExportIssueCompletionUncertain.
+  ///
+  /// In en, this message translates to:
+  /// **'Final status not marked as completed'**
+  String get shortVideoSpacePublishExportIssueCompletionUncertain;
+
+  /// No description provided for @shortVideoSpacePublishAssemblyLoadingHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading final assembly snapshot…'**
+  String get shortVideoSpacePublishAssemblyLoadingHeadline;
+
+  /// No description provided for @shortVideoSpacePublishAssemblyLoadingDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Data from GET …/short-video-assembly (aggregates storyboards and final elements by script order).'**
+  String get shortVideoSpacePublishAssemblyLoadingDetail;
+
+  /// No description provided for @shortVideoSpacePublishAssemblyUnavailableHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Final assembly snapshot unavailable.'**
+  String get shortVideoSpacePublishAssemblyUnavailableHeadline;
+
+  /// No description provided for @shortVideoSpacePublishAssemblyUnavailableDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Please refresh later, or confirm storyboards and timeline in production workspace.'**
+  String get shortVideoSpacePublishAssemblyUnavailableDetail;
+
+  /// No description provided for @shortVideoSpacePublishAssemblyNoScriptsHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'No script / storyboard assembly data yet.'**
+  String get shortVideoSpacePublishAssemblyNoScriptsHeadline;
+
+  /// No description provided for @shortVideoSpacePublishAssemblyHeadlineScripts.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 script} other{{count} scripts}} · {shots} shots (export path snapshot)\nTotal duration: {seconds}s ({formatted})'**
+  String shortVideoSpacePublishAssemblyHeadlineScripts(
+    int count,
+    int shots,
+    int seconds,
+    String formatted,
+  );
+
+  /// No description provided for @shortVideoSpacePublishAssemblyVoiceProfileNotSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice profile: Not set'**
+  String get shortVideoSpacePublishAssemblyVoiceProfileNotSet;
+
+  /// No description provided for @shortVideoSpacePublishAssemblyVoiceProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice profile: {profile}'**
+  String shortVideoSpacePublishAssemblyVoiceProfile(String profile);
+
+  /// No description provided for @shortVideoSpacePublishAssemblySubtitleDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtitle: Default'**
+  String get shortVideoSpacePublishAssemblySubtitleDefault;
+
+  /// No description provided for @shortVideoSpacePublishAssemblySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtitle: {style}'**
+  String shortVideoSpacePublishAssemblySubtitle(String style);
+
+  /// No description provided for @shortVideoSpacePublishAssemblyBgmNotSpecified.
+  ///
+  /// In en, this message translates to:
+  /// **'BGM: Not specified'**
+  String get shortVideoSpacePublishAssemblyBgmNotSpecified;
+
+  /// No description provided for @shortVideoSpacePublishAssemblyBgm.
+  ///
+  /// In en, this message translates to:
+  /// **'BGM: {strategy}'**
+  String shortVideoSpacePublishAssemblyBgm(String strategy);
+
+  /// No description provided for @shortVideoSpacePublishAssemblyEffectiveTts.
+  ///
+  /// In en, this message translates to:
+  /// **'Effective TTS (queue/worker): {voice}'**
+  String shortVideoSpacePublishAssemblyEffectiveTts(String voice);
+
+  /// No description provided for @shortVideoSpacePublishAssemblyScriptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Script #{id}'**
+  String shortVideoSpacePublishAssemblyScriptTitle(int id);
+
+  /// No description provided for @shortVideoSpacePublishAssemblyScriptTitleNamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Script #{id} · {name}'**
+  String shortVideoSpacePublishAssemblyScriptTitleNamed(int id, String name);
+
+  /// No description provided for @shortVideoSpacePublishAssemblyScriptSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{title} · {shots} shots · Final selected {withMedia} · Voiceover ready {voReady}'**
+  String shortVideoSpacePublishAssemblyScriptSummary(
+    String title,
+    int shots,
+    int withMedia,
+    int voReady,
+  );
+
+  /// No description provided for @shortVideoSpacePublishAssemblyShotPreviewYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview✓'**
+  String get shortVideoSpacePublishAssemblyShotPreviewYes;
+
+  /// No description provided for @shortVideoSpacePublishAssemblyShotPreviewNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview×'**
+  String get shortVideoSpacePublishAssemblyShotPreviewNo;
+
+  /// No description provided for @shortVideoSpacePublishAssemblyShotDurationUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration?'**
+  String get shortVideoSpacePublishAssemblyShotDurationUnknown;
+
+  /// No description provided for @shortVideoSpacePublishAssemblyShotSubtitleYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtitle✓'**
+  String get shortVideoSpacePublishAssemblyShotSubtitleYes;
+
+  /// No description provided for @shortVideoSpacePublishAssemblyShotSubtitleNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtitle×'**
+  String get shortVideoSpacePublishAssemblyShotSubtitleNo;
+
+  /// No description provided for @shortVideoSpacePublishAssemblyShotVoiceoverYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Voiceover✓'**
+  String get shortVideoSpacePublishAssemblyShotVoiceoverYes;
+
+  /// No description provided for @shortVideoSpacePublishAssemblyShotVoiceoverNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Voiceover×'**
+  String get shortVideoSpacePublishAssemblyShotVoiceoverNo;
+
+  /// No description provided for @shortVideoSpacePublishAssemblyShotBgmDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get shortVideoSpacePublishAssemblyShotBgmDefault;
+
+  /// No description provided for @shortVideoSpacePublishAssemblyShotDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Shot[{order}] · {preview} · {duration} · {subtitle} · {voiceover} · BGM {bgm}'**
+  String shortVideoSpacePublishAssemblyShotDetail(
+    String order,
+    String preview,
+    String duration,
+    String subtitle,
+    String voiceover,
+    String bgm,
+  );
+
+  /// No description provided for @shortVideoSpacePublishAssemblyMoreShots.
+  ///
+  /// In en, this message translates to:
+  /// **'…{count} more shots, view in production workspace timeline'**
+  String shortVideoSpacePublishAssemblyMoreShots(int count);
+
+  /// No description provided for @shortVideoSpacePublishAssemblyQualityProjectBadCase.
+  ///
+  /// In en, this message translates to:
+  /// **'Project-level bad cases pending review: {count} (same source as production overview)'**
+  String shortVideoSpacePublishAssemblyQualityProjectBadCase(int count);
+
+  /// No description provided for @shortVideoSpacePublishAssemblyQualityAssemblyReviews.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviews on current assembly storyboards: {total} · Bad cases {badCase} · Affected storyboards {shots}'**
+  String shortVideoSpacePublishAssemblyQualityAssemblyReviews(
+    int total,
+    int badCase,
+    int shots,
+  );
+
+  /// No description provided for @shortVideoSpacePublishAssemblyQualityLateStageBadCase.
+  ///
+  /// In en, this message translates to:
+  /// **'Late-stage bad cases (storyboard panel/video prompt): {count}'**
+  String shortVideoSpacePublishAssemblyQualityLateStageBadCase(int count);
+
+  /// No description provided for @shortVideoSpacePublishAssemblyQualityByStage.
+  ///
+  /// In en, this message translates to:
+  /// **'By stage: {stages}'**
+  String shortVideoSpacePublishAssemblyQualityByStage(String stages);
+
+  /// No description provided for @shortVideoSpacePublishAssemblyQualityStageBadCase.
+  ///
+  /// In en, this message translates to:
+  /// **'{stage} · Bad cases {count}'**
+  String shortVideoSpacePublishAssemblyQualityStageBadCase(
+    String stage,
+    int count,
+  );
+
+  /// No description provided for @shortVideoSpacePublishAssemblyQualityTaskCenterHint.
+  ///
+  /// In en, this message translates to:
+  /// **'In task center, you can filter quality review list by project; storyboard-level targets match assembly.'**
+  String get shortVideoSpacePublishAssemblyQualityTaskCenterHint;
+
+  /// No description provided for @shortVideoSpacePublishAssemblyMultiTrackEstimate.
+  ///
+  /// In en, this message translates to:
+  /// **'Track usage estimate: Video 1 + Subtitle {subtitle} + Voiceover {voiceover} + BGM {bgm} = {total} tracks.'**
+  String shortVideoSpacePublishAssemblyMultiTrackEstimate(
+    int subtitle,
+    int voiceover,
+    int bgm,
+    int total,
+  );
+
+  /// No description provided for @shortVideoSpacePublishAssemblyMaterialReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Materials ready: Video shots {video}/{totalShots}, Subtitle shots {subtitle}/{totalShots}, Voiceover shots {voiceover}/{totalShots}.'**
+  String shortVideoSpacePublishAssemblyMaterialReady(
+    int video,
+    int subtitle,
+    int voiceover,
+    int totalShots,
+  );
+
+  /// No description provided for @shortVideoSpacePublishAssemblyDurationEstimate.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration estimate: Identified {known}/{total} shots, total duration ~{minutes} minutes.'**
+  String shortVideoSpacePublishAssemblyDurationEstimate(
+    int known,
+    int total,
+    String minutes,
+  );
+
+  /// No description provided for @shortVideoSpacePublishAssemblyExportDecisionProfessional.
+  ///
+  /// In en, this message translates to:
+  /// **'Export decision: Exceeds limited multi-track boundary (>4 tracks or complex duration), recommend professional platform (Requirement 8.2).'**
+  String get shortVideoSpacePublishAssemblyExportDecisionProfessional;
+
+  /// No description provided for @shortVideoSpacePublishAssemblyExportDecisionLimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Export decision: Maintain limited multi-track (<=4 tracks) path, can continue export in current pipeline.'**
+  String get shortVideoSpacePublishAssemblyExportDecisionLimited;
+
+  /// No description provided for @shortVideoSpacePublishAssemblyBoundaryNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Boundary note: Space only covers \"video + single subtitle track + voiceover + BGM\" limited mixing, not a replacement for professional NLE.'**
+  String get shortVideoSpacePublishAssemblyBoundaryNote;
+
+  /// No description provided for @shortVideoSpacePublishAssemblyDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Read-only editing desk: Shows shot order, duration, subtitle, voiceover, BGM and preview readiness summary; export blocking conclusions see \"Export Pre-check\" below.'**
+  String get shortVideoSpacePublishAssemblyDetail;
+
+  /// No description provided for @shortVideoSpacePublishExportCheckLoadingHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading export pre-check…'**
+  String get shortVideoSpacePublishExportCheckLoadingHeadline;
+
+  /// No description provided for @shortVideoSpacePublishExportCheckLoadingDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Aggregates storyboard blocking and warnings; quality gate observation fields are placeholder display only.'**
+  String get shortVideoSpacePublishExportCheckLoadingDetail;
+
+  /// No description provided for @shortVideoSpacePublishExportCheckUnavailableHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Export pre-check unavailable.'**
+  String get shortVideoSpacePublishExportCheckUnavailableHeadline;
+
+  /// No description provided for @shortVideoSpacePublishExportCheckUnavailableDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Please refresh page later, or confirm storyboards in production workspace.'**
+  String get shortVideoSpacePublishExportCheckUnavailableDetail;
+
+  /// No description provided for @shortVideoSpacePublishExportCheckReadyHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Server found no blocking issues (still need to confirm final in production).'**
+  String get shortVideoSpacePublishExportCheckReadyHeadline;
+
+  /// No description provided for @shortVideoSpacePublishExportCheckBlockingHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocking items exist: Recommend completing fields in production workspace before export / final.'**
+  String get shortVideoSpacePublishExportCheckBlockingHeadline;
+
+  /// No description provided for @shortVideoSpacePublishExportCheckMetricStoryboards.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboards'**
+  String get shortVideoSpacePublishExportCheckMetricStoryboards;
+
+  /// No description provided for @shortVideoSpacePublishExportCheckMetricBlocking.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocking'**
+  String get shortVideoSpacePublishExportCheckMetricBlocking;
+
+  /// No description provided for @shortVideoSpacePublishExportCheckMetricWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Warning'**
+  String get shortVideoSpacePublishExportCheckMetricWarning;
+
+  /// No description provided for @shortVideoSpacePublishExportCheckMetricExportable.
+  ///
+  /// In en, this message translates to:
+  /// **'Exportable'**
+  String get shortVideoSpacePublishExportCheckMetricExportable;
+
+  /// No description provided for @shortVideoSpacePublishExportCheckMetricYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get shortVideoSpacePublishExportCheckMetricYes;
+
+  /// No description provided for @shortVideoSpacePublishExportCheckMetricNo.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get shortVideoSpacePublishExportCheckMetricNo;
+
+  /// No description provided for @shortVideoSpacePublishExportCheckQualityGateOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality gate: Off (no quality check).'**
+  String get shortVideoSpacePublishExportCheckQualityGateOff;
+
+  /// No description provided for @shortVideoSpacePublishExportCheckQualityGateWarnNoBadCase.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality gate: Warn mode - No pending review bad cases (export allowed).'**
+  String get shortVideoSpacePublishExportCheckQualityGateWarnNoBadCase;
+
+  /// No description provided for @shortVideoSpacePublishExportCheckQualityGateWarnWithBadCase.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality gate: Warn mode - {count} pending review bad cases (export allowed but recommend fixing).'**
+  String shortVideoSpacePublishExportCheckQualityGateWarnWithBadCase(int count);
+
+  /// No description provided for @shortVideoSpacePublishExportCheckQualityGateBlockEnforcedWithBadCase.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality gate: Block mode - {count} pending review bad cases (blocks export, must fix first).'**
+  String shortVideoSpacePublishExportCheckQualityGateBlockEnforcedWithBadCase(
+    int count,
+  );
+
+  /// No description provided for @shortVideoSpacePublishExportCheckQualityGateBlockNotEnforcedWithBadCase.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality gate: Block mode - {count} pending review bad cases (not enforced yet).'**
+  String
+  shortVideoSpacePublishExportCheckQualityGateBlockNotEnforcedWithBadCase(
+    int count,
+  );
+
+  /// No description provided for @shortVideoSpacePublishExportCheckQualityGateBlockNoBadCase.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality gate: Block mode - No pending review bad cases (export allowed).'**
+  String get shortVideoSpacePublishExportCheckQualityGateBlockNoBadCase;
+
+  /// No description provided for @shortVideoSpacePublishExportCheckQualityGateUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality gate: Unknown strategy \"{strategy}\".'**
+  String shortVideoSpacePublishExportCheckQualityGateUnknown(String strategy);
+
+  /// No description provided for @shortVideoSpacePublishExportCheckBlockingIssue.
+  ///
+  /// In en, this message translates to:
+  /// **'Script #{scriptId} · Storyboard #{sbId}{sbIndex} · {label} · {detail}'**
+  String shortVideoSpacePublishExportCheckBlockingIssue(
+    int scriptId,
+    int sbId,
+    String sbIndex,
+    String label,
+    String detail,
+  );
+
+  /// No description provided for @shortVideoSpacePublishExportCheckDetailReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocking count is 0, indicating no hard blocking on server aggregation path (still subject to actual export pipeline).'**
+  String get shortVideoSpacePublishExportCheckDetailReady;
+
+  /// No description provided for @shortVideoSpacePublishExportCheckDetailBlocking.
+  ///
+  /// In en, this message translates to:
+  /// **'Below lists some blocking items; for complete list, check each shot in production workspace.'**
+  String get shortVideoSpacePublishExportCheckDetailBlocking;
+
+  /// No description provided for @shortVideoSpacePublishCandidateLoadingHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading project assets…'**
+  String get shortVideoSpacePublishCandidateLoadingHeadline;
+
+  /// No description provided for @shortVideoSpacePublishCandidateLoadingDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Used to count candidate workflow: pending / linked / ignored (consistent with PATCH asset).'**
+  String get shortVideoSpacePublishCandidateLoadingDetail;
+
+  /// No description provided for @shortVideoSpacePublishCandidateUnavailableHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Candidate asset summary unavailable.'**
+  String get shortVideoSpacePublishCandidateUnavailableHeadline;
+
+  /// No description provided for @shortVideoSpacePublishCandidateUnavailableDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Please refresh page later, or go to project area to view and edit assets.'**
+  String get shortVideoSpacePublishCandidateUnavailableDetail;
+
+  /// No description provided for @shortVideoSpacePublishCandidateNoTrackedHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'No pending / linked / ignored marked yet; can PATCH candidate_status on shot candidates and other assets in project area.'**
+  String get shortVideoSpacePublishCandidateNoTrackedHeadline;
+
+  /// No description provided for @shortVideoSpacePublishCandidateTrackedHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Candidate status aggregated by project (counts below include unmarked):'**
+  String get shortVideoSpacePublishCandidateTrackedHeadline;
+
+  /// No description provided for @shortVideoSpacePublishCandidateDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Project has {total} assets; counts aggregated by server in one go (no pagination). Can update via PATCH candidate_status in project area.'**
+  String shortVideoSpacePublishCandidateDetail(int total);
+
+  /// No description provided for @shortVideoSpacePublishPanelLoadingHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading export check and publish domain…'**
+  String get shortVideoSpacePublishPanelLoadingHeadline;
+
+  /// No description provided for @shortVideoSpacePublishPanelLoadingDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Backend path: `/api/v1/projects/:id/publish/*` (profiles / drafts / jobs).'**
+  String get shortVideoSpacePublishPanelLoadingDetail;
+
+  /// No description provided for @shortVideoSpacePublishPanelUnavailableHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish domain interface unavailable (database migration may not be executed yet).'**
+  String get shortVideoSpacePublishPanelUnavailableHeadline;
+
+  /// No description provided for @shortVideoSpacePublishPanelUnavailableExportGateMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Export check data missing, publish panel shows placeholder only.'**
+  String get shortVideoSpacePublishPanelUnavailableExportGateMissing;
+
+  /// No description provided for @shortVideoSpacePublishPanelUnavailableExportGateNoBlocking.
+  ///
+  /// In en, this message translates to:
+  /// **'Export check: Currently no blocking items.'**
+  String get shortVideoSpacePublishPanelUnavailableExportGateNoBlocking;
+
+  /// No description provided for @shortVideoSpacePublishPanelUnavailableExportGateBlocking.
+  ///
+  /// In en, this message translates to:
+  /// **'Export check: Still {count} blocking items.'**
+  String shortVideoSpacePublishPanelUnavailableExportGateBlocking(int count);
+
+  /// No description provided for @shortVideoSpacePublishPanelUnavailableDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Supabase has applied `app_publish_*` migrations then retry; Rust worker will digest publish job queue in background.'**
+  String get shortVideoSpacePublishPanelUnavailableDetail;
+
+  /// No description provided for @shortVideoSpacePublishPanelExportGateUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Export check data unavailable; can still try creating publish draft and validate.'**
+  String get shortVideoSpacePublishPanelExportGateUnavailable;
+
+  /// No description provided for @shortVideoSpacePublishPanelExportGateReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Export check: No blocking items (**E13**: Can enter publish preparation from final pipeline).'**
+  String get shortVideoSpacePublishPanelExportGateReady;
+
+  /// No description provided for @shortVideoSpacePublishPanelExportGateBlocking.
+  ///
+  /// In en, this message translates to:
+  /// **'Export check: Still {count} blocking items; can complete fields first then submit job.'**
+  String shortVideoSpacePublishPanelExportGateBlocking(int count);
+
+  /// No description provided for @shortVideoSpacePublishPanelHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected to publish API: {drafts} drafts · {jobs} jobs.'**
+  String shortVideoSpacePublishPanelHeadline(int drafts, int jobs);
+
+  /// No description provided for @shortVideoSpacePublishPanelCurrentDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Current draft: {title}'**
+  String shortVideoSpacePublishPanelCurrentDraft(String title);
+
+  /// No description provided for @shortVideoSpacePublishPanelCurrentDraftUntitled.
+  ///
+  /// In en, this message translates to:
+  /// **'Current draft: (Untitled)'**
+  String get shortVideoSpacePublishPanelCurrentDraftUntitled;
+
+  /// No description provided for @shortVideoSpacePublishPanelSelectDraftWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'⚠️ Please explicitly select draft (no longer auto-use first one)'**
+  String get shortVideoSpacePublishPanelSelectDraftWarning;
+
+  /// No description provided for @shortVideoSpacePublishPanelPrepareCheckOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Validation: ✓ Current draft meets placeholder rules (still needs real final reference to actually go live).'**
+  String get shortVideoSpacePublishPanelPrepareCheckOk;
+
+  /// No description provided for @shortVideoSpacePublishPanelPrepareCheckMultipleDrafts.
+  ///
+  /// In en, this message translates to:
+  /// **'When multiple drafts exist, please select one in \"Current Operation Draft\" first, then show prepare-check.'**
+  String get shortVideoSpacePublishPanelPrepareCheckMultipleDrafts;
+
+  /// No description provided for @shortVideoSpacePublishPanelPrepareCheckSelectFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'After selecting draft, will show prepare-check validation result.'**
+  String get shortVideoSpacePublishPanelPrepareCheckSelectFirst;
+
+  /// No description provided for @shortVideoSpacePublishPanelPrepareCheckNoDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'No draft yet or prepare-check not completed.'**
+  String get shortVideoSpacePublishPanelPrepareCheckNoDraft;
+
+  /// No description provided for @shortVideoSpacePublishPanelDraftNoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'(Untitled)'**
+  String get shortVideoSpacePublishPanelDraftNoTitle;
+
+  /// No description provided for @shortVideoSpacePublishPanelDraftMissingVideo.
+  ///
+  /// In en, this message translates to:
+  /// **' · Missing video reference'**
+  String get shortVideoSpacePublishPanelDraftMissingVideo;
+
+  /// No description provided for @shortVideoSpacePublishPanelDraftScheduled.
+  ///
+  /// In en, this message translates to:
+  /// **' · Scheduled {time}'**
+  String shortVideoSpacePublishPanelDraftScheduled(String time);
+
+  /// No description provided for @shortVideoSpacePublishPanelJobShortId.
+  ///
+  /// In en, this message translates to:
+  /// **'{id}…'**
+  String shortVideoSpacePublishPanelJobShortId(String id);
+
+  /// No description provided for @shortVideoSpacePublishPanelJobError.
+  ///
+  /// In en, this message translates to:
+  /// **' · {error}'**
+  String shortVideoSpacePublishPanelJobError(String error);
+
+  /// No description provided for @shortVideoSpacePublishPanelOverviewSucceeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Succeeded jobs: {count}'**
+  String shortVideoSpacePublishPanelOverviewSucceeded(int count);
+
+  /// No description provided for @shortVideoSpacePublishPanelOverviewFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed/Partial failed: {count}'**
+  String shortVideoSpacePublishPanelOverviewFailed(int count);
+
+  /// No description provided for @shortVideoSpacePublishPanelOverviewAwaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Awaiting confirmation: {count}'**
+  String shortVideoSpacePublishPanelOverviewAwaiting(int count);
+
+  /// No description provided for @shortVideoSpacePublishPanelOverviewScheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled drafts: {scheduled}/{total}'**
+  String shortVideoSpacePublishPanelOverviewScheduled(int scheduled, int total);
+
+  /// No description provided for @shortVideoSpacePublishPanelOverviewDeliveryModes.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery modes: {modes}'**
+  String shortVideoSpacePublishPanelOverviewDeliveryModes(String modes);
+
+  /// No description provided for @shortVideoSpacePublishPanelOverviewPerformanceAlerts.
+  ///
+  /// In en, this message translates to:
+  /// **'Low performance alerts: {count} (recommend troubleshooting in task center and rewriting copy)'**
+  String shortVideoSpacePublishPanelOverviewPerformanceAlerts(int count);
+
+  /// No description provided for @shortVideoSpacePublishPanelOverviewPerformanceAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'{platform} · Views {views} · Completion {rate}%'**
+  String shortVideoSpacePublishPanelOverviewPerformanceAlert(
+    String platform,
+    int views,
+    String rate,
+  );
+
+  /// No description provided for @shortVideoSpacePublishPanelOverviewAudit.
+  ///
+  /// In en, this message translates to:
+  /// **'Audit: {platform} · {status} · mode={mode}'**
+  String shortVideoSpacePublishPanelOverviewAudit(
+    String platform,
+    String status,
+    String mode,
+  );
+
+  /// No description provided for @shortVideoSpacePublishPanelOverviewTargetAutomation.
+  ///
+  /// In en, this message translates to:
+  /// **'Target automation: {modes}'**
+  String shortVideoSpacePublishPanelOverviewTargetAutomation(String modes);
+
+  /// No description provided for @shortVideoSpacePublishPanelDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Semi-auto jobs need \"Confirm\" when in `awaiting_confirmation`; worker skeleton will write `publish_attempts` placeholder success records.'**
+  String get shortVideoSpacePublishPanelDetail;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyExportCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Export completed.'**
+  String get shortVideoSpaceProductionAssemblyExportCompleted;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyExportNotCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Export not completed or cancelled.'**
+  String get shortVideoSpaceProductionAssemblyExportNotCompleted;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyExportStartFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Export start failed: {error}'**
+  String shortVideoSpaceProductionAssemblyExportStartFailed(String error);
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyReplaceVideoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace current video version'**
+  String get shortVideoSpaceProductionAssemblyReplaceVideoTitle;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyVideoUrlLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Video URL'**
+  String get shortVideoSpaceProductionAssemblyVideoUrlLabel;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyVideoUrlHint.
+  ///
+  /// In en, this message translates to:
+  /// **'https://...'**
+  String get shortVideoSpaceProductionAssemblyVideoUrlHint;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get shortVideoSpaceProductionAssemblyCancel;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyWriteBackVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Write back current version'**
+  String get shortVideoSpaceProductionAssemblyWriteBackVersion;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyShotDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Shot #{storyboardId} paused (cleared current video).'**
+  String shortVideoSpaceProductionAssemblyShotDisabled(int storyboardId);
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyDisableFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause failed: {error}'**
+  String shortVideoSpaceProductionAssemblyDisableFailed(String error);
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyNoVideoUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'No available video URL, please enter replacement address first.'**
+  String get shortVideoSpaceProductionAssemblyNoVideoUrl;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyShotWriteBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Shot #{storyboardId} wrote back current video version.'**
+  String shortVideoSpaceProductionAssemblyShotWriteBack(int storyboardId);
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyWriteBackFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Write back failed: {error}'**
+  String shortVideoSpaceProductionAssemblyWriteBackFailed(String error);
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyReorderPersisted.
+  ///
+  /// In en, this message translates to:
+  /// **'Persisted shot reorder (wrote back timeline and shot numbers by script).'**
+  String get shortVideoSpaceProductionAssemblyReorderPersisted;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyReorderFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Reorder persistence failed: {error}'**
+  String shortVideoSpaceProductionAssemblyReorderFailed(String error);
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyShotAligned.
+  ///
+  /// In en, this message translates to:
+  /// **'Shot #{storyboardId} aligned to {duration}s.'**
+  String shortVideoSpaceProductionAssemblyShotAligned(
+    int storyboardId,
+    int duration,
+  );
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyAlignFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration alignment failed: {error}'**
+  String shortVideoSpaceProductionAssemblyAlignFailed(String error);
+
+  /// No description provided for @shortVideoSpaceProductionAssemblySubtitleExistsDurationMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtitle exists, but duration not explicit (suggest aligning duration first).'**
+  String get shortVideoSpaceProductionAssemblySubtitleExistsDurationMissing;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyDurationSetSubtitleEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration is set, but subtitle is empty (possible subtitle track gap).'**
+  String get shortVideoSpaceProductionAssemblyDurationSetSubtitleEmpty;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblySubtitleExistsDurationAbnormal.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtitle exists, but duration is abnormal (<=0).'**
+  String get shortVideoSpaceProductionAssemblySubtitleExistsDurationAbnormal;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblySubtitleDurationNoMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No obvious subtitle-duration mismatch.'**
+  String get shortVideoSpaceProductionAssemblySubtitleDurationNoMismatch;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyBasicOpsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic shot operations'**
+  String get shortVideoSpaceProductionAssemblyBasicOpsTitle;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyBasicOpsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Supports basic reordering (this panel view), enable/disable, and replace current video version.'**
+  String get shortVideoSpaceProductionAssemblyBasicOpsDescription;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyBasicOpsNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable/disable/replace writes back directly to J media slot; reorder is for this troubleshooting view only.'**
+  String get shortVideoSpaceProductionAssemblyBasicOpsNote;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyTotalDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Total finished duration: {seconds}s ({formatted})'**
+  String shortVideoSpaceProductionAssemblyTotalDuration(
+    int seconds,
+    String formatted,
+  );
+
+  /// No description provided for @shortVideoSpaceProductionAssemblySaveReorder.
+  ///
+  /// In en, this message translates to:
+  /// **'Save reorder'**
+  String get shortVideoSpaceProductionAssemblySaveReorder;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyUndoToOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo to open time'**
+  String get shortVideoSpaceProductionAssemblyUndoToOpen;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyVoiceoverTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'Voiceover tasks'**
+  String get shortVideoSpaceProductionAssemblyVoiceoverTasks;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get shortVideoSpaceProductionAssemblyClose;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyNoShotsFiltered.
+  ///
+  /// In en, this message translates to:
+  /// **'No shots under current filter conditions, try clearing search or relaxing criteria.'**
+  String get shortVideoSpaceProductionAssemblyNoShotsFiltered;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyScriptShotOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Script #{scriptId} · Shot #{storyboardId} · Order {order}'**
+  String shortVideoSpaceProductionAssemblyScriptShotOrder(
+    int scriptId,
+    int storyboardId,
+    int order,
+  );
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyStatusPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Status: Paused'**
+  String get shortVideoSpaceProductionAssemblyStatusPaused;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyStatusEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Status: Enabled ({kind})'**
+  String shortVideoSpaceProductionAssemblyStatusEnabled(String kind);
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyDurationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration:'**
+  String get shortVideoSpaceProductionAssemblyDurationLabel;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyDurationNotSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get shortVideoSpaceProductionAssemblyDurationNotSet;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblySubtitleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtitle:'**
+  String get shortVideoSpaceProductionAssemblySubtitleLabel;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblySubtitleEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty'**
+  String get shortVideoSpaceProductionAssemblySubtitleEmpty;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyVoiceoverScriptReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Voiceover script: ✓ Ready'**
+  String get shortVideoSpaceProductionAssemblyVoiceoverScriptReady;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyVoiceoverScriptNotReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Voiceover script: ✗ Not ready'**
+  String get shortVideoSpaceProductionAssemblyVoiceoverScriptNotReady;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyVoiceoverAssetReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Voiceover asset: ✓ Ready'**
+  String get shortVideoSpaceProductionAssemblyVoiceoverAssetReady;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyVoiceoverAssetNotReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Voiceover asset: ✗ Not ready'**
+  String get shortVideoSpaceProductionAssemblyVoiceoverAssetNotReady;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyVoiceoverStatusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Voiceover status:'**
+  String get shortVideoSpaceProductionAssemblyVoiceoverStatusLabel;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyVoiceoverAudioLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Voiceover audio:'**
+  String get shortVideoSpaceProductionAssemblyVoiceoverAudioLabel;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyVoiceoverErrorLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Voiceover error:'**
+  String get shortVideoSpaceProductionAssemblyVoiceoverErrorLabel;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyMismatchCheckLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Mismatch check:'**
+  String get shortVideoSpaceProductionAssemblyMismatchCheckLabel;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyMoveUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Move up'**
+  String get shortVideoSpaceProductionAssemblyMoveUp;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyMoveDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Move down'**
+  String get shortVideoSpaceProductionAssemblyMoveDown;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyEnable.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable'**
+  String get shortVideoSpaceProductionAssemblyEnable;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyPause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get shortVideoSpaceProductionAssemblyPause;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyAlignDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Align duration'**
+  String get shortVideoSpaceProductionAssemblyAlignDuration;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyReplaceVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace current version'**
+  String get shortVideoSpaceProductionAssemblyReplaceVersion;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyGenerateVoiceover.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate voiceover'**
+  String get shortVideoSpaceProductionAssemblyGenerateVoiceover;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyPreviewVoiceover.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview voiceover'**
+  String get shortVideoSpaceProductionAssemblyPreviewVoiceover;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblySingleShotDurationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Single shot duration alignment'**
+  String get shortVideoSpaceProductionAssemblySingleShotDurationTitle;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblySingleShotDurationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration (seconds)'**
+  String get shortVideoSpaceProductionAssemblySingleShotDurationLabel;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblySingleShotDurationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter 1~300'**
+  String get shortVideoSpaceProductionAssemblySingleShotDurationHint;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyAlignAndWriteBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Align and write back'**
+  String get shortVideoSpaceProductionAssemblyAlignAndWriteBack;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyAssemblyStyleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Assembly-level style adjustment'**
+  String get shortVideoSpaceProductionAssemblyAssemblyStyleTitle;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblySubtitleStyleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtitle style subtitle_style'**
+  String get shortVideoSpaceProductionAssemblySubtitleStyleLabel;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblySubtitleStyleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. cinematic_cn_v2 (leave empty to fall back to default)'**
+  String get shortVideoSpaceProductionAssemblySubtitleStyleHint;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyBgmStrategyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'BGM strategy bgm_strategy'**
+  String get shortVideoSpaceProductionAssemblyBgmStrategyLabel;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyBgmStrategyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. pulse_light (leave empty to fall back to default)'**
+  String get shortVideoSpaceProductionAssemblyBgmStrategyHint;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyStyleNote.
+  ///
+  /// In en, this message translates to:
+  /// **'After saving, will write back D7 default configuration and refresh effective values in assembly snapshot.'**
+  String get shortVideoSpaceProductionAssemblyStyleNote;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblySaveAndRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Save and refresh'**
+  String get shortVideoSpaceProductionAssemblySaveAndRefresh;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyStyleUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated assembly-level defaults: subtitle {subtitle} · BGM {bgm}'**
+  String shortVideoSpaceProductionAssemblyStyleUpdated(
+    String subtitle,
+    String bgm,
+  );
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyStyleDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'default'**
+  String get shortVideoSpaceProductionAssemblyStyleDefault;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyStyleWriteBackFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Assembly style write back failed: {error}'**
+  String shortVideoSpaceProductionAssemblyStyleWriteBackFailed(String error);
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyVoiceoverTaskCenterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Voiceover task center'**
+  String get shortVideoSpaceProductionAssemblyVoiceoverTaskCenterTitle;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyAllStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'All status'**
+  String get shortVideoSpaceProductionAssemblyAllStatus;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get shortVideoSpaceProductionAssemblyRefresh;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyGroupByShot.
+  ///
+  /// In en, this message translates to:
+  /// **'Group by shot'**
+  String get shortVideoSpaceProductionAssemblyGroupByShot;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyBatchRetryFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch retry failed ({count})'**
+  String shortVideoSpaceProductionAssemblyBatchRetryFailed(int count);
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyFilterTaskIdScriptShot.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter: Task ID / Script # / Shot #'**
+  String get shortVideoSpaceProductionAssemblyFilterTaskIdScriptShot;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyTaskSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Total {total} · queued {queued} · running {running} · succeeded {succeeded} · failed {failed} · cancelled {cancelled} · Showing {filtered}/{visible}'**
+  String shortVideoSpaceProductionAssemblyTaskSummary(
+    int total,
+    int queued,
+    int running,
+    int succeeded,
+    int failed,
+    int cancelled,
+    int filtered,
+    int visible,
+  );
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyNoVoiceoverTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'No voiceover tasks yet'**
+  String get shortVideoSpaceProductionAssemblyNoVoiceoverTasks;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyTaskEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'{prefix} {taskId} · Status {status}'**
+  String shortVideoSpaceProductionAssemblyTaskEntry(
+    String prefix,
+    String taskId,
+    String status,
+  );
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyLatestTask.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest task'**
+  String get shortVideoSpaceProductionAssemblyLatestTask;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyTask.
+  ///
+  /// In en, this message translates to:
+  /// **'Task'**
+  String get shortVideoSpaceProductionAssemblyTask;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyTaskSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Script #{scriptId} · Shot #{shotId}{audio}{error}'**
+  String shortVideoSpaceProductionAssemblyTaskSubtitle(
+    String scriptId,
+    String shotId,
+    String audio,
+    String error,
+  );
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyTaskSubtitleAudioReady.
+  ///
+  /// In en, this message translates to:
+  /// **' · Audio ready'**
+  String get shortVideoSpaceProductionAssemblyTaskSubtitleAudioReady;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyTaskSubtitleError.
+  ///
+  /// In en, this message translates to:
+  /// **' · Error: {error}'**
+  String shortVideoSpaceProductionAssemblyTaskSubtitleError(String error);
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyPreviewAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview audio'**
+  String get shortVideoSpaceProductionAssemblyPreviewAudio;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyCopyAudioLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy audio link'**
+  String get shortVideoSpaceProductionAssemblyCopyAudioLink;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyAudioLinkCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio link copied'**
+  String get shortVideoSpaceProductionAssemblyAudioLinkCopied;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyCancelTask.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get shortVideoSpaceProductionAssemblyCancelTask;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyTaskCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled voiceover task {taskId}'**
+  String shortVideoSpaceProductionAssemblyTaskCancelled(String taskId);
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyCancelFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel failed: {error}'**
+  String shortVideoSpaceProductionAssemblyCancelFailed(String error);
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyRetryTask.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get shortVideoSpaceProductionAssemblyRetryTask;
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyTaskRetried.
+  ///
+  /// In en, this message translates to:
+  /// **'Retried, task {taskId} queued'**
+  String shortVideoSpaceProductionAssemblyTaskRetried(String taskId);
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyRetryFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry failed: {error}'**
+  String shortVideoSpaceProductionAssemblyRetryFailed(String error);
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyBatchRetryCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch retry completed: succeeded {succeeded}, failed {failed}'**
+  String shortVideoSpaceProductionAssemblyBatchRetryCompleted(
+    int succeeded,
+    int failed,
+  );
+
+  /// No description provided for @shortVideoSpaceProductionAssemblyLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Load failed: {error}'**
+  String shortVideoSpaceProductionAssemblyLoadFailed(String error);
 }
 
 class _AppLocalizationsDelegate

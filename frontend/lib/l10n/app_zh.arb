@@ -48,6 +48,49 @@
       }
     }
   },
+  "shortVideoSpaceCannotSaveNoProject": "无法保存：未选择项目或未登录",
+  "shortVideoSpaceSavingInProgress": "正在保存中，请稍候...",
+  "shortVideoSpaceSelectAllAvailable": "全选快捷键 (Ctrl+A / Cmd+A) 在镜头操作面板中可用",
+  "shortVideoSpaceSearchFocused": "已聚焦搜索框",
+  "shortVideoSpaceSearchNotAvailable": "搜索框不可用（请先打开镜头操作面板）",
+  "shortVideoSpaceSaveProjectConfig": "保存项目配置",
+  "shortVideoSpaceSelectAllShots": "全选镜头（在批量操作模式下）",
+  "shortVideoSpaceFocusSearch": "聚焦搜索框",
+  "shortVideoSpaceUndoOperation": "撤销上一步操作",
+  "shortVideoSpaceRedoOperation": "重做上一步操作",
+  "shortVideoSpaceFileOperations": "文件操作",
+  "shortVideoSpaceSelectionOperations": "选择操作",
+  "shortVideoSpaceNavigation": "导航",
+  "shortVideoSpaceEditOperations": "编辑操作",
+  "shortVideoSpaceKeyboardShortcuts": "键盘快捷键",
+  "shortVideoSpaceClose": "关闭",
+  "shortVideoSpaceCurrentProjectOverview": "当前项目概览",
+  "shortVideoSpaceRecentBadCaseTrends": "最近坏例倾向",
+  "shortVideoSpaceRecentTaskFlow": "最近任务流",
+  "shortVideoSpaceAssetsOverview": "资产总览",
+  "shortVideoSpaceAssemblySnapshot": "成片装配快照",
+  "shortVideoSpaceQualityReview": "成片候选验收（质量评审）",
+  "shortVideoSpaceMultiTrackExportDecision": "受限多轨导出决策（K5）",
+  "shortVideoSpaceOpenProductionWorkspace": "打开制作工作区",
+  "shortVideoSpaceBasicShotOperations": "镜头基础操作",
+  "shortVideoSpaceAssemblyStyleAdjustment": "成片样式调整",
+  "shortVideoSpaceExportPreCheck": "导出前检查",
+  "shortVideoSpaceQualityGateBlockingReasons": "质量门禁阻断原因",
+  "shortVideoSpaceBlockingItems": "阻塞项（按接口顺序节选）",
+  "shortVideoSpaceWarningItems": "警告项（按接口顺序节选）",
+  "shortVideoSpaceExporting": "导出中…",
+  "shortVideoSpaceStartExport": "开始导出",
+  "shortVideoSpaceExportHistory": "导出历史",
+  "shortVideoSpacePublishJobs": "发布作业",
+  "shortVideoSpaceScheduleCalendar": "排程月历（按本地日历日计数；点选某日批量写入定时）",
+  "shortVideoSpaceTargetConfiguration": "短视频目标配置",
+  "shortVideoSpaceConfigurationDescription": "把创作模式和画幅直接写回项目,后面的脚本与制作流程就能基于同一份项目配置继续工作。",
+  "shortVideoSpaceTargetProject": "目标项目",
+  "shortVideoSpaceLoading": "读取中",
+  "shortVideoSpaceRefreshProjects": "刷新项目",
+  "shortVideoSpaceRestoreRiskyConfirmation": "恢复高风险确认提示",
+  "shortVideoSpacePortrait916": "竖屏 9:16",
+  "shortVideoSpaceLandscape169": "横屏 16:9",
   "notificationsCenterTitle": "通知中心",
   "notificationsCenterSubtitle": "统一汇总任务完成、工作区邀请与技能变更，并保留已读状态。",
   "notificationsMarkAllRead": "全部已读",
@@ -829,6 +872,261 @@
   "projectsDialogFieldCoreHook": "Core hook",
   "projectsDialogFieldVisualDirection": "Visual direction",
   "projectsDialogSectionBrand": "品牌圣经",
+  "shortVideoSpaceErrorTimeout": "请求超时{context}，请检查网络连接后重试。",
+  "@shortVideoSpaceErrorTimeout": {
+    "placeholders": {
+      "context": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceErrorOperationFailed": "操作失败{context}：{error}",
+  "@shortVideoSpaceErrorOperationFailed": {
+    "placeholders": {
+      "context": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceErrorConcurrentLimitExceeded": "同时进行的工作区审计导出已达上限，请等待已有任务完成或结束后再试{context}。",
+  "@shortVideoSpaceErrorConcurrentLimitExceeded": {
+    "placeholders": {
+      "context": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceErrorRateLimitWithWait": "请求过于频繁{context}，{waitText}。",
+  "@shortVideoSpaceErrorRateLimitWithWait": {
+    "placeholders": {
+      "context": {
+        "type": "String"
+      },
+      "waitText": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceErrorNotFound": "未找到对应记录{context}。",
+  "@shortVideoSpaceErrorNotFound": {
+    "placeholders": {
+      "context": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceErrorPermissionDenied": "权限不足{context}，请检查登录状态。",
+  "@shortVideoSpaceErrorPermissionDenied": {
+    "placeholders": {
+      "context": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceErrorBadRequest": "请求参数错误",
+  "shortVideoSpaceErrorBadRequestWithContext": "{message}{context}",
+  "@shortVideoSpaceErrorBadRequestWithContext": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      },
+      "context": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceErrorServerError": "服务器错误{context}，请稍后重试。",
+  "@shortVideoSpaceErrorServerError": {
+    "placeholders": {
+      "context": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceErrorDetailedMessage": "{message}{context}",
+  "@shortVideoSpaceErrorDetailedMessage": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      },
+      "context": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceErrorDefaultMessage": "操作失败{context}：{error}",
+  "@shortVideoSpaceErrorDefaultMessage": {
+    "placeholders": {
+      "context": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceErrorRetryButton": "重试",
+  "shortVideoSpaceDialogExportHistoryTitle": "导出历史",
+  "shortVideoSpaceDialogExportHistoryRefresh": "刷新",
+  "shortVideoSpaceDialogExportHistoryStatusLabel": "状态",
+  "shortVideoSpaceDialogExportHistoryTimeLabel": "时间",
+  "shortVideoSpaceDialogExportHistoryClose": "关闭",
+  "shortVideoSpaceDialogExportHistoryRetry": "重试",
+  "shortVideoSpaceDialogExportHistoryNoRecords": "暂无导出记录",
+  "shortVideoSpaceDialogExportHistoryNoRecordsHint": "导出视频后，记录将显示在这里",
+  "shortVideoSpaceDialogExportHistoryDownload": "下载",
+  "shortVideoSpaceDialogExportHistoryDownloading": "下载中...",
+  "shortVideoSpaceDialogExportHistoryTimeFilterAll": "全部时间",
+  "shortVideoSpaceDialogExportHistoryTimeFilterToday": "今天",
+  "shortVideoSpaceDialogExportHistoryTimeFilterWeek": "最近一周",
+  "shortVideoSpaceDialogExportHistoryTimeFilterMonth": "最近一月",
+  "shortVideoSpaceDialogExportHistoryStatusFilterAll": "全部状态",
+  "shortVideoSpaceDialogExportHistoryStatusFilterCompleted": "已完成",
+  "shortVideoSpaceDialogExportHistoryStatusFilterFailed": "失败",
+  "shortVideoSpaceDialogExportHistoryStatusFilterCancelled": "已取消",
+  "shortVideoSpaceDialogExportHistoryFileSizeUnknown": "未知",
+  "shortVideoSpaceDialogExportHistoryFileSizeKB": "{size} KB",
+  "@shortVideoSpaceDialogExportHistoryFileSizeKB": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceDialogExportHistoryFileSizeMB": "{size} MB",
+  "@shortVideoSpaceDialogExportHistoryFileSizeMB": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceDialogExportHistoryFileSizeGB": "{size} GB",
+  "@shortVideoSpaceDialogExportHistoryFileSizeGB": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceDialogExportHistoryDurationSeconds": "{seconds} 秒",
+  "@shortVideoSpaceDialogExportHistoryDurationSeconds": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoSpaceDialogExportHistoryDurationMinutes": "{minutes} 分钟",
+  "@shortVideoSpaceDialogExportHistoryDurationMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoSpaceDialogExportHistoryDurationHours": "{hours} 小时 {minutes} 分钟",
+  "@shortVideoSpaceDialogExportHistoryDurationHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoSpaceDialogExportHistoryCreatedAt": "创建时间: {time}",
+  "@shortVideoSpaceDialogExportHistoryCreatedAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceDialogExportHistoryCompletedAt": "完成时间: {time} · 耗时: {duration}",
+  "@shortVideoSpaceDialogExportHistoryCompletedAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceDialogExportHistoryFileSize": "文件大小: {size}",
+  "@shortVideoSpaceDialogExportHistoryFileSize": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceDialogExportHistorySettings": "设置: {bitrate} · {framerate} FPS",
+  "@shortVideoSpaceDialogExportHistorySettings": {
+    "placeholders": {
+      "bitrate": {
+        "type": "String"
+      },
+      "framerate": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoSpaceDialogExportHistoryLoadError": "加载导出历史失败: {error}",
+  "@shortVideoSpaceDialogExportHistoryLoadError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceDialogExportHistorySessionExpired": "会话已失效，请重新登录",
+  "shortVideoSpaceDialogExportHistoryDownloadLinkCopied": "已复制下载链接（{format}）",
+  "@shortVideoSpaceDialogExportHistoryDownloadLinkCopied": {
+    "placeholders": {
+      "format": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceDialogExportHistoryDownloadFailed": "下载失败: {error}",
+  "@shortVideoSpaceDialogExportHistoryDownloadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceDialogExportHistoryTimeJustNow": "刚刚",
+  "shortVideoSpaceDialogExportHistoryTimeMinutesAgo": "{minutes} 分钟前",
+  "@shortVideoSpaceDialogExportHistoryTimeMinutesAgo": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoSpaceDialogExportHistoryTimeHoursAgo": "{hours} 小时前",
+  "@shortVideoSpaceDialogExportHistoryTimeHoursAgo": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoSpaceDialogExportHistoryTimeDaysAgo": "{days} 天前",
+  "@shortVideoSpaceDialogExportHistoryTimeDaysAgo": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "projectsDialogFieldBrandName": "Brand name",
   "projectsDialogFieldBrandPromise": "Brand promise",
   "projectsDialogFieldVisualMotifsMultiline": "Visual motifs (每行一个)",
@@ -3917,5 +4215,801 @@
         "type": "String"
       }
     }
-  }
+  },
+  "projectEditorAssetHistoryTitle": "资产历史图工作台",
+  "projectEditorAssetHistoryTypeFilterLabel": "类型过滤（可选）",
+  "projectEditorAssetHistoryTypeFilterHelper": "逗号分隔，例如 role,clip,props；留空表示全部",
+  "projectEditorAssetHistoryLoading": "加载中…",
+  "projectEditorAssetHistoryQueryButton": "查询历史图资产",
+  "projectEditorAssetHistoryClearFilter": "清空类型过滤",
+  "projectEditorAssetHistoryLoadingAssets": "正在加载历史图资产…",
+  "projectEditorAssetHistoryEmptyState": "暂无数据，点击「查询历史图资产」开始。",
+  "projectEditorAssetHistoryImageDropdownLabel": "历史图片",
+  "projectEditorAssetHistoryNoImages": "该资产暂无历史图片",
+  "projectEditorAssetHistoryCurrentImage": "当前图片：sort={sortIndex} · state={state}",
+  "@projectEditorAssetHistoryCurrentImage": {
+    "placeholders": {
+      "sortIndex": {
+        "type": "int"
+      },
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetHistoryNoPreview": "当前图片没有可用预览（可能仅存路径占位或远程资源暂不可达）",
+  "projectEditorAssetHistoryClose": "关闭",
+  "projectEditorAssetGenerationTitle": "资产出图工作台",
+  "projectEditorAssetGenerationDescription": "把 production 资产摘要、批量出图、状态轮询、衍生图清理和封面 URL 更新收口到项目资产主流程，不再只依赖 system probe。",
+  "projectEditorAssetGenerationClose": "关闭",
+  "projectEditorScriptsBatchAddTitle": "批量新增剧本",
+  "projectEditorScriptsBatchAddCountLabel": "数量（1-20）",
+  "projectEditorScriptsBatchAddCountHelper": "单次最多创建 20 条，避免误操作。",
+  "projectEditorScriptsBatchAddNamePrefixLabel": "名称前缀",
+  "projectEditorScriptsBatchAddContentLabel": "剧本默认内容",
+  "projectEditorScriptsBatchAddCancel": "取消",
+  "projectEditorScriptsBatchAddCreate": "创建",
+  "projectEditorScriptsBatchAddCountError": "数量必须是 1-20 的整数",
+  "projectEditorScriptsBatchAddDefaultPrefix": "新剧本",
+  "projectEditorScriptsBatchAddDefaultContent": "剧情梗概待补充。",
+  "projectEditorScriptsBatchAddSuccess": "已批量创建 {count} 条剧本",
+  "@projectEditorScriptsBatchAddSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorProbeTasksZeroItems": "0 项",
+  "projectEditorProbeTasksZeroClasses": "0 类",
+  "projectEditorProbeTasksCompatGetTaskApi": "compat get-task-api（GET jobs/page）：total={total} · {count} 条本页",
+  "@projectEditorProbeTasksCompatGetTaskApi": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorProbeProjectsZeroItems": "0 项",
+  "projectEditorProbeProjectsCompatList": "GET …/projects（compat 列表）：{line}",
+  "@projectEditorProbeProjectsCompatList": {
+    "placeholders": {
+      "line": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorProbeScriptsZeroItems": "0 条",
+  "projectEditorProbeScriptsEmpty": "（empty：均在提取中或 idle）",
+  "projectEditorProbeScriptsGetFirstScript": "GET projects/…/scripts (首条)",
+  "projectEditorProbeScriptsLoading": "script…",
+  "projectEditorProbeScriptsPostGetScriptApi": "POST …/projects/{id}/scripts/get-script-api：{count} 条 · {sample}",
+  "@projectEditorProbeScriptsPostGetScriptApi": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "sample": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetSummaryProductionEmpty": "production 资产数据为空",
+  "projectEditorAssetSummaryProductionLine": "production 资产 {total} 条 · {typesLine} · 示例：{sampleLine}",
+  "@projectEditorAssetSummaryProductionLine": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "typesLine": {
+        "type": "String"
+      },
+      "sampleLine": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetSummaryTypeCount": "{type} {count} 条",
+  "@projectEditorAssetSummaryTypeCount": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorAssetSummaryPollingEmpty": "未返回选中资产的图片状态",
+  "projectEditorAssetSummaryPollingLine": "已轮询 {count} 条资产 · {stateLine} · 示例：{sampleLine}",
+  "@projectEditorAssetSummaryPollingLine": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "stateLine": {
+        "type": "String"
+      },
+      "sampleLine": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetSummaryStateCount": "{state} {count} 条",
+  "@projectEditorAssetSummaryStateCount": {
+    "placeholders": {
+      "state": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorAssetSummaryImageCount": "#{assetId}: {count} 张",
+  "@projectEditorAssetSummaryImageCount": {
+    "placeholders": {
+      "assetId": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorAssetSummaryMaterialContext": "素材上下文 {imageCount} 条图片素材 · {videoCount} 条视频素材",
+  "@projectEditorAssetSummaryMaterialContext": {
+    "placeholders": {
+      "imageCount": {
+        "type": "int"
+      },
+      "videoCount": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorAssetSummaryBatchEmpty": "批量候选为空",
+  "projectEditorAssetSummaryBatchLine": "批量候选 {count}/{total} 条 · 示例：{sampleLine}",
+  "@projectEditorAssetSummaryBatchLine": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "sampleLine": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetSummaryPromptEmpty": "未返回 prompt 状态",
+  "projectEditorAssetSummaryPromptLine": "prompt 轮询 {count} 条 · {stateLine}",
+  "@projectEditorAssetSummaryPromptLine": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "stateLine": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetSummarySelectionNone": "当前未选择资产",
+  "projectEditorAssetSummarySelectionSingle": "当前选择 #{id} {name}",
+  "@projectEditorAssetSummarySelectionSingle": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetSummarySelectionMultiple": "当前选择 {count} 条资产：{sample}",
+  "@projectEditorAssetSummarySelectionMultiple": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "sample": {
+        "type": "String"
+      }
+    }
+  },
+  "authSupabaseNotConfigured": "未配置：运行示例\nflutter run --dart-define=SUPABASE_URL=... --dart-define=SUPABASE_ANON_KEY=...",
+  "authSignIn": "登录",
+  "authSignUp": "注册",
+  "authSignOut": "退出",
+  "authSignedInUser": "已登录 user: {userId}",
+  "@authSignedInUser": {
+    "placeholders": {
+      "userId": {
+        "type": "String"
+      }
+    }
+  },
+  "authRequestInProgress": "请求中…",
+  "authGetMeBearer": "GET /api/v1/me (Bearer)",
+  "authMeResponse": "/me: {response}",
+  "@authMeResponse": {
+    "placeholders": {
+      "response": {
+        "type": "String"
+      }
+    }
+  },
+  "authDevSwitchProbe": "GET+PUT /api/v1/settings/dev/switch-ai-tool",
+  "authDevSwitchResponse": "dev switch: {response}",
+  "@authDevSwitchResponse": {
+    "placeholders": {
+      "response": {
+        "type": "String"
+      }
+    }
+  },
+  "authMemoryConfigProbe": "memory-config GET+POST + clear-agent-memories",
+  "authMemoryConfigResponse": "memory-config: {response}",
+  "@authMemoryConfigResponse": {
+    "placeholders": {
+      "response": {
+        "type": "String"
+      }
+    }
+  },
+  "authAboutProbe": "POST …/settings/about/check-update + download-app",
+  "authAboutResponse": "about: {response}",
+  "@authAboutResponse": {
+    "placeholders": {
+      "response": {
+        "type": "String"
+      }
+    }
+  },
+  "authUsageSummary": "GET /api/v1/usage/summary",
+  "authUsageResponse": "usage: {response}",
+  "@authUsageResponse": {
+    "placeholders": {
+      "response": {
+        "type": "String"
+      }
+    }
+  },
+  "authPromptsProbe": "GET /api/v1/prompts + GET/1 + PATCH/1",
+  "authPromptsResponse": "prompts: {response}",
+  "@authPromptsResponse": {
+    "placeholders": {
+      "response": {
+        "type": "String"
+      }
+    }
+  },
+  "authVisualManualProbe": "GET+POST /api/v1/visual-manual",
+  "authVisualManualResponse": "visual-manual: {response}",
+  "@authVisualManualResponse": {
+    "placeholders": {
+      "response": {
+        "type": "String"
+      }
+    }
+  },
+  "authDirectorManualProbe": "POST …/project/query-director-manual",
+  "authDirectorManualResponse": "director-manual: {response}",
+  "@authDirectorManualResponse": {
+    "placeholders": {
+      "response": {
+        "type": "String"
+      }
+    }
+  },
+  "authSkillsBinaryProbe": "GET /api/v1/skills/binary (_smoke PNG)",
+  "authSkillsBinaryResponse": "skills/binary: {response}",
+  "@authSkillsBinaryResponse": {
+    "placeholders": {
+      "response": {
+        "type": "String"
+      }
+    }
+  },
+  "authModelsCatalogProbe": "models + vendors + vendor-add + danger + production + agent-deploy + model-test + script-agent + assets-gen",
+  "authTextModelDefaultProbe": "GET+PATCH /api/v1/models/text-default",
+  "authModelDetailProbe": "GET /api/v1/models/detail (1:gpt-4o-mini)",
+  "authModelsResponse": "models: {response}",
+  "@authModelsResponse": {
+    "placeholders": {
+      "response": {
+        "type": "String"
+      }
+    }
+  },
+  "authTextDefaultResponse": "text-default: {response}",
+  "@authTextDefaultResponse": {
+    "placeholders": {
+      "response": {
+        "type": "String"
+      }
+    }
+  },
+  "authModelDetailResponse": "model detail: {response}",
+  "@authModelDetailResponse": {
+    "placeholders": {
+      "response": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceDialogExportProgressTitle": "导出进度",
+  "shortVideoSpaceDialogExportProgressStatusQueued": "排队中",
+  "shortVideoSpaceDialogExportProgressStatusProcessing": "处理中",
+  "shortVideoSpaceDialogExportProgressStatusCompleted": "已完成",
+  "shortVideoSpaceDialogExportProgressStatusFailed": "失败",
+  "shortVideoSpaceDialogExportProgressStatusCancelled": "已取消",
+  "shortVideoSpaceDialogExportProgressStageInitializing": "初始化",
+  "shortVideoSpaceDialogExportProgressStageLoadingAssets": "加载素材",
+  "shortVideoSpaceDialogExportProgressStageEncoding": "编码视频",
+  "shortVideoSpaceDialogExportProgressStageUploading": "上传文件",
+  "shortVideoSpaceDialogExportProgressStageFinalizing": "完成处理",
+  "shortVideoSpaceDialogExportProgressLoadingStatus": "正在获取导出状态...",
+  "shortVideoSpaceDialogExportProgressFetchError": "获取进度失败: {error}",
+  "@shortVideoSpaceDialogExportProgressFetchError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceDialogExportProgressSessionExpired": "会话已失效，请重新登录",
+  "shortVideoSpaceDialogExportProgressCancelFailed": "取消失败: {error}",
+  "@shortVideoSpaceDialogExportProgressCancelFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceDialogExportProgressTaskId": "任务 ID: {taskId}",
+  "@shortVideoSpaceDialogExportProgressTaskId": {
+    "placeholders": {
+      "taskId": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceDialogExportProgressCancelButton": "取消导出",
+  "shortVideoSpaceDialogExportProgressCloseButton": "关闭",
+  "shortVideoSpaceDialogExportProgressMessageQueued": "导出任务已加入队列，等待处理...",
+  "shortVideoSpaceDialogExportProgressMessageInitializing": "正在初始化导出任务...",
+  "shortVideoSpaceDialogExportProgressMessageLoadingAssets": "正在加载视频素材和音频文件...",
+  "shortVideoSpaceDialogExportProgressMessageEncoding": "正在编码视频，这可能需要几分钟...",
+  "shortVideoSpaceDialogExportProgressMessageUploading": "正在上传导出的视频文件...",
+  "shortVideoSpaceDialogExportProgressMessageFinalizing": "正在完成最后的处理步骤...",
+  "shortVideoSpaceDialogExportProgressMessageProcessing": "正在处理导出任务...",
+  "shortVideoSpaceDialogExportProgressMessageCompleted": "导出成功完成！视频已准备好下载。",
+  "shortVideoSpaceDialogExportProgressMessageFailed": "导出失败，请重试或联系支持。",
+  "shortVideoSpaceDialogExportProgressMessageCancelled": "导出已被取消。",
+  "shortVideoSpaceDialogConfirmDeleteVersionTitle": "确认删除",
+  "shortVideoSpaceDialogConfirmDeleteVersionMessage": "确定要删除版本 \"{versionName}\" 吗？\n\n此操作无法撤销。",
+  "@shortVideoSpaceDialogConfirmDeleteVersionMessage": {
+    "placeholders": {
+      "versionName": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceDialogConfirmDeleteVersionDontShow": "不再提示",
+  "shortVideoSpaceDialogConfirmDeleteVersionCancel": "取消",
+  "shortVideoSpaceDialogConfirmDeleteVersionConfirm": "删除",
+  "shortVideoSpaceDialogConfirmBatchDisableTitle": "确认批量禁用",
+  "shortVideoSpaceDialogConfirmBatchDisableMessage": "确定要禁用选中的 {shotCount} 个镜头吗？\n\n禁用后的镜头将不会出现在最终视频中。",
+  "@shortVideoSpaceDialogConfirmBatchDisableMessage": {
+    "placeholders": {
+      "shotCount": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoSpaceDialogConfirmBatchDisableConfirm": "确认禁用",
+  "shortVideoSpaceDialogConfirmRestoreDraftTitle": "确认恢复草稿",
+  "shortVideoSpaceDialogConfirmRestoreDraftMessage": "确定要恢复草稿 \"{draftName}\" 吗？\n\n当前未保存的编辑状态将会丢失。",
+  "@shortVideoSpaceDialogConfirmRestoreDraftMessage": {
+    "placeholders": {
+      "draftName": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceDialogConfirmRestoreDraftConfirm": "恢复",
+  "shortVideoSpaceDialogConfirmCancelExportTitle": "取消导出",
+  "shortVideoSpaceDialogConfirmCancelExportMessage": "确定要取消导出吗？已处理的内容将会丢失。",
+  "shortVideoSpaceDialogConfirmCancelExportContinue": "继续导出",
+  "shortVideoSpaceDialogConfirmCancelExportConfirm": "确认取消",
+  "shortVideoSpaceDialogConfirmBatchArchiveTitle": "批量归档确认",
+  "shortVideoSpaceDialogConfirmBatchArchiveMessage": "确定要归档 {draftCount} 张发布草稿吗？归档后将从待发布队列中移除（视后端策略可能可恢复）。",
+  "@shortVideoSpaceDialogConfirmBatchArchiveMessage": {
+    "placeholders": {
+      "draftCount": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoSpaceDialogConfirmBatchArchiveConfirm": "确认归档",
+  "shortVideoSpaceDialogVoiceoverSettingsTitle": "配音参数设置",
+  "shortVideoSpaceDialogVoiceoverSettingsProviderLabel": "TTS 供应商",
+  "shortVideoSpaceDialogVoiceoverSettingsProviderOpenAI": "OpenAI TTS",
+  "shortVideoSpaceDialogVoiceoverSettingsProviderAzure": "Azure TTS",
+  "shortVideoSpaceDialogVoiceoverSettingsProviderGoogle": "Google TTS",
+  "shortVideoSpaceDialogVoiceoverSettingsVoiceLabel": "声线",
+  "shortVideoSpaceDialogVoiceoverSettingsVoiceAlloy": "Alloy (中性)",
+  "shortVideoSpaceDialogVoiceoverSettingsVoiceEcho": "Echo (男性)",
+  "shortVideoSpaceDialogVoiceoverSettingsVoiceFable": "Fable (英式)",
+  "shortVideoSpaceDialogVoiceoverSettingsVoiceOnyx": "Onyx (深沉)",
+  "shortVideoSpaceDialogVoiceoverSettingsVoiceNova": "Nova (女性)",
+  "shortVideoSpaceDialogVoiceoverSettingsVoiceShimmer": "Shimmer (柔和)",
+  "shortVideoSpaceDialogVoiceoverSettingsEmotionLabel": "情绪",
+  "shortVideoSpaceDialogVoiceoverSettingsEmotionNeutral": "中性 (Neutral)",
+  "shortVideoSpaceDialogVoiceoverSettingsEmotionHappy": "愉悦 (Happy)",
+  "shortVideoSpaceDialogVoiceoverSettingsEmotionSad": "悲伤 (Sad)",
+  "shortVideoSpaceDialogVoiceoverSettingsEmotionAngry": "愤怒 (Angry)",
+  "shortVideoSpaceDialogVoiceoverSettingsSpeedLabel": "语速",
+  "shortVideoSpaceDialogVoiceoverSettingsSpeedRange": "调整范围：0.5x (慢速) - 2.0x (快速)",
+  "shortVideoSpaceDialogVoiceoverSettingsInfoMessage": "保存后将应用到新生成的配音。已生成的配音需要重新生成才能应用新参数。",
+  "shortVideoSpaceDialogVoiceoverSettingsCancel": "取消",
+  "shortVideoSpaceDialogVoiceoverSettingsSave": "保存",
+  "shortVideoSpacePublishQualityStageUnlabeled": "未标注阶段",
+  "shortVideoSpacePublishQualityStageStorySkeleton": "故事骨架",
+  "shortVideoSpacePublishQualityStageAdaptationStrategy": "改编策略",
+  "shortVideoSpacePublishQualityStageDirectorPlanning": "导演规划",
+  "shortVideoSpacePublishQualityStageStoryboardTable": "分镜表",
+  "shortVideoSpacePublishQualityStageStoryboardPanel": "分镜面板",
+  "shortVideoSpacePublishQualityStageVideoPrompt": "视频提示 / 成片",
+  "shortVideoSpacePublishExportIssueCandidatePending": "候选待确认",
+  "shortVideoSpacePublishExportIssueMissingSelectedMedia": "未选成片媒体",
+  "shortVideoSpacePublishExportIssueSelectedMediaNotVideo": "所选媒体非视频",
+  "shortVideoSpacePublishExportIssueSubtitlePlaceholder": "字幕 / 口播文案缺失",
+  "shortVideoSpacePublishExportIssueSubtitleEmpty": "字幕为空",
+  "shortVideoSpacePublishExportIssueVoiceoverFailed": "旁白生成失败",
+  "shortVideoSpacePublishExportIssueVoiceoverAudioMissing": "旁白音频未就绪",
+  "shortVideoSpacePublishExportIssueVoiceoverNotReady": "配音未就绪",
+  "shortVideoSpacePublishExportIssueDurationNotExplicit": "时长未标明（导出默认）",
+  "shortVideoSpacePublishExportIssueDurationNotSet": "时长未设定",
+  "shortVideoSpacePublishExportIssueDurationUnparsable": "时长格式异常",
+  "shortVideoSpacePublishExportIssueCompletionUncertain": "成片状态未标「已完成」",
+  "shortVideoSpacePublishAssemblyLoadingHeadline": "正在读取成片装配快照…",
+  "shortVideoSpacePublishAssemblyLoadingDetail": "数据来自 GET …/short-video-assembly（按剧本顺序汇总分镜与成片要素）。",
+  "shortVideoSpacePublishAssemblyUnavailableHeadline": "成片装配快照暂不可用。",
+  "shortVideoSpacePublishAssemblyUnavailableDetail": "可稍后刷新，或在制作工作区确认分镜与时间线后再试。",
+  "shortVideoSpacePublishAssemblyNoScriptsHeadline": "当前尚无剧本 / 分镜装配数据。",
+  "shortVideoSpacePublishAssemblyHeadlineScripts": "{count, plural, =1{1 个剧本} other{{count} 个剧本}} · {shots} 条分镜（导出路径快照）\n成片总时长：{seconds}秒 ({formatted})",
+  "@shortVideoSpacePublishAssemblyHeadlineScripts": {
+    "placeholders": {
+      "count": {"type": "int"},
+      "shots": {"type": "int"},
+      "seconds": {"type": "int"},
+      "formatted": {"type": "String"}
+    }
+  },
+  "shortVideoSpacePublishAssemblyVoiceProfileNotSet": "配音档案：未写",
+  "shortVideoSpacePublishAssemblyVoiceProfile": "配音档案：{profile}",
+  "@shortVideoSpacePublishAssemblyVoiceProfile": {
+    "placeholders": {
+      "profile": {"type": "String"}
+    }
+  },
+  "shortVideoSpacePublishAssemblySubtitleDefault": "字幕：默认",
+  "shortVideoSpacePublishAssemblySubtitle": "字幕：{style}",
+  "@shortVideoSpacePublishAssemblySubtitle": {
+    "placeholders": {
+      "style": {"type": "String"}
+    }
+  },
+  "shortVideoSpacePublishAssemblyBgmNotSpecified": "BGM：未指定",
+  "shortVideoSpacePublishAssemblyBgm": "BGM：{strategy}",
+  "@shortVideoSpacePublishAssemblyBgm": {
+    "placeholders": {
+      "strategy": {"type": "String"}
+    }
+  },
+  "shortVideoSpacePublishAssemblyEffectiveTts": "生效 TTS（入队/worker）：{voice}",
+  "@shortVideoSpacePublishAssemblyEffectiveTts": {
+    "placeholders": {
+      "voice": {"type": "String"}
+    }
+  },
+  "shortVideoSpacePublishAssemblyScriptTitle": "剧本 #{id}",
+  "@shortVideoSpacePublishAssemblyScriptTitle": {
+    "placeholders": {
+      "id": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishAssemblyScriptTitleNamed": "剧本 #{id} · {name}",
+  "@shortVideoSpacePublishAssemblyScriptTitleNamed": {
+    "placeholders": {
+      "id": {"type": "int"},
+      "name": {"type": "String"}
+    }
+  },
+  "shortVideoSpacePublishAssemblyScriptSummary": "{title} · {shots} 镜 · 已选成片 {withMedia} · 旁白就绪 {voReady}",
+  "@shortVideoSpacePublishAssemblyScriptSummary": {
+    "placeholders": {
+      "title": {"type": "String"},
+      "shots": {"type": "int"},
+      "withMedia": {"type": "int"},
+      "voReady": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishAssemblyShotPreviewYes": "预览✓",
+  "shortVideoSpacePublishAssemblyShotPreviewNo": "预览×",
+  "shortVideoSpacePublishAssemblyShotDurationUnknown": "时长?",
+  "shortVideoSpacePublishAssemblyShotSubtitleYes": "字幕✓",
+  "shortVideoSpacePublishAssemblyShotSubtitleNo": "字幕×",
+  "shortVideoSpacePublishAssemblyShotVoiceoverYes": "旁白✓",
+  "shortVideoSpacePublishAssemblyShotVoiceoverNo": "旁白×",
+  "shortVideoSpacePublishAssemblyShotBgmDefault": "默认",
+  "shortVideoSpacePublishAssemblyShotDetail": "镜头[{order}] · {preview} · {duration} · {subtitle} · {voiceover} · BGM {bgm}",
+  "@shortVideoSpacePublishAssemblyShotDetail": {
+    "placeholders": {
+      "order": {"type": "String"},
+      "preview": {"type": "String"},
+      "duration": {"type": "String"},
+      "subtitle": {"type": "String"},
+      "voiceover": {"type": "String"},
+      "bgm": {"type": "String"}
+    }
+  },
+  "shortVideoSpacePublishAssemblyMoreShots": "…其余 {count} 镜请在制作工作区时间线查看",
+  "@shortVideoSpacePublishAssemblyMoreShots": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishAssemblyQualityProjectBadCase": "项目级待验收坏例：{count}（与生产概览同源）",
+  "@shortVideoSpacePublishAssemblyQualityProjectBadCase": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishAssemblyQualityAssemblyReviews": "当前装配分镜上的评审：{total} 条 · 坏例 {badCase} · 涉及分镜 {shots}",
+  "@shortVideoSpacePublishAssemblyQualityAssemblyReviews": {
+    "placeholders": {
+      "total": {"type": "int"},
+      "badCase": {"type": "int"},
+      "shots": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishAssemblyQualityLateStageBadCase": "贴近成片阶段坏例（分镜面板/视频提示）：{count}",
+  "@shortVideoSpacePublishAssemblyQualityLateStageBadCase": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishAssemblyQualityByStage": "按阶段：{stages}",
+  "@shortVideoSpacePublishAssemblyQualityByStage": {
+    "placeholders": {
+      "stages": {"type": "String"}
+    }
+  },
+  "shortVideoSpacePublishAssemblyQualityStageBadCase": "{stage} · 坏例 {count}",
+  "@shortVideoSpacePublishAssemblyQualityStageBadCase": {
+    "placeholders": {
+      "stage": {"type": "String"},
+      "count": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishAssemblyQualityTaskCenterHint": "在任务中心侧可按项目筛选质量评审列表，分镜级 target 与装配一致。",
+  "shortVideoSpacePublishAssemblyMultiTrackEstimate": "轨道占用估算：视频 1 + 字幕 {subtitle} + 旁白 {voiceover} + BGM {bgm} = {total} 轨。",
+  "@shortVideoSpacePublishAssemblyMultiTrackEstimate": {
+    "placeholders": {
+      "subtitle": {"type": "int"},
+      "voiceover": {"type": "int"},
+      "bgm": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishAssemblyMaterialReady": "素材就绪：视频镜头 {video}/{totalShots}，字幕镜头 {subtitle}/{totalShots}，旁白镜头 {voiceover}/{totalShots}。",
+  "@shortVideoSpacePublishAssemblyMaterialReady": {
+    "placeholders": {
+      "video": {"type": "int"},
+      "subtitle": {"type": "int"},
+      "voiceover": {"type": "int"},
+      "totalShots": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishAssemblyDurationEstimate": "时长估算：已识别 {known}/{total} 镜，总时长约 {minutes} 分钟。",
+  "@shortVideoSpacePublishAssemblyDurationEstimate": {
+    "placeholders": {
+      "known": {"type": "int"},
+      "total": {"type": "int"},
+      "minutes": {"type": "String"}
+    }
+  },
+  "shortVideoSpacePublishAssemblyExportDecisionProfessional": "导出决策：当前超出受限多轨边界（>4 轨或时长复杂），建议转专业台（需求 8.2）处理。",
+  "shortVideoSpacePublishAssemblyExportDecisionLimited": "导出决策：维持受限多轨（<=4 轨）路径，可继续在当前链路导出。",
+  "shortVideoSpacePublishAssemblyBoundaryNote": "边界说明：Space 仅覆盖\"视频 + 单字幕轨 + 旁白 + BGM\"受限混排，不替代专业 NLE。",
+  "shortVideoSpacePublishAssemblyDetail": "只读剪辑台：展示镜头顺序、时长、字幕、旁白、BGM 与预览就绪摘要；导出阻塞结论见下方「导出前检查」。",
+  "shortVideoSpacePublishExportCheckLoadingHeadline": "正在读取导出前检查…",
+  "shortVideoSpacePublishExportCheckLoadingDetail": "聚合分镜阻塞与提醒；质量门禁观测字段仅占位展示。",
+  "shortVideoSpacePublishExportCheckUnavailableHeadline": "导出前检查暂不可用。",
+  "shortVideoSpacePublishExportCheckUnavailableDetail": "可稍后刷新页面，或在制作工作区确认分镜后再试。",
+  "shortVideoSpacePublishExportCheckReadyHeadline": "服务端未发现阻塞级问题（仍需在制作侧确认成片）。",
+  "shortVideoSpacePublishExportCheckBlockingHeadline": "存在阻塞项：建议先在制作工作区补齐后再导出 / 成片。",
+  "shortVideoSpacePublishExportCheckMetricStoryboards": "分镜",
+  "shortVideoSpacePublishExportCheckMetricBlocking": "阻塞",
+  "shortVideoSpacePublishExportCheckMetricWarning": "提醒",
+  "shortVideoSpacePublishExportCheckMetricExportable": "可导出",
+  "shortVideoSpacePublishExportCheckMetricYes": "是",
+  "shortVideoSpacePublishExportCheckMetricNo": "否",
+  "shortVideoSpacePublishExportCheckQualityGateOff": "质量门禁：已关闭（不检查质量问题）。",
+  "shortVideoSpacePublishExportCheckQualityGateWarnNoBadCase": "质量门禁：警告模式 - 暂无待复核坏例（允许导出）。",
+  "shortVideoSpacePublishExportCheckQualityGateWarnWithBadCase": "质量门禁：警告模式 - 待复核坏例 {count} 条（允许导出但建议修复）。",
+  "@shortVideoSpacePublishExportCheckQualityGateWarnWithBadCase": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishExportCheckQualityGateBlockEnforcedWithBadCase": "质量门禁：阻断模式 - 待复核坏例 {count} 条（阻止导出，需先修复）。",
+  "@shortVideoSpacePublishExportCheckQualityGateBlockEnforcedWithBadCase": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishExportCheckQualityGateBlockNotEnforcedWithBadCase": "质量门禁：阻断模式 - 待复核坏例 {count} 条（暂未强制执行）。",
+  "@shortVideoSpacePublishExportCheckQualityGateBlockNotEnforcedWithBadCase": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishExportCheckQualityGateBlockNoBadCase": "质量门禁：阻断模式 - 暂无待复核坏例（允许导出）。",
+  "shortVideoSpacePublishExportCheckQualityGateUnknown": "质量门禁：未知策略 \"{strategy}\"。",
+  "@shortVideoSpacePublishExportCheckQualityGateUnknown": {
+    "placeholders": {
+      "strategy": {"type": "String"}
+    }
+  },
+  "shortVideoSpacePublishExportCheckBlockingIssue": "剧本 #{scriptId} · 分镜 #{sbId}{sbIndex} · {label} · {detail}",
+  "@shortVideoSpacePublishExportCheckBlockingIssue": {
+    "placeholders": {
+      "scriptId": {"type": "int"},
+      "sbId": {"type": "int"},
+      "sbIndex": {"type": "String"},
+      "label": {"type": "String"},
+      "detail": {"type": "String"}
+    }
+  },
+  "shortVideoSpacePublishExportCheckDetailReady": "阻塞计数为 0 时表示服务端聚合路径上暂无硬阻塞（仍以实际导出管线为准）。",
+  "shortVideoSpacePublishExportCheckDetailBlocking": "下方列出部分阻塞项；完整列表请在制作工作区逐镜核对。",
+  "shortVideoSpacePublishCandidateLoadingHeadline": "正在读取项目资产…",
+  "shortVideoSpacePublishCandidateLoadingDetail": "用于统计候选 workflow：pending / linked / ignored（与 PATCH 资产一致）。",
+  "shortVideoSpacePublishCandidateUnavailableHeadline": "候选资产摘要暂不可用。",
+  "shortVideoSpacePublishCandidateUnavailableDetail": "可稍后刷新页面，或直接去项目区查看并编辑资产。",
+  "shortVideoSpacePublishCandidateNoTrackedHeadline": "尚未标记 pending / linked / ignored；可在项目区对镜头候选等资产 PATCH candidate_status。",
+  "shortVideoSpacePublishCandidateTrackedHeadline": "候选状态已按项目全量聚合（下方计数含未标记）：",
+  "shortVideoSpacePublishCandidateDetail": "项目资产共 {total} 条；计数由服务端一次性聚合（不分页）。在项目区可通过 PATCH candidate_status 更新。",
+  "@shortVideoSpacePublishCandidateDetail": {
+    "placeholders": {
+      "total": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishPanelLoadingHeadline": "正在读取导出检查与发布域…",
+  "shortVideoSpacePublishPanelLoadingDetail": "后端路径：`/api/v1/projects/:id/publish/*`（profiles / drafts / jobs）。",
+  "shortVideoSpacePublishPanelUnavailableHeadline": "发布域接口暂不可用（可能尚未执行数据库迁移）。",
+  "shortVideoSpacePublishPanelUnavailableExportGateMissing": "导出检查数据缺失，发布面板仅提示占位。",
+  "shortVideoSpacePublishPanelUnavailableExportGateNoBlocking": "导出检查：当前无阻塞项。",
+  "shortVideoSpacePublishPanelUnavailableExportGateBlocking": "导出检查：仍有 {count} 条阻塞项。",
+  "@shortVideoSpacePublishPanelUnavailableExportGateBlocking": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishPanelUnavailableDetail": "确认 Supabase 已应用 `app_publish_*` 迁移后再试；Rust worker 会在后台消化发布作业队列。",
+  "shortVideoSpacePublishPanelExportGateUnavailable": "导出检查数据暂不可用；仍可试着创建发布草稿并校验。",
+  "shortVideoSpacePublishPanelExportGateReady": "导出检查：无阻塞项（**E13**：可从成片链路进入发布准备）。",
+  "shortVideoSpacePublishPanelExportGateBlocking": "导出检查：仍有 {count} 条阻塞项；可先补齐字段再投递作业。",
+  "@shortVideoSpacePublishPanelExportGateBlocking": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishPanelHeadline": "已连接发布 API：{drafts} 张草稿 · {jobs} 条作业。",
+  "@shortVideoSpacePublishPanelHeadline": {
+    "placeholders": {
+      "drafts": {"type": "int"},
+      "jobs": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishPanelCurrentDraft": "当前草稿：{title}",
+  "@shortVideoSpacePublishPanelCurrentDraft": {
+    "placeholders": {
+      "title": {"type": "String"}
+    }
+  },
+  "shortVideoSpacePublishPanelCurrentDraftUntitled": "当前草稿：（无标题）",
+  "shortVideoSpacePublishPanelSelectDraftWarning": "⚠️ 请明确选择草稿（不再自动使用第一条）",
+  "shortVideoSpacePublishPanelPrepareCheckOk": "校验：✓ 当前草稿满足占位规则（仍需真实成片引用才能实际上线）。",
+  "shortVideoSpacePublishPanelPrepareCheckMultipleDrafts": "多张草稿时请先在「当前操作草稿」中选择一张，再显示 prepare-check。",
+  "shortVideoSpacePublishPanelPrepareCheckSelectFirst": "选择草稿后将显示 prepare-check 校验结果。",
+  "shortVideoSpacePublishPanelPrepareCheckNoDraft": "尚无草稿或未完成 prepare-check。",
+  "shortVideoSpacePublishPanelDraftNoTitle": "（无标题）",
+  "shortVideoSpacePublishPanelDraftMissingVideo": " · 缺 video 引用",
+  "shortVideoSpacePublishPanelDraftScheduled": " · 定时 {time}",
+  "@shortVideoSpacePublishPanelDraftScheduled": {
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "shortVideoSpacePublishPanelJobShortId": "{id}…",
+  "@shortVideoSpacePublishPanelJobShortId": {
+    "placeholders": {
+      "id": {"type": "String"}
+    }
+  },
+  "shortVideoSpacePublishPanelJobError": " · {error}",
+  "@shortVideoSpacePublishPanelJobError": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "shortVideoSpacePublishPanelOverviewSucceeded": "成功作业：{count}",
+  "@shortVideoSpacePublishPanelOverviewSucceeded": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishPanelOverviewFailed": "失败/部分失败：{count}",
+  "@shortVideoSpacePublishPanelOverviewFailed": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishPanelOverviewAwaiting": "待确认：{count}",
+  "@shortVideoSpacePublishPanelOverviewAwaiting": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishPanelOverviewScheduled": "已定时草稿：{scheduled}/{total}",
+  "@shortVideoSpacePublishPanelOverviewScheduled": {
+    "placeholders": {
+      "scheduled": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishPanelOverviewDeliveryModes": "投递模式：{modes}",
+  "@shortVideoSpacePublishPanelOverviewDeliveryModes": {
+    "placeholders": {
+      "modes": {"type": "String"}
+    }
+  },
+  "shortVideoSpacePublishPanelOverviewPerformanceAlerts": "低表现预警：{count} 条（建议进入任务中心排障并改写文案）",
+  "@shortVideoSpacePublishPanelOverviewPerformanceAlerts": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "shortVideoSpacePublishPanelOverviewPerformanceAlert": "{platform} · 播放 {views} · 完播 {rate}%",
+  "@shortVideoSpacePublishPanelOverviewPerformanceAlert": {
+    "placeholders": {
+      "platform": {"type": "String"},
+      "views": {"type": "int"},
+      "rate": {"type": "String"}
+    }
+  },
+  "shortVideoSpacePublishPanelOverviewAudit": "审计：{platform} · {status} · mode={mode}",
+  "@shortVideoSpacePublishPanelOverviewAudit": {
+    "placeholders": {
+      "platform": {"type": "String"},
+      "status": {"type": "String"},
+      "mode": {"type": "String"}
+    }
+  },
+  "shortVideoSpacePublishPanelOverviewTargetAutomation": "目标自动化：{modes}",
+  "@shortVideoSpacePublishPanelOverviewTargetAutomation": {
+    "placeholders": {
+      "modes": {"type": "String"}
+    }
+  },
+  "shortVideoSpacePublishPanelDetail": "半自动作业在 `awaiting_confirmation` 时需点「确认」；worker 骨架会写入 `publish_attempts` 占位成功记录。"
 }

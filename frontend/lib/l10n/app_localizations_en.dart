@@ -79,6 +79,152 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get shortVideoSpaceCannotSaveNoProject =>
+      'Cannot save: no project selected or not logged in';
+
+  @override
+  String get shortVideoSpaceSavingInProgress =>
+      'Saving in progress, please wait...';
+
+  @override
+  String get shortVideoSpaceSelectAllAvailable =>
+      'Select all shortcut (Ctrl+A / Cmd+A) is available in the shot operation panel';
+
+  @override
+  String get shortVideoSpaceSearchFocused => 'Search box focused';
+
+  @override
+  String get shortVideoSpaceSearchNotAvailable =>
+      'Search box not available (please open shot operation panel first)';
+
+  @override
+  String get shortVideoSpaceSaveProjectConfig => 'Save project configuration';
+
+  @override
+  String get shortVideoSpaceSelectAllShots =>
+      'Select all shots (in batch operation mode)';
+
+  @override
+  String get shortVideoSpaceFocusSearch => 'Focus search box';
+
+  @override
+  String get shortVideoSpaceUndoOperation => 'Undo last operation';
+
+  @override
+  String get shortVideoSpaceRedoOperation => 'Redo last operation';
+
+  @override
+  String get shortVideoSpaceFileOperations => 'File Operations';
+
+  @override
+  String get shortVideoSpaceSelectionOperations => 'Selection Operations';
+
+  @override
+  String get shortVideoSpaceNavigation => 'Navigation';
+
+  @override
+  String get shortVideoSpaceEditOperations => 'Edit Operations';
+
+  @override
+  String get shortVideoSpaceKeyboardShortcuts => 'Keyboard Shortcuts';
+
+  @override
+  String get shortVideoSpaceClose => 'Close';
+
+  @override
+  String get shortVideoSpaceCurrentProjectOverview =>
+      'Current Project Overview';
+
+  @override
+  String get shortVideoSpaceRecentBadCaseTrends => 'Recent Bad Case Trends';
+
+  @override
+  String get shortVideoSpaceRecentTaskFlow => 'Recent Task Flow';
+
+  @override
+  String get shortVideoSpaceAssetsOverview => 'Assets Overview';
+
+  @override
+  String get shortVideoSpaceAssemblySnapshot => 'Assembly Snapshot';
+
+  @override
+  String get shortVideoSpaceQualityReview =>
+      'Quality Review (Quality Acceptance)';
+
+  @override
+  String get shortVideoSpaceMultiTrackExportDecision =>
+      'Limited Multi-track Export Decision (K5)';
+
+  @override
+  String get shortVideoSpaceOpenProductionWorkspace =>
+      'Open Production Workspace';
+
+  @override
+  String get shortVideoSpaceBasicShotOperations => 'Basic Shot Operations';
+
+  @override
+  String get shortVideoSpaceAssemblyStyleAdjustment =>
+      'Assembly Style Adjustment';
+
+  @override
+  String get shortVideoSpaceExportPreCheck => 'Export Pre-check';
+
+  @override
+  String get shortVideoSpaceQualityGateBlockingReasons =>
+      'Quality Gate Blocking Reasons';
+
+  @override
+  String get shortVideoSpaceBlockingItems =>
+      'Blocking Items (Selected by Interface Order)';
+
+  @override
+  String get shortVideoSpaceWarningItems =>
+      'Warning Items (Selected by Interface Order)';
+
+  @override
+  String get shortVideoSpaceExporting => 'Exporting...';
+
+  @override
+  String get shortVideoSpaceStartExport => 'Start Export';
+
+  @override
+  String get shortVideoSpaceExportHistory => 'Export History';
+
+  @override
+  String get shortVideoSpacePublishJobs => 'Publish Jobs';
+
+  @override
+  String get shortVideoSpaceScheduleCalendar =>
+      'Schedule Calendar (counted by local calendar days; click a day to batch write timing)';
+
+  @override
+  String get shortVideoSpaceTargetConfiguration =>
+      'Short Video Target Configuration';
+
+  @override
+  String get shortVideoSpaceConfigurationDescription =>
+      'Write the creation mode and aspect ratio directly back to the project, so that subsequent scripts and production processes can continue to work based on the same project configuration.';
+
+  @override
+  String get shortVideoSpaceTargetProject => 'Target Project';
+
+  @override
+  String get shortVideoSpaceLoading => 'Loading';
+
+  @override
+  String get shortVideoSpaceRefreshProjects => 'Refresh Projects';
+
+  @override
+  String get shortVideoSpaceRestoreRiskyConfirmation =>
+      'Restore High-Risk Confirmation Prompts';
+
+  @override
+  String get shortVideoSpacePortrait916 => 'Portrait 9:16';
+
+  @override
+  String get shortVideoSpaceLandscape169 => 'Landscape 16:9';
+
+  @override
   String get notificationsCenterTitle => 'Notifications';
 
   @override
@@ -1510,6 +1656,224 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get projectsDialogSectionBrand => 'Brand bible';
+
+  @override
+  String shortVideoSpaceErrorTimeout(String context) {
+    return 'Request timeout$context, please check network connection and retry.';
+  }
+
+  @override
+  String shortVideoSpaceErrorOperationFailed(String context, String error) {
+    return 'Operation failed$context: $error';
+  }
+
+  @override
+  String shortVideoSpaceErrorConcurrentLimitExceeded(String context) {
+    return 'Concurrent workspace audit export limit reached, please wait for existing tasks to complete$context.';
+  }
+
+  @override
+  String shortVideoSpaceErrorRateLimitWithWait(
+    String context,
+    String waitText,
+  ) {
+    return 'Too many requests$context, $waitText.';
+  }
+
+  @override
+  String shortVideoSpaceErrorNotFound(String context) {
+    return 'Record not found$context.';
+  }
+
+  @override
+  String shortVideoSpaceErrorPermissionDenied(String context) {
+    return 'Permission denied$context, please check login status.';
+  }
+
+  @override
+  String get shortVideoSpaceErrorBadRequest => 'Bad request parameters';
+
+  @override
+  String shortVideoSpaceErrorBadRequestWithContext(
+    String message,
+    String context,
+  ) {
+    return '$message$context';
+  }
+
+  @override
+  String shortVideoSpaceErrorServerError(String context) {
+    return 'Server error$context, please retry later.';
+  }
+
+  @override
+  String shortVideoSpaceErrorDetailedMessage(String message, String context) {
+    return '$message$context';
+  }
+
+  @override
+  String shortVideoSpaceErrorDefaultMessage(String context, String error) {
+    return 'Operation failed$context: $error';
+  }
+
+  @override
+  String get shortVideoSpaceErrorRetryButton => 'Retry';
+
+  @override
+  String get shortVideoSpaceDialogExportHistoryTitle => 'Export History';
+
+  @override
+  String get shortVideoSpaceDialogExportHistoryRefresh => 'Refresh';
+
+  @override
+  String get shortVideoSpaceDialogExportHistoryStatusLabel => 'Status';
+
+  @override
+  String get shortVideoSpaceDialogExportHistoryTimeLabel => 'Time';
+
+  @override
+  String get shortVideoSpaceDialogExportHistoryClose => 'Close';
+
+  @override
+  String get shortVideoSpaceDialogExportHistoryRetry => 'Retry';
+
+  @override
+  String get shortVideoSpaceDialogExportHistoryNoRecords => 'No export records';
+
+  @override
+  String get shortVideoSpaceDialogExportHistoryNoRecordsHint =>
+      'Export records will appear here after exporting videos';
+
+  @override
+  String get shortVideoSpaceDialogExportHistoryDownload => 'Download';
+
+  @override
+  String get shortVideoSpaceDialogExportHistoryDownloading => 'Downloading...';
+
+  @override
+  String get shortVideoSpaceDialogExportHistoryTimeFilterAll => 'All time';
+
+  @override
+  String get shortVideoSpaceDialogExportHistoryTimeFilterToday => 'Today';
+
+  @override
+  String get shortVideoSpaceDialogExportHistoryTimeFilterWeek => 'Last week';
+
+  @override
+  String get shortVideoSpaceDialogExportHistoryTimeFilterMonth => 'Last month';
+
+  @override
+  String get shortVideoSpaceDialogExportHistoryStatusFilterAll => 'All status';
+
+  @override
+  String get shortVideoSpaceDialogExportHistoryStatusFilterCompleted =>
+      'Completed';
+
+  @override
+  String get shortVideoSpaceDialogExportHistoryStatusFilterFailed => 'Failed';
+
+  @override
+  String get shortVideoSpaceDialogExportHistoryStatusFilterCancelled =>
+      'Cancelled';
+
+  @override
+  String get shortVideoSpaceDialogExportHistoryFileSizeUnknown => 'Unknown';
+
+  @override
+  String shortVideoSpaceDialogExportHistoryFileSizeKB(String size) {
+    return '$size KB';
+  }
+
+  @override
+  String shortVideoSpaceDialogExportHistoryFileSizeMB(String size) {
+    return '$size MB';
+  }
+
+  @override
+  String shortVideoSpaceDialogExportHistoryFileSizeGB(String size) {
+    return '$size GB';
+  }
+
+  @override
+  String shortVideoSpaceDialogExportHistoryDurationSeconds(int seconds) {
+    return '$seconds seconds';
+  }
+
+  @override
+  String shortVideoSpaceDialogExportHistoryDurationMinutes(int minutes) {
+    return '$minutes minutes';
+  }
+
+  @override
+  String shortVideoSpaceDialogExportHistoryDurationHours(
+    int hours,
+    int minutes,
+  ) {
+    return '$hours hours $minutes minutes';
+  }
+
+  @override
+  String shortVideoSpaceDialogExportHistoryCreatedAt(String time) {
+    return 'Created: $time';
+  }
+
+  @override
+  String shortVideoSpaceDialogExportHistoryCompletedAt(
+    String time,
+    String duration,
+  ) {
+    return 'Completed: $time · Duration: $duration';
+  }
+
+  @override
+  String shortVideoSpaceDialogExportHistoryFileSize(String size) {
+    return 'File size: $size';
+  }
+
+  @override
+  String shortVideoSpaceDialogExportHistorySettings(
+    String bitrate,
+    int framerate,
+  ) {
+    return 'Settings: $bitrate · $framerate FPS';
+  }
+
+  @override
+  String shortVideoSpaceDialogExportHistoryLoadError(String error) {
+    return 'Failed to load export history: $error';
+  }
+
+  @override
+  String get shortVideoSpaceDialogExportHistorySessionExpired =>
+      'Session expired, please login again';
+
+  @override
+  String shortVideoSpaceDialogExportHistoryDownloadLinkCopied(String format) {
+    return 'Download link copied ($format)';
+  }
+
+  @override
+  String shortVideoSpaceDialogExportHistoryDownloadFailed(String error) {
+    return 'Download failed: $error';
+  }
+
+  @override
+  String get shortVideoSpaceDialogExportHistoryTimeJustNow => 'Just now';
+
+  @override
+  String shortVideoSpaceDialogExportHistoryTimeMinutesAgo(int minutes) {
+    return '$minutes minutes ago';
+  }
+
+  @override
+  String shortVideoSpaceDialogExportHistoryTimeHoursAgo(int hours) {
+    return '$hours hours ago';
+  }
+
+  @override
+  String shortVideoSpaceDialogExportHistoryTimeDaysAgo(int days) {
+    return '$days days ago';
+  }
 
   @override
   String get projectsDialogFieldBrandName => 'Brand name';
@@ -5429,5 +5793,1578 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String qualityReviewsScopeSeedLine(String line) {
     return 'Scope seed: $line';
+  }
+
+  @override
+  String get projectEditorAssetHistoryTitle => 'Asset History Workbench';
+
+  @override
+  String get projectEditorAssetHistoryTypeFilterLabel =>
+      'Type filter (optional)';
+
+  @override
+  String get projectEditorAssetHistoryTypeFilterHelper =>
+      'Comma-separated, e.g. role,clip,props; leave empty for all';
+
+  @override
+  String get projectEditorAssetHistoryLoading => 'Loading…';
+
+  @override
+  String get projectEditorAssetHistoryQueryButton => 'Query history assets';
+
+  @override
+  String get projectEditorAssetHistoryClearFilter => 'Clear type filter';
+
+  @override
+  String get projectEditorAssetHistoryLoadingAssets =>
+      'Loading history assets…';
+
+  @override
+  String get projectEditorAssetHistoryEmptyState =>
+      'No data, click \"Query history assets\" to start.';
+
+  @override
+  String get projectEditorAssetHistoryImageDropdownLabel => 'History image';
+
+  @override
+  String get projectEditorAssetHistoryNoImages =>
+      'This asset has no history images';
+
+  @override
+  String projectEditorAssetHistoryCurrentImage(int sortIndex, String state) {
+    return 'Current image: sort=$sortIndex · state=$state';
+  }
+
+  @override
+  String get projectEditorAssetHistoryNoPreview =>
+      'Current image has no available preview (may be path placeholder or remote resource temporarily unavailable)';
+
+  @override
+  String get projectEditorAssetHistoryClose => 'Close';
+
+  @override
+  String get projectEditorAssetGenerationTitle => 'Asset Generation Workbench';
+
+  @override
+  String get projectEditorAssetGenerationDescription =>
+      'Consolidates production asset summary, batch generation, status polling, derivative cleanup, and cover URL updates into the main project asset workflow, no longer relying solely on system probes.';
+
+  @override
+  String get projectEditorAssetGenerationClose => 'Close';
+
+  @override
+  String get projectEditorScriptsBatchAddTitle => 'Batch Add Scripts';
+
+  @override
+  String get projectEditorScriptsBatchAddCountLabel => 'Count (1-20)';
+
+  @override
+  String get projectEditorScriptsBatchAddCountHelper =>
+      'Maximum 20 per batch to avoid accidental operations.';
+
+  @override
+  String get projectEditorScriptsBatchAddNamePrefixLabel => 'Name prefix';
+
+  @override
+  String get projectEditorScriptsBatchAddContentLabel =>
+      'Default script content';
+
+  @override
+  String get projectEditorScriptsBatchAddCancel => 'Cancel';
+
+  @override
+  String get projectEditorScriptsBatchAddCreate => 'Create';
+
+  @override
+  String get projectEditorScriptsBatchAddCountError =>
+      'Count must be an integer between 1-20';
+
+  @override
+  String get projectEditorScriptsBatchAddDefaultPrefix => 'New Script';
+
+  @override
+  String get projectEditorScriptsBatchAddDefaultContent =>
+      'Plot synopsis to be added.';
+
+  @override
+  String projectEditorScriptsBatchAddSuccess(int count) {
+    return 'Created $count scripts in batch';
+  }
+
+  @override
+  String get projectEditorProbeTasksZeroItems => '0 items';
+
+  @override
+  String get projectEditorProbeTasksZeroClasses => '0 classes';
+
+  @override
+  String projectEditorProbeTasksCompatGetTaskApi(int total, int count) {
+    return 'compat get-task-api (GET jobs/page): total=$total · $count items on this page';
+  }
+
+  @override
+  String get projectEditorProbeProjectsZeroItems => '0 items';
+
+  @override
+  String projectEditorProbeProjectsCompatList(String line) {
+    return 'GET …/projects (compat list): $line';
+  }
+
+  @override
+  String get projectEditorProbeScriptsZeroItems => '0 items';
+
+  @override
+  String get projectEditorProbeScriptsEmpty =>
+      '(empty: all extracting or idle)';
+
+  @override
+  String get projectEditorProbeScriptsGetFirstScript =>
+      'GET projects/…/scripts (first)';
+
+  @override
+  String get projectEditorProbeScriptsLoading => 'script…';
+
+  @override
+  String projectEditorProbeScriptsPostGetScriptApi(
+    int count,
+    String sample,
+    Object id,
+  ) {
+    return 'POST …/projects/$id/scripts/get-script-api: $count items · $sample';
+  }
+
+  @override
+  String get projectEditorAssetSummaryProductionEmpty =>
+      'Production asset data is empty';
+
+  @override
+  String projectEditorAssetSummaryProductionLine(
+    int total,
+    String typesLine,
+    String sampleLine,
+  ) {
+    return 'Production assets $total items · $typesLine · Sample: $sampleLine';
+  }
+
+  @override
+  String projectEditorAssetSummaryTypeCount(String type, int count) {
+    return '$type $count items';
+  }
+
+  @override
+  String get projectEditorAssetSummaryPollingEmpty =>
+      'No image status returned for selected assets';
+
+  @override
+  String projectEditorAssetSummaryPollingLine(
+    int count,
+    String stateLine,
+    String sampleLine,
+  ) {
+    return 'Polled $count assets · $stateLine · Sample: $sampleLine';
+  }
+
+  @override
+  String projectEditorAssetSummaryStateCount(String state, int count) {
+    return '$state $count items';
+  }
+
+  @override
+  String projectEditorAssetSummaryImageCount(int assetId, int count) {
+    return '#$assetId: $count images';
+  }
+
+  @override
+  String projectEditorAssetSummaryMaterialContext(
+    int imageCount,
+    int videoCount,
+  ) {
+    return 'Material context $imageCount image materials · $videoCount video materials';
+  }
+
+  @override
+  String get projectEditorAssetSummaryBatchEmpty =>
+      'Batch candidates are empty';
+
+  @override
+  String projectEditorAssetSummaryBatchLine(
+    int count,
+    int total,
+    String sampleLine,
+  ) {
+    return 'Batch candidates $count/$total items · Sample: $sampleLine';
+  }
+
+  @override
+  String get projectEditorAssetSummaryPromptEmpty =>
+      'No prompt status returned';
+
+  @override
+  String projectEditorAssetSummaryPromptLine(int count, String stateLine) {
+    return 'Prompt polling $count items · $stateLine';
+  }
+
+  @override
+  String get projectEditorAssetSummarySelectionNone =>
+      'No assets currently selected';
+
+  @override
+  String projectEditorAssetSummarySelectionSingle(int id, String name) {
+    return 'Currently selected #$id $name';
+  }
+
+  @override
+  String projectEditorAssetSummarySelectionMultiple(int count, String sample) {
+    return 'Currently selected $count assets: $sample';
+  }
+
+  @override
+  String get authSupabaseNotConfigured =>
+      'Not configured: run example\nflutter run --dart-define=SUPABASE_URL=... --dart-define=SUPABASE_ANON_KEY=...';
+
+  @override
+  String get authSignIn => 'Sign In';
+
+  @override
+  String get authSignUp => 'Sign Up';
+
+  @override
+  String get authSignOut => 'Sign Out';
+
+  @override
+  String authSignedInUser(String userId) {
+    return 'Signed in user: $userId';
+  }
+
+  @override
+  String get authRequestInProgress => 'Requesting…';
+
+  @override
+  String get authGetMeBearer => 'GET /api/v1/me (Bearer)';
+
+  @override
+  String authMeResponse(String response) {
+    return '/me: $response';
+  }
+
+  @override
+  String get authDevSwitchProbe =>
+      'GET+PUT /api/v1/settings/dev/switch-ai-tool';
+
+  @override
+  String authDevSwitchResponse(String response) {
+    return 'dev switch: $response';
+  }
+
+  @override
+  String get authMemoryConfigProbe =>
+      'memory-config GET+POST + clear-agent-memories';
+
+  @override
+  String authMemoryConfigResponse(String response) {
+    return 'memory-config: $response';
+  }
+
+  @override
+  String get authAboutProbe =>
+      'POST …/settings/about/check-update + download-app';
+
+  @override
+  String authAboutResponse(String response) {
+    return 'about: $response';
+  }
+
+  @override
+  String get authUsageSummary => 'GET /api/v1/usage/summary';
+
+  @override
+  String authUsageResponse(String response) {
+    return 'usage: $response';
+  }
+
+  @override
+  String get authPromptsProbe => 'GET /api/v1/prompts + GET/1 + PATCH/1';
+
+  @override
+  String authPromptsResponse(String response) {
+    return 'prompts: $response';
+  }
+
+  @override
+  String get authVisualManualProbe => 'GET+POST /api/v1/visual-manual';
+
+  @override
+  String authVisualManualResponse(String response) {
+    return 'visual-manual: $response';
+  }
+
+  @override
+  String get authDirectorManualProbe => 'POST …/project/query-director-manual';
+
+  @override
+  String authDirectorManualResponse(String response) {
+    return 'director-manual: $response';
+  }
+
+  @override
+  String get authSkillsBinaryProbe => 'GET /api/v1/skills/binary (_smoke PNG)';
+
+  @override
+  String authSkillsBinaryResponse(String response) {
+    return 'skills/binary: $response';
+  }
+
+  @override
+  String get authModelsCatalogProbe =>
+      'models + vendors + vendor-add + danger + production + agent-deploy + model-test + script-agent + assets-gen';
+
+  @override
+  String get authTextModelDefaultProbe =>
+      'GET+PATCH /api/v1/models/text-default';
+
+  @override
+  String get authModelDetailProbe =>
+      'GET /api/v1/models/detail (1:gpt-4o-mini)';
+
+  @override
+  String authModelsResponse(String response) {
+    return 'models: $response';
+  }
+
+  @override
+  String authTextDefaultResponse(String response) {
+    return 'text-default: $response';
+  }
+
+  @override
+  String authModelDetailResponse(String response) {
+    return 'model detail: $response';
+  }
+
+  @override
+  String get shortVideoSpaceDialogExportProgressTitle => 'Export Progress';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressStatusQueued => 'Queued';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressStatusProcessing =>
+      'Processing';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressStatusCompleted => 'Completed';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressStatusFailed => 'Failed';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressStatusCancelled => 'Cancelled';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressStageInitializing =>
+      'Initializing';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressStageLoadingAssets =>
+      'Loading Assets';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressStageEncoding =>
+      'Encoding Video';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressStageUploading =>
+      'Uploading File';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressStageFinalizing => 'Finalizing';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressLoadingStatus =>
+      'Fetching export status...';
+
+  @override
+  String shortVideoSpaceDialogExportProgressFetchError(String error) {
+    return 'Failed to fetch progress: $error';
+  }
+
+  @override
+  String get shortVideoSpaceDialogExportProgressSessionExpired =>
+      'Session expired, please login again';
+
+  @override
+  String shortVideoSpaceDialogExportProgressCancelFailed(String error) {
+    return 'Cancel failed: $error';
+  }
+
+  @override
+  String shortVideoSpaceDialogExportProgressTaskId(String taskId) {
+    return 'Task ID: $taskId';
+  }
+
+  @override
+  String get shortVideoSpaceDialogExportProgressCancelButton => 'Cancel Export';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressCloseButton => 'Close';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressMessageQueued =>
+      'Export task queued, waiting for processing...';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressMessageInitializing =>
+      'Initializing export task...';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressMessageLoadingAssets =>
+      'Loading video assets and audio files...';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressMessageEncoding =>
+      'Encoding video, this may take a few minutes...';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressMessageUploading =>
+      'Uploading exported video file...';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressMessageFinalizing =>
+      'Completing final processing steps...';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressMessageProcessing =>
+      'Processing export task...';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressMessageCompleted =>
+      'Export completed successfully! Video is ready for download.';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressMessageFailed =>
+      'Export failed, please retry or contact support.';
+
+  @override
+  String get shortVideoSpaceDialogExportProgressMessageCancelled =>
+      'Export has been cancelled.';
+
+  @override
+  String get shortVideoSpaceDialogConfirmDeleteVersionTitle => 'Confirm Delete';
+
+  @override
+  String shortVideoSpaceDialogConfirmDeleteVersionMessage(String versionName) {
+    return 'Are you sure you want to delete version \"$versionName\"?\n\nThis action cannot be undone.';
+  }
+
+  @override
+  String get shortVideoSpaceDialogConfirmDeleteVersionDontShow =>
+      'Don\'t show again';
+
+  @override
+  String get shortVideoSpaceDialogConfirmDeleteVersionCancel => 'Cancel';
+
+  @override
+  String get shortVideoSpaceDialogConfirmDeleteVersionConfirm => 'Delete';
+
+  @override
+  String get shortVideoSpaceDialogConfirmBatchDisableTitle =>
+      'Confirm Batch Disable';
+
+  @override
+  String shortVideoSpaceDialogConfirmBatchDisableMessage(int shotCount) {
+    return 'Are you sure you want to disable $shotCount selected shots?\n\nDisabled shots will not appear in the final video.';
+  }
+
+  @override
+  String get shortVideoSpaceDialogConfirmBatchDisableConfirm =>
+      'Confirm Disable';
+
+  @override
+  String get shortVideoSpaceDialogConfirmRestoreDraftTitle =>
+      'Confirm Restore Draft';
+
+  @override
+  String shortVideoSpaceDialogConfirmRestoreDraftMessage(String draftName) {
+    return 'Are you sure you want to restore draft \"$draftName\"?\n\nCurrent unsaved edits will be lost.';
+  }
+
+  @override
+  String get shortVideoSpaceDialogConfirmRestoreDraftConfirm => 'Restore';
+
+  @override
+  String get shortVideoSpaceDialogConfirmCancelExportTitle => 'Cancel Export';
+
+  @override
+  String get shortVideoSpaceDialogConfirmCancelExportMessage =>
+      'Are you sure you want to cancel the export? Processed content will be lost.';
+
+  @override
+  String get shortVideoSpaceDialogConfirmCancelExportContinue =>
+      'Continue Export';
+
+  @override
+  String get shortVideoSpaceDialogConfirmCancelExportConfirm =>
+      'Confirm Cancel';
+
+  @override
+  String get shortVideoSpaceDialogConfirmBatchArchiveTitle =>
+      'Confirm Batch Archive';
+
+  @override
+  String shortVideoSpaceDialogConfirmBatchArchiveMessage(int draftCount) {
+    return 'Are you sure you want to archive $draftCount publish drafts? They will be removed from the publish queue (may be recoverable depending on backend policy).';
+  }
+
+  @override
+  String get shortVideoSpaceDialogConfirmBatchArchiveConfirm =>
+      'Confirm Archive';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsTitle =>
+      'Voiceover Settings';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsProviderLabel =>
+      'TTS Provider';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsProviderOpenAI =>
+      'OpenAI TTS';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsProviderAzure => 'Azure TTS';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsProviderGoogle =>
+      'Google TTS';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsVoiceLabel => 'Voice';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsVoiceAlloy =>
+      'Alloy (Neutral)';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsVoiceEcho => 'Echo (Male)';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsVoiceFable =>
+      'Fable (British)';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsVoiceOnyx => 'Onyx (Deep)';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsVoiceNova => 'Nova (Female)';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsVoiceShimmer =>
+      'Shimmer (Soft)';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsEmotionLabel => 'Emotion';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsEmotionNeutral => 'Neutral';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsEmotionHappy => 'Happy';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsEmotionSad => 'Sad';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsEmotionAngry => 'Angry';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsSpeedLabel => 'Speed';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsSpeedRange =>
+      'Range: 0.5x (slow) - 2.0x (fast)';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsInfoMessage =>
+      'Settings will apply to newly generated voiceovers. Existing voiceovers need to be regenerated to apply new parameters.';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsCancel => 'Cancel';
+
+  @override
+  String get shortVideoSpaceDialogVoiceoverSettingsSave => 'Save';
+
+  @override
+  String get shortVideoSpacePublishQualityStageUnlabeled => 'Unlabeled stage';
+
+  @override
+  String get shortVideoSpacePublishQualityStageStorySkeleton =>
+      'Story skeleton';
+
+  @override
+  String get shortVideoSpacePublishQualityStageAdaptationStrategy =>
+      'Adaptation strategy';
+
+  @override
+  String get shortVideoSpacePublishQualityStageDirectorPlanning =>
+      'Director planning';
+
+  @override
+  String get shortVideoSpacePublishQualityStageStoryboardTable =>
+      'Storyboard table';
+
+  @override
+  String get shortVideoSpacePublishQualityStageStoryboardPanel =>
+      'Storyboard panel';
+
+  @override
+  String get shortVideoSpacePublishQualityStageVideoPrompt =>
+      'Video prompt / Final';
+
+  @override
+  String get shortVideoSpacePublishExportIssueCandidatePending =>
+      'Candidate pending confirmation';
+
+  @override
+  String get shortVideoSpacePublishExportIssueMissingSelectedMedia =>
+      'Missing final media';
+
+  @override
+  String get shortVideoSpacePublishExportIssueSelectedMediaNotVideo =>
+      'Selected media is not video';
+
+  @override
+  String get shortVideoSpacePublishExportIssueSubtitlePlaceholder =>
+      'Subtitle / voiceover text missing';
+
+  @override
+  String get shortVideoSpacePublishExportIssueSubtitleEmpty =>
+      'Subtitle is empty';
+
+  @override
+  String get shortVideoSpacePublishExportIssueVoiceoverFailed =>
+      'Voiceover generation failed';
+
+  @override
+  String get shortVideoSpacePublishExportIssueVoiceoverAudioMissing =>
+      'Voiceover audio not ready';
+
+  @override
+  String get shortVideoSpacePublishExportIssueVoiceoverNotReady =>
+      'Voiceover not ready';
+
+  @override
+  String get shortVideoSpacePublishExportIssueDurationNotExplicit =>
+      'Duration not specified (export default)';
+
+  @override
+  String get shortVideoSpacePublishExportIssueDurationNotSet =>
+      'Duration not set';
+
+  @override
+  String get shortVideoSpacePublishExportIssueDurationUnparsable =>
+      'Duration format error';
+
+  @override
+  String get shortVideoSpacePublishExportIssueCompletionUncertain =>
+      'Final status not marked as completed';
+
+  @override
+  String get shortVideoSpacePublishAssemblyLoadingHeadline =>
+      'Loading final assembly snapshot…';
+
+  @override
+  String get shortVideoSpacePublishAssemblyLoadingDetail =>
+      'Data from GET …/short-video-assembly (aggregates storyboards and final elements by script order).';
+
+  @override
+  String get shortVideoSpacePublishAssemblyUnavailableHeadline =>
+      'Final assembly snapshot unavailable.';
+
+  @override
+  String get shortVideoSpacePublishAssemblyUnavailableDetail =>
+      'Please refresh later, or confirm storyboards and timeline in production workspace.';
+
+  @override
+  String get shortVideoSpacePublishAssemblyNoScriptsHeadline =>
+      'No script / storyboard assembly data yet.';
+
+  @override
+  String shortVideoSpacePublishAssemblyHeadlineScripts(
+    int count,
+    int shots,
+    int seconds,
+    String formatted,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count scripts',
+      one: '1 script',
+    );
+    return '$_temp0 · $shots shots (export path snapshot)\nTotal duration: ${seconds}s ($formatted)';
+  }
+
+  @override
+  String get shortVideoSpacePublishAssemblyVoiceProfileNotSet =>
+      'Voice profile: Not set';
+
+  @override
+  String shortVideoSpacePublishAssemblyVoiceProfile(String profile) {
+    return 'Voice profile: $profile';
+  }
+
+  @override
+  String get shortVideoSpacePublishAssemblySubtitleDefault =>
+      'Subtitle: Default';
+
+  @override
+  String shortVideoSpacePublishAssemblySubtitle(String style) {
+    return 'Subtitle: $style';
+  }
+
+  @override
+  String get shortVideoSpacePublishAssemblyBgmNotSpecified =>
+      'BGM: Not specified';
+
+  @override
+  String shortVideoSpacePublishAssemblyBgm(String strategy) {
+    return 'BGM: $strategy';
+  }
+
+  @override
+  String shortVideoSpacePublishAssemblyEffectiveTts(String voice) {
+    return 'Effective TTS (queue/worker): $voice';
+  }
+
+  @override
+  String shortVideoSpacePublishAssemblyScriptTitle(int id) {
+    return 'Script #$id';
+  }
+
+  @override
+  String shortVideoSpacePublishAssemblyScriptTitleNamed(int id, String name) {
+    return 'Script #$id · $name';
+  }
+
+  @override
+  String shortVideoSpacePublishAssemblyScriptSummary(
+    String title,
+    int shots,
+    int withMedia,
+    int voReady,
+  ) {
+    return '$title · $shots shots · Final selected $withMedia · Voiceover ready $voReady';
+  }
+
+  @override
+  String get shortVideoSpacePublishAssemblyShotPreviewYes => 'Preview✓';
+
+  @override
+  String get shortVideoSpacePublishAssemblyShotPreviewNo => 'Preview×';
+
+  @override
+  String get shortVideoSpacePublishAssemblyShotDurationUnknown => 'Duration?';
+
+  @override
+  String get shortVideoSpacePublishAssemblyShotSubtitleYes => 'Subtitle✓';
+
+  @override
+  String get shortVideoSpacePublishAssemblyShotSubtitleNo => 'Subtitle×';
+
+  @override
+  String get shortVideoSpacePublishAssemblyShotVoiceoverYes => 'Voiceover✓';
+
+  @override
+  String get shortVideoSpacePublishAssemblyShotVoiceoverNo => 'Voiceover×';
+
+  @override
+  String get shortVideoSpacePublishAssemblyShotBgmDefault => 'Default';
+
+  @override
+  String shortVideoSpacePublishAssemblyShotDetail(
+    String order,
+    String preview,
+    String duration,
+    String subtitle,
+    String voiceover,
+    String bgm,
+  ) {
+    return 'Shot[$order] · $preview · $duration · $subtitle · $voiceover · BGM $bgm';
+  }
+
+  @override
+  String shortVideoSpacePublishAssemblyMoreShots(int count) {
+    return '…$count more shots, view in production workspace timeline';
+  }
+
+  @override
+  String shortVideoSpacePublishAssemblyQualityProjectBadCase(int count) {
+    return 'Project-level bad cases pending review: $count (same source as production overview)';
+  }
+
+  @override
+  String shortVideoSpacePublishAssemblyQualityAssemblyReviews(
+    int total,
+    int badCase,
+    int shots,
+  ) {
+    return 'Reviews on current assembly storyboards: $total · Bad cases $badCase · Affected storyboards $shots';
+  }
+
+  @override
+  String shortVideoSpacePublishAssemblyQualityLateStageBadCase(int count) {
+    return 'Late-stage bad cases (storyboard panel/video prompt): $count';
+  }
+
+  @override
+  String shortVideoSpacePublishAssemblyQualityByStage(String stages) {
+    return 'By stage: $stages';
+  }
+
+  @override
+  String shortVideoSpacePublishAssemblyQualityStageBadCase(
+    String stage,
+    int count,
+  ) {
+    return '$stage · Bad cases $count';
+  }
+
+  @override
+  String get shortVideoSpacePublishAssemblyQualityTaskCenterHint =>
+      'In task center, you can filter quality review list by project; storyboard-level targets match assembly.';
+
+  @override
+  String shortVideoSpacePublishAssemblyMultiTrackEstimate(
+    int subtitle,
+    int voiceover,
+    int bgm,
+    int total,
+  ) {
+    return 'Track usage estimate: Video 1 + Subtitle $subtitle + Voiceover $voiceover + BGM $bgm = $total tracks.';
+  }
+
+  @override
+  String shortVideoSpacePublishAssemblyMaterialReady(
+    int video,
+    int subtitle,
+    int voiceover,
+    int totalShots,
+  ) {
+    return 'Materials ready: Video shots $video/$totalShots, Subtitle shots $subtitle/$totalShots, Voiceover shots $voiceover/$totalShots.';
+  }
+
+  @override
+  String shortVideoSpacePublishAssemblyDurationEstimate(
+    int known,
+    int total,
+    String minutes,
+  ) {
+    return 'Duration estimate: Identified $known/$total shots, total duration ~$minutes minutes.';
+  }
+
+  @override
+  String get shortVideoSpacePublishAssemblyExportDecisionProfessional =>
+      'Export decision: Exceeds limited multi-track boundary (>4 tracks or complex duration), recommend professional platform (Requirement 8.2).';
+
+  @override
+  String get shortVideoSpacePublishAssemblyExportDecisionLimited =>
+      'Export decision: Maintain limited multi-track (<=4 tracks) path, can continue export in current pipeline.';
+
+  @override
+  String get shortVideoSpacePublishAssemblyBoundaryNote =>
+      'Boundary note: Space only covers \"video + single subtitle track + voiceover + BGM\" limited mixing, not a replacement for professional NLE.';
+
+  @override
+  String get shortVideoSpacePublishAssemblyDetail =>
+      'Read-only editing desk: Shows shot order, duration, subtitle, voiceover, BGM and preview readiness summary; export blocking conclusions see \"Export Pre-check\" below.';
+
+  @override
+  String get shortVideoSpacePublishExportCheckLoadingHeadline =>
+      'Loading export pre-check…';
+
+  @override
+  String get shortVideoSpacePublishExportCheckLoadingDetail =>
+      'Aggregates storyboard blocking and warnings; quality gate observation fields are placeholder display only.';
+
+  @override
+  String get shortVideoSpacePublishExportCheckUnavailableHeadline =>
+      'Export pre-check unavailable.';
+
+  @override
+  String get shortVideoSpacePublishExportCheckUnavailableDetail =>
+      'Please refresh page later, or confirm storyboards in production workspace.';
+
+  @override
+  String get shortVideoSpacePublishExportCheckReadyHeadline =>
+      'Server found no blocking issues (still need to confirm final in production).';
+
+  @override
+  String get shortVideoSpacePublishExportCheckBlockingHeadline =>
+      'Blocking items exist: Recommend completing fields in production workspace before export / final.';
+
+  @override
+  String get shortVideoSpacePublishExportCheckMetricStoryboards =>
+      'Storyboards';
+
+  @override
+  String get shortVideoSpacePublishExportCheckMetricBlocking => 'Blocking';
+
+  @override
+  String get shortVideoSpacePublishExportCheckMetricWarning => 'Warning';
+
+  @override
+  String get shortVideoSpacePublishExportCheckMetricExportable => 'Exportable';
+
+  @override
+  String get shortVideoSpacePublishExportCheckMetricYes => 'Yes';
+
+  @override
+  String get shortVideoSpacePublishExportCheckMetricNo => 'No';
+
+  @override
+  String get shortVideoSpacePublishExportCheckQualityGateOff =>
+      'Quality gate: Off (no quality check).';
+
+  @override
+  String get shortVideoSpacePublishExportCheckQualityGateWarnNoBadCase =>
+      'Quality gate: Warn mode - No pending review bad cases (export allowed).';
+
+  @override
+  String shortVideoSpacePublishExportCheckQualityGateWarnWithBadCase(
+    int count,
+  ) {
+    return 'Quality gate: Warn mode - $count pending review bad cases (export allowed but recommend fixing).';
+  }
+
+  @override
+  String shortVideoSpacePublishExportCheckQualityGateBlockEnforcedWithBadCase(
+    int count,
+  ) {
+    return 'Quality gate: Block mode - $count pending review bad cases (blocks export, must fix first).';
+  }
+
+  @override
+  String
+  shortVideoSpacePublishExportCheckQualityGateBlockNotEnforcedWithBadCase(
+    int count,
+  ) {
+    return 'Quality gate: Block mode - $count pending review bad cases (not enforced yet).';
+  }
+
+  @override
+  String get shortVideoSpacePublishExportCheckQualityGateBlockNoBadCase =>
+      'Quality gate: Block mode - No pending review bad cases (export allowed).';
+
+  @override
+  String shortVideoSpacePublishExportCheckQualityGateUnknown(String strategy) {
+    return 'Quality gate: Unknown strategy \"$strategy\".';
+  }
+
+  @override
+  String shortVideoSpacePublishExportCheckBlockingIssue(
+    int scriptId,
+    int sbId,
+    String sbIndex,
+    String label,
+    String detail,
+  ) {
+    return 'Script #$scriptId · Storyboard #$sbId$sbIndex · $label · $detail';
+  }
+
+  @override
+  String get shortVideoSpacePublishExportCheckDetailReady =>
+      'Blocking count is 0, indicating no hard blocking on server aggregation path (still subject to actual export pipeline).';
+
+  @override
+  String get shortVideoSpacePublishExportCheckDetailBlocking =>
+      'Below lists some blocking items; for complete list, check each shot in production workspace.';
+
+  @override
+  String get shortVideoSpacePublishCandidateLoadingHeadline =>
+      'Loading project assets…';
+
+  @override
+  String get shortVideoSpacePublishCandidateLoadingDetail =>
+      'Used to count candidate workflow: pending / linked / ignored (consistent with PATCH asset).';
+
+  @override
+  String get shortVideoSpacePublishCandidateUnavailableHeadline =>
+      'Candidate asset summary unavailable.';
+
+  @override
+  String get shortVideoSpacePublishCandidateUnavailableDetail =>
+      'Please refresh page later, or go to project area to view and edit assets.';
+
+  @override
+  String get shortVideoSpacePublishCandidateNoTrackedHeadline =>
+      'No pending / linked / ignored marked yet; can PATCH candidate_status on shot candidates and other assets in project area.';
+
+  @override
+  String get shortVideoSpacePublishCandidateTrackedHeadline =>
+      'Candidate status aggregated by project (counts below include unmarked):';
+
+  @override
+  String shortVideoSpacePublishCandidateDetail(int total) {
+    return 'Project has $total assets; counts aggregated by server in one go (no pagination). Can update via PATCH candidate_status in project area.';
+  }
+
+  @override
+  String get shortVideoSpacePublishPanelLoadingHeadline =>
+      'Loading export check and publish domain…';
+
+  @override
+  String get shortVideoSpacePublishPanelLoadingDetail =>
+      'Backend path: `/api/v1/projects/:id/publish/*` (profiles / drafts / jobs).';
+
+  @override
+  String get shortVideoSpacePublishPanelUnavailableHeadline =>
+      'Publish domain interface unavailable (database migration may not be executed yet).';
+
+  @override
+  String get shortVideoSpacePublishPanelUnavailableExportGateMissing =>
+      'Export check data missing, publish panel shows placeholder only.';
+
+  @override
+  String get shortVideoSpacePublishPanelUnavailableExportGateNoBlocking =>
+      'Export check: Currently no blocking items.';
+
+  @override
+  String shortVideoSpacePublishPanelUnavailableExportGateBlocking(int count) {
+    return 'Export check: Still $count blocking items.';
+  }
+
+  @override
+  String get shortVideoSpacePublishPanelUnavailableDetail =>
+      'Confirm Supabase has applied `app_publish_*` migrations then retry; Rust worker will digest publish job queue in background.';
+
+  @override
+  String get shortVideoSpacePublishPanelExportGateUnavailable =>
+      'Export check data unavailable; can still try creating publish draft and validate.';
+
+  @override
+  String get shortVideoSpacePublishPanelExportGateReady =>
+      'Export check: No blocking items (**E13**: Can enter publish preparation from final pipeline).';
+
+  @override
+  String shortVideoSpacePublishPanelExportGateBlocking(int count) {
+    return 'Export check: Still $count blocking items; can complete fields first then submit job.';
+  }
+
+  @override
+  String shortVideoSpacePublishPanelHeadline(int drafts, int jobs) {
+    return 'Connected to publish API: $drafts drafts · $jobs jobs.';
+  }
+
+  @override
+  String shortVideoSpacePublishPanelCurrentDraft(String title) {
+    return 'Current draft: $title';
+  }
+
+  @override
+  String get shortVideoSpacePublishPanelCurrentDraftUntitled =>
+      'Current draft: (Untitled)';
+
+  @override
+  String get shortVideoSpacePublishPanelSelectDraftWarning =>
+      '⚠️ Please explicitly select draft (no longer auto-use first one)';
+
+  @override
+  String get shortVideoSpacePublishPanelPrepareCheckOk =>
+      'Validation: ✓ Current draft meets placeholder rules (still needs real final reference to actually go live).';
+
+  @override
+  String get shortVideoSpacePublishPanelPrepareCheckMultipleDrafts =>
+      'When multiple drafts exist, please select one in \"Current Operation Draft\" first, then show prepare-check.';
+
+  @override
+  String get shortVideoSpacePublishPanelPrepareCheckSelectFirst =>
+      'After selecting draft, will show prepare-check validation result.';
+
+  @override
+  String get shortVideoSpacePublishPanelPrepareCheckNoDraft =>
+      'No draft yet or prepare-check not completed.';
+
+  @override
+  String get shortVideoSpacePublishPanelDraftNoTitle => '(Untitled)';
+
+  @override
+  String get shortVideoSpacePublishPanelDraftMissingVideo =>
+      ' · Missing video reference';
+
+  @override
+  String shortVideoSpacePublishPanelDraftScheduled(String time) {
+    return ' · Scheduled $time';
+  }
+
+  @override
+  String shortVideoSpacePublishPanelJobShortId(String id) {
+    return '$id…';
+  }
+
+  @override
+  String shortVideoSpacePublishPanelJobError(String error) {
+    return ' · $error';
+  }
+
+  @override
+  String shortVideoSpacePublishPanelOverviewSucceeded(int count) {
+    return 'Succeeded jobs: $count';
+  }
+
+  @override
+  String shortVideoSpacePublishPanelOverviewFailed(int count) {
+    return 'Failed/Partial failed: $count';
+  }
+
+  @override
+  String shortVideoSpacePublishPanelOverviewAwaiting(int count) {
+    return 'Awaiting confirmation: $count';
+  }
+
+  @override
+  String shortVideoSpacePublishPanelOverviewScheduled(
+    int scheduled,
+    int total,
+  ) {
+    return 'Scheduled drafts: $scheduled/$total';
+  }
+
+  @override
+  String shortVideoSpacePublishPanelOverviewDeliveryModes(String modes) {
+    return 'Delivery modes: $modes';
+  }
+
+  @override
+  String shortVideoSpacePublishPanelOverviewPerformanceAlerts(int count) {
+    return 'Low performance alerts: $count (recommend troubleshooting in task center and rewriting copy)';
+  }
+
+  @override
+  String shortVideoSpacePublishPanelOverviewPerformanceAlert(
+    String platform,
+    int views,
+    String rate,
+  ) {
+    return '$platform · Views $views · Completion $rate%';
+  }
+
+  @override
+  String shortVideoSpacePublishPanelOverviewAudit(
+    String platform,
+    String status,
+    String mode,
+  ) {
+    return 'Audit: $platform · $status · mode=$mode';
+  }
+
+  @override
+  String shortVideoSpacePublishPanelOverviewTargetAutomation(String modes) {
+    return 'Target automation: $modes';
+  }
+
+  @override
+  String get shortVideoSpacePublishPanelDetail =>
+      'Semi-auto jobs need \"Confirm\" when in `awaiting_confirmation`; worker skeleton will write `publish_attempts` placeholder success records.';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyExportCompleted =>
+      'Export completed.';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyExportNotCompleted =>
+      'Export not completed or cancelled.';
+
+  @override
+  String shortVideoSpaceProductionAssemblyExportStartFailed(String error) {
+    return 'Export start failed: $error';
+  }
+
+  @override
+  String get shortVideoSpaceProductionAssemblyReplaceVideoTitle =>
+      'Replace current video version';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyVideoUrlLabel => 'Video URL';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyVideoUrlHint => 'https://...';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyCancel => 'Cancel';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyWriteBackVersion =>
+      'Write back current version';
+
+  @override
+  String shortVideoSpaceProductionAssemblyShotDisabled(int storyboardId) {
+    return 'Shot #$storyboardId paused (cleared current video).';
+  }
+
+  @override
+  String shortVideoSpaceProductionAssemblyDisableFailed(String error) {
+    return 'Pause failed: $error';
+  }
+
+  @override
+  String get shortVideoSpaceProductionAssemblyNoVideoUrl =>
+      'No available video URL, please enter replacement address first.';
+
+  @override
+  String shortVideoSpaceProductionAssemblyShotWriteBack(int storyboardId) {
+    return 'Shot #$storyboardId wrote back current video version.';
+  }
+
+  @override
+  String shortVideoSpaceProductionAssemblyWriteBackFailed(String error) {
+    return 'Write back failed: $error';
+  }
+
+  @override
+  String get shortVideoSpaceProductionAssemblyReorderPersisted =>
+      'Persisted shot reorder (wrote back timeline and shot numbers by script).';
+
+  @override
+  String shortVideoSpaceProductionAssemblyReorderFailed(String error) {
+    return 'Reorder persistence failed: $error';
+  }
+
+  @override
+  String shortVideoSpaceProductionAssemblyShotAligned(
+    int storyboardId,
+    int duration,
+  ) {
+    return 'Shot #$storyboardId aligned to ${duration}s.';
+  }
+
+  @override
+  String shortVideoSpaceProductionAssemblyAlignFailed(String error) {
+    return 'Duration alignment failed: $error';
+  }
+
+  @override
+  String get shortVideoSpaceProductionAssemblySubtitleExistsDurationMissing =>
+      'Subtitle exists, but duration not explicit (suggest aligning duration first).';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyDurationSetSubtitleEmpty =>
+      'Duration is set, but subtitle is empty (possible subtitle track gap).';
+
+  @override
+  String get shortVideoSpaceProductionAssemblySubtitleExistsDurationAbnormal =>
+      'Subtitle exists, but duration is abnormal (<=0).';
+
+  @override
+  String get shortVideoSpaceProductionAssemblySubtitleDurationNoMismatch =>
+      'No obvious subtitle-duration mismatch.';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyBasicOpsTitle =>
+      'Basic shot operations';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyBasicOpsDescription =>
+      'Supports basic reordering (this panel view), enable/disable, and replace current video version.';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyBasicOpsNote =>
+      'Enable/disable/replace writes back directly to J media slot; reorder is for this troubleshooting view only.';
+
+  @override
+  String shortVideoSpaceProductionAssemblyTotalDuration(
+    int seconds,
+    String formatted,
+  ) {
+    return 'Total finished duration: ${seconds}s ($formatted)';
+  }
+
+  @override
+  String get shortVideoSpaceProductionAssemblySaveReorder => 'Save reorder';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyUndoToOpen => 'Undo to open time';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyVoiceoverTasks =>
+      'Voiceover tasks';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyClose => 'Close';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyNoShotsFiltered =>
+      'No shots under current filter conditions, try clearing search or relaxing criteria.';
+
+  @override
+  String shortVideoSpaceProductionAssemblyScriptShotOrder(
+    int scriptId,
+    int storyboardId,
+    int order,
+  ) {
+    return 'Script #$scriptId · Shot #$storyboardId · Order $order';
+  }
+
+  @override
+  String get shortVideoSpaceProductionAssemblyStatusPaused => 'Status: Paused';
+
+  @override
+  String shortVideoSpaceProductionAssemblyStatusEnabled(String kind) {
+    return 'Status: Enabled ($kind)';
+  }
+
+  @override
+  String get shortVideoSpaceProductionAssemblyDurationLabel => 'Duration:';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyDurationNotSet => 'Not set';
+
+  @override
+  String get shortVideoSpaceProductionAssemblySubtitleLabel => 'Subtitle:';
+
+  @override
+  String get shortVideoSpaceProductionAssemblySubtitleEmpty => 'Empty';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyVoiceoverScriptReady =>
+      'Voiceover script: ✓ Ready';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyVoiceoverScriptNotReady =>
+      'Voiceover script: ✗ Not ready';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyVoiceoverAssetReady =>
+      'Voiceover asset: ✓ Ready';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyVoiceoverAssetNotReady =>
+      'Voiceover asset: ✗ Not ready';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyVoiceoverStatusLabel =>
+      'Voiceover status:';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyVoiceoverAudioLabel =>
+      'Voiceover audio:';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyVoiceoverErrorLabel =>
+      'Voiceover error:';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyMismatchCheckLabel =>
+      'Mismatch check:';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyMoveUp => 'Move up';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyMoveDown => 'Move down';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyEnable => 'Enable';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyPause => 'Pause';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyAlignDuration => 'Align duration';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyReplaceVersion =>
+      'Replace current version';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyGenerateVoiceover =>
+      'Generate voiceover';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyPreviewVoiceover =>
+      'Preview voiceover';
+
+  @override
+  String get shortVideoSpaceProductionAssemblySingleShotDurationTitle =>
+      'Single shot duration alignment';
+
+  @override
+  String get shortVideoSpaceProductionAssemblySingleShotDurationLabel =>
+      'Duration (seconds)';
+
+  @override
+  String get shortVideoSpaceProductionAssemblySingleShotDurationHint =>
+      'Enter 1~300';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyAlignAndWriteBack =>
+      'Align and write back';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyAssemblyStyleTitle =>
+      'Assembly-level style adjustment';
+
+  @override
+  String get shortVideoSpaceProductionAssemblySubtitleStyleLabel =>
+      'Subtitle style subtitle_style';
+
+  @override
+  String get shortVideoSpaceProductionAssemblySubtitleStyleHint =>
+      'e.g. cinematic_cn_v2 (leave empty to fall back to default)';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyBgmStrategyLabel =>
+      'BGM strategy bgm_strategy';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyBgmStrategyHint =>
+      'e.g. pulse_light (leave empty to fall back to default)';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyStyleNote =>
+      'After saving, will write back D7 default configuration and refresh effective values in assembly snapshot.';
+
+  @override
+  String get shortVideoSpaceProductionAssemblySaveAndRefresh =>
+      'Save and refresh';
+
+  @override
+  String shortVideoSpaceProductionAssemblyStyleUpdated(
+    String subtitle,
+    String bgm,
+  ) {
+    return 'Updated assembly-level defaults: subtitle $subtitle · BGM $bgm';
+  }
+
+  @override
+  String get shortVideoSpaceProductionAssemblyStyleDefault => 'default';
+
+  @override
+  String shortVideoSpaceProductionAssemblyStyleWriteBackFailed(String error) {
+    return 'Assembly style write back failed: $error';
+  }
+
+  @override
+  String get shortVideoSpaceProductionAssemblyVoiceoverTaskCenterTitle =>
+      'Voiceover task center';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyAllStatus => 'All status';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyRefresh => 'Refresh';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyGroupByShot => 'Group by shot';
+
+  @override
+  String shortVideoSpaceProductionAssemblyBatchRetryFailed(int count) {
+    return 'Batch retry failed ($count)';
+  }
+
+  @override
+  String get shortVideoSpaceProductionAssemblyFilterTaskIdScriptShot =>
+      'Filter: Task ID / Script # / Shot #';
+
+  @override
+  String shortVideoSpaceProductionAssemblyTaskSummary(
+    int total,
+    int queued,
+    int running,
+    int succeeded,
+    int failed,
+    int cancelled,
+    int filtered,
+    int visible,
+  ) {
+    return 'Total $total · queued $queued · running $running · succeeded $succeeded · failed $failed · cancelled $cancelled · Showing $filtered/$visible';
+  }
+
+  @override
+  String get shortVideoSpaceProductionAssemblyNoVoiceoverTasks =>
+      'No voiceover tasks yet';
+
+  @override
+  String shortVideoSpaceProductionAssemblyTaskEntry(
+    String prefix,
+    String taskId,
+    String status,
+  ) {
+    return '$prefix $taskId · Status $status';
+  }
+
+  @override
+  String get shortVideoSpaceProductionAssemblyLatestTask => 'Latest task';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyTask => 'Task';
+
+  @override
+  String shortVideoSpaceProductionAssemblyTaskSubtitle(
+    String scriptId,
+    String shotId,
+    String audio,
+    String error,
+  ) {
+    return 'Script #$scriptId · Shot #$shotId$audio$error';
+  }
+
+  @override
+  String get shortVideoSpaceProductionAssemblyTaskSubtitleAudioReady =>
+      ' · Audio ready';
+
+  @override
+  String shortVideoSpaceProductionAssemblyTaskSubtitleError(String error) {
+    return ' · Error: $error';
+  }
+
+  @override
+  String get shortVideoSpaceProductionAssemblyPreviewAudio => 'Preview audio';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyCopyAudioLink =>
+      'Copy audio link';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyAudioLinkCopied =>
+      'Audio link copied';
+
+  @override
+  String get shortVideoSpaceProductionAssemblyCancelTask => 'Cancel';
+
+  @override
+  String shortVideoSpaceProductionAssemblyTaskCancelled(String taskId) {
+    return 'Cancelled voiceover task $taskId';
+  }
+
+  @override
+  String shortVideoSpaceProductionAssemblyCancelFailed(String error) {
+    return 'Cancel failed: $error';
+  }
+
+  @override
+  String get shortVideoSpaceProductionAssemblyRetryTask => 'Retry';
+
+  @override
+  String shortVideoSpaceProductionAssemblyTaskRetried(String taskId) {
+    return 'Retried, task $taskId queued';
+  }
+
+  @override
+  String shortVideoSpaceProductionAssemblyRetryFailed(String error) {
+    return 'Retry failed: $error';
+  }
+
+  @override
+  String shortVideoSpaceProductionAssemblyBatchRetryCompleted(
+    int succeeded,
+    int failed,
+  ) {
+    return 'Batch retry completed: succeeded $succeeded, failed $failed';
+  }
+
+  @override
+  String shortVideoSpaceProductionAssemblyLoadFailed(String error) {
+    return 'Load failed: $error';
   }
 }
