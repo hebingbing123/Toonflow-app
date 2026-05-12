@@ -18,7 +18,7 @@ Future<void> openProjectScriptsWorkbenchDialog({
   required List<ScriptBrief> scriptList,
   required List<ProjectStats?> statsRef,
 }) async {
-  final session = ProjectScriptsWorkbenchSession(scriptList: scriptList);
+  final session = ProjectScriptsWorkbenchSession(l10n: l10n, scriptList: scriptList);
   final controller = ProjectScriptsWorkbenchController(
     ctx: ctx,
     l10n: l10n,

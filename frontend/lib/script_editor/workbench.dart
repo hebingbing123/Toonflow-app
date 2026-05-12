@@ -38,6 +38,7 @@ class _ScriptWorkbenchPanelState extends State<_ScriptWorkbenchPanel> {
   }
 
   Future<void> _refreshContext() async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _loadingContext = true;
       _contextLine = null;
@@ -55,16 +56,26 @@ class _ScriptWorkbenchPanelState extends State<_ScriptWorkbenchPanel> {
       setState(() {
         _scriptContext = current;
         _contextLine = current == null
-            ? '当前剧本暂未出现在 get-script-api 结果里。'
-            : '已加载脚本上下文：素材 ${current.relatedAssets.length} 项';
+            ? l10n.projectEditorScriptsSingleWorkbenchContextNotInApi
+            : l10n.projectEditorScriptsSingleWorkbenchContextLoaded(
+                current.relatedAssets.length,
+              );
       });
       widget.onExtractStateSynced(current?.extractState);
     } on RustApiException catch (e) {
       if (!mounted) return;
-      setState(() => _contextLine = '脚本上下文读取失败：$e');
+      setState(
+        () => _contextLine = l10n.projectEditorScriptsSingleWorkbenchContextReadFailed(
+          e.toString(),
+        ),
+      );
     } catch (e) {
       if (!mounted) return;
-      setState(() => _contextLine = '脚本上下文读取失败：$e');
+      setState(
+        () => _contextLine = l10n.projectEditorScriptsSingleWorkbenchContextReadFailed(
+          e.toString(),
+        ),
+      );
     } finally {
       if (mounted) {
         setState(() => _loadingContext = false);
@@ -94,21 +105,27 @@ class _ScriptWorkbenchPanelState extends State<_ScriptWorkbenchPanel> {
   }
 
   Future<void> _exportCurrentScript() async {
+    final l10n = AppLocalizations.of(context)!;
     final zip = await exportScriptsZip(widget.token, [widget.scriptNumericId]);
     final diagnosis = diagnoseScriptWorkbench(
+      l10n,
       scriptContext: _scriptContext,
       extractStateRow: _extractStateRow,
     );
     if (!mounted) return;
     setState(
       () => _exportLine = buildScriptWorkbenchFollowUp(
-        actionSummary: '导出完成：1 个剧本，ZIP ${formatBinarySize(zip.length)}。',
+        l10n,
+        actionSummary: l10n.projectEditorScriptsSingleWorkbenchFollowUpExportDone(
+          formatBinarySize(zip.length),
+        ),
         diagnosis: diagnosis,
       ),
     );
   }
 
   Future<void> _pollExtractState() async {
+    final l10n = AppLocalizations.of(context)!;
     final rows = await pollScriptExtractState(widget.token, [
       widget.scriptNumericId,
     ]);
@@ -118,14 +135,22 @@ class _ScriptWorkbenchPanelState extends State<_ScriptWorkbenchPanel> {
     );
     if (!mounted) return;
     final diagnosis = diagnoseScriptWorkbench(
+      l10n,
       scriptContext: _scriptContext,
       extractStateRow: current,
+    );
+    final stateLine = describeScriptExtractState(
+      l10n,
+      extractState: current?.extractState,
+      errorReason: current?.errorReason,
     );
     setState(() {
       _extractStateRow = current;
       _extractStateLine = buildScriptWorkbenchFollowUp(
-        actionSummary:
-            '已轮询当前剧本提取状态：${describeScriptExtractState(extractState: current?.extractState, errorReason: current?.errorReason)}',
+        l10n,
+        actionSummary: l10n.projectEditorScriptsSingleWorkbenchFollowUpPollState(
+          stateLine,
+        ),
         diagnosis: diagnosis,
       );
     });
@@ -139,6 +164,7 @@ class _ScriptWorkbenchPanelState extends State<_ScriptWorkbenchPanel> {
   }
 
   Future<void> _startExtractAssets() async {
+    final l10n = AppLocalizations.of(context)!;
     final accepted = await startScriptAssetExtract(
       widget.token,
       projectUuid: widget.projectId,
@@ -147,15 +173,22 @@ class _ScriptWorkbenchPanelState extends State<_ScriptWorkbenchPanel> {
     await _refreshWorkbench();
     if (!mounted) return;
     final diagnosis = diagnoseScriptWorkbench(
+      l10n,
       scriptContext: _scriptContext,
       extractStateRow: _extractStateRow,
     );
     setState(() {
       _extractAssetsLine = buildScriptWorkbenchFollowUp(
-        actionSummary: '素材抽取已提交：${accepted.status} · ${accepted.message}',
+        l10n,
+        actionSummary:
+            l10n.projectEditorScriptsSingleWorkbenchFollowUpExtractSubmitted(
+              accepted.status,
+              accepted.message,
+            ),
         diagnosis: diagnosis,
       );
       _extractStateLine = describeScriptExtractState(
+        l10n,
         extractState:
             _extractStateRow?.extractState ?? _scriptContext?.extractState,
         errorReason:
@@ -165,19 +198,23 @@ class _ScriptWorkbenchPanelState extends State<_ScriptWorkbenchPanel> {
   }
 
   Future<void> _openEditImageWorkbench() async {
+    final l10n = AppLocalizations.of(context)!;
     await widget.onOpenEditImageWorkbench();
     if (!mounted) return;
     await _refreshWorkbench();
     if (!mounted) return;
     final diagnosis = diagnoseScriptWorkbench(
+      l10n,
       scriptContext: _scriptContext,
       extractStateRow: _extractStateRow,
     );
     setState(() {
       _contextLine = _scriptContext == null
-          ? '编辑图片工作台已关闭；当前剧本仍未出现在 get-script-api 结果里。'
+          ? l10n.projectEditorScriptsSingleWorkbenchEditClosedStillMissing
           : buildScriptWorkbenchFollowUp(
-              actionSummary: '编辑图片工作台已关闭，已同步脚本上下文与提取状态。',
+              l10n,
+              actionSummary:
+                  l10n.projectEditorScriptsSingleWorkbenchFollowUpEditClosedSynced,
               diagnosis: diagnosis,
             );
     });
@@ -185,9 +222,11 @@ class _ScriptWorkbenchPanelState extends State<_ScriptWorkbenchPanel> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final relatedAssets = _scriptContext?.relatedAssets ?? const [];
     final errorReason = (_scriptContext?.errorReason ?? '').trim();
     final diagnosis = diagnoseScriptWorkbench(
+      l10n,
       scriptContext: _scriptContext,
       extractStateRow: _extractStateRow,
     );
@@ -199,36 +238,41 @@ class _ScriptWorkbenchPanelState extends State<_ScriptWorkbenchPanel> {
             ? null
             : _refreshWorkbench;
         recommendedActionLabel = _loadingContext
-            ? '同步中…'
-            : describeScriptWorkbenchRecommendedAction(
+            ? l10n.projectEditorScriptsSingleWorkbenchSyncBusy
+            : scriptWorkbenchRecommendedActionLabel(
+                l10n,
                 diagnosis.recommendedAction,
               );
       case ScriptWorkbenchRecommendedAction.pollExtractState:
         recommendedAction = _runningAction
             ? null
             : () => _runAction(_pollExtractState);
-        recommendedActionLabel = describeScriptWorkbenchRecommendedAction(
+        recommendedActionLabel = scriptWorkbenchRecommendedActionLabel(
+          l10n,
           diagnosis.recommendedAction,
         );
       case ScriptWorkbenchRecommendedAction.startExtractAssets:
         recommendedAction = _runningAction
             ? null
             : () => _runAction(_startExtractAssets);
-        recommendedActionLabel = describeScriptWorkbenchRecommendedAction(
+        recommendedActionLabel = scriptWorkbenchRecommendedActionLabel(
+          l10n,
           diagnosis.recommendedAction,
         );
       case ScriptWorkbenchRecommendedAction.openEditImageWorkbench:
         recommendedAction = _runningAction
             ? null
             : () => _runAction(_openEditImageWorkbench);
-        recommendedActionLabel = describeScriptWorkbenchRecommendedAction(
+        recommendedActionLabel = scriptWorkbenchRecommendedActionLabel(
+          l10n,
           diagnosis.recommendedAction,
         );
       case ScriptWorkbenchRecommendedAction.exportScriptZip:
         recommendedAction = _runningAction
             ? null
             : () => _runAction(_exportCurrentScript);
-        recommendedActionLabel = describeScriptWorkbenchRecommendedAction(
+        recommendedActionLabel = scriptWorkbenchRecommendedActionLabel(
+          l10n,
           diagnosis.recommendedAction,
         );
     }

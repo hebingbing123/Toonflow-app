@@ -26,6 +26,7 @@ Widget buildProjectScriptsSection({
       .map((script) => script.numericId)
       .toList(growable: false);
   final overviewDiagnosis = diagnoseScriptBatchWorkbench(
+    l10n,
     selectedIds: allScriptIds,
     scripts: scriptList,
     previewRows: const [],
@@ -40,6 +41,7 @@ Widget buildProjectScriptsSection({
       final zip = await exportScriptsZip(token, allScriptIds);
       if (!ctx.mounted) return;
       final nextDiagnosis = diagnoseScriptBatchWorkbench(
+        l10n,
         selectedIds: allScriptIds,
         scripts: scriptList,
         previewRows: const [],
@@ -95,6 +97,7 @@ Widget buildProjectScriptsSection({
                 .join(' · ');
       if (!ctx.mounted) return;
       final nextDiagnosis = diagnoseScriptBatchWorkbench(
+        l10n,
         selectedIds: allScriptIds,
         scripts: scriptList,
         previewRows: const [],
@@ -149,6 +152,7 @@ Widget buildProjectScriptsSection({
         ..addAll(synced);
       if (!ctx.mounted) return;
       final nextDiagnosis = diagnoseScriptBatchWorkbench(
+        l10n,
         selectedIds: allScriptIds,
         scripts: scriptList,
         previewRows: const [],
@@ -202,6 +206,7 @@ Widget buildProjectScriptsSection({
         statsRef[0] = await fetchProjectStatsByProjectId(token, project.id);
       } catch (_) {}
       final nextDiagnosis = diagnoseScriptBatchWorkbench(
+        l10n,
         selectedIds: scriptList.map((item) => item.numericId),
         scripts: scriptList,
         previewRows: const [],

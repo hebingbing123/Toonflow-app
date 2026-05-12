@@ -11318,6 +11318,263 @@ abstract class AppLocalizations {
   /// **'Export all scripts'**
   String get projectEditorScriptsWorkbenchOverviewExportAllScripts;
 
+  /// No description provided for @projectEditorScriptsSessionInfoNoScripts.
+  ///
+  /// In en, this message translates to:
+  /// **'This project has no scripts yet.'**
+  String get projectEditorScriptsSessionInfoNoScripts;
+
+  /// No description provided for @projectEditorScriptsSessionInfoLoadedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} scripts loaded; you can filter and run batch actions.'**
+  String projectEditorScriptsSessionInfoLoadedCount(int count);
+
+  /// No description provided for @projectEditorScriptsSessionDefaultAddBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Plot outline to be filled.'**
+  String get projectEditorScriptsSessionDefaultAddBody;
+
+  /// No description provided for @projectEditorScriptsDiagnosisBatchEmptySummary.
+  ///
+  /// In en, this message translates to:
+  /// **'No scripts selected for processing.'**
+  String get projectEditorScriptsDiagnosisBatchEmptySummary;
+
+  /// No description provided for @projectEditorScriptsDiagnosisBatchEmptyDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Read script context or enter target script ids, then run batch export, polling, or asset extract.'**
+  String get projectEditorScriptsDiagnosisBatchEmptyDetail;
+
+  /// No description provided for @projectEditorScriptsDiagnosisBatchRunningSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected script(s) are still extracting.'**
+  String projectEditorScriptsDiagnosisBatchRunningSummary(int count);
+
+  /// No description provided for @projectEditorScriptsDiagnosisBatchRunningDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Poll selected extract states first to confirm batch work finished before retrying extract.'**
+  String get projectEditorScriptsDiagnosisBatchRunningDetail;
+
+  /// No description provided for @projectEditorScriptsDiagnosisBatchFailedSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected script(s) recently failed extract.'**
+  String projectEditorScriptsDiagnosisBatchFailedSummary(int count);
+
+  /// No description provided for @projectEditorScriptsDiagnosisBatchFailedDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Start asset extract again for the selection; prioritize fixing failed items.'**
+  String get projectEditorScriptsDiagnosisBatchFailedDetail;
+
+  /// No description provided for @projectEditorScriptsDiagnosisBatchMissingContextSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected script(s) are missing a context snapshot.'**
+  String projectEditorScriptsDiagnosisBatchMissingContextSummary(int count);
+
+  /// No description provided for @projectEditorScriptsDiagnosisBatchMissingContextDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Read script context first to see which scripts already have assets, then decide whether to export ZIP or run asset extract.'**
+  String get projectEditorScriptsDiagnosisBatchMissingContextDetail;
+
+  /// No description provided for @projectEditorScriptsDiagnosisBatchAllAssetsSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'All {count} selected script(s) already have related assets.'**
+  String projectEditorScriptsDiagnosisBatchAllAssetsSummary(int count);
+
+  /// No description provided for @projectEditorScriptsDiagnosisBatchAllAssetsDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'You can export a ZIP of the selection for review, or continue in the single-script workbench for images.'**
+  String get projectEditorScriptsDiagnosisBatchAllAssetsDetail;
+
+  /// No description provided for @projectEditorScriptsDiagnosisBatchPendingExtractSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected script(s) still have items pending extract.'**
+  String projectEditorScriptsDiagnosisBatchPendingExtractSummary(int count);
+
+  /// No description provided for @projectEditorScriptsDiagnosisBatchPendingExtractDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Start batch asset extract to turn the current selection into assets usable for images and storyboards.'**
+  String get projectEditorScriptsDiagnosisBatchPendingExtractDetail;
+
+  /// No description provided for @projectEditorScriptsDiagnosisSingleNoSnapshotSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'No workbench snapshot for the current script yet.'**
+  String get projectEditorScriptsDiagnosisSingleNoSnapshotSummary;
+
+  /// No description provided for @projectEditorScriptsDiagnosisSingleNoSnapshotDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync the workbench first to load get-script-api context and the latest extract state.'**
+  String get projectEditorScriptsDiagnosisSingleNoSnapshotDetail;
+
+  /// No description provided for @projectEditorScriptsDiagnosisSingleExtractFailedSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'The latest asset extract run failed.'**
+  String get projectEditorScriptsDiagnosisSingleExtractFailedSummary;
+
+  /// No description provided for @projectEditorScriptsDiagnosisSingleExtractFailedDetailNoReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix inputs and start asset extract again for this script.'**
+  String get projectEditorScriptsDiagnosisSingleExtractFailedDetailNoReason;
+
+  /// No description provided for @projectEditorScriptsDiagnosisSingleExtractFailedDetailWithReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason: {reason}. Fix inputs and start asset extract again.'**
+  String projectEditorScriptsDiagnosisSingleExtractFailedDetailWithReason(
+    String reason,
+  );
+
+  /// No description provided for @projectEditorScriptsDiagnosisSingleExtractRunningSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Asset extract is in progress.'**
+  String get projectEditorScriptsDiagnosisSingleExtractRunningSummary;
+
+  /// No description provided for @projectEditorScriptsDiagnosisSingleExtractRunningDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Poll extract state first to confirm the task finished before continuing to image editing.'**
+  String get projectEditorScriptsDiagnosisSingleExtractRunningDetail;
+
+  /// No description provided for @projectEditorScriptsDiagnosisSingleNoAssetsSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'This script has no related assets yet.'**
+  String get projectEditorScriptsDiagnosisSingleNoAssetsSummary;
+
+  /// No description provided for @projectEditorScriptsDiagnosisSingleNoAssetsDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'You can start asset extract to turn script context into assets for images and storyboards.'**
+  String get projectEditorScriptsDiagnosisSingleNoAssetsDetail;
+
+  /// No description provided for @projectEditorScriptsDiagnosisSingleHasAssetsSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'This script already has related assets.'**
+  String get projectEditorScriptsDiagnosisSingleHasAssetsSummary;
+
+  /// No description provided for @projectEditorScriptsDiagnosisSingleHasAssetsDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Synced {count} related assets; continue to the edit-image workbench or export a ZIP for local review.'**
+  String projectEditorScriptsDiagnosisSingleHasAssetsDetail(int count);
+
+  /// No description provided for @projectEditorScriptsSingleWorkbenchRecommendSyncWorkbench.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync workbench'**
+  String get projectEditorScriptsSingleWorkbenchRecommendSyncWorkbench;
+
+  /// No description provided for @projectEditorScriptsSingleWorkbenchRecommendPollExtractState.
+  ///
+  /// In en, this message translates to:
+  /// **'Poll extract state'**
+  String get projectEditorScriptsSingleWorkbenchRecommendPollExtractState;
+
+  /// No description provided for @projectEditorScriptsSingleWorkbenchRecommendStartExtractAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'Extract assets for this script'**
+  String get projectEditorScriptsSingleWorkbenchRecommendStartExtractAssets;
+
+  /// No description provided for @projectEditorScriptsSingleWorkbenchRecommendOpenEditImageWorkbench.
+  ///
+  /// In en, this message translates to:
+  /// **'Open edit-image workbench'**
+  String get projectEditorScriptsSingleWorkbenchRecommendOpenEditImageWorkbench;
+
+  /// No description provided for @projectEditorScriptsSingleWorkbenchRecommendExportScriptZip.
+  ///
+  /// In en, this message translates to:
+  /// **'Export this script ZIP'**
+  String get projectEditorScriptsSingleWorkbenchRecommendExportScriptZip;
+
+  /// No description provided for @projectEditorScriptsSingleWorkbenchContextNotInApi.
+  ///
+  /// In en, this message translates to:
+  /// **'This script is not present in get-script-api results yet.'**
+  String get projectEditorScriptsSingleWorkbenchContextNotInApi;
+
+  /// No description provided for @projectEditorScriptsSingleWorkbenchContextLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Loaded script context: {assetCount} related assets'**
+  String projectEditorScriptsSingleWorkbenchContextLoaded(int assetCount);
+
+  /// No description provided for @projectEditorScriptsSingleWorkbenchContextReadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to read script context: {error}'**
+  String projectEditorScriptsSingleWorkbenchContextReadFailed(String error);
+
+  /// No description provided for @projectEditorScriptsSingleWorkbenchFollowUpExportDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Export finished: 1 script, ZIP {zipSize}.'**
+  String projectEditorScriptsSingleWorkbenchFollowUpExportDone(String zipSize);
+
+  /// No description provided for @projectEditorScriptsSingleWorkbenchFollowUpPollState.
+  ///
+  /// In en, this message translates to:
+  /// **'Polled extract state for this script: {stateLine}'**
+  String projectEditorScriptsSingleWorkbenchFollowUpPollState(String stateLine);
+
+  /// No description provided for @projectEditorScriptsSingleWorkbenchFollowUpExtractSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Asset extract submitted: {status} · {message}'**
+  String projectEditorScriptsSingleWorkbenchFollowUpExtractSubmitted(
+    String status,
+    String message,
+  );
+
+  /// No description provided for @projectEditorScriptsSingleWorkbenchEditClosedStillMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit-image workbench closed; this script is still not present in get-script-api results.'**
+  String get projectEditorScriptsSingleWorkbenchEditClosedStillMissing;
+
+  /// No description provided for @projectEditorScriptsSingleWorkbenchFollowUpEditClosedSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit-image workbench closed; synced script context and extract state.'**
+  String get projectEditorScriptsSingleWorkbenchFollowUpEditClosedSynced;
+
+  /// No description provided for @projectEditorScriptsSingleWorkbenchSyncBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing…'**
+  String get projectEditorScriptsSingleWorkbenchSyncBusy;
+
+  /// No description provided for @projectEditorScriptsExtractStateEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Extract state is empty: usually idle or completed.'**
+  String get projectEditorScriptsExtractStateEmpty;
+
+  /// No description provided for @projectEditorScriptsExtractStateLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Extract state {state}{errorSuffix}'**
+  String projectEditorScriptsExtractStateLine(int state, String errorSuffix);
+
   /// No description provided for @projectEditorAssetSummaryProductionEmpty.
   ///
   /// In en, this message translates to:

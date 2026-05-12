@@ -7059,6 +7059,195 @@ class AppLocalizationsEn extends AppLocalizations {
       'Export all scripts';
 
   @override
+  String get projectEditorScriptsSessionInfoNoScripts =>
+      'This project has no scripts yet.';
+
+  @override
+  String projectEditorScriptsSessionInfoLoadedCount(int count) {
+    return '$count scripts loaded; you can filter and run batch actions.';
+  }
+
+  @override
+  String get projectEditorScriptsSessionDefaultAddBody =>
+      'Plot outline to be filled.';
+
+  @override
+  String get projectEditorScriptsDiagnosisBatchEmptySummary =>
+      'No scripts selected for processing.';
+
+  @override
+  String get projectEditorScriptsDiagnosisBatchEmptyDetail =>
+      'Read script context or enter target script ids, then run batch export, polling, or asset extract.';
+
+  @override
+  String projectEditorScriptsDiagnosisBatchRunningSummary(int count) {
+    return '$count selected script(s) are still extracting.';
+  }
+
+  @override
+  String get projectEditorScriptsDiagnosisBatchRunningDetail =>
+      'Poll selected extract states first to confirm batch work finished before retrying extract.';
+
+  @override
+  String projectEditorScriptsDiagnosisBatchFailedSummary(int count) {
+    return '$count selected script(s) recently failed extract.';
+  }
+
+  @override
+  String get projectEditorScriptsDiagnosisBatchFailedDetail =>
+      'Start asset extract again for the selection; prioritize fixing failed items.';
+
+  @override
+  String projectEditorScriptsDiagnosisBatchMissingContextSummary(int count) {
+    return '$count selected script(s) are missing a context snapshot.';
+  }
+
+  @override
+  String get projectEditorScriptsDiagnosisBatchMissingContextDetail =>
+      'Read script context first to see which scripts already have assets, then decide whether to export ZIP or run asset extract.';
+
+  @override
+  String projectEditorScriptsDiagnosisBatchAllAssetsSummary(int count) {
+    return 'All $count selected script(s) already have related assets.';
+  }
+
+  @override
+  String get projectEditorScriptsDiagnosisBatchAllAssetsDetail =>
+      'You can export a ZIP of the selection for review, or continue in the single-script workbench for images.';
+
+  @override
+  String projectEditorScriptsDiagnosisBatchPendingExtractSummary(int count) {
+    return '$count selected script(s) still have items pending extract.';
+  }
+
+  @override
+  String get projectEditorScriptsDiagnosisBatchPendingExtractDetail =>
+      'Start batch asset extract to turn the current selection into assets usable for images and storyboards.';
+
+  @override
+  String get projectEditorScriptsDiagnosisSingleNoSnapshotSummary =>
+      'No workbench snapshot for the current script yet.';
+
+  @override
+  String get projectEditorScriptsDiagnosisSingleNoSnapshotDetail =>
+      'Sync the workbench first to load get-script-api context and the latest extract state.';
+
+  @override
+  String get projectEditorScriptsDiagnosisSingleExtractFailedSummary =>
+      'The latest asset extract run failed.';
+
+  @override
+  String get projectEditorScriptsDiagnosisSingleExtractFailedDetailNoReason =>
+      'Fix inputs and start asset extract again for this script.';
+
+  @override
+  String projectEditorScriptsDiagnosisSingleExtractFailedDetailWithReason(
+    String reason,
+  ) {
+    return 'Reason: $reason. Fix inputs and start asset extract again.';
+  }
+
+  @override
+  String get projectEditorScriptsDiagnosisSingleExtractRunningSummary =>
+      'Asset extract is in progress.';
+
+  @override
+  String get projectEditorScriptsDiagnosisSingleExtractRunningDetail =>
+      'Poll extract state first to confirm the task finished before continuing to image editing.';
+
+  @override
+  String get projectEditorScriptsDiagnosisSingleNoAssetsSummary =>
+      'This script has no related assets yet.';
+
+  @override
+  String get projectEditorScriptsDiagnosisSingleNoAssetsDetail =>
+      'You can start asset extract to turn script context into assets for images and storyboards.';
+
+  @override
+  String get projectEditorScriptsDiagnosisSingleHasAssetsSummary =>
+      'This script already has related assets.';
+
+  @override
+  String projectEditorScriptsDiagnosisSingleHasAssetsDetail(int count) {
+    return 'Synced $count related assets; continue to the edit-image workbench or export a ZIP for local review.';
+  }
+
+  @override
+  String get projectEditorScriptsSingleWorkbenchRecommendSyncWorkbench =>
+      'Sync workbench';
+
+  @override
+  String get projectEditorScriptsSingleWorkbenchRecommendPollExtractState =>
+      'Poll extract state';
+
+  @override
+  String get projectEditorScriptsSingleWorkbenchRecommendStartExtractAssets =>
+      'Extract assets for this script';
+
+  @override
+  String
+  get projectEditorScriptsSingleWorkbenchRecommendOpenEditImageWorkbench =>
+      'Open edit-image workbench';
+
+  @override
+  String get projectEditorScriptsSingleWorkbenchRecommendExportScriptZip =>
+      'Export this script ZIP';
+
+  @override
+  String get projectEditorScriptsSingleWorkbenchContextNotInApi =>
+      'This script is not present in get-script-api results yet.';
+
+  @override
+  String projectEditorScriptsSingleWorkbenchContextLoaded(int assetCount) {
+    return 'Loaded script context: $assetCount related assets';
+  }
+
+  @override
+  String projectEditorScriptsSingleWorkbenchContextReadFailed(String error) {
+    return 'Failed to read script context: $error';
+  }
+
+  @override
+  String projectEditorScriptsSingleWorkbenchFollowUpExportDone(String zipSize) {
+    return 'Export finished: 1 script, ZIP $zipSize.';
+  }
+
+  @override
+  String projectEditorScriptsSingleWorkbenchFollowUpPollState(
+    String stateLine,
+  ) {
+    return 'Polled extract state for this script: $stateLine';
+  }
+
+  @override
+  String projectEditorScriptsSingleWorkbenchFollowUpExtractSubmitted(
+    String status,
+    String message,
+  ) {
+    return 'Asset extract submitted: $status · $message';
+  }
+
+  @override
+  String get projectEditorScriptsSingleWorkbenchEditClosedStillMissing =>
+      'Edit-image workbench closed; this script is still not present in get-script-api results.';
+
+  @override
+  String get projectEditorScriptsSingleWorkbenchFollowUpEditClosedSynced =>
+      'Edit-image workbench closed; synced script context and extract state.';
+
+  @override
+  String get projectEditorScriptsSingleWorkbenchSyncBusy => 'Syncing…';
+
+  @override
+  String get projectEditorScriptsExtractStateEmpty =>
+      'Extract state is empty: usually idle or completed.';
+
+  @override
+  String projectEditorScriptsExtractStateLine(int state, String errorSuffix) {
+    return 'Extract state $state$errorSuffix';
+  }
+
+  @override
   String get projectEditorAssetSummaryProductionEmpty =>
       'Production asset data is empty';
 

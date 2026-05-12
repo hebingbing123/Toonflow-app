@@ -5248,6 +5248,152 @@
   "projectEditorScriptsWorkbenchOverviewPollAllExtract": "轮询全部提取状态",
   "projectEditorScriptsWorkbenchOverviewExtractAllAssets": "提取全部剧本素材",
   "projectEditorScriptsWorkbenchOverviewExportAllScripts": "导出全部剧本",
+  "projectEditorScriptsSessionInfoNoScripts": "当前项目还没有剧本。",
+  "projectEditorScriptsSessionInfoLoadedCount": "当前已载入 {count} 条剧本，可筛选后批量执行。",
+  "@projectEditorScriptsSessionInfoLoadedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorScriptsSessionDefaultAddBody": "剧情梗概待补充。",
+  "projectEditorScriptsDiagnosisBatchEmptySummary": "还没有选择要处理的剧本。",
+  "projectEditorScriptsDiagnosisBatchEmptyDetail": "先读取剧本上下文或填写目标剧本 id，再执行批量导出、轮询或素材抽取。",
+  "projectEditorScriptsDiagnosisBatchRunningSummary": "所选剧本里有 {count} 条仍在提取中。",
+  "@projectEditorScriptsDiagnosisBatchRunningSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorScriptsDiagnosisBatchRunningDetail": "建议先轮询所选状态，确认批量任务是否完成，再决定是否重试抽取。",
+  "projectEditorScriptsDiagnosisBatchFailedSummary": "所选剧本里有 {count} 条最近提取失败。",
+  "@projectEditorScriptsDiagnosisBatchFailedSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorScriptsDiagnosisBatchFailedDetail": "建议重新发起所选剧本素材抽取，优先收敛失败项。",
+  "projectEditorScriptsDiagnosisBatchMissingContextSummary": "所选 {count} 条剧本还缺少上下文快照。",
+  "@projectEditorScriptsDiagnosisBatchMissingContextSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorScriptsDiagnosisBatchMissingContextDetail": "建议先读取剧本上下文，确认哪些剧本已有素材，再决定导出 ZIP 还是补做素材抽取。",
+  "projectEditorScriptsDiagnosisBatchAllAssetsSummary": "所选 {count} 条剧本都已有关联素材。",
+  "@projectEditorScriptsDiagnosisBatchAllAssetsSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorScriptsDiagnosisBatchAllAssetsDetail": "可以先导出所选剧本 ZIP 做集中审阅，或转入单剧本工作台继续处理图片流程。",
+  "projectEditorScriptsDiagnosisBatchPendingExtractSummary": "所选 {count} 条剧本仍有待抽取素材的项。",
+  "@projectEditorScriptsDiagnosisBatchPendingExtractSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorScriptsDiagnosisBatchPendingExtractDetail": "建议直接批量发起素材抽取，把当前选择转成后续图片和分镜流程可用的资产。",
+  "projectEditorScriptsDiagnosisSingleNoSnapshotSummary": "还没有当前剧本的工作台快照。",
+  "projectEditorScriptsDiagnosisSingleNoSnapshotDetail": "先同步工作台，读取 get-script-api 上下文和最近一次提取状态。",
+  "projectEditorScriptsDiagnosisSingleExtractFailedSummary": "素材提取最近一次执行失败。",
+  "projectEditorScriptsDiagnosisSingleExtractFailedDetailNoReason": "建议修正输入后重新发起当前剧本素材抽取。",
+  "projectEditorScriptsDiagnosisSingleExtractFailedDetailWithReason": "失败原因：{reason}，建议修正后重新发起当前剧本素材抽取。",
+  "@projectEditorScriptsDiagnosisSingleExtractFailedDetailWithReason": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorScriptsDiagnosisSingleExtractRunningSummary": "素材提取正在进行中。",
+  "projectEditorScriptsDiagnosisSingleExtractRunningDetail": "建议先轮询提取状态，确认任务是否完成，再决定是否进入图片编辑流程。",
+  "projectEditorScriptsDiagnosisSingleNoAssetsSummary": "当前剧本还没有关联素材。",
+  "projectEditorScriptsDiagnosisSingleNoAssetsDetail": "可以直接发起素材抽取，把脚本上下文转成后续图片与分镜流程可用的资产。",
+  "projectEditorScriptsDiagnosisSingleHasAssetsSummary": "当前剧本已有关联素材。",
+  "projectEditorScriptsDiagnosisSingleHasAssetsDetail": "已同步 {count} 条关联素材，可继续进入编辑图片工作台，或先导出 ZIP 做本地审阅。",
+  "@projectEditorScriptsDiagnosisSingleHasAssetsDetail": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorScriptsSingleWorkbenchRecommendSyncWorkbench": "同步工作台",
+  "projectEditorScriptsSingleWorkbenchRecommendPollExtractState": "轮询提取状态",
+  "projectEditorScriptsSingleWorkbenchRecommendStartExtractAssets": "提取当前剧本素材",
+  "projectEditorScriptsSingleWorkbenchRecommendOpenEditImageWorkbench": "进入编辑图片工作台",
+  "projectEditorScriptsSingleWorkbenchRecommendExportScriptZip": "导出当前剧本 ZIP",
+  "projectEditorScriptsSingleWorkbenchContextNotInApi": "当前剧本暂未出现在 get-script-api 结果里。",
+  "projectEditorScriptsSingleWorkbenchContextLoaded": "已加载脚本上下文：素材 {assetCount} 项",
+  "@projectEditorScriptsSingleWorkbenchContextLoaded": {
+    "placeholders": {
+      "assetCount": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorScriptsSingleWorkbenchContextReadFailed": "脚本上下文读取失败：{error}",
+  "@projectEditorScriptsSingleWorkbenchContextReadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorScriptsSingleWorkbenchFollowUpExportDone": "导出完成：1 个剧本，ZIP {zipSize}。",
+  "@projectEditorScriptsSingleWorkbenchFollowUpExportDone": {
+    "placeholders": {
+      "zipSize": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorScriptsSingleWorkbenchFollowUpPollState": "已轮询当前剧本提取状态：{stateLine}",
+  "@projectEditorScriptsSingleWorkbenchFollowUpPollState": {
+    "placeholders": {
+      "stateLine": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorScriptsSingleWorkbenchFollowUpExtractSubmitted": "素材抽取已提交：{status} · {message}",
+  "@projectEditorScriptsSingleWorkbenchFollowUpExtractSubmitted": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      },
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorScriptsSingleWorkbenchEditClosedStillMissing": "编辑图片工作台已关闭；当前剧本仍未出现在 get-script-api 结果里。",
+  "projectEditorScriptsSingleWorkbenchFollowUpEditClosedSynced": "编辑图片工作台已关闭，已同步脚本上下文与提取状态。",
+  "projectEditorScriptsSingleWorkbenchSyncBusy": "同步中…",
+  "projectEditorScriptsExtractStateEmpty": "当前脚本提取状态为空：通常表示 idle 或已完成。",
+  "projectEditorScriptsExtractStateLine": "提取状态 {state}{errorSuffix}",
+  "@projectEditorScriptsExtractStateLine": {
+    "placeholders": {
+      "state": {
+        "type": "int"
+      },
+      "errorSuffix": {
+        "type": "String"
+      }
+    }
+  },
   "projectEditorAssetSummaryProductionEmpty": "production 资产数据为空",
   "projectEditorAssetSummaryProductionLine": "production 资产 {total} 条 · {typesLine} · 示例：{sampleLine}",
   "@projectEditorAssetSummaryProductionLine": {

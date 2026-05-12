@@ -6759,6 +6759,192 @@ class AppLocalizationsZh extends AppLocalizations {
   String get projectEditorScriptsWorkbenchOverviewExportAllScripts => '导出全部剧本';
 
   @override
+  String get projectEditorScriptsSessionInfoNoScripts => '当前项目还没有剧本。';
+
+  @override
+  String projectEditorScriptsSessionInfoLoadedCount(int count) {
+    return '当前已载入 $count 条剧本，可筛选后批量执行。';
+  }
+
+  @override
+  String get projectEditorScriptsSessionDefaultAddBody => '剧情梗概待补充。';
+
+  @override
+  String get projectEditorScriptsDiagnosisBatchEmptySummary => '还没有选择要处理的剧本。';
+
+  @override
+  String get projectEditorScriptsDiagnosisBatchEmptyDetail =>
+      '先读取剧本上下文或填写目标剧本 id，再执行批量导出、轮询或素材抽取。';
+
+  @override
+  String projectEditorScriptsDiagnosisBatchRunningSummary(int count) {
+    return '所选剧本里有 $count 条仍在提取中。';
+  }
+
+  @override
+  String get projectEditorScriptsDiagnosisBatchRunningDetail =>
+      '建议先轮询所选状态，确认批量任务是否完成，再决定是否重试抽取。';
+
+  @override
+  String projectEditorScriptsDiagnosisBatchFailedSummary(int count) {
+    return '所选剧本里有 $count 条最近提取失败。';
+  }
+
+  @override
+  String get projectEditorScriptsDiagnosisBatchFailedDetail =>
+      '建议重新发起所选剧本素材抽取，优先收敛失败项。';
+
+  @override
+  String projectEditorScriptsDiagnosisBatchMissingContextSummary(int count) {
+    return '所选 $count 条剧本还缺少上下文快照。';
+  }
+
+  @override
+  String get projectEditorScriptsDiagnosisBatchMissingContextDetail =>
+      '建议先读取剧本上下文，确认哪些剧本已有素材，再决定导出 ZIP 还是补做素材抽取。';
+
+  @override
+  String projectEditorScriptsDiagnosisBatchAllAssetsSummary(int count) {
+    return '所选 $count 条剧本都已有关联素材。';
+  }
+
+  @override
+  String get projectEditorScriptsDiagnosisBatchAllAssetsDetail =>
+      '可以先导出所选剧本 ZIP 做集中审阅，或转入单剧本工作台继续处理图片流程。';
+
+  @override
+  String projectEditorScriptsDiagnosisBatchPendingExtractSummary(int count) {
+    return '所选 $count 条剧本仍有待抽取素材的项。';
+  }
+
+  @override
+  String get projectEditorScriptsDiagnosisBatchPendingExtractDetail =>
+      '建议直接批量发起素材抽取，把当前选择转成后续图片和分镜流程可用的资产。';
+
+  @override
+  String get projectEditorScriptsDiagnosisSingleNoSnapshotSummary =>
+      '还没有当前剧本的工作台快照。';
+
+  @override
+  String get projectEditorScriptsDiagnosisSingleNoSnapshotDetail =>
+      '先同步工作台，读取 get-script-api 上下文和最近一次提取状态。';
+
+  @override
+  String get projectEditorScriptsDiagnosisSingleExtractFailedSummary =>
+      '素材提取最近一次执行失败。';
+
+  @override
+  String get projectEditorScriptsDiagnosisSingleExtractFailedDetailNoReason =>
+      '建议修正输入后重新发起当前剧本素材抽取。';
+
+  @override
+  String projectEditorScriptsDiagnosisSingleExtractFailedDetailWithReason(
+    String reason,
+  ) {
+    return '失败原因：$reason，建议修正后重新发起当前剧本素材抽取。';
+  }
+
+  @override
+  String get projectEditorScriptsDiagnosisSingleExtractRunningSummary =>
+      '素材提取正在进行中。';
+
+  @override
+  String get projectEditorScriptsDiagnosisSingleExtractRunningDetail =>
+      '建议先轮询提取状态，确认任务是否完成，再决定是否进入图片编辑流程。';
+
+  @override
+  String get projectEditorScriptsDiagnosisSingleNoAssetsSummary =>
+      '当前剧本还没有关联素材。';
+
+  @override
+  String get projectEditorScriptsDiagnosisSingleNoAssetsDetail =>
+      '可以直接发起素材抽取，把脚本上下文转成后续图片与分镜流程可用的资产。';
+
+  @override
+  String get projectEditorScriptsDiagnosisSingleHasAssetsSummary =>
+      '当前剧本已有关联素材。';
+
+  @override
+  String projectEditorScriptsDiagnosisSingleHasAssetsDetail(int count) {
+    return '已同步 $count 条关联素材，可继续进入编辑图片工作台，或先导出 ZIP 做本地审阅。';
+  }
+
+  @override
+  String get projectEditorScriptsSingleWorkbenchRecommendSyncWorkbench =>
+      '同步工作台';
+
+  @override
+  String get projectEditorScriptsSingleWorkbenchRecommendPollExtractState =>
+      '轮询提取状态';
+
+  @override
+  String get projectEditorScriptsSingleWorkbenchRecommendStartExtractAssets =>
+      '提取当前剧本素材';
+
+  @override
+  String
+  get projectEditorScriptsSingleWorkbenchRecommendOpenEditImageWorkbench =>
+      '进入编辑图片工作台';
+
+  @override
+  String get projectEditorScriptsSingleWorkbenchRecommendExportScriptZip =>
+      '导出当前剧本 ZIP';
+
+  @override
+  String get projectEditorScriptsSingleWorkbenchContextNotInApi =>
+      '当前剧本暂未出现在 get-script-api 结果里。';
+
+  @override
+  String projectEditorScriptsSingleWorkbenchContextLoaded(int assetCount) {
+    return '已加载脚本上下文：素材 $assetCount 项';
+  }
+
+  @override
+  String projectEditorScriptsSingleWorkbenchContextReadFailed(String error) {
+    return '脚本上下文读取失败：$error';
+  }
+
+  @override
+  String projectEditorScriptsSingleWorkbenchFollowUpExportDone(String zipSize) {
+    return '导出完成：1 个剧本，ZIP $zipSize。';
+  }
+
+  @override
+  String projectEditorScriptsSingleWorkbenchFollowUpPollState(
+    String stateLine,
+  ) {
+    return '已轮询当前剧本提取状态：$stateLine';
+  }
+
+  @override
+  String projectEditorScriptsSingleWorkbenchFollowUpExtractSubmitted(
+    String status,
+    String message,
+  ) {
+    return '素材抽取已提交：$status · $message';
+  }
+
+  @override
+  String get projectEditorScriptsSingleWorkbenchEditClosedStillMissing =>
+      '编辑图片工作台已关闭；当前剧本仍未出现在 get-script-api 结果里。';
+
+  @override
+  String get projectEditorScriptsSingleWorkbenchFollowUpEditClosedSynced =>
+      '编辑图片工作台已关闭，已同步脚本上下文与提取状态。';
+
+  @override
+  String get projectEditorScriptsSingleWorkbenchSyncBusy => '同步中…';
+
+  @override
+  String get projectEditorScriptsExtractStateEmpty =>
+      '当前脚本提取状态为空：通常表示 idle 或已完成。';
+
+  @override
+  String projectEditorScriptsExtractStateLine(int state, String errorSuffix) {
+    return '提取状态 $state$errorSuffix';
+  }
+
+  @override
   String get projectEditorAssetSummaryProductionEmpty => 'production 资产数据为空';
 
   @override

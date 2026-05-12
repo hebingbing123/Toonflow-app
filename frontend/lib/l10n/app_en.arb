@@ -5248,6 +5248,152 @@
   "projectEditorScriptsWorkbenchOverviewPollAllExtract": "Poll extract state for all",
   "projectEditorScriptsWorkbenchOverviewExtractAllAssets": "Extract assets for all scripts",
   "projectEditorScriptsWorkbenchOverviewExportAllScripts": "Export all scripts",
+  "projectEditorScriptsSessionInfoNoScripts": "This project has no scripts yet.",
+  "projectEditorScriptsSessionInfoLoadedCount": "{count} scripts loaded; you can filter and run batch actions.",
+  "@projectEditorScriptsSessionInfoLoadedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorScriptsSessionDefaultAddBody": "Plot outline to be filled.",
+  "projectEditorScriptsDiagnosisBatchEmptySummary": "No scripts selected for processing.",
+  "projectEditorScriptsDiagnosisBatchEmptyDetail": "Read script context or enter target script ids, then run batch export, polling, or asset extract.",
+  "projectEditorScriptsDiagnosisBatchRunningSummary": "{count} selected script(s) are still extracting.",
+  "@projectEditorScriptsDiagnosisBatchRunningSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorScriptsDiagnosisBatchRunningDetail": "Poll selected extract states first to confirm batch work finished before retrying extract.",
+  "projectEditorScriptsDiagnosisBatchFailedSummary": "{count} selected script(s) recently failed extract.",
+  "@projectEditorScriptsDiagnosisBatchFailedSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorScriptsDiagnosisBatchFailedDetail": "Start asset extract again for the selection; prioritize fixing failed items.",
+  "projectEditorScriptsDiagnosisBatchMissingContextSummary": "{count} selected script(s) are missing a context snapshot.",
+  "@projectEditorScriptsDiagnosisBatchMissingContextSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorScriptsDiagnosisBatchMissingContextDetail": "Read script context first to see which scripts already have assets, then decide whether to export ZIP or run asset extract.",
+  "projectEditorScriptsDiagnosisBatchAllAssetsSummary": "All {count} selected script(s) already have related assets.",
+  "@projectEditorScriptsDiagnosisBatchAllAssetsSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorScriptsDiagnosisBatchAllAssetsDetail": "You can export a ZIP of the selection for review, or continue in the single-script workbench for images.",
+  "projectEditorScriptsDiagnosisBatchPendingExtractSummary": "{count} selected script(s) still have items pending extract.",
+  "@projectEditorScriptsDiagnosisBatchPendingExtractSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorScriptsDiagnosisBatchPendingExtractDetail": "Start batch asset extract to turn the current selection into assets usable for images and storyboards.",
+  "projectEditorScriptsDiagnosisSingleNoSnapshotSummary": "No workbench snapshot for the current script yet.",
+  "projectEditorScriptsDiagnosisSingleNoSnapshotDetail": "Sync the workbench first to load get-script-api context and the latest extract state.",
+  "projectEditorScriptsDiagnosisSingleExtractFailedSummary": "The latest asset extract run failed.",
+  "projectEditorScriptsDiagnosisSingleExtractFailedDetailNoReason": "Fix inputs and start asset extract again for this script.",
+  "projectEditorScriptsDiagnosisSingleExtractFailedDetailWithReason": "Reason: {reason}. Fix inputs and start asset extract again.",
+  "@projectEditorScriptsDiagnosisSingleExtractFailedDetailWithReason": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorScriptsDiagnosisSingleExtractRunningSummary": "Asset extract is in progress.",
+  "projectEditorScriptsDiagnosisSingleExtractRunningDetail": "Poll extract state first to confirm the task finished before continuing to image editing.",
+  "projectEditorScriptsDiagnosisSingleNoAssetsSummary": "This script has no related assets yet.",
+  "projectEditorScriptsDiagnosisSingleNoAssetsDetail": "You can start asset extract to turn script context into assets for images and storyboards.",
+  "projectEditorScriptsDiagnosisSingleHasAssetsSummary": "This script already has related assets.",
+  "projectEditorScriptsDiagnosisSingleHasAssetsDetail": "Synced {count} related assets; continue to the edit-image workbench or export a ZIP for local review.",
+  "@projectEditorScriptsDiagnosisSingleHasAssetsDetail": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorScriptsSingleWorkbenchRecommendSyncWorkbench": "Sync workbench",
+  "projectEditorScriptsSingleWorkbenchRecommendPollExtractState": "Poll extract state",
+  "projectEditorScriptsSingleWorkbenchRecommendStartExtractAssets": "Extract assets for this script",
+  "projectEditorScriptsSingleWorkbenchRecommendOpenEditImageWorkbench": "Open edit-image workbench",
+  "projectEditorScriptsSingleWorkbenchRecommendExportScriptZip": "Export this script ZIP",
+  "projectEditorScriptsSingleWorkbenchContextNotInApi": "This script is not present in get-script-api results yet.",
+  "projectEditorScriptsSingleWorkbenchContextLoaded": "Loaded script context: {assetCount} related assets",
+  "@projectEditorScriptsSingleWorkbenchContextLoaded": {
+    "placeholders": {
+      "assetCount": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorScriptsSingleWorkbenchContextReadFailed": "Failed to read script context: {error}",
+  "@projectEditorScriptsSingleWorkbenchContextReadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorScriptsSingleWorkbenchFollowUpExportDone": "Export finished: 1 script, ZIP {zipSize}.",
+  "@projectEditorScriptsSingleWorkbenchFollowUpExportDone": {
+    "placeholders": {
+      "zipSize": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorScriptsSingleWorkbenchFollowUpPollState": "Polled extract state for this script: {stateLine}",
+  "@projectEditorScriptsSingleWorkbenchFollowUpPollState": {
+    "placeholders": {
+      "stateLine": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorScriptsSingleWorkbenchFollowUpExtractSubmitted": "Asset extract submitted: {status} · {message}",
+  "@projectEditorScriptsSingleWorkbenchFollowUpExtractSubmitted": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      },
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorScriptsSingleWorkbenchEditClosedStillMissing": "Edit-image workbench closed; this script is still not present in get-script-api results.",
+  "projectEditorScriptsSingleWorkbenchFollowUpEditClosedSynced": "Edit-image workbench closed; synced script context and extract state.",
+  "projectEditorScriptsSingleWorkbenchSyncBusy": "Syncing…",
+  "projectEditorScriptsExtractStateEmpty": "Extract state is empty: usually idle or completed.",
+  "projectEditorScriptsExtractStateLine": "Extract state {state}{errorSuffix}",
+  "@projectEditorScriptsExtractStateLine": {
+    "placeholders": {
+      "state": {
+        "type": "int"
+      },
+      "errorSuffix": {
+        "type": "String"
+      }
+    }
+  },
   "projectEditorAssetSummaryProductionEmpty": "Production asset data is empty",
   "projectEditorAssetSummaryProductionLine": "Production assets {total} items · {typesLine} · Sample: {sampleLine}",
   "@projectEditorAssetSummaryProductionLine": {

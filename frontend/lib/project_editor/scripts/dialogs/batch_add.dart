@@ -105,6 +105,7 @@ extension _HomePageProjectEditorScriptsBatchAddDialog on _HomePageState {
       } catch (_) {}
       if (!ctx.mounted) return;
       final nextDiagnosis = diagnoseScriptBatchWorkbench(
+        l10n,
         selectedIds: scriptList.map((script) => script.numericId),
         scripts: scriptList,
         previewRows: const [],

@@ -102,6 +102,7 @@ class ProjectScriptsWorkbenchController {
   }) {
     setLocalState(() {
       final nextDiagnosis = diagnoseScriptBatchWorkbench(
+        l10n,
         selectedIds: selectedIds,
         scripts: scriptList,
         previewRows: session.previewRows,

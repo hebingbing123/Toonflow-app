@@ -3,6 +3,8 @@ import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/script_editor/support.dart';
 import 'package:openflow_app/rust_api.dart';
 
+final _zh = AppLocalizationsZh();
+
 void main() {
   test('findScriptContextByNumericId returns matching row', () {
     final row = findScriptContextByNumericId(const [
@@ -32,13 +34,14 @@ void main() {
   });
 
   test('describeScriptExtractState renders empty and error variants', () {
-    expect(describeScriptExtractState(), '当前脚本提取状态为空：通常表示 idle 或已完成。');
+    expect(describeScriptExtractState(_zh), _zh.projectEditorScriptsExtractStateEmpty);
     expect(
       describeScriptExtractState(
+        _zh,
         extractState: -1,
         errorReason: 'llm_not_configured',
       ),
-      '提取状态 -1 · llm_not_configured',
+      _zh.projectEditorScriptsExtractStateLine(-1, ' · llm_not_configured'),
     );
   });
 
@@ -55,9 +58,9 @@ void main() {
   });
 
   test('diagnoseScriptWorkbench suggests sync before any snapshot exists', () {
-    final diagnosis = diagnoseScriptWorkbench();
+    final diagnosis = diagnoseScriptWorkbench(_zh);
 
-    expect(diagnosis.summary, '还没有当前剧本的工作台快照。');
+    expect(diagnosis.summary, _zh.projectEditorScriptsDiagnosisSingleNoSnapshotSummary);
     expect(
       diagnosis.recommendedAction,
       ScriptWorkbenchRecommendedAction.syncWorkbench,
@@ -66,6 +69,7 @@ void main() {
 
   test('diagnoseScriptWorkbench suggests retry when extract failed', () {
     final diagnosis = diagnoseScriptWorkbench(
+      _zh,
       scriptContext: const ScriptWorkbenchDetailRow(
         numericId: 7,
         relatedAssets: [],
@@ -77,7 +81,7 @@ void main() {
       ),
     );
 
-    expect(diagnosis.summary, '素材提取最近一次执行失败。');
+    expect(diagnosis.summary, _zh.projectEditorScriptsDiagnosisSingleExtractFailedSummary);
     expect(diagnosis.detail, contains('llm_not_configured'));
     expect(
       diagnosis.recommendedAction,
@@ -87,6 +91,7 @@ void main() {
 
   test('diagnoseScriptWorkbench suggests polling while extract runs', () {
     final diagnosis = diagnoseScriptWorkbench(
+      _zh,
       scriptContext: const ScriptWorkbenchDetailRow(
         numericId: 7,
         relatedAssets: [],
@@ -97,7 +102,7 @@ void main() {
       ),
     );
 
-    expect(diagnosis.summary, '素材提取正在进行中。');
+    expect(diagnosis.summary, _zh.projectEditorScriptsDiagnosisSingleExtractRunningSummary);
     expect(
       diagnosis.recommendedAction,
       ScriptWorkbenchRecommendedAction.pollExtractState,
@@ -106,6 +111,7 @@ void main() {
 
   test('diagnoseScriptWorkbench suggests extract when no assets exist', () {
     final diagnosis = diagnoseScriptWorkbench(
+      _zh,
       scriptContext: const ScriptWorkbenchDetailRow(
         numericId: 7,
         extractState: 0,
@@ -113,7 +119,7 @@ void main() {
       ),
     );
 
-    expect(diagnosis.summary, '当前剧本还没有关联素材。');
+    expect(diagnosis.summary, _zh.projectEditorScriptsDiagnosisSingleNoAssetsSummary);
     expect(
       diagnosis.recommendedAction,
       ScriptWorkbenchRecommendedAction.startExtractAssets,
@@ -124,6 +130,7 @@ void main() {
     'diagnoseScriptWorkbench suggests image workbench when assets exist',
     () {
       final diagnosis = diagnoseScriptWorkbench(
+        _zh,
         scriptContext: const ScriptWorkbenchDetailRow(
           numericId: 7,
           extractState: 0,
@@ -133,7 +140,7 @@ void main() {
         ),
       );
 
-      expect(diagnosis.summary, '当前剧本已有关联素材。');
+      expect(diagnosis.summary, _zh.projectEditorScriptsDiagnosisSingleHasAssetsSummary);
       expect(
         diagnosis.recommendedAction,
         ScriptWorkbenchRecommendedAction.openEditImageWorkbench,
@@ -143,6 +150,7 @@ void main() {
 
   test('buildScriptWorkbenchFollowUp appends next step guidance', () {
     final diagnosis = diagnoseScriptWorkbench(
+      _zh,
       scriptContext: const ScriptWorkbenchDetailRow(
         numericId: 7,
         extractState: 0,
@@ -152,10 +160,11 @@ void main() {
 
     expect(
       buildScriptWorkbenchFollowUp(
+        _zh,
         actionSummary: '已同步当前剧本。',
         diagnosis: diagnosis,
       ),
-      contains('下一步建议：提取当前剧本素材。'),
+      contains('下一步建议：${_zh.projectEditorScriptsSingleWorkbenchRecommendStartExtractAssets}'),
     );
   });
 
@@ -163,12 +172,13 @@ void main() {
     'diagnoseScriptBatchWorkbench suggests sync when selection is empty',
     () {
       final diagnosis = diagnoseScriptBatchWorkbench(
+        _zh,
         selectedIds: const [],
         scripts: const [],
         previewRows: const [],
       );
 
-      expect(diagnosis.summary, '还没有选择要处理的剧本。');
+      expect(diagnosis.summary, _zh.projectEditorScriptsDiagnosisBatchEmptySummary);
       expect(
         diagnosis.recommendedAction,
         ScriptBatchWorkbenchRecommendedAction.syncContext,
@@ -178,6 +188,7 @@ void main() {
 
   test('diagnoseScriptBatchWorkbench suggests polling for running rows', () {
     final diagnosis = diagnoseScriptBatchWorkbench(
+      _zh,
       selectedIds: const [3, 4],
       scripts: const [
         ScriptBrief(numericId: 3, extractState: 2),
@@ -186,7 +197,7 @@ void main() {
       previewRows: const [],
     );
 
-    expect(diagnosis.summary, '所选剧本里有 1 条仍在提取中。');
+    expect(diagnosis.summary, _zh.projectEditorScriptsDiagnosisBatchRunningSummary(1));
     expect(
       diagnosis.recommendedAction,
       ScriptBatchWorkbenchRecommendedAction.pollSelected,
@@ -197,6 +208,7 @@ void main() {
     'diagnoseScriptBatchWorkbench suggests syncing context before asset-aware actions',
     () {
       final diagnosis = diagnoseScriptBatchWorkbench(
+        _zh,
         selectedIds: const [3, 4],
         scripts: const [
           ScriptBrief(numericId: 3, extractState: 0),
@@ -205,7 +217,7 @@ void main() {
         previewRows: const [],
       );
 
-      expect(diagnosis.summary, '所选 2 条剧本还缺少上下文快照。');
+      expect(diagnosis.summary, _zh.projectEditorScriptsDiagnosisBatchMissingContextSummary(2));
       expect(
         diagnosis.recommendedAction,
         ScriptBatchWorkbenchRecommendedAction.syncContext,
@@ -215,6 +227,7 @@ void main() {
 
   test('diagnoseScriptBatchWorkbench suggests retry for failed rows', () {
     final diagnosis = diagnoseScriptBatchWorkbench(
+      _zh,
       selectedIds: const [3, 4],
       scripts: const [
         ScriptBrief(numericId: 3, extractState: -1),
@@ -223,7 +236,7 @@ void main() {
       previewRows: const [],
     );
 
-    expect(diagnosis.summary, '所选剧本里有 1 条最近提取失败。');
+    expect(diagnosis.summary, _zh.projectEditorScriptsDiagnosisBatchFailedSummary(1));
     expect(
       diagnosis.recommendedAction,
       ScriptBatchWorkbenchRecommendedAction.startExtractSelected,
@@ -234,6 +247,7 @@ void main() {
     'diagnoseScriptBatchWorkbench suggests export when all preview rows have assets',
     () {
       final diagnosis = diagnoseScriptBatchWorkbench(
+        _zh,
         selectedIds: const [7, 8],
         scripts: const [
           ScriptBrief(numericId: 7, extractState: 0),
@@ -255,7 +269,7 @@ void main() {
         ],
       );
 
-      expect(diagnosis.summary, '所选 2 条剧本都已有关联素材。');
+      expect(diagnosis.summary, _zh.projectEditorScriptsDiagnosisBatchAllAssetsSummary(2));
       expect(
         diagnosis.recommendedAction,
         ScriptBatchWorkbenchRecommendedAction.exportSelectedZip,
@@ -267,6 +281,7 @@ void main() {
     'diagnoseScriptBatchWorkbench suggests extract when assets are still missing',
     () {
       final diagnosis = diagnoseScriptBatchWorkbench(
+        _zh,
         selectedIds: const [7, 8],
         scripts: const [
           ScriptBrief(numericId: 7, extractState: 0),
@@ -282,7 +297,7 @@ void main() {
         ],
       );
 
-      expect(diagnosis.summary, '所选 2 条剧本还缺少上下文快照。');
+      expect(diagnosis.summary, _zh.projectEditorScriptsDiagnosisBatchMissingContextSummary(2));
       expect(
         diagnosis.recommendedAction,
         ScriptBatchWorkbenchRecommendedAction.syncContext,
@@ -291,8 +306,8 @@ void main() {
   );
 
   test('buildScriptBatchWorkbenchFollowUp appends next step guidance', () {
-    final l10n = AppLocalizationsZh();
     final diagnosis = diagnoseScriptBatchWorkbench(
+      _zh,
       selectedIds: const [3, 4],
       scripts: const [
         ScriptBrief(numericId: 3, extractState: 2),
@@ -303,11 +318,11 @@ void main() {
 
     expect(
       buildScriptBatchWorkbenchFollowUp(
-        l10n,
+        _zh,
         actionSummary: '已提交 2 条剧本素材抽取。',
         diagnosis: diagnosis,
       ),
-      contains('下一步建议：轮询所选状态'),
+      contains('下一步建议：${_zh.projectEditorScriptsWorkbenchRecommendPollSelected}'),
     );
   });
 

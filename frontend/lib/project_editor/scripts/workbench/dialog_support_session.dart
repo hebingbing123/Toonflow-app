@@ -1,21 +1,28 @@
 part of 'dialog_support.dart';
 
 class ProjectScriptsWorkbenchSession {
-  ProjectScriptsWorkbenchSession({required List<ScriptBrief> scriptList})
-    : filterCtrl = TextEditingController(),
-      selectedIdsCtrl = TextEditingController(
-        text: encodeNumericIdSelection(
-          scriptList.map((script) => script.numericId),
-        ),
-      ),
-      groupSizeCtrl = TextEditingController(text: '3'),
-      addCountCtrl = TextEditingController(text: '3'),
-      addPrefixCtrl = TextEditingController(text: '新剧本'),
-      addBodyCtrl = TextEditingController(text: '剧情梗概待补充。'),
-      infoLine = scriptList.isEmpty
-          ? '当前项目还没有剧本。'
-          : '当前已载入 ${scriptList.length} 条剧本，可筛选后批量执行。';
+  ProjectScriptsWorkbenchSession({
+    required this.l10n,
+    required List<ScriptBrief> scriptList,
+  }) : filterCtrl = TextEditingController(),
+       selectedIdsCtrl = TextEditingController(
+         text: encodeNumericIdSelection(
+           scriptList.map((script) => script.numericId),
+         ),
+       ),
+       groupSizeCtrl = TextEditingController(text: '3'),
+       addCountCtrl = TextEditingController(text: '3'),
+       addPrefixCtrl = TextEditingController(
+         text: l10n.projectEditorScriptsWorkbenchDefaultNewScriptName,
+       ),
+       addBodyCtrl = TextEditingController(
+         text: l10n.projectEditorScriptsSessionDefaultAddBody,
+       ),
+       infoLine = scriptList.isEmpty
+           ? l10n.projectEditorScriptsSessionInfoNoScripts
+           : l10n.projectEditorScriptsSessionInfoLoadedCount(scriptList.length);
 
+  final AppLocalizations l10n;
   final TextEditingController filterCtrl;
   final TextEditingController selectedIdsCtrl;
   final TextEditingController groupSizeCtrl;
@@ -37,6 +44,7 @@ class ProjectScriptsWorkbenchSession {
     required List<ScriptBrief> scriptList,
   }) {
     return diagnoseScriptBatchWorkbench(
+      l10n,
       selectedIds: selectedIds(),
       scripts: scriptList,
       previewRows: previewRows,

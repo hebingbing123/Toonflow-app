@@ -1,19 +1,21 @@
 part of 'support.dart';
 
-String describeScriptWorkbenchRecommendedAction(
+String scriptWorkbenchRecommendedActionLabel(
+  AppLocalizations l10n,
   ScriptWorkbenchRecommendedAction action,
 ) {
   switch (action) {
     case ScriptWorkbenchRecommendedAction.syncWorkbench:
-      return '同步工作台';
+      return l10n.projectEditorScriptsSingleWorkbenchRecommendSyncWorkbench;
     case ScriptWorkbenchRecommendedAction.pollExtractState:
-      return '轮询提取状态';
+      return l10n.projectEditorScriptsSingleWorkbenchRecommendPollExtractState;
     case ScriptWorkbenchRecommendedAction.startExtractAssets:
-      return '提取当前剧本素材';
+      return l10n.projectEditorScriptsSingleWorkbenchRecommendStartExtractAssets;
     case ScriptWorkbenchRecommendedAction.openEditImageWorkbench:
-      return '进入编辑图片工作台';
+      return l10n
+          .projectEditorScriptsSingleWorkbenchRecommendOpenEditImageWorkbench;
     case ScriptWorkbenchRecommendedAction.exportScriptZip:
-      return '导出当前剧本 ZIP';
+      return l10n.projectEditorScriptsSingleWorkbenchRecommendExportScriptZip;
   }
 }
 
@@ -33,14 +35,20 @@ String scriptBatchWorkbenchRecommendedActionLabel(
   }
 }
 
-String buildScriptWorkbenchFollowUp({
+String buildScriptWorkbenchFollowUp(
+  AppLocalizations l10n, {
   required String actionSummary,
   required ScriptWorkbenchDiagnosis diagnosis,
 }) {
-  final nextAction = describeScriptWorkbenchRecommendedAction(
+  final nextAction = scriptWorkbenchRecommendedActionLabel(
+    l10n,
     diagnosis.recommendedAction,
   );
-  return '$actionSummary 下一步建议：$nextAction。${diagnosis.detail}';
+  return l10n.projectEditorScriptsWorkbenchBatchFollowUpLine(
+    actionSummary,
+    nextAction,
+    diagnosis.detail,
+  );
 }
 
 String buildScriptBatchWorkbenchFollowUp(
@@ -83,15 +91,15 @@ ScriptExtractStatePollRow? findScriptExtractStateByNumericId(
   return null;
 }
 
-String describeScriptExtractState({
+String describeScriptExtractState(
+  AppLocalizations l10n, {
   int? extractState,
   String? errorReason,
-  String emptyLabel = '当前脚本提取状态为空：通常表示 idle 或已完成。',
 }) {
   if (extractState == null) {
-    return emptyLabel;
+    return l10n.projectEditorScriptsExtractStateEmpty;
   }
   final trimmedError = (errorReason ?? '').trim();
-  return '提取状态 $extractState'
-      '${trimmedError.isEmpty ? '' : ' · $trimmedError'}';
+  final suffix = trimmedError.isEmpty ? '' : ' · $trimmedError';
+  return l10n.projectEditorScriptsExtractStateLine(extractState, suffix);
 }
