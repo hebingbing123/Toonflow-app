@@ -6057,6 +6057,192 @@
     }
   },
   "storyboardWorkbenchProductionMetaLoadedEmpty": "Production view loaded",
+  "storyboardEditorDialogTitle": "Storyboard #{numericId}",
+  "@storyboardEditorDialogTitle": {
+    "placeholders": {
+      "numericId": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardEditorPromptLabelClearEmpty": "Shot prompt (leave empty to clear)",
+  "storyboardEditorStateLabelClearEmpty": "Status (leave empty to clear)",
+  "storyboardEditorVideoDescLabelClearEmpty": "Video description (leave empty to clear)",
+  "storyboardEditorSbIndexLabelClearEmpty": "Shot index (leave empty to clear)",
+  "storyboardEditorShouldGenerateImageLabelClearEmpty": "Generate image flag (leave empty to clear)",
+  "storyboardEditorDeleteConfirmTitle": "Delete this storyboard?",
+  "storyboardEditorDeleteConfirmBody": "This will delete storyboard #{numericId}.",
+  "@storyboardEditorDeleteConfirmBody": {
+    "placeholders": {
+      "numericId": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardEditorDialogCancel": "Cancel",
+  "storyboardEditorDialogConfirmDelete": "Delete",
+  "storyboardEditorDeletedSnack": "Storyboard deleted",
+  "storyboardEditorSbIndexMustBeInteger": "Shot index must be an integer",
+  "storyboardEditorShouldGenerateImageMustBeInteger": "Generate-image flag must be an integer",
+  "storyboardEditorDeleteStoryboard": "Delete storyboard",
+  "storyboardEditorSaving": "Saving…",
+  "storyboardEditorSaveChanges": "Save changes",
+  "storyboardVideoWorkbenchTitle": "Video workbench",
+  "storyboardVideoWorkbenchTrackIdLabel": "Track ID",
+  "storyboardVideoWorkbenchTrackIdHelperNoTracks": "No known tracks yet—you can create one first.",
+  "storyboardVideoWorkbenchTrackIdHelperKnown": "Known tracks: {ids}",
+  "@storyboardVideoWorkbenchTrackIdHelperKnown": {
+    "placeholders": {
+      "ids": {
+        "type": "String"
+      }
+    }
+  },
+  "storyboardVideoWorkbenchNewTrackNameLabel": "New track name",
+  "storyboardVideoWorkbenchNewTrackNameHelper": "After adding, the track ID will be filled in automatically.",
+  "storyboardVideoWorkbenchAddTrack": "Add track",
+  "storyboardVideoWorkbenchDeleteTrack": "Delete track",
+  "storyboardVideoWorkbenchGenerateDefaultPrompt": "Generate default prompt manually",
+  "storyboardVideoWorkbenchPatchRegeneration": "Partial rework",
+  "storyboardVideoWorkbenchApplyPromptRepairs": "Apply pre-generation suggestions manually",
+  "storyboardVideoWorkbenchRefreshing": "Refreshing…",
+  "storyboardVideoWorkbenchRefreshVideoDataManual": "Refresh video data manually",
+  "storyboardVideoWorkbenchPrimaryHint": "Prefer “Generate video” below—the system fills prompts, trims low-value fragments, dedupes negative constraints, and refreshes results. The buttons above are for manual intervention.",
+  "storyboardVideoWorkbenchPatchAttributionHint": "Partial rework submits the smallest fix scope; attribution mode returns upstream hints so you don’t treat a single-shot issue as a full rerun.",
+  "storyboardVideoWorkbenchQualityReviewCheckboxTitle": "Record quality-review samples when generating",
+  "storyboardVideoWorkbenchQualityReviewCheckboxSubtitle": "Used to track pass rates and bad-case trends for “performance/delivery memory priority”.",
+  "storyboardVideoWorkbenchSubtitleLabel": "Subtitle / voiceover script",
+  "storyboardVideoWorkbenchSubtitleHelper": "SRT export, timeline captions, and the default video prompt prefer this text.",
+  "storyboardVideoWorkbenchSaveSubtitle": "Save subtitle / voiceover script",
+  "storyboardVideoWorkbenchRegenerateVoiceover": "Regenerate voiceover",
+  "storyboardVideoWorkbenchGenerateVoiceover": "Generate voiceover",
+  "storyboardVideoWorkbenchLiveActionRefsLabel": "Live-action reference shot URLs (one per line)",
+  "storyboardVideoWorkbenchLiveActionRefsHelper": "Live-action mode includes these in readiness; animated mode can leave empty.",
+  "storyboardVideoWorkbenchPerformanceNotesLabel": "Performance / delivery constraints",
+  "storyboardVideoWorkbenchPerformanceNotesHelper": "e.g. pauses, emotional intensity, realism, lip-sync emphasis.",
+  "storyboardVideoWorkbenchSaveLiveAction": "Save live-action refs & performance constraints",
+  "storyboardVideoWorkbenchVideoPromptLabel": "Video generation prompt",
+  "storyboardVideoWorkbenchRepairSuggestionsPrefix": "Pre-generation suggestions: {items}",
+  "@storyboardVideoWorkbenchRepairSuggestionsPrefix": {
+    "placeholders": {
+      "items": {
+        "type": "String"
+      }
+    }
+  },
+  "storyboardVideoWorkbenchNegativePromptLabel": "Negative prompt",
+  "storyboardVideoWorkbenchNegativePromptHelper": "Auto-filled from this shot’s failure constraints; trim or extend as needed.",
+  "storyboardVideoWorkbenchDurationSecondsLabel": "Duration (seconds)",
+  "storyboardVideoWorkbenchResolutionLabel": "Resolution",
+  "storyboardVideoWorkbenchModeLabel": "Generation mode",
+  "storyboardVideoWorkbenchModelLabel": "Model",
+  "storyboardVideoWorkbenchModelLoading": "Loading model info…",
+  "storyboardVideoWorkbenchIncludeAudioTitle": "Include audio in generated video",
+  "storyboardVideoWorkbenchGenerating": "Generating…",
+  "storyboardVideoWorkbenchGenerateVideoOneClick": "Generate video",
+  "storyboardVideoWorkbenchExportCurrentVideoJob": "Export current video (job)",
+  "storyboardVideoWorkbenchRefreshingExportJob": "Refreshing export job…",
+  "storyboardVideoWorkbenchRefreshExportJobStatus": "Refresh export job status",
+  "storyboardVideoWorkbenchSingleTrackHint": "If only one usable track is detected, it will be auto-filled on submit; with multiple tracks you still pick manually to avoid wrong renders.",
+  "storyboardVideoWorkbenchLatestExportJobLine": "Latest export job: #{taskId} · {status} · {updatedAt}",
+  "@storyboardVideoWorkbenchLatestExportJobLine": {
+    "placeholders": {
+      "taskId": {
+        "type": "int"
+      },
+      "status": {
+        "type": "String"
+      },
+      "updatedAt": {
+        "type": "String"
+      }
+    }
+  },
+  "storyboardVideoWorkbenchExportLinkPrefix": "Export URL:",
+  "storyboardVideoWorkbenchExportErrorPrefix": "Export error:",
+  "storyboardVideoWorkbenchSelectedVideoHeading": "Selected video",
+  "storyboardVideoWorkbenchSelectedVideoDetailSelected": "This is the version used for export and reuse on this shot.",
+  "storyboardVideoWorkbenchSelectedVideoDetailEmpty": "No selected video yet—pick one from candidates below, then continue rework or export.",
+  "storyboardVideoWorkbenchExportSelectedVideo": "Export current video",
+  "storyboardVideoWorkbenchContinuePatch": "Continue partial rework",
+  "storyboardVideoWorkbenchDeleteSelectedVideo": "Remove selected video",
+  "storyboardVideoWorkbenchPickCandidateFirst": "Pick a candidate below first—rework will be more focused.",
+  "storyboardVideoWorkbenchCandidatesHeading": "Video candidates for this shot",
+  "storyboardVideoWorkbenchCandidatesEmpty": "No generated videos linked to this storyboard yet.",
+  "storyboardVideoWorkbenchCandidatesDetail": "Shows videos for this storyboard; set one as current or continue partial rework.",
+  "storyboardVideoWorkbenchVideoUrlMissing": "Video URL missing",
+  "storyboardVideoWorkbenchCandidateMetaCurrent": "Active",
+  "storyboardVideoWorkbenchCandidateMetaState": "Status {state}",
+  "@storyboardVideoWorkbenchCandidateMetaState": {
+    "placeholders": {
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "storyboardVideoWorkbenchCandidateMetaTrack": "Track {trackId}",
+  "@storyboardVideoWorkbenchCandidateMetaTrack": {
+    "placeholders": {
+      "trackId": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardVideoWorkbenchCandidateMetaDuration": "Duration {duration}",
+  "@storyboardVideoWorkbenchCandidateMetaDuration": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "storyboardVideoWorkbenchCurrentSelectedBadge": "Current",
+  "storyboardVideoWorkbenchSetAsCurrentVideo": "Set as current video",
+  "storyboardVideoWorkbenchPatchShort": "Partial rework",
+  "storyboardVideoWorkbenchPatchContinue": "Continue partial rework",
+  "storyboardVideoWorkbenchInFlightJobsHeading": "In-flight video jobs",
+  "storyboardVideoWorkbenchWritebackSummaryNoPending": "Writeback summary: this script mirror has {scriptCount} shots; persisted media paths for {persistedCount}; in-flight tasks tied to {inFlightCount} shots.",
+  "@storyboardVideoWorkbenchWritebackSummaryNoPending": {
+    "placeholders": {
+      "scriptCount": {
+        "type": "int"
+      },
+      "persistedCount": {
+        "type": "int"
+      },
+      "inFlightCount": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardVideoWorkbenchWritebackSummaryWithPending": "Writeback summary: this script mirror has {scriptCount} shots; persisted media paths for {persistedCount}; in-flight tasks tied to {inFlightCount} shots; ~{pendingCount} shots still pending worker writeback.",
+  "@storyboardVideoWorkbenchWritebackSummaryWithPending": {
+    "placeholders": {
+      "scriptCount": {
+        "type": "int"
+      },
+      "persistedCount": {
+        "type": "int"
+      },
+      "inFlightCount": {
+        "type": "int"
+      },
+      "pendingCount": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardVideoWorkbenchJobSubtitle": "Status {status} · {updatedAt}",
+  "@storyboardVideoWorkbenchJobSubtitle": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      },
+      "updatedAt": {
+        "type": "String"
+      }
+    }
+  },
   "shortVideoReadinessNoPayloadHeadline": "Shot readiness data is not available yet.",
   "shortVideoReadinessEmptyProjectHeadline": "This project has no storyboard rows yet; split shots on the script side first to see the rollup.",
   "shortVideoReadinessRollupHeadline": "{ready}/{total} shots ready; {blocked} blocked.",

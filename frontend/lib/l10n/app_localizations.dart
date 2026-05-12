@@ -12813,6 +12813,529 @@ abstract class AppLocalizations {
   /// **'Production view loaded'**
   String get storyboardWorkbenchProductionMetaLoadedEmpty;
 
+  /// No description provided for @storyboardEditorDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard #{numericId}'**
+  String storyboardEditorDialogTitle(int numericId);
+
+  /// No description provided for @storyboardEditorPromptLabelClearEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Shot prompt (leave empty to clear)'**
+  String get storyboardEditorPromptLabelClearEmpty;
+
+  /// No description provided for @storyboardEditorStateLabelClearEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Status (leave empty to clear)'**
+  String get storyboardEditorStateLabelClearEmpty;
+
+  /// No description provided for @storyboardEditorVideoDescLabelClearEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Video description (leave empty to clear)'**
+  String get storyboardEditorVideoDescLabelClearEmpty;
+
+  /// No description provided for @storyboardEditorSbIndexLabelClearEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Shot index (leave empty to clear)'**
+  String get storyboardEditorSbIndexLabelClearEmpty;
+
+  /// No description provided for @storyboardEditorShouldGenerateImageLabelClearEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate image flag (leave empty to clear)'**
+  String get storyboardEditorShouldGenerateImageLabelClearEmpty;
+
+  /// No description provided for @storyboardEditorDeleteConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this storyboard?'**
+  String get storyboardEditorDeleteConfirmTitle;
+
+  /// No description provided for @storyboardEditorDeleteConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This will delete storyboard #{numericId}.'**
+  String storyboardEditorDeleteConfirmBody(int numericId);
+
+  /// No description provided for @storyboardEditorDialogCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get storyboardEditorDialogCancel;
+
+  /// No description provided for @storyboardEditorDialogConfirmDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get storyboardEditorDialogConfirmDelete;
+
+  /// No description provided for @storyboardEditorDeletedSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard deleted'**
+  String get storyboardEditorDeletedSnack;
+
+  /// No description provided for @storyboardEditorSbIndexMustBeInteger.
+  ///
+  /// In en, this message translates to:
+  /// **'Shot index must be an integer'**
+  String get storyboardEditorSbIndexMustBeInteger;
+
+  /// No description provided for @storyboardEditorShouldGenerateImageMustBeInteger.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate-image flag must be an integer'**
+  String get storyboardEditorShouldGenerateImageMustBeInteger;
+
+  /// No description provided for @storyboardEditorDeleteStoryboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete storyboard'**
+  String get storyboardEditorDeleteStoryboard;
+
+  /// No description provided for @storyboardEditorSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get storyboardEditorSaving;
+
+  /// No description provided for @storyboardEditorSaveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save changes'**
+  String get storyboardEditorSaveChanges;
+
+  /// No description provided for @storyboardVideoWorkbenchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Video workbench'**
+  String get storyboardVideoWorkbenchTitle;
+
+  /// No description provided for @storyboardVideoWorkbenchTrackIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Track ID'**
+  String get storyboardVideoWorkbenchTrackIdLabel;
+
+  /// No description provided for @storyboardVideoWorkbenchTrackIdHelperNoTracks.
+  ///
+  /// In en, this message translates to:
+  /// **'No known tracks yet—you can create one first.'**
+  String get storyboardVideoWorkbenchTrackIdHelperNoTracks;
+
+  /// No description provided for @storyboardVideoWorkbenchTrackIdHelperKnown.
+  ///
+  /// In en, this message translates to:
+  /// **'Known tracks: {ids}'**
+  String storyboardVideoWorkbenchTrackIdHelperKnown(String ids);
+
+  /// No description provided for @storyboardVideoWorkbenchNewTrackNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'New track name'**
+  String get storyboardVideoWorkbenchNewTrackNameLabel;
+
+  /// No description provided for @storyboardVideoWorkbenchNewTrackNameHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'After adding, the track ID will be filled in automatically.'**
+  String get storyboardVideoWorkbenchNewTrackNameHelper;
+
+  /// No description provided for @storyboardVideoWorkbenchAddTrack.
+  ///
+  /// In en, this message translates to:
+  /// **'Add track'**
+  String get storyboardVideoWorkbenchAddTrack;
+
+  /// No description provided for @storyboardVideoWorkbenchDeleteTrack.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete track'**
+  String get storyboardVideoWorkbenchDeleteTrack;
+
+  /// No description provided for @storyboardVideoWorkbenchGenerateDefaultPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate default prompt manually'**
+  String get storyboardVideoWorkbenchGenerateDefaultPrompt;
+
+  /// No description provided for @storyboardVideoWorkbenchPatchRegeneration.
+  ///
+  /// In en, this message translates to:
+  /// **'Partial rework'**
+  String get storyboardVideoWorkbenchPatchRegeneration;
+
+  /// No description provided for @storyboardVideoWorkbenchApplyPromptRepairs.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply pre-generation suggestions manually'**
+  String get storyboardVideoWorkbenchApplyPromptRepairs;
+
+  /// No description provided for @storyboardVideoWorkbenchRefreshing.
+  ///
+  /// In en, this message translates to:
+  /// **'Refreshing…'**
+  String get storyboardVideoWorkbenchRefreshing;
+
+  /// No description provided for @storyboardVideoWorkbenchRefreshVideoDataManual.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh video data manually'**
+  String get storyboardVideoWorkbenchRefreshVideoDataManual;
+
+  /// No description provided for @storyboardVideoWorkbenchPrimaryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Prefer “Generate video” below—the system fills prompts, trims low-value fragments, dedupes negative constraints, and refreshes results. The buttons above are for manual intervention.'**
+  String get storyboardVideoWorkbenchPrimaryHint;
+
+  /// No description provided for @storyboardVideoWorkbenchPatchAttributionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Partial rework submits the smallest fix scope; attribution mode returns upstream hints so you don’t treat a single-shot issue as a full rerun.'**
+  String get storyboardVideoWorkbenchPatchAttributionHint;
+
+  /// No description provided for @storyboardVideoWorkbenchQualityReviewCheckboxTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Record quality-review samples when generating'**
+  String get storyboardVideoWorkbenchQualityReviewCheckboxTitle;
+
+  /// No description provided for @storyboardVideoWorkbenchQualityReviewCheckboxSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Used to track pass rates and bad-case trends for “performance/delivery memory priority”.'**
+  String get storyboardVideoWorkbenchQualityReviewCheckboxSubtitle;
+
+  /// No description provided for @storyboardVideoWorkbenchSubtitleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtitle / voiceover script'**
+  String get storyboardVideoWorkbenchSubtitleLabel;
+
+  /// No description provided for @storyboardVideoWorkbenchSubtitleHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'SRT export, timeline captions, and the default video prompt prefer this text.'**
+  String get storyboardVideoWorkbenchSubtitleHelper;
+
+  /// No description provided for @storyboardVideoWorkbenchSaveSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save subtitle / voiceover script'**
+  String get storyboardVideoWorkbenchSaveSubtitle;
+
+  /// No description provided for @storyboardVideoWorkbenchRegenerateVoiceover.
+  ///
+  /// In en, this message translates to:
+  /// **'Regenerate voiceover'**
+  String get storyboardVideoWorkbenchRegenerateVoiceover;
+
+  /// No description provided for @storyboardVideoWorkbenchGenerateVoiceover.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate voiceover'**
+  String get storyboardVideoWorkbenchGenerateVoiceover;
+
+  /// No description provided for @storyboardVideoWorkbenchLiveActionRefsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Live-action reference shot URLs (one per line)'**
+  String get storyboardVideoWorkbenchLiveActionRefsLabel;
+
+  /// No description provided for @storyboardVideoWorkbenchLiveActionRefsHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Live-action mode includes these in readiness; animated mode can leave empty.'**
+  String get storyboardVideoWorkbenchLiveActionRefsHelper;
+
+  /// No description provided for @storyboardVideoWorkbenchPerformanceNotesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Performance / delivery constraints'**
+  String get storyboardVideoWorkbenchPerformanceNotesLabel;
+
+  /// No description provided for @storyboardVideoWorkbenchPerformanceNotesHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. pauses, emotional intensity, realism, lip-sync emphasis.'**
+  String get storyboardVideoWorkbenchPerformanceNotesHelper;
+
+  /// No description provided for @storyboardVideoWorkbenchSaveLiveAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Save live-action refs & performance constraints'**
+  String get storyboardVideoWorkbenchSaveLiveAction;
+
+  /// No description provided for @storyboardVideoWorkbenchVideoPromptLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Video generation prompt'**
+  String get storyboardVideoWorkbenchVideoPromptLabel;
+
+  /// No description provided for @storyboardVideoWorkbenchRepairSuggestionsPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-generation suggestions: {items}'**
+  String storyboardVideoWorkbenchRepairSuggestionsPrefix(String items);
+
+  /// No description provided for @storyboardVideoWorkbenchNegativePromptLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Negative prompt'**
+  String get storyboardVideoWorkbenchNegativePromptLabel;
+
+  /// No description provided for @storyboardVideoWorkbenchNegativePromptHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-filled from this shot’s failure constraints; trim or extend as needed.'**
+  String get storyboardVideoWorkbenchNegativePromptHelper;
+
+  /// No description provided for @storyboardVideoWorkbenchDurationSecondsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration (seconds)'**
+  String get storyboardVideoWorkbenchDurationSecondsLabel;
+
+  /// No description provided for @storyboardVideoWorkbenchResolutionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolution'**
+  String get storyboardVideoWorkbenchResolutionLabel;
+
+  /// No description provided for @storyboardVideoWorkbenchModeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Generation mode'**
+  String get storyboardVideoWorkbenchModeLabel;
+
+  /// No description provided for @storyboardVideoWorkbenchModelLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get storyboardVideoWorkbenchModelLabel;
+
+  /// No description provided for @storyboardVideoWorkbenchModelLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading model info…'**
+  String get storyboardVideoWorkbenchModelLoading;
+
+  /// No description provided for @storyboardVideoWorkbenchIncludeAudioTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Include audio in generated video'**
+  String get storyboardVideoWorkbenchIncludeAudioTitle;
+
+  /// No description provided for @storyboardVideoWorkbenchGenerating.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating…'**
+  String get storyboardVideoWorkbenchGenerating;
+
+  /// No description provided for @storyboardVideoWorkbenchGenerateVideoOneClick.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate video'**
+  String get storyboardVideoWorkbenchGenerateVideoOneClick;
+
+  /// No description provided for @storyboardVideoWorkbenchExportCurrentVideoJob.
+  ///
+  /// In en, this message translates to:
+  /// **'Export current video (job)'**
+  String get storyboardVideoWorkbenchExportCurrentVideoJob;
+
+  /// No description provided for @storyboardVideoWorkbenchRefreshingExportJob.
+  ///
+  /// In en, this message translates to:
+  /// **'Refreshing export job…'**
+  String get storyboardVideoWorkbenchRefreshingExportJob;
+
+  /// No description provided for @storyboardVideoWorkbenchRefreshExportJobStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh export job status'**
+  String get storyboardVideoWorkbenchRefreshExportJobStatus;
+
+  /// No description provided for @storyboardVideoWorkbenchSingleTrackHint.
+  ///
+  /// In en, this message translates to:
+  /// **'If only one usable track is detected, it will be auto-filled on submit; with multiple tracks you still pick manually to avoid wrong renders.'**
+  String get storyboardVideoWorkbenchSingleTrackHint;
+
+  /// No description provided for @storyboardVideoWorkbenchLatestExportJobLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest export job: #{taskId} · {status} · {updatedAt}'**
+  String storyboardVideoWorkbenchLatestExportJobLine(
+    int taskId,
+    String status,
+    String updatedAt,
+  );
+
+  /// No description provided for @storyboardVideoWorkbenchExportLinkPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Export URL:'**
+  String get storyboardVideoWorkbenchExportLinkPrefix;
+
+  /// No description provided for @storyboardVideoWorkbenchExportErrorPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Export error:'**
+  String get storyboardVideoWorkbenchExportErrorPrefix;
+
+  /// No description provided for @storyboardVideoWorkbenchSelectedVideoHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected video'**
+  String get storyboardVideoWorkbenchSelectedVideoHeading;
+
+  /// No description provided for @storyboardVideoWorkbenchSelectedVideoDetailSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'This is the version used for export and reuse on this shot.'**
+  String get storyboardVideoWorkbenchSelectedVideoDetailSelected;
+
+  /// No description provided for @storyboardVideoWorkbenchSelectedVideoDetailEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No selected video yet—pick one from candidates below, then continue rework or export.'**
+  String get storyboardVideoWorkbenchSelectedVideoDetailEmpty;
+
+  /// No description provided for @storyboardVideoWorkbenchExportSelectedVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Export current video'**
+  String get storyboardVideoWorkbenchExportSelectedVideo;
+
+  /// No description provided for @storyboardVideoWorkbenchContinuePatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue partial rework'**
+  String get storyboardVideoWorkbenchContinuePatch;
+
+  /// No description provided for @storyboardVideoWorkbenchDeleteSelectedVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove selected video'**
+  String get storyboardVideoWorkbenchDeleteSelectedVideo;
+
+  /// No description provided for @storyboardVideoWorkbenchPickCandidateFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a candidate below first—rework will be more focused.'**
+  String get storyboardVideoWorkbenchPickCandidateFirst;
+
+  /// No description provided for @storyboardVideoWorkbenchCandidatesHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Video candidates for this shot'**
+  String get storyboardVideoWorkbenchCandidatesHeading;
+
+  /// No description provided for @storyboardVideoWorkbenchCandidatesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No generated videos linked to this storyboard yet.'**
+  String get storyboardVideoWorkbenchCandidatesEmpty;
+
+  /// No description provided for @storyboardVideoWorkbenchCandidatesDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Shows videos for this storyboard; set one as current or continue partial rework.'**
+  String get storyboardVideoWorkbenchCandidatesDetail;
+
+  /// No description provided for @storyboardVideoWorkbenchVideoUrlMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Video URL missing'**
+  String get storyboardVideoWorkbenchVideoUrlMissing;
+
+  /// No description provided for @storyboardVideoWorkbenchCandidateMetaCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get storyboardVideoWorkbenchCandidateMetaCurrent;
+
+  /// No description provided for @storyboardVideoWorkbenchCandidateMetaState.
+  ///
+  /// In en, this message translates to:
+  /// **'Status {state}'**
+  String storyboardVideoWorkbenchCandidateMetaState(String state);
+
+  /// No description provided for @storyboardVideoWorkbenchCandidateMetaTrack.
+  ///
+  /// In en, this message translates to:
+  /// **'Track {trackId}'**
+  String storyboardVideoWorkbenchCandidateMetaTrack(int trackId);
+
+  /// No description provided for @storyboardVideoWorkbenchCandidateMetaDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration {duration}'**
+  String storyboardVideoWorkbenchCandidateMetaDuration(String duration);
+
+  /// No description provided for @storyboardVideoWorkbenchCurrentSelectedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Current'**
+  String get storyboardVideoWorkbenchCurrentSelectedBadge;
+
+  /// No description provided for @storyboardVideoWorkbenchSetAsCurrentVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Set as current video'**
+  String get storyboardVideoWorkbenchSetAsCurrentVideo;
+
+  /// No description provided for @storyboardVideoWorkbenchPatchShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Partial rework'**
+  String get storyboardVideoWorkbenchPatchShort;
+
+  /// No description provided for @storyboardVideoWorkbenchPatchContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue partial rework'**
+  String get storyboardVideoWorkbenchPatchContinue;
+
+  /// No description provided for @storyboardVideoWorkbenchInFlightJobsHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'In-flight video jobs'**
+  String get storyboardVideoWorkbenchInFlightJobsHeading;
+
+  /// No description provided for @storyboardVideoWorkbenchWritebackSummaryNoPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Writeback summary: this script mirror has {scriptCount} shots; persisted media paths for {persistedCount}; in-flight tasks tied to {inFlightCount} shots.'**
+  String storyboardVideoWorkbenchWritebackSummaryNoPending(
+    int scriptCount,
+    int persistedCount,
+    int inFlightCount,
+  );
+
+  /// No description provided for @storyboardVideoWorkbenchWritebackSummaryWithPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Writeback summary: this script mirror has {scriptCount} shots; persisted media paths for {persistedCount}; in-flight tasks tied to {inFlightCount} shots; ~{pendingCount} shots still pending worker writeback.'**
+  String storyboardVideoWorkbenchWritebackSummaryWithPending(
+    int scriptCount,
+    int persistedCount,
+    int inFlightCount,
+    int pendingCount,
+  );
+
+  /// No description provided for @storyboardVideoWorkbenchJobSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Status {status} · {updatedAt}'**
+  String storyboardVideoWorkbenchJobSubtitle(String status, String updatedAt);
+
   /// No description provided for @shortVideoReadinessNoPayloadHeadline.
   ///
   /// In en, this message translates to:

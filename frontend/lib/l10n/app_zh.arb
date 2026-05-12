@@ -6057,6 +6057,192 @@
     }
   },
   "storyboardWorkbenchProductionMetaLoadedEmpty": "制作视图已加载",
+  "storyboardEditorDialogTitle": "分镜 #{numericId}",
+  "@storyboardEditorDialogTitle": {
+    "placeholders": {
+      "numericId": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardEditorPromptLabelClearEmpty": "分镜提示词（留空则清空）",
+  "storyboardEditorStateLabelClearEmpty": "状态（留空则清空）",
+  "storyboardEditorVideoDescLabelClearEmpty": "视频描述（留空则清空）",
+  "storyboardEditorSbIndexLabelClearEmpty": "分镜序号（留空则清空）",
+  "storyboardEditorShouldGenerateImageLabelClearEmpty": "是否需要出图（留空则清空）",
+  "storyboardEditorDeleteConfirmTitle": "删除分镜？",
+  "storyboardEditorDeleteConfirmBody": "将删除 storyboard #{numericId}。",
+  "@storyboardEditorDeleteConfirmBody": {
+    "placeholders": {
+      "numericId": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardEditorDialogCancel": "取消",
+  "storyboardEditorDialogConfirmDelete": "删除",
+  "storyboardEditorDeletedSnack": "分镜已删除",
+  "storyboardEditorSbIndexMustBeInteger": "分镜序号必须是整数",
+  "storyboardEditorShouldGenerateImageMustBeInteger": "是否需要出图必须是整数",
+  "storyboardEditorDeleteStoryboard": "删除分镜",
+  "storyboardEditorSaving": "保存中…",
+  "storyboardEditorSaveChanges": "保存修改",
+  "storyboardVideoWorkbenchTitle": "视频工作台",
+  "storyboardVideoWorkbenchTrackIdLabel": "轨道 ID",
+  "storyboardVideoWorkbenchTrackIdHelperNoTracks": "当前还没有已知轨道，可先新建。",
+  "storyboardVideoWorkbenchTrackIdHelperKnown": "已发现轨道：{ids}",
+  "@storyboardVideoWorkbenchTrackIdHelperKnown": {
+    "placeholders": {
+      "ids": {
+        "type": "String"
+      }
+    }
+  },
+  "storyboardVideoWorkbenchNewTrackNameLabel": "新轨道名称",
+  "storyboardVideoWorkbenchNewTrackNameHelper": "新增后会自动回填轨道 ID。",
+  "storyboardVideoWorkbenchAddTrack": "新增轨道",
+  "storyboardVideoWorkbenchDeleteTrack": "删除轨道",
+  "storyboardVideoWorkbenchGenerateDefaultPrompt": "手动生成默认提示词",
+  "storyboardVideoWorkbenchPatchRegeneration": "局部返工",
+  "storyboardVideoWorkbenchApplyPromptRepairs": "手动应用生成前建议",
+  "storyboardVideoWorkbenchRefreshing": "刷新中…",
+  "storyboardVideoWorkbenchRefreshVideoDataManual": "手动刷新视频数据",
+  "storyboardVideoWorkbenchPrimaryHint": "默认建议直接点「一键生成视频」。系统会自动补提示词、裁剪低收益片段、压缩重复负向约束并刷新结果；上面这些按钮保留给需要手动干预的场景。",
+  "storyboardVideoWorkbenchPatchAttributionHint": "局部返工只提交最小修复范围；若命中 attribution mode，会返回归因提示，避免把单点问题误当全量重跑。",
+  "storyboardVideoWorkbenchQualityReviewCheckboxTitle": "生成时自动记录质量评审样本",
+  "storyboardVideoWorkbenchQualityReviewCheckboxSubtitle": "用于统计「命中表演/语气记忆优先策略」的通过率与坏例趋势。",
+  "storyboardVideoWorkbenchSubtitleLabel": "字幕/旁白文案",
+  "storyboardVideoWorkbenchSubtitleHelper": "导出 SRT、时间线字幕和默认视频提示词会优先使用这里的内容。",
+  "storyboardVideoWorkbenchSaveSubtitle": "保存字幕/旁白文案",
+  "storyboardVideoWorkbenchRegenerateVoiceover": "重新生成配音",
+  "storyboardVideoWorkbenchGenerateVoiceover": "生成配音",
+  "storyboardVideoWorkbenchLiveActionRefsLabel": "真人参考镜头 URL（每行一条）",
+  "storyboardVideoWorkbenchLiveActionRefsHelper": "真人模式会把这组参考镜头纳入 readiness；动漫模式可留空。",
+  "storyboardVideoWorkbenchPerformanceNotesLabel": "表演 / 口播约束",
+  "storyboardVideoWorkbenchPerformanceNotesHelper": "例如停顿、情绪强度、镜头真实感、口型同步重点。",
+  "storyboardVideoWorkbenchSaveLiveAction": "保存真人参考与表演约束",
+  "storyboardVideoWorkbenchVideoPromptLabel": "视频生成提示词",
+  "storyboardVideoWorkbenchRepairSuggestionsPrefix": "生成前建议：{items}",
+  "@storyboardVideoWorkbenchRepairSuggestionsPrefix": {
+    "placeholders": {
+      "items": {
+        "type": "String"
+      }
+    }
+  },
+  "storyboardVideoWorkbenchNegativePromptLabel": "负向提示词",
+  "storyboardVideoWorkbenchNegativePromptHelper": "会自动回填当前分镜的失败约束，可按需继续删减或补充。",
+  "storyboardVideoWorkbenchDurationSecondsLabel": "时长（秒）",
+  "storyboardVideoWorkbenchResolutionLabel": "分辨率",
+  "storyboardVideoWorkbenchModeLabel": "生成模式",
+  "storyboardVideoWorkbenchModelLabel": "模型",
+  "storyboardVideoWorkbenchModelLoading": "等待加载模型信息",
+  "storyboardVideoWorkbenchIncludeAudioTitle": "生成视频时携带音频",
+  "storyboardVideoWorkbenchGenerating": "生成中…",
+  "storyboardVideoWorkbenchGenerateVideoOneClick": "一键生成视频",
+  "storyboardVideoWorkbenchExportCurrentVideoJob": "导出当前视频（job）",
+  "storyboardVideoWorkbenchRefreshingExportJob": "刷新导出任务中…",
+  "storyboardVideoWorkbenchRefreshExportJobStatus": "刷新导出任务状态",
+  "storyboardVideoWorkbenchSingleTrackHint": "若当前只发现 1 条可用轨道，提交时会自动回填，减少重复填写；存在多条轨道时仍保持手动选择，避免误生成。",
+  "storyboardVideoWorkbenchLatestExportJobLine": "最近导出任务：#{taskId} · {status} · {updatedAt}",
+  "@storyboardVideoWorkbenchLatestExportJobLine": {
+    "placeholders": {
+      "taskId": {
+        "type": "int"
+      },
+      "status": {
+        "type": "String"
+      },
+      "updatedAt": {
+        "type": "String"
+      }
+    }
+  },
+  "storyboardVideoWorkbenchExportLinkPrefix": "导出链接：",
+  "storyboardVideoWorkbenchExportErrorPrefix": "导出错误：",
+  "storyboardVideoWorkbenchSelectedVideoHeading": "当前已选视频",
+  "storyboardVideoWorkbenchSelectedVideoDetailSelected": "这条是当前分镜真正会继续导出和复用的视频版本。",
+  "storyboardVideoWorkbenchSelectedVideoDetailEmpty": "当前还没有已选视频；可先从候选里设为当前，再继续返工或导出。",
+  "storyboardVideoWorkbenchExportSelectedVideo": "导出当前视频",
+  "storyboardVideoWorkbenchContinuePatch": "继续局部返工",
+  "storyboardVideoWorkbenchDeleteSelectedVideo": "删除当前已选视频",
+  "storyboardVideoWorkbenchPickCandidateFirst": "先从下面的视频候选里选一条更满意的版本，后续返工会更聚焦。",
+  "storyboardVideoWorkbenchCandidatesHeading": "当前分镜的视频候选",
+  "storyboardVideoWorkbenchCandidatesEmpty": "还没有与当前 storyboard 关联的已生成视频。",
+  "storyboardVideoWorkbenchCandidatesDetail": "优先展示当前 storyboard 的视频结果；可直接设为当前，或继续局部返工。",
+  "storyboardVideoWorkbenchVideoUrlMissing": "视频 URL 缺失",
+  "storyboardVideoWorkbenchCandidateMetaCurrent": "当前生效中",
+  "storyboardVideoWorkbenchCandidateMetaState": "状态 {state}",
+  "@storyboardVideoWorkbenchCandidateMetaState": {
+    "placeholders": {
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "storyboardVideoWorkbenchCandidateMetaTrack": "轨道 {trackId}",
+  "@storyboardVideoWorkbenchCandidateMetaTrack": {
+    "placeholders": {
+      "trackId": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardVideoWorkbenchCandidateMetaDuration": "时长 {duration}",
+  "@storyboardVideoWorkbenchCandidateMetaDuration": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "storyboardVideoWorkbenchCurrentSelectedBadge": "当前已选",
+  "storyboardVideoWorkbenchSetAsCurrentVideo": "设为当前视频",
+  "storyboardVideoWorkbenchPatchShort": "局部返工",
+  "storyboardVideoWorkbenchPatchContinue": "继续局部返工",
+  "storyboardVideoWorkbenchInFlightJobsHeading": "进行中的视频任务",
+  "storyboardVideoWorkbenchWritebackSummaryNoPending": "成片回写概要：本分镜脚本共 {scriptCount} 镜；已检测到片媒体路径 {persistedCount}；进行中任务关联 {inFlightCount} 镜。",
+  "@storyboardVideoWorkbenchWritebackSummaryNoPending": {
+    "placeholders": {
+      "scriptCount": {
+        "type": "int"
+      },
+      "persistedCount": {
+        "type": "int"
+      },
+      "inFlightCount": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardVideoWorkbenchWritebackSummaryWithPending": "成片回写概要：本分镜脚本共 {scriptCount} 镜；已检测到片媒体路径 {persistedCount}；进行中任务关联 {inFlightCount} 镜，其中尚未回库的约 {pendingCount} 镜（待 worker 完结）。",
+  "@storyboardVideoWorkbenchWritebackSummaryWithPending": {
+    "placeholders": {
+      "scriptCount": {
+        "type": "int"
+      },
+      "persistedCount": {
+        "type": "int"
+      },
+      "inFlightCount": {
+        "type": "int"
+      },
+      "pendingCount": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardVideoWorkbenchJobSubtitle": "状态 {status} · {updatedAt}",
+  "@storyboardVideoWorkbenchJobSubtitle": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      },
+      "updatedAt": {
+        "type": "String"
+      }
+    }
+  },
   "shortVideoReadinessNoPayloadHeadline": "还没有读取到分镜就绪数据。",
   "shortVideoReadinessEmptyProjectHeadline": "当前项目还没有分镜行，可先在脚本侧拆镜后再看聚合。",
   "shortVideoReadinessRollupHeadline": "就绪 {ready}/{total} 条分镜；阻塞 {blocked} 条。",

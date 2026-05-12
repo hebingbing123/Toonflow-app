@@ -7745,6 +7745,311 @@ class AppLocalizationsZh extends AppLocalizations {
   String get storyboardWorkbenchProductionMetaLoadedEmpty => '制作视图已加载';
 
   @override
+  String storyboardEditorDialogTitle(int numericId) {
+    return '分镜 #$numericId';
+  }
+
+  @override
+  String get storyboardEditorPromptLabelClearEmpty => '分镜提示词（留空则清空）';
+
+  @override
+  String get storyboardEditorStateLabelClearEmpty => '状态（留空则清空）';
+
+  @override
+  String get storyboardEditorVideoDescLabelClearEmpty => '视频描述（留空则清空）';
+
+  @override
+  String get storyboardEditorSbIndexLabelClearEmpty => '分镜序号（留空则清空）';
+
+  @override
+  String get storyboardEditorShouldGenerateImageLabelClearEmpty =>
+      '是否需要出图（留空则清空）';
+
+  @override
+  String get storyboardEditorDeleteConfirmTitle => '删除分镜？';
+
+  @override
+  String storyboardEditorDeleteConfirmBody(int numericId) {
+    return '将删除 storyboard #$numericId。';
+  }
+
+  @override
+  String get storyboardEditorDialogCancel => '取消';
+
+  @override
+  String get storyboardEditorDialogConfirmDelete => '删除';
+
+  @override
+  String get storyboardEditorDeletedSnack => '分镜已删除';
+
+  @override
+  String get storyboardEditorSbIndexMustBeInteger => '分镜序号必须是整数';
+
+  @override
+  String get storyboardEditorShouldGenerateImageMustBeInteger => '是否需要出图必须是整数';
+
+  @override
+  String get storyboardEditorDeleteStoryboard => '删除分镜';
+
+  @override
+  String get storyboardEditorSaving => '保存中…';
+
+  @override
+  String get storyboardEditorSaveChanges => '保存修改';
+
+  @override
+  String get storyboardVideoWorkbenchTitle => '视频工作台';
+
+  @override
+  String get storyboardVideoWorkbenchTrackIdLabel => '轨道 ID';
+
+  @override
+  String get storyboardVideoWorkbenchTrackIdHelperNoTracks => '当前还没有已知轨道，可先新建。';
+
+  @override
+  String storyboardVideoWorkbenchTrackIdHelperKnown(String ids) {
+    return '已发现轨道：$ids';
+  }
+
+  @override
+  String get storyboardVideoWorkbenchNewTrackNameLabel => '新轨道名称';
+
+  @override
+  String get storyboardVideoWorkbenchNewTrackNameHelper => '新增后会自动回填轨道 ID。';
+
+  @override
+  String get storyboardVideoWorkbenchAddTrack => '新增轨道';
+
+  @override
+  String get storyboardVideoWorkbenchDeleteTrack => '删除轨道';
+
+  @override
+  String get storyboardVideoWorkbenchGenerateDefaultPrompt => '手动生成默认提示词';
+
+  @override
+  String get storyboardVideoWorkbenchPatchRegeneration => '局部返工';
+
+  @override
+  String get storyboardVideoWorkbenchApplyPromptRepairs => '手动应用生成前建议';
+
+  @override
+  String get storyboardVideoWorkbenchRefreshing => '刷新中…';
+
+  @override
+  String get storyboardVideoWorkbenchRefreshVideoDataManual => '手动刷新视频数据';
+
+  @override
+  String get storyboardVideoWorkbenchPrimaryHint =>
+      '默认建议直接点「一键生成视频」。系统会自动补提示词、裁剪低收益片段、压缩重复负向约束并刷新结果；上面这些按钮保留给需要手动干预的场景。';
+
+  @override
+  String get storyboardVideoWorkbenchPatchAttributionHint =>
+      '局部返工只提交最小修复范围；若命中 attribution mode，会返回归因提示，避免把单点问题误当全量重跑。';
+
+  @override
+  String get storyboardVideoWorkbenchQualityReviewCheckboxTitle =>
+      '生成时自动记录质量评审样本';
+
+  @override
+  String get storyboardVideoWorkbenchQualityReviewCheckboxSubtitle =>
+      '用于统计「命中表演/语气记忆优先策略」的通过率与坏例趋势。';
+
+  @override
+  String get storyboardVideoWorkbenchSubtitleLabel => '字幕/旁白文案';
+
+  @override
+  String get storyboardVideoWorkbenchSubtitleHelper =>
+      '导出 SRT、时间线字幕和默认视频提示词会优先使用这里的内容。';
+
+  @override
+  String get storyboardVideoWorkbenchSaveSubtitle => '保存字幕/旁白文案';
+
+  @override
+  String get storyboardVideoWorkbenchRegenerateVoiceover => '重新生成配音';
+
+  @override
+  String get storyboardVideoWorkbenchGenerateVoiceover => '生成配音';
+
+  @override
+  String get storyboardVideoWorkbenchLiveActionRefsLabel => '真人参考镜头 URL（每行一条）';
+
+  @override
+  String get storyboardVideoWorkbenchLiveActionRefsHelper =>
+      '真人模式会把这组参考镜头纳入 readiness；动漫模式可留空。';
+
+  @override
+  String get storyboardVideoWorkbenchPerformanceNotesLabel => '表演 / 口播约束';
+
+  @override
+  String get storyboardVideoWorkbenchPerformanceNotesHelper =>
+      '例如停顿、情绪强度、镜头真实感、口型同步重点。';
+
+  @override
+  String get storyboardVideoWorkbenchSaveLiveAction => '保存真人参考与表演约束';
+
+  @override
+  String get storyboardVideoWorkbenchVideoPromptLabel => '视频生成提示词';
+
+  @override
+  String storyboardVideoWorkbenchRepairSuggestionsPrefix(String items) {
+    return '生成前建议：$items';
+  }
+
+  @override
+  String get storyboardVideoWorkbenchNegativePromptLabel => '负向提示词';
+
+  @override
+  String get storyboardVideoWorkbenchNegativePromptHelper =>
+      '会自动回填当前分镜的失败约束，可按需继续删减或补充。';
+
+  @override
+  String get storyboardVideoWorkbenchDurationSecondsLabel => '时长（秒）';
+
+  @override
+  String get storyboardVideoWorkbenchResolutionLabel => '分辨率';
+
+  @override
+  String get storyboardVideoWorkbenchModeLabel => '生成模式';
+
+  @override
+  String get storyboardVideoWorkbenchModelLabel => '模型';
+
+  @override
+  String get storyboardVideoWorkbenchModelLoading => '等待加载模型信息';
+
+  @override
+  String get storyboardVideoWorkbenchIncludeAudioTitle => '生成视频时携带音频';
+
+  @override
+  String get storyboardVideoWorkbenchGenerating => '生成中…';
+
+  @override
+  String get storyboardVideoWorkbenchGenerateVideoOneClick => '一键生成视频';
+
+  @override
+  String get storyboardVideoWorkbenchExportCurrentVideoJob => '导出当前视频（job）';
+
+  @override
+  String get storyboardVideoWorkbenchRefreshingExportJob => '刷新导出任务中…';
+
+  @override
+  String get storyboardVideoWorkbenchRefreshExportJobStatus => '刷新导出任务状态';
+
+  @override
+  String get storyboardVideoWorkbenchSingleTrackHint =>
+      '若当前只发现 1 条可用轨道，提交时会自动回填，减少重复填写；存在多条轨道时仍保持手动选择，避免误生成。';
+
+  @override
+  String storyboardVideoWorkbenchLatestExportJobLine(
+    int taskId,
+    String status,
+    String updatedAt,
+  ) {
+    return '最近导出任务：#$taskId · $status · $updatedAt';
+  }
+
+  @override
+  String get storyboardVideoWorkbenchExportLinkPrefix => '导出链接：';
+
+  @override
+  String get storyboardVideoWorkbenchExportErrorPrefix => '导出错误：';
+
+  @override
+  String get storyboardVideoWorkbenchSelectedVideoHeading => '当前已选视频';
+
+  @override
+  String get storyboardVideoWorkbenchSelectedVideoDetailSelected =>
+      '这条是当前分镜真正会继续导出和复用的视频版本。';
+
+  @override
+  String get storyboardVideoWorkbenchSelectedVideoDetailEmpty =>
+      '当前还没有已选视频；可先从候选里设为当前，再继续返工或导出。';
+
+  @override
+  String get storyboardVideoWorkbenchExportSelectedVideo => '导出当前视频';
+
+  @override
+  String get storyboardVideoWorkbenchContinuePatch => '继续局部返工';
+
+  @override
+  String get storyboardVideoWorkbenchDeleteSelectedVideo => '删除当前已选视频';
+
+  @override
+  String get storyboardVideoWorkbenchPickCandidateFirst =>
+      '先从下面的视频候选里选一条更满意的版本，后续返工会更聚焦。';
+
+  @override
+  String get storyboardVideoWorkbenchCandidatesHeading => '当前分镜的视频候选';
+
+  @override
+  String get storyboardVideoWorkbenchCandidatesEmpty =>
+      '还没有与当前 storyboard 关联的已生成视频。';
+
+  @override
+  String get storyboardVideoWorkbenchCandidatesDetail =>
+      '优先展示当前 storyboard 的视频结果；可直接设为当前，或继续局部返工。';
+
+  @override
+  String get storyboardVideoWorkbenchVideoUrlMissing => '视频 URL 缺失';
+
+  @override
+  String get storyboardVideoWorkbenchCandidateMetaCurrent => '当前生效中';
+
+  @override
+  String storyboardVideoWorkbenchCandidateMetaState(String state) {
+    return '状态 $state';
+  }
+
+  @override
+  String storyboardVideoWorkbenchCandidateMetaTrack(int trackId) {
+    return '轨道 $trackId';
+  }
+
+  @override
+  String storyboardVideoWorkbenchCandidateMetaDuration(String duration) {
+    return '时长 $duration';
+  }
+
+  @override
+  String get storyboardVideoWorkbenchCurrentSelectedBadge => '当前已选';
+
+  @override
+  String get storyboardVideoWorkbenchSetAsCurrentVideo => '设为当前视频';
+
+  @override
+  String get storyboardVideoWorkbenchPatchShort => '局部返工';
+
+  @override
+  String get storyboardVideoWorkbenchPatchContinue => '继续局部返工';
+
+  @override
+  String get storyboardVideoWorkbenchInFlightJobsHeading => '进行中的视频任务';
+
+  @override
+  String storyboardVideoWorkbenchWritebackSummaryNoPending(
+    int scriptCount,
+    int persistedCount,
+    int inFlightCount,
+  ) {
+    return '成片回写概要：本分镜脚本共 $scriptCount 镜；已检测到片媒体路径 $persistedCount；进行中任务关联 $inFlightCount 镜。';
+  }
+
+  @override
+  String storyboardVideoWorkbenchWritebackSummaryWithPending(
+    int scriptCount,
+    int persistedCount,
+    int inFlightCount,
+    int pendingCount,
+  ) {
+    return '成片回写概要：本分镜脚本共 $scriptCount 镜；已检测到片媒体路径 $persistedCount；进行中任务关联 $inFlightCount 镜，其中尚未回库的约 $pendingCount 镜（待 worker 完结）。';
+  }
+
+  @override
+  String storyboardVideoWorkbenchJobSubtitle(String status, String updatedAt) {
+    return '状态 $status · $updatedAt';
+  }
+
+  @override
   String get shortVideoReadinessNoPayloadHeadline => '还没有读取到分镜就绪数据。';
 
   @override

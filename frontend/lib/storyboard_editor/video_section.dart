@@ -93,6 +93,7 @@ class _StoryboardVideoSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final latestExportUrl = (latestExportJob?.result?['export_url'] as String?)
         ?.trim();
     final resolvedExportUrl =
@@ -107,24 +108,29 @@ class _StoryboardVideoSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('视频工作台', style: Theme.of(context).textTheme.titleSmall),
+        Text(
+          l10n.storyboardVideoWorkbenchTitle,
+          style: Theme.of(context).textTheme.titleSmall,
+        ),
         const SizedBox(height: 8),
         TextField(
           controller: trackIdCtrl,
           keyboardType: TextInputType.number,
           decoration: InputDecoration(
-            labelText: '轨道 ID',
+            labelText: l10n.storyboardVideoWorkbenchTrackIdLabel,
             helperText: knownTrackIds.isEmpty
-                ? '当前还没有已知轨道，可先新建。'
-                : '已发现轨道：${knownTrackIds.join(", ")}',
+                ? l10n.storyboardVideoWorkbenchTrackIdHelperNoTracks
+                : l10n.storyboardVideoWorkbenchTrackIdHelperKnown(
+                    knownTrackIds.join(', '),
+                  ),
           ),
         ),
         const SizedBox(height: 8),
         TextField(
           controller: trackNameCtrl,
-          decoration: const InputDecoration(
-            labelText: '新轨道名称',
-            helperText: '新增后会自动回填轨道 ID。',
+          decoration: InputDecoration(
+            labelText: l10n.storyboardVideoWorkbenchNewTrackNameLabel,
+            helperText: l10n.storyboardVideoWorkbenchNewTrackNameHelper,
           ),
         ),
         const SizedBox(height: 8),
@@ -134,42 +140,46 @@ class _StoryboardVideoSection extends StatelessWidget {
           children: [
             FilledButton.tonal(
               onPressed: saving ? null : onAddTrack,
-              child: const Text('新增轨道'),
+              child: Text(l10n.storyboardVideoWorkbenchAddTrack),
             ),
             TextButton(
               onPressed: saving ? null : onDeleteTrack,
-              child: const Text('删除轨道'),
+              child: Text(l10n.storyboardVideoWorkbenchDeleteTrack),
             ),
             TextButton(
               onPressed: saving ? null : onGenerateVideoPrompt,
-              child: const Text('手动生成默认提示词'),
+              child: Text(l10n.storyboardVideoWorkbenchGenerateDefaultPrompt),
             ),
             TextButton(
               onPressed: saving ? null : onOpenPatchRegeneration,
-              child: const Text('局部返工'),
+              child: Text(l10n.storyboardVideoWorkbenchPatchRegeneration),
             ),
             TextButton(
               onPressed: saving || promptDiagnostics == null
                   ? null
                   : onApplyPromptRepairs,
-              child: const Text('手动应用生成前建议'),
+              child: Text(l10n.storyboardVideoWorkbenchApplyPromptRepairs),
             ),
             TextButton(
               onPressed: saving || loadingWorkbench ? null : onRefreshVideoData,
-              child: Text(loadingWorkbench ? '刷新中…' : '手动刷新视频数据'),
+              child: Text(
+                loadingWorkbench
+                    ? l10n.storyboardVideoWorkbenchRefreshing
+                    : l10n.storyboardVideoWorkbenchRefreshVideoDataManual,
+              ),
             ),
           ],
         ),
         const SizedBox(height: 4),
         Text(
-          '默认建议直接点“一键生成视频”。系统会自动补提示词、裁剪低收益片段、压缩重复负向约束并刷新结果；上面这些按钮保留给需要手动干预的场景。',
+          l10n.storyboardVideoWorkbenchPrimaryHint,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
             color: Theme.of(context).colorScheme.primary,
           ),
         ),
         const SizedBox(height: 4),
         Text(
-          '局部返工只提交最小修复范围；若命中 attribution mode，会返回归因提示，避免把单点问题误当全量重跑。',
+          l10n.storyboardVideoWorkbenchPatchAttributionHint,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
             color: Theme.of(context).colorScheme.outline,
           ),
@@ -183,8 +193,10 @@ class _StoryboardVideoSection extends StatelessWidget {
                     onAutoQualityReviewOnGeneratePromptChanged(value ?? false),
           dense: true,
           contentPadding: EdgeInsets.zero,
-          title: const Text('生成时自动记录质量评审样本'),
-          subtitle: const Text('用于统计“命中表演/语气记忆优先策略”的通过率与坏例趋势。'),
+          title: Text(l10n.storyboardVideoWorkbenchQualityReviewCheckboxTitle),
+          subtitle: Text(
+            l10n.storyboardVideoWorkbenchQualityReviewCheckboxSubtitle,
+          ),
           controlAffinity: ListTileControlAffinity.leading,
         ),
         const SizedBox(height: 8),
@@ -192,9 +204,9 @@ class _StoryboardVideoSection extends StatelessWidget {
           controller: videoDescriptionCtrl,
           minLines: 2,
           maxLines: 4,
-          decoration: const InputDecoration(
-            labelText: '字幕/旁白文案',
-            helperText: '导出 SRT、时间线字幕和默认视频提示词会优先使用这里的内容。',
+          decoration: InputDecoration(
+            labelText: l10n.storyboardVideoWorkbenchSubtitleLabel,
+            helperText: l10n.storyboardVideoWorkbenchSubtitleHelper,
             alignLabelWithHint: true,
           ),
         ),
@@ -207,14 +219,14 @@ class _StoryboardVideoSection extends StatelessWidget {
             children: [
               TextButton(
                 onPressed: saving ? null : onSaveVideoDescription,
-                child: const Text('保存字幕/旁白文案'),
+                child: Text(l10n.storyboardVideoWorkbenchSaveSubtitle),
               ),
               TextButton(
                 onPressed: saving ? null : onGenerateVoiceover,
                 child: Text(
                   (productionRow?.voiceoverState ?? '').trim() == 'completed'
-                      ? '重新生成配音'
-                      : '生成配音',
+                      ? l10n.storyboardVideoWorkbenchRegenerateVoiceover
+                      : l10n.storyboardVideoWorkbenchGenerateVoiceover,
                 ),
               ),
             ],
@@ -225,9 +237,9 @@ class _StoryboardVideoSection extends StatelessWidget {
           controller: liveActionReferenceShotsCtrl,
           minLines: 2,
           maxLines: 4,
-          decoration: const InputDecoration(
-            labelText: '真人参考镜头 URL（每行一条）',
-            helperText: '真人模式会把这组参考镜头纳入 readiness；动漫模式可留空。',
+          decoration: InputDecoration(
+            labelText: l10n.storyboardVideoWorkbenchLiveActionRefsLabel,
+            helperText: l10n.storyboardVideoWorkbenchLiveActionRefsHelper,
             alignLabelWithHint: true,
           ),
         ),
@@ -236,9 +248,9 @@ class _StoryboardVideoSection extends StatelessWidget {
           controller: liveActionPerformanceNotesCtrl,
           minLines: 2,
           maxLines: 4,
-          decoration: const InputDecoration(
-            labelText: '表演 / 口播约束',
-            helperText: '例如停顿、情绪强度、镜头真实感、口型同步重点。',
+          decoration: InputDecoration(
+            labelText: l10n.storyboardVideoWorkbenchPerformanceNotesLabel,
+            helperText: l10n.storyboardVideoWorkbenchPerformanceNotesHelper,
             alignLabelWithHint: true,
           ),
         ),
@@ -247,7 +259,7 @@ class _StoryboardVideoSection extends StatelessWidget {
           alignment: Alignment.centerLeft,
           child: TextButton(
             onPressed: saving ? null : onSaveLiveActionReference,
-            child: const Text('保存真人参考与表演约束'),
+            child: Text(l10n.storyboardVideoWorkbenchSaveLiveAction),
           ),
         ),
         const SizedBox(height: 8),
@@ -255,8 +267,8 @@ class _StoryboardVideoSection extends StatelessWidget {
           controller: videoPromptCtrl,
           minLines: 3,
           maxLines: 6,
-          decoration: const InputDecoration(
-            labelText: '视频生成提示词',
+          decoration: InputDecoration(
+            labelText: l10n.storyboardVideoWorkbenchVideoPromptLabel,
             alignLabelWithHint: true,
           ),
         ),
@@ -290,7 +302,9 @@ class _StoryboardVideoSection extends StatelessWidget {
           if (repairSuggestions.isNotEmpty) ...[
             const SizedBox(height: 6),
             Text(
-              '生成前建议：${repairSuggestions.join(' / ')}',
+              l10n.storyboardVideoWorkbenchRepairSuggestionsPrefix(
+                repairSuggestions.join(' / '),
+              ),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(context).colorScheme.primary,
               ),
@@ -302,9 +316,9 @@ class _StoryboardVideoSection extends StatelessWidget {
           controller: negativeVideoPromptCtrl,
           minLines: 2,
           maxLines: 4,
-          decoration: const InputDecoration(
-            labelText: '负向提示词',
-            helperText: '会自动回填当前分镜的失败约束，可按需继续删减或补充。',
+          decoration: InputDecoration(
+            labelText: l10n.storyboardVideoWorkbenchNegativePromptLabel,
+            helperText: l10n.storyboardVideoWorkbenchNegativePromptHelper,
             alignLabelWithHint: true,
           ),
         ),
@@ -315,14 +329,18 @@ class _StoryboardVideoSection extends StatelessWidget {
               child: TextField(
                 controller: videoDurationCtrl,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: '时长（秒）'),
+                decoration: InputDecoration(
+                  labelText: l10n.storyboardVideoWorkbenchDurationSecondsLabel,
+                ),
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: DropdownButtonFormField<String>(
                 initialValue: resolution,
-                decoration: const InputDecoration(labelText: '分辨率'),
+                decoration: InputDecoration(
+                  labelText: l10n.storyboardVideoWorkbenchResolutionLabel,
+                ),
                 items: (modelDetail?.resolutions.isNotEmpty ?? false)
                     ? modelDetail!.resolutions
                           .map(
@@ -352,7 +370,9 @@ class _StoryboardVideoSection extends StatelessWidget {
             Expanded(
               child: DropdownButtonFormField<String>(
                 initialValue: mode,
-                decoration: const InputDecoration(labelText: '生成模式'),
+                decoration: InputDecoration(
+                  labelText: l10n.storyboardVideoWorkbenchModeLabel,
+                ),
                 items: const [
                   DropdownMenuItem(value: 'standard', child: Text('standard')),
                   DropdownMenuItem(value: 'fast', child: Text('fast')),
@@ -368,8 +388,13 @@ class _StoryboardVideoSection extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: InputDecorator(
-                decoration: const InputDecoration(labelText: '模型'),
-                child: Text(modelDetail?.modelId ?? '等待加载模型信息'),
+                decoration: InputDecoration(
+                  labelText: l10n.storyboardVideoWorkbenchModelLabel,
+                ),
+                child: Text(
+                  modelDetail?.modelId ??
+                      l10n.storyboardVideoWorkbenchModelLoading,
+                ),
               ),
             ),
           ],
@@ -377,7 +402,7 @@ class _StoryboardVideoSection extends StatelessWidget {
         CheckboxListTile(
           value: audio,
           contentPadding: EdgeInsets.zero,
-          title: const Text('生成视频时携带音频'),
+          title: Text(l10n.storyboardVideoWorkbenchIncludeAudioTitle),
           controlAffinity: ListTileControlAffinity.leading,
           onChanged: saving ? null : (value) => onAudioChanged(value ?? false),
         ),
@@ -390,24 +415,32 @@ class _StoryboardVideoSection extends StatelessWidget {
             children: [
               FilledButton(
                 onPressed: saving ? null : onSubmitVideoGeneration,
-                child: Text(saving ? '生成中…' : '一键生成视频'),
+                child: Text(
+                  saving
+                      ? l10n.storyboardVideoWorkbenchGenerating
+                      : l10n.storyboardVideoWorkbenchGenerateVideoOneClick,
+                ),
               ),
               OutlinedButton(
                 onPressed: saving ? null : onExportCurrentVideo,
-                child: const Text('导出当前视频（job）'),
+                child: Text(l10n.storyboardVideoWorkbenchExportCurrentVideoJob),
               ),
               TextButton(
                 onPressed: saving || loadingExportJob
                     ? null
                     : onRefreshExportJob,
-                child: Text(loadingExportJob ? '刷新导出任务中…' : '刷新导出任务状态'),
+                child: Text(
+                  loadingExportJob
+                      ? l10n.storyboardVideoWorkbenchRefreshingExportJob
+                      : l10n.storyboardVideoWorkbenchRefreshExportJobStatus,
+                ),
               ),
             ],
           ),
         ),
         const SizedBox(height: 4),
         Text(
-          '若当前只发现 1 条可用轨道，提交时会自动回填，减少重复填写；存在多条轨道时仍保持手动选择，避免误生成。',
+          l10n.storyboardVideoWorkbenchSingleTrackHint,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
             color: Theme.of(context).colorScheme.outline,
           ),
@@ -415,17 +448,21 @@ class _StoryboardVideoSection extends StatelessWidget {
         if (latestExportJob != null) ...[
           const SizedBox(height: 8),
           Text(
-            '最近导出任务：#${latestExportJob!.numericTaskId} · ${latestExportJob!.status} · ${latestExportJob!.updatedAt}',
+            l10n.storyboardVideoWorkbenchLatestExportJobLine(
+              latestExportJob!.numericTaskId,
+              latestExportJob!.status,
+              latestExportJob!.updatedAt,
+            ),
             style: Theme.of(context).textTheme.bodySmall,
           ),
           if (resolvedExportUrl != null)
             SelectableText(
-              '导出链接：$resolvedExportUrl',
+              '${l10n.storyboardVideoWorkbenchExportLinkPrefix} $resolvedExportUrl',
               style: Theme.of(context).textTheme.bodySmall,
             ),
           if ((latestExportJob!.errorMessage ?? '').trim().isNotEmpty)
             Text(
-              '导出错误：${latestExportJob!.errorMessage}',
+              '${l10n.storyboardVideoWorkbenchExportErrorPrefix} ${latestExportJob!.errorMessage}',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(context).colorScheme.error,
               ),
@@ -436,12 +473,15 @@ class _StoryboardVideoSection extends StatelessWidget {
           Text(workbenchLine!, style: Theme.of(context).textTheme.bodySmall),
         ],
         const SizedBox(height: 12),
-        Text('当前已选视频', style: Theme.of(context).textTheme.labelLarge),
+        Text(
+          l10n.storyboardVideoWorkbenchSelectedVideoHeading,
+          style: Theme.of(context).textTheme.labelLarge,
+        ),
         const SizedBox(height: 4),
         Text(
           hasSelectedVideo
-              ? '这条是当前分镜真正会继续导出和复用的视频版本。'
-              : '当前还没有已选视频；可先从候选里设为当前，再继续返工或导出。',
+              ? l10n.storyboardVideoWorkbenchSelectedVideoDetailSelected
+              : l10n.storyboardVideoWorkbenchSelectedVideoDetailEmpty,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
             color: Theme.of(context).colorScheme.outline,
           ),
@@ -459,30 +499,33 @@ class _StoryboardVideoSection extends StatelessWidget {
             children: [
               OutlinedButton(
                 onPressed: saving ? null : onExportCurrentVideo,
-                child: const Text('导出当前视频'),
+                child: Text(l10n.storyboardVideoWorkbenchExportSelectedVideo),
               ),
               TextButton(
                 onPressed: saving ? null : onOpenPatchRegeneration,
-                child: const Text('继续局部返工'),
+                child: Text(l10n.storyboardVideoWorkbenchContinuePatch),
               ),
               TextButton(
                 onPressed: saving ? null : onDeleteCurrentVideo,
-                child: const Text('删除当前已选视频'),
+                child: Text(l10n.storyboardVideoWorkbenchDeleteSelectedVideo),
               ),
             ],
           ),
         ] else
           Text(
-            '先从下面的视频候选里选一条更满意的版本，后续返工会更聚焦。',
+            l10n.storyboardVideoWorkbenchPickCandidateFirst,
             style: Theme.of(context).textTheme.bodySmall,
           ),
         const SizedBox(height: 12),
-        Text('当前分镜的视频候选', style: Theme.of(context).textTheme.labelLarge),
+        Text(
+          l10n.storyboardVideoWorkbenchCandidatesHeading,
+          style: Theme.of(context).textTheme.labelLarge,
+        ),
         const SizedBox(height: 4),
         Text(
           storyboardVideos.isEmpty
-              ? '还没有与当前 storyboard 关联的已生成视频。'
-              : '优先展示当前 storyboard 的视频结果；可直接设为当前，或继续局部返工。',
+              ? l10n.storyboardVideoWorkbenchCandidatesEmpty
+              : l10n.storyboardVideoWorkbenchCandidatesDetail,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
             color: Theme.of(context).colorScheme.outline,
           ),
@@ -497,7 +540,7 @@ class _StoryboardVideoSection extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                video.videoUrl ?? '视频 URL 缺失',
+                video.videoUrl ?? l10n.storyboardVideoWorkbenchVideoUrlMissing,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.bodyMedium,
@@ -505,10 +548,20 @@ class _StoryboardVideoSection extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 [
-                  if (isCurrent) '当前生效中',
-                  if (state.trim().isNotEmpty) '状态 $state',
-                  if (video.trackId != null) '轨道 ${video.trackId}',
-                  if (duration.trim().isNotEmpty) '时长 $duration',
+                  if (isCurrent)
+                    l10n.storyboardVideoWorkbenchCandidateMetaCurrent,
+                  if (state.trim().isNotEmpty)
+                    l10n.storyboardVideoWorkbenchCandidateMetaState(
+                      state.trim(),
+                    ),
+                  if (video.trackId != null)
+                    l10n.storyboardVideoWorkbenchCandidateMetaTrack(
+                      video.trackId!,
+                    ),
+                  if (duration.trim().isNotEmpty)
+                    l10n.storyboardVideoWorkbenchCandidateMetaDuration(
+                      duration.trim(),
+                    ),
                 ].join(' · '),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
@@ -520,18 +573,26 @@ class _StoryboardVideoSection extends StatelessWidget {
                   if (isCurrent)
                     FilledButton.tonal(
                       onPressed: null,
-                      child: const Text('当前已选'),
+                      child: Text(
+                        l10n.storyboardVideoWorkbenchCurrentSelectedBadge,
+                      ),
                     )
                   else
                     TextButton(
                       onPressed: saving || videoUrl.isEmpty
                           ? null
                           : () => onSelectVideo(video),
-                      child: const Text('设为当前视频'),
+                      child: Text(
+                        l10n.storyboardVideoWorkbenchSetAsCurrentVideo,
+                      ),
                     ),
                   TextButton(
                     onPressed: saving ? null : onOpenPatchRegeneration,
-                    child: Text(isCurrent ? '继续局部返工' : '局部返工'),
+                    child: Text(
+                      isCurrent
+                          ? l10n.storyboardVideoWorkbenchPatchContinue
+                          : l10n.storyboardVideoWorkbenchPatchShort,
+                    ),
                   ),
                 ],
               ),
@@ -546,20 +607,33 @@ class _StoryboardVideoSection extends StatelessWidget {
                 generateData!.videoWritebackSummary.inFlightGenerationJobCount >
                     0)) ...[
           const SizedBox(height: 8),
-          Text('进行中的视频任务', style: Theme.of(context).textTheme.labelLarge),
+          Text(
+            l10n.storyboardVideoWorkbenchInFlightJobsHeading,
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
           Builder(
             builder: (ctx) {
               final s = generateData!.videoWritebackSummary;
               if (s.scriptStoryboardCount == 0) {
                 return const SizedBox.shrink();
               }
+              final pending = s.storyboardNumericIdsPendingWriteback;
+              final summaryText = pending.isEmpty
+                  ? l10n.storyboardVideoWorkbenchWritebackSummaryNoPending(
+                      s.scriptStoryboardCount,
+                      s.storyboardNumericIdsWithPersistedVideo.length,
+                      s.storyboardNumericIdsWithInFlightGeneration.length,
+                    )
+                  : l10n.storyboardVideoWorkbenchWritebackSummaryWithPending(
+                      s.scriptStoryboardCount,
+                      s.storyboardNumericIdsWithPersistedVideo.length,
+                      s.storyboardNumericIdsWithInFlightGeneration.length,
+                      pending.length,
+                    );
               return Padding(
                 padding: const EdgeInsets.only(bottom: 6),
                 child: Text(
-                  '成片回写概要：本分镜脚本共 ${s.scriptStoryboardCount} 镜；'
-                  '已检测到片媒体路径 ${s.storyboardNumericIdsWithPersistedVideo.length}；'
-                  '进行中任务关联 ${s.storyboardNumericIdsWithInFlightGeneration.length} 镜'
-                  '${s.storyboardNumericIdsPendingWriteback.isNotEmpty ? '，其中尚未回库的约 ${s.storyboardNumericIdsPendingWriteback.length} 镜（待 worker 完结）' : ''}。',
+                  summaryText,
                   style: Theme.of(ctx).textTheme.bodySmall,
                 ),
               );
@@ -573,7 +647,12 @@ class _StoryboardVideoSection extends StatelessWidget {
                   dense: true,
                   contentPadding: EdgeInsets.zero,
                   title: Text(job.kind),
-                  subtitle: Text('状态 ${job.status} · ${job.updatedAt}'),
+                  subtitle: Text(
+                    l10n.storyboardVideoWorkbenchJobSubtitle(
+                      job.status,
+                      job.updatedAt,
+                    ),
+                  ),
                 ),
               ),
         ],

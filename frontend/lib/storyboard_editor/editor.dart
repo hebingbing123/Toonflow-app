@@ -32,12 +32,13 @@ extension _HomePageStoryboardEditor on _HomePageState {
 
           return StatefulBuilder(
             builder: (ctx, setDialogState) {
+              final l10n = AppLocalizations.of(ctx)!;
               final viewportWidth = MediaQuery.sizeOf(ctx).width;
               final dialogWidth = viewportWidth.isFinite
                   ? viewportWidth.clamp(320.0, 720.0)
                   : 720.0;
               return AlertDialog(
-                title: Text('Storyboard #${row.numericId}'),
+                title: Text(l10n.storyboardEditorDialogTitle(row.numericId)),
                 content: SizedBox(
                   width: dialogWidth,
                   child: SingleChildScrollView(
@@ -60,24 +61,25 @@ extension _HomePageStoryboardEditor on _HomePageState {
                         TextField(
                           controller: promptCtrl,
                           maxLines: 4,
-                          decoration: const InputDecoration(
-                            labelText: '分镜提示词（留空则清空）',
+                          decoration: InputDecoration(
+                            labelText: l10n.storyboardEditorPromptLabelClearEmpty,
                             alignLabelWithHint: true,
                           ),
                         ),
                         const SizedBox(height: 8),
                         TextField(
                           controller: stateCtrl,
-                          decoration: const InputDecoration(
-                            labelText: '状态（留空则清空）',
+                          decoration: InputDecoration(
+                            labelText: l10n.storyboardEditorStateLabelClearEmpty,
                           ),
                         ),
                         const SizedBox(height: 8),
                         TextField(
                           controller: videoCtrl,
                           maxLines: 3,
-                          decoration: const InputDecoration(
-                            labelText: '视频描述（留空则清空）',
+                          decoration: InputDecoration(
+                            labelText:
+                                l10n.storyboardEditorVideoDescLabelClearEmpty,
                             alignLabelWithHint: true,
                           ),
                         ),
@@ -88,8 +90,9 @@ extension _HomePageStoryboardEditor on _HomePageState {
                               child: TextField(
                                 controller: sbIdxCtrl,
                                 keyboardType: TextInputType.number,
-                                decoration: const InputDecoration(
-                                  labelText: '分镜序号（留空则清空）',
+                                decoration: InputDecoration(
+                                  labelText:
+                                      l10n.storyboardEditorSbIndexLabelClearEmpty,
                                 ),
                               ),
                             ),
@@ -98,8 +101,9 @@ extension _HomePageStoryboardEditor on _HomePageState {
                               child: TextField(
                                 controller: sgiCtrl,
                                 keyboardType: TextInputType.number,
-                                decoration: const InputDecoration(
-                                  labelText: '是否需要出图（留空则清空）',
+                                decoration: InputDecoration(
+                                  labelText: l10n
+                                      .storyboardEditorShouldGenerateImageLabelClearEmpty,
                                 ),
                               ),
                             ),
@@ -112,7 +116,7 @@ extension _HomePageStoryboardEditor on _HomePageState {
                 actions: [
                   TextButton(
                     onPressed: saving[0] ? null : () => Navigator.of(ctx).pop(),
-                    child: const Text('关闭'),
+                    child: Text(l10n.projectEditorScriptsWorkbenchDialogClose),
                   ),
                   TextButton(
                     onPressed: saving[0]
@@ -121,18 +125,22 @@ extension _HomePageStoryboardEditor on _HomePageState {
                             final ok = await showDialog<bool>(
                               context: ctx,
                               builder: (c) => AlertDialog(
-                                title: const Text('删除分镜？'),
+                                title: Text(l10n.storyboardEditorDeleteConfirmTitle),
                                 content: Text(
-                                  '将删除 storyboard #${row.numericId}。',
+                                  l10n.storyboardEditorDeleteConfirmBody(
+                                    row.numericId,
+                                  ),
                                 ),
                                 actions: [
                                   TextButton(
                                     onPressed: () => Navigator.of(c).pop(false),
-                                    child: const Text('取消'),
+                                    child: Text(l10n.storyboardEditorDialogCancel),
                                   ),
                                   FilledButton(
                                     onPressed: () => Navigator.of(c).pop(true),
-                                    child: const Text('删除'),
+                                    child: Text(
+                                      l10n.storyboardEditorDialogConfirmDelete,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -151,7 +159,9 @@ extension _HomePageStoryboardEditor on _HomePageState {
                               Navigator.of(ctx).pop();
                               if (!mounted) return;
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('分镜已删除')),
+                                SnackBar(
+                                  content: Text(l10n.storyboardEditorDeletedSnack),
+                                ),
                               );
                             } on RustApiException catch (e) {
                               if (ctx.mounted) {
@@ -169,7 +179,7 @@ extension _HomePageStoryboardEditor on _HomePageState {
                               }
                             }
                           },
-                    child: const Text('删除分镜'),
+                    child: Text(l10n.storyboardEditorDeleteStoryboard),
                   ),
                   FilledButton(
                     onPressed: saving[0]
@@ -184,7 +194,11 @@ extension _HomePageStoryboardEditor on _HomePageState {
                                 if (ctx.mounted) {
                                   setDialogState(() => saving[0] = false);
                                   ScaffoldMessenger.of(ctx).showSnackBar(
-                                    const SnackBar(content: Text('分镜序号必须是整数')),
+                                    SnackBar(
+                                      content: Text(
+                                        l10n.storyboardEditorSbIndexMustBeInteger,
+                                      ),
+                                    ),
                                   );
                                 }
                                 return;
@@ -198,8 +212,11 @@ extension _HomePageStoryboardEditor on _HomePageState {
                                 if (ctx.mounted) {
                                   setDialogState(() => saving[0] = false);
                                   ScaffoldMessenger.of(ctx).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('是否需要出图必须是整数'),
+                                    SnackBar(
+                                      content: Text(
+                                        l10n
+                                            .storyboardEditorShouldGenerateImageMustBeInteger,
+                                      ),
                                     ),
                                   );
                                 }
@@ -247,7 +264,11 @@ extension _HomePageStoryboardEditor on _HomePageState {
                               }
                             }
                           },
-                    child: Text(saving[0] ? '保存中…' : '保存修改'),
+                    child: Text(
+                      saving[0]
+                          ? l10n.storyboardEditorSaving
+                          : l10n.storyboardEditorSaveChanges,
+                    ),
                   ),
                 ],
               );

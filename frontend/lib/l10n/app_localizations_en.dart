@@ -8091,6 +8091,339 @@ class AppLocalizationsEn extends AppLocalizations {
       'Production view loaded';
 
   @override
+  String storyboardEditorDialogTitle(int numericId) {
+    return 'Storyboard #$numericId';
+  }
+
+  @override
+  String get storyboardEditorPromptLabelClearEmpty =>
+      'Shot prompt (leave empty to clear)';
+
+  @override
+  String get storyboardEditorStateLabelClearEmpty =>
+      'Status (leave empty to clear)';
+
+  @override
+  String get storyboardEditorVideoDescLabelClearEmpty =>
+      'Video description (leave empty to clear)';
+
+  @override
+  String get storyboardEditorSbIndexLabelClearEmpty =>
+      'Shot index (leave empty to clear)';
+
+  @override
+  String get storyboardEditorShouldGenerateImageLabelClearEmpty =>
+      'Generate image flag (leave empty to clear)';
+
+  @override
+  String get storyboardEditorDeleteConfirmTitle => 'Delete this storyboard?';
+
+  @override
+  String storyboardEditorDeleteConfirmBody(int numericId) {
+    return 'This will delete storyboard #$numericId.';
+  }
+
+  @override
+  String get storyboardEditorDialogCancel => 'Cancel';
+
+  @override
+  String get storyboardEditorDialogConfirmDelete => 'Delete';
+
+  @override
+  String get storyboardEditorDeletedSnack => 'Storyboard deleted';
+
+  @override
+  String get storyboardEditorSbIndexMustBeInteger =>
+      'Shot index must be an integer';
+
+  @override
+  String get storyboardEditorShouldGenerateImageMustBeInteger =>
+      'Generate-image flag must be an integer';
+
+  @override
+  String get storyboardEditorDeleteStoryboard => 'Delete storyboard';
+
+  @override
+  String get storyboardEditorSaving => 'Saving…';
+
+  @override
+  String get storyboardEditorSaveChanges => 'Save changes';
+
+  @override
+  String get storyboardVideoWorkbenchTitle => 'Video workbench';
+
+  @override
+  String get storyboardVideoWorkbenchTrackIdLabel => 'Track ID';
+
+  @override
+  String get storyboardVideoWorkbenchTrackIdHelperNoTracks =>
+      'No known tracks yet—you can create one first.';
+
+  @override
+  String storyboardVideoWorkbenchTrackIdHelperKnown(String ids) {
+    return 'Known tracks: $ids';
+  }
+
+  @override
+  String get storyboardVideoWorkbenchNewTrackNameLabel => 'New track name';
+
+  @override
+  String get storyboardVideoWorkbenchNewTrackNameHelper =>
+      'After adding, the track ID will be filled in automatically.';
+
+  @override
+  String get storyboardVideoWorkbenchAddTrack => 'Add track';
+
+  @override
+  String get storyboardVideoWorkbenchDeleteTrack => 'Delete track';
+
+  @override
+  String get storyboardVideoWorkbenchGenerateDefaultPrompt =>
+      'Generate default prompt manually';
+
+  @override
+  String get storyboardVideoWorkbenchPatchRegeneration => 'Partial rework';
+
+  @override
+  String get storyboardVideoWorkbenchApplyPromptRepairs =>
+      'Apply pre-generation suggestions manually';
+
+  @override
+  String get storyboardVideoWorkbenchRefreshing => 'Refreshing…';
+
+  @override
+  String get storyboardVideoWorkbenchRefreshVideoDataManual =>
+      'Refresh video data manually';
+
+  @override
+  String get storyboardVideoWorkbenchPrimaryHint =>
+      'Prefer “Generate video” below—the system fills prompts, trims low-value fragments, dedupes negative constraints, and refreshes results. The buttons above are for manual intervention.';
+
+  @override
+  String get storyboardVideoWorkbenchPatchAttributionHint =>
+      'Partial rework submits the smallest fix scope; attribution mode returns upstream hints so you don’t treat a single-shot issue as a full rerun.';
+
+  @override
+  String get storyboardVideoWorkbenchQualityReviewCheckboxTitle =>
+      'Record quality-review samples when generating';
+
+  @override
+  String get storyboardVideoWorkbenchQualityReviewCheckboxSubtitle =>
+      'Used to track pass rates and bad-case trends for “performance/delivery memory priority”.';
+
+  @override
+  String get storyboardVideoWorkbenchSubtitleLabel =>
+      'Subtitle / voiceover script';
+
+  @override
+  String get storyboardVideoWorkbenchSubtitleHelper =>
+      'SRT export, timeline captions, and the default video prompt prefer this text.';
+
+  @override
+  String get storyboardVideoWorkbenchSaveSubtitle =>
+      'Save subtitle / voiceover script';
+
+  @override
+  String get storyboardVideoWorkbenchRegenerateVoiceover =>
+      'Regenerate voiceover';
+
+  @override
+  String get storyboardVideoWorkbenchGenerateVoiceover => 'Generate voiceover';
+
+  @override
+  String get storyboardVideoWorkbenchLiveActionRefsLabel =>
+      'Live-action reference shot URLs (one per line)';
+
+  @override
+  String get storyboardVideoWorkbenchLiveActionRefsHelper =>
+      'Live-action mode includes these in readiness; animated mode can leave empty.';
+
+  @override
+  String get storyboardVideoWorkbenchPerformanceNotesLabel =>
+      'Performance / delivery constraints';
+
+  @override
+  String get storyboardVideoWorkbenchPerformanceNotesHelper =>
+      'e.g. pauses, emotional intensity, realism, lip-sync emphasis.';
+
+  @override
+  String get storyboardVideoWorkbenchSaveLiveAction =>
+      'Save live-action refs & performance constraints';
+
+  @override
+  String get storyboardVideoWorkbenchVideoPromptLabel =>
+      'Video generation prompt';
+
+  @override
+  String storyboardVideoWorkbenchRepairSuggestionsPrefix(String items) {
+    return 'Pre-generation suggestions: $items';
+  }
+
+  @override
+  String get storyboardVideoWorkbenchNegativePromptLabel => 'Negative prompt';
+
+  @override
+  String get storyboardVideoWorkbenchNegativePromptHelper =>
+      'Auto-filled from this shot’s failure constraints; trim or extend as needed.';
+
+  @override
+  String get storyboardVideoWorkbenchDurationSecondsLabel =>
+      'Duration (seconds)';
+
+  @override
+  String get storyboardVideoWorkbenchResolutionLabel => 'Resolution';
+
+  @override
+  String get storyboardVideoWorkbenchModeLabel => 'Generation mode';
+
+  @override
+  String get storyboardVideoWorkbenchModelLabel => 'Model';
+
+  @override
+  String get storyboardVideoWorkbenchModelLoading => 'Loading model info…';
+
+  @override
+  String get storyboardVideoWorkbenchIncludeAudioTitle =>
+      'Include audio in generated video';
+
+  @override
+  String get storyboardVideoWorkbenchGenerating => 'Generating…';
+
+  @override
+  String get storyboardVideoWorkbenchGenerateVideoOneClick => 'Generate video';
+
+  @override
+  String get storyboardVideoWorkbenchExportCurrentVideoJob =>
+      'Export current video (job)';
+
+  @override
+  String get storyboardVideoWorkbenchRefreshingExportJob =>
+      'Refreshing export job…';
+
+  @override
+  String get storyboardVideoWorkbenchRefreshExportJobStatus =>
+      'Refresh export job status';
+
+  @override
+  String get storyboardVideoWorkbenchSingleTrackHint =>
+      'If only one usable track is detected, it will be auto-filled on submit; with multiple tracks you still pick manually to avoid wrong renders.';
+
+  @override
+  String storyboardVideoWorkbenchLatestExportJobLine(
+    int taskId,
+    String status,
+    String updatedAt,
+  ) {
+    return 'Latest export job: #$taskId · $status · $updatedAt';
+  }
+
+  @override
+  String get storyboardVideoWorkbenchExportLinkPrefix => 'Export URL:';
+
+  @override
+  String get storyboardVideoWorkbenchExportErrorPrefix => 'Export error:';
+
+  @override
+  String get storyboardVideoWorkbenchSelectedVideoHeading => 'Selected video';
+
+  @override
+  String get storyboardVideoWorkbenchSelectedVideoDetailSelected =>
+      'This is the version used for export and reuse on this shot.';
+
+  @override
+  String get storyboardVideoWorkbenchSelectedVideoDetailEmpty =>
+      'No selected video yet—pick one from candidates below, then continue rework or export.';
+
+  @override
+  String get storyboardVideoWorkbenchExportSelectedVideo =>
+      'Export current video';
+
+  @override
+  String get storyboardVideoWorkbenchContinuePatch => 'Continue partial rework';
+
+  @override
+  String get storyboardVideoWorkbenchDeleteSelectedVideo =>
+      'Remove selected video';
+
+  @override
+  String get storyboardVideoWorkbenchPickCandidateFirst =>
+      'Pick a candidate below first—rework will be more focused.';
+
+  @override
+  String get storyboardVideoWorkbenchCandidatesHeading =>
+      'Video candidates for this shot';
+
+  @override
+  String get storyboardVideoWorkbenchCandidatesEmpty =>
+      'No generated videos linked to this storyboard yet.';
+
+  @override
+  String get storyboardVideoWorkbenchCandidatesDetail =>
+      'Shows videos for this storyboard; set one as current or continue partial rework.';
+
+  @override
+  String get storyboardVideoWorkbenchVideoUrlMissing => 'Video URL missing';
+
+  @override
+  String get storyboardVideoWorkbenchCandidateMetaCurrent => 'Active';
+
+  @override
+  String storyboardVideoWorkbenchCandidateMetaState(String state) {
+    return 'Status $state';
+  }
+
+  @override
+  String storyboardVideoWorkbenchCandidateMetaTrack(int trackId) {
+    return 'Track $trackId';
+  }
+
+  @override
+  String storyboardVideoWorkbenchCandidateMetaDuration(String duration) {
+    return 'Duration $duration';
+  }
+
+  @override
+  String get storyboardVideoWorkbenchCurrentSelectedBadge => 'Current';
+
+  @override
+  String get storyboardVideoWorkbenchSetAsCurrentVideo =>
+      'Set as current video';
+
+  @override
+  String get storyboardVideoWorkbenchPatchShort => 'Partial rework';
+
+  @override
+  String get storyboardVideoWorkbenchPatchContinue => 'Continue partial rework';
+
+  @override
+  String get storyboardVideoWorkbenchInFlightJobsHeading =>
+      'In-flight video jobs';
+
+  @override
+  String storyboardVideoWorkbenchWritebackSummaryNoPending(
+    int scriptCount,
+    int persistedCount,
+    int inFlightCount,
+  ) {
+    return 'Writeback summary: this script mirror has $scriptCount shots; persisted media paths for $persistedCount; in-flight tasks tied to $inFlightCount shots.';
+  }
+
+  @override
+  String storyboardVideoWorkbenchWritebackSummaryWithPending(
+    int scriptCount,
+    int persistedCount,
+    int inFlightCount,
+    int pendingCount,
+  ) {
+    return 'Writeback summary: this script mirror has $scriptCount shots; persisted media paths for $persistedCount; in-flight tasks tied to $inFlightCount shots; ~$pendingCount shots still pending worker writeback.';
+  }
+
+  @override
+  String storyboardVideoWorkbenchJobSubtitle(String status, String updatedAt) {
+    return 'Status $status · $updatedAt';
+  }
+
+  @override
   String get shortVideoReadinessNoPayloadHeadline =>
       'Shot readiness data is not available yet.';
 
