@@ -56,6 +56,7 @@ import 'content_compliance/controller.dart';
 import 'content_compliance/section.dart';
 import 'jobs/controller.dart';
 import 'notifications/controller.dart';
+import 'notifications/product_scope.dart';
 import 'notifications/section.dart';
 import 'projects/controller.dart';
 import 'quality_reviews/controller.dart';
@@ -602,6 +603,23 @@ class _HomePageState extends State<HomePage> {
       return;
     }
     final path = uri.path;
+    final scope = resolveNotificationProductScope(notification, uri);
+
+    void applyNotificationProjectScope() {
+      if (!scope.hasProjectScope) {
+        return;
+      }
+      setState(() {
+        _productScopedProjectNumericId = scope.projectNumericId;
+      });
+      _workspaceInputController.applyProjectScopeRef(
+        projectNumericId: scope.projectNumericId,
+        scriptNumericId: scope.scriptNumericId,
+        projectUuid: scope.projectUuid,
+        workspaceId: scope.workspaceId,
+      );
+    }
+
     if (path == '/product/search') {
       final q = uri.queryParameters['q']?.trim() ?? '';
       if (q.length >= 2) {
@@ -610,6 +628,7 @@ class _HomePageState extends State<HomePage> {
       return;
     }
     if (path == '/product/jobs') {
+      applyNotificationProjectScope();
       final jobId = uri.queryParameters['jobId'];
       if (jobId != null && jobId.isNotEmpty) {
         _jobsController.jobIdController.text = jobId;
@@ -634,21 +653,7 @@ class _HomePageState extends State<HomePage> {
       return;
     }
     if (path == '/product/projects') {
-      final projectNumericId = int.tryParse(
-        uri.queryParameters['projectNumericId'] ?? '',
-      );
-      final projectUuid = (uri.queryParameters['projectUuid'] ?? '').trim();
-      final workspaceId = (uri.queryParameters['workspaceId'] ?? '').trim();
-      if (projectNumericId != null || projectUuid.isNotEmpty) {
-        setState(() {
-          _productScopedProjectNumericId = projectNumericId;
-        });
-        _workspaceInputController.applyProjectScopeRef(
-          projectNumericId: projectNumericId,
-          projectUuid: projectUuid.isEmpty ? null : projectUuid,
-          workspaceId: workspaceId.isEmpty ? null : workspaceId,
-        );
-      }
+      applyNotificationProjectScope();
       _shellNavigationController.selectProductWorkspacePane(
         ProductWorkspacePane.projects,
       );
@@ -688,11 +693,19 @@ class _HomePageState extends State<HomePage> {
       return;
     }
     if (path == '/product/quality') {
+      applyNotificationProjectScope();
       _selectProductPaneWithGate(
         ProductWorkspacePane.quality,
         disabledReason: AppLocalizations.of(
           context,
         )!.productPaneDisabledQuality,
+      );
+      return;
+    }
+    if (path == '/product/tasks') {
+      applyNotificationProjectScope();
+      _shellNavigationController.selectProductWorkspacePane(
+        ProductWorkspacePane.tasks,
       );
       return;
     }
