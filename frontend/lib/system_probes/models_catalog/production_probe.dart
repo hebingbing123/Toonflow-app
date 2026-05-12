@@ -149,6 +149,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbe on _HomePageState {
       await postProductionWorkbenchBatchGenerateCandidateClipsV1(
         token,
         projectId: projectId,
+        projectUuid: projectUuid,
         scriptId: scriptId,
       );
       batchCandStatus = 200;

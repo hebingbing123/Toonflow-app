@@ -37,6 +37,7 @@ extension _ShortVideoSpaceSectionProductionExtension on _ShortVideoSpaceSectionS
       final res = await postProductionWorkbenchBatchGenerateCandidateClipsV1(
         token,
         projectId: project.numericId,
+        projectUuid: project.id,
         scriptId: scriptNumericId,
       );
       if (!mounted) {
@@ -250,6 +251,7 @@ extension _ShortVideoSpaceSectionProductionExtension on _ShortVideoSpaceSectionS
               final resp = await postProductionGetStoryboardDataV1(
                 token,
                 projectId: project.numericId,
+                projectUuid: project.id,
                 scriptId: script.numericId,
               );
               storyboardRows.addAll(resp.data);
