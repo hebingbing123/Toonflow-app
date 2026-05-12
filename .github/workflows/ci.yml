@@ -13,8 +13,33 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  refactor-monorepo:
-    name: Refactor stack (OpenAPI + Rust + Flutter)
+  openapi-contract:
+    name: OpenAPI contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: backend
+      - name: Export merged OpenAPI and validate YAML
+        env:
+          TOONFLOW_GIT_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          tmp_spec="$(mktemp)"
+          (
+            cd backend
+            cargo run --quiet --bin export-openapi
+          ) > "$tmp_spec"
+          ruby -ryaml -e "YAML.load(File.read(ARGV[0]))" "$tmp_spec"
+          export TOONFLOW_OPENAPI_SPEC="$tmp_spec"
+          bash scripts/check_openapi_drift.sh
+          bash scripts/check_rust_api_consistency.sh
+          rm -f "$tmp_spec"
+
+  backend-rust:
+    name: Backend Rust
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,14 +49,42 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: backend
+      - name: cargo fmt + clippy
+        run: |
+          set -euo pipefail
+          cd backend
+          cargo fmt -- --check
+          cargo clippy -- -D warnings
+      - name: cargo test
+        run: |
+          set -euo pipefail
+          cd backend
+          cargo test -- --test-threads=1
+
+  frontend-flutter:
+    name: Frontend Flutter
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
-      - name: scripts/refactor-check.sh (same as yarn refactor:check)
-        env:
-          TOONFLOW_GIT_SHA: ${{ github.sha }}
-        run: bash scripts/refactor-check.sh
+      - name: flutter pub get
+        run: |
+          set -euo pipefail
+          cd frontend
+          flutter pub get
+      - name: flutter analyze
+        run: |
+          set -euo pipefail
+          cd frontend
+          flutter analyze
+      - name: flutter test
+        run: |
+          set -euo pipefail
+          cd frontend
+          flutter test
 
   supabase-migrations:
     name: Supabase migrations (local DB)
@@ -41,7 +94,19 @@ jobs:
       - uses: supabase/setup-cli@v1
         with:
           version: latest
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: backend
       - name: Start local Postgres (Supabase CLI) and apply supabase/migrations
         run: |
           supabase db start
           supabase db reset --yes --no-seed
+      - name: PG contract — workspace shared audit export (ignored tests)
+        run: |
+          set -euo pipefail
+          eval "$(supabase status -o env)"
+          export DATABASE_URL="${DB_URL:?missing DB_URL from supabase status}"
+          export SUPABASE_JWT_SECRET="${JWT_SECRET:?missing JWT_SECRET from supabase status}"
+          cd backend
+          cargo test settings_workspace_shared_audit_export -- --ignored --nocapture

@@ -12,6 +12,9 @@ cd "$ROOT"
 
 STEP_START=0
 OPENAPI_SPEC_FILE=""
+BACKEND_CHANGED=true
+FRONTEND_CHANGED=true
+OPENAPI_CHANGED=true
 
 cleanup() {
   if [ -n "$OPENAPI_SPEC_FILE" ] && [ -f "$OPENAPI_SPEC_FILE" ]; then
@@ -49,6 +52,41 @@ need_flutter_pub_get() {
   return 1
 }
 
+detect_changed_components() {
+  local changed_files staged_files untracked_files all_changed file
+
+  changed_files=$(git diff --name-only HEAD 2>/dev/null || echo "")
+  staged_files=$(git diff --cached --name-only 2>/dev/null || echo "")
+  untracked_files=$(git ls-files --others --exclude-standard 2>/dev/null || echo "")
+  all_changed="$changed_files"$'\n'"$staged_files"$'\n'"$untracked_files"
+
+  BACKEND_CHANGED=false
+  FRONTEND_CHANGED=false
+  OPENAPI_CHANGED=false
+
+  while IFS= read -r file; do
+    [ -z "$file" ] && continue
+
+    case "$file" in
+      backend/*)
+        BACKEND_CHANGED=true
+        if [[ "$file" =~ (openapi|routes|handlers) ]]; then
+          OPENAPI_CHANGED=true
+        fi
+        ;;
+      frontend/*)
+        FRONTEND_CHANGED=true
+        ;;
+      frontend/pubspec.yaml|frontend/pubspec.lock)
+        FRONTEND_CHANGED=true
+        ;;
+      scripts/check_openapi_drift.sh|scripts/check_rust_api_consistency.sh)
+        OPENAPI_CHANGED=true
+        ;;
+    esac
+  done <<< "$all_changed"
+}
+
 # Parse arguments
 MODE="full"
 for arg in "$@"; do
@@ -77,39 +115,10 @@ for arg in "$@"; do
   esac
 done
 
-# Detect changed files for incremental mode
-if [ "$MODE" = "incremental" ]; then
+# Detect changed files for quick/incremental mode
+if [ "$MODE" = "quick" ] || [ "$MODE" = "incremental" ]; then
   echo "==> Detecting changed files..."
-  
-  # Get changed files (staged + unstaged)
-  CHANGED_FILES=$(git diff --name-only HEAD 2>/dev/null || echo "")
-  STAGED_FILES=$(git diff --cached --name-only 2>/dev/null || echo "")
-  ALL_CHANGED="$CHANGED_FILES"$'\n'"$STAGED_FILES"
-  
-  # Determine which components changed
-  BACKEND_CHANGED=false
-  FRONTEND_CHANGED=false
-  OPENAPI_CHANGED=false
-  
-  while IFS= read -r file; do
-    [ -z "$file" ] && continue
-    
-    case "$file" in
-      backend/*)
-        BACKEND_CHANGED=true
-        # Check if OpenAPI-related files changed
-        if [[ "$file" =~ (openapi|routes|handlers) ]]; then
-          OPENAPI_CHANGED=true
-        fi
-        ;;
-      frontend/*)
-        FRONTEND_CHANGED=true
-        ;;
-      scripts/check_openapi_drift.sh|scripts/check_rust_api_consistency.sh)
-        OPENAPI_CHANGED=true
-        ;;
-    esac
-  done <<< "$ALL_CHANGED"
+  detect_changed_components
   
   echo "   Backend changed: $BACKEND_CHANGED"
   echo "   Frontend changed: $FRONTEND_CHANGED"
@@ -124,7 +133,7 @@ if [ "$MODE" = "incremental" ]; then
 fi
 
 # OpenAPI checks (only if backend or OpenAPI changed, or in full mode)
-if [ "$MODE" = "full" ] || [ "$MODE" = "quick" ] || [ "$OPENAPI_CHANGED" = true ]; then
+if [ "$MODE" = "full" ] || [ "$OPENAPI_CHANGED" = true ]; then
   echo "==> merged OpenAPI export (YAML parse)"
   OPENAPI_SPEC_FILE="$(mktemp "${TMPDIR:-/tmp}/toonflow-openapi.XXXXXX.yaml")"
   step_start
@@ -147,7 +156,7 @@ else
 fi
 
 # Backend checks (only if backend changed, or in full mode)
-if [ "$MODE" = "full" ] || [ "$MODE" = "quick" ] || [ "$BACKEND_CHANGED" = true ]; then
+if [ "$MODE" = "full" ] || [ "$BACKEND_CHANGED" = true ]; then
   echo "==> backend/ (fmt, clippy)"
   step_start
   (
@@ -171,7 +180,7 @@ else
 fi
 
 # Frontend checks (only if frontend changed, or in full mode)
-if [ "$MODE" = "full" ] || [ "$MODE" = "quick" ] || [ "$FRONTEND_CHANGED" = true ]; then
+if [ "$MODE" = "full" ] || [ "$FRONTEND_CHANGED" = true ]; then
   echo "==> frontend/ (pub get if needed, analyze)"
   if command -v flutter >/dev/null 2>&1; then
     if need_flutter_pub_get; then

@@ -25,7 +25,7 @@ bash scripts/refactor-check.sh
 
 ### 2. 快速检查（跳过测试）
 
-运行所有 lint 和验证，但跳过测试。适用于快速验证代码格式和类型检查。
+运行 lint 和验证，但跳过测试；同时只检查有改动的模块。适用于提交前的快速验证。
 
 ```bash
 yarn refactor:quick
@@ -33,18 +33,18 @@ yarn refactor:quick
 bash scripts/refactor-check.sh --quick
 ```
 
-**包含**:
-- ✅ OpenAPI 导出和验证
-- ✅ OpenAPI drift 检测
-- ✅ rust_api 契约一致性
-- ✅ Backend: fmt, clippy
-- ✅ Frontend: pub get, analyze
+**包含**（根据修改的文件）:
+- ✅ OpenAPI 导出和验证（如果 OpenAPI 相关内容有修改）
+- ✅ OpenAPI drift 检测（如果 OpenAPI 相关内容有修改）
+- ✅ rust_api 契约一致性（如果 OpenAPI 相关内容有修改）
+- ✅ Backend: fmt, clippy（如果 backend 有修改）
+- ✅ Frontend: pub get, analyze（如果 frontend 有修改）
 
 **跳过**:
 - ❌ Backend tests
 - ❌ Frontend tests
 
-**耗时**: ~2-3 分钟
+**耗时**: ~30 秒 - 3 分钟（取决于修改范围）
 
 ### 3. 增量检查（仅检查修改的文件）
 
@@ -125,12 +125,13 @@ yarn refactor:check
 ### 2026-05 本地提速更新
 
 - OpenAPI 导出现在在 `refactor-check.sh` 内只生成一次；后续 drift 与 `rust_api` 一致性检查复用同一份 YAML，避免重复触发 `cargo run --bin export-openapi`。
+- `quick` 模式现在也会按改动范围裁剪，只跑受影响的 Rust / Flutter / OpenAPI 模块；不再无条件全量执行。
 - `flutter pub get` 变为条件执行：仅在 `frontend/.dart_tool/package_config.json` 缺失，或 `pubspec.yaml` / `pubspec.lock` 更新后才重新拉依赖。
 - 每个主要步骤都会输出耗时，方便快速确认当前瓶颈是在 OpenAPI、Rust 还是 Flutter。
 
 ### 增量检查的文件检测
 
-增量模式使用 `git diff` 检测修改的文件：
+快速 / 增量模式使用 `git diff` 与未跟踪文件列表检测修改的文件：
 
 ```bash
 # 检测未暂存的修改
@@ -138,6 +139,9 @@ git diff --name-only HEAD
 
 # 检测已暂存的修改
 git diff --cached --name-only
+
+# 检测未跟踪的新文件
+git ls-files --others --exclude-standard
 ```
 
 **检测规则**:
@@ -188,7 +192,7 @@ yarn rust:target:clean
 
 4. **OpenAPI 检查**
    - 修改 backend routes/handlers 时会触发 OpenAPI 检查
-   - 即使在增量模式下也会运行（因为 OpenAPI 是契约）
+   - 即使在快速 / 增量模式下也会运行（因为 OpenAPI 是契约）
 
 ## 故障排除
 
