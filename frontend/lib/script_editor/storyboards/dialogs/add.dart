@@ -93,6 +93,7 @@ extension _HomePageScriptEditorStoryboardsAddDialog on _HomePageState {
         final added = await postStoryboardAddV1(
           token,
           projectId: projectNumericId,
+          projectUuid: projectId,
           scriptId: scriptNumericId,
           prompt: prompt,
           duration: duration,
@@ -110,6 +111,7 @@ extension _HomePageScriptEditorStoryboardsAddDialog on _HomePageState {
         if (!ctx.mounted) return;
         await _reloadProductionStoryboardSummary(
           token: token,
+          projectId: projectId,
           projectNumericId: projectNumericId,
           scriptNumericId: scriptNumericId,
           productionSummaryLine: productionSummaryLine,

@@ -3,6 +3,7 @@ part of '../../../home_page.dart';
 class _StoryboardBatchWorkbenchDialog extends StatefulWidget {
   const _StoryboardBatchWorkbenchDialog({
     required this.token,
+    required this.projectId,
     required this.projectNumericId,
     required this.scriptNumericId,
     required this.boardsList,
@@ -11,6 +12,7 @@ class _StoryboardBatchWorkbenchDialog extends StatefulWidget {
   });
 
   final String token;
+  final String projectId;
   final int projectNumericId;
   final int scriptNumericId;
   final List<StoryboardRow> boardsList;
@@ -137,6 +139,7 @@ class _StoryboardBatchWorkbenchDialogState
       final response = await postProductionGetStoryboardDataV1(
         widget.token,
         projectId: widget.projectNumericId,
+        projectUuid: widget.projectId,
         scriptId: widget.scriptNumericId,
       );
       final ids = widget.boardsList.map((row) => row.numericId).toSet();

@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/rust_api/production/storyboard/project_scope.dart';
+import 'package:openflow_app/rust_api/production/workbench/storyboard_media_op.dart';
 
 void main() {
   test('buildStoryboardProjectScopeBodyV1 prefers projectUuid', () {
@@ -32,5 +33,17 @@ void main() {
       ),
       throwsArgumentError,
     );
+  });
+
+  test('buildStoryboardMediaOpBodyV1 prefers projectUuid', () {
+    final body = buildStoryboardMediaOpBodyV1(
+      base: const <String, dynamic>{'op': 'selectVideo', 'scriptId': 7},
+      projectId: 42,
+      projectUuid: '550e8400-e29b-41d4-a716-446655440000',
+    );
+
+    expect(body['projectUuid'], '550e8400-e29b-41d4-a716-446655440000');
+    expect(body.containsKey('projectId'), isFalse);
+    expect(body['op'], 'selectVideo');
   });
 }

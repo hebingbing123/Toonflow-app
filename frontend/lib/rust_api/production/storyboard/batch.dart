@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 
 import '../../../config.dart';
 import '../../core.dart';
+import 'project_scope.dart';
 
 /// OpenAPI **`BatchGenerateImageItem`** — single item for batch image generation.
 class BatchGenerateImageItem {
@@ -57,7 +58,8 @@ class BatchGenerateImageResponse {
 /// `POST /api/v1/production/storyboard/batch-generate-image` — OpenAPI `postStoryboardBatchGenerateImageV1`.
 Future<BatchGenerateImageResponse> postStoryboardBatchGenerateImageV1(
   String accessToken, {
-  required int projectId,
+  int? projectId,
+  String? projectUuid,
   required int scriptId,
   required List<BatchGenerateImageItem> items,
   String? model,
@@ -66,11 +68,14 @@ Future<BatchGenerateImageResponse> postStoryboardBatchGenerateImageV1(
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/production/storyboard/batch-generate-image',
   );
-  final body = <String, dynamic>{
-    'projectId': projectId,
-    'scriptId': scriptId,
-    'items': items.map((e) => e.toJson()).toList(),
-  };
+  final body = buildStoryboardProjectScopeBodyV1(
+    base: <String, dynamic>{
+      'scriptId': scriptId,
+      'items': items.map((e) => e.toJson()).toList(),
+    },
+    projectId: projectId,
+    projectUuid: projectUuid,
+  );
   if (model != null) body['model'] = model;
   if (resolution != null) body['resolution'] = resolution;
   final res = await http

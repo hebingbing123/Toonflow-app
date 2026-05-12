@@ -191,15 +191,18 @@ extension _StoryboardWorkbenchPatchActions on _StoryboardWorkbenchPanelState {
                             try {
                               final media = await postWorkbenchStoryboardMediaOpV1(
                                 widget.token,
-                                <String, dynamic>{
-                                  'op': 'patchRegeneration',
-                                  'projectId': widget.projectNumericId,
+                                buildStoryboardMediaOpBodyV1(
+                                  base: <String, dynamic>{
+                                    'op': 'patchRegeneration',
                                   'episodesId': widget.scriptNumericId,
                                   'scope': scopeCtrl.text,
                                   'ids': ids,
                                   'reason': reasonCtrl.text.trim(),
                                   'modelTier': modelTierCtrl.text,
-                                },
+                                  },
+                                  projectId: widget.projectNumericId,
+                                  projectUuid: widget.projectId,
+                                ),
                               );
                               final response = media.patchRegeneration!;
                               if (!ctx.mounted) return;

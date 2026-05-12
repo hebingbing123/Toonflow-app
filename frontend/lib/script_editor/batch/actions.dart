@@ -54,6 +54,7 @@ extension _StoryboardBatchWorkbenchActions
     final response = await postStoryboardBatchGenerateImageV1(
       widget.token,
       projectId: widget.projectNumericId,
+      projectUuid: widget.projectId,
       scriptId: widget.scriptNumericId,
       items: items,
       model: _ctrls.modelCtrl.text.trim().isEmpty
@@ -117,6 +118,7 @@ extension _StoryboardBatchWorkbenchActions
     final preview = await postStoryboardPreviewImageV1(
       widget.token,
       projectId: widget.projectNumericId,
+      projectUuid: widget.projectId,
       scriptId: widget.scriptNumericId,
       storyboardId: storyboardId,
     );
@@ -137,6 +139,7 @@ extension _StoryboardBatchWorkbenchActions
     final preview = await postStoryboardDownPreviewImageV1(
       widget.token,
       projectId: widget.projectNumericId,
+      projectUuid: widget.projectId,
       scriptId: widget.scriptNumericId,
       storyboardId: storyboardId,
     );
@@ -157,6 +160,7 @@ extension _StoryboardBatchWorkbenchActions
     final zip = await fetchProductionExportImageZipV1(
       widget.token,
       projectId: widget.projectNumericId,
+      projectUuid: widget.projectId,
       scriptId: widget.scriptNumericId,
       shotId: selected
           .map((id) => <String, dynamic>{'id': '$id'})

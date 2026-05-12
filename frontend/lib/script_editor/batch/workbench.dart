@@ -4,6 +4,7 @@ extension _HomePageScriptEditorStoryboardsWorkbench on _HomePageState {
   Future<void> _openStoryboardBatchWorkbenchDialog({
     required BuildContext ctx,
     required String token,
+    required String projectId,
     required int projectNumericId,
     required int scriptNumericId,
     required List<StoryboardRow> boardsList,
@@ -15,6 +16,7 @@ extension _HomePageScriptEditorStoryboardsWorkbench on _HomePageState {
       builder: (dialogCtx) {
         return _StoryboardBatchWorkbenchDialog(
           token: token,
+          projectId: projectId,
           projectNumericId: projectNumericId,
           scriptNumericId: scriptNumericId,
           boardsList: boardsList,

@@ -3,6 +3,7 @@ part of '../../../home_page.dart';
 extension _HomePageScriptEditorStoryboards on _HomePageState {
   Future<void> _reloadProductionStoryboardSummary({
     required String token,
+    required String projectId,
     required int projectNumericId,
     required int scriptNumericId,
     required List<String?> productionSummaryLine,
@@ -16,6 +17,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
       final response = await postProductionGetStoryboardDataV1(
         token,
         projectId: projectNumericId,
+        projectUuid: projectId,
         scriptId: scriptNumericId,
       );
       final preview = response.data
@@ -102,6 +104,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                   if (!ctx2.mounted) return;
                   await _reloadProductionStoryboardSummary(
                     token: token,
+                    projectId: projectId,
                     projectNumericId: projectNumericId,
                     scriptNumericId: scriptNumericId,
                     productionSummaryLine: productionSummaryLine,
@@ -173,6 +176,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                           await _openStoryboardBatchWorkbenchDialog(
                             ctx: ctx2,
                             token: token,
+                            projectId: projectId,
                             projectNumericId: projectNumericId,
                             scriptNumericId: scriptNumericId,
                             boardsList: boardsList,
@@ -192,6 +196,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                           if (!ctx2.mounted) return;
                           await _reloadProductionStoryboardSummary(
                             token: token,
+                            projectId: projectId,
                             projectNumericId: projectNumericId,
                             scriptNumericId: scriptNumericId,
                             productionSummaryLine: productionSummaryLine,
@@ -205,6 +210,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                       ? null
                       : () => _reloadProductionStoryboardSummary(
                           token: token,
+                          projectId: projectId,
                           projectNumericId: projectNumericId,
                           scriptNumericId: scriptNumericId,
                           productionSummaryLine: productionSummaryLine,
@@ -232,6 +238,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                         if (!ctx2.mounted) return;
                         await _reloadProductionStoryboardSummary(
                           token: token,
+                          projectId: projectId,
                           projectNumericId: projectNumericId,
                           scriptNumericId: scriptNumericId,
                           productionSummaryLine: productionSummaryLine,

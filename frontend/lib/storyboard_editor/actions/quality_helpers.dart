@@ -169,13 +169,16 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
   Future<void> _selectVideo(VideoItem video) async {
     final media = await postWorkbenchStoryboardMediaOpV1(
       widget.token,
-      <String, dynamic>{
-        'op': 'selectVideo',
-        'projectId': widget.projectNumericId,
-        'scriptId': widget.scriptNumericId,
-        'storyboardId': widget.storyNumericId,
-        'videoUrl': video.videoUrl!.trim(),
-      },
+      buildStoryboardMediaOpBodyV1(
+        base: <String, dynamic>{
+          'op': 'selectVideo',
+          'scriptId': widget.scriptNumericId,
+          'storyboardId': widget.storyNumericId,
+          'videoUrl': video.videoUrl!.trim(),
+        },
+        projectId: widget.projectNumericId,
+        projectUuid: widget.projectId,
+      ),
     );
     final response = media.selectVideo!;
     await _refreshProductionData(syncTrackId: true);

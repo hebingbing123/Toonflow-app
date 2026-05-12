@@ -103,6 +103,7 @@ extension _HomePageScriptEditorStoryboardsBatchAddDialog on _HomePageState {
         final added = await postStoryboardBatchAddInfoV1(
           token,
           projectId: projectNumericId,
+          projectUuid: projectId,
           scriptId: scriptNumericId,
           storyboards: payload,
         );
@@ -119,6 +120,7 @@ extension _HomePageScriptEditorStoryboardsBatchAddDialog on _HomePageState {
         if (!ctx.mounted) return;
         await _reloadProductionStoryboardSummary(
           token: token,
+          projectId: projectId,
           projectNumericId: projectNumericId,
           scriptNumericId: scriptNumericId,
           productionSummaryLine: productionSummaryLine,

@@ -303,14 +303,17 @@ extension _StoryboardWorkbenchVideoActions on _StoryboardWorkbenchPanelState {
     }
     final media = await postWorkbenchStoryboardMediaOpV1(
       widget.token,
-      <String, dynamic>{
-        'op': 'enqueueVideoExport',
-        'projectId': widget.projectNumericId,
-        'scriptId': widget.scriptNumericId,
-        'storyboardId': widget.storyNumericId,
-        'sourceUrl': sourceUrl,
-        'format': 'mp4',
-      },
+      buildStoryboardMediaOpBodyV1(
+        base: <String, dynamic>{
+          'op': 'enqueueVideoExport',
+          'scriptId': widget.scriptNumericId,
+          'storyboardId': widget.storyNumericId,
+          'sourceUrl': sourceUrl,
+          'format': 'mp4',
+        },
+        projectId: widget.projectNumericId,
+        projectUuid: widget.projectId,
+      ),
     );
     final job = media.enqueueVideoExport!.job;
     if (!mounted) return;
