@@ -203,6 +203,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                 await postWorkbenchDeleteVideoV1(
                   token,
                   projectId: project.numericId,
+                  projectUuid: project.id,
                   scriptId: item.scriptNumericId,
                   storyboardId: item.storyboardNumericId,
                 );
@@ -257,6 +258,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                 await postWorkbenchSelectVideoV1(
                   token,
                   projectId: project.numericId,
+                  projectUuid: project.id,
                   scriptId: item.scriptNumericId,
                   storyboardId: item.storyboardNumericId,
                   videoUrl: seedUrl,
@@ -769,6 +771,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                             selectedStoryboardIds: selectedStoryboardIds,
                             allEntries: ordered,
                             projectId: project.numericId,
+                            projectUuid: project.id,
                             scriptId: ordered.first.scriptNumericId,
                             token: token,
                             showFeedback: _showOperationFeedback,
@@ -787,6 +790,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                           await _batchDisableShots(
                             selectedStoryboardIds: selectedStoryboardIds,
                             projectId: project.numericId,
+                            projectUuid: project.id,
                             scriptId: ordered.first.scriptNumericId,
                             token: token,
                             showFeedback: _showOperationFeedback,
@@ -805,6 +809,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                           await _batchUpdateDuration(
                             selectedStoryboardIds: selectedStoryboardIds,
                             projectId: project.numericId,
+                            projectUuid: project.id,
                             scriptId: ordered.first.scriptNumericId,
                             token: token,
                             context: ctx,
@@ -824,6 +829,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension on _ShortVideoSpace
                             selectedStoryboardIds: selectedStoryboardIds,
                             allEntries: ordered,
                             projectId: project.numericId,
+                            projectUuid: project.id,
                             scriptId: ordered.first.scriptNumericId,
                             token: token,
                             context: ctx,

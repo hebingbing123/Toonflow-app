@@ -167,6 +167,7 @@ extension _ShortVideoSpaceSectionDraftManagementExtension on _ShortVideoSpaceSec
             await postWorkbenchSelectVideoV1(
               token,
               projectId: project.numericId,
+              projectUuid: project.id,
               scriptId: script.scriptNumericId,
               storyboardId: shot.storyboardNumericId,
               videoUrl: videoUrl,
@@ -175,6 +176,7 @@ extension _ShortVideoSpaceSectionDraftManagementExtension on _ShortVideoSpaceSec
             await postWorkbenchDeleteVideoV1(
               token,
               projectId: project.numericId,
+              projectUuid: project.id,
               scriptId: script.scriptNumericId,
               storyboardId: shot.storyboardNumericId,
             );
@@ -189,6 +191,7 @@ extension _ShortVideoSpaceSectionDraftManagementExtension on _ShortVideoSpaceSec
               await postStoryboardUpdateDurationV1(
                 token,
                 projectId: project.numericId,
+                projectUuid: project.id,
                 scriptId: script.scriptNumericId,
                 storyboardId: shot.storyboardNumericId,
                 duration: durationSeconds,

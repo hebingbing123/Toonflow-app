@@ -134,6 +134,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension on _ShortVideoSpaceSectionSta
         await postWorkbenchDeleteVideoV1(
           token,
           projectId: _selectedProject!.numericId,
+          projectUuid: _selectedProject!.id,
           scriptId: scriptId,
           storyboardId: storyboardId,
         );
@@ -142,6 +143,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension on _ShortVideoSpaceSectionSta
         await postWorkbenchSelectVideoV1(
           token,
           projectId: _selectedProject!.numericId,
+          projectUuid: _selectedProject!.id,
           scriptId: scriptId,
           storyboardId: storyboardId,
           videoUrl: videoUrl,
@@ -182,6 +184,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension on _ShortVideoSpaceSectionSta
         await postWorkbenchSelectVideoV1(
           token,
           projectId: _selectedProject!.numericId,
+          projectUuid: _selectedProject!.id,
           scriptId: scriptId,
           storyboardId: storyboardId,
           videoUrl: previousVideoUrl,
@@ -191,6 +194,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension on _ShortVideoSpaceSectionSta
         await postWorkbenchDeleteVideoV1(
           token,
           projectId: _selectedProject!.numericId,
+          projectUuid: _selectedProject!.id,
           scriptId: scriptId,
           storyboardId: storyboardId,
         );
@@ -279,6 +283,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension on _ShortVideoSpaceSectionSta
         await postWorkbenchSelectVideoV1(
           token,
           projectId: _selectedProject!.numericId,
+          projectUuid: _selectedProject!.id,
           scriptId: scriptId,
           storyboardId: storyboardId,
           videoUrl: previousVideoUrl,
@@ -288,6 +293,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension on _ShortVideoSpaceSectionSta
         await postWorkbenchSelectVideoV1(
           token,
           projectId: _selectedProject!.numericId,
+          projectUuid: _selectedProject!.id,
           scriptId: scriptId,
           storyboardId: storyboardId,
           videoUrl: newVideoUrl,
@@ -326,6 +332,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension on _ShortVideoSpaceSectionSta
           await postWorkbenchDeleteVideoV1(
             token,
             projectId: _selectedProject!.numericId,
+            projectUuid: _selectedProject!.id,
             scriptId: scriptId,
             storyboardId: op['storyboardId'] as int,
           );
@@ -337,6 +344,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension on _ShortVideoSpaceSectionSta
           await postWorkbenchSelectVideoV1(
             token,
             projectId: _selectedProject!.numericId,
+            projectUuid: _selectedProject!.id,
             scriptId: scriptId,
             storyboardId: op['storyboardId'] as int,
             videoUrl: op['videoUrl'] as String,
@@ -376,6 +384,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension on _ShortVideoSpaceSectionSta
           await postWorkbenchSelectVideoV1(
             token,
             projectId: _selectedProject!.numericId,
+            projectUuid: _selectedProject!.id,
             scriptId: scriptId,
             storyboardId: op['storyboardId'] as int,
             videoUrl: op['previousVideoUrl'] as String,
@@ -388,6 +397,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension on _ShortVideoSpaceSectionSta
           await postWorkbenchDeleteVideoV1(
             token,
             projectId: _selectedProject!.numericId,
+            projectUuid: _selectedProject!.id,
             scriptId: scriptId,
             storyboardId: op['storyboardId'] as int,
           );
@@ -477,6 +487,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension on _ShortVideoSpaceSectionSta
           await postWorkbenchSelectVideoV1(
             token,
             projectId: _selectedProject!.numericId,
+            projectUuid: _selectedProject!.id,
             scriptId: scriptId,
             storyboardId: op['storyboardId'] as int,
             videoUrl: op['previousVideoUrl'] as String,
@@ -489,6 +500,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension on _ShortVideoSpaceSectionSta
           await postWorkbenchSelectVideoV1(
             token,
             projectId: _selectedProject!.numericId,
+            projectUuid: _selectedProject!.id,
             scriptId: scriptId,
             storyboardId: op['storyboardId'] as int,
             videoUrl: op['newVideoUrl'] as String,

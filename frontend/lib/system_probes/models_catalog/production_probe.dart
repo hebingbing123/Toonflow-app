@@ -35,6 +35,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbe on _HomePageState {
       fetchStoryboards: fetchStoryboardsForProjectScript,
     );
     final projectId = scope.projectId;
+    final projectUuid = resources.projectUuid;
     final scriptId = scope.scriptId;
     if (projectId == null || scriptId == null) {
       _missingProductionScopeStatus(
@@ -76,6 +77,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbe on _HomePageState {
         token,
         statuses,
         projectId: -1,
+        projectUuid: projectUuid,
         scriptId: -1,
         assetId: resources.assetId,
         storyboardId: resources.storyboardId,
@@ -192,6 +194,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbe on _HomePageState {
       token,
       statuses,
       projectId: projectId,
+      projectUuid: projectUuid,
       scriptId: scriptId,
       assetId: resources.assetId,
       storyboardId: resources.storyboardId,

@@ -288,13 +288,23 @@ postStoryboardUpdateLiveActionReferenceV1(
 /// `POST /api/v1/production/storyboard/update-duration` — OpenAPI `postStoryboardUpdateDurationV1`.
 Future<int> postStoryboardUpdateDurationV1(
   String accessToken, {
-  required int projectId,
+  int? projectId,
+  String? projectUuid,
   required int scriptId,
   required int storyboardId,
   required int duration,
 }) async {
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/production/storyboard/update-duration',
+  );
+  final body = buildStoryboardProjectScopeBodyV1(
+    base: <String, dynamic>{
+      'scriptId': scriptId,
+      'storyboardId': storyboardId,
+      'duration': duration,
+    },
+    projectId: projectId,
+    projectUuid: projectUuid,
   );
   final res = await http
       .post(
@@ -303,12 +313,7 @@ Future<int> postStoryboardUpdateDurationV1(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({
-          'projectId': projectId,
-          'scriptId': scriptId,
-          'storyboardId': storyboardId,
-          'duration': duration,
-        }),
+        body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {

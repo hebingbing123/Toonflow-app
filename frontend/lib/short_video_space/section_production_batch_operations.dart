@@ -9,6 +9,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
     required Set<int> selectedStoryboardIds,
     required List<_AssemblyClipDeskOpEntry> allEntries,
     required int projectId,
+    required String projectUuid,
     required int scriptId,
     required String token,
     required Function(String message, {required bool isSuccess}) showFeedback,
@@ -54,6 +55,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
           await postWorkbenchSelectVideoV1(
             token,
             projectId: projectId,
+            projectUuid: projectUuid,
             scriptId: scriptId,
             storyboardId: operation['storyboardId'] as int,
             videoUrl: operation['videoUrl'] as String,
@@ -73,6 +75,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
         final response = await postProductionWorkbenchBatchSelectVideoV1(
           token,
           projectId: projectId,
+          projectUuid: projectUuid,
           scriptId: scriptId,
           operations: operations,
         );
@@ -101,6 +104,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
   Future<void> _batchDisableShots({
     required Set<int> selectedStoryboardIds,
     required int projectId,
+    required String projectUuid,
     required int scriptId,
     required String token,
     required Function(String message, {required bool isSuccess}) showFeedback,
@@ -140,6 +144,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
           await postWorkbenchDeleteVideoV1(
             token,
             projectId: projectId,
+            projectUuid: projectUuid,
             scriptId: scriptId,
             storyboardId: operation['storyboardId'] as int,
           );
@@ -158,6 +163,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
         final response = await postProductionWorkbenchBatchDeleteVideoV1(
           token,
           projectId: projectId,
+          projectUuid: projectUuid,
           scriptId: scriptId,
           storyboardIds: selectedStoryboardIds.toList(),
         );
@@ -186,6 +192,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
   Future<void> _batchUpdateDuration({
     required Set<int> selectedStoryboardIds,
     required int projectId,
+    required String projectUuid,
     required int scriptId,
     required String token,
     required BuildContext context,
@@ -251,6 +258,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
           await postStoryboardUpdateDurationV1(
             token,
             projectId: projectId,
+            projectUuid: projectUuid,
             scriptId: scriptId,
             storyboardId: operation['storyboardId'] as int,
             duration: operation['duration'] as int,
@@ -272,6 +280,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
     required Set<int> selectedStoryboardIds,
     required List<_AssemblyClipDeskOpEntry> allEntries,
     required int projectId,
+    required String projectUuid,
     required int scriptId,
     required String token,
     required BuildContext context,
@@ -384,6 +393,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension on _ShortVid
       final response = await postProductionWorkbenchBatchSelectVideoV1(
         token,
         projectId: projectId,
+        projectUuid: projectUuid,
         scriptId: scriptId,
         operations: operations,
       );

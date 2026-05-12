@@ -6,6 +6,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
     String token,
     Map<String, int> statuses, {
     required int projectId,
+    String? projectUuid,
     required int scriptId,
     required int assetId,
     required int storyboardId,
@@ -77,6 +78,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
       run: () => postProductionGetStoryboardDataV1(
         token,
         projectId: projectId,
+        projectUuid: projectUuid,
         scriptId: scriptId,
       ),
     );
@@ -85,6 +87,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
       run: () => postStoryboardAddV1(
         token,
         projectId: projectId,
+        projectUuid: projectUuid,
         scriptId: scriptId,
         prompt: 'probe storyboard',
       ),
@@ -94,6 +97,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
       run: () => postStoryboardBatchAddInfoV1(
         token,
         projectId: projectId,
+        projectUuid: projectUuid,
         scriptId: scriptId,
         storyboards: const [
           StoryboardBatchAddInfoItem(prompt: 'probe storyboard'),
@@ -105,6 +109,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
       run: () => postStoryboardBatchGenerateImageV1(
         token,
         projectId: projectId,
+        projectUuid: projectUuid,
         scriptId: scriptId,
         items: [
           BatchGenerateImageItem(
@@ -119,6 +124,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
       run: () => postStoryboardDownPreviewImageV1(
         token,
         projectId: projectId,
+        projectUuid: projectUuid,
         scriptId: scriptId,
         storyboardId: storyboardId,
       ),
@@ -128,6 +134,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
       run: () => postStoryboardEditInfoV1(
         token,
         projectId: projectId,
+        projectUuid: projectUuid,
         scriptId: scriptId,
         storyboardId: storyboardId,
         prompt: 'probe storyboard',
@@ -138,6 +145,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
       run: () => postStoryboardGetDataV1(
         token,
         projectId: projectId,
+        projectUuid: projectUuid,
         scriptId: scriptId,
         storyboardId: storyboardId,
       ),
@@ -147,6 +155,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
       run: () => postStoryboardPreviewImageV1(
         token,
         projectId: projectId,
+        projectUuid: projectUuid,
         scriptId: scriptId,
         storyboardId: storyboardId,
       ),
@@ -156,6 +165,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
       run: () => postStoryboardRemoveFrameV1(
         token,
         projectId: projectId,
+        projectUuid: projectUuid,
         scriptId: scriptId,
         storyboardId: storyboardId,
       ),
@@ -165,6 +175,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
       run: () => postStoryboardUpdateUrlV1(
         token,
         projectId: projectId,
+        projectUuid: projectUuid,
         scriptId: scriptId,
         storyboardId: storyboardId,
         imageUrl: 'https://example.com/probe.png',
@@ -202,6 +213,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
       run: () => postProductionEditImageGenerateFlowImageV1(
         token,
         projectId: projectId,
+        projectUuid: projectUuid,
         scriptId: scriptId,
         flowId: 'img-flow-001',
         prompt: 'probe',
@@ -212,6 +224,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
       run: () => postProductionEditImageUploadImageV1(
         token,
         projectId: projectId,
+        projectUuid: projectUuid,
         scriptId: scriptId,
         base64Data: 'data:image/png;base64,AA==',
       ),
@@ -239,6 +252,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
       run: () => postWorkbenchDeleteVideoV1(
         token,
         projectId: projectId,
+        projectUuid: projectUuid,
         scriptId: scriptId,
         storyboardId: storyboardId,
       ),
@@ -272,6 +286,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
       run: () => postWorkbenchSelectVideoV1(
         token,
         projectId: projectId,
+        projectUuid: projectUuid,
         scriptId: scriptId,
         storyboardId: storyboardId,
         videoUrl: 'https://example.com/probe.mp4',
@@ -279,13 +294,19 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
     );
     statuses['prod/workbench.media-op'] = await skipOrRun(
       label: 'POST production/workbench/storyboard-media-op',
-      run: () => postWorkbenchStoryboardMediaOpV1(token, <String, dynamic>{
-        'op': 'selectVideo',
-        'projectId': projectId,
-        'scriptId': scriptId,
-        'storyboardId': storyboardId,
-        'videoUrl': 'https://example.com/probe.mp4',
-      }),
+      run: () => postWorkbenchStoryboardMediaOpV1(
+        token,
+        buildStoryboardMediaOpBodyV1(
+          base: <String, dynamic>{
+            'op': 'selectVideo',
+            'scriptId': scriptId,
+            'storyboardId': storyboardId,
+            'videoUrl': 'https://example.com/probe.mp4',
+          },
+          projectId: projectId,
+          projectUuid: projectUuid,
+        ),
+      ),
     );
   }
 }
