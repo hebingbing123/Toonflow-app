@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../prompt_preset.dart';
 import 'support.dart';
 
@@ -100,15 +101,16 @@ class ProductionWorkspaceControlsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         TextField(
           controller: productionPromptController,
           maxLines: 4,
-          decoration: const InputDecoration(
-            labelText: '工作区提示词',
-            helperText: '用于制作通道 harness.agent.run',
+          decoration: InputDecoration(
+            labelText: l10n.agentWorkspaceProductionPromptLabel,
+            helperText: l10n.agentWorkspaceProductionPromptHelper,
           ),
         ),
         const SizedBox(height: 8),
@@ -118,7 +120,11 @@ class ProductionWorkspaceControlsPanel extends StatelessWidget {
           children: <Widget>[
             FilledButton.tonal(
               onPressed: busy ? null : onRunProductionWorkspace,
-              child: Text(loadingProductionWorkspaceRun ? '…' : '运行制作工作流'),
+              child: Text(
+                loadingProductionWorkspaceRun
+                    ? '…'
+                    : l10n.agentWorkspaceProductionRunWorkflow,
+              ),
             ),
             SizedBox(
               width: 260,
@@ -139,7 +145,9 @@ class ProductionWorkspaceControlsPanel extends StatelessWidget {
                         if (value == null) return;
                         onProductionDomainToolChanged(value);
                       },
-                decoration: const InputDecoration(labelText: '制作域工具'),
+                decoration: InputDecoration(
+                  labelText: l10n.agentWorkspaceProductionDomainToolLabel,
+                ),
               ),
             ),
             SizedBox(
@@ -161,9 +169,9 @@ class ProductionWorkspaceControlsPanel extends StatelessWidget {
                         if (value == null) return;
                         onFlowKeyChanged(value);
                       },
-                decoration: const InputDecoration(
-                  labelText: 'flow key',
-                  helperText: '作为 get_flowData key 和写回 key',
+                decoration: InputDecoration(
+                  labelText: l10n.agentWorkspaceProductionFlowKeyLabel,
+                  helperText: l10n.agentWorkspaceProductionFlowKeyHelper,
                 ),
               ),
             ),
@@ -172,9 +180,9 @@ class ProductionWorkspaceControlsPanel extends StatelessWidget {
               child: TextField(
                 controller: productionDomainArgsController,
                 maxLines: 2,
-                decoration: const InputDecoration(
-                  labelText: '制作工具参数(JSON)',
-                  helperText: '非 get_flowData 时使用，例如 {"ids":[1,2]}',
+                decoration: InputDecoration(
+                  labelText: l10n.agentWorkspaceProductionArgsLabel,
+                  helperText: l10n.agentWorkspaceProductionArgsHelper,
                 ),
               ),
             ),
@@ -184,7 +192,11 @@ class ProductionWorkspaceControlsPanel extends StatelessWidget {
               SizedBox(width: 360, child: actionCandidatePanel!),
             FilledButton.tonal(
               onPressed: busy ? null : onProbeProductionDomainTool,
-              child: Text(loadingProductionFlowProbe ? '…' : '读取制作工具'),
+              child: Text(
+                loadingProductionFlowProbe
+                    ? '…'
+                    : l10n.agentWorkspaceProductionReadTool,
+              ),
             ),
             SizedBox(
               width: 300,
@@ -205,7 +217,9 @@ class ProductionWorkspaceControlsPanel extends StatelessWidget {
                         if (value == null) return;
                         onProductionSubAgentChanged(value);
                       },
-                decoration: const InputDecoration(labelText: '制作子代理工具'),
+                decoration: InputDecoration(
+                  labelText: l10n.agentWorkspaceProductionSubAgentToolLabel,
+                ),
               ),
             ),
             SizedBox(
@@ -213,21 +227,29 @@ class ProductionWorkspaceControlsPanel extends StatelessWidget {
               child: TextField(
                 controller: productionSubAgentArgsController,
                 maxLines: 2,
-                decoration: const InputDecoration(
-                  labelText: '子代理范围参数(JSON)',
-                  helperText: '例如 {"storyboardIds":[1,2],"assetIds":[7,12]}',
+                decoration: InputDecoration(
+                  labelText: l10n.agentWorkspaceProductionSubAgentArgsLabel,
+                  helperText: l10n.agentWorkspaceProductionSubAgentArgsHelper,
                 ),
               ),
             ),
             FilledButton.tonal(
               onPressed: busy ? null : onRunProductionSubAgentTool,
-              child: Text(loadingProductionSubAgentRun ? '…' : '运行子代理'),
+              child: Text(
+                loadingProductionSubAgentRun
+                    ? '…'
+                    : l10n.agentWorkspaceProductionRunSubAgent,
+              ),
             ),
             FilledButton(
               onPressed: busy || !hasLastToolResult
                   ? null
                   : onWriteBackProductionFlowResult,
-              child: Text(loadingProductionResultWriteback ? '…' : '写回工具结果'),
+              child: Text(
+                loadingProductionResultWriteback
+                    ? '…'
+                    : l10n.agentWorkspaceProductionWritebackToolResult,
+              ),
             ),
           ],
         ),
@@ -252,10 +274,14 @@ class ProductionWorkspaceArgumentTemplatesPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text('参数模板', style: Theme.of(context).textTheme.labelMedium),
+        Text(
+          l10n.agentWorkspaceProductionArgumentTemplates,
+          style: Theme.of(context).textTheme.labelMedium,
+        ),
         const SizedBox(height: 6),
         Wrap(
           spacing: 8,
@@ -293,14 +319,24 @@ class ProductionWorkspaceActionCandidatesPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text('当前结果候选参数', style: Theme.of(context).textTheme.labelMedium),
+        Text(
+          l10n.agentWorkspaceProductionCurrentCandidateArgs,
+          style: Theme.of(context).textTheme.labelMedium,
+        ),
         if (candidateIds.isNotEmpty) ...<Widget>[
           const SizedBox(height: 6),
           Text(
-            '候选 ${candidateIds.length} 项：${candidateIds.take(8).join(", ")}${candidateIds.length > 8 ? "…" : ""}',
+            l10n.agentWorkspaceProductionCandidateIds(
+              candidateIds.length,
+              [
+                candidateIds.take(8).join(', '),
+                if (candidateIds.length > 8) '…',
+              ].join(),
+            ),
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],

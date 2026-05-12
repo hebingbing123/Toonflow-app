@@ -8335,13 +8335,13 @@ abstract class AppLocalizations {
   /// No description provided for @adminConsoleDailyQuotaInputExample.
   ///
   /// In en, this message translates to:
-  /// **'e.g. 500'**
+  /// **'e.g. 100'**
   String get adminConsoleDailyQuotaInputExample;
 
   /// No description provided for @adminConsoleDailyQuotaInputDisabledHint.
   ///
   /// In en, this message translates to:
-  /// **'Only effective when \"Set quota\" is selected'**
+  /// **'Unlimited'**
   String get adminConsoleDailyQuotaInputDisabledHint;
 
   /// No description provided for @adminConsoleSaving.
@@ -12816,8 +12816,8 @@ abstract class AppLocalizations {
   /// No description provided for @storyboardEditorDialogTitle.
   ///
   /// In en, this message translates to:
-  /// **'分镜编辑器 {title}'**
-  String storyboardEditorDialogTitle(String title);
+  /// **'Storyboard editor #{numericId}'**
+  String storyboardEditorDialogTitle(int numericId);
 
   /// No description provided for @storyboardEditorPromptLabelClearEmpty.
   ///
@@ -17059,8 +17059,8 @@ abstract class AppLocalizations {
   /// No description provided for @adminConsoleDailyQuotaLabel.
   ///
   /// In en, this message translates to:
-  /// **'每日配额 {detail}'**
-  String adminConsoleDailyQuotaLabel(String detail);
+  /// **'Daily quota'**
+  String get adminConsoleDailyQuotaLabel;
 
   /// No description provided for @adminConsoleChipMember.
   ///
@@ -17111,21 +17111,22 @@ abstract class AppLocalizations {
   /// No description provided for @adminConsoleAclMemberItem.
   ///
   /// In en, this message translates to:
-  /// **'{email} · workspace {workspaceRole} · project {projectRole}'**
+  /// **'{email} · workspace {workspaceRole} · project {projectRole} · {detail}'**
   String adminConsoleAclMemberItem(
     String email,
     String workspaceRole,
     String projectRole,
+    String detail,
   );
 
   /// No description provided for @adminConsoleWorkspaceCandidateItem.
   ///
   /// In en, this message translates to:
-  /// **'{email} · {workspaceRole} · explicit {explicitProjectCount}'**
+  /// **'{email} · {workspaceRole} · explicit project role {explicitProjectRole}'**
   String adminConsoleWorkspaceCandidateItem(
     String email,
     String workspaceRole,
-    int explicitProjectCount,
+    String explicitProjectRole,
   );
 
   /// No description provided for @adminConsoleProjectRecentJobItem.
@@ -17148,19 +17149,25 @@ abstract class AppLocalizations {
   /// No description provided for @adminConsoleAuditWorkspaceMembership.
   ///
   /// In en, this message translates to:
-  /// **'action={action} · user={userId} · role={role} · workspace={workspaceId}'**
+  /// **'action={action} · user={userId} · role={role} · workspace={workspaceId} · detail={detail}'**
   String adminConsoleAuditWorkspaceMembership(
     String action,
     String userId,
     String role,
     String workspaceId,
+    String detail,
   );
 
   /// No description provided for @adminConsoleAuditOwnerTransfer.
   ///
   /// In en, this message translates to:
-  /// **'owner transfer: {previousOwner} → {newOwner}'**
-  String adminConsoleAuditOwnerTransfer(String previousOwner, String newOwner);
+  /// **'owner transfer: {previousOwner} → {newOwner} · role={role} · reset={reset}'**
+  String adminConsoleAuditOwnerTransfer(
+    String previousOwner,
+    String newOwner,
+    String role,
+    String reset,
+  );
 
   /// No description provided for @adminConsoleAuditArchiveNote.
   ///
@@ -17181,8 +17188,8 @@ abstract class AppLocalizations {
   /// No description provided for @adminConsoleFieldUserId.
   ///
   /// In en, this message translates to:
-  /// **'用户 ID {detail}'**
-  String adminConsoleFieldUserId(String detail);
+  /// **'User ID'**
+  String get adminConsoleFieldUserId;
 
   /// No description provided for @adminConsoleFieldCreatedAt.
   ///
@@ -17529,8 +17536,12 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionReviewIssues.
   ///
   /// In en, this message translates to:
-  /// **'issues {count}: {issues}'**
-  String agentWorkspaceProductionReviewIssues(int count, String issues);
+  /// **'issues: severe {severe}, medium {medium}, minor {minor}'**
+  String agentWorkspaceProductionReviewIssues(
+    int severe,
+    int medium,
+    int minor,
+  );
 
   /// No description provided for @agentWorkspaceProductionReviewNextStep.
   ///
@@ -17673,23 +17684,27 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionSummaryReviewHeadline.
   ///
   /// In en, this message translates to:
-  /// **'focused assets {count}: {scope}'**
-  String agentWorkspaceProductionSummaryReviewHeadline(int count, String scope);
+  /// **'focused {target}: grade {grade}'**
+  String agentWorkspaceProductionSummaryReviewHeadline(
+    String target,
+    String grade,
+  );
 
   /// No description provided for @agentWorkspaceProductionSummaryIssueBreakdown.
   ///
   /// In en, this message translates to:
-  /// **'issue breakdown {count}: {breakdown}'**
+  /// **'issues: severe {severe}, medium {medium}, minor {minor}'**
   String agentWorkspaceProductionSummaryIssueBreakdown(
-    int count,
-    String breakdown,
+    int severe,
+    int medium,
+    int minor,
   );
 
   /// No description provided for @agentWorkspaceProductionSummaryFocusedAssets.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production summary focused assets'**
-  String get agentWorkspaceProductionSummaryFocusedAssets;
+  /// **'focused assets {count}'**
+  String agentWorkspaceProductionSummaryFocusedAssets(int count);
 
   /// No description provided for @agentWorkspaceProductionSummaryFocusedAssetScope.
   ///
@@ -17784,8 +17799,8 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionSummaryMissingFrames.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production summary missing frames'**
-  String get agentWorkspaceProductionSummaryMissingFrames;
+  /// **'missing frames {count}'**
+  String agentWorkspaceProductionSummaryMissingFrames(int count);
 
   /// No description provided for @agentWorkspaceProductionSummaryTextOnlyCount.
   ///
@@ -17796,8 +17811,8 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionSummaryStateTypes.
   ///
   /// In en, this message translates to:
-  /// **'状态类型 {states}'**
-  String agentWorkspaceProductionSummaryStateTypes(String states);
+  /// **'state types {count}'**
+  String agentWorkspaceProductionSummaryStateTypes(int count);
 
   /// No description provided for @agentWorkspaceProductionSummaryObjectKeyCount.
   ///
@@ -17832,8 +17847,8 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionLatestToolResult.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production latest tool result'**
-  String get agentWorkspaceProductionLatestToolResult;
+  /// **'Latest tool result: {detail}'**
+  String agentWorkspaceProductionLatestToolResult(String detail);
 
   /// No description provided for @agentWorkspaceProductionResultSummary.
   ///
@@ -17844,8 +17859,8 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionSuggestedFlowKey.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace production suggested flow key'**
-  String get agentWorkspaceProductionSuggestedFlowKey;
+  /// **'Suggested writeback key: {flowKey}'**
+  String agentWorkspaceProductionSuggestedFlowKey(String flowKey);
 
   /// No description provided for @agentWorkspaceProductionUseSuggestedFlowKey.
   ///
@@ -18141,8 +18156,8 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceScriptWritebackSource.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script writeback source'**
-  String get agentWorkspaceScriptWritebackSource;
+  /// **'Writeback source: {source}'**
+  String agentWorkspaceScriptWritebackSource(String source);
 
   /// No description provided for @agentWorkspaceScriptSummaryReviewReturned.
   ///
@@ -18182,7 +18197,7 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceScriptSummaryPlanScripts.
   ///
   /// In en, this message translates to:
-  /// **'计划剧本 {count} 条'**
+  /// **'plan scripts {count}'**
   String agentWorkspaceScriptSummaryPlanScripts(int count);
 
   /// No description provided for @agentWorkspaceScriptSummaryRewriteReady.
@@ -18206,7 +18221,7 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceScriptSummaryScriptChars.
   ///
   /// In en, this message translates to:
-  /// **'剧本正文 {chars} 字'**
+  /// **'script {chars} chars'**
   String agentWorkspaceScriptSummaryScriptChars(int chars);
 
   /// No description provided for @agentWorkspaceScriptSummaryNovelTextEmpty.
@@ -18218,7 +18233,7 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceScriptSummaryNovelTextCount.
   ///
   /// In en, this message translates to:
-  /// **'章节材料 {count} 条'**
+  /// **'novel text {count}'**
   String agentWorkspaceScriptSummaryNovelTextCount(int count);
 
   /// No description provided for @agentWorkspaceScriptSummaryNovelEventsEmpty.
@@ -18230,7 +18245,7 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceScriptSummaryNovelEventsCount.
   ///
   /// In en, this message translates to:
-  /// **'小说事件 {count} 条'**
+  /// **'novel events {count}'**
   String agentWorkspaceScriptSummaryNovelEventsCount(int count);
 
   /// No description provided for @agentWorkspaceScopeProjectIdLabel.
@@ -18296,8 +18311,8 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceActivityLatestToolResult.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace activity latest tool result'**
-  String get agentWorkspaceActivityLatestToolResult;
+  /// **'Latest tool result: {detail}'**
+  String agentWorkspaceActivityLatestToolResult(String detail);
 
   /// No description provided for @agentWorkspaceActivityLatestAssistantText.
   ///
@@ -18332,8 +18347,8 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceScriptPlanHint.
   ///
   /// In en, this message translates to:
-  /// **'计划 {pid}'**
-  String agentWorkspaceScriptPlanHint(String pid);
+  /// **'Plan {pid}'**
+  String agentWorkspaceScriptPlanHint(int pid);
 
   /// No description provided for @agentWorkspaceScriptPlanWritebackReady.
   ///
@@ -18593,20 +18608,20 @@ abstract class AppLocalizations {
   /// No description provided for @contentComplianceMetricResolved.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance metric resolved'**
-  String get contentComplianceMetricResolved;
+  /// **'resolved {count}'**
+  String contentComplianceMetricResolved(int count);
 
   /// No description provided for @contentComplianceMetricDismissed.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance metric dismissed'**
-  String get contentComplianceMetricDismissed;
+  /// **'dismissed {count}'**
+  String contentComplianceMetricDismissed(int count);
 
   /// No description provided for @contentComplianceMetricCritical.
   ///
   /// In en, this message translates to:
-  /// **'Content compliance metric critical'**
-  String get contentComplianceMetricCritical;
+  /// **'critical {count}'**
+  String contentComplianceMetricCritical(int count);
 
   /// No description provided for @contentComplianceMetricHigh.
   ///
@@ -18635,7 +18650,7 @@ abstract class AppLocalizations {
   /// No description provided for @contentComplianceOwnerDetail.
   ///
   /// In en, this message translates to:
-  /// **'详情 {detail}'**
+  /// **'detail {detail}'**
   String contentComplianceOwnerDetail(String detail);
 
   /// No description provided for @contentComplianceWorkspaceCounts.
@@ -18647,14 +18662,18 @@ abstract class AppLocalizations {
   /// No description provided for @contentComplianceWorkspaceDetail.
   ///
   /// In en, this message translates to:
-  /// **'critical {critical} · high {high}'**
-  String contentComplianceWorkspaceDetail(int critical, int high);
+  /// **'critical {critical} · high {high} · SLA {sla}'**
+  String contentComplianceWorkspaceDetail(int critical, int high, String sla);
 
   /// No description provided for @contentComplianceReportInfo.
   ///
   /// In en, this message translates to:
-  /// **'reporter {reporter} · {reportedAt}'**
-  String contentComplianceReportInfo(String reporter, String reportedAt);
+  /// **'reporter {reporter} · {reportedAt} · {detail}'**
+  String contentComplianceReportInfo(
+    String reporter,
+    String reportedAt,
+    String detail,
+  );
 
   /// No description provided for @contentComplianceResolutionLine.
   ///
@@ -18719,26 +18738,26 @@ abstract class AppLocalizations {
   /// No description provided for @jobsKindCountEntry.
   ///
   /// In en, this message translates to:
-  /// **'Jobs kind count entry'**
-  String get jobsKindCountEntry;
+  /// **'{kind}: {jobCount}'**
+  String jobsKindCountEntry(String kind, int jobCount);
 
   /// No description provided for @jobsStatusCountEntry.
   ///
   /// In en, this message translates to:
-  /// **'Jobs status count entry'**
-  String get jobsStatusCountEntry;
+  /// **'{status}: {jobCount}'**
+  String jobsStatusCountEntry(String status, int jobCount);
 
   /// No description provided for @jobsIdempotencyMismatch.
   ///
   /// In en, this message translates to:
-  /// **'Jobs idempotency mismatch'**
-  String get jobsIdempotencyMismatch;
+  /// **'POST /api/v1/jobs idempotency: expected same id, got {firstId} vs {secondId}'**
+  String jobsIdempotencyMismatch(String firstId, String secondId);
 
   /// No description provided for @jobsUpdatedAt.
   ///
   /// In en, this message translates to:
-  /// **'Jobs updated at'**
-  String get jobsUpdatedAt;
+  /// **'updated {updatedAt}'**
+  String jobsUpdatedAt(String updatedAt);
 
   /// No description provided for @jobsClaimedBy.
   ///
@@ -18923,20 +18942,20 @@ abstract class AppLocalizations {
   /// No description provided for @notificationsPlatformStatusAffectedEndpoints.
   ///
   /// In en, this message translates to:
-  /// **'Notifications platform status affected endpoints'**
-  String get notificationsPlatformStatusAffectedEndpoints;
+  /// **'Affected endpoints: {endpoints}'**
+  String notificationsPlatformStatusAffectedEndpoints(String endpoints);
 
   /// No description provided for @notificationsComplianceAlertTitle.
   ///
   /// In en, this message translates to:
-  /// **'Notifications compliance alert title'**
-  String get notificationsComplianceAlertTitle;
+  /// **'Content compliance alert: {title}'**
+  String notificationsComplianceAlertTitle(String title);
 
   /// No description provided for @notificationsDownloadUnsupported.
   ///
   /// In en, this message translates to:
-  /// **'Notifications download unsupported'**
-  String get notificationsDownloadUnsupported;
+  /// **'Downloads are not supported on this platform: {fileName} ({bytes} bytes)'**
+  String notificationsDownloadUnsupported(String fileName, int bytes);
 
   /// No description provided for @notificationsComplianceSharedAsyncExportCompleted.
   ///
@@ -18947,20 +18966,23 @@ abstract class AppLocalizations {
   /// No description provided for @notificationsComplianceSharedAsyncExportCancelled.
   ///
   /// In en, this message translates to:
-  /// **'Notifications compliance shared async export cancelled'**
-  String get notificationsComplianceSharedAsyncExportCancelled;
+  /// **'Workspace shared audit background export cancelled (task #{taskId}).'**
+  String notificationsComplianceSharedAsyncExportCancelled(int taskId);
 
   /// No description provided for @notificationsComplianceSharedAsyncExportFailed.
   ///
   /// In en, this message translates to:
-  /// **'Notifications compliance shared async export failed'**
-  String get notificationsComplianceSharedAsyncExportFailed;
+  /// **'Workspace shared audit background export failed (task #{taskId}).'**
+  String notificationsComplianceSharedAsyncExportFailed(int taskId);
 
   /// No description provided for @notificationsComplianceSharedAsyncExportFailedWithDetail.
   ///
   /// In en, this message translates to:
-  /// **'Notifications compliance shared async export failed with detail'**
-  String get notificationsComplianceSharedAsyncExportFailedWithDetail;
+  /// **'Workspace shared audit background export failed (task #{taskId}): {detail}'**
+  String notificationsComplianceSharedAsyncExportFailedWithDetail(
+    int taskId,
+    String detail,
+  );
 
   /// No description provided for @notificationsComplianceSharedAsyncExportTimedOut.
   ///
@@ -18977,14 +18999,14 @@ abstract class AppLocalizations {
   /// No description provided for @notificationsImportJsonParseFailed.
   ///
   /// In en, this message translates to:
-  /// **'Notifications import json parse failed'**
-  String get notificationsImportJsonParseFailed;
+  /// **'Failed to parse imported JSON: {message}'**
+  String notificationsImportJsonParseFailed(String message);
 
   /// No description provided for @notificationsUnknownTemplate.
   ///
   /// In en, this message translates to:
-  /// **'Notifications unknown template'**
-  String get notificationsUnknownTemplate;
+  /// **'Unknown template: {templateId}'**
+  String notificationsUnknownTemplate(String templateId);
 
   /// No description provided for @platformStatusChipLabel.
   ///

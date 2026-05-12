@@ -4870,10 +4870,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get adminConsoleQuotaActionSet => '设置配额';
 
   @override
-  String get adminConsoleDailyQuotaInputExample => '例如 500';
+  String get adminConsoleDailyQuotaInputExample => '例如 100';
 
   @override
-  String get adminConsoleDailyQuotaInputDisabledHint => '仅在“设置配额”时生效';
+  String get adminConsoleDailyQuotaInputDisabledHint => '无限制';
 
   @override
   String get adminConsoleSaving => '保存中…';
@@ -7745,8 +7745,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get storyboardWorkbenchProductionMetaLoadedEmpty => '制作视图已加载';
 
   @override
-  String storyboardEditorDialogTitle(String title) {
-    return '分镜编辑器 $title';
+  String storyboardEditorDialogTitle(int numericId) {
+    return '分镜编辑器 #$numericId';
   }
 
   @override
@@ -10561,9 +10561,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String adminConsoleDailyQuotaLabel(String detail) {
-    return '每日配额 $detail';
-  }
+  String get adminConsoleDailyQuotaLabel => '每日配额';
 
   @override
   String adminConsoleChipMember(int count) {
@@ -10611,17 +10609,18 @@ class AppLocalizationsZh extends AppLocalizations {
     String email,
     String workspaceRole,
     String projectRole,
+    String detail,
   ) {
-    return '$email · 工作区 $workspaceRole · 项目 $projectRole';
+    return '$email · 工作区 $workspaceRole · 项目 $projectRole · $detail';
   }
 
   @override
   String adminConsoleWorkspaceCandidateItem(
     String email,
     String workspaceRole,
-    int explicitProjectCount,
+    String explicitProjectRole,
   ) {
-    return '$email · $workspaceRole · 显式 $explicitProjectCount';
+    return '$email · $workspaceRole · 显式项目角色 $explicitProjectRole';
   }
 
   @override
@@ -10645,13 +10644,19 @@ class AppLocalizationsZh extends AppLocalizations {
     String userId,
     String role,
     String workspaceId,
+    String detail,
   ) {
-    return '操作=$action · 用户=$userId · 角色=$role · 工作区=$workspaceId';
+    return '操作=$action · 用户=$userId · 角色=$role · 工作区=$workspaceId · 详情=$detail';
   }
 
   @override
-  String adminConsoleAuditOwnerTransfer(String previousOwner, String newOwner) {
-    return '所有权转移：$previousOwner → $newOwner';
+  String adminConsoleAuditOwnerTransfer(
+    String previousOwner,
+    String newOwner,
+    String role,
+    String reset,
+  ) {
+    return '所有权转移：$previousOwner → $newOwner · 角色=$role · 重置=$reset';
   }
 
   @override
@@ -10669,9 +10674,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String adminConsoleFieldUserId(String detail) {
-    return '用户 ID $detail';
-  }
+  String get adminConsoleFieldUserId => '用户 ID';
 
   @override
   String get adminConsoleFieldCreatedAt => 'admin console field created at';
@@ -10882,8 +10885,12 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String agentWorkspaceProductionReviewIssues(int count, String issues) {
-    return '问题 $count 项：$issues';
+  String agentWorkspaceProductionReviewIssues(
+    int severe,
+    int medium,
+    int minor,
+  ) {
+    return '问题：严重 $severe，中等 $medium，轻微 $minor';
   }
 
   @override
@@ -10989,23 +10996,25 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionSummaryReviewHeadline(
-    int count,
-    String scope,
+    String target,
+    String grade,
   ) {
-    return '聚焦资产 $count 项：$scope';
+    return '聚焦 $target：$grade 级';
   }
 
   @override
   String agentWorkspaceProductionSummaryIssueBreakdown(
-    int count,
-    String breakdown,
+    int severe,
+    int medium,
+    int minor,
   ) {
-    return '问题分布 $count 项：$breakdown';
+    return '问题：严重 $severe，中等 $medium，轻微 $minor';
   }
 
   @override
-  String get agentWorkspaceProductionSummaryFocusedAssets =>
-      'agent workspace production summary focused assets';
+  String agentWorkspaceProductionSummaryFocusedAssets(int count) {
+    return '聚焦资产 $count 项';
+  }
 
   @override
   String agentWorkspaceProductionSummaryFocusedAssetScope(String scope) {
@@ -11077,8 +11086,9 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get agentWorkspaceProductionSummaryMissingFrames =>
-      '纯文本 \$skippedCount 项';
+  String agentWorkspaceProductionSummaryMissingFrames(int count) {
+    return '缺少帧 $count 项';
+  }
 
   @override
   String agentWorkspaceProductionSummaryTextOnlyCount(int count) {
@@ -11086,8 +11096,8 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String agentWorkspaceProductionSummaryStateTypes(String states) {
-    return '状态类型 $states';
+  String agentWorkspaceProductionSummaryStateTypes(int count) {
+    return '状态类型 $count';
   }
 
   @override
@@ -11114,15 +11124,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String get agentWorkspaceProductionIdleHint => '等待执行：可直接用引导任务或表单按钮。';
 
   @override
-  String get agentWorkspaceProductionLatestToolResult =>
-      '最新工具结果：\$workspaceLastToolResultLine';
+  String agentWorkspaceProductionLatestToolResult(String detail) {
+    return '最新工具结果：$detail';
+  }
 
   @override
   String get agentWorkspaceProductionResultSummary => '结果摘要';
 
   @override
-  String get agentWorkspaceProductionSuggestedFlowKey =>
-      '建议写回 key：\$suggestedFlowKeyLine';
+  String agentWorkspaceProductionSuggestedFlowKey(String flowKey) {
+    return '建议写回 key：$flowKey';
+  }
 
   @override
   String get agentWorkspaceProductionUseSuggestedFlowKey => '使用该 key';
@@ -11294,8 +11306,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get agentWorkspaceScriptLatestAssistantResult => '最新助手结果';
 
   @override
-  String get agentWorkspaceScriptWritebackSource =>
-      '写回来源：\$scriptWritebackSourceLine';
+  String agentWorkspaceScriptWritebackSource(String source) {
+    return '写回来源：$source';
+  }
 
   @override
   String get agentWorkspaceScriptSummaryReviewReturned => '审核结果已返回';
@@ -11395,8 +11408,9 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get agentWorkspaceActivityLatestToolResult =>
-      '最新工具结果：\$workspaceLastToolResultLine';
+  String agentWorkspaceActivityLatestToolResult(String detail) {
+    return '最新工具结果：$detail';
+  }
 
   @override
   String get agentWorkspaceActivityLatestAssistantText => '最新助手文本';
@@ -11414,7 +11428,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get agentWorkspaceScriptWritebackSourceAssistant => 'assistant stream';
 
   @override
-  String agentWorkspaceScriptPlanHint(String pid) {
+  String agentWorkspaceScriptPlanHint(int pid) {
     return '计划 $pid';
   }
 
@@ -11582,16 +11596,19 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get contentComplianceMetricResolved =>
-      'content compliance metric resolved';
+  String contentComplianceMetricResolved(int count) {
+    return '已解决 $count';
+  }
 
   @override
-  String get contentComplianceMetricDismissed =>
-      'content compliance metric dismissed';
+  String contentComplianceMetricDismissed(int count) {
+    return '已忽略 $count';
+  }
 
   @override
-  String get contentComplianceMetricCritical =>
-      'content compliance metric critical';
+  String contentComplianceMetricCritical(int count) {
+    return '严重 $count';
+  }
 
   @override
   String contentComplianceMetricHigh(int count) {
@@ -11624,13 +11641,17 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String contentComplianceWorkspaceDetail(int critical, int high) {
-    return 'critical $critical · high $high';
+  String contentComplianceWorkspaceDetail(int critical, int high, String sla) {
+    return 'critical $critical · high $high · SLA $sla';
   }
 
   @override
-  String contentComplianceReportInfo(String reporter, String reportedAt) {
-    return 'reporter $reporter · $reportedAt';
+  String contentComplianceReportInfo(
+    String reporter,
+    String reportedAt,
+    String detail,
+  ) {
+    return 'reporter $reporter · $reportedAt · $detail';
   }
 
   @override
@@ -11666,16 +11687,24 @@ class AppLocalizationsZh extends AppLocalizations {
   String get jobsEmptyValue => 'jobs empty value';
 
   @override
-  String get jobsKindCountEntry => 'jobs kind count entry';
+  String jobsKindCountEntry(String kind, int jobCount) {
+    return '$kind：$jobCount';
+  }
 
   @override
-  String get jobsStatusCountEntry => 'jobs status count entry';
+  String jobsStatusCountEntry(String status, int jobCount) {
+    return '$status：$jobCount';
+  }
 
   @override
-  String get jobsIdempotencyMismatch => 'jobs idempotency mismatch';
+  String jobsIdempotencyMismatch(String firstId, String secondId) {
+    return 'POST /api/v1/jobs 幂等：期望同一 id，实际 $firstId 与 $secondId';
+  }
 
   @override
-  String get jobsUpdatedAt => 'jobs updated at';
+  String jobsUpdatedAt(String updatedAt) {
+    return '更新于 $updatedAt';
+  }
 
   @override
   String jobsClaimedBy(String claimedBy) {
@@ -11787,32 +11816,41 @@ class AppLocalizationsZh extends AppLocalizations {
       'notifications platform status degraded message';
 
   @override
-  String get notificationsPlatformStatusAffectedEndpoints =>
-      'notifications platform status affected endpoints';
+  String notificationsPlatformStatusAffectedEndpoints(String endpoints) {
+    return '受影响端点：$endpoints';
+  }
 
   @override
-  String get notificationsComplianceAlertTitle =>
-      'notifications compliance alert title';
+  String notificationsComplianceAlertTitle(String title) {
+    return '内容合规告警：$title';
+  }
 
   @override
-  String get notificationsDownloadUnsupported =>
-      'notifications download unsupported';
+  String notificationsDownloadUnsupported(String fileName, int bytes) {
+    return '当前平台不支持下载：$fileName（$bytes 字节）';
+  }
 
   @override
   String get notificationsComplianceSharedAsyncExportCompleted =>
       'notifications compliance shared async export completed';
 
   @override
-  String get notificationsComplianceSharedAsyncExportCancelled =>
-      'notifications compliance shared async export cancelled';
+  String notificationsComplianceSharedAsyncExportCancelled(int taskId) {
+    return '工作区共享审计后台导出已取消（任务 #$taskId）。';
+  }
 
   @override
-  String get notificationsComplianceSharedAsyncExportFailed =>
-      'notifications compliance shared async export failed';
+  String notificationsComplianceSharedAsyncExportFailed(int taskId) {
+    return '工作区共享审计后台导出失败（任务 #$taskId）。';
+  }
 
   @override
-  String get notificationsComplianceSharedAsyncExportFailedWithDetail =>
-      'notifications compliance shared async export failed with detail';
+  String notificationsComplianceSharedAsyncExportFailedWithDetail(
+    int taskId,
+    String detail,
+  ) {
+    return '工作区共享审计后台导出失败（任务 #$taskId）：$detail';
+  }
 
   @override
   String get notificationsComplianceSharedAsyncExportTimedOut =>
@@ -11823,11 +11861,14 @@ class AppLocalizationsZh extends AppLocalizations {
       'notifications import json object required';
 
   @override
-  String get notificationsImportJsonParseFailed =>
-      'notifications import json parse failed';
+  String notificationsImportJsonParseFailed(String message) {
+    return '导入 JSON 解析失败：$message';
+  }
 
   @override
-  String get notificationsUnknownTemplate => 'notifications unknown template';
+  String notificationsUnknownTemplate(String templateId) {
+    return '未知模板：$templateId';
+  }
 
   @override
   String platformStatusChipLabel(String title, String value) {

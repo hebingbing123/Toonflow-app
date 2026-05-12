@@ -5062,11 +5062,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminConsoleQuotaActionSet => 'Set quota';
 
   @override
-  String get adminConsoleDailyQuotaInputExample => 'e.g. 500';
+  String get adminConsoleDailyQuotaInputExample => 'e.g. 100';
 
   @override
-  String get adminConsoleDailyQuotaInputDisabledHint =>
-      'Only effective when \"Set quota\" is selected';
+  String get adminConsoleDailyQuotaInputDisabledHint => 'Unlimited';
 
   @override
   String get adminConsoleSaving => 'Saving...';
@@ -8091,8 +8090,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'Production view loaded';
 
   @override
-  String storyboardEditorDialogTitle(String title) {
-    return '分镜编辑器 $title';
+  String storyboardEditorDialogTitle(int numericId) {
+    return 'Storyboard editor #$numericId';
   }
 
   @override
@@ -11056,9 +11055,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String adminConsoleDailyQuotaLabel(String detail) {
-    return '每日配额 $detail';
-  }
+  String get adminConsoleDailyQuotaLabel => 'Daily quota';
 
   @override
   String adminConsoleChipMember(int count) {
@@ -11106,17 +11103,18 @@ class AppLocalizationsEn extends AppLocalizations {
     String email,
     String workspaceRole,
     String projectRole,
+    String detail,
   ) {
-    return '$email · workspace $workspaceRole · project $projectRole';
+    return '$email · workspace $workspaceRole · project $projectRole · $detail';
   }
 
   @override
   String adminConsoleWorkspaceCandidateItem(
     String email,
     String workspaceRole,
-    int explicitProjectCount,
+    String explicitProjectRole,
   ) {
-    return '$email · $workspaceRole · explicit $explicitProjectCount';
+    return '$email · $workspaceRole · explicit project role $explicitProjectRole';
   }
 
   @override
@@ -11140,13 +11138,19 @@ class AppLocalizationsEn extends AppLocalizations {
     String userId,
     String role,
     String workspaceId,
+    String detail,
   ) {
-    return 'action=$action · user=$userId · role=$role · workspace=$workspaceId';
+    return 'action=$action · user=$userId · role=$role · workspace=$workspaceId · detail=$detail';
   }
 
   @override
-  String adminConsoleAuditOwnerTransfer(String previousOwner, String newOwner) {
-    return 'owner transfer: $previousOwner → $newOwner';
+  String adminConsoleAuditOwnerTransfer(
+    String previousOwner,
+    String newOwner,
+    String role,
+    String reset,
+  ) {
+    return 'owner transfer: $previousOwner → $newOwner · role=$role · reset=$reset';
   }
 
   @override
@@ -11164,9 +11168,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String adminConsoleFieldUserId(String detail) {
-    return '用户 ID $detail';
-  }
+  String get adminConsoleFieldUserId => 'User ID';
 
   @override
   String get adminConsoleFieldCreatedAt => 'Admin console field created at';
@@ -11397,8 +11399,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String agentWorkspaceProductionReviewIssues(int count, String issues) {
-    return 'issues $count: $issues';
+  String agentWorkspaceProductionReviewIssues(
+    int severe,
+    int medium,
+    int minor,
+  ) {
+    return 'issues: severe $severe, medium $medium, minor $minor';
   }
 
   @override
@@ -11510,23 +11516,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionSummaryReviewHeadline(
-    int count,
-    String scope,
+    String target,
+    String grade,
   ) {
-    return 'focused assets $count: $scope';
+    return 'focused $target: grade $grade';
   }
 
   @override
   String agentWorkspaceProductionSummaryIssueBreakdown(
-    int count,
-    String breakdown,
+    int severe,
+    int medium,
+    int minor,
   ) {
-    return 'issue breakdown $count: $breakdown';
+    return 'issues: severe $severe, medium $medium, minor $minor';
   }
 
   @override
-  String get agentWorkspaceProductionSummaryFocusedAssets =>
-      'Agent workspace production summary focused assets';
+  String agentWorkspaceProductionSummaryFocusedAssets(int count) {
+    return 'focused assets $count';
+  }
 
   @override
   String agentWorkspaceProductionSummaryFocusedAssetScope(String scope) {
@@ -11601,8 +11609,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get agentWorkspaceProductionSummaryMissingFrames =>
-      'Agent workspace production summary missing frames';
+  String agentWorkspaceProductionSummaryMissingFrames(int count) {
+    return 'missing frames $count';
+  }
 
   @override
   String agentWorkspaceProductionSummaryTextOnlyCount(int count) {
@@ -11610,8 +11619,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String agentWorkspaceProductionSummaryStateTypes(String states) {
-    return '状态类型 $states';
+  String agentWorkspaceProductionSummaryStateTypes(int count) {
+    return 'state types $count';
   }
 
   @override
@@ -11639,16 +11648,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'Agent workspace production idle hint';
 
   @override
-  String get agentWorkspaceProductionLatestToolResult =>
-      'Agent workspace production latest tool result';
+  String agentWorkspaceProductionLatestToolResult(String detail) {
+    return 'Latest tool result: $detail';
+  }
 
   @override
   String get agentWorkspaceProductionResultSummary =>
       'Agent workspace production result summary';
 
   @override
-  String get agentWorkspaceProductionSuggestedFlowKey =>
-      'Agent workspace production suggested flow key';
+  String agentWorkspaceProductionSuggestedFlowKey(String flowKey) {
+    return 'Suggested writeback key: $flowKey';
+  }
 
   @override
   String get agentWorkspaceProductionUseSuggestedFlowKey =>
@@ -11851,8 +11862,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Agent workspace script latest assistant result';
 
   @override
-  String get agentWorkspaceScriptWritebackSource =>
-      'Agent workspace script writeback source';
+  String agentWorkspaceScriptWritebackSource(String source) {
+    return 'Writeback source: $source';
+  }
 
   @override
   String get agentWorkspaceScriptSummaryReviewReturned =>
@@ -11882,7 +11894,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceScriptSummaryPlanScripts(int count) {
-    return '计划剧本 $count 条';
+    return 'plan scripts $count';
   }
 
   @override
@@ -11900,7 +11912,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceScriptSummaryScriptChars(int chars) {
-    return '剧本正文 $chars 字';
+    return 'script $chars chars';
   }
 
   @override
@@ -11910,7 +11922,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceScriptSummaryNovelTextCount(int count) {
-    return '章节材料 $count 条';
+    return 'novel text $count';
   }
 
   @override
@@ -11920,7 +11932,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceScriptSummaryNovelEventsCount(int count) {
-    return '小说事件 $count 条';
+    return 'novel events $count';
   }
 
   @override
@@ -11961,8 +11973,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get agentWorkspaceActivityLatestToolResult =>
-      'Agent workspace activity latest tool result';
+  String agentWorkspaceActivityLatestToolResult(String detail) {
+    return 'Latest tool result: $detail';
+  }
 
   @override
   String get agentWorkspaceActivityLatestAssistantText =>
@@ -11985,8 +11998,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'Agent workspace script writeback source assistant';
 
   @override
-  String agentWorkspaceScriptPlanHint(String pid) {
-    return '计划 $pid';
+  String agentWorkspaceScriptPlanHint(int pid) {
+    return 'Plan $pid';
   }
 
   @override
@@ -12161,16 +12174,19 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get contentComplianceMetricResolved =>
-      'Content compliance metric resolved';
+  String contentComplianceMetricResolved(int count) {
+    return 'resolved $count';
+  }
 
   @override
-  String get contentComplianceMetricDismissed =>
-      'Content compliance metric dismissed';
+  String contentComplianceMetricDismissed(int count) {
+    return 'dismissed $count';
+  }
 
   @override
-  String get contentComplianceMetricCritical =>
-      'Content compliance metric critical';
+  String contentComplianceMetricCritical(int count) {
+    return 'critical $count';
+  }
 
   @override
   String contentComplianceMetricHigh(int count) {
@@ -12194,7 +12210,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String contentComplianceOwnerDetail(String detail) {
-    return '详情 $detail';
+    return 'detail $detail';
   }
 
   @override
@@ -12203,13 +12219,17 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String contentComplianceWorkspaceDetail(int critical, int high) {
-    return 'critical $critical · high $high';
+  String contentComplianceWorkspaceDetail(int critical, int high, String sla) {
+    return 'critical $critical · high $high · SLA $sla';
   }
 
   @override
-  String contentComplianceReportInfo(String reporter, String reportedAt) {
-    return 'reporter $reporter · $reportedAt';
+  String contentComplianceReportInfo(
+    String reporter,
+    String reportedAt,
+    String detail,
+  ) {
+    return 'reporter $reporter · $reportedAt · $detail';
   }
 
   @override
@@ -12252,16 +12272,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get jobsEmptyValue => 'Jobs empty value';
 
   @override
-  String get jobsKindCountEntry => 'Jobs kind count entry';
+  String jobsKindCountEntry(String kind, int jobCount) {
+    return '$kind: $jobCount';
+  }
 
   @override
-  String get jobsStatusCountEntry => 'Jobs status count entry';
+  String jobsStatusCountEntry(String status, int jobCount) {
+    return '$status: $jobCount';
+  }
 
   @override
-  String get jobsIdempotencyMismatch => 'Jobs idempotency mismatch';
+  String jobsIdempotencyMismatch(String firstId, String secondId) {
+    return 'POST /api/v1/jobs idempotency: expected same id, got $firstId vs $secondId';
+  }
 
   @override
-  String get jobsUpdatedAt => 'Jobs updated at';
+  String jobsUpdatedAt(String updatedAt) {
+    return 'updated $updatedAt';
+  }
 
   @override
   String jobsClaimedBy(String claimedBy) {
@@ -12373,32 +12401,41 @@ class AppLocalizationsEn extends AppLocalizations {
       'Notifications platform status degraded message';
 
   @override
-  String get notificationsPlatformStatusAffectedEndpoints =>
-      'Notifications platform status affected endpoints';
+  String notificationsPlatformStatusAffectedEndpoints(String endpoints) {
+    return 'Affected endpoints: $endpoints';
+  }
 
   @override
-  String get notificationsComplianceAlertTitle =>
-      'Notifications compliance alert title';
+  String notificationsComplianceAlertTitle(String title) {
+    return 'Content compliance alert: $title';
+  }
 
   @override
-  String get notificationsDownloadUnsupported =>
-      'Notifications download unsupported';
+  String notificationsDownloadUnsupported(String fileName, int bytes) {
+    return 'Downloads are not supported on this platform: $fileName ($bytes bytes)';
+  }
 
   @override
   String get notificationsComplianceSharedAsyncExportCompleted =>
       'Notifications compliance shared async export completed';
 
   @override
-  String get notificationsComplianceSharedAsyncExportCancelled =>
-      'Notifications compliance shared async export cancelled';
+  String notificationsComplianceSharedAsyncExportCancelled(int taskId) {
+    return 'Workspace shared audit background export cancelled (task #$taskId).';
+  }
 
   @override
-  String get notificationsComplianceSharedAsyncExportFailed =>
-      'Notifications compliance shared async export failed';
+  String notificationsComplianceSharedAsyncExportFailed(int taskId) {
+    return 'Workspace shared audit background export failed (task #$taskId).';
+  }
 
   @override
-  String get notificationsComplianceSharedAsyncExportFailedWithDetail =>
-      'Notifications compliance shared async export failed with detail';
+  String notificationsComplianceSharedAsyncExportFailedWithDetail(
+    int taskId,
+    String detail,
+  ) {
+    return 'Workspace shared audit background export failed (task #$taskId): $detail';
+  }
 
   @override
   String get notificationsComplianceSharedAsyncExportTimedOut =>
@@ -12409,11 +12446,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'Notifications import json object required';
 
   @override
-  String get notificationsImportJsonParseFailed =>
-      'Notifications import json parse failed';
+  String notificationsImportJsonParseFailed(String message) {
+    return 'Failed to parse imported JSON: $message';
+  }
 
   @override
-  String get notificationsUnknownTemplate => 'Notifications unknown template';
+  String notificationsUnknownTemplate(String templateId) {
+    return 'Unknown template: $templateId';
+  }
 
   @override
   String platformStatusChipLabel(String title, String value) {

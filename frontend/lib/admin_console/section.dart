@@ -419,7 +419,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
         l10n.adminConsoleChipUnreadNotif(detail.unreadNotificationCount),
       ],
       sections: [
-        _kvWrap({
+        _kvWrap(context, {
           'userId': detail.userId,
           'createdAt': _fmt(detail.createdAt),
           'operationalStatus': detail.operationalStatus,
@@ -434,9 +434,14 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           title: l10n.adminConsoleSectionMemberships,
           items: detail.memberships
               .map(
-                (item) =>
-                    '${item.workspaceName} · ${item.workspaceType} · ${item.role}'
-                    '${item.archivedAt == null ? '' : l10n.adminConsoleArchivedSuffix}',
+                (item) => l10n.adminConsoleMembershipItem(
+                  item.workspaceName,
+                  item.workspaceType,
+                  item.role,
+                  item.archivedAt == null
+                      ? ''
+                      : l10n.adminConsoleArchivedSuffix,
+                ),
               )
               .toList(growable: false),
         ),
@@ -445,8 +450,12 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           title: l10n.adminConsoleSectionRecentJobs,
           items: detail.recentJobs
               .map(
-                (job) =>
-                    '${job.kind} · ${job.status} · project ${job.projectNumericId ?? '-'} · ${_fmt(job.createdAt)}',
+                (job) => l10n.adminConsoleRecentJobItem(
+                  job.kind,
+                  job.status,
+                  _jobProjectScopeLabel(job),
+                  _fmt(job.createdAt),
+                ),
               )
               .toList(growable: false),
         ),
@@ -455,8 +464,11 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           title: l10n.adminConsoleSectionGovernanceAudit,
           items: detail.governanceAudit
               .map(
-                (item) =>
-                    '${_fmt(item.createdAt)} · ${item.actorLabel} · ${_auditSummary(item)}',
+                (item) => l10n.adminConsoleAuditListItem(
+                  _fmt(item.createdAt),
+                  item.actorLabel,
+                  _auditSummary(context, item),
+                ),
               )
               .toList(growable: false),
         ),
@@ -473,7 +485,10 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(l10n.adminConsoleGovernanceActionsTitle, style: theme.textTheme.titleSmall),
+        Text(
+          l10n.adminConsoleGovernanceActionsTitle,
+          style: theme.textTheme.titleSmall,
+        ),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -523,7 +538,10 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           ),
         ),
         const SizedBox(height: 12),
-        Text(l10n.adminConsoleDailyQuotaOverrideTitle, style: theme.textTheme.titleSmall),
+        Text(
+          l10n.adminConsoleDailyQuotaOverrideTitle,
+          style: theme.textTheme.titleSmall,
+        ),
         const SizedBox(height: 8),
         Text(
           detail.dailyJobQuotaOverride == null
@@ -577,7 +595,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
             enabled: _quotaRequiresValue,
             keyboardType: TextInputType.number,
             decoration: InputDecoration(
-              labelText: 'dailyJobQuota',
+              labelText: l10n.adminConsoleDailyQuotaLabel,
               hintText: _quotaRequiresValue
                   ? (detail.dailyJobQuotaOverride?.toString() ??
                         l10n.adminConsoleDailyQuotaInputExample)
@@ -642,7 +660,10 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(l10n.adminConsoleWorkspaceContextRepairTitle, style: theme.textTheme.titleSmall),
+        Text(
+          l10n.adminConsoleWorkspaceContextRepairTitle,
+          style: theme.textTheme.titleSmall,
+        ),
         const SizedBox(height: 8),
         Text(
           l10n.adminConsoleWorkspaceContextRepairIntro,
@@ -679,7 +700,9 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                             AdminUserWorkspaceContextActionV1.setToWorkspace,
                         workspaceId: item.workspaceId,
                       ),
-                child: Text(l10n.adminConsoleWorkspaceContextSwitchTo(item.workspaceName)),
+                child: Text(
+                  l10n.adminConsoleWorkspaceContextSwitchTo(item.workspaceName),
+                ),
               ),
             ),
           ],
@@ -719,7 +742,10 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(l10n.adminConsoleWorkspaceGovernanceTitle, style: theme.textTheme.titleSmall),
+        Text(
+          l10n.adminConsoleWorkspaceGovernanceTitle,
+          style: theme.textTheme.titleSmall,
+        ),
         const SizedBox(height: 8),
         if (isPersonal)
           Text(
@@ -781,7 +807,10 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           ),
           const SizedBox(height: 8),
         ],
-        Text(l10n.adminConsoleInternalNoteLabel, style: theme.textTheme.titleSmall),
+        Text(
+          l10n.adminConsoleInternalNoteLabel,
+          style: theme.textTheme.titleSmall,
+        ),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -872,7 +901,10 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(l10n.adminConsoleWorkspaceMemberRemediationTitle, style: theme.textTheme.titleSmall),
+        Text(
+          l10n.adminConsoleWorkspaceMemberRemediationTitle,
+          style: theme.textTheme.titleSmall,
+        ),
         const SizedBox(height: 8),
         Text(
           l10n.adminConsoleWorkspaceMemberRemediationHint,
@@ -1012,7 +1044,10 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(l10n.adminConsoleWorkspaceOwnerRemediationTitle, style: theme.textTheme.titleSmall),
+        Text(
+          l10n.adminConsoleWorkspaceOwnerRemediationTitle,
+          style: theme.textTheme.titleSmall,
+        ),
         const SizedBox(height: 8),
         Text(
           isPersonal
@@ -1098,15 +1133,30 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(l10n.adminConsoleAclSummaryTitle, style: theme.textTheme.titleSmall),
+        Text(
+          l10n.adminConsoleAclSummaryTitle,
+          style: theme.textTheme.titleSmall,
+        ),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
           runSpacing: 8,
           children: [
-            Chip(label: Text(l10n.adminConsoleRoleCountOwner(breakdown['owner'] ?? 0))),
-            Chip(label: Text(l10n.adminConsoleRoleCountAdmin(breakdown['admin'] ?? 0))),
-            Chip(label: Text(l10n.adminConsoleRoleCountMember(breakdown['member'] ?? 0))),
+            Chip(
+              label: Text(
+                l10n.adminConsoleRoleCountOwner(breakdown['owner'] ?? 0),
+              ),
+            ),
+            Chip(
+              label: Text(
+                l10n.adminConsoleRoleCountAdmin(breakdown['admin'] ?? 0),
+              ),
+            ),
+            Chip(
+              label: Text(
+                l10n.adminConsoleRoleCountMember(breakdown['member'] ?? 0),
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 8),
@@ -1151,9 +1201,23 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                     style: theme.textTheme.bodySmall,
                   ),
                   Chip(label: Text(project.aclMode)),
-                  Chip(label: Text(l10n.adminConsoleExplicitAclCount(project.explicitAclCount))),
-                  Chip(label: Text(l10n.adminConsoleEditorCount(project.editorCount))),
-                  Chip(label: Text(l10n.adminConsoleViewerCount(project.viewerCount))),
+                  Chip(
+                    label: Text(
+                      l10n.adminConsoleExplicitAclCount(
+                        project.explicitAclCount,
+                      ),
+                    ),
+                  ),
+                  Chip(
+                    label: Text(
+                      l10n.adminConsoleEditorCount(project.editorCount),
+                    ),
+                  ),
+                  Chip(
+                    label: Text(
+                      l10n.adminConsoleViewerCount(project.viewerCount),
+                    ),
+                  ),
                   if (project.archivedAt != null)
                     const Chip(label: Text('archived')),
                   TextButton(
@@ -1178,7 +1242,10 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(l10n.adminConsoleBatchProjectGovernanceTitle, style: theme.textTheme.titleSmall),
+        Text(
+          l10n.adminConsoleBatchProjectGovernanceTitle,
+          style: theme.textTheme.titleSmall,
+        ),
         const SizedBox(height: 8),
         Text(
           l10n.adminConsoleBatchProjectGovernanceHint,
@@ -1334,13 +1401,13 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
       title: detail.name,
       chips: [
         detail.workspaceType,
-        'member ${detail.memberCount}',
-        'project ${detail.projectCount}',
-        'active job ${detail.activeJobCount}',
-        if (detail.archivedAt != null) 'archived',
+        l10n.adminConsoleChipMember(detail.memberCount),
+        l10n.adminConsoleChipProject(detail.projectCount),
+        l10n.adminConsoleChipActiveJob(detail.activeJobCount),
+        if (detail.archivedAt != null) l10n.adminConsoleArchivedLabel,
       ],
       sections: [
-        _kvWrap({
+        _kvWrap(context, {
           'workspaceId': detail.workspaceId,
           'owner': detail.ownerEmail ?? detail.ownerUserId,
           'archivedAt': detail.archivedAt == null
@@ -1360,8 +1427,11 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           title: l10n.adminConsoleSectionMembers,
           items: detail.members
               .map(
-                (item) =>
-                    '${item.email ?? item.userId} · ${item.role} · joined ${_fmt(item.createdAt)}',
+                (item) => l10n.adminConsoleMemberListItem(
+                  item.email ?? item.userId,
+                  item.role,
+                  _fmt(item.createdAt),
+                ),
               )
               .toList(growable: false),
         ),
@@ -1370,8 +1440,11 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           title: l10n.adminConsoleSectionRecentProjects,
           items: detail.recentProjects
               .map(
-                (item) =>
-                    '#${item.numericId} ${item.name ?? ''} · ${item.ownerEmail ?? item.ownerUserId}',
+                (item) => l10n.adminConsoleRecentProjectItem(
+                  item.numericId,
+                  item.name ?? '',
+                  item.ownerEmail ?? item.ownerUserId,
+                ),
               )
               .toList(growable: false),
         ),
@@ -1380,8 +1453,12 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           title: l10n.adminConsoleSectionRecentJobs,
           items: detail.recentJobs
               .map(
-                (job) =>
-                    '${job.kind} · ${job.status} · project ${job.projectNumericId ?? '-'} · ${_fmt(job.createdAt)}',
+                (job) => l10n.adminConsoleRecentJobItem(
+                  job.kind,
+                  job.status,
+                  _jobProjectScopeLabel(job),
+                  _fmt(job.createdAt),
+                ),
               )
               .toList(growable: false),
         ),
@@ -1390,8 +1467,11 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           title: l10n.adminConsoleSectionGovernanceAudit,
           items: detail.governanceAudit
               .map(
-                (item) =>
-                    '${_fmt(item.createdAt)} · ${item.actorLabel} · ${_workspaceAuditSummary(item)}',
+                (item) => l10n.adminConsoleAuditListItem(
+                  _fmt(item.createdAt),
+                  item.actorLabel,
+                  _workspaceAuditSummary(context, item),
+                ),
               )
               .toList(growable: false),
         ),
@@ -1414,7 +1494,10 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(l10n.adminConsoleProjectOwnerRemediationTitle, style: theme.textTheme.titleSmall),
+        Text(
+          l10n.adminConsoleProjectOwnerRemediationTitle,
+          style: theme.textTheme.titleSmall,
+        ),
         const SizedBox(height: 8),
         Text(
           l10n.adminConsoleProjectOwnerRemediationHint,
@@ -1467,7 +1550,10 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(l10n.adminConsoleProjectGovernanceTitle, style: theme.textTheme.titleSmall),
+        Text(
+          l10n.adminConsoleProjectGovernanceTitle,
+          style: theme.textTheme.titleSmall,
+        ),
         const SizedBox(height: 8),
         Text(
           l10n.adminConsoleProjectGovernanceHint,
@@ -1513,7 +1599,10 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           ],
         ),
         const SizedBox(height: 8),
-        Text(l10n.adminConsoleInternalNoteLabel, style: theme.textTheme.titleSmall),
+        Text(
+          l10n.adminConsoleInternalNoteLabel,
+          style: theme.textTheme.titleSmall,
+        ),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -1606,16 +1695,16 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
             )
           : l10n.adminConsoleProjectTitle(detail.numericId),
       chips: [
-        'script ${detail.scriptCount}',
-        'asset ${detail.assetCount}',
-        'job ${detail.jobCount}',
-        'active job ${detail.activeJobCount}',
+        l10n.adminConsoleChipScript(detail.scriptCount),
+        l10n.adminConsoleChipAsset(detail.assetCount),
+        l10n.adminConsoleChipJob(detail.jobCount),
+        l10n.adminConsoleChipActiveJob(detail.activeJobCount),
         detail.projectAclMode,
-        'explicit acl ${detail.explicitAclCount}',
-        if (detail.archivedAt != null) 'archived',
+        l10n.adminConsoleExplicitAclCount(detail.explicitAclCount),
+        if (detail.archivedAt != null) l10n.adminConsoleArchivedLabel,
       ],
       sections: [
-        _kvWrap({
+        _kvWrap(context, {
           'projectId': detail.projectId,
           'owner': detail.ownerEmail ?? detail.ownerUserId,
           'workspace': detail.workspace?.name ?? '-',
@@ -1638,8 +1727,12 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           title: l10n.adminConsoleSectionExplicitAclMembers,
           items: detail.aclMembers
               .map(
-                (item) =>
-                    '${item.email ?? item.userId} · workspace ${item.workspaceRole} · project ${item.projectRole} · ${_fmt(item.updatedAt)}',
+                (item) => l10n.adminConsoleAclMemberItem(
+                  item.email ?? item.userId,
+                  item.workspaceRole,
+                  item.projectRole,
+                  _fmt(item.updatedAt),
+                ),
               )
               .toList(growable: false),
         ),
@@ -1648,8 +1741,11 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           title: l10n.adminConsoleSectionWorkspaceCandidates,
           items: detail.workspaceMemberCandidates
               .map(
-                (item) =>
-                    '${item.email ?? item.userId} · ${item.workspaceRole} · explicit ${item.explicitProjectRole ?? '-'}',
+                (item) => l10n.adminConsoleWorkspaceCandidateItem(
+                  item.email ?? item.userId,
+                  item.workspaceRole,
+                  item.explicitProjectRole ?? '-',
+                ),
               )
               .toList(growable: false),
         ),
@@ -1658,8 +1754,12 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           title: l10n.adminConsoleSectionRecentJobs,
           items: detail.recentJobs
               .map(
-                (job) =>
-                    '${job.kind} · ${job.status} · ${job.ownerEmail ?? job.ownerUserId} · ${_fmt(job.createdAt)}',
+                (job) => l10n.adminConsoleProjectRecentJobItem(
+                  job.kind,
+                  job.status,
+                  job.ownerEmail ?? job.ownerUserId,
+                  _fmt(job.createdAt),
+                ),
               )
               .toList(growable: false),
         ),
@@ -1668,8 +1768,11 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           title: l10n.adminConsoleSectionGovernanceAudit,
           items: detail.governanceAudit
               .map(
-                (item) =>
-                    '${_fmt(item.createdAt)} · ${item.actorLabel} · ${_projectAuditSummary(item)}',
+                (item) => l10n.adminConsoleAuditListItem(
+                  _fmt(item.createdAt),
+                  item.actorLabel,
+                  _projectAuditSummary(context, item),
+                ),
               )
               .toList(growable: false),
         ),
@@ -1713,12 +1816,17 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     );
   }
 
-  Widget _kvWrap(Map<String, String> rows) {
+  Widget _kvWrap(BuildContext context, Map<String, String> rows) {
+    final l10n = AppLocalizations.of(context)!;
     return Wrap(
       spacing: 8,
       runSpacing: 8,
       children: rows.entries
-          .map((entry) => Chip(label: Text('${entry.key}: ${entry.value}')))
+          .map(
+            (entry) => Chip(
+              label: Text('${_fieldLabel(l10n, entry.key)}: ${entry.value}'),
+            ),
+          )
           .toList(growable: false),
     );
   }
@@ -1753,13 +1861,24 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     );
   }
 
-  String _auditSummary(AdminUserGovernanceAuditSummaryV1 item) {
+  String _auditSummary(
+    BuildContext context,
+    AdminUserGovernanceAuditSummaryV1 item,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
     final nextStatus = item.nextState['operationalStatus'];
     final nextQuota = item.nextState['dailyJobQuotaOverride'];
-    return 'status=$nextStatus · quota=${nextQuota ?? 'null'}';
+    return l10n.adminConsoleAuditUserSummary(
+      '$nextStatus',
+      '${nextQuota ?? 'null'}',
+    );
   }
 
-  String _workspaceAuditSummary(AdminWorkspaceGovernanceAuditSummaryV1 item) {
+  String _workspaceAuditSummary(
+    BuildContext context,
+    AdminWorkspaceGovernanceAuditSummaryV1 item,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
     final action = item.nextState['action'];
     if (action == 'upsert' || action == 'remove') {
       final targetUserId =
@@ -1768,29 +1887,95 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
           item.nextState['targetRole'] ?? item.previousState['targetRole'];
       final prunedProjectAclCount = item.nextState['prunedProjectAclCount'];
       final currentWorkspaceReset = item.nextState['currentWorkspaceReset'];
-      return 'action=$action · user=${targetUserId ?? '-'} · role=${targetRole ?? '-'} · prunedAcl=${prunedProjectAclCount ?? 0} · reset=${currentWorkspaceReset ?? false}';
+      return l10n.adminConsoleAuditWorkspaceMembership(
+        '$action',
+        '${targetUserId ?? '-'}',
+        '${targetRole ?? '-'}',
+        '${prunedProjectAclCount ?? 0}',
+        '${currentWorkspaceReset ?? false}',
+      );
     }
     final newOwnerUserId = item.nextState['newOwnerUserId'];
     if (newOwnerUserId != null) {
       final previousOwnerUserId = item.nextState['previousOwnerUserId'];
-      return 'owner=${previousOwnerUserId ?? '-'} -> ${newOwnerUserId ?? '-'}';
+      return l10n.adminConsoleAuditOwnerTransfer(
+        '${previousOwnerUserId ?? '-'}',
+        '${newOwnerUserId ?? '-'}',
+        '${item.nextState['targetRole'] ?? '-'}',
+        '${item.nextState['currentWorkspaceReset'] ?? '-'}',
+      );
     }
     final nextArchived = item.nextState['archivedAt'];
     final nextNote = item.nextState['opsNote'];
-    return 'archivedAt=$nextArchived · opsNote=${nextNote ?? 'null'}';
+    return l10n.adminConsoleAuditArchiveNote(
+      '$nextArchived',
+      '${nextNote ?? 'null'}',
+    );
   }
 
-  String _projectAuditSummary(AdminProjectGovernanceAuditSummaryV1 item) {
+  String _projectAuditSummary(
+    BuildContext context,
+    AdminProjectGovernanceAuditSummaryV1 item,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
     final newOwnerUserId = item.nextState['newOwnerUserId'];
     if (newOwnerUserId != null) {
       final previousOwnerUserId = item.nextState['previousOwnerUserId'];
       final preservedAccess =
           item.nextState['preservedPreviousOwnerEditorAccess'];
-      return 'owner=${previousOwnerUserId ?? '-'} -> ${newOwnerUserId ?? '-'} · preserveOldEditor=${preservedAccess ?? false}';
+      return l10n.adminConsoleAuditProjectOwnerTransfer(
+        '${previousOwnerUserId ?? '-'}',
+        '${newOwnerUserId ?? '-'}',
+        '${preservedAccess ?? false}',
+      );
     }
     final nextArchived = item.nextState['archivedAt'];
     final nextNote = item.nextState['opsNote'];
-    return 'archivedAt=$nextArchived · opsNote=${nextNote ?? 'null'}';
+    return l10n.adminConsoleAuditArchiveNote(
+      '$nextArchived',
+      '${nextNote ?? 'null'}',
+    );
+  }
+
+  String _fieldLabel(AppLocalizations l10n, String key) {
+    switch (key) {
+      case 'userId':
+        return l10n.adminConsoleFieldUserId;
+      case 'createdAt':
+        return l10n.adminConsoleFieldCreatedAt;
+      case 'updatedAt':
+        return l10n.adminConsoleFieldUpdatedAt;
+      case 'operationalStatus':
+        return l10n.adminConsoleFieldOperationalStatus;
+      case 'billingProvider':
+        return l10n.adminConsoleFieldBillingProvider;
+      case 'subscription':
+        return l10n.adminConsoleFieldSubscription;
+      case 'currentWorkspace':
+        return l10n.adminConsoleFieldCurrentWorkspace;
+      case 'workspaceId':
+        return l10n.adminConsoleFieldWorkspaceId;
+      case 'owner':
+        return l10n.adminConsoleFieldOwner;
+      case 'archivedAt':
+        return l10n.adminConsoleFieldArchivedAt;
+      case 'opsNote':
+        return l10n.adminConsoleFieldOpsNote;
+      case 'projectId':
+        return l10n.adminConsoleFieldProjectId;
+      case 'workspace':
+        return l10n.adminConsoleFieldWorkspace;
+      case 'projectArchivedAt':
+        return l10n.adminConsoleFieldProjectArchivedAt;
+      case 'aclMode':
+        return l10n.adminConsoleFieldAclMode;
+      case 'editorCount':
+        return l10n.adminConsoleFieldEditorCount;
+      case 'viewerCount':
+        return l10n.adminConsoleFieldViewerCount;
+      default:
+        return key;
+    }
   }
 
   String _fmt(String raw) {
@@ -1803,5 +1988,20 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     final hh = parsed.hour.toString().padLeft(2, '0');
     final min = parsed.minute.toString().padLeft(2, '0');
     return '${parsed.year}-$mm-$dd $hh:$min';
+  }
+
+  String _jobProjectScopeLabel(AdminJobSummaryV1 job) {
+    final numeric = job.projectNumericId;
+    final projectId = job.projectId?.trim() ?? '';
+    if (numeric != null && projectId.isNotEmpty) {
+      return '#$numeric · $projectId';
+    }
+    if (numeric != null) {
+      return '#$numeric';
+    }
+    if (projectId.isNotEmpty) {
+      return projectId;
+    }
+    return '-';
   }
 }

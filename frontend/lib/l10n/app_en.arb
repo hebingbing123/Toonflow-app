@@ -3739,8 +3739,8 @@
   "adminConsoleQuotaActionPreserve": "Keep current",
   "adminConsoleQuotaActionClear": "Clear override",
   "adminConsoleQuotaActionSet": "Set quota",
-  "adminConsoleDailyQuotaInputExample": "e.g. 500",
-  "adminConsoleDailyQuotaInputDisabledHint": "Only effective when \"Set quota\" is selected",
+  "adminConsoleDailyQuotaInputExample": "e.g. 100",
+  "adminConsoleDailyQuotaInputDisabledHint": "Unlimited",
   "adminConsoleSaving": "Saving...",
   "adminConsoleSaveGovernanceSettings": "Save governance settings",
   "adminConsoleWorkspaceContextRepairTitle": "Workspace context repair",
@@ -6057,11 +6057,11 @@
     }
   },
   "storyboardWorkbenchProductionMetaLoadedEmpty": "Production view loaded",
-  "storyboardEditorDialogTitle": "分镜编辑器 {title}",
+  "storyboardEditorDialogTitle": "Storyboard editor #{numericId}",
   "@storyboardEditorDialogTitle": {
     "placeholders": {
-      "title": {
-        "type": "String"
+      "numericId": {
+        "type": "int"
       }
     }
   },
@@ -8377,7 +8377,7 @@
   "adminConsoleMembershipItem": "{workspaceName} · {workspaceType} · {role}{archivedSuffix}",
   "adminConsoleRecentJobItem": "{kind} · {status} · project {projectId} · {ownerEmail}",
   "adminConsoleAuditListItem": "{createdAt} · {actorLabel} · {summary}",
-  "adminConsoleDailyQuotaLabel": "每日配额 {detail}",
+  "adminConsoleDailyQuotaLabel": "Daily quota",
   "adminConsoleChipMember": "成员 {count}",
   "adminConsoleArchivedLabel": "Admin console archived label",
   "adminConsoleMemberListItem": "{email} · {role} · joined {joinedAt}",
@@ -8385,15 +8385,15 @@
   "adminConsoleChipScript": "剧本 {count}",
   "adminConsoleChipAsset": "资产 {count}",
   "adminConsoleChipJob": "作业 {count}",
-  "adminConsoleAclMemberItem": "{email} · workspace {workspaceRole} · project {projectRole}",
-  "adminConsoleWorkspaceCandidateItem": "{email} · {workspaceRole} · explicit {explicitProjectCount}",
+  "adminConsoleAclMemberItem": "{email} · workspace {workspaceRole} · project {projectRole} · {detail}",
+  "adminConsoleWorkspaceCandidateItem": "{email} · {workspaceRole} · explicit project role {explicitProjectRole}",
   "adminConsoleProjectRecentJobItem": "{kind} · {status} · {ownerEmail} · {createdAt}",
   "adminConsoleAuditUserSummary": "status={status} · quota={quota}",
-  "adminConsoleAuditWorkspaceMembership": "action={action} · user={userId} · role={role} · workspace={workspaceId}",
-  "adminConsoleAuditOwnerTransfer": "owner transfer: {previousOwner} → {newOwner}",
+  "adminConsoleAuditWorkspaceMembership": "action={action} · user={userId} · role={role} · workspace={workspaceId} · detail={detail}",
+  "adminConsoleAuditOwnerTransfer": "owner transfer: {previousOwner} → {newOwner} · role={role} · reset={reset}",
   "adminConsoleAuditArchiveNote": "archived {archivedAt} · note {note}",
   "adminConsoleAuditProjectOwnerTransfer": "project owner transfer: {previousOwner} → {newOwner} · {projectId}",
-  "adminConsoleFieldUserId": "用户 ID {detail}",
+  "adminConsoleFieldUserId": "User ID",
   "adminConsoleFieldCreatedAt": "Admin console field created at",
   "adminConsoleFieldUpdatedAt": "Admin console field updated at",
   "adminConsoleFieldOperationalStatus": "Admin console field operational status",
@@ -8451,7 +8451,7 @@
   "agentWorkspaceProductionCollapsedRows": "已折叠 {count} 行",
   "agentWorkspaceProductionReviewTarget": "目标：{target}",
   "agentWorkspaceProductionReviewGrade": "等级：{grade}",
-  "agentWorkspaceProductionReviewIssues": "issues {count}: {issues}",
+  "agentWorkspaceProductionReviewIssues": "issues: severe {severe}, medium {medium}, minor {minor}",
   "agentWorkspaceProductionReviewNextStep": "下一步：{nextAction}",
   "agentWorkspaceProductionReviewAssetIds": "资产：{assetIds}",
   "agentWorkspaceProductionReviewAssetScope": "资产范围：{scope}",
@@ -8475,9 +8475,9 @@
   "agentWorkspaceSummaryReturnedList": "返回列表 {count} 项",
   "agentWorkspaceSummaryReturnedText": "返回文本 {chars} 字",
   "agentWorkspaceProductionSummaryItems": "返回 items {count} 项",
-  "agentWorkspaceProductionSummaryReviewHeadline": "focused assets {count}: {scope}",
-  "agentWorkspaceProductionSummaryIssueBreakdown": "issue breakdown {count}: {breakdown}",
-  "agentWorkspaceProductionSummaryFocusedAssets": "Agent workspace production summary focused assets",
+  "agentWorkspaceProductionSummaryReviewHeadline": "focused {target}: grade {grade}",
+  "agentWorkspaceProductionSummaryIssueBreakdown": "issues: severe {severe}, medium {medium}, minor {minor}",
+  "agentWorkspaceProductionSummaryFocusedAssets": "focused assets {count}",
   "agentWorkspaceProductionSummaryFocusedAssetScope": "聚焦资产范围 {scope}",
   "agentWorkspaceProductionSummaryFocusedShots": "聚焦镜头 {count} 项",
   "agentWorkspaceSummaryReturnedObjectKeys": "返回对象 keys={keys}",
@@ -8493,17 +8493,17 @@
   "agentWorkspaceProductionSummaryPrompts": "提示词 {count}",
   "agentWorkspaceProductionSummaryMediaUrls": "媒体 URL {count}",
   "agentWorkspaceProductionSummaryNeedImages": "需要图片 {count}",
-  "agentWorkspaceProductionSummaryMissingFrames": "Agent workspace production summary missing frames",
+  "agentWorkspaceProductionSummaryMissingFrames": "missing frames {count}",
   "agentWorkspaceProductionSummaryTextOnlyCount": "纯文本 {count}",
-  "agentWorkspaceProductionSummaryStateTypes": "状态类型 {states}",
+  "agentWorkspaceProductionSummaryStateTypes": "state types {count}",
   "agentWorkspaceProductionSummaryObjectKeyCount": "对象 keys={count} 个",
   "agentWorkspaceProductionSummaryObjectListEntry": "{key}: {count} items",
   "agentWorkspaceProductionSummaryObjectTextEntry": "{key}: {chars} chars",
   "agentWorkspaceProductionSummaryReturnedType": "返回 {type}",
   "agentWorkspaceProductionIdleHint": "Agent workspace production idle hint",
-  "agentWorkspaceProductionLatestToolResult": "Agent workspace production latest tool result",
+  "agentWorkspaceProductionLatestToolResult": "Latest tool result: {detail}",
   "agentWorkspaceProductionResultSummary": "Agent workspace production result summary",
-  "agentWorkspaceProductionSuggestedFlowKey": "Agent workspace production suggested flow key",
+  "agentWorkspaceProductionSuggestedFlowKey": "Suggested writeback key: {flowKey}",
   "agentWorkspaceProductionUseSuggestedFlowKey": "Agent workspace production use suggested flow key",
   "agentWorkspaceProductionWritebackStrategy": "Agent workspace production writeback strategy",
   "agentWorkspaceScriptStepFetchPlanData": "Agent workspace script step fetch plan data",
@@ -8552,21 +8552,21 @@
   "agentWorkspaceScriptContextNovelEventsSubtitle": "Agent workspace script context novel events subtitle",
   "agentWorkspaceScriptContextSnapshotTitle": "Agent workspace script context snapshot title",
   "agentWorkspaceScriptLatestAssistantResult": "Agent workspace script latest assistant result",
-  "agentWorkspaceScriptWritebackSource": "Agent workspace script writeback source",
+  "agentWorkspaceScriptWritebackSource": "Writeback source: {source}",
   "agentWorkspaceScriptSummaryReviewReturned": "Agent workspace script summary review returned",
   "agentWorkspaceScriptSummaryReviewLine": "review {target}: grade {grade}, {issueCount} issues{summary}",
   "agentWorkspaceScriptSummaryPlanDataMissing": "Agent workspace script summary plan data missing",
   "agentWorkspaceScriptSummaryStorySkeletonReady": "Agent workspace script summary story skeleton ready",
   "agentWorkspaceScriptSummaryAdaptationReady": "Agent workspace script summary adaptation ready",
-  "agentWorkspaceScriptSummaryPlanScripts": "计划剧本 {count} 条",
+  "agentWorkspaceScriptSummaryPlanScripts": "plan scripts {count}",
   "agentWorkspaceScriptSummaryRewriteReady": "Agent workspace script summary rewrite ready",
   "agentWorkspaceScriptSummaryPlanDataReturned": "Agent workspace script summary plan data returned",
   "agentWorkspaceScriptSummaryScriptEmpty": "剧本正文 {chars} 字",
-  "agentWorkspaceScriptSummaryScriptChars": "剧本正文 {chars} 字",
+  "agentWorkspaceScriptSummaryScriptChars": "script {chars} chars",
   "agentWorkspaceScriptSummaryNovelTextEmpty": "章节材料 {count} 条",
-  "agentWorkspaceScriptSummaryNovelTextCount": "章节材料 {count} 条",
+  "agentWorkspaceScriptSummaryNovelTextCount": "novel text {count}",
   "agentWorkspaceScriptSummaryNovelEventsEmpty": "小说事件 {count} 条",
-  "agentWorkspaceScriptSummaryNovelEventsCount": "小说事件 {count} 条",
+  "agentWorkspaceScriptSummaryNovelEventsCount": "novel events {count}",
   "agentWorkspaceScopeProjectIdLabel": "Agent workspace scope project id label",
   "agentWorkspaceScopeScriptIdLabel": "Agent workspace scope script id label",
   "agentWorkspaceScopeProjectUuidLabel": "Agent workspace scope project uuid label",
@@ -8577,13 +8577,13 @@
   "agentWorkspacePaneActivity": "Agent workspace pane activity",
   "agentWorkspaceActivityTitle": "Agent workspace activity title",
   "agentWorkspaceActivityLatest": "最新：{eventType}",
-  "agentWorkspaceActivityLatestToolResult": "Agent workspace activity latest tool result",
+  "agentWorkspaceActivityLatestToolResult": "Latest tool result: {detail}",
   "agentWorkspaceActivityLatestAssistantText": "Agent workspace activity latest assistant text",
   "agentWorkspaceActivityNoWsEvents": "Agent workspace activity no ws events",
   "agentWorkspaceProductionCardTitle": "Agent workspace production card title",
   "agentWorkspaceGuidedTasksTitle": "Agent workspace guided tasks title",
   "agentWorkspaceScriptWritebackSourceAssistant": "Agent workspace script writeback source assistant",
-  "agentWorkspaceScriptPlanHint": "计划 {pid}",
+  "agentWorkspaceScriptPlanHint": "Plan {pid}",
   "agentWorkspaceScriptPlanWritebackReady": "计划回写就绪：{planHint}，{scriptCount} 条剧本",
   "agentWorkspaceScriptRunningWorkflow": "Agent workspace script running workflow",
   "agentWorkspaceScriptRunningReadContext": "Agent workspace script running read context",
@@ -8626,17 +8626,17 @@
   "contentComplianceSlaChip": "SLA: {bucket}",
   "contentComplianceMetricPending": "待处理 {count}",
   "contentComplianceMetricClaimed": "已认领 {count}",
-  "contentComplianceMetricResolved": "Content compliance metric resolved",
-  "contentComplianceMetricDismissed": "Content compliance metric dismissed",
-  "contentComplianceMetricCritical": "Content compliance metric critical",
+  "contentComplianceMetricResolved": "resolved {count}",
+  "contentComplianceMetricDismissed": "dismissed {count}",
+  "contentComplianceMetricCritical": "critical {count}",
   "contentComplianceMetricHigh": "高优先级 {count}",
   "contentComplianceOldestHours": "最旧 {hours}h",
   "contentComplianceCapacityPerReviewer": "容量 {capacity}/reviewer",
   "contentComplianceOwnerCounts": "待处理 {pending} · 已认领 {claimed}",
-  "contentComplianceOwnerDetail": "详情 {detail}",
+  "contentComplianceOwnerDetail": "detail {detail}",
   "contentComplianceWorkspaceCounts": "open {open} · pending {pending} · claimed {claimed}",
-  "contentComplianceWorkspaceDetail": "critical {critical} · high {high}",
-  "contentComplianceReportInfo": "reporter {reporter} · {reportedAt}",
+  "contentComplianceWorkspaceDetail": "critical {critical} · high {high} · SLA {sla}",
+  "contentComplianceReportInfo": "reporter {reporter} · {reportedAt} · {detail}",
   "contentComplianceResolutionLine": "resolution: {note}",
   "contentComplianceActionClaim": "Content compliance action claim",
   "contentComplianceActionResolve": "Content compliance action resolve",
@@ -8647,10 +8647,10 @@
   "contentComplianceDispositionSuspendUser": "Content compliance disposition suspend user",
   "contentComplianceFieldResolutionNote": "Content compliance field resolution note",
   "jobsEmptyValue": "Jobs empty value",
-  "jobsKindCountEntry": "Jobs kind count entry",
-  "jobsStatusCountEntry": "Jobs status count entry",
-  "jobsIdempotencyMismatch": "Jobs idempotency mismatch",
-  "jobsUpdatedAt": "Jobs updated at",
+  "jobsKindCountEntry": "{kind}: {jobCount}",
+  "jobsStatusCountEntry": "{status}: {jobCount}",
+  "jobsIdempotencyMismatch": "POST /api/v1/jobs idempotency: expected same id, got {firstId} vs {secondId}",
+  "jobsUpdatedAt": "updated {updatedAt}",
   "jobsClaimedBy": "认领者：{claimedBy}",
   "jobsFailedReason": "失败原因：{reason}",
   "jobsTitle": "Jobs title",
@@ -8681,17 +8681,17 @@
   "notificationsPlatformStatusDegraded": "Notifications platform status degraded",
   "notificationsPlatformStatusRecoveredMessage": "Notifications platform status recovered message",
   "notificationsPlatformStatusDegradedMessage": "Notifications platform status degraded message",
-  "notificationsPlatformStatusAffectedEndpoints": "Notifications platform status affected endpoints",
-  "notificationsComplianceAlertTitle": "Notifications compliance alert title",
-  "notificationsDownloadUnsupported": "Notifications download unsupported",
+  "notificationsPlatformStatusAffectedEndpoints": "Affected endpoints: {endpoints}",
+  "notificationsComplianceAlertTitle": "Content compliance alert: {title}",
+  "notificationsDownloadUnsupported": "Downloads are not supported on this platform: {fileName} ({bytes} bytes)",
   "notificationsComplianceSharedAsyncExportCompleted": "Notifications compliance shared async export completed",
-  "notificationsComplianceSharedAsyncExportCancelled": "Notifications compliance shared async export cancelled",
-  "notificationsComplianceSharedAsyncExportFailed": "Notifications compliance shared async export failed",
-  "notificationsComplianceSharedAsyncExportFailedWithDetail": "Notifications compliance shared async export failed with detail",
+  "notificationsComplianceSharedAsyncExportCancelled": "Workspace shared audit background export cancelled (task #{taskId}).",
+  "notificationsComplianceSharedAsyncExportFailed": "Workspace shared audit background export failed (task #{taskId}).",
+  "notificationsComplianceSharedAsyncExportFailedWithDetail": "Workspace shared audit background export failed (task #{taskId}): {detail}",
   "notificationsComplianceSharedAsyncExportTimedOut": "Notifications compliance shared async export timed out",
   "notificationsImportJsonObjectRequired": "Notifications import json object required",
-  "notificationsImportJsonParseFailed": "Notifications import json parse failed",
-  "notificationsUnknownTemplate": "Notifications unknown template",
+  "notificationsImportJsonParseFailed": "Failed to parse imported JSON: {message}",
+  "notificationsUnknownTemplate": "Unknown template: {templateId}",
   "platformStatusChipLabel": "{title}: {value}",
   "opsWhActivityEntryTitle": "{action} · {webhookId}",
   "opsWhFieldId": "ID: {id}",
@@ -8867,6 +8867,9 @@
       },
       "projectRole": {
         "type": "String"
+      },
+      "detail": {
+        "type": "String"
       }
     }
   },
@@ -8878,8 +8881,8 @@
       "workspaceRole": {
         "type": "String"
       },
-      "explicitProjectCount": {
-        "type": "int"
+      "explicitProjectRole": {
+        "type": "String"
       }
     }
   },
@@ -8922,6 +8925,9 @@
       },
       "workspaceId": {
         "type": "String"
+      },
+      "detail": {
+        "type": "String"
       }
     }
   },
@@ -8931,6 +8937,12 @@
         "type": "String"
       },
       "newOwner": {
+        "type": "String"
+      },
+      "role": {
+        "type": "String"
+      },
+      "reset": {
         "type": "String"
       }
     }
@@ -8954,20 +8966,6 @@
         "type": "String"
       },
       "projectId": {
-        "type": "String"
-      }
-    }
-  },
-  "@adminConsoleFieldUserId": {
-    "placeholders": {
-      "detail": {
-        "type": "String"
-      }
-    }
-  },
-  "@adminConsoleDailyQuotaLabel": {
-    "placeholders": {
-      "detail": {
         "type": "String"
       }
     }
@@ -9065,11 +9063,14 @@
   },
   "@agentWorkspaceProductionReviewIssues": {
     "placeholders": {
-      "count": {
+      "severe": {
         "type": "int"
       },
-      "issues": {
-        "type": "String"
+      "medium": {
+        "type": "int"
+      },
+      "minor": {
+        "type": "int"
       }
     }
   },
@@ -9246,8 +9247,8 @@
   },
   "@agentWorkspaceProductionSummaryStateTypes": {
     "placeholders": {
-      "states": {
-        "type": "String"
+      "count": {
+        "type": "int"
       }
     }
   },
@@ -9287,21 +9288,24 @@
   },
   "@agentWorkspaceProductionSummaryReviewHeadline": {
     "placeholders": {
-      "count": {
-        "type": "int"
+      "target": {
+        "type": "String"
       },
-      "scope": {
+      "grade": {
         "type": "String"
       }
     }
   },
   "@agentWorkspaceProductionSummaryIssueBreakdown": {
     "placeholders": {
-      "count": {
+      "severe": {
         "type": "int"
       },
-      "breakdown": {
-        "type": "String"
+      "medium": {
+        "type": "int"
+      },
+      "minor": {
+        "type": "int"
       }
     }
   },
@@ -9432,7 +9436,7 @@
   "@agentWorkspaceScriptPlanHint": {
     "placeholders": {
       "pid": {
-        "type": "String"
+        "type": "int"
       }
     }
   },
@@ -9546,6 +9550,9 @@
       },
       "high": {
         "type": "int"
+      },
+      "sla": {
+        "type": "String"
       }
     }
   },
@@ -9555,6 +9562,9 @@
         "type": "String"
       },
       "reportedAt": {
+        "type": "String"
+      },
+      "detail": {
         "type": "String"
       }
     }
@@ -9611,6 +9621,105 @@
   "@jobsClaimedBy": {
     "placeholders": {
       "claimedBy": {
+        "type": "String"
+      }
+    }
+  },
+  "@jobsKindCountEntry": {
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      },
+      "jobCount": {
+        "type": "int"
+      }
+    }
+  },
+  "@jobsStatusCountEntry": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      },
+      "jobCount": {
+        "type": "int"
+      }
+    }
+  },
+  "@jobsIdempotencyMismatch": {
+    "placeholders": {
+      "firstId": {
+        "type": "String"
+      },
+      "secondId": {
+        "type": "String"
+      }
+    }
+  },
+  "@jobsUpdatedAt": {
+    "placeholders": {
+      "updatedAt": {
+        "type": "String"
+      }
+    }
+  },
+  "@notificationsPlatformStatusAffectedEndpoints": {
+    "placeholders": {
+      "endpoints": {
+        "type": "String"
+      }
+    }
+  },
+  "@notificationsComplianceAlertTitle": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "@notificationsDownloadUnsupported": {
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      },
+      "bytes": {
+        "type": "int"
+      }
+    }
+  },
+  "@notificationsComplianceSharedAsyncExportCancelled": {
+    "placeholders": {
+      "taskId": {
+        "type": "int"
+      }
+    }
+  },
+  "@notificationsComplianceSharedAsyncExportFailed": {
+    "placeholders": {
+      "taskId": {
+        "type": "int"
+      }
+    }
+  },
+  "@notificationsComplianceSharedAsyncExportFailedWithDetail": {
+    "placeholders": {
+      "taskId": {
+        "type": "int"
+      },
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@notificationsImportJsonParseFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "@notificationsUnknownTemplate": {
+    "placeholders": {
+      "templateId": {
         "type": "String"
       }
     }
@@ -9673,6 +9782,69 @@
   },
   "notificationsUnreadCount": "未读 {count}",
   "@notificationsUnreadCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryFocusedAssets": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryMissingFrames": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionLatestToolResult": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSuggestedFlowKey": {
+    "placeholders": {
+      "flowKey": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceActivityLatestToolResult": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceScriptWritebackSource": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "@contentComplianceMetricResolved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@contentComplianceMetricDismissed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@contentComplianceMetricCritical": {
     "placeholders": {
       "count": {
         "type": "int"

@@ -1,10 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/agent_workspaces/contexts/production/flow_logic.dart';
 import 'package:openflow_app/agent_workspaces/contexts/production/support.dart';
+import 'package:openflow_app/l10n/app_localizations_zh.dart';
+
+final _zh = AppLocalizationsZh();
 
 void main() {
   test('summarizeProductionFlowValue counts prompt and media rows', () {
-    final lines = summarizeProductionFlowValue(<Map<String, dynamic>>[
+    final lines = summarizeProductionFlowValue(_zh, <Map<String, dynamic>>[
       <String, dynamic>{
         'id': 1,
         'prompt': 'scene one',
@@ -15,13 +18,13 @@ void main() {
     ]);
 
     expect(lines, contains('列表 2 项'));
-    expect(lines, contains('含提示词 2 项'));
-    expect(lines, contains('含媒体地址 1 项'));
-    expect(lines, contains('状态种类 2 个'));
+    expect(lines, contains('提示词 2'));
+    expect(lines, contains('媒体 URL 1'));
+    expect(lines, contains('状态类型 2'));
   });
 
   test('summarizeProductionFlowValue surfaces asset readiness digest', () {
-    final lines = summarizeProductionFlowValue(<Map<String, dynamic>>[
+    final lines = summarizeProductionFlowValue(_zh, <Map<String, dynamic>>[
       <String, dynamic>{
         'id': 1,
         'name': '角色A',
@@ -39,7 +42,7 @@ void main() {
   test(
     'summarizeProductionFlowValue surfaces storyboard generation digest',
     () {
-      final lines = summarizeProductionFlowValue(<Map<String, dynamic>>[
+      final lines = summarizeProductionFlowValue(_zh, <Map<String, dynamic>>[
         <String, dynamic>{
           'id': 1,
           'prompt': 'scene one',
@@ -61,9 +64,9 @@ void main() {
 
       expect(lines, contains('列表 3 项'));
       expect(lines, contains('画面结果 1/2 已就绪，待补帧 1 项，纯文本 1 项'));
-      expect(lines, contains('需出图 2 项'));
-      expect(lines, contains('缺帧 1 项'));
-      expect(lines, contains('纯文本 1 项'));
+      expect(lines, contains('需要图片 2'));
+      expect(lines, contains('缺少帧 1 项'));
+      expect(lines, contains('纯文本 1'));
     },
   );
 
@@ -166,6 +169,7 @@ void main() {
     'summarizeProductionFlowValue marks script plan rewrite constraints as landed',
     () {
       final lines = summarizeProductionFlowValue(
+        _zh,
         '''
 <scriptPlan>
 ① 主题立意与叙事核心
@@ -175,7 +179,7 @@ void main() {
         flowKey: 'scriptPlan',
       );
 
-      expect(lines, contains('规划维度 1/6'));
+      expect(lines, contains('计划章节 1'));
       expect(lines, contains('已承接改写约束'));
     },
   );
@@ -744,6 +748,7 @@ void main() {
     'summarizeProductionResultSnapshot surfaces focused asset and storyboard scope',
     () {
       final lines = summarizeProductionResultSnapshot(
+        _zh,
         'run_sub_agent_production_supervision',
         <String, dynamic>{
           'review': <String, dynamic>{
@@ -2576,19 +2581,19 @@ void main() {
   );
 
   test('summarizeProductionFlowValue surfaces storyboard table row digest', () {
-    final lines = summarizeProductionFlowValue('''
+    final lines = summarizeProductionFlowValue(_zh, '''
 | 序号 | 画面描述 | 场景 | 关联资产ID |
 |---|---|---|---|
 | 1 | 首镜 | 大殿 | [12, 7] |
 | 2 | 次镜 | 大殿 | [3] |
 ''', flowKey: 'storyboardTable');
 
-    expect(lines, contains('分镜表 2 行'));
-    expect(lines, contains('关联资产 3 项'));
+    expect(lines, contains('分镜 2 条'));
+    expect(lines, contains('关联资产 3'));
   });
 
   test('summarizeProductionFlowValue surfaces script plan section digest', () {
-    final lines = summarizeProductionFlowValue('''
+    final lines = summarizeProductionFlowValue(_zh, '''
 <scriptPlan>
 ① 主题立意与叙事核心
 ② 视觉风格与画面基调
@@ -2596,7 +2601,7 @@ void main() {
 </scriptPlan>
 ''', flowKey: 'scriptPlan');
 
-    expect(lines, contains('规划维度 3/6'));
+    expect(lines, contains('计划章节 3'));
   });
 
   test(
@@ -2882,7 +2887,7 @@ void main() {
   test(
     'summarizeProductionFlowValue surfaces storyboard table coverage digest',
     () {
-      final lines = summarizeProductionFlowValue(<String, dynamic>{
+      final lines = summarizeProductionFlowValue(_zh, <String, dynamic>{
         'rowStart': 1,
         'rowCount': 8,
         'totalRows': 24,
@@ -2892,7 +2897,7 @@ void main() {
       }, flowKey: 'storyboardTable');
 
       expect(lines, contains('分镜表已读 8/24 行，待展开 16 行'));
-      expect(lines, contains('关联资产 1 项'));
+      expect(lines, contains('关联资产 1'));
     },
   );
 

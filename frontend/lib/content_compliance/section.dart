@@ -101,7 +101,10 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
     _selectedReportIds.removeWhere((id) => !activeIds.contains(id));
   }
 
-  String _openTargetLabel(AppLocalizations l10n, ContentComplianceReportItemV1 item) {
+  String _openTargetLabel(
+    AppLocalizations l10n,
+    ContentComplianceReportItemV1 item,
+  ) {
     switch (item.targetType) {
       case 'project':
         return l10n.contentComplianceOpenProject;
@@ -172,6 +175,101 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
     return l10n.contentComplianceWorkspacePersonalScope;
   }
 
+  String _targetTypeLabel(AppLocalizations l10n, String value) {
+    switch (value) {
+      case 'project':
+        return l10n.contentComplianceTargetProject;
+      case 'script':
+        return l10n.contentComplianceTargetScript;
+      case 'storyboard':
+        return l10n.contentComplianceTargetStoryboard;
+      case 'asset':
+        return l10n.contentComplianceTargetAsset;
+      case 'novel':
+        return l10n.contentComplianceTargetNovel;
+      case 'user':
+        return l10n.contentComplianceTargetUser;
+      case 'all':
+        return l10n.contentComplianceOptionAll;
+      default:
+        return value;
+    }
+  }
+
+  String _categoryLabel(AppLocalizations l10n, String value) {
+    switch (value) {
+      case 'copyright':
+        return l10n.contentComplianceCategoryCopyright;
+      case 'safety':
+        return l10n.contentComplianceCategorySafety;
+      case 'harassment':
+        return l10n.contentComplianceCategoryHarassment;
+      case 'adult':
+        return l10n.contentComplianceCategoryAdult;
+      case 'violence':
+        return l10n.contentComplianceCategoryViolence;
+      case 'spam':
+        return l10n.contentComplianceCategorySpam;
+      case 'other':
+        return l10n.contentComplianceCategoryOther;
+      case 'all':
+        return l10n.contentComplianceOptionAll;
+      default:
+        return value;
+    }
+  }
+
+  String _severityLabel(AppLocalizations l10n, String value) {
+    switch (value) {
+      case 'low':
+        return l10n.contentComplianceSeverityLow;
+      case 'medium':
+        return l10n.contentComplianceSeverityMedium;
+      case 'high':
+        return l10n.contentComplianceSeverityHigh;
+      case 'critical':
+        return l10n.contentComplianceSeverityCritical;
+      default:
+        return value;
+    }
+  }
+
+  String _statusLabel(AppLocalizations l10n, String value) {
+    switch (value) {
+      case 'pending':
+        return l10n.contentComplianceStatusPending;
+      case 'claimed':
+        return l10n.contentComplianceStatusClaimed;
+      case 'resolved':
+        return l10n.contentComplianceStatusResolved;
+      case 'dismissed':
+        return l10n.contentComplianceStatusDismissed;
+      case 'all':
+        return l10n.contentComplianceOptionAll;
+      default:
+        return value;
+    }
+  }
+
+  String _slaBucketLabel(AppLocalizations l10n, String value) {
+    switch (value) {
+      case 'open_over_24h':
+        return l10n.contentComplianceSlaOpenOver24h(0).replaceFirst(' 0', '');
+      case 'open_over_72h':
+        return l10n.contentComplianceSlaOpenOver72h(0).replaceFirst(' 0', '');
+      case 'claimed_over_24h':
+        return l10n
+            .contentComplianceSlaClaimedOver24h(0)
+            .replaceFirst(' 0', '');
+      case 'unclaimed_critical':
+        return l10n
+            .contentComplianceSlaUnclaimedCritical(0)
+            .replaceFirst(' 0', '');
+      default:
+        return value;
+    }
+  }
+
   Future<void> _applyWorkspaceFilter(
     ContentComplianceWorkspaceSummaryV1 item,
   ) async {
@@ -192,7 +290,10 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
     );
   }
 
-  String _ownerSummaryLabel(AppLocalizations l10n, ContentComplianceOwnerSummaryV1 item) {
+  String _ownerSummaryLabel(
+    AppLocalizations l10n,
+    ContentComplianceOwnerSummaryV1 item,
+  ) {
     return item.ownerLabel == 'unclaimed'
         ? l10n.contentComplianceOwnerUnclaimed
         : item.ownerLabel;
@@ -289,7 +390,10 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
     }
   }
 
-  String _topAlertActionHint(AppLocalizations l10n, ContentComplianceQueueAlertV1 alert) {
+  String _topAlertActionHint(
+    AppLocalizations l10n,
+    ContentComplianceQueueAlertV1 alert,
+  ) {
     switch (alert.stage) {
       case 'critical_unclaimed':
         return l10n.contentComplianceAlertHintCriticalUnclaimed;
@@ -304,7 +408,9 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
     }
   }
 
-  Future<void> _runTopAlertPrimaryAction(ContentComplianceQueueAlertV1 alert) async {
+  Future<void> _runTopAlertPrimaryAction(
+    ContentComplianceQueueAlertV1 alert,
+  ) async {
     final l10n = AppLocalizations.of(context)!;
     switch (alert.stage) {
       case 'critical_unclaimed':
@@ -312,7 +418,9 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
         if (count == 0) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(l10n.contentComplianceSnackNoCriticalUnclaimedBulkClaim),
+              content: Text(
+                l10n.contentComplianceSnackNoCriticalUnclaimedBulkClaim,
+              ),
             ),
           );
           return;
@@ -325,13 +433,21 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
       case 'stalled_claimed':
         final count = _selectStalledClaimedFromCurrentQueue();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.contentComplianceSnackSelectedStalledClaimed(count))),
+          SnackBar(
+            content: Text(
+              l10n.contentComplianceSnackSelectedStalledClaimed(count),
+            ),
+          ),
         );
         return;
       case 'escalated_72h':
         final count = _selectEscalated72hFromCurrentQueue();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.contentComplianceSnackSelected72hUnconverged(count))),
+          SnackBar(
+            content: Text(
+              l10n.contentComplianceSnackSelected72hUnconverged(count),
+            ),
+          ),
         );
         return;
       default:
@@ -340,7 +456,10 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
     }
   }
 
-  String _topAlertPrimaryLabel(AppLocalizations l10n, ContentComplianceQueueAlertV1 alert) {
+  String _topAlertPrimaryLabel(
+    AppLocalizations l10n,
+    ContentComplianceQueueAlertV1 alert,
+  ) {
     switch (alert.stage) {
       case 'critical_unclaimed':
         return l10n.contentComplianceBulkClaimOneClick;
@@ -355,7 +474,10 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
     }
   }
 
-  String? _topAlertSecondaryLabel(AppLocalizations l10n, ContentComplianceQueueAlertV1 alert) {
+  String? _topAlertSecondaryLabel(
+    AppLocalizations l10n,
+    ContentComplianceQueueAlertV1 alert,
+  ) {
     switch (alert.stage) {
       case 'critical_unclaimed':
         return l10n.contentComplianceTopSecondaryPendingOnly;
@@ -378,7 +500,11 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
       case 'critical_unclaimed':
         final count = _selectCriticalUnclaimedFromCurrentQueue();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.contentComplianceSnackSelectedCriticalUnclaimed(count))),
+          SnackBar(
+            content: Text(
+              l10n.contentComplianceSnackSelectedCriticalUnclaimed(count),
+            ),
+          ),
         );
         return;
       case 'over_capacity':
@@ -390,7 +516,9 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
       case 'escalated_72h':
         final count = _selectEscalated72hFromCurrentQueue();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.contentComplianceSnackSelected72hItems(count))),
+          SnackBar(
+            content: Text(l10n.contentComplianceSnackSelected72hItems(count)),
+          ),
         );
         return;
       default:
@@ -398,7 +526,10 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
     }
   }
 
-  String _effectiveTopPrimaryLabel(AppLocalizations l10n, ContentComplianceQueueAlertV1 alert) {
+  String _effectiveTopPrimaryLabel(
+    AppLocalizations l10n,
+    ContentComplianceQueueAlertV1 alert,
+  ) {
     final secondaryLabel = _topAlertSecondaryLabel(l10n, alert);
     if (_preferSecondaryAsPrimaryStages.contains(alert.stage) &&
         secondaryLabel != null) {
@@ -407,7 +538,10 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
     return _topAlertPrimaryLabel(l10n, alert);
   }
 
-  String? _effectiveTopSecondaryLabel(AppLocalizations l10n, ContentComplianceQueueAlertV1 alert) {
+  String? _effectiveTopSecondaryLabel(
+    AppLocalizations l10n,
+    ContentComplianceQueueAlertV1 alert,
+  ) {
     final secondaryLabel = _topAlertSecondaryLabel(l10n, alert);
     if (secondaryLabel == null) {
       return null;
@@ -504,10 +638,14 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
     if (!mounted) {
       return;
     }
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(
-      SnackBar(content: Text(AppLocalizations.of(context)!.contentComplianceSnackRestoredDefaultActionOrder)),
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          AppLocalizations.of(
+            context,
+          )!.contentComplianceSnackRestoredDefaultActionOrder,
+        ),
+      ),
     );
   }
 
@@ -548,7 +686,8 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
     final selectable = queue.items
         .where(
           (item) =>
-              item.status == 'claimed' && item.escalationStage == 'stalled_claimed',
+              item.status == 'claimed' &&
+              item.escalationStage == 'stalled_claimed',
         )
         .map((item) => item.id)
         .toSet();
@@ -614,7 +753,10 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
       builder: (dialogContext) => AlertDialog(
         title: Text(verb),
         content: Text(
-          l10n.contentComplianceBulkConfirmBody(verb, _selectedReportIds.length) +
+          l10n.contentComplianceBulkConfirmBody(
+                verb,
+                _selectedReportIds.length,
+              ) +
               (_resolutionNoteController.text.trim().isNotEmpty
                   ? l10n.contentComplianceBulkConfirmNoteReuse
                   : ''),
@@ -650,7 +792,9 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
     final remainingAlerts = queueAfter?.alerts.length ?? 0;
     final criticalAlerts =
         queueAfter?.alerts
-            .where((alert) => alert.level == 'critical' || alert.level == 'high')
+            .where(
+              (alert) => alert.level == 'critical' || alert.level == 'high',
+            )
             .length ??
         0;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -723,7 +867,13 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
       return;
     }
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(AppLocalizations.of(context)!.contentComplianceCsvCopied(queue.items.length))),
+      SnackBar(
+        content: Text(
+          AppLocalizations.of(
+            context,
+          )!.contentComplianceCsvCopied(queue.items.length),
+        ),
+      ),
     );
   }
 
@@ -734,9 +884,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
     final l10n = AppLocalizations.of(context)!;
     final assignee = _reassignReviewerController.text.trim();
     if (assignee.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.contentComplianceFillReviewerFirst)),
       );
       return;
@@ -745,7 +893,12 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(l10n.contentComplianceReassignTitle),
-        content: Text(l10n.contentComplianceReassignBody(_selectedReportIds.length, assignee)),
+        content: Text(
+          l10n.contentComplianceReassignBody(
+            _selectedReportIds.length,
+            assignee,
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
@@ -792,9 +945,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
       return;
     }
     if (!dryRun && queue.capacity.overloadedReviewerCount == 0) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.contentComplianceAutoRebalanceNoOverload)),
       );
       return;
@@ -823,7 +974,11 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
           ),
           FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(dryRun ? l10n.contentComplianceStartPreview : l10n.contentComplianceExecuteNow),
+            child: Text(
+              dryRun
+                  ? l10n.contentComplianceStartPreview
+                  : l10n.contentComplianceExecuteNow,
+            ),
           ),
         ],
       ),
@@ -955,7 +1110,10 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(l10n.contentComplianceTitle, style: theme.textTheme.titleMedium),
+            Text(
+              l10n.contentComplianceTitle,
+              style: theme.textTheme.titleMedium,
+            ),
             const SizedBox(height: 8),
             Text(
               l10n.contentComplianceIntro,
@@ -964,7 +1122,10 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
               ),
             ),
             const SizedBox(height: 12),
-            Text(l10n.contentComplianceSubmitReportTitle, style: theme.textTheme.titleSmall),
+            Text(
+              l10n.contentComplianceSubmitReportTitle,
+              style: theme.textTheme.titleSmall,
+            ),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -972,14 +1133,32 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
               children: [
                 DropdownMenu<String>(
                   initialSelection: _targetType,
-                  label: const Text('targetType'),
-                  dropdownMenuEntries: const [
-                    DropdownMenuEntry(value: 'project', label: 'project'),
-                    DropdownMenuEntry(value: 'script', label: 'script'),
-                    DropdownMenuEntry(value: 'storyboard', label: 'storyboard'),
-                    DropdownMenuEntry(value: 'asset', label: 'asset'),
-                    DropdownMenuEntry(value: 'novel', label: 'novel'),
-                    DropdownMenuEntry(value: 'user', label: 'user'),
+                  label: Text(l10n.contentComplianceFieldTargetType),
+                  dropdownMenuEntries: [
+                    DropdownMenuEntry(
+                      value: 'project',
+                      label: l10n.contentComplianceTargetProject,
+                    ),
+                    DropdownMenuEntry(
+                      value: 'script',
+                      label: l10n.contentComplianceTargetScript,
+                    ),
+                    DropdownMenuEntry(
+                      value: 'storyboard',
+                      label: l10n.contentComplianceTargetStoryboard,
+                    ),
+                    DropdownMenuEntry(
+                      value: 'asset',
+                      label: l10n.contentComplianceTargetAsset,
+                    ),
+                    DropdownMenuEntry(
+                      value: 'novel',
+                      label: l10n.contentComplianceTargetNovel,
+                    ),
+                    DropdownMenuEntry(
+                      value: 'user',
+                      label: l10n.contentComplianceTargetUser,
+                    ),
                   ],
                   onSelected: (value) {
                     if (value == null) return;
@@ -990,15 +1169,36 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                 ),
                 DropdownMenu<String>(
                   initialSelection: _category,
-                  label: const Text('category'),
-                  dropdownMenuEntries: const [
-                    DropdownMenuEntry(value: 'copyright', label: 'copyright'),
-                    DropdownMenuEntry(value: 'safety', label: 'safety'),
-                    DropdownMenuEntry(value: 'harassment', label: 'harassment'),
-                    DropdownMenuEntry(value: 'adult', label: 'adult'),
-                    DropdownMenuEntry(value: 'violence', label: 'violence'),
-                    DropdownMenuEntry(value: 'spam', label: 'spam'),
-                    DropdownMenuEntry(value: 'other', label: 'other'),
+                  label: Text(l10n.contentComplianceFieldCategory),
+                  dropdownMenuEntries: [
+                    DropdownMenuEntry(
+                      value: 'copyright',
+                      label: l10n.contentComplianceCategoryCopyright,
+                    ),
+                    DropdownMenuEntry(
+                      value: 'safety',
+                      label: l10n.contentComplianceCategorySafety,
+                    ),
+                    DropdownMenuEntry(
+                      value: 'harassment',
+                      label: l10n.contentComplianceCategoryHarassment,
+                    ),
+                    DropdownMenuEntry(
+                      value: 'adult',
+                      label: l10n.contentComplianceCategoryAdult,
+                    ),
+                    DropdownMenuEntry(
+                      value: 'violence',
+                      label: l10n.contentComplianceCategoryViolence,
+                    ),
+                    DropdownMenuEntry(
+                      value: 'spam',
+                      label: l10n.contentComplianceCategorySpam,
+                    ),
+                    DropdownMenuEntry(
+                      value: 'other',
+                      label: l10n.contentComplianceCategoryOther,
+                    ),
                   ],
                   onSelected: (value) {
                     if (value == null) return;
@@ -1009,12 +1209,24 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                 ),
                 DropdownMenu<String>(
                   initialSelection: _severity,
-                  label: const Text('severity'),
-                  dropdownMenuEntries: const [
-                    DropdownMenuEntry(value: 'low', label: 'low'),
-                    DropdownMenuEntry(value: 'medium', label: 'medium'),
-                    DropdownMenuEntry(value: 'high', label: 'high'),
-                    DropdownMenuEntry(value: 'critical', label: 'critical'),
+                  label: Text(l10n.contentComplianceFieldSeverity),
+                  dropdownMenuEntries: [
+                    DropdownMenuEntry(
+                      value: 'low',
+                      label: l10n.contentComplianceSeverityLow,
+                    ),
+                    DropdownMenuEntry(
+                      value: 'medium',
+                      label: l10n.contentComplianceSeverityMedium,
+                    ),
+                    DropdownMenuEntry(
+                      value: 'high',
+                      label: l10n.contentComplianceSeverityHigh,
+                    ),
+                    DropdownMenuEntry(
+                      value: 'critical',
+                      label: l10n.contentComplianceSeverityCritical,
+                    ),
                   ],
                   onSelected: (value) {
                     if (value == null) return;
@@ -1029,7 +1241,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
             TextField(
               controller: _targetIdController,
               decoration: InputDecoration(
-                labelText: 'target UUID',
+                labelText: l10n.contentComplianceFieldTargetUuid,
                 hintText: l10n.contentComplianceTargetUuidHint,
               ),
             ),
@@ -1071,7 +1283,10 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
               Row(
                 children: [
                   Expanded(
-                    child: Text(l10n.contentComplianceQueueTitle, style: theme.textTheme.titleSmall),
+                    child: Text(
+                      l10n.contentComplianceQueueTitle,
+                      style: theme.textTheme.titleSmall,
+                    ),
                   ),
                   TextButton.icon(
                     onPressed:
@@ -1111,8 +1326,8 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                     builder: (context) {
                       final sortedAlerts = [...queue.alerts]
                         ..sort(
-                          (a, b) => _alertPriority(a)
-                              .compareTo(_alertPriority(b)),
+                          (a, b) =>
+                              _alertPriority(a).compareTo(_alertPriority(b)),
                         );
                       final topAlert = sortedAlerts.first;
                       return Container(
@@ -1153,7 +1368,10 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                     _effectiveTopPrimaryLabel(l10n, topAlert),
                                   ),
                                 ),
-                                if (_effectiveTopSecondaryLabel(l10n, topAlert) !=
+                                if (_effectiveTopSecondaryLabel(
+                                      l10n,
+                                      topAlert,
+                                    ) !=
                                     null)
                                   FilledButton.tonal(
                                     onPressed: widget.controller.mutatingQueue
@@ -1167,24 +1385,30 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                             );
                                           },
                                     child: Text(
-                                      _effectiveTopSecondaryLabel(l10n, topAlert)!,
+                                      _effectiveTopSecondaryLabel(
+                                        l10n,
+                                        topAlert,
+                                      )!,
                                     ),
                                   ),
                                 OutlinedButton(
                                   onPressed: widget.controller.loadingQueue
                                       ? null
-                                      : () => _applyAlertShortcut(topAlert.stage),
+                                      : () =>
+                                            _applyAlertShortcut(topAlert.stage),
                                   child: Text(l10n.contentComplianceViewLayer),
                                 ),
                                 OutlinedButton(
                                   key: const ValueKey(
                                     'contentComplianceResetAlertPreferences',
                                   ),
-                                  onPressed: _preferSecondaryAsPrimaryStages
-                                          .isEmpty
+                                  onPressed:
+                                      _preferSecondaryAsPrimaryStages.isEmpty
                                       ? null
                                       : _resetAlertActionPreferences,
-                                  child: Text(l10n.contentComplianceRestoreDefaultActionOrder),
+                                  child: Text(
+                                    l10n.contentComplianceRestoreDefaultActionOrder,
+                                  ),
                                 ),
                               ],
                             ),
@@ -1198,92 +1422,121 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                     builder: (context) {
                       final sortedAlerts = [...queue.alerts]
                         ..sort(
-                          (a, b) => _alertPriority(a)
-                              .compareTo(_alertPriority(b)),
+                          (a, b) =>
+                              _alertPriority(a).compareTo(_alertPriority(b)),
                         );
                       return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: sortedAlerts
-                        .map(
-                          (alert) => Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: _alertBorderColor(theme, alert.level),
-                                ),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    '${alert.title} (${alert.count})',
-                                    style: theme.textTheme.titleSmall,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    alert.message,
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: theme.colorScheme.onSurfaceVariant,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Wrap(
-                                    spacing: 8,
-                                    runSpacing: 8,
-                                    children: [
-                                      OutlinedButton(
-                                        onPressed: widget.controller.loadingQueue
-                                            ? null
-                                            : () => _applyAlertShortcut(
-                                                alert.stage,
-                                              ),
-                                        child: Text(l10n.contentComplianceViewLayer),
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: sortedAlerts
+                            .map(
+                              (alert) => Padding(
+                                padding: const EdgeInsets.only(bottom: 8),
+                                child: Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: _alertBorderColor(
+                                        theme,
+                                        alert.level,
                                       ),
-                                      if (alert.stage == 'over_capacity')
-                                        FilledButton.tonal(
-                                          onPressed: widget.controller
-                                                  .mutatingQueue
-                                              ? null
-                                              : () =>
-                                                    _runAutoRebalance(dryRun: true),
-                                          child: Text(l10n.contentCompliancePreviewRebalanceShort),
-                                        ),
-                                      if (alert.stage == 'over_capacity')
-                                        FilledButton(
-                                          onPressed: widget.controller
-                                                  .mutatingQueue
-                                              ? null
-                                              : () => _runAutoRebalance(
-                                                  dryRun: false,
-                                                ),
-                                          child: Text(l10n.contentComplianceExecuteRebalanceShort),
-                                        ),
-                                      if (alert.stage == 'critical_unclaimed')
-                                        OutlinedButton(
-                                          onPressed: widget.controller.loadingQueue
-                                              ? null
-                                              : () {
-                                                  final count =
-                                                      _selectCriticalUnclaimedFromCurrentQueue();
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(
-                                                    SnackBar(
-                                                      content: Text(
-                                                        l10n.contentComplianceSnackSelectedCriticalReadyClaim(count),
-                                                      ),
+                                    ),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        '${alert.title} (${alert.count})',
+                                        style: theme.textTheme.titleSmall,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        alert.message,
+                                        style: theme.textTheme.bodySmall
+                                            ?.copyWith(
+                                              color: theme
+                                                  .colorScheme
+                                                  .onSurfaceVariant,
+                                            ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Wrap(
+                                        spacing: 8,
+                                        runSpacing: 8,
+                                        children: [
+                                          OutlinedButton(
+                                            onPressed:
+                                                widget.controller.loadingQueue
+                                                ? null
+                                                : () => _applyAlertShortcut(
+                                                    alert.stage,
+                                                  ),
+                                            child: Text(
+                                              l10n.contentComplianceViewLayer,
+                                            ),
+                                          ),
+                                          if (alert.stage == 'over_capacity')
+                                            FilledButton.tonal(
+                                              onPressed:
+                                                  widget
+                                                      .controller
+                                                      .mutatingQueue
+                                                  ? null
+                                                  : () => _runAutoRebalance(
+                                                      dryRun: true,
                                                     ),
-                                                  );
-                                                },
-                                          child: Text(l10n.contentComplianceSelectCriticalUnclaimed),
-                                        ),
-                                      if (alert.stage == 'critical_unclaimed')
-                                        FilledButton(
-                                          onPressed:
-                                              widget.controller.mutatingQueue
+                                              child: Text(
+                                                l10n.contentCompliancePreviewRebalanceShort,
+                                              ),
+                                            ),
+                                          if (alert.stage == 'over_capacity')
+                                            FilledButton(
+                                              onPressed:
+                                                  widget
+                                                      .controller
+                                                      .mutatingQueue
+                                                  ? null
+                                                  : () => _runAutoRebalance(
+                                                      dryRun: false,
+                                                    ),
+                                              child: Text(
+                                                l10n.contentComplianceExecuteRebalanceShort,
+                                              ),
+                                            ),
+                                          if (alert.stage ==
+                                              'critical_unclaimed')
+                                            OutlinedButton(
+                                              onPressed:
+                                                  widget.controller.loadingQueue
+                                                  ? null
+                                                  : () {
+                                                      final count =
+                                                          _selectCriticalUnclaimedFromCurrentQueue();
+                                                      ScaffoldMessenger.of(
+                                                        context,
+                                                      ).showSnackBar(
+                                                        SnackBar(
+                                                          content: Text(
+                                                            l10n.contentComplianceSnackSelectedCriticalReadyClaim(
+                                                              count,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      );
+                                                    },
+                                              child: Text(
+                                                l10n.contentComplianceSelectCriticalUnclaimed,
+                                              ),
+                                            ),
+                                          if (alert.stage ==
+                                              'critical_unclaimed')
+                                            FilledButton(
+                                              onPressed:
+                                                  widget
+                                                      .controller
+                                                      .mutatingQueue
                                                   ? null
                                                   : () {
                                                       final count =
@@ -1302,60 +1555,80 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                                       }
                                                       _runBulkAction('claim');
                                                     },
-                                          child: Text(l10n.contentComplianceBulkClaimOneClick),
-                                        ),
-                                      if (alert.stage == 'stalled_claimed')
-                                        OutlinedButton(
-                                          onPressed: widget.controller.loadingQueue
-                                              ? null
-                                              : () {
-                                                  final count =
-                                                      _selectStalledClaimedFromCurrentQueue();
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(
-                                                    SnackBar(
-                                                      content: Text(
-                                                        l10n.contentComplianceSnackSelectedStalledClaimed(count),
-                                                      ),
+                                              child: Text(
+                                                l10n.contentComplianceBulkClaimOneClick,
+                                              ),
+                                            ),
+                                          if (alert.stage == 'stalled_claimed')
+                                            OutlinedButton(
+                                              onPressed:
+                                                  widget.controller.loadingQueue
+                                                  ? null
+                                                  : () {
+                                                      final count =
+                                                          _selectStalledClaimedFromCurrentQueue();
+                                                      ScaffoldMessenger.of(
+                                                        context,
+                                                      ).showSnackBar(
+                                                        SnackBar(
+                                                          content: Text(
+                                                            l10n.contentComplianceSnackSelectedStalledClaimed(
+                                                              count,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      );
+                                                    },
+                                              child: Text(
+                                                l10n.contentComplianceSelectStalled,
+                                              ),
+                                            ),
+                                          if (alert.stage == 'stalled_claimed')
+                                            FilledButton.tonal(
+                                              onPressed:
+                                                  widget
+                                                      .controller
+                                                      .mutatingQueue
+                                                  ? null
+                                                  : () => _runAutoRebalance(
+                                                      dryRun: true,
                                                     ),
-                                                  );
-                                                },
-                                          child: Text(l10n.contentComplianceSelectStalled),
-                                        ),
-                                      if (alert.stage == 'stalled_claimed')
-                                        FilledButton.tonal(
-                                          onPressed: widget.controller
-                                                  .mutatingQueue
-                                              ? null
-                                              : () => _runAutoRebalance(dryRun: true),
-                                          child: Text(l10n.contentCompliancePreviewStalledRebalance),
-                                        ),
-                                      if (alert.stage == 'escalated_72h')
-                                        OutlinedButton(
-                                          onPressed: widget.controller.loadingQueue
-                                              ? null
-                                              : () {
-                                                  final count =
-                                                      _selectEscalated72hFromCurrentQueue();
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(
-                                                    SnackBar(
-                                                      content: Text(
-                                                        l10n.contentComplianceSnackSelected72hUnconverged(count),
-                                                      ),
-                                                    ),
-                                                  );
-                                                },
-                                          child: Text(l10n.contentComplianceLabelSelect72hUnconverged),
-                                        ),
+                                              child: Text(
+                                                l10n.contentCompliancePreviewStalledRebalance,
+                                              ),
+                                            ),
+                                          if (alert.stage == 'escalated_72h')
+                                            OutlinedButton(
+                                              onPressed:
+                                                  widget.controller.loadingQueue
+                                                  ? null
+                                                  : () {
+                                                      final count =
+                                                          _selectEscalated72hFromCurrentQueue();
+                                                      ScaffoldMessenger.of(
+                                                        context,
+                                                      ).showSnackBar(
+                                                        SnackBar(
+                                                          content: Text(
+                                                            l10n.contentComplianceSnackSelected72hUnconverged(
+                                                              count,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      );
+                                                    },
+                                              child: Text(
+                                                l10n.contentComplianceLabelSelect72hUnconverged,
+                                              ),
+                                            ),
+                                        ],
+                                      ),
                                     ],
                                   ),
-                                ],
+                                ),
                               ),
-                            ),
-                          ),
-                        )
-                        .toList(growable: false),
+                            )
+                            .toList(growable: false),
                       );
                     },
                   ),
@@ -1367,15 +1640,27 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                   children: [
                     DropdownMenu<String>(
                       initialSelection: _queueStatus,
-                      label: const Text('status'),
-                      dropdownMenuEntries: const [
-                        DropdownMenuEntry(value: 'all', label: 'all'),
-                        DropdownMenuEntry(value: 'pending', label: 'pending'),
-                        DropdownMenuEntry(value: 'claimed', label: 'claimed'),
-                        DropdownMenuEntry(value: 'resolved', label: 'resolved'),
+                      label: Text(l10n.contentComplianceFieldStatus),
+                      dropdownMenuEntries: [
+                        DropdownMenuEntry(
+                          value: 'all',
+                          label: l10n.contentComplianceOptionAll,
+                        ),
+                        DropdownMenuEntry(
+                          value: 'pending',
+                          label: l10n.contentComplianceStatusPending,
+                        ),
+                        DropdownMenuEntry(
+                          value: 'claimed',
+                          label: l10n.contentComplianceStatusClaimed,
+                        ),
+                        DropdownMenuEntry(
+                          value: 'resolved',
+                          label: l10n.contentComplianceStatusResolved,
+                        ),
                         DropdownMenuEntry(
                           value: 'dismissed',
-                          label: 'dismissed',
+                          label: l10n.contentComplianceStatusDismissed,
                         ),
                       ],
                       onSelected: (value) {
@@ -1398,22 +1683,40 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                     ),
                     DropdownMenu<String>(
                       initialSelection: _queueCategory,
-                      label: const Text('category'),
-                      dropdownMenuEntries: const [
-                        DropdownMenuEntry(value: 'all', label: 'all'),
+                      label: Text(l10n.contentComplianceFieldCategory),
+                      dropdownMenuEntries: [
+                        DropdownMenuEntry(
+                          value: 'all',
+                          label: l10n.contentComplianceOptionAll,
+                        ),
                         DropdownMenuEntry(
                           value: 'copyright',
-                          label: 'copyright',
+                          label: l10n.contentComplianceCategoryCopyright,
                         ),
-                        DropdownMenuEntry(value: 'safety', label: 'safety'),
+                        DropdownMenuEntry(
+                          value: 'safety',
+                          label: l10n.contentComplianceCategorySafety,
+                        ),
                         DropdownMenuEntry(
                           value: 'harassment',
-                          label: 'harassment',
+                          label: l10n.contentComplianceCategoryHarassment,
                         ),
-                        DropdownMenuEntry(value: 'adult', label: 'adult'),
-                        DropdownMenuEntry(value: 'violence', label: 'violence'),
-                        DropdownMenuEntry(value: 'spam', label: 'spam'),
-                        DropdownMenuEntry(value: 'other', label: 'other'),
+                        DropdownMenuEntry(
+                          value: 'adult',
+                          label: l10n.contentComplianceCategoryAdult,
+                        ),
+                        DropdownMenuEntry(
+                          value: 'violence',
+                          label: l10n.contentComplianceCategoryViolence,
+                        ),
+                        DropdownMenuEntry(
+                          value: 'spam',
+                          label: l10n.contentComplianceCategorySpam,
+                        ),
+                        DropdownMenuEntry(
+                          value: 'other',
+                          label: l10n.contentComplianceCategoryOther,
+                        ),
                       ],
                       onSelected: (value) {
                         if (value == null) return;
@@ -1435,18 +1738,36 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                     ),
                     DropdownMenu<String>(
                       initialSelection: _queueTargetType,
-                      label: const Text('targetType'),
-                      dropdownMenuEntries: const [
-                        DropdownMenuEntry(value: 'all', label: 'all'),
-                        DropdownMenuEntry(value: 'project', label: 'project'),
-                        DropdownMenuEntry(value: 'script', label: 'script'),
+                      label: Text(l10n.contentComplianceFieldTargetType),
+                      dropdownMenuEntries: [
+                        DropdownMenuEntry(
+                          value: 'all',
+                          label: l10n.contentComplianceOptionAll,
+                        ),
+                        DropdownMenuEntry(
+                          value: 'project',
+                          label: l10n.contentComplianceTargetProject,
+                        ),
+                        DropdownMenuEntry(
+                          value: 'script',
+                          label: l10n.contentComplianceTargetScript,
+                        ),
                         DropdownMenuEntry(
                           value: 'storyboard',
-                          label: 'storyboard',
+                          label: l10n.contentComplianceTargetStoryboard,
                         ),
-                        DropdownMenuEntry(value: 'asset', label: 'asset'),
-                        DropdownMenuEntry(value: 'novel', label: 'novel'),
-                        DropdownMenuEntry(value: 'user', label: 'user'),
+                        DropdownMenuEntry(
+                          value: 'asset',
+                          label: l10n.contentComplianceTargetAsset,
+                        ),
+                        DropdownMenuEntry(
+                          value: 'novel',
+                          label: l10n.contentComplianceTargetNovel,
+                        ),
+                        DropdownMenuEntry(
+                          value: 'user',
+                          label: l10n.contentComplianceTargetUser,
+                        ),
                       ],
                       onSelected: (value) {
                         if (value == null) return;
@@ -1513,7 +1834,9 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                         label: Text(
                           _queueClaimedByLabel == 'unclaimed'
                               ? l10n.contentComplianceOwnerChipUnclaimed
-                              : l10n.contentComplianceOwnerChip(_queueClaimedByLabel!),
+                              : l10n.contentComplianceOwnerChip(
+                                  _queueClaimedByLabel!,
+                                ),
                         ),
                         onDeleted: () {
                           setState(() {
@@ -1534,7 +1857,11 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                       ),
                     if ((_queueSlaBucket ?? '').isNotEmpty)
                       InputChip(
-                        label: Text('SLA: ${_queueSlaBucket!}'),
+                        label: Text(
+                          l10n.contentComplianceSlaChip(
+                            _slaBucketLabel(l10n, _queueSlaBucket!),
+                          ),
+                        ),
                         onDeleted: () {
                           setState(() {
                             _queueSlaBucket = null;
@@ -1583,14 +1910,52 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    Chip(label: Text('pending ${queue.summary.pending}')),
-                    Chip(label: Text('claimed ${queue.summary.claimed}')),
-                    Chip(label: Text('resolved ${queue.summary.resolved}')),
-                    Chip(label: Text('dismissed ${queue.summary.dismissed}')),
-                    Chip(label: Text('critical ${queue.summary.critical}')),
-                    Chip(label: Text('high ${queue.summary.high}')),
+                    Chip(
+                      label: Text(
+                        l10n.contentComplianceMetricPending(
+                          queue.summary.pending,
+                        ),
+                      ),
+                    ),
+                    Chip(
+                      label: Text(
+                        l10n.contentComplianceMetricClaimed(
+                          queue.summary.claimed,
+                        ),
+                      ),
+                    ),
+                    Chip(
+                      label: Text(
+                        l10n.contentComplianceMetricResolved(
+                          queue.summary.resolved,
+                        ),
+                      ),
+                    ),
+                    Chip(
+                      label: Text(
+                        l10n.contentComplianceMetricDismissed(
+                          queue.summary.dismissed,
+                        ),
+                      ),
+                    ),
+                    Chip(
+                      label: Text(
+                        l10n.contentComplianceMetricCritical(
+                          queue.summary.critical,
+                        ),
+                      ),
+                    ),
+                    Chip(
+                      label: Text(
+                        l10n.contentComplianceMetricHigh(queue.summary.high),
+                      ),
+                    ),
                     FilterChip(
-                      label: Text('open>24h ${queue.sla.openOver24h}'),
+                      label: Text(
+                        l10n.contentComplianceSlaOpenOver24h(
+                          queue.sla.openOver24h,
+                        ),
+                      ),
                       selected: _queueSlaBucket == 'open_over_24h',
                       onSelected: (_) => _applySlaBucketFilter(
                         _queueSlaBucket == 'open_over_24h'
@@ -1599,7 +1964,11 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                       ),
                     ),
                     FilterChip(
-                      label: Text('open>72h ${queue.sla.openOver72h}'),
+                      label: Text(
+                        l10n.contentComplianceSlaOpenOver72h(
+                          queue.sla.openOver72h,
+                        ),
+                      ),
                       selected: _queueSlaBucket == 'open_over_72h',
                       onSelected: (_) => _applySlaBucketFilter(
                         _queueSlaBucket == 'open_over_72h'
@@ -1608,7 +1977,11 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                       ),
                     ),
                     FilterChip(
-                      label: Text('claimed>24h ${queue.sla.claimedOver24h}'),
+                      label: Text(
+                        l10n.contentComplianceSlaClaimedOver24h(
+                          queue.sla.claimedOver24h,
+                        ),
+                      ),
                       selected: _queueSlaBucket == 'claimed_over_24h',
                       onSelected: (_) => _applySlaBucketFilter(
                         _queueSlaBucket == 'claimed_over_24h'
@@ -1618,7 +1991,9 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                     ),
                     FilterChip(
                       label: Text(
-                        l10n.contentComplianceSlaUnclaimedCritical(queue.sla.unclaimedCritical),
+                        l10n.contentComplianceSlaUnclaimedCritical(
+                          queue.sla.unclaimedCritical,
+                        ),
                       ),
                       selected: _queueSlaBucket == 'unclaimed_critical',
                       onSelected: (_) => _applySlaBucketFilter(
@@ -1628,11 +2003,17 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                       ),
                     ),
                     Chip(
-                      label: Text('oldest ${queue.sla.oldestOpenAgeHours}h'),
+                      label: Text(
+                        l10n.contentComplianceOldestHours(
+                          queue.sla.oldestOpenAgeHours,
+                        ),
+                      ),
                     ),
                     Chip(
                       label: Text(
-                        'capacity ${queue.capacity.reviewerCapacityLimit}/reviewer',
+                        l10n.contentComplianceCapacityPerReviewer(
+                          queue.capacity.reviewerCapacityLimit,
+                        ),
                       ),
                     ),
                     if (queue.capacity.overloadedReviewerCount > 0)
@@ -1686,13 +2067,25 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                   ),
                                   const SizedBox(height: 6),
                                   Text(
-                                    'pending ${owner.pendingCount} · claimed ${owner.claimedCount}',
+                                    l10n.contentComplianceOwnerCounts(
+                                      owner.pendingCount,
+                                      owner.claimedCount,
+                                    ),
                                     style: theme.textTheme.bodySmall,
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    'critical ${owner.criticalOpenCount} · overdue ${owner.overdueCount} · oldest ${owner.oldestOpenAgeHours}h'
-                                    '${owner.overCapacity ? l10n.contentComplianceOverCapacitySuffix(owner.overCapacityBy) : ''}',
+                                    l10n.contentComplianceOwnerDetail(
+                                      [
+                                        'critical ${owner.criticalOpenCount}',
+                                        'overdue ${owner.overdueCount}',
+                                        '${owner.oldestOpenAgeHours}h oldest',
+                                        if (owner.overCapacity)
+                                          l10n.contentComplianceOverCapacitySuffix(
+                                            owner.overCapacityBy,
+                                          ),
+                                      ].join(' · '),
+                                    ),
                                     style: theme.textTheme.bodySmall?.copyWith(
                                       color: owner.overCapacity
                                           ? theme.colorScheme.error
@@ -1709,7 +2102,10 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                 ],
                 if (queue.escalationSummaries.isNotEmpty) ...[
                   const SizedBox(height: 8),
-                  Text(l10n.contentComplianceEscalationRhythm, style: theme.textTheme.titleSmall),
+                  Text(
+                    l10n.contentComplianceEscalationRhythm,
+                    style: theme.textTheme.titleSmall,
+                  ),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
@@ -1734,7 +2130,10 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                 ],
                 if (queue.workspaceSummaries.isNotEmpty) ...[
                   const SizedBox(height: 8),
-                  Text(l10n.contentComplianceWorkspaceHotspots, style: theme.textTheme.titleSmall),
+                  Text(
+                    l10n.contentComplianceWorkspaceHotspots,
+                    style: theme.textTheme.titleSmall,
+                  ),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
@@ -1762,12 +2161,20 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                   ),
                                   const SizedBox(height: 6),
                                   Text(
-                                    'open ${workspace.openCount} · pending ${workspace.pendingCount} · claimed ${workspace.claimedCount}',
+                                    l10n.contentComplianceWorkspaceCounts(
+                                      workspace.openCount,
+                                      workspace.pendingCount,
+                                      workspace.claimedCount,
+                                    ),
                                     style: theme.textTheme.bodySmall,
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    'critical ${workspace.criticalOpenCount} · high ${workspace.highOpenCount} · SLA ${workspace.slaBreachedCount} · oldest ${workspace.oldestOpenAgeHours}h',
+                                    l10n.contentComplianceWorkspaceDetail(
+                                      workspace.criticalOpenCount,
+                                      workspace.highOpenCount,
+                                      'breached ${workspace.slaBreachedCount} · ${workspace.oldestOpenAgeHours}h',
+                                    ),
                                     style: theme.textTheme.bodySmall?.copyWith(
                                       color: theme.colorScheme.onSurfaceVariant,
                                     ),
@@ -1831,11 +2238,19 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                     children: [
                                       Chip(
                                         label: Text(
-                                          '${item.targetType} · ${item.category}',
+                                          '${_targetTypeLabel(l10n, item.targetType)} · ${_categoryLabel(l10n, item.category)}',
                                         ),
                                       ),
-                                      Chip(label: Text(item.severity)),
-                                      Chip(label: Text(item.status)),
+                                      Chip(
+                                        label: Text(
+                                          _severityLabel(l10n, item.severity),
+                                        ),
+                                      ),
+                                      Chip(
+                                        label: Text(
+                                          _statusLabel(l10n, item.status),
+                                        ),
+                                      ),
                                       Chip(
                                         label: Text(
                                           _escalationStageLabel(
@@ -1855,9 +2270,11 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                             ),
                             const SizedBox(height: 8),
                             SelectableText(
-                              'report ${item.id}\n'
-                              'target ${item.targetId}\n'
-                              'reporter ${item.reporterEmail ?? item.reporterUserId}',
+                              l10n.contentComplianceReportInfo(
+                                item.id,
+                                item.targetId,
+                                item.reporterEmail ?? item.reporterUserId,
+                              ),
                               style: theme.textTheme.bodySmall,
                             ),
                             const SizedBox(height: 6),
@@ -1877,7 +2294,9 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                             if ((item.resolutionNote ?? '').isNotEmpty) ...[
                               const SizedBox(height: 8),
                               Text(
-                                'resolution: ${item.resolutionNote!}',
+                                l10n.contentComplianceResolutionLine(
+                                  item.resolutionNote!,
+                                ),
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: theme.colorScheme.onSurfaceVariant,
                                 ),
@@ -1895,7 +2314,9 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                     );
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        content: Text(l10n.contentComplianceCopiedTargetUuid),
+                                        content: Text(
+                                          l10n.contentComplianceCopiedTargetUuid,
+                                        ),
                                       ),
                                     );
                                   },
@@ -1908,7 +2329,9 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                     );
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        content: Text(l10n.contentComplianceCopiedReportUuid),
+                                        content: Text(
+                                          l10n.contentComplianceCopiedReportUuid,
+                                        ),
                                       ),
                                     );
                                   },
@@ -1923,7 +2346,9 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                   OutlinedButton(
                                     onPressed: () =>
                                         widget.onOpenOpsTarget!(item),
-                                    child: Text(l10n.contentComplianceAdminConsoleContext),
+                                    child: Text(
+                                      l10n.contentComplianceAdminConsoleContext,
+                                    ),
                                   ),
                                 OutlinedButton(
                                   onPressed:
@@ -1946,7 +2371,9 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                       : () => widget.controller.claimReport(
                                           item.id,
                                         ),
-                                  child: const Text('claim'),
+                                  child: Text(
+                                    l10n.contentComplianceActionClaim,
+                                  ),
                                 ),
                                 OutlinedButton(
                                   onPressed:
@@ -1961,7 +2388,9 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                           resolutionNote:
                                               _resolutionNoteController.text,
                                         ),
-                                  child: const Text('resolve'),
+                                  child: Text(
+                                    l10n.contentComplianceActionResolve,
+                                  ),
                                 ),
                                 OutlinedButton(
                                   onPressed:
@@ -1976,7 +2405,9 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                           resolutionNote:
                                               _resolutionNoteController.text,
                                         ),
-                                  child: const Text('dismiss'),
+                                  child: Text(
+                                    l10n.contentComplianceActionDismiss,
+                                  ),
                                 ),
                               ],
                             ),
@@ -1990,7 +2421,8 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                   TextField(
                     controller: _reassignReviewerController,
                     decoration: InputDecoration(
-                      labelText: l10n.contentComplianceBulkReassignReviewerLabel,
+                      labelText:
+                          l10n.contentComplianceBulkReassignReviewerLabel,
                       hintText: l10n.contentComplianceBulkReassignReviewerHint,
                     ),
                   ),
@@ -2000,7 +2432,11 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                     runSpacing: 8,
                     children: [
                       FilterChip(
-                        label: Text(l10n.contentComplianceSelectedCount(_selectedReportIds.length)),
+                        label: Text(
+                          l10n.contentComplianceSelectedCount(
+                            _selectedReportIds.length,
+                          ),
+                        ),
                         selected: _selectedReportIds.isNotEmpty,
                         onSelected: (_) {},
                       ),
@@ -2044,13 +2480,17 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                         onPressed: widget.controller.mutatingQueue
                             ? null
                             : () => _runAutoRebalance(dryRun: true),
-                        child: Text(l10n.contentComplianceAutoRebalanceTitlePreview),
+                        child: Text(
+                          l10n.contentComplianceAutoRebalanceTitlePreview,
+                        ),
                       ),
                       FilledButton(
                         onPressed: widget.controller.mutatingQueue
                             ? null
                             : () => _runAutoRebalance(dryRun: false),
-                        child: Text(l10n.contentComplianceAutoRebalanceTitleExecute),
+                        child: Text(
+                          l10n.contentComplianceAutoRebalanceTitleExecute,
+                        ),
                       ),
                       FilledButton.tonal(
                         onPressed:
@@ -2082,16 +2522,19 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                 const SizedBox(height: 8),
                 DropdownMenu<String>(
                   initialSelection: _disposition,
-                  label: const Text('disposition'),
-                  dropdownMenuEntries: const [
-                    DropdownMenuEntry(value: 'none', label: 'none'),
+                  label: Text(l10n.contentComplianceFieldDisposition),
+                  dropdownMenuEntries: [
+                    DropdownMenuEntry(
+                      value: 'none',
+                      label: l10n.contentComplianceDispositionNone,
+                    ),
                     DropdownMenuEntry(
                       value: 'archive_project',
-                      label: 'archive_project',
+                      label: l10n.contentComplianceDispositionArchiveProject,
                     ),
                     DropdownMenuEntry(
                       value: 'suspend_user',
-                      label: 'suspend_user',
+                      label: l10n.contentComplianceDispositionSuspendUser,
                     ),
                   ],
                   onSelected: (value) {
@@ -2106,7 +2549,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                   controller: _resolutionNoteController,
                   maxLines: 2,
                   decoration: InputDecoration(
-                    labelText: 'resolution note',
+                    labelText: l10n.contentComplianceFieldResolutionNote,
                     hintText: l10n.contentComplianceResolutionNoteHint,
                   ),
                 ),

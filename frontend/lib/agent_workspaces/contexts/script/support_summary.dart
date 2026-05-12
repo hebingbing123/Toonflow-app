@@ -1,11 +1,19 @@
 part of 'support.dart';
 
-List<String> summarizeScriptResultSnapshot(String? toolName, Object? result) {
+List<String> summarizeScriptResultSnapshot(
+  AppLocalizations l10n,
+  String? toolName,
+  Object? result,
+) {
   final normalizedTool = toolName?.trim() ?? '';
   if (result is! Map<String, dynamic>) {
-    if (result is List) return <String>['返回列表 ${result.length} 项'];
+    if (result is List) {
+      return <String>[l10n.agentWorkspaceSummaryReturnedList(result.length)];
+    }
     if (result is String && result.trim().isNotEmpty) {
-      return <String>['返回文本 ${result.trim().length} 字'];
+      return <String>[
+        l10n.agentWorkspaceSummaryReturnedText(result.trim().length),
+      ];
     }
     return const <String>[];
   }
@@ -14,53 +22,72 @@ List<String> summarizeScriptResultSnapshot(String? toolName, Object? result) {
     case 'run_supervision_agent':
       final review = parseScriptWorkspaceReview(result);
       if (review == null) {
-        return <String>['审核结果已返回'];
+        return <String>[l10n.agentWorkspaceScriptSummaryReviewReturned];
       }
       final issueCount =
           review.severeCount + review.mediumCount + review.minorCount;
       final summary = review.summary.isEmpty ? '' : ' · ${review.summary}';
       return <String>[
-        '审核 ${review.target}：${review.grade} 级，问题 $issueCount 项$summary',
+        l10n.agentWorkspaceScriptSummaryReviewLine(
+          review.target,
+          review.grade,
+          issueCount,
+          summary,
+        ),
       ];
     case 'get_planData':
       final data = result['data'];
       if (data is! Map<String, dynamic>) {
-        return <String>['planData 缺少 data'];
+        return <String>[l10n.agentWorkspaceScriptSummaryPlanDataMissing];
       }
       final scriptRows = data['script'];
       final lines = <String>[];
       if ((data['storySkeleton'] as String?)?.trim().isNotEmpty == true) {
-        lines.add('故事骨架已就绪');
+        lines.add(l10n.agentWorkspaceScriptSummaryStorySkeletonReady);
       }
       if ((data['adaptationStrategy'] as String?)?.trim().isNotEmpty == true) {
-        lines.add('改编策略已就绪');
+        lines.add(l10n.agentWorkspaceScriptSummaryAdaptationReady);
       }
       if (scriptRows is List) {
-        lines.add('计划剧本 ${scriptRows.length} 条');
+        lines.add(
+          l10n.agentWorkspaceScriptSummaryPlanScripts(scriptRows.length),
+        );
         if (scriptRows.isNotEmpty &&
             (data['storySkeleton'] as String?)?.trim().isNotEmpty == true &&
             (data['adaptationStrategy'] as String?)?.trim().isNotEmpty ==
                 true) {
-          lines.add('改写约束已可下游消费');
+          lines.add(l10n.agentWorkspaceScriptSummaryRewriteReady);
         }
       }
-      return lines.isEmpty ? <String>['planData 已返回'] : lines;
+      return lines.isEmpty
+          ? <String>[l10n.agentWorkspaceScriptSummaryPlanDataReturned]
+          : lines;
     case 'get_script_content':
       final content = (result['content'] as String?)?.trim() ?? '';
-      if (content.isEmpty) return <String>['剧本正文为空'];
-      return <String>['剧本正文 ${content.length} 字'];
+      if (content.isEmpty) {
+        return <String>[l10n.agentWorkspaceScriptSummaryScriptEmpty(0)];
+      }
+      return <String>[
+        l10n.agentWorkspaceScriptSummaryScriptChars(content.length),
+      ];
     case 'get_novel_text':
       final items = _extractResultItems(result);
       return items.isEmpty
-          ? <String>['章节材料为空']
-          : <String>['章节材料 ${items.length} 条'];
+          ? <String>[l10n.agentWorkspaceScriptSummaryNovelTextEmpty(0)]
+          : <String>[
+              l10n.agentWorkspaceScriptSummaryNovelTextCount(items.length),
+            ];
     case 'get_novel_events':
       final items = _extractResultItems(result);
       return items.isEmpty
-          ? <String>['小说事件为空']
-          : <String>['小说事件 ${items.length} 条'];
+          ? <String>[l10n.agentWorkspaceScriptSummaryNovelEventsEmpty(0)]
+          : <String>[
+              l10n.agentWorkspaceScriptSummaryNovelEventsCount(items.length),
+            ];
     default:
-      return <String>['返回对象 keys=${result.keys.join(",")}'];
+      return <String>[
+        l10n.agentWorkspaceSummaryReturnedObjectKeys(result.keys.join(',')),
+      ];
   }
 }
 

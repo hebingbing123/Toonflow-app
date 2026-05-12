@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import 'flow_logic.dart';
 import 'support.dart';
 
@@ -27,34 +28,45 @@ class ProductionContextSnapshotView extends StatelessWidget {
   }
 
   String _buildPreviewBody(
+    AppLocalizations l10n,
     Object body, {
     String? flowKey,
     Set<int> focusedStoryboardIds = const <int>{},
   }) {
     final normalizedKey = flowKey?.trim() ?? '';
     final summary = summarizeProductionFlowValue(
+      l10n,
       body,
       flowKey: normalizedKey,
     ).join(' · ');
-    final digest = switch (normalizedKey) {
-      'script' => _scriptDigest(body),
-      'scriptPlan' => _scriptPlanDigest(body),
-      'storyboardTable' => _storyboardTableDigest(
+    final String digest;
+    if (normalizedKey == 'script') {
+      digest = _scriptDigest(body);
+    } else if (normalizedKey == 'scriptPlan') {
+      digest = _scriptPlanDigest(body);
+    } else if (normalizedKey == 'storyboardTable') {
+      digest = _storyboardTableDigest(
+        l10n,
         body,
         focusedStoryboardIds: focusedStoryboardIds,
-      ),
-      'storyboard' => _storyboardDigest(body),
-      _ => switch (body) {
-          String value => value.trim(),
-          _ => _prettyJsonEncoder.convert(body).trim(),
-        },
-    };
+      );
+    } else if (normalizedKey == 'storyboard') {
+      digest = _storyboardDigest(l10n, body);
+    } else if (body is String) {
+      digest = body.trim();
+    } else {
+      digest = _prettyJsonEncoder.convert(body).trim();
+    }
     if (summary.isEmpty) return digest;
     if (digest.isEmpty || digest == summary) return summary;
     return '$summary\n\n$digest';
   }
 
-  String _plainTextDigest(String value, {int maxLines = 6, int maxChars = 360}) {
+  String _plainTextDigest(
+    String value, {
+    int maxLines = 6,
+    int maxChars = 360,
+  }) {
     final lines = value
         .split('\n')
         .map((line) => line.trim())
@@ -85,11 +97,17 @@ class ProductionContextSnapshotView extends StatelessWidget {
     return _plainTextDigest(body, maxLines: 8, maxChars: 420);
   }
 
-  String _scriptPlanRewriteConstraintDigest(Object body) {
+  String _scriptPlanRewriteConstraintDigest(
+    AppLocalizations l10n,
+    Object body,
+  ) {
     if (body is! String) {
       return '';
     }
-    final sections = summarizeProductionScriptPlanSections(body, maxSections: 3);
+    final sections = summarizeProductionScriptPlanSections(
+      body,
+      maxSections: 3,
+    );
     if (sections.isEmpty) {
       return '';
     }
@@ -97,27 +115,31 @@ class ProductionContextSnapshotView extends StatelessWidget {
       buildProductionScriptPlanAssetArgs(body),
     );
     final lines = <String>[
-      'scriptPlan 已承接上游改写约束，后续分镜与素材先服从当前导演计划。',
-      '改写重点：${sections.first}',
-      if (sections.length > 1) '视觉/节奏：${sections[1]}',
-      if (sections.length > 2) '补充约束：${sections[2]}',
-      '资产聚焦：$assetScope',
-      '执行顺序：先核对导演计划点名资产，再补分镜表和镜头结果。',
+      l10n.agentWorkspaceProductionPromptFlowDown,
+      l10n.agentWorkspaceProductionPromptRewriteFocus(sections.first),
+      if (sections.length > 1)
+        l10n.agentWorkspaceProductionPromptVisualPacing(sections[1]),
+      if (sections.length > 2)
+        l10n.agentWorkspaceProductionPromptExtraConstraint(sections[2]),
+      l10n.agentWorkspaceProductionPromptAssetFocus(assetScope),
+      l10n.agentWorkspaceProductionPromptExecutionOrder,
     ];
     return lines.join('\n');
   }
 
   String _storyboardTableDigest(
+    AppLocalizations l10n,
     Object body, {
     Set<int> focusedStoryboardIds = const <int>{},
   }) {
     final rows = switch (body) {
       String value => parseProductionStoryboardTableMarkdown(value),
-      Map<String, dynamic> value => (value['rows'] is List)
-          ? (value['rows'] as List)
-                .whereType<Map<String, dynamic>>()
-                .toList(growable: false)
-          : const <Map<String, dynamic>>[],
+      Map<String, dynamic> value =>
+        (value['rows'] is List)
+            ? (value['rows'] as List).whereType<Map<String, dynamic>>().toList(
+                growable: false,
+              )
+            : const <Map<String, dynamic>>[],
       _ => const <Map<String, dynamic>>[],
     };
     if (rows.isEmpty) {
@@ -128,28 +150,32 @@ class ProductionContextSnapshotView extends StatelessWidget {
     }
     final focusedRows = focusedStoryboardIds.isEmpty
         ? const <Map<String, dynamic>>[]
-        : rows.where((row) {
-            final id = _readNumericId(
-              row['id'] ??
-                  row['numeric_id'] ??
-                  row['numericId'] ??
-                  row['storyboardId'],
-            );
-            return id != null && focusedStoryboardIds.contains(id);
-          }).toList(growable: false);
+        : rows
+              .where((row) {
+                final id = _readNumericId(
+                  row['id'] ??
+                      row['numeric_id'] ??
+                      row['numericId'] ??
+                      row['storyboardId'],
+                );
+                return id != null && focusedStoryboardIds.contains(id);
+              })
+              .toList(growable: false);
     final selectedRows = (focusedRows.isNotEmpty ? focusedRows : rows)
         .take(4)
         .toList(growable: false);
     final hiddenCount = rows.length - selectedRows.length;
     final lines = <String>[
-      if (focusedRows.isNotEmpty) '优先展示缺帧相关镜头',
-      ...selectedRows.map(_formatStoryboardTableRow),
-      if (hiddenCount > 0) '其余 $hiddenCount 行已折叠',
+      if (focusedRows.isNotEmpty)
+        l10n.agentWorkspaceProductionStoryboardPriorityMissing,
+      ...selectedRows.map((row) => _formatStoryboardTableRow(l10n, row)),
+      if (hiddenCount > 0)
+        l10n.agentWorkspaceProductionCollapsedRows(hiddenCount),
     ];
     return lines.join('\n\n');
   }
 
-  String _storyboardDigest(Object body) {
+  String _storyboardDigest(AppLocalizations l10n, Object body) {
     if (body is! List) {
       return switch (body) {
         String value => value.trim(),
@@ -168,34 +194,52 @@ class ProductionContextSnapshotView extends StatelessWidget {
         .toList(growable: false);
     final selectedRows = (missingRows.isNotEmpty ? missingRows : rows)
         .take(4)
-        .map(_formatStoryboardRow)
+        .map((row) => _formatStoryboardRow(l10n, row))
         .toList(growable: false);
     final hiddenCount = rows.length - selectedRows.length;
     final lines = <String>[
-      if (missingRows.isNotEmpty) '优先展示缺帧镜头',
+      if (missingRows.isNotEmpty)
+        l10n.agentWorkspaceProductionStoryboardPriorityMissing,
       ...selectedRows,
-      if (hiddenCount > 0) '其余 $hiddenCount 项已折叠',
+      if (hiddenCount > 0)
+        l10n.agentWorkspaceProductionCollapsedRows(hiddenCount),
     ];
     return lines.join('\n\n');
   }
 
-  String _reviewDigest(ProductionSupervisionReview review) {
+  String _reviewDigest(
+    AppLocalizations l10n,
+    ProductionSupervisionReview review,
+  ) {
     final lines = <String>[
-      '目标: ${review.target}',
-      '评级: ${review.grade}',
-      '问题: 严重 ${review.severeCount} / 中等 ${review.mediumCount} / 轻微 ${review.minorCount}',
-      '下一步: ${review.nextAction}',
-      if (review.assetIds.isNotEmpty) '聚焦资产: ${review.assetIds.join(', ')}',
+      l10n.agentWorkspaceProductionReviewTarget(review.target),
+      l10n.agentWorkspaceProductionReviewGrade(review.grade),
+      l10n.agentWorkspaceProductionReviewIssues(
+        review.severeCount,
+        review.mediumCount,
+        review.minorCount,
+      ),
+      l10n.agentWorkspaceProductionReviewNextStep(review.nextAction),
+      if (review.assetIds.isNotEmpty)
+        l10n.agentWorkspaceProductionReviewAssetIds(review.assetIds.join(', ')),
       if (review.assetIds.isEmpty && review.assetTypes.isNotEmpty)
-        '聚焦资产范围: ${summarizeProductionAssetTypeScope(review.assetTypes)}',
+        l10n.agentWorkspaceProductionReviewAssetScope(
+          summarizeProductionAssetTypeScope(review.assetTypes),
+        ),
       if (review.storyboardIds.isNotEmpty)
-        '聚焦镜头: ${review.storyboardIds.join(', ')}',
-      if (review.summary.isNotEmpty) '结论: ${review.summary}',
+        l10n.agentWorkspaceProductionReviewStoryboardIds(
+          review.storyboardIds.join(', '),
+        ),
+      if (review.summary.isNotEmpty)
+        l10n.agentWorkspaceProductionReviewSummary(review.summary),
     ];
     return lines.join('\n');
   }
 
-  String _formatStoryboardTableRow(Map<String, dynamic> row) {
+  String _formatStoryboardTableRow(
+    AppLocalizations l10n,
+    Map<String, dynamic> row,
+  ) {
     final id = _readNumericId(
       row['id'] ?? row['numeric_id'] ?? row['numericId'] ?? row['storyboardId'],
     );
@@ -206,16 +250,18 @@ class ProductionContextSnapshotView extends StatelessWidget {
       'rows': <Map<String, dynamic>>[row],
     });
     final lines = <String>[
-      if (id != null) '镜头 #$id',
-      if (scene.isNotEmpty) '场景: $scene',
-      if (duration.isNotEmpty) '时长: $duration',
+      if (id != null) l10n.agentWorkspaceProductionShotLabel(id),
+      if (scene.isNotEmpty) l10n.agentWorkspaceProductionSceneLabel(scene),
+      if (duration.isNotEmpty)
+        l10n.agentWorkspaceProductionDurationLabel(duration),
       if (description.isNotEmpty) _previewText(description, maxChars: 180),
-      if (assetIds.isNotEmpty) '资产: ${assetIds.join(', ')}',
+      if (assetIds.isNotEmpty)
+        l10n.agentWorkspaceProductionAssetsLabel(assetIds.join(', ')),
     ];
     return lines.join('\n');
   }
 
-  String _formatStoryboardRow(Map<String, dynamic> row) {
+  String _formatStoryboardRow(AppLocalizations l10n, Map<String, dynamic> row) {
     final id = _readNumericId(
       row['id'] ?? row['numeric_id'] ?? row['numericId'] ?? row['storyboardId'],
     );
@@ -230,15 +276,20 @@ class ProductionContextSnapshotView extends StatelessWidget {
       row,
     ]);
     final lines = <String>[
-      if (id != null) '镜头 #$id',
-      if (state.isNotEmpty) '状态: $state',
-      if (duration.isNotEmpty) '时长: $duration',
-      if (!productionStoryboardEntryNeedsImageGeneration(row)) '模式: 纯文本',
+      if (id != null) l10n.agentWorkspaceProductionShotLabel(id),
+      if (state.isNotEmpty) l10n.agentWorkspaceProductionStateLabel(state),
+      if (duration.isNotEmpty)
+        l10n.agentWorkspaceProductionDurationLabel(duration),
+      if (!productionStoryboardEntryNeedsImageGeneration(row))
+        l10n.agentWorkspaceProductionModeTextOnly,
       if (productionFlowEntryHasMediaResult(row))
-        '结果: 已有画面'
+        l10n.agentWorkspaceProductionResultHasImage
       else if (productionStoryboardEntryNeedsImageGeneration(row))
-        '结果: 缺帧待补图',
-      if (assetIds.isNotEmpty) '资产: ${assetIds.join(', ')}',
+        l10n.agentWorkspaceProductionResultMissingImage(
+          assetIds.isEmpty ? '—' : assetIds.join(', '),
+        ),
+      if (assetIds.isNotEmpty)
+        l10n.agentWorkspaceProductionAssetsLabel(assetIds.join(', ')),
       if (prompt.isNotEmpty) _previewText(prompt, maxChars: 180),
     ];
     return lines.join('\n');
@@ -252,6 +303,7 @@ class ProductionContextSnapshotView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final result = workspaceLastToolResultData;
     final toolName = workspaceLastToolName?.trim();
     final suggestedFlowKey = workspaceSuggestedFlowKey?.trim();
@@ -272,6 +324,7 @@ class ProductionContextSnapshotView extends StatelessWidget {
       Set<int> focusedStoryboardIds = const <int>{},
     }) {
       final normalized = _buildPreviewBody(
+        l10n,
         body,
         flowKey: flowKey,
         focusedStoryboardIds: focusedStoryboardIds,
@@ -320,7 +373,7 @@ class ProductionContextSnapshotView extends StatelessWidget {
         addPreviewCard(
           title: 'flow[$key]',
           flowKey: key,
-          subtitle: '来自 $toolName',
+          subtitle: l10n.agentWorkspaceProductionContextFromTool(toolName),
           body: value,
           focusedStoryboardIds: key == 'storyboardTable'
               ? focusedStoryboardIds
@@ -328,12 +381,14 @@ class ProductionContextSnapshotView extends StatelessWidget {
         );
         if (key == 'scriptPlan') {
           final rewriteConstraintDigest = _scriptPlanRewriteConstraintDigest(
+            l10n,
             value,
           );
           if (rewriteConstraintDigest.trim().isNotEmpty) {
             addPreviewCard(
-              title: '改写约束下沉',
-              subtitle: '由 scriptPlan 派生的 production 执行提示',
+              title: l10n.agentWorkspaceProductionContextDerivedRewrite,
+              subtitle:
+                  l10n.agentWorkspaceProductionContextDerivedRewriteSubtitle,
               body: rewriteConstraintDigest,
             );
           }
@@ -346,17 +401,19 @@ class ProductionContextSnapshotView extends StatelessWidget {
       addPreviewCard(
         title: 'flow[$suggestedFlowKey]',
         flowKey: suggestedFlowKey,
-        subtitle: '来自 $toolName',
+        subtitle: l10n.agentWorkspaceProductionContextFromTool(toolName),
         body: data,
       );
       if (suggestedFlowKey == 'scriptPlan') {
         final rewriteConstraintDigest = _scriptPlanRewriteConstraintDigest(
+          l10n,
           data,
         );
         if (rewriteConstraintDigest.trim().isNotEmpty) {
           addPreviewCard(
-            title: '改写约束下沉',
-            subtitle: '由 scriptPlan 派生的 production 执行提示',
+            title: l10n.agentWorkspaceProductionContextDerivedRewrite,
+            subtitle:
+                l10n.agentWorkspaceProductionContextDerivedRewriteSubtitle,
             body: rewriteConstraintDigest,
           );
         }
@@ -366,23 +423,27 @@ class ProductionContextSnapshotView extends StatelessWidget {
     final items = result['items'];
     if (items is List && items.isNotEmpty) {
       addPreviewCard(
-        title: '返回列表',
-        subtitle: '来自 $toolName',
+        title: l10n.agentWorkspaceProductionContextReturnList,
+        subtitle: l10n.agentWorkspaceProductionContextFromTool(toolName),
         body: items.take(6).toList(growable: false),
       );
     }
 
     final text = result['result'];
     if (text is String && text.trim().isNotEmpty) {
-      addPreviewCard(title: '工具返回文本', subtitle: '来自 $toolName', body: text);
+      addPreviewCard(
+        title: l10n.agentWorkspaceProductionContextToolText,
+        subtitle: l10n.agentWorkspaceProductionContextFromTool(toolName),
+        body: text,
+      );
     }
 
     final review = parseProductionSupervisionReview(result);
     if (review != null) {
       addPreviewCard(
-        title: '审核摘要',
-        subtitle: '来自 $toolName',
-        body: _reviewDigest(review),
+        title: l10n.agentWorkspaceProductionContextReviewSummary,
+        subtitle: l10n.agentWorkspaceProductionContextFromTool(toolName),
+        body: _reviewDigest(l10n, review),
       );
     }
 
@@ -392,7 +453,10 @@ class ProductionContextSnapshotView extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         const SizedBox(height: 8),
-        Text('上下文快照', style: theme.labelLarge),
+        Text(
+          l10n.agentWorkspaceProductionContextSnapshotTitle,
+          style: theme.labelLarge,
+        ),
         ...sections,
       ],
     );

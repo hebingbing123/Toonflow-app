@@ -3739,8 +3739,8 @@
   "adminConsoleQuotaActionPreserve": "保留当前",
   "adminConsoleQuotaActionClear": "清除覆写",
   "adminConsoleQuotaActionSet": "设置配额",
-  "adminConsoleDailyQuotaInputExample": "例如 500",
-  "adminConsoleDailyQuotaInputDisabledHint": "仅在“设置配额”时生效",
+  "adminConsoleDailyQuotaInputExample": "例如 100",
+  "adminConsoleDailyQuotaInputDisabledHint": "无限制",
   "adminConsoleSaving": "保存中…",
   "adminConsoleSaveGovernanceSettings": "保存治理设置",
   "adminConsoleWorkspaceContextRepairTitle": "Workspace 上下文修复",
@@ -6057,11 +6057,11 @@
     }
   },
   "storyboardWorkbenchProductionMetaLoadedEmpty": "制作视图已加载",
-  "storyboardEditorDialogTitle": "分镜编辑器 {title}",
+  "storyboardEditorDialogTitle": "分镜编辑器 #{numericId}",
   "@storyboardEditorDialogTitle": {
     "placeholders": {
-      "title": {
-        "type": "String"
+      "numericId": {
+        "type": "int"
       }
     }
   },
@@ -8063,7 +8063,7 @@
   "adminConsoleMembershipItem": "{workspaceName} · {workspaceType} · {role}{archivedSuffix}",
   "adminConsoleRecentJobItem": "{kind} · {status} · 项目 {projectId} · {ownerEmail}",
   "adminConsoleAuditListItem": "{createdAt} · {actorLabel} · {summary}",
-  "adminConsoleDailyQuotaLabel": "每日配额 {detail}",
+  "adminConsoleDailyQuotaLabel": "每日配额",
   "adminConsoleChipMember": "成员 {count}",
   "adminConsoleArchivedLabel": "archived",
   "adminConsoleMemberListItem": "{email} · {role} · 加入 {joinedAt}",
@@ -8071,15 +8071,15 @@
   "adminConsoleChipScript": "剧本 {count}",
   "adminConsoleChipAsset": "资产 {count}",
   "adminConsoleChipJob": "作业 {count}",
-  "adminConsoleAclMemberItem": "{email} · 工作区 {workspaceRole} · 项目 {projectRole}",
-  "adminConsoleWorkspaceCandidateItem": "{email} · {workspaceRole} · 显式 {explicitProjectCount}",
+  "adminConsoleAclMemberItem": "{email} · 工作区 {workspaceRole} · 项目 {projectRole} · {detail}",
+  "adminConsoleWorkspaceCandidateItem": "{email} · {workspaceRole} · 显式项目角色 {explicitProjectRole}",
   "adminConsoleProjectRecentJobItem": "{kind} · {status} · {ownerEmail} · {createdAt}",
   "adminConsoleAuditUserSummary": "状态={status} · 配额={quota}",
-  "adminConsoleAuditWorkspaceMembership": "操作={action} · 用户={userId} · 角色={role} · 工作区={workspaceId}",
-  "adminConsoleAuditOwnerTransfer": "所有权转移：{previousOwner} → {newOwner}",
+  "adminConsoleAuditWorkspaceMembership": "操作={action} · 用户={userId} · 角色={role} · 工作区={workspaceId} · 详情={detail}",
+  "adminConsoleAuditOwnerTransfer": "所有权转移：{previousOwner} → {newOwner} · 角色={role} · 重置={reset}",
   "adminConsoleAuditArchiveNote": "归档 {archivedAt} · 备注 {note}",
   "adminConsoleAuditProjectOwnerTransfer": "项目所有权转移：{previousOwner} → {newOwner} · {projectId}",
-  "adminConsoleFieldUserId": "用户 ID {detail}",
+  "adminConsoleFieldUserId": "用户 ID",
   "adminConsoleFieldCreatedAt": "admin console field created at",
   "adminConsoleFieldUpdatedAt": "admin console field updated at",
   "adminConsoleFieldOperationalStatus": "admin console field operational status",
@@ -8137,7 +8137,7 @@
   "agentWorkspaceProductionCollapsedRows": "已折叠 {count} 行",
   "agentWorkspaceProductionReviewTarget": "目标：{target}",
   "agentWorkspaceProductionReviewGrade": "等级：{grade}",
-  "agentWorkspaceProductionReviewIssues": "问题 {count} 项：{issues}",
+  "agentWorkspaceProductionReviewIssues": "问题：严重 {severe}，中等 {medium}，轻微 {minor}",
   "agentWorkspaceProductionReviewNextStep": "下一步：{nextAction}",
   "agentWorkspaceProductionReviewAssetIds": "资产：{assetIds}",
   "agentWorkspaceProductionReviewAssetScope": "资产范围：{scope}",
@@ -8161,9 +8161,9 @@
   "agentWorkspaceSummaryReturnedList": "返回列表 {count} 项",
   "agentWorkspaceSummaryReturnedText": "返回文本 {chars} 字",
   "agentWorkspaceProductionSummaryItems": "返回 items {count} 项",
-  "agentWorkspaceProductionSummaryReviewHeadline": "聚焦资产 {count} 项：{scope}",
-  "agentWorkspaceProductionSummaryIssueBreakdown": "问题分布 {count} 项：{breakdown}",
-  "agentWorkspaceProductionSummaryFocusedAssets": "agent workspace production summary focused assets",
+  "agentWorkspaceProductionSummaryReviewHeadline": "聚焦 {target}：{grade} 级",
+  "agentWorkspaceProductionSummaryIssueBreakdown": "问题：严重 {severe}，中等 {medium}，轻微 {minor}",
+  "agentWorkspaceProductionSummaryFocusedAssets": "聚焦资产 {count} 项",
   "agentWorkspaceProductionSummaryFocusedAssetScope": "聚焦资产范围 {scope}",
   "agentWorkspaceProductionSummaryFocusedShots": "聚焦镜头 {count} 项",
   "agentWorkspaceSummaryReturnedObjectKeys": "返回对象 keys={keys}",
@@ -8179,17 +8179,17 @@
   "agentWorkspaceProductionSummaryPrompts": "提示词 {count}",
   "agentWorkspaceProductionSummaryMediaUrls": "媒体 URL {count}",
   "agentWorkspaceProductionSummaryNeedImages": "需要图片 {count}",
-  "agentWorkspaceProductionSummaryMissingFrames": "纯文本 $skippedCount 项",
+  "agentWorkspaceProductionSummaryMissingFrames": "缺少帧 {count} 项",
   "agentWorkspaceProductionSummaryTextOnlyCount": "纯文本 {count}",
-  "agentWorkspaceProductionSummaryStateTypes": "状态类型 {states}",
+  "agentWorkspaceProductionSummaryStateTypes": "状态类型 {count}",
   "agentWorkspaceProductionSummaryObjectKeyCount": "对象 keys={count} 个",
   "agentWorkspaceProductionSummaryObjectListEntry": "{key}: {count} 项",
   "agentWorkspaceProductionSummaryObjectTextEntry": "{key}: {chars} 字",
   "agentWorkspaceProductionSummaryReturnedType": "返回 {type}",
   "agentWorkspaceProductionIdleHint": "等待执行：可直接用引导任务或表单按钮。",
-  "agentWorkspaceProductionLatestToolResult": "最新工具结果：$workspaceLastToolResultLine",
+  "agentWorkspaceProductionLatestToolResult": "最新工具结果：{detail}",
   "agentWorkspaceProductionResultSummary": "结果摘要",
-  "agentWorkspaceProductionSuggestedFlowKey": "建议写回 key：$suggestedFlowKeyLine",
+  "agentWorkspaceProductionSuggestedFlowKey": "建议写回 key：{flowKey}",
   "agentWorkspaceProductionUseSuggestedFlowKey": "使用该 key",
   "agentWorkspaceProductionWritebackStrategy": "核心 key 回写策略：get_flowData 直接写回；资产/分镜/导演计划相关工具会先刷新对应 flow key 再写回。",
   "agentWorkspaceScriptStepFetchPlanData": "1) 拉取 planData",
@@ -8238,7 +8238,7 @@
   "agentWorkspaceScriptContextNovelEventsSubtitle": "来自 get_novel_events，最多展示前 6 条",
   "agentWorkspaceScriptContextSnapshotTitle": "上下文快照",
   "agentWorkspaceScriptLatestAssistantResult": "最新助手结果",
-  "agentWorkspaceScriptWritebackSource": "写回来源：$scriptWritebackSourceLine",
+  "agentWorkspaceScriptWritebackSource": "写回来源：{source}",
   "agentWorkspaceScriptSummaryReviewReturned": "审核结果已返回",
   "agentWorkspaceScriptSummaryReviewLine": "审核 {target}：{grade} 级，问题 {issueCount} 项{summary}",
   "agentWorkspaceScriptSummaryPlanDataMissing": "planData 缺少 data",
@@ -8263,7 +8263,7 @@
   "agentWorkspacePaneActivity": "执行动态",
   "agentWorkspaceActivityTitle": "执行动态",
   "agentWorkspaceActivityLatest": "最新：{eventType}",
-  "agentWorkspaceActivityLatestToolResult": "最新工具结果：$workspaceLastToolResultLine",
+  "agentWorkspaceActivityLatestToolResult": "最新工具结果：{detail}",
   "agentWorkspaceActivityLatestAssistantText": "最新助手文本",
   "agentWorkspaceActivityNoWsEvents": "暂无 WS 事件。",
   "agentWorkspaceProductionCardTitle": "制作工作区",
@@ -8312,17 +8312,17 @@
   "contentComplianceSlaChip": "SLA: {bucket}",
   "contentComplianceMetricPending": "待处理 {count}",
   "contentComplianceMetricClaimed": "已认领 {count}",
-  "contentComplianceMetricResolved": "content compliance metric resolved",
-  "contentComplianceMetricDismissed": "content compliance metric dismissed",
-  "contentComplianceMetricCritical": "content compliance metric critical",
+  "contentComplianceMetricResolved": "已解决 {count}",
+  "contentComplianceMetricDismissed": "已忽略 {count}",
+  "contentComplianceMetricCritical": "严重 {count}",
   "contentComplianceMetricHigh": "高优先级 {count}",
   "contentComplianceOldestHours": "最旧 {hours}h",
   "contentComplianceCapacityPerReviewer": "容量 {capacity}/reviewer",
   "contentComplianceOwnerCounts": "待处理 {pending} · 已认领 {claimed}",
   "contentComplianceOwnerDetail": "详情 {detail}",
   "contentComplianceWorkspaceCounts": "open {open} · pending {pending} · claimed {claimed}",
-  "contentComplianceWorkspaceDetail": "critical {critical} · high {high}",
-  "contentComplianceReportInfo": "reporter {reporter} · {reportedAt}",
+  "contentComplianceWorkspaceDetail": "critical {critical} · high {high} · SLA {sla}",
+  "contentComplianceReportInfo": "reporter {reporter} · {reportedAt} · {detail}",
   "contentComplianceResolutionLine": "resolution: {note}",
   "contentComplianceActionClaim": "content compliance action claim",
   "contentComplianceActionResolve": "resolve",
@@ -8333,10 +8333,10 @@
   "contentComplianceDispositionSuspendUser": "suspend_user",
   "contentComplianceFieldResolutionNote": "resolution note",
   "jobsEmptyValue": "jobs empty value",
-  "jobsKindCountEntry": "jobs kind count entry",
-  "jobsStatusCountEntry": "jobs status count entry",
-  "jobsIdempotencyMismatch": "jobs idempotency mismatch",
-  "jobsUpdatedAt": "jobs updated at",
+  "jobsKindCountEntry": "{kind}：{jobCount}",
+  "jobsStatusCountEntry": "{status}：{jobCount}",
+  "jobsIdempotencyMismatch": "POST /api/v1/jobs 幂等：期望同一 id，实际 {firstId} 与 {secondId}",
+  "jobsUpdatedAt": "更新于 {updatedAt}",
   "jobsClaimedBy": "认领者：{claimedBy}",
   "jobsFailedReason": "失败原因：{reason}",
   "jobsTitle": "任务作业",
@@ -8367,17 +8367,17 @@
   "notificationsPlatformStatusDegraded": "notifications platform status degraded",
   "notificationsPlatformStatusRecoveredMessage": "notifications platform status recovered message",
   "notificationsPlatformStatusDegradedMessage": "notifications platform status degraded message",
-  "notificationsPlatformStatusAffectedEndpoints": "notifications platform status affected endpoints",
-  "notificationsComplianceAlertTitle": "notifications compliance alert title",
-  "notificationsDownloadUnsupported": "notifications download unsupported",
+  "notificationsPlatformStatusAffectedEndpoints": "受影响端点：{endpoints}",
+  "notificationsComplianceAlertTitle": "内容合规告警：{title}",
+  "notificationsDownloadUnsupported": "当前平台不支持下载：{fileName}（{bytes} 字节）",
   "notificationsComplianceSharedAsyncExportCompleted": "notifications compliance shared async export completed",
-  "notificationsComplianceSharedAsyncExportCancelled": "notifications compliance shared async export cancelled",
-  "notificationsComplianceSharedAsyncExportFailed": "notifications compliance shared async export failed",
-  "notificationsComplianceSharedAsyncExportFailedWithDetail": "notifications compliance shared async export failed with detail",
+  "notificationsComplianceSharedAsyncExportCancelled": "工作区共享审计后台导出已取消（任务 #{taskId}）。",
+  "notificationsComplianceSharedAsyncExportFailed": "工作区共享审计后台导出失败（任务 #{taskId}）。",
+  "notificationsComplianceSharedAsyncExportFailedWithDetail": "工作区共享审计后台导出失败（任务 #{taskId}）：{detail}",
   "notificationsComplianceSharedAsyncExportTimedOut": "notifications compliance shared async export timed out",
   "notificationsImportJsonObjectRequired": "notifications import json object required",
-  "notificationsImportJsonParseFailed": "notifications import json parse failed",
-  "notificationsUnknownTemplate": "notifications unknown template",
+  "notificationsImportJsonParseFailed": "导入 JSON 解析失败：{message}",
+  "notificationsUnknownTemplate": "未知模板：{templateId}",
   "platformStatusChipLabel": "{title}: {value}",
   "opsWhActivityEntryTitle": "{action} · {webhookId}",
   "opsWhFieldId": "ID: {id}",
@@ -8553,6 +8553,9 @@
       },
       "projectRole": {
         "type": "String"
+      },
+      "detail": {
+        "type": "String"
       }
     }
   },
@@ -8564,8 +8567,8 @@
       "workspaceRole": {
         "type": "String"
       },
-      "explicitProjectCount": {
-        "type": "int"
+      "explicitProjectRole": {
+        "type": "String"
       }
     }
   },
@@ -8608,6 +8611,9 @@
       },
       "workspaceId": {
         "type": "String"
+      },
+      "detail": {
+        "type": "String"
       }
     }
   },
@@ -8617,6 +8623,12 @@
         "type": "String"
       },
       "newOwner": {
+        "type": "String"
+      },
+      "role": {
+        "type": "String"
+      },
+      "reset": {
         "type": "String"
       }
     }
@@ -8640,20 +8652,6 @@
         "type": "String"
       },
       "projectId": {
-        "type": "String"
-      }
-    }
-  },
-  "@adminConsoleFieldUserId": {
-    "placeholders": {
-      "detail": {
-        "type": "String"
-      }
-    }
-  },
-  "@adminConsoleDailyQuotaLabel": {
-    "placeholders": {
-      "detail": {
         "type": "String"
       }
     }
@@ -8751,11 +8749,14 @@
   },
   "@agentWorkspaceProductionReviewIssues": {
     "placeholders": {
-      "count": {
+      "severe": {
         "type": "int"
       },
-      "issues": {
-        "type": "String"
+      "medium": {
+        "type": "int"
+      },
+      "minor": {
+        "type": "int"
       }
     }
   },
@@ -8932,8 +8933,8 @@
   },
   "@agentWorkspaceProductionSummaryStateTypes": {
     "placeholders": {
-      "states": {
-        "type": "String"
+      "count": {
+        "type": "int"
       }
     }
   },
@@ -8973,21 +8974,24 @@
   },
   "@agentWorkspaceProductionSummaryReviewHeadline": {
     "placeholders": {
-      "count": {
-        "type": "int"
+      "target": {
+        "type": "String"
       },
-      "scope": {
+      "grade": {
         "type": "String"
       }
     }
   },
   "@agentWorkspaceProductionSummaryIssueBreakdown": {
     "placeholders": {
-      "count": {
+      "severe": {
         "type": "int"
       },
-      "breakdown": {
-        "type": "String"
+      "medium": {
+        "type": "int"
+      },
+      "minor": {
+        "type": "int"
       }
     }
   },
@@ -9118,7 +9122,7 @@
   "@agentWorkspaceScriptPlanHint": {
     "placeholders": {
       "pid": {
-        "type": "String"
+        "type": "int"
       }
     }
   },
@@ -9232,6 +9236,9 @@
       },
       "high": {
         "type": "int"
+      },
+      "sla": {
+        "type": "String"
       }
     }
   },
@@ -9241,6 +9248,9 @@
         "type": "String"
       },
       "reportedAt": {
+        "type": "String"
+      },
+      "detail": {
         "type": "String"
       }
     }
@@ -9297,6 +9307,105 @@
   "@jobsClaimedBy": {
     "placeholders": {
       "claimedBy": {
+        "type": "String"
+      }
+    }
+  },
+  "@jobsKindCountEntry": {
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      },
+      "jobCount": {
+        "type": "int"
+      }
+    }
+  },
+  "@jobsStatusCountEntry": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      },
+      "jobCount": {
+        "type": "int"
+      }
+    }
+  },
+  "@jobsIdempotencyMismatch": {
+    "placeholders": {
+      "firstId": {
+        "type": "String"
+      },
+      "secondId": {
+        "type": "String"
+      }
+    }
+  },
+  "@jobsUpdatedAt": {
+    "placeholders": {
+      "updatedAt": {
+        "type": "String"
+      }
+    }
+  },
+  "@notificationsPlatformStatusAffectedEndpoints": {
+    "placeholders": {
+      "endpoints": {
+        "type": "String"
+      }
+    }
+  },
+  "@notificationsComplianceAlertTitle": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "@notificationsDownloadUnsupported": {
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      },
+      "bytes": {
+        "type": "int"
+      }
+    }
+  },
+  "@notificationsComplianceSharedAsyncExportCancelled": {
+    "placeholders": {
+      "taskId": {
+        "type": "int"
+      }
+    }
+  },
+  "@notificationsComplianceSharedAsyncExportFailed": {
+    "placeholders": {
+      "taskId": {
+        "type": "int"
+      }
+    }
+  },
+  "@notificationsComplianceSharedAsyncExportFailedWithDetail": {
+    "placeholders": {
+      "taskId": {
+        "type": "int"
+      },
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@notificationsImportJsonParseFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "@notificationsUnknownTemplate": {
+    "placeholders": {
+      "templateId": {
         "type": "String"
       }
     }
@@ -9359,6 +9468,69 @@
   },
   "notificationsUnreadCount": "未读 {count}",
   "@notificationsUnreadCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryFocusedAssets": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSummaryMissingFrames": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agentWorkspaceProductionLatestToolResult": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceProductionSuggestedFlowKey": {
+    "placeholders": {
+      "flowKey": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceActivityLatestToolResult": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "@agentWorkspaceScriptWritebackSource": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "@contentComplianceMetricResolved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@contentComplianceMetricDismissed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@contentComplianceMetricCritical": {
     "placeholders": {
       "count": {
         "type": "int"
