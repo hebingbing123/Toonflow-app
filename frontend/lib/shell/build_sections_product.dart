@@ -360,7 +360,7 @@ extension _HomePageBuildProductSections on _HomePageState {
               ? null
               : _workspaceInputController.projectUuidController.text.trim(),
           onNavigateExportJobDeepLink: (TaskCenterExportJobDeepLink link) {
-            if (link.projectNumericId != null) {
+            if (link.projectNumericId != null || link.projectUuid != null) {
               setState(() {
                 _productScopedProjectNumericId = link.projectNumericId;
               });
@@ -378,7 +378,7 @@ extension _HomePageBuildProductSections on _HomePageState {
             );
           },
           onNavigateDomainDeepLink: (TaskCenterDomainDeepLink link) {
-            if (link.projectNumericId != null) {
+            if (link.projectNumericId != null || link.projectUuid != null) {
               setState(() {
                 _productScopedProjectNumericId = link.projectNumericId;
               });

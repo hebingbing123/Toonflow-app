@@ -503,9 +503,13 @@ class _HomePageState extends State<HomePage> {
     final scriptNumeric = _intFromSearchMeta(metadata?['script_numeric_id']);
 
     void goProjectsScoped() {
-      if (projectNumeric != null && projectNumeric > 0) {
+      if ((projectNumeric != null && projectNumeric > 0) ||
+          (projectUuid != null && projectUuid.isNotEmpty)) {
         setState(() {
-          _productScopedProjectNumericId = projectNumeric;
+          _productScopedProjectNumericId =
+              projectNumeric != null && projectNumeric > 0
+              ? projectNumeric
+              : null;
         });
       }
       if ((projectNumeric != null && projectNumeric > 0) ||
@@ -523,9 +527,13 @@ class _HomePageState extends State<HomePage> {
 
     switch (type) {
       case ResultType.project:
-        if (projectNumeric != null && projectNumeric > 0) {
+        if ((projectNumeric != null && projectNumeric > 0) ||
+            id.trim().isNotEmpty) {
           setState(() {
-            _productScopedProjectNumericId = projectNumeric;
+            _productScopedProjectNumericId =
+                projectNumeric != null && projectNumeric > 0
+                ? projectNumeric
+                : null;
           });
         }
         if (id.trim().isNotEmpty || (projectNumeric != null && projectNumeric > 0)) {
@@ -540,9 +548,13 @@ class _HomePageState extends State<HomePage> {
         );
         break;
       case ResultType.script:
-        if (projectNumeric != null && projectNumeric > 0) {
+        if ((projectNumeric != null && projectNumeric > 0) ||
+            (projectUuid != null && projectUuid.isNotEmpty)) {
           setState(() {
-            _productScopedProjectNumericId = projectNumeric;
+            _productScopedProjectNumericId =
+                projectNumeric != null && projectNumeric > 0
+                ? projectNumeric
+                : null;
           });
         }
         if ((projectNumeric != null && projectNumeric > 0) ||
@@ -623,11 +635,17 @@ class _HomePageState extends State<HomePage> {
       final projectNumericId = int.tryParse(
         uri.queryParameters['projectNumericId'] ?? '',
       );
-      if (projectNumericId != null) {
+      final projectUuid = (uri.queryParameters['projectUuid'] ?? '').trim();
+      final workspaceId = (uri.queryParameters['workspaceId'] ?? '').trim();
+      if (projectNumericId != null || projectUuid.isNotEmpty) {
         setState(() {
           _productScopedProjectNumericId = projectNumericId;
         });
-        _workspaceInputController.applyProjectScope(projectNumericId);
+        _workspaceInputController.applyProjectScopeRef(
+          projectNumericId: projectNumericId,
+          projectUuid: projectUuid.isEmpty ? null : projectUuid,
+          workspaceId: workspaceId.isEmpty ? null : workspaceId,
+        );
       }
       _shellNavigationController.selectProductWorkspacePane(
         ProductWorkspacePane.projects,
