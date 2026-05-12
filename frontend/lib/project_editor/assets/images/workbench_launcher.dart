@@ -84,9 +84,9 @@ Future<void> openAssetImagesWorkbenchDialog({
 }) async {
   final assets = assetsRef[0]?.items ?? const <AssetRow>[];
   if (assets.isEmpty) {
-    ScaffoldMessenger.of(
-      ctx,
-    ).showSnackBar(const SnackBar(content: Text('请先创建资产再管理图片')));
+    ScaffoldMessenger.of(ctx).showSnackBar(
+      const SnackBar(content: Text('Create an asset before managing images')),
+    );
     return;
   }
   final deps = _AssetImagesWorkbenchDialogDeps.build(

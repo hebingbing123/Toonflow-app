@@ -782,11 +782,10 @@ class PreviewPlayerDialog extends StatelessWidget {
                 playlist: playlist,
                 autoPlay: true,
                 onPlaylistComplete: () {
-                  // 播放列表完成后显示提示
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('所有镜头播放完毕'),
+                        content: Text('Finished playing all shots'),
                         duration: Duration(seconds: 2),
                       ),
                     );
@@ -800,7 +799,7 @@ class PreviewPlayerDialog extends StatelessWidget {
                   children: [
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('关闭'),
+                      child: const Text('Close'),
                     ),
                   ],
                 ),

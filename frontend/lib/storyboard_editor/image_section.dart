@@ -25,15 +25,15 @@ class _StoryboardImageSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('图片工作台', style: Theme.of(context).textTheme.titleSmall),
+        Text('Image workbench', style: Theme.of(context).textTheme.titleSmall),
         const SizedBox(height: 8),
         TextField(
           controller: imageUrlCtrl,
           minLines: 2,
           maxLines: 4,
           decoration: const InputDecoration(
-            labelText: '当前图片 URL / data URI',
-            helperText: '支持 HTTP URL 或 data:image/...;base64。',
+            labelText: 'Current image URL / data URI',
+            helperText: 'HTTP URL or data:image/...;base64.',
             alignLabelWithHint: true,
           ),
         ),
@@ -44,21 +44,23 @@ class _StoryboardImageSection extends StatelessWidget {
           children: [
             FilledButton.tonal(
               onPressed: saving ? null : onReadCurrentPreview,
-              child: Text(saving ? '处理中…' : '读取当前预览'),
+              child: Text(saving ? 'Working…' : 'Load current preview'),
             ),
             TextButton(
               onPressed: saving ? null : onSaveImageUrl,
-              child: const Text('保存图片 URL'),
+              child: const Text('Save image URL'),
             ),
             TextButton(
               onPressed: saving ? null : onClearFrame,
-              child: const Text('清空画面'),
+              child: const Text('Clear frame'),
             ),
             TextButton(
               onPressed: saving || loadingProduction
                   ? null
                   : onRefreshProductionData,
-              child: Text(loadingProduction ? '刷新中…' : '刷新制作数据'),
+              child: Text(
+                loadingProduction ? 'Refreshing…' : 'Refresh production data',
+              ),
             ),
           ],
         ),

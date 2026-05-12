@@ -121,11 +121,17 @@ void main() {
     );
 
     expect(find.text('资产图片工作台'), findsOneWidget);
-    expect(find.text('加载图片列表'), findsOneWidget);
-    expect(find.text('预览当前图片'), findsOneWidget);
-    expect(find.widgetWithText(TextButton, '新增图片'), findsOneWidget);
-    expect(find.widgetWithText(TextButton, '保存当前图片'), findsOneWidget);
-    expect(find.widgetWithText(TextButton, '删除当前图片'), findsOneWidget);
+    expect(find.text('Load image list'), findsOneWidget);
+    expect(find.text('Preview image'), findsOneWidget);
+    expect(find.widgetWithText(TextButton, 'Add image'), findsOneWidget);
+    expect(
+      find.widgetWithText(TextButton, 'Save current image'),
+      findsOneWidget,
+    );
+    expect(
+      find.widgetWithText(TextButton, 'Delete current image'),
+      findsOneWidget,
+    );
     expect(find.text('保存当前图片。'), findsOneWidget);
     expect(find.byType(Image), findsNothing);
   });
@@ -159,7 +165,7 @@ void main() {
       ),
     );
 
-    expect(find.text('加载中…'), findsOneWidget);
+    expect(find.text('Loading…'), findsOneWidget);
     expect(
       tester
           .widget<FilledButton>(
@@ -170,13 +176,13 @@ void main() {
     );
     expect(
       tester
-          .widget<FilledButton>(find.widgetWithText(FilledButton, '加载中…'))
+          .widget<FilledButton>(find.widgetWithText(FilledButton, 'Loading…'))
           .onPressed,
       isNull,
     );
     expect(
       tester
-          .widget<TextButton>(find.widgetWithText(TextButton, '新增图片'))
+          .widget<TextButton>(find.widgetWithText(TextButton, 'Add image'))
           .onPressed,
       isNull,
     );

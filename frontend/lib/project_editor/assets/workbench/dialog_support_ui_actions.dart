@@ -51,19 +51,19 @@ class _ProjectAssetsWorkbenchActions extends StatelessWidget {
           children: [
             FilledButton.tonal(
               onPressed: localBusy || assetsBusy ? null : onCreate,
-              child: const Text('新建资产'),
+              child: const Text('New asset'),
             ),
             OutlinedButton(
               onPressed: canMutateAssets ? onEdit : null,
-              child: const Text('编辑资产'),
+              child: const Text('Edit asset'),
             ),
             OutlinedButton(
               onPressed: canMutateAssets ? onDelete : null,
-              child: const Text('删除资产'),
+              child: const Text('Delete asset'),
             ),
             OutlinedButton(
               onPressed: canMutateAssets ? onFilter : null,
-              child: const Text('筛选资产'),
+              child: const Text('Filter assets'),
             ),
           ],
         ),
@@ -74,19 +74,19 @@ class _ProjectAssetsWorkbenchActions extends StatelessWidget {
           children: [
             OutlinedButton(
               onPressed: canLinkScripts ? onLink : null,
-              child: const Text('关联剧本与资产'),
+              child: const Text('Link script & assets'),
             ),
             OutlinedButton(
               onPressed: canLinkScripts ? onUnlink : null,
-              child: const Text('取消关联'),
+              child: const Text('Unlink'),
             ),
             OutlinedButton(
               onPressed: canUploadEditImage ? onUploadEditImage : null,
-              child: const Text('上传编辑图片'),
+              child: const Text('Upload edit image'),
             ),
             OutlinedButton(
               onPressed: localBusy || assetsBusy ? null : onUploadClip,
-              child: const Text('上传 Clip 资产'),
+              child: const Text('Upload clip asset'),
             ),
           ],
         ),
@@ -94,4 +94,3 @@ class _ProjectAssetsWorkbenchActions extends StatelessWidget {
     );
   }
 }
-

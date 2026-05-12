@@ -21,7 +21,9 @@
     "lint": "tsc --noEmit",
     "refactor:check": "bash scripts/refactor-check.sh",
     "refactor:quick": "bash scripts/refactor-check.sh --quick",
-    "refactor:incremental": "bash scripts/refactor-check.sh --incremental"
+    "refactor:incremental": "bash scripts/refactor-check.sh --incremental",
+    "rust:target:report": "bash scripts/rust-target-maintenance.sh report",
+    "rust:target:clean": "bash scripts/rust-target-maintenance.sh clean"
   },
   "dependencies": {},
   "devDependencies": {

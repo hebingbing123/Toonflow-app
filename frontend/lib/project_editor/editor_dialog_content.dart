@@ -106,10 +106,10 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('发布', style: Theme.of(ctx).textTheme.titleSmall),
+          Text('Publish', style: Theme.of(ctx).textTheme.titleSmall),
           const SizedBox(height: 4),
           Text(
-            '发布草稿/排期/作业（jobs）/审计入口目前在「短剧空间 → 发布」里。',
+            'Drafts, scheduling, jobs, and audit live under Short Video Space → Publish.',
             style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
               color: Theme.of(ctx).colorScheme.onSurfaceVariant,
             ),
@@ -134,7 +134,7 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
                     ProductWorkspacePane.shortVideoSpace,
                   );
                 },
-                child: const Text('打开发布工作台'),
+                child: const Text('Open publish workspace'),
               ),
               OutlinedButton(
                 onPressed: () async {
@@ -144,7 +144,7 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
                     ScaffoldMessenger.of(ctx).showSnackBar(
                       SnackBar(
                         content: Text(
-                          '发布总览：drafts=${overview.drafts.length} jobs=${overview.jobs.length}',
+                          'Publish overview: drafts=${overview.drafts.length} jobs=${overview.jobs.length}',
                         ),
                       ),
                     );
@@ -155,12 +155,14 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
                     );
                   } catch (e) {
                     if (!ctx.mounted) return;
-                    ScaffoldMessenger.of(
-                      ctx,
-                    ).showSnackBar(SnackBar(content: Text('读取发布总览失败：$e')));
+                    ScaffoldMessenger.of(ctx).showSnackBar(
+                      SnackBar(
+                        content: Text('Failed to load publish overview: $e'),
+                      ),
+                    );
                   }
                 },
-                child: const Text('查看发布总览'),
+                child: const Text('View publish overview'),
               ),
             ],
           ),

@@ -63,7 +63,7 @@ void main() {
       ),
     );
 
-    expect(find.text('骨架与改编策略'), findsOneWidget);
+    expect(find.text('Story skeleton & adaptation strategy'), findsOneWidget);
     expect(find.text('Story Skeleton'), findsOneWidget);
     expect(find.text('Adaptation Strategy'), findsOneWidget);
     expect(find.textContaining('planId 12'), findsOneWidget);
@@ -72,15 +72,15 @@ void main() {
     expect(find.textContaining('已生成 1 份结构化改写 guidance'), findsOneWidget);
     expect(find.widgetWithText(TextField, '三幕结构'), findsOneWidget);
     expect(find.widgetWithText(TextField, '角色先压后扬'), findsOneWidget);
-    expect(find.text('用事件填充骨架草稿'), findsOneWidget);
-    expect(find.text('用事件填充策略草稿'), findsOneWidget);
-    expect(find.text('生成剧本初稿包'), findsOneWidget);
-    expect(find.text('生成结构化改写 guidance'), findsOneWidget);
-    expect(find.text('写入剧本初稿'), findsOneWidget);
-    expect(find.text('剧本初稿预览'), findsOneWidget);
-    expect(find.text('结构化改写 Guidance'), findsOneWidget);
+    expect(find.text('Fill skeleton draft from events'), findsOneWidget);
+    expect(find.text('Fill strategy draft from events'), findsOneWidget);
+    expect(find.text('Generate script draft packets'), findsOneWidget);
+    expect(find.text('Generate structured rewrite guidance'), findsOneWidget);
+    expect(find.text('Write script drafts'), findsOneWidget);
+    expect(find.text('Script draft preview'), findsOneWidget);
+    expect(find.text('Structured rewrite guidance'), findsOneWidget);
     expect(find.text('第1集'), findsNWidgets(2));
-    expect(find.text('刷新计划'), findsOneWidget);
-    expect(find.text('保存计划'), findsOneWidget);
+    expect(find.text('Reload plan'), findsOneWidget);
+    expect(find.text('Save plan'), findsOneWidget);
   });
 }

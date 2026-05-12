@@ -33,6 +33,7 @@ class _AssetGenerationStatusPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final outline = Theme.of(context).colorScheme.outline;
     final bodySmall = Theme.of(context).textTheme.bodySmall;
     return Column(
@@ -45,14 +46,14 @@ class _AssetGenerationStatusPanel extends StatelessWidget {
         if (productionData != null) ...[
           const SizedBox(height: 4),
           Text(
-            summarizeProductionAssetData(productionData!),
+            summarizeProductionAssetData(productionData!, l10n),
             style: bodySmall?.copyWith(color: outline),
           ),
         ],
         if (pollingData != null) ...[
           const SizedBox(height: 4),
           Text(
-            summarizeAssetPollingStatuses(pollingData!.statuses),
+            summarizeAssetPollingStatuses(pollingData!.statuses, l10n),
             style: bodySmall?.copyWith(color: outline),
           ),
           const SizedBox(height: 4),
@@ -62,7 +63,12 @@ class _AssetGenerationStatusPanel extends StatelessWidget {
             children: pollingSelections.entries
                 .map(
                   (entry) => ActionChip(
-                    label: Text('${entry.key} ${entry.value.length} 条'),
+                    label: Text(
+                      l10n.projectEditorAssetSummaryTypeCount(
+                        entry.key,
+                        entry.value.length,
+                      ),
+                    ),
                     onPressed: busy
                         ? null
                         : () => onApplyPollingSelection(entry.key, entry.value),
@@ -74,7 +80,7 @@ class _AssetGenerationStatusPanel extends StatelessWidget {
         if (materialData != null) ...[
           const SizedBox(height: 4),
           Text(
-            summarizeWorkbenchAssetMaterialData(materialData!),
+            summarizeWorkbenchAssetMaterialData(materialData!, l10n),
             style: bodySmall?.copyWith(color: outline),
           ),
           const SizedBox(height: 4),
@@ -83,7 +89,9 @@ class _AssetGenerationStatusPanel extends StatelessWidget {
             runSpacing: 8,
             children: [
               ActionChip(
-                label: Text('使用素材上下文 ${materialData!.data.length} 条'),
+                label: Text(
+                  'Use material context (${materialData!.data.length} rows)',
+                ),
                 onPressed: busy ? null : onApplyMaterialSelection,
               ),
             ],
@@ -92,7 +100,7 @@ class _AssetGenerationStatusPanel extends StatelessWidget {
         if (batchData != null) ...[
           const SizedBox(height: 4),
           Text(
-            summarizeWorkbenchBatchGenerationData(batchData!),
+            summarizeWorkbenchBatchGenerationData(batchData!, l10n),
             style: bodySmall?.copyWith(color: outline),
           ),
           const SizedBox(height: 4),
@@ -101,7 +109,9 @@ class _AssetGenerationStatusPanel extends StatelessWidget {
             runSpacing: 8,
             children: [
               ActionChip(
-                label: Text('使用批量候选 ${batchData!.data.length} 条'),
+                label: Text(
+                  'Use batch candidates (${batchData!.data.length} rows)',
+                ),
                 onPressed: busy ? null : onApplyBatchSelection,
               ),
             ],
@@ -110,7 +120,7 @@ class _AssetGenerationStatusPanel extends StatelessWidget {
         if (promptPollingData != null) ...[
           const SizedBox(height: 4),
           Text(
-            summarizeWorkbenchPromptPolling(promptPollingData!),
+            summarizeWorkbenchPromptPolling(promptPollingData!, l10n),
             style: bodySmall?.copyWith(color: outline),
           ),
           const SizedBox(height: 4),
@@ -120,7 +130,12 @@ class _AssetGenerationStatusPanel extends StatelessWidget {
             children: promptSelections.entries
                 .map(
                   (entry) => ActionChip(
-                    label: Text('${entry.key} ${entry.value.length} 条'),
+                    label: Text(
+                      l10n.projectEditorAssetSummaryStateCount(
+                        entry.key,
+                        entry.value.length,
+                      ),
+                    ),
                     onPressed: busy
                         ? null
                         : () => onApplyPromptSelection(entry.key, entry.value),
@@ -133,4 +148,3 @@ class _AssetGenerationStatusPanel extends StatelessWidget {
     );
   }
 }
-

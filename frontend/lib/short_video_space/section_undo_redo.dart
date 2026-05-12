@@ -169,7 +169,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
           videoUrl: videoUrl,
         );
       },
-      description: '启用镜头 #$storyboardId',
+      description: 'Enable shot #$storyboardId',
     );
 
     _operationHistory.recordOperation(operation);
@@ -217,7 +217,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
           storyboardId: storyboardId,
         );
       },
-      description: '禁用镜头 #$storyboardId',
+      description: 'Disable shot #$storyboardId',
     );
 
     _operationHistory.recordOperation(operation);
@@ -266,7 +266,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
           duration: newDuration,
         );
       },
-      description: '调整镜头 #$storyboardId 时长为 ${newDuration}s',
+      description: 'Set shot #$storyboardId duration to ${newDuration}s',
     );
 
     _operationHistory.recordOperation(operation);
@@ -315,7 +315,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
           videoUrl: newVideoUrl,
         );
       },
-      description: '替换镜头 #$storyboardId 视频',
+      description: 'Replace shot #$storyboardId video',
     );
 
     _operationHistory.recordOperation(operation);
@@ -359,7 +359,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
           );
         }
       },
-      description: '批量启用 ${operations.length} 个镜头',
+      description: 'Batch enable ${operations.length} shot(s)',
     );
 
     _operationHistory.recordOperation(operation);
@@ -403,7 +403,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
           );
         }
       },
-      description: '批量禁用 ${operations.length} 个镜头',
+      description: 'Batch disable ${operations.length} shot(s)',
     );
 
     _operationHistory.recordOperation(operation);
@@ -448,7 +448,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
           );
         }
       },
-      description: '批量时长对齐 ${operations.length} 个镜头',
+      description: 'Batch align duration for ${operations.length} shot(s)',
     );
 
     _operationHistory.recordOperation(operation);
@@ -493,7 +493,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
           );
         }
       },
-      description: '批量替换 ${operations.length} 个镜头视频',
+      description: 'Batch replace video for ${operations.length} shot(s)',
     );
 
     _operationHistory.recordOperation(operation);
@@ -510,7 +510,9 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
       mainAxisSize: MainAxisSize.min,
       children: [
         Tooltip(
-          message: canUndo ? '撤销：$undoDescription (Ctrl+Z / Cmd+Z)' : '无可撤销操作',
+          message: canUndo
+              ? 'Undo: $undoDescription (Ctrl+Z / Cmd+Z)'
+              : 'Nothing to undo',
           child: IconButton(
             icon: const Icon(Icons.undo),
             onPressed: canUndo ? () => _performUndo() : null,
@@ -519,8 +521,8 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
         const SizedBox(width: 4),
         Tooltip(
           message: canRedo
-              ? '重做：$redoDescription (Ctrl+Shift+Z / Cmd+Shift+Z)'
-              : '无可重做操作',
+              ? 'Redo: $redoDescription (Ctrl+Shift+Z / Cmd+Shift+Z)'
+              : 'Nothing to redo',
           child: IconButton(
             icon: const Icon(Icons.redo),
             onPressed: canRedo ? () => _performRedo() : null,
@@ -528,7 +530,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
         ),
         const SizedBox(width: 4),
         Tooltip(
-          message: '查看操作历史',
+          message: 'View operation history',
           child: IconButton(
             icon: const Icon(Icons.history),
             onPressed: () => _showOperationHistoryDialog(),
@@ -549,7 +551,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
       context: context,
       builder: (ctx) {
         return AlertDialog(
-          title: const Text('操作历史'),
+          title: const Text('Operation history'),
           content: SizedBox(
             width: 600,
             child: Column(
@@ -567,7 +569,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '历史记录摘要',
+                        'Summary',
                         style: Theme.of(ctx).textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -581,7 +583,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
                             color: Theme.of(ctx).colorScheme.primary,
                           ),
                           const SizedBox(width: 4),
-                          Text('可撤销操作：${summary['undoCount']}'),
+                          Text('Undo stack: ${summary['undoCount']}'),
                           const SizedBox(width: 16),
                           Icon(
                             Icons.redo,
@@ -589,12 +591,12 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
                             color: Theme.of(ctx).colorScheme.primary,
                           ),
                           const SizedBox(width: 4),
-                          Text('可重做操作：${summary['redoCount']}'),
+                          Text('Redo stack: ${summary['redoCount']}'),
                         ],
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '历史记录上限：${summary['maxHistorySize']} 条',
+                        'History limit: ${summary['maxHistorySize']} entries',
                         style: Theme.of(ctx).textTheme.bodySmall,
                       ),
                     ],
@@ -615,7 +617,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            '暂无操作历史',
+                            'No operations yet',
                             style: Theme.of(ctx).textTheme.bodyLarge?.copyWith(
                               color: Theme.of(ctx).colorScheme.outline,
                             ),
@@ -630,7 +632,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '操作记录（从新到旧）',
+                          'Operations (newest first)',
                           style: Theme.of(ctx).textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -689,7 +691,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
                                   ),
                                   trailing: isLatest
                                       ? Chip(
-                                          label: const Text('最新'),
+                                          label: const Text('Latest'),
                                           backgroundColor: Theme.of(
                                             ctx,
                                           ).colorScheme.primary,
@@ -718,15 +720,18 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
                 onPressed: () {
                   _operationHistory.clearHistory();
                   Navigator.of(ctx).pop();
-                  _showOperationFeedback('已清空操作历史', isSuccess: true);
+                  _showOperationFeedback(
+                    'Operation history cleared',
+                    isSuccess: true,
+                  );
                   setState(() {});
                 },
                 icon: const Icon(Icons.delete_outline),
-                label: const Text('清空历史'),
+                label: const Text('Clear history'),
               ),
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('关闭'),
+              child: const Text('Close'),
             ),
           ],
         );
@@ -740,11 +745,11 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
     final difference = now.difference(timestamp);
 
     if (difference.inSeconds < 60) {
-      return '${difference.inSeconds}秒前';
+      return '${difference.inSeconds}s ago';
     } else if (difference.inMinutes < 60) {
-      return '${difference.inMinutes}分钟前';
+      return '${difference.inMinutes}m ago';
     } else if (difference.inHours < 24) {
-      return '${difference.inHours}小时前';
+      return '${difference.inHours}h ago';
     } else {
       return '${timestamp.year}-${timestamp.month.toString().padLeft(2, '0')}-${timestamp.day.toString().padLeft(2, '0')} '
           '${timestamp.hour.toString().padLeft(2, '0')}:${timestamp.minute.toString().padLeft(2, '0')}';

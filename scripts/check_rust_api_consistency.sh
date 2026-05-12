@@ -6,8 +6,13 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-OPENAPI_SPEC="/tmp/openapi_for_consistency_$$.yaml"
+OPENAPI_SPEC="${TOONFLOW_OPENAPI_SPEC:-/tmp/openapi_for_consistency_$$.yaml}"
 CONSISTENCY_REPORT="/tmp/rust_api_consistency_$$.txt"
+OPENAPI_SPEC_FROM_ENV=false
+
+if [ -n "${TOONFLOW_OPENAPI_SPEC:-}" ]; then
+    OPENAPI_SPEC_FROM_ENV=true
+fi
 
 # Colors for output
 RED='\033[0;31m'
@@ -16,12 +21,19 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 cleanup() {
-    rm -f "$OPENAPI_SPEC" "$CONSISTENCY_REPORT"
+    if [ "$OPENAPI_SPEC_FROM_ENV" = false ]; then
+        rm -f "$OPENAPI_SPEC"
+    fi
+    rm -f "$CONSISTENCY_REPORT"
 }
 trap cleanup EXIT
 
-echo "==> Generating OpenAPI spec..."
-(cd backend && cargo run --quiet --bin export-openapi) > "$OPENAPI_SPEC"
+if [ "$OPENAPI_SPEC_FROM_ENV" = true ]; then
+    echo "==> Reusing pre-generated OpenAPI spec from \$TOONFLOW_OPENAPI_SPEC"
+else
+    echo "==> Generating OpenAPI spec..."
+    (cd backend && cargo run --quiet --bin export-openapi) > "$OPENAPI_SPEC"
+fi
 
 echo "==> Checking rust_api consistency..."
 

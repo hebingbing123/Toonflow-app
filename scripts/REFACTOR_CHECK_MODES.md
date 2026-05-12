@@ -122,6 +122,12 @@ yarn refactor:check
 
 ## 技术细节
 
+### 2026-05 本地提速更新
+
+- OpenAPI 导出现在在 `refactor-check.sh` 内只生成一次；后续 drift 与 `rust_api` 一致性检查复用同一份 YAML，避免重复触发 `cargo run --bin export-openapi`。
+- `flutter pub get` 变为条件执行：仅在 `frontend/.dart_tool/package_config.json` 缺失，或 `pubspec.yaml` / `pubspec.lock` 更新后才重新拉依赖。
+- 每个主要步骤都会输出耗时，方便快速确认当前瓶颈是在 OpenAPI、Rust 还是 Flutter。
+
 ### 增量检查的文件检测
 
 增量模式使用 `git diff` 检测修改的文件：
@@ -153,6 +159,18 @@ git diff --cached --name-only
 | 增量检查（无修改） | 跳过 | 跳过 | 跳过 | ~1 秒 |
 
 *注：实际耗时取决于硬件性能和项目规模*
+
+### Rust target 维护
+
+本仓库的体积如果突然膨胀，通常是 `backend/target/` 中累积了大量 Rust debug/test 产物。可用下面两个命令处理：
+
+```bash
+yarn rust:target:report
+yarn rust:target:clean
+```
+
+- `report`：查看 `backend/target` 总大小和最大的构建产物
+- `clean`：执行 `cargo clean`，回收本地编译缓存空间
 
 ## 注意事项
 

@@ -24,7 +24,7 @@ extension _HomePageProjectEditorAssetsFilterDialogs on _HomePageState {
           return StatefulBuilder(
             builder: (dialogCtx, setState) {
               return AlertDialog(
-                title: const Text('高级筛选资产'),
+                title: const Text('Advanced asset filter'),
                 content: SizedBox(
                   width: 520,
                   child: Column(
@@ -32,11 +32,13 @@ extension _HomePageProjectEditorAssetsFilterDialogs on _HomePageState {
                     children: [
                       DropdownButtonFormField<int?>(
                         initialValue: selectedScriptNumericId,
-                        decoration: const InputDecoration(labelText: '按剧本筛选'),
+                        decoration: const InputDecoration(
+                          labelText: 'Filter by script',
+                        ),
                         items: [
                           const DropdownMenuItem<int?>(
                             value: null,
-                            child: Text('（全部剧本）'),
+                            child: Text('(All scripts)'),
                           ),
                           ...scriptList.map(
                             (script) => DropdownMenuItem<int?>(
@@ -56,7 +58,7 @@ extension _HomePageProjectEditorAssetsFilterDialogs on _HomePageState {
                       TextField(
                         controller: typeCtrl,
                         decoration: const InputDecoration(
-                          labelText: '资产类型（可选）',
+                          labelText: 'Asset type (optional)',
                           hintText: 'role / clip / props',
                         ),
                       ),
@@ -64,7 +66,7 @@ extension _HomePageProjectEditorAssetsFilterDialogs on _HomePageState {
                       TextField(
                         controller: nameCtrl,
                         decoration: const InputDecoration(
-                          labelText: '资产名称关键字（可选）',
+                          labelText: 'Name contains (optional)',
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -97,11 +99,11 @@ extension _HomePageProjectEditorAssetsFilterDialogs on _HomePageState {
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.of(dialogCtx).pop(false),
-                    child: const Text('取消'),
+                    child: const Text('Cancel'),
                   ),
                   FilledButton(
                     onPressed: () => Navigator.of(dialogCtx).pop(true),
-                    child: const Text('应用筛选'),
+                    child: const Text('Apply filter'),
                   ),
                 ],
               );
@@ -114,9 +116,11 @@ extension _HomePageProjectEditorAssetsFilterDialogs on _HomePageState {
       final page = int.tryParse(pageCtrl.text.trim());
       final limit = int.tryParse(limitCtrl.text.trim());
       if ((page != null && page <= 0) || (limit != null && limit <= 0)) {
-        ScaffoldMessenger.of(
-          ctx,
-        ).showSnackBar(const SnackBar(content: Text('page/limit 必须是正整数')));
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          const SnackBar(
+            content: Text('page and limit must be positive integers'),
+          ),
+        );
         return;
       }
 
@@ -143,7 +147,9 @@ extension _HomePageProjectEditorAssetsFilterDialogs on _HomePageState {
       });
       ScaffoldMessenger.of(ctx).showSnackBar(
         SnackBar(
-          content: Text('筛选完成：返回 ${filtered.items.length}/${filtered.total} 条'),
+          content: Text(
+            'Filter applied: ${filtered.items.length}/${filtered.total} rows',
+          ),
         ),
       );
     } on RustApiException catch (e) {

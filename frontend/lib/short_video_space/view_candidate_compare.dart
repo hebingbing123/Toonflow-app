@@ -16,7 +16,7 @@ class _CandidateComparePanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final outline = theme.colorScheme.outline;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -25,7 +25,10 @@ class _CandidateComparePanel extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('候选资产确认', style: theme.textTheme.titleSmall),
+                Text(
+                  'Candidate asset confirmation',
+                  style: theme.textTheme.titleSmall,
+                ),
                 const SizedBox(height: 8),
                 if (candidateCardUi.loading)
                   Text(
@@ -48,19 +51,19 @@ class _CandidateComparePanel extends StatelessWidget {
                     runSpacing: 8,
                     children: [
                       _MetricChip(
-                        label: '待确认',
+                        label: 'Pending',
                         value: '${candidateCardUi.pending}',
                       ),
                       _MetricChip(
-                        label: '已关联',
+                        label: 'Linked',
                         value: '${candidateCardUi.linked}',
                       ),
                       _MetricChip(
-                        label: '已忽略',
+                        label: 'Ignored',
                         value: '${candidateCardUi.ignored}',
                       ),
                       _MetricChip(
-                        label: '未标记',
+                        label: 'Unset',
                         value: '${candidateCardUi.unset}',
                       ),
                     ],
@@ -86,8 +89,8 @@ class _CandidateComparePanel extends StatelessWidget {
                         : const Icon(Icons.movie_creation_outlined),
                     label: Text(
                       candidateCardUi.batchGenerateCandidateClipsBusy
-                          ? '正在批量投递候选成片任务…'
-                          : '一键批量生成候选成片（按项目默认参数）',
+                          ? 'Submitting candidate clip batch jobs…'
+                          : 'Batch-generate candidate clips (project defaults)',
                     ),
                   ),
                 ],
@@ -96,7 +99,7 @@ class _CandidateComparePanel extends StatelessWidget {
                   OutlinedButton.icon(
                     onPressed: onOpenProjectsForCandidateAssets,
                     icon: const Icon(Icons.folder_open_outlined),
-                    label: const Text('打开项目区维护资产'),
+                    label: const Text('Open projects to manage assets'),
                   ),
                 ],
               ],
@@ -109,7 +112,7 @@ class _CandidateComparePanel extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('候选对比', style: theme.textTheme.titleSmall),
+                Text('Candidate compare', style: theme.textTheme.titleSmall),
                 const SizedBox(height: 8),
                 Text(
                   candidateComparePanelUi.headline,

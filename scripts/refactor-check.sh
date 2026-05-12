@@ -10,6 +10,45 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
+STEP_START=0
+OPENAPI_SPEC_FILE=""
+
+cleanup() {
+  if [ -n "$OPENAPI_SPEC_FILE" ] && [ -f "$OPENAPI_SPEC_FILE" ]; then
+    rm -f "$OPENAPI_SPEC_FILE"
+  fi
+}
+trap cleanup EXIT
+
+step_start() {
+  STEP_START=$(date +%s)
+}
+
+step_finish() {
+  local label="$1"
+  local now elapsed
+  now=$(date +%s)
+  elapsed=$((now - STEP_START))
+  echo "==> ${label} completed in ${elapsed}s"
+}
+
+need_flutter_pub_get() {
+  local package_config="frontend/.dart_tool/package_config.json"
+  if [ ! -f "$package_config" ]; then
+    return 0
+  fi
+
+  if [ "frontend/pubspec.yaml" -nt "$package_config" ]; then
+    return 0
+  fi
+
+  if [ -f "frontend/pubspec.lock" ] && [ "frontend/pubspec.lock" -nt "$package_config" ]; then
+    return 0
+  fi
+
+  return 1
+}
+
 # Parse arguments
 MODE="full"
 for arg in "$@"; do
@@ -87,13 +126,22 @@ fi
 # OpenAPI checks (only if backend or OpenAPI changed, or in full mode)
 if [ "$MODE" = "full" ] || [ "$MODE" = "quick" ] || [ "$OPENAPI_CHANGED" = true ]; then
   echo "==> merged OpenAPI export (YAML parse)"
-  (cd backend && cargo run --quiet --bin export-openapi) | ruby -ryaml -e "YAML.load(STDIN.read)"
+  OPENAPI_SPEC_FILE="$(mktemp "${TMPDIR:-/tmp}/toonflow-openapi.XXXXXX.yaml")"
+  step_start
+  (cd backend && cargo run --quiet --bin export-openapi) > "$OPENAPI_SPEC_FILE"
+  ruby -ryaml -e "YAML.load(File.read('$OPENAPI_SPEC_FILE'))"
+  step_finish "OpenAPI export + YAML parse"
+  export TOONFLOW_OPENAPI_SPEC="$OPENAPI_SPEC_FILE"
 
   echo "==> OpenAPI drift detection"
+  step_start
   bash scripts/check_openapi_drift.sh
+  step_finish "OpenAPI drift detection"
 
   echo "==> rust_api contract consistency"
+  step_start
   bash scripts/check_rust_api_consistency.sh
+  step_finish "rust_api contract consistency"
 else
   echo "==> Skipping OpenAPI checks (no relevant changes)"
 fi
@@ -101,16 +149,20 @@ fi
 # Backend checks (only if backend changed, or in full mode)
 if [ "$MODE" = "full" ] || [ "$MODE" = "quick" ] || [ "$BACKEND_CHANGED" = true ]; then
   echo "==> backend/ (fmt, clippy)"
+  step_start
   (
     cd backend
     cargo fmt -- --check
     cargo clippy -- -D warnings
   )
+  step_finish "backend fmt + clippy"
   
   # Tests only in full mode
   if [ "$MODE" = "full" ]; then
     echo "==> backend/ (test)"
+    step_start
     (cd backend && cargo test -- --test-threads=1)
+    step_finish "backend test"
   else
     echo "==> Skipping backend tests (quick/incremental mode)"
   fi
@@ -120,18 +172,28 @@ fi
 
 # Frontend checks (only if frontend changed, or in full mode)
 if [ "$MODE" = "full" ] || [ "$MODE" = "quick" ] || [ "$FRONTEND_CHANGED" = true ]; then
-  echo "==> frontend/ (pub get, analyze)"
+  echo "==> frontend/ (pub get if needed, analyze)"
   if command -v flutter >/dev/null 2>&1; then
-    (
-      cd frontend
-      flutter pub get
-      flutter analyze
-    )
+    if need_flutter_pub_get; then
+      echo "==> frontend/ flutter pub get"
+      step_start
+      (cd frontend && flutter pub get)
+      step_finish "frontend flutter pub get"
+    else
+      echo "==> Skipping flutter pub get (dependencies unchanged)"
+    fi
+
+    echo "==> frontend/ flutter analyze"
+    step_start
+    (cd frontend && flutter analyze)
+    step_finish "frontend flutter analyze"
     
     # Tests only in full mode
     if [ "$MODE" = "full" ]; then
       echo "==> frontend/ (test)"
+      step_start
       (cd frontend && flutter test)
+      step_finish "frontend test"
     else
       echo "==> Skipping frontend tests (quick/incremental mode)"
     fi

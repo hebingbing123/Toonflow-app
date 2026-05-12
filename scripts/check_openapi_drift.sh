@@ -7,8 +7,13 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
 BASELINE="scripts/fixtures/openapi_baseline.yaml"
-GENERATED="/tmp/openapi_generated_$$.yaml"
+GENERATED="${TOONFLOW_OPENAPI_SPEC:-/tmp/openapi_generated_$$.yaml}"
 DIFF_OUTPUT="/tmp/openapi_diff_$$.txt"
+GENERATED_FROM_ENV=false
+
+if [ -n "${TOONFLOW_OPENAPI_SPEC:-}" ]; then
+    GENERATED_FROM_ENV=true
+fi
 
 # Colors for output
 RED='\033[0;31m'
@@ -17,12 +22,19 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 cleanup() {
-    rm -f "$GENERATED" "$DIFF_OUTPUT"
+    if [ "$GENERATED_FROM_ENV" = false ]; then
+        rm -f "$GENERATED"
+    fi
+    rm -f "$DIFF_OUTPUT"
 }
 trap cleanup EXIT
 
-echo "==> Generating current OpenAPI spec..."
-(cd backend && cargo run --quiet --bin export-openapi) > "$GENERATED"
+if [ "$GENERATED_FROM_ENV" = true ]; then
+    echo "==> Reusing pre-generated OpenAPI spec from \$TOONFLOW_OPENAPI_SPEC"
+else
+    echo "==> Generating current OpenAPI spec..."
+    (cd backend && cargo run --quiet --bin export-openapi) > "$GENERATED"
+fi
 
 # Validate YAML is parseable
 if ! ruby -ryaml -e "YAML.load(File.read('$GENERATED'))" 2>/dev/null; then

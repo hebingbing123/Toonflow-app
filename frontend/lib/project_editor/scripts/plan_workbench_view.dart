@@ -66,7 +66,7 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
     final theme = Theme.of(context);
     final planData = model.planData;
     return AlertDialog(
-      title: const Text('骨架与改编策略'),
+      title: const Text('Story skeleton & adaptation strategy'),
       content: SizedBox(
         width: 720,
         child: SingleChildScrollView(
@@ -78,7 +78,7 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
               const SizedBox(height: 8),
               if (planData != null)
                 Text(
-                  'planId ${planData.planId ?? 'new'} · 已挂载 ${planData.scriptRows.length} 条剧本'
+                  'planId ${planData.planId ?? 'new'} · ${planData.scriptRows.length} script row(s) mounted'
                   '${planData.scriptRows.isEmpty ? '' : ' · ${planData.scriptRows.take(3).map((row) => row.name ?? '#${row.id ?? 0}').join(' / ')}'}',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
@@ -114,31 +114,31 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
                     onPressed: model.localBusy
                         ? null
                         : callbacks.onFillStorySkeletonSeed,
-                    child: const Text('用事件填充骨架草稿'),
+                    child: const Text('Fill skeleton draft from events'),
                   ),
                   OutlinedButton(
                     onPressed: model.localBusy
                         ? null
                         : callbacks.onFillAdaptationStrategySeed,
-                    child: const Text('用事件填充策略草稿'),
+                    child: const Text('Fill strategy draft from events'),
                   ),
                   FilledButton.tonal(
                     onPressed: model.localBusy
                         ? null
                         : callbacks.onGenerateDraftPackets,
-                    child: const Text('生成剧本初稿包'),
+                    child: const Text('Generate script draft packets'),
                   ),
                   FilledButton.tonal(
                     onPressed: model.localBusy
                         ? null
                         : callbacks.onGenerateGuidance,
-                    child: const Text('生成结构化改写 guidance'),
+                    child: const Text('Generate structured rewrite guidance'),
                   ),
                   OutlinedButton(
                     onPressed: model.localBusy || model.draftPackets.isEmpty
                         ? null
                         : callbacks.onWriteDraftPackets,
-                    child: const Text('写入剧本初稿'),
+                    child: const Text('Write script drafts'),
                   ),
                 ],
               ),
@@ -149,7 +149,8 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
                 maxLines: 10,
                 decoration: const InputDecoration(
                   labelText: 'Story Skeleton',
-                  helperText: '聚焦故事骨架、主冲突、关键转折和收束路径',
+                  helperText:
+                      'Focus on story spine, main conflict, turning points, and resolution path',
                 ),
               ),
               const SizedBox(height: 12),
@@ -159,108 +160,119 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
                 maxLines: 10,
                 decoration: const InputDecoration(
                   labelText: 'Adaptation Strategy',
-                  helperText: '记录改编取舍、人物弧光、节奏策略和风格约束',
+                  helperText:
+                      'Capture adaptation trade-offs, character arcs, pacing, and style constraints',
                 ),
               ),
               const SizedBox(height: 16),
-              Text('剧本初稿预览', style: theme.textTheme.titleSmall),
+              Text('Script draft preview', style: theme.textTheme.titleSmall),
               const SizedBox(height: 8),
               if (model.draftPackets.isEmpty)
                 Text(
-                  '还没有生成初稿包，建议先整理骨架/策略后再生成。',
+                  'No draft packets yet. Refine skeleton/strategy first, then generate.',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                 )
               else
-                ...model.draftPackets.take(4).map(
-                  (draft) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: theme.colorScheme.outlineVariant,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                        color: theme.colorScheme.surfaceContainerHighest
-                            .withValues(alpha: 0.25),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(draft.name, style: theme.textTheme.titleSmall),
-                          const SizedBox(height: 4),
-                          Text(
-                            '章节 ${draft.chapterIndexes.isEmpty ? '待补' : draft.chapterIndexes.join(', ')}'
-                            '${draft.eventNames.isEmpty ? '' : ' · ${draft.eventNames.take(3).join(' / ')}'}',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
+                ...model.draftPackets
+                    .take(4)
+                    .map(
+                      (draft) => Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: theme.colorScheme.outlineVariant,
                             ),
+                            borderRadius: BorderRadius.circular(12),
+                            color: theme.colorScheme.surfaceContainerHighest
+                                .withValues(alpha: 0.25),
                           ),
-                          const SizedBox(height: 6),
-                          SelectableText(
-                            draft.content,
-                            maxLines: 10,
-                            style: theme.textTheme.bodySmall,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                draft.name,
+                                style: theme.textTheme.titleSmall,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Chapters ${draft.chapterIndexes.isEmpty ? 'TBD' : draft.chapterIndexes.join(', ')}'
+                                '${draft.eventNames.isEmpty ? '' : ' · ${draft.eventNames.take(3).join(' / ')}'}',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              SelectableText(
+                                draft.content,
+                                maxLines: 10,
+                                style: theme.textTheme.bodySmall,
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                     ),
-                  ),
-                ),
               const SizedBox(height: 8),
-              Text('结构化改写 Guidance', style: theme.textTheme.titleSmall),
+              Text(
+                'Structured rewrite guidance',
+                style: theme.textTheme.titleSmall,
+              ),
               const SizedBox(height: 8),
               if (model.guidanceRows.isEmpty)
                 Text(
-                  '还没有生成结构化改写 guidance，建议在剧本初稿前后都跑一次，用来约束后续改稿。',
+                  'No structured guidance yet. Run before and after drafts to constrain revisions.',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                 )
               else
-                ...model.guidanceRows.take(4).map(
-                  (guidance) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: theme.colorScheme.outlineVariant,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                        color: theme.colorScheme.surfaceContainerHighest
-                            .withValues(alpha: 0.2),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            guidance.name,
-                            style: theme.textTheme.titleSmall,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '章节 ${guidance.chapterIndexes.isEmpty ? '待补' : guidance.chapterIndexes.join(', ')}'
-                            '${guidance.eventNames.isEmpty ? '' : ' · ${guidance.eventNames.take(3).join(' / ')}'}',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
+                ...model.guidanceRows
+                    .take(4)
+                    .map(
+                      (guidance) => Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: theme.colorScheme.outlineVariant,
                             ),
+                            borderRadius: BorderRadius.circular(12),
+                            color: theme.colorScheme.surfaceContainerHighest
+                                .withValues(alpha: 0.2),
                           ),
-                          const SizedBox(height: 6),
-                          SelectableText(
-                            guidance.content,
-                            maxLines: 10,
-                            style: theme.textTheme.bodySmall,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                guidance.name,
+                                style: theme.textTheme.titleSmall,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Chapters ${guidance.chapterIndexes.isEmpty ? 'TBD' : guidance.chapterIndexes.join(', ')}'
+                                '${guidance.eventNames.isEmpty ? '' : ' · ${guidance.eventNames.take(3).join(' / ')}'}',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              SelectableText(
+                                guidance.content,
+                                maxLines: 10,
+                                style: theme.textTheme.bodySmall,
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                     ),
-                  ),
-                ),
             ],
           ),
         ),
@@ -268,13 +280,13 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: model.localBusy ? null : callbacks.onReload,
-          child: Text(model.localBusy ? '刷新中…' : '刷新计划'),
+          child: Text(model.localBusy ? 'Refreshing…' : 'Reload plan'),
         ),
         FilledButton(
           onPressed: model.localBusy ? null : callbacks.onSave,
-          child: Text(model.localBusy ? '保存中…' : '保存计划'),
+          child: Text(model.localBusy ? 'Saving…' : 'Save plan'),
         ),
-        TextButton(onPressed: callbacks.onClose, child: const Text('关闭')),
+        TextButton(onPressed: callbacks.onClose, child: const Text('Close')),
       ],
     );
   }

@@ -32,18 +32,18 @@ extension _HomePageProjectEditorDialogActions on _HomePageState {
                 final ok = await showDialog<bool>(
                   context: ctx,
                   builder: (c) => AlertDialog(
-                    title: const Text('删除项目？'),
+                    title: const Text('Delete project?'),
                     content: Text(
-                      '将删除项目 #${p.numericId} 及关联剧本/分镜（数据库级联），且清除该项目的 agent 记忆。',
+                      'Deletes project #${p.numericId}, related scripts/storyboards (DB cascade), and clears agent memory for this project.',
                     ),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.of(c).pop(false),
-                        child: const Text('取消'),
+                        child: const Text('Cancel'),
                       ),
                       FilledButton(
                         onPressed: () => Navigator.of(c).pop(true),
-                        child: const Text('删除'),
+                        child: const Text('Delete'),
                       ),
                     ],
                   ),
@@ -57,9 +57,9 @@ extension _HomePageProjectEditorDialogActions on _HomePageState {
                   if (!mounted) return;
                   await _projectsController.loadProjects();
                   if (!mounted) return;
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(const SnackBar(content: Text('项目已删除')));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Project deleted')),
+                  );
                 } on RustApiException catch (e) {
                   if (ctx.mounted) {
                     setDialogState(() => dialogState.saving[0] = false);
@@ -141,7 +141,7 @@ extension _HomePageProjectEditorDialogActions on _HomePageState {
                   }
                 }
               },
-        child: Text(dialogState.saving[0] ? '保存中…' : 'PATCH 保存'),
+        child: Text(dialogState.saving[0] ? 'Saving…' : 'Save (PATCH)'),
       ),
     ];
   }

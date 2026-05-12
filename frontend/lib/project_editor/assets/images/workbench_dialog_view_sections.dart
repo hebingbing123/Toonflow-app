@@ -19,12 +19,12 @@ List<Widget> buildAssetImagesWorkbenchSections(
       filePathController: model.createFilePathController,
       stateController: model.createStateController,
       sortController: model.createSortController,
-      filePathLabel: '新增 file_path（可选）',
-      stateLabel: '新增 state（可选）',
-      sortLabel: '新增 sort_index（可选）',
+      filePathLabel: 'New file_path (optional)',
+      stateLabel: 'New state (optional)',
+      sortLabel: 'New sort_index (optional)',
       actions: [
         AssetImagesWorkbenchMutationAction(
-          label: '新增图片',
+          label: 'Add image',
           onPressed: callbacks.onCreateImage,
         ),
       ],
@@ -33,16 +33,16 @@ List<Widget> buildAssetImagesWorkbenchSections(
       filePathController: model.patchFilePathController,
       stateController: model.patchStateController,
       sortController: model.patchSortController,
-      filePathLabel: '编辑 file_path（可置空）',
-      stateLabel: '编辑 state（可置空）',
-      sortLabel: '编辑 sort_index（可选）',
+      filePathLabel: 'Edit file_path (may clear)',
+      stateLabel: 'Edit state (may clear)',
+      sortLabel: 'Edit sort_index (optional)',
       actions: [
         AssetImagesWorkbenchMutationAction(
-          label: '保存当前图片',
+          label: 'Save current image',
           onPressed: callbacks.onPatchImage,
         ),
         AssetImagesWorkbenchMutationAction(
-          label: '删除当前图片',
+          label: 'Delete current image',
           onPressed: callbacks.onDeleteImage,
         ),
       ],
@@ -68,7 +68,7 @@ Widget _buildAssetField({
 }) {
   return DropdownButtonFormField<int>(
     initialValue: model.selectedAssetNumericId,
-    decoration: const InputDecoration(labelText: '目标资产'),
+    decoration: const InputDecoration(labelText: 'Target asset'),
     items: model.assets
         .map(
           (asset) => DropdownMenuItem<int>(
@@ -133,11 +133,13 @@ Widget _buildToolbar({
     children: [
       FilledButton(
         onPressed: callbacks.onReloadImages,
-        child: Text(model.loadingList ? '加载中…' : '加载图片列表'),
+        child: Text(model.loadingList ? 'Loading…' : 'Load image list'),
       ),
       TextButton(
         onPressed: callbacks.onLoadPreview,
-        child: Text(model.loadingPreview ? '预览中…' : '预览当前图片'),
+        child: Text(
+          model.loadingPreview ? 'Loading preview…' : 'Preview image',
+        ),
       ),
     ],
   );
@@ -149,7 +151,7 @@ Widget _buildImageField({
 }) {
   return DropdownButtonFormField<String>(
     initialValue: model.selectedImageId,
-    decoration: const InputDecoration(labelText: '图片列表'),
+    decoration: const InputDecoration(labelText: 'Images'),
     items: model.imageItems
         .map(
           (img) => DropdownMenuItem<String>(
@@ -241,4 +243,3 @@ class AssetImagesWorkbenchMutationAction {
   final String label;
   final VoidCallback? onPressed;
 }
-
