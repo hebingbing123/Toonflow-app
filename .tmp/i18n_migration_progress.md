@@ -137,10 +137,8 @@
    - ✅ Already passes `l10n`
 
 8. **Other project_editor files**
-   - Need to scan for additional hardcoded strings in:
-     - novels/workbench_launcher.dart
-     - novels/events/workbench_view.dart
-     - Any other dialog or workbench files
+   - **Novel events workbench** (`novels/events/workbench_launcher.dart`, `novels/events/workbench_view.dart`, `editor_dialog_content_novels.dart`): ✅ strings moved to ARB (`projectEditorNovelsEvents*`, `projectEditorNovelsAndEventsTitle`)
+   - Still to scan: `novels/workbench_launcher.dart` (main novel workbench), `novels/actions.dart`, members panel, short_drama_targets, editor_dialog_basics, asset generation status chips, etc.
 
 ### Priority 2: Other Areas
 

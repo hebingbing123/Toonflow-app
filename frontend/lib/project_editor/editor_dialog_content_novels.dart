@@ -8,11 +8,12 @@ extension _HomePageProjectEditorDialogContentNovels on _HomePageState {
     required ProjectRow p,
     required _ProjectEditorDialogState dialogState,
   }) {
+    final l10n = AppLocalizations.of(ctx)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text('小说与事件', style: Theme.of(ctx).textTheme.titleSmall),
+        Text(l10n.projectEditorNovelsAndEventsTitle, style: Theme.of(ctx).textTheme.titleSmall),
         const SizedBox(height: 8),
         buildProjectNovelsWorkbenchSection(
           ctx: ctx,
@@ -59,8 +60,8 @@ extension _HomePageProjectEditorDialogContentNovels on _HomePageState {
               if (ids.isEmpty) {
                 if (ctx.mounted) {
                   ScaffoldMessenger.of(ctx).showSnackBar(
-                    const SnackBar(
-                      content: Text('没有可生成事件的 admitted 章节，请先准入章节。'),
+                    SnackBar(
+                      content: Text(l10n.projectEditorNovelsEventsGenerateEmptyAdmitted),
                     ),
                   );
                 }
@@ -76,7 +77,12 @@ extension _HomePageProjectEditorDialogContentNovels on _HomePageState {
               if (!ctx.mounted) return;
               ScaffoldMessenger.of(ctx).showSnackBar(
                 SnackBar(
-                  content: Text('已为章节 ${ids.join(', ')} 触发事件生成：$message'),
+                  content: Text(
+                    l10n.projectEditorNovelsEventsGenerateTriggered(
+                      ids.join(', '),
+                      message,
+                    ),
+                  ),
                 ),
               );
             } on RustApiException catch (e) {

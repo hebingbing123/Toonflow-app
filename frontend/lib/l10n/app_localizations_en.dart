@@ -6099,6 +6099,171 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String projectEditorNovelsEventsDefaultCreateName(int stamp) {
+    return 'Event_$stamp';
+  }
+
+  @override
+  String get projectEditorNovelsEventsDefaultCreateDetail =>
+      'Describe the event here.';
+
+  @override
+  String get projectEditorNovelsEventsInfoNoEvents =>
+      'This project has no events yet.';
+
+  @override
+  String projectEditorNovelsEventsInfoLoaded(int count) {
+    return 'Loaded $count events.';
+  }
+
+  @override
+  String get projectEditorNovelsEventsInfoListEmpty => 'Event list is empty.';
+
+  @override
+  String projectEditorNovelsEventsInfoRefreshed(int count) {
+    return 'Refreshed: $count events in total.';
+  }
+
+  @override
+  String projectEditorNovelsEventsInfoSearchDual(int restTotal, int wbTotal) {
+    return 'REST matched $restTotal; workbench matched $wbTotal.';
+  }
+
+  @override
+  String get projectEditorNovelsEventsInfoCreated => 'Event created.';
+
+  @override
+  String projectEditorNovelsEventsInfoCreatedWithId(int id) {
+    return 'Event created; numeric id = $id.';
+  }
+
+  @override
+  String projectEditorNovelsEventsInfoUpdated(int eventId, String message) {
+    return 'Updated event $eventId: $message';
+  }
+
+  @override
+  String projectEditorNovelsEventsInfoDeleted(int eventId, String message) {
+    return 'Deleted event $eventId: $message';
+  }
+
+  @override
+  String projectEditorNovelsEventsInfoBatchDeleted(int count, String message) {
+    return 'Batch deleted $count events: $message';
+  }
+
+  @override
+  String get projectEditorNovelsEventsWorkbenchTitle => 'Events workbench';
+
+  @override
+  String get projectEditorNovelsEventsPreviewSectionTitle =>
+      'Current event preview';
+
+  @override
+  String projectEditorNovelsEventsPreviewRow(
+    int numericId,
+    String name,
+    String indexesLine,
+  ) {
+    return '$numericId · $name · chapter indexes $indexesLine';
+  }
+
+  @override
+  String get projectEditorNovelsEventsSearchLabel => 'Search event keyword';
+
+  @override
+  String get projectEditorNovelsEventsSearchHelper =>
+      'Calls both REST and workbench get-events search';
+
+  @override
+  String get projectEditorNovelsEventsSearchButton => 'Search events';
+
+  @override
+  String get projectEditorNovelsEventsRefreshListButton => 'Refresh list';
+
+  @override
+  String get projectEditorNovelsEventsNewEventHeading => 'New event';
+
+  @override
+  String get projectEditorNovelsEventsFieldEventName => 'Event name';
+
+  @override
+  String get projectEditorNovelsEventsFieldEventDescription =>
+      'Event description';
+
+  @override
+  String get projectEditorNovelsEventsFieldChapterIdsLabel =>
+      'Linked chapter IDs';
+
+  @override
+  String get projectEditorNovelsEventsFieldChapterIdsHelper =>
+      'Comma-separated chapter numeric IDs';
+
+  @override
+  String get projectEditorNovelsEventsCreateButton => 'Create event';
+
+  @override
+  String get projectEditorNovelsEventsUpdateHeading => 'Update event';
+
+  @override
+  String get projectEditorNovelsEventsFieldNumericId => 'Event numeric ID';
+
+  @override
+  String get projectEditorNovelsEventsFieldUpdatedName => 'Updated event name';
+
+  @override
+  String get projectEditorNovelsEventsFieldUpdatedDescription =>
+      'Updated event description';
+
+  @override
+  String get projectEditorNovelsEventsFieldUpdatedChapterIds =>
+      'Updated chapter IDs';
+
+  @override
+  String get projectEditorNovelsEventsFieldUpdatedChapterIdsHelper =>
+      'Chapter numeric IDs; mapped to chapterIds internally';
+
+  @override
+  String get projectEditorNovelsEventsSaveButton => 'Save event';
+
+  @override
+  String get projectEditorNovelsEventsDeleteHeading => 'Delete / batch delete';
+
+  @override
+  String get projectEditorNovelsEventsDeleteCurrentButton =>
+      'Delete current event';
+
+  @override
+  String get projectEditorNovelsEventsBatchDeleteIdsLabel =>
+      'Batch delete event IDs';
+
+  @override
+  String get projectEditorNovelsEventsBatchDeleteIdsHelper =>
+      'Comma-separated IDs (POST …/novel-events/batch-delete).';
+
+  @override
+  String get projectEditorNovelsEventsBatchDeleteButton =>
+      'Batch delete events';
+
+  @override
+  String get projectEditorNovelsEventsCloseButton => 'Close';
+
+  @override
+  String get projectEditorNovelsAndEventsTitle => 'Novels & events';
+
+  @override
+  String get projectEditorNovelsEventsGenerateEmptyAdmitted =>
+      'No admitted chapters eligible for event generation; admit chapters first.';
+
+  @override
+  String projectEditorNovelsEventsGenerateTriggered(
+    String ids,
+    String message,
+  ) {
+    return 'Triggered event generation for chapters $ids: $message';
+  }
+
+  @override
   String get projectEditorAssetSummaryProductionEmpty =>
       'Production asset data is empty';
 

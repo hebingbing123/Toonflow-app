@@ -4442,6 +4442,138 @@
       }
     }
   },
+  "projectEditorNovelsEventsDefaultCreateName": "事件_{stamp}",
+  "@projectEditorNovelsEventsDefaultCreateName": {
+    "placeholders": {
+      "stamp": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsEventsDefaultCreateDetail": "在这里描述事件。",
+  "projectEditorNovelsEventsInfoNoEvents": "当前项目还没有事件。",
+  "projectEditorNovelsEventsInfoLoaded": "已载入 {count} 条事件。",
+  "@projectEditorNovelsEventsInfoLoaded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsEventsInfoListEmpty": "事件列表为空。",
+  "projectEditorNovelsEventsInfoRefreshed": "已刷新，共 {count} 条事件。",
+  "@projectEditorNovelsEventsInfoRefreshed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsEventsInfoSearchDual": "REST 命中 {restTotal} 条，workbench 命中 {wbTotal} 条。",
+  "@projectEditorNovelsEventsInfoSearchDual": {
+    "placeholders": {
+      "restTotal": {
+        "type": "int"
+      },
+      "wbTotal": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsEventsInfoCreated": "已新增事件。",
+  "projectEditorNovelsEventsInfoCreatedWithId": "已新增事件；编号为 {id}。",
+  "@projectEditorNovelsEventsInfoCreatedWithId": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsEventsInfoUpdated": "已更新事件 {eventId}：{message}",
+  "@projectEditorNovelsEventsInfoUpdated": {
+    "placeholders": {
+      "eventId": {
+        "type": "int"
+      },
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsEventsInfoDeleted": "已删除事件 {eventId}：{message}",
+  "@projectEditorNovelsEventsInfoDeleted": {
+    "placeholders": {
+      "eventId": {
+        "type": "int"
+      },
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsEventsInfoBatchDeleted": "已批量删除 {count} 条事件：{message}",
+  "@projectEditorNovelsEventsInfoBatchDeleted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsEventsWorkbenchTitle": "事件工作台",
+  "projectEditorNovelsEventsPreviewSectionTitle": "当前事件预览",
+  "projectEditorNovelsEventsPreviewRow": "{numericId} · {name} · 章节索引 {indexesLine}",
+  "@projectEditorNovelsEventsPreviewRow": {
+    "placeholders": {
+      "numericId": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      },
+      "indexesLine": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsEventsSearchLabel": "搜索事件关键字",
+  "projectEditorNovelsEventsSearchHelper": "同时调用 REST 与 workbench get-events 搜索",
+  "projectEditorNovelsEventsSearchButton": "搜索事件",
+  "projectEditorNovelsEventsRefreshListButton": "刷新列表",
+  "projectEditorNovelsEventsNewEventHeading": "新增事件",
+  "projectEditorNovelsEventsFieldEventName": "事件名称",
+  "projectEditorNovelsEventsFieldEventDescription": "事件描述",
+  "projectEditorNovelsEventsFieldChapterIdsLabel": "关联章节 IDs",
+  "projectEditorNovelsEventsFieldChapterIdsHelper": "用逗号分隔，按章节 numeric ID 填写",
+  "projectEditorNovelsEventsCreateButton": "新增事件",
+  "projectEditorNovelsEventsUpdateHeading": "更新事件",
+  "projectEditorNovelsEventsFieldNumericId": "事件 numeric ID",
+  "projectEditorNovelsEventsFieldUpdatedName": "更新后的事件名称",
+  "projectEditorNovelsEventsFieldUpdatedDescription": "更新后的事件描述",
+  "projectEditorNovelsEventsFieldUpdatedChapterIds": "更新后的章节 IDs",
+  "projectEditorNovelsEventsFieldUpdatedChapterIdsHelper": "按章节 numeric ID 填写；内部会映射为 chapterIds",
+  "projectEditorNovelsEventsSaveButton": "保存事件",
+  "projectEditorNovelsEventsDeleteHeading": "删除 / 批量删除",
+  "projectEditorNovelsEventsDeleteCurrentButton": "删除当前事件",
+  "projectEditorNovelsEventsBatchDeleteIdsLabel": "批量删除事件 IDs",
+  "projectEditorNovelsEventsBatchDeleteIdsHelper": "POST …/novel-events/batch-delete；用逗号分隔",
+  "projectEditorNovelsEventsBatchDeleteButton": "批量删除事件",
+  "projectEditorNovelsEventsCloseButton": "关闭",
+  "projectEditorNovelsAndEventsTitle": "小说与事件",
+  "projectEditorNovelsEventsGenerateEmptyAdmitted": "没有可生成事件的 admitted 章节，请先准入章节。",
+  "projectEditorNovelsEventsGenerateTriggered": "已为章节 {ids} 触发事件生成：{message}",
+  "@projectEditorNovelsEventsGenerateTriggered": {
+    "placeholders": {
+      "ids": {
+        "type": "String"
+      },
+      "message": {
+        "type": "String"
+      }
+    }
+  },
   "projectEditorAssetSummaryProductionEmpty": "production 资产数据为空",
   "projectEditorAssetSummaryProductionLine": "production 资产 {total} 条 · {typesLine} · 示例：{sampleLine}",
   "@projectEditorAssetSummaryProductionLine": {

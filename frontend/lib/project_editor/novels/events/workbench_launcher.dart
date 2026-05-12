@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../../../rust_api.dart';
 import 'workbench_view.dart';
 
@@ -19,14 +20,19 @@ Future<void> openNovelEventsWorkbenchDialog({
   })
   chapterIndexesToNumericIds,
 }) async {
+  final l10n = AppLocalizations.of(ctx)!;
   final chapters = novelsRef[0]?.items ?? const <NovelRow>[];
   final events = novelEventsRef[0]?.items ?? const <NovelEventRow>[];
   final firstEvent = events.isNotEmpty ? events.first : null;
   final searchCtrl = TextEditingController();
   final createNameCtrl = TextEditingController(
-    text: '事件_${DateTime.now().millisecondsSinceEpoch}',
+    text: l10n.projectEditorNovelsEventsDefaultCreateName(
+      DateTime.now().millisecondsSinceEpoch,
+    ),
   );
-  final createDetailCtrl = TextEditingController(text: '在这里描述事件。');
+  final createDetailCtrl = TextEditingController(
+    text: l10n.projectEditorNovelsEventsDefaultCreateDetail,
+  );
   final createChapterIdsCtrl = TextEditingController(
     text: chapters.take(2).map((e) => e.numericId).join(','),
   );
@@ -46,7 +52,9 @@ Future<void> openNovelEventsWorkbenchDialog({
   );
 
   List<NovelEventRow> previewRows = List<NovelEventRow>.from(events.take(6));
-  String infoLine = events.isEmpty ? '当前项目还没有事件。' : '已载入 ${events.length} 条事件。';
+  String infoLine = events.isEmpty
+      ? l10n.projectEditorNovelsEventsInfoNoEvents
+      : l10n.projectEditorNovelsEventsInfoLoaded(events.length);
   bool localBusy = false;
 
   Future<void> refreshWorkbench(StateSetter setLocalState) async {
@@ -65,8 +73,8 @@ Future<void> openNovelEventsWorkbenchDialog({
     setLocalState(() {
       previewRows = List<NovelEventRow>.from(refreshed.take(6));
       infoLine = refreshed.isEmpty
-          ? '事件列表为空。'
-          : '已刷新，共 ${refreshed.length} 条事件。';
+          ? l10n.projectEditorNovelsEventsInfoListEmpty
+          : l10n.projectEditorNovelsEventsInfoRefreshed(refreshed.length);
       if (selectedEventIdCtrl.text.trim().isEmpty && refreshed.isNotEmpty) {
         final row = refreshed.first;
         selectedEventIdCtrl.text = row.numericId.toString();
@@ -149,8 +157,10 @@ Future<void> openNovelEventsWorkbenchDialog({
                         );
                         setLocalState(() {
                           previewRows = List<NovelEventRow>.from(rows.items);
-                          infoLine =
-                              'REST 命中 ${rows.total} 条，workbench 命中 ${workbenchPage.total} 条。';
+                          infoLine = l10n.projectEditorNovelsEventsInfoSearchDual(
+                            rows.total,
+                            workbenchPage.total,
+                          );
                         });
                       }),
                 onRefresh: localBusy
@@ -171,7 +181,11 @@ Future<void> openNovelEventsWorkbenchDialog({
                         await refreshWorkbench(setLocalState);
                         setLocalState(() {
                           final numericId = (created['id'] as num?)?.toInt();
-                          infoLine = numericId == null ? '已新增事件。' : '已新增事件 #$numericId。';
+                          infoLine = numericId == null
+                              ? l10n.projectEditorNovelsEventsInfoCreated
+                              : l10n.projectEditorNovelsEventsInfoCreatedWithId(
+                                  numericId,
+                                );
                           if (numericId != null) {
                             selectedEventIdCtrl.text = numericId.toString();
                           }
@@ -198,7 +212,10 @@ Future<void> openNovelEventsWorkbenchDialog({
                         );
                         await refreshWorkbench(setLocalState);
                         setLocalState(() {
-                          infoLine = '已更新事件 #$eventId：$message';
+                          infoLine = l10n.projectEditorNovelsEventsInfoUpdated(
+                            eventId,
+                            message,
+                          );
                         });
                       }),
                 onDeleteCurrent: localBusy
@@ -212,7 +229,10 @@ Future<void> openNovelEventsWorkbenchDialog({
                         );
                         await refreshWorkbench(setLocalState);
                         setLocalState(() {
-                          infoLine = '已删除事件 #$eventId：$message';
+                          infoLine = l10n.projectEditorNovelsEventsInfoDeleted(
+                            eventId,
+                            message,
+                          );
                         });
                       }),
                 onBatchDelete: localBusy
@@ -227,7 +247,10 @@ Future<void> openNovelEventsWorkbenchDialog({
                             );
                         await refreshWorkbench(setLocalState);
                         setLocalState(() {
-                          infoLine = '已批量删除 ${ids.length} 条事件：$message';
+                          infoLine = l10n.projectEditorNovelsEventsInfoBatchDeleted(
+                            ids.length,
+                            message,
+                          );
                         });
                       }),
                 onClose: localBusy ? null : () => Navigator.of(dialogCtx).pop(),

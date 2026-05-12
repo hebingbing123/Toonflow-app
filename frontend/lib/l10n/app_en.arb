@@ -4442,6 +4442,138 @@
       }
     }
   },
+  "projectEditorNovelsEventsDefaultCreateName": "Event_{stamp}",
+  "@projectEditorNovelsEventsDefaultCreateName": {
+    "placeholders": {
+      "stamp": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsEventsDefaultCreateDetail": "Describe the event here.",
+  "projectEditorNovelsEventsInfoNoEvents": "This project has no events yet.",
+  "projectEditorNovelsEventsInfoLoaded": "Loaded {count} events.",
+  "@projectEditorNovelsEventsInfoLoaded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsEventsInfoListEmpty": "Event list is empty.",
+  "projectEditorNovelsEventsInfoRefreshed": "Refreshed: {count} events in total.",
+  "@projectEditorNovelsEventsInfoRefreshed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsEventsInfoSearchDual": "REST matched {restTotal}; workbench matched {wbTotal}.",
+  "@projectEditorNovelsEventsInfoSearchDual": {
+    "placeholders": {
+      "restTotal": {
+        "type": "int"
+      },
+      "wbTotal": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsEventsInfoCreated": "Event created.",
+  "projectEditorNovelsEventsInfoCreatedWithId": "Event created; numeric id = {id}.",
+  "@projectEditorNovelsEventsInfoCreatedWithId": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsEventsInfoUpdated": "Updated event {eventId}: {message}",
+  "@projectEditorNovelsEventsInfoUpdated": {
+    "placeholders": {
+      "eventId": {
+        "type": "int"
+      },
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsEventsInfoDeleted": "Deleted event {eventId}: {message}",
+  "@projectEditorNovelsEventsInfoDeleted": {
+    "placeholders": {
+      "eventId": {
+        "type": "int"
+      },
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsEventsInfoBatchDeleted": "Batch deleted {count} events: {message}",
+  "@projectEditorNovelsEventsInfoBatchDeleted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsEventsWorkbenchTitle": "Events workbench",
+  "projectEditorNovelsEventsPreviewSectionTitle": "Current event preview",
+  "projectEditorNovelsEventsPreviewRow": "{numericId} · {name} · chapter indexes {indexesLine}",
+  "@projectEditorNovelsEventsPreviewRow": {
+    "placeholders": {
+      "numericId": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      },
+      "indexesLine": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsEventsSearchLabel": "Search event keyword",
+  "projectEditorNovelsEventsSearchHelper": "Calls both REST and workbench get-events search",
+  "projectEditorNovelsEventsSearchButton": "Search events",
+  "projectEditorNovelsEventsRefreshListButton": "Refresh list",
+  "projectEditorNovelsEventsNewEventHeading": "New event",
+  "projectEditorNovelsEventsFieldEventName": "Event name",
+  "projectEditorNovelsEventsFieldEventDescription": "Event description",
+  "projectEditorNovelsEventsFieldChapterIdsLabel": "Linked chapter IDs",
+  "projectEditorNovelsEventsFieldChapterIdsHelper": "Comma-separated chapter numeric IDs",
+  "projectEditorNovelsEventsCreateButton": "Create event",
+  "projectEditorNovelsEventsUpdateHeading": "Update event",
+  "projectEditorNovelsEventsFieldNumericId": "Event numeric ID",
+  "projectEditorNovelsEventsFieldUpdatedName": "Updated event name",
+  "projectEditorNovelsEventsFieldUpdatedDescription": "Updated event description",
+  "projectEditorNovelsEventsFieldUpdatedChapterIds": "Updated chapter IDs",
+  "projectEditorNovelsEventsFieldUpdatedChapterIdsHelper": "Chapter numeric IDs; mapped to chapterIds internally",
+  "projectEditorNovelsEventsSaveButton": "Save event",
+  "projectEditorNovelsEventsDeleteHeading": "Delete / batch delete",
+  "projectEditorNovelsEventsDeleteCurrentButton": "Delete current event",
+  "projectEditorNovelsEventsBatchDeleteIdsLabel": "Batch delete event IDs",
+  "projectEditorNovelsEventsBatchDeleteIdsHelper": "Comma-separated IDs (POST …/novel-events/batch-delete).",
+  "projectEditorNovelsEventsBatchDeleteButton": "Batch delete events",
+  "projectEditorNovelsEventsCloseButton": "Close",
+  "projectEditorNovelsAndEventsTitle": "Novels & events",
+  "projectEditorNovelsEventsGenerateEmptyAdmitted": "No admitted chapters eligible for event generation; admit chapters first.",
+  "projectEditorNovelsEventsGenerateTriggered": "Triggered event generation for chapters {ids}: {message}",
+  "@projectEditorNovelsEventsGenerateTriggered": {
+    "placeholders": {
+      "ids": {
+        "type": "String"
+      },
+      "message": {
+        "type": "String"
+      }
+    }
+  },
   "projectEditorAssetSummaryProductionEmpty": "Production asset data is empty",
   "projectEditorAssetSummaryProductionLine": "Production assets {total} items · {typesLine} · Sample: {sampleLine}",
   "@projectEditorAssetSummaryProductionLine": {

@@ -5856,6 +5856,161 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String projectEditorNovelsEventsDefaultCreateName(int stamp) {
+    return '事件_$stamp';
+  }
+
+  @override
+  String get projectEditorNovelsEventsDefaultCreateDetail => '在这里描述事件。';
+
+  @override
+  String get projectEditorNovelsEventsInfoNoEvents => '当前项目还没有事件。';
+
+  @override
+  String projectEditorNovelsEventsInfoLoaded(int count) {
+    return '已载入 $count 条事件。';
+  }
+
+  @override
+  String get projectEditorNovelsEventsInfoListEmpty => '事件列表为空。';
+
+  @override
+  String projectEditorNovelsEventsInfoRefreshed(int count) {
+    return '已刷新，共 $count 条事件。';
+  }
+
+  @override
+  String projectEditorNovelsEventsInfoSearchDual(int restTotal, int wbTotal) {
+    return 'REST 命中 $restTotal 条，workbench 命中 $wbTotal 条。';
+  }
+
+  @override
+  String get projectEditorNovelsEventsInfoCreated => '已新增事件。';
+
+  @override
+  String projectEditorNovelsEventsInfoCreatedWithId(int id) {
+    return '已新增事件；编号为 $id。';
+  }
+
+  @override
+  String projectEditorNovelsEventsInfoUpdated(int eventId, String message) {
+    return '已更新事件 $eventId：$message';
+  }
+
+  @override
+  String projectEditorNovelsEventsInfoDeleted(int eventId, String message) {
+    return '已删除事件 $eventId：$message';
+  }
+
+  @override
+  String projectEditorNovelsEventsInfoBatchDeleted(int count, String message) {
+    return '已批量删除 $count 条事件：$message';
+  }
+
+  @override
+  String get projectEditorNovelsEventsWorkbenchTitle => '事件工作台';
+
+  @override
+  String get projectEditorNovelsEventsPreviewSectionTitle => '当前事件预览';
+
+  @override
+  String projectEditorNovelsEventsPreviewRow(
+    int numericId,
+    String name,
+    String indexesLine,
+  ) {
+    return '$numericId · $name · 章节索引 $indexesLine';
+  }
+
+  @override
+  String get projectEditorNovelsEventsSearchLabel => '搜索事件关键字';
+
+  @override
+  String get projectEditorNovelsEventsSearchHelper =>
+      '同时调用 REST 与 workbench get-events 搜索';
+
+  @override
+  String get projectEditorNovelsEventsSearchButton => '搜索事件';
+
+  @override
+  String get projectEditorNovelsEventsRefreshListButton => '刷新列表';
+
+  @override
+  String get projectEditorNovelsEventsNewEventHeading => '新增事件';
+
+  @override
+  String get projectEditorNovelsEventsFieldEventName => '事件名称';
+
+  @override
+  String get projectEditorNovelsEventsFieldEventDescription => '事件描述';
+
+  @override
+  String get projectEditorNovelsEventsFieldChapterIdsLabel => '关联章节 IDs';
+
+  @override
+  String get projectEditorNovelsEventsFieldChapterIdsHelper =>
+      '用逗号分隔，按章节 numeric ID 填写';
+
+  @override
+  String get projectEditorNovelsEventsCreateButton => '新增事件';
+
+  @override
+  String get projectEditorNovelsEventsUpdateHeading => '更新事件';
+
+  @override
+  String get projectEditorNovelsEventsFieldNumericId => '事件 numeric ID';
+
+  @override
+  String get projectEditorNovelsEventsFieldUpdatedName => '更新后的事件名称';
+
+  @override
+  String get projectEditorNovelsEventsFieldUpdatedDescription => '更新后的事件描述';
+
+  @override
+  String get projectEditorNovelsEventsFieldUpdatedChapterIds => '更新后的章节 IDs';
+
+  @override
+  String get projectEditorNovelsEventsFieldUpdatedChapterIdsHelper =>
+      '按章节 numeric ID 填写；内部会映射为 chapterIds';
+
+  @override
+  String get projectEditorNovelsEventsSaveButton => '保存事件';
+
+  @override
+  String get projectEditorNovelsEventsDeleteHeading => '删除 / 批量删除';
+
+  @override
+  String get projectEditorNovelsEventsDeleteCurrentButton => '删除当前事件';
+
+  @override
+  String get projectEditorNovelsEventsBatchDeleteIdsLabel => '批量删除事件 IDs';
+
+  @override
+  String get projectEditorNovelsEventsBatchDeleteIdsHelper =>
+      'POST …/novel-events/batch-delete；用逗号分隔';
+
+  @override
+  String get projectEditorNovelsEventsBatchDeleteButton => '批量删除事件';
+
+  @override
+  String get projectEditorNovelsEventsCloseButton => '关闭';
+
+  @override
+  String get projectEditorNovelsAndEventsTitle => '小说与事件';
+
+  @override
+  String get projectEditorNovelsEventsGenerateEmptyAdmitted =>
+      '没有可生成事件的 admitted 章节，请先准入章节。';
+
+  @override
+  String projectEditorNovelsEventsGenerateTriggered(
+    String ids,
+    String message,
+  ) {
+    return '已为章节 $ids 触发事件生成：$message';
+  }
+
+  @override
   String get projectEditorAssetSummaryProductionEmpty => 'production 资产数据为空';
 
   @override

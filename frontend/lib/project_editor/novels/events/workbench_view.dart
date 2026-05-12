@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../../../rust_api.dart';
 
 class NovelEventsWorkbenchDialogViewModel {
@@ -64,12 +65,13 @@ class NovelEventsWorkbenchDialogView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final viewportWidth = MediaQuery.sizeOf(context).width;
     final dialogWidth = viewportWidth.isFinite
         ? viewportWidth.clamp(320.0, 760.0)
         : 760.0;
     return AlertDialog(
-      title: const Text('事件工作台'),
+      title: Text(l10n.projectEditorNovelsEventsWorkbenchTitle),
       content: SizedBox(
         width: dialogWidth,
         child: SingleChildScrollView(
@@ -96,7 +98,7 @@ class NovelEventsWorkbenchDialogView extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '当前事件预览',
+                        l10n.projectEditorNovelsEventsPreviewSectionTitle,
                         style: Theme.of(context).textTheme.labelLarge,
                       ),
                       const SizedBox(height: 8),
@@ -104,7 +106,11 @@ class NovelEventsWorkbenchDialogView extends StatelessWidget {
                         (row) => Padding(
                           padding: const EdgeInsets.only(bottom: 6),
                           child: Text(
-                            '#${row.numericId} · ${row.name} · 章节索引 ${row.chapterIndexes.join('/')}',
+                            l10n.projectEditorNovelsEventsPreviewRow(
+                              row.numericId,
+                              row.name,
+                              row.chapterIndexes.join('/'),
+                            ),
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                         ),
@@ -115,9 +121,9 @@ class NovelEventsWorkbenchDialogView extends StatelessWidget {
               const SizedBox(height: 12),
               TextField(
                 controller: model.searchCtrl,
-                decoration: const InputDecoration(
-                  labelText: '搜索事件关键字',
-                  helperText: '同时调用 REST 与 workbench get-events 搜索',
+                decoration: InputDecoration(
+                  labelText: l10n.projectEditorNovelsEventsSearchLabel,
+                  helperText: l10n.projectEditorNovelsEventsSearchHelper,
                 ),
               ),
               const SizedBox(height: 8),
@@ -127,76 +133,86 @@ class NovelEventsWorkbenchDialogView extends StatelessWidget {
                 children: [
                   FilledButton.tonal(
                     onPressed: callbacks.onSearch,
-                    child: const Text('搜索事件'),
+                    child: Text(l10n.projectEditorNovelsEventsSearchButton),
                   ),
                   OutlinedButton(
                     onPressed: callbacks.onRefresh,
-                    child: const Text('刷新列表'),
+                    child: Text(l10n.projectEditorNovelsEventsRefreshListButton),
                   ),
                 ],
               ),
               const SizedBox(height: 16),
-              Text('新增事件', style: Theme.of(context).textTheme.labelLarge),
+              Text(l10n.projectEditorNovelsEventsNewEventHeading, style: Theme.of(context).textTheme.labelLarge),
               const SizedBox(height: 8),
               TextField(
                 controller: model.createNameCtrl,
-                decoration: const InputDecoration(labelText: '事件名称'),
+                decoration: InputDecoration(
+                  labelText: l10n.projectEditorNovelsEventsFieldEventName,
+                ),
               ),
               const SizedBox(height: 8),
               TextField(
                 controller: model.createDetailCtrl,
                 minLines: 3,
                 maxLines: 5,
-                decoration: const InputDecoration(labelText: '事件描述'),
+                decoration: InputDecoration(
+                  labelText: l10n.projectEditorNovelsEventsFieldEventDescription,
+                ),
               ),
               const SizedBox(height: 8),
               TextField(
                 controller: model.createChapterIdsCtrl,
-                decoration: const InputDecoration(
-                  labelText: '关联章节 IDs',
-                  helperText: '用逗号分隔，按章节 numeric ID 填写',
+                decoration: InputDecoration(
+                  labelText: l10n.projectEditorNovelsEventsFieldChapterIdsLabel,
+                  helperText: l10n.projectEditorNovelsEventsFieldChapterIdsHelper,
                 ),
               ),
               const SizedBox(height: 8),
               FilledButton(
                 onPressed: callbacks.onCreate,
-                child: const Text('新增事件'),
+                child: Text(l10n.projectEditorNovelsEventsCreateButton),
               ),
               const SizedBox(height: 16),
-              Text('更新事件', style: Theme.of(context).textTheme.labelLarge),
+              Text(l10n.projectEditorNovelsEventsUpdateHeading, style: Theme.of(context).textTheme.labelLarge),
               const SizedBox(height: 8),
               TextField(
                 controller: model.selectedEventIdCtrl,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: '事件 numeric ID'),
+                decoration: InputDecoration(
+                  labelText: l10n.projectEditorNovelsEventsFieldNumericId,
+                ),
               ),
               const SizedBox(height: 8),
               TextField(
                 controller: model.patchNameCtrl,
-                decoration: const InputDecoration(labelText: '更新后的事件名称'),
+                decoration: InputDecoration(
+                  labelText: l10n.projectEditorNovelsEventsFieldUpdatedName,
+                ),
               ),
               const SizedBox(height: 8),
               TextField(
                 controller: model.patchDetailCtrl,
                 minLines: 3,
                 maxLines: 5,
-                decoration: const InputDecoration(labelText: '更新后的事件描述'),
+                decoration: InputDecoration(
+                  labelText: l10n.projectEditorNovelsEventsFieldUpdatedDescription,
+                ),
               ),
               const SizedBox(height: 8),
               TextField(
                 controller: model.patchChapterIdsCtrl,
-                decoration: const InputDecoration(
-                  labelText: '更新后的章节 IDs',
-                  helperText: '按章节 numeric ID 填写；内部会映射为 chapterIds',
+                decoration: InputDecoration(
+                  labelText: l10n.projectEditorNovelsEventsFieldUpdatedChapterIds,
+                  helperText: l10n.projectEditorNovelsEventsFieldUpdatedChapterIdsHelper,
                 ),
               ),
               const SizedBox(height: 8),
               FilledButton.tonal(
                 onPressed: callbacks.onSave,
-                child: const Text('保存事件'),
+                child: Text(l10n.projectEditorNovelsEventsSaveButton),
               ),
               const SizedBox(height: 16),
-              Text('删除 / 批量删除', style: Theme.of(context).textTheme.labelLarge),
+              Text(l10n.projectEditorNovelsEventsDeleteHeading, style: Theme.of(context).textTheme.labelLarge),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
@@ -204,30 +220,32 @@ class NovelEventsWorkbenchDialogView extends StatelessWidget {
                 children: [
                   OutlinedButton(
                     onPressed: callbacks.onDeleteCurrent,
-                    child: const Text('删除当前事件'),
+                    child: Text(l10n.projectEditorNovelsEventsDeleteCurrentButton),
                   ),
                 ],
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: model.batchDeleteIdsCtrl,
-                decoration: const InputDecoration(
-                  labelText: '批量删除事件 IDs',
-                  helperText:
-                      'POST …/projects/{uuid}/novel-events/batch-delete；用逗号分隔',
+                decoration: InputDecoration(
+                  labelText: l10n.projectEditorNovelsEventsBatchDeleteIdsLabel,
+                  helperText: l10n.projectEditorNovelsEventsBatchDeleteIdsHelper,
                 ),
               ),
               const SizedBox(height: 8),
               FilledButton.tonal(
                 onPressed: callbacks.onBatchDelete,
-                child: const Text('批量删除事件'),
+                child: Text(l10n.projectEditorNovelsEventsBatchDeleteButton),
               ),
             ],
           ),
         ),
       ),
       actions: [
-        TextButton(onPressed: callbacks.onClose, child: const Text('关闭')),
+        TextButton(
+          onPressed: callbacks.onClose,
+          child: Text(l10n.projectEditorNovelsEventsCloseButton),
+        ),
       ],
     );
   }

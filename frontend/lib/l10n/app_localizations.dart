@@ -9973,6 +9973,256 @@ abstract class AppLocalizations {
     String message,
   );
 
+  /// No description provided for @projectEditorNovelsEventsDefaultCreateName.
+  ///
+  /// In en, this message translates to:
+  /// **'Event_{stamp}'**
+  String projectEditorNovelsEventsDefaultCreateName(int stamp);
+
+  /// No description provided for @projectEditorNovelsEventsDefaultCreateDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe the event here.'**
+  String get projectEditorNovelsEventsDefaultCreateDetail;
+
+  /// No description provided for @projectEditorNovelsEventsInfoNoEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'This project has no events yet.'**
+  String get projectEditorNovelsEventsInfoNoEvents;
+
+  /// No description provided for @projectEditorNovelsEventsInfoLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Loaded {count} events.'**
+  String projectEditorNovelsEventsInfoLoaded(int count);
+
+  /// No description provided for @projectEditorNovelsEventsInfoListEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Event list is empty.'**
+  String get projectEditorNovelsEventsInfoListEmpty;
+
+  /// No description provided for @projectEditorNovelsEventsInfoRefreshed.
+  ///
+  /// In en, this message translates to:
+  /// **'Refreshed: {count} events in total.'**
+  String projectEditorNovelsEventsInfoRefreshed(int count);
+
+  /// No description provided for @projectEditorNovelsEventsInfoSearchDual.
+  ///
+  /// In en, this message translates to:
+  /// **'REST matched {restTotal}; workbench matched {wbTotal}.'**
+  String projectEditorNovelsEventsInfoSearchDual(int restTotal, int wbTotal);
+
+  /// No description provided for @projectEditorNovelsEventsInfoCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Event created.'**
+  String get projectEditorNovelsEventsInfoCreated;
+
+  /// No description provided for @projectEditorNovelsEventsInfoCreatedWithId.
+  ///
+  /// In en, this message translates to:
+  /// **'Event created; numeric id = {id}.'**
+  String projectEditorNovelsEventsInfoCreatedWithId(int id);
+
+  /// No description provided for @projectEditorNovelsEventsInfoUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated event {eventId}: {message}'**
+  String projectEditorNovelsEventsInfoUpdated(int eventId, String message);
+
+  /// No description provided for @projectEditorNovelsEventsInfoDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted event {eventId}: {message}'**
+  String projectEditorNovelsEventsInfoDeleted(int eventId, String message);
+
+  /// No description provided for @projectEditorNovelsEventsInfoBatchDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch deleted {count} events: {message}'**
+  String projectEditorNovelsEventsInfoBatchDeleted(int count, String message);
+
+  /// No description provided for @projectEditorNovelsEventsWorkbenchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Events workbench'**
+  String get projectEditorNovelsEventsWorkbenchTitle;
+
+  /// No description provided for @projectEditorNovelsEventsPreviewSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Current event preview'**
+  String get projectEditorNovelsEventsPreviewSectionTitle;
+
+  /// No description provided for @projectEditorNovelsEventsPreviewRow.
+  ///
+  /// In en, this message translates to:
+  /// **'{numericId} · {name} · chapter indexes {indexesLine}'**
+  String projectEditorNovelsEventsPreviewRow(
+    int numericId,
+    String name,
+    String indexesLine,
+  );
+
+  /// No description provided for @projectEditorNovelsEventsSearchLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Search event keyword'**
+  String get projectEditorNovelsEventsSearchLabel;
+
+  /// No description provided for @projectEditorNovelsEventsSearchHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Calls both REST and workbench get-events search'**
+  String get projectEditorNovelsEventsSearchHelper;
+
+  /// No description provided for @projectEditorNovelsEventsSearchButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Search events'**
+  String get projectEditorNovelsEventsSearchButton;
+
+  /// No description provided for @projectEditorNovelsEventsRefreshListButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh list'**
+  String get projectEditorNovelsEventsRefreshListButton;
+
+  /// No description provided for @projectEditorNovelsEventsNewEventHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'New event'**
+  String get projectEditorNovelsEventsNewEventHeading;
+
+  /// No description provided for @projectEditorNovelsEventsFieldEventName.
+  ///
+  /// In en, this message translates to:
+  /// **'Event name'**
+  String get projectEditorNovelsEventsFieldEventName;
+
+  /// No description provided for @projectEditorNovelsEventsFieldEventDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Event description'**
+  String get projectEditorNovelsEventsFieldEventDescription;
+
+  /// No description provided for @projectEditorNovelsEventsFieldChapterIdsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked chapter IDs'**
+  String get projectEditorNovelsEventsFieldChapterIdsLabel;
+
+  /// No description provided for @projectEditorNovelsEventsFieldChapterIdsHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Comma-separated chapter numeric IDs'**
+  String get projectEditorNovelsEventsFieldChapterIdsHelper;
+
+  /// No description provided for @projectEditorNovelsEventsCreateButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Create event'**
+  String get projectEditorNovelsEventsCreateButton;
+
+  /// No description provided for @projectEditorNovelsEventsUpdateHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Update event'**
+  String get projectEditorNovelsEventsUpdateHeading;
+
+  /// No description provided for @projectEditorNovelsEventsFieldNumericId.
+  ///
+  /// In en, this message translates to:
+  /// **'Event numeric ID'**
+  String get projectEditorNovelsEventsFieldNumericId;
+
+  /// No description provided for @projectEditorNovelsEventsFieldUpdatedName.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated event name'**
+  String get projectEditorNovelsEventsFieldUpdatedName;
+
+  /// No description provided for @projectEditorNovelsEventsFieldUpdatedDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated event description'**
+  String get projectEditorNovelsEventsFieldUpdatedDescription;
+
+  /// No description provided for @projectEditorNovelsEventsFieldUpdatedChapterIds.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated chapter IDs'**
+  String get projectEditorNovelsEventsFieldUpdatedChapterIds;
+
+  /// No description provided for @projectEditorNovelsEventsFieldUpdatedChapterIdsHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter numeric IDs; mapped to chapterIds internally'**
+  String get projectEditorNovelsEventsFieldUpdatedChapterIdsHelper;
+
+  /// No description provided for @projectEditorNovelsEventsSaveButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Save event'**
+  String get projectEditorNovelsEventsSaveButton;
+
+  /// No description provided for @projectEditorNovelsEventsDeleteHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete / batch delete'**
+  String get projectEditorNovelsEventsDeleteHeading;
+
+  /// No description provided for @projectEditorNovelsEventsDeleteCurrentButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete current event'**
+  String get projectEditorNovelsEventsDeleteCurrentButton;
+
+  /// No description provided for @projectEditorNovelsEventsBatchDeleteIdsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch delete event IDs'**
+  String get projectEditorNovelsEventsBatchDeleteIdsLabel;
+
+  /// No description provided for @projectEditorNovelsEventsBatchDeleteIdsHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Comma-separated IDs (POST …/novel-events/batch-delete).'**
+  String get projectEditorNovelsEventsBatchDeleteIdsHelper;
+
+  /// No description provided for @projectEditorNovelsEventsBatchDeleteButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch delete events'**
+  String get projectEditorNovelsEventsBatchDeleteButton;
+
+  /// No description provided for @projectEditorNovelsEventsCloseButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get projectEditorNovelsEventsCloseButton;
+
+  /// No description provided for @projectEditorNovelsAndEventsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Novels & events'**
+  String get projectEditorNovelsAndEventsTitle;
+
+  /// No description provided for @projectEditorNovelsEventsGenerateEmptyAdmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'No admitted chapters eligible for event generation; admit chapters first.'**
+  String get projectEditorNovelsEventsGenerateEmptyAdmitted;
+
+  /// No description provided for @projectEditorNovelsEventsGenerateTriggered.
+  ///
+  /// In en, this message translates to:
+  /// **'Triggered event generation for chapters {ids}: {message}'**
+  String projectEditorNovelsEventsGenerateTriggered(String ids, String message);
+
   /// No description provided for @projectEditorAssetSummaryProductionEmpty.
   ///
   /// In en, this message translates to:
