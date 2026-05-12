@@ -63,6 +63,7 @@ import 'shell/job_queue_stats_card.dart';
 import 'shell/help_hub_support.dart';
 import 'shell/navigation_controller.dart';
 import 'shell/platform_short_drama_pipeline_strip.dart';
+import 'shell/product_scope_label.dart';
 import 'shell/sections.dart';
 import 'shell/workspace_context_view.dart';
 import 'shell/outbound_webhook_event_chips.dart';

@@ -198,16 +198,15 @@ extension _HomePageBuildSections on _HomePageState {
   Widget _buildWorkspaceContextSection(BuildContext context) {
     final workspace = _sessionMe?.currentWorkspace;
     final projects = _projectsController.projects;
-    final currentProject = _productScopedProjectNumericId == null
+    final projectUuid =
+        _workspaceInputController.projectUuidController.text.trim().isEmpty
         ? null
-        : projects
-              ?.where((p) => p.numericId == _productScopedProjectNumericId)
-              .firstOrNull;
-    final projectLabel = currentProject != null
-        ? 'Project #${currentProject.numericId} · ${currentProject.name?.trim().isNotEmpty == true ? currentProject.name!.trim() : 'Untitled project'}'
-        : (_productScopedProjectNumericId != null
-              ? 'Project #$_productScopedProjectNumericId'
-              : null);
+        : _workspaceInputController.projectUuidController.text.trim();
+    final projectLabel = productWorkspaceProjectLabel(
+      projects: projects,
+      projectNumericId: _productScopedProjectNumericId,
+      projectUuid: projectUuid,
+    );
 
     // Task 6.2: Extract workspace billing info from v2 response
     final meV2 = _sessionMeV2;
