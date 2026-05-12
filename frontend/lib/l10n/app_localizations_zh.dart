@@ -5206,4 +5206,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get contentComplianceErrAssigneeRequired => '改派 reviewer 不能为空';
+
+  @override
+  String get taskCenterFieldProjectUuidOptional => '项目 UUID（可选）';
+
+  @override
+  String qualityReviewsScopeSeedLine(String line) {
+    return '范围种子：$line';
+  }
 }

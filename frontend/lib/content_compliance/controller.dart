@@ -4,11 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import '../config.dart';
+import '../l10n/app_localizations.dart';
 import '../platform/rust_api_feedback.dart';
 import '../rust_api/core.dart';
+import '../rust_api/settings/notifications.dart';
 
 typedef ContentComplianceAccessTokenProvider = String? Function();
 typedef ContentComplianceErrorSink = void Function(String? error);
+typedef ContentComplianceL10nProvider = AppLocalizations? Function();
+typedef ContentComplianceAlertsSink =
+    void Function(List<ContentComplianceQueueAlertV1> alerts);
 
 class ContentComplianceReportItemV1 {
   const ContentComplianceReportItemV1({
@@ -24,6 +29,7 @@ class ContentComplianceReportItemV1 {
     required this.category,
     required this.severity,
     required this.status,
+    required this.escalationStage,
     required this.detail,
     required this.claimedByLabel,
     required this.claimedAt,
@@ -45,6 +51,7 @@ class ContentComplianceReportItemV1 {
   final String category;
   final String severity;
   final String status;
+  final String escalationStage;
   final String? detail;
   final String? claimedByLabel;
   final String? claimedAt;
@@ -67,6 +74,7 @@ class ContentComplianceReportItemV1 {
       category: json['category'] as String? ?? '',
       severity: json['severity'] as String? ?? '',
       status: json['status'] as String? ?? '',
+      escalationStage: json['escalationStage'] as String? ?? 'watch',
       detail: json['detail'] as String?,
       claimedByLabel: json['claimedByLabel'] as String?,
       claimedAt: json['claimedAt'] as String?,
@@ -183,6 +191,8 @@ class ContentComplianceOwnerSummaryV1 {
     required this.criticalOpenCount,
     required this.overdueCount,
     required this.oldestOpenAgeHours,
+    required this.overCapacity,
+    required this.overCapacityBy,
   });
 
   final String ownerLabel;
@@ -191,6 +201,8 @@ class ContentComplianceOwnerSummaryV1 {
   final int criticalOpenCount;
   final int overdueCount;
   final int oldestOpenAgeHours;
+  final bool overCapacity;
+  final int overCapacityBy;
 
   factory ContentComplianceOwnerSummaryV1.fromJson(Map<String, dynamic> json) {
     return ContentComplianceOwnerSummaryV1(
@@ -200,6 +212,52 @@ class ContentComplianceOwnerSummaryV1 {
       criticalOpenCount: (json['criticalOpenCount'] as num?)?.toInt() ?? 0,
       overdueCount: (json['overdueCount'] as num?)?.toInt() ?? 0,
       oldestOpenAgeHours: (json['oldestOpenAgeHours'] as num?)?.toInt() ?? 0,
+      overCapacity: json['overCapacity'] as bool? ?? false,
+      overCapacityBy: (json['overCapacityBy'] as num?)?.toInt() ?? 0,
+    );
+  }
+}
+
+class ContentComplianceQueueCapacitySummaryV1 {
+  const ContentComplianceQueueCapacitySummaryV1({
+    required this.reviewerCapacityLimit,
+    required this.overloadedReviewerCount,
+    required this.overloadedClaimedCount,
+  });
+
+  final int reviewerCapacityLimit;
+  final int overloadedReviewerCount;
+  final int overloadedClaimedCount;
+
+  factory ContentComplianceQueueCapacitySummaryV1.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return ContentComplianceQueueCapacitySummaryV1(
+      reviewerCapacityLimit:
+          (json['reviewerCapacityLimit'] as num?)?.toInt() ?? 12,
+      overloadedReviewerCount:
+          (json['overloadedReviewerCount'] as num?)?.toInt() ?? 0,
+      overloadedClaimedCount:
+          (json['overloadedClaimedCount'] as num?)?.toInt() ?? 0,
+    );
+  }
+}
+
+class ContentComplianceEscalationSummaryV1 {
+  const ContentComplianceEscalationSummaryV1({
+    required this.escalationStage,
+    required this.reportCount,
+  });
+
+  final String escalationStage;
+  final int reportCount;
+
+  factory ContentComplianceEscalationSummaryV1.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return ContentComplianceEscalationSummaryV1(
+      escalationStage: json['escalationStage'] as String? ?? 'watch',
+      reportCount: (json['reportCount'] as num?)?.toInt() ?? 0,
     );
   }
 }
@@ -208,15 +266,21 @@ class ContentComplianceQueueResponseV1 {
   const ContentComplianceQueueResponseV1({
     required this.summary,
     required this.sla,
+    required this.capacity,
+    required this.alerts,
     required this.workspaceSummaries,
     required this.ownerSummaries,
+    required this.escalationSummaries,
     required this.items,
   });
 
   final ContentComplianceQueueSummaryV1 summary;
   final ContentComplianceQueueSlaSummaryV1 sla;
+  final ContentComplianceQueueCapacitySummaryV1 capacity;
+  final List<ContentComplianceQueueAlertV1> alerts;
   final List<ContentComplianceWorkspaceSummaryV1> workspaceSummaries;
   final List<ContentComplianceOwnerSummaryV1> ownerSummaries;
+  final List<ContentComplianceEscalationSummaryV1> escalationSummaries;
   final List<ContentComplianceReportItemV1> items;
 
   factory ContentComplianceQueueResponseV1.fromJson(Map<String, dynamic> json) {
@@ -227,6 +291,16 @@ class ContentComplianceQueueResponseV1 {
       sla: ContentComplianceQueueSlaSummaryV1.fromJson(
         Map<String, dynamic>.from(json['sla'] as Map? ?? const {}),
       ),
+      capacity: ContentComplianceQueueCapacitySummaryV1.fromJson(
+        Map<String, dynamic>.from(json['capacity'] as Map? ?? const {}),
+      ),
+      alerts: (json['alerts'] as List? ?? const [])
+          .map(
+            (item) => ContentComplianceQueueAlertV1.fromJson(
+              Map<String, dynamic>.from(item as Map),
+            ),
+          )
+          .toList(growable: false),
       workspaceSummaries: (json['workspaceSummaries'] as List? ?? const [])
           .map(
             (item) => ContentComplianceWorkspaceSummaryV1.fromJson(
@@ -241,6 +315,13 @@ class ContentComplianceQueueResponseV1 {
             ),
           )
           .toList(growable: false),
+      escalationSummaries: (json['escalationSummaries'] as List? ?? const [])
+          .map(
+            (item) => ContentComplianceEscalationSummaryV1.fromJson(
+              Map<String, dynamic>.from(item as Map),
+            ),
+          )
+          .toList(growable: false),
       items: (json['items'] as List? ?? const [])
           .map(
             (item) => ContentComplianceReportItemV1.fromJson(
@@ -248,6 +329,32 @@ class ContentComplianceQueueResponseV1 {
             ),
           )
           .toList(growable: false),
+    );
+  }
+}
+
+class ContentComplianceQueueAlertV1 {
+  const ContentComplianceQueueAlertV1({
+    required this.level,
+    required this.stage,
+    required this.count,
+    required this.title,
+    required this.message,
+  });
+
+  final String level;
+  final String stage;
+  final int count;
+  final String title;
+  final String message;
+
+  factory ContentComplianceQueueAlertV1.fromJson(Map<String, dynamic> json) {
+    return ContentComplianceQueueAlertV1(
+      level: json['level'] as String? ?? 'medium',
+      stage: json['stage'] as String? ?? '',
+      count: (json['count'] as num?)?.toInt() ?? 0,
+      title: json['title'] as String? ?? '',
+      message: json['message'] as String? ?? '',
     );
   }
 }
@@ -342,15 +449,49 @@ class ContentComplianceReassignResponseV1 {
   }
 }
 
+class ContentComplianceAutoRebalanceResponseV1 {
+  const ContentComplianceAutoRebalanceResponseV1({
+    required this.dryRun,
+    required this.reviewerCapacityLimit,
+    required this.plannedMoveCount,
+    required this.executedMoveCount,
+  });
+
+  final bool dryRun;
+  final int reviewerCapacityLimit;
+  final int plannedMoveCount;
+  final int executedMoveCount;
+
+  factory ContentComplianceAutoRebalanceResponseV1.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return ContentComplianceAutoRebalanceResponseV1(
+      dryRun: json['dryRun'] as bool? ?? false,
+      reviewerCapacityLimit:
+          (json['reviewerCapacityLimit'] as num?)?.toInt() ?? 12,
+      plannedMoveCount: (json['plannedMoveCount'] as num?)?.toInt() ?? 0,
+      executedMoveCount: (json['executedMoveCount'] as num?)?.toInt() ?? 0,
+    );
+  }
+}
+
 class ContentComplianceController extends ChangeNotifier {
   ContentComplianceController({
     required ContentComplianceAccessTokenProvider accessTokenProvider,
     required ContentComplianceErrorSink onErrorChanged,
+    ContentComplianceAlertsSink? onAlertsChanged,
+    ContentComplianceL10nProvider? l10nProvider,
   }) : _accessTokenProvider = accessTokenProvider,
-       _onErrorChanged = onErrorChanged;
+       _onErrorChanged = onErrorChanged,
+       _onAlertsChanged = onAlertsChanged,
+       _l10nProvider = l10nProvider;
 
   final ContentComplianceAccessTokenProvider _accessTokenProvider;
   final ContentComplianceErrorSink _onErrorChanged;
+  final ContentComplianceAlertsSink? _onAlertsChanged;
+  final ContentComplianceL10nProvider? _l10nProvider;
+
+  AppLocalizations? get _l10n => _l10nProvider?.call();
 
   bool submittingReport = false;
   bool loadingQueue = false;
@@ -364,9 +505,17 @@ class ContentComplianceController extends ChangeNotifier {
   String? queueWorkspaceNameFilter;
   String? queueClaimedByLabelFilter;
   String? queueSlaBucketFilter;
+  String? queueEscalationStageFilter;
   bool queueClaimedOnly = false;
 
-  bool get queueEnabled => kInternalOpsToken.trim().isNotEmpty;
+  /// When non-null, overrides [kInternalOpsToken] non-empty check (widget tests).
+  bool? queueEnabledOverride;
+
+  /// When true, [ContentComplianceSection] will not call [loadQueue] on mount.
+  bool skipAutoLoadQueueOnMount = false;
+
+  bool get queueEnabled =>
+      queueEnabledOverride ?? kInternalOpsToken.trim().isNotEmpty;
 
   void _setError(String? value) => _onErrorChanged(value);
 
@@ -423,6 +572,7 @@ class ContentComplianceController extends ChangeNotifier {
     String? workspaceName,
     String? claimedByLabel,
     String? slaBucket,
+    String? escalationStage,
     bool? claimedOnly,
   }) async {
     if (!queueEnabled || loadingQueue) {
@@ -441,6 +591,8 @@ class ContentComplianceController extends ChangeNotifier {
         _normalizeQueueFilter(claimedByLabel) ?? queueClaimedByLabelFilter;
     queueSlaBucketFilter =
         _normalizeQueueFilter(slaBucket) ?? queueSlaBucketFilter;
+    queueEscalationStageFilter =
+        _normalizeQueueFilter(escalationStage) ?? queueEscalationStageFilter;
     queueClaimedOnly = claimedOnly ?? queueClaimedOnly;
     loadingQueue = true;
     _setError(null);
@@ -461,6 +613,8 @@ class ContentComplianceController extends ChangeNotifier {
                 'claimedByLabel': queueClaimedByLabelFilter!,
               if ((queueSlaBucketFilter ?? '').isNotEmpty)
                 'slaBucket': queueSlaBucketFilter!,
+              if ((queueEscalationStageFilter ?? '').isNotEmpty)
+                'escalationStage': queueEscalationStageFilter!,
               if (queueClaimedOnly) 'claimedOnly': 'true',
             },
           );
@@ -474,6 +628,26 @@ class ContentComplianceController extends ChangeNotifier {
       queue = ContentComplianceQueueResponseV1.fromJson(
         jsonDecode(res.body) as Map<String, dynamic>,
       );
+      _onAlertsChanged?.call(queue?.alerts ?? const <ContentComplianceQueueAlertV1>[]);
+      final accessToken = _accessTokenProvider()?.trim();
+      if (accessToken != null && accessToken.isNotEmpty && queue != null) {
+        await syncContentComplianceAlertsV1(
+          accessToken,
+          queue!.alerts
+              .map(
+                (alert) => SyncContentComplianceAlertItemV1(
+                  stage: alert.stage,
+                  level: alert.level,
+                  count: alert.count,
+                  title: alert.title,
+                  message: alert.message,
+                  linkPath:
+                      '/product/content-compliance?escalationStage=${alert.stage}',
+                ),
+              )
+              .toList(growable: false),
+        );
+      }
     } on RustApiException catch (error) {
       reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
@@ -551,6 +725,7 @@ class ContentComplianceController extends ChangeNotifier {
     String? workspaceName,
     String? claimedByLabel,
     String? slaBucket,
+    String? escalationStage,
     required bool claimedOnly,
   }) async {
     queueStatusFilter = _normalizeQueueFilter(status);
@@ -560,6 +735,7 @@ class ContentComplianceController extends ChangeNotifier {
     queueWorkspaceNameFilter = _normalizeQueueFilter(workspaceName);
     queueClaimedByLabelFilter = _normalizeQueueFilter(claimedByLabel);
     queueSlaBucketFilter = _normalizeQueueFilter(slaBucket);
+    queueEscalationStageFilter = _normalizeQueueFilter(escalationStage);
     queueClaimedOnly = claimedOnly;
     notifyListeners();
     await loadQueue(
@@ -570,6 +746,7 @@ class ContentComplianceController extends ChangeNotifier {
       workspaceName: queueWorkspaceNameFilter,
       claimedByLabel: queueClaimedByLabelFilter,
       slaBucket: queueSlaBucketFilter,
+      escalationStage: queueEscalationStageFilter,
       claimedOnly: queueClaimedOnly,
     );
   }
@@ -582,6 +759,7 @@ class ContentComplianceController extends ChangeNotifier {
     queueWorkspaceNameFilter = null;
     queueClaimedByLabelFilter = null;
     queueSlaBucketFilter = null;
+    queueEscalationStageFilter = null;
     queueClaimedOnly = false;
     notifyListeners();
     await loadQueue(
@@ -592,6 +770,7 @@ class ContentComplianceController extends ChangeNotifier {
       workspaceName: '',
       claimedByLabel: '',
       slaBucket: '',
+      escalationStage: '',
       claimedOnly: false,
     );
   }
@@ -658,7 +837,9 @@ class ContentComplianceController extends ChangeNotifier {
     }
     final trimmedAssignee = assigneeLabel.trim();
     if (trimmedAssignee.isEmpty) {
-      _setError('改派 reviewer 不能为空');
+      _setError(
+        _l10n?.contentComplianceErrAssigneeRequired ?? '改派 reviewer 不能为空',
+      );
       notifyListeners();
       return null;
     }
@@ -685,6 +866,54 @@ class ContentComplianceController extends ChangeNotifier {
           .timeout(const Duration(seconds: 20));
       ensureHttpSuccess(res);
       final response = ContentComplianceReassignResponseV1.fromJson(
+        jsonDecode(res.body) as Map<String, dynamic>,
+      );
+      await loadQueue();
+      return response;
+    } on RustApiException catch (error) {
+      reportRustApiError(error, onErrorChanged: _setError);
+      return null;
+    } catch (error) {
+      _setError('$error');
+      return null;
+    } finally {
+      mutatingQueue = false;
+      notifyListeners();
+    }
+  }
+
+  Future<ContentComplianceAutoRebalanceResponseV1?> autoRebalanceReports({
+    bool dryRun = false,
+    String actorLabel = 'internal_ops',
+    String? note,
+    int maxMoves = 100,
+  }) async {
+    if (!queueEnabled || mutatingQueue) {
+      return null;
+    }
+    mutatingQueue = true;
+    _setError(null);
+    notifyListeners();
+    try {
+      final res = await http
+          .post(
+            Uri.parse(
+              '$kApiBaseUrl/api/v1/internal/compliance/reports/auto-rebalance',
+            ),
+            headers: {
+              'x-toonflow-internal-token': kInternalOpsToken.trim(),
+              'content-type': 'application/json',
+            },
+            body: jsonEncode(<String, dynamic>{
+              'dryRun': dryRun,
+              'actorLabel': actorLabel,
+              'maxMoves': maxMoves.clamp(1, 500),
+              if ((note ?? '').trim().isNotEmpty) 'note': note!.trim(),
+            }),
+          )
+          .timeout(const Duration(seconds: 20));
+      ensureHttpSuccess(res);
+      final response = ContentComplianceAutoRebalanceResponseV1.fromJson(
         jsonDecode(res.body) as Map<String, dynamic>,
       );
       await loadQueue();

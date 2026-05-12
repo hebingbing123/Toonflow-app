@@ -8938,6 +8938,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Assignee reviewer cannot be empty.'**
   String get contentComplianceErrAssigneeRequired;
+
+  /// No description provided for @taskCenterFieldProjectUuidOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Project UUID (optional)'**
+  String get taskCenterFieldProjectUuidOptional;
+
+  /// No description provided for @qualityReviewsScopeSeedLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Scope seed: {line}'**
+  String qualityReviewsScopeSeedLine(String line);
 }
 
 class _AppLocalizationsDelegate

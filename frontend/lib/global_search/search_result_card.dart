@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
 import '../rust_api/search/api.dart';
+import '../utils/localized_formatting.dart';
 
 /// Individual search result card component.
 ///
@@ -63,24 +64,11 @@ class SearchResultCard extends StatelessWidget {
     }
   }
 
-  /// Format time display
-  String _formatTime(AppLocalizations l10n, String isoString) {
+  /// Format time display using localized formatting
+  String _formatTime(AppLocalizations l10n, BuildContext context, String isoString) {
     try {
       final dateTime = DateTime.parse(isoString);
-      final now = DateTime.now();
-      final difference = now.difference(dateTime);
-
-      if (difference.inMinutes < 1) {
-        return l10n.globalSearchTimeJustNow;
-      } else if (difference.inHours < 1) {
-        return l10n.globalSearchTimeMinutesAgo(difference.inMinutes);
-      } else if (difference.inDays < 1) {
-        return l10n.globalSearchTimeHoursAgo(difference.inHours);
-      } else if (difference.inDays < 7) {
-        return l10n.globalSearchTimeDaysAgo(difference.inDays);
-      } else {
-        return '${dateTime.year}/${dateTime.month}/${dateTime.day}';
-      }
+      return LocalizedFormatting.formatRelativeTime(context, dateTime);
     } catch (_) {
       return '';
     }
@@ -221,7 +209,7 @@ class SearchResultCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      _formatTime(l10n, result.updatedAt),
+                      _formatTime(l10n, context, result.updatedAt),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),

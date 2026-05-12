@@ -3598,5 +3598,324 @@
   "adminConsoleErrMemberRoleRequired": "Role is required when adding or updating a member",
   "adminConsoleErrTargetOwnerUserIdRequired": "Target owner userId cannot be empty",
   "adminConsoleErrAtLeastOneProjectRequired": "Select at least one project",
-  "adminConsoleErrBatchNoteRequired": "Batch note content is required when writing notes"
+  "adminConsoleErrBatchNoteRequired": "Batch note content is required when writing notes",
+  "contentComplianceWorkspacePersonalScope": "Personal / direct user scope",
+  "contentComplianceOpenProject": "Open project",
+  "contentComplianceOpenScriptProject": "Open script project",
+  "contentComplianceOpenStoryboardProject": "Open storyboard project",
+  "contentComplianceOpenAssetProject": "Open asset project",
+  "contentComplianceOpenNovelProject": "Open novel project",
+  "contentComplianceOpenUserContext": "View user context",
+  "contentComplianceOpenContext": "Open context",
+  "contentComplianceOwnerUnclaimed": "Unclaimed",
+  "contentComplianceEscalationCriticalUnclaimed": "critical unclaimed",
+  "contentComplianceEscalationStalledClaimed": "claimed stalled",
+  "contentComplianceEscalationOverCapacity": "reviewer overloaded",
+  "contentComplianceEscalationEscalated72h": "72h escalated",
+  "contentComplianceEscalationUrgent": "Urgent",
+  "contentComplianceEscalationClosed": "Closed",
+  "contentComplianceEscalationWatch": "Watch",
+  "contentComplianceAlertHintCriticalUnclaimed": "Start by bulk-claiming critical unclaimed items.",
+  "contentComplianceAlertHintOverCapacity": "Preview or run auto-rebalance first.",
+  "contentComplianceAlertHintStalledClaimed": "Handle stalled claimed items first (reassign or converge).",
+  "contentComplianceAlertHintEscalated72h": "Prioritize clearing 72h non-converged items.",
+  "contentComplianceAlertHintDefault": "Review this layer and address high-risk items first.",
+  "contentComplianceSnackNoCriticalUnclaimedBulkClaim": "No critical unclaimed items available for bulk claim.",
+  "contentComplianceSnackSelectedStalledClaimed": "Selected {count} stalled claimed items; you can reassign or process them.",
+  "@contentComplianceSnackSelectedStalledClaimed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "contentComplianceSnackSelected72hUnconverged": "Selected {count} 72h non-converged items; you can reassign or process them.",
+  "@contentComplianceSnackSelected72hUnconverged": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "contentComplianceSnackSelectedCriticalUnclaimed": "Selected {count} critical unclaimed items.",
+  "@contentComplianceSnackSelectedCriticalUnclaimed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "contentComplianceSnackSelected72hItems": "Selected {count} 72h non-converged items.",
+  "@contentComplianceSnackSelected72hItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "contentComplianceSnackRestoredDefaultActionOrder": "Restored default action order.",
+  "contentComplianceBulkClaim": "Bulk claim",
+  "contentComplianceBulkResolve": "Bulk resolve",
+  "contentComplianceBulkDismiss": "Bulk dismiss",
+  "contentComplianceBulkGeneric": "Bulk action",
+  "contentComplianceBulkConfirmBody": "Run {verb} on {count} reports?",
+  "@contentComplianceBulkConfirmBody": {
+    "placeholders": {
+      "verb": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "contentComplianceBulkConfirmNoteReuse": "\n\nWill reuse the current resolution note.",
+  "contentComplianceBulkResult": "{verb} finished: succeeded {succeeded}, failed {failed}; {remainingAlerts} alerts remaining ({criticalAlerts} high priority).",
+  "@contentComplianceBulkResult": {
+    "placeholders": {
+      "verb": {
+        "type": "String"
+      },
+      "succeeded": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      },
+      "remainingAlerts": {
+        "type": "int"
+      },
+      "criticalAlerts": {
+        "type": "int"
+      }
+    }
+  },
+  "contentComplianceCsvCopied": "Copied filtered queue CSV ({count} rows).",
+  "@contentComplianceCsvCopied": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "contentComplianceFillReviewerFirst": "Enter a target reviewer first.",
+  "contentComplianceReassignTitle": "Bulk reassign",
+  "contentComplianceReassignBody": "Reassign {count} reports to {assignee}?",
+  "@contentComplianceReassignBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "assignee": {
+        "type": "String"
+      }
+    }
+  },
+  "contentComplianceReassignResult": "Reassigned to {assignee}: succeeded {succeeded}, failed {failed}.",
+  "@contentComplianceReassignResult": {
+    "placeholders": {
+      "assignee": {
+        "type": "String"
+      },
+      "succeeded": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
+  "contentComplianceAutoRebalanceNoOverload": "No overloaded reviewers; auto-rebalance is not needed.",
+  "contentComplianceAutoRebalanceTitlePreview": "Preview auto-rebalance",
+  "contentComplianceAutoRebalanceTitleExecute": "Run auto-rebalance",
+  "contentComplianceAutoRebalanceBodyPreview": "Preview reassignment plan at capacity threshold ({limit}); nothing will be written.",
+  "@contentComplianceAutoRebalanceBodyPreview": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "contentComplianceAutoRebalanceBodyExecute": "Run automatic reassignment at capacity threshold ({limit}) and write audit records.",
+  "@contentComplianceAutoRebalanceBodyExecute": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "contentComplianceStartPreview": "Start preview",
+  "contentComplianceExecuteNow": "Run now",
+  "contentComplianceAutoRebalanceResultPreview": "Auto-rebalance preview: {planned} moves suggested (capacity {capacity}).",
+  "@contentComplianceAutoRebalanceResultPreview": {
+    "placeholders": {
+      "planned": {
+        "type": "int"
+      },
+      "capacity": {
+        "type": "int"
+      }
+    }
+  },
+  "contentComplianceAutoRebalanceResultExecute": "Auto-rebalance done: planned {planned}, executed {executed}; over_capacity remaining {overCapacityRemaining}, {remainingAlerts} alerts total.",
+  "@contentComplianceAutoRebalanceResultExecute": {
+    "placeholders": {
+      "planned": {
+        "type": "int"
+      },
+      "executed": {
+        "type": "int"
+      },
+      "overCapacityRemaining": {
+        "type": "int"
+      },
+      "remainingAlerts": {
+        "type": "int"
+      }
+    }
+  },
+  "contentComplianceAuditTitle": "Report audit · {reportId}",
+  "@contentComplianceAuditTitle": {
+    "placeholders": {
+      "reportId": {
+        "type": "String"
+      }
+    }
+  },
+  "contentComplianceAuditEmpty": "No audit records to display.",
+  "contentComplianceTitle": "Content & compliance",
+  "contentComplianceIntro": "One place for user-submitted content reports and internal-ops claim/resolve review queues.",
+  "contentComplianceSubmitReportTitle": "Submit report",
+  "contentComplianceTargetUuidHint": "Enter reported object UUID",
+  "contentComplianceDetailLabel": "Additional details",
+  "contentComplianceDetailHint": "Add context, timeline, or risk description",
+  "contentComplianceSubmitting": "Submitting…",
+  "contentComplianceSubmitReport": "Submit report",
+  "contentComplianceQueueTitle": "Review queue",
+  "contentComplianceClearFilters": "Clear filters",
+  "contentComplianceRefresh": "Refresh",
+  "contentComplianceCopyCsv": "Copy CSV",
+  "contentComplianceTopActionSummary": "Primary action: {title} ({count})\n{hint}",
+  "@contentComplianceTopActionSummary": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "hint": {
+        "type": "String"
+      }
+    }
+  },
+  "contentComplianceViewLayer": "View this layer",
+  "contentComplianceRestoreDefaultActionOrder": "Restore default action order",
+  "contentCompliancePreviewRebalanceShort": "Preview rebalance",
+  "contentComplianceExecuteRebalanceShort": "Run rebalance",
+  "contentComplianceSnackSelectedCriticalReadyClaim": "Selected {count} critical unclaimed items; you can bulk claim.",
+  "@contentComplianceSnackSelectedCriticalReadyClaim": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "contentComplianceSelectCriticalUnclaimed": "Select critical unclaimed",
+  "contentComplianceSnackNoCriticalUnclaimedInList": "No critical unclaimed items in the current list for bulk claim.",
+  "contentComplianceBulkClaimOneClick": "Bulk claim (one click)",
+  "contentComplianceSelectStalled": "Select stalled",
+  "contentCompliancePreviewStalledRebalance": "Preview stalled rebalance",
+  "contentComplianceSelect72hUnconverged": "Select 72h non-converged",
+  "contentComplianceClaimedOnly": "Claimed only",
+  "contentComplianceOwnerChipUnclaimed": "owner: unclaimed",
+  "contentComplianceOwnerChip": "owner: {owner}",
+  "@contentComplianceOwnerChip": {
+    "placeholders": {
+      "owner": {
+        "type": "String"
+      }
+    }
+  },
+  "contentComplianceEscalationChipPrefix": "Escalation: {stage}",
+  "@contentComplianceEscalationChipPrefix": {
+    "placeholders": {
+      "stage": {
+        "type": "String"
+      }
+    }
+  },
+  "contentComplianceSlaUnclaimedCritical": "critical unclaimed {count}",
+  "@contentComplianceSlaUnclaimedCritical": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "contentComplianceOverloadedReviewers": "overloaded reviewers {count}",
+  "@contentComplianceOverloadedReviewers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "contentComplianceRebalanceNeeded": "rebalance needed {count}",
+  "@contentComplianceRebalanceNeeded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "contentComplianceReviewerOwnerLoad": "Reviewer / owner load",
+  "contentComplianceOverCapacitySuffix": " · overloaded +{by}",
+  "@contentComplianceOverCapacitySuffix": {
+    "placeholders": {
+      "by": {
+        "type": "int"
+      }
+    }
+  },
+  "contentComplianceEscalationRhythm": "Escalation rhythm",
+  "contentComplianceWorkspaceHotspots": "Workspace hotspots",
+  "contentComplianceQueueEmpty": "No pending reports right now.",
+  "contentComplianceCopyTarget": "Copy target",
+  "contentComplianceCopiedTargetUuid": "Copied target UUID",
+  "contentComplianceCopyReport": "Copy report",
+  "contentComplianceCopiedReportUuid": "Copied report UUID",
+  "contentComplianceAdminConsoleContext": "Admin console context",
+  "contentComplianceLoadingAudit": "Loading audit…",
+  "contentComplianceViewAudit": "View audit",
+  "contentComplianceBulkReassignReviewerLabel": "Bulk reassign reviewer",
+  "contentComplianceBulkReassignReviewerHint": "e.g. internal_ops_cn_shift_b",
+  "contentComplianceSelectedCount": "Selected {count}",
+  "@contentComplianceSelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "contentComplianceSelectAllOpen": "Select all open",
+  "contentComplianceClearSelection": "Clear selection",
+  "contentComplianceBulkReassign": "Bulk reassign",
+  "contentComplianceResolutionNoteHint": "Reused for claim / resolve when provided",
+  "contentComplianceTopSecondaryPendingOnly": "Select pending only",
+  "contentComplianceTopSecondaryRunRebalance": "Run auto-rebalance",
+  "contentComplianceTopSecondaryPreviewStalledRebalance": "Preview stalled rebalance",
+  "contentComplianceTopSecondarySelect72hOnly": "Select 72h non-converged only",
+  "contentComplianceDialogContinue": "Continue",
+  "contentComplianceLabelSelect72hUnconverged": "Select 72h non-converged",
+  "contentComplianceErrAssigneeRequired": "Assignee reviewer cannot be empty.",
+  "taskCenterFieldProjectUuidOptional": "Project UUID (optional)",
+  "qualityReviewsScopeSeedLine": "Scope seed: {line}",
+  "@qualityReviewsScopeSeedLine": {
+    "placeholders": {
+      "line": {
+        "type": "String"
+      }
+    }
+  }
 }

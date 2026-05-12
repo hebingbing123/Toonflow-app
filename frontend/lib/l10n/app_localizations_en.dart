@@ -5422,4 +5422,12 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get contentComplianceErrAssigneeRequired =>
       'Assignee reviewer cannot be empty.';
+
+  @override
+  String get taskCenterFieldProjectUuidOptional => 'Project UUID (optional)';
+
+  @override
+  String qualityReviewsScopeSeedLine(String line) {
+    return 'Scope seed: $line';
+  }
 }

@@ -242,6 +242,7 @@ class _HomePageState extends State<HomePage> {
       ContentComplianceController(
         accessTokenProvider: () => _session?.accessToken,
         onErrorChanged: _setSharedError,
+        l10nProvider: () => _appL10n,
       );
 
   late final AccountProbesController _accountProbesController =

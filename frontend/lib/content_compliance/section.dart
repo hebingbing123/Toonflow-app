@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../l10n/app_localizations.dart';
 import 'controller.dart';
 
 class ContentComplianceSection extends StatefulWidget {
@@ -22,6 +24,8 @@ class ContentComplianceSection extends StatefulWidget {
 }
 
 class _ContentComplianceSectionState extends State<ContentComplianceSection> {
+  static const String _alertActionPreferenceKey =
+      'content_compliance_alert_action_preference_stages_v1';
   final _targetIdController = TextEditingController();
   final _detailController = TextEditingController();
   final _resolutionNoteController = TextEditingController();
@@ -37,15 +41,19 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
   String? _queueWorkspaceName;
   String? _queueClaimedByLabel;
   String? _queueSlaBucket;
+  String? _queueEscalationStage;
   bool _queueClaimedOnly = false;
   final Set<String> _selectedReportIds = <String>{};
+  final Set<String> _preferSecondaryAsPrimaryStages = <String>{};
 
   @override
   void initState() {
     super.initState();
     widget.controller.addListener(_onChanged);
     _syncFilterStateFromController();
-    if (widget.controller.queueEnabled) {
+    _loadAlertActionPreferences();
+    if (widget.controller.queueEnabled &&
+        !widget.controller.skipAutoLoadQueueOnMount) {
       widget.controller.loadQueue();
     }
   }
@@ -85,6 +93,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
     _queueWorkspaceName = widget.controller.queueWorkspaceNameFilter;
     _queueClaimedByLabel = widget.controller.queueClaimedByLabelFilter;
     _queueSlaBucket = widget.controller.queueSlaBucketFilter;
+    _queueEscalationStage = widget.controller.queueEscalationStageFilter;
     _queueClaimedOnly = widget.controller.queueClaimedOnly;
     final activeIds =
         widget.controller.queue?.items.map((item) => item.id).toSet() ??
@@ -92,22 +101,22 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
     _selectedReportIds.removeWhere((id) => !activeIds.contains(id));
   }
 
-  String _openTargetLabel(ContentComplianceReportItemV1 item) {
+  String _openTargetLabel(AppLocalizations l10n, ContentComplianceReportItemV1 item) {
     switch (item.targetType) {
       case 'project':
-        return '打开项目';
+        return l10n.contentComplianceOpenProject;
       case 'script':
-        return '打开剧本项目';
+        return l10n.contentComplianceOpenScriptProject;
       case 'storyboard':
-        return '打开分镜项目';
+        return l10n.contentComplianceOpenStoryboardProject;
       case 'asset':
-        return '打开资产项目';
+        return l10n.contentComplianceOpenAssetProject;
       case 'novel':
-        return '打开小说项目';
+        return l10n.contentComplianceOpenNovelProject;
       case 'user':
-        return '查看用户上下文';
+        return l10n.contentComplianceOpenUserContext;
       default:
-        return '打开上下文';
+        return l10n.contentComplianceOpenContext;
     }
   }
 
@@ -152,12 +161,15 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
         .join('\n');
   }
 
-  String _workspaceSummaryLabel(ContentComplianceWorkspaceSummaryV1 item) {
+  String _workspaceSummaryLabel(
+    AppLocalizations l10n,
+    ContentComplianceWorkspaceSummaryV1 item,
+  ) {
     final name = (item.workspaceName ?? '').trim();
     if (name.isNotEmpty) {
       return name;
     }
-    return 'Personal / direct user scope';
+    return l10n.contentComplianceWorkspacePersonalScope;
   }
 
   Future<void> _applyWorkspaceFilter(
@@ -175,12 +187,15 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
       workspaceName: item.workspaceName,
       claimedByLabel: _queueClaimedByLabel,
       slaBucket: _queueSlaBucket,
+      escalationStage: _queueEscalationStage,
       claimedOnly: _queueClaimedOnly,
     );
   }
 
-  String _ownerSummaryLabel(ContentComplianceOwnerSummaryV1 item) {
-    return item.ownerLabel == 'unclaimed' ? '未认领' : item.ownerLabel;
+  String _ownerSummaryLabel(AppLocalizations l10n, ContentComplianceOwnerSummaryV1 item) {
+    return item.ownerLabel == 'unclaimed'
+        ? l10n.contentComplianceOwnerUnclaimed
+        : item.ownerLabel;
   }
 
   Future<void> _applyOwnerFilter(ContentComplianceOwnerSummaryV1 item) async {
@@ -195,6 +210,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
       workspaceName: _queueWorkspaceName,
       claimedByLabel: item.ownerLabel,
       slaBucket: _queueSlaBucket,
+      escalationStage: _queueEscalationStage,
       claimedOnly: _queueClaimedOnly,
     );
   }
@@ -211,6 +227,373 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
       workspaceName: _queueWorkspaceName,
       claimedByLabel: _queueClaimedByLabel,
       slaBucket: bucket,
+      escalationStage: _queueEscalationStage,
+      claimedOnly: _queueClaimedOnly,
+    );
+  }
+
+  String _escalationStageLabel(AppLocalizations l10n, String stage) {
+    switch (stage) {
+      case 'critical_unclaimed':
+        return l10n.contentComplianceEscalationCriticalUnclaimed;
+      case 'stalled_claimed':
+        return l10n.contentComplianceEscalationStalledClaimed;
+      case 'over_capacity':
+        return l10n.contentComplianceEscalationOverCapacity;
+      case 'escalated_72h':
+        return l10n.contentComplianceEscalationEscalated72h;
+      case 'urgent':
+        return l10n.contentComplianceEscalationUrgent;
+      case 'closed':
+        return l10n.contentComplianceEscalationClosed;
+      default:
+        return l10n.contentComplianceEscalationWatch;
+    }
+  }
+
+  Color _alertBorderColor(ThemeData theme, String level) {
+    switch (level) {
+      case 'critical':
+        return theme.colorScheme.error;
+      case 'high':
+        return theme.colorScheme.tertiary;
+      case 'medium':
+        return theme.colorScheme.primary;
+      default:
+        return theme.colorScheme.outlineVariant;
+    }
+  }
+
+  int _alertPriority(ContentComplianceQueueAlertV1 alert) {
+    if (alert.stage == 'critical_unclaimed') {
+      return 0;
+    }
+    if (alert.stage == 'over_capacity') {
+      return 1;
+    }
+    if (alert.stage == 'stalled_claimed') {
+      return 2;
+    }
+    if (alert.stage == 'escalated_72h') {
+      return 3;
+    }
+    switch (alert.level) {
+      case 'critical':
+        return 4;
+      case 'high':
+        return 5;
+      case 'medium':
+        return 6;
+      default:
+        return 7;
+    }
+  }
+
+  String _topAlertActionHint(AppLocalizations l10n, ContentComplianceQueueAlertV1 alert) {
+    switch (alert.stage) {
+      case 'critical_unclaimed':
+        return l10n.contentComplianceAlertHintCriticalUnclaimed;
+      case 'over_capacity':
+        return l10n.contentComplianceAlertHintOverCapacity;
+      case 'stalled_claimed':
+        return l10n.contentComplianceAlertHintStalledClaimed;
+      case 'escalated_72h':
+        return l10n.contentComplianceAlertHintEscalated72h;
+      default:
+        return l10n.contentComplianceAlertHintDefault;
+    }
+  }
+
+  Future<void> _runTopAlertPrimaryAction(ContentComplianceQueueAlertV1 alert) async {
+    final l10n = AppLocalizations.of(context)!;
+    switch (alert.stage) {
+      case 'critical_unclaimed':
+        final count = _selectCriticalUnclaimedFromCurrentQueue();
+        if (count == 0) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.contentComplianceSnackNoCriticalUnclaimedBulkClaim),
+            ),
+          );
+          return;
+        }
+        await _runBulkAction('claim');
+        return;
+      case 'over_capacity':
+        await _runAutoRebalance(dryRun: true);
+        return;
+      case 'stalled_claimed':
+        final count = _selectStalledClaimedFromCurrentQueue();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.contentComplianceSnackSelectedStalledClaimed(count))),
+        );
+        return;
+      case 'escalated_72h':
+        final count = _selectEscalated72hFromCurrentQueue();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.contentComplianceSnackSelected72hUnconverged(count))),
+        );
+        return;
+      default:
+        await _applyAlertShortcut(alert.stage);
+        return;
+    }
+  }
+
+  String _topAlertPrimaryLabel(AppLocalizations l10n, ContentComplianceQueueAlertV1 alert) {
+    switch (alert.stage) {
+      case 'critical_unclaimed':
+        return l10n.contentComplianceBulkClaimOneClick;
+      case 'over_capacity':
+        return l10n.contentComplianceAutoRebalanceTitlePreview;
+      case 'stalled_claimed':
+        return l10n.contentComplianceSelectStalled;
+      case 'escalated_72h':
+        return l10n.contentComplianceLabelSelect72hUnconverged;
+      default:
+        return l10n.contentComplianceViewLayer;
+    }
+  }
+
+  String? _topAlertSecondaryLabel(AppLocalizations l10n, ContentComplianceQueueAlertV1 alert) {
+    switch (alert.stage) {
+      case 'critical_unclaimed':
+        return l10n.contentComplianceTopSecondaryPendingOnly;
+      case 'over_capacity':
+        return l10n.contentComplianceAutoRebalanceTitleExecute;
+      case 'stalled_claimed':
+        return l10n.contentCompliancePreviewStalledRebalance;
+      case 'escalated_72h':
+        return l10n.contentComplianceTopSecondarySelect72hOnly;
+      default:
+        return null;
+    }
+  }
+
+  Future<void> _runTopAlertSecondaryAction(
+    ContentComplianceQueueAlertV1 alert,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    switch (alert.stage) {
+      case 'critical_unclaimed':
+        final count = _selectCriticalUnclaimedFromCurrentQueue();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.contentComplianceSnackSelectedCriticalUnclaimed(count))),
+        );
+        return;
+      case 'over_capacity':
+        await _runAutoRebalance(dryRun: false);
+        return;
+      case 'stalled_claimed':
+        await _runAutoRebalance(dryRun: true);
+        return;
+      case 'escalated_72h':
+        final count = _selectEscalated72hFromCurrentQueue();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.contentComplianceSnackSelected72hItems(count))),
+        );
+        return;
+      default:
+        return;
+    }
+  }
+
+  String _effectiveTopPrimaryLabel(AppLocalizations l10n, ContentComplianceQueueAlertV1 alert) {
+    final secondaryLabel = _topAlertSecondaryLabel(l10n, alert);
+    if (_preferSecondaryAsPrimaryStages.contains(alert.stage) &&
+        secondaryLabel != null) {
+      return secondaryLabel;
+    }
+    return _topAlertPrimaryLabel(l10n, alert);
+  }
+
+  String? _effectiveTopSecondaryLabel(AppLocalizations l10n, ContentComplianceQueueAlertV1 alert) {
+    final secondaryLabel = _topAlertSecondaryLabel(l10n, alert);
+    if (secondaryLabel == null) {
+      return null;
+    }
+    if (_preferSecondaryAsPrimaryStages.contains(alert.stage)) {
+      return _topAlertPrimaryLabel(l10n, alert);
+    }
+    return secondaryLabel;
+  }
+
+  Future<void> _runEffectiveTopPrimaryAction(
+    ContentComplianceQueueAlertV1 alert,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    final secondaryLabel = _topAlertSecondaryLabel(l10n, alert);
+    if (_preferSecondaryAsPrimaryStages.contains(alert.stage) &&
+        secondaryLabel != null) {
+      await _runTopAlertSecondaryAction(alert);
+      return;
+    }
+    await _runTopAlertPrimaryAction(alert);
+  }
+
+  Future<void> _runEffectiveTopSecondaryAction(
+    ContentComplianceQueueAlertV1 alert,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    final secondaryLabel = _topAlertSecondaryLabel(l10n, alert);
+    if (secondaryLabel == null) {
+      return;
+    }
+    if (_preferSecondaryAsPrimaryStages.contains(alert.stage)) {
+      await _runTopAlertPrimaryAction(alert);
+      return;
+    }
+    await _runTopAlertSecondaryAction(alert);
+  }
+
+  void _rememberSecondaryPreferenceForStage(String stage) {
+    if (stage.isEmpty) {
+      return;
+    }
+    setState(() {
+      _preferSecondaryAsPrimaryStages.add(stage);
+    });
+    _saveAlertActionPreferences();
+  }
+
+  Future<void> _loadAlertActionPreferences() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final stored = prefs.getString(_alertActionPreferenceKey);
+      if (stored == null || stored.trim().isEmpty) {
+        return;
+      }
+      final stages = stored
+          .split(',')
+          .map((item) => item.trim())
+          .where((item) => item.isNotEmpty)
+          .toSet();
+      if (!mounted || stages.isEmpty) {
+        return;
+      }
+      setState(() {
+        _preferSecondaryAsPrimaryStages
+          ..clear()
+          ..addAll(stages);
+      });
+    } catch (_) {
+      // Ignore local preference read failures.
+    }
+  }
+
+  Future<void> _saveAlertActionPreferences() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final ordered = _preferSecondaryAsPrimaryStages.toList()..sort();
+      await prefs.setString(_alertActionPreferenceKey, ordered.join(','));
+    } catch (_) {
+      // Ignore local preference write failures.
+    }
+  }
+
+  Future<void> _resetAlertActionPreferences() async {
+    setState(() {
+      _preferSecondaryAsPrimaryStages.clear();
+    });
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_alertActionPreferenceKey);
+    } catch (_) {
+      // Ignore local preference reset failures.
+    }
+    if (!mounted) {
+      return;
+    }
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(
+      SnackBar(content: Text(AppLocalizations.of(context)!.contentComplianceSnackRestoredDefaultActionOrder)),
+    );
+  }
+
+  Future<void> _applyAlertShortcut(String stage) async {
+    if (stage.isEmpty) {
+      return;
+    }
+    await _applyEscalationStageFilter(stage);
+  }
+
+  int _selectCriticalUnclaimedFromCurrentQueue() {
+    final queue = widget.controller.queue;
+    if (queue == null) {
+      return 0;
+    }
+    final selectable = queue.items
+        .where(
+          (item) =>
+              item.status == 'pending' &&
+              item.severity == 'critical' &&
+              (item.claimedByLabel ?? '').trim().isEmpty,
+        )
+        .map((item) => item.id)
+        .toSet();
+    setState(() {
+      _selectedReportIds
+        ..clear()
+        ..addAll(selectable);
+    });
+    return selectable.length;
+  }
+
+  int _selectStalledClaimedFromCurrentQueue() {
+    final queue = widget.controller.queue;
+    if (queue == null) {
+      return 0;
+    }
+    final selectable = queue.items
+        .where(
+          (item) =>
+              item.status == 'claimed' && item.escalationStage == 'stalled_claimed',
+        )
+        .map((item) => item.id)
+        .toSet();
+    setState(() {
+      _selectedReportIds
+        ..clear()
+        ..addAll(selectable);
+    });
+    return selectable.length;
+  }
+
+  int _selectEscalated72hFromCurrentQueue() {
+    final queue = widget.controller.queue;
+    if (queue == null) {
+      return 0;
+    }
+    final selectable = queue.items
+        .where(
+          (item) =>
+              (item.status == 'pending' || item.status == 'claimed') &&
+              item.escalationStage == 'escalated_72h',
+        )
+        .map((item) => item.id)
+        .toSet();
+    setState(() {
+      _selectedReportIds
+        ..clear()
+        ..addAll(selectable);
+    });
+    return selectable.length;
+  }
+
+  Future<void> _applyEscalationStageFilter(String? stage) async {
+    setState(() {
+      _queueEscalationStage = stage;
+    });
+    await widget.controller.applyQueueFilters(
+      status: _queueStatus,
+      category: _queueCategory,
+      targetType: _queueTargetType,
+      workspaceId: _queueWorkspaceId,
+      workspaceName: _queueWorkspaceName,
+      claimedByLabel: _queueClaimedByLabel,
+      slaBucket: _queueSlaBucket,
+      escalationStage: stage,
       claimedOnly: _queueClaimedOnly,
     );
   }
@@ -219,28 +602,31 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
     if (_selectedReportIds.isEmpty) {
       return;
     }
+    final l10n = AppLocalizations.of(context)!;
     final verb = switch (action) {
-      'claim' => '批量 claim',
-      'resolve' => '批量 resolve',
-      'dismiss' => '批量 dismiss',
-      _ => '批量操作',
+      'claim' => l10n.contentComplianceBulkClaim,
+      'resolve' => l10n.contentComplianceBulkResolve,
+      'dismiss' => l10n.contentComplianceBulkDismiss,
+      _ => l10n.contentComplianceBulkGeneric,
     };
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(verb),
         content: Text(
-          '确定对 ${_selectedReportIds.length} 条举报执行$verb吗？'
-          '${_resolutionNoteController.text.trim().isNotEmpty ? '\n\n会复用当前 resolution note。' : ''}',
+          l10n.contentComplianceBulkConfirmBody(verb, _selectedReportIds.length) +
+              (_resolutionNoteController.text.trim().isNotEmpty
+                  ? l10n.contentComplianceBulkConfirmNoteReuse
+                  : ''),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('取消'),
+            child: Text(l10n.taskCenterCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('继续'),
+            child: Text(l10n.contentComplianceDialogContinue),
           ),
         ],
       ),
@@ -260,10 +646,23 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
     setState(() {
       _selectedReportIds.clear();
     });
+    final queueAfter = widget.controller.queue;
+    final remainingAlerts = queueAfter?.alerts.length ?? 0;
+    final criticalAlerts =
+        queueAfter?.alerts
+            .where((alert) => alert.level == 'critical' || alert.level == 'high')
+            .length ??
+        0;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          '$verb 完成：成功 ${response.succeededCount}，失败 ${response.failedCount}',
+          l10n.contentComplianceBulkResult(
+            verb,
+            response.succeededCount,
+            response.failedCount,
+            remainingAlerts,
+            criticalAlerts,
+          ),
         ),
       ),
     );
@@ -324,7 +723,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
       return;
     }
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('已复制当前筛选结果 CSV（${queue.items.length} 条）')),
+      SnackBar(content: Text(AppLocalizations.of(context)!.contentComplianceCsvCopied(queue.items.length))),
     );
   }
 
@@ -332,26 +731,29 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
     if (_selectedReportIds.isEmpty) {
       return;
     }
+    final l10n = AppLocalizations.of(context)!;
     final assignee = _reassignReviewerController.text.trim();
     if (assignee.isEmpty) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('请先填写目标 reviewer')));
+      ).showSnackBar(
+        SnackBar(content: Text(l10n.contentComplianceFillReviewerFirst)),
+      );
       return;
     }
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('批量改派'),
-        content: Text('确定将 ${_selectedReportIds.length} 条举报改派给 $assignee 吗？'),
+        title: Text(l10n.contentComplianceReassignTitle),
+        content: Text(l10n.contentComplianceReassignBody(_selectedReportIds.length, assignee)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('取消'),
+            child: Text(l10n.taskCenterCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('继续'),
+            child: Text(l10n.contentComplianceDialogContinue),
           ),
         ],
       ),
@@ -373,13 +775,97 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          '已改派给 ${response.assigneeLabel}：成功 ${response.succeededCount}，失败 ${response.failedCount}',
+          l10n.contentComplianceReassignResult(
+            response.assigneeLabel,
+            response.succeededCount,
+            response.failedCount,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _runAutoRebalance({required bool dryRun}) async {
+    final l10n = AppLocalizations.of(context)!;
+    final queue = widget.controller.queue;
+    if (queue == null) {
+      return;
+    }
+    if (!dryRun && queue.capacity.overloadedReviewerCount == 0) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(
+        SnackBar(content: Text(l10n.contentComplianceAutoRebalanceNoOverload)),
+      );
+      return;
+    }
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(
+          dryRun
+              ? l10n.contentComplianceAutoRebalanceTitlePreview
+              : l10n.contentComplianceAutoRebalanceTitleExecute,
+        ),
+        content: Text(
+          dryRun
+              ? l10n.contentComplianceAutoRebalanceBodyPreview(
+                  queue.capacity.reviewerCapacityLimit,
+                )
+              : l10n.contentComplianceAutoRebalanceBodyExecute(
+                  queue.capacity.reviewerCapacityLimit,
+                ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(l10n.taskCenterCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(dryRun ? l10n.contentComplianceStartPreview : l10n.contentComplianceExecuteNow),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) {
+      return;
+    }
+    final response = await widget.controller.autoRebalanceReports(
+      dryRun: dryRun,
+      note: _resolutionNoteController.text,
+    );
+    if (!mounted || response == null) {
+      return;
+    }
+    final queueAfter = widget.controller.queue;
+    final remainingAlerts = queueAfter?.alerts.length ?? 0;
+    final overCapacityRemaining =
+        queueAfter?.alerts
+            .where((alert) => alert.stage == 'over_capacity')
+            .fold<int>(0, (sum, alert) => sum + alert.count) ??
+        0;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          dryRun
+              ? l10n.contentComplianceAutoRebalanceResultPreview(
+                  response.plannedMoveCount,
+                  response.reviewerCapacityLimit,
+                )
+              : l10n.contentComplianceAutoRebalanceResultExecute(
+                  response.plannedMoveCount,
+                  response.executedMoveCount,
+                  overCapacityRemaining,
+                  remainingAlerts,
+                ),
         ),
       ),
     );
   }
 
   Future<void> _showAuditDialog(ContentComplianceReportItemV1 item) async {
+    final l10n = AppLocalizations.of(context)!;
     final rows = await widget.controller.fetchReportAudit(item.id);
     if (!mounted) {
       return;
@@ -389,11 +875,11 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
       builder: (dialogContext) {
         final theme = Theme.of(dialogContext);
         return AlertDialog(
-          title: Text('举报审计 · ${item.id}'),
+          title: Text(l10n.contentComplianceAuditTitle(item.id)),
           content: SizedBox(
             width: 640,
             child: rows.isEmpty
-                ? const Text('当前没有可展示的审计记录。')
+                ? Text(l10n.contentComplianceAuditEmpty)
                 : SingleChildScrollView(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -444,7 +930,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('关闭'),
+              child: Text(l10n.helpHubDialogClose),
             ),
           ],
         );
@@ -454,6 +940,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final queue = widget.controller.queue;
     return Padding(
@@ -468,16 +955,16 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('内容与合规', style: theme.textTheme.titleMedium),
+            Text(l10n.contentComplianceTitle, style: theme.textTheme.titleMedium),
             const SizedBox(height: 8),
             Text(
-              '同一入口支持用户提交内容举报，以及 internal ops 的 claim / resolve 审核队列。',
+              l10n.contentComplianceIntro,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: 12),
-            Text('提交举报', style: theme.textTheme.titleSmall),
+            Text(l10n.contentComplianceSubmitReportTitle, style: theme.textTheme.titleSmall),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -541,18 +1028,18 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
             const SizedBox(height: 8),
             TextField(
               controller: _targetIdController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'target UUID',
-                hintText: '输入被举报对象 UUID',
+                hintText: l10n.contentComplianceTargetUuidHint,
               ),
             ),
             const SizedBox(height: 8),
             TextField(
               controller: _detailController,
               maxLines: 3,
-              decoration: const InputDecoration(
-                labelText: '补充说明',
-                hintText: '可填写上下文、时间线或风险描述',
+              decoration: InputDecoration(
+                labelText: l10n.contentComplianceDetailLabel,
+                hintText: l10n.contentComplianceDetailHint,
               ),
             ),
             const SizedBox(height: 12),
@@ -573,14 +1060,18 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.report_outlined),
-              label: Text(widget.controller.submittingReport ? '提交中…' : '提交举报'),
+              label: Text(
+                widget.controller.submittingReport
+                    ? l10n.contentComplianceSubmitting
+                    : l10n.contentComplianceSubmitReport,
+              ),
             ),
             if (widget.controller.queueEnabled) ...[
               const SizedBox(height: 16),
               Row(
                 children: [
                   Expanded(
-                    child: Text('审核队列', style: theme.textTheme.titleSmall),
+                    child: Text(l10n.contentComplianceQueueTitle, style: theme.textTheme.titleSmall),
                   ),
                   TextButton.icon(
                     onPressed:
@@ -591,29 +1082,284 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                 _queueTargetType == 'all' &&
                                 (_queueWorkspaceId ?? '').isEmpty &&
                                 (_queueClaimedByLabel ?? '').isEmpty &&
-                                (_queueSlaBucket ?? '').isEmpty)
+                                (_queueSlaBucket ?? '').isEmpty &&
+                                (_queueEscalationStage ?? '').isEmpty)
                         ? null
                         : widget.controller.clearQueueFilters,
                     icon: const Icon(Icons.filter_alt_off_outlined),
-                    label: const Text('清空筛选'),
+                    label: Text(l10n.contentComplianceClearFilters),
                   ),
                   TextButton.icon(
                     onPressed: widget.controller.loadingQueue
                         ? null
                         : widget.controller.loadQueue,
                     icon: const Icon(Icons.refresh),
-                    label: const Text('刷新'),
+                    label: Text(l10n.contentComplianceRefresh),
                   ),
                   TextButton.icon(
                     onPressed: queue == null || queue.items.isEmpty
                         ? null
                         : _copyCurrentQueueCsv,
                     icon: const Icon(Icons.download_outlined),
-                    label: const Text('复制 CSV'),
+                    label: Text(l10n.contentComplianceCopyCsv),
                   ),
                 ],
               ),
               if (queue != null) ...[
+                if (queue.alerts.isNotEmpty) ...[
+                  Builder(
+                    builder: (context) {
+                      final sortedAlerts = [...queue.alerts]
+                        ..sort(
+                          (a, b) => _alertPriority(a)
+                              .compareTo(_alertPriority(b)),
+                        );
+                      final topAlert = sortedAlerts.first;
+                      return Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: _alertBorderColor(theme, topAlert.level),
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.contentComplianceTopActionSummary(
+                                topAlert.title,
+                                topAlert.count,
+                                _topAlertActionHint(l10n, topAlert),
+                              ),
+                              style: theme.textTheme.bodySmall,
+                            ),
+                            const SizedBox(height: 8),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: [
+                                FilledButton(
+                                  key: const ValueKey(
+                                    'contentComplianceTopAlertPrimary',
+                                  ),
+                                  onPressed: widget.controller.mutatingQueue
+                                      ? null
+                                      : () => _runEffectiveTopPrimaryAction(
+                                          topAlert,
+                                        ),
+                                  child: Text(
+                                    _effectiveTopPrimaryLabel(l10n, topAlert),
+                                  ),
+                                ),
+                                if (_effectiveTopSecondaryLabel(l10n, topAlert) !=
+                                    null)
+                                  FilledButton.tonal(
+                                    onPressed: widget.controller.mutatingQueue
+                                        ? null
+                                        : () async {
+                                            _rememberSecondaryPreferenceForStage(
+                                              topAlert.stage,
+                                            );
+                                            await _runEffectiveTopSecondaryAction(
+                                              topAlert,
+                                            );
+                                          },
+                                    child: Text(
+                                      _effectiveTopSecondaryLabel(l10n, topAlert)!,
+                                    ),
+                                  ),
+                                OutlinedButton(
+                                  onPressed: widget.controller.loadingQueue
+                                      ? null
+                                      : () => _applyAlertShortcut(topAlert.stage),
+                                  child: Text(l10n.contentComplianceViewLayer),
+                                ),
+                                OutlinedButton(
+                                  key: const ValueKey(
+                                    'contentComplianceResetAlertPreferences',
+                                  ),
+                                  onPressed: _preferSecondaryAsPrimaryStages
+                                          .isEmpty
+                                      ? null
+                                      : _resetAlertActionPreferences,
+                                  child: Text(l10n.contentComplianceRestoreDefaultActionOrder),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  Builder(
+                    builder: (context) {
+                      final sortedAlerts = [...queue.alerts]
+                        ..sort(
+                          (a, b) => _alertPriority(a)
+                              .compareTo(_alertPriority(b)),
+                        );
+                      return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: sortedAlerts
+                        .map(
+                          (alert) => Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: _alertBorderColor(theme, alert.level),
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '${alert.title} (${alert.count})',
+                                    style: theme.textTheme.titleSmall,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    alert.message,
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: theme.colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Wrap(
+                                    spacing: 8,
+                                    runSpacing: 8,
+                                    children: [
+                                      OutlinedButton(
+                                        onPressed: widget.controller.loadingQueue
+                                            ? null
+                                            : () => _applyAlertShortcut(
+                                                alert.stage,
+                                              ),
+                                        child: Text(l10n.contentComplianceViewLayer),
+                                      ),
+                                      if (alert.stage == 'over_capacity')
+                                        FilledButton.tonal(
+                                          onPressed: widget.controller
+                                                  .mutatingQueue
+                                              ? null
+                                              : () =>
+                                                    _runAutoRebalance(dryRun: true),
+                                          child: Text(l10n.contentCompliancePreviewRebalanceShort),
+                                        ),
+                                      if (alert.stage == 'over_capacity')
+                                        FilledButton(
+                                          onPressed: widget.controller
+                                                  .mutatingQueue
+                                              ? null
+                                              : () => _runAutoRebalance(
+                                                  dryRun: false,
+                                                ),
+                                          child: Text(l10n.contentComplianceExecuteRebalanceShort),
+                                        ),
+                                      if (alert.stage == 'critical_unclaimed')
+                                        OutlinedButton(
+                                          onPressed: widget.controller.loadingQueue
+                                              ? null
+                                              : () {
+                                                  final count =
+                                                      _selectCriticalUnclaimedFromCurrentQueue();
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(
+                                                    SnackBar(
+                                                      content: Text(
+                                                        l10n.contentComplianceSnackSelectedCriticalReadyClaim(count),
+                                                      ),
+                                                    ),
+                                                  );
+                                                },
+                                          child: Text(l10n.contentComplianceSelectCriticalUnclaimed),
+                                        ),
+                                      if (alert.stage == 'critical_unclaimed')
+                                        FilledButton(
+                                          onPressed:
+                                              widget.controller.mutatingQueue
+                                                  ? null
+                                                  : () {
+                                                      final count =
+                                                          _selectCriticalUnclaimedFromCurrentQueue();
+                                                      if (count == 0) {
+                                                        ScaffoldMessenger.of(
+                                                          context,
+                                                        ).showSnackBar(
+                                                          SnackBar(
+                                                            content: Text(
+                                                              l10n.contentComplianceSnackNoCriticalUnclaimedInList,
+                                                            ),
+                                                          ),
+                                                        );
+                                                        return;
+                                                      }
+                                                      _runBulkAction('claim');
+                                                    },
+                                          child: Text(l10n.contentComplianceBulkClaimOneClick),
+                                        ),
+                                      if (alert.stage == 'stalled_claimed')
+                                        OutlinedButton(
+                                          onPressed: widget.controller.loadingQueue
+                                              ? null
+                                              : () {
+                                                  final count =
+                                                      _selectStalledClaimedFromCurrentQueue();
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(
+                                                    SnackBar(
+                                                      content: Text(
+                                                        l10n.contentComplianceSnackSelectedStalledClaimed(count),
+                                                      ),
+                                                    ),
+                                                  );
+                                                },
+                                          child: Text(l10n.contentComplianceSelectStalled),
+                                        ),
+                                      if (alert.stage == 'stalled_claimed')
+                                        FilledButton.tonal(
+                                          onPressed: widget.controller
+                                                  .mutatingQueue
+                                              ? null
+                                              : () => _runAutoRebalance(dryRun: true),
+                                          child: Text(l10n.contentCompliancePreviewStalledRebalance),
+                                        ),
+                                      if (alert.stage == 'escalated_72h')
+                                        OutlinedButton(
+                                          onPressed: widget.controller.loadingQueue
+                                              ? null
+                                              : () {
+                                                  final count =
+                                                      _selectEscalated72hFromCurrentQueue();
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(
+                                                    SnackBar(
+                                                      content: Text(
+                                                        l10n.contentComplianceSnackSelected72hUnconverged(count),
+                                                      ),
+                                                    ),
+                                                  );
+                                                },
+                                          child: Text(l10n.contentComplianceLabelSelect72hUnconverged),
+                                        ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        )
+                        .toList(growable: false),
+                      );
+                    },
+                  ),
+                ],
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
@@ -645,6 +1391,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                           workspaceName: _queueWorkspaceName,
                           claimedByLabel: _queueClaimedByLabel,
                           slaBucket: _queueSlaBucket,
+                          escalationStage: _queueEscalationStage,
                           claimedOnly: _queueClaimedOnly,
                         );
                       },
@@ -681,6 +1428,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                           workspaceName: _queueWorkspaceName,
                           claimedByLabel: _queueClaimedByLabel,
                           slaBucket: _queueSlaBucket,
+                          escalationStage: _queueEscalationStage,
                           claimedOnly: _queueClaimedOnly,
                         );
                       },
@@ -713,12 +1461,13 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                           workspaceName: _queueWorkspaceName,
                           claimedByLabel: _queueClaimedByLabel,
                           slaBucket: _queueSlaBucket,
+                          escalationStage: _queueEscalationStage,
                           claimedOnly: _queueClaimedOnly,
                         );
                       },
                     ),
                     FilterChip(
-                      label: const Text('仅已 claim'),
+                      label: Text(l10n.contentComplianceClaimedOnly),
                       selected: _queueClaimedOnly,
                       onSelected: (selected) {
                         setState(() {
@@ -732,6 +1481,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                           workspaceName: _queueWorkspaceName,
                           claimedByLabel: _queueClaimedByLabel,
                           slaBucket: _queueSlaBucket,
+                          escalationStage: _queueEscalationStage,
                           claimedOnly: selected,
                         );
                       },
@@ -753,6 +1503,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                             workspaceName: '',
                             claimedByLabel: _queueClaimedByLabel,
                             slaBucket: _queueSlaBucket,
+                            escalationStage: _queueEscalationStage,
                             claimedOnly: _queueClaimedOnly,
                           );
                         },
@@ -761,8 +1512,8 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                       InputChip(
                         label: Text(
                           _queueClaimedByLabel == 'unclaimed'
-                              ? 'owner: 未认领'
-                              : 'owner: ${_queueClaimedByLabel!}',
+                              ? l10n.contentComplianceOwnerChipUnclaimed
+                              : l10n.contentComplianceOwnerChip(_queueClaimedByLabel!),
                         ),
                         onDeleted: () {
                           setState(() {
@@ -776,6 +1527,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                             workspaceName: _queueWorkspaceName,
                             claimedByLabel: '',
                             slaBucket: _queueSlaBucket,
+                            escalationStage: _queueEscalationStage,
                             claimedOnly: _queueClaimedOnly,
                           );
                         },
@@ -795,6 +1547,31 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                             workspaceName: _queueWorkspaceName,
                             claimedByLabel: _queueClaimedByLabel,
                             slaBucket: '',
+                            escalationStage: _queueEscalationStage,
+                            claimedOnly: _queueClaimedOnly,
+                          );
+                        },
+                      ),
+                    if ((_queueEscalationStage ?? '').isNotEmpty)
+                      InputChip(
+                        label: Text(
+                          l10n.contentComplianceEscalationChipPrefix(
+                            _escalationStageLabel(l10n, _queueEscalationStage!),
+                          ),
+                        ),
+                        onDeleted: () {
+                          setState(() {
+                            _queueEscalationStage = null;
+                          });
+                          widget.controller.applyQueueFilters(
+                            status: _queueStatus,
+                            category: _queueCategory,
+                            targetType: _queueTargetType,
+                            workspaceId: _queueWorkspaceId,
+                            workspaceName: _queueWorkspaceName,
+                            claimedByLabel: _queueClaimedByLabel,
+                            slaBucket: _queueSlaBucket,
+                            escalationStage: '',
                             claimedOnly: _queueClaimedOnly,
                           );
                         },
@@ -841,7 +1618,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                     ),
                     FilterChip(
                       label: Text(
-                        'critical未claim ${queue.sla.unclaimedCritical}',
+                        l10n.contentComplianceSlaUnclaimedCritical(queue.sla.unclaimedCritical),
                       ),
                       selected: _queueSlaBucket == 'unclaimed_critical',
                       onSelected: (_) => _applySlaBucketFilter(
@@ -853,12 +1630,33 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                     Chip(
                       label: Text('oldest ${queue.sla.oldestOpenAgeHours}h'),
                     ),
+                    Chip(
+                      label: Text(
+                        'capacity ${queue.capacity.reviewerCapacityLimit}/reviewer',
+                      ),
+                    ),
+                    if (queue.capacity.overloadedReviewerCount > 0)
+                      Chip(
+                        label: Text(
+                          l10n.contentComplianceOverloadedReviewers(
+                            queue.capacity.overloadedReviewerCount,
+                          ),
+                        ),
+                      ),
+                    if (queue.capacity.overloadedClaimedCount > 0)
+                      Chip(
+                        label: Text(
+                          l10n.contentComplianceRebalanceNeeded(
+                            queue.capacity.overloadedClaimedCount,
+                          ),
+                        ),
+                      ),
                   ],
                 ),
                 if (queue.ownerSummaries.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   Text(
-                    'reviewer / owner 负载',
+                    l10n.contentComplianceReviewerOwnerLoad,
                     style: theme.textTheme.titleSmall,
                   ),
                   const SizedBox(height: 8),
@@ -881,7 +1679,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    _ownerSummaryLabel(owner),
+                                    _ownerSummaryLabel(l10n, owner),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: theme.textTheme.titleSmall,
@@ -893,9 +1691,12 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    'critical ${owner.criticalOpenCount} · overdue ${owner.overdueCount} · oldest ${owner.oldestOpenAgeHours}h',
+                                    'critical ${owner.criticalOpenCount} · overdue ${owner.overdueCount} · oldest ${owner.oldestOpenAgeHours}h'
+                                    '${owner.overCapacity ? l10n.contentComplianceOverCapacitySuffix(owner.overCapacityBy) : ''}',
                                     style: theme.textTheme.bodySmall?.copyWith(
-                                      color: theme.colorScheme.onSurfaceVariant,
+                                      color: owner.overCapacity
+                                          ? theme.colorScheme.error
+                                          : theme.colorScheme.onSurfaceVariant,
                                     ),
                                   ),
                                 ],
@@ -906,9 +1707,34 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                         .toList(growable: false),
                   ),
                 ],
+                if (queue.escalationSummaries.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Text(l10n.contentComplianceEscalationRhythm, style: theme.textTheme.titleSmall),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: queue.escalationSummaries
+                        .map(
+                          (item) => FilterChip(
+                            label: Text(
+                              '${_escalationStageLabel(l10n, item.escalationStage)} ${item.reportCount}',
+                            ),
+                            selected:
+                                _queueEscalationStage == item.escalationStage,
+                            onSelected: (_) => _applyEscalationStageFilter(
+                              _queueEscalationStage == item.escalationStage
+                                  ? null
+                                  : item.escalationStage,
+                            ),
+                          ),
+                        )
+                        .toList(growable: false),
+                  ),
+                ],
                 if (queue.workspaceSummaries.isNotEmpty) ...[
                   const SizedBox(height: 8),
-                  Text('workspace 热点', style: theme.textTheme.titleSmall),
+                  Text(l10n.contentComplianceWorkspaceHotspots, style: theme.textTheme.titleSmall),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
@@ -929,7 +1755,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    _workspaceSummaryLabel(workspace),
+                                    _workspaceSummaryLabel(l10n, workspace),
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                     style: theme.textTheme.titleSmall,
@@ -957,7 +1783,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                 const SizedBox(height: 8),
                 if (queue.items.isEmpty)
                   Text(
-                    '当前没有待处理举报',
+                    l10n.contentComplianceQueueEmpty,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -1010,6 +1836,14 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                       ),
                                       Chip(label: Text(item.severity)),
                                       Chip(label: Text(item.status)),
+                                      Chip(
+                                        label: Text(
+                                          _escalationStageLabel(
+                                            l10n,
+                                            item.escalationStage,
+                                          ),
+                                        ),
+                                      ),
                                       if ((item.projectName ?? '').isNotEmpty)
                                         Chip(label: Text(item.projectName!)),
                                       if ((item.workspaceName ?? '').isNotEmpty)
@@ -1060,12 +1894,12 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                       ClipboardData(text: item.targetId),
                                     );
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('已复制 target UUID'),
+                                      SnackBar(
+                                        content: Text(l10n.contentComplianceCopiedTargetUuid),
                                       ),
                                     );
                                   },
-                                  child: const Text('复制 target'),
+                                  child: Text(l10n.contentComplianceCopyTarget),
                                 ),
                                 OutlinedButton(
                                   onPressed: () {
@@ -1073,23 +1907,23 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                       ClipboardData(text: item.id),
                                     );
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('已复制 report UUID'),
+                                      SnackBar(
+                                        content: Text(l10n.contentComplianceCopiedReportUuid),
                                       ),
                                     );
                                   },
-                                  child: const Text('复制 report'),
+                                  child: Text(l10n.contentComplianceCopyReport),
                                 ),
                                 if (widget.onOpenTarget != null)
                                   OutlinedButton(
                                     onPressed: () => widget.onOpenTarget!(item),
-                                    child: Text(_openTargetLabel(item)),
+                                    child: Text(_openTargetLabel(l10n, item)),
                                   ),
                                 if (widget.onOpenOpsTarget != null)
                                   OutlinedButton(
                                     onPressed: () =>
                                         widget.onOpenOpsTarget!(item),
-                                    child: const Text('管理台上下文'),
+                                    child: Text(l10n.contentComplianceAdminConsoleContext),
                                   ),
                                 OutlinedButton(
                                   onPressed:
@@ -1100,8 +1934,8 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                   child: Text(
                                     widget.controller.loadingAuditReportId ==
                                             item.id
-                                        ? '加载审计中…'
-                                        : '查看审计',
+                                        ? l10n.contentComplianceLoadingAudit
+                                        : l10n.contentComplianceViewAudit,
                                   ),
                                 ),
                                 OutlinedButton(
@@ -1155,9 +1989,9 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                   const SizedBox(height: 8),
                   TextField(
                     controller: _reassignReviewerController,
-                    decoration: const InputDecoration(
-                      labelText: '批量改派 reviewer',
-                      hintText: '例如 internal_ops_cn_shift_b',
+                    decoration: InputDecoration(
+                      labelText: l10n.contentComplianceBulkReassignReviewerLabel,
+                      hintText: l10n.contentComplianceBulkReassignReviewerHint,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -1166,7 +2000,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                     runSpacing: 8,
                     children: [
                       FilterChip(
-                        label: Text('已选 ${_selectedReportIds.length}'),
+                        label: Text(l10n.contentComplianceSelectedCount(_selectedReportIds.length)),
                         selected: _selectedReportIds.isNotEmpty,
                         onSelected: (_) {},
                       ),
@@ -1188,7 +2022,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                     ..addAll(selectable);
                                 });
                               },
-                        child: const Text('全选开放项'),
+                        child: Text(l10n.contentComplianceSelectAllOpen),
                       ),
                       OutlinedButton(
                         onPressed: _selectedReportIds.isEmpty
@@ -1196,7 +2030,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                             : () => setState(() {
                                 _selectedReportIds.clear();
                               }),
-                        child: const Text('清空选择'),
+                        child: Text(l10n.contentComplianceClearSelection),
                       ),
                       FilledButton.tonal(
                         onPressed:
@@ -1204,7 +2038,19 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                 _selectedReportIds.isEmpty
                             ? null
                             : _runReassign,
-                        child: const Text('批量改派'),
+                        child: Text(l10n.contentComplianceBulkReassign),
+                      ),
+                      FilledButton.tonal(
+                        onPressed: widget.controller.mutatingQueue
+                            ? null
+                            : () => _runAutoRebalance(dryRun: true),
+                        child: Text(l10n.contentComplianceAutoRebalanceTitlePreview),
+                      ),
+                      FilledButton(
+                        onPressed: widget.controller.mutatingQueue
+                            ? null
+                            : () => _runAutoRebalance(dryRun: false),
+                        child: Text(l10n.contentComplianceAutoRebalanceTitleExecute),
                       ),
                       FilledButton.tonal(
                         onPressed:
@@ -1212,7 +2058,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                 _selectedReportIds.isEmpty
                             ? null
                             : () => _runBulkAction('claim'),
-                        child: const Text('批量 claim'),
+                        child: Text(l10n.contentComplianceBulkClaim),
                       ),
                       FilledButton.tonal(
                         onPressed:
@@ -1220,7 +2066,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                 _selectedReportIds.isEmpty
                             ? null
                             : () => _runBulkAction('resolve'),
-                        child: const Text('批量 resolve'),
+                        child: Text(l10n.contentComplianceBulkResolve),
                       ),
                       FilledButton.tonal(
                         onPressed:
@@ -1228,7 +2074,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                 _selectedReportIds.isEmpty
                             ? null
                             : () => _runBulkAction('dismiss'),
-                        child: const Text('批量 dismiss'),
+                        child: Text(l10n.contentComplianceBulkDismiss),
                       ),
                     ],
                   ),
@@ -1259,9 +2105,9 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                 TextField(
                   controller: _resolutionNoteController,
                   maxLines: 2,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'resolution note',
-                    hintText: 'claim / resolve 时可复用这段说明',
+                    hintText: l10n.contentComplianceResolutionNoteHint,
                   ),
                 ),
               ],

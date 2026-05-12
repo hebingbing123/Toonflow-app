@@ -3598,5 +3598,324 @@
   "adminConsoleErrMemberRoleRequired": "新增或更新成员时必须指定角色",
   "adminConsoleErrTargetOwnerUserIdRequired": "目标 owner userId 不能为空",
   "adminConsoleErrAtLeastOneProjectRequired": "至少选择一个 project",
-  "adminConsoleErrBatchNoteRequired": "批量写备注时必须填写内容"
+  "adminConsoleErrBatchNoteRequired": "批量写备注时必须填写内容",
+  "contentComplianceWorkspacePersonalScope": "个人 / 直连用户范围",
+  "contentComplianceOpenProject": "打开项目",
+  "contentComplianceOpenScriptProject": "打开剧本项目",
+  "contentComplianceOpenStoryboardProject": "打开分镜项目",
+  "contentComplianceOpenAssetProject": "打开资产项目",
+  "contentComplianceOpenNovelProject": "打开小说项目",
+  "contentComplianceOpenUserContext": "查看用户上下文",
+  "contentComplianceOpenContext": "打开上下文",
+  "contentComplianceOwnerUnclaimed": "未认领",
+  "contentComplianceEscalationCriticalUnclaimed": "critical 未认领",
+  "contentComplianceEscalationStalledClaimed": "claimed 停滞",
+  "contentComplianceEscalationOverCapacity": "reviewer 超载",
+  "contentComplianceEscalationEscalated72h": "72h 升级",
+  "contentComplianceEscalationUrgent": "紧急",
+  "contentComplianceEscalationClosed": "已关闭",
+  "contentComplianceEscalationWatch": "观察",
+  "contentComplianceAlertHintCriticalUnclaimed": "建议先一键批量 claim critical 未认领项",
+  "contentComplianceAlertHintOverCapacity": "建议先预览或执行自动再平衡",
+  "contentComplianceAlertHintStalledClaimed": "建议先处理停滞 claimed 项（改派或收敛）",
+  "contentComplianceAlertHintEscalated72h": "建议优先清理 72h 未收敛项",
+  "contentComplianceAlertHintDefault": "建议先查看该分层并处理高风险项",
+  "contentComplianceSnackNoCriticalUnclaimedBulkClaim": "当前没有可批量 claim 的 critical 未认领项",
+  "contentComplianceSnackSelectedStalledClaimed": "已选中 {count} 条 claimed 停滞项，可直接改派或处理",
+  "@contentComplianceSnackSelectedStalledClaimed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "contentComplianceSnackSelected72hUnconverged": "已选中 {count} 条 72h 未收敛项，可直接改派/处理",
+  "@contentComplianceSnackSelected72hUnconverged": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "contentComplianceSnackSelectedCriticalUnclaimed": "已选中 {count} 条 critical 未认领项",
+  "@contentComplianceSnackSelectedCriticalUnclaimed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "contentComplianceSnackSelected72hItems": "已选中 {count} 条 72h 未收敛项",
+  "@contentComplianceSnackSelected72hItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "contentComplianceSnackRestoredDefaultActionOrder": "已恢复默认动作顺序",
+  "contentComplianceBulkClaim": "批量 claim",
+  "contentComplianceBulkResolve": "批量 resolve",
+  "contentComplianceBulkDismiss": "批量 dismiss",
+  "contentComplianceBulkGeneric": "批量操作",
+  "contentComplianceBulkConfirmBody": "确定对 {count} 条举报执行 {verb} 吗？",
+  "@contentComplianceBulkConfirmBody": {
+    "placeholders": {
+      "verb": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "contentComplianceBulkConfirmNoteReuse": "\n\n会复用当前 resolution note。",
+  "contentComplianceBulkResult": "{verb} 完成：成功 {succeeded}，失败 {failed}；当前告警 {remainingAlerts} 条（高优先级 {criticalAlerts} 条）",
+  "@contentComplianceBulkResult": {
+    "placeholders": {
+      "verb": {
+        "type": "String"
+      },
+      "succeeded": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      },
+      "remainingAlerts": {
+        "type": "int"
+      },
+      "criticalAlerts": {
+        "type": "int"
+      }
+    }
+  },
+  "contentComplianceCsvCopied": "已复制当前筛选结果 CSV（{count} 条）",
+  "@contentComplianceCsvCopied": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "contentComplianceFillReviewerFirst": "请先填写目标 reviewer",
+  "contentComplianceReassignTitle": "批量改派",
+  "contentComplianceReassignBody": "确定将 {count} 条举报改派给 {assignee} 吗？",
+  "@contentComplianceReassignBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "assignee": {
+        "type": "String"
+      }
+    }
+  },
+  "contentComplianceReassignResult": "已改派给 {assignee}：成功 {succeeded}，失败 {failed}",
+  "@contentComplianceReassignResult": {
+    "placeholders": {
+      "assignee": {
+        "type": "String"
+      },
+      "succeeded": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
+  "contentComplianceAutoRebalanceNoOverload": "当前没有超载 reviewer，无需自动再平衡",
+  "contentComplianceAutoRebalanceTitlePreview": "预览自动再平衡",
+  "contentComplianceAutoRebalanceTitleExecute": "执行自动再平衡",
+  "contentComplianceAutoRebalanceBodyPreview": "按容量阈值（{limit}）预览改派计划，不会写入。",
+  "@contentComplianceAutoRebalanceBodyPreview": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "contentComplianceAutoRebalanceBodyExecute": "按容量阈值（{limit}）执行自动改派，并写入审计。",
+  "@contentComplianceAutoRebalanceBodyExecute": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "contentComplianceStartPreview": "开始预览",
+  "contentComplianceExecuteNow": "立即执行",
+  "contentComplianceAutoRebalanceResultPreview": "自动再平衡预览：建议 {planned} 条（capacity {capacity}）",
+  "@contentComplianceAutoRebalanceResultPreview": {
+    "placeholders": {
+      "planned": {
+        "type": "int"
+      },
+      "capacity": {
+        "type": "int"
+      }
+    }
+  },
+  "contentComplianceAutoRebalanceResultExecute": "自动再平衡完成：计划 {planned} 条，执行 {executed} 条；剩余 over_capacity {overCapacityRemaining} 条，告警共 {remainingAlerts} 条",
+  "@contentComplianceAutoRebalanceResultExecute": {
+    "placeholders": {
+      "planned": {
+        "type": "int"
+      },
+      "executed": {
+        "type": "int"
+      },
+      "overCapacityRemaining": {
+        "type": "int"
+      },
+      "remainingAlerts": {
+        "type": "int"
+      }
+    }
+  },
+  "contentComplianceAuditTitle": "举报审计 · {reportId}",
+  "@contentComplianceAuditTitle": {
+    "placeholders": {
+      "reportId": {
+        "type": "String"
+      }
+    }
+  },
+  "contentComplianceAuditEmpty": "当前没有可展示的审计记录。",
+  "contentComplianceTitle": "内容与合规",
+  "contentComplianceIntro": "同一入口支持用户提交内容举报，以及 internal ops 的 claim / resolve 审核队列。",
+  "contentComplianceSubmitReportTitle": "提交举报",
+  "contentComplianceTargetUuidHint": "输入被举报对象 UUID",
+  "contentComplianceDetailLabel": "补充说明",
+  "contentComplianceDetailHint": "可填写上下文、时间线或风险描述",
+  "contentComplianceSubmitting": "提交中…",
+  "contentComplianceSubmitReport": "提交举报",
+  "contentComplianceQueueTitle": "审核队列",
+  "contentComplianceClearFilters": "清空筛选",
+  "contentComplianceRefresh": "刷新",
+  "contentComplianceCopyCsv": "复制 CSV",
+  "contentComplianceTopActionSummary": "首要动作：{title}（{count}）\n{hint}",
+  "@contentComplianceTopActionSummary": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "hint": {
+        "type": "String"
+      }
+    }
+  },
+  "contentComplianceViewLayer": "查看该分层",
+  "contentComplianceRestoreDefaultActionOrder": "恢复默认动作顺序",
+  "contentCompliancePreviewRebalanceShort": "预览再平衡",
+  "contentComplianceExecuteRebalanceShort": "执行再平衡",
+  "contentComplianceSnackSelectedCriticalReadyClaim": "已选中 {count} 条 critical 未认领项，可直接批量 claim",
+  "@contentComplianceSnackSelectedCriticalReadyClaim": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "contentComplianceSelectCriticalUnclaimed": "选中 critical 未认领",
+  "contentComplianceSnackNoCriticalUnclaimedInList": "当前列表没有可批量 claim 的 critical 未认领项",
+  "contentComplianceBulkClaimOneClick": "一键批量 claim",
+  "contentComplianceSelectStalled": "选中停滞项",
+  "contentCompliancePreviewStalledRebalance": "预览停滞再平衡",
+  "contentComplianceSelect72hUnconverged": "选中72h未收敛项",
+  "contentComplianceClaimedOnly": "仅已 claim",
+  "contentComplianceOwnerChipUnclaimed": "owner: 未认领",
+  "contentComplianceOwnerChip": "owner: {owner}",
+  "@contentComplianceOwnerChip": {
+    "placeholders": {
+      "owner": {
+        "type": "String"
+      }
+    }
+  },
+  "contentComplianceEscalationChipPrefix": "升级: {stage}",
+  "@contentComplianceEscalationChipPrefix": {
+    "placeholders": {
+      "stage": {
+        "type": "String"
+      }
+    }
+  },
+  "contentComplianceSlaUnclaimedCritical": "critical未claim {count}",
+  "@contentComplianceSlaUnclaimedCritical": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "contentComplianceOverloadedReviewers": "超载 reviewer {count}",
+  "@contentComplianceOverloadedReviewers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "contentComplianceRebalanceNeeded": "需再平衡 {count}",
+  "@contentComplianceRebalanceNeeded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "contentComplianceReviewerOwnerLoad": "reviewer / owner 负载",
+  "contentComplianceOverCapacitySuffix": " · 超载 +{by}",
+  "@contentComplianceOverCapacitySuffix": {
+    "placeholders": {
+      "by": {
+        "type": "int"
+      }
+    }
+  },
+  "contentComplianceEscalationRhythm": "升级节奏",
+  "contentComplianceWorkspaceHotspots": "workspace 热点",
+  "contentComplianceQueueEmpty": "当前没有待处理举报",
+  "contentComplianceCopyTarget": "复制 target",
+  "contentComplianceCopiedTargetUuid": "已复制 target UUID",
+  "contentComplianceCopyReport": "复制 report",
+  "contentComplianceCopiedReportUuid": "已复制 report UUID",
+  "contentComplianceAdminConsoleContext": "管理台上下文",
+  "contentComplianceLoadingAudit": "加载审计中…",
+  "contentComplianceViewAudit": "查看审计",
+  "contentComplianceBulkReassignReviewerLabel": "批量改派 reviewer",
+  "contentComplianceBulkReassignReviewerHint": "例如 internal_ops_cn_shift_b",
+  "contentComplianceSelectedCount": "已选 {count}",
+  "@contentComplianceSelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "contentComplianceSelectAllOpen": "全选开放项",
+  "contentComplianceClearSelection": "清空选择",
+  "contentComplianceBulkReassign": "批量改派",
+  "contentComplianceResolutionNoteHint": "claim / resolve 时可复用这段说明",
+  "contentComplianceTopSecondaryPendingOnly": "仅选中待处理项",
+  "contentComplianceTopSecondaryRunRebalance": "执行自动再平衡",
+  "contentComplianceTopSecondaryPreviewStalledRebalance": "预览停滞再平衡",
+  "contentComplianceTopSecondarySelect72hOnly": "仅选中72h未收敛项",
+  "contentComplianceDialogContinue": "继续",
+  "contentComplianceLabelSelect72hUnconverged": "选中72h未收敛项",
+  "contentComplianceErrAssigneeRequired": "改派 reviewer 不能为空",
+  "taskCenterFieldProjectUuidOptional": "项目 UUID（可选）",
+  "qualityReviewsScopeSeedLine": "范围种子：{line}",
+  "@qualityReviewsScopeSeedLine": {
+    "placeholders": {
+      "line": {
+        "type": "String"
+      }
+    }
+  }
 }
