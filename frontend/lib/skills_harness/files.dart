@@ -2,6 +2,7 @@ part of 'controller.dart';
 
 extension SkillsHarnessFileController on SkillsHarnessController {
   Future<void> previewSkillFile(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     final token = _accessToken;
     if (token == null) return;
     final path = skillPathController.text.trim();
@@ -15,7 +16,7 @@ extension SkillsHarnessFileController on SkillsHarnessController {
       _publish();
       if (!context.mounted) return;
       final text = r.content.length > 12000
-          ? '${r.content.substring(0, 12000)}…\n\n(truncated)'
+          ? l10n.skillsHarnessPreviewTruncated(r.content.substring(0, 12000))
           : r.content;
       await showDialog<void>(
         context: context,
@@ -30,7 +31,7 @@ extension SkillsHarnessFileController on SkillsHarnessController {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('Close'),
+              child: Text(l10n.skillsHarnessPreviewClose),
             ),
           ],
         ),
@@ -47,6 +48,7 @@ extension SkillsHarnessFileController on SkillsHarnessController {
   }
 
   Future<void> showSkillVersionHistory(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     final token = _accessToken;
     if (token == null) return;
     final path = skillPathController.text.trim();
@@ -72,21 +74,23 @@ extension SkillsHarnessFileController on SkillsHarnessController {
                 selectedContent,
               );
               return AlertDialog(
-                title: Text('版本历史 · $path'),
+                title: Text(l10n.skillsHarnessVersionDialogTitle(path)),
                 content: SizedBox(
                   width: 980,
                   height: 720,
                   child: versions.isEmpty
-                      ? const Padding(
+                      ? Padding(
                           padding: EdgeInsets.symmetric(vertical: 24),
-                          child: Text('该文件暂无版本历史记录'),
+                          child: Text(l10n.skillsHarnessVersionEmpty),
                         )
                       : Column(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              '共 ${versions.length} 个版本，选择一条历史记录查看与当前版本的差异。',
+                              l10n.skillsHarnessVersionCountHint(
+                                versions.length,
+                              ),
                               style: Theme.of(ctx).textTheme.bodySmall,
                             ),
                             const SizedBox(height: 12),
@@ -105,7 +109,9 @@ extension SkillsHarnessFileController on SkillsHarnessController {
                                     _formatSkillVersionTime(version.changedAt),
                                     if (summary != null && summary.isNotEmpty)
                                       summary,
-                                    'hash ${_shortHash(version.hashAfter)}',
+                                    l10n.skillsHarnessVersionHash(
+                                      _shortHash(version.hashAfter),
+                                    ),
                                   ].join(' · ');
                                   return ListTile(
                                     dense: true,
@@ -113,8 +119,12 @@ extension SkillsHarnessFileController on SkillsHarnessController {
                                     contentPadding: EdgeInsets.zero,
                                     title: Text(
                                       version.rollbackOf == null
-                                          ? '版本 ${index + 1}'
-                                          : '回滚版本 ${index + 1}',
+                                          ? l10n.skillsHarnessVersionTitle(
+                                              index + 1,
+                                            )
+                                          : l10n.skillsHarnessRollbackVersionTitle(
+                                              index + 1,
+                                            ),
                                     ),
                                     subtitle: Text(subtitle),
                                     onTap: () => setState(() {
@@ -126,7 +136,7 @@ extension SkillsHarnessFileController on SkillsHarnessController {
                             ),
                             const SizedBox(height: 12),
                             Text(
-                              '当前版本 vs 选中版本',
+                              l10n.skillsHarnessDiffTitle,
                               style: Theme.of(ctx).textTheme.titleSmall,
                             ),
                             const SizedBox(height: 8),
@@ -193,20 +203,29 @@ extension SkillsHarnessFileController on SkillsHarnessController {
                               final confirmed = await showDialog<bool>(
                                 context: ctx,
                                 builder: (confirmCtx) => AlertDialog(
-                                  title: const Text('确认回滚'),
+                                  title: Text(
+                                    l10n.skillsHarnessConfirmRollbackTitle,
+                                  ),
                                   content: Text(
-                                    '当前文件将回滚到 ${_formatSkillVersionTime(selected!.changedAt)} 的版本（hash ${_shortHash(selected!.hashAfter)}）。',
+                                    l10n.skillsHarnessConfirmRollbackBody(
+                                      _formatSkillVersionTime(
+                                        selected!.changedAt,
+                                      ),
+                                      _shortHash(selected!.hashAfter),
+                                    ),
                                   ),
                                   actions: [
                                     TextButton(
                                       onPressed: () =>
                                           Navigator.of(confirmCtx).pop(false),
-                                      child: const Text('取消'),
+                                      child: Text(l10n.skillsHarnessCancel),
                                     ),
                                     FilledButton(
                                       onPressed: () =>
                                           Navigator.of(confirmCtx).pop(true),
-                                      child: const Text('确认回滚'),
+                                      child: Text(
+                                        l10n.skillsHarnessConfirmRollback,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -221,11 +240,15 @@ extension SkillsHarnessFileController on SkillsHarnessController {
                               if (!ctx.mounted) return;
                               Navigator.of(ctx).pop();
                             },
-                      child: Text(rollingBackSkillVersion ? '回滚中…' : '回滚到此版本'),
+                      child: Text(
+                        rollingBackSkillVersion
+                            ? l10n.skillsHarnessRollingBack
+                            : l10n.skillsHarnessRollbackToVersion,
+                      ),
                     ),
                   TextButton(
                     onPressed: () => Navigator.of(ctx).pop(),
-                    child: const Text('关闭'),
+                    child: Text(l10n.skillsHarnessPreviewClose),
                   ),
                 ],
               );
@@ -261,6 +284,7 @@ extension SkillsHarnessFileController on SkillsHarnessController {
       );
       loadingSkillPut = false;
       skillMutationLine =
+          _l10n?.skillsHarnessPutResult(r.path, r.content.length) ??
           'PUT 200: ${r.path} (${r.content.length} chars written)';
       _publish();
     } on RustApiException catch (e) {
@@ -291,6 +315,7 @@ extension SkillsHarnessFileController on SkillsHarnessController {
       );
       loadingSkillPost = false;
       skillMutationLine =
+          _l10n?.skillsHarnessPostResult(r.path, r.content.length) ??
           'POST 201: ${r.path} (${r.content.length} chars written)';
       _publish();
     } on RustApiException catch (e) {
@@ -316,7 +341,8 @@ extension SkillsHarnessFileController on SkillsHarnessController {
     try {
       await deleteSkillContent(token, path);
       loadingSkillDelete = false;
-      skillMutationLine = 'DELETE 204: $path';
+      skillMutationLine =
+          _l10n?.skillsHarnessDeleteResult(path) ?? 'DELETE 204: $path';
       _publish();
     } on RustApiException catch (e) {
       _setError(e.toString());
@@ -334,6 +360,7 @@ extension SkillsHarnessFileController on SkillsHarnessController {
     required String path,
     required SkillVersion version,
   }) async {
+    final l10n = AppLocalizations.of(context)!;
     final token = _accessToken;
     if (token == null) return;
     rollingBackSkillVersion = true;
@@ -344,16 +371,18 @@ extension SkillsHarnessFileController on SkillsHarnessController {
         token,
         filePath: path,
         targetVersionId: version.id,
-        summary: 'SkillsHarness 手动回滚',
+        summary: l10n.skillsHarnessRollbackSummary,
       );
       final current = await fetchSkillContent(token, path);
       skillContentController.text = current.content;
-      skillMutationLine =
-          'ROLLBACK 200: ${result.filePath} -> ${_shortHash(result.hashAfter)}';
+      skillMutationLine = l10n.skillsHarnessRollbackResult(
+        result.filePath,
+        _shortHash(result.hashAfter),
+      );
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('技能文件已回滚并刷新内容')));
+        ).showSnackBar(SnackBar(content: Text(l10n.skillsHarnessRollbackDone)));
       }
     } on RustApiException catch (e) {
       _setError(e.toString());

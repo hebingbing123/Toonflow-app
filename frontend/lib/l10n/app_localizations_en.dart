@@ -7707,6 +7707,322 @@ class AppLocalizationsEn extends AppLocalizations {
       'Generation job running';
 
   @override
+  String get scriptEditorEditImageWorkbenchTitle => 'Edit image workbench';
+
+  @override
+  String get scriptEditorEditImageWorkbenchIntro =>
+      'Manage the edit-image flow inside the script workbench—upload a source image and start generation instead of relying only on production probes.';
+
+  @override
+  String get scriptEditorEditImageWorkbenchSyncing => 'Syncing…';
+
+  @override
+  String get scriptEditorEditImageWorkbenchResyncFlow => 'Resync flow';
+
+  @override
+  String scriptEditorEditImageWorkbenchDefaultModelLine(
+    String model,
+    String resolution,
+  ) {
+    return 'Default model $model · $resolution';
+  }
+
+  @override
+  String get scriptEditorEditImageWorkbenchUploadLabel =>
+      'Source image base64 / data URI';
+
+  @override
+  String get scriptEditorEditImageWorkbenchUploadHelper =>
+      'Paste data:image/png;base64,... or raw base64; used for upload-image.';
+
+  @override
+  String get scriptEditorEditImageWorkbenchBusy => 'Working…';
+
+  @override
+  String get scriptEditorEditImageWorkbenchUploadSource =>
+      'Upload source image';
+
+  @override
+  String get scriptEditorEditImageWorkbenchFlowIdLabel => 'Flow ID';
+
+  @override
+  String get scriptEditorEditImageWorkbenchModelOptionalLabel =>
+      'Generation model (optional)';
+
+  @override
+  String get scriptEditorEditImageWorkbenchPromptLabel => 'Generation prompt';
+
+  @override
+  String get scriptEditorEditImageWorkbenchGenerate => 'Generate from flow';
+
+  @override
+  String get scriptEditorEditImageWorkbenchSaveFlow => 'Save current flow';
+
+  @override
+  String get scriptEditorEditImageWorkbenchStepsHeading => 'Step status';
+
+  @override
+  String get scriptEditorEditImageWorkbenchStepsEmpty =>
+      'No steps yet—tap Resync flow first.';
+
+  @override
+  String scriptEditorEditImageWorkbenchStepLine(String stepId, String status) {
+    return '$stepId · $status';
+  }
+
+  @override
+  String get scriptEditorEditImageWorkbenchStepIdLabel => 'Step ID';
+
+  @override
+  String get scriptEditorEditImageWorkbenchNewStatusLabel => 'New status';
+
+  @override
+  String get scriptEditorEditImageWorkbenchNewStatusHelper =>
+      'e.g. pending / completed / failed';
+
+  @override
+  String get scriptEditorEditImageWorkbenchUpdateStep => 'Update step status';
+
+  @override
+  String scriptEditorEditImageWorkbenchFlowLoaded(
+    String flowId,
+    int stepCount,
+    String model,
+  ) {
+    return 'Loaded flow $flowId, $stepCount steps, default model $model.';
+  }
+
+  @override
+  String scriptEditorEditImageWorkbenchLoadFailed(String error) {
+    return 'Failed to load edit-image workbench: $error';
+  }
+
+  @override
+  String get scriptEditorEditImageWorkbenchErrPasteSource =>
+      'Paste source image base64 or data URI first.';
+
+  @override
+  String get scriptEditorEditImageWorkbenchErrFlowAndPromptEmpty =>
+      'Flow ID and generation prompt are required.';
+
+  @override
+  String get scriptEditorEditImageWorkbenchSourceUploaded =>
+      'Source image uploaded; URL returned—you can continue flow generation.';
+
+  @override
+  String scriptEditorEditImageWorkbenchJobEnqueued(
+    String jobId,
+    String status,
+  ) {
+    return 'Generation job enqueued: $jobId · $status';
+  }
+
+  @override
+  String get scriptEditorEditImageWorkbenchErrFlowIdEmpty =>
+      'Flow ID is required.';
+
+  @override
+  String scriptEditorEditImageWorkbenchFlowSaved(String flowId) {
+    return 'Flow $flowId saved.';
+  }
+
+  @override
+  String get scriptEditorEditImageWorkbenchErrFlowStepStatusEmpty =>
+      'Flow ID, step ID, and new status are required.';
+
+  @override
+  String scriptEditorEditImageWorkbenchStepUpdated(String stepId) {
+    return 'Step $stepId updated.';
+  }
+
+  @override
+  String get skillsHarnessTitle => 'Harness / skills';
+
+  @override
+  String get skillsHarnessPrefsTooltip =>
+      'Local client preferences (debug shell; same overflow menu as other panel titles).';
+
+  @override
+  String skillsHarnessToolsLabel(String line) {
+    return 'tools: $line';
+  }
+
+  @override
+  String skillsHarnessUserWasmValidateLabel(String line) {
+    return 'user-wasm validate: $line';
+  }
+
+  @override
+  String skillsHarnessUserWasmPersistLabel(String line) {
+    return 'user-wasm persist: $line';
+  }
+
+  @override
+  String skillsHarnessUserWasmListLabel(String line) {
+    return 'user-wasm list: $line';
+  }
+
+  @override
+  String skillsHarnessUserWasmRevokeLabel(String line) {
+    return 'user-wasm revoke: $line';
+  }
+
+  @override
+  String skillsHarnessSummaryLabel(String line) {
+    return 'summary: $line';
+  }
+
+  @override
+  String get skillsHarnessPathLabel => 'Skill relative path';
+
+  @override
+  String get skillsHarnessPathHelper =>
+      'POST needs a path that does not exist yet under data/skills';
+
+  @override
+  String get skillsHarnessBodyLabel => 'Body for PUT / POST';
+
+  @override
+  String get skillsHarnessRollingBack => 'Rolling back…';
+
+  @override
+  String get skillsHarnessVersions => 'Version history / rollback';
+
+  @override
+  String get skillsHarnessWsRecent => 'Recent WebSocket messages:';
+
+  @override
+  String skillsHarnessPreviewTruncated(String preview) {
+    return '$preview\n\n(Preview truncated at 12,000 characters.)';
+  }
+
+  @override
+  String get skillsHarnessPreviewClose => 'Close';
+
+  @override
+  String skillsHarnessVersionDialogTitle(String path) {
+    return 'Version history · $path';
+  }
+
+  @override
+  String get skillsHarnessVersionEmpty => 'No recorded versions for this path.';
+
+  @override
+  String skillsHarnessVersionCountHint(int count) {
+    return '$count versions';
+  }
+
+  @override
+  String skillsHarnessVersionHash(String hash) {
+    return 'hash $hash';
+  }
+
+  @override
+  String skillsHarnessVersionTitle(int index) {
+    return 'Version $index';
+  }
+
+  @override
+  String skillsHarnessRollbackVersionTitle(int index) {
+    return 'Rollback snapshot $index';
+  }
+
+  @override
+  String get skillsHarnessDiffTitle => 'Diff (current vs selected)';
+
+  @override
+  String get skillsHarnessConfirmRollbackTitle => 'Confirm rollback';
+
+  @override
+  String skillsHarnessConfirmRollbackBody(String time, String hash) {
+    return 'Rollback to the snapshot from $time (hash $hash)?';
+  }
+
+  @override
+  String get skillsHarnessCancel => 'Cancel';
+
+  @override
+  String get skillsHarnessConfirmRollback => 'Rollback';
+
+  @override
+  String get skillsHarnessRollbackToVersion => 'Rollback to this version';
+
+  @override
+  String skillsHarnessPutResult(String path, int length) {
+    return 'PUT succeeded: $path ($length chars written)';
+  }
+
+  @override
+  String skillsHarnessPostResult(String path, int length) {
+    return 'POST succeeded: $path ($length chars written)';
+  }
+
+  @override
+  String skillsHarnessDeleteResult(String path) {
+    return 'DELETE succeeded: $path';
+  }
+
+  @override
+  String get skillsHarnessRollbackSummary => 'Rollback via harness UI';
+
+  @override
+  String skillsHarnessRollbackResult(String path, String hash) {
+    return 'Rolled back $path · hash $hash';
+  }
+
+  @override
+  String get skillsHarnessRollbackDone => 'Rollback completed.';
+
+  @override
+  String skillsHarnessValidateResult(String validated, int sizeBytes) {
+    return 'validated=$validated, size_bytes=$sizeBytes (embedded probe)';
+  }
+
+  @override
+  String skillsHarnessPersistResult(
+    String id,
+    String sha,
+    int sizeBytes,
+    String createdAt,
+  ) {
+    return 'stored id=$id, sha256=$sha, size=$sizeBytes, at=$createdAt';
+  }
+
+  @override
+  String get skillsHarnessStoredModulesEmpty => '0 stored modules';
+
+  @override
+  String skillsHarnessStoredModulesSummary(
+    int count,
+    String preview,
+    String suffix,
+  ) {
+    return '$count stored modules — $preview$suffix';
+  }
+
+  @override
+  String skillsHarnessRevokeResult(String id, String revokedAt) {
+    return 'revoked id=$id, revoked_at=$revokedAt';
+  }
+
+  @override
+  String skillsHarnessAggregateResult(
+    String scope,
+    int markdownCount,
+    int totalBytes,
+  ) {
+    return 'scope=$scope · $markdownCount markdown files, $totalBytes bytes total';
+  }
+
+  @override
+  String skillsHarnessListSummary(int count, String sample) {
+    return '$count files; sample: $sample';
+  }
+
+  @override
+  String get skillsHarnessListSampleEmpty => '—';
+
+  @override
   String get scriptEditorStoryboardsProductionEmptyData =>
       'Production view has no storyboard rows yet.';
 

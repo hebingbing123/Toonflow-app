@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../rust_api.dart';
 
 class ScriptEditImageWorkbenchDialogViewModel {
@@ -52,7 +53,7 @@ class ScriptEditImageWorkbenchDialogViewCallbacks {
   final VoidCallback onClose;
 }
 
-/// 编辑图片工作台视图，承载 flow 同步、源图上传、出图与步骤状态编辑。
+/// Script edit-image workbench dialog: flow sync, source upload, generate, step edits.
 class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
   const ScriptEditImageWorkbenchDialogView({
     super.key,
@@ -65,6 +66,7 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final outline = theme.colorScheme.outline;
     final viewportWidth = MediaQuery.sizeOf(context).width;
@@ -72,7 +74,7 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
         ? viewportWidth.clamp(320.0, 780.0)
         : 780.0;
     return AlertDialog(
-      title: const Text('编辑图片工作台'),
+      title: Text(l10n.scriptEditorEditImageWorkbenchTitle),
       content: SizedBox(
         width: dialogWidth,
         child: SingleChildScrollView(
@@ -81,7 +83,7 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '直接在脚本工作台内管理 edit-image flow、上传源图并发起生成，不再只停留在 production probe。',
+                l10n.scriptEditorEditImageWorkbenchIntro,
                 style: theme.textTheme.bodySmall?.copyWith(color: outline),
               ),
               const SizedBox(height: 12),
@@ -94,11 +96,18 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
                     onPressed: model.loading || model.busy
                         ? null
                         : callbacks.onRefresh,
-                    child: Text(model.loading ? '同步中…' : '重新同步 Flow'),
+                    child: Text(
+                      model.loading
+                          ? l10n.scriptEditorEditImageWorkbenchSyncing
+                          : l10n.scriptEditorEditImageWorkbenchResyncFlow,
+                    ),
                   ),
                   if (model.defaultModel != null)
                     Text(
-                      '默认模型 ${model.defaultModel!.model} · ${model.defaultModel!.resolution}',
+                      l10n.scriptEditorEditImageWorkbenchDefaultModelLine(
+                        model.defaultModel!.model,
+                        model.defaultModel!.resolution,
+                      ),
                       style: theme.textTheme.bodySmall,
                     ),
                 ],
@@ -108,10 +117,9 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
                 controller: model.uploadCtrl,
                 minLines: 4,
                 maxLines: 8,
-                decoration: const InputDecoration(
-                  labelText: '源图 base64 / data URI',
-                  helperText:
-                      '粘贴 data:image/png;base64,... 或原始 base64；用于 upload-image。',
+                decoration: InputDecoration(
+                  labelText: l10n.scriptEditorEditImageWorkbenchUploadLabel,
+                  helperText: l10n.scriptEditorEditImageWorkbenchUploadHelper,
                   alignLabelWithHint: true,
                 ),
               ),
@@ -125,7 +133,11 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
                     onPressed: model.busy
                         ? null
                         : callbacks.onUploadSourceImage,
-                    child: Text(model.busy ? '处理中…' : '上传源图'),
+                    child: Text(
+                      model.busy
+                          ? l10n.scriptEditorEditImageWorkbenchBusy
+                          : l10n.scriptEditorEditImageWorkbenchUploadSource,
+                    ),
                   ),
                 ],
               ),
@@ -142,14 +154,19 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
                   Expanded(
                     child: TextField(
                       controller: model.flowIdCtrl,
-                      decoration: const InputDecoration(labelText: 'Flow ID'),
+                      decoration: InputDecoration(
+                        labelText: l10n.scriptEditorEditImageWorkbenchFlowIdLabel,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: TextField(
                       controller: model.modelCtrl,
-                      decoration: const InputDecoration(labelText: '生成模型（可选）'),
+                      decoration: InputDecoration(
+                        labelText:
+                            l10n.scriptEditorEditImageWorkbenchModelOptionalLabel,
+                      ),
                     ),
                   ),
                 ],
@@ -159,8 +176,8 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
                 controller: model.promptCtrl,
                 minLines: 3,
                 maxLines: 6,
-                decoration: const InputDecoration(
-                  labelText: '生成提示词',
+                decoration: InputDecoration(
+                  labelText: l10n.scriptEditorEditImageWorkbenchPromptLabel,
                   alignLabelWithHint: true,
                 ),
               ),
@@ -173,19 +190,25 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
                     onPressed: model.busy
                         ? null
                         : callbacks.onGenerateFlowImage,
-                    child: const Text('发起流程出图'),
+                    child: Text(l10n.scriptEditorEditImageWorkbenchGenerate),
                   ),
                   TextButton(
                     onPressed: model.busy ? null : callbacks.onSaveFlow,
-                    child: const Text('保存当前 Flow'),
+                    child: Text(l10n.scriptEditorEditImageWorkbenchSaveFlow),
                   ),
                 ],
               ),
               const SizedBox(height: 16),
-              Text('步骤状态', style: theme.textTheme.titleSmall),
+              Text(
+                l10n.scriptEditorEditImageWorkbenchStepsHeading,
+                style: theme.textTheme.titleSmall,
+              ),
               const SizedBox(height: 8),
               if (model.steps.isEmpty)
-                Text('暂无步骤，先点击“重新同步 Flow”。', style: theme.textTheme.bodySmall)
+                Text(
+                  l10n.scriptEditorEditImageWorkbenchStepsEmpty,
+                  style: theme.textTheme.bodySmall,
+                )
               else
                 SizedBox(
                   height: 160,
@@ -200,7 +223,12 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
                         contentPadding: EdgeInsets.zero,
                         selected: selected,
                         title: Text(step.stepName),
-                        subtitle: Text('${step.stepId} · ${step.status}'),
+                        subtitle: Text(
+                          l10n.scriptEditorEditImageWorkbenchStepLine(
+                            step.stepId,
+                            step.status,
+                          ),
+                        ),
                         onTap: model.busy
                             ? null
                             : () => callbacks.onSelectStep(step),
@@ -214,16 +242,19 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
                   Expanded(
                     child: TextField(
                       controller: model.stepIdCtrl,
-                      decoration: const InputDecoration(labelText: 'Step ID'),
+                      decoration: InputDecoration(
+                        labelText: l10n.scriptEditorEditImageWorkbenchStepIdLabel,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: TextField(
                       controller: model.stepStatusCtrl,
-                      decoration: const InputDecoration(
-                        labelText: '新状态',
-                        helperText: '例如 pending / completed / failed',
+                      decoration: InputDecoration(
+                        labelText: l10n.scriptEditorEditImageWorkbenchNewStatusLabel,
+                        helperText:
+                            l10n.scriptEditorEditImageWorkbenchNewStatusHelper,
                       ),
                     ),
                   ),
@@ -232,7 +263,7 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
               const SizedBox(height: 8),
               TextButton(
                 onPressed: model.busy ? null : callbacks.onUpdateStepStatus,
-                child: const Text('更新单个步骤状态'),
+                child: Text(l10n.scriptEditorEditImageWorkbenchUpdateStep),
               ),
               if (model.statusLine != null) ...[
                 const SizedBox(height: 8),
@@ -245,7 +276,7 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: model.busy ? null : callbacks.onClose,
-          child: const Text('关闭'),
+          child: Text(l10n.projectEditorScriptsWorkbenchDialogClose),
         ),
       ],
     );

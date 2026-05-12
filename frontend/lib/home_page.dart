@@ -198,6 +198,7 @@ class _HomePageState extends State<HomePage> {
   late final JobsController _jobsController = JobsController(
     accessTokenProvider: () => _session?.accessToken,
     onErrorChanged: _setSharedError,
+    l10nProvider: () => _appL10n,
     onJobScopeResolved: (scope) {
       if (!scope.hasProjectScope) {
         return;
@@ -233,6 +234,7 @@ class _HomePageState extends State<HomePage> {
       NotificationsController(
         accessTokenProvider: () => _session?.accessToken,
         onErrorChanged: _setSharedError,
+        l10nProvider: () => _appL10n,
       );
 
   late final TaskCenterController _taskCenterController = TaskCenterController(
@@ -345,6 +347,7 @@ class _HomePageState extends State<HomePage> {
       SkillsHarnessController(
         accessTokenProvider: () => _session?.accessToken,
         onErrorChanged: _setSharedError,
+        l10nProvider: () => _appL10n,
         onWsMessage: (raw) {
           _workspaceWsEventController.handleRawMessage(raw);
         },

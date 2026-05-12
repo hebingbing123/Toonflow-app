@@ -12259,6 +12259,464 @@ abstract class AppLocalizations {
   /// **'Generation job running'**
   String get scriptEditorStoryboardsReadinessBlockingBlockingJob;
 
+  /// No description provided for @scriptEditorEditImageWorkbenchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit image workbench'**
+  String get scriptEditorEditImageWorkbenchTitle;
+
+  /// No description provided for @scriptEditorEditImageWorkbenchIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage the edit-image flow inside the script workbench—upload a source image and start generation instead of relying only on production probes.'**
+  String get scriptEditorEditImageWorkbenchIntro;
+
+  /// No description provided for @scriptEditorEditImageWorkbenchSyncing.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing…'**
+  String get scriptEditorEditImageWorkbenchSyncing;
+
+  /// No description provided for @scriptEditorEditImageWorkbenchResyncFlow.
+  ///
+  /// In en, this message translates to:
+  /// **'Resync flow'**
+  String get scriptEditorEditImageWorkbenchResyncFlow;
+
+  /// No description provided for @scriptEditorEditImageWorkbenchDefaultModelLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Default model {model} · {resolution}'**
+  String scriptEditorEditImageWorkbenchDefaultModelLine(
+    String model,
+    String resolution,
+  );
+
+  /// No description provided for @scriptEditorEditImageWorkbenchUploadLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Source image base64 / data URI'**
+  String get scriptEditorEditImageWorkbenchUploadLabel;
+
+  /// No description provided for @scriptEditorEditImageWorkbenchUploadHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste data:image/png;base64,... or raw base64; used for upload-image.'**
+  String get scriptEditorEditImageWorkbenchUploadHelper;
+
+  /// No description provided for @scriptEditorEditImageWorkbenchBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'Working…'**
+  String get scriptEditorEditImageWorkbenchBusy;
+
+  /// No description provided for @scriptEditorEditImageWorkbenchUploadSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload source image'**
+  String get scriptEditorEditImageWorkbenchUploadSource;
+
+  /// No description provided for @scriptEditorEditImageWorkbenchFlowIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Flow ID'**
+  String get scriptEditorEditImageWorkbenchFlowIdLabel;
+
+  /// No description provided for @scriptEditorEditImageWorkbenchModelOptionalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Generation model (optional)'**
+  String get scriptEditorEditImageWorkbenchModelOptionalLabel;
+
+  /// No description provided for @scriptEditorEditImageWorkbenchPromptLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Generation prompt'**
+  String get scriptEditorEditImageWorkbenchPromptLabel;
+
+  /// No description provided for @scriptEditorEditImageWorkbenchGenerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate from flow'**
+  String get scriptEditorEditImageWorkbenchGenerate;
+
+  /// No description provided for @scriptEditorEditImageWorkbenchSaveFlow.
+  ///
+  /// In en, this message translates to:
+  /// **'Save current flow'**
+  String get scriptEditorEditImageWorkbenchSaveFlow;
+
+  /// No description provided for @scriptEditorEditImageWorkbenchStepsHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Step status'**
+  String get scriptEditorEditImageWorkbenchStepsHeading;
+
+  /// No description provided for @scriptEditorEditImageWorkbenchStepsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No steps yet—tap Resync flow first.'**
+  String get scriptEditorEditImageWorkbenchStepsEmpty;
+
+  /// No description provided for @scriptEditorEditImageWorkbenchStepLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{stepId} · {status}'**
+  String scriptEditorEditImageWorkbenchStepLine(String stepId, String status);
+
+  /// No description provided for @scriptEditorEditImageWorkbenchStepIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Step ID'**
+  String get scriptEditorEditImageWorkbenchStepIdLabel;
+
+  /// No description provided for @scriptEditorEditImageWorkbenchNewStatusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'New status'**
+  String get scriptEditorEditImageWorkbenchNewStatusLabel;
+
+  /// No description provided for @scriptEditorEditImageWorkbenchNewStatusHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. pending / completed / failed'**
+  String get scriptEditorEditImageWorkbenchNewStatusHelper;
+
+  /// No description provided for @scriptEditorEditImageWorkbenchUpdateStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Update step status'**
+  String get scriptEditorEditImageWorkbenchUpdateStep;
+
+  /// No description provided for @scriptEditorEditImageWorkbenchFlowLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Loaded flow {flowId}, {stepCount} steps, default model {model}.'**
+  String scriptEditorEditImageWorkbenchFlowLoaded(
+    String flowId,
+    int stepCount,
+    String model,
+  );
+
+  /// No description provided for @scriptEditorEditImageWorkbenchLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load edit-image workbench: {error}'**
+  String scriptEditorEditImageWorkbenchLoadFailed(String error);
+
+  /// No description provided for @scriptEditorEditImageWorkbenchErrPasteSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste source image base64 or data URI first.'**
+  String get scriptEditorEditImageWorkbenchErrPasteSource;
+
+  /// No description provided for @scriptEditorEditImageWorkbenchErrFlowAndPromptEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Flow ID and generation prompt are required.'**
+  String get scriptEditorEditImageWorkbenchErrFlowAndPromptEmpty;
+
+  /// No description provided for @scriptEditorEditImageWorkbenchSourceUploaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Source image uploaded; URL returned—you can continue flow generation.'**
+  String get scriptEditorEditImageWorkbenchSourceUploaded;
+
+  /// No description provided for @scriptEditorEditImageWorkbenchJobEnqueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Generation job enqueued: {jobId} · {status}'**
+  String scriptEditorEditImageWorkbenchJobEnqueued(String jobId, String status);
+
+  /// No description provided for @scriptEditorEditImageWorkbenchErrFlowIdEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Flow ID is required.'**
+  String get scriptEditorEditImageWorkbenchErrFlowIdEmpty;
+
+  /// No description provided for @scriptEditorEditImageWorkbenchFlowSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Flow {flowId} saved.'**
+  String scriptEditorEditImageWorkbenchFlowSaved(String flowId);
+
+  /// No description provided for @scriptEditorEditImageWorkbenchErrFlowStepStatusEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Flow ID, step ID, and new status are required.'**
+  String get scriptEditorEditImageWorkbenchErrFlowStepStatusEmpty;
+
+  /// No description provided for @scriptEditorEditImageWorkbenchStepUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {stepId} updated.'**
+  String scriptEditorEditImageWorkbenchStepUpdated(String stepId);
+
+  /// No description provided for @skillsHarnessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Harness / skills'**
+  String get skillsHarnessTitle;
+
+  /// No description provided for @skillsHarnessPrefsTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Local client preferences (debug shell; same overflow menu as other panel titles).'**
+  String get skillsHarnessPrefsTooltip;
+
+  /// No description provided for @skillsHarnessToolsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'tools: {line}'**
+  String skillsHarnessToolsLabel(String line);
+
+  /// No description provided for @skillsHarnessUserWasmValidateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'user-wasm validate: {line}'**
+  String skillsHarnessUserWasmValidateLabel(String line);
+
+  /// No description provided for @skillsHarnessUserWasmPersistLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'user-wasm persist: {line}'**
+  String skillsHarnessUserWasmPersistLabel(String line);
+
+  /// No description provided for @skillsHarnessUserWasmListLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'user-wasm list: {line}'**
+  String skillsHarnessUserWasmListLabel(String line);
+
+  /// No description provided for @skillsHarnessUserWasmRevokeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'user-wasm revoke: {line}'**
+  String skillsHarnessUserWasmRevokeLabel(String line);
+
+  /// No description provided for @skillsHarnessSummaryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'summary: {line}'**
+  String skillsHarnessSummaryLabel(String line);
+
+  /// No description provided for @skillsHarnessPathLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Skill relative path'**
+  String get skillsHarnessPathLabel;
+
+  /// No description provided for @skillsHarnessPathHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'POST needs a path that does not exist yet under data/skills'**
+  String get skillsHarnessPathHelper;
+
+  /// No description provided for @skillsHarnessBodyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Body for PUT / POST'**
+  String get skillsHarnessBodyLabel;
+
+  /// No description provided for @skillsHarnessRollingBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Rolling back…'**
+  String get skillsHarnessRollingBack;
+
+  /// No description provided for @skillsHarnessVersions.
+  ///
+  /// In en, this message translates to:
+  /// **'Version history / rollback'**
+  String get skillsHarnessVersions;
+
+  /// No description provided for @skillsHarnessWsRecent.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent WebSocket messages:'**
+  String get skillsHarnessWsRecent;
+
+  /// No description provided for @skillsHarnessPreviewTruncated.
+  ///
+  /// In en, this message translates to:
+  /// **'{preview}\n\n(Preview truncated at 12,000 characters.)'**
+  String skillsHarnessPreviewTruncated(String preview);
+
+  /// No description provided for @skillsHarnessPreviewClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get skillsHarnessPreviewClose;
+
+  /// No description provided for @skillsHarnessVersionDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Version history · {path}'**
+  String skillsHarnessVersionDialogTitle(String path);
+
+  /// No description provided for @skillsHarnessVersionEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No recorded versions for this path.'**
+  String get skillsHarnessVersionEmpty;
+
+  /// No description provided for @skillsHarnessVersionCountHint.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} versions'**
+  String skillsHarnessVersionCountHint(int count);
+
+  /// No description provided for @skillsHarnessVersionHash.
+  ///
+  /// In en, this message translates to:
+  /// **'hash {hash}'**
+  String skillsHarnessVersionHash(String hash);
+
+  /// No description provided for @skillsHarnessVersionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {index}'**
+  String skillsHarnessVersionTitle(int index);
+
+  /// No description provided for @skillsHarnessRollbackVersionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rollback snapshot {index}'**
+  String skillsHarnessRollbackVersionTitle(int index);
+
+  /// No description provided for @skillsHarnessDiffTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Diff (current vs selected)'**
+  String get skillsHarnessDiffTitle;
+
+  /// No description provided for @skillsHarnessConfirmRollbackTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm rollback'**
+  String get skillsHarnessConfirmRollbackTitle;
+
+  /// No description provided for @skillsHarnessConfirmRollbackBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Rollback to the snapshot from {time} (hash {hash})?'**
+  String skillsHarnessConfirmRollbackBody(String time, String hash);
+
+  /// No description provided for @skillsHarnessCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get skillsHarnessCancel;
+
+  /// No description provided for @skillsHarnessConfirmRollback.
+  ///
+  /// In en, this message translates to:
+  /// **'Rollback'**
+  String get skillsHarnessConfirmRollback;
+
+  /// No description provided for @skillsHarnessRollbackToVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Rollback to this version'**
+  String get skillsHarnessRollbackToVersion;
+
+  /// No description provided for @skillsHarnessPutResult.
+  ///
+  /// In en, this message translates to:
+  /// **'PUT succeeded: {path} ({length} chars written)'**
+  String skillsHarnessPutResult(String path, int length);
+
+  /// No description provided for @skillsHarnessPostResult.
+  ///
+  /// In en, this message translates to:
+  /// **'POST succeeded: {path} ({length} chars written)'**
+  String skillsHarnessPostResult(String path, int length);
+
+  /// No description provided for @skillsHarnessDeleteResult.
+  ///
+  /// In en, this message translates to:
+  /// **'DELETE succeeded: {path}'**
+  String skillsHarnessDeleteResult(String path);
+
+  /// No description provided for @skillsHarnessRollbackSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Rollback via harness UI'**
+  String get skillsHarnessRollbackSummary;
+
+  /// No description provided for @skillsHarnessRollbackResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Rolled back {path} · hash {hash}'**
+  String skillsHarnessRollbackResult(String path, String hash);
+
+  /// No description provided for @skillsHarnessRollbackDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Rollback completed.'**
+  String get skillsHarnessRollbackDone;
+
+  /// No description provided for @skillsHarnessValidateResult.
+  ///
+  /// In en, this message translates to:
+  /// **'validated={validated}, size_bytes={sizeBytes} (embedded probe)'**
+  String skillsHarnessValidateResult(String validated, int sizeBytes);
+
+  /// No description provided for @skillsHarnessPersistResult.
+  ///
+  /// In en, this message translates to:
+  /// **'stored id={id}, sha256={sha}, size={sizeBytes}, at={createdAt}'**
+  String skillsHarnessPersistResult(
+    String id,
+    String sha,
+    int sizeBytes,
+    String createdAt,
+  );
+
+  /// No description provided for @skillsHarnessStoredModulesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'0 stored modules'**
+  String get skillsHarnessStoredModulesEmpty;
+
+  /// No description provided for @skillsHarnessStoredModulesSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} stored modules — {preview}{suffix}'**
+  String skillsHarnessStoredModulesSummary(
+    int count,
+    String preview,
+    String suffix,
+  );
+
+  /// No description provided for @skillsHarnessRevokeResult.
+  ///
+  /// In en, this message translates to:
+  /// **'revoked id={id}, revoked_at={revokedAt}'**
+  String skillsHarnessRevokeResult(String id, String revokedAt);
+
+  /// No description provided for @skillsHarnessAggregateResult.
+  ///
+  /// In en, this message translates to:
+  /// **'scope={scope} · {markdownCount} markdown files, {totalBytes} bytes total'**
+  String skillsHarnessAggregateResult(
+    String scope,
+    int markdownCount,
+    int totalBytes,
+  );
+
+  /// No description provided for @skillsHarnessListSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} files; sample: {sample}'**
+  String skillsHarnessListSummary(int count, String sample);
+
+  /// No description provided for @skillsHarnessListSampleEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'—'**
+  String get skillsHarnessListSampleEmpty;
+
   /// No description provided for @scriptEditorStoryboardsProductionEmptyData.
   ///
   /// In en, this message translates to:

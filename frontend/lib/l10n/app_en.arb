@@ -5673,6 +5673,346 @@
   "scriptEditorStoryboardsReadinessBlockingMissingLiveActionPerformanceNotes": "Performance / delivery notes",
   "scriptEditorStoryboardsReadinessBlockingCandidatePending": "Candidate confirmation",
   "scriptEditorStoryboardsReadinessBlockingBlockingJob": "Generation job running",
+  "scriptEditorEditImageWorkbenchTitle": "Edit image workbench",
+  "scriptEditorEditImageWorkbenchIntro": "Manage the edit-image flow inside the script workbench—upload a source image and start generation instead of relying only on production probes.",
+  "scriptEditorEditImageWorkbenchSyncing": "Syncing…",
+  "scriptEditorEditImageWorkbenchResyncFlow": "Resync flow",
+  "scriptEditorEditImageWorkbenchDefaultModelLine": "Default model {model} · {resolution}",
+  "@scriptEditorEditImageWorkbenchDefaultModelLine": {
+    "placeholders": {
+      "model": {
+        "type": "String"
+      },
+      "resolution": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorEditImageWorkbenchUploadLabel": "Source image base64 / data URI",
+  "scriptEditorEditImageWorkbenchUploadHelper": "Paste data:image/png;base64,... or raw base64; used for upload-image.",
+  "scriptEditorEditImageWorkbenchBusy": "Working…",
+  "scriptEditorEditImageWorkbenchUploadSource": "Upload source image",
+  "scriptEditorEditImageWorkbenchFlowIdLabel": "Flow ID",
+  "scriptEditorEditImageWorkbenchModelOptionalLabel": "Generation model (optional)",
+  "scriptEditorEditImageWorkbenchPromptLabel": "Generation prompt",
+  "scriptEditorEditImageWorkbenchGenerate": "Generate from flow",
+  "scriptEditorEditImageWorkbenchSaveFlow": "Save current flow",
+  "scriptEditorEditImageWorkbenchStepsHeading": "Step status",
+  "scriptEditorEditImageWorkbenchStepsEmpty": "No steps yet—tap Resync flow first.",
+  "scriptEditorEditImageWorkbenchStepLine": "{stepId} · {status}",
+  "@scriptEditorEditImageWorkbenchStepLine": {
+    "placeholders": {
+      "stepId": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorEditImageWorkbenchStepIdLabel": "Step ID",
+  "scriptEditorEditImageWorkbenchNewStatusLabel": "New status",
+  "scriptEditorEditImageWorkbenchNewStatusHelper": "e.g. pending / completed / failed",
+  "scriptEditorEditImageWorkbenchUpdateStep": "Update step status",
+  "scriptEditorEditImageWorkbenchFlowLoaded": "Loaded flow {flowId}, {stepCount} steps, default model {model}.",
+  "@scriptEditorEditImageWorkbenchFlowLoaded": {
+    "placeholders": {
+      "flowId": {
+        "type": "String"
+      },
+      "stepCount": {
+        "type": "int"
+      },
+      "model": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorEditImageWorkbenchLoadFailed": "Failed to load edit-image workbench: {error}",
+  "@scriptEditorEditImageWorkbenchLoadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorEditImageWorkbenchErrPasteSource": "Paste source image base64 or data URI first.",
+  "scriptEditorEditImageWorkbenchErrFlowAndPromptEmpty": "Flow ID and generation prompt are required.",
+  "scriptEditorEditImageWorkbenchSourceUploaded": "Source image uploaded; URL returned—you can continue flow generation.",
+  "scriptEditorEditImageWorkbenchJobEnqueued": "Generation job enqueued: {jobId} · {status}",
+  "@scriptEditorEditImageWorkbenchJobEnqueued": {
+    "placeholders": {
+      "jobId": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorEditImageWorkbenchErrFlowIdEmpty": "Flow ID is required.",
+  "scriptEditorEditImageWorkbenchFlowSaved": "Flow {flowId} saved.",
+  "@scriptEditorEditImageWorkbenchFlowSaved": {
+    "placeholders": {
+      "flowId": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorEditImageWorkbenchErrFlowStepStatusEmpty": "Flow ID, step ID, and new status are required.",
+  "scriptEditorEditImageWorkbenchStepUpdated": "Step {stepId} updated.",
+  "@scriptEditorEditImageWorkbenchStepUpdated": {
+    "placeholders": {
+      "stepId": {
+        "type": "String"
+      }
+    }
+  },
+  "skillsHarnessTitle": "Harness / skills",
+  "skillsHarnessPrefsTooltip": "Local client preferences (debug shell; same overflow menu as other panel titles).",
+  "skillsHarnessToolsLabel": "tools: {line}",
+  "@skillsHarnessToolsLabel": {
+    "placeholders": {
+      "line": {
+        "type": "String"
+      }
+    }
+  },
+  "skillsHarnessUserWasmValidateLabel": "user-wasm validate: {line}",
+  "@skillsHarnessUserWasmValidateLabel": {
+    "placeholders": {
+      "line": {
+        "type": "String"
+      }
+    }
+  },
+  "skillsHarnessUserWasmPersistLabel": "user-wasm persist: {line}",
+  "@skillsHarnessUserWasmPersistLabel": {
+    "placeholders": {
+      "line": {
+        "type": "String"
+      }
+    }
+  },
+  "skillsHarnessUserWasmListLabel": "user-wasm list: {line}",
+  "@skillsHarnessUserWasmListLabel": {
+    "placeholders": {
+      "line": {
+        "type": "String"
+      }
+    }
+  },
+  "skillsHarnessUserWasmRevokeLabel": "user-wasm revoke: {line}",
+  "@skillsHarnessUserWasmRevokeLabel": {
+    "placeholders": {
+      "line": {
+        "type": "String"
+      }
+    }
+  },
+  "skillsHarnessSummaryLabel": "summary: {line}",
+  "@skillsHarnessSummaryLabel": {
+    "placeholders": {
+      "line": {
+        "type": "String"
+      }
+    }
+  },
+  "skillsHarnessPathLabel": "Skill relative path",
+  "skillsHarnessPathHelper": "POST needs a path that does not exist yet under data/skills",
+  "skillsHarnessBodyLabel": "Body for PUT / POST",
+  "skillsHarnessRollingBack": "Rolling back…",
+  "skillsHarnessVersions": "Version history / rollback",
+  "skillsHarnessWsRecent": "Recent WebSocket messages:",
+  "skillsHarnessPreviewTruncated": "{preview}\n\n(Preview truncated at 12,000 characters.)",
+  "@skillsHarnessPreviewTruncated": {
+    "placeholders": {
+      "preview": {
+        "type": "String"
+      }
+    }
+  },
+  "skillsHarnessPreviewClose": "Close",
+  "skillsHarnessVersionDialogTitle": "Version history · {path}",
+  "@skillsHarnessVersionDialogTitle": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "skillsHarnessVersionEmpty": "No recorded versions for this path.",
+  "skillsHarnessVersionCountHint": "{count} versions",
+  "@skillsHarnessVersionCountHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "skillsHarnessVersionHash": "hash {hash}",
+  "@skillsHarnessVersionHash": {
+    "placeholders": {
+      "hash": {
+        "type": "String"
+      }
+    }
+  },
+  "skillsHarnessVersionTitle": "Version {index}",
+  "@skillsHarnessVersionTitle": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "skillsHarnessRollbackVersionTitle": "Rollback snapshot {index}",
+  "@skillsHarnessRollbackVersionTitle": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "skillsHarnessDiffTitle": "Diff (current vs selected)",
+  "skillsHarnessConfirmRollbackTitle": "Confirm rollback",
+  "skillsHarnessConfirmRollbackBody": "Rollback to the snapshot from {time} (hash {hash})?",
+  "@skillsHarnessConfirmRollbackBody": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "hash": {
+        "type": "String"
+      }
+    }
+  },
+  "skillsHarnessCancel": "Cancel",
+  "skillsHarnessConfirmRollback": "Rollback",
+  "skillsHarnessRollbackToVersion": "Rollback to this version",
+  "skillsHarnessPutResult": "PUT succeeded: {path} ({length} chars written)",
+  "@skillsHarnessPutResult": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      },
+      "length": {
+        "type": "int"
+      }
+    }
+  },
+  "skillsHarnessPostResult": "POST succeeded: {path} ({length} chars written)",
+  "@skillsHarnessPostResult": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      },
+      "length": {
+        "type": "int"
+      }
+    }
+  },
+  "skillsHarnessDeleteResult": "DELETE succeeded: {path}",
+  "@skillsHarnessDeleteResult": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "skillsHarnessRollbackSummary": "Rollback via harness UI",
+  "skillsHarnessRollbackResult": "Rolled back {path} · hash {hash}",
+  "@skillsHarnessRollbackResult": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      },
+      "hash": {
+        "type": "String"
+      }
+    }
+  },
+  "skillsHarnessRollbackDone": "Rollback completed.",
+  "skillsHarnessValidateResult": "validated={validated}, size_bytes={sizeBytes} (embedded probe)",
+  "@skillsHarnessValidateResult": {
+    "placeholders": {
+      "validated": {
+        "type": "String"
+      },
+      "sizeBytes": {
+        "type": "int"
+      }
+    }
+  },
+  "skillsHarnessPersistResult": "stored id={id}, sha256={sha}, size={sizeBytes}, at={createdAt}",
+  "@skillsHarnessPersistResult": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      },
+      "sha": {
+        "type": "String"
+      },
+      "sizeBytes": {
+        "type": "int"
+      },
+      "createdAt": {
+        "type": "String"
+      }
+    }
+  },
+  "skillsHarnessStoredModulesEmpty": "0 stored modules",
+  "skillsHarnessStoredModulesSummary": "{count} stored modules — {preview}{suffix}",
+  "@skillsHarnessStoredModulesSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "preview": {
+        "type": "String"
+      },
+      "suffix": {
+        "type": "String"
+      }
+    }
+  },
+  "skillsHarnessRevokeResult": "revoked id={id}, revoked_at={revokedAt}",
+  "@skillsHarnessRevokeResult": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      },
+      "revokedAt": {
+        "type": "String"
+      }
+    }
+  },
+  "skillsHarnessAggregateResult": "scope={scope} · {markdownCount} markdown files, {totalBytes} bytes total",
+  "@skillsHarnessAggregateResult": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      },
+      "markdownCount": {
+        "type": "int"
+      },
+      "totalBytes": {
+        "type": "int"
+      }
+    }
+  },
+  "skillsHarnessListSummary": "{count} files; sample: {sample}",
+  "@skillsHarnessListSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "sample": {
+        "type": "String"
+      }
+    }
+  },
+  "skillsHarnessListSampleEmpty": "—",
   "scriptEditorStoryboardsProductionEmptyData": "Production view has no storyboard rows yet.",
   "scriptEditorStoryboardsProductionSummaryLine": "Production view · {count} rows · {preview}{ellipsis}",
   "@scriptEditorStoryboardsProductionSummaryLine": {

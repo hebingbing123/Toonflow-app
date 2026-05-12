@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../config.dart';
+import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
 
 part 'files.dart';
@@ -15,22 +16,26 @@ typedef SkillsHarnessErrorSink = void Function(String? error);
 typedef SkillsHarnessWsMessageHandler = void Function(String raw);
 typedef SkillsHarnessWsLifecycleHandler = void Function();
 typedef SkillsHarnessWsConnectionHandler = void Function(bool connected);
+typedef SkillsHarnessL10nProvider = AppLocalizations? Function();
 
 class SkillsHarnessController extends ChangeNotifier {
   SkillsHarnessController({
     required SkillsHarnessAccessTokenProvider accessTokenProvider,
     required SkillsHarnessErrorSink onErrorChanged,
+    required SkillsHarnessL10nProvider l10nProvider,
     required SkillsHarnessWsMessageHandler onWsMessage,
     required SkillsHarnessWsLifecycleHandler onWsLifecycleSettled,
     required SkillsHarnessWsConnectionHandler onWsConnectionChanged,
   }) : _accessTokenProvider = accessTokenProvider,
        _onErrorChanged = onErrorChanged,
+       _l10nProvider = l10nProvider,
        _onWsMessage = onWsMessage,
        _onWsLifecycleSettled = onWsLifecycleSettled,
        _onWsConnectionChanged = onWsConnectionChanged;
 
   final SkillsHarnessAccessTokenProvider _accessTokenProvider;
   final SkillsHarnessErrorSink _onErrorChanged;
+  final SkillsHarnessL10nProvider _l10nProvider;
   final SkillsHarnessWsMessageHandler _onWsMessage;
   final SkillsHarnessWsLifecycleHandler _onWsLifecycleSettled;
   final SkillsHarnessWsConnectionHandler _onWsConnectionChanged;
@@ -78,6 +83,7 @@ class SkillsHarnessController extends ChangeNotifier {
   String? skillMutationLine;
 
   String? get _accessToken => _accessTokenProvider();
+  AppLocalizations? get _l10n => _l10nProvider();
 
   bool get wsConnected => _ws != null;
 
@@ -220,6 +226,7 @@ class SkillsHarnessController extends ChangeNotifier {
     try {
       final r = await validateHarnessUserWasm(token, kHarnessEmbeddedProbeWasm);
       userWasmValidateLine =
+          _l10n?.skillsHarnessValidateResult('${r.validated}', r.sizeBytes) ??
           'validated=${r.validated}, size_bytes=${r.sizeBytes} (embedded probe)';
     } on RustApiException catch (e) {
       _setError(e.toString());
@@ -244,6 +251,12 @@ class SkillsHarnessController extends ChangeNotifier {
           ? '${r.wasmSha256Hex.substring(0, 12)}…'
           : r.wasmSha256Hex;
       userWasmPersistLine =
+          _l10n?.skillsHarnessPersistResult(
+            r.id,
+            shaShort,
+            r.sizeBytes,
+            r.createdAt.toIso8601String(),
+          ) ??
           'stored id=${r.id}, sha256=$shaShort, size=${r.sizeBytes}, at=${r.createdAt.toIso8601String()}';
       userWasmRevokeTargetId = r.id;
     } on RustApiException catch (e) {
@@ -266,7 +279,8 @@ class SkillsHarnessController extends ChangeNotifier {
     try {
       final r = await listHarnessUserWasm(token);
       if (r.items.isEmpty) {
-        userWasmListLine = '0 stored module(s)';
+        userWasmListLine =
+            _l10n?.skillsHarnessStoredModulesEmpty ?? '0 stored module(s)';
         userWasmRevokeTargetId = null;
       } else {
         final preview = r.items
@@ -274,6 +288,11 @@ class SkillsHarnessController extends ChangeNotifier {
             .map((row) => '${row.id}:${row.sizeBytes}b')
             .join(', ');
         userWasmListLine =
+            _l10n?.skillsHarnessStoredModulesSummary(
+              r.items.length,
+              preview,
+              r.items.length > 5 ? ', …' : '',
+            ) ??
             '${r.items.length} stored module(s) — $preview${r.items.length > 5 ? ', …' : ''}';
         userWasmRevokeTargetId = r.items.first.id;
       }
@@ -298,6 +317,10 @@ class SkillsHarnessController extends ChangeNotifier {
     try {
       final r = await revokeHarnessUserWasm(token, id);
       userWasmRevokeLine =
+          _l10n?.skillsHarnessRevokeResult(
+            r.id,
+            r.revokedAt.toIso8601String(),
+          ) ??
           'revoked id=${r.id}, revoked_at=${r.revokedAt.toIso8601String()}';
       userWasmRevokeTargetId = null;
     } on RustApiException catch (e) {
@@ -326,6 +349,10 @@ class SkillsHarnessController extends ChangeNotifier {
     try {
       final r = await revokeHarnessUserWasm(token, id);
       userWasmRevokeLine =
+          _l10n?.skillsHarnessRevokeResult(
+            r.id,
+            r.revokedAt.toIso8601String(),
+          ) ??
           'revoked id=${r.id}, revoked_at=${r.revokedAt.toIso8601String()}';
 
       // Reload so the list filtering (`revoked_at IS NULL`) is visibly verified.
@@ -350,7 +377,12 @@ class SkillsHarnessController extends ChangeNotifier {
     try {
       final summary = await fetchSkillsSummary(token);
       skillsAggregateLine =
-          '${summary.markdownFileCount} md files, ${summary.totalBytes} bytes total';
+          _l10n?.skillsHarnessAggregateResult(
+            summary.scope,
+            summary.markdownFileCount,
+            summary.totalBytes,
+          ) ??
+          'scope=${summary.scope} · ${summary.markdownFileCount} md files, ${summary.totalBytes} bytes total';
     } on RustApiException catch (e) {
       _setError(e.toString());
     } catch (e) {
@@ -372,6 +404,12 @@ class SkillsHarnessController extends ChangeNotifier {
       final list = await fetchSkills(token);
       final sample = list.take(5).map((m) => m.path).join(', ');
       skillsListSummary =
+          _l10n?.skillsHarnessListSummary(
+            list.length,
+            sample.isEmpty
+                ? (_l10n?.skillsHarnessListSampleEmpty ?? '—')
+                : sample,
+          ) ??
           '${list.length} files; sample: ${sample.isEmpty ? '—' : sample}';
     } on RustApiException catch (e) {
       _setError(e.toString());

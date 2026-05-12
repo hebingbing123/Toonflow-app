@@ -5673,6 +5673,346 @@
   "scriptEditorStoryboardsReadinessBlockingMissingLiveActionPerformanceNotes": "表演 / 口播约束",
   "scriptEditorStoryboardsReadinessBlockingCandidatePending": "候选确认",
   "scriptEditorStoryboardsReadinessBlockingBlockingJob": "生成任务进行中",
+  "scriptEditorEditImageWorkbenchTitle": "编辑图片工作台",
+  "scriptEditorEditImageWorkbenchIntro": "直接在脚本工作台内管理 edit-image flow、上传源图并发起生成，不再只停留在 production probe。",
+  "scriptEditorEditImageWorkbenchSyncing": "同步中…",
+  "scriptEditorEditImageWorkbenchResyncFlow": "重新同步 Flow",
+  "scriptEditorEditImageWorkbenchDefaultModelLine": "默认模型 {model} · {resolution}",
+  "@scriptEditorEditImageWorkbenchDefaultModelLine": {
+    "placeholders": {
+      "model": {
+        "type": "String"
+      },
+      "resolution": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorEditImageWorkbenchUploadLabel": "源图 base64 / data URI",
+  "scriptEditorEditImageWorkbenchUploadHelper": "粘贴 data:image/png;base64,... 或原始 base64；用于 upload-image。",
+  "scriptEditorEditImageWorkbenchBusy": "处理中…",
+  "scriptEditorEditImageWorkbenchUploadSource": "上传源图",
+  "scriptEditorEditImageWorkbenchFlowIdLabel": "Flow ID",
+  "scriptEditorEditImageWorkbenchModelOptionalLabel": "生成模型（可选）",
+  "scriptEditorEditImageWorkbenchPromptLabel": "生成提示词",
+  "scriptEditorEditImageWorkbenchGenerate": "发起流程出图",
+  "scriptEditorEditImageWorkbenchSaveFlow": "保存当前 Flow",
+  "scriptEditorEditImageWorkbenchStepsHeading": "步骤状态",
+  "scriptEditorEditImageWorkbenchStepsEmpty": "暂无步骤，先点击「重新同步 Flow」。",
+  "scriptEditorEditImageWorkbenchStepLine": "{stepId} · {status}",
+  "@scriptEditorEditImageWorkbenchStepLine": {
+    "placeholders": {
+      "stepId": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorEditImageWorkbenchStepIdLabel": "Step ID",
+  "scriptEditorEditImageWorkbenchNewStatusLabel": "新状态",
+  "scriptEditorEditImageWorkbenchNewStatusHelper": "例如 pending / completed / failed",
+  "scriptEditorEditImageWorkbenchUpdateStep": "更新单个步骤状态",
+  "scriptEditorEditImageWorkbenchFlowLoaded": "已加载 flow {flowId}，步骤 {stepCount}，默认模型 {model}",
+  "@scriptEditorEditImageWorkbenchFlowLoaded": {
+    "placeholders": {
+      "flowId": {
+        "type": "String"
+      },
+      "stepCount": {
+        "type": "int"
+      },
+      "model": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorEditImageWorkbenchLoadFailed": "读取编辑图片工作台失败：{error}",
+  "@scriptEditorEditImageWorkbenchLoadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorEditImageWorkbenchErrPasteSource": "请先粘贴源图 base64 或 data URI",
+  "scriptEditorEditImageWorkbenchErrFlowAndPromptEmpty": "Flow ID 和生成提示词都不能为空",
+  "scriptEditorEditImageWorkbenchSourceUploaded": "源图已上传，URL 已返回，可继续生成流程图片",
+  "scriptEditorEditImageWorkbenchJobEnqueued": "生成任务已入队：{jobId} · {status}",
+  "@scriptEditorEditImageWorkbenchJobEnqueued": {
+    "placeholders": {
+      "jobId": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorEditImageWorkbenchErrFlowIdEmpty": "Flow ID 不能为空",
+  "scriptEditorEditImageWorkbenchFlowSaved": "Flow {flowId} 已保存",
+  "@scriptEditorEditImageWorkbenchFlowSaved": {
+    "placeholders": {
+      "flowId": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorEditImageWorkbenchErrFlowStepStatusEmpty": "Flow ID、Step ID 和新状态都不能为空",
+  "scriptEditorEditImageWorkbenchStepUpdated": "步骤 {stepId} 已更新",
+  "@scriptEditorEditImageWorkbenchStepUpdated": {
+    "placeholders": {
+      "stepId": {
+        "type": "String"
+      }
+    }
+  },
+  "skillsHarnessTitle": "Harness / 技能",
+  "skillsHarnessPrefsTooltip": "本机客户端偏好（调试壳，与各主面板标题旁 ⋯ 相同）",
+  "skillsHarnessToolsLabel": "tools: {line}",
+  "@skillsHarnessToolsLabel": {
+    "placeholders": {
+      "line": {
+        "type": "String"
+      }
+    }
+  },
+  "skillsHarnessUserWasmValidateLabel": "user-wasm validate: {line}",
+  "@skillsHarnessUserWasmValidateLabel": {
+    "placeholders": {
+      "line": {
+        "type": "String"
+      }
+    }
+  },
+  "skillsHarnessUserWasmPersistLabel": "user-wasm persist: {line}",
+  "@skillsHarnessUserWasmPersistLabel": {
+    "placeholders": {
+      "line": {
+        "type": "String"
+      }
+    }
+  },
+  "skillsHarnessUserWasmListLabel": "user-wasm list: {line}",
+  "@skillsHarnessUserWasmListLabel": {
+    "placeholders": {
+      "line": {
+        "type": "String"
+      }
+    }
+  },
+  "skillsHarnessUserWasmRevokeLabel": "user-wasm revoke: {line}",
+  "@skillsHarnessUserWasmRevokeLabel": {
+    "placeholders": {
+      "line": {
+        "type": "String"
+      }
+    }
+  },
+  "skillsHarnessSummaryLabel": "summary: {line}",
+  "@skillsHarnessSummaryLabel": {
+    "placeholders": {
+      "line": {
+        "type": "String"
+      }
+    }
+  },
+  "skillsHarnessPathLabel": "技能相对路径",
+  "skillsHarnessPathHelper": "POST 需要一个在 data/skills 下尚不存在的路径",
+  "skillsHarnessBodyLabel": "PUT / POST 请求体",
+  "skillsHarnessRollingBack": "回滚中…",
+  "skillsHarnessVersions": "版本历史 / 回滚",
+  "skillsHarnessWsRecent": "WS 最近消息：",
+  "skillsHarnessPreviewTruncated": "{preview}\n\n（预览内容已在 12,000 字符处截断）",
+  "@skillsHarnessPreviewTruncated": {
+    "placeholders": {
+      "preview": {
+        "type": "String"
+      }
+    }
+  },
+  "skillsHarnessPreviewClose": "关闭",
+  "skillsHarnessVersionDialogTitle": "版本历史 · {path}",
+  "@skillsHarnessVersionDialogTitle": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "skillsHarnessVersionEmpty": "该路径暂无版本记录",
+  "skillsHarnessVersionCountHint": "共 {count} 个版本",
+  "@skillsHarnessVersionCountHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "skillsHarnessVersionHash": "哈希 {hash}",
+  "@skillsHarnessVersionHash": {
+    "placeholders": {
+      "hash": {
+        "type": "String"
+      }
+    }
+  },
+  "skillsHarnessVersionTitle": "版本 {index}",
+  "@skillsHarnessVersionTitle": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "skillsHarnessRollbackVersionTitle": "回滚快照 {index}",
+  "@skillsHarnessRollbackVersionTitle": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "skillsHarnessDiffTitle": "差异（当前 vs 所选）",
+  "skillsHarnessConfirmRollbackTitle": "确认回滚",
+  "skillsHarnessConfirmRollbackBody": "回滚到 {time} 的快照（哈希 {hash}）？",
+  "@skillsHarnessConfirmRollbackBody": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "hash": {
+        "type": "String"
+      }
+    }
+  },
+  "skillsHarnessCancel": "取消",
+  "skillsHarnessConfirmRollback": "回滚",
+  "skillsHarnessRollbackToVersion": "回滚到此版本",
+  "skillsHarnessPutResult": "PUT 成功：{path}（已写入 {length} 字符）",
+  "@skillsHarnessPutResult": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      },
+      "length": {
+        "type": "int"
+      }
+    }
+  },
+  "skillsHarnessPostResult": "POST 成功：{path}（已写入 {length} 字符）",
+  "@skillsHarnessPostResult": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      },
+      "length": {
+        "type": "int"
+      }
+    }
+  },
+  "skillsHarnessDeleteResult": "DELETE 成功：{path}",
+  "@skillsHarnessDeleteResult": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "skillsHarnessRollbackSummary": "通过 Harness 界面回滚",
+  "skillsHarnessRollbackResult": "已回滚 {path} · 哈希 {hash}",
+  "@skillsHarnessRollbackResult": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      },
+      "hash": {
+        "type": "String"
+      }
+    }
+  },
+  "skillsHarnessRollbackDone": "回滚完成",
+  "skillsHarnessValidateResult": "validated={validated}, size_bytes={sizeBytes}（内嵌探针）",
+  "@skillsHarnessValidateResult": {
+    "placeholders": {
+      "validated": {
+        "type": "String"
+      },
+      "sizeBytes": {
+        "type": "int"
+      }
+    }
+  },
+  "skillsHarnessPersistResult": "已存储 id={id}, sha256={sha}, size={sizeBytes}, 时间={createdAt}",
+  "@skillsHarnessPersistResult": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      },
+      "sha": {
+        "type": "String"
+      },
+      "sizeBytes": {
+        "type": "int"
+      },
+      "createdAt": {
+        "type": "String"
+      }
+    }
+  },
+  "skillsHarnessStoredModulesEmpty": "0 个已存储模块",
+  "skillsHarnessStoredModulesSummary": "{count} 个已存储模块 — {preview}{suffix}",
+  "@skillsHarnessStoredModulesSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "preview": {
+        "type": "String"
+      },
+      "suffix": {
+        "type": "String"
+      }
+    }
+  },
+  "skillsHarnessRevokeResult": "已吊销 id={id}, revoked_at={revokedAt}",
+  "@skillsHarnessRevokeResult": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      },
+      "revokedAt": {
+        "type": "String"
+      }
+    }
+  },
+  "skillsHarnessAggregateResult": "scope={scope} · {markdownCount} 个 Markdown 文件，共 {totalBytes} 字节",
+  "@skillsHarnessAggregateResult": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      },
+      "markdownCount": {
+        "type": "int"
+      },
+      "totalBytes": {
+        "type": "int"
+      }
+    }
+  },
+  "skillsHarnessListSummary": "{count} 个文件；示例：{sample}",
+  "@skillsHarnessListSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "sample": {
+        "type": "String"
+      }
+    }
+  },
+  "skillsHarnessListSampleEmpty": "—",
   "scriptEditorStoryboardsProductionEmptyData": "制作视图当前没有分镜数据",
   "scriptEditorStoryboardsProductionSummaryLine": "制作视图 {count} 条 · {preview}{ellipsis}",
   "@scriptEditorStoryboardsProductionSummaryLine": {

@@ -7374,6 +7374,316 @@ class AppLocalizationsZh extends AppLocalizations {
   String get scriptEditorStoryboardsReadinessBlockingBlockingJob => '生成任务进行中';
 
   @override
+  String get scriptEditorEditImageWorkbenchTitle => '编辑图片工作台';
+
+  @override
+  String get scriptEditorEditImageWorkbenchIntro =>
+      '直接在脚本工作台内管理 edit-image flow、上传源图并发起生成，不再只停留在 production probe。';
+
+  @override
+  String get scriptEditorEditImageWorkbenchSyncing => '同步中…';
+
+  @override
+  String get scriptEditorEditImageWorkbenchResyncFlow => '重新同步 Flow';
+
+  @override
+  String scriptEditorEditImageWorkbenchDefaultModelLine(
+    String model,
+    String resolution,
+  ) {
+    return '默认模型 $model · $resolution';
+  }
+
+  @override
+  String get scriptEditorEditImageWorkbenchUploadLabel =>
+      '源图 base64 / data URI';
+
+  @override
+  String get scriptEditorEditImageWorkbenchUploadHelper =>
+      '粘贴 data:image/png;base64,... 或原始 base64；用于 upload-image。';
+
+  @override
+  String get scriptEditorEditImageWorkbenchBusy => '处理中…';
+
+  @override
+  String get scriptEditorEditImageWorkbenchUploadSource => '上传源图';
+
+  @override
+  String get scriptEditorEditImageWorkbenchFlowIdLabel => 'Flow ID';
+
+  @override
+  String get scriptEditorEditImageWorkbenchModelOptionalLabel => '生成模型（可选）';
+
+  @override
+  String get scriptEditorEditImageWorkbenchPromptLabel => '生成提示词';
+
+  @override
+  String get scriptEditorEditImageWorkbenchGenerate => '发起流程出图';
+
+  @override
+  String get scriptEditorEditImageWorkbenchSaveFlow => '保存当前 Flow';
+
+  @override
+  String get scriptEditorEditImageWorkbenchStepsHeading => '步骤状态';
+
+  @override
+  String get scriptEditorEditImageWorkbenchStepsEmpty => '暂无步骤，先点击「重新同步 Flow」。';
+
+  @override
+  String scriptEditorEditImageWorkbenchStepLine(String stepId, String status) {
+    return '$stepId · $status';
+  }
+
+  @override
+  String get scriptEditorEditImageWorkbenchStepIdLabel => 'Step ID';
+
+  @override
+  String get scriptEditorEditImageWorkbenchNewStatusLabel => '新状态';
+
+  @override
+  String get scriptEditorEditImageWorkbenchNewStatusHelper =>
+      '例如 pending / completed / failed';
+
+  @override
+  String get scriptEditorEditImageWorkbenchUpdateStep => '更新单个步骤状态';
+
+  @override
+  String scriptEditorEditImageWorkbenchFlowLoaded(
+    String flowId,
+    int stepCount,
+    String model,
+  ) {
+    return '已加载 flow $flowId，步骤 $stepCount，默认模型 $model';
+  }
+
+  @override
+  String scriptEditorEditImageWorkbenchLoadFailed(String error) {
+    return '读取编辑图片工作台失败：$error';
+  }
+
+  @override
+  String get scriptEditorEditImageWorkbenchErrPasteSource =>
+      '请先粘贴源图 base64 或 data URI';
+
+  @override
+  String get scriptEditorEditImageWorkbenchErrFlowAndPromptEmpty =>
+      'Flow ID 和生成提示词都不能为空';
+
+  @override
+  String get scriptEditorEditImageWorkbenchSourceUploaded =>
+      '源图已上传，URL 已返回，可继续生成流程图片';
+
+  @override
+  String scriptEditorEditImageWorkbenchJobEnqueued(
+    String jobId,
+    String status,
+  ) {
+    return '生成任务已入队：$jobId · $status';
+  }
+
+  @override
+  String get scriptEditorEditImageWorkbenchErrFlowIdEmpty => 'Flow ID 不能为空';
+
+  @override
+  String scriptEditorEditImageWorkbenchFlowSaved(String flowId) {
+    return 'Flow $flowId 已保存';
+  }
+
+  @override
+  String get scriptEditorEditImageWorkbenchErrFlowStepStatusEmpty =>
+      'Flow ID、Step ID 和新状态都不能为空';
+
+  @override
+  String scriptEditorEditImageWorkbenchStepUpdated(String stepId) {
+    return '步骤 $stepId 已更新';
+  }
+
+  @override
+  String get skillsHarnessTitle => 'Harness / 技能';
+
+  @override
+  String get skillsHarnessPrefsTooltip => '本机客户端偏好（调试壳，与各主面板标题旁 ⋯ 相同）';
+
+  @override
+  String skillsHarnessToolsLabel(String line) {
+    return 'tools: $line';
+  }
+
+  @override
+  String skillsHarnessUserWasmValidateLabel(String line) {
+    return 'user-wasm validate: $line';
+  }
+
+  @override
+  String skillsHarnessUserWasmPersistLabel(String line) {
+    return 'user-wasm persist: $line';
+  }
+
+  @override
+  String skillsHarnessUserWasmListLabel(String line) {
+    return 'user-wasm list: $line';
+  }
+
+  @override
+  String skillsHarnessUserWasmRevokeLabel(String line) {
+    return 'user-wasm revoke: $line';
+  }
+
+  @override
+  String skillsHarnessSummaryLabel(String line) {
+    return 'summary: $line';
+  }
+
+  @override
+  String get skillsHarnessPathLabel => '技能相对路径';
+
+  @override
+  String get skillsHarnessPathHelper => 'POST 需要一个在 data/skills 下尚不存在的路径';
+
+  @override
+  String get skillsHarnessBodyLabel => 'PUT / POST 请求体';
+
+  @override
+  String get skillsHarnessRollingBack => '回滚中…';
+
+  @override
+  String get skillsHarnessVersions => '版本历史 / 回滚';
+
+  @override
+  String get skillsHarnessWsRecent => 'WS 最近消息：';
+
+  @override
+  String skillsHarnessPreviewTruncated(String preview) {
+    return '$preview\n\n（预览内容已在 12,000 字符处截断）';
+  }
+
+  @override
+  String get skillsHarnessPreviewClose => '关闭';
+
+  @override
+  String skillsHarnessVersionDialogTitle(String path) {
+    return '版本历史 · $path';
+  }
+
+  @override
+  String get skillsHarnessVersionEmpty => '该路径暂无版本记录';
+
+  @override
+  String skillsHarnessVersionCountHint(int count) {
+    return '共 $count 个版本';
+  }
+
+  @override
+  String skillsHarnessVersionHash(String hash) {
+    return '哈希 $hash';
+  }
+
+  @override
+  String skillsHarnessVersionTitle(int index) {
+    return '版本 $index';
+  }
+
+  @override
+  String skillsHarnessRollbackVersionTitle(int index) {
+    return '回滚快照 $index';
+  }
+
+  @override
+  String get skillsHarnessDiffTitle => '差异（当前 vs 所选）';
+
+  @override
+  String get skillsHarnessConfirmRollbackTitle => '确认回滚';
+
+  @override
+  String skillsHarnessConfirmRollbackBody(String time, String hash) {
+    return '回滚到 $time 的快照（哈希 $hash）？';
+  }
+
+  @override
+  String get skillsHarnessCancel => '取消';
+
+  @override
+  String get skillsHarnessConfirmRollback => '回滚';
+
+  @override
+  String get skillsHarnessRollbackToVersion => '回滚到此版本';
+
+  @override
+  String skillsHarnessPutResult(String path, int length) {
+    return 'PUT 成功：$path（已写入 $length 字符）';
+  }
+
+  @override
+  String skillsHarnessPostResult(String path, int length) {
+    return 'POST 成功：$path（已写入 $length 字符）';
+  }
+
+  @override
+  String skillsHarnessDeleteResult(String path) {
+    return 'DELETE 成功：$path';
+  }
+
+  @override
+  String get skillsHarnessRollbackSummary => '通过 Harness 界面回滚';
+
+  @override
+  String skillsHarnessRollbackResult(String path, String hash) {
+    return '已回滚 $path · 哈希 $hash';
+  }
+
+  @override
+  String get skillsHarnessRollbackDone => '回滚完成';
+
+  @override
+  String skillsHarnessValidateResult(String validated, int sizeBytes) {
+    return 'validated=$validated, size_bytes=$sizeBytes（内嵌探针）';
+  }
+
+  @override
+  String skillsHarnessPersistResult(
+    String id,
+    String sha,
+    int sizeBytes,
+    String createdAt,
+  ) {
+    return '已存储 id=$id, sha256=$sha, size=$sizeBytes, 时间=$createdAt';
+  }
+
+  @override
+  String get skillsHarnessStoredModulesEmpty => '0 个已存储模块';
+
+  @override
+  String skillsHarnessStoredModulesSummary(
+    int count,
+    String preview,
+    String suffix,
+  ) {
+    return '$count 个已存储模块 — $preview$suffix';
+  }
+
+  @override
+  String skillsHarnessRevokeResult(String id, String revokedAt) {
+    return '已吊销 id=$id, revoked_at=$revokedAt';
+  }
+
+  @override
+  String skillsHarnessAggregateResult(
+    String scope,
+    int markdownCount,
+    int totalBytes,
+  ) {
+    return 'scope=$scope · $markdownCount 个 Markdown 文件，共 $totalBytes 字节';
+  }
+
+  @override
+  String skillsHarnessListSummary(int count, String sample) {
+    return '$count 个文件；示例：$sample';
+  }
+
+  @override
+  String get skillsHarnessListSampleEmpty => '—';
+
+  @override
   String get scriptEditorStoryboardsProductionEmptyData => '制作视图当前没有分镜数据';
 
   @override

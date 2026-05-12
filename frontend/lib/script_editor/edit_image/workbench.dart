@@ -6,6 +6,7 @@ extension _HomePageScriptEditorEditImageWorkbench on _HomePageState {
     required String projectId,
     required int scriptNumericId,
   }) async {
+    final l10n = AppLocalizations.of(context)!;
     final uploadCtrl = TextEditingController();
     final flowIdCtrl = TextEditingController();
     final promptCtrl = TextEditingController();
@@ -54,13 +55,26 @@ extension _HomePageScriptEditorEditImageWorkbench on _HomePageState {
             stepIdCtrl.text = focusStep.stepId;
             stepStatusCtrl.text = focusStep.status;
           }
-          statusLine =
-              '已加载 flow ${flow.flowId}，步骤 ${flow.steps.length}，默认模型 ${model.model}';
+          statusLine = l10n.scriptEditorEditImageWorkbenchFlowLoaded(
+            flow.flowId,
+            flow.steps.length,
+            model.model,
+          );
         });
       } on RustApiException catch (e) {
-        setState(() => statusLine = '读取编辑图片工作台失败：$e');
+        setState(
+          () =>
+              statusLine = l10n.scriptEditorEditImageWorkbenchLoadFailed(
+                e.toString(),
+              ),
+        );
       } catch (e) {
-        setState(() => statusLine = '读取编辑图片工作台失败：$e');
+        setState(
+          () =>
+              statusLine = l10n.scriptEditorEditImageWorkbenchLoadFailed(
+                e.toString(),
+              ),
+        );
       } finally {
         setState(() => loading = false);
       }
@@ -112,7 +126,9 @@ extension _HomePageScriptEditorEditImageWorkbench on _HomePageState {
                   onUploadSourceImage: () => runMutation(setState, () async {
                     final base64Data = uploadCtrl.text.trim();
                     if (base64Data.isEmpty) {
-                      throw const FormatException('请先粘贴源图 base64 或 data URI');
+                      throw FormatException(
+                        l10n.scriptEditorEditImageWorkbenchErrPasteSource,
+                      );
                     }
                     final response = await postProductionEditImageUploadImageV1(
                       token,
@@ -122,14 +138,17 @@ extension _HomePageScriptEditorEditImageWorkbench on _HomePageState {
                     );
                     setState(() {
                       uploadedImageUrl = response.url;
-                      statusLine = '源图已上传，URL 已返回，可继续生成流程图片';
+                      statusLine =
+                          l10n.scriptEditorEditImageWorkbenchSourceUploaded;
                     });
                   }),
                   onGenerateFlowImage: () => runMutation(setState, () async {
                     final flowId = flowIdCtrl.text.trim();
                     final prompt = promptCtrl.text.trim();
                     if (flowId.isEmpty || prompt.isEmpty) {
-                      throw const FormatException('Flow ID 和生成提示词都不能为空');
+                      throw FormatException(
+                        l10n.scriptEditorEditImageWorkbenchErrFlowAndPromptEmpty,
+                      );
                     }
                     final response =
                         await postProductionEditImageGenerateFlowImageV1(
@@ -144,13 +163,18 @@ extension _HomePageScriptEditorEditImageWorkbench on _HomePageState {
                         );
                     setState(() {
                       statusLine =
-                          '生成任务已入队：${response.jobId} · ${response.status}';
+                          l10n.scriptEditorEditImageWorkbenchJobEnqueued(
+                            response.jobId,
+                            response.status,
+                          );
                     });
                   }),
                   onSaveFlow: () => runMutation(setState, () async {
                     final flowId = flowIdCtrl.text.trim();
                     if (flowId.isEmpty) {
-                      throw const FormatException('Flow ID 不能为空');
+                      throw FormatException(
+                        l10n.scriptEditorEditImageWorkbenchErrFlowIdEmpty,
+                      );
                     }
                     final response =
                         await postProductionEditImageSaveImageFlowV1(
@@ -161,7 +185,9 @@ extension _HomePageScriptEditorEditImageWorkbench on _HomePageState {
                               .toList(growable: false),
                         );
                     setState(() {
-                      statusLine = 'Flow ${response.flowId} 已保存';
+                      statusLine = l10n.scriptEditorEditImageWorkbenchFlowSaved(
+                        response.flowId,
+                      );
                     });
                   }),
                   onSelectStep: (step) {
@@ -177,7 +203,9 @@ extension _HomePageScriptEditorEditImageWorkbench on _HomePageState {
                     if (flowId.isEmpty ||
                         stepId.isEmpty ||
                         stepStatus.isEmpty) {
-                      throw const FormatException('Flow ID、Step ID 和新状态都不能为空');
+                      throw FormatException(
+                        l10n.scriptEditorEditImageWorkbenchErrFlowStepStatusEmpty,
+                      );
                     }
                     final response =
                         await postProductionEditImageUpdateImageFlowV1(
@@ -199,7 +227,10 @@ extension _HomePageScriptEditorEditImageWorkbench on _HomePageState {
                         .toList(growable: false);
                     setState(() {
                       steps = nextSteps;
-                      statusLine = '步骤 ${response.stepId} 已更新';
+                      statusLine =
+                          l10n.scriptEditorEditImageWorkbenchStepUpdated(
+                            response.stepId,
+                          );
                     });
                   }),
                   onClose: () => Navigator.of(dialogCtx).pop(),

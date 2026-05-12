@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 
 class HarnessSection extends StatelessWidget {
@@ -112,6 +113,7 @@ class HarnessSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -121,12 +123,12 @@ class HarnessSection extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                'Harness / skills',
+                l10n.skillsHarnessTitle,
                 style: Theme.of(context).textTheme.titleSmall,
               ),
             ),
-            const RiskyOperationConfirmPrefsOverflowMenu(
-              tooltip: '本机客户端偏好（调试壳，与各主面板标题旁 ⋯ 相同）',
+            RiskyOperationConfirmPrefsOverflowMenu(
+              tooltip: l10n.skillsHarnessPrefsTooltip,
             ),
           ],
         ),
@@ -142,7 +144,9 @@ class HarnessSection extends StatelessWidget {
               ),
             ),
             FilledButton.tonal(
-              onPressed: loadingUserWasmValidate ? null : onValidateUserWasmProbe,
+              onPressed: loadingUserWasmValidate
+                  ? null
+                  : onValidateUserWasmProbe,
               child: Text(
                 loadingUserWasmValidate
                     ? '…'
@@ -162,8 +166,7 @@ class HarnessSection extends StatelessWidget {
               ),
             ),
             FilledButton.tonal(
-              onPressed:
-                  loadingUserWasmRevoke || userWasmRevokeTargetId == null
+              onPressed: loadingUserWasmRevoke || userWasmRevokeTargetId == null
                   ? null
                   : onRevokeUserWasmProbe,
               child: Text(
@@ -173,7 +176,8 @@ class HarnessSection extends StatelessWidget {
               ),
             ),
             FilledButton.tonal(
-              onPressed: (loadingUserWasmRevoke ||
+              onPressed:
+                  (loadingUserWasmRevoke ||
                       loadingUserWasmList ||
                       userWasmRevokeTargetId == null)
                   ? null
@@ -199,42 +203,42 @@ class HarnessSection extends StatelessWidget {
         if (harnessToolsLine != null) ...[
           const SizedBox(height: 8),
           SelectableText(
-            'tools: $harnessToolsLine',
+            l10n.skillsHarnessToolsLabel(harnessToolsLine!),
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
         if (userWasmValidateLine != null) ...[
           const SizedBox(height: 8),
           SelectableText(
-            'user-wasm validate: $userWasmValidateLine',
+            l10n.skillsHarnessUserWasmValidateLabel(userWasmValidateLine!),
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
         if (userWasmPersistLine != null) ...[
           const SizedBox(height: 8),
           SelectableText(
-            'user-wasm persist: $userWasmPersistLine',
+            l10n.skillsHarnessUserWasmPersistLabel(userWasmPersistLine!),
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
         if (userWasmListLine != null) ...[
           const SizedBox(height: 8),
           SelectableText(
-            'user-wasm list: $userWasmListLine',
+            l10n.skillsHarnessUserWasmListLabel(userWasmListLine!),
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
         if (userWasmRevokeLine != null) ...[
           const SizedBox(height: 8),
           SelectableText(
-            'user-wasm revoke: $userWasmRevokeLine',
+            l10n.skillsHarnessUserWasmRevokeLabel(userWasmRevokeLine!),
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
         if (skillsAggregateLine != null) ...[
           const SizedBox(height: 8),
           SelectableText(
-            'summary: $skillsAggregateLine',
+            l10n.skillsHarnessSummaryLabel(skillsAggregateLine!),
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
@@ -248,16 +252,15 @@ class HarnessSection extends StatelessWidget {
         const SizedBox(height: 8),
         TextField(
           controller: skillPathController,
-          decoration: const InputDecoration(
-            labelText: 'Skill relative path',
-            helperText:
-                'POST needs a path that does not exist yet under data/skills',
+          decoration: InputDecoration(
+            labelText: l10n.skillsHarnessPathLabel,
+            helperText: l10n.skillsHarnessPathHelper,
           ),
         ),
         const SizedBox(height: 8),
         TextField(
           controller: skillContentController,
-          decoration: const InputDecoration(labelText: 'Body for PUT / POST'),
+          decoration: InputDecoration(labelText: l10n.skillsHarnessBodyLabel),
           maxLines: 4,
         ),
         const SizedBox(height: 8),
@@ -279,8 +282,8 @@ class HarnessSection extends StatelessWidget {
                 loadingSkillVersions
                     ? '…'
                     : rollingBackSkillVersion
-                    ? '回滚中…'
-                    : '版本历史 / 回滚',
+                    ? l10n.skillsHarnessRollingBack
+                    : l10n.skillsHarnessVersions,
               ),
             ),
             FilledButton.tonal(
@@ -355,7 +358,10 @@ class HarnessSection extends StatelessWidget {
         ),
         if (wsLog.isNotEmpty) ...[
           const SizedBox(height: 8),
-          Text('WS 最近消息:', style: Theme.of(context).textTheme.labelLarge),
+          Text(
+            l10n.skillsHarnessWsRecent,
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
           ...wsLog.map(
             (line) => Padding(
               padding: const EdgeInsets.only(top: 4),
