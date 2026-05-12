@@ -7274,6 +7274,53 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String scriptEditorDialogTitle(int numericId) {
+    return 'Script #$numericId';
+  }
+
+  @override
+  String get scriptEditorFieldNameLabelClearIfEmpty =>
+      'Name (leave empty to clear)';
+
+  @override
+  String get scriptEditorFieldContentLabelClearIfEmpty =>
+      'Content (leave empty to clear)';
+
+  @override
+  String get scriptEditorFieldExtractStateLabelClearIfEmpty =>
+      'Extract state (leave empty to clear)';
+
+  @override
+  String get scriptEditorOpenStoryboards => 'Storyboards…';
+
+  @override
+  String get scriptEditorDeleteScriptButton => 'Delete script';
+
+  @override
+  String get scriptEditorDeleteConfirmTitle => 'Delete this script?';
+
+  @override
+  String scriptEditorDeleteConfirmBody(int numericId) {
+    return 'This will delete script #$numericId and its storyboards (database cascade).';
+  }
+
+  @override
+  String get scriptEditorDeleteConfirmDelete => 'Delete';
+
+  @override
+  String get scriptEditorExtractStateMustBeInteger =>
+      'extract_state must be an integer';
+
+  @override
+  String get scriptEditorSaveSaving => 'Saving…';
+
+  @override
+  String get scriptEditorSaveChanges => 'Save changes';
+
+  @override
+  String get scriptEditorDeletedSnackBar => 'Script deleted';
+
+  @override
   String projectEditorScriptsSingleWorkbenchRecentExtractError(String reason) {
     return 'Recent extract error: $reason';
   }

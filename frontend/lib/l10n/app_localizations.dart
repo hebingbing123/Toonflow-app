@@ -11611,6 +11611,84 @@ abstract class AppLocalizations {
   /// **'Related assets: {assets}'**
   String scriptEditorWorkbenchRelatedAssetsLine(String assets);
 
+  /// No description provided for @scriptEditorDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Script #{numericId}'**
+  String scriptEditorDialogTitle(int numericId);
+
+  /// No description provided for @scriptEditorFieldNameLabelClearIfEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Name (leave empty to clear)'**
+  String get scriptEditorFieldNameLabelClearIfEmpty;
+
+  /// No description provided for @scriptEditorFieldContentLabelClearIfEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Content (leave empty to clear)'**
+  String get scriptEditorFieldContentLabelClearIfEmpty;
+
+  /// No description provided for @scriptEditorFieldExtractStateLabelClearIfEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Extract state (leave empty to clear)'**
+  String get scriptEditorFieldExtractStateLabelClearIfEmpty;
+
+  /// No description provided for @scriptEditorOpenStoryboards.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboards…'**
+  String get scriptEditorOpenStoryboards;
+
+  /// No description provided for @scriptEditorDeleteScriptButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete script'**
+  String get scriptEditorDeleteScriptButton;
+
+  /// No description provided for @scriptEditorDeleteConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this script?'**
+  String get scriptEditorDeleteConfirmTitle;
+
+  /// No description provided for @scriptEditorDeleteConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This will delete script #{numericId} and its storyboards (database cascade).'**
+  String scriptEditorDeleteConfirmBody(int numericId);
+
+  /// No description provided for @scriptEditorDeleteConfirmDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get scriptEditorDeleteConfirmDelete;
+
+  /// No description provided for @scriptEditorExtractStateMustBeInteger.
+  ///
+  /// In en, this message translates to:
+  /// **'extract_state must be an integer'**
+  String get scriptEditorExtractStateMustBeInteger;
+
+  /// No description provided for @scriptEditorSaveSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get scriptEditorSaveSaving;
+
+  /// No description provided for @scriptEditorSaveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save changes'**
+  String get scriptEditorSaveChanges;
+
+  /// No description provided for @scriptEditorDeletedSnackBar.
+  ///
+  /// In en, this message translates to:
+  /// **'Script deleted'**
+  String get scriptEditorDeletedSnackBar;
+
   /// No description provided for @projectEditorScriptsSingleWorkbenchRecentExtractError.
   ///
   /// In en, this message translates to:

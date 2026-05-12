@@ -5417,6 +5417,33 @@
       }
     }
   },
+  "scriptEditorDialogTitle": "剧本 #{numericId}",
+  "@scriptEditorDialogTitle": {
+    "placeholders": {
+      "numericId": {
+        "type": "int"
+      }
+    }
+  },
+  "scriptEditorFieldNameLabelClearIfEmpty": "名称（留空则清空）",
+  "scriptEditorFieldContentLabelClearIfEmpty": "内容（留空则清空）",
+  "scriptEditorFieldExtractStateLabelClearIfEmpty": "提取状态（留空则清空）",
+  "scriptEditorOpenStoryboards": "分镜列表…",
+  "scriptEditorDeleteScriptButton": "删除剧本",
+  "scriptEditorDeleteConfirmTitle": "删除剧本？",
+  "scriptEditorDeleteConfirmBody": "将删除 script #{numericId} 及其分镜（数据库级联）。",
+  "@scriptEditorDeleteConfirmBody": {
+    "placeholders": {
+      "numericId": {
+        "type": "int"
+      }
+    }
+  },
+  "scriptEditorDeleteConfirmDelete": "删除",
+  "scriptEditorExtractStateMustBeInteger": "extract_state 须为整数",
+  "scriptEditorSaveSaving": "保存中…",
+  "scriptEditorSaveChanges": "保存修改",
+  "scriptEditorDeletedSnackBar": "剧本已删除",
   "projectEditorScriptsSingleWorkbenchRecentExtractError": "最近提取错误：{reason}",
   "@projectEditorScriptsSingleWorkbenchRecentExtractError": {
     "placeholders": {

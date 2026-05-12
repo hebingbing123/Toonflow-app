@@ -5417,6 +5417,33 @@
       }
     }
   },
+  "scriptEditorDialogTitle": "Script #{numericId}",
+  "@scriptEditorDialogTitle": {
+    "placeholders": {
+      "numericId": {
+        "type": "int"
+      }
+    }
+  },
+  "scriptEditorFieldNameLabelClearIfEmpty": "Name (leave empty to clear)",
+  "scriptEditorFieldContentLabelClearIfEmpty": "Content (leave empty to clear)",
+  "scriptEditorFieldExtractStateLabelClearIfEmpty": "Extract state (leave empty to clear)",
+  "scriptEditorOpenStoryboards": "Storyboards…",
+  "scriptEditorDeleteScriptButton": "Delete script",
+  "scriptEditorDeleteConfirmTitle": "Delete this script?",
+  "scriptEditorDeleteConfirmBody": "This will delete script #{numericId} and its storyboards (database cascade).",
+  "@scriptEditorDeleteConfirmBody": {
+    "placeholders": {
+      "numericId": {
+        "type": "int"
+      }
+    }
+  },
+  "scriptEditorDeleteConfirmDelete": "Delete",
+  "scriptEditorExtractStateMustBeInteger": "extract_state must be an integer",
+  "scriptEditorSaveSaving": "Saving…",
+  "scriptEditorSaveChanges": "Save changes",
+  "scriptEditorDeletedSnackBar": "Script deleted",
   "projectEditorScriptsSingleWorkbenchRecentExtractError": "Recent extract error: {reason}",
   "@projectEditorScriptsSingleWorkbenchRecentExtractError": {
     "placeholders": {

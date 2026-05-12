@@ -6971,6 +6971,49 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String scriptEditorDialogTitle(int numericId) {
+    return '剧本 #$numericId';
+  }
+
+  @override
+  String get scriptEditorFieldNameLabelClearIfEmpty => '名称（留空则清空）';
+
+  @override
+  String get scriptEditorFieldContentLabelClearIfEmpty => '内容（留空则清空）';
+
+  @override
+  String get scriptEditorFieldExtractStateLabelClearIfEmpty => '提取状态（留空则清空）';
+
+  @override
+  String get scriptEditorOpenStoryboards => '分镜列表…';
+
+  @override
+  String get scriptEditorDeleteScriptButton => '删除剧本';
+
+  @override
+  String get scriptEditorDeleteConfirmTitle => '删除剧本？';
+
+  @override
+  String scriptEditorDeleteConfirmBody(int numericId) {
+    return '将删除 script #$numericId 及其分镜（数据库级联）。';
+  }
+
+  @override
+  String get scriptEditorDeleteConfirmDelete => '删除';
+
+  @override
+  String get scriptEditorExtractStateMustBeInteger => 'extract_state 须为整数';
+
+  @override
+  String get scriptEditorSaveSaving => '保存中…';
+
+  @override
+  String get scriptEditorSaveChanges => '保存修改';
+
+  @override
+  String get scriptEditorDeletedSnackBar => '剧本已删除';
+
+  @override
   String projectEditorScriptsSingleWorkbenchRecentExtractError(String reason) {
     return '最近提取错误：$reason';
   }

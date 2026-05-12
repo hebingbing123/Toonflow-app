@@ -24,6 +24,7 @@ extension _HomePageScriptEditor on _HomePageState {
       await showDialog<void>(
         context: context,
         builder: (ctx) {
+          final l10n = AppLocalizations.of(ctx)!;
           return StatefulBuilder(
             builder: (ctx, setDialogState) {
               final saving = <bool>[false];
@@ -32,7 +33,7 @@ extension _HomePageScriptEditor on _HomePageState {
                   ? viewportWidth.clamp(320.0, 720.0)
                   : 720.0;
               return AlertDialog(
-                title: Text('剧本 #${script.numericId}'),
+                title: Text(l10n.scriptEditorDialogTitle(script.numericId)),
                 content: SizedBox(
                   width: dialogWidth,
                   child: SingleChildScrollView(
@@ -59,8 +60,8 @@ extension _HomePageScriptEditor on _HomePageState {
                         const SizedBox(height: 16),
                         TextField(
                           controller: nameCtrl,
-                          decoration: const InputDecoration(
-                            labelText: '名称（留空则清空）',
+                          decoration: InputDecoration(
+                            labelText: l10n.scriptEditorFieldNameLabelClearIfEmpty,
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -68,8 +69,8 @@ extension _HomePageScriptEditor on _HomePageState {
                           controller: contentCtrl,
                           minLines: 4,
                           maxLines: 12,
-                          decoration: const InputDecoration(
-                            labelText: '内容（留空则清空）',
+                          decoration: InputDecoration(
+                            labelText: l10n.scriptEditorFieldContentLabelClearIfEmpty,
                             alignLabelWithHint: true,
                           ),
                         ),
@@ -77,8 +78,9 @@ extension _HomePageScriptEditor on _HomePageState {
                         TextField(
                           controller: stateCtrl,
                           keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(
-                            labelText: '提取状态（留空则清空）',
+                          decoration: InputDecoration(
+                            labelText:
+                                l10n.scriptEditorFieldExtractStateLabelClearIfEmpty,
                           ),
                         ),
                         Align(
@@ -92,7 +94,7 @@ extension _HomePageScriptEditor on _HomePageState {
                                     projectNumericId: projectNumericId,
                                     scriptNumericId: scriptNumericId,
                                   ),
-                            child: const Text('分镜列表…'),
+                            child: Text(l10n.scriptEditorOpenStoryboards),
                           ),
                         ),
                       ],
@@ -102,7 +104,7 @@ extension _HomePageScriptEditor on _HomePageState {
                 actions: [
                   TextButton(
                     onPressed: saving[0] ? null : () => Navigator.of(ctx).pop(),
-                    child: const Text('关闭'),
+                    child: Text(l10n.projectEditorScriptsWorkbenchDialogClose),
                   ),
                   TextButton(
                     onPressed: saving[0]
@@ -110,22 +112,37 @@ extension _HomePageScriptEditor on _HomePageState {
                         : () async {
                             final ok = await showDialog<bool>(
                               context: ctx,
-                              builder: (c) => AlertDialog(
-                                title: const Text('删除剧本？'),
-                                content: Text(
-                                  '将删除 script #${script.numericId} 及其分镜（数据库级联）。',
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.of(c).pop(false),
-                                    child: const Text('取消'),
+                              builder: (c) {
+                                final confirmL10n = AppLocalizations.of(c)!;
+                                return AlertDialog(
+                                  title: Text(
+                                    confirmL10n.scriptEditorDeleteConfirmTitle,
                                   ),
-                                  FilledButton(
-                                    onPressed: () => Navigator.of(c).pop(true),
-                                    child: const Text('删除'),
+                                  content: Text(
+                                    confirmL10n.scriptEditorDeleteConfirmBody(
+                                      script.numericId,
+                                    ),
                                   ),
-                                ],
-                              ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.of(c).pop(false),
+                                      child: Text(
+                                        confirmL10n
+                                            .projectEditorScriptsBatchAddCancel,
+                                      ),
+                                    ),
+                                    FilledButton(
+                                      onPressed: () =>
+                                          Navigator.of(c).pop(true),
+                                      child: Text(
+                                        confirmL10n
+                                            .scriptEditorDeleteConfirmDelete,
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
                             );
                             if (ok != true || !ctx.mounted) return;
                             setDialogState(() => saving[0] = true);
@@ -141,7 +158,12 @@ extension _HomePageScriptEditor on _HomePageState {
                               Navigator.of(ctx).pop();
                               if (!mounted) return;
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('剧本已删除')),
+                                SnackBar(
+                                  content: Text(
+                                    AppLocalizations.of(context)!
+                                        .scriptEditorDeletedSnackBar,
+                                  ),
+                                ),
                               );
                             } on RustApiException catch (e) {
                               if (ctx.mounted) {
@@ -159,7 +181,7 @@ extension _HomePageScriptEditor on _HomePageState {
                               }
                             }
                           },
-                    child: const Text('删除剧本'),
+                    child: Text(l10n.scriptEditorDeleteScriptButton),
                   ),
                   FilledButton(
                     onPressed: saving[0]
@@ -174,8 +196,10 @@ extension _HomePageScriptEditor on _HomePageState {
                                 if (ctx.mounted) {
                                   setDialogState(() => saving[0] = false);
                                   ScaffoldMessenger.of(ctx).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('extract_state 须为整数'),
+                                    SnackBar(
+                                      content: Text(
+                                        l10n.scriptEditorExtractStateMustBeInteger,
+                                      ),
                                     ),
                                   );
                                 }
@@ -217,7 +241,11 @@ extension _HomePageScriptEditor on _HomePageState {
                               }
                             }
                           },
-                    child: Text(saving[0] ? '保存中…' : '保存修改'),
+                    child: Text(
+                      saving[0]
+                          ? l10n.scriptEditorSaveSaving
+                          : l10n.scriptEditorSaveChanges,
+                    ),
                   ),
                 ],
               );
