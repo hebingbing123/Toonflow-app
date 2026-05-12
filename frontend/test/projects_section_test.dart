@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/projects/controller.dart';
 import 'package:openflow_app/projects/section.dart';
 import 'package:openflow_app/rust_api.dart';
@@ -23,6 +25,20 @@ ProjectsController buildController({
   return controller;
 }
 
+Widget buildTestApp(Widget child) {
+  return MaterialApp(
+    localizationsDelegates: const [
+      AppLocalizations.delegate,
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
+    supportedLocales: AppLocalizations.supportedLocales,
+    locale: const Locale('zh'),
+    home: Scaffold(body: child),
+  );
+}
+
 void main() {
   testWidgets('projects section exposes art styles workbench entry', (
     WidgetTester tester,
@@ -43,14 +59,12 @@ void main() {
       artStylesLine: 'total=1',
     );
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: ProjectsSection(
-            accessToken: 'token',
-            controller: controller,
-            onOpenProjectDetail: (_) {},
-            onOpenTeamWorkspaces: () {},
-          ),
+      buildTestApp(
+        ProjectsSection(
+          accessToken: 'token',
+          controller: controller,
+          onOpenProjectDetail: (_) {},
+          onOpenTeamWorkspaces: () {},
         ),
       ),
     );
@@ -81,14 +95,12 @@ void main() {
       artStylesLine: 'total=1',
     );
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: ProjectsSection(
+      buildTestApp(
+        ProjectsSection(
             accessToken: 'token',
             controller: controller,
             onOpenProjectDetail: (_) {},
             onOpenTeamWorkspaces: () {},
-          ),
         ),
       ),
     );
@@ -112,14 +124,12 @@ void main() {
       artStyles: const <ArtStyleRow>[],
     );
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: ProjectsSection(
+      buildTestApp(
+        ProjectsSection(
             accessToken: 'token',
             controller: controller,
             onOpenProjectDetail: (_) {},
             onOpenTeamWorkspaces: () {},
-          ),
         ),
       ),
     );
@@ -141,14 +151,12 @@ void main() {
       artStyles: const <ArtStyleRow>[],
     );
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: ProjectsSection(
+      buildTestApp(
+        ProjectsSection(
             accessToken: 'token',
             controller: controller,
             onOpenProjectDetail: (_) {},
             onOpenTeamWorkspaces: () {},
-          ),
         ),
       ),
     );
@@ -180,14 +188,12 @@ void main() {
       artStyles: const <ArtStyleRow>[],
     );
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: ProjectsSection(
+      buildTestApp(
+        ProjectsSection(
             accessToken: 'token',
             controller: controller,
             onOpenProjectDetail: (_) {},
             onOpenTeamWorkspaces: () {},
-          ),
         ),
       ),
     );
@@ -214,16 +220,14 @@ void main() {
     );
     var openedTeamWorkspaces = 0;
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: ProjectsSection(
+      buildTestApp(
+        ProjectsSection(
             accessToken: 'token',
             controller: controller,
             currentWorkspaceName: 'Team Alpha',
             currentWorkspaceType: 'enterprise',
             onOpenProjectDetail: (_) {},
             onOpenTeamWorkspaces: () => openedTeamWorkspaces++,
-          ),
         ),
       ),
     );
