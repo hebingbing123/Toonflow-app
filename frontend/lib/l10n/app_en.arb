@@ -5529,6 +5529,9 @@
     }
   },
   "scriptEditorStoryboardsStateFallback": "unknown",
+  "scriptEditorStoryboardsNarrationExplicit": "Explicit narration is set",
+  "scriptEditorStoryboardsNarrationPromptFallback": "Falls back to storyboard prompt",
+  "scriptEditorStoryboardsNarrationPlaceholder": "Still placeholder text",
   "scriptEditorStoryboardsProductionEmptyData": "Production view has no storyboard rows yet.",
   "scriptEditorStoryboardsProductionSummaryLine": "Production view · {count} rows · {preview}{ellipsis}",
   "@scriptEditorStoryboardsProductionSummaryLine": {
@@ -5602,6 +5605,243 @@
       }
     }
   },
+  "scriptEditorStoryboardBatchFollowUpLine": "{actionSummary} Suggested next step: {nextAction}. {detail}",
+  "@scriptEditorStoryboardBatchFollowUpLine": {
+    "placeholders": {
+      "actionSummary": {
+        "type": "String"
+      },
+      "nextAction": {
+        "type": "String"
+      },
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchRecommendSyncProduction": "Sync production view",
+  "scriptEditorStoryboardBatchRecommendSelectReady": "Select all image-ready shots",
+  "scriptEditorStoryboardBatchRecommendGenerateSelected": "Batch-generate images",
+  "scriptEditorStoryboardBatchRecommendPreviewSelected": "Read current preview",
+  "scriptEditorStoryboardBatchReadDownloadLink": "Read download link",
+  "scriptEditorStoryboardBatchRecommendExportSelected": "Export selected ZIP",
+  "scriptEditorStoryboardBatchDiagnosisNoSelectionSummary": "No storyboards selected for processing.",
+  "scriptEditorStoryboardBatchDiagnosisNoSelectionWithReadyDetail": "{readyCount} shots already have usable prompts; batch generate can auto-pick ready shots and enqueue them.",
+  "@scriptEditorStoryboardBatchDiagnosisNoSelectionWithReadyDetail": {
+    "placeholders": {
+      "readyCount": {
+        "type": "int"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchDiagnosisNoSelectionSyncFirstDetail": "Sync the production view first to confirm production rows and prompts, then choose your next step.",
+  "scriptEditorStoryboardBatchDiagnosisPartialProductionSummary": "{count} selected shot(s) are not all synced to the production view.",
+  "@scriptEditorStoryboardBatchDiagnosisPartialProductionSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchDiagnosisPartialProductionDetail": "Refresh the production view to fill production snapshots before preview, download links, or export.",
+  "scriptEditorStoryboardBatchDiagnosisNoPromptsSummary": "Selected shots are missing usable image prompts.",
+  "scriptEditorStoryboardBatchDiagnosisNoPromptsDetail": "Return to storyboard editing to add prompts, or sync production to reuse production-side prompts.",
+  "scriptEditorStoryboardBatchDiagnosisSingleHasImageSummary": "The selected shot already has an image.",
+  "scriptEditorStoryboardBatchDiagnosisSingleHasImageDetail": "Read the current preview first to see if it is reusable before re-generating.",
+  "scriptEditorStoryboardBatchDiagnosisAllHaveImagesSummary": "All {count} selected shots already have images.",
+  "@scriptEditorStoryboardBatchDiagnosisAllHaveImagesSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchDiagnosisAllHaveImagesDetail": "Export a ZIP for review, or return to a single storyboard to re-run generation if needed.",
+  "scriptEditorStoryboardBatchDiagnosisMixedReadySummary": "{selected} selected; {ready} can start image generation now.",
+  "@scriptEditorStoryboardBatchDiagnosisMixedReadySummary": {
+    "placeholders": {
+      "selected": {
+        "type": "int"
+      },
+      "ready": {
+        "type": "int"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchDiagnosisMixedReadyDetail": "Submit batch generate first, then return here for preview or download links.",
+  "scriptEditorStoryboardBatchDialogTitle": "Storyboard image workbench",
+  "scriptEditorStoryboardBatchDialogIntro": "Batch-generate images, read previews, download links, and export ZIP from the script storyboard area—without relying only on production probes.",
+  "scriptEditorStoryboardBatchHasImage": "Has image",
+  "scriptEditorStoryboardBatchMetaIncomplete": "Shot details incomplete",
+  "scriptEditorStoryboardBatchSyncProductionEmpty": "Production view has no storyboard rows yet; you can still start batch generate from script prompts.",
+  "scriptEditorStoryboardBatchSyncProductionCount": "Synced {count} production storyboard row(s).",
+  "@scriptEditorStoryboardBatchSyncProductionCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchLoadProductionFailed": "Failed to load production view: {error}",
+  "@scriptEditorStoryboardBatchLoadProductionFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchGenerateAutoSelected": "Auto-selected {readyCount} image-ready shot(s); created tasks for {total} shot(s); enqueued {enqueued}.",
+  "@scriptEditorStoryboardBatchGenerateAutoSelected": {
+    "placeholders": {
+      "readyCount": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "enqueued": {
+        "type": "int"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchGenerateSubmitted": "Created tasks for {total} shot(s); enqueued {enqueued}.",
+  "@scriptEditorStoryboardBatchGenerateSubmitted": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "enqueued": {
+        "type": "int"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchSelectAllReady": "Selected all shots that can generate images.",
+  "scriptEditorStoryboardBatchClearSelection": "Cleared selection.",
+  "scriptEditorStoryboardBatchNoPreview": "This shot has no preview image yet.",
+  "scriptEditorStoryboardBatchPreviewLoaded": "Read current preview for shot #{storyboardId}.",
+  "@scriptEditorStoryboardBatchPreviewLoaded": {
+    "placeholders": {
+      "storyboardId": {
+        "type": "int"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchDownloadReady": "Generated download link for shot #{storyboardId}.",
+  "@scriptEditorStoryboardBatchDownloadReady": {
+    "placeholders": {
+      "storyboardId": {
+        "type": "int"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchExportDone": "Exported {count} shot(s), file {filename}, total duration {durationLabel}.",
+  "@scriptEditorStoryboardBatchExportDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "filename": {
+        "type": "String"
+      },
+      "durationLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchNoPromptsError": "No selected shots have usable prompts; cannot start batch image generation.",
+  "scriptEditorStoryboardBatchSyncing": "Syncing…",
+  "scriptEditorStoryboardBatchClearSelectionButton": "Clear selection",
+  "scriptEditorStoryboardBatchPromptSuffixLabel": "Prompt suffix (optional)",
+  "scriptEditorStoryboardBatchPromptSuffixHelper": "Appended to each shot's base prompt.",
+  "scriptEditorStoryboardBatchNegativePromptLabel": "Negative prompt (optional)",
+  "scriptEditorStoryboardBatchModelLabel": "Model (optional)",
+  "scriptEditorStoryboardBatchResolutionLabel": "Resolution (optional)",
+  "scriptEditorStoryboardBatchQuickGenerateHint": "With no manual selection, batch generate auto-picks shots that already have usable prompts. Preview and export still need an explicit selection.",
+  "scriptEditorStoryboardBatchNoResolvablePrompt": "No usable prompt",
+  "scriptEditorStoryboardBatchPreviewExportHeading": "Preview and export",
+  "scriptEditorStoryboardBatchSelectOneForPreview": "Select exactly one shot to read preview and download link.",
+  "scriptEditorStoryboardBatchViewingShot": "Viewing shot #{id}",
+  "@scriptEditorStoryboardBatchViewingShot": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchExportEstimateHeading": "Export bundle estimate",
+  "scriptEditorStoryboardBatchExportEstimateContent": "Contents: {shotCount} storyboard image(s) + {sidecar}",
+  "@scriptEditorStoryboardBatchExportEstimateContent": {
+    "placeholders": {
+      "shotCount": {
+        "type": "int"
+      },
+      "sidecar": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchExportEstimateEntries": "Estimated entries: {entryCount} · total duration {durationLabel}",
+  "@scriptEditorStoryboardBatchExportEstimateEntries": {
+    "placeholders": {
+      "entryCount": {
+        "type": "int"
+      },
+      "durationLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchDownloadLinkLine": "Download link: {url}",
+  "@scriptEditorStoryboardBatchDownloadLinkLine": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchLastExportHeading": "Latest export bundle",
+  "scriptEditorStoryboardBatchExportFileLine": "File: {filename}",
+  "@scriptEditorStoryboardBatchExportFileLine": {
+    "placeholders": {
+      "filename": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchExportContentLine": "Contents: {shotCount} storyboard image(s) + {sidecar}",
+  "@scriptEditorStoryboardBatchExportContentLine": {
+    "placeholders": {
+      "shotCount": {
+        "type": "int"
+      },
+      "sidecar": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchExportDetailWithSize": "Estimated entries: {entryCount} · total duration {durationLabel} · size {size}",
+  "@scriptEditorStoryboardBatchExportDetailWithSize": {
+    "placeholders": {
+      "entryCount": {
+        "type": "int"
+      },
+      "durationLabel": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchExportShotIds": "Shot IDs: {ids}",
+  "@scriptEditorStoryboardBatchExportShotIds": {
+    "placeholders": {
+      "ids": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchPreviewPlaceholder": "Preview image appears here.",
   "projectEditorScriptsSingleWorkbenchRecentExtractError": "Recent extract error: {reason}",
   "@projectEditorScriptsSingleWorkbenchRecentExtractError": {
     "placeholders": {

@@ -5529,6 +5529,9 @@
     }
   },
   "scriptEditorStoryboardsStateFallback": "unknown",
+  "scriptEditorStoryboardsNarrationExplicit": "已具备显式旁白文案",
+  "scriptEditorStoryboardsNarrationPromptFallback": "将回退到分镜提示词",
+  "scriptEditorStoryboardsNarrationPlaceholder": "仍是占位文本",
   "scriptEditorStoryboardsProductionEmptyData": "制作视图当前没有分镜数据",
   "scriptEditorStoryboardsProductionSummaryLine": "制作视图 {count} 条 · {preview}{ellipsis}",
   "@scriptEditorStoryboardsProductionSummaryLine": {
@@ -5602,6 +5605,243 @@
       }
     }
   },
+  "scriptEditorStoryboardBatchFollowUpLine": "{actionSummary} 下一步建议：{nextAction}。{detail}",
+  "@scriptEditorStoryboardBatchFollowUpLine": {
+    "placeholders": {
+      "actionSummary": {
+        "type": "String"
+      },
+      "nextAction": {
+        "type": "String"
+      },
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchRecommendSyncProduction": "同步制作视图",
+  "scriptEditorStoryboardBatchRecommendSelectReady": "全选可出图分镜",
+  "scriptEditorStoryboardBatchRecommendGenerateSelected": "一键批量出图",
+  "scriptEditorStoryboardBatchRecommendPreviewSelected": "读取当前预览",
+  "scriptEditorStoryboardBatchReadDownloadLink": "读取下载链接",
+  "scriptEditorStoryboardBatchRecommendExportSelected": "导出所选 ZIP",
+  "scriptEditorStoryboardBatchDiagnosisNoSelectionSummary": "当前还没有选择要处理的分镜。",
+  "scriptEditorStoryboardBatchDiagnosisNoSelectionWithReadyDetail": "已有 {readyCount} 条分镜具备可用提示词，可直接一键批量出图；系统会自动挑出准备好的分镜入队。",
+  "@scriptEditorStoryboardBatchDiagnosisNoSelectionWithReadyDetail": {
+    "placeholders": {
+      "readyCount": {
+        "type": "int"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchDiagnosisNoSelectionSyncFirstDetail": "建议先同步制作视图，确认 production 侧分镜记录和提示词是否齐全，再决定后续动作。",
+  "scriptEditorStoryboardBatchDiagnosisPartialProductionSummary": "所选 {count} 条分镜还没有全部同步到制作视图。",
+  "@scriptEditorStoryboardBatchDiagnosisPartialProductionSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchDiagnosisPartialProductionDetail": "建议先刷新制作视图，补齐 production 侧分镜快照后再读预览、下载链接或导出。",
+  "scriptEditorStoryboardBatchDiagnosisNoPromptsSummary": "所选分镜都还缺少可直接出图的提示词。",
+  "scriptEditorStoryboardBatchDiagnosisNoPromptsDetail": "先回到分镜编辑区补全提示词，或同步制作视图确认 production 侧是否已有可复用提示词。",
+  "scriptEditorStoryboardBatchDiagnosisSingleHasImageSummary": "当前所选分镜已经有现成画面。",
+  "scriptEditorStoryboardBatchDiagnosisSingleHasImageDetail": "建议先读取当前预览确认画面是否可直接复用，再决定是否重新发起出图。",
+  "scriptEditorStoryboardBatchDiagnosisAllHaveImagesSummary": "所选 {count} 条分镜都已有现成画面。",
+  "@scriptEditorStoryboardBatchDiagnosisAllHaveImagesSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchDiagnosisAllHaveImagesDetail": "可以直接导出所选 ZIP 做集中审阅，必要时再回到单条分镜重跑出图。",
+  "scriptEditorStoryboardBatchDiagnosisMixedReadySummary": "所选 {selected} 条分镜里有 {ready} 条可直接发起出图。",
+  "@scriptEditorStoryboardBatchDiagnosisMixedReadySummary": {
+    "placeholders": {
+      "selected": {
+        "type": "int"
+      },
+      "ready": {
+        "type": "int"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchDiagnosisMixedReadyDetail": "建议先批量提交出图任务，再回到当前工作台读取预览或下载链接确认结果。",
+  "scriptEditorStoryboardBatchDialogTitle": "分镜出图工作台",
+  "scriptEditorStoryboardBatchDialogIntro": "把批量出图、当前预览、下载链接与导出 ZIP 收口到剧本分镜区，不再只依赖 production probe。",
+  "scriptEditorStoryboardBatchHasImage": "已有画面",
+  "scriptEditorStoryboardBatchMetaIncomplete": "待补充分镜信息",
+  "scriptEditorStoryboardBatchSyncProductionEmpty": "制作视图尚无分镜记录，仍可按脚本分镜提示词发起出图。",
+  "scriptEditorStoryboardBatchSyncProductionCount": "已同步 {count} 条制作分镜。",
+  "@scriptEditorStoryboardBatchSyncProductionCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchLoadProductionFailed": "加载制作视图失败：{error}",
+  "@scriptEditorStoryboardBatchLoadProductionFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchGenerateAutoSelected": "已自动选中 {readyCount} 条可出图分镜，并为 {total} 条分镜创建出图任务，队列 {enqueued} 条。",
+  "@scriptEditorStoryboardBatchGenerateAutoSelected": {
+    "placeholders": {
+      "readyCount": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "enqueued": {
+        "type": "int"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchGenerateSubmitted": "已为 {total} 条分镜创建出图任务，队列 {enqueued} 条。",
+  "@scriptEditorStoryboardBatchGenerateSubmitted": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "enqueued": {
+        "type": "int"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchSelectAllReady": "已选择全部可直接出图的分镜。",
+  "scriptEditorStoryboardBatchClearSelection": "已清空选择。",
+  "scriptEditorStoryboardBatchNoPreview": "当前分镜还没有预览图。",
+  "scriptEditorStoryboardBatchPreviewLoaded": "已读取分镜 #{storyboardId} 的当前预览。",
+  "@scriptEditorStoryboardBatchPreviewLoaded": {
+    "placeholders": {
+      "storyboardId": {
+        "type": "int"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchDownloadReady": "已生成分镜 #{storyboardId} 的下载链接。",
+  "@scriptEditorStoryboardBatchDownloadReady": {
+    "placeholders": {
+      "storyboardId": {
+        "type": "int"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchExportDone": "已导出 {count} 条分镜，文件 {filename}，总时长 {durationLabel}。",
+  "@scriptEditorStoryboardBatchExportDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "filename": {
+        "type": "String"
+      },
+      "durationLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchNoPromptsError": "所选分镜没有可用提示词，无法发起批量出图",
+  "scriptEditorStoryboardBatchSyncing": "同步中…",
+  "scriptEditorStoryboardBatchClearSelectionButton": "清空选择",
+  "scriptEditorStoryboardBatchPromptSuffixLabel": "追加提示词（可选）",
+  "scriptEditorStoryboardBatchPromptSuffixHelper": "会拼接到每条分镜原提示词末尾。",
+  "scriptEditorStoryboardBatchNegativePromptLabel": "负面提示词（可选）",
+  "scriptEditorStoryboardBatchModelLabel": "模型（可选）",
+  "scriptEditorStoryboardBatchResolutionLabel": "分辨率（可选）",
+  "scriptEditorStoryboardBatchQuickGenerateHint": "未手动选择分镜时，一键批量出图会自动挑出已具备可用提示词的分镜直接入队；只有预览和导出这类精确动作仍需要你明确选择。",
+  "scriptEditorStoryboardBatchNoResolvablePrompt": "无可用提示词",
+  "scriptEditorStoryboardBatchPreviewExportHeading": "预览与导出信息",
+  "scriptEditorStoryboardBatchSelectOneForPreview": "选中 1 条分镜后可读取当前预览与下载链接。",
+  "scriptEditorStoryboardBatchViewingShot": "当前查看分镜 #{id}",
+  "@scriptEditorStoryboardBatchViewingShot": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchExportEstimateHeading": "待导出包预估",
+  "scriptEditorStoryboardBatchExportEstimateContent": "内容：{shotCount} 张分镜图 + {sidecar}",
+  "@scriptEditorStoryboardBatchExportEstimateContent": {
+    "placeholders": {
+      "shotCount": {
+        "type": "int"
+      },
+      "sidecar": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchExportEstimateEntries": "预计条目：{entryCount} 个 · 总时长 {durationLabel}",
+  "@scriptEditorStoryboardBatchExportEstimateEntries": {
+    "placeholders": {
+      "entryCount": {
+        "type": "int"
+      },
+      "durationLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchDownloadLinkLine": "下载链接：{url}",
+  "@scriptEditorStoryboardBatchDownloadLinkLine": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchLastExportHeading": "最近导出包",
+  "scriptEditorStoryboardBatchExportFileLine": "文件：{filename}",
+  "@scriptEditorStoryboardBatchExportFileLine": {
+    "placeholders": {
+      "filename": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchExportContentLine": "内容：{shotCount} 张分镜图 + {sidecar}",
+  "@scriptEditorStoryboardBatchExportContentLine": {
+    "placeholders": {
+      "shotCount": {
+        "type": "int"
+      },
+      "sidecar": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchExportDetailWithSize": "预计条目：{entryCount} 个 · 总时长 {durationLabel} · 大小 {size}",
+  "@scriptEditorStoryboardBatchExportDetailWithSize": {
+    "placeholders": {
+      "entryCount": {
+        "type": "int"
+      },
+      "durationLabel": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchExportShotIds": "分镜 ID：{ids}",
+  "@scriptEditorStoryboardBatchExportShotIds": {
+    "placeholders": {
+      "ids": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardBatchPreviewPlaceholder": "这里会显示当前分镜预览图。",
   "projectEditorScriptsSingleWorkbenchRecentExtractError": "最近提取错误：{reason}",
   "@projectEditorScriptsSingleWorkbenchRecentExtractError": {
     "placeholders": {

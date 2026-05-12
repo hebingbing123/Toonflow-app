@@ -11906,6 +11906,24 @@ abstract class AppLocalizations {
   /// **'unknown'**
   String get scriptEditorStoryboardsStateFallback;
 
+  /// No description provided for @scriptEditorStoryboardsNarrationExplicit.
+  ///
+  /// In en, this message translates to:
+  /// **'Explicit narration is set'**
+  String get scriptEditorStoryboardsNarrationExplicit;
+
+  /// No description provided for @scriptEditorStoryboardsNarrationPromptFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Falls back to storyboard prompt'**
+  String get scriptEditorStoryboardsNarrationPromptFallback;
+
+  /// No description provided for @scriptEditorStoryboardsNarrationPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Still placeholder text'**
+  String get scriptEditorStoryboardsNarrationPlaceholder;
+
   /// No description provided for @scriptEditorStoryboardsProductionEmptyData.
   ///
   /// In en, this message translates to:
@@ -12012,6 +12030,386 @@ abstract class AppLocalizations {
     String nextAction,
     String detail,
   );
+
+  /// No description provided for @scriptEditorStoryboardBatchFollowUpLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{actionSummary} Suggested next step: {nextAction}. {detail}'**
+  String scriptEditorStoryboardBatchFollowUpLine(
+    String actionSummary,
+    String nextAction,
+    String detail,
+  );
+
+  /// No description provided for @scriptEditorStoryboardBatchRecommendSyncProduction.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync production view'**
+  String get scriptEditorStoryboardBatchRecommendSyncProduction;
+
+  /// No description provided for @scriptEditorStoryboardBatchRecommendSelectReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Select all image-ready shots'**
+  String get scriptEditorStoryboardBatchRecommendSelectReady;
+
+  /// No description provided for @scriptEditorStoryboardBatchRecommendGenerateSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch-generate images'**
+  String get scriptEditorStoryboardBatchRecommendGenerateSelected;
+
+  /// No description provided for @scriptEditorStoryboardBatchRecommendPreviewSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Read current preview'**
+  String get scriptEditorStoryboardBatchRecommendPreviewSelected;
+
+  /// No description provided for @scriptEditorStoryboardBatchReadDownloadLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Read download link'**
+  String get scriptEditorStoryboardBatchReadDownloadLink;
+
+  /// No description provided for @scriptEditorStoryboardBatchRecommendExportSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Export selected ZIP'**
+  String get scriptEditorStoryboardBatchRecommendExportSelected;
+
+  /// No description provided for @scriptEditorStoryboardBatchDiagnosisNoSelectionSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'No storyboards selected for processing.'**
+  String get scriptEditorStoryboardBatchDiagnosisNoSelectionSummary;
+
+  /// No description provided for @scriptEditorStoryboardBatchDiagnosisNoSelectionWithReadyDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'{readyCount} shots already have usable prompts; batch generate can auto-pick ready shots and enqueue them.'**
+  String scriptEditorStoryboardBatchDiagnosisNoSelectionWithReadyDetail(
+    int readyCount,
+  );
+
+  /// No description provided for @scriptEditorStoryboardBatchDiagnosisNoSelectionSyncFirstDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync the production view first to confirm production rows and prompts, then choose your next step.'**
+  String get scriptEditorStoryboardBatchDiagnosisNoSelectionSyncFirstDetail;
+
+  /// No description provided for @scriptEditorStoryboardBatchDiagnosisPartialProductionSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected shot(s) are not all synced to the production view.'**
+  String scriptEditorStoryboardBatchDiagnosisPartialProductionSummary(
+    int count,
+  );
+
+  /// No description provided for @scriptEditorStoryboardBatchDiagnosisPartialProductionDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh the production view to fill production snapshots before preview, download links, or export.'**
+  String get scriptEditorStoryboardBatchDiagnosisPartialProductionDetail;
+
+  /// No description provided for @scriptEditorStoryboardBatchDiagnosisNoPromptsSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected shots are missing usable image prompts.'**
+  String get scriptEditorStoryboardBatchDiagnosisNoPromptsSummary;
+
+  /// No description provided for @scriptEditorStoryboardBatchDiagnosisNoPromptsDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Return to storyboard editing to add prompts, or sync production to reuse production-side prompts.'**
+  String get scriptEditorStoryboardBatchDiagnosisNoPromptsDetail;
+
+  /// No description provided for @scriptEditorStoryboardBatchDiagnosisSingleHasImageSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'The selected shot already has an image.'**
+  String get scriptEditorStoryboardBatchDiagnosisSingleHasImageSummary;
+
+  /// No description provided for @scriptEditorStoryboardBatchDiagnosisSingleHasImageDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Read the current preview first to see if it is reusable before re-generating.'**
+  String get scriptEditorStoryboardBatchDiagnosisSingleHasImageDetail;
+
+  /// No description provided for @scriptEditorStoryboardBatchDiagnosisAllHaveImagesSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'All {count} selected shots already have images.'**
+  String scriptEditorStoryboardBatchDiagnosisAllHaveImagesSummary(int count);
+
+  /// No description provided for @scriptEditorStoryboardBatchDiagnosisAllHaveImagesDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Export a ZIP for review, or return to a single storyboard to re-run generation if needed.'**
+  String get scriptEditorStoryboardBatchDiagnosisAllHaveImagesDetail;
+
+  /// No description provided for @scriptEditorStoryboardBatchDiagnosisMixedReadySummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{selected} selected; {ready} can start image generation now.'**
+  String scriptEditorStoryboardBatchDiagnosisMixedReadySummary(
+    int selected,
+    int ready,
+  );
+
+  /// No description provided for @scriptEditorStoryboardBatchDiagnosisMixedReadyDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit batch generate first, then return here for preview or download links.'**
+  String get scriptEditorStoryboardBatchDiagnosisMixedReadyDetail;
+
+  /// No description provided for @scriptEditorStoryboardBatchDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard image workbench'**
+  String get scriptEditorStoryboardBatchDialogTitle;
+
+  /// No description provided for @scriptEditorStoryboardBatchDialogIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch-generate images, read previews, download links, and export ZIP from the script storyboard area—without relying only on production probes.'**
+  String get scriptEditorStoryboardBatchDialogIntro;
+
+  /// No description provided for @scriptEditorStoryboardBatchHasImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Has image'**
+  String get scriptEditorStoryboardBatchHasImage;
+
+  /// No description provided for @scriptEditorStoryboardBatchMetaIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Shot details incomplete'**
+  String get scriptEditorStoryboardBatchMetaIncomplete;
+
+  /// No description provided for @scriptEditorStoryboardBatchSyncProductionEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Production view has no storyboard rows yet; you can still start batch generate from script prompts.'**
+  String get scriptEditorStoryboardBatchSyncProductionEmpty;
+
+  /// No description provided for @scriptEditorStoryboardBatchSyncProductionCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Synced {count} production storyboard row(s).'**
+  String scriptEditorStoryboardBatchSyncProductionCount(int count);
+
+  /// No description provided for @scriptEditorStoryboardBatchLoadProductionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load production view: {error}'**
+  String scriptEditorStoryboardBatchLoadProductionFailed(String error);
+
+  /// No description provided for @scriptEditorStoryboardBatchGenerateAutoSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-selected {readyCount} image-ready shot(s); created tasks for {total} shot(s); enqueued {enqueued}.'**
+  String scriptEditorStoryboardBatchGenerateAutoSelected(
+    int readyCount,
+    int total,
+    int enqueued,
+  );
+
+  /// No description provided for @scriptEditorStoryboardBatchGenerateSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Created tasks for {total} shot(s); enqueued {enqueued}.'**
+  String scriptEditorStoryboardBatchGenerateSubmitted(int total, int enqueued);
+
+  /// No description provided for @scriptEditorStoryboardBatchSelectAllReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected all shots that can generate images.'**
+  String get scriptEditorStoryboardBatchSelectAllReady;
+
+  /// No description provided for @scriptEditorStoryboardBatchClearSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleared selection.'**
+  String get scriptEditorStoryboardBatchClearSelection;
+
+  /// No description provided for @scriptEditorStoryboardBatchNoPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'This shot has no preview image yet.'**
+  String get scriptEditorStoryboardBatchNoPreview;
+
+  /// No description provided for @scriptEditorStoryboardBatchPreviewLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Read current preview for shot #{storyboardId}.'**
+  String scriptEditorStoryboardBatchPreviewLoaded(int storyboardId);
+
+  /// No description provided for @scriptEditorStoryboardBatchDownloadReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Generated download link for shot #{storyboardId}.'**
+  String scriptEditorStoryboardBatchDownloadReady(int storyboardId);
+
+  /// No description provided for @scriptEditorStoryboardBatchExportDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Exported {count} shot(s), file {filename}, total duration {durationLabel}.'**
+  String scriptEditorStoryboardBatchExportDone(
+    int count,
+    String filename,
+    String durationLabel,
+  );
+
+  /// No description provided for @scriptEditorStoryboardBatchNoPromptsError.
+  ///
+  /// In en, this message translates to:
+  /// **'No selected shots have usable prompts; cannot start batch image generation.'**
+  String get scriptEditorStoryboardBatchNoPromptsError;
+
+  /// No description provided for @scriptEditorStoryboardBatchSyncing.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing…'**
+  String get scriptEditorStoryboardBatchSyncing;
+
+  /// No description provided for @scriptEditorStoryboardBatchClearSelectionButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear selection'**
+  String get scriptEditorStoryboardBatchClearSelectionButton;
+
+  /// No description provided for @scriptEditorStoryboardBatchPromptSuffixLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt suffix (optional)'**
+  String get scriptEditorStoryboardBatchPromptSuffixLabel;
+
+  /// No description provided for @scriptEditorStoryboardBatchPromptSuffixHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Appended to each shot\'s base prompt.'**
+  String get scriptEditorStoryboardBatchPromptSuffixHelper;
+
+  /// No description provided for @scriptEditorStoryboardBatchNegativePromptLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Negative prompt (optional)'**
+  String get scriptEditorStoryboardBatchNegativePromptLabel;
+
+  /// No description provided for @scriptEditorStoryboardBatchModelLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Model (optional)'**
+  String get scriptEditorStoryboardBatchModelLabel;
+
+  /// No description provided for @scriptEditorStoryboardBatchResolutionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolution (optional)'**
+  String get scriptEditorStoryboardBatchResolutionLabel;
+
+  /// No description provided for @scriptEditorStoryboardBatchQuickGenerateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'With no manual selection, batch generate auto-picks shots that already have usable prompts. Preview and export still need an explicit selection.'**
+  String get scriptEditorStoryboardBatchQuickGenerateHint;
+
+  /// No description provided for @scriptEditorStoryboardBatchNoResolvablePrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'No usable prompt'**
+  String get scriptEditorStoryboardBatchNoResolvablePrompt;
+
+  /// No description provided for @scriptEditorStoryboardBatchPreviewExportHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview and export'**
+  String get scriptEditorStoryboardBatchPreviewExportHeading;
+
+  /// No description provided for @scriptEditorStoryboardBatchSelectOneForPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Select exactly one shot to read preview and download link.'**
+  String get scriptEditorStoryboardBatchSelectOneForPreview;
+
+  /// No description provided for @scriptEditorStoryboardBatchViewingShot.
+  ///
+  /// In en, this message translates to:
+  /// **'Viewing shot #{id}'**
+  String scriptEditorStoryboardBatchViewingShot(int id);
+
+  /// No description provided for @scriptEditorStoryboardBatchExportEstimateHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Export bundle estimate'**
+  String get scriptEditorStoryboardBatchExportEstimateHeading;
+
+  /// No description provided for @scriptEditorStoryboardBatchExportEstimateContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Contents: {shotCount} storyboard image(s) + {sidecar}'**
+  String scriptEditorStoryboardBatchExportEstimateContent(
+    int shotCount,
+    String sidecar,
+  );
+
+  /// No description provided for @scriptEditorStoryboardBatchExportEstimateEntries.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated entries: {entryCount} · total duration {durationLabel}'**
+  String scriptEditorStoryboardBatchExportEstimateEntries(
+    int entryCount,
+    String durationLabel,
+  );
+
+  /// No description provided for @scriptEditorStoryboardBatchDownloadLinkLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Download link: {url}'**
+  String scriptEditorStoryboardBatchDownloadLinkLine(String url);
+
+  /// No description provided for @scriptEditorStoryboardBatchLastExportHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest export bundle'**
+  String get scriptEditorStoryboardBatchLastExportHeading;
+
+  /// No description provided for @scriptEditorStoryboardBatchExportFileLine.
+  ///
+  /// In en, this message translates to:
+  /// **'File: {filename}'**
+  String scriptEditorStoryboardBatchExportFileLine(String filename);
+
+  /// No description provided for @scriptEditorStoryboardBatchExportContentLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Contents: {shotCount} storyboard image(s) + {sidecar}'**
+  String scriptEditorStoryboardBatchExportContentLine(
+    int shotCount,
+    String sidecar,
+  );
+
+  /// No description provided for @scriptEditorStoryboardBatchExportDetailWithSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated entries: {entryCount} · total duration {durationLabel} · size {size}'**
+  String scriptEditorStoryboardBatchExportDetailWithSize(
+    int entryCount,
+    String durationLabel,
+    String size,
+  );
+
+  /// No description provided for @scriptEditorStoryboardBatchExportShotIds.
+  ///
+  /// In en, this message translates to:
+  /// **'Shot IDs: {ids}'**
+  String scriptEditorStoryboardBatchExportShotIds(String ids);
+
+  /// No description provided for @scriptEditorStoryboardBatchPreviewPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview image appears here.'**
+  String get scriptEditorStoryboardBatchPreviewPlaceholder;
 
   /// No description provided for @projectEditorScriptsSingleWorkbenchRecentExtractError.
   ///

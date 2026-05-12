@@ -265,6 +265,7 @@ void main() {
     'diagnoseStoryboardBatchWorkbench recommends selecting ready boards first',
     () {
       final diagnosis = diagnoseStoryboardBatchWorkbench(
+        _zh,
         selectedIds: const <int>[],
         boards: const [
           StoryboardRow(id: '1', numericId: 11, scriptId: '3', prompt: '镜头一'),
@@ -284,6 +285,7 @@ void main() {
     'diagnoseStoryboardBatchWorkbench requests production sync when coverage is missing',
     () {
       final diagnosis = diagnoseStoryboardBatchWorkbench(
+        _zh,
         selectedIds: const [11, 12],
         boards: const [
           StoryboardRow(id: '1', numericId: 11, scriptId: '3', prompt: '镜头一'),
@@ -305,6 +307,7 @@ void main() {
     'diagnoseStoryboardBatchWorkbench prefers preview for single selected board with image',
     () {
       final diagnosis = diagnoseStoryboardBatchWorkbench(
+        _zh,
         selectedIds: const [11],
         boards: const [
           StoryboardRow(
@@ -331,8 +334,10 @@ void main() {
     'buildStoryboardBatchWorkbenchFollowUp appends the recommended action',
     () {
       final line = buildStoryboardBatchWorkbenchFollowUp(
+        _zh,
         actionSummary: '已提交 2 条分镜出图任务。',
         diagnosis: diagnoseStoryboardBatchWorkbench(
+          _zh,
           selectedIds: const [11, 12],
           boards: const [
             StoryboardRow(id: '1', numericId: 11, scriptId: '3', prompt: '镜头一'),
@@ -997,7 +1002,7 @@ void main() {
       );
 
       expect(source, StoryboardNarrationSource.explicitNarration);
-      expect(describeStoryboardNarrationSource(source), '已具备显式旁白文案');
+      expect(describeStoryboardNarrationSource(_zh, source), '已具备显式旁白文案');
     },
   );
 
@@ -1015,7 +1020,7 @@ void main() {
       );
 
       expect(source, StoryboardNarrationSource.promptFallback);
-      expect(describeStoryboardNarrationSource(source), '将回退到分镜提示词');
+      expect(describeStoryboardNarrationSource(_zh, source), '将回退到分镜提示词');
     },
   );
 
@@ -1032,7 +1037,7 @@ void main() {
       );
 
       expect(source, StoryboardNarrationSource.placeholder);
-      expect(describeStoryboardNarrationSource(source), '仍是占位文本');
+      expect(describeStoryboardNarrationSource(_zh, source), '仍是占位文本');
     },
   );
 

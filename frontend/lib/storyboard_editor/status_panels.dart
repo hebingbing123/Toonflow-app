@@ -16,9 +16,11 @@ class _StoryboardPreviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final outline = Theme.of(context).colorScheme.outline;
     final imageUrl = productionRow?.url?.trim();
     final narrationSource = describeStoryboardNarrationSource(
+      l10n,
       resolveStoryboardNarrationSource(
         scriptStoryboard: scriptStoryboard,
         productionStoryboard: productionRow,
@@ -28,10 +30,12 @@ class _StoryboardPreviewCard extends StatelessWidget {
     final voiceoverAudioUrl = (productionRow?.voiceoverAudioUrl ?? '').trim();
     final voiceoverError = (productionRow?.voiceoverError ?? '').trim();
     final audioDeliveryLine = switch (voiceoverState) {
-      'completed' when voiceoverAudioUrl.isNotEmpty => '已生成配音',
-      'queued' => '配音排队中',
-      'failed' when voiceoverError.isNotEmpty => '配音失败：$voiceoverError',
-      'failed' => '配音失败',
+      'completed' when voiceoverAudioUrl.isNotEmpty =>
+        l10n.scriptEditorStoryboardsVoiceoverCompleted,
+      'queued' => l10n.scriptEditorStoryboardsVoiceoverQueued,
+      'failed' when voiceoverError.isNotEmpty =>
+        l10n.scriptEditorStoryboardsVoiceoverFailedWithError(voiceoverError),
+      'failed' => l10n.scriptEditorStoryboardsVoiceoverFailed,
       _ => narrationSource,
     };
     return Container(
@@ -43,7 +47,10 @@ class _StoryboardPreviewCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('当前画面', style: Theme.of(context).textTheme.labelLarge),
+          Text(
+            l10n.scriptEditorStoryboardsCurrentFrame,
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
           const SizedBox(height: 4),
           Text(
             metaLine,
@@ -56,7 +63,7 @@ class _StoryboardPreviewCard extends StatelessWidget {
             const Center(child: CircularProgressIndicator())
           else if (imageUrl == null || imageUrl.isEmpty)
             Text(
-              '当前分镜还没有选中的画面。可以先填写图片 URL，或先读取当前预览再继续生成视频。',
+              l10n.scriptEditorStoryboardsNoSelectedFrame,
               style: Theme.of(
                 context,
               ).textTheme.bodySmall?.copyWith(color: outline),
@@ -74,7 +81,7 @@ class _StoryboardPreviewCard extends StatelessWidget {
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   alignment: Alignment.center,
                   child: Text(
-                    '图片预览失败\n$imageUrl',
+                    l10n.scriptEditorStoryboardsPreviewLoadFailed(imageUrl),
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
@@ -93,7 +100,9 @@ class _StoryboardPreviewCard extends StatelessWidget {
           if ((productionRow?.videoDesc ?? '').trim().isNotEmpty) ...[
             const SizedBox(height: 8),
             Text(
-              '字幕/旁白：${productionRow!.videoDesc!.trim()}',
+              l10n.scriptEditorStoryboardsSubtitleNarration(
+                productionRow!.videoDesc!.trim(),
+              ),
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -103,7 +112,7 @@ class _StoryboardPreviewCard extends StatelessWidget {
           ],
           const SizedBox(height: 8),
           Text(
-            '音频交付：$audioDeliveryLine',
+            l10n.scriptEditorStoryboardsAudioDelivery(audioDeliveryLine),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -164,21 +173,37 @@ class _StoryboardShortVideoReadinessStrip extends StatelessWidget {
 
   final StoryboardShortVideoReadiness readiness;
 
-  static List<({String label, bool ok})> _steps(StoryboardShortVideoReadiness r) {
+  static List<({String label, bool ok})> _steps(
+    AppLocalizations l10n,
+    StoryboardShortVideoReadiness r,
+  ) {
     return <({String label, bool ok})>[
-      (label: '时间线槽位', ok: r.hasBasicSlot),
-      (label: '脚本 / 提示词', ok: r.hasPromptContext),
-      (label: '参考图', ok: r.hasReferenceVisual),
-      (label: '候选确认', ok: r.candidateCleared),
-      (label: '无阻塞任务', ok: r.noBlockingJob),
+      (label: l10n.scriptEditorStoryboardsReadinessBasicSlot, ok: r.hasBasicSlot),
+      (
+        label: l10n.scriptEditorStoryboardsReadinessPromptContext,
+        ok: r.hasPromptContext,
+      ),
+      (
+        label: l10n.scriptEditorStoryboardsReadinessReferenceVisual,
+        ok: r.hasReferenceVisual,
+      ),
+      (
+        label: l10n.scriptEditorStoryboardsReadinessCandidateCleared,
+        ok: r.candidateCleared,
+      ),
+      (
+        label: l10n.scriptEditorStoryboardsReadinessNoBlockingJob,
+        ok: r.noBlockingJob,
+      ),
     ];
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final outline = theme.colorScheme.outline;
-    final steps = _steps(readiness);
+    final steps = _steps(l10n, readiness);
     final ready = readiness.readyForGeneration;
     final badgeStyle = theme.textTheme.labelMedium?.copyWith(
       color: ready ? theme.colorScheme.primary : outline,
@@ -198,12 +223,14 @@ class _StoryboardShortVideoReadinessStrip extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  '短视频就绪（服务端）',
+                  l10n.scriptEditorStoryboardsReadinessTitle,
                   style: theme.textTheme.labelLarge,
                 ),
               ),
               Text(
-                ready ? '可生成' : '待补齐',
+                ready
+                    ? l10n.scriptEditorStoryboardsReadinessReady
+                    : l10n.scriptEditorStoryboardsReadinessIncomplete,
                 style: badgeStyle,
               ),
             ],

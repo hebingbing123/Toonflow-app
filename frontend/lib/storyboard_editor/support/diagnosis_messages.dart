@@ -77,19 +77,20 @@ String describeStoryboardListRecommendedAction(
 }
 
 String describeStoryboardBatchWorkbenchRecommendedAction(
+  AppLocalizations l10n,
   StoryboardBatchWorkbenchRecommendedAction action,
 ) {
   switch (action) {
     case StoryboardBatchWorkbenchRecommendedAction.syncProductionSummary:
-      return '同步制作视图';
+      return l10n.scriptEditorStoryboardBatchRecommendSyncProduction;
     case StoryboardBatchWorkbenchRecommendedAction.selectReadyStoryboards:
-      return '全选可出图分镜';
+      return l10n.scriptEditorStoryboardBatchRecommendSelectReady;
     case StoryboardBatchWorkbenchRecommendedAction.generateSelected:
-      return '一键批量出图';
+      return l10n.scriptEditorStoryboardBatchRecommendGenerateSelected;
     case StoryboardBatchWorkbenchRecommendedAction.previewSelected:
-      return '读取当前预览';
+      return l10n.scriptEditorStoryboardBatchRecommendPreviewSelected;
     case StoryboardBatchWorkbenchRecommendedAction.exportSelected:
-      return '导出所选 ZIP';
+      return l10n.scriptEditorStoryboardBatchRecommendExportSelected;
   }
 }
 
@@ -128,14 +129,20 @@ String buildStoryboardListFollowUp(
   );
 }
 
-String buildStoryboardBatchWorkbenchFollowUp({
+String buildStoryboardBatchWorkbenchFollowUp(
+  AppLocalizations l10n, {
   required String actionSummary,
   required StoryboardBatchWorkbenchDiagnosis diagnosis,
 }) {
   final nextAction = describeStoryboardBatchWorkbenchRecommendedAction(
+    l10n,
     diagnosis.recommendedAction,
   );
-  return '$actionSummary 下一步建议：$nextAction。${diagnosis.detail}';
+  return l10n.scriptEditorStoryboardBatchFollowUpLine(
+    actionSummary,
+    nextAction,
+    diagnosis.detail,
+  );
 }
 
 String buildStoryboardWorkbenchFollowUp({

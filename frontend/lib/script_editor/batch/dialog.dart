@@ -68,7 +68,8 @@ class _StoryboardBatchWorkbenchDialogState
     final productionMap = _productionById();
     return widget.boardsList
         .where(
-          (row) => resolveStoryboardGenerationPrompt(
+          (row) =>
+              resolveStoryboardGenerationPrompt(
                 scriptStoryboard: row,
                 productionStoryboard: productionMap[row.numericId],
               ) !=
@@ -93,6 +94,7 @@ class _StoryboardBatchWorkbenchDialogState
 
   StoryboardBatchWorkbenchDiagnosis _currentDiagnosis() =>
       diagnoseStoryboardBatchWorkbench(
+        AppLocalizations.of(context)!,
         selectedIds: _selectedIds,
         boards: widget.boardsList,
         productionRows: _productionRows,
@@ -110,19 +112,27 @@ class _StoryboardBatchWorkbenchDialogState
   }
 
   String _storyboardMetaLine(
+    AppLocalizations l10n,
     StoryboardRow row,
     ProductionStoryboardItemV1? productionRow,
   ) {
+    final idx = row.sbIndex ?? productionRow?.sbIndex;
     final parts = <String>[
-      if (row.sbIndex != null || productionRow?.sbIndex != null)
-        '序号 ${row.sbIndex ?? productionRow?.sbIndex}',
+      if (idx != null) l10n.scriptEditorStoryboardsRowOrder(idx),
       if ((row.state ?? productionRow?.state ?? '').trim().isNotEmpty)
-        '状态 ${row.state ?? productionRow?.state}',
+        l10n.scriptEditorStoryboardsRowState(
+          (row.state ?? productionRow?.state)!.trim(),
+        ),
       if ((row.duration ?? productionRow?.duration ?? '').trim().isNotEmpty)
-        '时长 ${row.duration ?? productionRow?.duration}',
-      if ((row.filePath ?? productionRow?.url ?? '').trim().isNotEmpty) '已有画面',
+        l10n.scriptEditorStoryboardsRowDuration(
+          (row.duration ?? productionRow?.duration)!.trim(),
+        ),
+      if ((row.filePath ?? productionRow?.url ?? '').trim().isNotEmpty)
+        l10n.scriptEditorStoryboardBatchHasImage,
     ];
-    return parts.isEmpty ? '待补充分镜信息' : parts.join(' · ');
+    return parts.isEmpty
+        ? l10n.scriptEditorStoryboardBatchMetaIncomplete
+        : parts.join(' · ');
   }
 
   Future<void> _refreshProduction() async {
@@ -150,6 +160,7 @@ class _StoryboardBatchWorkbenchDialogState
           ? nextSelectedIds.first
           : null;
       if (!mounted) return;
+      final l10n = AppLocalizations.of(context)!;
       setState(() {
         _productionRows = filtered;
         _selectedIds
@@ -159,16 +170,33 @@ class _StoryboardBatchWorkbenchDialogState
           _clearSelectionScopedOutputs();
         }
         _statusLine = buildStoryboardBatchWorkbenchFollowUp(
+          l10n,
           actionSummary: filtered.isEmpty
-              ? '制作视图尚无分镜记录，仍可按脚本分镜提示词发起出图。'
-              : '已同步 ${filtered.length} 条制作分镜。',
+              ? l10n.scriptEditorStoryboardBatchSyncProductionEmpty
+              : l10n.scriptEditorStoryboardBatchSyncProductionCount(
+                  filtered.length,
+                ),
           diagnosis: _currentDiagnosis(),
         );
       });
     } on RustApiException catch (e) {
-      if (mounted) setState(() => _statusLine = '加载制作视图失败：$e');
+      if (mounted) {
+        final loc = AppLocalizations.of(context)!;
+        setState(
+          () => _statusLine = loc.scriptEditorStoryboardBatchLoadProductionFailed(
+            e.toString(),
+          ),
+        );
+      }
     } catch (e) {
-      if (mounted) setState(() => _statusLine = '加载制作视图失败：$e');
+      if (mounted) {
+        final loc = AppLocalizations.of(context)!;
+        setState(
+          () => _statusLine = loc.scriptEditorStoryboardBatchLoadProductionFailed(
+            e.toString(),
+          ),
+        );
+      }
     } finally {
       if (mounted) setState(() => _loadingProduction = false);
     }
@@ -176,6 +204,7 @@ class _StoryboardBatchWorkbenchDialogState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final productionMap = _productionById();
     final selected = _sortedSelection();
     final singleSelectedId = selected.length == 1 ? selected.first : null;
@@ -189,14 +218,16 @@ class _StoryboardBatchWorkbenchDialogState
             ? null
             : _refreshProduction;
         recommendedActionLabel = _loadingProduction
-            ? '同步中…'
+            ? l10n.scriptEditorStoryboardsRefreshing
             : describeStoryboardBatchWorkbenchRecommendedAction(
+                l10n,
                 diagnosis.recommendedAction,
               );
       case StoryboardBatchWorkbenchRecommendedAction.selectReadyStoryboards:
         recommendedAction = _busyMutation ? null : _selectReadyStoryboards;
         recommendedActionLabel =
             describeStoryboardBatchWorkbenchRecommendedAction(
+              l10n,
               diagnosis.recommendedAction,
             );
       case StoryboardBatchWorkbenchRecommendedAction.generateSelected:
@@ -207,6 +238,7 @@ class _StoryboardBatchWorkbenchDialogState
             : () => _runMutation(_batchGenerate);
         recommendedActionLabel =
             describeStoryboardBatchWorkbenchRecommendedAction(
+              l10n,
               diagnosis.recommendedAction,
             );
       case StoryboardBatchWorkbenchRecommendedAction.previewSelected:
@@ -215,6 +247,7 @@ class _StoryboardBatchWorkbenchDialogState
             : () => _runMutation(() => _loadCurrentPreview(singleSelectedId));
         recommendedActionLabel =
             describeStoryboardBatchWorkbenchRecommendedAction(
+              l10n,
               diagnosis.recommendedAction,
             );
       case StoryboardBatchWorkbenchRecommendedAction.exportSelected:
@@ -223,12 +256,13 @@ class _StoryboardBatchWorkbenchDialogState
             : () => _runMutation(() => _exportSelectedZip(selected));
         recommendedActionLabel =
             describeStoryboardBatchWorkbenchRecommendedAction(
+              l10n,
               diagnosis.recommendedAction,
             );
     }
 
     return AlertDialog(
-      title: const Text('分镜出图工作台'),
+      title: Text(l10n.scriptEditorStoryboardBatchDialogTitle),
       content: SizedBox(
         width: 820,
         child: Column(
@@ -236,7 +270,7 @@ class _StoryboardBatchWorkbenchDialogState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '把批量出图、当前预览、下载链接与导出 ZIP 收口到剧本分镜区，不再只依赖 production probe。',
+              l10n.scriptEditorStoryboardBatchDialogIntro,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(context).colorScheme.outline,
               ),
@@ -289,7 +323,7 @@ class _StoryboardBatchWorkbenchDialogState
       actions: [
         TextButton(
           onPressed: _busyMutation ? null : () => Navigator.of(context).pop(),
-          child: const Text('关闭'),
+          child: Text(l10n.projectEditorScriptsWorkbenchDialogClose),
         ),
       ],
     );

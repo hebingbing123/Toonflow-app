@@ -7145,6 +7145,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get scriptEditorStoryboardsStateFallback => 'unknown';
 
   @override
+  String get scriptEditorStoryboardsNarrationExplicit => '已具备显式旁白文案';
+
+  @override
+  String get scriptEditorStoryboardsNarrationPromptFallback => '将回退到分镜提示词';
+
+  @override
+  String get scriptEditorStoryboardsNarrationPlaceholder => '仍是占位文本';
+
+  @override
   String get scriptEditorStoryboardsProductionEmptyData => '制作视图当前没有分镜数据';
 
   @override
@@ -7218,6 +7227,266 @@ class AppLocalizationsZh extends AppLocalizations {
   ) {
     return '$actionSummary 下一步建议：$nextAction。$detail';
   }
+
+  @override
+  String scriptEditorStoryboardBatchFollowUpLine(
+    String actionSummary,
+    String nextAction,
+    String detail,
+  ) {
+    return '$actionSummary 下一步建议：$nextAction。$detail';
+  }
+
+  @override
+  String get scriptEditorStoryboardBatchRecommendSyncProduction => '同步制作视图';
+
+  @override
+  String get scriptEditorStoryboardBatchRecommendSelectReady => '全选可出图分镜';
+
+  @override
+  String get scriptEditorStoryboardBatchRecommendGenerateSelected => '一键批量出图';
+
+  @override
+  String get scriptEditorStoryboardBatchRecommendPreviewSelected => '读取当前预览';
+
+  @override
+  String get scriptEditorStoryboardBatchReadDownloadLink => '读取下载链接';
+
+  @override
+  String get scriptEditorStoryboardBatchRecommendExportSelected => '导出所选 ZIP';
+
+  @override
+  String get scriptEditorStoryboardBatchDiagnosisNoSelectionSummary =>
+      '当前还没有选择要处理的分镜。';
+
+  @override
+  String scriptEditorStoryboardBatchDiagnosisNoSelectionWithReadyDetail(
+    int readyCount,
+  ) {
+    return '已有 $readyCount 条分镜具备可用提示词，可直接一键批量出图；系统会自动挑出准备好的分镜入队。';
+  }
+
+  @override
+  String get scriptEditorStoryboardBatchDiagnosisNoSelectionSyncFirstDetail =>
+      '建议先同步制作视图，确认 production 侧分镜记录和提示词是否齐全，再决定后续动作。';
+
+  @override
+  String scriptEditorStoryboardBatchDiagnosisPartialProductionSummary(
+    int count,
+  ) {
+    return '所选 $count 条分镜还没有全部同步到制作视图。';
+  }
+
+  @override
+  String get scriptEditorStoryboardBatchDiagnosisPartialProductionDetail =>
+      '建议先刷新制作视图，补齐 production 侧分镜快照后再读预览、下载链接或导出。';
+
+  @override
+  String get scriptEditorStoryboardBatchDiagnosisNoPromptsSummary =>
+      '所选分镜都还缺少可直接出图的提示词。';
+
+  @override
+  String get scriptEditorStoryboardBatchDiagnosisNoPromptsDetail =>
+      '先回到分镜编辑区补全提示词，或同步制作视图确认 production 侧是否已有可复用提示词。';
+
+  @override
+  String get scriptEditorStoryboardBatchDiagnosisSingleHasImageSummary =>
+      '当前所选分镜已经有现成画面。';
+
+  @override
+  String get scriptEditorStoryboardBatchDiagnosisSingleHasImageDetail =>
+      '建议先读取当前预览确认画面是否可直接复用，再决定是否重新发起出图。';
+
+  @override
+  String scriptEditorStoryboardBatchDiagnosisAllHaveImagesSummary(int count) {
+    return '所选 $count 条分镜都已有现成画面。';
+  }
+
+  @override
+  String get scriptEditorStoryboardBatchDiagnosisAllHaveImagesDetail =>
+      '可以直接导出所选 ZIP 做集中审阅，必要时再回到单条分镜重跑出图。';
+
+  @override
+  String scriptEditorStoryboardBatchDiagnosisMixedReadySummary(
+    int selected,
+    int ready,
+  ) {
+    return '所选 $selected 条分镜里有 $ready 条可直接发起出图。';
+  }
+
+  @override
+  String get scriptEditorStoryboardBatchDiagnosisMixedReadyDetail =>
+      '建议先批量提交出图任务，再回到当前工作台读取预览或下载链接确认结果。';
+
+  @override
+  String get scriptEditorStoryboardBatchDialogTitle => '分镜出图工作台';
+
+  @override
+  String get scriptEditorStoryboardBatchDialogIntro =>
+      '把批量出图、当前预览、下载链接与导出 ZIP 收口到剧本分镜区，不再只依赖 production probe。';
+
+  @override
+  String get scriptEditorStoryboardBatchHasImage => '已有画面';
+
+  @override
+  String get scriptEditorStoryboardBatchMetaIncomplete => '待补充分镜信息';
+
+  @override
+  String get scriptEditorStoryboardBatchSyncProductionEmpty =>
+      '制作视图尚无分镜记录，仍可按脚本分镜提示词发起出图。';
+
+  @override
+  String scriptEditorStoryboardBatchSyncProductionCount(int count) {
+    return '已同步 $count 条制作分镜。';
+  }
+
+  @override
+  String scriptEditorStoryboardBatchLoadProductionFailed(String error) {
+    return '加载制作视图失败：$error';
+  }
+
+  @override
+  String scriptEditorStoryboardBatchGenerateAutoSelected(
+    int readyCount,
+    int total,
+    int enqueued,
+  ) {
+    return '已自动选中 $readyCount 条可出图分镜，并为 $total 条分镜创建出图任务，队列 $enqueued 条。';
+  }
+
+  @override
+  String scriptEditorStoryboardBatchGenerateSubmitted(int total, int enqueued) {
+    return '已为 $total 条分镜创建出图任务，队列 $enqueued 条。';
+  }
+
+  @override
+  String get scriptEditorStoryboardBatchSelectAllReady => '已选择全部可直接出图的分镜。';
+
+  @override
+  String get scriptEditorStoryboardBatchClearSelection => '已清空选择。';
+
+  @override
+  String get scriptEditorStoryboardBatchNoPreview => '当前分镜还没有预览图。';
+
+  @override
+  String scriptEditorStoryboardBatchPreviewLoaded(int storyboardId) {
+    return '已读取分镜 #$storyboardId 的当前预览。';
+  }
+
+  @override
+  String scriptEditorStoryboardBatchDownloadReady(int storyboardId) {
+    return '已生成分镜 #$storyboardId 的下载链接。';
+  }
+
+  @override
+  String scriptEditorStoryboardBatchExportDone(
+    int count,
+    String filename,
+    String durationLabel,
+  ) {
+    return '已导出 $count 条分镜，文件 $filename，总时长 $durationLabel。';
+  }
+
+  @override
+  String get scriptEditorStoryboardBatchNoPromptsError =>
+      '所选分镜没有可用提示词，无法发起批量出图';
+
+  @override
+  String get scriptEditorStoryboardBatchSyncing => '同步中…';
+
+  @override
+  String get scriptEditorStoryboardBatchClearSelectionButton => '清空选择';
+
+  @override
+  String get scriptEditorStoryboardBatchPromptSuffixLabel => '追加提示词（可选）';
+
+  @override
+  String get scriptEditorStoryboardBatchPromptSuffixHelper => '会拼接到每条分镜原提示词末尾。';
+
+  @override
+  String get scriptEditorStoryboardBatchNegativePromptLabel => '负面提示词（可选）';
+
+  @override
+  String get scriptEditorStoryboardBatchModelLabel => '模型（可选）';
+
+  @override
+  String get scriptEditorStoryboardBatchResolutionLabel => '分辨率（可选）';
+
+  @override
+  String get scriptEditorStoryboardBatchQuickGenerateHint =>
+      '未手动选择分镜时，一键批量出图会自动挑出已具备可用提示词的分镜直接入队；只有预览和导出这类精确动作仍需要你明确选择。';
+
+  @override
+  String get scriptEditorStoryboardBatchNoResolvablePrompt => '无可用提示词';
+
+  @override
+  String get scriptEditorStoryboardBatchPreviewExportHeading => '预览与导出信息';
+
+  @override
+  String get scriptEditorStoryboardBatchSelectOneForPreview =>
+      '选中 1 条分镜后可读取当前预览与下载链接。';
+
+  @override
+  String scriptEditorStoryboardBatchViewingShot(int id) {
+    return '当前查看分镜 #$id';
+  }
+
+  @override
+  String get scriptEditorStoryboardBatchExportEstimateHeading => '待导出包预估';
+
+  @override
+  String scriptEditorStoryboardBatchExportEstimateContent(
+    int shotCount,
+    String sidecar,
+  ) {
+    return '内容：$shotCount 张分镜图 + $sidecar';
+  }
+
+  @override
+  String scriptEditorStoryboardBatchExportEstimateEntries(
+    int entryCount,
+    String durationLabel,
+  ) {
+    return '预计条目：$entryCount 个 · 总时长 $durationLabel';
+  }
+
+  @override
+  String scriptEditorStoryboardBatchDownloadLinkLine(String url) {
+    return '下载链接：$url';
+  }
+
+  @override
+  String get scriptEditorStoryboardBatchLastExportHeading => '最近导出包';
+
+  @override
+  String scriptEditorStoryboardBatchExportFileLine(String filename) {
+    return '文件：$filename';
+  }
+
+  @override
+  String scriptEditorStoryboardBatchExportContentLine(
+    int shotCount,
+    String sidecar,
+  ) {
+    return '内容：$shotCount 张分镜图 + $sidecar';
+  }
+
+  @override
+  String scriptEditorStoryboardBatchExportDetailWithSize(
+    int entryCount,
+    String durationLabel,
+    String size,
+  ) {
+    return '预计条目：$entryCount 个 · 总时长 $durationLabel · 大小 $size';
+  }
+
+  @override
+  String scriptEditorStoryboardBatchExportShotIds(String ids) {
+    return '分镜 ID：$ids';
+  }
+
+  @override
+  String get scriptEditorStoryboardBatchPreviewPlaceholder => '这里会显示当前分镜预览图。';
 
   @override
   String projectEditorScriptsSingleWorkbenchRecentExtractError(String reason) {

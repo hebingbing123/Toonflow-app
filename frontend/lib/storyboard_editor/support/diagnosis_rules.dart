@@ -48,7 +48,8 @@ StoryboardListDiagnosis diagnoseStoryboardList(
   );
 }
 
-StoryboardBatchWorkbenchDiagnosis diagnoseStoryboardBatchWorkbench({
+StoryboardBatchWorkbenchDiagnosis diagnoseStoryboardBatchWorkbench(
+  AppLocalizations l10n, {
   required Iterable<int> selectedIds,
   required Iterable<StoryboardRow> boards,
   required Iterable<ProductionStoryboardItemV1> productionRows,
@@ -70,15 +71,17 @@ StoryboardBatchWorkbenchDiagnosis diagnoseStoryboardBatchWorkbench({
   if (selected.isEmpty) {
     if (readyAcrossAll > 0) {
       return StoryboardBatchWorkbenchDiagnosis(
-        summary: '当前还没有选择要处理的分镜。',
-        detail: '已有 $readyAcrossAll 条分镜具备可用提示词，可直接一键批量出图；系统会自动挑出准备好的分镜入队。',
+        summary: l10n.scriptEditorStoryboardBatchDiagnosisNoSelectionSummary,
+        detail: l10n.scriptEditorStoryboardBatchDiagnosisNoSelectionWithReadyDetail(
+          readyAcrossAll,
+        ),
         recommendedAction:
             StoryboardBatchWorkbenchRecommendedAction.generateSelected,
       );
     }
-    return const StoryboardBatchWorkbenchDiagnosis(
-      summary: '当前还没有选择要处理的分镜。',
-      detail: '建议先同步制作视图，确认 production 侧分镜记录和提示词是否齐全，再决定后续动作。',
+    return StoryboardBatchWorkbenchDiagnosis(
+      summary: l10n.scriptEditorStoryboardBatchDiagnosisNoSelectionSummary,
+      detail: l10n.scriptEditorStoryboardBatchDiagnosisNoSelectionSyncFirstDetail,
       recommendedAction:
           StoryboardBatchWorkbenchRecommendedAction.syncProductionSummary,
     );
@@ -113,17 +116,19 @@ StoryboardBatchWorkbenchDiagnosis diagnoseStoryboardBatchWorkbench({
 
   if (selectedProductionCoverage < selected.length) {
     return StoryboardBatchWorkbenchDiagnosis(
-      summary: '所选 ${selected.length} 条分镜还没有全部同步到制作视图。',
-      detail: '建议先刷新制作视图，补齐 production 侧分镜快照后再读预览、下载链接或导出。',
+      summary: l10n.scriptEditorStoryboardBatchDiagnosisPartialProductionSummary(
+        selected.length,
+      ),
+      detail: l10n.scriptEditorStoryboardBatchDiagnosisPartialProductionDetail,
       recommendedAction:
           StoryboardBatchWorkbenchRecommendedAction.syncProductionSummary,
     );
   }
 
   if (selectedReadyCount == 0) {
-    return const StoryboardBatchWorkbenchDiagnosis(
-      summary: '所选分镜都还缺少可直接出图的提示词。',
-      detail: '先回到分镜编辑区补全提示词，或同步制作视图确认 production 侧是否已有可复用提示词。',
+    return StoryboardBatchWorkbenchDiagnosis(
+      summary: l10n.scriptEditorStoryboardBatchDiagnosisNoPromptsSummary,
+      detail: l10n.scriptEditorStoryboardBatchDiagnosisNoPromptsDetail,
       recommendedAction:
           StoryboardBatchWorkbenchRecommendedAction.syncProductionSummary,
     );
@@ -131,24 +136,29 @@ StoryboardBatchWorkbenchDiagnosis diagnoseStoryboardBatchWorkbench({
 
   if (selectedWithImageCount == selected.length) {
     if (selected.length == 1) {
-      return const StoryboardBatchWorkbenchDiagnosis(
-        summary: '当前所选分镜已经有现成画面。',
-        detail: '建议先读取当前预览确认画面是否可直接复用，再决定是否重新发起出图。',
+      return StoryboardBatchWorkbenchDiagnosis(
+        summary: l10n.scriptEditorStoryboardBatchDiagnosisSingleHasImageSummary,
+        detail: l10n.scriptEditorStoryboardBatchDiagnosisSingleHasImageDetail,
         recommendedAction:
             StoryboardBatchWorkbenchRecommendedAction.previewSelected,
       );
     }
     return StoryboardBatchWorkbenchDiagnosis(
-      summary: '所选 ${selected.length} 条分镜都已有现成画面。',
-      detail: '可以直接导出所选 ZIP 做集中审阅，必要时再回到单条分镜重跑出图。',
+      summary: l10n.scriptEditorStoryboardBatchDiagnosisAllHaveImagesSummary(
+        selected.length,
+      ),
+      detail: l10n.scriptEditorStoryboardBatchDiagnosisAllHaveImagesDetail,
       recommendedAction:
           StoryboardBatchWorkbenchRecommendedAction.exportSelected,
     );
   }
 
   return StoryboardBatchWorkbenchDiagnosis(
-    summary: '所选 ${selected.length} 条分镜里有 $selectedReadyCount 条可直接发起出图。',
-    detail: '建议先批量提交出图任务，再回到当前工作台读取预览或下载链接确认结果。',
+    summary: l10n.scriptEditorStoryboardBatchDiagnosisMixedReadySummary(
+      selected.length,
+      selectedReadyCount,
+    ),
+    detail: l10n.scriptEditorStoryboardBatchDiagnosisMixedReadyDetail,
     recommendedAction:
         StoryboardBatchWorkbenchRecommendedAction.generateSelected,
   );

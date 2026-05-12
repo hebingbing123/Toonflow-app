@@ -22,7 +22,9 @@ extension _StoryboardBatchWorkbenchActions
   Future<void> _batchGenerate() async {
     final productionMap = _productionById();
     final selected = _sortedSelection();
-    final effectiveSelected = selected.isEmpty ? _readyStoryboardIds() : selected;
+    final effectiveSelected = selected.isEmpty
+        ? _readyStoryboardIds()
+        : selected;
     final suffix = _ctrls.promptSuffixCtrl.text.trim();
     final negativePrompt = _ctrls.negativePromptCtrl.text.trim();
     final items = <BatchGenerateImageItem>[];
@@ -49,7 +51,8 @@ extension _StoryboardBatchWorkbenchActions
       );
     }
     if (items.isEmpty) {
-      throw const FormatException('所选分镜没有可用提示词，无法发起批量出图');
+      final loc = AppLocalizations.of(context)!;
+      throw FormatException(loc.scriptEditorStoryboardBatchNoPromptsError);
     }
     final response = await postStoryboardBatchGenerateImageV1(
       widget.token,
@@ -65,12 +68,20 @@ extension _StoryboardBatchWorkbenchActions
     );
     await _refreshProduction();
     if (mounted) {
+      final l10n = AppLocalizations.of(context)!;
       _applyBatchWorkbenchState(() {
         _statusLine = buildStoryboardBatchWorkbenchFollowUp(
-          actionSummary:
-              selected.isEmpty
-                  ? '已自动选中 ${effectiveSelected.length} 条可出图分镜，并为 ${response.total} 条分镜创建出图任务，队列 ${response.enqueued.length} 条。'
-                  : '已为 ${response.total} 条分镜创建出图任务，队列 ${response.enqueued.length} 条。',
+          l10n,
+          actionSummary: selected.isEmpty
+              ? l10n.scriptEditorStoryboardBatchGenerateAutoSelected(
+                  effectiveSelected.length,
+                  response.total,
+                  response.enqueued.length,
+                )
+              : l10n.scriptEditorStoryboardBatchGenerateSubmitted(
+                  response.total,
+                  response.enqueued.length,
+                ),
           diagnosis: _currentDiagnosis(),
         );
       });
@@ -78,6 +89,7 @@ extension _StoryboardBatchWorkbenchActions
   }
 
   void _selectReadyStoryboards() {
+    final l10n = AppLocalizations.of(context)!;
     final productionMap = _productionById();
     _applyBatchWorkbenchState(() {
       _selectedIds
@@ -96,18 +108,21 @@ extension _StoryboardBatchWorkbenchActions
         );
       _clearSelectionScopedOutputs();
       _statusLine = buildStoryboardBatchWorkbenchFollowUp(
-        actionSummary: '已选择全部可直接出图的分镜。',
+        l10n,
+        actionSummary: l10n.scriptEditorStoryboardBatchSelectAllReady,
         diagnosis: _currentDiagnosis(),
       );
     });
   }
 
   void _clearSelection() {
+    final l10n = AppLocalizations.of(context)!;
     _applyBatchWorkbenchState(() {
       _selectedIds.clear();
       _clearSelectionScopedOutputs();
       _statusLine = buildStoryboardBatchWorkbenchFollowUp(
-        actionSummary: '已清空选择。',
+        l10n,
+        actionSummary: l10n.scriptEditorStoryboardBatchClearSelection,
         diagnosis: _currentDiagnosis(),
       );
     });
@@ -121,12 +136,14 @@ extension _StoryboardBatchWorkbenchActions
       storyboardId: storyboardId,
     );
     if (mounted) {
+      final l10n = AppLocalizations.of(context)!;
       _applyBatchWorkbenchState(() {
         _previewUrl = preview.imageUrl;
         _statusLine = buildStoryboardBatchWorkbenchFollowUp(
+          l10n,
           actionSummary: preview.imageUrl == null
-              ? '当前分镜还没有预览图。'
-              : '已读取分镜 #$storyboardId 的当前预览。',
+              ? l10n.scriptEditorStoryboardBatchNoPreview
+              : l10n.scriptEditorStoryboardBatchPreviewLoaded(storyboardId),
           diagnosis: _currentDiagnosis(),
         );
       });
@@ -141,12 +158,14 @@ extension _StoryboardBatchWorkbenchActions
       storyboardId: storyboardId,
     );
     if (mounted) {
+      final l10n = AppLocalizations.of(context)!;
       _applyBatchWorkbenchState(() {
         _downloadUrl = preview.previewUrl;
         _statusLine = buildStoryboardBatchWorkbenchFollowUp(
+          l10n,
           actionSummary: preview.previewUrl == null
               ? preview.message
-              : '已生成分镜 #$storyboardId 的下载链接。',
+              : l10n.scriptEditorStoryboardBatchDownloadReady(storyboardId),
           diagnosis: _currentDiagnosis(),
         );
       });
@@ -169,11 +188,16 @@ extension _StoryboardBatchWorkbenchActions
       zip: zip,
     );
     if (mounted) {
+      final l10n = AppLocalizations.of(context)!;
       _applyBatchWorkbenchState(() {
         _exportSummary = summary;
         _statusLine = buildStoryboardBatchWorkbenchFollowUp(
-          actionSummary:
-              '已导出 ${summary.shotCount} 条分镜，文件 ${summary.filename}，总时长 ${summary.totalDurationLabel}。',
+          l10n,
+          actionSummary: l10n.scriptEditorStoryboardBatchExportDone(
+            summary.shotCount,
+            summary.filename,
+            summary.totalDurationLabel,
+          ),
           diagnosis: _currentDiagnosis(),
         );
       });

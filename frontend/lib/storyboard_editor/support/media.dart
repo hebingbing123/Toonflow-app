@@ -1,5 +1,7 @@
 import 'dart:collection';
 
+import 'package:openflow_app/l10n/app_localizations.dart';
+
 import '../../../rust_api.dart';
 
 enum StoryboardNarrationSource {
@@ -160,14 +162,17 @@ StoryboardNarrationSource resolveStoryboardNarrationSource({
   return StoryboardNarrationSource.placeholder;
 }
 
-String describeStoryboardNarrationSource(StoryboardNarrationSource source) {
+String describeStoryboardNarrationSource(
+  AppLocalizations l10n,
+  StoryboardNarrationSource source,
+) {
   switch (source) {
     case StoryboardNarrationSource.explicitNarration:
-      return '已具备显式旁白文案';
+      return l10n.scriptEditorStoryboardsNarrationExplicit;
     case StoryboardNarrationSource.promptFallback:
-      return '将回退到分镜提示词';
+      return l10n.scriptEditorStoryboardsNarrationPromptFallback;
     case StoryboardNarrationSource.placeholder:
-      return '仍是占位文本';
+      return l10n.scriptEditorStoryboardsNarrationPlaceholder;
   }
 }
 

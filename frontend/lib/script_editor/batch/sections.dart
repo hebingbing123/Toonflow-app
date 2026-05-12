@@ -5,6 +5,7 @@ part of '../../../home_page.dart';
 extension _StoryboardBatchWorkbenchSections
     on _StoryboardBatchWorkbenchDialogState {
   Widget _buildBatchWorkbenchTopActions() {
+    final l10n = AppLocalizations.of(context)!;
     return Wrap(
       spacing: 8,
       runSpacing: 8,
@@ -13,29 +14,34 @@ extension _StoryboardBatchWorkbenchSections
           onPressed: _loadingProduction || _busyMutation
               ? null
               : _refreshProduction,
-          child: Text(_loadingProduction ? '同步中…' : '同步制作视图'),
+          child: Text(
+            _loadingProduction
+                ? l10n.scriptEditorStoryboardBatchSyncing
+                : l10n.scriptEditorStoryboardBatchRecommendSyncProduction,
+          ),
         ),
         TextButton(
           onPressed: _busyMutation ? null : _selectReadyStoryboards,
-          child: const Text('全选可出图分镜'),
+          child: Text(l10n.scriptEditorStoryboardBatchRecommendSelectReady),
         ),
         TextButton(
           onPressed: _busyMutation ? null : _clearSelection,
-          child: const Text('清空选择'),
+          child: Text(l10n.scriptEditorStoryboardBatchClearSelectionButton),
         ),
       ],
     );
   }
 
   Widget _buildBatchWorkbenchPromptSection() {
+    final l10n = AppLocalizations.of(context)!;
     return Row(
       children: [
         Expanded(
           child: TextField(
             controller: _ctrls.promptSuffixCtrl,
-            decoration: const InputDecoration(
-              labelText: '追加提示词（可选）',
-              helperText: '会拼接到每条分镜原提示词末尾。',
+            decoration: InputDecoration(
+              labelText: l10n.scriptEditorStoryboardBatchPromptSuffixLabel,
+              helperText: l10n.scriptEditorStoryboardBatchPromptSuffixHelper,
             ),
           ),
         ),
@@ -43,7 +49,9 @@ extension _StoryboardBatchWorkbenchSections
         Expanded(
           child: TextField(
             controller: _ctrls.negativePromptCtrl,
-            decoration: const InputDecoration(labelText: '负面提示词（可选）'),
+            decoration: InputDecoration(
+              labelText: l10n.scriptEditorStoryboardBatchNegativePromptLabel,
+            ),
           ),
         ),
       ],
@@ -51,19 +59,24 @@ extension _StoryboardBatchWorkbenchSections
   }
 
   Widget _buildBatchWorkbenchModelSection() {
+    final l10n = AppLocalizations.of(context)!;
     return Row(
       children: [
         Expanded(
           child: TextField(
             controller: _ctrls.modelCtrl,
-            decoration: const InputDecoration(labelText: '模型（可选）'),
+            decoration: InputDecoration(
+              labelText: l10n.scriptEditorStoryboardBatchModelLabel,
+            ),
           ),
         ),
         const SizedBox(width: 12),
         Expanded(
           child: TextField(
             controller: _ctrls.resolutionCtrl,
-            decoration: const InputDecoration(labelText: '分辨率（可选）'),
+            decoration: InputDecoration(
+              labelText: l10n.scriptEditorStoryboardBatchResolutionLabel,
+            ),
           ),
         ),
       ],
@@ -74,6 +87,7 @@ extension _StoryboardBatchWorkbenchSections
     required List<int> selected,
     required int? singleSelectedId,
   }) {
+    final l10n = AppLocalizations.of(context)!;
     final canQuickGenerate =
         _selectedIds.isNotEmpty || _readyStoryboardIds().isNotEmpty;
     return Column(
@@ -87,33 +101,37 @@ extension _StoryboardBatchWorkbenchSections
               onPressed: _busyMutation || !canQuickGenerate
                   ? null
                   : () => _runMutation(_batchGenerate),
-              child: Text(_busyMutation ? '处理中…' : '一键批量出图'),
+              child: Text(
+                _busyMutation
+                    ? l10n.scriptEditorStoryboardsBusy
+                    : l10n.scriptEditorStoryboardBatchRecommendGenerateSelected,
+              ),
             ),
             TextButton(
               onPressed: _busyMutation || singleSelectedId == null
                   ? null
                   : () =>
                         _runMutation(() => _loadCurrentPreview(singleSelectedId)),
-              child: const Text('读取当前预览'),
+              child: Text(l10n.scriptEditorStoryboardBatchRecommendPreviewSelected),
             ),
             TextButton(
               onPressed: _busyMutation || singleSelectedId == null
                   ? null
                   : () =>
                         _runMutation(() => _loadDownloadUrl(singleSelectedId)),
-              child: const Text('读取下载链接'),
+              child: Text(l10n.scriptEditorStoryboardBatchReadDownloadLink),
             ),
             TextButton(
               onPressed: _busyMutation || _selectedIds.isEmpty
                   ? null
                   : () => _runMutation(() => _exportSelectedZip(selected)),
-              child: const Text('导出所选 ZIP'),
+              child: Text(l10n.scriptEditorStoryboardBatchRecommendExportSelected),
             ),
           ],
         ),
         const SizedBox(height: 4),
         Text(
-          '未手动选择分镜时，一键批量出图会自动挑出已具备可用提示词的分镜直接入队；只有预览和导出这类精确动作仍需要你明确选择。',
+          l10n.scriptEditorStoryboardBatchQuickGenerateHint,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
             color: Theme.of(context).colorScheme.outline,
           ),
@@ -125,6 +143,7 @@ extension _StoryboardBatchWorkbenchSections
   Widget _buildBatchWorkbenchBoardsList({
     required Map<int, ProductionStoryboardItemV1> productionMap,
   }) {
+    final l10n = AppLocalizations.of(context)!;
     return ListView.builder(
       itemCount: widget.boardsList.length,
       itemBuilder: (context, index) {
@@ -162,8 +181,8 @@ extension _StoryboardBatchWorkbenchSections
           title: Text('#${row.numericId}'),
           subtitle: Text(
             [
-              _storyboardMetaLine(row, productionRow),
-              prompt ?? '无可用提示词',
+              _storyboardMetaLine(l10n, row, productionRow),
+              prompt ?? l10n.scriptEditorStoryboardBatchNoResolvablePrompt,
             ].join('\n'),
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
@@ -178,6 +197,7 @@ extension _StoryboardBatchWorkbenchSections
     required BuildContext context,
     required int? singleSelectedId,
   }) {
+    final l10n = AppLocalizations.of(context)!;
     final exportEstimate = _currentExportEstimate();
     return Container(
       padding: const EdgeInsets.all(12),
@@ -190,24 +210,36 @@ extension _StoryboardBatchWorkbenchSections
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('预览与导出信息', style: Theme.of(context).textTheme.titleSmall),
+          Text(
+            l10n.scriptEditorStoryboardBatchPreviewExportHeading,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
           const SizedBox(height: 8),
           Text(
             singleSelectedId == null
-                ? '选中 1 条分镜后可读取当前预览与下载链接。'
-                : '当前查看分镜 #$singleSelectedId',
+                ? l10n.scriptEditorStoryboardBatchSelectOneForPreview
+                : l10n.scriptEditorStoryboardBatchViewingShot(singleSelectedId),
             style: Theme.of(context).textTheme.bodySmall,
           ),
           if (exportEstimate != null) ...[
             const SizedBox(height: 12),
-            Text('待导出包预估', style: Theme.of(context).textTheme.labelLarge),
+            Text(
+              l10n.scriptEditorStoryboardBatchExportEstimateHeading,
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
             const SizedBox(height: 6),
             Text(
-              '内容：${exportEstimate.shotCount} 张分镜图 + ${exportEstimate.sidecarLabel}',
+              l10n.scriptEditorStoryboardBatchExportEstimateContent(
+                exportEstimate.shotCount,
+                exportEstimate.sidecarLabel,
+              ),
               style: Theme.of(context).textTheme.bodySmall,
             ),
             Text(
-              '预计条目：${exportEstimate.estimatedEntryCount} 个 · 总时长 ${exportEstimate.totalDurationLabel}',
+              l10n.scriptEditorStoryboardBatchExportEstimateEntries(
+                exportEstimate.estimatedEntryCount,
+                exportEstimate.totalDurationLabel,
+              ),
               style: Theme.of(context).textTheme.bodySmall,
             ),
             Text(
@@ -234,24 +266,36 @@ extension _StoryboardBatchWorkbenchSections
           if (_downloadUrl != null) ...[
             const SizedBox(height: 8),
             SelectableText(
-              '下载链接：$_downloadUrl',
+              l10n.scriptEditorStoryboardBatchDownloadLinkLine(_downloadUrl!),
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
           if (_exportSummary != null) ...[
             const SizedBox(height: 12),
-            Text('最近导出包', style: Theme.of(context).textTheme.labelLarge),
+            Text(
+              l10n.scriptEditorStoryboardBatchLastExportHeading,
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
             const SizedBox(height: 6),
             Text(
-              '文件：${_exportSummary!.filename}',
+              l10n.scriptEditorStoryboardBatchExportFileLine(
+                _exportSummary!.filename,
+              ),
               style: Theme.of(context).textTheme.bodySmall,
             ),
             Text(
-              '内容：${_exportSummary!.shotCount} 张分镜图 + ${_exportSummary!.sidecarLabel}',
+              l10n.scriptEditorStoryboardBatchExportContentLine(
+                _exportSummary!.shotCount,
+                _exportSummary!.sidecarLabel,
+              ),
               style: Theme.of(context).textTheme.bodySmall,
             ),
             Text(
-              '预计条目：${_exportSummary!.estimatedEntryCount} 个 · 总时长 ${_exportSummary!.totalDurationLabel} · 大小 ${formatBinarySize(_exportSummary!.byteLength ?? 0)}',
+              l10n.scriptEditorStoryboardBatchExportDetailWithSize(
+                _exportSummary!.estimatedEntryCount,
+                _exportSummary!.totalDurationLabel,
+                formatBinarySize(_exportSummary!.byteLength ?? 0),
+              ),
               style: Theme.of(context).textTheme.bodySmall,
             ),
             Text(
@@ -275,7 +319,9 @@ extension _StoryboardBatchWorkbenchSections
               style: Theme.of(context).textTheme.bodySmall,
             ),
             Text(
-              '分镜 ID：${_exportSummary!.shotIds.join(", ")}',
+              l10n.scriptEditorStoryboardBatchExportShotIds(
+                _exportSummary!.shotIds.join(', '),
+              ),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(context).colorScheme.outline,
               ),
@@ -286,7 +332,7 @@ extension _StoryboardBatchWorkbenchSections
             child: _previewUrl == null
                 ? Center(
                     child: Text(
-                      '这里会显示当前分镜预览图。',
+                      l10n.scriptEditorStoryboardBatchPreviewPlaceholder,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.outline,
                       ),

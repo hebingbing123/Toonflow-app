@@ -7465,6 +7465,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get scriptEditorStoryboardsStateFallback => 'unknown';
 
   @override
+  String get scriptEditorStoryboardsNarrationExplicit =>
+      'Explicit narration is set';
+
+  @override
+  String get scriptEditorStoryboardsNarrationPromptFallback =>
+      'Falls back to storyboard prompt';
+
+  @override
+  String get scriptEditorStoryboardsNarrationPlaceholder =>
+      'Still placeholder text';
+
+  @override
   String get scriptEditorStoryboardsProductionEmptyData =>
       'Production view has no storyboard rows yet.';
 
@@ -7544,6 +7556,286 @@ class AppLocalizationsEn extends AppLocalizations {
   ) {
     return '$actionSummary Suggested next step: $nextAction. $detail';
   }
+
+  @override
+  String scriptEditorStoryboardBatchFollowUpLine(
+    String actionSummary,
+    String nextAction,
+    String detail,
+  ) {
+    return '$actionSummary Suggested next step: $nextAction. $detail';
+  }
+
+  @override
+  String get scriptEditorStoryboardBatchRecommendSyncProduction =>
+      'Sync production view';
+
+  @override
+  String get scriptEditorStoryboardBatchRecommendSelectReady =>
+      'Select all image-ready shots';
+
+  @override
+  String get scriptEditorStoryboardBatchRecommendGenerateSelected =>
+      'Batch-generate images';
+
+  @override
+  String get scriptEditorStoryboardBatchRecommendPreviewSelected =>
+      'Read current preview';
+
+  @override
+  String get scriptEditorStoryboardBatchReadDownloadLink =>
+      'Read download link';
+
+  @override
+  String get scriptEditorStoryboardBatchRecommendExportSelected =>
+      'Export selected ZIP';
+
+  @override
+  String get scriptEditorStoryboardBatchDiagnosisNoSelectionSummary =>
+      'No storyboards selected for processing.';
+
+  @override
+  String scriptEditorStoryboardBatchDiagnosisNoSelectionWithReadyDetail(
+    int readyCount,
+  ) {
+    return '$readyCount shots already have usable prompts; batch generate can auto-pick ready shots and enqueue them.';
+  }
+
+  @override
+  String get scriptEditorStoryboardBatchDiagnosisNoSelectionSyncFirstDetail =>
+      'Sync the production view first to confirm production rows and prompts, then choose your next step.';
+
+  @override
+  String scriptEditorStoryboardBatchDiagnosisPartialProductionSummary(
+    int count,
+  ) {
+    return '$count selected shot(s) are not all synced to the production view.';
+  }
+
+  @override
+  String get scriptEditorStoryboardBatchDiagnosisPartialProductionDetail =>
+      'Refresh the production view to fill production snapshots before preview, download links, or export.';
+
+  @override
+  String get scriptEditorStoryboardBatchDiagnosisNoPromptsSummary =>
+      'Selected shots are missing usable image prompts.';
+
+  @override
+  String get scriptEditorStoryboardBatchDiagnosisNoPromptsDetail =>
+      'Return to storyboard editing to add prompts, or sync production to reuse production-side prompts.';
+
+  @override
+  String get scriptEditorStoryboardBatchDiagnosisSingleHasImageSummary =>
+      'The selected shot already has an image.';
+
+  @override
+  String get scriptEditorStoryboardBatchDiagnosisSingleHasImageDetail =>
+      'Read the current preview first to see if it is reusable before re-generating.';
+
+  @override
+  String scriptEditorStoryboardBatchDiagnosisAllHaveImagesSummary(int count) {
+    return 'All $count selected shots already have images.';
+  }
+
+  @override
+  String get scriptEditorStoryboardBatchDiagnosisAllHaveImagesDetail =>
+      'Export a ZIP for review, or return to a single storyboard to re-run generation if needed.';
+
+  @override
+  String scriptEditorStoryboardBatchDiagnosisMixedReadySummary(
+    int selected,
+    int ready,
+  ) {
+    return '$selected selected; $ready can start image generation now.';
+  }
+
+  @override
+  String get scriptEditorStoryboardBatchDiagnosisMixedReadyDetail =>
+      'Submit batch generate first, then return here for preview or download links.';
+
+  @override
+  String get scriptEditorStoryboardBatchDialogTitle =>
+      'Storyboard image workbench';
+
+  @override
+  String get scriptEditorStoryboardBatchDialogIntro =>
+      'Batch-generate images, read previews, download links, and export ZIP from the script storyboard area—without relying only on production probes.';
+
+  @override
+  String get scriptEditorStoryboardBatchHasImage => 'Has image';
+
+  @override
+  String get scriptEditorStoryboardBatchMetaIncomplete =>
+      'Shot details incomplete';
+
+  @override
+  String get scriptEditorStoryboardBatchSyncProductionEmpty =>
+      'Production view has no storyboard rows yet; you can still start batch generate from script prompts.';
+
+  @override
+  String scriptEditorStoryboardBatchSyncProductionCount(int count) {
+    return 'Synced $count production storyboard row(s).';
+  }
+
+  @override
+  String scriptEditorStoryboardBatchLoadProductionFailed(String error) {
+    return 'Failed to load production view: $error';
+  }
+
+  @override
+  String scriptEditorStoryboardBatchGenerateAutoSelected(
+    int readyCount,
+    int total,
+    int enqueued,
+  ) {
+    return 'Auto-selected $readyCount image-ready shot(s); created tasks for $total shot(s); enqueued $enqueued.';
+  }
+
+  @override
+  String scriptEditorStoryboardBatchGenerateSubmitted(int total, int enqueued) {
+    return 'Created tasks for $total shot(s); enqueued $enqueued.';
+  }
+
+  @override
+  String get scriptEditorStoryboardBatchSelectAllReady =>
+      'Selected all shots that can generate images.';
+
+  @override
+  String get scriptEditorStoryboardBatchClearSelection => 'Cleared selection.';
+
+  @override
+  String get scriptEditorStoryboardBatchNoPreview =>
+      'This shot has no preview image yet.';
+
+  @override
+  String scriptEditorStoryboardBatchPreviewLoaded(int storyboardId) {
+    return 'Read current preview for shot #$storyboardId.';
+  }
+
+  @override
+  String scriptEditorStoryboardBatchDownloadReady(int storyboardId) {
+    return 'Generated download link for shot #$storyboardId.';
+  }
+
+  @override
+  String scriptEditorStoryboardBatchExportDone(
+    int count,
+    String filename,
+    String durationLabel,
+  ) {
+    return 'Exported $count shot(s), file $filename, total duration $durationLabel.';
+  }
+
+  @override
+  String get scriptEditorStoryboardBatchNoPromptsError =>
+      'No selected shots have usable prompts; cannot start batch image generation.';
+
+  @override
+  String get scriptEditorStoryboardBatchSyncing => 'Syncing…';
+
+  @override
+  String get scriptEditorStoryboardBatchClearSelectionButton =>
+      'Clear selection';
+
+  @override
+  String get scriptEditorStoryboardBatchPromptSuffixLabel =>
+      'Prompt suffix (optional)';
+
+  @override
+  String get scriptEditorStoryboardBatchPromptSuffixHelper =>
+      'Appended to each shot\'s base prompt.';
+
+  @override
+  String get scriptEditorStoryboardBatchNegativePromptLabel =>
+      'Negative prompt (optional)';
+
+  @override
+  String get scriptEditorStoryboardBatchModelLabel => 'Model (optional)';
+
+  @override
+  String get scriptEditorStoryboardBatchResolutionLabel =>
+      'Resolution (optional)';
+
+  @override
+  String get scriptEditorStoryboardBatchQuickGenerateHint =>
+      'With no manual selection, batch generate auto-picks shots that already have usable prompts. Preview and export still need an explicit selection.';
+
+  @override
+  String get scriptEditorStoryboardBatchNoResolvablePrompt =>
+      'No usable prompt';
+
+  @override
+  String get scriptEditorStoryboardBatchPreviewExportHeading =>
+      'Preview and export';
+
+  @override
+  String get scriptEditorStoryboardBatchSelectOneForPreview =>
+      'Select exactly one shot to read preview and download link.';
+
+  @override
+  String scriptEditorStoryboardBatchViewingShot(int id) {
+    return 'Viewing shot #$id';
+  }
+
+  @override
+  String get scriptEditorStoryboardBatchExportEstimateHeading =>
+      'Export bundle estimate';
+
+  @override
+  String scriptEditorStoryboardBatchExportEstimateContent(
+    int shotCount,
+    String sidecar,
+  ) {
+    return 'Contents: $shotCount storyboard image(s) + $sidecar';
+  }
+
+  @override
+  String scriptEditorStoryboardBatchExportEstimateEntries(
+    int entryCount,
+    String durationLabel,
+  ) {
+    return 'Estimated entries: $entryCount · total duration $durationLabel';
+  }
+
+  @override
+  String scriptEditorStoryboardBatchDownloadLinkLine(String url) {
+    return 'Download link: $url';
+  }
+
+  @override
+  String get scriptEditorStoryboardBatchLastExportHeading =>
+      'Latest export bundle';
+
+  @override
+  String scriptEditorStoryboardBatchExportFileLine(String filename) {
+    return 'File: $filename';
+  }
+
+  @override
+  String scriptEditorStoryboardBatchExportContentLine(
+    int shotCount,
+    String sidecar,
+  ) {
+    return 'Contents: $shotCount storyboard image(s) + $sidecar';
+  }
+
+  @override
+  String scriptEditorStoryboardBatchExportDetailWithSize(
+    int entryCount,
+    String durationLabel,
+    String size,
+  ) {
+    return 'Estimated entries: $entryCount · total duration $durationLabel · size $size';
+  }
+
+  @override
+  String scriptEditorStoryboardBatchExportShotIds(String ids) {
+    return 'Shot IDs: $ids';
+  }
+
+  @override
+  String get scriptEditorStoryboardBatchPreviewPlaceholder =>
+      'Preview image appears here.';
 
   @override
   String projectEditorScriptsSingleWorkbenchRecentExtractError(String reason) {
