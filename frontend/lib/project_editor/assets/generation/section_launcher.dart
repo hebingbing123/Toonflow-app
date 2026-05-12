@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../../rust_api.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../../rust_api.dart';
 import '../support.dart';
 import 'dialog.dart';
 import 'support.dart';
@@ -26,16 +27,17 @@ Future<void> openAssetGenerationWorkbenchDialog({
   }
 
   final seededAssets = visibleAssets();
+  final l10n = AppLocalizations.of(ctx)!;
   if (seededAssets.isEmpty) {
     ScaffoldMessenger.of(
       ctx,
-    ).showSnackBar(const SnackBar(content: Text('请先加载资产列表再打开出图工作台')));
+    ).showSnackBar(SnackBar(content: Text(l10n.projectEditorAssetGenWorkbenchNeedAssetsSnack)));
     return;
   }
   if (scriptList.isEmpty) {
     ScaffoldMessenger.of(
       ctx,
-    ).showSnackBar(const SnackBar(content: Text('请先创建剧本再发起资产出图')));
+    ).showSnackBar(SnackBar(content: Text(l10n.projectEditorAssetGenWorkbenchNeedScriptSnack)));
     return;
   }
 
