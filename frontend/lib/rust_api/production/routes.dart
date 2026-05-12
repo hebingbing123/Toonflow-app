@@ -139,9 +139,28 @@ class WorkbenchGenerateVideoResponse {
   }
 }
 
+Map<String, dynamic> buildProductionProjectScopeBodyV1({
+  required Map<String, dynamic> base,
+  int? projectId,
+  String? projectUuid,
+}) {
+  final body = Map<String, dynamic>.from(base);
+  final uuid = projectUuid?.trim();
+  if (uuid != null && uuid.isNotEmpty) {
+    body['projectUuid'] = uuid;
+    return body;
+  }
+  if (projectId != null) {
+    body['projectId'] = projectId;
+    return body;
+  }
+  throw ArgumentError('projectUuid or projectId is required');
+}
+
 class ProductionPatchRequest {
   const ProductionPatchRequest({
-    required this.projectId,
+    this.projectId,
+    this.projectUuid,
     required this.episodesId,
     required this.scope,
     required this.ids,
@@ -149,7 +168,10 @@ class ProductionPatchRequest {
     required this.modelTier,
   });
 
-  final int projectId;
+  /// Legacy numeric project ID; prefer [projectUuid] when available.
+  final int? projectId;
+  /// UUID of the project (`app_project.id`); takes precedence over [projectId].
+  final String? projectUuid;
   final int episodesId;
   final String scope;
   final List<int> ids;
@@ -157,14 +179,21 @@ class ProductionPatchRequest {
   final String modelTier;
 
   Map<String, dynamic> toJson() {
-    return <String, dynamic>{
-      'projectId': projectId,
+    final json = <String, dynamic>{
       'episodesId': episodesId,
       'scope': scope,
       'ids': ids,
       'reason': reason,
       'modelTier': modelTier,
     };
+    // UUID-first: prefer projectUuid over projectId
+    final u = projectUuid?.trim();
+    if (u != null && u.isNotEmpty) {
+      json['projectUuid'] = u;
+    } else if (projectId != null) {
+      json['projectId'] = projectId;
+    }
+    return json;
   }
 }
 
@@ -223,13 +252,22 @@ class ProductionPatchResponse {
   final bool memoryWritten;
 }
 
+/// `POST /api/v1/production/get-production-data` — OpenAPI `postProductionGetProductionDataV1`.
+///
+/// Prefer **`projectUuid`** (`app_project.id`); **`projectId`** is legacy numeric id.
 Future<int> postProductionGetProductionDataV1(
   String accessToken, {
-  required int projectId,
+  int? projectId,
+  String? projectUuid,
   required int scriptId,
   required List<int> storyboardIds,
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/production/get-production-data');
+  final body = buildProductionProjectScopeBodyV1(
+    base: <String, dynamic>{'scriptId': scriptId, 'ids': storyboardIds},
+    projectId: projectId,
+    projectUuid: projectUuid,
+  );
   final res = await http
       .post(
         uri,
@@ -237,11 +275,7 @@ Future<int> postProductionGetProductionDataV1(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({
-          'projectId': projectId,
-          'scriptId': scriptId,
-          'ids': storyboardIds,
-        }),
+        body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
   return res.statusCode;
@@ -272,12 +306,20 @@ Future<ProductionPatchResponse> postProductionPatchV1(
 
 /// `POST /api/v1/production/get-flow-data` — OpenAPI `postProductionGetFlowDataV1`
 /// (implemented in Rust; returns **200/404/503** when DB-gated).
+///
+/// Prefer **`projectUuid`** (`app_project.id`); **`projectId`** is legacy numeric id.
 Future<int> postProductionGetFlowDataV1(
   String accessToken, {
-  required int projectId,
+  int? projectId,
+  String? projectUuid,
   required int episodesId,
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/production/get-flow-data');
+  final body = buildProductionProjectScopeBodyV1(
+    base: <String, dynamic>{'episodesId': episodesId},
+    projectId: projectId,
+    projectUuid: projectUuid,
+  );
   final res = await http
       .post(
         uri,
@@ -285,19 +327,27 @@ Future<int> postProductionGetFlowDataV1(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({'projectId': projectId, 'episodesId': episodesId}),
+        body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
   return res.statusCode;
 }
 
 /// `POST /api/v1/production/get-flow-data` — returns flow JSON object on success.
+///
+/// Prefer **`projectUuid`** (`app_project.id`); **`projectId`** is legacy numeric id.
 Future<Map<String, dynamic>> fetchProductionFlowDataV1(
   String accessToken, {
-  required int projectId,
+  int? projectId,
+  String? projectUuid,
   required int episodesId,
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/production/get-flow-data');
+  final body = buildProductionProjectScopeBodyV1(
+    base: <String, dynamic>{'episodesId': episodesId},
+    projectId: projectId,
+    projectUuid: projectUuid,
+  );
   final res = await http
       .post(
         uri,
@@ -305,7 +355,7 @@ Future<Map<String, dynamic>> fetchProductionFlowDataV1(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({'projectId': projectId, 'episodesId': episodesId}),
+        body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
@@ -318,13 +368,21 @@ Future<Map<String, dynamic>> fetchProductionFlowDataV1(
 
 /// `POST /api/v1/production/save-flow-data` — OpenAPI `postProductionSaveFlowDataV1`
 /// (implemented in Rust; returns **200/404/503** when DB-gated).
+///
+/// Prefer **`projectUuid`** (`app_project.id`); **`projectId`** is legacy numeric id.
 Future<int> postProductionSaveFlowDataV1(
   String accessToken, {
-  required int projectId,
+  int? projectId,
+  String? projectUuid,
   required int episodesId,
   Map<String, dynamic> data = const {},
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/production/save-flow-data');
+  final body = buildProductionProjectScopeBodyV1(
+    base: <String, dynamic>{'episodesId': episodesId, 'data': data},
+    projectId: projectId,
+    projectUuid: projectUuid,
+  );
   final res = await http
       .post(
         uri,
@@ -332,11 +390,7 @@ Future<int> postProductionSaveFlowDataV1(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({
-          'projectId': projectId,
-          'episodesId': episodesId,
-          'data': data,
-        }),
+        body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
   return res.statusCode;
@@ -344,9 +398,12 @@ Future<int> postProductionSaveFlowDataV1(
 
 /// `POST /api/v1/production/workbench/generate-video` — OpenAPI `postProductionWorkbenchGenerateVideoV1`
 /// (implemented; returns final applied negative prompts per storyboard).
+///
+/// Prefer **`projectUuid`** (`app_project.id`); **`projectId`** is legacy numeric id.
 Future<WorkbenchGenerateVideoResponse> postProductionWorkbenchGenerateVideoV1(
   String accessToken, {
-  required int projectId,
+  int? projectId,
+  String? projectUuid,
   required int scriptId,
   required List<Map<String, dynamic>> uploadData,
   required String prompt,
@@ -361,17 +418,20 @@ Future<WorkbenchGenerateVideoResponse> postProductionWorkbenchGenerateVideoV1(
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/production/workbench/generate-video',
   );
-  final body = <String, dynamic>{
-    'projectId': projectId,
-    'scriptId': scriptId,
-    'uploadData': uploadData,
-    'prompt': prompt,
-    'model': model,
-    'mode': mode,
-    'resolution': resolution,
-    'duration': duration,
-    'trackId': trackId,
-  };
+  final body = buildProductionProjectScopeBodyV1(
+    base: <String, dynamic>{
+      'scriptId': scriptId,
+      'uploadData': uploadData,
+      'prompt': prompt,
+      'model': model,
+      'mode': mode,
+      'resolution': resolution,
+      'duration': duration,
+      'trackId': trackId,
+    },
+    projectId: projectId,
+    projectUuid: projectUuid,
+  );
   if (negativePrompt != null) body['negativePrompt'] = negativePrompt;
   if (audio != null) body['audio'] = audio;
   final res = await http
@@ -393,10 +453,13 @@ Future<WorkbenchGenerateVideoResponse> postProductionWorkbenchGenerateVideoV1(
 }
 
 /// `POST /api/v1/production/workbench/batch-generate-candidate-clips`.
+///
+/// Prefer **`projectUuid`** (`app_project.id`); **`projectId`** is legacy numeric id.
 Future<BatchGenerateCandidateClipsResponseV1>
 postProductionWorkbenchBatchGenerateCandidateClipsV1(
   String accessToken, {
-  required int projectId,
+  int? projectId,
+  String? projectUuid,
   required int scriptId,
   int? trackId,
   List<int>? storyboardNumericIds,
@@ -406,10 +469,11 @@ postProductionWorkbenchBatchGenerateCandidateClipsV1(
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/production/workbench/batch-generate-candidate-clips',
   );
-  final payload = <String, dynamic>{
-    'projectId': projectId,
-    'scriptId': scriptId,
-  };
+  final payload = buildProductionProjectScopeBodyV1(
+    base: <String, dynamic>{'scriptId': scriptId},
+    projectId: projectId,
+    projectUuid: projectUuid,
+  );
   if (trackId != null) payload['trackId'] = trackId;
   if (storyboardNumericIds != null) {
     payload['storyboardNumericIds'] = storyboardNumericIds;
@@ -440,14 +504,22 @@ postProductionWorkbenchBatchGenerateCandidateClipsV1(
 
 /// `POST /api/v1/production/storyboard/polling-image` — OpenAPI `postProductionStoryboardPollingImageV1`
 /// (implemented; returns **200** or **404** / **503** when DB-gated).
+///
+/// Prefer **`projectUuid`** (`app_project.id`); **`projectId`** is legacy numeric id.
 Future<int> postProductionStoryboardPollingImageV1(
   String accessToken, {
-  required int projectId,
+  int? projectId,
+  String? projectUuid,
   required int scriptId,
   required List<int> ids,
 }) async {
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/production/storyboard/polling-image',
+  );
+  final body = buildProductionProjectScopeBodyV1(
+    base: <String, dynamic>{'scriptId': scriptId, 'ids': ids},
+    projectId: projectId,
+    projectUuid: projectUuid,
   );
   final res = await http
       .post(
@@ -456,11 +528,7 @@ Future<int> postProductionStoryboardPollingImageV1(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({
-          'projectId': projectId,
-          'scriptId': scriptId,
-          'ids': ids,
-        }),
+        body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
   return res.statusCode;
@@ -468,13 +536,21 @@ Future<int> postProductionStoryboardPollingImageV1(
 
 /// `POST /api/v1/production/export-image` — OpenAPI `postProductionExportImageV1`
 /// Returns a ZIP attachment on **200**; this helper currently exposes status-only probing.
+///
+/// Prefer **`projectUuid`** (`app_project.id`); **`projectId`** is legacy numeric id.
 Future<int> postProductionExportImageV1(
   String accessToken, {
-  required int projectId,
+  int? projectId,
+  String? projectUuid,
   required int scriptId,
   required List<Map<String, dynamic>> shotId,
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/production/export-image');
+  final body = buildProductionProjectScopeBodyV1(
+    base: <String, dynamic>{'scriptId': scriptId, 'shotId': shotId},
+    projectId: projectId,
+    projectUuid: projectUuid,
+  );
   final res = await http
       .post(
         uri,
@@ -482,24 +558,28 @@ Future<int> postProductionExportImageV1(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({
-          'projectId': projectId,
-          'scriptId': scriptId,
-          'shotId': shotId,
-        }),
+        body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
   return res.statusCode;
 }
 
 /// `POST /api/v1/production/export-image` — fetches the ZIP attachment body.
+///
+/// Prefer **`projectUuid`** (`app_project.id`); **`projectId`** is legacy numeric id.
 Future<ProductionExportZipResponse> fetchProductionExportImageZipV1(
   String accessToken, {
-  required int projectId,
+  int? projectId,
+  String? projectUuid,
   required int scriptId,
   required List<Map<String, dynamic>> shotId,
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/production/export-image');
+  final body = buildProductionProjectScopeBodyV1(
+    base: <String, dynamic>{'scriptId': scriptId, 'shotId': shotId},
+    projectId: projectId,
+    projectUuid: projectUuid,
+  );
   final res = await http
       .post(
         uri,
@@ -507,11 +587,7 @@ Future<ProductionExportZipResponse> fetchProductionExportImageZipV1(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({
-          'projectId': projectId,
-          'scriptId': scriptId,
-          'shotId': shotId,
-        }),
+        body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 120));
   ensureHttpSuccess(res);

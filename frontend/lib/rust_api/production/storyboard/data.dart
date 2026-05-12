@@ -19,19 +19,11 @@ Future<StoryboardAddResponse> postStoryboardAddV1(
   int? duration,
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/production/storyboard/add');
-  final body = <String, dynamic>{
-    'scriptId': scriptId,
-    'prompt': prompt,
-  };
-  // UUID-first: prefer projectUuid over projectId
-  final u = projectUuid?.trim();
-  if (u != null && u.isNotEmpty) {
-    body['projectUuid'] = u;
-  } else if (projectId != null) {
-    body['projectId'] = projectId;
-  } else {
-    throw ArgumentError('projectUuid or projectId is required');
-  }
+  final body = buildStoryboardProjectScopeBodyV1(
+    base: <String, dynamic>{'scriptId': scriptId, 'prompt': prompt},
+    projectId: projectId,
+    projectUuid: projectUuid,
+  );
   if (duration != null) body['duration'] = duration;
   final res = await http
       .post(
@@ -64,19 +56,14 @@ Future<StoryboardBatchAddInfoResponse> postStoryboardBatchAddInfoV1(
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/production/storyboard/batch-add-info',
   );
-  final body = <String, dynamic>{
-    'scriptId': scriptId,
-    'storyboards': storyboards.map((e) => e.toJson()).toList(),
-  };
-  // UUID-first: prefer projectUuid over projectId
-  final u = projectUuid?.trim();
-  if (u != null && u.isNotEmpty) {
-    body['projectUuid'] = u;
-  } else if (projectId != null) {
-    body['projectId'] = projectId;
-  } else {
-    throw ArgumentError('projectUuid or projectId is required');
-  }
+  final body = buildStoryboardProjectScopeBodyV1(
+    base: <String, dynamic>{
+      'scriptId': scriptId,
+      'storyboards': storyboards.map((e) => e.toJson()).toList(),
+    },
+    projectId: projectId,
+    projectUuid: projectUuid,
+  );
   final res = await http
       .post(
         uri,
@@ -108,20 +95,15 @@ Future<int> postStoryboardEditInfoV1(
   int? duration,
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/production/storyboard/edit-info');
-  final body = <String, dynamic>{
-    'scriptId': scriptId,
-    'storyboardId': storyboardId,
-    'prompt': prompt,
-  };
-  // UUID-first: prefer projectUuid over projectId
-  final u = projectUuid?.trim();
-  if (u != null && u.isNotEmpty) {
-    body['projectUuid'] = u;
-  } else if (projectId != null) {
-    body['projectId'] = projectId;
-  } else {
-    throw ArgumentError('projectUuid or projectId is required');
-  }
+  final body = buildStoryboardProjectScopeBodyV1(
+    base: <String, dynamic>{
+      'scriptId': scriptId,
+      'storyboardId': storyboardId,
+      'prompt': prompt,
+    },
+    projectId: projectId,
+    projectUuid: projectUuid,
+  );
   if (duration != null) body['duration'] = duration;
   final res = await http
       .post(
@@ -150,19 +132,14 @@ Future<ProductionStoryboardItemV1> postStoryboardGetDataV1(
   required int storyboardId,
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/production/storyboard/get-data');
-  final body = <String, dynamic>{
-    'scriptId': scriptId,
-    'storyboardId': storyboardId,
-  };
-  // UUID-first: prefer projectUuid over projectId
-  final u = projectUuid?.trim();
-  if (u != null && u.isNotEmpty) {
-    body['projectUuid'] = u;
-  } else if (projectId != null) {
-    body['projectId'] = projectId;
-  } else {
-    throw ArgumentError('projectUuid or projectId is required');
-  }
+  final body = buildStoryboardProjectScopeBodyV1(
+    base: <String, dynamic>{
+      'scriptId': scriptId,
+      'storyboardId': storyboardId,
+    },
+    projectId: projectId,
+    projectUuid: projectUuid,
+  );
   final res = await http
       .post(
         uri,
