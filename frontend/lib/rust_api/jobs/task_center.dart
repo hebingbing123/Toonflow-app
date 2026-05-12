@@ -9,18 +9,80 @@ import 'api.dart';
 
 /// Task-center compatibility adapters layered over jobs and projects endpoints.
 class TaskCenterProjectItem {
-  const TaskCenterProjectItem({required this.numericId, required this.name});
+  const TaskCenterProjectItem({
+    required this.numericId,
+    required this.name,
+    this.projectUuid,
+  });
 
   /// `app_project` numeric id column (compat JSON key **`id`**).
   final int numericId;
   final String name;
+  final String? projectUuid;
 
   factory TaskCenterProjectItem.fromJson(Map<String, dynamic> json) {
     return TaskCenterProjectItem(
       numericId: (json['id'] as num).toInt(),
       name: json['name'] as String,
+      projectUuid: json['project_uuid'] as String?,
     );
   }
+}
+
+class TaskCenterProjectSelection {
+  const TaskCenterProjectSelection({
+    required this.projectId,
+    required this.projectUuid,
+    required this.resolvedFromUuid,
+  });
+
+  final int? projectId;
+  final String? projectUuid;
+  final bool resolvedFromUuid;
+}
+
+TaskCenterProjectSelection resolveTaskCenterProjectSelection({
+  required List<TaskCenterProjectItem> projects,
+  String? projectIdText,
+  String? projectUuid,
+}) {
+  final numericProjectId = int.tryParse((projectIdText ?? '').trim());
+  if (numericProjectId != null && numericProjectId > 0) {
+    String? matchedProjectUuid;
+    for (final project in projects) {
+      if (project.numericId == numericProjectId) {
+        matchedProjectUuid = project.projectUuid;
+        break;
+      }
+    }
+    return TaskCenterProjectSelection(
+      projectId: numericProjectId,
+      projectUuid: matchedProjectUuid ?? _trimmedNonEmpty(projectUuid),
+      resolvedFromUuid: false,
+    );
+  }
+  final explicitProjectUuid = _trimmedNonEmpty(projectUuid);
+  if (explicitProjectUuid != null) {
+    for (final project in projects) {
+      if (project.projectUuid == explicitProjectUuid) {
+        return TaskCenterProjectSelection(
+          projectId: project.numericId,
+          projectUuid: explicitProjectUuid,
+          resolvedFromUuid: true,
+        );
+      }
+    }
+    return TaskCenterProjectSelection(
+      projectId: null,
+      projectUuid: explicitProjectUuid,
+      resolvedFromUuid: true,
+    );
+  }
+  return const TaskCenterProjectSelection(
+    projectId: null,
+    projectUuid: null,
+    resolvedFromUuid: false,
+  );
 }
 
 class TaskCenterTaskClassRow {
@@ -62,7 +124,13 @@ Future<List<TaskCenterProjectItem>> postTasksGetProject(
     if (n.isEmpty) {
       continue;
     }
-    out.add(TaskCenterProjectItem(numericId: r.numericId, name: n));
+    out.add(
+      TaskCenterProjectItem(
+        numericId: r.numericId,
+        name: n,
+        projectUuid: r.id,
+      ),
+    );
   }
   return out;
 }
@@ -122,6 +190,14 @@ Future<JobRow> postTasksTaskDetails(String accessToken, int taskId) async {
   ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return JobRow.fromJson(map);
+}
+
+String? _trimmedNonEmpty(String? raw) {
+  final value = raw?.trim() ?? '';
+  if (value.isEmpty) {
+    return null;
+  }
+  return value;
 }
 
 /// Same payload as **`GET /api/v1/jobs/{id}`** (UUID).

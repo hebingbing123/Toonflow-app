@@ -217,6 +217,9 @@ class _HomePageState extends State<HomePage> {
   late final TaskCenterController _taskCenterController = TaskCenterController(
     accessTokenProvider: () => _session?.accessToken,
     onErrorChanged: _setSharedError,
+    projectIdTextProvider: () => _workspaceInputController.projectIdController.text,
+    projectUuidTextProvider:
+        () => _workspaceInputController.projectUuidController.text,
   );
 
   late final QualityReviewsController _qualityReviewsController =

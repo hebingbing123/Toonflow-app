@@ -22,6 +22,7 @@ void main() {
         TaskCenterSection(
           accessToken: 'token',
           initialProjectNumericId: 9,
+          initialProjectUuid: '550e8400-e29b-41d4-a716-446655440009',
           loadingTaskProjects: false,
           loadingTaskCategories: false,
           loadingTaskApi: false,
@@ -29,7 +30,11 @@ void main() {
           loadingTaskDetailsUuid: false,
           taskDetailJobIdController: TextEditingController(),
           taskProjects: const [
-            TaskCenterProjectItem(numericId: 9, name: '古风短剧'),
+            TaskCenterProjectItem(
+              numericId: 9,
+              name: '古风短剧',
+              projectUuid: '550e8400-e29b-41d4-a716-446655440009',
+            ),
           ],
           taskCategoriesLine:
               '分类 2 个 · asset.generate.image, script.export.zip',
@@ -78,6 +83,7 @@ void main() {
         TaskCenterSection(
           accessToken: 'token',
           initialProjectNumericId: 9,
+          initialProjectUuid: '550e8400-e29b-41d4-a716-446655440009',
           loadingTaskProjects: false,
           loadingTaskCategories: false,
           loadingTaskApi: false,
@@ -85,7 +91,11 @@ void main() {
           loadingTaskDetailsUuid: false,
           taskDetailJobIdController: detailController,
           taskProjects: const [
-            TaskCenterProjectItem(numericId: 9, name: '古风短剧'),
+            TaskCenterProjectItem(
+              numericId: 9,
+              name: '古风短剧',
+              projectUuid: '550e8400-e29b-41d4-a716-446655440009',
+            ),
           ],
           taskCategoriesLine:
               '分类 2 个 · asset.generate.image, script.export.zip',

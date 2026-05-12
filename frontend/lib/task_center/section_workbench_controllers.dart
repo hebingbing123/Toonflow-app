@@ -8,15 +8,22 @@ class _TaskCenterWorkbenchControllers {
     required this.taskClassCtrl,
     required this.productionPhaseCtrl,
     required this.projectIdCtrl,
+    required this.projectUuidCtrl,
     required this.numericTaskIdCtrl,
     required this.uuidCtrl,
   });
 
   factory _TaskCenterWorkbenchControllers.create({
     int? initialProjectNumericId,
+    String? initialProjectUuid,
     required List<TaskCenterProjectItem> initialProjects,
     required List<JobRow> initialJobs,
   }) {
+    final initialSelection = resolveTaskCenterProjectSelection(
+      projects: initialProjects,
+      projectIdText: initialProjectNumericId?.toString(),
+      projectUuid: initialProjectUuid,
+    );
     return _TaskCenterWorkbenchControllers(
       pageCtrl: TextEditingController(text: '1'),
       limitCtrl: TextEditingController(text: '10'),
@@ -25,10 +32,15 @@ class _TaskCenterWorkbenchControllers {
       productionPhaseCtrl: TextEditingController(),
       projectIdCtrl: TextEditingController(
         text:
-            initialProjectNumericId?.toString() ??
+            initialSelection.projectId?.toString() ??
             (initialProjects.isEmpty
                 ? ''
                 : initialProjects.first.numericId.toString()),
+      ),
+      projectUuidCtrl: TextEditingController(
+        text:
+            initialSelection.projectUuid ??
+            (initialProjects.isEmpty ? '' : (initialProjects.first.projectUuid ?? '')),
       ),
       numericTaskIdCtrl: TextEditingController(
         text: initialJobs.isEmpty
@@ -47,6 +59,7 @@ class _TaskCenterWorkbenchControllers {
   final TextEditingController taskClassCtrl;
   final TextEditingController productionPhaseCtrl;
   final TextEditingController projectIdCtrl;
+  final TextEditingController projectUuidCtrl;
   final TextEditingController numericTaskIdCtrl;
   final TextEditingController uuidCtrl;
 
@@ -57,6 +70,7 @@ class _TaskCenterWorkbenchControllers {
     taskClassCtrl.dispose();
     productionPhaseCtrl.dispose();
     projectIdCtrl.dispose();
+    projectUuidCtrl.dispose();
     numericTaskIdCtrl.dispose();
     uuidCtrl.dispose();
   }

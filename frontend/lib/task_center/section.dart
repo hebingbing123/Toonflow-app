@@ -20,6 +20,7 @@ class TaskCenterSection extends StatelessWidget {
     super.key,
     required this.accessToken,
     required this.initialProjectNumericId,
+    required this.initialProjectUuid,
     required this.loadingTaskProjects,
     required this.loadingTaskCategories,
     required this.loadingTaskApi,
@@ -45,6 +46,7 @@ class TaskCenterSection extends StatelessWidget {
 
   final String? accessToken;
   final int? initialProjectNumericId;
+  final String? initialProjectUuid;
   final bool loadingTaskProjects;
   final bool loadingTaskCategories;
   final bool loadingTaskApi;
@@ -82,6 +84,7 @@ class TaskCenterSection extends StatelessWidget {
       builder: (dialogCtx) => _TaskCenterWorkbenchDialog(
         accessToken: token,
         initialProjectNumericId: initialProjectNumericId,
+        initialProjectUuid: initialProjectUuid,
         initialProjects: taskProjects ?? const <TaskCenterProjectItem>[],
         initialTaskSummary: taskApiSummaryLine,
         initialCategoriesSummary: taskCategoriesLine,

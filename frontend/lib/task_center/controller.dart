@@ -4,16 +4,23 @@ import '../rust_api.dart';
 
 typedef TaskCenterAccessTokenProvider = String? Function();
 typedef TaskCenterErrorSink = void Function(String? error);
+typedef TaskCenterScopeTextProvider = String Function();
 
 class TaskCenterController extends ChangeNotifier {
   TaskCenterController({
     required TaskCenterAccessTokenProvider accessTokenProvider,
     required TaskCenterErrorSink onErrorChanged,
+    TaskCenterScopeTextProvider? projectIdTextProvider,
+    TaskCenterScopeTextProvider? projectUuidTextProvider,
   }) : _accessTokenProvider = accessTokenProvider,
-       _onErrorChanged = onErrorChanged;
+       _onErrorChanged = onErrorChanged,
+       _projectIdTextProvider = projectIdTextProvider ?? _emptyScopeText,
+       _projectUuidTextProvider = projectUuidTextProvider ?? _emptyScopeText;
 
   final TaskCenterAccessTokenProvider _accessTokenProvider;
   final TaskCenterErrorSink _onErrorChanged;
+  final TaskCenterScopeTextProvider _projectIdTextProvider;
+  final TaskCenterScopeTextProvider _projectUuidTextProvider;
 
   bool loadingTaskProjects = false;
   bool loadingTaskCategories = false;
@@ -105,7 +112,14 @@ class TaskCenterController extends ChangeNotifier {
     notifyListeners();
     try {
       final projects = taskProjects ?? await postTasksGetProject(token);
-      final projectId = projects.isEmpty ? null : projects.first.numericId;
+      final projectSelection = resolveTaskCenterProjectSelection(
+        projects: projects,
+        projectIdText: _projectIdTextProvider(),
+        projectUuid: _projectUuidTextProvider(),
+      );
+      final projectId =
+          projectSelection.projectId ??
+          (projects.isEmpty ? null : projects.first.numericId);
       final rows = await postTasksGetTaskApi(
         token,
         page: 1,
@@ -121,6 +135,7 @@ class TaskCenterController extends ChangeNotifier {
       taskApiSummaryLine =
           'page=1 limit=10'
           '${projectId == null ? '' : ' projectId=$projectId'}'
+          '${projectSelection.resolvedFromUuid && projectSelection.projectUuid != null ? ' projectUuid=${projectSelection.projectUuid}' : ''}'
           ' · total=${rows.total} · page_rows=${rows.data.length}'
           '${sample.isEmpty ? '' : ' · sample: $sample'}';
     } on RustApiException catch (e) {
@@ -197,3 +212,5 @@ class TaskCenterController extends ChangeNotifier {
     super.dispose();
   }
 }
+
+String _emptyScopeText() => '';

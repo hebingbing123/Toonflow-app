@@ -5,6 +5,7 @@ class _TaskCenterWorkbenchDialog extends StatefulWidget {
   const _TaskCenterWorkbenchDialog({
     required this.accessToken,
     required this.initialProjectNumericId,
+    required this.initialProjectUuid,
     required this.initialProjects,
     required this.initialTaskSummary,
     required this.initialCategoriesSummary,
@@ -17,6 +18,7 @@ class _TaskCenterWorkbenchDialog extends StatefulWidget {
 
   final String accessToken;
   final int? initialProjectNumericId;
+  final String? initialProjectUuid;
   final List<TaskCenterProjectItem> initialProjects;
   final String? initialTaskSummary;
   final String? initialCategoriesSummary;
@@ -60,6 +62,7 @@ class _TaskCenterWorkbenchDialogState
     super.initState();
     _ctrls = _TaskCenterWorkbenchControllers.create(
       initialProjectNumericId: widget.initialProjectNumericId,
+      initialProjectUuid: widget.initialProjectUuid,
       initialProjects: widget.initialProjects,
       initialJobs: widget.initialJobs,
     );
@@ -90,8 +93,21 @@ class _TaskCenterWorkbenchDialogState
       if (!mounted) return;
       setState(() {
         _projects = rows;
-        if (_ctrls.projectIdCtrl.text.trim().isEmpty && rows.isNotEmpty) {
+        final selection = resolveTaskCenterProjectSelection(
+          projects: rows,
+          projectIdText: _ctrls.projectIdCtrl.text,
+          projectUuid: _ctrls.projectUuidCtrl.text,
+        );
+        if (selection.projectUuid != null) {
+          _ctrls.projectUuidCtrl.text = selection.projectUuid!;
+        }
+        if (_ctrls.projectIdCtrl.text.trim().isEmpty &&
+            selection.projectId != null) {
+          _ctrls.projectIdCtrl.text = selection.projectId.toString();
+        } else if (_ctrls.projectIdCtrl.text.trim().isEmpty && rows.isNotEmpty) {
           _ctrls.projectIdCtrl.text = rows.first.numericId.toString();
+          _ctrls.projectUuidCtrl.text =
+              rows.first.projectUuid ?? _ctrls.projectUuidCtrl.text;
         }
         _statusLine = l10n.taskCenterStatusLoadedTaskProjects(rows.length);
         _loadingProjects = false;
@@ -145,7 +161,6 @@ class _TaskCenterWorkbenchDialogState
     final l10n = AppLocalizations.of(context)!;
     final page = int.tryParse(_ctrls.pageCtrl.text.trim()) ?? 1;
     final limit = int.tryParse(_ctrls.limitCtrl.text.trim()) ?? 10;
-    final projectId = int.tryParse(_ctrls.projectIdCtrl.text.trim());
     final state = _ctrls.stateCtrl.text.trim();
     final taskClass = _ctrls.taskClassCtrl.text.trim();
     setState(() {
@@ -154,6 +169,12 @@ class _TaskCenterWorkbenchDialogState
     });
     try {
       await _openLiveUpdates();
+      final projectSelection = resolveTaskCenterProjectSelection(
+        projects: _projects,
+        projectIdText: _ctrls.projectIdCtrl.text,
+        projectUuid: _ctrls.projectUuidCtrl.text,
+      );
+      final projectId = projectSelection.projectId;
       final rows = await postTasksGetTaskApi(
         widget.accessToken,
         page: page < 1 ? 1 : page,
@@ -166,9 +187,16 @@ class _TaskCenterWorkbenchDialogState
       final jobs = rows.data;
       setState(() {
         _jobs = jobs;
+        if (projectSelection.projectUuid != null) {
+          _ctrls.projectUuidCtrl.text = projectSelection.projectUuid!;
+        }
+        if (_ctrls.projectIdCtrl.text.trim().isEmpty && projectId != null) {
+          _ctrls.projectIdCtrl.text = projectId.toString();
+        }
         _taskSummary =
             'page=${page < 1 ? 1 : page} limit=${limit < 1 ? 10 : limit}'
             '${projectId == null ? '' : ' projectId=$projectId'}'
+            '${projectSelection.resolvedFromUuid && projectSelection.projectUuid != null ? ' projectUuid=${projectSelection.projectUuid}' : ''}'
             '${state.isEmpty ? '' : ' state=$state'}'
             '${taskClass.isEmpty ? '' : ' taskClass=$taskClass'}'
             ' · total=${rows.total} · page_rows=${jobs.length}';

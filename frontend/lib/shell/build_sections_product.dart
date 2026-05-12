@@ -355,6 +355,10 @@ extension _HomePageBuildProductSections on _HomePageState {
         TaskCenterSection(
           accessToken: _session?.accessToken,
           initialProjectNumericId: _productScopedProjectNumericId,
+          initialProjectUuid:
+              _workspaceInputController.projectUuidController.text.trim().isEmpty
+              ? null
+              : _workspaceInputController.projectUuidController.text.trim(),
           onNavigateExportJobDeepLink: (TaskCenterExportJobDeepLink link) {
             if (link.projectNumericId != null) {
               setState(() {
