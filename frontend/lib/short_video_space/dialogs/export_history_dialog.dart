@@ -37,16 +37,16 @@ enum ExportHistoryTimeFilter {
   week,
   month;
 
-  String get displayName {
+  String displayName(AppLocalizations l10n) {
     switch (this) {
       case ExportHistoryTimeFilter.all:
-        return '全部时间';
+        return l10n.shortVideoSpaceDialogExportHistoryTimeFilterAll;
       case ExportHistoryTimeFilter.today:
-        return '今天';
+        return l10n.shortVideoSpaceDialogExportHistoryTimeFilterToday;
       case ExportHistoryTimeFilter.week:
-        return '最近一周';
+        return l10n.shortVideoSpaceDialogExportHistoryTimeFilterWeek;
       case ExportHistoryTimeFilter.month:
-        return '最近一月';
+        return l10n.shortVideoSpaceDialogExportHistoryTimeFilterMonth;
     }
   }
 
@@ -72,16 +72,16 @@ enum ExportHistoryStatusFilter {
   failed,
   cancelled;
 
-  String get displayName {
+  String displayName(AppLocalizations l10n) {
     switch (this) {
       case ExportHistoryStatusFilter.all:
-        return '全部状态';
+        return l10n.shortVideoSpaceDialogExportHistoryStatusFilterAll;
       case ExportHistoryStatusFilter.completed:
-        return '已完成';
+        return l10n.shortVideoSpaceDialogExportHistoryStatusFilterCompleted;
       case ExportHistoryStatusFilter.failed:
-        return '失败';
+        return l10n.shortVideoSpaceDialogExportHistoryStatusFilterFailed;
       case ExportHistoryStatusFilter.cancelled:
-        return '已取消';
+        return l10n.shortVideoSpaceDialogExportHistoryStatusFilterCancelled;
     }
   }
 
@@ -154,27 +154,27 @@ class ExportHistoryItem {
     );
   }
 
-  String get formattedFileSize {
-    if (fileSize == null) return '未知';
+  String formattedFileSize(AppLocalizations l10n) {
+    if (fileSize == null) return l10n.shortVideoSpaceDialogExportHistoryFileSizeUnknown;
     final sizeInMB = fileSize! / (1024 * 1024);
     if (sizeInMB < 1) {
-      return '${(fileSize! / 1024).toStringAsFixed(0)} KB';
+      return l10n.shortVideoSpaceDialogExportHistoryFileSizeKB((fileSize! / 1024).toStringAsFixed(0));
     } else if (sizeInMB < 1024) {
-      return '${sizeInMB.toStringAsFixed(1)} MB';
+      return l10n.shortVideoSpaceDialogExportHistoryFileSizeMB(sizeInMB.toStringAsFixed(1));
     } else {
-      return '${(sizeInMB / 1024).toStringAsFixed(2)} GB';
+      return l10n.shortVideoSpaceDialogExportHistoryFileSizeGB((sizeInMB / 1024).toStringAsFixed(2));
     }
   }
 
-  String get formattedDuration {
+  String formattedDuration(AppLocalizations l10n) {
     if (completedAt == null) return '-';
     final duration = completedAt!.difference(createdAt);
     if (duration.inMinutes < 1) {
-      return '${duration.inSeconds} 秒';
+      return l10n.shortVideoSpaceDialogExportHistoryDurationSeconds(duration.inSeconds);
     } else if (duration.inHours < 1) {
-      return '${duration.inMinutes} 分钟';
+      return l10n.shortVideoSpaceDialogExportHistoryDurationMinutes(duration.inMinutes);
     } else {
-      return '${duration.inHours} 小时 ${duration.inMinutes % 60} 分钟';
+      return l10n.shortVideoSpaceDialogExportHistoryDurationHours(duration.inHours, duration.inMinutes % 60);
     }
   }
 }
@@ -231,8 +231,9 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
     } catch (e) {
       if (!mounted) return;
 
+      final l10n = AppLocalizations.of(context)!;
       setState(() {
-        _errorMessage = '加载导出历史失败: $e';
+        _errorMessage = l10n.shortVideoSpaceDialogExportHistoryLoadError(e.toString());
         _loading = false;
       });
     }
@@ -246,7 +247,9 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
   }) async {
     final token = widget.accessToken?.trim();
     if (token == null || token.isEmpty) {
-      throw Exception('会话已失效，请重新登录');
+      if (!mounted) throw Exception('Not mounted');
+      final l10n = AppLocalizations.of(context)!;
+      throw Exception(l10n.shortVideoSpaceDialogExportHistorySessionExpired);
     }
     final String? status = switch (statusFilter) {
       ExportHistoryStatusFilter.all => null,
@@ -331,18 +334,20 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
 
       if (!mounted) return;
 
+      final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('已复制下载链接（${item.format.toUpperCase()}）'),
+          content: Text(l10n.shortVideoSpaceDialogExportHistoryDownloadLinkCopied(item.format.toUpperCase())),
           duration: const Duration(seconds: 2),
         ),
       );
     } catch (e) {
       if (!mounted) return;
 
+      final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('下载失败: $e'),
+          content: Text(l10n.shortVideoSpaceDialogExportHistoryDownloadFailed(e.toString())),
           backgroundColor: Theme.of(context).colorScheme.error,
           duration: const Duration(seconds: 3),
         ),
@@ -364,18 +369,19 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return AlertDialog(
       title: Row(
         children: [
           const Icon(Icons.history),
           const SizedBox(width: 8),
-          const Text('导出历史'),
+          Text(l10n.shortVideoSpaceDialogExportHistoryTitle),
           const Spacer(),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _loading ? null : _loadHistory,
-            tooltip: '刷新',
+            tooltip: l10n.shortVideoSpaceDialogExportHistoryRefresh,
           ),
         ],
       ),
@@ -392,10 +398,10 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
                 Expanded(
                   child: DropdownButtonFormField<ExportHistoryStatusFilter>(
                     initialValue: _statusFilter,
-                    decoration: const InputDecoration(
-                      labelText: '状态',
-                      border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(
+                    decoration: InputDecoration(
+                      labelText: l10n.shortVideoSpaceDialogExportHistoryStatusLabel,
+                      border: const OutlineInputBorder(),
+                      contentPadding: const EdgeInsets.symmetric(
                         horizontal: 12,
                         vertical: 8,
                       ),
@@ -404,7 +410,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
                         .map(
                           (filter) => DropdownMenuItem(
                             value: filter,
-                            child: Text(filter.displayName),
+                            child: Text(filter.displayName(l10n)),
                           ),
                         )
                         .toList(),
@@ -422,10 +428,10 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
                 Expanded(
                   child: DropdownButtonFormField<ExportHistoryTimeFilter>(
                     initialValue: _timeFilter,
-                    decoration: const InputDecoration(
-                      labelText: '时间',
-                      border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(
+                    decoration: InputDecoration(
+                      labelText: l10n.shortVideoSpaceDialogExportHistoryTimeLabel,
+                      border: const OutlineInputBorder(),
+                      contentPadding: const EdgeInsets.symmetric(
                         horizontal: 12,
                         vertical: 8,
                       ),
@@ -434,7 +440,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
                         .map(
                           (filter) => DropdownMenuItem(
                             value: filter,
-                            child: Text(filter.displayName),
+                            child: Text(filter.displayName(l10n)),
                           ),
                         )
                         .toList(),
@@ -461,13 +467,15 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('关闭'),
+          child: Text(l10n.shortVideoSpaceDialogExportHistoryClose),
         ),
       ],
     );
   }
 
   Widget _buildHistoryList(ThemeData theme) {
+    final l10n = AppLocalizations.of(context)!;
+    
     if (_loading) {
       return const Center(
         child: CircularProgressIndicator(),
@@ -494,7 +502,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
             FilledButton.icon(
               onPressed: _loadHistory,
               icon: const Icon(Icons.refresh),
-              label: const Text('重试'),
+              label: Text(l10n.shortVideoSpaceDialogExportHistoryRetry),
             ),
           ],
         ),
@@ -513,14 +521,14 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
             ),
             const SizedBox(height: 16),
             Text(
-              '暂无导出记录',
+              l10n.shortVideoSpaceDialogExportHistoryNoRecords,
               style: theme.textTheme.titleMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              '导出视频后，记录将显示在这里',
+              l10n.shortVideoSpaceDialogExportHistoryNoRecordsHint,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -541,6 +549,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
   }
 
   Widget _buildHistoryItem(ExportHistoryItem item, ThemeData theme) {
+    final l10n = AppLocalizations.of(context)!;
     final isDownloading = _downloadingTasks.contains(item.taskId);
 
     return ListTile(
@@ -566,7 +575,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
-              item.status.displayName,
+              item.status.displayName(l10n),
               style: TextStyle(
                 fontSize: 12,
                 color: _getStatusColor(item.status, theme),
@@ -581,17 +590,20 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
         children: [
           const SizedBox(height: 4),
           Text(
-            '创建时间: ${_formatDateTime(item.createdAt)}',
+            l10n.shortVideoSpaceDialogExportHistoryCreatedAt(_formatDateTime(item.createdAt)),
             style: theme.textTheme.bodySmall,
           ),
           if (item.completedAt != null)
             Text(
-              '完成时间: ${_formatDateTime(item.completedAt!)} · 耗时: ${item.formattedDuration}',
+              l10n.shortVideoSpaceDialogExportHistoryCompletedAt(
+                _formatDateTime(item.completedAt!),
+                item.formattedDuration(l10n),
+              ),
               style: theme.textTheme.bodySmall,
             ),
           if (item.fileSize != null)
             Text(
-              '文件大小: ${item.formattedFileSize}',
+              l10n.shortVideoSpaceDialogExportHistoryFileSize(item.formattedFileSize(l10n)),
               style: theme.textTheme.bodySmall,
             ),
           if (item.errorMessage != null) ...[
@@ -624,7 +636,10 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
           ],
           const SizedBox(height: 4),
           Text(
-            '设置: ${getBitrateDisplayName(item.bitrate)} · ${item.framerate} FPS',
+            l10n.shortVideoSpaceDialogExportHistorySettings(
+              getBitrateDisplayName(item.bitrate),
+              item.framerate,
+            ),
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -641,7 +656,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.download),
-              label: Text(isDownloading ? '下载中...' : '下载'),
+              label: Text(isDownloading ? l10n.shortVideoSpaceDialogExportHistoryDownloading : l10n.shortVideoSpaceDialogExportHistoryDownload),
             )
           : null,
     );
@@ -693,17 +708,18 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
   }
 
   String _formatDateTime(DateTime dateTime) {
+    final l10n = AppLocalizations.of(context)!;
     final now = DateTime.now();
     final difference = now.difference(dateTime);
 
     if (difference.inMinutes < 1) {
-      return '刚刚';
+      return l10n.shortVideoSpaceDialogExportHistoryTimeJustNow;
     } else if (difference.inHours < 1) {
-      return '${difference.inMinutes} 分钟前';
+      return l10n.shortVideoSpaceDialogExportHistoryTimeMinutesAgo(difference.inMinutes);
     } else if (difference.inDays < 1) {
-      return '${difference.inHours} 小时前';
+      return l10n.shortVideoSpaceDialogExportHistoryTimeHoursAgo(difference.inHours);
     } else if (difference.inDays < 7) {
-      return '${difference.inDays} 天前';
+      return l10n.shortVideoSpaceDialogExportHistoryTimeDaysAgo(difference.inDays);
     } else {
       return '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')} '
           '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';

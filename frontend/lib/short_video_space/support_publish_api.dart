@@ -1,62 +1,72 @@
 import 'package:flutter/widgets.dart';
 
+import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
 import 'publish_copy_editor.dart';
 import 'publish_schedule_calendar.dart';
 import 'view.dart';
 
-/// Maps short-video-export-check machine code to short zh labels for Space lists.
-String shortVideoQualityStageLabelZh(String stage) {
+/// Maps short-video quality stage codes to localized labels (for tests and pure logic).
+String shortVideoQualityStageLabel(AppLocalizations l10n, String stage) {
   final s = stage.trim();
   switch (s) {
     case '':
-      return '未标注阶段';
+      return l10n.shortVideoSpacePublishQualityStageUnlabeled;
     case 'story_skeleton':
-      return '故事骨架';
+      return l10n.shortVideoSpacePublishQualityStageStorySkeleton;
     case 'adaptation_strategy':
-      return '改编策略';
+      return l10n.shortVideoSpacePublishQualityStageAdaptationStrategy;
     case 'director_planning':
-      return '导演规划';
+      return l10n.shortVideoSpacePublishQualityStageDirectorPlanning;
     case 'storyboard_table':
-      return '分镜表';
+      return l10n.shortVideoSpacePublishQualityStageStoryboardTable;
     case 'storyboard_panel':
-      return '分镜面板';
+      return l10n.shortVideoSpacePublishQualityStageStoryboardPanel;
     case 'video_prompt':
-      return '视频提示 / 成片';
+      return l10n.shortVideoSpacePublishQualityStageVideoPrompt;
     default:
       return s;
   }
 }
 
-String shortVideoExportIssueLabelZh(String code) {
+/// Maps short-video-export-check machine code to localized labels (for tests and pure logic).
+String shortVideoExportIssueLabel(AppLocalizations l10n, String code) {
   switch (code) {
     case 'candidate_pending':
-      return '候选待确认';
+      return l10n.shortVideoSpacePublishExportIssueCandidatePending;
     case 'missing_selected_media':
-      return '未选成片媒体';
+      return l10n.shortVideoSpacePublishExportIssueMissingSelectedMedia;
     case 'selected_media_not_video':
-      return '所选媒体非视频';
+      return l10n.shortVideoSpacePublishExportIssueSelectedMediaNotVideo;
     case 'subtitle_placeholder':
-      return '字幕 / 口播文案缺失';
+      return l10n.shortVideoSpacePublishExportIssueSubtitlePlaceholder;
     case 'subtitle_empty':
-      return '字幕为空';
+      return l10n.shortVideoSpacePublishExportIssueSubtitleEmpty;
     case 'voiceover_failed':
-      return '旁白生成失败';
+      return l10n.shortVideoSpacePublishExportIssueVoiceoverFailed;
     case 'voiceover_audio_missing':
-      return '旁白音频未就绪';
+      return l10n.shortVideoSpacePublishExportIssueVoiceoverAudioMissing;
     case 'voiceover_not_ready':
-      return '配音未就绪';
+      return l10n.shortVideoSpacePublishExportIssueVoiceoverNotReady;
     case 'duration_not_explicit':
-      return '时长未标明（导出默认）';
+      return l10n.shortVideoSpacePublishExportIssueDurationNotExplicit;
     case 'duration_not_set':
-      return '时长未设定';
+      return l10n.shortVideoSpacePublishExportIssueDurationNotSet;
     case 'duration_unparsable':
-      return '时长格式异常';
+      return l10n.shortVideoSpacePublishExportIssueDurationUnparsable;
     case 'completion_uncertain':
-      return '成片状态未标「已完成」';
+      return l10n.shortVideoSpacePublishExportIssueCompletionUncertain;
     default:
       return code;
   }
+}
+
+String shortVideoQualityStageLabelZh(BuildContext context, String stage) {
+  return shortVideoQualityStageLabel(AppLocalizations.of(context)!, stage);
+}
+
+String shortVideoExportIssueLabelZh(BuildContext context, String code) {
+  return shortVideoExportIssueLabel(AppLocalizations.of(context)!, code);
 }
 
 int? _parseDurationSecondsLoose(String raw) {
@@ -79,27 +89,29 @@ String formatDurationHHMMSS(int totalSeconds) {
 
 /// Space 成片装配卡：消费 GET .../short-video-assembly
 ShortVideoAssemblyPanelUi buildShortVideoAssemblyPanelUi({
+  required AppLocalizations l10n,
   required bool projectSelected,
   required bool loadingProjectOverview,
   required ProjectShortVideoAssembly? assembly,
 }) {
+  
   if (!projectSelected) {
     return const ShortVideoAssemblyPanelUi(visible: false);
   }
   if (loadingProjectOverview) {
-    return const ShortVideoAssemblyPanelUi(
+    return ShortVideoAssemblyPanelUi(
       visible: true,
       loading: true,
-      headline: '正在读取成片装配快照…',
-      detail: '数据来自 GET …/short-video-assembly（按剧本顺序汇总分镜与成片要素）。',
+      headline: l10n.shortVideoSpacePublishAssemblyLoadingHeadline,
+      detail: l10n.shortVideoSpacePublishAssemblyLoadingDetail,
     );
   }
   if (assembly == null) {
-    return const ShortVideoAssemblyPanelUi(
+    return ShortVideoAssemblyPanelUi(
       visible: true,
       unavailable: true,
-      headline: '成片装配快照暂不可用。',
-      detail: '可稍后刷新，或在制作工作区确认分镜与时间线后再试。',
+      headline: l10n.shortVideoSpacePublishAssemblyUnavailableHeadline,
+      detail: l10n.shortVideoSpacePublishAssemblyUnavailableDetail,
     );
   }
   final scripts = assembly.scripts;
@@ -111,14 +123,14 @@ ShortVideoAssemblyPanelUi buildShortVideoAssemblyPanelUi({
   final eff = assembly.effectiveShortVideoDefaults;
   final defaultParts = <String>[
     (d.voiceProfile ?? '').trim().isEmpty
-        ? '配音档案：未写'
-        : '配音档案：${d.voiceProfile!.trim()}',
+        ? l10n.shortVideoSpacePublishAssemblyVoiceProfileNotSet
+        : l10n.shortVideoSpacePublishAssemblyVoiceProfile(d.voiceProfile!.trim()),
     (d.subtitleStyle ?? '').trim().isEmpty
-        ? '字幕：默认'
-        : '字幕：${d.subtitleStyle!.trim()}',
+        ? l10n.shortVideoSpacePublishAssemblySubtitleDefault
+        : l10n.shortVideoSpacePublishAssemblySubtitle(d.subtitleStyle!.trim()),
     (d.bgmStrategy ?? '').trim().isEmpty
-        ? 'BGM：未指定'
-        : 'BGM：${d.bgmStrategy!.trim()}',
+        ? l10n.shortVideoSpacePublishAssemblyBgmNotSpecified
+        : l10n.shortVideoSpacePublishAssemblyBgm(d.bgmStrategy!.trim()),
   ];
   final scriptLines = <String>[];
   var shotsWithVideo = 0;
@@ -129,30 +141,42 @@ ShortVideoAssemblyPanelUi buildShortVideoAssemblyPanelUi({
   for (final g in scripts) {
     final name = (g.scriptName ?? '').trim();
     final title = name.isEmpty
-        ? '剧本 #${g.scriptNumericId}'
-        : '剧本 #${g.scriptNumericId} · $name';
+        ? l10n.shortVideoSpacePublishAssemblyScriptTitle(g.scriptNumericId)
+        : l10n.shortVideoSpacePublishAssemblyScriptTitleNamed(g.scriptNumericId, name);
     final shots = g.shots;
     final withMedia = shots
         .where((sh) => (sh.selectedMediaUrl ?? '').trim().isNotEmpty)
         .length;
     final voReady = shots.where((sh) => sh.voiceoverAssetReady).length;
     scriptLines.add(
-      '$title · ${shots.length} 镜 · 已选成片 $withMedia · 旁白就绪 $voReady',
+      l10n.shortVideoSpacePublishAssemblyScriptSummary(title, shots.length, withMedia, voReady),
     );
     for (final sh in shots.take(4)) {
-      final preview = (sh.selectedMediaUrl ?? '').trim().isNotEmpty ? '预览✓' : '预览×';
+      final preview = (sh.selectedMediaUrl ?? '').trim().isNotEmpty 
+          ? l10n.shortVideoSpacePublishAssemblyShotPreviewYes 
+          : l10n.shortVideoSpacePublishAssemblyShotPreviewNo;
       final duration = (sh.duration ?? '').trim();
       final subtitle = (sh.subtitleText ?? '').trim();
-      final subtitleState = subtitle.isEmpty ? '字幕×' : '字幕✓';
+      final subtitleState = subtitle.isEmpty 
+          ? l10n.shortVideoSpacePublishAssemblyShotSubtitleNo 
+          : l10n.shortVideoSpacePublishAssemblyShotSubtitleYes;
       final voiceover = sh.voiceoverAssetReady ||
               (sh.voiceoverAudioUrl ?? '').trim().isNotEmpty
-          ? '旁白✓'
-          : '旁白×';
+          ? l10n.shortVideoSpacePublishAssemblyShotVoiceoverYes
+          : l10n.shortVideoSpacePublishAssemblyShotVoiceoverNo;
       final order = sh.sbIndex?.toString() ?? '${sh.storyboardNumericId}';
+      final bgm = (d.bgmStrategy ?? '').trim().isEmpty 
+          ? l10n.shortVideoSpacePublishAssemblyShotBgmDefault 
+          : d.bgmStrategy!.trim();
       scriptLines.add(
-        '  镜头[$order] · $preview · ${duration.isEmpty ? '时长?' : duration} · '
-        '$subtitleState · $voiceover · '
-        'BGM ${(d.bgmStrategy ?? '').trim().isEmpty ? '默认' : d.bgmStrategy!.trim()}',
+        l10n.shortVideoSpacePublishAssemblyShotDetail(
+          order,
+          preview,
+          duration.isEmpty ? l10n.shortVideoSpacePublishAssemblyShotDurationUnknown : duration,
+          subtitleState,
+          voiceover,
+          bgm,
+        ),
       );
     }
     for (final sh in shots) {
@@ -172,124 +196,158 @@ ShortVideoAssemblyPanelUi buildShortVideoAssemblyPanelUi({
       }
     }
     if (shots.length > 4) {
-      scriptLines.add('  …其余 ${shots.length - 4} 镜请在制作工作区时间线查看');
+      scriptLines.add(l10n.shortVideoSpacePublishAssemblyMoreShots(shots.length - 4));
     }
   }
   final q = assembly.candidateQualitySummary;
   final qualityLines = <String>[
-    '项目级待验收坏例：${q.projectBadCaseTotal}（与生产概览同源）',
-    '当前装配分镜上的评审：${q.assemblyShotReviewTotal} 条 · 坏例 ${q.assemblyShotBadCaseCount} · 涉及分镜 ${q.assemblyShotsWithBadCase}',
-    '贴近成片阶段坏例（分镜面板/视频提示）：${q.assemblyLateStageBadCaseCount}',
+    l10n.shortVideoSpacePublishAssemblyQualityProjectBadCase(q.projectBadCaseTotal),
+    l10n.shortVideoSpacePublishAssemblyQualityAssemblyReviews(
+      q.assemblyShotReviewTotal,
+      q.assemblyShotBadCaseCount,
+      q.assemblyShotsWithBadCase,
+    ),
+    l10n.shortVideoSpacePublishAssemblyQualityLateStageBadCase(q.assemblyLateStageBadCaseCount),
   ];
   final stageLines = q.badCasesByStage
       .take(6)
       .map(
-        (b) =>
-            '${shortVideoQualityStageLabelZh(b.stage)} · 坏例 ${b.badCaseCount}',
+        (b) => l10n.shortVideoSpacePublishAssemblyQualityStageBadCase(
+          shortVideoQualityStageLabel(l10n, b.stage),
+          b.badCaseCount,
+        ),
       )
       .toList(growable: false);
   if (stageLines.isNotEmpty) {
-    qualityLines.add('按阶段：${stageLines.join('；')}');
+    qualityLines.add(l10n.shortVideoSpacePublishAssemblyQualityByStage(stageLines.join('；')));
   }
-  qualityLines.add(
-    '在任务中心侧可按项目筛选质量评审列表，分镜级 target 与装配一致。',
-  );
+  qualityLines.add(l10n.shortVideoSpacePublishAssemblyQualityTaskCenterHint);
+  
   final hasBgm = (d.bgmStrategy ?? '').trim().isNotEmpty;
   final multiTrackTrackCount = 1 + (shotsWithSubtitle > 0 ? 1 : 0) + (shotsWithVoiceover > 0 ? 1 : 0) + (hasBgm ? 1 : 0);
   final withinLimitedTracks = multiTrackTrackCount <= 4;
   final timelineMinutes = totalDurationSeconds / 60.0;
   final overProfessionalBoundary = !withinLimitedTracks || timelineMinutes > 8.0;
   
-  // 更新 headline 以包含总时长信息
   final totalDurationFormatted = formatDurationHHMMSS(totalDurationSeconds);
   final headlineWithDuration = scripts.isEmpty
-      ? '当前尚无剧本 / 分镜装配数据。'
-      : '${scripts.length} 个剧本 · $totalShots 条分镜（导出路径快照）\n'
-        '成片总时长：$totalDurationSeconds秒 ($totalDurationFormatted)';
+      ? l10n.shortVideoSpacePublishAssemblyNoScriptsHeadline
+      : l10n.shortVideoSpacePublishAssemblyHeadlineScripts(
+          scripts.length,
+          totalShots,
+          totalDurationSeconds,
+          totalDurationFormatted,
+        );
   
   final multiTrackDecisionLines = <String>[
-    '轨道占用估算：视频 1 + 字幕 ${shotsWithSubtitle > 0 ? 1 : 0} + 旁白 ${shotsWithVoiceover > 0 ? 1 : 0} + BGM ${hasBgm ? 1 : 0} = $multiTrackTrackCount 轨。',
-    '素材就绪：视频镜头 $shotsWithVideo/$totalShots，字幕镜头 $shotsWithSubtitle/$totalShots，旁白镜头 $shotsWithVoiceover/$totalShots。',
-    '时长估算：已识别 $durationKnownShots/$totalShots 镜，总时长约 ${timelineMinutes.toStringAsFixed(1)} 分钟。',
+    l10n.shortVideoSpacePublishAssemblyMultiTrackEstimate(
+      shotsWithSubtitle > 0 ? 1 : 0,
+      shotsWithVoiceover > 0 ? 1 : 0,
+      hasBgm ? 1 : 0,
+      multiTrackTrackCount,
+    ),
+    l10n.shortVideoSpacePublishAssemblyMaterialReady(
+      shotsWithVideo,
+      shotsWithSubtitle,
+      shotsWithVoiceover,
+      totalShots,
+    ),
+    l10n.shortVideoSpacePublishAssemblyDurationEstimate(
+      durationKnownShots,
+      totalShots,
+      timelineMinutes.toStringAsFixed(1),
+    ),
     if (overProfessionalBoundary)
-      '导出决策：当前超出受限多轨边界（>4 轨或时长复杂），建议转专业台（需求 8.2）处理。'
+      l10n.shortVideoSpacePublishAssemblyExportDecisionProfessional
     else
-      '导出决策：维持受限多轨（<=4 轨）路径，可继续在当前链路导出。',
-    '边界说明：Space 仅覆盖"视频 + 单字幕轨 + 旁白 + BGM"受限混排，不替代专业 NLE。',
+      l10n.shortVideoSpacePublishAssemblyExportDecisionLimited,
+    l10n.shortVideoSpacePublishAssemblyBoundaryNote,
   ];
   return ShortVideoAssemblyPanelUi(
     visible: true,
     headline: headlineWithDuration,
     defaultsLine:
-        '${defaultParts.join(' · ')}\n生效 TTS（入队/worker）：${eff.ttsVoice}',
+        '${defaultParts.join(' · ')}\n${l10n.shortVideoSpacePublishAssemblyEffectiveTts(eff.ttsVoice)}',
     qualityLines: qualityLines,
     scriptLines: scriptLines,
     multiTrackDecisionLines: multiTrackDecisionLines,
-    detail:
-        '只读剪辑台：展示镜头顺序、时长、字幕、旁白、BGM 与预览就绪摘要；导出阻塞结论见下方「导出前检查」。',
+    detail: l10n.shortVideoSpacePublishAssemblyDetail,
   );
 }
 
 /// Space 导出前检查卡：消费 GET .../short-video-export-check
 ShortVideoExportCheckPanelUi buildShortVideoExportCheckPanelUi({
+  required AppLocalizations l10n,
   required bool projectSelected,
   required bool loadingProjectOverview,
   required ProjectShortVideoExportCheck? exportCheck,
 }) {
+  
   if (!projectSelected) {
     return const ShortVideoExportCheckPanelUi(visible: false);
   }
   if (loadingProjectOverview) {
-    return const ShortVideoExportCheckPanelUi(
+    return ShortVideoExportCheckPanelUi(
       visible: true,
       loading: true,
-      headline: '正在读取导出前检查…',
-      detail: '聚合分镜阻塞与提醒；质量门禁观测字段仅占位展示。',
+      headline: l10n.shortVideoSpacePublishExportCheckLoadingHeadline,
+      detail: l10n.shortVideoSpacePublishExportCheckLoadingDetail,
     );
   }
   if (exportCheck == null) {
-    return const ShortVideoExportCheckPanelUi(
+    return ShortVideoExportCheckPanelUi(
       visible: true,
       unavailable: true,
-      headline: '导出前检查暂不可用。',
-      detail: '可稍后刷新页面，或在制作工作区确认分镜后再试。',
+      headline: l10n.shortVideoSpacePublishExportCheckUnavailableHeadline,
+      detail: l10n.shortVideoSpacePublishExportCheckUnavailableDetail,
     );
   }
   final s = exportCheck.summary;
   final metrics = <ShortVideoMetricData>[
-    ShortVideoMetricData(label: '分镜', value: '${s.storyboardCount}'),
-    ShortVideoMetricData(label: '阻塞', value: '${s.blockingIssueCount}'),
-    ShortVideoMetricData(label: '提醒', value: '${s.warningIssueCount}'),
     ShortVideoMetricData(
-      label: '可导出',
-      value: exportCheck.exportReady ? '是' : '否',
+      label: l10n.shortVideoSpacePublishExportCheckMetricStoryboards,
+      value: '${s.storyboardCount}',
+    ),
+    ShortVideoMetricData(
+      label: l10n.shortVideoSpacePublishExportCheckMetricBlocking,
+      value: '${s.blockingIssueCount}',
+    ),
+    ShortVideoMetricData(
+      label: l10n.shortVideoSpacePublishExportCheckMetricWarning,
+      value: '${s.warningIssueCount}',
+    ),
+    ShortVideoMetricData(
+      label: l10n.shortVideoSpacePublishExportCheckMetricExportable,
+      value: exportCheck.exportReady 
+          ? l10n.shortVideoSpacePublishExportCheckMetricYes 
+          : l10n.shortVideoSpacePublishExportCheckMetricNo,
     ),
   ];
   final headline = exportCheck.exportReady
-      ? '服务端未发现阻塞级问题（仍需在制作侧确认成片）。'
-      : '存在阻塞项：建议先在制作工作区补齐后再导出 / 成片。';
+      ? l10n.shortVideoSpacePublishExportCheckReadyHeadline
+      : l10n.shortVideoSpacePublishExportCheckBlockingHeadline;
   final qg = exportCheck.qualityGate;
   
   // Build quality gate line based on strategy
   String qualityGateLine;
   if (qg.strategy == 'off') {
-    qualityGateLine = '质量门禁：已关闭（不检查质量问题）。';
+    qualityGateLine = l10n.shortVideoSpacePublishExportCheckQualityGateOff;
   } else if (qg.strategy == 'warn') {
     if (qg.pendingReviewBadCaseCount > 0) {
-      qualityGateLine = '质量门禁：警告模式 - 待复核坏例 ${qg.pendingReviewBadCaseCount} 条（允许导出但建议修复）。';
+      qualityGateLine = l10n.shortVideoSpacePublishExportCheckQualityGateWarnWithBadCase(qg.pendingReviewBadCaseCount);
     } else {
-      qualityGateLine = '质量门禁：警告模式 - 暂无待复核坏例（允许导出）。';
+      qualityGateLine = l10n.shortVideoSpacePublishExportCheckQualityGateWarnNoBadCase;
     }
   } else if (qg.strategy == 'block') {
     if (qg.enforced && qg.pendingReviewBadCaseCount > 0) {
-      qualityGateLine = '质量门禁：阻断模式 - 待复核坏例 ${qg.pendingReviewBadCaseCount} 条（阻止导出，需先修复）。';
+      qualityGateLine = l10n.shortVideoSpacePublishExportCheckQualityGateBlockEnforcedWithBadCase(qg.pendingReviewBadCaseCount);
     } else if (qg.pendingReviewBadCaseCount > 0) {
-      qualityGateLine = '质量门禁：阻断模式 - 待复核坏例 ${qg.pendingReviewBadCaseCount} 条（暂未强制执行）。';
+      qualityGateLine = l10n.shortVideoSpacePublishExportCheckQualityGateBlockNotEnforcedWithBadCase(qg.pendingReviewBadCaseCount);
     } else {
-      qualityGateLine = '质量门禁：阻断模式 - 暂无待复核坏例（允许导出）。';
+      qualityGateLine = l10n.shortVideoSpacePublishExportCheckQualityGateBlockNoBadCase;
     }
   } else {
-    qualityGateLine = '质量门禁：未知策略 "${qg.strategy}"。';
+    qualityGateLine = l10n.shortVideoSpacePublishExportCheckQualityGateUnknown(qg.strategy);
   }
   
   // Collect blocking reasons if in block mode
@@ -306,7 +364,13 @@ ShortVideoExportCheckPanelUi buildShortVideoExportCheckPanelUi({
       .map((i) {
         final sb = i.sbIndex;
         final sbPart = sb == null ? '' : ' · 序 $sb';
-        return '剧本 #${i.scriptNumericId} · 分镜 #${i.storyboardNumericId}$sbPart · ${shortVideoExportIssueLabelZh(i.code)} · ${i.detail}';
+        return l10n.shortVideoSpacePublishExportCheckBlockingIssue(
+          i.scriptNumericId,
+          i.storyboardNumericId,
+          sbPart,
+          shortVideoExportIssueLabel(l10n, i.code),
+          i.detail,
+        );
       })
       .toList(growable: false);
   final warningLines = exportCheck.issues
@@ -315,12 +379,18 @@ ShortVideoExportCheckPanelUi buildShortVideoExportCheckPanelUi({
       .map((i) {
         final sb = i.sbIndex;
         final sbPart = sb == null ? '' : ' · 序 $sb';
-        return '剧本 #${i.scriptNumericId} · 分镜 #${i.storyboardNumericId}$sbPart · ${shortVideoExportIssueLabelZh(i.code)} · ${i.detail}';
+        return l10n.shortVideoSpacePublishExportCheckBlockingIssue(
+          i.scriptNumericId,
+          i.storyboardNumericId,
+          sbPart,
+          shortVideoExportIssueLabel(l10n, i.code),
+          i.detail,
+        );
       })
       .toList(growable: false);
   final detail = exportCheck.exportReady
-      ? '阻塞计数为 0 时表示服务端聚合路径上暂无硬阻塞（仍以实际导出管线为准）。'
-      : '下方列出部分阻塞项；完整列表请在制作工作区逐镜核对。';
+      ? l10n.shortVideoSpacePublishExportCheckDetailReady
+      : l10n.shortVideoSpacePublishExportCheckDetailBlocking;
   return ShortVideoExportCheckPanelUi(
     visible: true,
     headline: headline,
@@ -336,29 +406,31 @@ ShortVideoExportCheckPanelUi buildShortVideoExportCheckPanelUi({
 
 /// Space 候选资产确认卡：消费 GET .../assets-overview 的 candidate_counts
 ShortVideoCandidateCardUi buildShortVideoCandidateCardUi({
+  required AppLocalizations l10n,
   required bool projectSelected,
   required bool loadingProjectOverview,
   required ProjectAssetsOverview? assetsOverview,
   VoidCallback? onBatchGenerateCandidateClips,
   bool batchGenerateCandidateClipsBusy = false,
 }) {
+  
   if (!projectSelected) {
     return const ShortVideoCandidateCardUi(visible: false);
   }
   if (loadingProjectOverview) {
-    return const ShortVideoCandidateCardUi(
+    return ShortVideoCandidateCardUi(
       visible: true,
       loading: true,
-      headline: '正在读取项目资产…',
-      detail: '用于统计候选 workflow：pending / linked / ignored（与 PATCH 资产一致）。',
+      headline: l10n.shortVideoSpacePublishCandidateLoadingHeadline,
+      detail: l10n.shortVideoSpacePublishCandidateLoadingDetail,
     );
   }
   if (assetsOverview == null) {
-    return const ShortVideoCandidateCardUi(
+    return ShortVideoCandidateCardUi(
       visible: true,
       unavailable: true,
-      headline: '候选资产摘要暂不可用。',
-      detail: '可稍后刷新页面，或直接去项目区查看并编辑资产。',
+      headline: l10n.shortVideoSpacePublishCandidateUnavailableHeadline,
+      detail: l10n.shortVideoSpacePublishCandidateUnavailableDetail,
     );
   }
   final c = assetsOverview.candidateCounts;
@@ -368,10 +440,9 @@ ShortVideoCandidateCardUi buildShortVideoCandidateCardUi({
   final unset = c.unset;
   final tracked = pending + linked + ignored;
   final headline = tracked == 0
-      ? '尚未标记 pending / linked / ignored；可在项目区对镜头候选等资产 PATCH candidate_status。'
-      : '候选状态已按项目全量聚合（下方计数含未标记）：';
-  final detail =
-      '项目资产共 ${assetsOverview.totalCount} 条；计数由服务端一次性聚合（不分页）。在项目区可通过 PATCH candidate_status 更新。';
+      ? l10n.shortVideoSpacePublishCandidateNoTrackedHeadline
+      : l10n.shortVideoSpacePublishCandidateTrackedHeadline;
+  final detail = l10n.shortVideoSpacePublishCandidateDetail(assetsOverview.totalCount);
   return ShortVideoCandidateCardUi(
     visible: true,
     pending: pending,
@@ -387,6 +458,7 @@ ShortVideoCandidateCardUi buildShortVideoCandidateCardUi({
 
 /// E10–E13：消费 GET /publish/*，编排发布清单 / 矩阵 / 草稿 / 作业
 ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
+  required AppLocalizations l10n,
   required bool projectSelected,
   required bool loadingProjectOverview,
   required bool publishUnavailable,
@@ -442,26 +514,25 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
     return const ShortVideoPublishPanelUi(visible: false);
   }
   if (loadingProjectOverview) {
-    return const ShortVideoPublishPanelUi(
+    return ShortVideoPublishPanelUi(
       visible: true,
       loading: true,
-      headline: '正在读取导出检查与发布域…',
-      detail: '后端路径：`/api/v1/projects/{id}/publish/*`（profiles / drafts / jobs）。',
+      headline: l10n.shortVideoSpacePublishPanelLoadingHeadline,
+      detail: l10n.shortVideoSpacePublishPanelLoadingDetail,
     );
   }
   if (publishUnavailable) {
     return ShortVideoPublishPanelUi(
       visible: true,
       unavailable: true,
-      headline: '发布域接口暂不可用（可能尚未执行数据库迁移）。',
+      headline: l10n.shortVideoSpacePublishPanelUnavailableHeadline,
       exportGateHint: exportCheck == null
-          ? '导出检查数据缺失，发布面板仅提示占位。'
+          ? l10n.shortVideoSpacePublishPanelUnavailableExportGateMissing
           : (exportCheck.summary.blockingIssueCount <= 0
-                ? '导出检查：当前无阻塞项。'
-                : '导出检查：仍有 ${exportCheck.summary.blockingIssueCount} 条阻塞项。'),
+                ? l10n.shortVideoSpacePublishPanelUnavailableExportGateNoBlocking
+                : l10n.shortVideoSpacePublishPanelUnavailableExportGateBlocking(exportCheck.summary.blockingIssueCount)),
       exportReady: exportCheck?.exportReady ?? true,
-      detail:
-          '确认 Supabase 已应用 `app_publish_*` 迁移后再试；Rust worker 会在后台消化发布作业队列。',
+      detail: l10n.shortVideoSpacePublishPanelUnavailableDetail,
       onRefreshPublish: onRefreshPublish,
       publishBusy: publishBusy,
       onResetConfirmationDontShowAgain: onResetConfirmationDontShowAgain,
@@ -469,10 +540,10 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
   }
 
   final gate = exportCheck == null
-      ? '导出检查数据暂不可用；仍可试着创建发布草稿并校验。'
+      ? l10n.shortVideoSpacePublishPanelExportGateUnavailable
       : (exportCheck.summary.blockingIssueCount <= 0
-            ? '导出检查：无阻塞项（**E13**：可从成片链路进入发布准备）。'
-            : '导出检查：仍有 ${exportCheck.summary.blockingIssueCount} 条阻塞项；可先补齐字段再投递作业。');
+            ? l10n.shortVideoSpacePublishPanelExportGateReady
+            : l10n.shortVideoSpacePublishPanelExportGateBlocking(exportCheck.summary.blockingIssueCount));
   
   final exportReadyStatus = exportCheck?.exportReady ?? true;
 
@@ -511,37 +582,51 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
 
   final prepareLines = <String>[
     if (activeDraft != null) 
-      '当前草稿：${activeDraft.title.trim().isEmpty ? "（无标题）" : activeDraft.title.trim()}'
+      l10n.shortVideoSpacePublishPanelCurrentDraft(
+        activeDraft.title.trim().isEmpty 
+            ? l10n.shortVideoSpacePublishPanelDraftNoTitle 
+            : activeDraft.title.trim()
+      )
     else if (drafts.isNotEmpty)
-      '⚠️ 请明确选择草稿（不再自动使用第一条）',
+      l10n.shortVideoSpacePublishPanelSelectDraftWarning,
     if (activeDraft != null && prepare != null) ...[
-      if (prepare.ok) '校验：✓ 当前草稿满足占位规则（仍需真实成片引用才能实际上线）。',
+      if (prepare.ok) l10n.shortVideoSpacePublishPanelPrepareCheckOk,
       for (final issue in prepare.issues)
         '${issue.severity}: ${issue.message}'
             '${issue.platformId != null ? ' · ${issue.platformId}' : ''}',
-    ]     else if (activeDraft == null && drafts.length > 1)
-      '多张草稿时请先在「当前操作草稿」中选择一张，再显示 prepare-check。'
+    ] else if (activeDraft == null && drafts.length > 1)
+      l10n.shortVideoSpacePublishPanelPrepareCheckMultipleDrafts
     else if (activeDraft == null && drafts.isNotEmpty)
-      '选择草稿后将显示 prepare-check 校验结果。'
+      l10n.shortVideoSpacePublishPanelPrepareCheckSelectFirst
     else
-      '尚无草稿或未完成 prepare-check。',
+      l10n.shortVideoSpacePublishPanelPrepareCheckNoDraft,
   ];
 
   final draftLines = drafts
       .map(
-        (d) =>
-            '${d.title.trim().isEmpty ? '（无标题）' : d.title.trim()} · ${d.draftStatus}'
-            '${(d.videoAssetKey ?? '').trim().isEmpty ? ' · 缺 video 引用' : ''}'
-            '${(d.scheduledAt ?? '').trim().isEmpty ? '' : ' · 定时 ${d.scheduledAt}'}',
+        (d) {
+          final title = d.title.trim().isEmpty 
+              ? l10n.shortVideoSpacePublishPanelDraftNoTitle 
+              : d.title.trim();
+          final videoMissing = (d.videoAssetKey ?? '').trim().isEmpty 
+              ? l10n.shortVideoSpacePublishPanelDraftMissingVideo 
+              : '';
+          final scheduled = (d.scheduledAt ?? '').trim().isEmpty 
+              ? '' 
+              : l10n.shortVideoSpacePublishPanelDraftScheduled(d.scheduledAt!);
+          return '$title · ${d.draftStatus}$videoMissing$scheduled';
+        },
       )
       .toList(growable: false);
 
   final jobLines = jobs
       .map((j) {
-        final short = j.id.length > 8 ? '${j.id.substring(0, 8)}…' : j.id;
+        final short = j.id.length > 8 
+            ? l10n.shortVideoSpacePublishPanelJobShortId(j.id.substring(0, 8)) 
+            : j.id;
         final err = (j.errorMessage ?? '').trim();
-        return '$short · ${j.status}'
-            '${err.isEmpty ? '' : ' · $err'}';
+        final errPart = err.isEmpty ? '' : l10n.shortVideoSpacePublishPanelJobError(err);
+        return '$short · ${j.status}$errPart';
       })
       .toList(growable: false);
   final succeededJobCount = jobs.where((j) => j.status == 'succeeded').length;
@@ -561,25 +646,33 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
   }
 
   final publishOverviewLines = <String>[
-    '成功作业：$succeededJobCount · 失败/部分失败：$failedJobCount',
-    '待确认：$waitingConfirmCount · 已定时草稿：$scheduledDraftCount/${drafts.length}',
+    '${l10n.shortVideoSpacePublishPanelOverviewSucceeded(succeededJobCount)} · ${l10n.shortVideoSpacePublishPanelOverviewFailed(failedJobCount)}',
+    '${l10n.shortVideoSpacePublishPanelOverviewAwaiting(waitingConfirmCount)} · ${l10n.shortVideoSpacePublishPanelOverviewScheduled(scheduledDraftCount, drafts.length)}',
     if (audits.isNotEmpty)
-      '投递模式：${audits.take(8).map((a) => a.deliveryMode).toSet().join(" / ")}',
+      l10n.shortVideoSpacePublishPanelOverviewDeliveryModes(
+        audits.take(8).map((a) => a.deliveryMode).toSet().join(" / ")
+      ),
     if (performanceAlerts.isNotEmpty)
-      '低表现预警：${performanceAlerts.length} 条（建议进入任务中心排障并改写文案）',
+      l10n.shortVideoSpacePublishPanelOverviewPerformanceAlerts(performanceAlerts.length),
     ...performanceAlerts
         .take(3)
         .map(
-          (a) =>
-              '${kShortVideoPublishPlatformLabels[a.platformId] ?? a.platformId}'
-              ' · 播放 ${a.views} · 完播 ${(a.completionRate * 100).toStringAsFixed(0)}%',
+          (a) => l10n.shortVideoSpacePublishPanelOverviewPerformanceAlert(
+            kShortVideoPublishPlatformLabels[a.platformId] ?? a.platformId,
+            a.views,
+            (a.completionRate * 100).toStringAsFixed(0),
+          ),
         ),
     ...audits.take(3).map((a) {
       final p = kShortVideoPublishPlatformLabels[a.platformId] ?? a.platformId;
-      return '审计：$p · ${a.status} · mode=${a.deliveryMode}';
+      return l10n.shortVideoSpacePublishPanelOverviewAudit(p, a.status, a.deliveryMode);
     }),
     if (publishAutomationModesByPlatform.isNotEmpty)
-      '目标自动化：${publishAutomationModesByPlatform.entries.map((e) => "${labels[e.key] ?? e.key}=${e.value}").join("；")}',
+      l10n.shortVideoSpacePublishPanelOverviewTargetAutomation(
+        publishAutomationModesByPlatform.entries
+            .map((e) => "${labels[e.key] ?? e.key}=${e.value}")
+            .join("；")
+      ),
   ];
 
   String? awaitingId;
@@ -625,7 +718,7 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
 
   return ShortVideoPublishPanelUi(
     visible: true,
-    headline: '已连接发布 API：${drafts.length} 张草稿 · ${jobs.length} 条作业。',
+    headline: l10n.shortVideoSpacePublishPanelHeadline(drafts.length, jobs.length),
     exportGateHint: gate,
     exportReady: exportReadyStatus,
     matrixDomesticLines: matrixDomesticLines,
@@ -634,8 +727,7 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
     draftLines: draftLines,
     jobLines: jobLines,
     publishOverviewLines: publishOverviewLines,
-    detail:
-        '半自动作业在 `awaiting_confirmation` 时需点「确认」；worker 骨架会写入 `publish_attempts` 占位成功记录。',
+    detail: l10n.shortVideoSpacePublishPanelDetail,
     onRefreshPublish: onRefreshPublish,
     publishBusy: publishBusy,
     onBootstrapPublishDraft: onBootstrapPublishDraft,

@@ -1,8 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/rust_api/project/overview_models_assembly.dart';
 import 'package:openflow_app/short_video_space/support_publish_api.dart';
 
 void main() {
+  final zh = AppLocalizationsZh();
   group('Export Check Integration Tests', () {
     test('Export check displays ready state when no blocking issues', () {
       final exportCheck = ProjectShortVideoExportCheck(
@@ -24,6 +26,7 @@ void main() {
       );
 
       final ui = buildShortVideoExportCheckPanelUi(
+        l10n: zh,
         projectSelected: true,
         loadingProjectOverview: false,
         exportCheck: exportCheck,
@@ -93,6 +96,7 @@ void main() {
       );
 
       final ui = buildShortVideoExportCheckPanelUi(
+        l10n: zh,
         projectSelected: true,
         loadingProjectOverview: false,
         exportCheck: exportCheck,
@@ -118,6 +122,7 @@ void main() {
 
     test('Export check displays loading state correctly', () {
       final ui = buildShortVideoExportCheckPanelUi(
+        l10n: zh,
         projectSelected: true,
         loadingProjectOverview: true,
         exportCheck: null,
@@ -132,6 +137,7 @@ void main() {
 
     test('Export check displays unavailable state when no data', () {
       final ui = buildShortVideoExportCheckPanelUi(
+        l10n: zh,
         projectSelected: true,
         loadingProjectOverview: false,
         exportCheck: null,
@@ -146,6 +152,7 @@ void main() {
 
     test('Export check hidden when no project selected', () {
       final ui = buildShortVideoExportCheckPanelUi(
+        l10n: zh,
         projectSelected: false,
         loadingProjectOverview: false,
         exportCheck: null,
@@ -185,6 +192,7 @@ void main() {
       );
 
       final ui = buildShortVideoExportCheckPanelUi(
+        l10n: zh,
         projectSelected: true,
         loadingProjectOverview: false,
         exportCheck: exportCheck,
@@ -258,6 +266,7 @@ void main() {
       );
 
       final ui = buildShortVideoExportCheckPanelUi(
+        l10n: zh,
         projectSelected: true,
         loadingProjectOverview: false,
         exportCheck: exportCheck,
@@ -274,19 +283,19 @@ void main() {
     });
 
     test('Export check issue code mapping works correctly', () {
-      expect(shortVideoExportIssueLabelZh('candidate_pending'), '候选待确认');
-      expect(shortVideoExportIssueLabelZh('missing_selected_media'), '未选成片媒体');
-      expect(shortVideoExportIssueLabelZh('selected_media_not_video'), '所选媒体非视频');
-      expect(shortVideoExportIssueLabelZh('subtitle_placeholder'), '字幕 / 口播文案缺失');
-      expect(shortVideoExportIssueLabelZh('subtitle_empty'), '字幕为空');
-      expect(shortVideoExportIssueLabelZh('voiceover_failed'), '旁白生成失败');
-      expect(shortVideoExportIssueLabelZh('voiceover_audio_missing'), '旁白音频未就绪');
-      expect(shortVideoExportIssueLabelZh('voiceover_not_ready'), '配音未就绪');
-      expect(shortVideoExportIssueLabelZh('duration_not_explicit'), '时长未标明（导出默认）');
-      expect(shortVideoExportIssueLabelZh('duration_not_set'), '时长未设定');
-      expect(shortVideoExportIssueLabelZh('duration_unparsable'), '时长格式异常');
-      expect(shortVideoExportIssueLabelZh('completion_uncertain'), '成片状态未标「已完成」');
-      expect(shortVideoExportIssueLabelZh('unknown_code'), 'unknown_code');
+      expect(shortVideoExportIssueLabel(zh, 'candidate_pending'), '候选待确认');
+      expect(shortVideoExportIssueLabel(zh, 'missing_selected_media'), '未选成片媒体');
+      expect(shortVideoExportIssueLabel(zh, 'selected_media_not_video'), '所选媒体非视频');
+      expect(shortVideoExportIssueLabel(zh, 'subtitle_placeholder'), '字幕 / 口播文案缺失');
+      expect(shortVideoExportIssueLabel(zh, 'subtitle_empty'), '字幕为空');
+      expect(shortVideoExportIssueLabel(zh, 'voiceover_failed'), '旁白生成失败');
+      expect(shortVideoExportIssueLabel(zh, 'voiceover_audio_missing'), '旁白音频未就绪');
+      expect(shortVideoExportIssueLabel(zh, 'voiceover_not_ready'), '配音未就绪');
+      expect(shortVideoExportIssueLabel(zh, 'duration_not_explicit'), '时长未标明（导出默认）');
+      expect(shortVideoExportIssueLabel(zh, 'duration_not_set'), '时长未设定');
+      expect(shortVideoExportIssueLabel(zh, 'duration_unparsable'), '时长格式异常');
+      expect(shortVideoExportIssueLabel(zh, 'completion_uncertain'), '成片状态未标「已完成」');
+      expect(shortVideoExportIssueLabel(zh, 'unknown_code'), 'unknown_code');
     });
 
     test('Export check limits blocking and warning lines to 14 each', () {
@@ -322,6 +331,7 @@ void main() {
       );
 
       final ui = buildShortVideoExportCheckPanelUi(
+        l10n: zh,
         projectSelected: true,
         loadingProjectOverview: false,
         exportCheck: exportCheck,

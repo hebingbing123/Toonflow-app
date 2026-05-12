@@ -1,6 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/l10n/app_localizations.dart';
+import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/short_video_space/section.dart';
+
+Widget _materialAppZh({required Widget home}) => MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('zh'),
+      home: home,
+    );
 
 /// **Validates: Requirements 3, 4, 5**
 /// 
@@ -9,6 +18,7 @@ import 'package:openflow_app/short_video_space/section.dart';
 /// - Voiceover generation call (single and batch)
 /// - Audio preview functionality
 void main() {
+  final zh = AppLocalizationsZh();
   group('VoiceoverSettings', () {
     test('uses defaults when JSON is empty', () {
       final settings = VoiceoverSettings.fromJson(<String, dynamic>{});
@@ -53,9 +63,9 @@ void main() {
     });
 
     test('maps OpenAI voices to display names and keeps unknown ids raw', () {
-      expect(getVoiceoverDisplayName('alloy'), 'Alloy (中性)');
+      expect(getVoiceoverDisplayName('alloy', zh), 'Alloy (中性)');
       expect(
-        getVoiceoverDisplayName('zh-CN-XiaoxiaoNeural'),
+        getVoiceoverDisplayName('zh-CN-XiaoxiaoNeural', zh),
         'zh-CN-XiaoxiaoNeural',
       );
     });
@@ -65,8 +75,8 @@ void main() {
     testWidgets('renders initial values and keeps save hint visible',
         (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
+        _materialAppZh(
+          home: const Scaffold(
             body: VoiceoverSettingsDialog(
               initialSettings: VoiceoverSettings(
                 provider: 'azure',
@@ -92,8 +102,8 @@ void main() {
 
     testWidgets('resets voice choice when provider changes', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
+        _materialAppZh(
+          home: const Scaffold(
             body: VoiceoverSettingsDialog(
               initialSettings: VoiceoverSettings(
                 provider: 'openai',
@@ -118,7 +128,7 @@ void main() {
       VoiceoverSettings? result;
 
       await tester.pumpWidget(
-        MaterialApp(
+        _materialAppZh(
           home: Scaffold(
             body: Builder(
               builder: (context) {
@@ -166,10 +176,10 @@ void main() {
     });
 
     testWidgets('returns null when cancelled', (tester) async {
-      VoiceoverSettings? result = const VoiceoverSettings();
+      VoiceoverSettings? result;
 
       await tester.pumpWidget(
-        MaterialApp(
+        _materialAppZh(
           home: Scaffold(
             body: Builder(
               builder: (context) {
@@ -297,16 +307,16 @@ void main() {
     });
 
     test('getVoiceoverDisplayName maps OpenAI voices correctly', () {
-      expect(getVoiceoverDisplayName('alloy'), 'Alloy (中性)');
-      expect(getVoiceoverDisplayName('echo'), 'Echo (男性)');
-      expect(getVoiceoverDisplayName('fable'), 'Fable (英式)');
-      expect(getVoiceoverDisplayName('onyx'), 'Onyx (深沉)');
-      expect(getVoiceoverDisplayName('nova'), 'Nova (女性)');
-      expect(getVoiceoverDisplayName('shimmer'), 'Shimmer (柔和)');
+      expect(getVoiceoverDisplayName('alloy', zh), 'Alloy (中性)');
+      expect(getVoiceoverDisplayName('echo', zh), 'Echo (男性)');
+      expect(getVoiceoverDisplayName('fable', zh), 'Fable (英式)');
+      expect(getVoiceoverDisplayName('onyx', zh), 'Onyx (深沉)');
+      expect(getVoiceoverDisplayName('nova', zh), 'Nova (女性)');
+      expect(getVoiceoverDisplayName('shimmer', zh), 'Shimmer (柔和)');
       
       // Unknown voices return as-is
-      expect(getVoiceoverDisplayName('unknown'), 'unknown');
-      expect(getVoiceoverDisplayName('zh-CN-XiaoxiaoNeural'), 'zh-CN-XiaoxiaoNeural');
+      expect(getVoiceoverDisplayName('unknown', zh), 'unknown');
+      expect(getVoiceoverDisplayName('zh-CN-XiaoxiaoNeural', zh), 'zh-CN-XiaoxiaoNeural');
     });
   });
 

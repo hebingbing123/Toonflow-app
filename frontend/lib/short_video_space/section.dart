@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_list_view/flutter_list_view.dart';
 
+import '../l10n/app_localizations.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
 import 'components/batch_operation_toolbar.dart';
@@ -237,6 +238,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   @override
   Widget build(BuildContext context) {
     final project = _selectedProject;
+    final l10n = AppLocalizations.of(context)!;
     final visualLabel = shortVideoVisualStyleLabel(project);
     final directionLabel = shortVideoDirectionLabel(project);
     final modeTitle = _isAnimated ? '动漫短剧' : '真人短剧';
@@ -358,6 +360,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       overview: _projectAssetsOverview,
     );
     final assemblyPanelUi = buildShortVideoAssemblyPanelUi(
+      l10n: l10n,
       projectSelected: project != null,
       loadingProjectOverview: _loadingProjectOverview,
       assembly: _shortVideoAssembly,
@@ -379,12 +382,14 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
           )
         : null;
     final exportCheckPanelUi = buildShortVideoExportCheckPanelUi(
+      l10n: l10n,
       projectSelected: project != null,
       loadingProjectOverview: _loadingProjectOverview,
       exportCheck: _shortVideoExportCheck,
     );
     final accessToken = widget.accessToken;
     final publishPanelUi = buildShortVideoPublishPanelUi(
+      l10n: l10n,
       projectSelected: project != null,
       loadingProjectOverview: _loadingProjectOverview,
       publishUnavailable: _publishUnavailable,
@@ -545,6 +550,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       onDeliveryModeFilterChanged: _onDeliveryModeFilterChanged,
     );
     final candidateCardUi = buildShortVideoCandidateCardUi(
+      l10n: l10n,
       projectSelected: project != null,
       loadingProjectOverview: _loadingProjectOverview,
       assetsOverview: _projectAssetsOverview,

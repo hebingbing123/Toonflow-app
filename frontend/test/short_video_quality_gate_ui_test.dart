@@ -1,8 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/rust_api/project/overview_models_assembly.dart';
 import 'package:openflow_app/short_video_space/support_publish_api.dart';
 
 void main() {
+  final zh = AppLocalizationsZh();
   group('Quality Gate UI Tests', () {
     test('Quality gate strategy "off" displays correct message', () {
       final exportCheck = ProjectShortVideoExportCheck(
@@ -24,6 +26,7 @@ void main() {
       );
 
       final ui = buildShortVideoExportCheckPanelUi(
+        l10n: zh,
         projectSelected: true,
         loadingProjectOverview: false,
         exportCheck: exportCheck,
@@ -54,6 +57,7 @@ void main() {
       );
 
       final ui = buildShortVideoExportCheckPanelUi(
+        l10n: zh,
         projectSelected: true,
         loadingProjectOverview: false,
         exportCheck: exportCheck,
@@ -86,6 +90,7 @@ void main() {
       );
 
       final ui = buildShortVideoExportCheckPanelUi(
+        l10n: zh,
         projectSelected: true,
         loadingProjectOverview: false,
         exportCheck: exportCheck,
@@ -129,6 +134,7 @@ void main() {
       );
 
       final ui = buildShortVideoExportCheckPanelUi(
+        l10n: zh,
         projectSelected: true,
         loadingProjectOverview: false,
         exportCheck: exportCheck,
@@ -168,6 +174,7 @@ void main() {
       );
 
       final ui = buildShortVideoExportCheckPanelUi(
+        l10n: zh,
         projectSelected: true,
         loadingProjectOverview: false,
         exportCheck: exportCheck,
@@ -199,6 +206,7 @@ void main() {
       );
 
       final ui = buildShortVideoExportCheckPanelUi(
+        l10n: zh,
         projectSelected: true,
         loadingProjectOverview: false,
         exportCheck: exportCheck,
@@ -230,6 +238,7 @@ void main() {
       );
 
       final ui = buildShortVideoExportCheckPanelUi(
+        l10n: zh,
         projectSelected: true,
         loadingProjectOverview: false,
         exportCheck: exportCheck,

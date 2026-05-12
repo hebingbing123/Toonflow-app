@@ -1,11 +1,13 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/rust_api.dart';
 import 'package:openflow_app/short_video_space/support.dart';
 import 'package:openflow_app/short_video_space/view.dart';
 
 void main() {
+  final zh = AppLocalizationsZh();
   test('short video project scope keeps uuid and workspace context', () {
     final scope = ShortVideoProjectScope.fromProject(
       const ProjectRow(
@@ -238,13 +240,13 @@ void main() {
   });
 
   test('export check issue codes map to Chinese labels', () {
-    expect(shortVideoExportIssueLabelZh('candidate_pending'), '候选待确认');
-    expect(shortVideoExportIssueLabelZh('missing_selected_media'), '未选成片媒体');
-    expect(shortVideoExportIssueLabelZh('subtitle_empty'), '字幕为空');
-    expect(shortVideoExportIssueLabelZh('duration_not_set'), '时长未设定');
-    expect(shortVideoExportIssueLabelZh('voiceover_not_ready'), '配音未就绪');
+    expect(shortVideoExportIssueLabel(zh, 'candidate_pending'), '候选待确认');
+    expect(shortVideoExportIssueLabel(zh, 'missing_selected_media'), '未选成片媒体');
+    expect(shortVideoExportIssueLabel(zh, 'subtitle_empty'), '字幕为空');
+    expect(shortVideoExportIssueLabel(zh, 'duration_not_set'), '时长未设定');
+    expect(shortVideoExportIssueLabel(zh, 'voiceover_not_ready'), '配音未就绪');
     expect(
-      shortVideoExportIssueLabelZh('unknown_export_code'),
+      shortVideoExportIssueLabel(zh, 'unknown_export_code'),
       'unknown_export_code',
     );
   });
@@ -257,6 +259,7 @@ void main() {
       'by_asset_type': <dynamic>[],
     });
     final ui = buildShortVideoCandidateCardUi(
+      l10n: zh,
       projectSelected: true,
       loadingProjectOverview: false,
       assetsOverview: overview,
