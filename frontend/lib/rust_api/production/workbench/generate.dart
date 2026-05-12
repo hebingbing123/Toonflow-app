@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 
 import '../../../config.dart';
 import '../../core.dart';
+import '../project_scope.dart';
 import 'tracks.dart';
 
 /// OpenAPI **`GenerateVideoPromptResponse`**.
@@ -259,9 +260,12 @@ class WorkbenchGenerateVoiceoverResponse {
 }
 
 /// `POST /api/v1/production/workbench/generate-video-prompt` — OpenAPI `postWorkbenchGenerateVideoPromptV1`.
+///
+/// Prefer **`projectUuid`** (`app_project.id`); **`projectId`** is legacy numeric id.
 Future<GenerateVideoPromptResponse> postWorkbenchGenerateVideoPromptV1(
   String accessToken, {
-  required int projectId,
+  int? projectId,
+  String? projectUuid,
   required int scriptId,
   int? storyboardId,
   bool? autoQualityReview,
@@ -272,7 +276,11 @@ Future<GenerateVideoPromptResponse> postWorkbenchGenerateVideoPromptV1(
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/production/workbench/generate-video-prompt',
   );
-  final body = <String, dynamic>{'projectId': projectId, 'scriptId': scriptId};
+  final body = buildProductionProjectScopeBodyV1(
+    base: <String, dynamic>{'scriptId': scriptId},
+    projectId: projectId,
+    projectUuid: projectUuid,
+  );
   if (storyboardId != null) body['storyboardId'] = storyboardId;
   if (autoQualityReview == true) body['autoQualityReview'] = true;
   if (imageUrl != null) body['imageUrl'] = imageUrl;
@@ -377,13 +385,21 @@ class GetGenerateDataResponse {
 }
 
 /// `POST /api/v1/production/workbench/get-generate-data` — OpenAPI `postWorkbenchGetGenerateDataV1`.
+///
+/// Prefer **`projectUuid`** (`app_project.id`); **`projectId`** is legacy numeric id.
 Future<GetGenerateDataResponse> postWorkbenchGetGenerateDataV1(
   String accessToken, {
-  required int projectId,
+  int? projectId,
+  String? projectUuid,
   required int scriptId,
 }) async {
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/production/workbench/get-generate-data',
+  );
+  final body = buildProductionProjectScopeBodyV1(
+    base: <String, dynamic>{'scriptId': scriptId},
+    projectId: projectId,
+    projectUuid: projectUuid,
   );
   final res = await http
       .post(
@@ -392,7 +408,7 @@ Future<GetGenerateDataResponse> postWorkbenchGetGenerateDataV1(
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({'projectId': projectId, 'scriptId': scriptId}),
+        body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
   if (res.statusCode == 400 || res.statusCode == 404) {
@@ -404,9 +420,12 @@ Future<GetGenerateDataResponse> postWorkbenchGetGenerateDataV1(
 }
 
 /// `POST /api/v1/production/workbench/generate-voiceover`.
+///
+/// Prefer **`projectUuid`** (`app_project.id`); **`projectId`** is legacy numeric id.
 Future<WorkbenchGenerateVoiceoverResponse> postWorkbenchGenerateVoiceoverV1(
   String accessToken, {
-  required int projectId,
+  int? projectId,
+  String? projectUuid,
   required int scriptId,
   required List<int> storyboardIds,
   String? voice,
@@ -415,11 +434,14 @@ Future<WorkbenchGenerateVoiceoverResponse> postWorkbenchGenerateVoiceoverV1(
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/production/workbench/generate-voiceover',
   );
-  final body = <String, dynamic>{
-    'projectId': projectId,
-    'scriptId': scriptId,
-    'storyboardIds': storyboardIds,
-  };
+  final body = buildProductionProjectScopeBodyV1(
+    base: <String, dynamic>{
+      'scriptId': scriptId,
+      'storyboardIds': storyboardIds,
+    },
+    projectId: projectId,
+    projectUuid: projectUuid,
+  );
   if (voice != null && voice.trim().isNotEmpty) {
     body['voice'] = voice.trim();
   }
