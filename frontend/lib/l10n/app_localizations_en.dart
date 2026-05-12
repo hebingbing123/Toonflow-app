@@ -7244,8 +7244,116 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String projectEditorScriptsExtractStateLine(int state, String errorSuffix) {
-    return 'Extract state $state$errorSuffix';
+    return 'Extract state: $state$errorSuffix';
   }
+
+  @override
+  String get scriptEditorRelatedAssetsNone => 'No related assets';
+
+  @override
+  String get scriptEditorRelatedAssetsNameSeparator => ', ';
+
+  @override
+  String scriptEditorRelatedAssetsOverflow(
+    String visibleNames,
+    int totalCount,
+  ) {
+    return '$visibleNames · $totalCount items';
+  }
+
+  @override
+  String get scriptEditorWorkbenchPanelTitle => 'Script workbench';
+
+  @override
+  String get scriptEditorWorkbenchPanelIntro =>
+      'Automatically sync get-script-api context and extract state; supports ZIP export, asset extract, and edit-image flows.';
+
+  @override
+  String scriptEditorWorkbenchRelatedAssetsLine(String assets) {
+    return 'Related assets: $assets';
+  }
+
+  @override
+  String projectEditorScriptsSingleWorkbenchRecentExtractError(String reason) {
+    return 'Recent extract error: $reason';
+  }
+
+  @override
+  String get projectEditorScriptsWorkbenchDialogTitle =>
+      'Script batch workbench';
+
+  @override
+  String get projectEditorScriptsWorkbenchDialogNameFilterLabel =>
+      'Filter scripts by name';
+
+  @override
+  String get projectEditorScriptsWorkbenchDialogNameFilterHelper =>
+      'When calling POST …/projects/<project id>/scripts/get-script-api, filter by name; leave empty to load full context.';
+
+  @override
+  String get projectEditorScriptsWorkbenchDialogReadScriptContext =>
+      'Read script context';
+
+  @override
+  String get projectEditorScriptsWorkbenchDialogUseCurrentPreview =>
+      'Use current preview';
+
+  @override
+  String get projectEditorScriptsWorkbenchDialogUseAllScripts =>
+      'Use all project scripts';
+
+  @override
+  String get projectEditorScriptsWorkbenchDialogReloadProjectScripts =>
+      'Reload project scripts';
+
+  @override
+  String get projectEditorScriptsWorkbenchDialogTargetScriptIdsLabel =>
+      'Target script numeric ids';
+
+  @override
+  String get projectEditorScriptsWorkbenchDialogTargetScriptIdsHelper =>
+      'Separate with commas, spaces, or newlines; batch export, polling, and asset extract use this list.';
+
+  @override
+  String get projectEditorScriptsWorkbenchDialogExtractGroupSizeLabel =>
+      'Asset extract group size';
+
+  @override
+  String get projectEditorScriptsWorkbenchDialogExtractGroupSizeHelper =>
+      'Leave empty for backend default; used for extract-assets when set.';
+
+  @override
+  String get projectEditorScriptsWorkbenchDialogContextPreviewHeading =>
+      'Context preview';
+
+  @override
+  String get projectEditorScriptsWorkbenchDialogContextPreviewEmpty =>
+      'Nothing to preview yet.';
+
+  @override
+  String projectEditorScriptsWorkbenchDialogPreviewRowBrief(
+    int numericId,
+    String name,
+    int extractState,
+  ) {
+    return '#$numericId $name · extract state $extractState';
+  }
+
+  @override
+  String projectEditorScriptsWorkbenchDialogPreviewRowWithAssets(
+    int numericId,
+    String name,
+    int extractState,
+    String assets,
+  ) {
+    return '#$numericId $name · extract state $extractState · assets $assets';
+  }
+
+  @override
+  String get projectEditorScriptsWorkbenchDialogBatchCreate => 'Batch create';
+
+  @override
+  String get projectEditorScriptsWorkbenchDialogClose => 'Close';
 
   @override
   String get projectEditorAssetSummaryProductionEmpty =>

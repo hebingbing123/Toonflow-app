@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/app_localizations.dart';
 import '../../../../rust_api.dart';
 import '../../../script_editor/support.dart';
 
@@ -71,8 +72,9 @@ class ProjectScriptsWorkbenchDialogView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
-      title: const Text('剧本批量工作台'),
+      title: Text(l10n.projectEditorScriptsWorkbenchDialogTitle),
       content: SizedBox(
         width: 820,
         child: SingleChildScrollView(
@@ -87,10 +89,10 @@ class ProjectScriptsWorkbenchDialogView extends StatelessWidget {
               const SizedBox(height: 12),
               TextField(
                 controller: model.filterCtrl,
-                decoration: const InputDecoration(
-                  labelText: '剧本名称筛选',
+                decoration: InputDecoration(
+                  labelText: l10n.projectEditorScriptsWorkbenchDialogNameFilterLabel,
                   helperText:
-                      '读取 POST …/projects/{id}/scripts/get-script-api 时按名称过滤，可留空读取全量上下文。',
+                      l10n.projectEditorScriptsWorkbenchDialogNameFilterHelper,
                 ),
               ),
               const SizedBox(height: 8),
@@ -100,21 +102,27 @@ class ProjectScriptsWorkbenchDialogView extends StatelessWidget {
                 children: [
                   FilledButton.tonal(
                     onPressed: model.localBusy ? null : callbacks.onReadContext,
-                    child: const Text('读取剧本上下文'),
+                    child: Text(
+                      l10n.projectEditorScriptsWorkbenchDialogReadScriptContext,
+                    ),
                   ),
                   OutlinedButton(
                     onPressed: model.localBusy
                         ? null
                         : callbacks.onUsePreviewOrAll,
                     child: Text(
-                      model.previewRows.isNotEmpty ? '使用当前预览' : '使用全部剧本',
+                      model.previewRows.isNotEmpty
+                          ? l10n.projectEditorScriptsWorkbenchDialogUseCurrentPreview
+                          : l10n.projectEditorScriptsWorkbenchDialogUseAllScripts,
                     ),
                   ),
                   OutlinedButton(
                     onPressed: model.localBusy
                         ? null
                         : callbacks.onReloadScripts,
-                    child: const Text('刷新项目剧本'),
+                    child: Text(
+                      l10n.projectEditorScriptsWorkbenchDialogReloadProjectScripts,
+                    ),
                   ),
                 ],
               ),
@@ -123,9 +131,10 @@ class ProjectScriptsWorkbenchDialogView extends StatelessWidget {
                 controller: model.selectedIdsCtrl,
                 minLines: 2,
                 maxLines: 4,
-                decoration: const InputDecoration(
-                  labelText: '目标剧本 numeric ID',
-                  helperText: '支持逗号、空格或换行分隔；批量导出、轮询和素材抽取都使用这里的列表。',
+                decoration: InputDecoration(
+                  labelText: l10n.projectEditorScriptsWorkbenchDialogTargetScriptIdsLabel,
+                  helperText:
+                      l10n.projectEditorScriptsWorkbenchDialogTargetScriptIdsHelper,
                 ),
               ),
               const SizedBox(height: 8),
@@ -169,9 +178,11 @@ class ProjectScriptsWorkbenchDialogView extends StatelessWidget {
               TextField(
                 controller: model.groupSizeCtrl,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: '素材抽取 group size',
-                  helperText: '留空则沿用后端默认分组；设置后用于 extract-assets。',
+                decoration: InputDecoration(
+                  labelText:
+                      l10n.projectEditorScriptsWorkbenchDialogExtractGroupSizeLabel,
+                  helperText:
+                      l10n.projectEditorScriptsWorkbenchDialogExtractGroupSizeHelper,
                 ),
               ),
               const SizedBox(height: 12),
@@ -183,59 +194,75 @@ class ProjectScriptsWorkbenchDialogView extends StatelessWidget {
                     onPressed: model.localBusy
                         ? null
                         : callbacks.onExportSelected,
-                    child: const Text('导出所选剧本'),
+                    child: Text(l10n.projectEditorScriptsWorkbenchRecommendExportSelected),
                   ),
                   OutlinedButton(
                     onPressed: model.localBusy
                         ? null
                         : callbacks.onPollSelected,
-                    child: const Text('轮询所选状态'),
+                    child: Text(l10n.projectEditorScriptsWorkbenchRecommendPollSelected),
                   ),
                   OutlinedButton(
                     onPressed: model.localBusy
                         ? null
                         : callbacks.onExtractSelected,
-                    child: const Text('提取所选素材'),
+                    child: Text(l10n.projectEditorScriptsWorkbenchRecommendExtractSelected),
                   ),
                 ],
               ),
               const SizedBox(height: 16),
-              Text('批量新增剧本', style: Theme.of(context).textTheme.labelLarge),
+              Text(
+                l10n.projectEditorScriptsBatchAddTitle,
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
               const SizedBox(height: 8),
               TextField(
                 controller: model.addCountCtrl,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: '数量（1-20）'),
+                decoration: InputDecoration(
+                  labelText: l10n.projectEditorScriptsBatchAddCountLabel,
+                ),
               ),
               const SizedBox(height: 8),
               TextField(
                 controller: model.addPrefixCtrl,
-                decoration: const InputDecoration(labelText: '名称前缀'),
+                decoration: InputDecoration(
+                  labelText: l10n.projectEditorScriptsBatchAddNamePrefixLabel,
+                ),
               ),
               const SizedBox(height: 8),
               TextField(
                 controller: model.addBodyCtrl,
                 minLines: 3,
                 maxLines: 5,
-                decoration: const InputDecoration(labelText: '剧本默认内容'),
+                decoration: InputDecoration(
+                  labelText: l10n.projectEditorScriptsBatchAddContentLabel,
+                ),
               ),
               const SizedBox(height: 8),
               FilledButton.tonal(
                 onPressed: model.localBusy ? null : callbacks.onBatchCreate,
-                child: const Text('批量创建'),
+                child: Text(l10n.projectEditorScriptsWorkbenchDialogBatchCreate),
               ),
               const SizedBox(height: 16),
-              Text('上下文预览', style: Theme.of(context).textTheme.labelLarge),
+              Text(
+                l10n.projectEditorScriptsWorkbenchDialogContextPreviewHeading,
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
               const SizedBox(height: 8),
               if (model.previewRows.isEmpty)
                 Text(
                   model.scriptList.isEmpty
-                      ? '暂无可预览剧本。'
+                      ? l10n.projectEditorScriptsWorkbenchDialogContextPreviewEmpty
                       : model.scriptList
                             .take(6)
                             .map(
                               (script) =>
-                                  '#${script.numericId} ${script.name ?? ''} · 提取状态 ${script.extractState ?? 0}',
+                                  l10n.projectEditorScriptsWorkbenchDialogPreviewRowBrief(
+                                    script.numericId,
+                                    script.name ?? '',
+                                    script.extractState ?? 0,
+                                  ),
                             )
                             .join('\n'),
                   style: Theme.of(context).textTheme.bodySmall,
@@ -247,7 +274,12 @@ class ProjectScriptsWorkbenchDialogView extends StatelessWidget {
                       (row) => Padding(
                         padding: const EdgeInsets.only(bottom: 8),
                         child: Text(
-                          '#${row.numericId} ${row.name ?? ''} · 提取状态 ${row.extractState ?? 0} · 素材 ${summarizeRelatedScriptAssets(row.relatedAssets)}',
+                          l10n.projectEditorScriptsWorkbenchDialogPreviewRowWithAssets(
+                            row.numericId,
+                            row.name ?? '',
+                            row.extractState ?? 0,
+                            summarizeRelatedScriptAssets(l10n, row.relatedAssets),
+                          ),
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ),
@@ -266,7 +298,7 @@ class ProjectScriptsWorkbenchDialogView extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: model.localBusy ? null : callbacks.onClose,
-          child: const Text('关闭'),
+          child: Text(l10n.projectEditorScriptsWorkbenchDialogClose),
         ),
       ],
     );

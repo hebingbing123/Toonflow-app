@@ -46,13 +46,16 @@ void main() {
   });
 
   test('summarizeRelatedScriptAssets compacts long asset list', () {
-    final summary = summarizeRelatedScriptAssets(const [
-      ScriptRelatedAssetBrief(numericId: 1, name: '角色 A'),
-      ScriptRelatedAssetBrief(numericId: 2, name: '场景 B'),
-      ScriptRelatedAssetBrief(numericId: 3, name: '道具 C'),
-      ScriptRelatedAssetBrief(numericId: 4, name: '镜头 D'),
-      ScriptRelatedAssetBrief(numericId: 5, name: '音乐 E'),
-    ]);
+    final summary = summarizeRelatedScriptAssets(
+      _zh,
+      const [
+        ScriptRelatedAssetBrief(numericId: 1, name: '角色 A'),
+        ScriptRelatedAssetBrief(numericId: 2, name: '场景 B'),
+        ScriptRelatedAssetBrief(numericId: 3, name: '道具 C'),
+        ScriptRelatedAssetBrief(numericId: 4, name: '镜头 D'),
+        ScriptRelatedAssetBrief(numericId: 5, name: '音乐 E'),
+      ],
+    );
 
     expect(summary, '角色 A、场景 B、道具 C、镜头 D 等 5 项');
   });

@@ -11572,8 +11572,161 @@ abstract class AppLocalizations {
   /// No description provided for @projectEditorScriptsExtractStateLine.
   ///
   /// In en, this message translates to:
-  /// **'Extract state {state}{errorSuffix}'**
+  /// **'Extract state: {state}{errorSuffix}'**
   String projectEditorScriptsExtractStateLine(int state, String errorSuffix);
+
+  /// No description provided for @scriptEditorRelatedAssetsNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No related assets'**
+  String get scriptEditorRelatedAssetsNone;
+
+  /// No description provided for @scriptEditorRelatedAssetsNameSeparator.
+  ///
+  /// In en, this message translates to:
+  /// **', '**
+  String get scriptEditorRelatedAssetsNameSeparator;
+
+  /// No description provided for @scriptEditorRelatedAssetsOverflow.
+  ///
+  /// In en, this message translates to:
+  /// **'{visibleNames} · {totalCount} items'**
+  String scriptEditorRelatedAssetsOverflow(String visibleNames, int totalCount);
+
+  /// No description provided for @scriptEditorWorkbenchPanelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Script workbench'**
+  String get scriptEditorWorkbenchPanelTitle;
+
+  /// No description provided for @scriptEditorWorkbenchPanelIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically sync get-script-api context and extract state; supports ZIP export, asset extract, and edit-image flows.'**
+  String get scriptEditorWorkbenchPanelIntro;
+
+  /// No description provided for @scriptEditorWorkbenchRelatedAssetsLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Related assets: {assets}'**
+  String scriptEditorWorkbenchRelatedAssetsLine(String assets);
+
+  /// No description provided for @projectEditorScriptsSingleWorkbenchRecentExtractError.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent extract error: {reason}'**
+  String projectEditorScriptsSingleWorkbenchRecentExtractError(String reason);
+
+  /// No description provided for @projectEditorScriptsWorkbenchDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Script batch workbench'**
+  String get projectEditorScriptsWorkbenchDialogTitle;
+
+  /// No description provided for @projectEditorScriptsWorkbenchDialogNameFilterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter scripts by name'**
+  String get projectEditorScriptsWorkbenchDialogNameFilterLabel;
+
+  /// No description provided for @projectEditorScriptsWorkbenchDialogNameFilterHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'When calling POST …/projects/<project id>/scripts/get-script-api, filter by name; leave empty to load full context.'**
+  String get projectEditorScriptsWorkbenchDialogNameFilterHelper;
+
+  /// No description provided for @projectEditorScriptsWorkbenchDialogReadScriptContext.
+  ///
+  /// In en, this message translates to:
+  /// **'Read script context'**
+  String get projectEditorScriptsWorkbenchDialogReadScriptContext;
+
+  /// No description provided for @projectEditorScriptsWorkbenchDialogUseCurrentPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Use current preview'**
+  String get projectEditorScriptsWorkbenchDialogUseCurrentPreview;
+
+  /// No description provided for @projectEditorScriptsWorkbenchDialogUseAllScripts.
+  ///
+  /// In en, this message translates to:
+  /// **'Use all project scripts'**
+  String get projectEditorScriptsWorkbenchDialogUseAllScripts;
+
+  /// No description provided for @projectEditorScriptsWorkbenchDialogReloadProjectScripts.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload project scripts'**
+  String get projectEditorScriptsWorkbenchDialogReloadProjectScripts;
+
+  /// No description provided for @projectEditorScriptsWorkbenchDialogTargetScriptIdsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Target script numeric ids'**
+  String get projectEditorScriptsWorkbenchDialogTargetScriptIdsLabel;
+
+  /// No description provided for @projectEditorScriptsWorkbenchDialogTargetScriptIdsHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Separate with commas, spaces, or newlines; batch export, polling, and asset extract use this list.'**
+  String get projectEditorScriptsWorkbenchDialogTargetScriptIdsHelper;
+
+  /// No description provided for @projectEditorScriptsWorkbenchDialogExtractGroupSizeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Asset extract group size'**
+  String get projectEditorScriptsWorkbenchDialogExtractGroupSizeLabel;
+
+  /// No description provided for @projectEditorScriptsWorkbenchDialogExtractGroupSizeHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave empty for backend default; used for extract-assets when set.'**
+  String get projectEditorScriptsWorkbenchDialogExtractGroupSizeHelper;
+
+  /// No description provided for @projectEditorScriptsWorkbenchDialogContextPreviewHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Context preview'**
+  String get projectEditorScriptsWorkbenchDialogContextPreviewHeading;
+
+  /// No description provided for @projectEditorScriptsWorkbenchDialogContextPreviewEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to preview yet.'**
+  String get projectEditorScriptsWorkbenchDialogContextPreviewEmpty;
+
+  /// No description provided for @projectEditorScriptsWorkbenchDialogPreviewRowBrief.
+  ///
+  /// In en, this message translates to:
+  /// **'#{numericId} {name} · extract state {extractState}'**
+  String projectEditorScriptsWorkbenchDialogPreviewRowBrief(
+    int numericId,
+    String name,
+    int extractState,
+  );
+
+  /// No description provided for @projectEditorScriptsWorkbenchDialogPreviewRowWithAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'#{numericId} {name} · extract state {extractState} · assets {assets}'**
+  String projectEditorScriptsWorkbenchDialogPreviewRowWithAssets(
+    int numericId,
+    String name,
+    int extractState,
+    String assets,
+  );
+
+  /// No description provided for @projectEditorScriptsWorkbenchDialogBatchCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch create'**
+  String get projectEditorScriptsWorkbenchDialogBatchCreate;
+
+  /// No description provided for @projectEditorScriptsWorkbenchDialogClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get projectEditorScriptsWorkbenchDialogClose;
 
   /// No description provided for @projectEditorAssetSummaryProductionEmpty.
   ///

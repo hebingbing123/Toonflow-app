@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:openflow_app/l10n/app_localizations.dart';
+import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/script_editor/support.dart';
 import 'package:openflow_app/script_editor/workbench_view.dart';
 import 'package:openflow_app/rust_api.dart';
+
+final _zh = AppLocalizationsZh();
 
 ScriptWorkbenchPanelViewModel buildModel({
   ScriptWorkbenchDiagnosis? diagnosis,
@@ -10,7 +15,7 @@ ScriptWorkbenchPanelViewModel buildModel({
     ScriptRelatedAssetBrief(numericId: 1, name: '角色 A'),
     ScriptRelatedAssetBrief(numericId: 2, name: '场景 B'),
   ],
-  String? contextLine = '已加载脚本上下文：素材 2 项',
+  String? contextLine,
   bool loadingContext = false,
   bool runningAction = false,
   String? exportLine = '导出完成：1 个剧本，ZIP 16 KB。',
@@ -21,7 +26,8 @@ ScriptWorkbenchPanelViewModel buildModel({
   VoidCallback? recommendedAction,
 }) {
   return ScriptWorkbenchPanelViewModel(
-    contextLine: contextLine,
+    contextLine:
+        contextLine ?? _zh.projectEditorScriptsSingleWorkbenchContextLoaded(2),
     loadingContext: loadingContext,
     runningAction: runningAction,
     scriptContext: ScriptWorkbenchDetailRow(
@@ -82,28 +88,58 @@ Finder disabledButtonWithText(String text) {
 }
 
 void main() {
+  Widget appWithL10n(Widget child) => MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
+        home: Scaffold(body: child),
+      );
+
   testWidgets('script workbench panel view renders diagnosis and summaries', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: ScriptWorkbenchPanelView(
-            model: buildModel(),
-            callbacks: buildCallbacks(),
-          ),
+      appWithL10n(
+        ScriptWorkbenchPanelView(
+          model: buildModel(),
+          callbacks: buildCallbacks(),
         ),
       ),
     );
 
-    expect(find.text('脚本工作台'), findsOneWidget);
+    expect(find.text(_zh.scriptEditorWorkbenchPanelTitle), findsOneWidget);
     expect(find.text('当前剧本已有关联素材。'), findsOneWidget);
-    expect(find.text('进入编辑图片工作台'), findsOneWidget);
-    expect(find.textContaining('关联素材：角色 A、场景 B'), findsOneWidget);
-    expect(find.text('导出当前剧本 ZIP'), findsOneWidget);
-    expect(find.text('轮询提取状态'), findsOneWidget);
-    expect(find.text('提取当前剧本素材'), findsOneWidget);
-    expect(find.text('编辑图片工作台'), findsOneWidget);
+    expect(
+      find.textContaining(
+        _zh.scriptEditorWorkbenchRelatedAssetsLine('角色 A、场景 B'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.text(_zh.projectEditorScriptsSingleWorkbenchRecommendExportScriptZip),
+      findsOneWidget,
+    );
+    expect(
+      find.text(_zh.projectEditorScriptsSingleWorkbenchRecommendPollExtractState),
+      findsOneWidget,
+    );
+    expect(
+      find.text(
+        _zh.projectEditorScriptsSingleWorkbenchRecommendStartExtractAssets,
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.text(
+        _zh.projectEditorScriptsSingleWorkbenchRecommendOpenEditImageWorkbench,
+      ),
+      findsNWidgets(2),
+    );
     expect(find.text('导出完成：1 个剧本，ZIP 16 KB。'), findsOneWidget);
   });
 
@@ -111,34 +147,55 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: ScriptWorkbenchPanelView(
-            model: buildModel(
-              loadingContext: true,
-              runningAction: true,
-              recommendedActionLabel: '处理中…',
-              recommendedAction: null,
-            ),
-            callbacks: const ScriptWorkbenchPanelViewCallbacks(
-              onRefreshWorkbench: null,
-              onExportCurrentScript: null,
-              onPollExtractState: null,
-              onStartExtractAssets: null,
-              onOpenEditImageWorkbench: null,
-            ),
+      appWithL10n(
+        ScriptWorkbenchPanelView(
+          model: buildModel(
+            loadingContext: true,
+            runningAction: true,
+            recommendedActionLabel: '处理中…',
+            recommendedAction: null,
+          ),
+          callbacks: const ScriptWorkbenchPanelViewCallbacks(
+            onRefreshWorkbench: null,
+            onExportCurrentScript: null,
+            onPollExtractState: null,
+            onStartExtractAssets: null,
+            onOpenEditImageWorkbench: null,
           ),
         ),
       ),
     );
 
     expect(find.byType(LinearProgressIndicator), findsOneWidget);
-    expect(disabledButtonWithText('同步中…'), findsOneWidget);
+    expect(
+      disabledButtonWithText(_zh.projectEditorScriptsSingleWorkbenchSyncBusy),
+      findsOneWidget,
+    );
     expect(disabledButtonWithText('处理中…'), findsOneWidget);
-    expect(disabledButtonWithText('导出当前剧本 ZIP'), findsOneWidget);
-    expect(disabledButtonWithText('轮询提取状态'), findsOneWidget);
-    expect(disabledButtonWithText('提取当前剧本素材'), findsOneWidget);
-    expect(disabledButtonWithText('编辑图片工作台'), findsOneWidget);
+    expect(
+      disabledButtonWithText(
+        _zh.projectEditorScriptsSingleWorkbenchRecommendExportScriptZip,
+      ),
+      findsOneWidget,
+    );
+    expect(
+      disabledButtonWithText(
+        _zh.projectEditorScriptsSingleWorkbenchRecommendPollExtractState,
+      ),
+      findsOneWidget,
+    );
+    expect(
+      disabledButtonWithText(
+        _zh.projectEditorScriptsSingleWorkbenchRecommendStartExtractAssets,
+      ),
+      findsOneWidget,
+    );
+    expect(
+      disabledButtonWithText(
+        _zh.projectEditorScriptsSingleWorkbenchRecommendOpenEditImageWorkbench,
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('script workbench panel view forwards action callbacks', (
@@ -152,33 +209,61 @@ void main() {
     var recommendedCalls = 0;
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: ScriptWorkbenchPanelView(
-            model: buildModel(recommendedAction: () => recommendedCalls += 1),
-            callbacks: buildCallbacks(
-              onRefreshWorkbench: () => refreshCalls += 1,
-              onExportCurrentScript: () => exportCalls += 1,
-              onPollExtractState: () => pollCalls += 1,
-              onStartExtractAssets: () => extractCalls += 1,
-              onOpenEditImageWorkbench: () => editCalls += 1,
-            ),
+      appWithL10n(
+        ScriptWorkbenchPanelView(
+          model: buildModel(recommendedAction: () => recommendedCalls += 1),
+          callbacks: buildCallbacks(
+            onRefreshWorkbench: () => refreshCalls += 1,
+            onExportCurrentScript: () => exportCalls += 1,
+            onPollExtractState: () => pollCalls += 1,
+            onStartExtractAssets: () => extractCalls += 1,
+            onOpenEditImageWorkbench: () => editCalls += 1,
           ),
         ),
       ),
     );
 
-    await tester.tap(find.widgetWithText(TextButton, '同步工作台'));
+    await tester.tap(
+      find.widgetWithText(
+        TextButton,
+        _zh.projectEditorScriptsSingleWorkbenchRecommendSyncWorkbench,
+      ),
+    );
     await tester.pump();
-    await tester.tap(find.widgetWithText(FilledButton, '进入编辑图片工作台'));
+    await tester.tap(
+      find.widgetWithText(
+        FilledButton,
+        _zh.projectEditorScriptsSingleWorkbenchRecommendOpenEditImageWorkbench,
+      ),
+    );
     await tester.pump();
-    await tester.tap(find.widgetWithText(FilledButton, '导出当前剧本 ZIP'));
+    await tester.tap(
+      find.widgetWithText(
+        FilledButton,
+        _zh.projectEditorScriptsSingleWorkbenchRecommendExportScriptZip,
+      ),
+    );
     await tester.pump();
-    await tester.tap(find.widgetWithText(TextButton, '轮询提取状态'));
+    await tester.tap(
+      find.widgetWithText(
+        TextButton,
+        _zh.projectEditorScriptsSingleWorkbenchRecommendPollExtractState,
+      ),
+    );
     await tester.pump();
-    await tester.tap(find.widgetWithText(TextButton, '提取当前剧本素材'));
+    await tester.tap(
+      find.widgetWithText(
+        TextButton,
+        _zh.projectEditorScriptsSingleWorkbenchRecommendStartExtractAssets,
+      ),
+    );
     await tester.pump();
-    await tester.tap(find.widgetWithText(TextButton, '编辑图片工作台'));
+    await tester.tap(
+      find.widgetWithText(
+        TextButton,
+        _zh.projectEditorScriptsSingleWorkbenchRecommendOpenEditImageWorkbench,
+      ),
+    );
     await tester.pump();
 
     expect(refreshCalls, 1);

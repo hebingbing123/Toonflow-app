@@ -5383,7 +5383,7 @@
   "projectEditorScriptsSingleWorkbenchFollowUpEditClosedSynced": "Edit-image workbench closed; synced script context and extract state.",
   "projectEditorScriptsSingleWorkbenchSyncBusy": "Syncing…",
   "projectEditorScriptsExtractStateEmpty": "Extract state is empty: usually idle or completed.",
-  "projectEditorScriptsExtractStateLine": "Extract state {state}{errorSuffix}",
+  "projectEditorScriptsExtractStateLine": "Extract state: {state}{errorSuffix}",
   "@projectEditorScriptsExtractStateLine": {
     "placeholders": {
       "state": {
@@ -5394,6 +5394,83 @@
       }
     }
   },
+  "scriptEditorRelatedAssetsNone": "No related assets",
+  "scriptEditorRelatedAssetsNameSeparator": ", ",
+  "scriptEditorRelatedAssetsOverflow": "{visibleNames} · {totalCount} items",
+  "@scriptEditorRelatedAssetsOverflow": {
+    "placeholders": {
+      "visibleNames": {
+        "type": "String"
+      },
+      "totalCount": {
+        "type": "int"
+      }
+    }
+  },
+  "scriptEditorWorkbenchPanelTitle": "Script workbench",
+  "scriptEditorWorkbenchPanelIntro": "Automatically sync get-script-api context and extract state; supports ZIP export, asset extract, and edit-image flows.",
+  "scriptEditorWorkbenchRelatedAssetsLine": "Related assets: {assets}",
+  "@scriptEditorWorkbenchRelatedAssetsLine": {
+    "placeholders": {
+      "assets": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorScriptsSingleWorkbenchRecentExtractError": "Recent extract error: {reason}",
+  "@projectEditorScriptsSingleWorkbenchRecentExtractError": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorScriptsWorkbenchDialogTitle": "Script batch workbench",
+  "projectEditorScriptsWorkbenchDialogNameFilterLabel": "Filter scripts by name",
+  "projectEditorScriptsWorkbenchDialogNameFilterHelper": "When calling POST …/projects/<project id>/scripts/get-script-api, filter by name; leave empty to load full context.",
+  "projectEditorScriptsWorkbenchDialogReadScriptContext": "Read script context",
+  "projectEditorScriptsWorkbenchDialogUseCurrentPreview": "Use current preview",
+  "projectEditorScriptsWorkbenchDialogUseAllScripts": "Use all project scripts",
+  "projectEditorScriptsWorkbenchDialogReloadProjectScripts": "Reload project scripts",
+  "projectEditorScriptsWorkbenchDialogTargetScriptIdsLabel": "Target script numeric ids",
+  "projectEditorScriptsWorkbenchDialogTargetScriptIdsHelper": "Separate with commas, spaces, or newlines; batch export, polling, and asset extract use this list.",
+  "projectEditorScriptsWorkbenchDialogExtractGroupSizeLabel": "Asset extract group size",
+  "projectEditorScriptsWorkbenchDialogExtractGroupSizeHelper": "Leave empty for backend default; used for extract-assets when set.",
+  "projectEditorScriptsWorkbenchDialogContextPreviewHeading": "Context preview",
+  "projectEditorScriptsWorkbenchDialogContextPreviewEmpty": "Nothing to preview yet.",
+  "projectEditorScriptsWorkbenchDialogPreviewRowBrief": "#{numericId} {name} · extract state {extractState}",
+  "@projectEditorScriptsWorkbenchDialogPreviewRowBrief": {
+    "placeholders": {
+      "numericId": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      },
+      "extractState": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorScriptsWorkbenchDialogPreviewRowWithAssets": "#{numericId} {name} · extract state {extractState} · assets {assets}",
+  "@projectEditorScriptsWorkbenchDialogPreviewRowWithAssets": {
+    "placeholders": {
+      "numericId": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      },
+      "extractState": {
+        "type": "int"
+      },
+      "assets": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorScriptsWorkbenchDialogBatchCreate": "Batch create",
+  "projectEditorScriptsWorkbenchDialogClose": "Close",
   "projectEditorAssetSummaryProductionEmpty": "Production asset data is empty",
   "projectEditorAssetSummaryProductionLine": "Production assets {total} items · {typesLine} · Sample: {sampleLine}",
   "@projectEditorAssetSummaryProductionLine": {

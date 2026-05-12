@@ -1,6 +1,7 @@
 part of 'support.dart';
 
 String summarizeRelatedScriptAssets(
+  AppLocalizations l10n,
   Iterable<ScriptRelatedAssetBrief> assets, {
   int maxItems = 4,
 }) {
@@ -9,13 +10,14 @@ String summarizeRelatedScriptAssets(
       .where((name) => name.isNotEmpty)
       .toList(growable: false);
   if (trimmed.isEmpty) {
-    return '未关联素材';
+    return l10n.scriptEditorRelatedAssetsNone;
   }
-  final visible = trimmed.take(maxItems).join('、');
+  final sep = l10n.scriptEditorRelatedAssetsNameSeparator;
+  final visible = trimmed.take(maxItems).join(sep);
   if (trimmed.length <= maxItems) {
     return visible;
   }
-  return '$visible 等 ${trimmed.length} 项';
+  return l10n.scriptEditorRelatedAssetsOverflow(visible, trimmed.length);
 }
 
 String formatBinarySize(int bytes) {

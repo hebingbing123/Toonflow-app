@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../rust_api.dart';
 import 'support.dart';
 
@@ -64,6 +65,7 @@ class ScriptWorkbenchPanelView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final outline = theme.colorScheme.outline;
     return Container(
@@ -77,16 +79,24 @@ class ScriptWorkbenchPanelView extends StatelessWidget {
         children: [
           Row(
             children: [
-              Expanded(child: Text('脚本工作台', style: theme.textTheme.titleSmall)),
+              Expanded(
+                child: Text(
+                  l10n.scriptEditorWorkbenchPanelTitle,
+                  style: theme.textTheme.titleSmall,
+                ),
+              ),
               TextButton(
                 onPressed: callbacks.onRefreshWorkbench,
-                child: Text(model.loadingContext ? '同步中…' : '同步工作台'),
+                child: Text(
+                  model.loadingContext
+                      ? l10n.projectEditorScriptsSingleWorkbenchSyncBusy
+                      : l10n.projectEditorScriptsSingleWorkbenchRecommendSyncWorkbench,
+                ),
               ),
             ],
           ),
           Text(
-            model.contextLine ??
-                '自动同步 get-script-api 上下文与提取状态，并支持导出 ZIP、发起素材抽取与编辑图片流程。',
+            model.contextLine ?? l10n.scriptEditorWorkbenchPanelIntro,
             style: theme.textTheme.bodySmall?.copyWith(color: outline),
           ),
           const SizedBox(height: 12),
@@ -125,15 +135,21 @@ class ScriptWorkbenchPanelView extends StatelessWidget {
           else ...[
             Text(
               model.scriptContext == null
-                  ? '还没有当前剧本的上下文快照。'
-                  : '关联素材：${summarizeRelatedScriptAssets(model.relatedAssets)}',
+                  ? l10n.projectEditorScriptsDiagnosisSingleNoSnapshotSummary
+                  : l10n.scriptEditorWorkbenchRelatedAssetsLine(
+                      summarizeRelatedScriptAssets(l10n, model.relatedAssets),
+                    ),
               style: theme.textTheme.bodySmall,
             ),
             if (model.scriptContext != null) ...[
               const SizedBox(height: 6),
               Text(
-                '提取状态：${model.scriptContext?.extractState ?? 0}'
-                '${model.errorReason.isEmpty ? '' : ' · ${model.errorReason}'}',
+                l10n.projectEditorScriptsExtractStateLine(
+                  model.scriptContext?.extractState ?? 0,
+                  model.errorReason.isEmpty
+                      ? ''
+                      : ' · ${model.errorReason}',
+                ),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: model.errorReason.isEmpty
                       ? outline
@@ -149,19 +165,19 @@ class ScriptWorkbenchPanelView extends StatelessWidget {
             children: [
               FilledButton.tonal(
                 onPressed: callbacks.onExportCurrentScript,
-                child: const Text('导出当前剧本 ZIP'),
+                child: Text(l10n.projectEditorScriptsSingleWorkbenchRecommendExportScriptZip),
               ),
               TextButton(
                 onPressed: callbacks.onPollExtractState,
-                child: const Text('轮询提取状态'),
+                child: Text(l10n.projectEditorScriptsSingleWorkbenchRecommendPollExtractState),
               ),
               TextButton(
                 onPressed: callbacks.onStartExtractAssets,
-                child: const Text('提取当前剧本素材'),
+                child: Text(l10n.projectEditorScriptsSingleWorkbenchRecommendStartExtractAssets),
               ),
               TextButton(
                 onPressed: callbacks.onOpenEditImageWorkbench,
-                child: const Text('编辑图片工作台'),
+                child: Text(l10n.projectEditorScriptsSingleWorkbenchRecommendOpenEditImageWorkbench),
               ),
             ],
           ),
@@ -181,7 +197,9 @@ class ScriptWorkbenchPanelView extends StatelessWidget {
               (model.extractStateRow!.errorReason ?? '').trim().isNotEmpty) ...[
             const SizedBox(height: 8),
             Text(
-              '最近提取错误：${model.extractStateRow!.errorReason!.trim()}',
+              l10n.projectEditorScriptsSingleWorkbenchRecentExtractError(
+                model.extractStateRow!.errorReason!.trim(),
+              ),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.error,
               ),

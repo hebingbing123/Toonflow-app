@@ -5383,7 +5383,7 @@
   "projectEditorScriptsSingleWorkbenchFollowUpEditClosedSynced": "编辑图片工作台已关闭，已同步脚本上下文与提取状态。",
   "projectEditorScriptsSingleWorkbenchSyncBusy": "同步中…",
   "projectEditorScriptsExtractStateEmpty": "当前脚本提取状态为空：通常表示 idle 或已完成。",
-  "projectEditorScriptsExtractStateLine": "提取状态 {state}{errorSuffix}",
+  "projectEditorScriptsExtractStateLine": "提取状态：{state}{errorSuffix}",
   "@projectEditorScriptsExtractStateLine": {
     "placeholders": {
       "state": {
@@ -5394,6 +5394,83 @@
       }
     }
   },
+  "scriptEditorRelatedAssetsNone": "未关联素材",
+  "scriptEditorRelatedAssetsNameSeparator": "、",
+  "scriptEditorRelatedAssetsOverflow": "{visibleNames} 等 {totalCount} 项",
+  "@scriptEditorRelatedAssetsOverflow": {
+    "placeholders": {
+      "visibleNames": {
+        "type": "String"
+      },
+      "totalCount": {
+        "type": "int"
+      }
+    }
+  },
+  "scriptEditorWorkbenchPanelTitle": "脚本工作台",
+  "scriptEditorWorkbenchPanelIntro": "自动同步 get-script-api 上下文与提取状态，并支持导出 ZIP、发起素材抽取与编辑图片流程。",
+  "scriptEditorWorkbenchRelatedAssetsLine": "关联素材：{assets}",
+  "@scriptEditorWorkbenchRelatedAssetsLine": {
+    "placeholders": {
+      "assets": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorScriptsSingleWorkbenchRecentExtractError": "最近提取错误：{reason}",
+  "@projectEditorScriptsSingleWorkbenchRecentExtractError": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorScriptsWorkbenchDialogTitle": "剧本批量工作台",
+  "projectEditorScriptsWorkbenchDialogNameFilterLabel": "剧本名称筛选",
+  "projectEditorScriptsWorkbenchDialogNameFilterHelper": "读取 POST …/projects/<project id>/scripts/get-script-api 时按名称过滤，可留空读取全量上下文。",
+  "projectEditorScriptsWorkbenchDialogReadScriptContext": "读取剧本上下文",
+  "projectEditorScriptsWorkbenchDialogUseCurrentPreview": "使用当前预览",
+  "projectEditorScriptsWorkbenchDialogUseAllScripts": "使用全部剧本",
+  "projectEditorScriptsWorkbenchDialogReloadProjectScripts": "刷新项目剧本",
+  "projectEditorScriptsWorkbenchDialogTargetScriptIdsLabel": "目标剧本 numeric ID",
+  "projectEditorScriptsWorkbenchDialogTargetScriptIdsHelper": "支持逗号、空格或换行分隔；批量导出、轮询和素材抽取都使用这里的列表。",
+  "projectEditorScriptsWorkbenchDialogExtractGroupSizeLabel": "素材抽取 group size",
+  "projectEditorScriptsWorkbenchDialogExtractGroupSizeHelper": "留空则沿用后端默认分组；设置后用于 extract-assets。",
+  "projectEditorScriptsWorkbenchDialogContextPreviewHeading": "上下文预览",
+  "projectEditorScriptsWorkbenchDialogContextPreviewEmpty": "暂无可预览剧本。",
+  "projectEditorScriptsWorkbenchDialogPreviewRowBrief": "#{numericId} {name} · 提取状态 {extractState}",
+  "@projectEditorScriptsWorkbenchDialogPreviewRowBrief": {
+    "placeholders": {
+      "numericId": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      },
+      "extractState": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorScriptsWorkbenchDialogPreviewRowWithAssets": "#{numericId} {name} · 提取状态 {extractState} · 素材 {assets}",
+  "@projectEditorScriptsWorkbenchDialogPreviewRowWithAssets": {
+    "placeholders": {
+      "numericId": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      },
+      "extractState": {
+        "type": "int"
+      },
+      "assets": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorScriptsWorkbenchDialogBatchCreate": "批量创建",
+  "projectEditorScriptsWorkbenchDialogClose": "关闭",
   "projectEditorAssetSummaryProductionEmpty": "production 资产数据为空",
   "projectEditorAssetSummaryProductionLine": "production 资产 {total} 条 · {typesLine} · 示例：{sampleLine}",
   "@projectEditorAssetSummaryProductionLine": {

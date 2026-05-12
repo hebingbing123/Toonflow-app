@@ -6941,8 +6941,111 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String projectEditorScriptsExtractStateLine(int state, String errorSuffix) {
-    return '提取状态 $state$errorSuffix';
+    return '提取状态：$state$errorSuffix';
   }
+
+  @override
+  String get scriptEditorRelatedAssetsNone => '未关联素材';
+
+  @override
+  String get scriptEditorRelatedAssetsNameSeparator => '、';
+
+  @override
+  String scriptEditorRelatedAssetsOverflow(
+    String visibleNames,
+    int totalCount,
+  ) {
+    return '$visibleNames 等 $totalCount 项';
+  }
+
+  @override
+  String get scriptEditorWorkbenchPanelTitle => '脚本工作台';
+
+  @override
+  String get scriptEditorWorkbenchPanelIntro =>
+      '自动同步 get-script-api 上下文与提取状态，并支持导出 ZIP、发起素材抽取与编辑图片流程。';
+
+  @override
+  String scriptEditorWorkbenchRelatedAssetsLine(String assets) {
+    return '关联素材：$assets';
+  }
+
+  @override
+  String projectEditorScriptsSingleWorkbenchRecentExtractError(String reason) {
+    return '最近提取错误：$reason';
+  }
+
+  @override
+  String get projectEditorScriptsWorkbenchDialogTitle => '剧本批量工作台';
+
+  @override
+  String get projectEditorScriptsWorkbenchDialogNameFilterLabel => '剧本名称筛选';
+
+  @override
+  String get projectEditorScriptsWorkbenchDialogNameFilterHelper =>
+      '读取 POST …/projects/<project id>/scripts/get-script-api 时按名称过滤，可留空读取全量上下文。';
+
+  @override
+  String get projectEditorScriptsWorkbenchDialogReadScriptContext => '读取剧本上下文';
+
+  @override
+  String get projectEditorScriptsWorkbenchDialogUseCurrentPreview => '使用当前预览';
+
+  @override
+  String get projectEditorScriptsWorkbenchDialogUseAllScripts => '使用全部剧本';
+
+  @override
+  String get projectEditorScriptsWorkbenchDialogReloadProjectScripts =>
+      '刷新项目剧本';
+
+  @override
+  String get projectEditorScriptsWorkbenchDialogTargetScriptIdsLabel =>
+      '目标剧本 numeric ID';
+
+  @override
+  String get projectEditorScriptsWorkbenchDialogTargetScriptIdsHelper =>
+      '支持逗号、空格或换行分隔；批量导出、轮询和素材抽取都使用这里的列表。';
+
+  @override
+  String get projectEditorScriptsWorkbenchDialogExtractGroupSizeLabel =>
+      '素材抽取 group size';
+
+  @override
+  String get projectEditorScriptsWorkbenchDialogExtractGroupSizeHelper =>
+      '留空则沿用后端默认分组；设置后用于 extract-assets。';
+
+  @override
+  String get projectEditorScriptsWorkbenchDialogContextPreviewHeading =>
+      '上下文预览';
+
+  @override
+  String get projectEditorScriptsWorkbenchDialogContextPreviewEmpty =>
+      '暂无可预览剧本。';
+
+  @override
+  String projectEditorScriptsWorkbenchDialogPreviewRowBrief(
+    int numericId,
+    String name,
+    int extractState,
+  ) {
+    return '#$numericId $name · 提取状态 $extractState';
+  }
+
+  @override
+  String projectEditorScriptsWorkbenchDialogPreviewRowWithAssets(
+    int numericId,
+    String name,
+    int extractState,
+    String assets,
+  ) {
+    return '#$numericId $name · 提取状态 $extractState · 素材 $assets';
+  }
+
+  @override
+  String get projectEditorScriptsWorkbenchDialogBatchCreate => '批量创建';
+
+  @override
+  String get projectEditorScriptsWorkbenchDialogClose => '关闭';
 
   @override
   String get projectEditorAssetSummaryProductionEmpty => 'production 资产数据为空';
