@@ -9,8 +9,10 @@ extension _HomePageProjectEditorDialogContentScripts on _HomePageState {
     required _ProjectEditorDialogState dialogState,
     required List<ScriptBrief> scriptList,
   }) {
+    final l10n = AppLocalizations.of(ctx)!;
     return buildProjectScriptsSection(
       ctx: ctx,
+      l10n: l10n,
       setDialogState: setDialogState,
       token: token,
       project: p,
@@ -30,6 +32,7 @@ extension _HomePageProjectEditorDialogContentScripts on _HomePageState {
       ),
       openWorkbench: () => openProjectScriptsWorkbenchDialog(
         ctx: ctx,
+        l10n: l10n,
         setDialogState: setDialogState,
         token: token,
         project: p,

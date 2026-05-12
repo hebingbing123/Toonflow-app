@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/script_editor/support.dart';
 import 'package:openflow_app/rust_api.dart';
 
@@ -290,6 +291,7 @@ void main() {
   );
 
   test('buildScriptBatchWorkbenchFollowUp appends next step guidance', () {
+    final l10n = AppLocalizationsZh();
     final diagnosis = diagnoseScriptBatchWorkbench(
       selectedIds: const [3, 4],
       scripts: const [
@@ -301,10 +303,11 @@ void main() {
 
     expect(
       buildScriptBatchWorkbenchFollowUp(
+        l10n,
         actionSummary: '已提交 2 条剧本素材抽取。',
         diagnosis: diagnosis,
       ),
-      contains('下一步建议：轮询所选状态。'),
+      contains('下一步建议：轮询所选状态'),
     );
   });
 

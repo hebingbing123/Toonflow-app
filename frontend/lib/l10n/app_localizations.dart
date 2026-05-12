@@ -11123,6 +11123,201 @@ abstract class AppLocalizations {
   /// **'Chapter body'**
   String get projectEditorNovelsWorkbenchImportPreviewChapterBodyField;
 
+  /// No description provided for @projectEditorScriptsWorkbenchBatchFollowUpLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{actionSummary} Suggested next step: {nextAction}. {detail}'**
+  String projectEditorScriptsWorkbenchBatchFollowUpLine(
+    String actionSummary,
+    String nextAction,
+    String detail,
+  );
+
+  /// No description provided for @projectEditorScriptsWorkbenchRecommendSyncContext.
+  ///
+  /// In en, this message translates to:
+  /// **'Read script context'**
+  String get projectEditorScriptsWorkbenchRecommendSyncContext;
+
+  /// No description provided for @projectEditorScriptsWorkbenchRecommendPollSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Poll selected extract states'**
+  String get projectEditorScriptsWorkbenchRecommendPollSelected;
+
+  /// No description provided for @projectEditorScriptsWorkbenchRecommendExtractSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Extract assets for selected scripts'**
+  String get projectEditorScriptsWorkbenchRecommendExtractSelected;
+
+  /// No description provided for @projectEditorScriptsWorkbenchRecommendExportSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Export selected scripts'**
+  String get projectEditorScriptsWorkbenchRecommendExportSelected;
+
+  /// No description provided for @projectEditorScriptsWorkbenchReloadEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh finished; no scripts in this project.'**
+  String get projectEditorScriptsWorkbenchReloadEmpty;
+
+  /// No description provided for @projectEditorScriptsWorkbenchReloadCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh finished; loaded {count} scripts.'**
+  String projectEditorScriptsWorkbenchReloadCount(int count);
+
+  /// No description provided for @projectEditorScriptsWorkbenchReadContextEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Context read finished; no matching scripts.'**
+  String get projectEditorScriptsWorkbenchReadContextEmpty;
+
+  /// No description provided for @projectEditorScriptsWorkbenchReadContextCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Loaded {count} script context rows.'**
+  String projectEditorScriptsWorkbenchReadContextCount(int count);
+
+  /// No description provided for @projectEditorScriptsWorkbenchErrorNeedScriptIds.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter at least one script id.'**
+  String get projectEditorScriptsWorkbenchErrorNeedScriptIds;
+
+  /// No description provided for @projectEditorScriptsWorkbenchExportSelectedSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Exported {count} scripts, ZIP {zipSize}.'**
+  String projectEditorScriptsWorkbenchExportSelectedSummary(
+    int count,
+    String zipSize,
+  );
+
+  /// No description provided for @projectEditorScriptsWorkbenchPollExtractIdleOrComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'All idle or completed'**
+  String get projectEditorScriptsWorkbenchPollExtractIdleOrComplete;
+
+  /// No description provided for @projectEditorScriptsWorkbenchPollSelectedSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Polled {count} scripts for extract state: {sample}'**
+  String projectEditorScriptsWorkbenchPollSelectedSummary(
+    int count,
+    String sample,
+  );
+
+  /// No description provided for @projectEditorScriptsWorkbenchExtractSubmittedSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted asset extract for {count} scripts: {status} · {message}'**
+  String projectEditorScriptsWorkbenchExtractSubmittedSelected(
+    int count,
+    String status,
+    String message,
+  );
+
+  /// No description provided for @projectEditorScriptsWorkbenchBatchCreateCountInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Count must be an integer between 1 and 20.'**
+  String get projectEditorScriptsWorkbenchBatchCreateCountInvalid;
+
+  /// No description provided for @projectEditorScriptsWorkbenchDefaultNewScriptName.
+  ///
+  /// In en, this message translates to:
+  /// **'New script'**
+  String get projectEditorScriptsWorkbenchDefaultNewScriptName;
+
+  /// No description provided for @projectEditorScriptsWorkbenchBatchCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch created {inserted} scripts.'**
+  String projectEditorScriptsWorkbenchBatchCreated(int inserted);
+
+  /// No description provided for @projectEditorScriptsWorkbenchCreatedScriptFollowUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Created script #{id}.'**
+  String projectEditorScriptsWorkbenchCreatedScriptFollowUp(int id);
+
+  /// No description provided for @projectEditorScriptsWorkbenchCreatedScriptSnackBar.
+  ///
+  /// In en, this message translates to:
+  /// **'Created script #{id}'**
+  String projectEditorScriptsWorkbenchCreatedScriptSnackBar(int id);
+
+  /// No description provided for @projectEditorScriptsWorkbenchExportAllFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Export failed: {error}'**
+  String projectEditorScriptsWorkbenchExportAllFailed(String error);
+
+  /// No description provided for @projectEditorScriptsWorkbenchPollAllFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Polling extract state failed: {error}'**
+  String projectEditorScriptsWorkbenchPollAllFailed(String error);
+
+  /// No description provided for @projectEditorScriptsWorkbenchExtractAllFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitting asset extract failed: {error}'**
+  String projectEditorScriptsWorkbenchExtractAllFailed(String error);
+
+  /// No description provided for @projectEditorScriptsWorkbenchExportAllSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Exported {count} scripts, ZIP {zipSize}.'**
+  String projectEditorScriptsWorkbenchExportAllSummary(
+    int count,
+    String zipSize,
+  );
+
+  /// No description provided for @projectEditorScriptsWorkbenchPollAllSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Polled {count} scripts for extract state: {sample}'**
+  String projectEditorScriptsWorkbenchPollAllSummary(int count, String sample);
+
+  /// No description provided for @projectEditorScriptsWorkbenchExtractAllSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted asset extract for {count} scripts: {status} · {message}'**
+  String projectEditorScriptsWorkbenchExtractAllSummary(
+    int count,
+    String status,
+    String message,
+  );
+
+  /// No description provided for @projectEditorScriptsWorkbenchOverviewOpenWorkbenchReadContext.
+  ///
+  /// In en, this message translates to:
+  /// **'Open workbench to read context'**
+  String get projectEditorScriptsWorkbenchOverviewOpenWorkbenchReadContext;
+
+  /// No description provided for @projectEditorScriptsWorkbenchOverviewPollAllExtract.
+  ///
+  /// In en, this message translates to:
+  /// **'Poll extract state for all'**
+  String get projectEditorScriptsWorkbenchOverviewPollAllExtract;
+
+  /// No description provided for @projectEditorScriptsWorkbenchOverviewExtractAllAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'Extract assets for all scripts'**
+  String get projectEditorScriptsWorkbenchOverviewExtractAllAssets;
+
+  /// No description provided for @projectEditorScriptsWorkbenchOverviewExportAllScripts.
+  ///
+  /// In en, this message translates to:
+  /// **'Export all scripts'**
+  String get projectEditorScriptsWorkbenchOverviewExportAllScripts;
+
   /// No description provided for @projectEditorAssetSummaryProductionEmpty.
   ///
   /// In en, this message translates to:

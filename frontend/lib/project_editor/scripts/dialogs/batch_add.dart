@@ -12,15 +12,16 @@ extension _HomePageProjectEditorScriptsBatchAddDialog on _HomePageState {
     required List<ScriptBrief> scriptList,
     required List<ProjectStats?> statsRef,
   }) async {
+    final l10n = AppLocalizations.of(ctx)!;
     final countCtrl = TextEditingController(text: '3');
-    final namePrefixCtrl = TextEditingController(text: '新剧本');
-    final scriptDataCtrl = TextEditingController(text: '剧情梗概待补充。');
+    final namePrefixCtrl = TextEditingController(text: l10n.projectEditorScriptsBatchAddDefaultPrefix);
+    final scriptDataCtrl = TextEditingController(text: l10n.projectEditorScriptsBatchAddDefaultContent);
     try {
       final confirmed = await showDialog<bool>(
         context: ctx,
         builder: (dialogCtx) {
           return AlertDialog(
-            title: const Text('批量新增剧本'),
+            title: Text(l10n.projectEditorScriptsBatchAddTitle),
             content: SizedBox(
               width: 420,
               child: Column(
@@ -30,22 +31,22 @@ extension _HomePageProjectEditorScriptsBatchAddDialog on _HomePageState {
                   TextField(
                     controller: countCtrl,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: '数量（1-20）',
-                      helperText: '单次最多创建 20 条，避免误操作。',
+                    decoration: InputDecoration(
+                      labelText: l10n.projectEditorScriptsBatchAddCountLabel,
+                      helperText: l10n.projectEditorScriptsBatchAddCountHelper,
                     ),
                   ),
                   const SizedBox(height: 8),
                   TextField(
                     controller: namePrefixCtrl,
-                    decoration: const InputDecoration(labelText: '名称前缀'),
+                    decoration: InputDecoration(labelText: l10n.projectEditorScriptsBatchAddNamePrefixLabel),
                   ),
                   const SizedBox(height: 8),
                   TextField(
                     controller: scriptDataCtrl,
                     minLines: 3,
                     maxLines: 5,
-                    decoration: const InputDecoration(labelText: '剧本默认内容'),
+                    decoration: InputDecoration(labelText: l10n.projectEditorScriptsBatchAddContentLabel),
                   ),
                 ],
               ),
@@ -53,11 +54,11 @@ extension _HomePageProjectEditorScriptsBatchAddDialog on _HomePageState {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(dialogCtx).pop(false),
-                child: const Text('取消'),
+                child: Text(l10n.projectEditorScriptsBatchAddCancel),
               ),
               FilledButton(
                 onPressed: () => Navigator.of(dialogCtx).pop(true),
-                child: const Text('创建'),
+                child: Text(l10n.projectEditorScriptsBatchAddCreate),
               ),
             ],
           );
@@ -69,12 +70,12 @@ extension _HomePageProjectEditorScriptsBatchAddDialog on _HomePageState {
       if (count == null || count < 1 || count > 20) {
         ScaffoldMessenger.of(
           ctx,
-        ).showSnackBar(const SnackBar(content: Text('数量必须是 1-20 的整数')));
+        ).showSnackBar(SnackBar(content: Text(l10n.projectEditorScriptsBatchAddCountError)));
         return;
       }
 
       final prefix = namePrefixCtrl.text.trim().isEmpty
-          ? '新剧本'
+          ? l10n.projectEditorScriptsBatchAddDefaultPrefix
           : namePrefixCtrl.text.trim();
       final rows = buildBatchAddScriptItems(
         count: count,
@@ -111,13 +112,14 @@ extension _HomePageProjectEditorScriptsBatchAddDialog on _HomePageState {
       setDialogState(() => saving[0] = false);
       setDialogState(() {
         scriptTaskLine[0] = buildScriptBatchWorkbenchFollowUp(
-          actionSummary: '已批量创建 ${created.inserted} 条剧本。',
+          l10n,
+          actionSummary: l10n.projectEditorScriptsBatchAddSuccess(created.inserted),
           diagnosis: nextDiagnosis,
         );
       });
       ScaffoldMessenger.of(
         ctx,
-      ).showSnackBar(SnackBar(content: Text('已批量创建 ${created.inserted} 条剧本')));
+      ).showSnackBar(SnackBar(content: Text(l10n.projectEditorScriptsBatchAddSuccess(created.inserted))));
     } on RustApiException catch (e) {
       if (ctx.mounted) {
         setDialogState(() => saving[0] = false);

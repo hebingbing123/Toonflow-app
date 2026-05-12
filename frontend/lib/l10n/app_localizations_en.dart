@@ -6908,6 +6908,157 @@ class AppLocalizationsEn extends AppLocalizations {
       'Chapter body';
 
   @override
+  String projectEditorScriptsWorkbenchBatchFollowUpLine(
+    String actionSummary,
+    String nextAction,
+    String detail,
+  ) {
+    return '$actionSummary Suggested next step: $nextAction. $detail';
+  }
+
+  @override
+  String get projectEditorScriptsWorkbenchRecommendSyncContext =>
+      'Read script context';
+
+  @override
+  String get projectEditorScriptsWorkbenchRecommendPollSelected =>
+      'Poll selected extract states';
+
+  @override
+  String get projectEditorScriptsWorkbenchRecommendExtractSelected =>
+      'Extract assets for selected scripts';
+
+  @override
+  String get projectEditorScriptsWorkbenchRecommendExportSelected =>
+      'Export selected scripts';
+
+  @override
+  String get projectEditorScriptsWorkbenchReloadEmpty =>
+      'Refresh finished; no scripts in this project.';
+
+  @override
+  String projectEditorScriptsWorkbenchReloadCount(int count) {
+    return 'Refresh finished; loaded $count scripts.';
+  }
+
+  @override
+  String get projectEditorScriptsWorkbenchReadContextEmpty =>
+      'Context read finished; no matching scripts.';
+
+  @override
+  String projectEditorScriptsWorkbenchReadContextCount(int count) {
+    return 'Loaded $count script context rows.';
+  }
+
+  @override
+  String get projectEditorScriptsWorkbenchErrorNeedScriptIds =>
+      'Enter at least one script id.';
+
+  @override
+  String projectEditorScriptsWorkbenchExportSelectedSummary(
+    int count,
+    String zipSize,
+  ) {
+    return 'Exported $count scripts, ZIP $zipSize.';
+  }
+
+  @override
+  String get projectEditorScriptsWorkbenchPollExtractIdleOrComplete =>
+      'All idle or completed';
+
+  @override
+  String projectEditorScriptsWorkbenchPollSelectedSummary(
+    int count,
+    String sample,
+  ) {
+    return 'Polled $count scripts for extract state: $sample';
+  }
+
+  @override
+  String projectEditorScriptsWorkbenchExtractSubmittedSelected(
+    int count,
+    String status,
+    String message,
+  ) {
+    return 'Submitted asset extract for $count scripts: $status · $message';
+  }
+
+  @override
+  String get projectEditorScriptsWorkbenchBatchCreateCountInvalid =>
+      'Count must be an integer between 1 and 20.';
+
+  @override
+  String get projectEditorScriptsWorkbenchDefaultNewScriptName => 'New script';
+
+  @override
+  String projectEditorScriptsWorkbenchBatchCreated(int inserted) {
+    return 'Batch created $inserted scripts.';
+  }
+
+  @override
+  String projectEditorScriptsWorkbenchCreatedScriptFollowUp(int id) {
+    return 'Created script #$id.';
+  }
+
+  @override
+  String projectEditorScriptsWorkbenchCreatedScriptSnackBar(int id) {
+    return 'Created script #$id';
+  }
+
+  @override
+  String projectEditorScriptsWorkbenchExportAllFailed(String error) {
+    return 'Export failed: $error';
+  }
+
+  @override
+  String projectEditorScriptsWorkbenchPollAllFailed(String error) {
+    return 'Polling extract state failed: $error';
+  }
+
+  @override
+  String projectEditorScriptsWorkbenchExtractAllFailed(String error) {
+    return 'Submitting asset extract failed: $error';
+  }
+
+  @override
+  String projectEditorScriptsWorkbenchExportAllSummary(
+    int count,
+    String zipSize,
+  ) {
+    return 'Exported $count scripts, ZIP $zipSize.';
+  }
+
+  @override
+  String projectEditorScriptsWorkbenchPollAllSummary(int count, String sample) {
+    return 'Polled $count scripts for extract state: $sample';
+  }
+
+  @override
+  String projectEditorScriptsWorkbenchExtractAllSummary(
+    int count,
+    String status,
+    String message,
+  ) {
+    return 'Submitted asset extract for $count scripts: $status · $message';
+  }
+
+  @override
+  String get projectEditorScriptsWorkbenchOverviewOpenWorkbenchReadContext =>
+      'Open workbench to read context';
+
+  @override
+  String get projectEditorScriptsWorkbenchOverviewPollAllExtract =>
+      'Poll extract state for all';
+
+  @override
+  String get projectEditorScriptsWorkbenchOverviewExtractAllAssets =>
+      'Extract assets for all scripts';
+
+  @override
+  String get projectEditorScriptsWorkbenchOverviewExportAllScripts =>
+      'Export all scripts';
+
+  @override
   String get projectEditorAssetSummaryProductionEmpty =>
       'Production asset data is empty';
 

@@ -5084,6 +5084,170 @@
   "projectEditorNovelsWorkbenchImportPreviewDeleteChapterTooltip": "Remove this chapter",
   "projectEditorNovelsWorkbenchImportPreviewChapterTitleField": "Chapter title",
   "projectEditorNovelsWorkbenchImportPreviewChapterBodyField": "Chapter body",
+  "projectEditorScriptsWorkbenchBatchFollowUpLine": "{actionSummary} Suggested next step: {nextAction}. {detail}",
+  "@projectEditorScriptsWorkbenchBatchFollowUpLine": {
+    "placeholders": {
+      "actionSummary": {
+        "type": "String"
+      },
+      "nextAction": {
+        "type": "String"
+      },
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorScriptsWorkbenchRecommendSyncContext": "Read script context",
+  "projectEditorScriptsWorkbenchRecommendPollSelected": "Poll selected extract states",
+  "projectEditorScriptsWorkbenchRecommendExtractSelected": "Extract assets for selected scripts",
+  "projectEditorScriptsWorkbenchRecommendExportSelected": "Export selected scripts",
+  "projectEditorScriptsWorkbenchReloadEmpty": "Refresh finished; no scripts in this project.",
+  "projectEditorScriptsWorkbenchReloadCount": "Refresh finished; loaded {count} scripts.",
+  "@projectEditorScriptsWorkbenchReloadCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorScriptsWorkbenchReadContextEmpty": "Context read finished; no matching scripts.",
+  "projectEditorScriptsWorkbenchReadContextCount": "Loaded {count} script context rows.",
+  "@projectEditorScriptsWorkbenchReadContextCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorScriptsWorkbenchErrorNeedScriptIds": "Enter at least one script id.",
+  "projectEditorScriptsWorkbenchExportSelectedSummary": "Exported {count} scripts, ZIP {zipSize}.",
+  "@projectEditorScriptsWorkbenchExportSelectedSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "zipSize": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorScriptsWorkbenchPollExtractIdleOrComplete": "All idle or completed",
+  "projectEditorScriptsWorkbenchPollSelectedSummary": "Polled {count} scripts for extract state: {sample}",
+  "@projectEditorScriptsWorkbenchPollSelectedSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "sample": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorScriptsWorkbenchExtractSubmittedSelected": "Submitted asset extract for {count} scripts: {status} · {message}",
+  "@projectEditorScriptsWorkbenchExtractSubmittedSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "status": {
+        "type": "String"
+      },
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorScriptsWorkbenchBatchCreateCountInvalid": "Count must be an integer between 1 and 20.",
+  "projectEditorScriptsWorkbenchDefaultNewScriptName": "New script",
+  "projectEditorScriptsWorkbenchBatchCreated": "Batch created {inserted} scripts.",
+  "@projectEditorScriptsWorkbenchBatchCreated": {
+    "placeholders": {
+      "inserted": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorScriptsWorkbenchCreatedScriptFollowUp": "Created script #{id}.",
+  "@projectEditorScriptsWorkbenchCreatedScriptFollowUp": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorScriptsWorkbenchCreatedScriptSnackBar": "Created script #{id}",
+  "@projectEditorScriptsWorkbenchCreatedScriptSnackBar": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorScriptsWorkbenchExportAllFailed": "Export failed: {error}",
+  "@projectEditorScriptsWorkbenchExportAllFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorScriptsWorkbenchPollAllFailed": "Polling extract state failed: {error}",
+  "@projectEditorScriptsWorkbenchPollAllFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorScriptsWorkbenchExtractAllFailed": "Submitting asset extract failed: {error}",
+  "@projectEditorScriptsWorkbenchExtractAllFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorScriptsWorkbenchExportAllSummary": "Exported {count} scripts, ZIP {zipSize}.",
+  "@projectEditorScriptsWorkbenchExportAllSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "zipSize": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorScriptsWorkbenchPollAllSummary": "Polled {count} scripts for extract state: {sample}",
+  "@projectEditorScriptsWorkbenchPollAllSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "sample": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorScriptsWorkbenchExtractAllSummary": "Submitted asset extract for {count} scripts: {status} · {message}",
+  "@projectEditorScriptsWorkbenchExtractAllSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "status": {
+        "type": "String"
+      },
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorScriptsWorkbenchOverviewOpenWorkbenchReadContext": "Open workbench to read context",
+  "projectEditorScriptsWorkbenchOverviewPollAllExtract": "Poll extract state for all",
+  "projectEditorScriptsWorkbenchOverviewExtractAllAssets": "Extract assets for all scripts",
+  "projectEditorScriptsWorkbenchOverviewExportAllScripts": "Export all scripts",
   "projectEditorAssetSummaryProductionEmpty": "Production asset data is empty",
   "projectEditorAssetSummaryProductionLine": "Production assets {total} items · {typesLine} · Sample: {sampleLine}",
   "@projectEditorAssetSummaryProductionLine": {

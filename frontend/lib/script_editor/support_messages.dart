@@ -17,18 +17,19 @@ String describeScriptWorkbenchRecommendedAction(
   }
 }
 
-String describeScriptBatchWorkbenchRecommendedAction(
+String scriptBatchWorkbenchRecommendedActionLabel(
+  AppLocalizations l10n,
   ScriptBatchWorkbenchRecommendedAction action,
 ) {
   switch (action) {
     case ScriptBatchWorkbenchRecommendedAction.syncContext:
-      return '读取剧本上下文';
+      return l10n.projectEditorScriptsWorkbenchRecommendSyncContext;
     case ScriptBatchWorkbenchRecommendedAction.pollSelected:
-      return '轮询所选状态';
+      return l10n.projectEditorScriptsWorkbenchRecommendPollSelected;
     case ScriptBatchWorkbenchRecommendedAction.startExtractSelected:
-      return '提取所选素材';
+      return l10n.projectEditorScriptsWorkbenchRecommendExtractSelected;
     case ScriptBatchWorkbenchRecommendedAction.exportSelectedZip:
-      return '导出所选剧本';
+      return l10n.projectEditorScriptsWorkbenchRecommendExportSelected;
   }
 }
 
@@ -42,14 +43,20 @@ String buildScriptWorkbenchFollowUp({
   return '$actionSummary 下一步建议：$nextAction。${diagnosis.detail}';
 }
 
-String buildScriptBatchWorkbenchFollowUp({
+String buildScriptBatchWorkbenchFollowUp(
+  AppLocalizations l10n, {
   required String actionSummary,
   required ScriptBatchWorkbenchDiagnosis diagnosis,
 }) {
-  final nextAction = describeScriptBatchWorkbenchRecommendedAction(
+  final nextAction = scriptBatchWorkbenchRecommendedActionLabel(
+    l10n,
     diagnosis.recommendedAction,
   );
-  return '$actionSummary 下一步建议：$nextAction。${diagnosis.detail}';
+  return l10n.projectEditorScriptsWorkbenchBatchFollowUpLine(
+    actionSummary,
+    nextAction,
+    diagnosis.detail,
+  );
 }
 
 ScriptWorkbenchDetailRow? findScriptContextByNumericId(

@@ -6616,6 +6616,149 @@ class AppLocalizationsZh extends AppLocalizations {
       '章节正文';
 
   @override
+  String projectEditorScriptsWorkbenchBatchFollowUpLine(
+    String actionSummary,
+    String nextAction,
+    String detail,
+  ) {
+    return '$actionSummary 下一步建议：$nextAction。$detail';
+  }
+
+  @override
+  String get projectEditorScriptsWorkbenchRecommendSyncContext => '读取剧本上下文';
+
+  @override
+  String get projectEditorScriptsWorkbenchRecommendPollSelected => '轮询所选状态';
+
+  @override
+  String get projectEditorScriptsWorkbenchRecommendExtractSelected => '提取所选素材';
+
+  @override
+  String get projectEditorScriptsWorkbenchRecommendExportSelected => '导出所选剧本';
+
+  @override
+  String get projectEditorScriptsWorkbenchReloadEmpty => '刷新完成，当前没有剧本。';
+
+  @override
+  String projectEditorScriptsWorkbenchReloadCount(int count) {
+    return '刷新完成，共 $count 条剧本。';
+  }
+
+  @override
+  String get projectEditorScriptsWorkbenchReadContextEmpty =>
+      '上下文读取完成，但没有匹配剧本。';
+
+  @override
+  String projectEditorScriptsWorkbenchReadContextCount(int count) {
+    return '已读取 $count 条剧本上下文。';
+  }
+
+  @override
+  String get projectEditorScriptsWorkbenchErrorNeedScriptIds => '请先填写至少一个剧本 id';
+
+  @override
+  String projectEditorScriptsWorkbenchExportSelectedSummary(
+    int count,
+    String zipSize,
+  ) {
+    return '已导出 $count 条剧本，ZIP $zipSize。';
+  }
+
+  @override
+  String get projectEditorScriptsWorkbenchPollExtractIdleOrComplete =>
+      '当前均为 idle 或已完成';
+
+  @override
+  String projectEditorScriptsWorkbenchPollSelectedSummary(
+    int count,
+    String sample,
+  ) {
+    return '已轮询 $count 条剧本提取状态：$sample';
+  }
+
+  @override
+  String projectEditorScriptsWorkbenchExtractSubmittedSelected(
+    int count,
+    String status,
+    String message,
+  ) {
+    return '已提交 $count 条剧本素材抽取：$status · $message';
+  }
+
+  @override
+  String get projectEditorScriptsWorkbenchBatchCreateCountInvalid =>
+      '数量必须是 1-20 的整数';
+
+  @override
+  String get projectEditorScriptsWorkbenchDefaultNewScriptName => '新剧本';
+
+  @override
+  String projectEditorScriptsWorkbenchBatchCreated(int inserted) {
+    return '已批量创建 $inserted 条剧本。';
+  }
+
+  @override
+  String projectEditorScriptsWorkbenchCreatedScriptFollowUp(int id) {
+    return '已创建剧本 #$id。';
+  }
+
+  @override
+  String projectEditorScriptsWorkbenchCreatedScriptSnackBar(int id) {
+    return '已创建剧本 #$id';
+  }
+
+  @override
+  String projectEditorScriptsWorkbenchExportAllFailed(String error) {
+    return '导出失败：$error';
+  }
+
+  @override
+  String projectEditorScriptsWorkbenchPollAllFailed(String error) {
+    return '轮询提取状态失败：$error';
+  }
+
+  @override
+  String projectEditorScriptsWorkbenchExtractAllFailed(String error) {
+    return '提交素材抽取失败：$error';
+  }
+
+  @override
+  String projectEditorScriptsWorkbenchExportAllSummary(
+    int count,
+    String zipSize,
+  ) {
+    return '已导出 $count 条剧本，ZIP $zipSize。';
+  }
+
+  @override
+  String projectEditorScriptsWorkbenchPollAllSummary(int count, String sample) {
+    return '已轮询 $count 条剧本提取状态：$sample';
+  }
+
+  @override
+  String projectEditorScriptsWorkbenchExtractAllSummary(
+    int count,
+    String status,
+    String message,
+  ) {
+    return '已提交 $count 条剧本素材抽取：$status · $message';
+  }
+
+  @override
+  String get projectEditorScriptsWorkbenchOverviewOpenWorkbenchReadContext =>
+      '打开工作台读取上下文';
+
+  @override
+  String get projectEditorScriptsWorkbenchOverviewPollAllExtract => '轮询全部提取状态';
+
+  @override
+  String get projectEditorScriptsWorkbenchOverviewExtractAllAssets =>
+      '提取全部剧本素材';
+
+  @override
+  String get projectEditorScriptsWorkbenchOverviewExportAllScripts => '导出全部剧本';
+
+  @override
   String get projectEditorAssetSummaryProductionEmpty => 'production 资产数据为空';
 
   @override

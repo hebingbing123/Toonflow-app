@@ -5084,6 +5084,170 @@
   "projectEditorNovelsWorkbenchImportPreviewDeleteChapterTooltip": "删除该章节",
   "projectEditorNovelsWorkbenchImportPreviewChapterTitleField": "章节标题",
   "projectEditorNovelsWorkbenchImportPreviewChapterBodyField": "章节正文",
+  "projectEditorScriptsWorkbenchBatchFollowUpLine": "{actionSummary} 下一步建议：{nextAction}。{detail}",
+  "@projectEditorScriptsWorkbenchBatchFollowUpLine": {
+    "placeholders": {
+      "actionSummary": {
+        "type": "String"
+      },
+      "nextAction": {
+        "type": "String"
+      },
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorScriptsWorkbenchRecommendSyncContext": "读取剧本上下文",
+  "projectEditorScriptsWorkbenchRecommendPollSelected": "轮询所选状态",
+  "projectEditorScriptsWorkbenchRecommendExtractSelected": "提取所选素材",
+  "projectEditorScriptsWorkbenchRecommendExportSelected": "导出所选剧本",
+  "projectEditorScriptsWorkbenchReloadEmpty": "刷新完成，当前没有剧本。",
+  "projectEditorScriptsWorkbenchReloadCount": "刷新完成，共 {count} 条剧本。",
+  "@projectEditorScriptsWorkbenchReloadCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorScriptsWorkbenchReadContextEmpty": "上下文读取完成，但没有匹配剧本。",
+  "projectEditorScriptsWorkbenchReadContextCount": "已读取 {count} 条剧本上下文。",
+  "@projectEditorScriptsWorkbenchReadContextCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorScriptsWorkbenchErrorNeedScriptIds": "请先填写至少一个剧本 id",
+  "projectEditorScriptsWorkbenchExportSelectedSummary": "已导出 {count} 条剧本，ZIP {zipSize}。",
+  "@projectEditorScriptsWorkbenchExportSelectedSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "zipSize": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorScriptsWorkbenchPollExtractIdleOrComplete": "当前均为 idle 或已完成",
+  "projectEditorScriptsWorkbenchPollSelectedSummary": "已轮询 {count} 条剧本提取状态：{sample}",
+  "@projectEditorScriptsWorkbenchPollSelectedSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "sample": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorScriptsWorkbenchExtractSubmittedSelected": "已提交 {count} 条剧本素材抽取：{status} · {message}",
+  "@projectEditorScriptsWorkbenchExtractSubmittedSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "status": {
+        "type": "String"
+      },
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorScriptsWorkbenchBatchCreateCountInvalid": "数量必须是 1-20 的整数",
+  "projectEditorScriptsWorkbenchDefaultNewScriptName": "新剧本",
+  "projectEditorScriptsWorkbenchBatchCreated": "已批量创建 {inserted} 条剧本。",
+  "@projectEditorScriptsWorkbenchBatchCreated": {
+    "placeholders": {
+      "inserted": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorScriptsWorkbenchCreatedScriptFollowUp": "已创建剧本 #{id}。",
+  "@projectEditorScriptsWorkbenchCreatedScriptFollowUp": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorScriptsWorkbenchCreatedScriptSnackBar": "已创建剧本 #{id}",
+  "@projectEditorScriptsWorkbenchCreatedScriptSnackBar": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorScriptsWorkbenchExportAllFailed": "导出失败：{error}",
+  "@projectEditorScriptsWorkbenchExportAllFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorScriptsWorkbenchPollAllFailed": "轮询提取状态失败：{error}",
+  "@projectEditorScriptsWorkbenchPollAllFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorScriptsWorkbenchExtractAllFailed": "提交素材抽取失败：{error}",
+  "@projectEditorScriptsWorkbenchExtractAllFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorScriptsWorkbenchExportAllSummary": "已导出 {count} 条剧本，ZIP {zipSize}。",
+  "@projectEditorScriptsWorkbenchExportAllSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "zipSize": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorScriptsWorkbenchPollAllSummary": "已轮询 {count} 条剧本提取状态：{sample}",
+  "@projectEditorScriptsWorkbenchPollAllSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "sample": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorScriptsWorkbenchExtractAllSummary": "已提交 {count} 条剧本素材抽取：{status} · {message}",
+  "@projectEditorScriptsWorkbenchExtractAllSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "status": {
+        "type": "String"
+      },
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorScriptsWorkbenchOverviewOpenWorkbenchReadContext": "打开工作台读取上下文",
+  "projectEditorScriptsWorkbenchOverviewPollAllExtract": "轮询全部提取状态",
+  "projectEditorScriptsWorkbenchOverviewExtractAllAssets": "提取全部剧本素材",
+  "projectEditorScriptsWorkbenchOverviewExportAllScripts": "导出全部剧本",
   "projectEditorAssetSummaryProductionEmpty": "production 资产数据为空",
   "projectEditorAssetSummaryProductionLine": "production 资产 {total} 条 · {typesLine} · 示例：{sampleLine}",
   "@projectEditorAssetSummaryProductionLine": {

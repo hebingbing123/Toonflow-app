@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 
-import '../../../../rust_api.dart';
+import '../../../rust_api.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../script_editor/support.dart';
 import 'dialog_support.dart';
 import 'dialog_view.dart';
 
 Future<void> openProjectScriptsWorkbenchDialog({
   required BuildContext ctx,
+  required AppLocalizations l10n,
   required StateSetter setDialogState,
   required String token,
   required ProjectRow project,
@@ -19,6 +21,7 @@ Future<void> openProjectScriptsWorkbenchDialog({
   final session = ProjectScriptsWorkbenchSession(scriptList: scriptList);
   final controller = ProjectScriptsWorkbenchController(
     ctx: ctx,
+    l10n: l10n,
     token: token,
     project: project,
     setDialogState: setDialogState,

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
-import '../../../../rust_api.dart';
+import '../../l10n/app_localizations.dart';
+import '../../rust_api.dart';
 import '../../script_editor/support.dart';
 import 'section_view.dart';
 
 Widget buildProjectScriptsSection({
   required BuildContext ctx,
+  required AppLocalizations l10n,
   required StateSetter setDialogState,
   required String token,
   required ProjectRow project,
@@ -45,8 +47,11 @@ Widget buildProjectScriptsSection({
       setDialogState(() {
         scriptTaskBusy[0] = false;
         scriptTaskLine[0] = buildScriptBatchWorkbenchFollowUp(
-          actionSummary:
-              '已导出 ${scriptList.length} 条剧本，ZIP ${formatBinarySize(zip.length)}。',
+          l10n,
+          actionSummary: l10n.projectEditorScriptsWorkbenchExportAllSummary(
+            scriptList.length,
+            formatBinarySize(zip.length),
+          ),
           diagnosis: nextDiagnosis,
         );
       });
@@ -54,14 +59,18 @@ Widget buildProjectScriptsSection({
       if (ctx.mounted) {
         setDialogState(() {
           scriptTaskBusy[0] = false;
-          scriptTaskLine[0] = '导出失败：$e';
+          scriptTaskLine[0] = l10n.projectEditorScriptsWorkbenchExportAllFailed(
+            e.toString(),
+          );
         });
       }
     } catch (e) {
       if (ctx.mounted) {
         setDialogState(() {
           scriptTaskBusy[0] = false;
-          scriptTaskLine[0] = '导出失败：$e';
+          scriptTaskLine[0] = l10n.projectEditorScriptsWorkbenchExportAllFailed(
+            e.toString(),
+          );
         });
       }
     }
@@ -79,7 +88,7 @@ Widget buildProjectScriptsSection({
         ..clear()
         ..addAll(synced);
       final sample = rows.isEmpty
-          ? '当前均为 idle 或已完成'
+          ? l10n.projectEditorScriptsWorkbenchPollExtractIdleOrComplete
           : rows
                 .take(3)
                 .map((row) => '#${row.numericId}:${row.extractState ?? 0}')
@@ -93,7 +102,11 @@ Widget buildProjectScriptsSection({
       setDialogState(() {
         scriptTaskBusy[0] = false;
         scriptTaskLine[0] = buildScriptBatchWorkbenchFollowUp(
-          actionSummary: '已轮询 ${scriptList.length} 条剧本提取状态：$sample',
+          l10n,
+          actionSummary: l10n.projectEditorScriptsWorkbenchPollAllSummary(
+            scriptList.length,
+            sample,
+          ),
           diagnosis: nextDiagnosis,
         );
       });
@@ -101,14 +114,18 @@ Widget buildProjectScriptsSection({
       if (ctx.mounted) {
         setDialogState(() {
           scriptTaskBusy[0] = false;
-          scriptTaskLine[0] = '轮询提取状态失败：$e';
+          scriptTaskLine[0] = l10n.projectEditorScriptsWorkbenchPollAllFailed(
+            e.toString(),
+          );
         });
       }
     } catch (e) {
       if (ctx.mounted) {
         setDialogState(() {
           scriptTaskBusy[0] = false;
-          scriptTaskLine[0] = '轮询提取状态失败：$e';
+          scriptTaskLine[0] = l10n.projectEditorScriptsWorkbenchPollAllFailed(
+            e.toString(),
+          );
         });
       }
     }
@@ -139,8 +156,12 @@ Widget buildProjectScriptsSection({
       setDialogState(() {
         scriptTaskBusy[0] = false;
         scriptTaskLine[0] = buildScriptBatchWorkbenchFollowUp(
-          actionSummary:
-              '已提交 ${scriptList.length} 条剧本素材抽取：${accepted.status} · ${accepted.message}',
+          l10n,
+          actionSummary: l10n.projectEditorScriptsWorkbenchExtractAllSummary(
+            scriptList.length,
+            accepted.status,
+            accepted.message,
+          ),
           diagnosis: nextDiagnosis,
         );
       });
@@ -148,14 +169,18 @@ Widget buildProjectScriptsSection({
       if (ctx.mounted) {
         setDialogState(() {
           scriptTaskBusy[0] = false;
-          scriptTaskLine[0] = '提交素材抽取失败：$e';
+          scriptTaskLine[0] = l10n.projectEditorScriptsWorkbenchExtractAllFailed(
+            e.toString(),
+          );
         });
       }
     } catch (e) {
       if (ctx.mounted) {
         setDialogState(() {
           scriptTaskBusy[0] = false;
-          scriptTaskLine[0] = '提交素材抽取失败：$e';
+          scriptTaskLine[0] = l10n.projectEditorScriptsWorkbenchExtractAllFailed(
+            e.toString(),
+          );
         });
       }
     }
@@ -185,13 +210,22 @@ Widget buildProjectScriptsSection({
       setDialogState(() {
         saving[0] = false;
         scriptTaskLine[0] = buildScriptBatchWorkbenchFollowUp(
-          actionSummary: '已创建剧本 #${script.numericId}。',
+          l10n,
+          actionSummary: l10n.projectEditorScriptsWorkbenchCreatedScriptFollowUp(
+            script.numericId,
+          ),
           diagnosis: nextDiagnosis,
         );
       });
-      ScaffoldMessenger.of(
-        ctx,
-      ).showSnackBar(SnackBar(content: Text('已创建剧本 #${script.numericId}')));
+      ScaffoldMessenger.of(ctx).showSnackBar(
+        SnackBar(
+          content: Text(
+            l10n.projectEditorScriptsWorkbenchCreatedScriptSnackBar(
+              script.numericId,
+            ),
+          ),
+        ),
+      );
     } on RustApiException catch (e) {
       if (ctx.mounted) {
         setDialogState(() => saving[0] = false);
@@ -216,22 +250,26 @@ Widget buildProjectScriptsSection({
       overviewAction = saving[0] || scriptTaskBusy[0]
           ? null
           : () => openWorkbench();
-      overviewActionLabel = '打开工作台读取上下文';
+      overviewActionLabel =
+          l10n.projectEditorScriptsWorkbenchOverviewOpenWorkbenchReadContext;
     case ScriptBatchWorkbenchRecommendedAction.pollSelected:
       overviewAction = saving[0] || scriptTaskBusy[0] || scriptList.isEmpty
           ? null
           : runProjectScriptsPollAll;
-      overviewActionLabel = '轮询全部提取状态';
+      overviewActionLabel =
+          l10n.projectEditorScriptsWorkbenchOverviewPollAllExtract;
     case ScriptBatchWorkbenchRecommendedAction.startExtractSelected:
       overviewAction = saving[0] || scriptTaskBusy[0] || scriptList.isEmpty
           ? null
           : runProjectScriptsExtractAll;
-      overviewActionLabel = '提取全部剧本素材';
+      overviewActionLabel =
+          l10n.projectEditorScriptsWorkbenchOverviewExtractAllAssets;
     case ScriptBatchWorkbenchRecommendedAction.exportSelectedZip:
       overviewAction = saving[0] || scriptTaskBusy[0] || scriptList.isEmpty
           ? null
           : runProjectScriptsExportAll;
-      overviewActionLabel = '导出全部剧本';
+      overviewActionLabel =
+          l10n.projectEditorScriptsWorkbenchOverviewExportAllScripts;
   }
 
   return ProjectScriptsSectionView(
