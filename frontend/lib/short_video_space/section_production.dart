@@ -36,7 +36,6 @@ extension _ShortVideoSpaceSectionProductionExtension on _ShortVideoSpaceSectionS
       final scriptNumericId = detail.scripts.first.numericId;
       final res = await postProductionWorkbenchBatchGenerateCandidateClipsV1(
         token,
-        projectId: project.numericId,
         projectUuid: project.id,
         scriptId: scriptNumericId,
       );
@@ -250,7 +249,6 @@ extension _ShortVideoSpaceSectionProductionExtension on _ShortVideoSpaceSectionS
             for (final script in detail.scripts.take(6)) {
               final resp = await postProductionGetStoryboardDataV1(
                 token,
-                projectId: project.numericId,
                 projectUuid: project.id,
                 scriptId: script.numericId,
               );
