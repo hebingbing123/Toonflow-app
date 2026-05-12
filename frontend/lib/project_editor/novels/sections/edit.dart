@@ -2,6 +2,7 @@ part of '../../../../home_page.dart';
 
 extension _HomePageProjectEditorNovelWorkbenchEditSection on _HomePageState {
   Widget _buildNovelWorkbenchEditSection({
+    required AppLocalizations l10n,
     required BuildContext ctx,
     required StateSetter setDialogState,
     required StateSetter setLocalState,
@@ -44,6 +45,7 @@ extension _HomePageProjectEditorNovelWorkbenchEditSection on _HomePageState {
                       novelsBusy: novelsBusy,
                       setLocalBusy: setLocalBusy,
                       action: () => _readNovelWorkbenchChapter(
+                        l10n: l10n,
                         token: token,
                         project: project,
                         selectedNovelIdCtrl: selectedNovelIdCtrl,
@@ -101,6 +103,7 @@ extension _HomePageProjectEditorNovelWorkbenchEditSection on _HomePageState {
                   novelsBusy: novelsBusy,
                   setLocalBusy: setLocalBusy,
                   action: () => _saveNovelWorkbenchChapter(
+                    l10n: l10n,
                     token: token,
                     project: project,
                     selectedNovelIdCtrl: selectedNovelIdCtrl,

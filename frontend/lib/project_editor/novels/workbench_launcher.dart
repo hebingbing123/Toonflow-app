@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../../rust_api.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../rust_api.dart';
 import 'import_parser.dart';
 import 'support.dart';
 
@@ -10,6 +11,7 @@ part 'workbench_launcher_helpers.dart';
 
 Future<void> openNovelWorkbenchDialog({
   required BuildContext ctx,
+  required AppLocalizations l10n,
   required StateSetter setDialogState,
   required String token,
   required ProjectRow project,
@@ -18,6 +20,7 @@ Future<void> openNovelWorkbenchDialog({
   required Future<void> Function() reloadAssetsAndStats,
   required List<int> Function(String raw) parseNumericIdList,
   required Widget Function({
+    required AppLocalizations l10n,
     required BuildContext ctx,
     required StateSetter setDialogState,
     required StateSetter setLocalState,
@@ -35,6 +38,7 @@ Future<void> openNovelWorkbenchDialog({
   })
   buildSearchSection,
   required Widget Function({
+    required AppLocalizations l10n,
     required BuildContext ctx,
     required StateSetter setDialogState,
     required StateSetter setLocalState,
@@ -60,6 +64,7 @@ Future<void> openNovelWorkbenchDialog({
   })
   buildImportSection,
   required Widget Function({
+    required AppLocalizations l10n,
     required BuildContext ctx,
     required StateSetter setDialogState,
     required StateSetter setLocalState,
@@ -78,6 +83,7 @@ Future<void> openNovelWorkbenchDialog({
   })
   buildCreateSection,
   required Widget Function({
+    required AppLocalizations l10n,
     required BuildContext ctx,
     required StateSetter setDialogState,
     required StateSetter setLocalState,
@@ -97,6 +103,7 @@ Future<void> openNovelWorkbenchDialog({
   })
   buildEditSection,
   required Widget Function({
+    required AppLocalizations l10n,
     required BuildContext ctx,
     required StateSetter setDialogState,
     required StateSetter setLocalState,
@@ -112,6 +119,7 @@ Future<void> openNovelWorkbenchDialog({
   })
   buildDeleteSection,
   required Widget Function({
+    required AppLocalizations l10n,
     required BuildContext ctx,
     required StateSetter setDialogState,
     required StateSetter setLocalState,
@@ -139,7 +147,7 @@ Future<void> openNovelWorkbenchDialog({
     last: last,
   );
 
-  final local = _NovelWorkbenchLocalState.fromItems(currentItems);
+  final local = _NovelWorkbenchLocalState.fromItems(currentItems, l10n);
 
   Future<void> refreshWorkbench(StateSetter setLocalState) async {
     await refreshNovelWorkbenchLocalState(
@@ -148,6 +156,7 @@ Future<void> openNovelWorkbenchDialog({
       novelsRef: novelsRef,
       ctrls: ctrls,
       local: local,
+      l10n: l10n,
     );
   }
 
@@ -170,7 +179,7 @@ Future<void> openNovelWorkbenchDialog({
                 ? viewportWidth.clamp(320.0, 760.0)
                 : 760.0;
             return AlertDialog(
-              title: const Text('章节工作台'),
+              title: Text(l10n.projectEditorNovelsChapterWorkbenchTitle),
               content: SizedBox(
                 width: dialogWidth,
                 child: SingleChildScrollView(
@@ -199,7 +208,7 @@ Future<void> openNovelWorkbenchDialog({
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                '当前章节预览',
+                                l10n.projectEditorNovelsChapterWorkbenchPreviewTitle,
                                 style: Theme.of(dialogCtx).textTheme.labelLarge,
                               ),
                               const SizedBox(height: 8),
@@ -207,7 +216,17 @@ Future<void> openNovelWorkbenchDialog({
                                 (row) => Padding(
                                   padding: const EdgeInsets.only(bottom: 6),
                                   child: Text(
-                                    '#${row.numericId} · ${row.chapter} · ${row.intakeSource ?? 'unknown'} / ${row.intakeStatus ?? 'unset'} · 事件状态 ${row.eventState}',
+                                    l10n.projectEditorNovelsChapterWorkbenchPreviewRow(
+                                      row.numericId,
+                                      row.chapter,
+                                      row.intakeSource ??
+                                          l10n
+                                              .projectEditorNovelsChapterWorkbenchValueUnknown,
+                                      row.intakeStatus ??
+                                          l10n
+                                              .projectEditorNovelsChapterWorkbenchValueUnset,
+                                      row.eventState.toString(),
+                                    ),
                                     style: Theme.of(
                                       dialogCtx,
                                     ).textTheme.bodySmall,
@@ -219,6 +238,7 @@ Future<void> openNovelWorkbenchDialog({
                         ),
                       const SizedBox(height: 12),
                       buildSearchSection(
+                        l10n: l10n,
                         ctx: ctx,
                         setDialogState: setDialogState,
                         setLocalState: setLocalState,
@@ -243,6 +263,7 @@ Future<void> openNovelWorkbenchDialog({
                       ),
                       const SizedBox(height: 16),
                       buildImportSection(
+                        l10n: l10n,
                         ctx: dialogCtx,
                         setDialogState: setDialogState,
                         setLocalState: setLocalState,
@@ -274,6 +295,7 @@ Future<void> openNovelWorkbenchDialog({
                       ),
                       const SizedBox(height: 16),
                       buildCreateSection(
+                        l10n: l10n,
                         ctx: dialogCtx,
                         setDialogState: setDialogState,
                         setLocalState: setLocalState,
@@ -292,6 +314,7 @@ Future<void> openNovelWorkbenchDialog({
                       ),
                       const SizedBox(height: 16),
                       buildEditSection(
+                        l10n: l10n,
                         ctx: dialogCtx,
                         setDialogState: setDialogState,
                         setLocalState: setLocalState,
@@ -312,6 +335,7 @@ Future<void> openNovelWorkbenchDialog({
                       ),
                       const SizedBox(height: 16),
                       buildDeleteSection(
+                        l10n: l10n,
                         ctx: dialogCtx,
                         setDialogState: setDialogState,
                         setLocalState: setLocalState,
@@ -327,6 +351,7 @@ Future<void> openNovelWorkbenchDialog({
                       ),
                       const SizedBox(height: 16),
                       buildSnapshotSection(
+                        l10n: l10n,
                         ctx: dialogCtx,
                         setDialogState: setDialogState,
                         setLocalState: setLocalState,
@@ -353,7 +378,7 @@ Future<void> openNovelWorkbenchDialog({
                   onPressed: local.localBusy
                       ? null
                       : () => Navigator.of(dialogCtx).pop(),
-                  child: const Text('关闭'),
+                  child: Text(l10n.projectEditorNovelsChapterWorkbenchCloseButton),
                 ),
               ],
             );

@@ -3,6 +3,7 @@ part of '../../../../home_page.dart';
 extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
     on _HomePageState {
   Widget _buildNovelWorkbenchDeleteSection({
+    required AppLocalizations l10n,
     required BuildContext ctx,
     required StateSetter setDialogState,
     required StateSetter setLocalState,
@@ -37,6 +38,7 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
                   novelsBusy: novelsBusy,
                   setLocalBusy: setLocalBusy,
                   action: () => _deleteNovelWorkbenchChapter(
+                    l10n: l10n,
                     token: token,
                     project: project,
                     deleteNovelIdCtrl: deleteNovelIdCtrl,
@@ -66,6 +68,7 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
                   novelsBusy: novelsBusy,
                   setLocalBusy: setLocalBusy,
                   action: () => _generateNovelWorkbenchEvents(
+                    l10n: l10n,
                     token: token,
                     project: project,
                     generateIdsCtrl: generateIdsCtrl,
@@ -81,6 +84,7 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
   }
 
   Widget _buildNovelWorkbenchSnapshotSection({
+    required AppLocalizations l10n,
     required BuildContext ctx,
     required StateSetter setDialogState,
     required StateSetter setLocalState,
@@ -124,6 +128,7 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
                       novelsBusy: novelsBusy,
                       setLocalBusy: setLocalBusy,
                       action: () => _readNovelWorkbenchData(
+                        l10n: l10n,
                         token: token,
                         project: project,
                         applyInfoLine: updateInfoLine,
@@ -141,6 +146,7 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
                       novelsBusy: novelsBusy,
                       setLocalBusy: setLocalBusy,
                       action: () => _readNovelWorkbenchIndex(
+                        l10n: l10n,
                         token: token,
                         project: project,
                         applyInfoLine: updateInfoLine,
@@ -158,6 +164,7 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
                       novelsBusy: novelsBusy,
                       setLocalBusy: setLocalBusy,
                       action: () => _readNovelWorkbenchEventStates(
+                        l10n: l10n,
                         token: token,
                         project: project,
                         numericIdsCtrl: numericIdsCtrl,
@@ -187,6 +194,7 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
                   novelsBusy: novelsBusy,
                   setLocalBusy: setLocalBusy,
                   action: () => _batchDeleteNovelWorkbenchChapters(
+                    l10n: l10n,
                     token: token,
                     project: project,
                     batchDeleteIdsCtrl: batchDeleteIdsCtrl,
@@ -244,6 +252,7 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
                   novelsBusy: novelsBusy,
                   setLocalBusy: setLocalBusy,
                   action: () => _batchUpdateNovelWorkbenchAdmission(
+                    l10n: l10n,
                     token: token,
                     project: project,
                     batchAdmissionIdsCtrl: batchAdmissionIdsCtrl,

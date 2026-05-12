@@ -26,6 +26,7 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
   }
 
   Future<void> _crawlNovelSourcePreview({
+    required AppLocalizations l10n,
     required String token,
     required ProjectRow project,
     required TextEditingController importUrlCtrl,
@@ -37,12 +38,12 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
   }) async {
     final url = importUrlCtrl.text.trim();
     if (url.isEmpty) {
-      throw const FormatException('请先输入抓取 URL');
+      throw FormatException(l10n.projectEditorNovelsActionErrorUrlEmpty);
     }
 
     final uri = Uri.tryParse(url);
     if (uri == null || !(uri.isScheme('http') || uri.isScheme('https'))) {
-      throw const FormatException('抓取 URL 必须是合法的 http/https 地址');
+      throw FormatException(l10n.projectEditorNovelsActionErrorUrlInvalid);
     }
 
     final side = importExecutionSideCtrl.text.trim().toLowerCase();
@@ -69,7 +70,9 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
         },
       );
       if (response.statusCode < 200 || response.statusCode >= 300) {
-        throw FormatException('抓取失败，HTTP ${response.statusCode}');
+        throw FormatException(
+          l10n.projectEditorNovelsActionErrorCrawlHttp(response.statusCode),
+        );
       }
 
       payload = await _crawlNovelSourceAdaptive(uri, response.body);
@@ -80,12 +83,24 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     applyImportPreview(
       rows,
       rows.isEmpty
-          ? '已抓取 ${payload.title}，但没有抽出可导入正文。'
-          : '已抓取 ${payload.title}，抽出 ${rows.length} 条可导入章节。',
+          ? l10n.projectEditorNovelsActionCrawlImportPreviewEmpty(payload.title)
+          : l10n.projectEditorNovelsActionCrawlImportPreviewOk(
+              payload.title,
+              rows.length,
+            ),
     );
-    final label = side == 'server' ? 'server-side crawl' : 'client-side crawl';
+    final label = side == 'server'
+        ? l10n.projectEditorNovelsActionCrawlSideServer
+        : l10n.projectEditorNovelsActionCrawlSideClient;
     applyInfoLine(
-      '$label 已完成：${payload.title}（模式 ${payload.mode}，抓取 ${payload.pageCount} 页，候选章节链接 ${payload.chapterUrlCount}，正文 ${payload.bodyCharCount} 字）',
+      l10n.projectEditorNovelsActionCrawlDoneInfo(
+        label,
+        payload.title,
+        payload.mode,
+        payload.pageCount,
+        payload.chapterUrlCount,
+        payload.bodyCharCount,
+      ),
     );
   }
 
@@ -197,6 +212,7 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
   }
 
   Future<void> _searchNovelWorkbenchRows({
+    required AppLocalizations l10n,
     required String token,
     required ProjectRow project,
     required TextEditingController searchCtrl,
@@ -223,8 +239,15 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     applyResult(
       List<NovelRow>.from(rows.items),
       filters.isEmpty
-          ? '搜索命中 ${rows.total} 条，当前展示 ${rows.items.length} 条。'
-          : '筛选命中 ${rows.total} 条（${filters.join(' / ')}），当前展示 ${rows.items.length} 条。',
+          ? l10n.projectEditorNovelsActionSearchHit(
+              rows.total,
+              rows.items.length,
+            )
+          : l10n.projectEditorNovelsActionSearchFiltered(
+              rows.total,
+              filters.join(' / '),
+              rows.items.length,
+            ),
     );
   }
 
@@ -256,6 +279,7 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
   }
 
   Future<void> _importNovelWorkbenchChapters({
+    required AppLocalizations l10n,
     required String token,
     required ProjectRow project,
     required List<ParsedNovelChapter> chapters,
@@ -270,17 +294,29 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
   }) async {
     final normalizedChapters = reindexParsedNovelChapters(chapters);
     if (normalizedChapters.isEmpty) {
-      throw const FormatException('请先预解析整本内容');
+      throw FormatException(
+        l10n.projectEditorNovelsActionErrorPreparseRequired,
+      );
     }
     final quality = evaluateNovelImportQuality(normalizedChapters);
     if (!quality.canImport) {
-      throw FormatException('导入质量门未通过：${quality.blockers.join('；')}');
+      throw FormatException(
+        l10n.projectEditorNovelsActionErrorImportQuality(
+          quality.blockers.join('；'),
+        ),
+      );
     }
     if (quality.warnings.isNotEmpty) {
-      applyInfoLine('导入质量提示：${quality.warnings.join('；')}');
+      applyInfoLine(
+        l10n.projectEditorNovelsActionImportQualityHint(
+          quality.warnings.join('；'),
+        ),
+      );
     }
     if (batchSize <= 0) {
-      throw const FormatException('批次大小必须大于 0');
+      throw FormatException(
+        l10n.projectEditorNovelsActionErrorBatchSizePositive,
+      );
     }
     final emptyBodyChapter = normalizedChapters.firstWhere(
       (chapter) => chapter.chapterData.trim().isEmpty,
@@ -292,7 +328,9 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     );
     if (emptyBodyChapter.chapterIndex > 0) {
       throw FormatException(
-        '第 ${emptyBodyChapter.chapterIndex} 条章节正文为空，请先在预解析预览里修正后再导入',
+        l10n.projectEditorNovelsActionErrorChapterBodyEmpty(
+          emptyBodyChapter.chapterIndex,
+        ),
       );
     }
 
@@ -318,14 +356,20 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
           intakeNote: intakeNote,
         );
       }
-      applyInfoLine('已导入 $end/${normalizedChapters.length} 条章节…');
+      applyInfoLine(l10n.projectEditorNovelsActionImportProgress(
+        end,
+        normalizedChapters.length,
+      ));
     }
 
     await refreshWorkbench(setLocalState);
-    applyInfoLine('整本导入完成，共新增 ${normalizedChapters.length} 条章节。');
+    applyInfoLine(
+      l10n.projectEditorNovelsActionImportComplete(normalizedChapters.length),
+    );
   }
 
   Future<void> _importNovelWorkbenchViaServerCrawl({
+    required AppLocalizations l10n,
     required String token,
     required ProjectRow project,
     required String intakeSourceUrl,
@@ -337,7 +381,7 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
   }) async {
     final url = intakeSourceUrl.trim();
     if (url.isEmpty) {
-      throw const FormatException('请先输入抓取 URL');
+      throw FormatException(l10n.projectEditorNovelsActionErrorUrlEmpty);
     }
     final imported = await postProjectNovelCrawlImport(
       token,
@@ -347,15 +391,27 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
       intakeNote: intakeNote,
     );
     if (imported.qualityWarnings.isNotEmpty) {
-      applyInfoLine('导入质量提示：${imported.qualityWarnings.join('；')}');
+      applyInfoLine(
+        l10n.projectEditorNovelsActionImportQualityHint(
+          imported.qualityWarnings.join('；'),
+        ),
+      );
     }
     await refreshWorkbench(setLocalState);
     applyInfoLine(
-      'server 托管导入完成：${imported.title}（新增 ${imported.chaptersCreated} 条章节，模式 ${imported.mode}，抓取 ${imported.pageCount} 页，候选章节链接 ${imported.chapterUrlCount}，正文 ${imported.bodyCharCount} 字）',
+      l10n.projectEditorNovelsActionServerImportDone(
+        imported.title,
+        imported.chaptersCreated,
+        imported.mode,
+        imported.pageCount,
+        imported.chapterUrlCount,
+        imported.bodyCharCount,
+      ),
     );
   }
 
   Future<void> _importNovelWorkbenchViaServerCrawlBatch({
+    required AppLocalizations l10n,
     required String token,
     required ProjectRow project,
     required String batchUrls,
@@ -371,7 +427,7 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
         .where((e) => e.isNotEmpty)
         .toList(growable: false);
     if (urls.isEmpty) {
-      throw const FormatException('请先在批量托管 URL 里填入至少 1 行 URL');
+      throw FormatException(l10n.projectEditorNovelsActionErrorBatchUrlsEmpty);
     }
     final res = await postProjectNovelCrawlImportBatch(
       token,
@@ -386,13 +442,21 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
         .take(3)
         .map((e) => '${e.errorCode ?? 'error'}: ${e.url}')
         .join('；');
+    final detail = sampleFailures.isEmpty
+        ? ''
+        : '${l10n.projectEditorNovelsActionBatchImportFailuresPrefix}$sampleFailures';
     applyInfoLine(
-      '批量托管导入完成：成功 ${res.succeeded}/${res.total}，失败 ${res.failed}。'
-      '${sampleFailures.isEmpty ? '' : ' 失败样例：$sampleFailures'}',
+      l10n.projectEditorNovelsActionBatchImportDone(
+        res.succeeded,
+        res.total,
+        res.failed,
+        detail,
+      ),
     );
   }
 
   Future<void> _createNovelCrawlSchedule({
+    required AppLocalizations l10n,
     required String token,
     required ProjectRow project,
     required String batchUrls,
@@ -408,7 +472,7 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
         .where((e) => e.isNotEmpty)
         .toList(growable: false);
     if (urls.isEmpty) {
-      throw const FormatException('请先在批量托管 URL 里填入至少 1 行 URL');
+      throw FormatException(l10n.projectEditorNovelsActionErrorBatchUrlsEmpty);
     }
     final now = DateTime.now().millisecondsSinceEpoch;
     final runAtMs = now + (delayMinutes * 60 * 1000);
@@ -425,18 +489,24 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
       repeatIntervalMs: repeatIntervalMs,
     );
     applyInfoLine(
-      '已创建托管抓取计划：task #${created.numericTaskId}（${created.status}；delay ${delayMinutes}m；repeat ${repeatMinutes ?? 0}m）',
+      l10n.projectEditorNovelsActionCrawlScheduleCreated(
+        created.numericTaskId,
+        created.status,
+        delayMinutes,
+        repeatMinutes ?? 0,
+      ),
     );
   }
 
   Future<void> _listNovelCrawlSchedules({
+    required AppLocalizations l10n,
     required String token,
     required ProjectRow project,
     required void Function(String infoLine) applyInfoLine,
   }) async {
     final rows = await fetchProjectNovelCrawlSchedules(token, project.id);
     if (rows.isEmpty) {
-      applyInfoLine('暂无托管抓取计划（仅显示本项目最近 100 条）。');
+      applyInfoLine(l10n.projectEditorNovelsActionCrawlSchedulesEmpty);
       return;
     }
     final head = rows.take(3).map((e) {
@@ -446,10 +516,13 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
       final repeat = e.repeatIntervalMs == null ? '' : ' repeat=${e.repeatIntervalMs}ms';
       return '#${e.numericTaskId} ${e.status} runAt=$runAt$repeat';
     }).join('；');
-    applyInfoLine('本项目托管抓取计划 ${rows.length} 条，最近：$head');
+    applyInfoLine(
+      l10n.projectEditorNovelsActionCrawlSchedulesSummary(rows.length, head),
+    );
   }
 
   Future<void> _showNovelCrawlObservability({
+    required AppLocalizations l10n,
     required String token,
     required ProjectRow project,
     required void Function(String infoLine) applyInfoLine,
@@ -468,9 +541,20 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
         .join(', ');
     final recent = res.recentServerImports.isEmpty
         ? ''
-        : ' 最近 server 导入：${res.recentServerImports.take(2).map((e) => '#${e.numericId}').join(', ')}';
+        : l10n.projectEditorNovelsActionCrawlObservabilityRecentImports(
+            res.recentServerImports
+                .take(2)
+                .map((e) => '#${e.numericId}')
+                .join(', '),
+          );
     applyInfoLine(
-      '托管统计：章节总数 ${res.totalChapters}；source[$topSources]；status[$topStatuses]；crawlJobs[$jobs]。$recent',
+      l10n.projectEditorNovelsActionCrawlObservability(
+        res.totalChapters,
+        topSources,
+        topStatuses,
+        jobs,
+        recent,
+      ),
     );
   }
 
@@ -489,6 +573,7 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
   }
 
   Future<void> _readNovelWorkbenchChapter({
+    required AppLocalizations l10n,
     required String token,
     required ProjectRow project,
     required TextEditingController selectedNovelIdCtrl,
@@ -506,10 +591,11 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     patchIntakeStatusCtrl.text = row.intakeStatus ?? 'admitted';
     patchIntakeSourceUrlCtrl.text = row.intakeSourceUrl ?? '';
     patchIntakeNoteCtrl.text = row.intakeNote ?? '';
-    applyInfoLine('已读取章节 #${row.numericId}。');
+    applyInfoLine(l10n.projectEditorNovelsActionChapterReadOk(row.numericId));
   }
 
   Future<void> _saveNovelWorkbenchChapter({
+    required AppLocalizations l10n,
     required String token,
     required ProjectRow project,
     required TextEditingController selectedNovelIdCtrl,
@@ -535,10 +621,11 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
           : patchIntakeNoteCtrl.text.trim(),
     });
     await refreshWorkbench(setLocalState);
-    applyInfoLine('已更新章节 #${row.numericId}。');
+    applyInfoLine(l10n.projectEditorNovelsActionChapterSaveOk(row.numericId));
   }
 
   Future<void> _deleteNovelWorkbenchChapter({
+    required AppLocalizations l10n,
     required String token,
     required ProjectRow project,
     required TextEditingController deleteNovelIdCtrl,
@@ -549,10 +636,11 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     final id = int.parse(deleteNovelIdCtrl.text.trim());
     await deleteProjectNovelByProjectIds(token, project.id, id);
     await refreshWorkbench(setLocalState);
-    applyInfoLine('已删除章节 #$id。');
+    applyInfoLine(l10n.projectEditorNovelsActionChapterDeleteOk(id));
   }
 
   Future<void> _generateNovelWorkbenchEvents({
+    required AppLocalizations l10n,
     required String token,
     required ProjectRow project,
     required TextEditingController generateIdsCtrl,
@@ -562,7 +650,7 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
   }) async {
     final ids = parseNumericIdList(generateIdsCtrl.text);
     if (ids.isEmpty) {
-      throw const FormatException('至少提供一个章节 ID');
+      throw FormatException(l10n.projectEditorNovelsActionErrorIdsEmpty);
     }
     final message = await postNovelEventsGenerateEvents(
       token,
@@ -570,10 +658,13 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
       novelIds: ids,
     );
     await refreshWorkbench(setLocalState);
-    applyInfoLine('已触发事件生成：$message');
+    applyInfoLine(
+      l10n.projectEditorNovelsActionEventsGenerateOk(message),
+    );
   }
 
   Future<void> _readNovelWorkbenchData({
+    required AppLocalizations l10n,
     required String token,
     required ProjectRow project,
     required void Function(String infoLine) applyInfoLine,
@@ -583,15 +674,18 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
       projectUuid: project.id,
     );
     final sample = rows.isEmpty
-        ? '空列表'
+        ? l10n.projectEditorNovelsActionListLabelEmpty
         : rows
               .take(2)
               .map((row) => '#${row.numericId} ${row.chapter}')
               .join(' · ');
-    applyInfoLine('workbench get-novel-data 返回 ${rows.length} 条：$sample');
+    applyInfoLine(
+      l10n.projectEditorNovelsActionWorkbenchDataResult(rows.length, sample),
+    );
   }
 
   Future<void> _readNovelWorkbenchIndex({
+    required AppLocalizations l10n,
     required String token,
     required ProjectRow project,
     required void Function(String infoLine) applyInfoLine,
@@ -601,15 +695,18 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
       projectUuid: project.id,
     );
     final sample = rows.isEmpty
-        ? '空列表'
+        ? l10n.projectEditorNovelsActionListLabelEmpty
         : rows
               .take(3)
               .map((row) => '#${row.numericId}:${row.chapterIndex}')
               .join(' · ');
-    applyInfoLine('workbench get-novel-index 返回 ${rows.length} 条：$sample');
+    applyInfoLine(
+      l10n.projectEditorNovelsActionWorkbenchIndexResult(rows.length, sample),
+    );
   }
 
   Future<void> _readNovelWorkbenchEventStates({
+    required AppLocalizations l10n,
     required String token,
     required ProjectRow project,
     required TextEditingController numericIdsCtrl,
@@ -617,21 +714,25 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
   }) async {
     final ids = parseNumericIdList(numericIdsCtrl.text);
     if (ids.isEmpty) {
-      throw const FormatException('至少提供一个章节 ID');
+      throw FormatException(l10n.projectEditorNovelsActionErrorIdsEmpty);
     }
     final rows = await fetchNovelWorkbenchEventStates(token, project.id, ids);
     final sample = rows.isEmpty
-        ? '当前均为 0'
+        ? l10n.projectEditorNovelsActionListLabelAllZero
         : rows
               .take(3)
               .map((row) => '#${row.numericId}:${row.eventState}')
               .join(' · ');
     applyInfoLine(
-      'workbench get-novel-event-state 返回 ${rows.length} 条：$sample',
+      l10n.projectEditorNovelsActionWorkbenchEventStateResult(
+        rows.length,
+        sample,
+      ),
     );
   }
 
   Future<void> _batchDeleteNovelWorkbenchChapters({
+    required AppLocalizations l10n,
     required String token,
     required ProjectRow project,
     required TextEditingController batchDeleteIdsCtrl,
@@ -641,14 +742,17 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
   }) async {
     final ids = parseNumericIdList(batchDeleteIdsCtrl.text);
     if (ids.isEmpty) {
-      throw const FormatException('至少提供一个章节 ID');
+      throw FormatException(l10n.projectEditorNovelsActionErrorIdsEmpty);
     }
     final message = await batchDeleteNovelsUnderProject(token, project.id, ids);
     await refreshWorkbench(setLocalState);
-    applyInfoLine('已批量删除 ${ids.length} 条章节：$message');
+    applyInfoLine(
+      l10n.projectEditorNovelsActionBatchDeleteOk(ids.length, message),
+    );
   }
 
   Future<void> _batchUpdateNovelWorkbenchAdmission({
+    required AppLocalizations l10n,
     required String token,
     required ProjectRow project,
     required TextEditingController batchAdmissionIdsCtrl,
@@ -660,11 +764,13 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
   }) async {
     final ids = parseNumericIdList(batchAdmissionIdsCtrl.text);
     if (ids.isEmpty) {
-      throw const FormatException('至少提供一个章节 ID');
+      throw FormatException(l10n.projectEditorNovelsActionErrorIdsEmpty);
     }
     final nextStatus = batchAdmissionStatusCtrl.text.trim();
     if (nextStatus.isEmpty) {
-      throw const FormatException('请先选择目标准入状态');
+      throw FormatException(
+        l10n.projectEditorNovelsActionErrorAdmissionStatusEmpty,
+      );
     }
     final note = batchAdmissionNoteCtrl.text.trim();
     for (final id in ids) {
@@ -674,6 +780,8 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
       });
     }
     await refreshWorkbench(setLocalState);
-    applyInfoLine('已批量更新 ${ids.length} 条章节到 $nextStatus。');
+    applyInfoLine(
+      l10n.projectEditorNovelsActionBatchAdmissionOk(ids.length, nextStatus),
+    );
   }
 }

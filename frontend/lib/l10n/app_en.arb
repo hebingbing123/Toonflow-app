@@ -4574,6 +4574,417 @@
       }
     }
   },
+  "projectEditorNovelsChapterWorkbenchTitle": "Chapters workbench",
+  "projectEditorNovelsChapterWorkbenchPreviewTitle": "Current chapter preview",
+  "projectEditorNovelsChapterWorkbenchPreviewRow": "{numericId} · {chapter} · {intakeSource} / {intakeStatus} · event state {eventState}",
+  "@projectEditorNovelsChapterWorkbenchPreviewRow": {
+    "placeholders": {
+      "numericId": {
+        "type": "int"
+      },
+      "chapter": {
+        "type": "String"
+      },
+      "intakeSource": {
+        "type": "String"
+      },
+      "intakeStatus": {
+        "type": "String"
+      },
+      "eventState": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsChapterWorkbenchCloseButton": "Close",
+  "projectEditorNovelsChapterWorkbenchInfoNoChapters": "This project has no chapters yet.",
+  "projectEditorNovelsChapterWorkbenchInfoLoaded": "Loaded {count} chapters.",
+  "@projectEditorNovelsChapterWorkbenchInfoLoaded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsChapterWorkbenchInfoListEmpty": "Chapter list is empty.",
+  "projectEditorNovelsChapterWorkbenchInfoRefreshed": "Refreshed: {count} chapters in total.",
+  "@projectEditorNovelsChapterWorkbenchInfoRefreshed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsActionErrorUrlEmpty": "Enter a crawl URL first.",
+  "projectEditorNovelsActionErrorUrlInvalid": "Crawl URL must be a valid http/https address.",
+  "projectEditorNovelsActionErrorCrawlHttp": "Crawl failed, HTTP {code}",
+  "@projectEditorNovelsActionErrorCrawlHttp": {
+    "placeholders": {
+      "code": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsActionCrawlImportPreviewEmpty": "Captured {title}, but no importable body was extracted.",
+  "@projectEditorNovelsActionCrawlImportPreviewEmpty": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsActionCrawlImportPreviewOk": "Captured {title}; extracted {count} importable chapters.",
+  "@projectEditorNovelsActionCrawlImportPreviewOk": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsActionCrawlSideServer": "server-side crawl",
+  "projectEditorNovelsActionCrawlSideClient": "client-side crawl",
+  "projectEditorNovelsActionCrawlDoneInfo": "{side} completed: {title} (mode {mode}, pages {pageCount}, chapter link candidates {chapterUrlCount}, body {bodyCharCount} chars)",
+  "@projectEditorNovelsActionCrawlDoneInfo": {
+    "placeholders": {
+      "side": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      },
+      "mode": {
+        "type": "String"
+      },
+      "pageCount": {
+        "type": "int"
+      },
+      "chapterUrlCount": {
+        "type": "int"
+      },
+      "bodyCharCount": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsActionSearchHit": "Search matched {total} rows; showing {shown}.",
+  "@projectEditorNovelsActionSearchHit": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "shown": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsActionSearchFiltered": "Filter matched {total} rows ({filters}); showing {shown}.",
+  "@projectEditorNovelsActionSearchFiltered": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "filters": {
+        "type": "String"
+      },
+      "shown": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsActionErrorPreparseRequired": "Pre-parse the whole book first.",
+  "projectEditorNovelsActionErrorImportQuality": "Import quality gate failed: {blockers}",
+  "@projectEditorNovelsActionErrorImportQuality": {
+    "placeholders": {
+      "blockers": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsActionImportQualityHint": "Import quality hint: {warnings}",
+  "@projectEditorNovelsActionImportQualityHint": {
+    "placeholders": {
+      "warnings": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsActionErrorBatchSizePositive": "Batch size must be greater than 0.",
+  "projectEditorNovelsActionErrorChapterBodyEmpty": "Chapter #{index} has empty body; fix it in the pre-parse preview before importing.",
+  "@projectEditorNovelsActionErrorChapterBodyEmpty": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsActionImportProgress": "Imported {end}/{total} chapters…",
+  "@projectEditorNovelsActionImportProgress": {
+    "placeholders": {
+      "end": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsActionImportComplete": "Whole-book import finished; added {count} chapters.",
+  "@projectEditorNovelsActionImportComplete": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsActionServerImportDone": "Server-hosted import finished: {title} (added {chaptersCreated} chapters, mode {mode}, crawled {pageCount} pages, chapter link candidates {chapterUrlCount}, body {bodyCharCount} chars)",
+  "@projectEditorNovelsActionServerImportDone": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "chaptersCreated": {
+        "type": "int"
+      },
+      "mode": {
+        "type": "String"
+      },
+      "pageCount": {
+        "type": "int"
+      },
+      "chapterUrlCount": {
+        "type": "int"
+      },
+      "bodyCharCount": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsActionErrorBatchUrlsEmpty": "Enter at least one URL line in the batch hosted URL field.",
+  "projectEditorNovelsActionBatchImportDone": "Batch server import: succeeded {succeeded}/{total}, failed {failed}.{detail}",
+  "@projectEditorNovelsActionBatchImportDone": {
+    "placeholders": {
+      "succeeded": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      },
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsActionBatchImportFailuresPrefix": " Failure samples: ",
+  "projectEditorNovelsActionCrawlScheduleCreated": "Created crawl schedule: task id {taskId} ({status}; delay {delayMinutes}m; repeat {repeatMinutes}m)",
+  "@projectEditorNovelsActionCrawlScheduleCreated": {
+    "placeholders": {
+      "taskId": {
+        "type": "int"
+      },
+      "status": {
+        "type": "String"
+      },
+      "delayMinutes": {
+        "type": "int"
+      },
+      "repeatMinutes": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsActionCrawlSchedulesEmpty": "No hosted crawl schedules (showing up to 100 recent for this project).",
+  "projectEditorNovelsActionCrawlSchedulesSummary": "This project has {count} hosted crawl schedules; recent: {head}",
+  "@projectEditorNovelsActionCrawlSchedulesSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "head": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsActionCrawlObservability": "Hosted stats: chapters {totalChapters}; source[{topSources}]; status[{topStatuses}]; crawlJobs[{jobs}].{recent}",
+  "@projectEditorNovelsActionCrawlObservability": {
+    "placeholders": {
+      "totalChapters": {
+        "type": "int"
+      },
+      "topSources": {
+        "type": "String"
+      },
+      "topStatuses": {
+        "type": "String"
+      },
+      "jobs": {
+        "type": "String"
+      },
+      "recent": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsActionCrawlObservabilityRecentImports": " Recent server imports: {ids}",
+  "@projectEditorNovelsActionCrawlObservabilityRecentImports": {
+    "placeholders": {
+      "ids": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsActionChapterReadOk": "Loaded chapter #{id}.",
+  "@projectEditorNovelsActionChapterReadOk": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsActionChapterSaveOk": "Updated chapter #{id}.",
+  "@projectEditorNovelsActionChapterSaveOk": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsActionChapterDeleteOk": "Deleted chapter #{id}.",
+  "@projectEditorNovelsActionChapterDeleteOk": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsActionErrorIdsEmpty": "Provide at least one chapter id.",
+  "projectEditorNovelsActionEventsGenerateOk": "Triggered event generation: {message}",
+  "@projectEditorNovelsActionEventsGenerateOk": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsActionListLabelEmpty": "(empty list)",
+  "projectEditorNovelsActionListLabelAllZero": "(all zero)",
+  "projectEditorNovelsActionWorkbenchDataResult": "workbench get-novel-data returned {count} rows: {sample}",
+  "@projectEditorNovelsActionWorkbenchDataResult": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "sample": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsActionWorkbenchIndexResult": "workbench get-novel-index returned {count} rows: {sample}",
+  "@projectEditorNovelsActionWorkbenchIndexResult": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "sample": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsActionWorkbenchEventStateResult": "workbench get-novel-event-state returned {count} rows: {sample}",
+  "@projectEditorNovelsActionWorkbenchEventStateResult": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "sample": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsActionBatchDeleteOk": "Batch deleted {count} chapters: {message}",
+  "@projectEditorNovelsActionBatchDeleteOk": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsActionErrorAdmissionStatusEmpty": "Select a target admission status first.",
+  "projectEditorNovelsActionBatchAdmissionOk": "Batch updated {count} chapters to {status}.",
+  "@projectEditorNovelsActionBatchAdmissionOk": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsChapterWorkbenchValueUnknown": "unknown",
+  "projectEditorNovelsChapterWorkbenchValueUnset": "unset",
+  "projectEditorNovelsActionSearchFiltersCleared": "Chapter search filters cleared.",
+  "projectEditorNovelsActionChapterCreateOk": "Chapter created.",
+  "projectEditorNovelsActionPreparseResultEmpty": "No importable content was detected.",
+  "projectEditorNovelsActionPreparseResultOk": "Pre-parsed {count} chapters; confirm titles and order before importing.",
+  "@projectEditorNovelsActionPreparseResultOk": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsActionImportPreviewAppendChapter": "Appended 1 supplement chapter; fill in title and body before importing.",
+  "projectEditorNovelsActionImportPreviewDeletedRow": "Removed pre-parsed row #{chapterIndex}.",
+  "@projectEditorNovelsActionImportPreviewDeletedRow": {
+    "placeholders": {
+      "chapterIndex": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsActionImportPreviewRowTitleUpdated": "Updated title for pre-parsed row #{chapterIndex}.",
+  "@projectEditorNovelsActionImportPreviewRowTitleUpdated": {
+    "placeholders": {
+      "chapterIndex": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsActionImportPreviewRowBodyUpdated": "Updated body for row #{chapterIndex}.",
+  "@projectEditorNovelsActionImportPreviewRowBodyUpdated": {
+    "placeholders": {
+      "chapterIndex": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsActionImportPreviewAreaTitle": "Pre-parse edit area ({count} rows)",
+  "@projectEditorNovelsActionImportPreviewAreaTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsActionImportPreviewFooterNote": "Import will renumber automatically; empty-body chapters are blocked—fix them here first.",
+  "projectEditorNovelsActionImportPreviewLongListHint": "Preview is long; scroll to edit every chapter.",
+  "projectEditorNovelsActionImportPreviewSupplementChapterTitle": "Supplement chapter {n}",
+  "@projectEditorNovelsActionImportPreviewSupplementChapterTitle": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "projectEditorAssetSummaryProductionEmpty": "Production asset data is empty",
   "projectEditorAssetSummaryProductionLine": "Production assets {total} items · {typesLine} · Sample: {sampleLine}",
   "@projectEditorAssetSummaryProductionLine": {

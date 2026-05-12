@@ -6011,6 +6011,324 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get projectEditorNovelsChapterWorkbenchTitle => '章节工作台';
+
+  @override
+  String get projectEditorNovelsChapterWorkbenchPreviewTitle => '当前章节预览';
+
+  @override
+  String projectEditorNovelsChapterWorkbenchPreviewRow(
+    int numericId,
+    String chapter,
+    String intakeSource,
+    String intakeStatus,
+    String eventState,
+  ) {
+    return '$numericId · $chapter · $intakeSource / $intakeStatus · 事件状态 $eventState';
+  }
+
+  @override
+  String get projectEditorNovelsChapterWorkbenchCloseButton => '关闭';
+
+  @override
+  String get projectEditorNovelsChapterWorkbenchInfoNoChapters => '当前项目还没有章节。';
+
+  @override
+  String projectEditorNovelsChapterWorkbenchInfoLoaded(int count) {
+    return '已载入 $count 条章节。';
+  }
+
+  @override
+  String get projectEditorNovelsChapterWorkbenchInfoListEmpty => '章节列表为空。';
+
+  @override
+  String projectEditorNovelsChapterWorkbenchInfoRefreshed(int count) {
+    return '已刷新，共 $count 条章节。';
+  }
+
+  @override
+  String get projectEditorNovelsActionErrorUrlEmpty => '请先输入抓取 URL';
+
+  @override
+  String get projectEditorNovelsActionErrorUrlInvalid =>
+      '抓取 URL 必须是合法的 http/https 地址';
+
+  @override
+  String projectEditorNovelsActionErrorCrawlHttp(int code) {
+    return '抓取失败，HTTP $code';
+  }
+
+  @override
+  String projectEditorNovelsActionCrawlImportPreviewEmpty(String title) {
+    return '已抓取 $title，但没有抽出可导入正文。';
+  }
+
+  @override
+  String projectEditorNovelsActionCrawlImportPreviewOk(
+    String title,
+    int count,
+  ) {
+    return '已抓取 $title，抽出 $count 条可导入章节。';
+  }
+
+  @override
+  String get projectEditorNovelsActionCrawlSideServer => 'server-side crawl';
+
+  @override
+  String get projectEditorNovelsActionCrawlSideClient => 'client-side crawl';
+
+  @override
+  String projectEditorNovelsActionCrawlDoneInfo(
+    String side,
+    String title,
+    String mode,
+    int pageCount,
+    int chapterUrlCount,
+    int bodyCharCount,
+  ) {
+    return '$side 已完成：$title（模式 $mode，抓取 $pageCount 页，候选章节链接 $chapterUrlCount，正文 $bodyCharCount 字）';
+  }
+
+  @override
+  String projectEditorNovelsActionSearchHit(int total, int shown) {
+    return '搜索命中 $total 条，当前展示 $shown 条。';
+  }
+
+  @override
+  String projectEditorNovelsActionSearchFiltered(
+    int total,
+    String filters,
+    int shown,
+  ) {
+    return '筛选命中 $total 条（$filters），当前展示 $shown 条。';
+  }
+
+  @override
+  String get projectEditorNovelsActionErrorPreparseRequired => '请先预解析整本内容';
+
+  @override
+  String projectEditorNovelsActionErrorImportQuality(String blockers) {
+    return '导入质量门未通过：$blockers';
+  }
+
+  @override
+  String projectEditorNovelsActionImportQualityHint(String warnings) {
+    return '导入质量提示：$warnings';
+  }
+
+  @override
+  String get projectEditorNovelsActionErrorBatchSizePositive => '批次大小必须大于 0';
+
+  @override
+  String projectEditorNovelsActionErrorChapterBodyEmpty(int index) {
+    return '第 $index 条章节正文为空，请先在预解析预览里修正后再导入';
+  }
+
+  @override
+  String projectEditorNovelsActionImportProgress(int end, int total) {
+    return '已导入 $end/$total 条章节…';
+  }
+
+  @override
+  String projectEditorNovelsActionImportComplete(int count) {
+    return '整本导入完成，共新增 $count 条章节。';
+  }
+
+  @override
+  String projectEditorNovelsActionServerImportDone(
+    String title,
+    int chaptersCreated,
+    String mode,
+    int pageCount,
+    int chapterUrlCount,
+    int bodyCharCount,
+  ) {
+    return 'server 托管导入完成：$title（新增 $chaptersCreated 条章节，模式 $mode，抓取 $pageCount 页，候选章节链接 $chapterUrlCount，正文 $bodyCharCount 字）';
+  }
+
+  @override
+  String get projectEditorNovelsActionErrorBatchUrlsEmpty =>
+      '请先在批量托管 URL 里填入至少 1 行 URL';
+
+  @override
+  String projectEditorNovelsActionBatchImportDone(
+    int succeeded,
+    int total,
+    int failed,
+    String detail,
+  ) {
+    return '批量托管导入完成：成功 $succeeded/$total，失败 $failed。$detail';
+  }
+
+  @override
+  String get projectEditorNovelsActionBatchImportFailuresPrefix => ' 失败样例：';
+
+  @override
+  String projectEditorNovelsActionCrawlScheduleCreated(
+    int taskId,
+    String status,
+    int delayMinutes,
+    int repeatMinutes,
+  ) {
+    return '已创建托管抓取计划：任务 $taskId（$status；延迟 $delayMinutes 分钟；重复间隔 $repeatMinutes 分钟）';
+  }
+
+  @override
+  String get projectEditorNovelsActionCrawlSchedulesEmpty =>
+      '暂无托管抓取计划（仅显示本项目最近 100 条）。';
+
+  @override
+  String projectEditorNovelsActionCrawlSchedulesSummary(
+    int count,
+    String head,
+  ) {
+    return '本项目托管抓取计划 $count 条，最近：$head';
+  }
+
+  @override
+  String projectEditorNovelsActionCrawlObservability(
+    int totalChapters,
+    String topSources,
+    String topStatuses,
+    String jobs,
+    String recent,
+  ) {
+    return '托管统计：章节总数 $totalChapters；source[$topSources]；status[$topStatuses]；crawlJobs[$jobs]。$recent';
+  }
+
+  @override
+  String projectEditorNovelsActionCrawlObservabilityRecentImports(String ids) {
+    return ' 最近 server 导入：$ids';
+  }
+
+  @override
+  String projectEditorNovelsActionChapterReadOk(int id) {
+    return '已读取章节 #$id。';
+  }
+
+  @override
+  String projectEditorNovelsActionChapterSaveOk(int id) {
+    return '已更新章节 #$id。';
+  }
+
+  @override
+  String projectEditorNovelsActionChapterDeleteOk(int id) {
+    return '已删除章节 #$id。';
+  }
+
+  @override
+  String get projectEditorNovelsActionErrorIdsEmpty => '至少提供一个章节 ID';
+
+  @override
+  String projectEditorNovelsActionEventsGenerateOk(String message) {
+    return '已触发事件生成：$message';
+  }
+
+  @override
+  String get projectEditorNovelsActionListLabelEmpty => '空列表';
+
+  @override
+  String get projectEditorNovelsActionListLabelAllZero => '当前均为 0';
+
+  @override
+  String projectEditorNovelsActionWorkbenchDataResult(
+    int count,
+    String sample,
+  ) {
+    return 'workbench get-novel-data 返回 $count 条：$sample';
+  }
+
+  @override
+  String projectEditorNovelsActionWorkbenchIndexResult(
+    int count,
+    String sample,
+  ) {
+    return 'workbench get-novel-index 返回 $count 条：$sample';
+  }
+
+  @override
+  String projectEditorNovelsActionWorkbenchEventStateResult(
+    int count,
+    String sample,
+  ) {
+    return 'workbench get-novel-event-state 返回 $count 条：$sample';
+  }
+
+  @override
+  String projectEditorNovelsActionBatchDeleteOk(int count, String message) {
+    return '已批量删除 $count 条章节：$message';
+  }
+
+  @override
+  String get projectEditorNovelsActionErrorAdmissionStatusEmpty => '请先选择目标准入状态';
+
+  @override
+  String projectEditorNovelsActionBatchAdmissionOk(int count, String status) {
+    return '已批量更新 $count 条章节到 $status。';
+  }
+
+  @override
+  String get projectEditorNovelsChapterWorkbenchValueUnknown => 'unknown';
+
+  @override
+  String get projectEditorNovelsChapterWorkbenchValueUnset => 'unset';
+
+  @override
+  String get projectEditorNovelsActionSearchFiltersCleared => '已清空章节筛选条件。';
+
+  @override
+  String get projectEditorNovelsActionChapterCreateOk => '已新增章节。';
+
+  @override
+  String get projectEditorNovelsActionPreparseResultEmpty => '没有识别到可导入内容。';
+
+  @override
+  String projectEditorNovelsActionPreparseResultOk(int count) {
+    return '已预解析 $count 条章节，先确认标题和顺序再导入。';
+  }
+
+  @override
+  String get projectEditorNovelsActionImportPreviewAppendChapter =>
+      '已追加 1 条补充章节，请补全标题和正文后导入。';
+
+  @override
+  String projectEditorNovelsActionImportPreviewDeletedRow(int chapterIndex) {
+    return '已删除第 $chapterIndex 条预解析章节。';
+  }
+
+  @override
+  String projectEditorNovelsActionImportPreviewRowTitleUpdated(
+    int chapterIndex,
+  ) {
+    return '已更新第 $chapterIndex 条预解析章节标题。';
+  }
+
+  @override
+  String projectEditorNovelsActionImportPreviewRowBodyUpdated(
+    int chapterIndex,
+  ) {
+    return '已更新第 $chapterIndex 条正文。';
+  }
+
+  @override
+  String projectEditorNovelsActionImportPreviewAreaTitle(int count) {
+    return '预解析修正区（$count 条）';
+  }
+
+  @override
+  String get projectEditorNovelsActionImportPreviewFooterNote =>
+      '导入时会自动重新编号；空正文章节会被拦下，需先在这里补全。';
+
+  @override
+  String get projectEditorNovelsActionImportPreviewLongListHint =>
+      '当前预览较长，继续向下滚动可逐条修正全部章节。';
+
+  @override
+  String projectEditorNovelsActionImportPreviewSupplementChapterTitle(int n) {
+    return '补充章节 $n';
+  }
+
+  @override
   String get projectEditorAssetSummaryProductionEmpty => 'production 资产数据为空';
 
   @override

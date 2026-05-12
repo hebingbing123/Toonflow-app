@@ -6264,6 +6264,335 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get projectEditorNovelsChapterWorkbenchTitle => 'Chapters workbench';
+
+  @override
+  String get projectEditorNovelsChapterWorkbenchPreviewTitle =>
+      'Current chapter preview';
+
+  @override
+  String projectEditorNovelsChapterWorkbenchPreviewRow(
+    int numericId,
+    String chapter,
+    String intakeSource,
+    String intakeStatus,
+    String eventState,
+  ) {
+    return '$numericId · $chapter · $intakeSource / $intakeStatus · event state $eventState';
+  }
+
+  @override
+  String get projectEditorNovelsChapterWorkbenchCloseButton => 'Close';
+
+  @override
+  String get projectEditorNovelsChapterWorkbenchInfoNoChapters =>
+      'This project has no chapters yet.';
+
+  @override
+  String projectEditorNovelsChapterWorkbenchInfoLoaded(int count) {
+    return 'Loaded $count chapters.';
+  }
+
+  @override
+  String get projectEditorNovelsChapterWorkbenchInfoListEmpty =>
+      'Chapter list is empty.';
+
+  @override
+  String projectEditorNovelsChapterWorkbenchInfoRefreshed(int count) {
+    return 'Refreshed: $count chapters in total.';
+  }
+
+  @override
+  String get projectEditorNovelsActionErrorUrlEmpty =>
+      'Enter a crawl URL first.';
+
+  @override
+  String get projectEditorNovelsActionErrorUrlInvalid =>
+      'Crawl URL must be a valid http/https address.';
+
+  @override
+  String projectEditorNovelsActionErrorCrawlHttp(int code) {
+    return 'Crawl failed, HTTP $code';
+  }
+
+  @override
+  String projectEditorNovelsActionCrawlImportPreviewEmpty(String title) {
+    return 'Captured $title, but no importable body was extracted.';
+  }
+
+  @override
+  String projectEditorNovelsActionCrawlImportPreviewOk(
+    String title,
+    int count,
+  ) {
+    return 'Captured $title; extracted $count importable chapters.';
+  }
+
+  @override
+  String get projectEditorNovelsActionCrawlSideServer => 'server-side crawl';
+
+  @override
+  String get projectEditorNovelsActionCrawlSideClient => 'client-side crawl';
+
+  @override
+  String projectEditorNovelsActionCrawlDoneInfo(
+    String side,
+    String title,
+    String mode,
+    int pageCount,
+    int chapterUrlCount,
+    int bodyCharCount,
+  ) {
+    return '$side completed: $title (mode $mode, pages $pageCount, chapter link candidates $chapterUrlCount, body $bodyCharCount chars)';
+  }
+
+  @override
+  String projectEditorNovelsActionSearchHit(int total, int shown) {
+    return 'Search matched $total rows; showing $shown.';
+  }
+
+  @override
+  String projectEditorNovelsActionSearchFiltered(
+    int total,
+    String filters,
+    int shown,
+  ) {
+    return 'Filter matched $total rows ($filters); showing $shown.';
+  }
+
+  @override
+  String get projectEditorNovelsActionErrorPreparseRequired =>
+      'Pre-parse the whole book first.';
+
+  @override
+  String projectEditorNovelsActionErrorImportQuality(String blockers) {
+    return 'Import quality gate failed: $blockers';
+  }
+
+  @override
+  String projectEditorNovelsActionImportQualityHint(String warnings) {
+    return 'Import quality hint: $warnings';
+  }
+
+  @override
+  String get projectEditorNovelsActionErrorBatchSizePositive =>
+      'Batch size must be greater than 0.';
+
+  @override
+  String projectEditorNovelsActionErrorChapterBodyEmpty(int index) {
+    return 'Chapter #$index has empty body; fix it in the pre-parse preview before importing.';
+  }
+
+  @override
+  String projectEditorNovelsActionImportProgress(int end, int total) {
+    return 'Imported $end/$total chapters…';
+  }
+
+  @override
+  String projectEditorNovelsActionImportComplete(int count) {
+    return 'Whole-book import finished; added $count chapters.';
+  }
+
+  @override
+  String projectEditorNovelsActionServerImportDone(
+    String title,
+    int chaptersCreated,
+    String mode,
+    int pageCount,
+    int chapterUrlCount,
+    int bodyCharCount,
+  ) {
+    return 'Server-hosted import finished: $title (added $chaptersCreated chapters, mode $mode, crawled $pageCount pages, chapter link candidates $chapterUrlCount, body $bodyCharCount chars)';
+  }
+
+  @override
+  String get projectEditorNovelsActionErrorBatchUrlsEmpty =>
+      'Enter at least one URL line in the batch hosted URL field.';
+
+  @override
+  String projectEditorNovelsActionBatchImportDone(
+    int succeeded,
+    int total,
+    int failed,
+    String detail,
+  ) {
+    return 'Batch server import: succeeded $succeeded/$total, failed $failed.$detail';
+  }
+
+  @override
+  String get projectEditorNovelsActionBatchImportFailuresPrefix =>
+      ' Failure samples: ';
+
+  @override
+  String projectEditorNovelsActionCrawlScheduleCreated(
+    int taskId,
+    String status,
+    int delayMinutes,
+    int repeatMinutes,
+  ) {
+    return 'Created crawl schedule: task id $taskId ($status; delay ${delayMinutes}m; repeat ${repeatMinutes}m)';
+  }
+
+  @override
+  String get projectEditorNovelsActionCrawlSchedulesEmpty =>
+      'No hosted crawl schedules (showing up to 100 recent for this project).';
+
+  @override
+  String projectEditorNovelsActionCrawlSchedulesSummary(
+    int count,
+    String head,
+  ) {
+    return 'This project has $count hosted crawl schedules; recent: $head';
+  }
+
+  @override
+  String projectEditorNovelsActionCrawlObservability(
+    int totalChapters,
+    String topSources,
+    String topStatuses,
+    String jobs,
+    String recent,
+  ) {
+    return 'Hosted stats: chapters $totalChapters; source[$topSources]; status[$topStatuses]; crawlJobs[$jobs].$recent';
+  }
+
+  @override
+  String projectEditorNovelsActionCrawlObservabilityRecentImports(String ids) {
+    return ' Recent server imports: $ids';
+  }
+
+  @override
+  String projectEditorNovelsActionChapterReadOk(int id) {
+    return 'Loaded chapter #$id.';
+  }
+
+  @override
+  String projectEditorNovelsActionChapterSaveOk(int id) {
+    return 'Updated chapter #$id.';
+  }
+
+  @override
+  String projectEditorNovelsActionChapterDeleteOk(int id) {
+    return 'Deleted chapter #$id.';
+  }
+
+  @override
+  String get projectEditorNovelsActionErrorIdsEmpty =>
+      'Provide at least one chapter id.';
+
+  @override
+  String projectEditorNovelsActionEventsGenerateOk(String message) {
+    return 'Triggered event generation: $message';
+  }
+
+  @override
+  String get projectEditorNovelsActionListLabelEmpty => '(empty list)';
+
+  @override
+  String get projectEditorNovelsActionListLabelAllZero => '(all zero)';
+
+  @override
+  String projectEditorNovelsActionWorkbenchDataResult(
+    int count,
+    String sample,
+  ) {
+    return 'workbench get-novel-data returned $count rows: $sample';
+  }
+
+  @override
+  String projectEditorNovelsActionWorkbenchIndexResult(
+    int count,
+    String sample,
+  ) {
+    return 'workbench get-novel-index returned $count rows: $sample';
+  }
+
+  @override
+  String projectEditorNovelsActionWorkbenchEventStateResult(
+    int count,
+    String sample,
+  ) {
+    return 'workbench get-novel-event-state returned $count rows: $sample';
+  }
+
+  @override
+  String projectEditorNovelsActionBatchDeleteOk(int count, String message) {
+    return 'Batch deleted $count chapters: $message';
+  }
+
+  @override
+  String get projectEditorNovelsActionErrorAdmissionStatusEmpty =>
+      'Select a target admission status first.';
+
+  @override
+  String projectEditorNovelsActionBatchAdmissionOk(int count, String status) {
+    return 'Batch updated $count chapters to $status.';
+  }
+
+  @override
+  String get projectEditorNovelsChapterWorkbenchValueUnknown => 'unknown';
+
+  @override
+  String get projectEditorNovelsChapterWorkbenchValueUnset => 'unset';
+
+  @override
+  String get projectEditorNovelsActionSearchFiltersCleared =>
+      'Chapter search filters cleared.';
+
+  @override
+  String get projectEditorNovelsActionChapterCreateOk => 'Chapter created.';
+
+  @override
+  String get projectEditorNovelsActionPreparseResultEmpty =>
+      'No importable content was detected.';
+
+  @override
+  String projectEditorNovelsActionPreparseResultOk(int count) {
+    return 'Pre-parsed $count chapters; confirm titles and order before importing.';
+  }
+
+  @override
+  String get projectEditorNovelsActionImportPreviewAppendChapter =>
+      'Appended 1 supplement chapter; fill in title and body before importing.';
+
+  @override
+  String projectEditorNovelsActionImportPreviewDeletedRow(int chapterIndex) {
+    return 'Removed pre-parsed row #$chapterIndex.';
+  }
+
+  @override
+  String projectEditorNovelsActionImportPreviewRowTitleUpdated(
+    int chapterIndex,
+  ) {
+    return 'Updated title for pre-parsed row #$chapterIndex.';
+  }
+
+  @override
+  String projectEditorNovelsActionImportPreviewRowBodyUpdated(
+    int chapterIndex,
+  ) {
+    return 'Updated body for row #$chapterIndex.';
+  }
+
+  @override
+  String projectEditorNovelsActionImportPreviewAreaTitle(int count) {
+    return 'Pre-parse edit area ($count rows)';
+  }
+
+  @override
+  String get projectEditorNovelsActionImportPreviewFooterNote =>
+      'Import will renumber automatically; empty-body chapters are blocked—fix them here first.';
+
+  @override
+  String get projectEditorNovelsActionImportPreviewLongListHint =>
+      'Preview is long; scroll to edit every chapter.';
+
+  @override
+  String projectEditorNovelsActionImportPreviewSupplementChapterTitle(int n) {
+    return 'Supplement chapter $n';
+  }
+
+  @override
   String get projectEditorAssetSummaryProductionEmpty =>
       'Production asset data is empty';
 

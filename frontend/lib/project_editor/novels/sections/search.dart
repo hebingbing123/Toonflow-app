@@ -2,6 +2,7 @@ part of '../../../../home_page.dart';
 
 extension _HomePageProjectEditorNovelWorkbenchSearchSection on _HomePageState {
   Widget _buildNovelWorkbenchSearchSection({
+    required AppLocalizations l10n,
     required BuildContext ctx,
     required StateSetter setDialogState,
     required StateSetter setLocalState,
@@ -96,6 +97,7 @@ extension _HomePageProjectEditorNovelWorkbenchSearchSection on _HomePageState {
                       novelsBusy: novelsBusy,
                       setLocalBusy: setLocalBusy,
                       action: () => _searchNovelWorkbenchRows(
+                        l10n: l10n,
                         token: token,
                         project: project,
                         searchCtrl: searchCtrl,
@@ -115,7 +117,9 @@ extension _HomePageProjectEditorNovelWorkbenchSearchSection on _HomePageState {
                         searchIntakeStatusCtrl.clear();
                         searchIntakeSourceCtrl.clear();
                       });
-                      updateInfoLine('已清空章节筛选条件。');
+                      updateInfoLine(
+                        l10n.projectEditorNovelsActionSearchFiltersCleared,
+                      );
                     },
               child: const Text('清空筛选'),
             ),

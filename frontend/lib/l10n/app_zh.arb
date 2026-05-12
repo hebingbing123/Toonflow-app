@@ -4574,6 +4574,417 @@
       }
     }
   },
+  "projectEditorNovelsChapterWorkbenchTitle": "章节工作台",
+  "projectEditorNovelsChapterWorkbenchPreviewTitle": "当前章节预览",
+  "projectEditorNovelsChapterWorkbenchPreviewRow": "{numericId} · {chapter} · {intakeSource} / {intakeStatus} · 事件状态 {eventState}",
+  "@projectEditorNovelsChapterWorkbenchPreviewRow": {
+    "placeholders": {
+      "numericId": {
+        "type": "int"
+      },
+      "chapter": {
+        "type": "String"
+      },
+      "intakeSource": {
+        "type": "String"
+      },
+      "intakeStatus": {
+        "type": "String"
+      },
+      "eventState": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsChapterWorkbenchCloseButton": "关闭",
+  "projectEditorNovelsChapterWorkbenchInfoNoChapters": "当前项目还没有章节。",
+  "projectEditorNovelsChapterWorkbenchInfoLoaded": "已载入 {count} 条章节。",
+  "@projectEditorNovelsChapterWorkbenchInfoLoaded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsChapterWorkbenchInfoListEmpty": "章节列表为空。",
+  "projectEditorNovelsChapterWorkbenchInfoRefreshed": "已刷新，共 {count} 条章节。",
+  "@projectEditorNovelsChapterWorkbenchInfoRefreshed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsActionErrorUrlEmpty": "请先输入抓取 URL",
+  "projectEditorNovelsActionErrorUrlInvalid": "抓取 URL 必须是合法的 http/https 地址",
+  "projectEditorNovelsActionErrorCrawlHttp": "抓取失败，HTTP {code}",
+  "@projectEditorNovelsActionErrorCrawlHttp": {
+    "placeholders": {
+      "code": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsActionCrawlImportPreviewEmpty": "已抓取 {title}，但没有抽出可导入正文。",
+  "@projectEditorNovelsActionCrawlImportPreviewEmpty": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsActionCrawlImportPreviewOk": "已抓取 {title}，抽出 {count} 条可导入章节。",
+  "@projectEditorNovelsActionCrawlImportPreviewOk": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsActionCrawlSideServer": "server-side crawl",
+  "projectEditorNovelsActionCrawlSideClient": "client-side crawl",
+  "projectEditorNovelsActionCrawlDoneInfo": "{side} 已完成：{title}（模式 {mode}，抓取 {pageCount} 页，候选章节链接 {chapterUrlCount}，正文 {bodyCharCount} 字）",
+  "@projectEditorNovelsActionCrawlDoneInfo": {
+    "placeholders": {
+      "side": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      },
+      "mode": {
+        "type": "String"
+      },
+      "pageCount": {
+        "type": "int"
+      },
+      "chapterUrlCount": {
+        "type": "int"
+      },
+      "bodyCharCount": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsActionSearchHit": "搜索命中 {total} 条，当前展示 {shown} 条。",
+  "@projectEditorNovelsActionSearchHit": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "shown": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsActionSearchFiltered": "筛选命中 {total} 条（{filters}），当前展示 {shown} 条。",
+  "@projectEditorNovelsActionSearchFiltered": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "filters": {
+        "type": "String"
+      },
+      "shown": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsActionErrorPreparseRequired": "请先预解析整本内容",
+  "projectEditorNovelsActionErrorImportQuality": "导入质量门未通过：{blockers}",
+  "@projectEditorNovelsActionErrorImportQuality": {
+    "placeholders": {
+      "blockers": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsActionImportQualityHint": "导入质量提示：{warnings}",
+  "@projectEditorNovelsActionImportQualityHint": {
+    "placeholders": {
+      "warnings": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsActionErrorBatchSizePositive": "批次大小必须大于 0",
+  "projectEditorNovelsActionErrorChapterBodyEmpty": "第 {index} 条章节正文为空，请先在预解析预览里修正后再导入",
+  "@projectEditorNovelsActionErrorChapterBodyEmpty": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsActionImportProgress": "已导入 {end}/{total} 条章节…",
+  "@projectEditorNovelsActionImportProgress": {
+    "placeholders": {
+      "end": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsActionImportComplete": "整本导入完成，共新增 {count} 条章节。",
+  "@projectEditorNovelsActionImportComplete": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsActionServerImportDone": "server 托管导入完成：{title}（新增 {chaptersCreated} 条章节，模式 {mode}，抓取 {pageCount} 页，候选章节链接 {chapterUrlCount}，正文 {bodyCharCount} 字）",
+  "@projectEditorNovelsActionServerImportDone": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "chaptersCreated": {
+        "type": "int"
+      },
+      "mode": {
+        "type": "String"
+      },
+      "pageCount": {
+        "type": "int"
+      },
+      "chapterUrlCount": {
+        "type": "int"
+      },
+      "bodyCharCount": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsActionErrorBatchUrlsEmpty": "请先在批量托管 URL 里填入至少 1 行 URL",
+  "projectEditorNovelsActionBatchImportDone": "批量托管导入完成：成功 {succeeded}/{total}，失败 {failed}。{detail}",
+  "@projectEditorNovelsActionBatchImportDone": {
+    "placeholders": {
+      "succeeded": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      },
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsActionBatchImportFailuresPrefix": " 失败样例：",
+  "projectEditorNovelsActionCrawlScheduleCreated": "已创建托管抓取计划：任务 {taskId}（{status}；延迟 {delayMinutes} 分钟；重复间隔 {repeatMinutes} 分钟）",
+  "@projectEditorNovelsActionCrawlScheduleCreated": {
+    "placeholders": {
+      "taskId": {
+        "type": "int"
+      },
+      "status": {
+        "type": "String"
+      },
+      "delayMinutes": {
+        "type": "int"
+      },
+      "repeatMinutes": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsActionCrawlSchedulesEmpty": "暂无托管抓取计划（仅显示本项目最近 100 条）。",
+  "projectEditorNovelsActionCrawlSchedulesSummary": "本项目托管抓取计划 {count} 条，最近：{head}",
+  "@projectEditorNovelsActionCrawlSchedulesSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "head": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsActionCrawlObservability": "托管统计：章节总数 {totalChapters}；source[{topSources}]；status[{topStatuses}]；crawlJobs[{jobs}]。{recent}",
+  "@projectEditorNovelsActionCrawlObservability": {
+    "placeholders": {
+      "totalChapters": {
+        "type": "int"
+      },
+      "topSources": {
+        "type": "String"
+      },
+      "topStatuses": {
+        "type": "String"
+      },
+      "jobs": {
+        "type": "String"
+      },
+      "recent": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsActionCrawlObservabilityRecentImports": " 最近 server 导入：{ids}",
+  "@projectEditorNovelsActionCrawlObservabilityRecentImports": {
+    "placeholders": {
+      "ids": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsActionChapterReadOk": "已读取章节 #{id}。",
+  "@projectEditorNovelsActionChapterReadOk": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsActionChapterSaveOk": "已更新章节 #{id}。",
+  "@projectEditorNovelsActionChapterSaveOk": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsActionChapterDeleteOk": "已删除章节 #{id}。",
+  "@projectEditorNovelsActionChapterDeleteOk": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsActionErrorIdsEmpty": "至少提供一个章节 ID",
+  "projectEditorNovelsActionEventsGenerateOk": "已触发事件生成：{message}",
+  "@projectEditorNovelsActionEventsGenerateOk": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsActionListLabelEmpty": "空列表",
+  "projectEditorNovelsActionListLabelAllZero": "当前均为 0",
+  "projectEditorNovelsActionWorkbenchDataResult": "workbench get-novel-data 返回 {count} 条：{sample}",
+  "@projectEditorNovelsActionWorkbenchDataResult": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "sample": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsActionWorkbenchIndexResult": "workbench get-novel-index 返回 {count} 条：{sample}",
+  "@projectEditorNovelsActionWorkbenchIndexResult": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "sample": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsActionWorkbenchEventStateResult": "workbench get-novel-event-state 返回 {count} 条：{sample}",
+  "@projectEditorNovelsActionWorkbenchEventStateResult": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "sample": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsActionBatchDeleteOk": "已批量删除 {count} 条章节：{message}",
+  "@projectEditorNovelsActionBatchDeleteOk": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsActionErrorAdmissionStatusEmpty": "请先选择目标准入状态",
+  "projectEditorNovelsActionBatchAdmissionOk": "已批量更新 {count} 条章节到 {status}。",
+  "@projectEditorNovelsActionBatchAdmissionOk": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsChapterWorkbenchValueUnknown": "unknown",
+  "projectEditorNovelsChapterWorkbenchValueUnset": "unset",
+  "projectEditorNovelsActionSearchFiltersCleared": "已清空章节筛选条件。",
+  "projectEditorNovelsActionChapterCreateOk": "已新增章节。",
+  "projectEditorNovelsActionPreparseResultEmpty": "没有识别到可导入内容。",
+  "projectEditorNovelsActionPreparseResultOk": "已预解析 {count} 条章节，先确认标题和顺序再导入。",
+  "@projectEditorNovelsActionPreparseResultOk": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsActionImportPreviewAppendChapter": "已追加 1 条补充章节，请补全标题和正文后导入。",
+  "projectEditorNovelsActionImportPreviewDeletedRow": "已删除第 {chapterIndex} 条预解析章节。",
+  "@projectEditorNovelsActionImportPreviewDeletedRow": {
+    "placeholders": {
+      "chapterIndex": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsActionImportPreviewRowTitleUpdated": "已更新第 {chapterIndex} 条预解析章节标题。",
+  "@projectEditorNovelsActionImportPreviewRowTitleUpdated": {
+    "placeholders": {
+      "chapterIndex": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsActionImportPreviewRowBodyUpdated": "已更新第 {chapterIndex} 条正文。",
+  "@projectEditorNovelsActionImportPreviewRowBodyUpdated": {
+    "placeholders": {
+      "chapterIndex": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsActionImportPreviewAreaTitle": "预解析修正区（{count} 条）",
+  "@projectEditorNovelsActionImportPreviewAreaTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsActionImportPreviewFooterNote": "导入时会自动重新编号；空正文章节会被拦下，需先在这里补全。",
+  "projectEditorNovelsActionImportPreviewLongListHint": "当前预览较长，继续向下滚动可逐条修正全部章节。",
+  "projectEditorNovelsActionImportPreviewSupplementChapterTitle": "补充章节 {n}",
+  "@projectEditorNovelsActionImportPreviewSupplementChapterTitle": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "projectEditorAssetSummaryProductionEmpty": "production 资产数据为空",
   "projectEditorAssetSummaryProductionLine": "production 资产 {total} 条 · {typesLine} · 示例：{sampleLine}",
   "@projectEditorAssetSummaryProductionLine": {

@@ -2,6 +2,7 @@ part of '../../../../home_page.dart';
 
 extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
   Widget _buildNovelWorkbenchImportSection({
+    required AppLocalizations l10n,
     required BuildContext ctx,
     required StateSetter setDialogState,
     required StateSetter setLocalState,
@@ -98,6 +99,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                             novelsBusy: novelsBusy,
                             setLocalBusy: setLocalBusy,
                             action: () => _createNovelCrawlSchedule(
+                              l10n: l10n,
                               token: token,
                               project: project,
                               batchUrls: importBatchUrlsCtrl.text,
@@ -128,6 +130,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                             novelsBusy: novelsBusy,
                             setLocalBusy: setLocalBusy,
                             action: () => _listNovelCrawlSchedules(
+                              l10n: l10n,
                               token: token,
                               project: project,
                               applyInfoLine: updateInfoLine,
@@ -147,6 +150,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                             novelsBusy: novelsBusy,
                             setLocalBusy: setLocalBusy,
                             action: () => _showNovelCrawlObservability(
+                              l10n: l10n,
                               token: token,
                               project: project,
                               applyInfoLine: updateInfoLine,
@@ -169,6 +173,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                     novelsBusy: novelsBusy,
                     setLocalBusy: setLocalBusy,
                     action: () => _crawlNovelSourcePreview(
+                      l10n: l10n,
                       token: token,
                       project: project,
                       importUrlCtrl: importUrlCtrl,
@@ -213,8 +218,10 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                       applyImportPreview(
                         rows,
                         rows.isEmpty
-                            ? '没有识别到可导入内容。'
-                            : '已预解析 ${rows.length} 条章节，先确认标题和顺序再导入。',
+                            ? l10n.projectEditorNovelsActionPreparseResultEmpty
+                            : l10n.projectEditorNovelsActionPreparseResultOk(
+                                rows.length,
+                              ),
                       );
                     },
               child: const Text('预解析整本'),
@@ -230,6 +237,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                       novelsBusy: novelsBusy,
                       setLocalBusy: setLocalBusy,
                       action: () => _importNovelWorkbenchChapters(
+                        l10n: l10n,
                         token: token,
                         project: project,
                         chapters: importPreviewRows,
@@ -259,6 +267,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                       novelsBusy: novelsBusy,
                       setLocalBusy: setLocalBusy,
                       action: () => _importNovelWorkbenchViaServerCrawl(
+                        l10n: l10n,
                         token: token,
                         project: project,
                         intakeSourceUrl: importUrlCtrl.text.trim(),
@@ -284,6 +293,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                       novelsBusy: novelsBusy,
                       setLocalBusy: setLocalBusy,
                       action: () => _importNovelWorkbenchViaServerCrawlBatch(
+                        l10n: l10n,
                         token: token,
                         project: project,
                         batchUrls: importBatchUrlsCtrl.text,
@@ -377,7 +387,9 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                   children: [
                     Expanded(
                       child: Text(
-                        '预解析修正区（${importPreviewRows.length} 条）',
+                        l10n.projectEditorNovelsActionImportPreviewAreaTitle(
+                          importPreviewRows.length,
+                        ),
                         style: Theme.of(ctx).textTheme.bodySmall,
                       ),
                     ),
@@ -389,11 +401,13 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                                 ...importPreviewRows,
                                 ParsedNovelChapter(
                                   chapterIndex: importPreviewRows.length + 1,
-                                  chapter:
-                                      '补充章节 ${importPreviewRows.length + 1}',
+                                  chapter: l10n
+                                      .projectEditorNovelsActionImportPreviewSupplementChapterTitle(
+                                        importPreviewRows.length + 1,
+                                      ),
                                   chapterData: '',
                                 ),
-                              ], '已追加 1 条补充章节，请补全标题和正文后导入。');
+                              ], l10n.projectEditorNovelsActionImportPreviewAppendChapter);
                             },
                       child: const Text('补充章节'),
                     ),
@@ -434,7 +448,9 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                                           )..removeAt(index);
                                       updatePreviewRows(
                                         updated,
-                                        '已删除第 ${row.chapterIndex} 条预解析章节。',
+                                        l10n.projectEditorNovelsActionImportPreviewDeletedRow(
+                                          row.chapterIndex,
+                                        ),
                                       );
                                     },
                               icon: const Icon(Icons.delete_outline),
@@ -455,7 +471,9 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                             updated[index] = row.copyWith(chapter: value);
                             updatePreviewRows(
                               updated,
-                              '已更新第 ${row.chapterIndex} 条预解析章节。',
+                              l10n.projectEditorNovelsActionImportPreviewRowTitleUpdated(
+                                row.chapterIndex,
+                              ),
                             );
                           },
                         ),
@@ -475,7 +493,9 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                             updated[index] = row.copyWith(chapterData: value);
                             updatePreviewRows(
                               updated,
-                              '已更新第 ${row.chapterIndex} 条正文。',
+                              l10n.projectEditorNovelsActionImportPreviewRowBodyUpdated(
+                                row.chapterIndex,
+                              ),
                             );
                           },
                         ),
@@ -484,13 +504,13 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                   );
                 }),
                 Text(
-                  '导入时会自动重新编号；空正文章节会被拦下，需先在这里补全。',
+                  l10n.projectEditorNovelsActionImportPreviewFooterNote,
                   style: Theme.of(ctx).textTheme.bodySmall,
                 ),
                 if (importPreviewRows.length > 12) ...[
                   const SizedBox(height: 4),
                   Text(
-                    '当前预览较长，继续向下滚动可逐条修正全部章节。',
+                    l10n.projectEditorNovelsActionImportPreviewLongListHint,
                     style: Theme.of(ctx).textTheme.bodySmall,
                   ),
                 ],

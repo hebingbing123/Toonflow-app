@@ -25,6 +25,7 @@ extension _HomePageProjectEditorDialogContentNovels on _HomePageState {
           assetsScriptFilterLoading: dialogState.assetsScriptFilterLoading,
           openWorkbench: () => openNovelWorkbenchDialog(
             ctx: ctx,
+            l10n: l10n,
             setDialogState: setDialogState,
             token: token,
             project: p,

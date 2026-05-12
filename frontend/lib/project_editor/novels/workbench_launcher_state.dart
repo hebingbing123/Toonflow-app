@@ -8,13 +8,18 @@ class _NovelWorkbenchLocalState {
     required this.localBusy,
   });
 
-  factory _NovelWorkbenchLocalState.fromItems(List<NovelRow> currentItems) {
+  factory _NovelWorkbenchLocalState.fromItems(
+    List<NovelRow> currentItems,
+    AppLocalizations l10n,
+  ) {
     return _NovelWorkbenchLocalState(
       previewRows: List<NovelRow>.from(currentItems.take(6)),
       importPreviewRows: const <ParsedNovelChapter>[],
       infoLine: currentItems.isEmpty
-          ? '当前项目还没有章节。'
-          : '已载入 ${currentItems.length} 条章节。',
+          ? l10n.projectEditorNovelsChapterWorkbenchInfoNoChapters
+          : l10n.projectEditorNovelsChapterWorkbenchInfoLoaded(
+              currentItems.length,
+            ),
       localBusy: false,
     );
   }

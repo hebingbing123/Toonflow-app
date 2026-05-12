@@ -10223,6 +10223,420 @@ abstract class AppLocalizations {
   /// **'Triggered event generation for chapters {ids}: {message}'**
   String projectEditorNovelsEventsGenerateTriggered(String ids, String message);
 
+  /// No description provided for @projectEditorNovelsChapterWorkbenchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapters workbench'**
+  String get projectEditorNovelsChapterWorkbenchTitle;
+
+  /// No description provided for @projectEditorNovelsChapterWorkbenchPreviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Current chapter preview'**
+  String get projectEditorNovelsChapterWorkbenchPreviewTitle;
+
+  /// No description provided for @projectEditorNovelsChapterWorkbenchPreviewRow.
+  ///
+  /// In en, this message translates to:
+  /// **'{numericId} · {chapter} · {intakeSource} / {intakeStatus} · event state {eventState}'**
+  String projectEditorNovelsChapterWorkbenchPreviewRow(
+    int numericId,
+    String chapter,
+    String intakeSource,
+    String intakeStatus,
+    String eventState,
+  );
+
+  /// No description provided for @projectEditorNovelsChapterWorkbenchCloseButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get projectEditorNovelsChapterWorkbenchCloseButton;
+
+  /// No description provided for @projectEditorNovelsChapterWorkbenchInfoNoChapters.
+  ///
+  /// In en, this message translates to:
+  /// **'This project has no chapters yet.'**
+  String get projectEditorNovelsChapterWorkbenchInfoNoChapters;
+
+  /// No description provided for @projectEditorNovelsChapterWorkbenchInfoLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Loaded {count} chapters.'**
+  String projectEditorNovelsChapterWorkbenchInfoLoaded(int count);
+
+  /// No description provided for @projectEditorNovelsChapterWorkbenchInfoListEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter list is empty.'**
+  String get projectEditorNovelsChapterWorkbenchInfoListEmpty;
+
+  /// No description provided for @projectEditorNovelsChapterWorkbenchInfoRefreshed.
+  ///
+  /// In en, this message translates to:
+  /// **'Refreshed: {count} chapters in total.'**
+  String projectEditorNovelsChapterWorkbenchInfoRefreshed(int count);
+
+  /// No description provided for @projectEditorNovelsActionErrorUrlEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a crawl URL first.'**
+  String get projectEditorNovelsActionErrorUrlEmpty;
+
+  /// No description provided for @projectEditorNovelsActionErrorUrlInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Crawl URL must be a valid http/https address.'**
+  String get projectEditorNovelsActionErrorUrlInvalid;
+
+  /// No description provided for @projectEditorNovelsActionErrorCrawlHttp.
+  ///
+  /// In en, this message translates to:
+  /// **'Crawl failed, HTTP {code}'**
+  String projectEditorNovelsActionErrorCrawlHttp(int code);
+
+  /// No description provided for @projectEditorNovelsActionCrawlImportPreviewEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Captured {title}, but no importable body was extracted.'**
+  String projectEditorNovelsActionCrawlImportPreviewEmpty(String title);
+
+  /// No description provided for @projectEditorNovelsActionCrawlImportPreviewOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Captured {title}; extracted {count} importable chapters.'**
+  String projectEditorNovelsActionCrawlImportPreviewOk(String title, int count);
+
+  /// No description provided for @projectEditorNovelsActionCrawlSideServer.
+  ///
+  /// In en, this message translates to:
+  /// **'server-side crawl'**
+  String get projectEditorNovelsActionCrawlSideServer;
+
+  /// No description provided for @projectEditorNovelsActionCrawlSideClient.
+  ///
+  /// In en, this message translates to:
+  /// **'client-side crawl'**
+  String get projectEditorNovelsActionCrawlSideClient;
+
+  /// No description provided for @projectEditorNovelsActionCrawlDoneInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'{side} completed: {title} (mode {mode}, pages {pageCount}, chapter link candidates {chapterUrlCount}, body {bodyCharCount} chars)'**
+  String projectEditorNovelsActionCrawlDoneInfo(
+    String side,
+    String title,
+    String mode,
+    int pageCount,
+    int chapterUrlCount,
+    int bodyCharCount,
+  );
+
+  /// No description provided for @projectEditorNovelsActionSearchHit.
+  ///
+  /// In en, this message translates to:
+  /// **'Search matched {total} rows; showing {shown}.'**
+  String projectEditorNovelsActionSearchHit(int total, int shown);
+
+  /// No description provided for @projectEditorNovelsActionSearchFiltered.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter matched {total} rows ({filters}); showing {shown}.'**
+  String projectEditorNovelsActionSearchFiltered(
+    int total,
+    String filters,
+    int shown,
+  );
+
+  /// No description provided for @projectEditorNovelsActionErrorPreparseRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-parse the whole book first.'**
+  String get projectEditorNovelsActionErrorPreparseRequired;
+
+  /// No description provided for @projectEditorNovelsActionErrorImportQuality.
+  ///
+  /// In en, this message translates to:
+  /// **'Import quality gate failed: {blockers}'**
+  String projectEditorNovelsActionErrorImportQuality(String blockers);
+
+  /// No description provided for @projectEditorNovelsActionImportQualityHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Import quality hint: {warnings}'**
+  String projectEditorNovelsActionImportQualityHint(String warnings);
+
+  /// No description provided for @projectEditorNovelsActionErrorBatchSizePositive.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch size must be greater than 0.'**
+  String get projectEditorNovelsActionErrorBatchSizePositive;
+
+  /// No description provided for @projectEditorNovelsActionErrorChapterBodyEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter #{index} has empty body; fix it in the pre-parse preview before importing.'**
+  String projectEditorNovelsActionErrorChapterBodyEmpty(int index);
+
+  /// No description provided for @projectEditorNovelsActionImportProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported {end}/{total} chapters…'**
+  String projectEditorNovelsActionImportProgress(int end, int total);
+
+  /// No description provided for @projectEditorNovelsActionImportComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Whole-book import finished; added {count} chapters.'**
+  String projectEditorNovelsActionImportComplete(int count);
+
+  /// No description provided for @projectEditorNovelsActionServerImportDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Server-hosted import finished: {title} (added {chaptersCreated} chapters, mode {mode}, crawled {pageCount} pages, chapter link candidates {chapterUrlCount}, body {bodyCharCount} chars)'**
+  String projectEditorNovelsActionServerImportDone(
+    String title,
+    int chaptersCreated,
+    String mode,
+    int pageCount,
+    int chapterUrlCount,
+    int bodyCharCount,
+  );
+
+  /// No description provided for @projectEditorNovelsActionErrorBatchUrlsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter at least one URL line in the batch hosted URL field.'**
+  String get projectEditorNovelsActionErrorBatchUrlsEmpty;
+
+  /// No description provided for @projectEditorNovelsActionBatchImportDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch server import: succeeded {succeeded}/{total}, failed {failed}.{detail}'**
+  String projectEditorNovelsActionBatchImportDone(
+    int succeeded,
+    int total,
+    int failed,
+    String detail,
+  );
+
+  /// No description provided for @projectEditorNovelsActionBatchImportFailuresPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **' Failure samples: '**
+  String get projectEditorNovelsActionBatchImportFailuresPrefix;
+
+  /// No description provided for @projectEditorNovelsActionCrawlScheduleCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Created crawl schedule: task id {taskId} ({status}; delay {delayMinutes}m; repeat {repeatMinutes}m)'**
+  String projectEditorNovelsActionCrawlScheduleCreated(
+    int taskId,
+    String status,
+    int delayMinutes,
+    int repeatMinutes,
+  );
+
+  /// No description provided for @projectEditorNovelsActionCrawlSchedulesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No hosted crawl schedules (showing up to 100 recent for this project).'**
+  String get projectEditorNovelsActionCrawlSchedulesEmpty;
+
+  /// No description provided for @projectEditorNovelsActionCrawlSchedulesSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'This project has {count} hosted crawl schedules; recent: {head}'**
+  String projectEditorNovelsActionCrawlSchedulesSummary(int count, String head);
+
+  /// No description provided for @projectEditorNovelsActionCrawlObservability.
+  ///
+  /// In en, this message translates to:
+  /// **'Hosted stats: chapters {totalChapters}; source[{topSources}]; status[{topStatuses}]; crawlJobs[{jobs}].{recent}'**
+  String projectEditorNovelsActionCrawlObservability(
+    int totalChapters,
+    String topSources,
+    String topStatuses,
+    String jobs,
+    String recent,
+  );
+
+  /// No description provided for @projectEditorNovelsActionCrawlObservabilityRecentImports.
+  ///
+  /// In en, this message translates to:
+  /// **' Recent server imports: {ids}'**
+  String projectEditorNovelsActionCrawlObservabilityRecentImports(String ids);
+
+  /// No description provided for @projectEditorNovelsActionChapterReadOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Loaded chapter #{id}.'**
+  String projectEditorNovelsActionChapterReadOk(int id);
+
+  /// No description provided for @projectEditorNovelsActionChapterSaveOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated chapter #{id}.'**
+  String projectEditorNovelsActionChapterSaveOk(int id);
+
+  /// No description provided for @projectEditorNovelsActionChapterDeleteOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted chapter #{id}.'**
+  String projectEditorNovelsActionChapterDeleteOk(int id);
+
+  /// No description provided for @projectEditorNovelsActionErrorIdsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Provide at least one chapter id.'**
+  String get projectEditorNovelsActionErrorIdsEmpty;
+
+  /// No description provided for @projectEditorNovelsActionEventsGenerateOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Triggered event generation: {message}'**
+  String projectEditorNovelsActionEventsGenerateOk(String message);
+
+  /// No description provided for @projectEditorNovelsActionListLabelEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'(empty list)'**
+  String get projectEditorNovelsActionListLabelEmpty;
+
+  /// No description provided for @projectEditorNovelsActionListLabelAllZero.
+  ///
+  /// In en, this message translates to:
+  /// **'(all zero)'**
+  String get projectEditorNovelsActionListLabelAllZero;
+
+  /// No description provided for @projectEditorNovelsActionWorkbenchDataResult.
+  ///
+  /// In en, this message translates to:
+  /// **'workbench get-novel-data returned {count} rows: {sample}'**
+  String projectEditorNovelsActionWorkbenchDataResult(int count, String sample);
+
+  /// No description provided for @projectEditorNovelsActionWorkbenchIndexResult.
+  ///
+  /// In en, this message translates to:
+  /// **'workbench get-novel-index returned {count} rows: {sample}'**
+  String projectEditorNovelsActionWorkbenchIndexResult(
+    int count,
+    String sample,
+  );
+
+  /// No description provided for @projectEditorNovelsActionWorkbenchEventStateResult.
+  ///
+  /// In en, this message translates to:
+  /// **'workbench get-novel-event-state returned {count} rows: {sample}'**
+  String projectEditorNovelsActionWorkbenchEventStateResult(
+    int count,
+    String sample,
+  );
+
+  /// No description provided for @projectEditorNovelsActionBatchDeleteOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch deleted {count} chapters: {message}'**
+  String projectEditorNovelsActionBatchDeleteOk(int count, String message);
+
+  /// No description provided for @projectEditorNovelsActionErrorAdmissionStatusEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a target admission status first.'**
+  String get projectEditorNovelsActionErrorAdmissionStatusEmpty;
+
+  /// No description provided for @projectEditorNovelsActionBatchAdmissionOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch updated {count} chapters to {status}.'**
+  String projectEditorNovelsActionBatchAdmissionOk(int count, String status);
+
+  /// No description provided for @projectEditorNovelsChapterWorkbenchValueUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'unknown'**
+  String get projectEditorNovelsChapterWorkbenchValueUnknown;
+
+  /// No description provided for @projectEditorNovelsChapterWorkbenchValueUnset.
+  ///
+  /// In en, this message translates to:
+  /// **'unset'**
+  String get projectEditorNovelsChapterWorkbenchValueUnset;
+
+  /// No description provided for @projectEditorNovelsActionSearchFiltersCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter search filters cleared.'**
+  String get projectEditorNovelsActionSearchFiltersCleared;
+
+  /// No description provided for @projectEditorNovelsActionChapterCreateOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter created.'**
+  String get projectEditorNovelsActionChapterCreateOk;
+
+  /// No description provided for @projectEditorNovelsActionPreparseResultEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No importable content was detected.'**
+  String get projectEditorNovelsActionPreparseResultEmpty;
+
+  /// No description provided for @projectEditorNovelsActionPreparseResultOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-parsed {count} chapters; confirm titles and order before importing.'**
+  String projectEditorNovelsActionPreparseResultOk(int count);
+
+  /// No description provided for @projectEditorNovelsActionImportPreviewAppendChapter.
+  ///
+  /// In en, this message translates to:
+  /// **'Appended 1 supplement chapter; fill in title and body before importing.'**
+  String get projectEditorNovelsActionImportPreviewAppendChapter;
+
+  /// No description provided for @projectEditorNovelsActionImportPreviewDeletedRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed pre-parsed row #{chapterIndex}.'**
+  String projectEditorNovelsActionImportPreviewDeletedRow(int chapterIndex);
+
+  /// No description provided for @projectEditorNovelsActionImportPreviewRowTitleUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated title for pre-parsed row #{chapterIndex}.'**
+  String projectEditorNovelsActionImportPreviewRowTitleUpdated(
+    int chapterIndex,
+  );
+
+  /// No description provided for @projectEditorNovelsActionImportPreviewRowBodyUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated body for row #{chapterIndex}.'**
+  String projectEditorNovelsActionImportPreviewRowBodyUpdated(int chapterIndex);
+
+  /// No description provided for @projectEditorNovelsActionImportPreviewAreaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-parse edit area ({count} rows)'**
+  String projectEditorNovelsActionImportPreviewAreaTitle(int count);
+
+  /// No description provided for @projectEditorNovelsActionImportPreviewFooterNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Import will renumber automatically; empty-body chapters are blocked—fix them here first.'**
+  String get projectEditorNovelsActionImportPreviewFooterNote;
+
+  /// No description provided for @projectEditorNovelsActionImportPreviewLongListHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview is long; scroll to edit every chapter.'**
+  String get projectEditorNovelsActionImportPreviewLongListHint;
+
+  /// No description provided for @projectEditorNovelsActionImportPreviewSupplementChapterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Supplement chapter {n}'**
+  String projectEditorNovelsActionImportPreviewSupplementChapterTitle(int n);
+
   /// No description provided for @projectEditorAssetSummaryProductionEmpty.
   ///
   /// In en, this message translates to:

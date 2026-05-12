@@ -3,6 +3,7 @@ part of '../../../../home_page.dart';
 extension _HomePageProjectEditorNovelWorkbenchCreateSection
     on _HomePageState {
   Widget _buildNovelWorkbenchCreateSection({
+    required AppLocalizations l10n,
     required BuildContext ctx,
     required StateSetter setDialogState,
     required StateSetter setLocalState,
@@ -57,7 +58,7 @@ extension _HomePageProjectEditorNovelWorkbenchCreateSection
                       refreshWorkbench: refreshWorkbench,
                       setLocalState: setLocalState,
                     );
-                    updateInfoLine('已新增章节。');
+                    updateInfoLine(l10n.projectEditorNovelsActionChapterCreateOk);
                   },
                 ),
           child: const Text('新增章节'),

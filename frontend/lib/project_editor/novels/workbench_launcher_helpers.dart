@@ -8,14 +8,17 @@ Future<void> refreshNovelWorkbenchLocalState({
   required List<ListNovelsResponse?> novelsRef,
   required _NovelWorkbenchControllers ctrls,
   required _NovelWorkbenchLocalState local,
+  required AppLocalizations l10n,
 }) async {
   await reloadAssetsAndStats();
   final refreshed = novelsRef[0]?.items ?? const <NovelRow>[];
   setLocalState(() {
     local.previewRows = List<NovelRow>.from(refreshed.take(6));
     local.infoLine = refreshed.isEmpty
-        ? '章节列表为空。'
-        : '已刷新，共 ${refreshed.length} 条章节。';
+        ? l10n.projectEditorNovelsChapterWorkbenchInfoListEmpty
+        : l10n.projectEditorNovelsChapterWorkbenchInfoRefreshed(
+            refreshed.length,
+          );
     if (ctrls.selectedNovelIdCtrl.text.trim().isEmpty && refreshed.isNotEmpty) {
       ctrls.selectedNovelIdCtrl.text = refreshed.first.numericId.toString();
       ctrls.patchChapterCtrl.text = refreshed.first.chapter;
