@@ -10014,5 +10014,341 @@
         "type": "String"
       }
     }
+  },
+  "benchmarkSectionTitle": "质量基线与实验",
+  "benchmarkIntroBody": "在同一入口管理样本池、实验运行、人工复核、ROI、放行门和趋势，避免后续质量优化只靠感觉判断。",
+  "benchmarkActionFetchSamplePool": "读取样本池",
+  "benchmarkActionFetchExperiments": "读取实验",
+  "benchmarkActionFetchReviewQueue": "读取复核队列",
+  "benchmarkActionFetchMemoryTier": "读取记忆档",
+  "benchmarkActionFetchTrends": "读取趋势",
+  "benchmarkActionPromoteFromReview": "从评审提升样本",
+  "benchmarkActionFetchExperimentDetail": "读取实验详情",
+  "benchmarkActionStartExperiment": "启动实验",
+  "benchmarkActionCancelExperiment": "取消实验",
+  "benchmarkActionFetchRoi": "读取 ROI",
+  "benchmarkActionFetchGate": "读取放行门",
+  "benchmarkActionCreateExperiment": "创建实验",
+  "benchmarkActionSubmitReview": "提交复核",
+  "benchmarkActionSkipReview": "跳过复核",
+  "benchmarkActionSubmitGateDecision": "提交放行决策",
+  "benchmarkActionRunAbCompare": "执行 A/B 对比",
+  "benchmarkActionSaveRunAbCompare": "保存并执行 A/B 对比",
+  "benchmarkActionFetchAbHistory": "读取 A/B 历史",
+  "benchmarkActionFetchAbDetail": "读取 A/B 详情",
+  "benchmarkActionReplaySave": "复跑并保存",
+  "benchmarkStatusNeedSignIn": "当前未登录，无法执行 {action}",
+  "@benchmarkStatusNeedSignIn": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "benchmarkStatusRunning": "正在执行：{action}",
+  "@benchmarkStatusRunning": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "benchmarkStatusCompleted": "已完成：{action}",
+  "@benchmarkStatusCompleted": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "benchmarkStatusFailedHttp": "失败：{action}（{statusCode} {message}）",
+  "@benchmarkStatusFailedHttp": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      },
+      "statusCode": {
+        "type": "String"
+      },
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "benchmarkStatusFailed": "失败：{action}（{error}）",
+  "@benchmarkStatusFailed": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "benchmarkProjectIdOptional": "项目 ID（可选，用于样本筛选）",
+  "benchmarkCaseRowSubtitle": "{summary} · 权重 {weight} · 标签 {tags}",
+  "@benchmarkCaseRowSubtitle": {
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      },
+      "weight": {
+        "type": "String"
+      },
+      "tags": {
+        "type": "String"
+      }
+    }
+  },
+  "benchmarkExperimentRowSubtitle": "{sampleTier} · 阶段 {stages} · {id}",
+  "@benchmarkExperimentRowSubtitle": {
+    "placeholders": {
+      "sampleTier": {
+        "type": "String"
+      },
+      "stages": {
+        "type": "String"
+      },
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "benchmarkMemoryProfilesLine": "记忆预算档：{tiers}",
+  "@benchmarkMemoryProfilesLine": {
+    "placeholders": {
+      "tiers": {
+        "type": "String"
+      }
+    }
+  },
+  "benchmarkExperimentDetailHeader": "实验详情：{name} · {variantCount} 个变体",
+  "@benchmarkExperimentDetailHeader": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "variantCount": {
+        "type": "int"
+      }
+    }
+  },
+  "benchmarkRoiHeader": "ROI：{conclusion} · {rationale}",
+  "@benchmarkRoiHeader": {
+    "placeholders": {
+      "conclusion": {
+        "type": "String"
+      },
+      "rationale": {
+        "type": "String"
+      }
+    }
+  },
+  "benchmarkRoiVariantLine": "{variantLabel} · scoreΔ {scoreDelta} · tokenΔ {tokenDeltaPct}%",
+  "@benchmarkRoiVariantLine": {
+    "placeholders": {
+      "variantLabel": {
+        "type": "String"
+      },
+      "scoreDelta": {
+        "type": "String"
+      },
+      "tokenDeltaPct": {
+        "type": "String"
+      }
+    }
+  },
+  "benchmarkGateAssessmentRow": "{variantLabel} · {decision} · scoreΔ {scoreDelta} · severeGuard {severe}",
+  "@benchmarkGateAssessmentRow": {
+    "placeholders": {
+      "variantLabel": {
+        "type": "String"
+      },
+      "decision": {
+        "type": "String"
+      },
+      "scoreDelta": {
+        "type": "String"
+      },
+      "severe": {
+        "type": "String"
+      }
+    }
+  },
+  "benchmarkTrendWeekRow": "{weekStart} · 质量 {quality} · token {tokens} · approved {approved} / blocked {blocked}",
+  "@benchmarkTrendWeekRow": {
+    "placeholders": {
+      "weekStart": {
+        "type": "String"
+      },
+      "quality": {
+        "type": "String"
+      },
+      "tokens": {
+        "type": "String"
+      },
+      "approved": {
+        "type": "String"
+      },
+      "blocked": {
+        "type": "String"
+      }
+    }
+  },
+  "benchmarkAbOutcomePassed": "通过",
+  "benchmarkAbOutcomeFailed": "未通过",
+  "benchmarkAbAggregateSummary": "A/B 汇总：{outcome} · 通过 {passedCases}/{totalCases} · 平均 token 降幅 {tokenPct}% · 平均质量差 {qualityDiff}",
+  "@benchmarkAbAggregateSummary": {
+    "placeholders": {
+      "outcome": {
+        "type": "String"
+      },
+      "passedCases": {
+        "type": "int"
+      },
+      "totalCases": {
+        "type": "int"
+      },
+      "tokenPct": {
+        "type": "String"
+      },
+      "qualityDiff": {
+        "type": "String"
+      }
+    }
+  },
+  "benchmarkHistoryReplay": "历史回放：{nameOrId} · {createdAt}",
+  "@benchmarkHistoryReplay": {
+    "placeholders": {
+      "nameOrId": {
+        "type": "String"
+      },
+      "createdAt": {
+        "type": "String"
+      }
+    }
+  },
+  "benchmarkPromoteCardTitle": "从质量评审提升样本",
+  "benchmarkLabelQualityReviewId": "质量评审 ID",
+  "benchmarkLabelSampleType": "样本类型",
+  "benchmarkLabelSampleSummary": "样本摘要",
+  "benchmarkLabelTagsCommaSeparated": "标签（逗号分隔）",
+  "benchmarkButtonPromoteToSample": "提升为样本",
+  "benchmarkExperimentCardTitle": "实验运行",
+  "benchmarkLabelExperimentId": "实验 ID",
+  "benchmarkButtonLoadDetail": "读取详情",
+  "benchmarkButtonStart": "启动",
+  "benchmarkButtonCancel": "取消",
+  "benchmarkLabelNewExperimentName": "新实验名称",
+  "benchmarkLabelSampleTierSet": "样本集",
+  "benchmarkLabelStageScopeComma": "阶段范围（逗号分隔）",
+  "benchmarkLabelBaselineVariantLabel": "基线变体 label",
+  "benchmarkLabelVariantsJsonArray": "变体 JSON（数组）",
+  "benchmarkButtonCreateExperiment": "创建实验",
+  "benchmarkReviewCardTitle": "人工复核",
+  "benchmarkLabelReviewQueueId": "复核队列 ID",
+  "benchmarkLabelSubmittedScoreJson": "提交评分 JSON",
+  "benchmarkLabelSkipReasonOptional": "跳过原因（可选）",
+  "benchmarkGateCardTitle": "放行门决策",
+  "benchmarkLabelGateVariantId": "变体 ID",
+  "benchmarkLabelGateDecisionOptionalAuto": "决策（留空则使用 auto decision）",
+  "benchmarkLabelGateDecisionNote": "决策说明",
+  "benchmarkGatePromoteBaselineTitle": "同时提升为新基线",
+  "benchmarkGatePromoteBaselineSubtitle": "仅对 approved / approved_limited 生效",
+  "benchmarkAbCardTitle": "A/B 对比评估",
+  "benchmarkLabelAbSaveNameOptional": "保存名称（可选）",
+  "benchmarkLabelAbCaseLines": "案例列表（每行：testCaseId,baselineJobId,optimizedJobId）",
+  "benchmarkLabelAbMinTokenReductionPct": "最小 token 降幅 %",
+  "benchmarkLabelAbMaxQualityDrop": "最大质量下降",
+  "benchmarkLabelAbMinQualityScore": "最小质量分",
+  "benchmarkLabelAbSignificanceP": "显著性阈值 p",
+  "benchmarkButtonRunAbCompare": "执行 A/B 对比",
+  "benchmarkButtonSaveAndRun": "保存并执行",
+  "benchmarkButtonFetchHistory": "读取历史",
+  "benchmarkButtonLoadDetailAndFill": "读取详情并回填",
+  "benchmarkButtonReplaySave": "回放参数复跑并保存",
+  "benchmarkErrorInvalidCaseRow": "无效案例行：{line}",
+  "@benchmarkErrorInvalidCaseRow": {
+    "placeholders": {
+      "line": {
+        "type": "String"
+      }
+    }
+  },
+  "benchmarkErrorAbThresholdFormat": "A/B 阈值参数格式错误",
+  "benchmarkErrorVariantsMustBeJsonArray": "variants JSON 必须是数组",
+  "benchmarkErrorSubmittedScoreMustBeObject": "submittedScore 必须是对象",
+  "benchmarkSummaryCasesEmpty": "当前没有基线样本",
+  "benchmarkSummaryCases": "样本 {count} 条 · {preview}",
+  "@benchmarkSummaryCases": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "preview": {
+        "type": "String"
+      }
+    }
+  },
+  "benchmarkSummaryExperimentsEmpty": "当前没有实验运行",
+  "benchmarkSummaryExperiments": "实验 {count} 条 · {preview}",
+  "@benchmarkSummaryExperiments": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "preview": {
+        "type": "String"
+      }
+    }
+  },
+  "benchmarkSummaryReviewQueueEmpty": "当前没有待复核队列",
+  "benchmarkSummaryReviewQueue": "复核 {total} 条 · 待处理 {pending} 条",
+  "@benchmarkSummaryReviewQueue": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "pending": {
+        "type": "int"
+      }
+    }
+  },
+  "benchmarkSummaryGateEmpty": "尚未读取放行门结果",
+  "benchmarkSummaryGate": "放行评估 {count} 个 · approved {approved} / limited {limited} / blocked {blocked}",
+  "@benchmarkSummaryGate": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "approved": {
+        "type": "int"
+      },
+      "limited": {
+        "type": "int"
+      },
+      "blocked": {
+        "type": "int"
+      }
+    }
+  },
+  "benchmarkSummaryTrendsEmpty": "尚未读取趋势",
+  "benchmarkSummaryTrends": "趋势 {weeks} 周 · 最新 {weekStart} 质量 {quality} / token {tokens}",
+  "@benchmarkSummaryTrends": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      },
+      "weekStart": {
+        "type": "String"
+      },
+      "quality": {
+        "type": "String"
+      },
+      "tokens": {
+        "type": "String"
+      }
+    }
   }
 }

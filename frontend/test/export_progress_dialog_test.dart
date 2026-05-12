@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/short_video_space/section.dart';
 
@@ -180,6 +182,14 @@ void main() {
     testWidgets('renders initial loading state', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
+          localizationsDelegates: [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: Locale('zh'),
           home: Scaffold(
             body: ExportProgressDialog(
               taskId: 'test-task-123',
@@ -200,6 +210,14 @@ void main() {
     testWidgets('displays progress bar after initial poll', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
+          localizationsDelegates: [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: Locale('zh'),
           home: Scaffold(
             body: ExportProgressDialog(
               taskId: 'test-task-456',
@@ -223,6 +241,14 @@ void main() {
     testWidgets('shows cancel button for non-terminal status', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
+          localizationsDelegates: [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: Locale('zh'),
           home: Scaffold(
             body: ExportProgressDialog(
               taskId: 'test-task-789',
@@ -247,6 +273,14 @@ void main() {
     testWidgets('displays task ID for debugging', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
+          localizationsDelegates: [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: Locale('zh'),
           home: Scaffold(
             body: ExportProgressDialog(
               taskId: 'debug-task-id-12345',
@@ -268,6 +302,14 @@ void main() {
         (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
+          localizationsDelegates: [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: Locale('zh'),
           home: Scaffold(
             body: ExportProgressDialog(
               taskId: 'test-icons',
@@ -298,6 +340,14 @@ void main() {
     testWidgets('displays status messages', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
+          localizationsDelegates: [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: Locale('zh'),
           home: Scaffold(
             body: ExportProgressDialog(
               taskId: 'test-messages',
@@ -346,6 +396,14 @@ void main() {
     testWidgets('has error UI in widget tree', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
+          localizationsDelegates: [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: Locale('zh'),
           home: Scaffold(
             body: ExportProgressDialog(
               taskId: 'test-error',

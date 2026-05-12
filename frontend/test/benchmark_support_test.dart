@@ -1,10 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/benchmark/support.dart';
+import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/rust_api.dart';
 
 void main() {
+  final zh = AppLocalizationsZh();
+
   test('summarizeBenchmarkCases formats preview', () {
-    final summary = summarizeBenchmarkCases([
+    final summary = summarizeBenchmarkCases(zh, [
       const BenchmarkCaseV1(
         id: 'c1',
         projectId: 7,
@@ -23,6 +26,7 @@ void main() {
 
   test('summarizeBenchmarkGate includes decision counts', () {
     final summary = summarizeBenchmarkGate(
+      zh,
       GateDecisionEnvelopeV1(
         experimentRunId: 'exp-1',
         assessments: const [
@@ -74,6 +78,7 @@ void main() {
 
   test('summarizeBenchmarkGate counts limited approvals separately', () {
     final summary = summarizeBenchmarkGate(
+      zh,
       GateDecisionEnvelopeV1(
         experimentRunId: 'exp-2',
         assessments: const [

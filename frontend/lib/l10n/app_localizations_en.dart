@@ -13343,4 +13343,373 @@ class AppLocalizationsEn extends AppLocalizations {
   String statusPageApiBaseLabel(String baseUrl) {
     return 'API: $baseUrl';
   }
+
+  @override
+  String get benchmarkSectionTitle => 'Quality baseline & experiments';
+
+  @override
+  String get benchmarkIntroBody =>
+      'Manage sample pools, experiment runs, human review, ROI, release gates, and trends in one place instead of relying on gut feel alone.';
+
+  @override
+  String get benchmarkActionFetchSamplePool => 'Fetch sample pool';
+
+  @override
+  String get benchmarkActionFetchExperiments => 'Fetch experiments';
+
+  @override
+  String get benchmarkActionFetchReviewQueue => 'Fetch review queue';
+
+  @override
+  String get benchmarkActionFetchMemoryTier => 'Fetch memory profiles';
+
+  @override
+  String get benchmarkActionFetchTrends => 'Fetch trends';
+
+  @override
+  String get benchmarkActionPromoteFromReview => 'Promote from review';
+
+  @override
+  String get benchmarkActionFetchExperimentDetail => 'Fetch experiment detail';
+
+  @override
+  String get benchmarkActionStartExperiment => 'Start experiment';
+
+  @override
+  String get benchmarkActionCancelExperiment => 'Cancel experiment';
+
+  @override
+  String get benchmarkActionFetchRoi => 'Fetch ROI';
+
+  @override
+  String get benchmarkActionFetchGate => 'Fetch gate';
+
+  @override
+  String get benchmarkActionCreateExperiment => 'Create experiment';
+
+  @override
+  String get benchmarkActionSubmitReview => 'Submit review';
+
+  @override
+  String get benchmarkActionSkipReview => 'Skip review';
+
+  @override
+  String get benchmarkActionSubmitGateDecision => 'Submit gate decision';
+
+  @override
+  String get benchmarkActionRunAbCompare => 'Run A/B comparison';
+
+  @override
+  String get benchmarkActionSaveRunAbCompare => 'Save and run A/B comparison';
+
+  @override
+  String get benchmarkActionFetchAbHistory => 'Fetch A/B history';
+
+  @override
+  String get benchmarkActionFetchAbDetail => 'Fetch A/B detail';
+
+  @override
+  String get benchmarkActionReplaySave => 'Replay params and save';
+
+  @override
+  String benchmarkStatusNeedSignIn(String action) {
+    return 'Not signed in; cannot run $action';
+  }
+
+  @override
+  String benchmarkStatusRunning(String action) {
+    return 'Running: $action';
+  }
+
+  @override
+  String benchmarkStatusCompleted(String action) {
+    return 'Completed: $action';
+  }
+
+  @override
+  String benchmarkStatusFailedHttp(
+    String action,
+    String statusCode,
+    String message,
+  ) {
+    return 'Failed: $action ($statusCode $message)';
+  }
+
+  @override
+  String benchmarkStatusFailed(String action, String error) {
+    return 'Failed: $action ($error)';
+  }
+
+  @override
+  String get benchmarkProjectIdOptional =>
+      'Project ID (optional, for sample filter)';
+
+  @override
+  String benchmarkCaseRowSubtitle(String summary, String weight, String tags) {
+    return '$summary · weight $weight · tags $tags';
+  }
+
+  @override
+  String benchmarkExperimentRowSubtitle(
+    String sampleTier,
+    String stages,
+    String id,
+  ) {
+    return '$sampleTier · stages $stages · $id';
+  }
+
+  @override
+  String benchmarkMemoryProfilesLine(String tiers) {
+    return 'Memory profiles: $tiers';
+  }
+
+  @override
+  String benchmarkExperimentDetailHeader(String name, int variantCount) {
+    return 'Experiment detail: $name · $variantCount variants';
+  }
+
+  @override
+  String benchmarkRoiHeader(String conclusion, String rationale) {
+    return 'ROI: $conclusion · $rationale';
+  }
+
+  @override
+  String benchmarkRoiVariantLine(
+    String variantLabel,
+    String scoreDelta,
+    String tokenDeltaPct,
+  ) {
+    return '$variantLabel · scoreΔ $scoreDelta · tokenΔ $tokenDeltaPct%';
+  }
+
+  @override
+  String benchmarkGateAssessmentRow(
+    String variantLabel,
+    String decision,
+    String scoreDelta,
+    String severe,
+  ) {
+    return '$variantLabel · $decision · scoreΔ $scoreDelta · severeGuard $severe';
+  }
+
+  @override
+  String benchmarkTrendWeekRow(
+    String weekStart,
+    String quality,
+    String tokens,
+    String approved,
+    String blocked,
+  ) {
+    return '$weekStart · quality $quality · token $tokens · approved $approved / blocked $blocked';
+  }
+
+  @override
+  String get benchmarkAbOutcomePassed => 'passed';
+
+  @override
+  String get benchmarkAbOutcomeFailed => 'failed';
+
+  @override
+  String benchmarkAbAggregateSummary(
+    String outcome,
+    int passedCases,
+    int totalCases,
+    String tokenPct,
+    String qualityDiff,
+  ) {
+    return 'A/B summary: $outcome · passed $passedCases/$totalCases · avg token reduction $tokenPct% · avg quality diff $qualityDiff';
+  }
+
+  @override
+  String benchmarkHistoryReplay(String nameOrId, String createdAt) {
+    return 'Replay: $nameOrId · $createdAt';
+  }
+
+  @override
+  String get benchmarkPromoteCardTitle => 'Promote sample from quality review';
+
+  @override
+  String get benchmarkLabelQualityReviewId => 'Quality review ID';
+
+  @override
+  String get benchmarkLabelSampleType => 'Sample type';
+
+  @override
+  String get benchmarkLabelSampleSummary => 'Sample summary';
+
+  @override
+  String get benchmarkLabelTagsCommaSeparated => 'Tags (comma-separated)';
+
+  @override
+  String get benchmarkButtonPromoteToSample => 'Promote to sample';
+
+  @override
+  String get benchmarkExperimentCardTitle => 'Experiment runs';
+
+  @override
+  String get benchmarkLabelExperimentId => 'Experiment ID';
+
+  @override
+  String get benchmarkButtonLoadDetail => 'Load detail';
+
+  @override
+  String get benchmarkButtonStart => 'Start';
+
+  @override
+  String get benchmarkButtonCancel => 'Cancel';
+
+  @override
+  String get benchmarkLabelNewExperimentName => 'New experiment name';
+
+  @override
+  String get benchmarkLabelSampleTierSet => 'Sample tier';
+
+  @override
+  String get benchmarkLabelStageScopeComma => 'Stage scope (comma-separated)';
+
+  @override
+  String get benchmarkLabelBaselineVariantLabel => 'Baseline variant label';
+
+  @override
+  String get benchmarkLabelVariantsJsonArray => 'Variants JSON (array)';
+
+  @override
+  String get benchmarkButtonCreateExperiment => 'Create experiment';
+
+  @override
+  String get benchmarkReviewCardTitle => 'Human review';
+
+  @override
+  String get benchmarkLabelReviewQueueId => 'Review queue ID';
+
+  @override
+  String get benchmarkLabelSubmittedScoreJson => 'Submitted score JSON';
+
+  @override
+  String get benchmarkLabelSkipReasonOptional => 'Skip reason (optional)';
+
+  @override
+  String get benchmarkGateCardTitle => 'Gate decision';
+
+  @override
+  String get benchmarkLabelGateVariantId => 'Variant ID';
+
+  @override
+  String get benchmarkLabelGateDecisionOptionalAuto =>
+      'Decision (empty uses auto decision)';
+
+  @override
+  String get benchmarkLabelGateDecisionNote => 'Decision note';
+
+  @override
+  String get benchmarkGatePromoteBaselineTitle =>
+      'Also promote as new baseline';
+
+  @override
+  String get benchmarkGatePromoteBaselineSubtitle =>
+      'Only applies to approved / approved_limited';
+
+  @override
+  String get benchmarkAbCardTitle => 'A/B comparison';
+
+  @override
+  String get benchmarkLabelAbSaveNameOptional => 'Save name (optional)';
+
+  @override
+  String get benchmarkLabelAbCaseLines =>
+      'Cases (one per line: testCaseId,baselineJobId,optimizedJobId)';
+
+  @override
+  String get benchmarkLabelAbMinTokenReductionPct => 'Min token reduction %';
+
+  @override
+  String get benchmarkLabelAbMaxQualityDrop => 'Max quality drop';
+
+  @override
+  String get benchmarkLabelAbMinQualityScore => 'Min quality score';
+
+  @override
+  String get benchmarkLabelAbSignificanceP => 'Significance threshold p';
+
+  @override
+  String get benchmarkButtonRunAbCompare => 'Run A/B comparison';
+
+  @override
+  String get benchmarkButtonSaveAndRun => 'Save and run';
+
+  @override
+  String get benchmarkButtonFetchHistory => 'Fetch history';
+
+  @override
+  String get benchmarkButtonLoadDetailAndFill => 'Load detail and fill form';
+
+  @override
+  String get benchmarkButtonReplaySave => 'Replay params and save';
+
+  @override
+  String benchmarkErrorInvalidCaseRow(String line) {
+    return 'Invalid case line: $line';
+  }
+
+  @override
+  String get benchmarkErrorAbThresholdFormat =>
+      'Invalid A/B threshold parameter format';
+
+  @override
+  String get benchmarkErrorVariantsMustBeJsonArray =>
+      'variants JSON must be an array';
+
+  @override
+  String get benchmarkErrorSubmittedScoreMustBeObject =>
+      'submittedScore must be a JSON object';
+
+  @override
+  String get benchmarkSummaryCasesEmpty => 'No baseline samples loaded';
+
+  @override
+  String benchmarkSummaryCases(int count, String preview) {
+    return '$count samples · $preview';
+  }
+
+  @override
+  String get benchmarkSummaryExperimentsEmpty => 'No experiment runs loaded';
+
+  @override
+  String benchmarkSummaryExperiments(int count, String preview) {
+    return '$count experiments · $preview';
+  }
+
+  @override
+  String get benchmarkSummaryReviewQueueEmpty => 'No review queue loaded';
+
+  @override
+  String benchmarkSummaryReviewQueue(int total, int pending) {
+    return '$total review items · $pending pending';
+  }
+
+  @override
+  String get benchmarkSummaryGateEmpty => 'Gate results not loaded';
+
+  @override
+  String benchmarkSummaryGate(
+    int count,
+    int approved,
+    int limited,
+    int blocked,
+  ) {
+    return '$count gate assessments · approved $approved / limited $limited / blocked $blocked';
+  }
+
+  @override
+  String get benchmarkSummaryTrendsEmpty => 'Trends not loaded';
+
+  @override
+  String benchmarkSummaryTrends(
+    int weeks,
+    String weekStart,
+    String quality,
+    String tokens,
+  ) {
+    return '$weeks weeks · latest $weekStart quality $quality / token $tokens';
+  }
 }

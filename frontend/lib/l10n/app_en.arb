@@ -10328,5 +10328,341 @@
         "type": "String"
       }
     }
+  },
+  "benchmarkSectionTitle": "Quality baseline & experiments",
+  "benchmarkIntroBody": "Manage sample pools, experiment runs, human review, ROI, release gates, and trends in one place instead of relying on gut feel alone.",
+  "benchmarkActionFetchSamplePool": "Fetch sample pool",
+  "benchmarkActionFetchExperiments": "Fetch experiments",
+  "benchmarkActionFetchReviewQueue": "Fetch review queue",
+  "benchmarkActionFetchMemoryTier": "Fetch memory profiles",
+  "benchmarkActionFetchTrends": "Fetch trends",
+  "benchmarkActionPromoteFromReview": "Promote from review",
+  "benchmarkActionFetchExperimentDetail": "Fetch experiment detail",
+  "benchmarkActionStartExperiment": "Start experiment",
+  "benchmarkActionCancelExperiment": "Cancel experiment",
+  "benchmarkActionFetchRoi": "Fetch ROI",
+  "benchmarkActionFetchGate": "Fetch gate",
+  "benchmarkActionCreateExperiment": "Create experiment",
+  "benchmarkActionSubmitReview": "Submit review",
+  "benchmarkActionSkipReview": "Skip review",
+  "benchmarkActionSubmitGateDecision": "Submit gate decision",
+  "benchmarkActionRunAbCompare": "Run A/B comparison",
+  "benchmarkActionSaveRunAbCompare": "Save and run A/B comparison",
+  "benchmarkActionFetchAbHistory": "Fetch A/B history",
+  "benchmarkActionFetchAbDetail": "Fetch A/B detail",
+  "benchmarkActionReplaySave": "Replay params and save",
+  "benchmarkStatusNeedSignIn": "Not signed in; cannot run {action}",
+  "@benchmarkStatusNeedSignIn": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "benchmarkStatusRunning": "Running: {action}",
+  "@benchmarkStatusRunning": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "benchmarkStatusCompleted": "Completed: {action}",
+  "@benchmarkStatusCompleted": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "benchmarkStatusFailedHttp": "Failed: {action} ({statusCode} {message})",
+  "@benchmarkStatusFailedHttp": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      },
+      "statusCode": {
+        "type": "String"
+      },
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "benchmarkStatusFailed": "Failed: {action} ({error})",
+  "@benchmarkStatusFailed": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "benchmarkProjectIdOptional": "Project ID (optional, for sample filter)",
+  "benchmarkCaseRowSubtitle": "{summary} · weight {weight} · tags {tags}",
+  "@benchmarkCaseRowSubtitle": {
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      },
+      "weight": {
+        "type": "String"
+      },
+      "tags": {
+        "type": "String"
+      }
+    }
+  },
+  "benchmarkExperimentRowSubtitle": "{sampleTier} · stages {stages} · {id}",
+  "@benchmarkExperimentRowSubtitle": {
+    "placeholders": {
+      "sampleTier": {
+        "type": "String"
+      },
+      "stages": {
+        "type": "String"
+      },
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "benchmarkMemoryProfilesLine": "Memory profiles: {tiers}",
+  "@benchmarkMemoryProfilesLine": {
+    "placeholders": {
+      "tiers": {
+        "type": "String"
+      }
+    }
+  },
+  "benchmarkExperimentDetailHeader": "Experiment detail: {name} · {variantCount} variants",
+  "@benchmarkExperimentDetailHeader": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "variantCount": {
+        "type": "int"
+      }
+    }
+  },
+  "benchmarkRoiHeader": "ROI: {conclusion} · {rationale}",
+  "@benchmarkRoiHeader": {
+    "placeholders": {
+      "conclusion": {
+        "type": "String"
+      },
+      "rationale": {
+        "type": "String"
+      }
+    }
+  },
+  "benchmarkRoiVariantLine": "{variantLabel} · scoreΔ {scoreDelta} · tokenΔ {tokenDeltaPct}%",
+  "@benchmarkRoiVariantLine": {
+    "placeholders": {
+      "variantLabel": {
+        "type": "String"
+      },
+      "scoreDelta": {
+        "type": "String"
+      },
+      "tokenDeltaPct": {
+        "type": "String"
+      }
+    }
+  },
+  "benchmarkGateAssessmentRow": "{variantLabel} · {decision} · scoreΔ {scoreDelta} · severeGuard {severe}",
+  "@benchmarkGateAssessmentRow": {
+    "placeholders": {
+      "variantLabel": {
+        "type": "String"
+      },
+      "decision": {
+        "type": "String"
+      },
+      "scoreDelta": {
+        "type": "String"
+      },
+      "severe": {
+        "type": "String"
+      }
+    }
+  },
+  "benchmarkTrendWeekRow": "{weekStart} · quality {quality} · token {tokens} · approved {approved} / blocked {blocked}",
+  "@benchmarkTrendWeekRow": {
+    "placeholders": {
+      "weekStart": {
+        "type": "String"
+      },
+      "quality": {
+        "type": "String"
+      },
+      "tokens": {
+        "type": "String"
+      },
+      "approved": {
+        "type": "String"
+      },
+      "blocked": {
+        "type": "String"
+      }
+    }
+  },
+  "benchmarkAbOutcomePassed": "passed",
+  "benchmarkAbOutcomeFailed": "failed",
+  "benchmarkAbAggregateSummary": "A/B summary: {outcome} · passed {passedCases}/{totalCases} · avg token reduction {tokenPct}% · avg quality diff {qualityDiff}",
+  "@benchmarkAbAggregateSummary": {
+    "placeholders": {
+      "outcome": {
+        "type": "String"
+      },
+      "passedCases": {
+        "type": "int"
+      },
+      "totalCases": {
+        "type": "int"
+      },
+      "tokenPct": {
+        "type": "String"
+      },
+      "qualityDiff": {
+        "type": "String"
+      }
+    }
+  },
+  "benchmarkHistoryReplay": "Replay: {nameOrId} · {createdAt}",
+  "@benchmarkHistoryReplay": {
+    "placeholders": {
+      "nameOrId": {
+        "type": "String"
+      },
+      "createdAt": {
+        "type": "String"
+      }
+    }
+  },
+  "benchmarkPromoteCardTitle": "Promote sample from quality review",
+  "benchmarkLabelQualityReviewId": "Quality review ID",
+  "benchmarkLabelSampleType": "Sample type",
+  "benchmarkLabelSampleSummary": "Sample summary",
+  "benchmarkLabelTagsCommaSeparated": "Tags (comma-separated)",
+  "benchmarkButtonPromoteToSample": "Promote to sample",
+  "benchmarkExperimentCardTitle": "Experiment runs",
+  "benchmarkLabelExperimentId": "Experiment ID",
+  "benchmarkButtonLoadDetail": "Load detail",
+  "benchmarkButtonStart": "Start",
+  "benchmarkButtonCancel": "Cancel",
+  "benchmarkLabelNewExperimentName": "New experiment name",
+  "benchmarkLabelSampleTierSet": "Sample tier",
+  "benchmarkLabelStageScopeComma": "Stage scope (comma-separated)",
+  "benchmarkLabelBaselineVariantLabel": "Baseline variant label",
+  "benchmarkLabelVariantsJsonArray": "Variants JSON (array)",
+  "benchmarkButtonCreateExperiment": "Create experiment",
+  "benchmarkReviewCardTitle": "Human review",
+  "benchmarkLabelReviewQueueId": "Review queue ID",
+  "benchmarkLabelSubmittedScoreJson": "Submitted score JSON",
+  "benchmarkLabelSkipReasonOptional": "Skip reason (optional)",
+  "benchmarkGateCardTitle": "Gate decision",
+  "benchmarkLabelGateVariantId": "Variant ID",
+  "benchmarkLabelGateDecisionOptionalAuto": "Decision (empty uses auto decision)",
+  "benchmarkLabelGateDecisionNote": "Decision note",
+  "benchmarkGatePromoteBaselineTitle": "Also promote as new baseline",
+  "benchmarkGatePromoteBaselineSubtitle": "Only applies to approved / approved_limited",
+  "benchmarkAbCardTitle": "A/B comparison",
+  "benchmarkLabelAbSaveNameOptional": "Save name (optional)",
+  "benchmarkLabelAbCaseLines": "Cases (one per line: testCaseId,baselineJobId,optimizedJobId)",
+  "benchmarkLabelAbMinTokenReductionPct": "Min token reduction %",
+  "benchmarkLabelAbMaxQualityDrop": "Max quality drop",
+  "benchmarkLabelAbMinQualityScore": "Min quality score",
+  "benchmarkLabelAbSignificanceP": "Significance threshold p",
+  "benchmarkButtonRunAbCompare": "Run A/B comparison",
+  "benchmarkButtonSaveAndRun": "Save and run",
+  "benchmarkButtonFetchHistory": "Fetch history",
+  "benchmarkButtonLoadDetailAndFill": "Load detail and fill form",
+  "benchmarkButtonReplaySave": "Replay params and save",
+  "benchmarkErrorInvalidCaseRow": "Invalid case line: {line}",
+  "@benchmarkErrorInvalidCaseRow": {
+    "placeholders": {
+      "line": {
+        "type": "String"
+      }
+    }
+  },
+  "benchmarkErrorAbThresholdFormat": "Invalid A/B threshold parameter format",
+  "benchmarkErrorVariantsMustBeJsonArray": "variants JSON must be an array",
+  "benchmarkErrorSubmittedScoreMustBeObject": "submittedScore must be a JSON object",
+  "benchmarkSummaryCasesEmpty": "No baseline samples loaded",
+  "benchmarkSummaryCases": "{count} samples · {preview}",
+  "@benchmarkSummaryCases": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "preview": {
+        "type": "String"
+      }
+    }
+  },
+  "benchmarkSummaryExperimentsEmpty": "No experiment runs loaded",
+  "benchmarkSummaryExperiments": "{count} experiments · {preview}",
+  "@benchmarkSummaryExperiments": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "preview": {
+        "type": "String"
+      }
+    }
+  },
+  "benchmarkSummaryReviewQueueEmpty": "No review queue loaded",
+  "benchmarkSummaryReviewQueue": "{total} review items · {pending} pending",
+  "@benchmarkSummaryReviewQueue": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "pending": {
+        "type": "int"
+      }
+    }
+  },
+  "benchmarkSummaryGateEmpty": "Gate results not loaded",
+  "benchmarkSummaryGate": "{count} gate assessments · approved {approved} / limited {limited} / blocked {blocked}",
+  "@benchmarkSummaryGate": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "approved": {
+        "type": "int"
+      },
+      "limited": {
+        "type": "int"
+      },
+      "blocked": {
+        "type": "int"
+      }
+    }
+  },
+  "benchmarkSummaryTrendsEmpty": "Trends not loaded",
+  "benchmarkSummaryTrends": "{weeks} weeks · latest {weekStart} quality {quality} / token {tokens}",
+  "@benchmarkSummaryTrends": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      },
+      "weekStart": {
+        "type": "String"
+      },
+      "quality": {
+        "type": "String"
+      },
+      "tokens": {
+        "type": "String"
+      }
+    }
   }
 }

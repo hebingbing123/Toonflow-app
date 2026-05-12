@@ -20490,6 +20490,603 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'API: {baseUrl}'**
   String statusPageApiBaseLabel(String baseUrl);
+
+  /// No description provided for @benchmarkSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality baseline & experiments'**
+  String get benchmarkSectionTitle;
+
+  /// No description provided for @benchmarkIntroBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage sample pools, experiment runs, human review, ROI, release gates, and trends in one place instead of relying on gut feel alone.'**
+  String get benchmarkIntroBody;
+
+  /// No description provided for @benchmarkActionFetchSamplePool.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetch sample pool'**
+  String get benchmarkActionFetchSamplePool;
+
+  /// No description provided for @benchmarkActionFetchExperiments.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetch experiments'**
+  String get benchmarkActionFetchExperiments;
+
+  /// No description provided for @benchmarkActionFetchReviewQueue.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetch review queue'**
+  String get benchmarkActionFetchReviewQueue;
+
+  /// No description provided for @benchmarkActionFetchMemoryTier.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetch memory profiles'**
+  String get benchmarkActionFetchMemoryTier;
+
+  /// No description provided for @benchmarkActionFetchTrends.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetch trends'**
+  String get benchmarkActionFetchTrends;
+
+  /// No description provided for @benchmarkActionPromoteFromReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Promote from review'**
+  String get benchmarkActionPromoteFromReview;
+
+  /// No description provided for @benchmarkActionFetchExperimentDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetch experiment detail'**
+  String get benchmarkActionFetchExperimentDetail;
+
+  /// No description provided for @benchmarkActionStartExperiment.
+  ///
+  /// In en, this message translates to:
+  /// **'Start experiment'**
+  String get benchmarkActionStartExperiment;
+
+  /// No description provided for @benchmarkActionCancelExperiment.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel experiment'**
+  String get benchmarkActionCancelExperiment;
+
+  /// No description provided for @benchmarkActionFetchRoi.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetch ROI'**
+  String get benchmarkActionFetchRoi;
+
+  /// No description provided for @benchmarkActionFetchGate.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetch gate'**
+  String get benchmarkActionFetchGate;
+
+  /// No description provided for @benchmarkActionCreateExperiment.
+  ///
+  /// In en, this message translates to:
+  /// **'Create experiment'**
+  String get benchmarkActionCreateExperiment;
+
+  /// No description provided for @benchmarkActionSubmitReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit review'**
+  String get benchmarkActionSubmitReview;
+
+  /// No description provided for @benchmarkActionSkipReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip review'**
+  String get benchmarkActionSkipReview;
+
+  /// No description provided for @benchmarkActionSubmitGateDecision.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit gate decision'**
+  String get benchmarkActionSubmitGateDecision;
+
+  /// No description provided for @benchmarkActionRunAbCompare.
+  ///
+  /// In en, this message translates to:
+  /// **'Run A/B comparison'**
+  String get benchmarkActionRunAbCompare;
+
+  /// No description provided for @benchmarkActionSaveRunAbCompare.
+  ///
+  /// In en, this message translates to:
+  /// **'Save and run A/B comparison'**
+  String get benchmarkActionSaveRunAbCompare;
+
+  /// No description provided for @benchmarkActionFetchAbHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetch A/B history'**
+  String get benchmarkActionFetchAbHistory;
+
+  /// No description provided for @benchmarkActionFetchAbDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetch A/B detail'**
+  String get benchmarkActionFetchAbDetail;
+
+  /// No description provided for @benchmarkActionReplaySave.
+  ///
+  /// In en, this message translates to:
+  /// **'Replay params and save'**
+  String get benchmarkActionReplaySave;
+
+  /// No description provided for @benchmarkStatusNeedSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Not signed in; cannot run {action}'**
+  String benchmarkStatusNeedSignIn(String action);
+
+  /// No description provided for @benchmarkStatusRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Running: {action}'**
+  String benchmarkStatusRunning(String action);
+
+  /// No description provided for @benchmarkStatusCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed: {action}'**
+  String benchmarkStatusCompleted(String action);
+
+  /// No description provided for @benchmarkStatusFailedHttp.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed: {action} ({statusCode} {message})'**
+  String benchmarkStatusFailedHttp(
+    String action,
+    String statusCode,
+    String message,
+  );
+
+  /// No description provided for @benchmarkStatusFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed: {action} ({error})'**
+  String benchmarkStatusFailed(String action, String error);
+
+  /// No description provided for @benchmarkProjectIdOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Project ID (optional, for sample filter)'**
+  String get benchmarkProjectIdOptional;
+
+  /// No description provided for @benchmarkCaseRowSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{summary} · weight {weight} · tags {tags}'**
+  String benchmarkCaseRowSubtitle(String summary, String weight, String tags);
+
+  /// No description provided for @benchmarkExperimentRowSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{sampleTier} · stages {stages} · {id}'**
+  String benchmarkExperimentRowSubtitle(
+    String sampleTier,
+    String stages,
+    String id,
+  );
+
+  /// No description provided for @benchmarkMemoryProfilesLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory profiles: {tiers}'**
+  String benchmarkMemoryProfilesLine(String tiers);
+
+  /// No description provided for @benchmarkExperimentDetailHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Experiment detail: {name} · {variantCount} variants'**
+  String benchmarkExperimentDetailHeader(String name, int variantCount);
+
+  /// No description provided for @benchmarkRoiHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'ROI: {conclusion} · {rationale}'**
+  String benchmarkRoiHeader(String conclusion, String rationale);
+
+  /// No description provided for @benchmarkRoiVariantLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{variantLabel} · scoreΔ {scoreDelta} · tokenΔ {tokenDeltaPct}%'**
+  String benchmarkRoiVariantLine(
+    String variantLabel,
+    String scoreDelta,
+    String tokenDeltaPct,
+  );
+
+  /// No description provided for @benchmarkGateAssessmentRow.
+  ///
+  /// In en, this message translates to:
+  /// **'{variantLabel} · {decision} · scoreΔ {scoreDelta} · severeGuard {severe}'**
+  String benchmarkGateAssessmentRow(
+    String variantLabel,
+    String decision,
+    String scoreDelta,
+    String severe,
+  );
+
+  /// No description provided for @benchmarkTrendWeekRow.
+  ///
+  /// In en, this message translates to:
+  /// **'{weekStart} · quality {quality} · token {tokens} · approved {approved} / blocked {blocked}'**
+  String benchmarkTrendWeekRow(
+    String weekStart,
+    String quality,
+    String tokens,
+    String approved,
+    String blocked,
+  );
+
+  /// No description provided for @benchmarkAbOutcomePassed.
+  ///
+  /// In en, this message translates to:
+  /// **'passed'**
+  String get benchmarkAbOutcomePassed;
+
+  /// No description provided for @benchmarkAbOutcomeFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'failed'**
+  String get benchmarkAbOutcomeFailed;
+
+  /// No description provided for @benchmarkAbAggregateSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'A/B summary: {outcome} · passed {passedCases}/{totalCases} · avg token reduction {tokenPct}% · avg quality diff {qualityDiff}'**
+  String benchmarkAbAggregateSummary(
+    String outcome,
+    int passedCases,
+    int totalCases,
+    String tokenPct,
+    String qualityDiff,
+  );
+
+  /// No description provided for @benchmarkHistoryReplay.
+  ///
+  /// In en, this message translates to:
+  /// **'Replay: {nameOrId} · {createdAt}'**
+  String benchmarkHistoryReplay(String nameOrId, String createdAt);
+
+  /// No description provided for @benchmarkPromoteCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Promote sample from quality review'**
+  String get benchmarkPromoteCardTitle;
+
+  /// No description provided for @benchmarkLabelQualityReviewId.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality review ID'**
+  String get benchmarkLabelQualityReviewId;
+
+  /// No description provided for @benchmarkLabelSampleType.
+  ///
+  /// In en, this message translates to:
+  /// **'Sample type'**
+  String get benchmarkLabelSampleType;
+
+  /// No description provided for @benchmarkLabelSampleSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Sample summary'**
+  String get benchmarkLabelSampleSummary;
+
+  /// No description provided for @benchmarkLabelTagsCommaSeparated.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags (comma-separated)'**
+  String get benchmarkLabelTagsCommaSeparated;
+
+  /// No description provided for @benchmarkButtonPromoteToSample.
+  ///
+  /// In en, this message translates to:
+  /// **'Promote to sample'**
+  String get benchmarkButtonPromoteToSample;
+
+  /// No description provided for @benchmarkExperimentCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Experiment runs'**
+  String get benchmarkExperimentCardTitle;
+
+  /// No description provided for @benchmarkLabelExperimentId.
+  ///
+  /// In en, this message translates to:
+  /// **'Experiment ID'**
+  String get benchmarkLabelExperimentId;
+
+  /// No description provided for @benchmarkButtonLoadDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Load detail'**
+  String get benchmarkButtonLoadDetail;
+
+  /// No description provided for @benchmarkButtonStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get benchmarkButtonStart;
+
+  /// No description provided for @benchmarkButtonCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get benchmarkButtonCancel;
+
+  /// No description provided for @benchmarkLabelNewExperimentName.
+  ///
+  /// In en, this message translates to:
+  /// **'New experiment name'**
+  String get benchmarkLabelNewExperimentName;
+
+  /// No description provided for @benchmarkLabelSampleTierSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Sample tier'**
+  String get benchmarkLabelSampleTierSet;
+
+  /// No description provided for @benchmarkLabelStageScopeComma.
+  ///
+  /// In en, this message translates to:
+  /// **'Stage scope (comma-separated)'**
+  String get benchmarkLabelStageScopeComma;
+
+  /// No description provided for @benchmarkLabelBaselineVariantLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Baseline variant label'**
+  String get benchmarkLabelBaselineVariantLabel;
+
+  /// No description provided for @benchmarkLabelVariantsJsonArray.
+  ///
+  /// In en, this message translates to:
+  /// **'Variants JSON (array)'**
+  String get benchmarkLabelVariantsJsonArray;
+
+  /// No description provided for @benchmarkButtonCreateExperiment.
+  ///
+  /// In en, this message translates to:
+  /// **'Create experiment'**
+  String get benchmarkButtonCreateExperiment;
+
+  /// No description provided for @benchmarkReviewCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Human review'**
+  String get benchmarkReviewCardTitle;
+
+  /// No description provided for @benchmarkLabelReviewQueueId.
+  ///
+  /// In en, this message translates to:
+  /// **'Review queue ID'**
+  String get benchmarkLabelReviewQueueId;
+
+  /// No description provided for @benchmarkLabelSubmittedScoreJson.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted score JSON'**
+  String get benchmarkLabelSubmittedScoreJson;
+
+  /// No description provided for @benchmarkLabelSkipReasonOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip reason (optional)'**
+  String get benchmarkLabelSkipReasonOptional;
+
+  /// No description provided for @benchmarkGateCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Gate decision'**
+  String get benchmarkGateCardTitle;
+
+  /// No description provided for @benchmarkLabelGateVariantId.
+  ///
+  /// In en, this message translates to:
+  /// **'Variant ID'**
+  String get benchmarkLabelGateVariantId;
+
+  /// No description provided for @benchmarkLabelGateDecisionOptionalAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Decision (empty uses auto decision)'**
+  String get benchmarkLabelGateDecisionOptionalAuto;
+
+  /// No description provided for @benchmarkLabelGateDecisionNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Decision note'**
+  String get benchmarkLabelGateDecisionNote;
+
+  /// No description provided for @benchmarkGatePromoteBaselineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Also promote as new baseline'**
+  String get benchmarkGatePromoteBaselineTitle;
+
+  /// No description provided for @benchmarkGatePromoteBaselineSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Only applies to approved / approved_limited'**
+  String get benchmarkGatePromoteBaselineSubtitle;
+
+  /// No description provided for @benchmarkAbCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A/B comparison'**
+  String get benchmarkAbCardTitle;
+
+  /// No description provided for @benchmarkLabelAbSaveNameOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Save name (optional)'**
+  String get benchmarkLabelAbSaveNameOptional;
+
+  /// No description provided for @benchmarkLabelAbCaseLines.
+  ///
+  /// In en, this message translates to:
+  /// **'Cases (one per line: testCaseId,baselineJobId,optimizedJobId)'**
+  String get benchmarkLabelAbCaseLines;
+
+  /// No description provided for @benchmarkLabelAbMinTokenReductionPct.
+  ///
+  /// In en, this message translates to:
+  /// **'Min token reduction %'**
+  String get benchmarkLabelAbMinTokenReductionPct;
+
+  /// No description provided for @benchmarkLabelAbMaxQualityDrop.
+  ///
+  /// In en, this message translates to:
+  /// **'Max quality drop'**
+  String get benchmarkLabelAbMaxQualityDrop;
+
+  /// No description provided for @benchmarkLabelAbMinQualityScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Min quality score'**
+  String get benchmarkLabelAbMinQualityScore;
+
+  /// No description provided for @benchmarkLabelAbSignificanceP.
+  ///
+  /// In en, this message translates to:
+  /// **'Significance threshold p'**
+  String get benchmarkLabelAbSignificanceP;
+
+  /// No description provided for @benchmarkButtonRunAbCompare.
+  ///
+  /// In en, this message translates to:
+  /// **'Run A/B comparison'**
+  String get benchmarkButtonRunAbCompare;
+
+  /// No description provided for @benchmarkButtonSaveAndRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Save and run'**
+  String get benchmarkButtonSaveAndRun;
+
+  /// No description provided for @benchmarkButtonFetchHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetch history'**
+  String get benchmarkButtonFetchHistory;
+
+  /// No description provided for @benchmarkButtonLoadDetailAndFill.
+  ///
+  /// In en, this message translates to:
+  /// **'Load detail and fill form'**
+  String get benchmarkButtonLoadDetailAndFill;
+
+  /// No description provided for @benchmarkButtonReplaySave.
+  ///
+  /// In en, this message translates to:
+  /// **'Replay params and save'**
+  String get benchmarkButtonReplaySave;
+
+  /// No description provided for @benchmarkErrorInvalidCaseRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid case line: {line}'**
+  String benchmarkErrorInvalidCaseRow(String line);
+
+  /// No description provided for @benchmarkErrorAbThresholdFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid A/B threshold parameter format'**
+  String get benchmarkErrorAbThresholdFormat;
+
+  /// No description provided for @benchmarkErrorVariantsMustBeJsonArray.
+  ///
+  /// In en, this message translates to:
+  /// **'variants JSON must be an array'**
+  String get benchmarkErrorVariantsMustBeJsonArray;
+
+  /// No description provided for @benchmarkErrorSubmittedScoreMustBeObject.
+  ///
+  /// In en, this message translates to:
+  /// **'submittedScore must be a JSON object'**
+  String get benchmarkErrorSubmittedScoreMustBeObject;
+
+  /// No description provided for @benchmarkSummaryCasesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No baseline samples loaded'**
+  String get benchmarkSummaryCasesEmpty;
+
+  /// No description provided for @benchmarkSummaryCases.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} samples · {preview}'**
+  String benchmarkSummaryCases(int count, String preview);
+
+  /// No description provided for @benchmarkSummaryExperimentsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No experiment runs loaded'**
+  String get benchmarkSummaryExperimentsEmpty;
+
+  /// No description provided for @benchmarkSummaryExperiments.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} experiments · {preview}'**
+  String benchmarkSummaryExperiments(int count, String preview);
+
+  /// No description provided for @benchmarkSummaryReviewQueueEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No review queue loaded'**
+  String get benchmarkSummaryReviewQueueEmpty;
+
+  /// No description provided for @benchmarkSummaryReviewQueue.
+  ///
+  /// In en, this message translates to:
+  /// **'{total} review items · {pending} pending'**
+  String benchmarkSummaryReviewQueue(int total, int pending);
+
+  /// No description provided for @benchmarkSummaryGateEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Gate results not loaded'**
+  String get benchmarkSummaryGateEmpty;
+
+  /// No description provided for @benchmarkSummaryGate.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} gate assessments · approved {approved} / limited {limited} / blocked {blocked}'**
+  String benchmarkSummaryGate(
+    int count,
+    int approved,
+    int limited,
+    int blocked,
+  );
+
+  /// No description provided for @benchmarkSummaryTrendsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Trends not loaded'**
+  String get benchmarkSummaryTrendsEmpty;
+
+  /// No description provided for @benchmarkSummaryTrends.
+  ///
+  /// In en, this message translates to:
+  /// **'{weeks} weeks · latest {weekStart} quality {quality} / token {tokens}'**
+  String benchmarkSummaryTrends(
+    int weeks,
+    String weekStart,
+    String quality,
+    String tokens,
+  );
 }
 
 class _AppLocalizationsDelegate

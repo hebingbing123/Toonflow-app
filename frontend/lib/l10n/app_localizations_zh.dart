@@ -12717,4 +12717,368 @@ class AppLocalizationsZh extends AppLocalizations {
   String statusPageApiBaseLabel(String baseUrl) {
     return 'API：$baseUrl';
   }
+
+  @override
+  String get benchmarkSectionTitle => '质量基线与实验';
+
+  @override
+  String get benchmarkIntroBody =>
+      '在同一入口管理样本池、实验运行、人工复核、ROI、放行门和趋势，避免后续质量优化只靠感觉判断。';
+
+  @override
+  String get benchmarkActionFetchSamplePool => '读取样本池';
+
+  @override
+  String get benchmarkActionFetchExperiments => '读取实验';
+
+  @override
+  String get benchmarkActionFetchReviewQueue => '读取复核队列';
+
+  @override
+  String get benchmarkActionFetchMemoryTier => '读取记忆档';
+
+  @override
+  String get benchmarkActionFetchTrends => '读取趋势';
+
+  @override
+  String get benchmarkActionPromoteFromReview => '从评审提升样本';
+
+  @override
+  String get benchmarkActionFetchExperimentDetail => '读取实验详情';
+
+  @override
+  String get benchmarkActionStartExperiment => '启动实验';
+
+  @override
+  String get benchmarkActionCancelExperiment => '取消实验';
+
+  @override
+  String get benchmarkActionFetchRoi => '读取 ROI';
+
+  @override
+  String get benchmarkActionFetchGate => '读取放行门';
+
+  @override
+  String get benchmarkActionCreateExperiment => '创建实验';
+
+  @override
+  String get benchmarkActionSubmitReview => '提交复核';
+
+  @override
+  String get benchmarkActionSkipReview => '跳过复核';
+
+  @override
+  String get benchmarkActionSubmitGateDecision => '提交放行决策';
+
+  @override
+  String get benchmarkActionRunAbCompare => '执行 A/B 对比';
+
+  @override
+  String get benchmarkActionSaveRunAbCompare => '保存并执行 A/B 对比';
+
+  @override
+  String get benchmarkActionFetchAbHistory => '读取 A/B 历史';
+
+  @override
+  String get benchmarkActionFetchAbDetail => '读取 A/B 详情';
+
+  @override
+  String get benchmarkActionReplaySave => '复跑并保存';
+
+  @override
+  String benchmarkStatusNeedSignIn(String action) {
+    return '当前未登录，无法执行 $action';
+  }
+
+  @override
+  String benchmarkStatusRunning(String action) {
+    return '正在执行：$action';
+  }
+
+  @override
+  String benchmarkStatusCompleted(String action) {
+    return '已完成：$action';
+  }
+
+  @override
+  String benchmarkStatusFailedHttp(
+    String action,
+    String statusCode,
+    String message,
+  ) {
+    return '失败：$action（$statusCode $message）';
+  }
+
+  @override
+  String benchmarkStatusFailed(String action, String error) {
+    return '失败：$action（$error）';
+  }
+
+  @override
+  String get benchmarkProjectIdOptional => '项目 ID（可选，用于样本筛选）';
+
+  @override
+  String benchmarkCaseRowSubtitle(String summary, String weight, String tags) {
+    return '$summary · 权重 $weight · 标签 $tags';
+  }
+
+  @override
+  String benchmarkExperimentRowSubtitle(
+    String sampleTier,
+    String stages,
+    String id,
+  ) {
+    return '$sampleTier · 阶段 $stages · $id';
+  }
+
+  @override
+  String benchmarkMemoryProfilesLine(String tiers) {
+    return '记忆预算档：$tiers';
+  }
+
+  @override
+  String benchmarkExperimentDetailHeader(String name, int variantCount) {
+    return '实验详情：$name · $variantCount 个变体';
+  }
+
+  @override
+  String benchmarkRoiHeader(String conclusion, String rationale) {
+    return 'ROI：$conclusion · $rationale';
+  }
+
+  @override
+  String benchmarkRoiVariantLine(
+    String variantLabel,
+    String scoreDelta,
+    String tokenDeltaPct,
+  ) {
+    return '$variantLabel · scoreΔ $scoreDelta · tokenΔ $tokenDeltaPct%';
+  }
+
+  @override
+  String benchmarkGateAssessmentRow(
+    String variantLabel,
+    String decision,
+    String scoreDelta,
+    String severe,
+  ) {
+    return '$variantLabel · $decision · scoreΔ $scoreDelta · severeGuard $severe';
+  }
+
+  @override
+  String benchmarkTrendWeekRow(
+    String weekStart,
+    String quality,
+    String tokens,
+    String approved,
+    String blocked,
+  ) {
+    return '$weekStart · 质量 $quality · token $tokens · approved $approved / blocked $blocked';
+  }
+
+  @override
+  String get benchmarkAbOutcomePassed => '通过';
+
+  @override
+  String get benchmarkAbOutcomeFailed => '未通过';
+
+  @override
+  String benchmarkAbAggregateSummary(
+    String outcome,
+    int passedCases,
+    int totalCases,
+    String tokenPct,
+    String qualityDiff,
+  ) {
+    return 'A/B 汇总：$outcome · 通过 $passedCases/$totalCases · 平均 token 降幅 $tokenPct% · 平均质量差 $qualityDiff';
+  }
+
+  @override
+  String benchmarkHistoryReplay(String nameOrId, String createdAt) {
+    return '历史回放：$nameOrId · $createdAt';
+  }
+
+  @override
+  String get benchmarkPromoteCardTitle => '从质量评审提升样本';
+
+  @override
+  String get benchmarkLabelQualityReviewId => '质量评审 ID';
+
+  @override
+  String get benchmarkLabelSampleType => '样本类型';
+
+  @override
+  String get benchmarkLabelSampleSummary => '样本摘要';
+
+  @override
+  String get benchmarkLabelTagsCommaSeparated => '标签（逗号分隔）';
+
+  @override
+  String get benchmarkButtonPromoteToSample => '提升为样本';
+
+  @override
+  String get benchmarkExperimentCardTitle => '实验运行';
+
+  @override
+  String get benchmarkLabelExperimentId => '实验 ID';
+
+  @override
+  String get benchmarkButtonLoadDetail => '读取详情';
+
+  @override
+  String get benchmarkButtonStart => '启动';
+
+  @override
+  String get benchmarkButtonCancel => '取消';
+
+  @override
+  String get benchmarkLabelNewExperimentName => '新实验名称';
+
+  @override
+  String get benchmarkLabelSampleTierSet => '样本集';
+
+  @override
+  String get benchmarkLabelStageScopeComma => '阶段范围（逗号分隔）';
+
+  @override
+  String get benchmarkLabelBaselineVariantLabel => '基线变体 label';
+
+  @override
+  String get benchmarkLabelVariantsJsonArray => '变体 JSON（数组）';
+
+  @override
+  String get benchmarkButtonCreateExperiment => '创建实验';
+
+  @override
+  String get benchmarkReviewCardTitle => '人工复核';
+
+  @override
+  String get benchmarkLabelReviewQueueId => '复核队列 ID';
+
+  @override
+  String get benchmarkLabelSubmittedScoreJson => '提交评分 JSON';
+
+  @override
+  String get benchmarkLabelSkipReasonOptional => '跳过原因（可选）';
+
+  @override
+  String get benchmarkGateCardTitle => '放行门决策';
+
+  @override
+  String get benchmarkLabelGateVariantId => '变体 ID';
+
+  @override
+  String get benchmarkLabelGateDecisionOptionalAuto =>
+      '决策（留空则使用 auto decision）';
+
+  @override
+  String get benchmarkLabelGateDecisionNote => '决策说明';
+
+  @override
+  String get benchmarkGatePromoteBaselineTitle => '同时提升为新基线';
+
+  @override
+  String get benchmarkGatePromoteBaselineSubtitle =>
+      '仅对 approved / approved_limited 生效';
+
+  @override
+  String get benchmarkAbCardTitle => 'A/B 对比评估';
+
+  @override
+  String get benchmarkLabelAbSaveNameOptional => '保存名称（可选）';
+
+  @override
+  String get benchmarkLabelAbCaseLines =>
+      '案例列表（每行：testCaseId,baselineJobId,optimizedJobId）';
+
+  @override
+  String get benchmarkLabelAbMinTokenReductionPct => '最小 token 降幅 %';
+
+  @override
+  String get benchmarkLabelAbMaxQualityDrop => '最大质量下降';
+
+  @override
+  String get benchmarkLabelAbMinQualityScore => '最小质量分';
+
+  @override
+  String get benchmarkLabelAbSignificanceP => '显著性阈值 p';
+
+  @override
+  String get benchmarkButtonRunAbCompare => '执行 A/B 对比';
+
+  @override
+  String get benchmarkButtonSaveAndRun => '保存并执行';
+
+  @override
+  String get benchmarkButtonFetchHistory => '读取历史';
+
+  @override
+  String get benchmarkButtonLoadDetailAndFill => '读取详情并回填';
+
+  @override
+  String get benchmarkButtonReplaySave => '回放参数复跑并保存';
+
+  @override
+  String benchmarkErrorInvalidCaseRow(String line) {
+    return '无效案例行：$line';
+  }
+
+  @override
+  String get benchmarkErrorAbThresholdFormat => 'A/B 阈值参数格式错误';
+
+  @override
+  String get benchmarkErrorVariantsMustBeJsonArray => 'variants JSON 必须是数组';
+
+  @override
+  String get benchmarkErrorSubmittedScoreMustBeObject => 'submittedScore 必须是对象';
+
+  @override
+  String get benchmarkSummaryCasesEmpty => '当前没有基线样本';
+
+  @override
+  String benchmarkSummaryCases(int count, String preview) {
+    return '样本 $count 条 · $preview';
+  }
+
+  @override
+  String get benchmarkSummaryExperimentsEmpty => '当前没有实验运行';
+
+  @override
+  String benchmarkSummaryExperiments(int count, String preview) {
+    return '实验 $count 条 · $preview';
+  }
+
+  @override
+  String get benchmarkSummaryReviewQueueEmpty => '当前没有待复核队列';
+
+  @override
+  String benchmarkSummaryReviewQueue(int total, int pending) {
+    return '复核 $total 条 · 待处理 $pending 条';
+  }
+
+  @override
+  String get benchmarkSummaryGateEmpty => '尚未读取放行门结果';
+
+  @override
+  String benchmarkSummaryGate(
+    int count,
+    int approved,
+    int limited,
+    int blocked,
+  ) {
+    return '放行评估 $count 个 · approved $approved / limited $limited / blocked $blocked';
+  }
+
+  @override
+  String get benchmarkSummaryTrendsEmpty => '尚未读取趋势';
+
+  @override
+  String benchmarkSummaryTrends(
+    int weeks,
+    String weekStart,
+    String quality,
+    String tokens,
+  ) {
+    return '趋势 $weeks 周 · 最新 $weekStart 质量 $quality / token $tokens';
+  }
 }

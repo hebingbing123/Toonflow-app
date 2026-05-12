@@ -1,31 +1,43 @@
+import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
 
-String summarizeBenchmarkCases(List<BenchmarkCaseV1> cases) {
-  if (cases.isEmpty) return '当前没有基线样本';
+String summarizeBenchmarkCases(AppLocalizations l10n, List<BenchmarkCaseV1> cases) {
+  if (cases.isEmpty) {
+    return l10n.benchmarkSummaryCasesEmpty;
+  }
   final preview = cases
       .take(3)
       .map((item) => '#${item.projectId}/${item.caseType}:${item.stage}')
       .join(', ');
-  return '样本 ${cases.length} 条 · $preview';
+  return l10n.benchmarkSummaryCases(cases.length, preview);
 }
 
-String summarizeBenchmarkExperiments(List<ExperimentRunV1> experiments) {
-  if (experiments.isEmpty) return '当前没有实验运行';
+String summarizeBenchmarkExperiments(
+  AppLocalizations l10n,
+  List<ExperimentRunV1> experiments,
+) {
+  if (experiments.isEmpty) {
+    return l10n.benchmarkSummaryExperimentsEmpty;
+  }
   final preview = experiments
       .take(3)
       .map((item) => '${item.name}(${item.status}/${item.sampleTier})')
       .join(', ');
-  return '实验 ${experiments.length} 条 · $preview';
+  return l10n.benchmarkSummaryExperiments(experiments.length, preview);
 }
 
-String summarizeBenchmarkReviewQueue(List<ReviewQueueItemV1> items) {
-  if (items.isEmpty) return '当前没有待复核队列';
+String summarizeBenchmarkReviewQueue(AppLocalizations l10n, List<ReviewQueueItemV1> items) {
+  if (items.isEmpty) {
+    return l10n.benchmarkSummaryReviewQueueEmpty;
+  }
   final pending = items.where((item) => item.status == 'pending').length;
-  return '复核 ${items.length} 条 · 待处理 $pending 条';
+  return l10n.benchmarkSummaryReviewQueue(items.length, pending);
 }
 
-String summarizeBenchmarkGate(GateDecisionEnvelopeV1? gate) {
-  if (gate == null || gate.assessments.isEmpty) return '尚未读取放行门结果';
+String summarizeBenchmarkGate(AppLocalizations l10n, GateDecisionEnvelopeV1? gate) {
+  if (gate == null || gate.assessments.isEmpty) {
+    return l10n.benchmarkSummaryGateEmpty;
+  }
   final blocked = gate.assessments
       .where((item) => item.autoDecision == 'blocked')
       .length;
@@ -35,11 +47,18 @@ String summarizeBenchmarkGate(GateDecisionEnvelopeV1? gate) {
   final limited = gate.assessments
       .where((item) => item.autoDecision == 'approved_limited')
       .length;
-  return '放行评估 ${gate.assessments.length} 个 · approved $approved / limited $limited / blocked $blocked';
+  return l10n.benchmarkSummaryGate(gate.assessments.length, approved, limited, blocked);
 }
 
-String summarizeBenchmarkTrends(BenchmarkTrendsResponseV1? trends) {
-  if (trends == null || trends.weeks.isEmpty) return '尚未读取趋势';
+String summarizeBenchmarkTrends(AppLocalizations l10n, BenchmarkTrendsResponseV1? trends) {
+  if (trends == null || trends.weeks.isEmpty) {
+    return l10n.benchmarkSummaryTrendsEmpty;
+  }
   final latest = trends.weeks.last;
-  return '趋势 ${trends.weeks.length} 周 · 最新 ${latest.weekStart} 质量 ${latest.avgQualityScore.toStringAsFixed(1)} / token ${latest.totalTokens}';
+  return l10n.benchmarkSummaryTrends(
+    trends.weeks.length,
+    latest.weekStart,
+    latest.avgQualityScore.toStringAsFixed(1),
+    '${latest.totalTokens}',
+  );
 }

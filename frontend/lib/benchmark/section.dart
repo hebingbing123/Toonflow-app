@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
 import 'support.dart';
@@ -110,7 +111,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
 
   String? get _token => widget.accessToken;
 
-  List<ABCompareCaseV1> _parseAbCompareCases() {
+  List<ABCompareCaseV1> _parseAbCompareCases(AppLocalizations l10n) {
     return _abCompareCasesCtrl.text
         .split('\n')
         .map((line) => line.trim())
@@ -118,7 +119,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
         .map((line) {
           final parts = line.split(',').map((e) => e.trim()).toList();
           if (parts.length != 3) {
-            throw FormatException('无效案例行：$line');
+            throw FormatException(l10n.benchmarkErrorInvalidCaseRow(line));
           }
           return ABCompareCaseV1(
             testCaseId: parts[0],
@@ -129,13 +130,13 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
         .toList(growable: false);
   }
 
-  ABCompareConfigV1 _parseAbCompareConfig() {
+  ABCompareConfigV1 _parseAbCompareConfig(AppLocalizations l10n) {
     final minToken = double.tryParse(_abMinTokenReductionCtrl.text.trim());
     final maxDrop = double.tryParse(_abMaxQualityDropCtrl.text.trim());
     final minScore = double.tryParse(_abMinQualityScoreCtrl.text.trim());
     final p = double.tryParse(_abSignificanceCtrl.text.trim());
     if (minToken == null || maxDrop == null || minScore == null || p == null) {
-      throw const FormatException('A/B 阈值参数格式错误');
+      throw FormatException(l10n.benchmarkErrorAbThresholdFormat);
     }
     return ABCompareConfigV1(
       minTokenReductionPct: minToken,
@@ -146,35 +147,40 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
   }
 
   Future<void> _runAction(
+    AppLocalizations l10n,
     String label,
     Future<void> Function(String token) action,
   ) async {
     final token = _token;
     if (token == null || token.isEmpty) {
       setState(() {
-        _statusLine = '当前未登录，无法执行 $label';
+        _statusLine = l10n.benchmarkStatusNeedSignIn(label);
       });
       return;
     }
     setState(() {
       _busy = true;
-      _statusLine = '正在执行：$label';
+      _statusLine = l10n.benchmarkStatusRunning(label);
     });
     try {
       await action(token);
       if (!mounted) return;
       setState(() {
-        _statusLine = '已完成：$label';
+        _statusLine = l10n.benchmarkStatusCompleted(label);
       });
     } on RustApiException catch (error) {
       if (!mounted) return;
       setState(() {
-        _statusLine = '失败：$label（${error.statusCode ?? '-'} ${error.message}）';
+        _statusLine = l10n.benchmarkStatusFailedHttp(
+          label,
+          '${error.statusCode ?? '-'}',
+          error.message,
+        );
       });
     } catch (error) {
       if (!mounted) return;
       setState(() {
-        _statusLine = '失败：$label（$error）';
+        _statusLine = l10n.benchmarkStatusFailed(label, '$error');
       });
     } finally {
       if (mounted) {
@@ -223,6 +229,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
   Widget build(BuildContext context) {
     final outline = Theme.of(context).colorScheme.outline;
     final projectId = int.tryParse(_projectIdCtrl.text.trim());
+    final l10n = AppLocalizations.of(context)!;
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -233,18 +240,18 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
             children: [
               Expanded(
                 child: Text(
-                  '质量基线与实验',
+                  l10n.benchmarkSectionTitle,
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
               ),
-              const RiskyOperationConfirmPrefsOverflowMenu(
-                tooltip: '本机客户端偏好',
+              RiskyOperationConfirmPrefsOverflowMenu(
+                tooltip: l10n.riskyPrefsMenuDefaultTooltip,
               ),
             ],
           ),
           const SizedBox(height: 8),
           Text(
-            '在同一入口管理样本池、实验运行、人工复核、ROI、放行门和趋势，避免后续质量优化只靠感觉判断。',
+            l10n.benchmarkIntroBody,
             style: Theme.of(
               context,
             ).textTheme.bodySmall?.copyWith(color: outline),
@@ -257,47 +264,47 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
               FilledButton.tonal(
                 onPressed: _busy
                     ? null
-                    : () => _runAction('读取样本池', (token) async {
+                    : () => _runAction(l10n, l10n.benchmarkActionFetchSamplePool, (token) async {
                         _cases = await fetchBenchmarkCases(
                           token,
                           projectId: projectId,
                         );
                       }),
-                child: const Text('读取样本池'),
+                child: Text(l10n.benchmarkActionFetchSamplePool),
               ),
               FilledButton.tonal(
                 onPressed: _busy
                     ? null
-                    : () => _runAction('读取实验', (token) async {
+                    : () => _runAction(l10n, l10n.benchmarkActionFetchExperiments, (token) async {
                         _experiments = await fetchBenchmarkExperiments(token);
                       }),
-                child: const Text('读取实验'),
+                child: Text(l10n.benchmarkActionFetchExperiments),
               ),
               FilledButton.tonal(
                 onPressed: _busy
                     ? null
-                    : () => _runAction('读取复核队列', (token) async {
+                    : () => _runAction(l10n, l10n.benchmarkActionFetchReviewQueue, (token) async {
                         _reviewQueue = await fetchBenchmarkReviewQueue(token);
                       }),
-                child: const Text('读取复核队列'),
+                child: Text(l10n.benchmarkActionFetchReviewQueue),
               ),
               FilledButton.tonal(
                 onPressed: _busy
                     ? null
-                    : () => _runAction('读取记忆预算档', (token) async {
+                    : () => _runAction(l10n, l10n.benchmarkActionFetchMemoryTier, (token) async {
                         _memoryProfiles = await fetchBenchmarkMemoryProfiles(
                           token,
                         );
                       }),
-                child: const Text('读取记忆档'),
+                child: Text(l10n.benchmarkActionFetchMemoryTier),
               ),
               FilledButton.tonal(
                 onPressed: _busy
                     ? null
-                    : () => _runAction('读取趋势', (token) async {
+                    : () => _runAction(l10n, l10n.benchmarkActionFetchTrends, (token) async {
                         _trends = await fetchBenchmarkTrends(token);
                       }),
-                child: const Text('读取趋势'),
+                child: Text(l10n.benchmarkActionFetchTrends),
               ),
             ],
           ),
@@ -309,21 +316,23 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
           TextField(
             controller: _projectIdCtrl,
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(labelText: '项目 ID（可选，用于样本筛选）'),
+            decoration: InputDecoration(
+              labelText: l10n.benchmarkProjectIdOptional,
+            ),
           ),
           const SizedBox(height: 12),
-          _buildPromoteCard(context),
+          _buildPromoteCard(context, l10n),
           const SizedBox(height: 12),
-          _buildExperimentCard(context),
+          _buildExperimentCard(context, l10n),
           const SizedBox(height: 12),
-          _buildReviewCard(context),
+          _buildReviewCard(context, l10n),
           const SizedBox(height: 12),
-          _buildGateCard(context),
+          _buildGateCard(context, l10n),
           const SizedBox(height: 12),
-          _buildABCompareCard(context),
+          _buildABCompareCard(context, l10n),
           const SizedBox(height: 12),
           SelectableText(
-            summarizeBenchmarkCases(_cases),
+            summarizeBenchmarkCases(l10n, _cases),
             style: Theme.of(context).textTheme.bodySmall,
           ),
           if (_cases.isNotEmpty) ...[
@@ -338,14 +347,18 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                       '${item.caseType} · P${item.projectId} · ${item.stage}',
                     ),
                     subtitle: Text(
-                      '${item.summary} · 权重 ${item.weight} · 标签 ${item.issueTags.join('/')}',
+                      l10n.benchmarkCaseRowSubtitle(
+                        item.summary,
+                        '${item.weight}',
+                        item.issueTags.join('/'),
+                      ),
                     ),
                   ),
                 ),
           ],
           const SizedBox(height: 12),
           SelectableText(
-            summarizeBenchmarkExperiments(_experiments),
+            summarizeBenchmarkExperiments(l10n, _experiments),
             style: Theme.of(context).textTheme.bodySmall,
           ),
           if (_experiments.isNotEmpty) ...[
@@ -358,7 +371,11 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                     contentPadding: EdgeInsets.zero,
                     title: Text('${item.name} · ${item.status}'),
                     subtitle: Text(
-                      '${item.sampleTier} · 阶段 ${item.stageScope.join(', ')} · ${item.id}',
+                      l10n.benchmarkExperimentRowSubtitle(
+                        item.sampleTier,
+                        item.stageScope.join(', '),
+                        item.id,
+                      ),
                     ),
                     onTap: () {
                       _experimentIdCtrl.text = item.id;
@@ -369,7 +386,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
           ],
           const SizedBox(height: 12),
           SelectableText(
-            summarizeBenchmarkReviewQueue(_reviewQueue),
+            summarizeBenchmarkReviewQueue(l10n, _reviewQueue),
             style: Theme.of(context).textTheme.bodySmall,
           ),
           if (_reviewQueue.isNotEmpty) ...[
@@ -394,13 +411,25 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
           if (_memoryProfiles != null) ...[
             const SizedBox(height: 12),
             Text(
-              '记忆预算档：${_memoryProfiles!.profiles.map((item) => '${item.budgetTier}/${item.profileVersion ?? '-'}').join('，')}',
+              l10n.benchmarkMemoryProfilesLine(
+                _memoryProfiles!.profiles
+                    .map(
+                      (item) =>
+                          '${item.budgetTier}/${item.profileVersion ?? '-'}',
+                    )
+                    .join(', '),
+              ),
             ),
           ],
           if (_experimentDetail != null) ...[
             const SizedBox(height: 12),
             Text(
-              '实验详情：${_experimentDetail!.experiment.name} · ${_experimentDetail!.variants.length} 个变体',
+              l10n.benchmarkExperimentDetailHeader(
+                _experimentDetail!.experiment.name.trim().isEmpty
+                    ? _experimentDetail!.experiment.id
+                    : _experimentDetail!.experiment.name,
+                _experimentDetail!.variants.length,
+              ),
             ),
             const SizedBox(height: 6),
             ..._experimentDetail!.variants.map(
@@ -412,42 +441,65 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
           if (_roiSummary != null) ...[
             const SizedBox(height: 12),
             Text(
-              'ROI：${_roiSummary!.overallConclusionType} · ${_roiSummary!.overallRationale}',
+              l10n.benchmarkRoiHeader(
+                _roiSummary!.overallConclusionType,
+                _roiSummary!.overallRationale,
+              ),
             ),
             const SizedBox(height: 6),
             ..._roiSummary!.variantComparisons.map(
               (item) => Text(
-                '${item.variantLabel} · scoreΔ ${item.qualityScoreDelta.toStringAsFixed(2)} · tokenΔ ${item.tokenDeltaPercent.toStringAsFixed(1)}%',
+                l10n.benchmarkRoiVariantLine(
+                  item.variantLabel,
+                  item.qualityScoreDelta.toStringAsFixed(2),
+                  item.tokenDeltaPercent.toStringAsFixed(1),
+                ),
               ),
             ),
           ],
           if (_gateSummary != null) ...[
             const SizedBox(height: 12),
-            Text(summarizeBenchmarkGate(_gateSummary)),
+            Text(summarizeBenchmarkGate(l10n, _gateSummary)),
             const SizedBox(height: 6),
             ..._gateSummary!.assessments.map(
               (item) => Text(
-                '${item.variantLabel} · ${item.autoDecision} · scoreΔ ${item.qualityScoreDelta.toStringAsFixed(2)} · severeGuard ${item.severeGuardFailures}',
+                l10n.benchmarkGateAssessmentRow(
+                  item.variantLabel,
+                  item.autoDecision,
+                  item.qualityScoreDelta.toStringAsFixed(2),
+                  '${item.severeGuardFailures}',
+                ),
               ),
             ),
           ],
           if (_trends != null) ...[
             const SizedBox(height: 12),
-            Text(summarizeBenchmarkTrends(_trends)),
+            Text(summarizeBenchmarkTrends(l10n, _trends)),
             const SizedBox(height: 6),
             ..._trends!.weeks.map(
               (item) => Text(
-                '${item.weekStart} · 质量 ${item.avgQualityScore.toStringAsFixed(1)} · token ${item.totalTokens} · approved ${item.approvedCount} / blocked ${item.blockedCount}',
+                l10n.benchmarkTrendWeekRow(
+                  item.weekStart,
+                  item.avgQualityScore.toStringAsFixed(1),
+                  '${item.totalTokens}',
+                  '${item.approvedCount}',
+                  '${item.blockedCount}',
+                ),
               ),
             ),
           ],
           if (_abCompare != null) ...[
             const SizedBox(height: 12),
             Text(
-              'A/B 汇总：${_abCompare!.passed ? "通过" : "未通过"} · '
-              '通过 ${_abCompare!.passedCases}/${_abCompare!.totalCases} · '
-              '平均 token 降幅 ${_abCompare!.avgTokenReductionPct.toStringAsFixed(1)}% · '
-              '平均质量差 ${_abCompare!.avgQualityDiff.toStringAsFixed(2)}',
+              l10n.benchmarkAbAggregateSummary(
+                _abCompare!.passed
+                    ? l10n.benchmarkAbOutcomePassed
+                    : l10n.benchmarkAbOutcomeFailed,
+                _abCompare!.passedCases,
+                _abCompare!.totalCases,
+                _abCompare!.avgTokenReductionPct.toStringAsFixed(1),
+                _abCompare!.avgQualityDiff.toStringAsFixed(2),
+              ),
             ),
             const SizedBox(height: 6),
             ..._abCompare!.comparisons.take(12).map(
@@ -462,7 +514,12 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
           if (_abRunDetail != null) ...[
             const SizedBox(height: 12),
             Text(
-              '历史回放：${_abRunDetail!.run.name ?? _abRunDetail!.run.id} · ${_abRunDetail!.run.createdAt}',
+              l10n.benchmarkHistoryReplay(
+                ((_abRunDetail!.run.name?.trim().isEmpty) ?? true)
+                    ? _abRunDetail!.run.id
+                    : _abRunDetail!.run.name!,
+                _abRunDetail!.run.createdAt,
+              ),
             ),
             const SizedBox(height: 6),
             ..._abRunDetail!.cases.take(12).map((item) {
@@ -486,23 +543,30 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
     );
   }
 
-  Widget _buildPromoteCard(BuildContext context) {
+  Widget _buildPromoteCard(BuildContext context, AppLocalizations l10n) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('从质量评审提升样本', style: Theme.of(context).textTheme.titleSmall),
+            Text(
+              l10n.benchmarkPromoteCardTitle,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
             const SizedBox(height: 8),
             TextField(
               controller: _qualityReviewIdCtrl,
-              decoration: const InputDecoration(labelText: '质量评审 ID'),
+              decoration: InputDecoration(
+                labelText: l10n.benchmarkLabelQualityReviewId,
+              ),
             ),
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
               initialValue: _promoteCaseType,
-              decoration: const InputDecoration(labelText: '样本类型'),
+              decoration: InputDecoration(
+                labelText: l10n.benchmarkLabelSampleType,
+              ),
               items: const [
                 DropdownMenuItem(value: 'bad_case', child: Text('bad_case')),
                 DropdownMenuItem(value: 'golden', child: Text('golden')),
@@ -523,12 +587,16 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
             const SizedBox(height: 8),
             TextField(
               controller: _promoteSummaryCtrl,
-              decoration: const InputDecoration(labelText: '样本摘要'),
+              decoration: InputDecoration(
+                labelText: l10n.benchmarkLabelSampleSummary,
+              ),
             ),
             const SizedBox(height: 8),
             TextField(
               controller: _promoteTagsCtrl,
-              decoration: const InputDecoration(labelText: '标签（逗号分隔）'),
+              decoration: InputDecoration(
+                labelText: l10n.benchmarkLabelTagsCommaSeparated,
+              ),
             ),
             const SizedBox(height: 8),
             FilledButton.tonal(
@@ -537,7 +605,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                       _qualityReviewIdCtrl.text.trim().isEmpty ||
                       _promoteSummaryCtrl.text.trim().isEmpty
                   ? null
-                  : () => _runAction('从评审提升样本', (token) async {
+                  : () => _runAction(l10n, l10n.benchmarkActionPromoteFromReview, (token) async {
                       final item = await promoteBenchmarkCaseFromReview(
                         token,
                         qualityReviewId: _qualityReviewIdCtrl.text.trim(),
@@ -547,7 +615,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                       );
                       _cases = [item, ..._cases];
                     }),
-              child: const Text('提升为样本'),
+              child: Text(l10n.benchmarkButtonPromoteToSample),
             ),
           ],
         ),
@@ -555,18 +623,23 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
     );
   }
 
-  Widget _buildExperimentCard(BuildContext context) {
+  Widget _buildExperimentCard(BuildContext context, AppLocalizations l10n) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('实验运行', style: Theme.of(context).textTheme.titleSmall),
+            Text(
+              l10n.benchmarkExperimentCardTitle,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
             const SizedBox(height: 8),
             TextField(
               controller: _experimentIdCtrl,
-              decoration: const InputDecoration(labelText: '实验 ID'),
+              decoration: InputDecoration(
+                labelText: l10n.benchmarkLabelExperimentId,
+              ),
             ),
             const SizedBox(height: 8),
             Wrap(
@@ -576,70 +649,74 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                 FilledButton.tonal(
                   onPressed: _busy || _experimentIdCtrl.text.trim().isEmpty
                       ? null
-                      : () => _runAction('读取实验详情', (token) async {
+                      : () => _runAction(l10n, l10n.benchmarkActionFetchExperimentDetail, (token) async {
                           _experimentDetail =
                               await fetchBenchmarkExperimentDetail(
                                 token,
                                 _experimentIdCtrl.text.trim(),
                               );
                         }),
-                  child: const Text('读取详情'),
+                  child: Text(l10n.benchmarkButtonLoadDetail),
                 ),
                 FilledButton.tonal(
                   onPressed: _busy || _experimentIdCtrl.text.trim().isEmpty
                       ? null
-                      : () => _runAction('启动实验', (token) async {
+                      : () => _runAction(l10n, l10n.benchmarkActionStartExperiment, (token) async {
                           _experimentDetail = await startBenchmarkExperiment(
                             token,
                             _experimentIdCtrl.text.trim(),
                           );
                         }),
-                  child: const Text('启动'),
+                  child: Text(l10n.benchmarkButtonStart),
                 ),
                 FilledButton.tonal(
                   onPressed: _busy || _experimentIdCtrl.text.trim().isEmpty
                       ? null
-                      : () => _runAction('取消实验', (token) async {
+                      : () => _runAction(l10n, l10n.benchmarkActionCancelExperiment, (token) async {
                           _experimentDetail = await cancelBenchmarkExperiment(
                             token,
                             _experimentIdCtrl.text.trim(),
                           );
                         }),
-                  child: const Text('取消'),
+                  child: Text(l10n.benchmarkButtonCancel),
                 ),
                 FilledButton.tonal(
                   onPressed: _busy || _experimentIdCtrl.text.trim().isEmpty
                       ? null
-                      : () => _runAction('读取 ROI', (token) async {
+                      : () => _runAction(l10n, l10n.benchmarkActionFetchRoi, (token) async {
                           _roiSummary = await fetchBenchmarkExperimentRoi(
                             token,
                             _experimentIdCtrl.text.trim(),
                           );
                         }),
-                  child: const Text('读取 ROI'),
+                  child: Text(l10n.benchmarkActionFetchRoi),
                 ),
                 FilledButton.tonal(
                   onPressed: _busy || _experimentIdCtrl.text.trim().isEmpty
                       ? null
-                      : () => _runAction('读取放行门', (token) async {
+                      : () => _runAction(l10n, l10n.benchmarkActionFetchGate, (token) async {
                           _gateSummary = await fetchBenchmarkGate(
                             token,
                             _experimentIdCtrl.text.trim(),
                           );
                         }),
-                  child: const Text('读取放行门'),
+                  child: Text(l10n.benchmarkActionFetchGate),
                 ),
               ],
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _experimentNameCtrl,
-              decoration: const InputDecoration(labelText: '新实验名称'),
+              decoration: InputDecoration(
+                labelText: l10n.benchmarkLabelNewExperimentName,
+              ),
             ),
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
               initialValue: _sampleTier,
-              decoration: const InputDecoration(labelText: '样本集'),
+              decoration: InputDecoration(
+                labelText: l10n.benchmarkLabelSampleTierSet,
+              ),
               items: const [
                 DropdownMenuItem(value: 'smoke', child: Text('smoke')),
                 DropdownMenuItem(value: 'core', child: Text('core')),
@@ -657,28 +734,36 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
             const SizedBox(height: 8),
             TextField(
               controller: _stageScopeCtrl,
-              decoration: const InputDecoration(labelText: '阶段范围（逗号分隔）'),
+              decoration: InputDecoration(
+                labelText: l10n.benchmarkLabelStageScopeComma,
+              ),
               maxLines: 2,
             ),
             const SizedBox(height: 8),
             TextField(
               controller: _baselineLabelCtrl,
-              decoration: const InputDecoration(labelText: '基线变体 label'),
+              decoration: InputDecoration(
+                labelText: l10n.benchmarkLabelBaselineVariantLabel,
+              ),
             ),
             const SizedBox(height: 8),
             TextField(
               controller: _variantsJsonCtrl,
               maxLines: 14,
-              decoration: const InputDecoration(labelText: '变体 JSON（数组）'),
+              decoration: InputDecoration(
+                labelText: l10n.benchmarkLabelVariantsJsonArray,
+              ),
             ),
             const SizedBox(height: 8),
             FilledButton.tonal(
               onPressed: _busy || _experimentNameCtrl.text.trim().isEmpty
                   ? null
-                  : () => _runAction('创建实验', (token) async {
+                  : () => _runAction(l10n, l10n.benchmarkActionCreateExperiment, (token) async {
                       final decoded = jsonDecode(_variantsJsonCtrl.text.trim());
                       if (decoded is! List) {
-                        throw const FormatException('variants JSON 必须是数组');
+                        throw FormatException(
+                          l10n.benchmarkErrorVariantsMustBeJsonArray,
+                        );
                       }
                       final variants = decoded
                           .whereType<Map>()
@@ -700,7 +785,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                       _experimentIdCtrl.text = detail.experiment.id;
                       _experiments = [detail.experiment, ..._experiments];
                     }),
-              child: const Text('创建实验'),
+              child: Text(l10n.benchmarkButtonCreateExperiment),
             ),
           ],
         ),
@@ -708,24 +793,31 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
     );
   }
 
-  Widget _buildReviewCard(BuildContext context) {
+  Widget _buildReviewCard(BuildContext context, AppLocalizations l10n) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('人工复核', style: Theme.of(context).textTheme.titleSmall),
+            Text(
+              l10n.benchmarkReviewCardTitle,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
             const SizedBox(height: 8),
             TextField(
               controller: _reviewQueueIdCtrl,
-              decoration: const InputDecoration(labelText: '复核队列 ID'),
+              decoration: InputDecoration(
+                labelText: l10n.benchmarkLabelReviewQueueId,
+              ),
             ),
             const SizedBox(height: 8),
             TextField(
               controller: _reviewScoreJsonCtrl,
               maxLines: 8,
-              decoration: const InputDecoration(labelText: '提交评分 JSON'),
+              decoration: InputDecoration(
+                labelText: l10n.benchmarkLabelSubmittedScoreJson,
+              ),
             ),
             const SizedBox(height: 8),
             Wrap(
@@ -735,12 +827,14 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                 FilledButton.tonal(
                   onPressed: _busy || _reviewQueueIdCtrl.text.trim().isEmpty
                       ? null
-                      : () => _runAction('提交复核', (token) async {
+                      : () => _runAction(l10n, l10n.benchmarkActionSubmitReview, (token) async {
                           final decoded = jsonDecode(
                             _reviewScoreJsonCtrl.text.trim(),
                           );
                           if (decoded is! Map) {
-                            throw const FormatException('submittedScore 必须是对象');
+                            throw FormatException(
+                              l10n.benchmarkErrorSubmittedScoreMustBeObject,
+                            );
                           }
                           await submitBenchmarkReview(
                             token,
@@ -751,19 +845,21 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                           );
                           _reviewQueue = await fetchBenchmarkReviewQueue(token);
                         }),
-                  child: const Text('提交复核'),
+                  child: Text(l10n.benchmarkActionSubmitReview),
                 ),
                 SizedBox(
                   width: 280,
                   child: TextField(
                     controller: _reviewSkipReasonCtrl,
-                    decoration: const InputDecoration(labelText: '跳过原因（可选）'),
+                    decoration: InputDecoration(
+                      labelText: l10n.benchmarkLabelSkipReasonOptional,
+                    ),
                   ),
                 ),
                 FilledButton.tonal(
                   onPressed: _busy || _reviewQueueIdCtrl.text.trim().isEmpty
                       ? null
-                      : () => _runAction('跳过复核', (token) async {
+                      : () => _runAction(l10n, l10n.benchmarkActionSkipReview, (token) async {
                           await skipBenchmarkReview(
                             token,
                             reviewQueueId: _reviewQueueIdCtrl.text.trim(),
@@ -771,7 +867,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                           );
                           _reviewQueue = await fetchBenchmarkReviewQueue(token);
                         }),
-                  child: const Text('跳过复核'),
+                  child: Text(l10n.benchmarkActionSkipReview),
                 ),
               ],
             ),
@@ -781,38 +877,45 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
     );
   }
 
-  Widget _buildGateCard(BuildContext context) {
+  Widget _buildGateCard(BuildContext context, AppLocalizations l10n) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('放行门决策', style: Theme.of(context).textTheme.titleSmall),
+            Text(
+              l10n.benchmarkGateCardTitle,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
             const SizedBox(height: 8),
             TextField(
               controller: _gateVariantIdCtrl,
-              decoration: const InputDecoration(labelText: '变体 ID'),
+              decoration: InputDecoration(
+                labelText: l10n.benchmarkLabelGateVariantId,
+              ),
             ),
             const SizedBox(height: 8),
             TextField(
               controller: _gateDecisionCtrl,
-              decoration: const InputDecoration(
-                labelText: '决策（留空则使用 auto decision）',
+              decoration: InputDecoration(
+                labelText: l10n.benchmarkLabelGateDecisionOptionalAuto,
               ),
             ),
             const SizedBox(height: 8),
             TextField(
               controller: _gateNoteCtrl,
               maxLines: 3,
-              decoration: const InputDecoration(labelText: '决策说明'),
+              decoration: InputDecoration(
+                labelText: l10n.benchmarkLabelGateDecisionNote,
+              ),
             ),
             const SizedBox(height: 8),
             SwitchListTile.adaptive(
               contentPadding: EdgeInsets.zero,
               value: _promoteToBaseline,
-              title: const Text('同时提升为新基线'),
-              subtitle: const Text('仅对 approved / approved_limited 生效'),
+              title: Text(l10n.benchmarkGatePromoteBaselineTitle),
+              subtitle: Text(l10n.benchmarkGatePromoteBaselineSubtitle),
               onChanged: _busy
                   ? null
                   : (value) {
@@ -828,7 +931,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                       _experimentIdCtrl.text.trim().isEmpty ||
                       _gateVariantIdCtrl.text.trim().isEmpty
                   ? null
-                  : () => _runAction('提交放行决策', (token) async {
+                  : () => _runAction(l10n, l10n.benchmarkActionSubmitGateDecision, (token) async {
                       await submitBenchmarkGateDecision(
                         token,
                         experimentId: _experimentIdCtrl.text.trim(),
@@ -844,7 +947,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                         _experimentIdCtrl.text.trim(),
                       );
                     }),
-              child: const Text('提交放行决策'),
+              child: Text(l10n.benchmarkActionSubmitGateDecision),
             ),
           ],
         ),
@@ -852,25 +955,30 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
     );
   }
 
-  Widget _buildABCompareCard(BuildContext context) {
+  Widget _buildABCompareCard(BuildContext context, AppLocalizations l10n) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('A/B 对比评估', style: Theme.of(context).textTheme.titleSmall),
+            Text(
+              l10n.benchmarkAbCardTitle,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
             const SizedBox(height: 8),
             TextField(
               controller: _abCompareNameCtrl,
-              decoration: const InputDecoration(labelText: '保存名称（可选）'),
+              decoration: InputDecoration(
+                labelText: l10n.benchmarkLabelAbSaveNameOptional,
+              ),
             ),
             const SizedBox(height: 8),
             TextField(
               controller: _abCompareCasesCtrl,
               maxLines: 5,
-              decoration: const InputDecoration(
-                labelText: '案例列表（每行：testCaseId,baselineJobId,optimizedJobId）',
+              decoration: InputDecoration(
+                labelText: l10n.benchmarkLabelAbCaseLines,
               ),
             ),
             const SizedBox(height: 8),
@@ -882,7 +990,9 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                   width: 180,
                   child: TextField(
                     controller: _abMinTokenReductionCtrl,
-                    decoration: const InputDecoration(labelText: '最小 token 降幅 %'),
+                    decoration: InputDecoration(
+                      labelText: l10n.benchmarkLabelAbMinTokenReductionPct,
+                    ),
                     keyboardType: TextInputType.number,
                   ),
                 ),
@@ -890,7 +1000,9 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                   width: 180,
                   child: TextField(
                     controller: _abMaxQualityDropCtrl,
-                    decoration: const InputDecoration(labelText: '最大质量下降'),
+                    decoration: InputDecoration(
+                      labelText: l10n.benchmarkLabelAbMaxQualityDrop,
+                    ),
                     keyboardType: TextInputType.number,
                   ),
                 ),
@@ -898,7 +1010,9 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                   width: 180,
                   child: TextField(
                     controller: _abMinQualityScoreCtrl,
-                    decoration: const InputDecoration(labelText: '最小质量分'),
+                    decoration: InputDecoration(
+                      labelText: l10n.benchmarkLabelAbMinQualityScore,
+                    ),
                     keyboardType: TextInputType.number,
                   ),
                 ),
@@ -906,7 +1020,9 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                   width: 180,
                   child: TextField(
                     controller: _abSignificanceCtrl,
-                    decoration: const InputDecoration(labelText: '显著性阈值 p'),
+                    decoration: InputDecoration(
+                      labelText: l10n.benchmarkLabelAbSignificanceP,
+                    ),
                     keyboardType: TextInputType.number,
                   ),
                 ),
@@ -916,24 +1032,24 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
             FilledButton.tonal(
               onPressed: _busy
                   ? null
-                  : () => _runAction('执行 A/B 对比', (token) async {
-                      final cases = _parseAbCompareCases();
-                      final config = _parseAbCompareConfig();
+                  : () => _runAction(l10n, l10n.benchmarkActionRunAbCompare, (token) async {
+                      final cases = _parseAbCompareCases(l10n);
+                      final config = _parseAbCompareConfig(l10n);
                       _abCompare = await compareBenchmarkABJobs(
                         token,
                         cases: cases,
                         config: config,
                       );
                     }),
-              child: const Text('执行 A/B 对比'),
+              child: Text(l10n.benchmarkButtonRunAbCompare),
             ),
             const SizedBox(height: 8),
             FilledButton.tonal(
               onPressed: _busy
                   ? null
-                  : () => _runAction('保存并执行 A/B 对比', (token) async {
-                      final cases = _parseAbCompareCases();
-                      final config = _parseAbCompareConfig();
+                  : () => _runAction(l10n, l10n.benchmarkActionSaveRunAbCompare, (token) async {
+                      final cases = _parseAbCompareCases(l10n);
+                      final config = _parseAbCompareConfig(l10n);
                       _abCompare = await compareBenchmarkABJobs(
                         token,
                         persist: true,
@@ -943,7 +1059,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                       );
                       _abRuns = await fetchBenchmarkABCompareRuns(token);
                     }),
-              child: const Text('保存并执行'),
+              child: Text(l10n.benchmarkButtonSaveAndRun),
             ),
             const SizedBox(height: 8),
             Wrap(
@@ -953,13 +1069,13 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                 FilledButton.tonal(
                   onPressed: _busy
                       ? null
-                      : () => _runAction('读取 A/B 历史', (token) async {
+                      : () => _runAction(l10n, l10n.benchmarkActionFetchAbHistory, (token) async {
                           _abRuns = await fetchBenchmarkABCompareRuns(token);
                           if (_selectedAbRunId == null && _abRuns.isNotEmpty) {
                             _selectedAbRunId = _abRuns.first.id;
                           }
                         }),
-                  child: const Text('读取历史'),
+                  child: Text(l10n.benchmarkButtonFetchHistory),
                 ),
                 if (_abRuns.isNotEmpty)
                   DropdownButton<String>(
@@ -984,7 +1100,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                 FilledButton.tonal(
                   onPressed: _busy || _selectedAbRunId == null
                       ? null
-                      : () => _runAction('读取 A/B 详情', (token) async {
+                      : () => _runAction(l10n, l10n.benchmarkActionFetchAbDetail, (token) async {
                           final detail = await fetchBenchmarkABCompareRunDetail(
                             token,
                             _selectedAbRunId!,
@@ -1007,14 +1123,14 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                               )
                               .join('\n');
                         }),
-                  child: const Text('读取详情并回填'),
+                  child: Text(l10n.benchmarkButtonLoadDetailAndFill),
                 ),
                 FilledButton.tonal(
                   onPressed: _busy || _abRunDetail == null
                       ? null
-                      : () => _runAction('复跑并保存', (token) async {
-                          final cases = _parseAbCompareCases();
-                          final config = _parseAbCompareConfig();
+                      : () => _runAction(l10n, l10n.benchmarkActionReplaySave, (token) async {
+                          final cases = _parseAbCompareCases(l10n);
+                          final config = _parseAbCompareConfig(l10n);
                           final baseName = (_abCompareNameCtrl.text.trim().isNotEmpty)
                               ? _abCompareNameCtrl.text.trim()
                               : (_abRunDetail!.run.name ??
@@ -1041,7 +1157,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                             );
                           }
                         }),
-                  child: const Text('回放参数复跑并保存'),
+                  child: Text(l10n.benchmarkButtonReplaySave),
                 ),
               ],
             ),
