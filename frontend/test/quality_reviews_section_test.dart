@@ -114,4 +114,39 @@ void main() {
     expect(find.widgetWithText(TextField, '9'), findsNWidgets(2));
     expect(find.widgetWithText(TextField, 'output'), findsWidgets);
   });
+
+  testWidgets('quality workbench resolves numeric project seed from uuid-only scope', (
+    WidgetTester tester,
+  ) async {
+    final controller = buildController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      _buildTestApp(
+        QualityReviewsSection(
+          accessToken: 'token',
+          controller: controller,
+          initialProjectNumericId: null,
+          initialProjectUuid: 'project-uuid-9',
+          platformConfig: _testPlatformConfig,
+          fetchProjectsOverride: (token) async => const [
+            ProjectRow(
+              id: 'project-uuid-9',
+              workspaceId: 'workspace-1',
+              numericId: 9,
+              name: 'Project 9',
+              projectAccessMode: 'inherited',
+              projectAccessRole: 'member',
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('打开质量工作台'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('质量工作台'), findsOneWidget);
+    expect(find.widgetWithText(TextField, '9'), findsNWidgets(2));
+  });
 }

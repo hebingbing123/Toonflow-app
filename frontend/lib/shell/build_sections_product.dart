@@ -451,6 +451,10 @@ extension _HomePageBuildProductSections on _HomePageState {
             accessToken: _session?.accessToken,
             controller: _qualityReviewsController,
             initialProjectNumericId: _productScopedProjectNumericId,
+            initialProjectUuid:
+                _workspaceInputController.projectUuidController.text.trim().isEmpty
+                ? null
+                : _workspaceInputController.projectUuidController.text.trim(),
             platformConfig: _platformConfig,
           ),
         ),

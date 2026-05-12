@@ -19,13 +19,35 @@ class QualityReviewsSection extends StatelessWidget {
     required this.accessToken,
     required this.controller,
     required this.initialProjectNumericId,
+    this.initialProjectUuid,
     required this.platformConfig,
+    this.fetchProjectsOverride,
   });
 
   final String? accessToken;
   final QualityReviewsController controller;
   final int? initialProjectNumericId;
+  final String? initialProjectUuid;
   final PlatformConfigToggleSetV1 platformConfig;
+  final Future<List<ProjectRow>> Function(String accessToken)? fetchProjectsOverride;
+
+  Future<int?> _resolveInitialProjectNumericId() async {
+    if (initialProjectNumericId != null && initialProjectNumericId! > 0) {
+      return initialProjectNumericId;
+    }
+    final token = accessToken;
+    final projectUuid = initialProjectUuid?.trim();
+    if (token == null || token.isEmpty || projectUuid == null || projectUuid.isEmpty) {
+      return null;
+    }
+    final rows = await (fetchProjectsOverride ?? fetchProjects)(token);
+    for (final row in rows) {
+      if (row.id == projectUuid) {
+        return row.numericId;
+      }
+    }
+    return null;
+  }
 
   Future<void> _openQualityWorkbench(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
@@ -36,11 +58,15 @@ class QualityReviewsSection extends StatelessWidget {
       ).showSnackBar(SnackBar(content: Text(l10n.qualityReviewsErrNotLoggedIn)));
       return;
     }
+    final resolvedProjectNumericId = await _resolveInitialProjectNumericId();
+    if (!context.mounted) {
+      return;
+    }
     await showDialog<void>(
       context: context,
       builder: (dialogCtx) => _QualityReviewsWorkbenchDialog(
         accessToken: token,
-        initialProjectNumericId: initialProjectNumericId,
+        initialProjectNumericId: resolvedProjectNumericId,
         initialReviews: controller.qualityReviews ?? const <QualityReview>[],
         initialReviewDetails: controller.qualityReviewByIdLine,
         initialStatsSummary: controller.qualityStatsLine,
@@ -96,14 +122,17 @@ class QualityReviewsSection extends StatelessWidget {
               loadingQualityStats: controller.loadingQualityStats,
               loadingQualityStagePassRate: controller.loadingQualityStagePassRate,
               onOpenWorkbench: () => _openQualityWorkbench(context),
-              onLoadQualityDashboard: () => controller.loadQualityDashboard(
-                projectId: initialProjectNumericId,
-              ),
-              onRefreshQualityDashboardReadModel: () =>
-                  controller.loadQualityDashboard(
-                    projectId: initialProjectNumericId,
-                    refreshReadModel: true,
-                  ),
+              onLoadQualityDashboard: () async {
+                final projectId = await _resolveInitialProjectNumericId();
+                await controller.loadQualityDashboard(projectId: projectId);
+              },
+              onRefreshQualityDashboardReadModel: () async {
+                final projectId = await _resolveInitialProjectNumericId();
+                await controller.loadQualityDashboard(
+                  projectId: projectId,
+                  refreshReadModel: true,
+                );
+              },
               onLoadQualityReviews: controller.loadQualityReviews,
               onLoadQualityBadCases: controller.loadQualityBadCases,
               onLoadQualityStats: controller.loadQualityStats,
