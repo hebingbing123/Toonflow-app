@@ -31,6 +31,22 @@ class QualityReviewsSection extends StatelessWidget {
   final PlatformConfigToggleSetV1 platformConfig;
   final Future<List<ProjectRow>> Function(String accessToken)? fetchProjectsOverride;
 
+  String? _buildInitialProjectScopeSummary({
+    required int? resolvedProjectNumericId,
+  }) {
+    final projectUuid = initialProjectUuid?.trim();
+    if (projectUuid != null && projectUuid.isNotEmpty) {
+      if (resolvedProjectNumericId != null && resolvedProjectNumericId > 0) {
+        return 'projectUuid=$projectUuid -> projectId=$resolvedProjectNumericId';
+      }
+      return 'projectUuid=$projectUuid';
+    }
+    if (resolvedProjectNumericId != null && resolvedProjectNumericId > 0) {
+      return 'projectId=$resolvedProjectNumericId';
+    }
+    return null;
+  }
+
   Future<int?> _resolveInitialProjectNumericId() async {
     if (initialProjectNumericId != null && initialProjectNumericId! > 0) {
       return initialProjectNumericId;
@@ -67,6 +83,9 @@ class QualityReviewsSection extends StatelessWidget {
       builder: (dialogCtx) => _QualityReviewsWorkbenchDialog(
         accessToken: token,
         initialProjectNumericId: resolvedProjectNumericId,
+        initialProjectScopeSummary: _buildInitialProjectScopeSummary(
+          resolvedProjectNumericId: resolvedProjectNumericId,
+        ),
         initialReviews: controller.qualityReviews ?? const <QualityReview>[],
         initialReviewDetails: controller.qualityReviewByIdLine,
         initialStatsSummary: controller.qualityStatsLine,

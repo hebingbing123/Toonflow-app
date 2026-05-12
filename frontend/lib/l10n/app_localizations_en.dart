@@ -2340,9 +2340,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Project numeric ID (optional)';
 
   @override
-  String get taskCenterFieldProjectUuidOptional => 'Project UUID (optional)';
-
-  @override
   String get taskCenterFieldTaskClassOptional => 'Task class (optional)';
 
   @override
@@ -5008,4 +5005,421 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get adminConsoleErrBatchNoteRequired =>
       'Batch note content is required when writing notes';
+
+  @override
+  String get contentComplianceWorkspacePersonalScope =>
+      'Personal / direct user scope';
+
+  @override
+  String get contentComplianceOpenProject => 'Open project';
+
+  @override
+  String get contentComplianceOpenScriptProject => 'Open script project';
+
+  @override
+  String get contentComplianceOpenStoryboardProject =>
+      'Open storyboard project';
+
+  @override
+  String get contentComplianceOpenAssetProject => 'Open asset project';
+
+  @override
+  String get contentComplianceOpenNovelProject => 'Open novel project';
+
+  @override
+  String get contentComplianceOpenUserContext => 'View user context';
+
+  @override
+  String get contentComplianceOpenContext => 'Open context';
+
+  @override
+  String get contentComplianceOwnerUnclaimed => 'Unclaimed';
+
+  @override
+  String get contentComplianceEscalationCriticalUnclaimed =>
+      'critical unclaimed';
+
+  @override
+  String get contentComplianceEscalationStalledClaimed => 'claimed stalled';
+
+  @override
+  String get contentComplianceEscalationOverCapacity => 'reviewer overloaded';
+
+  @override
+  String get contentComplianceEscalationEscalated72h => '72h escalated';
+
+  @override
+  String get contentComplianceEscalationUrgent => 'Urgent';
+
+  @override
+  String get contentComplianceEscalationClosed => 'Closed';
+
+  @override
+  String get contentComplianceEscalationWatch => 'Watch';
+
+  @override
+  String get contentComplianceAlertHintCriticalUnclaimed =>
+      'Start by bulk-claiming critical unclaimed items.';
+
+  @override
+  String get contentComplianceAlertHintOverCapacity =>
+      'Preview or run auto-rebalance first.';
+
+  @override
+  String get contentComplianceAlertHintStalledClaimed =>
+      'Handle stalled claimed items first (reassign or converge).';
+
+  @override
+  String get contentComplianceAlertHintEscalated72h =>
+      'Prioritize clearing 72h non-converged items.';
+
+  @override
+  String get contentComplianceAlertHintDefault =>
+      'Review this layer and address high-risk items first.';
+
+  @override
+  String get contentComplianceSnackNoCriticalUnclaimedBulkClaim =>
+      'No critical unclaimed items available for bulk claim.';
+
+  @override
+  String contentComplianceSnackSelectedStalledClaimed(int count) {
+    return 'Selected $count stalled claimed items; you can reassign or process them.';
+  }
+
+  @override
+  String contentComplianceSnackSelected72hUnconverged(int count) {
+    return 'Selected $count 72h non-converged items; you can reassign or process them.';
+  }
+
+  @override
+  String contentComplianceSnackSelectedCriticalUnclaimed(int count) {
+    return 'Selected $count critical unclaimed items.';
+  }
+
+  @override
+  String contentComplianceSnackSelected72hItems(int count) {
+    return 'Selected $count 72h non-converged items.';
+  }
+
+  @override
+  String get contentComplianceSnackRestoredDefaultActionOrder =>
+      'Restored default action order.';
+
+  @override
+  String get contentComplianceBulkClaim => 'Bulk claim';
+
+  @override
+  String get contentComplianceBulkResolve => 'Bulk resolve';
+
+  @override
+  String get contentComplianceBulkDismiss => 'Bulk dismiss';
+
+  @override
+  String get contentComplianceBulkGeneric => 'Bulk action';
+
+  @override
+  String contentComplianceBulkConfirmBody(String verb, int count) {
+    return 'Run $verb on $count reports?';
+  }
+
+  @override
+  String get contentComplianceBulkConfirmNoteReuse =>
+      '\n\nWill reuse the current resolution note.';
+
+  @override
+  String contentComplianceBulkResult(
+    String verb,
+    int succeeded,
+    int failed,
+    int remainingAlerts,
+    int criticalAlerts,
+  ) {
+    return '$verb finished: succeeded $succeeded, failed $failed; $remainingAlerts alerts remaining ($criticalAlerts high priority).';
+  }
+
+  @override
+  String contentComplianceCsvCopied(int count) {
+    return 'Copied filtered queue CSV ($count rows).';
+  }
+
+  @override
+  String get contentComplianceFillReviewerFirst =>
+      'Enter a target reviewer first.';
+
+  @override
+  String get contentComplianceReassignTitle => 'Bulk reassign';
+
+  @override
+  String contentComplianceReassignBody(int count, String assignee) {
+    return 'Reassign $count reports to $assignee?';
+  }
+
+  @override
+  String contentComplianceReassignResult(
+    String assignee,
+    int succeeded,
+    int failed,
+  ) {
+    return 'Reassigned to $assignee: succeeded $succeeded, failed $failed.';
+  }
+
+  @override
+  String get contentComplianceAutoRebalanceNoOverload =>
+      'No overloaded reviewers; auto-rebalance is not needed.';
+
+  @override
+  String get contentComplianceAutoRebalanceTitlePreview =>
+      'Preview auto-rebalance';
+
+  @override
+  String get contentComplianceAutoRebalanceTitleExecute => 'Run auto-rebalance';
+
+  @override
+  String contentComplianceAutoRebalanceBodyPreview(int limit) {
+    return 'Preview reassignment plan at capacity threshold ($limit); nothing will be written.';
+  }
+
+  @override
+  String contentComplianceAutoRebalanceBodyExecute(int limit) {
+    return 'Run automatic reassignment at capacity threshold ($limit) and write audit records.';
+  }
+
+  @override
+  String get contentComplianceStartPreview => 'Start preview';
+
+  @override
+  String get contentComplianceExecuteNow => 'Run now';
+
+  @override
+  String contentComplianceAutoRebalanceResultPreview(
+    int planned,
+    int capacity,
+  ) {
+    return 'Auto-rebalance preview: $planned moves suggested (capacity $capacity).';
+  }
+
+  @override
+  String contentComplianceAutoRebalanceResultExecute(
+    int planned,
+    int executed,
+    int overCapacityRemaining,
+    int remainingAlerts,
+  ) {
+    return 'Auto-rebalance done: planned $planned, executed $executed; over_capacity remaining $overCapacityRemaining, $remainingAlerts alerts total.';
+  }
+
+  @override
+  String contentComplianceAuditTitle(String reportId) {
+    return 'Report audit · $reportId';
+  }
+
+  @override
+  String get contentComplianceAuditEmpty => 'No audit records to display.';
+
+  @override
+  String get contentComplianceTitle => 'Content & compliance';
+
+  @override
+  String get contentComplianceIntro =>
+      'One place for user-submitted content reports and internal-ops claim/resolve review queues.';
+
+  @override
+  String get contentComplianceSubmitReportTitle => 'Submit report';
+
+  @override
+  String get contentComplianceTargetUuidHint => 'Enter reported object UUID';
+
+  @override
+  String get contentComplianceDetailLabel => 'Additional details';
+
+  @override
+  String get contentComplianceDetailHint =>
+      'Add context, timeline, or risk description';
+
+  @override
+  String get contentComplianceSubmitting => 'Submitting…';
+
+  @override
+  String get contentComplianceSubmitReport => 'Submit report';
+
+  @override
+  String get contentComplianceQueueTitle => 'Review queue';
+
+  @override
+  String get contentComplianceClearFilters => 'Clear filters';
+
+  @override
+  String get contentComplianceRefresh => 'Refresh';
+
+  @override
+  String get contentComplianceCopyCsv => 'Copy CSV';
+
+  @override
+  String contentComplianceTopActionSummary(
+    String title,
+    int count,
+    String hint,
+  ) {
+    return 'Primary action: $title ($count)\n$hint';
+  }
+
+  @override
+  String get contentComplianceViewLayer => 'View this layer';
+
+  @override
+  String get contentComplianceRestoreDefaultActionOrder =>
+      'Restore default action order';
+
+  @override
+  String get contentCompliancePreviewRebalanceShort => 'Preview rebalance';
+
+  @override
+  String get contentComplianceExecuteRebalanceShort => 'Run rebalance';
+
+  @override
+  String contentComplianceSnackSelectedCriticalReadyClaim(int count) {
+    return 'Selected $count critical unclaimed items; you can bulk claim.';
+  }
+
+  @override
+  String get contentComplianceSelectCriticalUnclaimed =>
+      'Select critical unclaimed';
+
+  @override
+  String get contentComplianceSnackNoCriticalUnclaimedInList =>
+      'No critical unclaimed items in the current list for bulk claim.';
+
+  @override
+  String get contentComplianceBulkClaimOneClick => 'Bulk claim (one click)';
+
+  @override
+  String get contentComplianceSelectStalled => 'Select stalled';
+
+  @override
+  String get contentCompliancePreviewStalledRebalance =>
+      'Preview stalled rebalance';
+
+  @override
+  String get contentComplianceSelect72hUnconverged =>
+      'Select 72h non-converged';
+
+  @override
+  String get contentComplianceClaimedOnly => 'Claimed only';
+
+  @override
+  String get contentComplianceOwnerChipUnclaimed => 'owner: unclaimed';
+
+  @override
+  String contentComplianceOwnerChip(String owner) {
+    return 'owner: $owner';
+  }
+
+  @override
+  String contentComplianceEscalationChipPrefix(String stage) {
+    return 'Escalation: $stage';
+  }
+
+  @override
+  String contentComplianceSlaUnclaimedCritical(int count) {
+    return 'critical unclaimed $count';
+  }
+
+  @override
+  String contentComplianceOverloadedReviewers(int count) {
+    return 'overloaded reviewers $count';
+  }
+
+  @override
+  String contentComplianceRebalanceNeeded(int count) {
+    return 'rebalance needed $count';
+  }
+
+  @override
+  String get contentComplianceReviewerOwnerLoad => 'Reviewer / owner load';
+
+  @override
+  String contentComplianceOverCapacitySuffix(int by) {
+    return ' · overloaded +$by';
+  }
+
+  @override
+  String get contentComplianceEscalationRhythm => 'Escalation rhythm';
+
+  @override
+  String get contentComplianceWorkspaceHotspots => 'Workspace hotspots';
+
+  @override
+  String get contentComplianceQueueEmpty => 'No pending reports right now.';
+
+  @override
+  String get contentComplianceCopyTarget => 'Copy target';
+
+  @override
+  String get contentComplianceCopiedTargetUuid => 'Copied target UUID';
+
+  @override
+  String get contentComplianceCopyReport => 'Copy report';
+
+  @override
+  String get contentComplianceCopiedReportUuid => 'Copied report UUID';
+
+  @override
+  String get contentComplianceAdminConsoleContext => 'Admin console context';
+
+  @override
+  String get contentComplianceLoadingAudit => 'Loading audit…';
+
+  @override
+  String get contentComplianceViewAudit => 'View audit';
+
+  @override
+  String get contentComplianceBulkReassignReviewerLabel =>
+      'Bulk reassign reviewer';
+
+  @override
+  String get contentComplianceBulkReassignReviewerHint =>
+      'e.g. internal_ops_cn_shift_b';
+
+  @override
+  String contentComplianceSelectedCount(int count) {
+    return 'Selected $count';
+  }
+
+  @override
+  String get contentComplianceSelectAllOpen => 'Select all open';
+
+  @override
+  String get contentComplianceClearSelection => 'Clear selection';
+
+  @override
+  String get contentComplianceBulkReassign => 'Bulk reassign';
+
+  @override
+  String get contentComplianceResolutionNoteHint =>
+      'Reused for claim / resolve when provided';
+
+  @override
+  String get contentComplianceTopSecondaryPendingOnly => 'Select pending only';
+
+  @override
+  String get contentComplianceTopSecondaryRunRebalance => 'Run auto-rebalance';
+
+  @override
+  String get contentComplianceTopSecondaryPreviewStalledRebalance =>
+      'Preview stalled rebalance';
+
+  @override
+  String get contentComplianceTopSecondarySelect72hOnly =>
+      'Select 72h non-converged only';
+
+  @override
+  String get contentComplianceDialogContinue => 'Continue';
+
+  @override
+  String get contentComplianceLabelSelect72hUnconverged =>
+      'Select 72h non-converged';
+
+  @override
+  String get contentComplianceErrAssigneeRequired =>
+      'Assignee reviewer cannot be empty.';
 }

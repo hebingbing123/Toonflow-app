@@ -147,6 +147,12 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('质量工作台'), findsOneWidget);
+    expect(
+      find.text(
+        'Scope seed：projectUuid=project-uuid-9 -> projectId=9',
+      ),
+      findsOneWidget,
+    );
     expect(find.widgetWithText(TextField, '9'), findsNWidgets(2));
   });
 }

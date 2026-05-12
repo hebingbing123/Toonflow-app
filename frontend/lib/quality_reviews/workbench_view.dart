@@ -21,6 +21,7 @@ class QualityReviewsWorkbenchDialogViewModel {
     required this.badCaseStatsSummary,
     required this.reviewDetails,
     required this.statusLine,
+    required this.initialProjectScopeSummary,
     required this.activeFilterQuerySummary,
     required this.activeFilterRequestUrl,
     required this.filterBadCasesOnly,
@@ -70,6 +71,7 @@ class QualityReviewsWorkbenchDialogViewModel {
   final String? badCaseStatsSummary;
   final String? reviewDetails;
   final String? statusLine;
+  final String? initialProjectScopeSummary;
   final String? activeFilterQuerySummary;
   final String? activeFilterRequestUrl;
   final bool filterBadCasesOnly;
@@ -218,6 +220,17 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                   context,
                 ).textTheme.bodySmall?.copyWith(color: outline),
               ),
+              if (model.initialProjectScopeSummary != null) ...[
+                const SizedBox(height: 6),
+                SelectableText(
+                  l10n.qualityReviewsScopeSeedLine(
+                    model.initialProjectScopeSummary!,
+                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: outline),
+                ),
+              ],
               if (model.filterBadCasesOnly ||
                   model.filterDeliveryPriorityOnly ||
                   model.filterAutoSourceOnly) ...[

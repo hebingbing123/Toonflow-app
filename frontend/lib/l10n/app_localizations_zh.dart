@@ -2245,9 +2245,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get taskCenterFieldProjectNumericIdOptional => '项目 numeric ID（可空）';
 
   @override
-  String get taskCenterFieldProjectUuidOptional => '项目 UUID（可空）';
-
-  @override
   String get taskCenterFieldTaskClassOptional => '任务分类（可空）';
 
   @override
@@ -4812,4 +4809,401 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get adminConsoleErrBatchNoteRequired => '批量写备注时必须填写内容';
+
+  @override
+  String get contentComplianceWorkspacePersonalScope => '个人 / 直连用户范围';
+
+  @override
+  String get contentComplianceOpenProject => '打开项目';
+
+  @override
+  String get contentComplianceOpenScriptProject => '打开剧本项目';
+
+  @override
+  String get contentComplianceOpenStoryboardProject => '打开分镜项目';
+
+  @override
+  String get contentComplianceOpenAssetProject => '打开资产项目';
+
+  @override
+  String get contentComplianceOpenNovelProject => '打开小说项目';
+
+  @override
+  String get contentComplianceOpenUserContext => '查看用户上下文';
+
+  @override
+  String get contentComplianceOpenContext => '打开上下文';
+
+  @override
+  String get contentComplianceOwnerUnclaimed => '未认领';
+
+  @override
+  String get contentComplianceEscalationCriticalUnclaimed => 'critical 未认领';
+
+  @override
+  String get contentComplianceEscalationStalledClaimed => 'claimed 停滞';
+
+  @override
+  String get contentComplianceEscalationOverCapacity => 'reviewer 超载';
+
+  @override
+  String get contentComplianceEscalationEscalated72h => '72h 升级';
+
+  @override
+  String get contentComplianceEscalationUrgent => '紧急';
+
+  @override
+  String get contentComplianceEscalationClosed => '已关闭';
+
+  @override
+  String get contentComplianceEscalationWatch => '观察';
+
+  @override
+  String get contentComplianceAlertHintCriticalUnclaimed =>
+      '建议先一键批量 claim critical 未认领项';
+
+  @override
+  String get contentComplianceAlertHintOverCapacity => '建议先预览或执行自动再平衡';
+
+  @override
+  String get contentComplianceAlertHintStalledClaimed =>
+      '建议先处理停滞 claimed 项（改派或收敛）';
+
+  @override
+  String get contentComplianceAlertHintEscalated72h => '建议优先清理 72h 未收敛项';
+
+  @override
+  String get contentComplianceAlertHintDefault => '建议先查看该分层并处理高风险项';
+
+  @override
+  String get contentComplianceSnackNoCriticalUnclaimedBulkClaim =>
+      '当前没有可批量 claim 的 critical 未认领项';
+
+  @override
+  String contentComplianceSnackSelectedStalledClaimed(int count) {
+    return '已选中 $count 条 claimed 停滞项，可直接改派或处理';
+  }
+
+  @override
+  String contentComplianceSnackSelected72hUnconverged(int count) {
+    return '已选中 $count 条 72h 未收敛项，可直接改派/处理';
+  }
+
+  @override
+  String contentComplianceSnackSelectedCriticalUnclaimed(int count) {
+    return '已选中 $count 条 critical 未认领项';
+  }
+
+  @override
+  String contentComplianceSnackSelected72hItems(int count) {
+    return '已选中 $count 条 72h 未收敛项';
+  }
+
+  @override
+  String get contentComplianceSnackRestoredDefaultActionOrder => '已恢复默认动作顺序';
+
+  @override
+  String get contentComplianceBulkClaim => '批量 claim';
+
+  @override
+  String get contentComplianceBulkResolve => '批量 resolve';
+
+  @override
+  String get contentComplianceBulkDismiss => '批量 dismiss';
+
+  @override
+  String get contentComplianceBulkGeneric => '批量操作';
+
+  @override
+  String contentComplianceBulkConfirmBody(String verb, int count) {
+    return '确定对 $count 条举报执行 $verb 吗？';
+  }
+
+  @override
+  String get contentComplianceBulkConfirmNoteReuse =>
+      '\n\n会复用当前 resolution note。';
+
+  @override
+  String contentComplianceBulkResult(
+    String verb,
+    int succeeded,
+    int failed,
+    int remainingAlerts,
+    int criticalAlerts,
+  ) {
+    return '$verb 完成：成功 $succeeded，失败 $failed；当前告警 $remainingAlerts 条（高优先级 $criticalAlerts 条）';
+  }
+
+  @override
+  String contentComplianceCsvCopied(int count) {
+    return '已复制当前筛选结果 CSV（$count 条）';
+  }
+
+  @override
+  String get contentComplianceFillReviewerFirst => '请先填写目标 reviewer';
+
+  @override
+  String get contentComplianceReassignTitle => '批量改派';
+
+  @override
+  String contentComplianceReassignBody(int count, String assignee) {
+    return '确定将 $count 条举报改派给 $assignee 吗？';
+  }
+
+  @override
+  String contentComplianceReassignResult(
+    String assignee,
+    int succeeded,
+    int failed,
+  ) {
+    return '已改派给 $assignee：成功 $succeeded，失败 $failed';
+  }
+
+  @override
+  String get contentComplianceAutoRebalanceNoOverload =>
+      '当前没有超载 reviewer，无需自动再平衡';
+
+  @override
+  String get contentComplianceAutoRebalanceTitlePreview => '预览自动再平衡';
+
+  @override
+  String get contentComplianceAutoRebalanceTitleExecute => '执行自动再平衡';
+
+  @override
+  String contentComplianceAutoRebalanceBodyPreview(int limit) {
+    return '按容量阈值（$limit）预览改派计划，不会写入。';
+  }
+
+  @override
+  String contentComplianceAutoRebalanceBodyExecute(int limit) {
+    return '按容量阈值（$limit）执行自动改派，并写入审计。';
+  }
+
+  @override
+  String get contentComplianceStartPreview => '开始预览';
+
+  @override
+  String get contentComplianceExecuteNow => '立即执行';
+
+  @override
+  String contentComplianceAutoRebalanceResultPreview(
+    int planned,
+    int capacity,
+  ) {
+    return '自动再平衡预览：建议 $planned 条（capacity $capacity）';
+  }
+
+  @override
+  String contentComplianceAutoRebalanceResultExecute(
+    int planned,
+    int executed,
+    int overCapacityRemaining,
+    int remainingAlerts,
+  ) {
+    return '自动再平衡完成：计划 $planned 条，执行 $executed 条；剩余 over_capacity $overCapacityRemaining 条，告警共 $remainingAlerts 条';
+  }
+
+  @override
+  String contentComplianceAuditTitle(String reportId) {
+    return '举报审计 · $reportId';
+  }
+
+  @override
+  String get contentComplianceAuditEmpty => '当前没有可展示的审计记录。';
+
+  @override
+  String get contentComplianceTitle => '内容与合规';
+
+  @override
+  String get contentComplianceIntro =>
+      '同一入口支持用户提交内容举报，以及 internal ops 的 claim / resolve 审核队列。';
+
+  @override
+  String get contentComplianceSubmitReportTitle => '提交举报';
+
+  @override
+  String get contentComplianceTargetUuidHint => '输入被举报对象 UUID';
+
+  @override
+  String get contentComplianceDetailLabel => '补充说明';
+
+  @override
+  String get contentComplianceDetailHint => '可填写上下文、时间线或风险描述';
+
+  @override
+  String get contentComplianceSubmitting => '提交中…';
+
+  @override
+  String get contentComplianceSubmitReport => '提交举报';
+
+  @override
+  String get contentComplianceQueueTitle => '审核队列';
+
+  @override
+  String get contentComplianceClearFilters => '清空筛选';
+
+  @override
+  String get contentComplianceRefresh => '刷新';
+
+  @override
+  String get contentComplianceCopyCsv => '复制 CSV';
+
+  @override
+  String contentComplianceTopActionSummary(
+    String title,
+    int count,
+    String hint,
+  ) {
+    return '首要动作：$title（$count）\n$hint';
+  }
+
+  @override
+  String get contentComplianceViewLayer => '查看该分层';
+
+  @override
+  String get contentComplianceRestoreDefaultActionOrder => '恢复默认动作顺序';
+
+  @override
+  String get contentCompliancePreviewRebalanceShort => '预览再平衡';
+
+  @override
+  String get contentComplianceExecuteRebalanceShort => '执行再平衡';
+
+  @override
+  String contentComplianceSnackSelectedCriticalReadyClaim(int count) {
+    return '已选中 $count 条 critical 未认领项，可直接批量 claim';
+  }
+
+  @override
+  String get contentComplianceSelectCriticalUnclaimed => '选中 critical 未认领';
+
+  @override
+  String get contentComplianceSnackNoCriticalUnclaimedInList =>
+      '当前列表没有可批量 claim 的 critical 未认领项';
+
+  @override
+  String get contentComplianceBulkClaimOneClick => '一键批量 claim';
+
+  @override
+  String get contentComplianceSelectStalled => '选中停滞项';
+
+  @override
+  String get contentCompliancePreviewStalledRebalance => '预览停滞再平衡';
+
+  @override
+  String get contentComplianceSelect72hUnconverged => '选中72h未收敛项';
+
+  @override
+  String get contentComplianceClaimedOnly => '仅已 claim';
+
+  @override
+  String get contentComplianceOwnerChipUnclaimed => 'owner: 未认领';
+
+  @override
+  String contentComplianceOwnerChip(String owner) {
+    return 'owner: $owner';
+  }
+
+  @override
+  String contentComplianceEscalationChipPrefix(String stage) {
+    return '升级: $stage';
+  }
+
+  @override
+  String contentComplianceSlaUnclaimedCritical(int count) {
+    return 'critical未claim $count';
+  }
+
+  @override
+  String contentComplianceOverloadedReviewers(int count) {
+    return '超载 reviewer $count';
+  }
+
+  @override
+  String contentComplianceRebalanceNeeded(int count) {
+    return '需再平衡 $count';
+  }
+
+  @override
+  String get contentComplianceReviewerOwnerLoad => 'reviewer / owner 负载';
+
+  @override
+  String contentComplianceOverCapacitySuffix(int by) {
+    return ' · 超载 +$by';
+  }
+
+  @override
+  String get contentComplianceEscalationRhythm => '升级节奏';
+
+  @override
+  String get contentComplianceWorkspaceHotspots => 'workspace 热点';
+
+  @override
+  String get contentComplianceQueueEmpty => '当前没有待处理举报';
+
+  @override
+  String get contentComplianceCopyTarget => '复制 target';
+
+  @override
+  String get contentComplianceCopiedTargetUuid => '已复制 target UUID';
+
+  @override
+  String get contentComplianceCopyReport => '复制 report';
+
+  @override
+  String get contentComplianceCopiedReportUuid => '已复制 report UUID';
+
+  @override
+  String get contentComplianceAdminConsoleContext => '管理台上下文';
+
+  @override
+  String get contentComplianceLoadingAudit => '加载审计中…';
+
+  @override
+  String get contentComplianceViewAudit => '查看审计';
+
+  @override
+  String get contentComplianceBulkReassignReviewerLabel => '批量改派 reviewer';
+
+  @override
+  String get contentComplianceBulkReassignReviewerHint =>
+      '例如 internal_ops_cn_shift_b';
+
+  @override
+  String contentComplianceSelectedCount(int count) {
+    return '已选 $count';
+  }
+
+  @override
+  String get contentComplianceSelectAllOpen => '全选开放项';
+
+  @override
+  String get contentComplianceClearSelection => '清空选择';
+
+  @override
+  String get contentComplianceBulkReassign => '批量改派';
+
+  @override
+  String get contentComplianceResolutionNoteHint => 'claim / resolve 时可复用这段说明';
+
+  @override
+  String get contentComplianceTopSecondaryPendingOnly => '仅选中待处理项';
+
+  @override
+  String get contentComplianceTopSecondaryRunRebalance => '执行自动再平衡';
+
+  @override
+  String get contentComplianceTopSecondaryPreviewStalledRebalance => '预览停滞再平衡';
+
+  @override
+  String get contentComplianceTopSecondarySelect72hOnly => '仅选中72h未收敛项';
+
+  @override
+  String get contentComplianceDialogContinue => '继续';
+
+  @override
+  String get contentComplianceLabelSelect72hUnconverged => '选中72h未收敛项';
+
+  @override
+  String get contentComplianceErrAssigneeRequired => '改派 reviewer 不能为空';
 }

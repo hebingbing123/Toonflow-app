@@ -5,6 +5,7 @@ class _QualityReviewsWorkbenchDialog extends StatefulWidget {
   const _QualityReviewsWorkbenchDialog({
     required this.accessToken,
     required this.initialProjectNumericId,
+    required this.initialProjectScopeSummary,
     required this.initialReviews,
     required this.initialReviewDetails,
     required this.initialStatsSummary,
@@ -13,6 +14,7 @@ class _QualityReviewsWorkbenchDialog extends StatefulWidget {
 
   final String accessToken;
   final int? initialProjectNumericId;
+  final String? initialProjectScopeSummary;
   final List<QualityReview> initialReviews;
   final String? initialReviewDetails;
   final String? initialStatsSummary;
@@ -515,6 +517,7 @@ class _QualityReviewsWorkbenchDialogState
         badCaseStatsSummary: _badCaseStatsSummary,
         reviewDetails: _reviewDetails,
         statusLine: _statusLine,
+        initialProjectScopeSummary: widget.initialProjectScopeSummary,
         activeFilterQuerySummary: _activeFilterQuerySummary(),
         activeFilterRequestUrl: _activeFilterRequestUrl(),
         filterBadCasesOnly: _filterBadCasesOnly,

@@ -76,6 +76,7 @@ QualityReviewsWorkbenchDialogViewModel buildDialogModel({
     badCaseStatsSummary: null,
     reviewDetails: 'review-1 · output · manual',
     statusLine: '已读取评审详情',
+    initialProjectScopeSummary: 'projectUuid=project-uuid-7 -> projectId=7',
     activeFilterQuerySummary: null,
     activeFilterRequestUrl: null,
     filterBadCasesOnly: filterBadCasesOnly,
@@ -245,6 +246,10 @@ void main() {
     );
 
     expect(find.text('质量工作台'), findsOneWidget);
+    expect(
+      find.text('Scope seed：projectUuid=project-uuid-7 -> projectId=7'),
+      findsOneWidget,
+    );
     expect(find.text('筛选与读取'), findsOneWidget);
     expect(find.text('详情查询'), findsOneWidget);
     expect(find.text('创建评审'), findsNWidgets(2));

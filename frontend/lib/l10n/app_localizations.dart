@@ -3984,12 +3984,6 @@ abstract class AppLocalizations {
   /// **'Project numeric ID (optional)'**
   String get taskCenterFieldProjectNumericIdOptional;
 
-  /// No description provided for @taskCenterFieldProjectUuidOptional.
-  ///
-  /// In en, this message translates to:
-  /// **'Project UUID (optional)'**
-  String get taskCenterFieldProjectUuidOptional;
-
   /// No description provided for @taskCenterFieldTaskClassOptional.
   ///
   /// In en, this message translates to:
@@ -8283,6 +8277,667 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Batch note content is required when writing notes'**
   String get adminConsoleErrBatchNoteRequired;
+
+  /// No description provided for @contentComplianceWorkspacePersonalScope.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal / direct user scope'**
+  String get contentComplianceWorkspacePersonalScope;
+
+  /// No description provided for @contentComplianceOpenProject.
+  ///
+  /// In en, this message translates to:
+  /// **'Open project'**
+  String get contentComplianceOpenProject;
+
+  /// No description provided for @contentComplianceOpenScriptProject.
+  ///
+  /// In en, this message translates to:
+  /// **'Open script project'**
+  String get contentComplianceOpenScriptProject;
+
+  /// No description provided for @contentComplianceOpenStoryboardProject.
+  ///
+  /// In en, this message translates to:
+  /// **'Open storyboard project'**
+  String get contentComplianceOpenStoryboardProject;
+
+  /// No description provided for @contentComplianceOpenAssetProject.
+  ///
+  /// In en, this message translates to:
+  /// **'Open asset project'**
+  String get contentComplianceOpenAssetProject;
+
+  /// No description provided for @contentComplianceOpenNovelProject.
+  ///
+  /// In en, this message translates to:
+  /// **'Open novel project'**
+  String get contentComplianceOpenNovelProject;
+
+  /// No description provided for @contentComplianceOpenUserContext.
+  ///
+  /// In en, this message translates to:
+  /// **'View user context'**
+  String get contentComplianceOpenUserContext;
+
+  /// No description provided for @contentComplianceOpenContext.
+  ///
+  /// In en, this message translates to:
+  /// **'Open context'**
+  String get contentComplianceOpenContext;
+
+  /// No description provided for @contentComplianceOwnerUnclaimed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unclaimed'**
+  String get contentComplianceOwnerUnclaimed;
+
+  /// No description provided for @contentComplianceEscalationCriticalUnclaimed.
+  ///
+  /// In en, this message translates to:
+  /// **'critical unclaimed'**
+  String get contentComplianceEscalationCriticalUnclaimed;
+
+  /// No description provided for @contentComplianceEscalationStalledClaimed.
+  ///
+  /// In en, this message translates to:
+  /// **'claimed stalled'**
+  String get contentComplianceEscalationStalledClaimed;
+
+  /// No description provided for @contentComplianceEscalationOverCapacity.
+  ///
+  /// In en, this message translates to:
+  /// **'reviewer overloaded'**
+  String get contentComplianceEscalationOverCapacity;
+
+  /// No description provided for @contentComplianceEscalationEscalated72h.
+  ///
+  /// In en, this message translates to:
+  /// **'72h escalated'**
+  String get contentComplianceEscalationEscalated72h;
+
+  /// No description provided for @contentComplianceEscalationUrgent.
+  ///
+  /// In en, this message translates to:
+  /// **'Urgent'**
+  String get contentComplianceEscalationUrgent;
+
+  /// No description provided for @contentComplianceEscalationClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get contentComplianceEscalationClosed;
+
+  /// No description provided for @contentComplianceEscalationWatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch'**
+  String get contentComplianceEscalationWatch;
+
+  /// No description provided for @contentComplianceAlertHintCriticalUnclaimed.
+  ///
+  /// In en, this message translates to:
+  /// **'Start by bulk-claiming critical unclaimed items.'**
+  String get contentComplianceAlertHintCriticalUnclaimed;
+
+  /// No description provided for @contentComplianceAlertHintOverCapacity.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview or run auto-rebalance first.'**
+  String get contentComplianceAlertHintOverCapacity;
+
+  /// No description provided for @contentComplianceAlertHintStalledClaimed.
+  ///
+  /// In en, this message translates to:
+  /// **'Handle stalled claimed items first (reassign or converge).'**
+  String get contentComplianceAlertHintStalledClaimed;
+
+  /// No description provided for @contentComplianceAlertHintEscalated72h.
+  ///
+  /// In en, this message translates to:
+  /// **'Prioritize clearing 72h non-converged items.'**
+  String get contentComplianceAlertHintEscalated72h;
+
+  /// No description provided for @contentComplianceAlertHintDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Review this layer and address high-risk items first.'**
+  String get contentComplianceAlertHintDefault;
+
+  /// No description provided for @contentComplianceSnackNoCriticalUnclaimedBulkClaim.
+  ///
+  /// In en, this message translates to:
+  /// **'No critical unclaimed items available for bulk claim.'**
+  String get contentComplianceSnackNoCriticalUnclaimedBulkClaim;
+
+  /// No description provided for @contentComplianceSnackSelectedStalledClaimed.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected {count} stalled claimed items; you can reassign or process them.'**
+  String contentComplianceSnackSelectedStalledClaimed(int count);
+
+  /// No description provided for @contentComplianceSnackSelected72hUnconverged.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected {count} 72h non-converged items; you can reassign or process them.'**
+  String contentComplianceSnackSelected72hUnconverged(int count);
+
+  /// No description provided for @contentComplianceSnackSelectedCriticalUnclaimed.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected {count} critical unclaimed items.'**
+  String contentComplianceSnackSelectedCriticalUnclaimed(int count);
+
+  /// No description provided for @contentComplianceSnackSelected72hItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected {count} 72h non-converged items.'**
+  String contentComplianceSnackSelected72hItems(int count);
+
+  /// No description provided for @contentComplianceSnackRestoredDefaultActionOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Restored default action order.'**
+  String get contentComplianceSnackRestoredDefaultActionOrder;
+
+  /// No description provided for @contentComplianceBulkClaim.
+  ///
+  /// In en, this message translates to:
+  /// **'Bulk claim'**
+  String get contentComplianceBulkClaim;
+
+  /// No description provided for @contentComplianceBulkResolve.
+  ///
+  /// In en, this message translates to:
+  /// **'Bulk resolve'**
+  String get contentComplianceBulkResolve;
+
+  /// No description provided for @contentComplianceBulkDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Bulk dismiss'**
+  String get contentComplianceBulkDismiss;
+
+  /// No description provided for @contentComplianceBulkGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Bulk action'**
+  String get contentComplianceBulkGeneric;
+
+  /// No description provided for @contentComplianceBulkConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Run {verb} on {count} reports?'**
+  String contentComplianceBulkConfirmBody(String verb, int count);
+
+  /// No description provided for @contentComplianceBulkConfirmNoteReuse.
+  ///
+  /// In en, this message translates to:
+  /// **'\n\nWill reuse the current resolution note.'**
+  String get contentComplianceBulkConfirmNoteReuse;
+
+  /// No description provided for @contentComplianceBulkResult.
+  ///
+  /// In en, this message translates to:
+  /// **'{verb} finished: succeeded {succeeded}, failed {failed}; {remainingAlerts} alerts remaining ({criticalAlerts} high priority).'**
+  String contentComplianceBulkResult(
+    String verb,
+    int succeeded,
+    int failed,
+    int remainingAlerts,
+    int criticalAlerts,
+  );
+
+  /// No description provided for @contentComplianceCsvCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied filtered queue CSV ({count} rows).'**
+  String contentComplianceCsvCopied(int count);
+
+  /// No description provided for @contentComplianceFillReviewerFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a target reviewer first.'**
+  String get contentComplianceFillReviewerFirst;
+
+  /// No description provided for @contentComplianceReassignTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bulk reassign'**
+  String get contentComplianceReassignTitle;
+
+  /// No description provided for @contentComplianceReassignBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Reassign {count} reports to {assignee}?'**
+  String contentComplianceReassignBody(int count, String assignee);
+
+  /// No description provided for @contentComplianceReassignResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Reassigned to {assignee}: succeeded {succeeded}, failed {failed}.'**
+  String contentComplianceReassignResult(
+    String assignee,
+    int succeeded,
+    int failed,
+  );
+
+  /// No description provided for @contentComplianceAutoRebalanceNoOverload.
+  ///
+  /// In en, this message translates to:
+  /// **'No overloaded reviewers; auto-rebalance is not needed.'**
+  String get contentComplianceAutoRebalanceNoOverload;
+
+  /// No description provided for @contentComplianceAutoRebalanceTitlePreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview auto-rebalance'**
+  String get contentComplianceAutoRebalanceTitlePreview;
+
+  /// No description provided for @contentComplianceAutoRebalanceTitleExecute.
+  ///
+  /// In en, this message translates to:
+  /// **'Run auto-rebalance'**
+  String get contentComplianceAutoRebalanceTitleExecute;
+
+  /// No description provided for @contentComplianceAutoRebalanceBodyPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview reassignment plan at capacity threshold ({limit}); nothing will be written.'**
+  String contentComplianceAutoRebalanceBodyPreview(int limit);
+
+  /// No description provided for @contentComplianceAutoRebalanceBodyExecute.
+  ///
+  /// In en, this message translates to:
+  /// **'Run automatic reassignment at capacity threshold ({limit}) and write audit records.'**
+  String contentComplianceAutoRebalanceBodyExecute(int limit);
+
+  /// No description provided for @contentComplianceStartPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Start preview'**
+  String get contentComplianceStartPreview;
+
+  /// No description provided for @contentComplianceExecuteNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Run now'**
+  String get contentComplianceExecuteNow;
+
+  /// No description provided for @contentComplianceAutoRebalanceResultPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-rebalance preview: {planned} moves suggested (capacity {capacity}).'**
+  String contentComplianceAutoRebalanceResultPreview(int planned, int capacity);
+
+  /// No description provided for @contentComplianceAutoRebalanceResultExecute.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-rebalance done: planned {planned}, executed {executed}; over_capacity remaining {overCapacityRemaining}, {remainingAlerts} alerts total.'**
+  String contentComplianceAutoRebalanceResultExecute(
+    int planned,
+    int executed,
+    int overCapacityRemaining,
+    int remainingAlerts,
+  );
+
+  /// No description provided for @contentComplianceAuditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Report audit · {reportId}'**
+  String contentComplianceAuditTitle(String reportId);
+
+  /// No description provided for @contentComplianceAuditEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No audit records to display.'**
+  String get contentComplianceAuditEmpty;
+
+  /// No description provided for @contentComplianceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Content & compliance'**
+  String get contentComplianceTitle;
+
+  /// No description provided for @contentComplianceIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'One place for user-submitted content reports and internal-ops claim/resolve review queues.'**
+  String get contentComplianceIntro;
+
+  /// No description provided for @contentComplianceSubmitReportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit report'**
+  String get contentComplianceSubmitReportTitle;
+
+  /// No description provided for @contentComplianceTargetUuidHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter reported object UUID'**
+  String get contentComplianceTargetUuidHint;
+
+  /// No description provided for @contentComplianceDetailLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional details'**
+  String get contentComplianceDetailLabel;
+
+  /// No description provided for @contentComplianceDetailHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add context, timeline, or risk description'**
+  String get contentComplianceDetailHint;
+
+  /// No description provided for @contentComplianceSubmitting.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitting…'**
+  String get contentComplianceSubmitting;
+
+  /// No description provided for @contentComplianceSubmitReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit report'**
+  String get contentComplianceSubmitReport;
+
+  /// No description provided for @contentComplianceQueueTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review queue'**
+  String get contentComplianceQueueTitle;
+
+  /// No description provided for @contentComplianceClearFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear filters'**
+  String get contentComplianceClearFilters;
+
+  /// No description provided for @contentComplianceRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get contentComplianceRefresh;
+
+  /// No description provided for @contentComplianceCopyCsv.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy CSV'**
+  String get contentComplianceCopyCsv;
+
+  /// No description provided for @contentComplianceTopActionSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Primary action: {title} ({count})\n{hint}'**
+  String contentComplianceTopActionSummary(
+    String title,
+    int count,
+    String hint,
+  );
+
+  /// No description provided for @contentComplianceViewLayer.
+  ///
+  /// In en, this message translates to:
+  /// **'View this layer'**
+  String get contentComplianceViewLayer;
+
+  /// No description provided for @contentComplianceRestoreDefaultActionOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore default action order'**
+  String get contentComplianceRestoreDefaultActionOrder;
+
+  /// No description provided for @contentCompliancePreviewRebalanceShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview rebalance'**
+  String get contentCompliancePreviewRebalanceShort;
+
+  /// No description provided for @contentComplianceExecuteRebalanceShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Run rebalance'**
+  String get contentComplianceExecuteRebalanceShort;
+
+  /// No description provided for @contentComplianceSnackSelectedCriticalReadyClaim.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected {count} critical unclaimed items; you can bulk claim.'**
+  String contentComplianceSnackSelectedCriticalReadyClaim(int count);
+
+  /// No description provided for @contentComplianceSelectCriticalUnclaimed.
+  ///
+  /// In en, this message translates to:
+  /// **'Select critical unclaimed'**
+  String get contentComplianceSelectCriticalUnclaimed;
+
+  /// No description provided for @contentComplianceSnackNoCriticalUnclaimedInList.
+  ///
+  /// In en, this message translates to:
+  /// **'No critical unclaimed items in the current list for bulk claim.'**
+  String get contentComplianceSnackNoCriticalUnclaimedInList;
+
+  /// No description provided for @contentComplianceBulkClaimOneClick.
+  ///
+  /// In en, this message translates to:
+  /// **'Bulk claim (one click)'**
+  String get contentComplianceBulkClaimOneClick;
+
+  /// No description provided for @contentComplianceSelectStalled.
+  ///
+  /// In en, this message translates to:
+  /// **'Select stalled'**
+  String get contentComplianceSelectStalled;
+
+  /// No description provided for @contentCompliancePreviewStalledRebalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview stalled rebalance'**
+  String get contentCompliancePreviewStalledRebalance;
+
+  /// No description provided for @contentComplianceSelect72hUnconverged.
+  ///
+  /// In en, this message translates to:
+  /// **'Select 72h non-converged'**
+  String get contentComplianceSelect72hUnconverged;
+
+  /// No description provided for @contentComplianceClaimedOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Claimed only'**
+  String get contentComplianceClaimedOnly;
+
+  /// No description provided for @contentComplianceOwnerChipUnclaimed.
+  ///
+  /// In en, this message translates to:
+  /// **'owner: unclaimed'**
+  String get contentComplianceOwnerChipUnclaimed;
+
+  /// No description provided for @contentComplianceOwnerChip.
+  ///
+  /// In en, this message translates to:
+  /// **'owner: {owner}'**
+  String contentComplianceOwnerChip(String owner);
+
+  /// No description provided for @contentComplianceEscalationChipPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Escalation: {stage}'**
+  String contentComplianceEscalationChipPrefix(String stage);
+
+  /// No description provided for @contentComplianceSlaUnclaimedCritical.
+  ///
+  /// In en, this message translates to:
+  /// **'critical unclaimed {count}'**
+  String contentComplianceSlaUnclaimedCritical(int count);
+
+  /// No description provided for @contentComplianceOverloadedReviewers.
+  ///
+  /// In en, this message translates to:
+  /// **'overloaded reviewers {count}'**
+  String contentComplianceOverloadedReviewers(int count);
+
+  /// No description provided for @contentComplianceRebalanceNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'rebalance needed {count}'**
+  String contentComplianceRebalanceNeeded(int count);
+
+  /// No description provided for @contentComplianceReviewerOwnerLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviewer / owner load'**
+  String get contentComplianceReviewerOwnerLoad;
+
+  /// No description provided for @contentComplianceOverCapacitySuffix.
+  ///
+  /// In en, this message translates to:
+  /// **' · overloaded +{by}'**
+  String contentComplianceOverCapacitySuffix(int by);
+
+  /// No description provided for @contentComplianceEscalationRhythm.
+  ///
+  /// In en, this message translates to:
+  /// **'Escalation rhythm'**
+  String get contentComplianceEscalationRhythm;
+
+  /// No description provided for @contentComplianceWorkspaceHotspots.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace hotspots'**
+  String get contentComplianceWorkspaceHotspots;
+
+  /// No description provided for @contentComplianceQueueEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No pending reports right now.'**
+  String get contentComplianceQueueEmpty;
+
+  /// No description provided for @contentComplianceCopyTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy target'**
+  String get contentComplianceCopyTarget;
+
+  /// No description provided for @contentComplianceCopiedTargetUuid.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied target UUID'**
+  String get contentComplianceCopiedTargetUuid;
+
+  /// No description provided for @contentComplianceCopyReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy report'**
+  String get contentComplianceCopyReport;
+
+  /// No description provided for @contentComplianceCopiedReportUuid.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied report UUID'**
+  String get contentComplianceCopiedReportUuid;
+
+  /// No description provided for @contentComplianceAdminConsoleContext.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin console context'**
+  String get contentComplianceAdminConsoleContext;
+
+  /// No description provided for @contentComplianceLoadingAudit.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading audit…'**
+  String get contentComplianceLoadingAudit;
+
+  /// No description provided for @contentComplianceViewAudit.
+  ///
+  /// In en, this message translates to:
+  /// **'View audit'**
+  String get contentComplianceViewAudit;
+
+  /// No description provided for @contentComplianceBulkReassignReviewerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Bulk reassign reviewer'**
+  String get contentComplianceBulkReassignReviewerLabel;
+
+  /// No description provided for @contentComplianceBulkReassignReviewerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. internal_ops_cn_shift_b'**
+  String get contentComplianceBulkReassignReviewerHint;
+
+  /// No description provided for @contentComplianceSelectedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected {count}'**
+  String contentComplianceSelectedCount(int count);
+
+  /// No description provided for @contentComplianceSelectAllOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Select all open'**
+  String get contentComplianceSelectAllOpen;
+
+  /// No description provided for @contentComplianceClearSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear selection'**
+  String get contentComplianceClearSelection;
+
+  /// No description provided for @contentComplianceBulkReassign.
+  ///
+  /// In en, this message translates to:
+  /// **'Bulk reassign'**
+  String get contentComplianceBulkReassign;
+
+  /// No description provided for @contentComplianceResolutionNoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Reused for claim / resolve when provided'**
+  String get contentComplianceResolutionNoteHint;
+
+  /// No description provided for @contentComplianceTopSecondaryPendingOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Select pending only'**
+  String get contentComplianceTopSecondaryPendingOnly;
+
+  /// No description provided for @contentComplianceTopSecondaryRunRebalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Run auto-rebalance'**
+  String get contentComplianceTopSecondaryRunRebalance;
+
+  /// No description provided for @contentComplianceTopSecondaryPreviewStalledRebalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview stalled rebalance'**
+  String get contentComplianceTopSecondaryPreviewStalledRebalance;
+
+  /// No description provided for @contentComplianceTopSecondarySelect72hOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Select 72h non-converged only'**
+  String get contentComplianceTopSecondarySelect72hOnly;
+
+  /// No description provided for @contentComplianceDialogContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get contentComplianceDialogContinue;
+
+  /// No description provided for @contentComplianceLabelSelect72hUnconverged.
+  ///
+  /// In en, this message translates to:
+  /// **'Select 72h non-converged'**
+  String get contentComplianceLabelSelect72hUnconverged;
+
+  /// No description provided for @contentComplianceErrAssigneeRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Assignee reviewer cannot be empty.'**
+  String get contentComplianceErrAssigneeRequired;
 }
 
 class _AppLocalizationsDelegate
