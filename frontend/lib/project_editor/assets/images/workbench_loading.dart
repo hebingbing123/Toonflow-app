@@ -23,21 +23,24 @@ void _setAssetImagesPreviewLoading(AssetImagesWorkbenchRuntime runtime) {
 }
 
 void _setAssetImagesPreviewFailure(
+  AppLocalizations l10n,
   AssetImagesWorkbenchRuntime runtime,
   Object error,
 ) {
   runtime.onStatusChanged(
     buildAssetImagesWorkbenchFailureNotice(
-      actionSummary: '读取当前图片预览失败。',
+      l10n: l10n,
+      actionSummary: l10n.projectEditorAssetImagesPreviewLoadFailed,
       recommendedAction:
           AssetImagesWorkbenchRecommendedAction.previewSelectedImage,
       error: error,
-      fallbackDetail: '建议先确认 file_path 或切换到其他图片后重试。',
+      fallbackDetail: l10n.projectEditorAssetImagesPreviewLoadFailedFallback,
     ),
   );
 }
 
 void _setAssetImagesReloadFailure(
+  AppLocalizations l10n,
   AssetImagesWorkbenchRuntime runtime,
   Object error,
 ) {
@@ -46,10 +49,11 @@ void _setAssetImagesReloadFailure(
     selectedId: null,
     preview: null,
     statusLine: buildAssetImagesWorkbenchFailureNotice(
-      actionSummary: '读取当前资产图片列表失败。',
+      l10n: l10n,
+      actionSummary: l10n.projectEditorAssetImagesListLoadFailed,
       recommendedAction: AssetImagesWorkbenchRecommendedAction.loadImages,
       error: error,
-      fallbackDetail: '建议稍后重新同步图片列表，确认资产下是否已有图片。',
+      fallbackDetail: l10n.projectEditorAssetImagesListLoadFailedFallback,
     ),
   );
 }
@@ -66,12 +70,13 @@ Future<void> loadAssetImagePreview({
   );
   if (image == null) {
     applyAssetImagePreviewState(
+      l10n: scope.mutation.l10n,
       setState: setState,
       runtime: scope.runtime,
       imagesResponse: scope.runtime.imagesResponse(),
       selectedImageId: selectedImageId,
       previewBytes: null,
-      actionSummary: '当前没有可预览的图片，已清空预览内容。',
+      actionSummary: scope.mutation.l10n.projectEditorAssetImagesNoPreviewCleared,
     );
     return;
   }
@@ -86,16 +91,17 @@ Future<void> loadAssetImagePreview({
         image.id,
       );
       applyAssetImagePreviewState(
+        l10n: scope.mutation.l10n,
         setState: setState,
         runtime: scope.runtime,
         imagesResponse: scope.runtime.imagesResponse(),
         selectedImageId: selectedImageId,
         previewBytes: bytes,
-        actionSummary: '已读取当前图片预览。',
+        actionSummary: scope.mutation.l10n.projectEditorAssetImagesPreviewLoaded,
       );
     },
     onErrorStateUpdate: (error) =>
-        _setAssetImagesPreviewFailure(scope.runtime, error),
+        _setAssetImagesPreviewFailure(scope.mutation.l10n, scope.runtime, error),
     endStateUpdate: () => scope.runtime.onPreviewLoadingChanged(false),
   );
 }
@@ -118,6 +124,7 @@ Future<void> reloadAssetImages({
         assetNumericId,
       );
       final nextSelectedImageId = applyReloadedAssetImagesState(
+        l10n: scope.mutation.l10n,
         setState: setState,
         runtime: scope.runtime,
         response: response,
@@ -131,7 +138,7 @@ Future<void> reloadAssetImages({
       );
     },
     onErrorStateUpdate: (error) =>
-        _setAssetImagesReloadFailure(scope.runtime, error),
+        _setAssetImagesReloadFailure(scope.mutation.l10n, scope.runtime, error),
     endStateUpdate: () => scope.runtime.onListLoadingChanged(false),
   );
 }
@@ -141,7 +148,7 @@ Future<void> runAssetImagesRecommendedAction({
   required int assetNumericId,
   required StateSetter setState,
 }) async {
-  final diagnosis = scope.runtime.diagnose();
+  final diagnosis = scope.runtime.diagnose(scope.mutation.l10n);
   switch (diagnosis.recommendedAction) {
     case AssetImagesWorkbenchRecommendedAction.loadImages:
       await reloadAssetImages(

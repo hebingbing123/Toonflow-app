@@ -16,7 +16,7 @@ Future<void> changeAssetImagesWorkbenchAsset({
       images: null,
       selectedId: null,
       preview: null,
-      statusLine: '正在切换到资产 #$value 并加载图片列表…',
+      statusLine: scope.mutation.l10n.projectEditorAssetImagesSwitchingAsset(value),
     );
   });
   await reloadAssetImages(
@@ -36,6 +36,7 @@ Future<void> selectAssetImagesWorkbenchImage({
     return;
   }
   final nextState = _prepareAssetImagesSelectionSyncState(
+    l10n: scope.mutation.l10n,
     imagesResponse: scope.runtime.imagesResponse(),
     selectedImageId: value,
     previewBytes: null,
@@ -46,7 +47,9 @@ Future<void> selectAssetImagesWorkbenchImage({
       patchControllers: scope.patchControllers,
       state: nextState,
     );
-    scope.runtime.onStatusChanged('正在切换图片并刷新预览…');
+    scope.runtime.onStatusChanged(
+      scope.mutation.l10n.projectEditorAssetImagesSwitchingImagePreview,
+    );
   });
   await loadAssetImagePreview(
     scope: scope,

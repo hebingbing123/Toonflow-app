@@ -34,56 +34,73 @@ enum AssetImagesWorkbenchRecommendedAction {
 }
 
 String describeAssetImagesWorkbenchRecommendedAction(
+  AppLocalizations l10n,
   AssetImagesWorkbenchRecommendedAction action,
 ) {
   switch (action) {
     case AssetImagesWorkbenchRecommendedAction.loadImages:
-      return 'Load image list';
+      return l10n.projectEditorAssetImagesRecommendedLoadList;
     case AssetImagesWorkbenchRecommendedAction.createImage:
-      return 'Add image';
+      return l10n.projectEditorAssetImagesRecommendedAddImage;
     case AssetImagesWorkbenchRecommendedAction.previewSelectedImage:
-      return 'Load current preview';
+      return l10n.projectEditorAssetImagesRecommendedLoadPreview;
     case AssetImagesWorkbenchRecommendedAction.updateSelectedImage:
-      return 'Save current image';
+      return l10n.projectEditorAssetImagesRecommendedSaveImage;
   }
 }
 
 String buildAssetImagesWorkbenchFollowUp({
+  required AppLocalizations l10n,
   required String actionSummary,
   required AssetImagesWorkbenchDiagnosis diagnosis,
 }) {
   final nextAction = describeAssetImagesWorkbenchRecommendedAction(
+    l10n,
     diagnosis.recommendedAction,
   );
-  return '$actionSummary Next step: $nextAction. ${diagnosis.detail}';
+  return l10n.projectEditorAssetImagesFollowUp(
+    actionSummary,
+    nextAction,
+    diagnosis.detail,
+  );
 }
 
-String normalizeAssetImagesWorkbenchErrorMessage(String raw) {
+String normalizeAssetImagesWorkbenchErrorMessage(
+  AppLocalizations l10n,
+  String raw,
+) {
   final trimmed = raw.trim();
   if (trimmed.isEmpty) {
-    return 'No additional error detail.';
+    return l10n.projectEditorAssetImagesNoErrorDetail;
   }
   final normalized = trimmed.replaceFirst(
     RegExp(r'^RustApiException\([^)]*\):\s*'),
     '',
   );
   if (normalized.isEmpty) {
-    return 'No additional error detail.';
+    return l10n.projectEditorAssetImagesNoErrorDetail;
   }
   return normalized;
 }
 
 String buildAssetImagesWorkbenchFailureNotice({
+  required AppLocalizations l10n,
   required String actionSummary,
   required AssetImagesWorkbenchRecommendedAction recommendedAction,
   required Object error,
   required String fallbackDetail,
 }) {
-  final reason = normalizeAssetImagesWorkbenchErrorMessage(error.toString());
+  final reason = normalizeAssetImagesWorkbenchErrorMessage(l10n, error.toString());
   final nextAction = describeAssetImagesWorkbenchRecommendedAction(
+    l10n,
     recommendedAction,
   );
-  return '$actionSummary Next step: $nextAction. Reason: $reason. $fallbackDetail';
+  return l10n.projectEditorAssetImagesFailureNotice(
+    actionSummary,
+    nextAction,
+    reason,
+    fallbackDetail,
+  );
 }
 
 String? trimAssetImageWorkbenchText(String raw) {
@@ -133,25 +150,24 @@ AssetImagePatchDraft? parseAssetImagePatchDraft({
   return AssetImagePatchDraft(body: body);
 }
 
-AssetImagesWorkbenchDiagnosis diagnoseAssetImagesWorkbench({
+AssetImagesWorkbenchDiagnosis diagnoseAssetImagesWorkbench(
+  AppLocalizations l10n, {
   ListAssetImagesResponse? imagesResponse,
   String? selectedImageId,
   required bool hasPreviewBytes,
 }) {
   if (imagesResponse == null) {
-    return const AssetImagesWorkbenchDiagnosis(
-      summary: 'Image list for this asset has not been loaded yet.',
-      detail:
-          'Sync the image list first to see whether history images exist, then preview or add a new image.',
+    return AssetImagesWorkbenchDiagnosis(
+      summary: l10n.projectEditorAssetImagesDiagnosisNotLoadedSummary,
+      detail: l10n.projectEditorAssetImagesDiagnosisNotLoadedDetail,
       recommendedAction: AssetImagesWorkbenchRecommendedAction.loadImages,
     );
   }
 
   if (imagesResponse.items.isEmpty) {
-    return const AssetImagesWorkbenchDiagnosis(
-      summary: 'This asset has no images yet.',
-      detail:
-          'Add an image to create the first editable history row for this asset.',
+    return AssetImagesWorkbenchDiagnosis(
+      summary: l10n.projectEditorAssetImagesDiagnosisNoImagesSummary,
+      detail: l10n.projectEditorAssetImagesDiagnosisNoImagesDetail,
       recommendedAction: AssetImagesWorkbenchRecommendedAction.createImage,
     );
   }
@@ -169,19 +185,20 @@ AssetImagesWorkbenchDiagnosis diagnoseAssetImagesWorkbench({
 
   if (!hasPreviewBytes) {
     return AssetImagesWorkbenchDiagnosis(
-      summary:
-          'Loaded ${imagesResponse.items.length} image(s); preview not loaded yet.',
-      detail:
-          'Load the current image preview and verify file_path and state before editing or deleting.',
+      summary: l10n.projectEditorAssetImagesDiagnosisPreviewPendingSummary(
+        imagesResponse.items.length,
+      ),
+      detail: l10n.projectEditorAssetImagesDiagnosisPreviewPendingDetail,
       recommendedAction:
           AssetImagesWorkbenchRecommendedAction.previewSelectedImage,
     );
   }
 
   return AssetImagesWorkbenchDiagnosis(
-    summary: 'Current image is ready to edit.',
-    detail:
-        'Focused image sort=${selectedImage.sortIndex}; you can update file_path, state, or sort_index, then delete if needed.',
+    summary: l10n.projectEditorAssetImagesDiagnosisReadySummary,
+    detail: l10n.projectEditorAssetImagesDiagnosisReadyDetail(
+      selectedImage.sortIndex,
+    ),
     recommendedAction:
         AssetImagesWorkbenchRecommendedAction.updateSelectedImage,
   );
@@ -219,11 +236,12 @@ String? chooseInitialAssetImageId(
 }
 
 String summarizeAssetImageSelection(
+  AppLocalizations l10n,
   ListAssetImagesResponse response, {
   String? selectedImageId,
 }) {
   if (response.items.isEmpty) {
-    return 'This asset has no images.';
+    return l10n.projectEditorAssetImagesSelectionNoImages;
   }
   AssetImageRow? selectedImage;
   if (selectedImageId != null) {
@@ -236,9 +254,19 @@ String summarizeAssetImageSelection(
   }
   selectedImage ??= response.items.first;
   final coverLine = response.coverNumericImageId == null
-      ? 'No cover image'
-      : 'Cover numeric image #${response.coverNumericImageId}';
-  final selectedLine =
-      'Focus sort=${selectedImage.sortIndex} · ${selectedImage.state ?? "unknown state"}';
-  return 'Loaded ${response.items.length} image(s); $coverLine; $selectedLine.';
+      ? l10n.projectEditorAssetImagesSelectionCoverNone
+      : l10n.projectEditorAssetImagesSelectionCoverNumeric(
+          response.coverNumericImageId!,
+        );
+  final stateLabel =
+      selectedImage.state ?? l10n.projectEditorAssetImagesUnknownState;
+  final focusLine = l10n.projectEditorAssetImagesSelectionFocusLine(
+    selectedImage.sortIndex,
+    stateLabel,
+  );
+  return l10n.projectEditorAssetImagesSelectionSummary(
+    response.items.length,
+    coverLine,
+    focusLine,
+  );
 }

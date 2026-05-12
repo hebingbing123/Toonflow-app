@@ -7557,6 +7557,439 @@
   },
   "projectEditorScriptsWorkbenchDialogBatchCreate": "Batch create",
   "projectEditorScriptsWorkbenchDialogClose": "Close",
+  "projectScriptPlanWorkbenchTitle": "Story skeleton & adaptation strategy",
+  "projectScriptPlanWorkbenchPlanMountedLine": "planId {planId} · {count} script row(s) mounted{namesSuffix}",
+  "@projectScriptPlanWorkbenchPlanMountedLine": {
+    "placeholders": {
+      "planId": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "namesSuffix": {
+        "type": "String"
+      }
+    }
+  },
+  "projectScriptPlanWorkbenchFillSkeletonFromEvents": "Fill skeleton draft from events",
+  "projectScriptPlanWorkbenchFillStrategyFromEvents": "Fill strategy draft from events",
+  "projectScriptPlanWorkbenchGenerateDraftPackets": "Generate script draft packets",
+  "projectScriptPlanWorkbenchGenerateStructuredGuidance": "Generate structured rewrite guidance",
+  "projectScriptPlanWorkbenchWriteScriptDrafts": "Write script drafts",
+  "projectScriptPlanWorkbenchStorySkeletonLabel": "Story Skeleton",
+  "projectScriptPlanWorkbenchStorySkeletonHelper": "Focus on story spine, main conflict, turning points, and resolution path",
+  "projectScriptPlanWorkbenchAdaptationStrategyLabel": "Adaptation Strategy",
+  "projectScriptPlanWorkbenchAdaptationStrategyHelper": "Capture adaptation trade-offs, character arcs, pacing, and style constraints",
+  "projectScriptPlanWorkbenchScriptDraftPreviewTitle": "Script draft preview",
+  "projectScriptPlanWorkbenchNoDraftPacketsHint": "No draft packets yet. Refine skeleton/strategy first, then generate.",
+  "projectScriptPlanWorkbenchStructuredGuidanceTitle": "Structured rewrite guidance",
+  "projectScriptPlanWorkbenchNoGuidanceHint": "No structured guidance yet. Run before and after drafts to constrain revisions.",
+  "projectScriptPlanWorkbenchChaptersPrefix": "Chapters",
+  "projectScriptPlanWorkbenchTbd": "TBD",
+  "projectScriptPlanWorkbenchReloadPlan": "Reload plan",
+  "projectScriptPlanWorkbenchSavePlan": "Save plan",
+  "projectScriptPlanWorkbenchRefreshing": "Refreshing…",
+  "projectScriptPlanWorkbenchSaving": "Saving…",
+  "shortVideoUndoEnableShot": "Enable shot #{storyboardId}",
+  "@shortVideoUndoEnableShot": {
+    "placeholders": {
+      "storyboardId": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoUndoDisableShot": "Disable shot #{storyboardId}",
+  "@shortVideoUndoDisableShot": {
+    "placeholders": {
+      "storyboardId": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoUndoSetShotDuration": "Set shot #{storyboardId} duration to {seconds}s",
+  "@shortVideoUndoSetShotDuration": {
+    "placeholders": {
+      "storyboardId": {
+        "type": "int"
+      },
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoUndoReplaceShotVideo": "Replace shot #{storyboardId} video",
+  "@shortVideoUndoReplaceShotVideo": {
+    "placeholders": {
+      "storyboardId": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoUndoBatchEnable": "Batch enable {count} shot(s)",
+  "@shortVideoUndoBatchEnable": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoUndoBatchDisable": "Batch disable {count} shot(s)",
+  "@shortVideoUndoBatchDisable": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoUndoBatchAlignDuration": "Batch align duration for {count} shot(s)",
+  "@shortVideoUndoBatchAlignDuration": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoUndoBatchReplaceVideo": "Batch replace video for {count} shot(s)",
+  "@shortVideoUndoBatchReplaceVideo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoUndoTooltipWithDescription": "Undo: {description} (Ctrl+Z / Cmd+Z)",
+  "@shortVideoUndoTooltipWithDescription": {
+    "placeholders": {
+      "description": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoUndoTooltipEmpty": "Nothing to undo",
+  "shortVideoRedoTooltipWithDescription": "Redo: {description} (Ctrl+Shift+Z / Cmd+Shift+Z)",
+  "@shortVideoRedoTooltipWithDescription": {
+    "placeholders": {
+      "description": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoRedoTooltipEmpty": "Nothing to redo",
+  "shortVideoOperationHistoryToolbarTooltip": "View operation history",
+  "shortVideoOperationHistoryTitle": "Operation history",
+  "shortVideoOperationHistorySummaryHeading": "Summary",
+  "shortVideoOperationHistoryUndoStack": "Undo stack: {count}",
+  "@shortVideoOperationHistoryUndoStack": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoOperationHistoryRedoStack": "Redo stack: {count}",
+  "@shortVideoOperationHistoryRedoStack": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoOperationHistoryLimitLine": "History limit: {max} entries",
+  "@shortVideoOperationHistoryLimitLine": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoOperationHistoryEmpty": "No operations yet",
+  "shortVideoOperationHistoryOperationsHeading": "Operations (newest first)",
+  "shortVideoOperationHistoryLatestChip": "Latest",
+  "shortVideoOperationHistoryClear": "Clear history",
+  "shortVideoOperationHistoryClearedSnackbar": "Operation history cleared",
+  "shortVideoOperationHistoryRelativeSecondsAgo": "{count}s ago",
+  "@shortVideoOperationHistoryRelativeSecondsAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoOperationHistoryRelativeMinutesAgo": "{count}m ago",
+  "@shortVideoOperationHistoryRelativeMinutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoOperationHistoryRelativeHoursAgo": "{count}h ago",
+  "@shortVideoOperationHistoryRelativeHoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPreviewPlaylistComplete": "Finished playing all shots",
+  "shortVideoCandidateAssetConfirmationTitle": "Candidate asset confirmation",
+  "shortVideoCandidateMetricPending": "Pending",
+  "shortVideoCandidateMetricLinked": "Linked",
+  "shortVideoCandidateMetricIgnored": "Ignored",
+  "shortVideoCandidateMetricUnset": "Unset",
+  "shortVideoCandidateBatchGenerateSubmitting": "Submitting candidate clip batch jobs…",
+  "shortVideoCandidateBatchGenerateLabel": "Batch-generate candidate clips (project defaults)",
+  "shortVideoCandidateOpenProjectsForAssets": "Open projects to manage assets",
+  "shortVideoCandidateCompareSectionTitle": "Candidate compare",
+  "projectEditorAssetFilterDialogTitle": "Advanced asset filter",
+  "projectEditorAssetFilterByScript": "Filter by script",
+  "projectEditorAssetFilterAllScripts": "(All scripts)",
+  "projectEditorAssetFilterAssetTypeOptional": "Asset type (optional)",
+  "projectEditorAssetFilterAssetTypeHint": "role / clip / props",
+  "projectEditorAssetFilterNameContainsOptional": "Name contains (optional)",
+  "projectEditorAssetFilterPage": "page",
+  "projectEditorAssetFilterLimit": "limit",
+  "projectEditorAssetFilterApply": "Apply filter",
+  "projectEditorAssetFilterSnackbarPageLimitPositive": "page and limit must be positive integers",
+  "projectEditorAssetFilterSnackbarApplied": "Filter applied: {shown}/{total} rows",
+  "@projectEditorAssetFilterSnackbarApplied": {
+    "placeholders": {
+      "shown": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorDeleteProjectTitle": "Delete project?",
+  "projectEditorDeleteProjectBody": "Deletes project #{id}, related scripts/storyboards (DB cascade), and clears agent memory for this project.",
+  "@projectEditorDeleteProjectBody": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorDeleteProjectSnackbar": "Project deleted",
+  "projectEditorDeleteProjectButton": "DELETE",
+  "projectEditorSavePatch": "Save (PATCH)",
+  "projectEditorSavingEllipsis": "Saving…",
+  "projectEditorPublishSectionTitle": "Publish",
+  "projectEditorPublishSectionBody": "Drafts, scheduling, jobs, and audit live under Short Video Space → Publish.",
+  "projectEditorPublishOpenWorkspace": "Open publish workspace",
+  "projectEditorPublishOverviewSnackbar": "Publish overview: drafts={drafts} jobs={jobs}",
+  "@projectEditorPublishOverviewSnackbar": {
+    "placeholders": {
+      "drafts": {
+        "type": "int"
+      },
+      "jobs": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorPublishViewOverview": "View publish overview",
+  "projectEditorPublishOverviewFailed": "Failed to load publish overview: {error}",
+  "@projectEditorPublishOverviewFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorStoryboardImageWorkbenchTitle": "Image workbench",
+  "projectEditorStoryboardImageUrlLabel": "Current image URL / data URI",
+  "projectEditorStoryboardImageUrlHelper": "HTTP URL or data:image/...;base64.",
+  "projectEditorStoryboardImageLoadPreview": "Load current preview",
+  "projectEditorStoryboardImageWorking": "Working…",
+  "projectEditorStoryboardImageSaveUrl": "Save image URL",
+  "projectEditorStoryboardImageClearFrame": "Clear frame",
+  "projectEditorStoryboardImageRefreshProduction": "Refresh production data",
+  "projectEditorStoryboardImageRefreshing": "Refreshing…",
+  "projectEditorNovelsEventsWorkbenchEmptyDetail": "Manage events via explicit forms (search/create/update/delete/bulk) instead of relying on HTTP probe buttons.",
+  "projectEditorNovelsEventsWorkbenchSummaryFirst": "{summaryLine}; first #{id} {name}.",
+  "@projectEditorNovelsEventsWorkbenchSummaryFirst": {
+    "placeholders": {
+      "summaryLine": {
+        "type": "String"
+      },
+      "id": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsEventsOpenWorkbench": "Open events workbench",
+  "projectEditorNovelsEventsRefresh": "Refresh events",
+  "projectEditorNovelsEventsRefreshing": "Refreshing events…",
+  "projectEditorAssetsWorkbenchNewAsset": "New asset",
+  "projectEditorAssetsWorkbenchEditAsset": "Edit asset",
+  "projectEditorAssetsWorkbenchDeleteAsset": "Delete asset",
+  "projectEditorAssetsWorkbenchFilterAssets": "Filter assets",
+  "projectEditorAssetsWorkbenchLinkScript": "Link script & assets",
+  "projectEditorAssetsWorkbenchUnlink": "Unlink",
+  "projectEditorAssetsWorkbenchUploadEditImage": "Upload edit image",
+  "projectEditorAssetsWorkbenchUploadClipAsset": "Upload clip asset",
+  "projectEditorAssetImagesWorkbenchDialogTitle": "Asset images workbench",
+  "projectEditorAssetImagesFieldTargetAsset": "Target asset",
+  "projectEditorAssetImagesNewFilePathOptional": "New file_path (optional)",
+  "projectEditorAssetImagesNewStateOptional": "New state (optional)",
+  "projectEditorAssetImagesNewSortOptional": "New sort_index (optional)",
+  "projectEditorAssetImagesAddImage": "Add image",
+  "projectEditorAssetImagesEditFilePathMayClear": "Edit file_path (may clear)",
+  "projectEditorAssetImagesEditStateMayClear": "Edit state (may clear)",
+  "projectEditorAssetImagesEditSortOptional": "Edit sort_index (optional)",
+  "projectEditorAssetImagesSaveCurrentImage": "Save current image",
+  "projectEditorAssetImagesDeleteCurrentImage": "Delete current image",
+  "projectEditorAssetImagesLoadImageList": "Load image list",
+  "projectEditorAssetImagesLoadingEllipsis": "Loading…",
+  "projectEditorAssetImagesPreviewImage": "Preview image",
+  "projectEditorAssetImagesLoadingPreview": "Loading preview…",
+  "projectEditorAssetImagesFieldImages": "Images",
+  "projectEditorAssetGenUseMaterialContext": "Use material context ({count} rows)",
+  "@projectEditorAssetGenUseMaterialContext": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorAssetGenUseBatchCandidates": "Use batch candidates ({count} rows)",
+  "@projectEditorAssetGenUseBatchCandidates": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorAssetImagesCreateAssetFirst": "Create an asset before managing images",
+  "projectEditorAssetImagesDiagnosisNotLoadedSummary": "Image list for this asset has not been loaded yet.",
+  "projectEditorAssetImagesDiagnosisNotLoadedDetail": "Sync the image list first to see whether history images exist, then preview or add a new image.",
+  "projectEditorAssetImagesDiagnosisNoImagesSummary": "This asset has no images yet.",
+  "projectEditorAssetImagesDiagnosisNoImagesDetail": "Add an image to create the first editable history row for this asset.",
+  "projectEditorAssetImagesDiagnosisPreviewPendingSummary": "Loaded {count} image(s); preview not loaded yet.",
+  "@projectEditorAssetImagesDiagnosisPreviewPendingSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorAssetImagesDiagnosisPreviewPendingDetail": "Load the current image preview and verify file_path and state before editing or deleting.",
+  "projectEditorAssetImagesDiagnosisReadySummary": "Current image is ready to edit.",
+  "projectEditorAssetImagesDiagnosisReadyDetail": "Focused image sort={sortIndex}; you can update file_path, state, or sort_index, then delete if needed.",
+  "@projectEditorAssetImagesDiagnosisReadyDetail": {
+    "placeholders": {
+      "sortIndex": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorAssetImagesUnknownState": "unknown state",
+  "projectEditorAssetImagesSelectionNoImages": "This asset has no images.",
+  "projectEditorAssetImagesSelectionCoverNone": "No cover image",
+  "projectEditorAssetImagesSelectionCoverNumeric": "Cover numeric image #{id}",
+  "@projectEditorAssetImagesSelectionCoverNumeric": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorAssetImagesSelectionFocusLine": "Focus sort={sort} · {state}",
+  "@projectEditorAssetImagesSelectionFocusLine": {
+    "placeholders": {
+      "sort": {
+        "type": "int"
+      },
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetImagesSelectionSummary": "Loaded {count} image(s); {coverLine}; {focusLine}.",
+  "@projectEditorAssetImagesSelectionSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "coverLine": {
+        "type": "String"
+      },
+      "focusLine": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetImagesFollowUp": "{actionSummary} Next step: {nextAction}. {detail}",
+  "@projectEditorAssetImagesFollowUp": {
+    "placeholders": {
+      "actionSummary": {
+        "type": "String"
+      },
+      "nextAction": {
+        "type": "String"
+      },
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetImagesFailureNotice": "{actionSummary} Next step: {nextAction}. Reason: {reason}. {fallbackDetail}",
+  "@projectEditorAssetImagesFailureNotice": {
+    "placeholders": {
+      "actionSummary": {
+        "type": "String"
+      },
+      "nextAction": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "String"
+      },
+      "fallbackDetail": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetImagesNoErrorDetail": "No additional error detail.",
+  "projectEditorAssetImagesRecommendedLoadList": "Load image list",
+  "projectEditorAssetImagesRecommendedAddImage": "Add image",
+  "projectEditorAssetImagesRecommendedLoadPreview": "Load current preview",
+  "projectEditorAssetImagesRecommendedSaveImage": "Save current image",
+  "projectEditorAssetImagesMutationCreateSuccess": "Asset image created.",
+  "projectEditorAssetImagesMutationCreateFailure": "Failed to create asset image.",
+  "projectEditorAssetImagesMutationCreateFallback": "Check file_path, state, or sort_index and try again.",
+  "projectEditorAssetImagesMutationPatchSuccess": "Current image updated.",
+  "projectEditorAssetImagesMutationPatchFailure": "Failed to update current image.",
+  "projectEditorAssetImagesMutationPatchFallback": "Reload preview, verify the selected image, then edit again.",
+  "projectEditorAssetImagesMutationDeleteSuccess": "Current image deleted.",
+  "projectEditorAssetImagesMutationDeleteFailure": "Failed to delete current image.",
+  "projectEditorAssetImagesMutationDeleteFallback": "Refresh the image list, verify the selection, then delete again.",
+  "projectEditorAssetImagesPreviewLoadFailed": "Failed to load current image preview.",
+  "projectEditorAssetImagesPreviewLoadFailedFallback": "Verify file_path or switch to another image, then retry.",
+  "projectEditorAssetImagesListLoadFailed": "Failed to load image list for current asset.",
+  "projectEditorAssetImagesListLoadFailedFallback": "Retry syncing the image list and confirm this asset has images.",
+  "projectEditorAssetImagesNoPreviewCleared": "No image available to preview; preview cleared.",
+  "projectEditorAssetImagesPreviewLoaded": "Loaded current image preview.",
+  "projectEditorAssetImagesListSynced": "Synced image list for current asset.",
+  "projectEditorAssetImagesCreateSortMustBePositive": "sort_index for create must be a positive integer.",
+  "projectEditorAssetImagesPatchSortMustBePositive": "sort_index for edit must be a positive integer.",
+  "projectEditorAssetImagesSelectImageToEdit": "Select an image to edit first.",
+  "projectEditorAssetImagesSelectImageToDelete": "Select an image to delete first.",
+  "projectEditorAssetImagesSwitchingAsset": "Switching to asset #{id} and loading images…",
+  "@projectEditorAssetImagesSwitchingAsset": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorAssetImagesSwitchingImagePreview": "Switching image and refreshing preview…",
   "projectEditorAssetSummaryProductionEmpty": "Production asset data is empty",
   "projectEditorAssetSummaryProductionLine": "Production assets {total} items · {typesLine} · Sample: {sampleLine}",
   "@projectEditorAssetSummaryProductionLine": {
@@ -8871,7 +9304,7 @@
   "agentWorkspaceProductionSummaryLineCount": "line count {count}",
   "agentWorkspaceProductionSummaryPlanSections": "计划章节 {count}",
   "agentWorkspaceProductionSummaryRewriteInherited": "Rewrite constraints inherited",
-  "agentWorkspaceProductionSummaryStoryboardRows": "storyboard table {count} rows",
+  "agentWorkspaceProductionSummaryStoryboardRows": "storyboard {count} rows",
   "agentWorkspaceProductionSummaryLinkedAssets": "linked assets {count}",
   "agentWorkspaceProductionSummaryListCount": "列表 {count} 项",
   "agentWorkspaceProductionSummaryPrompts": "提示词 {count}",

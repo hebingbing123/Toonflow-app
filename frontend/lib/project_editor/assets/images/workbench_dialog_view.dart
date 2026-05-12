@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/app_localizations.dart';
 import 'workbench_dialog_view_contract.dart';
 import 'workbench_dialog_view_sections.dart';
 
@@ -19,12 +20,13 @@ class AssetImagesWorkbenchDialogView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final viewportWidth = MediaQuery.sizeOf(context).width;
     final dialogWidth = viewportWidth.isFinite
         ? viewportWidth.clamp(320.0, 760.0)
         : 760.0;
     return AlertDialog(
-      title: const Text('资产图片工作台'),
+      title: Text(l10n.projectEditorAssetImagesWorkbenchDialogTitle),
       content: SizedBox(
         width: dialogWidth,
         child: SingleChildScrollView(
@@ -42,7 +44,7 @@ class AssetImagesWorkbenchDialogView extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('关闭'),
+          child: Text(l10n.projectEditorScriptsWorkbenchDialogClose),
         ),
       ],
     );

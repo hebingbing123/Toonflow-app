@@ -14,6 +14,7 @@ class _CandidateComparePanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final outline = theme.colorScheme.outline;
 
@@ -26,7 +27,7 @@ class _CandidateComparePanel extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Candidate asset confirmation',
+                  l10n.shortVideoCandidateAssetConfirmationTitle,
                   style: theme.textTheme.titleSmall,
                 ),
                 const SizedBox(height: 8),
@@ -51,19 +52,19 @@ class _CandidateComparePanel extends StatelessWidget {
                     runSpacing: 8,
                     children: [
                       _MetricChip(
-                        label: 'Pending',
+                        label: l10n.shortVideoCandidateMetricPending,
                         value: '${candidateCardUi.pending}',
                       ),
                       _MetricChip(
-                        label: 'Linked',
+                        label: l10n.shortVideoCandidateMetricLinked,
                         value: '${candidateCardUi.linked}',
                       ),
                       _MetricChip(
-                        label: 'Ignored',
+                        label: l10n.shortVideoCandidateMetricIgnored,
                         value: '${candidateCardUi.ignored}',
                       ),
                       _MetricChip(
-                        label: 'Unset',
+                        label: l10n.shortVideoCandidateMetricUnset,
                         value: '${candidateCardUi.unset}',
                       ),
                     ],
@@ -89,8 +90,8 @@ class _CandidateComparePanel extends StatelessWidget {
                         : const Icon(Icons.movie_creation_outlined),
                     label: Text(
                       candidateCardUi.batchGenerateCandidateClipsBusy
-                          ? 'Submitting candidate clip batch jobs…'
-                          : 'Batch-generate candidate clips (project defaults)',
+                          ? l10n.shortVideoCandidateBatchGenerateSubmitting
+                          : l10n.shortVideoCandidateBatchGenerateLabel,
                     ),
                   ),
                 ],
@@ -99,7 +100,7 @@ class _CandidateComparePanel extends StatelessWidget {
                   OutlinedButton.icon(
                     onPressed: onOpenProjectsForCandidateAssets,
                     icon: const Icon(Icons.folder_open_outlined),
-                    label: const Text('Open projects to manage assets'),
+                    label: Text(l10n.shortVideoCandidateOpenProjectsForAssets),
                   ),
                 ],
               ],
@@ -112,7 +113,10 @@ class _CandidateComparePanel extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Candidate compare', style: theme.textTheme.titleSmall),
+                Text(
+                  l10n.shortVideoCandidateCompareSectionTitle,
+                  style: theme.textTheme.titleSmall,
+                ),
                 const SizedBox(height: 8),
                 Text(
                   candidateComparePanelUi.headline,

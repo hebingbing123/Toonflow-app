@@ -20,10 +20,11 @@ extension _HomePageProjectEditorDialogActions on _HomePageState {
     required TextEditingController forbiddenCtrl,
     required TextEditingController continuityCtrl,
   }) {
+    final l10n = AppLocalizations.of(ctx)!;
     return [
       TextButton(
         onPressed: dialogState.saving[0] ? null : () => Navigator.of(ctx).pop(),
-        child: const Text('Close'),
+        child: Text(l10n.projectEditorScriptsWorkbenchDialogClose),
       ),
       TextButton(
         onPressed: dialogState.saving[0]
@@ -31,22 +32,25 @@ extension _HomePageProjectEditorDialogActions on _HomePageState {
             : () async {
                 final ok = await showDialog<bool>(
                   context: ctx,
-                  builder: (c) => AlertDialog(
-                    title: const Text('Delete project?'),
-                    content: Text(
-                      'Deletes project #${p.numericId}, related scripts/storyboards (DB cascade), and clears agent memory for this project.',
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.of(c).pop(false),
-                        child: const Text('Cancel'),
+                  builder: (c) {
+                    final dlgL10n = AppLocalizations.of(c)!;
+                    return AlertDialog(
+                      title: Text(dlgL10n.projectEditorDeleteProjectTitle),
+                      content: Text(
+                        dlgL10n.projectEditorDeleteProjectBody(p.numericId),
                       ),
-                      FilledButton(
-                        onPressed: () => Navigator.of(c).pop(true),
-                        child: const Text('Delete'),
-                      ),
-                    ],
-                  ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(c).pop(false),
+                          child: Text(dlgL10n.storyboardEditorDialogCancel),
+                        ),
+                        FilledButton(
+                          onPressed: () => Navigator.of(c).pop(true),
+                          child: Text(dlgL10n.storyboardEditorDialogConfirmDelete),
+                        ),
+                      ],
+                    );
+                  },
                 );
                 if (ok != true || !ctx.mounted) return;
                 setDialogState(() => dialogState.saving[0] = true);
@@ -58,7 +62,7 @@ extension _HomePageProjectEditorDialogActions on _HomePageState {
                   await _projectsController.loadProjects();
                   if (!mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Project deleted')),
+                    SnackBar(content: Text(l10n.projectEditorDeleteProjectSnackbar)),
                   );
                 } on RustApiException catch (e) {
                   if (ctx.mounted) {
@@ -76,7 +80,7 @@ extension _HomePageProjectEditorDialogActions on _HomePageState {
                   }
                 }
               },
-        child: const Text('DELETE'),
+        child: Text(l10n.projectEditorDeleteProjectButton),
       ),
       FilledButton(
         onPressed: dialogState.saving[0]
@@ -141,7 +145,11 @@ extension _HomePageProjectEditorDialogActions on _HomePageState {
                   }
                 }
               },
-        child: Text(dialogState.saving[0] ? 'Saving…' : 'Save (PATCH)'),
+        child: Text(
+          dialogState.saving[0]
+              ? l10n.projectEditorSavingEllipsis
+              : l10n.projectEditorSavePatch,
+        ),
       ),
     ];
   }

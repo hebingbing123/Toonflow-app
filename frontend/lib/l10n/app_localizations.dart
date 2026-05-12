@@ -15827,6 +15827,1011 @@ abstract class AppLocalizations {
   /// **'Close'**
   String get projectEditorScriptsWorkbenchDialogClose;
 
+  /// No description provided for @projectScriptPlanWorkbenchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Story skeleton & adaptation strategy'**
+  String get projectScriptPlanWorkbenchTitle;
+
+  /// No description provided for @projectScriptPlanWorkbenchPlanMountedLine.
+  ///
+  /// In en, this message translates to:
+  /// **'planId {planId} · {count} script row(s) mounted{namesSuffix}'**
+  String projectScriptPlanWorkbenchPlanMountedLine(
+    String planId,
+    int count,
+    String namesSuffix,
+  );
+
+  /// No description provided for @projectScriptPlanWorkbenchFillSkeletonFromEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill skeleton draft from events'**
+  String get projectScriptPlanWorkbenchFillSkeletonFromEvents;
+
+  /// No description provided for @projectScriptPlanWorkbenchFillStrategyFromEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill strategy draft from events'**
+  String get projectScriptPlanWorkbenchFillStrategyFromEvents;
+
+  /// No description provided for @projectScriptPlanWorkbenchGenerateDraftPackets.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate script draft packets'**
+  String get projectScriptPlanWorkbenchGenerateDraftPackets;
+
+  /// No description provided for @projectScriptPlanWorkbenchGenerateStructuredGuidance.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate structured rewrite guidance'**
+  String get projectScriptPlanWorkbenchGenerateStructuredGuidance;
+
+  /// No description provided for @projectScriptPlanWorkbenchWriteScriptDrafts.
+  ///
+  /// In en, this message translates to:
+  /// **'Write script drafts'**
+  String get projectScriptPlanWorkbenchWriteScriptDrafts;
+
+  /// No description provided for @projectScriptPlanWorkbenchStorySkeletonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Story Skeleton'**
+  String get projectScriptPlanWorkbenchStorySkeletonLabel;
+
+  /// No description provided for @projectScriptPlanWorkbenchStorySkeletonHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus on story spine, main conflict, turning points, and resolution path'**
+  String get projectScriptPlanWorkbenchStorySkeletonHelper;
+
+  /// No description provided for @projectScriptPlanWorkbenchAdaptationStrategyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Adaptation Strategy'**
+  String get projectScriptPlanWorkbenchAdaptationStrategyLabel;
+
+  /// No description provided for @projectScriptPlanWorkbenchAdaptationStrategyHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Capture adaptation trade-offs, character arcs, pacing, and style constraints'**
+  String get projectScriptPlanWorkbenchAdaptationStrategyHelper;
+
+  /// No description provided for @projectScriptPlanWorkbenchScriptDraftPreviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Script draft preview'**
+  String get projectScriptPlanWorkbenchScriptDraftPreviewTitle;
+
+  /// No description provided for @projectScriptPlanWorkbenchNoDraftPacketsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'No draft packets yet. Refine skeleton/strategy first, then generate.'**
+  String get projectScriptPlanWorkbenchNoDraftPacketsHint;
+
+  /// No description provided for @projectScriptPlanWorkbenchStructuredGuidanceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Structured rewrite guidance'**
+  String get projectScriptPlanWorkbenchStructuredGuidanceTitle;
+
+  /// No description provided for @projectScriptPlanWorkbenchNoGuidanceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'No structured guidance yet. Run before and after drafts to constrain revisions.'**
+  String get projectScriptPlanWorkbenchNoGuidanceHint;
+
+  /// No description provided for @projectScriptPlanWorkbenchChaptersPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapters'**
+  String get projectScriptPlanWorkbenchChaptersPrefix;
+
+  /// No description provided for @projectScriptPlanWorkbenchTbd.
+  ///
+  /// In en, this message translates to:
+  /// **'TBD'**
+  String get projectScriptPlanWorkbenchTbd;
+
+  /// No description provided for @projectScriptPlanWorkbenchReloadPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload plan'**
+  String get projectScriptPlanWorkbenchReloadPlan;
+
+  /// No description provided for @projectScriptPlanWorkbenchSavePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Save plan'**
+  String get projectScriptPlanWorkbenchSavePlan;
+
+  /// No description provided for @projectScriptPlanWorkbenchRefreshing.
+  ///
+  /// In en, this message translates to:
+  /// **'Refreshing…'**
+  String get projectScriptPlanWorkbenchRefreshing;
+
+  /// No description provided for @projectScriptPlanWorkbenchSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get projectScriptPlanWorkbenchSaving;
+
+  /// No description provided for @shortVideoUndoEnableShot.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable shot #{storyboardId}'**
+  String shortVideoUndoEnableShot(int storyboardId);
+
+  /// No description provided for @shortVideoUndoDisableShot.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable shot #{storyboardId}'**
+  String shortVideoUndoDisableShot(int storyboardId);
+
+  /// No description provided for @shortVideoUndoSetShotDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Set shot #{storyboardId} duration to {seconds}s'**
+  String shortVideoUndoSetShotDuration(int storyboardId, int seconds);
+
+  /// No description provided for @shortVideoUndoReplaceShotVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace shot #{storyboardId} video'**
+  String shortVideoUndoReplaceShotVideo(int storyboardId);
+
+  /// No description provided for @shortVideoUndoBatchEnable.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch enable {count} shot(s)'**
+  String shortVideoUndoBatchEnable(int count);
+
+  /// No description provided for @shortVideoUndoBatchDisable.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch disable {count} shot(s)'**
+  String shortVideoUndoBatchDisable(int count);
+
+  /// No description provided for @shortVideoUndoBatchAlignDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch align duration for {count} shot(s)'**
+  String shortVideoUndoBatchAlignDuration(int count);
+
+  /// No description provided for @shortVideoUndoBatchReplaceVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch replace video for {count} shot(s)'**
+  String shortVideoUndoBatchReplaceVideo(int count);
+
+  /// No description provided for @shortVideoUndoTooltipWithDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo: {description} (Ctrl+Z / Cmd+Z)'**
+  String shortVideoUndoTooltipWithDescription(String description);
+
+  /// No description provided for @shortVideoUndoTooltipEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to undo'**
+  String get shortVideoUndoTooltipEmpty;
+
+  /// No description provided for @shortVideoRedoTooltipWithDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Redo: {description} (Ctrl+Shift+Z / Cmd+Shift+Z)'**
+  String shortVideoRedoTooltipWithDescription(String description);
+
+  /// No description provided for @shortVideoRedoTooltipEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to redo'**
+  String get shortVideoRedoTooltipEmpty;
+
+  /// No description provided for @shortVideoOperationHistoryToolbarTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'View operation history'**
+  String get shortVideoOperationHistoryToolbarTooltip;
+
+  /// No description provided for @shortVideoOperationHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Operation history'**
+  String get shortVideoOperationHistoryTitle;
+
+  /// No description provided for @shortVideoOperationHistorySummaryHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary'**
+  String get shortVideoOperationHistorySummaryHeading;
+
+  /// No description provided for @shortVideoOperationHistoryUndoStack.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo stack: {count}'**
+  String shortVideoOperationHistoryUndoStack(int count);
+
+  /// No description provided for @shortVideoOperationHistoryRedoStack.
+  ///
+  /// In en, this message translates to:
+  /// **'Redo stack: {count}'**
+  String shortVideoOperationHistoryRedoStack(int count);
+
+  /// No description provided for @shortVideoOperationHistoryLimitLine.
+  ///
+  /// In en, this message translates to:
+  /// **'History limit: {max} entries'**
+  String shortVideoOperationHistoryLimitLine(int max);
+
+  /// No description provided for @shortVideoOperationHistoryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No operations yet'**
+  String get shortVideoOperationHistoryEmpty;
+
+  /// No description provided for @shortVideoOperationHistoryOperationsHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Operations (newest first)'**
+  String get shortVideoOperationHistoryOperationsHeading;
+
+  /// No description provided for @shortVideoOperationHistoryLatestChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest'**
+  String get shortVideoOperationHistoryLatestChip;
+
+  /// No description provided for @shortVideoOperationHistoryClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear history'**
+  String get shortVideoOperationHistoryClear;
+
+  /// No description provided for @shortVideoOperationHistoryClearedSnackbar.
+  ///
+  /// In en, this message translates to:
+  /// **'Operation history cleared'**
+  String get shortVideoOperationHistoryClearedSnackbar;
+
+  /// No description provided for @shortVideoOperationHistoryRelativeSecondsAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}s ago'**
+  String shortVideoOperationHistoryRelativeSecondsAgo(int count);
+
+  /// No description provided for @shortVideoOperationHistoryRelativeMinutesAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}m ago'**
+  String shortVideoOperationHistoryRelativeMinutesAgo(int count);
+
+  /// No description provided for @shortVideoOperationHistoryRelativeHoursAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}h ago'**
+  String shortVideoOperationHistoryRelativeHoursAgo(int count);
+
+  /// No description provided for @shortVideoPreviewPlaylistComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Finished playing all shots'**
+  String get shortVideoPreviewPlaylistComplete;
+
+  /// No description provided for @shortVideoCandidateAssetConfirmationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Candidate asset confirmation'**
+  String get shortVideoCandidateAssetConfirmationTitle;
+
+  /// No description provided for @shortVideoCandidateMetricPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get shortVideoCandidateMetricPending;
+
+  /// No description provided for @shortVideoCandidateMetricLinked.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked'**
+  String get shortVideoCandidateMetricLinked;
+
+  /// No description provided for @shortVideoCandidateMetricIgnored.
+  ///
+  /// In en, this message translates to:
+  /// **'Ignored'**
+  String get shortVideoCandidateMetricIgnored;
+
+  /// No description provided for @shortVideoCandidateMetricUnset.
+  ///
+  /// In en, this message translates to:
+  /// **'Unset'**
+  String get shortVideoCandidateMetricUnset;
+
+  /// No description provided for @shortVideoCandidateBatchGenerateSubmitting.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitting candidate clip batch jobs…'**
+  String get shortVideoCandidateBatchGenerateSubmitting;
+
+  /// No description provided for @shortVideoCandidateBatchGenerateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch-generate candidate clips (project defaults)'**
+  String get shortVideoCandidateBatchGenerateLabel;
+
+  /// No description provided for @shortVideoCandidateOpenProjectsForAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'Open projects to manage assets'**
+  String get shortVideoCandidateOpenProjectsForAssets;
+
+  /// No description provided for @shortVideoCandidateCompareSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Candidate compare'**
+  String get shortVideoCandidateCompareSectionTitle;
+
+  /// No description provided for @projectEditorAssetFilterDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced asset filter'**
+  String get projectEditorAssetFilterDialogTitle;
+
+  /// No description provided for @projectEditorAssetFilterByScript.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by script'**
+  String get projectEditorAssetFilterByScript;
+
+  /// No description provided for @projectEditorAssetFilterAllScripts.
+  ///
+  /// In en, this message translates to:
+  /// **'(All scripts)'**
+  String get projectEditorAssetFilterAllScripts;
+
+  /// No description provided for @projectEditorAssetFilterAssetTypeOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Asset type (optional)'**
+  String get projectEditorAssetFilterAssetTypeOptional;
+
+  /// No description provided for @projectEditorAssetFilterAssetTypeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'role / clip / props'**
+  String get projectEditorAssetFilterAssetTypeHint;
+
+  /// No description provided for @projectEditorAssetFilterNameContainsOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Name contains (optional)'**
+  String get projectEditorAssetFilterNameContainsOptional;
+
+  /// No description provided for @projectEditorAssetFilterPage.
+  ///
+  /// In en, this message translates to:
+  /// **'page'**
+  String get projectEditorAssetFilterPage;
+
+  /// No description provided for @projectEditorAssetFilterLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'limit'**
+  String get projectEditorAssetFilterLimit;
+
+  /// No description provided for @projectEditorAssetFilterApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply filter'**
+  String get projectEditorAssetFilterApply;
+
+  /// No description provided for @projectEditorAssetFilterSnackbarPageLimitPositive.
+  ///
+  /// In en, this message translates to:
+  /// **'page and limit must be positive integers'**
+  String get projectEditorAssetFilterSnackbarPageLimitPositive;
+
+  /// No description provided for @projectEditorAssetFilterSnackbarApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter applied: {shown}/{total} rows'**
+  String projectEditorAssetFilterSnackbarApplied(int shown, int total);
+
+  /// No description provided for @projectEditorDeleteProjectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete project?'**
+  String get projectEditorDeleteProjectTitle;
+
+  /// No description provided for @projectEditorDeleteProjectBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Deletes project #{id}, related scripts/storyboards (DB cascade), and clears agent memory for this project.'**
+  String projectEditorDeleteProjectBody(int id);
+
+  /// No description provided for @projectEditorDeleteProjectSnackbar.
+  ///
+  /// In en, this message translates to:
+  /// **'Project deleted'**
+  String get projectEditorDeleteProjectSnackbar;
+
+  /// No description provided for @projectEditorDeleteProjectButton.
+  ///
+  /// In en, this message translates to:
+  /// **'DELETE'**
+  String get projectEditorDeleteProjectButton;
+
+  /// No description provided for @projectEditorSavePatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Save (PATCH)'**
+  String get projectEditorSavePatch;
+
+  /// No description provided for @projectEditorSavingEllipsis.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get projectEditorSavingEllipsis;
+
+  /// No description provided for @projectEditorPublishSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish'**
+  String get projectEditorPublishSectionTitle;
+
+  /// No description provided for @projectEditorPublishSectionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Drafts, scheduling, jobs, and audit live under Short Video Space → Publish.'**
+  String get projectEditorPublishSectionBody;
+
+  /// No description provided for @projectEditorPublishOpenWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Open publish workspace'**
+  String get projectEditorPublishOpenWorkspace;
+
+  /// No description provided for @projectEditorPublishOverviewSnackbar.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish overview: drafts={drafts} jobs={jobs}'**
+  String projectEditorPublishOverviewSnackbar(int drafts, int jobs);
+
+  /// No description provided for @projectEditorPublishViewOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'View publish overview'**
+  String get projectEditorPublishViewOverview;
+
+  /// No description provided for @projectEditorPublishOverviewFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load publish overview: {error}'**
+  String projectEditorPublishOverviewFailed(String error);
+
+  /// No description provided for @projectEditorStoryboardImageWorkbenchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Image workbench'**
+  String get projectEditorStoryboardImageWorkbenchTitle;
+
+  /// No description provided for @projectEditorStoryboardImageUrlLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Current image URL / data URI'**
+  String get projectEditorStoryboardImageUrlLabel;
+
+  /// No description provided for @projectEditorStoryboardImageUrlHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'HTTP URL or data:image/...;base64.'**
+  String get projectEditorStoryboardImageUrlHelper;
+
+  /// No description provided for @projectEditorStoryboardImageLoadPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Load current preview'**
+  String get projectEditorStoryboardImageLoadPreview;
+
+  /// No description provided for @projectEditorStoryboardImageWorking.
+  ///
+  /// In en, this message translates to:
+  /// **'Working…'**
+  String get projectEditorStoryboardImageWorking;
+
+  /// No description provided for @projectEditorStoryboardImageSaveUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Save image URL'**
+  String get projectEditorStoryboardImageSaveUrl;
+
+  /// No description provided for @projectEditorStoryboardImageClearFrame.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear frame'**
+  String get projectEditorStoryboardImageClearFrame;
+
+  /// No description provided for @projectEditorStoryboardImageRefreshProduction.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh production data'**
+  String get projectEditorStoryboardImageRefreshProduction;
+
+  /// No description provided for @projectEditorStoryboardImageRefreshing.
+  ///
+  /// In en, this message translates to:
+  /// **'Refreshing…'**
+  String get projectEditorStoryboardImageRefreshing;
+
+  /// No description provided for @projectEditorNovelsEventsWorkbenchEmptyDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage events via explicit forms (search/create/update/delete/bulk) instead of relying on HTTP probe buttons.'**
+  String get projectEditorNovelsEventsWorkbenchEmptyDetail;
+
+  /// No description provided for @projectEditorNovelsEventsWorkbenchSummaryFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'{summaryLine}; first #{id} {name}.'**
+  String projectEditorNovelsEventsWorkbenchSummaryFirst(
+    String summaryLine,
+    int id,
+    String name,
+  );
+
+  /// No description provided for @projectEditorNovelsEventsOpenWorkbench.
+  ///
+  /// In en, this message translates to:
+  /// **'Open events workbench'**
+  String get projectEditorNovelsEventsOpenWorkbench;
+
+  /// No description provided for @projectEditorNovelsEventsRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh events'**
+  String get projectEditorNovelsEventsRefresh;
+
+  /// No description provided for @projectEditorNovelsEventsRefreshing.
+  ///
+  /// In en, this message translates to:
+  /// **'Refreshing events…'**
+  String get projectEditorNovelsEventsRefreshing;
+
+  /// No description provided for @projectEditorAssetsWorkbenchNewAsset.
+  ///
+  /// In en, this message translates to:
+  /// **'New asset'**
+  String get projectEditorAssetsWorkbenchNewAsset;
+
+  /// No description provided for @projectEditorAssetsWorkbenchEditAsset.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit asset'**
+  String get projectEditorAssetsWorkbenchEditAsset;
+
+  /// No description provided for @projectEditorAssetsWorkbenchDeleteAsset.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete asset'**
+  String get projectEditorAssetsWorkbenchDeleteAsset;
+
+  /// No description provided for @projectEditorAssetsWorkbenchFilterAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter assets'**
+  String get projectEditorAssetsWorkbenchFilterAssets;
+
+  /// No description provided for @projectEditorAssetsWorkbenchLinkScript.
+  ///
+  /// In en, this message translates to:
+  /// **'Link script & assets'**
+  String get projectEditorAssetsWorkbenchLinkScript;
+
+  /// No description provided for @projectEditorAssetsWorkbenchUnlink.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlink'**
+  String get projectEditorAssetsWorkbenchUnlink;
+
+  /// No description provided for @projectEditorAssetsWorkbenchUploadEditImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload edit image'**
+  String get projectEditorAssetsWorkbenchUploadEditImage;
+
+  /// No description provided for @projectEditorAssetsWorkbenchUploadClipAsset.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload clip asset'**
+  String get projectEditorAssetsWorkbenchUploadClipAsset;
+
+  /// No description provided for @projectEditorAssetImagesWorkbenchDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Asset images workbench'**
+  String get projectEditorAssetImagesWorkbenchDialogTitle;
+
+  /// No description provided for @projectEditorAssetImagesFieldTargetAsset.
+  ///
+  /// In en, this message translates to:
+  /// **'Target asset'**
+  String get projectEditorAssetImagesFieldTargetAsset;
+
+  /// No description provided for @projectEditorAssetImagesNewFilePathOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'New file_path (optional)'**
+  String get projectEditorAssetImagesNewFilePathOptional;
+
+  /// No description provided for @projectEditorAssetImagesNewStateOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'New state (optional)'**
+  String get projectEditorAssetImagesNewStateOptional;
+
+  /// No description provided for @projectEditorAssetImagesNewSortOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'New sort_index (optional)'**
+  String get projectEditorAssetImagesNewSortOptional;
+
+  /// No description provided for @projectEditorAssetImagesAddImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Add image'**
+  String get projectEditorAssetImagesAddImage;
+
+  /// No description provided for @projectEditorAssetImagesEditFilePathMayClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit file_path (may clear)'**
+  String get projectEditorAssetImagesEditFilePathMayClear;
+
+  /// No description provided for @projectEditorAssetImagesEditStateMayClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit state (may clear)'**
+  String get projectEditorAssetImagesEditStateMayClear;
+
+  /// No description provided for @projectEditorAssetImagesEditSortOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit sort_index (optional)'**
+  String get projectEditorAssetImagesEditSortOptional;
+
+  /// No description provided for @projectEditorAssetImagesSaveCurrentImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Save current image'**
+  String get projectEditorAssetImagesSaveCurrentImage;
+
+  /// No description provided for @projectEditorAssetImagesDeleteCurrentImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete current image'**
+  String get projectEditorAssetImagesDeleteCurrentImage;
+
+  /// No description provided for @projectEditorAssetImagesLoadImageList.
+  ///
+  /// In en, this message translates to:
+  /// **'Load image list'**
+  String get projectEditorAssetImagesLoadImageList;
+
+  /// No description provided for @projectEditorAssetImagesLoadingEllipsis.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading…'**
+  String get projectEditorAssetImagesLoadingEllipsis;
+
+  /// No description provided for @projectEditorAssetImagesPreviewImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview image'**
+  String get projectEditorAssetImagesPreviewImage;
+
+  /// No description provided for @projectEditorAssetImagesLoadingPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading preview…'**
+  String get projectEditorAssetImagesLoadingPreview;
+
+  /// No description provided for @projectEditorAssetImagesFieldImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Images'**
+  String get projectEditorAssetImagesFieldImages;
+
+  /// No description provided for @projectEditorAssetGenUseMaterialContext.
+  ///
+  /// In en, this message translates to:
+  /// **'Use material context ({count} rows)'**
+  String projectEditorAssetGenUseMaterialContext(int count);
+
+  /// No description provided for @projectEditorAssetGenUseBatchCandidates.
+  ///
+  /// In en, this message translates to:
+  /// **'Use batch candidates ({count} rows)'**
+  String projectEditorAssetGenUseBatchCandidates(int count);
+
+  /// No description provided for @projectEditorAssetImagesCreateAssetFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Create an asset before managing images'**
+  String get projectEditorAssetImagesCreateAssetFirst;
+
+  /// No description provided for @projectEditorAssetImagesDiagnosisNotLoadedSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Image list for this asset has not been loaded yet.'**
+  String get projectEditorAssetImagesDiagnosisNotLoadedSummary;
+
+  /// No description provided for @projectEditorAssetImagesDiagnosisNotLoadedDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync the image list first to see whether history images exist, then preview or add a new image.'**
+  String get projectEditorAssetImagesDiagnosisNotLoadedDetail;
+
+  /// No description provided for @projectEditorAssetImagesDiagnosisNoImagesSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'This asset has no images yet.'**
+  String get projectEditorAssetImagesDiagnosisNoImagesSummary;
+
+  /// No description provided for @projectEditorAssetImagesDiagnosisNoImagesDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an image to create the first editable history row for this asset.'**
+  String get projectEditorAssetImagesDiagnosisNoImagesDetail;
+
+  /// No description provided for @projectEditorAssetImagesDiagnosisPreviewPendingSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Loaded {count} image(s); preview not loaded yet.'**
+  String projectEditorAssetImagesDiagnosisPreviewPendingSummary(int count);
+
+  /// No description provided for @projectEditorAssetImagesDiagnosisPreviewPendingDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Load the current image preview and verify file_path and state before editing or deleting.'**
+  String get projectEditorAssetImagesDiagnosisPreviewPendingDetail;
+
+  /// No description provided for @projectEditorAssetImagesDiagnosisReadySummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Current image is ready to edit.'**
+  String get projectEditorAssetImagesDiagnosisReadySummary;
+
+  /// No description provided for @projectEditorAssetImagesDiagnosisReadyDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Focused image sort={sortIndex}; you can update file_path, state, or sort_index, then delete if needed.'**
+  String projectEditorAssetImagesDiagnosisReadyDetail(int sortIndex);
+
+  /// No description provided for @projectEditorAssetImagesUnknownState.
+  ///
+  /// In en, this message translates to:
+  /// **'unknown state'**
+  String get projectEditorAssetImagesUnknownState;
+
+  /// No description provided for @projectEditorAssetImagesSelectionNoImages.
+  ///
+  /// In en, this message translates to:
+  /// **'This asset has no images.'**
+  String get projectEditorAssetImagesSelectionNoImages;
+
+  /// No description provided for @projectEditorAssetImagesSelectionCoverNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No cover image'**
+  String get projectEditorAssetImagesSelectionCoverNone;
+
+  /// No description provided for @projectEditorAssetImagesSelectionCoverNumeric.
+  ///
+  /// In en, this message translates to:
+  /// **'Cover numeric image #{id}'**
+  String projectEditorAssetImagesSelectionCoverNumeric(int id);
+
+  /// No description provided for @projectEditorAssetImagesSelectionFocusLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus sort={sort} · {state}'**
+  String projectEditorAssetImagesSelectionFocusLine(int sort, String state);
+
+  /// No description provided for @projectEditorAssetImagesSelectionSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Loaded {count} image(s); {coverLine}; {focusLine}.'**
+  String projectEditorAssetImagesSelectionSummary(
+    int count,
+    String coverLine,
+    String focusLine,
+  );
+
+  /// No description provided for @projectEditorAssetImagesFollowUp.
+  ///
+  /// In en, this message translates to:
+  /// **'{actionSummary} Next step: {nextAction}. {detail}'**
+  String projectEditorAssetImagesFollowUp(
+    String actionSummary,
+    String nextAction,
+    String detail,
+  );
+
+  /// No description provided for @projectEditorAssetImagesFailureNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'{actionSummary} Next step: {nextAction}. Reason: {reason}. {fallbackDetail}'**
+  String projectEditorAssetImagesFailureNotice(
+    String actionSummary,
+    String nextAction,
+    String reason,
+    String fallbackDetail,
+  );
+
+  /// No description provided for @projectEditorAssetImagesNoErrorDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'No additional error detail.'**
+  String get projectEditorAssetImagesNoErrorDetail;
+
+  /// No description provided for @projectEditorAssetImagesRecommendedLoadList.
+  ///
+  /// In en, this message translates to:
+  /// **'Load image list'**
+  String get projectEditorAssetImagesRecommendedLoadList;
+
+  /// No description provided for @projectEditorAssetImagesRecommendedAddImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Add image'**
+  String get projectEditorAssetImagesRecommendedAddImage;
+
+  /// No description provided for @projectEditorAssetImagesRecommendedLoadPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Load current preview'**
+  String get projectEditorAssetImagesRecommendedLoadPreview;
+
+  /// No description provided for @projectEditorAssetImagesRecommendedSaveImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Save current image'**
+  String get projectEditorAssetImagesRecommendedSaveImage;
+
+  /// No description provided for @projectEditorAssetImagesMutationCreateSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Asset image created.'**
+  String get projectEditorAssetImagesMutationCreateSuccess;
+
+  /// No description provided for @projectEditorAssetImagesMutationCreateFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create asset image.'**
+  String get projectEditorAssetImagesMutationCreateFailure;
+
+  /// No description provided for @projectEditorAssetImagesMutationCreateFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Check file_path, state, or sort_index and try again.'**
+  String get projectEditorAssetImagesMutationCreateFallback;
+
+  /// No description provided for @projectEditorAssetImagesMutationPatchSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Current image updated.'**
+  String get projectEditorAssetImagesMutationPatchSuccess;
+
+  /// No description provided for @projectEditorAssetImagesMutationPatchFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update current image.'**
+  String get projectEditorAssetImagesMutationPatchFailure;
+
+  /// No description provided for @projectEditorAssetImagesMutationPatchFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload preview, verify the selected image, then edit again.'**
+  String get projectEditorAssetImagesMutationPatchFallback;
+
+  /// No description provided for @projectEditorAssetImagesMutationDeleteSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Current image deleted.'**
+  String get projectEditorAssetImagesMutationDeleteSuccess;
+
+  /// No description provided for @projectEditorAssetImagesMutationDeleteFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete current image.'**
+  String get projectEditorAssetImagesMutationDeleteFailure;
+
+  /// No description provided for @projectEditorAssetImagesMutationDeleteFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh the image list, verify the selection, then delete again.'**
+  String get projectEditorAssetImagesMutationDeleteFallback;
+
+  /// No description provided for @projectEditorAssetImagesPreviewLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load current image preview.'**
+  String get projectEditorAssetImagesPreviewLoadFailed;
+
+  /// No description provided for @projectEditorAssetImagesPreviewLoadFailedFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify file_path or switch to another image, then retry.'**
+  String get projectEditorAssetImagesPreviewLoadFailedFallback;
+
+  /// No description provided for @projectEditorAssetImagesListLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load image list for current asset.'**
+  String get projectEditorAssetImagesListLoadFailed;
+
+  /// No description provided for @projectEditorAssetImagesListLoadFailedFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry syncing the image list and confirm this asset has images.'**
+  String get projectEditorAssetImagesListLoadFailedFallback;
+
+  /// No description provided for @projectEditorAssetImagesNoPreviewCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'No image available to preview; preview cleared.'**
+  String get projectEditorAssetImagesNoPreviewCleared;
+
+  /// No description provided for @projectEditorAssetImagesPreviewLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Loaded current image preview.'**
+  String get projectEditorAssetImagesPreviewLoaded;
+
+  /// No description provided for @projectEditorAssetImagesListSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Synced image list for current asset.'**
+  String get projectEditorAssetImagesListSynced;
+
+  /// No description provided for @projectEditorAssetImagesCreateSortMustBePositive.
+  ///
+  /// In en, this message translates to:
+  /// **'sort_index for create must be a positive integer.'**
+  String get projectEditorAssetImagesCreateSortMustBePositive;
+
+  /// No description provided for @projectEditorAssetImagesPatchSortMustBePositive.
+  ///
+  /// In en, this message translates to:
+  /// **'sort_index for edit must be a positive integer.'**
+  String get projectEditorAssetImagesPatchSortMustBePositive;
+
+  /// No description provided for @projectEditorAssetImagesSelectImageToEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Select an image to edit first.'**
+  String get projectEditorAssetImagesSelectImageToEdit;
+
+  /// No description provided for @projectEditorAssetImagesSelectImageToDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Select an image to delete first.'**
+  String get projectEditorAssetImagesSelectImageToDelete;
+
+  /// No description provided for @projectEditorAssetImagesSwitchingAsset.
+  ///
+  /// In en, this message translates to:
+  /// **'Switching to asset #{id} and loading images…'**
+  String projectEditorAssetImagesSwitchingAsset(int id);
+
+  /// No description provided for @projectEditorAssetImagesSwitchingImagePreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Switching image and refreshing preview…'**
+  String get projectEditorAssetImagesSwitchingImagePreview;
+
   /// No description provided for @projectEditorAssetSummaryProductionEmpty.
   ///
   /// In en, this message translates to:
@@ -18782,7 +19787,7 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionSummaryStoryboardRows.
   ///
   /// In en, this message translates to:
-  /// **'storyboard table {count} rows'**
+  /// **'storyboard {count} rows'**
   String agentWorkspaceProductionSummaryStoryboardRows(int count);
 
   /// No description provided for @agentWorkspaceProductionSummaryLinkedAssets.

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/app_localizations.dart';
 import '../../../../rust_api.dart';
 import 'workbench_dialog_view.dart';
 import 'workbench_support.dart';
@@ -57,9 +58,11 @@ class _AssetImagesWorkbenchDialogDeps {
   final AssetImagesWorkbenchController controller;
 
   AssetImagesWorkbenchDialogState captureDialogState({
+    required AppLocalizations l10n,
     required List<AssetRow> assets,
   }) {
     return session.captureDialogState(
+      l10n: l10n,
       assets: assets,
       createControllers: createControllers,
       patchControllers: patchControllers,
@@ -84,8 +87,9 @@ Future<void> openAssetImagesWorkbenchDialog({
 }) async {
   final assets = assetsRef[0]?.items ?? const <AssetRow>[];
   if (assets.isEmpty) {
+    final l10n = AppLocalizations.of(ctx)!;
     ScaffoldMessenger.of(ctx).showSnackBar(
-      const SnackBar(content: Text('Create an asset before managing images')),
+      SnackBar(content: Text(l10n.projectEditorAssetImagesCreateAssetFirst)),
     );
     return;
   }
@@ -113,7 +117,8 @@ Future<void> openAssetImagesWorkbenchDialog({
                 setState: setState,
               );
             }
-            final dialogState = deps.captureDialogState(assets: assets);
+            final l10n = AppLocalizations.of(dialogCtx)!;
+            final dialogState = deps.captureDialogState(l10n: l10n, assets: assets);
             final callbacks = deps.controller.buildDialogCallbacks(
               setState: setState,
             );

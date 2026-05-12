@@ -33,6 +33,7 @@ class _ProjectAssetsWorkbenchActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final canMutateAssets = !(localBusy || assetsBusy || assets.isEmpty);
     final canLinkScripts =
         !(localBusy ||
@@ -51,19 +52,19 @@ class _ProjectAssetsWorkbenchActions extends StatelessWidget {
           children: [
             FilledButton.tonal(
               onPressed: localBusy || assetsBusy ? null : onCreate,
-              child: const Text('New asset'),
+              child: Text(l10n.projectEditorAssetsWorkbenchNewAsset),
             ),
             OutlinedButton(
               onPressed: canMutateAssets ? onEdit : null,
-              child: const Text('Edit asset'),
+              child: Text(l10n.projectEditorAssetsWorkbenchEditAsset),
             ),
             OutlinedButton(
               onPressed: canMutateAssets ? onDelete : null,
-              child: const Text('Delete asset'),
+              child: Text(l10n.projectEditorAssetsWorkbenchDeleteAsset),
             ),
             OutlinedButton(
               onPressed: canMutateAssets ? onFilter : null,
-              child: const Text('Filter assets'),
+              child: Text(l10n.projectEditorAssetsWorkbenchFilterAssets),
             ),
           ],
         ),
@@ -74,19 +75,19 @@ class _ProjectAssetsWorkbenchActions extends StatelessWidget {
           children: [
             OutlinedButton(
               onPressed: canLinkScripts ? onLink : null,
-              child: const Text('Link script & assets'),
+              child: Text(l10n.projectEditorAssetsWorkbenchLinkScript),
             ),
             OutlinedButton(
               onPressed: canLinkScripts ? onUnlink : null,
-              child: const Text('Unlink'),
+              child: Text(l10n.projectEditorAssetsWorkbenchUnlink),
             ),
             OutlinedButton(
               onPressed: canUploadEditImage ? onUploadEditImage : null,
-              child: const Text('Upload edit image'),
+              child: Text(l10n.projectEditorAssetsWorkbenchUploadEditImage),
             ),
             OutlinedButton(
               onPressed: localBusy || assetsBusy ? null : onUploadClip,
-              child: const Text('Upload clip asset'),
+              child: Text(l10n.projectEditorAssetsWorkbenchUploadClipAsset),
             ),
           ],
         ),

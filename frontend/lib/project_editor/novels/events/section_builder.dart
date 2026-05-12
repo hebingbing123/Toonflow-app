@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../rust_api.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../../rust_api.dart';
 import '../support.dart';
 
 Widget buildProjectNovelEventsWorkbenchSection({
@@ -15,6 +16,7 @@ Widget buildProjectNovelEventsWorkbenchSection({
   required Future<void> Function() openWorkbench,
   required Future<void> Function() refreshEvents,
 }) {
+  final l10n = AppLocalizations.of(ctx)!;
   final first = events.isNotEmpty ? events.first : null;
   final summaryLine = summarizeNovelEventRows(events);
   final disabled =
@@ -38,12 +40,19 @@ Widget buildProjectNovelEventsWorkbenchSection({
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Events workbench', style: Theme.of(ctx).textTheme.titleSmall),
+        Text(
+          l10n.projectEditorNovelsEventsWorkbenchTitle,
+          style: Theme.of(ctx).textTheme.titleSmall,
+        ),
         const SizedBox(height: 4),
         Text(
           first == null
-              ? 'Manage events via explicit forms (search/create/update/delete/bulk) instead of relying on HTTP probe buttons.'
-              : '$summaryLine; first #${first.numericId} ${first.name}.',
+              ? l10n.projectEditorNovelsEventsWorkbenchEmptyDetail
+              : l10n.projectEditorNovelsEventsWorkbenchSummaryFirst(
+                  summaryLine,
+                  first.numericId,
+                  first.name,
+                ),
           style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
             color: Theme.of(ctx).colorScheme.onSurfaceVariant,
           ),
@@ -55,12 +64,14 @@ Widget buildProjectNovelEventsWorkbenchSection({
           children: [
             FilledButton.tonal(
               onPressed: disabled ? null : openWorkbench,
-              child: const Text('Open events workbench'),
+              child: Text(l10n.projectEditorNovelsEventsOpenWorkbench),
             ),
             OutlinedButton(
               onPressed: disabled ? null : refreshEvents,
               child: Text(
-                novelEventsLoading[0] ? 'Refreshing events…' : 'Refresh events',
+                novelEventsLoading[0]
+                    ? l10n.projectEditorNovelsEventsRefreshing
+                    : l10n.projectEditorNovelsEventsRefresh,
               ),
             ),
           ],

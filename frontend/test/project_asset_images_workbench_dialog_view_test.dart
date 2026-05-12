@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/project_editor/assets/images/workbench_dialog_view.dart';
 import 'package:openflow_app/project_editor/assets/support.dart';
 import 'package:openflow_app/rust_api.dart';
@@ -104,6 +105,9 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
         home: Scaffold(
           body: AssetImagesWorkbenchDialogView(
             model: buildDialogModel(
@@ -120,16 +124,17 @@ void main() {
       ),
     );
 
-    expect(find.text('资产图片工作台'), findsOneWidget);
-    expect(find.text('Load image list'), findsOneWidget);
-    expect(find.text('Preview image'), findsOneWidget);
-    expect(find.widgetWithText(TextButton, 'Add image'), findsOneWidget);
+    final zh = lookupAppLocalizations(const Locale('zh'));
+    expect(find.text(zh.projectEditorAssetImagesWorkbenchDialogTitle), findsOneWidget);
+    expect(find.text(zh.projectEditorAssetImagesLoadImageList), findsOneWidget);
+    expect(find.text(zh.projectEditorAssetImagesPreviewImage), findsOneWidget);
+    expect(find.widgetWithText(TextButton, zh.projectEditorAssetImagesAddImage), findsOneWidget);
     expect(
-      find.widgetWithText(TextButton, 'Save current image'),
+      find.widgetWithText(TextButton, zh.projectEditorAssetImagesSaveCurrentImage),
       findsOneWidget,
     );
     expect(
-      find.widgetWithText(TextButton, 'Delete current image'),
+      find.widgetWithText(TextButton, zh.projectEditorAssetImagesDeleteCurrentImage),
       findsOneWidget,
     );
     expect(find.text('保存当前图片。'), findsOneWidget);
@@ -141,6 +146,9 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
         home: Scaffold(
           body: AssetImagesWorkbenchDialogView(
             model: buildDialogModel(
@@ -165,7 +173,8 @@ void main() {
       ),
     );
 
-    expect(find.text('Loading…'), findsOneWidget);
+    final zhBusy = lookupAppLocalizations(const Locale('zh'));
+    expect(find.text(zhBusy.projectEditorAssetImagesLoadingEllipsis), findsOneWidget);
     expect(
       tester
           .widget<FilledButton>(
@@ -176,13 +185,23 @@ void main() {
     );
     expect(
       tester
-          .widget<FilledButton>(find.widgetWithText(FilledButton, 'Loading…'))
+          .widget<FilledButton>(
+            find.widgetWithText(
+              FilledButton,
+              zhBusy.projectEditorAssetImagesLoadingEllipsis,
+            ),
+          )
           .onPressed,
       isNull,
     );
     expect(
       tester
-          .widget<TextButton>(find.widgetWithText(TextButton, 'Add image'))
+          .widget<TextButton>(
+            find.widgetWithText(
+              TextButton,
+              zhBusy.projectEditorAssetImagesAddImage,
+            ),
+          )
           .onPressed,
       isNull,
     );
@@ -193,6 +212,9 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
         home: Scaffold(
           body: AssetImagesWorkbenchDialogView(
             model: buildDialogModel(

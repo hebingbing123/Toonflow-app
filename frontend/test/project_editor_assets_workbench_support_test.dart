@@ -1,12 +1,16 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/project_editor/assets/support.dart';
 import 'package:openflow_app/rust_api.dart';
 
 void main() {
-  test('diagnoseAssetImagesWorkbench suggests loading images first', () {
-    final diagnosis = diagnoseAssetImagesWorkbench(hasPreviewBytes: false);
+  final zh = lookupAppLocalizations(const Locale('zh'));
 
-    expect(diagnosis.summary, '还没有读取当前资产的图片列表。');
+  test('diagnoseAssetImagesWorkbench suggests loading images first', () {
+    final diagnosis = diagnoseAssetImagesWorkbench(zh, hasPreviewBytes: false);
+
+    expect(diagnosis.summary, zh.projectEditorAssetImagesDiagnosisNotLoadedSummary);
     expect(
       diagnosis.recommendedAction,
       AssetImagesWorkbenchRecommendedAction.loadImages,
@@ -15,11 +19,12 @@ void main() {
 
   test('diagnoseAssetImagesWorkbench suggests creating first image', () {
     final diagnosis = diagnoseAssetImagesWorkbench(
+      zh,
       imagesResponse: const ListAssetImagesResponse(items: []),
       hasPreviewBytes: false,
     );
 
-    expect(diagnosis.summary, '当前资产还没有图片。');
+    expect(diagnosis.summary, zh.projectEditorAssetImagesDiagnosisNoImagesSummary);
     expect(
       diagnosis.recommendedAction,
       AssetImagesWorkbenchRecommendedAction.createImage,
@@ -28,6 +33,7 @@ void main() {
 
   test('diagnoseAssetImagesWorkbench suggests preview before editing', () {
     final diagnosis = diagnoseAssetImagesWorkbench(
+      zh,
       imagesResponse: const ListAssetImagesResponse(
         items: [AssetImageRow(id: 'img-1', assetId: 'asset-a', sortIndex: 1)],
       ),
@@ -35,7 +41,10 @@ void main() {
       hasPreviewBytes: false,
     );
 
-    expect(diagnosis.summary, '已读取 1 张图片，但还没加载当前预览。');
+    expect(
+      diagnosis.summary,
+      zh.projectEditorAssetImagesDiagnosisPreviewPendingSummary(1),
+    );
     expect(
       diagnosis.recommendedAction,
       AssetImagesWorkbenchRecommendedAction.previewSelectedImage,
@@ -44,6 +53,7 @@ void main() {
 
   test('diagnoseAssetImagesWorkbench suggests saving current image', () {
     final diagnosis = diagnoseAssetImagesWorkbench(
+      zh,
       imagesResponse: const ListAssetImagesResponse(
         items: [
           AssetImageRow(
@@ -58,7 +68,7 @@ void main() {
       hasPreviewBytes: true,
     );
 
-    expect(diagnosis.summary, '当前图片已就绪，可继续编辑。');
+    expect(diagnosis.summary, zh.projectEditorAssetImagesDiagnosisReadySummary);
     expect(
       diagnosis.recommendedAction,
       AssetImagesWorkbenchRecommendedAction.updateSelectedImage,
@@ -67,9 +77,10 @@ void main() {
 
   test('buildAssetImagesWorkbenchFollowUp appends next step guidance', () {
     final text = buildAssetImagesWorkbenchFollowUp(
+      l10n: zh,
       actionSummary: '已新增资产图片。',
-      diagnosis: const AssetImagesWorkbenchDiagnosis(
-        summary: '当前图片已就绪，可继续编辑。',
+      diagnosis: AssetImagesWorkbenchDiagnosis(
+        summary: zh.projectEditorAssetImagesDiagnosisReadySummary,
         detail: '可继续更新 file_path。',
         recommendedAction:
             AssetImagesWorkbenchRecommendedAction.updateSelectedImage,
@@ -77,7 +88,7 @@ void main() {
     );
 
     expect(text, contains('已新增资产图片。'));
-    expect(text, contains('下一步建议：保存当前图片。'));
+    expect(text, contains(zh.projectEditorAssetImagesRecommendedSaveImage));
     expect(text, contains('可继续更新 file_path。'));
   });
 
@@ -161,21 +172,24 @@ void main() {
       AssetRow(id: 'c', numericId: 5, name: 'Mage', assetType: 'role'),
     ]);
 
-    expect(line, contains('资产 3 条'));
-    expect(line, contains('props 1 条'));
-    expect(line, contains('role 2 条'));
+    expect(line, contains('Assets 3'));
+    expect(line, contains('props 1'));
+    expect(line, contains('role 2'));
     expect(line, contains('#9 Hero'));
   });
 
   test('summarizeScriptScopedAssets describes project and script scope', () {
-    expect(summarizeScriptScopedAssets(null, const []), '当前按项目全量资产管理。');
-    expect(summarizeScriptScopedAssets(12, const []), '当前剧本 #12 下没有关联资产。');
+    expect(summarizeScriptScopedAssets(null, const []), 'Managing all project assets.');
+    expect(
+      summarizeScriptScopedAssets(12, const []),
+      'No assets linked under script #12.',
+    );
     expect(
       summarizeScriptScopedAssets(12, const [
         AssetRow(id: 'a', numericId: 9, name: 'Hero', assetType: 'role'),
         AssetRow(id: 'b', numericId: 3, name: 'Sword', assetType: 'props'),
       ]),
-      '当前剧本 #12 下关联 2 条资产。',
+      'Script #12 has 2 linked asset(s).',
     );
   });
 
@@ -261,8 +275,8 @@ void main() {
     );
 
     expect(line, contains('props, role'));
-    expect(line, contains('2 条资产、1 张历史图'));
-    expect(line, contains('当前焦点 #9 Hero'));
+    expect(line, contains('loaded 2 asset(s), 1 history image(s)'));
+    expect(line, contains('Focus #9 Hero'));
     expect(line, contains('sort=1'));
     expect(line, contains('done'));
   });
@@ -346,6 +360,7 @@ void main() {
 
   test('summarizeAssetImageSelection reports cover and current image', () {
     final line = summarizeAssetImageSelection(
+      zh,
       const ListAssetImagesResponse(
         coverNumericImageId: 8,
         items: [
@@ -367,9 +382,8 @@ void main() {
       selectedImageId: 'img-2',
     );
 
-    expect(line, contains('已加载 2 张图片'));
-    expect(line, contains('封面 numeric image #8'));
-    expect(line, contains('sort=2'));
-    expect(line, contains('done'));
+    final cover = zh.projectEditorAssetImagesSelectionCoverNumeric(8);
+    final focus = zh.projectEditorAssetImagesSelectionFocusLine(2, 'done');
+    expect(line, zh.projectEditorAssetImagesSelectionSummary(2, cover, focus));
   });
 }

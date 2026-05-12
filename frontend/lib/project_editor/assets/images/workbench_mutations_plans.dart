@@ -36,24 +36,27 @@ class _AssetImageMutationPlan {
   final Future<void> Function() request;
 }
 
-const _createAssetImageRequestPlan = _AssetImageMutationRequestPlan(
-  successSummary: '已新增资产图片。',
-  failureSummary: '新增资产图片失败。',
-  recommendedAction: AssetImagesWorkbenchRecommendedAction.createImage,
-  fallbackDetail: '建议检查 file_path、state 或 sort_index 后重试。',
-);
+_AssetImageMutationRequestPlan _createAssetImageRequestPlan(AppLocalizations l10n) =>
+    _AssetImageMutationRequestPlan(
+      successSummary: l10n.projectEditorAssetImagesMutationCreateSuccess,
+      failureSummary: l10n.projectEditorAssetImagesMutationCreateFailure,
+      recommendedAction: AssetImagesWorkbenchRecommendedAction.createImage,
+      fallbackDetail: l10n.projectEditorAssetImagesMutationCreateFallback,
+    );
 
-const _patchAssetImageRequestPlan = _AssetImageMutationRequestPlan(
-  successSummary: '已更新当前图片。',
-  failureSummary: '更新当前图片失败。',
-  recommendedAction: AssetImagesWorkbenchRecommendedAction.updateSelectedImage,
-  fallbackDetail: '建议先重新读取预览，确认当前图片后再修改。',
-);
+_AssetImageMutationRequestPlan _patchAssetImageRequestPlan(AppLocalizations l10n) =>
+    _AssetImageMutationRequestPlan(
+      successSummary: l10n.projectEditorAssetImagesMutationPatchSuccess,
+      failureSummary: l10n.projectEditorAssetImagesMutationPatchFailure,
+      recommendedAction: AssetImagesWorkbenchRecommendedAction.updateSelectedImage,
+      fallbackDetail: l10n.projectEditorAssetImagesMutationPatchFallback,
+    );
 
-const _deleteAssetImageRequestPlan = _AssetImageMutationRequestPlan(
-  successSummary: '已删除当前图片。',
-  failureSummary: '删除当前图片失败。',
-  recommendedAction: AssetImagesWorkbenchRecommendedAction.updateSelectedImage,
-  fallbackDetail: '建议先刷新图片列表，确认当前选择后再删除。',
-);
+_AssetImageMutationRequestPlan _deleteAssetImageRequestPlan(AppLocalizations l10n) =>
+    _AssetImageMutationRequestPlan(
+      successSummary: l10n.projectEditorAssetImagesMutationDeleteSuccess,
+      failureSummary: l10n.projectEditorAssetImagesMutationDeleteFailure,
+      recommendedAction: AssetImagesWorkbenchRecommendedAction.updateSelectedImage,
+      fallbackDetail: l10n.projectEditorAssetImagesMutationDeleteFallback,
+    );
 

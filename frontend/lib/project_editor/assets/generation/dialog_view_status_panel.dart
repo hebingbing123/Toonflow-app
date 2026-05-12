@@ -90,7 +90,9 @@ class _AssetGenerationStatusPanel extends StatelessWidget {
             children: [
               ActionChip(
                 label: Text(
-                  'Use material context (${materialData!.data.length} rows)',
+                  l10n.projectEditorAssetGenUseMaterialContext(
+                    materialData!.data.length,
+                  ),
                 ),
                 onPressed: busy ? null : onApplyMaterialSelection,
               ),
@@ -110,7 +112,9 @@ class _AssetGenerationStatusPanel extends StatelessWidget {
             children: [
               ActionChip(
                 label: Text(
-                  'Use batch candidates (${batchData!.data.length} rows)',
+                  l10n.projectEditorAssetGenUseBatchCandidates(
+                    batchData!.data.length,
+                  ),
                 ),
                 onPressed: busy ? null : onApplyBatchSelection,
               ),

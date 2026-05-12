@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../rust_api.dart';
 import 'plan_workbench_support.dart';
 
@@ -63,10 +64,11 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final planData = model.planData;
     return AlertDialog(
-      title: const Text('Story skeleton & adaptation strategy'),
+      title: Text(l10n.projectScriptPlanWorkbenchTitle),
       content: SizedBox(
         width: 720,
         child: SingleChildScrollView(
@@ -78,8 +80,13 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
               const SizedBox(height: 8),
               if (planData != null)
                 Text(
-                  'planId ${planData.planId ?? 'new'} · ${planData.scriptRows.length} script row(s) mounted'
-                  '${planData.scriptRows.isEmpty ? '' : ' · ${planData.scriptRows.take(3).map((row) => row.name ?? '#${row.id ?? 0}').join(' / ')}'}',
+                  l10n.projectScriptPlanWorkbenchPlanMountedLine(
+                    planData.planId?.toString() ?? 'new',
+                    planData.scriptRows.length,
+                    planData.scriptRows.isEmpty
+                        ? ''
+                        : ' · ${planData.scriptRows.take(3).map((row) => row.name ?? '#${row.id ?? 0}').join(' / ')}',
+                  ),
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -114,31 +121,31 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
                     onPressed: model.localBusy
                         ? null
                         : callbacks.onFillStorySkeletonSeed,
-                    child: const Text('Fill skeleton draft from events'),
+                    child: Text(l10n.projectScriptPlanWorkbenchFillSkeletonFromEvents),
                   ),
                   OutlinedButton(
                     onPressed: model.localBusy
                         ? null
                         : callbacks.onFillAdaptationStrategySeed,
-                    child: const Text('Fill strategy draft from events'),
+                    child: Text(l10n.projectScriptPlanWorkbenchFillStrategyFromEvents),
                   ),
                   FilledButton.tonal(
                     onPressed: model.localBusy
                         ? null
                         : callbacks.onGenerateDraftPackets,
-                    child: const Text('Generate script draft packets'),
+                    child: Text(l10n.projectScriptPlanWorkbenchGenerateDraftPackets),
                   ),
                   FilledButton.tonal(
                     onPressed: model.localBusy
                         ? null
                         : callbacks.onGenerateGuidance,
-                    child: const Text('Generate structured rewrite guidance'),
+                    child: Text(l10n.projectScriptPlanWorkbenchGenerateStructuredGuidance),
                   ),
                   OutlinedButton(
                     onPressed: model.localBusy || model.draftPackets.isEmpty
                         ? null
                         : callbacks.onWriteDraftPackets,
-                    child: const Text('Write script drafts'),
+                    child: Text(l10n.projectScriptPlanWorkbenchWriteScriptDrafts),
                   ),
                 ],
               ),
@@ -147,10 +154,9 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
                 controller: model.storySkeletonCtrl,
                 minLines: 6,
                 maxLines: 10,
-                decoration: const InputDecoration(
-                  labelText: 'Story Skeleton',
-                  helperText:
-                      'Focus on story spine, main conflict, turning points, and resolution path',
+                decoration: InputDecoration(
+                  labelText: l10n.projectScriptPlanWorkbenchStorySkeletonLabel,
+                  helperText: l10n.projectScriptPlanWorkbenchStorySkeletonHelper,
                 ),
               ),
               const SizedBox(height: 12),
@@ -158,18 +164,21 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
                 controller: model.adaptationStrategyCtrl,
                 minLines: 6,
                 maxLines: 10,
-                decoration: const InputDecoration(
-                  labelText: 'Adaptation Strategy',
+                decoration: InputDecoration(
+                  labelText: l10n.projectScriptPlanWorkbenchAdaptationStrategyLabel,
                   helperText:
-                      'Capture adaptation trade-offs, character arcs, pacing, and style constraints',
+                      l10n.projectScriptPlanWorkbenchAdaptationStrategyHelper,
                 ),
               ),
               const SizedBox(height: 16),
-              Text('Script draft preview', style: theme.textTheme.titleSmall),
+              Text(
+                l10n.projectScriptPlanWorkbenchScriptDraftPreviewTitle,
+                style: theme.textTheme.titleSmall,
+              ),
               const SizedBox(height: 8),
               if (model.draftPackets.isEmpty)
                 Text(
-                  'No draft packets yet. Refine skeleton/strategy first, then generate.',
+                  l10n.projectScriptPlanWorkbenchNoDraftPacketsHint,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -200,7 +209,7 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'Chapters ${draft.chapterIndexes.isEmpty ? 'TBD' : draft.chapterIndexes.join(', ')}'
+                                '${l10n.projectScriptPlanWorkbenchChaptersPrefix} ${draft.chapterIndexes.isEmpty ? l10n.projectScriptPlanWorkbenchTbd : draft.chapterIndexes.join(', ')}'
                                 '${draft.eventNames.isEmpty ? '' : ' · ${draft.eventNames.take(3).join(' / ')}'}',
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: theme.colorScheme.onSurfaceVariant,
@@ -219,13 +228,13 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
                     ),
               const SizedBox(height: 8),
               Text(
-                'Structured rewrite guidance',
+                l10n.projectScriptPlanWorkbenchStructuredGuidanceTitle,
                 style: theme.textTheme.titleSmall,
               ),
               const SizedBox(height: 8),
               if (model.guidanceRows.isEmpty)
                 Text(
-                  'No structured guidance yet. Run before and after drafts to constrain revisions.',
+                  l10n.projectScriptPlanWorkbenchNoGuidanceHint,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -256,7 +265,7 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'Chapters ${guidance.chapterIndexes.isEmpty ? 'TBD' : guidance.chapterIndexes.join(', ')}'
+                                '${l10n.projectScriptPlanWorkbenchChaptersPrefix} ${guidance.chapterIndexes.isEmpty ? l10n.projectScriptPlanWorkbenchTbd : guidance.chapterIndexes.join(', ')}'
                                 '${guidance.eventNames.isEmpty ? '' : ' · ${guidance.eventNames.take(3).join(' / ')}'}',
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: theme.colorScheme.onSurfaceVariant,
@@ -280,13 +289,24 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: model.localBusy ? null : callbacks.onReload,
-          child: Text(model.localBusy ? 'Refreshing…' : 'Reload plan'),
+          child: Text(
+            model.localBusy
+                ? l10n.projectScriptPlanWorkbenchRefreshing
+                : l10n.projectScriptPlanWorkbenchReloadPlan,
+          ),
         ),
         FilledButton(
           onPressed: model.localBusy ? null : callbacks.onSave,
-          child: Text(model.localBusy ? 'Saving…' : 'Save plan'),
+          child: Text(
+            model.localBusy
+                ? l10n.projectScriptPlanWorkbenchSaving
+                : l10n.projectScriptPlanWorkbenchSavePlan,
+          ),
         ),
-        TextButton(onPressed: callbacks.onClose, child: const Text('Close')),
+        TextButton(
+          onPressed: callbacks.onClose,
+          child: Text(l10n.projectEditorScriptsWorkbenchDialogClose),
+        ),
       ],
     );
   }

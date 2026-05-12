@@ -16,7 +16,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
       return false;
     }
 
-    final l10n = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context)!;
     try {
       final success = await _operationHistory.undo();
       if (success) {
@@ -30,10 +30,9 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
         final operation = _operationHistory.peekRedo();
         final description =
             operation?.getDescription() ??
-            (l10n?.shortVideoSpaceUndoRedoOperationDefault ?? 'Operation');
+            l10n.shortVideoSpaceUndoRedoOperationDefault;
         _showOperationFeedback(
-          l10n?.shortVideoSpaceUndoSucceeded(description) ??
-              'Undone: $description',
+          l10n.shortVideoSpaceUndoSucceeded(description),
           isSuccess: true,
         );
 
@@ -46,7 +45,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
         return false;
       }
       _showOperationFeedback(
-        l10n?.shortVideoSpaceUndoFailed('$e') ?? 'Undo failed: $e',
+        l10n.shortVideoSpaceUndoFailed('$e'),
         isSuccess: false,
       );
       return false;
@@ -62,7 +61,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
       return false;
     }
 
-    final l10n = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context)!;
     try {
       final success = await _operationHistory.redo();
       if (success) {
@@ -76,10 +75,9 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
         final operation = _operationHistory.peekUndo();
         final description =
             operation?.getDescription() ??
-            (l10n?.shortVideoSpaceUndoRedoOperationDefault ?? 'Operation');
+            l10n.shortVideoSpaceUndoRedoOperationDefault;
         _showOperationFeedback(
-          l10n?.shortVideoSpaceRedoSucceeded(description) ??
-              'Redone: $description',
+          l10n.shortVideoSpaceRedoSucceeded(description),
           isSuccess: true,
         );
 
@@ -92,7 +90,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
         return false;
       }
       _showOperationFeedback(
-        l10n?.shortVideoSpaceRedoFailed('$e') ?? 'Redo failed: $e',
+        l10n.shortVideoSpaceRedoFailed('$e'),
         isSuccess: false,
       );
       return false;
@@ -138,6 +136,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
       return;
     }
 
+    final l10n = AppLocalizations.of(context)!;
     final operation = Operation(
       type: 'enable',
       timestamp: DateTime.now(),
@@ -169,7 +168,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
           videoUrl: videoUrl,
         );
       },
-      description: 'Enable shot #$storyboardId',
+      description: l10n.shortVideoUndoEnableShot(storyboardId),
     );
 
     _operationHistory.recordOperation(operation);
@@ -186,6 +185,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
       return;
     }
 
+    final l10n = AppLocalizations.of(context)!;
     final operation = Operation(
       type: 'disable',
       timestamp: DateTime.now(),
@@ -217,7 +217,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
           storyboardId: storyboardId,
         );
       },
-      description: 'Disable shot #$storyboardId',
+      description: l10n.shortVideoUndoDisableShot(storyboardId),
     );
 
     _operationHistory.recordOperation(operation);
@@ -235,6 +235,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
       return;
     }
 
+    final l10n = AppLocalizations.of(context)!;
     final operation = Operation(
       type: 'duration',
       timestamp: DateTime.now(),
@@ -266,7 +267,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
           duration: newDuration,
         );
       },
-      description: 'Set shot #$storyboardId duration to ${newDuration}s',
+      description: l10n.shortVideoUndoSetShotDuration(storyboardId, newDuration),
     );
 
     _operationHistory.recordOperation(operation);
@@ -284,6 +285,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
       return;
     }
 
+    final l10n = AppLocalizations.of(context)!;
     final operation = Operation(
       type: 'replace',
       timestamp: DateTime.now(),
@@ -315,7 +317,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
           videoUrl: newVideoUrl,
         );
       },
-      description: 'Replace shot #$storyboardId video',
+      description: l10n.shortVideoUndoReplaceShotVideo(storyboardId),
     );
 
     _operationHistory.recordOperation(operation);
@@ -331,6 +333,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
       return;
     }
 
+    final l10n = AppLocalizations.of(context)!;
     final operation = Operation(
       type: 'batch_enable',
       timestamp: DateTime.now(),
@@ -359,7 +362,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
           );
         }
       },
-      description: 'Batch enable ${operations.length} shot(s)',
+      description: l10n.shortVideoUndoBatchEnable(operations.length),
     );
 
     _operationHistory.recordOperation(operation);
@@ -375,6 +378,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
       return;
     }
 
+    final l10n = AppLocalizations.of(context)!;
     final operation = Operation(
       type: 'batch_disable',
       timestamp: DateTime.now(),
@@ -403,7 +407,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
           );
         }
       },
-      description: 'Batch disable ${operations.length} shot(s)',
+      description: l10n.shortVideoUndoBatchDisable(operations.length),
     );
 
     _operationHistory.recordOperation(operation);
@@ -419,6 +423,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
       return;
     }
 
+    final l10n = AppLocalizations.of(context)!;
     final operation = Operation(
       type: 'batch_duration',
       timestamp: DateTime.now(),
@@ -448,7 +453,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
           );
         }
       },
-      description: 'Batch align duration for ${operations.length} shot(s)',
+      description: l10n.shortVideoUndoBatchAlignDuration(operations.length),
     );
 
     _operationHistory.recordOperation(operation);
@@ -464,6 +469,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
       return;
     }
 
+    final l10n = AppLocalizations.of(context)!;
     final operation = Operation(
       type: 'batch_replace',
       timestamp: DateTime.now(),
@@ -493,7 +499,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
           );
         }
       },
-      description: 'Batch replace video for ${operations.length} shot(s)',
+      description: l10n.shortVideoUndoBatchReplaceVideo(operations.length),
     );
 
     _operationHistory.recordOperation(operation);
@@ -501,6 +507,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
 
   /// Builds undo/redo toolbar buttons
   Widget _buildUndoRedoToolbar() {
+    final l10n = AppLocalizations.of(context)!;
     final canUndo = _operationHistory.canUndo;
     final canRedo = _operationHistory.canRedo;
     final undoDescription = _operationHistory.peekUndo()?.getDescription();
@@ -511,8 +518,8 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
       children: [
         Tooltip(
           message: canUndo
-              ? 'Undo: $undoDescription (Ctrl+Z / Cmd+Z)'
-              : 'Nothing to undo',
+              ? l10n.shortVideoUndoTooltipWithDescription(undoDescription!)
+              : l10n.shortVideoUndoTooltipEmpty,
           child: IconButton(
             icon: const Icon(Icons.undo),
             onPressed: canUndo ? () => _performUndo() : null,
@@ -521,8 +528,8 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
         const SizedBox(width: 4),
         Tooltip(
           message: canRedo
-              ? 'Redo: $redoDescription (Ctrl+Shift+Z / Cmd+Shift+Z)'
-              : 'Nothing to redo',
+              ? l10n.shortVideoRedoTooltipWithDescription(redoDescription!)
+              : l10n.shortVideoRedoTooltipEmpty,
           child: IconButton(
             icon: const Icon(Icons.redo),
             onPressed: canRedo ? () => _performRedo() : null,
@@ -530,7 +537,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
         ),
         const SizedBox(width: 4),
         Tooltip(
-          message: 'View operation history',
+          message: l10n.shortVideoOperationHistoryToolbarTooltip,
           child: IconButton(
             icon: const Icon(Icons.history),
             onPressed: () => _showOperationHistoryDialog(),
@@ -550,8 +557,9 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
     await showDialog<void>(
       context: context,
       builder: (ctx) {
+        final l10n = AppLocalizations.of(ctx)!;
         return AlertDialog(
-          title: const Text('Operation history'),
+          title: Text(l10n.shortVideoOperationHistoryTitle),
           content: SizedBox(
             width: 600,
             child: Column(
@@ -569,7 +577,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Summary',
+                        l10n.shortVideoOperationHistorySummaryHeading,
                         style: Theme.of(ctx).textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -583,7 +591,11 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
                             color: Theme.of(ctx).colorScheme.primary,
                           ),
                           const SizedBox(width: 4),
-                          Text('Undo stack: ${summary['undoCount']}'),
+                          Text(
+                            l10n.shortVideoOperationHistoryUndoStack(
+                              summary['undoCount'] as int,
+                            ),
+                          ),
                           const SizedBox(width: 16),
                           Icon(
                             Icons.redo,
@@ -591,12 +603,18 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
                             color: Theme.of(ctx).colorScheme.primary,
                           ),
                           const SizedBox(width: 4),
-                          Text('Redo stack: ${summary['redoCount']}'),
+                          Text(
+                            l10n.shortVideoOperationHistoryRedoStack(
+                              summary['redoCount'] as int,
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'History limit: ${summary['maxHistorySize']} entries',
+                        l10n.shortVideoOperationHistoryLimitLine(
+                          summary['maxHistorySize'] as int,
+                        ),
                         style: Theme.of(ctx).textTheme.bodySmall,
                       ),
                     ],
@@ -617,7 +635,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'No operations yet',
+                            l10n.shortVideoOperationHistoryEmpty,
                             style: Theme.of(ctx).textTheme.bodyLarge?.copyWith(
                               color: Theme.of(ctx).colorScheme.outline,
                             ),
@@ -632,7 +650,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Operations (newest first)',
+                          l10n.shortVideoOperationHistoryOperationsHeading,
                           style: Theme.of(ctx).textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -691,7 +709,9 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
                                   ),
                                   trailing: isLatest
                                       ? Chip(
-                                          label: const Text('Latest'),
+                                          label: Text(
+                                            l10n.shortVideoOperationHistoryLatestChip,
+                                          ),
                                           backgroundColor: Theme.of(
                                             ctx,
                                           ).colorScheme.primary,
@@ -721,17 +741,17 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
                   _operationHistory.clearHistory();
                   Navigator.of(ctx).pop();
                   _showOperationFeedback(
-                    'Operation history cleared',
+                    l10n.shortVideoOperationHistoryClearedSnackbar,
                     isSuccess: true,
                   );
                   setState(() {});
                 },
                 icon: const Icon(Icons.delete_outline),
-                label: const Text('Clear history'),
+                label: Text(l10n.shortVideoOperationHistoryClear),
               ),
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('Close'),
+              child: Text(l10n.shortVideoSpaceClose),
             ),
           ],
         );
@@ -741,18 +761,25 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
 
   /// Formats operation timestamp for display
   String _formatOperationTimestamp(DateTime timestamp) {
+    final l10n = AppLocalizations.of(context)!;
     final now = DateTime.now();
     final difference = now.difference(timestamp);
 
     if (difference.inSeconds < 60) {
-      return '${difference.inSeconds}s ago';
+      return l10n.shortVideoOperationHistoryRelativeSecondsAgo(
+        difference.inSeconds,
+      );
     } else if (difference.inMinutes < 60) {
-      return '${difference.inMinutes}m ago';
+      return l10n.shortVideoOperationHistoryRelativeMinutesAgo(
+        difference.inMinutes,
+      );
     } else if (difference.inHours < 24) {
-      return '${difference.inHours}h ago';
+      return l10n.shortVideoOperationHistoryRelativeHoursAgo(
+        difference.inHours,
+      );
     } else {
-      return '${timestamp.year}-${timestamp.month.toString().padLeft(2, '0')}-${timestamp.day.toString().padLeft(2, '0')} '
-          '${timestamp.hour.toString().padLeft(2, '0')}:${timestamp.minute.toString().padLeft(2, '0')}';
+      final locale = Localizations.localeOf(context).toString();
+      return DateFormat.yMd(locale).add_Hm().format(timestamp);
     }
   }
 }

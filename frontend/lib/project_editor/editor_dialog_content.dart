@@ -93,6 +93,7 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
     required String token,
     required ProjectRow p,
   }) {
+    final l10n = AppLocalizations.of(ctx)!;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
@@ -106,10 +107,10 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Publish', style: Theme.of(ctx).textTheme.titleSmall),
+          Text(l10n.projectEditorPublishSectionTitle, style: Theme.of(ctx).textTheme.titleSmall),
           const SizedBox(height: 4),
           Text(
-            'Drafts, scheduling, jobs, and audit live under Short Video Space → Publish.',
+            l10n.projectEditorPublishSectionBody,
             style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
               color: Theme.of(ctx).colorScheme.onSurfaceVariant,
             ),
@@ -134,7 +135,7 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
                     ProductWorkspacePane.shortVideoSpace,
                   );
                 },
-                child: const Text('Open publish workspace'),
+                child: Text(l10n.projectEditorPublishOpenWorkspace),
               ),
               OutlinedButton(
                 onPressed: () async {
@@ -144,7 +145,10 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
                     ScaffoldMessenger.of(ctx).showSnackBar(
                       SnackBar(
                         content: Text(
-                          'Publish overview: drafts=${overview.drafts.length} jobs=${overview.jobs.length}',
+                          l10n.projectEditorPublishOverviewSnackbar(
+                            overview.drafts.length,
+                            overview.jobs.length,
+                          ),
                         ),
                       ),
                     );
@@ -157,12 +161,14 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
                     if (!ctx.mounted) return;
                     ScaffoldMessenger.of(ctx).showSnackBar(
                       SnackBar(
-                        content: Text('Failed to load publish overview: $e'),
+                        content: Text(
+                          l10n.projectEditorPublishOverviewFailed('$e'),
+                        ),
                       ),
                     );
                   }
                 },
-                child: const Text('View publish overview'),
+                child: Text(l10n.projectEditorPublishViewOverview),
               ),
             ],
           ),

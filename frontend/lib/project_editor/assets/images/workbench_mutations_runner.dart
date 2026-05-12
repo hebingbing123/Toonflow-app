@@ -35,8 +35,9 @@ Future<void> _finishAssetImageMutation({
   setState(() {
     scope.runtime.onStatusChanged(
       buildAssetImagesWorkbenchFollowUp(
+        l10n: scope.mutation.l10n,
         actionSummary: successSummary,
-        diagnosis: scope.runtime.diagnose(),
+        diagnosis: scope.runtime.diagnose(scope.mutation.l10n),
       ),
     );
   });
@@ -59,6 +60,7 @@ Future<void> _runAssetImageMutationRequest({
     );
   } on RustApiException catch (e) {
     _setAssetImageMutationFailure(
+      l10n: scope.mutation.l10n,
       setState: setState,
       runtime: scope.runtime,
       actionSummary: plan.failureSummary,
@@ -95,6 +97,7 @@ Future<void> _runAssetImageMutationPlan({
 }
 
 void _setAssetImageMutationFailure({
+  required AppLocalizations l10n,
   required StateSetter setState,
   required AssetImagesWorkbenchRuntime runtime,
   required String actionSummary,
@@ -105,6 +108,7 @@ void _setAssetImageMutationFailure({
   setState(() {
     runtime.onStatusChanged(
       buildAssetImagesWorkbenchFailureNotice(
+        l10n: l10n,
         actionSummary: actionSummary,
         recommendedAction: recommendedAction,
         error: error,
@@ -164,7 +168,7 @@ AssetImageCreateDraft? _resolveCreateAssetImageDraft({
   return _resolveAssetImageMutationValue(
     setState: setState,
     runtime: scope.runtime,
-    emptyValueNotice: '新增 sort_index 需为正整数',
+    emptyValueNotice: scope.mutation.l10n.projectEditorAssetImagesCreateSortMustBePositive,
     value: parseAssetImageCreateDraft(
       filePath: scope.createControllers.filePathCtrl.text,
       state: scope.createControllers.stateCtrl.text,
@@ -180,7 +184,7 @@ AssetImagePatchDraft? _resolvePatchAssetImageDraft({
   return _resolveAssetImageMutationValue(
     setState: setState,
     runtime: scope.runtime,
-    emptyValueNotice: '编辑 sort_index 需为正整数',
+    emptyValueNotice: scope.mutation.l10n.projectEditorAssetImagesPatchSortMustBePositive,
     value: parseAssetImagePatchDraft(
       filePath: scope.patchControllers.filePathCtrl.text,
       state: scope.patchControllers.stateCtrl.text,
@@ -199,7 +203,7 @@ _AssetImageMutationPlan? _buildCreateAssetImageMutationPlan({
     return null;
   }
   return _AssetImageMutationPlan(
-    requestPlan: _createAssetImageRequestPlan,
+    requestPlan: _createAssetImageRequestPlan(scope.mutation.l10n),
     request: () => createProjectAssetImageForProject(
       scope.token,
       scope.projectId,
@@ -233,8 +237,8 @@ _SelectedAssetImageMutationPlan? _buildPatchAssetImageMutationPlan({
     return null;
   }
   return _buildSelectedAssetImageMutationPlan(
-    missingSelectionNotice: '请先选择要编辑的图片',
-    requestPlan: _patchAssetImageRequestPlan,
+    missingSelectionNotice: scope.mutation.l10n.projectEditorAssetImagesSelectImageToEdit,
+    requestPlan: _patchAssetImageRequestPlan(scope.mutation.l10n),
     request: (image) => patchProjectAssetImageByProjectIds(
       scope.token,
       scope.projectId,
@@ -250,8 +254,8 @@ _SelectedAssetImageMutationPlan _buildDeleteAssetImageMutationPlan({
   required int assetNumericId,
 }) {
   return _buildSelectedAssetImageMutationPlan(
-    missingSelectionNotice: '请先选择要删除的图片',
-    requestPlan: _deleteAssetImageRequestPlan,
+    missingSelectionNotice: scope.mutation.l10n.projectEditorAssetImagesSelectImageToDelete,
+    requestPlan: _deleteAssetImageRequestPlan(scope.mutation.l10n),
     request: (image) => deleteProjectAssetImageByProjectIds(
       scope.token,
       scope.projectId,

@@ -10116,6 +10116,650 @@ class AppLocalizationsEn extends AppLocalizations {
   String get projectEditorScriptsWorkbenchDialogClose => 'Close';
 
   @override
+  String get projectScriptPlanWorkbenchTitle =>
+      'Story skeleton & adaptation strategy';
+
+  @override
+  String projectScriptPlanWorkbenchPlanMountedLine(
+    String planId,
+    int count,
+    String namesSuffix,
+  ) {
+    return 'planId $planId · $count script row(s) mounted$namesSuffix';
+  }
+
+  @override
+  String get projectScriptPlanWorkbenchFillSkeletonFromEvents =>
+      'Fill skeleton draft from events';
+
+  @override
+  String get projectScriptPlanWorkbenchFillStrategyFromEvents =>
+      'Fill strategy draft from events';
+
+  @override
+  String get projectScriptPlanWorkbenchGenerateDraftPackets =>
+      'Generate script draft packets';
+
+  @override
+  String get projectScriptPlanWorkbenchGenerateStructuredGuidance =>
+      'Generate structured rewrite guidance';
+
+  @override
+  String get projectScriptPlanWorkbenchWriteScriptDrafts =>
+      'Write script drafts';
+
+  @override
+  String get projectScriptPlanWorkbenchStorySkeletonLabel => 'Story Skeleton';
+
+  @override
+  String get projectScriptPlanWorkbenchStorySkeletonHelper =>
+      'Focus on story spine, main conflict, turning points, and resolution path';
+
+  @override
+  String get projectScriptPlanWorkbenchAdaptationStrategyLabel =>
+      'Adaptation Strategy';
+
+  @override
+  String get projectScriptPlanWorkbenchAdaptationStrategyHelper =>
+      'Capture adaptation trade-offs, character arcs, pacing, and style constraints';
+
+  @override
+  String get projectScriptPlanWorkbenchScriptDraftPreviewTitle =>
+      'Script draft preview';
+
+  @override
+  String get projectScriptPlanWorkbenchNoDraftPacketsHint =>
+      'No draft packets yet. Refine skeleton/strategy first, then generate.';
+
+  @override
+  String get projectScriptPlanWorkbenchStructuredGuidanceTitle =>
+      'Structured rewrite guidance';
+
+  @override
+  String get projectScriptPlanWorkbenchNoGuidanceHint =>
+      'No structured guidance yet. Run before and after drafts to constrain revisions.';
+
+  @override
+  String get projectScriptPlanWorkbenchChaptersPrefix => 'Chapters';
+
+  @override
+  String get projectScriptPlanWorkbenchTbd => 'TBD';
+
+  @override
+  String get projectScriptPlanWorkbenchReloadPlan => 'Reload plan';
+
+  @override
+  String get projectScriptPlanWorkbenchSavePlan => 'Save plan';
+
+  @override
+  String get projectScriptPlanWorkbenchRefreshing => 'Refreshing…';
+
+  @override
+  String get projectScriptPlanWorkbenchSaving => 'Saving…';
+
+  @override
+  String shortVideoUndoEnableShot(int storyboardId) {
+    return 'Enable shot #$storyboardId';
+  }
+
+  @override
+  String shortVideoUndoDisableShot(int storyboardId) {
+    return 'Disable shot #$storyboardId';
+  }
+
+  @override
+  String shortVideoUndoSetShotDuration(int storyboardId, int seconds) {
+    return 'Set shot #$storyboardId duration to ${seconds}s';
+  }
+
+  @override
+  String shortVideoUndoReplaceShotVideo(int storyboardId) {
+    return 'Replace shot #$storyboardId video';
+  }
+
+  @override
+  String shortVideoUndoBatchEnable(int count) {
+    return 'Batch enable $count shot(s)';
+  }
+
+  @override
+  String shortVideoUndoBatchDisable(int count) {
+    return 'Batch disable $count shot(s)';
+  }
+
+  @override
+  String shortVideoUndoBatchAlignDuration(int count) {
+    return 'Batch align duration for $count shot(s)';
+  }
+
+  @override
+  String shortVideoUndoBatchReplaceVideo(int count) {
+    return 'Batch replace video for $count shot(s)';
+  }
+
+  @override
+  String shortVideoUndoTooltipWithDescription(String description) {
+    return 'Undo: $description (Ctrl+Z / Cmd+Z)';
+  }
+
+  @override
+  String get shortVideoUndoTooltipEmpty => 'Nothing to undo';
+
+  @override
+  String shortVideoRedoTooltipWithDescription(String description) {
+    return 'Redo: $description (Ctrl+Shift+Z / Cmd+Shift+Z)';
+  }
+
+  @override
+  String get shortVideoRedoTooltipEmpty => 'Nothing to redo';
+
+  @override
+  String get shortVideoOperationHistoryToolbarTooltip =>
+      'View operation history';
+
+  @override
+  String get shortVideoOperationHistoryTitle => 'Operation history';
+
+  @override
+  String get shortVideoOperationHistorySummaryHeading => 'Summary';
+
+  @override
+  String shortVideoOperationHistoryUndoStack(int count) {
+    return 'Undo stack: $count';
+  }
+
+  @override
+  String shortVideoOperationHistoryRedoStack(int count) {
+    return 'Redo stack: $count';
+  }
+
+  @override
+  String shortVideoOperationHistoryLimitLine(int max) {
+    return 'History limit: $max entries';
+  }
+
+  @override
+  String get shortVideoOperationHistoryEmpty => 'No operations yet';
+
+  @override
+  String get shortVideoOperationHistoryOperationsHeading =>
+      'Operations (newest first)';
+
+  @override
+  String get shortVideoOperationHistoryLatestChip => 'Latest';
+
+  @override
+  String get shortVideoOperationHistoryClear => 'Clear history';
+
+  @override
+  String get shortVideoOperationHistoryClearedSnackbar =>
+      'Operation history cleared';
+
+  @override
+  String shortVideoOperationHistoryRelativeSecondsAgo(int count) {
+    return '${count}s ago';
+  }
+
+  @override
+  String shortVideoOperationHistoryRelativeMinutesAgo(int count) {
+    return '${count}m ago';
+  }
+
+  @override
+  String shortVideoOperationHistoryRelativeHoursAgo(int count) {
+    return '${count}h ago';
+  }
+
+  @override
+  String get shortVideoPreviewPlaylistComplete => 'Finished playing all shots';
+
+  @override
+  String get shortVideoCandidateAssetConfirmationTitle =>
+      'Candidate asset confirmation';
+
+  @override
+  String get shortVideoCandidateMetricPending => 'Pending';
+
+  @override
+  String get shortVideoCandidateMetricLinked => 'Linked';
+
+  @override
+  String get shortVideoCandidateMetricIgnored => 'Ignored';
+
+  @override
+  String get shortVideoCandidateMetricUnset => 'Unset';
+
+  @override
+  String get shortVideoCandidateBatchGenerateSubmitting =>
+      'Submitting candidate clip batch jobs…';
+
+  @override
+  String get shortVideoCandidateBatchGenerateLabel =>
+      'Batch-generate candidate clips (project defaults)';
+
+  @override
+  String get shortVideoCandidateOpenProjectsForAssets =>
+      'Open projects to manage assets';
+
+  @override
+  String get shortVideoCandidateCompareSectionTitle => 'Candidate compare';
+
+  @override
+  String get projectEditorAssetFilterDialogTitle => 'Advanced asset filter';
+
+  @override
+  String get projectEditorAssetFilterByScript => 'Filter by script';
+
+  @override
+  String get projectEditorAssetFilterAllScripts => '(All scripts)';
+
+  @override
+  String get projectEditorAssetFilterAssetTypeOptional =>
+      'Asset type (optional)';
+
+  @override
+  String get projectEditorAssetFilterAssetTypeHint => 'role / clip / props';
+
+  @override
+  String get projectEditorAssetFilterNameContainsOptional =>
+      'Name contains (optional)';
+
+  @override
+  String get projectEditorAssetFilterPage => 'page';
+
+  @override
+  String get projectEditorAssetFilterLimit => 'limit';
+
+  @override
+  String get projectEditorAssetFilterApply => 'Apply filter';
+
+  @override
+  String get projectEditorAssetFilterSnackbarPageLimitPositive =>
+      'page and limit must be positive integers';
+
+  @override
+  String projectEditorAssetFilterSnackbarApplied(int shown, int total) {
+    return 'Filter applied: $shown/$total rows';
+  }
+
+  @override
+  String get projectEditorDeleteProjectTitle => 'Delete project?';
+
+  @override
+  String projectEditorDeleteProjectBody(int id) {
+    return 'Deletes project #$id, related scripts/storyboards (DB cascade), and clears agent memory for this project.';
+  }
+
+  @override
+  String get projectEditorDeleteProjectSnackbar => 'Project deleted';
+
+  @override
+  String get projectEditorDeleteProjectButton => 'DELETE';
+
+  @override
+  String get projectEditorSavePatch => 'Save (PATCH)';
+
+  @override
+  String get projectEditorSavingEllipsis => 'Saving…';
+
+  @override
+  String get projectEditorPublishSectionTitle => 'Publish';
+
+  @override
+  String get projectEditorPublishSectionBody =>
+      'Drafts, scheduling, jobs, and audit live under Short Video Space → Publish.';
+
+  @override
+  String get projectEditorPublishOpenWorkspace => 'Open publish workspace';
+
+  @override
+  String projectEditorPublishOverviewSnackbar(int drafts, int jobs) {
+    return 'Publish overview: drafts=$drafts jobs=$jobs';
+  }
+
+  @override
+  String get projectEditorPublishViewOverview => 'View publish overview';
+
+  @override
+  String projectEditorPublishOverviewFailed(String error) {
+    return 'Failed to load publish overview: $error';
+  }
+
+  @override
+  String get projectEditorStoryboardImageWorkbenchTitle => 'Image workbench';
+
+  @override
+  String get projectEditorStoryboardImageUrlLabel =>
+      'Current image URL / data URI';
+
+  @override
+  String get projectEditorStoryboardImageUrlHelper =>
+      'HTTP URL or data:image/...;base64.';
+
+  @override
+  String get projectEditorStoryboardImageLoadPreview => 'Load current preview';
+
+  @override
+  String get projectEditorStoryboardImageWorking => 'Working…';
+
+  @override
+  String get projectEditorStoryboardImageSaveUrl => 'Save image URL';
+
+  @override
+  String get projectEditorStoryboardImageClearFrame => 'Clear frame';
+
+  @override
+  String get projectEditorStoryboardImageRefreshProduction =>
+      'Refresh production data';
+
+  @override
+  String get projectEditorStoryboardImageRefreshing => 'Refreshing…';
+
+  @override
+  String get projectEditorNovelsEventsWorkbenchEmptyDetail =>
+      'Manage events via explicit forms (search/create/update/delete/bulk) instead of relying on HTTP probe buttons.';
+
+  @override
+  String projectEditorNovelsEventsWorkbenchSummaryFirst(
+    String summaryLine,
+    int id,
+    String name,
+  ) {
+    return '$summaryLine; first #$id $name.';
+  }
+
+  @override
+  String get projectEditorNovelsEventsOpenWorkbench => 'Open events workbench';
+
+  @override
+  String get projectEditorNovelsEventsRefresh => 'Refresh events';
+
+  @override
+  String get projectEditorNovelsEventsRefreshing => 'Refreshing events…';
+
+  @override
+  String get projectEditorAssetsWorkbenchNewAsset => 'New asset';
+
+  @override
+  String get projectEditorAssetsWorkbenchEditAsset => 'Edit asset';
+
+  @override
+  String get projectEditorAssetsWorkbenchDeleteAsset => 'Delete asset';
+
+  @override
+  String get projectEditorAssetsWorkbenchFilterAssets => 'Filter assets';
+
+  @override
+  String get projectEditorAssetsWorkbenchLinkScript => 'Link script & assets';
+
+  @override
+  String get projectEditorAssetsWorkbenchUnlink => 'Unlink';
+
+  @override
+  String get projectEditorAssetsWorkbenchUploadEditImage => 'Upload edit image';
+
+  @override
+  String get projectEditorAssetsWorkbenchUploadClipAsset => 'Upload clip asset';
+
+  @override
+  String get projectEditorAssetImagesWorkbenchDialogTitle =>
+      'Asset images workbench';
+
+  @override
+  String get projectEditorAssetImagesFieldTargetAsset => 'Target asset';
+
+  @override
+  String get projectEditorAssetImagesNewFilePathOptional =>
+      'New file_path (optional)';
+
+  @override
+  String get projectEditorAssetImagesNewStateOptional => 'New state (optional)';
+
+  @override
+  String get projectEditorAssetImagesNewSortOptional =>
+      'New sort_index (optional)';
+
+  @override
+  String get projectEditorAssetImagesAddImage => 'Add image';
+
+  @override
+  String get projectEditorAssetImagesEditFilePathMayClear =>
+      'Edit file_path (may clear)';
+
+  @override
+  String get projectEditorAssetImagesEditStateMayClear =>
+      'Edit state (may clear)';
+
+  @override
+  String get projectEditorAssetImagesEditSortOptional =>
+      'Edit sort_index (optional)';
+
+  @override
+  String get projectEditorAssetImagesSaveCurrentImage => 'Save current image';
+
+  @override
+  String get projectEditorAssetImagesDeleteCurrentImage =>
+      'Delete current image';
+
+  @override
+  String get projectEditorAssetImagesLoadImageList => 'Load image list';
+
+  @override
+  String get projectEditorAssetImagesLoadingEllipsis => 'Loading…';
+
+  @override
+  String get projectEditorAssetImagesPreviewImage => 'Preview image';
+
+  @override
+  String get projectEditorAssetImagesLoadingPreview => 'Loading preview…';
+
+  @override
+  String get projectEditorAssetImagesFieldImages => 'Images';
+
+  @override
+  String projectEditorAssetGenUseMaterialContext(int count) {
+    return 'Use material context ($count rows)';
+  }
+
+  @override
+  String projectEditorAssetGenUseBatchCandidates(int count) {
+    return 'Use batch candidates ($count rows)';
+  }
+
+  @override
+  String get projectEditorAssetImagesCreateAssetFirst =>
+      'Create an asset before managing images';
+
+  @override
+  String get projectEditorAssetImagesDiagnosisNotLoadedSummary =>
+      'Image list for this asset has not been loaded yet.';
+
+  @override
+  String get projectEditorAssetImagesDiagnosisNotLoadedDetail =>
+      'Sync the image list first to see whether history images exist, then preview or add a new image.';
+
+  @override
+  String get projectEditorAssetImagesDiagnosisNoImagesSummary =>
+      'This asset has no images yet.';
+
+  @override
+  String get projectEditorAssetImagesDiagnosisNoImagesDetail =>
+      'Add an image to create the first editable history row for this asset.';
+
+  @override
+  String projectEditorAssetImagesDiagnosisPreviewPendingSummary(int count) {
+    return 'Loaded $count image(s); preview not loaded yet.';
+  }
+
+  @override
+  String get projectEditorAssetImagesDiagnosisPreviewPendingDetail =>
+      'Load the current image preview and verify file_path and state before editing or deleting.';
+
+  @override
+  String get projectEditorAssetImagesDiagnosisReadySummary =>
+      'Current image is ready to edit.';
+
+  @override
+  String projectEditorAssetImagesDiagnosisReadyDetail(int sortIndex) {
+    return 'Focused image sort=$sortIndex; you can update file_path, state, or sort_index, then delete if needed.';
+  }
+
+  @override
+  String get projectEditorAssetImagesUnknownState => 'unknown state';
+
+  @override
+  String get projectEditorAssetImagesSelectionNoImages =>
+      'This asset has no images.';
+
+  @override
+  String get projectEditorAssetImagesSelectionCoverNone => 'No cover image';
+
+  @override
+  String projectEditorAssetImagesSelectionCoverNumeric(int id) {
+    return 'Cover numeric image #$id';
+  }
+
+  @override
+  String projectEditorAssetImagesSelectionFocusLine(int sort, String state) {
+    return 'Focus sort=$sort · $state';
+  }
+
+  @override
+  String projectEditorAssetImagesSelectionSummary(
+    int count,
+    String coverLine,
+    String focusLine,
+  ) {
+    return 'Loaded $count image(s); $coverLine; $focusLine.';
+  }
+
+  @override
+  String projectEditorAssetImagesFollowUp(
+    String actionSummary,
+    String nextAction,
+    String detail,
+  ) {
+    return '$actionSummary Next step: $nextAction. $detail';
+  }
+
+  @override
+  String projectEditorAssetImagesFailureNotice(
+    String actionSummary,
+    String nextAction,
+    String reason,
+    String fallbackDetail,
+  ) {
+    return '$actionSummary Next step: $nextAction. Reason: $reason. $fallbackDetail';
+  }
+
+  @override
+  String get projectEditorAssetImagesNoErrorDetail =>
+      'No additional error detail.';
+
+  @override
+  String get projectEditorAssetImagesRecommendedLoadList => 'Load image list';
+
+  @override
+  String get projectEditorAssetImagesRecommendedAddImage => 'Add image';
+
+  @override
+  String get projectEditorAssetImagesRecommendedLoadPreview =>
+      'Load current preview';
+
+  @override
+  String get projectEditorAssetImagesRecommendedSaveImage =>
+      'Save current image';
+
+  @override
+  String get projectEditorAssetImagesMutationCreateSuccess =>
+      'Asset image created.';
+
+  @override
+  String get projectEditorAssetImagesMutationCreateFailure =>
+      'Failed to create asset image.';
+
+  @override
+  String get projectEditorAssetImagesMutationCreateFallback =>
+      'Check file_path, state, or sort_index and try again.';
+
+  @override
+  String get projectEditorAssetImagesMutationPatchSuccess =>
+      'Current image updated.';
+
+  @override
+  String get projectEditorAssetImagesMutationPatchFailure =>
+      'Failed to update current image.';
+
+  @override
+  String get projectEditorAssetImagesMutationPatchFallback =>
+      'Reload preview, verify the selected image, then edit again.';
+
+  @override
+  String get projectEditorAssetImagesMutationDeleteSuccess =>
+      'Current image deleted.';
+
+  @override
+  String get projectEditorAssetImagesMutationDeleteFailure =>
+      'Failed to delete current image.';
+
+  @override
+  String get projectEditorAssetImagesMutationDeleteFallback =>
+      'Refresh the image list, verify the selection, then delete again.';
+
+  @override
+  String get projectEditorAssetImagesPreviewLoadFailed =>
+      'Failed to load current image preview.';
+
+  @override
+  String get projectEditorAssetImagesPreviewLoadFailedFallback =>
+      'Verify file_path or switch to another image, then retry.';
+
+  @override
+  String get projectEditorAssetImagesListLoadFailed =>
+      'Failed to load image list for current asset.';
+
+  @override
+  String get projectEditorAssetImagesListLoadFailedFallback =>
+      'Retry syncing the image list and confirm this asset has images.';
+
+  @override
+  String get projectEditorAssetImagesNoPreviewCleared =>
+      'No image available to preview; preview cleared.';
+
+  @override
+  String get projectEditorAssetImagesPreviewLoaded =>
+      'Loaded current image preview.';
+
+  @override
+  String get projectEditorAssetImagesListSynced =>
+      'Synced image list for current asset.';
+
+  @override
+  String get projectEditorAssetImagesCreateSortMustBePositive =>
+      'sort_index for create must be a positive integer.';
+
+  @override
+  String get projectEditorAssetImagesPatchSortMustBePositive =>
+      'sort_index for edit must be a positive integer.';
+
+  @override
+  String get projectEditorAssetImagesSelectImageToEdit =>
+      'Select an image to edit first.';
+
+  @override
+  String get projectEditorAssetImagesSelectImageToDelete =>
+      'Select an image to delete first.';
+
+  @override
+  String projectEditorAssetImagesSwitchingAsset(int id) {
+    return 'Switching to asset #$id and loading images…';
+  }
+
+  @override
+  String get projectEditorAssetImagesSwitchingImagePreview =>
+      'Switching image and refreshing preview…';
+
+  @override
   String get projectEditorAssetSummaryProductionEmpty =>
       'Production asset data is empty';
 
@@ -12202,7 +12846,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionSummaryStoryboardRows(int count) {
-    return 'storyboard table $count rows';
+    return 'storyboard $count rows';
   }
 
   @override

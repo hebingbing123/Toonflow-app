@@ -15,11 +15,13 @@ AssetImageRow? selectedAssetImageRow(
 }
 
 String _buildAssetImagesStatusLine({
+  required AppLocalizations l10n,
   required ListAssetImagesResponse? imagesResponse,
   required String? selectedImageId,
   required Uint8List? previewBytes,
 }) {
   final diagnosis = diagnoseAssetImagesWorkbench(
+    l10n,
     imagesResponse: imagesResponse,
     selectedImageId: selectedImageId,
     hasPreviewBytes: previewBytes != null,
@@ -27,6 +29,7 @@ String _buildAssetImagesStatusLine({
   final selectionLine = imagesResponse == null
       ? ''
       : summarizeAssetImageSelection(
+          l10n,
           imagesResponse,
           selectedImageId: selectedImageId,
         );
@@ -84,6 +87,7 @@ _AssetImagesPatchFieldValues _buildAssetImagesPatchFieldValues({
 }
 
 _AssetImagesSelectionSyncState _prepareAssetImagesSelectionSyncState({
+  required AppLocalizations l10n,
   required ListAssetImagesResponse? imagesResponse,
   required String? selectedImageId,
   required Uint8List? previewBytes,
@@ -92,6 +96,7 @@ _AssetImagesSelectionSyncState _prepareAssetImagesSelectionSyncState({
     selectedImageId: selectedImageId,
     previewBytes: previewBytes,
     statusLine: _buildAssetImagesStatusLine(
+      l10n: l10n,
       imagesResponse: imagesResponse,
       selectedImageId: selectedImageId,
       previewBytes: previewBytes,
@@ -117,6 +122,7 @@ void _applyAssetImagesSelectionSyncState({
 }
 
 void syncAssetImagesSelectionState({
+  required AppLocalizations l10n,
   required StateSetter setState,
   required AssetImagesWorkbenchRuntime runtime,
   required ListAssetImagesResponse? imagesResponse,
@@ -125,6 +131,7 @@ void syncAssetImagesSelectionState({
   required AssetImagesWorkbenchFormControllers patchControllers,
 }) {
   final nextState = _prepareAssetImagesSelectionSyncState(
+    l10n: l10n,
     imagesResponse: imagesResponse,
     selectedImageId: selectedImageId,
     previewBytes: previewBytes,
@@ -139,6 +146,7 @@ void syncAssetImagesSelectionState({
 }
 
 void setAssetImagesFollowUpStatus({
+  required AppLocalizations l10n,
   required StateSetter setState,
   required AssetImagesWorkbenchRuntime runtime,
   required ListAssetImagesResponse? imagesResponse,
@@ -147,6 +155,7 @@ void setAssetImagesFollowUpStatus({
   required String actionSummary,
 }) {
   final diagnosis = diagnoseAssetImagesWorkbench(
+    l10n,
     imagesResponse: imagesResponse,
     selectedImageId: selectedImageId,
     hasPreviewBytes: hasPreviewBytes,
@@ -154,6 +163,7 @@ void setAssetImagesFollowUpStatus({
   setState(() {
     runtime.onStatusChanged(
       buildAssetImagesWorkbenchFollowUp(
+        l10n: l10n,
         actionSummary: actionSummary,
         diagnosis: diagnosis,
       ),
@@ -162,6 +172,7 @@ void setAssetImagesFollowUpStatus({
 }
 
 String? applyReloadedAssetImagesState({
+  required AppLocalizations l10n,
   required StateSetter setState,
   required AssetImagesWorkbenchRuntime runtime,
   required ListAssetImagesResponse response,
@@ -172,13 +183,16 @@ String? applyReloadedAssetImagesState({
     preferredImageId: runtime.currentSelectedImageId,
   );
   final nextState = _prepareAssetImagesSelectionSyncState(
+    l10n: l10n,
     imagesResponse: response,
     selectedImageId: nextSelectedImageId,
     previewBytes: null,
   );
   final followUpStatus = buildAssetImagesWorkbenchFollowUp(
-    actionSummary: '已同步当前资产的图片列表。',
+    l10n: l10n,
+    actionSummary: l10n.projectEditorAssetImagesListSynced,
     diagnosis: diagnoseAssetImagesWorkbench(
+      l10n,
       imagesResponse: response,
       selectedImageId: nextSelectedImageId,
       hasPreviewBytes: false,
@@ -197,6 +211,7 @@ String? applyReloadedAssetImagesState({
 }
 
 void applyAssetImagePreviewState({
+  required AppLocalizations l10n,
   required StateSetter setState,
   required AssetImagesWorkbenchRuntime runtime,
   required ListAssetImagesResponse? imagesResponse,
@@ -205,8 +220,10 @@ void applyAssetImagePreviewState({
   required String actionSummary,
 }) {
   final followUpStatus = buildAssetImagesWorkbenchFollowUp(
+    l10n: l10n,
     actionSummary: actionSummary,
     diagnosis: diagnoseAssetImagesWorkbench(
+      l10n,
       imagesResponse: imagesResponse,
       selectedImageId: selectedImageId,
       hasPreviewBytes: previewBytes != null,

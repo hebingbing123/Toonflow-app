@@ -7557,6 +7557,439 @@
   },
   "projectEditorScriptsWorkbenchDialogBatchCreate": "批量创建",
   "projectEditorScriptsWorkbenchDialogClose": "关闭",
+  "projectScriptPlanWorkbenchTitle": "故事骨架与改编策略",
+  "projectScriptPlanWorkbenchPlanMountedLine": "planId {planId} · 已挂载 {count} 条剧本{namesSuffix}",
+  "@projectScriptPlanWorkbenchPlanMountedLine": {
+    "placeholders": {
+      "planId": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "namesSuffix": {
+        "type": "String"
+      }
+    }
+  },
+  "projectScriptPlanWorkbenchFillSkeletonFromEvents": "用事件填充骨架草稿",
+  "projectScriptPlanWorkbenchFillStrategyFromEvents": "用事件填充策略草稿",
+  "projectScriptPlanWorkbenchGenerateDraftPackets": "生成剧本草稿包",
+  "projectScriptPlanWorkbenchGenerateStructuredGuidance": "生成结构化改写指引",
+  "projectScriptPlanWorkbenchWriteScriptDrafts": "写入剧本草稿",
+  "projectScriptPlanWorkbenchStorySkeletonLabel": "故事骨架",
+  "projectScriptPlanWorkbenchStorySkeletonHelper": "聚焦故事主线、主要冲突、转折点与收束路径",
+  "projectScriptPlanWorkbenchAdaptationStrategyLabel": "改编策略",
+  "projectScriptPlanWorkbenchAdaptationStrategyHelper": "记录改编取舍、人物弧光、节奏与风格约束",
+  "projectScriptPlanWorkbenchScriptDraftPreviewTitle": "剧本草稿预览",
+  "projectScriptPlanWorkbenchNoDraftPacketsHint": "尚无草稿包。请先完善骨架/策略，再生成。",
+  "projectScriptPlanWorkbenchStructuredGuidanceTitle": "结构化改写指引",
+  "projectScriptPlanWorkbenchNoGuidanceHint": "尚无结构化指引。在改写前后运行以约束修订。",
+  "projectScriptPlanWorkbenchChaptersPrefix": "章节",
+  "projectScriptPlanWorkbenchTbd": "待定",
+  "projectScriptPlanWorkbenchReloadPlan": "重新加载方案",
+  "projectScriptPlanWorkbenchSavePlan": "保存方案",
+  "projectScriptPlanWorkbenchRefreshing": "刷新中…",
+  "projectScriptPlanWorkbenchSaving": "保存中…",
+  "shortVideoUndoEnableShot": "启用镜头 #{storyboardId}",
+  "@shortVideoUndoEnableShot": {
+    "placeholders": {
+      "storyboardId": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoUndoDisableShot": "停用镜头 #{storyboardId}",
+  "@shortVideoUndoDisableShot": {
+    "placeholders": {
+      "storyboardId": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoUndoSetShotDuration": "将镜头 #{storyboardId} 时长设为 {seconds} 秒",
+  "@shortVideoUndoSetShotDuration": {
+    "placeholders": {
+      "storyboardId": {
+        "type": "int"
+      },
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoUndoReplaceShotVideo": "替换镜头 #{storyboardId} 视频",
+  "@shortVideoUndoReplaceShotVideo": {
+    "placeholders": {
+      "storyboardId": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoUndoBatchEnable": "批量启用 {count} 个镜头",
+  "@shortVideoUndoBatchEnable": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoUndoBatchDisable": "批量停用 {count} 个镜头",
+  "@shortVideoUndoBatchDisable": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoUndoBatchAlignDuration": "批量对齐 {count} 个镜头时长",
+  "@shortVideoUndoBatchAlignDuration": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoUndoBatchReplaceVideo": "批量替换 {count} 个镜头视频",
+  "@shortVideoUndoBatchReplaceVideo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoUndoTooltipWithDescription": "撤销：{description}（Ctrl+Z / Cmd+Z）",
+  "@shortVideoUndoTooltipWithDescription": {
+    "placeholders": {
+      "description": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoUndoTooltipEmpty": "没有可撤销的操作",
+  "shortVideoRedoTooltipWithDescription": "重做：{description}（Ctrl+Shift+Z / Cmd+Shift+Z）",
+  "@shortVideoRedoTooltipWithDescription": {
+    "placeholders": {
+      "description": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoRedoTooltipEmpty": "没有可重做的操作",
+  "shortVideoOperationHistoryToolbarTooltip": "查看操作历史",
+  "shortVideoOperationHistoryTitle": "操作历史",
+  "shortVideoOperationHistorySummaryHeading": "摘要",
+  "shortVideoOperationHistoryUndoStack": "撤销栈：{count}",
+  "@shortVideoOperationHistoryUndoStack": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoOperationHistoryRedoStack": "重做栈：{count}",
+  "@shortVideoOperationHistoryRedoStack": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoOperationHistoryLimitLine": "历史上限：{max} 条",
+  "@shortVideoOperationHistoryLimitLine": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoOperationHistoryEmpty": "暂无操作记录",
+  "shortVideoOperationHistoryOperationsHeading": "操作（最新在前）",
+  "shortVideoOperationHistoryLatestChip": "最新",
+  "shortVideoOperationHistoryClear": "清空历史",
+  "shortVideoOperationHistoryClearedSnackbar": "已清空操作历史",
+  "shortVideoOperationHistoryRelativeSecondsAgo": "{count} 秒前",
+  "@shortVideoOperationHistoryRelativeSecondsAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoOperationHistoryRelativeMinutesAgo": "{count} 分钟前",
+  "@shortVideoOperationHistoryRelativeMinutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoOperationHistoryRelativeHoursAgo": "{count} 小时前",
+  "@shortVideoOperationHistoryRelativeHoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPreviewPlaylistComplete": "已播放完全部镜头",
+  "shortVideoCandidateAssetConfirmationTitle": "候选素材确认",
+  "shortVideoCandidateMetricPending": "待处理",
+  "shortVideoCandidateMetricLinked": "已关联",
+  "shortVideoCandidateMetricIgnored": "已忽略",
+  "shortVideoCandidateMetricUnset": "未设置",
+  "shortVideoCandidateBatchGenerateSubmitting": "正在提交候选片段批量任务…",
+  "shortVideoCandidateBatchGenerateLabel": "批量生成候选片段（项目默认）",
+  "shortVideoCandidateOpenProjectsForAssets": "打开项目管理素材",
+  "shortVideoCandidateCompareSectionTitle": "候选对比",
+  "projectEditorAssetFilterDialogTitle": "高级素材筛选",
+  "projectEditorAssetFilterByScript": "按剧本筛选",
+  "projectEditorAssetFilterAllScripts": "（全部剧本）",
+  "projectEditorAssetFilterAssetTypeOptional": "素材类型（可选）",
+  "projectEditorAssetFilterAssetTypeHint": "role / clip / props",
+  "projectEditorAssetFilterNameContainsOptional": "名称包含（可选）",
+  "projectEditorAssetFilterPage": "页码",
+  "projectEditorAssetFilterLimit": "每页条数",
+  "projectEditorAssetFilterApply": "应用筛选",
+  "projectEditorAssetFilterSnackbarPageLimitPositive": "page 与 limit 须为正整数",
+  "projectEditorAssetFilterSnackbarApplied": "已应用筛选：{shown}/{total} 行",
+  "@projectEditorAssetFilterSnackbarApplied": {
+    "placeholders": {
+      "shown": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorDeleteProjectTitle": "删除项目？",
+  "projectEditorDeleteProjectBody": "将删除项目 #{id}、相关剧本/分镜（数据库级联），并清除该项目的智能体记忆。",
+  "@projectEditorDeleteProjectBody": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorDeleteProjectSnackbar": "项目已删除",
+  "projectEditorDeleteProjectButton": "删除",
+  "projectEditorSavePatch": "保存（PATCH）",
+  "projectEditorSavingEllipsis": "保存中…",
+  "projectEditorPublishSectionTitle": "发布",
+  "projectEditorPublishSectionBody": "草稿、排期、任务与审计位于 短视频空间 → 发布。",
+  "projectEditorPublishOpenWorkspace": "打开发布工作区",
+  "projectEditorPublishOverviewSnackbar": "发布概览：草稿={drafts} 任务={jobs}",
+  "@projectEditorPublishOverviewSnackbar": {
+    "placeholders": {
+      "drafts": {
+        "type": "int"
+      },
+      "jobs": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorPublishViewOverview": "查看发布概览",
+  "projectEditorPublishOverviewFailed": "加载发布概览失败：{error}",
+  "@projectEditorPublishOverviewFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorStoryboardImageWorkbenchTitle": "图片工作台",
+  "projectEditorStoryboardImageUrlLabel": "当前图片 URL / data URI",
+  "projectEditorStoryboardImageUrlHelper": "HTTP URL 或 data:image/...;base64。",
+  "projectEditorStoryboardImageLoadPreview": "加载当前预览",
+  "projectEditorStoryboardImageWorking": "处理中…",
+  "projectEditorStoryboardImageSaveUrl": "保存图片 URL",
+  "projectEditorStoryboardImageClearFrame": "清空画格",
+  "projectEditorStoryboardImageRefreshProduction": "刷新制作数据",
+  "projectEditorStoryboardImageRefreshing": "刷新中…",
+  "projectEditorNovelsEventsWorkbenchEmptyDetail": "通过显式表单管理事件（搜索/创建/更新/删除/批量），勿依赖 HTTP 探测按钮。",
+  "projectEditorNovelsEventsWorkbenchSummaryFirst": "{summaryLine}；首条 #{id} {name}。",
+  "@projectEditorNovelsEventsWorkbenchSummaryFirst": {
+    "placeholders": {
+      "summaryLine": {
+        "type": "String"
+      },
+      "id": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsEventsOpenWorkbench": "打开事件工作台",
+  "projectEditorNovelsEventsRefresh": "刷新事件",
+  "projectEditorNovelsEventsRefreshing": "正在刷新事件…",
+  "projectEditorAssetsWorkbenchNewAsset": "新建素材",
+  "projectEditorAssetsWorkbenchEditAsset": "编辑素材",
+  "projectEditorAssetsWorkbenchDeleteAsset": "删除素材",
+  "projectEditorAssetsWorkbenchFilterAssets": "筛选素材",
+  "projectEditorAssetsWorkbenchLinkScript": "关联剧本与素材",
+  "projectEditorAssetsWorkbenchUnlink": "解除关联",
+  "projectEditorAssetsWorkbenchUploadEditImage": "上传修图",
+  "projectEditorAssetsWorkbenchUploadClipAsset": "上传片段素材",
+  "projectEditorAssetImagesWorkbenchDialogTitle": "资产图片工作台",
+  "projectEditorAssetImagesFieldTargetAsset": "目标素材",
+  "projectEditorAssetImagesNewFilePathOptional": "新建 file_path（可选）",
+  "projectEditorAssetImagesNewStateOptional": "新建 state（可选）",
+  "projectEditorAssetImagesNewSortOptional": "新建 sort_index（可选）",
+  "projectEditorAssetImagesAddImage": "新增图片",
+  "projectEditorAssetImagesEditFilePathMayClear": "编辑 file_path（可清空）",
+  "projectEditorAssetImagesEditStateMayClear": "编辑 state（可清空）",
+  "projectEditorAssetImagesEditSortOptional": "编辑 sort_index（可选）",
+  "projectEditorAssetImagesSaveCurrentImage": "保存当前图片",
+  "projectEditorAssetImagesDeleteCurrentImage": "删除当前图片",
+  "projectEditorAssetImagesLoadImageList": "加载图片列表",
+  "projectEditorAssetImagesLoadingEllipsis": "加载中…",
+  "projectEditorAssetImagesPreviewImage": "预览图片",
+  "projectEditorAssetImagesLoadingPreview": "正在加载预览…",
+  "projectEditorAssetImagesFieldImages": "图片",
+  "projectEditorAssetGenUseMaterialContext": "使用素材上下文（{count} 行）",
+  "@projectEditorAssetGenUseMaterialContext": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorAssetGenUseBatchCandidates": "使用批量候选（{count} 行）",
+  "@projectEditorAssetGenUseBatchCandidates": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorAssetImagesCreateAssetFirst": "请先创建素材再管理图片",
+  "projectEditorAssetImagesDiagnosisNotLoadedSummary": "尚未加载该资产的图片列表。",
+  "projectEditorAssetImagesDiagnosisNotLoadedDetail": "先同步图片列表以确认是否存在历史图片，再预览或新增。",
+  "projectEditorAssetImagesDiagnosisNoImagesSummary": "该资产尚无图片。",
+  "projectEditorAssetImagesDiagnosisNoImagesDetail": "新增图片以创建该资产的首条可编辑历史记录。",
+  "projectEditorAssetImagesDiagnosisPreviewPendingSummary": "已加载 {count} 张图片；尚未加载预览。",
+  "@projectEditorAssetImagesDiagnosisPreviewPendingSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorAssetImagesDiagnosisPreviewPendingDetail": "加载当前图片预览，并在编辑或删除前核对 file_path 与 state。",
+  "projectEditorAssetImagesDiagnosisReadySummary": "当前图片已就绪，可继续编辑。",
+  "projectEditorAssetImagesDiagnosisReadyDetail": "当前聚焦 sort={sortIndex}；可更新 file_path、state 或 sort_index，必要时删除。",
+  "@projectEditorAssetImagesDiagnosisReadyDetail": {
+    "placeholders": {
+      "sortIndex": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorAssetImagesUnknownState": "未知状态",
+  "projectEditorAssetImagesSelectionNoImages": "该资产没有图片。",
+  "projectEditorAssetImagesSelectionCoverNone": "无封面图",
+  "projectEditorAssetImagesSelectionCoverNumeric": "封面数字图片 #{id}",
+  "@projectEditorAssetImagesSelectionCoverNumeric": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorAssetImagesSelectionFocusLine": "聚焦 sort={sort} · {state}",
+  "@projectEditorAssetImagesSelectionFocusLine": {
+    "placeholders": {
+      "sort": {
+        "type": "int"
+      },
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetImagesSelectionSummary": "已加载 {count} 张图片；{coverLine}；{focusLine}。",
+  "@projectEditorAssetImagesSelectionSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "coverLine": {
+        "type": "String"
+      },
+      "focusLine": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetImagesFollowUp": "{actionSummary} 下一步：{nextAction}。{detail}",
+  "@projectEditorAssetImagesFollowUp": {
+    "placeholders": {
+      "actionSummary": {
+        "type": "String"
+      },
+      "nextAction": {
+        "type": "String"
+      },
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetImagesFailureNotice": "{actionSummary} 下一步：{nextAction}。原因：{reason}。{fallbackDetail}",
+  "@projectEditorAssetImagesFailureNotice": {
+    "placeholders": {
+      "actionSummary": {
+        "type": "String"
+      },
+      "nextAction": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "String"
+      },
+      "fallbackDetail": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetImagesNoErrorDetail": "无更多错误详情。",
+  "projectEditorAssetImagesRecommendedLoadList": "加载图片列表",
+  "projectEditorAssetImagesRecommendedAddImage": "新增图片",
+  "projectEditorAssetImagesRecommendedLoadPreview": "加载当前预览",
+  "projectEditorAssetImagesRecommendedSaveImage": "保存当前图片",
+  "projectEditorAssetImagesMutationCreateSuccess": "已新增资产图片。",
+  "projectEditorAssetImagesMutationCreateFailure": "新增资产图片失败。",
+  "projectEditorAssetImagesMutationCreateFallback": "请检查 file_path、state 或 sort_index 后重试。",
+  "projectEditorAssetImagesMutationPatchSuccess": "已更新当前图片。",
+  "projectEditorAssetImagesMutationPatchFailure": "更新当前图片失败。",
+  "projectEditorAssetImagesMutationPatchFallback": "请先重新读取预览，确认当前图片后再修改。",
+  "projectEditorAssetImagesMutationDeleteSuccess": "已删除当前图片。",
+  "projectEditorAssetImagesMutationDeleteFailure": "删除当前图片失败。",
+  "projectEditorAssetImagesMutationDeleteFallback": "请先刷新图片列表，确认当前选择后再删除。",
+  "projectEditorAssetImagesPreviewLoadFailed": "读取当前图片预览失败。",
+  "projectEditorAssetImagesPreviewLoadFailedFallback": "建议先确认 file_path 或切换到其他图片后重试。",
+  "projectEditorAssetImagesListLoadFailed": "读取当前资产图片列表失败。",
+  "projectEditorAssetImagesListLoadFailedFallback": "建议稍后重新同步图片列表，确认资产下是否已有图片。",
+  "projectEditorAssetImagesNoPreviewCleared": "当前没有可预览的图片，已清空预览内容。",
+  "projectEditorAssetImagesPreviewLoaded": "已读取当前图片预览。",
+  "projectEditorAssetImagesListSynced": "已同步当前资产的图片列表。",
+  "projectEditorAssetImagesCreateSortMustBePositive": "新增时 sort_index 须为正整数。",
+  "projectEditorAssetImagesPatchSortMustBePositive": "编辑时 sort_index 须为正整数。",
+  "projectEditorAssetImagesSelectImageToEdit": "请先选择要编辑的图片。",
+  "projectEditorAssetImagesSelectImageToDelete": "请先选择要删除的图片。",
+  "projectEditorAssetImagesSwitchingAsset": "正在切换到资产 #{id} 并加载图片列表…",
+  "@projectEditorAssetImagesSwitchingAsset": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorAssetImagesSwitchingImagePreview": "正在切换图片并刷新预览…",
   "projectEditorAssetSummaryProductionEmpty": "production 资产数据为空",
   "projectEditorAssetSummaryProductionLine": "production 资产 {total} 条 · {typesLine} · 示例：{sampleLine}",
   "@projectEditorAssetSummaryProductionLine": {
@@ -8557,7 +8990,7 @@
   "agentWorkspaceProductionSummaryLineCount": "行数 {count}",
   "agentWorkspaceProductionSummaryPlanSections": "计划章节 {count}",
   "agentWorkspaceProductionSummaryRewriteInherited": "改写约束下沉",
-  "agentWorkspaceProductionSummaryStoryboardRows": "分镜表 {count} 行",
+  "agentWorkspaceProductionSummaryStoryboardRows": "分镜 {count} 条",
   "agentWorkspaceProductionSummaryLinkedAssets": "关联资产 {count}",
   "agentWorkspaceProductionSummaryListCount": "列表 {count} 项",
   "agentWorkspaceProductionSummaryPrompts": "提示词 {count}",

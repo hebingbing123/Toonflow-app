@@ -17,6 +17,7 @@ extension _HomePageProjectEditorAssetsFilterDialogs on _HomePageState {
     final pageCtrl = TextEditingController(text: '1');
     final limitCtrl = TextEditingController(text: '20');
     int? selectedScriptNumericId = assetsFilterScriptNumericId[0];
+    final l10n = AppLocalizations.of(ctx)!;
     try {
       final confirmed = await showDialog<bool>(
         context: ctx,
@@ -24,7 +25,7 @@ extension _HomePageProjectEditorAssetsFilterDialogs on _HomePageState {
           return StatefulBuilder(
             builder: (dialogCtx, setState) {
               return AlertDialog(
-                title: const Text('Advanced asset filter'),
+                title: Text(l10n.projectEditorAssetFilterDialogTitle),
                 content: SizedBox(
                   width: 520,
                   child: Column(
@@ -32,13 +33,13 @@ extension _HomePageProjectEditorAssetsFilterDialogs on _HomePageState {
                     children: [
                       DropdownButtonFormField<int?>(
                         initialValue: selectedScriptNumericId,
-                        decoration: const InputDecoration(
-                          labelText: 'Filter by script',
+                        decoration: InputDecoration(
+                          labelText: l10n.projectEditorAssetFilterByScript,
                         ),
                         items: [
-                          const DropdownMenuItem<int?>(
+                          DropdownMenuItem<int?>(
                             value: null,
-                            child: Text('(All scripts)'),
+                            child: Text(l10n.projectEditorAssetFilterAllScripts),
                           ),
                           ...scriptList.map(
                             (script) => DropdownMenuItem<int?>(
@@ -57,16 +58,16 @@ extension _HomePageProjectEditorAssetsFilterDialogs on _HomePageState {
                       const SizedBox(height: 8),
                       TextField(
                         controller: typeCtrl,
-                        decoration: const InputDecoration(
-                          labelText: 'Asset type (optional)',
-                          hintText: 'role / clip / props',
+                        decoration: InputDecoration(
+                          labelText: l10n.projectEditorAssetFilterAssetTypeOptional,
+                          hintText: l10n.projectEditorAssetFilterAssetTypeHint,
                         ),
                       ),
                       const SizedBox(height: 8),
                       TextField(
                         controller: nameCtrl,
-                        decoration: const InputDecoration(
-                          labelText: 'Name contains (optional)',
+                        decoration: InputDecoration(
+                          labelText: l10n.projectEditorAssetFilterNameContainsOptional,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -76,8 +77,8 @@ extension _HomePageProjectEditorAssetsFilterDialogs on _HomePageState {
                             child: TextField(
                               controller: pageCtrl,
                               keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(
-                                labelText: 'page',
+                              decoration: InputDecoration(
+                                labelText: l10n.projectEditorAssetFilterPage,
                               ),
                             ),
                           ),
@@ -86,8 +87,8 @@ extension _HomePageProjectEditorAssetsFilterDialogs on _HomePageState {
                             child: TextField(
                               controller: limitCtrl,
                               keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(
-                                labelText: 'limit',
+                              decoration: InputDecoration(
+                                labelText: l10n.projectEditorAssetFilterLimit,
                               ),
                             ),
                           ),
@@ -99,11 +100,11 @@ extension _HomePageProjectEditorAssetsFilterDialogs on _HomePageState {
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.of(dialogCtx).pop(false),
-                    child: const Text('Cancel'),
+                    child: Text(l10n.storyboardEditorDialogCancel),
                   ),
                   FilledButton(
                     onPressed: () => Navigator.of(dialogCtx).pop(true),
-                    child: const Text('Apply filter'),
+                    child: Text(l10n.projectEditorAssetFilterApply),
                   ),
                 ],
               );
@@ -117,8 +118,8 @@ extension _HomePageProjectEditorAssetsFilterDialogs on _HomePageState {
       final limit = int.tryParse(limitCtrl.text.trim());
       if ((page != null && page <= 0) || (limit != null && limit <= 0)) {
         ScaffoldMessenger.of(ctx).showSnackBar(
-          const SnackBar(
-            content: Text('page and limit must be positive integers'),
+          SnackBar(
+            content: Text(l10n.projectEditorAssetFilterSnackbarPageLimitPositive),
           ),
         );
         return;
@@ -148,7 +149,10 @@ extension _HomePageProjectEditorAssetsFilterDialogs on _HomePageState {
       ScaffoldMessenger.of(ctx).showSnackBar(
         SnackBar(
           content: Text(
-            'Filter applied: ${filtered.items.length}/${filtered.total} rows',
+            l10n.projectEditorAssetFilterSnackbarApplied(
+              filtered.items.length,
+              filtered.total,
+            ),
           ),
         ),
       );

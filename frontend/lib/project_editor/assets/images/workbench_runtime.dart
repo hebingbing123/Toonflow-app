@@ -25,8 +25,9 @@ class AssetImagesWorkbenchRuntime {
 
   String? get currentSelectedImageId => selectedImageId();
 
-  AssetImagesWorkbenchDiagnosis diagnose() {
+  AssetImagesWorkbenchDiagnosis diagnose(AppLocalizations l10n) {
     return diagnoseAssetImagesWorkbench(
+      l10n,
       imagesResponse: imagesResponse(),
       selectedImageId: selectedImageId(),
       hasPreviewBytes: previewBytes() != null,
@@ -60,6 +61,8 @@ class AssetImagesWorkbenchMutationContext {
   final List<bool> assetsBusy;
   final ValueChanged<bool> onBusyMutationChanged;
   final Future<void> Function() reloadAssetsAndStats;
+
+  AppLocalizations get l10n => AppLocalizations.of(ctx)!;
 }
 
 class AssetImagesWorkbenchScope {

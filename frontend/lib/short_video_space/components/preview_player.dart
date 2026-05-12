@@ -764,6 +764,7 @@ class PreviewPlayerDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Dialog(
       child: ConstrainedBox(
         constraints: BoxConstraints(
@@ -784,9 +785,9 @@ class PreviewPlayerDialog extends StatelessWidget {
                 onPlaylistComplete: () {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Finished playing all shots'),
-                        duration: Duration(seconds: 2),
+                      SnackBar(
+                        content: Text(l10n.shortVideoPreviewPlaylistComplete),
+                        duration: const Duration(seconds: 2),
                       ),
                     );
                   }
@@ -799,7 +800,7 @@ class PreviewPlayerDialog extends StatelessWidget {
                   children: [
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Close'),
+                      child: Text(l10n.shortVideoSpaceClose),
                     ),
                   ],
                 ),

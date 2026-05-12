@@ -22,18 +22,22 @@ class _StoryboardImageSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Image workbench', style: Theme.of(context).textTheme.titleSmall),
+        Text(
+          l10n.projectEditorStoryboardImageWorkbenchTitle,
+          style: Theme.of(context).textTheme.titleSmall,
+        ),
         const SizedBox(height: 8),
         TextField(
           controller: imageUrlCtrl,
           minLines: 2,
           maxLines: 4,
-          decoration: const InputDecoration(
-            labelText: 'Current image URL / data URI',
-            helperText: 'HTTP URL or data:image/...;base64.',
+          decoration: InputDecoration(
+            labelText: l10n.projectEditorStoryboardImageUrlLabel,
+            helperText: l10n.projectEditorStoryboardImageUrlHelper,
             alignLabelWithHint: true,
           ),
         ),
@@ -44,22 +48,28 @@ class _StoryboardImageSection extends StatelessWidget {
           children: [
             FilledButton.tonal(
               onPressed: saving ? null : onReadCurrentPreview,
-              child: Text(saving ? 'Working…' : 'Load current preview'),
+              child: Text(
+                saving
+                    ? l10n.projectEditorStoryboardImageWorking
+                    : l10n.projectEditorStoryboardImageLoadPreview,
+              ),
             ),
             TextButton(
               onPressed: saving ? null : onSaveImageUrl,
-              child: const Text('Save image URL'),
+              child: Text(l10n.projectEditorStoryboardImageSaveUrl),
             ),
             TextButton(
               onPressed: saving ? null : onClearFrame,
-              child: const Text('Clear frame'),
+              child: Text(l10n.projectEditorStoryboardImageClearFrame),
             ),
             TextButton(
               onPressed: saving || loadingProduction
                   ? null
                   : onRefreshProductionData,
               child: Text(
-                loadingProduction ? 'Refreshing…' : 'Refresh production data',
+                loadingProduction
+                    ? l10n.projectEditorStoryboardImageRefreshing
+                    : l10n.projectEditorStoryboardImageRefreshProduction,
               ),
             ),
           ],

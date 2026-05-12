@@ -57,11 +57,13 @@ class AssetImagesWorkbenchSession {
   }
 
   AssetImagesWorkbenchDialogState captureDialogState({
+    required AppLocalizations l10n,
     required List<AssetRow> assets,
     required AssetImagesWorkbenchFormControllers createControllers,
     required AssetImagesWorkbenchFormControllers patchControllers,
   }) {
     return AssetImagesWorkbenchDialogState.capture(
+      l10n: l10n,
       assets: assets,
       imagesResponse: imagesResponse,
       selectedAssetNumericId: selectedAssetNumericId,
@@ -107,6 +109,7 @@ class AssetImagesWorkbenchDialogState {
   final AssetImagesWorkbenchFormControllers patchControllers;
 
   factory AssetImagesWorkbenchDialogState.capture({
+    required AppLocalizations l10n,
     required List<AssetRow> assets,
     required ListAssetImagesResponse? imagesResponse,
     required int selectedAssetNumericId,
@@ -121,6 +124,7 @@ class AssetImagesWorkbenchDialogState {
   }) {
     final imageItems = imagesResponse?.items ?? const <AssetImageRow>[];
     final diagnosis = diagnoseAssetImagesWorkbench(
+      l10n,
       imagesResponse: imagesResponse,
       selectedImageId: selectedImageId,
       hasPreviewBytes: previewBytes != null,

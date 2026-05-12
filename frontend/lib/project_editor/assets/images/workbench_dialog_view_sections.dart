@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/app_localizations.dart';
 import '../support.dart';
 import 'workbench_dialog_view.dart';
 
@@ -8,23 +9,24 @@ List<Widget> buildAssetImagesWorkbenchSections(
   required AssetImagesWorkbenchDialogViewModel model,
   required AssetImagesWorkbenchDialogViewCallbacks callbacks,
 }) {
+  final l10n = AppLocalizations.of(context)!;
   final sections = <Widget>[
-    _buildAssetField(model: model, callbacks: callbacks),
-    _buildDiagnosisCard(context, model: model, callbacks: callbacks),
-    _buildToolbar(model: model, callbacks: callbacks),
+    _buildAssetField(l10n: l10n, model: model, callbacks: callbacks),
+    _buildDiagnosisCard(context, l10n: l10n, model: model, callbacks: callbacks),
+    _buildToolbar(l10n: l10n, model: model, callbacks: callbacks),
     if (model.statusLine != null)
       Text(model.statusLine!, style: Theme.of(context).textTheme.bodySmall),
-    _buildImageField(model: model, callbacks: callbacks),
+    _buildImageField(l10n: l10n, model: model, callbacks: callbacks),
     _buildMutationForm(
       filePathController: model.createFilePathController,
       stateController: model.createStateController,
       sortController: model.createSortController,
-      filePathLabel: 'New file_path (optional)',
-      stateLabel: 'New state (optional)',
-      sortLabel: 'New sort_index (optional)',
+      filePathLabel: l10n.projectEditorAssetImagesNewFilePathOptional,
+      stateLabel: l10n.projectEditorAssetImagesNewStateOptional,
+      sortLabel: l10n.projectEditorAssetImagesNewSortOptional,
       actions: [
         AssetImagesWorkbenchMutationAction(
-          label: 'Add image',
+          label: l10n.projectEditorAssetImagesAddImage,
           onPressed: callbacks.onCreateImage,
         ),
       ],
@@ -33,16 +35,16 @@ List<Widget> buildAssetImagesWorkbenchSections(
       filePathController: model.patchFilePathController,
       stateController: model.patchStateController,
       sortController: model.patchSortController,
-      filePathLabel: 'Edit file_path (may clear)',
-      stateLabel: 'Edit state (may clear)',
-      sortLabel: 'Edit sort_index (optional)',
+      filePathLabel: l10n.projectEditorAssetImagesEditFilePathMayClear,
+      stateLabel: l10n.projectEditorAssetImagesEditStateMayClear,
+      sortLabel: l10n.projectEditorAssetImagesEditSortOptional,
       actions: [
         AssetImagesWorkbenchMutationAction(
-          label: 'Save current image',
+          label: l10n.projectEditorAssetImagesSaveCurrentImage,
           onPressed: callbacks.onPatchImage,
         ),
         AssetImagesWorkbenchMutationAction(
-          label: 'Delete current image',
+          label: l10n.projectEditorAssetImagesDeleteCurrentImage,
           onPressed: callbacks.onDeleteImage,
         ),
       ],
@@ -63,12 +65,13 @@ List<Widget> buildAssetImagesWorkbenchSections(
 }
 
 Widget _buildAssetField({
+  required AppLocalizations l10n,
   required AssetImagesWorkbenchDialogViewModel model,
   required AssetImagesWorkbenchDialogViewCallbacks callbacks,
 }) {
   return DropdownButtonFormField<int>(
     initialValue: model.selectedAssetNumericId,
-    decoration: const InputDecoration(labelText: 'Target asset'),
+    decoration: InputDecoration(labelText: l10n.projectEditorAssetImagesFieldTargetAsset),
     items: model.assets
         .map(
           (asset) => DropdownMenuItem<int>(
@@ -86,6 +89,7 @@ Widget _buildAssetField({
 
 Widget _buildDiagnosisCard(
   BuildContext context, {
+  required AppLocalizations l10n,
   required AssetImagesWorkbenchDialogViewModel model,
   required AssetImagesWorkbenchDialogViewCallbacks callbacks,
 }) {
@@ -114,6 +118,7 @@ Widget _buildDiagnosisCard(
           onPressed: callbacks.onRecommendedAction,
           child: Text(
             describeAssetImagesWorkbenchRecommendedAction(
+              l10n,
               model.diagnosis.recommendedAction,
             ),
           ),
@@ -124,6 +129,7 @@ Widget _buildDiagnosisCard(
 }
 
 Widget _buildToolbar({
+  required AppLocalizations l10n,
   required AssetImagesWorkbenchDialogViewModel model,
   required AssetImagesWorkbenchDialogViewCallbacks callbacks,
 }) {
@@ -133,12 +139,18 @@ Widget _buildToolbar({
     children: [
       FilledButton(
         onPressed: callbacks.onReloadImages,
-        child: Text(model.loadingList ? 'Loading…' : 'Load image list'),
+        child: Text(
+          model.loadingList
+              ? l10n.projectEditorAssetImagesLoadingEllipsis
+              : l10n.projectEditorAssetImagesLoadImageList,
+        ),
       ),
       TextButton(
         onPressed: callbacks.onLoadPreview,
         child: Text(
-          model.loadingPreview ? 'Loading preview…' : 'Preview image',
+          model.loadingPreview
+              ? l10n.projectEditorAssetImagesLoadingPreview
+              : l10n.projectEditorAssetImagesPreviewImage,
         ),
       ),
     ],
@@ -146,12 +158,13 @@ Widget _buildToolbar({
 }
 
 Widget _buildImageField({
+  required AppLocalizations l10n,
   required AssetImagesWorkbenchDialogViewModel model,
   required AssetImagesWorkbenchDialogViewCallbacks callbacks,
 }) {
   return DropdownButtonFormField<String>(
     initialValue: model.selectedImageId,
-    decoration: const InputDecoration(labelText: 'Images'),
+    decoration: InputDecoration(labelText: l10n.projectEditorAssetImagesFieldImages),
     items: model.imageItems
         .map(
           (img) => DropdownMenuItem<String>(

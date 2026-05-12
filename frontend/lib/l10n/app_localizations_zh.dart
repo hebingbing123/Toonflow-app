@@ -9637,6 +9637,603 @@ class AppLocalizationsZh extends AppLocalizations {
   String get projectEditorScriptsWorkbenchDialogClose => '关闭';
 
   @override
+  String get projectScriptPlanWorkbenchTitle => '故事骨架与改编策略';
+
+  @override
+  String projectScriptPlanWorkbenchPlanMountedLine(
+    String planId,
+    int count,
+    String namesSuffix,
+  ) {
+    return 'planId $planId · 已挂载 $count 条剧本$namesSuffix';
+  }
+
+  @override
+  String get projectScriptPlanWorkbenchFillSkeletonFromEvents => '用事件填充骨架草稿';
+
+  @override
+  String get projectScriptPlanWorkbenchFillStrategyFromEvents => '用事件填充策略草稿';
+
+  @override
+  String get projectScriptPlanWorkbenchGenerateDraftPackets => '生成剧本草稿包';
+
+  @override
+  String get projectScriptPlanWorkbenchGenerateStructuredGuidance =>
+      '生成结构化改写指引';
+
+  @override
+  String get projectScriptPlanWorkbenchWriteScriptDrafts => '写入剧本草稿';
+
+  @override
+  String get projectScriptPlanWorkbenchStorySkeletonLabel => '故事骨架';
+
+  @override
+  String get projectScriptPlanWorkbenchStorySkeletonHelper =>
+      '聚焦故事主线、主要冲突、转折点与收束路径';
+
+  @override
+  String get projectScriptPlanWorkbenchAdaptationStrategyLabel => '改编策略';
+
+  @override
+  String get projectScriptPlanWorkbenchAdaptationStrategyHelper =>
+      '记录改编取舍、人物弧光、节奏与风格约束';
+
+  @override
+  String get projectScriptPlanWorkbenchScriptDraftPreviewTitle => '剧本草稿预览';
+
+  @override
+  String get projectScriptPlanWorkbenchNoDraftPacketsHint =>
+      '尚无草稿包。请先完善骨架/策略，再生成。';
+
+  @override
+  String get projectScriptPlanWorkbenchStructuredGuidanceTitle => '结构化改写指引';
+
+  @override
+  String get projectScriptPlanWorkbenchNoGuidanceHint =>
+      '尚无结构化指引。在改写前后运行以约束修订。';
+
+  @override
+  String get projectScriptPlanWorkbenchChaptersPrefix => '章节';
+
+  @override
+  String get projectScriptPlanWorkbenchTbd => '待定';
+
+  @override
+  String get projectScriptPlanWorkbenchReloadPlan => '重新加载方案';
+
+  @override
+  String get projectScriptPlanWorkbenchSavePlan => '保存方案';
+
+  @override
+  String get projectScriptPlanWorkbenchRefreshing => '刷新中…';
+
+  @override
+  String get projectScriptPlanWorkbenchSaving => '保存中…';
+
+  @override
+  String shortVideoUndoEnableShot(int storyboardId) {
+    return '启用镜头 #$storyboardId';
+  }
+
+  @override
+  String shortVideoUndoDisableShot(int storyboardId) {
+    return '停用镜头 #$storyboardId';
+  }
+
+  @override
+  String shortVideoUndoSetShotDuration(int storyboardId, int seconds) {
+    return '将镜头 #$storyboardId 时长设为 $seconds 秒';
+  }
+
+  @override
+  String shortVideoUndoReplaceShotVideo(int storyboardId) {
+    return '替换镜头 #$storyboardId 视频';
+  }
+
+  @override
+  String shortVideoUndoBatchEnable(int count) {
+    return '批量启用 $count 个镜头';
+  }
+
+  @override
+  String shortVideoUndoBatchDisable(int count) {
+    return '批量停用 $count 个镜头';
+  }
+
+  @override
+  String shortVideoUndoBatchAlignDuration(int count) {
+    return '批量对齐 $count 个镜头时长';
+  }
+
+  @override
+  String shortVideoUndoBatchReplaceVideo(int count) {
+    return '批量替换 $count 个镜头视频';
+  }
+
+  @override
+  String shortVideoUndoTooltipWithDescription(String description) {
+    return '撤销：$description（Ctrl+Z / Cmd+Z）';
+  }
+
+  @override
+  String get shortVideoUndoTooltipEmpty => '没有可撤销的操作';
+
+  @override
+  String shortVideoRedoTooltipWithDescription(String description) {
+    return '重做：$description（Ctrl+Shift+Z / Cmd+Shift+Z）';
+  }
+
+  @override
+  String get shortVideoRedoTooltipEmpty => '没有可重做的操作';
+
+  @override
+  String get shortVideoOperationHistoryToolbarTooltip => '查看操作历史';
+
+  @override
+  String get shortVideoOperationHistoryTitle => '操作历史';
+
+  @override
+  String get shortVideoOperationHistorySummaryHeading => '摘要';
+
+  @override
+  String shortVideoOperationHistoryUndoStack(int count) {
+    return '撤销栈：$count';
+  }
+
+  @override
+  String shortVideoOperationHistoryRedoStack(int count) {
+    return '重做栈：$count';
+  }
+
+  @override
+  String shortVideoOperationHistoryLimitLine(int max) {
+    return '历史上限：$max 条';
+  }
+
+  @override
+  String get shortVideoOperationHistoryEmpty => '暂无操作记录';
+
+  @override
+  String get shortVideoOperationHistoryOperationsHeading => '操作（最新在前）';
+
+  @override
+  String get shortVideoOperationHistoryLatestChip => '最新';
+
+  @override
+  String get shortVideoOperationHistoryClear => '清空历史';
+
+  @override
+  String get shortVideoOperationHistoryClearedSnackbar => '已清空操作历史';
+
+  @override
+  String shortVideoOperationHistoryRelativeSecondsAgo(int count) {
+    return '$count 秒前';
+  }
+
+  @override
+  String shortVideoOperationHistoryRelativeMinutesAgo(int count) {
+    return '$count 分钟前';
+  }
+
+  @override
+  String shortVideoOperationHistoryRelativeHoursAgo(int count) {
+    return '$count 小时前';
+  }
+
+  @override
+  String get shortVideoPreviewPlaylistComplete => '已播放完全部镜头';
+
+  @override
+  String get shortVideoCandidateAssetConfirmationTitle => '候选素材确认';
+
+  @override
+  String get shortVideoCandidateMetricPending => '待处理';
+
+  @override
+  String get shortVideoCandidateMetricLinked => '已关联';
+
+  @override
+  String get shortVideoCandidateMetricIgnored => '已忽略';
+
+  @override
+  String get shortVideoCandidateMetricUnset => '未设置';
+
+  @override
+  String get shortVideoCandidateBatchGenerateSubmitting => '正在提交候选片段批量任务…';
+
+  @override
+  String get shortVideoCandidateBatchGenerateLabel => '批量生成候选片段（项目默认）';
+
+  @override
+  String get shortVideoCandidateOpenProjectsForAssets => '打开项目管理素材';
+
+  @override
+  String get shortVideoCandidateCompareSectionTitle => '候选对比';
+
+  @override
+  String get projectEditorAssetFilterDialogTitle => '高级素材筛选';
+
+  @override
+  String get projectEditorAssetFilterByScript => '按剧本筛选';
+
+  @override
+  String get projectEditorAssetFilterAllScripts => '（全部剧本）';
+
+  @override
+  String get projectEditorAssetFilterAssetTypeOptional => '素材类型（可选）';
+
+  @override
+  String get projectEditorAssetFilterAssetTypeHint => 'role / clip / props';
+
+  @override
+  String get projectEditorAssetFilterNameContainsOptional => '名称包含（可选）';
+
+  @override
+  String get projectEditorAssetFilterPage => '页码';
+
+  @override
+  String get projectEditorAssetFilterLimit => '每页条数';
+
+  @override
+  String get projectEditorAssetFilterApply => '应用筛选';
+
+  @override
+  String get projectEditorAssetFilterSnackbarPageLimitPositive =>
+      'page 与 limit 须为正整数';
+
+  @override
+  String projectEditorAssetFilterSnackbarApplied(int shown, int total) {
+    return '已应用筛选：$shown/$total 行';
+  }
+
+  @override
+  String get projectEditorDeleteProjectTitle => '删除项目？';
+
+  @override
+  String projectEditorDeleteProjectBody(int id) {
+    return '将删除项目 #$id、相关剧本/分镜（数据库级联），并清除该项目的智能体记忆。';
+  }
+
+  @override
+  String get projectEditorDeleteProjectSnackbar => '项目已删除';
+
+  @override
+  String get projectEditorDeleteProjectButton => '删除';
+
+  @override
+  String get projectEditorSavePatch => '保存（PATCH）';
+
+  @override
+  String get projectEditorSavingEllipsis => '保存中…';
+
+  @override
+  String get projectEditorPublishSectionTitle => '发布';
+
+  @override
+  String get projectEditorPublishSectionBody => '草稿、排期、任务与审计位于 短视频空间 → 发布。';
+
+  @override
+  String get projectEditorPublishOpenWorkspace => '打开发布工作区';
+
+  @override
+  String projectEditorPublishOverviewSnackbar(int drafts, int jobs) {
+    return '发布概览：草稿=$drafts 任务=$jobs';
+  }
+
+  @override
+  String get projectEditorPublishViewOverview => '查看发布概览';
+
+  @override
+  String projectEditorPublishOverviewFailed(String error) {
+    return '加载发布概览失败：$error';
+  }
+
+  @override
+  String get projectEditorStoryboardImageWorkbenchTitle => '图片工作台';
+
+  @override
+  String get projectEditorStoryboardImageUrlLabel => '当前图片 URL / data URI';
+
+  @override
+  String get projectEditorStoryboardImageUrlHelper =>
+      'HTTP URL 或 data:image/...;base64。';
+
+  @override
+  String get projectEditorStoryboardImageLoadPreview => '加载当前预览';
+
+  @override
+  String get projectEditorStoryboardImageWorking => '处理中…';
+
+  @override
+  String get projectEditorStoryboardImageSaveUrl => '保存图片 URL';
+
+  @override
+  String get projectEditorStoryboardImageClearFrame => '清空画格';
+
+  @override
+  String get projectEditorStoryboardImageRefreshProduction => '刷新制作数据';
+
+  @override
+  String get projectEditorStoryboardImageRefreshing => '刷新中…';
+
+  @override
+  String get projectEditorNovelsEventsWorkbenchEmptyDetail =>
+      '通过显式表单管理事件（搜索/创建/更新/删除/批量），勿依赖 HTTP 探测按钮。';
+
+  @override
+  String projectEditorNovelsEventsWorkbenchSummaryFirst(
+    String summaryLine,
+    int id,
+    String name,
+  ) {
+    return '$summaryLine；首条 #$id $name。';
+  }
+
+  @override
+  String get projectEditorNovelsEventsOpenWorkbench => '打开事件工作台';
+
+  @override
+  String get projectEditorNovelsEventsRefresh => '刷新事件';
+
+  @override
+  String get projectEditorNovelsEventsRefreshing => '正在刷新事件…';
+
+  @override
+  String get projectEditorAssetsWorkbenchNewAsset => '新建素材';
+
+  @override
+  String get projectEditorAssetsWorkbenchEditAsset => '编辑素材';
+
+  @override
+  String get projectEditorAssetsWorkbenchDeleteAsset => '删除素材';
+
+  @override
+  String get projectEditorAssetsWorkbenchFilterAssets => '筛选素材';
+
+  @override
+  String get projectEditorAssetsWorkbenchLinkScript => '关联剧本与素材';
+
+  @override
+  String get projectEditorAssetsWorkbenchUnlink => '解除关联';
+
+  @override
+  String get projectEditorAssetsWorkbenchUploadEditImage => '上传修图';
+
+  @override
+  String get projectEditorAssetsWorkbenchUploadClipAsset => '上传片段素材';
+
+  @override
+  String get projectEditorAssetImagesWorkbenchDialogTitle => '资产图片工作台';
+
+  @override
+  String get projectEditorAssetImagesFieldTargetAsset => '目标素材';
+
+  @override
+  String get projectEditorAssetImagesNewFilePathOptional => '新建 file_path（可选）';
+
+  @override
+  String get projectEditorAssetImagesNewStateOptional => '新建 state（可选）';
+
+  @override
+  String get projectEditorAssetImagesNewSortOptional => '新建 sort_index（可选）';
+
+  @override
+  String get projectEditorAssetImagesAddImage => '新增图片';
+
+  @override
+  String get projectEditorAssetImagesEditFilePathMayClear =>
+      '编辑 file_path（可清空）';
+
+  @override
+  String get projectEditorAssetImagesEditStateMayClear => '编辑 state（可清空）';
+
+  @override
+  String get projectEditorAssetImagesEditSortOptional => '编辑 sort_index（可选）';
+
+  @override
+  String get projectEditorAssetImagesSaveCurrentImage => '保存当前图片';
+
+  @override
+  String get projectEditorAssetImagesDeleteCurrentImage => '删除当前图片';
+
+  @override
+  String get projectEditorAssetImagesLoadImageList => '加载图片列表';
+
+  @override
+  String get projectEditorAssetImagesLoadingEllipsis => '加载中…';
+
+  @override
+  String get projectEditorAssetImagesPreviewImage => '预览图片';
+
+  @override
+  String get projectEditorAssetImagesLoadingPreview => '正在加载预览…';
+
+  @override
+  String get projectEditorAssetImagesFieldImages => '图片';
+
+  @override
+  String projectEditorAssetGenUseMaterialContext(int count) {
+    return '使用素材上下文（$count 行）';
+  }
+
+  @override
+  String projectEditorAssetGenUseBatchCandidates(int count) {
+    return '使用批量候选（$count 行）';
+  }
+
+  @override
+  String get projectEditorAssetImagesCreateAssetFirst => '请先创建素材再管理图片';
+
+  @override
+  String get projectEditorAssetImagesDiagnosisNotLoadedSummary =>
+      '尚未加载该资产的图片列表。';
+
+  @override
+  String get projectEditorAssetImagesDiagnosisNotLoadedDetail =>
+      '先同步图片列表以确认是否存在历史图片，再预览或新增。';
+
+  @override
+  String get projectEditorAssetImagesDiagnosisNoImagesSummary => '该资产尚无图片。';
+
+  @override
+  String get projectEditorAssetImagesDiagnosisNoImagesDetail =>
+      '新增图片以创建该资产的首条可编辑历史记录。';
+
+  @override
+  String projectEditorAssetImagesDiagnosisPreviewPendingSummary(int count) {
+    return '已加载 $count 张图片；尚未加载预览。';
+  }
+
+  @override
+  String get projectEditorAssetImagesDiagnosisPreviewPendingDetail =>
+      '加载当前图片预览，并在编辑或删除前核对 file_path 与 state。';
+
+  @override
+  String get projectEditorAssetImagesDiagnosisReadySummary => '当前图片已就绪，可继续编辑。';
+
+  @override
+  String projectEditorAssetImagesDiagnosisReadyDetail(int sortIndex) {
+    return '当前聚焦 sort=$sortIndex；可更新 file_path、state 或 sort_index，必要时删除。';
+  }
+
+  @override
+  String get projectEditorAssetImagesUnknownState => '未知状态';
+
+  @override
+  String get projectEditorAssetImagesSelectionNoImages => '该资产没有图片。';
+
+  @override
+  String get projectEditorAssetImagesSelectionCoverNone => '无封面图';
+
+  @override
+  String projectEditorAssetImagesSelectionCoverNumeric(int id) {
+    return '封面数字图片 #$id';
+  }
+
+  @override
+  String projectEditorAssetImagesSelectionFocusLine(int sort, String state) {
+    return '聚焦 sort=$sort · $state';
+  }
+
+  @override
+  String projectEditorAssetImagesSelectionSummary(
+    int count,
+    String coverLine,
+    String focusLine,
+  ) {
+    return '已加载 $count 张图片；$coverLine；$focusLine。';
+  }
+
+  @override
+  String projectEditorAssetImagesFollowUp(
+    String actionSummary,
+    String nextAction,
+    String detail,
+  ) {
+    return '$actionSummary 下一步：$nextAction。$detail';
+  }
+
+  @override
+  String projectEditorAssetImagesFailureNotice(
+    String actionSummary,
+    String nextAction,
+    String reason,
+    String fallbackDetail,
+  ) {
+    return '$actionSummary 下一步：$nextAction。原因：$reason。$fallbackDetail';
+  }
+
+  @override
+  String get projectEditorAssetImagesNoErrorDetail => '无更多错误详情。';
+
+  @override
+  String get projectEditorAssetImagesRecommendedLoadList => '加载图片列表';
+
+  @override
+  String get projectEditorAssetImagesRecommendedAddImage => '新增图片';
+
+  @override
+  String get projectEditorAssetImagesRecommendedLoadPreview => '加载当前预览';
+
+  @override
+  String get projectEditorAssetImagesRecommendedSaveImage => '保存当前图片';
+
+  @override
+  String get projectEditorAssetImagesMutationCreateSuccess => '已新增资产图片。';
+
+  @override
+  String get projectEditorAssetImagesMutationCreateFailure => '新增资产图片失败。';
+
+  @override
+  String get projectEditorAssetImagesMutationCreateFallback =>
+      '请检查 file_path、state 或 sort_index 后重试。';
+
+  @override
+  String get projectEditorAssetImagesMutationPatchSuccess => '已更新当前图片。';
+
+  @override
+  String get projectEditorAssetImagesMutationPatchFailure => '更新当前图片失败。';
+
+  @override
+  String get projectEditorAssetImagesMutationPatchFallback =>
+      '请先重新读取预览，确认当前图片后再修改。';
+
+  @override
+  String get projectEditorAssetImagesMutationDeleteSuccess => '已删除当前图片。';
+
+  @override
+  String get projectEditorAssetImagesMutationDeleteFailure => '删除当前图片失败。';
+
+  @override
+  String get projectEditorAssetImagesMutationDeleteFallback =>
+      '请先刷新图片列表，确认当前选择后再删除。';
+
+  @override
+  String get projectEditorAssetImagesPreviewLoadFailed => '读取当前图片预览失败。';
+
+  @override
+  String get projectEditorAssetImagesPreviewLoadFailedFallback =>
+      '建议先确认 file_path 或切换到其他图片后重试。';
+
+  @override
+  String get projectEditorAssetImagesListLoadFailed => '读取当前资产图片列表失败。';
+
+  @override
+  String get projectEditorAssetImagesListLoadFailedFallback =>
+      '建议稍后重新同步图片列表，确认资产下是否已有图片。';
+
+  @override
+  String get projectEditorAssetImagesNoPreviewCleared => '当前没有可预览的图片，已清空预览内容。';
+
+  @override
+  String get projectEditorAssetImagesPreviewLoaded => '已读取当前图片预览。';
+
+  @override
+  String get projectEditorAssetImagesListSynced => '已同步当前资产的图片列表。';
+
+  @override
+  String get projectEditorAssetImagesCreateSortMustBePositive =>
+      '新增时 sort_index 须为正整数。';
+
+  @override
+  String get projectEditorAssetImagesPatchSortMustBePositive =>
+      '编辑时 sort_index 须为正整数。';
+
+  @override
+  String get projectEditorAssetImagesSelectImageToEdit => '请先选择要编辑的图片。';
+
+  @override
+  String get projectEditorAssetImagesSelectImageToDelete => '请先选择要删除的图片。';
+
+  @override
+  String projectEditorAssetImagesSwitchingAsset(int id) {
+    return '正在切换到资产 #$id 并加载图片列表…';
+  }
+
+  @override
+  String get projectEditorAssetImagesSwitchingImagePreview => '正在切换图片并刷新预览…';
+
+  @override
   String get projectEditorAssetSummaryProductionEmpty => 'production 资产数据为空';
 
   @override
@@ -11645,7 +12242,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionSummaryStoryboardRows(int count) {
-    return '分镜表 $count 行';
+    return '分镜 $count 条';
   }
 
   @override
