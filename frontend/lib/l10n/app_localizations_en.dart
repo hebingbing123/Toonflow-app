@@ -7477,6 +7477,236 @@ class AppLocalizationsEn extends AppLocalizations {
       'Still placeholder text';
 
   @override
+  String get scriptEditorStoryboardsVideoRecommendSyncProductionData =>
+      'Sync current shot production data';
+
+  @override
+  String get scriptEditorStoryboardsVideoRecommendReadCurrentPreview =>
+      'Read current preview';
+
+  @override
+  String get scriptEditorStoryboardsVideoRecommendPrepareVideoTrack =>
+      'Prepare video track';
+
+  @override
+  String get scriptEditorStoryboardsVideoRecommendGenerateDefaultVideoPrompt =>
+      'Generate default video prompt';
+
+  @override
+  String get scriptEditorStoryboardsVideoRecommendRefreshVideoData =>
+      'Refresh video data';
+
+  @override
+  String get scriptEditorStoryboardsVideoRecommendSubmitVideoGeneration =>
+      'Generate video';
+
+  @override
+  String get scriptEditorStoryboardsVideoGenerating => 'Generating…';
+
+  @override
+  String get scriptEditorStoryboardsVideoDiagnosisNeedProductionSummary =>
+      'This shot is not synced to the production view yet.';
+
+  @override
+  String get scriptEditorStoryboardsVideoDiagnosisNeedProductionDetail =>
+      'Sync production data for this shot first so images, tracks, and prompts are available before continuing video.';
+
+  @override
+  String get scriptEditorStoryboardsVideoDiagnosisNoFrameSummary =>
+      'This shot has no usable frame yet.';
+
+  @override
+  String get scriptEditorStoryboardsVideoDiagnosisNoFrameDetail =>
+      'Read the current preview or paste an image URL so the video workbench has a clear visual input.';
+
+  @override
+  String get scriptEditorStoryboardsVideoDiagnosisNoTracksSummary =>
+      'No usable video tracks for this shot yet.';
+
+  @override
+  String get scriptEditorStoryboardsVideoDiagnosisNoTracksDetail =>
+      'Prepare a video track before submitting generation.';
+
+  @override
+  String get scriptEditorStoryboardsVideoDiagnosisNoTrackSelectedSummary =>
+      'No video track is selected for this shot.';
+
+  @override
+  String scriptEditorStoryboardsVideoDiagnosisPickTrackDetail(String trackIds) {
+    return 'Tracks found: $trackIds. Enter a track ID before generating video.';
+  }
+
+  @override
+  String
+  get scriptEditorStoryboardsVideoDiagnosisIncompleteVideoParamsSummary =>
+      'Video parameters are not complete yet.';
+
+  @override
+  String get scriptEditorStoryboardsVideoDiagnosisIncompleteVideoParamsDetail =>
+      'Generate a default video prompt and confirm duration; then you can generate video in one step.';
+
+  @override
+  String scriptEditorStoryboardsVideoDiagnosisJobsRunningSummary(int count) {
+    return '$count video job(s) are still running for this script.';
+  }
+
+  @override
+  String scriptEditorStoryboardsVideoDiagnosisJobsRunningDetailNoVideos(
+    String suffix,
+  ) {
+    return 'Refresh video data to see whether this shot already has new output before submitting again.$suffix';
+  }
+
+  @override
+  String scriptEditorStoryboardsVideoDiagnosisJobsRunningDetailHasVideos(
+    String suffix,
+  ) {
+    return 'Refresh video data and review existing candidates for this shot before submitting again.$suffix';
+  }
+
+  @override
+  String scriptEditorStoryboardsVideoDiagnosisJobsPendingSuffix(int pending) {
+    return ' About $pending shot(s) still have in-flight jobs without media write-back detected.';
+  }
+
+  @override
+  String scriptEditorStoryboardsVideoDiagnosisHasVideoCandidatesSummary(
+    int count,
+  ) {
+    return 'This shot already has $count video candidate(s).';
+  }
+
+  @override
+  String get scriptEditorStoryboardsVideoDiagnosisHasVideoCandidatesDetail =>
+      'Review existing videos and pick a current one; submit again only if you still need a new render.';
+
+  @override
+  String get scriptEditorStoryboardsVideoDiagnosisAllReadySummary =>
+      'Image, track, and video parameters look ready.';
+
+  @override
+  String get scriptEditorStoryboardsVideoDiagnosisAllReadyDetail =>
+      'You can generate video in one step; the system will refresh prompts, trim suggestions, and refresh results.';
+
+  @override
+  String get scriptEditorStoryboardsVideoErrorNoExtraDetail =>
+      'No additional error details.';
+
+  @override
+  String scriptEditorStoryboardsVideoFailureReasonDetail(
+    String reason,
+    String fallback,
+  ) {
+    return 'Failure reason: $reason. $fallback';
+  }
+
+  @override
+  String get scriptEditorStoryboardsVoiceoverCompleted =>
+      'Voiceover audio ready';
+
+  @override
+  String get scriptEditorStoryboardsVoiceoverQueued => 'Voiceover queued';
+
+  @override
+  String get scriptEditorStoryboardsVoiceoverFailed => 'Voiceover failed';
+
+  @override
+  String scriptEditorStoryboardsVoiceoverFailedWithError(String error) {
+    return 'Voiceover failed: $error';
+  }
+
+  @override
+  String get scriptEditorStoryboardsCurrentFrame => 'Current frame';
+
+  @override
+  String get scriptEditorStoryboardsNoSelectedFrame => 'No frame loaded';
+
+  @override
+  String scriptEditorStoryboardsPreviewLoadFailed(String url) {
+    return 'Preview failed to load: $url';
+  }
+
+  @override
+  String scriptEditorStoryboardsSubtitleNarration(String text) {
+    return 'Subtitle / narration: $text';
+  }
+
+  @override
+  String scriptEditorStoryboardsAudioDelivery(String line) {
+    return 'Audio: $line';
+  }
+
+  @override
+  String get scriptEditorStoryboardsReadinessBasicSlot => 'Timeline slot';
+
+  @override
+  String get scriptEditorStoryboardsReadinessPromptContext =>
+      'Script / prompt context';
+
+  @override
+  String get scriptEditorStoryboardsReadinessReferenceVisual =>
+      'Reference visual';
+
+  @override
+  String get scriptEditorStoryboardsReadinessCandidateCleared =>
+      'Candidate cleared';
+
+  @override
+  String get scriptEditorStoryboardsReadinessNoBlockingJob => 'No blocking job';
+
+  @override
+  String get scriptEditorStoryboardsReadinessTitle => 'Short video readiness';
+
+  @override
+  String get scriptEditorStoryboardsReadinessReady => 'Ready';
+
+  @override
+  String get scriptEditorStoryboardsReadinessIncomplete => 'Incomplete';
+
+  @override
+  String get scriptEditorStoryboardsReadinessSummaryReady =>
+      'Short video: checks passed; ready to generate.';
+
+  @override
+  String get scriptEditorStoryboardsReadinessSummaryPending =>
+      'Short video: still needs review.';
+
+  @override
+  String scriptEditorStoryboardsReadinessSummaryBlocked(String items) {
+    return 'Short video: still need $items';
+  }
+
+  @override
+  String get scriptEditorStoryboardsReadinessBlockingMissingBasicSlot =>
+      'Timeline slot';
+
+  @override
+  String get scriptEditorStoryboardsReadinessBlockingMissingPromptContext =>
+      'Script / prompt';
+
+  @override
+  String get scriptEditorStoryboardsReadinessBlockingMissingReferenceVisual =>
+      'Reference image';
+
+  @override
+  String
+  get scriptEditorStoryboardsReadinessBlockingMissingLiveActionReferenceShot =>
+      'Live-action reference shot';
+
+  @override
+  String
+  get scriptEditorStoryboardsReadinessBlockingMissingLiveActionPerformanceNotes =>
+      'Performance / delivery notes';
+
+  @override
+  String get scriptEditorStoryboardsReadinessBlockingCandidatePending =>
+      'Candidate confirmation';
+
+  @override
+  String get scriptEditorStoryboardsReadinessBlockingBlockingJob =>
+      'Generation job running';
+
+  @override
   String get scriptEditorStoryboardsProductionEmptyData =>
       'Production view has no storyboard rows yet.';
 

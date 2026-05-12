@@ -5532,6 +5532,147 @@
   "scriptEditorStoryboardsNarrationExplicit": "Explicit narration is set",
   "scriptEditorStoryboardsNarrationPromptFallback": "Falls back to storyboard prompt",
   "scriptEditorStoryboardsNarrationPlaceholder": "Still placeholder text",
+  "scriptEditorStoryboardsVideoRecommendSyncProductionData": "Sync current shot production data",
+  "scriptEditorStoryboardsVideoRecommendReadCurrentPreview": "Read current preview",
+  "scriptEditorStoryboardsVideoRecommendPrepareVideoTrack": "Prepare video track",
+  "scriptEditorStoryboardsVideoRecommendGenerateDefaultVideoPrompt": "Generate default video prompt",
+  "scriptEditorStoryboardsVideoRecommendRefreshVideoData": "Refresh video data",
+  "scriptEditorStoryboardsVideoRecommendSubmitVideoGeneration": "Generate video",
+  "scriptEditorStoryboardsVideoGenerating": "Generating…",
+  "scriptEditorStoryboardsVideoDiagnosisNeedProductionSummary": "This shot is not synced to the production view yet.",
+  "scriptEditorStoryboardsVideoDiagnosisNeedProductionDetail": "Sync production data for this shot first so images, tracks, and prompts are available before continuing video.",
+  "scriptEditorStoryboardsVideoDiagnosisNoFrameSummary": "This shot has no usable frame yet.",
+  "scriptEditorStoryboardsVideoDiagnosisNoFrameDetail": "Read the current preview or paste an image URL so the video workbench has a clear visual input.",
+  "scriptEditorStoryboardsVideoDiagnosisNoTracksSummary": "No usable video tracks for this shot yet.",
+  "scriptEditorStoryboardsVideoDiagnosisNoTracksDetail": "Prepare a video track before submitting generation.",
+  "scriptEditorStoryboardsVideoDiagnosisNoTrackSelectedSummary": "No video track is selected for this shot.",
+  "scriptEditorStoryboardsVideoDiagnosisPickTrackDetail": "Tracks found: {trackIds}. Enter a track ID before generating video.",
+  "@scriptEditorStoryboardsVideoDiagnosisPickTrackDetail": {
+    "placeholders": {
+      "trackIds": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardsVideoDiagnosisIncompleteVideoParamsSummary": "Video parameters are not complete yet.",
+  "scriptEditorStoryboardsVideoDiagnosisIncompleteVideoParamsDetail": "Generate a default video prompt and confirm duration; then you can generate video in one step.",
+  "scriptEditorStoryboardsVideoDiagnosisJobsRunningSummary": "{count} video job(s) are still running for this script.",
+  "@scriptEditorStoryboardsVideoDiagnosisJobsRunningSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scriptEditorStoryboardsVideoDiagnosisJobsRunningDetailNoVideos": "Refresh video data to see whether this shot already has new output before submitting again.{suffix}",
+  "@scriptEditorStoryboardsVideoDiagnosisJobsRunningDetailNoVideos": {
+    "placeholders": {
+      "suffix": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardsVideoDiagnosisJobsRunningDetailHasVideos": "Refresh video data and review existing candidates for this shot before submitting again.{suffix}",
+  "@scriptEditorStoryboardsVideoDiagnosisJobsRunningDetailHasVideos": {
+    "placeholders": {
+      "suffix": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardsVideoDiagnosisJobsPendingSuffix": " About {pending} shot(s) still have in-flight jobs without media write-back detected.",
+  "@scriptEditorStoryboardsVideoDiagnosisJobsPendingSuffix": {
+    "placeholders": {
+      "pending": {
+        "type": "int"
+      }
+    }
+  },
+  "scriptEditorStoryboardsVideoDiagnosisHasVideoCandidatesSummary": "This shot already has {count} video candidate(s).",
+  "@scriptEditorStoryboardsVideoDiagnosisHasVideoCandidatesSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scriptEditorStoryboardsVideoDiagnosisHasVideoCandidatesDetail": "Review existing videos and pick a current one; submit again only if you still need a new render.",
+  "scriptEditorStoryboardsVideoDiagnosisAllReadySummary": "Image, track, and video parameters look ready.",
+  "scriptEditorStoryboardsVideoDiagnosisAllReadyDetail": "You can generate video in one step; the system will refresh prompts, trim suggestions, and refresh results.",
+  "scriptEditorStoryboardsVideoErrorNoExtraDetail": "No additional error details.",
+  "scriptEditorStoryboardsVideoFailureReasonDetail": "Failure reason: {reason}. {fallback}",
+  "@scriptEditorStoryboardsVideoFailureReasonDetail": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      },
+      "fallback": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardsVoiceoverCompleted": "Voiceover audio ready",
+  "scriptEditorStoryboardsVoiceoverQueued": "Voiceover queued",
+  "scriptEditorStoryboardsVoiceoverFailed": "Voiceover failed",
+  "scriptEditorStoryboardsVoiceoverFailedWithError": "Voiceover failed: {error}",
+  "@scriptEditorStoryboardsVoiceoverFailedWithError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardsCurrentFrame": "Current frame",
+  "scriptEditorStoryboardsNoSelectedFrame": "No frame loaded",
+  "scriptEditorStoryboardsPreviewLoadFailed": "Preview failed to load: {url}",
+  "@scriptEditorStoryboardsPreviewLoadFailed": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardsSubtitleNarration": "Subtitle / narration: {text}",
+  "@scriptEditorStoryboardsSubtitleNarration": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardsAudioDelivery": "Audio: {line}",
+  "@scriptEditorStoryboardsAudioDelivery": {
+    "placeholders": {
+      "line": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardsReadinessBasicSlot": "Timeline slot",
+  "scriptEditorStoryboardsReadinessPromptContext": "Script / prompt context",
+  "scriptEditorStoryboardsReadinessReferenceVisual": "Reference visual",
+  "scriptEditorStoryboardsReadinessCandidateCleared": "Candidate cleared",
+  "scriptEditorStoryboardsReadinessNoBlockingJob": "No blocking job",
+  "scriptEditorStoryboardsReadinessTitle": "Short video readiness",
+  "scriptEditorStoryboardsReadinessReady": "Ready",
+  "scriptEditorStoryboardsReadinessIncomplete": "Incomplete",
+  "scriptEditorStoryboardsReadinessSummaryReady": "Short video: checks passed; ready to generate.",
+  "scriptEditorStoryboardsReadinessSummaryPending": "Short video: still needs review.",
+  "scriptEditorStoryboardsReadinessSummaryBlocked": "Short video: still need {items}",
+  "@scriptEditorStoryboardsReadinessSummaryBlocked": {
+    "placeholders": {
+      "items": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardsReadinessBlockingMissingBasicSlot": "Timeline slot",
+  "scriptEditorStoryboardsReadinessBlockingMissingPromptContext": "Script / prompt",
+  "scriptEditorStoryboardsReadinessBlockingMissingReferenceVisual": "Reference image",
+  "scriptEditorStoryboardsReadinessBlockingMissingLiveActionReferenceShot": "Live-action reference shot",
+  "scriptEditorStoryboardsReadinessBlockingMissingLiveActionPerformanceNotes": "Performance / delivery notes",
+  "scriptEditorStoryboardsReadinessBlockingCandidatePending": "Candidate confirmation",
+  "scriptEditorStoryboardsReadinessBlockingBlockingJob": "Generation job running",
   "scriptEditorStoryboardsProductionEmptyData": "Production view has no storyboard rows yet.",
   "scriptEditorStoryboardsProductionSummaryLine": "Production view · {count} rows · {preview}{ellipsis}",
   "@scriptEditorStoryboardsProductionSummaryLine": {

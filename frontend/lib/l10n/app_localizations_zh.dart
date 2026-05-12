@@ -7154,6 +7154,226 @@ class AppLocalizationsZh extends AppLocalizations {
   String get scriptEditorStoryboardsNarrationPlaceholder => '仍是占位文本';
 
   @override
+  String get scriptEditorStoryboardsVideoRecommendSyncProductionData =>
+      '同步当前分镜数据';
+
+  @override
+  String get scriptEditorStoryboardsVideoRecommendReadCurrentPreview =>
+      '读取当前预览';
+
+  @override
+  String get scriptEditorStoryboardsVideoRecommendPrepareVideoTrack => '准备视频轨道';
+
+  @override
+  String get scriptEditorStoryboardsVideoRecommendGenerateDefaultVideoPrompt =>
+      '生成默认视频提示词';
+
+  @override
+  String get scriptEditorStoryboardsVideoRecommendRefreshVideoData => '刷新视频数据';
+
+  @override
+  String get scriptEditorStoryboardsVideoRecommendSubmitVideoGeneration =>
+      '一键生成视频';
+
+  @override
+  String get scriptEditorStoryboardsVideoGenerating => '生成中…';
+
+  @override
+  String get scriptEditorStoryboardsVideoDiagnosisNeedProductionSummary =>
+      '当前分镜还没有同步到制作视图。';
+
+  @override
+  String get scriptEditorStoryboardsVideoDiagnosisNeedProductionDetail =>
+      '建议先同步当前分镜数据，补齐 production 侧的图片、轨道和提示词快照，再继续处理视频流程。';
+
+  @override
+  String get scriptEditorStoryboardsVideoDiagnosisNoFrameSummary =>
+      '当前分镜还没有可用画面。';
+
+  @override
+  String get scriptEditorStoryboardsVideoDiagnosisNoFrameDetail =>
+      '先读取当前预览或手动保存图片 URL，让视频工作台有明确的输入源。';
+
+  @override
+  String get scriptEditorStoryboardsVideoDiagnosisNoTracksSummary =>
+      '当前分镜还没有可用视频轨道。';
+
+  @override
+  String get scriptEditorStoryboardsVideoDiagnosisNoTracksDetail =>
+      '建议先准备视频轨道，再提交视频生成任务。';
+
+  @override
+  String get scriptEditorStoryboardsVideoDiagnosisNoTrackSelectedSummary =>
+      '当前分镜还没有选定视频轨道。';
+
+  @override
+  String scriptEditorStoryboardsVideoDiagnosisPickTrackDetail(String trackIds) {
+    return '已发现轨道 $trackIds，建议先回填一个轨道 ID 再继续生成视频。';
+  }
+
+  @override
+  String
+  get scriptEditorStoryboardsVideoDiagnosisIncompleteVideoParamsSummary =>
+      '视频参数还没有准备完整。';
+
+  @override
+  String get scriptEditorStoryboardsVideoDiagnosisIncompleteVideoParamsDetail =>
+      '建议先生成默认视频提示词并确认时长；准备完成后可直接一键生成视频。';
+
+  @override
+  String scriptEditorStoryboardsVideoDiagnosisJobsRunningSummary(int count) {
+    return '当前剧本还有 $count 条视频任务在运行。';
+  }
+
+  @override
+  String scriptEditorStoryboardsVideoDiagnosisJobsRunningDetailNoVideos(
+    String suffix,
+  ) {
+    return '建议先刷新视频数据，确认当前分镜是否已有新结果，再决定是否继续提交。$suffix';
+  }
+
+  @override
+  String scriptEditorStoryboardsVideoDiagnosisJobsRunningDetailHasVideos(
+    String suffix,
+  ) {
+    return '建议先刷新视频数据并检查当前分镜已有候选视频，再决定是否继续提交。$suffix';
+  }
+
+  @override
+  String scriptEditorStoryboardsVideoDiagnosisJobsPendingSuffix(int pending) {
+    return ' 其中约 $pending 条分镜仍仅有进行中任务，尚未检测到片媒体回库。';
+  }
+
+  @override
+  String scriptEditorStoryboardsVideoDiagnosisHasVideoCandidatesSummary(
+    int count,
+  ) {
+    return '当前分镜已有 $count 条视频候选。';
+  }
+
+  @override
+  String get scriptEditorStoryboardsVideoDiagnosisHasVideoCandidatesDetail =>
+      '可以先检查已有视频结果并设为当前视频；若仍不满意，再按当前参数继续提交新任务。';
+
+  @override
+  String get scriptEditorStoryboardsVideoDiagnosisAllReadySummary =>
+      '图片、轨道和视频参数都已就绪。';
+
+  @override
+  String get scriptEditorStoryboardsVideoDiagnosisAllReadyDetail =>
+      '可以直接一键生成视频，系统会自动补齐生成前提示词刷新、建议裁剪和结果回刷。';
+
+  @override
+  String get scriptEditorStoryboardsVideoErrorNoExtraDetail => '未提供额外错误信息。';
+
+  @override
+  String scriptEditorStoryboardsVideoFailureReasonDetail(
+    String reason,
+    String fallback,
+  ) {
+    return '失败原因：$reason。$fallback';
+  }
+
+  @override
+  String get scriptEditorStoryboardsVoiceoverCompleted => '已生成配音';
+
+  @override
+  String get scriptEditorStoryboardsVoiceoverQueued => '配音排队中';
+
+  @override
+  String get scriptEditorStoryboardsVoiceoverFailed => '配音失败';
+
+  @override
+  String scriptEditorStoryboardsVoiceoverFailedWithError(String error) {
+    return '配音失败：$error';
+  }
+
+  @override
+  String get scriptEditorStoryboardsCurrentFrame => '当前画面';
+
+  @override
+  String get scriptEditorStoryboardsNoSelectedFrame => '暂无画面';
+
+  @override
+  String scriptEditorStoryboardsPreviewLoadFailed(String url) {
+    return '预览加载失败：$url';
+  }
+
+  @override
+  String scriptEditorStoryboardsSubtitleNarration(String text) {
+    return '字幕 / 旁白：$text';
+  }
+
+  @override
+  String scriptEditorStoryboardsAudioDelivery(String line) {
+    return '音频：$line';
+  }
+
+  @override
+  String get scriptEditorStoryboardsReadinessBasicSlot => '时间线槽位';
+
+  @override
+  String get scriptEditorStoryboardsReadinessPromptContext => '脚本 / 提示词';
+
+  @override
+  String get scriptEditorStoryboardsReadinessReferenceVisual => '参考图';
+
+  @override
+  String get scriptEditorStoryboardsReadinessCandidateCleared => '候选已清空';
+
+  @override
+  String get scriptEditorStoryboardsReadinessNoBlockingJob => '无阻塞任务';
+
+  @override
+  String get scriptEditorStoryboardsReadinessTitle => '短视频就绪度';
+
+  @override
+  String get scriptEditorStoryboardsReadinessReady => '就绪';
+
+  @override
+  String get scriptEditorStoryboardsReadinessIncomplete => '未就绪';
+
+  @override
+  String get scriptEditorStoryboardsReadinessSummaryReady =>
+      '短视频就绪：本条分镜检查已通过，可继续生成。';
+
+  @override
+  String get scriptEditorStoryboardsReadinessSummaryPending => '短视频就绪：有待核对项。';
+
+  @override
+  String scriptEditorStoryboardsReadinessSummaryBlocked(String items) {
+    return '短视频就绪：待补齐 $items';
+  }
+
+  @override
+  String get scriptEditorStoryboardsReadinessBlockingMissingBasicSlot =>
+      '时间线槽位';
+
+  @override
+  String get scriptEditorStoryboardsReadinessBlockingMissingPromptContext =>
+      '脚本 / 提示词';
+
+  @override
+  String get scriptEditorStoryboardsReadinessBlockingMissingReferenceVisual =>
+      '参考图';
+
+  @override
+  String
+  get scriptEditorStoryboardsReadinessBlockingMissingLiveActionReferenceShot =>
+      '真人参考镜头';
+
+  @override
+  String
+  get scriptEditorStoryboardsReadinessBlockingMissingLiveActionPerformanceNotes =>
+      '表演 / 口播约束';
+
+  @override
+  String get scriptEditorStoryboardsReadinessBlockingCandidatePending => '候选确认';
+
+  @override
+  String get scriptEditorStoryboardsReadinessBlockingBlockingJob => '生成任务进行中';
+
+  @override
   String get scriptEditorStoryboardsProductionEmptyData => '制作视图当前没有分镜数据';
 
   @override

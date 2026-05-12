@@ -64,7 +64,9 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
   bool _autoQualityReviewOnGeneratePrompt = false;
 
   StoryboardWorkbenchDiagnosis _currentDiagnosis() {
+    final l10n = AppLocalizations.of(context)!;
     return diagnoseStoryboardWorkbench(
+      l10n,
       scriptStoryboard: widget.scriptStoryboard,
       productionStoryboard: _productionRow,
       productionStoryboards: _productionRows,
@@ -79,7 +81,9 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
   }
 
   void _setWorkbenchFollowUp(String actionSummary) {
+    final l10n = AppLocalizations.of(context)!;
     _workbenchLine = buildStoryboardWorkbenchFollowUp(
+      l10n,
       actionSummary: actionSummary,
       diagnosis: _currentDiagnosis(),
     );
@@ -90,7 +94,9 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
     required StoryboardWorkbenchRecommendedAction recommendedAction,
     required String detail,
   }) {
+    final l10n = AppLocalizations.of(context)!;
     _workbenchLine = buildStoryboardWorkbenchActionNotice(
+      l10n,
       actionSummary: actionSummary,
       recommendedAction: recommendedAction,
       detail: detail,
@@ -103,7 +109,9 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
     required Object error,
     required String fallbackDetail,
   }) {
+    final l10n = AppLocalizations.of(context)!;
     _workbenchLine = buildStoryboardWorkbenchFailureNotice(
+      l10n,
       actionSummary: actionSummary,
       recommendedAction: recommendedAction,
       error: error,
@@ -117,7 +125,9 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
     required Object error,
     required String fallbackDetail,
   }) {
+    final l10n = AppLocalizations.of(context)!;
     final notice = buildStoryboardWorkbenchFailureNotice(
+      l10n,
       actionSummary: actionSummary,
       recommendedAction: recommendedAction,
       error: error,

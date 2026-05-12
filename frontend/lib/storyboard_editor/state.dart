@@ -20,9 +20,11 @@ extension _StoryboardWorkbenchState on _StoryboardWorkbenchPanelState {
     StoryboardWorkbenchDiagnosis diagnosis,
     List<int> knownTrackIds,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     VoidCallback? recommendedAction;
     var recommendedActionLabel =
         describeStoryboardWorkbenchRecommendedAction(
+          l10n,
           diagnosis.recommendedAction,
         );
     switch (diagnosis.recommendedAction) {
@@ -45,14 +47,14 @@ extension _StoryboardWorkbenchState on _StoryboardWorkbenchPanelState {
             ? null
             : () => _runDialogAction(_refreshVideoDataAction);
         if (_loadingWorkbench) {
-          recommendedActionLabel = '刷新中…';
+          recommendedActionLabel = l10n.scriptEditorStoryboardsRefreshing;
         }
       case StoryboardWorkbenchRecommendedAction.submitVideoGeneration:
         recommendedAction = _saving
             ? null
             : () => _runDialogAction(_submitVideoGeneration);
         if (_saving) {
-          recommendedActionLabel = '生成中…';
+          recommendedActionLabel = l10n.scriptEditorStoryboardsVideoGenerating;
         }
     }
     return (

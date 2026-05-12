@@ -100,6 +100,7 @@ extension _StoryboardWorkbenchData on _StoryboardWorkbenchPanelState {
       if (!mounted) return;
       _applyWorkbenchState(() {
         _productionError = normalizeStoryboardWorkbenchErrorMessage(
+          AppLocalizations.of(context)!,
           e.toString(),
         );
         _setWorkbenchFailureNotice(
@@ -114,6 +115,7 @@ extension _StoryboardWorkbenchData on _StoryboardWorkbenchPanelState {
       if (!mounted) return;
       _applyWorkbenchState(() {
         _productionError = normalizeStoryboardWorkbenchErrorMessage(
+          AppLocalizations.of(context)!,
           e.toString(),
         );
         _setWorkbenchFailureNotice(

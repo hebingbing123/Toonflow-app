@@ -5532,6 +5532,147 @@
   "scriptEditorStoryboardsNarrationExplicit": "已具备显式旁白文案",
   "scriptEditorStoryboardsNarrationPromptFallback": "将回退到分镜提示词",
   "scriptEditorStoryboardsNarrationPlaceholder": "仍是占位文本",
+  "scriptEditorStoryboardsVideoRecommendSyncProductionData": "同步当前分镜数据",
+  "scriptEditorStoryboardsVideoRecommendReadCurrentPreview": "读取当前预览",
+  "scriptEditorStoryboardsVideoRecommendPrepareVideoTrack": "准备视频轨道",
+  "scriptEditorStoryboardsVideoRecommendGenerateDefaultVideoPrompt": "生成默认视频提示词",
+  "scriptEditorStoryboardsVideoRecommendRefreshVideoData": "刷新视频数据",
+  "scriptEditorStoryboardsVideoRecommendSubmitVideoGeneration": "一键生成视频",
+  "scriptEditorStoryboardsVideoGenerating": "生成中…",
+  "scriptEditorStoryboardsVideoDiagnosisNeedProductionSummary": "当前分镜还没有同步到制作视图。",
+  "scriptEditorStoryboardsVideoDiagnosisNeedProductionDetail": "建议先同步当前分镜数据，补齐 production 侧的图片、轨道和提示词快照，再继续处理视频流程。",
+  "scriptEditorStoryboardsVideoDiagnosisNoFrameSummary": "当前分镜还没有可用画面。",
+  "scriptEditorStoryboardsVideoDiagnosisNoFrameDetail": "先读取当前预览或手动保存图片 URL，让视频工作台有明确的输入源。",
+  "scriptEditorStoryboardsVideoDiagnosisNoTracksSummary": "当前分镜还没有可用视频轨道。",
+  "scriptEditorStoryboardsVideoDiagnosisNoTracksDetail": "建议先准备视频轨道，再提交视频生成任务。",
+  "scriptEditorStoryboardsVideoDiagnosisNoTrackSelectedSummary": "当前分镜还没有选定视频轨道。",
+  "scriptEditorStoryboardsVideoDiagnosisPickTrackDetail": "已发现轨道 {trackIds}，建议先回填一个轨道 ID 再继续生成视频。",
+  "@scriptEditorStoryboardsVideoDiagnosisPickTrackDetail": {
+    "placeholders": {
+      "trackIds": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardsVideoDiagnosisIncompleteVideoParamsSummary": "视频参数还没有准备完整。",
+  "scriptEditorStoryboardsVideoDiagnosisIncompleteVideoParamsDetail": "建议先生成默认视频提示词并确认时长；准备完成后可直接一键生成视频。",
+  "scriptEditorStoryboardsVideoDiagnosisJobsRunningSummary": "当前剧本还有 {count} 条视频任务在运行。",
+  "@scriptEditorStoryboardsVideoDiagnosisJobsRunningSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scriptEditorStoryboardsVideoDiagnosisJobsRunningDetailNoVideos": "建议先刷新视频数据，确认当前分镜是否已有新结果，再决定是否继续提交。{suffix}",
+  "@scriptEditorStoryboardsVideoDiagnosisJobsRunningDetailNoVideos": {
+    "placeholders": {
+      "suffix": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardsVideoDiagnosisJobsRunningDetailHasVideos": "建议先刷新视频数据并检查当前分镜已有候选视频，再决定是否继续提交。{suffix}",
+  "@scriptEditorStoryboardsVideoDiagnosisJobsRunningDetailHasVideos": {
+    "placeholders": {
+      "suffix": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardsVideoDiagnosisJobsPendingSuffix": " 其中约 {pending} 条分镜仍仅有进行中任务，尚未检测到片媒体回库。",
+  "@scriptEditorStoryboardsVideoDiagnosisJobsPendingSuffix": {
+    "placeholders": {
+      "pending": {
+        "type": "int"
+      }
+    }
+  },
+  "scriptEditorStoryboardsVideoDiagnosisHasVideoCandidatesSummary": "当前分镜已有 {count} 条视频候选。",
+  "@scriptEditorStoryboardsVideoDiagnosisHasVideoCandidatesSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scriptEditorStoryboardsVideoDiagnosisHasVideoCandidatesDetail": "可以先检查已有视频结果并设为当前视频；若仍不满意，再按当前参数继续提交新任务。",
+  "scriptEditorStoryboardsVideoDiagnosisAllReadySummary": "图片、轨道和视频参数都已就绪。",
+  "scriptEditorStoryboardsVideoDiagnosisAllReadyDetail": "可以直接一键生成视频，系统会自动补齐生成前提示词刷新、建议裁剪和结果回刷。",
+  "scriptEditorStoryboardsVideoErrorNoExtraDetail": "未提供额外错误信息。",
+  "scriptEditorStoryboardsVideoFailureReasonDetail": "失败原因：{reason}。{fallback}",
+  "@scriptEditorStoryboardsVideoFailureReasonDetail": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      },
+      "fallback": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardsVoiceoverCompleted": "已生成配音",
+  "scriptEditorStoryboardsVoiceoverQueued": "配音排队中",
+  "scriptEditorStoryboardsVoiceoverFailed": "配音失败",
+  "scriptEditorStoryboardsVoiceoverFailedWithError": "配音失败：{error}",
+  "@scriptEditorStoryboardsVoiceoverFailedWithError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardsCurrentFrame": "当前画面",
+  "scriptEditorStoryboardsNoSelectedFrame": "暂无画面",
+  "scriptEditorStoryboardsPreviewLoadFailed": "预览加载失败：{url}",
+  "@scriptEditorStoryboardsPreviewLoadFailed": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardsSubtitleNarration": "字幕 / 旁白：{text}",
+  "@scriptEditorStoryboardsSubtitleNarration": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardsAudioDelivery": "音频：{line}",
+  "@scriptEditorStoryboardsAudioDelivery": {
+    "placeholders": {
+      "line": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardsReadinessBasicSlot": "时间线槽位",
+  "scriptEditorStoryboardsReadinessPromptContext": "脚本 / 提示词",
+  "scriptEditorStoryboardsReadinessReferenceVisual": "参考图",
+  "scriptEditorStoryboardsReadinessCandidateCleared": "候选已清空",
+  "scriptEditorStoryboardsReadinessNoBlockingJob": "无阻塞任务",
+  "scriptEditorStoryboardsReadinessTitle": "短视频就绪度",
+  "scriptEditorStoryboardsReadinessReady": "就绪",
+  "scriptEditorStoryboardsReadinessIncomplete": "未就绪",
+  "scriptEditorStoryboardsReadinessSummaryReady": "短视频就绪：本条分镜检查已通过，可继续生成。",
+  "scriptEditorStoryboardsReadinessSummaryPending": "短视频就绪：有待核对项。",
+  "scriptEditorStoryboardsReadinessSummaryBlocked": "短视频就绪：待补齐 {items}",
+  "@scriptEditorStoryboardsReadinessSummaryBlocked": {
+    "placeholders": {
+      "items": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptEditorStoryboardsReadinessBlockingMissingBasicSlot": "时间线槽位",
+  "scriptEditorStoryboardsReadinessBlockingMissingPromptContext": "脚本 / 提示词",
+  "scriptEditorStoryboardsReadinessBlockingMissingReferenceVisual": "参考图",
+  "scriptEditorStoryboardsReadinessBlockingMissingLiveActionReferenceShot": "真人参考镜头",
+  "scriptEditorStoryboardsReadinessBlockingMissingLiveActionPerformanceNotes": "表演 / 口播约束",
+  "scriptEditorStoryboardsReadinessBlockingCandidatePending": "候选确认",
+  "scriptEditorStoryboardsReadinessBlockingBlockingJob": "生成任务进行中",
   "scriptEditorStoryboardsProductionEmptyData": "制作视图当前没有分镜数据",
   "scriptEditorStoryboardsProductionSummaryLine": "制作视图 {count} 条 · {preview}{ellipsis}",
   "@scriptEditorStoryboardsProductionSummaryLine": {

@@ -164,7 +164,8 @@ StoryboardBatchWorkbenchDiagnosis diagnoseStoryboardBatchWorkbench(
   );
 }
 
-StoryboardWorkbenchDiagnosis diagnoseStoryboardWorkbench({
+StoryboardWorkbenchDiagnosis diagnoseStoryboardWorkbench(
+  AppLocalizations l10n, {
   required StoryboardRow scriptStoryboard,
   required ProductionStoryboardItemV1? productionStoryboard,
   required Iterable<ProductionStoryboardItemV1> productionStoryboards,
@@ -177,9 +178,9 @@ StoryboardWorkbenchDiagnosis diagnoseStoryboardWorkbench({
   required String videoDurationText,
 }) {
   if (productionStoryboard == null) {
-    return const StoryboardWorkbenchDiagnosis(
-      summary: '当前分镜还没有同步到制作视图。',
-      detail: '建议先同步当前分镜数据，补齐 production 侧的图片、轨道和提示词快照，再继续处理视频流程。',
+    return StoryboardWorkbenchDiagnosis(
+      summary: l10n.scriptEditorStoryboardsVideoDiagnosisNeedProductionSummary,
+      detail: l10n.scriptEditorStoryboardsVideoDiagnosisNeedProductionDetail,
       recommendedAction:
           StoryboardWorkbenchRecommendedAction.syncProductionData,
     );
@@ -190,9 +191,9 @@ StoryboardWorkbenchDiagnosis diagnoseStoryboardWorkbench({
     draftImageUrl: draftImageUrl,
   );
   if (sourceImage == null) {
-    return const StoryboardWorkbenchDiagnosis(
-      summary: '当前分镜还没有可用画面。',
-      detail: '先读取当前预览或手动保存图片 URL，让视频工作台有明确的输入源。',
+    return StoryboardWorkbenchDiagnosis(
+      summary: l10n.scriptEditorStoryboardsVideoDiagnosisNoFrameSummary,
+      detail: l10n.scriptEditorStoryboardsVideoDiagnosisNoFrameDetail,
       recommendedAction:
           StoryboardWorkbenchRecommendedAction.readCurrentPreview,
     );
@@ -211,10 +212,14 @@ StoryboardWorkbenchDiagnosis diagnoseStoryboardWorkbench({
   if ((selectedTrackId == null || selectedTrackId <= 0) &&
       !canAutoFillSingleTrack) {
     return StoryboardWorkbenchDiagnosis(
-      summary: knownTrackIds.isEmpty ? '当前分镜还没有可用视频轨道。' : '当前分镜还没有选定视频轨道。',
+      summary: knownTrackIds.isEmpty
+          ? l10n.scriptEditorStoryboardsVideoDiagnosisNoTracksSummary
+          : l10n.scriptEditorStoryboardsVideoDiagnosisNoTrackSelectedSummary,
       detail: knownTrackIds.isEmpty
-          ? '建议先准备视频轨道，再提交视频生成任务。'
-          : '已发现轨道 ${knownTrackIds.join(", ")}，建议先回填一个轨道 ID 再继续生成视频。',
+          ? l10n.scriptEditorStoryboardsVideoDiagnosisNoTracksDetail
+          : l10n.scriptEditorStoryboardsVideoDiagnosisPickTrackDetail(
+              knownTrackIds.join(', '),
+            ),
       recommendedAction: StoryboardWorkbenchRecommendedAction.prepareVideoTrack,
     );
   }
@@ -222,9 +227,9 @@ StoryboardWorkbenchDiagnosis diagnoseStoryboardWorkbench({
   final prompt = videoPromptText.trim();
   final duration = int.tryParse(videoDurationText.trim());
   if (prompt.isEmpty || duration == null || duration <= 0) {
-    return const StoryboardWorkbenchDiagnosis(
-      summary: '视频参数还没有准备完整。',
-      detail: '建议先生成默认视频提示词并确认时长；准备完成后可直接一键生成视频。',
+    return StoryboardWorkbenchDiagnosis(
+      summary: l10n.scriptEditorStoryboardsVideoDiagnosisIncompleteVideoParamsSummary,
+      detail: l10n.scriptEditorStoryboardsVideoDiagnosisIncompleteVideoParamsDetail,
       recommendedAction:
           StoryboardWorkbenchRecommendedAction.generateDefaultVideoPrompt,
     );
@@ -240,29 +245,37 @@ StoryboardWorkbenchDiagnosis diagnoseStoryboardWorkbench({
     final pending = videoWritebackSummary?.storyboardNumericIdsPendingWriteback
             .length ??
         0;
-    final detailExtra = pending > 0
-        ? ' 其中约 $pending 条分镜仍仅有进行中任务，尚未检测到片媒体回库。'
+    final suffix = pending > 0
+        ? l10n.scriptEditorStoryboardsVideoDiagnosisJobsPendingSuffix(pending)
         : '';
     return StoryboardWorkbenchDiagnosis(
-      summary: '当前剧本还有 $inFlightJobTotal 条视频任务在运行。',
+      summary: l10n.scriptEditorStoryboardsVideoDiagnosisJobsRunningSummary(
+        inFlightJobTotal,
+      ),
       detail: storyboardVideos.isEmpty
-          ? '建议先刷新视频数据，确认当前分镜是否已有新结果，再决定是否继续提交。$detailExtra'
-          : '建议先刷新视频数据并检查当前分镜已有候选视频，再决定是否继续提交。$detailExtra',
+          ? l10n.scriptEditorStoryboardsVideoDiagnosisJobsRunningDetailNoVideos(
+              suffix,
+            )
+          : l10n.scriptEditorStoryboardsVideoDiagnosisJobsRunningDetailHasVideos(
+              suffix,
+            ),
       recommendedAction: StoryboardWorkbenchRecommendedAction.refreshVideoData,
     );
   }
 
   if (storyboardVideos.isNotEmpty) {
     return StoryboardWorkbenchDiagnosis(
-      summary: '当前分镜已有 ${storyboardVideos.length} 条视频候选。',
-      detail: '可以先检查已有视频结果并设为当前视频；若仍不满意，再按当前参数继续提交新任务。',
+      summary: l10n.scriptEditorStoryboardsVideoDiagnosisHasVideoCandidatesSummary(
+        storyboardVideos.length,
+      ),
+      detail: l10n.scriptEditorStoryboardsVideoDiagnosisHasVideoCandidatesDetail,
       recommendedAction: StoryboardWorkbenchRecommendedAction.refreshVideoData,
     );
   }
 
-  return const StoryboardWorkbenchDiagnosis(
-    summary: '图片、轨道和视频参数都已就绪。',
-    detail: '可以直接一键生成视频，系统会自动补齐生成前提示词刷新、建议裁剪和结果回刷。',
+  return StoryboardWorkbenchDiagnosis(
+    summary: l10n.scriptEditorStoryboardsVideoDiagnosisAllReadySummary,
+    detail: l10n.scriptEditorStoryboardsVideoDiagnosisAllReadyDetail,
     recommendedAction:
         StoryboardWorkbenchRecommendedAction.submitVideoGeneration,
   );

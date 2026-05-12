@@ -95,21 +95,22 @@ String describeStoryboardBatchWorkbenchRecommendedAction(
 }
 
 String describeStoryboardWorkbenchRecommendedAction(
+  AppLocalizations l10n,
   StoryboardWorkbenchRecommendedAction action,
 ) {
   switch (action) {
     case StoryboardWorkbenchRecommendedAction.syncProductionData:
-      return '同步当前分镜数据';
+      return l10n.scriptEditorStoryboardsVideoRecommendSyncProductionData;
     case StoryboardWorkbenchRecommendedAction.readCurrentPreview:
-      return '读取当前预览';
+      return l10n.scriptEditorStoryboardsVideoRecommendReadCurrentPreview;
     case StoryboardWorkbenchRecommendedAction.prepareVideoTrack:
-      return '准备视频轨道';
+      return l10n.scriptEditorStoryboardsVideoRecommendPrepareVideoTrack;
     case StoryboardWorkbenchRecommendedAction.generateDefaultVideoPrompt:
-      return '生成默认视频提示词';
+      return l10n.scriptEditorStoryboardsVideoRecommendGenerateDefaultVideoPrompt;
     case StoryboardWorkbenchRecommendedAction.refreshVideoData:
-      return '刷新视频数据';
+      return l10n.scriptEditorStoryboardsVideoRecommendRefreshVideoData;
     case StoryboardWorkbenchRecommendedAction.submitVideoGeneration:
-      return '一键生成视频';
+      return l10n.scriptEditorStoryboardsVideoRecommendSubmitVideoGeneration;
   }
 }
 
@@ -145,62 +146,84 @@ String buildStoryboardBatchWorkbenchFollowUp(
   );
 }
 
-String buildStoryboardWorkbenchFollowUp({
+String buildStoryboardWorkbenchFollowUp(
+  AppLocalizations l10n, {
   required String actionSummary,
   required StoryboardWorkbenchDiagnosis diagnosis,
 }) {
   final nextAction = describeStoryboardWorkbenchRecommendedAction(
+    l10n,
     diagnosis.recommendedAction,
   );
-  return '$actionSummary 下一步建议：$nextAction。${diagnosis.detail}';
+  return l10n.scriptEditorStoryboardsFollowUpLine(
+    actionSummary,
+    nextAction,
+    diagnosis.detail,
+  );
 }
 
-String buildStoryboardWorkbenchActionNotice({
+String buildStoryboardWorkbenchActionNotice(
+  AppLocalizations l10n, {
   required String actionSummary,
   required StoryboardWorkbenchRecommendedAction recommendedAction,
   required String detail,
 }) {
   final nextAction = describeStoryboardWorkbenchRecommendedAction(
+    l10n,
     recommendedAction,
   );
-  return '$actionSummary 下一步建议：$nextAction。$detail';
+  return l10n.scriptEditorStoryboardsFollowUpLine(
+    actionSummary,
+    nextAction,
+    detail,
+  );
 }
 
-String normalizeStoryboardWorkbenchErrorMessage(String raw) {
+String normalizeStoryboardWorkbenchErrorMessage(
+  AppLocalizations l10n,
+  String raw,
+) {
   final trimmed = raw.trim();
   if (trimmed.isEmpty) {
-    return '未提供额外错误信息。';
+    return l10n.scriptEditorStoryboardsVideoErrorNoExtraDetail;
   }
   final normalized = trimmed.replaceFirst(
     RegExp(r'^RustApiException\([^)]*\):\s*'),
     '',
   );
   if (normalized.isEmpty) {
-    return '未提供额外错误信息。';
+    return l10n.scriptEditorStoryboardsVideoErrorNoExtraDetail;
   }
   return normalized;
 }
 
-String buildStoryboardWorkbenchFailureNotice({
+String buildStoryboardWorkbenchFailureNotice(
+  AppLocalizations l10n, {
   required String actionSummary,
   required StoryboardWorkbenchRecommendedAction recommendedAction,
   required Object error,
   required String fallbackDetail,
 }) {
-  final reason = normalizeStoryboardWorkbenchErrorMessage(error.toString());
+  final reason = normalizeStoryboardWorkbenchErrorMessage(l10n, error.toString());
   return buildStoryboardWorkbenchActionNotice(
+    l10n,
     actionSummary: actionSummary,
     recommendedAction: recommendedAction,
-    detail: '失败原因：$reason。$fallbackDetail',
+    detail: l10n.scriptEditorStoryboardsVideoFailureReasonDetail(
+      reason,
+      fallbackDetail,
+    ),
   );
 }
 
-String buildStoryboardWorkbenchLoadingNotice({
+String buildStoryboardWorkbenchLoadingNotice(
+  AppLocalizations l10n, {
   required String actionSummary,
   required StoryboardWorkbenchRecommendedAction recommendedAction,
   required String detail,
 }) {
   return buildStoryboardWorkbenchActionNotice(
+    l10n,
     actionSummary: actionSummary,
     recommendedAction: recommendedAction,
     detail: detail,

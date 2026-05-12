@@ -356,6 +356,7 @@ void main() {
 
   test('diagnoseStoryboardWorkbench requests sync before anything else', () {
     final diagnosis = diagnoseStoryboardWorkbench(
+      _zh,
       scriptStoryboard: const StoryboardRow(
         id: '1',
         numericId: 11,
@@ -382,6 +383,7 @@ void main() {
     'diagnoseStoryboardWorkbench requests preview when image is missing',
     () {
       final diagnosis = diagnoseStoryboardWorkbench(
+        _zh,
         scriptStoryboard: const StoryboardRow(
           id: '1',
           numericId: 11,
@@ -409,6 +411,7 @@ void main() {
     'diagnoseStoryboardWorkbench allows one-click generation when a single track can auto-fill',
     () {
       final diagnosis = diagnoseStoryboardWorkbench(
+        _zh,
         scriptStoryboard: const StoryboardRow(
           id: '1',
           numericId: 11,
@@ -440,6 +443,7 @@ void main() {
     'diagnoseStoryboardWorkbench requests default prompt when video params are incomplete',
     () {
       final diagnosis = diagnoseStoryboardWorkbench(
+        _zh,
         scriptStoryboard: const StoryboardRow(
           id: '1',
           numericId: 11,
@@ -1137,6 +1141,7 @@ void main() {
     'diagnoseStoryboardWorkbench prefers refreshing when jobs or videos already exist',
     () {
       final withJobs = diagnoseStoryboardWorkbench(
+        _zh,
         scriptStoryboard: const StoryboardRow(
           id: '1',
           numericId: 11,
@@ -1168,6 +1173,7 @@ void main() {
       );
 
       final withVideos = diagnoseStoryboardWorkbench(
+        _zh,
         scriptStoryboard: const StoryboardRow(
           id: '1',
           numericId: 11,
@@ -1202,8 +1208,10 @@ void main() {
 
   test('buildStoryboardWorkbenchFollowUp appends the recommended action', () {
     final line = buildStoryboardWorkbenchFollowUp(
+      _zh,
       actionSummary: '已读取当前分镜预览。',
       diagnosis: diagnoseStoryboardWorkbench(
+        _zh,
         scriptStoryboard: const StoryboardRow(
           id: '1',
           numericId: 11,
@@ -1229,6 +1237,7 @@ void main() {
 
   test('buildStoryboardWorkbenchFailureNotice normalizes rust api errors', () {
     final line = buildStoryboardWorkbenchFailureNotice(
+      _zh,
       actionSummary: '刷新当前分镜的视频数据失败。',
       recommendedAction: StoryboardWorkbenchRecommendedAction.refreshVideoData,
       error: 'RustApiException(503): database_error',
@@ -1241,6 +1250,7 @@ void main() {
 
   test('buildStoryboardWorkbenchLoadingNotice appends detail text', () {
     final line = buildStoryboardWorkbenchLoadingNotice(
+      _zh,
       actionSummary: '正在同步当前分镜制作数据。',
       recommendedAction:
           StoryboardWorkbenchRecommendedAction.syncProductionData,

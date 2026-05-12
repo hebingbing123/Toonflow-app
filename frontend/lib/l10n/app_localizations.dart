@@ -11924,6 +11924,341 @@ abstract class AppLocalizations {
   /// **'Still placeholder text'**
   String get scriptEditorStoryboardsNarrationPlaceholder;
 
+  /// No description provided for @scriptEditorStoryboardsVideoRecommendSyncProductionData.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync current shot production data'**
+  String get scriptEditorStoryboardsVideoRecommendSyncProductionData;
+
+  /// No description provided for @scriptEditorStoryboardsVideoRecommendReadCurrentPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Read current preview'**
+  String get scriptEditorStoryboardsVideoRecommendReadCurrentPreview;
+
+  /// No description provided for @scriptEditorStoryboardsVideoRecommendPrepareVideoTrack.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepare video track'**
+  String get scriptEditorStoryboardsVideoRecommendPrepareVideoTrack;
+
+  /// No description provided for @scriptEditorStoryboardsVideoRecommendGenerateDefaultVideoPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate default video prompt'**
+  String get scriptEditorStoryboardsVideoRecommendGenerateDefaultVideoPrompt;
+
+  /// No description provided for @scriptEditorStoryboardsVideoRecommendRefreshVideoData.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh video data'**
+  String get scriptEditorStoryboardsVideoRecommendRefreshVideoData;
+
+  /// No description provided for @scriptEditorStoryboardsVideoRecommendSubmitVideoGeneration.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate video'**
+  String get scriptEditorStoryboardsVideoRecommendSubmitVideoGeneration;
+
+  /// No description provided for @scriptEditorStoryboardsVideoGenerating.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating…'**
+  String get scriptEditorStoryboardsVideoGenerating;
+
+  /// No description provided for @scriptEditorStoryboardsVideoDiagnosisNeedProductionSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'This shot is not synced to the production view yet.'**
+  String get scriptEditorStoryboardsVideoDiagnosisNeedProductionSummary;
+
+  /// No description provided for @scriptEditorStoryboardsVideoDiagnosisNeedProductionDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync production data for this shot first so images, tracks, and prompts are available before continuing video.'**
+  String get scriptEditorStoryboardsVideoDiagnosisNeedProductionDetail;
+
+  /// No description provided for @scriptEditorStoryboardsVideoDiagnosisNoFrameSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'This shot has no usable frame yet.'**
+  String get scriptEditorStoryboardsVideoDiagnosisNoFrameSummary;
+
+  /// No description provided for @scriptEditorStoryboardsVideoDiagnosisNoFrameDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Read the current preview or paste an image URL so the video workbench has a clear visual input.'**
+  String get scriptEditorStoryboardsVideoDiagnosisNoFrameDetail;
+
+  /// No description provided for @scriptEditorStoryboardsVideoDiagnosisNoTracksSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'No usable video tracks for this shot yet.'**
+  String get scriptEditorStoryboardsVideoDiagnosisNoTracksSummary;
+
+  /// No description provided for @scriptEditorStoryboardsVideoDiagnosisNoTracksDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepare a video track before submitting generation.'**
+  String get scriptEditorStoryboardsVideoDiagnosisNoTracksDetail;
+
+  /// No description provided for @scriptEditorStoryboardsVideoDiagnosisNoTrackSelectedSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'No video track is selected for this shot.'**
+  String get scriptEditorStoryboardsVideoDiagnosisNoTrackSelectedSummary;
+
+  /// No description provided for @scriptEditorStoryboardsVideoDiagnosisPickTrackDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Tracks found: {trackIds}. Enter a track ID before generating video.'**
+  String scriptEditorStoryboardsVideoDiagnosisPickTrackDetail(String trackIds);
+
+  /// No description provided for @scriptEditorStoryboardsVideoDiagnosisIncompleteVideoParamsSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Video parameters are not complete yet.'**
+  String get scriptEditorStoryboardsVideoDiagnosisIncompleteVideoParamsSummary;
+
+  /// No description provided for @scriptEditorStoryboardsVideoDiagnosisIncompleteVideoParamsDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate a default video prompt and confirm duration; then you can generate video in one step.'**
+  String get scriptEditorStoryboardsVideoDiagnosisIncompleteVideoParamsDetail;
+
+  /// No description provided for @scriptEditorStoryboardsVideoDiagnosisJobsRunningSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} video job(s) are still running for this script.'**
+  String scriptEditorStoryboardsVideoDiagnosisJobsRunningSummary(int count);
+
+  /// No description provided for @scriptEditorStoryboardsVideoDiagnosisJobsRunningDetailNoVideos.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh video data to see whether this shot already has new output before submitting again.{suffix}'**
+  String scriptEditorStoryboardsVideoDiagnosisJobsRunningDetailNoVideos(
+    String suffix,
+  );
+
+  /// No description provided for @scriptEditorStoryboardsVideoDiagnosisJobsRunningDetailHasVideos.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh video data and review existing candidates for this shot before submitting again.{suffix}'**
+  String scriptEditorStoryboardsVideoDiagnosisJobsRunningDetailHasVideos(
+    String suffix,
+  );
+
+  /// No description provided for @scriptEditorStoryboardsVideoDiagnosisJobsPendingSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **' About {pending} shot(s) still have in-flight jobs without media write-back detected.'**
+  String scriptEditorStoryboardsVideoDiagnosisJobsPendingSuffix(int pending);
+
+  /// No description provided for @scriptEditorStoryboardsVideoDiagnosisHasVideoCandidatesSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'This shot already has {count} video candidate(s).'**
+  String scriptEditorStoryboardsVideoDiagnosisHasVideoCandidatesSummary(
+    int count,
+  );
+
+  /// No description provided for @scriptEditorStoryboardsVideoDiagnosisHasVideoCandidatesDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Review existing videos and pick a current one; submit again only if you still need a new render.'**
+  String get scriptEditorStoryboardsVideoDiagnosisHasVideoCandidatesDetail;
+
+  /// No description provided for @scriptEditorStoryboardsVideoDiagnosisAllReadySummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Image, track, and video parameters look ready.'**
+  String get scriptEditorStoryboardsVideoDiagnosisAllReadySummary;
+
+  /// No description provided for @scriptEditorStoryboardsVideoDiagnosisAllReadyDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'You can generate video in one step; the system will refresh prompts, trim suggestions, and refresh results.'**
+  String get scriptEditorStoryboardsVideoDiagnosisAllReadyDetail;
+
+  /// No description provided for @scriptEditorStoryboardsVideoErrorNoExtraDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'No additional error details.'**
+  String get scriptEditorStoryboardsVideoErrorNoExtraDetail;
+
+  /// No description provided for @scriptEditorStoryboardsVideoFailureReasonDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Failure reason: {reason}. {fallback}'**
+  String scriptEditorStoryboardsVideoFailureReasonDetail(
+    String reason,
+    String fallback,
+  );
+
+  /// No description provided for @scriptEditorStoryboardsVoiceoverCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Voiceover audio ready'**
+  String get scriptEditorStoryboardsVoiceoverCompleted;
+
+  /// No description provided for @scriptEditorStoryboardsVoiceoverQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Voiceover queued'**
+  String get scriptEditorStoryboardsVoiceoverQueued;
+
+  /// No description provided for @scriptEditorStoryboardsVoiceoverFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Voiceover failed'**
+  String get scriptEditorStoryboardsVoiceoverFailed;
+
+  /// No description provided for @scriptEditorStoryboardsVoiceoverFailedWithError.
+  ///
+  /// In en, this message translates to:
+  /// **'Voiceover failed: {error}'**
+  String scriptEditorStoryboardsVoiceoverFailedWithError(String error);
+
+  /// No description provided for @scriptEditorStoryboardsCurrentFrame.
+  ///
+  /// In en, this message translates to:
+  /// **'Current frame'**
+  String get scriptEditorStoryboardsCurrentFrame;
+
+  /// No description provided for @scriptEditorStoryboardsNoSelectedFrame.
+  ///
+  /// In en, this message translates to:
+  /// **'No frame loaded'**
+  String get scriptEditorStoryboardsNoSelectedFrame;
+
+  /// No description provided for @scriptEditorStoryboardsPreviewLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview failed to load: {url}'**
+  String scriptEditorStoryboardsPreviewLoadFailed(String url);
+
+  /// No description provided for @scriptEditorStoryboardsSubtitleNarration.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtitle / narration: {text}'**
+  String scriptEditorStoryboardsSubtitleNarration(String text);
+
+  /// No description provided for @scriptEditorStoryboardsAudioDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio: {line}'**
+  String scriptEditorStoryboardsAudioDelivery(String line);
+
+  /// No description provided for @scriptEditorStoryboardsReadinessBasicSlot.
+  ///
+  /// In en, this message translates to:
+  /// **'Timeline slot'**
+  String get scriptEditorStoryboardsReadinessBasicSlot;
+
+  /// No description provided for @scriptEditorStoryboardsReadinessPromptContext.
+  ///
+  /// In en, this message translates to:
+  /// **'Script / prompt context'**
+  String get scriptEditorStoryboardsReadinessPromptContext;
+
+  /// No description provided for @scriptEditorStoryboardsReadinessReferenceVisual.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference visual'**
+  String get scriptEditorStoryboardsReadinessReferenceVisual;
+
+  /// No description provided for @scriptEditorStoryboardsReadinessCandidateCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Candidate cleared'**
+  String get scriptEditorStoryboardsReadinessCandidateCleared;
+
+  /// No description provided for @scriptEditorStoryboardsReadinessNoBlockingJob.
+  ///
+  /// In en, this message translates to:
+  /// **'No blocking job'**
+  String get scriptEditorStoryboardsReadinessNoBlockingJob;
+
+  /// No description provided for @scriptEditorStoryboardsReadinessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Short video readiness'**
+  String get scriptEditorStoryboardsReadinessTitle;
+
+  /// No description provided for @scriptEditorStoryboardsReadinessReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready'**
+  String get scriptEditorStoryboardsReadinessReady;
+
+  /// No description provided for @scriptEditorStoryboardsReadinessIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Incomplete'**
+  String get scriptEditorStoryboardsReadinessIncomplete;
+
+  /// No description provided for @scriptEditorStoryboardsReadinessSummaryReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Short video: checks passed; ready to generate.'**
+  String get scriptEditorStoryboardsReadinessSummaryReady;
+
+  /// No description provided for @scriptEditorStoryboardsReadinessSummaryPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Short video: still needs review.'**
+  String get scriptEditorStoryboardsReadinessSummaryPending;
+
+  /// No description provided for @scriptEditorStoryboardsReadinessSummaryBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Short video: still need {items}'**
+  String scriptEditorStoryboardsReadinessSummaryBlocked(String items);
+
+  /// No description provided for @scriptEditorStoryboardsReadinessBlockingMissingBasicSlot.
+  ///
+  /// In en, this message translates to:
+  /// **'Timeline slot'**
+  String get scriptEditorStoryboardsReadinessBlockingMissingBasicSlot;
+
+  /// No description provided for @scriptEditorStoryboardsReadinessBlockingMissingPromptContext.
+  ///
+  /// In en, this message translates to:
+  /// **'Script / prompt'**
+  String get scriptEditorStoryboardsReadinessBlockingMissingPromptContext;
+
+  /// No description provided for @scriptEditorStoryboardsReadinessBlockingMissingReferenceVisual.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference image'**
+  String get scriptEditorStoryboardsReadinessBlockingMissingReferenceVisual;
+
+  /// No description provided for @scriptEditorStoryboardsReadinessBlockingMissingLiveActionReferenceShot.
+  ///
+  /// In en, this message translates to:
+  /// **'Live-action reference shot'**
+  String
+  get scriptEditorStoryboardsReadinessBlockingMissingLiveActionReferenceShot;
+
+  /// No description provided for @scriptEditorStoryboardsReadinessBlockingMissingLiveActionPerformanceNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Performance / delivery notes'**
+  String
+  get scriptEditorStoryboardsReadinessBlockingMissingLiveActionPerformanceNotes;
+
+  /// No description provided for @scriptEditorStoryboardsReadinessBlockingCandidatePending.
+  ///
+  /// In en, this message translates to:
+  /// **'Candidate confirmation'**
+  String get scriptEditorStoryboardsReadinessBlockingCandidatePending;
+
+  /// No description provided for @scriptEditorStoryboardsReadinessBlockingBlockingJob.
+  ///
+  /// In en, this message translates to:
+  /// **'Generation job running'**
+  String get scriptEditorStoryboardsReadinessBlockingBlockingJob;
+
   /// No description provided for @scriptEditorStoryboardsProductionEmptyData.
   ///
   /// In en, this message translates to:
