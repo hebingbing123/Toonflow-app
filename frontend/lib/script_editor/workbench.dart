@@ -4,7 +4,6 @@ class _ScriptWorkbenchPanel extends StatefulWidget {
   const _ScriptWorkbenchPanel({
     required this.token,
     required this.projectId,
-    required this.projectNumericId,
     required this.scriptNumericId,
     required this.onExtractStateSynced,
     required this.onOpenEditImageWorkbench,
@@ -12,7 +11,6 @@ class _ScriptWorkbenchPanel extends StatefulWidget {
 
   final String token;
   final String projectId;
-  final int projectNumericId;
   final int scriptNumericId;
   final void Function(int? extractState) onExtractStateSynced;
   final Future<void> Function() onOpenEditImageWorkbench;

@@ -53,7 +53,6 @@ extension _StoryboardBatchWorkbenchActions
     }
     final response = await postStoryboardBatchGenerateImageV1(
       widget.token,
-      projectId: widget.projectNumericId,
       projectUuid: widget.projectId,
       scriptId: widget.scriptNumericId,
       items: items,
@@ -117,7 +116,6 @@ extension _StoryboardBatchWorkbenchActions
   Future<void> _loadCurrentPreview(int storyboardId) async {
     final preview = await postStoryboardPreviewImageV1(
       widget.token,
-      projectId: widget.projectNumericId,
       projectUuid: widget.projectId,
       scriptId: widget.scriptNumericId,
       storyboardId: storyboardId,
@@ -138,7 +136,6 @@ extension _StoryboardBatchWorkbenchActions
   Future<void> _loadDownloadUrl(int storyboardId) async {
     final preview = await postStoryboardDownPreviewImageV1(
       widget.token,
-      projectId: widget.projectNumericId,
       projectUuid: widget.projectId,
       scriptId: widget.scriptNumericId,
       storyboardId: storyboardId,
@@ -159,7 +156,6 @@ extension _StoryboardBatchWorkbenchActions
   Future<void> _exportSelectedZip(List<int> selected) async {
     final zip = await fetchProductionExportImageZipV1(
       widget.token,
-      projectId: widget.projectNumericId,
       projectUuid: widget.projectId,
       scriptId: widget.scriptNumericId,
       shotId: selected

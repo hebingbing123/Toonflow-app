@@ -5,7 +5,6 @@ extension _HomePageScriptEditor on _HomePageState {
     String token,
     int scriptNumericId, {
     required String projectId,
-    required int projectNumericId,
     Future<void> Function()? onScriptTreeMutated,
   }) async {
     final nameCtrl = TextEditingController();
@@ -44,7 +43,6 @@ extension _HomePageScriptEditor on _HomePageState {
                         _ScriptWorkbenchPanel(
                           token: token,
                           projectId: projectId,
-                          projectNumericId: projectNumericId,
                           scriptNumericId: scriptNumericId,
                           onExtractStateSynced: (extractState) {
                             stateCtrl.text = extractState?.toString() ?? '';
@@ -53,7 +51,6 @@ extension _HomePageScriptEditor on _HomePageState {
                               _openScriptEditImageWorkbenchDialog(
                                 token: token,
                                 projectId: projectId,
-                                projectNumericId: projectNumericId,
                                 scriptNumericId: scriptNumericId,
                               ),
                         ),
@@ -91,7 +88,6 @@ extension _HomePageScriptEditor on _HomePageState {
                                 : () => _openScriptStoryboardsDialog(
                                     token: token,
                                     projectId: projectId,
-                                    projectNumericId: projectNumericId,
                                     scriptNumericId: scriptNumericId,
                                   ),
                             child: Text(l10n.scriptEditorOpenStoryboards),

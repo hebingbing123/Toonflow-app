@@ -5,7 +5,6 @@ extension _HomePageStoryboardEditor on _HomePageState {
     String token,
     int storyNumericId, {
     required String projectId,
-    required int projectNumericId,
     required int scriptNumericId,
     Future<void> Function()? onStoryboardTreeMutated,
   }) async {
@@ -50,7 +49,6 @@ extension _HomePageStoryboardEditor on _HomePageState {
                           token: token,
                           projectId: projectId,
                           storyNumericId: storyNumericId,
-                          projectNumericId: projectNumericId,
                           scriptNumericId: scriptNumericId,
                           scriptStoryboard: row,
                           readPromptText: () => promptCtrl.text,

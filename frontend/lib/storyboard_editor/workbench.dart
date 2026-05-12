@@ -5,7 +5,6 @@ class _StoryboardWorkbenchPanel extends StatefulWidget {
     required this.token,
     required this.projectId,
     required this.storyNumericId,
-    required this.projectNumericId,
     required this.scriptNumericId,
     required this.scriptStoryboard,
     required this.readPromptText,
@@ -17,7 +16,6 @@ class _StoryboardWorkbenchPanel extends StatefulWidget {
   final String token;
   final String projectId;
   final int storyNumericId;
-  final int projectNumericId;
   final int scriptNumericId;
   final StoryboardRow scriptStoryboard;
   final String Function() readPromptText;

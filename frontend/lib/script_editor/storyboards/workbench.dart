@@ -5,7 +5,6 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
     required AppLocalizations l10n,
     required String token,
     required String projectId,
-    required int projectNumericId,
     required int scriptNumericId,
     required List<String?> productionSummaryLine,
     required List<bool> productionSummaryLoaded,
@@ -17,7 +16,6 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
     try {
       final response = await postProductionGetStoryboardDataV1(
         token,
-        projectId: projectNumericId,
         projectUuid: projectId,
         scriptId: scriptNumericId,
       );
@@ -88,7 +86,6 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
   Future<void> _openScriptStoryboardsDialog({
     required String token,
     required String projectId,
-    required int projectNumericId,
     required int scriptNumericId,
   }) async {
     try {
@@ -119,7 +116,6 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                     l10n: AppLocalizations.of(ctx2)!,
                     token: token,
                     projectId: projectId,
-                    projectNumericId: projectNumericId,
                     scriptNumericId: scriptNumericId,
                     productionSummaryLine: productionSummaryLine,
                     productionSummaryLoaded: productionSummaryLoaded,
@@ -152,7 +148,6 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                           setBoardsState: setBoardsState,
                           token: token,
                           projectId: projectId,
-                          projectNumericId: projectNumericId,
                           scriptNumericId: scriptNumericId,
                           boardsList: boardsList,
                           actionBusy: actionBusy,
@@ -167,7 +162,6 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                           setBoardsState: setBoardsState,
                           token: token,
                           projectId: projectId,
-                          projectNumericId: projectNumericId,
                           scriptNumericId: scriptNumericId,
                           boardsList: boardsList,
                           actionBusy: actionBusy,
@@ -193,7 +187,6 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                             ctx: ctx2,
                             token: token,
                             projectId: projectId,
-                            projectNumericId: projectNumericId,
                             scriptNumericId: scriptNumericId,
                             boardsList: boardsList,
                             setBoardsState: setBoardsState,
@@ -214,7 +207,6 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                             l10n: AppLocalizations.of(ctx2)!,
                             token: token,
                             projectId: projectId,
-                            projectNumericId: projectNumericId,
                             scriptNumericId: scriptNumericId,
                             productionSummaryLine: productionSummaryLine,
                             productionSummaryLoaded: productionSummaryLoaded,
@@ -229,7 +221,6 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                           l10n: AppLocalizations.of(ctx2)!,
                           token: token,
                           projectId: projectId,
-                          projectNumericId: projectNumericId,
                           scriptNumericId: scriptNumericId,
                           productionSummaryLine: productionSummaryLine,
                           productionSummaryLoaded: productionSummaryLoaded,
@@ -241,7 +232,6 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                       token,
                       board.numericId,
                       projectId: projectId,
-                      projectNumericId: projectNumericId,
                       scriptNumericId: scriptNumericId,
                       onStoryboardTreeMutated: () async {
                         await _reloadScriptStoryboards(
@@ -258,7 +248,6 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                           l10n: AppLocalizations.of(ctx2)!,
                           token: token,
                           projectId: projectId,
-                          projectNumericId: projectNumericId,
                           scriptNumericId: scriptNumericId,
                           productionSummaryLine: productionSummaryLine,
                           productionSummaryLoaded: productionSummaryLoaded,

@@ -5,7 +5,6 @@ extension _HomePageScriptEditorStoryboardsWorkbench on _HomePageState {
     required BuildContext ctx,
     required String token,
     required String projectId,
-    required int projectNumericId,
     required int scriptNumericId,
     required List<StoryboardRow> boardsList,
     required StateSetter setBoardsState,
@@ -17,7 +16,6 @@ extension _HomePageScriptEditorStoryboardsWorkbench on _HomePageState {
         return _StoryboardBatchWorkbenchDialog(
           token: token,
           projectId: projectId,
-          projectNumericId: projectNumericId,
           scriptNumericId: scriptNumericId,
           boardsList: boardsList,
           onMutationStart: () => setBoardsState(() => actionBusy[0] = true),

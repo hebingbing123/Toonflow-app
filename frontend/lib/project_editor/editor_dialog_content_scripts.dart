@@ -61,7 +61,6 @@ extension _HomePageProjectEditorDialogContentScripts on _HomePageState {
         token,
         script.numericId,
         projectId: p.id,
-        projectNumericId: p.numericId,
         onScriptTreeMutated: () async {
           final refreshed = await fetchProjectByProjectId(token, p.id);
           if (!ctx.mounted) return;

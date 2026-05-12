@@ -7,7 +7,6 @@ extension _HomePageScriptEditorStoryboardsBatchAddDialog on _HomePageState {
     required StateSetter setBoardsState,
     required String token,
     required String projectId,
-    required int projectNumericId,
     required int scriptNumericId,
     required List<StoryboardRow> boardsList,
     required List<bool> actionBusy,
@@ -121,7 +120,6 @@ extension _HomePageScriptEditorStoryboardsBatchAddDialog on _HomePageState {
       try {
         final added = await postStoryboardBatchAddInfoV1(
           token,
-          projectId: projectNumericId,
           projectUuid: projectId,
           scriptId: scriptNumericId,
           storyboards: payload,
@@ -141,7 +139,6 @@ extension _HomePageScriptEditorStoryboardsBatchAddDialog on _HomePageState {
           l10n: flowL10n,
           token: token,
           projectId: projectId,
-          projectNumericId: projectNumericId,
           scriptNumericId: scriptNumericId,
           productionSummaryLine: productionSummaryLine,
           productionSummaryLoaded: productionSummaryLoaded,
