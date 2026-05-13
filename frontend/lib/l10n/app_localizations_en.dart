@@ -10314,6 +10314,288 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shortVideoPreviewPlaylistComplete => 'Finished playing all shots';
 
   @override
+  String get shortVideoBatchThrottleMessage =>
+      'You\'re doing that too often. Wait a moment and try again.';
+
+  @override
+  String get shortVideoBatchSelectAll => 'Select all';
+
+  @override
+  String get shortVideoBatchDeselectAll => 'Deselect all';
+
+  @override
+  String shortVideoBatchSelectedCount(int selected, int total) {
+    return 'Selected: $selected / $total';
+  }
+
+  @override
+  String get shortVideoBatchOpEnable => 'Batch enable';
+
+  @override
+  String get shortVideoBatchOpDisable => 'Batch disable';
+
+  @override
+  String get shortVideoBatchOpDurationAlign => 'Duration align';
+
+  @override
+  String get shortVideoBatchOpReplace => 'Batch replace URL';
+
+  @override
+  String get shortVideoBatchOpVoiceover => 'Batch voiceover';
+
+  @override
+  String shortVideoBatchProgressCompletedTotal(int completed, int total) {
+    return 'Progress: $completed / $total';
+  }
+
+  @override
+  String shortVideoBatchProgressSucceededLabel(int count) {
+    return 'Succeeded: $count';
+  }
+
+  @override
+  String shortVideoBatchProgressFailedLabel(int count) {
+    return 'Failed: $count';
+  }
+
+  @override
+  String get shortVideoBatchProgressFailedHeading => 'Failed items:';
+
+  @override
+  String shortVideoBatchProgressStoryboardLine(int id) {
+    return 'Storyboard #$id';
+  }
+
+  @override
+  String get shortVideoBatchProgressCancel => 'Cancel';
+
+  @override
+  String get shortVideoBatchProgressRetryFailed => 'Retry failed';
+
+  @override
+  String get shortVideoBatchProgressClose => 'Close';
+
+  @override
+  String shortVideoBatchErrorCode(String code) {
+    return 'Error code: $code';
+  }
+
+  @override
+  String shortVideoBatchOperationRetryTitle(String title) {
+    return '$title (retry)';
+  }
+
+  @override
+  String get shortVideoBatchSelectShotsToEnableFirst =>
+      'Select shots to enable first.';
+
+  @override
+  String get shortVideoBatchNoShotsWithVideoUrl =>
+      'None of the selected shots have a usable video URL.';
+
+  @override
+  String get shortVideoBatchEnableTitle => 'Batch enable shots';
+
+  @override
+  String shortVideoBatchEnableFinished(int successful, int failed) {
+    return 'Batch enable finished: succeeded $successful, failed $failed';
+  }
+
+  @override
+  String shortVideoBatchEnableFailedStatus(String code) {
+    return 'Batch enable failed: $code';
+  }
+
+  @override
+  String shortVideoBatchEnableFailedError(String error) {
+    return 'Batch enable failed: $error';
+  }
+
+  @override
+  String get shortVideoBatchSelectShotsToDisableFirst =>
+      'Select shots to disable first.';
+
+  @override
+  String get shortVideoBatchDisableTitle => 'Batch disable shots';
+
+  @override
+  String shortVideoBatchDisableFinished(int successful, int failed) {
+    return 'Batch disable finished: succeeded $successful, failed $failed';
+  }
+
+  @override
+  String shortVideoBatchDisableFailedStatus(String code) {
+    return 'Batch disable failed: $code';
+  }
+
+  @override
+  String shortVideoBatchDisableFailedError(String error) {
+    return 'Batch disable failed: $error';
+  }
+
+  @override
+  String get shortVideoBatchSelectShotsDurationFirst =>
+      'Select shots to align duration first.';
+
+  @override
+  String get shortVideoBatchDurationDialogTitle => 'Batch duration align';
+
+  @override
+  String get shortVideoBatchDurationLabel => 'Duration (seconds)';
+
+  @override
+  String get shortVideoBatchDurationHint => 'Enter 1–300';
+
+  @override
+  String get shortVideoBatchAlignAndSave => 'Align and save';
+
+  @override
+  String get shortVideoBatchDurationProgressTitle => 'Batch duration align';
+
+  @override
+  String shortVideoBatchDurationFinished(int successful, int failed) {
+    return 'Batch duration align finished: succeeded $successful, failed $failed';
+  }
+
+  @override
+  String get shortVideoBatchSelectShotsReplaceFirst =>
+      'Select shots to replace first.';
+
+  @override
+  String get shortVideoBatchReplaceDialogTitle => 'Batch replace video URLs';
+
+  @override
+  String get shortVideoBatchReplaceFindPatternLabel =>
+      'Find pattern (regex supported)';
+
+  @override
+  String get shortVideoBatchReplaceFindPatternHint => 'e.g. /v1/';
+
+  @override
+  String get shortVideoBatchReplaceWithLabel => 'Replace with';
+
+  @override
+  String get shortVideoBatchReplaceWithHint => 'e.g. /v2/';
+
+  @override
+  String get shortVideoBatchReplaceUrlDescription =>
+      'Find-and-replace runs on each selected shot video URL.';
+
+  @override
+  String get shortVideoBatchApplyReplacement => 'Apply replacement';
+
+  @override
+  String get shortVideoBatchReplaceNoMatch =>
+      'No shots to replace (pattern did not match).';
+
+  @override
+  String shortVideoBatchReplaceFinished(int successful, int failed) {
+    return 'Batch replace finished: succeeded $successful, failed $failed';
+  }
+
+  @override
+  String shortVideoBatchReplaceFailedStatus(String code) {
+    return 'Batch replace failed: $code';
+  }
+
+  @override
+  String shortVideoBatchReplaceFailedError(String error) {
+    return 'Batch replace failed: $error';
+  }
+
+  @override
+  String get shortVideoBatchCannotLoadProject => 'Cannot load project.';
+
+  @override
+  String get shortVideoBatchSelectShotsVoiceoverFirst =>
+      'Select shots to generate voiceover first.';
+
+  @override
+  String get shortVideoBatchNoVoiceoverTextSelected =>
+      'None of the selected shots have usable voiceover text.';
+
+  @override
+  String get shortVideoBatchGenerateVoiceoverTitle =>
+      'Batch generate voiceover';
+
+  @override
+  String shortVideoBatchVoiceoverQueueProgress(
+    int done,
+    int total,
+    String percent,
+  ) {
+    return 'Progress: $done / $total ($percent%)';
+  }
+
+  @override
+  String shortVideoBatchVoiceoverQueueStats(int succeeded, int failed) {
+    return 'Succeeded: $succeeded · failed: $failed';
+  }
+
+  @override
+  String get shortVideoBatchVoiceoverQueueFailedHeading => 'Failed items:';
+
+  @override
+  String shortVideoBatchVoiceoverQueueFailedLine(int id, String message) {
+    return 'Shot #$id: $message';
+  }
+
+  @override
+  String get shortVideoBatchVoiceoverQueueDone => 'Done';
+
+  @override
+  String shortVideoBatchVoiceoverGenFailedStatus(String code) {
+    return 'Batch voiceover generation failed: $code';
+  }
+
+  @override
+  String shortVideoBatchVoiceoverGenFailedError(String error) {
+    return 'Batch voiceover generation failed: $error';
+  }
+
+  @override
+  String shortVideoBatchVoiceoverDoneJobs(int count) {
+    return 'Batch voiceover done: enqueued jobs for $count shot(s).';
+  }
+
+  @override
+  String shortVideoBatchVoiceoverDonePartial(int succeeded, int failed) {
+    return 'Batch voiceover done: succeeded $succeeded, failed $failed';
+  }
+
+  @override
+  String get shortVideoBatchShotNoVoiceoverText =>
+      'This shot has no usable voiceover text.';
+
+  @override
+  String get shortVideoBatchGeneratingVoiceover => 'Generating voiceover…';
+
+  @override
+  String shortVideoBatchVoiceoverJobEnqueued(int id) {
+    return 'Shot #$id voiceover job enqueued.';
+  }
+
+  @override
+  String get shortVideoBatchVoiceoverCouldNotCreateTask =>
+      'Voiceover generation failed: could not create task.';
+
+  @override
+  String shortVideoBatchVoiceoverSingleFailedStatus(
+    String code,
+    String message,
+  ) {
+    return 'Voiceover generation failed: $code — $message';
+  }
+
+  @override
+  String shortVideoBatchVoiceoverSingleFailedError(String error) {
+    return 'Voiceover generation failed: $error';
+  }
+
+  @override
+  String get shortVideoRustApiUnknownError => 'unknown error';
+
+  @override
   String get shortVideoCandidateAssetConfirmationTitle =>
       'Candidate asset confirmation';
 
@@ -10381,6 +10663,76 @@ class AppLocalizationsEn extends AppLocalizations {
   String projectEditorAssetFilterSnackbarApplied(int shown, int total) {
     return 'Filter applied: $shown/$total rows';
   }
+
+  @override
+  String get projectEditorAssetEditImageNeedScriptSnack =>
+      'Create a script before uploading an edit image.';
+
+  @override
+  String get projectEditorAssetEditImageDialogTitle => 'Upload edit image';
+
+  @override
+  String get projectEditorAssetEditImageTargetScriptLabel => 'Target script';
+
+  @override
+  String get projectEditorAssetEditImageDataUriLabel => 'Image data URI';
+
+  @override
+  String get projectEditorAssetEditImageDataUriHelper =>
+      'Supports base64 data URIs for jpeg/jpg/png.';
+
+  @override
+  String get projectEditorAssetEditImageUploadButton => 'Upload';
+
+  @override
+  String get projectEditorAssetEditImageEmptyDataUriSnack =>
+      'Base64 data URI cannot be empty.';
+
+  @override
+  String projectEditorAssetEditImageUploadSuccess(String url) {
+    return 'Upload succeeded: $url';
+  }
+
+  @override
+  String get projectEditorAssetLinkNeedScriptAndAssetSnack =>
+      'Prepare at least one script and one asset first.';
+
+  @override
+  String get projectEditorAssetLinkDialogTitleLink => 'Link script and asset';
+
+  @override
+  String get projectEditorAssetLinkDialogTitleUnlink =>
+      'Unlink script and asset';
+
+  @override
+  String get projectEditorAssetLinkScriptLabel => 'Script';
+
+  @override
+  String get projectEditorAssetLinkAssetLabel => 'Asset';
+
+  @override
+  String get projectEditorAssetLinkConfirmLink => 'Confirm link';
+
+  @override
+  String get projectEditorAssetLinkConfirmUnlink => 'Unlink';
+
+  @override
+  String projectEditorAssetLinkSuccessLinked(int scriptId, int assetId) {
+    return 'Linked script #$scriptId · asset #$assetId';
+  }
+
+  @override
+  String projectEditorAssetLinkSuccessUnlinked(int scriptId, int assetId) {
+    return 'Unlinked script #$scriptId · asset #$assetId';
+  }
+
+  @override
+  String get projectEditorAssetGenWorkbenchNeedAssetsSnack =>
+      'Load the asset list before opening the image generation workbench.';
+
+  @override
+  String get projectEditorAssetGenWorkbenchNeedScriptSnack =>
+      'Create a script before starting asset image generation.';
 
   @override
   String get projectEditorDeleteProjectTitle => 'Delete project?';
@@ -10565,6 +10917,114 @@ class AppLocalizationsEn extends AppLocalizations {
   String projectEditorAssetGenUseBatchCandidates(int count) {
     return 'Use batch candidates ($count rows)';
   }
+
+  @override
+  String get projectEditorAssetGenBatchCandidatesNeedAssetType =>
+      'Batch candidate read requires a valid asset type.';
+
+  @override
+  String get projectEditorAssetGenBatchCandidatesLimitPositive =>
+      'Candidate limit must be greater than 0.';
+
+  @override
+  String projectEditorAssetGenLeadBatchGenerate(int total, int enqueuedCount) {
+    return 'Created image tasks for $total assets; $enqueuedCount queued.';
+  }
+
+  @override
+  String projectEditorAssetGenLeadDeleteDerivatives(
+    int deleted,
+    String assetIds,
+  ) {
+    return 'Deleted $deleted derivative image record(s); assets $assetIds.';
+  }
+
+  @override
+  String projectEditorAssetGenLeadUpdateImageUrl(int assetId, String message) {
+    return 'Updated asset #$assetId cover URL: $message';
+  }
+
+  @override
+  String projectEditorAssetGenSyncSnapshotFailed(String error) {
+    return 'Failed to sync workbench summary: $error';
+  }
+
+  @override
+  String get projectEditorAssetGenSelectionLabelSelectAllVisible =>
+      'Selected all visible assets';
+
+  @override
+  String get projectEditorAssetGenSelectionLabelRebuildAllTypes =>
+      'Rebuilt selection for all types';
+
+  @override
+  String projectEditorAssetGenSelectionLabelRebuildForType(String assetType) {
+    return 'Rebuilt selection for type $assetType';
+  }
+
+  @override
+  String get projectEditorAssetGenSelectionLabelClear => 'Cleared selection';
+
+  @override
+  String projectEditorAssetGenSelectionLabelRebuildImageState(String state) {
+    return 'Rebuilt selection by image state $state';
+  }
+
+  @override
+  String get projectEditorAssetGenSelectionLabelRebuildMaterialContext =>
+      'Rebuilt selection from material context';
+
+  @override
+  String get projectEditorAssetGenSelectionLabelRebuildBatchCandidates =>
+      'Rebuilt selection from batch candidates';
+
+  @override
+  String projectEditorAssetGenSelectionLabelRebuildPromptState(String state) {
+    return 'Rebuilt selection by prompt state $state';
+  }
+
+  @override
+  String projectEditorAssetGenWorkbenchSelectionLineEmpty(String label) {
+    return '$label: no selectable assets';
+  }
+
+  @override
+  String projectEditorAssetGenWorkbenchSelectionLineCount(
+    String label,
+    int count,
+  ) {
+    return '$label: selected $count assets';
+  }
+
+  @override
+  String projectEditorAssetGenWorkbenchScopedSelectionLineEmpty(String label) {
+    return '$label: no matches among visible assets';
+  }
+
+  @override
+  String get projectEditorAssetGenSwitchingTypeAll =>
+      'Switching to all types; syncing workbench summary…';
+
+  @override
+  String projectEditorAssetGenSwitchingTypeNamed(String assetType) {
+    return 'Switching to $assetType; syncing workbench summary…';
+  }
+
+  @override
+  String projectEditorAssetGenSnapshotLoadingWithLead(String lead) {
+    return '$lead; syncing workbench summary…';
+  }
+
+  @override
+  String projectEditorAssetGenBatchCandidatesStatusWithType(
+    String summary,
+    String assetType,
+  ) {
+    return '$summary · type=$assetType';
+  }
+
+  @override
+  String get projectEditorAssetSummaryWorkbenchPartsSeparator => '; ';
 
   @override
   String get projectEditorAssetImagesCreateAssetFirst =>

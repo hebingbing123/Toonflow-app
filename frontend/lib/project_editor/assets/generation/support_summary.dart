@@ -1,8 +1,8 @@
 part of 'support.dart';
 
-String summarizeProductionAssetData(AssetsDataResponseV1 response) {
+String summarizeProductionAssetData(AssetsDataResponseV1 response, AppLocalizations l10n) {
   if (response.assets.isEmpty) {
-    return 'production 资产数据为空';
+    return l10n.projectEditorAssetSummaryProductionEmpty;
   }
   final typeCounts = SplayTreeMap<String, int>();
   for (final asset in response.assets) {
@@ -10,19 +10,23 @@ String summarizeProductionAssetData(AssetsDataResponseV1 response) {
     typeCounts[type] = (typeCounts[type] ?? 0) + 1;
   }
   final typesLine = typeCounts.entries
-      .map((entry) => '${entry.key} ${entry.value} 条')
+      .map((entry) => l10n.projectEditorAssetSummaryTypeCount(entry.key, entry.value))
       .join(' · ');
   final sampleLine = response.assets
       .take(3)
       .map((asset) => '#${asset.id} ${asset.name}')
       .join(', ');
-  return 'production 资产 ${response.total} 条 · $typesLine · 示例：$sampleLine';
+  return l10n.projectEditorAssetSummaryProductionLine(
+    response.total,
+    typesLine,
+    sampleLine,
+  );
 }
 
-String summarizeAssetPollingStatuses(Iterable<AssetImageStatusV1> statuses) {
+String summarizeAssetPollingStatuses(Iterable<AssetImageStatusV1> statuses, AppLocalizations l10n) {
   final rows = statuses.toList(growable: false);
   if (rows.isEmpty) {
-    return '未返回选中资产的图片状态';
+    return l10n.projectEditorAssetSummaryPollingEmpty;
   }
   final states = SplayTreeMap<String, int>();
   for (final row in rows) {
@@ -31,38 +35,51 @@ String summarizeAssetPollingStatuses(Iterable<AssetImageStatusV1> statuses) {
     states[key] = (states[key] ?? 0) + 1;
   }
   final stateLine = states.entries
-      .map((entry) => '${entry.key} ${entry.value} 条')
+      .map((entry) => l10n.projectEditorAssetSummaryStateCount(entry.key, entry.value))
       .join(' · ');
   final sampleLine = rows
       .take(3)
-      .map((row) => '#${row.assetId}: ${row.imageCount} 张')
+      .map((row) => l10n.projectEditorAssetSummaryImageCount(row.assetId, row.imageCount))
       .join(', ');
-  return '已轮询 ${rows.length} 条资产 · $stateLine · 示例：$sampleLine';
+  return l10n.projectEditorAssetSummaryPollingLine(
+    rows.length,
+    stateLine,
+    sampleLine,
+  );
 }
 
-String summarizeWorkbenchAssetMaterialData(WorkbenchAssetMaterialDataResponse data) {
-  return '素材上下文 ${data.data.length} 条图片素材 · ${data.video.length} 条视频素材';
+String summarizeWorkbenchAssetMaterialData(WorkbenchAssetMaterialDataResponse data, AppLocalizations l10n) {
+  return l10n.projectEditorAssetSummaryMaterialContext(
+    data.data.length,
+    data.video.length,
+  );
 }
 
 String summarizeWorkbenchBatchGenerationData(
   WorkbenchAssetBatchGenerationResponse data,
+  AppLocalizations l10n,
 ) {
   if (data.data.isEmpty) {
-    return '批量候选为空';
+    return l10n.projectEditorAssetSummaryBatchEmpty;
   }
   final sampleLine = data.data
       .take(3)
       .map((row) => '#${row.id} ${row.name}')
       .join(', ');
-  return '批量候选 ${data.data.length}/${data.total} 条 · 示例：$sampleLine';
+  return l10n.projectEditorAssetSummaryBatchLine(
+    data.data.length,
+    data.total,
+    sampleLine,
+  );
 }
 
 String summarizeWorkbenchPromptPolling(
   Iterable<WorkbenchAssetPollingPromptItem> rows,
+  AppLocalizations l10n,
 ) {
   final items = rows.toList(growable: false);
   if (items.isEmpty) {
-    return '未返回 prompt 状态';
+    return l10n.projectEditorAssetSummaryPromptEmpty;
   }
   final states = SplayTreeMap<String, int>();
   for (final row in items) {
@@ -70,14 +87,18 @@ String summarizeWorkbenchPromptPolling(
     states[key] = (states[key] ?? 0) + 1;
   }
   final stateLine = states.entries
-      .map((entry) => '${entry.key} ${entry.value} 条')
+      .map((entry) => l10n.projectEditorAssetSummaryStateCount(entry.key, entry.value))
       .join(' · ');
-  return 'prompt 轮询 ${items.length} 条 · $stateLine';
+  return l10n.projectEditorAssetSummaryPromptLine(
+    items.length,
+    stateLine,
+  );
 }
 
 String summarizeAssetWorkbenchSnapshot({
   required Iterable<AssetRow> visibleAssets,
   required Iterable<int> selectedIds,
+  required AppLocalizations l10n,
   AssetsDataResponseV1? productionData,
   AssetsPollingImageResponseV1? pollingData,
   Iterable<WorkbenchAssetPollingPromptItem>? promptPollingData,
@@ -90,21 +111,23 @@ String summarizeAssetWorkbenchSnapshot({
     selectedIds.where(visibleById.containsKey),
   );
   final selectionLine = switch (scopedSelection.length) {
-    0 => '当前未选择资产',
-    1 =>
-      '当前选择 #${scopedSelection.first} ${visibleById[scopedSelection.first]?.name ?? ""}'
-          .trim(),
-    _ =>
-      '当前选择 ${scopedSelection.length} 条资产：${scopedSelection.take(3).map((id) => "#$id ${visibleById[id]?.name ?? ""}".trim()).join(", ")}',
+    0 => l10n.projectEditorAssetSummarySelectionNone,
+    1 => l10n.projectEditorAssetSummarySelectionSingle(
+        scopedSelection.first,
+        visibleById[scopedSelection.first]?.name ?? "",
+      ).trim(),
+    _ => l10n.projectEditorAssetSummarySelectionMultiple(
+        scopedSelection.length,
+        scopedSelection.take(3).map((id) => "#$id ${visibleById[id]?.name ?? ""}".trim()).join(", "),
+      ),
   };
   final parts = <String>[
     if (lead != null && lead.trim().isNotEmpty) lead.trim(),
     selectionLine,
-    if (productionData != null) summarizeProductionAssetData(productionData),
-    if (pollingData != null) summarizeAssetPollingStatuses(pollingData.statuses),
+    if (productionData != null) summarizeProductionAssetData(productionData, l10n),
+    if (pollingData != null) summarizeAssetPollingStatuses(pollingData.statuses, l10n),
     if (promptPollingData != null)
-      summarizeWorkbenchPromptPolling(promptPollingData),
+      summarizeWorkbenchPromptPolling(promptPollingData, l10n),
   ];
-  return parts.join('；');
+  return parts.join(l10n.projectEditorAssetSummaryWorkbenchPartsSeparator);
 }
-

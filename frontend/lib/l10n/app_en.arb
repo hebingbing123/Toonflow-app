@@ -7733,6 +7733,190 @@
     }
   },
   "shortVideoPreviewPlaylistComplete": "Finished playing all shots",
+  "shortVideoBatchThrottleMessage": "You're doing that too often. Wait a moment and try again.",
+  "shortVideoBatchSelectAll": "Select all",
+  "shortVideoBatchDeselectAll": "Deselect all",
+  "shortVideoBatchSelectedCount": "Selected: {selected} / {total}",
+  "@shortVideoBatchSelectedCount": {
+    "placeholders": {
+      "selected": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "shortVideoBatchOpEnable": "Batch enable",
+  "shortVideoBatchOpDisable": "Batch disable",
+  "shortVideoBatchOpDurationAlign": "Duration align",
+  "shortVideoBatchOpReplace": "Batch replace URL",
+  "shortVideoBatchOpVoiceover": "Batch voiceover",
+  "shortVideoBatchProgressCompletedTotal": "Progress: {completed} / {total}",
+  "@shortVideoBatchProgressCompletedTotal": {
+    "placeholders": {
+      "completed": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "shortVideoBatchProgressSucceededLabel": "Succeeded: {count}",
+  "@shortVideoBatchProgressSucceededLabel": {
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "shortVideoBatchProgressFailedLabel": "Failed: {count}",
+  "@shortVideoBatchProgressFailedLabel": {
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "shortVideoBatchProgressFailedHeading": "Failed items:",
+  "shortVideoBatchProgressStoryboardLine": "Storyboard #{id}",
+  "@shortVideoBatchProgressStoryboardLine": {
+    "placeholders": {"id": {"type": "int"}}
+  },
+  "shortVideoBatchProgressCancel": "Cancel",
+  "shortVideoBatchProgressRetryFailed": "Retry failed",
+  "shortVideoBatchProgressClose": "Close",
+  "shortVideoBatchErrorCode": "Error code: {code}",
+  "@shortVideoBatchErrorCode": {
+    "placeholders": {"code": {"type": "String"}}
+  },
+  "shortVideoBatchOperationRetryTitle": "{title} (retry)",
+  "@shortVideoBatchOperationRetryTitle": {
+    "placeholders": {"title": {"type": "String"}}
+  },
+  "shortVideoBatchSelectShotsToEnableFirst": "Select shots to enable first.",
+  "shortVideoBatchNoShotsWithVideoUrl": "None of the selected shots have a usable video URL.",
+  "shortVideoBatchEnableTitle": "Batch enable shots",
+  "shortVideoBatchEnableFinished": "Batch enable finished: succeeded {successful}, failed {failed}",
+  "@shortVideoBatchEnableFinished": {
+    "placeholders": {
+      "successful": {"type": "int"},
+      "failed": {"type": "int"}
+    }
+  },
+  "shortVideoBatchEnableFailedStatus": "Batch enable failed: {code}",
+  "@shortVideoBatchEnableFailedStatus": {
+    "placeholders": {"code": {"type": "String"}}
+  },
+  "shortVideoBatchEnableFailedError": "Batch enable failed: {error}",
+  "@shortVideoBatchEnableFailedError": {
+    "placeholders": {"error": {"type": "String"}}
+  },
+  "shortVideoBatchSelectShotsToDisableFirst": "Select shots to disable first.",
+  "shortVideoBatchDisableTitle": "Batch disable shots",
+  "shortVideoBatchDisableFinished": "Batch disable finished: succeeded {successful}, failed {failed}",
+  "@shortVideoBatchDisableFinished": {
+    "placeholders": {
+      "successful": {"type": "int"},
+      "failed": {"type": "int"}
+    }
+  },
+  "shortVideoBatchDisableFailedStatus": "Batch disable failed: {code}",
+  "@shortVideoBatchDisableFailedStatus": {
+    "placeholders": {"code": {"type": "String"}}
+  },
+  "shortVideoBatchDisableFailedError": "Batch disable failed: {error}",
+  "@shortVideoBatchDisableFailedError": {
+    "placeholders": {"error": {"type": "String"}}
+  },
+  "shortVideoBatchSelectShotsDurationFirst": "Select shots to align duration first.",
+  "shortVideoBatchDurationDialogTitle": "Batch duration align",
+  "shortVideoBatchDurationLabel": "Duration (seconds)",
+  "shortVideoBatchDurationHint": "Enter 1–300",
+  "shortVideoBatchAlignAndSave": "Align and save",
+  "shortVideoBatchDurationProgressTitle": "Batch duration align",
+  "shortVideoBatchDurationFinished": "Batch duration align finished: succeeded {successful}, failed {failed}",
+  "@shortVideoBatchDurationFinished": {
+    "placeholders": {
+      "successful": {"type": "int"},
+      "failed": {"type": "int"}
+    }
+  },
+  "shortVideoBatchSelectShotsReplaceFirst": "Select shots to replace first.",
+  "shortVideoBatchReplaceDialogTitle": "Batch replace video URLs",
+  "shortVideoBatchReplaceFindPatternLabel": "Find pattern (regex supported)",
+  "shortVideoBatchReplaceFindPatternHint": "e.g. /v1/",
+  "shortVideoBatchReplaceWithLabel": "Replace with",
+  "shortVideoBatchReplaceWithHint": "e.g. /v2/",
+  "shortVideoBatchReplaceUrlDescription": "Find-and-replace runs on each selected shot video URL.",
+  "shortVideoBatchApplyReplacement": "Apply replacement",
+  "shortVideoBatchReplaceNoMatch": "No shots to replace (pattern did not match).",
+  "shortVideoBatchReplaceFinished": "Batch replace finished: succeeded {successful}, failed {failed}",
+  "@shortVideoBatchReplaceFinished": {
+    "placeholders": {
+      "successful": {"type": "int"},
+      "failed": {"type": "int"}
+    }
+  },
+  "shortVideoBatchReplaceFailedStatus": "Batch replace failed: {code}",
+  "@shortVideoBatchReplaceFailedStatus": {
+    "placeholders": {"code": {"type": "String"}}
+  },
+  "shortVideoBatchReplaceFailedError": "Batch replace failed: {error}",
+  "@shortVideoBatchReplaceFailedError": {
+    "placeholders": {"error": {"type": "String"}}
+  },
+  "shortVideoBatchCannotLoadProject": "Cannot load project.",
+  "shortVideoBatchSelectShotsVoiceoverFirst": "Select shots to generate voiceover first.",
+  "shortVideoBatchNoVoiceoverTextSelected": "None of the selected shots have usable voiceover text.",
+  "shortVideoBatchGenerateVoiceoverTitle": "Batch generate voiceover",
+  "shortVideoBatchVoiceoverQueueProgress": "Progress: {done} / {total} ({percent}%)",
+  "@shortVideoBatchVoiceoverQueueProgress": {
+    "placeholders": {
+      "done": {"type": "int"},
+      "total": {"type": "int"},
+      "percent": {"type": "String"}
+    }
+  },
+  "shortVideoBatchVoiceoverQueueStats": "Succeeded: {succeeded} · failed: {failed}",
+  "@shortVideoBatchVoiceoverQueueStats": {
+    "placeholders": {
+      "succeeded": {"type": "int"},
+      "failed": {"type": "int"}
+    }
+  },
+  "shortVideoBatchVoiceoverQueueFailedHeading": "Failed items:",
+  "shortVideoBatchVoiceoverQueueFailedLine": "Shot #{id}: {message}",
+  "@shortVideoBatchVoiceoverQueueFailedLine": {
+    "placeholders": {
+      "id": {"type": "int"},
+      "message": {"type": "String"}
+    }
+  },
+  "shortVideoBatchVoiceoverQueueDone": "Done",
+  "shortVideoBatchVoiceoverGenFailedStatus": "Batch voiceover generation failed: {code}",
+  "@shortVideoBatchVoiceoverGenFailedStatus": {
+    "placeholders": {"code": {"type": "String"}}
+  },
+  "shortVideoBatchVoiceoverGenFailedError": "Batch voiceover generation failed: {error}",
+  "@shortVideoBatchVoiceoverGenFailedError": {
+    "placeholders": {"error": {"type": "String"}}
+  },
+  "shortVideoBatchVoiceoverDoneJobs": "Batch voiceover done: enqueued jobs for {count} shot(s).",
+  "@shortVideoBatchVoiceoverDoneJobs": {
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "shortVideoBatchVoiceoverDonePartial": "Batch voiceover done: succeeded {succeeded}, failed {failed}",
+  "@shortVideoBatchVoiceoverDonePartial": {
+    "placeholders": {
+      "succeeded": {"type": "int"},
+      "failed": {"type": "int"}
+    }
+  },
+  "shortVideoBatchShotNoVoiceoverText": "This shot has no usable voiceover text.",
+  "shortVideoBatchGeneratingVoiceover": "Generating voiceover…",
+  "shortVideoBatchVoiceoverJobEnqueued": "Shot #{id} voiceover job enqueued.",
+  "@shortVideoBatchVoiceoverJobEnqueued": {
+    "placeholders": {"id": {"type": "int"}}
+  },
+  "shortVideoBatchVoiceoverCouldNotCreateTask": "Voiceover generation failed: could not create task.",
+  "shortVideoBatchVoiceoverSingleFailedStatus": "Voiceover generation failed: {code} — {message}",
+  "@shortVideoBatchVoiceoverSingleFailedStatus": {
+    "placeholders": {
+      "code": {"type": "String"},
+      "message": {"type": "String"}
+    }
+  },
+  "shortVideoBatchVoiceoverSingleFailedError": "Voiceover generation failed: {error}",
+  "@shortVideoBatchVoiceoverSingleFailedError": {
+    "placeholders": {"error": {"type": "String"}}
+  },
+  "shortVideoRustApiUnknownError": "unknown error",
   "shortVideoCandidateAssetConfirmationTitle": "Candidate asset confirmation",
   "shortVideoCandidateMetricPending": "Pending",
   "shortVideoCandidateMetricLinked": "Linked",
@@ -7763,6 +7947,40 @@
       }
     }
   },
+  "projectEditorAssetEditImageNeedScriptSnack": "Create a script before uploading an edit image.",
+  "projectEditorAssetEditImageDialogTitle": "Upload edit image",
+  "projectEditorAssetEditImageTargetScriptLabel": "Target script",
+  "projectEditorAssetEditImageDataUriLabel": "Image data URI",
+  "projectEditorAssetEditImageDataUriHelper": "Supports base64 data URIs for jpeg/jpg/png.",
+  "projectEditorAssetEditImageUploadButton": "Upload",
+  "projectEditorAssetEditImageEmptyDataUriSnack": "Base64 data URI cannot be empty.",
+  "projectEditorAssetEditImageUploadSuccess": "Upload succeeded: {url}",
+  "@projectEditorAssetEditImageUploadSuccess": {
+    "placeholders": {"url": {"type": "String"}}
+  },
+  "projectEditorAssetLinkNeedScriptAndAssetSnack": "Prepare at least one script and one asset first.",
+  "projectEditorAssetLinkDialogTitleLink": "Link script and asset",
+  "projectEditorAssetLinkDialogTitleUnlink": "Unlink script and asset",
+  "projectEditorAssetLinkScriptLabel": "Script",
+  "projectEditorAssetLinkAssetLabel": "Asset",
+  "projectEditorAssetLinkConfirmLink": "Confirm link",
+  "projectEditorAssetLinkConfirmUnlink": "Unlink",
+  "projectEditorAssetLinkSuccessLinked": "Linked script #{scriptId} · asset #{assetId}",
+  "@projectEditorAssetLinkSuccessLinked": {
+    "placeholders": {
+      "scriptId": {"type": "int"},
+      "assetId": {"type": "int"}
+    }
+  },
+  "projectEditorAssetLinkSuccessUnlinked": "Unlinked script #{scriptId} · asset #{assetId}",
+  "@projectEditorAssetLinkSuccessUnlinked": {
+    "placeholders": {
+      "scriptId": {"type": "int"},
+      "assetId": {"type": "int"}
+    }
+  },
+  "projectEditorAssetGenWorkbenchNeedAssetsSnack": "Load the asset list before opening the image generation workbench.",
+  "projectEditorAssetGenWorkbenchNeedScriptSnack": "Create a script before starting asset image generation.",
   "projectEditorDeleteProjectTitle": "Delete project?",
   "projectEditorDeleteProjectBody": "Deletes project #{id}, related scripts/storyboards (DB cascade), and clears agent memory for this project.",
   "@projectEditorDeleteProjectBody": {
@@ -7866,6 +8084,134 @@
       }
     }
   },
+  "projectEditorAssetGenBatchCandidatesNeedAssetType": "Batch candidate read requires a valid asset type.",
+  "projectEditorAssetGenBatchCandidatesLimitPositive": "Candidate limit must be greater than 0.",
+  "projectEditorAssetGenLeadBatchGenerate": "Created image tasks for {total} assets; {enqueuedCount} queued.",
+  "@projectEditorAssetGenLeadBatchGenerate": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "enqueuedCount": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorAssetGenLeadDeleteDerivatives": "Deleted {deleted} derivative image record(s); assets {assetIds}.",
+  "@projectEditorAssetGenLeadDeleteDerivatives": {
+    "placeholders": {
+      "deleted": {
+        "type": "int"
+      },
+      "assetIds": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetGenLeadUpdateImageUrl": "Updated asset #{assetId} cover URL: {message}",
+  "@projectEditorAssetGenLeadUpdateImageUrl": {
+    "placeholders": {
+      "assetId": {
+        "type": "int"
+      },
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetGenSyncSnapshotFailed": "Failed to sync workbench summary: {error}",
+  "@projectEditorAssetGenSyncSnapshotFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetGenSelectionLabelSelectAllVisible": "Selected all visible assets",
+  "projectEditorAssetGenSelectionLabelRebuildAllTypes": "Rebuilt selection for all types",
+  "projectEditorAssetGenSelectionLabelRebuildForType": "Rebuilt selection for type {assetType}",
+  "@projectEditorAssetGenSelectionLabelRebuildForType": {
+    "placeholders": {
+      "assetType": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetGenSelectionLabelClear": "Cleared selection",
+  "projectEditorAssetGenSelectionLabelRebuildImageState": "Rebuilt selection by image state {state}",
+  "@projectEditorAssetGenSelectionLabelRebuildImageState": {
+    "placeholders": {
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetGenSelectionLabelRebuildMaterialContext": "Rebuilt selection from material context",
+  "projectEditorAssetGenSelectionLabelRebuildBatchCandidates": "Rebuilt selection from batch candidates",
+  "projectEditorAssetGenSelectionLabelRebuildPromptState": "Rebuilt selection by prompt state {state}",
+  "@projectEditorAssetGenSelectionLabelRebuildPromptState": {
+    "placeholders": {
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetGenWorkbenchSelectionLineEmpty": "{label}: no selectable assets",
+  "@projectEditorAssetGenWorkbenchSelectionLineEmpty": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetGenWorkbenchSelectionLineCount": "{label}: selected {count} assets",
+  "@projectEditorAssetGenWorkbenchSelectionLineCount": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorAssetGenWorkbenchScopedSelectionLineEmpty": "{label}: no matches among visible assets",
+  "@projectEditorAssetGenWorkbenchScopedSelectionLineEmpty": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetGenSwitchingTypeAll": "Switching to all types; syncing workbench summary…",
+  "projectEditorAssetGenSwitchingTypeNamed": "Switching to {assetType}; syncing workbench summary…",
+  "@projectEditorAssetGenSwitchingTypeNamed": {
+    "placeholders": {
+      "assetType": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetGenSnapshotLoadingWithLead": "{lead}; syncing workbench summary…",
+  "@projectEditorAssetGenSnapshotLoadingWithLead": {
+    "placeholders": {
+      "lead": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetGenBatchCandidatesStatusWithType": "{summary} · type={assetType}",
+  "@projectEditorAssetGenBatchCandidatesStatusWithType": {
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      },
+      "assetType": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetSummaryWorkbenchPartsSeparator": "; ",
   "projectEditorAssetImagesCreateAssetFirst": "Create an asset before managing images",
   "projectEditorAssetImagesDiagnosisNotLoadedSummary": "Image list for this asset has not been loaded yet.",
   "projectEditorAssetImagesDiagnosisNotLoadedDetail": "Sync the image list first to see whether history images exist, then preview or add a new image.",

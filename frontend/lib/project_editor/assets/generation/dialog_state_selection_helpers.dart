@@ -19,6 +19,7 @@ typedef _ToggleSelectionResult = ({
 });
 
 _SelectionApplyResult _buildSelectionApplyResult({
+  required AppLocalizations l10n,
   required Iterable<int> ids,
   required String label,
   required int? previousFocusedAssetNumericId,
@@ -28,8 +29,8 @@ _SelectionApplyResult _buildSelectionApplyResult({
       ? previousFocusedAssetNumericId
       : selectedIds.first;
   final statusLine = selectedIds.isEmpty
-      ? '$label：没有可选资产'
-      : '$label：已选择 ${selectedIds.length} 条资产';
+      ? l10n.projectEditorAssetGenWorkbenchSelectionLineEmpty(label)
+      : l10n.projectEditorAssetGenWorkbenchSelectionLineCount(label, selectedIds.length);
   return (
     selectedIds: selectedIds,
     focusedAssetNumericId: focusedAssetNumericId,
@@ -38,6 +39,7 @@ _SelectionApplyResult _buildSelectionApplyResult({
 }
 
 _SelectionApplyResult _buildScopedSelectionApplyResult({
+  required AppLocalizations l10n,
   required Iterable<int> candidateIds,
   required List<AssetRow> scopedAssets,
   required String label,
@@ -45,8 +47,8 @@ _SelectionApplyResult _buildScopedSelectionApplyResult({
   final selectedIds = collectScopedAssetNumericIds(candidateIds, scopedAssets);
   final focusedAssetNumericId = selectedIds.isEmpty ? null : selectedIds.first;
   final statusLine = selectedIds.isEmpty
-      ? '$label：当前可见资产中没有匹配项'
-      : '$label：已选择 ${selectedIds.length} 条资产';
+      ? l10n.projectEditorAssetGenWorkbenchScopedSelectionLineEmpty(label)
+      : l10n.projectEditorAssetGenWorkbenchSelectionLineCount(label, selectedIds.length);
   return (
     selectedIds: selectedIds,
     focusedAssetNumericId: focusedAssetNumericId,
@@ -55,6 +57,7 @@ _SelectionApplyResult _buildScopedSelectionApplyResult({
 }
 
 _TypeChangeSelectionResult _buildTypeChangeSelectionResult({
+  required AppLocalizations l10n,
   required String nextType,
   required List<AssetRow> visibleAssets,
   required Set<int> preferredIds,
@@ -68,8 +71,8 @@ _TypeChangeSelectionResult _buildTypeChangeSelectionResult({
   );
   final focusedAssetNumericId = selectedIds.isEmpty ? null : selectedIds.first;
   final statusLine = nextType.isEmpty
-      ? '正在切换到全部类型并同步工作台摘要…'
-      : '正在切换到 $nextType 并同步工作台摘要…';
+      ? l10n.projectEditorAssetGenSwitchingTypeAll
+      : l10n.projectEditorAssetGenSwitchingTypeNamed(nextType);
   return (
     selectedIds: selectedIds,
     focusedAssetNumericId: focusedAssetNumericId,

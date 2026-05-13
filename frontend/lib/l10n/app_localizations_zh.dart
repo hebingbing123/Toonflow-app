@@ -9824,6 +9824,274 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shortVideoPreviewPlaylistComplete => '已播放完全部镜头';
 
   @override
+  String get shortVideoBatchThrottleMessage => '操作过于频繁，请稍后再试。';
+
+  @override
+  String get shortVideoBatchSelectAll => '全选';
+
+  @override
+  String get shortVideoBatchDeselectAll => '取消全选';
+
+  @override
+  String shortVideoBatchSelectedCount(int selected, int total) {
+    return '已选择：$selected / $total';
+  }
+
+  @override
+  String get shortVideoBatchOpEnable => '批量启用';
+
+  @override
+  String get shortVideoBatchOpDisable => '批量禁用';
+
+  @override
+  String get shortVideoBatchOpDurationAlign => '时长对齐';
+
+  @override
+  String get shortVideoBatchOpReplace => '批量替换 URL';
+
+  @override
+  String get shortVideoBatchOpVoiceover => '批量配音';
+
+  @override
+  String shortVideoBatchProgressCompletedTotal(int completed, int total) {
+    return '进度：$completed / $total';
+  }
+
+  @override
+  String shortVideoBatchProgressSucceededLabel(int count) {
+    return '成功：$count';
+  }
+
+  @override
+  String shortVideoBatchProgressFailedLabel(int count) {
+    return '失败：$count';
+  }
+
+  @override
+  String get shortVideoBatchProgressFailedHeading => '失败项：';
+
+  @override
+  String shortVideoBatchProgressStoryboardLine(int id) {
+    return '分镜 #$id';
+  }
+
+  @override
+  String get shortVideoBatchProgressCancel => '取消';
+
+  @override
+  String get shortVideoBatchProgressRetryFailed => '重试失败项';
+
+  @override
+  String get shortVideoBatchProgressClose => '关闭';
+
+  @override
+  String shortVideoBatchErrorCode(String code) {
+    return '错误码：$code';
+  }
+
+  @override
+  String shortVideoBatchOperationRetryTitle(String title) {
+    return '$title（重试）';
+  }
+
+  @override
+  String get shortVideoBatchSelectShotsToEnableFirst => '请先选择要启用的镜头。';
+
+  @override
+  String get shortVideoBatchNoShotsWithVideoUrl => '所选镜头均无可用的视频 URL。';
+
+  @override
+  String get shortVideoBatchEnableTitle => '批量启用镜头';
+
+  @override
+  String shortVideoBatchEnableFinished(int successful, int failed) {
+    return '批量启用完成：成功 $successful，失败 $failed';
+  }
+
+  @override
+  String shortVideoBatchEnableFailedStatus(String code) {
+    return '批量启用失败：$code';
+  }
+
+  @override
+  String shortVideoBatchEnableFailedError(String error) {
+    return '批量启用失败：$error';
+  }
+
+  @override
+  String get shortVideoBatchSelectShotsToDisableFirst => '请先选择要停用的镜头。';
+
+  @override
+  String get shortVideoBatchDisableTitle => '批量停用镜头';
+
+  @override
+  String shortVideoBatchDisableFinished(int successful, int failed) {
+    return '批量停用完成：成功 $successful，失败 $failed';
+  }
+
+  @override
+  String shortVideoBatchDisableFailedStatus(String code) {
+    return '批量停用失败：$code';
+  }
+
+  @override
+  String shortVideoBatchDisableFailedError(String error) {
+    return '批量停用失败：$error';
+  }
+
+  @override
+  String get shortVideoBatchSelectShotsDurationFirst => '请先选择要对齐时长的镜头。';
+
+  @override
+  String get shortVideoBatchDurationDialogTitle => '批量时长对齐';
+
+  @override
+  String get shortVideoBatchDurationLabel => '时长（秒）';
+
+  @override
+  String get shortVideoBatchDurationHint => '请输入 1–300';
+
+  @override
+  String get shortVideoBatchAlignAndSave => '对齐并保存';
+
+  @override
+  String get shortVideoBatchDurationProgressTitle => '批量时长对齐';
+
+  @override
+  String shortVideoBatchDurationFinished(int successful, int failed) {
+    return '批量时长对齐完成：成功 $successful，失败 $failed';
+  }
+
+  @override
+  String get shortVideoBatchSelectShotsReplaceFirst => '请先选择要替换的镜头。';
+
+  @override
+  String get shortVideoBatchReplaceDialogTitle => '批量替换视频 URL';
+
+  @override
+  String get shortVideoBatchReplaceFindPatternLabel => '查找模式（支持正则）';
+
+  @override
+  String get shortVideoBatchReplaceFindPatternHint => '例如 /v1/';
+
+  @override
+  String get shortVideoBatchReplaceWithLabel => '替换为';
+
+  @override
+  String get shortVideoBatchReplaceWithHint => '例如 /v2/';
+
+  @override
+  String get shortVideoBatchReplaceUrlDescription => '对每个选中镜头的视频 URL 执行查找替换。';
+
+  @override
+  String get shortVideoBatchApplyReplacement => '应用替换';
+
+  @override
+  String get shortVideoBatchReplaceNoMatch => '没有可替换的镜头（模式未匹配）。';
+
+  @override
+  String shortVideoBatchReplaceFinished(int successful, int failed) {
+    return '批量替换完成：成功 $successful，失败 $failed';
+  }
+
+  @override
+  String shortVideoBatchReplaceFailedStatus(String code) {
+    return '批量替换失败：$code';
+  }
+
+  @override
+  String shortVideoBatchReplaceFailedError(String error) {
+    return '批量替换失败：$error';
+  }
+
+  @override
+  String get shortVideoBatchCannotLoadProject => '无法加载项目。';
+
+  @override
+  String get shortVideoBatchSelectShotsVoiceoverFirst => '请先选择要生成配音的镜头。';
+
+  @override
+  String get shortVideoBatchNoVoiceoverTextSelected => '所选镜头没有可用的配音文案。';
+
+  @override
+  String get shortVideoBatchGenerateVoiceoverTitle => '批量生成配音';
+
+  @override
+  String shortVideoBatchVoiceoverQueueProgress(
+    int done,
+    int total,
+    String percent,
+  ) {
+    return '进度：$done / $total（$percent%）';
+  }
+
+  @override
+  String shortVideoBatchVoiceoverQueueStats(int succeeded, int failed) {
+    return '成功：$succeeded · 失败：$failed';
+  }
+
+  @override
+  String get shortVideoBatchVoiceoverQueueFailedHeading => '失败项：';
+
+  @override
+  String shortVideoBatchVoiceoverQueueFailedLine(int id, String message) {
+    return '镜头 #$id：$message';
+  }
+
+  @override
+  String get shortVideoBatchVoiceoverQueueDone => '完成';
+
+  @override
+  String shortVideoBatchVoiceoverGenFailedStatus(String code) {
+    return '批量配音生成失败：$code';
+  }
+
+  @override
+  String shortVideoBatchVoiceoverGenFailedError(String error) {
+    return '批量配音生成失败：$error';
+  }
+
+  @override
+  String shortVideoBatchVoiceoverDoneJobs(int count) {
+    return '批量配音完成：已为 $count 个镜头入队任务。';
+  }
+
+  @override
+  String shortVideoBatchVoiceoverDonePartial(int succeeded, int failed) {
+    return '批量配音完成：成功 $succeeded，失败 $failed';
+  }
+
+  @override
+  String get shortVideoBatchShotNoVoiceoverText => '该镜头没有可用的配音文案。';
+
+  @override
+  String get shortVideoBatchGeneratingVoiceover => '正在生成配音…';
+
+  @override
+  String shortVideoBatchVoiceoverJobEnqueued(int id) {
+    return '镜头 #$id 的配音任务已入队。';
+  }
+
+  @override
+  String get shortVideoBatchVoiceoverCouldNotCreateTask => '配音生成失败：无法创建任务。';
+
+  @override
+  String shortVideoBatchVoiceoverSingleFailedStatus(
+    String code,
+    String message,
+  ) {
+    return '配音生成失败：$code — $message';
+  }
+
+  @override
+  String shortVideoBatchVoiceoverSingleFailedError(String error) {
+    return '配音生成失败：$error';
+  }
+
+  @override
+  String get shortVideoRustApiUnknownError => '未知错误';
+
+  @override
   String get shortVideoCandidateAssetConfirmationTitle => '候选素材确认';
 
   @override
@@ -9885,6 +10153,73 @@ class AppLocalizationsZh extends AppLocalizations {
   String projectEditorAssetFilterSnackbarApplied(int shown, int total) {
     return '已应用筛选：$shown/$total 行';
   }
+
+  @override
+  String get projectEditorAssetEditImageNeedScriptSnack => '请先创建剧本再上传编辑图片。';
+
+  @override
+  String get projectEditorAssetEditImageDialogTitle => '上传编辑图片';
+
+  @override
+  String get projectEditorAssetEditImageTargetScriptLabel => '目标剧本';
+
+  @override
+  String get projectEditorAssetEditImageDataUriLabel => '图片 data URI';
+
+  @override
+  String get projectEditorAssetEditImageDataUriHelper =>
+      '支持 jpeg/jpg/png 的 base64 data URI。';
+
+  @override
+  String get projectEditorAssetEditImageUploadButton => '上传';
+
+  @override
+  String get projectEditorAssetEditImageEmptyDataUriSnack =>
+      'base64 data URI 不能为空。';
+
+  @override
+  String projectEditorAssetEditImageUploadSuccess(String url) {
+    return '上传成功：$url';
+  }
+
+  @override
+  String get projectEditorAssetLinkNeedScriptAndAssetSnack =>
+      '请先准备至少一个剧本和一个资产。';
+
+  @override
+  String get projectEditorAssetLinkDialogTitleLink => '关联剧本与资产';
+
+  @override
+  String get projectEditorAssetLinkDialogTitleUnlink => '取消剧本-资产关联';
+
+  @override
+  String get projectEditorAssetLinkScriptLabel => '剧本';
+
+  @override
+  String get projectEditorAssetLinkAssetLabel => '资产';
+
+  @override
+  String get projectEditorAssetLinkConfirmLink => '确认关联';
+
+  @override
+  String get projectEditorAssetLinkConfirmUnlink => '取消关联';
+
+  @override
+  String projectEditorAssetLinkSuccessLinked(int scriptId, int assetId) {
+    return '已关联 script#$scriptId · asset#$assetId';
+  }
+
+  @override
+  String projectEditorAssetLinkSuccessUnlinked(int scriptId, int assetId) {
+    return '已取消关联 script#$scriptId · asset#$assetId';
+  }
+
+  @override
+  String get projectEditorAssetGenWorkbenchNeedAssetsSnack =>
+      '请先加载资产列表再打开出图工作台。';
+
+  @override
+  String get projectEditorAssetGenWorkbenchNeedScriptSnack => '请先创建剧本再发起资产出图。';
 
   @override
   String get projectEditorDeleteProjectTitle => '删除项目？';
@@ -10060,6 +10395,111 @@ class AppLocalizationsZh extends AppLocalizations {
   String projectEditorAssetGenUseBatchCandidates(int count) {
     return '使用批量候选（$count 行）';
   }
+
+  @override
+  String get projectEditorAssetGenBatchCandidatesNeedAssetType =>
+      '批量候选读取需要有效资产类型。';
+
+  @override
+  String get projectEditorAssetGenBatchCandidatesLimitPositive =>
+      '候选 limit 必须大于 0。';
+
+  @override
+  String projectEditorAssetGenLeadBatchGenerate(int total, int enqueuedCount) {
+    return '已为 $total 条资产创建出图任务，队列 $enqueuedCount 条。';
+  }
+
+  @override
+  String projectEditorAssetGenLeadDeleteDerivatives(
+    int deleted,
+    String assetIds,
+  ) {
+    return '已删除 $deleted 个衍生图记录，资产 $assetIds。';
+  }
+
+  @override
+  String projectEditorAssetGenLeadUpdateImageUrl(int assetId, String message) {
+    return '已更新资产 #$assetId 封面 URL：$message';
+  }
+
+  @override
+  String projectEditorAssetGenSyncSnapshotFailed(String error) {
+    return '同步工作台摘要失败：$error';
+  }
+
+  @override
+  String get projectEditorAssetGenSelectionLabelSelectAllVisible => '已全选当前可见资产';
+
+  @override
+  String get projectEditorAssetGenSelectionLabelRebuildAllTypes => '已按全部类型重建选择';
+
+  @override
+  String projectEditorAssetGenSelectionLabelRebuildForType(String assetType) {
+    return '已按 $assetType 重建选择';
+  }
+
+  @override
+  String get projectEditorAssetGenSelectionLabelClear => '已清空选择';
+
+  @override
+  String projectEditorAssetGenSelectionLabelRebuildImageState(String state) {
+    return '已按图片状态 $state 重建选择';
+  }
+
+  @override
+  String get projectEditorAssetGenSelectionLabelRebuildMaterialContext =>
+      '已按素材上下文重建选择';
+
+  @override
+  String get projectEditorAssetGenSelectionLabelRebuildBatchCandidates =>
+      '已按批量候选重建选择';
+
+  @override
+  String projectEditorAssetGenSelectionLabelRebuildPromptState(String state) {
+    return '已按 prompt 状态 $state 重建选择';
+  }
+
+  @override
+  String projectEditorAssetGenWorkbenchSelectionLineEmpty(String label) {
+    return '$label：没有可选资产';
+  }
+
+  @override
+  String projectEditorAssetGenWorkbenchSelectionLineCount(
+    String label,
+    int count,
+  ) {
+    return '$label：已选择 $count 条资产';
+  }
+
+  @override
+  String projectEditorAssetGenWorkbenchScopedSelectionLineEmpty(String label) {
+    return '$label：当前可见资产中没有匹配项';
+  }
+
+  @override
+  String get projectEditorAssetGenSwitchingTypeAll => '正在切换到全部类型并同步工作台摘要…';
+
+  @override
+  String projectEditorAssetGenSwitchingTypeNamed(String assetType) {
+    return '正在切换到 $assetType 并同步工作台摘要…';
+  }
+
+  @override
+  String projectEditorAssetGenSnapshotLoadingWithLead(String lead) {
+    return '$lead，正在同步工作台摘要…';
+  }
+
+  @override
+  String projectEditorAssetGenBatchCandidatesStatusWithType(
+    String summary,
+    String assetType,
+  ) {
+    return '$summary · type=$assetType';
+  }
+
+  @override
+  String get projectEditorAssetSummaryWorkbenchPartsSeparator => '；';
 
   @override
   String get projectEditorAssetImagesCreateAssetFirst => '请先创建素材再管理图片';

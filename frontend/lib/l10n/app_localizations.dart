@@ -16119,6 +16119,427 @@ abstract class AppLocalizations {
   /// **'Finished playing all shots'**
   String get shortVideoPreviewPlaylistComplete;
 
+  /// No description provided for @shortVideoBatchThrottleMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re doing that too often. Wait a moment and try again.'**
+  String get shortVideoBatchThrottleMessage;
+
+  /// No description provided for @shortVideoBatchSelectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Select all'**
+  String get shortVideoBatchSelectAll;
+
+  /// No description provided for @shortVideoBatchDeselectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Deselect all'**
+  String get shortVideoBatchDeselectAll;
+
+  /// No description provided for @shortVideoBatchSelectedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected: {selected} / {total}'**
+  String shortVideoBatchSelectedCount(int selected, int total);
+
+  /// No description provided for @shortVideoBatchOpEnable.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch enable'**
+  String get shortVideoBatchOpEnable;
+
+  /// No description provided for @shortVideoBatchOpDisable.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch disable'**
+  String get shortVideoBatchOpDisable;
+
+  /// No description provided for @shortVideoBatchOpDurationAlign.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration align'**
+  String get shortVideoBatchOpDurationAlign;
+
+  /// No description provided for @shortVideoBatchOpReplace.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch replace URL'**
+  String get shortVideoBatchOpReplace;
+
+  /// No description provided for @shortVideoBatchOpVoiceover.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch voiceover'**
+  String get shortVideoBatchOpVoiceover;
+
+  /// No description provided for @shortVideoBatchProgressCompletedTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress: {completed} / {total}'**
+  String shortVideoBatchProgressCompletedTotal(int completed, int total);
+
+  /// No description provided for @shortVideoBatchProgressSucceededLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Succeeded: {count}'**
+  String shortVideoBatchProgressSucceededLabel(int count);
+
+  /// No description provided for @shortVideoBatchProgressFailedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed: {count}'**
+  String shortVideoBatchProgressFailedLabel(int count);
+
+  /// No description provided for @shortVideoBatchProgressFailedHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed items:'**
+  String get shortVideoBatchProgressFailedHeading;
+
+  /// No description provided for @shortVideoBatchProgressStoryboardLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard #{id}'**
+  String shortVideoBatchProgressStoryboardLine(int id);
+
+  /// No description provided for @shortVideoBatchProgressCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get shortVideoBatchProgressCancel;
+
+  /// No description provided for @shortVideoBatchProgressRetryFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry failed'**
+  String get shortVideoBatchProgressRetryFailed;
+
+  /// No description provided for @shortVideoBatchProgressClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get shortVideoBatchProgressClose;
+
+  /// No description provided for @shortVideoBatchErrorCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Error code: {code}'**
+  String shortVideoBatchErrorCode(String code);
+
+  /// No description provided for @shortVideoBatchOperationRetryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{title} (retry)'**
+  String shortVideoBatchOperationRetryTitle(String title);
+
+  /// No description provided for @shortVideoBatchSelectShotsToEnableFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Select shots to enable first.'**
+  String get shortVideoBatchSelectShotsToEnableFirst;
+
+  /// No description provided for @shortVideoBatchNoShotsWithVideoUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'None of the selected shots have a usable video URL.'**
+  String get shortVideoBatchNoShotsWithVideoUrl;
+
+  /// No description provided for @shortVideoBatchEnableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch enable shots'**
+  String get shortVideoBatchEnableTitle;
+
+  /// No description provided for @shortVideoBatchEnableFinished.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch enable finished: succeeded {successful}, failed {failed}'**
+  String shortVideoBatchEnableFinished(int successful, int failed);
+
+  /// No description provided for @shortVideoBatchEnableFailedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch enable failed: {code}'**
+  String shortVideoBatchEnableFailedStatus(String code);
+
+  /// No description provided for @shortVideoBatchEnableFailedError.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch enable failed: {error}'**
+  String shortVideoBatchEnableFailedError(String error);
+
+  /// No description provided for @shortVideoBatchSelectShotsToDisableFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Select shots to disable first.'**
+  String get shortVideoBatchSelectShotsToDisableFirst;
+
+  /// No description provided for @shortVideoBatchDisableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch disable shots'**
+  String get shortVideoBatchDisableTitle;
+
+  /// No description provided for @shortVideoBatchDisableFinished.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch disable finished: succeeded {successful}, failed {failed}'**
+  String shortVideoBatchDisableFinished(int successful, int failed);
+
+  /// No description provided for @shortVideoBatchDisableFailedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch disable failed: {code}'**
+  String shortVideoBatchDisableFailedStatus(String code);
+
+  /// No description provided for @shortVideoBatchDisableFailedError.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch disable failed: {error}'**
+  String shortVideoBatchDisableFailedError(String error);
+
+  /// No description provided for @shortVideoBatchSelectShotsDurationFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Select shots to align duration first.'**
+  String get shortVideoBatchSelectShotsDurationFirst;
+
+  /// No description provided for @shortVideoBatchDurationDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch duration align'**
+  String get shortVideoBatchDurationDialogTitle;
+
+  /// No description provided for @shortVideoBatchDurationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration (seconds)'**
+  String get shortVideoBatchDurationLabel;
+
+  /// No description provided for @shortVideoBatchDurationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter 1–300'**
+  String get shortVideoBatchDurationHint;
+
+  /// No description provided for @shortVideoBatchAlignAndSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Align and save'**
+  String get shortVideoBatchAlignAndSave;
+
+  /// No description provided for @shortVideoBatchDurationProgressTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch duration align'**
+  String get shortVideoBatchDurationProgressTitle;
+
+  /// No description provided for @shortVideoBatchDurationFinished.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch duration align finished: succeeded {successful}, failed {failed}'**
+  String shortVideoBatchDurationFinished(int successful, int failed);
+
+  /// No description provided for @shortVideoBatchSelectShotsReplaceFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Select shots to replace first.'**
+  String get shortVideoBatchSelectShotsReplaceFirst;
+
+  /// No description provided for @shortVideoBatchReplaceDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch replace video URLs'**
+  String get shortVideoBatchReplaceDialogTitle;
+
+  /// No description provided for @shortVideoBatchReplaceFindPatternLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Find pattern (regex supported)'**
+  String get shortVideoBatchReplaceFindPatternLabel;
+
+  /// No description provided for @shortVideoBatchReplaceFindPatternHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. /v1/'**
+  String get shortVideoBatchReplaceFindPatternHint;
+
+  /// No description provided for @shortVideoBatchReplaceWithLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace with'**
+  String get shortVideoBatchReplaceWithLabel;
+
+  /// No description provided for @shortVideoBatchReplaceWithHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. /v2/'**
+  String get shortVideoBatchReplaceWithHint;
+
+  /// No description provided for @shortVideoBatchReplaceUrlDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Find-and-replace runs on each selected shot video URL.'**
+  String get shortVideoBatchReplaceUrlDescription;
+
+  /// No description provided for @shortVideoBatchApplyReplacement.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply replacement'**
+  String get shortVideoBatchApplyReplacement;
+
+  /// No description provided for @shortVideoBatchReplaceNoMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No shots to replace (pattern did not match).'**
+  String get shortVideoBatchReplaceNoMatch;
+
+  /// No description provided for @shortVideoBatchReplaceFinished.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch replace finished: succeeded {successful}, failed {failed}'**
+  String shortVideoBatchReplaceFinished(int successful, int failed);
+
+  /// No description provided for @shortVideoBatchReplaceFailedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch replace failed: {code}'**
+  String shortVideoBatchReplaceFailedStatus(String code);
+
+  /// No description provided for @shortVideoBatchReplaceFailedError.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch replace failed: {error}'**
+  String shortVideoBatchReplaceFailedError(String error);
+
+  /// No description provided for @shortVideoBatchCannotLoadProject.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot load project.'**
+  String get shortVideoBatchCannotLoadProject;
+
+  /// No description provided for @shortVideoBatchSelectShotsVoiceoverFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Select shots to generate voiceover first.'**
+  String get shortVideoBatchSelectShotsVoiceoverFirst;
+
+  /// No description provided for @shortVideoBatchNoVoiceoverTextSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'None of the selected shots have usable voiceover text.'**
+  String get shortVideoBatchNoVoiceoverTextSelected;
+
+  /// No description provided for @shortVideoBatchGenerateVoiceoverTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch generate voiceover'**
+  String get shortVideoBatchGenerateVoiceoverTitle;
+
+  /// No description provided for @shortVideoBatchVoiceoverQueueProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress: {done} / {total} ({percent}%)'**
+  String shortVideoBatchVoiceoverQueueProgress(
+    int done,
+    int total,
+    String percent,
+  );
+
+  /// No description provided for @shortVideoBatchVoiceoverQueueStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Succeeded: {succeeded} · failed: {failed}'**
+  String shortVideoBatchVoiceoverQueueStats(int succeeded, int failed);
+
+  /// No description provided for @shortVideoBatchVoiceoverQueueFailedHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed items:'**
+  String get shortVideoBatchVoiceoverQueueFailedHeading;
+
+  /// No description provided for @shortVideoBatchVoiceoverQueueFailedLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Shot #{id}: {message}'**
+  String shortVideoBatchVoiceoverQueueFailedLine(int id, String message);
+
+  /// No description provided for @shortVideoBatchVoiceoverQueueDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get shortVideoBatchVoiceoverQueueDone;
+
+  /// No description provided for @shortVideoBatchVoiceoverGenFailedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch voiceover generation failed: {code}'**
+  String shortVideoBatchVoiceoverGenFailedStatus(String code);
+
+  /// No description provided for @shortVideoBatchVoiceoverGenFailedError.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch voiceover generation failed: {error}'**
+  String shortVideoBatchVoiceoverGenFailedError(String error);
+
+  /// No description provided for @shortVideoBatchVoiceoverDoneJobs.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch voiceover done: enqueued jobs for {count} shot(s).'**
+  String shortVideoBatchVoiceoverDoneJobs(int count);
+
+  /// No description provided for @shortVideoBatchVoiceoverDonePartial.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch voiceover done: succeeded {succeeded}, failed {failed}'**
+  String shortVideoBatchVoiceoverDonePartial(int succeeded, int failed);
+
+  /// No description provided for @shortVideoBatchShotNoVoiceoverText.
+  ///
+  /// In en, this message translates to:
+  /// **'This shot has no usable voiceover text.'**
+  String get shortVideoBatchShotNoVoiceoverText;
+
+  /// No description provided for @shortVideoBatchGeneratingVoiceover.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating voiceover…'**
+  String get shortVideoBatchGeneratingVoiceover;
+
+  /// No description provided for @shortVideoBatchVoiceoverJobEnqueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Shot #{id} voiceover job enqueued.'**
+  String shortVideoBatchVoiceoverJobEnqueued(int id);
+
+  /// No description provided for @shortVideoBatchVoiceoverCouldNotCreateTask.
+  ///
+  /// In en, this message translates to:
+  /// **'Voiceover generation failed: could not create task.'**
+  String get shortVideoBatchVoiceoverCouldNotCreateTask;
+
+  /// No description provided for @shortVideoBatchVoiceoverSingleFailedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Voiceover generation failed: {code} — {message}'**
+  String shortVideoBatchVoiceoverSingleFailedStatus(
+    String code,
+    String message,
+  );
+
+  /// No description provided for @shortVideoBatchVoiceoverSingleFailedError.
+  ///
+  /// In en, this message translates to:
+  /// **'Voiceover generation failed: {error}'**
+  String shortVideoBatchVoiceoverSingleFailedError(String error);
+
+  /// No description provided for @shortVideoRustApiUnknownError.
+  ///
+  /// In en, this message translates to:
+  /// **'unknown error'**
+  String get shortVideoRustApiUnknownError;
+
   /// No description provided for @shortVideoCandidateAssetConfirmationTitle.
   ///
   /// In en, this message translates to:
@@ -16238,6 +16659,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Filter applied: {shown}/{total} rows'**
   String projectEditorAssetFilterSnackbarApplied(int shown, int total);
+
+  /// No description provided for @projectEditorAssetEditImageNeedScriptSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a script before uploading an edit image.'**
+  String get projectEditorAssetEditImageNeedScriptSnack;
+
+  /// No description provided for @projectEditorAssetEditImageDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload edit image'**
+  String get projectEditorAssetEditImageDialogTitle;
+
+  /// No description provided for @projectEditorAssetEditImageTargetScriptLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Target script'**
+  String get projectEditorAssetEditImageTargetScriptLabel;
+
+  /// No description provided for @projectEditorAssetEditImageDataUriLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Image data URI'**
+  String get projectEditorAssetEditImageDataUriLabel;
+
+  /// No description provided for @projectEditorAssetEditImageDataUriHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Supports base64 data URIs for jpeg/jpg/png.'**
+  String get projectEditorAssetEditImageDataUriHelper;
+
+  /// No description provided for @projectEditorAssetEditImageUploadButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload'**
+  String get projectEditorAssetEditImageUploadButton;
+
+  /// No description provided for @projectEditorAssetEditImageEmptyDataUriSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Base64 data URI cannot be empty.'**
+  String get projectEditorAssetEditImageEmptyDataUriSnack;
+
+  /// No description provided for @projectEditorAssetEditImageUploadSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload succeeded: {url}'**
+  String projectEditorAssetEditImageUploadSuccess(String url);
+
+  /// No description provided for @projectEditorAssetLinkNeedScriptAndAssetSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepare at least one script and one asset first.'**
+  String get projectEditorAssetLinkNeedScriptAndAssetSnack;
+
+  /// No description provided for @projectEditorAssetLinkDialogTitleLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Link script and asset'**
+  String get projectEditorAssetLinkDialogTitleLink;
+
+  /// No description provided for @projectEditorAssetLinkDialogTitleUnlink.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlink script and asset'**
+  String get projectEditorAssetLinkDialogTitleUnlink;
+
+  /// No description provided for @projectEditorAssetLinkScriptLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Script'**
+  String get projectEditorAssetLinkScriptLabel;
+
+  /// No description provided for @projectEditorAssetLinkAssetLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Asset'**
+  String get projectEditorAssetLinkAssetLabel;
+
+  /// No description provided for @projectEditorAssetLinkConfirmLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm link'**
+  String get projectEditorAssetLinkConfirmLink;
+
+  /// No description provided for @projectEditorAssetLinkConfirmUnlink.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlink'**
+  String get projectEditorAssetLinkConfirmUnlink;
+
+  /// No description provided for @projectEditorAssetLinkSuccessLinked.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked script #{scriptId} · asset #{assetId}'**
+  String projectEditorAssetLinkSuccessLinked(int scriptId, int assetId);
+
+  /// No description provided for @projectEditorAssetLinkSuccessUnlinked.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlinked script #{scriptId} · asset #{assetId}'**
+  String projectEditorAssetLinkSuccessUnlinked(int scriptId, int assetId);
+
+  /// No description provided for @projectEditorAssetGenWorkbenchNeedAssetsSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Load the asset list before opening the image generation workbench.'**
+  String get projectEditorAssetGenWorkbenchNeedAssetsSnack;
+
+  /// No description provided for @projectEditorAssetGenWorkbenchNeedScriptSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a script before starting asset image generation.'**
+  String get projectEditorAssetGenWorkbenchNeedScriptSnack;
 
   /// No description provided for @projectEditorDeleteProjectTitle.
   ///
@@ -16554,6 +17089,147 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Use batch candidates ({count} rows)'**
   String projectEditorAssetGenUseBatchCandidates(int count);
+
+  /// No description provided for @projectEditorAssetGenBatchCandidatesNeedAssetType.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch candidate read requires a valid asset type.'**
+  String get projectEditorAssetGenBatchCandidatesNeedAssetType;
+
+  /// No description provided for @projectEditorAssetGenBatchCandidatesLimitPositive.
+  ///
+  /// In en, this message translates to:
+  /// **'Candidate limit must be greater than 0.'**
+  String get projectEditorAssetGenBatchCandidatesLimitPositive;
+
+  /// No description provided for @projectEditorAssetGenLeadBatchGenerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Created image tasks for {total} assets; {enqueuedCount} queued.'**
+  String projectEditorAssetGenLeadBatchGenerate(int total, int enqueuedCount);
+
+  /// No description provided for @projectEditorAssetGenLeadDeleteDerivatives.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted {deleted} derivative image record(s); assets {assetIds}.'**
+  String projectEditorAssetGenLeadDeleteDerivatives(
+    int deleted,
+    String assetIds,
+  );
+
+  /// No description provided for @projectEditorAssetGenLeadUpdateImageUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated asset #{assetId} cover URL: {message}'**
+  String projectEditorAssetGenLeadUpdateImageUrl(int assetId, String message);
+
+  /// No description provided for @projectEditorAssetGenSyncSnapshotFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to sync workbench summary: {error}'**
+  String projectEditorAssetGenSyncSnapshotFailed(String error);
+
+  /// No description provided for @projectEditorAssetGenSelectionLabelSelectAllVisible.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected all visible assets'**
+  String get projectEditorAssetGenSelectionLabelSelectAllVisible;
+
+  /// No description provided for @projectEditorAssetGenSelectionLabelRebuildAllTypes.
+  ///
+  /// In en, this message translates to:
+  /// **'Rebuilt selection for all types'**
+  String get projectEditorAssetGenSelectionLabelRebuildAllTypes;
+
+  /// No description provided for @projectEditorAssetGenSelectionLabelRebuildForType.
+  ///
+  /// In en, this message translates to:
+  /// **'Rebuilt selection for type {assetType}'**
+  String projectEditorAssetGenSelectionLabelRebuildForType(String assetType);
+
+  /// No description provided for @projectEditorAssetGenSelectionLabelClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleared selection'**
+  String get projectEditorAssetGenSelectionLabelClear;
+
+  /// No description provided for @projectEditorAssetGenSelectionLabelRebuildImageState.
+  ///
+  /// In en, this message translates to:
+  /// **'Rebuilt selection by image state {state}'**
+  String projectEditorAssetGenSelectionLabelRebuildImageState(String state);
+
+  /// No description provided for @projectEditorAssetGenSelectionLabelRebuildMaterialContext.
+  ///
+  /// In en, this message translates to:
+  /// **'Rebuilt selection from material context'**
+  String get projectEditorAssetGenSelectionLabelRebuildMaterialContext;
+
+  /// No description provided for @projectEditorAssetGenSelectionLabelRebuildBatchCandidates.
+  ///
+  /// In en, this message translates to:
+  /// **'Rebuilt selection from batch candidates'**
+  String get projectEditorAssetGenSelectionLabelRebuildBatchCandidates;
+
+  /// No description provided for @projectEditorAssetGenSelectionLabelRebuildPromptState.
+  ///
+  /// In en, this message translates to:
+  /// **'Rebuilt selection by prompt state {state}'**
+  String projectEditorAssetGenSelectionLabelRebuildPromptState(String state);
+
+  /// No description provided for @projectEditorAssetGenWorkbenchSelectionLineEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'{label}: no selectable assets'**
+  String projectEditorAssetGenWorkbenchSelectionLineEmpty(String label);
+
+  /// No description provided for @projectEditorAssetGenWorkbenchSelectionLineCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{label}: selected {count} assets'**
+  String projectEditorAssetGenWorkbenchSelectionLineCount(
+    String label,
+    int count,
+  );
+
+  /// No description provided for @projectEditorAssetGenWorkbenchScopedSelectionLineEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'{label}: no matches among visible assets'**
+  String projectEditorAssetGenWorkbenchScopedSelectionLineEmpty(String label);
+
+  /// No description provided for @projectEditorAssetGenSwitchingTypeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Switching to all types; syncing workbench summary…'**
+  String get projectEditorAssetGenSwitchingTypeAll;
+
+  /// No description provided for @projectEditorAssetGenSwitchingTypeNamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Switching to {assetType}; syncing workbench summary…'**
+  String projectEditorAssetGenSwitchingTypeNamed(String assetType);
+
+  /// No description provided for @projectEditorAssetGenSnapshotLoadingWithLead.
+  ///
+  /// In en, this message translates to:
+  /// **'{lead}; syncing workbench summary…'**
+  String projectEditorAssetGenSnapshotLoadingWithLead(String lead);
+
+  /// No description provided for @projectEditorAssetGenBatchCandidatesStatusWithType.
+  ///
+  /// In en, this message translates to:
+  /// **'{summary} · type={assetType}'**
+  String projectEditorAssetGenBatchCandidatesStatusWithType(
+    String summary,
+    String assetType,
+  );
+
+  /// No description provided for @projectEditorAssetSummaryWorkbenchPartsSeparator.
+  ///
+  /// In en, this message translates to:
+  /// **'; '**
+  String get projectEditorAssetSummaryWorkbenchPartsSeparator;
 
   /// No description provided for @projectEditorAssetImagesCreateAssetFirst.
   ///

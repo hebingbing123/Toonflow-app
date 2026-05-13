@@ -43,7 +43,9 @@ class _AssetGenerationWorkbenchDialogState
   List<int> _sortedSelection() => sortUniqueAssetNumericIds(_selectedIds);
 
   void _applySelection(Iterable<int> ids, String label) {
+    final l10n = AppLocalizations.of(context)!;
     final result = _buildSelectionApplyResult(
+      l10n: l10n,
       ids: ids,
       label: label,
       previousFocusedAssetNumericId: _focusedAssetNumericId,
@@ -58,7 +60,9 @@ class _AssetGenerationWorkbenchDialogState
   }
 
   void _applyScopedSelection(Iterable<int> candidateIds, String label) {
+    final l10n = AppLocalizations.of(context)!;
     final result = _buildScopedSelectionApplyResult(
+      l10n: l10n,
       candidateIds: candidateIds,
       scopedAssets: _filterAssetsByType(widget.visibleAssets(), _selectedType),
       label: label,
@@ -76,7 +80,9 @@ class _AssetGenerationWorkbenchDialogState
     String nextType,
     List<AssetRow> visible,
   ) async {
+    final l10n = AppLocalizations.of(context)!;
     final result = _buildTypeChangeSelectionResult(
+      l10n: l10n,
       nextType: nextType,
       visibleAssets: visible,
       preferredIds: _selectedIds,
@@ -115,9 +121,10 @@ class _AssetGenerationWorkbenchDialogState
     required bool includeProductionSummary,
     String? lead,
   }) async {
+    final l10n = AppLocalizations.of(context)!;
     _updateWorkbenchState(() {
       _loadingSummary = true;
-      _statusLine = _buildSnapshotLoadingStatusLine(lead);
+      _statusLine = _buildSnapshotLoadingStatusLine(l10n, lead);
     });
     try {
       final selected = _sortedSelection();
@@ -146,6 +153,7 @@ class _AssetGenerationWorkbenchDialogState
         );
       }
       final snapshotApply = _buildSnapshotApplyResult(
+        l10n: l10n,
         lead: lead,
         visibleAssets: widget.visibleAssets(),
         selectedType: _selectedType,
@@ -168,11 +176,15 @@ class _AssetGenerationWorkbenchDialogState
       });
     } on RustApiException catch (e) {
       if (mounted) {
-        _updateWorkbenchState(() => _statusLine = '同步工作台摘要失败：$e');
+        _updateWorkbenchState(
+          () => _statusLine = l10n.projectEditorAssetGenSyncSnapshotFailed('$e'),
+        );
       }
     } catch (e) {
       if (mounted) {
-        _updateWorkbenchState(() => _statusLine = '同步工作台摘要失败：$e');
+        _updateWorkbenchState(
+          () => _statusLine = l10n.projectEditorAssetGenSyncSnapshotFailed('$e'),
+        );
       }
     } finally {
       if (mounted) _updateWorkbenchState(() => _loadingSummary = false);
@@ -198,6 +210,7 @@ class _AssetGenerationWorkbenchDialogState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final visible = widget.visibleAssets();
     final scopedAssets = _filterAssetsByType(visible, _selectedType);
     final typeSelections = collectAssetIdsByType(visible);
@@ -252,7 +265,7 @@ class _AssetGenerationWorkbenchDialogState
             if (mounted) {
               setState(() {
                 _materialData = response;
-                _statusLine = summarizeWorkbenchAssetMaterialData(response);
+                _statusLine = summarizeWorkbenchAssetMaterialData(response, l10n);
               });
             }
           });
@@ -260,6 +273,7 @@ class _AssetGenerationWorkbenchDialogState
         onLoadBatchCandidates: () {
           _runMutation(() async {
             final request = _buildBatchCandidatesRequest(
+              l10n: l10n,
               selectedType: _selectedType,
               visibleAssets: visible,
               batchNameText: _ctrls.batchNameCtrl.text,
@@ -276,6 +290,7 @@ class _AssetGenerationWorkbenchDialogState
               setState(() {
                 _batchData = response;
                 _statusLine = _buildBatchCandidatesStatusLine(
+                  l10n: l10n,
                   response: response,
                   assetType: request.assetType,
                 );
@@ -283,15 +298,22 @@ class _AssetGenerationWorkbenchDialogState
             }
           });
         },
-        onSelectAllVisible: () =>
-            _applySelection(scopedAssets.map((a) => a.numericId), '已全选当前可见资产'),
+        onSelectAllVisible: () => _applySelection(
+          scopedAssets.map((a) => a.numericId),
+          l10n.projectEditorAssetGenSelectionLabelSelectAllVisible,
+        ),
         onRebuildSelectionByType: () => _applySelection(
           _selectedType.isEmpty
               ? scopedAssets.map((a) => a.numericId)
               : (typeSelections[_selectedType] ?? const <int>[]),
-          _selectedType.isEmpty ? '已按全部类型重建选择' : '已按 $_selectedType 重建选择',
+          _selectedType.isEmpty
+              ? l10n.projectEditorAssetGenSelectionLabelRebuildAllTypes
+              : l10n.projectEditorAssetGenSelectionLabelRebuildForType(_selectedType),
         ),
-        onClearSelection: () => _applySelection(const <int>[], '已清空选择'),
+        onClearSelection: () => _applySelection(
+          const <int>[],
+          l10n.projectEditorAssetGenSelectionLabelClear,
+        ),
         onBatchGenerateImages: () {
           _runMutation(() async {
             final response = await postProductionAssetsBatchGenerateAssetsImageV1(
@@ -309,6 +331,7 @@ class _AssetGenerationWorkbenchDialogState
             await _syncWorkbenchSnapshot(
               includeProductionSummary: true,
               lead: _buildBatchGenerateLead(
+                l10n: l10n,
                 total: response.total,
                 enqueuedCount: response.enqueued.length,
               ),
@@ -327,6 +350,7 @@ class _AssetGenerationWorkbenchDialogState
               setState(() {
                 _pollingData = response;
                 _statusLine = _buildWorkbenchPollingStatusLine(
+                  l10n: l10n,
                   scopedAssets: scopedAssets,
                   selectedIds: _selectedIds,
                   productionData: _productionData,
@@ -348,6 +372,7 @@ class _AssetGenerationWorkbenchDialogState
               setState(() {
                 _promptPollingData = response;
                 _statusLine = _buildWorkbenchPollingStatusLine(
+                  l10n: l10n,
                   scopedAssets: scopedAssets,
                   selectedIds: _selectedIds,
                   productionData: _productionData,
@@ -370,6 +395,7 @@ class _AssetGenerationWorkbenchDialogState
             await _syncWorkbenchSnapshot(
               includeProductionSummary: true,
               lead: _buildDeleteDerivativesLead(
+                l10n: l10n,
                 deleted: response.deleted,
                 assetIds: response.assetIds,
               ),
@@ -389,24 +415,29 @@ class _AssetGenerationWorkbenchDialogState
             await _syncWorkbenchSnapshot(
               includeProductionSummary: true,
               lead: _buildUpdateImageUrlLead(
+                l10n: l10n,
                 assetId: response.assetId,
                 message: response.message,
               ),
             );
           });
         },
-        onApplyPollingSelection: (label, ids) =>
-            _applyScopedSelection(ids, '已按图片状态 $label 重建选择'),
+        onApplyPollingSelection: (label, ids) => _applyScopedSelection(
+          ids,
+          l10n.projectEditorAssetGenSelectionLabelRebuildImageState(label),
+        ),
         onApplyMaterialSelection: () => _applyScopedSelection(
           _materialData!.data.map((item) => item.id),
-          '已按素材上下文重建选择',
+          l10n.projectEditorAssetGenSelectionLabelRebuildMaterialContext,
         ),
         onApplyBatchSelection: () => _applyScopedSelection(
           _batchData!.data.map((item) => item.id),
-          '已按批量候选重建选择',
+          l10n.projectEditorAssetGenSelectionLabelRebuildBatchCandidates,
         ),
-        onApplyPromptSelection: (label, ids) =>
-            _applyScopedSelection(ids, '已按 prompt 状态 $label 重建选择'),
+        onApplyPromptSelection: (label, ids) => _applyScopedSelection(
+          ids,
+          l10n.projectEditorAssetGenSelectionLabelRebuildPromptState(label),
+        ),
         onToggleAsset: _toggleAssetSelection,
         onClose: () => Navigator.of(context).pop(),
       ),

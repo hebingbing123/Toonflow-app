@@ -7733,6 +7733,190 @@
     }
   },
   "shortVideoPreviewPlaylistComplete": "已播放完全部镜头",
+  "shortVideoBatchThrottleMessage": "操作过于频繁，请稍后再试。",
+  "shortVideoBatchSelectAll": "全选",
+  "shortVideoBatchDeselectAll": "取消全选",
+  "shortVideoBatchSelectedCount": "已选择：{selected} / {total}",
+  "@shortVideoBatchSelectedCount": {
+    "placeholders": {
+      "selected": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "shortVideoBatchOpEnable": "批量启用",
+  "shortVideoBatchOpDisable": "批量禁用",
+  "shortVideoBatchOpDurationAlign": "时长对齐",
+  "shortVideoBatchOpReplace": "批量替换 URL",
+  "shortVideoBatchOpVoiceover": "批量配音",
+  "shortVideoBatchProgressCompletedTotal": "进度：{completed} / {total}",
+  "@shortVideoBatchProgressCompletedTotal": {
+    "placeholders": {
+      "completed": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "shortVideoBatchProgressSucceededLabel": "成功：{count}",
+  "@shortVideoBatchProgressSucceededLabel": {
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "shortVideoBatchProgressFailedLabel": "失败：{count}",
+  "@shortVideoBatchProgressFailedLabel": {
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "shortVideoBatchProgressFailedHeading": "失败项：",
+  "shortVideoBatchProgressStoryboardLine": "分镜 #{id}",
+  "@shortVideoBatchProgressStoryboardLine": {
+    "placeholders": {"id": {"type": "int"}}
+  },
+  "shortVideoBatchProgressCancel": "取消",
+  "shortVideoBatchProgressRetryFailed": "重试失败项",
+  "shortVideoBatchProgressClose": "关闭",
+  "shortVideoBatchErrorCode": "错误码：{code}",
+  "@shortVideoBatchErrorCode": {
+    "placeholders": {"code": {"type": "String"}}
+  },
+  "shortVideoBatchOperationRetryTitle": "{title}（重试）",
+  "@shortVideoBatchOperationRetryTitle": {
+    "placeholders": {"title": {"type": "String"}}
+  },
+  "shortVideoBatchSelectShotsToEnableFirst": "请先选择要启用的镜头。",
+  "shortVideoBatchNoShotsWithVideoUrl": "所选镜头均无可用的视频 URL。",
+  "shortVideoBatchEnableTitle": "批量启用镜头",
+  "shortVideoBatchEnableFinished": "批量启用完成：成功 {successful}，失败 {failed}",
+  "@shortVideoBatchEnableFinished": {
+    "placeholders": {
+      "successful": {"type": "int"},
+      "failed": {"type": "int"}
+    }
+  },
+  "shortVideoBatchEnableFailedStatus": "批量启用失败：{code}",
+  "@shortVideoBatchEnableFailedStatus": {
+    "placeholders": {"code": {"type": "String"}}
+  },
+  "shortVideoBatchEnableFailedError": "批量启用失败：{error}",
+  "@shortVideoBatchEnableFailedError": {
+    "placeholders": {"error": {"type": "String"}}
+  },
+  "shortVideoBatchSelectShotsToDisableFirst": "请先选择要停用的镜头。",
+  "shortVideoBatchDisableTitle": "批量停用镜头",
+  "shortVideoBatchDisableFinished": "批量停用完成：成功 {successful}，失败 {failed}",
+  "@shortVideoBatchDisableFinished": {
+    "placeholders": {
+      "successful": {"type": "int"},
+      "failed": {"type": "int"}
+    }
+  },
+  "shortVideoBatchDisableFailedStatus": "批量停用失败：{code}",
+  "@shortVideoBatchDisableFailedStatus": {
+    "placeholders": {"code": {"type": "String"}}
+  },
+  "shortVideoBatchDisableFailedError": "批量停用失败：{error}",
+  "@shortVideoBatchDisableFailedError": {
+    "placeholders": {"error": {"type": "String"}}
+  },
+  "shortVideoBatchSelectShotsDurationFirst": "请先选择要对齐时长的镜头。",
+  "shortVideoBatchDurationDialogTitle": "批量时长对齐",
+  "shortVideoBatchDurationLabel": "时长（秒）",
+  "shortVideoBatchDurationHint": "请输入 1–300",
+  "shortVideoBatchAlignAndSave": "对齐并保存",
+  "shortVideoBatchDurationProgressTitle": "批量时长对齐",
+  "shortVideoBatchDurationFinished": "批量时长对齐完成：成功 {successful}，失败 {failed}",
+  "@shortVideoBatchDurationFinished": {
+    "placeholders": {
+      "successful": {"type": "int"},
+      "failed": {"type": "int"}
+    }
+  },
+  "shortVideoBatchSelectShotsReplaceFirst": "请先选择要替换的镜头。",
+  "shortVideoBatchReplaceDialogTitle": "批量替换视频 URL",
+  "shortVideoBatchReplaceFindPatternLabel": "查找模式（支持正则）",
+  "shortVideoBatchReplaceFindPatternHint": "例如 /v1/",
+  "shortVideoBatchReplaceWithLabel": "替换为",
+  "shortVideoBatchReplaceWithHint": "例如 /v2/",
+  "shortVideoBatchReplaceUrlDescription": "对每个选中镜头的视频 URL 执行查找替换。",
+  "shortVideoBatchApplyReplacement": "应用替换",
+  "shortVideoBatchReplaceNoMatch": "没有可替换的镜头（模式未匹配）。",
+  "shortVideoBatchReplaceFinished": "批量替换完成：成功 {successful}，失败 {failed}",
+  "@shortVideoBatchReplaceFinished": {
+    "placeholders": {
+      "successful": {"type": "int"},
+      "failed": {"type": "int"}
+    }
+  },
+  "shortVideoBatchReplaceFailedStatus": "批量替换失败：{code}",
+  "@shortVideoBatchReplaceFailedStatus": {
+    "placeholders": {"code": {"type": "String"}}
+  },
+  "shortVideoBatchReplaceFailedError": "批量替换失败：{error}",
+  "@shortVideoBatchReplaceFailedError": {
+    "placeholders": {"error": {"type": "String"}}
+  },
+  "shortVideoBatchCannotLoadProject": "无法加载项目。",
+  "shortVideoBatchSelectShotsVoiceoverFirst": "请先选择要生成配音的镜头。",
+  "shortVideoBatchNoVoiceoverTextSelected": "所选镜头没有可用的配音文案。",
+  "shortVideoBatchGenerateVoiceoverTitle": "批量生成配音",
+  "shortVideoBatchVoiceoverQueueProgress": "进度：{done} / {total}（{percent}%）",
+  "@shortVideoBatchVoiceoverQueueProgress": {
+    "placeholders": {
+      "done": {"type": "int"},
+      "total": {"type": "int"},
+      "percent": {"type": "String"}
+    }
+  },
+  "shortVideoBatchVoiceoverQueueStats": "成功：{succeeded} · 失败：{failed}",
+  "@shortVideoBatchVoiceoverQueueStats": {
+    "placeholders": {
+      "succeeded": {"type": "int"},
+      "failed": {"type": "int"}
+    }
+  },
+  "shortVideoBatchVoiceoverQueueFailedHeading": "失败项：",
+  "shortVideoBatchVoiceoverQueueFailedLine": "镜头 #{id}：{message}",
+  "@shortVideoBatchVoiceoverQueueFailedLine": {
+    "placeholders": {
+      "id": {"type": "int"},
+      "message": {"type": "String"}
+    }
+  },
+  "shortVideoBatchVoiceoverQueueDone": "完成",
+  "shortVideoBatchVoiceoverGenFailedStatus": "批量配音生成失败：{code}",
+  "@shortVideoBatchVoiceoverGenFailedStatus": {
+    "placeholders": {"code": {"type": "String"}}
+  },
+  "shortVideoBatchVoiceoverGenFailedError": "批量配音生成失败：{error}",
+  "@shortVideoBatchVoiceoverGenFailedError": {
+    "placeholders": {"error": {"type": "String"}}
+  },
+  "shortVideoBatchVoiceoverDoneJobs": "批量配音完成：已为 {count} 个镜头入队任务。",
+  "@shortVideoBatchVoiceoverDoneJobs": {
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "shortVideoBatchVoiceoverDonePartial": "批量配音完成：成功 {succeeded}，失败 {failed}",
+  "@shortVideoBatchVoiceoverDonePartial": {
+    "placeholders": {
+      "succeeded": {"type": "int"},
+      "failed": {"type": "int"}
+    }
+  },
+  "shortVideoBatchShotNoVoiceoverText": "该镜头没有可用的配音文案。",
+  "shortVideoBatchGeneratingVoiceover": "正在生成配音…",
+  "shortVideoBatchVoiceoverJobEnqueued": "镜头 #{id} 的配音任务已入队。",
+  "@shortVideoBatchVoiceoverJobEnqueued": {
+    "placeholders": {"id": {"type": "int"}}
+  },
+  "shortVideoBatchVoiceoverCouldNotCreateTask": "配音生成失败：无法创建任务。",
+  "shortVideoBatchVoiceoverSingleFailedStatus": "配音生成失败：{code} — {message}",
+  "@shortVideoBatchVoiceoverSingleFailedStatus": {
+    "placeholders": {
+      "code": {"type": "String"},
+      "message": {"type": "String"}
+    }
+  },
+  "shortVideoBatchVoiceoverSingleFailedError": "配音生成失败：{error}",
+  "@shortVideoBatchVoiceoverSingleFailedError": {
+    "placeholders": {"error": {"type": "String"}}
+  },
+  "shortVideoRustApiUnknownError": "未知错误",
   "shortVideoCandidateAssetConfirmationTitle": "候选素材确认",
   "shortVideoCandidateMetricPending": "待处理",
   "shortVideoCandidateMetricLinked": "已关联",
@@ -7763,6 +7947,40 @@
       }
     }
   },
+  "projectEditorAssetEditImageNeedScriptSnack": "请先创建剧本再上传编辑图片。",
+  "projectEditorAssetEditImageDialogTitle": "上传编辑图片",
+  "projectEditorAssetEditImageTargetScriptLabel": "目标剧本",
+  "projectEditorAssetEditImageDataUriLabel": "图片 data URI",
+  "projectEditorAssetEditImageDataUriHelper": "支持 jpeg/jpg/png 的 base64 data URI。",
+  "projectEditorAssetEditImageUploadButton": "上传",
+  "projectEditorAssetEditImageEmptyDataUriSnack": "base64 data URI 不能为空。",
+  "projectEditorAssetEditImageUploadSuccess": "上传成功：{url}",
+  "@projectEditorAssetEditImageUploadSuccess": {
+    "placeholders": {"url": {"type": "String"}}
+  },
+  "projectEditorAssetLinkNeedScriptAndAssetSnack": "请先准备至少一个剧本和一个资产。",
+  "projectEditorAssetLinkDialogTitleLink": "关联剧本与资产",
+  "projectEditorAssetLinkDialogTitleUnlink": "取消剧本-资产关联",
+  "projectEditorAssetLinkScriptLabel": "剧本",
+  "projectEditorAssetLinkAssetLabel": "资产",
+  "projectEditorAssetLinkConfirmLink": "确认关联",
+  "projectEditorAssetLinkConfirmUnlink": "取消关联",
+  "projectEditorAssetLinkSuccessLinked": "已关联 script#{scriptId} · asset#{assetId}",
+  "@projectEditorAssetLinkSuccessLinked": {
+    "placeholders": {
+      "scriptId": {"type": "int"},
+      "assetId": {"type": "int"}
+    }
+  },
+  "projectEditorAssetLinkSuccessUnlinked": "已取消关联 script#{scriptId} · asset#{assetId}",
+  "@projectEditorAssetLinkSuccessUnlinked": {
+    "placeholders": {
+      "scriptId": {"type": "int"},
+      "assetId": {"type": "int"}
+    }
+  },
+  "projectEditorAssetGenWorkbenchNeedAssetsSnack": "请先加载资产列表再打开出图工作台。",
+  "projectEditorAssetGenWorkbenchNeedScriptSnack": "请先创建剧本再发起资产出图。",
   "projectEditorDeleteProjectTitle": "删除项目？",
   "projectEditorDeleteProjectBody": "将删除项目 #{id}、相关剧本/分镜（数据库级联），并清除该项目的智能体记忆。",
   "@projectEditorDeleteProjectBody": {
@@ -7866,6 +8084,134 @@
       }
     }
   },
+  "projectEditorAssetGenBatchCandidatesNeedAssetType": "批量候选读取需要有效资产类型。",
+  "projectEditorAssetGenBatchCandidatesLimitPositive": "候选 limit 必须大于 0。",
+  "projectEditorAssetGenLeadBatchGenerate": "已为 {total} 条资产创建出图任务，队列 {enqueuedCount} 条。",
+  "@projectEditorAssetGenLeadBatchGenerate": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "enqueuedCount": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorAssetGenLeadDeleteDerivatives": "已删除 {deleted} 个衍生图记录，资产 {assetIds}。",
+  "@projectEditorAssetGenLeadDeleteDerivatives": {
+    "placeholders": {
+      "deleted": {
+        "type": "int"
+      },
+      "assetIds": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetGenLeadUpdateImageUrl": "已更新资产 #{assetId} 封面 URL：{message}",
+  "@projectEditorAssetGenLeadUpdateImageUrl": {
+    "placeholders": {
+      "assetId": {
+        "type": "int"
+      },
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetGenSyncSnapshotFailed": "同步工作台摘要失败：{error}",
+  "@projectEditorAssetGenSyncSnapshotFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetGenSelectionLabelSelectAllVisible": "已全选当前可见资产",
+  "projectEditorAssetGenSelectionLabelRebuildAllTypes": "已按全部类型重建选择",
+  "projectEditorAssetGenSelectionLabelRebuildForType": "已按 {assetType} 重建选择",
+  "@projectEditorAssetGenSelectionLabelRebuildForType": {
+    "placeholders": {
+      "assetType": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetGenSelectionLabelClear": "已清空选择",
+  "projectEditorAssetGenSelectionLabelRebuildImageState": "已按图片状态 {state} 重建选择",
+  "@projectEditorAssetGenSelectionLabelRebuildImageState": {
+    "placeholders": {
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetGenSelectionLabelRebuildMaterialContext": "已按素材上下文重建选择",
+  "projectEditorAssetGenSelectionLabelRebuildBatchCandidates": "已按批量候选重建选择",
+  "projectEditorAssetGenSelectionLabelRebuildPromptState": "已按 prompt 状态 {state} 重建选择",
+  "@projectEditorAssetGenSelectionLabelRebuildPromptState": {
+    "placeholders": {
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetGenWorkbenchSelectionLineEmpty": "{label}：没有可选资产",
+  "@projectEditorAssetGenWorkbenchSelectionLineEmpty": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetGenWorkbenchSelectionLineCount": "{label}：已选择 {count} 条资产",
+  "@projectEditorAssetGenWorkbenchSelectionLineCount": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorAssetGenWorkbenchScopedSelectionLineEmpty": "{label}：当前可见资产中没有匹配项",
+  "@projectEditorAssetGenWorkbenchScopedSelectionLineEmpty": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetGenSwitchingTypeAll": "正在切换到全部类型并同步工作台摘要…",
+  "projectEditorAssetGenSwitchingTypeNamed": "正在切换到 {assetType} 并同步工作台摘要…",
+  "@projectEditorAssetGenSwitchingTypeNamed": {
+    "placeholders": {
+      "assetType": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetGenSnapshotLoadingWithLead": "{lead}，正在同步工作台摘要…",
+  "@projectEditorAssetGenSnapshotLoadingWithLead": {
+    "placeholders": {
+      "lead": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetGenBatchCandidatesStatusWithType": "{summary} · type={assetType}",
+  "@projectEditorAssetGenBatchCandidatesStatusWithType": {
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      },
+      "assetType": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetSummaryWorkbenchPartsSeparator": "；",
   "projectEditorAssetImagesCreateAssetFirst": "请先创建素材再管理图片",
   "projectEditorAssetImagesDiagnosisNotLoadedSummary": "尚未加载该资产的图片列表。",
   "projectEditorAssetImagesDiagnosisNotLoadedDetail": "先同步图片列表以确认是否存在历史图片，再预览或新增。",
