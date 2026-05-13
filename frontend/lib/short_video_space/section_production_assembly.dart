@@ -57,23 +57,22 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
         ),
       );
       await _loadProjectOverview();
-    } on RustApiException catch (e) {
-      if (!mounted) {
-        return;
-      }
-      reportRustApiError(e, onErrorChanged: (_) {});
     } catch (e) {
       if (!mounted) {
         return;
       }
-      final l10n = AppLocalizations.of(context)!;
-      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-        SnackBar(
-          content: Text(
-            l10n.shortVideoSpaceProductionAssemblyExportStartFailed(describeUserVisibleApiError(l10n, e)),
+      if (e is RustApiException) {
+        reportRustApiError(e, onErrorChanged: (_) {});
+      } else {
+        final l10n = AppLocalizations.of(context)!;
+        ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+          SnackBar(
+            content: Text(
+              l10n.shortVideoSpaceProductionAssemblyExportStartFailed(describeUserVisibleApiError(l10n, e)),
+            ),
           ),
-        ),
-      );
+        );
+      }
     } finally {
       if (mounted) {
         setState(() {
@@ -241,18 +240,12 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                 }
                 setLocalState(() {});
                 await _loadProjectOverview();
-              } on RustApiException catch (e) {
+              } catch (e) {
                 if (!mounted) return;
                 _showOperationFeedback(
                   l10n.shortVideoSpaceProductionAssemblyDisableFailed(
                     describeUserVisibleApiError(l10n, e),
                   ),
-                  isSuccess: false,
-                );
-              } catch (e) {
-                if (!mounted) return;
-                _showOperationFeedback(
-                  l10n.shortVideoSpaceProductionAssemblyDisableFailed(describeUserVisibleApiError(l10n, e)),
                   isSuccess: false,
                 );
               }
@@ -323,18 +316,12 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                 }
                 setLocalState(() {});
                 await _loadProjectOverview();
-              } on RustApiException catch (e) {
+              } catch (e) {
                 if (!mounted) return;
                 _showOperationFeedback(
                   l10n.shortVideoSpaceProductionAssemblyWriteBackFailed(
                     describeUserVisibleApiError(l10n, e),
                   ),
-                  isSuccess: false,
-                );
-              } catch (e) {
-                if (!mounted) return;
-                _showOperationFeedback(
-                  l10n.shortVideoSpaceProductionAssemblyWriteBackFailed(describeUserVisibleApiError(l10n, e)),
                   isSuccess: false,
                 );
               }
@@ -387,18 +374,12 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                   );
                 }
                 await _loadProjectOverview();
-              } on RustApiException catch (e) {
+              } catch (e) {
                 if (!mounted) return;
                 _showOperationFeedback(
                   l10n.shortVideoSpaceProductionAssemblyReorderFailed(
                     describeUserVisibleApiError(l10n, e),
                   ),
-                  isSuccess: false,
-                );
-              } catch (e) {
-                if (!mounted) return;
-                _showOperationFeedback(
-                  l10n.shortVideoSpaceProductionAssemblyReorderFailed(describeUserVisibleApiError(l10n, e)),
                   isSuccess: false,
                 );
               } finally {
@@ -462,18 +443,12 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                 }
                 setLocalState(() {});
                 await _loadProjectOverview();
-              } on RustApiException catch (e) {
+              } catch (e) {
                 if (!mounted) return;
                 _showOperationFeedback(
                   l10n.shortVideoSpaceProductionAssemblyAlignFailed(
                     describeUserVisibleApiError(l10n, e),
                   ),
-                  isSuccess: false,
-                );
-              } catch (e) {
-                if (!mounted) return;
-                _showOperationFeedback(
-                  l10n.shortVideoSpaceProductionAssemblyAlignFailed(describeUserVisibleApiError(l10n, e)),
                   isSuccess: false,
                 );
               }
@@ -1063,19 +1038,11 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                 errorMessage = null;
                 loading = false;
               });
-            } on RustApiException catch (e) {
+            } catch (e) {
               setState(() {
                 errorMessage = dialogL10n.shortVideoSpaceProductionAssemblyLoadFailed(
                   describeUserVisibleApiError(dialogL10n, e),
                 );
-                loading = false;
-              });
-            } catch (e) {
-              setState(() {
-                errorMessage =
-                    dialogL10n.shortVideoSpaceProductionAssemblyLoadFailed(
-                      describeUserVisibleApiError(dialogL10n, e),
-                    );
                 loading = false;
               });
             }
@@ -1448,17 +1415,6 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                                         isSuccess: true,
                                                       );
                                                       await loadTasks();
-                                                    } on RustApiException catch (
-                                                      e
-                                                    ) {
-                                                      if (!mounted) return;
-                                                      _showOperationFeedback(
-                                                        l10n
-                                                            .shortVideoSpaceProductionAssemblyCancelFailed(
-                                                          describeUserVisibleApiError(l10n, e),
-                                                        ),
-                                                        isSuccess: false,
-                                                      );
                                                     } catch (e) {
                                                       if (!mounted) return;
                                                       _showOperationFeedback(
@@ -1529,17 +1485,6 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                                         isSuccess: true,
                                                       );
                                                       await loadTasks();
-                                                    } on RustApiException catch (
-                                                      e
-                                                    ) {
-                                                      if (!mounted) return;
-                                                      _showOperationFeedback(
-                                                        l10n
-                                                            .shortVideoSpaceProductionAssemblyRetryFailed(
-                                                          describeUserVisibleApiError(l10n, e),
-                                                        ),
-                                                        isSuccess: false,
-                                                      );
                                                     } catch (e) {
                                                       if (!mounted) return;
                                                       _showOperationFeedback(
@@ -2108,14 +2053,6 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                       isSuccess: true,
                     );
                     await _loadProjectOverview();
-                  } on RustApiException catch (e) {
-                    if (!mounted) return;
-                    _showOperationFeedback(
-                      rootL10n.shortVideoSpaceProductionAssemblyStyleWriteBackFailed(
-                        describeUserVisibleApiError(rootL10n, e),
-                      ),
-                      isSuccess: false,
-                    );
                   } catch (e) {
                     if (!mounted) return;
                     _showOperationFeedback(
