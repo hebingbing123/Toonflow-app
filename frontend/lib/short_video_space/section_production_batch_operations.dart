@@ -94,7 +94,12 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
           isSuccess: false,
         );
       } catch (e) {
-        showFeedback(l10n.shortVideoBatchEnableFailedError('$e'), isSuccess: false);
+        showFeedback(
+          l10n.shortVideoBatchEnableFailedError(
+            describeUserVisibleApiError(l10n, e),
+          ),
+          isSuccess: false,
+        );
       }
     }
   }
@@ -177,7 +182,12 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
           isSuccess: false,
         );
       } catch (e) {
-        showFeedback(l10n.shortVideoBatchDisableFailedError('$e'), isSuccess: false);
+        showFeedback(
+          l10n.shortVideoBatchDisableFailedError(
+            describeUserVisibleApiError(l10n, e),
+          ),
+          isSuccess: false,
+        );
       }
     }
   }
@@ -405,7 +415,12 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
         isSuccess: false,
       );
     } catch (e) {
-      showFeedback(l10n.shortVideoBatchReplaceFailedError('$e'), isSuccess: false);
+      showFeedback(
+        l10n.shortVideoBatchReplaceFailedError(
+          describeUserVisibleApiError(l10n, e),
+        ),
+        isSuccess: false,
+      );
     }
   }
 
@@ -737,7 +752,12 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
         Navigator.of(context).pop();
       }
 
-      showFeedback(l10n.shortVideoBatchVoiceoverSingleFailedError('$e'), isSuccess: false);
+      showFeedback(
+        l10n.shortVideoBatchVoiceoverSingleFailedError(
+          describeUserVisibleApiError(l10n, e),
+        ),
+        isSuccess: false,
+      );
     }
   }
 
