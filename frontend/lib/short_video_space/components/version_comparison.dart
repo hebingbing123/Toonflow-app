@@ -1,6 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+import '../../l10n/app_localizations.dart';
 import 'version_manager.dart';
+
+String _formatVersionComparisonValue(AppLocalizations l10n, dynamic value) {
+  if (value == null) return l10n.shortVideoVersionComparisonValueEmpty;
+  if (value is String) return value;
+  if (value is num) return value.toString();
+  if (value is bool) {
+    return value ? l10n.shortVideoVersionComparisonValueYes : l10n.shortVideoVersionComparisonValueNo;
+  }
+  if (value is List) {
+    return l10n.shortVideoVersionComparisonValueList(value.length);
+  }
+  if (value is Map) {
+    return l10n.shortVideoVersionComparisonValueObject(value.length);
+  }
+  return value.toString();
+}
 
 /// 版本对比差异类型
 enum DifferenceType {
@@ -26,16 +44,18 @@ class ShotDifference {
   final dynamic oldValue;
   final dynamic newValue;
 
-  String get description {
+  String localizedDescription(AppLocalizations l10n) {
     switch (type) {
       case DifferenceType.added:
-        return '新增镜头';
+        return l10n.shortVideoVersionComparisonDiffAdded;
       case DifferenceType.removed:
-        return '删除镜头';
+        return l10n.shortVideoVersionComparisonDiffRemoved;
       case DifferenceType.modified:
-        return fieldName != null ? '修改 $fieldName' : '修改';
+        return fieldName != null
+            ? l10n.shortVideoVersionComparisonDiffModifiedField(fieldName!)
+            : l10n.shortVideoVersionComparisonDiffModifiedGeneric;
       case DifferenceType.unchanged:
-        return '未变化';
+        return l10n.shortVideoVersionComparisonDiffUnchanged;
     }
   }
 }
@@ -216,6 +236,7 @@ class _VersionComparisonState extends State<VersionComparison> {
 
   /// 过滤差异列表
   List<ShotDifference> get _filteredDifferences {
+    final l10n = AppLocalizations.of(context)!;
     var filtered = _differences;
 
     // 仅显示变化
@@ -228,7 +249,7 @@ class _VersionComparisonState extends State<VersionComparison> {
       final query = _searchQuery.toLowerCase();
       filtered = filtered.where((d) {
         return d.shotId.toLowerCase().contains(query) ||
-            d.description.toLowerCase().contains(query) ||
+            d.localizedDescription(l10n).toLowerCase().contains(query) ||
             (d.fieldName?.toLowerCase().contains(query) ?? false);
       }).toList();
     }
@@ -243,18 +264,19 @@ class _VersionComparisonState extends State<VersionComparison> {
     });
 
     try {
-      final report = _generateReportText();
-      
+      final l10n = AppLocalizations.of(context)!;
+      final report = _generateReportText(l10n);
+
       // 复制到剪贴板
       await Clipboard.setData(ClipboardData(text: report));
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('对比报告已复制到剪贴板'),
+            content: Text(l10n.shortVideoVersionComparisonReportCopied),
             backgroundColor: Theme.of(context).colorScheme.primary,
             action: SnackBarAction(
-              label: '查看',
+              label: l10n.shortVideoVersionComparisonSnackbarView,
               textColor: Colors.white,
               onPressed: () {
                 _showReportDialog(report);
@@ -265,9 +287,10 @@ class _VersionComparisonState extends State<VersionComparison> {
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('导出失败：$e'),
+            content: Text(l10n.shortVideoVersionComparisonExportFailed('$e')),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -282,101 +305,114 @@ class _VersionComparisonState extends State<VersionComparison> {
   }
 
   /// 生成报告文本
-  String _generateReportText() {
+  String _generateReportText(AppLocalizations l10n) {
     final buffer = StringBuffer();
-    
-    // 标题
-    buffer.writeln('# 版本对比报告');
+
+    buffer.writeln(l10n.shortVideoVersionComparisonReportTitle);
     buffer.writeln();
-    
-    // 版本信息
-    buffer.writeln('## 版本信息');
+
+    buffer.writeln(l10n.shortVideoVersionComparisonReportVersionInfo);
     buffer.writeln();
-    buffer.writeln('**基准版本（旧）：** ${widget.baseVersion.name}');
-    buffer.writeln('- 创建时间：${_formatDateTime(widget.baseVersion.createdAt)}');
-    buffer.writeln('- 镜头数：${widget.baseVersion.shotCount}');
+    buffer.writeln(
+      l10n.shortVideoVersionComparisonReportBaseVersionLine(widget.baseVersion.name),
+    );
+    buffer.writeln(
+      l10n.shortVideoVersionComparisonReportCreatedAt(
+        _formatDateTime(widget.baseVersion.createdAt),
+      ),
+    );
+    buffer.writeln(
+      l10n.shortVideoVersionComparisonReportShotCount(widget.baseVersion.shotCount),
+    );
     buffer.writeln();
-    buffer.writeln('**对比版本（新）：** ${widget.compareVersion.name}');
-    buffer.writeln('- 创建时间：${_formatDateTime(widget.compareVersion.createdAt)}');
-    buffer.writeln('- 镜头数：${widget.compareVersion.shotCount}');
+    buffer.writeln(
+      l10n.shortVideoVersionComparisonReportCompareVersionLine(widget.compareVersion.name),
+    );
+    buffer.writeln(
+      l10n.shortVideoVersionComparisonReportCreatedAt(
+        _formatDateTime(widget.compareVersion.createdAt),
+      ),
+    );
+    buffer.writeln(
+      l10n.shortVideoVersionComparisonReportShotCount(widget.compareVersion.shotCount),
+    );
     buffer.writeln();
-    
-    // 统计信息
-    buffer.writeln('## 差异统计');
+
+    buffer.writeln(l10n.shortVideoVersionComparisonReportStatistics);
     buffer.writeln();
-    buffer.writeln('- 总镜头数：${_statistics.totalShots}');
-    buffer.writeln('- 新增镜头：${_statistics.addedCount}');
-    buffer.writeln('- 删除镜头：${_statistics.removedCount}');
-    buffer.writeln('- 修改镜头：${_statistics.modifiedCount}');
-    buffer.writeln('- 未变化镜头：${_statistics.unchangedCount}');
-    buffer.writeln('- 变化率：${_statistics.changePercentage.toStringAsFixed(1)}%');
+    buffer.writeln(l10n.shortVideoVersionComparisonReportTotalShots(_statistics.totalShots));
+    buffer.writeln(l10n.shortVideoVersionComparisonReportAdded(_statistics.addedCount));
+    buffer.writeln(l10n.shortVideoVersionComparisonReportRemoved(_statistics.removedCount));
+    buffer.writeln(l10n.shortVideoVersionComparisonReportModified(_statistics.modifiedCount));
+    buffer.writeln(l10n.shortVideoVersionComparisonReportUnchanged(_statistics.unchangedCount));
+    buffer.writeln(
+      l10n.shortVideoVersionComparisonReportChangeRate(
+        '${_statistics.changePercentage.toStringAsFixed(1)}%',
+      ),
+    );
     buffer.writeln();
-    
-    // 详细差异
-    buffer.writeln('## 详细差异');
+
+    buffer.writeln(l10n.shortVideoVersionComparisonReportDetails);
     buffer.writeln();
-    
-    // 按类型分组
+
     final added = _differences.where((d) => d.type == DifferenceType.added).toList();
     final removed = _differences.where((d) => d.type == DifferenceType.removed).toList();
     final modified = _differences.where((d) => d.type == DifferenceType.modified).toList();
-    
+
     if (added.isNotEmpty) {
-      buffer.writeln('### 新增镜头 (${added.length})');
+      buffer.writeln(l10n.shortVideoVersionComparisonReportSectionAdded(added.length));
       buffer.writeln();
       for (final diff in added) {
-        buffer.writeln('- 镜头 ${diff.shotId}');
+        buffer.writeln(l10n.shortVideoVersionComparisonReportShotItem(diff.shotId));
       }
       buffer.writeln();
     }
-    
+
     if (removed.isNotEmpty) {
-      buffer.writeln('### 删除镜头 (${removed.length})');
+      buffer.writeln(l10n.shortVideoVersionComparisonReportSectionRemoved(removed.length));
       buffer.writeln();
       for (final diff in removed) {
-        buffer.writeln('- 镜头 ${diff.shotId}');
+        buffer.writeln(l10n.shortVideoVersionComparisonReportShotItem(diff.shotId));
       }
       buffer.writeln();
     }
-    
+
     if (modified.isNotEmpty) {
-      buffer.writeln('### 修改镜头');
+      buffer.writeln(l10n.shortVideoVersionComparisonReportSectionModified);
       buffer.writeln();
-      
-      // 按镜头分组
+
       final modifiedByShot = <String, List<ShotDifference>>{};
       for (final diff in modified) {
         modifiedByShot.putIfAbsent(diff.shotId, () => []).add(diff);
       }
-      
+
       for (final entry in modifiedByShot.entries) {
-        buffer.writeln('#### 镜头 ${entry.key}');
+        buffer.writeln(l10n.shortVideoVersionComparisonReportShotHeading(entry.key));
         buffer.writeln();
         for (final diff in entry.value) {
-          buffer.writeln('- **${diff.fieldName}**');
-          buffer.writeln('  - 旧值：${_formatValue(diff.oldValue)}');
-          buffer.writeln('  - 新值：${_formatValue(diff.newValue)}');
+          final field = diff.fieldName ?? '';
+          buffer.writeln(l10n.shortVideoVersionComparisonReportFieldLine(field));
+          buffer.writeln(
+            l10n.shortVideoVersionComparisonReportOldValue(
+              _formatVersionComparisonValue(l10n, diff.oldValue),
+            ),
+          );
+          buffer.writeln(
+            l10n.shortVideoVersionComparisonReportNewValue(
+              _formatVersionComparisonValue(l10n, diff.newValue),
+            ),
+          );
         }
         buffer.writeln();
       }
     }
-    
-    // 生成时间
-    buffer.writeln('---');
-    buffer.writeln('*报告生成时间：${_formatDateTime(DateTime.now())}*');
-    
-    return buffer.toString();
-  }
 
-  /// 格式化值
-  String _formatValue(dynamic value) {
-    if (value == null) return '(空)';
-    if (value is String) return value;
-    if (value is num) return value.toString();
-    if (value is bool) return value ? '是' : '否';
-    if (value is List) return '列表 (${value.length} 项)';
-    if (value is Map) return '对象 (${value.length} 个字段)';
-    return value.toString();
+    buffer.writeln('---');
+    buffer.writeln(
+      l10n.shortVideoVersionComparisonReportGeneratedFooter(_formatDateTime(DateTime.now())),
+    );
+
+    return buffer.toString();
   }
 
   /// 显示报告对话框
@@ -384,8 +420,9 @@ class _VersionComparisonState extends State<VersionComparison> {
     showDialog<void>(
       context: context,
       builder: (context) {
+        final dialogL10n = AppLocalizations.of(context)!;
         return AlertDialog(
-          title: const Text('对比报告'),
+          title: Text(dialogL10n.shortVideoVersionComparisonReportDialogTitle),
           content: SizedBox(
             width: double.maxFinite,
             child: SingleChildScrollView(
@@ -398,7 +435,7 @@ class _VersionComparisonState extends State<VersionComparison> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('关闭'),
+              child: Text(dialogL10n.shortVideoSpaceProductionAssemblyClose),
             ),
             FilledButton(
               onPressed: () async {
@@ -406,11 +443,13 @@ class _VersionComparisonState extends State<VersionComparison> {
                 if (context.mounted) {
                   Navigator.of(context).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('已复制到剪贴板')),
+                    SnackBar(
+                      content: Text(dialogL10n.shortVideoVersionComparisonClipboardCopied),
+                    ),
                   );
                 }
               },
-              child: const Text('复制'),
+              child: Text(dialogL10n.shortVideoVersionComparisonCopy),
             ),
           ],
         );
@@ -431,6 +470,7 @@ class _VersionComparisonState extends State<VersionComparison> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final filteredDiffs = _filteredDifferences;
 
     return Dialog(
@@ -451,7 +491,7 @@ class _VersionComparisonState extends State<VersionComparison> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '版本对比',
+                        l10n.shortVideoVersionComparisonTitle,
                         style: theme.textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -469,7 +509,7 @@ class _VersionComparisonState extends State<VersionComparison> {
                 IconButton(
                   icon: const Icon(Icons.close),
                   onPressed: widget.onClose,
-                  tooltip: '关闭',
+                  tooltip: l10n.shortVideoSpaceProductionAssemblyClose,
                 ),
               ],
             ),
@@ -485,7 +525,7 @@ class _VersionComparisonState extends State<VersionComparison> {
                     Expanded(
                       child: _StatisticItem(
                         icon: Icons.add_circle_outline,
-                        label: '新增',
+                        label: l10n.shortVideoVersionComparisonStatAdded,
                         value: _statistics.addedCount.toString(),
                         color: Colors.green,
                       ),
@@ -493,7 +533,7 @@ class _VersionComparisonState extends State<VersionComparison> {
                     Expanded(
                       child: _StatisticItem(
                         icon: Icons.remove_circle_outline,
-                        label: '删除',
+                        label: l10n.shortVideoVersionComparisonStatRemoved,
                         value: _statistics.removedCount.toString(),
                         color: Colors.red,
                       ),
@@ -501,7 +541,7 @@ class _VersionComparisonState extends State<VersionComparison> {
                     Expanded(
                       child: _StatisticItem(
                         icon: Icons.edit_outlined,
-                        label: '修改',
+                        label: l10n.shortVideoVersionComparisonStatModified,
                         value: _statistics.modifiedCount.toString(),
                         color: Colors.orange,
                       ),
@@ -509,7 +549,7 @@ class _VersionComparisonState extends State<VersionComparison> {
                     Expanded(
                       child: _StatisticItem(
                         icon: Icons.check_circle_outline,
-                        label: '未变化',
+                        label: l10n.shortVideoVersionComparisonStatUnchanged,
                         value: _statistics.unchangedCount.toString(),
                         color: Colors.grey,
                       ),
@@ -517,7 +557,7 @@ class _VersionComparisonState extends State<VersionComparison> {
                     Expanded(
                       child: _StatisticItem(
                         icon: Icons.percent,
-                        label: '变化率',
+                        label: l10n.shortVideoVersionComparisonStatChangeRate,
                         value: '${_statistics.changePercentage.toStringAsFixed(1)}%',
                         color: theme.colorScheme.primary,
                       ),
@@ -530,12 +570,12 @@ class _VersionComparisonState extends State<VersionComparison> {
 
             // 工具栏
             Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // 搜索框
                 Expanded(
                   child: TextField(
                     decoration: InputDecoration(
-                      hintText: '搜索镜头 ID 或字段名...',
+                      hintText: l10n.shortVideoVersionComparisonSearchHint,
                       prefixIcon: const Icon(Icons.search, size: 20),
                       border: const OutlineInputBorder(),
                       contentPadding: const EdgeInsets.symmetric(
@@ -552,34 +592,36 @@ class _VersionComparisonState extends State<VersionComparison> {
                   ),
                 ),
                 const SizedBox(width: 12),
-                
-                // 仅显示变化
-                FilterChip(
-                  label: const Text('仅显示变化'),
-                  selected: _showOnlyChanges,
-                  onSelected: (selected) {
-                    setState(() {
-                      _showOnlyChanges = selected;
-                    });
-                  },
-                  avatar: Icon(
-                    _showOnlyChanges ? Icons.filter_alt : Icons.filter_alt_outlined,
-                    size: 18,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                
-                // 导出报告按钮
-                FilledButton.tonalIcon(
-                  onPressed: _isExporting ? null : _exportComparisonReport,
-                  icon: _isExporting
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.download, size: 18),
-                  label: const Text('导出报告'),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    FilterChip(
+                      label: Text(l10n.shortVideoVersionComparisonShowChangesOnly),
+                      selected: _showOnlyChanges,
+                      onSelected: (selected) {
+                        setState(() {
+                          _showOnlyChanges = selected;
+                        });
+                      },
+                      avatar: Icon(
+                        _showOnlyChanges ? Icons.filter_alt : Icons.filter_alt_outlined,
+                        size: 18,
+                      ),
+                    ),
+                    FilledButton.tonalIcon(
+                      onPressed: _isExporting ? null : _exportComparisonReport,
+                      icon: _isExporting
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.download, size: 18),
+                      label: Text(l10n.shortVideoVersionComparisonExportReport),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -600,8 +642,8 @@ class _VersionComparisonState extends State<VersionComparison> {
                           const SizedBox(height: 16),
                           Text(
                             _searchQuery.isNotEmpty
-                                ? '没有找到匹配的差异'
-                                : '两个版本完全相同',
+                                ? l10n.shortVideoVersionComparisonEmptyNoMatch
+                                : l10n.shortVideoVersionComparisonEmptyIdentical,
                             style: theme.textTheme.titleMedium?.copyWith(
                               color: theme.colorScheme.onSurfaceVariant,
                             ),
@@ -701,19 +743,10 @@ class _DifferenceListItem extends StatelessWidget {
     }
   }
 
-  String _formatValue(dynamic value) {
-    if (value == null) return '(空)';
-    if (value is String) return value;
-    if (value is num) return value.toString();
-    if (value is bool) return value ? '是' : '否';
-    if (value is List) return '列表 (${value.length} 项)';
-    if (value is Map) return '对象 (${value.length} 个字段)';
-    return value.toString();
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final typeColor = _getTypeColor(context);
 
     return ListTile(
@@ -724,7 +757,7 @@ class _DifferenceListItem extends StatelessWidget {
       title: Row(
         children: [
           Text(
-            '镜头 ${difference.shotId}',
+            l10n.shortVideoVersionComparisonShotTitle(difference.shotId),
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           const SizedBox(width: 8),
@@ -736,7 +769,7 @@ class _DifferenceListItem extends StatelessWidget {
               border: Border.all(color: typeColor.withValues(alpha: 0.3)),
             ),
             child: Text(
-              difference.description,
+              difference.localizedDescription(l10n),
               style: TextStyle(
                 fontSize: 12,
                 color: typeColor,
@@ -760,15 +793,15 @@ class _DifferenceListItem extends StatelessWidget {
                           color: Colors.red.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        child: const Text(
-                          '旧',
-                          style: TextStyle(fontSize: 10, color: Colors.red),
+                        child: Text(
+                          l10n.shortVideoVersionComparisonBadgeOld,
+                          style: const TextStyle(fontSize: 10, color: Colors.red),
                         ),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          _formatValue(difference.oldValue),
+                          _formatVersionComparisonValue(l10n, difference.oldValue),
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: Colors.red.shade700,
                             decoration: TextDecoration.lineThrough,
@@ -788,15 +821,15 @@ class _DifferenceListItem extends StatelessWidget {
                           color: Colors.green.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        child: const Text(
-                          '新',
-                          style: TextStyle(fontSize: 10, color: Colors.green),
+                        child: Text(
+                          l10n.shortVideoVersionComparisonBadgeNew,
+                          style: const TextStyle(fontSize: 10, color: Colors.green),
                         ),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          _formatValue(difference.newValue),
+                          _formatVersionComparisonValue(l10n, difference.newValue),
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: Colors.green.shade700,
                             fontWeight: FontWeight.w500,

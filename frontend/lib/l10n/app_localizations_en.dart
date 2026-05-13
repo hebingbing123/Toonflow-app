@@ -15206,6 +15206,221 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shortVideoVersionManagerStartCompare => 'Compare';
 
   @override
+  String get shortVideoVersionComparisonDiffAdded => 'Shot added';
+
+  @override
+  String get shortVideoVersionComparisonDiffRemoved => 'Shot removed';
+
+  @override
+  String shortVideoVersionComparisonDiffModifiedField(String fieldName) {
+    return 'Modified: $fieldName';
+  }
+
+  @override
+  String get shortVideoVersionComparisonDiffModifiedGeneric => 'Modified';
+
+  @override
+  String get shortVideoVersionComparisonDiffUnchanged => 'Unchanged';
+
+  @override
+  String get shortVideoVersionComparisonReportTitle =>
+      '# Version comparison report';
+
+  @override
+  String get shortVideoVersionComparisonReportVersionInfo => '## Version info';
+
+  @override
+  String shortVideoVersionComparisonReportBaseVersionLine(String name) {
+    return '**Base (old):** $name';
+  }
+
+  @override
+  String shortVideoVersionComparisonReportCreatedAt(String dateTime) {
+    return '- Created: $dateTime';
+  }
+
+  @override
+  String shortVideoVersionComparisonReportShotCount(int count) {
+    return '- Shots: $count';
+  }
+
+  @override
+  String shortVideoVersionComparisonReportCompareVersionLine(String name) {
+    return '**Compare (new):** $name';
+  }
+
+  @override
+  String get shortVideoVersionComparisonReportStatistics =>
+      '## Difference summary';
+
+  @override
+  String shortVideoVersionComparisonReportTotalShots(int count) {
+    return '- Total shots: $count';
+  }
+
+  @override
+  String shortVideoVersionComparisonReportAdded(int count) {
+    return '- Added shots: $count';
+  }
+
+  @override
+  String shortVideoVersionComparisonReportRemoved(int count) {
+    return '- Removed shots: $count';
+  }
+
+  @override
+  String shortVideoVersionComparisonReportModified(int count) {
+    return '- Modified shots: $count';
+  }
+
+  @override
+  String shortVideoVersionComparisonReportUnchanged(int count) {
+    return '- Unchanged shots: $count';
+  }
+
+  @override
+  String shortVideoVersionComparisonReportChangeRate(String percent) {
+    return '- Change rate: $percent';
+  }
+
+  @override
+  String get shortVideoVersionComparisonReportDetails =>
+      '## Detailed differences';
+
+  @override
+  String shortVideoVersionComparisonReportSectionAdded(int count) {
+    return '### Added shots ($count)';
+  }
+
+  @override
+  String shortVideoVersionComparisonReportSectionRemoved(int count) {
+    return '### Removed shots ($count)';
+  }
+
+  @override
+  String get shortVideoVersionComparisonReportSectionModified =>
+      '### Modified shots';
+
+  @override
+  String shortVideoVersionComparisonReportShotItem(String shotId) {
+    return '- Shot $shotId';
+  }
+
+  @override
+  String shortVideoVersionComparisonReportShotHeading(String shotId) {
+    return '#### Shot $shotId';
+  }
+
+  @override
+  String shortVideoVersionComparisonReportFieldLine(String fieldName) {
+    return '- **$fieldName**';
+  }
+
+  @override
+  String shortVideoVersionComparisonReportOldValue(String value) {
+    return '  - Old: $value';
+  }
+
+  @override
+  String shortVideoVersionComparisonReportNewValue(String value) {
+    return '  - New: $value';
+  }
+
+  @override
+  String shortVideoVersionComparisonReportGeneratedFooter(String dateTime) {
+    return '*Generated at: $dateTime*';
+  }
+
+  @override
+  String get shortVideoVersionComparisonValueEmpty => '(empty)';
+
+  @override
+  String get shortVideoVersionComparisonValueYes => 'Yes';
+
+  @override
+  String get shortVideoVersionComparisonValueNo => 'No';
+
+  @override
+  String shortVideoVersionComparisonValueList(int count) {
+    return 'List ($count items)';
+  }
+
+  @override
+  String shortVideoVersionComparisonValueObject(int count) {
+    return 'Object ($count fields)';
+  }
+
+  @override
+  String get shortVideoVersionComparisonReportCopied =>
+      'Comparison report copied to clipboard';
+
+  @override
+  String get shortVideoVersionComparisonSnackbarView => 'View';
+
+  @override
+  String shortVideoVersionComparisonExportFailed(String error) {
+    return 'Export failed: $error';
+  }
+
+  @override
+  String get shortVideoVersionComparisonReportDialogTitle =>
+      'Comparison report';
+
+  @override
+  String get shortVideoVersionComparisonCopy => 'Copy';
+
+  @override
+  String get shortVideoVersionComparisonClipboardCopied =>
+      'Copied to clipboard';
+
+  @override
+  String get shortVideoVersionComparisonTitle => 'Version comparison';
+
+  @override
+  String get shortVideoVersionComparisonStatAdded => 'Added';
+
+  @override
+  String get shortVideoVersionComparisonStatRemoved => 'Removed';
+
+  @override
+  String get shortVideoVersionComparisonStatModified => 'Modified';
+
+  @override
+  String get shortVideoVersionComparisonStatUnchanged => 'Unchanged';
+
+  @override
+  String get shortVideoVersionComparisonStatChangeRate => 'Change rate';
+
+  @override
+  String get shortVideoVersionComparisonSearchHint =>
+      'Search shot ID or field name…';
+
+  @override
+  String get shortVideoVersionComparisonShowChangesOnly => 'Changes only';
+
+  @override
+  String get shortVideoVersionComparisonExportReport => 'Export report';
+
+  @override
+  String get shortVideoVersionComparisonEmptyNoMatch =>
+      'No matching differences';
+
+  @override
+  String get shortVideoVersionComparisonEmptyIdentical =>
+      'The two versions are identical';
+
+  @override
+  String shortVideoVersionComparisonShotTitle(String shotId) {
+    return 'Shot $shotId';
+  }
+
+  @override
+  String get shortVideoVersionComparisonBadgeOld => 'Old';
+
+  @override
+  String get shortVideoVersionComparisonBadgeNew => 'New';
+
+  @override
   String get accountSectionTitle => 'Account section title';
 
   @override

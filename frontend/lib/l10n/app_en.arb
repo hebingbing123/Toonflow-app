@@ -11531,6 +11531,220 @@
     }
   },
   "shortVideoVersionManagerStartCompare": "Compare",
+  "shortVideoVersionComparisonDiffAdded": "Shot added",
+  "shortVideoVersionComparisonDiffRemoved": "Shot removed",
+  "shortVideoVersionComparisonDiffModifiedField": "Modified: {fieldName}",
+  "@shortVideoVersionComparisonDiffModifiedField": {
+    "placeholders": {
+      "fieldName": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionComparisonDiffModifiedGeneric": "Modified",
+  "shortVideoVersionComparisonDiffUnchanged": "Unchanged",
+  "shortVideoVersionComparisonReportTitle": "# Version comparison report",
+  "shortVideoVersionComparisonReportVersionInfo": "## Version info",
+  "shortVideoVersionComparisonReportBaseVersionLine": "**Base (old):** {name}",
+  "@shortVideoVersionComparisonReportBaseVersionLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionComparisonReportCreatedAt": "- Created: {dateTime}",
+  "@shortVideoVersionComparisonReportCreatedAt": {
+    "placeholders": {
+      "dateTime": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionComparisonReportShotCount": "- Shots: {count}",
+  "@shortVideoVersionComparisonReportShotCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoVersionComparisonReportCompareVersionLine": "**Compare (new):** {name}",
+  "@shortVideoVersionComparisonReportCompareVersionLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionComparisonReportStatistics": "## Difference summary",
+  "shortVideoVersionComparisonReportTotalShots": "- Total shots: {count}",
+  "@shortVideoVersionComparisonReportTotalShots": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoVersionComparisonReportAdded": "- Added shots: {count}",
+  "@shortVideoVersionComparisonReportAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoVersionComparisonReportRemoved": "- Removed shots: {count}",
+  "@shortVideoVersionComparisonReportRemoved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoVersionComparisonReportModified": "- Modified shots: {count}",
+  "@shortVideoVersionComparisonReportModified": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoVersionComparisonReportUnchanged": "- Unchanged shots: {count}",
+  "@shortVideoVersionComparisonReportUnchanged": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoVersionComparisonReportChangeRate": "- Change rate: {percent}",
+  "@shortVideoVersionComparisonReportChangeRate": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionComparisonReportDetails": "## Detailed differences",
+  "shortVideoVersionComparisonReportSectionAdded": "### Added shots ({count})",
+  "@shortVideoVersionComparisonReportSectionAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoVersionComparisonReportSectionRemoved": "### Removed shots ({count})",
+  "@shortVideoVersionComparisonReportSectionRemoved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoVersionComparisonReportSectionModified": "### Modified shots",
+  "shortVideoVersionComparisonReportShotItem": "- Shot {shotId}",
+  "@shortVideoVersionComparisonReportShotItem": {
+    "placeholders": {
+      "shotId": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionComparisonReportShotHeading": "#### Shot {shotId}",
+  "@shortVideoVersionComparisonReportShotHeading": {
+    "placeholders": {
+      "shotId": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionComparisonReportFieldLine": "- **{fieldName}**",
+  "@shortVideoVersionComparisonReportFieldLine": {
+    "placeholders": {
+      "fieldName": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionComparisonReportOldValue": "  - Old: {value}",
+  "@shortVideoVersionComparisonReportOldValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionComparisonReportNewValue": "  - New: {value}",
+  "@shortVideoVersionComparisonReportNewValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionComparisonReportGeneratedFooter": "*Generated at: {dateTime}*",
+  "@shortVideoVersionComparisonReportGeneratedFooter": {
+    "placeholders": {
+      "dateTime": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionComparisonValueEmpty": "(empty)",
+  "shortVideoVersionComparisonValueYes": "Yes",
+  "shortVideoVersionComparisonValueNo": "No",
+  "shortVideoVersionComparisonValueList": "List ({count} items)",
+  "@shortVideoVersionComparisonValueList": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoVersionComparisonValueObject": "Object ({count} fields)",
+  "@shortVideoVersionComparisonValueObject": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoVersionComparisonReportCopied": "Comparison report copied to clipboard",
+  "shortVideoVersionComparisonSnackbarView": "View",
+  "shortVideoVersionComparisonExportFailed": "Export failed: {error}",
+  "@shortVideoVersionComparisonExportFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionComparisonReportDialogTitle": "Comparison report",
+  "shortVideoVersionComparisonCopy": "Copy",
+  "shortVideoVersionComparisonClipboardCopied": "Copied to clipboard",
+  "shortVideoVersionComparisonTitle": "Version comparison",
+  "shortVideoVersionComparisonStatAdded": "Added",
+  "shortVideoVersionComparisonStatRemoved": "Removed",
+  "shortVideoVersionComparisonStatModified": "Modified",
+  "shortVideoVersionComparisonStatUnchanged": "Unchanged",
+  "shortVideoVersionComparisonStatChangeRate": "Change rate",
+  "shortVideoVersionComparisonSearchHint": "Search shot ID or field name…",
+  "shortVideoVersionComparisonShowChangesOnly": "Changes only",
+  "shortVideoVersionComparisonExportReport": "Export report",
+  "shortVideoVersionComparisonEmptyNoMatch": "No matching differences",
+  "shortVideoVersionComparisonEmptyIdentical": "The two versions are identical",
+  "shortVideoVersionComparisonShotTitle": "Shot {shotId}",
+  "@shortVideoVersionComparisonShotTitle": {
+    "placeholders": {
+      "shotId": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionComparisonBadgeOld": "Old",
+  "shortVideoVersionComparisonBadgeNew": "New",
   "accountSectionTitle": "Account section title",
   "accountRiskyPrefsTooltip": "Account risky prefs tooltip",
   "accountSectionSubtitle": "Account section subtitle",

@@ -14480,6 +14480,211 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shortVideoVersionManagerStartCompare => '开始对比';
 
   @override
+  String get shortVideoVersionComparisonDiffAdded => '新增镜头';
+
+  @override
+  String get shortVideoVersionComparisonDiffRemoved => '删除镜头';
+
+  @override
+  String shortVideoVersionComparisonDiffModifiedField(String fieldName) {
+    return '修改 $fieldName';
+  }
+
+  @override
+  String get shortVideoVersionComparisonDiffModifiedGeneric => '修改';
+
+  @override
+  String get shortVideoVersionComparisonDiffUnchanged => '未变化';
+
+  @override
+  String get shortVideoVersionComparisonReportTitle => '# 版本对比报告';
+
+  @override
+  String get shortVideoVersionComparisonReportVersionInfo => '## 版本信息';
+
+  @override
+  String shortVideoVersionComparisonReportBaseVersionLine(String name) {
+    return '**基准版本（旧）：** $name';
+  }
+
+  @override
+  String shortVideoVersionComparisonReportCreatedAt(String dateTime) {
+    return '- 创建时间：$dateTime';
+  }
+
+  @override
+  String shortVideoVersionComparisonReportShotCount(int count) {
+    return '- 镜头数：$count';
+  }
+
+  @override
+  String shortVideoVersionComparisonReportCompareVersionLine(String name) {
+    return '**对比版本（新）：** $name';
+  }
+
+  @override
+  String get shortVideoVersionComparisonReportStatistics => '## 差异统计';
+
+  @override
+  String shortVideoVersionComparisonReportTotalShots(int count) {
+    return '- 总镜头数：$count';
+  }
+
+  @override
+  String shortVideoVersionComparisonReportAdded(int count) {
+    return '- 新增镜头：$count';
+  }
+
+  @override
+  String shortVideoVersionComparisonReportRemoved(int count) {
+    return '- 删除镜头：$count';
+  }
+
+  @override
+  String shortVideoVersionComparisonReportModified(int count) {
+    return '- 修改镜头：$count';
+  }
+
+  @override
+  String shortVideoVersionComparisonReportUnchanged(int count) {
+    return '- 未变化镜头：$count';
+  }
+
+  @override
+  String shortVideoVersionComparisonReportChangeRate(String percent) {
+    return '- 变化率：$percent';
+  }
+
+  @override
+  String get shortVideoVersionComparisonReportDetails => '## 详细差异';
+
+  @override
+  String shortVideoVersionComparisonReportSectionAdded(int count) {
+    return '### 新增镜头（$count）';
+  }
+
+  @override
+  String shortVideoVersionComparisonReportSectionRemoved(int count) {
+    return '### 删除镜头（$count）';
+  }
+
+  @override
+  String get shortVideoVersionComparisonReportSectionModified => '### 修改镜头';
+
+  @override
+  String shortVideoVersionComparisonReportShotItem(String shotId) {
+    return '- 镜头 $shotId';
+  }
+
+  @override
+  String shortVideoVersionComparisonReportShotHeading(String shotId) {
+    return '#### 镜头 $shotId';
+  }
+
+  @override
+  String shortVideoVersionComparisonReportFieldLine(String fieldName) {
+    return '- **$fieldName**';
+  }
+
+  @override
+  String shortVideoVersionComparisonReportOldValue(String value) {
+    return '  - 旧值：$value';
+  }
+
+  @override
+  String shortVideoVersionComparisonReportNewValue(String value) {
+    return '  - 新值：$value';
+  }
+
+  @override
+  String shortVideoVersionComparisonReportGeneratedFooter(String dateTime) {
+    return '*报告生成时间：$dateTime*';
+  }
+
+  @override
+  String get shortVideoVersionComparisonValueEmpty => '(空)';
+
+  @override
+  String get shortVideoVersionComparisonValueYes => '是';
+
+  @override
+  String get shortVideoVersionComparisonValueNo => '否';
+
+  @override
+  String shortVideoVersionComparisonValueList(int count) {
+    return '列表（$count 项）';
+  }
+
+  @override
+  String shortVideoVersionComparisonValueObject(int count) {
+    return '对象（$count 个字段）';
+  }
+
+  @override
+  String get shortVideoVersionComparisonReportCopied => '对比报告已复制到剪贴板';
+
+  @override
+  String get shortVideoVersionComparisonSnackbarView => '查看';
+
+  @override
+  String shortVideoVersionComparisonExportFailed(String error) {
+    return '导出失败：$error';
+  }
+
+  @override
+  String get shortVideoVersionComparisonReportDialogTitle => '对比报告';
+
+  @override
+  String get shortVideoVersionComparisonCopy => '复制';
+
+  @override
+  String get shortVideoVersionComparisonClipboardCopied => '已复制到剪贴板';
+
+  @override
+  String get shortVideoVersionComparisonTitle => '版本对比';
+
+  @override
+  String get shortVideoVersionComparisonStatAdded => '新增';
+
+  @override
+  String get shortVideoVersionComparisonStatRemoved => '删除';
+
+  @override
+  String get shortVideoVersionComparisonStatModified => '修改';
+
+  @override
+  String get shortVideoVersionComparisonStatUnchanged => '未变化';
+
+  @override
+  String get shortVideoVersionComparisonStatChangeRate => '变化率';
+
+  @override
+  String get shortVideoVersionComparisonSearchHint => '搜索镜头 ID 或字段名…';
+
+  @override
+  String get shortVideoVersionComparisonShowChangesOnly => '仅显示变化';
+
+  @override
+  String get shortVideoVersionComparisonExportReport => '导出报告';
+
+  @override
+  String get shortVideoVersionComparisonEmptyNoMatch => '没有找到匹配的差异';
+
+  @override
+  String get shortVideoVersionComparisonEmptyIdentical => '两个版本完全相同';
+
+  @override
+  String shortVideoVersionComparisonShotTitle(String shotId) {
+    return '镜头 $shotId';
+  }
+
+  @override
+  String get shortVideoVersionComparisonBadgeOld => '旧';
+
+  @override
+  String get shortVideoVersionComparisonBadgeNew => '新';
+
+  @override
   String get accountSectionTitle => '账户与隐私';
 
   @override

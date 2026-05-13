@@ -11491,6 +11491,220 @@
     }
   },
   "shortVideoVersionManagerStartCompare": "开始对比",
+  "shortVideoVersionComparisonDiffAdded": "新增镜头",
+  "shortVideoVersionComparisonDiffRemoved": "删除镜头",
+  "shortVideoVersionComparisonDiffModifiedField": "修改 {fieldName}",
+  "@shortVideoVersionComparisonDiffModifiedField": {
+    "placeholders": {
+      "fieldName": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionComparisonDiffModifiedGeneric": "修改",
+  "shortVideoVersionComparisonDiffUnchanged": "未变化",
+  "shortVideoVersionComparisonReportTitle": "# 版本对比报告",
+  "shortVideoVersionComparisonReportVersionInfo": "## 版本信息",
+  "shortVideoVersionComparisonReportBaseVersionLine": "**基准版本（旧）：** {name}",
+  "@shortVideoVersionComparisonReportBaseVersionLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionComparisonReportCreatedAt": "- 创建时间：{dateTime}",
+  "@shortVideoVersionComparisonReportCreatedAt": {
+    "placeholders": {
+      "dateTime": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionComparisonReportShotCount": "- 镜头数：{count}",
+  "@shortVideoVersionComparisonReportShotCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoVersionComparisonReportCompareVersionLine": "**对比版本（新）：** {name}",
+  "@shortVideoVersionComparisonReportCompareVersionLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionComparisonReportStatistics": "## 差异统计",
+  "shortVideoVersionComparisonReportTotalShots": "- 总镜头数：{count}",
+  "@shortVideoVersionComparisonReportTotalShots": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoVersionComparisonReportAdded": "- 新增镜头：{count}",
+  "@shortVideoVersionComparisonReportAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoVersionComparisonReportRemoved": "- 删除镜头：{count}",
+  "@shortVideoVersionComparisonReportRemoved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoVersionComparisonReportModified": "- 修改镜头：{count}",
+  "@shortVideoVersionComparisonReportModified": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoVersionComparisonReportUnchanged": "- 未变化镜头：{count}",
+  "@shortVideoVersionComparisonReportUnchanged": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoVersionComparisonReportChangeRate": "- 变化率：{percent}",
+  "@shortVideoVersionComparisonReportChangeRate": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionComparisonReportDetails": "## 详细差异",
+  "shortVideoVersionComparisonReportSectionAdded": "### 新增镜头（{count}）",
+  "@shortVideoVersionComparisonReportSectionAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoVersionComparisonReportSectionRemoved": "### 删除镜头（{count}）",
+  "@shortVideoVersionComparisonReportSectionRemoved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoVersionComparisonReportSectionModified": "### 修改镜头",
+  "shortVideoVersionComparisonReportShotItem": "- 镜头 {shotId}",
+  "@shortVideoVersionComparisonReportShotItem": {
+    "placeholders": {
+      "shotId": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionComparisonReportShotHeading": "#### 镜头 {shotId}",
+  "@shortVideoVersionComparisonReportShotHeading": {
+    "placeholders": {
+      "shotId": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionComparisonReportFieldLine": "- **{fieldName}**",
+  "@shortVideoVersionComparisonReportFieldLine": {
+    "placeholders": {
+      "fieldName": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionComparisonReportOldValue": "  - 旧值：{value}",
+  "@shortVideoVersionComparisonReportOldValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionComparisonReportNewValue": "  - 新值：{value}",
+  "@shortVideoVersionComparisonReportNewValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionComparisonReportGeneratedFooter": "*报告生成时间：{dateTime}*",
+  "@shortVideoVersionComparisonReportGeneratedFooter": {
+    "placeholders": {
+      "dateTime": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionComparisonValueEmpty": "(空)",
+  "shortVideoVersionComparisonValueYes": "是",
+  "shortVideoVersionComparisonValueNo": "否",
+  "shortVideoVersionComparisonValueList": "列表（{count} 项）",
+  "@shortVideoVersionComparisonValueList": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoVersionComparisonValueObject": "对象（{count} 个字段）",
+  "@shortVideoVersionComparisonValueObject": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoVersionComparisonReportCopied": "对比报告已复制到剪贴板",
+  "shortVideoVersionComparisonSnackbarView": "查看",
+  "shortVideoVersionComparisonExportFailed": "导出失败：{error}",
+  "@shortVideoVersionComparisonExportFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionComparisonReportDialogTitle": "对比报告",
+  "shortVideoVersionComparisonCopy": "复制",
+  "shortVideoVersionComparisonClipboardCopied": "已复制到剪贴板",
+  "shortVideoVersionComparisonTitle": "版本对比",
+  "shortVideoVersionComparisonStatAdded": "新增",
+  "shortVideoVersionComparisonStatRemoved": "删除",
+  "shortVideoVersionComparisonStatModified": "修改",
+  "shortVideoVersionComparisonStatUnchanged": "未变化",
+  "shortVideoVersionComparisonStatChangeRate": "变化率",
+  "shortVideoVersionComparisonSearchHint": "搜索镜头 ID 或字段名…",
+  "shortVideoVersionComparisonShowChangesOnly": "仅显示变化",
+  "shortVideoVersionComparisonExportReport": "导出报告",
+  "shortVideoVersionComparisonEmptyNoMatch": "没有找到匹配的差异",
+  "shortVideoVersionComparisonEmptyIdentical": "两个版本完全相同",
+  "shortVideoVersionComparisonShotTitle": "镜头 {shotId}",
+  "@shortVideoVersionComparisonShotTitle": {
+    "placeholders": {
+      "shotId": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionComparisonBadgeOld": "旧",
+  "shortVideoVersionComparisonBadgeNew": "新",
   "accountSectionTitle": "账户与隐私",
   "accountRiskyPrefsTooltip": "本机客户端偏好（删号、导出等「不再提示」与恢复确认）",
   "accountSectionSubtitle": "统一管理账户数据导出、下载留档和不可逆删号。导出任务会走平台 job 队列，可反复生成新版快照。",

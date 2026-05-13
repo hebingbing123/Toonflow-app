@@ -23367,6 +23367,324 @@ abstract class AppLocalizations {
   /// **'Compare'**
   String get shortVideoVersionManagerStartCompare;
 
+  /// No description provided for @shortVideoVersionComparisonDiffAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Shot added'**
+  String get shortVideoVersionComparisonDiffAdded;
+
+  /// No description provided for @shortVideoVersionComparisonDiffRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Shot removed'**
+  String get shortVideoVersionComparisonDiffRemoved;
+
+  /// No description provided for @shortVideoVersionComparisonDiffModifiedField.
+  ///
+  /// In en, this message translates to:
+  /// **'Modified: {fieldName}'**
+  String shortVideoVersionComparisonDiffModifiedField(String fieldName);
+
+  /// No description provided for @shortVideoVersionComparisonDiffModifiedGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Modified'**
+  String get shortVideoVersionComparisonDiffModifiedGeneric;
+
+  /// No description provided for @shortVideoVersionComparisonDiffUnchanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Unchanged'**
+  String get shortVideoVersionComparisonDiffUnchanged;
+
+  /// No description provided for @shortVideoVersionComparisonReportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'# Version comparison report'**
+  String get shortVideoVersionComparisonReportTitle;
+
+  /// No description provided for @shortVideoVersionComparisonReportVersionInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'## Version info'**
+  String get shortVideoVersionComparisonReportVersionInfo;
+
+  /// No description provided for @shortVideoVersionComparisonReportBaseVersionLine.
+  ///
+  /// In en, this message translates to:
+  /// **'**Base (old):** {name}'**
+  String shortVideoVersionComparisonReportBaseVersionLine(String name);
+
+  /// No description provided for @shortVideoVersionComparisonReportCreatedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'- Created: {dateTime}'**
+  String shortVideoVersionComparisonReportCreatedAt(String dateTime);
+
+  /// No description provided for @shortVideoVersionComparisonReportShotCount.
+  ///
+  /// In en, this message translates to:
+  /// **'- Shots: {count}'**
+  String shortVideoVersionComparisonReportShotCount(int count);
+
+  /// No description provided for @shortVideoVersionComparisonReportCompareVersionLine.
+  ///
+  /// In en, this message translates to:
+  /// **'**Compare (new):** {name}'**
+  String shortVideoVersionComparisonReportCompareVersionLine(String name);
+
+  /// No description provided for @shortVideoVersionComparisonReportStatistics.
+  ///
+  /// In en, this message translates to:
+  /// **'## Difference summary'**
+  String get shortVideoVersionComparisonReportStatistics;
+
+  /// No description provided for @shortVideoVersionComparisonReportTotalShots.
+  ///
+  /// In en, this message translates to:
+  /// **'- Total shots: {count}'**
+  String shortVideoVersionComparisonReportTotalShots(int count);
+
+  /// No description provided for @shortVideoVersionComparisonReportAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'- Added shots: {count}'**
+  String shortVideoVersionComparisonReportAdded(int count);
+
+  /// No description provided for @shortVideoVersionComparisonReportRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'- Removed shots: {count}'**
+  String shortVideoVersionComparisonReportRemoved(int count);
+
+  /// No description provided for @shortVideoVersionComparisonReportModified.
+  ///
+  /// In en, this message translates to:
+  /// **'- Modified shots: {count}'**
+  String shortVideoVersionComparisonReportModified(int count);
+
+  /// No description provided for @shortVideoVersionComparisonReportUnchanged.
+  ///
+  /// In en, this message translates to:
+  /// **'- Unchanged shots: {count}'**
+  String shortVideoVersionComparisonReportUnchanged(int count);
+
+  /// No description provided for @shortVideoVersionComparisonReportChangeRate.
+  ///
+  /// In en, this message translates to:
+  /// **'- Change rate: {percent}'**
+  String shortVideoVersionComparisonReportChangeRate(String percent);
+
+  /// No description provided for @shortVideoVersionComparisonReportDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'## Detailed differences'**
+  String get shortVideoVersionComparisonReportDetails;
+
+  /// No description provided for @shortVideoVersionComparisonReportSectionAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'### Added shots ({count})'**
+  String shortVideoVersionComparisonReportSectionAdded(int count);
+
+  /// No description provided for @shortVideoVersionComparisonReportSectionRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'### Removed shots ({count})'**
+  String shortVideoVersionComparisonReportSectionRemoved(int count);
+
+  /// No description provided for @shortVideoVersionComparisonReportSectionModified.
+  ///
+  /// In en, this message translates to:
+  /// **'### Modified shots'**
+  String get shortVideoVersionComparisonReportSectionModified;
+
+  /// No description provided for @shortVideoVersionComparisonReportShotItem.
+  ///
+  /// In en, this message translates to:
+  /// **'- Shot {shotId}'**
+  String shortVideoVersionComparisonReportShotItem(String shotId);
+
+  /// No description provided for @shortVideoVersionComparisonReportShotHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'#### Shot {shotId}'**
+  String shortVideoVersionComparisonReportShotHeading(String shotId);
+
+  /// No description provided for @shortVideoVersionComparisonReportFieldLine.
+  ///
+  /// In en, this message translates to:
+  /// **'- **{fieldName}**'**
+  String shortVideoVersionComparisonReportFieldLine(String fieldName);
+
+  /// No description provided for @shortVideoVersionComparisonReportOldValue.
+  ///
+  /// In en, this message translates to:
+  /// **'  - Old: {value}'**
+  String shortVideoVersionComparisonReportOldValue(String value);
+
+  /// No description provided for @shortVideoVersionComparisonReportNewValue.
+  ///
+  /// In en, this message translates to:
+  /// **'  - New: {value}'**
+  String shortVideoVersionComparisonReportNewValue(String value);
+
+  /// No description provided for @shortVideoVersionComparisonReportGeneratedFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'*Generated at: {dateTime}*'**
+  String shortVideoVersionComparisonReportGeneratedFooter(String dateTime);
+
+  /// No description provided for @shortVideoVersionComparisonValueEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'(empty)'**
+  String get shortVideoVersionComparisonValueEmpty;
+
+  /// No description provided for @shortVideoVersionComparisonValueYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get shortVideoVersionComparisonValueYes;
+
+  /// No description provided for @shortVideoVersionComparisonValueNo.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get shortVideoVersionComparisonValueNo;
+
+  /// No description provided for @shortVideoVersionComparisonValueList.
+  ///
+  /// In en, this message translates to:
+  /// **'List ({count} items)'**
+  String shortVideoVersionComparisonValueList(int count);
+
+  /// No description provided for @shortVideoVersionComparisonValueObject.
+  ///
+  /// In en, this message translates to:
+  /// **'Object ({count} fields)'**
+  String shortVideoVersionComparisonValueObject(int count);
+
+  /// No description provided for @shortVideoVersionComparisonReportCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Comparison report copied to clipboard'**
+  String get shortVideoVersionComparisonReportCopied;
+
+  /// No description provided for @shortVideoVersionComparisonSnackbarView.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get shortVideoVersionComparisonSnackbarView;
+
+  /// No description provided for @shortVideoVersionComparisonExportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Export failed: {error}'**
+  String shortVideoVersionComparisonExportFailed(String error);
+
+  /// No description provided for @shortVideoVersionComparisonReportDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Comparison report'**
+  String get shortVideoVersionComparisonReportDialogTitle;
+
+  /// No description provided for @shortVideoVersionComparisonCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get shortVideoVersionComparisonCopy;
+
+  /// No description provided for @shortVideoVersionComparisonClipboardCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied to clipboard'**
+  String get shortVideoVersionComparisonClipboardCopied;
+
+  /// No description provided for @shortVideoVersionComparisonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Version comparison'**
+  String get shortVideoVersionComparisonTitle;
+
+  /// No description provided for @shortVideoVersionComparisonStatAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Added'**
+  String get shortVideoVersionComparisonStatAdded;
+
+  /// No description provided for @shortVideoVersionComparisonStatRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed'**
+  String get shortVideoVersionComparisonStatRemoved;
+
+  /// No description provided for @shortVideoVersionComparisonStatModified.
+  ///
+  /// In en, this message translates to:
+  /// **'Modified'**
+  String get shortVideoVersionComparisonStatModified;
+
+  /// No description provided for @shortVideoVersionComparisonStatUnchanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Unchanged'**
+  String get shortVideoVersionComparisonStatUnchanged;
+
+  /// No description provided for @shortVideoVersionComparisonStatChangeRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Change rate'**
+  String get shortVideoVersionComparisonStatChangeRate;
+
+  /// No description provided for @shortVideoVersionComparisonSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search shot ID or field name…'**
+  String get shortVideoVersionComparisonSearchHint;
+
+  /// No description provided for @shortVideoVersionComparisonShowChangesOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes only'**
+  String get shortVideoVersionComparisonShowChangesOnly;
+
+  /// No description provided for @shortVideoVersionComparisonExportReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Export report'**
+  String get shortVideoVersionComparisonExportReport;
+
+  /// No description provided for @shortVideoVersionComparisonEmptyNoMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching differences'**
+  String get shortVideoVersionComparisonEmptyNoMatch;
+
+  /// No description provided for @shortVideoVersionComparisonEmptyIdentical.
+  ///
+  /// In en, this message translates to:
+  /// **'The two versions are identical'**
+  String get shortVideoVersionComparisonEmptyIdentical;
+
+  /// No description provided for @shortVideoVersionComparisonShotTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shot {shotId}'**
+  String shortVideoVersionComparisonShotTitle(String shotId);
+
+  /// No description provided for @shortVideoVersionComparisonBadgeOld.
+  ///
+  /// In en, this message translates to:
+  /// **'Old'**
+  String get shortVideoVersionComparisonBadgeOld;
+
+  /// No description provided for @shortVideoVersionComparisonBadgeNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get shortVideoVersionComparisonBadgeNew;
+
   /// No description provided for @accountSectionTitle.
   ///
   /// In en, this message translates to:
