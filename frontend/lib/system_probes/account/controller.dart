@@ -125,12 +125,8 @@ class AccountProbesController extends ChangeNotifier {
         parts.add('billing_provider=${response.billingProvider}');
       }
       meBody = parts.join(' · ');
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _onErrorChanged);
     } catch (error) {
-      _onErrorChanged(
-        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
-      );
+      reportRustOrDescribeApiError(error, onErrorChanged: _onErrorChanged);
     } finally {
       loadingMe = false;
       notifyListeners();
@@ -151,12 +147,8 @@ class AccountProbesController extends ChangeNotifier {
           'events_last_24h=${summary.eventsLast24h} · '
           'events_last_7d=${summary.eventsLast7d} · '
           'event_counts_last_7d=${summary.eventCountsLast7d}';
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _onErrorChanged);
     } catch (error) {
-      _onErrorChanged(
-        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
-      );
+      reportRustOrDescribeApiError(error, onErrorChanged: _onErrorChanged);
     } finally {
       loadingUsageSummary = false;
       notifyListeners();
@@ -185,12 +177,8 @@ class AccountProbesController extends ChangeNotifier {
           'GET value=${before.value} · '
           'PUT body {value:$target} -> ${updated.value} · '
           'GET value=${after.value}';
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _onErrorChanged);
     } catch (error) {
-      _onErrorChanged(
-        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
-      );
+      reportRustOrDescribeApiError(error, onErrorChanged: _onErrorChanged);
     } finally {
       loadingDevSwitchProbe = false;
       notifyListeners();
@@ -257,12 +245,8 @@ class AccountProbesController extends ChangeNotifier {
         _ => '$clearStatus',
       };
       memoryConfigProbeBody = '$line · clear-agent-memories -> $clearNote';
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _onErrorChanged);
     } catch (error) {
-      _onErrorChanged(
-        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
-      );
+      reportRustOrDescribeApiError(error, onErrorChanged: _onErrorChanged);
     } finally {
       loadingMemoryConfigProbe = false;
       notifyListeners();
@@ -290,12 +274,8 @@ class AccountProbesController extends ChangeNotifier {
           'check-update: needUpdate=${checkUpdate.needUpdate} '
           'latest=${checkUpdate.latestVersion} · '
           'download-app -> $downloadStatus';
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _onErrorChanged);
     } catch (error) {
-      _onErrorChanged(
-        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
-      );
+      reportRustOrDescribeApiError(error, onErrorChanged: _onErrorChanged);
     } finally {
       loadingAboutProbe = false;
       notifyListeners();

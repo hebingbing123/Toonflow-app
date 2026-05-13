@@ -74,12 +74,8 @@ class ContentProbesController extends ChangeNotifier {
       }
       promptsProbeBody =
           'count=${rows.length} · types=$types · data_chars_total=$totalChars$roundtrip';
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _onErrorChanged);
     } catch (error) {
-      _onErrorChanged(
-        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
-      );
+      reportRustOrDescribeApiError(error, onErrorChanged: _onErrorChanged);
     } finally {
       loadingPromptsProbe = false;
       notifyListeners();
@@ -117,12 +113,8 @@ class ContentProbesController extends ChangeNotifier {
       visualManualProbeBody =
           'GET+POST styles=${manual.styles.length} · slots_data_chars_total=$totalChars · image_paths=$totalImages'
           '${sample.isEmpty ? '' : ' · sample: $sample'}';
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _onErrorChanged);
     } catch (error) {
-      _onErrorChanged(
-        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
-      );
+      reportRustOrDescribeApiError(error, onErrorChanged: _onErrorChanged);
     } finally {
       loadingVisualManualProbe = false;
       notifyListeners();
@@ -153,12 +145,8 @@ class ContentProbesController extends ChangeNotifier {
       directorManualProbeBody =
           'folders=${list.data.length} · slot_data_chars=$slotChars · image_paths=$imagePaths'
           '${sample.isEmpty ? '' : ' · sample: $sample'}';
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _onErrorChanged);
     } catch (error) {
-      _onErrorChanged(
-        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
-      );
+      reportRustOrDescribeApiError(error, onErrorChanged: _onErrorChanged);
     } finally {
       loadingDirectorManualProbe = false;
       notifyListeners();
@@ -184,12 +172,8 @@ class ContentProbesController extends ChangeNotifier {
           head[3] == 0x47;
       skillsBinaryProbeBody =
           'path=$path · bytes=${bytes.length} · png_magic=$magicOk';
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _onErrorChanged);
     } catch (error) {
-      _onErrorChanged(
-        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
-      );
+      reportRustOrDescribeApiError(error, onErrorChanged: _onErrorChanged);
     } finally {
       loadingSkillsBinaryProbe = false;
       notifyListeners();
@@ -232,12 +216,8 @@ class ContentProbesController extends ChangeNotifier {
           'stub=${before.stubPlaceholder} · GET=${before.defaultModelId}'
           '${patched == null ? ' · PATCH skipped (single text model)' : ' · PATCH=$alternative'}'
           ' · reset=${reset.defaultModelId}';
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _onErrorChanged);
     } catch (error) {
-      _onErrorChanged(
-        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
-      );
+      reportRustOrDescribeApiError(error, onErrorChanged: _onErrorChanged);
     } finally {
       loadingTextModelDefault = false;
       notifyListeners();
@@ -255,12 +235,8 @@ class ContentProbesController extends ChangeNotifier {
       final detail = await fetchModelDetail(token, modelId: '1:gpt-4o-mini');
       modelDetailBody =
           '${detail.name} (${detail.modelName}) type=${detail.type} · vendor ${detail.vendorName} [${detail.vendorId}]';
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _onErrorChanged);
     } catch (error) {
-      _onErrorChanged(
-        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
-      );
+      reportRustOrDescribeApiError(error, onErrorChanged: _onErrorChanged);
     } finally {
       loadingModelDetail = false;
       notifyListeners();

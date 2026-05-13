@@ -57,10 +57,8 @@ class ApiKeysController extends ChangeNotifier {
       activeCount = list.activeCount;
       revokedCount = list.revokedCount;
       auditItems = audit.items;
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError(describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error));
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError);
     } finally {
       loading = false;
       notifyListeners();
@@ -88,10 +86,8 @@ class ApiKeysController extends ChangeNotifier {
       );
       latestPlaintextToken = created.plaintextToken;
       await refresh();
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError(describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error));
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError);
     } finally {
       creating = false;
       notifyListeners();
@@ -156,10 +152,8 @@ class ApiKeysController extends ChangeNotifier {
     notifyListeners();
     try {
       await action();
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError(describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error));
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError);
     } finally {
       busyKeyId = null;
       notifyListeners();

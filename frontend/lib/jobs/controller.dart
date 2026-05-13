@@ -92,11 +92,6 @@ class JobsController extends ChangeNotifier {
     _onErrorChanged(error);
   }
 
-  void _setErrorFromObject(Object error) {
-    final loc = _l10nProvider() ?? rustApiLookupL10nFromPlatform();
-    _setError(describeUserVisibleApiError(loc, error));
-  }
-
   Future<void> loadJobs() async {
     await _loadJobsList();
   }
@@ -125,10 +120,8 @@ class JobsController extends ChangeNotifier {
     notifyListeners();
     try {
       jobs = await fetchJobs(token, kind: kind, status: status);
-    } on RustApiException catch (e) {
-      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setErrorFromObject(e);
+      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10n);
     } finally {
       loadingJobs = false;
       notifyListeners();
@@ -147,10 +140,8 @@ class JobsController extends ChangeNotifier {
       jobKindsLine = kinds.isEmpty
           ? _l10n?.jobsEmptyValue ?? '(empty)'
           : kinds.join(', ');
-    } on RustApiException catch (e) {
-      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setErrorFromObject(e);
+      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10n);
     } finally {
       loadingJobKinds = false;
       notifyListeners();
@@ -175,10 +166,8 @@ class JobsController extends ChangeNotifier {
                       '${r.kind}: ${r.jobCount}',
                 )
                 .join(', ');
-    } on RustApiException catch (e) {
-      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setErrorFromObject(e);
+      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10n);
     } finally {
       loadingJobKindSummary = false;
       notifyListeners();
@@ -203,10 +192,8 @@ class JobsController extends ChangeNotifier {
                       '${r.status}: ${r.jobCount}',
                 )
                 .join(', ');
-    } on RustApiException catch (e) {
-      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setErrorFromObject(e);
+      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10n);
     } finally {
       loadingJobStatusSummary = false;
       notifyListeners();
@@ -229,10 +216,8 @@ class JobsController extends ChangeNotifier {
         _onJobScopeResolved?.call(scope);
       }
       jobByIdLine = _formatJobDetailLine(job);
-    } on RustApiException catch (e) {
-      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setErrorFromObject(e);
+      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10n);
     } finally {
       loadingJobById = false;
       notifyListeners();
@@ -250,10 +235,8 @@ class JobsController extends ChangeNotifier {
     try {
       final updated = await cancelJob(token, job.id);
       _upsertJob(updated);
-    } on RustApiException catch (e) {
-      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setErrorFromObject(e);
+      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10n);
     } finally {
       cancellingJobId = null;
       notifyListeners();
@@ -269,10 +252,8 @@ class JobsController extends ChangeNotifier {
     try {
       final updated = await retryJob(token, job.id);
       _upsertJob(updated);
-    } on RustApiException catch (e) {
-      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setErrorFromObject(e);
+      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10n);
     } finally {
       retryingJobId = null;
       notifyListeners();
@@ -306,10 +287,8 @@ class JobsController extends ChangeNotifier {
         return;
       }
       _upsertJob(secondJob);
-    } on RustApiException catch (e) {
-      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setErrorFromObject(e);
+      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10n);
     } finally {
       creatingJob = false;
       notifyListeners();

@@ -45,10 +45,6 @@ class ProjectsController extends ChangeNotifier {
     _onErrorChanged(error);
   }
 
-  void _setErrorFromObject(Object error) {
-    _setError(describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error));
-  }
-
   void reset() {
     loadingProjects = false;
     loadingProjectsSummary = false;
@@ -77,10 +73,8 @@ class ProjectsController extends ChangeNotifier {
       await createProject(token, fields: fields);
       await loadProjects();
       return true;
-    } on RustApiException catch (e) {
-      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setErrorFromObject(e);
+      reportRustOrDescribeApiError(e, onErrorChanged: _setError);
     } finally {
       creatingProject = false;
       notifyListeners();
@@ -125,10 +119,8 @@ class ProjectsController extends ChangeNotifier {
       }
       agentMemoryBody =
           '${rows.length} message(s) for project ${first.id}$appendBit';
-    } on RustApiException catch (e) {
-      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setErrorFromObject(e);
+      reportRustOrDescribeApiError(e, onErrorChanged: _setError);
     } finally {
       loadingAgentMemory = false;
       notifyListeners();
@@ -144,10 +136,8 @@ class ProjectsController extends ChangeNotifier {
     notifyListeners();
     try {
       projects = await fetchProjects(token);
-    } on RustApiException catch (e) {
-      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setErrorFromObject(e);
+      reportRustOrDescribeApiError(e, onErrorChanged: _setError);
     } finally {
       loadingProjects = false;
       notifyListeners();
@@ -165,10 +155,8 @@ class ProjectsController extends ChangeNotifier {
       final summary = await fetchProjectsSummary(token);
       projectsSummaryLine =
           'projects=${summary.projectCount} scripts=${summary.scriptCount} storyboards=${summary.storyboardCount} novels=${summary.novelCount} roles=${summary.roleCount} art_styles=${summary.artStyleCount} assets=${summary.assetCount} videos=${summary.videoCount}';
-    } on RustApiException catch (e) {
-      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setErrorFromObject(e);
+      reportRustOrDescribeApiError(e, onErrorChanged: _setError);
     } finally {
       loadingProjectsSummary = false;
       notifyListeners();
@@ -204,10 +192,8 @@ class ProjectsController extends ChangeNotifier {
       }
       artStyles = response.items;
       artStylesLine = line;
-    } on RustApiException catch (e) {
-      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setErrorFromObject(e);
+      reportRustOrDescribeApiError(e, onErrorChanged: _setError);
     } finally {
       loadingArtStyles = false;
       notifyListeners();

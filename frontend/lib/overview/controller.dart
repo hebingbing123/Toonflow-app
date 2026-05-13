@@ -39,10 +39,6 @@ class OverviewController extends ChangeNotifier {
     _onErrorChanged(error);
   }
 
-  void _setErrorFromObject(Object error) {
-    _setError(describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error));
-  }
-
   Future<void> pingHealth() async {
     loadingHealth = true;
     _setError(null);
@@ -51,10 +47,8 @@ class OverviewController extends ChangeNotifier {
     try {
       final response = await fetchHealthV1();
       healthBody = 'status=${response.status} service=${response.service}';
-    } on RustApiException catch (e) {
-      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setErrorFromObject(e);
+      reportRustOrDescribeApiError(e, onErrorChanged: _setError);
     } finally {
       loadingHealth = false;
       notifyListeners();
@@ -69,10 +63,8 @@ class OverviewController extends ChangeNotifier {
     try {
       final response = await fetchHealthRoot();
       healthRootBody = 'status=${response.status} service=${response.service}';
-    } on RustApiException catch (e) {
-      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setErrorFromObject(e);
+      reportRustOrDescribeApiError(e, onErrorChanged: _setError);
     } finally {
       loadingHealthRoot = false;
       notifyListeners();
@@ -87,10 +79,8 @@ class OverviewController extends ChangeNotifier {
     try {
       final response = await fetchPingV1();
       pingBody = 'ok=${response.ok}';
-    } on RustApiException catch (e) {
-      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setErrorFromObject(e);
+      reportRustOrDescribeApiError(e, onErrorChanged: _setError);
     } finally {
       loadingPing = false;
       notifyListeners();
@@ -112,10 +102,8 @@ class OverviewController extends ChangeNotifier {
         parts.add('git_sha=${response.gitSha}');
       }
       versionBody = parts.join(' · ');
-    } on RustApiException catch (e) {
-      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setErrorFromObject(e);
+      reportRustOrDescribeApiError(e, onErrorChanged: _setError);
     } finally {
       loadingVersion = false;
       notifyListeners();
@@ -130,10 +118,8 @@ class OverviewController extends ChangeNotifier {
     try {
       final response = await fetchReadyV1();
       readyBody = 'status=${response.status}, database=${response.database}';
-    } on RustApiException catch (e) {
-      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setErrorFromObject(e);
+      reportRustOrDescribeApiError(e, onErrorChanged: _setError);
     } finally {
       loadingReady = false;
       notifyListeners();

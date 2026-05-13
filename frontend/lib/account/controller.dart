@@ -59,10 +59,8 @@ class AccountController extends ChangeNotifier {
       final response = await fetchAccountExportsV1(token);
       items = response.items;
       activeCount = response.activeCount;
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError(describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error));
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError);
     } finally {
       loading = false;
       notifyListeners();
@@ -90,10 +88,8 @@ class AccountController extends ChangeNotifier {
       activeCount += created.status == 'queued' || created.status == 'running'
           ? 1
           : 0;
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError(describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error));
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError);
     } finally {
       creatingExport = false;
       notifyListeners();
@@ -120,10 +116,8 @@ class AccountController extends ChangeNotifier {
       );
       lastSavedPath = savedPath;
       return savedPath;
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError(describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error));
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError);
     } finally {
       _downloadingJobIds.remove(item.id);
       notifyListeners();
@@ -150,10 +144,8 @@ class AccountController extends ChangeNotifier {
       );
       lastDeleteResponse = response;
       return response;
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError(describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error));
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError);
     } finally {
       deletingAccount = false;
       notifyListeners();

@@ -254,14 +254,6 @@ class NotificationsController extends ChangeNotifier {
     _onErrorChanged(error);
   }
 
-  void _reportRustOrDescribe(Object error) {
-    if (error is RustApiException) {
-      reportRustApiError(error, onErrorChanged: _setError);
-    } else {
-      _setError(describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error));
-    }
-  }
-
   Future<void> prime() async {
     final token = _accessToken;
     if (token == null) {
@@ -290,7 +282,7 @@ class NotificationsController extends ChangeNotifier {
       _preferences = envelope.preferences;
       _preferencesAudit = envelope.audit;
     } catch (error) {
-      _reportRustOrDescribe(error);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
     } finally {
       loadingPreferences = false;
       notifyListeners();
@@ -393,7 +385,7 @@ class NotificationsController extends ChangeNotifier {
       workspaceSharedExportHistoryNextOffset =
           nextOffset ?? (offset + items.length);
     } catch (error) {
-      _reportRustOrDescribe(error);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
       if (offset == 0) {
         workspaceSharedAuditExports =
             const <WorkspaceSharedComplianceAuditExportRecordV1>[];
@@ -477,7 +469,7 @@ class NotificationsController extends ChangeNotifier {
         _setError(null);
         return path;
       } catch (error) {
-        _reportRustOrDescribe(error);
+        reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
         return null;
       } finally {
         await reloadExportHistory();
@@ -512,7 +504,7 @@ class NotificationsController extends ChangeNotifier {
       _setError(null);
       return path;
     } catch (error) {
-      _reportRustOrDescribe(error);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
       return null;
     } finally {
       await reloadExportHistory();
@@ -547,7 +539,7 @@ class NotificationsController extends ChangeNotifier {
       _setError(null);
       return job;
     } catch (error) {
-      _reportRustOrDescribe(error);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
       return null;
     } finally {
       enqueueingWorkspaceSharedAuditAsyncExport = false;
@@ -665,7 +657,7 @@ class NotificationsController extends ChangeNotifier {
       workspaceSharedAuditNextOffset = nextOffset ?? items.length;
       _setError(null);
     } catch (error) {
-      _reportRustOrDescribe(error);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
     } finally {
       loadingWorkspaceSharedAudit = false;
       notifyListeners();
@@ -696,7 +688,7 @@ class NotificationsController extends ChangeNotifier {
           nextOffset ?? (workspaceSharedAuditNextOffset + items.length);
       _setError(null);
     } catch (error) {
-      _reportRustOrDescribe(error);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
     } finally {
       loadingWorkspaceSharedAudit = false;
       notifyListeners();
@@ -754,7 +746,7 @@ class NotificationsController extends ChangeNotifier {
         ),
       );
     } catch (error) {
-      _reportRustOrDescribe(error);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
       return null;
     } finally {
       await reloadExportHistory();
@@ -791,7 +783,7 @@ class NotificationsController extends ChangeNotifier {
         ),
       );
     } catch (error) {
-      _reportRustOrDescribe(error);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
       return null;
     } finally {
       await reloadExportHistory();
@@ -815,7 +807,7 @@ class NotificationsController extends ChangeNotifier {
       };
       return const JsonEncoder.withIndent('  ').convert(payload);
     } catch (error) {
-      _reportRustOrDescribe(error);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
       return null;
     }
   }
@@ -887,7 +879,7 @@ class NotificationsController extends ChangeNotifier {
       _setError(null);
       return count;
     } catch (error) {
-      _reportRustOrDescribe(error);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
       return null;
     } finally {
       savingPreferences = false;
@@ -911,7 +903,7 @@ class NotificationsController extends ChangeNotifier {
       await _loadPreferences(token);
       _setError(null);
     } catch (error) {
-      _reportRustOrDescribe(error);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
     } finally {
       savingPreferences = false;
       notifyListeners();
@@ -947,7 +939,7 @@ class NotificationsController extends ChangeNotifier {
       await _loadPreferences(token);
       _setError(null);
     } catch (error) {
-      _reportRustOrDescribe(error);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
     } finally {
       savingPreferences = false;
       notifyListeners();
@@ -975,7 +967,7 @@ class NotificationsController extends ChangeNotifier {
         _setError(null);
       }
     } catch (error) {
-      _reportRustOrDescribe(error);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
     } finally {
       savingPreferences = false;
       notifyListeners();
@@ -997,7 +989,7 @@ class NotificationsController extends ChangeNotifier {
       await _loadPreferences(token);
       _setError(null);
     } catch (error) {
-      _reportRustOrDescribe(error);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
     } finally {
       savingPreferences = false;
       notifyListeners();
@@ -1017,7 +1009,7 @@ class NotificationsController extends ChangeNotifier {
       await _loadPreferences(token);
       _setError(null);
     } catch (error) {
-      _reportRustOrDescribe(error);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
     } finally {
       savingPreferences = false;
       notifyListeners();
@@ -1037,7 +1029,7 @@ class NotificationsController extends ChangeNotifier {
       await _loadPreferences(token);
       _setError(null);
     } catch (error) {
-      _reportRustOrDescribe(error);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
     } finally {
       savingPreferences = false;
       notifyListeners();
@@ -1066,7 +1058,7 @@ class NotificationsController extends ChangeNotifier {
       );
       _setError(null);
     } catch (error) {
-      _reportRustOrDescribe(error);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
     } finally {
       savingPreferences = false;
       notifyListeners();
@@ -1093,7 +1085,7 @@ class NotificationsController extends ChangeNotifier {
       );
       _setError(null);
     } catch (error) {
-      _reportRustOrDescribe(error);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
     } finally {
       savingPreferences = false;
       notifyListeners();
@@ -1117,7 +1109,7 @@ class NotificationsController extends ChangeNotifier {
       hasMore = response.hasMore;
       nextBeforeId = response.nextBeforeId;
     } catch (error) {
-      _reportRustOrDescribe(error);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
     } finally {
       loading = false;
       notifyListeners();
@@ -1141,7 +1133,7 @@ class NotificationsController extends ChangeNotifier {
       hasMore = response.hasMore;
       nextBeforeId = response.nextBeforeId;
     } catch (error) {
-      _reportRustOrDescribe(error);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
     } finally {
       loadingMore = false;
       notifyListeners();
@@ -1161,7 +1153,7 @@ class NotificationsController extends ChangeNotifier {
       unreadCount = response.unreadCount;
       notifyListeners();
     } catch (error) {
-      _reportRustOrDescribe(error);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
     }
   }
 
@@ -1200,7 +1192,7 @@ class NotificationsController extends ChangeNotifier {
           )
           .toList(growable: false);
     } catch (error) {
-      _reportRustOrDescribe(error);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
     } finally {
       markingAllRead = false;
       notifyListeners();

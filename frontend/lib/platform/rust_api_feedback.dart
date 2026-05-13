@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../l10n/rust_api_error_format.dart';
 import '../rust_api/core.dart';
 
@@ -31,6 +32,28 @@ void reportRustApiError(
   onErrorChanged(describeRustApiError(error));
   if (showGlobalSnackBar && error is RustApiException) {
     showRustApiErrorSnackBar(error);
+  }
+}
+
+/// Same split as the common `on RustApiException` + `catch` pair: [RustApiException] goes through
+/// [reportRustApiError] (global SnackBar by default); anything else uses [describeUserVisibleApiError]
+/// with [l10n] when provided, otherwise [rustApiLookupL10nFromPlatform].
+void reportRustOrDescribeApiError(
+  Object error, {
+  required void Function(String? error) onErrorChanged,
+  AppLocalizations? l10n,
+  bool showGlobalSnackBar = true,
+}) {
+  if (error is RustApiException) {
+    reportRustApiError(
+      error,
+      onErrorChanged: onErrorChanged,
+      showGlobalSnackBar: showGlobalSnackBar,
+    );
+  } else {
+    onErrorChanged(
+      describeUserVisibleApiError(l10n ?? rustApiLookupL10nFromPlatform(), error),
+    );
   }
 }
 

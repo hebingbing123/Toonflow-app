@@ -70,12 +70,8 @@ class TaskCenterController extends ChangeNotifier {
     notifyListeners();
     try {
       taskProjects = await postTasksGetProject(token);
-    } on RustApiException catch (e) {
-      reportRustApiError(e, onErrorChanged: _onErrorChanged);
     } catch (e) {
-      _onErrorChanged(
-        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), e),
-      );
+      reportRustOrDescribeApiError(e, onErrorChanged: _onErrorChanged);
     } finally {
       loadingTaskProjects = false;
       notifyListeners();
@@ -94,12 +90,8 @@ class TaskCenterController extends ChangeNotifier {
       taskCategoriesLine = rows.isEmpty
           ? '(empty)'
           : rows.map((row) => row.taskClass).join(', ');
-    } on RustApiException catch (e) {
-      reportRustApiError(e, onErrorChanged: _onErrorChanged);
     } catch (e) {
-      _onErrorChanged(
-        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), e),
-      );
+      reportRustOrDescribeApiError(e, onErrorChanged: _onErrorChanged);
     } finally {
       loadingTaskCategories = false;
       notifyListeners();
@@ -142,12 +134,8 @@ class TaskCenterController extends ChangeNotifier {
           '${projectSelection.resolvedFromUuid && projectSelection.projectUuid != null ? ' projectUuid=${projectSelection.projectUuid}' : ''}'
           ' · total=${rows.total} · page_rows=${rows.data.length}'
           '${sample.isEmpty ? '' : ' · sample: $sample'}';
-    } on RustApiException catch (e) {
-      reportRustApiError(e, onErrorChanged: _onErrorChanged);
     } catch (e) {
-      _onErrorChanged(
-        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), e),
-      );
+      reportRustOrDescribeApiError(e, onErrorChanged: _onErrorChanged);
     } finally {
       loadingTaskApi = false;
       notifyListeners();
@@ -173,12 +161,8 @@ class TaskCenterController extends ChangeNotifier {
       taskApiJobs = jobs;
       taskDetailNumericIdLine =
           'taskId=${row.numericTaskId} -> ${row.kind} · ${row.status} · uuid=${row.id}';
-    } on RustApiException catch (e) {
-      reportRustApiError(e, onErrorChanged: _onErrorChanged);
     } catch (e) {
-      _onErrorChanged(
-        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), e),
-      );
+      reportRustOrDescribeApiError(e, onErrorChanged: _onErrorChanged);
     } finally {
       loadingTaskDetailsByNumericId = false;
       notifyListeners();
@@ -204,12 +188,8 @@ class TaskCenterController extends ChangeNotifier {
         parts.add('error=${row.errorMessage}');
       }
       taskDetailUuidLine = parts.join(' · ');
-    } on RustApiException catch (e) {
-      reportRustApiError(e, onErrorChanged: _onErrorChanged);
     } catch (e) {
-      _onErrorChanged(
-        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), e),
-      );
+      reportRustOrDescribeApiError(e, onErrorChanged: _onErrorChanged);
     } finally {
       loadingTaskDetailsUuid = false;
       notifyListeners();

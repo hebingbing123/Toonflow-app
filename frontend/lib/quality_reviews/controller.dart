@@ -109,11 +109,6 @@ class QualityReviewsController extends ChangeNotifier {
     _onErrorChanged(error);
   }
 
-  void _setErrorFromObject(Object error) {
-    final loc = _l10n ?? rustApiLookupL10nFromPlatform();
-    _setError(describeUserVisibleApiError(loc, error));
-  }
-
   void onQualityReviewIdChanged(String _) {
     notifyListeners();
   }
@@ -179,10 +174,8 @@ class QualityReviewsController extends ChangeNotifier {
         isBadCase: onlyBadCases ? true : null,
         limit: 20,
       );
-    } on RustApiException catch (e) {
-      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setErrorFromObject(e);
+      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10n);
     } finally {
       if (onlyBadCases) {
         loadingQualityBadCases = false;
@@ -206,10 +199,8 @@ class QualityReviewsController extends ChangeNotifier {
         qualityReviewIdController.text = qualityReviews!.first.id;
         await fetchSelectedQualityReview();
       }
-    } on RustApiException catch (e) {
-      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setErrorFromObject(e);
+      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10n);
     } finally {
       creatingQualityReview = false;
       notifyListeners();
@@ -235,10 +226,8 @@ class QualityReviewsController extends ChangeNotifier {
         if (row.passed != null) 'passed=${row.passed}',
         if (row.badCaseCategory != null) 'badCase=${row.badCaseCategory}',
       ].join(' · ');
-    } on RustApiException catch (e) {
-      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setErrorFromObject(e);
+      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10n);
     } finally {
       loadingQualityReviewById = false;
       notifyListeners();
@@ -259,10 +248,8 @@ class QualityReviewsController extends ChangeNotifier {
           ? (_l10n?.qualityReviewsEmpty ?? '(empty)')
           : summarizeQualityStatsRows(rows, maxItems: 4, l10n: _l10n);
       _refreshQualityDashboardLine();
-    } on RustApiException catch (e) {
-      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setErrorFromObject(e);
+      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10n);
     } finally {
       loadingQualityStats = false;
       notifyListeners();
@@ -290,10 +277,8 @@ class QualityReviewsController extends ChangeNotifier {
         l10n: _l10n,
       );
       _refreshQualityDashboardLine();
-    } on RustApiException catch (e) {
-      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setErrorFromObject(e);
+      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10n);
     } finally {
       loadingQualityStagePassRate = false;
       notifyListeners();
@@ -402,10 +387,8 @@ class QualityReviewsController extends ChangeNotifier {
         dashboard.meta,
       );
       _refreshQualityDashboardLine();
-    } on RustApiException catch (e) {
-      reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setErrorFromObject(e);
+      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10n);
     } finally {
       loadingQualityDashboard = false;
       refreshingQualityDashboardReadModel = false;

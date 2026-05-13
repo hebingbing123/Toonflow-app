@@ -55,12 +55,8 @@ class AdminConsoleController extends ChangeNotifier {
     notifyListeners();
     try {
       searchResult = await fetchAdminSearchV1(_internalOpsToken, query: needle);
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError(
-        describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error),
-      );
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
     } finally {
       searching = false;
       notifyListeners();
@@ -115,12 +111,8 @@ class AdminConsoleController extends ChangeNotifier {
     notifyListeners();
     try {
       await action();
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError(
-        describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error),
-      );
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
     } finally {
       loadingDetail = false;
       notifyListeners();
@@ -203,12 +195,8 @@ class AdminConsoleController extends ChangeNotifier {
           jobs: current.jobs,
         );
       }
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError(
-        describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error),
-      );
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
     } finally {
       savingGovernance = false;
       notifyListeners();
@@ -259,12 +247,8 @@ class AdminConsoleController extends ChangeNotifier {
           jobs: current.jobs,
         );
       }
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError(
-        describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error),
-      );
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
     } finally {
       savingWorkspaceContext = false;
       notifyListeners();
@@ -329,12 +313,8 @@ class AdminConsoleController extends ChangeNotifier {
           jobs: current.jobs,
         );
       }
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError(
-        describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error),
-      );
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
     } finally {
       savingGovernance = false;
       notifyListeners();
@@ -405,12 +385,8 @@ class AdminConsoleController extends ChangeNotifier {
           jobs: current.jobs,
         );
       }
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError(
-        describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error),
-      );
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
     } finally {
       savingWorkspaceMembership = false;
       notifyListeners();
@@ -475,12 +451,8 @@ class AdminConsoleController extends ChangeNotifier {
           jobs: current.jobs,
         );
       }
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError(
-        describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error),
-      );
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
     } finally {
       savingGovernance = false;
       notifyListeners();
@@ -538,12 +510,8 @@ class AdminConsoleController extends ChangeNotifier {
           jobs: current.jobs,
         );
       }
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError(
-        describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error),
-      );
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
     } finally {
       savingOwnershipRemediation = false;
       notifyListeners();
@@ -601,12 +569,8 @@ class AdminConsoleController extends ChangeNotifier {
           jobs: current.jobs,
         );
       }
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError(
-        describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error),
-      );
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
     } finally {
       savingOwnershipRemediation = false;
       notifyListeners();
@@ -703,13 +667,8 @@ class AdminConsoleController extends ChangeNotifier {
         );
       }
       return response;
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
-      return null;
     } catch (error) {
-      _setError(
-        describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error),
-      );
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
       return null;
     } finally {
       savingBatchGovernance = false;

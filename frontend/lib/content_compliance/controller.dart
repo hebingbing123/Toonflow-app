@@ -5,7 +5,6 @@ import 'package:http/http.dart' as http;
 
 import '../config.dart';
 import '../l10n/app_localizations.dart';
-import '../l10n/rust_api_error_format.dart';
 import '../platform/rust_api_feedback.dart';
 import '../rust_api/core.dart';
 import '../rust_api/settings/notifications.dart';
@@ -520,16 +519,6 @@ class ContentComplianceController extends ChangeNotifier {
 
   void _setError(String? value) => _onErrorChanged(value);
 
-  void _reportRustOrDescribe(Object error) {
-    if (error is RustApiException) {
-      reportRustApiError(error, onErrorChanged: _setError);
-    } else {
-      _setError(
-        describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error),
-      );
-    }
-  }
-
   Future<void> submitReport({
     required String targetType,
     required String targetId,
@@ -566,7 +555,7 @@ class ContentComplianceController extends ChangeNotifier {
         await loadQueue();
       }
     } catch (error) {
-      _reportRustOrDescribe(error);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
     } finally {
       submittingReport = false;
       notifyListeners();
@@ -660,7 +649,7 @@ class ContentComplianceController extends ChangeNotifier {
         );
       }
     } catch (error) {
-      _reportRustOrDescribe(error);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
     } finally {
       loadingQueue = false;
       notifyListeners();
@@ -717,7 +706,7 @@ class ContentComplianceController extends ChangeNotifier {
       ensureHttpSuccess(res);
       await loadQueue();
     } catch (error) {
-      _reportRustOrDescribe(error);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
     } finally {
       mutatingQueue = false;
       notifyListeners();
@@ -822,7 +811,7 @@ class ContentComplianceController extends ChangeNotifier {
       await loadQueue();
       return response;
     } catch (error) {
-      _reportRustOrDescribe(error);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
       return null;
     } finally {
       mutatingQueue = false;
@@ -876,7 +865,7 @@ class ContentComplianceController extends ChangeNotifier {
       await loadQueue();
       return response;
     } catch (error) {
-      _reportRustOrDescribe(error);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
       return null;
     } finally {
       mutatingQueue = false;
@@ -921,7 +910,7 @@ class ContentComplianceController extends ChangeNotifier {
       await loadQueue();
       return response;
     } catch (error) {
-      _reportRustOrDescribe(error);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
       return null;
     } finally {
       mutatingQueue = false;
@@ -967,7 +956,7 @@ class ContentComplianceController extends ChangeNotifier {
           )
           .toList(growable: false);
     } catch (error) {
-      _reportRustOrDescribe(error);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
       return const <ContentComplianceAuditItemV1>[];
     } finally {
       loadingAuditReportId = null;
