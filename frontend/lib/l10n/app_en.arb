@@ -8244,6 +8244,28 @@
       }
     }
   },
+  "projectEditorAssetCrudCreateTitle": "Create asset",
+  "projectEditorAssetCrudEditTitle": "Edit asset",
+  "projectEditorAssetCrudFieldNameLabel": "Asset name",
+  "projectEditorAssetCrudFieldTypeLabel": "Asset type",
+  "projectEditorAssetCrudFieldTypeHelperCreate": "Examples: role / clip / props",
+  "projectEditorAssetCrudFieldDescriptionLabel": "Description (optional)",
+  "projectEditorAssetCrudEditTargetLabel": "Target asset",
+  "projectEditorAssetCrudCancel": "Cancel",
+  "projectEditorAssetCrudCreate": "Create",
+  "projectEditorAssetCrudSave": "Save",
+  "projectEditorAssetCrudCreateNameTypeRequiredSnack": "Name and type cannot be empty.",
+  "projectEditorAssetCrudCreateSuccessSnack": "Asset created.",
+  "projectEditorAssetCrudEditNoneSnack": "No assets available to edit.",
+  "projectEditorAssetCrudEditEmptyPatchSnack": "Change at least one field before saving.",
+  "projectEditorAssetCrudEditSuccessSnack": "Updated asset #{id}",
+  "@projectEditorAssetCrudEditSuccessSnack": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
   "projectEditorAssetEditImageNeedScriptSnack": "Create a script before uploading an edit image.",
   "projectEditorAssetEditImageDialogTitle": "Upload edit image",
   "projectEditorAssetEditImageTargetScriptLabel": "Target script",

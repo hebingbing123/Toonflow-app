@@ -17347,6 +17347,96 @@ abstract class AppLocalizations {
   /// **'Filter applied: {shown}/{total} rows'**
   String projectEditorAssetFilterSnackbarApplied(int shown, int total);
 
+  /// No description provided for @projectEditorAssetCrudCreateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create asset'**
+  String get projectEditorAssetCrudCreateTitle;
+
+  /// No description provided for @projectEditorAssetCrudEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit asset'**
+  String get projectEditorAssetCrudEditTitle;
+
+  /// No description provided for @projectEditorAssetCrudFieldNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Asset name'**
+  String get projectEditorAssetCrudFieldNameLabel;
+
+  /// No description provided for @projectEditorAssetCrudFieldTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Asset type'**
+  String get projectEditorAssetCrudFieldTypeLabel;
+
+  /// No description provided for @projectEditorAssetCrudFieldTypeHelperCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Examples: role / clip / props'**
+  String get projectEditorAssetCrudFieldTypeHelperCreate;
+
+  /// No description provided for @projectEditorAssetCrudFieldDescriptionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Description (optional)'**
+  String get projectEditorAssetCrudFieldDescriptionLabel;
+
+  /// No description provided for @projectEditorAssetCrudEditTargetLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Target asset'**
+  String get projectEditorAssetCrudEditTargetLabel;
+
+  /// No description provided for @projectEditorAssetCrudCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get projectEditorAssetCrudCancel;
+
+  /// No description provided for @projectEditorAssetCrudCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get projectEditorAssetCrudCreate;
+
+  /// No description provided for @projectEditorAssetCrudSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get projectEditorAssetCrudSave;
+
+  /// No description provided for @projectEditorAssetCrudCreateNameTypeRequiredSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Name and type cannot be empty.'**
+  String get projectEditorAssetCrudCreateNameTypeRequiredSnack;
+
+  /// No description provided for @projectEditorAssetCrudCreateSuccessSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Asset created.'**
+  String get projectEditorAssetCrudCreateSuccessSnack;
+
+  /// No description provided for @projectEditorAssetCrudEditNoneSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'No assets available to edit.'**
+  String get projectEditorAssetCrudEditNoneSnack;
+
+  /// No description provided for @projectEditorAssetCrudEditEmptyPatchSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Change at least one field before saving.'**
+  String get projectEditorAssetCrudEditEmptyPatchSnack;
+
+  /// No description provided for @projectEditorAssetCrudEditSuccessSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated asset #{id}'**
+  String projectEditorAssetCrudEditSuccessSnack(int id);
+
   /// No description provided for @projectEditorAssetEditImageNeedScriptSnack.
   ///
   /// In en, this message translates to:

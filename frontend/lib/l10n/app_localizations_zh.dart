@@ -10594,6 +10594,54 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get projectEditorAssetCrudCreateTitle => '新建资产';
+
+  @override
+  String get projectEditorAssetCrudEditTitle => '编辑资产';
+
+  @override
+  String get projectEditorAssetCrudFieldNameLabel => '资产名称';
+
+  @override
+  String get projectEditorAssetCrudFieldTypeLabel => '资产类型';
+
+  @override
+  String get projectEditorAssetCrudFieldTypeHelperCreate =>
+      '示例：role / clip / props';
+
+  @override
+  String get projectEditorAssetCrudFieldDescriptionLabel => '描述（可选）';
+
+  @override
+  String get projectEditorAssetCrudEditTargetLabel => '目标资产';
+
+  @override
+  String get projectEditorAssetCrudCancel => '取消';
+
+  @override
+  String get projectEditorAssetCrudCreate => '创建';
+
+  @override
+  String get projectEditorAssetCrudSave => '保存';
+
+  @override
+  String get projectEditorAssetCrudCreateNameTypeRequiredSnack => '资产名称和类型不能为空';
+
+  @override
+  String get projectEditorAssetCrudCreateSuccessSnack => '已创建资产';
+
+  @override
+  String get projectEditorAssetCrudEditNoneSnack => '当前没有可编辑资产';
+
+  @override
+  String get projectEditorAssetCrudEditEmptyPatchSnack => '请至少填写一项修改内容';
+
+  @override
+  String projectEditorAssetCrudEditSuccessSnack(int id) {
+    return '已更新资产 #$id';
+  }
+
+  @override
   String get projectEditorAssetEditImageNeedScriptSnack => '请先创建剧本再上传编辑图片。';
 
   @override

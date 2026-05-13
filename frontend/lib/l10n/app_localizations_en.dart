@@ -11120,6 +11120,58 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get projectEditorAssetCrudCreateTitle => 'Create asset';
+
+  @override
+  String get projectEditorAssetCrudEditTitle => 'Edit asset';
+
+  @override
+  String get projectEditorAssetCrudFieldNameLabel => 'Asset name';
+
+  @override
+  String get projectEditorAssetCrudFieldTypeLabel => 'Asset type';
+
+  @override
+  String get projectEditorAssetCrudFieldTypeHelperCreate =>
+      'Examples: role / clip / props';
+
+  @override
+  String get projectEditorAssetCrudFieldDescriptionLabel =>
+      'Description (optional)';
+
+  @override
+  String get projectEditorAssetCrudEditTargetLabel => 'Target asset';
+
+  @override
+  String get projectEditorAssetCrudCancel => 'Cancel';
+
+  @override
+  String get projectEditorAssetCrudCreate => 'Create';
+
+  @override
+  String get projectEditorAssetCrudSave => 'Save';
+
+  @override
+  String get projectEditorAssetCrudCreateNameTypeRequiredSnack =>
+      'Name and type cannot be empty.';
+
+  @override
+  String get projectEditorAssetCrudCreateSuccessSnack => 'Asset created.';
+
+  @override
+  String get projectEditorAssetCrudEditNoneSnack =>
+      'No assets available to edit.';
+
+  @override
+  String get projectEditorAssetCrudEditEmptyPatchSnack =>
+      'Change at least one field before saving.';
+
+  @override
+  String projectEditorAssetCrudEditSuccessSnack(int id) {
+    return 'Updated asset #$id';
+  }
+
+  @override
   String get projectEditorAssetEditImageNeedScriptSnack =>
       'Create a script before uploading an edit image.';
 

@@ -10,6 +10,7 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
     required List<bool> assetsBusy,
     required Future<void> Function() reloadAssetsAndStats,
   }) async {
+    final l10n = AppLocalizations.of(ctx)!;
     final nameCtrl = TextEditingController();
     final typeCtrl = TextEditingController(text: 'role');
     final descriptionCtrl = TextEditingController();
@@ -17,8 +18,9 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
       final confirmed = await showDialog<bool>(
         context: ctx,
         builder: (dialogCtx) {
+          final dlgL10n = AppLocalizations.of(dialogCtx)!;
           return AlertDialog(
-            title: const Text('新建资产'),
+            title: Text(dlgL10n.projectEditorAssetCrudCreateTitle),
             content: SizedBox(
               width: 520,
               child: Column(
@@ -26,14 +28,17 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
                 children: [
                   TextField(
                     controller: nameCtrl,
-                    decoration: const InputDecoration(labelText: '资产名称'),
+                    decoration: InputDecoration(
+                      labelText: dlgL10n.projectEditorAssetCrudFieldNameLabel,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   TextField(
                     controller: typeCtrl,
-                    decoration: const InputDecoration(
-                      labelText: '资产类型',
-                      helperText: '示例：role / clip / props',
+                    decoration: InputDecoration(
+                      labelText: dlgL10n.projectEditorAssetCrudFieldTypeLabel,
+                      helperText:
+                          dlgL10n.projectEditorAssetCrudFieldTypeHelperCreate,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -41,7 +46,9 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
                     controller: descriptionCtrl,
                     minLines: 2,
                     maxLines: 4,
-                    decoration: const InputDecoration(labelText: '描述（可选）'),
+                    decoration: InputDecoration(
+                      labelText: dlgL10n.projectEditorAssetCrudFieldDescriptionLabel,
+                    ),
                   ),
                 ],
               ),
@@ -49,11 +56,11 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(dialogCtx).pop(false),
-                child: const Text('取消'),
+                child: Text(dlgL10n.projectEditorAssetCrudCancel),
               ),
               FilledButton(
                 onPressed: () => Navigator.of(dialogCtx).pop(true),
-                child: const Text('创建'),
+                child: Text(dlgL10n.projectEditorAssetCrudCreate),
               ),
             ],
           );
@@ -63,9 +70,11 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
       final name = nameCtrl.text.trim();
       final type = typeCtrl.text.trim();
       if (name.isEmpty || type.isEmpty) {
-        ScaffoldMessenger.of(
-          ctx,
-        ).showSnackBar(const SnackBar(content: Text('资产名称和类型不能为空')));
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          SnackBar(
+            content: Text(l10n.projectEditorAssetCrudCreateNameTypeRequiredSnack),
+          ),
+        );
         return;
       }
 
@@ -83,9 +92,9 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
       await reloadAssetsAndStats();
       if (!ctx.mounted) return;
       setDialogState(() => assetsBusy[0] = false);
-      ScaffoldMessenger.of(
-        ctx,
-      ).showSnackBar(const SnackBar(content: Text('已创建资产')));
+      ScaffoldMessenger.of(ctx).showSnackBar(
+        SnackBar(content: Text(l10n.projectEditorAssetCrudCreateSuccessSnack)),
+      );
     } on RustApiException catch (e) {
       if (ctx.mounted) {
         setDialogState(() => assetsBusy[0] = false);
@@ -113,11 +122,12 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
     required List<bool> assetsBusy,
     required Future<void> Function() reloadAssetsAndStats,
   }) async {
+    final l10n = AppLocalizations.of(ctx)!;
     final list = assetsRef[0]?.items ?? const <AssetRow>[];
     if (list.isEmpty) {
-      ScaffoldMessenger.of(
-        ctx,
-      ).showSnackBar(const SnackBar(content: Text('当前没有可编辑资产')));
+      ScaffoldMessenger.of(ctx).showSnackBar(
+        SnackBar(content: Text(l10n.projectEditorAssetCrudEditNoneSnack)),
+      );
       return;
     }
     var selectedAssetNumericId = list.first.numericId;
@@ -130,10 +140,11 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
       final confirmed = await showDialog<bool>(
         context: ctx,
         builder: (dialogCtx) {
+          final dlgL10n = AppLocalizations.of(dialogCtx)!;
           return StatefulBuilder(
             builder: (dialogCtx, setState) {
               return AlertDialog(
-                title: const Text('编辑资产'),
+                title: Text(dlgL10n.projectEditorAssetCrudEditTitle),
                 content: SizedBox(
                   width: 520,
                   child: Column(
@@ -142,7 +153,9 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
                     children: [
                       DropdownButtonFormField<int>(
                         initialValue: selectedAssetNumericId,
-                        decoration: const InputDecoration(labelText: '目标资产'),
+                        decoration: InputDecoration(
+                          labelText: dlgL10n.projectEditorAssetCrudEditTargetLabel,
+                        ),
                         items: list
                             .map(
                               (asset) => DropdownMenuItem<int>(
@@ -170,19 +183,26 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
                       const SizedBox(height: 8),
                       TextField(
                         controller: nameCtrl,
-                        decoration: const InputDecoration(labelText: '资产名称'),
+                        decoration: InputDecoration(
+                          labelText: dlgL10n.projectEditorAssetCrudFieldNameLabel,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       TextField(
                         controller: typeCtrl,
-                        decoration: const InputDecoration(labelText: '资产类型'),
+                        decoration: InputDecoration(
+                          labelText: dlgL10n.projectEditorAssetCrudFieldTypeLabel,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       TextField(
                         controller: descriptionCtrl,
                         minLines: 2,
                         maxLines: 4,
-                        decoration: const InputDecoration(labelText: '描述（可选）'),
+                        decoration: InputDecoration(
+                          labelText:
+                              dlgL10n.projectEditorAssetCrudFieldDescriptionLabel,
+                        ),
                       ),
                     ],
                   ),
@@ -190,11 +210,11 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.of(dialogCtx).pop(false),
-                    child: const Text('取消'),
+                    child: Text(dlgL10n.projectEditorAssetCrudCancel),
                   ),
                   FilledButton(
                     onPressed: () => Navigator.of(dialogCtx).pop(true),
-                    child: const Text('保存'),
+                    child: Text(dlgL10n.projectEditorAssetCrudSave),
                   ),
                 ],
               );
@@ -216,9 +236,9 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
           ? null
           : descriptionCtrl.text.trim();
       if (body.isEmpty) {
-        ScaffoldMessenger.of(
-          ctx,
-        ).showSnackBar(const SnackBar(content: Text('请至少填写一项修改内容')));
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          SnackBar(content: Text(l10n.projectEditorAssetCrudEditEmptyPatchSnack)),
+        );
         return;
       }
 
@@ -233,9 +253,13 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
       await reloadAssetsAndStats();
       if (!ctx.mounted) return;
       setDialogState(() => assetsBusy[0] = false);
-      ScaffoldMessenger.of(
-        ctx,
-      ).showSnackBar(SnackBar(content: Text('已更新资产 #$selectedAssetNumericId')));
+      ScaffoldMessenger.of(ctx).showSnackBar(
+        SnackBar(
+          content: Text(
+            l10n.projectEditorAssetCrudEditSuccessSnack(selectedAssetNumericId),
+          ),
+        ),
+      );
     } on RustApiException catch (e) {
       if (ctx.mounted) {
         setDialogState(() => assetsBusy[0] = false);

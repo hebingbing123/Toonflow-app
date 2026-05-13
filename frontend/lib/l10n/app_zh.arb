@@ -8204,6 +8204,28 @@
       }
     }
   },
+  "projectEditorAssetCrudCreateTitle": "新建资产",
+  "projectEditorAssetCrudEditTitle": "编辑资产",
+  "projectEditorAssetCrudFieldNameLabel": "资产名称",
+  "projectEditorAssetCrudFieldTypeLabel": "资产类型",
+  "projectEditorAssetCrudFieldTypeHelperCreate": "示例：role / clip / props",
+  "projectEditorAssetCrudFieldDescriptionLabel": "描述（可选）",
+  "projectEditorAssetCrudEditTargetLabel": "目标资产",
+  "projectEditorAssetCrudCancel": "取消",
+  "projectEditorAssetCrudCreate": "创建",
+  "projectEditorAssetCrudSave": "保存",
+  "projectEditorAssetCrudCreateNameTypeRequiredSnack": "资产名称和类型不能为空",
+  "projectEditorAssetCrudCreateSuccessSnack": "已创建资产",
+  "projectEditorAssetCrudEditNoneSnack": "当前没有可编辑资产",
+  "projectEditorAssetCrudEditEmptyPatchSnack": "请至少填写一项修改内容",
+  "projectEditorAssetCrudEditSuccessSnack": "已更新资产 #{id}",
+  "@projectEditorAssetCrudEditSuccessSnack": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
   "projectEditorAssetEditImageNeedScriptSnack": "请先创建剧本再上传编辑图片。",
   "projectEditorAssetEditImageDialogTitle": "上传编辑图片",
   "projectEditorAssetEditImageTargetScriptLabel": "目标剧本",
