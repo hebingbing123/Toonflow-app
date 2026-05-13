@@ -12403,6 +12403,47 @@
       }
     }
   },
+  "shortVideoPublishMatrixPlatformRow": "{labelZh} · {platformId} · {automationMode} · Title ≤{titleMaxChars} · Tags ≤{tagsMax} · Summary ≤{descriptionMaxChars}",
+  "@shortVideoPublishMatrixPlatformRow": {
+    "placeholders": {
+      "labelZh": {
+        "type": "String"
+      },
+      "platformId": {
+        "type": "String"
+      },
+      "automationMode": {
+        "type": "String"
+      },
+      "titleMaxChars": {
+        "type": "int"
+      },
+      "tagsMax": {
+        "type": "int"
+      },
+      "descriptionMaxChars": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishMatrixRequiresCoverSuffix": " · Cover required",
+  "shortVideoPublishAuditOverviewTitle": "Publish overview",
+  "shortVideoPublishAuditDeliveryModeTitle": "Jobs by delivery mode",
+  "shortVideoPublishAuditJobCount": "{count} jobs",
+  "@shortVideoPublishAuditJobCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishCalendarPrevMonth": "Previous month",
+  "shortVideoPublishCalendarNextMonth": "Next month",
+  "shortVideoPublishCopyEditorSectionTitle": "Per-platform differentiated copy",
+  "shortVideoPublishCopyFieldTitle": "Title",
+  "shortVideoPublishCopyFieldDescription": "Description",
+  "shortVideoPublishCopyFieldTagsCommaHint": "Tags (comma-separated)",
+  "shortVideoPublishCopySaveToCurrentDraft": "Save to current draft",
   "accountSectionTitle": "Account section title",
   "accountRiskyPrefsTooltip": "Account risky prefs tooltip",
   "accountSectionSubtitle": "Account section subtitle",

@@ -16231,6 +16231,55 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String shortVideoPublishMatrixPlatformRow(
+    String labelZh,
+    String platformId,
+    String automationMode,
+    int titleMaxChars,
+    int tagsMax,
+    int descriptionMaxChars,
+  ) {
+    return '$labelZh · $platformId · $automationMode · Title ≤$titleMaxChars · Tags ≤$tagsMax · Summary ≤$descriptionMaxChars';
+  }
+
+  @override
+  String get shortVideoPublishMatrixRequiresCoverSuffix => ' · Cover required';
+
+  @override
+  String get shortVideoPublishAuditOverviewTitle => 'Publish overview';
+
+  @override
+  String get shortVideoPublishAuditDeliveryModeTitle => 'Jobs by delivery mode';
+
+  @override
+  String shortVideoPublishAuditJobCount(int count) {
+    return '$count jobs';
+  }
+
+  @override
+  String get shortVideoPublishCalendarPrevMonth => 'Previous month';
+
+  @override
+  String get shortVideoPublishCalendarNextMonth => 'Next month';
+
+  @override
+  String get shortVideoPublishCopyEditorSectionTitle =>
+      'Per-platform differentiated copy';
+
+  @override
+  String get shortVideoPublishCopyFieldTitle => 'Title';
+
+  @override
+  String get shortVideoPublishCopyFieldDescription => 'Description';
+
+  @override
+  String get shortVideoPublishCopyFieldTagsCommaHint =>
+      'Tags (comma-separated)';
+
+  @override
+  String get shortVideoPublishCopySaveToCurrentDraft => 'Save to current draft';
+
+  @override
   String get accountSectionTitle => 'Account section title';
 
   @override

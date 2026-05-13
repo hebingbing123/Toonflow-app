@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
+import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
 
 typedef PublishCalendarDayCallback = void Function(
@@ -49,13 +51,16 @@ class _PublishScheduleCalendarState extends State<PublishScheduleCalendar> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final outline =
         theme.colorScheme.outlineVariant.withValues(alpha: 0.7);
     final counts = _scheduledCountsByDay();
-    final title =
-        '${_monthFirst.year}年${_monthFirst.month}月';
-    final weekdayLabels = ['一', '二', '三', '四', '五', '六', '日'];
+    final locale = Localizations.localeOf(context);
+    final title = DateFormat.yMMMM(locale.toString()).format(_monthFirst);
+    final mat = MaterialLocalizations.of(context);
+    final n = mat.narrowWeekdays;
+    final weekdayLabels = [n[1], n[2], n[3], n[4], n[5], n[6], n[0]];
     final cells = _cellsForMonth(_monthFirst);
     final today = DateTime.now();
     final todayKey = DateTime(today.year, today.month, today.day);
@@ -66,7 +71,7 @@ class _PublishScheduleCalendarState extends State<PublishScheduleCalendar> {
         Row(
           children: [
             IconButton(
-              tooltip: '上一月',
+              tooltip: l10n.shortVideoPublishCalendarPrevMonth,
               onPressed:
                   widget.busy ? null : () => _shiftMonth(-1),
               icon: const Icon(Icons.chevron_left),
@@ -79,7 +84,7 @@ class _PublishScheduleCalendarState extends State<PublishScheduleCalendar> {
               ),
             ),
             IconButton(
-              tooltip: '下一月',
+              tooltip: l10n.shortVideoPublishCalendarNextMonth,
               onPressed:
                   widget.busy ? null : () => _shiftMonth(1),
               icon: const Icon(Icons.chevron_right),

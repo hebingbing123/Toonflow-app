@@ -12363,6 +12363,47 @@
       }
     }
   },
+  "shortVideoPublishMatrixPlatformRow": "{labelZh} · {platformId} · {automationMode} · 标题≤{titleMaxChars} · 标签≤{tagsMax} · 简介≤{descriptionMaxChars}",
+  "@shortVideoPublishMatrixPlatformRow": {
+    "placeholders": {
+      "labelZh": {
+        "type": "String"
+      },
+      "platformId": {
+        "type": "String"
+      },
+      "automationMode": {
+        "type": "String"
+      },
+      "titleMaxChars": {
+        "type": "int"
+      },
+      "tagsMax": {
+        "type": "int"
+      },
+      "descriptionMaxChars": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishMatrixRequiresCoverSuffix": " · 需封面",
+  "shortVideoPublishAuditOverviewTitle": "发布概览",
+  "shortVideoPublishAuditDeliveryModeTitle": "作业投递模式分布",
+  "shortVideoPublishAuditJobCount": "{count} 条",
+  "@shortVideoPublishAuditJobCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishCalendarPrevMonth": "上一月",
+  "shortVideoPublishCalendarNextMonth": "下一月",
+  "shortVideoPublishCopyEditorSectionTitle": "差异化文案（按平台）",
+  "shortVideoPublishCopyFieldTitle": "标题",
+  "shortVideoPublishCopyFieldDescription": "简介",
+  "shortVideoPublishCopyFieldTagsCommaHint": "标签（英文逗号分隔）",
+  "shortVideoPublishCopySaveToCurrentDraft": "保存到当前草稿",
   "accountSectionTitle": "账户与隐私",
   "accountRiskyPrefsTooltip": "本机客户端偏好（删号、导出等「不再提示」与恢复确认）",
   "accountSectionSubtitle": "统一管理账户数据导出、下载留档和不可逆删号。导出任务会走平台 job 队列，可反复生成新版快照。",

@@ -556,9 +556,17 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
   if (matrix != null) {
     for (final row in matrix.platforms) {
       final line =
-          '${row.labelZh} · ${row.platformId} · ${row.automationMode} · 标题≤${row.titleMaxChars}'
-          ' · 标签≤${row.tagsMax} · 简介≤${row.descriptionMaxChars}'
-          '${row.requiresCover ? ' · 需封面' : ''}';
+          l10n.shortVideoPublishMatrixPlatformRow(
+            row.labelZh,
+            row.platformId,
+            row.automationMode,
+            row.titleMaxChars,
+            row.tagsMax,
+            row.descriptionMaxChars,
+          ) +
+          (row.requiresCover
+              ? l10n.shortVideoPublishMatrixRequiresCoverSuffix
+              : '');
       if (row.marketRegion == 'overseas') {
         matrixOverseasLines.add(line);
       } else {

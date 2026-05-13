@@ -24903,6 +24903,85 @@ abstract class AppLocalizations {
   /// **' · Seq. {sb}'**
   String shortVideoPublishExportCheckStoryboardIndexPart(int sb);
 
+  /// No description provided for @shortVideoPublishMatrixPlatformRow.
+  ///
+  /// In en, this message translates to:
+  /// **'{labelZh} · {platformId} · {automationMode} · Title ≤{titleMaxChars} · Tags ≤{tagsMax} · Summary ≤{descriptionMaxChars}'**
+  String shortVideoPublishMatrixPlatformRow(
+    String labelZh,
+    String platformId,
+    String automationMode,
+    int titleMaxChars,
+    int tagsMax,
+    int descriptionMaxChars,
+  );
+
+  /// No description provided for @shortVideoPublishMatrixRequiresCoverSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **' · Cover required'**
+  String get shortVideoPublishMatrixRequiresCoverSuffix;
+
+  /// No description provided for @shortVideoPublishAuditOverviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish overview'**
+  String get shortVideoPublishAuditOverviewTitle;
+
+  /// No description provided for @shortVideoPublishAuditDeliveryModeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs by delivery mode'**
+  String get shortVideoPublishAuditDeliveryModeTitle;
+
+  /// No description provided for @shortVideoPublishAuditJobCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} jobs'**
+  String shortVideoPublishAuditJobCount(int count);
+
+  /// No description provided for @shortVideoPublishCalendarPrevMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous month'**
+  String get shortVideoPublishCalendarPrevMonth;
+
+  /// No description provided for @shortVideoPublishCalendarNextMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Next month'**
+  String get shortVideoPublishCalendarNextMonth;
+
+  /// No description provided for @shortVideoPublishCopyEditorSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Per-platform differentiated copy'**
+  String get shortVideoPublishCopyEditorSectionTitle;
+
+  /// No description provided for @shortVideoPublishCopyFieldTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get shortVideoPublishCopyFieldTitle;
+
+  /// No description provided for @shortVideoPublishCopyFieldDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get shortVideoPublishCopyFieldDescription;
+
+  /// No description provided for @shortVideoPublishCopyFieldTagsCommaHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags (comma-separated)'**
+  String get shortVideoPublishCopyFieldTagsCommaHint;
+
+  /// No description provided for @shortVideoPublishCopySaveToCurrentDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to current draft'**
+  String get shortVideoPublishCopySaveToCurrentDraft;
+
   /// No description provided for @accountSectionTitle.
   ///
   /// In en, this message translates to:

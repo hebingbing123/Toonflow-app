@@ -10,6 +10,7 @@ class _PublishAuditPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final outline = theme.colorScheme.outline;
     
@@ -25,7 +26,7 @@ class _PublishAuditPanel extends StatelessWidget {
       children: [
         const SizedBox(height: 10),
         Text(
-          '发布概览',
+          l10n.shortVideoPublishAuditOverviewTitle,
           style: theme.textTheme.labelSmall?.copyWith(color: outline),
         ),
         const SizedBox(height: 6),
@@ -41,7 +42,7 @@ class _PublishAuditPanel extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '作业投递模式分布',
+                  l10n.shortVideoPublishAuditDeliveryModeTitle,
                   style: theme.textTheme.labelSmall?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
@@ -57,7 +58,7 @@ class _PublishAuditPanel extends StatelessWidget {
                         DeliveryModeBadge(deliveryMode: e.key),
                         const SizedBox(width: 6),
                         Text(
-                          '${e.value} 条',
+                          l10n.shortVideoPublishAuditJobCount(e.value),
                           style: theme.textTheme.bodySmall,
                         ),
                       ],

@@ -15447,6 +15447,53 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String shortVideoPublishMatrixPlatformRow(
+    String labelZh,
+    String platformId,
+    String automationMode,
+    int titleMaxChars,
+    int tagsMax,
+    int descriptionMaxChars,
+  ) {
+    return '$labelZh · $platformId · $automationMode · 标题≤$titleMaxChars · 标签≤$tagsMax · 简介≤$descriptionMaxChars';
+  }
+
+  @override
+  String get shortVideoPublishMatrixRequiresCoverSuffix => ' · 需封面';
+
+  @override
+  String get shortVideoPublishAuditOverviewTitle => '发布概览';
+
+  @override
+  String get shortVideoPublishAuditDeliveryModeTitle => '作业投递模式分布';
+
+  @override
+  String shortVideoPublishAuditJobCount(int count) {
+    return '$count 条';
+  }
+
+  @override
+  String get shortVideoPublishCalendarPrevMonth => '上一月';
+
+  @override
+  String get shortVideoPublishCalendarNextMonth => '下一月';
+
+  @override
+  String get shortVideoPublishCopyEditorSectionTitle => '差异化文案（按平台）';
+
+  @override
+  String get shortVideoPublishCopyFieldTitle => '标题';
+
+  @override
+  String get shortVideoPublishCopyFieldDescription => '简介';
+
+  @override
+  String get shortVideoPublishCopyFieldTagsCommaHint => '标签（英文逗号分隔）';
+
+  @override
+  String get shortVideoPublishCopySaveToCurrentDraft => '保存到当前草稿';
+
+  @override
   String get accountSectionTitle => '账户与隐私';
 
   @override

@@ -429,50 +429,24 @@ void main() {
   testWidgets('Script pane renders novel event snapshot from tool result', (
     WidgetTester tester,
   ) async {
-    final projectIdController = TextEditingController(text: '1');
-    final scriptIdController = TextEditingController(text: '2');
-    final scriptPromptController = TextEditingController(text: 'script prompt');
-    final scriptDomainArgsController = TextEditingController(text: '{}');
-    final productionPromptController = TextEditingController(text: '');
-    final flowKeyController = TextEditingController(text: 'assets');
-    final productionDomainToolController = TextEditingController(
-      text: 'get_flowData',
-    );
-    final productionDomainArgsController = TextEditingController(text: '{}');
-    final productionSubAgentArgsController = TextEditingController(text: '{}');
-    final scriptSubAgentToolController = TextEditingController(
-      text: 'run_sub_agent_storySkeleton',
-    );
-    final productionSubAgentToolController = TextEditingController(
-      text: 'run_sub_agent_director_plan',
-    );
-
-    addTearDown(() {
-      projectIdController.dispose();
-      scriptIdController.dispose();
-      scriptPromptController.dispose();
-      scriptDomainArgsController.dispose();
-      productionPromptController.dispose();
-      flowKeyController.dispose();
-      productionDomainToolController.dispose();
-      productionDomainArgsController.dispose();
-      productionSubAgentArgsController.dispose();
-      scriptSubAgentToolController.dispose();
-      productionSubAgentToolController.dispose();
-    });
+    final controllers = _WorkspaceControllers(scriptPrompt: 'script prompt');
+    _addWorkspaceTearDown(tester, controllers);
 
     await _pumpAgentWorkspacesSection(
       tester,
       AgentWorkspacesSection(
-        projectIdController: projectIdController,
-        scriptIdController: scriptIdController,
-        scriptPromptController: scriptPromptController,
-        scriptDomainArgsController: scriptDomainArgsController,
-        productionPromptController: productionPromptController,
-        flowKeyController: flowKeyController,
-        productionDomainToolController: productionDomainToolController,
-        productionDomainArgsController: productionDomainArgsController,
-        productionSubAgentArgsController: productionSubAgentArgsController,
+        projectIdController: controllers.projectIdController,
+        scriptIdController: controllers.scriptIdController,
+        scriptPromptController: controllers.scriptPromptController,
+        scriptDomainArgsController: controllers.scriptDomainArgsController,
+        productionPromptController: controllers.productionPromptController,
+        flowKeyController: controllers.flowKeyController,
+        productionDomainToolController:
+            controllers.productionDomainToolController,
+        productionDomainArgsController:
+            controllers.productionDomainArgsController,
+        productionSubAgentArgsController:
+            controllers.productionSubAgentArgsController,
         loadingScriptWorkspaceRun: false,
         loadingProductionWorkspaceRun: false,
         loadingScriptDomainProbe: false,
@@ -504,8 +478,9 @@ void main() {
         onRunProductionWorkspace: () {},
         onProbeScriptDomainTool: (_, _) {},
         onProbeProductionDomainTool: () {},
-        scriptSubAgentToolController: scriptSubAgentToolController,
-        productionSubAgentToolController: productionSubAgentToolController,
+        scriptSubAgentToolController: controllers.scriptSubAgentToolController,
+        productionSubAgentToolController:
+            controllers.productionSubAgentToolController,
         onRunScriptSubAgentTool: () {},
         onRunProductionSubAgentTool: () {},
         onWriteBackScriptResult: () {},
@@ -814,52 +789,26 @@ void main() {
     tester.view.physicalSize = const Size(1920, 2400);
     tester.view.devicePixelRatio = 1.0;
 
-    final projectIdController = TextEditingController(text: '1');
-    final scriptIdController = TextEditingController(text: '9');
-    final scriptPromptController = TextEditingController(text: '');
-    final scriptDomainArgsController = TextEditingController(text: '{}');
-    final productionPromptController = TextEditingController(text: '');
-    final flowKeyController = TextEditingController(text: 'assets');
-    final productionDomainToolController = TextEditingController(
-      text: 'get_flowData',
-    );
-    final productionDomainArgsController = TextEditingController(text: '{}');
-    final scriptSubAgentToolController = TextEditingController(
-      text: 'run_sub_agent_storySkeleton',
-    );
-    final productionSubAgentToolController = TextEditingController(
-      text: 'run_sub_agent_director_plan',
-    );
+    final controllers = _WorkspaceControllers(scriptId: '9');
 
     String? lastTool;
     String? lastArgs;
 
-    addTearDown(() {
-      tester.view.resetPhysicalSize();
-      tester.view.resetDevicePixelRatio();
-      projectIdController.dispose();
-      scriptIdController.dispose();
-      scriptPromptController.dispose();
-      scriptDomainArgsController.dispose();
-      productionPromptController.dispose();
-      flowKeyController.dispose();
-      productionDomainToolController.dispose();
-      productionDomainArgsController.dispose();
-      scriptSubAgentToolController.dispose();
-      productionSubAgentToolController.dispose();
-    });
+    _addWorkspaceTearDown(tester, controllers, resetView: true);
 
     await _pumpAgentWorkspacesSection(
       tester,
       AgentWorkspacesSection(
-        projectIdController: projectIdController,
-        scriptIdController: scriptIdController,
-        scriptPromptController: scriptPromptController,
-        scriptDomainArgsController: scriptDomainArgsController,
-        productionPromptController: productionPromptController,
-        flowKeyController: flowKeyController,
-        productionDomainToolController: productionDomainToolController,
-        productionDomainArgsController: productionDomainArgsController,
+        projectIdController: controllers.projectIdController,
+        scriptIdController: controllers.scriptIdController,
+        scriptPromptController: controllers.scriptPromptController,
+        scriptDomainArgsController: controllers.scriptDomainArgsController,
+        productionPromptController: controllers.productionPromptController,
+        flowKeyController: controllers.flowKeyController,
+        productionDomainToolController:
+            controllers.productionDomainToolController,
+        productionDomainArgsController:
+            controllers.productionDomainArgsController,
         loadingScriptWorkspaceRun: false,
         loadingProductionWorkspaceRun: false,
         loadingScriptDomainProbe: false,
@@ -893,8 +842,9 @@ void main() {
           lastArgs = args;
         },
         onProbeProductionDomainTool: () {},
-        scriptSubAgentToolController: scriptSubAgentToolController,
-        productionSubAgentToolController: productionSubAgentToolController,
+        scriptSubAgentToolController: controllers.scriptSubAgentToolController,
+        productionSubAgentToolController:
+            controllers.productionSubAgentToolController,
         onRunScriptSubAgentTool: () {},
         onRunProductionSubAgentTool: () {},
         onWriteBackScriptResult: () {},
@@ -918,7 +868,7 @@ void main() {
     await tester.tap(find.text('模板: 当前剧本窗口'));
     await tester.pump();
     expect(
-      scriptDomainArgsController.text,
+      controllers.scriptDomainArgsController.text,
       '{"scriptId":9,"lineStart":1,"lineEnd":80,"maxChars":2200}',
     );
 
@@ -1417,48 +1367,27 @@ void main() {
   testWidgets('Production pane renders tool result text snapshot', (
     WidgetTester tester,
   ) async {
-    final projectIdController = TextEditingController(text: '1');
-    final scriptIdController = TextEditingController(text: '2');
-    final scriptPromptController = TextEditingController(text: '');
-    final scriptDomainArgsController = TextEditingController(text: '{}');
-    final productionPromptController = TextEditingController(text: '');
-    final flowKeyController = TextEditingController(text: 'scriptPlan');
-    final productionDomainToolController = TextEditingController(
-      text: 'run_sub_agent_director_plan',
+    final controllers = _WorkspaceControllers(
+      flowKey: 'scriptPlan',
+      productionDomainTool: 'run_sub_agent_director_plan',
+      productionSubAgentTool: 'run_sub_agent_director_plan',
     );
-    final productionDomainArgsController = TextEditingController(text: '{}');
-    final scriptSubAgentToolController = TextEditingController(
-      text: 'run_sub_agent_storySkeleton',
-    );
-    final productionSubAgentToolController = TextEditingController(
-      text: 'run_sub_agent_director_plan',
-    );
-
-    addTearDown(() {
-      projectIdController.dispose();
-      scriptIdController.dispose();
-      scriptPromptController.dispose();
-      scriptDomainArgsController.dispose();
-      productionPromptController.dispose();
-      flowKeyController.dispose();
-      productionDomainToolController.dispose();
-      productionDomainArgsController.dispose();
-      scriptSubAgentToolController.dispose();
-      productionSubAgentToolController.dispose();
-    });
+    _addWorkspaceTearDown(tester, controllers);
 
     await _pumpAgentWorkspacesSection(
       tester,
       AgentWorkspacesSection(
         initialPane: AgentWorkspacePane.production,
-        projectIdController: projectIdController,
-        scriptIdController: scriptIdController,
-        scriptPromptController: scriptPromptController,
-        scriptDomainArgsController: scriptDomainArgsController,
-        productionPromptController: productionPromptController,
-        flowKeyController: flowKeyController,
-        productionDomainToolController: productionDomainToolController,
-        productionDomainArgsController: productionDomainArgsController,
+        projectIdController: controllers.projectIdController,
+        scriptIdController: controllers.scriptIdController,
+        scriptPromptController: controllers.scriptPromptController,
+        scriptDomainArgsController: controllers.scriptDomainArgsController,
+        productionPromptController: controllers.productionPromptController,
+        flowKeyController: controllers.flowKeyController,
+        productionDomainToolController:
+            controllers.productionDomainToolController,
+        productionDomainArgsController:
+            controllers.productionDomainArgsController,
         loadingScriptWorkspaceRun: false,
         loadingProductionWorkspaceRun: false,
         loadingScriptDomainProbe: false,
@@ -1486,8 +1415,9 @@ void main() {
         onRunProductionWorkspace: () {},
         onProbeScriptDomainTool: (_, _) {},
         onProbeProductionDomainTool: () {},
-        scriptSubAgentToolController: scriptSubAgentToolController,
-        productionSubAgentToolController: productionSubAgentToolController,
+        scriptSubAgentToolController: controllers.scriptSubAgentToolController,
+        productionSubAgentToolController:
+            controllers.productionSubAgentToolController,
         onRunScriptSubAgentTool: () {},
         onRunProductionSubAgentTool: () {},
         onWriteBackScriptResult: () {},
@@ -1505,50 +1435,26 @@ void main() {
   testWidgets('Production pane renders single flow snapshot for get_flowData', (
     WidgetTester tester,
   ) async {
-    final projectIdController = TextEditingController(text: '1');
-    final scriptIdController = TextEditingController(text: '2');
-    final scriptPromptController = TextEditingController(text: '');
-    final scriptDomainArgsController = TextEditingController(text: '{}');
-    final productionPromptController = TextEditingController(text: '');
-    final flowKeyController = TextEditingController(text: 'storyboard');
-    final productionDomainToolController = TextEditingController(
-      text: 'get_flowData',
+    final controllers = _WorkspaceControllers(
+      flowKey: 'storyboard',
+      productionDomainArgs: '{"key":"storyboard"}',
     );
-    final productionDomainArgsController = TextEditingController(
-      text: '{"key":"storyboard"}',
-    );
-    final scriptSubAgentToolController = TextEditingController(
-      text: 'run_sub_agent_storySkeleton',
-    );
-    final productionSubAgentToolController = TextEditingController(
-      text: 'run_sub_agent_director_plan',
-    );
-
-    addTearDown(() {
-      projectIdController.dispose();
-      scriptIdController.dispose();
-      scriptPromptController.dispose();
-      scriptDomainArgsController.dispose();
-      productionPromptController.dispose();
-      flowKeyController.dispose();
-      productionDomainToolController.dispose();
-      productionDomainArgsController.dispose();
-      scriptSubAgentToolController.dispose();
-      productionSubAgentToolController.dispose();
-    });
+    _addWorkspaceTearDown(tester, controllers);
 
     await _pumpAgentWorkspacesSection(
       tester,
       AgentWorkspacesSection(
         initialPane: AgentWorkspacePane.production,
-        projectIdController: projectIdController,
-        scriptIdController: scriptIdController,
-        scriptPromptController: scriptPromptController,
-        scriptDomainArgsController: scriptDomainArgsController,
-        productionPromptController: productionPromptController,
-        flowKeyController: flowKeyController,
-        productionDomainToolController: productionDomainToolController,
-        productionDomainArgsController: productionDomainArgsController,
+        projectIdController: controllers.projectIdController,
+        scriptIdController: controllers.scriptIdController,
+        scriptPromptController: controllers.scriptPromptController,
+        scriptDomainArgsController: controllers.scriptDomainArgsController,
+        productionPromptController: controllers.productionPromptController,
+        flowKeyController: controllers.flowKeyController,
+        productionDomainToolController:
+            controllers.productionDomainToolController,
+        productionDomainArgsController:
+            controllers.productionDomainArgsController,
         loadingScriptWorkspaceRun: false,
         loadingProductionWorkspaceRun: false,
         loadingScriptDomainProbe: false,
@@ -1583,8 +1489,9 @@ void main() {
         onRunProductionWorkspace: () {},
         onProbeScriptDomainTool: (_, _) {},
         onProbeProductionDomainTool: () {},
-        scriptSubAgentToolController: scriptSubAgentToolController,
-        productionSubAgentToolController: productionSubAgentToolController,
+        scriptSubAgentToolController: controllers.scriptSubAgentToolController,
+        productionSubAgentToolController:
+            controllers.productionSubAgentToolController,
         onRunScriptSubAgentTool: () {},
         onRunProductionSubAgentTool: () {},
         onWriteBackScriptResult: () {},
@@ -1608,53 +1515,28 @@ void main() {
     tester.view.physicalSize = const Size(1920, 2400);
     tester.view.devicePixelRatio = 1.0;
 
-    final projectIdController = TextEditingController(text: '1');
-    final scriptIdController = TextEditingController(text: '2');
-    final scriptPromptController = TextEditingController(text: '');
-    final scriptDomainArgsController = TextEditingController(text: '{}');
-    final productionPromptController = TextEditingController(text: '');
-    final flowKeyController = TextEditingController(text: 'storyboard');
-    final productionDomainToolController = TextEditingController(
-      text: 'get_flowData',
-    );
-    final productionDomainArgsController = TextEditingController(
-      text: '{"key":"assets"}',
-    );
-    final scriptSubAgentToolController = TextEditingController(
-      text: 'run_sub_agent_storySkeleton',
-    );
-    final productionSubAgentToolController = TextEditingController(
-      text: 'run_sub_agent_director_plan',
+    final controllers = _WorkspaceControllers(
+      flowKey: 'storyboard',
+      productionDomainArgs: '{"key":"assets"}',
     );
 
     var productionProbeCalls = 0;
 
-    addTearDown(() {
-      tester.view.resetPhysicalSize();
-      tester.view.resetDevicePixelRatio();
-      projectIdController.dispose();
-      scriptIdController.dispose();
-      scriptPromptController.dispose();
-      scriptDomainArgsController.dispose();
-      productionPromptController.dispose();
-      flowKeyController.dispose();
-      productionDomainToolController.dispose();
-      productionDomainArgsController.dispose();
-      scriptSubAgentToolController.dispose();
-      productionSubAgentToolController.dispose();
-    });
+    _addWorkspaceTearDown(tester, controllers, resetView: true);
 
     await _pumpAgentWorkspacesSection(
       tester,
       AgentWorkspacesSection(
-        projectIdController: projectIdController,
-        scriptIdController: scriptIdController,
-        scriptPromptController: scriptPromptController,
-        scriptDomainArgsController: scriptDomainArgsController,
-        productionPromptController: productionPromptController,
-        flowKeyController: flowKeyController,
-        productionDomainToolController: productionDomainToolController,
-        productionDomainArgsController: productionDomainArgsController,
+        projectIdController: controllers.projectIdController,
+        scriptIdController: controllers.scriptIdController,
+        scriptPromptController: controllers.scriptPromptController,
+        scriptDomainArgsController: controllers.scriptDomainArgsController,
+        productionPromptController: controllers.productionPromptController,
+        flowKeyController: controllers.flowKeyController,
+        productionDomainToolController:
+            controllers.productionDomainToolController,
+        productionDomainArgsController:
+            controllers.productionDomainArgsController,
         loadingScriptWorkspaceRun: false,
         loadingProductionWorkspaceRun: false,
         loadingScriptDomainProbe: false,
@@ -1677,8 +1559,9 @@ void main() {
         onRunProductionWorkspace: () {},
         onProbeScriptDomainTool: (_, _) {},
         onProbeProductionDomainTool: () => productionProbeCalls += 1,
-        scriptSubAgentToolController: scriptSubAgentToolController,
-        productionSubAgentToolController: productionSubAgentToolController,
+        scriptSubAgentToolController: controllers.scriptSubAgentToolController,
+        productionSubAgentToolController:
+            controllers.productionSubAgentToolController,
         onRunScriptSubAgentTool: () {},
         onRunProductionSubAgentTool: () {},
         onWriteBackScriptResult: () {},
@@ -1696,54 +1579,35 @@ void main() {
     await tester.pump();
 
     expect(productionProbeCalls, 1);
-    expect(productionDomainArgsController.text, '{"key":"storyboard"}');
+    expect(
+      controllers.productionDomainArgsController.text,
+      '{"key":"storyboard"}',
+    );
   });
 
   testWidgets('Production pane fills candidate storyboard ids from flow', (
     WidgetTester tester,
   ) async {
-    final projectIdController = TextEditingController(text: '1');
-    final scriptIdController = TextEditingController(text: '2');
-    final scriptPromptController = TextEditingController(text: '');
-    final scriptDomainArgsController = TextEditingController(text: '{}');
-    final productionPromptController = TextEditingController(text: '');
-    final flowKeyController = TextEditingController(text: 'storyboard');
-    final productionDomainToolController = TextEditingController(
-      text: 'generate_storyboard',
+    final controllers = _WorkspaceControllers(
+      flowKey: 'storyboard',
+      productionDomainTool: 'generate_storyboard',
     );
-    final productionDomainArgsController = TextEditingController(text: '{}');
-    final scriptSubAgentToolController = TextEditingController(
-      text: 'run_sub_agent_storySkeleton',
-    );
-    final productionSubAgentToolController = TextEditingController(
-      text: 'run_sub_agent_director_plan',
-    );
-
-    addTearDown(() {
-      projectIdController.dispose();
-      scriptIdController.dispose();
-      scriptPromptController.dispose();
-      scriptDomainArgsController.dispose();
-      productionPromptController.dispose();
-      flowKeyController.dispose();
-      productionDomainToolController.dispose();
-      productionDomainArgsController.dispose();
-      scriptSubAgentToolController.dispose();
-      productionSubAgentToolController.dispose();
-    });
+    _addWorkspaceTearDown(tester, controllers);
 
     await _pumpAgentWorkspacesSection(
       tester,
       AgentWorkspacesSection(
         initialPane: AgentWorkspacePane.production,
-        projectIdController: projectIdController,
-        scriptIdController: scriptIdController,
-        scriptPromptController: scriptPromptController,
-        scriptDomainArgsController: scriptDomainArgsController,
-        productionPromptController: productionPromptController,
-        flowKeyController: flowKeyController,
-        productionDomainToolController: productionDomainToolController,
-        productionDomainArgsController: productionDomainArgsController,
+        projectIdController: controllers.projectIdController,
+        scriptIdController: controllers.scriptIdController,
+        scriptPromptController: controllers.scriptPromptController,
+        scriptDomainArgsController: controllers.scriptDomainArgsController,
+        productionPromptController: controllers.productionPromptController,
+        flowKeyController: controllers.flowKeyController,
+        productionDomainToolController:
+            controllers.productionDomainToolController,
+        productionDomainArgsController:
+            controllers.productionDomainArgsController,
         loadingScriptWorkspaceRun: false,
         loadingProductionWorkspaceRun: false,
         loadingScriptDomainProbe: false,
@@ -1775,8 +1639,9 @@ void main() {
         onRunProductionWorkspace: () {},
         onProbeScriptDomainTool: (_, _) {},
         onProbeProductionDomainTool: () {},
-        scriptSubAgentToolController: scriptSubAgentToolController,
-        productionSubAgentToolController: productionSubAgentToolController,
+        scriptSubAgentToolController: controllers.scriptSubAgentToolController,
+        productionSubAgentToolController:
+            controllers.productionSubAgentToolController,
         onRunScriptSubAgentTool: () {},
         onRunProductionSubAgentTool: () {},
         onWriteBackScriptResult: () {},
@@ -1795,55 +1660,36 @@ void main() {
     await tester.tap(fillButton);
     await tester.pump();
 
-    expect(productionDomainArgsController.text, '{"ids":[101,102,103]}');
+    expect(
+      controllers.productionDomainArgsController.text,
+      '{"ids":[101,102,103]}',
+    );
     expect(find.textContaining('已填充候选参数：填充前 3 项'), findsOneWidget);
   });
 
   testWidgets(
     'Production pane fills focused storyboard ids from supervision review',
     (WidgetTester tester) async {
-      final projectIdController = TextEditingController(text: '1');
-      final scriptIdController = TextEditingController(text: '2');
-      final scriptPromptController = TextEditingController(text: '');
-      final scriptDomainArgsController = TextEditingController(text: '{}');
-      final productionPromptController = TextEditingController(text: '');
-      final flowKeyController = TextEditingController(text: 'storyboard');
-      final productionDomainToolController = TextEditingController(
-        text: 'generate_storyboard',
+      final controllers = _WorkspaceControllers(
+        flowKey: 'storyboard',
+        productionDomainTool: 'generate_storyboard',
       );
-      final productionDomainArgsController = TextEditingController(text: '{}');
-      final scriptSubAgentToolController = TextEditingController(
-        text: 'run_sub_agent_storySkeleton',
-      );
-      final productionSubAgentToolController = TextEditingController(
-        text: 'run_sub_agent_director_plan',
-      );
-
-      addTearDown(() {
-        projectIdController.dispose();
-        scriptIdController.dispose();
-        scriptPromptController.dispose();
-        scriptDomainArgsController.dispose();
-        productionPromptController.dispose();
-        flowKeyController.dispose();
-        productionDomainToolController.dispose();
-        productionDomainArgsController.dispose();
-        scriptSubAgentToolController.dispose();
-        productionSubAgentToolController.dispose();
-      });
+      _addWorkspaceTearDown(tester, controllers);
 
       await _pumpAgentWorkspacesSection(
         tester,
         AgentWorkspacesSection(
           initialPane: AgentWorkspacePane.production,
-          projectIdController: projectIdController,
-          scriptIdController: scriptIdController,
-          scriptPromptController: scriptPromptController,
-          scriptDomainArgsController: scriptDomainArgsController,
-          productionPromptController: productionPromptController,
-          flowKeyController: flowKeyController,
-          productionDomainToolController: productionDomainToolController,
-          productionDomainArgsController: productionDomainArgsController,
+          projectIdController: controllers.projectIdController,
+          scriptIdController: controllers.scriptIdController,
+          scriptPromptController: controllers.scriptPromptController,
+          scriptDomainArgsController: controllers.scriptDomainArgsController,
+          productionPromptController: controllers.productionPromptController,
+          flowKeyController: controllers.flowKeyController,
+          productionDomainToolController:
+              controllers.productionDomainToolController,
+          productionDomainArgsController:
+              controllers.productionDomainArgsController,
           loadingScriptWorkspaceRun: false,
           loadingProductionWorkspaceRun: false,
           loadingScriptDomainProbe: false,
@@ -1880,8 +1726,10 @@ void main() {
           onRunProductionWorkspace: () {},
           onProbeScriptDomainTool: (_, _) {},
           onProbeProductionDomainTool: () {},
-          scriptSubAgentToolController: scriptSubAgentToolController,
-          productionSubAgentToolController: productionSubAgentToolController,
+          scriptSubAgentToolController:
+              controllers.scriptSubAgentToolController,
+          productionSubAgentToolController:
+              controllers.productionSubAgentToolController,
           onRunScriptSubAgentTool: () {},
           onRunProductionSubAgentTool: () {},
           onWriteBackScriptResult: () {},
@@ -1900,7 +1748,7 @@ void main() {
       await tester.tap(fillButton);
       await tester.pump();
 
-      expect(productionDomainArgsController.text, '{"ids":[3,9]}');
+      expect(controllers.productionDomainArgsController.text, '{"ids":[3,9]}');
       expect(find.textContaining('已填充候选参数：填充前 3 项'), findsOneWidget);
     },
   );
@@ -1908,51 +1756,27 @@ void main() {
   testWidgets('Production stage board applies and advances stage actions', (
     WidgetTester tester,
   ) async {
-    final projectIdController = TextEditingController(text: '1');
-    final scriptIdController = TextEditingController(text: '2');
-    final scriptPromptController = TextEditingController(text: '');
-    final scriptDomainArgsController = TextEditingController(text: '{}');
-    final productionPromptController = TextEditingController(text: '');
-    final flowKeyController = TextEditingController(text: 'assets');
-    final productionDomainToolController = TextEditingController(
-      text: 'get_flowData',
-    );
-    final productionDomainArgsController = TextEditingController(text: '{}');
-    final scriptSubAgentToolController = TextEditingController(
-      text: 'run_sub_agent_storySkeleton',
-    );
-    final productionSubAgentToolController = TextEditingController(
-      text: 'run_sub_agent_director_plan',
-    );
+    final controllers = _WorkspaceControllers();
 
     var productionProbeCalls = 0;
     var productionSubAgentCalls = 0;
 
-    addTearDown(() {
-      projectIdController.dispose();
-      scriptIdController.dispose();
-      scriptPromptController.dispose();
-      scriptDomainArgsController.dispose();
-      productionPromptController.dispose();
-      flowKeyController.dispose();
-      productionDomainToolController.dispose();
-      productionDomainArgsController.dispose();
-      scriptSubAgentToolController.dispose();
-      productionSubAgentToolController.dispose();
-    });
+    _addWorkspaceTearDown(tester, controllers);
 
     await _pumpAgentWorkspacesSection(
       tester,
       AgentWorkspacesSection(
         initialPane: AgentWorkspacePane.production,
-        projectIdController: projectIdController,
-        scriptIdController: scriptIdController,
-        scriptPromptController: scriptPromptController,
-        scriptDomainArgsController: scriptDomainArgsController,
-        productionPromptController: productionPromptController,
-        flowKeyController: flowKeyController,
-        productionDomainToolController: productionDomainToolController,
-        productionDomainArgsController: productionDomainArgsController,
+        projectIdController: controllers.projectIdController,
+        scriptIdController: controllers.scriptIdController,
+        scriptPromptController: controllers.scriptPromptController,
+        scriptDomainArgsController: controllers.scriptDomainArgsController,
+        productionPromptController: controllers.productionPromptController,
+        flowKeyController: controllers.flowKeyController,
+        productionDomainToolController:
+            controllers.productionDomainToolController,
+        productionDomainArgsController:
+            controllers.productionDomainArgsController,
         loadingScriptWorkspaceRun: false,
         loadingProductionWorkspaceRun: false,
         loadingScriptDomainProbe: false,
@@ -1979,8 +1803,9 @@ void main() {
         onRunProductionWorkspace: () {},
         onProbeScriptDomainTool: (_, _) {},
         onProbeProductionDomainTool: () => productionProbeCalls += 1,
-        scriptSubAgentToolController: scriptSubAgentToolController,
-        productionSubAgentToolController: productionSubAgentToolController,
+        scriptSubAgentToolController: controllers.scriptSubAgentToolController,
+        productionSubAgentToolController:
+            controllers.productionSubAgentToolController,
         onRunScriptSubAgentTool: () {},
         onRunProductionSubAgentTool: () => productionSubAgentCalls += 1,
         onWriteBackScriptResult: () {},
@@ -2004,20 +1829,20 @@ void main() {
     await tester.pump();
     expect(productionSubAgentCalls, 1);
     expect(
-      productionSubAgentToolController.text,
+      controllers.productionSubAgentToolController.text,
       'run_sub_agent_derive_assets',
     );
-    expect(productionPromptController.text, isNotEmpty);
+    expect(controllers.productionPromptController.text, isNotEmpty);
 
     final readFlowButton = _buttonInCard(FilledButton, '导演计划', '读取 flow');
     await tester.ensureVisible(readFlowButton);
     await tester.tap(readFlowButton);
     await tester.pump();
     expect(productionProbeCalls, 1);
-    expect(flowKeyController.text, 'scriptPlan');
-    expect(productionDomainToolController.text, 'get_flowData');
+    expect(controllers.flowKeyController.text, 'scriptPlan');
+    expect(controllers.productionDomainToolController.text, 'get_flowData');
     expect(
-      productionDomainArgsController.text,
+      controllers.productionDomainArgsController.text,
       '{"key":"scriptPlan","maxChars":2200}',
     );
   });

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
+
 typedef PublishPlatformCopyCommit = Future<void> Function(
   String platformId,
   String title,
@@ -7,7 +9,7 @@ typedef PublishPlatformCopyCommit = Future<void> Function(
   String tagsComma,
 );
 
-/// Minimal per-platform **`platform_copy`** editor (**§F4**)：国内 / 海外分组 chips + 标题/简介/标签。
+/// Minimal per-platform `platform_copy` editor (F4): domestic / overseas chip groups and title, description, tags.
 class PublishPlatformCopyEditor extends StatefulWidget {
   const PublishPlatformCopyEditor({
     super.key,
@@ -154,6 +156,7 @@ class _PublishPlatformCopyEditorState extends State<PublishPlatformCopyEditor> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final outline = theme.colorScheme.outline;
     final ids = _allIds;
@@ -165,19 +168,27 @@ class _PublishPlatformCopyEditorState extends State<PublishPlatformCopyEditor> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '差异化文案（按平台）',
+          l10n.shortVideoPublishCopyEditorSectionTitle,
           style: theme.textTheme.labelSmall?.copyWith(color: outline),
         ),
         const SizedBox(height: 6),
-        _chipRow('国内', widget.domesticPlatformIds, outline),
+        _chipRow(
+          l10n.shortVideoSpaceTargetMarketDomestic,
+          widget.domesticPlatformIds,
+          outline,
+        ),
         const SizedBox(height: 8),
-        _chipRow('海外', widget.overseasPlatformIds, outline),
+        _chipRow(
+          l10n.shortVideoSpaceTargetMarketOverseas,
+          widget.overseasPlatformIds,
+          outline,
+        ),
         const SizedBox(height: 10),
         TextField(
           controller: _titleController,
-          decoration: const InputDecoration(
-            labelText: '标题',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: l10n.shortVideoPublishCopyFieldTitle,
+            border: const OutlineInputBorder(),
             isDense: true,
           ),
           enabled: !widget.busy,
@@ -186,9 +197,9 @@ class _PublishPlatformCopyEditorState extends State<PublishPlatformCopyEditor> {
         const SizedBox(height: 8),
         TextField(
           controller: _descriptionController,
-          decoration: const InputDecoration(
-            labelText: '简介',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: l10n.shortVideoPublishCopyFieldDescription,
+            border: const OutlineInputBorder(),
             isDense: true,
           ),
           enabled: !widget.busy,
@@ -198,9 +209,9 @@ class _PublishPlatformCopyEditorState extends State<PublishPlatformCopyEditor> {
         const SizedBox(height: 8),
         TextField(
           controller: _tagsController,
-          decoration: const InputDecoration(
-            labelText: '标签（英文逗号分隔）',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: l10n.shortVideoPublishCopyFieldTagsCommaHint,
+            border: const OutlineInputBorder(),
             isDense: true,
           ),
           enabled: !widget.busy,
@@ -218,7 +229,7 @@ class _PublishPlatformCopyEditorState extends State<PublishPlatformCopyEditor> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : const Icon(Icons.save_outlined),
-            label: const Text('保存到当前草稿'),
+            label: Text(l10n.shortVideoPublishCopySaveToCurrentDraft),
           ),
         ),
       ],
