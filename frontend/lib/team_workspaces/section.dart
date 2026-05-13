@@ -303,18 +303,12 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
         _items = rows;
         _loading = false;
       });
-    } on RustApiException catch (e) {
-      if (!mounted) {
-        return;
-      }
-      showRustApiErrorSnackBar(e);
-      setState(() {
-        _error = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
-        _loading = false;
-      });
     } catch (e) {
       if (!mounted) {
         return;
+      }
+      if (e is RustApiException) {
+        showRustApiErrorSnackBar(e);
       }
       setState(() {
         _error = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
@@ -347,17 +341,6 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
         context,
       ).showSnackBar(SnackBar(content: Text(l10n.teamWorkspaceCreated)));
       await _load();
-    } on RustApiException catch (e) {
-      if (!mounted) {
-        return;
-      }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            l10n.teamWorkspaceCreateFailed(describeUserVisibleApiError(l10n, e)),
-          ),
-        ),
-      );
     } catch (e) {
       if (!mounted) {
         return;
@@ -365,9 +348,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            l10n.teamWorkspaceCreateFailed(
-              describeUserVisibleApiError(l10n, e),
-            ),
+            l10n.teamWorkspaceCreateFailed(describeUserVisibleApiError(l10n, e)),
           ),
         ),
       );
@@ -413,19 +394,6 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
         await widget.onWorkspaceContextChanged!();
       }
       await _load();
-    } on RustApiException catch (e) {
-      if (!mounted) {
-        return;
-      }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            l10n.teamWorkspaceAcceptInviteFailed(
-              describeUserVisibleApiError(l10n, e),
-            ),
-          ),
-        ),
-      );
     } catch (e) {
       if (!mounted) {
         return;

@@ -141,12 +141,6 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
         _selectedDraftIds = <String>{};
         _batchValidation = null;
       });
-    } on RustApiException catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.shortVideoPublishBatchScheduleFailed(describeUserVisibleApiError(l10n, e)))),
-        );
-      }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -260,12 +254,6 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
         _selectedDraftIds = <String>{};
         _batchValidation = null;
       });
-    } on RustApiException catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.shortVideoPublishBatchPublishFailed(describeUserVisibleApiError(l10n, e)))),
-        );
-      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -330,12 +318,6 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
         _selectedDraftIds = <String>{};
         _batchValidation = null;
       });
-    } on RustApiException catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.shortVideoPublishBatchArchiveFailed(describeUserVisibleApiError(l10n, e)))),
-        );
-      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

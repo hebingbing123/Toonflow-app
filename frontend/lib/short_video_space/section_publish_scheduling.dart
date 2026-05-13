@@ -71,10 +71,6 @@ extension ShortVideoPublishScheduling on _ShortVideoSpaceSectionState {
       messenger?.showSnackBar(
         SnackBar(content: Text(l10n.shortVideoPublishScheduleSingleSet(iso))),
       );
-    } on RustApiException catch (e) {
-      messenger?.showSnackBar(
-        SnackBar(content: Text(l10n.shortVideoPublishScheduleSingleFailed(describeUserVisibleApiError(l10n, e)))),
-      );
     } catch (e) {
       messenger?.showSnackBar(
         SnackBar(content: Text(l10n.shortVideoPublishScheduleSingleFailed(describeUserVisibleApiError(l10n, e)))),
@@ -117,10 +113,6 @@ extension ShortVideoPublishScheduling on _ShortVideoSpaceSectionState {
       await _refreshPublishSlice(project, token);
       messenger?.showSnackBar(
         SnackBar(content: Text(l10n.shortVideoPublishBatchScheduledCount(res.updated, iso))),
-      );
-    } on RustApiException catch (e) {
-      messenger?.showSnackBar(
-        SnackBar(content: Text(l10n.shortVideoPublishBatchScheduleFailed(describeUserVisibleApiError(l10n, e)))),
       );
     } catch (e) {
       messenger?.showSnackBar(
@@ -251,10 +243,6 @@ extension ShortVideoPublishScheduling on _ShortVideoSpaceSectionState {
       messenger?.showSnackBar(
         SnackBar(content: Text(l10n.shortVideoPublishScheduleCalendarUpdated(res.updated, iso))),
       );
-    } on RustApiException catch (e) {
-      messenger?.showSnackBar(
-        SnackBar(content: Text(l10n.shortVideoPublishScheduleCalendarFailed(describeUserVisibleApiError(l10n, e)))),
-      );
     } catch (e) {
       messenger?.showSnackBar(
         SnackBar(content: Text(l10n.shortVideoPublishScheduleCalendarFailed(describeUserVisibleApiError(l10n, e)))),
@@ -296,12 +284,6 @@ extension ShortVideoPublishScheduling on _ShortVideoSpaceSectionState {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.shortVideoPublishScheduleClearUpdated(res.updated))),
       );
-    } on RustApiException catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.shortVideoPublishScheduleClearFailed(describeUserVisibleApiError(l10n, e)))),
-        );
-      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
