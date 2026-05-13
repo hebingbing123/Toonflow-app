@@ -4,6 +4,7 @@ import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/rust_api.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   test('buildProjectStyleConfigPatchBody keeps partial update semantics', () {
     expect(
       buildProjectStyleConfigPatchBody(
@@ -87,5 +88,32 @@ void main() {
       message,
       '同时进行的工作区审计导出已达上限，请等待已有任务完成或结束后再试。',
     );
+  });
+
+  test('reportRustOrDescribeApiError forwards RustApiException to sink', () {
+    String? got;
+    reportRustOrDescribeApiError(
+      RustApiException(
+        '{"code":"bad_request","message":"nope"}',
+        statusCode: 400,
+      ),
+      onErrorChanged: (s) => got = s,
+      showGlobalSnackBar: false,
+    );
+    expect(got, isNotNull);
+    expect(got!.isNotEmpty, true);
+  });
+
+  test('reportRustOrDescribeApiError uses l10n for non-Rust errors', () {
+    final l10n = lookupAppLocalizations(const Locale('en'));
+    String? got;
+    reportRustOrDescribeApiError(
+      StateError('wire'),
+      onErrorChanged: (s) => got = s,
+      l10n: l10n,
+      showGlobalSnackBar: false,
+    );
+    expect(got, isNotNull);
+    expect(got!.isNotEmpty, true);
   });
 }
