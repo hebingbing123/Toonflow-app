@@ -15120,6 +15120,139 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get shortVideoExportSettingsTitle => '导出设置';
+
+  @override
+  String get shortVideoExportSettingsFormatLabel => '导出格式';
+
+  @override
+  String get shortVideoExportSettingsResolutionLabel => '分辨率';
+
+  @override
+  String get shortVideoExportSettingsBitrateLabel => '码率';
+
+  @override
+  String get shortVideoExportSettingsFramerateLabel => '帧率';
+
+  @override
+  String get shortVideoExportSettingsEstimatedSize => '预估文件大小';
+
+  @override
+  String shortVideoExportSettingsBasedOnDuration(int seconds) {
+    return '基于 $seconds 秒视频时长';
+  }
+
+  @override
+  String get shortVideoExportSettingsExportTimeHint =>
+      '导出时间取决于视频长度和质量设置。高质量设置将需要更长的处理时间。';
+
+  @override
+  String get shortVideoExportSettingsStartExport => '开始导出';
+
+  @override
+  String get shortVideoExportFormatMp4 => 'MP4 (推荐)';
+
+  @override
+  String get shortVideoExportFormatMov => 'MOV (高质量)';
+
+  @override
+  String get shortVideoExportFormatWebm => 'WebM (网络优化)';
+
+  @override
+  String get shortVideoExportResolution1080p => '1080p (1920×1080)';
+
+  @override
+  String get shortVideoExportResolution720p => '720p (1280×720)';
+
+  @override
+  String get shortVideoExportResolution480p => '480p (854×480)';
+
+  @override
+  String get shortVideoExportResolution360p => '360p (640×360)';
+
+  @override
+  String get shortVideoExportBitrateHigh => '高 (8 Mbps)';
+
+  @override
+  String get shortVideoExportBitrateMedium => '中 (4 Mbps)';
+
+  @override
+  String get shortVideoExportBitrateLow => '低 (2 Mbps)';
+
+  @override
+  String get shortVideoAudioPreviewTitle => '配音预览';
+
+  @override
+  String get shortVideoAudioPreviewCloseTooltip => '关闭';
+
+  @override
+  String get shortVideoAudioPreviewLoading => '正在加载音频…';
+
+  @override
+  String get shortVideoAudioPreviewTooltipStop => '停止';
+
+  @override
+  String get shortVideoAudioPreviewTooltipPlay => '播放';
+
+  @override
+  String get shortVideoAudioPreviewTooltipPause => '暂停';
+
+  @override
+  String shortVideoAudioPreviewLoadFailed(String error) {
+    return '加载音频失败：$error';
+  }
+
+  @override
+  String shortVideoAudioPreviewPlaybackFailed(String error) {
+    return '播放控制失败：$error';
+  }
+
+  @override
+  String shortVideoAudioPreviewStopFailed(String error) {
+    return '停止播放失败：$error';
+  }
+
+  @override
+  String shortVideoAudioPreviewSeekFailed(String error) {
+    return '跳转失败：$error';
+  }
+
+  @override
+  String shortVideoAudioPreviewVolumeFailed(String error) {
+    return '音量调节失败：$error';
+  }
+
+  @override
+  String get shortVideoOpHistoryEnableShot => '启用镜头';
+
+  @override
+  String get shortVideoOpHistoryDisableShot => '禁用镜头';
+
+  @override
+  String get shortVideoOpHistoryReorderShots => '重排镜头顺序';
+
+  @override
+  String get shortVideoOpHistoryAdjustDuration => '调整镜头时长';
+
+  @override
+  String get shortVideoOpHistoryReplaceVideo => '替换视频';
+
+  @override
+  String get shortVideoOpHistoryBatchEnable => '批量启用镜头';
+
+  @override
+  String get shortVideoOpHistoryBatchDisable => '批量禁用镜头';
+
+  @override
+  String get shortVideoOpHistoryBatchDuration => '批量时长对齐';
+
+  @override
+  String get shortVideoOpHistoryBatchReplace => '批量替换视频';
+
+  @override
+  String get shortVideoOpHistoryEditOperation => '编辑操作';
+
+  @override
   String get accountSectionTitle => '账户与隐私';
 
   @override

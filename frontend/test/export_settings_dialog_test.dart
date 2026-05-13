@@ -1,8 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/l10n/app_localizations.dart';
+import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/short_video_space/section.dart';
 
 /// **Validates: Requirements 13, 14, 15, 16**
+final _zh = AppLocalizationsZh();
+
+Widget _wrapZh(Widget body) {
+  return MaterialApp(
+    localizationsDelegates: const [
+      AppLocalizations.delegate,
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
+    supportedLocales: AppLocalizations.supportedLocales,
+    locale: const Locale('zh'),
+    home: Scaffold(body: body),
+  );
+}
+
 void main() {
   group('ExportSettings', () {
     test('uses defaults when JSON is empty', () {
@@ -81,25 +100,25 @@ void main() {
     });
 
     test('maps formats to display names', () {
-      expect(getFormatDisplayName('mp4'), 'MP4 (推荐)');
-      expect(getFormatDisplayName('mov'), 'MOV (高质量)');
-      expect(getFormatDisplayName('webm'), 'WebM (网络优化)');
-      expect(getFormatDisplayName('unknown'), 'UNKNOWN');
+      expect(getFormatDisplayName(_zh, 'mp4'), _zh.shortVideoExportFormatMp4);
+      expect(getFormatDisplayName(_zh, 'mov'), _zh.shortVideoExportFormatMov);
+      expect(getFormatDisplayName(_zh, 'webm'), _zh.shortVideoExportFormatWebm);
+      expect(getFormatDisplayName(_zh, 'unknown'), 'UNKNOWN');
     });
 
     test('maps resolutions to display names', () {
-      expect(getResolutionDisplayName('1080p'), '1080p (1920×1080)');
-      expect(getResolutionDisplayName('720p'), '720p (1280×720)');
-      expect(getResolutionDisplayName('480p'), '480p (854×480)');
-      expect(getResolutionDisplayName('360p'), '360p (640×360)');
-      expect(getResolutionDisplayName('unknown'), 'unknown');
+      expect(getResolutionDisplayName(_zh, '1080p'), _zh.shortVideoExportResolution1080p);
+      expect(getResolutionDisplayName(_zh, '720p'), _zh.shortVideoExportResolution720p);
+      expect(getResolutionDisplayName(_zh, '480p'), _zh.shortVideoExportResolution480p);
+      expect(getResolutionDisplayName(_zh, '360p'), _zh.shortVideoExportResolution360p);
+      expect(getResolutionDisplayName(_zh, 'unknown'), 'unknown');
     });
 
     test('maps bitrates to display names and values', () {
-      expect(getBitrateDisplayName('high'), '高 (8 Mbps)');
-      expect(getBitrateDisplayName('medium'), '中 (4 Mbps)');
-      expect(getBitrateDisplayName('low'), '低 (2 Mbps)');
-      expect(getBitrateDisplayName('unknown'), 'unknown');
+      expect(getBitrateDisplayName(_zh, 'high'), _zh.shortVideoExportBitrateHigh);
+      expect(getBitrateDisplayName(_zh, 'medium'), _zh.shortVideoExportBitrateMedium);
+      expect(getBitrateDisplayName(_zh, 'low'), _zh.shortVideoExportBitrateLow);
+      expect(getBitrateDisplayName(_zh, 'unknown'), 'unknown');
 
       expect(getBitrateValue('high'), 8000);
       expect(getBitrateValue('medium'), 4000);
@@ -112,44 +131,40 @@ void main() {
     testWidgets('renders initial values and shows estimated file size',
         (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: ExportSettingsDialog(
-              initialSettings: ExportSettings(
-                format: 'mov',
-                resolution: '720p',
-                bitrate: 'high',
-                framerate: 60,
-              ),
-              estimatedDurationSeconds: 120,
+        _wrapZh(
+          ExportSettingsDialog(
+            initialSettings: const ExportSettings(
+              format: 'mov',
+              resolution: '720p',
+              bitrate: 'high',
+              framerate: 60,
             ),
+            estimatedDurationSeconds: 120,
           ),
         ),
       );
 
-      expect(find.text('导出设置'), findsOneWidget);
-      expect(find.text('MOV (高质量)'), findsOneWidget);
-      expect(find.text('720p (1280×720)'), findsOneWidget);
-      expect(find.text('高 (8 Mbps)'), findsOneWidget);
+      expect(find.text(_zh.shortVideoExportSettingsTitle), findsOneWidget);
+      expect(find.text(_zh.shortVideoExportFormatMov), findsOneWidget);
+      expect(find.text(_zh.shortVideoExportResolution720p), findsOneWidget);
+      expect(find.text(_zh.shortVideoExportBitrateHigh), findsOneWidget);
       expect(find.text('60 FPS'), findsOneWidget);
-      expect(find.text('预估文件大小'), findsOneWidget);
-      expect(find.text('基于 120 秒视频时长'), findsOneWidget);
+      expect(find.text(_zh.shortVideoExportSettingsEstimatedSize), findsOneWidget);
+      expect(find.text(_zh.shortVideoExportSettingsBasedOnDuration(120)), findsOneWidget);
       expect(
-        find.text('导出时间取决于视频长度和质量设置。高质量设置将需要更长的处理时间。'),
+        find.text(_zh.shortVideoExportSettingsExportTimeHint),
         findsOneWidget,
       );
     });
 
     testWidgets('calculates estimated file size correctly', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: ExportSettingsDialog(
-              initialSettings: ExportSettings(
-                bitrate: 'medium', // 4000 kbps
-              ),
-              estimatedDurationSeconds: 60,
+        _wrapZh(
+          ExportSettingsDialog(
+            initialSettings: const ExportSettings(
+              bitrate: 'medium', // 4000 kbps
             ),
+            estimatedDurationSeconds: 60,
           ),
         ),
       );
@@ -161,14 +176,12 @@ void main() {
     testWidgets('updates estimated file size when bitrate changes',
         (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: ExportSettingsDialog(
-              initialSettings: ExportSettings(
-                bitrate: 'low',
-              ),
-              estimatedDurationSeconds: 60,
+        _wrapZh(
+          ExportSettingsDialog(
+            initialSettings: const ExportSettings(
+              bitrate: 'low',
             ),
+            estimatedDurationSeconds: 60,
           ),
         ),
       );
@@ -177,46 +190,44 @@ void main() {
       await tester.pumpAndSettle();
 
       // Change to high bitrate
-      await tester.tap(find.text('低 (2 Mbps)'));
+      await tester.tap(find.text(_zh.shortVideoExportBitrateLow));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('高 (8 Mbps)').last);
+      await tester.tap(find.text(_zh.shortVideoExportBitrateHigh).last);
       await tester.pumpAndSettle();
 
       // File size should increase
-      expect(find.text('高 (8 Mbps)'), findsOneWidget);
+      expect(find.text(_zh.shortVideoExportBitrateHigh), findsOneWidget);
     });
 
     testWidgets('allows changing all export settings', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: ExportSettingsDialog(
-              initialSettings: ExportSettings(),
-            ),
+        _wrapZh(
+          const ExportSettingsDialog(
+            initialSettings: ExportSettings(),
           ),
         ),
       );
 
       // Change format
-      await tester.tap(find.text('MP4 (推荐)'));
+      await tester.tap(find.text(_zh.shortVideoExportFormatMp4));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('WebM (网络优化)').last);
+      await tester.tap(find.text(_zh.shortVideoExportFormatWebm).last);
       await tester.pumpAndSettle();
-      expect(find.text('WebM (网络优化)'), findsOneWidget);
+      expect(find.text(_zh.shortVideoExportFormatWebm), findsOneWidget);
 
       // Change resolution
-      await tester.tap(find.text('1080p (1920×1080)'));
+      await tester.tap(find.text(_zh.shortVideoExportResolution1080p));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('480p (854×480)').last);
+      await tester.tap(find.text(_zh.shortVideoExportResolution480p).last);
       await tester.pumpAndSettle();
-      expect(find.text('480p (854×480)'), findsOneWidget);
+      expect(find.text(_zh.shortVideoExportResolution480p), findsOneWidget);
 
       // Change bitrate
-      await tester.tap(find.text('中 (4 Mbps)'));
+      await tester.tap(find.text(_zh.shortVideoExportBitrateMedium));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('低 (2 Mbps)').last);
+      await tester.tap(find.text(_zh.shortVideoExportBitrateLow).last);
       await tester.pumpAndSettle();
-      expect(find.text('低 (2 Mbps)'), findsOneWidget);
+      expect(find.text(_zh.shortVideoExportBitrateLow), findsOneWidget);
 
       // Change framerate
       await tester.tap(find.text('30 FPS'));
@@ -231,23 +242,21 @@ void main() {
       ExportSettings? result;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Builder(
-              builder: (context) {
-                return FilledButton(
-                  onPressed: () async {
-                    result = await showDialog<ExportSettings>(
-                      context: context,
-                      builder: (_) => const ExportSettingsDialog(
-                        initialSettings: ExportSettings(),
-                      ),
-                    );
-                  },
-                  child: const Text('Open'),
-                );
-              },
-            ),
+        _wrapZh(
+          Builder(
+            builder: (context) {
+              return FilledButton(
+                onPressed: () async {
+                  result = await showDialog<ExportSettings>(
+                    context: context,
+                    builder: (_) => const ExportSettingsDialog(
+                      initialSettings: ExportSettings(),
+                    ),
+                  );
+                },
+                child: const Text('Open'),
+              );
+            },
           ),
         ),
       );
@@ -256,21 +265,21 @@ void main() {
       await tester.pumpAndSettle();
 
       // Change format to WebM
-      await tester.tap(find.text('MP4 (推荐)'));
+      await tester.tap(find.text(_zh.shortVideoExportFormatMp4));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('WebM (网络优化)').last);
+      await tester.tap(find.text(_zh.shortVideoExportFormatWebm).last);
       await tester.pumpAndSettle();
 
       // Change resolution to 720p
-      await tester.tap(find.text('1080p (1920×1080)'));
+      await tester.tap(find.text(_zh.shortVideoExportResolution1080p));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('720p (1280×720)').last);
+      await tester.tap(find.text(_zh.shortVideoExportResolution720p).last);
       await tester.pumpAndSettle();
 
       // Change bitrate to high
-      await tester.tap(find.text('中 (4 Mbps)'));
+      await tester.tap(find.text(_zh.shortVideoExportBitrateMedium));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('高 (8 Mbps)').last);
+      await tester.tap(find.text(_zh.shortVideoExportBitrateHigh).last);
       await tester.pumpAndSettle();
 
       // Change framerate to 60
@@ -279,7 +288,7 @@ void main() {
       await tester.tap(find.text('60 FPS').last);
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('开始导出'));
+      await tester.tap(find.text(_zh.shortVideoExportSettingsStartExport));
       await tester.pumpAndSettle();
 
       expect(result, isNotNull);
@@ -293,28 +302,26 @@ void main() {
       ExportSettings? result = const ExportSettings();
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Builder(
-              builder: (context) {
-                return FilledButton(
-                  onPressed: () async {
-                    result = await showDialog<ExportSettings>(
-                      context: context,
-                      builder: (_) => const ExportSettingsDialog(),
-                    );
-                  },
-                  child: const Text('Open'),
-                );
-              },
-            ),
+        _wrapZh(
+          Builder(
+            builder: (context) {
+              return FilledButton(
+                onPressed: () async {
+                  result = await showDialog<ExportSettings>(
+                    context: context,
+                    builder: (_) => const ExportSettingsDialog(),
+                  );
+                },
+                child: const Text('Open'),
+              );
+            },
           ),
         ),
       );
 
       await tester.tap(find.text('Open'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('取消'));
+      await tester.tap(find.text(_zh.notificationsActionCancel));
       await tester.pumpAndSettle();
 
       expect(result, isNull);
@@ -322,18 +329,16 @@ void main() {
 
     testWidgets('handles missing duration gracefully', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: ExportSettingsDialog(
-              initialSettings: ExportSettings(),
-              // No estimatedDurationSeconds provided
-            ),
+        _wrapZh(
+          const ExportSettingsDialog(
+            initialSettings: ExportSettings(),
+            // No estimatedDurationSeconds provided
           ),
         ),
       );
 
-      expect(find.text('导出设置'), findsOneWidget);
-      expect(find.text('预估文件大小'), findsOneWidget);
+      expect(find.text(_zh.shortVideoExportSettingsTitle), findsOneWidget);
+      expect(find.text(_zh.shortVideoExportSettingsEstimatedSize), findsOneWidget);
       // Should not show duration text when not provided
       expect(find.textContaining('基于'), findsNothing);
     });
@@ -342,12 +347,10 @@ void main() {
         (tester) async {
       // Test small file (< 1 MB)
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: ExportSettingsDialog(
-              initialSettings: ExportSettings(bitrate: 'low'),
-              estimatedDurationSeconds: 1,
-            ),
+        _wrapZh(
+          ExportSettingsDialog(
+            initialSettings: const ExportSettings(bitrate: 'low'),
+            estimatedDurationSeconds: 1,
           ),
         ),
       );
@@ -356,12 +359,10 @@ void main() {
 
       // Test medium file (MB range)
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: ExportSettingsDialog(
-              initialSettings: ExportSettings(bitrate: 'medium'),
-              estimatedDurationSeconds: 60,
-            ),
+        _wrapZh(
+          ExportSettingsDialog(
+            initialSettings: const ExportSettings(bitrate: 'medium'),
+            estimatedDurationSeconds: 60,
           ),
         ),
       );
@@ -371,12 +372,10 @@ void main() {
       // Test large file (GB range)
       // 8000 kbps * 7200 seconds / (8 * 1024) = ~7031 MB = ~6.87 GB
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: ExportSettingsDialog(
-              initialSettings: ExportSettings(bitrate: 'high'),
-              estimatedDurationSeconds: 7200, // 2 hours
-            ),
+        _wrapZh(
+          ExportSettingsDialog(
+            initialSettings: const ExportSettings(bitrate: 'high'),
+            estimatedDurationSeconds: 7200, // 2 hours
           ),
         ),
       );

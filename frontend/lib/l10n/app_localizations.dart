@@ -24357,6 +24357,246 @@ abstract class AppLocalizations {
   /// **'Clear schedule failed: {error}'**
   String shortVideoPublishScheduleClearFailed(String error);
 
+  /// No description provided for @shortVideoExportSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Export settings'**
+  String get shortVideoExportSettingsTitle;
+
+  /// No description provided for @shortVideoExportSettingsFormatLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Format'**
+  String get shortVideoExportSettingsFormatLabel;
+
+  /// No description provided for @shortVideoExportSettingsResolutionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolution'**
+  String get shortVideoExportSettingsResolutionLabel;
+
+  /// No description provided for @shortVideoExportSettingsBitrateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Bitrate'**
+  String get shortVideoExportSettingsBitrateLabel;
+
+  /// No description provided for @shortVideoExportSettingsFramerateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Frame rate'**
+  String get shortVideoExportSettingsFramerateLabel;
+
+  /// No description provided for @shortVideoExportSettingsEstimatedSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated file size'**
+  String get shortVideoExportSettingsEstimatedSize;
+
+  /// No description provided for @shortVideoExportSettingsBasedOnDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Based on {seconds} seconds of video'**
+  String shortVideoExportSettingsBasedOnDuration(int seconds);
+
+  /// No description provided for @shortVideoExportSettingsExportTimeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Export time depends on length and quality. Higher quality takes longer to process.'**
+  String get shortVideoExportSettingsExportTimeHint;
+
+  /// No description provided for @shortVideoExportSettingsStartExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Start export'**
+  String get shortVideoExportSettingsStartExport;
+
+  /// No description provided for @shortVideoExportFormatMp4.
+  ///
+  /// In en, this message translates to:
+  /// **'MP4 (recommended)'**
+  String get shortVideoExportFormatMp4;
+
+  /// No description provided for @shortVideoExportFormatMov.
+  ///
+  /// In en, this message translates to:
+  /// **'MOV (high quality)'**
+  String get shortVideoExportFormatMov;
+
+  /// No description provided for @shortVideoExportFormatWebm.
+  ///
+  /// In en, this message translates to:
+  /// **'WebM (web optimized)'**
+  String get shortVideoExportFormatWebm;
+
+  /// No description provided for @shortVideoExportResolution1080p.
+  ///
+  /// In en, this message translates to:
+  /// **'1080p (1920×1080)'**
+  String get shortVideoExportResolution1080p;
+
+  /// No description provided for @shortVideoExportResolution720p.
+  ///
+  /// In en, this message translates to:
+  /// **'720p (1280×720)'**
+  String get shortVideoExportResolution720p;
+
+  /// No description provided for @shortVideoExportResolution480p.
+  ///
+  /// In en, this message translates to:
+  /// **'480p (854×480)'**
+  String get shortVideoExportResolution480p;
+
+  /// No description provided for @shortVideoExportResolution360p.
+  ///
+  /// In en, this message translates to:
+  /// **'360p (640×360)'**
+  String get shortVideoExportResolution360p;
+
+  /// No description provided for @shortVideoExportBitrateHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High (8 Mbps)'**
+  String get shortVideoExportBitrateHigh;
+
+  /// No description provided for @shortVideoExportBitrateMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium (4 Mbps)'**
+  String get shortVideoExportBitrateMedium;
+
+  /// No description provided for @shortVideoExportBitrateLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Low (2 Mbps)'**
+  String get shortVideoExportBitrateLow;
+
+  /// No description provided for @shortVideoAudioPreviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Voiceover preview'**
+  String get shortVideoAudioPreviewTitle;
+
+  /// No description provided for @shortVideoAudioPreviewCloseTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get shortVideoAudioPreviewCloseTooltip;
+
+  /// No description provided for @shortVideoAudioPreviewLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading audio…'**
+  String get shortVideoAudioPreviewLoading;
+
+  /// No description provided for @shortVideoAudioPreviewTooltipStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get shortVideoAudioPreviewTooltipStop;
+
+  /// No description provided for @shortVideoAudioPreviewTooltipPlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Play'**
+  String get shortVideoAudioPreviewTooltipPlay;
+
+  /// No description provided for @shortVideoAudioPreviewTooltipPause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get shortVideoAudioPreviewTooltipPause;
+
+  /// No description provided for @shortVideoAudioPreviewLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load audio: {error}'**
+  String shortVideoAudioPreviewLoadFailed(String error);
+
+  /// No description provided for @shortVideoAudioPreviewPlaybackFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Playback control failed: {error}'**
+  String shortVideoAudioPreviewPlaybackFailed(String error);
+
+  /// No description provided for @shortVideoAudioPreviewStopFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop failed: {error}'**
+  String shortVideoAudioPreviewStopFailed(String error);
+
+  /// No description provided for @shortVideoAudioPreviewSeekFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Seek failed: {error}'**
+  String shortVideoAudioPreviewSeekFailed(String error);
+
+  /// No description provided for @shortVideoAudioPreviewVolumeFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Volume change failed: {error}'**
+  String shortVideoAudioPreviewVolumeFailed(String error);
+
+  /// No description provided for @shortVideoOpHistoryEnableShot.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable shot'**
+  String get shortVideoOpHistoryEnableShot;
+
+  /// No description provided for @shortVideoOpHistoryDisableShot.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable shot'**
+  String get shortVideoOpHistoryDisableShot;
+
+  /// No description provided for @shortVideoOpHistoryReorderShots.
+  ///
+  /// In en, this message translates to:
+  /// **'Reorder shots'**
+  String get shortVideoOpHistoryReorderShots;
+
+  /// No description provided for @shortVideoOpHistoryAdjustDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust shot duration'**
+  String get shortVideoOpHistoryAdjustDuration;
+
+  /// No description provided for @shortVideoOpHistoryReplaceVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace video'**
+  String get shortVideoOpHistoryReplaceVideo;
+
+  /// No description provided for @shortVideoOpHistoryBatchEnable.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch enable shots'**
+  String get shortVideoOpHistoryBatchEnable;
+
+  /// No description provided for @shortVideoOpHistoryBatchDisable.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch disable shots'**
+  String get shortVideoOpHistoryBatchDisable;
+
+  /// No description provided for @shortVideoOpHistoryBatchDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch align duration'**
+  String get shortVideoOpHistoryBatchDuration;
+
+  /// No description provided for @shortVideoOpHistoryBatchReplace.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch replace video'**
+  String get shortVideoOpHistoryBatchReplace;
+
+  /// No description provided for @shortVideoOpHistoryEditOperation.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit operation'**
+  String get shortVideoOpHistoryEditOperation;
+
   /// No description provided for @accountSectionTitle.
   ///
   /// In en, this message translates to:

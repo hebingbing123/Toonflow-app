@@ -56,32 +56,45 @@ const List<int> kSupportedFramerates = <int>[
   24,
 ];
 
-String getFormatDisplayName(String format) {
-  const formatNames = <String, String>{
-    'mp4': 'MP4 (推荐)',
-    'mov': 'MOV (高质量)',
-    'webm': 'WebM (网络优化)',
-  };
-  return formatNames[format] ?? format.toUpperCase();
+String getFormatDisplayName(AppLocalizations l10n, String format) {
+  switch (format) {
+    case 'mp4':
+      return l10n.shortVideoExportFormatMp4;
+    case 'mov':
+      return l10n.shortVideoExportFormatMov;
+    case 'webm':
+      return l10n.shortVideoExportFormatWebm;
+    default:
+      return format.toUpperCase();
+  }
 }
 
-String getResolutionDisplayName(String resolution) {
-  const resolutionNames = <String, String>{
-    '1080p': '1080p (1920×1080)',
-    '720p': '720p (1280×720)',
-    '480p': '480p (854×480)',
-    '360p': '360p (640×360)',
-  };
-  return resolutionNames[resolution] ?? resolution;
+String getResolutionDisplayName(AppLocalizations l10n, String resolution) {
+  switch (resolution) {
+    case '1080p':
+      return l10n.shortVideoExportResolution1080p;
+    case '720p':
+      return l10n.shortVideoExportResolution720p;
+    case '480p':
+      return l10n.shortVideoExportResolution480p;
+    case '360p':
+      return l10n.shortVideoExportResolution360p;
+    default:
+      return resolution;
+  }
 }
 
-String getBitrateDisplayName(String bitrate) {
-  const bitrateNames = <String, String>{
-    'high': '高 (8 Mbps)',
-    'medium': '中 (4 Mbps)',
-    'low': '低 (2 Mbps)',
-  };
-  return bitrateNames[bitrate] ?? bitrate;
+String getBitrateDisplayName(AppLocalizations l10n, String bitrate) {
+  switch (bitrate) {
+    case 'high':
+      return l10n.shortVideoExportBitrateHigh;
+    case 'medium':
+      return l10n.shortVideoExportBitrateMedium;
+    case 'low':
+      return l10n.shortVideoExportBitrateLow;
+    default:
+      return bitrate;
+  }
 }
 
 int getBitrateValue(String bitrate) {
@@ -144,10 +157,11 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final estimatedSize = _calculateEstimatedFileSize();
 
     return AlertDialog(
-      title: const Text('导出设置'),
+      title: Text(l10n.shortVideoExportSettingsTitle),
       content: SizedBox(
         width: 520,
         child: SingleChildScrollView(
@@ -155,9 +169,9 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                '导出格式',
-                style: TextStyle(fontWeight: FontWeight.bold),
+              Text(
+                l10n.shortVideoExportSettingsFormatLabel,
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
@@ -173,7 +187,7 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
                     .map(
                       (format) => DropdownMenuItem(
                         value: format,
-                        child: Text(getFormatDisplayName(format)),
+                        child: Text(getFormatDisplayName(l10n, format)),
                       ),
                     )
                     .toList(),
@@ -187,9 +201,9 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
                 },
               ),
               const SizedBox(height: 16),
-              const Text(
-                '分辨率',
-                style: TextStyle(fontWeight: FontWeight.bold),
+              Text(
+                l10n.shortVideoExportSettingsResolutionLabel,
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
@@ -205,7 +219,7 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
                     .map(
                       (resolution) => DropdownMenuItem(
                         value: resolution,
-                        child: Text(getResolutionDisplayName(resolution)),
+                        child: Text(getResolutionDisplayName(l10n, resolution)),
                       ),
                     )
                     .toList(),
@@ -219,9 +233,9 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
                 },
               ),
               const SizedBox(height: 16),
-              const Text(
-                '码率',
-                style: TextStyle(fontWeight: FontWeight.bold),
+              Text(
+                l10n.shortVideoExportSettingsBitrateLabel,
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
@@ -237,7 +251,7 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
                     .map(
                       (bitrate) => DropdownMenuItem(
                         value: bitrate,
-                        child: Text(getBitrateDisplayName(bitrate)),
+                        child: Text(getBitrateDisplayName(l10n, bitrate)),
                       ),
                     )
                     .toList(),
@@ -251,9 +265,9 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
                 },
               ),
               const SizedBox(height: 16),
-              const Text(
-                '帧率',
-                style: TextStyle(fontWeight: FontWeight.bold),
+              Text(
+                l10n.shortVideoExportSettingsFramerateLabel,
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<int>(
@@ -301,7 +315,7 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          '预估文件大小',
+                          l10n.shortVideoExportSettingsEstimatedSize,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Theme.of(context).colorScheme.onPrimaryContainer,
@@ -320,7 +334,9 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
                     if (widget.estimatedDurationSeconds != null) ...[
                       const SizedBox(height: 4),
                       Text(
-                        '基于 ${widget.estimatedDurationSeconds} 秒视频时长',
+                        l10n.shortVideoExportSettingsBasedOnDuration(
+                          widget.estimatedDurationSeconds!,
+                        ),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: Theme.of(context).colorScheme.onPrimaryContainer,
                             ),
@@ -346,7 +362,7 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        '导出时间取决于视频长度和质量设置。高质量设置将需要更长的处理时间。',
+                        l10n.shortVideoExportSettingsExportTimeHint,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: Theme.of(
                                 context,
@@ -364,7 +380,7 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('取消'),
+          child: Text(l10n.notificationsActionCancel),
         ),
         FilledButton(
           onPressed: () {
@@ -377,7 +393,7 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
               ),
             );
           },
-          child: const Text('开始导出'),
+          child: Text(l10n.shortVideoExportSettingsStartExport),
         ),
       ],
     );

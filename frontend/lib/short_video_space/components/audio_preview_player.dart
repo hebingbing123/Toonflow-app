@@ -101,9 +101,10 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         setState(() {
           _isLoading = false;
-          _errorMessage = '加载音频失败: $e';
+          _errorMessage = l10n.shortVideoAudioPreviewLoadFailed(e.toString());
         });
       }
     }
@@ -124,8 +125,9 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         setState(() {
-          _errorMessage = '播放控制失败: $e';
+          _errorMessage = l10n.shortVideoAudioPreviewPlaybackFailed(e.toString());
         });
       }
     }
@@ -139,8 +141,9 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
       });
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         setState(() {
-          _errorMessage = '停止播放失败: $e';
+          _errorMessage = l10n.shortVideoAudioPreviewStopFailed(e.toString());
         });
       }
     }
@@ -151,8 +154,9 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
       await _audioPlayer.seek(position);
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         setState(() {
-          _errorMessage = '跳转失败: $e';
+          _errorMessage = l10n.shortVideoAudioPreviewSeekFailed(e.toString());
         });
       }
     }
@@ -166,8 +170,9 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
       });
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         setState(() {
-          _errorMessage = '音量调节失败: $e';
+          _errorMessage = l10n.shortVideoAudioPreviewVolumeFailed(e.toString());
         });
       }
     }
@@ -181,6 +186,7 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -204,7 +210,7 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  '配音预览',
+                  l10n.shortVideoAudioPreviewTitle,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -214,7 +220,7 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
                 IconButton(
                   icon: const Icon(Icons.close),
                   onPressed: widget.onClose,
-                  tooltip: '关闭',
+                  tooltip: l10n.shortVideoAudioPreviewCloseTooltip,
                 ),
             ],
           ),
@@ -258,7 +264,7 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
             const SizedBox(height: 8),
             Center(
               child: Text(
-                '正在加载音频...',
+                l10n.shortVideoAudioPreviewLoading,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ),
@@ -315,7 +321,7 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
                 IconButton(
                   icon: const Icon(Icons.stop),
                   onPressed: _playerState != PlayerState.stopped ? _stop : null,
-                  tooltip: '停止',
+                  tooltip: l10n.shortVideoAudioPreviewTooltipStop,
                   iconSize: 28,
                 ),
                 const SizedBox(width: 16),
@@ -328,7 +334,9 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
                         : Icons.play_circle_filled,
                   ),
                   onPressed: _togglePlayPause,
-                  tooltip: _playerState == PlayerState.playing ? '暂停' : '播放',
+                  tooltip: _playerState == PlayerState.playing
+                      ? l10n.shortVideoAudioPreviewTooltipPause
+                      : l10n.shortVideoAudioPreviewTooltipPlay,
                   iconSize: 48,
                   color: Theme.of(context).colorScheme.primary,
                 ),

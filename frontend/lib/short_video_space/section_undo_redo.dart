@@ -29,7 +29,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
         // Show feedback
         final operation = _operationHistory.peekRedo();
         final description =
-            operation?.getDescription() ??
+            operation?.localizedDescription(l10n) ??
             l10n.shortVideoSpaceUndoRedoOperationDefault;
         _showOperationFeedback(
           l10n.shortVideoSpaceUndoSucceeded(description),
@@ -74,7 +74,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
         // Show feedback
         final operation = _operationHistory.peekUndo();
         final description =
-            operation?.getDescription() ??
+            operation?.localizedDescription(l10n) ??
             l10n.shortVideoSpaceUndoRedoOperationDefault;
         _showOperationFeedback(
           l10n.shortVideoSpaceRedoSucceeded(description),
@@ -510,8 +510,8 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
     final l10n = AppLocalizations.of(context)!;
     final canUndo = _operationHistory.canUndo;
     final canRedo = _operationHistory.canRedo;
-    final undoDescription = _operationHistory.peekUndo()?.getDescription();
-    final redoDescription = _operationHistory.peekRedo()?.getDescription();
+    final undoDescription = _operationHistory.peekUndo()?.localizedDescription(l10n);
+    final redoDescription = _operationHistory.peekRedo()?.localizedDescription(l10n);
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -549,7 +549,6 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
 
   /// Shows the operation history dialog
   Future<void> _showOperationHistoryDialog() async {
-    final summary = _operationHistory.getSummary();
     final historyList = _operationHistory.getHistoryList();
 
     if (!mounted) return;
@@ -558,6 +557,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
       context: context,
       builder: (ctx) {
         final l10n = AppLocalizations.of(ctx)!;
+        final summary = _operationHistory.getSummary(l10n);
         return AlertDialog(
           title: Text(l10n.shortVideoOperationHistoryTitle),
           content: SizedBox(
@@ -694,7 +694,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
                                     ),
                                   ),
                                   title: Text(
-                                    operation.getDescription(),
+                                    operation.localizedDescription(l10n),
                                     style: TextStyle(
                                       fontWeight: isLatest
                                           ? FontWeight.bold

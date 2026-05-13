@@ -12160,6 +12160,88 @@
       }
     }
   },
+  "shortVideoExportSettingsTitle": "导出设置",
+  "shortVideoExportSettingsFormatLabel": "导出格式",
+  "shortVideoExportSettingsResolutionLabel": "分辨率",
+  "shortVideoExportSettingsBitrateLabel": "码率",
+  "shortVideoExportSettingsFramerateLabel": "帧率",
+  "shortVideoExportSettingsEstimatedSize": "预估文件大小",
+  "shortVideoExportSettingsBasedOnDuration": "基于 {seconds} 秒视频时长",
+  "@shortVideoExportSettingsBasedOnDuration": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoExportSettingsExportTimeHint": "导出时间取决于视频长度和质量设置。高质量设置将需要更长的处理时间。",
+  "shortVideoExportSettingsStartExport": "开始导出",
+  "shortVideoExportFormatMp4": "MP4 (推荐)",
+  "shortVideoExportFormatMov": "MOV (高质量)",
+  "shortVideoExportFormatWebm": "WebM (网络优化)",
+  "shortVideoExportResolution1080p": "1080p (1920×1080)",
+  "shortVideoExportResolution720p": "720p (1280×720)",
+  "shortVideoExportResolution480p": "480p (854×480)",
+  "shortVideoExportResolution360p": "360p (640×360)",
+  "shortVideoExportBitrateHigh": "高 (8 Mbps)",
+  "shortVideoExportBitrateMedium": "中 (4 Mbps)",
+  "shortVideoExportBitrateLow": "低 (2 Mbps)",
+  "shortVideoAudioPreviewTitle": "配音预览",
+  "shortVideoAudioPreviewCloseTooltip": "关闭",
+  "shortVideoAudioPreviewLoading": "正在加载音频…",
+  "shortVideoAudioPreviewTooltipStop": "停止",
+  "shortVideoAudioPreviewTooltipPlay": "播放",
+  "shortVideoAudioPreviewTooltipPause": "暂停",
+  "shortVideoAudioPreviewLoadFailed": "加载音频失败：{error}",
+  "@shortVideoAudioPreviewLoadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoAudioPreviewPlaybackFailed": "播放控制失败：{error}",
+  "@shortVideoAudioPreviewPlaybackFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoAudioPreviewStopFailed": "停止播放失败：{error}",
+  "@shortVideoAudioPreviewStopFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoAudioPreviewSeekFailed": "跳转失败：{error}",
+  "@shortVideoAudioPreviewSeekFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoAudioPreviewVolumeFailed": "音量调节失败：{error}",
+  "@shortVideoAudioPreviewVolumeFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoOpHistoryEnableShot": "启用镜头",
+  "shortVideoOpHistoryDisableShot": "禁用镜头",
+  "shortVideoOpHistoryReorderShots": "重排镜头顺序",
+  "shortVideoOpHistoryAdjustDuration": "调整镜头时长",
+  "shortVideoOpHistoryReplaceVideo": "替换视频",
+  "shortVideoOpHistoryBatchEnable": "批量启用镜头",
+  "shortVideoOpHistoryBatchDisable": "批量禁用镜头",
+  "shortVideoOpHistoryBatchDuration": "批量时长对齐",
+  "shortVideoOpHistoryBatchReplace": "批量替换视频",
+  "shortVideoOpHistoryEditOperation": "编辑操作",
   "accountSectionTitle": "账户与隐私",
   "accountRiskyPrefsTooltip": "本机客户端偏好（删号、导出等「不再提示」与恢复确认）",
   "accountSectionSubtitle": "统一管理账户数据导出、下载留档和不可逆删号。导出任务会走平台 job 队列，可反复生成新版快照。",

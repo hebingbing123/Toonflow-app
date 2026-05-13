@@ -12200,6 +12200,88 @@
       }
     }
   },
+  "shortVideoExportSettingsTitle": "Export settings",
+  "shortVideoExportSettingsFormatLabel": "Format",
+  "shortVideoExportSettingsResolutionLabel": "Resolution",
+  "shortVideoExportSettingsBitrateLabel": "Bitrate",
+  "shortVideoExportSettingsFramerateLabel": "Frame rate",
+  "shortVideoExportSettingsEstimatedSize": "Estimated file size",
+  "shortVideoExportSettingsBasedOnDuration": "Based on {seconds} seconds of video",
+  "@shortVideoExportSettingsBasedOnDuration": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoExportSettingsExportTimeHint": "Export time depends on length and quality. Higher quality takes longer to process.",
+  "shortVideoExportSettingsStartExport": "Start export",
+  "shortVideoExportFormatMp4": "MP4 (recommended)",
+  "shortVideoExportFormatMov": "MOV (high quality)",
+  "shortVideoExportFormatWebm": "WebM (web optimized)",
+  "shortVideoExportResolution1080p": "1080p (1920×1080)",
+  "shortVideoExportResolution720p": "720p (1280×720)",
+  "shortVideoExportResolution480p": "480p (854×480)",
+  "shortVideoExportResolution360p": "360p (640×360)",
+  "shortVideoExportBitrateHigh": "High (8 Mbps)",
+  "shortVideoExportBitrateMedium": "Medium (4 Mbps)",
+  "shortVideoExportBitrateLow": "Low (2 Mbps)",
+  "shortVideoAudioPreviewTitle": "Voiceover preview",
+  "shortVideoAudioPreviewCloseTooltip": "Close",
+  "shortVideoAudioPreviewLoading": "Loading audio…",
+  "shortVideoAudioPreviewTooltipStop": "Stop",
+  "shortVideoAudioPreviewTooltipPlay": "Play",
+  "shortVideoAudioPreviewTooltipPause": "Pause",
+  "shortVideoAudioPreviewLoadFailed": "Failed to load audio: {error}",
+  "@shortVideoAudioPreviewLoadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoAudioPreviewPlaybackFailed": "Playback control failed: {error}",
+  "@shortVideoAudioPreviewPlaybackFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoAudioPreviewStopFailed": "Stop failed: {error}",
+  "@shortVideoAudioPreviewStopFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoAudioPreviewSeekFailed": "Seek failed: {error}",
+  "@shortVideoAudioPreviewSeekFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoAudioPreviewVolumeFailed": "Volume change failed: {error}",
+  "@shortVideoAudioPreviewVolumeFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoOpHistoryEnableShot": "Enable shot",
+  "shortVideoOpHistoryDisableShot": "Disable shot",
+  "shortVideoOpHistoryReorderShots": "Reorder shots",
+  "shortVideoOpHistoryAdjustDuration": "Adjust shot duration",
+  "shortVideoOpHistoryReplaceVideo": "Replace video",
+  "shortVideoOpHistoryBatchEnable": "Batch enable shots",
+  "shortVideoOpHistoryBatchDisable": "Batch disable shots",
+  "shortVideoOpHistoryBatchDuration": "Batch align duration",
+  "shortVideoOpHistoryBatchReplace": "Batch replace video",
+  "shortVideoOpHistoryEditOperation": "Edit operation",
   "accountSectionTitle": "Account section title",
   "accountRiskyPrefsTooltip": "Account risky prefs tooltip",
   "accountSectionSubtitle": "Account section subtitle",

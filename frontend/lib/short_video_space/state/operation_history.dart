@@ -6,6 +6,8 @@
 /// **Validates: Requirements 17**
 library;
 
+import 'package:openflow_app/l10n/app_localizations.dart';
+
 /// Represents a single reversible operation in the editing workflow
 class Operation {
   /// Type of operation (e.g., 'enable', 'disable', 'reorder', 'duration', 'replace')
@@ -60,34 +62,33 @@ class Operation {
     );
   }
 
-  /// Returns a human-readable description of this operation
-  String getDescription() {
-    if (description != null && description!.isNotEmpty) {
+  /// Returns a localized description for UI and tooltips.
+  String localizedDescription(AppLocalizations l10n) {
+    if (description != null && description!.trim().isNotEmpty) {
       return description!;
     }
 
-    // Generate default description based on operation type
     switch (type) {
       case 'enable':
-        return '启用镜头';
+        return l10n.shortVideoOpHistoryEnableShot;
       case 'disable':
-        return '禁用镜头';
+        return l10n.shortVideoOpHistoryDisableShot;
       case 'reorder':
-        return '重排镜头顺序';
+        return l10n.shortVideoOpHistoryReorderShots;
       case 'duration':
-        return '调整镜头时长';
+        return l10n.shortVideoOpHistoryAdjustDuration;
       case 'replace':
-        return '替换视频';
+        return l10n.shortVideoOpHistoryReplaceVideo;
       case 'batch_enable':
-        return '批量启用镜头';
+        return l10n.shortVideoOpHistoryBatchEnable;
       case 'batch_disable':
-        return '批量禁用镜头';
+        return l10n.shortVideoOpHistoryBatchDisable;
       case 'batch_duration':
-        return '批量时长对齐';
+        return l10n.shortVideoOpHistoryBatchDuration;
       case 'batch_replace':
-        return '批量替换视频';
+        return l10n.shortVideoOpHistoryBatchReplace;
       default:
-        return '编辑操作';
+        return l10n.shortVideoOpHistoryEditOperation;
     }
   }
 }
@@ -233,15 +234,15 @@ class OperationHistory {
   }
 
   /// Returns a summary of the current history state
-  Map<String, dynamic> getSummary() {
+  Map<String, dynamic> getSummary(AppLocalizations l10n) {
     return {
       'canUndo': canUndo,
       'canRedo': canRedo,
       'undoCount': undoCount,
       'redoCount': redoCount,
       'maxHistorySize': maxHistorySize,
-      'lastUndoOperation': peekUndo()?.getDescription(),
-      'lastRedoOperation': peekRedo()?.getDescription(),
+      'lastUndoOperation': peekUndo()?.localizedDescription(l10n),
+      'lastRedoOperation': peekRedo()?.localizedDescription(l10n),
     };
   }
 }

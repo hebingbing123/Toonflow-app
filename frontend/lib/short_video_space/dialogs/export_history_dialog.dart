@@ -562,7 +562,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
         children: [
           Expanded(
             child: Text(
-              '${item.format.toUpperCase()} · ${getResolutionDisplayName(item.resolution)}',
+              '${item.format.toUpperCase()} · ${getResolutionDisplayName(l10n, item.resolution)}',
               style: const TextStyle(fontWeight: FontWeight.bold),
               overflow: TextOverflow.ellipsis,
             ),
@@ -637,7 +637,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
           const SizedBox(height: 4),
           Text(
             l10n.shortVideoSpaceDialogExportHistorySettings(
-              getBitrateDisplayName(item.bitrate),
+              getBitrateDisplayName(l10n, item.bitrate),
               item.framerate,
             ),
             style: theme.textTheme.bodySmall?.copyWith(

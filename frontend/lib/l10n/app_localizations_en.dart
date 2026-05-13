@@ -15888,6 +15888,139 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get shortVideoExportSettingsTitle => 'Export settings';
+
+  @override
+  String get shortVideoExportSettingsFormatLabel => 'Format';
+
+  @override
+  String get shortVideoExportSettingsResolutionLabel => 'Resolution';
+
+  @override
+  String get shortVideoExportSettingsBitrateLabel => 'Bitrate';
+
+  @override
+  String get shortVideoExportSettingsFramerateLabel => 'Frame rate';
+
+  @override
+  String get shortVideoExportSettingsEstimatedSize => 'Estimated file size';
+
+  @override
+  String shortVideoExportSettingsBasedOnDuration(int seconds) {
+    return 'Based on $seconds seconds of video';
+  }
+
+  @override
+  String get shortVideoExportSettingsExportTimeHint =>
+      'Export time depends on length and quality. Higher quality takes longer to process.';
+
+  @override
+  String get shortVideoExportSettingsStartExport => 'Start export';
+
+  @override
+  String get shortVideoExportFormatMp4 => 'MP4 (recommended)';
+
+  @override
+  String get shortVideoExportFormatMov => 'MOV (high quality)';
+
+  @override
+  String get shortVideoExportFormatWebm => 'WebM (web optimized)';
+
+  @override
+  String get shortVideoExportResolution1080p => '1080p (1920×1080)';
+
+  @override
+  String get shortVideoExportResolution720p => '720p (1280×720)';
+
+  @override
+  String get shortVideoExportResolution480p => '480p (854×480)';
+
+  @override
+  String get shortVideoExportResolution360p => '360p (640×360)';
+
+  @override
+  String get shortVideoExportBitrateHigh => 'High (8 Mbps)';
+
+  @override
+  String get shortVideoExportBitrateMedium => 'Medium (4 Mbps)';
+
+  @override
+  String get shortVideoExportBitrateLow => 'Low (2 Mbps)';
+
+  @override
+  String get shortVideoAudioPreviewTitle => 'Voiceover preview';
+
+  @override
+  String get shortVideoAudioPreviewCloseTooltip => 'Close';
+
+  @override
+  String get shortVideoAudioPreviewLoading => 'Loading audio…';
+
+  @override
+  String get shortVideoAudioPreviewTooltipStop => 'Stop';
+
+  @override
+  String get shortVideoAudioPreviewTooltipPlay => 'Play';
+
+  @override
+  String get shortVideoAudioPreviewTooltipPause => 'Pause';
+
+  @override
+  String shortVideoAudioPreviewLoadFailed(String error) {
+    return 'Failed to load audio: $error';
+  }
+
+  @override
+  String shortVideoAudioPreviewPlaybackFailed(String error) {
+    return 'Playback control failed: $error';
+  }
+
+  @override
+  String shortVideoAudioPreviewStopFailed(String error) {
+    return 'Stop failed: $error';
+  }
+
+  @override
+  String shortVideoAudioPreviewSeekFailed(String error) {
+    return 'Seek failed: $error';
+  }
+
+  @override
+  String shortVideoAudioPreviewVolumeFailed(String error) {
+    return 'Volume change failed: $error';
+  }
+
+  @override
+  String get shortVideoOpHistoryEnableShot => 'Enable shot';
+
+  @override
+  String get shortVideoOpHistoryDisableShot => 'Disable shot';
+
+  @override
+  String get shortVideoOpHistoryReorderShots => 'Reorder shots';
+
+  @override
+  String get shortVideoOpHistoryAdjustDuration => 'Adjust shot duration';
+
+  @override
+  String get shortVideoOpHistoryReplaceVideo => 'Replace video';
+
+  @override
+  String get shortVideoOpHistoryBatchEnable => 'Batch enable shots';
+
+  @override
+  String get shortVideoOpHistoryBatchDisable => 'Batch disable shots';
+
+  @override
+  String get shortVideoOpHistoryBatchDuration => 'Batch align duration';
+
+  @override
+  String get shortVideoOpHistoryBatchReplace => 'Batch replace video';
+
+  @override
+  String get shortVideoOpHistoryEditOperation => 'Edit operation';
+
+  @override
   String get accountSectionTitle => 'Account section title';
 
   @override

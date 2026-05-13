@@ -1,7 +1,16 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/short_video_space/state/operation_history.dart';
 
+late AppLocalizations _testZhL10n;
+
 void main() {
+  setUpAll(() async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    _testZhL10n = await AppLocalizations.delegate.load(const Locale('zh'));
+  });
+
   group('Operation', () {
     test('creates operation with all required fields', () {
       final operation = Operation(
@@ -32,7 +41,7 @@ void main() {
       );
 
       expect(operation.description, '自定义描述');
-      expect(operation.getDescription(), '自定义描述');
+      expect(operation.localizedDescription(_testZhL10n), '自定义描述');
     });
 
     test('copyWith creates new operation with overridden fields', () {
@@ -56,7 +65,7 @@ void main() {
       expect(copied.beforeState, {'enabled': false});
     });
 
-    test('getDescription returns custom description when provided', () {
+    test('localizedDescription returns custom description when provided', () {
       final operation = Operation(
         type: 'enable',
         timestamp: DateTime.now(),
@@ -67,10 +76,10 @@ void main() {
         description: '自定义操作',
       );
 
-      expect(operation.getDescription(), '自定义操作');
+      expect(operation.localizedDescription(_testZhL10n), '自定义操作');
     });
 
-    test('getDescription returns default description for known types', () {
+    test('localizedDescription returns default labels for known types', () {
       final testCases = {
         'enable': '启用镜头',
         'disable': '禁用镜头',
@@ -94,7 +103,7 @@ void main() {
           redo: () async {},
         );
 
-        expect(operation.getDescription(), entry.value,
+        expect(operation.localizedDescription(_testZhL10n), entry.value,
             reason: 'Type ${entry.key} should return "${entry.value}"');
       }
     });
@@ -413,7 +422,7 @@ void main() {
   group('OperationHistory - getSummary', () {
     test('returns correct summary for empty history', () {
       final history = OperationHistory();
-      final summary = history.getSummary();
+      final summary = history.getSummary(_testZhL10n);
 
       expect(summary['canUndo'], false);
       expect(summary['canRedo'], false);
@@ -428,7 +437,7 @@ void main() {
       final history = OperationHistory();
       history.recordOperation(_createTestOperation('enable'));
 
-      final summary = history.getSummary();
+      final summary = history.getSummary(_testZhL10n);
 
       expect(summary['canUndo'], true);
       expect(summary['canRedo'], false);
@@ -443,7 +452,7 @@ void main() {
       history.recordOperation(_createTestOperation('enable'));
       await history.undo();
 
-      final summary = history.getSummary();
+      final summary = history.getSummary(_testZhL10n);
 
       expect(summary['canUndo'], false);
       expect(summary['canRedo'], true);
@@ -581,7 +590,7 @@ void main() {
         description: '',
       );
 
-      expect(operation.getDescription(), '启用镜头');
+      expect(operation.localizedDescription(_testZhL10n), '启用镜头');
     });
 
     test('handles very large history size', () {
