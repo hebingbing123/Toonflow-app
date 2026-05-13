@@ -1668,6 +1668,132 @@ abstract class AppLocalizations {
   /// **'Help'**
   String get productNavHelp;
 
+  /// No description provided for @productPipelineStripTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Short-drama production chain'**
+  String get productPipelineStripTitle;
+
+  /// No description provided for @productPipelineStripSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unified entry from project settings through scripts, production, tasks, and quality review; Short-video Space handles scheduling and assembly.'**
+  String get productPipelineStripSubtitle;
+
+  /// No description provided for @productPipelineStripProjects.
+  ///
+  /// In en, this message translates to:
+  /// **'Projects'**
+  String get productPipelineStripProjects;
+
+  /// No description provided for @productPipelineStripScripts.
+  ///
+  /// In en, this message translates to:
+  /// **'Scripts'**
+  String get productPipelineStripScripts;
+
+  /// No description provided for @productPipelineStripProduction.
+  ///
+  /// In en, this message translates to:
+  /// **'Production'**
+  String get productPipelineStripProduction;
+
+  /// No description provided for @productPipelineStripTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks'**
+  String get productPipelineStripTasks;
+
+  /// No description provided for @productPipelineStripJobs.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs'**
+  String get productPipelineStripJobs;
+
+  /// No description provided for @productPipelineStripQuality.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality'**
+  String get productPipelineStripQuality;
+
+  /// No description provided for @productPipelineStripShortVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Short video'**
+  String get productPipelineStripShortVideo;
+
+  /// No description provided for @workspaceDebugOverviewApiBase.
+  ///
+  /// In en, this message translates to:
+  /// **'API: {baseUrl}'**
+  String workspaceDebugOverviewApiBase(String baseUrl);
+
+  /// No description provided for @workspaceDebugOverviewProbeBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'Requesting…'**
+  String get workspaceDebugOverviewProbeBusy;
+
+  /// No description provided for @workspaceDebugOverviewButtonHealthV1.
+  ///
+  /// In en, this message translates to:
+  /// **'GET /api/v1/health'**
+  String get workspaceDebugOverviewButtonHealthV1;
+
+  /// No description provided for @workspaceDebugOverviewButtonHealthRoot.
+  ///
+  /// In en, this message translates to:
+  /// **'GET /health'**
+  String get workspaceDebugOverviewButtonHealthRoot;
+
+  /// No description provided for @workspaceDebugOverviewButtonPing.
+  ///
+  /// In en, this message translates to:
+  /// **'GET /api/v1/ping'**
+  String get workspaceDebugOverviewButtonPing;
+
+  /// No description provided for @workspaceDebugOverviewButtonVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'GET /api/v1/version'**
+  String get workspaceDebugOverviewButtonVersion;
+
+  /// No description provided for @workspaceDebugOverviewButtonReady.
+  ///
+  /// In en, this message translates to:
+  /// **'GET /api/v1/ready'**
+  String get workspaceDebugOverviewButtonReady;
+
+  /// No description provided for @workspaceDebugOverviewHealthV1Line.
+  ///
+  /// In en, this message translates to:
+  /// **'health (v1): {body}'**
+  String workspaceDebugOverviewHealthV1Line(String body);
+
+  /// No description provided for @workspaceDebugOverviewHealthRootLine.
+  ///
+  /// In en, this message translates to:
+  /// **'health (root): {body}'**
+  String workspaceDebugOverviewHealthRootLine(String body);
+
+  /// No description provided for @workspaceDebugOverviewPingLine.
+  ///
+  /// In en, this message translates to:
+  /// **'ping: {body}'**
+  String workspaceDebugOverviewPingLine(String body);
+
+  /// No description provided for @workspaceDebugOverviewVersionLine.
+  ///
+  /// In en, this message translates to:
+  /// **'version: {body}'**
+  String workspaceDebugOverviewVersionLine(String body);
+
+  /// No description provided for @workspaceDebugOverviewReadyLine.
+  ///
+  /// In en, this message translates to:
+  /// **'ready: {body}'**
+  String workspaceDebugOverviewReadyLine(String body);
+
   /// No description provided for @productAgentScriptWorkspaceTitle.
   ///
   /// In en, this message translates to:

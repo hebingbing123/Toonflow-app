@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/l10n/app_localizations.dart';
+import 'package:openflow_app/l10n/app_localizations_en.dart';
 import 'package:openflow_app/overview/section_view.dart';
 
 void noop() {}
@@ -47,55 +49,62 @@ OverviewSectionViewCallbacks buildCallbacks({
   );
 }
 
+Widget wrapWithEnL10n(Widget child) {
+  return MaterialApp(
+    locale: const Locale('en'),
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    home: Scaffold(body: child),
+  );
+}
+
 void main() {
+  final en = AppLocalizationsEn();
+
   testWidgets('overview section view renders probe buttons and responses', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: OverviewSectionView(
-            model: buildModel(),
-            callbacks: buildCallbacks(),
-          ),
+      wrapWithEnL10n(
+        OverviewSectionView(
+          model: buildModel(),
+          callbacks: buildCallbacks(),
         ),
       ),
     );
 
-    expect(find.text('API: http://127.0.0.1:8666'), findsOneWidget);
-    expect(find.text('GET /api/v1/health'), findsOneWidget);
-    expect(find.text('GET /health'), findsOneWidget);
-    expect(find.text('GET /api/v1/ping'), findsOneWidget);
-    expect(find.text('GET /api/v1/version'), findsOneWidget);
-    expect(find.text('GET /api/v1/ready'), findsOneWidget);
-    expect(find.text('health (v1): {"ok":true}'), findsOneWidget);
-    expect(find.text('health (root): {"root":true}'), findsOneWidget);
-    expect(find.text('ping: pong'), findsOneWidget);
-    expect(find.text('version: {"version":"1.0.0"}'), findsOneWidget);
-    expect(find.text('ready: {"ready":true}'), findsOneWidget);
+    expect(find.text(en.workspaceDebugOverviewApiBase('http://127.0.0.1:8666')), findsOneWidget);
+    expect(find.text(en.workspaceDebugOverviewButtonHealthV1), findsOneWidget);
+    expect(find.text(en.workspaceDebugOverviewButtonHealthRoot), findsOneWidget);
+    expect(find.text(en.workspaceDebugOverviewButtonPing), findsOneWidget);
+    expect(find.text(en.workspaceDebugOverviewButtonVersion), findsOneWidget);
+    expect(find.text(en.workspaceDebugOverviewButtonReady), findsOneWidget);
+    expect(find.text(en.workspaceDebugOverviewHealthV1Line('{"ok":true}')), findsOneWidget);
+    expect(find.text(en.workspaceDebugOverviewHealthRootLine('{"root":true}')), findsOneWidget);
+    expect(find.text(en.workspaceDebugOverviewPingLine('pong')), findsOneWidget);
+    expect(find.text(en.workspaceDebugOverviewVersionLine('{"version":"1.0.0"}')), findsOneWidget);
+    expect(find.text(en.workspaceDebugOverviewReadyLine('{"ready":true}')), findsOneWidget);
   });
 
   testWidgets('overview section view disables buttons while loading', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: OverviewSectionView(
-            model: buildModel(
-              loadingHealth: true,
-              loadingHealthRoot: true,
-              loadingPing: true,
-              loadingVersion: true,
-              loadingReady: true,
-            ),
-            callbacks: buildCallbacks(
-              onPingHealth: null,
-              onPingHealthRoot: null,
-              onPingPing: null,
-              onPingVersion: null,
-              onPingReady: null,
-            ),
+      wrapWithEnL10n(
+        OverviewSectionView(
+          model: buildModel(
+            loadingHealth: true,
+            loadingHealthRoot: true,
+            loadingPing: true,
+            loadingVersion: true,
+            loadingReady: true,
+          ),
+          callbacks: buildCallbacks(
+            onPingHealth: null,
+            onPingHealthRoot: null,
+            onPingPing: null,
+            onPingVersion: null,
+            onPingReady: null,
           ),
         ),
       ),
@@ -107,7 +116,7 @@ void main() {
           .every((button) => button.onPressed == null),
       isTrue,
     );
-    expect(find.text('请求中…'), findsNWidgets(5));
+    expect(find.text(en.workspaceDebugOverviewProbeBusy), findsNWidgets(5));
   });
 
   testWidgets('overview section view forwards probe taps', (
@@ -120,27 +129,25 @@ void main() {
     var readyTapped = 0;
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: OverviewSectionView(
-            model: buildModel(),
-            callbacks: buildCallbacks(
-              onPingHealth: () => healthTapped++,
-              onPingHealthRoot: () => healthRootTapped++,
-              onPingPing: () => pingTapped++,
-              onPingVersion: () => versionTapped++,
-              onPingReady: () => readyTapped++,
-            ),
+      wrapWithEnL10n(
+        OverviewSectionView(
+          model: buildModel(),
+          callbacks: buildCallbacks(
+            onPingHealth: () => healthTapped++,
+            onPingHealthRoot: () => healthRootTapped++,
+            onPingPing: () => pingTapped++,
+            onPingVersion: () => versionTapped++,
+            onPingReady: () => readyTapped++,
           ),
         ),
       ),
     );
 
-    await tester.tap(find.text('GET /api/v1/health'));
-    await tester.tap(find.text('GET /health'));
-    await tester.tap(find.text('GET /api/v1/ping'));
-    await tester.tap(find.text('GET /api/v1/version'));
-    await tester.tap(find.text('GET /api/v1/ready'));
+    await tester.tap(find.text(en.workspaceDebugOverviewButtonHealthV1));
+    await tester.tap(find.text(en.workspaceDebugOverviewButtonHealthRoot));
+    await tester.tap(find.text(en.workspaceDebugOverviewButtonPing));
+    await tester.tap(find.text(en.workspaceDebugOverviewButtonVersion));
+    await tester.tap(find.text(en.workspaceDebugOverviewButtonReady));
     await tester.pump();
 
     expect(healthTapped, 1);

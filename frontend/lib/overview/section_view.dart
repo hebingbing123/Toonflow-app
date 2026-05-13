@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
+
 class OverviewSectionViewModel {
   const OverviewSectionViewModel({
     required this.apiBaseUrl,
@@ -56,11 +58,13 @@ class OverviewSectionView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final busy = l10n.workspaceDebugOverviewProbeBusy;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'API: ${model.apiBaseUrl}',
+          l10n.workspaceDebugOverviewApiBase(model.apiBaseUrl),
           style: Theme.of(context).textTheme.bodyMedium,
         ),
         const SizedBox(height: 16),
@@ -70,49 +74,69 @@ class OverviewSectionView extends StatelessWidget {
           children: [
             FilledButton(
               onPressed: model.loadingHealth ? null : callbacks.onPingHealth,
-              child: Text(model.loadingHealth ? '请求中…' : 'GET /api/v1/health'),
+              child: Text(
+                model.loadingHealth
+                    ? busy
+                    : l10n.workspaceDebugOverviewButtonHealthV1,
+              ),
             ),
             FilledButton.tonal(
               onPressed: model.loadingHealthRoot
                   ? null
                   : callbacks.onPingHealthRoot,
-              child: Text(model.loadingHealthRoot ? '请求中…' : 'GET /health'),
+              child: Text(
+                model.loadingHealthRoot
+                    ? busy
+                    : l10n.workspaceDebugOverviewButtonHealthRoot,
+              ),
             ),
             FilledButton.tonal(
               onPressed: model.loadingPing ? null : callbacks.onPingPing,
-              child: Text(model.loadingPing ? '请求中…' : 'GET /api/v1/ping'),
+              child: Text(
+                model.loadingPing
+                    ? busy
+                    : l10n.workspaceDebugOverviewButtonPing,
+              ),
             ),
           ],
         ),
         if (model.healthBody != null) ...[
           const SizedBox(height: 8),
-          Text('health (v1): ${model.healthBody}'),
+          Text(l10n.workspaceDebugOverviewHealthV1Line(model.healthBody!)),
         ],
         if (model.healthRootBody != null) ...[
           const SizedBox(height: 8),
-          Text('health (root): ${model.healthRootBody}'),
+          Text(l10n.workspaceDebugOverviewHealthRootLine(model.healthRootBody!)),
         ],
         if (model.pingBody != null) ...[
           const SizedBox(height: 8),
-          Text('ping: ${model.pingBody}'),
+          Text(l10n.workspaceDebugOverviewPingLine(model.pingBody!)),
         ],
         const SizedBox(height: 12),
         FilledButton.tonal(
           onPressed: model.loadingVersion ? null : callbacks.onPingVersion,
-          child: Text(model.loadingVersion ? '请求中…' : 'GET /api/v1/version'),
+          child: Text(
+            model.loadingVersion
+                ? busy
+                : l10n.workspaceDebugOverviewButtonVersion,
+          ),
         ),
         if (model.versionBody != null) ...[
           const SizedBox(height: 8),
-          Text('version: ${model.versionBody}'),
+          Text(l10n.workspaceDebugOverviewVersionLine(model.versionBody!)),
         ],
         const SizedBox(height: 12),
         FilledButton.tonal(
           onPressed: model.loadingReady ? null : callbacks.onPingReady,
-          child: Text(model.loadingReady ? '请求中…' : 'GET /api/v1/ready'),
+          child: Text(
+            model.loadingReady
+                ? busy
+                : l10n.workspaceDebugOverviewButtonReady,
+          ),
         ),
         if (model.readyBody != null) ...[
           const SizedBox(height: 8),
-          Text('ready: ${model.readyBody}'),
+          Text(l10n.workspaceDebugOverviewReadyLine(model.readyBody!)),
         ],
       ],
     );

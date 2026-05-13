@@ -865,6 +865,82 @@ class AppLocalizationsZh extends AppLocalizations {
   String get productNavHelp => '帮助';
 
   @override
+  String get productPipelineStripTitle => '短剧生产平台链';
+
+  @override
+  String get productPipelineStripSubtitle =>
+      '从项目配置到脚本、制作、任务与质量评审的统一入口；短视频 Space 用于编排与成片相关能力。';
+
+  @override
+  String get productPipelineStripProjects => '项目';
+
+  @override
+  String get productPipelineStripScripts => '脚本';
+
+  @override
+  String get productPipelineStripProduction => '制作';
+
+  @override
+  String get productPipelineStripTasks => '任务';
+
+  @override
+  String get productPipelineStripJobs => '作业';
+
+  @override
+  String get productPipelineStripQuality => '质量';
+
+  @override
+  String get productPipelineStripShortVideo => '短视频';
+
+  @override
+  String workspaceDebugOverviewApiBase(String baseUrl) {
+    return 'API: $baseUrl';
+  }
+
+  @override
+  String get workspaceDebugOverviewProbeBusy => '请求中…';
+
+  @override
+  String get workspaceDebugOverviewButtonHealthV1 => 'GET /api/v1/health';
+
+  @override
+  String get workspaceDebugOverviewButtonHealthRoot => 'GET /health';
+
+  @override
+  String get workspaceDebugOverviewButtonPing => 'GET /api/v1/ping';
+
+  @override
+  String get workspaceDebugOverviewButtonVersion => 'GET /api/v1/version';
+
+  @override
+  String get workspaceDebugOverviewButtonReady => 'GET /api/v1/ready';
+
+  @override
+  String workspaceDebugOverviewHealthV1Line(String body) {
+    return 'health (v1): $body';
+  }
+
+  @override
+  String workspaceDebugOverviewHealthRootLine(String body) {
+    return 'health (root): $body';
+  }
+
+  @override
+  String workspaceDebugOverviewPingLine(String body) {
+    return 'ping: $body';
+  }
+
+  @override
+  String workspaceDebugOverviewVersionLine(String body) {
+    return 'version: $body';
+  }
+
+  @override
+  String workspaceDebugOverviewReadyLine(String body) {
+    return 'ready: $body';
+  }
+
+  @override
   String get productAgentScriptWorkspaceTitle => '剧本工作区';
 
   @override

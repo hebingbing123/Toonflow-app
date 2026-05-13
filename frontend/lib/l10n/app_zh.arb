@@ -435,6 +435,69 @@
   "productNavQuality": "质量评审",
   "productNavPlatformConfig": "平台配置",
   "productNavHelp": "帮助",
+  "productPipelineStripTitle": "短剧生产平台链",
+  "productPipelineStripSubtitle": "从项目配置到脚本、制作、任务与质量评审的统一入口；短视频 Space 用于编排与成片相关能力。",
+  "productPipelineStripProjects": "项目",
+  "productPipelineStripScripts": "脚本",
+  "productPipelineStripProduction": "制作",
+  "productPipelineStripTasks": "任务",
+  "productPipelineStripJobs": "作业",
+  "productPipelineStripQuality": "质量",
+  "productPipelineStripShortVideo": "短视频",
+  "workspaceDebugOverviewApiBase": "API: {baseUrl}",
+  "@workspaceDebugOverviewApiBase": {
+    "placeholders": {
+      "baseUrl": {
+        "type": "String"
+      }
+    }
+  },
+  "workspaceDebugOverviewProbeBusy": "请求中…",
+  "workspaceDebugOverviewButtonHealthV1": "GET /api/v1/health",
+  "workspaceDebugOverviewButtonHealthRoot": "GET /health",
+  "workspaceDebugOverviewButtonPing": "GET /api/v1/ping",
+  "workspaceDebugOverviewButtonVersion": "GET /api/v1/version",
+  "workspaceDebugOverviewButtonReady": "GET /api/v1/ready",
+  "workspaceDebugOverviewHealthV1Line": "health (v1): {body}",
+  "@workspaceDebugOverviewHealthV1Line": {
+    "placeholders": {
+      "body": {
+        "type": "String"
+      }
+    }
+  },
+  "workspaceDebugOverviewHealthRootLine": "health (root): {body}",
+  "@workspaceDebugOverviewHealthRootLine": {
+    "placeholders": {
+      "body": {
+        "type": "String"
+      }
+    }
+  },
+  "workspaceDebugOverviewPingLine": "ping: {body}",
+  "@workspaceDebugOverviewPingLine": {
+    "placeholders": {
+      "body": {
+        "type": "String"
+      }
+    }
+  },
+  "workspaceDebugOverviewVersionLine": "version: {body}",
+  "@workspaceDebugOverviewVersionLine": {
+    "placeholders": {
+      "body": {
+        "type": "String"
+      }
+    }
+  },
+  "workspaceDebugOverviewReadyLine": "ready: {body}",
+  "@workspaceDebugOverviewReadyLine": {
+    "placeholders": {
+      "body": {
+        "type": "String"
+      }
+    }
+  },
   "productAgentScriptWorkspaceTitle": "剧本工作区",
   "productAgentScriptWorkspaceSubtitle": "专注剧本 Agent 工作流：上下文探测、子 Agent 编排与正文/计划回写。",
   "productAgentProductionWorkspaceTitle": "制作工作区",

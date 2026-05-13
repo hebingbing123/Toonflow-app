@@ -925,6 +925,82 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productNavHelp => 'Help';
 
   @override
+  String get productPipelineStripTitle => 'Short-drama production chain';
+
+  @override
+  String get productPipelineStripSubtitle =>
+      'Unified entry from project settings through scripts, production, tasks, and quality review; Short-video Space handles scheduling and assembly.';
+
+  @override
+  String get productPipelineStripProjects => 'Projects';
+
+  @override
+  String get productPipelineStripScripts => 'Scripts';
+
+  @override
+  String get productPipelineStripProduction => 'Production';
+
+  @override
+  String get productPipelineStripTasks => 'Tasks';
+
+  @override
+  String get productPipelineStripJobs => 'Jobs';
+
+  @override
+  String get productPipelineStripQuality => 'Quality';
+
+  @override
+  String get productPipelineStripShortVideo => 'Short video';
+
+  @override
+  String workspaceDebugOverviewApiBase(String baseUrl) {
+    return 'API: $baseUrl';
+  }
+
+  @override
+  String get workspaceDebugOverviewProbeBusy => 'Requesting…';
+
+  @override
+  String get workspaceDebugOverviewButtonHealthV1 => 'GET /api/v1/health';
+
+  @override
+  String get workspaceDebugOverviewButtonHealthRoot => 'GET /health';
+
+  @override
+  String get workspaceDebugOverviewButtonPing => 'GET /api/v1/ping';
+
+  @override
+  String get workspaceDebugOverviewButtonVersion => 'GET /api/v1/version';
+
+  @override
+  String get workspaceDebugOverviewButtonReady => 'GET /api/v1/ready';
+
+  @override
+  String workspaceDebugOverviewHealthV1Line(String body) {
+    return 'health (v1): $body';
+  }
+
+  @override
+  String workspaceDebugOverviewHealthRootLine(String body) {
+    return 'health (root): $body';
+  }
+
+  @override
+  String workspaceDebugOverviewPingLine(String body) {
+    return 'ping: $body';
+  }
+
+  @override
+  String workspaceDebugOverviewVersionLine(String body) {
+    return 'version: $body';
+  }
+
+  @override
+  String workspaceDebugOverviewReadyLine(String body) {
+    return 'ready: $body';
+  }
+
+  @override
   String get productAgentScriptWorkspaceTitle => 'Script workspace';
 
   @override

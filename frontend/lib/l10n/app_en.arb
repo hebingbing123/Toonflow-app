@@ -435,6 +435,69 @@
   "productNavQuality": "Quality",
   "productNavPlatformConfig": "Platform configuration",
   "productNavHelp": "Help",
+  "productPipelineStripTitle": "Short-drama production chain",
+  "productPipelineStripSubtitle": "Unified entry from project settings through scripts, production, tasks, and quality review; Short-video Space handles scheduling and assembly.",
+  "productPipelineStripProjects": "Projects",
+  "productPipelineStripScripts": "Scripts",
+  "productPipelineStripProduction": "Production",
+  "productPipelineStripTasks": "Tasks",
+  "productPipelineStripJobs": "Jobs",
+  "productPipelineStripQuality": "Quality",
+  "productPipelineStripShortVideo": "Short video",
+  "workspaceDebugOverviewApiBase": "API: {baseUrl}",
+  "@workspaceDebugOverviewApiBase": {
+    "placeholders": {
+      "baseUrl": {
+        "type": "String"
+      }
+    }
+  },
+  "workspaceDebugOverviewProbeBusy": "Requesting…",
+  "workspaceDebugOverviewButtonHealthV1": "GET /api/v1/health",
+  "workspaceDebugOverviewButtonHealthRoot": "GET /health",
+  "workspaceDebugOverviewButtonPing": "GET /api/v1/ping",
+  "workspaceDebugOverviewButtonVersion": "GET /api/v1/version",
+  "workspaceDebugOverviewButtonReady": "GET /api/v1/ready",
+  "workspaceDebugOverviewHealthV1Line": "health (v1): {body}",
+  "@workspaceDebugOverviewHealthV1Line": {
+    "placeholders": {
+      "body": {
+        "type": "String"
+      }
+    }
+  },
+  "workspaceDebugOverviewHealthRootLine": "health (root): {body}",
+  "@workspaceDebugOverviewHealthRootLine": {
+    "placeholders": {
+      "body": {
+        "type": "String"
+      }
+    }
+  },
+  "workspaceDebugOverviewPingLine": "ping: {body}",
+  "@workspaceDebugOverviewPingLine": {
+    "placeholders": {
+      "body": {
+        "type": "String"
+      }
+    }
+  },
+  "workspaceDebugOverviewVersionLine": "version: {body}",
+  "@workspaceDebugOverviewVersionLine": {
+    "placeholders": {
+      "body": {
+        "type": "String"
+      }
+    }
+  },
+  "workspaceDebugOverviewReadyLine": "ready: {body}",
+  "@workspaceDebugOverviewReadyLine": {
+    "placeholders": {
+      "body": {
+        "type": "String"
+      }
+    }
+  },
   "productAgentScriptWorkspaceTitle": "Script workspace",
   "productAgentScriptWorkspaceSubtitle": "Script Agent flow: context probes, sub-agent orchestration, and body/plan writeback.",
   "productAgentProductionWorkspaceTitle": "Production workspace",

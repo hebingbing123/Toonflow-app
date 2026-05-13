@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import 'navigation_controller.dart';
 
 /// Platform-level entry points for the short-drama production chain (Moneyprinter-style),
@@ -19,20 +20,21 @@ class PlatformShortDramaPipelineStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final steps = <(ProductWorkspacePane, String, IconData)>[
-      (ProductWorkspacePane.projects, '项目', Icons.folder_special_outlined),
-      (ProductWorkspacePane.scriptWorkspace, '脚本', Icons.menu_book_outlined),
+      (ProductWorkspacePane.projects, l10n.productPipelineStripProjects, Icons.folder_special_outlined),
+      (ProductWorkspacePane.scriptWorkspace, l10n.productPipelineStripScripts, Icons.menu_book_outlined),
       (
         ProductWorkspacePane.productionWorkspace,
-        '制作',
+        l10n.productPipelineStripProduction,
         Icons.movie_filter_outlined,
       ),
-      (ProductWorkspacePane.tasks, '任务', Icons.task_alt_outlined),
-      (ProductWorkspacePane.jobs, '作业', Icons.cloud_queue_outlined),
-      (ProductWorkspacePane.quality, '质量', Icons.verified_outlined),
+      (ProductWorkspacePane.tasks, l10n.productPipelineStripTasks, Icons.task_alt_outlined),
+      (ProductWorkspacePane.jobs, l10n.productPipelineStripJobs, Icons.cloud_queue_outlined),
+      (ProductWorkspacePane.quality, l10n.productPipelineStripQuality, Icons.verified_outlined),
       (
         ProductWorkspacePane.shortVideoSpace,
-        '短视频',
+        l10n.productPipelineStripShortVideo,
         Icons.video_library_outlined,
       ),
     ];
@@ -47,10 +49,10 @@ class PlatformShortDramaPipelineStrip extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text('短剧生产平台链', style: theme.textTheme.labelLarge),
+          Text(l10n.productPipelineStripTitle, style: theme.textTheme.labelLarge),
           const SizedBox(height: 6),
           Text(
-            '从项目配置到脚本、制作、任务与质量评审的统一入口；短视频 Space 用于编排与成片相关能力。',
+            l10n.productPipelineStripSubtitle,
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.outline,
             ),

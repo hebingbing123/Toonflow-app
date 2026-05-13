@@ -512,7 +512,7 @@ class _HomePageState extends State<HomePage> {
     return int.tryParse(v.toString());
   }
 
-  /// 全局搜索命中后：回到产品壳并尽量恢复项目 / 剧本上下文（平台级深链）。
+  /// After a global search hit: return to the product shell and restore project/script context when possible (platform deep link).
   void _handleSearchResultNavigation(
     ResultType type,
     String id, {
@@ -603,15 +603,22 @@ class _HomePageState extends State<HomePage> {
       case ResultType.novel:
       case ResultType.novelEvent:
         goProjectsScoped();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              type == ResultType.novelEvent
-                  ? '已定位到项目。请在项目详情中打开「小说与事件」查看大纲事件（事件 #${_intFromSearchMeta(metadata?['event_numeric_id']) ?? '?'}）。'
-                  : '已定位到项目。请在项目详情中打开「小说与事件」查看章节（章索引 ${metadata?['chapter_index'] ?? '?'}）。',
+        final l10n = AppLocalizations.of(context);
+        if (l10n != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                type == ResultType.novelEvent
+                    ? l10n.globalSearchNovelEventNavigated(
+                        '${_intFromSearchMeta(metadata?['event_numeric_id']) ?? '?'}',
+                      )
+                    : l10n.globalSearchNovelChapterNavigated(
+                        '${metadata?['chapter_index'] ?? '?'}',
+                      ),
+              ),
             ),
-          ),
-        );
+          );
+        }
         break;
     }
   }
@@ -1002,15 +1009,20 @@ class _HomePageState extends State<HomePage> {
     if (!mounted) {
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          '账号已删除：workspace ${response.ownedWorkspaceCount} · '
-          'project ${response.ownedProjectCount} · '
-          'job ${response.generationJobCount}',
+    final l10n = AppLocalizations.of(context);
+    if (l10n != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            l10n.accountDeletedSummary(
+              response.ownedWorkspaceCount,
+              response.ownedProjectCount,
+              response.generationJobCount,
+            ),
+          ),
         ),
-      ),
-    );
+      );
+    }
   }
 
   @override
