@@ -167,7 +167,9 @@ class ExportHistoryItem {
   }
 
   String formattedDuration(AppLocalizations l10n) {
-    if (completedAt == null) return '-';
+    if (completedAt == null) {
+      return l10n.shortVideoSpaceDialogExportHistoryDurationDash;
+    }
     final duration = completedAt!.difference(createdAt);
     if (duration.inMinutes < 1) {
       return l10n.shortVideoSpaceDialogExportHistoryDurationSeconds(duration.inSeconds);
@@ -247,9 +249,12 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
   }) async {
     final token = widget.accessToken?.trim();
     if (token == null || token.isEmpty) {
-      if (!mounted) throw Exception('Not mounted');
-      final l10n = AppLocalizations.of(context)!;
-      throw Exception(l10n.shortVideoSpaceDialogExportHistorySessionExpired);
+      if (!mounted) {
+        throw StateError('ExportHistoryDialog._fetchExportHistory: not mounted');
+      }
+      throw Exception(
+        AppLocalizations.of(context)!.shortVideoSpaceDialogExportHistorySessionExpired,
+      );
     }
     final String? status = switch (statusFilter) {
       ExportHistoryStatusFilter.all => null,
@@ -337,7 +342,11 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
       final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(l10n.shortVideoSpaceDialogExportHistoryDownloadLinkCopied(item.format.toUpperCase())),
+          content: Text(
+            l10n.shortVideoSpaceDialogExportHistoryDownloadLinkCopied(
+              getFormatDisplayName(l10n, item.format.toLowerCase()),
+            ),
+          ),
           duration: const Duration(seconds: 2),
         ),
       );
@@ -562,7 +571,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
         children: [
           Expanded(
             child: Text(
-              '${item.format.toUpperCase()} · ${getResolutionDisplayName(l10n, item.resolution)}',
+              '${getFormatDisplayName(l10n, item.format.toLowerCase())} · ${getResolutionDisplayName(l10n, item.resolution)}',
               style: const TextStyle(fontWeight: FontWeight.bold),
               overflow: TextOverflow.ellipsis,
             ),
@@ -638,7 +647,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
           Text(
             l10n.shortVideoSpaceDialogExportHistorySettings(
               getBitrateDisplayName(l10n, item.bitrate),
-              item.framerate,
+              l10n.shortVideoExportSettingsFramerateOption(item.framerate),
             ),
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
@@ -721,8 +730,8 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
     } else if (difference.inDays < 7) {
       return l10n.shortVideoSpaceDialogExportHistoryTimeDaysAgo(difference.inDays);
     } else {
-      return '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')} '
-          '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+      final localeName = Localizations.localeOf(context).toString();
+      return DateFormat.yMMMd(localeName).add_Hm().format(dateTime);
     }
   }
 }

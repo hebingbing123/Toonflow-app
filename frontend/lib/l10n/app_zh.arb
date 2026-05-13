@@ -1166,6 +1166,7 @@
       }
     }
   },
+  "shortVideoSpaceDialogExportHistoryDurationDash": "—",
   "shortVideoSpaceDialogExportHistoryCreatedAt": "创建时间: {time}",
   "@shortVideoSpaceDialogExportHistoryCreatedAt": {
     "placeholders": {
@@ -1193,14 +1194,14 @@
       }
     }
   },
-  "shortVideoSpaceDialogExportHistorySettings": "设置: {bitrate} · {framerate} FPS",
+  "shortVideoSpaceDialogExportHistorySettings": "设置: {bitrate} · {framerateDisplay}",
   "@shortVideoSpaceDialogExportHistorySettings": {
     "placeholders": {
       "bitrate": {
         "type": "String"
       },
-      "framerate": {
-        "type": "int"
+      "framerateDisplay": {
+        "type": "String"
       }
     }
   },

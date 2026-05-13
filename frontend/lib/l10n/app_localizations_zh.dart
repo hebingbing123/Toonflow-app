@@ -1845,6 +1845,9 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get shortVideoSpaceDialogExportHistoryDurationDash => '—';
+
+  @override
   String shortVideoSpaceDialogExportHistoryCreatedAt(String time) {
     return '创建时间: $time';
   }
@@ -1865,9 +1868,9 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String shortVideoSpaceDialogExportHistorySettings(
     String bitrate,
-    int framerate,
+    String framerateDisplay,
   ) {
-    return '设置: $bitrate · $framerate FPS';
+    return '设置: $bitrate · $framerateDisplay';
   }
 
   @override

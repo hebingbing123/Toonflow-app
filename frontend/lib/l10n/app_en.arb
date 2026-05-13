@@ -1166,6 +1166,7 @@
       }
     }
   },
+  "shortVideoSpaceDialogExportHistoryDurationDash": "—",
   "shortVideoSpaceDialogExportHistoryCreatedAt": "Created: {time}",
   "@shortVideoSpaceDialogExportHistoryCreatedAt": {
     "placeholders": {
@@ -1193,14 +1194,14 @@
       }
     }
   },
-  "shortVideoSpaceDialogExportHistorySettings": "Settings: {bitrate} · {framerate} FPS",
+  "shortVideoSpaceDialogExportHistorySettings": "Settings: {bitrate} · {framerateDisplay}",
   "@shortVideoSpaceDialogExportHistorySettings": {
     "placeholders": {
       "bitrate": {
         "type": "String"
       },
-      "framerate": {
-        "type": "int"
+      "framerateDisplay": {
+        "type": "String"
       }
     }
   },

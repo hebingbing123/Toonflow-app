@@ -1934,6 +1934,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get shortVideoSpaceDialogExportHistoryDurationDash => '—';
+
+  @override
   String shortVideoSpaceDialogExportHistoryCreatedAt(String time) {
     return 'Created: $time';
   }
@@ -1954,9 +1957,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String shortVideoSpaceDialogExportHistorySettings(
     String bitrate,
-    int framerate,
+    String framerateDisplay,
   ) {
-    return 'Settings: $bitrate · $framerate FPS';
+    return 'Settings: $bitrate · $framerateDisplay';
   }
 
   @override

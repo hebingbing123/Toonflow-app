@@ -3334,6 +3334,12 @@ abstract class AppLocalizations {
     int minutes,
   );
 
+  /// No description provided for @shortVideoSpaceDialogExportHistoryDurationDash.
+  ///
+  /// In en, this message translates to:
+  /// **'—'**
+  String get shortVideoSpaceDialogExportHistoryDurationDash;
+
   /// No description provided for @shortVideoSpaceDialogExportHistoryCreatedAt.
   ///
   /// In en, this message translates to:
@@ -3358,10 +3364,10 @@ abstract class AppLocalizations {
   /// No description provided for @shortVideoSpaceDialogExportHistorySettings.
   ///
   /// In en, this message translates to:
-  /// **'Settings: {bitrate} · {framerate} FPS'**
+  /// **'Settings: {bitrate} · {framerateDisplay}'**
   String shortVideoSpaceDialogExportHistorySettings(
     String bitrate,
-    int framerate,
+    String framerateDisplay,
   );
 
   /// No description provided for @shortVideoSpaceDialogExportHistoryLoadError.
