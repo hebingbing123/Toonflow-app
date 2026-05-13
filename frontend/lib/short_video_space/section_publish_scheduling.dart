@@ -73,7 +73,7 @@ extension ShortVideoPublishScheduling on _ShortVideoSpaceSectionState {
       );
     } on RustApiException catch (e) {
       messenger?.showSnackBar(
-        SnackBar(content: Text(l10n.shortVideoPublishScheduleSingleFailedStatus(e.statusCode ?? 0))),
+        SnackBar(content: Text(l10n.shortVideoPublishScheduleSingleFailed(describeUserVisibleApiError(l10n, e)))),
       );
     } catch (e) {
       messenger?.showSnackBar(
@@ -120,7 +120,7 @@ extension ShortVideoPublishScheduling on _ShortVideoSpaceSectionState {
       );
     } on RustApiException catch (e) {
       messenger?.showSnackBar(
-        SnackBar(content: Text(l10n.shortVideoPublishBatchScheduleFailedStatus(e.statusCode ?? 0))),
+        SnackBar(content: Text(l10n.shortVideoPublishBatchScheduleFailed(describeUserVisibleApiError(l10n, e)))),
       );
     } catch (e) {
       messenger?.showSnackBar(
@@ -253,7 +253,7 @@ extension ShortVideoPublishScheduling on _ShortVideoSpaceSectionState {
       );
     } on RustApiException catch (e) {
       messenger?.showSnackBar(
-        SnackBar(content: Text(l10n.shortVideoPublishScheduleCalendarFailedStatus(e.statusCode ?? 0))),
+        SnackBar(content: Text(l10n.shortVideoPublishScheduleCalendarFailed(describeUserVisibleApiError(l10n, e)))),
       );
     } catch (e) {
       messenger?.showSnackBar(
@@ -299,7 +299,7 @@ extension ShortVideoPublishScheduling on _ShortVideoSpaceSectionState {
     } on RustApiException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.shortVideoPublishScheduleClearFailedStatus(e.statusCode ?? 0))),
+          SnackBar(content: Text(l10n.shortVideoPublishScheduleClearFailed(describeUserVisibleApiError(l10n, e)))),
         );
       }
     } catch (e) {

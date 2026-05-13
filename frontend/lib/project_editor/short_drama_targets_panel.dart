@@ -95,8 +95,8 @@ class _ShortDramaTargetsPanelState extends State<ShortDramaTargetsPanel> {
     } on RustApiException catch (e) {
       if (mounted) {
         setState(() {
-          _line = l10n.projectEditorShortDramaTargetsSaveFailedHttp(
-            '${e.statusCode ?? '-'}',
+          _line = l10n.projectEditorShortDramaTargetsSaveFailed(
+            describeUserVisibleApiError(l10n, e),
           );
         });
       }

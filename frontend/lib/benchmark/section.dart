@@ -171,10 +171,9 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
     } on RustApiException catch (error) {
       if (!mounted) return;
       setState(() {
-        _statusLine = l10n.benchmarkStatusFailedHttp(
+        _statusLine = l10n.benchmarkStatusFailed(
           label,
-          '${error.statusCode ?? '-'}',
-          error.message,
+          describeUserVisibleApiError(l10n, error),
         );
       });
     } catch (error) {

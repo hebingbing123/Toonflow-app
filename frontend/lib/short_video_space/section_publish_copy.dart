@@ -54,7 +54,7 @@ extension ShortVideoPublishCopy on _ShortVideoSpaceSectionState {
     } on RustApiException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.shortVideoPublishCopySuggestFailedStatus(e.statusCode ?? 0))),
+          SnackBar(content: Text(l10n.shortVideoPublishCopySuggestFailed(describeUserVisibleApiError(l10n, e)))),
         );
       }
     } catch (e) {
@@ -126,7 +126,7 @@ extension ShortVideoPublishCopy on _ShortVideoSpaceSectionState {
       );
     } on RustApiException catch (e) {
       messenger?.showSnackBar(
-        SnackBar(content: Text(l10n.shortVideoPublishCopySaveFailedStatus(e.statusCode ?? 0))),
+        SnackBar(content: Text(l10n.shortVideoPublishCopySaveFailed(describeUserVisibleApiError(l10n, e)))),
       );
     } catch (e) {
       messenger?.showSnackBar(
