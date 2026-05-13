@@ -40,7 +40,7 @@ class LocalizedFormatting {
   /// English: 2:30 PM
   static String formatTime(BuildContext context, DateTime dateTime) {
     final locale = _getFormattingLocale(context);
-    final formatter = DateFormat.Hm(locale.toString());
+    final formatter = DateFormat.jm(locale.toString());
     return formatter.format(dateTime);
   }
 
@@ -49,7 +49,7 @@ class LocalizedFormatting {
   /// English: January 15, 2024 at 2:30 PM
   static String formatDateTime(BuildContext context, DateTime dateTime) {
     final locale = _getFormattingLocale(context);
-    final formatter = DateFormat.yMMMMd(locale.toString()).add_Hm();
+    final formatter = DateFormat.yMMMMd(locale.toString()).add_jm();
     return formatter.format(dateTime);
   }
 
@@ -58,7 +58,7 @@ class LocalizedFormatting {
   /// English: 1/15/2024, 2:30 PM
   static String formatShortDateTime(BuildContext context, DateTime dateTime) {
     final locale = _getFormattingLocale(context);
-    final formatter = DateFormat.yMd(locale.toString()).add_Hm();
+    final formatter = DateFormat.yMd(locale.toString()).add_jm();
     return formatter.format(dateTime);
   }
 
