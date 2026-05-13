@@ -132,7 +132,10 @@ extension _HomePageProjectEditorScriptPlanWorkbench on _HomePageState {
           script: const <Map<String, dynamic>>[],
         );
         if (status != 200) {
-          throw Exception(l10n.projectScriptPlanWorkbenchSaveFailedHttp(status));
+          throw RustApiException(
+            'set-plan-data failed with status $status',
+            statusCode: status,
+          );
         }
         await loadPlan(setLocalState);
         if (!ctx.mounted) return;
@@ -175,7 +178,10 @@ extension _HomePageProjectEditorScriptPlanWorkbench on _HomePageState {
               .toList(growable: false),
         );
         if (status != 200) {
-          throw Exception(l10n.projectScriptPlanWorkbenchWriteFailedHttp(status));
+          throw RustApiException(
+            'set-plan-data failed with status $status',
+            statusCode: status,
+          );
         }
         await loadPlan(setLocalState);
         if (!ctx.mounted) return;

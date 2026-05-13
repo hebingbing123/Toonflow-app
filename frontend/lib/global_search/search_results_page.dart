@@ -193,7 +193,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
       if (!mounted) return;
 
       setState(() {
-        _error = formatRustApiExceptionForDisplay(l10n, e);
+        _error = describeUserVisibleApiError(l10n, e);
         _isLoading = false;
       });
     } catch (e) {

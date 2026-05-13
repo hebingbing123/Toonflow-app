@@ -614,7 +614,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
         );
       }
       showFeedback(
-        l10n.shortVideoBatchVoiceoverGenFailedStatus(
+        l10n.shortVideoBatchVoiceoverGenFailedError(
           describeUserVisibleApiError(l10n, e),
         ),
         isSuccess: false,
