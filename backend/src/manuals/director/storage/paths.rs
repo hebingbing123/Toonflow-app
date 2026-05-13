@@ -2,7 +2,7 @@
 
 use std::path::PathBuf;
 
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, ApiError};
 use crate::prompting::skills::skills_root;
 
 pub(super) fn is_safe_style_component(name: &str) -> bool {
@@ -27,8 +27,9 @@ pub(crate) fn story_manual_dir(director_manual: &str) -> Result<PathBuf, ApiErro
     validate_style_key("名称不能包含路径分隔符或为纯数字", director_manual)?;
     let root = skills_root();
     if !root.is_dir() {
-        return Err(ApiError::BadRequest(
-            "skills directory missing (expected backend/data/skills)".into(),
+        return Err(bad_request_i18n(
+            "skills directory missing (expected backend/data/skills)",
+            "skills 目录缺失（预期为 backend/data/skills）",
         ));
     }
     Ok(root.join("story_skills").join(director_manual))

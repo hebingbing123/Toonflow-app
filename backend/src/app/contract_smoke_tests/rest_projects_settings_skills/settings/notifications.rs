@@ -200,3 +200,121 @@ async fn settings_notifications_preferences_import_requires_database_with_jwt() 
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
     assert_eq!(v["code"], "database_error");
 }
+
+// --- Workspace shared cleared-template audit export (sync + async + history + job file) ---
+
+#[tokio::test]
+async fn settings_notifications_workspace_shared_audit_export_unauthorized_without_bearer() {
+    let (status, v) = get_json(
+        "/api/v1/settings/notifications/content-compliance/cleared-templates/shared/audit/export?format=json",
+    )
+    .await;
+    assert_eq!(status, StatusCode::UNAUTHORIZED);
+    assert_eq!(v["code"], "unauthorized");
+}
+
+#[tokio::test]
+async fn settings_notifications_workspace_shared_audit_export_requires_database_with_jwt() {
+    let token = test_jwt(Uuid::nil());
+    let (status, v) = get_json_bearer(
+        "/api/v1/settings/notifications/content-compliance/cleared-templates/shared/audit/export?format=json",
+        &token,
+    )
+    .await;
+    assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+    assert_eq!(v["code"], "database_error");
+}
+
+#[tokio::test]
+async fn settings_notifications_workspace_shared_audit_exports_unauthorized_without_bearer() {
+    let (status, v) = get_json(
+        "/api/v1/settings/notifications/content-compliance/cleared-templates/shared/audit/exports",
+    )
+    .await;
+    assert_eq!(status, StatusCode::UNAUTHORIZED);
+    assert_eq!(v["code"], "unauthorized");
+}
+
+#[tokio::test]
+async fn settings_notifications_workspace_shared_audit_exports_requires_database_with_jwt() {
+    let token = test_jwt(Uuid::nil());
+    let (status, v) = get_json_bearer(
+        "/api/v1/settings/notifications/content-compliance/cleared-templates/shared/audit/exports",
+        &token,
+    )
+    .await;
+    assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+    assert_eq!(v["code"], "database_error");
+}
+
+#[tokio::test]
+async fn settings_notifications_workspace_shared_audit_export_async_unauthorized_without_bearer() {
+    let body = r#"{"format":"json"}"#;
+    let (status, v) = post_json(
+        "/api/v1/settings/notifications/content-compliance/cleared-templates/shared/audit/export-async",
+        body,
+    )
+    .await;
+    assert_eq!(status, StatusCode::UNAUTHORIZED);
+    assert_eq!(v["code"], "unauthorized");
+}
+
+#[tokio::test]
+async fn settings_notifications_workspace_shared_audit_export_async_requires_database_with_jwt() {
+    let token = test_jwt(Uuid::nil());
+    let body = r#"{"format":"json"}"#;
+    let (status, v) = post_json_bearer(
+        "/api/v1/settings/notifications/content-compliance/cleared-templates/shared/audit/export-async",
+        &token,
+        body,
+    )
+    .await;
+    assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+    assert_eq!(v["code"], "database_error");
+}
+
+#[tokio::test]
+async fn settings_notifications_workspace_shared_audit_export_job_unauthorized_without_bearer() {
+    let (status, v) = get_json(
+        "/api/v1/settings/notifications/content-compliance/cleared-templates/shared/audit/export-jobs/00000000-0000-0000-0000-000000000000",
+    )
+    .await;
+    assert_eq!(status, StatusCode::UNAUTHORIZED);
+    assert_eq!(v["code"], "unauthorized");
+}
+
+#[tokio::test]
+async fn settings_notifications_workspace_shared_audit_export_job_requires_database_with_jwt() {
+    let token = test_jwt(Uuid::nil());
+    let (status, v) = get_json_bearer(
+        "/api/v1/settings/notifications/content-compliance/cleared-templates/shared/audit/export-jobs/00000000-0000-0000-0000-000000000000",
+        &token,
+    )
+    .await;
+    assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+    assert_eq!(v["code"], "database_error");
+}
+
+#[tokio::test]
+async fn settings_notifications_workspace_shared_audit_export_job_file_unauthorized_without_bearer()
+{
+    let (status, v) = get_json(
+        "/api/v1/settings/notifications/content-compliance/cleared-templates/shared/audit/export-jobs/00000000-0000-0000-0000-000000000000/file",
+    )
+    .await;
+    assert_eq!(status, StatusCode::UNAUTHORIZED);
+    assert_eq!(v["code"], "unauthorized");
+}
+
+#[tokio::test]
+async fn settings_notifications_workspace_shared_audit_export_job_file_requires_database_with_jwt()
+{
+    let token = test_jwt(Uuid::nil());
+    let (status, v) = get_json_bearer(
+        "/api/v1/settings/notifications/content-compliance/cleared-templates/shared/audit/export-jobs/00000000-0000-0000-0000-000000000000/file",
+        &token,
+    )
+    .await;
+    assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
+    assert_eq!(v["code"], "database_error");
+}

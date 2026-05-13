@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
+
 /// Groups status, result summaries, and suggested flow-key hints for production.
 class ProductionWorkspaceStatusPanel extends StatelessWidget {
   const ProductionWorkspaceStatusPanel({
@@ -23,22 +25,33 @@ class ProductionWorkspaceStatusPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final bodySmall = Theme.of(context).textTheme.bodySmall;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         const SizedBox(height: 8),
         Text(
-          runningTaskLine ?? taskStatusLine ?? '等待执行：可直接用引导任务或表单按钮。',
+          runningTaskLine ??
+              taskStatusLine ??
+              l10n.agentWorkspaceProductionIdleHint,
           style: bodySmall,
         ),
         if (workspaceLastToolResultLine != null) ...<Widget>[
           const SizedBox(height: 8),
-          Text('最新工具结果：$workspaceLastToolResultLine', style: bodySmall),
+          Text(
+            l10n.agentWorkspaceProductionLatestToolResult(
+              workspaceLastToolResultLine!,
+            ),
+            style: bodySmall,
+          ),
         ],
         if (resultSummaryLines.isNotEmpty) ...<Widget>[
           const SizedBox(height: 8),
-          Text('结果摘要', style: Theme.of(context).textTheme.labelLarge),
+          Text(
+            l10n.agentWorkspaceProductionResultSummary,
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
           const SizedBox(height: 4),
           ...resultSummaryLines.map(
             (String line) => Text(line, style: bodySmall),
@@ -49,21 +62,23 @@ class ProductionWorkspaceStatusPanel extends StatelessWidget {
           Row(
             children: <Widget>[
               Expanded(
-                child: Text('建议写回 key：$suggestedFlowKeyLine', style: bodySmall),
+                child: Text(
+                  l10n.agentWorkspaceProductionSuggestedFlowKey(
+                    suggestedFlowKeyLine!,
+                  ),
+                  style: bodySmall,
+                ),
               ),
               const SizedBox(width: 8),
               OutlinedButton(
                 onPressed: busy ? null : onApplySuggestedFlowKey,
-                child: const Text('使用该 key'),
+                child: Text(l10n.agentWorkspaceProductionUseSuggestedFlowKey),
               ),
             ],
           ),
         ],
         const SizedBox(height: 8),
-        Text(
-          '核心 key 回写策略：get_flowData 直接写回；资产/分镜/导演计划相关工具会先刷新对应 flow key 再写回。',
-          style: bodySmall,
-        ),
+        Text(l10n.agentWorkspaceProductionWritebackStrategy, style: bodySmall),
       ],
     );
   }

@@ -7,7 +7,7 @@ use serde_json::json;
 use sqlx::PgPool;
 
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{validate_positive, ApiError};
 use crate::jobs::{
     JobRow, JOB_KIND_ASSET_GENERATE_BATCH, JOB_KIND_ASSET_GENERATE_IMAGE,
     JOB_KIND_ASSET_POLISH_BATCH, JOB_KIND_ASSET_POLISH_PROMPT,
@@ -22,9 +22,7 @@ pub(crate) async fn post_cancel_generate(
     Json(body): Json<CancelGenerateBody>,
 ) -> Result<JsonResponse<serde_json::Value>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    if body.id <= 0 {
-        return Err(ApiError::BadRequest("id must be positive".into()));
-    }
+    validate_positive(body.id, "id")?;
 
     let pool: &PgPool = state
         .pool

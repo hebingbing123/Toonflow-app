@@ -6,7 +6,7 @@ use axum::{
     response::{IntoResponse, Response},
 };
 
-use super::super::common::require_owned_normalized_storyboards_scope;
+use super::super::common::require_owned_normalized_storyboards_scope_ref;
 use super::super::types::{ExportImageBody, ExportImageSourceRow};
 use super::shot_ids::normalize_export_shot_ids;
 use super::zip_export::build_storyboard_export_zip;
@@ -38,14 +38,16 @@ pub(in crate::production) async fn post_export_image(
 ) -> Result<Response, ApiError> {
     let normalized_ids = normalize_export_shot_ids(&body.shot_id)?;
 
-    let (uid, pool, script_id, _confirmed_ids) = require_owned_normalized_storyboards_scope(
-        &state,
-        &headers,
-        body.project_id,
-        body.script_id,
-        &normalized_ids,
-    )
-    .await?;
+    let (uid, pool, _project_numeric_id, script_id, _confirmed_ids) =
+        require_owned_normalized_storyboards_scope_ref(
+            &state,
+            &headers,
+            body.project_id,
+            body.project_uuid,
+            body.script_id,
+            &normalized_ids,
+        )
+        .await?;
 
     let rows = sqlx::query_as::<_, ExportImageSourceRow>(
         r#"

@@ -1,7 +1,7 @@
 use axum::{extract::State, http::HeaderMap, Json};
 
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, ApiError};
 use crate::harness::observe;
 use crate::state::AppState;
 
@@ -32,8 +32,9 @@ pub(crate) async fn clear_memory(
     let uid = require_user_uuid(&state, &headers)?;
     let agent_type = parse_agent_type(&body.agent_type)?;
     if body.project_uuid.is_none() && body.project_id.is_none() {
-        return Err(ApiError::BadRequest(
-            "Provide projectUuid (preferred) or legacy numeric projectId".into(),
+        return Err(bad_request_i18n(
+            "Provide projectUuid (preferred) or legacy numeric projectId",
+            "请提供 projectUuid（推荐）或旧版数值 projectId",
         ));
     }
     let pool = state.require_pool()?;
@@ -118,8 +119,9 @@ pub(crate) async fn clear_memory(
             .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
         }
         _ => {
-            return Err(ApiError::BadRequest(
-                "clearType must be all, message, or summary".into(),
+            return Err(bad_request_i18n(
+                "clearType must be all, message, or summary",
+                "clearType 必须为 all、message 或 summary",
             ));
         }
     }

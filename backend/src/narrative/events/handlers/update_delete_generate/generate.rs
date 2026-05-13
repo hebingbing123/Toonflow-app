@@ -6,7 +6,7 @@ use axum::{
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, ApiError};
 use crate::projects::routes::common::require_project_write_scope;
 use crate::state::AppState;
 
@@ -41,10 +41,16 @@ pub(crate) async fn post_generate_novel_events_for_project(
 ) -> Result<JsonResponse<NovelOkMessageResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     if body.novel_ids.is_empty() {
-        return Err(ApiError::BadRequest("novelIds must not be empty".into()));
+        return Err(bad_request_i18n(
+            "novelIds must not be empty",
+            "novelIds 不能为空",
+        ));
     }
     if body.concurrent_count == 0 {
-        return Err(ApiError::BadRequest("concurrentCount must be >= 1".into()));
+        return Err(bad_request_i18n(
+            "concurrentCount must be >= 1",
+            "concurrentCount 必须大于等于 1",
+        ));
     }
     if body.concurrent_count > MAX_GENERATE_EVENTS_CONCURRENCY {
         return Err(ApiError::BadRequest(format!(

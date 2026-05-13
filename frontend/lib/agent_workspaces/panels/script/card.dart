@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../panel_support.dart';
 import '../../prompt_preset.dart';
 import '../../contexts/script/action_panels.dart';
@@ -101,15 +102,17 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
       widget.workspaceScriptPlanRowId != null;
 
   String? get _scriptWritebackSourceLine {
+    final l10n = AppLocalizations.of(context)!;
     final source = widget.workspaceScriptWritebackSource?.trim();
     if (source != null && source.isNotEmpty) return source;
     if (widget.workspaceAssistantText.trim().isNotEmpty) {
-      return 'assistant stream';
+      return l10n.agentWorkspaceScriptWritebackSourceAssistant;
     }
     return null;
   }
 
   String? get _scriptPlanWritebackLine {
+    final l10n = AppLocalizations.of(context)!;
     final candidate = widget.workspaceScriptPlanWritebackCandidate;
     if (candidate == null) return null;
     final data = candidate['data'];
@@ -119,16 +122,27 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
         ? scriptRaw.whereType<Map<String, dynamic>>().length
         : 0;
     final pid = widget.workspaceScriptPlanRowId;
-    final planHint = pid != null ? ' plan_row_id=$pid' : '';
-    return 'PlanData source ready:$planHint story/adaptation + script rows=$scriptCount';
+    final planHint = pid != null ? l10n.agentWorkspaceScriptPlanHint(pid) : '';
+    return l10n.agentWorkspaceScriptPlanWritebackReady(planHint, scriptCount);
   }
 
   String? get _runningTaskLine {
-    if (widget.loadingScriptWorkspaceRun) return '执行中：运行剧本工作流';
-    if (widget.loadingScriptDomainProbe) return '执行中：读取剧本上下文';
-    if (widget.loadingScriptSubAgentRun) return '执行中：运行子代理';
-    if (widget.loadingScriptResultWriteback) return '执行中：写回剧本';
-    if (widget.loadingScriptPlanResultWriteback) return '执行中：写回计划数据';
+    final l10n = AppLocalizations.of(context)!;
+    if (widget.loadingScriptWorkspaceRun) {
+      return l10n.agentWorkspaceScriptRunningWorkflow;
+    }
+    if (widget.loadingScriptDomainProbe) {
+      return l10n.agentWorkspaceScriptRunningReadContext;
+    }
+    if (widget.loadingScriptSubAgentRun) {
+      return l10n.agentWorkspaceScriptRunningSubAgent;
+    }
+    if (widget.loadingScriptResultWriteback) {
+      return l10n.agentWorkspaceScriptRunningWriteback;
+    }
+    if (widget.loadingScriptPlanResultWriteback) {
+      return l10n.agentWorkspaceScriptRunningWritebackPlan;
+    }
     return null;
   }
 
@@ -145,6 +159,7 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final resultSummaryLines = _buildResultSummaryLines();
     return Card(
       child: Padding(
@@ -152,9 +167,15 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text('剧本工作区', style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              l10n.agentWorkspaceScriptCardTitle,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             const SizedBox(height: 8),
-            Text('引导任务', style: Theme.of(context).textTheme.labelLarge),
+            Text(
+              l10n.agentWorkspaceGuidedTasksTitle,
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
             const SizedBox(height: 6),
             _buildGuidedTasks(),
             const SizedBox(height: 10),

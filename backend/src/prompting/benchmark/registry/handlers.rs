@@ -9,7 +9,7 @@ use sqlx::{Postgres, QueryBuilder};
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, ApiError};
 use crate::state::AppState;
 
 use super::types::{
@@ -44,8 +44,12 @@ pub(crate) async fn create_benchmark_case(
     // 检查重复样本（需求 1.6）
     check_duplicate_case(pool, user_id, body.project_id, body.script_id, &body.stage).await?;
 
-    let issue_tags = serde_json::to_value(body.issue_tags.unwrap_or_default())
-        .map_err(|e| ApiError::BadRequest(format!("Invalid issue_tags: {}", e)))?;
+    let issue_tags = serde_json::to_value(body.issue_tags.unwrap_or_default()).map_err(|e| {
+        bad_request_i18n(
+            &format!("Invalid issue_tags: {}", e),
+            &format!("无效的 issue_tags：{}", e),
+        )
+    })?;
 
     let weight = body.weight.unwrap_or(1);
 
@@ -192,8 +196,12 @@ pub(crate) async fn update_benchmark_case(
         qb.push_bind(case_type);
     }
     if let Some(issue_tags) = &body.issue_tags {
-        let tags_json = serde_json::to_value(issue_tags)
-            .map_err(|e| ApiError::BadRequest(format!("Invalid issue_tags: {}", e)))?;
+        let tags_json = serde_json::to_value(issue_tags).map_err(|e| {
+            bad_request_i18n(
+                &format!("Invalid issue_tags: {}", e),
+                &format!("无效的 issue_tags：{}", e),
+            )
+        })?;
         qb.push(", issue_tags = ");
         qb.push_bind(tags_json);
     }
@@ -274,21 +282,28 @@ pub(crate) async fn promote_from_quality_review(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?
     .ok_or(ApiError::NotFound)?;
 
-    let project_id = review
-        .0
-        .ok_or_else(|| ApiError::BadRequest("Quality review missing project_id".into()))?;
+    let project_id = review.0.ok_or_else(|| {
+        bad_request_i18n(
+            "Quality review missing project_id",
+            "质量评审缺少 project_id",
+        )
+    })?;
 
     let stage = review
         .2
-        .ok_or_else(|| ApiError::BadRequest("Quality review missing stage".into()))?;
+        .ok_or_else(|| bad_request_i18n("Quality review missing stage", "质量评审缺少 stage"))?;
 
     let script_id = review.1;
 
     // 检查重复样本（需求 1.6）
     check_duplicate_case(pool, user_id, project_id, script_id, &stage).await?;
 
-    let issue_tags = serde_json::to_value(body.issue_tags.unwrap_or_default())
-        .map_err(|e| ApiError::BadRequest(format!("Invalid issue_tags: {}", e)))?;
+    let issue_tags = serde_json::to_value(body.issue_tags.unwrap_or_default()).map_err(|e| {
+        bad_request_i18n(
+            &format!("Invalid issue_tags: {}", e),
+            &format!("无效的 issue_tags：{}", e),
+        )
+    })?;
 
     let weight = body.weight.unwrap_or(1);
     let source_ref = body.quality_review_id.to_string();
@@ -329,13 +344,17 @@ fn validate_create_body(body: &CreateBenchmarkCaseBody) -> Result<(), ApiError> 
     validate_source_kind(&body.source_kind)?;
 
     if body.summary.trim().is_empty() {
-        return Err(ApiError::BadRequest("summary cannot be empty".into()));
+        return Err(bad_request_i18n(
+            "summary cannot be empty",
+            "summary 不能为空",
+        ));
     }
 
     if let Some(weight) = body.weight {
         if !(1..=100).contains(&weight) {
-            return Err(ApiError::BadRequest(
-                "weight must be between 1 and 100".into(),
+            return Err(bad_request_i18n(
+                "weight must be between 1 and 100",
+                "weight 必须在 1 到 100 之间",
             ));
         }
     }
@@ -365,13 +384,17 @@ fn validate_update_body(body: &UpdateBenchmarkCaseBody) -> Result<(), ApiError> 
     }
     if let Some(summary) = &body.summary {
         if summary.trim().is_empty() {
-            return Err(ApiError::BadRequest("summary cannot be empty".into()));
+            return Err(bad_request_i18n(
+                "summary cannot be empty",
+                "summary 不能为空",
+            ));
         }
     }
     if let Some(weight) = body.weight {
         if !(1..=100).contains(&weight) {
-            return Err(ApiError::BadRequest(
-                "weight must be between 1 and 100".into(),
+            return Err(bad_request_i18n(
+                "weight must be between 1 and 100",
+                "weight 必须在 1 到 100 之间",
             ));
         }
     }
@@ -382,13 +405,17 @@ fn validate_promote_body(body: &PromoteFromQualityReviewBody) -> Result<(), ApiE
     validate_case_type(&body.case_type)?;
 
     if body.summary.trim().is_empty() {
-        return Err(ApiError::BadRequest("summary cannot be empty".into()));
+        return Err(bad_request_i18n(
+            "summary cannot be empty",
+            "summary 不能为空",
+        ));
     }
 
     if let Some(weight) = body.weight {
         if !(1..=100).contains(&weight) {
-            return Err(ApiError::BadRequest(
-                "weight must be between 1 and 100".into(),
+            return Err(bad_request_i18n(
+                "weight must be between 1 and 100",
+                "weight 必须在 1 到 100 之间",
             ));
         }
     }
@@ -407,11 +434,18 @@ pub(super) fn validate_stage(stage: &str) -> Result<(), ApiError> {
     ];
 
     if !VALID_STAGES.contains(&stage) {
-        return Err(ApiError::BadRequest(format!(
-            "Invalid stage '{}'. Must be one of: {}",
-            stage,
-            VALID_STAGES.join(", ")
-        )));
+        return Err(bad_request_i18n(
+            &format!(
+                "Invalid stage '{}'. Must be one of: {}",
+                stage,
+                VALID_STAGES.join(", ")
+            ),
+            &format!(
+                "无效的 stage '{}'。必须是以下之一：{}",
+                stage,
+                VALID_STAGES.join("、")
+            ),
+        ));
     }
 
     Ok(())
@@ -421,11 +455,18 @@ pub(super) fn validate_case_type(case_type: &str) -> Result<(), ApiError> {
     const VALID_TYPES: &[&str] = &["golden", "bad_case", "regression_guard"];
 
     if !VALID_TYPES.contains(&case_type) {
-        return Err(ApiError::BadRequest(format!(
-            "Invalid case_type '{}'. Must be one of: {}",
-            case_type,
-            VALID_TYPES.join(", ")
-        )));
+        return Err(bad_request_i18n(
+            &format!(
+                "Invalid case_type '{}'. Must be one of: {}",
+                case_type,
+                VALID_TYPES.join(", ")
+            ),
+            &format!(
+                "无效的 case_type '{}'。必须是以下之一：{}",
+                case_type,
+                VALID_TYPES.join("、")
+            ),
+        ));
     }
 
     Ok(())
@@ -440,11 +481,18 @@ pub(super) fn validate_source_kind(source_kind: &str) -> Result<(), ApiError> {
     ];
 
     if !VALID_SOURCES.contains(&source_kind) {
-        return Err(ApiError::BadRequest(format!(
-            "Invalid source_kind '{}'. Must be one of: {}",
-            source_kind,
-            VALID_SOURCES.join(", ")
-        )));
+        return Err(bad_request_i18n(
+            &format!(
+                "Invalid source_kind '{}'. Must be one of: {}",
+                source_kind,
+                VALID_SOURCES.join(", ")
+            ),
+            &format!(
+                "无效的 source_kind '{}'。必须是以下之一：{}",
+                source_kind,
+                VALID_SOURCES.join("、")
+            ),
+        ));
     }
 
     Ok(())
@@ -495,10 +543,13 @@ async fn check_duplicate_case(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     if count > 0 {
-        return Err(ApiError::BadRequest(format!(
-            "Duplicate benchmark case detected for scope {}. Consider updating existing case instead.",
-            scope_key
-        )));
+        return Err(bad_request_i18n(
+            &format!(
+                "Duplicate benchmark case detected for scope {}. Consider updating existing case instead.",
+                scope_key
+            ),
+            &format!("检测到 scope {} 下存在重复 benchmark case，请考虑更新已有样本。", scope_key),
+        ));
     }
 
     Ok(())

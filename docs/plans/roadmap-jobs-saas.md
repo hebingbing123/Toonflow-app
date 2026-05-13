@@ -3,6 +3,8 @@
 母文档：[`harness-rust-flutter.md`](./harness-rust-flutter.md)  
 YAML：`jobs-and-webhook-hardening`、`saas-product-spec`。
 
+**阅读提醒**：本文中的 `plan_tier` 既可能表示当前 user-scope 套餐输入，也可能表示未来 billing/workspace 规格中的字段讨论。若未明确提到 W8 future 迁移，默认不要把这里的限流 / webhook / 收单路线图解读成 workspace-scope billing 已生效。
+
 ## 基线（当前分支）
 
 | 条目 | 状态 | 说明 |

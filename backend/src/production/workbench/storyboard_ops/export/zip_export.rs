@@ -13,7 +13,7 @@ use super::super::shot_text::{
     parse_storyboard_duration_seconds, resolve_shot_script_source, resolve_shot_voiceover_ready,
 };
 use super::super::types::ExportImageSourceRow;
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, ApiError};
 use crate::state::AppState;
 
 pub(super) async fn build_storyboard_export_zip(
@@ -28,10 +28,13 @@ pub(super) async fn build_storyboard_export_zip(
     for (order_index, row) in rows.into_iter().enumerate() {
         manifest_rows.push(StoryboardExportManifestShot::from_row(&row, order_index));
         let file_path = row.file_path.as_deref().ok_or_else(|| {
-            ApiError::BadRequest(format!(
-                "storyboard {} has no generated image to export",
-                row.numeric_id
-            ))
+            bad_request_i18n(
+                &format!(
+                    "storyboard {} has no generated image to export",
+                    row.numeric_id
+                ),
+                &format!("storyboard {} 没有可导出的已生成图片", row.numeric_id),
+            )
         })?;
 
         let exported =
@@ -528,15 +531,22 @@ async fn fetch_storyboard_export_bytes(
         }),
         StoryboardExportSource::RemoteUrl { url } => {
             let resp = state.http_client.get(&url).send().await.map_err(|e| {
-                ApiError::BadRequest(format!(
-                    "failed to fetch storyboard {numeric_id} image: {e}"
-                ))
+                bad_request_i18n(
+                    &format!("failed to fetch storyboard {numeric_id} image: {e}"),
+                    &format!("获取 storyboard {numeric_id} 图片失败：{e}"),
+                )
             })?;
             if !resp.status().is_success() {
-                return Err(ApiError::BadRequest(format!(
-                    "failed to fetch storyboard {numeric_id} image: upstream status {}",
-                    resp.status()
-                )));
+                return Err(bad_request_i18n(
+                    &format!(
+                        "failed to fetch storyboard {numeric_id} image: upstream status {}",
+                        resp.status()
+                    ),
+                    &format!(
+                        "获取 storyboard {numeric_id} 图片失败：上游状态码 {}",
+                        resp.status()
+                    ),
+                ));
             }
             let content_type = resp
                 .headers()
@@ -544,7 +554,10 @@ async fn fetch_storyboard_export_bytes(
                 .and_then(|v| v.to_str().ok())
                 .map(str::to_string);
             let bytes = resp.bytes().await.map_err(|e| {
-                ApiError::BadRequest(format!("failed to read storyboard {numeric_id} image: {e}"))
+                bad_request_i18n(
+                    &format!("failed to read storyboard {numeric_id} image: {e}"),
+                    &format!("读取 storyboard {numeric_id} 图片失败：{e}"),
+                )
             })?;
             let extension = infer_export_extension(&url, content_type.as_deref());
             Ok(StoryboardExportFile {
@@ -554,7 +567,10 @@ async fn fetch_storyboard_export_bytes(
         }
         StoryboardExportSource::AbsolutePath { path } => {
             let bytes = tokio::fs::read(&path).await.map_err(|e| {
-                ApiError::BadRequest(format!("failed to read storyboard {numeric_id} file: {e}"))
+                bad_request_i18n(
+                    &format!("failed to read storyboard {numeric_id} file: {e}"),
+                    &format!("读取 storyboard {numeric_id} 文件失败：{e}"),
+                )
             })?;
             let extension = path
                 .extension()
@@ -568,15 +584,21 @@ async fn fetch_storyboard_export_bytes(
         }
         StoryboardExportSource::LocalStorage { relative_path } => {
             let base = state.local_asset_image_dir.as_ref().ok_or_else(|| {
-                ApiError::BadRequest(format!(
-                    "storyboard {numeric_id} uses local storage but no local image directory is configured"
-                ))
+                bad_request_i18n(
+                    &format!(
+                        "storyboard {numeric_id} uses local storage but no local image directory is configured"
+                    ),
+                    &format!(
+                        "storyboard {numeric_id} 使用本地存储，但未配置本地图片目录"
+                    ),
+                )
             })?;
             let local_path = base.join(owner_user_id.to_string()).join(relative_path);
             let bytes = tokio::fs::read(&local_path).await.map_err(|e| {
-                ApiError::BadRequest(format!(
-                    "failed to read storyboard {numeric_id} local file: {e}"
-                ))
+                bad_request_i18n(
+                    &format!("failed to read storyboard {numeric_id} local file: {e}"),
+                    &format!("读取 storyboard {numeric_id} 本地文件失败：{e}"),
+                )
             })?;
             let extension = local_path
                 .extension()

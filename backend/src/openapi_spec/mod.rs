@@ -38,7 +38,12 @@ use utoipa::OpenApi;
         crate::app::handlers::VersionResponse,
         crate::app::handlers::ReadyResponse,
         crate::app::handlers::ReadyHarnessIsolateMetrics,
+        crate::app::handlers::ReadyQuotaMetrics,
         crate::app::handlers::MeResponse,
+        crate::app::handlers::MeV2Response,
+        crate::app::handlers::UserBillingSummary,
+        crate::app::handlers::WorkspaceBillingSummary,
+        crate::app::handlers::WorkspaceSummary,
         crate::app::handlers::metrics::MetricsQuery,
         crate::app::handlers::metrics::MetricsResponse,
         crate::app::handlers::metrics::SliStatusResponse,
@@ -66,6 +71,7 @@ pub fn combined_openapi() -> utoipa::openapi::OpenApi {
     doc.merge(crate::settings::SettingsOpenApi::openapi());
     doc.merge(crate::vendor::VendorCatalogOpenApi::openapi());
     doc.merge(crate::prompting::PromptingHttpOpenApi::openapi());
+    doc.merge(crate::prompting::SkillsOpenApi::openapi());
     doc.merge(crate::production::ProductionApi::openapi());
     doc.merge(crate::projects::ProjectsOpenApi::openapi());
     doc.merge(crate::publish::PublishOpenApi::openapi());

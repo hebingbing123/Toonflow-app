@@ -105,7 +105,7 @@ fn generate_video_prompt_body_accepts_auto_quality_review_flag() {
         r#"{"projectId":1,"scriptId":2,"storyboardId":3,"autoQualityReview":true}"#,
     )
     .unwrap();
-    assert_eq!(body.project_id, 1);
+    assert_eq!(body.project_id, Some(1));
     assert_eq!(body.script_id, 2);
     assert_eq!(body.storyboard_id, Some(3));
     assert!(body.auto_quality_review);

@@ -1,11 +1,15 @@
 //! 工作台视频轨添加 / 删除请求与响应。
 
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct AddTrackBody {
-    pub(crate) project_id: i32,
+    #[serde(default)]
+    pub(crate) project_id: Option<i32>,
+    #[serde(default)]
+    pub(crate) project_uuid: Option<Uuid>,
     pub(crate) script_id: i32,
     pub(crate) track_name: String,
     #[serde(default)]
@@ -24,7 +28,10 @@ pub(in crate::production) struct AddTrackResponse {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct DeleteTrackBody {
-    pub(crate) project_id: i32,
+    #[serde(default)]
+    pub(crate) project_id: Option<i32>,
+    #[serde(default)]
+    pub(crate) project_uuid: Option<Uuid>,
     pub(crate) script_id: i32,
     pub(crate) track_id: i32,
 }

@@ -15,7 +15,7 @@ use crate::state::AppState;
 
 use super::super::models::*;
 use super::super::utils::normalize_corner_types_filter;
-use super::resolve::ensure_owned_project_pk;
+use super::resolve::require_asset_project_read_scope;
 
 async fn list_corner_scape_assets_inner(
     pool: &sqlx::PgPool,
@@ -135,6 +135,6 @@ pub(crate) async fn list_corner_scape_assets_for_project(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    ensure_owned_project_pk(pool, uid, project_id).await?;
+    require_asset_project_read_scope(&state, uid, project_id).await?;
     list_corner_scape_assets_inner(pool, uid, project_id, body).await
 }

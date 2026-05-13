@@ -3,7 +3,7 @@ use axum::http::HeaderMap;
 use serde::{Deserialize, Serialize};
 
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, validate_non_empty_string, ApiError};
 use crate::state::AppState;
 
 #[derive(Debug, Deserialize)]
@@ -40,13 +40,15 @@ pub(crate) async fn post_download_app(
 ) -> Result<Json<DownloadAppAcceptedResponse>, ApiError> {
     let _ = require_user_uuid(&state, &headers)?;
     let u = body.url.trim();
-    if u.is_empty() {
-        return Err(ApiError::BadRequest("url is required".into()));
-    }
-    let parsed = reqwest::Url::parse(u).map_err(|_| ApiError::BadRequest("invalid url".into()))?;
+    validate_non_empty_string(u, "url")?;
+    let parsed =
+        reqwest::Url::parse(u).map_err(|_| bad_request_i18n("invalid url", "无效的 url"))?;
     let scheme = parsed.scheme();
     if scheme != "http" && scheme != "https" {
-        return Err(ApiError::BadRequest("url must be http or https".into()));
+        return Err(bad_request_i18n(
+            "url must be http or https",
+            "url 必须是 http 或 https",
+        ));
     }
     let _ = body.reinstall;
     Ok(Json(DownloadAppAcceptedResponse {

@@ -1,7 +1,7 @@
 use chrono::{DateTime, NaiveDateTime, Utc};
 use serde_json::Value;
 
-pub(super) fn build_provider_event_id(provider: Option<&str>, raw_id: &str) -> String {
+pub(crate) fn build_provider_event_id(provider: Option<&str>, raw_id: &str) -> String {
     let id = raw_id.trim();
     let p = provider.unwrap_or("").trim();
     if p.is_empty() {

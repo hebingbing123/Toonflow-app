@@ -2,7 +2,7 @@
 
 use std::path::{Path, PathBuf};
 
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, ApiError};
 use crate::prompting::skills::skills_root;
 
 use super::super::types::{
@@ -12,22 +12,22 @@ use super::paths::is_safe_style_component;
 
 fn read_limited_utf8(path: &Path, max_bytes: u64) -> Result<String, ApiError> {
     let meta = std::fs::metadata(path).map_err(|e| {
-        ApiError::BadRequest(format!(
-            "director-manual: cannot stat {}: {e}",
-            path.display()
-        ))
+        bad_request_i18n(
+            &format!("director-manual: cannot stat {}: {e}", path.display()),
+            &format!("director-manual：无法读取 {} 的元数据：{e}", path.display()),
+        )
     })?;
     if meta.len() > max_bytes {
-        return Err(ApiError::BadRequest(format!(
-            "director-manual: file too large: {}",
-            path.display()
-        )));
+        return Err(bad_request_i18n(
+            &format!("director-manual: file too large: {}", path.display()),
+            &format!("director-manual：文件过大：{}", path.display()),
+        ));
     }
     std::fs::read_to_string(path).map_err(|e| {
-        ApiError::BadRequest(format!(
-            "director-manual: cannot read {}: {e}",
-            path.display()
-        ))
+        bad_request_i18n(
+            &format!("director-manual: cannot read {}: {e}", path.display()),
+            &format!("director-manual：无法读取 {}：{e}", path.display()),
+        )
     })
 }
 
@@ -111,21 +111,31 @@ pub(crate) fn load_director_manual_list() -> Result<DirectorManualListResponse, 
     let root = skills_root();
     let story = root.join("story_skills");
     if !story.is_dir() {
-        return Err(ApiError::BadRequest(
-            "story_skills directory missing (expected backend/data/skills/story_skills)".into(),
+        return Err(bad_request_i18n(
+            "story_skills directory missing (expected backend/data/skills/story_skills)",
+            "story_skills 目录缺失（预期为 backend/data/skills/story_skills）",
         ));
     }
 
     let mut keys: Vec<String> = Vec::new();
     for entry in std::fs::read_dir(&story).map_err(|e| {
-        ApiError::BadRequest(format!("director-manual: cannot read story_skills: {e}"))
+        bad_request_i18n(
+            &format!("director-manual: cannot read story_skills: {e}"),
+            &format!("director-manual：无法读取 story_skills：{e}"),
+        )
     })? {
         let entry = entry.map_err(|e| {
-            ApiError::BadRequest(format!("director-manual: story_skills entry: {e}"))
+            bad_request_i18n(
+                &format!("director-manual: story_skills entry: {e}"),
+                &format!("director-manual：读取 story_skills 条目失败：{e}"),
+            )
         })?;
-        let ft = entry
-            .file_type()
-            .map_err(|e| ApiError::BadRequest(format!("director-manual: file_type: {e}")))?;
+        let ft = entry.file_type().map_err(|e| {
+            bad_request_i18n(
+                &format!("director-manual: file_type: {e}"),
+                &format!("director-manual：读取 file_type 失败：{e}"),
+            )
+        })?;
         if !ft.is_dir() {
             continue;
         }

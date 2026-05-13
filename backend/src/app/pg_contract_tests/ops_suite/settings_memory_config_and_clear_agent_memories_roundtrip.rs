@@ -164,6 +164,7 @@ async fn settings_memory_config_and_clear_agent_memories_roundtrip() {
     let (status, episode_memory) = read_json_response(res).await;
     assert_eq!(status, StatusCode::OK, "episode_memory={episode_memory}");
     assert_eq!(episode_memory.as_array().map(|a| a.len()), Some(1));
+    assert_eq!(episode_memory[0]["scope"].as_str(), Some("user"));
     assert_eq!(
         episode_memory[0]["content"][0]["data"].as_str(),
         Some("episode scoped memory")
@@ -192,6 +193,7 @@ async fn settings_memory_config_and_clear_agent_memories_roundtrip() {
         "episode_summary_memory={episode_summary_memory}"
     );
     assert_eq!(episode_summary_memory.as_array().map(|a| a.len()), Some(1));
+    assert_eq!(episode_summary_memory[0]["scope"].as_str(), Some("user"));
     assert_eq!(
         episode_summary_memory[0]["content"][0]["data"].as_str(),
         Some("episode scoped summary")
@@ -220,6 +222,8 @@ async fn settings_memory_config_and_clear_agent_memories_roundtrip() {
         "episode_all_memory={episode_all_memory}"
     );
     assert_eq!(episode_all_memory.as_array().map(|a| a.len()), Some(2));
+    assert_eq!(episode_all_memory[0]["scope"].as_str(), Some("user"));
+    assert_eq!(episode_all_memory[1]["scope"].as_str(), Some("user"));
 
     let res = app
         .clone()
@@ -331,6 +335,7 @@ async fn settings_memory_config_and_clear_agent_memories_roundtrip() {
     assert_eq!(status, StatusCode::OK, "scoped_memory={scoped_memory}");
     let scoped_memory = scoped_memory.as_array().expect("scoped_memory list");
     assert_eq!(scoped_memory.len(), 1);
+    assert_eq!(scoped_memory[0]["scope"].as_str(), Some("user"));
     assert_eq!(
         scoped_memory[0]["content"][0]["data"].as_str(),
         Some("scene A exact memory")

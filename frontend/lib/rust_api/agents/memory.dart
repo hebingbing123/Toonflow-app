@@ -27,6 +27,7 @@ class AgentMemoryContentBlock {
 
 class AgentMemoryHistoryItem {
   const AgentMemoryHistoryItem({
+    required this.scope,
     required this.id,
     required this.role,
     required this.name,
@@ -50,6 +51,7 @@ class AgentMemoryHistoryItem {
               .toList(growable: false)
         : const <AgentMemoryContentBlock>[];
     return AgentMemoryHistoryItem(
+      scope: json['scope']?.toString() ?? 'user',
       id: json['id']?.toString() ?? '',
       role: json['role']?.toString() ?? 'user',
       name: json['name']?.toString(),
@@ -61,6 +63,7 @@ class AgentMemoryHistoryItem {
     );
   }
 
+  final String scope;
   final String id;
   final String role;
   final String? name;
@@ -75,6 +78,7 @@ class AgentMemoryHistoryItem {
 
 class AgentMemoryCostOverview {
   const AgentMemoryCostOverview({
+    required this.scope,
     required this.projectId,
     required this.styleBibleCount,
     required this.stageSummaryCount,
@@ -87,6 +91,7 @@ class AgentMemoryCostOverview {
 
   factory AgentMemoryCostOverview.fromJson(Map<String, dynamic> json) {
     return AgentMemoryCostOverview(
+      scope: json['scope']?.toString() ?? 'user',
       projectId: (json['projectId'] as num?)?.toInt() ?? 0,
       styleBibleCount: (json['styleBibleCount'] as num?)?.toInt() ?? 0,
       stageSummaryCount: (json['stageSummaryCount'] as num?)?.toInt() ?? 0,
@@ -100,6 +105,7 @@ class AgentMemoryCostOverview {
     );
   }
 
+  final String scope;
   final int projectId;
   final int styleBibleCount;
   final int stageSummaryCount;

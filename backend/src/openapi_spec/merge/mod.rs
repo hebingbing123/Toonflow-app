@@ -33,6 +33,10 @@ pub fn merged_openapi_yaml_string() -> anyhow::Result<String> {
     overlay::overlay_components_object(&mut base, &gen_val, "schemas")?;
     overlay::overlay_components_object(&mut base, &gen_val, "securitySchemes")?;
 
+    // D-batch migration: mark numeric ID path parameters as deprecated where UUID alternatives exist.
+    // Column removal is blocked by import infrastructure; this annotation signals migration direction.
+    overlay::mark_numeric_id_parameters_deprecated(&mut base)?;
+
     let raw = serde_yaml::to_string(&base).context("serialize merged openapi")?;
     Ok(base::strip_optional_yaml_document_prefix(raw))
 }

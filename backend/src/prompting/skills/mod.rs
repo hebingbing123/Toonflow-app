@@ -14,6 +14,7 @@ use axum::{
     Json, Router,
 };
 use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 use walkdir::WalkDir;
 
 use crate::auth::require_user_uuid;
@@ -53,14 +54,15 @@ pub struct SkillContentResponse {
 }
 
 /// Aggregate over `*.md` under `data/skills` (same walk cap as [`list_skills`]).
-#[derive(Serialize)]
+#[derive(Serialize, ToSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum SkillsSummaryScope {
     User,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, ToSchema)]
 pub struct SkillsSummaryResponse {
+    /// Aggregation scope: 'user' indicates user-level aggregation. Workspace-level aggregation pending product finalization.
     pub scope: SkillsSummaryScope,
     pub markdown_file_count: u64,
     pub total_bytes: u64,
@@ -125,6 +127,18 @@ fn scan_skill_markdown_aggregate() -> Result<SkillsSummaryResponse, ApiError> {
     })
 }
 
+#[utoipa::path(
+    get,
+    path = "/api/v1/skills/summary",
+    operation_id = "getSkillsSummaryV1",
+    tag = "skills",
+    summary = "Aggregate Markdown skill count and total bytes",
+    responses(
+        (status = 200, description = "OK", body = SkillsSummaryResponse),
+        (status = 400, description = "Skills directory missing", body = crate::error::ErrorBody),
+        (status = 401, description = "Missing or invalid Bearer token", body = crate::error::ErrorBody)
+    )
+)]
 async fn skills_summary(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -293,6 +307,18 @@ async fn delete_skill_content(
     delete_skill_markdown(q.path.trim()).map_err(SkillDeleteError::into_api_error)?;
     Ok(StatusCode::NO_CONTENT)
 }
+
+#[derive(utoipa::OpenApi)]
+#[openapi(
+    paths(skills_summary),
+    components(schemas(
+        SkillsSummaryResponse,
+        SkillsSummaryScope,
+        crate::error::ErrorBody
+    )),
+    tags((name = "skills", description = "Markdown skills under backend/data/skills"))
+)]
+pub struct SkillsOpenApi;
 
 #[cfg(test)]
 mod tests;

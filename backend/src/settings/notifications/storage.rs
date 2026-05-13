@@ -3,7 +3,7 @@ use sqlx::PgPool;
 use std::collections::HashMap;
 use uuid::Uuid;
 
-use crate::error::ApiError;
+use crate::error::{validate_enum, validate_non_empty_string, ApiError};
 use crate::state::WsNotifyHub;
 
 use super::content_compliance_sync_pure::{
@@ -612,9 +612,7 @@ pub async fn apply_notification_preferences_template(
     template_raw: &str,
 ) -> Result<NotificationPreferences, ApiError> {
     let template = template_raw.trim().to_ascii_lowercase();
-    if template.is_empty() {
-        return Err(ApiError::BadRequest("template must not be empty".into()));
-    }
+    validate_non_empty_string(&template, "template")?;
     let known_types: Vec<String> = sqlx::query_scalar(
         r#"
         SELECT DISTINCT notification_type
@@ -660,14 +658,17 @@ pub async fn apply_notification_preferences_template(
             content_compliance_cleared_recent_template_ids: Vec::new(),
         },
         _ => {
-            return Err(ApiError::BadRequest(
-                "template must be one of: default, quiet, incident".into(),
-            ))
+            validate_enum(&template, &["default", "quiet", "incident"], "template")?;
+            unreachable!("validate_enum should reject unknown template");
         }
     };
     upsert_notification_preferences(pool, user_id, &prefs, &format!("template:{template}")).await
 }
 
+/// Raw WebSocket envelope broadcast by [`crate::state::WsNotifyHub`].
+///
+/// Downstream tests and clients should assert against the stable
+/// `type` / `schema_version` / `payload` shape directly.
 pub fn notification_created_envelope(row: &NotificationRecord) -> String {
     serde_json::to_string(&json!({
         "type": "settings.notification.created",
@@ -677,6 +678,7 @@ pub fn notification_created_envelope(row: &NotificationRecord) -> String {
     .expect("notification envelope should serialize")
 }
 
+/// Raw WebSocket envelope broadcast by [`crate::state::WsNotifyHub`].
 pub fn notification_updated_envelope(row: &NotificationRecord) -> String {
     serde_json::to_string(&json!({
         "type": "settings.notification.updated",
@@ -730,4 +732,76 @@ async fn is_notification_muted(
         }
     }
     Ok(false)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{notification_created_envelope, notification_updated_envelope};
+    use crate::settings::notifications::types::NotificationRecord;
+    use chrono::Utc;
+    use serde_json::{json, Value};
+    use uuid::Uuid;
+
+    fn sample_notification() -> NotificationRecord {
+        let now = Utc::now();
+        NotificationRecord {
+            id: 42,
+            user_id: Uuid::nil(),
+            workspace_id: Some(Uuid::parse_str("11111111-1111-1111-1111-111111111111").unwrap()),
+            project_id: Some(Uuid::parse_str("22222222-2222-2222-2222-222222222222").unwrap()),
+            project_numeric_id: Some(7),
+            job_id: Some(Uuid::parse_str("33333333-3333-3333-3333-333333333333").unwrap()),
+            notification_type: "content_compliance_alert".to_string(),
+            title: "Compliance alert".to_string(),
+            message: "Queue exceeded threshold".to_string(),
+            link_path: Some("/product/content-compliance?escalationStage=over_capacity".into()),
+            payload: json!({
+                "stage": "over_capacity",
+                "level": "warn",
+                "count": 5
+            }),
+            file_path: None,
+            changed_at: Some(now),
+            read_at: None,
+            created_at: now,
+            updated_at: now,
+        }
+    }
+
+    #[test]
+    fn notification_created_envelope_uses_ws_shape() {
+        let raw = notification_created_envelope(&sample_notification());
+        let value: Value = serde_json::from_str(&raw).expect("valid JSON");
+
+        assert_eq!(
+            value.get("type").and_then(Value::as_str),
+            Some("settings.notification.created")
+        );
+        assert_eq!(value.get("schema_version").and_then(Value::as_i64), Some(1));
+        assert_eq!(
+            value["payload"]["notificationType"].as_str(),
+            Some("content_compliance_alert")
+        );
+        assert_eq!(
+            value["payload"]["payload"]["stage"].as_str(),
+            Some("over_capacity")
+        );
+    }
+
+    #[test]
+    fn notification_updated_envelope_uses_ws_shape() {
+        let raw = notification_updated_envelope(&sample_notification());
+        let value: Value = serde_json::from_str(&raw).expect("valid JSON");
+
+        assert_eq!(
+            value.get("type").and_then(Value::as_str),
+            Some("settings.notification.updated")
+        );
+        assert_eq!(value.get("schema_version").and_then(Value::as_i64), Some(1));
+        assert_eq!(
+            value["payload"]["notificationType"].as_str(),
+            Some("content_compliance_alert")
+        );
+        assert_eq!(value["payload"]["payload"]["count"].as_i64(), Some(5));
+    }
 }

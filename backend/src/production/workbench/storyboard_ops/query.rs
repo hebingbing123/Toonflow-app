@@ -5,13 +5,13 @@ use axum::{
     Json as JsonResponse,
 };
 
-use super::common::{require_owned_normalized_storyboards_access, validate_storyboard_ids};
+use super::common::{require_owned_normalized_storyboards_access_ref, validate_storyboard_ids};
 use super::media_slots::hydrate_production_storyboard_items;
 use super::types::{
     ProductionGetProductionDataResponse, ProductionStoryboardItem, StoryboardIdListBody,
 };
 use crate::error::ApiError;
-use crate::scope::http::require_owned_numeric_script_scope_ids;
+use crate::scope::http::require_script_read_scope_ref;
 use crate::state::AppState;
 
 #[utoipa::path(
@@ -39,9 +39,14 @@ pub(in crate::production) async fn post_get_production_data(
 ) -> Result<Response, ApiError> {
     validate_storyboard_ids(&body.ids)?;
 
-    let (_uid, pool, script_id) =
-        require_owned_numeric_script_scope_ids(&state, &headers, body.project_id, body.script_id)
-            .await?;
+    let (_uid, pool, scope_row) = require_script_read_scope_ref(
+        &state,
+        &headers,
+        body.project_id,
+        body.project_uuid,
+        body.script_id,
+    )
+    .await?;
 
     let mut rows = sqlx::query_as::<_, ProductionStoryboardItem>(
         r#"
@@ -71,7 +76,7 @@ pub(in crate::production) async fn post_get_production_data(
         ORDER BY array_position($2::int4[], sb.numeric_id)
         "#,
     )
-    .bind(script_id)
+    .bind(scope_row.script_id)
     .bind(&body.ids)
     .fetch_all(pool)
     .await
@@ -105,10 +110,11 @@ pub(in crate::production) async fn post_storyboard_polling_image(
     headers: HeaderMap,
     Json(body): Json<StoryboardIdListBody>,
 ) -> Result<Response, ApiError> {
-    require_owned_normalized_storyboards_access(
+    require_owned_normalized_storyboards_access_ref(
         &state,
         &headers,
         body.project_id,
+        body.project_uuid,
         body.script_id,
         &body.ids,
     )

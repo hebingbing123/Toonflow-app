@@ -10,7 +10,7 @@ use uuid::Uuid;
 
 use crate::{
     auth::require_user_uuid,
-    error::ApiError,
+    error::{bad_request_i18n, ApiError},
     jobs::{enqueue_generation_job, JOB_KIND_VOICEOVER_GENERATE},
     projects::routes::common::require_project_write_scope,
     short_video::defaults::resolve_tts_voice,
@@ -164,7 +164,12 @@ pub async fn generate_tts(
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-    .ok_or_else(|| ApiError::BadRequest("shot_id does not belong to project_id".into()))?;
+    .ok_or_else(|| {
+        bad_request_i18n(
+            "shot_id does not belong to project_id",
+            "shot_id 不属于该 project_id",
+        )
+    })?;
 
     let (
         project_numeric_id,
@@ -254,6 +259,7 @@ pub async fn generate_tts(
         JOB_KIND_VOICEOVER_GENERATE,
         payload,
         Some(&headers),
+        &state.billing_config,
     )
     .await?;
 
@@ -571,31 +577,52 @@ pub async fn retry_tts_task(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
     let (payload, _project_id, shot_id, voice_profile) = base.ok_or(ApiError::NotFound)?;
-    let shot_id =
-        shot_id.ok_or_else(|| ApiError::BadRequest("task has no resolvable storyboard".into()))?;
+    let shot_id = shot_id.ok_or_else(|| {
+        bad_request_i18n(
+            "task has no resolvable storyboard",
+            "任务没有可解析的 storyboard",
+        )
+    })?;
 
     let project_numeric_id = payload
         .get("project_numeric_id")
         .and_then(Value::as_i64)
-        .ok_or_else(|| ApiError::BadRequest("task payload missing project_numeric_id".into()))?
-        as i32;
+        .ok_or_else(|| {
+            bad_request_i18n(
+                "task payload missing project_numeric_id",
+                "任务 payload 缺少 project_numeric_id",
+            )
+        })? as i32;
     let script_numeric_id = payload
         .get("script_numeric_id")
         .and_then(Value::as_i64)
-        .ok_or_else(|| ApiError::BadRequest("task payload missing script_numeric_id".into()))?
-        as i32;
+        .ok_or_else(|| {
+            bad_request_i18n(
+                "task payload missing script_numeric_id",
+                "任务 payload 缺少 script_numeric_id",
+            )
+        })? as i32;
     let storyboard_numeric_id = payload
         .get("storyboard_numeric_id")
         .and_then(Value::as_i64)
-        .ok_or_else(|| ApiError::BadRequest("task payload missing storyboard_numeric_id".into()))?
-        as i32;
+        .ok_or_else(|| {
+            bad_request_i18n(
+                "task payload missing storyboard_numeric_id",
+                "任务 payload 缺少 storyboard_numeric_id",
+            )
+        })? as i32;
 
     let source_text = payload
         .get("source_text")
         .and_then(Value::as_str)
         .map(str::trim)
         .filter(|v| !v.is_empty())
-        .ok_or_else(|| ApiError::BadRequest("task payload missing source_text".into()))?
+        .ok_or_else(|| {
+            bad_request_i18n(
+                "task payload missing source_text",
+                "任务 payload 缺少 source_text",
+            )
+        })?
         .to_string();
     let provider = req
         .provider
@@ -695,6 +722,7 @@ pub async fn retry_tts_task(
         JOB_KIND_VOICEOVER_GENERATE,
         new_payload,
         Some(&headers),
+        &state.billing_config,
     )
     .await?;
 

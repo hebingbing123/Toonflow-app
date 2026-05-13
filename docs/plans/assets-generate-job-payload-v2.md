@@ -7,9 +7,9 @@
 | `payload_schema_version` | 语义 |
 |--------------------------|------|
 | **缺省 / `1`**（隐含） | 仅 **`project_numeric_id`**（历史行为）。 |
-| **`2`** | **双写**：**`project_uuid`**（`app_project.id`）+ **`project_numeric_id`**（任务中心按 numeric 过滤、兼容旧 worker）。 |
+| **`2`** | **UUID-first + legacy fallback 双写**：**`project_uuid`**（`app_project.id`，主语义）+ **`project_numeric_id`**（任务中心按 numeric 过滤、兼容旧 worker）。 |
 
-新入队统一写 **`payload_schema_version`: 2**。
+新入队统一写 **`payload_schema_version`: 2**；其中 **`project_uuid`** 是目标主语义，**`project_numeric_id`** 仅为当前兼容窗口保留。
 
 ## Worker 兼容（v1 / v2）
 
@@ -28,7 +28,7 @@
 
 ## 观测（Q2）
 
-**`QueueStats.pending_by_kind_json`** 按 **`kind`** 聚合，与 payload 内字段无关。**`/jobs/page?project_id=`** 仍使用 **`payload->>'project_numeric_id'`**，双写保证过滤不变。
+**`QueueStats.pending_by_kind_json`** 按 **`kind`** 聚合，与 payload 内字段无关。**`/jobs/page?project_id=`** 当前仍使用 **`payload->>'project_numeric_id'`**，所以兼容窗口内继续双写以保证过滤不变；这不改变整体 **UUID-first** 迁移方向。
 
 ## 后续（非本竖切）
 

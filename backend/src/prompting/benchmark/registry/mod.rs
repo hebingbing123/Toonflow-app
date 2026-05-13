@@ -10,9 +10,6 @@ use crate::state::AppState;
 mod handlers;
 mod types;
 
-#[cfg(test)]
-mod tests;
-
 pub(crate) use handlers::{
     __path_create_benchmark_case, __path_list_benchmark_cases, __path_promote_from_quality_review,
     __path_update_benchmark_case,

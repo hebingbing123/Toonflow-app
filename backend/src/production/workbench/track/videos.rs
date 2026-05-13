@@ -4,6 +4,7 @@ use axum::{
     Json as JsonResponse,
 };
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 use crate::error::ApiError;
 use crate::production::workbench::video_prompt_memory::{
@@ -14,7 +15,7 @@ use crate::production::workbench::video_prompt_memory::{
     refresh_script_video_style_memory, StoryboardPromptSeedRow,
 };
 use crate::scope::http::require_authenticated_user;
-use crate::scope::http::require_owned_numeric_script_scope_row;
+use crate::scope::http::require_script_write_scope_ref;
 use crate::state::AppState;
 
 use super::common::validate_positive_id;
@@ -22,7 +23,10 @@ use super::common::validate_positive_id;
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct DeleteVideoBody {
-    project_id: i32,
+    #[serde(default)]
+    project_id: Option<i32>,
+    #[serde(default)]
+    project_uuid: Option<Uuid>,
     script_id: i32,
     storyboard_id: i32,
 }
@@ -124,9 +128,15 @@ pub(in crate::production) async fn post_workbench_delete_video(
 ) -> Result<JsonResponse<DeleteVideoResponse>, ApiError> {
     validate_positive_id("storyboardId", body.storyboard_id)?;
     let user_id = require_authenticated_user(&state, &headers)?;
-    let (pool, scope_row) =
-        require_owned_numeric_script_scope_row(&state, &headers, body.project_id, body.script_id)
-            .await?;
+    let (pool, scope_row) = require_script_write_scope_ref(
+        &state,
+        &headers,
+        body.project_id,
+        body.project_uuid,
+        body.script_id,
+    )
+    .await
+    .map(|(_uid, pool, scope_row)| (pool, scope_row))?;
 
     let updated = sqlx::query(
         r#"
@@ -168,7 +178,7 @@ pub(in crate::production) async fn post_workbench_delete_video(
             persist_rejected_video_negative_memory(
                 pool,
                 user_id,
-                body.project_id,
+                scope_row.project_numeric_id,
                 body.script_id,
                 &memory_content,
             )
@@ -178,13 +188,14 @@ pub(in crate::production) async fn post_workbench_delete_video(
     clear_selected_video_memory(
         pool,
         user_id,
-        body.project_id,
+        scope_row.project_numeric_id,
         body.script_id,
         body.storyboard_id,
     )
     .await?;
-    refresh_script_video_style_memory(pool, user_id, body.project_id, body.script_id).await?;
-    refresh_project_video_style_memory(pool, user_id, body.project_id).await?;
+    refresh_script_video_style_memory(pool, user_id, scope_row.project_numeric_id, body.script_id)
+        .await?;
+    refresh_project_video_style_memory(pool, user_id, scope_row.project_numeric_id).await?;
 
     Ok(JsonResponse(DeleteVideoResponse {
         storyboard_id: body.storyboard_id,
@@ -196,7 +207,10 @@ pub(in crate::production) async fn post_workbench_delete_video(
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct SelectVideoBody {
-    pub project_id: i32,
+    #[serde(default)]
+    pub project_id: Option<i32>,
+    #[serde(default)]
+    pub project_uuid: Option<Uuid>,
     pub script_id: i32,
     pub storyboard_id: i32,
     pub video_url: String,
@@ -217,14 +231,18 @@ pub(in crate::production::workbench) async fn run_workbench_select_video(
     body: SelectVideoBody,
 ) -> Result<SelectVideoResponse, ApiError> {
     validate_positive_id("storyboardId", body.storyboard_id)?;
-    if body.video_url.trim().is_empty() {
-        return Err(ApiError::BadRequest("videoUrl must not be empty".into()));
-    }
+    crate::error::validate_non_empty_string(body.video_url.trim(), "videoUrl")?;
     let user_id = require_authenticated_user(state, headers)?;
 
-    let (pool, scope_row) =
-        require_owned_numeric_script_scope_row(state, headers, body.project_id, body.script_id)
-            .await?;
+    let (pool, scope_row) = require_script_write_scope_ref(
+        state,
+        headers,
+        body.project_id,
+        body.project_uuid,
+        body.script_id,
+    )
+    .await
+    .map(|(_uid, pool, scope_row)| (pool, scope_row))?;
 
     let updated = sqlx::query(
         r#"
@@ -261,7 +279,7 @@ pub(in crate::production::workbench) async fn run_workbench_select_video(
     clear_rejected_video_negative_memory(
         pool,
         user_id,
-        body.project_id,
+        scope_row.project_numeric_id,
         body.script_id,
         body.storyboard_id,
     )
@@ -274,20 +292,30 @@ pub(in crate::production::workbench) async fn run_workbench_select_video(
             persist_selected_video_memory(
                 pool,
                 user_id,
-                body.project_id,
+                scope_row.project_numeric_id,
                 body.script_id,
                 &memory_content,
             )
             .await?;
-            let optimization =
-                optimize_scoped_video_memory(pool, user_id, body.project_id, body.script_id)
-                    .await?;
+            let optimization = optimize_scoped_video_memory(
+                pool,
+                user_id,
+                scope_row.project_numeric_id,
+                body.script_id,
+            )
+            .await?;
             if !optimization.refreshed_script_summary {
-                refresh_script_video_style_memory(pool, user_id, body.project_id, body.script_id)
-                    .await?;
+                refresh_script_video_style_memory(
+                    pool,
+                    user_id,
+                    scope_row.project_numeric_id,
+                    body.script_id,
+                )
+                .await?;
             }
             if !optimization.refreshed_project_summary {
-                refresh_project_video_style_memory(pool, user_id, body.project_id).await?;
+                refresh_project_video_style_memory(pool, user_id, scope_row.project_numeric_id)
+                    .await?;
             }
         }
     }

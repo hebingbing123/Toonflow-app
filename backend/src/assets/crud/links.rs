@@ -9,7 +9,7 @@ use axum::{
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, ApiError};
 use crate::scope;
 use crate::state::AppState;
 use sqlx::PgPool;
@@ -22,7 +22,10 @@ async fn resolve_script_and_asset_for_project(
     asset_numeric_id: i32,
 ) -> Result<(Uuid, Uuid), ApiError> {
     if script_numeric_id <= 0 || asset_numeric_id <= 0 {
-        return Err(ApiError::BadRequest("numeric ids must be positive".into()));
+        return Err(bad_request_i18n(
+            "numeric ids must be positive",
+            "numeric ids 必须为正数",
+        ));
     }
     let oip = scope::owned_script_in_project(pool, uid, project_id, script_numeric_id)
         .await

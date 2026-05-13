@@ -5,6 +5,7 @@ use axum::{
 };
 use uuid::Uuid;
 
+use crate::error::helpers::{bad_request_i18n, forbidden_i18n};
 use crate::error::ApiError;
 use crate::state::AppState;
 
@@ -27,8 +28,9 @@ fn internal_ops_token_expected() -> Option<String> {
 
 fn require_internal_ops_token(headers: &HeaderMap) -> Result<(), ApiError> {
     let Some(expected) = internal_ops_token_expected() else {
-        return Err(ApiError::Forbidden(
-            "internal admin console disabled (set TOONFLOW_INTERNAL_OPS_TOKEN)".into(),
+        return Err(forbidden_i18n(
+            "internal admin console disabled (set TOONFLOW_INTERNAL_OPS_TOKEN)",
+            "内部管理控制台已禁用（请设置 TOONFLOW_INTERNAL_OPS_TOKEN）",
         ));
     };
     let got = headers
@@ -63,8 +65,9 @@ pub(crate) async fn get_admin_search(
     require_internal_ops_token(&headers)?;
     let needle = query.q.trim();
     if needle.len() < 2 {
-        return Err(ApiError::BadRequest(
-            "q must be at least 2 characters".into(),
+        return Err(bad_request_i18n(
+            "q must be at least 2 characters",
+            "q 必须至少包含 2 个字符",
         ));
     }
     let limit = query.limit.unwrap_or(8).clamp(1, 20);
@@ -378,5 +381,31 @@ pub(crate) async fn get_admin_project_detail(
 ) -> Result<Json<AdminProjectDetailResponse>, ApiError> {
     require_internal_ops_token(&headers)?;
     let response = storage::get_admin_project_detail(&state, project_id).await?;
+    Ok(Json(response))
+}
+
+/// Workspace billing query endpoint (Task 8.1).
+/// Returns workspace billing information including subscription, quota, and usage aggregates.
+/// PII hygiene: only aggregates, no individual user data beyond workspace owner.
+#[utoipa::path(
+    get,
+    path = "/api/v1/internal/admin/workspaces/billing",
+    operation_id = "getInternalAdminWorkspaceBillingV1",
+    tag = "settings",
+    params(super::types::AdminWorkspaceBillingQuery),
+    responses(
+        (status = 200, description = "OK", body = Vec<super::types::AdminWorkspaceBillingResponse>),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    )
+)]
+pub(crate) async fn get_admin_workspace_billing(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Query(query): Query<super::types::AdminWorkspaceBillingQuery>,
+) -> Result<Json<Vec<super::types::AdminWorkspaceBillingResponse>>, ApiError> {
+    require_internal_ops_token(&headers)?;
+    let response = storage::get_admin_workspace_billing(&state, query).await?;
     Ok(Json(response))
 }

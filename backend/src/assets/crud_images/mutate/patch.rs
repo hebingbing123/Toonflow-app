@@ -6,13 +6,15 @@ use axum::{
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, validate_positive, ApiError};
 use crate::http_kit::json_patch::{
     parse_optional_i32_field, parse_optional_text_field, FieldPatch,
 };
 use crate::state::AppState;
 
-use super::super::super::crud::resolve_owned_asset_id_for_project;
+use super::super::super::crud::{
+    require_asset_project_write_scope, resolve_owned_asset_id_for_project,
+};
 use super::super::super::models::*;
 
 pub(in crate::assets) async fn patch_project_asset_image_for_project(
@@ -22,15 +24,14 @@ pub(in crate::assets) async fn patch_project_asset_image_for_project(
     Json(body): Json<PatchAssetImageBody>,
 ) -> Result<Json<AssetImageRow>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-
-    if asset_numeric_id <= 0 {
-        return Err(ApiError::BadRequest("numeric ids must be positive".into()));
-    }
+    validate_positive(asset_numeric_id, "numeric ids")?;
 
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    require_asset_project_write_scope(&state, uid, project_id).await?;
 
     let asset_id =
         resolve_owned_asset_id_for_project(pool, uid, project_id, asset_numeric_id).await?;
@@ -43,8 +44,9 @@ pub(in crate::assets) async fn patch_project_asset_image_for_project(
         && matches!(st_patch, FieldPatch::Absent)
         && matches!(si_patch, FieldPatch::Absent)
     {
-        return Err(ApiError::BadRequest(
-            "expected at least one of: file_path, state, sort_index".into(),
+        return Err(bad_request_i18n(
+            "expected at least one of: file_path, state, sort_index",
+            "file_path、state、sort_index 至少需要提供一个",
         ));
     }
 
@@ -76,8 +78,9 @@ pub(in crate::assets) async fn patch_project_asset_image_for_project(
         FieldPatch::Absent => current.sort_index,
         FieldPatch::Set(Some(v)) => *v,
         FieldPatch::Set(None) => {
-            return Err(ApiError::BadRequest(
-                "sort_index cannot be null; omit to leave unchanged".into(),
+            return Err(bad_request_i18n(
+                "sort_index cannot be null; omit to leave unchanged",
+                "sort_index 不能为 null；如需保持不变请省略该字段",
             ));
         }
     };

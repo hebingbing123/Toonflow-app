@@ -1,6 +1,8 @@
 //! `GET /api/v1/me` — JWT sub + `app_user_profile` 等。
+//!
+//! **Task 5**: Versioned `/me` response (v1 default, v2 opt-in via `?v=2`).
 
-use axum::extract::State;
+use axum::extract::{Query, State};
 use axum::http::HeaderMap;
 use axum::Json;
 use chrono::{DateTime, Utc};
@@ -10,16 +12,25 @@ use uuid::Uuid;
 
 use crate::auth::{bearer_token, require_claims, require_user_uuid};
 use crate::error::ApiError;
+use crate::metering::{get_effective_billing_context, BillingScope};
 use crate::state::{AppState, MemoryConfig};
 
 use crate::workspaces::ensure_personal_workspace;
 
-use super::types::{MeResponse, WorkspaceSummary};
+use super::types::{
+    MeResponse, MeV2Response, UserBillingSummary, WorkspaceBillingSummary, WorkspaceSummary,
+};
 
 #[derive(Debug, Deserialize, utoipa::ToSchema)]
 #[serde(deny_unknown_fields)]
 pub struct PatchCurrentWorkspaceBody {
     pub workspace_id: Uuid,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct MeQueryParams {
+    /// API version: "2" for v2 response, omit or "1" for v1 (default).
+    pub v: Option<String>,
 }
 
 fn request_id_from_headers(headers: &HeaderMap) -> Option<&str> {
@@ -48,18 +59,23 @@ struct UserProfileRow {
     operation_id = "meV1",
     tag = "session",
     summary = "Current user from JWT plus SaaS profile when database is configured",
-    description = "Always returns JWT `sub` (and `email` when present in claims). When **`DATABASE_URL`** is set, loads **`plan_tier`** / billing fields from **`app_user_profile`** (defaults to **`plan_tier: free`** when no row).\nIncludes `subscription_status` and `subscription_current_period_end_at` when present in profile.\nAlso returns **`daily_job_quota`** (effective cap; `null` = unlimited) and **`jobs_today`** (UTC-day count) when the database is connected — clients can use these to render quota progress without a separate call.",
+    description = "Always returns JWT `sub` (and `email` when present in claims). When **`DATABASE_URL`** is set, loads **`plan_tier`** / billing fields from **`app_user_profile`** (defaults to **`plan_tier: free`** when no row).\nIncludes `subscription_status` and `subscription_current_period_end_at` when present in profile.\nAlso returns **`daily_job_quota`** (effective cap; `null` = unlimited) and **`jobs_today`** (UTC-day count) when the database is connected — clients can use these to render quota progress without a separate call.\n\n**Versioning (Task 5.2)**: Add `?v=2` query parameter for v2 response with nested `user` + `current_workspace_billing` fields.",
+    params(
+        ("v" = Option<String>, Query, description = "API version: '2' for v2 response, omit or '1' for v1 (default)")
+    ),
     security(("bearerAuth" = [])),
     responses(
-        (status = 200, description = "OK", body = MeResponse),
+        (status = 200, description = "OK (v1 response)", body = MeResponse),
+        (status = 200, description = "OK (v2 response when ?v=2)", body = MeV2Response),
         (status = 401, description = "Missing or invalid Bearer token", body = crate::error::ErrorBody),
         (status = 503, description = "`SUPABASE_JWT_SECRET` not configured, or database error when loading profile", body = crate::error::ErrorBody)
     )
 )]
 pub(crate) async fn me(
     State(state): State<AppState>,
+    Query(params): Query<MeQueryParams>,
     headers: HeaderMap,
-) -> Result<Json<MeResponse>, ApiError> {
+) -> Result<Json<serde_json::Value>, ApiError> {
     let sub = require_user_uuid(&state, &headers)?;
     let claims = if bearer_token(&headers).is_some_and(|token| token.contains('.')) {
         Some(require_claims(&state, &headers)?)
@@ -67,6 +83,9 @@ pub(crate) async fn me(
         None
     };
     let request_id = request_id_from_headers(&headers);
+
+    // Check if v2 is requested
+    let is_v2 = params.v.as_deref() == Some("2");
 
     let (
         plan_tier,
@@ -252,19 +271,148 @@ pub(crate) async fn me(
         None // DB connected but user has no custom config; don't leak server defaults.
     };
 
-    Ok(Json(MeResponse {
-        sub,
-        email: claims.and_then(|c| c.email),
-        plan_tier,
-        billing_currency,
-        billing_provider,
-        subscription_status,
-        subscription_current_period_end_at,
-        daily_job_quota,
-        jobs_today,
-        memory_config,
-        current_workspace,
-    }))
+    // Return v2 response if requested (Task 5.3)
+    if is_v2 {
+        return me_v2_response(
+            &state,
+            sub,
+            claims.and_then(|c| c.email),
+            plan_tier,
+            billing_currency,
+            billing_provider,
+            subscription_status,
+            subscription_current_period_end_at,
+            daily_job_quota,
+            jobs_today,
+            memory_config,
+            current_workspace,
+        )
+        .await;
+    }
+
+    // V1 response (default)
+    Ok(Json(
+        serde_json::to_value(MeResponse {
+            sub,
+            email: claims.and_then(|c| c.email),
+            plan_tier,
+            billing_currency,
+            billing_provider,
+            subscription_status,
+            subscription_current_period_end_at,
+            daily_job_quota,
+            jobs_today,
+            memory_config,
+            current_workspace,
+        })
+        .unwrap(),
+    ))
+}
+
+/// Build v2 response with nested billing context (Task 5.3).
+#[allow(clippy::too_many_arguments)]
+async fn me_v2_response(
+    state: &AppState,
+    sub: Uuid,
+    email: Option<String>,
+    plan_tier: String,
+    billing_currency: Option<String>,
+    billing_provider: Option<String>,
+    subscription_status: Option<String>,
+    subscription_current_period_end_at: Option<DateTime<Utc>>,
+    daily_job_quota: Option<i64>,
+    jobs_today: Option<i64>,
+    memory_config: Option<MemoryConfig>,
+    current_workspace: Option<WorkspaceSummary>,
+) -> Result<Json<serde_json::Value>, ApiError> {
+    let pool = state.require_pool()?;
+
+    // Get current workspace ID
+    let current_workspace_id = current_workspace.as_ref().map(|w| w.id);
+
+    // Resolve effective billing context
+    let billing_context = if let Some(workspace_id) = current_workspace_id {
+        get_effective_billing_context(pool, sub, workspace_id, &state.billing_config).await?
+    } else {
+        // No current workspace; fall back to user-scope
+        return Ok(Json(
+            serde_json::to_value(MeV2Response {
+                billing_scope: "user".to_string(),
+                user: UserBillingSummary {
+                    sub,
+                    email,
+                    plan_tier,
+                    billing_currency,
+                    billing_provider,
+                    subscription_status,
+                    subscription_current_period_end_at,
+                    daily_job_quota,
+                    jobs_today,
+                },
+                current_workspace_billing: None,
+                memory_config,
+                current_workspace,
+            })
+            .unwrap(),
+        ));
+    };
+
+    let billing_scope_str = match billing_context.billing_scope {
+        BillingScope::User => "user",
+        BillingScope::Workspace => "workspace",
+    };
+
+    // Build workspace billing summary if workspace-scope
+    let current_workspace_billing = if billing_context.billing_scope == BillingScope::Workspace {
+        let workspace_id = current_workspace_id.unwrap(); // Safe: we checked above
+
+        // Get workspace jobs_today
+        let workspace_jobs_today: i64 = sqlx::query_scalar(
+            r#"
+            SELECT COUNT(*)::bigint
+            FROM app_generation_job
+            WHERE workspace_id = $1
+              AND created_at >= DATE_TRUNC('day', NOW() AT TIME ZONE 'UTC')
+            "#,
+        )
+        .bind(workspace_id)
+        .fetch_one(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+        Some(WorkspaceBillingSummary {
+            workspace_id,
+            workspace_type: current_workspace.as_ref().unwrap().workspace_type.clone(),
+            plan_tier: billing_context.plan_tier.clone(),
+            billing_currency: billing_context.billing_currency.clone(),
+            billing_provider: billing_context.billing_provider.clone(),
+            daily_job_quota: billing_context.daily_job_quota,
+            jobs_today: Some(workspace_jobs_today),
+        })
+    } else {
+        None
+    };
+
+    Ok(Json(
+        serde_json::to_value(MeV2Response {
+            billing_scope: billing_scope_str.to_string(),
+            user: UserBillingSummary {
+                sub,
+                email,
+                plan_tier,
+                billing_currency,
+                billing_provider,
+                subscription_status,
+                subscription_current_period_end_at,
+                daily_job_quota,
+                jobs_today,
+            },
+            current_workspace_billing,
+            memory_config,
+            current_workspace,
+        })
+        .unwrap(),
+    ))
 }
 
 #[utoipa::path(

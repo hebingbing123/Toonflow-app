@@ -4,6 +4,7 @@ use axum::{
 };
 
 use crate::auth::require_user_uuid;
+use crate::error::helpers::{bad_request_i18n, forbidden_i18n};
 use crate::error::ApiError;
 use crate::state::AppState;
 
@@ -76,7 +77,10 @@ pub(crate) async fn post_platform_config(
                 clear_user_platform_config(pool, uid).await?;
             } else {
                 let toggles = body.toggles.as_ref().ok_or_else(|| {
-                    ApiError::BadRequest("toggles are required unless reset=true".into())
+                    bad_request_i18n(
+                        "toggles are required unless reset=true",
+                        "除非 reset=true，否则 toggles 为必填项",
+                    )
                 })?;
                 save_user_platform_config(pool, uid, toggles).await?;
             }
@@ -84,24 +88,34 @@ pub(crate) async fn post_platform_config(
         "workspace" => {
             let workspace = resolve_current_workspace_platform_config(pool, uid)
                 .await?
-                .ok_or_else(|| ApiError::BadRequest("current workspace is unavailable".into()))?;
+                .ok_or_else(|| {
+                    bad_request_i18n(
+                        "current workspace is unavailable",
+                        "当前工作区不可用",
+                    )
+                })?;
             if !workspace.summary.can_manage_override {
-                return Err(ApiError::Forbidden(
-                    "current workspace override requires enterprise owner/admin".into(),
+                return Err(forbidden_i18n(
+                    "current workspace override requires enterprise owner/admin",
+                    "当前工作区覆盖需要企业所有者/管理员权限",
                 ));
             }
             if reset {
                 clear_workspace_platform_config(pool, workspace.summary.id).await?;
             } else {
                 let toggles = body.toggles.as_ref().ok_or_else(|| {
-                    ApiError::BadRequest("toggles are required unless reset=true".into())
+                    bad_request_i18n(
+                        "toggles are required unless reset=true",
+                        "除非 reset=true，否则 toggles 为必填项",
+                    )
                 })?;
                 save_workspace_platform_config(pool, workspace.summary.id, toggles).await?;
             }
         }
         _ => {
-            return Err(ApiError::BadRequest(
-                "scope must be user or workspace".into(),
+            return Err(bad_request_i18n(
+                "scope must be user or workspace",
+                "scope 必须为 user 或 workspace",
             ));
         }
     }

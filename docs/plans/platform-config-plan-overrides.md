@@ -10,6 +10,8 @@
 
 为 `GET /api/v1/settings/platform-config` 提供一层**只读的 plan override**，让服务端可以按 `plan_tier` 统一收口平台能力，再继续叠加 workspace / user 覆盖层。
 
+**边界提醒**：这里的 `plan_tier` 仅作为平台能力开关合成输入使用；它不单独表示当前产品已经启用 workspace-scope quota 或 billing attribution。
+
 当前合成顺序：
 
 1. `defaults`

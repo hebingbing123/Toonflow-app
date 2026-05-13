@@ -1,7 +1,7 @@
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, validate_positive, ApiError};
 use crate::projects::routes::common::{
     require_project_workspace_member_scope, require_project_write_scope, ProjectAccessScope,
 };
@@ -67,26 +67,19 @@ pub(crate) async fn resolve_owned_project_numeric_from_uuid_or_legacy_id(
 ) -> Result<i32, ApiError> {
     match (project_uuid, project_numeric_id) {
         (Some(u), Some(n)) => {
-            if n <= 0 {
-                return Err(ApiError::BadRequest(
-                    "project_numeric_id must be positive".into(),
-                ));
-            }
+            validate_positive(n, "project_numeric_id")?;
             let resolved = ensure_owned_project_numeric_id(pool, uid, u).await?;
             if resolved != n {
-                return Err(ApiError::BadRequest(
-                    "Project UUID and numeric project id must refer to the same project".into(),
+                return Err(bad_request_i18n(
+                    "Project UUID and numeric project id must refer to the same project",
+                    "project UUID 和 numeric project id 必须指向同一个项目",
                 ));
             }
             Ok(resolved)
         }
         (Some(u), None) => ensure_owned_project_numeric_id(pool, uid, u).await,
         (None, Some(n)) => {
-            if n <= 0 {
-                return Err(ApiError::BadRequest(
-                    "project_numeric_id must be positive".into(),
-                ));
-            }
+            validate_positive(n, "project_numeric_id")?;
             let ok: bool = sqlx::query_scalar(
                 r#"
                 SELECT EXISTS(
@@ -113,8 +106,9 @@ pub(crate) async fn resolve_owned_project_numeric_from_uuid_or_legacy_id(
             }
             Ok(n)
         }
-        (None, None) => Err(ApiError::BadRequest(
-            "Provide project UUID (preferred) or legacy numeric project id".into(),
+        (None, None) => Err(bad_request_i18n(
+            "Provide project UUID (preferred) or legacy numeric project id",
+            "请提供 project UUID（推荐）或旧版 numeric project id",
         )),
     }
 }
@@ -129,11 +123,7 @@ pub(crate) async fn resolve_owned_project_pk_and_numeric_from_uuid_or_legacy_id(
 ) -> Result<(Uuid, i32, Uuid), ApiError> {
     match (project_uuid, project_numeric_id) {
         (Some(u), Some(n)) => {
-            if n <= 0 {
-                return Err(ApiError::BadRequest(
-                    "project_numeric_id must be positive".into(),
-                ));
-            }
+            validate_positive(n, "project_numeric_id")?;
             let row: Option<(Uuid, i32, Uuid)> = sqlx::query_as(
                 r#"
                 SELECT p.id, p.numeric_id, p.workspace_id
@@ -155,8 +145,9 @@ pub(crate) async fn resolve_owned_project_pk_and_numeric_from_uuid_or_legacy_id(
             .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
             let (id, num, workspace_id) = row.ok_or(ApiError::NotFound)?;
             if num != n {
-                return Err(ApiError::BadRequest(
-                    "Project UUID and numeric project id must refer to the same project".into(),
+                return Err(bad_request_i18n(
+                    "Project UUID and numeric project id must refer to the same project",
+                    "project UUID 和 numeric project id 必须指向同一个项目",
                 ));
             }
             Ok((id, num, workspace_id))
@@ -184,11 +175,7 @@ pub(crate) async fn resolve_owned_project_pk_and_numeric_from_uuid_or_legacy_id(
             row.ok_or(ApiError::NotFound)
         }
         (None, Some(n)) => {
-            if n <= 0 {
-                return Err(ApiError::BadRequest(
-                    "project_numeric_id must be positive".into(),
-                ));
-            }
+            validate_positive(n, "project_numeric_id")?;
             let row: Option<(Uuid, i32, Uuid)> = sqlx::query_as(
                 r#"
                 SELECT p.id, p.numeric_id, p.workspace_id
@@ -210,8 +197,9 @@ pub(crate) async fn resolve_owned_project_pk_and_numeric_from_uuid_or_legacy_id(
             .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
             row.ok_or(ApiError::NotFound)
         }
-        (None, None) => Err(ApiError::BadRequest(
-            "Provide project UUID (preferred) or legacy numeric project id".into(),
+        (None, None) => Err(bad_request_i18n(
+            "Provide project UUID (preferred) or legacy numeric project id",
+            "请提供 project UUID（推荐）或旧版 numeric project id",
         )),
     }
 }

@@ -9,6 +9,7 @@ extension _HomePageBuildDebugSections on _HomePageState {
     if (!mounted) {
       return;
     }
+    final l10n = AppLocalizations.of(context)!;
     final messenger = ScaffoldMessenger.of(context);
     _shellNavigationController.selectHomeSectionMode(HomeSectionMode.debug);
     switch (item.targetType) {
@@ -28,7 +29,7 @@ extension _HomePageBuildDebugSections on _HomePageState {
           return;
         }
         messenger.showSnackBar(
-          const SnackBar(content: Text('该举报没有可打开的管理台上下文。')),
+          SnackBar(content: Text(l10n.productComplianceNoProjectContext)),
         );
     }
   }

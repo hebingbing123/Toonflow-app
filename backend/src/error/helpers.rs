@@ -451,6 +451,209 @@ pub fn feature_under_development_i18n(feature: &str) -> ApiError {
     }
 }
 
+/// 验证 UUID 格式。
+///
+/// 根据当前请求的 `Accept-Language` 偏好返回对应语言的错误消息。
+///
+/// # 示例
+///
+/// ```ignore
+/// validate_uuid(&body.user_id, "userId")?;
+/// validate_uuid(&body.workspace_id, "workspaceId")?;
+/// ```
+#[allow(dead_code)] // Staged helper for bilingual UUID validation; exercised in unit tests.
+pub fn validate_uuid(value: &str, field_name: &str) -> Result<(), ApiError> {
+    match uuid::Uuid::parse_str(value) {
+        Ok(_) => Ok(()),
+        Err(_) => Err(ApiError::BadRequestI18n {
+            en: format!(
+                "Invalid format for field '{}': expected valid UUID",
+                field_name
+            ),
+            zh: format!("字段 '{}' 格式无效：期望有效的 UUID", field_name),
+        }),
+    }
+}
+
+/// 验证 URL 格式。
+///
+/// 根据当前请求的 `Accept-Language` 偏好返回对应语言的错误消息。
+/// 仅接受 HTTP 和 HTTPS 协议的 URL。
+///
+/// # 示例
+///
+/// ```ignore
+/// validate_url(&body.webhook_url, "webhookUrl")?;
+/// validate_url(&body.callback_url, "callbackUrl")?;
+/// ```
+#[allow(dead_code)] // Staged helper for bilingual URL validation; exercised in unit tests.
+pub fn validate_url(value: &str, field_name: &str) -> Result<(), ApiError> {
+    match url::Url::parse(value) {
+        Ok(parsed_url) => {
+            // Only accept HTTP and HTTPS URLs
+            let scheme = parsed_url.scheme();
+            if scheme == "http" || scheme == "https" {
+                Ok(())
+            } else {
+                Err(ApiError::BadRequestI18n {
+                    en: format!(
+                        "Invalid format for field '{}': expected valid HTTP/HTTPS URL",
+                        field_name
+                    ),
+                    zh: format!("字段 '{}' 格式无效：期望有效的 HTTP/HTTPS URL", field_name),
+                })
+            }
+        }
+        Err(_) => Err(ApiError::BadRequestI18n {
+            en: format!(
+                "Invalid format for field '{}': expected valid HTTP/HTTPS URL",
+                field_name
+            ),
+            zh: format!("字段 '{}' 格式无效：期望有效的 HTTP/HTTPS URL", field_name),
+        }),
+    }
+}
+
+/// 验证 Email 格式。
+///
+/// 根据当前请求的 `Accept-Language` 偏好返回对应语言的错误消息。
+/// 使用基本的 email 格式验证（local@domain）。
+///
+/// # 示例
+///
+/// ```ignore
+/// validate_email(&body.email, "email")?;
+/// validate_email(&body.contact_email, "contactEmail")?;
+/// ```
+#[allow(dead_code)] // Staged helper for bilingual email validation; exercised in unit tests.
+pub fn validate_email(value: &str, field_name: &str) -> Result<(), ApiError> {
+    // Basic email validation regex: local@domain
+    // This is a simplified pattern that covers most common cases
+    // Pattern: one or more characters before @, then one or more characters, then a dot, then 2+ characters
+    let email_regex = regex::Regex::new(r"^[^@\s]+@[^@\s]+\.[^@\s]+$").unwrap();
+
+    if email_regex.is_match(value) {
+        Ok(())
+    } else {
+        Err(ApiError::BadRequestI18n {
+            en: format!(
+                "Invalid format for field '{}': expected valid email address",
+                field_name
+            ),
+            zh: format!("字段 '{}' 格式无效：期望有效的电子邮件地址", field_name),
+        })
+    }
+}
+
+/// 验证 JSON 格式。
+///
+/// 根据当前请求的 `Accept-Language` 偏好返回对应语言的错误消息。
+/// 使用 serde_json 验证 JSON 格式是否有效。
+///
+/// # 示例
+///
+/// ```ignore
+/// validate_json(&body.metadata, "metadata")?;
+/// validate_json(&body.config, "config")?;
+/// ```
+#[allow(dead_code)] // Staged helper for bilingual JSON validation; exercised in unit tests.
+pub fn validate_json(value: &str, field_name: &str) -> Result<(), ApiError> {
+    match serde_json::from_str::<serde_json::Value>(value) {
+        Ok(_) => Ok(()),
+        Err(_) => Err(ApiError::BadRequestI18n {
+            en: format!(
+                "Invalid format for field '{}': expected valid JSON",
+                field_name
+            ),
+            zh: format!("字段 '{}' 格式无效：期望有效的 JSON", field_name),
+        }),
+    }
+}
+
+/// 验证字符串最小长度。
+///
+/// 根据当前请求的 `Accept-Language` 偏好返回对应语言的错误消息。
+///
+/// # 示例
+///
+/// ```ignore
+/// validate_min_length(&body.password, 8, "password")?;
+/// validate_min_length(&body.name, 3, "name")?;
+/// ```
+#[allow(dead_code)] // Staged helper for bilingual min length validation; exercised in unit tests.
+pub fn validate_min_length(value: &str, min_len: usize, field_name: &str) -> Result<(), ApiError> {
+    if value.len() >= min_len {
+        Ok(())
+    } else {
+        Err(ApiError::BadRequestI18n {
+            en: format!(
+                "Invalid value for field '{}': must be at least {} characters",
+                field_name, min_len
+            ),
+            zh: format!(
+                "字段 '{}' 的值无效：长度必须至少为 {} 个字符",
+                field_name, min_len
+            ),
+        })
+    }
+}
+
+/// 验证数组非空。
+///
+/// 根据当前请求的 `Accept-Language` 偏好返回对应语言的错误消息。
+///
+/// # 示例
+///
+/// ```ignore
+/// validate_array_not_empty(&body.items, "items")?;
+/// validate_array_not_empty(&body.tags, "tags")?;
+/// ```
+#[allow(dead_code)] // Staged helper for bilingual array validation; exercised in unit tests.
+pub fn validate_array_not_empty<T>(arr: &[T], field_name: &str) -> Result<(), ApiError> {
+    if !arr.is_empty() {
+        Ok(())
+    } else {
+        Err(ApiError::BadRequestI18n {
+            en: format!(
+                "Invalid value for field '{}': array must not be empty",
+                field_name
+            ),
+            zh: format!("字段 '{}' 的值无效：数组不能为空", field_name),
+        })
+    }
+}
+
+/// 验证数组元素唯一性。
+///
+/// 根据当前请求的 `Accept-Language` 偏好返回对应语言的错误消息。
+/// 使用 HashSet 检测重复元素。
+///
+/// # 示例
+///
+/// ```ignore
+/// validate_unique_items(&body.tags, "tags")?;
+/// validate_unique_items(&body.ids, "ids")?;
+/// ```
+#[allow(dead_code)] // Staged helper for bilingual uniqueness validation; exercised in unit tests.
+pub fn validate_unique_items<T: Eq + std::hash::Hash>(
+    arr: &[T],
+    field_name: &str,
+) -> Result<(), ApiError> {
+    let mut seen = std::collections::HashSet::new();
+    for item in arr {
+        if !seen.insert(item) {
+            return Err(ApiError::BadRequestI18n {
+                en: format!(
+                    "Invalid value for field '{}': array contains duplicate items",
+                    field_name
+                ),
+                zh: format!("字段 '{}' 的值无效：数组包含重复项", field_name),
+            });
+        }
+    }
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -481,6 +684,701 @@ mod tests {
     fn validate_non_empty_string_fails_for_empty() {
         assert!(validate_non_empty_string("", "field").is_err());
         assert!(validate_non_empty_string("   ", "field").is_err());
+    }
+
+    #[test]
+    fn validate_uuid_accepts_valid() {
+        assert!(validate_uuid("550e8400-e29b-41d4-a716-446655440000", "id",).is_ok());
+    }
+
+    #[test]
+    fn validate_uuid_rejects_invalid() {
+        let err = validate_uuid("not-a-uuid", "userId").unwrap_err();
+        match err {
+            ApiError::BadRequestI18n { en, .. } => assert!(en.contains("userId")),
+            _ => panic!("expected BadRequestI18n"),
+        }
+    }
+
+    #[test]
+    fn validate_url_accepts_valid_http() {
+        assert!(validate_url("http://example.com", "url").is_ok());
+        assert!(validate_url("http://example.com/path", "url").is_ok());
+        assert!(validate_url("http://example.com:8080/path?query=value", "url").is_ok());
+    }
+
+    #[test]
+    fn validate_url_accepts_valid_https() {
+        assert!(validate_url("https://example.com", "url").is_ok());
+        assert!(validate_url("https://example.com/path", "url").is_ok());
+        assert!(validate_url("https://api.example.com/v1/endpoint", "url").is_ok());
+    }
+
+    #[test]
+    fn validate_url_rejects_invalid() {
+        let err = validate_url("not-a-url", "webhookUrl").unwrap_err();
+        match err {
+            ApiError::BadRequestI18n { en, .. } => {
+                assert!(en.contains("webhookUrl"));
+                assert!(en.contains("HTTP/HTTPS"));
+            }
+            _ => panic!("expected BadRequestI18n"),
+        }
+    }
+
+    #[test]
+    fn validate_url_rejects_non_http_schemes() {
+        // FTP should be rejected
+        let err = validate_url("ftp://example.com", "url").unwrap_err();
+        match err {
+            ApiError::BadRequestI18n { en, .. } => {
+                assert!(en.contains("HTTP/HTTPS"));
+            }
+            _ => panic!("expected BadRequestI18n"),
+        }
+
+        // File scheme should be rejected
+        let err = validate_url("file:///path/to/file", "url").unwrap_err();
+        match err {
+            ApiError::BadRequestI18n { en, .. } => {
+                assert!(en.contains("HTTP/HTTPS"));
+            }
+            _ => panic!("expected BadRequestI18n"),
+        }
+    }
+
+    #[tokio::test]
+    async fn validate_url_zh_locale() {
+        let err = REQUEST_LOCALE
+            .scope(ApiLocale::Zh, async {
+                validate_url("not-a-url", "webhookUrl").unwrap_err()
+            })
+            .await;
+        match err {
+            ApiError::BadRequestI18n { zh, .. } => {
+                assert!(zh.contains("webhookUrl"));
+                assert!(zh.contains("HTTP/HTTPS"));
+            }
+            _ => panic!("expected BadRequestI18n"),
+        }
+    }
+
+    #[tokio::test]
+    async fn validate_url_response_en() {
+        use axum::body::to_bytes;
+        use axum::response::IntoResponse;
+
+        let err = validate_url("invalid-url", "callbackUrl").unwrap_err();
+        let resp = err.into_response();
+
+        let bytes = to_bytes(resp.into_body(), 16 * 1024)
+            .await
+            .expect("body bytes");
+        let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
+
+        assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(400));
+        assert_eq!(
+            json.get("code").and_then(|v| v.as_str()),
+            Some("bad_request")
+        );
+        let message = json.get("message").and_then(|v| v.as_str()).unwrap();
+        assert!(message.contains("callbackUrl"));
+        assert!(message.contains("HTTP/HTTPS"));
+    }
+
+    #[tokio::test]
+    async fn validate_url_response_zh() {
+        use axum::body::to_bytes;
+        use axum::response::IntoResponse;
+
+        let resp = REQUEST_LOCALE
+            .scope(ApiLocale::Zh, async {
+                let err = validate_url("invalid-url", "callbackUrl").unwrap_err();
+                err.into_response()
+            })
+            .await;
+
+        let bytes = to_bytes(resp.into_body(), 16 * 1024)
+            .await
+            .expect("body bytes");
+        let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
+
+        assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(400));
+        assert_eq!(
+            json.get("code").and_then(|v| v.as_str()),
+            Some("bad_request")
+        );
+        let message = json.get("message").and_then(|v| v.as_str()).unwrap();
+        assert!(message.contains("callbackUrl"));
+        assert!(message.contains("HTTP/HTTPS"));
+    }
+
+    #[test]
+    fn validate_email_accepts_valid() {
+        assert!(validate_email("user@example.com", "email").is_ok());
+        assert!(validate_email("test.user@example.com", "email").is_ok());
+        assert!(validate_email("user+tag@example.co.uk", "email").is_ok());
+        assert!(validate_email("user_name@sub.example.com", "email").is_ok());
+    }
+
+    #[test]
+    fn validate_email_rejects_invalid() {
+        // No @ symbol
+        let err = validate_email("notanemail", "email").unwrap_err();
+        match err {
+            ApiError::BadRequestI18n { en, .. } => {
+                assert!(en.contains("email"));
+                assert!(en.contains("valid email address"));
+            }
+            _ => panic!("expected BadRequestI18n"),
+        }
+
+        // No domain
+        let err = validate_email("user@", "email").unwrap_err();
+        match err {
+            ApiError::BadRequestI18n { en, .. } => {
+                assert!(en.contains("email"));
+            }
+            _ => panic!("expected BadRequestI18n"),
+        }
+
+        // No local part
+        let err = validate_email("@example.com", "email").unwrap_err();
+        match err {
+            ApiError::BadRequestI18n { en, .. } => {
+                assert!(en.contains("email"));
+            }
+            _ => panic!("expected BadRequestI18n"),
+        }
+
+        // No TLD
+        let err = validate_email("user@example", "email").unwrap_err();
+        match err {
+            ApiError::BadRequestI18n { en, .. } => {
+                assert!(en.contains("email"));
+            }
+            _ => panic!("expected BadRequestI18n"),
+        }
+
+        // Contains whitespace
+        let err = validate_email("user @example.com", "email").unwrap_err();
+        match err {
+            ApiError::BadRequestI18n { en, .. } => {
+                assert!(en.contains("email"));
+            }
+            _ => panic!("expected BadRequestI18n"),
+        }
+    }
+
+    #[tokio::test]
+    async fn validate_email_zh_locale() {
+        let err = REQUEST_LOCALE
+            .scope(ApiLocale::Zh, async {
+                validate_email("invalid-email", "email").unwrap_err()
+            })
+            .await;
+        match err {
+            ApiError::BadRequestI18n { zh, .. } => {
+                assert!(zh.contains("email"));
+                assert!(zh.contains("电子邮件地址"));
+            }
+            _ => panic!("expected BadRequestI18n"),
+        }
+    }
+
+    #[tokio::test]
+    async fn validate_email_response_en() {
+        use axum::body::to_bytes;
+        use axum::response::IntoResponse;
+
+        let err = validate_email("invalid-email", "contactEmail").unwrap_err();
+        let resp = err.into_response();
+
+        let bytes = to_bytes(resp.into_body(), 16 * 1024)
+            .await
+            .expect("body bytes");
+        let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
+
+        assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(400));
+        assert_eq!(
+            json.get("code").and_then(|v| v.as_str()),
+            Some("bad_request")
+        );
+        let message = json.get("message").and_then(|v| v.as_str()).unwrap();
+        assert!(message.contains("contactEmail"));
+        assert!(message.contains("valid email address"));
+    }
+
+    #[tokio::test]
+    async fn validate_email_response_zh() {
+        use axum::body::to_bytes;
+        use axum::response::IntoResponse;
+
+        let resp = REQUEST_LOCALE
+            .scope(ApiLocale::Zh, async {
+                let err = validate_email("invalid-email", "contactEmail").unwrap_err();
+                err.into_response()
+            })
+            .await;
+
+        let bytes = to_bytes(resp.into_body(), 16 * 1024)
+            .await
+            .expect("body bytes");
+        let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
+
+        assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(400));
+        assert_eq!(
+            json.get("code").and_then(|v| v.as_str()),
+            Some("bad_request")
+        );
+        let message = json.get("message").and_then(|v| v.as_str()).unwrap();
+        assert!(message.contains("contactEmail"));
+        assert!(message.contains("电子邮件地址"));
+    }
+
+    #[test]
+    fn validate_json_accepts_valid() {
+        assert!(validate_json(r#"{"key": "value"}"#, "metadata").is_ok());
+        assert!(validate_json(r#"[]"#, "items").is_ok());
+        assert!(validate_json(r#"null"#, "data").is_ok());
+        assert!(validate_json(r#"123"#, "number").is_ok());
+        assert!(validate_json(r#""string""#, "text").is_ok());
+        assert!(validate_json(r#"true"#, "flag").is_ok());
+        assert!(validate_json(r#"{"nested": {"object": {"with": "values"}}}"#, "config").is_ok());
+    }
+
+    #[test]
+    fn validate_json_rejects_invalid() {
+        // Invalid JSON syntax
+        let err = validate_json(r#"{"key": "value""#, "metadata").unwrap_err();
+        match err {
+            ApiError::BadRequestI18n { en, .. } => {
+                assert!(en.contains("metadata"));
+                assert!(en.contains("valid JSON"));
+            }
+            _ => panic!("expected BadRequestI18n"),
+        }
+
+        // Not JSON at all
+        let err = validate_json("not json", "config").unwrap_err();
+        match err {
+            ApiError::BadRequestI18n { en, .. } => {
+                assert!(en.contains("config"));
+            }
+            _ => panic!("expected BadRequestI18n"),
+        }
+
+        // Empty string
+        let err = validate_json("", "data").unwrap_err();
+        match err {
+            ApiError::BadRequestI18n { en, .. } => {
+                assert!(en.contains("data"));
+            }
+            _ => panic!("expected BadRequestI18n"),
+        }
+
+        // Unclosed array
+        let err = validate_json("[1, 2, 3", "items").unwrap_err();
+        match err {
+            ApiError::BadRequestI18n { en, .. } => {
+                assert!(en.contains("items"));
+            }
+            _ => panic!("expected BadRequestI18n"),
+        }
+    }
+
+    #[tokio::test]
+    async fn validate_json_zh_locale() {
+        let err = REQUEST_LOCALE
+            .scope(ApiLocale::Zh, async {
+                validate_json("invalid json", "metadata").unwrap_err()
+            })
+            .await;
+        match err {
+            ApiError::BadRequestI18n { zh, .. } => {
+                assert!(zh.contains("metadata"));
+                assert!(zh.contains("JSON"));
+            }
+            _ => panic!("expected BadRequestI18n"),
+        }
+    }
+
+    #[tokio::test]
+    async fn validate_json_response_en() {
+        use axum::body::to_bytes;
+        use axum::response::IntoResponse;
+
+        let err = validate_json("invalid json", "config").unwrap_err();
+        let resp = err.into_response();
+
+        let bytes = to_bytes(resp.into_body(), 16 * 1024)
+            .await
+            .expect("body bytes");
+        let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
+
+        assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(400));
+        assert_eq!(
+            json.get("code").and_then(|v| v.as_str()),
+            Some("bad_request")
+        );
+        let message = json.get("message").and_then(|v| v.as_str()).unwrap();
+        assert!(message.contains("config"));
+        assert!(message.contains("valid JSON"));
+    }
+
+    #[tokio::test]
+    async fn validate_json_response_zh() {
+        use axum::body::to_bytes;
+        use axum::response::IntoResponse;
+
+        let resp = REQUEST_LOCALE
+            .scope(ApiLocale::Zh, async {
+                let err = validate_json("invalid json", "config").unwrap_err();
+                err.into_response()
+            })
+            .await;
+
+        let bytes = to_bytes(resp.into_body(), 16 * 1024)
+            .await
+            .expect("body bytes");
+        let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
+
+        assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(400));
+        assert_eq!(
+            json.get("code").and_then(|v| v.as_str()),
+            Some("bad_request")
+        );
+        let message = json.get("message").and_then(|v| v.as_str()).unwrap();
+        assert!(message.contains("config"));
+        assert!(message.contains("JSON"));
+    }
+
+    #[test]
+    fn validate_min_length_accepts_valid() {
+        assert!(validate_min_length("password123", 8, "password").is_ok());
+        assert!(validate_min_length("exactly8", 8, "password").is_ok());
+        assert!(validate_min_length("hello", 3, "name").is_ok());
+        assert!(validate_min_length("a", 1, "code").is_ok());
+    }
+
+    #[test]
+    fn validate_min_length_rejects_too_short() {
+        // Too short
+        let err = validate_min_length("short", 8, "password").unwrap_err();
+        match err {
+            ApiError::BadRequestI18n { en, .. } => {
+                assert!(en.contains("password"));
+                assert!(en.contains("at least 8 characters"));
+            }
+            _ => panic!("expected BadRequestI18n"),
+        }
+
+        // Empty string
+        let err = validate_min_length("", 1, "name").unwrap_err();
+        match err {
+            ApiError::BadRequestI18n { en, .. } => {
+                assert!(en.contains("name"));
+                assert!(en.contains("at least 1 characters"));
+            }
+            _ => panic!("expected BadRequestI18n"),
+        }
+
+        // One character short
+        let err = validate_min_length("1234567", 8, "code").unwrap_err();
+        match err {
+            ApiError::BadRequestI18n { en, .. } => {
+                assert!(en.contains("code"));
+                assert!(en.contains("at least 8 characters"));
+            }
+            _ => panic!("expected BadRequestI18n"),
+        }
+    }
+
+    #[tokio::test]
+    async fn validate_min_length_zh_locale() {
+        let err = REQUEST_LOCALE
+            .scope(ApiLocale::Zh, async {
+                validate_min_length("short", 8, "password").unwrap_err()
+            })
+            .await;
+        match err {
+            ApiError::BadRequestI18n { zh, .. } => {
+                assert!(zh.contains("password"));
+                assert!(zh.contains("至少为 8 个字符"));
+            }
+            _ => panic!("expected BadRequestI18n"),
+        }
+    }
+
+    #[tokio::test]
+    async fn validate_min_length_response_en() {
+        use axum::body::to_bytes;
+        use axum::response::IntoResponse;
+
+        let err = validate_min_length("abc", 5, "username").unwrap_err();
+        let resp = err.into_response();
+
+        let bytes = to_bytes(resp.into_body(), 16 * 1024)
+            .await
+            .expect("body bytes");
+        let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
+
+        assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(400));
+        assert_eq!(
+            json.get("code").and_then(|v| v.as_str()),
+            Some("bad_request")
+        );
+        let message = json.get("message").and_then(|v| v.as_str()).unwrap();
+        assert!(message.contains("username"));
+        assert!(message.contains("at least 5 characters"));
+    }
+
+    #[tokio::test]
+    async fn validate_min_length_response_zh() {
+        use axum::body::to_bytes;
+        use axum::response::IntoResponse;
+
+        let resp = REQUEST_LOCALE
+            .scope(ApiLocale::Zh, async {
+                let err = validate_min_length("abc", 5, "username").unwrap_err();
+                err.into_response()
+            })
+            .await;
+
+        let bytes = to_bytes(resp.into_body(), 16 * 1024)
+            .await
+            .expect("body bytes");
+        let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
+
+        assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(400));
+        assert_eq!(
+            json.get("code").and_then(|v| v.as_str()),
+            Some("bad_request")
+        );
+        let message = json.get("message").and_then(|v| v.as_str()).unwrap();
+        assert!(message.contains("username"));
+        assert!(message.contains("至少为 5 个字符"));
+    }
+
+    #[test]
+    fn validate_array_not_empty_accepts_non_empty() {
+        let items = vec![1, 2, 3];
+        assert!(validate_array_not_empty(&items, "items").is_ok());
+
+        let single_item = vec!["hello"];
+        assert!(validate_array_not_empty(&single_item, "tags").is_ok());
+
+        let strings = vec!["a".to_string(), "b".to_string()];
+        assert!(validate_array_not_empty(&strings, "names").is_ok());
+    }
+
+    #[test]
+    fn validate_array_not_empty_rejects_empty() {
+        let empty_vec: Vec<i32> = vec![];
+        let err = validate_array_not_empty(&empty_vec, "items").unwrap_err();
+        match err {
+            ApiError::BadRequestI18n { en, .. } => {
+                assert!(en.contains("items"));
+                assert!(en.contains("array must not be empty"));
+            }
+            _ => panic!("expected BadRequestI18n"),
+        }
+
+        let empty_strings: Vec<String> = vec![];
+        let err = validate_array_not_empty(&empty_strings, "tags").unwrap_err();
+        match err {
+            ApiError::BadRequestI18n { en, .. } => {
+                assert!(en.contains("tags"));
+                assert!(en.contains("array must not be empty"));
+            }
+            _ => panic!("expected BadRequestI18n"),
+        }
+    }
+
+    #[tokio::test]
+    async fn validate_array_not_empty_zh_locale() {
+        let empty_vec: Vec<i32> = vec![];
+        let err = REQUEST_LOCALE
+            .scope(ApiLocale::Zh, async {
+                validate_array_not_empty(&empty_vec, "items").unwrap_err()
+            })
+            .await;
+        match err {
+            ApiError::BadRequestI18n { zh, .. } => {
+                assert!(zh.contains("items"));
+                assert!(zh.contains("数组不能为空"));
+            }
+            _ => panic!("expected BadRequestI18n"),
+        }
+    }
+
+    #[tokio::test]
+    async fn validate_array_not_empty_response_en() {
+        use axum::body::to_bytes;
+        use axum::response::IntoResponse;
+
+        let empty_vec: Vec<String> = vec![];
+        let err = validate_array_not_empty(&empty_vec, "tags").unwrap_err();
+        let resp = err.into_response();
+
+        let bytes = to_bytes(resp.into_body(), 16 * 1024)
+            .await
+            .expect("body bytes");
+        let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
+
+        assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(400));
+        assert_eq!(
+            json.get("code").and_then(|v| v.as_str()),
+            Some("bad_request")
+        );
+        let message = json.get("message").and_then(|v| v.as_str()).unwrap();
+        assert!(message.contains("tags"));
+        assert!(message.contains("array must not be empty"));
+    }
+
+    #[tokio::test]
+    async fn validate_array_not_empty_response_zh() {
+        use axum::body::to_bytes;
+        use axum::response::IntoResponse;
+
+        let resp = REQUEST_LOCALE
+            .scope(ApiLocale::Zh, async {
+                let empty_vec: Vec<i32> = vec![];
+                let err = validate_array_not_empty(&empty_vec, "items").unwrap_err();
+                err.into_response()
+            })
+            .await;
+
+        let bytes = to_bytes(resp.into_body(), 16 * 1024)
+            .await
+            .expect("body bytes");
+        let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
+
+        assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(400));
+        assert_eq!(
+            json.get("code").and_then(|v| v.as_str()),
+            Some("bad_request")
+        );
+        let message = json.get("message").and_then(|v| v.as_str()).unwrap();
+        assert!(message.contains("items"));
+        assert!(message.contains("数组不能为空"));
+    }
+
+    #[test]
+    fn validate_unique_items_accepts_unique() {
+        let items = vec![1, 2, 3, 4, 5];
+        assert!(validate_unique_items(&items, "items").is_ok());
+
+        let strings = vec!["a", "b", "c"];
+        assert!(validate_unique_items(&strings, "tags").is_ok());
+
+        let single_item = vec![42];
+        assert!(validate_unique_items(&single_item, "ids").is_ok());
+
+        let empty_vec: Vec<i32> = vec![];
+        assert!(validate_unique_items(&empty_vec, "items").is_ok());
+    }
+
+    #[test]
+    fn validate_unique_items_rejects_duplicates() {
+        let items = vec![1, 2, 3, 2, 4];
+        let err = validate_unique_items(&items, "items").unwrap_err();
+        match err {
+            ApiError::BadRequestI18n { en, .. } => {
+                assert!(en.contains("items"));
+                assert!(en.contains("array contains duplicate items"));
+            }
+            _ => panic!("expected BadRequestI18n"),
+        }
+
+        let strings = vec!["a", "b", "a"];
+        let err = validate_unique_items(&strings, "tags").unwrap_err();
+        match err {
+            ApiError::BadRequestI18n { en, .. } => {
+                assert!(en.contains("tags"));
+                assert!(en.contains("array contains duplicate items"));
+            }
+            _ => panic!("expected BadRequestI18n"),
+        }
+
+        let all_same = vec![1, 1, 1];
+        let err = validate_unique_items(&all_same, "ids").unwrap_err();
+        match err {
+            ApiError::BadRequestI18n { en, .. } => {
+                assert!(en.contains("ids"));
+                assert!(en.contains("array contains duplicate items"));
+            }
+            _ => panic!("expected BadRequestI18n"),
+        }
+    }
+
+    #[tokio::test]
+    async fn validate_unique_items_zh_locale() {
+        let items = vec![1, 2, 3, 2];
+        let err = REQUEST_LOCALE
+            .scope(ApiLocale::Zh, async {
+                validate_unique_items(&items, "items").unwrap_err()
+            })
+            .await;
+        match err {
+            ApiError::BadRequestI18n { zh, .. } => {
+                assert!(zh.contains("items"));
+                assert!(zh.contains("数组包含重复项"));
+            }
+            _ => panic!("expected BadRequestI18n"),
+        }
+    }
+
+    #[tokio::test]
+    async fn validate_unique_items_response_en() {
+        use axum::body::to_bytes;
+        use axum::response::IntoResponse;
+
+        let items = vec!["a", "b", "c", "b"];
+        let err = validate_unique_items(&items, "tags").unwrap_err();
+        let resp = err.into_response();
+
+        let bytes = to_bytes(resp.into_body(), 16 * 1024)
+            .await
+            .expect("body bytes");
+        let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
+
+        assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(400));
+        assert_eq!(
+            json.get("code").and_then(|v| v.as_str()),
+            Some("bad_request")
+        );
+        let message = json.get("message").and_then(|v| v.as_str()).unwrap();
+        assert!(message.contains("tags"));
+        assert!(message.contains("array contains duplicate items"));
+    }
+
+    #[tokio::test]
+    async fn validate_unique_items_response_zh() {
+        use axum::body::to_bytes;
+        use axum::response::IntoResponse;
+
+        let resp = REQUEST_LOCALE
+            .scope(ApiLocale::Zh, async {
+                let items = vec![1, 2, 3, 1];
+                let err = validate_unique_items(&items, "ids").unwrap_err();
+                err.into_response()
+            })
+            .await;
+
+        let bytes = to_bytes(resp.into_body(), 16 * 1024)
+            .await
+            .expect("body bytes");
+        let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
+
+        assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(400));
+        assert_eq!(
+            json.get("code").and_then(|v| v.as_str()),
+            Some("bad_request")
+        );
+        let message = json.get("message").and_then(|v| v.as_str()).unwrap();
+        assert!(message.contains("ids"));
+        assert!(message.contains("数组包含重复项"));
     }
 
     #[test]
@@ -737,6 +1635,58 @@ mod tests {
         }
     }
 
+    #[tokio::test]
+    async fn missing_field_i18n_response_en() {
+        use axum::body::to_bytes;
+        use axum::response::IntoResponse;
+
+        let err = missing_field_i18n("email");
+        let resp = err.into_response();
+
+        let bytes = to_bytes(resp.into_body(), 16 * 1024)
+            .await
+            .expect("body bytes");
+        let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
+
+        assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(400));
+        assert_eq!(
+            json.get("code").and_then(|v| v.as_str()),
+            Some("bad_request")
+        );
+        assert_eq!(
+            json.get("message").and_then(|v| v.as_str()),
+            Some("Missing required field 'email'")
+        );
+    }
+
+    #[tokio::test]
+    async fn missing_field_i18n_response_zh() {
+        use axum::body::to_bytes;
+        use axum::response::IntoResponse;
+
+        let resp = REQUEST_LOCALE
+            .scope(ApiLocale::Zh, async {
+                let err = missing_field_i18n("name");
+                err.into_response()
+            })
+            .await;
+
+        let bytes = to_bytes(resp.into_body(), 16 * 1024)
+            .await
+            .expect("body bytes");
+        let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
+
+        assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(400));
+        assert_eq!(
+            json.get("code").and_then(|v| v.as_str()),
+            Some("bad_request")
+        );
+        assert_eq!(
+            json.get("message").and_then(|v| v.as_str()),
+            Some("缺少必填字段 'name'")
+        );
+    }
+
     #[test]
     fn invalid_value_i18n_en() {
         let err = invalid_value_i18n("age", "must be between 0 and 150");
@@ -768,6 +1718,58 @@ mod tests {
             }
             _ => panic!("expected BadRequestI18n"),
         }
+    }
+
+    #[tokio::test]
+    async fn invalid_value_i18n_response_en() {
+        use axum::body::to_bytes;
+        use axum::response::IntoResponse;
+
+        let err = invalid_value_i18n("age", "must be between 0 and 150");
+        let resp = err.into_response();
+
+        let bytes = to_bytes(resp.into_body(), 16 * 1024)
+            .await
+            .expect("body bytes");
+        let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
+
+        assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(400));
+        assert_eq!(
+            json.get("code").and_then(|v| v.as_str()),
+            Some("bad_request")
+        );
+        assert_eq!(
+            json.get("message").and_then(|v| v.as_str()),
+            Some("Invalid value for field 'age': must be between 0 and 150")
+        );
+    }
+
+    #[tokio::test]
+    async fn invalid_value_i18n_response_zh() {
+        use axum::body::to_bytes;
+        use axum::response::IntoResponse;
+
+        let resp = REQUEST_LOCALE
+            .scope(ApiLocale::Zh, async {
+                let err = invalid_value_i18n("status", "must be one of: active, inactive");
+                err.into_response()
+            })
+            .await;
+
+        let bytes = to_bytes(resp.into_body(), 16 * 1024)
+            .await
+            .expect("body bytes");
+        let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
+
+        assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(400));
+        assert_eq!(
+            json.get("code").and_then(|v| v.as_str()),
+            Some("bad_request")
+        );
+        assert_eq!(
+            json.get("message").and_then(|v| v.as_str()),
+            Some("字段 'status' 的值无效：must be one of: active, inactive")
+        );
     }
 
     #[tokio::test]
@@ -1478,6 +2480,204 @@ mod tests {
         assert_eq!(
             json.get("message").and_then(|v| v.as_str()),
             Some("此端点已弃用。请改用 /api/v2/projects")
+        );
+    }
+
+    #[test]
+    fn feature_under_development_i18n_en() {
+        let err = feature_under_development_i18n("advanced_analytics");
+        match err {
+            ApiError::NotImplementedI18n { en, zh } => {
+                assert_eq!(
+                    en,
+                    "Feature 'advanced_analytics' is currently under development"
+                );
+                assert_eq!(zh, "功能 'advanced_analytics' 正在开发中");
+            }
+            _ => panic!("expected NotImplementedI18n"),
+        }
+    }
+
+    #[test]
+    fn feature_under_development_i18n_with_different_features() {
+        let test_cases = vec![
+            (
+                "advanced_analytics",
+                "Feature 'advanced_analytics' is currently under development",
+                "功能 'advanced_analytics' 正在开发中",
+            ),
+            (
+                "video_export",
+                "Feature 'video_export' is currently under development",
+                "功能 'video_export' 正在开发中",
+            ),
+            (
+                "real_time_collaboration",
+                "Feature 'real_time_collaboration' is currently under development",
+                "功能 'real_time_collaboration' 正在开发中",
+            ),
+        ];
+
+        for (feature, expected_en, expected_zh) in test_cases {
+            let err = feature_under_development_i18n(feature);
+            match err {
+                ApiError::NotImplementedI18n { en, zh } => {
+                    assert_eq!(en, expected_en);
+                    assert_eq!(zh, expected_zh);
+                }
+                _ => panic!("expected NotImplementedI18n"),
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn feature_under_development_i18n_response_en() {
+        use axum::body::to_bytes;
+        use axum::response::IntoResponse;
+
+        let err = feature_under_development_i18n("advanced_analytics");
+        let resp = err.into_response();
+
+        let bytes = to_bytes(resp.into_body(), 16 * 1024)
+            .await
+            .expect("body bytes");
+        let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
+
+        assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(501));
+        assert_eq!(
+            json.get("code").and_then(|v| v.as_str()),
+            Some("not_implemented")
+        );
+        assert_eq!(
+            json.get("message").and_then(|v| v.as_str()),
+            Some("Feature 'advanced_analytics' is currently under development")
+        );
+    }
+
+    #[tokio::test]
+    async fn feature_under_development_i18n_response_zh() {
+        use axum::body::to_bytes;
+        use axum::response::IntoResponse;
+
+        let resp = REQUEST_LOCALE
+            .scope(ApiLocale::Zh, async {
+                let err = feature_under_development_i18n("video_export");
+                err.into_response()
+            })
+            .await;
+
+        let bytes = to_bytes(resp.into_body(), 16 * 1024)
+            .await
+            .expect("body bytes");
+        let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
+
+        assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(501));
+        assert_eq!(
+            json.get("code").and_then(|v| v.as_str()),
+            Some("not_implemented")
+        );
+        assert_eq!(
+            json.get("message").and_then(|v| v.as_str()),
+            Some("功能 'video_export' 正在开发中")
+        );
+    }
+
+    #[test]
+    fn validate_uuid_passes_for_valid_uuids() {
+        // Test various valid UUID formats
+        assert!(validate_uuid("550e8400-e29b-41d4-a716-446655440000", "userId").is_ok());
+        assert!(validate_uuid("6ba7b810-9dad-11d1-80b4-00c04fd430c8", "workspaceId").is_ok());
+        assert!(validate_uuid("00000000-0000-0000-0000-000000000000", "id").is_ok());
+        assert!(validate_uuid("ffffffff-ffff-ffff-ffff-ffffffffffff", "id").is_ok());
+    }
+
+    #[test]
+    fn validate_uuid_fails_for_invalid_uuids() {
+        // Test various invalid UUID formats
+        assert!(validate_uuid("not-a-uuid", "userId").is_err());
+        assert!(validate_uuid("", "userId").is_err());
+        assert!(validate_uuid("550e8400-e29b-41d4-a716", "userId").is_err()); // Too short
+        assert!(validate_uuid("550e8400-e29b-41d4-a716-446655440000-extra", "userId").is_err()); // Too long
+        assert!(validate_uuid("550e8400-e29b-41d4-a716-44665544000g", "userId").is_err()); // Invalid character
+        assert!(validate_uuid("not a valid uuid at all", "userId").is_err());
+    }
+
+    #[test]
+    fn validate_uuid_error_message_en() {
+        let err = validate_uuid("invalid-uuid", "userId").unwrap_err();
+        match err {
+            ApiError::BadRequestI18n { en, zh } => {
+                assert_eq!(en, "Invalid format for field 'userId': expected valid UUID");
+                assert_eq!(zh, "字段 'userId' 格式无效：期望有效的 UUID");
+            }
+            _ => panic!("expected BadRequestI18n"),
+        }
+    }
+
+    #[test]
+    fn validate_uuid_error_message_with_different_field() {
+        let err = validate_uuid("not-a-uuid", "workspaceId").unwrap_err();
+        match err {
+            ApiError::BadRequestI18n { en, zh } => {
+                assert_eq!(
+                    en,
+                    "Invalid format for field 'workspaceId': expected valid UUID"
+                );
+                assert_eq!(zh, "字段 'workspaceId' 格式无效：期望有效的 UUID");
+            }
+            _ => panic!("expected BadRequestI18n"),
+        }
+    }
+
+    #[tokio::test]
+    async fn validate_uuid_response_en() {
+        use axum::body::to_bytes;
+        use axum::response::IntoResponse;
+
+        let err = validate_uuid("invalid-uuid", "userId").unwrap_err();
+        let resp = err.into_response();
+
+        let bytes = to_bytes(resp.into_body(), 16 * 1024)
+            .await
+            .expect("body bytes");
+        let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
+
+        assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(400));
+        assert_eq!(
+            json.get("code").and_then(|v| v.as_str()),
+            Some("bad_request")
+        );
+        assert_eq!(
+            json.get("message").and_then(|v| v.as_str()),
+            Some("Invalid format for field 'userId': expected valid UUID")
+        );
+    }
+
+    #[tokio::test]
+    async fn validate_uuid_response_zh() {
+        use axum::body::to_bytes;
+        use axum::response::IntoResponse;
+
+        let resp = REQUEST_LOCALE
+            .scope(ApiLocale::Zh, async {
+                let err = validate_uuid("not-a-uuid", "workspaceId").unwrap_err();
+                err.into_response()
+            })
+            .await;
+
+        let bytes = to_bytes(resp.into_body(), 16 * 1024)
+            .await
+            .expect("body bytes");
+        let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
+
+        assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(400));
+        assert_eq!(
+            json.get("code").and_then(|v| v.as_str()),
+            Some("bad_request")
+        );
+        assert_eq!(
+            json.get("message").and_then(|v| v.as_str()),
+            Some("字段 'workspaceId' 格式无效：期望有效的 UUID")
         );
     }
 }

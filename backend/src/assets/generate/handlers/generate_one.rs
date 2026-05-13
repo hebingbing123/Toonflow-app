@@ -6,7 +6,7 @@ use axum::{
 use serde_json::json;
 
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{validate_max_length, validate_positive, ApiError};
 use crate::jobs::{
     enqueue_generation_job, payload_project::ASSETS_GENERATE_PAYLOAD_SCHEMA_VERSION_V2, JobRow,
     JOB_KIND_ASSET_GENERATE_IMAGE,
@@ -26,38 +26,16 @@ pub(crate) async fn post_generate_assets(
     Json(body): Json<GenerateAssetsBody>,
 ) -> Result<JsonResponse<JobRow>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    if body.project_id <= 0 {
-        return Err(ApiError::BadRequest("projectId must be positive".into()));
-    }
-    if body.id <= 0 {
-        return Err(ApiError::BadRequest(
-            "id (asset numeric id) must be positive".into(),
-        ));
-    }
+    validate_positive(body.project_id, "projectId")?;
+    validate_positive(body.id, "id (asset numeric id)")?;
     let model = trim_non_empty(body.model, "model")?;
     let resolution = trim_non_empty(body.resolution, "resolution")?;
     let name = trim_non_empty(body.name, "name")?;
     let prompt = trim_non_empty(body.prompt, "prompt")?;
-    if model.len() > MAX_MODEL_LEN {
-        return Err(ApiError::BadRequest(format!(
-            "model must be at most {MAX_MODEL_LEN} chars"
-        )));
-    }
-    if resolution.len() > MAX_RESOLUTION_LEN {
-        return Err(ApiError::BadRequest(format!(
-            "resolution must be at most {MAX_RESOLUTION_LEN} chars"
-        )));
-    }
-    if name.len() > MAX_NAME_LEN {
-        return Err(ApiError::BadRequest(format!(
-            "name must be at most {MAX_NAME_LEN} chars"
-        )));
-    }
-    if prompt.len() > MAX_PROMPT_LEN {
-        return Err(ApiError::BadRequest(format!(
-            "prompt must be at most {MAX_PROMPT_LEN} chars"
-        )));
-    }
+    validate_max_length(&model, MAX_MODEL_LEN, "model")?;
+    validate_max_length(&resolution, MAX_RESOLUTION_LEN, "resolution")?;
+    validate_max_length(&name, MAX_NAME_LEN, "name")?;
+    validate_max_length(&prompt, MAX_PROMPT_LEN, "prompt")?;
     let image_base64 = normalize_optional_base64(body.base64.as_deref(), "base64")?;
 
     let pool = state.require_pool()?;
@@ -93,6 +71,7 @@ pub(crate) async fn post_generate_assets(
         JOB_KIND_ASSET_GENERATE_IMAGE,
         payload,
         Some(&headers),
+        &state.billing_config,
     )
     .await?;
     Ok(JsonResponse(row))

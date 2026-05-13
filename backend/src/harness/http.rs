@@ -222,8 +222,12 @@ async fn revoke_user_wasm_by_id(
     headers: HeaderMap,
     Path(id_raw): Path<String>,
 ) -> Result<Json<HarnessUserWasmRevoked>, ApiError> {
-    let id = Uuid::parse_str(id_raw.trim())
-        .map_err(|_| ApiError::BadRequest("harness user-wasm id must be a UUID".into()))?;
+    let id = Uuid::parse_str(id_raw.trim()).map_err(|_| {
+        crate::error::bad_request_i18n(
+            "harness user-wasm id must be a UUID",
+            "harness user-wasm id 必须是 UUID",
+        )
+    })?;
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
     observe::harness_user_wasm_revoke_http(uid, id);

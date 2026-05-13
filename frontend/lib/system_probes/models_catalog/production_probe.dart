@@ -89,6 +89,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbe on _HomePageState {
     final getData = await postProductionGetProductionDataV1(
       token,
       projectId: projectId,
+      projectUuid: projectUuid,
       scriptId: scriptId,
       storyboardIds: [resources.storyboardId],
     );

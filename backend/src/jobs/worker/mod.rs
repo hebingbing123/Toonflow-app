@@ -230,6 +230,8 @@ async fn process_one_job(
         client_rid,
     );
 
+    // All user-facing job worker pushes share the same raw WS envelope:
+    // `generation.job.updated` with the full job row in `payload`.
     let text = envelope_generation_job_updated(&row);
     state
         .notify

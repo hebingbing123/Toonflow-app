@@ -10,7 +10,7 @@ use crate::error::ApiError;
 use crate::jobs::dto::JobRow;
 use crate::state::AppState;
 
-use super::super::common::{fetch_job_by_id, job_status_allows_retry, require_pool};
+use super::super::common::{job_status_allows_retry, require_pool};
 use super::outcome::resolve_job_mutation_outcome;
 
 #[utoipa::path(
@@ -18,6 +18,36 @@ use super::outcome::resolve_job_mutation_outcome;
     path = "/api/v1/jobs/{id}/retry",
     operation_id = "retryJobV1",
     tag = "jobs",
+    description = "Retry a failed job with workspace membership validation.
+
+## Permission Requirements
+
+A user can retry a job if:
+
+1. **Owner permission**: The user is the job owner (`owner_user_id` matches the authenticated user)
+2. **Workspace member permission**: The job is associated with a project in a workspace where the user is a member
+
+### Project Association
+
+Jobs are associated with a project when the job payload contains project scope fields:
+- `project_uuid`: Preferred project UUID (`app_project.id`)
+- `project_numeric_id`: Legacy numeric project ID fallback
+
+### Personal Jobs
+
+Jobs without project information (no `project_uuid` or `project_numeric_id` in payload) are **personal jobs** and can only be retried by the job owner.
+
+### Archived Projects
+
+Jobs associated with archived projects are excluded from workspace member permissions. Only the job owner can retry jobs for archived projects.
+
+### Status Requirements
+
+Only jobs in `failed` status can be retried. Attempting to retry a job in any other status returns 409 Conflict.
+
+### Access Denied
+
+If the user does not have permission to retry the job, the endpoint returns 404 Not Found (not 403 Forbidden) to maintain security by not revealing the existence of jobs the user cannot access.",
     request_body(content = serde_json::Value, content_type = "application/json"),
     responses(
         (status = 200, description = "OK", body = serde_json::Value),
@@ -39,7 +69,9 @@ pub(crate) async fn retry_job(
 ) -> Result<Json<JobRow>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = require_pool(&state)?;
-    let current = fetch_job_by_id(pool, uid, id).await?;
+
+    // First validate access using the new permission check
+    let current = super::super::common::require_job_access(pool, uid, id).await?;
 
     if !job_status_allows_retry(&current.status) {
         return Err(ApiError::Conflict(
@@ -47,28 +79,17 @@ pub(crate) async fn retry_job(
         ));
     }
 
+    // Perform the retry
     let updated = sqlx::query_as::<_, JobRow>(
         r#"
         UPDATE app_generation_job
         SET status = 'queued', error_message = NULL, result = NULL, error_details = NULL, claimed_by = NULL, updated_at = NOW()
         WHERE id = $1
           AND status = 'failed'
-          AND (
-            owner_user_id = $2
-            OR EXISTS (
-              SELECT 1
-              FROM app_project p
-              INNER JOIN app_workspace_member wm ON wm.workspace_id = p.workspace_id
-              WHERE wm.user_id = $2
-                AND (app_generation_job.payload->>'project_numeric_id') ~ '^[0-9]+$'
-                AND p.numeric_id = (app_generation_job.payload->>'project_numeric_id')::int
-            )
-          )
         RETURNING numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, error_details, idempotency_key, claimed_by, created_at, updated_at
         "#,
     )
     .bind(id)
-    .bind(uid)
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;

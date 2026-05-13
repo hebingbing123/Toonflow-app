@@ -3,21 +3,21 @@
 use serde_json::Value;
 
 use crate::billing::provider_rules::is_informational_event;
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, ApiError};
 
 use super::apply_plan::apply_plan_from_webhook_payload;
 use super::event_parse::{
     build_provider_event_id, parse_event_created_at, parse_event_type, parse_raw_event_id,
 };
 
-pub(crate) async fn ingest_webhook(
+pub async fn ingest_webhook(
     pool: &sqlx::PgPool,
     v: &Value,
 ) -> Result<(bool, Option<i64>, bool, String, bool), ApiError> {
     let raw_event_id = parse_raw_event_id(v).ok_or_else(|| {
-        ApiError::BadRequest(
-            "JSON body must include a non-empty id (or event_id/eventId/notify_id/notifyId) for deduplication"
-                .into(),
+        bad_request_i18n(
+            "JSON body must include a non-empty id (or event_id/eventId/notify_id/notifyId) for deduplication",
+            "JSON body 必须包含非空 id（或 event_id/eventId/notify_id/notifyId）以便去重",
         )
     })?;
 

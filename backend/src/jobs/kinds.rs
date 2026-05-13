@@ -27,6 +27,11 @@ pub const JOB_KIND_SETTINGS_VENDOR_MODEL_TEST: &str = "settings.vendor.model_tes
 /// Account data export (**`POST /api/v1/settings/account/export`**); worker snapshots current-user
 /// structured data into a local zip artifact and returns a settings download path.
 pub const JOB_KIND_SETTINGS_ACCOUNT_EXPORT: &str = "settings.account.export";
+/// Workspace shared cleared-template audit export (**`POST …/shared/audit/export-async`**); worker
+/// writes **`TOONFLOW_LOCAL_WORKSPACE_SHARED_AUDIT_EXPORT_DIR`** (defaults under temp), then history
+/// is appended with **`job_id`** for **`GET …/export-jobs/{id}/file`**.
+pub const JOB_KIND_SETTINGS_WORKSPACE_SHARED_AUDIT_EXPORT: &str =
+    "settings.workspace_shared_audit.export";
 /// Flutter / integration probe (**`POST /api/v1/jobs`**); worker sleeps ~1s then **`succeeded`** with **`{ ok, probe }`**.
 pub const JOB_KIND_FLUTTER_PROBE: &str = "flutter.probe";
 /// Video generation (**`POST …/production/workbench/generate-video`**); worker generates video from storyboard items.

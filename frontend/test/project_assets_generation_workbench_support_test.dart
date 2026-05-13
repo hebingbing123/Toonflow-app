@@ -1,8 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/project_editor/assets/generation/support.dart';
 import 'package:openflow_app/rust_api.dart';
 
 void main() {
+  final l10n = AppLocalizationsZh();
   test('sortUniqueAssetNumericIds removes duplicates and sorts ascending', () {
     expect(sortUniqueAssetNumericIds([3, 2, 3, -1, 1]), [1, 2, 3]);
   });
@@ -72,6 +74,7 @@ void main() {
           AssetDataItemV1(id: 3, name: 'Mage', type: 'role'),
         ],
       ),
+      l10n,
     );
 
     expect(line, contains('production 资产 3 条'));
@@ -85,7 +88,7 @@ void main() {
       AssetImageStatusV1(assetId: 11, imageCount: 2, latestState: 'done'),
       AssetImageStatusV1(assetId: 12, imageCount: 0, latestState: 'queued'),
       AssetImageStatusV1(assetId: 13, imageCount: 1),
-    ]);
+    ], l10n);
 
     expect(line, contains('已轮询 3 条资产'));
     expect(line, contains('done 1 条'));
@@ -149,6 +152,7 @@ void main() {
           ],
           video: [WorkbenchAssetMaterialVideoItem(id: 2, filePath: 'b.mp4')],
         ),
+        l10n,
       ),
       contains('1 条图片素材 · 1 条视频素材'),
     );
@@ -165,6 +169,7 @@ void main() {
             ),
           ],
         ),
+        l10n,
       ),
       contains('批量候选 1/2 条'),
     );
@@ -183,7 +188,7 @@ void main() {
           assetType: 'props',
           promptState: '',
         ),
-      ]),
+      ], l10n),
       contains('生成中 1 条'),
     );
   });
@@ -198,6 +203,7 @@ void main() {
           AssetRow(id: '12', numericId: 12, name: 'Sword', assetType: 'props'),
         ],
         selectedIds: const [11, 12],
+        l10n: l10n,
         productionData: const AssetsDataResponseV1(
           total: 2,
           assets: [

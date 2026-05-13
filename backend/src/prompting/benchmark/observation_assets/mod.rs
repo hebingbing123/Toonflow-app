@@ -10,9 +10,6 @@ use crate::state::AppState;
 mod handlers;
 mod types;
 
-#[cfg(test)]
-mod tests;
-
 pub(crate) use handlers::{
     __path_archive_observation_asset, __path_create_observation_asset,
     __path_increment_falsified_count, __path_increment_hit_count, __path_list_observation_assets,

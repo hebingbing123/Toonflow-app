@@ -8,7 +8,7 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, validate_non_empty_string, validate_positive, ApiError};
 use crate::projects::routes::common::require_project_write_scope;
 use crate::state::AppState;
 
@@ -20,9 +20,7 @@ async fn update_novel_event_core(
     event_numeric_id: i32,
     body: UpdateNovelEventBody,
 ) -> Result<JsonResponse<Value>, ApiError> {
-    if event_numeric_id <= 0 {
-        return Err(ApiError::BadRequest("ids must be positive".into()));
-    }
+    validate_positive(event_numeric_id, "id")?;
 
     let mut tx = pool
         .begin()
@@ -47,9 +45,7 @@ async fn update_novel_event_core(
 
     if let Some(name) = &body.name {
         let name = name.trim();
-        if name.is_empty() {
-            return Err(ApiError::BadRequest("name must not be empty".into()));
-        }
+        validate_non_empty_string(name, "name")?;
         sqlx::query("UPDATE app_novel_event SET name = $1, updated_at = NOW() WHERE id = $2")
             .bind(name)
             .bind(event_uuid)
@@ -69,7 +65,12 @@ async fn update_novel_event_core(
                     Some(t.to_string())
                 }
             }
-            _ => return Err(ApiError::BadRequest("detail must be string or null".into())),
+            _ => {
+                return Err(bad_request_i18n(
+                    "detail must be string or null",
+                    "detail 必须是字符串或 null",
+                ))
+            }
         };
         sqlx::query("UPDATE app_novel_event SET detail = $1, updated_at = NOW() WHERE id = $2")
             .bind(detail_val)
@@ -97,8 +98,9 @@ async fn update_novel_event_core(
             .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
             if valid_novels.len() != chapter_ids.len() {
-                return Err(ApiError::BadRequest(
-                    "Some chapter_ids do not exist in this project".into(),
+                return Err(bad_request_i18n(
+                    "some chapterIds do not exist in this project",
+                    "部分 chapterIds 在当前项目中不存在",
                 ));
             }
 

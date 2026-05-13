@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
+
 enum AgentWorkspacePane { script, production, activity }
 
 /// Agent 工作区顶部作用域输入，独立出来让 section 保持壳层职责。
@@ -21,6 +23,7 @@ class AgentWorkspaceScopeInputs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
@@ -30,8 +33,8 @@ class AgentWorkspaceScopeInputs extends StatelessWidget {
               child: TextField(
                 controller: projectIdController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: '项目 ID（numeric）',
+                decoration: InputDecoration(
+                  labelText: l10n.agentWorkspaceScopeProjectIdLabel,
                 ),
               ),
             ),
@@ -40,8 +43,8 @@ class AgentWorkspaceScopeInputs extends StatelessWidget {
               child: TextField(
                 controller: scriptIdController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: '剧本 ID（numeric）',
+                decoration: InputDecoration(
+                  labelText: l10n.agentWorkspaceScopeScriptIdLabel,
                 ),
               ),
             ),
@@ -53,8 +56,8 @@ class AgentWorkspaceScopeInputs extends StatelessWidget {
             Expanded(
               child: TextField(
                 controller: projectUuidController,
-                decoration: const InputDecoration(
-                  labelText: '项目 UUID（可选，与 WS projectUuid 对齐）',
+                decoration: InputDecoration(
+                  labelText: l10n.agentWorkspaceScopeProjectUuidLabel,
                 ),
               ),
             ),
@@ -62,8 +65,8 @@ class AgentWorkspaceScopeInputs extends StatelessWidget {
             Expanded(
               child: TextField(
                 controller: scriptUuidController,
-                decoration: const InputDecoration(
-                  labelText: '剧本 UUID（可选，制作 attach）',
+                decoration: InputDecoration(
+                  labelText: l10n.agentWorkspaceScopeScriptUuidLabel,
                 ),
               ),
             ),
@@ -72,8 +75,8 @@ class AgentWorkspaceScopeInputs extends StatelessWidget {
         const SizedBox(height: 8),
         TextField(
           controller: workspaceUuidController,
-          decoration: const InputDecoration(
-            labelText: '工作区 UUID（可选，WS workspaceUuid）',
+          decoration: InputDecoration(
+            labelText: l10n.agentWorkspaceScopeWorkspaceUuidLabel,
           ),
         ),
       ],
@@ -94,10 +97,11 @@ class AgentWorkspacePaneSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final tabs = <(AgentWorkspacePane, String)>[
-      (AgentWorkspacePane.script, '剧本工作区'),
-      (AgentWorkspacePane.production, '制作工作区'),
-      (AgentWorkspacePane.activity, '执行动态'),
+      (AgentWorkspacePane.script, l10n.agentWorkspacePaneScript),
+      (AgentWorkspacePane.production, l10n.agentWorkspacePaneProduction),
+      (AgentWorkspacePane.activity, l10n.agentWorkspacePaneActivity),
     ];
     return Wrap(
       spacing: 8,

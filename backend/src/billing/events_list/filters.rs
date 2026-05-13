@@ -1,12 +1,17 @@
 use chrono::{DateTime, Utc};
 
 use crate::billing::provider_rules::normalize_provider_name;
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, validate_non_empty_string, ApiError};
 
 pub(super) fn parse_query_ts(raw: &str, field: &str) -> Result<DateTime<Utc>, ApiError> {
     DateTime::parse_from_rfc3339(raw.trim())
         .map(|dt| dt.with_timezone(&Utc))
-        .map_err(|_| ApiError::BadRequest(format!("{field} must be RFC3339 timestamp")))
+        .map_err(|_| {
+            bad_request_i18n(
+                &format!("{field} must be RFC3339 timestamp"),
+                &format!("{field} 必须是 RFC3339 时间戳"),
+            )
+        })
 }
 
 pub(super) fn parse_query_text_non_empty(
@@ -15,9 +20,7 @@ pub(super) fn parse_query_text_non_empty(
     max_len: usize,
 ) -> Result<String, ApiError> {
     let v = raw.trim();
-    if v.is_empty() {
-        return Err(ApiError::BadRequest(format!("{field} must be non-empty")));
-    }
+    validate_non_empty_string(v, field)?;
     Ok(v.chars().take(max_len).collect())
 }
 
@@ -28,8 +31,9 @@ pub(super) fn parse_sort(raw: Option<&str>) -> Result<&'static str, ApiError> {
     match raw.trim().to_ascii_lowercase().as_str() {
         "id_desc" => Ok("id DESC"),
         "id_asc" => Ok("id ASC"),
-        _ => Err(ApiError::BadRequest(
-            "sort must be one of: id_desc, id_asc".into(),
+        _ => Err(bad_request_i18n(
+            "sort must be one of: id_desc, id_asc",
+            "sort 必须是以下之一：id_desc、id_asc",
         )),
     }
 }
@@ -39,11 +43,12 @@ pub(super) fn parse_provider_filter(raw: Option<&str>) -> Result<Option<String>,
         return Ok(None);
     };
     let normalized = normalize_provider_name(raw)
-        .ok_or_else(|| ApiError::BadRequest("provider must be non-empty".into()))?;
+        .ok_or_else(|| bad_request_i18n("provider must be non-empty", "provider 不能为空"))?;
     match normalized.as_str() {
         "stripe" | "alipay" | "paddle" => Ok(Some(normalized)),
-        _ => Err(ApiError::BadRequest(
-            "provider must be one of: stripe, alipay, paddle".into(),
+        _ => Err(bad_request_i18n(
+            "provider must be one of: stripe, alipay, paddle",
+            "provider 必须是以下之一：stripe、alipay、paddle",
         )),
     }
 }
@@ -56,9 +61,10 @@ pub(super) fn validate_time_range(
 ) -> Result<(), ApiError> {
     if let (Some(from), Some(to)) = (from, to) {
         if from > to {
-            return Err(ApiError::BadRequest(format!(
-                "{from_field} must be less than or equal to {to_field}"
-            )));
+            return Err(bad_request_i18n(
+                &format!("{from_field} must be less than or equal to {to_field}"),
+                &format!("{from_field} 必须小于或等于 {to_field}"),
+            ));
         }
     }
     Ok(())

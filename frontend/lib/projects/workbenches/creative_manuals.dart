@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../../rust_api.dart';
 
 part 'creative_manuals_row.dart';

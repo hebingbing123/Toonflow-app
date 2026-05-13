@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../local_prefs/risky_operation_confirm_prefs.dart';
 import '../../rust_api.dart';
 
@@ -81,6 +82,7 @@ class JobsSectionView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final outline = Theme.of(context).colorScheme.outline;
     return SingleChildScrollView(
       child: Column(
@@ -92,18 +94,18 @@ class JobsSectionView extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  '任务作业',
+                  l10n.jobsTitle,
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
               ),
-              const RiskyOperationConfirmPrefsOverflowMenu(
-                tooltip: '本机客户端偏好',
+              RiskyOperationConfirmPrefsOverflowMenu(
+                tooltip: l10n.jobsPrefsTooltip,
               ),
             ],
           ),
           const SizedBox(height: 8),
           Text(
-            '查看作业列表、状态汇总，并按 ID 打开单条执行记录。',
+            l10n.jobsSubtitle,
             style: Theme.of(
               context,
             ).textTheme.bodySmall?.copyWith(color: outline),
@@ -115,31 +117,37 @@ class JobsSectionView extends StatelessWidget {
             children: [
               FilledButton.tonal(
                 onPressed: model.loadingJobs ? null : callbacks.onLoadJobs,
-                child: Text(model.loadingJobs ? '…' : '加载作业列表'),
+                child: Text(model.loadingJobs ? '…' : l10n.jobsLoadList),
               ),
               FilledButton.tonal(
                 onPressed: model.loadingJobs
                     ? null
                     : callbacks.onLoadJobsStatusFailed,
-                child: const Text('查看失败作业'),
+                child: Text(l10n.jobsLoadFailed),
               ),
               FilledButton.tonal(
                 onPressed: model.loadingJobKinds
                     ? null
                     : callbacks.onLoadJobKinds,
-                child: Text(model.loadingJobKinds ? '…' : '加载作业类型'),
+                child: Text(model.loadingJobKinds ? '…' : l10n.jobsLoadKinds),
               ),
               FilledButton.tonal(
                 onPressed: model.loadingJobKindSummary
                     ? null
                     : callbacks.onLoadJobKindSummary,
-                child: Text(model.loadingJobKindSummary ? '…' : '查看类型汇总'),
+                child: Text(
+                  model.loadingJobKindSummary ? '…' : l10n.jobsLoadKindSummary,
+                ),
               ),
               FilledButton.tonal(
                 onPressed: model.loadingJobStatusSummary
                     ? null
                     : callbacks.onLoadJobStatusSummary,
-                child: Text(model.loadingJobStatusSummary ? '…' : '查看状态汇总'),
+                child: Text(
+                  model.loadingJobStatusSummary
+                      ? '…'
+                      : l10n.jobsLoadStatusSummary,
+                ),
               ),
             ],
           ),
@@ -147,9 +155,9 @@ class JobsSectionView extends StatelessWidget {
           ExpansionTile(
             tilePadding: EdgeInsets.zero,
             childrenPadding: EdgeInsets.zero,
-            title: const Text('兼容性检查'),
+            title: Text(l10n.jobsCompatTitle),
             subtitle: Text(
-              '保留 flutter.probe 相关回归入口，默认折叠',
+              l10n.jobsCompatSubtitle,
               style: Theme.of(
                 context,
               ).textTheme.bodySmall?.copyWith(color: outline),
@@ -158,7 +166,7 @@ class JobsSectionView extends StatelessWidget {
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  'HTTP probe filters',
+                  l10n.jobsCompatHttpProbeFilters,
                   style: Theme.of(
                     context,
                   ).textTheme.labelSmall?.copyWith(color: outline),
@@ -173,19 +181,21 @@ class JobsSectionView extends StatelessWidget {
                     onPressed: model.loadingJobs
                         ? null
                         : callbacks.onLoadJobsKindFlutterProbe,
-                    child: const Text('按 flutter.probe 查看'),
+                    child: Text(l10n.jobsFilterFlutterProbe),
                   ),
                   FilledButton.tonal(
                     onPressed: model.loadingJobs
                         ? null
                         : callbacks.onLoadJobsKindProbeStatusQueued,
-                    child: const Text('查看 flutter.probe 排队中'),
+                    child: Text(l10n.jobsFilterFlutterProbeQueued),
                   ),
                   FilledButton.tonal(
                     onPressed: model.creatingJob
                         ? null
                         : callbacks.onCreateProbeJob,
-                    child: Text(model.creatingJob ? '…' : '创建 probe 作业'),
+                    child: Text(
+                      model.creatingJob ? '…' : l10n.jobsCreateProbeJob,
+                    ),
                   ),
                 ],
               ),
@@ -195,7 +205,7 @@ class JobsSectionView extends StatelessWidget {
           TextField(
             controller: model.jobIdController,
             onChanged: callbacks.onJobIdChanged,
-            decoration: const InputDecoration(labelText: '作业 ID（点下方列表可自动填入）'),
+            decoration: InputDecoration(labelText: l10n.jobsJobIdLabel),
           ),
           const SizedBox(height: 8),
           FilledButton.tonal(
@@ -204,78 +214,90 @@ class JobsSectionView extends StatelessWidget {
                     model.jobIdController.text.trim().isEmpty)
                 ? null
                 : callbacks.onFetchJobById,
-            child: Text(model.loadingJobById ? '…' : '查看作业详情'),
+            child: Text(model.loadingJobById ? '…' : l10n.jobsFetchDetail),
           ),
           if (model.jobByIdLine != null) ...[
             const SizedBox(height: 8),
             SelectableText(
-              '作业详情：${model.jobByIdLine}',
+              l10n.jobsDetailLabel(model.jobByIdLine!),
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
           if (model.jobKindsLine != null) ...[
             const SizedBox(height: 8),
-            SelectableText('作业类型：${model.jobKindsLine}'),
+            SelectableText(l10n.jobsKindsLabel(model.jobKindsLine!)),
           ],
           if (model.jobKindSummaryLine != null) ...[
             const SizedBox(height: 8),
-            SelectableText('类型汇总：${model.jobKindSummaryLine}'),
+            SelectableText(
+              l10n.jobsKindSummaryLabel(model.jobKindSummaryLine!),
+            ),
           ],
           if (model.jobStatusSummaryLine != null) ...[
             const SizedBox(height: 8),
-            SelectableText('状态汇总：${model.jobStatusSummaryLine}'),
+            SelectableText(
+              l10n.jobsStatusSummaryLabel(model.jobStatusSummaryLine!),
+            ),
           ],
           if (model.jobs != null) ...[
             const SizedBox(height: 8),
             Text(
-              '${model.jobs!.length} 条作业',
+              l10n.jobsCountLabel(model.jobs!.length),
               style: Theme.of(context).textTheme.labelLarge,
             ),
-            ...model.jobs!.take(8).map(
-              (job) => ListTile(
-                dense: true,
-                contentPadding: EdgeInsets.zero,
-                title: Text('${job.kind} · ${job.status}'),
-                subtitle: Text(
-                  [
-                    job.id,
-                    if (job.errorMessage != null && job.errorMessage!.isNotEmpty)
-                      '失败原因=${job.errorMessage}',
-                    if (job.claimedBy != null && job.claimedBy!.isNotEmpty)
-                      'claimed_by=${job.claimedBy}',
-                  ].join(' · '),
+            ...model.jobs!
+                .take(8)
+                .map(
+                  (job) => ListTile(
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                    title: Text('${job.kind} · ${job.status}'),
+                    subtitle: Text(
+                      [
+                        job.id,
+                        if (job.errorMessage != null &&
+                            job.errorMessage!.isNotEmpty)
+                          l10n.jobsFailedReason(job.errorMessage!),
+                        if (job.claimedBy != null && job.claimedBy!.isNotEmpty)
+                          l10n.jobsClaimedBy(job.claimedBy!),
+                      ].join(' · '),
+                    ),
+                    onTap: () => callbacks.onSelectJob(job),
+                    trailing:
+                        (job.status == 'failed' ||
+                            job.status == 'queued' ||
+                            job.status == 'running')
+                        ? Wrap(
+                            spacing: 4,
+                            children: [
+                              if (job.status == 'failed')
+                                TextButton(
+                                  onPressed: model.retryingJobId == job.id
+                                      ? null
+                                      : () => callbacks.onRetryFailedJob(job),
+                                  child: Text(
+                                    model.retryingJobId == job.id
+                                        ? '…'
+                                        : l10n.jobsRetry,
+                                  ),
+                                ),
+                              if (job.status == 'queued' ||
+                                  job.status == 'running')
+                                TextButton(
+                                  onPressed: model.cancellingJobId == job.id
+                                      ? null
+                                      : () => callbacks.onCancelQueuedJob(job),
+                                  child: Text(
+                                    model.cancellingJobId == job.id
+                                        ? '…'
+                                        : l10n.jobsCancel,
+                                  ),
+                                ),
+                            ],
+                          )
+                        : null,
+                  ),
                 ),
-                onTap: () => callbacks.onSelectJob(job),
-                trailing:
-                    (job.status == 'failed' ||
-                        job.status == 'queued' ||
-                        job.status == 'running')
-                    ? Wrap(
-                        spacing: 4,
-                        children: [
-                          if (job.status == 'failed')
-                            TextButton(
-                              onPressed: model.retryingJobId == job.id
-                                  ? null
-                                  : () => callbacks.onRetryFailedJob(job),
-                              child: Text(
-                                model.retryingJobId == job.id ? '…' : '重试',
-                              ),
-                            ),
-                          if (job.status == 'queued' || job.status == 'running')
-                            TextButton(
-                              onPressed: model.cancellingJobId == job.id
-                                  ? null
-                                  : () => callbacks.onCancelQueuedJob(job),
-                              child: Text(
-                                model.cancellingJobId == job.id ? '…' : '取消',
-                              ),
-                            ),
-                        ],
-                      )
-                    : null,
-              ),
-            ),
           ],
         ],
       ),

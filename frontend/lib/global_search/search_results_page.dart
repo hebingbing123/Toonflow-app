@@ -192,7 +192,9 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
       if (!mounted) return;
 
       setState(() {
-        _error = l10n.globalSearchErrSearchFailed(describeUserVisibleApiError(l10n, e));
+        _error = l10n.globalSearchErrSearchFailed(
+          describeUserVisibleApiError(l10n, e),
+        );
         _isLoading = false;
       });
     }
@@ -449,9 +451,9 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
       if (!mounted) {
         return;
       }
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l10n.globalSearchViewNameRequired)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.globalSearchViewNameRequired)),
+      );
       return;
     }
     final current = await _loadSavedViews();
@@ -589,7 +591,9 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                               return;
                             }
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(l10n.globalSearchViewDeleted)),
+                              SnackBar(
+                                content: Text(l10n.globalSearchViewDeleted),
+                              ),
                             );
                           },
                         ),
@@ -720,10 +724,9 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
           if (!context.mounted) {
             return;
           }
+          final l10n = AppLocalizations.of(context)!;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('请从首页主导航打开「项目列表」，在目标项目内使用小说工作台查看章节与事件。'),
-            ),
+            SnackBar(content: Text(l10n.globalSearchNovelOrEventNavigatedHint)),
           );
           break;
       }
@@ -1092,7 +1095,10 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
               color: Theme.of(context).colorScheme.error,
             ),
             const SizedBox(height: 16),
-            Text(l10n.globalSearchErrorTitle, style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              l10n.globalSearchErrorTitle,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             const SizedBox(height: 8),
             Text(
               _error ?? l10n.globalSearchUnknownError,
@@ -1128,7 +1134,10 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
             const SizedBox(height: 16),
-            Text(l10n.globalSearchNoResultsTitle, style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              l10n.globalSearchNoResultsTitle,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             const SizedBox(height: 8),
             Text(
               l10n.globalSearchNoResultsHint,
@@ -1231,7 +1240,10 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
           const SizedBox(width: 16),
 
           // Page indicator
-          Text(l10n.globalSearchCurrentPage(_currentPage), style: theme.textTheme.bodyMedium),
+          Text(
+            l10n.globalSearchCurrentPage(_currentPage),
+            style: theme.textTheme.bodyMedium,
+          ),
 
           const SizedBox(width: 16),
 
@@ -1363,7 +1375,8 @@ class _SavedSearchView {
       'title': title,
       'query': query,
       'workspaceName': workspaceName,
-      if (workspaceId != null && workspaceId!.isNotEmpty) 'workspaceId': workspaceId,
+      if (workspaceId != null && workspaceId!.isNotEmpty)
+        'workspaceId': workspaceId,
       'pinned': pinned,
       'resultTypes': resultTypes,
       'timeFrom': timeFrom?.toUtc().toIso8601String(),

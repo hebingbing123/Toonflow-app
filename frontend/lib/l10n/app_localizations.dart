@@ -3060,6 +3060,12 @@ abstract class AppLocalizations {
   /// **'Located project. Please open \"Novels & Events\" in project details to view the chapter (chapter index {chapterIndex}).'**
   String globalSearchNovelChapterNavigated(String chapterIndex);
 
+  /// No description provided for @globalSearchNovelOrEventNavigatedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Please open \"Project List\" from the home navigation, then use the novel workbench within the target project to view chapters and events.'**
+  String get globalSearchNovelOrEventNavigatedHint;
+
   /// No description provided for @accountDeletedSummary.
   ///
   /// In en, this message translates to:

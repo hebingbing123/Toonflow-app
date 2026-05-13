@@ -23,15 +23,18 @@ class SkillFileMeta {
 /// `GET /api/v1/skills/summary`. See `getSkillsSummaryV1`.
 class SkillsSummary {
   const SkillsSummary({
+    required this.scope,
     required this.markdownFileCount,
     required this.totalBytes,
   });
 
+  final String scope;
   final int markdownFileCount;
   final int totalBytes;
 
   factory SkillsSummary.fromJson(Map<String, dynamic> json) {
     return SkillsSummary(
+      scope: json['scope'] as String? ?? 'user',
       markdownFileCount: (json['markdown_file_count'] as num).toInt(),
       totalBytes: (json['total_bytes'] as num).toInt(),
     );

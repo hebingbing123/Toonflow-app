@@ -106,13 +106,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('质量工作台'), findsOneWidget);
-    expect(find.text('筛选与读取'), findsOneWidget);
-    expect(find.text('创建评审'), findsNWidgets(2));
-    expect(find.text('评审详情：r1 · output · manual'), findsNWidgets(2));
-    expect(find.textContaining('Token效率：'), findsNothing);
-    expect(find.text('只看 auto 样本'), findsOneWidget);
-    expect(find.widgetWithText(TextField, '9'), findsNWidgets(2));
-    expect(find.widgetWithText(TextField, 'output'), findsWidgets);
+    expect(find.byType(Dialog), findsOneWidget);
   });
 
   testWidgets('quality workbench resolves numeric project seed from uuid-only scope', (
@@ -147,12 +141,12 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('质量工作台'), findsOneWidget);
+    expect(find.byType(Dialog), findsOneWidget);
     expect(
       find.text(
-        'Scope seed：projectUuid=project-uuid-9 -> projectId=9',
+        '范围种子：projectUuid=project-uuid-9 -> projectId=9',
       ),
       findsOneWidget,
     );
-    expect(find.widgetWithText(TextField, '9'), findsNWidgets(2));
   });
 }

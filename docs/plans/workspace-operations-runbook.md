@@ -34,6 +34,9 @@
 - 项目删除权限：
   - `owner` / `admin` 可删任意项目
   - `member` 只能删自己创建的项目；否则返回 **`403 forbidden`**
+- jobs / Harness scope：
+  - jobs 可见性按 **`project_uuid`**（首选）/ **`project_numeric_id`**（legacy fallback）派生 workspace
+  - WS attach / 工作台上下文按 **`projectUuid`** / **`scriptUuid`** 优先，legacy numeric 仅作兼容回退
 
 ## 2) 快速分诊
 

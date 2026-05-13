@@ -17,8 +17,23 @@ impl PgQueue {
 
 #[async_trait]
 impl Queue for PgQueue {
+    /// **DEPRECATED / UNUSED**: This enqueue method is not called anywhere in the codebase.
+    ///
+    /// For job creation, use:
+    /// - `jobs::enqueue_generation_job` (primary, with workspace_id resolution)
+    /// - `jobs::handlers::mutate::create::create_job` (HTTP endpoint)
+    ///
+    /// This method is kept for the `Queue` trait implementation, but the INSERT statement
+    /// is outdated (missing `workspace_id` column, uses old `user_id` instead of `owner_user_id`).
+    ///
+    /// **Task 2.1 Audit**: Confirmed via grep that `.enqueue()` is never called.
+    /// Only `PgQueue::stats()` is used (for queue metrics).
+    ///
+    /// TODO: Consider removing this method or updating to match current schema in future cleanup.
     async fn enqueue(&self, payload: JobPayload) -> anyhow::Result<Uuid> {
         let id = Uuid::new_v4();
+        // WARNING: This INSERT is outdated and missing workspace_id column
+        // Do not use this method - use jobs::enqueue_generation_job instead
         sqlx::query(
             r#"
             INSERT INTO app_generation_job (id, user_id, kind, payload, status, priority, created_at)

@@ -9,7 +9,7 @@ use sqlx::{Postgres, QueryBuilder};
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, ApiError};
 use crate::state::AppState;
 
 use super::types::{
@@ -230,8 +230,9 @@ pub(crate) async fn update_observation_asset(
     }
 
     if !has_field {
-        return Err(ApiError::BadRequest(
-            "At least one field must be provided".into(),
+        return Err(bad_request_i18n(
+            "At least one field must be provided",
+            "至少需要提供一个字段",
         ));
     }
 
@@ -452,19 +453,24 @@ fn validate_create_body(body: &CreateObservationAssetBody) -> Result<(), ApiErro
     validate_source_kind(&body.source_kind)?;
 
     if body.issue_type.trim().is_empty() {
-        return Err(ApiError::BadRequest("issue_type cannot be empty".into()));
+        return Err(bad_request_i18n(
+            "issue_type cannot be empty",
+            "issue_type 不能为空",
+        ));
     }
 
     if body.normalized_note.trim().is_empty() {
-        return Err(ApiError::BadRequest(
-            "normalized_note cannot be empty".into(),
+        return Err(bad_request_i18n(
+            "normalized_note cannot be empty",
+            "normalized_note 不能为空",
         ));
     }
 
     if let Some(signal_strength) = body.signal_strength {
         if !(1..=10).contains(&signal_strength) {
-            return Err(ApiError::BadRequest(
-                "signal_strength must be between 1 and 10".into(),
+            return Err(bad_request_i18n(
+                "signal_strength must be between 1 and 10",
+                "signal_strength 必须在 1 到 10 之间",
             ));
         }
     }
@@ -491,20 +497,25 @@ fn validate_update_body(body: &UpdateObservationAssetBody) -> Result<(), ApiErro
     }
     if let Some(issue_type) = &body.issue_type {
         if issue_type.trim().is_empty() {
-            return Err(ApiError::BadRequest("issue_type cannot be empty".into()));
+            return Err(bad_request_i18n(
+                "issue_type cannot be empty",
+                "issue_type 不能为空",
+            ));
         }
     }
     if let Some(normalized_note) = &body.normalized_note {
         if normalized_note.trim().is_empty() {
-            return Err(ApiError::BadRequest(
-                "normalized_note cannot be empty".into(),
+            return Err(bad_request_i18n(
+                "normalized_note cannot be empty",
+                "normalized_note 不能为空",
             ));
         }
     }
     if let Some(signal_strength) = body.signal_strength {
         if !(1..=10).contains(&signal_strength) {
-            return Err(ApiError::BadRequest(
-                "signal_strength must be between 1 and 10".into(),
+            return Err(bad_request_i18n(
+                "signal_strength must be between 1 and 10",
+                "signal_strength 必须在 1 到 10 之间",
             ));
         }
     }
@@ -518,11 +529,18 @@ pub(super) fn validate_scope_kind(scope_kind: &str) -> Result<(), ApiError> {
     const VALID_SCOPES: &[&str] = &["global", "project", "style_pack"];
 
     if !VALID_SCOPES.contains(&scope_kind) {
-        return Err(ApiError::BadRequest(format!(
-            "Invalid scope_kind '{}'. Must be one of: {}",
-            scope_kind,
-            VALID_SCOPES.join(", ")
-        )));
+        return Err(bad_request_i18n(
+            &format!(
+                "Invalid scope_kind '{}'. Must be one of: {}",
+                scope_kind,
+                VALID_SCOPES.join(", ")
+            ),
+            &format!(
+                "无效的 scope_kind '{}'。必须是以下之一：{}",
+                scope_kind,
+                VALID_SCOPES.join("、")
+            ),
+        ));
     }
 
     Ok(())
@@ -538,11 +556,18 @@ pub(super) fn validate_source_kind(source_kind: &str) -> Result<(), ApiError> {
     ];
 
     if !VALID_SOURCES.contains(&source_kind) {
-        return Err(ApiError::BadRequest(format!(
-            "Invalid source_kind '{}'. Must be one of: {}",
-            source_kind,
-            VALID_SOURCES.join(", ")
-        )));
+        return Err(bad_request_i18n(
+            &format!(
+                "Invalid source_kind '{}'. Must be one of: {}",
+                source_kind,
+                VALID_SOURCES.join(", ")
+            ),
+            &format!(
+                "无效的 source_kind '{}'。必须是以下之一：{}",
+                source_kind,
+                VALID_SOURCES.join("、")
+            ),
+        ));
     }
 
     Ok(())
@@ -552,11 +577,18 @@ pub(super) fn validate_status(status: &str) -> Result<(), ApiError> {
     const VALID_STATUSES: &[&str] = &["candidate", "active", "archived", "rejected"];
 
     if !VALID_STATUSES.contains(&status) {
-        return Err(ApiError::BadRequest(format!(
-            "Invalid status '{}'. Must be one of: {}",
-            status,
-            VALID_STATUSES.join(", ")
-        )));
+        return Err(bad_request_i18n(
+            &format!(
+                "Invalid status '{}'. Must be one of: {}",
+                status,
+                VALID_STATUSES.join(", ")
+            ),
+            &format!(
+                "无效的 status '{}'。必须是以下之一：{}",
+                status,
+                VALID_STATUSES.join("、")
+            ),
+        ));
     }
 
     Ok(())
@@ -629,10 +661,13 @@ async fn check_duplicate_asset(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     if count > 0 {
-        return Err(ApiError::BadRequest(format!(
-            "Duplicate observation asset detected for key {}. Consider updating existing asset instead.",
-            dedup_key
-        )));
+        return Err(bad_request_i18n(
+            &format!(
+                "Duplicate observation asset detected for key {}. Consider updating existing asset instead.",
+                dedup_key
+            ),
+            &format!("检测到 key {} 下存在重复 observation asset，请考虑更新已有资产。", dedup_key),
+        ));
     }
 
     Ok(())

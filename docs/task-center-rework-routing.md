@@ -10,6 +10,8 @@ This document defines the task-center failure card action mapping for short-vide
 
 ## Route Mapping Rules
 
+All workspace/project restore below follows **UUID-first** context recovery. Numeric task / storyboard / script identifiers may still participate as domain-specific compat keys, but project scope should prefer `project_uuid` and only fall back to `project_numeric_id` when needed.
+
 - `publish*` task kinds or payload with `publish_draft_id`
   - Partial rework route: Short-video Space (`ProductWorkspacePane.shortVideoSpace`)
   - Compensation: UUID detail + inspect `error_details` writeback keys
@@ -17,7 +19,7 @@ This document defines the task-center failure card action mapping for short-vide
   - Partial rework route: Production Workspace (`ProductWorkspacePane.productionWorkspace`)
 - `script*` task kinds or payload/deep-links with `script_numeric_id`
   - Partial rework route: Script Workspace (`ProductWorkspacePane.scriptWorkspace`)
-- Fallback project-scoped tasks (`project_numeric_id` only)
+- Fallback project-scoped tasks (prefer `project_uuid`, allow `project_numeric_id` legacy fallback)
   - Partial rework route: Short-video Space (`ProductWorkspacePane.shortVideoSpace`)
 
 ## Writeback Compensation Trigger Heuristics

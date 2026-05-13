@@ -24,6 +24,7 @@ fn test_state_without_llm() -> AppState {
         local_art_style_cover_dir: None,
         local_video_export_dir: None,
         local_voiceover_audio_dir: None,
+        billing_config: crate::metering::BillingConfig::default(),
     }
 }
 

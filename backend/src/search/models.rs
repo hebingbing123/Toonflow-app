@@ -200,6 +200,50 @@ impl From<SearchError> for crate::error::ApiError {
     }
 }
 
+/// One saved search view (matches Flutter `global_search.saved_views.v1` JSON shape).
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct SearchSavedViewItem {
+    pub id: String,
+    pub title: String,
+    #[serde(default)]
+    pub query: String,
+    #[serde(default)]
+    pub workspace_name: Option<String>,
+    #[serde(default)]
+    pub workspace_id: Option<Uuid>,
+    #[serde(default)]
+    pub pinned: bool,
+    #[serde(default)]
+    pub result_types: Vec<String>,
+    #[serde(default)]
+    pub time_from: Option<DateTime<Utc>>,
+    #[serde(default)]
+    pub time_to: Option<DateTime<Utc>>,
+    /// 首次创建时间；旧客户端可省略，服务端写入时补全。
+    #[serde(default)]
+    pub created_at: Option<DateTime<Utc>>,
+    pub updated_at: DateTime<Utc>,
+    #[serde(default)]
+    pub last_used_at: Option<DateTime<Utc>>,
+    #[serde(default)]
+    pub use_count: i32,
+}
+
+/// `GET /api/v1/search/saved-views`
+#[derive(Debug, Clone, Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct SearchSavedViewsResponse {
+    pub items: Vec<SearchSavedViewItem>,
+}
+
+/// `PUT /api/v1/search/saved-views` — replaces **all** saved views for the user (full sync).
+#[derive(Debug, Clone, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct SearchSavedViewsPutBody {
+    pub items: Vec<SearchSavedViewItem>,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

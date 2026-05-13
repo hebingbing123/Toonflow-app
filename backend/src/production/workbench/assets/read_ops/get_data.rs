@@ -5,10 +5,10 @@ use axum::{
 };
 
 use crate::error::ApiError;
+use crate::scope::http::require_script_read_scope_ref;
 use crate::state::AppState;
 
 use super::types::{AssetDataItem, AssetsDataResponse, GetAssetsDataBody};
-use crate::scope::http::require_owned_numeric_script_scope_ids;
 
 #[utoipa::path(
     post,
@@ -33,9 +33,14 @@ pub(in crate::production) async fn post_assets_get_data(
     headers: HeaderMap,
     Json(body): Json<GetAssetsDataBody>,
 ) -> Result<JsonResponse<AssetsDataResponse>, ApiError> {
-    let (uid, pool, script_id) =
-        require_owned_numeric_script_scope_ids(&state, &headers, body.project_id, body.script_id)
-            .await?;
+    let (uid, pool, scope_row) = require_script_read_scope_ref(
+        &state,
+        &headers,
+        body.project_id,
+        body.project_uuid,
+        body.script_id,
+    )
+    .await?;
 
     let limit = body.limit.map(|l| l.clamp(1, 100)).unwrap_or(50);
     let offset = body.offset.unwrap_or(0).max(0);
@@ -70,8 +75,8 @@ pub(in crate::production) async fn post_assets_get_data(
         "#,
     )
     .bind(uid)
-    .bind(body.project_id)
-    .bind(script_id)
+    .bind(scope_row.project_numeric_id)
+    .bind(scope_row.script_id)
     .bind(asset_type)
     .bind(limit)
     .bind(offset)
@@ -96,8 +101,8 @@ pub(in crate::production) async fn post_assets_get_data(
         "#,
     )
     .bind(uid)
-    .bind(body.project_id)
-    .bind(script_id)
+    .bind(scope_row.project_numeric_id)
+    .bind(scope_row.script_id)
     .bind(asset_type)
     .fetch_one(pool)
     .await

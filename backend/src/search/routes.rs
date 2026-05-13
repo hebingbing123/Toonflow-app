@@ -3,7 +3,7 @@
 use axum::{
     extract::{Query, State},
     http::{HeaderMap, StatusCode},
-    routing::{delete, get},
+    routing::{delete, get, put},
     Json, Router,
 };
 
@@ -20,6 +20,14 @@ pub fn router() -> Router<AppState> {
         .route("/api/v1/search", get(search_handler))
         .route("/api/v1/search/history", get(get_search_history))
         .route("/api/v1/search/history", delete(delete_search_history))
+        .route(
+            "/api/v1/search/saved-views",
+            get(crate::search::saved_views::get_search_saved_views),
+        )
+        .route(
+            "/api/v1/search/saved-views",
+            put(crate::search::saved_views::put_search_saved_views),
+        )
 }
 
 /// 执行全局搜索

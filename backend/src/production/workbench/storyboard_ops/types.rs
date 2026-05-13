@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
+use uuid::Uuid;
 
 /// Read-only **`mediaSlots`** on API responses clarifies legacy storyboard **`url`** / DB **`file_path`**
 /// (single column) versus voiceover (**`metadata.voiceover`**) versus **candidate/export** aggregates.
@@ -30,7 +31,10 @@ pub(crate) struct StoryboardMediaSlotsSummary {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct StoryboardIdListBody {
-    pub(in crate::production) project_id: i32,
+    #[serde(default)]
+    pub(in crate::production) project_id: Option<i32>,
+    #[serde(default)]
+    pub(in crate::production) project_uuid: Option<Uuid>,
     pub(in crate::production) script_id: i32,
     pub(in crate::production) ids: Vec<i32>,
 }
@@ -78,7 +82,10 @@ pub(in crate::production) struct ExportImageShotRef {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct ExportImageBody {
-    pub(in crate::production) project_id: i32,
+    #[serde(default)]
+    pub(in crate::production) project_id: Option<i32>,
+    #[serde(default)]
+    pub(in crate::production) project_uuid: Option<Uuid>,
     pub(in crate::production) script_id: i32,
     pub(in crate::production) shot_id: Vec<ExportImageShotRef>,
 }
@@ -113,7 +120,10 @@ pub(super) struct BatchGenerateImageItem {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct BatchGenerateImageBody {
-    pub(super) project_id: i32,
+    #[serde(default)]
+    pub(super) project_id: Option<i32>,
+    #[serde(default)]
+    pub(super) project_uuid: Option<Uuid>,
     pub(super) script_id: i32,
     pub(super) items: Vec<BatchGenerateImageItem>,
     #[serde(default)]
@@ -148,7 +158,7 @@ mod tests {
     fn storyboard_id_list_body_accepts_valid() {
         let b: StoryboardIdListBody =
             serde_json::from_str(r#"{"projectId":9,"scriptId":3,"ids":[1,2,3]}"#).unwrap();
-        assert_eq!(b.project_id, 9);
+        assert_eq!(b.project_id, Some(9));
         assert_eq!(b.script_id, 3);
         assert_eq!(b.ids, vec![1, 2, 3]);
     }
@@ -179,10 +189,37 @@ mod tests {
             r#"{"projectId":7,"scriptId":2,"shotId":[{"id":"1"},{"id":"2"}]}"#,
         )
         .unwrap();
-        assert_eq!(b.project_id, 7);
+        assert_eq!(b.project_id, Some(7));
         assert_eq!(b.script_id, 2);
         assert_eq!(b.shot_id.len(), 2);
         assert_eq!(b.shot_id[0].id, "1");
+    }
+
+    #[test]
+    fn export_image_body_accepts_project_uuid() {
+        let b: ExportImageBody = serde_json::from_str(
+            r#"{"projectUuid":"550e8400-e29b-41d4-a716-446655440000","scriptId":2,"shotId":[{"id":"1"}]}"#,
+        )
+        .unwrap();
+        assert_eq!(b.project_id, None);
+        assert_eq!(
+            b.project_uuid.map(|id| id.to_string()).as_deref(),
+            Some("550e8400-e29b-41d4-a716-446655440000")
+        );
+    }
+
+    #[test]
+    fn batch_generate_image_body_accepts_project_uuid() {
+        let b: super::BatchGenerateImageBody = serde_json::from_str(
+            r#"{"projectUuid":"550e8400-e29b-41d4-a716-446655440000","scriptId":2,"items":[{"storyboardId":1,"prompt":"hello"}]}"#,
+        )
+        .unwrap();
+        assert_eq!(b.project_id, None);
+        assert_eq!(
+            b.project_uuid.map(|id| id.to_string()).as_deref(),
+            Some("550e8400-e29b-41d4-a716-446655440000")
+        );
+        assert_eq!(b.items.len(), 1);
     }
 
     #[test]

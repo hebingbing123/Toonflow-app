@@ -15,3 +15,4 @@ pub mod skill_versions;
 pub mod skills;
 
 pub use openapi::PromptingHttpOpenApi;
+pub use skills::SkillsOpenApi;

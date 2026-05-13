@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
+
 /// Groups status, result summary, and writeback snapshots for the script workspace.
 class ScriptWorkspaceStatusPanel extends StatelessWidget {
   const ScriptWorkspaceStatusPanel({
@@ -16,7 +18,8 @@ class ScriptWorkspaceStatusPanel extends StatelessWidget {
 
   final List<String> resultSummaryLines;
   final String workspaceAssistantText;
-  final String Function(String value, {required int maxChars}) previewAssistantText;
+  final String Function(String value, {required int maxChars})
+  previewAssistantText;
   final String? runningTaskLine;
   final String? taskStatusLine;
   final String? scriptWritebackSourceLine;
@@ -25,6 +28,7 @@ class ScriptWorkspaceStatusPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final bodySmall = Theme.of(context).textTheme.bodySmall;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -44,7 +48,10 @@ class ScriptWorkspaceStatusPanel extends StatelessWidget {
         ],
         if (workspaceAssistantText.trim().isNotEmpty) ...<Widget>[
           const SizedBox(height: 8),
-          Text('最新助手结果', style: Theme.of(context).textTheme.labelLarge),
+          Text(
+            l10n.agentWorkspaceScriptLatestAssistantResult,
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
           const SizedBox(height: 4),
           SelectableText(
             previewAssistantText(workspaceAssistantText.trim(), maxChars: 720),
@@ -53,7 +60,12 @@ class ScriptWorkspaceStatusPanel extends StatelessWidget {
         ],
         if (scriptWritebackSourceLine != null) ...<Widget>[
           const SizedBox(height: 8),
-          Text('写回来源：$scriptWritebackSourceLine', style: bodySmall),
+          Text(
+            l10n.agentWorkspaceScriptWritebackSource(
+              scriptWritebackSourceLine!,
+            ),
+            style: bodySmall,
+          ),
         ],
         if (scriptPlanWritebackLine != null) ...<Widget>[
           const SizedBox(height: 8),

@@ -9,7 +9,7 @@ use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
 
-use super::super::super::crud::ensure_owned_project_pk;
+use super::super::super::crud::require_asset_project_read_scope;
 use super::super::super::models::*;
 use super::validate::validate_polling_ids;
 
@@ -41,7 +41,6 @@ async fn run_polling_prompt_assets(
             '已完成'
           ) AS prompt_state
         FROM app_asset a
-        INNER JOIN app_project p ON p.id = a.project_id
         LEFT JOIN LATERAL (
           SELECT j.status
           FROM app_generation_job j
@@ -64,7 +63,7 @@ async fn run_polling_prompt_assets(
           ORDER BY j.updated_at DESC, j.created_at DESC, j.id DESC
           LIMIT 1
         ) pj ON TRUE
-        WHERE p.id = $2
+        WHERE a.project_id = $2
           AND a.numeric_id = ANY($3)
           AND COALESCE(
             CASE pj.status
@@ -77,12 +76,6 @@ async fn run_polling_prompt_assets(
             END,
             '已完成'
           ) <> '生成中'
-          AND EXISTS (
-            SELECT 1
-            FROM app_workspace_member wm
-            WHERE wm.workspace_id = p.workspace_id
-              AND wm.user_id = $1
-          )
         ORDER BY a.numeric_id ASC
         "#,
     )
@@ -105,7 +98,7 @@ pub(crate) async fn post_project_workbench_polling_prompt_assets(
     let uid = require_user_uuid(&state, &headers)?;
     validate_polling_ids(&body.ids)?;
     let pool = state.require_pool()?;
-    ensure_owned_project_pk(pool, uid, project_id).await?;
+    require_asset_project_read_scope(&state, uid, project_id).await?;
     let rows = run_polling_prompt_assets(pool, uid, project_id, &body.ids).await?;
     Ok(Json(rows))
 }

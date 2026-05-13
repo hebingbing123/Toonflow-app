@@ -9,7 +9,7 @@ use sqlx::{Postgres, QueryBuilder};
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, ApiError};
 use crate::state::AppState;
 
 use super::types::{GetReviewQueueQuery, ReviewQueueItem, SkipReviewBody, SubmitReviewBody};
@@ -114,10 +114,10 @@ pub(crate) async fn submit_review(
     .ok_or(ApiError::NotFound)?;
 
     if existing.status != "pending" {
-        return Err(ApiError::BadRequest(format!(
-            "Cannot submit review with status '{}'",
-            existing.status
-        )));
+        return Err(bad_request_i18n(
+            &format!("Cannot submit review with status '{}'", existing.status),
+            &format!("状态为 '{}' 的复核项无法提交", existing.status),
+        ));
     }
 
     // 开始事务：更新复核队列项并回写实验结果
@@ -143,7 +143,12 @@ pub(crate) async fn submit_review(
     .fetch_optional(&mut *tx)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-    .ok_or_else(|| ApiError::BadRequest("Review queue item is no longer pending".into()))?;
+    .ok_or_else(|| {
+        bad_request_i18n(
+            "Review queue item is no longer pending",
+            "复核队列项已不再处于 pending 状态",
+        )
+    })?;
 
     // 回写实验结果（需求 5.5）
     if let Some(result_id) = updated.experiment_result_id {
@@ -197,10 +202,10 @@ pub(crate) async fn skip_review(
     .ok_or(ApiError::NotFound)?;
 
     if existing.status != "pending" {
-        return Err(ApiError::BadRequest(format!(
-            "Cannot skip review with status '{}'",
-            existing.status
-        )));
+        return Err(bad_request_i18n(
+            &format!("Cannot skip review with status '{}'", existing.status),
+            &format!("状态为 '{}' 的复核项无法跳过", existing.status),
+        ));
     }
 
     let mut tx = pool
@@ -222,7 +227,12 @@ pub(crate) async fn skip_review(
     .fetch_optional(&mut *tx)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-    .ok_or_else(|| ApiError::BadRequest("Review queue item is no longer pending".into()))?;
+    .ok_or_else(|| {
+        bad_request_i18n(
+            "Review queue item is no longer pending",
+            "复核队列项已不再处于 pending 状态",
+        )
+    })?;
 
     if let Some(result_id) = updated.experiment_result_id {
         clear_experiment_result_human_review_requirement(&mut tx, result_id).await?;
@@ -251,8 +261,9 @@ fn validate_get_query(query: &GetReviewQueueQuery) -> Result<(), ApiError> {
 
 pub(super) fn validate_submit_body(body: &SubmitReviewBody) -> Result<(), ApiError> {
     let Some(score_obj) = body.submitted_score.as_object() else {
-        return Err(ApiError::BadRequest(
-            "submitted_score must be a JSON object".into(),
+        return Err(bad_request_i18n(
+            "submitted_score must be a JSON object",
+            "submitted_score 必须是 JSON 对象",
         ));
     };
 
@@ -260,13 +271,15 @@ pub(super) fn validate_submit_body(body: &SubmitReviewBody) -> Result<(), ApiErr
         .get("overallScore")
         .and_then(|value| value.as_f64())
     else {
-        return Err(ApiError::BadRequest(
-            "submitted_score.overallScore must be a number between 0 and 100".into(),
+        return Err(bad_request_i18n(
+            "submitted_score.overallScore must be a number between 0 and 100",
+            "submitted_score.overallScore 必须是 0 到 100 之间的数字",
         ));
     };
     if !(0.0..=100.0).contains(&overall_score) {
-        return Err(ApiError::BadRequest(
-            "submitted_score.overallScore must be between 0 and 100".into(),
+        return Err(bad_request_i18n(
+            "submitted_score.overallScore must be between 0 and 100",
+            "submitted_score.overallScore 必须在 0 到 100 之间",
         ));
     }
 
@@ -275,8 +288,9 @@ pub(super) fn validate_submit_body(body: &SubmitReviewBody) -> Result<(), ApiErr
         .and_then(|value| value.as_bool())
         .is_none()
     {
-        return Err(ApiError::BadRequest(
-            "submitted_score.passed must be a boolean".into(),
+        return Err(bad_request_i18n(
+            "submitted_score.passed must be a boolean",
+            "submitted_score.passed 必须是布尔值",
         ));
     }
 
@@ -286,8 +300,9 @@ pub(super) fn validate_submit_body(body: &SubmitReviewBody) -> Result<(), ApiErr
             .and_then(|value| value.as_bool())
             .is_none()
     {
-        return Err(ApiError::BadRequest(
-            "submitted_score.requiresRework must be a boolean when provided".into(),
+        return Err(bad_request_i18n(
+            "submitted_score.requiresRework must be a boolean when provided",
+            "submitted_score.requiresRework 提供时必须是布尔值",
         ));
     }
     Ok(())
@@ -297,11 +312,18 @@ pub(super) fn validate_review_type(review_type: &str) -> Result<(), ApiError> {
     const VALID_TYPES: &[&str] = &["quality", "roi"];
 
     if !VALID_TYPES.contains(&review_type) {
-        return Err(ApiError::BadRequest(format!(
-            "Invalid review_type '{}'. Must be one of: {}",
-            review_type,
-            VALID_TYPES.join(", ")
-        )));
+        return Err(bad_request_i18n(
+            &format!(
+                "Invalid review_type '{}'. Must be one of: {}",
+                review_type,
+                VALID_TYPES.join(", ")
+            ),
+            &format!(
+                "无效的 review_type '{}'。必须是以下之一：{}",
+                review_type,
+                VALID_TYPES.join("、")
+            ),
+        ));
     }
 
     Ok(())
@@ -311,11 +333,18 @@ pub(super) fn validate_status(status: &str) -> Result<(), ApiError> {
     const VALID_STATUSES: &[&str] = &["pending", "submitted", "skipped"];
 
     if !VALID_STATUSES.contains(&status) {
-        return Err(ApiError::BadRequest(format!(
-            "Invalid status '{}'. Must be one of: {}",
-            status,
-            VALID_STATUSES.join(", ")
-        )));
+        return Err(bad_request_i18n(
+            &format!(
+                "Invalid status '{}'. Must be one of: {}",
+                status,
+                VALID_STATUSES.join(", ")
+            ),
+            &format!(
+                "无效的 status '{}'。必须是以下之一：{}",
+                status,
+                VALID_STATUSES.join("、")
+            ),
+        ));
     }
 
     Ok(())

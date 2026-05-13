@@ -979,6 +979,7 @@
       }
     }
   },
+  "globalSearchNovelOrEventNavigatedHint": "请从首页主导航打开「项目列表」，在目标项目内使用小说工作台查看章节与事件。",
   "accountDeletedSummary": "账号已删除：workspace {workspaceCount} · project {projectCount} · job {jobCount}",
   "@accountDeletedSummary": {
     "placeholders": {

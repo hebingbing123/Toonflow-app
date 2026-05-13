@@ -29,7 +29,7 @@ rg -n "project_numeric_id|project_legacy_id|projectId" \
 
 | 项 | 内容 |
 |----|------|
-| **快照日期** | 2026-05-07（随 PR 更新本表时请改日期） |
+| **快照日期** | 2026-05-22（H1.5 任务完成：标记 C4 批次为已完成） |
 | **Parity** | 已对照 **`http-api-cleanup.md` §四**「B·其余域」行；**`electron-node-parity.md`** 中与 **整型 body / 队列 payload** 相关行须在 H3/H4 合并时同步更新。 |
 | **agent_memory 路径** | 现为 **`backend/src/settings/agent_memory/**`**（非单文件 `agent_memory.rs`）。 |
 
@@ -70,6 +70,24 @@ rg -n "project_numeric_id|project_legacy_id|projectId" \
 - [x] **`electron-node-parity.md`** 与 **`http-api-cleanup.md` §四** 已作为权威交叉阅读（逐行补 **🔀** 可与 **H1 同一 PR** 完成）。
 - [x] **H1** 可引用本文件作 `rg` 基线。
 
+## 4.1 HTTP API 收敛批次完成状态
+
+### C 批次收敛状态
+
+- [x] **C0** - 模块根冲突清理：已完成删除与子目录并存的遗留顶层文件
+- [x] **C1** - 测试重导出噪音：已完成清理未使用的测试导出项
+- [x] **C2** - cfg/sqlx/dead_code 小修：已完成 Cargo.toml 和代码修正
+- [x] **C3** - all-features clippy：已完成清理 clippy 警告
+- [x] **C4** - 未注册孤儿模块：**已完成** - 删除 `backend/src/services/video_encoder.rs` 等未注册模块
+- [x] **C5** - 窄域路由导出收口：已完成清理未注册的路由导出
+- [x] **C6** - 遗留 .backup 源文件：已完成删除备份文件
+
+### D 批次收敛状态
+
+- [ ] **D** - PG `legacy_id` 列删除：**进行中** - 需要独立窗口，依赖 `import_staging` / promote 方案
+
+**说明**：C4 批次已按照 `tasks-http-api-cleanup.md` H5·C4 清单完成，包括删除未注册孤儿模块等后端死代码清理工作。该批次无前端迁移依赖，无对外契约变更。
+
 ---
 
 *下一自动步骤：在单独 PR 中启动 **H1**（`settings/agent_memory` + Flutter memory + OpenAPI），仍须 **全栈同窗口**。*
@@ -79,16 +97,17 @@ rg -n "project_numeric_id|project_legacy_id|projectId" \
 ## 5. D 波次 kickoff（2026-05-11）
 
 > 结论先行：**D = schema + 队列 + 导入链路的联合窗口**，不能被当成“顺手删几个列名”的小清理。
+> 说明：本节是 **2026-05-11 的 kickoff 快照**。其中若干 numeric 依赖已在后续竖切里被部分收口；引用本节做当前判断时，应同时对照 [`tasks-http-api-cleanup.md`](./tasks-http-api-cleanup.md)、[`http-api-cleanup.md`](./http-api-cleanup.md)、[`product-deep-links.md`](../product-deep-links.md) 与 [`harness-ws-context-matrix.md`](./harness-ws-context-matrix.md) 的较新 UUID-first 说明。
 
 ### 5.1 已确认的阻塞面
 
 - **Flutter 主路径/ops 面仍依赖整型兼容字段**：
   - `frontend/lib/rust_api/production/**` 大量请求体仍直接发送 `projectId` / `scriptId`
-  - `frontend/lib/task_center/**` 深链与筛选仍读取 `project_numeric_id` / `script_numeric_id` / `storyboard_numeric_id`
-  - `frontend/lib/agent_workspaces/**` 控制器与 attach 辅助仍保留 `projectIdController` / `numeric_id` 读法
+  - `frontend/lib/task_center/**` 深链与筛选仍读取 `project_numeric_id` / `script_numeric_id` / `storyboard_numeric_id`（注：后续已补一轮产品壳 UUID-first restore / scoped cache 收口；这里保留的是 D kickoff 时的阻塞快照）
+  - `frontend/lib/agent_workspaces/**` 控制器与 attach 辅助仍保留 `projectIdController` / `numeric_id` 读法（注：后续 attach 主路径已按 `projectUuid` / `scriptUuid` 优先收口；这里保留的是剩余兼容债描述）
 - **后端 production / jobs / scope 仍以 numeric 语义为核心桥梁**：
   - `backend/src/production/flow_data/**`、`backend/src/scope/**`、`backend/src/jobs/worker/asset_image/**` 仍大量以 `project_numeric_id` / `script_numeric_id` / `asset_numeric_id` 串联路由、worker 与结果回写
-  - `backend/src/jobs/notifications.rs`、`workspaces/ops_stats.rs`、jobs summary 仍读取 payload 中的 `project_numeric_id`
+  - `backend/src/jobs/notifications.rs`、`workspaces/ops_stats.rs`、jobs summary 仍读取 payload 中的 `project_numeric_id`（注：jobs 可见性与通知/product restore 语义后续已明确为 `project_uuid` 优先、numeric fallback）
 - **导入与 staging/promote 链路仍明确依赖历史/整型标识**：
   - `backend/src/bin/sqlite_import.rs` 继续写 `import_staging.snapshot`
   - `supabase/migrations/20260420120000_rename_legacy_staging_to_import_staging.sql` 之后的 `promote_import_snapshots()` 虽已把多数表切到 `numeric_id`，但导入映射仍以旧 SQLite id 为幂等锚点

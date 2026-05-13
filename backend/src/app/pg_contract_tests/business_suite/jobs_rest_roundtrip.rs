@@ -304,6 +304,11 @@ async fn jobs_rest_roundtrip() {
         .unwrap();
     let (status, usage_summary) = read_json_response(res).await;
     assert_eq!(status, StatusCode::OK, "usage_summary={usage_summary}");
+    assert_eq!(
+        usage_summary["scope"].as_str(),
+        Some("user"),
+        "usage summary should include scope field with value 'user': {usage_summary}"
+    );
     assert!(
         usage_summary["eventsLast24h"].as_i64().unwrap_or_default() >= 2,
         "usage summary should see created job events: {usage_summary}"

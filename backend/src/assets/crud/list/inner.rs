@@ -4,7 +4,7 @@ use axum::Json;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, ApiError};
 use crate::scope;
 
 use super::super::super::models::*;
@@ -21,8 +21,9 @@ pub(super) async fn list_project_assets_inner(
 ) -> Result<Json<ListAssetsResponse>, ApiError> {
     if let Some(sid) = query.script_numeric_id {
         if sid <= 0 {
-            return Err(ApiError::BadRequest(
-                "script_numeric_id must be positive when set".into(),
+            return Err(bad_request_i18n(
+                "script_numeric_id must be positive when set",
+                "script_numeric_id 设置时必须为正数",
             ));
         }
         scope::owned_script_in_project(pool, uid, project_id, sid)
@@ -38,8 +39,9 @@ pub(super) async fn list_project_assets_inner(
     let limit_clamped = match query.limit {
         None => None,
         Some(0) => {
-            return Err(ApiError::BadRequest(
-                "limit must be positive or omitted".into(),
+            return Err(bad_request_i18n(
+                "limit must be positive or omitted",
+                "limit 必须为正数，或省略该字段",
             ));
         }
         Some(l) => Some(i64::from(l).min(MAX_ASSET_LIST_LIMIT)),
@@ -48,15 +50,16 @@ pub(super) async fn list_project_assets_inner(
     if query.page.is_some() && limit_clamped.is_none() {
         let p = query.page.unwrap_or(1);
         if p != 1 {
-            return Err(ApiError::BadRequest(
-                "page is only valid together with limit".into(),
+            return Err(bad_request_i18n(
+                "page is only valid together with limit",
+                "page 只能与 limit 一起使用",
             ));
         }
     }
 
     let page = query.page.unwrap_or(1);
     if page == 0 {
-        return Err(ApiError::BadRequest("page must be >= 1".into()));
+        return Err(bad_request_i18n("page must be >= 1", "page 必须大于等于 1"));
     }
 
     let limit_offset = limit_clamped.map(|lim| {

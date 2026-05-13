@@ -171,7 +171,7 @@ void main() {
     expect(find.text('1 个项目 · #7 春季短剧'), findsOneWidget);
     expect(find.text('2 个分类 · storyboard, render'), findsOneWidget);
     expect(find.text('1 条任务'), findsOneWidget);
-    expect(find.text('项目 UUID（可空）'), findsOneWidget);
+    expect(find.text('项目 UUID（可选）'), findsOneWidget);
     expect(find.text('任务详情'), findsOneWidget);
     expect(find.textContaining('#11 · job-11'), findsOneWidget);
     expect(find.text('状态：已刷新 1 条任务。'), findsOneWidget);

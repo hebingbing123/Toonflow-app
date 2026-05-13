@@ -24,6 +24,7 @@ pub struct HarnessAgentWsParams {
     pub cancel: CancellationToken,
     pub out_tx: UnboundedSender<String>,
     pub request_id: Option<String>,
+    pub billing_config: crate::metering::BillingConfig,
 }
 
 /// Spawn the non-streaming harness agent loop; caller must reset LLM cancellation / attach channel first.
@@ -38,6 +39,7 @@ pub fn spawn_harness_agent_run(p: HarnessAgentWsParams) {
             p.workspace_id,
             Some(p.cfg.clone()),
             Some(p.client.clone()),
+            p.billing_config.clone(),
         );
         let res = if p.stream {
             harness_agent_run_streaming_tools(

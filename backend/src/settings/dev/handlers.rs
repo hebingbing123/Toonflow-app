@@ -4,6 +4,7 @@ use axum::{
 };
 
 use crate::auth::require_user_uuid;
+use crate::error::helpers::bad_request_i18n;
 use crate::error::ApiError;
 use crate::state::AppState;
 
@@ -52,7 +53,10 @@ pub(crate) async fn put_switch_ai_dev_tool(
     let _ = require_user_uuid(&state, &headers)?;
     let v = body.value.trim();
     if v != "0" && v != "1" {
-        return Err(ApiError::BadRequest("value must be \"0\" or \"1\"".into()));
+        return Err(bad_request_i18n(
+            "value must be \"0\" or \"1\"",
+            "value 必须为 \"0\" 或 \"1\"",
+        ));
     }
     let mut current = state.switch_ai_dev_tool.write().await;
     *current = v.to_string();

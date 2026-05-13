@@ -2,6 +2,7 @@
 
 use crate::error::ApiError;
 use crate::prompting::quality::{NextAction, QualityReview};
+use crate::scope::{owned_script_numeric_scope, ScopeError};
 use serde_json::json;
 use sqlx::PgPool;
 use uuid::Uuid;
@@ -73,38 +74,13 @@ pub async fn create_quality_review_for_low_performance(
 ) -> Result<QualityReview, ApiError> {
     // Convert script_id UUID to numeric ID if available
     let (project_numeric_id, script_numeric_id) = if let Some(script_uuid) = alert.script_id {
-        #[derive(sqlx::FromRow)]
-        struct NumericIds {
-            project_numeric_id: i32,
-            script_numeric_id: i32,
-        }
-
-        let row = sqlx::query_as::<_, NumericIds>(
-            r#"
-            SELECT 
-                p.numeric_id AS project_numeric_id,
-                s.numeric_id AS script_numeric_id
-            FROM app_script s
-            INNER JOIN app_project p ON p.id = s.project_id
-            WHERE s.id = $1
-              AND EXISTS (
-                SELECT 1
-                FROM app_workspace_member wm
-                WHERE wm.workspace_id = p.workspace_id
-                  AND wm.user_id = $2
-              )
-            "#,
-        )
-        .bind(script_uuid)
-        .bind(user_id)
-        .fetch_optional(pool)
-        .await
-        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-
-        if let Some(row) = row {
-            (Some(row.project_numeric_id), Some(row.script_numeric_id))
-        } else {
-            (None, None)
+        match owned_script_numeric_scope(pool, user_id, script_uuid).await {
+            Ok(scope) => (
+                Some(scope.project_numeric_id),
+                Some(scope.script_numeric_id),
+            ),
+            Err(ScopeError::NotFound) => (None, None),
+            Err(ScopeError::Database(msg)) => return Err(ApiError::DatabaseError(msg)),
         }
     } else {
         (None, None)

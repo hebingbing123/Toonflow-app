@@ -114,5 +114,6 @@ pub(super) async fn harness_agent_run(
         cancel,
         out_tx: out_tx.clone(),
         request_id: env.request_id.clone(),
+        billing_config: state.billing_config.clone(),
     });
 }

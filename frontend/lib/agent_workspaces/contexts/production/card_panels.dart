@@ -3,6 +3,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import 'support.dart';
 
 /// Renders the "执行阶段" stage board.
@@ -23,6 +24,7 @@ class ProductionWorkspaceStagesPanel extends StatelessWidget {
   final ValueChanged<ProductionWorkspaceStage> onRunStageSubAgent;
 
   Widget _buildPromptPreview(BuildContext context, String prompt) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(10),
@@ -33,7 +35,10 @@ class ProductionWorkspaceStagesPanel extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text('执行提示', style: Theme.of(context).textTheme.labelSmall),
+          Text(
+            l10n.agentWorkspaceProductionPromptPreviewTitle,
+            style: Theme.of(context).textTheme.labelSmall,
+          ),
           const SizedBox(height: 4),
           Text(prompt, style: Theme.of(context).textTheme.bodySmall),
         ],
@@ -43,19 +48,20 @@ class ProductionWorkspaceStagesPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     if (stages.isEmpty) return const SizedBox.shrink();
     final blockerSummary = summarizeProductionPrimaryBlocker(stages);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         const SizedBox(height: 8),
-        Text('执行阶段', style: Theme.of(context).textTheme.labelLarge),
+        Text(
+          l10n.agentWorkspaceProductionStagesTitle,
+          style: Theme.of(context).textTheme.labelLarge,
+        ),
         if (blockerSummary.isNotEmpty) ...<Widget>[
           const SizedBox(height: 6),
-          Text(
-            blockerSummary,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
+          Text(blockerSummary, style: Theme.of(context).textTheme.bodySmall),
         ],
         const SizedBox(height: 6),
         ...stages.map(
@@ -91,11 +97,14 @@ class ProductionWorkspaceStagesPanel extends StatelessWidget {
                     spacing: 8,
                     runSpacing: 8,
                     children: <Widget>[
-                      Chip(label: Text('flow=${stage.flowKey}')),
+                      Chip(
+                        label: Text(
+                          l10n.agentWorkspaceProductionFlowChip(stage.flowKey),
+                        ),
+                      ),
                       OutlinedButton(
-                        onPressed:
-                            busy ? null : () => onApplyStage(stage),
-                        child: const Text('应用阶段'),
+                        onPressed: busy ? null : () => onApplyStage(stage),
+                        child: Text(l10n.agentWorkspaceProductionApplyStage),
                       ),
                       if (stage.domainTool != null)
                         FilledButton.tonal(
@@ -109,7 +118,9 @@ class ProductionWorkspaceStagesPanel extends StatelessWidget {
                           onPressed: busy
                               ? null
                               : () => onRunStageSubAgent(stage),
-                          child: Text(productionStageSubAgentButtonLabel(stage)),
+                          child: Text(
+                            productionStageSubAgentButtonLabel(stage),
+                          ),
                         ),
                     ],
                   ),
@@ -141,6 +152,7 @@ class ProductionWorkspaceDiagnosisPanel extends StatelessWidget {
   final ValueChanged<ProductionWorkspaceRecipe> onRunRecipeSubAgent;
 
   Widget _buildPromptPreview(BuildContext context, String prompt) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(10),
@@ -151,7 +163,10 @@ class ProductionWorkspaceDiagnosisPanel extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text('执行提示', style: Theme.of(context).textTheme.labelSmall),
+          Text(
+            l10n.agentWorkspaceProductionPromptPreviewTitle,
+            style: Theme.of(context).textTheme.labelSmall,
+          ),
           const SizedBox(height: 4),
           Text(prompt, style: Theme.of(context).textTheme.bodySmall),
         ],
@@ -161,19 +176,20 @@ class ProductionWorkspaceDiagnosisPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     if (recipes.isEmpty) return const SizedBox.shrink();
     final diagnosisHeadline = summarizeProductionDiagnosisHeadline(recipes);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         const SizedBox(height: 8),
-        Text('下一步建议', style: Theme.of(context).textTheme.labelLarge),
+        Text(
+          l10n.agentWorkspaceProductionDiagnosisTitle,
+          style: Theme.of(context).textTheme.labelLarge,
+        ),
         if (diagnosisHeadline.isNotEmpty) ...<Widget>[
           const SizedBox(height: 6),
-          Text(
-            diagnosisHeadline,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
+          Text(diagnosisHeadline, style: Theme.of(context).textTheme.bodySmall),
         ],
         const SizedBox(height: 6),
         ...recipes.map(
@@ -203,29 +219,50 @@ class ProductionWorkspaceDiagnosisPanel extends StatelessWidget {
                     spacing: 8,
                     runSpacing: 8,
                     children: <Widget>[
-                      Chip(label: Text('flow=${recipe.flowKey}')),
+                      Chip(
+                        label: Text(
+                          l10n.agentWorkspaceProductionFlowChip(recipe.flowKey),
+                        ),
+                      ),
                       if (recipe.domainTool != null)
-                        Chip(label: Text('tool=${recipe.domainTool}')),
+                        Chip(
+                          label: Text(
+                            l10n.agentWorkspaceProductionToolChip(
+                              recipe.domainTool!,
+                            ),
+                          ),
+                        ),
                       if (recipe.subAgentTool != null)
-                        Chip(label: Text('agent=${recipe.subAgentTool}')),
+                        Chip(
+                          label: Text(
+                            l10n.agentWorkspaceProductionAgentChip(
+                              recipe.subAgentTool!,
+                            ),
+                          ),
+                        ),
                       OutlinedButton(
-                        onPressed:
-                            busy ? null : () => onApplyRecipe(recipe),
-                        child: const Text('应用建议'),
+                        onPressed: busy ? null : () => onApplyRecipe(recipe),
+                        child: Text(
+                          l10n.agentWorkspaceProductionApplySuggestion,
+                        ),
                       ),
                       if (recipe.domainTool != null)
                         FilledButton.tonal(
                           onPressed: busy
                               ? null
                               : () => onRunRecipeDomainTool(recipe),
-                          child: Text(productionRecipeDomainButtonLabel(recipe)),
+                          child: Text(
+                            productionRecipeDomainButtonLabel(recipe),
+                          ),
                         ),
                       if (recipe.subAgentTool != null)
                         FilledButton(
                           onPressed: busy
                               ? null
                               : () => onRunRecipeSubAgent(recipe),
-                          child: Text(productionRecipeSubAgentButtonLabel(recipe)),
+                          child: Text(
+                            productionRecipeSubAgentButtonLabel(recipe),
+                          ),
                         ),
                     ],
                   ),
@@ -264,33 +301,34 @@ class ProductionWorkspaceGuidedTasksPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Wrap(
       spacing: 8,
       runSpacing: 8,
       children: <Widget>[
         FilledButton.tonal(
           onPressed: busy ? null : onPullAssetsFlow,
-          child: const Text('1) 拉取资产 flow'),
+          child: Text(l10n.agentWorkspaceProductionStepPullAssetsFlow),
         ),
         FilledButton.tonal(
           onPressed: busy ? null : onRunAssetsSubAgent,
-          child: const Text('2) 运行资产子代理'),
+          child: Text(l10n.agentWorkspaceProductionStepRunAssetsSubAgent),
         ),
         FilledButton.tonal(
           onPressed: busy ? null : onPullStoryboardFlow,
-          child: const Text('3) 拉取分镜 flow'),
+          child: Text(l10n.agentWorkspaceProductionStepPullStoryboardFlow),
         ),
         OutlinedButton(
           onPressed: busy || !hasLastResult ? null : onWriteBackFlow,
-          child: const Text('4) 写回 flow'),
+          child: Text(l10n.agentWorkspaceProductionStepWritebackFlow),
         ),
         FilledButton.tonal(
           onPressed: busy ? null : onRunStoryboardSubAgent,
-          child: const Text('5) 运行分镜子代理'),
+          child: Text(l10n.agentWorkspaceProductionStepRunStoryboardSubAgent),
         ),
         FilledButton.tonal(
           onPressed: busy ? null : onRunDirectorPlanSubAgent,
-          child: const Text('6) 运行导演计划子代理'),
+          child: Text(l10n.agentWorkspaceProductionStepRunDirectorPlanSubAgent),
         ),
       ],
     );

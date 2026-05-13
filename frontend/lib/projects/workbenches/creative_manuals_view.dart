@@ -52,9 +52,10 @@ class CreativeManualsWorkbenchView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final outline = Theme.of(context).colorScheme.outline;
     return AlertDialog(
-      title: const Text('创作手册工作台'),
+      title: Text(l10n.projectsCreativeManualTitle),
       content: SizedBox(
         width: 820,
         child: SingleChildScrollView(
@@ -63,21 +64,21 @@ class CreativeManualsWorkbenchView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '把导演手册与视觉手册从首页探针收口到同一工作台，可直接刷新、查看、创建、更新和删除。',
+                l10n.projectsCreativeManualIntro,
                 style: Theme.of(
                   context,
                 ).textTheme.bodySmall?.copyWith(color: outline),
               ),
               const SizedBox(height: 12),
               SegmentedButton<_CreativeManualKind>(
-                segments: const <ButtonSegment<_CreativeManualKind>>[
+                segments: <ButtonSegment<_CreativeManualKind>>[
                   ButtonSegment<_CreativeManualKind>(
                     value: _CreativeManualKind.director,
-                    label: Text('导演手册'),
+                    label: Text(l10n.projectsCreativeManualSegmentDirector),
                   ),
                   ButtonSegment<_CreativeManualKind>(
                     value: _CreativeManualKind.visual,
-                    label: Text('视觉手册'),
+                    label: Text(l10n.projectsCreativeManualSegmentVisual),
                   ),
                 ],
                 selected: <_CreativeManualKind>{kind},
@@ -97,7 +98,11 @@ class CreativeManualsWorkbenchView extends StatelessWidget {
                 children: [
                   FilledButton.tonal(
                     onPressed: busy ? null : onReloadAll,
-                    child: Text(busy ? '处理中…' : '刷新全部手册'),
+                    child: Text(
+                      busy
+                          ? l10n.projectsBusyProcessing
+                          : l10n.projectsCreativeManualReloadAll,
+                    ),
                   ),
                   FilledButton(
                     onPressed: busy ? null : onCreate,
@@ -139,7 +144,7 @@ class CreativeManualsWorkbenchView extends StatelessWidget {
                 )
               else
                 Text(
-                  '当前类型还没有手册，可直接填写下方表单新建。',
+                  l10n.projectsCreativeManualEmptyKind,
                   style: Theme.of(
                     context,
                   ).textTheme.bodySmall?.copyWith(color: outline),
@@ -147,7 +152,9 @@ class CreativeManualsWorkbenchView extends StatelessWidget {
               const SizedBox(height: 12),
               TextField(
                 controller: nameCtrl,
-                decoration: const InputDecoration(labelText: '名称'),
+                decoration: InputDecoration(
+                  labelText: l10n.projectsCreativeManualFieldName,
+                ),
               ),
               const SizedBox(height: 8),
               TextField(
@@ -159,9 +166,9 @@ class CreativeManualsWorkbenchView extends StatelessWidget {
                 controller: imagesCtrl,
                 minLines: 2,
                 maxLines: 4,
-                decoration: const InputDecoration(
-                  labelText: '图片列表',
-                  helperText: '按换行或逗号分隔多个图片 URL / 路径。',
+                decoration: InputDecoration(
+                  labelText: l10n.projectsCreativeManualFieldImagesList,
+                  helperText: l10n.projectsCreativeManualFieldImagesHelper,
                 ),
               ),
               const SizedBox(height: 8),
@@ -169,18 +176,25 @@ class CreativeManualsWorkbenchView extends StatelessWidget {
                 controller: slotsCtrl,
                 minLines: 5,
                 maxLines: 8,
-                decoration: const InputDecoration(
-                  labelText: '数据槽位',
-                  helperText: '每行一个槽位，格式为 label|value|data',
+                decoration: InputDecoration(
+                  labelText: l10n.projectsCreativeManualFieldSlots,
+                  helperText: l10n.projectsCreativeManualFieldSlotsHelper,
                 ),
               ),
               if (selected != null) ...[
                 const SizedBox(height: 12),
-                Text('当前摘要', style: Theme.of(context).textTheme.titleSmall),
+                Text(
+                  l10n.projectsCreativeManualSummaryTitle,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
                 const SizedBox(height: 4),
                 SelectableText(
-                  '${selected!.name} · 路径 ${selected!.path} · '
-                  '图片 ${selected!.images.length} 张 · 槽位 ${selected!.slots.length} 个',
+                  l10n.projectsCreativeManualSummaryLine(
+                    selected!.name,
+                    selected!.path,
+                    selected!.images.length,
+                    selected!.slots.length,
+                  ),
                 ),
               ],
               if (statusLine != null) ...[
@@ -191,7 +205,9 @@ class CreativeManualsWorkbenchView extends StatelessWidget {
           ),
         ),
       ),
-      actions: [TextButton(onPressed: onClose, child: const Text('关闭'))],
+      actions: [
+        TextButton(onPressed: onClose, child: Text(l10n.helpHubDialogClose)),
+      ],
     );
   }
 }

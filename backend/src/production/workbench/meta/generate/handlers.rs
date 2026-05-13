@@ -1,11 +1,15 @@
 //! HTTP handlers for workbench meta generation.
 
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct GenerateVideoPromptBody {
-    pub(super) project_id: i32,
+    #[serde(default)]
+    pub(super) project_id: Option<i32>,
+    #[serde(default)]
+    pub(super) project_uuid: Option<Uuid>,
     pub(super) script_id: i32,
     #[serde(default)]
     pub(super) storyboard_id: Option<i32>,
@@ -82,4 +86,25 @@ pub(in crate::production) struct GenerateVideoPromptDiagnostics {
     pub(super) memory_project_scope_row_count: usize,
     pub(super) memory_script_scope_row_count: usize,
     pub(super) memory_role_scope_row_count: usize,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::GenerateVideoPromptBody;
+
+    #[test]
+    fn generate_video_prompt_body_accepts_project_uuid() {
+        let body: GenerateVideoPromptBody = serde_json::from_str(
+            r#"{"projectUuid":"550e8400-e29b-41d4-a716-446655440000","scriptId":2,"storyboardId":5,"autoQualityReview":true}"#,
+        )
+        .unwrap();
+        assert_eq!(body.project_id, None);
+        assert_eq!(body.script_id, 2);
+        assert_eq!(body.storyboard_id, Some(5));
+        assert!(body.auto_quality_review);
+        assert_eq!(
+            body.project_uuid.map(|id| id.to_string()).as_deref(),
+            Some("550e8400-e29b-41d4-a716-446655440000")
+        );
+    }
 }

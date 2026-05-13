@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../../rust_api.dart';
 
 class ArtStylesWorkbenchDialogViewModel {
@@ -67,13 +68,14 @@ class ArtStylesWorkbenchDialogView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final outline = Theme.of(context).colorScheme.outline;
     final viewportWidth = MediaQuery.sizeOf(context).width;
     final dialogWidth = viewportWidth.isFinite
         ? viewportWidth.clamp(320.0, 760.0)
         : 760.0;
     return AlertDialog(
-      title: const Text('画风工作台'),
+      title: Text(l10n.projectsArtWorkbenchTitle),
       content: SizedBox(
         width: dialogWidth,
         child: SingleChildScrollView(
@@ -82,7 +84,7 @@ class ArtStylesWorkbenchDialogView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '在同一入口内完成画风列表刷新、封面查看、CRUD 与 prompt 抽取，不再只停留在列表加载与回归探针。',
+                l10n.projectsArtWorkbenchIntro,
                 style: Theme.of(
                   context,
                 ).textTheme.bodySmall?.copyWith(color: outline),
@@ -94,7 +96,11 @@ class ArtStylesWorkbenchDialogView extends StatelessWidget {
                 children: [
                   FilledButton.tonal(
                     onPressed: model.busy ? null : callbacks.onReloadRows,
-                    child: Text(model.busy ? '处理中…' : '刷新列表'),
+                    child: Text(
+                      model.busy
+                          ? l10n.projectsBusyProcessing
+                          : l10n.projectsArtWorkbenchReloadList,
+                    ),
                   ),
                   FilledButton.tonal(
                     onPressed:
@@ -103,23 +109,27 @@ class ArtStylesWorkbenchDialogView extends StatelessWidget {
                             model.selected == null
                         ? null
                         : callbacks.onLoadCover,
-                    child: Text(model.loadingCover ? '读取中…' : '查看封面'),
+                    child: Text(
+                      model.loadingCover
+                          ? l10n.projectsArtWorkbenchReadingCover
+                          : l10n.projectsArtWorkbenchViewCover,
+                    ),
                   ),
                   FilledButton(
                     onPressed: model.busy ? null : callbacks.onCreateStyle,
-                    child: const Text('新建画风'),
+                    child: Text(l10n.projectsArtWorkbenchNew),
                   ),
                   FilledButton(
                     onPressed: model.busy || model.selected == null
                         ? null
                         : callbacks.onSaveSelected,
-                    child: const Text('保存当前画风'),
+                    child: Text(l10n.projectsArtWorkbenchSave),
                   ),
                   FilledButton.tonal(
                     onPressed: model.busy || model.selected == null
                         ? null
                         : callbacks.onDeleteSelected,
-                    child: const Text('删除当前画风'),
+                    child: Text(l10n.projectsArtWorkbenchDelete),
                   ),
                 ],
               ),
@@ -127,7 +137,9 @@ class ArtStylesWorkbenchDialogView extends StatelessWidget {
               if (model.rows.isNotEmpty)
                 DropdownButtonFormField<int>(
                   initialValue: model.selected?.numericId,
-                  decoration: const InputDecoration(labelText: '当前画风'),
+                  decoration: InputDecoration(
+                    labelText: l10n.projectsArtWorkbenchCurrentStyle,
+                  ),
                   items: model.rows
                       .map(
                         (row) => DropdownMenuItem<int>(
@@ -151,7 +163,7 @@ class ArtStylesWorkbenchDialogView extends StatelessWidget {
                 )
               else
                 Text(
-                  '当前还没有画风，填写下面表单后可直接新建。',
+                  l10n.projectsArtWorkbenchEmptyHint,
                   style: Theme.of(
                     context,
                   ).textTheme.bodySmall?.copyWith(color: outline),
@@ -159,21 +171,25 @@ class ArtStylesWorkbenchDialogView extends StatelessWidget {
               const SizedBox(height: 12),
               TextField(
                 controller: model.nameCtrl,
-                decoration: const InputDecoration(labelText: '名称'),
+                decoration: InputDecoration(
+                  labelText: l10n.projectsArtWorkbenchFieldName,
+                ),
               ),
               const SizedBox(height: 8),
               TextField(
                 controller: model.labelCtrl,
-                decoration: const InputDecoration(labelText: '标签'),
+                decoration: InputDecoration(
+                  labelText: l10n.projectsArtWorkbenchFieldTags,
+                ),
               ),
               const SizedBox(height: 8),
               TextField(
                 controller: model.fileUrlCtrl,
                 minLines: 2,
                 maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: '封面 URL / data URI',
-                  helperText: '可填写可访问 URL，或 data:image/...;base64,...',
+                decoration: InputDecoration(
+                  labelText: l10n.projectsArtWorkbenchFieldCoverUrl,
+                  helperText: l10n.projectsArtWorkbenchFieldCoverUrlHelper,
                 ),
               ),
               const SizedBox(height: 8),
@@ -181,18 +197,23 @@ class ArtStylesWorkbenchDialogView extends StatelessWidget {
                 controller: model.promptCtrl,
                 minLines: 3,
                 maxLines: 5,
-                decoration: const InputDecoration(labelText: 'Prompt'),
+                decoration: InputDecoration(
+                  labelText: l10n.projectsArtWorkbenchFieldPrompt,
+                ),
               ),
               const SizedBox(height: 12),
-              Text('Prompt 抽取', style: Theme.of(context).textTheme.titleSmall),
+              Text(
+                l10n.projectsArtWorkbenchExtractTitle,
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
               const SizedBox(height: 4),
               TextField(
                 controller: model.extractImagesCtrl,
                 minLines: 3,
                 maxLines: 5,
-                decoration: const InputDecoration(
-                  labelText: '图片输入',
-                  helperText: '按换行或逗号分隔多个图片 URL / data URI。',
+                decoration: InputDecoration(
+                  labelText: l10n.projectsArtWorkbenchExtractImagesLabel,
+                  helperText: l10n.projectsArtWorkbenchExtractImagesHelper,
                 ),
               ),
               const SizedBox(height: 8),
@@ -200,7 +221,7 @@ class ArtStylesWorkbenchDialogView extends StatelessWidget {
                 alignment: Alignment.centerLeft,
                 child: FilledButton.tonal(
                   onPressed: model.busy ? null : callbacks.onExtractPrompt,
-                  child: const Text('抽取 Prompt 到编辑区'),
+                  child: Text(l10n.projectsArtWorkbenchExtractButton),
                 ),
               ),
               const SizedBox(height: 12),
@@ -209,7 +230,7 @@ class ArtStylesWorkbenchDialogView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '当前封面预览',
+                      l10n.projectsArtWorkbenchCoverPreview,
                       style: Theme.of(context).textTheme.titleSmall,
                     ),
                     const SizedBox(height: 8),
@@ -232,7 +253,10 @@ class ArtStylesWorkbenchDialogView extends StatelessWidget {
         ),
       ),
       actions: [
-        TextButton(onPressed: callbacks.onClose, child: const Text('关闭')),
+        TextButton(
+          onPressed: callbacks.onClose,
+          child: Text(l10n.helpHubDialogClose),
+        ),
       ],
     );
   }

@@ -10,6 +10,8 @@
 - **格式**：`/product/<pane>`，参数用 query string。
 - **gate 行为**：若目标面板被平台配置禁用，客户端应提示原因并跳转到 **平台配置** 面板。
 - **稳定性**：深链仅用于产品壳层导航，不承诺跨版本永久兼容（若要兼容需在变更说明中保留别名路径）。
+- **上下文恢复**：凡涉及 project / script / jobs scope，默认按 **UUID-first** 恢复；numeric 参数仅作 legacy fallback。
+- **边界**：这里的 project/workspace scope 仅用于产品壳导航与上下文恢复，不单独决定 quota / billing attribution。
 
 ### 已支持路径
 
@@ -20,7 +22,8 @@
 - **`/product/projects`**
   - **用途**：打开项目面板
   - **参数**：
-    - `projectNumericId`（可选，int）：同步项目上下文
+    - `projectUuid`（可选，string）：首选项目 UUID（`app_project.id`）
+    - `projectNumericId`（可选，int）：legacy 项目整型 ID 回退
   - **gate**：无
 
 - **`/product/team-workspaces`**
@@ -31,7 +34,11 @@
   - **用途**：打开 jobs 面板并可预填 jobId
   - **参数**：
     - `jobId`（可选，string）：预填并触发查询
+    - `projectUuid`（可选，string）：首选项目 UUID；用于同步产品壳项目上下文
+    - `projectNumericId`（可选，int）：legacy 项目整型 ID 回退
+    - `workspaceId`（可选，string）：同步工作区上下文
   - **gate**：`jobsPaneEnabled`
+  - **说明**：若 query 未显式携带这些 scope 参数，客户端也可回退使用通知记录本身的 `projectId`（UUID）、`projectNumericId`（legacy numeric）/ `workspaceId` 与 payload 恢复上下文；恢复顺序仍以 UUID-first 为准。
 
 - **`/product/platform-status`**
   - **用途**：打开平台状态面板（Health/Ready/SLI/Metrics）
@@ -59,4 +66,3 @@
 - **`/product/workspace-activity`**
   - **用途**：打开工作区动态（执行动态）面板
   - **gate**：`workspaceActivityEnabled`
-

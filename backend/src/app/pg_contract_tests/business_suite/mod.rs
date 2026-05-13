@@ -1,10 +1,12 @@
 mod art_styles_base64_cover_roundtrip;
 mod art_styles_crud_roundtrip;
+mod billing_webhook_dual_write_roundtrip;
 mod billing_webhook_events_roundtrip;
 mod jobs_rest_roundtrip;
 mod me_current_workspace_switch_roundtrip;
 mod me_profile_subscription_and_jobs_today_roundtrip;
 mod promote_staging_populates_assets_and_links;
 mod prompts_list_patch_roundtrip;
+mod search_saved_views_roundtrip;
 mod vendor_config_enable_update_roundtrip;
 mod workspaces_crud_roundtrip;

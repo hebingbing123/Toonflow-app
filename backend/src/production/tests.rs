@@ -40,11 +40,24 @@ fn workbench_generate_video_body_accepts_valid() {
         r#"{"projectId":1,"scriptId":2,"uploadData":[{"id":1,"sources":"url"}],"prompt":"test","model":"runway","mode":"standard","resolution":"1080p","duration":5,"trackId":1}"#,
     )
     .unwrap();
-    assert_eq!(b.project_id, 1);
+    assert_eq!(b.project_id, Some(1));
     assert_eq!(b.script_id, 2);
     assert_eq!(b.upload_data.len(), 1);
     assert_eq!(b.duration, 5);
     assert_eq!(b.audio, None);
+}
+
+#[test]
+fn workbench_generate_video_body_accepts_project_uuid() {
+    let b: WorkbenchGenerateVideoBody = serde_json::from_str(
+        r#"{"projectUuid":"550e8400-e29b-41d4-a716-446655440000","scriptId":2,"uploadData":[{"id":1,"sources":"url"}],"prompt":"test","model":"runway","mode":"standard","resolution":"1080p","duration":5,"trackId":1}"#,
+    )
+    .unwrap();
+    assert_eq!(b.project_id, None);
+    assert_eq!(
+        b.project_uuid.map(|id| id.to_string()).as_deref(),
+        Some("550e8400-e29b-41d4-a716-446655440000")
+    );
 }
 
 #[test]

@@ -5,10 +5,12 @@ use axum::{
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{validate_positive, ApiError};
 use crate::state::AppState;
 
-use super::super::super::crud::resolve_owned_asset_id_for_project;
+use super::super::super::crud::{
+    require_asset_project_write_scope, resolve_owned_asset_id_for_project,
+};
 
 pub(in crate::assets) async fn delete_project_asset_image_for_project(
     State(state): State<AppState>,
@@ -16,15 +18,14 @@ pub(in crate::assets) async fn delete_project_asset_image_for_project(
     headers: HeaderMap,
 ) -> Result<StatusCode, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-
-    if asset_numeric_id <= 0 {
-        return Err(ApiError::BadRequest("numeric ids must be positive".into()));
-    }
+    validate_positive(asset_numeric_id, "numeric ids")?;
 
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    require_asset_project_write_scope(&state, uid, project_id).await?;
 
     let asset_id =
         resolve_owned_asset_id_for_project(pool, uid, project_id, asset_numeric_id).await?;

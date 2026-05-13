@@ -3,7 +3,7 @@ use chrono::Utc;
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, validate_non_empty_string, ApiError};
 use crate::harness::observe;
 use crate::state::AppState;
 
@@ -50,20 +50,19 @@ pub(crate) async fn append_memory(
     Json(body): Json<AppendMemoryBody>,
 ) -> Result<Json<AppendMemoryResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    if body.content.trim().is_empty() {
-        return Err(ApiError::BadRequest("content must be non-empty".into()));
-    }
+    validate_non_empty_string(body.content.trim(), "content")?;
     if !matches!(body.memory_type.as_str(), "message" | "summary") {
-        return Err(ApiError::BadRequest(
-            "memoryType must be message or summary".into(),
+        return Err(bad_request_i18n(
+            "memoryType must be message or summary",
+            "memoryType 必须是 message 或 summary",
         ));
     }
     // 验证 memory_tier（如果提供）
     if let Some(ref tier) = body.memory_tier {
         if !MemoryTier::is_valid(tier.as_str()) {
-            return Err(ApiError::BadRequest(
-                "memoryTier must be one of: style_bible, stage_summary, delta_memory, message"
-                    .into(),
+            return Err(bad_request_i18n(
+                "memoryTier must be one of: style_bible, stage_summary, delta_memory, message",
+                "memoryTier 必须是以下之一：style_bible、stage_summary、delta_memory、message",
             ));
         }
     }
@@ -74,14 +73,16 @@ pub(crate) async fn append_memory(
             .as_ref()
             .is_some_and(scope_signature_has_any_dimension)
     {
-        return Err(ApiError::BadRequest(format!(
-            "memoryTier {memory_tier} requires a non-empty scopeSignature"
-        )));
+        return Err(bad_request_i18n(
+            &format!("memoryTier {memory_tier} requires a non-empty scopeSignature"),
+            &format!("memoryTier {memory_tier} 需要非空的 scopeSignature"),
+        ));
     }
     let agent_type = parse_agent_type(&body.agent_type)?;
     if body.project_uuid.is_none() && body.project_id.is_none() {
-        return Err(ApiError::BadRequest(
-            "Provide projectUuid (preferred) or legacy numeric projectId".into(),
+        return Err(bad_request_i18n(
+            "Provide projectUuid (preferred) or legacy numeric projectId",
+            "请提供 projectUuid（推荐）或旧版数值 projectId",
         ));
     }
     let pool = state.require_pool()?;

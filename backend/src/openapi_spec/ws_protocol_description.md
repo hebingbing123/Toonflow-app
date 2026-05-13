@@ -36,6 +36,8 @@ Server responds with `session.ready` or `error.occurred` before other traffic.
 |-------|--------|
 | `payload.sub` | Authenticated user id (UUID string, matches JWT `sub`) |
 
+When the client supplied **`request_id`** on **`session.auth`**, the same correlation id may be echoed on the envelope root of **`session.ready`**.
+
 ### `harness.tool.invoke` (client → server)
 
 Requires an authenticated session (`?access_token=` or successful `session.auth`). Does **not** require `agent.*.attach`.
@@ -62,6 +64,8 @@ Emitted when invocation succeeds.
 | `payload.name` | Tool that ran |
 | `payload.result` | JSON value returned by the tool (`echo`: mirrors `arguments`; `isolated.echo`: same as `echo` but runs in a child process; `skills.read`: `{ path, content }`; script tools: `get_planData` (includes optional numeric `planId` when an `app_script_agent_plan` row exists, aligned with REST `get-plan-data`), `get_script_content` (supports `scriptId` plus optional `relativeOffset` for previous/next episode windows), `get_novel_text`, `get_novel_events` (both default to compact reads when args are omitted: `get_novel_text` returns one chapter window with trimmed fields; `get_novel_events` returns up to eight trimmed event rows), `run_sub_agent_storySkeleton`, `run_sub_agent_adaptationStrategy`, `run_sub_agent_script`, `run_supervision_agent` (sub-agent tools return `{ tool, agent_role, result, review? }`; supervision tools may include parsed `reviewSummary` attrs under `review`); production tools: `get_flowData` (compact by default when filters are omitted: `script`/`scriptPlan` return trimmed text windows, `storyboardTable` returns the first 8 key rows, `assets`/`storyboard` return trimmed field subsets plus bounded row counts), `add_deriveAsset` (parent `arguments.assetsId` must be linked to the active script in `app_script_asset`; see **Production `add_deriveAsset`** below), `del_deriveAsset`, `generate_deriveAsset`, `generate_storyboard`, `run_sub_agent_derive_assets`, `run_sub_agent_generate_assets`, `run_sub_agent_director_plan`, `run_sub_agent_storyboard_gen`, `run_sub_agent_storyboard_panel`, `run_sub_agent_storyboard_table`, `run_sub_agent_production_supervision`; `wasm.probe`: `{ ok, value }`; `wasm.user.probe` (requires `arguments.wasm_id` UUID): `{ ok, value }`) |
 
+This is a normal raw WebSocket envelope (`type` / `schema_version` / `payload`). When the client supplied **`request_id`** on **`harness.tool.invoke`**, the server echoes it on the successful **`harness.tool.result`** envelope as well.
+
 ### `harness.agent.run` (client → server)
 
 Multi-round **OpenAI tool calling** loop: the model may invoke Harness catalog tools; the server runs them (same rules as `harness.tool.invoke`) and feeds results back until the model returns a final assistant message.
@@ -84,6 +88,8 @@ Shares **`agent.run.cancel`** with streaming chat: cancel aborts an in-flight `h
 |-------|-------|
 | `payload.max_tool_rounds` | Configured cap |
 
+Like other server success events, this uses the normal raw WebSocket envelope and echoes the client **`request_id`** when **`harness.agent.run`** supplied one.
+
 ### `harness.agent.tool_call` (server → client)
 
 Emitted before each tool execution during the loop.
@@ -94,6 +100,8 @@ Emitted before each tool execution during the loop.
 | `payload.name` | Tool name |
 | `payload.arguments` | Parsed JSON arguments (or a fallback object if JSON parse fails) |
 
+This event also inherits the originating **`request_id`** from **`harness.agent.run`** when present.
+
 ### `harness.agent.finished` (server → client)
 
 After the model returns a final text response (no tool calls in that completion).
@@ -103,9 +111,17 @@ After the model returns a final text response (no tool calls in that completion)
 | `payload.tool_rounds_executed` | Completions that executed at least one tool call |
 | `payload.finish_reason` | e.g. `stop` |
 
+This final loop-status envelope also echoes the originating **`request_id`** when present.
+
 ### `harness.agent.cancelled` (server → client)
 
 Emitted when the run stops due to **`agent.run.cancel`** (cancel token).
+
+| Field | Notes |
+|-------|-------|
+| `payload.tool_rounds_executed` | Completions that executed at least one tool call before cancellation |
+
+This cancellation-status envelope also echoes the originating **`request_id`** when present.
 
 The final assistant text uses the same **`chat.message.*` / `chat.content.*`** sequence as a non-streaming single block (one `chat.content.updated` with full text).
 
@@ -125,13 +141,21 @@ Client-side `linkPath` (product deep links) are documented in `docs/product-deep
 
 Current producers include:
 
-1. skill file / pack change notices
-2. job terminal-state summaries (`succeeded` / `failed` / `cancelled`)
-3. workspace invite lifecycle summaries (`created` / `resent` / `revoked` / `accepted`)
+1. skill file / pack change notices (`notificationType = skill_change`)
+2. job terminal-state summaries (`notificationType = job_succeeded` / `job_failed` / `job_cancelled`)
+3. workspace invite lifecycle summaries (`notificationType = workspace_invite_created` / `workspace_invite_resent` / `workspace_invite_revoked` / `workspace_invite_accepted`)
+4. content compliance queue alerts (`notificationType = content_compliance_alert`) from `POST /api/v1/settings/notifications/content-compliance/sync`
+5. content compliance cleared summaries (`notificationType = content_compliance_alert_cleared`) when a previously open stage leaves the active queue and the per-user throttle window allows a new cleared notice
 
 ### `session.ack` (server → client)
 
-Generic success for attach / context update / cancel; carries `request_id` when the client sent one. When the server resolved **`app_project.workspace_id`** from Postgres, **`payload.workspaceUuid`** echoes that UUID so clients can confirm the active Harness workspace boundary.
+Generic success for attach / context update / cancel; carries `request_id` when the client sent one. Current payloads include:
+
+- attach success: **`{ "ok": true, "channel": "script" | "production", "workspaceUuid"?: "<uuid>" }`**
+- context update success: **`{ "ok": true, "workspaceUuid"?: "<uuid>" }`**
+- cancel success: **`{ "stopped": true }`**
+
+When the server resolved **`app_project.workspace_id`** from Postgres, **`payload.workspaceUuid`** echoes that UUID so clients can confirm the active Harness workspace boundary.
 
 ### `agent.chat.send` → LLM stream (server → client)
 

@@ -716,3 +716,50 @@ mod task15_tests {
         assert_eq!(issue_types[0], "dialogue_stiffness");
     }
 }
+
+/// W3.8: Verify scope field exists and has correct value in QualityScopeInsightResponse
+#[test]
+fn quality_scope_insight_response_scope_field_is_user() {
+    use super::types::QualityScopeInsightResponse;
+
+    let insight = QualityScopeInsightResponse {
+        scope: "user".to_string(),
+        scope_label: "Project 1".to_string(),
+        project_id: Some(1),
+        script_id: None,
+        total_reviews: 10,
+        auto_reviews: 5,
+        passed_count: 8,
+        bad_case_count: 2,
+        pass_rate_percent: 80.0,
+        avg_overall_score: 7.5,
+        dialogue_risk_count: 1,
+        visual_risk_count: 1,
+        avg_prompt_chars: 500.0,
+        avg_memory_chars: 100.0,
+        avg_memory_delivery_chars: 50.0,
+        delivery_priority_hit_rate_percent: 60.0,
+        memory_removed_chars: 200,
+        memory_removed_rows: 5,
+        feedback_selected_memory_promotions: 3,
+        feedback_rejected_memory_writes: 2,
+        feedback_summary_memory_writes: 1,
+        feedback_memory_removed_chars: 100,
+        feedback_memory_removed_rows: 2,
+        feedback_focus_tags: vec!["dialogue".to_string()],
+        memory_action: "keep".to_string(),
+        memory_focus: "delivery".to_string(),
+        memory_reason: "quality".to_string(),
+    };
+
+    // Verify scope field is "user"
+    assert_eq!(insight.scope, "user");
+
+    // Verify scope serializes to "user"
+    let json = serde_json::to_string(&insight).unwrap();
+    assert!(
+        json.contains("\"scope\":\"user\""),
+        "scope field should serialize to 'user', got: {}",
+        json
+    );
+}

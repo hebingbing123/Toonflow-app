@@ -83,8 +83,12 @@ pub(in crate::production::workbench::storyboard) async fn update_live_action_ref
     reference_shot_urls: &[String],
     performance_notes: Option<&str>,
 ) -> Result<(), ApiError> {
-    let reference_json = serde_json::to_value(reference_shot_urls)
-        .map_err(|e| ApiError::BadRequest(format!("invalid live-action reference urls: {e}")))?;
+    let reference_json = serde_json::to_value(reference_shot_urls).map_err(|e| {
+        crate::error::bad_request_i18n(
+            &format!("invalid live-action reference urls: {e}"),
+            &format!("live-action reference urls 无效：{e}"),
+        )
+    })?;
     let performance_json = match performance_notes {
         Some(value) if !value.trim().is_empty() => {
             serde_json::Value::String(value.trim().to_string())

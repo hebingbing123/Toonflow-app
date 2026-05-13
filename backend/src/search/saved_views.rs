@@ -9,7 +9,7 @@ use uuid::Uuid;
 
 use crate::{
     auth::require_user_uuid,
-    error::ApiError,
+    error::{bad_request_i18n, ApiError},
     search::models::{SearchSavedViewItem, SearchSavedViewsPutBody, SearchSavedViewsResponse},
     state::AppState,
 };
@@ -42,47 +42,47 @@ async fn user_is_workspace_member(
 fn validate_item(i: usize, item: &SearchSavedViewItem) -> Result<(), ApiError> {
     let id = item.id.trim();
     if id.is_empty() {
-        return Err(ApiError::BadRequest(format!(
-            "items[{}].id must not be empty",
-            i
-        )));
+        return Err(bad_request_i18n(
+            &format!("items[{}].id must not be empty", i),
+            &format!("items[{}].id 不能为空", i),
+        ));
     }
     if id.len() > 128 {
-        return Err(ApiError::BadRequest(format!(
-            "items[{}].id exceeds 128 characters",
-            i
-        )));
+        return Err(bad_request_i18n(
+            &format!("items[{}].id exceeds 128 characters", i),
+            &format!("items[{}].id 超过 128 个字符", i),
+        ));
     }
     if item.title.len() > 200 {
-        return Err(ApiError::BadRequest(format!(
-            "items[{}].title exceeds 200 characters",
-            i
-        )));
+        return Err(bad_request_i18n(
+            &format!("items[{}].title exceeds 200 characters", i),
+            &format!("items[{}].title 超过 200 个字符", i),
+        ));
     }
     if item.query.len() > 2000 {
-        return Err(ApiError::BadRequest(format!(
-            "items[{}].query exceeds 2000 characters",
-            i
-        )));
+        return Err(bad_request_i18n(
+            &format!("items[{}].query exceeds 2000 characters", i),
+            &format!("items[{}].query 超过 2000 个字符", i),
+        ));
     }
     if item.use_count < 0 {
-        return Err(ApiError::BadRequest(format!(
-            "items[{}].use_count must be >= 0",
-            i
-        )));
+        return Err(bad_request_i18n(
+            &format!("items[{}].use_count must be >= 0", i),
+            &format!("items[{}].use_count 必须大于等于 0", i),
+        ));
     }
     if item.result_types.len() > 32 {
-        return Err(ApiError::BadRequest(format!(
-            "items[{}].result_types too many entries (max 32)",
-            i
-        )));
+        return Err(bad_request_i18n(
+            &format!("items[{}].result_types too many entries (max 32)", i),
+            &format!("items[{}].result_types 条目过多（最多 32 个）", i),
+        ));
     }
     for (j, wire) in item.result_types.iter().enumerate() {
         if wire.len() > 64 {
-            return Err(ApiError::BadRequest(format!(
-                "items[{}].result_types[{}] too long",
-                i, j
-            )));
+            return Err(bad_request_i18n(
+                &format!("items[{}].result_types[{}] too long", i, j),
+                &format!("items[{}].result_types[{}] 过长", i, j),
+            ));
         }
     }
     Ok(())
@@ -174,10 +174,10 @@ async fn replace_saved_views_tx(
     items: Vec<SearchSavedViewItem>,
 ) -> Result<Vec<SearchSavedViewItem>, ApiError> {
     if items.len() > MAX_SAVED_VIEWS {
-        return Err(ApiError::BadRequest(format!(
-            "at most {} saved views allowed",
-            MAX_SAVED_VIEWS
-        )));
+        return Err(bad_request_i18n(
+            &format!("at most {} saved views allowed", MAX_SAVED_VIEWS),
+            &format!("最多允许 {} 个 saved views", MAX_SAVED_VIEWS),
+        ));
     }
 
     let mut seen_ids = std::collections::HashSet::with_capacity(items.len());
@@ -185,8 +185,9 @@ async fn replace_saved_views_tx(
         validate_item(i, item)?;
         let id = item.id.trim().to_string();
         if !seen_ids.insert(id) {
-            return Err(ApiError::BadRequest(
-                "duplicate items[].id in request body".to_string(),
+            return Err(bad_request_i18n(
+                "duplicate items[].id in request body",
+                "请求体中存在重复的 items[].id",
             ));
         }
         if let Some(ws) = item.workspace_id {
@@ -212,8 +213,12 @@ async fn replace_saved_views_tx(
     let now = Utc::now();
     for item in &items {
         let created_at = item.created_at.unwrap_or(now);
-        let rt = serde_json::to_value(&item.result_types)
-            .map_err(|e| ApiError::BadRequest(format!("result_types serialization: {}", e)))?;
+        let rt = serde_json::to_value(&item.result_types).map_err(|e| {
+            bad_request_i18n(
+                &format!("result_types serialization: {}", e),
+                &format!("result_types 序列化失败：{}", e),
+            )
+        })?;
 
         sqlx::query(
             r#"

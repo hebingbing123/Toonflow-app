@@ -71,7 +71,8 @@ mod tests {
 
     fn make_request(scope: PatchScope, ids: Vec<i64>, reason: &str) -> PatchRequest {
         PatchRequest {
-            project_id: 1,
+            project_id: Some(1),
+            project_uuid: None,
             episodes_id: Some(2),
             scope,
             ids,

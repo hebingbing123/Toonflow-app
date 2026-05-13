@@ -4,7 +4,7 @@ use super::super::common::{
     normalize_storyboard_duration, normalize_storyboard_prompt, StoryboardInsertDraft,
 };
 use super::types::StoryboardInfoInput;
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, ApiError};
 
 pub(super) fn prepare_storyboard_insert(
     prompt: &str,
@@ -20,7 +20,10 @@ pub(super) fn prepare_batch_storyboard_inserts(
     storyboards: &[StoryboardInfoInput],
 ) -> Result<Vec<StoryboardInsertDraft>, ApiError> {
     if storyboards.is_empty() {
-        return Err(ApiError::BadRequest("storyboards must not be empty".into()));
+        return Err(bad_request_i18n(
+            "storyboards must not be empty",
+            "storyboards 不能为空",
+        ));
     }
 
     storyboards
@@ -31,12 +34,18 @@ pub(super) fn prepare_batch_storyboard_inserts(
                     ApiError::BadRequest(message) if message == "prompt must not be empty" => {
                         ApiError::BadRequest("storyboards[*].prompt must not be empty".into())
                     }
+                    ApiError::BadRequest(message) if message == "prompt 不能为空" => {
+                        ApiError::BadRequest("storyboards[*].prompt 不能为空".into())
+                    }
                     ApiError::BadRequest(message)
                         if message == "duration must be a positive integer" =>
                     {
                         ApiError::BadRequest(
                             "storyboards[*].duration must be a positive integer".into(),
                         )
+                    }
+                    ApiError::BadRequest(message) if message == "duration 必须是正整数" => {
+                        ApiError::BadRequest("storyboards[*].duration 必须是正整数".into())
                     }
                     other => other,
                 }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../l10n/app_localizations.dart';
+
 /// Batch operation toolbar component for short video assembly
 /// 
 /// Provides batch selection and batch operation functionality:
@@ -85,11 +87,11 @@ class _BatchOperationToolbarState extends State<BatchOperationToolbar> {
       return true;
     }
     
-    // Show a brief message that operation is throttled
+    final l10n = AppLocalizations.of(context)!;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('操作过于频繁，请稍后再试'),
-        duration: Duration(milliseconds: 1500),
+      SnackBar(
+        content: Text(l10n.shortVideoBatchThrottleMessage),
+        duration: const Duration(milliseconds: 1500),
       ),
     );
     return false;
@@ -103,6 +105,7 @@ class _BatchOperationToolbarState extends State<BatchOperationToolbar> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final hasSelection = widget.selectedIds.isNotEmpty;
     final isAllSelected = widget.selectedIds.length == widget.totalCount && widget.totalCount > 0;
 
@@ -147,7 +150,9 @@ class _BatchOperationToolbarState extends State<BatchOperationToolbar> {
                     }
                   },
             icon: Icon(isAllSelected ? Icons.deselect : Icons.select_all),
-            label: Text(isAllSelected ? '取消全选' : '全选'),
+            label: Text(
+              isAllSelected ? l10n.shortVideoBatchDeselectAll : l10n.shortVideoBatchSelectAll,
+            ),
           ),
           
           const SizedBox(width: 16),
@@ -162,7 +167,10 @@ class _BatchOperationToolbarState extends State<BatchOperationToolbar> {
               borderRadius: BorderRadius.circular(16),
             ),
             child: Text(
-              '已选择: ${widget.selectedIds.length} / ${widget.totalCount}',
+              l10n.shortVideoBatchSelectedCount(
+                widget.selectedIds.length,
+                widget.totalCount,
+              ),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w500,
                     color: hasSelection
@@ -190,7 +198,7 @@ class _BatchOperationToolbarState extends State<BatchOperationToolbar> {
                         ? null 
                         : () => _handleBatchOperation(widget.onBatchEnable),
                     icon: const Icon(Icons.play_arrow, size: 18),
-                    label: const Text('批量启用'),
+                    label: Text(l10n.shortVideoBatchOpEnable),
                   ),
                   
                   // Batch disable
@@ -199,7 +207,7 @@ class _BatchOperationToolbarState extends State<BatchOperationToolbar> {
                         ? null 
                         : () => _handleBatchOperation(widget.onBatchDisable),
                     icon: const Icon(Icons.pause, size: 18),
-                    label: const Text('批量禁用'),
+                    label: Text(l10n.shortVideoBatchOpDisable),
                   ),
                   
                   // Batch update duration
@@ -208,7 +216,7 @@ class _BatchOperationToolbarState extends State<BatchOperationToolbar> {
                         ? null 
                         : () => _handleBatchOperation(widget.onBatchUpdateDuration),
                     icon: const Icon(Icons.timer, size: 18),
-                    label: const Text('时长对齐'),
+                    label: Text(l10n.shortVideoBatchOpDurationAlign),
                   ),
                   
                   // Batch replace
@@ -217,7 +225,7 @@ class _BatchOperationToolbarState extends State<BatchOperationToolbar> {
                         ? null 
                         : () => _handleBatchOperation(widget.onBatchReplace),
                     icon: const Icon(Icons.swap_horiz, size: 18),
-                    label: const Text('批量替换'),
+                    label: Text(l10n.shortVideoBatchOpReplace),
                   ),
                   
                   // Batch generate voiceover
@@ -226,7 +234,7 @@ class _BatchOperationToolbarState extends State<BatchOperationToolbar> {
                         ? null 
                         : () => _handleBatchOperation(widget.onBatchGenerateVoiceover),
                     icon: const Icon(Icons.record_voice_over, size: 18),
-                    label: const Text('批量配音'),
+                    label: Text(l10n.shortVideoBatchOpVoiceover),
                   ),
                 ],
               ),
@@ -386,6 +394,7 @@ class BatchOperationProgressDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final progress = total > 0 ? completed / total : 0.0;
     final hasFailures = failedItems.isNotEmpty;
 
@@ -406,7 +415,7 @@ class BatchOperationProgressDialog extends StatelessWidget {
             
             // Statistics
             Text(
-              '进度: $completed / $total',
+              l10n.shortVideoBatchProgressCompletedTotal(completed, total),
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
@@ -418,7 +427,7 @@ class BatchOperationProgressDialog extends StatelessWidget {
                   size: 20,
                 ),
                 const SizedBox(width: 8),
-                Text('成功: $successful'),
+                Text(l10n.shortVideoBatchProgressSucceededLabel(successful)),
                 const SizedBox(width: 24),
                 Icon(
                   Icons.error,
@@ -426,7 +435,7 @@ class BatchOperationProgressDialog extends StatelessWidget {
                   size: 20,
                 ),
                 const SizedBox(width: 8),
-                Text('失败: $failed'),
+                Text(l10n.shortVideoBatchProgressFailedLabel(failed)),
               ],
             ),
             
@@ -436,7 +445,7 @@ class BatchOperationProgressDialog extends StatelessWidget {
               const Divider(),
               const SizedBox(height: 8),
               Text(
-                '失败项:',
+                l10n.shortVideoBatchProgressFailedHeading,
                 style: Theme.of(context).textTheme.titleSmall,
               ),
               const SizedBox(height: 8),
@@ -453,7 +462,7 @@ class BatchOperationProgressDialog extends StatelessWidget {
                         color: Theme.of(context).colorScheme.error,
                         size: 20,
                       ),
-                      title: Text('分镜 #${item.shotId}'),
+                      title: Text(l10n.shortVideoBatchProgressStoryboardLine(item.shotId)),
                       subtitle: Text(
                         item.errorMessage,
                         style: Theme.of(context).textTheme.bodySmall,
@@ -470,17 +479,17 @@ class BatchOperationProgressDialog extends StatelessWidget {
         if (!isComplete && onCancel != null)
           TextButton(
             onPressed: onCancel,
-            child: const Text('取消'),
+            child: Text(l10n.shortVideoBatchProgressCancel),
           ),
         if (isComplete && hasFailures && onRetryFailed != null)
           FilledButton.tonal(
             onPressed: onRetryFailed,
-            child: const Text('重试失败项'),
+            child: Text(l10n.shortVideoBatchProgressRetryFailed),
           ),
         if (isComplete)
           FilledButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('关闭'),
+            child: Text(l10n.shortVideoBatchProgressClose),
           ),
       ],
     );

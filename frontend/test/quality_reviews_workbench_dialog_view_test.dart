@@ -247,7 +247,7 @@ void main() {
 
     expect(find.text('质量工作台'), findsOneWidget);
     expect(
-      find.text('Scope seed：projectUuid=project-uuid-7 -> projectId=7'),
+      find.text('范围种子：projectUuid=project-uuid-7 -> projectId=7'),
       findsOneWidget,
     );
     expect(find.text('筛选与读取'), findsOneWidget);

@@ -9,7 +9,10 @@ use serde::{Deserialize, Serialize};
 use utoipa::{IntoParams, ToSchema};
 
 use crate::{
-    auth::require_user_uuid, error::ApiError, prompting::quality::QualityReview, state::AppState,
+    auth::require_user_uuid,
+    error::{bad_request_i18n, ApiError},
+    prompting::quality::QualityReview,
+    state::AppState,
 };
 
 use super::{
@@ -110,8 +113,9 @@ pub async fn score_preview(
         return Ok(Json(summary));
     }
 
-    Err(ApiError::BadRequest(
-        "必须提供 quality_review_id 或 manual_scores".to_string(),
+    Err(bad_request_i18n(
+        "Either quality_review_id or manual_scores must be provided",
+        "必须提供 quality_review_id 或 manual_scores",
     ))
 }
 

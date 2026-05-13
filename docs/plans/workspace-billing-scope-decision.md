@@ -48,7 +48,7 @@
 
 ### 2.3 jobs 目前仍保留 owner 个人视角残留
 
-尽管带项目上下文的 jobs 已能按 workspace 成员可见，但：
+尽管带项目上下文的 jobs（`project_uuid` 优先，`project_numeric_id` 为 legacy fallback）已能按 workspace 成员可见，但：
 
 - `app_generation_job` 仍不双写 `workspace_id`
 - 无 `project_*` 的 jobs 仍按 `owner_user_id` 个人视图

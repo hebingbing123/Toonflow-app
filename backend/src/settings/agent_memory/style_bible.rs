@@ -2,6 +2,7 @@ use serde_json::{json, Value};
 use sqlx::PgPool;
 use uuid::Uuid;
 
+use crate::error::helpers::bad_request_i18n;
 use crate::error::ApiError;
 
 use super::replace_named_summary_memory_with_scope;
@@ -326,8 +327,12 @@ pub(crate) async fn ensure_project_style_bible_template(
     {
         return Ok(());
     }
-    let content = serde_json::to_string(&empty_style_bible_value())
-        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
+    let content = serde_json::to_string(&empty_style_bible_value()).map_err(|e| {
+        bad_request_i18n(
+            &format!("Failed to serialize style bible: {}", e),
+            &format!("风格圣经序列化失败：{}", e),
+        )
+    })?;
     let scope_signature = style_bible_scope_signature(project_id);
     replace_named_summary_memory_with_scope(
         pool,

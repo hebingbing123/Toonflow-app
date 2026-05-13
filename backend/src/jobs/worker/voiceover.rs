@@ -4,6 +4,9 @@ use serde_json::{json, Value};
 use sqlx::PgPool;
 use uuid::Uuid;
 
+use crate::jobs::payload_project::{
+    payload_project_uuid, resolve_project_numeric_from_job_payload,
+};
 use crate::jobs::worker::JobRunError;
 use crate::jobs::JobRow;
 use crate::llm::{audio_speech_bytes, LlmConfig};
@@ -35,7 +38,8 @@ pub(crate) async fn run_voiceover_generate(
     row: &JobRow,
 ) -> Result<Value, JobRunError> {
     let payload = &row.payload;
-    let project_numeric_id = payload_json_i32(payload, "project_numeric_id")?;
+    let project_numeric_id =
+        resolve_project_numeric_from_job_payload(pool, row.owner_user_id, payload).await?;
     let script_numeric_id = payload_json_i32(payload, "script_numeric_id")?;
     let storyboard_numeric_id = payload_json_i32(payload, "storyboard_numeric_id")?;
     let storyboard_id = load_storyboard_uuid(
@@ -110,7 +114,7 @@ pub(crate) async fn run_voiceover_generate(
         )
         .await?;
 
-        Ok(json!({
+        let mut result = json!({
             "source": "voiceover.generate",
             "storyboard_numeric_id": storyboard_numeric_id,
             "project_numeric_id": project_numeric_id,
@@ -123,7 +127,11 @@ pub(crate) async fn run_voiceover_generate(
             "speed": speed,
             "model": cfg.model,
             "text": narration_text,
-        }))
+        });
+        if let Some(project_uuid) = payload_project_uuid(payload) {
+            result["project_uuid"] = json!(project_uuid);
+        }
+        Ok(result)
     }
     .await;
 

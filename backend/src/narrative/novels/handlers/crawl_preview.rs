@@ -13,9 +13,9 @@ use scraper::{Html, Selector};
 use serde_json::{Map, Value};
 use uuid::Uuid;
 
-use crate::assets::ensure_owned_project_pk;
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, validate_enum, validate_non_empty_string, ApiError};
+use crate::projects::routes::common::require_project_write_scope;
 use crate::state::AppState;
 
 use super::super::dto::{
@@ -51,33 +51,41 @@ pub(crate) struct CrawlAuditSummary {
 fn assert_fetchable_url(url: &url::Url) -> Result<(), ApiError> {
     match url.scheme() {
         "http" | "https" => {}
-        _ => return Err(ApiError::BadRequest("url must use http or https".into())),
+        _ => {
+            return Err(bad_request_i18n(
+                "url must use http or https",
+                "url 必须使用 http 或 https",
+            ))
+        }
     }
     let host = url
         .host_str()
-        .ok_or_else(|| ApiError::BadRequest("url missing host".into()))?;
+        .ok_or_else(|| bad_request_i18n("url missing host", "url 缺少 host"))?;
     if host.eq_ignore_ascii_case("localhost")
         || host == "127.0.0.1"
         || host == "::1"
         || host.ends_with(".localhost")
     {
-        return Err(ApiError::BadRequest(
-            "localhost and loopback URLs are not allowed".into(),
+        return Err(bad_request_i18n(
+            "localhost and loopback URLs are not allowed",
+            "不允许使用 localhost 或 loopback URL",
         ));
     }
     if let Ok(ip) = host.parse::<IpAddr>() {
         match ip {
             IpAddr::V4(v4) => {
                 if v4.is_private() || v4.is_loopback() || v4.is_link_local() {
-                    return Err(ApiError::BadRequest(
-                        "private or loopback IP URLs are not allowed".into(),
+                    return Err(bad_request_i18n(
+                        "private or loopback IP URLs are not allowed",
+                        "不允许使用私有网段或 loopback IP URL",
                     ));
                 }
             }
             IpAddr::V6(v6) => {
                 if v6.is_loopback() || v6.is_unique_local() || v6.is_unicast_link_local() {
-                    return Err(ApiError::BadRequest(
-                        "private or loopback IP URLs are not allowed".into(),
+                    return Err(bad_request_i18n(
+                        "private or loopback IP URLs are not allowed",
+                        "不允许使用私有网段或 loopback IP URL",
                     ));
                 }
             }
@@ -261,29 +269,32 @@ async fn fetch_crawler_content(
         )
         .send()
         .await
-        .map_err(|e| ApiError::BadRequest(format!("fetch failed: {e}")))?;
+        .map_err(|e| bad_request_i18n(&format!("fetch failed: {e}"), &format!("抓取失败：{e}")))?;
 
     let status = resp.status();
     if !status.is_success() {
-        return Err(ApiError::BadRequest(format!(
-            "upstream returned HTTP {}",
-            status.as_u16()
-        )));
+        return Err(bad_request_i18n(
+            &format!("upstream returned HTTP {}", status.as_u16()),
+            &format!("上游返回 HTTP {}", status.as_u16()),
+        ));
     }
 
     let len = resp.content_length().unwrap_or(0);
     if len > MAX_HTML_BYTES {
-        return Err(ApiError::BadRequest(
-            "response body too large (Content-Length)".into(),
+        return Err(bad_request_i18n(
+            "response body too large (Content-Length)",
+            "响应体过大（Content-Length）",
         ));
     }
 
-    let bytes = resp
-        .bytes()
-        .await
-        .map_err(|e| ApiError::BadRequest(format!("failed to read response body: {e}")))?;
+    let bytes = resp.bytes().await.map_err(|e| {
+        bad_request_i18n(
+            &format!("failed to read response body: {e}"),
+            &format!("读取响应体失败：{e}"),
+        )
+    })?;
     if bytes.len() as u64 > MAX_HTML_BYTES {
-        return Err(ApiError::BadRequest("response body too large".into()));
+        return Err(bad_request_i18n("response body too large", "响应体过大"));
     }
     let html = String::from_utf8_lossy(&bytes).into_owned();
     let host = parsed.host_str().unwrap_or("novel");
@@ -381,15 +392,12 @@ pub(crate) async fn post_novel_crawl_preview(
     Json(body): Json<NovelCrawlPreviewBody>,
 ) -> Result<JsonResponse<NovelCrawlPreviewResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    let pool = state.require_pool()?;
-    ensure_owned_project_pk(pool, uid, project_id).await?;
+    require_project_write_scope(&state, uid, project_id).await?;
 
     let raw_url = body.url.trim();
-    if raw_url.is_empty() {
-        return Err(ApiError::BadRequest("url must not be empty".into()));
-    }
+    validate_non_empty_string(raw_url, "url")?;
     let parsed =
-        url::Url::parse(raw_url).map_err(|_| ApiError::BadRequest("invalid url".into()))?;
+        url::Url::parse(raw_url).map_err(|_| bad_request_i18n("invalid url", "无效的 url"))?;
     assert_fetchable_url(&parsed)?;
 
     let payload = crawl_preview_adaptive(&state, &parsed).await?;
@@ -583,20 +591,20 @@ pub(crate) async fn insert_imported_novels_for_project(
     crawl_audit: &CrawlAuditSummary,
 ) -> Result<i32, ApiError> {
     let intake_source = normalize_intake_source("crawler_server")?;
-    let intake_source_url = trim_opt(Some(intake_source_url.to_string()))
-        .ok_or_else(|| ApiError::BadRequest("intake_source_url must not be empty".into()))?;
+    let intake_source_url = trim_opt(Some(intake_source_url.to_string())).ok_or_else(|| {
+        bad_request_i18n(
+            "intake_source_url must not be empty",
+            "intake_source_url 不能为空",
+        )
+    })?;
     let intake_note = intake_note.and_then(|s| trim_opt(Some(s.to_string())));
 
     let intake_status = intake_status.trim().to_string();
-    // Validate intake_status using the same allowed set as create.rs.
-    match intake_status.as_str() {
-        "draft" | "pending_review" | "admitted" | "rejected" => {}
-        _ => {
-            return Err(ApiError::BadRequest(
-                "intake_status must be one of draft, pending_review, admitted, rejected".into(),
-            ))
-        }
-    }
+    validate_enum(
+        intake_status.as_str(),
+        &["draft", "pending_review", "admitted", "rejected"],
+        "intake_status",
+    )?;
 
     let metadata = {
         let mut m = Map::new();
@@ -697,14 +705,12 @@ pub(crate) async fn post_novel_crawl_import(
 ) -> Result<JsonResponse<NovelCrawlImportResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    ensure_owned_project_pk(pool, uid, project_id).await?;
+    require_project_write_scope(&state, uid, project_id).await?;
 
     let raw_url = body.url.trim();
-    if raw_url.is_empty() {
-        return Err(ApiError::BadRequest("url must not be empty".into()));
-    }
+    validate_non_empty_string(raw_url, "url")?;
     let parsed =
-        url::Url::parse(raw_url).map_err(|_| ApiError::BadRequest("invalid url".into()))?;
+        url::Url::parse(raw_url).map_err(|_| bad_request_i18n("invalid url", "无效的 url"))?;
     assert_fetchable_url(&parsed)?;
 
     let preview = crawl_preview_adaptive(&state, &parsed).await?;
@@ -721,10 +727,10 @@ pub(crate) async fn post_novel_crawl_import(
 
     let (blockers, warnings) = evaluate_novel_import_quality(&chapters, 200, 50, 40);
     if !blockers.is_empty() {
-        return Err(ApiError::BadRequest(format!(
-            "导入质量门未通过：{}",
-            blockers.join("；")
-        )));
+        return Err(bad_request_i18n(
+            &format!("novel import quality gate failed: {}", blockers.join("; ")),
+            &format!("导入质量门未通过：{}", blockers.join("；")),
+        ));
     }
 
     let created = insert_imported_novels_for_project(
@@ -767,6 +773,7 @@ fn classify_import_error(err: &ApiError) -> (String, String) {
         ApiError::ConflictWithDetails { message, .. } => ("conflict".into(), message.clone()),
         ApiError::DatabaseError(msg) => ("database_error".into(), msg.clone()),
         ApiError::QuotaExceeded(msg) => ("quota_exceeded".into(), msg.clone()),
+        ApiError::ConcurrentLimitExceeded(msg) => ("concurrent_limit_exceeded".into(), msg.clone()),
         ApiError::NotImplemented(msg) => ("not_implemented".into(), msg.clone()),
         ApiError::Internal => ("internal".into(), "internal error".into()),
         ApiError::WebhookNotConfigured => (
@@ -778,6 +785,12 @@ fn classify_import_error(err: &ApiError) -> (String, String) {
             "invalid webhook signature".into(),
         ),
         ApiError::LlmNotConfigured => ("llm_not_configured".into(), "llm not configured".into()),
+        // Bilingual variants - use English message for classification
+        ApiError::BadRequestI18n { en, .. } => ("bad_request".into(), en.clone()),
+        ApiError::ConflictI18n { en, .. } => ("conflict".into(), en.clone()),
+        ApiError::ConflictWithDetailsI18n { en, .. } => ("conflict".into(), en.clone()),
+        ApiError::ForbiddenI18n { en, .. } => ("forbidden".into(), en.clone()),
+        ApiError::NotImplementedI18n { en, .. } => ("not_implemented".into(), en.clone()),
     }
 }
 
@@ -807,13 +820,16 @@ pub(crate) async fn post_novel_crawl_import_batch(
 ) -> Result<JsonResponse<NovelCrawlImportBatchResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    ensure_owned_project_pk(pool, uid, project_id).await?;
+    require_project_write_scope(&state, uid, project_id).await?;
 
     if body.urls.is_empty() {
-        return Err(ApiError::BadRequest("urls must not be empty".into()));
+        return Err(bad_request_i18n("urls must not be empty", "urls 不能为空"));
     }
     if body.urls.len() > 50 {
-        return Err(ApiError::BadRequest("urls too many (max 50)".into()));
+        return Err(bad_request_i18n(
+            "urls too many (max 50)",
+            "urls 过多（最多 50 个）",
+        ));
     }
 
     let mut items: Vec<NovelCrawlImportBatchItem> = Vec::new();
@@ -828,7 +844,7 @@ pub(crate) async fn post_novel_crawl_import_batch(
 
         let result: Result<NovelCrawlImportResponse, ApiError> = async {
             let parsed =
-                url::Url::parse(&url).map_err(|_| ApiError::BadRequest("invalid url".into()))?;
+                url::Url::parse(&url).map_err(|_| bad_request_i18n("invalid url", "无效的 url"))?;
             assert_fetchable_url(&parsed)?;
 
             let preview = crawl_preview_adaptive(&state, &parsed).await?;
@@ -842,10 +858,10 @@ pub(crate) async fn post_novel_crawl_import_batch(
 
             let (blockers, warnings) = evaluate_novel_import_quality(&chapters, 200, 50, 40);
             if !blockers.is_empty() {
-                return Err(ApiError::BadRequest(format!(
-                    "导入质量门未通过：{}",
-                    blockers.join("；")
-                )));
+                return Err(bad_request_i18n(
+                    &format!("novel import quality gate failed: {}", blockers.join("; ")),
+                    &format!("导入质量门未通过：{}", blockers.join("；")),
+                ));
             }
 
             let created = insert_imported_novels_for_project(

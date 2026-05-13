@@ -5,15 +5,19 @@ use axum::{
 };
 use base64::Engine;
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
-use crate::error::ApiError;
-use crate::scope::http::require_owned_numeric_script_access;
+use crate::error::{bad_request_i18n, ApiError};
+use crate::scope::http::require_script_read_scope_ref;
 use crate::state::AppState;
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct EditImageUploadImageBody {
-    project_id: i32,
+    #[serde(default)]
+    project_id: Option<i32>,
+    #[serde(default)]
+    project_uuid: Option<Uuid>,
     script_id: i32,
     base64_data: String,
 }
@@ -27,29 +31,44 @@ pub(in crate::production) struct EditImageUploadImageResponse {
 fn normalize_upload_image_data_uri(input: &str) -> Result<String, ApiError> {
     let trimmed = input.trim();
     if trimmed.is_empty() {
-        return Err(ApiError::BadRequest("base64Data must not be empty".into()));
+        return Err(bad_request_i18n(
+            "base64Data must not be empty",
+            "base64Data 不能为空",
+        ));
     }
-    let (prefix, payload) = trimmed
-        .split_once(',')
-        .ok_or_else(|| ApiError::BadRequest("base64Data must be a valid data URI".into()))?;
+    let (prefix, payload) = trimmed.split_once(',').ok_or_else(|| {
+        bad_request_i18n(
+            "base64Data must be a valid data URI",
+            "base64Data 必须是有效的 data URI",
+        )
+    })?;
     let lower = prefix.to_ascii_lowercase();
     if !(lower.starts_with("data:image/jpeg;")
         || lower.starts_with("data:image/jpg;")
         || lower.starts_with("data:image/png;"))
         || !lower.contains(";base64")
     {
-        return Err(ApiError::BadRequest("不支持的文件类型".into()));
+        return Err(bad_request_i18n(
+            "unsupported file type",
+            "不支持的文件类型",
+        ));
     }
 
     let payload = payload.trim();
     if payload.is_empty() {
-        return Err(ApiError::BadRequest(
-            "base64Data payload must not be empty".into(),
+        return Err(bad_request_i18n(
+            "base64Data payload must not be empty",
+            "base64Data 的 payload 不能为空",
         ));
     }
     base64::engine::general_purpose::STANDARD
         .decode(payload)
-        .map_err(|_| ApiError::BadRequest("base64Data must be valid base64".into()))?;
+        .map_err(|_| {
+            bad_request_i18n(
+                "base64Data must be valid base64",
+                "base64Data 必须是有效的 base64",
+            )
+        })?;
 
     let mime = prefix
         .trim()
@@ -84,7 +103,14 @@ pub(in crate::production) async fn post_edit_image_upload_image(
     Json(body): Json<EditImageUploadImageBody>,
 ) -> Result<JsonResponse<EditImageUploadImageResponse>, ApiError> {
     let normalized = normalize_upload_image_data_uri(&body.base64_data)?;
-    require_owned_numeric_script_access(&state, &headers, body.project_id, body.script_id).await?;
+    let (_uid, _pool, _scope_row) = require_script_read_scope_ref(
+        &state,
+        &headers,
+        body.project_id,
+        body.project_uuid,
+        body.script_id,
+    )
+    .await?;
 
     Ok(JsonResponse(EditImageUploadImageResponse {
         url: normalized,
@@ -107,7 +133,7 @@ mod tests {
         let err = normalize_upload_image_data_uri("data:text/plain;base64,AA==")
             .expect_err("text mime should fail");
         match err {
-            ApiError::BadRequest(msg) => assert!(msg.contains("不支持")),
+            ApiError::BadRequest(msg) => assert_eq!(msg, "unsupported file type"),
             other => panic!("unexpected error: {other:?}"),
         }
     }

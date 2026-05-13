@@ -44,7 +44,10 @@ impl std::str::FromStr for SampleTier {
             "smoke" => Ok(SampleTier::Smoke),
             "core" => Ok(SampleTier::Core),
             "full" => Ok(SampleTier::Full),
-            _ => Err(format!("Invalid sample tier: {}", s)),
+            _ => Err(format!(
+                "Invalid sample tier: {} | 无效的 sample tier：{}",
+                s, s
+            )),
         }
     }
 }
@@ -114,7 +117,7 @@ impl std::str::FromStr for Stage {
             "storyboard_table" => Ok(Stage::StoryboardTable),
             "storyboard_panel" => Ok(Stage::StoryboardPanel),
             "video_prompt" => Ok(Stage::VideoPrompt),
-            _ => Err(format!("Invalid stage: {}", s)),
+            _ => Err(format!("Invalid stage: {} | 无效的 stage：{}", s, s)),
         }
     }
 }

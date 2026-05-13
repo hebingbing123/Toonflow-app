@@ -56,6 +56,7 @@
 
 - 保留 user-scope 列直至窗口结束；一键回滚 = 读路径回到 user + 关闭 v2 响应。
 - **数据库**：rollback migration 仅在未删列前提下执行 `DROP` 新增对象。
+- **详细 Runbook**：[`workspace-billing-rollback-runbook.md`](./workspace-billing-rollback-runbook.md) — 包含安全检查清单、SQL 脚本、验证步骤与读路径回滚（operational rollback）流程。
 
 ### 4.3 脚本位置约定
 

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../panel_support.dart';
 import '../../prompt_preset.dart';
 import '../../contexts/production/action_panels.dart';
@@ -96,6 +97,7 @@ class _AgentWorkspaceProductionCardState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final resultSummaryLines = _buildResultSummaryLines();
     return Card(
       child: Padding(
@@ -103,9 +105,15 @@ class _AgentWorkspaceProductionCardState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text('制作工作区', style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              l10n.agentWorkspaceProductionCardTitle,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             const SizedBox(height: 8),
-            Text('引导任务', style: Theme.of(context).textTheme.labelLarge),
+            Text(
+              l10n.agentWorkspaceGuidedTasksTitle,
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
             const SizedBox(height: 6),
             _buildGuidedTasks(),
             const SizedBox(height: 10),

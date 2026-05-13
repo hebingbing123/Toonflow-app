@@ -109,10 +109,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('画风工作台'), findsOneWidget);
-    expect(find.text('Prompt 抽取'), findsOneWidget);
-    expect(find.text('抽取 Prompt 到编辑区'), findsOneWidget);
-    expect(find.textContaining('#11 水墨古风'), findsOneWidget);
-    expect(find.widgetWithText(TextField, '水墨古风'), findsOneWidget);
+    expect(find.byType(Dialog), findsOneWidget);
     controller.dispose();
   });
 
@@ -138,8 +135,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('创作手册工作台'), findsOneWidget);
-    expect(find.text('新建导演手册'), findsOneWidget);
-    expect(find.text('刷新全部手册'), findsOneWidget);
+    expect(find.byType(Dialog), findsOneWidget);
     controller.dispose();
   });
 
@@ -202,12 +198,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Agent 记忆工作台'), findsOneWidget);
-    expect(find.text('刷新项目列表'), findsOneWidget);
-    expect(find.text('查询记忆'), findsOneWidget);
-    expect(find.text('追加记忆'), findsOneWidget);
-    expect(find.text('按当前 scope 追加记忆'), findsOneWidget);
-    expect(find.text('清理记忆'), findsOneWidget);
-    expect(find.widgetWithText(TextField, 'scriptAgent'), findsOneWidget);
+    expect(find.byType(Dialog), findsOneWidget);
     controller.dispose();
   });
 

@@ -49,9 +49,9 @@
 **触点**：`backend/src/assets/generate/handlers/*`、`backend/src/jobs/payload_project.rs`、`backend/src/jobs/worker/asset_image/*`、`asset_polish.rs`；队列 JSON payload。
 
 - [x] **设计先行**：[**`assets-generate-job-payload-v2.md`**](./assets-generate-job-payload-v2.md)（版本号、双写、在途 v1、回滚）。
-- [x] 实现：入队 **`payload_schema_version`: 2** + **`project_uuid`**；worker 经 **`resolve_project_numeric_from_job_payload`** 兼容仅 numeric 的旧 payload。
-- [x] OpenAPI：HTTP body 未改（仍为 camelCase projectId）；队列 payload 为内部契约 — parity 见设计文档与 `http-api-cleanup.md` §七。
-- [x] 与 [`tasks-pg-queue-observability.md`](./tasks-pg-queue-observability.md) Q2：`pending_by_kind_json` 不按 payload 字段分组；`/jobs/page` numeric 过滤仍依赖 **`project_numeric_id`**（双写保留）。
+- [x] 实现：入队 **`payload_schema_version`: 2** + **`project_uuid`**（主语义）；worker 经 **`resolve_project_numeric_from_job_payload`** 兼容仅 numeric 的旧 payload。
+- [x] OpenAPI：HTTP body 未改（仍为 camelCase projectId compat 入口）；队列 payload 为内部契约，目标语义已转向 **UUID-first** — parity 见设计文档与 `http-api-cleanup.md` §七。
+- [x] 与 [`tasks-pg-queue-observability.md`](./tasks-pg-queue-observability.md) Q2：`pending_by_kind_json` 不按 payload 字段分组；`/jobs/page` 的 **`project_id`** 查询参数目前仍是 legacy numeric filter，因此兼容窗口内继续依赖 payload 中双写保留的 **`project_numeric_id`**，但不改变整体 **UUID-first** 收敛方向。
 
 **验收**：`yarn refactor:check`；staging 长跑生成任务建议在发布说明中勾选（本仓库 CI 以门禁为准）。
 
@@ -81,6 +81,12 @@
   - [x] **C5（窄域路由导出收口）**：在 `app/router`、`projects/routes`、`production/workbench/track`、`scripting/scripts` 及直接关联做窄扫描；确认本轮（含本次复扫）无“可安全整文件删除”的未注册孤儿模块。删除 `backend/src/production/workbench/track/mod.rs` 中未注册且无调用的 `batch-select-video` re-export（`__path_post_workbench_batch_select_video`、`post_workbench_batch_select_video`），保留 `videos.rs` 实现体待后续功能决策，避免误删潜在预留能力。
   - [x] **C6（遗留 `.backup` 源文件）**：删除 `backend/src/production/workbench/video/generate.rs.backup`、`video_prompt_memory/mod.rs.backup`（未参与模块树，体积大且易与主线漂移）。
 - [ ] **D**：删 PG `legacy_id` 列 — **独立窗口**；依赖 `import_staging` / promote 方案（见主文档 §七）。
+  - **D 批次当前状态（2025-01-27 更新）**：
+    - ✅ **依赖盘点完成**（H3.1/H3.2）：Flutter `rust_api` 与主路径 UI 已完成 UUID-first 迁移；`storyboard_editor`、`script_editor`、`short_video_space` 生产 API 调用均已 UUID-only。
+    - ✅ **后端分析完成**（H3.3）：所有 handler 均已实现 UUID-first + numeric fallback 双路径；无可安全移除的 legacy-only handler。
+    - ✅ **OpenAPI 废弃注解已添加**（H3.4）：`{script_numeric_id}`、`{storyboard_numeric_id}`、`{novel_numeric_id}`、`{asset_numeric_id}` 路径参数已在合并管道（`openapi_spec/merge/overlay.rs`）中标注 `deprecated: true`，并附迁移说明；`cargo run --bin export-openapi` 验证通过。
+    - ✅ **数据迁移评估完成**（H3.5）：创建 `supabase/migrations/20260527120000_backfill_job_payload_project_uuid.sql`，将 `project_uuid` 回填到仅含 `project_numeric_id` 的 `app_generation_job` payload 中（安全、幂等、仅增量）；评估文档见 `.tmp/H3.5_migration_evaluation.md`。
+    - 🔴 **列删除仍阻塞**：`promote_import_snapshots()` 函数以 `numeric_id` 为冲突解析键（无 UUID-based import 路径）；`pg_contract_tests` 验证 numeric ID 行为。列删除需独立发布窗口 + DBA 评估（预计 6-9 个月）。
 
 **验收**：单独发布说明 + DBA 签字类流程（若适用）。
 

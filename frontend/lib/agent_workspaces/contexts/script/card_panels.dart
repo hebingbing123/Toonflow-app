@@ -3,6 +3,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import 'support.dart';
 
 /// Renders the "执行阶段" stage board for the script workspace.
@@ -24,12 +25,16 @@ class ScriptWorkspaceStagesPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     if (stages.isEmpty) return const SizedBox.shrink();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         const SizedBox(height: 8),
-        Text('执行阶段', style: Theme.of(context).textTheme.labelLarge),
+        Text(
+          l10n.agentWorkspaceScriptStagesTitle,
+          style: Theme.of(context).textTheme.labelLarge,
+        ),
         const SizedBox(height: 6),
         ...stages.map(
           (ScriptWorkspaceStage stage) => Card(
@@ -61,23 +66,22 @@ class ScriptWorkspaceStagesPanel extends StatelessWidget {
                     runSpacing: 8,
                     children: <Widget>[
                       OutlinedButton(
-                        onPressed:
-                            busy ? null : () => onApplyStage(stage),
-                        child: const Text('应用阶段'),
+                        onPressed: busy ? null : () => onApplyStage(stage),
+                        child: Text(l10n.agentWorkspaceScriptApplyStage),
                       ),
                       if (stage.domainTool != null)
                         FilledButton.tonal(
                           onPressed: busy
                               ? null
                               : () => onRunStageDomainTool(stage),
-                          child: const Text('读取上下文'),
+                          child: Text(l10n.agentWorkspaceScriptReadContext),
                         ),
                       if (stage.subAgentTool != null)
                         FilledButton(
                           onPressed: busy
                               ? null
                               : () => onRunStageSubAgent(stage),
-                          child: const Text('推进阶段'),
+                          child: Text(l10n.agentWorkspaceScriptAdvanceStage),
                         ),
                     ],
                   ),
@@ -110,12 +114,16 @@ class ScriptWorkspaceDiagnosisPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     if (recipes.isEmpty) return const SizedBox.shrink();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         const SizedBox(height: 8),
-        Text('下一步建议', style: Theme.of(context).textTheme.labelLarge),
+        Text(
+          l10n.agentWorkspaceScriptDiagnosisTitle,
+          style: Theme.of(context).textTheme.labelLarge,
+        ),
         const SizedBox(height: 6),
         ...recipes.map(
           (ScriptWorkspaceRecipe recipe) => Card(
@@ -141,27 +149,38 @@ class ScriptWorkspaceDiagnosisPanel extends StatelessWidget {
                     runSpacing: 8,
                     children: <Widget>[
                       if (recipe.domainTool != null)
-                        Chip(label: Text('tool=${recipe.domainTool}')),
+                        Chip(
+                          label: Text(
+                            l10n.agentWorkspaceScriptToolChip(
+                              recipe.domainTool!,
+                            ),
+                          ),
+                        ),
                       if (recipe.subAgentTool != null)
-                        Chip(label: Text('agent=${recipe.subAgentTool}')),
+                        Chip(
+                          label: Text(
+                            l10n.agentWorkspaceScriptAgentChip(
+                              recipe.subAgentTool!,
+                            ),
+                          ),
+                        ),
                       OutlinedButton(
-                        onPressed:
-                            busy ? null : () => onApplyRecipe(recipe),
-                        child: const Text('应用建议'),
+                        onPressed: busy ? null : () => onApplyRecipe(recipe),
+                        child: Text(l10n.agentWorkspaceScriptApplySuggestion),
                       ),
                       if (recipe.domainTool != null)
                         FilledButton.tonal(
                           onPressed: busy
                               ? null
                               : () => onRunRecipeDomainTool(recipe),
-                          child: const Text('读取上下文'),
+                          child: Text(l10n.agentWorkspaceScriptReadContext),
                         ),
                       if (recipe.subAgentTool != null)
                         FilledButton(
                           onPressed: busy
                               ? null
                               : () => onRunRecipeSubAgent(recipe),
-                          child: const Text('运行子代理'),
+                          child: Text(l10n.agentWorkspaceScriptRunSubAgent),
                         ),
                     ],
                   ),

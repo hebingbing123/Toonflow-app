@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
+import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/short_video_space/section.dart';
+
+final _zh = AppLocalizationsZh();
 
 /// **Validates: Requirement 13**
 void main() {
@@ -35,11 +38,11 @@ void main() {
     });
 
     test('provides correct display names', () {
-      expect(ExportTaskStatus.queued.displayName, '排队中');
-      expect(ExportTaskStatus.processing.displayName, '处理中');
-      expect(ExportTaskStatus.completed.displayName, '已完成');
-      expect(ExportTaskStatus.failed.displayName, '失败');
-      expect(ExportTaskStatus.cancelled.displayName, '已取消');
+      expect(ExportTaskStatus.queued.displayName(_zh), '排队中');
+      expect(ExportTaskStatus.processing.displayName(_zh), '处理中');
+      expect(ExportTaskStatus.completed.displayName(_zh), '已完成');
+      expect(ExportTaskStatus.failed.displayName(_zh), '失败');
+      expect(ExportTaskStatus.cancelled.displayName(_zh), '已取消');
     });
 
     test('identifies terminal statuses correctly', () {
@@ -84,11 +87,11 @@ void main() {
     });
 
     test('provides correct display names', () {
-      expect(ExportTaskStage.initializing.displayName, '初始化');
-      expect(ExportTaskStage.loadingAssets.displayName, '加载素材');
-      expect(ExportTaskStage.encoding.displayName, '编码视频');
-      expect(ExportTaskStage.uploading.displayName, '上传文件');
-      expect(ExportTaskStage.finalizing.displayName, '完成处理');
+      expect(ExportTaskStage.initializing.displayName(_zh), '初始化');
+      expect(ExportTaskStage.loadingAssets.displayName(_zh), '加载素材');
+      expect(ExportTaskStage.encoding.displayName(_zh), '编码视频');
+      expect(ExportTaskStage.uploading.displayName(_zh), '上传文件');
+      expect(ExportTaskStage.finalizing.displayName(_zh), '完成处理');
     });
   });
 

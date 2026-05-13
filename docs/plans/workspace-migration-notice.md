@@ -5,6 +5,9 @@
 路线图：[`roadmap-workspace.md`](./roadmap-workspace.md)。  
 差异背景：[`electron-node-parity.md`](./electron-node-parity.md) §2.2。
 
+**注意**：本文档关注 **workspace 协作与可见性** 变化（W11.3）。关于 **计费口径迁移**（user-scope → workspace-scope billing，W8.2–W8.4），请参阅独立文档：[`workspace-billing-migration-notice.md`](./workspace-billing-migration-notice.md)。
+**补充**：除非另有明确公告，本文中的 workspace 上线说明**不**意味着 `plan_tier`、`daily_job_quota`、`jobs_today` 已切到 workspace-scope；当前仍以 [`workspace-billing-scope-decision.md`](./workspace-billing-scope-decision.md) 的 **user-scope** 结论为准。
+
 ## 1) 本次迁移影响什么
 
 Workspace 上线后，以下语义以 **workspace 成员关系** 为主，不再只看 `owner_user_id`：
@@ -12,8 +15,8 @@ Workspace 上线后，以下语义以 **workspace 成员关系** 为主，不再
 - 项目列表与项目详情可见性
 - 大多数 `project_id` 路径下的 CRUD / workbench / publish / production 能力
 - `current_workspace` 切换与自动回退 personal
-- 带 `project_uuid` / `project_numeric_id` 的 jobs 可见性
-- Harness / WS attach 的 workspace 上下文
+- 带 `project_uuid`（首选）/ `project_numeric_id`（legacy fallback）的 jobs 可见性
+- Harness / WS attach 的 workspace 上下文（`projectUuid` / `scriptUuid` 优先，legacy numeric 回退）
 
 仍然保留用户级口径的能力：
 

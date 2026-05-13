@@ -9,7 +9,7 @@ use axum::{
 use super::super::super::common::validate_positive_id;
 use super::super::types::{DeleteTrackBody, DeleteTrackResponse};
 use crate::error::ApiError;
-use crate::scope::http::require_owned_numeric_script_scope_row;
+use crate::scope::http::require_script_write_scope_ref;
 use crate::state::AppState;
 
 #[utoipa::path(
@@ -36,9 +36,15 @@ pub(in crate::production) async fn post_workbench_delete_track(
     Json(body): Json<DeleteTrackBody>,
 ) -> Result<JsonResponse<DeleteTrackResponse>, ApiError> {
     validate_positive_id("trackId", body.track_id)?;
-    let (pool, scope_row) =
-        require_owned_numeric_script_scope_row(&state, &headers, body.project_id, body.script_id)
-            .await?;
+    let (pool, scope_row) = require_script_write_scope_ref(
+        &state,
+        &headers,
+        body.project_id,
+        body.project_uuid,
+        body.script_id,
+    )
+    .await
+    .map(|(_uid, pool, scope_row)| (pool, scope_row))?;
 
     let mut tx = pool
         .begin()

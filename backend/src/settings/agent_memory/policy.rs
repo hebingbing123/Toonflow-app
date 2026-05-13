@@ -3,6 +3,7 @@ use serde_json::{json, Value};
 use sqlx::PgPool;
 use uuid::Uuid;
 
+use crate::error::helpers::bad_request_i18n;
 use crate::error::ApiError;
 
 use super::replace_named_summary_memory_with_scope;
@@ -220,7 +221,12 @@ pub(crate) async fn save_project_automation_memory_policy(
     agent_type: &str,
     policy: &ProjectAutomationMemoryPolicy,
 ) -> Result<(), ApiError> {
-    let content = serde_json::to_string(policy).map_err(|e| ApiError::BadRequest(e.to_string()))?;
+    let content = serde_json::to_string(policy).map_err(|e| {
+        bad_request_i18n(
+            &format!("Failed to serialize memory policy: {}", e),
+            &format!("内存策略序列化失败：{}", e),
+        )
+    })?;
     replace_named_summary_memory_with_scope(
         pool,
         user_id,

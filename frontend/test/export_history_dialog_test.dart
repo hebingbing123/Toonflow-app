@@ -1,15 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/l10n/app_localizations.dart';
+import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/short_video_space/section.dart';
 
 /// **Validates: Requirement 14**
+final _zh = AppLocalizationsZh();
+
+Widget buildTestApp(Widget child) {
+  return MaterialApp(
+    localizationsDelegates: const [
+      AppLocalizations.delegate,
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
+    supportedLocales: AppLocalizations.supportedLocales,
+    locale: const Locale('zh'),
+    home: Scaffold(body: child),
+  );
+}
+
 void main() {
   group('ExportHistoryTimeFilter', () {
     test('has correct display names', () {
-      expect(ExportHistoryTimeFilter.all.displayName, '全部时间');
-      expect(ExportHistoryTimeFilter.today.displayName, '今天');
-      expect(ExportHistoryTimeFilter.week.displayName, '最近一周');
-      expect(ExportHistoryTimeFilter.month.displayName, '最近一月');
+      expect(ExportHistoryTimeFilter.all.displayName(_zh), '全部时间');
+      expect(ExportHistoryTimeFilter.today.displayName(_zh), '今天');
+      expect(ExportHistoryTimeFilter.week.displayName(_zh), '最近一周');
+      expect(ExportHistoryTimeFilter.month.displayName(_zh), '最近一月');
     });
 
     test('calculates correct start dates', () {
@@ -33,10 +52,10 @@ void main() {
 
   group('ExportHistoryStatusFilter', () {
     test('has correct display names', () {
-      expect(ExportHistoryStatusFilter.all.displayName, '全部状态');
-      expect(ExportHistoryStatusFilter.completed.displayName, '已完成');
-      expect(ExportHistoryStatusFilter.failed.displayName, '失败');
-      expect(ExportHistoryStatusFilter.cancelled.displayName, '已取消');
+      expect(ExportHistoryStatusFilter.all.displayName(_zh), '全部状态');
+      expect(ExportHistoryStatusFilter.completed.displayName(_zh), '已完成');
+      expect(ExportHistoryStatusFilter.failed.displayName(_zh), '失败');
+      expect(ExportHistoryStatusFilter.cancelled.displayName(_zh), '已取消');
     });
 
     test('matches status correctly', () {
@@ -160,7 +179,7 @@ void main() {
         createdAt: DateTime.now(),
         fileSize: 512 * 1024, // 512 KB
       );
-      expect(itemKB.formattedFileSize, '512 KB');
+      expect(itemKB.formattedFileSize(_zh), '512 KB');
 
       // MB range
       final itemMB = ExportHistoryItem(
@@ -173,7 +192,7 @@ void main() {
         createdAt: DateTime.now(),
         fileSize: 50 * 1024 * 1024, // 50 MB
       );
-      expect(itemMB.formattedFileSize, '50.0 MB');
+      expect(itemMB.formattedFileSize(_zh), '50.0 MB');
 
       // GB range
       final itemGB = ExportHistoryItem(
@@ -186,7 +205,7 @@ void main() {
         createdAt: DateTime.now(),
         fileSize: 2 * 1024 * 1024 * 1024, // 2 GB
       );
-      expect(itemGB.formattedFileSize, '2.00 GB');
+      expect(itemGB.formattedFileSize(_zh), '2.00 GB');
 
       // Null file size
       final itemNull = ExportHistoryItem(
@@ -199,7 +218,7 @@ void main() {
         createdAt: DateTime.now(),
         fileSize: null,
       );
-      expect(itemNull.formattedFileSize, '未知');
+      expect(itemNull.formattedFileSize(_zh), '未知');
     });
 
     test('formats duration correctly', () {
@@ -216,7 +235,7 @@ void main() {
         createdAt: now.subtract(const Duration(seconds: 45)),
         completedAt: now,
       );
-      expect(itemSeconds.formattedDuration, '45 秒');
+      expect(itemSeconds.formattedDuration(_zh), '45 秒');
 
       // Minutes
       final itemMinutes = ExportHistoryItem(
@@ -229,7 +248,7 @@ void main() {
         createdAt: now.subtract(const Duration(minutes: 5)),
         completedAt: now,
       );
-      expect(itemMinutes.formattedDuration, '5 分钟');
+      expect(itemMinutes.formattedDuration(_zh), '5 分钟');
 
       // Hours
       final itemHours = ExportHistoryItem(
@@ -242,7 +261,7 @@ void main() {
         createdAt: now.subtract(const Duration(hours: 2, minutes: 30)),
         completedAt: now,
       );
-      expect(itemHours.formattedDuration, '2 小时 30 分钟');
+      expect(itemHours.formattedDuration(_zh), '2 小时 30 分钟');
 
       // No completion time
       final itemIncomplete = ExportHistoryItem(
@@ -255,7 +274,7 @@ void main() {
         createdAt: now,
         completedAt: null,
       );
-      expect(itemIncomplete.formattedDuration, '-');
+      expect(itemIncomplete.formattedDuration(_zh), '-');
     });
   });
 
@@ -265,12 +284,10 @@ void main() {
 
     testWidgets('renders with filters and empty state', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: ExportHistoryDialog(
-              projectId: 'project-123',
-              accessToken: 'test-token',
-            ),
+        buildTestApp(
+          const ExportHistoryDialog(
+            projectId: 'project-123',
+            accessToken: 'test-token',
           ),
         ),
       );
@@ -290,12 +307,10 @@ void main() {
 
     testWidgets('displays history items correctly', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: ExportHistoryDialog(
-              projectId: 'project-123',
-              accessToken: 'test-token',
-            ),
+        buildTestApp(
+          const ExportHistoryDialog(
+            projectId: 'project-123',
+            accessToken: 'test-token',
           ),
         ),
       );
@@ -314,12 +329,10 @@ void main() {
 
     testWidgets('filters by status', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: ExportHistoryDialog(
-              projectId: 'project-123',
-              accessToken: 'test-token',
-            ),
+        buildTestApp(
+          const ExportHistoryDialog(
+            projectId: 'project-123',
+            accessToken: 'test-token',
           ),
         ),
       );
@@ -341,12 +354,10 @@ void main() {
 
     testWidgets('filters by time', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: ExportHistoryDialog(
-              projectId: 'project-123',
-              accessToken: 'test-token',
-            ),
+        buildTestApp(
+          const ExportHistoryDialog(
+            projectId: 'project-123',
+            accessToken: 'test-token',
           ),
         ),
       );
@@ -366,12 +377,10 @@ void main() {
     testWidgets('refreshes history when refresh button is tapped',
         (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: ExportHistoryDialog(
-              projectId: 'project-123',
-              accessToken: 'test-token',
-            ),
+        buildTestApp(
+          const ExportHistoryDialog(
+            projectId: 'project-123',
+            accessToken: 'test-token',
           ),
         ),
       );
@@ -401,12 +410,10 @@ void main() {
 
     testWidgets('shows download button for completed exports', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: ExportHistoryDialog(
-              projectId: 'project-123',
-              accessToken: 'test-token',
-            ),
+        buildTestApp(
+          const ExportHistoryDialog(
+            projectId: 'project-123',
+            accessToken: 'test-token',
           ),
         ),
       );
@@ -423,12 +430,10 @@ void main() {
 
     testWidgets('handles download action', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: ExportHistoryDialog(
-              projectId: 'project-123',
-              accessToken: 'test-token',
-            ),
+        buildTestApp(
+          const ExportHistoryDialog(
+            projectId: 'project-123',
+            accessToken: 'test-token',
           ),
         ),
       );
@@ -447,12 +452,10 @@ void main() {
 
     testWidgets('displays error message correctly', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: ExportHistoryDialog(
-              projectId: 'project-123',
-              accessToken: 'test-token',
-            ),
+        buildTestApp(
+          const ExportHistoryDialog(
+            projectId: 'project-123',
+            accessToken: 'test-token',
           ),
         ),
       );
@@ -465,12 +468,10 @@ void main() {
 
     testWidgets('shows status icons correctly', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: ExportHistoryDialog(
-              projectId: 'project-123',
-              accessToken: 'test-token',
-            ),
+        buildTestApp(
+          const ExportHistoryDialog(
+            projectId: 'project-123',
+            accessToken: 'test-token',
           ),
         ),
       );
@@ -487,12 +488,10 @@ void main() {
 
     testWidgets('displays export settings information', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: ExportHistoryDialog(
-              projectId: 'project-123',
-              accessToken: 'test-token',
-            ),
+        buildTestApp(
+          const ExportHistoryDialog(
+            projectId: 'project-123',
+            accessToken: 'test-token',
           ),
         ),
       );
@@ -510,12 +509,10 @@ void main() {
 
     testWidgets('shows file size for completed exports', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: ExportHistoryDialog(
-              projectId: 'project-123',
-              accessToken: 'test-token',
-            ),
+        buildTestApp(
+          const ExportHistoryDialog(
+            projectId: 'project-123',
+            accessToken: 'test-token',
           ),
         ),
       );
@@ -532,12 +529,10 @@ void main() {
 
     testWidgets('shows duration for completed exports', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: ExportHistoryDialog(
-              projectId: 'project-123',
-              accessToken: 'test-token',
-            ),
+        buildTestApp(
+          const ExportHistoryDialog(
+            projectId: 'project-123',
+            accessToken: 'test-token',
           ),
         ),
       );
@@ -554,24 +549,22 @@ void main() {
 
     testWidgets('closes dialog when close button is tapped', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Builder(
-              builder: (context) {
-                return FilledButton(
-                  onPressed: () async {
-                    await showDialog<void>(
-                      context: context,
-                      builder: (_) => const ExportHistoryDialog(
-                        projectId: 'project-123',
-                        accessToken: 'test-token',
-                      ),
-                    );
-                  },
-                  child: const Text('Open'),
-                );
-              },
-            ),
+        buildTestApp(
+          Builder(
+            builder: (context) {
+              return FilledButton(
+                onPressed: () async {
+                  await showDialog<void>(
+                    context: context,
+                    builder: (_) => const ExportHistoryDialog(
+                      projectId: 'project-123',
+                      accessToken: 'test-token',
+                    ),
+                  );
+                },
+                child: const Text('Open'),
+              );
+            },
           ),
         ),
       );
@@ -589,12 +582,10 @@ void main() {
 
     testWidgets('formats relative time correctly', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: ExportHistoryDialog(
-              projectId: 'project-123',
-              accessToken: 'test-token',
-            ),
+        buildTestApp(
+          const ExportHistoryDialog(
+            projectId: 'project-123',
+            accessToken: 'test-token',
           ),
         ),
       );
@@ -614,12 +605,10 @@ void main() {
 
     testWidgets('prevents multiple simultaneous downloads', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: ExportHistoryDialog(
-              projectId: 'project-123',
-              accessToken: 'test-token',
-            ),
+        buildTestApp(
+          const ExportHistoryDialog(
+            projectId: 'project-123',
+            accessToken: 'test-token',
           ),
         ),
       );

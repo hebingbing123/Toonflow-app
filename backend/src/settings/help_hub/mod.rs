@@ -10,6 +10,7 @@ use utoipa::ToSchema;
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
+use crate::error::helpers::forbidden_i18n;
 use crate::error::ApiError;
 use crate::state::AppState;
 use crate::workspaces::ensure_personal_workspace;
@@ -329,8 +330,9 @@ pub(crate) async fn post_workspace_help_hub_links(
     let pool = state.require_pool()?;
     let (workspace_id, can_manage) = resolve_current_workspace(pool, uid).await?;
     if !can_manage {
-        return Err(ApiError::Forbidden(
-            "requires enterprise workspace owner/admin".into(),
+        return Err(forbidden_i18n(
+            "requires enterprise workspace owner/admin",
+            "需要企业工作区所有者/管理员权限",
         ));
     }
     replace_links(pool, "workspace", Some(workspace_id), None, &body.items).await?;
@@ -387,5 +389,80 @@ mod tests {
         assert_eq!(items.len(), 1);
         assert_eq!(items[0].url, "https://x.test");
         std::env::remove_var("TOONFLOW_HELP_HUB_URL");
+    }
+
+    #[test]
+    fn help_hub_permission_error_creates_correct_variant() {
+        use crate::error::helpers::forbidden_i18n;
+        use crate::error::ApiError;
+
+        let err = forbidden_i18n(
+            "requires enterprise workspace owner/admin",
+            "需要企业工作区所有者/管理员权限",
+        );
+        match err {
+            ApiError::Forbidden(msg) => {
+                assert!(
+                    msg == "requires enterprise workspace owner/admin"
+                        || msg == "需要企业工作区所有者/管理员权限"
+                );
+            }
+            _ => panic!("expected Forbidden variant"),
+        }
+    }
+
+    #[tokio::test]
+    async fn help_hub_permission_error_response_en() {
+        use crate::error::helpers::forbidden_i18n;
+        use axum::body::to_bytes;
+        use axum::response::IntoResponse;
+
+        let err = forbidden_i18n(
+            "requires enterprise workspace owner/admin",
+            "需要企业工作区所有者/管理员权限",
+        );
+        let resp = err.into_response();
+
+        let bytes = to_bytes(resp.into_body(), 16 * 1024)
+            .await
+            .expect("body bytes");
+        let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
+
+        assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(403));
+        assert_eq!(json.get("code").and_then(|v| v.as_str()), Some("forbidden"));
+        assert_eq!(
+            json.get("message").and_then(|v| v.as_str()),
+            Some("requires enterprise workspace owner/admin")
+        );
+    }
+
+    #[tokio::test]
+    async fn help_hub_permission_error_response_zh() {
+        use crate::error::helpers::forbidden_i18n;
+        use crate::error::locale::{ApiLocale, REQUEST_LOCALE};
+        use axum::body::to_bytes;
+        use axum::response::IntoResponse;
+
+        let resp = REQUEST_LOCALE
+            .scope(ApiLocale::Zh, async {
+                let err = forbidden_i18n(
+                    "requires enterprise workspace owner/admin",
+                    "需要企业工作区所有者/管理员权限",
+                );
+                err.into_response()
+            })
+            .await;
+
+        let bytes = to_bytes(resp.into_body(), 16 * 1024)
+            .await
+            .expect("body bytes");
+        let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
+
+        assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(403));
+        assert_eq!(json.get("code").and_then(|v| v.as_str()), Some("forbidden"));
+        assert_eq!(
+            json.get("message").and_then(|v| v.as_str()),
+            Some("需要企业工作区所有者/管理员权限")
+        );
     }
 }

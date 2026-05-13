@@ -1,6 +1,7 @@
 use axum::{extract::State, http::HeaderMap, Json};
 
 use crate::auth::require_user_uuid;
+use crate::error::helpers::not_implemented_i18n;
 use crate::error::ApiError;
 use crate::state::AppState;
 use crate::vendor::credential::{encrypt, is_encryption_configured, key_hint};
@@ -33,8 +34,9 @@ pub(crate) async fn post_store_credential(
     let vendor_id = require_nonempty_vendor_id(&body.vendor_id)?;
 
     if !is_encryption_configured() {
-        return Err(ApiError::NotImplemented(
-            "Credential encryption not configured (set TOONFLOW_VENDOR_CREDENTIAL_KEY)".into(),
+        return Err(not_implemented_i18n(
+            "Credential encryption not configured (set TOONFLOW_VENDOR_CREDENTIAL_KEY)",
+            "凭据加密未配置（请设置 TOONFLOW_VENDOR_CREDENTIAL_KEY）",
         ));
     }
 

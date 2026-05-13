@@ -254,7 +254,7 @@ async fn insert_notification_table_row(
                 _ => message.to_string(),
             },
             link_path: Some(format!(
-                "/product/projects?projectNumericId={project_numeric_id}"
+                "/product/projects?projectUuid={project_uuid}&projectNumericId={project_numeric_id}"
             )),
             payload: json!({
                 "filePath": path,

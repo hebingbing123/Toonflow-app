@@ -4,7 +4,7 @@ use axum::{extract::State, http::HeaderMap, Json};
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, validate_non_empty_string, ApiError};
 use crate::settings::vendors::dto::{AddVendorBody, VendorCodeFromLinkBody};
 use crate::settings::vendors::store::{load_vendor_config, save_vendor_config};
 use crate::state::AppState;
@@ -31,9 +31,7 @@ pub(crate) async fn post_add_vendor(
     Json(body): Json<AddVendorBody>,
 ) -> Result<Json<serde_json::Value>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    if body.ts_code.trim().is_empty() {
-        return Err(ApiError::BadRequest("tsCode must be non-empty".into()));
-    }
+    validate_non_empty_string(body.ts_code.trim(), "tsCode")?;
     let pool = require_pool(&state)?;
 
     let vendor_id = format!(
@@ -81,12 +79,11 @@ pub(crate) async fn post_vendor_code_from_link(
 ) -> Result<Json<serde_json::Value>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let link = body.link.trim();
-    if link.is_empty() {
-        return Err(ApiError::BadRequest("link must be non-empty".into()));
-    }
+    validate_non_empty_string(link, "link")?;
     if !link.starts_with("http://") && !link.starts_with("https://") {
-        return Err(ApiError::BadRequest(
-            "link must be a valid HTTP(S) URL".into(),
+        return Err(bad_request_i18n(
+            "link must be a valid HTTP(S) URL",
+            "link 必须是有效的 HTTP(S) URL",
         ));
     }
 

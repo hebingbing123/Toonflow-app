@@ -12,7 +12,7 @@ use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
 
-use super::super::resolve::ensure_owned_project_pk;
+use super::super::resolve::require_asset_project_write_scope;
 use inner::patch_project_asset_inner;
 
 pub(crate) async fn patch_project_asset_for_project(
@@ -26,6 +26,6 @@ pub(crate) async fn patch_project_asset_for_project(
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    ensure_owned_project_pk(pool, uid, project_id).await?;
+    require_asset_project_write_scope(&state, uid, project_id).await?;
     patch_project_asset_inner(pool, uid, project_id, asset_numeric_id, body).await
 }

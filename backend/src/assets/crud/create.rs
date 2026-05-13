@@ -8,12 +8,12 @@ use axum::{
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{validate_enum, validate_non_empty_string, ApiError};
 use crate::state::AppState;
 
 use super::super::models::*;
 use super::super::ADV_LOCK_ASSET_NUMERIC;
-use super::resolve::ensure_owned_project_pk;
+use super::resolve::require_asset_project_write_scope;
 
 async fn create_project_asset_inner(
     pool: &sqlx::PgPool,
@@ -21,16 +21,10 @@ async fn create_project_asset_inner(
     body: CreateAssetBody,
 ) -> Result<(StatusCode, Json<AssetRow>), ApiError> {
     let name = body.name.trim().to_string();
-    if name.is_empty() {
-        return Err(ApiError::BadRequest("name must not be empty".into()));
-    }
+    validate_non_empty_string(&name, "name")?;
 
     let t = body.asset_type.trim().to_lowercase();
-    if t != "role" && t != "tool" && t != "scene" {
-        return Err(ApiError::BadRequest(
-            "type must be role, tool, or scene".into(),
-        ));
-    }
+    validate_enum(&t, &["role", "tool", "scene"], "type")?;
 
     let desc = body
         .description
@@ -53,7 +47,12 @@ async fn create_project_asset_inner(
     if exists {
         tx.rollback().await.ok();
         return Err(ApiError::Conflict(
-            "an asset with this name already exists in the project".into(),
+            match crate::error::locale::current_locale() {
+                crate::error::ApiLocale::En => {
+                    "an asset with this name already exists in the project".into()
+                }
+                crate::error::ApiLocale::Zh => "项目中已存在同名资产".into(),
+            },
         ));
     }
 
@@ -109,6 +108,6 @@ pub(crate) async fn create_project_asset_for_project(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    ensure_owned_project_pk(pool, uid, project_id).await?;
+    require_asset_project_write_scope(&state, uid, project_id).await?;
     create_project_asset_inner(pool, project_id, body).await
 }

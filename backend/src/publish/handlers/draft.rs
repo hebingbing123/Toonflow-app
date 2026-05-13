@@ -9,7 +9,7 @@ use chrono::{DateTime, Utc};
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, ApiError};
 use crate::projects::routes::common::{
     require_project_workspace_member_scope, require_project_write_scope,
 };
@@ -69,23 +69,29 @@ pub(super) fn resolve_scheduled_draft_window(
     match (&q.scheduled_from, &q.scheduled_to) {
         (None, None) => Ok(None),
         (Some(from_s), Some(to_s)) => {
-            let from: DateTime<Utc> = from_s
-                .trim()
-                .parse()
-                .map_err(|_| ApiError::BadRequest("scheduled_from must be valid RFC3339".into()))?;
-            let to_excl: DateTime<Utc> = to_s
-                .trim()
-                .parse()
-                .map_err(|_| ApiError::BadRequest("scheduled_to must be valid RFC3339".into()))?;
+            let from: DateTime<Utc> = from_s.trim().parse().map_err(|_| {
+                bad_request_i18n(
+                    "scheduled_from must be valid RFC3339",
+                    "scheduled_from 必须是有效的 RFC3339",
+                )
+            })?;
+            let to_excl: DateTime<Utc> = to_s.trim().parse().map_err(|_| {
+                bad_request_i18n(
+                    "scheduled_to must be valid RFC3339",
+                    "scheduled_to 必须是有效的 RFC3339",
+                )
+            })?;
             if from >= to_excl {
-                return Err(ApiError::BadRequest(
-                    "scheduled_from must be strictly before scheduled_to".into(),
+                return Err(bad_request_i18n(
+                    "scheduled_from must be strictly before scheduled_to",
+                    "scheduled_from 必须严格早于 scheduled_to",
                 ));
             }
             Ok(Some((from, to_excl)))
         }
-        _ => Err(ApiError::BadRequest(
-            "scheduled_from and scheduled_to must both be set when filtering".into(),
+        _ => Err(bad_request_i18n(
+            "scheduled_from and scheduled_to must both be set when filtering",
+            "按时间过滤时，必须同时提供 scheduled_from 和 scheduled_to",
         )),
     }
 }
@@ -93,8 +99,9 @@ pub(super) fn resolve_scheduled_draft_window(
 pub(super) fn validate_draft_status(raw: &str) -> Result<(), ApiError> {
     match raw {
         "editing" | "ready" | "archived" => Ok(()),
-        _ => Err(ApiError::BadRequest(
-            "draft_status must be editing, ready, or archived".into(),
+        _ => Err(bad_request_i18n(
+            "draft_status must be editing, ready, or archived",
+            "draft_status 必须是 editing、ready 或 archived",
         )),
     }
 }
@@ -125,15 +132,17 @@ pub(crate) async fn create_publish_draft(
 
     if let Some(pid) = body.profile_id {
         if !profile_belongs_to_project(pool, pid, project_id).await? {
-            return Err(ApiError::BadRequest(
-                "profile_id does not belong to project".into(),
+            return Err(bad_request_i18n(
+                "profile_id does not belong to project",
+                "profile_id 不属于该 project",
             ));
         }
     }
     if let Some(sid) = body.script_id {
         if !script_belongs_to_project(pool, sid, project_id).await? {
-            return Err(ApiError::BadRequest(
-                "script_id does not belong to project".into(),
+            return Err(bad_request_i18n(
+                "script_id does not belong to project",
+                "script_id 不属于该 project",
             ));
         }
     }
@@ -202,15 +211,17 @@ pub(crate) async fn patch_publish_draft(
     }
     if let Some(pid) = body.profile_id {
         if !profile_belongs_to_project(pool, pid, project_id).await? {
-            return Err(ApiError::BadRequest(
-                "profile_id does not belong to project".into(),
+            return Err(bad_request_i18n(
+                "profile_id does not belong to project",
+                "profile_id 不属于该 project",
             ));
         }
     }
     if let Some(sid) = body.script_id {
         if !script_belongs_to_project(pool, sid, project_id).await? {
-            return Err(ApiError::BadRequest(
-                "script_id does not belong to project".into(),
+            return Err(bad_request_i18n(
+                "script_id does not belong to project",
+                "script_id 不属于该 project",
             ));
         }
     }

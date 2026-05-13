@@ -6,7 +6,7 @@ use axum::{
 use serde_json::json;
 
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{validate_max_length, validate_positive, ApiError};
 use crate::jobs::{
     enqueue_generation_job, payload_project::ASSETS_GENERATE_PAYLOAD_SCHEMA_VERSION_V2, JobRow,
     JOB_KIND_ASSET_POLISH_PROMPT,
@@ -25,30 +25,14 @@ pub(crate) async fn post_polish_assets_prompt(
     Json(body): Json<PolishAssetsPromptBody>,
 ) -> Result<JsonResponse<JobRow>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    if body.project_id <= 0 {
-        return Err(ApiError::BadRequest("projectId must be positive".into()));
-    }
-    if body.assets_id <= 0 {
-        return Err(ApiError::BadRequest("assetsId must be positive".into()));
-    }
+    validate_positive(body.project_id, "projectId")?;
+    validate_positive(body.assets_id, "assetsId")?;
     let asset_type = trim_non_empty(body.asset_type, "type")?;
     let name = trim_non_empty(body.name, "name")?;
     let describe = trim_non_empty(body.describe, "describe")?;
-    if asset_type.len() > MAX_ASSET_TYPE_LEN {
-        return Err(ApiError::BadRequest(format!(
-            "type must be at most {MAX_ASSET_TYPE_LEN} chars"
-        )));
-    }
-    if name.len() > MAX_NAME_LEN {
-        return Err(ApiError::BadRequest(format!(
-            "name must be at most {MAX_NAME_LEN} chars"
-        )));
-    }
-    if describe.len() > MAX_DESCRIBE_LEN {
-        return Err(ApiError::BadRequest(format!(
-            "describe must be at most {MAX_DESCRIBE_LEN} chars"
-        )));
-    }
+    validate_max_length(&asset_type, MAX_ASSET_TYPE_LEN, "type")?;
+    validate_max_length(&name, MAX_NAME_LEN, "name")?;
+    validate_max_length(&describe, MAX_DESCRIBE_LEN, "describe")?;
 
     let pool = state.require_pool()?;
 
@@ -78,6 +62,7 @@ pub(crate) async fn post_polish_assets_prompt(
         JOB_KIND_ASSET_POLISH_PROMPT,
         payload,
         Some(&headers),
+        &state.billing_config,
     )
     .await?;
     Ok(JsonResponse(row))

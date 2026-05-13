@@ -23,36 +23,57 @@
 
 - `docs/plans/` 中 **竖切任务清单**（`tasks-*.md`）、**路线图分册**（`roadmap-*.md`）及 **Workspace 全量计划** 默认要求：用户/运营可见的能力 **须 `backend/` + `frontend/`（含 `rust_api`）+ 契约** 同里程碑交付；例外须在计划中标 **`(ops-only)`**。约定见 [`docs/plans/full-stack-delivery-covenant.md`](docs/plans/full-stack-delivery-covenant.md)；平台级补漏清单见 [`docs/plans/platform-capabilities-backlog.md`](docs/plans/platform-capabilities-backlog.md)。
 
-## 重构栈门禁（自动跑，别让用户手动点）
+## 重构栈门禁（自动跑，但别默认每次都全量）
 
-凡改动 **`backend/`**（含 **`backend/src/openapi_spec/shell.rs`**、**`openapi_spec/generated/`**、**`scripts/fixtures/openapi_stub_input.yaml`**（改后通常需跑 **`scripts/gen_openapi_utoipa_stubs.py`**））、**`frontend/`**、**`docs/websocket-events.md`**、**`.github/workflows/`**、**`supabase/migrations/`** 或 **`scripts/refactor-check.sh`**，在**宣布完成或 commit 之前**在仓库根执行：
+凡改动 **`backend/`**（含 **`backend/src/openapi_spec/shell.rs`**、**`openapi_spec/generated/`**、**`scripts/fixtures/openapi_stub_input.yaml`**（改后通常需跑 **`scripts/gen_openapi_utoipa_stubs.py`**））、**`frontend/`**、**`docs/websocket-events.md`**、**`.github/workflows/`**、**`supabase/migrations/`** 或 **`scripts/refactor-check.sh`**，Agent 必须自动跑与改动阶段匹配的门禁，但 **日常开发默认不要直接跑 `yarn refactor:check`**。
+
+**执行规则**：
+- Agent 日常只允许通过 `yarn refactor:agent` 这个入口触发门禁，**不要直接调用** `yarn refactor:check` / `yarn refactor:quick` / `yarn refactor:incremental`
+- **开发中 / 单轮修改后 / 排查问题时**：运行 `yarn refactor:agent`（默认即 incremental）
+- **准备提交前的快速自检**：运行 `yarn refactor:agent --quick`
+- **只有在以下时机才运行 `yarn refactor:agent --full`**：
+  - 明确要 **宣布完成**
+  - 明确要 **`git commit`**
+  - 用户明确要求 **全量门禁 / 全量测试 / 与 CI 同级验证**
 
 ```bash
-yarn refactor:check
-# 等价：bash scripts/refactor-check.sh
+# 日常开发默认
+yarn refactor:agent
+
+# 提交前快速自检
+yarn refactor:agent --quick
+
+# 仅在宣布完成 / commit 前 / 用户明确要求全量时
+yarn refactor:agent --full
 ```
 
-须 **合并后 OpenAPI 可解析**（`cargo run --bin export-openapi`，由 `scripts/refactor-check.sh` 执行）+ **`backend/`**：`cargo fmt --check`、`clippy -D warnings`、`test` + **`frontend/`**：`flutter pub get`、`analyze`、`test`。与 CI 任务 **`refactor-monorepo`**（[`.github/workflows/ci.yml`](.github/workflows/ci.yml)，内部即 **`scripts/refactor-check.sh`**）一致；不含 Supabase 起库与旧栈 **`yarn lint`**。失败则修到绿再提交；环境若缺 Rust/Flutter，说明缺什么即可。
+`yarn refactor:check` 仍是最高强度校验：要求 **合并后 OpenAPI 可解析**（`cargo run --bin export-openapi`，由 `scripts/refactor-check.sh` 执行）+ **`backend/`**：`cargo fmt --check`、`clippy -D warnings`、`test` + **`frontend/`**：`flutter pub get`、`analyze`、`test`。它对应当前 CI 中的 OpenAPI / Rust / Flutter 全量校验；不含 Supabase 起库与旧栈 **`yarn lint`**。失败则修到绿再提交；环境若缺 Rust/Flutter，说明缺什么即可。
 
 ### 重构门禁优化模式（2025-01 新增）
 
 为提升开发效率，`refactor-check.sh` 现支持三种模式：
 
 ```bash
-# 完整检查（默认，CI 使用）- 包含所有测试
-yarn refactor:check
+# Agent 默认入口（默认 incremental）
+yarn refactor:agent
 
-# 快速检查 - 跳过测试，只验证格式和类型
-yarn refactor:quick
+# 提交前快速检查
+yarn refactor:agent --quick
 
-# 增量检查 - 只检查修改的文件（最快）
-yarn refactor:incremental
+# 完整检查（仅在完成前 / commit 前 / 明确要求时）
+yarn refactor:agent --full
 ```
 
-**推荐使用**：
-- 开发过程中频繁验证 → `yarn refactor:incremental`（~1 分钟）
-- 提交前快速检查 → `yarn refactor:quick`（~3 分钟）
-- 提交前最终验证 / CI → `yarn refactor:check`（~8 分钟）
+**Agent 默认策略**：
+- 开发过程中频繁验证 → `yarn refactor:agent`（默认首选）
+- 提交前快速检查 → `yarn refactor:agent --quick`
+- 提交前最终验证 / 用户明确要求全量 → `yarn refactor:agent --full`
+
+**禁止事项**：
+- 不要直接调用 `yarn refactor:check` 作为 Agent 的日常入口
+- 不要因为“只是改了代码”就立刻跑 `yarn refactor:agent --full`
+- 不要在同一轮里已经跑过 `yarn refactor:agent` / `yarn refactor:agent --quick` 且尚未准备提交时，又重复跑 full check
+- 不要把 full check 当成日常调试循环命令
 
 详见 [`scripts/REFACTOR_CHECK_MODES.md`](scripts/REFACTOR_CHECK_MODES.md)。
 
@@ -68,7 +89,7 @@ yarn refactor:incremental
 1. 打开 **Settings**（macOS：`Cmd + ,`），搜索 **Agent** / **Auto-run** / **Terminal**。
 2. 打开 **Agent 自动运行**（或「在 Agent 模式下自动执行终端命令」一类开关）。
 3. 若提供 **命令允许列表（allowlist）**：为本仓库加入与门禁一致的命令，例如：
-   - `bash scripts/refactor-check.sh`、`yarn refactor:check`
+   - `bash scripts/agent-refactor-check.sh`、`yarn refactor:agent`
    - `cargo fmt`、`cargo clippy`、`cargo test`（工作目录在 `backend/` 时）
    - `flutter pub get`、`flutter analyze`、`flutter test`（工作目录在 `frontend/` 时）
    - `cargo run --bin export-openapi`（工作目录在 `backend/` 时）与 `ruby -ryaml`（解析导出的 YAML）

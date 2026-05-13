@@ -83,7 +83,7 @@ mod tests {
         let err = normalize_optional_base64(Some(&oversized), "base64").expect_err("oversized");
         match err {
             ApiError::BadRequest(msg) => assert!(
-                msg.contains(&format!("at most {MAX_BASE64_HINT_LEN} chars")),
+                msg.contains(&format!("at most {MAX_BASE64_HINT_LEN} characters")),
                 "msg={msg}"
             ),
             other => panic!("expected bad_request, got {other:?}"),

@@ -2,6 +2,7 @@
 // production workspace. Extracted into the production context package to keep
 // individual files ≤800 lines.
 
+import '../../../l10n/app_localizations.dart';
 import 'support.dart';
 
 part 'flow_logic_summary.dart';

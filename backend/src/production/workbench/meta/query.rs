@@ -5,11 +5,12 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
+use uuid::Uuid;
 
 use crate::error::ApiError;
 use crate::jobs::{hydrate_job_rows, JobRow, JOB_KIND_VIDEO_GENERATE};
 use crate::production::VideoItem;
-use crate::scope::http::require_owned_numeric_script_scope_ids;
+use crate::scope::http::require_script_read_scope_ref;
 use crate::state::AppState;
 
 /// Server-side rollup for MP-W4 / J3: persisted vs in-flight video generation for a script scope.
@@ -27,7 +28,10 @@ pub(in crate::production) struct VideoBatchWritebackSummary {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct GetGenerateDataBody {
-    project_id: i32,
+    #[serde(default)]
+    project_id: Option<i32>,
+    #[serde(default)]
+    project_uuid: Option<Uuid>,
     script_id: i32,
 }
 
@@ -73,9 +77,14 @@ pub(in crate::production) async fn post_workbench_get_generate_data(
         AND (j.payload->>'script_id')::int = $3
     "#;
 
-    let (_uid, pool, script_id) =
-        require_owned_numeric_script_scope_ids(&state, &headers, body.project_id, body.script_id)
-            .await?;
+    let (_uid, pool, scope_row) = require_script_read_scope_ref(
+        &state,
+        &headers,
+        body.project_id,
+        body.project_uuid,
+        body.script_id,
+    )
+    .await?;
 
     let generated_videos = sqlx::query_as::<_, VideoItem>(
         r#"
@@ -96,7 +105,7 @@ pub(in crate::production) async fn post_workbench_get_generate_data(
         ORDER BY sb.created_at DESC
         "#,
     )
-    .bind(script_id)
+    .bind(scope_row.script_id)
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -114,7 +123,7 @@ pub(in crate::production) async fn post_workbench_get_generate_data(
 
     let mut generating_jobs = sqlx::query_as::<_, JobRow>(&generating_jobs_sql)
         .bind(JOB_KIND_VIDEO_GENERATE)
-        .bind(body.project_id)
+        .bind(scope_row.project_numeric_id)
         .bind(body.script_id)
         .fetch_all(pool)
         .await
@@ -125,7 +134,7 @@ pub(in crate::production) async fn post_workbench_get_generate_data(
     let script_storyboard_count: i64 = sqlx::query_scalar(
         r#"SELECT COUNT(*)::bigint FROM app_storyboard sb WHERE sb.script_id = $1"#,
     )
-    .bind(script_id)
+    .bind(scope_row.script_id)
     .fetch_one(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -137,7 +146,7 @@ pub(in crate::production) async fn post_workbench_get_generate_data(
         );
         sqlx::query_scalar(&count_sql)
             .bind(JOB_KIND_VIDEO_GENERATE)
-            .bind(body.project_id)
+            .bind(scope_row.project_numeric_id)
             .bind(body.script_id)
             .fetch_one(pool)
             .await
@@ -159,7 +168,7 @@ pub(in crate::production) async fn post_workbench_get_generate_data(
     let storyboard_numeric_ids_with_in_flight_generation: Vec<i32> =
         sqlx::query_scalar::<_, i32>(&in_flight_storyboards_sql)
             .bind(JOB_KIND_VIDEO_GENERATE)
-            .bind(body.project_id)
+            .bind(scope_row.project_numeric_id)
             .bind(body.script_id)
             .fetch_all(pool)
             .await
@@ -177,7 +186,7 @@ pub(in crate::production) async fn post_workbench_get_generate_data(
             .collect();
 
     Ok(JsonResponse(GetGenerateDataResponse {
-        project_id: body.project_id,
+        project_id: scope_row.project_numeric_id,
         script_id: body.script_id,
         generated_videos,
         generating_jobs,

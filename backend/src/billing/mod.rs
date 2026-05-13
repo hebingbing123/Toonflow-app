@@ -9,15 +9,28 @@
 //! - `provider_adapter` — 提供商适配器
 //! - `provider_rules` — 提供商规则
 //! - `events_list` — `GET /api/v1/webhooks/billing/events` 审计查询
+//! - `reconciliation_worker` — 定期对账任务（Task 4.3）
+//! - `ops_view` — Internal ops endpoints for workspace billing queries (Task 8.1)
 
 mod events_list;
 mod ingest;
 mod openapi;
+mod ops_view;
 mod provider_adapter;
 mod provider_rules;
+mod reconciliation_worker;
 mod verify;
 
 pub use openapi::BillingApi;
+// Re-export reconciliation functions for ops/monitoring (Task 4.3)
+pub use ingest::{
+    check_personal_workspace_billing_consistency, reconcile_all_personal_workspaces,
+    BillingMismatch,
+};
+// Re-export ingest_webhook for integration tests (Task 4.2)
+pub use ingest::ingest_webhook;
+// Re-export reconciliation worker (Task 4.3)
+pub use reconciliation_worker::run as run_reconciliation_worker;
 
 use axum::body::Bytes;
 use axum::extract::State;
@@ -32,6 +45,7 @@ use crate::error::ApiError;
 use crate::state::AppState;
 
 use events_list::list_billing_webhook_events;
+use ops_view::{get_workspace_job_aggregates, get_workspace_subscription};
 
 pub fn router() -> Router<AppState> {
     Router::new()
@@ -39,6 +53,19 @@ pub fn router() -> Router<AppState> {
         .route(
             "/api/v1/webhooks/billing/events",
             get(list_billing_webhook_events),
+        )
+        .route(
+            "/api/v1/webhooks/billing/reconcile",
+            post(post_billing_reconcile),
+        )
+        // Internal ops endpoints (Task 8.1)
+        .route(
+            "/api/v1/ops/billing/workspace-subscription",
+            get(get_workspace_subscription),
+        )
+        .route(
+            "/api/v1/ops/billing/workspace-job-aggregates",
+            get(get_workspace_job_aggregates),
         )
 }
 
@@ -81,8 +108,9 @@ async fn post_billing_webhook(
 
     let pool = state.require_pool()?;
 
-    let v: Value = serde_json::from_slice(&body)
-        .map_err(|_| ApiError::BadRequest("body must be valid JSON".into()))?;
+    let v: Value = serde_json::from_slice(&body).map_err(|_| {
+        crate::error::bad_request_i18n("body must be valid JSON", "body 必须是有效的 JSON")
+    })?;
 
     let (duplicate, row_id, profile_updated, provider_event_id, informational_event) =
         ingest::ingest_webhook(pool, &v).await?;
@@ -98,5 +126,85 @@ async fn post_billing_webhook(
             Some(profile_updated)
         },
         informational_event,
+    }))
+}
+
+// ── POST /api/v1/webhooks/billing/reconcile ──────────────────────────────────
+
+#[derive(Debug, Serialize, ToSchema)]
+struct BillingReconcileResponse {
+    total_users_checked: usize,
+    mismatch_count: usize,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    mismatches: Vec<BillingMismatchDetail>,
+}
+
+#[derive(Debug, Serialize, ToSchema)]
+struct BillingMismatchDetail {
+    user_id: String,
+    workspace_id: String,
+    field: String,
+    user_value: Option<String>,
+    workspace_value: Option<String>,
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/webhooks/billing/reconcile",
+    operation_id = "postBillingReconcileV1",
+    tag = "webhooks",
+    responses(
+        (status = 200, description = "Reconciliation completed", body = BillingReconcileResponse),
+        (status = 503, description = "Database not configured", body = crate::error::ErrorBody)
+    ),
+    security(
+        ("bearer" = [])
+    )
+)]
+async fn post_billing_reconcile(
+    State(state): State<AppState>,
+) -> Result<Json<BillingReconcileResponse>, ApiError> {
+    let pool = state.require_pool()?;
+
+    // Get all users with personal workspaces
+    let user_ids: Vec<(uuid::Uuid,)> = sqlx::query_as(
+        r#"
+        SELECT DISTINCT u.user_id
+        FROM app_user_profile u
+        INNER JOIN app_workspace w ON w.owner_user_id = u.user_id
+        WHERE w.workspace_type = 'personal'
+        "#,
+    )
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let total_users_checked = user_ids.len();
+    let mut all_mismatches = Vec::new();
+
+    for (user_id,) in user_ids {
+        let mismatches = check_personal_workspace_billing_consistency(pool, user_id)
+            .await
+            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+        all_mismatches.extend(mismatches);
+    }
+
+    let mismatch_count = all_mismatches.len();
+
+    let mismatches: Vec<BillingMismatchDetail> = all_mismatches
+        .into_iter()
+        .map(|m| BillingMismatchDetail {
+            user_id: m.user_id.to_string(),
+            workspace_id: m.workspace_id.to_string(),
+            field: m.field,
+            user_value: m.user_value,
+            workspace_value: m.workspace_value,
+        })
+        .collect();
+
+    Ok(Json(BillingReconcileResponse {
+        total_users_checked,
+        mismatch_count,
+        mismatches,
     }))
 }

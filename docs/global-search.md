@@ -6,6 +6,8 @@
 
 **实现状态**: ✅ 已完成并部署
 
+**边界提醒**：本文中的 `workspace_id`、`metadata.project_id` 与结果回流 scope，服务于权限过滤、搜索分析与产品壳上下文恢复；它们不单独决定当前 `plan_tier`、quota 或 billing attribution。
+
 ### 核心特性
 
 - **全文搜索**：基于 PostgreSQL tsvector + GIN 索引的高性能全文搜索
@@ -88,6 +90,7 @@ curl -X GET "https://api.toonflow.com/api/v1/search?q=角色设计&result_type=p
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | `results` | Array | 搜索结果列表 |
+| `metadata.project_id` | String | 结果所属项目 UUID（可用于产品壳 UUID-first 上下文恢复） |
 | `results[].id` | UUID | 结果 ID |
 | `results[].result_type` | String | 结果类型：`project`, `script`, `asset` |
 | `results[].title` | String | 标题/名称 |

@@ -3,6 +3,8 @@
 **目的**：把 [`workspace-rls-consistency-matrix.md`](./workspace-rls-consistency-matrix.md) 里的“应当如何判读”变成一套可执行验证步骤，供本地 `supabase start` 或 staging 直接使用。  
 关联：[`workspace-security-boundary.md`](./workspace-security-boundary.md)、[`workspace-team-full-plan.md`](./workspace-team-full-plan.md) Phase W9、[`workspace-release-checklist.md`](./workspace-release-checklist.md)。
 
+**边界**：本 Runbook 验证的是 workspace 协作/RLS 与 Rust 应用层权限语义，不用于判定未来 **workspace-scope billing** 是否可切换；计费范围仍以 [`workspace-billing-scope-decision.md`](./workspace-billing-scope-decision.md) 为准。
+
 ## 1) 这份 Runbook 解决什么问题
 
 W9.2 当前最大的缺口不是“不知道哪里 mismatch”，而是：

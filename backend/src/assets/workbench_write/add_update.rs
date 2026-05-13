@@ -8,10 +8,10 @@ use sqlx::types::Json as SqlxJson;
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{validate_enum, validate_non_empty_string, validate_positive, ApiError};
 use crate::state::AppState;
 
-use super::super::crud::ensure_owned_project_pk;
+use super::super::crud::require_asset_project_write_scope;
 use super::super::models::*;
 use super::super::utils::{
     merge_workbench_asset_metadata, normalize_optional_trimmed_text, resolve_owned_asset_metadata,
@@ -26,26 +26,18 @@ pub(crate) async fn post_project_workbench_add_assets(
 ) -> Result<Json<WorkbenchAssetMutationResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let name = body.name.trim();
-    if name.is_empty() {
-        return Err(ApiError::BadRequest("name must not be empty".into()));
-    }
+    validate_non_empty_string(name, "name")?;
     let describe = body.describe.trim();
-    if describe.is_empty() {
-        return Err(ApiError::BadRequest("describe must not be empty".into()));
-    }
+    validate_non_empty_string(describe, "describe")?;
     let asset_type = body.asset_type.trim().to_lowercase();
-    if asset_type != "role" && asset_type != "scene" && asset_type != "tool" {
-        return Err(ApiError::BadRequest(
-            "type must be role, scene, or tool".into(),
-        ));
-    }
+    validate_enum(&asset_type, &["role", "scene", "tool"], "type")?;
 
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    ensure_owned_project_pk(pool, uid, project_id).await?;
+    require_asset_project_write_scope(&state, uid, project_id).await?;
 
     let mut tx = pool
         .begin()
@@ -107,24 +99,18 @@ pub(crate) async fn post_project_workbench_update_assets(
     Json(body): Json<WorkbenchUpdateAssetsBody>,
 ) -> Result<Json<WorkbenchAssetMutationResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    if body.id <= 0 {
-        return Err(ApiError::BadRequest("id must be positive".into()));
-    }
+    validate_positive(body.id, "id")?;
     let name = body.name.trim();
-    if name.is_empty() {
-        return Err(ApiError::BadRequest("name must not be empty".into()));
-    }
+    validate_non_empty_string(name, "name")?;
     let describe = body.describe.trim();
-    if describe.is_empty() {
-        return Err(ApiError::BadRequest("describe must not be empty".into()));
-    }
+    validate_non_empty_string(describe, "describe")?;
 
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    ensure_owned_project_pk(pool, uid, project_id).await?;
+    require_asset_project_write_scope(&state, uid, project_id).await?;
 
     let current = resolve_owned_asset_metadata(pool, uid, project_id, body.id).await?;
     let metadata = merge_workbench_asset_metadata(
@@ -136,21 +122,13 @@ pub(crate) async fn post_project_workbench_update_assets(
 
     sqlx::query(
         r#"
-        UPDATE app_asset a
+        UPDATE app_asset
         SET name = $1,
             description = $2,
             metadata = $3,
             updated_at = NOW()
-        FROM app_project p
-        WHERE a.project_id = p.id
-          AND p.id = $4
-          AND a.numeric_id = $5
-          AND EXISTS (
-            SELECT 1
-            FROM app_workspace_member wm
-            WHERE wm.workspace_id = p.workspace_id
-              AND wm.user_id = $6
-          )
+        WHERE project_id = $4
+          AND numeric_id = $5
         "#,
     )
     .bind(name)
@@ -158,7 +136,6 @@ pub(crate) async fn post_project_workbench_update_assets(
     .bind(SqlxJson(metadata))
     .bind(project_id)
     .bind(body.id)
-    .bind(uid)
     .execute(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;

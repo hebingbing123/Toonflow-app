@@ -2,6 +2,7 @@ use serde_json::json;
 use sqlx::PgPool;
 use uuid::Uuid;
 
+use crate::jobs::payload_project::payload_project_numeric_id;
 use crate::jobs::worker::common::{job_ok, JobRunError};
 use crate::narrative::novels::handlers::crawl_preview::{
     crawl_preview_adaptive, evaluate_novel_import_quality, insert_imported_novels_for_project,
@@ -160,10 +161,7 @@ pub(crate) async fn run_novel_crawl_import_batch(
         let next_run_at_ms = now_ms + interval_ms;
         let mut next_payload = row.payload.clone();
         next_payload["run_at_ms"] = json!(next_run_at_ms);
-        // Keep project key for task-center filtering.
-        if next_payload.get("project_numeric_id").is_none() {
-            // no-op if missing; payload producers should include it.
-        }
+        // Keep any existing project UUID / numeric scope keys for task-center filtering.
         if let Err(e) = crate::jobs::enqueue_generation_job(
             pool,
             row.owner_user_id,
@@ -178,10 +176,16 @@ pub(crate) async fn run_novel_crawl_import_batch(
         }
     }
 
-    Ok(job_ok(json!({
+    let mut result = json!({
+      "project_uuid": project_id,
       "total": succeeded + failed,
       "succeeded": succeeded,
       "failed": failed,
       "items": items
-    })))
+    });
+    if let Some(project_numeric_id) = payload_project_numeric_id(&row.payload) {
+        result["project_numeric_id"] = json!(project_numeric_id);
+    }
+
+    Ok(job_ok(result))
 }

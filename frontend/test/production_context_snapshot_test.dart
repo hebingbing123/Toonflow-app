@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/agent_workspaces/contexts/production/context_snapshot.dart';
 
@@ -8,6 +10,14 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
+          localizationsDelegates: [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: Locale('zh'),
           home: Scaffold(
             body: ProductionContextSnapshotView(
               workspaceLastToolName: 'get_flowData',
@@ -51,7 +61,7 @@ void main() {
 
       expect(find.text('上下文快照'), findsOneWidget);
       expect(find.text('flow[storyboardTable]'), findsOneWidget);
-      expect(find.textContaining('分镜表 3 行'), findsOneWidget);
+      expect(find.textContaining('分镜 3 条'), findsOneWidget);
       expect(find.textContaining('优先展示缺帧相关镜头'), findsOneWidget);
       expect(find.textContaining('镜头 #101\n场景: 大殿'), findsOneWidget);
       expect(
@@ -59,7 +69,7 @@ void main() {
         findsOneWidget,
       );
       expect(find.textContaining('镜头 #102'), findsNothing);
-      expect(find.textContaining('其余 2 行已折叠'), findsOneWidget);
+      expect(find.textContaining('其余 2 行已折叠'), findsNWidgets(2));
 
       expect(find.text('flow[storyboard]'), findsOneWidget);
       expect(find.textContaining('缺帧 1 项'), findsOneWidget);
@@ -67,7 +77,7 @@ void main() {
       expect(find.textContaining('结果: 缺帧待补图'), findsOneWidget);
       expect(find.textContaining('镜头 #101\n结果: 缺帧待补图'), findsOneWidget);
       expect(find.textContaining('镜头 #102'), findsNothing);
-      expect(find.textContaining('其余 2 项已折叠'), findsOneWidget);
+      expect(find.textContaining('其余 2 行已折叠'), findsNWidgets(2));
     },
   );
 
@@ -76,6 +86,14 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
+          localizationsDelegates: [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: Locale('zh'),
           home: Scaffold(
             body: ProductionContextSnapshotView(
               workspaceLastToolName: 'get_flowData',
@@ -109,6 +127,14 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
+          localizationsDelegates: [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: Locale('zh'),
           home: Scaffold(
             body: ProductionContextSnapshotView(
               workspaceLastToolName: 'run_sub_agent_production_supervision',
@@ -148,7 +174,7 @@ void main() {
         findsNWidgets(2),
       );
       expect(find.textContaining('② 视觉风格与画面基调：冷金对比'), findsNWidgets(2));
-      expect(find.text('改写约束下沉'), findsOneWidget);
+      expect(find.textContaining('改写约束下沉'), findsOneWidget);
       expect(find.textContaining('scriptPlan 已承接上游改写约束'), findsOneWidget);
       expect(find.textContaining('资产聚焦：角色/场景资产'), findsOneWidget);
       expect(find.text('审核摘要'), findsOneWidget);

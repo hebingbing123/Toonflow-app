@@ -2,18 +2,25 @@
 
 use serde::Deserialize;
 use serde_json::Value;
+use uuid::Uuid;
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(crate) struct GetFlowDataBody {
-    pub(crate) project_id: i32,
+    #[serde(default)]
+    pub(crate) project_id: Option<i32>,
+    #[serde(default)]
+    pub(crate) project_uuid: Option<Uuid>,
     pub(crate) episodes_id: i32,
 }
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(crate) struct SaveFlowDataBody {
-    pub(crate) project_id: i32,
+    #[serde(default)]
+    pub(crate) project_id: Option<i32>,
+    #[serde(default)]
+    pub(crate) project_uuid: Option<Uuid>,
     pub(crate) episodes_id: i32,
     pub(crate) data: Value,
     /// Optional version timestamp (ISO 8601) for optimistic locking.

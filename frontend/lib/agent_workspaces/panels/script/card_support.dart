@@ -2,6 +2,7 @@ part of 'card.dart';
 
 extension _AgentWorkspaceScriptCardSupport on _AgentWorkspaceScriptCardState {
   List<String> _buildResultSummaryLines() {
+    final l10n = AppLocalizations.of(context)!;
     final lines = <String>[
       'tool=${widget.selectedScriptDomainTool}',
       if (_scriptWritebackSourceLine != null)
@@ -34,6 +35,7 @@ extension _AgentWorkspaceScriptCardSupport on _AgentWorkspaceScriptCardState {
     }
     lines.addAll(
       summarizeScriptResultSnapshot(
+        l10n,
         widget.workspaceLastToolName,
         widget.workspaceLastToolResultData,
       ),

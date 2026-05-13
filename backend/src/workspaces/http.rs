@@ -11,7 +11,7 @@ use utoipa::{IntoParams, ToSchema};
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, ApiError};
 use crate::settings::notifications::{record_notification, NotificationRecordPayload};
 use crate::state::AppState;
 
@@ -323,8 +323,9 @@ fn normalize_member_role(role: &str) -> Option<&'static str> {
 fn parse_invite_expires_hours(expires_in_hours: Option<i64>) -> Result<i64, ApiError> {
     let hours = expires_in_hours.unwrap_or(168);
     if !(1..=720).contains(&hours) {
-        return Err(ApiError::BadRequest(
-            "expires_in_hours must be between 1 and 720".into(),
+        return Err(bad_request_i18n(
+            "expires_in_hours must be between 1 and 720",
+            "expires_in_hours 必须在 1 到 720 之间",
         ));
     }
     Ok(hours)
@@ -397,6 +398,7 @@ async fn record_workspace_invite_notification(
     message: String,
     payload: Value,
 ) -> Result<(), ApiError> {
+    // Keep notification_type aligned with docs/websocket-events.md producer list.
     let _ = record_notification(
         state.require_pool()?,
         Some(&state.notify),
@@ -585,18 +587,22 @@ pub(crate) async fn create_workspace(
     let pool = state.require_pool()?;
     let name = body.name.trim();
     if name.is_empty() {
-        return Err(ApiError::BadRequest("name must not be empty".into()));
+        return Err(bad_request_i18n("name must not be empty", "name 不能为空"));
     }
     if name.len() > 120 {
-        return Err(ApiError::BadRequest(
-            "name must be at most 120 chars".into(),
+        return Err(bad_request_i18n(
+            "name must be at most 120 chars",
+            "name 最多 120 个字符",
         ));
     }
     let metadata = body
         .metadata
         .unwrap_or_else(|| Value::Object(Default::default()));
     if !metadata.is_object() {
-        return Err(ApiError::BadRequest("metadata must be an object".into()));
+        return Err(bad_request_i18n(
+            "metadata must be an object",
+            "metadata 必须是对象",
+        ));
     }
 
     let cap = max_enterprise_workspaces_per_user();
@@ -814,8 +820,9 @@ pub(crate) async fn patch_workspace(
     };
 
     if body.archive == Some(true) && ws_type == "personal" {
-        return Err(ApiError::BadRequest(
-            "cannot archive a personal workspace".into(),
+        return Err(bad_request_i18n(
+            "cannot archive a personal workspace",
+            "不能归档个人工作区",
         ));
     }
 
@@ -825,14 +832,18 @@ pub(crate) async fn patch_workspace(
         .filter(|s| !s.is_empty());
     if let Some(ref n) = name {
         if n.len() > 120 {
-            return Err(ApiError::BadRequest(
-                "name must be at most 120 chars".into(),
+            return Err(bad_request_i18n(
+                "name must be at most 120 chars",
+                "name 最多 120 个字符",
             ));
         }
     }
     if let Some(ref meta) = body.metadata {
         if !meta.is_object() {
-            return Err(ApiError::BadRequest("metadata must be an object".into()));
+            return Err(bad_request_i18n(
+                "metadata must be an object",
+                "metadata 必须是对象",
+            ));
         }
     }
 
@@ -956,7 +967,10 @@ pub(crate) async fn add_workspace_member(
     guard_workspace_member_mutation_rate(pool, workspace_id).await?;
 
     let role = normalize_member_role(&body.role).ok_or_else(|| {
-        ApiError::BadRequest("role must be admin or member (owner requires transfer flow)".into())
+        bad_request_i18n(
+            "role must be admin or member (owner requires transfer flow)",
+            "role 必须是 admin 或 member（owner 需要走专门的转移流程）",
+        )
     })?;
 
     let ws_exists: bool =
@@ -1085,8 +1099,12 @@ pub(crate) async fn patch_workspace_member(
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
     require_workspace_admin_or_owner(pool, uid, workspace_id).await?;
-    let role = normalize_member_role(&body.role)
-        .ok_or_else(|| ApiError::BadRequest("role must be admin or member".into()))?;
+    let role = normalize_member_role(&body.role).ok_or_else(|| {
+        bad_request_i18n(
+            "role must be admin or member",
+            "role 必须是 admin 或 member",
+        )
+    })?;
 
     let current_role: Option<String> = sqlx::query_scalar(
         "SELECT role FROM public.app_workspace_member WHERE workspace_id = $1 AND user_id = $2",
@@ -1245,8 +1263,9 @@ pub(crate) async fn leave_workspace(
         return Err(ApiError::NotFound);
     };
     if ws_type == "personal" {
-        return Err(ApiError::BadRequest(
-            "cannot leave personal workspace".into(),
+        return Err(bad_request_i18n(
+            "cannot leave personal workspace",
+            "不能离开个人工作区",
         ));
     }
 
@@ -1338,8 +1357,9 @@ pub(crate) async fn transfer_workspace_owner(
     };
 
     if workspace.workspace_type == "personal" {
-        return Err(ApiError::BadRequest(
-            "cannot transfer owner of a personal workspace".into(),
+        return Err(bad_request_i18n(
+            "cannot transfer owner of a personal workspace",
+            "不能转移个人工作区的所有者",
         ));
     }
     if workspace.owner_user_id != uid {
@@ -1448,8 +1468,9 @@ fn normalize_invite_list_status(raw: Option<String>) -> Result<Option<String>, A
     }
     match t.as_str() {
         "pending" | "accepted" | "revoked" => Ok(Some(t)),
-        _ => Err(ApiError::BadRequest(
-            "status must be pending, accepted, or revoked".into(),
+        _ => Err(bad_request_i18n(
+            "status must be pending, accepted, or revoked",
+            "status 必须是 pending、accepted 或 revoked",
         )),
     }
 }
@@ -1629,7 +1650,7 @@ pub(crate) async fn revoke_workspace_invite(
     Path((workspace_id, invite_id_raw)): Path<(Uuid, String)>,
 ) -> Result<Json<WorkspaceInviteResponse>, ApiError> {
     let invite_id = Uuid::parse_str(invite_id_raw.trim())
-        .map_err(|_| ApiError::BadRequest("invite_id must be a UUID".into()))?;
+        .map_err(|_| bad_request_i18n("invite_id must be a UUID", "invite_id 必须是 UUID"))?;
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
     require_workspace_admin_or_owner(pool, uid, workspace_id).await?;
@@ -1731,7 +1752,7 @@ pub(crate) async fn resend_workspace_invite(
     Json(body): Json<ResendWorkspaceInviteBody>,
 ) -> Result<Json<WorkspaceInviteResponse>, ApiError> {
     let invite_id = Uuid::parse_str(invite_id_raw.trim())
-        .map_err(|_| ApiError::BadRequest("invite_id must be a UUID".into()))?;
+        .map_err(|_| bad_request_i18n("invite_id must be a UUID", "invite_id 必须是 UUID"))?;
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
     require_workspace_admin_or_owner(pool, uid, workspace_id).await?;
@@ -1848,11 +1869,18 @@ pub(crate) async fn create_workspace_invite(
     require_workspace_admin_or_owner(pool, uid, workspace_id).await?;
     guard_workspace_member_mutation_rate(pool, workspace_id).await?;
 
-    let role = normalize_member_role(&body.role)
-        .ok_or_else(|| ApiError::BadRequest("role must be admin or member".into()))?;
+    let role = normalize_member_role(&body.role).ok_or_else(|| {
+        bad_request_i18n(
+            "role must be admin or member",
+            "role 必须是 admin 或 member",
+        )
+    })?;
     let email = body.email.trim().to_ascii_lowercase();
     if email.is_empty() || !email.contains('@') {
-        return Err(ApiError::BadRequest("email must be a valid address".into()));
+        return Err(bad_request_i18n(
+            "email must be a valid address",
+            "email 必须是有效地址",
+        ));
     }
     let expires_hours = parse_invite_expires_hours(body.expires_in_hours)?;
     let token = Uuid::new_v4().to_string();
@@ -1940,7 +1968,10 @@ pub(crate) async fn accept_workspace_invite(
     let pool = state.require_pool()?;
     let token = body.token.trim();
     if token.is_empty() {
-        return Err(ApiError::BadRequest("token must not be empty".into()));
+        return Err(bad_request_i18n(
+            "token must not be empty",
+            "token 不能为空",
+        ));
     }
 
     let mut tx = pool

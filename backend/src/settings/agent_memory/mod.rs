@@ -33,9 +33,8 @@ pub(crate) use policy::{
     ProjectAutomationMemoryPolicy, MEMORY_POLICY_NAME,
 };
 pub(crate) use storage::{
-    delete_all_agent_memory_rows, ensure_project_owned, parse_agent_type,
-    replace_named_summary_memory, replace_named_summary_memory_with_scope,
-    resolve_agent_memory_project_numeric_id,
+    delete_all_agent_memory_rows, parse_agent_type, replace_named_summary_memory,
+    replace_named_summary_memory_with_scope, resolve_agent_memory_project_numeric_id,
 };
 pub(crate) use style_bible::{
     ensure_project_style_bible_template, load_project_style_bible_character_anchors,
@@ -61,6 +60,50 @@ mod tests {
     use proptest::prelude::*;
     use serde_json::json;
     use uuid::Uuid;
+
+    use super::types::{to_memory_history_item, AgentMemoryResponseScope, MessageRow};
+
+    /// W3.8: Verify scope field exists and has correct value in AgentMemoryResponseScope
+    #[test]
+    fn agent_memory_response_scope_is_user() {
+        let scope = AgentMemoryResponseScope::User;
+
+        // Verify scope enum variant
+        assert_eq!(
+            std::mem::discriminant(&scope),
+            std::mem::discriminant(&AgentMemoryResponseScope::User)
+        );
+
+        // Verify scope serializes to "user"
+        let json = serde_json::to_string(&scope).unwrap();
+        assert_eq!(json, "\"user\"", "scope should serialize to 'user'");
+    }
+
+    /// W3.8: Verify scope field exists and has correct value in MemoryHistoryItem
+    #[test]
+    fn memory_history_item_scope_field_is_user() {
+        let row = MessageRow {
+            id: Uuid::new_v4(),
+            role: Some("assistant".to_string()),
+            name: Some("test".to_string()),
+            content: "test content".to_string(),
+            create_time_ms: 1704067200000,
+            memory_tier: Some("message".to_string()),
+        };
+
+        let item = to_memory_history_item(row);
+
+        // Verify scope field is "user"
+        assert_eq!(item.scope, "user");
+
+        // Verify scope serializes to "user"
+        let json = serde_json::to_string(&item).unwrap();
+        assert!(
+            json.contains("\"scope\":\"user\""),
+            "scope field should serialize to 'user', got: {}",
+            json
+        );
+    }
 
     #[test]
     fn query_body_accepts_camel_case() {

@@ -33,6 +33,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
       run: () => postProductionAssetsBatchGenerateAssetsImageV1(
         token,
         projectId: projectId,
+        projectUuid: projectUuid,
         scriptId: scriptId,
         assetIds: [assetId],
       ),
@@ -42,6 +43,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
       run: () => postProductionAssetsDeleteAssetsDerivativeV1(
         token,
         projectId: projectId,
+        projectUuid: projectUuid,
         scriptId: scriptId,
         assetIds: [assetId],
       ),
@@ -51,6 +53,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
       run: () => postProductionAssetsGetAssetsDataV1(
         token,
         projectId: projectId,
+        projectUuid: projectUuid,
         scriptId: scriptId,
       ),
     );
@@ -59,6 +62,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
       run: () => postProductionAssetsPollingImageV1(
         token,
         projectId: projectId,
+        projectUuid: projectUuid,
         scriptId: scriptId,
         assetIds: [assetId],
       ),
@@ -68,6 +72,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
       run: () => postProductionAssetsUpdateAssetsUrlV1(
         token,
         projectId: projectId,
+        projectUuid: projectUuid,
         scriptId: scriptId,
         assetId: assetId,
         imageUrl: 'https://example.com/probe.png',
@@ -234,6 +239,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
       run: () => postWorkbenchAddTrackV1(
         token,
         projectId: projectId,
+        projectUuid: projectUuid,
         scriptId: scriptId,
         trackName: 'probe',
       ),
@@ -243,6 +249,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
       run: () => postWorkbenchDeleteTrackV1(
         token,
         projectId: projectId,
+        projectUuid: projectUuid,
         scriptId: scriptId,
         trackId: 1,
       ),
@@ -262,6 +269,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
       run: () => postWorkbenchGenerateVideoPromptV1(
         token,
         projectId: projectId,
+        projectUuid: projectUuid,
         scriptId: scriptId,
       ),
     );
@@ -270,12 +278,17 @@ extension _HomePageSystemProbesModelsCatalogProductionProbeTyped
       run: () => postWorkbenchGetGenerateDataV1(
         token,
         projectId: projectId,
+        projectUuid: projectUuid,
         scriptId: scriptId,
       ),
     );
     statuses['prod/workbench.list'] = await skipOrRun(
       label: 'POST production/workbench/get-video-list',
-      run: () => postWorkbenchGetVideoListV1(token, projectId: projectId),
+      run: () => postWorkbenchGetVideoListV1(
+        token,
+        projectId: projectId,
+        projectUuid: projectUuid,
+      ),
     );
     statuses['prod/workbench.model-detail'] = await skipOrRun(
       label: 'POST production/workbench/get-video-model-detail',

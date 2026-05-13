@@ -14,7 +14,7 @@ use super::emit::emit_final_assistant_chat;
 use super::schemas::harness_openai_tools;
 
 /// Runs up to **`max_tool_rounds`** LLM completion calls, executing Harness tools and emitting
-/// `harness.*` plus final `chat.message.*` envelopes (same family as streaming chat).
+/// raw WS `harness.*` plus final `chat.message.*` envelopes (same family as streaming chat).
 #[allow(clippy::too_many_arguments)]
 pub async fn harness_agent_run(
     cfg: &LlmConfig,

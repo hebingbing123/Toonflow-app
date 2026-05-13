@@ -42,11 +42,23 @@ pub(crate) struct ReadyHarnessIsolateMetrics {
     pub total_pool_evictions: u64,
 }
 
+/// Quota denial metrics for **`GET /api/v1/ready`** observability (Task 3.4).
+#[derive(Serialize, ToSchema)]
+pub(crate) struct ReadyQuotaMetrics {
+    /// Total quota denials across all billing scopes
+    pub total_denials: u64,
+    /// Quota denials for user-scope billing
+    pub user_scope_denials: u64,
+    /// Quota denials for workspace-scope billing
+    pub workspace_scope_denials: u64,
+}
+
 #[derive(Serialize, ToSchema)]
 pub(crate) struct ReadyResponse {
     pub status: &'static str,
     pub database: &'static str,
     pub harness_isolate: ReadyHarnessIsolateMetrics,
+    pub quota: ReadyQuotaMetrics,
 }
 
 #[derive(Serialize, ToSchema)]
@@ -54,6 +66,65 @@ pub(crate) struct WorkspaceSummary {
     pub id: Uuid,
     pub name: String,
     pub workspace_type: String,
+}
+
+/// User billing summary for `/me` v2 response (nested under `user` field).
+#[derive(Serialize, ToSchema)]
+pub(crate) struct UserBillingSummary {
+    pub sub: Uuid,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub email: Option<String>,
+    pub plan_tier: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub billing_currency: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub billing_provider: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub subscription_status: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub subscription_current_period_end_at: Option<DateTime<Utc>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub daily_job_quota: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub jobs_today: Option<i64>,
+}
+
+/// Workspace billing summary for `/me` v2 response.
+///
+/// Present when `billing_scope = "workspace"` and user has a current workspace.
+#[derive(Serialize, ToSchema)]
+pub(crate) struct WorkspaceBillingSummary {
+    pub workspace_id: Uuid,
+    pub workspace_type: String,
+    pub plan_tier: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub billing_currency: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub billing_provider: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub daily_job_quota: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub jobs_today: Option<i64>,
+}
+
+/// `/me` v2 response with nested billing context (Task 5.1, 5.3).
+///
+/// Accessed via `GET /api/v1/me?v=2` (query parameter versioning per ADR).
+#[derive(Serialize, ToSchema)]
+pub(crate) struct MeV2Response {
+    /// Effective billing scope for current session.
+    pub billing_scope: String, // "user" | "workspace"
+    /// User billing summary (always present).
+    pub user: UserBillingSummary,
+    /// Workspace billing summary (present when billing_scope = "workspace").
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub current_workspace_billing: Option<WorkspaceBillingSummary>,
+    /// User memory/RAG configuration.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub memory_config: Option<MemoryConfig>,
+    /// Current workspace summary (always present when DB connected).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub current_workspace: Option<WorkspaceSummary>,
 }
 
 #[derive(Serialize, ToSchema)]

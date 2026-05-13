@@ -256,10 +256,10 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
 
   /// Agent 工作区外层视图，负责标题、范围输入与 pane 壳层布局。
   Widget _buildAgentWorkspacesSectionView(BuildContext context) {
-    final title = widget.sectionTitle ?? 'Agent 工作区';
+    final l10n = AppLocalizations.of(context)!;
+    final title = widget.sectionTitle ?? l10n.agentWorkspaceSectionTitle;
     final description =
-        widget.sectionDescription ??
-        '将 script 与 production 工作流拆分为独立面板，并把执行日志归并到单独执行动态面板。';
+        widget.sectionDescription ?? l10n.agentWorkspaceSectionDescription;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[

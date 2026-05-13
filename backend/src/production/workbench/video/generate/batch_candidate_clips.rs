@@ -14,8 +14,8 @@ use uuid::Uuid;
 
 use crate::error::ApiError;
 use crate::production::types::{GenerateVideoUploadItem, WorkbenchGenerateVideoBody};
-use crate::scope::http::require_owned_numeric_script_scope;
-use crate::scope::OwnedScriptScope;
+use crate::scope::http::require_script_write_scope_ref;
+use crate::scope::OwnedScriptInProject;
 use crate::state::AppState;
 
 use super::short_video_config::load_storyboard_generation_config;
@@ -32,7 +32,10 @@ struct CandidateStoryRow {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct BatchGenerateCandidateClipsBody {
-    pub project_id: i32,
+    #[serde(default)]
+    pub project_id: Option<i32>,
+    #[serde(default)]
+    pub project_uuid: Option<Uuid>,
     pub script_id: i32,
     #[serde(default)]
     pub track_id: Option<i32>,
@@ -86,6 +89,27 @@ pub(in crate::production) struct BatchGenerateCandidateClipsResponse {
     pub applied_defaults: BatchCandidateClipDefaultsApplied,
     #[serde(flatten)]
     pub generation: WorkbenchGenerateVideoResponse,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::BatchGenerateCandidateClipsBody;
+
+    #[test]
+    fn batch_generate_candidate_clips_body_accepts_project_uuid() {
+        let body: BatchGenerateCandidateClipsBody = serde_json::from_str(
+            r#"{"projectUuid":"550e8400-e29b-41d4-a716-446655440000","scriptId":2,"storyboardNumericIds":[1,2],"skipInFlightStoryboards":false}"#,
+        )
+        .unwrap();
+        assert_eq!(body.project_id, None);
+        assert_eq!(body.script_id, 2);
+        assert_eq!(body.storyboard_numeric_ids, Some(vec![1, 2]));
+        assert!(!body.skip_in_flight_storyboards);
+        assert_eq!(
+            body.project_uuid.map(|id| id.to_string()).as_deref(),
+            Some("550e8400-e29b-41d4-a716-446655440000")
+        );
+    }
 }
 
 #[inline]
@@ -182,6 +206,7 @@ pub(in crate::production) async fn post_workbench_batch_generate_candidate_clips
 ) -> Result<JsonResponse<BatchGenerateCandidateClipsResponse>, ApiError> {
     let BatchGenerateCandidateClipsBody {
         project_id,
+        project_uuid,
         script_id,
         track_id: track_override,
         storyboard_numeric_ids,
@@ -196,7 +221,8 @@ pub(in crate::production) async fn post_workbench_batch_generate_candidate_clips
     } = body;
 
     let (user_id, pool, scope_row) =
-        require_owned_numeric_script_scope(&state, &headers, project_id, script_id).await?;
+        require_script_write_scope_ref(&state, &headers, project_id, project_uuid, script_id)
+            .await?;
 
     let resolved = resolve_batch_defaults(
         pool,
@@ -287,7 +313,8 @@ pub(in crate::production) async fn post_workbench_batch_generate_candidate_clips
     }
 
     let workbench_body = WorkbenchGenerateVideoBody {
-        project_id,
+        project_id: Some(scope_row.project_numeric_id),
+        project_uuid: Some(scope_row.project_id),
         script_id,
         upload_data,
         prompt: resolved.prompt_overlay.clone(),
@@ -306,6 +333,7 @@ pub(in crate::production) async fn post_workbench_batch_generate_candidate_clips
         &scope_row,
         workbench_body,
         Some(&headers),
+        &state.billing_config,
     )
     .await?;
 
@@ -342,7 +370,7 @@ struct BatchEnqueueParamOverrides {
 
 async fn resolve_batch_defaults(
     pool: &PgPool,
-    scope_row: &OwnedScriptScope,
+    scope_row: &OwnedScriptInProject,
     overrides: BatchEnqueueParamOverrides,
 ) -> Result<ResolvedBatchDefaults, ApiError> {
     let pv_config = load_storyboard_generation_config(pool, scope_row.project_id).await?;

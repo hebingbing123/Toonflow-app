@@ -1,7 +1,7 @@
 use axum::{extract::State, http::HeaderMap, Json};
 
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, ApiError};
 use crate::harness::observe;
 use crate::state::AppState;
 
@@ -52,17 +52,18 @@ pub(crate) async fn query_memory(
         "summary" => "summary",
         "all" => "all",
         other => {
-            return Err(ApiError::BadRequest(format!(
-                "memoryType must be one of: message, summary, all (got {other})"
-            )));
+            return Err(bad_request_i18n(
+                &format!("memoryType must be one of: message, summary, all (got {other})"),
+                &format!("memoryType 必须是以下之一：message、summary、all（当前为 {other}）"),
+            ));
         }
     };
     // 验证 memory_tier 过滤字段（如果提供）
     if let Some(ref tier) = body.memory_tier {
         if !crate::settings::agent_memory::memory_tier::MemoryTier::is_valid(tier.as_str()) {
-            return Err(ApiError::BadRequest(
-                "memoryTier must be one of: style_bible, stage_summary, delta_memory, message"
-                    .into(),
+            return Err(bad_request_i18n(
+                "memoryTier must be one of: style_bible, stage_summary, delta_memory, message",
+                "memoryTier 必须是以下之一：style_bible、stage_summary、delta_memory、message",
             ));
         }
         if memory_tier_requires_scope(tier)
@@ -71,22 +72,25 @@ pub(crate) async fn query_memory(
                 .as_ref()
                 .is_some_and(scope_signature_has_any_dimension)
         {
-            return Err(ApiError::BadRequest(format!(
-                "memoryTier {tier} requires a non-empty scopeSignature"
-            )));
+            return Err(bad_request_i18n(
+                &format!("memoryTier {tier} requires a non-empty scopeSignature"),
+                &format!("memoryTier {tier} 需要非空的 scopeSignature"),
+            ));
         }
     } else if body
         .scope_signature
         .as_ref()
         .is_some_and(|scope| !scope_signature_has_any_dimension(scope))
     {
-        return Err(ApiError::BadRequest(
-            "scopeSignature must contain at least one scope dimension".into(),
+        return Err(bad_request_i18n(
+            "scopeSignature must contain at least one scope dimension",
+            "scopeSignature 至少需要包含一个范围维度",
         ));
     }
     if body.project_uuid.is_none() && body.project_id.is_none() {
-        return Err(ApiError::BadRequest(
-            "Provide projectUuid (preferred) or legacy numeric projectId".into(),
+        return Err(bad_request_i18n(
+            "Provide projectUuid (preferred) or legacy numeric projectId",
+            "请提供 projectUuid（推荐）或旧版数值 projectId",
         ));
     }
     let pool = state.require_pool()?;

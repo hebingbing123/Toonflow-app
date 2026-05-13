@@ -3,6 +3,7 @@ use serde_json::json;
 use sqlx::FromRow;
 use uuid::Uuid;
 
+use crate::error::helpers::{bad_request_i18n, conflict_i18n};
 use crate::error::ApiError;
 use crate::state::AppState;
 use crate::workspaces::ensure_personal_workspace;
@@ -354,8 +355,9 @@ fn resolve_daily_job_quota_override(
         AdminQuotaOverrideActionDto::Clear => Ok(None),
         AdminQuotaOverrideActionDto::Set => match body.daily_job_quota {
             Some(value) if value > 0 => Ok(Some(value)),
-            _ => Err(ApiError::BadRequest(
-                "dailyJobQuota must be a positive integer when action=set".into(),
+            _ => Err(bad_request_i18n(
+                "dailyJobQuota must be a positive integer when action=set",
+                "action=set 时，dailyJobQuota 必须是正整数",
             )),
         },
     }
@@ -1081,8 +1083,9 @@ pub async fn update_admin_workspace_governance(
     if cur.workspace_type == "personal"
         && body.workspace_lifecycle == AdminWorkspaceLifecycleActionDto::Archive
     {
-        return Err(ApiError::BadRequest(
-            "personal workspaces cannot be archived".into(),
+        return Err(bad_request_i18n(
+            "personal workspaces cannot be archived",
+            "个人工作区不能被归档",
         ));
     }
 
@@ -1103,8 +1106,9 @@ pub async fn update_admin_workspace_governance(
         AdminWorkspaceOpsNoteActionDto::Set => {
             let normalized = normalize_optional_text(body.ops_note.clone());
             if normalized.is_none() {
-                return Err(ApiError::BadRequest(
-                    "opsNote is required when opsNoteAction is set".into(),
+                return Err(bad_request_i18n(
+                    "opsNote is required when opsNoteAction is set",
+                    "opsNoteAction 为 set 时必须提供 opsNote",
                 ));
             }
             normalized
@@ -1120,8 +1124,9 @@ pub async fn update_admin_workspace_governance(
     let archived_changed = next_archived != cur.archived_at;
 
     if !meta_changed && !archived_changed {
-        return Err(ApiError::BadRequest(
-            "no governance changes requested".into(),
+        return Err(bad_request_i18n(
+            "no governance changes requested",
+            "未请求任何治理变更",
         ));
     }
 
@@ -1201,7 +1206,10 @@ pub async fn update_admin_workspace_member_remediation(
     match body.action {
         AdminWorkspaceMemberRemediationActionDto::Upsert => {
             let role = body.role.as_ref().ok_or_else(|| {
-                ApiError::BadRequest("role is required when action=upsert".into())
+                bad_request_i18n(
+                    "role is required when action=upsert",
+                    "action=upsert 时必须提供 role",
+                )
             })?;
             let current_role: Option<String> = sqlx::query_scalar(
                 r#"
@@ -1219,8 +1227,9 @@ pub async fn update_admin_workspace_member_remediation(
             if current_role.as_deref() == Some("owner")
                 || owner_user_id.is_some_and(|owner_id| owner_id == body.user_id)
             {
-                return Err(ApiError::Conflict(
-                    "workspace owner role must use owner-transfer flow".into(),
+                return Err(conflict_i18n(
+                    "workspace owner role must use owner-transfer flow",
+                    "工作区所有者角色必须使用所有者转移流程",
                 ));
             }
 
@@ -1289,8 +1298,9 @@ pub async fn update_admin_workspace_member_remediation(
             if current_role == "owner"
                 || owner_user_id.is_some_and(|owner_id| owner_id == body.user_id)
             {
-                return Err(ApiError::Conflict(
-                    "workspace owner must use owner-transfer flow before removal".into(),
+                return Err(conflict_i18n(
+                    "workspace owner must use owner-transfer flow before removal",
+                    "工作区所有者必须在移除前使用所有者转移流程",
                 ));
             }
 
@@ -1387,13 +1397,15 @@ pub async fn transfer_admin_workspace_owner(
     };
 
     if workspace_type == "personal" {
-        return Err(ApiError::BadRequest(
-            "cannot transfer owner of a personal workspace".into(),
+        return Err(bad_request_i18n(
+            "cannot transfer owner of a personal workspace",
+            "不能转移个人工作区的所有者",
         ));
     }
     if body.target_user_id == owner_user_id {
-        return Err(ApiError::Conflict(
-            "target owner must differ from current owner".into(),
+        return Err(conflict_i18n(
+            "target owner must differ from current owner",
+            "目标所有者必须与当前所有者不同",
         ));
     }
 
@@ -1411,8 +1423,9 @@ pub async fn transfer_admin_workspace_owner(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
     let Some(target_previous_role) = target_role else {
-        return Err(ApiError::Conflict(
-            "target user must already be a workspace member".into(),
+        return Err(conflict_i18n(
+            "target user must already be a workspace member",
+            "目标用户必须已经是工作区成员",
         ));
     };
 
@@ -1786,8 +1799,9 @@ pub async fn update_admin_project_governance(
         AdminWorkspaceOpsNoteActionDto::Set => {
             let normalized = normalize_optional_text(body.ops_note.clone());
             if normalized.is_none() {
-                return Err(ApiError::BadRequest(
-                    "opsNote is required when opsNoteAction is set".into(),
+                return Err(bad_request_i18n(
+                    "opsNote is required when opsNoteAction is set",
+                    "opsNoteAction 为 set 时必须提供 opsNote",
                 ));
             }
             normalized
@@ -1803,8 +1817,9 @@ pub async fn update_admin_project_governance(
     let archived_changed = next_archived != cur.archived_at;
 
     if !meta_changed && !archived_changed {
-        return Err(ApiError::BadRequest(
-            "no governance changes requested".into(),
+        return Err(bad_request_i18n(
+            "no governance changes requested",
+            "未请求任何治理变更",
         ));
     }
 
@@ -1867,11 +1882,15 @@ pub async fn update_admin_project_batch_governance(
     let _pool = state.require_pool()?;
     let requested_count = body.project_ids.len() as i64;
     if body.project_ids.is_empty() {
-        return Err(ApiError::BadRequest("projectIds must not be empty".into()));
+        return Err(bad_request_i18n(
+            "projectIds must not be empty",
+            "projectIds 不能为空",
+        ));
     }
     if body.project_ids.len() > 50 {
-        return Err(ApiError::BadRequest(
-            "projectIds must not contain more than 50 items".into(),
+        return Err(bad_request_i18n(
+            "projectIds must not contain more than 50 items",
+            "projectIds 不能超过 50 项",
         ));
     }
 
@@ -1881,8 +1900,9 @@ pub async fn update_admin_project_batch_governance(
         AdminWorkspaceOpsNoteActionDto::Set => {
             let normalized = normalize_optional_text(body.ops_note.clone());
             if normalized.is_none() {
-                return Err(ApiError::BadRequest(
-                    "opsNote is required when opsNoteAction is set".into(),
+                return Err(bad_request_i18n(
+                    "opsNote is required when opsNoteAction is set",
+                    "opsNoteAction 为 set 时必须提供 opsNote",
                 ));
             }
             Some(normalized)
@@ -1904,7 +1924,8 @@ pub async fn update_admin_project_batch_governance(
 
         match detail {
             Ok(_) => updated_ids.push(*project_id),
-            Err(ApiError::BadRequest(message)) if message == "no governance changes requested" => {}
+            Err(ApiError::BadRequest(message))
+                if message.contains("no governance changes requested") => {}
             Err(error) => return Err(error),
         }
     }
@@ -1944,8 +1965,9 @@ pub async fn transfer_admin_project_owner(
     };
 
     if body.target_user_id == owner_user_id {
-        return Err(ApiError::Conflict(
-            "target owner must differ from current owner".into(),
+        return Err(conflict_i18n(
+            "target owner must differ from current owner",
+            "目标所有者必须与当前所有者不同",
         ));
     }
 
@@ -1963,8 +1985,9 @@ pub async fn transfer_admin_project_owner(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
     let Some(target_workspace_role) = target_workspace_role else {
-        return Err(ApiError::Conflict(
-            "target user must already be a workspace member".into(),
+        return Err(conflict_i18n(
+            "target user must already be a workspace member",
+            "目标用户必须已经是工作区成员",
         ));
     };
 
@@ -2117,13 +2140,15 @@ pub async fn update_admin_user_governance(
     let next_ops_note = normalize_optional_text(body.ops_note);
 
     if next_operational_status == "active" && next_reason.is_some() {
-        return Err(ApiError::BadRequest(
-            "operationalStatusReason is only allowed when status=suspended".into(),
+        return Err(bad_request_i18n(
+            "operationalStatusReason is only allowed when status=suspended",
+            "仅当 status=suspended 时才允许提供 operationalStatusReason",
         ));
     }
     if next_operational_status == "suspended" && next_reason.is_none() {
-        return Err(ApiError::BadRequest(
-            "operationalStatusReason is required when status=suspended".into(),
+        return Err(bad_request_i18n(
+            "operationalStatusReason is required when status=suspended",
+            "status=suspended 时必须提供 operationalStatusReason",
         ));
     }
 
@@ -2205,7 +2230,10 @@ pub async fn update_admin_user_workspace_context(
         }
         AdminUserWorkspaceContextActionDto::SetToWorkspace => {
             let workspace_id = body.workspace_id.ok_or_else(|| {
-                ApiError::BadRequest("workspaceId is required when action=set_to_workspace".into())
+                bad_request_i18n(
+                    "workspaceId is required when action=set_to_workspace",
+                    "action=set_to_workspace 时必须提供 workspaceId",
+                )
             })?;
             let row: Option<(Option<DateTime<Utc>>,)> = sqlx::query_as(
                 r#"
@@ -2224,13 +2252,15 @@ pub async fn update_admin_user_workspace_context(
             .await
             .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
             let Some((archived_at,)) = row else {
-                return Err(ApiError::BadRequest(
-                    "user must still be a member of workspaceId".into(),
+                return Err(bad_request_i18n(
+                    "user must still be a member of workspaceId",
+                    "用户仍需是 workspaceId 对应工作区的成员",
                 ));
             };
             if archived_at.is_some() {
-                return Err(ApiError::BadRequest(
-                    "cannot switch current workspace to an archived workspace".into(),
+                return Err(bad_request_i18n(
+                    "cannot switch current workspace to an archived workspace",
+                    "不能将当前工作区切换为已归档工作区",
                 ));
             }
             workspace_id
@@ -2254,4 +2284,151 @@ pub async fn update_admin_user_workspace_context(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     get_admin_user_detail(state, user_id).await
+}
+
+/// Workspace billing query storage function (Task 8.1).
+/// Returns workspace billing information with PII hygiene (aggregates only).
+pub async fn get_admin_workspace_billing(
+    state: &AppState,
+    query: super::types::AdminWorkspaceBillingQuery,
+) -> Result<Vec<super::types::AdminWorkspaceBillingResponse>, ApiError> {
+    let pool = state.require_pool()?;
+    let limit = query.limit.unwrap_or(50).clamp(1, 200);
+    let offset = query.offset.unwrap_or(0).max(0);
+
+    #[derive(Debug, FromRow)]
+    struct WorkspaceBillingRow {
+        workspace_id: Uuid,
+        workspace_name: String,
+        workspace_type: String,
+        owner_user_id: Uuid,
+        owner_email: Option<String>,
+        plan_tier: Option<String>,
+        billing_currency: Option<String>,
+        billing_provider: Option<String>,
+        daily_job_quota: Option<i64>,
+        jobs_today: i64,
+        jobs_this_month: i64,
+        member_count: i64,
+        project_count: i64,
+        created_at: DateTime<Utc>,
+    }
+
+    let rows = if let Some(workspace_id) = query.workspace_id {
+        // Single workspace query
+        sqlx::query_as::<_, WorkspaceBillingRow>(
+            r#"
+            SELECT
+              w.id AS workspace_id,
+              w.name AS workspace_name,
+              w.workspace_type,
+              w.owner_user_id,
+              owner.email AS owner_email,
+              w.plan_tier,
+              w.billing_currency,
+              w.billing_provider,
+              w.daily_job_quota,
+              (
+                SELECT COUNT(*)::bigint
+                FROM public.app_generation_job j
+                WHERE j.workspace_id = w.id
+                  AND j.created_at >= DATE_TRUNC('day', NOW() AT TIME ZONE 'UTC')
+              ) AS jobs_today,
+              (
+                SELECT COUNT(*)::bigint
+                FROM public.app_generation_job j
+                WHERE j.workspace_id = w.id
+                  AND j.created_at >= DATE_TRUNC('month', NOW() AT TIME ZONE 'UTC')
+              ) AS jobs_this_month,
+              (
+                SELECT COUNT(*)::bigint
+                FROM public.app_workspace_member m
+                WHERE m.workspace_id = w.id
+              ) AS member_count,
+              (
+                SELECT COUNT(*)::bigint
+                FROM public.app_project p
+                WHERE p.workspace_id = w.id
+                  AND p.archived_at IS NULL
+              ) AS project_count,
+              w.created_at
+            FROM public.app_workspace w
+            LEFT JOIN auth.users owner ON owner.id = w.owner_user_id
+            WHERE w.id = $1
+            "#,
+        )
+        .bind(workspace_id)
+        .fetch_all(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    } else {
+        // List all workspaces with billing info
+        sqlx::query_as::<_, WorkspaceBillingRow>(
+            r#"
+            SELECT
+              w.id AS workspace_id,
+              w.name AS workspace_name,
+              w.workspace_type,
+              w.owner_user_id,
+              owner.email AS owner_email,
+              w.plan_tier,
+              w.billing_currency,
+              w.billing_provider,
+              w.daily_job_quota,
+              (
+                SELECT COUNT(*)::bigint
+                FROM public.app_generation_job j
+                WHERE j.workspace_id = w.id
+                  AND j.created_at >= DATE_TRUNC('day', NOW() AT TIME ZONE 'UTC')
+              ) AS jobs_today,
+              (
+                SELECT COUNT(*)::bigint
+                FROM public.app_generation_job j
+                WHERE j.workspace_id = w.id
+                  AND j.created_at >= DATE_TRUNC('month', NOW() AT TIME ZONE 'UTC')
+              ) AS jobs_this_month,
+              (
+                SELECT COUNT(*)::bigint
+                FROM public.app_workspace_member m
+                WHERE m.workspace_id = w.id
+              ) AS member_count,
+              (
+                SELECT COUNT(*)::bigint
+                FROM public.app_project p
+                WHERE p.workspace_id = w.id
+                  AND p.archived_at IS NULL
+              ) AS project_count,
+              w.created_at
+            FROM public.app_workspace w
+            LEFT JOIN auth.users owner ON owner.id = w.owner_user_id
+            ORDER BY w.created_at DESC
+            LIMIT $1 OFFSET $2
+            "#,
+        )
+        .bind(limit)
+        .bind(offset)
+        .fetch_all(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    };
+
+    Ok(rows
+        .into_iter()
+        .map(|row| super::types::AdminWorkspaceBillingResponse {
+            workspace_id: row.workspace_id,
+            workspace_name: row.workspace_name,
+            workspace_type: row.workspace_type,
+            owner_user_id: row.owner_user_id,
+            owner_email: row.owner_email,
+            plan_tier: row.plan_tier,
+            billing_currency: row.billing_currency,
+            billing_provider: row.billing_provider,
+            daily_job_quota: row.daily_job_quota,
+            jobs_today: row.jobs_today,
+            jobs_this_month: row.jobs_this_month,
+            member_count: row.member_count,
+            project_count: row.project_count,
+            created_at: row.created_at,
+        })
+        .collect())
 }

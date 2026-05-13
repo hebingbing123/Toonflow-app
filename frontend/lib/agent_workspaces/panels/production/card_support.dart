@@ -3,12 +3,14 @@ part of 'card.dart';
 extension _AgentWorkspaceProductionCardSupport
     on _AgentWorkspaceProductionCardState {
   List<String> _buildResultSummaryLines() {
+    final l10n = AppLocalizations.of(context)!;
     final toolName = widget.workspaceLastToolName?.trim();
     final result = widget.workspaceLastToolResultData;
     final lines = <String>[
       if (toolName != null && toolName.isNotEmpty) 'tool=$toolName',
       if (result != null) 'resultType=${result.runtimeType}',
       ...summarizeProductionResultSnapshot(
+        l10n,
         toolName,
         result,
         _suggestedFlowKeyLine,

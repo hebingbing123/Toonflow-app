@@ -10,7 +10,7 @@ mod types;
 #[allow(unused_imports)]
 pub(crate) use batch_generate::__path_post_storyboard_batch_generate_image;
 pub(in crate::production) use batch_generate::post_storyboard_batch_generate_image;
-pub(crate) use common::require_owned_normalized_storyboards_scope;
+pub(crate) use common::require_owned_normalized_storyboards_scope_ref;
 #[allow(unused_imports)]
 pub(crate) use export::__path_post_export_image;
 pub(in crate::production) use export::post_export_image;

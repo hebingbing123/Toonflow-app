@@ -1,6 +1,6 @@
 use std::path::{Path, PathBuf};
 
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, ApiError};
 use crate::prompting::skills::skills_root;
 
 use super::super::slots::{MANUAL_SLOTS, MAX_README_BYTES, MAX_SLOT_BYTES};
@@ -9,22 +9,22 @@ use super::super::validation::is_safe_style_component;
 
 fn read_limited_utf8(path: &Path, max_bytes: u64) -> Result<String, ApiError> {
     let meta = std::fs::metadata(path).map_err(|e| {
-        ApiError::BadRequest(format!(
-            "visual-manual: cannot stat {}: {e}",
-            path.display()
-        ))
+        bad_request_i18n(
+            &format!("visual-manual: cannot stat {}: {e}", path.display()),
+            &format!("visual-manual：无法读取 {} 的元数据：{e}", path.display()),
+        )
     })?;
     if meta.len() > max_bytes {
-        return Err(ApiError::BadRequest(format!(
-            "visual-manual: file too large: {}",
-            path.display()
-        )));
+        return Err(bad_request_i18n(
+            &format!("visual-manual: file too large: {}", path.display()),
+            &format!("visual-manual：文件过大：{}", path.display()),
+        ));
     }
     std::fs::read_to_string(path).map_err(|e| {
-        ApiError::BadRequest(format!(
-            "visual-manual: cannot read {}: {e}",
-            path.display()
-        ))
+        bad_request_i18n(
+            &format!("visual-manual: cannot read {}: {e}", path.display()),
+            &format!("visual-manual：无法读取 {}：{e}", path.display()),
+        )
     })
 }
 
@@ -108,20 +108,31 @@ pub(crate) fn load_visual_manual() -> Result<VisualManualResponse, ApiError> {
     let root = skills_root();
     let art = root.join("art_skills");
     if !art.is_dir() {
-        return Err(ApiError::BadRequest(
-            "art_skills directory missing (expected backend/data/skills/art_skills)".into(),
+        return Err(bad_request_i18n(
+            "art_skills directory missing (expected backend/data/skills/art_skills)",
+            "art_skills 目录缺失（预期为 backend/data/skills/art_skills）",
         ));
     }
 
     let mut keys: Vec<String> = Vec::new();
-    for entry in std::fs::read_dir(&art)
-        .map_err(|e| ApiError::BadRequest(format!("visual-manual: cannot read art_skills: {e}")))?
-    {
-        let entry = entry
-            .map_err(|e| ApiError::BadRequest(format!("visual-manual: art_skills entry: {e}")))?;
-        let ft = entry
-            .file_type()
-            .map_err(|e| ApiError::BadRequest(format!("visual-manual: file_type: {e}")))?;
+    for entry in std::fs::read_dir(&art).map_err(|e| {
+        bad_request_i18n(
+            &format!("visual-manual: cannot read art_skills: {e}"),
+            &format!("visual-manual：无法读取 art_skills：{e}"),
+        )
+    })? {
+        let entry = entry.map_err(|e| {
+            bad_request_i18n(
+                &format!("visual-manual: art_skills entry: {e}"),
+                &format!("visual-manual：读取 art_skills 条目失败：{e}"),
+            )
+        })?;
+        let ft = entry.file_type().map_err(|e| {
+            bad_request_i18n(
+                &format!("visual-manual: file_type: {e}"),
+                &format!("visual-manual：读取 file_type 失败：{e}"),
+            )
+        })?;
         if !ft.is_dir() {
             continue;
         }

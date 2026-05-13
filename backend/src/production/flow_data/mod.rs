@@ -31,6 +31,20 @@ pub(crate) async fn resolve_owned_production_scope(
     Ok((scope.project_id, scope.script_id, script_content))
 }
 
+pub(crate) async fn resolve_owned_production_scope_by_project_id(
+    pool: &sqlx::PgPool,
+    uid: Uuid,
+    project_id: Uuid,
+    script_numeric_id: i32,
+) -> Result<(Uuid, Uuid, Option<String>), ApiError> {
+    let scope = scope::owned_script_in_project(pool, uid, project_id, script_numeric_id)
+        .await
+        .map_err(|e| e.into_api_error())?;
+
+    let script_content = rows::fetch_script_content(pool, scope.script_id).await?;
+    Ok((scope.project_id, scope.script_id, script_content))
+}
+
 pub(crate) async fn load_production_flow_json_by_scope(
     pool: &sqlx::PgPool,
     project_id: Uuid,

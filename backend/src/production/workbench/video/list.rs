@@ -5,9 +5,10 @@ use axum::{
 };
 
 use super::{VideoListBody, VideoListResponse};
-use crate::error::ApiError;
-use crate::scope::http::require_owned_numeric_project_scope_id;
+use crate::error::{bad_request_i18n, ApiError};
+use crate::scope::http::require_authenticated_user;
 use crate::state::AppState;
+use crate::{projects::routes::common::require_project_workspace_member_scope, scope};
 
 #[utoipa::path(
     post,
@@ -32,8 +33,22 @@ pub(in crate::production) async fn post_workbench_get_video_list(
     headers: HeaderMap,
     Json(body): Json<VideoListBody>,
 ) -> Result<JsonResponse<VideoListResponse>, ApiError> {
-    let (pool, project_id) =
-        require_owned_numeric_project_scope_id(&state, &headers, body.project_id).await?;
+    let uid = require_authenticated_user(&state, &headers)?;
+    let pool = state.require_pool()?;
+    let project_id = if let Some(project_uuid) = body.project_uuid {
+        let _scope = require_project_workspace_member_scope(&state, uid, project_uuid).await?;
+        project_uuid
+    } else {
+        let project_numeric_id = body.project_id.ok_or_else(|| {
+            bad_request_i18n(
+                "projectId or projectUuid is required",
+                "projectId 或 projectUuid 至少需要提供一个",
+            )
+        })?;
+        scope::owned_project_id_by_numeric(pool, uid, project_numeric_id)
+            .await
+            .map_err(|e| e.into_api_error())?
+    };
 
     let limit = body.limit.map(|l| l.clamp(1, 100)).unwrap_or(50);
     let offset = body.offset.unwrap_or(0).max(0);

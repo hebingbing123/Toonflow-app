@@ -1665,6 +1665,10 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get globalSearchNovelOrEventNavigatedHint =>
+      '请从首页主导航打开「项目列表」，在目标项目内使用小说工作台查看章节与事件。';
+
+  @override
   String accountDeletedSummary(
     int workspaceCount,
     int projectCount,

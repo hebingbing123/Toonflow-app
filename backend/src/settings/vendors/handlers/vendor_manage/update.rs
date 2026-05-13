@@ -3,7 +3,7 @@
 use axum::{extract::State, http::HeaderMap, Json};
 
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{validate_non_empty_string, ApiError};
 use crate::settings::vendors::dto::{
     EnableVendorBody, UpdateVendorBody, UpdateVendorCodeBody, UpdateVendorResponse,
 };
@@ -33,9 +33,7 @@ pub(crate) async fn post_update_vendor(
 ) -> Result<Json<UpdateVendorResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let vendor_id = body.id.trim();
-    if vendor_id.is_empty() {
-        return Err(ApiError::BadRequest("id must be non-empty".into()));
-    }
+    validate_non_empty_string(vendor_id, "id")?;
     let pool = require_pool(&state)?;
 
     let mut cfg = load_vendor_config(pool, uid).await?;
@@ -87,9 +85,7 @@ pub(crate) async fn post_enable_vendor(
 ) -> Result<Json<serde_json::Value>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let vendor_id = body.id.trim();
-    if vendor_id.is_empty() {
-        return Err(ApiError::BadRequest("id must be non-empty".into()));
-    }
+    validate_non_empty_string(vendor_id, "id")?;
     let pool = require_pool(&state)?;
 
     let mut cfg = load_vendor_config(pool, uid).await?;
@@ -124,12 +120,8 @@ pub(crate) async fn post_update_vendor_code(
 ) -> Result<Json<serde_json::Value>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let vendor_id = body.id.trim();
-    if vendor_id.is_empty() {
-        return Err(ApiError::BadRequest("id must be non-empty".into()));
-    }
-    if body.ts_code.trim().is_empty() {
-        return Err(ApiError::BadRequest("tsCode must be non-empty".into()));
-    }
+    validate_non_empty_string(vendor_id, "id")?;
+    validate_non_empty_string(body.ts_code.trim(), "tsCode")?;
 
     let pool = require_pool(&state)?;
     let mut cfg = load_vendor_config(pool, uid).await?;

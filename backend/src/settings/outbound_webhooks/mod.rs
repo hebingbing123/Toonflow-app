@@ -19,6 +19,7 @@ use utoipa::{IntoParams, ToSchema};
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
+use crate::error::helpers::{bad_request_i18n, forbidden_i18n};
 use crate::error::ApiError;
 use crate::state::AppState;
 
@@ -149,15 +150,20 @@ pub struct OutboundWebhookDeliveriesQuery {
 fn validate_url(raw: &str) -> Result<String, ApiError> {
     let trimmed = raw.trim();
     if trimmed.is_empty() {
-        return Err(ApiError::BadRequest("url must be non-empty".into()));
+        return Err(bad_request_i18n("url must be non-empty", "url 不能为空"));
     }
-    let parsed = url::Url::parse(trimmed)
-        .map_err(|_| ApiError::BadRequest("url must be a valid absolute URL".into()))?;
+    let parsed = url::Url::parse(trimmed).map_err(|_| {
+        bad_request_i18n(
+            "url must be a valid absolute URL",
+            "url 必须是有效的绝对 URL",
+        )
+    })?;
     match parsed.scheme() {
         "http" | "https" => {}
         _ => {
-            return Err(ApiError::BadRequest(
-                "url must start with http:// or https://".into(),
+            return Err(bad_request_i18n(
+                "url must start with http:// or https://",
+                "url 必须以 http:// 或 https:// 开头",
             ));
         }
     }
@@ -194,10 +200,16 @@ fn normalize_event_types(raw: Option<Vec<String>>) -> Result<Vec<String>, ApiErr
     }
     for x in &v {
         if !OUTBOUND_WEBHOOK_PLATFORM_EVENT_TYPES.contains(&x.as_str()) {
-            return Err(ApiError::BadRequest(format!(
-                "unknown event type {x:?}; allowed: {}",
-                OUTBOUND_WEBHOOK_PLATFORM_EVENT_TYPES.join(", ")
-            )));
+            return Err(bad_request_i18n(
+                &format!(
+                    "unknown event type {x:?}; allowed: {}",
+                    OUTBOUND_WEBHOOK_PLATFORM_EVENT_TYPES.join(", ")
+                ),
+                &format!(
+                    "未知的 event type {x:?}；允许值：{}",
+                    OUTBOUND_WEBHOOK_PLATFORM_EVENT_TYPES.join(", ")
+                ),
+            ));
         }
     }
     let set: BTreeSet<String> = v.into_iter().collect();
@@ -287,8 +299,9 @@ async fn require_workspace_member(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
     if !ok {
-        return Err(ApiError::Forbidden(
-            "not a member of the selected workspace".into(),
+        return Err(forbidden_i18n(
+            "not a member of the selected workspace",
+            "不是所选工作区的成员",
         ));
     }
     Ok(())
@@ -302,10 +315,10 @@ async fn probe_url_reachable(http: &reqwest::Client, url: &str) -> Result<(), Ap
             return Ok(());
         }
         if s.is_server_error() {
-            return Err(ApiError::BadRequest(format!(
-                "webhook URL probe failed: HTTP {}",
-                s.as_u16()
-            )));
+            return Err(bad_request_i18n(
+                &format!("webhook URL probe failed: HTTP {}", s.as_u16()),
+                &format!("webhook URL 探测失败：HTTP {}", s.as_u16()),
+            ));
         }
     }
     let try_get = http.get(url).timeout(Duration::from_secs(5)).send().await;
@@ -315,15 +328,16 @@ async fn probe_url_reachable(http: &reqwest::Client, url: &str) -> Result<(), Ap
             if s.is_success() || s.is_redirection() {
                 Ok(())
             } else {
-                Err(ApiError::BadRequest(format!(
-                    "webhook URL not reachable: HTTP {}",
-                    s.as_u16()
-                )))
+                Err(bad_request_i18n(
+                    &format!("webhook URL not reachable: HTTP {}", s.as_u16()),
+                    &format!("webhook URL 不可达：HTTP {}", s.as_u16()),
+                ))
             }
         }
-        Err(e) => Err(ApiError::BadRequest(format!(
-            "webhook URL not reachable: {e}"
-        ))),
+        Err(e) => Err(bad_request_i18n(
+            &format!("webhook URL not reachable: {e}"),
+            &format!("webhook URL 不可达：{e}"),
+        )),
     }
 }
 
@@ -701,7 +715,10 @@ pub(crate) async fn post_outbound_webhook_test(
         .trim()
         .to_string();
     if event_type.is_empty() {
-        return Err(ApiError::BadRequest("eventType must be non-empty".into()));
+        return Err(bad_request_i18n(
+            "eventType must be non-empty",
+            "eventType 不能为空",
+        ));
     }
 
     let payload = json!({

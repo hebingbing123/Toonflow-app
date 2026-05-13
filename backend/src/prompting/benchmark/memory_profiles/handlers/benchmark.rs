@@ -7,7 +7,11 @@ use axum::{
 };
 use uuid::Uuid;
 
-use crate::{auth::require_user_uuid, error::ApiError, state::AppState};
+use crate::{
+    auth::require_user_uuid,
+    error::{bad_request_i18n, ApiError},
+    state::AppState,
+};
 
 use super::super::types::{
     MemoryBudgetProfileSnapshot, QualityMetrics, RoiConclusion, RoiConclusionType,
@@ -75,14 +79,14 @@ pub async fn get_experiment_roi(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     if variants.is_empty() {
-        return Err(ApiError::BadRequest("实验无变体".to_string()));
+        return Err(bad_request_i18n("Experiment has no variants", "实验无变体"));
     }
 
     // 3. 获取基线变体（用于计算增量）
     let baseline_variant = variants
         .iter()
         .find(|v| v.2)
-        .ok_or_else(|| ApiError::BadRequest("实验无基线变体".to_string()))?;
+        .ok_or_else(|| bad_request_i18n("Experiment has no baseline variant", "实验无基线变体"))?;
 
     let results: Vec<ExperimentResultRow> = sqlx::query_as(
         r#"

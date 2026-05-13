@@ -7,6 +7,7 @@ use crate::auth::api_keys::{
     compose_api_key_token, generate_api_key_material, generate_api_key_secret_material,
     key_hint_from_secret,
 };
+use crate::error::helpers::bad_request_i18n;
 use crate::error::ApiError;
 use crate::state::AppState;
 
@@ -91,11 +92,15 @@ fn into_record(row: ApiKeyRow) -> Result<ApiKeyRecord, ApiError> {
 fn normalized_display_name(raw: &str) -> Result<String, ApiError> {
     let name = raw.trim();
     if name.is_empty() {
-        return Err(ApiError::BadRequest("displayName must be non-empty".into()));
+        return Err(bad_request_i18n(
+            "displayName must be non-empty",
+            "displayName 不能为空",
+        ));
     }
     if name.chars().count() > 80 {
-        return Err(ApiError::BadRequest(
-            "displayName must be 80 characters or fewer".into(),
+        return Err(bad_request_i18n(
+            "displayName must be 80 characters or fewer",
+            "displayName 长度不能超过 80 个字符",
         ));
     }
     Ok(name.to_string())
@@ -113,8 +118,9 @@ fn validate_expires_at(
 ) -> Result<Option<DateTime<Utc>>, ApiError> {
     if let Some(value) = expires_at {
         if value <= Utc::now() {
-            return Err(ApiError::BadRequest(
-                "expiresAt must be in the future".into(),
+            return Err(bad_request_i18n(
+                "expiresAt must be in the future",
+                "expiresAt 必须是未来时间",
             ));
         }
         return Ok(Some(value));

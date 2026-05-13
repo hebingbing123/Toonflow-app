@@ -7,10 +7,12 @@ use axum::{
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use sqlx::{Executor, FromRow, Postgres, QueryBuilder};
+use std::collections::HashMap;
 use utoipa::{IntoParams, ToSchema};
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
+use crate::error::helpers::{bad_request_i18n, forbidden_i18n};
 use crate::error::ApiError;
 use crate::state::AppState;
 
@@ -134,6 +136,8 @@ pub struct ListContentComplianceReportsQuery {
     #[serde(default)]
     sla_bucket: Option<String>,
     #[serde(default)]
+    escalation_stage: Option<String>,
+    #[serde(default)]
     workspace_id: Option<Uuid>,
     #[serde(default)]
     limit: Option<i64>,
@@ -161,6 +165,19 @@ pub struct ReassignContentReportsBody {
     actor_label: Option<String>,
     #[serde(default)]
     note: Option<String>,
+}
+
+#[derive(Debug, Clone, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct AutoRebalanceContentReportsBody {
+    #[serde(default)]
+    actor_label: Option<String>,
+    #[serde(default)]
+    note: Option<String>,
+    #[serde(default)]
+    dry_run: Option<bool>,
+    #[serde(default)]
+    max_moves: Option<i64>,
 }
 
 #[derive(Debug, Clone, Deserialize, IntoParams, ToSchema)]
@@ -230,6 +247,7 @@ pub struct ContentComplianceReportItem {
     category: String,
     severity: String,
     status: String,
+    escalation_stage: String,
     detail: Option<String>,
     snapshot: Value,
     claimed_by_label: Option<String>,
@@ -285,6 +303,15 @@ pub struct ContentComplianceOwnerSummary {
     critical_open_count: i64,
     overdue_count: i64,
     oldest_open_age_hours: i64,
+    over_capacity: bool,
+    over_capacity_by: i64,
+}
+
+#[derive(Debug, Clone, Serialize, ToSchema, FromRow)]
+#[serde(rename_all = "camelCase")]
+pub struct ContentComplianceEscalationSummary {
+    escalation_stage: String,
+    report_count: i64,
 }
 
 #[derive(Debug, Clone, Serialize, ToSchema)]
@@ -292,9 +319,30 @@ pub struct ContentComplianceOwnerSummary {
 pub struct ListContentComplianceReportsResponse {
     summary: ContentComplianceQueueSummary,
     sla: ContentComplianceQueueSlaSummary,
+    capacity: ContentComplianceQueueCapacitySummary,
+    alerts: Vec<ContentComplianceQueueAlert>,
     workspace_summaries: Vec<ContentComplianceWorkspaceSummary>,
     owner_summaries: Vec<ContentComplianceOwnerSummary>,
+    escalation_summaries: Vec<ContentComplianceEscalationSummary>,
     items: Vec<ContentComplianceReportItem>,
+}
+
+#[derive(Debug, Clone, Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ContentComplianceQueueCapacitySummary {
+    reviewer_capacity_limit: i64,
+    overloaded_reviewer_count: i64,
+    overloaded_claimed_count: i64,
+}
+
+#[derive(Debug, Clone, Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ContentComplianceQueueAlert {
+    level: String,
+    stage: String,
+    count: i64,
+    title: String,
+    message: String,
 }
 
 #[derive(Debug, Clone, Serialize, ToSchema, FromRow)]
@@ -341,6 +389,24 @@ pub struct ReassignContentReportsResponse {
     results: Vec<BatchMutateContentReportsResultItem>,
 }
 
+#[derive(Debug, Clone, Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct AutoRebalanceMoveItem {
+    report_id: Uuid,
+    from_assignee_label: String,
+    to_assignee_label: String,
+}
+
+#[derive(Debug, Clone, Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct AutoRebalanceContentReportsResponse {
+    dry_run: bool,
+    reviewer_capacity_limit: i64,
+    planned_move_count: i64,
+    executed_move_count: i64,
+    moves: Vec<AutoRebalanceMoveItem>,
+}
+
 #[derive(Debug, FromRow)]
 struct SummaryRow {
     pending: i64,
@@ -360,6 +426,12 @@ struct SlaSummaryRow {
     oldest_open_age_hours: i64,
 }
 
+#[derive(Debug, FromRow)]
+struct ReviewerLoadRow {
+    owner_label: String,
+    claimed_count: i64,
+}
+
 fn internal_ops_token_expected() -> Option<String> {
     std::env::var("TOONFLOW_INTERNAL_OPS_TOKEN")
         .ok()
@@ -369,8 +441,9 @@ fn internal_ops_token_expected() -> Option<String> {
 
 fn require_internal_ops_token(headers: &HeaderMap) -> Result<(), ApiError> {
     let Some(expected) = internal_ops_token_expected() else {
-        return Err(ApiError::Forbidden(
-            "content compliance console disabled (set TOONFLOW_INTERNAL_OPS_TOKEN)".into(),
+        return Err(forbidden_i18n(
+            "content compliance console disabled (set TOONFLOW_INTERNAL_OPS_TOKEN)",
+            "内容合规控制台已禁用（请设置 TOONFLOW_INTERNAL_OPS_TOKEN）",
         ));
     };
     let got = headers
@@ -398,6 +471,51 @@ fn normalize_optional_filter(raw: Option<&str>) -> Option<String> {
     raw.map(str::trim)
         .filter(|value| !value.is_empty())
         .map(ToOwned::to_owned)
+}
+
+fn escalation_stage_sql(alias: &str, reviewer_capacity_limit: i64) -> String {
+    format!(
+        r#"
+        CASE
+          WHEN {alias}.status IN ('resolved', 'dismissed') THEN 'closed'
+          WHEN {alias}.status = 'pending' AND {alias}.severity = 'critical' THEN 'critical_unclaimed'
+          WHEN {alias}.status = 'claimed'
+            AND COALESCE(NULLIF(TRIM({alias}.claimed_by_label), ''), 'unclaimed') <> 'unclaimed'
+            AND (
+              SELECT COUNT(*)
+              FROM public.app_content_compliance_report r2
+              WHERE r2.status IN ('pending', 'claimed')
+                AND COALESCE(NULLIF(TRIM(r2.claimed_by_label), ''), 'unclaimed') =
+                    COALESCE(NULLIF(TRIM({alias}.claimed_by_label), ''), 'unclaimed')
+            ) > {reviewer_capacity_limit}
+            THEN 'over_capacity'
+          WHEN {alias}.status = 'claimed'
+            AND {alias}.claimed_at IS NOT NULL
+            AND {alias}.claimed_at <= NOW() - INTERVAL '24 hours'
+            THEN 'stalled_claimed'
+          WHEN {alias}.status IN ('pending', 'claimed')
+            AND {alias}.created_at <= NOW() - INTERVAL '72 hours'
+            THEN 'escalated_72h'
+          WHEN {alias}.status IN ('pending', 'claimed')
+            AND (
+              {alias}.severity = 'high'
+              OR {alias}.created_at <= NOW() - INTERVAL '24 hours'
+            )
+            THEN 'urgent'
+          ELSE 'watch'
+        END
+        "#,
+        alias = alias,
+        reviewer_capacity_limit = reviewer_capacity_limit
+    )
+}
+
+fn reviewer_capacity_limit() -> i64 {
+    std::env::var("TOONFLOW_COMPLIANCE_REVIEWER_CAPACITY")
+        .ok()
+        .and_then(|value| value.trim().parse::<i64>().ok())
+        .filter(|value| *value > 0)
+        .unwrap_or(12)
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -502,8 +620,9 @@ where
         ContentReportDisposition::None => Ok(()),
         ContentReportDisposition::ArchiveProject => {
             let Some(project_id) = report.project_id else {
-                return Err(ApiError::BadRequest(
-                    "archive_project requires a report linked to project scope".into(),
+                return Err(bad_request_i18n(
+                    "archive_project requires a report linked to project scope",
+                    "archive_project 需要与项目范围关联的报告",
                 ));
             };
             let note = match resolution_note {
@@ -534,8 +653,9 @@ where
         }
         ContentReportDisposition::SuspendUser => {
             if report.target_type != "user" {
-                return Err(ApiError::BadRequest(
-                    "suspend_user is only valid for user reports".into(),
+                return Err(bad_request_i18n(
+                    "suspend_user is only valid for user reports",
+                    "suspend_user 仅对用户报告有效",
                 ));
             }
             let reason = resolution_note
@@ -824,8 +944,11 @@ pub(crate) async fn list_content_reports(
     require_internal_ops_token(&headers)?;
     let pool = state.require_pool()?;
     let limit = query.limit.unwrap_or(50).clamp(1, 200);
+    let reviewer_capacity_limit = reviewer_capacity_limit();
     let claimed_by_label_filter = normalize_optional_filter(query.claimed_by_label.as_deref());
     let sla_bucket_filter = normalize_optional_filter(query.sla_bucket.as_deref());
+    let escalation_stage_filter = normalize_optional_filter(query.escalation_stage.as_deref());
+    let report_escalation_sql = escalation_stage_sql("r", reviewer_capacity_limit);
 
     let mut qb = QueryBuilder::<Postgres>::new(
         r#"
@@ -842,6 +965,12 @@ pub(crate) async fn list_content_reports(
           r.category,
           r.severity,
           r.status,
+        "#,
+    );
+    qb.push(report_escalation_sql.as_str());
+    qb.push(
+        r#"
+          AS escalation_stage,
           r.detail,
           r.snapshot,
           r.claimed_by_label,
@@ -897,6 +1026,12 @@ pub(crate) async fn list_content_reports(
             "unclaimed_critical" => qb.push(" AND r.status = 'pending' AND r.severity = 'critical'"),
             _ => &mut qb,
         };
+    }
+    if let Some(escalation_stage) = escalation_stage_filter.as_deref() {
+        qb.push(" AND ");
+        qb.push(report_escalation_sql.as_str());
+        qb.push(" = ");
+        qb.push_bind(escalation_stage);
     }
     if let Some(workspace_id) = query.workspace_id {
         qb.push(" AND r.workspace_id = ");
@@ -1041,7 +1176,11 @@ pub(crate) async fn list_content_reports(
               )
             ) FILTER (WHERE status IN ('pending', 'claimed'))::bigint,
             0
-          ) AS oldest_open_age_hours
+          ) AS oldest_open_age_hours,
+          (
+            COUNT(*) FILTER (WHERE status = 'claimed')::bigint > $1
+          ) AS over_capacity,
+          GREATEST(COUNT(*) FILTER (WHERE status = 'claimed')::bigint - $1, 0) AS over_capacity_by
         FROM public.app_content_compliance_report
         WHERE status IN ('pending', 'claimed')
         GROUP BY 1
@@ -1054,9 +1193,96 @@ pub(crate) async fn list_content_reports(
         LIMIT 12
         "#,
     )
+    .bind(reviewer_capacity_limit)
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let overloaded_reviewer_count = owner_summaries
+        .iter()
+        .filter(|item| item.over_capacity)
+        .count() as i64;
+    let overloaded_claimed_count = owner_summaries
+        .iter()
+        .map(|item| item.over_capacity_by)
+        .sum::<i64>();
+
+    let escalation_summaries = sqlx::query_as::<_, ContentComplianceEscalationSummary>(
+        format!(
+            r#"
+                SELECT
+                  {stage_sql} AS escalation_stage,
+                  COUNT(*)::bigint AS report_count
+                FROM public.app_content_compliance_report r
+                WHERE r.status IN ('pending', 'claimed')
+                GROUP BY 1
+                ORDER BY report_count DESC, escalation_stage ASC
+                "#,
+            stage_sql = escalation_stage_sql("r", reviewer_capacity_limit)
+        )
+        .as_str(),
+    )
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let mut alerts = Vec::new();
+    let mut stage_counts = HashMap::<String, i64>::new();
+    for item in &escalation_summaries {
+        stage_counts.insert(item.escalation_stage.clone(), item.report_count);
+    }
+    let critical_unclaimed_count = *stage_counts.get("critical_unclaimed").unwrap_or(&0);
+    if critical_unclaimed_count > 0 {
+        alerts.push(ContentComplianceQueueAlert {
+            level: "critical".into(),
+            stage: "critical_unclaimed".into(),
+            count: critical_unclaimed_count,
+            title: "存在 critical 未认领举报".into(),
+            message: format!(
+                "{} 条 critical 举报尚未 claim，建议立即认领或改派。",
+                critical_unclaimed_count
+            ),
+        });
+    }
+    let over_capacity_count = *stage_counts.get("over_capacity").unwrap_or(&0);
+    if over_capacity_count > 0 {
+        alerts.push(ContentComplianceQueueAlert {
+            level: "high".into(),
+            stage: "over_capacity".into(),
+            count: over_capacity_count,
+            title: "reviewer 负载超出容量阈值".into(),
+            message: format!(
+                "{} 条开放项处于 over-capacity，建议执行自动再平衡。",
+                over_capacity_count
+            ),
+        });
+    }
+    let stalled_claimed_count = *stage_counts.get("stalled_claimed").unwrap_or(&0);
+    if stalled_claimed_count > 0 {
+        alerts.push(ContentComplianceQueueAlert {
+            level: "high".into(),
+            stage: "stalled_claimed".into(),
+            count: stalled_claimed_count,
+            title: "已认领举报处理停滞".into(),
+            message: format!(
+                "{} 条已 claim 举报超过 24h 未收敛，建议升级处理。",
+                stalled_claimed_count
+            ),
+        });
+    }
+    let escalated_72h_count = *stage_counts.get("escalated_72h").unwrap_or(&0);
+    if escalated_72h_count > 0 {
+        alerts.push(ContentComplianceQueueAlert {
+            level: "medium".into(),
+            stage: "escalated_72h".into(),
+            count: escalated_72h_count,
+            title: "队列存在 72h 未收敛项".into(),
+            message: format!(
+                "{} 条开放举报已超过 72h，建议优先清理。",
+                escalated_72h_count
+            ),
+        });
+    }
 
     Ok(Json(ListContentComplianceReportsResponse {
         summary: ContentComplianceQueueSummary {
@@ -1074,8 +1300,15 @@ pub(crate) async fn list_content_reports(
             unclaimed_critical: sla.unclaimed_critical,
             oldest_open_age_hours: sla.oldest_open_age_hours,
         },
+        capacity: ContentComplianceQueueCapacitySummary {
+            reviewer_capacity_limit,
+            overloaded_reviewer_count,
+            overloaded_claimed_count,
+        },
+        alerts,
         workspace_summaries,
         owner_summaries,
+        escalation_summaries,
         items,
     }))
 }
@@ -1222,7 +1455,9 @@ pub(crate) async fn claim_content_report(
     .fetch_optional(&mut *tx)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-    .ok_or_else(|| ApiError::BadRequest("report is no longer pending".into()))?;
+    .ok_or_else(|| {
+        bad_request_i18n("report is no longer pending", "报告已不再处于 pending 状态")
+    })?;
     append_content_compliance_audit(
         &mut *tx,
         item.id,
@@ -1270,8 +1505,9 @@ pub(crate) async fn resolve_content_report(
     let pool = state.require_pool()?;
     let next_status = body.status.as_str();
     if next_status != "resolved" && next_status != "dismissed" {
-        return Err(ApiError::BadRequest(
-            "status must be resolved or dismissed".into(),
+        return Err(bad_request_i18n(
+            "status must be resolved or dismissed",
+            "status 必须为 resolved 或 dismissed",
         ));
     }
     let actor_label = normalize_actor_label(body.actor_label);
@@ -1293,7 +1529,7 @@ pub(crate) async fn resolve_content_report(
     .fetch_optional(&mut *tx)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-    .ok_or_else(|| ApiError::BadRequest("report is no longer open".into()))?;
+    .ok_or_else(|| bad_request_i18n("report is no longer open", "报告已不再处于 open 状态"))?;
     let item = sqlx::query_as::<_, ContentComplianceReportItem>(
         r#"
         WITH updated AS (
@@ -1343,7 +1579,7 @@ pub(crate) async fn resolve_content_report(
     .fetch_optional(&mut *tx)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-    .ok_or_else(|| ApiError::BadRequest("report is no longer open".into()))?;
+    .ok_or_else(|| bad_request_i18n("report is no longer open", "报告已不再处于 open 状态"))?;
     let disposition_label = body.disposition.as_ref().map(|value| match value {
         ContentReportDisposition::None => "none",
         ContentReportDisposition::ArchiveProject => "archive_project",
@@ -1418,11 +1654,15 @@ pub(crate) async fn batch_mutate_content_reports(
 ) -> Result<Json<BatchMutateContentReportsResponse>, ApiError> {
     require_internal_ops_token(&headers)?;
     if body.report_ids.is_empty() {
-        return Err(ApiError::BadRequest("reportIds must not be empty".into()));
+        return Err(bad_request_i18n(
+            "reportIds must not be empty",
+            "reportIds 不能为空",
+        ));
     }
     if body.report_ids.len() > 100 {
-        return Err(ApiError::BadRequest(
-            "reportIds exceeds the maximum batch size of 100".into(),
+        return Err(bad_request_i18n(
+            "reportIds exceeds the maximum batch size of 100",
+            "reportIds 超过最大批量大小 100",
         ));
     }
     let pool = state.require_pool()?;
@@ -1673,17 +1913,22 @@ pub(crate) async fn reassign_content_reports(
 ) -> Result<Json<ReassignContentReportsResponse>, ApiError> {
     require_internal_ops_token(&headers)?;
     if body.report_ids.is_empty() {
-        return Err(ApiError::BadRequest("reportIds must not be empty".into()));
+        return Err(bad_request_i18n(
+            "reportIds must not be empty",
+            "reportIds 不能为空",
+        ));
     }
     if body.report_ids.len() > 100 {
-        return Err(ApiError::BadRequest(
-            "reportIds exceeds the maximum batch size of 100".into(),
+        return Err(bad_request_i18n(
+            "reportIds exceeds the maximum batch size of 100",
+            "reportIds 超过最大批量大小 100",
         ));
     }
     let assignee_label = body.assignee_label.trim().to_string();
     if assignee_label.is_empty() {
-        return Err(ApiError::BadRequest(
-            "assigneeLabel must not be empty".into(),
+        return Err(bad_request_i18n(
+            "assigneeLabel must not be empty",
+            "assigneeLabel 不能为空",
         ));
     }
     let actor_label = normalize_actor_label(body.actor_label);
@@ -1777,6 +2022,203 @@ pub(crate) async fn reassign_content_reports(
     }))
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/internal/compliance/reports/auto-rebalance",
+    operation_id = "postInternalContentComplianceAutoRebalanceV1",
+    tag = "settings",
+    request_body(content = AutoRebalanceContentReportsBody, content_type = "application/json"),
+    responses(
+        (status = 200, description = "OK", body = AutoRebalanceContentReportsResponse),
+        (status = 400, description = "Bad request", body = crate::error::ErrorBody),
+        (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
+        (status = 403, description = "Forbidden", body = crate::error::ErrorBody),
+        (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
+    )
+)]
+pub(crate) async fn auto_rebalance_content_reports(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<AutoRebalanceContentReportsBody>,
+) -> Result<Json<AutoRebalanceContentReportsResponse>, ApiError> {
+    require_internal_ops_token(&headers)?;
+    let pool = state.require_pool()?;
+    let reviewer_capacity_limit = reviewer_capacity_limit();
+    let dry_run = body.dry_run.unwrap_or(false);
+    let max_moves = body.max_moves.unwrap_or(100).clamp(1, 500);
+    let actor_label = normalize_actor_label(body.actor_label);
+    let note = normalize_optional_text(body.note);
+
+    let loads = sqlx::query_as::<_, ReviewerLoadRow>(
+        r#"
+        SELECT
+          COALESCE(NULLIF(TRIM(claimed_by_label), ''), 'unclaimed') AS owner_label,
+          COUNT(*) FILTER (WHERE status = 'claimed')::bigint AS claimed_count
+        FROM public.app_content_compliance_report
+        WHERE status IN ('pending', 'claimed')
+        GROUP BY 1
+        "#,
+    )
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let mut source_excess: HashMap<String, i64> = HashMap::new();
+    let mut receiver_spare: HashMap<String, i64> = HashMap::new();
+    for row in loads {
+        if row.owner_label == "unclaimed" {
+            continue;
+        }
+        if row.claimed_count > reviewer_capacity_limit {
+            source_excess.insert(row.owner_label, row.claimed_count - reviewer_capacity_limit);
+        } else if row.claimed_count < reviewer_capacity_limit {
+            receiver_spare.insert(row.owner_label, reviewer_capacity_limit - row.claimed_count);
+        }
+    }
+
+    if source_excess.is_empty() || receiver_spare.is_empty() {
+        return Ok(Json(AutoRebalanceContentReportsResponse {
+            dry_run,
+            reviewer_capacity_limit,
+            planned_move_count: 0,
+            executed_move_count: 0,
+            moves: Vec::new(),
+        }));
+    }
+
+    let mut sources: Vec<(String, i64)> = source_excess.into_iter().collect();
+    sources.sort_by(|a, b| b.1.cmp(&a.1).then_with(|| a.0.cmp(&b.0)));
+
+    let mut moves: Vec<AutoRebalanceMoveItem> = Vec::new();
+    for (source_label, mut excess) in sources {
+        if excess <= 0 {
+            continue;
+        }
+        let report_ids: Vec<Uuid> = sqlx::query_scalar(
+            r#"
+            SELECT id
+            FROM public.app_content_compliance_report
+            WHERE status = 'claimed'
+              AND COALESCE(NULLIF(TRIM(claimed_by_label), ''), 'unclaimed') = $1
+            ORDER BY
+              CASE severity
+                WHEN 'low' THEN 0
+                WHEN 'medium' THEN 1
+                WHEN 'high' THEN 2
+                ELSE 3
+              END ASC,
+              COALESCE(claimed_at, created_at) DESC,
+              created_at DESC
+            "#,
+        )
+        .bind(&source_label)
+        .fetch_all(pool)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+        for report_id in report_ids {
+            if excess <= 0 || moves.len() as i64 >= max_moves {
+                break;
+            }
+            let mut receivers: Vec<(String, i64)> = receiver_spare
+                .iter()
+                .filter(|(_, spare)| **spare > 0)
+                .map(|(label, spare)| (label.clone(), *spare))
+                .collect();
+            if receivers.is_empty() {
+                break;
+            }
+            receivers.sort_by(|a, b| b.1.cmp(&a.1).then_with(|| a.0.cmp(&b.0)));
+            let Some((target_label, _)) = receivers
+                .into_iter()
+                .find(|(label, _)| label.as_str() != source_label.as_str())
+            else {
+                break;
+            };
+            moves.push(AutoRebalanceMoveItem {
+                report_id,
+                from_assignee_label: source_label.clone(),
+                to_assignee_label: target_label.clone(),
+            });
+            excess -= 1;
+            if let Some(spare) = receiver_spare.get_mut(&target_label) {
+                *spare -= 1;
+            }
+        }
+    }
+
+    if dry_run || moves.is_empty() {
+        return Ok(Json(AutoRebalanceContentReportsResponse {
+            dry_run,
+            reviewer_capacity_limit,
+            planned_move_count: moves.len() as i64,
+            executed_move_count: 0,
+            moves,
+        }));
+    }
+
+    let mut tx = pool
+        .begin()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let mut executed_count = 0_i64;
+    for planned in &moves {
+        let changed = sqlx::query(
+            r#"
+            UPDATE public.app_content_compliance_report
+            SET
+              status = 'claimed',
+              claimed_by_label = $2,
+              claimed_at = COALESCE(claimed_at, NOW()),
+              updated_at = NOW()
+            WHERE id = $1
+              AND status = 'claimed'
+              AND COALESCE(NULLIF(TRIM(claimed_by_label), ''), 'unclaimed') = $3
+            "#,
+        )
+        .bind(planned.report_id)
+        .bind(&planned.to_assignee_label)
+        .bind(&planned.from_assignee_label)
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+        .rows_affected();
+        if changed == 0 {
+            continue;
+        }
+        append_content_compliance_audit(
+            &mut *tx,
+            planned.report_id,
+            None,
+            &actor_label,
+            "auto_rebalanced",
+            Some("claimed"),
+            Some("claimed"),
+            None,
+            json!({
+                "fromClaimedByLabel": planned.from_assignee_label,
+                "toClaimedByLabel": planned.to_assignee_label,
+                "note": note,
+                "trigger": "capacity_policy",
+                "reviewerCapacityLimit": reviewer_capacity_limit,
+            }),
+        )
+        .await?;
+        executed_count += 1;
+    }
+    tx.commit()
+        .await
+        .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    Ok(Json(AutoRebalanceContentReportsResponse {
+        dry_run,
+        reviewer_capacity_limit,
+        planned_move_count: moves.len() as i64,
+        executed_move_count: executed_count,
+        moves,
+    }))
+}
+
 pub fn router() -> Router<AppState> {
     Router::new()
         .route("/api/v1/content/reports", post(create_content_report))
@@ -1791,6 +2233,10 @@ pub fn router() -> Router<AppState> {
         .route(
             "/api/v1/internal/compliance/reports/reassign",
             post(reassign_content_reports),
+        )
+        .route(
+            "/api/v1/internal/compliance/reports/auto-rebalance",
+            post(auto_rebalance_content_reports),
         )
         .route(
             "/api/v1/internal/compliance/reports/{id}/claim",

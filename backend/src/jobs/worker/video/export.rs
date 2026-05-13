@@ -3,6 +3,9 @@ use serde_json::{json, Map};
 use sqlx::PgPool;
 use uuid::Uuid;
 
+use crate::jobs::payload_project::{
+    payload_project_uuid, resolve_optional_project_numeric_from_job_payload,
+};
 use crate::jobs::worker::common::{job_ok, job_ok_with_details};
 use crate::jobs::worker::{JobCompletion, JobRunError};
 use crate::jobs::{JobRow, JOB_KIND_VIDEO_EXPORT};
@@ -29,6 +32,9 @@ fn structured_video_export_failure(
         if let Some(n) = p.get(key).and_then(|x| x.as_i64()) {
             links.insert(key.to_string(), json!(n));
         }
+    }
+    if let Some(project_uuid) = payload_project_uuid(p) {
+        links.insert("project_uuid".to_string(), json!(project_uuid));
     }
     JobRunError::FailedStructured {
         message: message.clone(),
@@ -84,7 +90,8 @@ pub(crate) async fn run_video_export(
         .and_then(|x| x.as_bool())
         .unwrap_or(true);
 
-    let project_numeric_id = payload_coerced_i32(p, "project_numeric_id");
+    let project_numeric_id =
+        resolve_optional_project_numeric_from_job_payload(pool, row.owner_user_id, p).await?;
     let script_numeric_id = payload_coerced_i32(p, "script_numeric_id");
     let storyboard_id = payload_coerced_i32(p, "storyboard_numeric_id");
 
@@ -229,6 +236,9 @@ pub(crate) async fn run_video_export(
     });
     if let Some(obj) = result.as_object_mut() {
         obj.insert("writeback".to_string(), writeback);
+    }
+    if let Some(project_uuid) = payload_project_uuid(p) {
+        result["project_uuid"] = json!(project_uuid);
     }
 
     Ok(match error_details {

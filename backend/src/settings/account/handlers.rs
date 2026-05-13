@@ -7,6 +7,7 @@ use serde_json::json;
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
+use crate::error::helpers::bad_request_i18n;
 use crate::error::ApiError;
 use crate::jobs::{enqueue_generation_job, JobRow, JOB_KIND_SETTINGS_ACCOUNT_EXPORT};
 use crate::state::AppState;
@@ -54,6 +55,7 @@ pub(crate) async fn post_account_export(
             "include_notifications": body.include_notifications,
         }),
         Some(&headers),
+        &state.billing_config,
     )
     .await?;
     Ok(Json(to_account_export_job_record(&row)))
@@ -126,13 +128,15 @@ pub(crate) async fn post_account_delete(
 ) -> Result<Json<AccountDeleteResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     if body.confirm_phrase.trim() != ACCOUNT_DELETE_CONFIRM_PHRASE {
-        return Err(ApiError::BadRequest(format!(
-            "confirmPhrase must equal `{ACCOUNT_DELETE_CONFIRM_PHRASE}`"
-        )));
+        return Err(bad_request_i18n(
+            &format!("confirmPhrase must equal `{ACCOUNT_DELETE_CONFIRM_PHRASE}`"),
+            &format!("confirmPhrase 必须等于 `{ACCOUNT_DELETE_CONFIRM_PHRASE}`"),
+        ));
     }
     if !body.acknowledge_irreversible {
-        return Err(ApiError::BadRequest(
-            "acknowledgeIrreversible must be true".into(),
+        return Err(bad_request_i18n(
+            "acknowledgeIrreversible must be true",
+            "acknowledgeIrreversible 必须为 true",
         ));
     }
     let pool = state.require_pool()?;

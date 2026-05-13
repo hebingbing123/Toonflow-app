@@ -2,7 +2,7 @@ use serde_json::{json, Value};
 use sqlx::{PgPool, Postgres, Transaction};
 use uuid::Uuid;
 
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, ApiError};
 
 use super::{
     load_project_automation_memory_policy, policy_allows_automated_memory, MEMORY_POLICY_NAME,
@@ -12,8 +12,9 @@ pub(crate) fn parse_agent_type(raw: &str) -> Result<&'static str, ApiError> {
     match raw {
         "scriptAgent" => Ok("scriptAgent"),
         "productionAgent" => Ok("productionAgent"),
-        _ => Err(ApiError::BadRequest(
-            "agentType must be scriptAgent or productionAgent".into(),
+        _ => Err(bad_request_i18n(
+            "agentType must be scriptAgent or productionAgent",
+            "agentType 必须是 scriptAgent 或 productionAgent",
         )),
     }
 }
@@ -40,21 +41,32 @@ pub(crate) async fn resolve_agent_memory_project_numeric_id(
         Err(ApiError::BadRequest(msg))
             if msg == "Provide project UUID (preferred) or legacy numeric project id" =>
         {
-            Err(ApiError::BadRequest(
-                "Provide projectUuid (preferred) or legacy numeric projectId".into(),
+            Err(bad_request_i18n(
+                "Provide projectUuid (preferred) or legacy numeric projectId",
+                "请提供 projectUuid（推荐）或旧版数值 projectId",
             ))
         }
         Err(ApiError::BadRequest(msg))
             if msg == "Project UUID and numeric project id must refer to the same project" =>
         {
-            Err(ApiError::BadRequest(
-                "projectUuid and projectId must refer to the same project".into(),
+            Err(bad_request_i18n(
+                "projectUuid and projectId must refer to the same project",
+                "projectUuid 和 projectId 必须指向同一个项目",
             ))
         }
         Err(e) => Err(e),
     }
 }
 
+/// **DEPRECATED**: Use `require_project_workspace_member_scope` or `require_project_write_scope` instead.
+///
+/// This function checks `owner_user_id` which is more restrictive than workspace membership.
+/// For workspace-aware permission validation, use the unified helpers from `projects::routes::common`.
+#[deprecated(
+    since = "0.1.0",
+    note = "Use require_project_workspace_member_scope or require_project_write_scope from projects::routes::common instead"
+)]
+#[allow(dead_code)]
 pub(crate) async fn ensure_project_owned(
     pool: &PgPool,
     uid: Uuid,

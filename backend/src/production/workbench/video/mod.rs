@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 use crate::production::{VideoItem, WorkbenchGenerateVideoBody};
 
@@ -15,7 +16,10 @@ pub(in crate::production) struct VideoListResponse {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct VideoListBody {
-    project_id: i32,
+    #[serde(default)]
+    project_id: Option<i32>,
+    #[serde(default)]
+    project_uuid: Option<Uuid>,
     #[serde(default)]
     track_id: Option<i32>,
     #[serde(default)]

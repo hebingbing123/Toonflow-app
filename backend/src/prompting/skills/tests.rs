@@ -109,3 +109,29 @@ fn read_skill_binary_rejects_markdown_extension() {
         Err(SkillReadError::BadPath(_))
     ));
 }
+
+/// W3.8: Verify scope field exists and has correct value in SkillsSummaryResponse
+#[test]
+fn skills_summary_response_scope_field_is_user() {
+    let resp = SkillsSummaryResponse {
+        scope: SkillsSummaryScope::User,
+        markdown_file_count: 5,
+        total_bytes: 1024,
+    };
+
+    // Verify scope field exists in struct
+    assert_eq!(
+        std::mem::discriminant(&resp.scope),
+        std::mem::discriminant(&SkillsSummaryScope::User)
+    );
+
+    // Verify scope serializes to "user"
+    let json = serde_json::to_string(&resp).unwrap();
+    assert!(
+        json.contains("\"scope\":\"user\""),
+        "scope field should serialize to 'user', got: {}",
+        json
+    );
+    assert!(json.contains("\"markdown_file_count\":5"));
+    assert!(json.contains("\"total_bytes\":1024"));
+}

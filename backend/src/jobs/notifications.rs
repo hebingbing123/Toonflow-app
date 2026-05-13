@@ -1,7 +1,9 @@
 use serde_json::json;
-use uuid::Uuid;
 
 use crate::error::ApiError;
+use crate::jobs::payload_project::{
+    payload_project_numeric_id, payload_project_uuid, payload_workspace_id,
+};
 use crate::settings::notifications::{record_notification, NotificationRecordPayload};
 use crate::state::AppState;
 
@@ -11,15 +13,16 @@ pub(crate) async fn record_job_notification(
     state: &AppState,
     row: &JobRow,
 ) -> Result<(), ApiError> {
+    // Keep notification_type aligned with docs/websocket-events.md producer list.
     let status = row.status.trim();
     if status != "succeeded" && status != "failed" && status != "cancelled" {
         return Ok(());
     }
     let title = job_notification_title(row);
     let message = job_notification_message(row);
-    let workspace_id = payload_uuid(&row.payload, "workspace_id");
-    let project_id = payload_uuid(&row.payload, "project_uuid");
-    let project_numeric_id = payload_i32(&row.payload, "project_numeric_id");
+    let workspace_id = payload_workspace_id(&row.payload);
+    let project_id = payload_project_uuid(&row.payload);
+    let project_numeric_id = payload_project_numeric_id(&row.payload);
     let link_path = format!("/product/jobs?jobId={}", row.id);
     let _ = record_notification(
         state.require_pool()?,
@@ -42,6 +45,7 @@ pub(crate) async fn record_job_notification(
                 "jobSubKind": row.job_sub_kind,
                 "productionPhase": row.production_phase,
                 "projectId": project_id,
+                "projectUuid": project_id,
                 "projectNumericId": project_numeric_id,
                 "workspaceId": workspace_id,
             }),
@@ -92,18 +96,4 @@ fn job_notification_message(row: &JobRow) -> String {
         ),
         _ => format!("任务 #{}（{}）状态已更新。", row.numeric_task_id, row.kind),
     }
-}
-
-fn payload_uuid(payload: &serde_json::Value, key: &str) -> Option<Uuid> {
-    payload
-        .get(key)
-        .and_then(|value| value.as_str())
-        .and_then(|value| Uuid::parse_str(value.trim()).ok())
-}
-
-fn payload_i32(payload: &serde_json::Value, key: &str) -> Option<i32> {
-    payload
-        .get(key)
-        .and_then(|value| value.as_i64())
-        .and_then(|value| i32::try_from(value).ok())
 }

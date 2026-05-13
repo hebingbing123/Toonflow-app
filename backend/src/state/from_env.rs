@@ -11,6 +11,7 @@ use tokio::sync::RwLock;
 use super::{AppState, MemoryConfig, WsNotifyHub};
 use crate::http_kit::metrics::MetricsRegistry;
 use crate::llm::LlmConfig;
+use crate::metering::BillingConfig;
 
 const ENV_SWITCH_AI_DEV_TOOL: &str = "TOONFLOW_SWITCH_AI_DEV_TOOL";
 
@@ -105,6 +106,50 @@ pub(super) async fn load() -> Result<AppState, sqlx::Error> {
             "TOONFLOW_LOCAL_VOICEOVER_AUDIO_DIR set; voiceover.generate workers will persist audio artifacts locally"
         );
     }
+    if std::env::var("TOONFLOW_LOCAL_WORKSPACE_SHARED_AUDIT_EXPORT_DIR")
+        .ok()
+        .map(|s| s.trim().to_string())
+        .filter(|s| !s.is_empty())
+        .is_some()
+    {
+        tracing::info!(
+            "TOONFLOW_LOCAL_WORKSPACE_SHARED_AUDIT_EXPORT_DIR set; settings.workspace_shared_audit.export workers will persist CSV/JSON under that root"
+        );
+    }
+    if std::env::var("TOONFLOW_WORKSPACE_SHARED_AUDIT_EXPORT_S3_BUCKET")
+        .ok()
+        .map(|s| s.trim().to_string())
+        .filter(|s| !s.is_empty())
+        .is_some()
+    {
+        tracing::info!(
+            "TOONFLOW_WORKSPACE_SHARED_AUDIT_EXPORT_S3_BUCKET set; workspace shared audit export artifacts use S3 (multi-replica safe)"
+        );
+    }
+    if std::env::var("TOONFLOW_ACCOUNT_EXPORT_S3_BUCKET")
+        .ok()
+        .map(|s| s.trim().to_string())
+        .filter(|s| !s.is_empty())
+        .is_some()
+    {
+        tracing::info!(
+            "TOONFLOW_ACCOUNT_EXPORT_S3_BUCKET set; settings.account.export artifacts use S3 (multi-replica safe)"
+        );
+    }
+    if std::env::var("TOONFLOW_EXPORT_S3_ENDPOINT")
+        .ok()
+        .map(|s| !s.trim().is_empty())
+        .unwrap_or(false)
+    {
+        tracing::info!("TOONFLOW_EXPORT_S3_ENDPOINT set; shared S3/MinIO endpoint override for export artifacts");
+    }
+
+    let billing_config = BillingConfig::from_env();
+    if billing_config.workspace_billing_enabled {
+        tracing::info!("Workspace-scope billing enabled (WORKSPACE_BILLING_ENABLED=true)");
+    } else {
+        tracing::info!("User-scope billing active (WORKSPACE_BILLING_ENABLED not set or false)");
+    }
 
     Ok(AppState {
         pool,
@@ -119,5 +164,6 @@ pub(super) async fn load() -> Result<AppState, sqlx::Error> {
         local_video_export_dir,
         local_voiceover_audio_dir,
         metrics_registry: Arc::new(MetricsRegistry::default()),
+        billing_config,
     })
 }

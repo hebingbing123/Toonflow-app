@@ -6,9 +6,9 @@ use axum::{
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::assets::ensure_owned_project_pk;
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{validate_positive, ApiError};
+use crate::projects::routes::common::require_project_workspace_member_scope;
 use crate::state::AppState;
 
 use super::super::dto::NovelRow;
@@ -18,9 +18,7 @@ async fn fetch_owned_novel_row(
     project_id: Uuid,
     novel_numeric_id: i32,
 ) -> Result<NovelRow, ApiError> {
-    if novel_numeric_id <= 0 {
-        return Err(ApiError::BadRequest("numeric ids must be positive".into()));
-    }
+    validate_positive(novel_numeric_id, "numericId")?;
 
     let row = sqlx::query_as::<_, NovelRow>(
         r#"
@@ -57,7 +55,7 @@ pub(crate) async fn get_novel_for_project(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    ensure_owned_project_pk(pool, uid, project_id).await?;
+    require_project_workspace_member_scope(&state, uid, project_id).await?;
     let row = fetch_owned_novel_row(pool, project_id, novel_numeric_id).await?;
     Ok(Json(row))
 }

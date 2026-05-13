@@ -1,7 +1,7 @@
 use axum::{extract::State, http::HeaderMap, Json};
 
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, ApiError};
 use crate::harness::observe;
 use crate::production::optimize_scoped_video_memory;
 use crate::state::AppState;
@@ -35,8 +35,9 @@ pub(crate) async fn optimize_memory(
     let uid = require_user_uuid(&state, &headers)?;
     let agent_type = parse_agent_type(&body.agent_type)?;
     if body.project_uuid.is_none() && body.project_id.is_none() {
-        return Err(ApiError::BadRequest(
-            "Provide projectUuid (preferred) or legacy numeric projectId".into(),
+        return Err(bad_request_i18n(
+            "Provide projectUuid (preferred) or legacy numeric projectId",
+            "请提供 projectUuid（推荐）或旧版数值 projectId",
         ));
     }
     let pool = state.require_pool()?;
@@ -48,7 +49,10 @@ pub(crate) async fn optimize_memory(
 
     let automation_mode = if let Some(raw_mode) = body.automation_mode.as_deref() {
         let mode = AutomationMemoryMode::from_str(raw_mode).ok_or_else(|| {
-            ApiError::BadRequest("automationMode must be one of: off, lean, standard".into())
+            bad_request_i18n(
+                "automationMode must be one of: off, lean, standard",
+                "automationMode 必须是以下之一：off、lean、standard",
+            )
         })?;
         save_project_automation_memory_policy(
             pool,

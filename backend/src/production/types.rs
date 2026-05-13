@@ -2,6 +2,7 @@
 
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
+use uuid::Uuid;
 
 #[allow(dead_code)]
 #[derive(Debug, Deserialize)]
@@ -19,7 +20,10 @@ pub(crate) struct GenerateVideoUploadItem {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(crate) struct WorkbenchGenerateVideoBody {
-    pub(crate) project_id: i32,
+    #[serde(default)]
+    pub(crate) project_id: Option<i32>,
+    #[serde(default)]
+    pub(crate) project_uuid: Option<Uuid>,
     pub(crate) script_id: i32,
     pub(crate) upload_data: Vec<GenerateVideoUploadItem>,
     pub(crate) prompt: String,

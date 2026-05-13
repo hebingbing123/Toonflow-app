@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
 
 import '../../../rust_api.dart';
 
@@ -62,13 +63,14 @@ class CornerScapeWorkbenchDialogView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final outline = Theme.of(context).colorScheme.outline;
     final viewportWidth = MediaQuery.sizeOf(context).width;
     final dialogWidth = viewportWidth.isFinite
         ? viewportWidth.clamp(320.0, 760.0)
         : 760.0;
     return AlertDialog(
-      title: const Text('资产历史图工作台'),
+      title: Text(l10n.projectEditorAssetHistoryTitle),
       content: SizedBox(
         width: dialogWidth,
         child: SingleChildScrollView(
@@ -78,9 +80,9 @@ class CornerScapeWorkbenchDialogView extends StatelessWidget {
             children: [
               TextField(
                 controller: model.typesCtrl,
-                decoration: const InputDecoration(
-                  labelText: '类型过滤（可选）',
-                  helperText: '逗号分隔，例如 role,clip,props；留空表示全部',
+                decoration: InputDecoration(
+                  labelText: l10n.projectEditorAssetHistoryTypeFilterLabel,
+                  helperText: l10n.projectEditorAssetHistoryTypeFilterHelper,
                 ),
                 onSubmitted: model.loading
                     ? null
@@ -95,11 +97,11 @@ class CornerScapeWorkbenchDialogView extends StatelessWidget {
                     onPressed: model.busy || model.loading
                         ? null
                         : callbacks.onRefresh,
-                    child: Text(model.loading ? '加载中…' : '查询历史图资产'),
+                    child: Text(model.loading ? l10n.projectEditorAssetHistoryLoading : l10n.projectEditorAssetHistoryQueryButton),
                   ),
                   TextButton(
                     onPressed: model.loading ? null : callbacks.onClearFilter,
-                    child: const Text('清空类型过滤'),
+                    child: Text(l10n.projectEditorAssetHistoryClearFilter),
                   ),
                   ...const ['role', 'clip', 'props', 'scene'].map(
                     (type) => ActionChip(
@@ -121,7 +123,7 @@ class CornerScapeWorkbenchDialogView extends StatelessWidget {
               const SizedBox(height: 12),
               if (model.assets.isEmpty)
                 Text(
-                  model.loading ? '正在加载历史图资产…' : '暂无数据，点击“查询历史图资产”开始。',
+                  model.loading ? l10n.projectEditorAssetHistoryLoadingAssets : l10n.projectEditorAssetHistoryEmptyState,
                   style: Theme.of(
                     context,
                   ).textTheme.bodySmall?.copyWith(color: outline),
@@ -157,7 +159,7 @@ class CornerScapeWorkbenchDialogView extends StatelessWidget {
                     model.selectedAsset!.historyImages.isNotEmpty)
                   DropdownButtonFormField<String>(
                     initialValue: model.selectedHistoryImageId,
-                    decoration: const InputDecoration(labelText: '历史图片'),
+                    decoration: InputDecoration(labelText: l10n.projectEditorAssetHistoryImageDropdownLabel),
                     items: model.selectedAsset!.historyImages
                         .map(
                           (img) => DropdownMenuItem<String>(
@@ -178,7 +180,7 @@ class CornerScapeWorkbenchDialogView extends StatelessWidget {
                   )
                 else if (model.selectedAsset != null)
                   Text(
-                    '该资产暂无历史图片',
+                    l10n.projectEditorAssetHistoryNoImages,
                     style: Theme.of(
                       context,
                     ).textTheme.bodySmall?.copyWith(color: outline),
@@ -186,7 +188,10 @@ class CornerScapeWorkbenchDialogView extends StatelessWidget {
                 if (model.selectedImage != null) ...[
                   const SizedBox(height: 8),
                   Text(
-                    '当前图片：sort=${model.selectedImage!.sortIndex} · state=${model.selectedImage!.state ?? "-"}',
+                    l10n.projectEditorAssetHistoryCurrentImage(
+                      model.selectedImage!.sortIndex,
+                      model.selectedImage!.state ?? "-",
+                    ),
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
@@ -209,7 +214,7 @@ class CornerScapeWorkbenchDialogView extends StatelessWidget {
                   )
                 else
                   Text(
-                    '当前图片没有可用预览（可能仅存路径占位或远程资源暂不可达）',
+                    l10n.projectEditorAssetHistoryNoPreview,
                     style: Theme.of(
                       context,
                     ).textTheme.bodySmall?.copyWith(color: outline),
@@ -220,7 +225,7 @@ class CornerScapeWorkbenchDialogView extends StatelessWidget {
         ),
       ),
       actions: [
-        TextButton(onPressed: callbacks.onClose, child: const Text('关闭')),
+        TextButton(onPressed: callbacks.onClose, child: Text(l10n.projectEditorAssetHistoryClose)),
       ],
     );
   }

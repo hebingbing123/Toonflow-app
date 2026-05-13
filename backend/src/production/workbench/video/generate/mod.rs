@@ -17,8 +17,8 @@ use crate::production::workbench::video_prompt_memory::{
     optimize_scoped_video_memory, AgentMemoryRow, StoryboardPromptSeedRow,
 };
 use crate::production::{enforce_quality_gate, run_quality_gate, QualityGateStage};
-use crate::scope::http::require_owned_numeric_script_scope;
-use crate::scope::OwnedScriptScope;
+use crate::scope::http::require_script_write_scope_ref;
+use crate::scope::OwnedScriptInProject;
 use crate::settings::agent_memory::{
     load_project_automation_memory_policy, save_project_automation_memory_policy,
     AutomationMemoryMode, ProjectAutomationMemoryPolicy,
@@ -236,12 +236,23 @@ pub(in crate::production) async fn post_workbench_generate_video(
     headers: HeaderMap,
     Json(body): Json<WorkbenchGenerateVideoBody>,
 ) -> Result<JsonResponse<WorkbenchGenerateVideoResponse>, ApiError> {
-    let (user_id, pool, scope_row) =
-        require_owned_numeric_script_scope(&state, &headers, body.project_id, body.script_id)
-            .await?;
-    let response =
-        workbench_enqueue_video_jobs_from_body(user_id, pool, &scope_row, body, Some(&headers))
-            .await?;
+    let (user_id, pool, scope_row) = require_script_write_scope_ref(
+        &state,
+        &headers,
+        body.project_id,
+        body.project_uuid,
+        body.script_id,
+    )
+    .await?;
+    let response = workbench_enqueue_video_jobs_from_body(
+        user_id,
+        pool,
+        &scope_row,
+        body,
+        Some(&headers),
+        &state.billing_config,
+    )
+    .await?;
     Ok(JsonResponse(response))
 }
 
@@ -249,24 +260,28 @@ pub(in crate::production) async fn post_workbench_generate_video(
 pub(crate) async fn workbench_enqueue_video_jobs_from_body(
     user_id: Uuid,
     pool: &sqlx::PgPool,
-    scope_row: &OwnedScriptScope,
+    scope_row: &OwnedScriptInProject,
     body: WorkbenchGenerateVideoBody,
     http_headers: Option<&HeaderMap>,
+    billing_config: &crate::metering::BillingConfig,
 ) -> Result<WorkbenchGenerateVideoResponse, ApiError> {
     if body.track_id <= 0 {
-        return Err(ApiError::BadRequest(
-            "trackId must be a positive integer".into(),
+        return Err(crate::error::bad_request_i18n(
+            "trackId must be a positive integer",
+            "trackId 必须是正整数",
         ));
     }
     if body.upload_data.is_empty() {
-        return Err(ApiError::BadRequest("uploadData must not be empty".into()));
+        return Err(crate::error::bad_request_i18n(
+            "uploadData must not be empty",
+            "uploadData 不能为空",
+        ));
     }
-    if body.model.trim().is_empty() {
-        return Err(ApiError::BadRequest("model must not be empty".into()));
-    }
+    crate::error::validate_non_empty_string(body.model.trim(), "model")?;
     if body.duration <= 0 {
-        return Err(ApiError::BadRequest(
-            "duration must be a positive integer".into(),
+        return Err(crate::error::bad_request_i18n(
+            "duration must be a positive integer",
+            "duration 必须是正整数",
         ));
     }
 
@@ -293,7 +308,7 @@ pub(crate) async fn workbench_enqueue_video_jobs_from_body(
     let (gate, strategy) = run_quality_gate(
         pool,
         user_id,
-        body.project_id,
+        scope_row.project_numeric_id,
         body.script_id,
         QualityGateStage::VideoGenerate,
         &storyboard_ids,
@@ -304,7 +319,7 @@ pub(crate) async fn workbench_enqueue_video_jobs_from_body(
     let recent_quality_rows = memory_integration::load_recent_quality_signal_rows(
         pool,
         user_id,
-        body.project_id,
+        scope_row.project_numeric_id,
         body.script_id,
         &storyboard_ids,
     )
@@ -317,7 +332,7 @@ pub(crate) async fn workbench_enqueue_video_jobs_from_body(
     let storyboard_negative_prompt_details = memory_integration::load_auto_negative_prompt_details(
         pool,
         user_id,
-        body.project_id,
+        scope_row.project_numeric_id,
         body.script_id,
         &storyboard_ids,
     )
@@ -330,12 +345,13 @@ pub(crate) async fn workbench_enqueue_video_jobs_from_body(
     apply_adaptive_project_memory_mode(
         pool,
         user_id,
-        body.project_id,
+        scope_row.project_numeric_id,
         &recent_quality_rows,
         constraint_pressure,
     )
     .await?;
-    optimize_scoped_video_memory(pool, user_id, body.project_id, body.script_id).await?;
+    optimize_scoped_video_memory(pool, user_id, scope_row.project_numeric_id, body.script_id)
+        .await?;
 
     let aspect_ratio = load_project_aspect_ratio(pool, scope_row.project_id)
         .await?
@@ -390,7 +406,8 @@ pub(crate) async fn workbench_enqueue_video_jobs_from_body(
 
         let payload = serde_json::json!({
             "source": "production.workbench.generate-video",
-            "project_numeric_id": body.project_id,
+            "project_uuid": scope_row.project_id,
+            "project_numeric_id": scope_row.project_numeric_id,
             "script_id": body.script_id,
             "storyboard_numeric_id": item.storyboard_id,
             "provider": provider,
@@ -411,6 +428,7 @@ pub(crate) async fn workbench_enqueue_video_jobs_from_body(
             JOB_KIND_VIDEO_GENERATE,
             payload,
             http_headers,
+            billing_config,
         )
         .await?;
         enqueued.push(row);

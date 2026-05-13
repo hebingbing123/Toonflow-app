@@ -1,8 +1,9 @@
 use axum::{extract::State, http::HeaderMap, Json};
 use serde::Serialize;
+use utoipa::ToSchema;
 
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, ApiError};
 use crate::state::AppState;
 
 use super::super::{
@@ -11,9 +12,10 @@ use super::super::{
     types::AgentMemoryResponseScope,
 };
 
-#[derive(Serialize)]
+#[derive(Serialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct MemoryCostOverview {
+    /// Aggregation scope: 'user' indicates user-level aggregation. Workspace-level aggregation pending product finalization.
     pub(crate) scope: AgentMemoryResponseScope,
     pub(crate) project_id: i32,
     pub(crate) automation_mode: String,
@@ -51,7 +53,7 @@ pub(crate) struct CostOverviewQuery {
         ("agentType" = String, Query, description = "Agent type"),
     ),
     responses(
-        (status = 200, description = "OK", body = serde_json::Value),
+        (status = 200, description = "OK", body = MemoryCostOverview),
         (status = 401, description = "Unauthorized", body = crate::error::ErrorBody),
         (status = 503, description = "Unavailable", body = crate::error::ErrorBody)
     ),
@@ -65,8 +67,9 @@ pub(crate) async fn get_memory_cost_overview(
     let uid = require_user_uuid(&state, &headers)?;
     let agent_type = parse_agent_type(&params.agent_type)?;
     if params.project_uuid.is_none() && params.project_id.is_none() {
-        return Err(ApiError::BadRequest(
-            "Provide projectUuid (preferred) or legacy numeric projectId query parameter".into(),
+        return Err(bad_request_i18n(
+            "Provide projectUuid (preferred) or legacy numeric projectId query parameter",
+            "请提供查询参数 projectUuid（推荐）或旧版数值 projectId",
         ));
     }
     let pool = state.require_pool()?;

@@ -11,7 +11,7 @@ fn get_flow_data_body_rejects_unknown_fields() {
 #[test]
 fn get_flow_data_body_accepts_valid() {
     let b: GetFlowDataBody = serde_json::from_str(r#"{"projectId":1,"episodesId":5}"#).unwrap();
-    assert_eq!(b.project_id, 1);
+    assert_eq!(b.project_id, Some(1));
     assert_eq!(b.episodes_id, 5);
 }
 
@@ -27,7 +27,7 @@ fn save_flow_data_body_rejects_unknown_fields() {
 fn save_flow_data_body_accepts_valid() {
     let b: SaveFlowDataBody =
         serde_json::from_str(r#"{"projectId":1,"episodesId":5,"data":{"key":"value"}}"#).unwrap();
-    assert_eq!(b.project_id, 1);
+    assert_eq!(b.project_id, Some(1));
     assert_eq!(b.episodes_id, 5);
     assert!(b.data.is_object());
 }

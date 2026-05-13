@@ -30,6 +30,8 @@ pub(crate) async fn send_error(
     message: &str,
     request_id: Option<&str>,
 ) -> bool {
+    // Keep `error.occurred` aligned with the documented raw WS envelope:
+    // `type` / `schema_version` / `payload`, plus optional `request_id` on root + payload.
     let mut payload = json!({
         "code": code,
         "message": message,

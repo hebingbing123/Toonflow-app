@@ -5,7 +5,7 @@ use axum::{
 };
 
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, ApiError};
 use crate::http_kit::json_patch::{parse_optional_text_field, FieldPatch};
 use crate::state::AppState;
 
@@ -37,8 +37,9 @@ pub(super) async fn patch_art_style_by_numeric_id(
         && matches!(label_patch, FieldPatch::Absent)
         && matches!(prompt_patch, FieldPatch::Absent)
     {
-        return Err(ApiError::BadRequest(
-            "expected at least one of: name, file_url, label, prompt".into(),
+        return Err(bad_request_i18n(
+            "expected at least one of: name, file_url, label, prompt",
+            "name、file_url、label、prompt 至少需要提供一个",
         ));
     }
 
@@ -61,7 +62,7 @@ pub(super) async fn patch_art_style_by_numeric_id(
         FieldPatch::Set(v) => v.clone().unwrap_or_default(),
     };
     if new_name.trim().is_empty() {
-        return Err(ApiError::BadRequest("name cannot be empty".into()));
+        return Err(bad_request_i18n("name cannot be empty", "name 不能为空"));
     }
 
     let new_file_url = match &file_url_patch {

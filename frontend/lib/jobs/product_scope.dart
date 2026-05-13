@@ -43,13 +43,43 @@ String? _payloadString(Object? raw) {
 
 JobProductScope jobProductScopeFromRow(JobRow job) {
   final payload = job.payload;
+  final result = job.result ?? const <String, dynamic>{};
+  final projectNumericId =
+      _payloadInt(payload['project_numeric_id']) ??
+      _payloadInt(payload['projectNumericId']) ??
+      _payloadInt(result['project_numeric_id']) ??
+      _payloadInt(result['projectNumericId']) ??
+      _payloadInt(payload['project_id']) ??
+      _payloadInt(payload['projectId']);
+  final projectUuid =
+      _payloadString(payload['project_uuid']) ??
+      _payloadString(payload['projectUuid']) ??
+      _payloadString(result['project_uuid']) ??
+      _payloadString(result['projectUuid']) ??
+      _payloadString(result['projectId']) ??
+      _payloadString(payload['projectId']);
+  final workspaceId =
+      _payloadString(payload['workspace_id']) ??
+      _payloadString(payload['workspaceId']) ??
+      _payloadString(result['workspace_id']) ??
+      _payloadString(result['workspaceId']);
+  final scriptNumericId =
+      _payloadInt(payload['script_numeric_id']) ??
+      _payloadInt(payload['scriptNumericId']) ??
+      _payloadInt(result['script_numeric_id']) ??
+      _payloadInt(result['scriptNumericId']) ??
+      _payloadInt(payload['script_id']) ??
+      _payloadInt(payload['scriptId']);
+  final scriptUuid =
+      _payloadString(payload['script_uuid']) ??
+      _payloadString(payload['scriptUuid']) ??
+      _payloadString(result['script_uuid']) ??
+      _payloadString(result['scriptUuid']);
   return JobProductScope(
-    projectNumericId: _payloadInt(payload['project_numeric_id']),
-    projectUuid: _payloadString(payload['project_uuid']),
-    workspaceId: _payloadString(payload['workspace_id']),
-    scriptNumericId:
-        _payloadInt(payload['script_numeric_id']) ??
-        _payloadInt(payload['script_id']),
-    scriptUuid: _payloadString(payload['script_uuid']),
+    projectNumericId: projectNumericId,
+    projectUuid: projectUuid,
+    workspaceId: workspaceId,
+    scriptNumericId: scriptNumericId,
+    scriptUuid: scriptUuid,
   );
 }

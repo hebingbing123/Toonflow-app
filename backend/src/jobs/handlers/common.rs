@@ -1,7 +1,7 @@
 use axum::http::HeaderMap;
 use uuid::Uuid;
 
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, ApiError};
 use crate::jobs::dto::JobRow;
 use crate::jobs::hydrate_job_row;
 
@@ -48,8 +48,9 @@ pub(crate) fn normalize_job_list_status_filter(
     ) {
         Ok(Some(s))
     } else {
-        Err(ApiError::BadRequest(
-            "status must be one of: queued, running, succeeded, failed, cancelled".into(),
+        Err(bad_request_i18n(
+            "status must be one of: queued, running, succeeded, failed, cancelled",
+            "status 必须是以下之一：queued、running、succeeded、failed、cancelled",
         ))
     }
 }
@@ -62,15 +63,17 @@ pub(crate) fn list_jobs_limit_offset(
         None => 100,
         Some(x) if (1..=100).contains(&x) => x,
         Some(_) => {
-            return Err(ApiError::BadRequest(
-                "limit must be between 1 and 100".into(),
+            return Err(bad_request_i18n(
+                "limit must be between 1 and 100",
+                "limit 必须在 1 到 100 之间",
             ));
         }
     };
     let offset = offset.unwrap_or(0);
     if offset < 0 {
-        return Err(ApiError::BadRequest(
-            "offset must be greater than or equal to 0".into(),
+        return Err(bad_request_i18n(
+            "offset must be greater than or equal to 0",
+            "offset 必须大于或等于 0",
         ));
     }
     Ok((limit, offset))
@@ -81,6 +84,47 @@ pub(crate) fn normalize_task_page_project_filter(project_id: Option<i32>) -> Opt
         .filter(|id| *id > 0)
         .map(|id| id.to_string())
         .filter(|s| !s.is_empty())
+}
+
+pub(crate) fn workspace_visibility_clause() -> &'static str {
+    r#"
+        (
+            app_generation_job.owner_user_id = $1
+            OR EXISTS (
+                SELECT 1
+                FROM app_project p
+                INNER JOIN app_workspace_member wm ON wm.workspace_id = p.workspace_id
+                WHERE wm.user_id = $1
+                  AND (
+                    (app_generation_job.payload->>'project_uuid' IS NOT NULL
+                     AND p.id::text = app_generation_job.payload->>'project_uuid')
+                    OR
+                    (app_generation_job.payload->>'project_numeric_id' IS NOT NULL
+                     AND (app_generation_job.payload->>'project_numeric_id') ~ '^[0-9]+$'
+                     AND p.numeric_id = (app_generation_job.payload->>'project_numeric_id')::int)
+                  )
+                  AND p.archived_at IS NULL
+            )
+        )
+    "#
+}
+
+pub(crate) fn payload_matches_project_numeric_clause(project_bind: &str) -> String {
+    format!(
+        r#"
+        (
+          (payload->>'project_uuid' IS NOT NULL AND EXISTS (
+            SELECT 1
+            FROM app_project p
+            WHERE p.id::text = payload->>'project_uuid'
+              AND p.numeric_id::text = {project_bind}
+          ))
+          OR
+          (payload->>'project_numeric_id' IS NOT NULL
+           AND payload->>'project_numeric_id' = {project_bind})
+        )
+        "#
+    )
 }
 
 pub(crate) async fn ensure_workspace_member_project_numeric_access(
@@ -123,30 +167,85 @@ pub(crate) async fn fetch_job_by_numeric_task_id(
     uid: Uuid,
     numeric_task_id: i64,
 ) -> Result<JobRow, ApiError> {
+    // First fetch the job without permission check to get the payload
     let mut row = sqlx::query_as::<_, JobRow>(
         r#"
         SELECT numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, error_details, idempotency_key, claimed_by, created_at, updated_at
         FROM app_generation_job
-        WHERE numeric_task_id = $2
-          AND (
-            owner_user_id = $1
-            OR EXISTS (
-              SELECT 1
-              FROM app_project p
-              INNER JOIN app_workspace_member wm ON wm.workspace_id = p.workspace_id
-              WHERE wm.user_id = $1
-                AND (app_generation_job.payload->>'project_numeric_id') ~ '^[0-9]+$'
-                AND p.numeric_id = (app_generation_job.payload->>'project_numeric_id')::int
-            )
-          )
+        WHERE numeric_task_id = $1
         "#,
     )
-    .bind(uid)
     .bind(numeric_task_id)
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?
     .ok_or(ApiError::NotFound)?;
+
+    // If user is the job owner, grant access immediately
+    if row.owner_user_id == uid {
+        hydrate_job_row(&mut row);
+        return Ok(row);
+    }
+
+    // Otherwise, check workspace membership via derive_workspace_from_job_payload
+    let workspace_id =
+        crate::jobs::payload_project::derive_workspace_from_job_payload(pool, uid, &row.payload)
+            .await?;
+
+    // If derive_workspace_from_job_payload returns None, the user doesn't have access
+    // Return 404 (not 403) to maintain security
+    if workspace_id.is_none() {
+        return Err(ApiError::NotFound);
+    }
+
+    hydrate_job_row(&mut row);
+    Ok(row)
+}
+
+/// Validates that the user has access to a job based on workspace membership.
+/// Returns 404 (not 403) when user doesn't have access to maintain security.
+///
+/// Access is granted if:
+/// - User is the job owner, OR
+/// - Job is associated with a project in a workspace where user is a member
+///
+/// Excludes archived projects from workspace member access.
+pub(crate) async fn require_job_access(
+    pool: &sqlx::PgPool,
+    uid: Uuid,
+    job_id: Uuid,
+) -> Result<JobRow, ApiError> {
+    // First fetch the job without permission check to get the payload
+    let mut row = sqlx::query_as::<_, JobRow>(
+        r#"
+        SELECT numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, error_details, idempotency_key, claimed_by, created_at, updated_at
+        FROM app_generation_job
+        WHERE id = $1
+        "#,
+    )
+    .bind(job_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .ok_or(ApiError::NotFound)?;
+
+    // If user is the job owner, grant access immediately
+    if row.owner_user_id == uid {
+        hydrate_job_row(&mut row);
+        return Ok(row);
+    }
+
+    // Otherwise, check workspace membership via derive_workspace_from_job_payload
+    let workspace_id =
+        crate::jobs::payload_project::derive_workspace_from_job_payload(pool, uid, &row.payload)
+            .await?;
+
+    // If derive_workspace_from_job_payload returns None, the user doesn't have access
+    // Return 404 (not 403) to maintain security
+    if workspace_id.is_none() {
+        return Err(ApiError::NotFound);
+    }
+
     hydrate_job_row(&mut row);
     Ok(row)
 }
@@ -156,32 +255,7 @@ pub(crate) async fn fetch_job_by_id(
     uid: Uuid,
     id: Uuid,
 ) -> Result<JobRow, ApiError> {
-    let mut row = sqlx::query_as::<_, JobRow>(
-        r#"
-        SELECT numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, error_details, idempotency_key, claimed_by, created_at, updated_at
-        FROM app_generation_job
-        WHERE id = $1
-          AND (
-            owner_user_id = $2
-            OR EXISTS (
-              SELECT 1
-              FROM app_project p
-              INNER JOIN app_workspace_member wm ON wm.workspace_id = p.workspace_id
-              WHERE wm.user_id = $2
-                AND (app_generation_job.payload->>'project_numeric_id') ~ '^[0-9]+$'
-                AND p.numeric_id = (app_generation_job.payload->>'project_numeric_id')::int
-            )
-          )
-        "#,
-    )
-    .bind(id)
-    .bind(uid)
-    .fetch_optional(pool)
-    .await
-    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-    .ok_or(ApiError::NotFound)?;
-    hydrate_job_row(&mut row);
-    Ok(row)
+    require_job_access(pool, uid, id).await
 }
 
 #[cfg(test)]

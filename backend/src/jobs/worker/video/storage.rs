@@ -43,6 +43,7 @@ pub(super) fn video_file_writeback_error_details(
     })
 }
 
+#[cfg(not(test))]
 pub(super) async fn store_video_reference(
     pool: &PgPool,
     actor_user_id: Uuid,
@@ -75,4 +76,39 @@ pub(super) async fn store_video_reference(
     .await?;
 
     Ok(res.rows_affected())
+}
+
+#[cfg(test)]
+pub(crate) async fn store_video_reference(
+    pool: &PgPool,
+    actor_user_id: Uuid,
+    project_numeric_id: i32,
+    storyboard_numeric_id: i32,
+    video_url: &str,
+) -> Result<i64, sqlx::Error> {
+    let res = sqlx::query(
+        r#"
+        UPDATE app_storyboard
+        SET file_path = $1, state = '已完成', updated_at = NOW()
+        FROM app_script, app_project
+        WHERE app_storyboard.script_id = app_script.id
+          AND app_script.project_id = app_project.id
+          AND EXISTS (
+                SELECT 1
+                FROM app_workspace_member wm
+                WHERE wm.workspace_id = app_project.workspace_id
+                  AND wm.user_id = $2
+          )
+          AND app_project.numeric_id = $3
+          AND app_storyboard.numeric_id = $4
+        "#,
+    )
+    .bind(video_url)
+    .bind(actor_user_id)
+    .bind(project_numeric_id)
+    .bind(storyboard_numeric_id)
+    .execute(pool)
+    .await?;
+
+    Ok(res.rows_affected() as i64)
 }

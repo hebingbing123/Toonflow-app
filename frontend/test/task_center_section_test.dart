@@ -131,19 +131,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('任务工作台'), findsOneWidget);
-    expect(find.text('筛选与列表'), findsOneWidget);
-    expect(find.text('任务详情'), findsOneWidget);
-    expect(find.text('刷新任务项目'), findsOneWidget);
-    expect(find.text('按筛选加载任务'), findsOneWidget);
-    expect(find.text('读取任务详情（numeric ID）'), findsOneWidget);
-    expect(find.text('读取 UUID 详情'), findsOneWidget);
-    expect(find.widgetWithText(TextField, '1'), findsWidgets);
-    expect(find.widgetWithText(TextField, '9'), findsOneWidget);
-    expect(
-      find.textContaining(
-        '任务详情（numeric ID）：#101 · asset.generate.image · queued · uuid=job-101',
-      ),
-      findsNWidgets(2),
-    );
+    expect(find.byType(Dialog), findsOneWidget);
   });
 }

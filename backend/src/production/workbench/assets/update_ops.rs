@@ -4,16 +4,20 @@ use axum::{
     Json as JsonResponse,
 };
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, validate_non_empty_string, ApiError};
 use crate::state::AppState;
 
-use crate::scope::http::require_owned_numeric_script_scope_ids;
+use crate::scope::http::require_script_write_scope_ref;
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct UpdateAssetsUrlBody {
-    project_id: i32,
+    #[serde(default)]
+    project_id: Option<i32>,
+    #[serde(default)]
+    project_uuid: Option<Uuid>,
     script_id: i32,
     asset_id: i32,
     image_url: String,
@@ -51,17 +55,21 @@ pub(in crate::production) async fn post_assets_update_url(
     Json(body): Json<UpdateAssetsUrlBody>,
 ) -> Result<JsonResponse<UpdateAssetsUrlResponse>, ApiError> {
     if body.asset_id <= 0 {
-        return Err(ApiError::BadRequest(
-            "projectId, scriptId, and assetId must be positive integers".into(),
+        return Err(bad_request_i18n(
+            "projectId, scriptId, and assetId must be positive integers",
+            "projectId、scriptId 和 assetId 必须是正整数",
         ));
     }
-    if body.image_url.trim().is_empty() {
-        return Err(ApiError::BadRequest("imageUrl must not be empty".into()));
-    }
+    validate_non_empty_string(body.image_url.trim(), "imageUrl")?;
 
-    let (uid, pool, script_id) =
-        require_owned_numeric_script_scope_ids(&state, &headers, body.project_id, body.script_id)
-            .await?;
+    let (uid, pool, scope_row) = require_script_write_scope_ref(
+        &state,
+        &headers,
+        body.project_id,
+        body.project_uuid,
+        body.script_id,
+    )
+    .await?;
 
     let image_id = sqlx::query_scalar::<_, uuid::Uuid>(
         r#"
@@ -83,9 +91,9 @@ pub(in crate::production) async fn post_assets_update_url(
         RETURNING id
         "#,
     )
-    .bind(script_id)
+    .bind(scope_row.script_id)
     .bind(uid)
-    .bind(body.project_id)
+    .bind(scope_row.project_numeric_id)
     .bind(body.asset_id)
     .bind(uuid::Uuid::new_v4())
     .bind(body.image_url.trim())

@@ -4,9 +4,9 @@ use axum::{
     Json as JsonResponse,
 };
 
-use super::common::{normalize_storyboard_ids, require_owned_normalized_storyboards_user_pool};
+use super::common::{normalize_storyboard_ids, require_owned_normalized_storyboards_user_pool_ref};
 use super::types::{BatchGenerateImageBody, BatchGenerateImageResponse};
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, ApiError};
 use crate::jobs::{enqueue_generation_job, JOB_KIND_ASSET_GENERATE_BATCH};
 use crate::state::AppState;
 
@@ -34,14 +34,18 @@ pub(in crate::production) async fn post_storyboard_batch_generate_image(
     Json(body): Json<BatchGenerateImageBody>,
 ) -> Result<JsonResponse<BatchGenerateImageResponse>, ApiError> {
     if body.items.is_empty() {
-        return Err(ApiError::BadRequest("items must not be empty".into()));
+        return Err(bad_request_i18n(
+            "items must not be empty",
+            "items 不能为空",
+        ));
     }
 
     let normalized_ids = normalize_batch_generate_storyboard_ids(&body.items)?;
-    let (uid, pool) = require_owned_normalized_storyboards_user_pool(
+    let (uid, pool, project_numeric_id) = require_owned_normalized_storyboards_user_pool_ref(
         &state,
         &headers,
         body.project_id,
+        body.project_uuid,
         body.script_id,
         &normalized_ids,
     )
@@ -54,7 +58,7 @@ pub(in crate::production) async fn post_storyboard_batch_generate_image(
     for item in &body.items {
         let payload = serde_json::json!({
             "source": "production.storyboard.batch-generate-image",
-            "project_numeric_id": body.project_id,
+            "project_numeric_id": project_numeric_id,
             "script_id": body.script_id,
             "storyboard_numeric_id": item.storyboard_id,
             "prompt": item.prompt,
@@ -62,6 +66,13 @@ pub(in crate::production) async fn post_storyboard_batch_generate_image(
             "model": item.model.as_deref().unwrap_or(default_model),
             "resolution": item.resolution.as_deref().unwrap_or(default_resolution),
         });
+        let payload = if let Some(project_uuid) = body.project_uuid {
+            let mut payload = payload;
+            payload["project_uuid"] = serde_json::json!(project_uuid);
+            payload
+        } else {
+            payload
+        };
 
         let row = enqueue_generation_job(
             pool,
@@ -69,6 +80,7 @@ pub(in crate::production) async fn post_storyboard_batch_generate_image(
             JOB_KIND_ASSET_GENERATE_BATCH,
             payload,
             Some(&headers),
+            &state.billing_config,
         )
         .await?;
         enqueued.push(row);
@@ -83,8 +95,9 @@ fn normalize_batch_generate_storyboard_ids(
 ) -> Result<Vec<i32>, ApiError> {
     let storyboard_ids: Vec<i32> = items.iter().map(|item| item.storyboard_id).collect();
     if storyboard_ids.iter().any(|id| *id <= 0) {
-        return Err(ApiError::BadRequest(
-            "each item.storyboardId must be a positive integer".into(),
+        return Err(bad_request_i18n(
+            "each item.storyboardId must be a positive integer",
+            "每个 item.storyboardId 都必须是正整数",
         ));
     }
 

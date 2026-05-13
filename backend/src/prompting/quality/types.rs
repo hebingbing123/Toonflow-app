@@ -111,6 +111,7 @@ pub struct ListQualityReviewsQuery {
 #[derive(Debug, Serialize, Deserialize, sqlx::FromRow)]
 #[serde(rename_all = "camelCase")]
 pub struct QualityStatsResponse {
+    /// Aggregation scope: 'user' indicates user-level aggregation. Workspace-level aggregation pending product finalization.
     pub scope: String,
     pub target_type: String,
     pub total_reviews: i64,
@@ -133,6 +134,7 @@ pub struct QualityStatsResponse {
 #[derive(Debug, Serialize, Deserialize, sqlx::FromRow)]
 #[serde(rename_all = "camelCase")]
 pub struct QualityScopeInsightResponse {
+    /// Aggregation scope: 'user' indicates user-level aggregation. Workspace-level aggregation pending product finalization.
     pub scope: String,
     pub scope_label: String,
     pub project_id: Option<i32>,
@@ -166,6 +168,7 @@ pub struct QualityScopeInsightResponse {
 #[derive(Debug, Serialize, Deserialize, sqlx::FromRow)]
 #[serde(rename_all = "camelCase")]
 pub struct StagePassRateItem {
+    /// Aggregation scope: 'user' indicates user-level aggregation. Workspace-level aggregation pending product finalization.
     pub scope: String,
     pub target_type: String,
     pub review_date: chrono::DateTime<chrono::Utc>,
@@ -188,6 +191,7 @@ pub struct StagePassRateItem {
 #[derive(Debug, Serialize, Deserialize, sqlx::FromRow)]
 #[serde(rename_all = "camelCase")]
 pub struct StageGradeDistributionItem {
+    /// Aggregation scope: 'user' indicates user-level aggregation. Workspace-level aggregation pending product finalization.
     pub scope: String,
     /// 生成阶段（story_skeleton / adaptation_strategy / director_planning / storyboard_table / storyboard_panel / video_prompt）
     pub stage: String,
@@ -209,6 +213,7 @@ pub struct StageGradeDistributionItem {
 #[derive(Debug, Serialize, Deserialize, sqlx::FromRow)]
 #[serde(rename_all = "camelCase")]
 pub struct QualityTokenEfficiencyResponse {
+    /// Aggregation scope: 'user' indicates user-level aggregation. Workspace-level aggregation pending product finalization.
     pub scope: String,
     pub target_type: String,
     pub stage: Option<String>,
@@ -244,6 +249,7 @@ pub struct QualityTokenEfficiencyResponse {
 #[derive(Debug, Serialize, sqlx::FromRow)]
 #[serde(rename_all = "camelCase")]
 pub struct QualityTokenEfficiencySample {
+    /// Aggregation scope: 'user' indicates user-level aggregation. Workspace-level aggregation pending product finalization.
     pub scope: String,
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub target_type: String,
@@ -273,6 +279,7 @@ pub struct QualityTokenEfficiencySample {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct QualityDashboardTargetStat {
+    /// Aggregation scope: 'user' indicates user-level aggregation. Workspace-level aggregation pending product finalization.
     pub scope: String,
     pub target_type: String,
     pub total_reviews: i64,
@@ -283,6 +290,7 @@ pub struct QualityDashboardTargetStat {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct QualityDashboardStagePassRateItem {
+    /// Aggregation scope: 'user' indicates user-level aggregation. Workspace-level aggregation pending product finalization.
     pub scope: String,
     pub target_type: String,
     pub review_date: chrono::DateTime<chrono::Utc>,
@@ -293,6 +301,7 @@ pub struct QualityDashboardStagePassRateItem {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct QualityDashboardStageGradeItem {
+    /// Aggregation scope: 'user' indicates user-level aggregation. Workspace-level aggregation pending product finalization.
     pub scope: String,
     pub stage: String,
     pub grade_a_count: i64,
@@ -306,6 +315,7 @@ pub struct QualityDashboardStageGradeItem {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct QualityDashboardScopeInsightItem {
+    /// Aggregation scope: 'user' indicates user-level aggregation. Workspace-level aggregation pending product finalization.
     pub scope: String,
     pub scope_label: String,
     pub total_reviews: i64,
@@ -316,6 +326,7 @@ pub struct QualityDashboardScopeInsightItem {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct QualityDashboardTokenEfficiencyItem {
+    /// Aggregation scope: 'user' indicates user-level aggregation. Workspace-level aggregation pending product finalization.
     pub scope: String,
     pub target_type: String,
     pub sample_count: i64,
@@ -328,6 +339,7 @@ pub struct QualityDashboardTokenEfficiencyItem {
 #[derive(Debug, Serialize, Deserialize, sqlx::FromRow)]
 #[serde(rename_all = "camelCase")]
 pub struct QualityBadCaseStatResponse {
+    /// Aggregation scope: 'user' indicates user-level aggregation. Workspace-level aggregation pending product finalization.
     pub scope: String,
     pub bad_case_category: Option<String>,
     pub count: i64,
@@ -380,6 +392,7 @@ pub struct QualityDashboardRefreshResponse {
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct BadCaseFrequencyItem {
+    /// Aggregation scope: 'user' indicates user-level aggregation. Workspace-level aggregation pending product finalization.
     pub scope: String,
     /// 规范化问题类型（snake_case）
     pub issue_type: String,
@@ -397,6 +410,7 @@ pub struct BadCaseFrequencyItem {
 #[derive(Debug, Serialize, sqlx::FromRow)]
 #[serde(rename_all = "camelCase")]
 pub struct SkillVersionComparisonItem {
+    /// Aggregation scope: 'user' indicates user-level aggregation. Workspace-level aggregation pending product finalization.
     pub scope: String,
     pub skill_file_path: String,
     pub skill_version_hash: String,

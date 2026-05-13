@@ -7,24 +7,23 @@ use serde_json::{Map, Value};
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::assets::ensure_owned_project_pk;
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, validate_enum, validate_positive, ApiError};
 use crate::http_kit::json_patch::{
     parse_optional_i32_field, parse_optional_text_field, FieldPatch,
 };
+use crate::projects::routes::common::require_project_write_scope;
 use crate::state::AppState;
 
 use super::super::super::dto::{NovelRow, PatchNovelBody};
 use super::super::list::normalize_intake_source;
 
 fn validate_intake_status(value: &str) -> Result<(), ApiError> {
-    match value {
-        "draft" | "pending_review" | "admitted" | "rejected" => Ok(()),
-        _ => Err(ApiError::BadRequest(
-            "intake_status must be one of draft, pending_review, admitted, rejected".into(),
-        )),
-    }
+    validate_enum(
+        value,
+        &["draft", "pending_review", "admitted", "rejected"],
+        "intake_status",
+    )
 }
 
 fn build_novel_intake_metadata_from_row(
@@ -56,9 +55,7 @@ async fn patch_novel_inner(
     novel_numeric_id: i32,
     body: PatchNovelBody,
 ) -> Result<Json<NovelRow>, ApiError> {
-    if novel_numeric_id <= 0 {
-        return Err(ApiError::BadRequest("numeric ids must be positive".into()));
-    }
+    validate_positive(novel_numeric_id, "numericId")?;
 
     let idx_patch = parse_optional_i32_field(body.chapter_index, "chapter_index")?;
     let reel_patch = parse_optional_text_field(body.reel, "reel")?;
@@ -85,8 +82,9 @@ async fn patch_novel_inner(
         && matches!(intake_status_patch, FieldPatch::Absent)
         && matches!(intake_note_patch, FieldPatch::Absent)
     {
-        return Err(ApiError::BadRequest(
-            "expected at least one patch field".into(),
+        return Err(bad_request_i18n(
+            "expected at least one patch field",
+            "至少需要提供一个 patch 字段",
         ));
     }
 
@@ -114,8 +112,9 @@ async fn patch_novel_inner(
     let new_idx = match &idx_patch {
         FieldPatch::Absent => current.chapter_index,
         FieldPatch::Set(None) => {
-            return Err(ApiError::BadRequest(
-                "chapter_index cannot be null; omit or set a number".into(),
+            return Err(bad_request_i18n(
+                "chapter_index cannot be null; omit or set a number",
+                "chapter_index 不能为 null；请省略该字段或提供数字",
             ));
         }
         FieldPatch::Set(Some(v)) => *v,
@@ -146,8 +145,9 @@ async fn patch_novel_inner(
     let new_state = match &state_patch {
         FieldPatch::Absent => current.event_state,
         FieldPatch::Set(None) => {
-            return Err(ApiError::BadRequest(
-                "event_state cannot be null; omit or set a number".into(),
+            return Err(bad_request_i18n(
+                "event_state cannot be null; omit or set a number",
+                "event_state 不能为 null；请省略该字段或提供数字",
             ));
         }
         FieldPatch::Set(Some(v)) => *v,
@@ -237,6 +237,6 @@ pub(crate) async fn patch_novel_for_project(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    ensure_owned_project_pk(pool, uid, project_id).await?;
+    require_project_write_scope(&state, uid, project_id).await?;
     patch_novel_inner(pool, project_id, novel_numeric_id, body).await
 }

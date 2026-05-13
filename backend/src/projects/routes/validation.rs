@@ -1,6 +1,6 @@
 //! 短视频配置字段校验
 
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, ApiError};
 
 /// 校验 mode 字段（动漫短剧 / 真人短剧）
 ///
@@ -9,10 +9,16 @@ pub(crate) fn validate_mode(mode: &str) -> Result<(), ApiError> {
     match mode {
         "动漫" | "真人" => Ok(()),
         "animated.short_drama" | "live_action.short_drama" => Ok(()),
-        _ => Err(ApiError::BadRequest(format!(
-            "mode must be 'animated.short_drama', 'live_action.short_drama', '动漫', or '真人', got '{}'",
-            mode
-        ))),
+        _ => Err(bad_request_i18n(
+            &format!(
+                "mode must be 'animated.short_drama', 'live_action.short_drama', '动漫', or '真人', got '{}'",
+                mode
+            ),
+            &format!(
+                "mode 必须是 'animated.short_drama'、'live_action.short_drama'、'动漫' 或 '真人'，当前为 '{}'",
+                mode
+            ),
+        )),
     }
 }
 
@@ -20,10 +26,16 @@ pub(crate) fn validate_mode(mode: &str) -> Result<(), ApiError> {
 pub(crate) fn validate_target_market(market: &str) -> Result<(), ApiError> {
     match market {
         "domestic" | "overseas" | "both" => Ok(()),
-        _ => Err(ApiError::BadRequest(format!(
-            "target_market must be 'domestic', 'overseas', or 'both', got '{}'",
-            market
-        ))),
+        _ => Err(bad_request_i18n(
+            &format!(
+                "target_market must be 'domestic', 'overseas', or 'both', got '{}'",
+                market
+            ),
+            &format!(
+                "target_market 必须是 'domestic'、'overseas' 或 'both'，当前为 '{}'",
+                market
+            ),
+        )),
     }
 }
 
@@ -31,10 +43,16 @@ pub(crate) fn validate_target_market(market: &str) -> Result<(), ApiError> {
 pub(crate) fn validate_duration_strategy(strategy: &str) -> Result<(), ApiError> {
     match strategy {
         "short" | "medium" | "long" => Ok(()),
-        _ => Err(ApiError::BadRequest(format!(
-            "duration_strategy must be 'short', 'medium', or 'long', got '{}'",
-            strategy
-        ))),
+        _ => Err(bad_request_i18n(
+            &format!(
+                "duration_strategy must be 'short', 'medium', or 'long', got '{}'",
+                strategy
+            ),
+            &format!(
+                "duration_strategy 必须是 'short'、'medium' 或 'long'，当前为 '{}'",
+                strategy
+            ),
+        )),
     }
 }
 
@@ -42,8 +60,9 @@ pub(crate) fn validate_duration_strategy(strategy: &str) -> Result<(), ApiError>
 pub(crate) fn validate_target_platforms(platforms: &[String]) -> Result<(), ApiError> {
     // 数组非空校验
     if platforms.is_empty() {
-        return Err(ApiError::BadRequest(
-            "target_platforms must not be empty".into(),
+        return Err(bad_request_i18n(
+            "target_platforms must not be empty",
+            "target_platforms 不能为空",
         ));
     }
 
@@ -64,11 +83,18 @@ pub(crate) fn validate_target_platforms(platforms: &[String]) -> Result<(), ApiE
 
     for platform in platforms {
         if !VALID_PLATFORMS.contains(&platform.as_str()) {
-            return Err(ApiError::BadRequest(format!(
-                "invalid platform identifier '{}', must be one of: {}",
-                platform,
-                VALID_PLATFORMS.join(", ")
-            )));
+            return Err(bad_request_i18n(
+                &format!(
+                    "invalid platform identifier '{}', must be one of: {}",
+                    platform,
+                    VALID_PLATFORMS.join(", ")
+                ),
+                &format!(
+                    "无效的平台标识符 '{}'，必须是以下之一：{}",
+                    platform,
+                    VALID_PLATFORMS.join(", ")
+                ),
+            ));
         }
     }
 
@@ -79,10 +105,16 @@ pub(crate) fn validate_target_platforms(platforms: &[String]) -> Result<(), ApiE
 pub(crate) fn validate_quality_gate_strategy(strategy: &str) -> Result<(), ApiError> {
     match strategy {
         "off" | "warn" | "block" => Ok(()),
-        _ => Err(ApiError::BadRequest(format!(
-            "quality_gate_strategy must be 'off', 'warn', or 'block', got '{}'",
-            strategy
-        ))),
+        _ => Err(bad_request_i18n(
+            &format!(
+                "quality_gate_strategy must be 'off', 'warn', or 'block', got '{}'",
+                strategy
+            ),
+            &format!(
+                "quality_gate_strategy 必须是 'off'、'warn' 或 'block'，当前为 '{}'",
+                strategy
+            ),
+        )),
     }
 }
 

@@ -412,3 +412,35 @@ pub struct AdminProjectBatchGovernanceResponse {
     pub updated_count: i64,
     pub projects: Vec<AdminProjectDetailResponse>,
 }
+
+/// Workspace billing query response (Task 8.1).
+#[derive(Debug, Clone, Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminWorkspaceBillingResponse {
+    pub workspace_id: Uuid,
+    pub workspace_name: String,
+    pub workspace_type: String,
+    pub owner_user_id: Uuid,
+    pub owner_email: Option<String>,
+    pub plan_tier: Option<String>,
+    pub billing_currency: Option<String>,
+    pub billing_provider: Option<String>,
+    pub daily_job_quota: Option<i64>,
+    pub jobs_today: i64,
+    pub jobs_this_month: i64,
+    pub member_count: i64,
+    pub project_count: i64,
+    pub created_at: DateTime<Utc>,
+}
+
+/// Query parameters for workspace billing list (Task 8.1).
+#[derive(Debug, Clone, Deserialize, IntoParams, ToSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct AdminWorkspaceBillingQuery {
+    #[serde(default)]
+    pub workspace_id: Option<Uuid>,
+    #[serde(default)]
+    pub limit: Option<i64>,
+    #[serde(default)]
+    pub offset: Option<i64>,
+}

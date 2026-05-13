@@ -5,18 +5,22 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use uuid::Uuid;
 
 use crate::error::ApiError;
 use crate::jobs::{enqueue_generation_job, JobRow, JOB_KIND_VOICEOVER_GENERATE};
-use crate::production::workbench::storyboard_ops::require_owned_normalized_storyboards_scope;
-use crate::scope::http::require_owned_numeric_storyboard_scope;
+use crate::production::workbench::storyboard_ops::require_owned_normalized_storyboards_scope_ref;
+use crate::scope::http::require_storyboard_write_scope_ref;
 use crate::short_video::defaults::resolve_tts_voice;
 use crate::state::AppState;
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct WorkbenchGenerateVoiceoverBody {
-    pub(crate) project_id: i32,
+    #[serde(default)]
+    pub(crate) project_id: Option<i32>,
+    #[serde(default)]
+    pub(crate) project_uuid: Option<Uuid>,
     pub(crate) script_id: i32,
     pub(crate) storyboard_ids: Vec<i32>,
     #[serde(default)]
@@ -35,7 +39,8 @@ pub(in crate::production) struct WorkbenchGenerateVoiceoverResponse {
 struct VoiceoverQueueContext<'a> {
     state: &'a AppState,
     headers: &'a HeaderMap,
-    project_id: i32,
+    project_id: Option<i32>,
+    project_uuid: Option<Uuid>,
     script_id: i32,
     resolved_voice: &'a str,
     speed: Option<f32>,
@@ -63,25 +68,26 @@ pub(in crate::production) async fn post_workbench_generate_voiceover(
     headers: HeaderMap,
     Json(body): Json<WorkbenchGenerateVoiceoverBody>,
 ) -> Result<JsonResponse<WorkbenchGenerateVoiceoverResponse>, ApiError> {
-    let (uid, pool, script_uuid, storyboard_ids) = require_owned_normalized_storyboards_scope(
-        &state,
-        &headers,
-        body.project_id,
-        body.script_id,
-        &body.storyboard_ids,
-    )
-    .await?;
+    let (uid, pool, project_numeric_id, script_uuid, storyboard_ids) =
+        require_owned_normalized_storyboards_scope_ref(
+            &state,
+            &headers,
+            body.project_id,
+            body.project_uuid,
+            body.script_id,
+            &body.storyboard_ids,
+        )
+        .await?;
 
     let proj_defaults: Option<(Option<String>, Option<String>, Option<String>)> = sqlx::query_as(
         r#"
         SELECT voice_profile, subtitle_style, bgm_strategy
         FROM app_project
-        WHERE owner_user_id = $1 AND numeric_id = $2
+        WHERE numeric_id = $1
           AND archived_at IS NULL
         "#,
     )
-    .bind(uid)
-    .bind(body.project_id)
+    .bind(project_numeric_id)
     .fetch_optional(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -93,6 +99,7 @@ pub(in crate::production) async fn post_workbench_generate_voiceover(
         state: &state,
         headers: &headers,
         project_id: body.project_id,
+        project_uuid: body.project_uuid,
         script_id: body.script_id,
         resolved_voice: resolved_voice.as_str(),
         speed: body.speed,
@@ -135,11 +142,14 @@ pub(in crate::production) async fn post_workbench_generate_voiceover(
         mark_storyboard_voiceover_queued(pool, &queue_ctx, storyboard_id, narration).await?;
 
         let mut payload = json!({
-            "project_numeric_id": body.project_id,
+            "project_numeric_id": project_numeric_id,
             "script_numeric_id": body.script_id,
             "storyboard_numeric_id": storyboard_id,
             "voice": resolved_voice.as_str(),
         });
+        if let Some(project_uuid) = body.project_uuid {
+            payload["project_uuid"] = json!(project_uuid);
+        }
         if let Some(speed) = body.speed.filter(|value| *value >= 0.25 && *value <= 4.0) {
             payload["speed"] = json!(speed);
         }
@@ -149,6 +159,7 @@ pub(in crate::production) async fn post_workbench_generate_voiceover(
             JOB_KIND_VOICEOVER_GENERATE,
             payload,
             Some(&headers),
+            &state.billing_config,
         )
         .await?;
         enqueued.push(row);
@@ -166,10 +177,11 @@ async fn mark_storyboard_voiceover_queued(
     storyboard_id: i32,
     narration: &str,
 ) -> Result<(), ApiError> {
-    let (_pool, storyboard_uuid) = require_owned_numeric_storyboard_scope(
+    let (_pool, storyboard_uuid) = require_storyboard_write_scope_ref(
         ctx.state,
         ctx.headers,
         ctx.project_id,
+        ctx.project_uuid,
         ctx.script_id,
         storyboard_id,
     )

@@ -3,6 +3,8 @@
 **定位**：在 **个人路径（Personal Workspace）已落地** 的前提下，把 **enterprise 工作区、成员生命周期、权限、全站 API/前端/Harness/计费与观测** 做成 **可对外承诺的完整产品能力**，而不是「最小演示」。  
 **个人与团队并存**：任何改动 **不得破坏** 现有 `personal` 唯一性、`ensure_personal_workspace` 默认行为与既有项目归属。
 
+**阅读提醒**：本文是 Workspace 功能真源，但其中仍会保留 jobs payload、HTTP 兼容字段、Harness attach 等过渡期表述；凡看到 `project_numeric_id` / legacy numeric，请默认理解为兼容回退，除非条目明确声明不是。
+
 **关联**：[`harness-rust-flutter.md`](./harness-rust-flutter.md)（组织/工作区按阶段）、[`toonflow-platform-progress.md`](./toonflow-platform-progress.md) §1 基线、迁移 `supabase/migrations/*app_workspace*`。  
 **门禁**：凡动 `backend/` / `frontend/` / OpenAPI / 迁移 / WS 文档，合并前 **`yarn refactor:check`**。
 
@@ -74,8 +76,8 @@
 - [x] **W4.2** `POST /api/v1/projects`：默认当前 workspace（含 personal 回退）；支持显式 `workspaceId` 且强校验 membership，非成员写入返回 `403`
 - [x] **W4.3** `GET/PATCH/DELETE …/projects/{id}`：已改为按 **project.workspace_id + workspace member** 校验（移除 owner_user_id 单用户闸门）
 - [x] **W4.4** 剧本 / 分镜 / 小说 / 资产 / workbench **所有** `project_id` 路径 handler：统一 **「project ∈ workspace + 成员权限」**（已抽 `require_project_workspace_member_scope` 等 helper；生产/质量/发布/脚本/小说等后续批次已按成员可见性收敛，见历史 commit 与本文 W4.5）。
-- [x] **W4.5** `app_generation_job`（及 payload）：**不新增** `workspace_id` 列，空间可见性由 payload 中 **`project_uuid` + `project_numeric_id`** 派生 + **`GET …/jobs*`**、`cancel`/`retry`、worker 写回与通知规则与成员语义对齐（见下行定稿）。
-  - **W4.5 决策定稿（2026-05-08）**：`app_generation_job` **不新增** `workspace_id` 列；空间可见性由 payload 中规范化后的 `project_uuid + project_numeric_id` 派生。理由：避免双写一致性负担（`project_id`/`workspace_id` 漂移）、兼容历史行、且与现有 project-membership helper 复用最稳。
+- [x] **W4.5** `app_generation_job`（及 payload）：**不新增** `workspace_id` 列，空间可见性由 payload 中 **`project_uuid`**（首选）+ **`project_numeric_id`**（legacy fallback）派生，且 **`GET …/jobs*`**、`cancel`/`retry`、worker 写回与通知规则与成员语义对齐（见下行定稿）。
+  - **W4.5 决策定稿（2026-05-08）**：`app_generation_job` **不新增** `workspace_id` 列；空间可见性由 payload 中规范化后的 **`project_uuid`**（首选）/ **`project_numeric_id`**（legacy fallback）派生。理由：避免双写一致性负担（`project_id`/`workspace_id` 漂移）、兼容历史行、且与现有 project-membership helper 复用最稳。
   - **约束**：无 `project_*` 的 job 继续按 `owner_user_id` 个人视图；带 `project_*` 的 job 一律按「owner 或同 workspace 成员」判定读写权限。
 - [x] **W4.6** `GET /api/v1/usage/summary`、memory、skills、quality 等：**用户口径**在响应与 OpenAPI 中显式标注 `scope = user`（含 **`GET …/usage/summary`**、**`GET …/skills/summary`**、**`GET …/agents/memory/cost-overview`**、**`POST …/agents/memory/query`** 列表项、**`POST …/agents/memory/append|clear|optimize`** 响应，以及 quality 聚合端点）；workspace 级汇总仍待 W5/W8 产品定稿。
 - [x] **W4.7** Parity：**[`electron-node-parity.md`](./electron-node-parity.md)** §2.2 **「多用户可见范围」** 与旧栈差异说明已补充。
@@ -116,7 +118,7 @@
 
 ## 八、Phase W7 — Harness / WebSocket
 
-- [x] **W7.1** `HarnessContext`（或 attach payload）增加 **`workspace_id`**（UUID）与 **解析规则**（与 REST 一致）
+- [x] **W7.1** `HarnessContext`（或 attach payload）增加 **`workspace_id`**（UUID）与 **解析规则**（与 REST 一致；`projectUuid` / `scriptUuid` 为主路径，legacy numeric 仅作兼容回退）
 - [x] **W7.2** `docs/websocket-events.md`：attach / context 更新事件字段表（见 `openapi_spec/ws_protocol_description.md`、`docs/plans/harness-ws-context-matrix.md`）
 - [x] **W7.3** 工具权限：`permissions` 模块按 workspace 成员校验 **读 production/script** 等 channel（attach 解析已由 **`app_workspace_member`** 门禁；`ws_channel_allowed` 文档化与 env  allowlist 分工）
 - [x] **W7.4** Flutter WS 客户端：切换 workspace 后 **重 attach** 或刷新 context（团队上下文变更时清空项目/script/**workspaceUuid** 作用域；项目入口写入 **workspaceUuid** 随 attach 发送）
@@ -129,9 +131,9 @@
 **Kiro 工程规格**（W8.2–W8.4 完整需求 / 架构 / 任务，与 global-search spec 同结构）：[`.kiro/specs/workspace-scope-billing/`](../../.kiro/specs/workspace-scope-billing/)。
 
 - [x] **W8.1** 结论落地文档：`plan_tier` / `daily_job_quota` / `jobs_today` **按 user 还是按 workspace**（或 hybrid）— 当前定稿为 **user-scope**，见 [`workspace-billing-scope-decision.md`](./workspace-billing-scope-decision.md)
-- [ ] **W8.2** 若未来改为 workspace-scope：`app_user_profile` vs `app_workspace` 字段迁移 + webhook 与 **`/me`** 响应形状变更策略（版本化）— **规格草案**（未实施）：[`workspace-billing-future-workspace-scope.md`](./workspace-billing-future-workspace-scope.md) §2
-- [ ] **W8.3** 若未来改为 workspace-scope：Billing 运营视图是否按 workspace 过滤 — 与 [`roadmap-jobs-saas.md`](./roadmap-jobs-saas.md) WP-D 对齐 — **规格草案**：同上 §3
-- [ ] **W8.4** 若未来改为 workspace-scope：迁移与回填脚本 + 回滚 Runbook — **规格草案**：同上 §4
+- [x] **W8.2** 若未来改为 workspace-scope：`app_user_profile` vs `app_workspace` 字段迁移 + webhook 与 **`/me`** 响应形状变更策略（版本化）— **规格草案**（未实施）：[`workspace-billing-future-workspace-scope.md`](./workspace-billing-future-workspace-scope.md) §2；**完整规格**：[`.kiro/specs/workspace-scope-billing/`](../../.kiro/specs/workspace-scope-billing/)；**Cutover Runbook**：[`workspace-billing-cutover-runbook.md`](./workspace-billing-cutover-runbook.md)
+- [x] **W8.3** 若未来改为 workspace-scope：Billing 运营视图是否按 workspace 过滤 — 与 [`roadmap-jobs-saas.md`](./roadmap-jobs-saas.md) WP-D 对齐 — **规格草案**：同上 §3；**完整规格**：[`.kiro/specs/workspace-scope-billing/`](../../.kiro/specs/workspace-scope-billing/)
+- [x] **W8.4** 若未来改为 workspace-scope：迁移与回填脚本 + 回滚 Runbook — **规格草案**：同上 §4；**Rollback Procedures**：[`workspace-billing-rollback-procedures.md`](./workspace-billing-rollback-procedures.md)；**Staging Validation Checklist**：[`workspace-billing-staging-validation-checklist.md`](./workspace-billing-staging-validation-checklist.md)
 
 ---
 

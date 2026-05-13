@@ -50,14 +50,20 @@ pub(crate) async fn persist_local_art_style_cover(
     cover: &LocalArtStyleCover,
 ) -> Result<(), ApiError> {
     let dir = root.join(owner_user_id.to_string());
-    fs::create_dir_all(&dir)
-        .await
-        .map_err(|e| ApiError::BadRequest(format!("art style cover mkdir failed: {e}")))?;
+    fs::create_dir_all(&dir).await.map_err(|e| {
+        crate::error::bad_request_i18n(
+            &format!("art style cover mkdir failed: {e}"),
+            &format!("art style cover 创建目录失败：{e}"),
+        )
+    })?;
     delete_local_art_style_cover_files(root, owner_user_id, numeric_id).await;
     let path = art_style_cover_file_path(root, owner_user_id, numeric_id, cover.ext);
-    fs::write(&path, &cover.bytes)
-        .await
-        .map_err(|e| ApiError::BadRequest(format!("art style cover write failed: {e}")))?;
+    fs::write(&path, &cover.bytes).await.map_err(|e| {
+        crate::error::bad_request_i18n(
+            &format!("art style cover write failed: {e}"),
+            &format!("art style cover 写入失败：{e}"),
+        )
+    })?;
     Ok(())
 }
 

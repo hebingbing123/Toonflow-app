@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../l10n/app_localizations.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
+import '../utils/localized_formatting.dart';
 import 'controller.dart';
 
 class AccountSection extends StatefulWidget {
@@ -68,6 +70,7 @@ class _AccountSectionState extends State<AccountSection> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final canDelete =
         _acknowledgeIrreversible &&
         _confirmController.text.trim() == 'DELETE MY ACCOUNT' &&
@@ -82,18 +85,18 @@ class _AccountSectionState extends State<AccountSection> {
             children: [
               Expanded(
                 child: Text(
-                  '账户与隐私',
+                  l10n.accountSectionTitle,
                   style: theme.textTheme.titleMedium,
                 ),
               ),
-              const RiskyOperationConfirmPrefsOverflowMenu(
-                tooltip: '本机客户端偏好（删号、导出等「不再提示」与恢复确认）',
+              RiskyOperationConfirmPrefsOverflowMenu(
+                tooltip: l10n.accountRiskyPrefsTooltip,
               ),
             ],
           ),
           const SizedBox(height: 4),
           Text(
-            '统一管理账户数据导出、下载留档和不可逆删号。导出任务会走平台 job 队列，可反复生成新版快照。',
+            l10n.accountSectionSubtitle,
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -109,6 +112,7 @@ class _AccountSectionState extends State<AccountSection> {
 
   Widget _buildExportPanel(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -121,13 +125,18 @@ class _AccountSectionState extends State<AccountSection> {
         children: [
           Row(
             children: [
-              Expanded(child: Text('数据导出', style: theme.textTheme.titleSmall)),
+              Expanded(
+                child: Text(
+                  l10n.accountExportTitle,
+                  style: theme.textTheme.titleSmall,
+                ),
+              ),
               TextButton.icon(
                 onPressed: widget.controller.loading
                     ? null
                     : widget.controller.refresh,
                 icon: const Icon(Icons.refresh, size: 18),
-                label: const Text('刷新'),
+                label: Text(l10n.notificationsRefresh),
               ),
               const SizedBox(width: 8),
               FilledButton.tonalIcon(
@@ -141,7 +150,7 @@ class _AccountSectionState extends State<AccountSection> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.archive_outlined),
-                label: const Text('创建导出包'),
+                label: Text(l10n.accountExportCreate),
               ),
             ],
           ),
@@ -153,17 +162,21 @@ class _AccountSectionState extends State<AccountSection> {
               FilterChip(
                 selected: widget.controller.includeAuditLogs,
                 onSelected: widget.controller.setIncludeAuditLogs,
-                label: const Text('包含审计日志'),
+                label: Text(l10n.accountExportIncludeAuditLogs),
               ),
               FilterChip(
                 selected: widget.controller.includeNotifications,
                 onSelected: widget.controller.setIncludeNotifications,
-                label: const Text('包含通知记录'),
+                label: Text(l10n.accountExportIncludeNotifications),
               ),
-              Chip(label: Text('进行中 ${widget.controller.activeCount}')),
+              Chip(
+                label: Text(
+                  l10n.accountExportActiveCount(widget.controller.activeCount),
+                ),
+              ),
               if (widget.controller.lastSavedPath != null)
                 ActionChip(
-                  label: const Text('复制最近保存路径'),
+                  label: Text(l10n.accountExportCopyLastSavedPath),
                   onPressed: () => Clipboard.setData(
                     ClipboardData(text: widget.controller.lastSavedPath!),
                   ),
@@ -175,7 +188,7 @@ class _AccountSectionState extends State<AccountSection> {
             const Center(child: CircularProgressIndicator())
           else if (widget.controller.items.isEmpty)
             Text(
-              '还没有账户导出记录。',
+              l10n.accountExportEmpty,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -191,6 +204,7 @@ class _AccountSectionState extends State<AccountSection> {
 
   Widget _buildExportRow(BuildContext context, AccountExportJobRecordV1 item) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final downloading = widget.controller.isDownloading(item.id);
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -206,7 +220,8 @@ class _AccountSectionState extends State<AccountSection> {
             children: [
               Expanded(
                 child: Text(
-                  item.fileName ?? '账户导出 #${item.numericTaskId}',
+                  item.fileName ??
+                      l10n.accountExportDefaultFileName(item.numericTaskId),
                   style: theme.textTheme.titleSmall,
                 ),
               ),
@@ -215,7 +230,10 @@ class _AccountSectionState extends State<AccountSection> {
           ),
           const SizedBox(height: 6),
           Text(
-            '任务 #${item.numericTaskId} · ${_formatDateTime(item.createdAt)}',
+            l10n.accountExportTaskLine(
+              item.numericTaskId,
+              _formatDateTime(item.createdAt),
+            ),
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -223,7 +241,7 @@ class _AccountSectionState extends State<AccountSection> {
           if (item.byteSize != null) ...[
             const SizedBox(height: 4),
             Text(
-              '大小 ${_formatBytes(item.byteSize!)}',
+              l10n.accountExportSizeLine(_formatBytes(item.byteSize!)),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -256,7 +274,9 @@ class _AccountSectionState extends State<AccountSection> {
                             return;
                           }
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('已保存导出包：$path')),
+                            SnackBar(
+                              content: Text(l10n.accountExportSavedSnack(path)),
+                            ),
                           );
                         },
                   icon: downloading
@@ -266,14 +286,14 @@ class _AccountSectionState extends State<AccountSection> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.download_outlined),
-                  label: const Text('下载到本机'),
+                  label: Text(l10n.accountExportDownload),
                 ),
               if (item.fileName != null)
                 TextButton.icon(
                   onPressed: () =>
                       Clipboard.setData(ClipboardData(text: item.fileName!)),
                   icon: const Icon(Icons.copy_all_outlined, size: 18),
-                  label: const Text('复制文件名'),
+                  label: Text(l10n.accountExportCopyFileName),
                 ),
             ],
           ),
@@ -284,6 +304,7 @@ class _AccountSectionState extends State<AccountSection> {
 
   Widget _buildDeletePanel(BuildContext context, bool canDelete) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -297,18 +318,15 @@ class _AccountSectionState extends State<AccountSection> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('删除账号', style: theme.textTheme.titleSmall),
+          Text(l10n.accountDeleteTitle, style: theme.textTheme.titleSmall),
           const SizedBox(height: 6),
-          Text(
-            '删号会删除当前用户、其 owner workspace、个人项目、任务、通知和本地导出/媒体目录。共享 workspace 中的成员关系也会移除。',
-            style: theme.textTheme.bodySmall,
-          ),
+          Text(l10n.accountDeleteDescription, style: theme.textTheme.bodySmall),
           const SizedBox(height: 10),
           TextField(
             controller: _confirmController,
             onChanged: (_) => setState(() {}),
-            decoration: const InputDecoration(
-              labelText: '输入 DELETE MY ACCOUNT 以确认',
+            decoration: InputDecoration(
+              labelText: l10n.accountDeleteConfirmLabel,
               isDense: true,
             ),
           ),
@@ -321,15 +339,17 @@ class _AccountSectionState extends State<AccountSection> {
               });
             },
             contentPadding: EdgeInsets.zero,
-            title: const Text('我确认这是不可逆操作，并接受相关 workspace / project 级联删除。'),
+            title: Text(l10n.accountDeleteIrreversibleAck),
             controlAffinity: ListTileControlAffinity.leading,
           ),
           if (widget.controller.lastDeleteResponse != null) ...[
             const SizedBox(height: 8),
             Text(
-              '最近一次删号响应：workspace ${widget.controller.lastDeleteResponse!.ownedWorkspaceCount} · '
-              'project ${widget.controller.lastDeleteResponse!.ownedProjectCount} · '
-              'job ${widget.controller.lastDeleteResponse!.generationJobCount}',
+              l10n.accountDeleteLastResponse(
+                widget.controller.lastDeleteResponse!.ownedWorkspaceCount,
+                widget.controller.lastDeleteResponse!.ownedProjectCount,
+                widget.controller.lastDeleteResponse!.generationJobCount,
+              ),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -348,7 +368,7 @@ class _AccountSectionState extends State<AccountSection> {
                     height: 16,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('永久删除当前账号'),
+                : Text(l10n.accountDeleteButton),
           ),
         ],
       ),
@@ -356,25 +376,23 @@ class _AccountSectionState extends State<AccountSection> {
   }
 
   String _statusLabel(String status) {
+    final l10n = AppLocalizations.of(context)!;
     switch (status) {
       case 'queued':
-        return '排队中';
+        return l10n.accountExportStatusQueued;
       case 'running':
-        return '生成中';
+        return l10n.accountExportStatusRunning;
       case 'succeeded':
-        return '可下载';
+        return l10n.accountExportStatusSucceeded;
       case 'failed':
-        return '失败';
+        return l10n.accountExportStatusFailed;
       default:
         return status;
     }
   }
 
   String _formatDateTime(DateTime value) {
-    final local = value.toLocal();
-    String twoDigits(int part) => part.toString().padLeft(2, '0');
-    return '${local.year}-${twoDigits(local.month)}-${twoDigits(local.day)} '
-        '${twoDigits(local.hour)}:${twoDigits(local.minute)}';
+    return LocalizedFormatting.formatShortDateTime(context, value);
   }
 
   String _formatBytes(int bytes) {

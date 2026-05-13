@@ -8,11 +8,11 @@ use axum::{
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{validate_positive, ApiError};
 use crate::state::AppState;
 
 use super::super::models::*;
-use super::resolve::ensure_owned_project_pk;
+use super::resolve::require_asset_project_read_scope;
 
 pub(crate) async fn get_project_asset_for_project(
     State(state): State<AppState>,
@@ -21,12 +21,9 @@ pub(crate) async fn get_project_asset_for_project(
 ) -> Result<Json<AssetRow>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
+    validate_positive(asset_numeric_id, "numeric ids")?;
 
-    if asset_numeric_id <= 0 {
-        return Err(ApiError::BadRequest("numeric ids must be positive".into()));
-    }
-
-    ensure_owned_project_pk(pool, uid, project_id).await?;
+    require_asset_project_read_scope(&state, uid, project_id).await?;
 
     let row = sqlx::query_as::<_, AssetRow>(
         r#"

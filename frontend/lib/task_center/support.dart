@@ -147,7 +147,28 @@ String? taskCenterDeepLinkString(Map<String, dynamic>? map, String key) {
   return text.isEmpty ? null : text;
 }
 
-TaskCenterProjectScope taskCenterProjectScopeFromMap(Map<String, dynamic>? map) {
+TaskCenterProjectScope _taskCenterScopeFromJob(JobRow job) {
+  final deepLinks = job.errorDetails?['deep_links'];
+  final links = deepLinks is Map<String, dynamic> ? deepLinks : null;
+  final result = job.result;
+  final linkScope = taskCenterProjectScopeFromMap(links);
+  final resultScope = taskCenterProjectScopeFromMap(result);
+  final payloadScope = taskCenterProjectScopeFromMap(job.payload);
+  return TaskCenterProjectScope(
+    projectNumericId:
+        linkScope.projectNumericId ??
+        resultScope.projectNumericId ??
+        payloadScope.projectNumericId,
+    projectUuid:
+        linkScope.projectUuid ??
+        resultScope.projectUuid ??
+        payloadScope.projectUuid,
+  );
+}
+
+TaskCenterProjectScope taskCenterProjectScopeFromMap(
+  Map<String, dynamic>? map,
+) {
   final numericId =
       taskCenterDeepLinkInt(map, 'project_numeric_id') ??
       taskCenterDeepLinkInt(map, 'projectNumericId') ??
@@ -168,26 +189,34 @@ TaskCenterExportJobDeepLink? tryParseVideoExportJobDeepLink(JobRow job) {
   if (job.kind != 'video.export') {
     return null;
   }
-  final payload = job.payload;
   final rawLinks = job.errorDetails == null
       ? null
       : job.errorDetails!['deep_links'];
   final links = rawLinks is Map<String, dynamic>
       ? rawLinks
       : <String, dynamic>{};
-  final linkScope = taskCenterProjectScopeFromMap(links);
-  final payloadScope = taskCenterProjectScopeFromMap(payload);
-  final project = linkScope.projectNumericId ?? payloadScope.projectNumericId;
-  final projectUuid = linkScope.projectUuid ?? payloadScope.projectUuid;
+  final payload = job.payload;
+  final result = job.result;
+  final scope = _taskCenterScopeFromJob(job);
+  final project = scope.projectNumericId;
+  final projectUuid = scope.projectUuid;
   if (project == null && projectUuid == null) {
     return null;
   }
-  final script = taskCenterDeepLinkInt(links, 'script_numeric_id') ??
+  final script =
+      taskCenterDeepLinkInt(links, 'script_numeric_id') ??
+      taskCenterDeepLinkInt(result, 'script_numeric_id') ??
+      taskCenterDeepLinkInt(result, 'scriptNumericId') ??
       taskCenterDeepLinkInt(payload, 'script_numeric_id');
-  final storyboard = taskCenterDeepLinkInt(links, 'storyboard_numeric_id') ??
+  final storyboard =
+      taskCenterDeepLinkInt(links, 'storyboard_numeric_id') ??
+      taskCenterDeepLinkInt(result, 'storyboard_numeric_id') ??
+      taskCenterDeepLinkInt(result, 'storyboardNumericId') ??
       taskCenterDeepLinkInt(payload, 'storyboard_numeric_id');
   final workspaceId =
       taskCenterDeepLinkString(links, 'workspace_id') ??
+      taskCenterDeepLinkString(result, 'workspace_id') ??
+      taskCenterDeepLinkString(result, 'workspaceId') ??
       taskCenterDeepLinkString(payload, 'workspace_id');
   return TaskCenterExportJobDeepLink(
     projectNumericId: project,
@@ -201,24 +230,43 @@ TaskCenterExportJobDeepLink? tryParseVideoExportJobDeepLink(JobRow job) {
 
 TaskCenterDomainDeepLink? tryParseTaskCenterDomainDeepLink(JobRow job) {
   final payload = job.payload;
-  final rawLinks = job.errorDetails == null ? null : job.errorDetails!['deep_links'];
-  final links = rawLinks is Map<String, dynamic> ? rawLinks : <String, dynamic>{};
-  final linkScope = taskCenterProjectScopeFromMap(links);
-  final payloadScope = taskCenterProjectScopeFromMap(payload);
-  final project = linkScope.projectNumericId ?? payloadScope.projectNumericId;
-  final projectUuid = linkScope.projectUuid ?? payloadScope.projectUuid;
+  final result = job.result;
+  final rawLinks = job.errorDetails == null
+      ? null
+      : job.errorDetails!['deep_links'];
+  final links = rawLinks is Map<String, dynamic>
+      ? rawLinks
+      : <String, dynamic>{};
+  final scope = _taskCenterScopeFromJob(job);
+  final project = scope.projectNumericId;
+  final projectUuid = scope.projectUuid;
   if (project == null && projectUuid == null) {
     return null;
   }
 
-  final script = taskCenterDeepLinkInt(links, 'script_numeric_id') ??
+  final script =
+      taskCenterDeepLinkInt(links, 'script_numeric_id') ??
+      taskCenterDeepLinkInt(result, 'script_numeric_id') ??
+      taskCenterDeepLinkInt(result, 'scriptNumericId') ??
       taskCenterDeepLinkInt(payload, 'script_numeric_id');
-  final storyboard = taskCenterDeepLinkInt(links, 'storyboard_numeric_id') ??
+  final storyboard =
+      taskCenterDeepLinkInt(links, 'storyboard_numeric_id') ??
+      taskCenterDeepLinkInt(result, 'storyboard_numeric_id') ??
+      taskCenterDeepLinkInt(result, 'storyboardNumericId') ??
       taskCenterDeepLinkInt(payload, 'storyboard_numeric_id');
   final workspaceId =
       taskCenterDeepLinkString(links, 'workspace_id') ??
+      taskCenterDeepLinkString(result, 'workspace_id') ??
+      taskCenterDeepLinkString(result, 'workspaceId') ??
       taskCenterDeepLinkString(payload, 'workspace_id');
-  final publishDraftId = (links['publish_draft_id'] ?? payload['publish_draft_id'])?.toString();
+  final publishDraftId =
+      (links['publish_draft_id'] ??
+              links['publishDraftId'] ??
+              result?['publish_draft_id'] ??
+              result?['publishDraftId'] ??
+              payload['publish_draft_id'] ??
+              payload['publishDraftId'])
+          ?.toString();
 
   final kind = job.kind.trim().toLowerCase();
   TaskCenterDomainDeepLinkTarget target;
@@ -252,10 +300,14 @@ String taskCenterShortVideoStageKey(JobRow job) {
   if (phase.contains('export') || kind.contains('video.export')) {
     return 'export';
   }
-  if (phase.contains('video') || kind.contains('video.') || kind.contains('clip')) {
+  if (phase.contains('video') ||
+      kind.contains('video.') ||
+      kind.contains('clip')) {
     return 'video';
   }
-  if (phase.contains('image') || kind.contains('image') || kind.contains('asset.generate.image')) {
+  if (phase.contains('image') ||
+      kind.contains('image') ||
+      kind.contains('asset.generate.image')) {
     return 'image';
   }
   if (phase.isNotEmpty) {

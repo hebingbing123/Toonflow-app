@@ -166,8 +166,9 @@ pub(super) async fn list_billing_webhook_events(
 
     if let (Some(min), Some(max)) = (q.id_min, q.id_max) {
         if min > max {
-            return Err(ApiError::BadRequest(
-                "id_min must be less than or equal to id_max".into(),
+            return Err(crate::error::bad_request_i18n(
+                "id_min must be less than or equal to id_max",
+                "id_min 必须小于或等于 id_max",
             ));
         }
     }

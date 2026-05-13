@@ -19,3 +19,4 @@ mod project_dashboard_surface_roundtrip;
 mod projects_create_stats_roundtrip;
 mod projects_numeric_crud_roundtrip;
 mod projects_partial_patch_roundtrip;
+mod workspace_suite;

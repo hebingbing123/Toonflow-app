@@ -4,7 +4,7 @@ use axum::{
 };
 
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{validate_non_empty_string, ApiError};
 use crate::state::AppState;
 
 use super::super::super::cover::{
@@ -22,9 +22,7 @@ pub(crate) async fn create_art_style(
     let pool = state.require_pool()?;
 
     let name = body.name.trim().to_string();
-    if name.is_empty() {
-        return Err(ApiError::BadRequest("name must not be empty".into()));
-    }
+    validate_non_empty_string(&name, "name")?;
 
     let file_url = trim_opt(body.file_url);
     let label = trim_opt(body.label);

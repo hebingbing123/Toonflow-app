@@ -4,6 +4,7 @@ use uuid::Uuid;
 use crate::error::ApiError;
 use crate::jobs::dto::JobRow;
 use crate::jobs::enqueue::envelope_generation_job_updated;
+use crate::jobs::handlers::common::workspace_visibility_clause;
 use crate::jobs::hydrate_job_row;
 use crate::jobs::record_job_notification;
 use crate::state::AppState;
@@ -27,27 +28,17 @@ pub(super) async fn resolve_job_mutation_outcome(
         return Ok(Json(row));
     }
 
-    let exists: bool = sqlx::query_scalar(
+    let exists: bool = sqlx::query_scalar(&format!(
         r#"
-        SELECT EXISTS(
-          SELECT 1
-          FROM app_generation_job
-          WHERE id = $1
-            AND (
-              owner_user_id = $2
-              OR EXISTS (
-                SELECT 1
-                FROM app_project p
-                INNER JOIN app_workspace_member wm ON wm.workspace_id = p.workspace_id
-                WHERE wm.user_id = $2
-                  AND p.archived_at IS NULL
-                  AND (app_generation_job.payload->>'project_numeric_id') ~ '^[0-9]+$'
-                  AND p.numeric_id = (app_generation_job.payload->>'project_numeric_id')::int
-              )
+            SELECT EXISTS(
+              SELECT 1
+              FROM app_generation_job
+              WHERE id = $1
+                AND {}
             )
-        )
-        "#,
-    )
+            "#,
+        workspace_visibility_clause().replace("$1", "$2")
+    ))
     .bind(id)
     .bind(uid)
     .fetch_one(pool)

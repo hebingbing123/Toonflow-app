@@ -2,7 +2,7 @@ use serde_json::Value;
 use sqlx::{types::Json as SqlxJson, PgPool};
 use uuid::Uuid;
 
-use crate::error::ApiError;
+use crate::error::{validate_positive, ApiError};
 
 pub(crate) async fn resolve_owned_asset_id_for_project(
     pool: &PgPool,
@@ -10,11 +10,7 @@ pub(crate) async fn resolve_owned_asset_id_for_project(
     project_id: Uuid,
     asset_numeric_id: i32,
 ) -> Result<Uuid, ApiError> {
-    if asset_numeric_id <= 0 {
-        return Err(ApiError::BadRequest(
-            "asset_numeric_id must be positive".into(),
-        ));
-    }
+    validate_positive(asset_numeric_id, "asset_numeric_id")?;
     let id: Option<Uuid> = sqlx::query_scalar(
         r#"
         SELECT a.id
@@ -38,11 +34,7 @@ pub(crate) async fn resolve_owned_asset_id_and_metadata_for_project(
     project_id: Uuid,
     asset_numeric_id: i32,
 ) -> Result<(Uuid, Value), ApiError> {
-    if asset_numeric_id <= 0 {
-        return Err(ApiError::BadRequest(
-            "asset_numeric_id must be positive".into(),
-        ));
-    }
+    validate_positive(asset_numeric_id, "asset_numeric_id")?;
     let row: Option<(Uuid, SqlxJson<Value>)> = sqlx::query_as(
         r#"
         SELECT a.id, a.metadata

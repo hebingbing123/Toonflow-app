@@ -6,7 +6,7 @@ use axum::{
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, ApiError};
 use crate::projects::routes::audit::{
     append_project_audit, project_acl_details, AppendProjectAudit,
 };
@@ -131,8 +131,12 @@ pub(crate) async fn create_project_member(
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
     let scope = require_project_member_admin_scope(&state, uid, project_id).await?;
-    let role = normalize_project_member_role(&body.role)
-        .ok_or_else(|| ApiError::BadRequest("role must be editor or viewer".into()))?;
+    let role = normalize_project_member_role(&body.role).ok_or_else(|| {
+        bad_request_i18n(
+            "role must be editor or viewer",
+            "role 必须是 editor 或 viewer",
+        )
+    })?;
 
     let previous_role: Option<String> = sqlx::query_scalar(
         r#"
@@ -217,8 +221,12 @@ pub(crate) async fn patch_project_member(
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
     let scope = require_project_member_admin_scope(&state, uid, project_id).await?;
-    let role = normalize_project_member_role(&body.role)
-        .ok_or_else(|| ApiError::BadRequest("role must be editor or viewer".into()))?;
+    let role = normalize_project_member_role(&body.role).ok_or_else(|| {
+        bad_request_i18n(
+            "role must be editor or viewer",
+            "role 必须是 editor 或 viewer",
+        )
+    })?;
 
     let previous_role: Option<String> = sqlx::query_scalar(
         r#"

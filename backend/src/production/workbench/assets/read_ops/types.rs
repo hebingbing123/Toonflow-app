@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
+use uuid::Uuid;
 
 #[derive(Debug, Serialize, FromRow)]
 #[serde(rename_all = "camelCase")]
@@ -23,7 +24,10 @@ pub(in crate::production) struct AssetsDataResponse {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct GetAssetsDataBody {
-    pub(super) project_id: i32,
+    #[serde(default)]
+    pub(super) project_id: Option<i32>,
+    #[serde(default)]
+    pub(super) project_uuid: Option<Uuid>,
     pub(super) script_id: i32,
     #[serde(default)]
     pub(super) asset_type: Option<String>,
@@ -36,7 +40,10 @@ pub(in crate::production) struct GetAssetsDataBody {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct AssetsPollingImageBody {
-    pub(super) project_id: i32,
+    #[serde(default)]
+    pub(super) project_id: Option<i32>,
+    #[serde(default)]
+    pub(super) project_uuid: Option<Uuid>,
     pub(super) script_id: i32,
     pub(super) asset_ids: Vec<i32>,
 }

@@ -1752,6 +1752,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get globalSearchNovelOrEventNavigatedHint =>
+      'Please open \"Project List\" from the home navigation, then use the novel workbench within the target project to view chapters and events.';
+
+  @override
   String accountDeletedSummary(
     int workspaceCount,
     int projectCount,

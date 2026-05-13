@@ -4,16 +4,20 @@ use axum::{
     Json as JsonResponse,
 };
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
-use crate::error::ApiError;
+use crate::error::{validate_non_empty_string, ApiError};
 use crate::jobs::{enqueue_generation_job, JOB_KIND_ASSET_GENERATE_BATCH};
-use crate::scope::http::require_owned_numeric_script_scope_user_pool;
+use crate::scope::http::require_script_write_scope_ref;
 use crate::state::AppState;
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct GenerateFlowImageBody {
-    project_id: i32,
+    #[serde(default)]
+    project_id: Option<i32>,
+    #[serde(default)]
+    project_uuid: Option<Uuid>,
     script_id: i32,
     flow_id: String,
     prompt: String,
@@ -51,23 +55,21 @@ pub(in crate::production) async fn post_edit_image_generate_flow_image(
     headers: HeaderMap,
     Json(body): Json<GenerateFlowImageBody>,
 ) -> Result<JsonResponse<GenerateFlowImageResponse>, ApiError> {
-    if body.flow_id.trim().is_empty() {
-        return Err(ApiError::BadRequest("flowId must not be empty".into()));
-    }
-    if body.prompt.trim().is_empty() {
-        return Err(ApiError::BadRequest("prompt must not be empty".into()));
-    }
-    let (uid, pool) = require_owned_numeric_script_scope_user_pool(
+    validate_non_empty_string(body.flow_id.trim(), "flowId")?;
+    validate_non_empty_string(body.prompt.trim(), "prompt")?;
+    let (uid, pool, scope_row) = require_script_write_scope_ref(
         &state,
         &headers,
         body.project_id,
+        body.project_uuid,
         body.script_id,
     )
     .await?;
 
     let payload = serde_json::json!({
         "source": "production.edit-image.generate-flow",
-        "project_numeric_id": body.project_id,
+        "project_uuid": scope_row.project_id,
+        "project_numeric_id": scope_row.project_numeric_id,
         "script_id": body.script_id,
         "flow_id": body.flow_id.trim(),
         "prompt": body.prompt.trim(),
@@ -80,6 +82,7 @@ pub(in crate::production) async fn post_edit_image_generate_flow_image(
         JOB_KIND_ASSET_GENERATE_BATCH,
         payload,
         Some(&headers),
+        &state.billing_config,
     )
     .await?;
 

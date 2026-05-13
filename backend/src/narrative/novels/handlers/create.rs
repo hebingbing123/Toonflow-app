@@ -7,9 +7,9 @@ use serde_json::{Map, Value};
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::assets::ensure_owned_project_pk;
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{validate_enum, ApiError};
+use crate::projects::routes::common::require_project_write_scope;
 use crate::state::AppState;
 
 use super::super::dto::{CreateNovelBody, NovelRow};
@@ -18,12 +18,11 @@ use super::super::ADV_LOCK_NOVEL_NUMERIC;
 use super::list::{normalize_intake_source, trim_opt};
 
 fn validate_intake_status(value: &str) -> Result<(), ApiError> {
-    match value {
-        "draft" | "pending_review" | "admitted" | "rejected" => Ok(()),
-        _ => Err(ApiError::BadRequest(
-            "intake_status must be one of draft, pending_review, admitted, rejected".into(),
-        )),
-    }
+    validate_enum(
+        value,
+        &["draft", "pending_review", "admitted", "rejected"],
+        "intake_status",
+    )
 }
 
 fn build_novel_intake_metadata(
@@ -143,6 +142,6 @@ pub(crate) async fn create_novel_for_project(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    ensure_owned_project_pk(pool, uid, project_id).await?;
+    require_project_write_scope(&state, uid, project_id).await?;
     create_novel_inner(pool, project_id, body).await
 }

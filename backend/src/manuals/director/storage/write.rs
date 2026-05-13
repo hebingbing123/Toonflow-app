@@ -6,7 +6,7 @@ use std::path::Path;
 use base64::Engine;
 use uuid::Uuid;
 
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, ApiError};
 
 use super::super::types::{DirectorManualDataItem, DIRECTOR_SLOTS};
 
@@ -31,10 +31,10 @@ pub(crate) fn write_slots(
             .expect("value in set matches slot");
 
         if item.data.len() as u64 > super::super::MAX_SLOT_BYTES {
-            return Err(ApiError::BadRequest(format!(
-                "director-manual: slot {} exceeds max size",
-                item.value
-            )));
+            return Err(bad_request_i18n(
+                &format!("director-manual: slot {} exceeds max size", item.value),
+                &format!("director-manual：槽位 {} 超出大小限制", item.value),
+            ));
         }
 
         let rel_path: std::path::PathBuf = match slot.sub_dir {
@@ -43,7 +43,10 @@ pub(crate) fn write_slots(
         };
         if let Some(parent) = rel_path.parent() {
             std::fs::create_dir_all(parent).map_err(|e| {
-                ApiError::BadRequest(format!("director-manual: mkdir {}: {e}", parent.display()))
+                bad_request_i18n(
+                    &format!("director-manual: mkdir {}: {e}", parent.display()),
+                    &format!("director-manual：创建目录 {} 失败：{e}", parent.display()),
+                )
             })?;
         }
 
@@ -54,10 +57,10 @@ pub(crate) fn write_slots(
         };
 
         std::fs::write(&rel_path, content).map_err(|e| {
-            ApiError::BadRequest(format!(
-                "director-manual: write {}: {e}",
-                rel_path.display()
-            ))
+            bad_request_i18n(
+                &format!("director-manual: write {}: {e}", rel_path.display()),
+                &format!("director-manual：写入 {} 失败：{e}", rel_path.display()),
+            )
         })?;
     }
     Ok(())
@@ -67,11 +70,18 @@ pub(crate) fn sync_images(main_path: &Path, images: &[String]) -> Result<(), Api
     let images_dir = main_path.join("images");
     let mut existing: Vec<String> = Vec::new();
     if images_dir.is_dir() {
-        for e in std::fs::read_dir(&images_dir)
-            .map_err(|e| ApiError::BadRequest(format!("director-manual: readdir images: {e}")))?
-        {
-            let e =
-                e.map_err(|e| ApiError::BadRequest(format!("director-manual: images entry: {e}")))?;
+        for e in std::fs::read_dir(&images_dir).map_err(|e| {
+            bad_request_i18n(
+                &format!("director-manual: readdir images: {e}"),
+                &format!("director-manual：读取 images 目录失败：{e}"),
+            )
+        })? {
+            let e = e.map_err(|e| {
+                bad_request_i18n(
+                    &format!("director-manual: images entry: {e}"),
+                    &format!("director-manual：读取 images 条目失败：{e}"),
+                )
+            })?;
             let n = e.file_name().to_string_lossy().to_string();
             let lower = n.to_ascii_lowercase();
             if lower.ends_with(".png")
@@ -111,8 +121,12 @@ pub(crate) fn sync_images(main_path: &Path, images: &[String]) -> Result<(), Api
         }
     }
 
-    std::fs::create_dir_all(&images_dir)
-        .map_err(|e| ApiError::BadRequest(format!("director-manual: mkdir images: {e}")))?;
+    std::fs::create_dir_all(&images_dir).map_err(|e| {
+        bad_request_i18n(
+            &format!("director-manual: mkdir images: {e}"),
+            &format!("director-manual：创建 images 目录失败：{e}"),
+        )
+    })?;
 
     for item in images {
         if item.starts_with("http://") || item.starts_with("https://") {
@@ -120,8 +134,9 @@ pub(crate) fn sync_images(main_path: &Path, images: &[String]) -> Result<(), Api
         }
 
         if item.len() > super::super::MAX_BASE64_IMAGE_INPUT_CHARS {
-            return Err(ApiError::BadRequest(
-                "director-manual: base64 image payload too large".into(),
+            return Err(bad_request_i18n(
+                "director-manual: base64 image payload too large",
+                "director-manual：base64 图片载荷过大",
             ));
         }
 
@@ -133,17 +148,27 @@ pub(crate) fn sync_images(main_path: &Path, images: &[String]) -> Result<(), Api
 
         let bytes = base64::engine::general_purpose::STANDARD
             .decode(b64.trim().as_bytes())
-            .map_err(|_| ApiError::BadRequest("director-manual: invalid base64 image".into()))?;
+            .map_err(|_| {
+                bad_request_i18n(
+                    "director-manual: invalid base64 image",
+                    "director-manual：无效的 base64 图片",
+                )
+            })?;
         if bytes.len() as u64 > super::super::MAX_DECODED_IMAGE_BYTES {
-            return Err(ApiError::BadRequest(
-                "director-manual: decoded image too large".into(),
+            return Err(bad_request_i18n(
+                "director-manual: decoded image too large",
+                "director-manual：解码后的图片过大",
             ));
         }
 
         let file_name = format!("{}.jpg", Uuid::new_v4());
         let target = images_dir.join(&file_name);
-        std::fs::write(&target, bytes)
-            .map_err(|e| ApiError::BadRequest(format!("director-manual: write image: {e}")))?;
+        std::fs::write(&target, bytes).map_err(|e| {
+            bad_request_i18n(
+                &format!("director-manual: write image: {e}"),
+                &format!("director-manual：写入图片失败：{e}"),
+            )
+        })?;
     }
 
     Ok(())

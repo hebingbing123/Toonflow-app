@@ -453,6 +453,49 @@ class AdminWorkspaceGovernanceAuditSummaryV1 {
   }
 }
 
+class AdminWorkspaceProjectAclSummaryV1 {
+  const AdminWorkspaceProjectAclSummaryV1({
+    required this.projectId,
+    required this.numericId,
+    required this.name,
+    required this.ownerUserId,
+    required this.ownerEmail,
+    required this.archivedAt,
+    required this.aclMode,
+    required this.explicitAclCount,
+    required this.editorCount,
+    required this.viewerCount,
+  });
+
+  final String projectId;
+  final int numericId;
+  final String? name;
+  final String ownerUserId;
+  final String? ownerEmail;
+  final String? archivedAt;
+  final String aclMode;
+  final int explicitAclCount;
+  final int editorCount;
+  final int viewerCount;
+
+  factory AdminWorkspaceProjectAclSummaryV1.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return AdminWorkspaceProjectAclSummaryV1(
+      projectId: json['projectId'] as String? ?? '',
+      numericId: (json['numericId'] as num?)?.toInt() ?? 0,
+      name: json['name'] as String?,
+      ownerUserId: json['ownerUserId'] as String? ?? '',
+      ownerEmail: json['ownerEmail'] as String?,
+      archivedAt: json['archivedAt'] as String?,
+      aclMode: json['aclMode'] as String? ?? 'inherited',
+      explicitAclCount: (json['explicitAclCount'] as num?)?.toInt() ?? 0,
+      editorCount: (json['editorCount'] as num?)?.toInt() ?? 0,
+      viewerCount: (json['viewerCount'] as num?)?.toInt() ?? 0,
+    );
+  }
+}
+
 class AdminWorkspaceDetailResponseV1 {
   const AdminWorkspaceDetailResponseV1({
     required this.workspaceId,
@@ -466,6 +509,8 @@ class AdminWorkspaceDetailResponseV1 {
     required this.projectCount,
     required this.activeJobCount,
     required this.members,
+    required this.workspaceRoleBreakdown,
+    required this.projectAclSummaries,
     required this.recentProjects,
     required this.recentJobs,
     required this.governanceAudit,
@@ -482,6 +527,8 @@ class AdminWorkspaceDetailResponseV1 {
   final int projectCount;
   final int activeJobCount;
   final List<AdminWorkspaceMemberSummaryV1> members;
+  final Map<String, dynamic> workspaceRoleBreakdown;
+  final List<AdminWorkspaceProjectAclSummaryV1> projectAclSummaries;
   final List<AdminProjectSummaryV1> recentProjects;
   final List<AdminJobSummaryV1> recentJobs;
   final List<AdminWorkspaceGovernanceAuditSummaryV1> governanceAudit;
@@ -501,6 +548,13 @@ class AdminWorkspaceDetailResponseV1 {
       members: _listOf(
         json['members'],
         (item) => AdminWorkspaceMemberSummaryV1.fromJson(item),
+      ),
+      workspaceRoleBreakdown: Map<String, dynamic>.from(
+        json['workspaceRoleBreakdown'] as Map? ?? const {},
+      ),
+      projectAclSummaries: _listOf(
+        json['projectAclSummaries'],
+        (item) => AdminWorkspaceProjectAclSummaryV1.fromJson(item),
       ),
       recentProjects: _listOf(
         json['recentProjects'],
@@ -550,6 +604,60 @@ class AdminProjectGovernanceAuditSummaryV1 {
   }
 }
 
+class AdminProjectAclMemberSummaryV1 {
+  const AdminProjectAclMemberSummaryV1({
+    required this.userId,
+    required this.email,
+    required this.workspaceRole,
+    required this.projectRole,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  final String userId;
+  final String? email;
+  final String workspaceRole;
+  final String projectRole;
+  final String createdAt;
+  final String updatedAt;
+
+  factory AdminProjectAclMemberSummaryV1.fromJson(Map<String, dynamic> json) {
+    return AdminProjectAclMemberSummaryV1(
+      userId: json['userId'] as String? ?? '',
+      email: json['email'] as String?,
+      workspaceRole: json['workspaceRole'] as String? ?? '',
+      projectRole: json['projectRole'] as String? ?? '',
+      createdAt: json['createdAt'] as String? ?? '',
+      updatedAt: json['updatedAt'] as String? ?? '',
+    );
+  }
+}
+
+class AdminProjectWorkspaceMemberCandidateSummaryV1 {
+  const AdminProjectWorkspaceMemberCandidateSummaryV1({
+    required this.userId,
+    required this.email,
+    required this.workspaceRole,
+    required this.explicitProjectRole,
+  });
+
+  final String userId;
+  final String? email;
+  final String workspaceRole;
+  final String? explicitProjectRole;
+
+  factory AdminProjectWorkspaceMemberCandidateSummaryV1.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return AdminProjectWorkspaceMemberCandidateSummaryV1(
+      userId: json['userId'] as String? ?? '',
+      email: json['email'] as String?,
+      workspaceRole: json['workspaceRole'] as String? ?? '',
+      explicitProjectRole: json['explicitProjectRole'] as String?,
+    );
+  }
+}
+
 class AdminProjectDetailResponseV1 {
   const AdminProjectDetailResponseV1({
     required this.projectId,
@@ -566,6 +674,12 @@ class AdminProjectDetailResponseV1 {
     required this.assetCount,
     required this.jobCount,
     required this.activeJobCount,
+    required this.projectAclMode,
+    required this.explicitAclCount,
+    required this.editorCount,
+    required this.viewerCount,
+    required this.aclMembers,
+    required this.workspaceMemberCandidates,
     required this.recentJobs,
     required this.governanceAudit,
   });
@@ -584,6 +698,13 @@ class AdminProjectDetailResponseV1 {
   final int assetCount;
   final int jobCount;
   final int activeJobCount;
+  final String projectAclMode;
+  final int explicitAclCount;
+  final int editorCount;
+  final int viewerCount;
+  final List<AdminProjectAclMemberSummaryV1> aclMembers;
+  final List<AdminProjectWorkspaceMemberCandidateSummaryV1>
+  workspaceMemberCandidates;
   final List<AdminJobSummaryV1> recentJobs;
   final List<AdminProjectGovernanceAuditSummaryV1> governanceAudit;
 
@@ -607,6 +728,18 @@ class AdminProjectDetailResponseV1 {
       assetCount: (json['assetCount'] as num?)?.toInt() ?? 0,
       jobCount: (json['jobCount'] as num?)?.toInt() ?? 0,
       activeJobCount: (json['activeJobCount'] as num?)?.toInt() ?? 0,
+      projectAclMode: json['projectAclMode'] as String? ?? 'inherited',
+      explicitAclCount: (json['explicitAclCount'] as num?)?.toInt() ?? 0,
+      editorCount: (json['editorCount'] as num?)?.toInt() ?? 0,
+      viewerCount: (json['viewerCount'] as num?)?.toInt() ?? 0,
+      aclMembers: _listOf(
+        json['aclMembers'],
+        (item) => AdminProjectAclMemberSummaryV1.fromJson(item),
+      ),
+      workspaceMemberCandidates: _listOf(
+        json['workspaceMemberCandidates'],
+        (item) => AdminProjectWorkspaceMemberCandidateSummaryV1.fromJson(item),
+      ),
       recentJobs: _listOf(
         json['recentJobs'],
         (item) => AdminJobSummaryV1.fromJson(item),
@@ -640,6 +773,31 @@ Future<AdminSearchResponseV1> fetchAdminSearchV1(
   return AdminSearchResponseV1.fromJson(
     jsonDecode(res.body) as Map<String, dynamic>,
   );
+}
+
+class AdminProjectBatchGovernanceResponseV1 {
+  const AdminProjectBatchGovernanceResponseV1({
+    required this.requestedCount,
+    required this.updatedCount,
+    required this.projects,
+  });
+
+  final int requestedCount;
+  final int updatedCount;
+  final List<AdminProjectDetailResponseV1> projects;
+
+  factory AdminProjectBatchGovernanceResponseV1.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return AdminProjectBatchGovernanceResponseV1(
+      requestedCount: (json['requestedCount'] as num?)?.toInt() ?? 0,
+      updatedCount: (json['updatedCount'] as num?)?.toInt() ?? 0,
+      projects: _listOf(
+        json['projects'],
+        (item) => AdminProjectDetailResponseV1.fromJson(item),
+      ),
+    );
+  }
 }
 
 Future<AdminUserDetailResponseV1> fetchAdminUserDetailV1(
@@ -912,6 +1070,49 @@ Future<AdminProjectDetailResponseV1> updateAdminProjectGovernanceV1(
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   return AdminProjectDetailResponseV1.fromJson(
+    jsonDecode(res.body) as Map<String, dynamic>,
+  );
+}
+
+Future<AdminProjectBatchGovernanceResponseV1>
+updateAdminProjectBatchGovernanceV1(
+  String internalOpsToken, {
+  required List<String> projectIds,
+  required AdminProjectLifecycleActionV1 projectLifecycle,
+  required AdminWorkspaceOpsNoteActionV1 opsNoteAction,
+  String? opsNote,
+}) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/internal/admin/projects/batch-governance',
+  );
+  final body = <String, dynamic>{
+    'projectIds': projectIds,
+    'projectLifecycle': switch (projectLifecycle) {
+      AdminProjectLifecycleActionV1.preserve => 'preserve',
+      AdminProjectLifecycleActionV1.archive => 'archive',
+      AdminProjectLifecycleActionV1.restore => 'restore',
+    },
+    'opsNoteAction': switch (opsNoteAction) {
+      AdminWorkspaceOpsNoteActionV1.preserve => 'preserve',
+      AdminWorkspaceOpsNoteActionV1.set => 'set',
+      AdminWorkspaceOpsNoteActionV1.clear => 'clear',
+    },
+  };
+  if (opsNote != null) {
+    body['opsNote'] = opsNote;
+  }
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          ..._internalHeaders(internalOpsToken),
+          'content-type': 'application/json',
+        },
+        body: jsonEncode(body),
+      )
+      .timeout(const Duration(seconds: 15));
+  ensureHttpSuccess(res);
+  return AdminProjectBatchGovernanceResponseV1.fromJson(
     jsonDecode(res.body) as Map<String, dynamic>,
   );
 }

@@ -8,16 +8,15 @@ use axum::{
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{validate_positive, ApiError};
 use crate::state::AppState;
 
-use super::super::crud::ensure_owned_project_numeric_id;
+use super::super::crud::require_asset_project_read_scope;
 use super::super::models::*;
 use super::super::utils::metadata_cover_numeric_image_id;
 
 async fn run_get_image(
     pool: &sqlx::PgPool,
-    uid: uuid::Uuid,
     project_numeric_id: i32,
     assets_id: i32,
 ) -> Result<WorkbenchGetImageResponse, ApiError> {
@@ -26,19 +25,12 @@ async fn run_get_image(
         SELECT a.id, a.numeric_id, a.asset_type, a.metadata
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
-        WHERE p.numeric_id = $2
-          AND a.numeric_id = $3
-          AND EXISTS (
-            SELECT 1
-            FROM app_workspace_member wm
-            WHERE wm.workspace_id = p.workspace_id
-              AND wm.user_id = $1
-          )
+        WHERE p.numeric_id = $1
+          AND a.numeric_id = $2
         ORDER BY a.created_at DESC
         LIMIT 1
         "#,
     )
-    .bind(uid)
     .bind(project_numeric_id)
     .bind(assets_id)
     .fetch_optional(pool)
@@ -88,11 +80,15 @@ pub(crate) async fn post_project_workbench_image_bundle(
     Json(body): Json<WorkbenchGetImageBody>,
 ) -> Result<Json<WorkbenchGetImageResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    if body.assets_id <= 0 {
-        return Err(ApiError::BadRequest("assetsId must be positive".into()));
-    }
+    validate_positive(body.assets_id, "assetsId")?;
     let pool = state.require_pool()?;
-    let project_numeric_id = ensure_owned_project_numeric_id(pool, uid, project_id).await?;
-    let out = run_get_image(pool, uid, project_numeric_id, body.assets_id).await?;
+    require_asset_project_read_scope(&state, uid, project_id).await?;
+    let project_numeric_id: i32 =
+        sqlx::query_scalar("SELECT numeric_id FROM app_project WHERE id = $1")
+            .bind(project_id)
+            .fetch_one(pool)
+            .await
+            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let out = run_get_image(pool, project_numeric_id, body.assets_id).await?;
     Ok(Json(out))
 }

@@ -156,6 +156,8 @@
 
 目标：把当前 Flutter 从“接口探针台”推进到“用户可用的主界面”。
 
+说明：本节记录的是 **逐波收口过程**，既包含历史兼容状态，也包含后续已完成的产品化收敛；若引用其中的 id / scope 语义做当前判断，应同时对照 [`product-deep-links.md`](../product-deep-links.md)、[`roadmap-workspace.md`](./roadmap-workspace.md)、[`tasks-http-api-cleanup.md`](./tasks-http-api-cleanup.md) 与 [`harness-ws-context-matrix.md`](./harness-ws-context-matrix.md) 的较新 UUID-first 结论。
+
 当前进度（本轮）：
 
 - 首页已新增 `Workspace mode` 双模式切换（`Product workspace` / `Ops and debug`），把项目、任务、质量、Agent 工作区归入产品主链路，把 Harness/WS/system probes 收敛到运维调试模式，避免默认信息架构继续以 probe 为中心。
@@ -166,7 +168,7 @@
 - 已加入常用提示词模板与子 Agent 工具快捷选择，能够更稳定复用旧 `run_sub_agent_*` / `run_supervision_agent` 编排入口。
 - 已增加最近 WS 事件摘要，便于在同一工作区内追踪执行返回。
 - 已增加 production 领域工具直调入口（`get_flowData`、`add_deriveAsset`、`del_deriveAsset`、`generate_deriveAsset`、`generate_storyboard`）并支持 JSON 参数探测，减少必须靠提示词间接触发工具的调试成本。
-- 已增加 script 结果回写优先策略：workspace 优先使用 `get_script_content` 工具返回的结构化 `content` 作为写回源，并支持 `run_sub_agent_script` 结果文本直接作为写回候选；缺省回退到 `chat.content.updated` 聚合文本，并一键调用 `PATCH /api/v1/projects/{project_id}/scripts/{script_numeric_id}` 写回，降低 Agent 产出到业务数据落库的错写风险与手工搬运成本。
+- 已增加 script 结果回写优先策略：workspace 优先使用 `get_script_content` 工具返回的结构化 `content` 作为写回源，并支持 `run_sub_agent_script` 结果文本直接作为写回候选；缺省回退到 `chat.content.updated` 聚合文本，并一键调用 `PATCH /api/v1/projects/{project_id}/scripts/{script_numeric_id}` 写回，降低 Agent 产出到业务数据落库的错写风险与手工搬运成本。（其中 `project_id` 为项目 UUID；`script_numeric_id` 仍是当前剧本兼容键）
 - 已增加 production 侧 flow 回写：workspace 可基于最新 `get_flowData` 结果，先拉取完整 flow JSON，再按当前 key 合并并调用 `POST /api/v1/production/save-flow-data` 保存，避免只写单 key 时覆盖其他 flow 字段。
 - 已扩展 production 工具结果回写面：除 `get_flowData` 外，其他工具结果也可写入自定义扩展 key（如 `workspaceResult`）；同时增加核心 key 保护，阻止非 `get_flowData` 结果覆盖 `assets/script/scriptPlan/storyboardTable/storyboard`。
 - 已增强 production 核心 key 回写闭环：当 `add_deriveAsset`/`del_deriveAsset`/`generate_deriveAsset`/`generate_storyboard` 触发后，若用户选择对应核心 key 回写，workspace 会先刷新最新 flow key 数据再写回，避免把工具执行回执误写成核心 flow 结构；同时新增建议写回 key 提示与一键应用。
@@ -191,7 +193,7 @@
 - 项目详情章节工作台已新增 历史 快照与批量动作区：可直接读取 `get-novel-data` / `get-novel-index` / `get-novel-event-state`，并在同一入口执行 历史 `batch-delete`，把高频 novels 包装接口从兼容性折叠区收口进正式章节工作流。
 - 项目详情“小说与事件”区已进一步去 probe 化：主视图现在只保留章节/事件正式工作台摘要卡与刷新入口，旧 REST 首条/末条探针已退出主链路，仅在兼容性折叠区保留 历史 回归检查。
 - 首页“质量评审”区已完成 probe 收口：主区现在以“质量工作台”承载评审筛选、坏例查看、统计/阶段通过率读取、详情查询与手动创建，旧 probe 创建入口仅保留在兼容性折叠区。
-- 首页“任务中心”区已完成首轮 probe 收口：主区现在以“任务工作台”承载任务项目/分类读取、按项目/分类/状态筛选列表，以及按 历史 id 或 UUID 查看详情，旧加载按钮与首条/UUID probe 下沉到兼容性折叠区。
+- 首页“任务中心”区已完成首轮 probe 收口：主区现在以“任务工作台”承载任务项目/分类读取、按项目/分类/状态筛选列表，以及按 历史 id 或 UUID 查看详情，旧加载按钮与首条/UUID probe 下沉到兼容性折叠区。（补充：后续产品壳 / 通知 / 搜索回流的项目上下文恢复已继续收口到 UUID-first）
 - Projects 页已新增“记忆工作台”：可按项目 历史 id、agent type 与可选 episodes id 查询、追加、清理 Agent 记忆，不再只保留“首项目 scriptAgent query+append”探针。
 - Projects 页已新增“创作手册工作台”：导演手册与视觉手册现在可在同一对话框内完成刷新、查看、创建、更新、删除，并交叉校验 `GET/POST /api/v1/visual-manual` 结果一致性，不再只靠首页 probe。
 - 项目详情资产区已提供“上传编辑图片”正式表单，直接调用 `POST /api/v1/production/edit-image/upload-image`。

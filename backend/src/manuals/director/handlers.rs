@@ -2,7 +2,7 @@ use axum::{extract::State, http::HeaderMap, routing::post, Json, Router};
 use serde::Serialize;
 
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, ApiError};
 use crate::state::AppState;
 
 use super::storage::{
@@ -40,14 +40,17 @@ async fn post_add_director_manual(
 
     let main_path = story_manual_dir(&body.director_manual)?;
     if main_path.exists() {
-        return Err(ApiError::BadRequest("请勿填写重复名称的视觉手册".into()));
+        return Err(bad_request_i18n(
+            "Duplicate director manual name is not allowed",
+            "请勿填写重复名称的导演手册",
+        ));
     }
 
     std::fs::create_dir_all(&main_path).map_err(|e| {
-        ApiError::BadRequest(format!(
-            "director-manual: create {}: {e}",
-            main_path.display()
-        ))
+        bad_request_i18n(
+            &format!("director-manual: create {}: {e}", main_path.display()),
+            &format!("director-manual：创建 {} 失败：{e}", main_path.display()),
+        )
     })?;
 
     if let Err(e) = write_slots(&main_path, &body.name, &body.data, false) {
@@ -73,7 +76,10 @@ async fn post_edit_director_manual(
 
     let main_path = story_manual_dir(&body.director_manual)?;
     if !main_path.is_dir() {
-        return Err(ApiError::BadRequest("导演手册不存在".into()));
+        return Err(bad_request_i18n(
+            "Director manual does not exist",
+            "导演手册不存在",
+        ));
     }
 
     write_slots(&main_path, &body.name, &body.data, true)?;

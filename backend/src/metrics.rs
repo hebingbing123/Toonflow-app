@@ -132,6 +132,17 @@ pub fn record_cache_operation(operation: &str, cache_key: &str, hit: bool, durat
     );
 }
 
+/// 记录计费对账不匹配指标
+///
+/// Task 4.3: Reconciliation metrics for shadow period monitoring.
+pub fn record_billing_reconciliation_mismatch(field: &str) {
+    warn!(
+        target: "toonflow.metrics.billing_reconciliation",
+        field = %field,
+        "Billing reconciliation mismatch detected"
+    );
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -194,5 +205,10 @@ mod tests {
     #[test]
     fn test_record_cache_operation() {
         record_cache_operation("get", "user:123:profile", true, Duration::from_micros(500));
+    }
+
+    #[test]
+    fn test_record_billing_reconciliation_mismatch() {
+        record_billing_reconciliation_mismatch("plan_tier");
     }
 }

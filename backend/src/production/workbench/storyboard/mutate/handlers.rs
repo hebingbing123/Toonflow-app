@@ -17,8 +17,8 @@ use super::types::{
     UpdateStoryboardLiveActionReferenceBody, UpdateStoryboardLiveActionReferenceResponse,
     UpdateStoryboardUrlBody, UpdateStoryboardUrlResponse,
 };
-use crate::error::ApiError;
-use crate::scope::http::require_owned_numeric_storyboard_scope;
+use crate::error::{bad_request_i18n, validate_positive, ApiError};
+use crate::scope::http::require_storyboard_write_scope_ref;
 use crate::state::AppState;
 
 #[utoipa::path(
@@ -47,10 +47,11 @@ pub(in crate::production) async fn post_storyboard_edit_info(
     let prompt = normalize_storyboard_prompt(&body.prompt)?;
     let duration = validate_storyboard_duration(body.duration)?;
 
-    let (pool, sb_uuid) = require_owned_numeric_storyboard_scope(
+    let (pool, sb_uuid) = require_storyboard_write_scope_ref(
         &state,
         &headers,
         body.project_id,
+        body.project_uuid,
         body.script_id,
         body.storyboard_id,
     )
@@ -86,10 +87,11 @@ pub(in crate::production) async fn post_storyboard_remove_frame(
     headers: HeaderMap,
     Json(body): Json<RemoveFrameBody>,
 ) -> Result<JsonResponse<RemoveFrameResponse>, ApiError> {
-    let (pool, sb_uuid) = require_owned_numeric_storyboard_scope(
+    let (pool, sb_uuid) = require_storyboard_write_scope_ref(
         &state,
         &headers,
         body.project_id,
+        body.project_uuid,
         body.script_id,
         body.storyboard_id,
     )
@@ -127,10 +129,11 @@ pub(in crate::production) async fn post_storyboard_update_url(
 ) -> Result<JsonResponse<UpdateStoryboardUrlResponse>, ApiError> {
     let image_url = normalize_storyboard_image_url(&body.image_url)?;
 
-    let (pool, sb_uuid) = require_owned_numeric_storyboard_scope(
+    let (pool, sb_uuid) = require_storyboard_write_scope_ref(
         &state,
         &headers,
         body.project_id,
+        body.project_uuid,
         body.script_id,
         body.storyboard_id,
     )
@@ -174,16 +177,18 @@ pub(in crate::production) async fn post_storyboard_update_live_action_reference(
         .filter(|value| !value.is_empty())
         .collect::<Vec<_>>();
     if reference_shot_urls.len() > 6 {
-        return Err(ApiError::BadRequest(
-            "referenceShotUrls must contain at most 6 items".into(),
+        return Err(bad_request_i18n(
+            "referenceShotUrls must contain at most 6 items",
+            "referenceShotUrls 最多只能包含 6 项",
         ));
     }
     if reference_shot_urls
         .iter()
         .any(|value| !(value.starts_with("http://") || value.starts_with("https://")))
     {
-        return Err(ApiError::BadRequest(
-            "referenceShotUrls must use http(s) URLs".into(),
+        return Err(bad_request_i18n(
+            "referenceShotUrls must use http(s) URLs",
+            "referenceShotUrls 必须使用 http(s) URL",
         ));
     }
     let performance_notes = body
@@ -196,15 +201,17 @@ pub(in crate::production) async fn post_storyboard_update_live_action_reference(
         .as_ref()
         .is_some_and(|value| value.chars().count() > 280)
     {
-        return Err(ApiError::BadRequest(
-            "performanceNotes must be 280 chars or fewer".into(),
+        return Err(bad_request_i18n(
+            "performanceNotes must be 280 chars or fewer",
+            "performanceNotes 必须不超过 280 个字符",
         ));
     }
 
-    let (pool, sb_uuid) = require_owned_numeric_storyboard_scope(
+    let (pool, sb_uuid) = require_storyboard_write_scope_ref(
         &state,
         &headers,
         body.project_id,
+        body.project_uuid,
         body.script_id,
         body.storyboard_id,
     )
@@ -248,16 +255,13 @@ pub(in crate::production) async fn post_storyboard_update_duration(
     headers: HeaderMap,
     Json(body): Json<UpdateStoryboardDurationBody>,
 ) -> Result<JsonResponse<UpdateStoryboardDurationResponse>, ApiError> {
-    if body.duration <= 0 {
-        return Err(ApiError::BadRequest(
-            "duration must be a positive integer".into(),
-        ));
-    }
+    validate_positive(body.duration, "duration")?;
 
-    let (pool, sb_uuid) = require_owned_numeric_storyboard_scope(
+    let (pool, sb_uuid) = require_storyboard_write_scope_ref(
         &state,
         &headers,
         body.project_id,
+        body.project_uuid,
         body.script_id,
         body.storyboard_id,
     )

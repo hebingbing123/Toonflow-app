@@ -8,10 +8,10 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{validate_positive, ApiError};
 use crate::state::AppState;
 
-use super::super::resolve::ensure_owned_project_pk;
+use super::super::resolve::require_asset_project_write_scope;
 
 async fn delete_project_asset_inner(
     pool: &PgPool,
@@ -19,9 +19,7 @@ async fn delete_project_asset_inner(
     project_id: Uuid,
     asset_numeric_id: i32,
 ) -> Result<StatusCode, ApiError> {
-    if asset_numeric_id <= 0 {
-        return Err(ApiError::BadRequest("numeric ids must be positive".into()));
-    }
+    validate_positive(asset_numeric_id, "numeric ids")?;
 
     let res = sqlx::query(
         r#"
@@ -55,6 +53,6 @@ pub(crate) async fn delete_project_asset_for_project(
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-    ensure_owned_project_pk(pool, uid, project_id).await?;
+    require_asset_project_write_scope(&state, uid, project_id).await?;
     delete_project_asset_inner(pool, uid, project_id, asset_numeric_id).await
 }

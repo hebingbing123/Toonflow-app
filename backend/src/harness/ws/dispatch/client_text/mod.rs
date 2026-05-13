@@ -77,6 +77,7 @@ pub(crate) async fn dispatch_client_text(
         sess.workspace_id,
         state.llm.clone(),
         Some(state.http_client.clone()),
+        state.billing_config.clone(),
     );
     observe::ws_frame(&ctx, &env.msg_type);
 

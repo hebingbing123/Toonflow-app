@@ -6,7 +6,7 @@ use axum::{
 use serde_json::json;
 
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, validate_max_length, validate_positive, ApiError};
 use crate::jobs::{
     enqueue_generation_job, payload_project::ASSETS_GENERATE_PAYLOAD_SCHEMA_VERSION_V2, JobRow,
     JOB_KIND_ASSET_GENERATE_BATCH,
@@ -27,62 +27,51 @@ pub(crate) async fn post_batch_generate_image_assets(
     Json(body): Json<BatchGenerateImageAssetsBody>,
 ) -> Result<JsonResponse<JobRow>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    if body.project_id <= 0 {
-        return Err(ApiError::BadRequest("projectId must be positive".into()));
-    }
+    validate_positive(body.project_id, "projectId")?;
     if body.items.is_empty() {
-        return Err(ApiError::BadRequest("items must be non-empty".into()));
+        return Err(bad_request_i18n(
+            "items must be non-empty",
+            "items 不能为空",
+        ));
     }
     if body.items.len() > MAX_BATCH_ITEMS {
-        return Err(ApiError::BadRequest(format!(
-            "items must have at most {MAX_BATCH_ITEMS} rows"
-        )));
+        return Err(bad_request_i18n(
+            &format!("items must have at most {MAX_BATCH_ITEMS} rows"),
+            &format!("items 最多只能包含 {MAX_BATCH_ITEMS} 条"),
+        ));
     }
     if let Some(n) = body.concurrent_count {
         if n <= 0 {
-            return Err(ApiError::BadRequest(
-                "concurrentCount must be at least 1".into(),
+            return Err(bad_request_i18n(
+                "concurrentCount must be at least 1",
+                "concurrentCount 至少必须为 1",
             ));
         }
         if n > MAX_CONCURRENT_COUNT {
-            return Err(ApiError::BadRequest(format!(
-                "concurrentCount must be at most {MAX_CONCURRENT_COUNT}"
-            )));
+            return Err(bad_request_i18n(
+                &format!("concurrentCount must be at most {MAX_CONCURRENT_COUNT}"),
+                &format!("concurrentCount 不能超过 {MAX_CONCURRENT_COUNT}"),
+            ));
         }
     }
 
     let model = trim_non_empty(body.model, "model")?;
     let resolution = trim_non_empty(body.resolution, "resolution")?;
-    if model.len() > MAX_MODEL_LEN {
-        return Err(ApiError::BadRequest(format!(
-            "model must be at most {MAX_MODEL_LEN} chars"
-        )));
-    }
-    if resolution.len() > MAX_RESOLUTION_LEN {
-        return Err(ApiError::BadRequest(format!(
-            "resolution must be at most {MAX_RESOLUTION_LEN} chars"
-        )));
-    }
+    validate_max_length(&model, MAX_MODEL_LEN, "model")?;
+    validate_max_length(&resolution, MAX_RESOLUTION_LEN, "resolution")?;
 
     let mut items_json = Vec::with_capacity(body.items.len());
     for it in &body.items {
         if it.id <= 0 {
-            return Err(ApiError::BadRequest(
-                "each items[].id must be positive".into(),
+            return Err(bad_request_i18n(
+                "each items[].id must be positive",
+                "items[].id 的每一项都必须为正数",
             ));
         }
         let name = trim_non_empty_str(&it.name, "items[].name")?;
         let prompt = trim_non_empty_str(&it.prompt, "items[].prompt")?;
-        if name.len() > MAX_NAME_LEN {
-            return Err(ApiError::BadRequest(format!(
-                "items[].name must be at most {MAX_NAME_LEN} chars"
-            )));
-        }
-        if prompt.len() > MAX_PROMPT_LEN {
-            return Err(ApiError::BadRequest(format!(
-                "items[].prompt must be at most {MAX_PROMPT_LEN} chars"
-            )));
-        }
+        validate_max_length(&name, MAX_NAME_LEN, "items[].name")?;
+        validate_max_length(&prompt, MAX_PROMPT_LEN, "items[].prompt")?;
         let image_base64 = normalize_optional_base64(it.base64.as_deref(), "items[].base64")?;
         let asset_type = asset_type_str(&it.asset_type);
         items_json.push(json!({
@@ -98,8 +87,9 @@ pub(crate) async fn post_batch_generate_image_assets(
         .script_id
         .is_some_and(|script_numeric_id| script_numeric_id <= 0)
     {
-        return Err(ApiError::BadRequest(
-            "scriptId must be positive when provided".into(),
+        return Err(bad_request_i18n(
+            "scriptId must be positive when provided",
+            "scriptId 提供时必须为正数",
         ));
     }
 
@@ -142,6 +132,7 @@ pub(crate) async fn post_batch_generate_image_assets(
         JOB_KIND_ASSET_GENERATE_BATCH,
         payload,
         Some(&headers),
+        &state.billing_config,
     )
     .await?;
     Ok(JsonResponse(row))

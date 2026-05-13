@@ -7,7 +7,7 @@ use axum::{
 use crate::error::ApiError;
 use crate::state::AppState;
 
-use super::super::common::require_owned_normalized_assets_scope;
+use super::super::common::require_owned_normalized_assets_scope_ref;
 use super::types::{AssetImageStatus, AssetsPollingImageBody, AssetsPollingImageResponse};
 
 #[utoipa::path(
@@ -33,14 +33,16 @@ pub(in crate::production) async fn post_assets_polling_image(
     headers: HeaderMap,
     Json(body): Json<AssetsPollingImageBody>,
 ) -> Result<JsonResponse<AssetsPollingImageResponse>, ApiError> {
-    let (uid, pool, script_id, uniq) = require_owned_normalized_assets_scope(
-        &state,
-        &headers,
-        body.project_id,
-        body.script_id,
-        &body.asset_ids,
-    )
-    .await?;
+    let (uid, pool, project_numeric_id, script_id, uniq) =
+        require_owned_normalized_assets_scope_ref(
+            &state,
+            &headers,
+            body.project_id,
+            body.project_uuid,
+            body.script_id,
+            &body.asset_ids,
+        )
+        .await?;
 
     let statuses = sqlx::query_as::<_, AssetImageStatus>(
         r#"
@@ -66,7 +68,7 @@ pub(in crate::production) async fn post_assets_polling_image(
     )
     .bind(script_id)
     .bind(uid)
-    .bind(body.project_id)
+    .bind(project_numeric_id)
     .bind(&uniq)
     .fetch_all(pool)
     .await

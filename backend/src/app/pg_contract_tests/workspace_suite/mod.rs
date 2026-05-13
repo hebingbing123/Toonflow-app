@@ -1,0 +1,9 @@
+//! Workspace visibility and permission tests
+
+mod admin_cannot_manage_billing_or_delete_workspace;
+mod jobs_workspace_visibility;
+mod last_owner_transition_guard_matches_policy;
+mod member_cannot_invite_or_manage_members;
+mod member_removal_resets_current_workspace;
+mod workspace_archive_resets_members_current_workspace;
+mod workspace_role_matrix_owner_admin_member;

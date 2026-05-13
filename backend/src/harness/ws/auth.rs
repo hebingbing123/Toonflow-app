@@ -116,6 +116,8 @@ pub async fn try_session_auth(
     let conn_id = state.notify.subscribe(uid, out_tx.clone()).await;
     let session = WsConnectionSession::new_authenticated(uid, Some((uid, conn_id)));
 
+    // `session.ready` is the raw WS auth-success envelope; correlation stays on `request_id`
+    // when the client supplied one on `session.auth`.
     let _ = send_envelope(
         socket,
         "session.ready",

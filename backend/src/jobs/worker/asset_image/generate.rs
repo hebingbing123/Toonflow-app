@@ -2,7 +2,9 @@ use serde_json::json;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::jobs::payload_project::resolve_project_numeric_from_job_payload;
+use crate::jobs::payload_project::{
+    payload_project_uuid, resolve_project_numeric_from_job_payload,
+};
 use crate::jobs::worker::common::{generation_job_is_cancelled, JobRunError};
 use crate::jobs::JobRow;
 use crate::llm::{resolve_openai_image_model, resolve_openai_image_size};
@@ -90,7 +92,7 @@ pub(crate) async fn run_asset_generate_image(
     )
     .await?;
 
-    Ok(json!({
+    let mut result = json!({
         "source": "assets-generate.generate",
         "project_numeric_id": project_numeric_id,
         "image_model": image_model,
@@ -100,5 +102,9 @@ pub(crate) async fn run_asset_generate_image(
         "image_url": body["image_url"],
         "revised_prompt": body["revised_prompt"],
         "has_reference_image": body["has_reference_image"],
-    }))
+    });
+    if let Some(project_uuid) = payload_project_uuid(p) {
+        result["project_uuid"] = json!(project_uuid);
+    }
+    Ok(result)
 }

@@ -4,7 +4,7 @@
 
 use serde_json::Value;
 
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, ApiError};
 
 #[derive(Debug, PartialEq, Eq)]
 pub(crate) enum FieldPatch<T> {
@@ -26,9 +26,10 @@ pub(crate) fn parse_optional_text_field(
                 Ok(FieldPatch::Set(Some(s)))
             }
         }
-        _ => Err(ApiError::BadRequest(format!(
-            "{field} must be a string, null, or omitted",
-        ))),
+        _ => Err(bad_request_i18n(
+            &format!("{field} must be a string, null, or omitted"),
+            &format!("{field} 必须是字符串、null，或省略该字段"),
+        )),
     }
 }
 
@@ -40,16 +41,24 @@ pub(crate) fn parse_optional_i32_field(
         None => Ok(FieldPatch::Absent),
         Some(Value::Null) => Ok(FieldPatch::Set(None)),
         Some(Value::Number(n)) => {
-            let i = n
-                .as_i64()
-                .ok_or_else(|| ApiError::BadRequest(format!("{field} must fit in i64")))?;
-            let v = i32::try_from(i)
-                .map_err(|_| ApiError::BadRequest(format!("{field} must fit in i32")))?;
+            let i = n.as_i64().ok_or_else(|| {
+                bad_request_i18n(
+                    &format!("{field} must fit in i64"),
+                    &format!("{field} 必须可表示为 i64"),
+                )
+            })?;
+            let v = i32::try_from(i).map_err(|_| {
+                bad_request_i18n(
+                    &format!("{field} must fit in i32"),
+                    &format!("{field} 必须可表示为 i32"),
+                )
+            })?;
             Ok(FieldPatch::Set(Some(v)))
         }
-        _ => Err(ApiError::BadRequest(format!(
-            "{field} must be a number, null, or omitted",
-        ))),
+        _ => Err(bad_request_i18n(
+            &format!("{field} must be a number, null, or omitted"),
+            &format!("{field} 必须是数字、null，或省略该字段"),
+        )),
     }
 }
 

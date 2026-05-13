@@ -13,6 +13,7 @@ void main() {
     final skillsHarnessController = SkillsHarnessController(
       accessTokenProvider: () => null,
       onErrorChanged: (_) {},
+      l10nProvider: () => null,
       onWsMessage: (_) {},
       onWsLifecycleSettled: () {},
       onWsConnectionChanged: (_) {},
@@ -58,6 +59,7 @@ void main() {
       final skillsHarnessController = SkillsHarnessController(
         accessTokenProvider: () => null,
         onErrorChanged: (_) {},
+        l10nProvider: () => null,
         onWsMessage: (_) {},
         onWsLifecycleSettled: () {},
         onWsConnectionChanged: (_) {},
@@ -100,6 +102,7 @@ void main() {
     final skillsHarnessController = SkillsHarnessController(
       accessTokenProvider: () => null,
       onErrorChanged: (_) {},
+      l10nProvider: () => null,
       onWsMessage: (_) {},
       onWsLifecycleSettled: () {},
       onWsConnectionChanged: (_) {},
@@ -143,6 +146,7 @@ void main() {
     final skillsHarnessController = SkillsHarnessController(
       accessTokenProvider: () => null,
       onErrorChanged: (_) {},
+      l10nProvider: () => null,
       onWsMessage: (_) {},
       onWsLifecycleSettled: () {},
       onWsConnectionChanged: (_) {},

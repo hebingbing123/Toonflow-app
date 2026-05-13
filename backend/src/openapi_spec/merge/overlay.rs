@@ -137,3 +137,97 @@ pub(super) fn overlay_components_object(
     }
     Ok(())
 }
+
+/// Add `deprecated: true` to numeric ID path parameters where UUID alternatives exist.
+///
+/// This marks the D-batch numeric ID parameters as deprecated in the OpenAPI spec
+/// to signal the migration direction toward UUID-first APIs, without breaking existing clients.
+///
+/// Affected parameters (path params in routes that also have a UUID `{project_id}`):
+/// - `{script_numeric_id}` — prefer UUID-based script lookup via project UUID
+/// - `{storyboard_numeric_id}` — prefer UUID-based storyboard lookup via project UUID
+/// - `{novel_numeric_id}` — prefer UUID-based novel lookup via project UUID
+/// - `{asset_numeric_id}` — prefer UUID-based asset lookup via project UUID
+///
+/// Column removal is blocked by `promote_import_snapshots()` and job payload compatibility;
+/// this annotation signals the migration direction without breaking existing clients.
+///
+/// See: `docs/plans/tasks-http-api-cleanup.md` H5·D, `.tmp/H3.2_numeric_id_dependency_analysis.md`
+pub(super) fn mark_numeric_id_parameters_deprecated(doc: &mut Json) -> anyhow::Result<()> {
+    let Some(paths) = doc.get_mut("paths").and_then(|p| p.as_object_mut()) else {
+        return Ok(());
+    };
+
+    // Numeric ID parameter names that should be marked deprecated when UUID alternatives exist.
+    // These are path parameters where the parent resource is already identified by UUID
+    // (e.g. `{project_id}` is a UUID), making the numeric child ID a legacy identifier.
+    const DEPRECATED_NUMERIC_PARAMS: &[(&str, &str)] = &[
+        ("script_numeric_id", "Legacy numeric script id. Prefer UUID-based lookup via project UUID. Will be removed in a future release after import infrastructure migration."),
+        ("storyboard_numeric_id", "Legacy numeric storyboard id. Prefer UUID-based lookup via project UUID. Will be removed in a future release after import infrastructure migration."),
+        ("novel_numeric_id", "Legacy numeric novel id. Prefer UUID-based lookup via project UUID. Will be removed in a future release after import infrastructure migration."),
+        ("asset_numeric_id", "Legacy numeric asset id. Prefer UUID-based lookup via project UUID. Will be removed in a future release after import infrastructure migration."),
+    ];
+
+    for (path_key, path_item) in paths.iter_mut() {
+        let Some(item_obj) = path_item.as_object_mut() else {
+            continue;
+        };
+
+        // Determine which numeric params appear in this path template
+        let deprecated_in_path: Vec<(&str, &str)> = DEPRECATED_NUMERIC_PARAMS
+            .iter()
+            .filter(|(param_name, _)| path_key.contains(&format!("{{{param_name}}}")))
+            .copied()
+            .collect();
+
+        if deprecated_in_path.is_empty() {
+            continue;
+        }
+
+        for method in HTTP_METHODS {
+            let Some(operation) = item_obj.get_mut(*method) else {
+                continue;
+            };
+            let Some(op_obj) = operation.as_object_mut() else {
+                continue;
+            };
+
+            // Get or create parameters array
+            let params = op_obj
+                .entry("parameters")
+                .or_insert_with(|| Json::Array(vec![]));
+            let Some(params_arr) = params.as_array_mut() else {
+                continue;
+            };
+
+            for (param_name, description) in &deprecated_in_path {
+                // Check if parameter already exists
+                let existing_idx = params_arr
+                    .iter()
+                    .position(|p| p.get("name").and_then(|n| n.as_str()) == Some(param_name));
+
+                if let Some(idx) = existing_idx {
+                    // Mark existing parameter as deprecated
+                    if let Some(param_obj) = params_arr[idx].as_object_mut() {
+                        param_obj.insert("deprecated".to_string(), Json::Bool(true));
+                    }
+                } else {
+                    // Inject a new parameter definition with deprecated: true
+                    params_arr.push(serde_json::json!({
+                        "name": param_name,
+                        "in": "path",
+                        "required": true,
+                        "deprecated": true,
+                        "description": description,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }));
+                }
+            }
+        }
+    }
+
+    Ok(())
+}

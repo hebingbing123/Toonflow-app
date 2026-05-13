@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 
 import '../../../../rust_api.dart';
 import 'support.dart';
@@ -23,8 +24,9 @@ class AssetGenerationWorkbenchDialogView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
-      title: const Text('资产出图工作台'),
+      title: Text(l10n.projectEditorAssetGenerationTitle),
       content: SizedBox(
         width: 860,
         child: SingleChildScrollView(
@@ -33,7 +35,7 @@ class AssetGenerationWorkbenchDialogView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '把 production 资产摘要、批量出图、状态轮询、衍生图清理和封面 URL 更新收口到项目资产主流程，不再只依赖 system probe。',
+                l10n.projectEditorAssetGenerationDescription,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.outline,
                 ),
@@ -105,7 +107,7 @@ class AssetGenerationWorkbenchDialogView extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: model.busyMutation ? null : callbacks.onClose,
-          child: const Text('关闭'),
+          child: Text(l10n.projectEditorAssetGenerationClose),
         ),
       ],
     );

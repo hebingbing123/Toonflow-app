@@ -6,7 +6,7 @@ use axum::{
 use serde_json::json;
 
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, validate_max_length, validate_positive, ApiError};
 use crate::jobs::{
     enqueue_generation_job, payload_project::ASSETS_GENERATE_PAYLOAD_SCHEMA_VERSION_V2, JobRow,
     JOB_KIND_ASSET_POLISH_BATCH,
@@ -25,55 +25,48 @@ pub(crate) async fn post_batch_polish_assets_prompt(
     Json(body): Json<BatchPolishAssetsPromptBody>,
 ) -> Result<JsonResponse<JobRow>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    if body.project_id <= 0 {
-        return Err(ApiError::BadRequest("projectId must be positive".into()));
-    }
+    validate_positive(body.project_id, "projectId")?;
     if body.items.is_empty() {
-        return Err(ApiError::BadRequest("items must be non-empty".into()));
+        return Err(bad_request_i18n(
+            "items must be non-empty",
+            "items 不能为空",
+        ));
     }
     if body.items.len() > MAX_BATCH_ITEMS {
-        return Err(ApiError::BadRequest(format!(
-            "items must have at most {MAX_BATCH_ITEMS} rows"
-        )));
+        return Err(bad_request_i18n(
+            &format!("items must have at most {MAX_BATCH_ITEMS} rows"),
+            &format!("items 最多只能包含 {MAX_BATCH_ITEMS} 条"),
+        ));
     }
     if let Some(n) = body.concurrent_count {
         if n <= 0 {
-            return Err(ApiError::BadRequest(
-                "concurrentCount must be at least 1".into(),
+            return Err(bad_request_i18n(
+                "concurrentCount must be at least 1",
+                "concurrentCount 至少必须为 1",
             ));
         }
         if n > MAX_CONCURRENT_COUNT {
-            return Err(ApiError::BadRequest(format!(
-                "concurrentCount must be at most {MAX_CONCURRENT_COUNT}"
-            )));
+            return Err(bad_request_i18n(
+                &format!("concurrentCount must be at most {MAX_CONCURRENT_COUNT}"),
+                &format!("concurrentCount 不能超过 {MAX_CONCURRENT_COUNT}"),
+            ));
         }
     }
 
     let mut items_json = Vec::with_capacity(body.items.len());
     for it in &body.items {
         if it.assets_id <= 0 {
-            return Err(ApiError::BadRequest(
-                "each items[].assetsId must be positive".into(),
+            return Err(bad_request_i18n(
+                "each items[].assetsId must be positive",
+                "items[].assetsId 的每一项都必须为正数",
             ));
         }
         let asset_type = trim_non_empty_str(&it.asset_type, "items[].type")?;
         let name = trim_non_empty_str(&it.name, "items[].name")?;
         let describe = trim_non_empty_str(&it.describe, "items[].describe")?;
-        if asset_type.len() > MAX_ASSET_TYPE_LEN {
-            return Err(ApiError::BadRequest(format!(
-                "items[].type must be at most {MAX_ASSET_TYPE_LEN} chars"
-            )));
-        }
-        if name.len() > MAX_NAME_LEN {
-            return Err(ApiError::BadRequest(format!(
-                "items[].name must be at most {MAX_NAME_LEN} chars"
-            )));
-        }
-        if describe.len() > MAX_DESCRIBE_LEN {
-            return Err(ApiError::BadRequest(format!(
-                "items[].describe must be at most {MAX_DESCRIBE_LEN} chars"
-            )));
-        }
+        validate_max_length(&asset_type, MAX_ASSET_TYPE_LEN, "items[].type")?;
+        validate_max_length(&name, MAX_NAME_LEN, "items[].name")?;
+        validate_max_length(&describe, MAX_DESCRIBE_LEN, "items[].describe")?;
         items_json.push(json!({
             "asset_numeric_id": it.assets_id,
             "asset_type": asset_type,
@@ -103,6 +96,7 @@ pub(crate) async fn post_batch_polish_assets_prompt(
         JOB_KIND_ASSET_POLISH_BATCH,
         payload,
         Some(&headers),
+        &state.billing_config,
     )
     .await?;
     Ok(JsonResponse(row))

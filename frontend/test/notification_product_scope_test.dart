@@ -90,4 +90,28 @@ void main() {
     expect(scope.scriptNumericId, 21);
     expect(scope.hasProjectScope, isTrue);
   });
+
+  test(
+    'resolveNotificationProductScope accepts snake_case payload and query keys',
+    () {
+      final scope = resolveNotificationProductScope(
+        _notification(
+          payload: <String, dynamic>{
+            'workspace_id': 'workspace-snake',
+            'project_uuid': 'project-snake',
+            'project_numeric_id': '22',
+            'script_numeric_id': 34,
+          },
+        ),
+        Uri.parse(
+          '/product/jobs?workspace_id=workspace-query&project_uuid=project-query&project_id=23&script_numeric_id=35',
+        ),
+      );
+
+      expect(scope.workspaceId, 'workspace-query');
+      expect(scope.projectUuid, 'project-query');
+      expect(scope.projectNumericId, 23);
+      expect(scope.scriptNumericId, 35);
+    },
+  );
 }

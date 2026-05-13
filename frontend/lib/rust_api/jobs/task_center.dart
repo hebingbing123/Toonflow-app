@@ -144,6 +144,8 @@ Future<List<TaskCenterTaskClassRow>> postTasksGetTaskCategories(
 }
 
 /// Compat **`getTaskApi`**: **`GET /api/v1/jobs/page`** (query: **`page`**, **`limit`**, **`state`**, **`task_class`**, **`project_id`**).
+/// The backend still treats **`project_id`** here as the legacy numeric project filter; callers
+/// should resolve **`projectUuid`** to numeric first when possible.
 Future<TaskCenterGetTaskApiResult> postTasksGetTaskApi(
   String accessToken, {
   required int page,

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import 'controls.dart';
 import 'contexts/production/support.dart';
@@ -74,9 +75,11 @@ class AgentWorkspacesSection extends StatefulWidget {
   final String? sectionDescription;
   final TextEditingController projectIdController;
   final TextEditingController scriptIdController;
+
   /// When both **`projectUuidController`** and **`scriptUuidController`** are null, the state creates internal controllers.
   final TextEditingController? projectUuidController;
   final TextEditingController? scriptUuidController;
+
   /// When **`projectUuidController`** / **`scriptUuidController`** are supplied together, this must be non-null (WS **`workspaceUuid`**).
   final TextEditingController? workspaceUuidController;
   final TextEditingController scriptPromptController;

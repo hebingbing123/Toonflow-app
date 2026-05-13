@@ -7,10 +7,10 @@ use sqlx::types::Json as SqlxJson;
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, validate_enum, validate_positive, ApiError};
 use crate::state::AppState;
 
-use super::super::crud::ensure_owned_project_pk;
+use super::super::crud::require_asset_project_write_scope;
 use super::super::models::*;
 use super::super::utils::{
     merge_workbench_asset_metadata, normalize_optional_trimmed_text,
@@ -24,24 +24,19 @@ pub(crate) async fn post_project_workbench_save_assets(
     Json(body): Json<WorkbenchSaveAssetsBody>,
 ) -> Result<Json<WorkbenchAssetMutationResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-    if body.id <= 0 {
-        return Err(ApiError::BadRequest("id must be positive".into()));
-    }
+    validate_positive(body.id, "id")?;
     let asset_type = body.asset_type.trim().to_lowercase();
-    if asset_type != "role" && asset_type != "scene" && asset_type != "tool" {
-        return Err(ApiError::BadRequest(
-            "type must be role, scene, or tool".into(),
-        ));
-    }
+    validate_enum(&asset_type, &["role", "scene", "tool"], "type")?;
     if body.image_id.is_some_and(|id| id <= 0) {
-        return Err(ApiError::BadRequest(
-            "imageId must be positive when set".into(),
+        return Err(bad_request_i18n(
+            "imageId must be positive when set",
+            "imageId 设置时必须为正数",
         ));
     }
 
     let pool = state.require_pool()?;
 
-    ensure_owned_project_pk(pool, uid, project_id).await?;
+    require_asset_project_write_scope(&state, uid, project_id).await?;
 
     let mut tx = pool
         .begin()
@@ -52,18 +47,10 @@ pub(crate) async fn post_project_workbench_save_assets(
         r#"
         SELECT a.id, a.metadata
         FROM app_asset a
-        INNER JOIN app_project p ON p.id = a.project_id
-        WHERE p.id = $2
-          AND a.numeric_id = $3
-          AND EXISTS (
-            SELECT 1
-            FROM app_workspace_member wm
-            WHERE wm.workspace_id = p.workspace_id
-              AND wm.user_id = $1
-          )
+        WHERE a.project_id = $1
+          AND a.numeric_id = $2
         "#,
     )
-    .bind(uid)
     .bind(project_id)
     .bind(body.id)
     .fetch_optional(&mut *tx)
@@ -130,25 +117,16 @@ pub(crate) async fn post_project_workbench_save_assets(
 
     sqlx::query(
         r#"
-        UPDATE app_asset a
+        UPDATE app_asset
         SET metadata = $1,
             updated_at = NOW()
-        FROM app_project p
-        WHERE a.project_id = p.id
-          AND p.id = $2
-          AND a.numeric_id = $3
-          AND EXISTS (
-            SELECT 1
-            FROM app_workspace_member wm
-            WHERE wm.workspace_id = p.workspace_id
-              AND wm.user_id = $4
-          )
+        WHERE project_id = $2
+          AND numeric_id = $3
         "#,
     )
     .bind(SqlxJson(metadata))
     .bind(project_id)
     .bind(body.id)
-    .bind(uid)
     .execute(&mut *tx)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;

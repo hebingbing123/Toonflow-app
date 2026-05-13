@@ -14,7 +14,11 @@ use crate::publish::ab_testing::{
     aggregate_comparisons, compare_variants, fetch_quality_metrics, fetch_token_metrics,
     ABTestConfig, ABTestResult, ABVariant,
 };
-use crate::{auth::require_user_uuid, error::ApiError, state::AppState};
+use crate::{
+    auth::require_user_uuid,
+    error::{bad_request_i18n, ApiError},
+    state::AppState,
+};
 
 use super::{
     cost_optimization::{
@@ -141,8 +145,9 @@ pub async fn create_experiment(
 
     // 校验至少有一个变体
     if body.variants.is_empty() {
-        return Err(ApiError::BadRequest(
-            "At least one variant is required".into(),
+        return Err(bad_request_i18n(
+            "At least one variant is required",
+            "至少需要一个变体",
         ));
     }
 
@@ -431,10 +436,16 @@ pub async fn start_experiment(
     .ok_or(ApiError::NotFound)?;
 
     if experiment.status != "draft" {
-        return Err(ApiError::BadRequest(format!(
-            "Experiment must be in 'draft' status to start, current status: {}",
-            experiment.status
-        )));
+        return Err(bad_request_i18n(
+            &format!(
+                "Experiment must be in 'draft' status to start, current status: {}",
+                experiment.status
+            ),
+            &format!(
+                "实验必须处于 'draft' 状态才能启动，当前状态：{}",
+                experiment.status
+            ),
+        ));
     }
 
     // 校验依赖
@@ -448,10 +459,13 @@ pub async fn start_experiment(
             .map(|e| format!("{}: {}", e.variant_label, e.missing_dependencies.join(", ")))
             .collect();
 
-        return Err(ApiError::BadRequest(format!(
-            "Dependency validation failed: {}",
-            error_messages.join("; ")
-        )));
+        return Err(bad_request_i18n(
+            &format!(
+                "Dependency validation failed: {}",
+                error_messages.join("; ")
+            ),
+            &format!("依赖校验失败：{}", error_messages.join("；")),
+        ));
     }
 
     // 更新状态为 queued
@@ -513,10 +527,10 @@ pub async fn cancel_experiment(
     .ok_or(ApiError::NotFound)?;
 
     if !["draft", "queued", "running"].contains(&experiment.status.as_str()) {
-        return Err(ApiError::BadRequest(format!(
-            "Cannot cancel experiment in '{}' status",
-            experiment.status
-        )));
+        return Err(bad_request_i18n(
+            &format!("Cannot cancel experiment in '{}' status", experiment.status),
+            &format!("处于 '{}' 状态的实验无法取消", experiment.status),
+        ));
     }
 
     // 更新状态为 cancelled
@@ -583,8 +597,13 @@ pub async fn estimate_cost(
         .map_err(|e: String| ApiError::BadRequest(e))?;
 
     // 解析阶段范围
-    let stage_scope: Vec<String> = serde_json::from_value(experiment.stage_scope.clone())
-        .map_err(|e| ApiError::BadRequest(format!("Invalid stage_scope: {}", e)))?;
+    let stage_scope: Vec<String> =
+        serde_json::from_value(experiment.stage_scope.clone()).map_err(|e| {
+            bad_request_i18n(
+                &format!("Invalid stage_scope: {}", e),
+                &format!("无效的 stage_scope：{}", e),
+            )
+        })?;
 
     let stages: Result<Vec<Stage>, _> = stage_scope.iter().map(|s| s.parse::<Stage>()).collect();
 
@@ -678,7 +697,7 @@ pub async fn compare_ab_jobs(
     let pool = state.require_pool()?;
 
     if body.cases.is_empty() {
-        return Err(ApiError::BadRequest("cases cannot be empty".into()));
+        return Err(bad_request_i18n("cases cannot be empty", "cases 不能为空"));
     }
     let cases = body.cases.clone();
 

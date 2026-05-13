@@ -8,10 +8,10 @@ use axum::{
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, validate_non_empty_string, ApiError};
 use crate::state::AppState;
 
-use super::super::crud::ensure_owned_project_pk;
+use super::super::crud::require_asset_project_write_scope;
 use super::super::models::*;
 use super::super::utils::{normalize_upload_clip_data_uri, ADV_LOCK_ASSET_IMAGE_NUMERIC};
 use super::super::ADV_LOCK_ASSET_NUMERIC;
@@ -25,9 +25,7 @@ pub(crate) async fn post_project_workbench_upload_clip(
     let uid = require_user_uuid(&state, &headers)?;
 
     let name = body.name.trim();
-    if name.is_empty() {
-        return Err(ApiError::BadRequest("name must not be empty".into()));
-    }
+    validate_non_empty_string(name, "name")?;
 
     let asset_type = body
         .asset_type
@@ -36,14 +34,14 @@ pub(crate) async fn post_project_workbench_upload_clip(
         .trim()
         .to_lowercase();
     if asset_type != "clip" {
-        return Err(ApiError::BadRequest("type must be clip".into()));
+        return Err(bad_request_i18n("type must be clip", "type 必须为 clip"));
     }
 
     let file_path = normalize_upload_clip_data_uri(&body.base64_data)?;
 
     let pool = state.require_pool()?;
 
-    ensure_owned_project_pk(pool, uid, project_id).await?;
+    require_asset_project_write_scope(&state, uid, project_id).await?;
 
     let mut tx = pool
         .begin()

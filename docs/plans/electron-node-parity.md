@@ -3,6 +3,8 @@
 **目的**：把「用 Rust 重写完整后端」从口号拆成**可勾选、可排序**的条目；与文首 YAML **`product-shipping-bar`**、**`decommission-electron`** 对齐。  
 **维护**：旧路由由 `src/core.ts` 生成 **`src/router.ts`**（`@routes-hash`）；新增或删除 `src/routes/**/*.ts` 后应复核本表对应行。
 
+**阅读提醒**：本文同时承担 **parity 真源** 与 **兼容层盘点** 两种角色，因此会保留大量 numeric / legacy / compat 术语。引用其中的 project/script/jobs scope 现状时，应优先结合 [`product-deep-links.md`](../product-deep-links.md)、[`harness-ws-context-matrix.md`](./harness-ws-context-matrix.md)、[`tasks-http-api-cleanup.md`](./tasks-http-api-cleanup.md) 与 [`workspace-team-full-plan.md`](./workspace-team-full-plan.md) 的较新 **UUID-first** 结论阅读。
+
 ## 0. 术语约定（避免 `legacy` 误读）
 
 - 本仓库 **Postgres schema** 已逐步把 SQLite 时代的 `legacy_*` 统一收敛为：
@@ -47,12 +49,282 @@
 
 ### 2.2 Workspace 与多用户可见性（相对旧 Electron）
 
-旧 Electron 栈是 **单机 SQLite**：项目与任务在直觉上等同于 **当前登录用户**，没有跨用户共享工作区的概念。Rust 托管栈以 **`app_workspace` + `app_workspace_member`** 为空间边界：
+#### 2.2.1 旧栈（Electron/Node）可见性规则
+
+旧 Electron 栈是 **单机 SQLite**：项目与任务在直觉上等同于 **当前登录用户**，没有跨用户共享工作区的概念。所有数据（项目、剧本、分镜、资产、任务）均按 **`owner_user_id`** 严格隔离，仅创建者可见可操作。
+
+**技术实现细节**：
+
+- **数据库架构**：使用本地 SQLite 数据库（通过 Knex.js ORM），所有表均包含 `user_id` 或 `owner_user_id` 列作为数据隔离的主键之一。
+- **鉴权机制**：基于 JWT token（存储在 `o_setting.tokenKey`），每次请求通过中间件验证 token 并提取 `user_id`，所有数据库查询自动附加 `WHERE user_id = ?` 条件。
+- **项目可见性**：`o_project` 表的所有记录按 `user_id` 过滤，路由如 `/api/project/getProject` 仅返回当前登录用户创建的项目，无法查询或访问其他用户的项目。
+- **剧本/分镜/资产**：
+  - `o_script`（剧本）、`o_storyboard`（分镜）、`o_assets`（资产）表均通过 `user_id` 关联到创建者
+  - 所有 CRUD 操作（`/api/script/*`、`/api/assets/*`）在 SQL 查询中强制 `WHERE user_id = current_user_id`
+  - 无跨用户读取或共享机制，即使知道其他用户的资源 ID 也无法访问
+- **任务（Jobs）**：`o_task` 表按 `user_id` 隔离，`/api/task/getTaskApi` 仅返回当前用户提交的任务，任务状态更新和结果查询均限定在用户自己的任务范围内。
+- **Agent 记忆**：`o_agentMemory` 表按 `user_id` + `project_id` 组合隔离，每个用户在每个项目中有独立的记忆上下文，无法访问其他用户的记忆数据。
+- **本地文件存储**：生成的图片、视频等文件存储在用户本地文件系统（通过 Electron 的文件 API），路径通常包含 `user_id` 或项目标识，确保文件级别的隔离。
+
+**隐式单用户假设**：
+
+- 旧栈设计时假设 Electron 应用运行在单用户桌面环境，每个应用实例对应一个登录用户
+- 无 workspace 或 organization 概念，所有资源的"所有权"等同于"创建者身份"
+- 无成员邀请、角色管理、权限委派等多用户协作功能
+- 数据迁移或备份时，整个 SQLite 数据库文件（包含单个用户的所有数据）作为原子单元处理
+
+#### 2.2.2 新栈（Rust/Flutter）Workspace 成员可见性规则
+
+Rust 托管栈以 **`app_workspace` + `app_workspace_member`** 为空间边界：
 
 - **项目**：`GET/PATCH/DELETE …/projects/{id}` 与多数 **`project_id` 段** 路由通过 **「项目所属 `workspace_id` + 当前用户是否为成员」** 校验可读可写，而不再以 **`project.owner_user_id`** 作为唯一闸门（`owner_user_id` 仍表示创建者/责任人）。
-- **生成任务**：`app_generation_job` **不双写** `workspace_id`；带 **`project_uuid` / `project_numeric_id`** 的 payload 时，可见性与操作权限由 **项目成员关系** 派生；无项目字段的任务仍主要按 **`owner_user_id`** 个人视图。
+- **剧本/分镜/资产**：所有 **`…/projects/{project_id}/scripts`**、**`…/projects/{project_id}/assets`**、**`…/storyboards`** 等路由均按 **项目所属 workspace 的成员权限** 校验，workspace 内 `owner`/`admin`/`member` 均可访问（具体写权限按角色矩阵，见 `workspace-project-permission-policy.md`）。
+- **生成任务**：`app_generation_job` **不双写** `workspace_id`；带 **`project_uuid`**（首选）或 **`project_numeric_id`**（legacy fallback）的 payload 时，可见性与操作权限由 **项目成员关系** 派生；无项目字段的任务仍主要按 **`owner_user_id`** 个人视图。
 - **Agent 记忆**：`app_agent_memory` 仍按 **`owner_user_id`** 行级隔离；同一 workspace 内协作者各有一份记忆行。相关 HTTP 响应（含 **`cost-overview`**、**`query`** 列表项、**`append` / `clear` / `optimize`**）在需要处标明 **`scope: "user"`**，表示聚合与变更口径为 **当前用户行**，而非 workspace 级合并。
 - **本地路径与通知**：部分落盘目录与 WS/job 通知仍按 **实际写入者/任务 owner** 对齐，避免成员代操作时把文件或事件发到错误用户（见 [`workspace-team-full-plan.md`](./workspace-team-full-plan.md) Phase W4.5 备注）。
+
+#### 2.2.3 主要差异点
+
+| 维度 | 旧栈（Electron/Node） | 新栈（Rust/Flutter） |
+|------|----------------------|---------------------|
+| **工作空间类型** | 无显式概念，隐式单用户 | **`personal`**（个人）+ **`enterprise`**（企业） |
+| **项目可见性** | 仅 `owner_user_id` 可见 | `personal`: 仅 owner；`enterprise`: 所有成员可见 |
+| **剧本/分镜/资产** | 仅 owner 可见可操作 | workspace 成员按角色权限访问（owner/admin/member） |
+| **Jobs 任务** | 仅 owner 可见 | 关联项目时：workspace 成员可见；无项目时：仅 owner |
+| **Agent 记忆** | 仅 owner | 仍按用户隔离（`scope: "user"`），非 workspace 级合并 |
+| **成员管理** | 不支持 | 支持邀请、角色分配（owner/admin/member）、移除 |
+
+#### 2.2.4 迁移路径与向后兼容
+
+- **自动创建 Personal Workspace**：用户首次登录新栈时，系统自动调用 `ensure_personal_workspace` 为其创建唯一的 `personal` workspace，并将现有项目的 `workspace_id` 指向该 personal workspace。
+- **Personal Workspace 行为与旧栈一致**：`personal` workspace 中的项目仅所有者可见，禁止删除或归档 personal workspace，禁止用户离开自己的 personal workspace，确保单用户路径体验不受影响。
+- **Enterprise Workspace 为新增能力**：用户可选择创建或加入 `enterprise` workspace 以启用团队协作，但不影响其 personal workspace 的独立性。
+- **数据迁移**：旧 SQLite 数据通过 `toonflow-sqlite-import` + `promote_import_snapshots()` 导入时，自动归属到用户的 personal workspace，保持原有隔离性。
+
+#### 2.2.5 Jobs（生成任务）可见性差异详解
+
+**背景**：Jobs（生成任务，存储在 `app_generation_job` 表）是平台的核心异步工作负载，包括资产图片生成、prompt 优化、视频生成等。旧栈与新栈在 jobs 可见性上有显著差异。
+
+##### 2.2.5.1 旧栈（Electron/Node）Jobs 可见性
+
+- **严格按用户隔离**：`o_task` 表通过 `user_id` 列隔离，所有 jobs 查询（`/api/task/getTaskApi`）自动附加 `WHERE user_id = current_user_id` 条件
+- **仅创建者可见**：用户只能查看、取消、重试自己提交的任务，无法访问其他用户的任务，即使任务关联到共享资源
+- **无项目关联概念**：任务虽然可能在 payload 中包含项目信息，但可见性判定完全基于 `user_id`，不考虑项目归属或协作关系
+- **本地通知**：任务完成通知仅发送给 `owner_user_id`，本地 artifact 下载目录也按任务所有者组织
+
+##### 2.2.5.2 新栈（Rust/Flutter）Jobs 可见性
+
+新栈引入 **workspace 成员可见性**，但 `app_generation_job` 表 **不直接存储 `workspace_id`**，而是通过 **payload 中的项目信息派生** workspace 关联：
+
+**技术实现**：
+
+- **`derive_workspace_from_job_payload` 函数**：优先从 job payload 中提取 `project_uuid`，缺失时回退 `project_numeric_id`，查询 `app_project` 表获取项目所属的 `workspace_id`
+- **可见性规则**：
+  - **关联项目的任务**：如果 payload 包含有效的项目标识，任务对项目所属 workspace 的所有成员可见（owner/admin/member）
+  - **无项目关联的任务**：如果 payload 不包含项目信息或项目已删除，任务仅对 `owner_user_id`（任务创建者）可见
+  - **权限校验**：查看任务详情、取消任务、重试任务均需满足"用户是任务 owner 或项目 workspace 成员"条件
+
+**受影响的端点**：
+
+- `GET /api/v1/jobs/page`：按 workspace 成员可见性过滤任务列表
+- `GET /api/v1/jobs`：按 workspace 成员可见性过滤任务列表
+- `GET /api/v1/jobs/kinds/summary` 与 `GET /api/v1/jobs/status/summary`：按 workspace 可见性聚合任务统计
+- `GET /api/v1/jobs/{id}`：校验用户是否有权查看该任务
+- `POST /api/v1/jobs/{id}/cancel`：校验用户是否有权取消该任务
+- `POST /api/v1/jobs/{id}/retry`：校验用户是否有权重试该任务
+
+**创建时校验**：
+
+- `POST /api/v1/jobs` 在接收 payload 时，如果包含项目 scope（`project_uuid` 优先，`project_numeric_id` 为 legacy fallback），会校验当前用户是否为该项目所属 workspace 的成员
+- 校验通过后，规范化 payload 中的项目字段（确保 `project_uuid` 和 `project_numeric_id` 一致）
+
+**Worker 侧行为**：
+
+- Worker 在执行任务并写回结果时（如 `video/voiceover/asset-image` 任务更新项目资源），也会按 workspace 成员权限校验写入权限
+- 本地 artifact 下载目录与更新通知仍按 `job.owner_user_id` 对齐，避免成员代操作时把文件或事件发到错误用户
+
+**向后兼容**：
+
+- Personal workspace 中的任务行为与旧栈一致：项目仅所有者可见，关联项目的任务也仅所有者可见
+- 无项目关联的任务（如全局配置测试任务）保持用户级隔离，不受 workspace 影响
+
+##### 2.2.5.3 Jobs 可见性对比表
+
+| 维度 | 旧栈（Electron/Node） | 新栈（Rust/Flutter） |
+|------|----------------------|---------------------|
+| **数据库隔离** | `o_task.user_id` 严格隔离 | `app_generation_job.owner_user_id` + 项目派生 workspace |
+| **关联项目的任务** | 仅 owner 可见 | Workspace 成员可见（owner/admin/member） |
+| **无项目关联的任务** | 仅 owner 可见 | 仅 owner 可见（与旧栈一致） |
+| **任务列表查询** | `WHERE user_id = ?` | `WHERE owner_user_id = ? OR project.workspace_id IN (user_workspaces)` |
+| **任务详情查看** | 仅 owner | Owner 或项目 workspace 成员 |
+| **任务取消/重试** | 仅 owner | Owner 或项目 workspace 成员 |
+| **任务创建校验** | 无项目成员校验 | 校验用户是否为项目 workspace 成员 |
+| **通知与本地文件** | 发送给 owner | 仍发送给 owner（避免成员代操作混淆） |
+| **Personal Workspace** | N/A（隐式单用户） | 行为与旧栈一致（仅 owner 可见） |
+| **Enterprise Workspace** | N/A | 成员可见关联项目的任务 |
+
+##### 2.2.5.4 实现细节参考
+
+- **代码位置**：`backend/src/jobs/http.rs` 中的 `derive_workspace_from_job_payload` 函数和相关权限校验逻辑
+- **设计文档**：`docs/plans/workspace-team-full-plan.md` Phase W4.5
+- **测试覆盖**：`backend/src/jobs/http.rs` 中的集成测试验证 workspace 成员查看/操作 jobs 的权限矩阵
+
+#### 2.2.6 资产/剧本/分镜可见性差异详解
+
+**背景**：资产（Assets）、剧本（Scripts）、分镜（Storyboards）是项目的核心创作资源，旧栈与新栈在这些资源的可见性和权限控制上有显著差异。
+
+##### 2.2.6.1 旧栈（Electron/Node）资产/剧本/分镜可见性
+
+- **严格按用户隔离**：`o_assets`、`o_script`、`o_storyboard` 表均通过 `user_id` 列隔离，所有查询自动附加 `WHERE user_id = current_user_id` 条件
+- **仅创建者可见可操作**：用户只能查看、编辑、删除自己创建的资产/剧本/分镜，无法访问其他用户的资源，即使这些资源关联到同一项目
+- **无协作共享机制**：资源的"所有权"等同于"创建者身份"，不支持跨用户共享或委派权限
+- **剧本-资产关联**：`o_scriptAssets` 表记录剧本与资产的关联关系，但关联关系也按 `user_id` 隔离，仅创建者可见
+- **分镜图片**：分镜关联的图片（`o_image` 表）也按 `user_id` 隔离，仅创建者可查看和下载
+
+**技术实现细节**：
+
+- **数据库架构**：所有资源表均包含 `user_id` 或 `owner_user_id` 列作为主键之一，确保数据库层面的严格隔离
+- **路由权限校验**：所有 CRUD 路由（`/api/assets/*`、`/api/script/*`、`/api/storyboard/*`）在 SQL 查询中强制 `WHERE user_id = current_user_id`
+- **关联查询**：查询剧本关联的资产时（`/api/script/getScriptApi`），返回的 `relatedAssets` 仅包含当前用户创建的资产
+- **导出功能**：剧本导出（`/api/script/exportScript`）、分镜导出（`/api/production/export-image`）仅导出当前用户创建的资源
+
+##### 2.2.6.2 新栈（Rust/Flutter）资产/剧本/分镜可见性
+
+新栈引入 **workspace 成员可见性**，资产/剧本/分镜的可见性和操作权限基于 **项目所属 workspace 的成员关系**：
+
+**技术实现**：
+
+- **项目归属校验**：所有资产/剧本/分镜路由首先通过 `project_id` 查询项目所属的 `workspace_id`，然后校验当前用户是否为该 workspace 的成员
+- **统一权限 Helper**：`backend/src/workspaces/helpers.rs` 中的 `require_project_workspace_member_scope` 函数统一处理项目路径的成员权限校验
+- **可见性规则**：
+  - **Personal Workspace**：资产/剧本/分镜仅项目所有者可见，行为与旧栈一致
+  - **Enterprise Workspace**：workspace 内所有成员（owner/admin/member）可查看项目下的资产/剧本/分镜
+  - **操作权限**：按角色矩阵细化（见 `workspace-project-permission-policy.md`），例如 `member` 可查看但可能不可删除他人创建的资源
+
+**受影响的端点**：
+
+**资产（Assets）**：
+- `GET /api/v1/projects/{project_id}/assets`：按 workspace 成员可见性过滤资产列表
+- `POST /api/v1/projects/{project_id}/assets`：校验用户是否为项目 workspace 成员
+- `GET /api/v1/projects/{project_id}/assets/{asset_id}`：校验成员权限
+- `PATCH /api/v1/projects/{project_id}/assets/{asset_id}`：校验成员权限
+- `DELETE /api/v1/projects/{project_id}/assets/{asset_id}`：校验成员权限
+- `POST /api/v1/projects/{project_id}/assets/workbench/*`：所有 workbench 端点（nested、image-bundle、material-data、batch-generation-data、upload-clip、polling-image-assets、polling-prompt-assets、add-assets、save-assets、update-assets、del-assets、batch-delete、del-image）均按 workspace 成员权限校验
+
+**剧本（Scripts）**：
+- `POST /api/v1/projects/{project_id}/scripts/get-script-api`：按 workspace 成员可见性过滤剧本列表
+- `POST /api/v1/projects/{project_id}/scripts/batch-add`：校验用户是否为项目 workspace 成员
+- `GET /api/v1/projects/{project_id}/scripts/{script_legacy_id}`：校验成员权限
+- `PATCH /api/v1/projects/{project_id}/scripts/{script_legacy_id}`：校验成员权限
+- `DELETE /api/v1/projects/{project_id}/scripts/{script_legacy_id}`：校验成员权限
+- `POST /api/v1/projects/{project_id}/scripts/export`：workspace 成员可导出项目剧本
+- `POST /api/v1/projects/{project_id}/scripts/{script_legacy_id}/extract-assets`：workspace 成员可触发资产抽取
+- `PUT /api/v1/projects/{project_id}/scripts/{s}/assets/{a}`：维护剧本-资产关联，校验成员权限
+- `DELETE /api/v1/projects/{project_id}/scripts/{s}/assets/{a}`：删除剧本-资产关联，校验成员权限
+
+**分镜（Storyboards）**：
+- `POST /api/v1/production/get-production-data`：按 workspace 成员可见性返回分镜数据
+- `POST /api/v1/production/storyboard/*`：所有分镜操作（读取、新增、批量补齐、预览、移除、更新 URL、polling-image）均按 workspace 成员权限校验
+- `POST /api/v1/production/get-flow-data`：workspace 成员可查看项目的 flow 数据（包含分镜快照）
+- `POST /api/v1/production/save-flow-data`：workspace 成员可保存 flow 数据并同步分镜索引
+- `POST /api/v1/production/export-image`：workspace 成员可导出分镜图片
+
+**小说（Novels）**：
+- `GET /api/v1/projects/{project_id}/novels`：按 workspace 成员可见性过滤小说列表
+- `POST /api/v1/projects/{project_id}/novels`：校验用户是否为项目 workspace 成员
+- `GET /api/v1/novels/{novel_legacy_id}`：校验成员权限
+- `PATCH /api/v1/novels/{novel_legacy_id}`：校验成员权限
+- `DELETE /api/v1/novels/{novel_legacy_id}`：校验成员权限
+- `GET /api/v1/projects/{project_id}/novel-events`：按 workspace 成员可见性过滤小说事件
+- `POST /api/v1/projects/{project_id}/novel-events/generate-events`：workspace 成员可触发事件生成
+
+**Workbench（工作台）**：
+- `POST /api/v1/projects/{project_id}/assets/workbench/*`：资产工作台所有操作按 workspace 成员权限校验
+- `POST /api/v1/production/workbench/*`：分镜工作台所有操作按 workspace 成员权限校验
+
+**权限校验实现**：
+
+- **代码位置**：`backend/src/workspaces/helpers.rs` 中的 `require_project_workspace_member_scope` 函数
+- **校验逻辑**：
+  1. 从 `project_id` 查询项目所属的 `workspace_id`
+  2. 查询 `app_workspace_member` 表验证当前用户是否为该 workspace 的成员
+  3. 如果用户不是成员，返回 `403 Forbidden` 错误
+  4. 如果项目不存在或已删除，返回 `404 Not Found` 错误
+- **统一应用**：所有项目路径的 handler（剧本、分镜、小说、资产、workbench）均通过该 helper 统一校验
+
+**向后兼容**：
+
+- **Personal Workspace**：资产/剧本/分镜仅项目所有者可见，行为与旧栈一致
+- **数据迁移**：旧 SQLite 数据通过 `toonflow-sqlite-import` + `promote_import_snapshots()` 导入时，资产/剧本/分镜自动归属到用户的 personal workspace，保持原有隔离性
+- **`owner_user_id` 保留**：资产/剧本/分镜表仍保留 `owner_user_id` 列记录创建者，用于审计和归属追踪，但可见性判定基于 workspace 成员关系
+
+##### 2.2.6.3 资产/剧本/分镜可见性对比表
+
+| 维度 | 旧栈（Electron/Node） | 新栈（Rust/Flutter） |
+|------|----------------------|---------------------|
+| **数据库隔离** | `user_id` 严格隔离 | `owner_user_id` + 项目所属 workspace 成员关系 |
+| **资产可见性** | 仅创建者可见 | Personal: 仅 owner；Enterprise: workspace 成员可见 |
+| **剧本可见性** | 仅创建者可见 | Personal: 仅 owner；Enterprise: workspace 成员可见 |
+| **分镜可见性** | 仅创建者可见 | Personal: 仅 owner；Enterprise: workspace 成员可见 |
+| **小说可见性** | 仅创建者可见 | Personal: 仅 owner；Enterprise: workspace 成员可见 |
+| **剧本-资产关联** | 仅创建者可见 | Workspace 成员可查看和管理关联关系 |
+| **资产图片** | 仅创建者可见 | Workspace 成员可查看和下载（按成员权限） |
+| **导出功能** | 仅创建者可导出 | Workspace 成员可导出项目资源 |
+| **批量操作** | 仅创建者可批量操作 | Workspace 成员可批量操作（按角色权限） |
+| **Workbench 操作** | 仅创建者可操作 | Workspace 成员可操作（按角色权限） |
+| **权限校验** | `WHERE user_id = ?` | `require_project_workspace_member_scope` helper |
+| **Personal Workspace** | N/A（隐式单用户） | 行为与旧栈一致（仅 owner 可见） |
+| **Enterprise Workspace** | N/A | 成员可见项目下的所有资产/剧本/分镜 |
+
+##### 2.2.6.4 实现细节参考
+
+- **代码位置**：
+  - `backend/src/workspaces/helpers.rs`：`require_project_workspace_member_scope` 统一权限校验
+  - `backend/src/assets/http.rs`：资产路由权限校验
+  - `backend/src/scripts/http.rs`：剧本路由权限校验
+  - `backend/src/production/`：分镜路由权限校验
+  - `backend/src/novels/http.rs`：小说路由权限校验
+  - `backend/src/workbench/http.rs`：工作台路由权限校验
+- **设计文档**：`docs/plans/workspace-team-full-plan.md` Phase W4.4
+- **权限策略**：`docs/plans/workspace-project-permission-policy.md`
+- **测试覆盖**：各模块的集成测试验证 owner/admin/member/outsider 访问项目资源的权限矩阵
+
+#### 2.2.7 示例场景对比
+
+**场景 1：单用户创作（Personal Workspace）**
+
+| 操作 | 旧栈行为 | 新栈行为 |
+|------|---------|---------|
+| 创建项目 | 项目归属当前用户，仅自己可见 | 项目归属 personal workspace，仅自己可见 |
+| 查看剧本 | 仅自己创建的剧本可见 | 仅 personal workspace 内的剧本可见（等同于自己创建） |
+| 查看资产 | 仅自己创建的资产可见 | 仅 personal workspace 内的资产可见（等同于自己创建） |
+| 查看分镜 | 仅自己创建的分镜可见 | 仅 personal workspace 内的分镜可见（等同于自己创建） |
+| 查看任务 | 仅自己提交的任务可见 | 仅自己提交的任务可见（personal workspace 内） |
+| 邀请协作者 | 不支持 | Personal workspace 不支持邀请（需创建 enterprise workspace） |
+
+**场景 2：团队协作（Enterprise Workspace，新栈独有）**
+
+| 操作 | 旧栈行为 | 新栈行为 |
+|------|---------|---------|
+| 创建项目 | N/A（不支持团队） | 项目归属 enterprise workspace，所有成员可见 |
+| 查看剧本 | N/A | workspace 内所有成员可查看项目下的剧本 |
+| 编辑剧本 | N/A | workspace 成员可编辑剧本（按角色权限） |
+| 查看资产 | N/A | workspace 内所有成员可查看项目下的资产 |
+| 编辑资产 | N/A | `owner`/`admin` 可编辑；`member` 按角色矩阵权限 |
+| 查看分镜 | N/A | workspace 内所有成员可查看项目下的分镜 |
+| 编辑分镜 | N/A | workspace 成员可编辑分镜（按角色权限） |
+| 导出资源 | N/A | workspace 成员可导出剧本/分镜（按角色权限） |
+| 批量操作 | N/A | workspace 成员可批量操作资产/剧本（按角色权限） |
+| 查看任务 | N/A | 关联项目的任务对 workspace 成员可见 |
+| 成员管理 | N/A | `owner` 可邀请/移除成员、分配角色；`admin` 可邀请/管理成员但不可删除空间 |
+
+**场景 3：跨 Workspace 切换（新栈独有）**
+
+| 操作 | 旧栈行为 | 新栈行为 |
+|------|---------|---------|
+| 切换工作空间 | N/A | 用户可在 personal 和多个 enterprise workspace 间切换 |
+| 离开 Enterprise | N/A | 离开后自动回退到 personal workspace，原 enterprise 项目及其资产/剧本/分镜不再可见 |
+| Personal 始终可用 | N/A | Personal workspace 始终存在且可访问，作为用户的"私有空间" |
 
 详细任务勾选以 **`workspace-team-full-plan.md`** Phase W4–W5 为准。
 
@@ -88,7 +360,7 @@
 | `/api/setting/promptManage/*` | Prompt 模板 | ✅ | **`app_user_prompt` + REST**：**`GET /api/v1/prompts`**（恒为 **3** 条，**`id`** **1–3** 对齐旧 **`o_prompt.id`**；无行时 **`data`** 来自服务端默认文件 **`backend/data/prompt_defaults/*.txt`**，与 **`initDB`** 种子一致）；**`GET /api/v1/prompts/{numeric_id}`** 单条（合并规则同列表）；**`PATCH /api/v1/prompts/{numeric_id}`** 仅更新 **`data`**（**upsert**）；OpenAPI、无 DB 烟雾、**`prompts_list_patch_roundtrip`** PG 回归，以及 Flutter **`fetchPromptsV1`** / **`fetchPromptByNumericIdV1`** / **`patchPromptByNumericIdV1`** 与首页探针已对齐完成态 |
 | `/api/setting/skillManagement/*` | Skills 列表/读写 | ✅ | Rust：**`GET /api/v1/skills*`** + **`PUT /api/v1/skills/content`**（覆盖已存在文件，对齐 **`saveSkillContent`**）+ **`POST /api/v1/skills/content`**（**新建**文件，父目录自动建；已存在 → **409**）+ **`DELETE /api/v1/skills/content`**（删单个文件 → **204**；不存在 → **404**；目录/非文件 → **400**）+ **`GET /api/v1/skills/binary?path=`**（**`data/skills` 下图片**原始字节 + **`Content-Type`**，供 **`visual-manual`** 的 **`image`** 相对路径替代旧 OSS URL；**png/jpeg/gif/webp/svg**，上限 **25MB**）；OpenAPI 与无 Bearer / 路径校验 / 创建覆盖 / 删除 / binary 烟雾已齐，Flutter **skills API**、**`fetchSkillsBinaryV1`** 与首页 probe 也已接上完成态 |
 | `/api/setting/vendorConfig/*` | 供应商与密钥 | ✅ | 密钥不混入 **`vendor_config`**；**`GET …/settings/vendors/summary`** 返回 **`static_catalog_with_user_config`**（静态目录 + **`app_user_profile.vendor_config`**）；**`POST …/settings/vendors/model-test`** 校验 + 配额 → 入队 **`settings.vendor.model_test`**，worker 现执行真实探测：**text/image** 优先用 **`app_vendor_credential`** 解密后的用户凭证，缺失时回退服务端 **LLM** 环境；**video** 解析 **Runway/Pika/Kling** 并发起最小生成请求（优先用户凭证，回退 provider env）；结果写入 **`JobRow.result`**。**`pg_contract`** **`settings_vendor_model_test_enqueue`**、**`vendor_config_enable_update_roundtrip`**、**`vendor_credential_store_get_delete_roundtrip`** 已覆盖任务入队、元数据流和密钥元数据流；首页 models/settings probe 也已覆盖 add/update/enable/update-code/code-from-link/store/get/delete/get404，故该行按后端 parity 收口为完成 |
-| `/api/task/getProject`、`getTaskApi`、`getTaskCategories`、`taskDetails` | 任务中心 | ✅ | **已删除** **`POST /api/v1/tasks/*`**。**HTTP**：**`GET /api/v1/projects`**（客户端筛非空名，**`legacy_id`** 作任务中心 **`id`**）；**`GET /api/v1/jobs/kinds`**（排除空 **`kind`**）；**`GET /api/v1/jobs/page`**（**`page`/`limit`/`task_class`/`state`/`project_id`**，**`project_id>0`** 对齐 **`payload.project_legacy_id`**）；**`GET /api/v1/jobs/task-detail/{task_id}`**（UUID 或 **`legacy_task_id`** 正整数路径）；另保留 **`GET /api/v1/jobs`**（**`limit`/`offset`**）与 **`kinds`/`status` summary**。Flutter **`postTasks*`** 为 compat 封装；**`pg_contract`** **`task_center_jobs_rest_roundtrip`** |
+| `/api/task/getProject`、`getTaskApi`、`getTaskCategories`、`taskDetails` | 任务中心 | ✅ | **已删除** **`POST /api/v1/tasks/*`**。**HTTP**：**`GET /api/v1/projects`**（客户端筛非空名，返回中的 compat **`id`** 对应项目 numeric id，同时保留 `project_uuid` 供 UUID-first 恢复）；**`GET /api/v1/jobs/kinds`**（排除空 **`kind`**）；**`GET /api/v1/jobs/page`**（**`page`/`limit`/`task_class`/`state`/`project_id`**，其中 **`project_id`** 仍是 legacy numeric project filter，对齐 jobs payload 中保留双写的 **`project_numeric_id`**）；**`GET /api/v1/jobs/task-detail/{task_id}`**（UUID 或 legacy numeric task id 正整数路径）；另保留 **`GET /api/v1/jobs`**（**`limit`/`offset`**）与 **`kinds`/`status` summary**。Flutter **`postTasks*`** 为 compat 封装；**`pg_contract`** **`task_center_jobs_rest_roundtrip`** |
 | `/api/test/test` | 测试路由 | ✅ | **`GET /api/v1/ping`** — JSON **`{"ok":true}`**（旧栈为纯文本 **`ok`**） |
 
 补充产品化进展：

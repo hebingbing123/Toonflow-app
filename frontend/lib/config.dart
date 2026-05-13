@@ -27,6 +27,14 @@ const String kInternalOpsToken = String.fromEnvironment(
   defaultValue: '',
 );
 
+/// Feature flag for workspace-scope billing (Task 6.3).
+/// Override: `flutter run --dart-define=ENABLE_WORKSPACE_BILLING=true`
+/// Default: false (user-scope billing)
+const bool kEnableWorkspaceBilling = bool.fromEnvironment(
+  'ENABLE_WORKSPACE_BILLING',
+  defaultValue: false,
+);
+
 String resolveRustApiUrl(String pathOrUrl) {
   final raw = pathOrUrl.trim();
   if (raw.isEmpty) {

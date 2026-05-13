@@ -9,16 +9,16 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use uuid::Uuid;
 
-use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, ApiError};
 use crate::jobs::{enqueue_generation_job, JobRow, JOB_KIND_VIDEO_EXPORT};
 use crate::production::patch::models::{ModelTier, PatchRequest, PatchScope};
 use crate::production::patch::run_production_patch_core;
 use crate::scope::http::{
-    require_owned_numeric_script_scope_user_pool, require_owned_numeric_storyboard_scope,
+    require_project_write_scope_ref, require_script_read_scope_ref,
+    require_storyboard_read_scope_ref,
 };
-use crate::settings::agent_memory::ensure_project_owned;
 use crate::state::AppState;
 
 use super::track::common::validate_positive_id;
@@ -28,13 +28,19 @@ use super::track::videos::{run_workbench_select_video, SelectVideoBody};
 #[serde(tag = "op", rename_all = "camelCase", rename_all_fields = "camelCase")]
 pub(in crate::production) enum StoryboardMediaOpRequest {
     SelectVideo {
-        project_id: i32,
+        #[serde(default)]
+        project_id: Option<i32>,
+        #[serde(default)]
+        project_uuid: Option<Uuid>,
         script_id: i32,
         storyboard_id: i32,
         video_url: String,
     },
     EnqueueVideoExport {
-        project_id: i32,
+        #[serde(default)]
+        project_id: Option<i32>,
+        #[serde(default)]
+        project_uuid: Option<Uuid>,
         script_id: i32,
         storyboard_id: i32,
         source_url: String,
@@ -42,7 +48,10 @@ pub(in crate::production) enum StoryboardMediaOpRequest {
         format: Option<String>,
     },
     PatchRegeneration {
-        project_id: i32,
+        #[serde(default)]
+        project_id: Option<i32>,
+        #[serde(default)]
+        project_uuid: Option<Uuid>,
         #[serde(default)]
         episodes_id: Option<i32>,
         scope: PatchScope,
@@ -104,12 +113,14 @@ pub(in crate::production) async fn post_workbench_storyboard_media_op(
     match req {
         StoryboardMediaOpRequest::SelectVideo {
             project_id,
+            project_uuid,
             script_id,
             storyboard_id,
             video_url,
         } => {
             let body = SelectVideoBody {
                 project_id,
+                project_uuid,
                 script_id,
                 storyboard_id,
                 video_url,
@@ -124,6 +135,7 @@ pub(in crate::production) async fn post_workbench_storyboard_media_op(
         }
         StoryboardMediaOpRequest::EnqueueVideoExport {
             project_id,
+            project_uuid,
             script_id,
             storyboard_id,
             source_url,
@@ -131,17 +143,20 @@ pub(in crate::production) async fn post_workbench_storyboard_media_op(
         } => {
             validate_positive_id("storyboardId", storyboard_id)?;
             let source_url = source_url.trim();
-            if source_url.is_empty() {
-                return Err(ApiError::BadRequest("sourceUrl must not be empty".into()));
-            }
-            let parsed = reqwest::Url::parse(source_url)
-                .map_err(|e| ApiError::BadRequest(format!("sourceUrl is not a valid URL: {e}")))?;
+            crate::error::validate_non_empty_string(source_url, "sourceUrl")?;
+            let parsed = reqwest::Url::parse(source_url).map_err(|e| {
+                bad_request_i18n(
+                    &format!("sourceUrl is not a valid URL: {e}"),
+                    &format!("sourceUrl 不是有效的 URL：{e}"),
+                )
+            })?;
             match parsed.scheme() {
                 "http" | "https" => {}
                 other => {
-                    return Err(ApiError::BadRequest(format!(
-                        "sourceUrl scheme must be http or https (got {other})"
-                    )));
+                    return Err(bad_request_i18n(
+                        &format!("sourceUrl scheme must be http or https (got {other})"),
+                        &format!("sourceUrl scheme 必须是 http 或 https（当前为 {other}）"),
+                    ));
                 }
             }
 
@@ -151,20 +166,26 @@ pub(in crate::production) async fn post_workbench_storyboard_media_op(
                 .trim()
                 .to_ascii_lowercase();
             if !matches!(format_norm.as_str(), "mp4" | "mov" | "webm") {
-                return Err(ApiError::BadRequest(format!(
-                    "format must be mp4, mov, or webm (got {format_norm})"
-                )));
+                return Err(bad_request_i18n(
+                    &format!("format must be mp4, mov, or webm (got {format_norm})"),
+                    &format!("format 必须是 mp4、mov 或 webm（当前为 {format_norm}）"),
+                ));
             }
 
-            let (uid, pool) = require_owned_numeric_script_scope_user_pool(
-                &state, &headers, project_id, script_id,
-            )
-            .await?;
-
-            require_owned_numeric_storyboard_scope(
+            let (uid, pool, scope_row) = require_script_read_scope_ref(
                 &state,
                 &headers,
                 project_id,
+                project_uuid,
+                script_id,
+            )
+            .await?;
+
+            require_storyboard_read_scope_ref(
+                &state,
+                &headers,
+                project_id,
+                project_uuid,
                 script_id,
                 storyboard_id,
             )
@@ -174,13 +195,20 @@ pub(in crate::production) async fn post_workbench_storyboard_media_op(
                 "source": "production.workbench.storyboard-media-op",
                 "source_url": source_url,
                 "format": format_norm,
-                "project_numeric_id": project_id,
+                "project_uuid": scope_row.project_id,
+                "project_numeric_id": scope_row.project_numeric_id,
                 "script_numeric_id": script_id,
                 "storyboard_numeric_id": storyboard_id,
             });
-            let job =
-                enqueue_generation_job(pool, uid, JOB_KIND_VIDEO_EXPORT, payload, Some(&headers))
-                    .await?;
+            let job = enqueue_generation_job(
+                pool,
+                uid,
+                JOB_KIND_VIDEO_EXPORT,
+                payload,
+                Some(&headers),
+                &state.billing_config,
+            )
+            .await?;
             Ok(JsonResponse(StoryboardMediaOpResponse {
                 op: StoryboardMediaOpKind::EnqueueVideoExport,
                 select_video: None,
@@ -190,23 +218,24 @@ pub(in crate::production) async fn post_workbench_storyboard_media_op(
         }
         StoryboardMediaOpRequest::PatchRegeneration {
             project_id,
+            project_uuid,
             episodes_id,
             scope,
             ids,
             reason,
             model_tier,
         } => {
+            let (uid, pool, _project_uuid, project_numeric_id) =
+                require_project_write_scope_ref(&state, &headers, project_id, project_uuid).await?;
             let patch_req = PatchRequest {
-                project_id,
+                project_id: Some(project_numeric_id),
+                project_uuid: None,
                 episodes_id,
                 scope,
                 ids,
                 reason,
                 model_tier,
             };
-            let uid = require_user_uuid(&state, &headers)?;
-            let pool = state.require_pool()?;
-            ensure_project_owned(pool, uid, patch_req.project_id).await?;
             let patch_regeneration = Some(run_production_patch_core(pool, uid, &patch_req).await?);
             Ok(JsonResponse(StoryboardMediaOpResponse {
                 op: StoryboardMediaOpKind::PatchRegeneration,
@@ -232,8 +261,30 @@ mod tests {
                 storyboard_id,
                 ..
             } => {
-                assert_eq!(project_id, 1);
+                assert_eq!(project_id, Some(1));
                 assert_eq!(storyboard_id, 1);
+            }
+            _ => panic!("wrong variant"),
+        }
+    }
+
+    #[test]
+    fn patch_regeneration_accepts_project_uuid() {
+        let s = r#"{"op":"patchRegeneration","projectUuid":"550e8400-e29b-41d4-a716-446655440000","episodesId":2,"scope":"storyboard_item","ids":[11],"reason":"repair","modelTier":"low"}"#;
+        let req: StoryboardMediaOpRequest = serde_json::from_str(s).unwrap();
+        match req {
+            StoryboardMediaOpRequest::PatchRegeneration {
+                project_id,
+                project_uuid,
+                episodes_id,
+                ..
+            } => {
+                assert_eq!(project_id, None);
+                assert_eq!(episodes_id, Some(2));
+                assert_eq!(
+                    project_uuid.map(|id| id.to_string()).as_deref(),
+                    Some("550e8400-e29b-41d4-a716-446655440000")
+                );
             }
             _ => panic!("wrong variant"),
         }

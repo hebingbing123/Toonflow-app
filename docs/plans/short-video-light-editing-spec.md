@@ -169,7 +169,7 @@ last-updated: 2026-05-05
 建议优先只考虑下面两类新增对象：
 
 1. `assembly configuration`
-   - project_id / script_id
+   - project_uuid / script scope id
    - bgm
    - subtitle_style
    - voiceover_mode

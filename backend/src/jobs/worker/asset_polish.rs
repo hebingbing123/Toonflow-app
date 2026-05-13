@@ -7,7 +7,9 @@ use crate::llm::{chat_completion_with_usage, LlmConfig, TokenUsage};
 use crate::metering::llm_usage::record_llm_usage;
 use crate::state::AppState;
 
-use crate::jobs::payload_project::resolve_project_numeric_from_job_payload;
+use crate::jobs::payload_project::{
+    payload_project_uuid, resolve_project_numeric_from_job_payload,
+};
 use crate::jobs::JobRow;
 
 use super::common::{generation_job_is_cancelled, JobRunError};
@@ -123,12 +125,16 @@ pub(super) async fn run_asset_polish_prompt(
     )
     .await;
 
-    Ok(json!({
+    let mut result = json!({
         "source": "assets-generate.polish-prompt",
         "project_numeric_id": project_numeric_id as i64,
         "asset_numeric_id": asset_numeric_id,
         "polished_prompt": result.text,
-    }))
+    });
+    if let Some(project_uuid) = payload_project_uuid(p) {
+        result["project_uuid"] = json!(project_uuid);
+    }
+    Ok(result)
 }
 
 pub(super) async fn run_asset_polish_batch(
@@ -217,9 +223,13 @@ pub(super) async fn run_asset_polish_batch(
         }));
     }
 
-    Ok(json!({
+    let mut result = json!({
         "source": "assets-generate.batch-polish",
         "project_numeric_id": project_numeric_id as i64,
         "items": out,
-    }))
+    });
+    if let Some(project_uuid) = payload_project_uuid(p) {
+        result["project_uuid"] = json!(project_uuid);
+    }
+    Ok(result)
 }

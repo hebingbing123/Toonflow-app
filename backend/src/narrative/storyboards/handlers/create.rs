@@ -7,6 +7,7 @@ use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::projects::routes::common::require_project_write_scope;
 use crate::scope;
 use crate::state::AppState;
 
@@ -20,6 +21,10 @@ pub(in crate::narrative::storyboards) async fn create_under_script_for_project(
     Json(body): Json<CreateStoryboardBody>,
 ) -> Result<(StatusCode, Json<StoryboardRow>), ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
+
+    // Verify workspace member write access to the project
+    let _scope = require_project_write_scope(&state, uid, project_id).await?;
+
     let pool = state
         .pool
         .as_ref()

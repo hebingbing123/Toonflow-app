@@ -9,7 +9,8 @@ use crate::llm::envelope::envelope;
 use super::super::config::LlmConfig;
 use super::parse::parse_sse_data_line;
 
-/// Stream one assistant reply; emits `chat.message.*` / `chat.content.*` per `docs/websocket-events.md`.
+/// Stream one assistant reply; emits raw WS envelopes in the documented
+/// `chat.message.*` / `chat.content.*` sequence from `docs/websocket-events.md`.
 pub async fn stream_chat_turn(
     cfg: &LlmConfig,
     client: &reqwest::Client,

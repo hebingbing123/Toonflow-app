@@ -27,6 +27,11 @@
 - 可能触发 `current_workspace` 自动回退
 - 一旦执行错误，往往不是简单刷新页面能解决
 
+补充理解：
+
+- jobs 协作可见性当前按 **`project_uuid`**（首选）/ **`project_numeric_id`**（legacy fallback）派生
+- Harness / 工作台 attach 当前按 **`projectUuid`** / **`scriptUuid`** 优先恢复上下文，legacy numeric 仅作兼容回退
+
 ## 2) 当前系统已经替你挡住了什么
 
 Rust 应用层已内建的保护包括：

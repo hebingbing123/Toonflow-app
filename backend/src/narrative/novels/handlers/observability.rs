@@ -5,10 +5,10 @@ use axum::{
 };
 use uuid::Uuid;
 
-use crate::assets::ensure_owned_project_pk;
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::jobs::JOB_KIND_NOVEL_CRAWL_IMPORT_BATCH;
+use crate::projects::routes::common::require_project_workspace_member_scope;
 use crate::state::AppState;
 
 use super::super::dto::{
@@ -40,7 +40,7 @@ pub(crate) async fn get_novel_crawl_observability(
 ) -> Result<Json<NovelCrawlObservabilityResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    ensure_owned_project_pk(pool, uid, project_id).await?;
+    require_project_workspace_member_scope(&state, uid, project_id).await?;
 
     let total_chapters: i64 = sqlx::query_scalar(
         r#"

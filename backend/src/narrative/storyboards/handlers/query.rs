@@ -7,6 +7,7 @@ use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::projects::routes::common::require_project_workspace_member_scope;
 use crate::scope;
 use crate::state::AppState;
 
@@ -19,6 +20,10 @@ pub(in crate::narrative::storyboards) async fn list_by_script_for_project(
     headers: HeaderMap,
 ) -> Result<Json<Vec<StoryboardRow>>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
+
+    // Verify workspace member access to the project
+    let _scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
+
     let pool = state
         .pool
         .as_ref()
@@ -53,6 +58,10 @@ pub(in crate::narrative::storyboards) async fn get_by_numeric_id_for_project(
     headers: HeaderMap,
 ) -> Result<Json<StoryboardRow>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
+
+    // Verify workspace member access to the project
+    let _scope = require_project_workspace_member_scope(&state, uid, project_id).await?;
+
     let pool = state
         .pool
         .as_ref()

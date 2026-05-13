@@ -21,7 +21,7 @@ List<DirectorManualDataSlot> parseCreativeManualSlots(String raw) {
   for (final line in lines) {
     final parts = line.split('|');
     if (parts.length < 3) {
-      throw FormatException('槽位格式必须为 label|value|data：$line');
+      throw FormatException(line);
     }
     slots.add(
       DirectorManualDataSlot(
@@ -41,7 +41,12 @@ String encodeCreativeManualSlots(List<DirectorManualDataSlot> slots) {
   return slots.map((slot) => '${slot.label}|${slot.value}|${slot.data}').join('\n');
 }
 
-String creativeManualKindLabel(_CreativeManualKind kind) {
-  return kind == _CreativeManualKind.director ? '导演手册' : '视觉手册';
+String creativeManualKindLabel(
+  AppLocalizations l10n,
+  _CreativeManualKind kind,
+) {
+  return kind == _CreativeManualKind.director
+      ? l10n.projectsCreativeManualKindDirector
+      : l10n.projectsCreativeManualKindVisual;
 }
 

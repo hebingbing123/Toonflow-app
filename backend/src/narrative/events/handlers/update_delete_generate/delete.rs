@@ -8,7 +8,7 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, validate_positive, ApiError};
 use crate::projects::routes::common::require_project_write_scope;
 use crate::state::AppState;
 
@@ -20,9 +20,7 @@ async fn delete_novel_event_core(
     project_uuid: Uuid,
     event_numeric_id: i32,
 ) -> Result<JsonResponse<Value>, ApiError> {
-    if event_numeric_id <= 0 {
-        return Err(ApiError::BadRequest("ids must be positive".into()));
-    }
+    validate_positive(event_numeric_id, "id")?;
 
     let res = sqlx::query(
         r#"
@@ -71,9 +69,10 @@ async fn batch_delete_novel_events_core(
         return Err(ApiError::BadRequest("请先选择需要删除的事件".into()));
     }
     if body.ids.len() > MAX_EVENT_BATCH_DELETE {
-        return Err(ApiError::BadRequest(format!(
-            "ids must contain at most {MAX_EVENT_BATCH_DELETE} entries",
-        )));
+        return Err(bad_request_i18n(
+            &format!("ids must contain at most {MAX_EVENT_BATCH_DELETE} entries"),
+            &format!("ids 最多只能包含 {MAX_EVENT_BATCH_DELETE} 个条目"),
+        ));
     }
 
     let mut tx = pool

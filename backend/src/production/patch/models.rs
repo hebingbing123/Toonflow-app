@@ -2,6 +2,7 @@
 //! 局部返工（Patch Regeneration）数据模型（需求 35.1, 35.2）
 
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 /// 返工粒度枚举（需求 35.2）
 ///
@@ -58,11 +59,15 @@ impl ModelTier {
 }
 
 /// `POST /api/v1/production/patch` 请求体（需求 35.1）
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PatchRequest {
     /// 项目 ID（用于权限校验、记忆写入与返工历史隔离）
-    pub project_id: i32,
+    #[serde(default)]
+    pub project_id: Option<i32>,
+    /// 项目 UUID（`app_project.id`）；优先于 `project_id`
+    #[serde(default)]
+    pub project_uuid: Option<Uuid>,
     /// 剧本/集 ID（用于同项目不同剧集的返工历史隔离）
     #[serde(default)]
     pub episodes_id: Option<i32>,
@@ -74,6 +79,42 @@ pub struct PatchRequest {
     pub reason: String,
     /// 模型层级选择
     pub model_tier: ModelTier,
+}
+
+impl PatchRequest {
+    pub fn require_project_numeric_id(&self) -> Result<i32, crate::error::ApiError> {
+        self.project_id.ok_or_else(|| {
+            crate::error::bad_request_i18n(
+                "projectId or projectUuid is required",
+                "projectId 或 projectUuid 至少需要提供一个",
+            )
+        })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::PatchRequest;
+
+    #[test]
+    fn patch_request_accepts_project_uuid() {
+        let body: PatchRequest = serde_json::from_str(
+            r#"{
+                "projectUuid":"550e8400-e29b-41d4-a716-446655440000",
+                "episodesId":12,
+                "scope":"storyboard_item",
+                "ids":[1,2],
+                "reason":"repair",
+                "modelTier":"low"
+            }"#,
+        )
+        .unwrap();
+        assert_eq!(body.project_id, None);
+        assert_eq!(
+            body.project_uuid.map(|id| id.to_string()).as_deref(),
+            Some("550e8400-e29b-41d4-a716-446655440000")
+        );
+    }
 }
 
 /// `POST /api/v1/production/patch` 响应体

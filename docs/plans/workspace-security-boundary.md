@@ -5,19 +5,40 @@
 关联路线图：[`roadmap-workspace.md`](./roadmap-workspace.md)。  
 运维排障：[`workspace-operations-runbook.md`](./workspace-operations-runbook.md)。
 
-## 1) 结论先行
+**边界提醒**：本文讨论的是授权、可见性与作用域安全边界。即便当前 jobs / project scope 已能派生 `workspace_id`，也不表示 `plan_tier`、quota 或 billing attribution 已切换到 workspace-scope；计费仍以 [`workspace-billing-scope-decision.md`](./workspace-billing-scope-decision.md) 为准。
 
-当前仓库的默认安全边界是：
+## 1) 结论先行：双层安全模型
+
+当前仓库采用 **双层安全模型**，明确定义授权责任边界：
+
+### 1.1 应用层授权（主要安全边界）
+
+**Rust 应用层是授权的真源（Source of Truth）**：
 
 1. **Rust API 把 `DATABASE_URL` 视为特权后端连接**，**不依赖 Supabase RLS 作为每个 HTTP/WS 请求的最终授权器**
-2. **Flutter / Supabase 直连客户端** 若存在，仍受 RLS 约束；但这条路径 **不能** 替代 Rust API 的应用层授权
-3. 只要请求经过 Rust `backend/`，就必须在 handler / helper 层显式校验：
+2. 所有通过 Rust `backend/` 的请求必须在 handler / helper 层显式校验：
    - 当前用户是谁
    - 当前用户是否是目标 workspace 成员
    - 当前用户角色是否允许该动作
    - 项目 / job / workbench / Harness attach 是否属于该 workspace
+3. **应用层负责 100% 的业务授权逻辑**，包括复杂的多表关联、workspace 成员语义、角色权限矩阵等
 
-换句话说：**RLS 是补充护栏，不是 Rust API 的授权主链。**
+### 1.2 RLS 层（补充安全护栏）
+
+**RLS 作为补充护栏（Supplementary Guardrail）**：
+
+1. **Flutter / Supabase 直连客户端** 若存在，仍受 RLS 约束；但这条路径 **不能** 替代 Rust API 的应用层授权
+2. RLS 提供数据库层的最后一道防线，防止误操作和直连查询越权
+3. RLS 策略声明了数据的"预期用户边界"，但不承担主要的业务授权责任
+
+### 1.3 核心原则
+
+**应用层授权为真源，RLS 为补充护栏。**
+
+这意味着：
+- **主要责任**：Rust 应用层必须实现完整的授权逻辑
+- **补充保护**：RLS 提供额外的安全层，但不能依赖它作为唯一的安全机制
+- **设计哲学**：即使 RLS 完全失效，应用层授权也应该能够独立保证安全性
 
 ## 2) 为什么这样定义
 
@@ -52,40 +73,59 @@
 
 但它们**不是** Rust API 授权正确性的充分条件。
 
-## 3) 当前 RLS 与应用层的责任分工
+## 3) 双层安全模型的责任分工
 
-### 3.1 RLS 负责什么
+### 3.1 应用层授权责任（主要安全边界）
 
-- `authenticated` 角色下的直连查询，只能看到策略允许的数据
-- workspace 基础表有成员可见性约束：
-  - `app_workspace_member_access`：workspace 必须存在该用户 membership
-  - `app_workspace_member_self`：成员表仅允许用户操作自己的 membership 行
-- 若未来有 Flutter/Supabase 直连读路径，RLS 是最后一道数据库侧护栏
+**Rust 应用层作为授权真源，必须负责以下完整的授权逻辑：**
 
-### 3.2 Rust 应用层必须负责什么
-
-以下能力必须由 Rust 显式校验，不可只依赖 RLS：
-
-- **Workspace 成员关系**
+- **Workspace 成员关系验证**
   - `backend/src/workspaces/http.rs`
   - `require_workspace_member_role`
   - `require_workspace_admin_or_owner`
-- **项目属于哪个 workspace，用户是否是该项目 workspace 成员**
+- **项目 Workspace 成员权限校验**
   - `backend/src/projects/routes/common.rs`
   - `require_project_workspace_member_scope`
-- **角色动作矩阵**
+- **角色权限矩阵执行**
   - `backend/src/workspaces/http.rs`
   - `WorkspaceRoleAction`
   - `role_allows_workspace_action`
-- **当前 workspace 自动回退 personal**
+- **当前 Workspace 上下文管理**
   - `reset_current_workspace_if_matches`
-- **项目删除的 owner/admin/member 差异**
+- **项目删除的角色差异控制**
   - `backend/src/projects/routes/handlers/detail/delete.rs`
   - `can_delete_project_by_workspace_policy`
-- **Jobs 通过 `project_uuid` / `project_numeric_id` 派生 workspace 可见性**
+- **Jobs 可见性派生**
+  - 通过 `project_uuid`（首选）/ `project_numeric_id`（legacy fallback）派生 workspace 可见性
   - 这是应用层策略，不在数据库默认 RLS 表达范围内
-- **Harness / WS attach / tool / production/script channel 的 workspace 门禁**
-  - 这是应用层上下文协议，不能指望数据库自动理解 WebSocket 语义
+- **Harness / WebSocket / 工具链的 Workspace 门禁**
+  - 应用层上下文协议，不能指望数据库自动理解 WebSocket 语义
+
+**关键原则：应用层必须假设自己是唯一的授权层，不能依赖 RLS 来补全业务逻辑。**
+
+### 3.2 RLS 补充护栏责任
+
+**RLS 作为补充安全层，提供以下保护：**
+
+- **直连客户端保护**
+  - `authenticated` 角色下的直连查询，只能看到策略允许的数据
+  - 为 Flutter/Supabase 直连路径提供数据库层隔离
+- **基础数据边界声明**
+  - workspace 基础表有成员可见性约束：
+    - `app_workspace_member_access`：workspace 必须存在该用户 membership
+    - `app_workspace_member_self`：成员表仅允许用户操作自己的 membership 行
+- **误操作防护**
+  - 为手工 SQL / Studio 排查提供一层额外的误操作缓冲
+  - 让 schema 本身保留"预期用户边界"的声明
+
+**关键原则：RLS 是安全的额外层次，但不承担主要的业务授权责任。**
+
+### 3.3 为什么采用这种分工
+
+1. **技术架构决定**：Rust 通过 `DATABASE_URL` 直连，不会自动继承 Supabase 的用户上下文
+2. **业务复杂性**：Workspace 成员语义、角色权限矩阵、跨表关联等复杂逻辑更适合在应用层实现
+3. **可维护性**：集中的授权逻辑更容易测试、调试和维护
+4. **安全性**：明确的责任边界避免了"以为数据库会替你挡"的安全假设
 
 ## 4) Workspace 方向的最低授权清单
 
@@ -164,7 +204,37 @@
 - **W10.1**：把 `workspace_id` 进入 trace / logs，便于排查授权与作用域问题
 - **W8**：计费若切到 workspace 口径，也必须沿用同样的“应用层为主、RLS 为辅”原则
 
-## 9) 当前默认结论
+## 9) 双层安全模型总结
+
+### 9.1 核心设计原则
+
+本仓库采用 **双层安全模型**，明确定义了授权责任的边界：
+
+1. **应用层授权是真源（Source of Truth）**
+   - Rust 应用层负责 100% 的业务授权逻辑
+   - 包括 workspace 成员验证、角色权限矩阵、跨表关联等复杂逻辑
+   - 即使 RLS 完全失效，应用层也应该能够独立保证安全性
+
+2. **RLS 是补充护栏（Supplementary Guardrail）**
+   - 为直连客户端提供数据库层保护
+   - 防止误操作和提供额外的安全层
+   - 声明数据的"预期用户边界"，但不承担主要授权责任
+
+### 9.2 为什么这样设计
+
+1. **技术架构要求**：Rust 通过 `DATABASE_URL` 直连，不会自动继承 Supabase 用户上下文
+2. **业务复杂性**：Workspace 多用户协作的复杂授权逻辑更适合在应用层统一实现
+3. **安全可靠性**：明确的责任边界避免了"以为数据库会替你挡"的危险假设
+4. **可维护性**：集中的授权逻辑更容易测试、调试和维护
+
+### 9.3 实施要点
+
+- **应用层必须**：实现完整的授权逻辑，不能依赖 RLS 补全业务规则
+- **RLS 应该**：提供基础的行级过滤和直连客户端保护
+- **开发者应该**：优先复用现有的授权 helper 函数，避免重复实现授权逻辑
+- **代码审查应该**：确保每个新功能都明确了授权责任和实现方式
+
+## 10) 当前默认结论
 
 除非未来显式引入“数据库按每请求用户身份执行 SQL”的机制，并完成全链路验证，否则本仓库的默认原则保持为：
 

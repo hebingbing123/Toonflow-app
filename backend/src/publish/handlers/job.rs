@@ -12,6 +12,7 @@ use crate::error::ApiError;
 use crate::projects::routes::common::{
     require_project_workspace_member_scope, require_project_write_scope,
 };
+use crate::scope::owned_script_numeric_in_project;
 use crate::state::AppState;
 
 use super::super::job_from_row;
@@ -94,33 +95,9 @@ pub(crate) async fn create_publish_job(
     if let Some(script_id_uuid) = draft.script_id {
         use crate::production::{enforce_quality_gate, run_quality_gate, QualityGateStage};
 
-        // Convert script UUID to numeric ID
-        let script_numeric_id: i32 = sqlx::query_scalar(
-            r#"
-            SELECT numeric_id
-            FROM app_script
-            WHERE id = $1
-            "#,
-        )
-        .bind(script_id_uuid)
-        .fetch_optional(pool)
-        .await
-        .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-        .ok_or(ApiError::NotFound)?;
-
-        // Convert project UUID to numeric ID
-        let project_numeric_id: i32 = sqlx::query_scalar(
-            r#"
-            SELECT numeric_id
-            FROM app_project
-            WHERE id = $1
-            "#,
-        )
-        .bind(project_id)
-        .fetch_optional(pool)
-        .await
-        .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-        .ok_or(ApiError::NotFound)?;
+        let numeric_scope = owned_script_numeric_in_project(pool, uid, project_id, script_id_uuid)
+            .await
+            .map_err(|e| e.into_api_error())?;
 
         // Get all storyboard IDs for this script
         let storyboard_ids: Vec<i32> = sqlx::query_scalar(
@@ -140,8 +117,8 @@ pub(crate) async fn create_publish_job(
         let (gate, strategy) = run_quality_gate(
             pool,
             uid,
-            project_numeric_id,
-            script_numeric_id,
+            numeric_scope.project_numeric_id,
+            numeric_scope.script_numeric_id,
             QualityGateStage::VideoGenerate,
             &storyboard_ids,
             &[], // No additional context

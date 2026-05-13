@@ -7,9 +7,11 @@ use crate::error::ApiError;
 use crate::state::AppState;
 
 use super::types::{
-    HealthResponse, PingResponse, ReadyHarnessIsolateMetrics, ReadyResponse, VersionResponse,
+    HealthResponse, PingResponse, ReadyHarnessIsolateMetrics, ReadyQuotaMetrics, ReadyResponse,
+    VersionResponse,
 };
 use crate::harness::isolate;
+use crate::metering::quota;
 
 #[utoipa::path(
     get,
@@ -62,7 +64,7 @@ pub(crate) async fn version() -> Json<VersionResponse> {
     operation_id = "readyV1",
     tag = "system",
     summary = "Readiness (optional database ping)",
-    description = "If `DATABASE_URL` is set, runs `SELECT 1`. Otherwise returns `database: not_configured` (HTTP 200). Includes **`harness_isolate`** counters (see `isolate::metrics_snapshot`) for observability.",
+    description = "If `DATABASE_URL` is set, runs `SELECT 1`. Otherwise returns `database: not_configured` (HTTP 200). Includes **`harness_isolate`** counters (see `isolate::metrics_snapshot`) and **`quota`** denial metrics (Task 3.4) for observability.",
     responses(
         (status = 200, description = "OK", body = ReadyResponse),
         (status = 503, description = "Database unreachable", body = crate::error::ErrorBody)
@@ -80,11 +82,21 @@ pub(crate) async fn ready(State(state): State<AppState>) -> Result<Json<ReadyRes
         total_process_reuse_hits: snap.total_process_reuse_hits,
         total_pool_evictions: snap.total_pool_evictions,
     };
+
+    let (total_denials, user_scope_denials, workspace_scope_denials) =
+        quota::quota_metrics_snapshot();
+    let quota = ReadyQuotaMetrics {
+        total_denials,
+        user_scope_denials,
+        workspace_scope_denials,
+    };
+
     match &state.pool {
         None => Ok(Json(ReadyResponse {
             status: "ok",
             database: "not_configured",
             harness_isolate,
+            quota,
         })),
         Some(pool) => {
             sqlx::query_scalar::<_, i32>("SELECT 1")
@@ -95,6 +107,7 @@ pub(crate) async fn ready(State(state): State<AppState>) -> Result<Json<ReadyRes
                 status: "ok",
                 database: "connected",
                 harness_isolate,
+                quota,
             }))
         }
     }

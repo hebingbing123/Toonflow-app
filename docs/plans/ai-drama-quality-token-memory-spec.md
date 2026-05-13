@@ -45,7 +45,7 @@ last-updated: 2026-05-04
 - 已有通用 agent memory：
   - `backend/src/settings/agent_memory/`
   - 支持 `style_bible` / `stage_summary` / `delta_memory` / `message`
-  - 已有按 `owner_user_id + numeric_project_id + agent_type + episodes_id + scope_signature` 的隔离维度
+  - 已有按 `owner_user_id + numeric_project_id + agent_type + episodes_id + scope_signature` 的隔离维度（这里的 `numeric_project_id` 是当前记忆子系统内部隔离键，不代表产品级 project scope 语义应回退为 numeric-first）
 - 已有项目级自动记忆预算策略：
   - `backend/src/settings/agent_memory/policy.rs`
   - 已支持 `off / lean / standard`

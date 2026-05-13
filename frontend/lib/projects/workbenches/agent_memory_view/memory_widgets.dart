@@ -1,5 +1,18 @@
 part of '../agent_memory_view.dart';
 
+/// Internal classification slugs (stable across locales).
+const String _memClsNeg = 'mem_cls_neg';
+const String _memClsDelVis = 'mem_cls_del_vis';
+const String _memClsDelFirst = 'mem_cls_del_first';
+const String _memClsVisHeavy = 'mem_cls_vis_heavy';
+const String _memClsVideo = 'mem_cls_video';
+
+/// Internal action slugs (stable across locales).
+const String _memActMerge = 'mem_act_merge';
+const String _memActObserve = 'mem_act_observe';
+const String _memActCompress = 'mem_act_compress';
+const String _memActKeep = 'mem_act_keep';
+
 class _AgentMemoryInsights {
   const _AgentMemoryInsights({
     required this.previews,
@@ -43,15 +56,54 @@ class _AgentMemoryPreview {
   final int charCount;
   final String normalizedPrefix;
   final bool isDuplicated;
+  /// Internal classification slug (see `_memCls*`).
   final String classificationLabel;
+  /// Internal action slug (see `_memAct*`).
   final String actionLabel;
   final String scopeLabel;
   final String subjectLabel;
   final String signalLabel;
 }
 
+String _displayMemoryClass(AppLocalizations l10n, String slug) {
+  switch (slug) {
+    case _memClsNeg:
+      return l10n.agentMemoryClassNegative;
+    case _memClsDelVis:
+      return l10n.agentMemoryClassDeliveryVisual;
+    case _memClsDelFirst:
+      return l10n.agentMemoryClassDeliveryFirst;
+    case _memClsVisHeavy:
+      return l10n.agentMemoryClassVisualHeavy;
+    case _memClsVideo:
+      return l10n.agentMemoryClassVideoMemory;
+    case '':
+      return '';
+    default:
+      return slug;
+  }
+}
+
+String _displayMemoryAction(AppLocalizations l10n, String slug) {
+  switch (slug) {
+    case _memActMerge:
+      return l10n.agentMemoryActionMergeNegative;
+    case _memActObserve:
+      return l10n.agentMemoryActionObserve;
+    case _memActCompress:
+      return l10n.agentMemoryActionCompress;
+    case _memActKeep:
+      return l10n.agentMemoryActionKeep;
+    case '':
+      return '';
+    default:
+      return slug;
+  }
+}
+
 _AgentMemoryInsights _buildAgentMemoryInsights(
   List<AgentMemoryHistoryItem> rows,
+  AppLocalizations l10n,
 ) {
   final rawPreviews = rows
       .map(_buildAgentMemoryPreview)
@@ -106,30 +158,30 @@ _AgentMemoryInsights _buildAgentMemoryInsights(
       );
     }
     switch (preview.classificationLabel) {
-      case '表演优先':
-      case '表演+视觉':
+      case _memClsDelFirst:
+      case _memClsDelVis:
         deliveryRows += 1;
         deliveryChars += preview.charCount;
         break;
-      case '视觉偏重':
+      case _memClsVisHeavy:
         visualRows += 1;
         visualChars += preview.charCount;
         break;
-      case '坏例约束':
+      case _memClsNeg:
         rejectedRows += 1;
         rejectedChars += preview.charCount;
         break;
     }
     switch (preview.actionLabel) {
-      case '优先保留':
+      case _memActKeep:
         keepRows += 1;
         keepChars += preview.charCount;
         break;
-      case '待压缩':
+      case _memActCompress:
         trimRows += 1;
         trimChars += preview.charCount;
         break;
-      case '合并坏例':
+      case _memActMerge:
         mergeRows += 1;
         mergeChars += preview.charCount;
         break;
@@ -173,16 +225,41 @@ _AgentMemoryInsights _buildAgentMemoryInsights(
             .take(3)
             .map((entry) => '${entry.key} ${entry.value}')
             .join(' / ');
-  final summary =
-      '角色分布：$rolesSummary${typeSummary == null ? '' : ' · 类型 $typeSummary'} · 约 $totalChars chars · 最长 $longestChars chars${duplicateCount > 0 ? ' · 重复 $duplicateCount 条' : ''}';
+  final typesPart = typeSummary == null
+      ? ''
+      : l10n.agentMemoryInsightTypesPart(typeSummary);
+  final dupPart = duplicateCount > 0
+      ? l10n.agentMemoryInsightDupPart(duplicateCount)
+      : '';
+  final summary = l10n.agentMemoryInsightCore(
+    rolesSummary,
+    typesPart,
+    totalChars,
+    longestChars,
+    dupPart,
+  );
   final hasVideoMemorySummary =
       deliveryRows > 0 || visualRows > 0 || rejectedRows > 0;
   final videoSummary = hasVideoMemorySummary
-      ? '视频记忆：delivery $deliveryRows/$deliveryChars chars · visual $visualRows/$visualChars chars · negative $rejectedRows/$rejectedChars chars'
+      ? l10n.agentMemoryVideoInsight(
+          deliveryRows,
+          deliveryChars,
+          visualRows,
+          visualChars,
+          rejectedRows,
+          rejectedChars,
+        )
       : null;
   final hasEfficiencySummary = keepRows > 0 || trimRows > 0 || mergeRows > 0;
   final efficiencySummary = hasEfficiencySummary
-      ? '处理建议：保留 $keepRows/$keepChars chars · 压缩 $trimRows/$trimChars chars · 合并坏例 $mergeRows/$mergeChars chars'
+      ? l10n.agentMemoryEfficiencyInsight(
+          keepRows,
+          keepChars,
+          trimRows,
+          trimChars,
+          mergeRows,
+          mergeChars,
+        )
       : null;
   for (final preview in previews) {
     if (preview.memoryName.isEmpty || preview.actionLabel.isEmpty) {
@@ -194,30 +271,32 @@ _AgentMemoryInsights _buildAgentMemoryInsights(
       ifAbsent: () => _MemoryBucketStats.fromPreview(preview),
     );
   }
-  final bucketPrioritySummary = _buildBucketPrioritySummary(bucketStats);
+  final bucketPrioritySummary = _buildBucketPrioritySummary(bucketStats, l10n);
   final rankedBuckets = _rankMemoryBuckets(bucketStats);
   String? recommendation;
   if (duplicateCount >= 2) {
-    recommendation = '检测到重复表述，先去重旧记忆，避免同一约束反复注入。';
+    recommendation = l10n.agentMemoryRecDup;
   } else if (visualRows >= 2 && deliveryRows == 0 && rejectedRows == 0) {
-    recommendation = '当前视频记忆几乎只有镜头/光影，先补一条表演、语气或情绪锚点，再决定删哪条视觉记忆。';
+    recommendation = l10n.agentMemoryRecVisualOnly;
   } else if (visualRows >= 2 &&
       visualChars >= deliveryChars + 40 &&
       deliveryRows > 0) {
-    recommendation = '视觉偏重记忆吃掉了更多预算，先清理只保留镜头/光影的旧条目，把 chars 留给表演、语气和情绪。';
+    recommendation = l10n.agentMemoryRecVisualBudget;
   } else if (rejectedRows >= 3 && rejectedChars >= 180) {
-    recommendation = '坏例约束累计较多，先合并重复 risk/avoid 片段，避免 negative memory 自己膨胀。';
+    recommendation = l10n.agentMemoryRecNegativeMerge;
   } else if (memoryNamesSummary.isNotEmpty &&
       memoryNamesSummary.first.value >= 6) {
-    recommendation =
-        '${memoryNamesSummary.first.key} 已累计 ${memoryNamesSummary.first.value} 条，先压缩这个记忆桶，避免它单独吃掉预算。';
+    recommendation = l10n.agentMemoryRecBucketHot(
+      memoryNamesSummary.first.key,
+      memoryNamesSummary.first.value,
+    );
   } else if (totalChars >= 1600 || longestChars >= 420) {
-    recommendation = '当前记忆偏长，优先压缩长记忆，再决定是否继续追加。';
+    recommendation = l10n.agentMemoryRecLong;
   } else if (rows.length >= 12) {
-    recommendation = '条数偏多，先读取 summary 或清理旧 message，给当前镜头约束留预算。';
+    recommendation = l10n.agentMemoryRecManyRows;
   } else if ((roleCounts['assistant'] ?? 0) >= 3 &&
       (roleCounts['assistant'] ?? 0) > (roleCounts['user'] ?? 0) * 2) {
-    recommendation = 'assistant 记忆偏多，先清旧总结，只保留最新执行约束。';
+    recommendation = l10n.agentMemoryRecAssistantHeavy;
   }
 
   return _AgentMemoryInsights(
@@ -247,6 +326,7 @@ class _MemoryTierGroup {
 
 List<_MemoryTierGroup> _buildMemoryTierGroups(
   List<AgentMemoryHistoryItem> rows,
+  AppLocalizations l10n,
 ) {
   if (rows.isEmpty) {
     return const <_MemoryTierGroup>[];
@@ -273,7 +353,7 @@ List<_MemoryTierGroup> _buildMemoryTierGroups(
           });
         return _MemoryTierGroup(
           tier: tier,
-          label: _memoryTierLabel(tier),
+          label: _memoryTierLabel(l10n, tier),
           rows: groupRows,
           lastInjectedLabel: _formatMemoryTimestamp(groupRows.first.datetime),
         );
@@ -281,29 +361,41 @@ List<_MemoryTierGroup> _buildMemoryTierGroups(
       .toList(growable: false);
 }
 
-String? _buildCostOverviewLine(AgentMemoryCostOverview? overview) {
+String? _buildCostOverviewLine(
+  AppLocalizations l10n,
+  AgentMemoryCostOverview? overview,
+) {
   if (overview == null) {
     return null;
   }
   final lastInjected = overview.lastInjectedAt == null
-      ? '暂无'
+      ? l10n.agentMemoryCostNever
       : _formatMemoryTimestamp(overview.lastInjectedAt!);
-  return '成本概览：风格圣经 ${overview.styleBibleCount} 条 · 阶段摘要 ${overview.stageSummaryCount} 条 · 增量记忆 ${overview.deltaMemoryCount} 条 · 普通消息 ${overview.messageCount} 条 · 近 30 次平均注入 ${overview.avgInjectedCharsLast30} 字 · 近 30 次平均命中层级 ${overview.avgHitTierCountLast30} 个 · 最近注入 $lastInjected';
+  return l10n.agentMemoryCostOverviewLine(
+    overview.scope,
+    overview.styleBibleCount,
+    overview.stageSummaryCount,
+    overview.deltaMemoryCount,
+    overview.messageCount,
+    overview.avgInjectedCharsLast30,
+    overview.avgHitTierCountLast30,
+    lastInjected,
+  );
 }
 
-String _memoryTierLabel(String tier) {
+String _memoryTierLabel(AppLocalizations l10n, String tier) {
   switch (tier) {
     case 'all':
-      return '全部';
+      return l10n.agentMemoryTierAll;
     case 'style_bible':
-      return '风格圣经';
+      return l10n.agentMemoryTierStyleBible;
     case 'stage_summary':
-      return '阶段摘要';
+      return l10n.agentMemoryTierStageSummary;
     case 'delta_memory':
-      return '增量记忆';
+      return l10n.agentMemoryTierDeltaMemory;
     case 'message':
     default:
-      return '普通消息';
+      return l10n.agentMemoryTierMessage;
   }
 }
 
@@ -347,6 +439,7 @@ class _MemoryBucketStats {
   final String memoryName;
   final int rowCount;
   final int charCount;
+  /// Internal action slug.
   final String actionLabel;
 
   _MemoryBucketStats merge(_AgentMemoryPreview preview) {
@@ -365,10 +458,22 @@ class _MemoryBucketStats {
 
 String? _buildBucketPrioritySummary(
   Map<String, _MemoryBucketStats> bucketStats,
+  AppLocalizations l10n,
 ) {
   if (bucketStats.isEmpty) return null;
   final ranked = _rankMemoryBuckets(bucketStats);
-  return '记忆桶优先级：${ranked.take(3).map((bucket) => '${bucket.actionLabel} ${bucket.memoryName} ${bucket.rowCount}条/${bucket.charCount} chars').join(' | ')}';
+  final detail = ranked
+      .take(3)
+      .map(
+        (bucket) => l10n.agentMemoryBucketPriorityItem(
+          _displayMemoryAction(l10n, bucket.actionLabel),
+          bucket.memoryName,
+          bucket.rowCount,
+          bucket.charCount,
+        ),
+      )
+      .join(' | ');
+  return l10n.agentMemoryBucketPriorityLine(detail);
 }
 
 List<_MemoryBucketStats> _rankMemoryBuckets(
@@ -390,6 +495,7 @@ List<_MemoryBucketStats> _rankMemoryBuckets(
 String? _buildScopedExecutionChecklist(
   ProjectsAgentMemoryWorkbenchDialogViewModel model,
   _AgentMemoryInsights insights,
+  AppLocalizations l10n,
 ) {
   if (insights.previews.isEmpty) return null;
   final projectId = model.projectIdCtrl.text.trim();
@@ -401,23 +507,25 @@ String? _buildScopedExecutionChecklist(
     if (episodesId.isNotEmpty) 'E$episodesId',
   ].join(' / ');
   final steps = <String>[
-    '范围：只处理 ${scopeLabel.isEmpty ? "当前查询 scope" : scopeLabel} 的记忆，不跨用户、项目或短剧复用。',
+    l10n.agentMemoryChecklistScope(
+      scopeLabel.isEmpty
+          ? l10n.agentMemoryChecklistScopeFallback
+          : scopeLabel,
+    ),
   ];
   for (final bucket in insights.topBuckets) {
     final action = switch (bucket.actionLabel) {
-      '待压缩' => '压缩 ${bucket.memoryName} 的镜头/光影/氛围套话，优先保留表演、语气、情绪和人物一致性片段。',
-      '合并坏例' =>
-        '合并 ${bucket.memoryName} 的重复 risk/avoid 约束，保留最能防止穿帮、口型僵硬和身份漂移的坏例。',
-      '优先保留' =>
-        '保留 ${bucket.memoryName} 里最具体的表演/情绪锚点，避免删掉能让人物不读稿、不木的 delivery 记忆。',
-      _ => '观察 ${bucket.memoryName} 的新增条目，避免继续堆重复记忆。',
+      _memActCompress => l10n.agentMemoryChecklistCompress(bucket.memoryName),
+      _memActMerge => l10n.agentMemoryChecklistMerge(bucket.memoryName),
+      _memActKeep => l10n.agentMemoryChecklistKeep(bucket.memoryName),
+      _ => l10n.agentMemoryChecklistObserve(bucket.memoryName),
     };
     steps.add(action);
   }
   if (insights.recommendation != null) {
-    steps.add('当前提醒：${insights.recommendation}');
+    steps.add(l10n.agentMemoryChecklistReminder(insights.recommendation!));
   }
-  return '记忆执行清单：${steps.join(' ')}';
+  return '${l10n.agentMemoryChecklistTitle} ${steps.join(' ')}';
 }
 
 int _compareAgentMemoryPreviewPriority(
@@ -445,13 +553,13 @@ int _compareAgentMemoryPreviewPriority(
 
 int _actionPriority(String actionLabel) {
   switch (actionLabel) {
-    case '待压缩':
+    case _memActCompress:
       return 4;
-    case '合并坏例':
+    case _memActMerge:
       return 3;
-    case '优先保留':
+    case _memActKeep:
       return 2;
-    case '待观察':
+    case _memActObserve:
       return 1;
     default:
       return 0;
@@ -495,7 +603,7 @@ _AgentMemoryPreview _buildAgentMemoryPreview(AgentMemoryHistoryItem row) {
 
 String _memoryClassificationLabel(String memoryName, String content) {
   if (memoryName == 'rejected_video_negative_memory') {
-    return '坏例约束';
+    return _memClsNeg;
   }
   if (!_isVideoStyleMemory(memoryName)) {
     return '';
@@ -506,15 +614,15 @@ String _memoryClassificationLabel(String memoryName, String content) {
   );
   final visualSignals = _countKeywordMatches(content, _visualMemoryKeywords);
   if (deliverySignals > 0 && visualSignals > 0) {
-    return '表演+视觉';
+    return _memClsDelVis;
   }
   if (deliverySignals > 0) {
-    return '表演优先';
+    return _memClsDelFirst;
   }
   if (visualSignals > 0) {
-    return '视觉偏重';
+    return _memClsVisHeavy;
   }
-  return '视频记忆';
+  return _memClsVideo;
 }
 
 String _memoryActionLabel(
@@ -528,9 +636,9 @@ String _memoryActionLabel(
     );
     final riskTags = _extractMemoryKeyValue(content, 'riskTags') ?? '';
     if ((rejectionCount ?? 0) >= 2 || riskTags.isNotEmpty) {
-      return '合并坏例';
+      return _memActMerge;
     }
-    return '待观察';
+    return _memActObserve;
   }
   if (!_isVideoStyleMemory(memoryName)) {
     return '';
@@ -546,16 +654,17 @@ String _memoryActionLabel(
       riskTags.contains('identity') ||
       riskTags.contains('dialogue') ||
       riskTags.contains('performance');
-  if (classificationLabel == '视觉偏重') {
-    return '待压缩';
+  if (classificationLabel == _memClsVisHeavy) {
+    return _memActCompress;
   }
   if (hasDelivery && (hasSubject || hasHighValueRisk)) {
-    return '优先保留';
+    return _memActKeep;
   }
-  if (classificationLabel == '表演优先' || classificationLabel == '表演+视觉') {
-    return '优先保留';
+  if (classificationLabel == _memClsDelFirst ||
+      classificationLabel == _memClsDelVis) {
+    return _memActKeep;
   }
-  return '待观察';
+  return _memActObserve;
 }
 
 bool _isVideoStyleMemory(String memoryName) {
@@ -571,7 +680,7 @@ int _countKeywordMatches(String content, List<String> keywords) {
   return keywords.where((keyword) => normalized.contains(keyword)).length;
 }
 
-String _memorySignalLabel(String content, String classificationLabel) {
+String _memorySignalLabel(String content, String classificationSlug) {
   final tags = <String>{};
   final subject = _extractMemoryKeyValue(content, 'subject') ?? '';
   final delivery = _extractMemoryKeyValue(content, 'delivery') ?? '';
@@ -579,31 +688,83 @@ String _memorySignalLabel(String content, String classificationLabel) {
   final rejectionCount =
       _extractMemoryKeyValue(content, 'rejectionCount') ?? '';
   if (subject.isNotEmpty) {
-    tags.add('人物');
+    tags.add(_signalSubjectTag);
   }
   if (delivery.isNotEmpty ||
-      classificationLabel == '表演优先' ||
-      classificationLabel == '表演+视觉') {
-    tags.add('情绪');
+      classificationSlug == _memClsDelFirst ||
+      classificationSlug == _memClsDelVis) {
+    tags.add(_signalEmotionTag);
   }
-  if (classificationLabel == '表演+视觉') {
-    tags.add('镜头');
-  } else if (classificationLabel == '视觉偏重') {
-    tags.add('视觉');
+  if (classificationSlug == _memClsDelVis) {
+    tags.add(_signalCameraTag);
+  } else if (classificationSlug == _memClsVisHeavy) {
+    tags.add(_signalVisualTag);
   }
   if (riskTags.contains('identity')) {
-    tags.add('身份');
+    tags.add(_signalIdentityTag);
   }
   if (riskTags.contains('dialogue')) {
-    tags.add('台词');
+    tags.add(_signalDialogueTag);
   }
   if (riskTags.contains('performance')) {
-    tags.add('表演');
+    tags.add(_signalPerformanceTag);
   }
   if (rejectionCount.isNotEmpty) {
-    tags.add('坏例$rejectionCount');
+    tags.add('$_signalNegativePrefix$rejectionCount');
   }
   return tags.join('/');
+}
+
+/// Tags are internal keys; localized when rendering via [_formatSignalLabelDisplay].
+const String _signalSubjectTag = 'sig_subject';
+const String _signalEmotionTag = 'sig_emotion';
+const String _signalCameraTag = 'sig_camera';
+const String _signalVisualTag = 'sig_visual';
+const String _signalIdentityTag = 'sig_identity';
+const String _signalDialogueTag = 'sig_dialogue';
+const String _signalPerformanceTag = 'sig_performance';
+const String _signalNegativePrefix = 'sig_negative:';
+
+String _formatSignalLabelDisplay(AppLocalizations l10n, String raw) {
+  if (raw.isEmpty) return '';
+  final parts = raw.split('/');
+  final out = <String>[];
+  for (final p in parts) {
+    switch (p) {
+      case _signalSubjectTag:
+        out.add(l10n.agentMemorySignalSubject);
+        break;
+      case _signalEmotionTag:
+        out.add(l10n.agentMemorySignalEmotion);
+        break;
+      case _signalCameraTag:
+        out.add(l10n.agentMemorySignalCamera);
+        break;
+      case _signalVisualTag:
+        out.add(l10n.agentMemorySignalVisual);
+        break;
+      case _signalIdentityTag:
+        out.add(l10n.agentMemorySignalIdentity);
+        break;
+      case _signalDialogueTag:
+        out.add(l10n.agentMemorySignalDialogue);
+        break;
+      case _signalPerformanceTag:
+        out.add(l10n.agentMemorySignalPerformance);
+        break;
+      default:
+        if (p.startsWith(_signalNegativePrefix)) {
+          out.add(
+            l10n.agentMemorySignalNegative(
+              p.substring(_signalNegativePrefix.length),
+            ),
+          );
+        } else {
+          out.add(p);
+        }
+    }
+  }
+  return out.join('/');
 }
 
 String _memoryScopeLabel(String content) {

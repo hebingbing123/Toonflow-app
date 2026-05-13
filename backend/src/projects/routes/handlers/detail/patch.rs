@@ -179,7 +179,10 @@ pub(crate) async fn patch_project_by_id(
                 .into_iter()
                 .map(|v| {
                     v.as_str().map(|s| s.to_string()).ok_or_else(|| {
-                        ApiError::BadRequest("target_platforms must be array of strings".into())
+                        crate::error::bad_request_i18n(
+                            "target_platforms must be array of strings",
+                            "target_platforms 必须是字符串数组",
+                        )
                     })
                 })
                 .collect();

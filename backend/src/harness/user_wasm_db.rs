@@ -77,9 +77,14 @@ pub(crate) async fn persist_user_wasm_checked(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     let Some((id, sz, created_at)) = row else {
-        return Err(ApiError::BadRequest(format!(
-            "user wasm: stored uploads limit reached (max rows per user={max_rows}; set HARNESS_USER_WASM_MAX_STORED_PER_USER)"
-        )));
+        return Err(crate::error::bad_request_i18n(
+            &format!(
+                "user wasm: stored uploads limit reached (max rows per user={max_rows}; set HARNESS_USER_WASM_MAX_STORED_PER_USER)"
+            ),
+            &format!(
+                "user wasm：已达到存储上传数量上限（每个用户最多 {max_rows} 条；可设置 HARNESS_USER_WASM_MAX_STORED_PER_USER）"
+            ),
+        ));
     };
     Ok(UserWasmPersistResult {
         id,

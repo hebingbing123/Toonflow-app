@@ -14,6 +14,8 @@
 - 调整了 Supabase policy、workspace migration、member 审计逻辑
 - 准备把 workspace 相关改动推到 staging 或生产
 
+默认情况下，本文验证的是 **workspace 协作 / 可见性 / 恢复 / 治理** 语义；除非本次发布明确重开 [`workspace-billing-future-workspace-scope.md`](./workspace-billing-future-workspace-scope.md) 所述迁移，否则**不**把 `plan_tier` / `daily_job_quota` / `jobs_today` 的 workspace-scope cutover 当作本清单的默认范围。
+
 ## 2) 预备信息
 
 开始前先准备：
@@ -129,6 +131,9 @@
   - 用 internal ops token 读一遍，确认成员数 / 项目数 / active jobs 口径没漂
 - Harness / WS attach
   - 验证 workspace 切换后 attach 上下文刷新正常
+  - 验证 `projectUuid` / `scriptUuid` 主路径正常，legacy numeric 仅作兼容回退
+- Notifications / product deep links
+  - 验证 jobs / projects 通知点开后，产品壳能按 UUID-first scope 正确恢复 workspace / project 上下文
 - Flutter workspace UI
   - 验证当前高亮、空状态、成员管理入口、invite 接受入口
 

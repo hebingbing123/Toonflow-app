@@ -1,5 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/agent_workspaces/contexts/script/support.dart';
+import 'package:openflow_app/l10n/app_localizations_zh.dart';
+
+final _zh = AppLocalizationsZh();
 
 void main() {
   test('extractScriptWorkspaceNovelIds reads numeric ids from items', () {
@@ -78,7 +81,7 @@ void main() {
   );
 
   test('summarizeScriptResultSnapshot marks rewrite guidance as ready', () {
-    final lines = summarizeScriptResultSnapshot('get_planData', <String, dynamic>{
+    final lines = summarizeScriptResultSnapshot(_zh, 'get_planData', <String, dynamic>{
       'data': <String, dynamic>{
         'storySkeleton': '三幕骨架',
         'adaptationStrategy': '先压后扬',

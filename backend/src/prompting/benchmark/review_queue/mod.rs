@@ -10,9 +10,6 @@ use crate::state::AppState;
 mod handlers;
 mod types;
 
-#[cfg(test)]
-mod tests;
-
 pub(crate) use handlers::{__path_get_review_queue, __path_skip_review, __path_submit_review};
 pub use types::{GetReviewQueueQuery, ReviewQueueItem, SkipReviewBody, SubmitReviewBody};
 

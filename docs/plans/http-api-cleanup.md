@@ -87,7 +87,7 @@
 | `backend/src/prompting/prompts/*.rs` | `GET`/`PATCH /api/v1/prompts/{numeric_id}`（对齐旧 `o_prompt.id` 1–3） |
 | `backend/src/scripting/scripts.rs` | **主路径**：`POST …/projects/{project_id}/scripts`、`POST …/projects/{project_id}/scripts/batch-add`，`GET`/`PATCH`/`DELETE …/projects/{project_id}/scripts/{script_legacy_id}`。**已删除** `…/projects/历史/{id}/scripts` 与 **`…/scripts/历史/{id}`**（剧本本体 `GET`/`PATCH`/`DELETE`）；分镜列表/创建见 **`narrative/storyboards`** UUID 路径。旧 `POST …/scripts/batch-add` 已移除 |
 | `backend/src/scripting/asset_extract/mod.rs` | 请求体 **`project_uuid`**（优先）+ legacy **`project_numeric_id`** + **`script_numeric_ids[]`** |
-| `backend/src/assets/generate/handlers/*` | HTTP **`projectId`** 仍为 **`app_project.numeric_id`**（camelCase）；入队 payload **v2** 含 **`payload_schema_version`**、**`project_uuid`** + **`project_numeric_id`**（双写）；worker 见 [**`assets-generate-job-payload-v2.md`**](./assets-generate-job-payload-v2.md)；`cancel-generate` 仍按任务 **`id`**（numeric）协同取消 |
+| `backend/src/assets/generate/handlers/*` | HTTP **`projectId`** 仍为 legacy **`app_project.numeric_id`**（camelCase compat）；入队 payload **v2** 含 **`payload_schema_version`**、**`project_uuid`**（UUID-first 主语义）+ **`project_numeric_id`**（legacy fallback，双写保留）；worker 见 [**`assets-generate-job-payload-v2.md`**](./assets-generate-job-payload-v2.md)；`cancel-generate` 仍按任务 **`id`**（numeric）协同取消 |
 | `backend/src/settings/agent_memory.rs` | `project_id: i32`（**项目 历史 id**）+ `episodes_id` 等驼峰体；与 Harness/工作台「按 历史 项目」一致 |
 | `backend/src/jobs/worker/*.rs`（如 `asset_image.rs`） | 生成结果回写、`/file` URL 模板中含 `project_legacy_id` / `asset_legacy_id` |
 

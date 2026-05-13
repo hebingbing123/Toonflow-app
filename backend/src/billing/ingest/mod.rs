@@ -6,13 +6,19 @@
 //! - `apply_plan` — 应用计费计划
 //! - `webhook_ingest` — Webhook 摄取主逻辑
 //! - `event_parse` — 事件解析
+//! - `reconciliation` — 用户与 workspace 计费对账（Task 4.3）
 
 mod apply_plan;
 mod event_parse;
+mod reconciliation;
 mod subscription_state;
 mod webhook_ingest;
 
 #[cfg(test)]
 mod tests;
 
-pub(crate) use webhook_ingest::ingest_webhook;
+pub use reconciliation::{
+    check_personal_workspace_billing_consistency, reconcile_all_personal_workspaces,
+    BillingMismatch,
+};
+pub use webhook_ingest::ingest_webhook;

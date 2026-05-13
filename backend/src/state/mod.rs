@@ -14,6 +14,7 @@ use tokio::sync::RwLock;
 use crate::error::ApiError;
 use crate::http_kit::metrics::MetricsRegistry;
 use crate::llm::LlmConfig;
+use crate::metering::BillingConfig;
 
 pub use memory_config::MemoryConfig;
 pub use notify_hub::WsNotifyHub;
@@ -44,6 +45,8 @@ pub struct AppState {
     pub local_voiceover_audio_dir: Option<PathBuf>,
     /// Metrics registry for request tracking and SLI monitoring
     pub metrics_registry: Arc<MetricsRegistry>,
+    /// Billing configuration for workspace-scope billing (W8.2–W8.4)
+    pub billing_config: BillingConfig,
 }
 
 impl AppState {

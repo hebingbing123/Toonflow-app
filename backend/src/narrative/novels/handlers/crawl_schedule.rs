@@ -9,12 +9,15 @@ use serde_json::json;
 use utoipa::ToSchema;
 use uuid::Uuid;
 
-use crate::assets::ensure_owned_project_pk;
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, validate_enum, ApiError};
 use crate::jobs::{
-    enqueue_generation_job, hydrate_job_row, merge_client_request_id_from_http_headers, JobRow,
-    JOB_KIND_NOVEL_CRAWL_IMPORT_BATCH,
+    billing_workspace::resolve_billing_workspace_id, enqueue_generation_job, hydrate_job_row,
+    merge_client_request_id_from_http_headers, JobRow, JOB_KIND_NOVEL_CRAWL_IMPORT_BATCH,
+};
+use crate::metering::quota;
+use crate::projects::routes::common::{
+    require_project_workspace_member_scope, require_project_write_scope,
 };
 use crate::state::AppState;
 
@@ -70,12 +73,11 @@ fn schedule_row_from_job(mut row: JobRow) -> NovelCrawlScheduleRow {
 }
 
 fn validate_intake_status(value: &str) -> Result<(), ApiError> {
-    match value {
-        "draft" | "pending_review" | "admitted" | "rejected" => Ok(()),
-        _ => Err(ApiError::BadRequest(
-            "intake_status must be one of draft, pending_review, admitted, rejected".into(),
-        )),
-    }
+    validate_enum(
+        value,
+        &["draft", "pending_review", "admitted", "rejected"],
+        "intake_status",
+    )
 }
 
 fn normalize_urls(urls: &[String]) -> Vec<String> {
@@ -111,14 +113,17 @@ pub(crate) async fn post_novel_crawl_schedule_create(
 ) -> Result<JsonResponse<NovelCrawlScheduleRow>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    ensure_owned_project_pk(pool, uid, project_id).await?;
+    require_project_write_scope(&state, uid, project_id).await?;
 
     let urls = normalize_urls(&body.urls);
     if urls.is_empty() {
-        return Err(ApiError::BadRequest("urls must not be empty".into()));
+        return Err(bad_request_i18n("urls must not be empty", "urls 不能为空"));
     }
     if urls.len() > 50 {
-        return Err(ApiError::BadRequest("urls too many (max 50)".into()));
+        return Err(bad_request_i18n(
+            "urls too many (max 50)",
+            "urls 过多（最多 50 个）",
+        ));
     }
     validate_intake_status(body.intake_status.trim())?;
 
@@ -150,11 +155,38 @@ pub(crate) async fn post_novel_crawl_schedule_create(
         .filter(|s| !s.is_empty())
         .map(|s| s.chars().take(200).collect::<String>());
 
+    // Resolve workspace_id for billing attribution (Task 2.1)
+    // Get the project's workspace_id for project-based jobs
+    let project_workspace_id: Uuid = sqlx::query_scalar(
+        r#"
+        SELECT p.workspace_id
+        FROM app_project p
+        WHERE p.id = $1
+          AND p.archived_at IS NULL
+        "#,
+    )
+    .bind(project_id)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let billing_workspace_id =
+        resolve_billing_workspace_id(pool, uid, Some(project_workspace_id)).await?;
+
+    // Check quota with effective billing context (Task 3.3)
+    quota::check_daily_job_quota_with_context(
+        pool,
+        uid,
+        billing_workspace_id,
+        &state.billing_config,
+    )
+    .await?;
+
     let row = if let Some(key) = idem.as_deref() {
         let insert = sqlx::query_as::<_, JobRow>(
             r#"
-            INSERT INTO app_generation_job (owner_user_id, kind, payload, status, idempotency_key)
-            VALUES ($1, $2, $3, 'queued', $4)
+            INSERT INTO app_generation_job (owner_user_id, kind, payload, status, idempotency_key, workspace_id)
+            VALUES ($1, $2, $3, 'queued', $4, $5)
             RETURNING numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, error_details, idempotency_key, claimed_by, created_at, updated_at
             "#,
         )
@@ -162,6 +194,7 @@ pub(crate) async fn post_novel_crawl_schedule_create(
         .bind(JOB_KIND_NOVEL_CRAWL_IMPORT_BATCH)
         .bind(payload)
         .bind(key)
+        .bind(billing_workspace_id)
         .fetch_one(pool)
         .await;
 
@@ -191,6 +224,7 @@ pub(crate) async fn post_novel_crawl_schedule_create(
             JOB_KIND_NOVEL_CRAWL_IMPORT_BATCH,
             payload,
             Some(&headers),
+            &state.billing_config,
         )
         .await?
     };
@@ -222,7 +256,7 @@ pub(crate) async fn list_novel_crawl_schedules(
 ) -> Result<JsonResponse<Vec<NovelCrawlScheduleRow>>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
-    ensure_owned_project_pk(pool, uid, project_id).await?;
+    require_project_workspace_member_scope(&state, uid, project_id).await?;
 
     let rows = sqlx::query_as::<_, JobRow>(
         r#"

@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, ApiError};
 use crate::prompting::skills::skills_root;
 
 use super::slots::NAME_RULE_MSG;
@@ -33,8 +33,9 @@ pub(super) fn art_skills_style_dir(style_path: &str) -> Result<PathBuf, ApiError
     validate_manual_folder_name(style_path)?;
     let root = skills_root();
     if !root.is_dir() {
-        return Err(ApiError::BadRequest(
-            "skills directory missing (expected backend/data/skills)".into(),
+        return Err(bad_request_i18n(
+            "skills directory missing (expected backend/data/skills)",
+            "skills 目录缺失（预期为 backend/data/skills）",
         ));
     }
     Ok(root.join("art_skills").join(style_path))

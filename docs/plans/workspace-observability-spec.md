@@ -5,6 +5,8 @@
 - **W10.1**：`workspace_id` 在 HTTP / jobs / Harness 的 trace 与结构化日志贯通
 - **W10.2**：workspace 级管理指标（成员数、项目数、活跃 jobs）口径
 
+**边界提醒**：本文中的 `workspace_id` 贯通与 workspace 级管理指标，服务于可观测性与排障，并不单独决定计费语义；不要把这里的 workspace 聚合口径误读成当前产品已经启用 workspace-scope billing。
+
 总表：[`workspace-team-full-plan.md`](./workspace-team-full-plan.md) Phase W10。  
 路线图：[`roadmap-workspace.md`](./roadmap-workspace.md)。  
 现有相关真源：
@@ -77,7 +79,7 @@
 - `PATCH /api/v1/me/current-workspace`
 - workspace CRUD / membership / invites
 - project 详情、overview、stats、workbench 等通过 `require_project_workspace_member_scope` 解析作用域的 handler
-- 任何基于 `project_uuid` / `project_numeric_id` 进一步派生 workspace 的 jobs enqueue 路径
+- 任何基于 `project_uuid`（首选）/ `project_numeric_id`（legacy fallback）进一步派生 workspace 的 jobs enqueue 路径
 
 #### Jobs
 
@@ -175,7 +177,7 @@
 
 口径：
 
-- 仅统计能从 payload 解析出 `project_uuid` / `project_numeric_id`，并进一步派生出 `workspace_id` 的 jobs
+- 仅统计能从 payload 解析出 `project_uuid`（首选）或 `project_numeric_id`（legacy fallback），并进一步派生出 `workspace_id` 的 jobs
 - 状态至少包括：
   - `queued`
   - `running`

@@ -16,11 +16,9 @@ use serde_json::json;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::auth::require_user_uuid;
 use crate::error::ApiError;
-use crate::settings::agent_memory::{
-    ensure_project_owned, replace_named_summary_memory_with_scope,
-};
+use crate::scope::http::require_project_write_scope_ref;
+use crate::settings::agent_memory::replace_named_summary_memory_with_scope;
 use crate::state::AppState;
 
 use models::{ModelTier, PatchAttempt, PatchRequest, PatchResponse, PatchScope};
@@ -105,6 +103,7 @@ async fn persist_patch_attempt(
     user_id: Uuid,
     request: &PatchRequest,
 ) -> Result<(), ApiError> {
+    let project_id = request.require_project_numeric_id()?;
     let content = serde_json::to_string(&json!({
         "scope": request.scope,
         "ids": request.ids,
@@ -126,7 +125,7 @@ async fn persist_patch_attempt(
         "#,
     )
     .bind(user_id)
-    .bind(request.project_id)
+    .bind(project_id)
     .bind(request.episodes_id)
     .bind(patch_attempt_name(&request.scope))
     .bind(content)
@@ -145,6 +144,7 @@ async fn persist_attribution_memory(
     request: &PatchRequest,
     response: &PatchResponse,
 ) -> Result<bool, ApiError> {
+    let project_id = request.require_project_numeric_id()?;
     if !response.attribution_mode {
         return Ok(false);
     }
@@ -177,7 +177,7 @@ async fn persist_attribution_memory(
     replace_named_summary_memory_with_scope(
         pool,
         user_id,
-        request.project_id,
+        project_id,
         request.episodes_id,
         "productionAgent",
         "assistant",
@@ -204,8 +204,14 @@ pub(crate) async fn run_production_patch_core(
         ));
     }
 
-    let history =
-        load_patch_history(pool, uid, body.project_id, body.episodes_id, &body.scope).await?;
+    let history = load_patch_history(
+        pool,
+        uid,
+        body.require_project_numeric_id()?,
+        body.episodes_id,
+        &body.scope,
+    )
+    .await?;
     let mut response =
         dispatch::build_patch_response(body, &history).map_err(ApiError::BadRequest)?;
     response.memory_written = persist_attribution_memory(pool, uid, body, &response).await?;
@@ -226,9 +232,13 @@ pub async fn post_production_patch(
     headers: HeaderMap,
     Json(body): Json<PatchRequest>,
 ) -> Result<Json<PatchResponse>, ApiError> {
-    let uid = require_user_uuid(&state, &headers)?;
-    let pool = state.require_pool()?;
-    ensure_project_owned(pool, uid, body.project_id).await?;
+    let (uid, pool, project_uuid, project_numeric_id) =
+        require_project_write_scope_ref(&state, &headers, body.project_id, body.project_uuid)
+            .await?;
+
+    let mut body = body;
+    body.project_id = Some(project_numeric_id);
+    body.project_uuid = Some(project_uuid);
 
     let response = run_production_patch_core(pool, uid, &body).await?;
     Ok(Json(response))

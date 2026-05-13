@@ -7,9 +7,9 @@ use axum::{
 };
 use uuid::Uuid;
 
-use crate::assets::ensure_owned_project_pk;
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::projects::routes::common::require_project_write_scope;
 use crate::state::AppState;
 
 use super::super::types::{
@@ -24,12 +24,14 @@ pub(in crate::scripting::scripts) async fn create_script_under_project_for_proje
     Json(body): Json<CreateScriptBody>,
 ) -> Result<(StatusCode, Json<ScriptRow>), ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
+
+    // Validate workspace member write access to project
+    let _scope = require_project_write_scope(&state, uid, project_id).await?;
+
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
-    ensure_owned_project_pk(pool, uid, project_id).await?;
 
     let mut tx = pool
         .begin()
@@ -52,12 +54,14 @@ pub(in crate::scripting::scripts) async fn post_scripts_batch_add_for_project(
     Json(body): Json<BatchAddScriptDataBody>,
 ) -> Result<Json<BatchAddScriptResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
+
+    // Validate workspace member write access to project
+    let _scope = require_project_write_scope(&state, uid, project_id).await?;
+
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
-
-    ensure_owned_project_pk(pool, uid, project_id).await?;
 
     let mut tx = pool
         .begin()

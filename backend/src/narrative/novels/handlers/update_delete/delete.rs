@@ -5,9 +5,9 @@ use axum::{
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::assets::ensure_owned_project_pk;
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{validate_positive, ApiError};
+use crate::projects::routes::common::require_project_write_scope;
 use crate::state::AppState;
 
 async fn delete_novel_inner(
@@ -15,9 +15,7 @@ async fn delete_novel_inner(
     project_id: Uuid,
     novel_numeric_id: i32,
 ) -> Result<StatusCode, ApiError> {
-    if novel_numeric_id <= 0 {
-        return Err(ApiError::BadRequest("numeric ids must be positive".into()));
-    }
+    validate_positive(novel_numeric_id, "numericId")?;
 
     let res = sqlx::query(
         r#"
@@ -52,6 +50,6 @@ pub(crate) async fn delete_novel_for_project(
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
 
-    ensure_owned_project_pk(pool, uid, project_id).await?;
+    require_project_write_scope(&state, uid, project_id).await?;
     delete_novel_inner(pool, project_id, novel_numeric_id).await
 }

@@ -2,16 +2,24 @@ use axum::http::HeaderMap;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::error::ApiError;
-use crate::scope::http::require_owned_numeric_script_scope_ids;
+use crate::error::{bad_request_i18n, ApiError};
+use crate::scope::http::{
+    require_script_read_scope, require_script_read_scope_ref, require_script_write_scope,
+};
 use crate::state::AppState;
 
 pub(super) fn validate_storyboard_ids(storyboard_ids: &[i32]) -> Result<(), ApiError> {
     if storyboard_ids.is_empty() {
-        return Err(ApiError::BadRequest("ids must be a non-empty array".into()));
+        return Err(bad_request_i18n(
+            "ids must be a non-empty array",
+            "ids 必须是非空数组",
+        ));
     }
     if storyboard_ids.iter().any(|id| *id <= 0) {
-        return Err(ApiError::BadRequest("ids must be positive integers".into()));
+        return Err(bad_request_i18n(
+            "ids must be positive integers",
+            "ids 必须是正整数",
+        ));
     }
     Ok(())
 }
@@ -57,12 +65,49 @@ pub(crate) async fn require_owned_normalized_storyboards_scope<'a>(
     storyboard_ids: &[i32],
 ) -> Result<(Uuid, &'a PgPool, Uuid, Vec<i32>), ApiError> {
     let normalized_ids = normalize_storyboard_ids(storyboard_ids)?;
-    let (uid, pool, script_uuid) =
-        require_owned_numeric_script_scope_ids(state, headers, project_id, script_id).await?;
-    ensure_owned_storyboards(pool, script_uuid, &normalized_ids).await?;
-    Ok((uid, pool, script_uuid, normalized_ids))
+    let (uid, pool, scope_row) =
+        require_script_read_scope(state, headers, project_id, script_id).await?;
+    ensure_owned_storyboards(pool, scope_row.script_id, &normalized_ids).await?;
+    Ok((uid, pool, scope_row.script_id, normalized_ids))
 }
 
+pub(crate) async fn require_owned_normalized_storyboards_scope_ref<'a>(
+    state: &'a AppState,
+    headers: &HeaderMap,
+    project_id: Option<i32>,
+    project_uuid: Option<Uuid>,
+    script_id: i32,
+    storyboard_ids: &[i32],
+) -> Result<(Uuid, &'a PgPool, i32, Uuid, Vec<i32>), ApiError> {
+    let normalized_ids = normalize_storyboard_ids(storyboard_ids)?;
+    let (uid, pool, scope_row) =
+        require_script_read_scope_ref(state, headers, project_id, project_uuid, script_id).await?;
+    ensure_owned_storyboards(pool, scope_row.script_id, &normalized_ids).await?;
+    Ok((
+        uid,
+        pool,
+        scope_row.project_numeric_id,
+        scope_row.script_id,
+        normalized_ids,
+    ))
+}
+
+#[allow(dead_code)]
+pub(crate) async fn require_owned_normalized_storyboards_write_scope<'a>(
+    state: &'a AppState,
+    headers: &HeaderMap,
+    project_id: i32,
+    script_id: i32,
+    storyboard_ids: &[i32],
+) -> Result<(Uuid, &'a PgPool, Uuid, Vec<i32>), ApiError> {
+    let normalized_ids = normalize_storyboard_ids(storyboard_ids)?;
+    let (uid, pool, scope_row) =
+        require_script_write_scope(state, headers, project_id, script_id).await?;
+    ensure_owned_storyboards(pool, scope_row.script_id, &normalized_ids).await?;
+    Ok((uid, pool, scope_row.script_id, normalized_ids))
+}
+
+#[allow(dead_code)]
 pub(super) async fn require_owned_normalized_storyboards_access(
     state: &AppState,
     headers: &HeaderMap,
@@ -81,6 +126,28 @@ pub(super) async fn require_owned_normalized_storyboards_access(
     Ok(())
 }
 
+pub(super) async fn require_owned_normalized_storyboards_access_ref(
+    state: &AppState,
+    headers: &HeaderMap,
+    project_id: Option<i32>,
+    project_uuid: Option<Uuid>,
+    script_id: i32,
+    storyboard_ids: &[i32],
+) -> Result<(), ApiError> {
+    let (_uid, _pool, _project_numeric_id, _script_uuid, _normalized_ids) =
+        require_owned_normalized_storyboards_scope_ref(
+            state,
+            headers,
+            project_id,
+            project_uuid,
+            script_id,
+            storyboard_ids,
+        )
+        .await?;
+    Ok(())
+}
+
+#[allow(dead_code)]
 pub(super) async fn require_owned_normalized_storyboards_user_pool<'a>(
     state: &'a AppState,
     headers: &HeaderMap,
@@ -97,6 +164,27 @@ pub(super) async fn require_owned_normalized_storyboards_user_pool<'a>(
     )
     .await?;
     Ok((uid, pool))
+}
+
+pub(super) async fn require_owned_normalized_storyboards_user_pool_ref<'a>(
+    state: &'a AppState,
+    headers: &HeaderMap,
+    project_id: Option<i32>,
+    project_uuid: Option<Uuid>,
+    script_id: i32,
+    storyboard_ids: &[i32],
+) -> Result<(Uuid, &'a PgPool, i32), ApiError> {
+    let (uid, pool, project_numeric_id, _script_uuid, _normalized_ids) =
+        require_owned_normalized_storyboards_scope_ref(
+            state,
+            headers,
+            project_id,
+            project_uuid,
+            script_id,
+            storyboard_ids,
+        )
+        .await?;
+    Ok((uid, pool, project_numeric_id))
 }
 
 #[cfg(test)]

@@ -54,9 +54,12 @@ pub struct HarnessContext {
     pub llm: Option<crate::llm::LlmConfig>,
     /// HTTP 客户端（用于需要外部 API 调用的工具）。
     pub http_client: Option<reqwest::Client>,
+    /// Billing configuration for workspace-scope billing.
+    pub billing_config: crate::metering::BillingConfig,
 }
 
 impl HarnessContext {
+    #[allow(clippy::too_many_arguments)]
     pub fn with_runtime_scope(
         user_id: Uuid,
         pool: Option<sqlx::PgPool>,
@@ -65,6 +68,7 @@ impl HarnessContext {
         workspace_id: Option<Uuid>,
         llm: Option<crate::llm::LlmConfig>,
         http_client: Option<reqwest::Client>,
+        billing_config: crate::metering::BillingConfig,
     ) -> Self {
         Self {
             user_id,
@@ -74,6 +78,7 @@ impl HarnessContext {
             workspace_id,
             llm,
             http_client,
+            billing_config,
         }
     }
 }

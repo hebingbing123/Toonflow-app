@@ -1,11 +1,15 @@
 //! 分镜「单条添加 / 批量添加」请求与响应类型。
 
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct AddStoryboardBody {
-    pub(crate) project_id: i32,
+    #[serde(default)]
+    pub(crate) project_id: Option<i32>,
+    #[serde(default)]
+    pub(crate) project_uuid: Option<Uuid>,
     pub(crate) script_id: i32,
     pub(crate) prompt: String,
     #[serde(default)]
@@ -22,7 +26,10 @@ pub(in crate::production) struct AddStoryboardResponse {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct BatchAddInfoBody {
-    pub(crate) project_id: i32,
+    #[serde(default)]
+    pub(crate) project_id: Option<i32>,
+    #[serde(default)]
+    pub(crate) project_uuid: Option<Uuid>,
     pub(crate) script_id: i32,
     pub(crate) storyboards: Vec<StoryboardInfoInput>,
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../prompt_preset.dart';
 
 class ScriptWorkspaceArgumentTemplateEntry {
@@ -33,27 +34,28 @@ class ScriptWorkspaceGuidedTasksPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Wrap(
       spacing: 8,
       runSpacing: 8,
       children: <Widget>[
         FilledButton.tonal(
           onPressed: busy ? null : onFetchPlanData,
-          child: const Text('1) 拉取 planData'),
+          child: Text(l10n.agentWorkspaceScriptStepFetchPlanData),
         ),
         FilledButton.tonal(
           onPressed: busy ? null : onFetchScriptContent,
-          child: const Text('2) 拉取剧本正文'),
+          child: Text(l10n.agentWorkspaceScriptStepFetchContent),
         ),
         FilledButton.tonal(
           onPressed: busy ? null : onGenerateDraft,
-          child: const Text('3) 生成剧本草稿'),
+          child: Text(l10n.agentWorkspaceScriptStepGenerateDraft),
         ),
         OutlinedButton(
           onPressed: busy || !canWriteBackScriptResult
               ? null
               : onWriteBackScript,
-          child: const Text('4) 写回剧本'),
+          child: Text(l10n.agentWorkspaceScriptStepWriteback),
         ),
       ],
     );
@@ -145,15 +147,16 @@ class ScriptWorkspaceControlsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         TextField(
           controller: scriptPromptController,
           maxLines: 4,
-          decoration: const InputDecoration(
-            labelText: '工作区提示词',
-            helperText: '用于剧本通道 harness.agent.run',
+          decoration: InputDecoration(
+            labelText: l10n.agentWorkspaceScriptPromptLabel,
+            helperText: l10n.agentWorkspaceScriptPromptHelper,
           ),
         ),
         const SizedBox(height: 8),
@@ -163,7 +166,11 @@ class ScriptWorkspaceControlsPanel extends StatelessWidget {
           children: <Widget>[
             FilledButton.tonal(
               onPressed: busy ? null : onRunScriptWorkspace,
-              child: Text(loadingScriptWorkspaceRun ? '…' : '运行剧本工作流'),
+              child: Text(
+                loadingScriptWorkspaceRun
+                    ? '…'
+                    : l10n.agentWorkspaceScriptRunWorkflow,
+              ),
             ),
             SizedBox(
               width: 220,
@@ -184,21 +191,27 @@ class ScriptWorkspaceControlsPanel extends StatelessWidget {
                         if (value == null) return;
                         onScriptDomainToolChanged(value);
                       },
-                decoration: const InputDecoration(labelText: '剧本域工具'),
+                decoration: InputDecoration(
+                  labelText: l10n.agentWorkspaceScriptDomainToolLabel,
+                ),
               ),
             ),
             FilledButton.tonal(
               onPressed: busy ? null : onProbeScriptDomainTool,
-              child: Text(loadingScriptDomainProbe ? '…' : '读取剧本上下文'),
+              child: Text(
+                loadingScriptDomainProbe
+                    ? '…'
+                    : l10n.agentWorkspaceScriptReadContext,
+              ),
             ),
             SizedBox(
               width: 320,
               child: TextField(
                 controller: scriptDomainArgsController,
                 maxLines: 2,
-                decoration: const InputDecoration(
-                  labelText: '剧本工具参数(JSON)',
-                  helperText: '优先沿用最近章节结果填充 novelId；拿不准时先别写死。',
+                decoration: InputDecoration(
+                  labelText: l10n.agentWorkspaceScriptArgsLabel,
+                  helperText: l10n.agentWorkspaceScriptArgsHelper,
                 ),
               ),
             ),
@@ -221,25 +234,37 @@ class ScriptWorkspaceControlsPanel extends StatelessWidget {
                         if (value == null) return;
                         onScriptSubAgentChanged(value);
                       },
-                decoration: const InputDecoration(labelText: '剧本子代理工具'),
+                decoration: InputDecoration(
+                  labelText: l10n.agentWorkspaceScriptSubAgentToolLabel,
+                ),
               ),
             ),
             FilledButton.tonal(
               onPressed: busy ? null : onRunScriptSubAgentTool,
-              child: Text(loadingScriptSubAgentRun ? '…' : '运行子代理'),
+              child: Text(
+                loadingScriptSubAgentRun
+                    ? '…'
+                    : l10n.agentWorkspaceScriptRunSubAgent,
+              ),
             ),
             FilledButton(
               onPressed: busy || !canWriteBackScriptResult
                   ? null
                   : onWriteBackScriptResult,
-              child: Text(loadingScriptResultWriteback ? '…' : '写回剧本'),
+              child: Text(
+                loadingScriptResultWriteback
+                    ? '…'
+                    : l10n.agentWorkspaceScriptStepWriteback,
+              ),
             ),
             FilledButton.tonal(
               onPressed: busy || !canWriteBackScriptPlanResult
                   ? null
                   : onWriteBackScriptPlanResult,
               child: Text(
-                loadingScriptPlanResultWriteback ? '…' : '写回计划数据',
+                loadingScriptPlanResultWriteback
+                    ? '…'
+                    : l10n.agentWorkspaceScriptWritebackPlanData,
               ),
             ),
             OutlinedButton(
@@ -247,7 +272,9 @@ class ScriptWorkspaceControlsPanel extends StatelessWidget {
                   ? null
                   : onWriteBackScriptPlanViaUpdateData,
               child: Text(
-                loadingScriptPlanResultWriteback ? '…' : 'update-data 写回',
+                loadingScriptPlanResultWriteback
+                    ? '…'
+                    : l10n.agentWorkspaceScriptWritebackUpdateData,
               ),
             ),
           ],
@@ -279,7 +306,9 @@ class ScriptWorkspaceArgumentTemplatesPanel extends StatelessWidget {
           .map(
             (ScriptWorkspaceArgumentTemplateEntry entry) => ActionChip(
               label: Text(entry.label),
-              onPressed: busy ? null : () => onApplyTemplate(entry.args, entry.label),
+              onPressed: busy
+                  ? null
+                  : () => onApplyTemplate(entry.args, entry.label),
             ),
           )
           .toList(growable: false),

@@ -1,4 +1,8 @@
 //! `app_user_profile` upsert from normalized webhook payload.
+//!
+//! **Workspace-scope billing dual-write (Task 4.1)**:
+//! When `workspace_id` is present in webhook payload, also upsert `app_workspace` billing columns
+//! to support workspace-scope billing migration (W8.2–W8.4).
 
 use chrono::{DateTime, Utc};
 use serde_json::Value;
@@ -115,6 +119,66 @@ pub(crate) async fn apply_plan_from_webhook_payload(
     .bind(resolved.subscription_status_updated_at)
     .execute(&mut **tx)
     .await?;
+
+    // Workspace-scope billing dual-write (Task 4.1)
+    // If webhook includes workspace_id, also update workspace billing columns
+    if let Some(workspace_id_str) = v.get("workspace_id").and_then(Value::as_str) {
+        if let Ok(workspace_id) = Uuid::parse_str(workspace_id_str.trim()) {
+            // Verify workspace exists and user has access (owner or member)
+            let workspace_exists: Option<(Uuid,)> = sqlx::query_as(
+                r#"
+                SELECT w.id
+                FROM app_workspace w
+                LEFT JOIN app_workspace_member m ON m.workspace_id = w.id
+                WHERE w.id = $1
+                  AND (w.owner_user_id = $2 OR m.user_id = $2)
+                "#,
+            )
+            .bind(workspace_id)
+            .bind(uid)
+            .fetch_optional(&mut **tx)
+            .await?;
+
+            if workspace_exists.is_some() {
+                // Update workspace billing columns (dual-write)
+                sqlx::query(
+                    r#"
+                    UPDATE app_workspace
+                    SET
+                      plan_tier = $2,
+                      billing_currency = COALESCE($3, billing_currency),
+                      billing_provider = COALESCE($4, billing_provider),
+                      updated_at = NOW()
+                    WHERE id = $1
+                    "#,
+                )
+                .bind(workspace_id)
+                .bind(&tier)
+                .bind(currency.as_deref())
+                .bind(provider.as_deref())
+                .execute(&mut **tx)
+                .await?;
+
+                tracing::info!(
+                    user_id = %uid,
+                    workspace_id = %workspace_id,
+                    plan_tier = %tier,
+                    "Workspace billing dual-write: updated workspace billing columns"
+                );
+            } else {
+                tracing::warn!(
+                    user_id = %uid,
+                    workspace_id = %workspace_id_str,
+                    "Workspace billing dual-write: workspace not found or user not authorized (skipped)"
+                );
+            }
+        } else {
+            tracing::warn!(
+                workspace_id = %workspace_id_str,
+                "Workspace billing dual-write: invalid workspace_id format (skipped)"
+            );
+        }
+    }
 
     Ok(true)
 }

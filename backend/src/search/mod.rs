@@ -8,6 +8,7 @@ pub mod logging;
 pub mod models;
 mod openapi;
 pub mod routes;
+pub mod saved_views;
 pub mod service;
 
 pub use cache::SearchCache;

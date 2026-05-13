@@ -28,7 +28,7 @@ use crate::production::workbench::video_prompt_memory::{
 };
 use crate::production::{enforce_quality_gate, run_quality_gate, QualityGateStage};
 use crate::scope::http::require_authenticated;
-use crate::scope::http::require_owned_numeric_script_scope_user_pool;
+use crate::scope::http::require_script_write_scope_ref;
 use crate::settings::agent_memory::{
     load_project_automation_memory_policy, optimize_project_memory_budget,
     save_project_automation_memory_policy, AutomationMemoryMode, ProjectAutomationMemoryPolicy,
@@ -275,13 +275,15 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
     headers: HeaderMap,
     Json(body): Json<GenerateVideoPromptBody>,
 ) -> Result<JsonResponse<GenerateVideoPromptResponse>, ApiError> {
-    let (user_id, pool) = require_owned_numeric_script_scope_user_pool(
+    let (user_id, pool, scope_row) = require_script_write_scope_ref(
         &state,
         &headers,
         body.project_id,
+        body.project_uuid,
         body.script_id,
     )
     .await?;
+    let project_numeric_id = scope_row.project_numeric_id;
     let storyboard_ids = body
         .storyboard_id
         .filter(|id| *id > 0)
@@ -291,7 +293,7 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
     let (gate, strategy) = run_quality_gate(
         pool,
         user_id,
-        body.project_id,
+        project_numeric_id,
         body.script_id,
         QualityGateStage::VideoPrompt,
         &storyboard_ids,
@@ -302,14 +304,14 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
     let recent_quality_rows = load_recent_quality_signal_rows(
         pool,
         user_id,
-        body.project_id,
+        project_numeric_id,
         body.script_id,
         body.storyboard_id,
     )
     .await?;
     let recent_quality_pressure = derive_recent_quality_constraint_pressure(&recent_quality_rows);
     let memory_optimization = if body.storyboard_id.is_some_and(|id| id > 0) {
-        Some(optimize_scoped_video_memory(pool, user_id, body.project_id, body.script_id).await?)
+        Some(optimize_scoped_video_memory(pool, user_id, project_numeric_id, body.script_id).await?)
     } else {
         None
     };
@@ -319,7 +321,7 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
                 load_storyboard_negative_prompt_runtime(
                     pool,
                     user_id,
-                    body.project_id,
+                    project_numeric_id,
                     body.script_id,
                     storyboard_id,
                 )
@@ -351,7 +353,7 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
     apply_adaptive_project_memory_mode(
         pool,
         user_id,
-        body.project_id,
+        project_numeric_id,
         &recent_quality_rows,
         constraint_pressure,
     )
@@ -359,7 +361,7 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
     let project_memory_optimization = optimize_project_memory_budget(
         pool,
         user_id,
-        body.project_id,
+        project_numeric_id,
         Some(body.script_id),
         "productionAgent",
     )
@@ -367,7 +369,7 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
     let context = load_video_prompt_context(
         pool,
         user_id,
-        body.project_id,
+        project_numeric_id,
         body.script_id,
         body.storyboard_id,
         single_storyboard_runtime.as_ref(),
@@ -404,7 +406,7 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
     if body.auto_quality_review {
         let pool = pool.clone();
         let model_name = "runway-gen-2".to_string();
-        let project_id = body.project_id;
+        let project_id = project_numeric_id;
         let script_id = body.script_id;
         let target_type = if body.storyboard_id.is_some_and(|id| id > 0) {
             "storyboard".to_string()

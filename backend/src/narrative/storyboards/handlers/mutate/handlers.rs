@@ -11,6 +11,7 @@ use super::delete::delete_storyboard_row;
 use super::patch::patch_storyboard_row;
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
+use crate::projects::routes::common::require_project_write_scope;
 use crate::state::AppState;
 
 pub(in crate::narrative::storyboards) async fn patch_by_numeric_id_for_project(
@@ -20,6 +21,10 @@ pub(in crate::narrative::storyboards) async fn patch_by_numeric_id_for_project(
     Json(body): Json<PatchStoryboardBody>,
 ) -> Result<Json<StoryboardRow>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
+
+    // Verify workspace member write access to the project
+    let _scope = require_project_write_scope(&state, uid, project_id).await?;
+
     let pool = state
         .pool
         .as_ref()
@@ -34,6 +39,10 @@ pub(in crate::narrative::storyboards) async fn delete_by_numeric_id_for_project(
     headers: HeaderMap,
 ) -> Result<axum::http::StatusCode, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
+
+    // Verify workspace member write access to the project
+    let _scope = require_project_write_scope(&state, uid, project_id).await?;
+
     let pool = state
         .pool
         .as_ref()

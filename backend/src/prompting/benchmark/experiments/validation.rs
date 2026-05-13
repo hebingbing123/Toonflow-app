@@ -170,14 +170,14 @@ fn validate_variant_snapshot_from_db(variant: &ExperimentVariant) -> Result<()> 
 pub fn validate_sample_tier(tier: &str) -> Result<()> {
     match tier {
         "smoke" | "core" | "full" => Ok(()),
-        _ => bail!("Invalid sample_tier: must be 'smoke', 'core', or 'full'"),
+        _ => bail!("Invalid sample_tier: must be 'smoke', 'core', or 'full' | 无效的 sample_tier：必须是 'smoke'、'core' 或 'full'"),
     }
 }
 
 /// 校验阶段范围
 pub fn validate_stage_scope(stages: &[String]) -> Result<()> {
     if stages.is_empty() {
-        bail!("stage_scope cannot be empty");
+        bail!("stage_scope cannot be empty | stage_scope 不能为空");
     }
 
     let valid_stages = [
@@ -191,7 +191,7 @@ pub fn validate_stage_scope(stages: &[String]) -> Result<()> {
 
     for stage in stages {
         if !valid_stages.contains(&stage.as_str()) {
-            bail!("Invalid stage: {}", stage);
+            bail!("Invalid stage: {} | 无效的 stage：{}", stage, stage);
         }
     }
 

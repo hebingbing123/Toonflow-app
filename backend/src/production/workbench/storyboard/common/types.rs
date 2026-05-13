@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(in crate::production::workbench::storyboard) struct StoryboardInsertDraft {
@@ -15,7 +16,10 @@ pub(in crate::production::workbench::storyboard) struct StoryboardPreviewData {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct StoryboardScopeBody {
-    pub(in crate::production::workbench::storyboard) project_id: i32,
+    #[serde(default)]
+    pub(in crate::production::workbench::storyboard) project_id: Option<i32>,
+    #[serde(default)]
+    pub(in crate::production::workbench::storyboard) project_uuid: Option<Uuid>,
     pub(in crate::production::workbench::storyboard) script_id: i32,
     pub(in crate::production::workbench::storyboard) storyboard_id: i32,
 }
@@ -23,7 +27,10 @@ pub(in crate::production) struct StoryboardScopeBody {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct StoryboardScriptScopeBody {
-    pub(in crate::production::workbench::storyboard) project_id: i32,
+    #[serde(default)]
+    pub(in crate::production::workbench::storyboard) project_id: Option<i32>,
+    #[serde(default)]
+    pub(in crate::production::workbench::storyboard) project_uuid: Option<Uuid>,
     pub(in crate::production::workbench::storyboard) script_id: i32,
 }
 

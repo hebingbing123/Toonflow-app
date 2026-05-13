@@ -2,6 +2,9 @@ use serde_json::{json, Value, Value as JsonValue};
 use sqlx::PgPool;
 use uuid::Uuid;
 
+use crate::jobs::payload_project::{
+    payload_project_uuid, resolve_project_numeric_from_job_payload,
+};
 use crate::jobs::worker::common::{generation_job_is_cancelled, JobRunError};
 use crate::jobs::JobRow;
 use crate::llm::{resolve_openai_image_model, resolve_openai_image_size, LlmConfig};
@@ -23,7 +26,8 @@ pub(crate) async fn run_production_assets_batch_generate(
         return Err(JobRunError::Cancelled);
     }
 
-    let project_numeric_id = payload_json_i32(p, "project_numeric_id")?;
+    let project_numeric_id =
+        resolve_project_numeric_from_job_payload(pool, row.owner_user_id, p).await?;
     let script_numeric_id = payload_json_i32(p, "script_id")?;
     let asset_numeric_id = payload_json_i32(p, "asset_id")?;
     let model_in = p
@@ -80,12 +84,16 @@ pub(crate) async fn run_production_assets_batch_generate(
     )
     .await?;
 
-    Ok(json!({
+    let mut result = json!({
         "source": "production.assets.batch-generate",
         "project_numeric_id": project_numeric_id,
         "script_id": script_numeric_id,
         "image_model": image_model,
         "size": size,
         "items": [one],
-    }))
+    });
+    if let Some(project_uuid) = payload_project_uuid(p) {
+        result["project_uuid"] = json!(project_uuid);
+    }
+    Ok(result)
 }

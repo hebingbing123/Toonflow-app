@@ -5,15 +5,16 @@ use axum::{
 };
 
 use crate::auth::require_user_uuid;
+use crate::error::helpers::not_implemented_i18n;
 use crate::error::ApiError;
 use crate::state::AppState;
 
 use super::types::EmptyDangerBody;
 
 pub(super) fn wipe_not_supported() -> ApiError {
-    ApiError::NotImplemented(
-        "bulk database wipe is not supported on this API; use hosted Postgres operations or product-level account deletion"
-            .into(),
+    not_implemented_i18n(
+        "bulk database wipe is not supported on this API; use hosted Postgres operations or product-level account deletion",
+        "此 API 不支持批量数据库清除；请使用托管 Postgres 操作或产品级账户删除",
     )
 }
 

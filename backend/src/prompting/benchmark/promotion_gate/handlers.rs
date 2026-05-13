@@ -8,7 +8,11 @@ use axum::{
 use serde_json::json;
 use uuid::Uuid;
 
-use crate::{auth::require_user_uuid, error::ApiError, state::AppState};
+use crate::{
+    auth::require_user_uuid,
+    error::{bad_request_i18n, ApiError},
+    state::AppState,
+};
 
 use super::types::{
     BenchmarkTrendPoint, BenchmarkTrendsQuery, BenchmarkTrendsResponse, GateDecisionEnvelope,
@@ -579,8 +583,9 @@ pub(super) fn validate_promotion_request(
     promote_to_baseline: bool,
 ) -> Result<(), ApiError> {
     if promote_to_baseline && decision != "approved" && decision != "approved_limited" {
-        return Err(ApiError::BadRequest(
-            "只有 approved 或 approved_limited 的变体才能提升为新基线".to_string(),
+        return Err(bad_request_i18n(
+            "Only approved or approved_limited variants can be promoted to the new baseline",
+            "只有 approved 或 approved_limited 的变体才能提升为新基线",
         ));
     }
     Ok(())
@@ -589,9 +594,9 @@ pub(super) fn validate_promotion_request(
 pub(super) fn validate_decision_value(decision: &str) -> Result<(), ApiError> {
     match decision {
         "blocked" | "needs_review" | "approved" | "approved_limited" => Ok(()),
-        _ => Err(ApiError::BadRequest(
-            "decision must be one of: blocked, needs_review, approved, approved_limited"
-                .to_string(),
+        _ => Err(bad_request_i18n(
+            "decision must be one of: blocked, needs_review, approved, approved_limited",
+            "decision 必须是 blocked、needs_review、approved、approved_limited 之一",
         )),
     }
 }

@@ -8,16 +8,15 @@ use axum::{
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, ApiError};
 use crate::state::AppState;
 
-use super::super::crud::ensure_owned_project_numeric_id;
+use super::super::crud::require_asset_project_read_scope;
 use super::super::models::*;
 use super::super::utils::{normalize_name_ilike, MAX_ASSET_LIST_LIMIT};
 
 async fn run_batch_generation_data(
     pool: &sqlx::PgPool,
-    uid: uuid::Uuid,
     project_numeric_id: i32,
     body: &WorkbenchBatchGenerationDataBody,
 ) -> Result<WorkbenchBatchGenerationDataResponse, ApiError> {
@@ -29,18 +28,11 @@ async fn run_batch_generation_data(
         SELECT COUNT(*)::bigint
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
-        WHERE p.numeric_id = $2
-          AND a.asset_type = $3
-          AND ($4::text IS NULL OR a.name ILIKE $4)
-          AND EXISTS (
-            SELECT 1
-            FROM app_workspace_member wm
-            WHERE wm.workspace_id = p.workspace_id
-              AND wm.user_id = $1
-          )
+        WHERE p.numeric_id = $1
+          AND a.asset_type = $2
+          AND ($3::text IS NULL OR a.name ILIKE $3)
         "#,
     )
-    .bind(uid)
     .bind(project_numeric_id)
     .bind(&asset_type)
     .bind(name.as_deref())
@@ -59,21 +51,14 @@ async fn run_batch_generation_data(
           a.create_time_ms AS create_time_ms
         FROM app_asset a
         INNER JOIN app_project p ON p.id = a.project_id
-        WHERE p.numeric_id = $2
-          AND a.asset_type = $3
-          AND ($4::text IS NULL OR a.name ILIKE $4)
-          AND EXISTS (
-            SELECT 1
-            FROM app_workspace_member wm
-            WHERE wm.workspace_id = p.workspace_id
-              AND wm.user_id = $1
-          )
+        WHERE p.numeric_id = $1
+          AND a.asset_type = $2
+          AND ($3::text IS NULL OR a.name ILIKE $3)
         ORDER BY a.create_time_ms DESC NULLS LAST, a.numeric_id DESC
-        OFFSET $5
-        LIMIT $6
+        OFFSET $4
+        LIMIT $5
         "#,
     )
-    .bind(uid)
     .bind(project_numeric_id)
     .bind(asset_type)
     .bind(name.as_deref())
@@ -95,18 +80,25 @@ pub(crate) async fn post_project_workbench_batch_generation_data(
     let uid = require_user_uuid(&state, &headers)?;
     let asset_type = body.asset_type.trim().to_lowercase();
     if asset_type.is_empty() {
-        return Err(ApiError::BadRequest("type must be non-empty".into()));
+        return Err(bad_request_i18n("type must be non-empty", "type 不能为空"));
     }
     if body.page < 1 {
-        return Err(ApiError::BadRequest("page must be >= 1".into()));
+        return Err(bad_request_i18n("page must be >= 1", "page 必须大于等于 1"));
     }
     if body.limit < 1 || body.limit > MAX_ASSET_LIST_LIMIT as i32 {
-        return Err(ApiError::BadRequest(format!(
-            "limit must be between 1 and {MAX_ASSET_LIST_LIMIT}"
-        )));
+        return Err(bad_request_i18n(
+            &format!("limit must be between 1 and {MAX_ASSET_LIST_LIMIT}"),
+            &format!("limit 必须在 1 到 {MAX_ASSET_LIST_LIMIT} 之间"),
+        ));
     }
     let pool = state.require_pool()?;
-    let project_numeric_id = ensure_owned_project_numeric_id(pool, uid, project_id).await?;
-    let out = run_batch_generation_data(pool, uid, project_numeric_id, &body).await?;
+    require_asset_project_read_scope(&state, uid, project_id).await?;
+    let project_numeric_id: i32 =
+        sqlx::query_scalar("SELECT numeric_id FROM app_project WHERE id = $1")
+            .bind(project_id)
+            .fetch_one(pool)
+            .await
+            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let out = run_batch_generation_data(pool, project_numeric_id, &body).await?;
     Ok(Json(out))
 }

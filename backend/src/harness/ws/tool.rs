@@ -49,6 +49,8 @@ pub async fn handle_harness_tool_invoke(
     let args = p.arguments.unwrap_or_else(|| json!({}));
     match invoke::invoke_tool_async(ctx, name, &args).await {
         Ok(result) => {
+            // Successful tool invocations answer with the same raw WS envelope family;
+            // `payload.name` identifies the tool and `payload.result` carries its JSON return value.
             let _ = send_envelope(
                 socket,
                 "harness.tool.result",

@@ -4,7 +4,7 @@
 
 use std::net::SocketAddr;
 
-use toonflow_server::{app, harness, jobs, publish, state};
+use toonflow_server::{app, billing, harness, jobs, publish, state};
 #[tokio::main]
 async fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -56,6 +56,12 @@ async fn main() {
     let publish_worker_state = state.clone();
     tokio::spawn(async move {
         publish::worker::run(publish_worker_state).await;
+    });
+
+    // Task 4.3: Billing reconciliation worker (shadow period monitoring)
+    let reconciliation_state = state.clone();
+    tokio::spawn(async move {
+        billing::run_reconciliation_worker(reconciliation_state).await;
     });
 
     let app = app::build_router(state);

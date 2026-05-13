@@ -3,7 +3,7 @@
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, validate_max_length, validate_positive, ApiError};
 
 use super::types::AssetGenKind;
 
@@ -30,7 +30,10 @@ pub(super) fn asset_type_str(k: &AssetGenKind) -> &'static str {
 pub(super) fn trim_non_empty_str(s: &str, field: &'static str) -> Result<String, ApiError> {
     let t = s.trim();
     if t.is_empty() {
-        return Err(ApiError::BadRequest(format!("{field} must be non-empty")));
+        return Err(bad_request_i18n(
+            &format!("{field} must be non-empty"),
+            &format!("{field} 不能为空"),
+        ));
     }
     Ok(t.to_owned())
 }
@@ -51,9 +54,7 @@ pub(super) fn normalize_optional_base64(
         return Ok(None);
     }
     if trimmed.len() > MAX_BASE64_HINT_LEN {
-        return Err(ApiError::BadRequest(format!(
-            "{field} must be at most {MAX_BASE64_HINT_LEN} chars"
-        )));
+        validate_max_length(trimmed, MAX_BASE64_HINT_LEN, field)?;
     }
     if trimmed.starts_with("data:") {
         return Ok(Some(trimmed.to_owned()));
@@ -66,9 +67,7 @@ pub(super) async fn resolve_owned_project_uuid(
     uid: Uuid,
     project_numeric_id: i32,
 ) -> Result<Uuid, ApiError> {
-    if project_numeric_id <= 0 {
-        return Err(ApiError::BadRequest("projectId must be positive".into()));
-    }
+    validate_positive(project_numeric_id, "projectId")?;
     let id: Option<Uuid> = sqlx::query_scalar(
         r#"
         SELECT p.id

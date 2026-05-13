@@ -1,11 +1,15 @@
 //! 分镜编辑 / 删帧 / 更新 URL 的请求与响应类型。
 
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct EditStoryboardInfoBody {
-    pub(crate) project_id: i32,
+    #[serde(default)]
+    pub(crate) project_id: Option<i32>,
+    #[serde(default)]
+    pub(crate) project_uuid: Option<Uuid>,
     pub(crate) script_id: i32,
     pub(crate) storyboard_id: i32,
     pub(crate) prompt: String,
@@ -23,7 +27,10 @@ pub(in crate::production) struct EditStoryboardInfoResponse {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct RemoveFrameBody {
-    pub(crate) project_id: i32,
+    #[serde(default)]
+    pub(crate) project_id: Option<i32>,
+    #[serde(default)]
+    pub(crate) project_uuid: Option<Uuid>,
     pub(crate) script_id: i32,
     pub(crate) storyboard_id: i32,
 }
@@ -38,7 +45,10 @@ pub(in crate::production) struct RemoveFrameResponse {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct UpdateStoryboardUrlBody {
-    pub(crate) project_id: i32,
+    #[serde(default)]
+    pub(crate) project_id: Option<i32>,
+    #[serde(default)]
+    pub(crate) project_uuid: Option<Uuid>,
     pub(crate) script_id: i32,
     pub(crate) storyboard_id: i32,
     pub(crate) image_url: String,
@@ -55,7 +65,10 @@ pub(in crate::production) struct UpdateStoryboardUrlResponse {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct UpdateStoryboardLiveActionReferenceBody {
-    pub(crate) project_id: i32,
+    #[serde(default)]
+    pub(crate) project_id: Option<i32>,
+    #[serde(default)]
+    pub(crate) project_uuid: Option<Uuid>,
     pub(crate) script_id: i32,
     pub(crate) storyboard_id: i32,
     #[serde(default)]
@@ -76,7 +89,10 @@ pub(in crate::production) struct UpdateStoryboardLiveActionReferenceResponse {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct UpdateStoryboardDurationBody {
-    pub(crate) project_id: i32,
+    #[serde(default)]
+    pub(crate) project_id: Option<i32>,
+    #[serde(default)]
+    pub(crate) project_uuid: Option<Uuid>,
     pub(crate) script_id: i32,
     pub(crate) storyboard_id: i32,
     pub(crate) duration: i32,

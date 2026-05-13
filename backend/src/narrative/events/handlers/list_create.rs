@@ -6,7 +6,7 @@ use axum::{
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, validate_non_empty_string, ApiError};
 use crate::projects::routes::common::{
     require_project_workspace_member_scope, require_project_write_scope,
 };
@@ -27,10 +27,13 @@ async fn list_novel_events_core(
     let page = query.page.unwrap_or(1);
     let limit = query.limit.unwrap_or(20);
     if page < 1 {
-        return Err(ApiError::BadRequest("page must be >= 1".into()));
+        return Err(bad_request_i18n("page must be >= 1", "page 必须大于等于 1"));
     }
     if limit < 1 {
-        return Err(ApiError::BadRequest("limit must be positive".into()));
+        return Err(bad_request_i18n(
+            "limit must be positive",
+            "limit 必须为正数",
+        ));
     }
 
     let lim = i64::from(limit).min(MAX_EVENT_LIST_LIMIT);
@@ -65,9 +68,7 @@ async fn create_novel_event_core(
     body: CreateNovelEventBody,
 ) -> Result<JsonResponse<serde_json::Value>, ApiError> {
     let name = body.name.trim();
-    if name.is_empty() {
-        return Err(ApiError::BadRequest("name must not be empty".into()));
-    }
+    validate_non_empty_string(name, "name")?;
 
     let mut tx = pool
         .begin()
@@ -116,8 +117,9 @@ async fn create_novel_event_core(
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
         if valid_novels.len() != body.chapter_ids.len() {
-            return Err(ApiError::BadRequest(
-                "Some chapter_ids do not exist in this project".into(),
+            return Err(bad_request_i18n(
+                "some chapterIds do not exist in this project",
+                "部分 chapterIds 在当前项目中不存在",
             ));
         }
 

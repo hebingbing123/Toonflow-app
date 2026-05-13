@@ -9,6 +9,8 @@
 | **新栈（Rust + Flutter）** | **Supabase PostgreSQL** | 唯一主库；开发与生产见 `docs/plans/harness-rust-flutter.md` §4.1 |
 | **旧栈（Electron + Node）** | **SQLite**（`db2.sqlite`，Knex + better-sqlite3） | 仅迁移**源**；见 `src/utils/db.ts`、`src/lib/initDB.ts` |
 
+说明：本文里的 `project_id`、`script_id`、`numeric_id` 等表述主要用于**导入映射 / 数据库内部关联**。它们不应覆盖产品壳、deep-link、jobs payload、Harness attach 等面向当前产品行为的 **UUID-first** 语义。
+
 ## 源库表清单（Knex `initDB`）
 
 以下表名来自 `src/lib/initDB.ts`，迁移时需映射到 PG schema（建议 `public` 下新表名或带 `import_` 前缀 staging，再归一到目标模型）：

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../config.dart';
+import '../l10n/app_localizations.dart';
 
 part 'section_view_content.dart';
 

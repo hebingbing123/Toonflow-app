@@ -69,6 +69,34 @@ pub enum ApiError {
     ConcurrentLimitExceeded(String),
     /// HTTP **403** — authenticated but not allowed (e.g. ops-only endpoint with env gate off).
     Forbidden(String),
+
+    // Bilingual error variants (internal use only - use helper functions from helpers.rs)
+    /// BadRequest with bilingual messages (English and Chinese)
+    BadRequestI18n {
+        en: String,
+        zh: String,
+    },
+    /// Conflict with bilingual messages (English and Chinese)
+    ConflictI18n {
+        en: String,
+        zh: String,
+    },
+    /// Conflict with bilingual messages and additional details
+    ConflictWithDetailsI18n {
+        en: String,
+        zh: String,
+        details: serde_json::Value,
+    },
+    /// Forbidden with bilingual messages (English and Chinese)
+    ForbiddenI18n {
+        en: String,
+        zh: String,
+    },
+    /// NotImplemented with bilingual messages (English and Chinese)
+    NotImplementedI18n {
+        en: String,
+        zh: String,
+    },
 }
 
 #[inline]
@@ -235,6 +263,53 @@ impl IntoResponse for ApiError {
                     "Concurrent operation limit exceeded"
                 );
             }
+            // Bilingual variants - log with English message
+            ApiError::BadRequestI18n { en, .. } => {
+                tracing::info!(
+                    target: "toonflow.api.error",
+                    error_type = "bad_request",
+                    status = 400,
+                    message = %en,
+                    "Bad request (bilingual)"
+                );
+            }
+            ApiError::ConflictI18n { en, .. } => {
+                tracing::info!(
+                    target: "toonflow.api.error",
+                    error_type = "conflict",
+                    status = 409,
+                    message = %en,
+                    "Conflict error (bilingual)"
+                );
+            }
+            ApiError::ConflictWithDetailsI18n { en, details, .. } => {
+                tracing::info!(
+                    target: "toonflow.api.error",
+                    error_type = "conflict",
+                    status = 409,
+                    message = %en,
+                    details = ?details,
+                    "Conflict error with details (bilingual)"
+                );
+            }
+            ApiError::ForbiddenI18n { en, .. } => {
+                tracing::info!(
+                    target: "toonflow.api.error",
+                    error_type = "forbidden",
+                    status = 403,
+                    message = %en,
+                    "Forbidden (bilingual)"
+                );
+            }
+            ApiError::NotImplementedI18n { en, .. } => {
+                tracing::info!(
+                    target: "toonflow.api.error",
+                    error_type = "not_implemented",
+                    status = 501,
+                    message = %en,
+                    "Not implemented (bilingual)"
+                );
+            }
         }
 
         let is_quota = matches!(&self, ApiError::QuotaExceeded(_));
@@ -326,6 +401,42 @@ impl IntoResponse for ApiError {
                 None,
             ),
             ApiError::Forbidden(msg) => (StatusCode::FORBIDDEN, "forbidden", msg, None),
+            // Bilingual variants - select message based on current locale
+            ApiError::BadRequestI18n { en, zh } => {
+                let msg = match loc {
+                    ApiLocale::En => en,
+                    ApiLocale::Zh => zh,
+                };
+                (StatusCode::BAD_REQUEST, "bad_request", msg, None)
+            }
+            ApiError::ConflictI18n { en, zh } => {
+                let msg = match loc {
+                    ApiLocale::En => en,
+                    ApiLocale::Zh => zh,
+                };
+                (StatusCode::CONFLICT, "conflict", msg, None)
+            }
+            ApiError::ConflictWithDetailsI18n { en, zh, details } => {
+                let msg = match loc {
+                    ApiLocale::En => en,
+                    ApiLocale::Zh => zh,
+                };
+                (StatusCode::CONFLICT, "conflict", msg, Some(details))
+            }
+            ApiError::ForbiddenI18n { en, zh } => {
+                let msg = match loc {
+                    ApiLocale::En => en,
+                    ApiLocale::Zh => zh,
+                };
+                (StatusCode::FORBIDDEN, "forbidden", msg, None)
+            }
+            ApiError::NotImplementedI18n { en, zh } => {
+                let msg = match loc {
+                    ApiLocale::En => en,
+                    ApiLocale::Zh => zh,
+                };
+                (StatusCode::NOT_IMPLEMENTED, "not_implemented", msg, None)
+            }
         };
 
         let retry_secs = if is_quota {
@@ -530,6 +641,104 @@ mod tests {
                 body.get("status").and_then(serde_json::Value::as_u64),
                 Some(429)
             );
+        }
+
+        // **Validates: Requirements 1.4**
+        // Feature: backend-api-i18n-migration, Property 3: Error Structure Preservation
+        // For any error type and any language selection, the error response JSON SHALL contain
+        // exactly the fields: status (u16), code (string), message (string), and optionally
+        // request_id, details, retry_after_ms.
+        #[test]
+        fn prop_error_structure_preservation_across_languages(
+            message in ".{1,100}",
+            locale_is_zh in proptest::bool::ANY,
+        ) {
+            let runtime = tokio::runtime::Builder::new_current_thread()
+                .enable_all()
+                .build()
+                .expect("runtime");
+
+            let locale = if locale_is_zh { ApiLocale::Zh } else { ApiLocale::En };
+
+            // Test all error variants
+            let errors = vec![
+                ApiError::Unauthorized,
+                ApiError::BadToken,
+                ApiError::AuthNotConfigured,
+                ApiError::NotFound,
+                ApiError::Conflict(message.clone()),
+                ApiError::ConflictWithDetails {
+                    message: message.clone(),
+                    details: serde_json::json!({"key": "value"}),
+                },
+                ApiError::BadRequest(message.clone()),
+                ApiError::DatabaseError(message.clone()),
+                ApiError::WebhookNotConfigured,
+                ApiError::InvalidWebhookSignature,
+                ApiError::Internal,
+                ApiError::LlmNotConfigured,
+                ApiError::NotImplemented(message.clone()),
+                ApiError::QuotaExceeded(message.clone()),
+                ApiError::ConcurrentLimitExceeded(message.clone()),
+                ApiError::Forbidden(message.clone()),
+            ];
+
+            for error in errors {
+                let resp = runtime.block_on(REQUEST_LOCALE.scope(locale, async {
+                    error.into_response()
+                }));
+
+                let body = decode_error_body(resp);
+
+                // Required fields must be present
+                prop_assert!(body.get("status").is_some(), "status field must be present");
+                prop_assert!(body.get("code").is_some(), "code field must be present");
+                prop_assert!(body.get("message").is_some(), "message field must be present");
+
+                // Validate field types
+                let status = body.get("status").and_then(serde_json::Value::as_u64);
+                prop_assert!(status.is_some(), "status must be a number");
+                prop_assert!(status.unwrap() >= 100 && status.unwrap() < 600, "status must be valid HTTP status code");
+
+                let code = body.get("code").and_then(serde_json::Value::as_str);
+                prop_assert!(code.is_some(), "code must be a string");
+                prop_assert!(!code.unwrap().is_empty(), "code must not be empty");
+
+                let message_val = body.get("message").and_then(serde_json::Value::as_str);
+                prop_assert!(message_val.is_some(), "message must be a string");
+                prop_assert!(!message_val.unwrap().is_empty(), "message must not be empty");
+
+                // Optional fields: request_id, details, retry_after_ms
+                // If present, they must have correct types
+                if let Some(request_id) = body.get("request_id") {
+                    prop_assert!(!request_id.is_null(), "request_id if present must not be null");
+                    if !request_id.is_null() {
+                        prop_assert!(request_id.is_string(), "request_id must be a string");
+                    }
+                }
+
+                if let Some(details) = body.get("details") {
+                    prop_assert!(!details.is_null(), "details if present must not be null");
+                    if !details.is_null() {
+                        prop_assert!(details.is_object() || details.is_array(), "details must be an object or array");
+                    }
+                }
+
+                if let Some(retry_after_ms) = body.get("retry_after_ms") {
+                    prop_assert!(!retry_after_ms.is_null(), "retry_after_ms if present must not be null");
+                    if !retry_after_ms.is_null() {
+                        prop_assert!(retry_after_ms.is_u64(), "retry_after_ms must be a number");
+                    }
+                }
+
+                // Ensure no unexpected fields (only the documented fields should be present)
+                let allowed_fields = ["status", "code", "message", "request_id", "details", "retry_after_ms"];
+                if let Some(obj) = body.as_object() {
+                    for key in obj.keys() {
+                        prop_assert!(allowed_fields.contains(&key.as_str()), "unexpected field: {}", key);
+                    }
+                }
+            }
         }
     }
 }

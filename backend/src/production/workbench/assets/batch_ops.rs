@@ -4,19 +4,23 @@ use axum::{
     Json as JsonResponse,
 };
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 use crate::error::ApiError;
 use crate::jobs::{enqueue_generation_job, JobRow, JOB_KIND_ASSET_GENERATE_BATCH};
 use crate::state::AppState;
 
 use super::common::{
-    require_owned_normalized_assets_scope, require_owned_normalized_assets_user_pool,
+    require_owned_normalized_assets_scope_ref, require_owned_normalized_assets_write_user_pool_ref,
 };
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct BatchGenerateAssetsImageBody {
-    project_id: i32,
+    #[serde(default)]
+    project_id: Option<i32>,
+    #[serde(default)]
+    project_uuid: Option<Uuid>,
     script_id: i32,
     asset_ids: Vec<i32>,
     #[serde(default)]
@@ -55,10 +59,11 @@ pub(in crate::production) async fn post_assets_batch_generate_image(
     headers: HeaderMap,
     Json(body): Json<BatchGenerateAssetsImageBody>,
 ) -> Result<JsonResponse<BatchGenerateAssetsImageResponse>, ApiError> {
-    let (uid, pool) = require_owned_normalized_assets_user_pool(
+    let (uid, pool, project_numeric_id) = require_owned_normalized_assets_write_user_pool_ref(
         &state,
         &headers,
         body.project_id,
+        body.project_uuid,
         body.script_id,
         &body.asset_ids,
     )
@@ -71,12 +76,19 @@ pub(in crate::production) async fn post_assets_batch_generate_image(
     for asset_id in &body.asset_ids {
         let payload = serde_json::json!({
             "source": "production.assets.batch-generate",
-            "project_numeric_id": body.project_id,
+            "project_numeric_id": project_numeric_id,
             "script_id": body.script_id,
             "asset_id": asset_id,
             "model": default_model,
             "resolution": default_resolution,
         });
+        let payload = if let Some(project_uuid) = body.project_uuid {
+            let mut payload = payload;
+            payload["project_uuid"] = serde_json::json!(project_uuid);
+            payload
+        } else {
+            payload
+        };
 
         let row = enqueue_generation_job(
             pool,
@@ -84,6 +96,7 @@ pub(in crate::production) async fn post_assets_batch_generate_image(
             JOB_KIND_ASSET_GENERATE_BATCH,
             payload,
             Some(&headers),
+            &state.billing_config,
         )
         .await?;
         enqueued.push(row);
@@ -99,7 +112,10 @@ pub(in crate::production) async fn post_assets_batch_generate_image(
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(in crate::production) struct DeleteAssetsDerivativeBody {
-    project_id: i32,
+    #[serde(default)]
+    project_id: Option<i32>,
+    #[serde(default)]
+    project_uuid: Option<Uuid>,
     script_id: i32,
     asset_ids: Vec<i32>,
 }
@@ -134,14 +150,16 @@ pub(in crate::production) async fn post_assets_delete_derivative(
     headers: HeaderMap,
     Json(body): Json<DeleteAssetsDerivativeBody>,
 ) -> Result<JsonResponse<DeleteAssetsDerivativeResponse>, ApiError> {
-    let (uid, pool, script_id, uniq) = require_owned_normalized_assets_scope(
-        &state,
-        &headers,
-        body.project_id,
-        body.script_id,
-        &body.asset_ids,
-    )
-    .await?;
+    let (uid, pool, project_numeric_id, script_id, uniq) =
+        require_owned_normalized_assets_scope_ref(
+            &state,
+            &headers,
+            body.project_id,
+            body.project_uuid,
+            body.script_id,
+            &body.asset_ids,
+        )
+        .await?;
 
     let result = sqlx::query(
         r#"
@@ -162,7 +180,7 @@ pub(in crate::production) async fn post_assets_delete_derivative(
         "#,
     )
     .bind(uid)
-    .bind(body.project_id)
+    .bind(project_numeric_id)
     .bind(script_id)
     .bind(&uniq)
     .execute(pool)

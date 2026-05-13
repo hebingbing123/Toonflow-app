@@ -7,6 +7,7 @@ use serde_json::{json, Value};
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
+use crate::error::helpers::{bad_request_i18n, forbidden_i18n, validate_non_empty_string};
 use crate::error::ApiError;
 use crate::jobs::{
     enqueue_generation_job, JobRow, JOB_KIND_SETTINGS_WORKSPACE_SHARED_AUDIT_EXPORT,
@@ -201,7 +202,10 @@ async fn resolve_current_workspace_with_permission(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
     let workspace_id = personal_workspace_id.ok_or_else(|| {
-        ApiError::BadRequest("cannot resolve current workspace for template operations".into())
+        crate::error::bad_request_i18n(
+            "cannot resolve current workspace for template operations",
+            "无法解析当前 workspace，无法执行模板操作",
+        )
     })?;
     Ok((workspace_id, true))
 }
@@ -255,8 +259,18 @@ async fn persist_workspace_shared_templates_and_audit(
         "#,
     )
     .bind(workspace_id)
-    .bind(serde_json::to_value(templates).map_err(|e| ApiError::BadRequest(e.to_string()))?)
-    .bind(serde_json::to_value(audit).map_err(|e| ApiError::BadRequest(e.to_string()))?)
+    .bind(serde_json::to_value(templates).map_err(|e| {
+        bad_request_i18n(
+            &format!("Failed to serialize templates: {}", e),
+            &format!("模板序列化失败：{}", e),
+        )
+    })?)
+    .bind(serde_json::to_value(audit).map_err(|e| {
+        bad_request_i18n(
+            &format!("Failed to serialize audit: {}", e),
+            &format!("审计序列化失败：{}", e),
+        )
+    })?)
     .execute(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
@@ -308,7 +322,10 @@ pub(crate) async fn mark_notifications_read(
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
     if body.ids.is_empty() {
-        return Err(ApiError::BadRequest("ids must not be empty".into()));
+        return Err(crate::error::bad_request_i18n(
+            "ids must not be empty",
+            "ids 不能为空",
+        ));
     }
     let read = body.read.unwrap_or(true);
     let items = mark_notifications_read_state(pool, &state.notify, uid, &body.ids, read).await?;
@@ -367,7 +384,10 @@ pub(crate) async fn delete_notifications(
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
     if body.ids.is_empty() {
-        return Err(ApiError::BadRequest("ids must not be empty".into()));
+        return Err(crate::error::bad_request_i18n(
+            "ids must not be empty",
+            "ids 不能为空",
+        ));
     }
     let deleted_count = delete_notifications_storage(pool, uid, &body.ids).await?;
     let unread_count = unread_notification_count(pool, uid).await?;
@@ -617,14 +637,8 @@ pub(crate) async fn post_notifications_content_compliance_cleared_template(
     let pool = state.require_pool()?;
     let mut prefs = get_notification_preferences(pool, uid).await?;
     let id = body.template.id.trim().to_ascii_lowercase();
-    if id.is_empty() {
-        return Err(ApiError::BadRequest("template.id must not be empty".into()));
-    }
-    if body.template.label.trim().is_empty() {
-        return Err(ApiError::BadRequest(
-            "template.label must not be empty".into(),
-        ));
-    }
+    validate_non_empty_string(&id, "template.id")?;
+    validate_non_empty_string(body.template.label.trim(), "template.label")?;
     let mut next = prefs
         .content_compliance_cleared_templates
         .into_iter()
@@ -666,9 +680,7 @@ pub(crate) async fn delete_notifications_content_compliance_cleared_template(
     let uid = require_user_uuid(&state, &headers)?;
     let pool = state.require_pool()?;
     let target_id = body.id.trim().to_ascii_lowercase();
-    if target_id.is_empty() {
-        return Err(ApiError::BadRequest("id must not be empty".into()));
-    }
+    validate_non_empty_string(&target_id, "id")?;
     let mut prefs = get_notification_preferences(pool, uid).await?;
     let before = prefs.content_compliance_cleared_templates.len();
     prefs
@@ -707,9 +719,7 @@ pub(crate) async fn post_notifications_content_compliance_cleared_template_apply
     let pool = state.require_pool()?;
     let mut prefs = get_notification_preferences(pool, uid).await?;
     let id = body.id.trim().to_ascii_lowercase();
-    if id.is_empty() {
-        return Err(ApiError::BadRequest("id must not be empty".into()));
-    }
+    validate_non_empty_string(&id, "id")?;
     let templates = merged_templates_for_prefs(&prefs);
     let Some(template) = templates
         .iter()
@@ -1188,20 +1198,15 @@ pub(crate) async fn post_notifications_content_compliance_cleared_templates_shar
     let pool = state.require_pool()?;
     let (workspace_id, can_manage) = resolve_current_workspace_with_permission(pool, uid).await?;
     if !can_manage {
-        return Err(ApiError::Forbidden(
-            "only owner/admin can manage shared templates".into(),
+        return Err(forbidden_i18n(
+            "only owner/admin can manage shared templates",
+            "只有所有者/管理员可以管理共享模板",
         ));
     }
     let id = body.template.id.trim().to_ascii_lowercase();
-    if id.is_empty() {
-        return Err(ApiError::BadRequest("template.id must not be empty".into()));
-    }
+    validate_non_empty_string(&id, "template.id")?;
     let label = body.template.label.trim().to_string();
-    if label.is_empty() {
-        return Err(ApiError::BadRequest(
-            "template.label must not be empty".into(),
-        ));
-    }
+    validate_non_empty_string(&label, "template.label")?;
     let mut templates = load_workspace_shared_templates(pool, workspace_id).await?;
     templates.retain(|item| item.id.trim().to_ascii_lowercase() != id);
     let mut template = body.template;
@@ -1257,14 +1262,13 @@ pub(crate) async fn delete_notifications_content_compliance_cleared_templates_sh
     let pool = state.require_pool()?;
     let (workspace_id, can_manage) = resolve_current_workspace_with_permission(pool, uid).await?;
     if !can_manage {
-        return Err(ApiError::Forbidden(
-            "only owner/admin can manage shared templates".into(),
+        return Err(forbidden_i18n(
+            "only owner/admin can manage shared templates",
+            "只有所有者/管理员可以管理共享模板",
         ));
     }
     let id = body.id.trim().to_ascii_lowercase();
-    if id.is_empty() {
-        return Err(ApiError::BadRequest("id must not be empty".into()));
-    }
+    validate_non_empty_string(&id, "id")?;
     let mut templates = load_workspace_shared_templates(pool, workspace_id).await?;
     templates.retain(|item| item.id.trim().to_ascii_lowercase() != id);
     let mut audit = load_workspace_shared_template_audit(pool, workspace_id).await?;

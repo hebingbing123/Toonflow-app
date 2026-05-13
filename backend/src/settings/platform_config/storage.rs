@@ -1,6 +1,7 @@
 use serde_json::{json, Value};
 use sqlx::types::Json as SqlxJson;
 
+use crate::error::helpers::bad_request_i18n;
 use crate::error::ApiError;
 use crate::workspaces::ensure_personal_workspace;
 
@@ -235,7 +236,12 @@ pub(super) async fn save_workspace_platform_config(
     workspace_id: uuid::Uuid,
     cfg: &PlatformConfigToggleSet,
 ) -> Result<(), ApiError> {
-    let cfg_value = serde_json::to_value(cfg).map_err(|e| ApiError::BadRequest(e.to_string()))?;
+    let cfg_value = serde_json::to_value(cfg).map_err(|e| {
+        bad_request_i18n(
+            &format!("Failed to serialize platform config: {}", e),
+            &format!("平台配置序列化失败：{}", e),
+        )
+    })?;
     let cfg_json = SqlxJson(cfg_value);
     sqlx::query(
         r#"
@@ -297,8 +303,9 @@ fn parse_workspace_platform_config(
     // Enterprise workspace override must be explicit and complete; do not silently
     // default missing fields for governance-critical toggles.
     let Some(obj) = raw.as_object() else {
-        return Err(ApiError::BadRequest(
-            "workspace platform_config is invalid: expected JSON object".to_string(),
+        return Err(bad_request_i18n(
+            "workspace platform_config is invalid: expected JSON object",
+            "工作区 platform_config 无效：期望 JSON 对象",
         ));
     };
     const REQUIRED_KEYS: [&str; 7] = [
@@ -312,15 +319,21 @@ fn parse_workspace_platform_config(
     ];
     for key in REQUIRED_KEYS {
         if !obj.contains_key(key) {
-            return Err(ApiError::BadRequest(format!(
-                "workspace platform_config is invalid: missing required key '{key}'"
-            )));
+            return Err(bad_request_i18n(
+                &format!("workspace platform_config is invalid: missing required key '{key}'"),
+                &format!("工作区 platform_config 无效：缺少必需键 '{key}'"),
+            ));
         }
     }
 
     serde_json::from_value(Value::Object(obj.clone()))
         .map(Some)
-        .map_err(|e| ApiError::BadRequest(format!("workspace platform_config is invalid: {e}")))
+        .map_err(|e| {
+            bad_request_i18n(
+                &format!("workspace platform_config is invalid: {e}"),
+                &format!("工作区 platform_config 无效：{e}"),
+            )
+        })
 }
 
 fn merge_platform_config(
@@ -342,9 +355,10 @@ fn load_plan_platform_config_override(
     }
     let parsed: std::collections::BTreeMap<String, PlatformConfigToggleSet> =
         serde_json::from_str(normalized).map_err(|e| {
-            ApiError::BadRequest(format!(
-                "{PLAN_OVERRIDES_ENV} must be a JSON object keyed by plan tier: {e}"
-            ))
+            bad_request_i18n(
+                &format!("{PLAN_OVERRIDES_ENV} must be a JSON object keyed by plan tier: {e}"),
+                &format!("{PLAN_OVERRIDES_ENV} 必须是按计划层级键入的 JSON 对象：{e}"),
+            )
         })?;
     let normalized_tier = plan_tier.trim().to_ascii_lowercase();
     Ok(parsed

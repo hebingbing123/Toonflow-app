@@ -8,6 +8,8 @@ class _AuthSectionContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -16,9 +18,7 @@ class _AuthSectionContent extends StatelessWidget {
         const SizedBox(height: 8),
         if (!kSupabaseConfigured)
           Text(
-            '未配置：运行示例\n'
-            'flutter run --dart-define=SUPABASE_URL=... '
-            '--dart-define=SUPABASE_ANON_KEY=...',
+            l10n.authSupabaseNotConfigured,
             style: Theme.of(context).textTheme.bodySmall,
           )
         else ...[
@@ -40,10 +40,10 @@ class _AuthSectionContent extends StatelessWidget {
             spacing: 8,
             runSpacing: 8,
             children: [
-              FilledButton(onPressed: callbacks.onSignIn, child: const Text('登录')),
-              OutlinedButton(onPressed: callbacks.onSignUp, child: const Text('注册')),
+              FilledButton(onPressed: callbacks.onSignIn, child: Text(l10n.authSignIn)),
+              OutlinedButton(onPressed: callbacks.onSignUp, child: Text(l10n.authSignUp)),
               if (model.signedIn)
-                TextButton(onPressed: callbacks.onSignOut, child: const Text('退出')),
+                TextButton(onPressed: callbacks.onSignOut, child: Text(l10n.authSignOut)),
             ],
           ),
           if (model.signedIn) _AuthSignedInPanel(model: model, callbacks: callbacks),
@@ -61,32 +61,34 @@ class _AuthSignedInPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 12),
-        Text('已登录 user: ${model.session?.user.id ?? ''}'),
+        Text(l10n.authSignedInUser(model.session?.user.id ?? '')),
         const SizedBox(height: 8),
         FilledButton.tonal(
           onPressed: model.loadingMe ? null : callbacks.onCallMe,
-          child: Text(model.loadingMe ? '请求中…' : 'GET /api/v1/me (Bearer)'),
+          child: Text(model.loadingMe ? l10n.authRequestInProgress : l10n.authGetMeBearer),
         ),
         if (model.meBody != null) ...[
           const SizedBox(height: 8),
-          SelectableText('/me: ${model.meBody}'),
+          SelectableText(l10n.authMeResponse(model.meBody!)),
         ],
         const SizedBox(height: 8),
         FilledButton.tonal(
           onPressed: model.loadingDevSwitchProbe ? null : callbacks.onCallDevSwitchProbe,
           child: Text(
             model.loadingDevSwitchProbe
-                ? '请求中…'
-                : 'GET+PUT /api/v1/settings/dev/switch-ai-tool',
+                ? l10n.authRequestInProgress
+                : l10n.authDevSwitchProbe,
           ),
         ),
         if (model.devSwitchProbeBody != null) ...[
           const SizedBox(height: 8),
-          SelectableText('dev switch: ${model.devSwitchProbeBody}'),
+          SelectableText(l10n.authDevSwitchResponse(model.devSwitchProbeBody!)),
         ],
         const SizedBox(height: 8),
         FilledButton.tonal(
@@ -94,60 +96,60 @@ class _AuthSignedInPanel extends StatelessWidget {
               model.loadingMemoryConfigProbe ? null : callbacks.onCallMemoryConfigProbe,
           child: Text(
             model.loadingMemoryConfigProbe
-                ? '请求中…'
-                : 'memory-config GET+POST + clear-agent-memories',
+                ? l10n.authRequestInProgress
+                : l10n.authMemoryConfigProbe,
           ),
         ),
         if (model.memoryConfigProbeBody != null) ...[
           const SizedBox(height: 8),
-          SelectableText('memory-config: ${model.memoryConfigProbeBody}'),
+          SelectableText(l10n.authMemoryConfigResponse(model.memoryConfigProbeBody!)),
         ],
         const SizedBox(height: 8),
         FilledButton.tonal(
           onPressed: model.loadingAboutProbe ? null : callbacks.onCallAboutProbe,
           child: Text(
             model.loadingAboutProbe
-                ? '请求中…'
-                : 'POST …/settings/about/check-update + download-app',
+                ? l10n.authRequestInProgress
+                : l10n.authAboutProbe,
           ),
         ),
         if (model.aboutProbeBody != null) ...[
           const SizedBox(height: 8),
-          SelectableText('about: ${model.aboutProbeBody}'),
+          SelectableText(l10n.authAboutResponse(model.aboutProbeBody!)),
         ],
         const SizedBox(height: 8),
         FilledButton.tonal(
           onPressed: model.loadingUsageSummary ? null : callbacks.onCallUsageSummary,
           child: Text(
-            model.loadingUsageSummary ? '请求中…' : 'GET /api/v1/usage/summary',
+            model.loadingUsageSummary ? l10n.authRequestInProgress : l10n.authUsageSummary,
           ),
         ),
         if (model.usageSummaryBody != null) ...[
           const SizedBox(height: 8),
-          SelectableText('usage: ${model.usageSummaryBody}'),
+          SelectableText(l10n.authUsageResponse(model.usageSummaryBody!)),
         ],
         const SizedBox(height: 8),
         FilledButton.tonal(
           onPressed: model.loadingPromptsProbe ? null : callbacks.onCallPromptsProbe,
           child: Text(
-            model.loadingPromptsProbe ? '请求中…' : 'GET /api/v1/prompts + GET/1 + PATCH/1',
+            model.loadingPromptsProbe ? l10n.authRequestInProgress : l10n.authPromptsProbe,
           ),
         ),
         if (model.promptsProbeBody != null) ...[
           const SizedBox(height: 8),
-          SelectableText('prompts: ${model.promptsProbeBody}'),
+          SelectableText(l10n.authPromptsResponse(model.promptsProbeBody!)),
         ],
         const SizedBox(height: 8),
         FilledButton.tonal(
           onPressed:
               model.loadingVisualManualProbe ? null : callbacks.onCallVisualManualProbe,
           child: Text(
-            model.loadingVisualManualProbe ? '请求中…' : 'GET+POST /api/v1/visual-manual',
+            model.loadingVisualManualProbe ? l10n.authRequestInProgress : l10n.authVisualManualProbe,
           ),
         ),
         if (model.visualManualProbeBody != null) ...[
           const SizedBox(height: 8),
-          SelectableText('visual-manual: ${model.visualManualProbeBody}'),
+          SelectableText(l10n.authVisualManualResponse(model.visualManualProbeBody!)),
         ],
         const SizedBox(height: 8),
         FilledButton.tonal(
@@ -155,13 +157,13 @@ class _AuthSignedInPanel extends StatelessWidget {
               model.loadingDirectorManualProbe ? null : callbacks.onCallDirectorManualProbe,
           child: Text(
             model.loadingDirectorManualProbe
-                ? '请求中…'
-                : 'POST …/project/query-director-manual',
+                ? l10n.authRequestInProgress
+                : l10n.authDirectorManualProbe,
           ),
         ),
         if (model.directorManualProbeBody != null) ...[
           const SizedBox(height: 8),
-          SelectableText('director-manual: ${model.directorManualProbeBody}'),
+          SelectableText(l10n.authDirectorManualResponse(model.directorManualProbeBody!)),
         ],
         const SizedBox(height: 8),
         FilledButton.tonal(
@@ -169,13 +171,13 @@ class _AuthSignedInPanel extends StatelessWidget {
               model.loadingSkillsBinaryProbe ? null : callbacks.onCallSkillsBinaryProbe,
           child: Text(
             model.loadingSkillsBinaryProbe
-                ? '请求中…'
-                : 'GET /api/v1/skills/binary (_smoke PNG)',
+                ? l10n.authRequestInProgress
+                : l10n.authSkillsBinaryProbe,
           ),
         ),
         if (model.skillsBinaryProbeBody != null) ...[
           const SizedBox(height: 8),
-          SelectableText('skills/binary: ${model.skillsBinaryProbeBody}'),
+          SelectableText(l10n.authSkillsBinaryResponse(model.skillsBinaryProbeBody!)),
         ],
         const SizedBox(height: 8),
         Wrap(
@@ -186,8 +188,8 @@ class _AuthSignedInPanel extends StatelessWidget {
               onPressed: model.loadingModelsCatalog ? null : callbacks.onCallModelsCatalog,
               child: Text(
                 model.loadingModelsCatalog
-                    ? '请求中…'
-                    : 'models + vendors + vendor-add + danger + production + agent-deploy + model-test + script-agent + assets-gen',
+                    ? l10n.authRequestInProgress
+                    : l10n.authModelsCatalogProbe,
               ),
             ),
             FilledButton.tonal(
@@ -195,31 +197,31 @@ class _AuthSignedInPanel extends StatelessWidget {
                   model.loadingTextModelDefault ? null : callbacks.onCallTextModelDefault,
               child: Text(
                 model.loadingTextModelDefault
-                    ? '请求中…'
-                    : 'GET+PATCH /api/v1/models/text-default',
+                    ? l10n.authRequestInProgress
+                    : l10n.authTextModelDefaultProbe,
               ),
             ),
             FilledButton.tonal(
               onPressed: model.loadingModelDetail ? null : callbacks.onCallModelDetail,
               child: Text(
                 model.loadingModelDetail
-                    ? '请求中…'
-                    : 'GET /api/v1/models/detail (1:gpt-4o-mini)',
+                    ? l10n.authRequestInProgress
+                    : l10n.authModelDetailProbe,
               ),
             ),
           ],
         ),
         if (model.modelsCatalogBody != null) ...[
           const SizedBox(height: 8),
-          SelectableText('models: ${model.modelsCatalogBody}'),
+          SelectableText(l10n.authModelsResponse(model.modelsCatalogBody!)),
         ],
         if (model.textModelDefaultBody != null) ...[
           const SizedBox(height: 8),
-          SelectableText('text-default: ${model.textModelDefaultBody}'),
+          SelectableText(l10n.authTextDefaultResponse(model.textModelDefaultBody!)),
         ],
         if (model.modelDetailBody != null) ...[
           const SizedBox(height: 8),
-          SelectableText('model detail: ${model.modelDetailBody}'),
+          SelectableText(l10n.authModelDetailResponse(model.modelDetailBody!)),
         ],
       ],
     );

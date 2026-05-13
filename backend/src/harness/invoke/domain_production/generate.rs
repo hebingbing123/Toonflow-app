@@ -67,6 +67,7 @@ pub(crate) async fn invoke_generate_derive_asset(
     for asset_id in &valid_ids {
         let payload = json!({
             "source": "production.assets.batch-generate",
+            "project_uuid": scope.project_id,
             "project_numeric_id": project_numeric_id,
             "script_id": script_numeric_id,
             "asset_id": asset_id,
@@ -79,6 +80,7 @@ pub(crate) async fn invoke_generate_derive_asset(
             JOB_KIND_ASSET_GENERATE_BATCH,
             payload,
             None,
+            &ctx.billing_config,
         )
         .await
         .map_err(|e| map_api_error(e, "failed to enqueue derived-asset generation job"))?;
@@ -137,6 +139,7 @@ pub(crate) async fn invoke_generate_storyboard(
     for row in rows {
         let payload = json!({
             "source": "production.storyboard.batch-generate-image",
+            "project_uuid": scope.project_id,
             "project_numeric_id": project_numeric_id,
             "script_id": script_numeric_id,
             "storyboard_numeric_id": row.numeric_id,
@@ -150,6 +153,7 @@ pub(crate) async fn invoke_generate_storyboard(
             JOB_KIND_ASSET_GENERATE_BATCH,
             payload,
             None,
+            &ctx.billing_config,
         )
         .await
         .map_err(|e| map_api_error(e, "failed to enqueue storyboard generation job"))?;

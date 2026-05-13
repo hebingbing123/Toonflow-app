@@ -2,11 +2,14 @@
 /// `GET /api/v1/usage/summary` — OpenAPI `UsageSummaryResponse`.
 class UsageSummaryResponse {
   const UsageSummaryResponse({
+    required this.scope,
     required this.eventsLast24h,
     required this.eventsLast7d,
     required this.eventCountsLast7d,
   });
 
+  /// Aggregation scope for this response: "user" or "workspace"
+  final String scope;
   final int eventsLast24h;
   final int eventsLast7d;
   final Map<String, int> eventCountsLast7d;
@@ -22,6 +25,7 @@ class UsageSummaryResponse {
       });
     }
     return UsageSummaryResponse(
+      scope: json['scope'] as String,
       eventsLast24h: (json['events_last_24h'] as num).toInt(),
       eventsLast7d: (json['events_last_7d'] as num).toInt(),
       eventCountsLast7d: counts,

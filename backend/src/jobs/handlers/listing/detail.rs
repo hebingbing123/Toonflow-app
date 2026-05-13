@@ -19,6 +19,34 @@ use super::super::common::{fetch_job_by_id, fetch_job_by_numeric_task_id, requir
     path = "/api/v1/jobs/task-detail/{task_id}",
     operation_id = "getJobTaskDetailCompatV1",
     tag = "jobs",
+    description = "Get job details by task ID (compatibility endpoint) with workspace visibility validation.
+
+This endpoint accepts either a UUID or a numeric task ID for backward compatibility.
+
+## Visibility Rules
+
+A job is accessible to the authenticated user if:
+
+1. **Owner access**: The user is the job owner (`owner_user_id` matches the authenticated user)
+2. **Workspace member access**: The job is associated with a project in a workspace where the user is a member
+
+### Project Association
+
+Jobs are associated with a project when the job payload contains project scope fields:
+- `project_uuid`: Preferred project UUID (`app_project.id`)
+- `project_numeric_id`: Legacy numeric project ID fallback
+
+### Personal Jobs
+
+Jobs without project information (no `project_uuid` or `project_numeric_id` in payload) are **personal jobs** and are only accessible to the job owner.
+
+### Archived Projects
+
+Jobs associated with archived projects are excluded from workspace member access. Only the job owner can access jobs for archived projects.
+
+### Access Denied
+
+If the user does not have access to the job, the endpoint returns 404 Not Found (not 403 Forbidden) to maintain security by not revealing the existence of jobs the user cannot access.",
     responses(
         (status = 200, description = "OK", body = serde_json::Value),
         (status = 400, description = "Bad request", body = crate::error::ErrorBody),
@@ -41,8 +69,9 @@ pub(crate) async fn get_job_task_detail_compat(
 
     let s = task_id.trim();
     if s.is_empty() {
-        return Err(ApiError::BadRequest(
-            "task_id path segment must not be empty".into(),
+        return Err(crate::error::bad_request_i18n(
+            "task_id path segment must not be empty",
+            "task_id 路径段不能为空",
         ));
     }
 
@@ -54,8 +83,9 @@ pub(crate) async fn get_job_task_detail_compat(
 
     if let Ok(parsed_task) = s.parse::<i64>() {
         if parsed_task <= 0 {
-            return Err(ApiError::BadRequest(
-                "task_id must be a UUID or a positive integer".into(),
+            return Err(crate::error::bad_request_i18n(
+                "task_id must be a UUID or a positive integer",
+                "task_id 必须是 UUID 或正整数",
             ));
         }
         let pool = require_pool(&state)?;
@@ -63,8 +93,9 @@ pub(crate) async fn get_job_task_detail_compat(
         return Ok(Json(row));
     }
 
-    Err(ApiError::BadRequest(
-        "task_id must be a UUID or a positive integer".into(),
+    Err(crate::error::bad_request_i18n(
+        "task_id must be a UUID or a positive integer",
+        "task_id 必须是 UUID 或正整数",
     ))
 }
 
@@ -73,6 +104,32 @@ pub(crate) async fn get_job_task_detail_compat(
     path = "/api/v1/jobs/{id}",
     operation_id = "getJobV1",
     tag = "jobs",
+    description = "Get job details by ID with workspace visibility validation.
+
+## Visibility Rules
+
+A job is accessible to the authenticated user if:
+
+1. **Owner access**: The user is the job owner (`owner_user_id` matches the authenticated user)
+2. **Workspace member access**: The job is associated with a project in a workspace where the user is a member
+
+### Project Association
+
+Jobs are associated with a project when the job payload contains project scope fields:
+- `project_uuid`: Preferred project UUID (`app_project.id`)
+- `project_numeric_id`: Legacy numeric project ID fallback
+
+### Personal Jobs
+
+Jobs without project information (no `project_uuid` or `project_numeric_id` in payload) are **personal jobs** and are only accessible to the job owner.
+
+### Archived Projects
+
+Jobs associated with archived projects are excluded from workspace member access. Only the job owner can access jobs for archived projects.
+
+### Access Denied
+
+If the user does not have access to the job, the endpoint returns 404 Not Found (not 403 Forbidden) to maintain security by not revealing the existence of jobs the user cannot access.",
     responses(
         (status = 200, description = "OK", body = serde_json::Value),
         (status = 400, description = "Bad request", body = crate::error::ErrorBody),
@@ -195,9 +252,12 @@ pub(crate) async fn get_job_file(
         return Err(ApiError::NotFound);
     };
     if export_url.starts_with("http://") || export_url.starts_with("https://") {
-        let _: axum::http::Uri = export_url
-            .parse()
-            .map_err(|_| ApiError::BadRequest("job export_url is not a valid URL".into()))?;
+        let _: axum::http::Uri = export_url.parse().map_err(|_| {
+            crate::error::bad_request_i18n(
+                "job export_url is not a valid URL",
+                "job export_url 不是有效的 URL",
+            )
+        })?;
         return Ok(Redirect::temporary(export_url).into_response());
     }
 

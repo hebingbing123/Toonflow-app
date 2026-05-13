@@ -1,4 +1,5 @@
 mod hmac;
+mod ops_view;
 mod stripe_signature;
 
 use ::hmac::{Hmac, Mac};

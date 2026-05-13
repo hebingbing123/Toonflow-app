@@ -95,6 +95,7 @@ mod tests {
             None,
             None,
             None,
+            crate::metering::BillingConfig::default(),
         )
     }
 

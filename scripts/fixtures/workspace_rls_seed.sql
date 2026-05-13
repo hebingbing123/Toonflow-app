@@ -251,7 +251,8 @@ INSERT INTO public.app_generation_job (
   kind,
   status,
   payload,
-  idempotency_key
+  idempotency_key,
+  workspace_id
 )
 VALUES
   (
@@ -264,7 +265,8 @@ VALUES
       'project_numeric_id', 1001,
       'workspace_id', '20000000-0000-0000-0000-000000000010'
     ),
-    'workspace-rls-seed-job'
+    'workspace-rls-seed-job',
+    '20000000-0000-0000-0000-000000000010'::uuid
   )
 ON CONFLICT (owner_user_id, idempotency_key)
 WHERE idempotency_key IS NOT NULL

@@ -29,18 +29,9 @@ CREATE INDEX IF NOT EXISTS idx_app_generation_job_workspace_status
   ON public.app_generation_job (workspace_id, status, created_at DESC)
   WHERE workspace_id IS NOT NULL;
 
--- Index for daily job quota enforcement (UTC day boundary)
--- Optimized for queries like:
---   SELECT COUNT(*) FROM app_generation_job
---   WHERE workspace_id = ? 
---     AND created_at >= date_trunc('day', NOW() AT TIME ZONE 'UTC')
---     AND created_at < date_trunc('day', NOW() AT TIME ZONE 'UTC') + INTERVAL '1 day'
--- Note: Uses partial index (WHERE workspace_id IS NOT NULL) for efficiency
--- during migration period when many rows have NULL workspace_id
-CREATE INDEX IF NOT EXISTS idx_app_generation_job_workspace_daily
-  ON public.app_generation_job (workspace_id, created_at)
-  WHERE workspace_id IS NOT NULL
-    AND created_at >= date_trunc('day', NOW() AT TIME ZONE 'UTC');
+-- Daily quota queries use `idx_app_generation_job_workspace_created` with a runtime
+-- `created_at >= date_trunc('day', now() AT TIME ZONE 'UTC')` predicate in WHERE.
+-- A partial index cannot reference `now()` / `NOW()` (not IMMUTABLE in PostgreSQL).
 
 -- Comments documenting the nullable semantics and workspace billing attribution
 COMMENT ON COLUMN public.app_generation_job.workspace_id IS 
@@ -48,7 +39,6 @@ COMMENT ON COLUMN public.app_generation_job.workspace_id IS
 
 -- Rollback guidance (for phase 1 additive-only migration):
 -- To rollback this migration (before workspace-scope billing is activated):
---   DROP INDEX IF EXISTS public.idx_app_generation_job_workspace_daily;
 --   DROP INDEX IF EXISTS public.idx_app_generation_job_workspace_status;
 --   DROP INDEX IF EXISTS public.idx_app_generation_job_workspace_created;
 --   ALTER TABLE public.app_generation_job DROP COLUMN IF EXISTS workspace_id;

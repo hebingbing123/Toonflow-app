@@ -8,11 +8,12 @@ use axum::{
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{validate_positive, ApiError};
 use crate::state::AppState;
 
 use super::super::crud::{
-    resolve_owned_asset_id_and_metadata_for_project, resolve_owned_asset_id_for_project,
+    require_asset_project_read_scope, resolve_owned_asset_id_and_metadata_for_project,
+    resolve_owned_asset_id_for_project,
 };
 use super::super::models::*;
 use super::super::utils::metadata_cover_numeric_image_id;
@@ -23,15 +24,14 @@ pub(in crate::assets) async fn list_project_asset_images_for_project(
     headers: HeaderMap,
 ) -> Result<Json<ListAssetImagesResponse>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-
-    if asset_numeric_id <= 0 {
-        return Err(ApiError::BadRequest("numeric ids must be positive".into()));
-    }
+    validate_positive(asset_numeric_id, "numeric ids")?;
 
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    require_asset_project_read_scope(&state, uid, project_id).await?;
 
     let (asset_id, metadata) =
         resolve_owned_asset_id_and_metadata_for_project(pool, uid, project_id, asset_numeric_id)
@@ -71,15 +71,14 @@ pub(in crate::assets) async fn get_project_asset_image_for_project(
     headers: HeaderMap,
 ) -> Result<Json<AssetImageRow>, ApiError> {
     let uid = require_user_uuid(&state, &headers)?;
-
-    if asset_numeric_id <= 0 {
-        return Err(ApiError::BadRequest("numeric ids must be positive".into()));
-    }
+    validate_positive(asset_numeric_id, "numeric ids")?;
 
     let pool = state
         .pool
         .as_ref()
         .ok_or_else(|| ApiError::DatabaseError("DATABASE_URL not configured".into()))?;
+
+    require_asset_project_read_scope(&state, uid, project_id).await?;
 
     let asset_id =
         resolve_owned_asset_id_for_project(pool, uid, project_id, asset_numeric_id).await?;

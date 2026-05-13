@@ -32,4 +32,9 @@ async fn skills_summary_ok_with_jwt_when_skills_tree_present() {
         value["markdown_file_count"].as_u64().unwrap_or(0) > 0,
         "repo ships backend/data/skills markdown"
     );
+    assert_eq!(
+        value["scope"].as_str(),
+        Some("user"),
+        "scope field should be present and set to 'user'"
+    );
 }

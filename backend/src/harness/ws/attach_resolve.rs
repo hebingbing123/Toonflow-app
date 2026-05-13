@@ -4,7 +4,7 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::assets::resolve_owned_project_pk_and_numeric_from_uuid_or_legacy_id;
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, ApiError};
 use crate::scope::{self, resolve_owned_script_numeric_from_uuid_or_legacy_id};
 
 #[derive(Debug, Clone)]
@@ -24,13 +24,15 @@ pub(crate) fn enforce_workspace_uuid_claim(
         return Ok(());
     };
     let Some(actual) = resolved_workspace_id else {
-        return Err(ApiError::BadRequest(
-            "workspaceUuid requires database-backed project resolution".into(),
+        return Err(bad_request_i18n(
+            "workspaceUuid requires database-backed project resolution",
+            "workspaceUuid 需要基于数据库的项目解析",
         ));
     };
     if actual != claimed {
-        return Err(ApiError::BadRequest(
-            "workspaceUuid does not match project workspace".into(),
+        return Err(bad_request_i18n(
+            "workspaceUuid does not match project workspace",
+            "workspaceUuid 与项目所属 workspace 不匹配",
         ));
     }
     Ok(())
@@ -47,13 +49,15 @@ pub(crate) async fn resolve_ws_attach_project(
         .filter(|&n| n > 0);
 
     match (project_uuid, legacy) {
-        (None, None) => Err(ApiError::BadRequest(
-            "Provide projectUuid (preferred) or legacy numeric project_id".into(),
+        (None, None) => Err(bad_request_i18n(
+            "Provide projectUuid (preferred) or legacy numeric project_id",
+            "请提供 projectUuid（推荐）或旧版 numeric project_id",
         )),
         (Some(u), legacy_opt) => {
             let Some(pool) = pool else {
-                return Err(ApiError::BadRequest(
-                    "Database not configured; cannot resolve projectUuid".into(),
+                return Err(bad_request_i18n(
+                    "Database not configured; cannot resolve projectUuid",
+                    "数据库未配置，无法解析 projectUuid",
                 ));
             };
             let (pk, num, ws) = resolve_owned_project_pk_and_numeric_from_uuid_or_legacy_id(
@@ -106,17 +110,22 @@ pub(crate) async fn resolve_ws_attach_script_production(
         .filter(|&n| n > 0);
 
     match (script_uuid, legacy_script) {
-        (None, None) => Err(ApiError::BadRequest(
-            "Provide scriptUuid (preferred) or legacy numeric script_id".into(),
+        (None, None) => Err(bad_request_i18n(
+            "Provide scriptUuid (preferred) or legacy numeric script_id",
+            "请提供 scriptUuid（推荐）或旧版 numeric script_id",
         )),
         (Some(u), opt_n) => {
             let Some(pool) = pool else {
-                return Err(ApiError::BadRequest(
-                    "Database not configured; cannot resolve scriptUuid".into(),
+                return Err(bad_request_i18n(
+                    "Database not configured; cannot resolve scriptUuid",
+                    "数据库未配置，无法解析 scriptUuid",
                 ));
             };
             let pk = project.project_pk.ok_or_else(|| {
-                ApiError::BadRequest("Resolve project with database before using scriptUuid".into())
+                bad_request_i18n(
+                    "Resolve project with database before using scriptUuid",
+                    "使用 scriptUuid 前需要先通过数据库解析项目",
+                )
             })?;
             resolve_owned_script_numeric_from_uuid_or_legacy_id(pool, user_id, pk, Some(u), opt_n)
                 .await

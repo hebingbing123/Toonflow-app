@@ -5,7 +5,7 @@ use axum::{
 };
 
 use crate::auth::require_user_uuid;
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, ApiError};
 use crate::state::AppState;
 
 use super::storage::{load_visual_manual, sync_visual_images, write_visual_slots};
@@ -26,14 +26,17 @@ pub(super) async fn post_add_visual_manual(
 
     let main_path = art_skills_style_dir(&body.style_path)?;
     if main_path.exists() {
-        return Err(ApiError::BadRequest("请勿填写重复名称的视觉手册".into()));
+        return Err(bad_request_i18n(
+            "Duplicate visual manual name is not allowed",
+            "请勿填写重复名称的视觉手册",
+        ));
     }
 
     std::fs::create_dir_all(&main_path).map_err(|e| {
-        ApiError::BadRequest(format!(
-            "visual-manual: create {}: {e}",
-            main_path.display()
-        ))
+        bad_request_i18n(
+            &format!("visual-manual: create {}: {e}", main_path.display()),
+            &format!("visual-manual：创建 {} 失败：{e}", main_path.display()),
+        )
     })?;
 
     if let Err(e) = write_visual_slots(&main_path, &body.name, &body.data, false) {
@@ -59,7 +62,10 @@ pub(super) async fn post_edit_visual_manual(
 
     let main_path = art_skills_style_dir(&body.style_path)?;
     if !main_path.is_dir() {
-        return Err(ApiError::BadRequest("视觉手册不存在".into()));
+        return Err(bad_request_i18n(
+            "Visual manual does not exist",
+            "视觉手册不存在",
+        ));
     }
 
     write_visual_slots(&main_path, &body.name, &body.data, true)?;

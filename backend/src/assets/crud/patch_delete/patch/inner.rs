@@ -6,7 +6,7 @@ use sqlx::{types::Json as SqlxJson, PgPool};
 use uuid::Uuid;
 
 use crate::assets::models::{AssetPatchCurrent, AssetRow, PatchAssetBody};
-use crate::error::ApiError;
+use crate::error::{bad_request_i18n, validate_positive, ApiError};
 use crate::http_kit::json_patch::{
     parse_optional_i32_field, parse_optional_text_field, FieldPatch,
 };
@@ -26,14 +26,15 @@ fn parse_candidate_status_patch(v: Option<Value>) -> Result<FieldPatch<String>, 
             }
             match t.as_str() {
                 "pending" | "linked" | "ignored" => Ok(FieldPatch::Set(Some(t))),
-                _ => Err(ApiError::BadRequest(
-                    "candidate_status must be pending, linked, or ignored (or null to clear)"
-                        .into(),
+                _ => Err(bad_request_i18n(
+                    "candidate_status must be pending, linked, or ignored (or null to clear)",
+                    "candidate_status 必须是 pending、linked、ignored 之一（或传 null 清空）",
                 )),
             }
         }
-        _ => Err(ApiError::BadRequest(
-            "candidate_status must be a string or null".into(),
+        _ => Err(bad_request_i18n(
+            "candidate_status must be a string or null",
+            "candidate_status 必须是字符串或 null",
         )),
     }
 }
@@ -45,9 +46,7 @@ pub(super) async fn patch_project_asset_inner(
     asset_numeric_id: i32,
     body: PatchAssetBody,
 ) -> Result<Json<AssetRow>, ApiError> {
-    if asset_numeric_id <= 0 {
-        return Err(ApiError::BadRequest("numeric ids must be positive".into()));
-    }
+    validate_positive(asset_numeric_id, "numeric ids")?;
 
     let name_patch = parse_optional_text_field(body.name, "name")?;
     let desc_patch = parse_optional_text_field(body.description, "description")?;
@@ -62,9 +61,9 @@ pub(super) async fn patch_project_asset_inner(
         && matches!(cover_patch, FieldPatch::Absent)
         && matches!(candidate_patch, FieldPatch::Absent)
     {
-        return Err(ApiError::BadRequest(
-            "expected at least one of: name, description, asset_type, cover_numeric_image_id, candidate_status"
-                .into(),
+        return Err(bad_request_i18n(
+            "expected at least one of: name, description, asset_type, cover_numeric_image_id, candidate_status",
+            "name、description、asset_type、cover_numeric_image_id、candidate_status 至少需要提供一个",
         ));
     }
 
@@ -86,8 +85,9 @@ pub(super) async fn patch_project_asset_inner(
 
     if let FieldPatch::Set(Some(leg)) = &cover_patch {
         if !cover_numeric_image_exists_for_asset(pool, current.id, *leg).await? {
-            return Err(ApiError::BadRequest(
-                "cover_numeric_image_id must match an app_asset_image row for this asset".into(),
+            return Err(bad_request_i18n(
+                "cover_numeric_image_id must match an app_asset_image row for this asset",
+                "cover_numeric_image_id 必须匹配该资产下的一条 app_asset_image 记录",
             ));
         }
     }
@@ -99,7 +99,7 @@ pub(super) async fn patch_project_asset_inner(
         FieldPatch::Set(v) => v.clone().unwrap_or_default(),
     };
     if new_name.trim().is_empty() {
-        return Err(ApiError::BadRequest("name cannot be empty".into()));
+        return Err(bad_request_i18n("name cannot be empty", "name 不能为空"));
     }
 
     let new_desc = match &desc_patch {
@@ -111,8 +111,9 @@ pub(super) async fn patch_project_asset_inner(
         FieldPatch::Absent => current.asset_type.clone(),
         FieldPatch::Set(Some(t)) => t.clone(),
         FieldPatch::Set(None) => {
-            return Err(ApiError::BadRequest(
-                "asset_type cannot be null; omit or set role|tool|scene".into(),
+            return Err(bad_request_i18n(
+                "asset_type cannot be null; omit or set role|tool|scene",
+                "asset_type 不能为 null；请省略该字段或设置为 role|tool|scene",
             ));
         }
     };
@@ -143,7 +144,12 @@ pub(super) async fn patch_project_asset_inner(
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
         if clash {
             return Err(ApiError::Conflict(
-                "another asset in this project already uses that name".into(),
+                match crate::error::locale::current_locale() {
+                    crate::error::ApiLocale::En => {
+                        "another asset in this project already uses that name".into()
+                    }
+                    crate::error::ApiLocale::Zh => "项目中已有其他资产使用该名称".into(),
+                },
             ));
         }
     }

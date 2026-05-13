@@ -10,8 +10,9 @@ use super::dto::JobRow;
 use super::kinds::{
     JOB_KIND_ASSET_GENERATE_BATCH, JOB_KIND_ASSET_GENERATE_IMAGE, JOB_KIND_ASSET_POLISH_BATCH,
     JOB_KIND_ASSET_POLISH_PROMPT, JOB_KIND_BGM_GENERATE, JOB_KIND_FLUTTER_PROBE,
-    JOB_KIND_SETTINGS_VENDOR_MODEL_TEST, JOB_KIND_SUBTITLE_GENERATE, JOB_KIND_VIDEO_EXPORT,
-    JOB_KIND_VIDEO_GENERATE, JOB_KIND_VOICEOVER_GENERATE,
+    JOB_KIND_SETTINGS_ACCOUNT_EXPORT, JOB_KIND_SETTINGS_VENDOR_MODEL_TEST,
+    JOB_KIND_SETTINGS_WORKSPACE_SHARED_AUDIT_EXPORT, JOB_KIND_SUBTITLE_GENERATE,
+    JOB_KIND_VIDEO_EXPORT, JOB_KIND_VIDEO_GENERATE, JOB_KIND_VOICEOVER_GENERATE,
 };
 
 /// TTS / speech synthesis leg of narration (**`voiceover.generate`** worker).
@@ -28,6 +29,9 @@ pub const JOB_SUB_KIND_ASSET_POLISH_SINGLE: &str = "asset.polish.single";
 pub const JOB_SUB_KIND_ASSET_POLISH_BATCH: &str = "asset.polish.batch";
 pub const JOB_SUB_KIND_SYSTEM_PROBE: &str = "system.probe";
 pub const JOB_SUB_KIND_SETTINGS_VENDOR_TEST: &str = "settings.vendor.model_test";
+pub const JOB_SUB_KIND_SETTINGS_ACCOUNT_EXPORT: &str = "settings.account.export";
+pub const JOB_SUB_KIND_SETTINGS_WORKSPACE_SHARED_AUDIT_EXPORT: &str =
+    "settings.workspace_shared_audit.export";
 
 pub const PRODUCTION_PHASE_NARRATION: &str = "post_production.narration";
 pub const PRODUCTION_PHASE_SUBTITLE: &str = "post_production.subtitle";
@@ -51,6 +55,10 @@ fn default_job_sub_kind(kind: &str) -> Option<&'static str> {
         k if k == JOB_KIND_ASSET_POLISH_BATCH => JOB_SUB_KIND_ASSET_POLISH_BATCH,
         k if k == JOB_KIND_FLUTTER_PROBE => JOB_SUB_KIND_SYSTEM_PROBE,
         k if k == JOB_KIND_SETTINGS_VENDOR_MODEL_TEST => JOB_SUB_KIND_SETTINGS_VENDOR_TEST,
+        k if k == JOB_KIND_SETTINGS_ACCOUNT_EXPORT => JOB_SUB_KIND_SETTINGS_ACCOUNT_EXPORT,
+        k if k == JOB_KIND_SETTINGS_WORKSPACE_SHARED_AUDIT_EXPORT => {
+            JOB_SUB_KIND_SETTINGS_WORKSPACE_SHARED_AUDIT_EXPORT
+        }
         _ => return None,
     })
 }
@@ -70,7 +78,11 @@ fn default_production_phase(kind: &str) -> Option<&'static str> {
         {
             PRODUCTION_PHASE_ASSETS
         }
-        k if k == JOB_KIND_FLUTTER_PROBE || k == JOB_KIND_SETTINGS_VENDOR_MODEL_TEST => {
+        k if k == JOB_KIND_FLUTTER_PROBE
+            || k == JOB_KIND_SETTINGS_VENDOR_MODEL_TEST
+            || k == JOB_KIND_SETTINGS_ACCOUNT_EXPORT
+            || k == JOB_KIND_SETTINGS_WORKSPACE_SHARED_AUDIT_EXPORT =>
+        {
             PRODUCTION_PHASE_SYSTEM
         }
         _ => return None,
@@ -179,6 +191,17 @@ mod tests {
         merge_default_track_metadata(JOB_KIND_VOICEOVER_GENERATE, &mut p);
         assert_eq!(p["job_sub_kind"], json!("custom.voiceover"));
         assert_eq!(p["production_phase"], json!(PRODUCTION_PHASE_NARRATION));
+    }
+
+    #[test]
+    fn merge_inserts_settings_workspace_shared_audit_export_defaults() {
+        let mut p = json!({"workspace_id": "00000000-0000-0000-0000-000000000001"});
+        merge_default_track_metadata(JOB_KIND_SETTINGS_WORKSPACE_SHARED_AUDIT_EXPORT, &mut p);
+        assert_eq!(
+            p["job_sub_kind"],
+            json!(JOB_SUB_KIND_SETTINGS_WORKSPACE_SHARED_AUDIT_EXPORT)
+        );
+        assert_eq!(p["production_phase"], json!(PRODUCTION_PHASE_SYSTEM));
     }
 
     #[test]

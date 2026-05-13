@@ -9,7 +9,7 @@ use super::common::{
     DownPreviewImageResponse, PreviewImageResponse, StoryboardScopeBody,
 };
 use crate::error::ApiError;
-use crate::scope::http::require_owned_numeric_storyboard_scope;
+use crate::scope::http::require_storyboard_read_scope_ref;
 use crate::state::AppState;
 
 #[utoipa::path(
@@ -35,10 +35,11 @@ pub(in crate::production) async fn post_storyboard_down_preview_image(
     headers: HeaderMap,
     Json(body): Json<StoryboardScopeBody>,
 ) -> Result<JsonResponse<DownPreviewImageResponse>, ApiError> {
-    let (pool, sb_uuid) = require_owned_numeric_storyboard_scope(
+    let (pool, sb_uuid) = require_storyboard_read_scope_ref(
         &state,
         &headers,
         body.project_id,
+        body.project_uuid,
         body.script_id,
         body.storyboard_id,
     )
@@ -74,10 +75,11 @@ pub(in crate::production) async fn post_storyboard_preview_image(
     headers: HeaderMap,
     Json(body): Json<StoryboardScopeBody>,
 ) -> Result<JsonResponse<PreviewImageResponse>, ApiError> {
-    let (pool, sb_uuid) = require_owned_numeric_storyboard_scope(
+    let (pool, sb_uuid) = require_storyboard_read_scope_ref(
         &state,
         &headers,
         body.project_id,
+        body.project_uuid,
         body.script_id,
         body.storyboard_id,
     )

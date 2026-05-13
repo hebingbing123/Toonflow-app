@@ -29,6 +29,13 @@ pub struct OwnedScriptInProject {
     pub script_id: Uuid,
 }
 
+/// 当前用户在 **`project_id`（UUID）** 下对某条 **`script_id`（UUID）** 的 numeric scope。
+#[derive(Debug, Clone, sqlx::FromRow)]
+pub struct OwnedScriptNumericInProject {
+    pub project_numeric_id: i32,
+    pub script_numeric_id: i32,
+}
+
 /// 用户在项目 **`app_project.id`** 下对某条分镜（**`app_storyboard.numeric_id`**）的归属。
 #[derive(Debug, Clone, sqlx::FromRow)]
 pub struct OwnedStoryboardInProject {
@@ -153,6 +160,70 @@ pub async fn owned_script_in_project(
     .ok_or(ScopeError::NotFound)
 }
 
+/// 解析当前 workspace 成员在 **`project_id`（`app_project.id`）** 下对 **`script_id`（`app_script.id`）**
+/// 的 numeric scope。
+pub async fn owned_script_numeric_in_project(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_id: Uuid,
+    script_id: Uuid,
+) -> Result<OwnedScriptNumericInProject, ScopeError> {
+    sqlx::query_as::<_, OwnedScriptNumericInProject>(
+        r#"
+        SELECT
+          p.numeric_id AS project_numeric_id,
+          s.numeric_id AS script_numeric_id
+        FROM app_script s
+        INNER JOIN app_project p ON p.id = s.project_id
+        WHERE p.id = $2
+          AND s.id = $3
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $1
+          )
+        "#,
+    )
+    .bind(user_id)
+    .bind(project_id)
+    .bind(script_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ScopeError::Database(e.to_string()))?
+    .ok_or(ScopeError::NotFound)
+}
+
+/// 解析当前 workspace 成员对 **`script_id`（`app_script.id`）** 的 numeric scope。
+pub async fn owned_script_numeric_scope(
+    pool: &PgPool,
+    user_id: Uuid,
+    script_id: Uuid,
+) -> Result<OwnedScriptNumericInProject, ScopeError> {
+    sqlx::query_as::<_, OwnedScriptNumericInProject>(
+        r#"
+        SELECT
+          p.numeric_id AS project_numeric_id,
+          s.numeric_id AS script_numeric_id
+        FROM app_script s
+        INNER JOIN app_project p ON p.id = s.project_id
+        WHERE s.id = $2
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $1
+          )
+        "#,
+    )
+    .bind(user_id)
+    .bind(script_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ScopeError::Database(e.to_string()))?
+    .ok_or(ScopeError::NotFound)
+}
+
 /// 解析 `owner_user_id` 在 **`project_numeric_id` + `script_numeric_id`** 下对 **`storyboard_numeric_id`** 的分镜行（`app_storyboard.id`）。
 pub async fn owned_storyboard_in_script_scope(
     pool: &PgPool,
@@ -211,6 +282,32 @@ pub async fn owned_storyboard_in_project(
     .ok_or(ScopeError::NotFound)
 }
 
+/// 解析当前 workspace 成员在 **`project_id`** + **`script_numeric_id`** 下对
+/// **`storyboard_numeric_id`** 的分镜行（`app_storyboard.id`）。
+pub async fn owned_storyboard_in_project_script_scope(
+    pool: &PgPool,
+    user_id: Uuid,
+    project_id: Uuid,
+    script_numeric_id: i32,
+    storyboard_numeric_id: i32,
+) -> Result<OwnedStoryboardInProject, ScopeError> {
+    let scope_row = owned_script_in_project(pool, user_id, project_id, script_numeric_id).await?;
+    sqlx::query_as::<_, OwnedStoryboardInProject>(
+        r#"
+        SELECT sb.id AS storyboard_id
+        FROM app_storyboard sb
+        WHERE sb.script_id = $1
+          AND sb.numeric_id = $2
+        "#,
+    )
+    .bind(scope_row.script_id)
+    .bind(storyboard_numeric_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ScopeError::Database(e.to_string()))?
+    .ok_or(ScopeError::NotFound)
+}
+
 /// Resolve **`app_script.numeric_id`** for a script owned by **`user_id`** under **`project_id`** (**`app_project.id`**).
 ///
 /// Prefer UUID (**`app_script.id`**); legacy numeric id is **`app_script.numeric_id`**. If both are set they must agree.
@@ -255,30 +352,10 @@ pub async fn resolve_owned_script_numeric_from_uuid_or_legacy_id(
             }
             Ok(n)
         }
-        (Some(u), None) => {
-            let v: Option<i32> = sqlx::query_scalar(
-                r#"
-                SELECT s.numeric_id
-                FROM app_script s
-                INNER JOIN app_project p ON p.id = s.project_id
-                WHERE p.id = $2
-                  AND EXISTS (
-                    SELECT 1
-                    FROM app_workspace_member wm
-                    WHERE wm.workspace_id = p.workspace_id
-                      AND wm.user_id = $1
-                  )
-                  AND s.id = $3
-                "#,
-            )
-            .bind(user_id)
-            .bind(project_id)
-            .bind(u)
-            .fetch_optional(pool)
+        (Some(u), None) => owned_script_numeric_in_project(pool, user_id, project_id, u)
             .await
-            .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
-            v.ok_or(ApiError::NotFound)
-        }
+            .map(|scope| scope.script_numeric_id)
+            .map_err(|e| e.into_api_error()),
         (None, Some(n)) => {
             if n <= 0 {
                 return Err(ApiError::BadRequest("script_id must be positive".into()));

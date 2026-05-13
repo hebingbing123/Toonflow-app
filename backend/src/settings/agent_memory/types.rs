@@ -1,9 +1,10 @@
 use chrono::{TimeZone, Utc};
 use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 use uuid::Uuid;
 
 /// HTTP 响应里标明聚合/变更口径：**`user`** = 按 `owner_user_id` 行级隔离（与 `app_agent_memory` 一致）。
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 #[serde(rename_all = "snake_case")]
 pub(crate) enum AgentMemoryResponseScope {
     User,
@@ -126,6 +127,7 @@ pub(crate) struct ContentBlock {
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct MemoryHistoryItem {
+    /// Aggregation scope: 'user' indicates user-level aggregation. Workspace-level aggregation pending product finalization.
     pub(crate) scope: &'static str,
     pub(crate) id: String,
     pub(crate) role: String,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
 import '../rust_api/search/api.dart';
+import '../utils/localized_formatting.dart';
 
 /// Advanced filter panel for search results
 ///
@@ -464,9 +465,9 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
     );
   }
 
-  /// Format date for display
+  /// Format date for display using localized formatting
   String _formatDate(DateTime date) {
-    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    return LocalizedFormatting.formatShortDate(context, date);
   }
 }
 
