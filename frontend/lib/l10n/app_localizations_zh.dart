@@ -10143,6 +10143,56 @@ class AppLocalizationsZh extends AppLocalizations {
   String get projectEditorScriptsWorkbenchDialogClose => '关闭';
 
   @override
+  String get projectScriptPlanCoverageNoChaptersNoEvents =>
+      '当前还没有章节与事件，可先从内容接入区导入并生成事件。';
+
+  @override
+  String projectScriptPlanCoverageChaptersNoEventsYet(int chapterCount) {
+    return '当前有 $chapterCount 条章节，但还没有事件；建议先生成事件后再整理骨架。';
+  }
+
+  @override
+  String get projectScriptPlanCoverageChaptersNotLoaded => '暂未加载章节';
+
+  @override
+  String projectScriptPlanCoverageChaptersProgress(int covered, int total) {
+    return '覆盖 $covered/$total 条章节';
+  }
+
+  @override
+  String projectScriptPlanCoverageEventsSummary(
+    int eventCount,
+    String coverage,
+    String sampleSuffix,
+  ) {
+    return '当前 $eventCount 条事件，$coverage$sampleSuffix';
+  }
+
+  @override
+  String get projectScriptPlanDraftsSummaryEmpty => '当前还没有可生成的剧本初稿，先补章节或事件。';
+
+  @override
+  String projectScriptPlanDraftsSummary(
+    int draftCount,
+    int chapterCount,
+    String sampleSuffix,
+  ) {
+    return '已生成 $draftCount 份剧本初稿，覆盖 $chapterCount 条章节$sampleSuffix';
+  }
+
+  @override
+  String get projectScriptPlanGuidanceSummaryEmpty =>
+      '当前还没有结构化改写 guidance，先生成剧本初稿或补齐章节事件。';
+
+  @override
+  String projectScriptPlanGuidanceSummary(
+    int guidanceCount,
+    String sampleSuffix,
+  ) {
+    return '已生成 $guidanceCount 份结构化改写 guidance$sampleSuffix';
+  }
+
+  @override
   String get projectScriptPlanWorkbenchTitle => '故事骨架与改编策略';
 
   @override

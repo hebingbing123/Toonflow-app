@@ -10641,6 +10641,58 @@ class AppLocalizationsEn extends AppLocalizations {
   String get projectEditorScriptsWorkbenchDialogClose => 'Close';
 
   @override
+  String get projectScriptPlanCoverageNoChaptersNoEvents =>
+      'No chapters or events yet. Import from the content area and generate events first.';
+
+  @override
+  String projectScriptPlanCoverageChaptersNoEventsYet(int chapterCount) {
+    return 'This project has $chapterCount chapter(s) but no events yet. Generate events before refining the skeleton.';
+  }
+
+  @override
+  String get projectScriptPlanCoverageChaptersNotLoaded =>
+      'Chapters not loaded';
+
+  @override
+  String projectScriptPlanCoverageChaptersProgress(int covered, int total) {
+    return '$covered/$total chapters covered';
+  }
+
+  @override
+  String projectScriptPlanCoverageEventsSummary(
+    int eventCount,
+    String coverage,
+    String sampleSuffix,
+  ) {
+    return '$eventCount events · $coverage$sampleSuffix';
+  }
+
+  @override
+  String get projectScriptPlanDraftsSummaryEmpty =>
+      'No script draft packets yet. Add chapters or events first.';
+
+  @override
+  String projectScriptPlanDraftsSummary(
+    int draftCount,
+    int chapterCount,
+    String sampleSuffix,
+  ) {
+    return 'Generated $draftCount draft packet(s), covering $chapterCount chapter(s)$sampleSuffix';
+  }
+
+  @override
+  String get projectScriptPlanGuidanceSummaryEmpty =>
+      'No structured rewrite guidance yet. Generate draft packets first or add chapters/events.';
+
+  @override
+  String projectScriptPlanGuidanceSummary(
+    int guidanceCount,
+    String sampleSuffix,
+  ) {
+    return 'Generated $guidanceCount structured rewrite guidance row(s)$sampleSuffix';
+  }
+
+  @override
   String get projectScriptPlanWorkbenchTitle =>
       'Story skeleton & adaptation strategy';
 

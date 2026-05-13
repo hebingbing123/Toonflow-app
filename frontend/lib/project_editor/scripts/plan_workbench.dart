@@ -6,6 +6,7 @@ extension _HomePageProjectEditorScriptPlanWorkbench on _HomePageState {
     required String token,
     required ProjectRow project,
   }) async {
+    final l10n = AppLocalizations.of(ctx)!;
     final storySkeletonCtrl = TextEditingController();
     final adaptationStrategyCtrl = TextEditingController();
     ScriptAgentPlanData? planData;
@@ -15,12 +16,12 @@ extension _HomePageProjectEditorScriptPlanWorkbench on _HomePageState {
     List<StructuredRewriteGuidance> guidanceRows =
         const <StructuredRewriteGuidance>[];
     var localBusy = false;
-    var infoLine = '正在读取当前项目的故事骨架与改编策略…';
+    var infoLine = l10n.projectScriptPlanWorkbenchLoadingInitial;
 
     Future<void> loadPlan(StateSetter setLocalState) async {
       setLocalState(() {
         localBusy = true;
-        infoLine = '正在刷新骨架与改编策略…';
+        infoLine = l10n.projectScriptPlanWorkbenchRefreshingPlan;
       });
       try {
         final results = await Future.wait<Object>([
@@ -40,13 +41,15 @@ extension _HomePageProjectEditorScriptPlanWorkbench on _HomePageState {
           adaptationStrategyCtrl.text = next.adaptationStrategy;
           draftPackets = const <ScriptDraftPacket>[];
           guidanceRows = const <StructuredRewriteGuidance>[];
-          infoLine =
-              '已载入 plan ${next.planId ?? 'new'}，当前挂载 ${next.scriptRows.length} 条剧本。';
+          infoLine = l10n.projectScriptPlanWorkbenchLoadedPlan(
+            next.planId?.toString() ?? 'new',
+            next.scriptRows.length,
+          );
         });
       } catch (e) {
         if (!ctx.mounted) return;
         setLocalState(() {
-          infoLine = '读取失败：$e';
+          infoLine = l10n.projectScriptPlanWorkbenchLoadFailed(e.toString());
         });
       } finally {
         if (ctx.mounted) {
@@ -62,7 +65,7 @@ extension _HomePageProjectEditorScriptPlanWorkbench on _HomePageState {
       );
       setLocalState(() {
         storySkeletonCtrl.text = seed;
-        infoLine = '已用当前事件与章节生成骨架草稿。';
+        infoLine = l10n.projectScriptPlanWorkbenchSkeletonDraftGenerated;
       });
     }
 
@@ -73,7 +76,7 @@ extension _HomePageProjectEditorScriptPlanWorkbench on _HomePageState {
       );
       setLocalState(() {
         adaptationStrategyCtrl.text = seed;
-        infoLine = '已用当前事件与章节生成改编策略草稿。';
+        infoLine = l10n.projectScriptPlanWorkbenchStrategyDraftGenerated;
       });
     }
 
@@ -89,8 +92,8 @@ extension _HomePageProjectEditorScriptPlanWorkbench on _HomePageState {
         draftPackets = nextDrafts;
         guidanceRows = const <StructuredRewriteGuidance>[];
         infoLine = nextDrafts.isEmpty
-            ? '当前缺少可用事件或章节，暂时无法生成剧本初稿。'
-            : '已根据当前事件、章节和计划生成 ${nextDrafts.length} 份剧本初稿包。';
+            ? l10n.projectScriptPlanWorkbenchNoDraftsNoEvents
+            : l10n.projectScriptPlanWorkbenchDraftsGenerated(nextDrafts.length);
       });
     }
 
@@ -106,15 +109,15 @@ extension _HomePageProjectEditorScriptPlanWorkbench on _HomePageState {
       setLocalState(() {
         guidanceRows = nextGuidance;
         infoLine = nextGuidance.isEmpty
-            ? '当前缺少可用事件或章节，暂时无法生成结构化改写 guidance。'
-            : '已生成 ${nextGuidance.length} 份结构化改写 guidance，可直接供后续 script 子代理或人工改稿消费。';
+            ? l10n.projectScriptPlanWorkbenchNoGuidanceNoEvents
+            : l10n.projectScriptPlanWorkbenchGuidanceGenerated(nextGuidance.length);
       });
     }
 
     Future<void> savePlan(StateSetter setLocalState) async {
       setLocalState(() {
         localBusy = true;
-        infoLine = '正在保存骨架与改编策略…';
+        infoLine = l10n.projectScriptPlanWorkbenchSavingPlan;
       });
       try {
         final status = await postScriptAgentSetPlanDataV1(
@@ -125,18 +128,18 @@ extension _HomePageProjectEditorScriptPlanWorkbench on _HomePageState {
           script: const <Map<String, dynamic>>[],
         );
         if (status != 200) {
-          throw Exception('保存失败，HTTP $status');
+          throw Exception(l10n.projectScriptPlanWorkbenchSaveFailedHttp(status));
         }
         await loadPlan(setLocalState);
         if (!ctx.mounted) return;
         setLocalState(() {
-          infoLine = '已保存骨架与改编策略。';
+          infoLine = l10n.projectScriptPlanWorkbenchPlanSaved;
         });
       } catch (e) {
         if (!ctx.mounted) return;
         setLocalState(() {
           localBusy = false;
-          infoLine = '保存失败：$e';
+          infoLine = l10n.projectScriptPlanWorkbenchSaveFailed(e.toString());
         });
       }
     }
@@ -144,13 +147,13 @@ extension _HomePageProjectEditorScriptPlanWorkbench on _HomePageState {
     Future<void> writeDraftPackets(StateSetter setLocalState) async {
       if (draftPackets.isEmpty) {
         setLocalState(() {
-          infoLine = '请先生成剧本初稿包。';
+          infoLine = l10n.projectScriptPlanWorkbenchNeedDraftsFirst;
         });
         return;
       }
       setLocalState(() {
         localBusy = true;
-        infoLine = '正在把剧本初稿写入当前项目…';
+        infoLine = l10n.projectScriptPlanWorkbenchWritingDrafts;
       });
       try {
         final status = await postScriptAgentSetPlanDataV1(
@@ -168,7 +171,7 @@ extension _HomePageProjectEditorScriptPlanWorkbench on _HomePageState {
               .toList(growable: false),
         );
         if (status != 200) {
-          throw Exception('写入失败，HTTP $status');
+          throw Exception(l10n.projectScriptPlanWorkbenchWriteFailedHttp(status));
         }
         await loadPlan(setLocalState);
         if (!ctx.mounted) return;
@@ -189,13 +192,13 @@ extension _HomePageProjectEditorScriptPlanWorkbench on _HomePageState {
             existingScripts:
                 planData?.scriptRows ?? const <ScriptAgentPlanScriptRow>[],
           );
-          infoLine = '已写入 ${draftPackets.length} 份剧本初稿；同名剧本已覆盖更新，缺失剧本已自动创建。';
+          infoLine = l10n.projectScriptPlanWorkbenchDraftsWritten(draftPackets.length);
         });
       } catch (e) {
         if (!ctx.mounted) return;
         setLocalState(() {
           localBusy = false;
-          infoLine = '写入剧本初稿失败：$e';
+          infoLine = l10n.projectScriptPlanWorkbenchWriteDraftsFailed(e.toString());
         });
       }
     }
@@ -221,12 +224,17 @@ extension _HomePageProjectEditorScriptPlanWorkbench on _HomePageState {
                   adaptationStrategyCtrl: adaptationStrategyCtrl,
                   planData: planData,
                   eventSummaryLine: summarizePlanEventCoverage(
+                    l10n: l10n,
                     events: eventRows,
                     novels: novelRows,
                   ),
-                  draftSummaryLine: summarizeScriptDraftPackets(draftPackets),
+                  draftSummaryLine: summarizeScriptDraftPackets(
+                    l10n,
+                    draftPackets,
+                  ),
                   draftPackets: draftPackets,
                   guidanceSummaryLine: summarizeStructuredRewriteGuidance(
+                    l10n,
                     guidanceRows,
                   ),
                   guidanceRows: guidanceRows,

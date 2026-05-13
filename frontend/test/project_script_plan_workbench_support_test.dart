@@ -1,10 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/project_editor/scripts/plan_workbench_support.dart';
 import 'package:openflow_app/rust_api.dart';
 
 void main() {
+  final zh = AppLocalizationsZh();
+
   test('summarizePlanEventCoverage reports event and chapter coverage', () {
     final summary = summarizePlanEventCoverage(
+      l10n: zh,
       events: const [
         NovelEventRow(
           id: 'e1',
@@ -149,6 +153,7 @@ void main() {
 
   test('summarizeScriptDraftPackets reports generated coverage', () {
     final summary = summarizeScriptDraftPackets(
+      zh,
       const [
         ScriptDraftPacket(
           name: '第1集',
@@ -204,6 +209,7 @@ void main() {
 
   test('summarizeStructuredRewriteGuidance reports generated count', () {
     final summary = summarizeStructuredRewriteGuidance(
+      zh,
       const [
         StructuredRewriteGuidance(
           name: '第1集',

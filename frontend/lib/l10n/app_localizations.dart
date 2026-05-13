@@ -16603,6 +16603,71 @@ abstract class AppLocalizations {
   /// **'Close'**
   String get projectEditorScriptsWorkbenchDialogClose;
 
+  /// No description provided for @projectScriptPlanCoverageNoChaptersNoEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'No chapters or events yet. Import from the content area and generate events first.'**
+  String get projectScriptPlanCoverageNoChaptersNoEvents;
+
+  /// No description provided for @projectScriptPlanCoverageChaptersNoEventsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'This project has {chapterCount} chapter(s) but no events yet. Generate events before refining the skeleton.'**
+  String projectScriptPlanCoverageChaptersNoEventsYet(int chapterCount);
+
+  /// No description provided for @projectScriptPlanCoverageChaptersNotLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapters not loaded'**
+  String get projectScriptPlanCoverageChaptersNotLoaded;
+
+  /// No description provided for @projectScriptPlanCoverageChaptersProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{covered}/{total} chapters covered'**
+  String projectScriptPlanCoverageChaptersProgress(int covered, int total);
+
+  /// No description provided for @projectScriptPlanCoverageEventsSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{eventCount} events · {coverage}{sampleSuffix}'**
+  String projectScriptPlanCoverageEventsSummary(
+    int eventCount,
+    String coverage,
+    String sampleSuffix,
+  );
+
+  /// No description provided for @projectScriptPlanDraftsSummaryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No script draft packets yet. Add chapters or events first.'**
+  String get projectScriptPlanDraftsSummaryEmpty;
+
+  /// No description provided for @projectScriptPlanDraftsSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Generated {draftCount} draft packet(s), covering {chapterCount} chapter(s){sampleSuffix}'**
+  String projectScriptPlanDraftsSummary(
+    int draftCount,
+    int chapterCount,
+    String sampleSuffix,
+  );
+
+  /// No description provided for @projectScriptPlanGuidanceSummaryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No structured rewrite guidance yet. Generate draft packets first or add chapters/events.'**
+  String get projectScriptPlanGuidanceSummaryEmpty;
+
+  /// No description provided for @projectScriptPlanGuidanceSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Generated {guidanceCount} structured rewrite guidance row(s){sampleSuffix}'**
+  String projectScriptPlanGuidanceSummary(
+    int guidanceCount,
+    String sampleSuffix,
+  );
+
   /// No description provided for @projectScriptPlanWorkbenchTitle.
   ///
   /// In en, this message translates to:

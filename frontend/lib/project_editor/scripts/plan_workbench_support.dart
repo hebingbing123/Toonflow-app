@@ -1,3 +1,4 @@
+import '../../l10n/app_localizations.dart';
 import '../../rust_api.dart';
 
 class ScriptDraftPacket {
@@ -29,23 +30,32 @@ class StructuredRewriteGuidance {
 }
 
 String summarizePlanEventCoverage({
+  required AppLocalizations l10n,
   required List<NovelEventRow> events,
   required List<NovelRow> novels,
 }) {
   if (events.isEmpty) {
     return novels.isEmpty
-        ? '当前还没有章节与事件，可先从内容接入区导入并生成事件。'
-        : '当前有 ${novels.length} 条章节，但还没有事件；建议先生成事件后再整理骨架。';
+        ? l10n.projectScriptPlanCoverageNoChaptersNoEvents
+        : l10n.projectScriptPlanCoverageChaptersNoEventsYet(novels.length);
   }
   final coveredChapterIndexes = <int>{
     for (final event in events) ...event.chapterIndexes,
   };
   final totalChapters = novels.length;
   final coverageText = totalChapters == 0
-      ? '暂未加载章节'
-      : '覆盖 ${coveredChapterIndexes.length}/$totalChapters 条章节';
+      ? l10n.projectScriptPlanCoverageChaptersNotLoaded
+      : l10n.projectScriptPlanCoverageChaptersProgress(
+          coveredChapterIndexes.length,
+          totalChapters,
+        );
   final sample = events.take(3).map((row) => row.name).join(' / ');
-  return '当前 ${events.length} 条事件，$coverageText${sample.isEmpty ? '' : ' · $sample'}';
+  final sampleSuffix = sample.isEmpty ? '' : ' · $sample';
+  return l10n.projectScriptPlanCoverageEventsSummary(
+    events.length,
+    coverageText,
+    sampleSuffix,
+  );
 }
 
 String buildStorySkeletonSeedFromEvents({
@@ -150,13 +160,21 @@ List<ScriptDraftPacket> buildScriptDraftPackets({
   }, growable: false);
 }
 
-String summarizeScriptDraftPackets(List<ScriptDraftPacket> drafts) {
+String summarizeScriptDraftPackets(
+  AppLocalizations l10n,
+  List<ScriptDraftPacket> drafts,
+) {
   if (drafts.isEmpty) {
-    return '当前还没有可生成的剧本初稿，先补章节或事件。';
+    return l10n.projectScriptPlanDraftsSummaryEmpty;
   }
   final chapterCoverage = <int>{for (final draft in drafts) ...draft.chapterIndexes};
   final sample = drafts.take(3).map((draft) => draft.name).join(' / ');
-  return '已生成 ${drafts.length} 份剧本初稿，覆盖 ${chapterCoverage.length} 条章节${sample.isEmpty ? '' : ' · $sample'}';
+  final sampleSuffix = sample.isEmpty ? '' : ' · $sample';
+  return l10n.projectScriptPlanDraftsSummary(
+    drafts.length,
+    chapterCoverage.length,
+    sampleSuffix,
+  );
 }
 
 List<StructuredRewriteGuidance> buildStructuredRewriteGuidance({
@@ -197,13 +215,18 @@ List<StructuredRewriteGuidance> buildStructuredRewriteGuidance({
 }
 
 String summarizeStructuredRewriteGuidance(
+  AppLocalizations l10n,
   List<StructuredRewriteGuidance> guidanceRows,
 ) {
   if (guidanceRows.isEmpty) {
-    return '当前还没有结构化改写 guidance，先生成剧本初稿或补齐章节事件。';
+    return l10n.projectScriptPlanGuidanceSummaryEmpty;
   }
   final sample = guidanceRows.take(3).map((row) => row.name).join(' / ');
-  return '已生成 ${guidanceRows.length} 份结构化改写 guidance${sample.isEmpty ? '' : ' · $sample'}';
+  final sampleSuffix = sample.isEmpty ? '' : ' · $sample';
+  return l10n.projectScriptPlanGuidanceSummary(
+    guidanceRows.length,
+    sampleSuffix,
+  );
 }
 
 class _DraftChunk {

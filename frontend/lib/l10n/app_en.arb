@@ -7923,6 +7923,68 @@
   },
   "projectEditorScriptsWorkbenchDialogBatchCreate": "Batch create",
   "projectEditorScriptsWorkbenchDialogClose": "Close",
+  "projectScriptPlanCoverageNoChaptersNoEvents": "No chapters or events yet. Import from the content area and generate events first.",
+  "projectScriptPlanCoverageChaptersNoEventsYet": "This project has {chapterCount} chapter(s) but no events yet. Generate events before refining the skeleton.",
+  "@projectScriptPlanCoverageChaptersNoEventsYet": {
+    "placeholders": {
+      "chapterCount": {
+        "type": "int"
+      }
+    }
+  },
+  "projectScriptPlanCoverageChaptersNotLoaded": "Chapters not loaded",
+  "projectScriptPlanCoverageChaptersProgress": "{covered}/{total} chapters covered",
+  "@projectScriptPlanCoverageChaptersProgress": {
+    "placeholders": {
+      "covered": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "projectScriptPlanCoverageEventsSummary": "{eventCount} events · {coverage}{sampleSuffix}",
+  "@projectScriptPlanCoverageEventsSummary": {
+    "placeholders": {
+      "eventCount": {
+        "type": "int"
+      },
+      "coverage": {
+        "type": "String"
+      },
+      "sampleSuffix": {
+        "type": "String"
+      }
+    }
+  },
+  "projectScriptPlanDraftsSummaryEmpty": "No script draft packets yet. Add chapters or events first.",
+  "projectScriptPlanDraftsSummary": "Generated {draftCount} draft packet(s), covering {chapterCount} chapter(s){sampleSuffix}",
+  "@projectScriptPlanDraftsSummary": {
+    "placeholders": {
+      "draftCount": {
+        "type": "int"
+      },
+      "chapterCount": {
+        "type": "int"
+      },
+      "sampleSuffix": {
+        "type": "String"
+      }
+    }
+  },
+  "projectScriptPlanGuidanceSummaryEmpty": "No structured rewrite guidance yet. Generate draft packets first or add chapters/events.",
+  "projectScriptPlanGuidanceSummary": "Generated {guidanceCount} structured rewrite guidance row(s){sampleSuffix}",
+  "@projectScriptPlanGuidanceSummary": {
+    "placeholders": {
+      "guidanceCount": {
+        "type": "int"
+      },
+      "sampleSuffix": {
+        "type": "String"
+      }
+    }
+  },
   "projectScriptPlanWorkbenchTitle": "Story skeleton & adaptation strategy",
   "projectScriptPlanWorkbenchPlanMountedLine": "planId {planId} · {count} script row(s) mounted{namesSuffix}",
   "@projectScriptPlanWorkbenchPlanMountedLine": {

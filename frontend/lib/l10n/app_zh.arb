@@ -7883,6 +7883,68 @@
   },
   "projectEditorScriptsWorkbenchDialogBatchCreate": "批量创建",
   "projectEditorScriptsWorkbenchDialogClose": "关闭",
+  "projectScriptPlanCoverageNoChaptersNoEvents": "当前还没有章节与事件，可先从内容接入区导入并生成事件。",
+  "projectScriptPlanCoverageChaptersNoEventsYet": "当前有 {chapterCount} 条章节，但还没有事件；建议先生成事件后再整理骨架。",
+  "@projectScriptPlanCoverageChaptersNoEventsYet": {
+    "placeholders": {
+      "chapterCount": {
+        "type": "int"
+      }
+    }
+  },
+  "projectScriptPlanCoverageChaptersNotLoaded": "暂未加载章节",
+  "projectScriptPlanCoverageChaptersProgress": "覆盖 {covered}/{total} 条章节",
+  "@projectScriptPlanCoverageChaptersProgress": {
+    "placeholders": {
+      "covered": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "projectScriptPlanCoverageEventsSummary": "当前 {eventCount} 条事件，{coverage}{sampleSuffix}",
+  "@projectScriptPlanCoverageEventsSummary": {
+    "placeholders": {
+      "eventCount": {
+        "type": "int"
+      },
+      "coverage": {
+        "type": "String"
+      },
+      "sampleSuffix": {
+        "type": "String"
+      }
+    }
+  },
+  "projectScriptPlanDraftsSummaryEmpty": "当前还没有可生成的剧本初稿，先补章节或事件。",
+  "projectScriptPlanDraftsSummary": "已生成 {draftCount} 份剧本初稿，覆盖 {chapterCount} 条章节{sampleSuffix}",
+  "@projectScriptPlanDraftsSummary": {
+    "placeholders": {
+      "draftCount": {
+        "type": "int"
+      },
+      "chapterCount": {
+        "type": "int"
+      },
+      "sampleSuffix": {
+        "type": "String"
+      }
+    }
+  },
+  "projectScriptPlanGuidanceSummaryEmpty": "当前还没有结构化改写 guidance，先生成剧本初稿或补齐章节事件。",
+  "projectScriptPlanGuidanceSummary": "已生成 {guidanceCount} 份结构化改写 guidance{sampleSuffix}",
+  "@projectScriptPlanGuidanceSummary": {
+    "placeholders": {
+      "guidanceCount": {
+        "type": "int"
+      },
+      "sampleSuffix": {
+        "type": "String"
+      }
+    }
+  },
   "projectScriptPlanWorkbenchTitle": "故事骨架与改编策略",
   "projectScriptPlanWorkbenchPlanMountedLine": "planId {planId} · 已挂载 {count} 条剧本{namesSuffix}",
   "@projectScriptPlanWorkbenchPlanMountedLine": {
