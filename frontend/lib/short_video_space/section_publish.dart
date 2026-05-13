@@ -128,6 +128,7 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
   }
 
   Future<void> _bootstrapPublishDraft() async {
+    final l10n = AppLocalizations.of(context)!;
     final token = widget.accessToken;
     final project = _selectedProject;
     if (token == null || token.isEmpty || project == null) {
@@ -139,7 +140,7 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
     try {
       final title = (project.name ?? '').trim();
       final created = await createPublishDraft(token, project.id, <String, dynamic>{
-        'title': title.isEmpty ? '发布草稿' : title,
+        'title': title.isEmpty ? l10n.shortVideoPublishOpsDefaultDraftTitle : title,
         'draft_status': 'editing',
         'tags': <String>[],
         'platform_copy': <String, dynamic>{},
@@ -155,18 +156,18 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
         return;
       }
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('已创建发布草稿并写入平台目标。')),
+        SnackBar(content: Text(l10n.shortVideoPublishOpsDraftCreated)),
       );
     } on RustApiException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('发布草稿失败：${e.statusCode}')),
+          SnackBar(content: Text(l10n.shortVideoPublishOpsCreateDraftFailedStatus(e.statusCode ?? 0))),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('发布草稿失败：$e')),
+          SnackBar(content: Text(l10n.shortVideoPublishOpsCreateDraftFailed(e.toString()))),
         );
       }
     } finally {
@@ -179,6 +180,7 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
   }
 
   Future<void> _enqueuePublishJob() async {
+    final l10n = AppLocalizations.of(context)!;
     final token = widget.accessToken;
     final project = _selectedProject;
     if (token == null || token.isEmpty || project == null) {
@@ -192,7 +194,7 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
       if (drafts.isEmpty) {
         final title = (project.name ?? '').trim();
         final created = await createPublishDraft(token, project.id, <String, dynamic>{
-          'title': title.isEmpty ? '发布草稿' : title,
+          'title': title.isEmpty ? l10n.shortVideoPublishOpsDefaultDraftTitle : title,
           'draft_status': 'editing',
           'tags': <String>[],
           'platform_copy': <String, dynamic>{},
@@ -213,9 +215,13 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
       if (draftId == null) {
         if (mounted && drafts.length > 1) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('有多张发布草稿时，请先在「当前操作草稿」中选择一张。'),
-              duration: Duration(seconds: 4),
+            SnackBar(
+              content: Text(
+                l10n.shortVideoPublishOpsSelectActiveDraftWhenMany(
+                  l10n.shortVideoPublishPanelCurrentDraftLabel,
+                ),
+              ),
+              duration: const Duration(seconds: 4),
             ),
           );
         }
@@ -231,18 +237,18 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
         return;
       }
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('已投递发布作业（服务端 worker 将处理队列）。')),
+        SnackBar(content: Text(l10n.shortVideoPublishOpsJobSubmitted)),
       );
     } on RustApiException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('投递失败：${e.statusCode}')),
+          SnackBar(content: Text(l10n.shortVideoPublishOpsEnqueueFailedStatus(e.statusCode ?? 0))),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('投递失败：$e')),
+          SnackBar(content: Text(l10n.shortVideoPublishOpsEnqueueFailed(e.toString()))),
         );
       }
     } finally {
@@ -255,6 +261,7 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
   }
 
   Future<void> _enqueueAllDraftJobs() async {
+    final l10n = AppLocalizations.of(context)!;
     final token = widget.accessToken;
     final project = _selectedProject;
     if (token == null || token.isEmpty || project == null) {
@@ -279,11 +286,16 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
           await createPublishJob(token, project.id, draft.id);
           ok++;
           final title = draft.title.trim().isEmpty ? draft.id : draft.title.trim();
-          summary.add('OK · $title');
+          summary.add(l10n.shortVideoPublishOpsBatchLineOk(title));
         } on RustApiException catch (e) {
-          summary.add('FAIL · ${draft.id} · ${e.statusCode ?? '-'}');
+          summary.add(
+            l10n.shortVideoPublishOpsBatchLineFail(
+              draft.id,
+              '${e.statusCode ?? '-'}',
+            ),
+          );
         } catch (e) {
-          summary.add('FAIL · ${draft.id} · $e');
+          summary.add(l10n.shortVideoPublishOpsBatchLineFail(draft.id, e.toString()));
         }
       }
       await _refreshPublishSlice(project, token);
@@ -294,7 +306,7 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
         _publishBatchResultLines = summary;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('批量投递完成：$ok/${_publishDrafts.length} 成功。')),
+        SnackBar(content: Text(l10n.shortVideoPublishOpsBatchEnqueueResult(ok, _publishDrafts.length))),
       );
     } finally {
       if (mounted) {
@@ -306,6 +318,7 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
   }
 
   Future<void> _retryFailedPublishJobs() async {
+    final l10n = AppLocalizations.of(context)!;
     final token = widget.accessToken;
     final project = _selectedProject;
     if (token == null || token.isEmpty || project == null) {
@@ -328,12 +341,16 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
         try {
           await retryPublishJob(token, project.id, job.id);
           ok++;
-          summary.add('OK · 重试作业 ${job.id.substring(0, 8)}');
+          summary.add(l10n.shortVideoPublishOpsBatchLineRetryOk(job.id.substring(0, 8)));
         } on RustApiException catch (e) {
-          summary
-              .add('FAIL · ${job.id.substring(0, 8)} · ${e.statusCode ?? '-'}');
+          summary.add(
+            l10n.shortVideoPublishOpsBatchLineFail(
+              job.id.substring(0, 8),
+              '${e.statusCode ?? '-'}',
+            ),
+          );
         } catch (e) {
-          summary.add('FAIL · ${job.id.substring(0, 8)} · $e');
+          summary.add(l10n.shortVideoPublishOpsBatchLineFail(job.id.substring(0, 8), e.toString()));
         }
       }
       await _refreshPublishSlice(project, token);
@@ -344,7 +361,7 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
         _publishBatchResultLines = summary;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('批量重试完成：$ok/${failed.length} 成功。')),
+        SnackBar(content: Text(l10n.shortVideoPublishOpsBatchRetryResult(ok, failed.length))),
       );
     } finally {
       if (mounted) {
@@ -356,6 +373,7 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
   }
 
   Future<void> _confirmSemiAutoPublish() async {
+    final l10n = AppLocalizations.of(context)!;
     final token = widget.accessToken;
     final project = _selectedProject;
     if (token == null || token.isEmpty || project == null) {
@@ -381,18 +399,18 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
         return;
       }
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('已确认半自动闸门，worker 将继续投递。')),
+        SnackBar(content: Text(l10n.shortVideoPublishOpsSemiAutoConfirmed)),
       );
     } on RustApiException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('确认失败：${e.statusCode}')),
+          SnackBar(content: Text(l10n.shortVideoPublishOpsConfirmFailedStatus(e.statusCode ?? 0))),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('确认失败：$e')),
+          SnackBar(content: Text(l10n.shortVideoPublishOpsConfirmFailed(e.toString()))),
         );
       }
     } finally {

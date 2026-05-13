@@ -15641,6 +15641,253 @@ class AppLocalizationsEn extends AppLocalizations {
       'Some selected drafts no longer exist. Refresh the publish area and try again.';
 
   @override
+  String shortVideoPublishDraftCompareTitle(int count) {
+    return 'Compare publish drafts ($count)';
+  }
+
+  @override
+  String get shortVideoPublishDraftCompareIntro =>
+      'Shown in your current multi-select order. Compare titles, schedule, asset keys, and per-platform copy.';
+
+  @override
+  String get shortVideoPublishDraftComparePerPlatformHeading =>
+      'Per-platform copy (title / description / tags)';
+
+  @override
+  String shortVideoPublishDraftCompareIdLine(String shortId) {
+    return 'ID: $shortId';
+  }
+
+  @override
+  String get shortVideoPublishDraftCompareFieldStatus => 'Status';
+
+  @override
+  String get shortVideoPublishDraftCompareFieldScheduled => 'Scheduled';
+
+  @override
+  String get shortVideoPublishDraftCompareFieldScript => 'Script';
+
+  @override
+  String get shortVideoPublishDraftCompareFieldVideoAsset => 'Video asset';
+
+  @override
+  String get shortVideoPublishDraftCompareFieldCover => 'Cover';
+
+  @override
+  String get shortVideoPublishDraftCompareFieldSummary => 'Summary';
+
+  @override
+  String get shortVideoPublishDraftCompareFieldTags => 'Tags';
+
+  @override
+  String shortVideoPublishDraftComparePlatformTitle(String platformId) {
+    return 'Platform $platformId';
+  }
+
+  @override
+  String shortVideoPublishDraftCompareCopyLineTitle(String value) {
+    return 'title: $value';
+  }
+
+  @override
+  String shortVideoPublishDraftCompareCopyLineDescription(String value) {
+    return 'description: $value';
+  }
+
+  @override
+  String shortVideoPublishDraftCompareCopyLineTags(String value) {
+    return 'tags: $value';
+  }
+
+  @override
+  String get shortVideoPublishCopyCreateDraftFirst =>
+      'Create a publish draft first.';
+
+  @override
+  String get shortVideoPublishCopySelectDraftToSuggest =>
+      'Select which draft should receive generated copy.';
+
+  @override
+  String shortVideoPublishCopySuggestApplied(String source) {
+    return 'Differentiated copy applied (source: $source).';
+  }
+
+  @override
+  String shortVideoPublishCopySuggestFailedStatus(int statusCode) {
+    return 'Copy suggestion failed: $statusCode';
+  }
+
+  @override
+  String shortVideoPublishCopySuggestFailed(String error) {
+    return 'Copy suggestion failed: $error';
+  }
+
+  @override
+  String get shortVideoPublishCopySelectDraftToEdit =>
+      'Select which draft to edit copy for.';
+
+  @override
+  String get shortVideoPublishCopySaved => 'Differentiated copy saved.';
+
+  @override
+  String shortVideoPublishCopySaveFailedStatus(int statusCode) {
+    return 'Save copy failed: $statusCode';
+  }
+
+  @override
+  String shortVideoPublishCopySaveFailed(String error) {
+    return 'Save copy failed: $error';
+  }
+
+  @override
+  String get shortVideoPublishOpsDefaultDraftTitle => 'Publish draft';
+
+  @override
+  String get shortVideoPublishOpsDraftCreated =>
+      'Publish draft created with platform targets.';
+
+  @override
+  String shortVideoPublishOpsCreateDraftFailedStatus(int statusCode) {
+    return 'Create publish draft failed: $statusCode';
+  }
+
+  @override
+  String shortVideoPublishOpsCreateDraftFailed(String error) {
+    return 'Create publish draft failed: $error';
+  }
+
+  @override
+  String shortVideoPublishOpsSelectActiveDraftWhenMany(String draftLabel) {
+    return 'When multiple publish drafts exist, pick one under “$draftLabel” first.';
+  }
+
+  @override
+  String get shortVideoPublishOpsJobSubmitted =>
+      'Publish job submitted (server worker will process the queue).';
+
+  @override
+  String shortVideoPublishOpsEnqueueFailedStatus(int statusCode) {
+    return 'Submit failed: $statusCode';
+  }
+
+  @override
+  String shortVideoPublishOpsEnqueueFailed(String error) {
+    return 'Submit failed: $error';
+  }
+
+  @override
+  String shortVideoPublishOpsBatchEnqueueResult(int ok, int total) {
+    return 'Batch submit finished: $ok/$total succeeded.';
+  }
+
+  @override
+  String shortVideoPublishOpsBatchLineOk(String ref) {
+    return 'OK · $ref';
+  }
+
+  @override
+  String shortVideoPublishOpsBatchLineFail(String id, String detail) {
+    return 'FAIL · $id · $detail';
+  }
+
+  @override
+  String shortVideoPublishOpsBatchLineRetryOk(String jobId) {
+    return 'OK · retry job $jobId';
+  }
+
+  @override
+  String shortVideoPublishOpsBatchRetryResult(int ok, int total) {
+    return 'Batch retry finished: $ok/$total succeeded.';
+  }
+
+  @override
+  String get shortVideoPublishOpsSemiAutoConfirmed =>
+      'Semi-auto gate confirmed; worker will continue delivery.';
+
+  @override
+  String shortVideoPublishOpsConfirmFailedStatus(int statusCode) {
+    return 'Confirm failed: $statusCode';
+  }
+
+  @override
+  String shortVideoPublishOpsConfirmFailed(String error) {
+    return 'Confirm failed: $error';
+  }
+
+  @override
+  String get shortVideoPublishScheduleSelectDraftFirst =>
+      'Select which draft to schedule first.';
+
+  @override
+  String shortVideoPublishScheduleSingleSet(String iso) {
+    return 'Scheduled: $iso (UTC)';
+  }
+
+  @override
+  String shortVideoPublishScheduleSingleFailedStatus(int statusCode) {
+    return 'Schedule failed: $statusCode';
+  }
+
+  @override
+  String shortVideoPublishScheduleSingleFailed(String error) {
+    return 'Schedule failed: $error';
+  }
+
+  @override
+  String shortVideoPublishScheduleCalendarTitle(String day) {
+    return 'Batch schedule · $day';
+  }
+
+  @override
+  String get shortVideoPublishScheduleCalendarIncludeScheduled =>
+      'Include already-scheduled drafts and overwrite to this time';
+
+  @override
+  String get shortVideoPublishScheduleCalendarHintOverrideAll =>
+      'Writes the same publish time for every draft in the current list.';
+
+  @override
+  String get shortVideoPublishScheduleCalendarHintNewOnly =>
+      'Only drafts without a schedule time will be updated.';
+
+  @override
+  String get shortVideoPublishScheduleCalendarChooseTime => 'Choose time';
+
+  @override
+  String get shortVideoPublishScheduleCalendarNoDrafts =>
+      'No matching drafts (try enabling “include already-scheduled”).';
+
+  @override
+  String shortVideoPublishScheduleCalendarUpdated(int count, String iso) {
+    return 'Updated schedule for $count draft(s): $iso (UTC)';
+  }
+
+  @override
+  String shortVideoPublishScheduleCalendarFailedStatus(int statusCode) {
+    return 'Calendar batch schedule failed: $statusCode';
+  }
+
+  @override
+  String shortVideoPublishScheduleCalendarFailed(String error) {
+    return 'Calendar batch schedule failed: $error';
+  }
+
+  @override
+  String shortVideoPublishScheduleClearUpdated(int count) {
+    return 'Updated schedule fields on $count draft(s) (worker may proceed).';
+  }
+
+  @override
+  String shortVideoPublishScheduleClearFailedStatus(int statusCode) {
+    return 'Clear schedule failed: $statusCode';
+  }
+
+  @override
+  String shortVideoPublishScheduleClearFailed(String error) {
+    return 'Clear schedule failed: $error';
+  }
+
+  @override
   String get accountSectionTitle => 'Account section title';
 
   @override

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../rust_api/project/publish_models.dart';
 
 /// Side-by-side comparison for 2–4 [PublishDraftRow] (title, copy, schedule, assets).
@@ -86,6 +87,7 @@ class _PublishDraftCompareDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final platformIds = _allPlatformIdsSorted(drafts);
 
     return AlertDialog(
@@ -94,7 +96,7 @@ class _PublishDraftCompareDialog extends StatelessWidget {
           const Icon(Icons.compare_arrows),
           const SizedBox(width: 8),
           Expanded(
-            child: Text('发布草稿对比（${drafts.length}）'),
+            child: Text(l10n.shortVideoPublishDraftCompareTitle(drafts.length)),
           ),
         ],
       ),
@@ -106,7 +108,7 @@ class _PublishDraftCompareDialog extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                '按当前多选顺序展示。可核对标题、定时、资产键与分平台文案差异。',
+                l10n.shortVideoPublishDraftCompareIntro,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.outline,
                 ),
@@ -150,7 +152,7 @@ class _PublishDraftCompareDialog extends StatelessWidget {
               if (platformIds.isNotEmpty) ...[
                 const SizedBox(height: 20),
                 Text(
-                  '分平台文案（title / description / tags）',
+                  l10n.shortVideoPublishDraftComparePerPlatformHeading,
                   style: theme.textTheme.titleSmall,
                 ),
                 const SizedBox(height: 8),
@@ -171,7 +173,7 @@ class _PublishDraftCompareDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('关闭'),
+          child: Text(l10n.shortVideoSpaceClose),
         ),
       ],
     );
@@ -186,6 +188,7 @@ class _DraftCompareCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       margin: EdgeInsets.zero,
       child: Padding(
@@ -194,31 +197,31 @@ class _DraftCompareCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              draft.title.trim().isEmpty ? '（无标题）' : draft.title,
+              draft.title.trim().isEmpty ? l10n.shortVideoPublishPanelUntitledDraft : draft.title,
               style: theme.textTheme.titleSmall,
             ),
             const SizedBox(height: 6),
             Text(
-              'ID: ${_shortId(draft.id)}',
+              l10n.shortVideoPublishDraftCompareIdLine(_shortId(draft.id)),
               style: theme.textTheme.bodySmall?.copyWith(
                 fontFamily: 'monospace',
               ),
             ),
             const SizedBox(height: 8),
-            _kv(context, '状态', draft.draftStatus),
-            _kv(context, '定时', _formatScheduled(draft.scheduledAt)),
-            _kv(context, '剧本', _emptyAsDash(draft.scriptId)),
-            _kv(context, '视频资产', _emptyAsDash(draft.videoAssetKey)),
-            _kv(context, '封面', _emptyAsDash(draft.coverAssetKey)),
+            _kv(context, l10n.shortVideoPublishDraftCompareFieldStatus, draft.draftStatus),
+            _kv(context, l10n.shortVideoPublishDraftCompareFieldScheduled, _formatScheduled(draft.scheduledAt)),
+            _kv(context, l10n.shortVideoPublishDraftCompareFieldScript, _emptyAsDash(draft.scriptId)),
+            _kv(context, l10n.shortVideoPublishDraftCompareFieldVideoAsset, _emptyAsDash(draft.videoAssetKey)),
+            _kv(context, l10n.shortVideoPublishDraftCompareFieldCover, _emptyAsDash(draft.coverAssetKey)),
             const SizedBox(height: 8),
-            Text('简介', style: theme.textTheme.labelSmall),
+            Text(l10n.shortVideoPublishDraftCompareFieldSummary, style: theme.textTheme.labelSmall),
             const SizedBox(height: 4),
             Text(
               draft.description.trim().isEmpty ? '—' : draft.description,
               style: theme.textTheme.bodySmall,
             ),
             const SizedBox(height: 8),
-            Text('标签', style: theme.textTheme.labelSmall),
+            Text(l10n.shortVideoPublishDraftCompareFieldTags, style: theme.textTheme.labelSmall),
             const SizedBox(height: 4),
             Text(
               _tagsLine(draft.tags),
@@ -265,6 +268,7 @@ class _PlatformCopyCompareSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       margin: EdgeInsets.zero,
       child: Padding(
@@ -273,7 +277,7 @@ class _PlatformCopyCompareSection extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '平台 $platformId',
+              l10n.shortVideoPublishDraftComparePlatformTitle(platformId),
               style: theme.textTheme.labelLarge,
             ),
             const SizedBox(height: 8),
@@ -301,9 +305,18 @@ class _PlatformCopyCompareSection extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text('title: $title', style: theme.textTheme.bodySmall),
-                    Text('description: $desc', style: theme.textTheme.bodySmall),
-                    Text('tags: $tags', style: theme.textTheme.bodySmall),
+                    Text(
+                      l10n.shortVideoPublishDraftCompareCopyLineTitle(title),
+                      style: theme.textTheme.bodySmall,
+                    ),
+                    Text(
+                      l10n.shortVideoPublishDraftCompareCopyLineDescription(desc),
+                      style: theme.textTheme.bodySmall,
+                    ),
+                    Text(
+                      l10n.shortVideoPublishDraftCompareCopyLineTags(tags),
+                      style: theme.textTheme.bodySmall,
+                    ),
                   ],
                 ),
               );

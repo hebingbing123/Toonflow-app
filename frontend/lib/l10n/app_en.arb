@@ -11901,6 +11901,305 @@
   },
   "shortVideoPublishBatchCompareSelectCount": "Select 2–4 drafts to compare.",
   "shortVideoPublishBatchCompareStaleSelection": "Some selected drafts no longer exist. Refresh the publish area and try again.",
+  "shortVideoPublishDraftCompareTitle": "Compare publish drafts ({count})",
+  "@shortVideoPublishDraftCompareTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishDraftCompareIntro": "Shown in your current multi-select order. Compare titles, schedule, asset keys, and per-platform copy.",
+  "shortVideoPublishDraftComparePerPlatformHeading": "Per-platform copy (title / description / tags)",
+  "shortVideoPublishDraftCompareIdLine": "ID: {shortId}",
+  "@shortVideoPublishDraftCompareIdLine": {
+    "placeholders": {
+      "shortId": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishDraftCompareFieldStatus": "Status",
+  "shortVideoPublishDraftCompareFieldScheduled": "Scheduled",
+  "shortVideoPublishDraftCompareFieldScript": "Script",
+  "shortVideoPublishDraftCompareFieldVideoAsset": "Video asset",
+  "shortVideoPublishDraftCompareFieldCover": "Cover",
+  "shortVideoPublishDraftCompareFieldSummary": "Summary",
+  "shortVideoPublishDraftCompareFieldTags": "Tags",
+  "shortVideoPublishDraftComparePlatformTitle": "Platform {platformId}",
+  "@shortVideoPublishDraftComparePlatformTitle": {
+    "placeholders": {
+      "platformId": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishDraftCompareCopyLineTitle": "title: {value}",
+  "@shortVideoPublishDraftCompareCopyLineTitle": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishDraftCompareCopyLineDescription": "description: {value}",
+  "@shortVideoPublishDraftCompareCopyLineDescription": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishDraftCompareCopyLineTags": "tags: {value}",
+  "@shortVideoPublishDraftCompareCopyLineTags": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishCopyCreateDraftFirst": "Create a publish draft first.",
+  "shortVideoPublishCopySelectDraftToSuggest": "Select which draft should receive generated copy.",
+  "shortVideoPublishCopySuggestApplied": "Differentiated copy applied (source: {source}).",
+  "@shortVideoPublishCopySuggestApplied": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishCopySuggestFailedStatus": "Copy suggestion failed: {statusCode}",
+  "@shortVideoPublishCopySuggestFailedStatus": {
+    "placeholders": {
+      "statusCode": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishCopySuggestFailed": "Copy suggestion failed: {error}",
+  "@shortVideoPublishCopySuggestFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishCopySelectDraftToEdit": "Select which draft to edit copy for.",
+  "shortVideoPublishCopySaved": "Differentiated copy saved.",
+  "shortVideoPublishCopySaveFailedStatus": "Save copy failed: {statusCode}",
+  "@shortVideoPublishCopySaveFailedStatus": {
+    "placeholders": {
+      "statusCode": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishCopySaveFailed": "Save copy failed: {error}",
+  "@shortVideoPublishCopySaveFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishOpsDefaultDraftTitle": "Publish draft",
+  "shortVideoPublishOpsDraftCreated": "Publish draft created with platform targets.",
+  "shortVideoPublishOpsCreateDraftFailedStatus": "Create publish draft failed: {statusCode}",
+  "@shortVideoPublishOpsCreateDraftFailedStatus": {
+    "placeholders": {
+      "statusCode": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishOpsCreateDraftFailed": "Create publish draft failed: {error}",
+  "@shortVideoPublishOpsCreateDraftFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishOpsSelectActiveDraftWhenMany": "When multiple publish drafts exist, pick one under “{draftLabel}” first.",
+  "@shortVideoPublishOpsSelectActiveDraftWhenMany": {
+    "placeholders": {
+      "draftLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishOpsJobSubmitted": "Publish job submitted (server worker will process the queue).",
+  "shortVideoPublishOpsEnqueueFailedStatus": "Submit failed: {statusCode}",
+  "@shortVideoPublishOpsEnqueueFailedStatus": {
+    "placeholders": {
+      "statusCode": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishOpsEnqueueFailed": "Submit failed: {error}",
+  "@shortVideoPublishOpsEnqueueFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishOpsBatchEnqueueResult": "Batch submit finished: {ok}/{total} succeeded.",
+  "@shortVideoPublishOpsBatchEnqueueResult": {
+    "placeholders": {
+      "ok": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishOpsBatchLineOk": "OK · {ref}",
+  "@shortVideoPublishOpsBatchLineOk": {
+    "placeholders": {
+      "ref": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishOpsBatchLineFail": "FAIL · {id} · {detail}",
+  "@shortVideoPublishOpsBatchLineFail": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      },
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishOpsBatchLineRetryOk": "OK · retry job {jobId}",
+  "@shortVideoPublishOpsBatchLineRetryOk": {
+    "placeholders": {
+      "jobId": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishOpsBatchRetryResult": "Batch retry finished: {ok}/{total} succeeded.",
+  "@shortVideoPublishOpsBatchRetryResult": {
+    "placeholders": {
+      "ok": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishOpsSemiAutoConfirmed": "Semi-auto gate confirmed; worker will continue delivery.",
+  "shortVideoPublishOpsConfirmFailedStatus": "Confirm failed: {statusCode}",
+  "@shortVideoPublishOpsConfirmFailedStatus": {
+    "placeholders": {
+      "statusCode": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishOpsConfirmFailed": "Confirm failed: {error}",
+  "@shortVideoPublishOpsConfirmFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishScheduleSelectDraftFirst": "Select which draft to schedule first.",
+  "shortVideoPublishScheduleSingleSet": "Scheduled: {iso} (UTC)",
+  "@shortVideoPublishScheduleSingleSet": {
+    "placeholders": {
+      "iso": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishScheduleSingleFailedStatus": "Schedule failed: {statusCode}",
+  "@shortVideoPublishScheduleSingleFailedStatus": {
+    "placeholders": {
+      "statusCode": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishScheduleSingleFailed": "Schedule failed: {error}",
+  "@shortVideoPublishScheduleSingleFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishScheduleCalendarTitle": "Batch schedule · {day}",
+  "@shortVideoPublishScheduleCalendarTitle": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishScheduleCalendarIncludeScheduled": "Include already-scheduled drafts and overwrite to this time",
+  "shortVideoPublishScheduleCalendarHintOverrideAll": "Writes the same publish time for every draft in the current list.",
+  "shortVideoPublishScheduleCalendarHintNewOnly": "Only drafts without a schedule time will be updated.",
+  "shortVideoPublishScheduleCalendarChooseTime": "Choose time",
+  "shortVideoPublishScheduleCalendarNoDrafts": "No matching drafts (try enabling “include already-scheduled”).",
+  "shortVideoPublishScheduleCalendarUpdated": "Updated schedule for {count} draft(s): {iso} (UTC)",
+  "@shortVideoPublishScheduleCalendarUpdated": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "iso": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishScheduleCalendarFailedStatus": "Calendar batch schedule failed: {statusCode}",
+  "@shortVideoPublishScheduleCalendarFailedStatus": {
+    "placeholders": {
+      "statusCode": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishScheduleCalendarFailed": "Calendar batch schedule failed: {error}",
+  "@shortVideoPublishScheduleCalendarFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishScheduleClearUpdated": "Updated schedule fields on {count} draft(s) (worker may proceed).",
+  "@shortVideoPublishScheduleClearUpdated": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishScheduleClearFailedStatus": "Clear schedule failed: {statusCode}",
+  "@shortVideoPublishScheduleClearFailedStatus": {
+    "placeholders": {
+      "statusCode": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishScheduleClearFailed": "Clear schedule failed: {error}",
+  "@shortVideoPublishScheduleClearFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "accountSectionTitle": "Account section title",
   "accountRiskyPrefsTooltip": "Account risky prefs tooltip",
   "accountSectionSubtitle": "Account section subtitle",

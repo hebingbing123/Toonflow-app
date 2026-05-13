@@ -24021,6 +24021,342 @@ abstract class AppLocalizations {
   /// **'Some selected drafts no longer exist. Refresh the publish area and try again.'**
   String get shortVideoPublishBatchCompareStaleSelection;
 
+  /// No description provided for @shortVideoPublishDraftCompareTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare publish drafts ({count})'**
+  String shortVideoPublishDraftCompareTitle(int count);
+
+  /// No description provided for @shortVideoPublishDraftCompareIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Shown in your current multi-select order. Compare titles, schedule, asset keys, and per-platform copy.'**
+  String get shortVideoPublishDraftCompareIntro;
+
+  /// No description provided for @shortVideoPublishDraftComparePerPlatformHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Per-platform copy (title / description / tags)'**
+  String get shortVideoPublishDraftComparePerPlatformHeading;
+
+  /// No description provided for @shortVideoPublishDraftCompareIdLine.
+  ///
+  /// In en, this message translates to:
+  /// **'ID: {shortId}'**
+  String shortVideoPublishDraftCompareIdLine(String shortId);
+
+  /// No description provided for @shortVideoPublishDraftCompareFieldStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get shortVideoPublishDraftCompareFieldStatus;
+
+  /// No description provided for @shortVideoPublishDraftCompareFieldScheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled'**
+  String get shortVideoPublishDraftCompareFieldScheduled;
+
+  /// No description provided for @shortVideoPublishDraftCompareFieldScript.
+  ///
+  /// In en, this message translates to:
+  /// **'Script'**
+  String get shortVideoPublishDraftCompareFieldScript;
+
+  /// No description provided for @shortVideoPublishDraftCompareFieldVideoAsset.
+  ///
+  /// In en, this message translates to:
+  /// **'Video asset'**
+  String get shortVideoPublishDraftCompareFieldVideoAsset;
+
+  /// No description provided for @shortVideoPublishDraftCompareFieldCover.
+  ///
+  /// In en, this message translates to:
+  /// **'Cover'**
+  String get shortVideoPublishDraftCompareFieldCover;
+
+  /// No description provided for @shortVideoPublishDraftCompareFieldSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary'**
+  String get shortVideoPublishDraftCompareFieldSummary;
+
+  /// No description provided for @shortVideoPublishDraftCompareFieldTags.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags'**
+  String get shortVideoPublishDraftCompareFieldTags;
+
+  /// No description provided for @shortVideoPublishDraftComparePlatformTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform {platformId}'**
+  String shortVideoPublishDraftComparePlatformTitle(String platformId);
+
+  /// No description provided for @shortVideoPublishDraftCompareCopyLineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'title: {value}'**
+  String shortVideoPublishDraftCompareCopyLineTitle(String value);
+
+  /// No description provided for @shortVideoPublishDraftCompareCopyLineDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'description: {value}'**
+  String shortVideoPublishDraftCompareCopyLineDescription(String value);
+
+  /// No description provided for @shortVideoPublishDraftCompareCopyLineTags.
+  ///
+  /// In en, this message translates to:
+  /// **'tags: {value}'**
+  String shortVideoPublishDraftCompareCopyLineTags(String value);
+
+  /// No description provided for @shortVideoPublishCopyCreateDraftFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a publish draft first.'**
+  String get shortVideoPublishCopyCreateDraftFirst;
+
+  /// No description provided for @shortVideoPublishCopySelectDraftToSuggest.
+  ///
+  /// In en, this message translates to:
+  /// **'Select which draft should receive generated copy.'**
+  String get shortVideoPublishCopySelectDraftToSuggest;
+
+  /// No description provided for @shortVideoPublishCopySuggestApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'Differentiated copy applied (source: {source}).'**
+  String shortVideoPublishCopySuggestApplied(String source);
+
+  /// No description provided for @shortVideoPublishCopySuggestFailedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy suggestion failed: {statusCode}'**
+  String shortVideoPublishCopySuggestFailedStatus(int statusCode);
+
+  /// No description provided for @shortVideoPublishCopySuggestFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy suggestion failed: {error}'**
+  String shortVideoPublishCopySuggestFailed(String error);
+
+  /// No description provided for @shortVideoPublishCopySelectDraftToEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Select which draft to edit copy for.'**
+  String get shortVideoPublishCopySelectDraftToEdit;
+
+  /// No description provided for @shortVideoPublishCopySaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Differentiated copy saved.'**
+  String get shortVideoPublishCopySaved;
+
+  /// No description provided for @shortVideoPublishCopySaveFailedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Save copy failed: {statusCode}'**
+  String shortVideoPublishCopySaveFailedStatus(int statusCode);
+
+  /// No description provided for @shortVideoPublishCopySaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Save copy failed: {error}'**
+  String shortVideoPublishCopySaveFailed(String error);
+
+  /// No description provided for @shortVideoPublishOpsDefaultDraftTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish draft'**
+  String get shortVideoPublishOpsDefaultDraftTitle;
+
+  /// No description provided for @shortVideoPublishOpsDraftCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish draft created with platform targets.'**
+  String get shortVideoPublishOpsDraftCreated;
+
+  /// No description provided for @shortVideoPublishOpsCreateDraftFailedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Create publish draft failed: {statusCode}'**
+  String shortVideoPublishOpsCreateDraftFailedStatus(int statusCode);
+
+  /// No description provided for @shortVideoPublishOpsCreateDraftFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Create publish draft failed: {error}'**
+  String shortVideoPublishOpsCreateDraftFailed(String error);
+
+  /// No description provided for @shortVideoPublishOpsSelectActiveDraftWhenMany.
+  ///
+  /// In en, this message translates to:
+  /// **'When multiple publish drafts exist, pick one under “{draftLabel}” first.'**
+  String shortVideoPublishOpsSelectActiveDraftWhenMany(String draftLabel);
+
+  /// No description provided for @shortVideoPublishOpsJobSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish job submitted (server worker will process the queue).'**
+  String get shortVideoPublishOpsJobSubmitted;
+
+  /// No description provided for @shortVideoPublishOpsEnqueueFailedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit failed: {statusCode}'**
+  String shortVideoPublishOpsEnqueueFailedStatus(int statusCode);
+
+  /// No description provided for @shortVideoPublishOpsEnqueueFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit failed: {error}'**
+  String shortVideoPublishOpsEnqueueFailed(String error);
+
+  /// No description provided for @shortVideoPublishOpsBatchEnqueueResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch submit finished: {ok}/{total} succeeded.'**
+  String shortVideoPublishOpsBatchEnqueueResult(int ok, int total);
+
+  /// No description provided for @shortVideoPublishOpsBatchLineOk.
+  ///
+  /// In en, this message translates to:
+  /// **'OK · {ref}'**
+  String shortVideoPublishOpsBatchLineOk(String ref);
+
+  /// No description provided for @shortVideoPublishOpsBatchLineFail.
+  ///
+  /// In en, this message translates to:
+  /// **'FAIL · {id} · {detail}'**
+  String shortVideoPublishOpsBatchLineFail(String id, String detail);
+
+  /// No description provided for @shortVideoPublishOpsBatchLineRetryOk.
+  ///
+  /// In en, this message translates to:
+  /// **'OK · retry job {jobId}'**
+  String shortVideoPublishOpsBatchLineRetryOk(String jobId);
+
+  /// No description provided for @shortVideoPublishOpsBatchRetryResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch retry finished: {ok}/{total} succeeded.'**
+  String shortVideoPublishOpsBatchRetryResult(int ok, int total);
+
+  /// No description provided for @shortVideoPublishOpsSemiAutoConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Semi-auto gate confirmed; worker will continue delivery.'**
+  String get shortVideoPublishOpsSemiAutoConfirmed;
+
+  /// No description provided for @shortVideoPublishOpsConfirmFailedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm failed: {statusCode}'**
+  String shortVideoPublishOpsConfirmFailedStatus(int statusCode);
+
+  /// No description provided for @shortVideoPublishOpsConfirmFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm failed: {error}'**
+  String shortVideoPublishOpsConfirmFailed(String error);
+
+  /// No description provided for @shortVideoPublishScheduleSelectDraftFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Select which draft to schedule first.'**
+  String get shortVideoPublishScheduleSelectDraftFirst;
+
+  /// No description provided for @shortVideoPublishScheduleSingleSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled: {iso} (UTC)'**
+  String shortVideoPublishScheduleSingleSet(String iso);
+
+  /// No description provided for @shortVideoPublishScheduleSingleFailedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule failed: {statusCode}'**
+  String shortVideoPublishScheduleSingleFailedStatus(int statusCode);
+
+  /// No description provided for @shortVideoPublishScheduleSingleFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule failed: {error}'**
+  String shortVideoPublishScheduleSingleFailed(String error);
+
+  /// No description provided for @shortVideoPublishScheduleCalendarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch schedule · {day}'**
+  String shortVideoPublishScheduleCalendarTitle(String day);
+
+  /// No description provided for @shortVideoPublishScheduleCalendarIncludeScheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'Include already-scheduled drafts and overwrite to this time'**
+  String get shortVideoPublishScheduleCalendarIncludeScheduled;
+
+  /// No description provided for @shortVideoPublishScheduleCalendarHintOverrideAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Writes the same publish time for every draft in the current list.'**
+  String get shortVideoPublishScheduleCalendarHintOverrideAll;
+
+  /// No description provided for @shortVideoPublishScheduleCalendarHintNewOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Only drafts without a schedule time will be updated.'**
+  String get shortVideoPublishScheduleCalendarHintNewOnly;
+
+  /// No description provided for @shortVideoPublishScheduleCalendarChooseTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose time'**
+  String get shortVideoPublishScheduleCalendarChooseTime;
+
+  /// No description provided for @shortVideoPublishScheduleCalendarNoDrafts.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching drafts (try enabling “include already-scheduled”).'**
+  String get shortVideoPublishScheduleCalendarNoDrafts;
+
+  /// No description provided for @shortVideoPublishScheduleCalendarUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated schedule for {count} draft(s): {iso} (UTC)'**
+  String shortVideoPublishScheduleCalendarUpdated(int count, String iso);
+
+  /// No description provided for @shortVideoPublishScheduleCalendarFailedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar batch schedule failed: {statusCode}'**
+  String shortVideoPublishScheduleCalendarFailedStatus(int statusCode);
+
+  /// No description provided for @shortVideoPublishScheduleCalendarFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar batch schedule failed: {error}'**
+  String shortVideoPublishScheduleCalendarFailed(String error);
+
+  /// No description provided for @shortVideoPublishScheduleClearUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated schedule fields on {count} draft(s) (worker may proceed).'**
+  String shortVideoPublishScheduleClearUpdated(int count);
+
+  /// No description provided for @shortVideoPublishScheduleClearFailedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear schedule failed: {statusCode}'**
+  String shortVideoPublishScheduleClearFailedStatus(int statusCode);
+
+  /// No description provided for @shortVideoPublishScheduleClearFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear schedule failed: {error}'**
+  String shortVideoPublishScheduleClearFailed(String error);
+
   /// No description provided for @accountSectionTitle.
   ///
   /// In en, this message translates to:

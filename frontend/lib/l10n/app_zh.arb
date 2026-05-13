@@ -11861,6 +11861,305 @@
   },
   "shortVideoPublishBatchCompareSelectCount": "请选择 2-4 张草稿进行对比。",
   "shortVideoPublishBatchCompareStaleSelection": "部分选中草稿已不存在，请刷新发布区后重试。",
+  "shortVideoPublishDraftCompareTitle": "发布草稿对比（{count}）",
+  "@shortVideoPublishDraftCompareTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishDraftCompareIntro": "按当前多选顺序展示。可核对标题、定时、资产键与分平台文案差异。",
+  "shortVideoPublishDraftComparePerPlatformHeading": "分平台文案（title / description / tags）",
+  "shortVideoPublishDraftCompareIdLine": "ID：{shortId}",
+  "@shortVideoPublishDraftCompareIdLine": {
+    "placeholders": {
+      "shortId": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishDraftCompareFieldStatus": "状态",
+  "shortVideoPublishDraftCompareFieldScheduled": "定时",
+  "shortVideoPublishDraftCompareFieldScript": "剧本",
+  "shortVideoPublishDraftCompareFieldVideoAsset": "视频资产",
+  "shortVideoPublishDraftCompareFieldCover": "封面",
+  "shortVideoPublishDraftCompareFieldSummary": "简介",
+  "shortVideoPublishDraftCompareFieldTags": "标签",
+  "shortVideoPublishDraftComparePlatformTitle": "平台 {platformId}",
+  "@shortVideoPublishDraftComparePlatformTitle": {
+    "placeholders": {
+      "platformId": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishDraftCompareCopyLineTitle": "title: {value}",
+  "@shortVideoPublishDraftCompareCopyLineTitle": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishDraftCompareCopyLineDescription": "description: {value}",
+  "@shortVideoPublishDraftCompareCopyLineDescription": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishDraftCompareCopyLineTags": "tags: {value}",
+  "@shortVideoPublishDraftCompareCopyLineTags": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishCopyCreateDraftFirst": "请先创建发布草稿。",
+  "shortVideoPublishCopySelectDraftToSuggest": "请先明确选择要生成文案的草稿。",
+  "shortVideoPublishCopySuggestApplied": "差异化文案已写入（来源：{source}）。",
+  "@shortVideoPublishCopySuggestApplied": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishCopySuggestFailedStatus": "文案建议失败：{statusCode}",
+  "@shortVideoPublishCopySuggestFailedStatus": {
+    "placeholders": {
+      "statusCode": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishCopySuggestFailed": "文案建议失败：{error}",
+  "@shortVideoPublishCopySuggestFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishCopySelectDraftToEdit": "请先明确选择要编辑文案的草稿。",
+  "shortVideoPublishCopySaved": "已保存差异化文案。",
+  "shortVideoPublishCopySaveFailedStatus": "保存文案失败：{statusCode}",
+  "@shortVideoPublishCopySaveFailedStatus": {
+    "placeholders": {
+      "statusCode": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishCopySaveFailed": "保存文案失败：{error}",
+  "@shortVideoPublishCopySaveFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishOpsDefaultDraftTitle": "发布草稿",
+  "shortVideoPublishOpsDraftCreated": "已创建发布草稿并写入平台目标。",
+  "shortVideoPublishOpsCreateDraftFailedStatus": "发布草稿失败：{statusCode}",
+  "@shortVideoPublishOpsCreateDraftFailedStatus": {
+    "placeholders": {
+      "statusCode": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishOpsCreateDraftFailed": "发布草稿失败：{error}",
+  "@shortVideoPublishOpsCreateDraftFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishOpsSelectActiveDraftWhenMany": "有多张发布草稿时，请先在「{draftLabel}」中选择一张。",
+  "@shortVideoPublishOpsSelectActiveDraftWhenMany": {
+    "placeholders": {
+      "draftLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishOpsJobSubmitted": "已投递发布作业（服务端 worker 将处理队列）。",
+  "shortVideoPublishOpsEnqueueFailedStatus": "投递失败：{statusCode}",
+  "@shortVideoPublishOpsEnqueueFailedStatus": {
+    "placeholders": {
+      "statusCode": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishOpsEnqueueFailed": "投递失败：{error}",
+  "@shortVideoPublishOpsEnqueueFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishOpsBatchEnqueueResult": "批量投递完成：{ok}/{total} 成功。",
+  "@shortVideoPublishOpsBatchEnqueueResult": {
+    "placeholders": {
+      "ok": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishOpsBatchLineOk": "OK · {ref}",
+  "@shortVideoPublishOpsBatchLineOk": {
+    "placeholders": {
+      "ref": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishOpsBatchLineFail": "FAIL · {id} · {detail}",
+  "@shortVideoPublishOpsBatchLineFail": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      },
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishOpsBatchLineRetryOk": "OK · 重试作业 {jobId}",
+  "@shortVideoPublishOpsBatchLineRetryOk": {
+    "placeholders": {
+      "jobId": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishOpsBatchRetryResult": "批量重试完成：{ok}/{total} 成功。",
+  "@shortVideoPublishOpsBatchRetryResult": {
+    "placeholders": {
+      "ok": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishOpsSemiAutoConfirmed": "已确认半自动闸门，worker 将继续投递。",
+  "shortVideoPublishOpsConfirmFailedStatus": "确认失败：{statusCode}",
+  "@shortVideoPublishOpsConfirmFailedStatus": {
+    "placeholders": {
+      "statusCode": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishOpsConfirmFailed": "确认失败：{error}",
+  "@shortVideoPublishOpsConfirmFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishScheduleSelectDraftFirst": "请先明确选择要定时的草稿。",
+  "shortVideoPublishScheduleSingleSet": "已设为定时：{iso}（UTC）",
+  "@shortVideoPublishScheduleSingleSet": {
+    "placeholders": {
+      "iso": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishScheduleSingleFailedStatus": "定时失败：{statusCode}",
+  "@shortVideoPublishScheduleSingleFailedStatus": {
+    "placeholders": {
+      "statusCode": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishScheduleSingleFailed": "定时失败：{error}",
+  "@shortVideoPublishScheduleSingleFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishScheduleCalendarTitle": "批量定时 · {day}",
+  "@shortVideoPublishScheduleCalendarTitle": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishScheduleCalendarIncludeScheduled": "包含已定时草稿并重写为该时刻",
+  "shortVideoPublishScheduleCalendarHintOverrideAll": "将对当前列表中的全部草稿写入同一发布时间。",
+  "shortVideoPublishScheduleCalendarHintNewOnly": "仅对尚未填写定时的草稿写入发布时间。",
+  "shortVideoPublishScheduleCalendarChooseTime": "选择时间",
+  "shortVideoPublishScheduleCalendarNoDrafts": "没有符合条件的草稿（试勾选「包含已定时」）。",
+  "shortVideoPublishScheduleCalendarUpdated": "已更新 {count} 张草稿定时：{iso}（UTC）",
+  "@shortVideoPublishScheduleCalendarUpdated": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "iso": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishScheduleCalendarFailedStatus": "日历批量定时失败：{statusCode}",
+  "@shortVideoPublishScheduleCalendarFailedStatus": {
+    "placeholders": {
+      "statusCode": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishScheduleCalendarFailed": "日历批量定时失败：{error}",
+  "@shortVideoPublishScheduleCalendarFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishScheduleClearUpdated": "已更新 {count} 张草稿的定时字段（可为 worker 放行）。",
+  "@shortVideoPublishScheduleClearUpdated": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishScheduleClearFailedStatus": "清除定时失败：{statusCode}",
+  "@shortVideoPublishScheduleClearFailedStatus": {
+    "placeholders": {
+      "statusCode": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishScheduleClearFailed": "清除定时失败：{error}",
+  "@shortVideoPublishScheduleClearFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "accountSectionTitle": "账户与隐私",
   "accountRiskyPrefsTooltip": "本机客户端偏好（删号、导出等「不再提示」与恢复确认）",
   "accountSectionSubtitle": "统一管理账户数据导出、下载留档和不可逆删号。导出任务会走平台 job 队列，可反复生成新版快照。",

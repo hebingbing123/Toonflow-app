@@ -5,6 +5,7 @@ part of 'section.dart';
 /// Publish copy: suggestion, editing, platform-specific copy.
 extension ShortVideoPublishCopy on _ShortVideoSpaceSectionState {
   Future<void> _suggestPublishCopy() async {
+    final l10n = AppLocalizations.of(context)!;
     final token = widget.accessToken;
     final project = _selectedProject;
     if (token == null || token.isEmpty || project == null) {
@@ -13,7 +14,7 @@ extension ShortVideoPublishCopy on _ShortVideoSpaceSectionState {
     if (_publishDrafts.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('请先创建发布草稿。')),
+          SnackBar(content: Text(l10n.shortVideoPublishCopyCreateDraftFirst)),
         );
       }
       return;
@@ -26,9 +27,9 @@ extension ShortVideoPublishCopy on _ShortVideoSpaceSectionState {
       if (draftId == null) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('请先明确选择要生成文案的草稿。'),
-              duration: Duration(seconds: 4),
+            SnackBar(
+              content: Text(l10n.shortVideoPublishCopySelectDraftToSuggest),
+              duration: const Duration(seconds: 4),
             ),
           );
         }
@@ -48,18 +49,18 @@ extension ShortVideoPublishCopy on _ShortVideoSpaceSectionState {
         _publishCopyEditorRevision++;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('差异化文案已写入（来源：${res.source}）。')),
+        SnackBar(content: Text(l10n.shortVideoPublishCopySuggestApplied(res.source))),
       );
     } on RustApiException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('文案建议失败：${e.statusCode}')),
+          SnackBar(content: Text(l10n.shortVideoPublishCopySuggestFailedStatus(e.statusCode ?? 0))),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('文案建议失败：$e')),
+          SnackBar(content: Text(l10n.shortVideoPublishCopySuggestFailed(e.toString()))),
         );
       }
     } finally {
@@ -79,6 +80,7 @@ extension ShortVideoPublishCopy on _ShortVideoSpaceSectionState {
     String description,
     String tagsComma,
   ) async {
+    final l10n = AppLocalizations.of(context)!;
     if (_publishDrafts.isEmpty) {
       return;
     }
@@ -86,9 +88,9 @@ extension ShortVideoPublishCopy on _ShortVideoSpaceSectionState {
     final draftId = _activePublishDraft?.id;
     if (draftId == null) {
       messenger?.showSnackBar(
-        const SnackBar(
-          content: Text('请先明确选择要编辑文案的草稿。'),
-          duration: Duration(seconds: 4),
+        SnackBar(
+          content: Text(l10n.shortVideoPublishCopySelectDraftToEdit),
+          duration: const Duration(seconds: 4),
         ),
       );
       return;
@@ -120,15 +122,15 @@ extension ShortVideoPublishCopy on _ShortVideoSpaceSectionState {
       });
       await _refreshPublishSlice(project, token);
       messenger?.showSnackBar(
-        const SnackBar(content: Text('已保存差异化文案。')),
+        SnackBar(content: Text(l10n.shortVideoPublishCopySaved)),
       );
     } on RustApiException catch (e) {
       messenger?.showSnackBar(
-        SnackBar(content: Text('保存文案失败：${e.statusCode}')),
+        SnackBar(content: Text(l10n.shortVideoPublishCopySaveFailedStatus(e.statusCode ?? 0))),
       );
     } catch (e) {
       messenger?.showSnackBar(
-        SnackBar(content: Text('保存文案失败：$e')),
+        SnackBar(content: Text(l10n.shortVideoPublishCopySaveFailed(e.toString()))),
       );
     } finally {
       if (mounted) {

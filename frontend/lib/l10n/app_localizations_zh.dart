@@ -14880,6 +14880,246 @@ class AppLocalizationsZh extends AppLocalizations {
       '部分选中草稿已不存在，请刷新发布区后重试。';
 
   @override
+  String shortVideoPublishDraftCompareTitle(int count) {
+    return '发布草稿对比（$count）';
+  }
+
+  @override
+  String get shortVideoPublishDraftCompareIntro =>
+      '按当前多选顺序展示。可核对标题、定时、资产键与分平台文案差异。';
+
+  @override
+  String get shortVideoPublishDraftComparePerPlatformHeading =>
+      '分平台文案（title / description / tags）';
+
+  @override
+  String shortVideoPublishDraftCompareIdLine(String shortId) {
+    return 'ID：$shortId';
+  }
+
+  @override
+  String get shortVideoPublishDraftCompareFieldStatus => '状态';
+
+  @override
+  String get shortVideoPublishDraftCompareFieldScheduled => '定时';
+
+  @override
+  String get shortVideoPublishDraftCompareFieldScript => '剧本';
+
+  @override
+  String get shortVideoPublishDraftCompareFieldVideoAsset => '视频资产';
+
+  @override
+  String get shortVideoPublishDraftCompareFieldCover => '封面';
+
+  @override
+  String get shortVideoPublishDraftCompareFieldSummary => '简介';
+
+  @override
+  String get shortVideoPublishDraftCompareFieldTags => '标签';
+
+  @override
+  String shortVideoPublishDraftComparePlatformTitle(String platformId) {
+    return '平台 $platformId';
+  }
+
+  @override
+  String shortVideoPublishDraftCompareCopyLineTitle(String value) {
+    return 'title: $value';
+  }
+
+  @override
+  String shortVideoPublishDraftCompareCopyLineDescription(String value) {
+    return 'description: $value';
+  }
+
+  @override
+  String shortVideoPublishDraftCompareCopyLineTags(String value) {
+    return 'tags: $value';
+  }
+
+  @override
+  String get shortVideoPublishCopyCreateDraftFirst => '请先创建发布草稿。';
+
+  @override
+  String get shortVideoPublishCopySelectDraftToSuggest => '请先明确选择要生成文案的草稿。';
+
+  @override
+  String shortVideoPublishCopySuggestApplied(String source) {
+    return '差异化文案已写入（来源：$source）。';
+  }
+
+  @override
+  String shortVideoPublishCopySuggestFailedStatus(int statusCode) {
+    return '文案建议失败：$statusCode';
+  }
+
+  @override
+  String shortVideoPublishCopySuggestFailed(String error) {
+    return '文案建议失败：$error';
+  }
+
+  @override
+  String get shortVideoPublishCopySelectDraftToEdit => '请先明确选择要编辑文案的草稿。';
+
+  @override
+  String get shortVideoPublishCopySaved => '已保存差异化文案。';
+
+  @override
+  String shortVideoPublishCopySaveFailedStatus(int statusCode) {
+    return '保存文案失败：$statusCode';
+  }
+
+  @override
+  String shortVideoPublishCopySaveFailed(String error) {
+    return '保存文案失败：$error';
+  }
+
+  @override
+  String get shortVideoPublishOpsDefaultDraftTitle => '发布草稿';
+
+  @override
+  String get shortVideoPublishOpsDraftCreated => '已创建发布草稿并写入平台目标。';
+
+  @override
+  String shortVideoPublishOpsCreateDraftFailedStatus(int statusCode) {
+    return '发布草稿失败：$statusCode';
+  }
+
+  @override
+  String shortVideoPublishOpsCreateDraftFailed(String error) {
+    return '发布草稿失败：$error';
+  }
+
+  @override
+  String shortVideoPublishOpsSelectActiveDraftWhenMany(String draftLabel) {
+    return '有多张发布草稿时，请先在「$draftLabel」中选择一张。';
+  }
+
+  @override
+  String get shortVideoPublishOpsJobSubmitted => '已投递发布作业（服务端 worker 将处理队列）。';
+
+  @override
+  String shortVideoPublishOpsEnqueueFailedStatus(int statusCode) {
+    return '投递失败：$statusCode';
+  }
+
+  @override
+  String shortVideoPublishOpsEnqueueFailed(String error) {
+    return '投递失败：$error';
+  }
+
+  @override
+  String shortVideoPublishOpsBatchEnqueueResult(int ok, int total) {
+    return '批量投递完成：$ok/$total 成功。';
+  }
+
+  @override
+  String shortVideoPublishOpsBatchLineOk(String ref) {
+    return 'OK · $ref';
+  }
+
+  @override
+  String shortVideoPublishOpsBatchLineFail(String id, String detail) {
+    return 'FAIL · $id · $detail';
+  }
+
+  @override
+  String shortVideoPublishOpsBatchLineRetryOk(String jobId) {
+    return 'OK · 重试作业 $jobId';
+  }
+
+  @override
+  String shortVideoPublishOpsBatchRetryResult(int ok, int total) {
+    return '批量重试完成：$ok/$total 成功。';
+  }
+
+  @override
+  String get shortVideoPublishOpsSemiAutoConfirmed => '已确认半自动闸门，worker 将继续投递。';
+
+  @override
+  String shortVideoPublishOpsConfirmFailedStatus(int statusCode) {
+    return '确认失败：$statusCode';
+  }
+
+  @override
+  String shortVideoPublishOpsConfirmFailed(String error) {
+    return '确认失败：$error';
+  }
+
+  @override
+  String get shortVideoPublishScheduleSelectDraftFirst => '请先明确选择要定时的草稿。';
+
+  @override
+  String shortVideoPublishScheduleSingleSet(String iso) {
+    return '已设为定时：$iso（UTC）';
+  }
+
+  @override
+  String shortVideoPublishScheduleSingleFailedStatus(int statusCode) {
+    return '定时失败：$statusCode';
+  }
+
+  @override
+  String shortVideoPublishScheduleSingleFailed(String error) {
+    return '定时失败：$error';
+  }
+
+  @override
+  String shortVideoPublishScheduleCalendarTitle(String day) {
+    return '批量定时 · $day';
+  }
+
+  @override
+  String get shortVideoPublishScheduleCalendarIncludeScheduled =>
+      '包含已定时草稿并重写为该时刻';
+
+  @override
+  String get shortVideoPublishScheduleCalendarHintOverrideAll =>
+      '将对当前列表中的全部草稿写入同一发布时间。';
+
+  @override
+  String get shortVideoPublishScheduleCalendarHintNewOnly =>
+      '仅对尚未填写定时的草稿写入发布时间。';
+
+  @override
+  String get shortVideoPublishScheduleCalendarChooseTime => '选择时间';
+
+  @override
+  String get shortVideoPublishScheduleCalendarNoDrafts =>
+      '没有符合条件的草稿（试勾选「包含已定时」）。';
+
+  @override
+  String shortVideoPublishScheduleCalendarUpdated(int count, String iso) {
+    return '已更新 $count 张草稿定时：$iso（UTC）';
+  }
+
+  @override
+  String shortVideoPublishScheduleCalendarFailedStatus(int statusCode) {
+    return '日历批量定时失败：$statusCode';
+  }
+
+  @override
+  String shortVideoPublishScheduleCalendarFailed(String error) {
+    return '日历批量定时失败：$error';
+  }
+
+  @override
+  String shortVideoPublishScheduleClearUpdated(int count) {
+    return '已更新 $count 张草稿的定时字段（可为 worker 放行）。';
+  }
+
+  @override
+  String shortVideoPublishScheduleClearFailedStatus(int statusCode) {
+    return '清除定时失败：$statusCode';
+  }
+
+  @override
+  String shortVideoPublishScheduleClearFailed(String error) {
+    return '清除定时失败：$error';
+  }
+
+  @override
   String get accountSectionTitle => '账户与隐私';
 
   @override

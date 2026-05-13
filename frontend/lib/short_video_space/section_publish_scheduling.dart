@@ -40,6 +40,7 @@ extension ShortVideoPublishScheduling on _ShortVideoSpaceSectionState {
     ProjectRow project,
     String token,
   ) async {
+    final l10n = AppLocalizations.of(context)!;
     if (_publishDrafts.isEmpty) {
       return;
     }
@@ -47,9 +48,9 @@ extension ShortVideoPublishScheduling on _ShortVideoSpaceSectionState {
     final draftId = _activePublishDraft?.id;
     if (draftId == null) {
       messenger?.showSnackBar(
-        const SnackBar(
-          content: Text('请先明确选择要定时的草稿。'),
-          duration: Duration(seconds: 4),
+        SnackBar(
+          content: Text(l10n.shortVideoPublishScheduleSelectDraftFirst),
+          duration: const Duration(seconds: 4),
         ),
       );
       return;
@@ -68,15 +69,15 @@ extension ShortVideoPublishScheduling on _ShortVideoSpaceSectionState {
       });
       await _refreshPublishSlice(project, token);
       messenger?.showSnackBar(
-        SnackBar(content: Text('已设为定时：$iso（UTC）')),
+        SnackBar(content: Text(l10n.shortVideoPublishScheduleSingleSet(iso))),
       );
     } on RustApiException catch (e) {
       messenger?.showSnackBar(
-        SnackBar(content: Text('定时失败：${e.statusCode}')),
+        SnackBar(content: Text(l10n.shortVideoPublishScheduleSingleFailedStatus(e.statusCode ?? 0))),
       );
     } catch (e) {
       messenger?.showSnackBar(
-        SnackBar(content: Text('定时失败：$e')),
+        SnackBar(content: Text(l10n.shortVideoPublishScheduleSingleFailed(e.toString()))),
       );
     } finally {
       if (mounted) {
@@ -92,6 +93,7 @@ extension ShortVideoPublishScheduling on _ShortVideoSpaceSectionState {
     ProjectRow project,
     String token,
   ) async {
+    final l10n = AppLocalizations.of(context)!;
     if (_publishDrafts.length < 2) {
       return;
     }
@@ -114,15 +116,15 @@ extension ShortVideoPublishScheduling on _ShortVideoSpaceSectionState {
       );
       await _refreshPublishSlice(project, token);
       messenger?.showSnackBar(
-        SnackBar(content: Text('已批量定时 ${res.updated} 张草稿：$iso（UTC）')),
+        SnackBar(content: Text(l10n.shortVideoPublishBatchScheduledCount(res.updated, iso))),
       );
     } on RustApiException catch (e) {
       messenger?.showSnackBar(
-        SnackBar(content: Text('批量定时失败：${e.statusCode}')),
+        SnackBar(content: Text(l10n.shortVideoPublishBatchScheduleFailedStatus(e.statusCode ?? 0))),
       );
     } catch (e) {
       messenger?.showSnackBar(
-        SnackBar(content: Text('批量定时失败：$e')),
+        SnackBar(content: Text(l10n.shortVideoPublishBatchScheduleFailed(e.toString()))),
       );
     } finally {
       if (mounted) {
@@ -169,10 +171,11 @@ extension ShortVideoPublishScheduling on _ShortVideoSpaceSectionState {
       builder: (dialogCtx) {
         return StatefulBuilder(
           builder: (ctx, setLocal) {
+            final dlgL10n = AppLocalizations.of(ctx)!;
             final dayLabel =
                 '${dayLocal.year}-${dayLocal.month.toString().padLeft(2, '0')}-${dayLocal.day.toString().padLeft(2, '0')}';
             return AlertDialog(
-              title: Text('批量定时 · $dayLabel'),
+              title: Text(dlgL10n.shortVideoPublishScheduleCalendarTitle(dayLabel)),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -185,14 +188,14 @@ extension ShortVideoPublishScheduling on _ShortVideoSpaceSectionState {
                         overrideExisting = v ?? false;
                       });
                     },
-                    title: const Text('包含已定时草稿并重写为该时刻'),
+                    title: Text(dlgL10n.shortVideoPublishScheduleCalendarIncludeScheduled),
                     controlAffinity: ListTileControlAffinity.leading,
                   ),
                   const SizedBox(height: 6),
                   Text(
                     overrideExisting
-                        ? '将对当前列表中的全部草稿写入同一发布时间。'
-                        : '仅对尚未填写定时的草稿写入发布时间。',
+                        ? dlgL10n.shortVideoPublishScheduleCalendarHintOverrideAll
+                        : dlgL10n.shortVideoPublishScheduleCalendarHintNewOnly,
                     style: Theme.of(dialogCtx).textTheme.bodySmall,
                   ),
                 ],
@@ -200,11 +203,11 @@ extension ShortVideoPublishScheduling on _ShortVideoSpaceSectionState {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(dialogCtx, false),
-                  child: const Text('取消'),
+                  child: Text(dlgL10n.notificationsActionCancel),
                 ),
                 FilledButton(
                   onPressed: () => Navigator.pop(dialogCtx, true),
-                  child: const Text('选择时间'),
+                  child: Text(dlgL10n.shortVideoPublishScheduleCalendarChooseTime),
                 ),
               ],
             );
@@ -219,6 +222,7 @@ extension ShortVideoPublishScheduling on _ShortVideoSpaceSectionState {
     if (dt == null || !context.mounted) {
       return;
     }
+    final l10n = AppLocalizations.of(context)!;
     final ids = _publishDrafts
         .where(
           (d) =>
@@ -228,7 +232,7 @@ extension ShortVideoPublishScheduling on _ShortVideoSpaceSectionState {
         .toList(growable: false);
     if (ids.isEmpty) {
       messenger?.showSnackBar(
-        const SnackBar(content: Text('没有符合条件的草稿（试勾选「包含已定时」）。')),
+        SnackBar(content: Text(l10n.shortVideoPublishScheduleCalendarNoDrafts)),
       );
       return;
     }
@@ -245,15 +249,15 @@ extension ShortVideoPublishScheduling on _ShortVideoSpaceSectionState {
       );
       await _refreshPublishSlice(project, token);
       messenger?.showSnackBar(
-        SnackBar(content: Text('已更新 ${res.updated} 张草稿定时：$iso（UTC）')),
+        SnackBar(content: Text(l10n.shortVideoPublishScheduleCalendarUpdated(res.updated, iso))),
       );
     } on RustApiException catch (e) {
       messenger?.showSnackBar(
-        SnackBar(content: Text('日历批量定时失败：${e.statusCode}')),
+        SnackBar(content: Text(l10n.shortVideoPublishScheduleCalendarFailedStatus(e.statusCode ?? 0))),
       );
     } catch (e) {
       messenger?.showSnackBar(
-        SnackBar(content: Text('日历批量定时失败：$e')),
+        SnackBar(content: Text(l10n.shortVideoPublishScheduleCalendarFailed(e.toString()))),
       );
     } finally {
       if (mounted) {
@@ -265,6 +269,7 @@ extension ShortVideoPublishScheduling on _ShortVideoSpaceSectionState {
   }
 
   Future<void> _clearPublishSchedule() async {
+    final l10n = AppLocalizations.of(context)!;
     final token = widget.accessToken;
     final project = _selectedProject;
     if (token == null || token.isEmpty || project == null) {
@@ -289,18 +294,18 @@ extension ShortVideoPublishScheduling on _ShortVideoSpaceSectionState {
         return;
       }
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('已更新 ${res.updated} 张草稿的定时字段（可为 worker 放行）。')),
+        SnackBar(content: Text(l10n.shortVideoPublishScheduleClearUpdated(res.updated))),
       );
     } on RustApiException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('清除定时失败：${e.statusCode}')),
+          SnackBar(content: Text(l10n.shortVideoPublishScheduleClearFailedStatus(e.statusCode ?? 0))),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('清除定时失败：$e')),
+          SnackBar(content: Text(l10n.shortVideoPublishScheduleClearFailed(e.toString()))),
         );
       }
     } finally {
