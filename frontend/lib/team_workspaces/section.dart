@@ -309,7 +309,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
       }
       showRustApiErrorSnackBar(e);
       setState(() {
-        _error = describeRustApiError(e);
+        _error = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
         _loading = false;
       });
     } catch (e) {
@@ -317,7 +317,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
         return;
       }
       setState(() {
-        _error = e.toString();
+        _error = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
         _loading = false;
       });
     }
@@ -354,7 +354,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            l10n.teamWorkspaceCreateFailed(describeRustApiError(e)),
+            l10n.teamWorkspaceCreateFailed(describeUserVisibleApiError(l10n, e)),
           ),
         ),
       );
@@ -363,7 +363,13 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
         return;
       }
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.teamWorkspaceCreateFailed('$e'))),
+        SnackBar(
+          content: Text(
+            l10n.teamWorkspaceCreateFailed(
+              describeUserVisibleApiError(l10n, e),
+            ),
+          ),
+        ),
       );
     } finally {
       if (mounted) {
@@ -414,7 +420,9 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            l10n.teamWorkspaceAcceptInviteFailed(describeRustApiError(e)),
+            l10n.teamWorkspaceAcceptInviteFailed(
+              describeUserVisibleApiError(l10n, e),
+            ),
           ),
         ),
       );
@@ -423,7 +431,13 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
         return;
       }
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.teamWorkspaceAcceptInviteFailed('$e'))),
+        SnackBar(
+          content: Text(
+            l10n.teamWorkspaceAcceptInviteFailed(
+              describeUserVisibleApiError(l10n, e),
+            ),
+          ),
+        ),
       );
     } finally {
       if (mounted) {
@@ -551,7 +565,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
         });
       } catch (e) {
         setModalState(() {
-          error = describeRustApiError(e);
+          error = describeUserVisibleApiError(l10n, e);
           loadingMoreAudit = false;
         });
       }
@@ -581,7 +595,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
         });
       } catch (e) {
         setModalState(() {
-          workspaceStatsError = describeRustApiError(e);
+          workspaceStatsError = describeUserVisibleApiError(l10n, e);
           loadingWorkspaceStats = false;
         });
       }
@@ -636,7 +650,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
         await loadWorkspaceStats(setModalState, silent: true);
       } catch (e) {
         setModalState(() {
-          error = describeRustApiError(e);
+          error = describeUserVisibleApiError(l10n, e);
           loading = false;
           loadingMoreInvites = false;
           loadingMoreAudit = false;
@@ -662,7 +676,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
         });
       } catch (e) {
         setModalState(() {
-          error = describeRustApiError(e);
+          error = describeUserVisibleApiError(l10n, e);
           loadingMoreInvites = false;
         });
       }
@@ -752,7 +766,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                       await loadMembers(setModalState);
                                     } catch (e) {
                                       setModalState(
-                                        () => error = describeRustApiError(e),
+                                        () => error = describeUserVisibleApiError(l10n, e),
                                       );
                                     } finally {
                                       setModalState(() => adding = false);
@@ -814,7 +828,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                   inviteEmailController.clear();
                                 } catch (e) {
                                   setModalState(
-                                    () => error = describeRustApiError(e),
+                                    () => error = describeUserVisibleApiError(l10n, e),
                                   );
                                 } finally {
                                   setModalState(() => inviting = false);
@@ -1015,7 +1029,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                           } catch (e) {
                                             setModalState(
                                               () => error =
-                                                  describeRustApiError(e),
+                                                  describeUserVisibleApiError(l10n, e),
                                             );
                                           } finally {
                                             setModalState(
@@ -1064,7 +1078,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                           } catch (e) {
                                             setModalState(
                                               () => error =
-                                                  describeRustApiError(e),
+                                                  describeUserVisibleApiError(l10n, e),
                                             );
                                           } finally {
                                             setModalState(
@@ -1287,7 +1301,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                             } catch (e) {
                                               setModalState(
                                                 () => error =
-                                                    describeRustApiError(e),
+                                                    describeUserVisibleApiError(l10n, e),
                                               );
                                             } finally {
                                               setModalState(
@@ -1341,7 +1355,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                             } catch (e) {
                                               setModalState(
                                                 () => error =
-                                                    describeRustApiError(e),
+                                                    describeUserVisibleApiError(l10n, e),
                                               );
                                             } finally {
                                               setModalState(
@@ -1372,7 +1386,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                           } catch (e) {
                                             setModalState(
                                               () => error =
-                                                  describeRustApiError(e),
+                                                  describeUserVisibleApiError(l10n, e),
                                             );
                                           } finally {
                                             setModalState(
@@ -1420,7 +1434,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                             await _load();
                           } catch (e) {
                             setModalState(() {
-                              error = e.toString();
+                              error = describeUserVisibleApiError(l10n, e);
                               leaving = false;
                             });
                           }
@@ -2004,7 +2018,13 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
       }
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(l10n.teamWorkspaceOpFailed('$e'))));
+      ).showSnackBar(
+        SnackBar(
+          content: Text(
+            l10n.teamWorkspaceOpFailed(describeUserVisibleApiError(l10n, e)),
+          ),
+        ),
+      );
     } finally {
       if (mounted) {
         setState(() => _patchingWorkspaceId = null);
@@ -2042,7 +2062,13 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
         return;
       }
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.teamWorkspaceSwitchFailed('$e'))),
+        SnackBar(
+          content: Text(
+            l10n.teamWorkspaceSwitchFailed(
+              describeUserVisibleApiError(l10n, e),
+            ),
+          ),
+        ),
       );
     } finally {
       if (mounted) {

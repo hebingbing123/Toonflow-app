@@ -130,11 +130,13 @@ extension _HomePageProjectEditorDialogContentNovels on _HomePageState {
             try {
               dialogState.novelEventsRef[0] =
                   await fetchProjectNovelEventsByProjectId(token, p.id);
-            } on RustApiException catch (e) {
+            } catch (e) {
               if (ctx.mounted) {
-                ScaffoldMessenger.of(
-                  ctx,
-                ).showSnackBar(SnackBar(content: Text(e.toString())));
+                ScaffoldMessenger.of(ctx).showSnackBar(
+                  SnackBar(
+                    content: Text(describeUserVisibleApiError(l10n, e)),
+                  ),
+                );
               }
             } finally {
               if (ctx.mounted) {
