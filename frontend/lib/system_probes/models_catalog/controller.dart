@@ -73,10 +73,6 @@ class ModelsCatalogController extends ChangeNotifier {
       final agentDeployBit =
           'agent-deploy: ${agentDeployRows.length} rows · ${_formatProbeStatusMap(settingsSummary)} · ${_formatProbeStatusMap(productionSummary.statuses)} · prod/implemented ${productionSummary.implementedCount}x(200/404/503)';
       modelsCatalogBody = '$modelsLine · $vendorsBit · $agentDeployBit';
-    } on RustApiException catch (error) {
-      _onErrorChanged(
-        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
-      );
     } catch (error) {
       _onErrorChanged(
         describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),

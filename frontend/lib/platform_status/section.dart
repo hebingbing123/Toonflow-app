@@ -107,13 +107,6 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
           );
         }
       }
-    } on RustApiException catch (error) {
-      if (!mounted) {
-        return;
-      }
-      setState(() {
-        _error = describeUserVisibleApiError(l10n, error);
-      });
     } catch (error) {
       if (!mounted) {
         return;

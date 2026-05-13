@@ -62,15 +62,6 @@ class _StatusPageState extends State<StatusPage> {
         _lastUpdatedAt = DateTime.now();
         _loading = false;
       });
-    } on RustApiException catch (error) {
-      if (!mounted) {
-        return;
-      }
-      final l10n = AppLocalizations.of(context)!;
-      setState(() {
-        _error = describeUserVisibleApiError(l10n, error);
-        _loading = false;
-      });
     } catch (error) {
       if (!mounted) {
         return;
