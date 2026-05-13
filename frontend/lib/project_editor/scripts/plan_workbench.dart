@@ -49,7 +49,7 @@ extension _HomePageProjectEditorScriptPlanWorkbench on _HomePageState {
       } catch (e) {
         if (!ctx.mounted) return;
         setLocalState(() {
-          infoLine = l10n.projectScriptPlanWorkbenchLoadFailed(e.toString());
+          infoLine = l10n.projectScriptPlanWorkbenchLoadFailed(describeUserVisibleApiError(l10n, e));
         });
       } finally {
         if (ctx.mounted) {
@@ -143,7 +143,7 @@ extension _HomePageProjectEditorScriptPlanWorkbench on _HomePageState {
         if (!ctx.mounted) return;
         setLocalState(() {
           localBusy = false;
-          infoLine = l10n.projectScriptPlanWorkbenchSaveFailed(e.toString());
+          infoLine = l10n.projectScriptPlanWorkbenchSaveFailed(describeUserVisibleApiError(l10n, e));
         });
       }
     }
@@ -204,7 +204,7 @@ extension _HomePageProjectEditorScriptPlanWorkbench on _HomePageState {
         if (!ctx.mounted) return;
         setLocalState(() {
           localBusy = false;
-          infoLine = l10n.projectScriptPlanWorkbenchWriteDraftsFailed(e.toString());
+          infoLine = l10n.projectScriptPlanWorkbenchWriteDraftsFailed(describeUserVisibleApiError(l10n, e));
         });
       }
     }

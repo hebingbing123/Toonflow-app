@@ -433,6 +433,24 @@ pub fn deprecated_endpoint_i18n(alternative: &str) -> ApiError {
     }
 }
 
+/// 创建开发中功能错误（带功能名称参数）。
+///
+/// 根据当前请求的 `Accept-Language` 偏好返回对应语言的错误消息。
+///
+/// # 示例
+///
+/// ```ignore
+/// return Err(feature_under_development_i18n("advanced_analytics"));
+/// return Err(feature_under_development_i18n("video_export"));
+/// ```
+#[allow(dead_code)] // Public helper for handlers; not all call sites wired yet.
+pub fn feature_under_development_i18n(feature: &str) -> ApiError {
+    ApiError::NotImplementedI18n {
+        en: format!("Feature '{}' is currently under development", feature),
+        zh: format!("功能 '{}' 正在开发中", feature),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

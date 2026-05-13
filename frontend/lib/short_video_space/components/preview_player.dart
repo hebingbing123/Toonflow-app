@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../../rust_api.dart';
 
 AppLocalizations _previewPlayerL10n(BuildContext context) =>
     AppLocalizations.of(context) ?? lookupAppLocalizations(const Locale('en'));
@@ -213,7 +214,7 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
       final l10n = _previewPlayerL10n(context);
       setState(() {
         _hasError = true;
-        _errorMessage = l10n.shortVideoPreviewPlayerLoadFailed('$e');
+        _errorMessage = l10n.shortVideoPreviewPlayerLoadFailed(describeUserVisibleApiError(l10n, e));
       });
     }
   }

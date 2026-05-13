@@ -1030,7 +1030,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(l10n.globalSearchClearHistoryFailed(e.toString())),
+            content: Text(l10n.globalSearchClearHistoryFailed(describeUserVisibleApiError(l10n, e))),
             duration: const Duration(seconds: 3),
           ),
         );

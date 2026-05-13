@@ -5,23 +5,28 @@ import 'package:flutter/material.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../config.dart';
+import '../l10n/app_localizations.dart';
 import 'product_scope.dart';
 import '../../rust_api.dart';
 
 typedef JobsAccessTokenProvider = String? Function();
 typedef JobsErrorSink = void Function(String? error);
 typedef JobsScopeSink = void Function(JobProductScope scope);
+typedef JobsL10nProvider = AppLocalizations? Function();
 
 class JobsController extends ChangeNotifier {
   JobsController({
     required JobsAccessTokenProvider accessTokenProvider,
     required JobsErrorSink onErrorChanged,
+    required JobsL10nProvider l10nProvider,
     JobsScopeSink? onJobScopeResolved,
   }) : _accessTokenProvider = accessTokenProvider,
+       _l10nProvider = l10nProvider,
        _onErrorChanged = onErrorChanged,
        _onJobScopeResolved = onJobScopeResolved;
 
   final JobsAccessTokenProvider _accessTokenProvider;
+  final JobsL10nProvider _l10nProvider;
   final JobsErrorSink _onErrorChanged;
   final JobsScopeSink? _onJobScopeResolved;
   WebSocketChannel? _ws;
@@ -47,6 +52,7 @@ class JobsController extends ChangeNotifier {
   String? _lastStatusFilter;
 
   String? get _accessToken => _accessTokenProvider();
+  AppLocalizations? get _l10n => _l10nProvider();
 
   void onJobIdChanged(String _) {
     notifyListeners();
@@ -86,6 +92,11 @@ class JobsController extends ChangeNotifier {
     _onErrorChanged(error);
   }
 
+  void _setErrorFromObject(Object error) {
+    final loc = _l10nProvider() ?? rustApiLookupL10nFromPlatform();
+    _setError(describeUserVisibleApiError(loc, error));
+  }
+
   Future<void> loadJobs() async {
     await _loadJobsList();
   }
@@ -117,7 +128,7 @@ class JobsController extends ChangeNotifier {
     } on RustApiException catch (e) {
       reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setError(e.toString());
+      _setErrorFromObject(e);
     } finally {
       loadingJobs = false;
       notifyListeners();
@@ -133,11 +144,13 @@ class JobsController extends ChangeNotifier {
     notifyListeners();
     try {
       final kinds = await fetchJobKinds(token);
-      jobKindsLine = kinds.isEmpty ? '(empty)' : kinds.join(', ');
+      jobKindsLine = kinds.isEmpty
+          ? _l10n?.jobsEmptyValue ?? '(empty)'
+          : kinds.join(', ');
     } on RustApiException catch (e) {
       reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setError(e.toString());
+      _setErrorFromObject(e);
     } finally {
       loadingJobKinds = false;
       notifyListeners();
@@ -154,12 +167,18 @@ class JobsController extends ChangeNotifier {
     try {
       final rows = await fetchJobKindSummaries(token);
       jobKindSummaryLine = rows.isEmpty
-          ? '(empty)'
-          : rows.map((r) => '${r.kind}: ${r.jobCount}').join(', ');
+          ? _l10n?.jobsEmptyValue ?? '(empty)'
+          : rows
+                .map(
+                  (r) =>
+                      _l10n?.jobsKindCountEntry(r.kind, r.jobCount) ??
+                      '${r.kind}: ${r.jobCount}',
+                )
+                .join(', ');
     } on RustApiException catch (e) {
       reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setError(e.toString());
+      _setErrorFromObject(e);
     } finally {
       loadingJobKindSummary = false;
       notifyListeners();
@@ -176,12 +195,18 @@ class JobsController extends ChangeNotifier {
     try {
       final rows = await fetchJobStatusSummaries(token);
       jobStatusSummaryLine = rows.isEmpty
-          ? '(empty)'
-          : rows.map((r) => '${r.status}: ${r.jobCount}').join(', ');
+          ? _l10n?.jobsEmptyValue ?? '(empty)'
+          : rows
+                .map(
+                  (r) =>
+                      _l10n?.jobsStatusCountEntry(r.status, r.jobCount) ??
+                      '${r.status}: ${r.jobCount}',
+                )
+                .join(', ');
     } on RustApiException catch (e) {
       reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setError(e.toString());
+      _setErrorFromObject(e);
     } finally {
       loadingJobStatusSummary = false;
       notifyListeners();
@@ -203,21 +228,11 @@ class JobsController extends ChangeNotifier {
       if (scope.hasProjectScope) {
         _onJobScopeResolved?.call(scope);
       }
-      final parts = <String>[
-        '${job.kind} · ${job.status}',
-        'updated ${job.updatedAt}',
-      ];
-      if (job.claimedBy != null && job.claimedBy!.isNotEmpty) {
-        parts.add('claimed_by=${job.claimedBy}');
-      }
-      if (job.errorMessage != null && job.errorMessage!.isNotEmpty) {
-        parts.add('error=${job.errorMessage}');
-      }
-      jobByIdLine = parts.join(' · ');
+      jobByIdLine = _formatJobDetailLine(job);
     } on RustApiException catch (e) {
       reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setError(e.toString());
+      _setErrorFromObject(e);
     } finally {
       loadingJobById = false;
       notifyListeners();
@@ -238,7 +253,7 @@ class JobsController extends ChangeNotifier {
     } on RustApiException catch (e) {
       reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setError(e.toString());
+      _setErrorFromObject(e);
     } finally {
       cancellingJobId = null;
       notifyListeners();
@@ -257,7 +272,7 @@ class JobsController extends ChangeNotifier {
     } on RustApiException catch (e) {
       reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setError(e.toString());
+      _setErrorFromObject(e);
     } finally {
       retryingJobId = null;
       notifyListeners();
@@ -284,8 +299,9 @@ class JobsController extends ChangeNotifier {
       );
       if (firstJob.id != secondJob.id) {
         _setError(
-          'POST /api/v1/jobs idempotency: expected same id, got '
-          '${firstJob.id} vs ${secondJob.id}',
+          _l10n?.jobsIdempotencyMismatch(firstJob.id, secondJob.id) ??
+              'POST /api/v1/jobs idempotency: expected same id, got '
+                  '${firstJob.id} vs ${secondJob.id}',
         );
         return;
       }
@@ -293,7 +309,7 @@ class JobsController extends ChangeNotifier {
     } on RustApiException catch (e) {
       reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setError(e.toString());
+      _setErrorFromObject(e);
     } finally {
       creatingJob = false;
       notifyListeners();
@@ -365,19 +381,28 @@ class JobsController extends ChangeNotifier {
       jobs = next;
     }
     if (jobIdController.text.trim() == updated.id) {
-      final parts = <String>[
-        '${updated.kind} · ${updated.status}',
-        'updated ${updated.updatedAt}',
-      ];
-      if (updated.claimedBy != null && updated.claimedBy!.isNotEmpty) {
-        parts.add('claimed_by=${updated.claimedBy}');
-      }
-      if (updated.errorMessage != null && updated.errorMessage!.isNotEmpty) {
-        parts.add('error=${updated.errorMessage}');
-      }
-      jobByIdLine = parts.join(' · ');
+      jobByIdLine = _formatJobDetailLine(updated);
     }
     notifyListeners();
+  }
+
+  String _formatJobDetailLine(JobRow job) {
+    final parts = <String>[
+      '${job.kind} · ${job.status}',
+      _l10n?.jobsUpdatedAt(job.updatedAt) ?? 'updated ${job.updatedAt}',
+    ];
+    if (job.claimedBy != null && job.claimedBy!.isNotEmpty) {
+      parts.add(
+        _l10n?.jobsClaimedBy(job.claimedBy!) ?? 'claimed_by=${job.claimedBy}',
+      );
+    }
+    if (job.errorMessage != null && job.errorMessage!.isNotEmpty) {
+      parts.add(
+        _l10n?.jobsFailedReason(job.errorMessage!) ??
+            'error=${job.errorMessage}',
+      );
+    }
+    return parts.join(' · ');
   }
 
   bool _matchesCurrentFilters(JobRow row) {

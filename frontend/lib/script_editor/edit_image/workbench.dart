@@ -88,9 +88,9 @@ extension _HomePageScriptEditorEditImageWorkbench on _HomePageState {
       try {
         await action();
       } on RustApiException catch (e) {
-        setState(() => statusLine = '$e');
+        setState(() => statusLine = describeUserVisibleApiError(l10n, e));
       } catch (e) {
-        setState(() => statusLine = '$e');
+        setState(() => statusLine = describeUserVisibleApiError(l10n, e));
       } finally {
         setState(() => busy = false);
       }

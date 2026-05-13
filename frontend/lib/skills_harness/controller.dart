@@ -186,6 +186,11 @@ class SkillsHarnessController extends ChangeNotifier {
     _onErrorChanged(error);
   }
 
+  void _setErrorFromException(Object error) {
+    final loc = _l10n ?? rustApiLookupL10nFromPlatform();
+    _setError(describeUserVisibleApiError(loc, error));
+  }
+
   void publishWsConnection(bool connected) {
     _onWsConnectionChanged(connected);
   }
@@ -207,9 +212,9 @@ class SkillsHarnessController extends ChangeNotifier {
           .map((t) => '${t.name}: ${t.description}')
           .join('\n');
     } on RustApiException catch (e) {
-      _setError(e.toString());
+      _setErrorFromException(e);
     } catch (e) {
-      _setError(e.toString());
+      _setErrorFromException(e);
     } finally {
       loadingHarnessTools = false;
       _publish();
@@ -229,9 +234,9 @@ class SkillsHarnessController extends ChangeNotifier {
           _l10n?.skillsHarnessValidateResult('${r.validated}', r.sizeBytes) ??
           'validated=${r.validated}, size_bytes=${r.sizeBytes} (embedded probe)';
     } on RustApiException catch (e) {
-      _setError(e.toString());
+      _setErrorFromException(e);
     } catch (e) {
-      _setError(e.toString());
+      _setErrorFromException(e);
     } finally {
       loadingUserWasmValidate = false;
       _publish();
@@ -260,9 +265,9 @@ class SkillsHarnessController extends ChangeNotifier {
           'stored id=${r.id}, sha256=$shaShort, size=${r.sizeBytes}, at=${r.createdAt.toIso8601String()}';
       userWasmRevokeTargetId = r.id;
     } on RustApiException catch (e) {
-      _setError(e.toString());
+      _setErrorFromException(e);
     } catch (e) {
-      _setError(e.toString());
+      _setErrorFromException(e);
     } finally {
       loadingUserWasmPersist = false;
       _publish();
@@ -297,9 +302,9 @@ class SkillsHarnessController extends ChangeNotifier {
         userWasmRevokeTargetId = r.items.first.id;
       }
     } on RustApiException catch (e) {
-      _setError(e.toString());
+      _setErrorFromException(e);
     } catch (e) {
-      _setError(e.toString());
+      _setErrorFromException(e);
     } finally {
       loadingUserWasmList = false;
       _publish();
@@ -324,9 +329,9 @@ class SkillsHarnessController extends ChangeNotifier {
           'revoked id=${r.id}, revoked_at=${r.revokedAt.toIso8601String()}';
       userWasmRevokeTargetId = null;
     } on RustApiException catch (e) {
-      _setError(e.toString());
+      _setErrorFromException(e);
     } catch (e) {
-      _setError(e.toString());
+      _setErrorFromException(e);
     } finally {
       loadingUserWasmRevoke = false;
       _publish();
@@ -358,9 +363,9 @@ class SkillsHarnessController extends ChangeNotifier {
       // Reload so the list filtering (`revoked_at IS NULL`) is visibly verified.
       await loadUserWasmList();
     } on RustApiException catch (e) {
-      _setError(e.toString());
+      _setErrorFromException(e);
     } catch (e) {
-      _setError(e.toString());
+      _setErrorFromException(e);
     } finally {
       loadingUserWasmRevoke = false;
       _publish();
@@ -384,9 +389,9 @@ class SkillsHarnessController extends ChangeNotifier {
           ) ??
           'scope=${summary.scope} · ${summary.markdownFileCount} md files, ${summary.totalBytes} bytes total';
     } on RustApiException catch (e) {
-      _setError(e.toString());
+      _setErrorFromException(e);
     } catch (e) {
-      _setError(e.toString());
+      _setErrorFromException(e);
     } finally {
       loadingSkillsSummary = false;
       _publish();
@@ -412,9 +417,9 @@ class SkillsHarnessController extends ChangeNotifier {
           ) ??
           '${list.length} files; sample: ${sample.isEmpty ? '—' : sample}';
     } on RustApiException catch (e) {
-      _setError(e.toString());
+      _setErrorFromException(e);
     } catch (e) {
-      _setError(e.toString());
+      _setErrorFromException(e);
     } finally {
       loadingSkillList = false;
       _publish();

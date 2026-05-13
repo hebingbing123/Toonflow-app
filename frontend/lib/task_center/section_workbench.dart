@@ -121,7 +121,7 @@ class _TaskCenterWorkbenchDialogState
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _statusLine = e.toString();
+        _statusLine = describeUserVisibleApiError(l10n, e);
         _loadingProjects = false;
       });
     }
@@ -151,7 +151,7 @@ class _TaskCenterWorkbenchDialogState
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _statusLine = e.toString();
+        _statusLine = describeUserVisibleApiError(l10n, e);
         _loadingCategories = false;
       });
     }
@@ -216,7 +216,7 @@ class _TaskCenterWorkbenchDialogState
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _statusLine = e.toString();
+        _statusLine = describeUserVisibleApiError(l10n, e);
         _loadingTasks = false;
       });
     }
@@ -250,7 +250,7 @@ class _TaskCenterWorkbenchDialogState
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _statusLine = e.toString();
+        _statusLine = describeUserVisibleApiError(l10n, e);
         _loadingNumericIdTaskDetail = false;
       });
     }
@@ -284,7 +284,7 @@ class _TaskCenterWorkbenchDialogState
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _statusLine = e.toString();
+        _statusLine = describeUserVisibleApiError(l10n, e);
         _loadingUuidDetails = false;
       });
     }
@@ -315,7 +315,7 @@ class _TaskCenterWorkbenchDialogState
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _statusLine = e.toString();
+        _statusLine = describeUserVisibleApiError(l10n, e);
         _retryingJobId = null;
       });
     }
@@ -346,7 +346,7 @@ class _TaskCenterWorkbenchDialogState
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _statusLine = e.toString();
+        _statusLine = describeUserVisibleApiError(l10n, e);
         _cancellingJobId = null;
       });
     }

@@ -55,7 +55,7 @@ extension ShortVideoSpaceSectionProject on _ShortVideoSpaceSectionState {
       }
       final l10n = AppLocalizations.of(context)!;
       setState(() {
-        _projectConfigLine = l10n.shortVideoProjectLoadFailed('$e');
+        _projectConfigLine = l10n.shortVideoProjectLoadFailed(describeUserVisibleApiError(l10n, e));
       });
     } finally {
       if (mounted) {
@@ -204,7 +204,7 @@ extension ShortVideoSpaceSectionProject on _ShortVideoSpaceSectionState {
       }
       final errL10n = AppLocalizations.of(context)!;
       setState(() {
-        _projectConfigLine = errL10n.shortVideoProjectCreateFailed('$e');
+        _projectConfigLine = errL10n.shortVideoProjectCreateFailed(describeUserVisibleApiError(errL10n, e));
       });
     } finally {
       if (mounted) {
@@ -287,7 +287,7 @@ extension ShortVideoSpaceSectionProject on _ShortVideoSpaceSectionState {
       }
       final errL10n = AppLocalizations.of(context)!;
       setState(() {
-        _projectConfigLine = errL10n.shortVideoProjectSaveFailed('$e');
+        _projectConfigLine = errL10n.shortVideoProjectSaveFailed(describeUserVisibleApiError(errL10n, e));
       });
     } finally {
       if (mounted) {

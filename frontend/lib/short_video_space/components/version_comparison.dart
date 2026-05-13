@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../../rust_api.dart';
 import 'version_manager.dart';
 
 String _formatVersionComparisonValue(AppLocalizations l10n, dynamic value) {
@@ -290,7 +291,7 @@ class _VersionComparisonState extends State<VersionComparison> {
         final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(l10n.shortVideoVersionComparisonExportFailed('$e')),
+            content: Text(l10n.shortVideoVersionComparisonExportFailed(describeUserVisibleApiError(l10n, e))),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );

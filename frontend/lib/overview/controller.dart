@@ -39,6 +39,10 @@ class OverviewController extends ChangeNotifier {
     _onErrorChanged(error);
   }
 
+  void _setErrorFromObject(Object error) {
+    _setError(describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error));
+  }
+
   Future<void> pingHealth() async {
     loadingHealth = true;
     _setError(null);
@@ -50,7 +54,7 @@ class OverviewController extends ChangeNotifier {
     } on RustApiException catch (e) {
       reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setError(e.toString());
+      _setErrorFromObject(e);
     } finally {
       loadingHealth = false;
       notifyListeners();
@@ -68,7 +72,7 @@ class OverviewController extends ChangeNotifier {
     } on RustApiException catch (e) {
       reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setError(e.toString());
+      _setErrorFromObject(e);
     } finally {
       loadingHealthRoot = false;
       notifyListeners();
@@ -86,7 +90,7 @@ class OverviewController extends ChangeNotifier {
     } on RustApiException catch (e) {
       reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setError(e.toString());
+      _setErrorFromObject(e);
     } finally {
       loadingPing = false;
       notifyListeners();
@@ -111,7 +115,7 @@ class OverviewController extends ChangeNotifier {
     } on RustApiException catch (e) {
       reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setError(e.toString());
+      _setErrorFromObject(e);
     } finally {
       loadingVersion = false;
       notifyListeners();
@@ -129,7 +133,7 @@ class OverviewController extends ChangeNotifier {
     } on RustApiException catch (e) {
       reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setError(e.toString());
+      _setErrorFromObject(e);
     } finally {
       loadingReady = false;
       notifyListeners();

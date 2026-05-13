@@ -45,6 +45,10 @@ class ProjectsController extends ChangeNotifier {
     _onErrorChanged(error);
   }
 
+  void _setErrorFromObject(Object error) {
+    _setError(describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error));
+  }
+
   void reset() {
     loadingProjects = false;
     loadingProjectsSummary = false;
@@ -76,7 +80,7 @@ class ProjectsController extends ChangeNotifier {
     } on RustApiException catch (e) {
       reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setError(e.toString());
+      _setErrorFromObject(e);
     } finally {
       creatingProject = false;
       notifyListeners();
@@ -124,7 +128,7 @@ class ProjectsController extends ChangeNotifier {
     } on RustApiException catch (e) {
       reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setError(e.toString());
+      _setErrorFromObject(e);
     } finally {
       loadingAgentMemory = false;
       notifyListeners();
@@ -143,7 +147,7 @@ class ProjectsController extends ChangeNotifier {
     } on RustApiException catch (e) {
       reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setError(e.toString());
+      _setErrorFromObject(e);
     } finally {
       loadingProjects = false;
       notifyListeners();
@@ -164,7 +168,7 @@ class ProjectsController extends ChangeNotifier {
     } on RustApiException catch (e) {
       reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setError(e.toString());
+      _setErrorFromObject(e);
     } finally {
       loadingProjectsSummary = false;
       notifyListeners();
@@ -203,7 +207,7 @@ class ProjectsController extends ChangeNotifier {
     } on RustApiException catch (e) {
       reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setError(e.toString());
+      _setErrorFromObject(e);
     } finally {
       loadingArtStyles = false;
       notifyListeners();

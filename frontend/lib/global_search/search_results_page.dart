@@ -200,7 +200,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
       if (!mounted) return;
 
       setState(() {
-        _error = l10n.globalSearchErrSearchFailed(e.toString());
+        _error = l10n.globalSearchErrSearchFailed(describeUserVisibleApiError(l10n, e));
         _isLoading = false;
       });
     }

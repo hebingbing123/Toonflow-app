@@ -177,13 +177,13 @@ class _AssetGenerationWorkbenchDialogState
     } on RustApiException catch (e) {
       if (mounted) {
         _updateWorkbenchState(
-          () => _statusLine = l10n.projectEditorAssetGenSyncSnapshotFailed('$e'),
+          () => _statusLine = l10n.projectEditorAssetGenSyncSnapshotFailed(describeUserVisibleApiError(l10n, e)),
         );
       }
     } catch (e) {
       if (mounted) {
         _updateWorkbenchState(
-          () => _statusLine = l10n.projectEditorAssetGenSyncSnapshotFailed('$e'),
+          () => _statusLine = l10n.projectEditorAssetGenSyncSnapshotFailed(describeUserVisibleApiError(l10n, e)),
         );
       }
     } finally {
@@ -197,11 +197,21 @@ class _AssetGenerationWorkbenchDialogState
     try {
       await action();
     } on RustApiException catch (e) {
-      if (mounted) _updateWorkbenchState(() => _statusLine = '$e');
+      if (mounted) {
+        final loc = AppLocalizations.of(context)!;
+        _updateWorkbenchState(
+          () => _statusLine = describeUserVisibleApiError(loc, e),
+        );
+      }
     } on FormatException catch (e) {
       if (mounted) _updateWorkbenchState(() => _statusLine = e.message);
     } catch (e) {
-      if (mounted) _updateWorkbenchState(() => _statusLine = '$e');
+      if (mounted) {
+        final loc = AppLocalizations.of(context)!;
+        _updateWorkbenchState(
+          () => _statusLine = describeUserVisibleApiError(loc, e),
+        );
+      }
     } finally {
       if (mounted) _updateWorkbenchState(() => _busyMutation = false);
       widget.onMutationEnd();

@@ -101,13 +101,13 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _statusLine = l10n.projectsArtWorkbenchStatusRefreshFailed('$e');
+        _statusLine = l10n.projectsArtWorkbenchStatusRefreshFailed(describeUserVisibleApiError(l10n, e));
       });
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _statusLine = l10n.projectsArtWorkbenchStatusRefreshFailed('$e');
+        _statusLine = l10n.projectsArtWorkbenchStatusRefreshFailed(describeUserVisibleApiError(l10n, e));
       });
     }
   }
@@ -136,14 +136,14 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
       setState(() {
         _coverBytes = null;
         _loadingCover = false;
-        _statusLine = l10n.projectsArtWorkbenchStatusReadCoverFailed('$e');
+        _statusLine = l10n.projectsArtWorkbenchStatusReadCoverFailed(describeUserVisibleApiError(l10n, e));
       });
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _coverBytes = null;
         _loadingCover = false;
-        _statusLine = l10n.projectsArtWorkbenchStatusReadCoverFailed('$e');
+        _statusLine = l10n.projectsArtWorkbenchStatusReadCoverFailed(describeUserVisibleApiError(l10n, e));
       });
     }
   }
@@ -184,13 +184,13 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _statusLine = l10n.projectsArtWorkbenchStatusCreateFailed('$e');
+        _statusLine = l10n.projectsArtWorkbenchStatusCreateFailed(describeUserVisibleApiError(l10n, e));
       });
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _statusLine = l10n.projectsArtWorkbenchStatusCreateFailed('$e');
+        _statusLine = l10n.projectsArtWorkbenchStatusCreateFailed(describeUserVisibleApiError(l10n, e));
       });
     }
   }
@@ -229,13 +229,13 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _statusLine = l10n.projectsArtWorkbenchStatusSaveFailed('$e');
+        _statusLine = l10n.projectsArtWorkbenchStatusSaveFailed(describeUserVisibleApiError(l10n, e));
       });
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _statusLine = l10n.projectsArtWorkbenchStatusSaveFailed('$e');
+        _statusLine = l10n.projectsArtWorkbenchStatusSaveFailed(describeUserVisibleApiError(l10n, e));
       });
     }
   }
@@ -264,13 +264,13 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _statusLine = l10n.projectsArtWorkbenchStatusDeleteFailed('$e');
+        _statusLine = l10n.projectsArtWorkbenchStatusDeleteFailed(describeUserVisibleApiError(l10n, e));
       });
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _statusLine = l10n.projectsArtWorkbenchStatusDeleteFailed('$e');
+        _statusLine = l10n.projectsArtWorkbenchStatusDeleteFailed(describeUserVisibleApiError(l10n, e));
       });
     }
   }
@@ -300,13 +300,13 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _statusLine = l10n.projectsArtWorkbenchStatusExtractFailed('$e');
+        _statusLine = l10n.projectsArtWorkbenchStatusExtractFailed(describeUserVisibleApiError(l10n, e));
       });
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _statusLine = l10n.projectsArtWorkbenchStatusExtractFailed('$e');
+        _statusLine = l10n.projectsArtWorkbenchStatusExtractFailed(describeUserVisibleApiError(l10n, e));
       });
     }
   }

@@ -37,11 +37,11 @@ extension SkillsHarnessFileController on SkillsHarnessController {
         ),
       );
     } on RustApiException catch (e) {
-      _setError(e.toString());
+      _setErrorFromException(e);
       loadingSkillPreview = false;
       _publish();
     } catch (e) {
-      _setError(e.toString());
+      _setErrorFromException(e);
       loadingSkillPreview = false;
       _publish();
     }
@@ -257,11 +257,11 @@ extension SkillsHarnessFileController on SkillsHarnessController {
         },
       );
     } on RustApiException catch (e) {
-      _setError(e.toString());
+      _setErrorFromException(e);
       loadingSkillVersions = false;
       _publish();
     } catch (e) {
-      _setError(e.toString());
+      _setErrorFromException(e);
       loadingSkillVersions = false;
       _publish();
     }
@@ -288,11 +288,11 @@ extension SkillsHarnessFileController on SkillsHarnessController {
           'PUT 200: ${r.path} (${r.content.length} chars written)';
       _publish();
     } on RustApiException catch (e) {
-      _setError(e.toString());
+      _setErrorFromException(e);
       loadingSkillPut = false;
       _publish();
     } catch (e) {
-      _setError(e.toString());
+      _setErrorFromException(e);
       loadingSkillPut = false;
       _publish();
     }
@@ -319,11 +319,11 @@ extension SkillsHarnessFileController on SkillsHarnessController {
           'POST 201: ${r.path} (${r.content.length} chars written)';
       _publish();
     } on RustApiException catch (e) {
-      _setError(e.toString());
+      _setErrorFromException(e);
       loadingSkillPost = false;
       _publish();
     } catch (e) {
-      _setError(e.toString());
+      _setErrorFromException(e);
       loadingSkillPost = false;
       _publish();
     }
@@ -345,11 +345,11 @@ extension SkillsHarnessFileController on SkillsHarnessController {
           _l10n?.skillsHarnessDeleteResult(path) ?? 'DELETE 204: $path';
       _publish();
     } on RustApiException catch (e) {
-      _setError(e.toString());
+      _setErrorFromException(e);
       loadingSkillDelete = false;
       _publish();
     } catch (e) {
-      _setError(e.toString());
+      _setErrorFromException(e);
       loadingSkillDelete = false;
       _publish();
     }
@@ -385,9 +385,9 @@ extension SkillsHarnessFileController on SkillsHarnessController {
         ).showSnackBar(SnackBar(content: Text(l10n.skillsHarnessRollbackDone)));
       }
     } on RustApiException catch (e) {
-      _setError(e.toString());
+      _setErrorFromException(e);
     } catch (e) {
-      _setError(e.toString());
+      _setErrorFromException(e);
     } finally {
       rollingBackSkillVersion = false;
       _publish();

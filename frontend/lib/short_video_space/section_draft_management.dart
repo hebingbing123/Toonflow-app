@@ -77,7 +77,7 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
         _showOperationFeedback(
-          l10n.shortVideoAssemblyDraftLoadFailed('$e'),
+          l10n.shortVideoAssemblyDraftLoadFailed(describeUserVisibleApiError(l10n, e)),
           isSuccess: false,
         );
       }
@@ -288,7 +288,7 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
         _showOperationFeedback(
-          l10n.shortVideoAssemblyDraftSaveFailed('$e'),
+          l10n.shortVideoAssemblyDraftSaveFailed(describeUserVisibleApiError(l10n, e)),
           isSuccess: false,
         );
       }
@@ -323,7 +323,7 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
         _showOperationFeedback(
-          l10n.shortVideoAssemblyDraftRestoreFailed('$e'),
+          l10n.shortVideoAssemblyDraftRestoreFailed(describeUserVisibleApiError(l10n, e)),
           isSuccess: false,
         );
       }
@@ -392,7 +392,7 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
         _showOperationFeedback(
-          l10n.shortVideoAssemblyDraftDeleteFailed('$e'),
+          l10n.shortVideoAssemblyDraftDeleteFailed(describeUserVisibleApiError(l10n, e)),
           isSuccess: false,
         );
       }
@@ -461,7 +461,7 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
       if (mounted) {
         final l10nErr = AppLocalizations.of(context)!;
         _showOperationFeedback(
-          l10nErr.shortVideoAssemblyVersionCreateFailed('$e'),
+          l10nErr.shortVideoAssemblyVersionCreateFailed(describeUserVisibleApiError(l10nErr, e)),
           isSuccess: false,
         );
       }
@@ -502,7 +502,7 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
       if (mounted) {
         final l10nErr = AppLocalizations.of(context)!;
         _showOperationFeedback(
-          l10nErr.shortVideoAssemblyVersionSwitchFailed('$e'),
+          l10nErr.shortVideoAssemblyVersionSwitchFailed(describeUserVisibleApiError(l10nErr, e)),
           isSuccess: false,
         );
       }
@@ -558,7 +558,7 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
       if (mounted) {
         final l10nErr = AppLocalizations.of(context)!;
         _showOperationFeedback(
-          l10nErr.shortVideoAssemblyVersionDeleteFailed('$e'),
+          l10nErr.shortVideoAssemblyVersionDeleteFailed(describeUserVisibleApiError(l10nErr, e)),
           isSuccess: false,
         );
       }

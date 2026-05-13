@@ -41,12 +41,12 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
     } on RustApiException catch (e) {
       productionSummaryLoaded[0] = false;
       productionSummaryLine[0] = l10n.scriptEditorStoryboardsProductionReadFailed(
-        e.toString(),
+        describeUserVisibleApiError(l10n, e),
       );
     } catch (e) {
       productionSummaryLoaded[0] = false;
       productionSummaryLine[0] = l10n.scriptEditorStoryboardsProductionReadFailed(
-        e.toString(),
+        describeUserVisibleApiError(l10n, e),
       );
     } finally {
       productionSummaryLoading[0] = false;

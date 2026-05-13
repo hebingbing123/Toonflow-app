@@ -109,6 +109,11 @@ class QualityReviewsController extends ChangeNotifier {
     _onErrorChanged(error);
   }
 
+  void _setErrorFromObject(Object error) {
+    final loc = _l10n ?? rustApiLookupL10nFromPlatform();
+    _setError(describeUserVisibleApiError(loc, error));
+  }
+
   void onQualityReviewIdChanged(String _) {
     notifyListeners();
   }
@@ -177,7 +182,7 @@ class QualityReviewsController extends ChangeNotifier {
     } on RustApiException catch (e) {
       reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setError(e.toString());
+      _setErrorFromObject(e);
     } finally {
       if (onlyBadCases) {
         loadingQualityBadCases = false;
@@ -204,7 +209,7 @@ class QualityReviewsController extends ChangeNotifier {
     } on RustApiException catch (e) {
       reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setError(e.toString());
+      _setErrorFromObject(e);
     } finally {
       creatingQualityReview = false;
       notifyListeners();
@@ -233,7 +238,7 @@ class QualityReviewsController extends ChangeNotifier {
     } on RustApiException catch (e) {
       reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setError(e.toString());
+      _setErrorFromObject(e);
     } finally {
       loadingQualityReviewById = false;
       notifyListeners();
@@ -257,7 +262,7 @@ class QualityReviewsController extends ChangeNotifier {
     } on RustApiException catch (e) {
       reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setError(e.toString());
+      _setErrorFromObject(e);
     } finally {
       loadingQualityStats = false;
       notifyListeners();
@@ -288,7 +293,7 @@ class QualityReviewsController extends ChangeNotifier {
     } on RustApiException catch (e) {
       reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setError(e.toString());
+      _setErrorFromObject(e);
     } finally {
       loadingQualityStagePassRate = false;
       notifyListeners();
@@ -400,7 +405,7 @@ class QualityReviewsController extends ChangeNotifier {
     } on RustApiException catch (e) {
       reportRustApiError(e, onErrorChanged: _setError);
     } catch (e) {
-      _setError(e.toString());
+      _setErrorFromObject(e);
     } finally {
       loadingQualityDashboard = false;
       refreshingQualityDashboardReadModel = false;

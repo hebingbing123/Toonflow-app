@@ -73,7 +73,9 @@ extension _ShortVideoSpaceSectionProductionExtension
       setState(() {
         _batchCandidateBusy = false;
         _projectConfigLine =
-            AppLocalizations.of(context)!.shortVideoProductionBatchFailed('$e');
+            AppLocalizations.of(context)!.shortVideoProductionBatchFailed(
+          describeUserVisibleApiError(AppLocalizations.of(context)!, e),
+        );
       });
     }
   }
@@ -438,8 +440,8 @@ extension _ShortVideoSpaceSectionProductionExtension
       setState(() {
         _projectConfigLine =
             AppLocalizations.of(context)!.shortVideoProductionSetCurrentFailed(
-              '$e',
-            );
+          describeUserVisibleApiError(AppLocalizations.of(context)!, e),
+        );
       });
     }
   }

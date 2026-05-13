@@ -108,13 +108,17 @@ class _ProjectsCreativeManualsWorkbenchDialogState
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _statusLine = l10n.projectsCreativeManualStatusReloadFail(e.toString());
+        _statusLine = l10n.projectsCreativeManualStatusReloadFail(
+          describeUserVisibleApiError(l10n, e),
+        );
       });
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _statusLine = l10n.projectsCreativeManualStatusReloadFail('$e');
+        _statusLine = l10n.projectsCreativeManualStatusReloadFail(
+          describeUserVisibleApiError(l10n, e),
+        );
       });
     }
   }
@@ -165,7 +169,7 @@ class _ProjectsCreativeManualsWorkbenchDialogState
         _busy = false;
         _statusLine = l10n.projectsCreativeManualStatusOpFail(
           l10n.projectsCreativeManualVerbCreate,
-          e.toString(),
+          describeUserVisibleApiError(l10n, e),
         );
       });
     } on FormatException catch (e) {
@@ -180,7 +184,7 @@ class _ProjectsCreativeManualsWorkbenchDialogState
         _busy = false;
         _statusLine = l10n.projectsCreativeManualStatusOpFail(
           l10n.projectsCreativeManualVerbCreate,
-          '$e',
+          describeUserVisibleApiError(l10n, e),
         );
       });
     }
@@ -236,7 +240,7 @@ class _ProjectsCreativeManualsWorkbenchDialogState
         _busy = false;
         _statusLine = l10n.projectsCreativeManualStatusOpFail(
           l10n.projectsCreativeManualVerbSave,
-          e.toString(),
+          describeUserVisibleApiError(l10n, e),
         );
       });
     } on FormatException catch (e) {
@@ -251,7 +255,7 @@ class _ProjectsCreativeManualsWorkbenchDialogState
         _busy = false;
         _statusLine = l10n.projectsCreativeManualStatusOpFail(
           l10n.projectsCreativeManualVerbSave,
-          '$e',
+          describeUserVisibleApiError(l10n, e),
         );
       });
     }
@@ -291,7 +295,7 @@ class _ProjectsCreativeManualsWorkbenchDialogState
         _busy = false;
         _statusLine = l10n.projectsCreativeManualStatusOpFail(
           l10n.projectsCreativeManualVerbDelete,
-          e.toString(),
+          describeUserVisibleApiError(l10n, e),
         );
       });
     } catch (e) {
@@ -300,7 +304,7 @@ class _ProjectsCreativeManualsWorkbenchDialogState
         _busy = false;
         _statusLine = l10n.projectsCreativeManualStatusOpFail(
           l10n.projectsCreativeManualVerbDelete,
-          '$e',
+          describeUserVisibleApiError(l10n, e),
         );
       });
     }

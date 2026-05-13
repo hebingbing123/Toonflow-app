@@ -10,9 +10,15 @@ extension _StoryboardBatchWorkbenchActions
     try {
       await action();
     } on RustApiException catch (e) {
-      if (mounted) _applyBatchWorkbenchState(() => _statusLine = '$e');
+      if (mounted) {
+        final loc = AppLocalizations.of(context)!;
+        _applyBatchWorkbenchState(() => _statusLine = describeUserVisibleApiError(loc, e));
+      }
     } catch (e) {
-      if (mounted) _applyBatchWorkbenchState(() => _statusLine = '$e');
+      if (mounted) {
+        final loc = AppLocalizations.of(context)!;
+        _applyBatchWorkbenchState(() => _statusLine = describeUserVisibleApiError(loc, e));
+      }
     } finally {
       if (mounted) _applyBatchWorkbenchState(() => _busyMutation = false);
       widget.onMutationEnd();

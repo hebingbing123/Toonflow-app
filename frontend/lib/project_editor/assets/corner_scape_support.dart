@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../../rust_api.dart';
 import 'support.dart';
 
@@ -105,13 +106,14 @@ class CornerScapeWorkbenchController {
   }
 
   Future<void> refreshAssets(StateSetter setState) async {
+    final l10n = AppLocalizations.of(ctx)!;
     final activeTypes = parseCornerScapeTypesInput(session.typesCtrl.text);
     setDialogState(() => assetsBusy[0] = true);
     setState(() {
       session.loading = true;
       session.summaryLine = activeTypes == null
-          ? '正在加载全部类型的历史图资产…'
-          : '正在加载类型 ${activeTypes.join(", ")} 的历史图资产…';
+          ? l10n.projectEditorAssetsCornerScapeLoadingAll
+          : l10n.projectEditorAssetsCornerScapeLoadingTypes(activeTypes.join(", "));
       session.selectedPreviewBytes = null;
     });
     try {
@@ -153,14 +155,18 @@ class CornerScapeWorkbenchController {
       await loadPreview(setState);
     } on RustApiException catch (e) {
       setState(() {
-        session.summaryLine = '加载失败：$e';
+        session.summaryLine = l10n.projectEditorAssetsCornerScapeLoadFailed(
+          describeUserVisibleApiError(l10n, e),
+        );
         session.selectedAssetNumericId = null;
         session.selectedHistoryImageId = null;
         session.selectedPreviewBytes = null;
       });
     } catch (e) {
       setState(() {
-        session.summaryLine = '加载失败：$e';
+        session.summaryLine = l10n.projectEditorAssetsCornerScapeLoadFailed(
+          describeUserVisibleApiError(l10n, e),
+        );
         session.selectedAssetNumericId = null;
         session.selectedHistoryImageId = null;
         session.selectedPreviewBytes = null;

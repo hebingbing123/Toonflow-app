@@ -103,7 +103,7 @@ class _ShortDramaTargetsPanelState extends State<ShortDramaTargetsPanel> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _line = l10n.projectEditorShortDramaTargetsSaveFailed('$e');
+          _line = l10n.projectEditorShortDramaTargetsSaveFailed(describeUserVisibleApiError(l10n, e));
         });
       }
     } finally {

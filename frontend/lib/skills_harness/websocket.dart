@@ -24,7 +24,9 @@ extension SkillsHarnessWebSocketController on SkillsHarnessController {
             _wsSub = null;
           }
           publishWsConnection(false);
-          _setError('ws: $e');
+          _setError(
+            'ws: ${describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), e)}',
+          );
           resetWsBusyFlags();
           scheduleSessionWsReconnect();
           _onWsLifecycleSettled();
@@ -45,7 +47,7 @@ extension SkillsHarnessWebSocketController on SkillsHarnessController {
       return channel;
     } catch (e) {
       publishWsConnection(false);
-      _setError(e.toString());
+      _setErrorFromException(e);
       resetWsBusyFlags();
       _publish();
       return null;

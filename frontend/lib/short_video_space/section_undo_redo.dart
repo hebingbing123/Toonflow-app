@@ -45,7 +45,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
         return false;
       }
       _showOperationFeedback(
-        l10n.shortVideoSpaceUndoFailed('$e'),
+        l10n.shortVideoSpaceUndoFailed(describeUserVisibleApiError(l10n, e)),
         isSuccess: false,
       );
       return false;
@@ -90,7 +90,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
         return false;
       }
       _showOperationFeedback(
-        l10n.shortVideoSpaceRedoFailed('$e'),
+        l10n.shortVideoSpaceRedoFailed(describeUserVisibleApiError(l10n, e)),
         isSuccess: false,
       );
       return false;

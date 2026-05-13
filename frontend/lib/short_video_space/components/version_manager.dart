@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../../rust_api.dart';
 import '../dialogs/confirmation_dialogs.dart';
 import 'version_comparison.dart';
 
@@ -584,7 +585,7 @@ class _VersionManagerState extends State<VersionManager> {
       if (mounted) {
         setState(() {
           _errorMessage = AppLocalizations.of(context)!
-              .shortVideoVersionManagerErrorVersionCreate('$e');
+              .shortVideoVersionManagerErrorVersionCreate(describeUserVisibleApiError(AppLocalizations.of(context)!, e));
         });
       }
     } finally {
@@ -621,7 +622,7 @@ class _VersionManagerState extends State<VersionManager> {
       if (mounted) {
         setState(() {
           _errorMessage = AppLocalizations.of(context)!
-              .shortVideoVersionManagerErrorVersionSwitch('$e');
+              .shortVideoVersionManagerErrorVersionSwitch(describeUserVisibleApiError(AppLocalizations.of(context)!, e));
         });
       }
     } finally {
@@ -668,7 +669,7 @@ class _VersionManagerState extends State<VersionManager> {
       if (mounted) {
         setState(() {
           _errorMessage = AppLocalizations.of(context)!
-              .shortVideoVersionManagerErrorVersionDelete('$e');
+              .shortVideoVersionManagerErrorVersionDelete(describeUserVisibleApiError(AppLocalizations.of(context)!, e));
         });
       }
     } finally {
@@ -809,7 +810,7 @@ class _VersionManagerState extends State<VersionManager> {
       if (mounted) {
         setState(() {
           _errorMessage = AppLocalizations.of(context)!
-              .shortVideoVersionManagerErrorDraftSave('$e');
+              .shortVideoVersionManagerErrorDraftSave(describeUserVisibleApiError(AppLocalizations.of(context)!, e));
         });
       }
     } finally {
@@ -934,7 +935,7 @@ class _VersionManagerState extends State<VersionManager> {
       if (mounted) {
         setState(() {
           _errorMessage = AppLocalizations.of(context)!
-              .shortVideoVersionManagerErrorDraftRestore('$e');
+              .shortVideoVersionManagerErrorDraftRestore(describeUserVisibleApiError(AppLocalizations.of(context)!, e));
         });
       }
     } finally {
@@ -1001,7 +1002,7 @@ class _VersionManagerState extends State<VersionManager> {
       if (mounted) {
         setState(() {
           _errorMessage = AppLocalizations.of(context)!
-              .shortVideoVersionManagerErrorDraftDelete('$e');
+              .shortVideoVersionManagerErrorDraftDelete(describeUserVisibleApiError(AppLocalizations.of(context)!, e));
         });
       }
     } finally {

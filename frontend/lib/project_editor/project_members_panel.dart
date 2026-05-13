@@ -90,7 +90,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
         _projectRows = const <ProjectMemberResponse>[];
         _pendingRole.clear();
         _loading = false;
-        _error = '$e';
+        _error = describeUserVisibleApiError(l10n, e);
       });
     }
 
@@ -144,7 +144,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
         _workspaceRows = const <WorkspaceMemberResponse>[];
         _loadingWorkspaceMembers = false;
         _selectedWorkspaceCandidateUserId = null;
-        _workspaceMembersError = '$e';
+        _workspaceMembersError = describeUserVisibleApiError(l10n, e);
       });
     }
   }
@@ -215,7 +215,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
       _showSnack(formatRustApiExceptionForDisplay(l10n, e));
     } catch (e) {
       if (!mounted) return;
-      _showSnack('$e');
+      _showSnack(describeUserVisibleApiError(l10n, e));
     } finally {
       if (mounted) {
         setState(() {
@@ -247,7 +247,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
       _showSnack(formatRustApiExceptionForDisplay(l10n, e));
     } catch (e) {
       if (!mounted) return;
-      _showSnack('$e');
+      _showSnack(describeUserVisibleApiError(l10n, e));
     } finally {
       if (mounted) {
         setState(() {
@@ -272,7 +272,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
       _showSnack(formatRustApiExceptionForDisplay(l10n, e));
     } catch (e) {
       if (!mounted) return;
-      _showSnack('$e');
+      _showSnack(describeUserVisibleApiError(l10n, e));
     } finally {
       if (mounted) {
         setState(() {

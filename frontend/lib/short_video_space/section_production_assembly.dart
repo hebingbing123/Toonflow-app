@@ -70,7 +70,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
       ScaffoldMessenger.maybeOf(context)?.showSnackBar(
         SnackBar(
           content: Text(
-            l10n.shortVideoSpaceProductionAssemblyExportStartFailed('$e'),
+            l10n.shortVideoSpaceProductionAssemblyExportStartFailed(describeUserVisibleApiError(l10n, e)),
           ),
         ),
       );
@@ -252,7 +252,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
               } catch (e) {
                 if (!mounted) return;
                 _showOperationFeedback(
-                  l10n.shortVideoSpaceProductionAssemblyDisableFailed('$e'),
+                  l10n.shortVideoSpaceProductionAssemblyDisableFailed(describeUserVisibleApiError(l10n, e)),
                   isSuccess: false,
                 );
               }
@@ -334,7 +334,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
               } catch (e) {
                 if (!mounted) return;
                 _showOperationFeedback(
-                  l10n.shortVideoSpaceProductionAssemblyWriteBackFailed('$e'),
+                  l10n.shortVideoSpaceProductionAssemblyWriteBackFailed(describeUserVisibleApiError(l10n, e)),
                   isSuccess: false,
                 );
               }
@@ -398,7 +398,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
               } catch (e) {
                 if (!mounted) return;
                 _showOperationFeedback(
-                  l10n.shortVideoSpaceProductionAssemblyReorderFailed('$e'),
+                  l10n.shortVideoSpaceProductionAssemblyReorderFailed(describeUserVisibleApiError(l10n, e)),
                   isSuccess: false,
                 );
               } finally {
@@ -473,7 +473,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
               } catch (e) {
                 if (!mounted) return;
                 _showOperationFeedback(
-                  l10n.shortVideoSpaceProductionAssemblyAlignFailed('$e'),
+                  l10n.shortVideoSpaceProductionAssemblyAlignFailed(describeUserVisibleApiError(l10n, e)),
                   isSuccess: false,
                 );
               }
@@ -1073,7 +1073,9 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
             } catch (e) {
               setState(() {
                 errorMessage =
-                    dialogL10n.shortVideoSpaceProductionAssemblyLoadFailed('$e');
+                    dialogL10n.shortVideoSpaceProductionAssemblyLoadFailed(
+                      describeUserVisibleApiError(dialogL10n, e),
+                    );
                 loading = false;
               });
             }
@@ -1462,7 +1464,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                                       _showOperationFeedback(
                                                         l10n
                                                             .shortVideoSpaceProductionAssemblyCancelFailed(
-                                                          '$e',
+                                                          describeUserVisibleApiError(l10n, e),
                                                         ),
                                                         isSuccess: false,
                                                       );
@@ -1543,7 +1545,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                                       _showOperationFeedback(
                                                         l10n
                                                             .shortVideoSpaceProductionAssemblyRetryFailed(
-                                                          '$e',
+                                                          describeUserVisibleApiError(l10n, e),
                                                         ),
                                                         isSuccess: false,
                                                       );
@@ -2118,7 +2120,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                     if (!mounted) return;
                     _showOperationFeedback(
                       rootL10n.shortVideoSpaceProductionAssemblyStyleWriteBackFailed(
-                        '$e',
+                        describeUserVisibleApiError(rootL10n, e),
                       ),
                       isSuccess: false,
                     );

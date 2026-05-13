@@ -162,7 +162,9 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
                     ScaffoldMessenger.of(ctx).showSnackBar(
                       SnackBar(
                         content: Text(
-                          l10n.projectEditorPublishOverviewFailed('$e'),
+                          l10n.projectEditorPublishOverviewFailed(
+                            describeUserVisibleApiError(l10n, e),
+                          ),
                         ),
                       ),
                     );

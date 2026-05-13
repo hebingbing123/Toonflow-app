@@ -60,7 +60,8 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
       if (!mounted) return;
 
       setState(() {
-        _error = e.toString();
+        final loc = AppLocalizations.of(context)!;
+        _error = describeUserVisibleApiError(loc, e);
         _loading = false;
       });
     }
@@ -115,7 +116,8 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
       if (!mounted) return;
 
       setState(() {
-        _error = e.toString();
+        final loc = AppLocalizations.of(context)!;
+        _error = describeUserVisibleApiError(loc, e);
         _loading = false;
       });
 
