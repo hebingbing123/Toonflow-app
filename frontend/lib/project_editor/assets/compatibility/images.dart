@@ -12,12 +12,13 @@ extension _HomePageProjectEditorAssetsImagesProbe on _HomePageState {
     required List<bool> assetsBusy,
     required Future<void> Function() reloadAssetsAndStats,
   }) {
+    final l10n = AppLocalizations.of(ctx)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          '资产图片 / workbench 轮询检查',
+          l10n.projectEditorAssetsCompatibilityImagesSectionLabel,
           style: Theme.of(ctx).textTheme.labelSmall?.copyWith(
             color: Theme.of(ctx).colorScheme.outline,
           ),

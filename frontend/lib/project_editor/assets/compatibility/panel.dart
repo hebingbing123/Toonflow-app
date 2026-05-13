@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../../rust_api.dart';
 
 /// Renders collapsed asset probe actions for project editor diagnostics.
@@ -41,12 +42,13 @@ class ProjectAssetsCompatibilityPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return ExpansionTile(
       tilePadding: EdgeInsets.zero,
       childrenPadding: EdgeInsets.zero,
-      title: const Text('资产探针'),
+      title: Text(l10n.projectEditorAssetsCompatibilityPanelTitle),
       subtitle: Text(
-        '用于资产轮询、历史图片与 workbench 形检查，默认折叠',
+        l10n.projectEditorAssetsCompatibilityPanelSubtitle,
         style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
           color: Theme.of(ctx).colorScheme.outline,
         ),

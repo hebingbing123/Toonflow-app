@@ -12,6 +12,7 @@ extension _HomePageProjectEditorAssetsImagesCrudProbeActions on _HomePageState {
     required List<bool> assetsBusy,
     required Future<void> Function() reloadAssetsAndStats,
   }) {
+    final l10n = AppLocalizations.of(ctx)!;
     return [
       TextButton(
         onPressed:
@@ -40,6 +41,15 @@ extension _HomePageProjectEditorAssetsImagesCrudProbeActions on _HomePageState {
                   final h0 = r.items.isEmpty
                       ? 0
                       : r.items.first.historyImages.length;
+                  final cornerText = r.items.isEmpty
+                      ? l10n.projectEditorAssetsProbeImagesCornerScapeSnackZero
+                      : l10n.projectEditorAssetsProbeImagesCornerScapeSnack(
+                          r.items.length,
+                          h0,
+                          cornerThumb == null
+                              ? ''
+                              : l10n.projectEditorAssetsProbeImagesCornerScapePreviewSuffix,
+                        );
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       duration: const Duration(seconds: 6),
@@ -62,12 +72,7 @@ extension _HomePageProjectEditorAssetsImagesCrudProbeActions on _HomePageState {
                             const SizedBox(width: 10),
                           ],
                           Expanded(
-                            child: Text(
-                              'POST …/assets/corner-scape：'
-                              '${r.items.length} 条'
-                              '${r.items.isEmpty ? "" : "，首条 history_images=$h0"}'
-                              '${cornerThumb == null ? "" : "（预览）"}',
-                            ),
+                            child: Text(cornerText),
                           ),
                         ],
                       ),
@@ -85,7 +90,7 @@ extension _HomePageProjectEditorAssetsImagesCrudProbeActions on _HomePageState {
                   }
                 }
               },
-        child: const Text('POST corner-scape'),
+        child: Text(l10n.projectEditorAssetsProbeImagesCornerScapeButton),
       ),
       TextButton(
         onPressed:
@@ -107,10 +112,14 @@ extension _HomePageProjectEditorAssetsImagesCrudProbeActions on _HomePageState {
                     filePath: 'probe/hist_$ts.png',
                   );
                   if (!ctx.mounted) return;
+                  final idPrefix = row.id.length <= 8 ? row.id : row.id.substring(0, 8);
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'POST …/assets/${first.numericId}/images：${row.id.substring(0, 8)}…',
+                        l10n.projectEditorAssetsProbeImagesPostFirstSnack(
+                          first.numericId,
+                          idPrefix,
+                        ),
                       ),
                     ),
                   );
@@ -126,7 +135,7 @@ extension _HomePageProjectEditorAssetsImagesCrudProbeActions on _HomePageState {
                   }
                 }
               },
-        child: const Text('POST 首条资产图片'),
+        child: Text(l10n.projectEditorAssetsProbeImagesPostFirstButton),
       ),
       TextButton(
         onPressed:
@@ -148,8 +157,8 @@ extension _HomePageProjectEditorAssetsImagesCrudProbeActions on _HomePageState {
                   if (list.items.isEmpty) {
                     if (!ctx.mounted) return;
                     ScaffoldMessenger.of(ctx).showSnackBar(
-                      const SnackBar(
-                        content: Text('GET …/images：0 条，可先点「POST 首条资产图片」'),
+                      SnackBar(
+                        content: Text(l10n.projectEditorAssetsProbeImagesGetEmptySnack),
                       ),
                     );
                     return;
@@ -180,8 +189,12 @@ extension _HomePageProjectEditorAssetsImagesCrudProbeActions on _HomePageState {
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'GET …/images/$idShort：sort=${one.sortIndex} '
-                        'state=${one.state ?? "-"}$fileSuffix',
+                        l10n.projectEditorAssetsProbeImagesGetOneSnack(
+                          idShort,
+                          one.sortIndex,
+                          one.state ?? '-',
+                          fileSuffix,
+                        ),
                       ),
                     ),
                   );
@@ -197,7 +210,7 @@ extension _HomePageProjectEditorAssetsImagesCrudProbeActions on _HomePageState {
                   }
                 }
               },
-        child: const Text('GET 资产图片(单条)'),
+        child: Text(l10n.projectEditorAssetsProbeImagesGetOneButton),
       ),
       TextButton(
         onPressed:
@@ -237,8 +250,11 @@ extension _HomePageProjectEditorAssetsImagesCrudProbeActions on _HomePageState {
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'POST→PATCH→DEL 资产图片：sort ${row.sortIndex}→${patched.sortIndex} '
-                        'state=${patched.state ?? "-"} 已删',
+                        l10n.projectEditorAssetsProbeImagesPatchDelSnack(
+                          row.sortIndex,
+                          patched.sortIndex,
+                          patched.state ?? '-',
+                        ),
                       ),
                     ),
                   );
@@ -254,7 +270,7 @@ extension _HomePageProjectEditorAssetsImagesCrudProbeActions on _HomePageState {
                   }
                 }
               },
-        child: const Text('POST→PATCH→DEL 图'),
+        child: Text(l10n.projectEditorAssetsProbeImagesPatchDelButton),
       ),
     ];
   }

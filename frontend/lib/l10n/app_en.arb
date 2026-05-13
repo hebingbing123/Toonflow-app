@@ -8229,6 +8229,72 @@
   "projectEditorAssetsProbeDeleteLastAssetButton": "Delete last asset",
   "projectEditorAssetsProbeLinkFirstPairButton": "Link first script & first asset",
   "projectEditorAssetsProbeUnlinkFirstPairButton": "Unlink first script–asset pair",
+  "projectEditorAssetsCompatibilityPanelTitle": "Asset probe",
+  "projectEditorAssetsCompatibilityPanelSubtitle": "For asset polling, history images, and workbench-style checks; collapsed by default.",
+  "projectEditorAssetsCompatibilityImagesSectionLabel": "Asset images / workbench-style polling checks",
+  "projectEditorAssetsProbeImagesCornerScapeButton": "POST corner-scape",
+  "projectEditorAssetsProbeImagesCornerScapeSnackZero": "POST …/assets/corner-scape: 0 rows",
+  "projectEditorAssetsProbeImagesCornerScapeSnack": "POST …/assets/corner-scape: {count} rows, first asset history_images={history}{previewSuffix}",
+  "@projectEditorAssetsProbeImagesCornerScapeSnack": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "history": {
+        "type": "int"
+      },
+      "previewSuffix": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetsProbeImagesCornerScapePreviewSuffix": " (preview)",
+  "projectEditorAssetsProbeImagesPostFirstButton": "POST first asset image",
+  "projectEditorAssetsProbeImagesPostFirstSnack": "POST …/assets/{assetId}/images: {imageIdPrefix}…",
+  "@projectEditorAssetsProbeImagesPostFirstSnack": {
+    "placeholders": {
+      "assetId": {
+        "type": "int"
+      },
+      "imageIdPrefix": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetsProbeImagesGetOneButton": "GET asset image (single)",
+  "projectEditorAssetsProbeImagesGetEmptySnack": "GET …/images: 0 items. Create an image with \"POST first asset image\" first.",
+  "projectEditorAssetsProbeImagesGetOneSnack": "GET …/images/{idShort}: sort={sortIndex} state={state}{filePart}",
+  "@projectEditorAssetsProbeImagesGetOneSnack": {
+    "placeholders": {
+      "idShort": {
+        "type": "String"
+      },
+      "sortIndex": {
+        "type": "int"
+      },
+      "state": {
+        "type": "String"
+      },
+      "filePart": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetsProbeImagesPatchDelButton": "POST→PATCH→DEL image",
+  "projectEditorAssetsProbeImagesPatchDelSnack": "POST→PATCH→DEL image: sort {sortBefore}→{sortAfter}, state={state}, deleted",
+  "@projectEditorAssetsProbeImagesPatchDelSnack": {
+    "placeholders": {
+      "sortBefore": {
+        "type": "int"
+      },
+      "sortAfter": {
+        "type": "int"
+      },
+      "state": {
+        "type": "String"
+      }
+    }
+  },
   "projectEditorDeleteProjectTitle": "Delete project?",
   "projectEditorDeleteProjectBody": "Deletes project #{id}, related scripts/storyboards (DB cascade), and clears agent memory for this project.",
   "@projectEditorDeleteProjectBody": {

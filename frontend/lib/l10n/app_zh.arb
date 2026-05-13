@@ -8189,6 +8189,72 @@
   "projectEditorAssetsProbeDeleteLastAssetButton": "删除末条资产",
   "projectEditorAssetsProbeLinkFirstPairButton": "关联首剧本与首资产",
   "projectEditorAssetsProbeUnlinkFirstPairButton": "取消首条关联",
+  "projectEditorAssetsCompatibilityPanelTitle": "资产探针",
+  "projectEditorAssetsCompatibilityPanelSubtitle": "用于资产轮询、历史图片与 workbench 形检查，默认折叠",
+  "projectEditorAssetsCompatibilityImagesSectionLabel": "资产图片 / workbench 轮询检查",
+  "projectEditorAssetsProbeImagesCornerScapeButton": "POST corner-scape",
+  "projectEditorAssetsProbeImagesCornerScapeSnackZero": "POST …/assets/corner-scape：0 条",
+  "projectEditorAssetsProbeImagesCornerScapeSnack": "POST …/assets/corner-scape：{count} 条，首条 history_images={history}{previewSuffix}",
+  "@projectEditorAssetsProbeImagesCornerScapeSnack": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "history": {
+        "type": "int"
+      },
+      "previewSuffix": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetsProbeImagesCornerScapePreviewSuffix": "（预览）",
+  "projectEditorAssetsProbeImagesPostFirstButton": "POST 首条资产图片",
+  "projectEditorAssetsProbeImagesPostFirstSnack": "POST …/assets/{assetId}/images：{imageIdPrefix}…",
+  "@projectEditorAssetsProbeImagesPostFirstSnack": {
+    "placeholders": {
+      "assetId": {
+        "type": "int"
+      },
+      "imageIdPrefix": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetsProbeImagesGetOneButton": "GET 资产图片(单条)",
+  "projectEditorAssetsProbeImagesGetEmptySnack": "GET …/images：0 条，可先点「POST 首条资产图片」",
+  "projectEditorAssetsProbeImagesGetOneSnack": "GET …/images/{idShort}：sort={sortIndex} state={state}{filePart}",
+  "@projectEditorAssetsProbeImagesGetOneSnack": {
+    "placeholders": {
+      "idShort": {
+        "type": "String"
+      },
+      "sortIndex": {
+        "type": "int"
+      },
+      "state": {
+        "type": "String"
+      },
+      "filePart": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetsProbeImagesPatchDelButton": "POST→PATCH→DEL 图",
+  "projectEditorAssetsProbeImagesPatchDelSnack": "POST→PATCH→DEL 资产图片：sort {sortBefore}→{sortAfter} state={state} 已删",
+  "@projectEditorAssetsProbeImagesPatchDelSnack": {
+    "placeholders": {
+      "sortBefore": {
+        "type": "int"
+      },
+      "sortAfter": {
+        "type": "int"
+      },
+      "state": {
+        "type": "String"
+      }
+    }
+  },
   "projectEditorDeleteProjectTitle": "删除项目？",
   "projectEditorDeleteProjectBody": "将删除项目 #{id}、相关剧本/分镜（数据库级联），并清除该项目的智能体记忆。",
   "@projectEditorDeleteProjectBody": {

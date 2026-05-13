@@ -11234,6 +11234,81 @@ class AppLocalizationsEn extends AppLocalizations {
       'Unlink first script–asset pair';
 
   @override
+  String get projectEditorAssetsCompatibilityPanelTitle => 'Asset probe';
+
+  @override
+  String get projectEditorAssetsCompatibilityPanelSubtitle =>
+      'For asset polling, history images, and workbench-style checks; collapsed by default.';
+
+  @override
+  String get projectEditorAssetsCompatibilityImagesSectionLabel =>
+      'Asset images / workbench-style polling checks';
+
+  @override
+  String get projectEditorAssetsProbeImagesCornerScapeButton =>
+      'POST corner-scape';
+
+  @override
+  String get projectEditorAssetsProbeImagesCornerScapeSnackZero =>
+      'POST …/assets/corner-scape: 0 rows';
+
+  @override
+  String projectEditorAssetsProbeImagesCornerScapeSnack(
+    int count,
+    int history,
+    String previewSuffix,
+  ) {
+    return 'POST …/assets/corner-scape: $count rows, first asset history_images=$history$previewSuffix';
+  }
+
+  @override
+  String get projectEditorAssetsProbeImagesCornerScapePreviewSuffix =>
+      ' (preview)';
+
+  @override
+  String get projectEditorAssetsProbeImagesPostFirstButton =>
+      'POST first asset image';
+
+  @override
+  String projectEditorAssetsProbeImagesPostFirstSnack(
+    int assetId,
+    String imageIdPrefix,
+  ) {
+    return 'POST …/assets/$assetId/images: $imageIdPrefix…';
+  }
+
+  @override
+  String get projectEditorAssetsProbeImagesGetOneButton =>
+      'GET asset image (single)';
+
+  @override
+  String get projectEditorAssetsProbeImagesGetEmptySnack =>
+      'GET …/images: 0 items. Create an image with \"POST first asset image\" first.';
+
+  @override
+  String projectEditorAssetsProbeImagesGetOneSnack(
+    String idShort,
+    int sortIndex,
+    String state,
+    String filePart,
+  ) {
+    return 'GET …/images/$idShort: sort=$sortIndex state=$state$filePart';
+  }
+
+  @override
+  String get projectEditorAssetsProbeImagesPatchDelButton =>
+      'POST→PATCH→DEL image';
+
+  @override
+  String projectEditorAssetsProbeImagesPatchDelSnack(
+    int sortBefore,
+    int sortAfter,
+    String state,
+  ) {
+    return 'POST→PATCH→DEL image: sort $sortBefore→$sortAfter, state=$state, deleted';
+  }
+
+  @override
   String get projectEditorDeleteProjectTitle => 'Delete project?';
 
   @override

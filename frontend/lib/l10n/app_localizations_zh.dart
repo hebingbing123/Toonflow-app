@@ -10689,6 +10689,77 @@ class AppLocalizationsZh extends AppLocalizations {
   String get projectEditorAssetsProbeUnlinkFirstPairButton => '取消首条关联';
 
   @override
+  String get projectEditorAssetsCompatibilityPanelTitle => '资产探针';
+
+  @override
+  String get projectEditorAssetsCompatibilityPanelSubtitle =>
+      '用于资产轮询、历史图片与 workbench 形检查，默认折叠';
+
+  @override
+  String get projectEditorAssetsCompatibilityImagesSectionLabel =>
+      '资产图片 / workbench 轮询检查';
+
+  @override
+  String get projectEditorAssetsProbeImagesCornerScapeButton =>
+      'POST corner-scape';
+
+  @override
+  String get projectEditorAssetsProbeImagesCornerScapeSnackZero =>
+      'POST …/assets/corner-scape：0 条';
+
+  @override
+  String projectEditorAssetsProbeImagesCornerScapeSnack(
+    int count,
+    int history,
+    String previewSuffix,
+  ) {
+    return 'POST …/assets/corner-scape：$count 条，首条 history_images=$history$previewSuffix';
+  }
+
+  @override
+  String get projectEditorAssetsProbeImagesCornerScapePreviewSuffix => '（预览）';
+
+  @override
+  String get projectEditorAssetsProbeImagesPostFirstButton => 'POST 首条资产图片';
+
+  @override
+  String projectEditorAssetsProbeImagesPostFirstSnack(
+    int assetId,
+    String imageIdPrefix,
+  ) {
+    return 'POST …/assets/$assetId/images：$imageIdPrefix…';
+  }
+
+  @override
+  String get projectEditorAssetsProbeImagesGetOneButton => 'GET 资产图片(单条)';
+
+  @override
+  String get projectEditorAssetsProbeImagesGetEmptySnack =>
+      'GET …/images：0 条，可先点「POST 首条资产图片」';
+
+  @override
+  String projectEditorAssetsProbeImagesGetOneSnack(
+    String idShort,
+    int sortIndex,
+    String state,
+    String filePart,
+  ) {
+    return 'GET …/images/$idShort：sort=$sortIndex state=$state$filePart';
+  }
+
+  @override
+  String get projectEditorAssetsProbeImagesPatchDelButton => 'POST→PATCH→DEL 图';
+
+  @override
+  String projectEditorAssetsProbeImagesPatchDelSnack(
+    int sortBefore,
+    int sortAfter,
+    String state,
+  ) {
+    return 'POST→PATCH→DEL 资产图片：sort $sortBefore→$sortAfter state=$state 已删';
+  }
+
+  @override
   String get projectEditorDeleteProjectTitle => '删除项目？';
 
   @override

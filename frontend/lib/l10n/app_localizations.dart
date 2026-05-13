@@ -17563,6 +17563,106 @@ abstract class AppLocalizations {
   /// **'Unlink first script–asset pair'**
   String get projectEditorAssetsProbeUnlinkFirstPairButton;
 
+  /// No description provided for @projectEditorAssetsCompatibilityPanelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Asset probe'**
+  String get projectEditorAssetsCompatibilityPanelTitle;
+
+  /// No description provided for @projectEditorAssetsCompatibilityPanelSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'For asset polling, history images, and workbench-style checks; collapsed by default.'**
+  String get projectEditorAssetsCompatibilityPanelSubtitle;
+
+  /// No description provided for @projectEditorAssetsCompatibilityImagesSectionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Asset images / workbench-style polling checks'**
+  String get projectEditorAssetsCompatibilityImagesSectionLabel;
+
+  /// No description provided for @projectEditorAssetsProbeImagesCornerScapeButton.
+  ///
+  /// In en, this message translates to:
+  /// **'POST corner-scape'**
+  String get projectEditorAssetsProbeImagesCornerScapeButton;
+
+  /// No description provided for @projectEditorAssetsProbeImagesCornerScapeSnackZero.
+  ///
+  /// In en, this message translates to:
+  /// **'POST …/assets/corner-scape: 0 rows'**
+  String get projectEditorAssetsProbeImagesCornerScapeSnackZero;
+
+  /// No description provided for @projectEditorAssetsProbeImagesCornerScapeSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'POST …/assets/corner-scape: {count} rows, first asset history_images={history}{previewSuffix}'**
+  String projectEditorAssetsProbeImagesCornerScapeSnack(
+    int count,
+    int history,
+    String previewSuffix,
+  );
+
+  /// No description provided for @projectEditorAssetsProbeImagesCornerScapePreviewSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **' (preview)'**
+  String get projectEditorAssetsProbeImagesCornerScapePreviewSuffix;
+
+  /// No description provided for @projectEditorAssetsProbeImagesPostFirstButton.
+  ///
+  /// In en, this message translates to:
+  /// **'POST first asset image'**
+  String get projectEditorAssetsProbeImagesPostFirstButton;
+
+  /// No description provided for @projectEditorAssetsProbeImagesPostFirstSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'POST …/assets/{assetId}/images: {imageIdPrefix}…'**
+  String projectEditorAssetsProbeImagesPostFirstSnack(
+    int assetId,
+    String imageIdPrefix,
+  );
+
+  /// No description provided for @projectEditorAssetsProbeImagesGetOneButton.
+  ///
+  /// In en, this message translates to:
+  /// **'GET asset image (single)'**
+  String get projectEditorAssetsProbeImagesGetOneButton;
+
+  /// No description provided for @projectEditorAssetsProbeImagesGetEmptySnack.
+  ///
+  /// In en, this message translates to:
+  /// **'GET …/images: 0 items. Create an image with \"POST first asset image\" first.'**
+  String get projectEditorAssetsProbeImagesGetEmptySnack;
+
+  /// No description provided for @projectEditorAssetsProbeImagesGetOneSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'GET …/images/{idShort}: sort={sortIndex} state={state}{filePart}'**
+  String projectEditorAssetsProbeImagesGetOneSnack(
+    String idShort,
+    int sortIndex,
+    String state,
+    String filePart,
+  );
+
+  /// No description provided for @projectEditorAssetsProbeImagesPatchDelButton.
+  ///
+  /// In en, this message translates to:
+  /// **'POST→PATCH→DEL image'**
+  String get projectEditorAssetsProbeImagesPatchDelButton;
+
+  /// No description provided for @projectEditorAssetsProbeImagesPatchDelSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'POST→PATCH→DEL image: sort {sortBefore}→{sortAfter}, state={state}, deleted'**
+  String projectEditorAssetsProbeImagesPatchDelSnack(
+    int sortBefore,
+    int sortAfter,
+    String state,
+  );
+
   /// No description provided for @projectEditorDeleteProjectTitle.
   ///
   /// In en, this message translates to:
