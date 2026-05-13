@@ -4601,6 +4601,65 @@
       }
     }
   },
+  "projectEditorNovelsSummaryNoChapters": "当前没有小说章节",
+  "projectEditorNovelsSummaryChaptersLine": "共 {count} 条 · {visible}{suffix}",
+  "@projectEditorNovelsSummaryChaptersLine": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "visible": {
+        "type": "String"
+      },
+      "suffix": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsSummaryIntakeEmptyBaseline": "准入 admitted 0 / pending 0 / rejected 0 · source manual 0 / import 0 / crawler_client 0 / crawler_server 0",
+  "projectEditorNovelsSummaryIntakeCounts": "准入 admitted {admitted} / pending {pending} / rejected {rejected} · source manual {manual} / import {bookImport} / crawler_client {crawlerClient} / crawler_server {crawlerServer}",
+  "@projectEditorNovelsSummaryIntakeCounts": {
+    "placeholders": {
+      "admitted": {
+        "type": "int"
+      },
+      "pending": {
+        "type": "int"
+      },
+      "rejected": {
+        "type": "int"
+      },
+      "manual": {
+        "type": "int"
+      },
+      "bookImport": {
+        "type": "int"
+      },
+      "crawlerClient": {
+        "type": "int"
+      },
+      "crawlerServer": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsSummaryNoEvents": "当前没有小说事件",
+  "projectEditorNovelsSummaryEventsLine": "事件 {count} 条 · {visible}{suffix}",
+  "@projectEditorNovelsSummaryEventsLine": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "visible": {
+        "type": "String"
+      },
+      "suffix": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetsWorkbenchNoAssetsYet": "当前项目还没有资产，可直接在这里创建。",
+  "projectEditorAssetsSectionListNotLoaded": "资产列表尚未加载",
   "projectEditorNovelsEventsDefaultCreateName": "事件_{stamp}",
   "@projectEditorNovelsEventsDefaultCreateName": {
     "placeholders": {

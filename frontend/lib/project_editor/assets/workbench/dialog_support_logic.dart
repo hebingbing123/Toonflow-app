@@ -4,13 +4,12 @@ class ProjectAssetsWorkbenchSession {
   ProjectAssetsWorkbenchSession({
     required List<AssetRow> visibleAssets,
     required List<ScriptBrief> scriptList,
+    required String initialStatusLine,
   }) : selectedAssetNumericId = chooseInitialAssetNumericId(visibleAssets),
        selectedScriptNumericId = scriptList.isEmpty
            ? null
            : scriptList.first.numericId,
-       statusLine = visibleAssets.isEmpty
-           ? '当前项目还没有资产，可直接在这里创建。'
-           : summarizeProjectAssetRows(visibleAssets);
+       statusLine = initialStatusLine;
 
   int? selectedAssetNumericId;
   int? selectedScriptNumericId;
@@ -81,6 +80,7 @@ class ProjectAssetsWorkbenchController {
 
   Future<void> refreshWorkbench(StateSetter setLocalState) =>
       refreshProjectAssetsWorkbench(
+        l10n: AppLocalizations.of(ctx)!,
         reloadAssetsAndStats: reloadAssetsAndStats,
         assetsRef: assetsRef,
         selectedAssetNumericId: session.selectedAssetNumericId,
@@ -126,6 +126,7 @@ AssetRow? findAssetByNumericId(List<AssetRow> assets, int? numericId) {
 }
 
 Future<void> refreshProjectAssetsWorkbench({
+  required AppLocalizations l10n,
   required Future<void> Function() reloadAssetsAndStats,
   required List<ListAssetsResponse?> assetsRef,
   required int? selectedAssetNumericId,
@@ -144,7 +145,7 @@ Future<void> refreshProjectAssetsWorkbench({
     );
     onStatusLineChanged(
       refreshed.isEmpty
-          ? '当前项目还没有资产，可直接在这里创建。'
+          ? l10n.projectEditorAssetsWorkbenchNoAssetsYet
           : summarizeProjectAssetRows(refreshed),
     );
   });

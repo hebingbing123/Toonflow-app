@@ -6149,6 +6149,53 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get projectEditorNovelsSummaryNoChapters => '当前没有小说章节';
+
+  @override
+  String projectEditorNovelsSummaryChaptersLine(
+    int count,
+    String visible,
+    String suffix,
+  ) {
+    return '共 $count 条 · $visible$suffix';
+  }
+
+  @override
+  String get projectEditorNovelsSummaryIntakeEmptyBaseline =>
+      '准入 admitted 0 / pending 0 / rejected 0 · source manual 0 / import 0 / crawler_client 0 / crawler_server 0';
+
+  @override
+  String projectEditorNovelsSummaryIntakeCounts(
+    int admitted,
+    int pending,
+    int rejected,
+    int manual,
+    int bookImport,
+    int crawlerClient,
+    int crawlerServer,
+  ) {
+    return '准入 admitted $admitted / pending $pending / rejected $rejected · source manual $manual / import $bookImport / crawler_client $crawlerClient / crawler_server $crawlerServer';
+  }
+
+  @override
+  String get projectEditorNovelsSummaryNoEvents => '当前没有小说事件';
+
+  @override
+  String projectEditorNovelsSummaryEventsLine(
+    int count,
+    String visible,
+    String suffix,
+  ) {
+    return '事件 $count 条 · $visible$suffix';
+  }
+
+  @override
+  String get projectEditorAssetsWorkbenchNoAssetsYet => '当前项目还没有资产，可直接在这里创建。';
+
+  @override
+  String get projectEditorAssetsSectionListNotLoaded => '资产列表尚未加载';
+
+  @override
   String projectEditorNovelsEventsDefaultCreateName(int stamp) {
     return '事件_$stamp';
   }

@@ -10434,6 +10434,70 @@ abstract class AppLocalizations {
     String message,
   );
 
+  /// No description provided for @projectEditorNovelsSummaryNoChapters.
+  ///
+  /// In en, this message translates to:
+  /// **'No novel chapters yet'**
+  String get projectEditorNovelsSummaryNoChapters;
+
+  /// No description provided for @projectEditorNovelsSummaryChaptersLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} chapters · {visible}{suffix}'**
+  String projectEditorNovelsSummaryChaptersLine(
+    int count,
+    String visible,
+    String suffix,
+  );
+
+  /// No description provided for @projectEditorNovelsSummaryIntakeEmptyBaseline.
+  ///
+  /// In en, this message translates to:
+  /// **'Intake admitted 0 / pending 0 / rejected 0 · source manual 0 / import 0 / crawler_client 0 / crawler_server 0'**
+  String get projectEditorNovelsSummaryIntakeEmptyBaseline;
+
+  /// No description provided for @projectEditorNovelsSummaryIntakeCounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Intake admitted {admitted} / pending {pending} / rejected {rejected} · source manual {manual} / import {bookImport} / crawler_client {crawlerClient} / crawler_server {crawlerServer}'**
+  String projectEditorNovelsSummaryIntakeCounts(
+    int admitted,
+    int pending,
+    int rejected,
+    int manual,
+    int bookImport,
+    int crawlerClient,
+    int crawlerServer,
+  );
+
+  /// No description provided for @projectEditorNovelsSummaryNoEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'No novel events yet'**
+  String get projectEditorNovelsSummaryNoEvents;
+
+  /// No description provided for @projectEditorNovelsSummaryEventsLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} events · {visible}{suffix}'**
+  String projectEditorNovelsSummaryEventsLine(
+    int count,
+    String visible,
+    String suffix,
+  );
+
+  /// No description provided for @projectEditorAssetsWorkbenchNoAssetsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'This project has no assets yet. You can create one here.'**
+  String get projectEditorAssetsWorkbenchNoAssetsYet;
+
+  /// No description provided for @projectEditorAssetsSectionListNotLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Asset list not loaded yet.'**
+  String get projectEditorAssetsSectionListNotLoaded;
+
   /// No description provided for @projectEditorNovelsEventsDefaultCreateName.
   ///
   /// In en, this message translates to:

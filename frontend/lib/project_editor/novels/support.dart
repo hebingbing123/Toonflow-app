@@ -1,22 +1,31 @@
-import '../../../rust_api.dart';
+import '../../l10n/app_localizations.dart';
+import '../../rust_api.dart';
 
-String summarizeNovelRows(Iterable<NovelRow> rows, {int maxItems = 4}) {
+String summarizeNovelRows(
+  AppLocalizations l10n,
+  Iterable<NovelRow> rows, {
+  int maxItems = 4,
+}) {
   final items = rows.toList(growable: false);
   if (items.isEmpty) {
-    return '当前没有小说章节';
+    return l10n.projectEditorNovelsSummaryNoChapters;
   }
   final visible = items
       .take(maxItems)
       .map((row) => '#${row.numericId}:${row.chapter}')
       .join(', ');
   final suffix = items.length > maxItems ? '…' : '';
-  return '共 ${items.length} 条 · $visible$suffix';
+  return l10n.projectEditorNovelsSummaryChaptersLine(
+    items.length,
+    visible,
+    suffix,
+  );
 }
 
-String summarizeNovelIntakeRows(Iterable<NovelRow> rows) {
+String summarizeNovelIntakeRows(AppLocalizations l10n, Iterable<NovelRow> rows) {
   final items = rows.toList(growable: false);
   if (items.isEmpty) {
-    return '准入 admitted 0 / pending 0 / rejected 0 · source manual 0 / import 0 / crawler_client 0 / crawler_server 0';
+    return l10n.projectEditorNovelsSummaryIntakeEmptyBaseline;
   }
   final admittedCount = items
       .where((row) => row.intakeStatus == 'admitted')
@@ -33,23 +42,36 @@ String summarizeNovelIntakeRows(Iterable<NovelRow> rows) {
   final importCount = countBySource('whole_book_import');
   final crawlerClientCount = countBySource('crawler_client');
   final crawlerServerCount = countBySource('crawler_server');
-  return '准入 admitted $admittedCount / pending $pendingCount / rejected $rejectedCount · source manual $manualCount / import $importCount / crawler_client $crawlerClientCount / crawler_server $crawlerServerCount';
+  return l10n.projectEditorNovelsSummaryIntakeCounts(
+    admittedCount,
+    pendingCount,
+    rejectedCount,
+    manualCount,
+    importCount,
+    crawlerClientCount,
+    crawlerServerCount,
+  );
 }
 
 String summarizeNovelEventRows(
+  AppLocalizations l10n,
   Iterable<NovelEventRow> rows, {
   int maxItems = 3,
 }) {
   final items = rows.toList(growable: false);
   if (items.isEmpty) {
-    return '当前没有小说事件';
+    return l10n.projectEditorNovelsSummaryNoEvents;
   }
   final visible = items
       .take(maxItems)
       .map((row) => '#${row.numericId}:${row.name}')
       .join(', ');
   final suffix = items.length > maxItems ? '…' : '';
-  return '事件 ${items.length} 条 · $visible$suffix';
+  return l10n.projectEditorNovelsSummaryEventsLine(
+    items.length,
+    visible,
+    suffix,
+  );
 }
 
 List<int> parseNumericIdList(String raw) {

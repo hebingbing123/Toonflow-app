@@ -18,7 +18,7 @@ Widget buildProjectNovelEventsWorkbenchSection({
 }) {
   final l10n = AppLocalizations.of(ctx)!;
   final first = events.isNotEmpty ? events.first : null;
-  final summaryLine = summarizeNovelEventRows(events);
+  final summaryLine = summarizeNovelEventRows(l10n, events);
   final disabled =
       novelsBusy[0] ||
       novelsLoading[0] ||

@@ -4641,6 +4641,65 @@
       }
     }
   },
+  "projectEditorNovelsSummaryNoChapters": "No novel chapters yet",
+  "projectEditorNovelsSummaryChaptersLine": "{count} chapters · {visible}{suffix}",
+  "@projectEditorNovelsSummaryChaptersLine": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "visible": {
+        "type": "String"
+      },
+      "suffix": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsSummaryIntakeEmptyBaseline": "Intake admitted 0 / pending 0 / rejected 0 · source manual 0 / import 0 / crawler_client 0 / crawler_server 0",
+  "projectEditorNovelsSummaryIntakeCounts": "Intake admitted {admitted} / pending {pending} / rejected {rejected} · source manual {manual} / import {bookImport} / crawler_client {crawlerClient} / crawler_server {crawlerServer}",
+  "@projectEditorNovelsSummaryIntakeCounts": {
+    "placeholders": {
+      "admitted": {
+        "type": "int"
+      },
+      "pending": {
+        "type": "int"
+      },
+      "rejected": {
+        "type": "int"
+      },
+      "manual": {
+        "type": "int"
+      },
+      "bookImport": {
+        "type": "int"
+      },
+      "crawlerClient": {
+        "type": "int"
+      },
+      "crawlerServer": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsSummaryNoEvents": "No novel events yet",
+  "projectEditorNovelsSummaryEventsLine": "{count} events · {visible}{suffix}",
+  "@projectEditorNovelsSummaryEventsLine": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "visible": {
+        "type": "String"
+      },
+      "suffix": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetsWorkbenchNoAssetsYet": "This project has no assets yet. You can create one here.",
+  "projectEditorAssetsSectionListNotLoaded": "Asset list not loaded yet.",
   "projectEditorNovelsEventsDefaultCreateName": "Event_{stamp}",
   "@projectEditorNovelsEventsDefaultCreateName": {
     "placeholders": {

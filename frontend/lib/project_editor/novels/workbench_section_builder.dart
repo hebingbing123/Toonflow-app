@@ -19,8 +19,8 @@ Widget buildProjectNovelsWorkbenchSection({
 }) {
   final first = novels.isNotEmpty ? novels.first : null;
   final last = novels.isNotEmpty ? novels.last : null;
-  final summaryLine = summarizeNovelRows(novels);
-  final intakeSummaryLine = summarizeNovelIntakeRows(novels);
+  final summaryLine = summarizeNovelRows(l10n, novels);
+  final intakeSummaryLine = summarizeNovelIntakeRows(l10n, novels);
   final disabled =
       novelsBusy[0] ||
       novelsLoading[0] ||

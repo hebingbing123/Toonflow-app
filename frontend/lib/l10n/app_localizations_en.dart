@@ -6399,6 +6399,55 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get projectEditorNovelsSummaryNoChapters => 'No novel chapters yet';
+
+  @override
+  String projectEditorNovelsSummaryChaptersLine(
+    int count,
+    String visible,
+    String suffix,
+  ) {
+    return '$count chapters · $visible$suffix';
+  }
+
+  @override
+  String get projectEditorNovelsSummaryIntakeEmptyBaseline =>
+      'Intake admitted 0 / pending 0 / rejected 0 · source manual 0 / import 0 / crawler_client 0 / crawler_server 0';
+
+  @override
+  String projectEditorNovelsSummaryIntakeCounts(
+    int admitted,
+    int pending,
+    int rejected,
+    int manual,
+    int bookImport,
+    int crawlerClient,
+    int crawlerServer,
+  ) {
+    return 'Intake admitted $admitted / pending $pending / rejected $rejected · source manual $manual / import $bookImport / crawler_client $crawlerClient / crawler_server $crawlerServer';
+  }
+
+  @override
+  String get projectEditorNovelsSummaryNoEvents => 'No novel events yet';
+
+  @override
+  String projectEditorNovelsSummaryEventsLine(
+    int count,
+    String visible,
+    String suffix,
+  ) {
+    return '$count events · $visible$suffix';
+  }
+
+  @override
+  String get projectEditorAssetsWorkbenchNoAssetsYet =>
+      'This project has no assets yet. You can create one here.';
+
+  @override
+  String get projectEditorAssetsSectionListNotLoaded =>
+      'Asset list not loaded yet.';
+
+  @override
   String projectEditorNovelsEventsDefaultCreateName(int stamp) {
     return 'Event_$stamp';
   }
