@@ -16021,6 +16021,216 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shortVideoOpHistoryEditOperation => 'Edit operation';
 
   @override
+  String shortVideoProjectVisualStylePack(String pack) {
+    return 'Style pack: $pack';
+  }
+
+  @override
+  String shortVideoProjectVisualArtStyle(String style) {
+    return 'Art style: $style';
+  }
+
+  @override
+  String shortVideoProjectDirectionStoryPack(String pack) {
+    return 'Story pack: $pack';
+  }
+
+  @override
+  String shortVideoProjectDirectionManual(String manual) {
+    return 'Manual: $manual';
+  }
+
+  @override
+  String get shortVideoProjectReadinessAwaitingStats =>
+      'After project stats load, we will suggest whether to start in Script or Production.';
+
+  @override
+  String get shortVideoProjectReadinessNoScript =>
+      'This project has no script yet. Generate a first draft in the Script workspace.';
+
+  @override
+  String get shortVideoProjectReadinessNoStoryboard =>
+      'A script exists but storyboards are missing. Continue script/storyboard planning before Production.';
+
+  @override
+  String get shortVideoProjectReadinessNoRoles =>
+      'Script and storyboards exist, but character assets are thin. Add characters and reference material first.';
+
+  @override
+  String get shortVideoProjectReadinessProductionReady =>
+      'Script, storyboards, and character assets have a baseline. Continue in Production for images and video.';
+
+  @override
+  String get shortVideoSpaceOverviewAggregating =>
+      'Summarizing script, tasks, and quality status for this project…';
+
+  @override
+  String get shortVideoSpaceOverviewSelectProjectFirst =>
+      'Select a project so Space can fold mode, tasks, and quality signals into one overview.';
+
+  @override
+  String get shortVideoSpaceOverviewProjectSelectedNoStats =>
+      'Project is selected, but the overview has not loaded yet. Refresh the project or open the Script workspace.';
+
+  @override
+  String shortVideoSpaceOverviewRecentFailedTasks(int count) {
+    return 'This project has $count recent failed task(s). Open the task center to find the blocker before continuing.';
+  }
+
+  @override
+  String shortVideoSpaceOverviewRunningTasks(int count) {
+    return '$count task(s) are still running. Watch progress in the task center while preparing the next script or assets.';
+  }
+
+  @override
+  String shortVideoSpaceOverviewBadCaseRecords(int count) {
+    return 'This project has $count bad-case record(s). Review quality before deciding to rework script or storyboards.';
+  }
+
+  @override
+  String shortVideoSpaceOverviewRecentTaskRecords(int count) {
+    return 'This project already has $count recent task record(s). The pipeline is active—continue script, production, or quality review.';
+  }
+
+  @override
+  String get shortVideoNextStepCtaGoProjectsFirst => 'Go to projects';
+
+  @override
+  String get shortVideoNextStepCtaOpenTasks => 'Open task center';
+
+  @override
+  String get shortVideoNextStepCtaOpenQuality => 'Open quality review';
+
+  @override
+  String get shortVideoNextStepCtaOpenProjectsPrep =>
+      'Open projects to finish prep';
+
+  @override
+  String get shortVideoNextStepCtaOpenScriptWorkspace =>
+      'Open Script workspace';
+
+  @override
+  String get shortVideoNextStepCtaOpenProductionWorkspace =>
+      'Open Production workspace';
+
+  @override
+  String get shortVideoNextStepPickProjectTitle =>
+      'Select a short drama project';
+
+  @override
+  String get shortVideoNextStepPickProjectDetail =>
+      'After selection, Space aligns mode, tasks, quality, and workspace context on one path.';
+
+  @override
+  String get shortVideoNextStepFailedTasksTitle => 'Resolve failed tasks first';
+
+  @override
+  String get shortVideoNextStepFailedTasksDetail =>
+      'Recent failures detected. Use the task center to see whether script, assets, renders, or export is blocked.';
+
+  @override
+  String get shortVideoNextStepQualityTitle =>
+      'Review bad cases and quality feedback';
+
+  @override
+  String get shortVideoNextStepQualityDetailAnimated =>
+      'Focus on character consistency, visual continuity, and shot rhythm before rework.';
+
+  @override
+  String get shortVideoNextStepQualityDetailLive =>
+      'Focus on performance naturalness, scene realism, and talking-head shot quality before rework.';
+
+  @override
+  String get shortVideoNextStepAnimVisualStyleTitle =>
+      'Lock in art style and visual direction';
+
+  @override
+  String get shortVideoNextStepAnimVisualStyleDetail =>
+      'In animated mode, settle art style, visual manual, or style packs first for steadier characters and continuity.';
+
+  @override
+  String get shortVideoNextStepLiveSceneRefsTitle =>
+      'Add live-action scene references';
+
+  @override
+  String get shortVideoNextStepLiveSceneRefsDetail =>
+      'Live mode benefits from scene references for blocking, spatial realism, and shot transitions.';
+
+  @override
+  String get shortVideoNextStepLiveClipRefsTitle =>
+      'Add live-action clip references';
+
+  @override
+  String get shortVideoNextStepLiveClipRefsDetail =>
+      'Live mode relies on clip / shot references. Add reference footage for performance, framing, and delivery.';
+
+  @override
+  String get shortVideoNextStepLivePerformManualTitle =>
+      'Lock performance and host-read scripts';
+
+  @override
+  String get shortVideoNextStepLivePerformManualDetail =>
+      'Settle tone, pacing, and director notes first for steadier voiceover and on-camera delivery.';
+
+  @override
+  String get shortVideoNextStepFirstScriptTitle =>
+      'Generate a first script draft';
+
+  @override
+  String get shortVideoNextStepFirstScriptDetailAnimated =>
+      'In Script, establish emotional rhythm, character relationships, and chapter adaptation for animated shorts.';
+
+  @override
+  String get shortVideoNextStepFirstScriptDetailLive =>
+      'In Script, tune dialogue, host-read feel, and scene blocking for live-action shorts.';
+
+  @override
+  String get shortVideoNextStepStoryboardTitle =>
+      'Add storyboards and shot structure';
+
+  @override
+  String get shortVideoNextStepStoryboardDetail =>
+      'The script exists but is not yet broken into shots. Continue script/storyboard planning before Production.';
+
+  @override
+  String get shortVideoNextStepRolesAnimTitle =>
+      'Add character and style assets';
+
+  @override
+  String get shortVideoNextStepRolesLiveTitle =>
+      'Add live references and character setup';
+
+  @override
+  String get shortVideoNextStepRolesAnimDetail =>
+      'Storyboards started but character assets are thin—add characters, style, and reference images.';
+
+  @override
+  String get shortVideoNextStepRolesLiveDetail =>
+      'Storyboards started but live references, character setup, and shot refs are still thin.';
+
+  @override
+  String get shortVideoNextStepProductionReadyTitle =>
+      'Continue in Production and export';
+
+  @override
+  String get shortVideoNextStepProductionReadyDetailAnimated =>
+      'Script, storyboards, and characters have a baseline—continue in Production for renders and review.';
+
+  @override
+  String get shortVideoNextStepProductionReadyDetailLive =>
+      'Script, storyboards, and characters have a baseline—continue in Production for live shots, video, and review.';
+
+  @override
+  String shortVideoPublishExportCheckReworkRouteSuffix(String route) {
+    return ' [Rework: $route]';
+  }
+
+  @override
+  String shortVideoPublishExportCheckStoryboardIndexPart(int sb) {
+    return ' · Seq. $sb';
+  }
+
+  @override
   String get accountSectionTitle => 'Account section title';
 
   @override

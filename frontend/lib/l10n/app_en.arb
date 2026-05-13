@@ -12282,6 +12282,127 @@
   "shortVideoOpHistoryBatchDuration": "Batch align duration",
   "shortVideoOpHistoryBatchReplace": "Batch replace video",
   "shortVideoOpHistoryEditOperation": "Edit operation",
+  "shortVideoProjectVisualStylePack": "Style pack: {pack}",
+  "@shortVideoProjectVisualStylePack": {
+    "placeholders": {
+      "pack": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoProjectVisualArtStyle": "Art style: {style}",
+  "@shortVideoProjectVisualArtStyle": {
+    "placeholders": {
+      "style": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoProjectDirectionStoryPack": "Story pack: {pack}",
+  "@shortVideoProjectDirectionStoryPack": {
+    "placeholders": {
+      "pack": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoProjectDirectionManual": "Manual: {manual}",
+  "@shortVideoProjectDirectionManual": {
+    "placeholders": {
+      "manual": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoProjectReadinessAwaitingStats": "After project stats load, we will suggest whether to start in Script or Production.",
+  "shortVideoProjectReadinessNoScript": "This project has no script yet. Generate a first draft in the Script workspace.",
+  "shortVideoProjectReadinessNoStoryboard": "A script exists but storyboards are missing. Continue script/storyboard planning before Production.",
+  "shortVideoProjectReadinessNoRoles": "Script and storyboards exist, but character assets are thin. Add characters and reference material first.",
+  "shortVideoProjectReadinessProductionReady": "Script, storyboards, and character assets have a baseline. Continue in Production for images and video.",
+  "shortVideoSpaceOverviewAggregating": "Summarizing script, tasks, and quality status for this project…",
+  "shortVideoSpaceOverviewSelectProjectFirst": "Select a project so Space can fold mode, tasks, and quality signals into one overview.",
+  "shortVideoSpaceOverviewProjectSelectedNoStats": "Project is selected, but the overview has not loaded yet. Refresh the project or open the Script workspace.",
+  "shortVideoSpaceOverviewRecentFailedTasks": "This project has {count} recent failed task(s). Open the task center to find the blocker before continuing.",
+  "@shortVideoSpaceOverviewRecentFailedTasks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoSpaceOverviewRunningTasks": "{count} task(s) are still running. Watch progress in the task center while preparing the next script or assets.",
+  "@shortVideoSpaceOverviewRunningTasks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoSpaceOverviewBadCaseRecords": "This project has {count} bad-case record(s). Review quality before deciding to rework script or storyboards.",
+  "@shortVideoSpaceOverviewBadCaseRecords": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoSpaceOverviewRecentTaskRecords": "This project already has {count} recent task record(s). The pipeline is active—continue script, production, or quality review.",
+  "@shortVideoSpaceOverviewRecentTaskRecords": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoNextStepCtaGoProjectsFirst": "Go to projects",
+  "shortVideoNextStepCtaOpenTasks": "Open task center",
+  "shortVideoNextStepCtaOpenQuality": "Open quality review",
+  "shortVideoNextStepCtaOpenProjectsPrep": "Open projects to finish prep",
+  "shortVideoNextStepCtaOpenScriptWorkspace": "Open Script workspace",
+  "shortVideoNextStepCtaOpenProductionWorkspace": "Open Production workspace",
+  "shortVideoNextStepPickProjectTitle": "Select a short drama project",
+  "shortVideoNextStepPickProjectDetail": "After selection, Space aligns mode, tasks, quality, and workspace context on one path.",
+  "shortVideoNextStepFailedTasksTitle": "Resolve failed tasks first",
+  "shortVideoNextStepFailedTasksDetail": "Recent failures detected. Use the task center to see whether script, assets, renders, or export is blocked.",
+  "shortVideoNextStepQualityTitle": "Review bad cases and quality feedback",
+  "shortVideoNextStepQualityDetailAnimated": "Focus on character consistency, visual continuity, and shot rhythm before rework.",
+  "shortVideoNextStepQualityDetailLive": "Focus on performance naturalness, scene realism, and talking-head shot quality before rework.",
+  "shortVideoNextStepAnimVisualStyleTitle": "Lock in art style and visual direction",
+  "shortVideoNextStepAnimVisualStyleDetail": "In animated mode, settle art style, visual manual, or style packs first for steadier characters and continuity.",
+  "shortVideoNextStepLiveSceneRefsTitle": "Add live-action scene references",
+  "shortVideoNextStepLiveSceneRefsDetail": "Live mode benefits from scene references for blocking, spatial realism, and shot transitions.",
+  "shortVideoNextStepLiveClipRefsTitle": "Add live-action clip references",
+  "shortVideoNextStepLiveClipRefsDetail": "Live mode relies on clip / shot references. Add reference footage for performance, framing, and delivery.",
+  "shortVideoNextStepLivePerformManualTitle": "Lock performance and host-read scripts",
+  "shortVideoNextStepLivePerformManualDetail": "Settle tone, pacing, and director notes first for steadier voiceover and on-camera delivery.",
+  "shortVideoNextStepFirstScriptTitle": "Generate a first script draft",
+  "shortVideoNextStepFirstScriptDetailAnimated": "In Script, establish emotional rhythm, character relationships, and chapter adaptation for animated shorts.",
+  "shortVideoNextStepFirstScriptDetailLive": "In Script, tune dialogue, host-read feel, and scene blocking for live-action shorts.",
+  "shortVideoNextStepStoryboardTitle": "Add storyboards and shot structure",
+  "shortVideoNextStepStoryboardDetail": "The script exists but is not yet broken into shots. Continue script/storyboard planning before Production.",
+  "shortVideoNextStepRolesAnimTitle": "Add character and style assets",
+  "shortVideoNextStepRolesLiveTitle": "Add live references and character setup",
+  "shortVideoNextStepRolesAnimDetail": "Storyboards started but character assets are thin—add characters, style, and reference images.",
+  "shortVideoNextStepRolesLiveDetail": "Storyboards started but live references, character setup, and shot refs are still thin.",
+  "shortVideoNextStepProductionReadyTitle": "Continue in Production and export",
+  "shortVideoNextStepProductionReadyDetailAnimated": "Script, storyboards, and characters have a baseline—continue in Production for renders and review.",
+  "shortVideoNextStepProductionReadyDetailLive": "Script, storyboards, and characters have a baseline—continue in Production for live shots, video, and review.",
+  "shortVideoPublishExportCheckReworkRouteSuffix": " [Rework: {route}]",
+  "@shortVideoPublishExportCheckReworkRouteSuffix": {
+    "placeholders": {
+      "route": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishExportCheckStoryboardIndexPart": " · Seq. {sb}",
+  "@shortVideoPublishExportCheckStoryboardIndexPart": {
+    "placeholders": {
+      "sb": {
+        "type": "int"
+      }
+    }
+  },
   "accountSectionTitle": "Account section title",
   "accountRiskyPrefsTooltip": "Account risky prefs tooltip",
   "accountSectionSubtitle": "Account section subtitle",

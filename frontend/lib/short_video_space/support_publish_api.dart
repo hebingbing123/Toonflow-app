@@ -354,7 +354,9 @@ ShortVideoExportCheckPanelUi buildShortVideoExportCheckPanelUi({
   final qualityGateBlockingLines = <String>[];
   if (qg.strategy == 'block' && qg.enforced && qg.blockingReasons != null) {
     for (final reason in qg.blockingReasons!) {
-      final routePart = reason.reworkRoute != null ? ' [返工: ${reason.reworkRoute}]' : '';
+      final routePart = reason.reworkRoute != null
+          ? l10n.shortVideoPublishExportCheckReworkRouteSuffix(reason.reworkRoute!)
+          : '';
       qualityGateBlockingLines.add('${reason.code}: ${reason.message}$routePart');
     }
   }
@@ -363,7 +365,8 @@ ShortVideoExportCheckPanelUi buildShortVideoExportCheckPanelUi({
       .take(14)
       .map((i) {
         final sb = i.sbIndex;
-        final sbPart = sb == null ? '' : ' · 序 $sb';
+        final sbPart =
+            sb == null ? '' : l10n.shortVideoPublishExportCheckStoryboardIndexPart(sb);
         return l10n.shortVideoSpacePublishExportCheckBlockingIssue(
           i.scriptNumericId,
           i.storyboardNumericId,
@@ -378,7 +381,8 @@ ShortVideoExportCheckPanelUi buildShortVideoExportCheckPanelUi({
       .take(14)
       .map((i) {
         final sb = i.sbIndex;
-        final sbPart = sb == null ? '' : ' · 序 $sb';
+        final sbPart =
+            sb == null ? '' : l10n.shortVideoPublishExportCheckStoryboardIndexPart(sb);
         return l10n.shortVideoSpacePublishExportCheckBlockingIssue(
           i.scriptNumericId,
           i.storyboardNumericId,

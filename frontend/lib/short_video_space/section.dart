@@ -240,8 +240,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   Widget build(BuildContext context) {
     final project = _selectedProject;
     final l10n = AppLocalizations.of(context)!;
-    final visualLabel = shortVideoVisualStyleLabel(project);
-    final directionLabel = shortVideoDirectionLabel(project);
+    final visualLabel = shortVideoVisualStyleLabel(project, l10n);
+    final directionLabel = shortVideoDirectionLabel(project, l10n);
     final modeTitle = _isAnimated
         ? l10n.shortVideoSpaceModeTitleAnimated
         : l10n.shortVideoSpaceModeTitleLive;
@@ -591,6 +591,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
             },
     );
     final nextStepPlan = buildShortVideoNextStepPlan(
+      l10n: l10n,
       isAnimated: _isAnimated,
       project: project,
       stats: _projectStats,
@@ -704,11 +705,13 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         loadingProjectOverview: _loadingProjectOverview,
         projectReadinessSummary: shortVideoProjectReadinessSummary(
           _projectStats,
+          l10n,
         ),
         visualLabel: visualLabel,
         directionLabel: directionLabel,
         projectMetrics: projectMetrics,
         spaceOverviewSummary: shortVideoSpaceOverviewSummary(
+          l10n: l10n,
           loadingProjectOverview: _loadingProjectOverview,
           project: project,
           projectStats: _projectStats,

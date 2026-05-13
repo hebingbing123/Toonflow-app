@@ -299,7 +299,9 @@ extension ShortVideoSpaceSectionProject on _ShortVideoSpaceSectionState {
   }
 
   VoidCallback _nextStepAction() {
+    final l10n = AppLocalizations.of(context)!;
     final plan = buildShortVideoNextStepPlan(
+      l10n: l10n,
       isAnimated: _isAnimated,
       project: _selectedProject,
       stats: _projectStats,

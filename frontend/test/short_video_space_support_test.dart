@@ -148,6 +148,7 @@ void main() {
 
   test('live-action next step prefers scene references before clip refs', () {
     final plan = buildShortVideoNextStepPlan(
+      l10n: zh,
       isAnimated: false,
       project: const ProjectRow(
         id: 'project-1',
@@ -182,6 +183,7 @@ void main() {
 
   test('failed tasks override creative prep routing', () {
     final plan = buildShortVideoNextStepPlan(
+      l10n: zh,
       isAnimated: true,
       project: const ProjectRow(
         id: 'project-1',

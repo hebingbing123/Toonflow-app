@@ -69,8 +69,8 @@ List<ShortVideoReadinessItem> buildShortVideoReadinessItems(
 }) {
   final hasVisualStyle = shortVideoHasVisualStyleSignal(project);
   final hasDirection = shortVideoHasDirectionSignal(project);
-  final visualLabel = shortVideoVisualStyleLabel(project);
-  final directionLabel = shortVideoDirectionLabel(project);
+  final visualLabel = shortVideoVisualStyleLabel(project, l10n);
+  final directionLabel = shortVideoDirectionLabel(project, l10n);
   final roleCount = stats?.roleCount ?? 0;
   final scriptCount = stats?.scriptCount ?? 0;
   final storyboardCount = stats?.storyboardCount ?? 0;

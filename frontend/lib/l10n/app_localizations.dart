@@ -24597,6 +24597,312 @@ abstract class AppLocalizations {
   /// **'Edit operation'**
   String get shortVideoOpHistoryEditOperation;
 
+  /// No description provided for @shortVideoProjectVisualStylePack.
+  ///
+  /// In en, this message translates to:
+  /// **'Style pack: {pack}'**
+  String shortVideoProjectVisualStylePack(String pack);
+
+  /// No description provided for @shortVideoProjectVisualArtStyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Art style: {style}'**
+  String shortVideoProjectVisualArtStyle(String style);
+
+  /// No description provided for @shortVideoProjectDirectionStoryPack.
+  ///
+  /// In en, this message translates to:
+  /// **'Story pack: {pack}'**
+  String shortVideoProjectDirectionStoryPack(String pack);
+
+  /// No description provided for @shortVideoProjectDirectionManual.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual: {manual}'**
+  String shortVideoProjectDirectionManual(String manual);
+
+  /// No description provided for @shortVideoProjectReadinessAwaitingStats.
+  ///
+  /// In en, this message translates to:
+  /// **'After project stats load, we will suggest whether to start in Script or Production.'**
+  String get shortVideoProjectReadinessAwaitingStats;
+
+  /// No description provided for @shortVideoProjectReadinessNoScript.
+  ///
+  /// In en, this message translates to:
+  /// **'This project has no script yet. Generate a first draft in the Script workspace.'**
+  String get shortVideoProjectReadinessNoScript;
+
+  /// No description provided for @shortVideoProjectReadinessNoStoryboard.
+  ///
+  /// In en, this message translates to:
+  /// **'A script exists but storyboards are missing. Continue script/storyboard planning before Production.'**
+  String get shortVideoProjectReadinessNoStoryboard;
+
+  /// No description provided for @shortVideoProjectReadinessNoRoles.
+  ///
+  /// In en, this message translates to:
+  /// **'Script and storyboards exist, but character assets are thin. Add characters and reference material first.'**
+  String get shortVideoProjectReadinessNoRoles;
+
+  /// No description provided for @shortVideoProjectReadinessProductionReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Script, storyboards, and character assets have a baseline. Continue in Production for images and video.'**
+  String get shortVideoProjectReadinessProductionReady;
+
+  /// No description provided for @shortVideoSpaceOverviewAggregating.
+  ///
+  /// In en, this message translates to:
+  /// **'Summarizing script, tasks, and quality status for this project…'**
+  String get shortVideoSpaceOverviewAggregating;
+
+  /// No description provided for @shortVideoSpaceOverviewSelectProjectFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a project so Space can fold mode, tasks, and quality signals into one overview.'**
+  String get shortVideoSpaceOverviewSelectProjectFirst;
+
+  /// No description provided for @shortVideoSpaceOverviewProjectSelectedNoStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Project is selected, but the overview has not loaded yet. Refresh the project or open the Script workspace.'**
+  String get shortVideoSpaceOverviewProjectSelectedNoStats;
+
+  /// No description provided for @shortVideoSpaceOverviewRecentFailedTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'This project has {count} recent failed task(s). Open the task center to find the blocker before continuing.'**
+  String shortVideoSpaceOverviewRecentFailedTasks(int count);
+
+  /// No description provided for @shortVideoSpaceOverviewRunningTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} task(s) are still running. Watch progress in the task center while preparing the next script or assets.'**
+  String shortVideoSpaceOverviewRunningTasks(int count);
+
+  /// No description provided for @shortVideoSpaceOverviewBadCaseRecords.
+  ///
+  /// In en, this message translates to:
+  /// **'This project has {count} bad-case record(s). Review quality before deciding to rework script or storyboards.'**
+  String shortVideoSpaceOverviewBadCaseRecords(int count);
+
+  /// No description provided for @shortVideoSpaceOverviewRecentTaskRecords.
+  ///
+  /// In en, this message translates to:
+  /// **'This project already has {count} recent task record(s). The pipeline is active—continue script, production, or quality review.'**
+  String shortVideoSpaceOverviewRecentTaskRecords(int count);
+
+  /// No description provided for @shortVideoNextStepCtaGoProjectsFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to projects'**
+  String get shortVideoNextStepCtaGoProjectsFirst;
+
+  /// No description provided for @shortVideoNextStepCtaOpenTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'Open task center'**
+  String get shortVideoNextStepCtaOpenTasks;
+
+  /// No description provided for @shortVideoNextStepCtaOpenQuality.
+  ///
+  /// In en, this message translates to:
+  /// **'Open quality review'**
+  String get shortVideoNextStepCtaOpenQuality;
+
+  /// No description provided for @shortVideoNextStepCtaOpenProjectsPrep.
+  ///
+  /// In en, this message translates to:
+  /// **'Open projects to finish prep'**
+  String get shortVideoNextStepCtaOpenProjectsPrep;
+
+  /// No description provided for @shortVideoNextStepCtaOpenScriptWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Script workspace'**
+  String get shortVideoNextStepCtaOpenScriptWorkspace;
+
+  /// No description provided for @shortVideoNextStepCtaOpenProductionWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Production workspace'**
+  String get shortVideoNextStepCtaOpenProductionWorkspace;
+
+  /// No description provided for @shortVideoNextStepPickProjectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a short drama project'**
+  String get shortVideoNextStepPickProjectTitle;
+
+  /// No description provided for @shortVideoNextStepPickProjectDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'After selection, Space aligns mode, tasks, quality, and workspace context on one path.'**
+  String get shortVideoNextStepPickProjectDetail;
+
+  /// No description provided for @shortVideoNextStepFailedTasksTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolve failed tasks first'**
+  String get shortVideoNextStepFailedTasksTitle;
+
+  /// No description provided for @shortVideoNextStepFailedTasksDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent failures detected. Use the task center to see whether script, assets, renders, or export is blocked.'**
+  String get shortVideoNextStepFailedTasksDetail;
+
+  /// No description provided for @shortVideoNextStepQualityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review bad cases and quality feedback'**
+  String get shortVideoNextStepQualityTitle;
+
+  /// No description provided for @shortVideoNextStepQualityDetailAnimated.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus on character consistency, visual continuity, and shot rhythm before rework.'**
+  String get shortVideoNextStepQualityDetailAnimated;
+
+  /// No description provided for @shortVideoNextStepQualityDetailLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus on performance naturalness, scene realism, and talking-head shot quality before rework.'**
+  String get shortVideoNextStepQualityDetailLive;
+
+  /// No description provided for @shortVideoNextStepAnimVisualStyleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock in art style and visual direction'**
+  String get shortVideoNextStepAnimVisualStyleTitle;
+
+  /// No description provided for @shortVideoNextStepAnimVisualStyleDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'In animated mode, settle art style, visual manual, or style packs first for steadier characters and continuity.'**
+  String get shortVideoNextStepAnimVisualStyleDetail;
+
+  /// No description provided for @shortVideoNextStepLiveSceneRefsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add live-action scene references'**
+  String get shortVideoNextStepLiveSceneRefsTitle;
+
+  /// No description provided for @shortVideoNextStepLiveSceneRefsDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Live mode benefits from scene references for blocking, spatial realism, and shot transitions.'**
+  String get shortVideoNextStepLiveSceneRefsDetail;
+
+  /// No description provided for @shortVideoNextStepLiveClipRefsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add live-action clip references'**
+  String get shortVideoNextStepLiveClipRefsTitle;
+
+  /// No description provided for @shortVideoNextStepLiveClipRefsDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Live mode relies on clip / shot references. Add reference footage for performance, framing, and delivery.'**
+  String get shortVideoNextStepLiveClipRefsDetail;
+
+  /// No description provided for @shortVideoNextStepLivePerformManualTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock performance and host-read scripts'**
+  String get shortVideoNextStepLivePerformManualTitle;
+
+  /// No description provided for @shortVideoNextStepLivePerformManualDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Settle tone, pacing, and director notes first for steadier voiceover and on-camera delivery.'**
+  String get shortVideoNextStepLivePerformManualDetail;
+
+  /// No description provided for @shortVideoNextStepFirstScriptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate a first script draft'**
+  String get shortVideoNextStepFirstScriptTitle;
+
+  /// No description provided for @shortVideoNextStepFirstScriptDetailAnimated.
+  ///
+  /// In en, this message translates to:
+  /// **'In Script, establish emotional rhythm, character relationships, and chapter adaptation for animated shorts.'**
+  String get shortVideoNextStepFirstScriptDetailAnimated;
+
+  /// No description provided for @shortVideoNextStepFirstScriptDetailLive.
+  ///
+  /// In en, this message translates to:
+  /// **'In Script, tune dialogue, host-read feel, and scene blocking for live-action shorts.'**
+  String get shortVideoNextStepFirstScriptDetailLive;
+
+  /// No description provided for @shortVideoNextStepStoryboardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add storyboards and shot structure'**
+  String get shortVideoNextStepStoryboardTitle;
+
+  /// No description provided for @shortVideoNextStepStoryboardDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'The script exists but is not yet broken into shots. Continue script/storyboard planning before Production.'**
+  String get shortVideoNextStepStoryboardDetail;
+
+  /// No description provided for @shortVideoNextStepRolesAnimTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add character and style assets'**
+  String get shortVideoNextStepRolesAnimTitle;
+
+  /// No description provided for @shortVideoNextStepRolesLiveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add live references and character setup'**
+  String get shortVideoNextStepRolesLiveTitle;
+
+  /// No description provided for @shortVideoNextStepRolesAnimDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboards started but character assets are thin—add characters, style, and reference images.'**
+  String get shortVideoNextStepRolesAnimDetail;
+
+  /// No description provided for @shortVideoNextStepRolesLiveDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboards started but live references, character setup, and shot refs are still thin.'**
+  String get shortVideoNextStepRolesLiveDetail;
+
+  /// No description provided for @shortVideoNextStepProductionReadyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue in Production and export'**
+  String get shortVideoNextStepProductionReadyTitle;
+
+  /// No description provided for @shortVideoNextStepProductionReadyDetailAnimated.
+  ///
+  /// In en, this message translates to:
+  /// **'Script, storyboards, and characters have a baseline—continue in Production for renders and review.'**
+  String get shortVideoNextStepProductionReadyDetailAnimated;
+
+  /// No description provided for @shortVideoNextStepProductionReadyDetailLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Script, storyboards, and characters have a baseline—continue in Production for live shots, video, and review.'**
+  String get shortVideoNextStepProductionReadyDetailLive;
+
+  /// No description provided for @shortVideoPublishExportCheckReworkRouteSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **' [Rework: {route}]'**
+  String shortVideoPublishExportCheckReworkRouteSuffix(String route);
+
+  /// No description provided for @shortVideoPublishExportCheckStoryboardIndexPart.
+  ///
+  /// In en, this message translates to:
+  /// **' · Seq. {sb}'**
+  String shortVideoPublishExportCheckStoryboardIndexPart(int sb);
+
   /// No description provided for @accountSectionTitle.
   ///
   /// In en, this message translates to:
