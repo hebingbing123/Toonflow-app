@@ -329,9 +329,11 @@ class _PublishDraftsPanel extends StatelessWidget {
                   final title = d.title.trim().isEmpty
                       ? l10n.shortVideoPublishPanelUntitledDraft
                       : d.title.trim();
+                  final statusLabel =
+                      shortVideoPublishDraftStatusLabel(l10n, d.draftStatus);
                   return DropdownMenuItem<String>(
                     value: d.id,
-                    child: Text('$title · ${d.draftStatus}'),
+                    child: Text('$title · $statusLabel'),
                   );
                 }).toList(growable: false),
                 onChanged: publishPanelUi.publishBusy
@@ -410,18 +412,33 @@ class _PublishDraftsPanel extends StatelessWidget {
                             border: OutlineInputBorder(),
                             isDense: true,
                           ),
-                          items: const [
+                          items: [
                             DropdownMenuItem(
                               value: 'full_auto',
-                              child: Text('full_auto'),
+                              child: Text(
+                                shortVideoPublishAutomationModeLabel(
+                                  l10n,
+                                  'full_auto',
+                                ),
+                              ),
                             ),
                             DropdownMenuItem(
                               value: 'semi_auto',
-                              child: Text('semi_auto'),
+                              child: Text(
+                                shortVideoPublishAutomationModeLabel(
+                                  l10n,
+                                  'semi_auto',
+                                ),
+                              ),
                             ),
                             DropdownMenuItem(
                               value: 'manual_assisted',
-                              child: Text('manual_assisted'),
+                              child: Text(
+                                shortVideoPublishAutomationModeLabel(
+                                  l10n,
+                                  'manual_assisted',
+                                ),
+                              ),
                             ),
                           ],
                           onChanged: publishPanelUi.publishBusy

@@ -24982,6 +24982,72 @@ abstract class AppLocalizations {
   /// **'Save to current draft'**
   String get shortVideoPublishCopySaveToCurrentDraft;
 
+  /// No description provided for @shortVideoPublishDraftStatusEditing.
+  ///
+  /// In en, this message translates to:
+  /// **'Editing'**
+  String get shortVideoPublishDraftStatusEditing;
+
+  /// No description provided for @shortVideoPublishDraftStatusReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready'**
+  String get shortVideoPublishDraftStatusReady;
+
+  /// No description provided for @shortVideoPublishDraftStatusArchived.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived'**
+  String get shortVideoPublishDraftStatusArchived;
+
+  /// No description provided for @shortVideoPublishDraftStatusDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft'**
+  String get shortVideoPublishDraftStatusDraft;
+
+  /// No description provided for @shortVideoPublishDraftStatusUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown status'**
+  String get shortVideoPublishDraftStatusUnknown;
+
+  /// No description provided for @shortVideoPublishDraftStatusRaw.
+  ///
+  /// In en, this message translates to:
+  /// **'{status}'**
+  String shortVideoPublishDraftStatusRaw(String status);
+
+  /// No description provided for @shortVideoPublishAutomationFullAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Full auto'**
+  String get shortVideoPublishAutomationFullAuto;
+
+  /// No description provided for @shortVideoPublishAutomationSemiAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Semi-auto'**
+  String get shortVideoPublishAutomationSemiAuto;
+
+  /// No description provided for @shortVideoPublishAutomationManualAssisted.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual assisted'**
+  String get shortVideoPublishAutomationManualAssisted;
+
+  /// No description provided for @shortVideoPublishAutomationModeUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown mode'**
+  String get shortVideoPublishAutomationModeUnknown;
+
+  /// No description provided for @shortVideoPublishAutomationModeRaw.
+  ///
+  /// In en, this message translates to:
+  /// **'{mode}'**
+  String shortVideoPublishAutomationModeRaw(String mode);
+
   /// No description provided for @accountSectionTitle.
   ///
   /// In en, this message translates to:

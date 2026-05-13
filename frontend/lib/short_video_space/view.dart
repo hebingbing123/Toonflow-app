@@ -71,6 +71,46 @@ String shortVideoPublishPlatformLabelWithMatrixFallback(
   return platformId;
 }
 
+String shortVideoPublishDraftStatusLabel(
+  AppLocalizations l10n,
+  String draftStatus,
+) {
+  switch (draftStatus.trim()) {
+    case 'editing':
+      return l10n.shortVideoPublishDraftStatusEditing;
+    case 'ready':
+      return l10n.shortVideoPublishDraftStatusReady;
+    case 'archived':
+      return l10n.shortVideoPublishDraftStatusArchived;
+    case 'draft':
+      return l10n.shortVideoPublishDraftStatusDraft;
+    default:
+      final s = draftStatus.trim();
+      return s.isEmpty
+          ? l10n.shortVideoPublishDraftStatusUnknown
+          : l10n.shortVideoPublishDraftStatusRaw(s);
+  }
+}
+
+String shortVideoPublishAutomationModeLabel(
+  AppLocalizations l10n,
+  String mode,
+) {
+  switch (mode.trim()) {
+    case 'full_auto':
+      return l10n.shortVideoPublishAutomationFullAuto;
+    case 'semi_auto':
+      return l10n.shortVideoPublishAutomationSemiAuto;
+    case 'manual_assisted':
+      return l10n.shortVideoPublishAutomationManualAssisted;
+    default:
+      final m = mode.trim();
+      return m.isEmpty
+          ? l10n.shortVideoPublishAutomationModeUnknown
+          : l10n.shortVideoPublishAutomationModeRaw(m);
+  }
+}
+
 class ShortVideoProjectOption {
   const ShortVideoProjectOption({required this.id, required this.label});
 

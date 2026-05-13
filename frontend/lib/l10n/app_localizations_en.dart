@@ -16280,6 +16280,43 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shortVideoPublishCopySaveToCurrentDraft => 'Save to current draft';
 
   @override
+  String get shortVideoPublishDraftStatusEditing => 'Editing';
+
+  @override
+  String get shortVideoPublishDraftStatusReady => 'Ready';
+
+  @override
+  String get shortVideoPublishDraftStatusArchived => 'Archived';
+
+  @override
+  String get shortVideoPublishDraftStatusDraft => 'Draft';
+
+  @override
+  String get shortVideoPublishDraftStatusUnknown => 'Unknown status';
+
+  @override
+  String shortVideoPublishDraftStatusRaw(String status) {
+    return '$status';
+  }
+
+  @override
+  String get shortVideoPublishAutomationFullAuto => 'Full auto';
+
+  @override
+  String get shortVideoPublishAutomationSemiAuto => 'Semi-auto';
+
+  @override
+  String get shortVideoPublishAutomationManualAssisted => 'Manual assisted';
+
+  @override
+  String get shortVideoPublishAutomationModeUnknown => 'Unknown mode';
+
+  @override
+  String shortVideoPublishAutomationModeRaw(String mode) {
+    return '$mode';
+  }
+
+  @override
   String get accountSectionTitle => 'Account section title';
 
   @override

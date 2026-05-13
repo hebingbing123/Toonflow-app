@@ -15494,6 +15494,43 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shortVideoPublishCopySaveToCurrentDraft => '保存到当前草稿';
 
   @override
+  String get shortVideoPublishDraftStatusEditing => '编辑中';
+
+  @override
+  String get shortVideoPublishDraftStatusReady => '就绪';
+
+  @override
+  String get shortVideoPublishDraftStatusArchived => '已归档';
+
+  @override
+  String get shortVideoPublishDraftStatusDraft => '草稿';
+
+  @override
+  String get shortVideoPublishDraftStatusUnknown => '未知状态';
+
+  @override
+  String shortVideoPublishDraftStatusRaw(String status) {
+    return '$status';
+  }
+
+  @override
+  String get shortVideoPublishAutomationFullAuto => '全自动';
+
+  @override
+  String get shortVideoPublishAutomationSemiAuto => '半自动';
+
+  @override
+  String get shortVideoPublishAutomationManualAssisted => '人工辅助';
+
+  @override
+  String get shortVideoPublishAutomationModeUnknown => '未知模式';
+
+  @override
+  String shortVideoPublishAutomationModeRaw(String mode) {
+    return '$mode';
+  }
+
+  @override
   String get accountSectionTitle => '账户与隐私';
 
   @override

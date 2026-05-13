@@ -70,11 +70,16 @@ mod api_error;
 mod helpers;
 pub mod locale;
 
+#[cfg(test)]
+mod bilingual_test;
+
 // `ErrorBody` is part of the stable JSON contract but only referenced from docs / future callers.
 #[allow(unused_imports)]
 pub use api_error::{ApiError, ErrorBody};
 pub use helpers::{
-    db_error, internal_error, validate_enum, validate_input, validate_non_empty_string,
-    validate_range,
+    bad_request_i18n, conflict_i18n, db_error, duplicate_resource_i18n, forbidden_i18n,
+    internal_error, invalid_format_i18n, invalid_value_i18n, missing_field_i18n, validate_enum,
+    validate_input, validate_max_length, validate_non_empty_string, validate_positive,
+    validate_range, version_conflict_i18n,
 };
 pub use locale::ApiLocale;

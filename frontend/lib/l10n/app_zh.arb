@@ -12404,6 +12404,31 @@
   "shortVideoPublishCopyFieldDescription": "简介",
   "shortVideoPublishCopyFieldTagsCommaHint": "标签（英文逗号分隔）",
   "shortVideoPublishCopySaveToCurrentDraft": "保存到当前草稿",
+  "shortVideoPublishDraftStatusEditing": "编辑中",
+  "shortVideoPublishDraftStatusReady": "就绪",
+  "shortVideoPublishDraftStatusArchived": "已归档",
+  "shortVideoPublishDraftStatusDraft": "草稿",
+  "shortVideoPublishDraftStatusUnknown": "未知状态",
+  "shortVideoPublishDraftStatusRaw": "{status}",
+  "@shortVideoPublishDraftStatusRaw": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishAutomationFullAuto": "全自动",
+  "shortVideoPublishAutomationSemiAuto": "半自动",
+  "shortVideoPublishAutomationManualAssisted": "人工辅助",
+  "shortVideoPublishAutomationModeUnknown": "未知模式",
+  "shortVideoPublishAutomationModeRaw": "{mode}",
+  "@shortVideoPublishAutomationModeRaw": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
   "accountSectionTitle": "账户与隐私",
   "accountRiskyPrefsTooltip": "本机客户端偏好（删号、导出等「不再提示」与恢复确认）",
   "accountSectionSubtitle": "统一管理账户数据导出、下载留档和不可逆删号。导出任务会走平台 job 队列，可反复生成新版快照。",

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../rust_api/project/publish_models.dart';
+import '../view.dart' show shortVideoPublishDraftStatusLabel;
 
 /// Side-by-side comparison for 2–4 [PublishDraftRow] (title, copy, schedule, assets).
 Future<void> showPublishDraftCompareDialog(
@@ -208,7 +209,11 @@ class _DraftCompareCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            _kv(context, l10n.shortVideoPublishDraftCompareFieldStatus, draft.draftStatus),
+            _kv(
+              context,
+              l10n.shortVideoPublishDraftCompareFieldStatus,
+              shortVideoPublishDraftStatusLabel(l10n, draft.draftStatus),
+            ),
             _kv(context, l10n.shortVideoPublishDraftCompareFieldScheduled, _formatScheduled(draft.scheduledAt)),
             _kv(context, l10n.shortVideoPublishDraftCompareFieldScript, _emptyAsDash(draft.scriptId)),
             _kv(context, l10n.shortVideoPublishDraftCompareFieldVideoAsset, _emptyAsDash(draft.videoAssetKey)),

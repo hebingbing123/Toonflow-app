@@ -232,11 +232,44 @@ pub fn validate_max_length(value: &str, max_len: usize, field_name: &str) -> Res
 ///     "资源已存在"
 /// ));
 /// ```
-#[allow(dead_code)] // Public helper for handlers; not all call sites wired yet.
 pub fn conflict_i18n(en_msg: &str, zh_msg: &str) -> ApiError {
     ApiError::ConflictI18n {
         en: en_msg.to_string(),
         zh: zh_msg.to_string(),
+    }
+}
+
+/// 创建重复资源错误（带资源类型和标识符参数）。
+///
+/// 根据当前请求的 `Accept-Language` 偏好返回对应语言的错误消息。
+///
+/// # 示例
+///
+/// ```ignore
+/// return Err(duplicate_resource_i18n("workspace", "my-workspace"));
+/// return Err(duplicate_resource_i18n("project", "project-123"));
+/// ```
+pub fn duplicate_resource_i18n(resource_type: &str, identifier: &str) -> ApiError {
+    ApiError::ConflictI18n {
+        en: format!("{} '{}' already exists", resource_type, identifier),
+        zh: format!("{} '{}' 已存在", resource_type, identifier),
+    }
+}
+
+/// 创建版本冲突错误（带资源名称参数）。
+///
+/// 根据当前请求的 `Accept-Language` 偏好返回对应语言的错误消息。
+///
+/// # 示例
+///
+/// ```ignore
+/// return Err(version_conflict_i18n("Timeline"));
+/// return Err(version_conflict_i18n("Project"));
+/// ```
+pub fn version_conflict_i18n(resource: &str) -> ApiError {
+    ApiError::ConflictI18n {
+        en: format!("{} has been modified by another user", resource),
+        zh: format!("{} 已被其他用户修改", resource),
     }
 }
 
@@ -662,6 +695,169 @@ mod tests {
         assert_eq!(
             json.get("message").and_then(|v| v.as_str()),
             Some("字段 'email' 格式无效：期望 valid email address")
+        );
+    }
+
+    #[test]
+    fn version_conflict_i18n_en() {
+        let err = version_conflict_i18n("Timeline");
+        match err {
+            ApiError::ConflictI18n { en, zh } => {
+                assert_eq!(en, "Timeline has been modified by another user");
+                assert_eq!(zh, "Timeline 已被其他用户修改");
+            }
+            _ => panic!("expected ConflictI18n"),
+        }
+    }
+
+    #[test]
+    fn version_conflict_i18n_with_different_resource() {
+        let err = version_conflict_i18n("Project");
+        match err {
+            ApiError::ConflictI18n { en, zh } => {
+                assert_eq!(en, "Project has been modified by another user");
+                assert_eq!(zh, "Project 已被其他用户修改");
+            }
+            _ => panic!("expected ConflictI18n"),
+        }
+    }
+
+    #[tokio::test]
+    async fn version_conflict_i18n_response_en() {
+        use axum::body::to_bytes;
+        use axum::response::IntoResponse;
+
+        let err = version_conflict_i18n("Timeline");
+        let resp = err.into_response();
+
+        let bytes = to_bytes(resp.into_body(), 16 * 1024)
+            .await
+            .expect("body bytes");
+        let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
+
+        assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(409));
+        assert_eq!(json.get("code").and_then(|v| v.as_str()), Some("conflict"));
+        assert_eq!(
+            json.get("message").and_then(|v| v.as_str()),
+            Some("Timeline has been modified by another user")
+        );
+    }
+
+    #[tokio::test]
+    async fn version_conflict_i18n_response_zh() {
+        use axum::body::to_bytes;
+        use axum::response::IntoResponse;
+
+        let resp = REQUEST_LOCALE
+            .scope(ApiLocale::Zh, async {
+                let err = version_conflict_i18n("Timeline");
+                err.into_response()
+            })
+            .await;
+
+        let bytes = to_bytes(resp.into_body(), 16 * 1024)
+            .await
+            .expect("body bytes");
+        let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
+
+        assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(409));
+        assert_eq!(json.get("code").and_then(|v| v.as_str()), Some("conflict"));
+        assert_eq!(
+            json.get("message").and_then(|v| v.as_str()),
+            Some("Timeline 已被其他用户修改")
+        );
+    }
+
+    #[test]
+    fn duplicate_resource_i18n_en() {
+        let err = duplicate_resource_i18n("workspace", "my-workspace");
+        match err {
+            ApiError::ConflictI18n { en, zh } => {
+                assert_eq!(en, "workspace 'my-workspace' already exists");
+                assert_eq!(zh, "workspace 'my-workspace' 已存在");
+            }
+            _ => panic!("expected ConflictI18n"),
+        }
+    }
+
+    #[test]
+    fn duplicate_resource_i18n_with_different_resource_types() {
+        let test_cases = vec![
+            (
+                "workspace",
+                "my-workspace",
+                "workspace 'my-workspace' already exists",
+                "workspace 'my-workspace' 已存在",
+            ),
+            (
+                "project",
+                "project-123",
+                "project 'project-123' already exists",
+                "project 'project-123' 已存在",
+            ),
+            (
+                "user",
+                "john@example.com",
+                "user 'john@example.com' already exists",
+                "user 'john@example.com' 已存在",
+            ),
+        ];
+
+        for (resource_type, identifier, expected_en, expected_zh) in test_cases {
+            let err = duplicate_resource_i18n(resource_type, identifier);
+            match err {
+                ApiError::ConflictI18n { en, zh } => {
+                    assert_eq!(en, expected_en);
+                    assert_eq!(zh, expected_zh);
+                }
+                _ => panic!("expected ConflictI18n"),
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn duplicate_resource_i18n_response_en() {
+        use axum::body::to_bytes;
+        use axum::response::IntoResponse;
+
+        let err = duplicate_resource_i18n("workspace", "my-workspace");
+        let resp = err.into_response();
+
+        let bytes = to_bytes(resp.into_body(), 16 * 1024)
+            .await
+            .expect("body bytes");
+        let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
+
+        assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(409));
+        assert_eq!(json.get("code").and_then(|v| v.as_str()), Some("conflict"));
+        assert_eq!(
+            json.get("message").and_then(|v| v.as_str()),
+            Some("workspace 'my-workspace' already exists")
+        );
+    }
+
+    #[tokio::test]
+    async fn duplicate_resource_i18n_response_zh() {
+        use axum::body::to_bytes;
+        use axum::response::IntoResponse;
+
+        let resp = REQUEST_LOCALE
+            .scope(ApiLocale::Zh, async {
+                let err = duplicate_resource_i18n("project", "project-123");
+                err.into_response()
+            })
+            .await;
+
+        let bytes = to_bytes(resp.into_body(), 16 * 1024)
+            .await
+            .expect("body bytes");
+        let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
+
+        assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(409));
+        assert_eq!(json.get("code").and_then(|v| v.as_str()), Some("conflict"));
+        assert_eq!(
+            json.get("message").and_then(|v| v.as_str()),
+            Some("project 'project-123' 已存在")
         );
     }
 }

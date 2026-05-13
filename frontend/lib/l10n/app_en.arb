@@ -12444,6 +12444,31 @@
   "shortVideoPublishCopyFieldDescription": "Description",
   "shortVideoPublishCopyFieldTagsCommaHint": "Tags (comma-separated)",
   "shortVideoPublishCopySaveToCurrentDraft": "Save to current draft",
+  "shortVideoPublishDraftStatusEditing": "Editing",
+  "shortVideoPublishDraftStatusReady": "Ready",
+  "shortVideoPublishDraftStatusArchived": "Archived",
+  "shortVideoPublishDraftStatusDraft": "Draft",
+  "shortVideoPublishDraftStatusUnknown": "Unknown status",
+  "shortVideoPublishDraftStatusRaw": "{status}",
+  "@shortVideoPublishDraftStatusRaw": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishAutomationFullAuto": "Full auto",
+  "shortVideoPublishAutomationSemiAuto": "Semi-auto",
+  "shortVideoPublishAutomationManualAssisted": "Manual assisted",
+  "shortVideoPublishAutomationModeUnknown": "Unknown mode",
+  "shortVideoPublishAutomationModeRaw": "{mode}",
+  "@shortVideoPublishAutomationModeRaw": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
   "accountSectionTitle": "Account section title",
   "accountRiskyPrefsTooltip": "Account risky prefs tooltip",
   "accountSectionSubtitle": "Account section subtitle",

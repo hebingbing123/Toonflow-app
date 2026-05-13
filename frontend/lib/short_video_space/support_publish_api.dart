@@ -626,7 +626,9 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
           final scheduled = (d.scheduledAt ?? '').trim().isEmpty 
               ? '' 
               : l10n.shortVideoSpacePublishPanelDraftScheduled(d.scheduledAt!);
-          return '$title · ${d.draftStatus}$videoMissing$scheduled';
+          final statusLabel =
+              shortVideoPublishDraftStatusLabel(l10n, d.draftStatus);
+          return '$title · $statusLabel$videoMissing$scheduled';
         },
       )
       .toList(growable: false);
