@@ -135,7 +135,8 @@ fi
 # OpenAPI checks (only if backend or OpenAPI changed, or in full mode)
 if [ "$MODE" = "full" ] || [ "$OPENAPI_CHANGED" = true ]; then
   echo "==> merged OpenAPI export (YAML parse)"
-  OPENAPI_SPEC_FILE="$(mktemp "${TMPDIR:-/tmp}/toonflow-openapi.XXXXXX.yaml")"
+  # BSD mktemp requires XXXXXX at the end of the template (no ".yaml" suffix).
+  OPENAPI_SPEC_FILE="$(mktemp "${TMPDIR:-/tmp}/toonflow-openapi.XXXXXX")"
   step_start
   (cd backend && cargo run --quiet --bin export-openapi) > "$OPENAPI_SPEC_FILE"
   ruby -ryaml -e "YAML.load(File.read('$OPENAPI_SPEC_FILE'))"
