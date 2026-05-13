@@ -1,9 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/project_editor/novels/import_parser.dart';
 
 void main() {
+  final zh = AppLocalizationsZh();
+
   test('parseWholeBookNovelText splits Chinese chapter headers', () {
-    final rows = parseWholeBookNovelText('''
+    final rows = parseWholeBookNovelText(zh, '''
 第一章 初见
 她推开门，看见了雨。
 
@@ -18,17 +21,17 @@ void main() {
   });
 
   test('parseWholeBookNovelText falls back to single chapter', () {
-    final rows = parseWholeBookNovelText('没有章节标题，只有一整段正文。');
+    final rows = parseWholeBookNovelText(zh, '没有章节标题，只有一整段正文。');
 
     expect(rows.length, 1);
-    expect(rows.first.chapter, '导入章节 1');
+    expect(rows.first.chapter, zh.projectEditorNovelImportFallbackChapterTitle(1));
     expect(rows.first.chapterData, '没有章节标题，只有一整段正文。');
   });
 
   test(
     'extractCrawlerContentFromHtml removes script and keeps readable text',
     () {
-      final extracted = extractCrawlerContentFromHtml('''
+      final extracted = extractCrawlerContentFromHtml(zh, '''
 <html>
   <head>
     <title>测试小说</title>
@@ -53,7 +56,7 @@ void main() {
   );
 
   test('extractCrawlerContentFromHtml removes crawler junk lines', () {
-    final extracted = extractCrawlerContentFromHtml('''
+    final extracted = extractCrawlerContentFromHtml(zh, '''
 <html>
   <head><title>测试站</title></head>
   <body>
@@ -74,7 +77,7 @@ void main() {
   test(
     'reindexParsedNovelChapters trims and renumbers edited preview rows',
     () {
-      final rows = reindexParsedNovelChapters([
+      final rows = reindexParsedNovelChapters(zh, [
         const ParsedNovelChapter(
           chapterIndex: 9,
           chapter: '  ',
@@ -89,7 +92,7 @@ void main() {
 
       expect(rows.length, 2);
       expect(rows[0].chapterIndex, 1);
-      expect(rows[0].chapter, '导入章节 1');
+      expect(rows[0].chapter, zh.projectEditorNovelImportFallbackChapterTitle(1));
       expect(rows[0].chapterData, '第一段');
       expect(rows[1].chapterIndex, 2);
       expect(rows[1].chapter, '第二章 回响');
@@ -98,7 +101,7 @@ void main() {
   );
 
   test('reindexParsedNovelChapters can drop empty bodies before import', () {
-    final rows = reindexParsedNovelChapters([
+    final rows = reindexParsedNovelChapters(zh, [
       const ParsedNovelChapter(
         chapterIndex: 1,
         chapter: '第一章',
@@ -117,7 +120,7 @@ void main() {
   });
 
   test('parseWholeBookNovelText supports 序章 and 番外 headers', () {
-    final rows = parseWholeBookNovelText('''
+    final rows = parseWholeBookNovelText(zh, '''
 序章
 雨从凌晨开始下。
 
@@ -131,7 +134,7 @@ void main() {
   });
 
   test('evaluateNovelImportQuality blocks too short imports', () {
-    final report = evaluateNovelImportQuality([
+    final report = evaluateNovelImportQuality(zh, [
       const ParsedNovelChapter(
         chapterIndex: 1,
         chapter: '第一章',
@@ -145,6 +148,7 @@ void main() {
 
   test('evaluateNovelImportQuality warns duplicated chapter content', () {
     final report = evaluateNovelImportQuality(
+      zh,
       [
         const ParsedNovelChapter(
           chapterIndex: 1,
@@ -172,6 +176,7 @@ void main() {
 
   test('extractCrawlerContentFromHtml discovers next page url', () {
     final extracted = extractCrawlerContentFromHtml(
+      zh,
       '''
 <html>
   <head><title>分页正文</title></head>
@@ -189,6 +194,7 @@ void main() {
 
   test('extractCrawlerContentFromHtml discovers chapter links from toc', () {
     final extracted = extractCrawlerContentFromHtml(
+      zh,
       '''
 <html>
   <head><title>目录</title></head>

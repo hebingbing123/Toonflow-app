@@ -1,5 +1,7 @@
 import 'package:html/parser.dart' as html_parser;
 
+import '../../l10n/app_localizations.dart';
+
 class ParsedNovelChapter {
   const ParsedNovelChapter({
     required this.chapterIndex,
@@ -61,21 +63,26 @@ final RegExp _junkLinePattern = RegExp(
 );
 
 ExtractedCrawlerContent extractCrawlerContentFromHtml(
+  AppLocalizations l10n,
   String rawHtml, {
-  String fallbackTitle = '抓取正文',
+  String? fallbackTitle,
   Uri? pageUri,
 }) {
+  final resolvedFallback =
+      (fallbackTitle == null || fallbackTitle.trim().isEmpty)
+      ? l10n.projectEditorNovelImportCrawlerBodyFallbackTitle
+      : fallbackTitle.trim();
   final document = html_parser.parse(rawHtml);
   document.querySelectorAll('script,style,noscript').forEach((node) {
     node.remove();
   });
 
-  final title = (document.querySelector('title')?.text ?? fallbackTitle).trim();
+  final title = (document.querySelector('title')?.text ?? resolvedFallback).trim();
   final bodyText = _normalizeExtractedText(document.body?.text ?? '');
   final nextPageUrl = _discoverNextPageUrl(document, pageUri);
   final chapterUrls = _discoverChapterUrls(document, pageUri);
   return ExtractedCrawlerContent(
-    title: title.isEmpty ? fallbackTitle : title,
+    title: title.isEmpty ? resolvedFallback : title,
     bodyText: bodyText,
     nextPageUrl: nextPageUrl,
     chapterUrls: chapterUrls,
@@ -174,15 +181,20 @@ String _normalizeExtractedText(String raw) {
 }
 
 NovelImportQualityReport evaluateNovelImportQuality(
+  AppLocalizations l10n,
   Iterable<ParsedNovelChapter> rows, {
   int minTotalChars = 200,
   int minAverageChapterChars = 50,
   int maxDuplicateBodyRatioPercent = 40,
 }) {
-  final chapters = reindexParsedNovelChapters(rows, dropEmptyBodies: true);
+  final chapters = reindexParsedNovelChapters(
+    l10n,
+    rows,
+    dropEmptyBodies: true,
+  );
   if (chapters.isEmpty) {
-    return const NovelImportQualityReport(
-      blockers: <String>['没有可导入的正文章节'],
+    return NovelImportQualityReport(
+      blockers: <String>[l10n.projectEditorNovelImportQualityNoChaptersBlocker],
       warnings: <String>[],
     );
   }
@@ -197,26 +209,40 @@ NovelImportQualityReport evaluateNovelImportQuality(
   final avgChars = totalChars ~/ bodyTexts.length;
 
   if (totalChars < minTotalChars) {
-    blockers.add('正文总字数过少（$totalChars），疑似抽取失败');
+    blockers.add(
+      l10n.projectEditorNovelImportQualityTotalCharsTooLowBlocker(totalChars),
+    );
   }
   if (avgChars < minAverageChapterChars) {
-    blockers.add('平均章节字数过少（$avgChars），请先检查切章结果');
+    blockers.add(
+      l10n.projectEditorNovelImportQualityAvgCharsTooLowBlocker(avgChars),
+    );
   }
 
   final uniqueBodies = bodyTexts.toSet();
   final duplicateCount = bodyTexts.length - uniqueBodies.length;
   final duplicateRatioPercent = (duplicateCount * 100) ~/ bodyTexts.length;
   if (duplicateRatioPercent >= maxDuplicateBodyRatioPercent) {
-    blockers.add('章节正文重复比例过高（$duplicateRatioPercent%）');
+    blockers.add(
+      l10n.projectEditorNovelImportQualityDuplicateHighBlocker(
+        duplicateRatioPercent,
+      ),
+    );
   } else if (duplicateRatioPercent > 0) {
-    warnings.add('检测到部分重复正文（$duplicateRatioPercent%）');
+    warnings.add(
+      l10n.projectEditorNovelImportQualityDuplicatePartialWarning(
+        duplicateRatioPercent,
+      ),
+    );
   }
 
   if (chapters.length == 1) {
-    warnings.add('仅识别到 1 章，可能是整本未正确切章');
+    warnings.add(l10n.projectEditorNovelImportQualitySingleChapterWarning);
   }
   if (chapters.length > 300) {
-    warnings.add('章节数较多（${chapters.length}），建议抽样检查切章准确性');
+    warnings.add(
+      l10n.projectEditorNovelImportQualityManyChaptersWarning(chapters.length),
+    );
   }
 
   return NovelImportQualityReport(
@@ -226,9 +252,9 @@ NovelImportQualityReport evaluateNovelImportQuality(
 }
 
 List<ParsedNovelChapter> reindexParsedNovelChapters(
+  AppLocalizations l10n,
   Iterable<ParsedNovelChapter> rows, {
   bool dropEmptyBodies = false,
-  String fallbackChapterPrefix = '导入章节',
 }) {
   final normalized = <ParsedNovelChapter>[];
   for (final row in rows) {
@@ -241,7 +267,9 @@ List<ParsedNovelChapter> reindexParsedNovelChapters(
       ParsedNovelChapter(
         chapterIndex: normalized.length + 1,
         chapter: chapter.isEmpty
-            ? '$fallbackChapterPrefix ${normalized.length + 1}'
+            ? l10n.projectEditorNovelImportFallbackChapterTitle(
+                normalized.length + 1,
+              )
             : chapter,
         chapterData: chapterData,
       ),
@@ -251,9 +279,9 @@ List<ParsedNovelChapter> reindexParsedNovelChapters(
 }
 
 List<ParsedNovelChapter> parseWholeBookNovelText(
-  String raw, {
-  String fallbackChapterPrefix = '导入章节',
-}) {
+  AppLocalizations l10n,
+  String raw,
+) {
   final normalized = _normalizeExtractedText(raw);
   if (normalized.isEmpty) {
     return const <ParsedNovelChapter>[];
@@ -262,22 +290,24 @@ List<ParsedNovelChapter> parseWholeBookNovelText(
   final matches = _chapterHeaderPattern.allMatches(normalized).toList();
   if (matches.isEmpty) {
     return reindexParsedNovelChapters(
+      l10n,
       <ParsedNovelChapter>[
         ParsedNovelChapter(
           chapterIndex: 1,
-          chapter: '$fallbackChapterPrefix 1',
+          chapter: l10n.projectEditorNovelImportFallbackChapterTitle(1),
           chapterData: normalized,
         ),
       ],
       dropEmptyBodies: true,
-      fallbackChapterPrefix: fallbackChapterPrefix,
     );
   }
 
   final chapters = <ParsedNovelChapter>[];
   for (var i = 0; i < matches.length; i += 1) {
     final match = matches[i];
-    final title = match.group(1)?.trim() ?? '$fallbackChapterPrefix ${i + 1}';
+    final title =
+        match.group(1)?.trim() ??
+        l10n.projectEditorNovelImportFallbackChapterTitle(i + 1);
     final bodyStart = match.end;
     final bodyEnd = i + 1 < matches.length
         ? matches[i + 1].start
@@ -297,20 +327,20 @@ List<ParsedNovelChapter> parseWholeBookNovelText(
 
   if (chapters.isEmpty) {
     return reindexParsedNovelChapters(
+      l10n,
       <ParsedNovelChapter>[
         ParsedNovelChapter(
           chapterIndex: 1,
-          chapter: '$fallbackChapterPrefix 1',
+          chapter: l10n.projectEditorNovelImportFallbackChapterTitle(1),
           chapterData: normalized,
         ),
       ],
       dropEmptyBodies: true,
-      fallbackChapterPrefix: fallbackChapterPrefix,
     );
   }
   return reindexParsedNovelChapters(
+    l10n,
     chapters,
     dropEmptyBodies: true,
-    fallbackChapterPrefix: fallbackChapterPrefix,
   );
 }

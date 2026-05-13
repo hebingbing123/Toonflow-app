@@ -6213,6 +6213,52 @@ class AppLocalizationsZh extends AppLocalizations {
   String get projectEditorStylePackNoDescriptionFallback => '暂无简介';
 
   @override
+  String get projectEditorNovelImportCrawlerBodyFallbackTitle => '抓取正文';
+
+  @override
+  String projectEditorNovelImportFallbackChapterTitle(int index) {
+    return '导入章节 $index';
+  }
+
+  @override
+  String get projectEditorNovelImportQualityNoChaptersBlocker => '没有可导入的正文章节';
+
+  @override
+  String projectEditorNovelImportQualityTotalCharsTooLowBlocker(
+    int totalChars,
+  ) {
+    return '正文总字数过少（$totalChars），疑似抽取失败';
+  }
+
+  @override
+  String projectEditorNovelImportQualityAvgCharsTooLowBlocker(int avgChars) {
+    return '平均章节字数过少（$avgChars），请先检查切章结果';
+  }
+
+  @override
+  String projectEditorNovelImportQualityDuplicateHighBlocker(
+    int duplicateRatioPercent,
+  ) {
+    return '章节正文重复比例过高（$duplicateRatioPercent%）';
+  }
+
+  @override
+  String projectEditorNovelImportQualityDuplicatePartialWarning(
+    int duplicateRatioPercent,
+  ) {
+    return '检测到部分重复正文（$duplicateRatioPercent%）';
+  }
+
+  @override
+  String get projectEditorNovelImportQualitySingleChapterWarning =>
+      '仅识别到 1 章，可能是整本未正确切章';
+
+  @override
+  String projectEditorNovelImportQualityManyChaptersWarning(int count) {
+    return '章节数较多（$count），建议抽样检查切章准确性';
+  }
+
+  @override
   String projectEditorNovelsEventsDefaultCreateName(int stamp) {
     return '事件_$stamp';
   }

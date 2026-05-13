@@ -6467,6 +6467,53 @@ class AppLocalizationsEn extends AppLocalizations {
       'No description yet';
 
   @override
+  String get projectEditorNovelImportCrawlerBodyFallbackTitle => 'Fetched body';
+
+  @override
+  String projectEditorNovelImportFallbackChapterTitle(int index) {
+    return 'Imported chapter $index';
+  }
+
+  @override
+  String get projectEditorNovelImportQualityNoChaptersBlocker =>
+      'No importable body chapters';
+
+  @override
+  String projectEditorNovelImportQualityTotalCharsTooLowBlocker(
+    int totalChars,
+  ) {
+    return 'Body text too short ($totalChars characters); extraction may have failed';
+  }
+
+  @override
+  String projectEditorNovelImportQualityAvgCharsTooLowBlocker(int avgChars) {
+    return 'Average chapter length too low ($avgChars characters); check chapter splits';
+  }
+
+  @override
+  String projectEditorNovelImportQualityDuplicateHighBlocker(
+    int duplicateRatioPercent,
+  ) {
+    return 'Chapter body duplicate ratio too high ($duplicateRatioPercent%)';
+  }
+
+  @override
+  String projectEditorNovelImportQualityDuplicatePartialWarning(
+    int duplicateRatioPercent,
+  ) {
+    return 'Some duplicate body text detected ($duplicateRatioPercent%)';
+  }
+
+  @override
+  String get projectEditorNovelImportQualitySingleChapterWarning =>
+      'Only 1 chapter detected; the book may not be split correctly';
+
+  @override
+  String projectEditorNovelImportQualityManyChaptersWarning(int count) {
+    return 'Many chapters ($count); spot-check split accuracy';
+  }
+
+  @override
   String projectEditorNovelsEventsDefaultCreateName(int stamp) {
     return 'Event_$stamp';
   }

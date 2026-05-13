@@ -32,6 +32,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
       bool dropEmptyBodies = false,
     }) {
       final normalized = reindexParsedNovelChapters(
+        l10n,
         rows,
         dropEmptyBodies: dropEmptyBodies,
       );
@@ -223,6 +224,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                   ? null
                   : () {
                       final rows = _parseNovelImportPreview(
+                        l10n,
                         importRawTextCtrl.text,
                       );
                       applyImportPreview(

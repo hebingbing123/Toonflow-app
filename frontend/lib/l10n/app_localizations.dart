@@ -10528,6 +10528,64 @@ abstract class AppLocalizations {
   /// **'No description yet'**
   String get projectEditorStylePackNoDescriptionFallback;
 
+  /// No description provided for @projectEditorNovelImportCrawlerBodyFallbackTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetched body'**
+  String get projectEditorNovelImportCrawlerBodyFallbackTitle;
+
+  /// No description provided for @projectEditorNovelImportFallbackChapterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported chapter {index}'**
+  String projectEditorNovelImportFallbackChapterTitle(int index);
+
+  /// No description provided for @projectEditorNovelImportQualityNoChaptersBlocker.
+  ///
+  /// In en, this message translates to:
+  /// **'No importable body chapters'**
+  String get projectEditorNovelImportQualityNoChaptersBlocker;
+
+  /// No description provided for @projectEditorNovelImportQualityTotalCharsTooLowBlocker.
+  ///
+  /// In en, this message translates to:
+  /// **'Body text too short ({totalChars} characters); extraction may have failed'**
+  String projectEditorNovelImportQualityTotalCharsTooLowBlocker(int totalChars);
+
+  /// No description provided for @projectEditorNovelImportQualityAvgCharsTooLowBlocker.
+  ///
+  /// In en, this message translates to:
+  /// **'Average chapter length too low ({avgChars} characters); check chapter splits'**
+  String projectEditorNovelImportQualityAvgCharsTooLowBlocker(int avgChars);
+
+  /// No description provided for @projectEditorNovelImportQualityDuplicateHighBlocker.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter body duplicate ratio too high ({duplicateRatioPercent}%)'**
+  String projectEditorNovelImportQualityDuplicateHighBlocker(
+    int duplicateRatioPercent,
+  );
+
+  /// No description provided for @projectEditorNovelImportQualityDuplicatePartialWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Some duplicate body text detected ({duplicateRatioPercent}%)'**
+  String projectEditorNovelImportQualityDuplicatePartialWarning(
+    int duplicateRatioPercent,
+  );
+
+  /// No description provided for @projectEditorNovelImportQualitySingleChapterWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Only 1 chapter detected; the book may not be split correctly'**
+  String get projectEditorNovelImportQualitySingleChapterWarning;
+
+  /// No description provided for @projectEditorNovelImportQualityManyChaptersWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Many chapters ({count}); spot-check split accuracy'**
+  String projectEditorNovelImportQualityManyChaptersWarning(int count);
+
   /// No description provided for @projectEditorNovelsEventsDefaultCreateName.
   ///
   /// In en, this message translates to:

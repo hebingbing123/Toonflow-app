@@ -4712,6 +4712,57 @@
   "projectEditorStylePackTagArt": "Art",
   "projectEditorStylePackTagStory": "Story",
   "projectEditorStylePackNoDescriptionFallback": "No description yet",
+  "projectEditorNovelImportCrawlerBodyFallbackTitle": "Fetched body",
+  "projectEditorNovelImportFallbackChapterTitle": "Imported chapter {index}",
+  "@projectEditorNovelImportFallbackChapterTitle": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelImportQualityNoChaptersBlocker": "No importable body chapters",
+  "projectEditorNovelImportQualityTotalCharsTooLowBlocker": "Body text too short ({totalChars} characters); extraction may have failed",
+  "@projectEditorNovelImportQualityTotalCharsTooLowBlocker": {
+    "placeholders": {
+      "totalChars": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelImportQualityAvgCharsTooLowBlocker": "Average chapter length too low ({avgChars} characters); check chapter splits",
+  "@projectEditorNovelImportQualityAvgCharsTooLowBlocker": {
+    "placeholders": {
+      "avgChars": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelImportQualityDuplicateHighBlocker": "Chapter body duplicate ratio too high ({duplicateRatioPercent}%)",
+  "@projectEditorNovelImportQualityDuplicateHighBlocker": {
+    "placeholders": {
+      "duplicateRatioPercent": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelImportQualityDuplicatePartialWarning": "Some duplicate body text detected ({duplicateRatioPercent}%)",
+  "@projectEditorNovelImportQualityDuplicatePartialWarning": {
+    "placeholders": {
+      "duplicateRatioPercent": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelImportQualitySingleChapterWarning": "Only 1 chapter detected; the book may not be split correctly",
+  "projectEditorNovelImportQualityManyChaptersWarning": "Many chapters ({count}); spot-check split accuracy",
+  "@projectEditorNovelImportQualityManyChaptersWarning": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "projectEditorNovelsEventsDefaultCreateName": "Event_{stamp}",
   "@projectEditorNovelsEventsDefaultCreateName": {
     "placeholders": {

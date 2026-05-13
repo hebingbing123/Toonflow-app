@@ -4672,6 +4672,57 @@
   "projectEditorStylePackTagArt": "画风",
   "projectEditorStylePackTagStory": "故事",
   "projectEditorStylePackNoDescriptionFallback": "暂无简介",
+  "projectEditorNovelImportCrawlerBodyFallbackTitle": "抓取正文",
+  "projectEditorNovelImportFallbackChapterTitle": "导入章节 {index}",
+  "@projectEditorNovelImportFallbackChapterTitle": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelImportQualityNoChaptersBlocker": "没有可导入的正文章节",
+  "projectEditorNovelImportQualityTotalCharsTooLowBlocker": "正文总字数过少（{totalChars}），疑似抽取失败",
+  "@projectEditorNovelImportQualityTotalCharsTooLowBlocker": {
+    "placeholders": {
+      "totalChars": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelImportQualityAvgCharsTooLowBlocker": "平均章节字数过少（{avgChars}），请先检查切章结果",
+  "@projectEditorNovelImportQualityAvgCharsTooLowBlocker": {
+    "placeholders": {
+      "avgChars": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelImportQualityDuplicateHighBlocker": "章节正文重复比例过高（{duplicateRatioPercent}%）",
+  "@projectEditorNovelImportQualityDuplicateHighBlocker": {
+    "placeholders": {
+      "duplicateRatioPercent": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelImportQualityDuplicatePartialWarning": "检测到部分重复正文（{duplicateRatioPercent}%）",
+  "@projectEditorNovelImportQualityDuplicatePartialWarning": {
+    "placeholders": {
+      "duplicateRatioPercent": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelImportQualitySingleChapterWarning": "仅识别到 1 章，可能是整本未正确切章",
+  "projectEditorNovelImportQualityManyChaptersWarning": "章节数较多（{count}），建议抽样检查切章准确性",
+  "@projectEditorNovelImportQualityManyChaptersWarning": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "projectEditorNovelsEventsDefaultCreateName": "事件_{stamp}",
   "@projectEditorNovelsEventsDefaultCreateName": {
     "placeholders": {

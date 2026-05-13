@@ -21,8 +21,11 @@ class _CrawlerPreviewPayload {
 /// Encapsulates chapter workbench mutations so the main novels workbench file
 /// can focus on dialog orchestration and domain layout.
 extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
-  List<ParsedNovelChapter> _parseNovelImportPreview(String raw) {
-    return parseWholeBookNovelText(raw);
+  List<ParsedNovelChapter> _parseNovelImportPreview(
+    AppLocalizations l10n,
+    String raw,
+  ) {
+    return parseWholeBookNovelText(l10n, raw);
   }
 
   Future<void> _crawlNovelSourcePreview({
@@ -75,11 +78,11 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
         );
       }
 
-      payload = await _crawlNovelSourceAdaptive(uri, response.body);
+      payload = await _crawlNovelSourceAdaptive(l10n, uri, response.body);
     }
 
     importRawTextCtrl.text = payload.bodyText;
-    final rows = _parseNovelImportPreview(payload.bodyText);
+    final rows = _parseNovelImportPreview(l10n, payload.bodyText);
     applyImportPreview(
       rows,
       rows.isEmpty
@@ -105,10 +108,12 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
   }
 
   Future<_CrawlerPreviewPayload> _crawlNovelSourceAdaptive(
+    AppLocalizations l10n,
     Uri seedUri,
     String seedHtml,
   ) async {
     final seed = extractCrawlerContentFromHtml(
+      l10n,
       seedHtml,
       fallbackTitle: seedUri.host,
       pageUri: seedUri,
@@ -117,7 +122,7 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
       final chapterPages = seed.chapterUrls.take(20).toList(growable: false);
       final chunks = <String>[];
       for (var i = 0; i < chapterPages.length; i += 1) {
-        final body = await _fetchCrawlerBodyText(chapterPages[i]);
+        final body = await _fetchCrawlerBodyText(l10n, chapterPages[i]);
         if (body == null || body.bodyText.trim().isEmpty) {
           continue;
         }
@@ -144,7 +149,7 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
         break;
       }
       visited.add(next);
-      final page = await _fetchCrawlerBodyText(next);
+      final page = await _fetchCrawlerBodyText(l10n, next);
       if (page == null || page.bodyText.trim().isEmpty) {
         break;
       }
@@ -162,7 +167,10 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     );
   }
 
-  Future<ExtractedCrawlerContent?> _fetchCrawlerBodyText(String rawUrl) async {
+  Future<ExtractedCrawlerContent?> _fetchCrawlerBodyText(
+    AppLocalizations l10n,
+    String rawUrl,
+  ) async {
     final uri = Uri.tryParse(rawUrl);
     if (uri == null || !(uri.isScheme('http') || uri.isScheme('https'))) {
       return null;
@@ -177,6 +185,7 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
       return null;
     }
     return extractCrawlerContentFromHtml(
+      l10n,
       response.body,
       fallbackTitle: uri.host,
       pageUri: uri,
@@ -292,13 +301,13 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     required StateSetter setLocalState,
     required void Function(String infoLine) applyInfoLine,
   }) async {
-    final normalizedChapters = reindexParsedNovelChapters(chapters);
+    final normalizedChapters = reindexParsedNovelChapters(l10n, chapters);
     if (normalizedChapters.isEmpty) {
       throw FormatException(
         l10n.projectEditorNovelsActionErrorPreparseRequired,
       );
     }
-    final quality = evaluateNovelImportQuality(normalizedChapters);
+    final quality = evaluateNovelImportQuality(l10n, normalizedChapters);
     if (!quality.canImport) {
       throw FormatException(
         l10n.projectEditorNovelsActionErrorImportQuality(
