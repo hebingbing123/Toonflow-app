@@ -61,18 +61,23 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
       if (!mounted) {
         return;
       }
-      if (e is RustApiException) {
-        reportRustApiError(e, onErrorChanged: (_) {});
-      } else {
-        final l10n = AppLocalizations.of(context)!;
-        ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-          SnackBar(
-            content: Text(
-              l10n.shortVideoSpaceProductionAssemblyExportStartFailed(describeUserVisibleApiError(l10n, e)),
+      final l10n = AppLocalizations.of(context)!;
+      reportRustOrDescribeApiError(
+        e,
+        l10n: l10n,
+        onErrorChanged: (msg) {
+          if (!mounted || msg == null || e is RustApiException) {
+            return;
+          }
+          ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+            SnackBar(
+              content: Text(
+                l10n.shortVideoSpaceProductionAssemblyExportStartFailed(msg),
+              ),
             ),
-          ),
-        );
-      }
+          );
+        },
+      );
     } finally {
       if (mounted) {
         setState(() {
