@@ -123,45 +123,6 @@ class ErrorBody {
   }
 }
 
-String formatRetryAfterMs(int retryAfterMs) {
-  if (retryAfterMs <= 0) {
-    return '稍后重试';
-  }
-  final totalSeconds = (retryAfterMs / 1000).ceil();
-  if (totalSeconds < 60) {
-    return '$totalSeconds 秒后重试';
-  }
-  final minutes = totalSeconds ~/ 60;
-  final seconds = totalSeconds % 60;
-  if (minutes < 60) {
-    return seconds == 0 ? '$minutes 分钟后重试' : '$minutes 分 $seconds 秒后重试';
-  }
-  final hours = minutes ~/ 60;
-  final remainMinutes = minutes % 60;
-  return remainMinutes == 0 ? '$hours 小时后重试' : '$hours 小时 $remainMinutes 分钟后重试';
-}
-
-String formatRustApiException(RustApiException error) {
-  final details = RustApiErrorDetails.tryParse(error.message);
-  if (details != null) {
-    if (error.statusCode == 429 || details.code == 'quota_exceeded') {
-      final waitMs = details.retryAfterMs ?? error.retryAfterMsHint;
-      final waitText = waitMs == null ? '请稍后重试' : formatRetryAfterMs(waitMs);
-      return '配额或频率已用尽，$waitText。';
-    }
-    return details.message;
-  }
-  if (error.statusCode == 429) {
-    final waitMs = error.retryAfterMsHint;
-    final waitText = waitMs == null ? '请稍后重试' : formatRetryAfterMs(waitMs);
-    return '请求过于频繁，$waitText。';
-  }
-  if (error.statusCode == 404) {
-    return '未找到对应记录。';
-  }
-  return error.toString();
-}
-
 class JobRow {
   const JobRow({
     required this.numericTaskId,

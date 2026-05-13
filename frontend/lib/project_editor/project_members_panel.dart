@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
 
 /// Per-project editor / viewer ACL (`app_project_member`), managed by workspace
@@ -51,6 +52,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
   }
 
   Future<void> _reload() async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _loading = true;
       _error = null;
@@ -79,7 +81,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
         if (e.statusCode == 403) {
           _projectMembersForbidden = true;
         } else {
-          _error = formatRustApiException(e);
+          _error = formatRustApiExceptionForDisplay(l10n, e);
         }
       });
     } catch (e) {
@@ -108,6 +110,8 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
       return;
     }
 
+    final l10n = AppLocalizations.of(context)!;
+
     setState(() {
       _loadingWorkspaceMembers = true;
       _workspaceMembersError = null;
@@ -131,7 +135,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
         if (e.statusCode == 403) {
           _workspaceMembersForbidden = true;
         } else {
-          _workspaceMembersError = formatRustApiException(e);
+          _workspaceMembersError = formatRustApiExceptionForDisplay(l10n, e);
         }
       });
     } catch (e) {
@@ -173,7 +177,8 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
     final raw = _manualUserIdCtrl.text.trim();
     if (raw.isEmpty) return;
     if (!_looksLikeUuid(raw)) {
-      _showSnack('请输入有效的用户 UUID');
+      final l10n = AppLocalizations.of(context)!;
+      _showSnack(l10n.projectMembersSnackInvalidUuid);
       return;
     }
     await _createMember(raw, role: _newRole);
@@ -182,13 +187,15 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
   Future<void> _addWorkspaceCandidate() async {
     final userId = _selectedWorkspaceCandidateUserId;
     if (userId == null || userId.isEmpty) {
-      _showSnack('当前没有可直接添加的 workspace member');
+      final l10n = AppLocalizations.of(context)!;
+      _showSnack(l10n.projectMembersSnackNoCandidates);
       return;
     }
     await _createMember(userId, role: _newRole);
   }
 
   Future<void> _createMember(String userId, {required String role}) async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _adding = true;
     });
@@ -201,11 +208,11 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
       );
       if (!mounted) return;
       _manualUserIdCtrl.clear();
-      _showSnack('已添加项目成员');
+      _showSnack(l10n.projectMembersSnackMemberAdded);
       await _reload();
     } on RustApiException catch (e) {
       if (!mounted) return;
-      _showSnack(formatRustApiException(e));
+      _showSnack(formatRustApiExceptionForDisplay(l10n, e));
     } catch (e) {
       if (!mounted) return;
       _showSnack('$e');
@@ -221,6 +228,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
   Future<void> _saveRow(String userId) async {
     final role = _pendingRole[userId];
     if (role == null) return;
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _savingUsers.add(userId);
     });
@@ -232,11 +240,11 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
         role: role,
       );
       if (!mounted) return;
-      _showSnack('角色已更新');
+      _showSnack(l10n.projectMembersSnackRoleUpdated);
       await _reload();
     } on RustApiException catch (e) {
       if (!mounted) return;
-      _showSnack(formatRustApiException(e));
+      _showSnack(formatRustApiExceptionForDisplay(l10n, e));
     } catch (e) {
       if (!mounted) return;
       _showSnack('$e');
@@ -250,17 +258,18 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
   }
 
   Future<void> _remove(String userId) async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _removingUsers.add(userId);
     });
     try {
       await deleteProjectMemberV1(widget.accessToken, widget.projectId, userId);
       if (!mounted) return;
-      _showSnack('已移除显式 ACL');
+      _showSnack(l10n.projectMembersSnackAclRemoved);
       await _reload();
     } on RustApiException catch (e) {
       if (!mounted) return;
-      _showSnack(formatRustApiException(e));
+      _showSnack(formatRustApiExceptionForDisplay(l10n, e));
     } catch (e) {
       if (!mounted) return;
       _showSnack('$e');
@@ -275,7 +284,8 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
 
   void _copyUserId(String userId) {
     Clipboard.setData(ClipboardData(text: userId));
-    _showSnack('已复制用户 UUID');
+    final l10n = AppLocalizations.of(context)!;
+    _showSnack(l10n.projectMembersSnackUserIdCopied);
   }
 
   void _showSnack(String message) {
@@ -284,6 +294,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final assignableCandidates = _assignableWorkspaceCandidates;
     final selectedCandidateStillValid = assignableCandidates.any(
@@ -311,12 +322,12 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('项目成员 ACL', style: theme.textTheme.titleSmall),
+                    Text(l10n.projectMembersTitle, style: theme.textTheme.titleSmall),
                     const SizedBox(height: 4),
                     Text(
                       _aclEnabled
-                          ? '当前项目已启用显式 ACL：普通 member 只会按 viewer / editor 行生效；workspace owner/admin 仍有天然完全权限。'
-                          : '当前项目仍处于 workspace 继承模式：普通 member 默认沿用原有项目访问权限。只要新增第一条显式 ACL，项目就会切到 restricted 模式。',
+                          ? l10n.projectMembersAclEnabledIntro
+                          : l10n.projectMembersAclInheritedIntro,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -332,18 +343,18 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
                 children: [
                   _buildSummaryChip(
                     theme,
-                    label: '模式',
+                    label: l10n.projectMembersChipMode,
                     value: _aclEnabled ? 'restricted' : 'inherited',
                   ),
                   _buildSummaryChip(
                     theme,
-                    label: '显式成员',
+                    label: l10n.projectMembersChipExplicitMembers,
                     value: '${_projectRows.length}',
                   ),
                   if (widget.workspaceId != null)
                     _buildSummaryChip(
                       theme,
-                      label: '候选 workspace member',
+                      label: l10n.projectMembersChipCandidates,
                       value: _workspaceRows.isEmpty
                           ? (_loadingWorkspaceMembers ? '...' : '${assignableCandidates.length}')
                           : '${assignableCandidates.length}',
@@ -369,11 +380,11 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
               child: Center(child: CircularProgressIndicator()),
             )
           else if (_projectMembersForbidden)
-            _buildForbiddenNotice(theme)
+            _buildForbiddenNotice(theme, l10n)
           else ...[
-            _buildAddSection(theme, assignableCandidates),
+            _buildAddSection(theme, l10n, assignableCandidates),
             const SizedBox(height: 12),
-            _buildExplicitMembersSection(theme),
+            _buildExplicitMembersSection(theme, l10n),
           ],
           const SizedBox(height: 8),
           Align(
@@ -381,7 +392,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
             child: TextButton.icon(
               onPressed: _loading || _loadingWorkspaceMembers ? null : _reload,
               icon: const Icon(Icons.refresh, size: 18),
-              label: const Text('刷新'),
+              label: Text(l10n.projectMembersButtonRefresh),
             ),
           ),
         ],
@@ -389,7 +400,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
     );
   }
 
-  Widget _buildForbiddenNotice(ThemeData theme) {
+  Widget _buildForbiddenNotice(ThemeData theme, AppLocalizations l10n) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
@@ -401,10 +412,10 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('当前账号不能管理项目 ACL', style: theme.textTheme.titleSmall),
+          Text(l10n.projectMembersForbiddenTitle, style: theme.textTheme.titleSmall),
           const SizedBox(height: 4),
           Text(
-            '只有 workspace owner/admin 或项目 owner 可以查看和修改显式项目成员。若你只需要继续编辑其它内容，当前项目仍会按已有 workspace / project 权限正常工作。',
+            l10n.projectMembersForbiddenBody,
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -416,6 +427,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
 
   Widget _buildAddSection(
     ThemeData theme,
+    AppLocalizations l10n,
     List<WorkspaceMemberResponse> assignableCandidates,
   ) {
     return Container(
@@ -429,10 +441,10 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('添加显式成员', style: theme.textTheme.titleSmall),
+          Text(l10n.projectMembersAddSectionTitle, style: theme.textTheme.titleSmall),
           const SizedBox(height: 4),
           Text(
-            '优先从当前 workspace member 里挑选；如果你此刻拿不到 workspace 成员列表，也可以直接输入用户 UUID 做受控补录。',
+            l10n.projectMembersAddSectionIntro,
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -444,13 +456,13 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
                 child: DropdownButtonFormField<String>(
                   key: ValueKey<String>('newRole-$_newRole'),
                   initialValue: _newRole,
-                  decoration: const InputDecoration(
-                    labelText: '授予角色',
+                  decoration: InputDecoration(
+                    labelText: l10n.projectMembersFieldGrantRole,
                     isDense: true,
                   ),
-                  items: const [
-                    DropdownMenuItem(value: 'viewer', child: Text('viewer')),
-                    DropdownMenuItem(value: 'editor', child: Text('editor')),
+                  items: [
+                    DropdownMenuItem(value: 'viewer', child: Text(l10n.projectMembersRoleViewer)),
+                    DropdownMenuItem(value: 'editor', child: Text(l10n.projectMembersRoleEditor)),
                   ],
                   onChanged: (value) {
                     if (value != null) {
@@ -473,7 +485,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
                   child: CircularProgressIndicator(strokeWidth: 2),
                 ),
                 const SizedBox(width: 8),
-                Text('正在读取 workspace 成员...', style: theme.textTheme.bodySmall),
+                Text(l10n.projectMembersLoadingWorkspaceMembers, style: theme.textTheme.bodySmall),
               ],
             )
           else if (_workspaceMembersError != null)
@@ -485,14 +497,14 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
             )
           else if (_workspaceMembersForbidden)
             Text(
-              '当前账号没有读取 workspace 成员列表的权限；仍可直接输入用户 UUID 做显式 ACL 管理。',
+              l10n.projectMembersForbiddenWorkspaceMembers,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             )
           else if (widget.workspaceId == null || widget.workspaceId!.trim().isEmpty)
             Text(
-              '这个项目暂时没有可用的 workspace 上下文，先保留手动 UUID 入口。',
+              l10n.projectMembersNoWorkspaceContext,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -500,7 +512,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
           else ...[
             if (assignableCandidates.isEmpty)
               Text(
-                '当前没有可直接添加的普通 workspace member。owner/admin 已天然拥有项目访问权限，已有显式行的成员会在下方列出。',
+                l10n.projectMembersNoCandidates,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -515,8 +527,8 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
                       ),
                       initialValue: _selectedWorkspaceCandidateUserId,
                       isExpanded: true,
-                      decoration: const InputDecoration(
-                        labelText: '从 workspace member 里添加',
+                      decoration: InputDecoration(
+                        labelText: l10n.projectMembersFieldSelectFromWorkspace,
                         isDense: true,
                       ),
                       items: assignableCandidates
@@ -540,7 +552,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
                   FilledButton.tonalIcon(
                     onPressed: _adding ? null : _addWorkspaceCandidate,
                     icon: const Icon(Icons.person_add_alt_1_outlined),
-                    label: const Text('添加'),
+                    label: Text(l10n.projectMembersButtonAdd),
                   ),
                 ],
               ),
@@ -551,9 +563,9 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
               Expanded(
                 child: TextField(
                   controller: _manualUserIdCtrl,
-                  decoration: const InputDecoration(
-                    labelText: '手动输入用户 UUID',
-                    hintText: '00000000-0000-0000-0000-000000000000',
+                  decoration: InputDecoration(
+                    labelText: l10n.projectMembersFieldManualUserId,
+                    hintText: l10n.projectMembersFieldManualUserIdHint,
                     isDense: true,
                   ),
                 ),
@@ -561,7 +573,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
               const SizedBox(width: 8),
               FilledButton(
                 onPressed: _adding ? null : _addManual,
-                child: const Text('按 UUID 添加'),
+                child: Text(l10n.projectMembersButtonAddByUuid),
               ),
             ],
           ),
@@ -570,7 +582,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
     );
   }
 
-  Widget _buildExplicitMembersSection(ThemeData theme) {
+  Widget _buildExplicitMembersSection(ThemeData theme, AppLocalizations l10n) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
@@ -582,27 +594,27 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('显式 ACL 行', style: theme.textTheme.titleSmall),
+          Text(l10n.projectMembersExplicitSectionTitle, style: theme.textTheme.titleSmall),
           const SizedBox(height: 4),
           Text(
             _projectRows.isEmpty
-                ? '当前还没有显式项目成员。项目仍按 workspace 继承模式工作。'
-                : '这些行是当前项目真正启用的 viewer/editor 规则。移除最后一行后，项目会回到 inherited 模式。',
+                ? l10n.projectMembersExplicitEmptyIntro
+                : l10n.projectMembersExplicitNonEmptyIntro,
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 10),
           if (_projectRows.isEmpty)
-            Text('无显式 ACL 行', style: theme.textTheme.bodySmall)
+            Text(l10n.projectMembersExplicitEmptyState, style: theme.textTheme.bodySmall)
           else
-            ..._projectRows.map((row) => _buildExplicitMemberRow(theme, row)),
+            ..._projectRows.map((row) => _buildExplicitMemberRow(theme, l10n, row)),
         ],
       ),
     );
   }
 
-  Widget _buildExplicitMemberRow(ThemeData theme, ProjectMemberResponse row) {
+  Widget _buildExplicitMemberRow(ThemeData theme, AppLocalizations l10n, ProjectMemberResponse row) {
     final pendingRole = _pendingRole[row.userId] ?? row.role;
     final workspaceRole = _workspaceRows
         .where((candidate) => candidate.userId == row.userId)
@@ -634,7 +646,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
                   ),
                 ),
                 IconButton(
-                  tooltip: '复制用户 UUID',
+                  tooltip: l10n.projectMembersTooltipCopyUserId,
                   onPressed: () => _copyUserId(row.userId),
                   icon: const Icon(Icons.copy_all_outlined, size: 18),
                 ),
@@ -645,12 +657,12 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
               spacing: 8,
               runSpacing: 8,
               children: [
-                _buildTag(theme, '显式角色', row.role),
+                _buildTag(theme, l10n.projectMembersTagExplicitRole, row.role),
                 if (workspaceRole != null)
-                  _buildTag(theme, 'workspace 角色', workspaceRole),
+                  _buildTag(theme, l10n.projectMembersTagWorkspaceRole, workspaceRole),
                 _buildTag(
                   theme,
-                  '更新时间',
+                  l10n.projectMembersTagUpdatedAt,
                   _formatShortDateTime(row.updatedAt),
                 ),
               ],
@@ -662,13 +674,13 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
                   child: DropdownButtonFormField<String>(
                     key: ValueKey<String>('${row.userId}-$pendingRole'),
                     initialValue: pendingRole,
-                    decoration: const InputDecoration(
-                      labelText: '更新角色',
+                    decoration: InputDecoration(
+                      labelText: l10n.projectMembersFieldUpdateRole,
                       isDense: true,
                     ),
-                    items: const [
-                      DropdownMenuItem(value: 'viewer', child: Text('viewer')),
-                      DropdownMenuItem(value: 'editor', child: Text('editor')),
+                    items: [
+                      DropdownMenuItem(value: 'viewer', child: Text(l10n.projectMembersRoleViewer)),
+                      DropdownMenuItem(value: 'editor', child: Text(l10n.projectMembersRoleEditor)),
                     ],
                     onChanged: saving || removing
                         ? null
@@ -683,7 +695,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
                 ),
                 const SizedBox(width: 8),
                 IconButton(
-                  tooltip: '保存角色',
+                  tooltip: l10n.projectMembersTooltipSaveRole,
                   onPressed: saving || removing || pendingRole == row.role
                       ? null
                       : () => _saveRow(row.userId),
@@ -696,7 +708,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
                       : const Icon(Icons.save_outlined),
                 ),
                 IconButton(
-                  tooltip: '移除显式 ACL',
+                  tooltip: l10n.projectMembersTooltipRemoveAcl,
                   onPressed: saving || removing ? null : () => _remove(row.userId),
                   icon: removing
                       ? const SizedBox(

@@ -115,7 +115,7 @@ class _TaskCenterWorkbenchDialogState
     } on RustApiException catch (e) {
       if (!mounted) return;
       setState(() {
-        _statusLine = formatRustApiException(e);
+        _statusLine = formatRustApiExceptionForDisplay(l10n, e);
         _loadingProjects = false;
       });
     } catch (e) {
@@ -145,7 +145,7 @@ class _TaskCenterWorkbenchDialogState
     } on RustApiException catch (e) {
       if (!mounted) return;
       setState(() {
-        _statusLine = formatRustApiException(e);
+        _statusLine = formatRustApiExceptionForDisplay(l10n, e);
         _loadingCategories = false;
       });
     } catch (e) {
@@ -210,7 +210,7 @@ class _TaskCenterWorkbenchDialogState
     } on RustApiException catch (e) {
       if (!mounted) return;
       setState(() {
-        _statusLine = formatRustApiException(e);
+        _statusLine = formatRustApiExceptionForDisplay(l10n, e);
         _loadingTasks = false;
       });
     } catch (e) {
@@ -244,7 +244,7 @@ class _TaskCenterWorkbenchDialogState
     } on RustApiException catch (e) {
       if (!mounted) return;
       setState(() {
-        _statusLine = formatRustApiException(e);
+        _statusLine = formatRustApiExceptionForDisplay(l10n, e);
         _loadingNumericIdTaskDetail = false;
       });
     } catch (e) {
@@ -278,7 +278,7 @@ class _TaskCenterWorkbenchDialogState
     } on RustApiException catch (e) {
       if (!mounted) return;
       setState(() {
-        _statusLine = formatRustApiException(e);
+        _statusLine = formatRustApiExceptionForDisplay(l10n, e);
         _loadingUuidDetails = false;
       });
     } catch (e) {
@@ -309,7 +309,7 @@ class _TaskCenterWorkbenchDialogState
     } on RustApiException catch (e) {
       if (!mounted) return;
       setState(() {
-        _statusLine = formatRustApiException(e);
+        _statusLine = formatRustApiExceptionForDisplay(l10n, e);
         _retryingJobId = null;
       });
     } catch (e) {
@@ -340,7 +340,7 @@ class _TaskCenterWorkbenchDialogState
     } on RustApiException catch (e) {
       if (!mounted) return;
       setState(() {
-        _statusLine = formatRustApiException(e);
+        _statusLine = formatRustApiExceptionForDisplay(l10n, e);
         _cancellingJobId = null;
       });
     } catch (e) {

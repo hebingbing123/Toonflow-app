@@ -10374,11 +10374,8 @@ abstract class AppLocalizations {
   /// No description provided for @projectEditorProbeGeneralUpdateProjectSnack.
   ///
   /// In en, this message translates to:
-  /// **'compat updateProject (PATCH …/projects): {probeMsg} → restored ({restoreMsg})'**
-  String projectEditorProbeGeneralUpdateProjectSnack(
-    String probeMsg,
-    String restoreMsg,
-  );
+  /// **'compat updateProject (PATCH …/projects): intro probe + restore completed.'**
+  String get projectEditorProbeGeneralUpdateProjectSnack;
 
   /// No description provided for @projectEditorProbeGeneralPatchNameNoopSnack.
   ///
@@ -10401,8 +10398,8 @@ abstract class AppLocalizations {
   /// No description provided for @projectEditorProbeProjectEditNoopResult.
   ///
   /// In en, this message translates to:
-  /// **'POST …/project/edit-project noop #{numericId}: {message}'**
-  String projectEditorProbeProjectEditNoopResult(int numericId, String message);
+  /// **'POST …/project/edit-project noop #{numericId} completed.'**
+  String projectEditorProbeProjectEditNoopResult(int numericId);
 
   /// No description provided for @projectEditorProbeProjectButtonEditNoop.
   ///
@@ -11281,8 +11278,8 @@ abstract class AppLocalizations {
   /// No description provided for @projectEditorNovelsActionBatchDeleteOk.
   ///
   /// In en, this message translates to:
-  /// **'Batch deleted {count} chapters: {message}'**
-  String projectEditorNovelsActionBatchDeleteOk(int count, String message);
+  /// **'Batch deleted {count} chapters.'**
+  String projectEditorNovelsActionBatchDeleteOk(int count);
 
   /// No description provided for @projectEditorNovelsActionErrorAdmissionStatusEmpty.
   ///
@@ -11547,8 +11544,8 @@ abstract class AppLocalizations {
   /// No description provided for @projectEditorNovelsProbeMutationAddNovelEmptySnackbar.
   ///
   /// In en, this message translates to:
-  /// **'POST …/novels/add-novel (empty body): {detail}'**
-  String projectEditorNovelsProbeMutationAddNovelEmptySnackbar(String detail);
+  /// **'POST …/novels/add-novel (empty body): no-op.'**
+  String get projectEditorNovelsProbeMutationAddNovelEmptySnackbar;
 
   /// No description provided for @projectEditorNovelsProbeMutationBatchDeleteUnexpected200Snackbar.
   ///
@@ -11577,11 +11574,8 @@ abstract class AppLocalizations {
   /// No description provided for @projectEditorNovelsProbeMutationUpdateNovelNoopSnackbar.
   ///
   /// In en, this message translates to:
-  /// **'POST …/novels/update-novel noop #{id}: {detail}'**
-  String projectEditorNovelsProbeMutationUpdateNovelNoopSnackbar(
-    int id,
-    String detail,
-  );
+  /// **'POST …/novels/update-novel noop #{id} completed.'**
+  String projectEditorNovelsProbeMutationUpdateNovelNoopSnackbar(int id);
 
   /// No description provided for @projectEditorNovelsCompatibilitySectionTitle.
   ///
@@ -24955,6 +24949,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'9+'**
   String get shortVideoPublishCalendarDraftCountOverflow;
+
+  /// No description provided for @rustApiClientRetryAfterTryLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again in a moment'**
+  String get rustApiClientRetryAfterTryLater;
+
+  /// No description provided for @rustApiClientRetryAfterSeconds.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry in {seconds}s'**
+  String rustApiClientRetryAfterSeconds(int seconds);
+
+  /// No description provided for @rustApiClientRetryAfterMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry in {minutes} min'**
+  String rustApiClientRetryAfterMinutes(int minutes);
+
+  /// No description provided for @rustApiClientRetryAfterMinutesSeconds.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry in {minutes}m {seconds}s'**
+  String rustApiClientRetryAfterMinutesSeconds(int minutes, int seconds);
+
+  /// No description provided for @rustApiClientRetryAfterHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry in {hours}h'**
+  String rustApiClientRetryAfterHours(int hours);
+
+  /// No description provided for @rustApiClientRetryAfterHoursMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry in {hours}h {minutes}m'**
+  String rustApiClientRetryAfterHoursMinutes(int hours, int minutes);
+
+  /// No description provided for @rustApiClientConcurrentLimitExceeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many concurrent operations for this resource. Wait for an existing task to finish, then try again.'**
+  String get rustApiClientConcurrentLimitExceeded;
+
+  /// No description provided for @rustApiClientQuotaOrRateWithWait.
+  ///
+  /// In en, this message translates to:
+  /// **'Quota or rate limit reached. {wait}'**
+  String rustApiClientQuotaOrRateWithWait(String wait);
+
+  /// No description provided for @rustApiClientTooFrequentWithWait.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many requests. {wait}'**
+  String rustApiClientTooFrequentWithWait(String wait);
+
+  /// No description provided for @rustApiClientRecordNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Record not found.'**
+  String get rustApiClientRecordNotFound;
+
+  /// No description provided for @rustApiClientRequestCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Request was cancelled.'**
+  String get rustApiClientRequestCancelled;
+
+  /// No description provided for @rustApiClientUnknownError.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong: {detail}'**
+  String rustApiClientUnknownError(String detail);
+
+  /// No description provided for @rustApiClientSearchQueryTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Search text must be at least 2 characters.'**
+  String get rustApiClientSearchQueryTooShort;
+
+  /// No description provided for @rustApiClientSearchQueryTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Search text is too long (max 200 characters).'**
+  String get rustApiClientSearchQueryTooLong;
+
+  /// No description provided for @rustApiOutboundWebhookJobCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Job completed'**
+  String get rustApiOutboundWebhookJobCompleted;
+
+  /// No description provided for @rustApiOutboundWebhookJobFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Job failed'**
+  String get rustApiOutboundWebhookJobFailed;
+
+  /// No description provided for @rustApiOutboundWebhookProjectCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Project created'**
+  String get rustApiOutboundWebhookProjectCreated;
+
+  /// No description provided for @rustApiOutboundWebhookWorkspaceMemberAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace member added'**
+  String get rustApiOutboundWebhookWorkspaceMemberAdded;
 
   /// No description provided for @shortVideoPublishCopyEditorSectionTitle.
   ///

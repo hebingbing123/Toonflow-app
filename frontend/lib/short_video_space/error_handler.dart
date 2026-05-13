@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import '../l10n/rust_api_error_format.dart';
 import '../rust_api/core.dart';
 
 /// 错误严重程度
@@ -96,7 +97,7 @@ class ShortVideoErrorHandler {
     // 429 频率限制
     if (statusCode == 429 || details?.code == 'quota_exceeded') {
       final waitMs = details?.retryAfterMs ?? error.retryAfterMsHint ?? 5000;
-      final waitText = formatRetryAfterMs(waitMs);
+      final waitText = formatRetryAfterMsForDisplay(l10n, waitMs);
       return ErrorHandlingResult(
         shouldRetry: true,
         userMessage: l10n.shortVideoSpaceErrorRateLimitWithWait(contextStr, waitText),
@@ -125,7 +126,10 @@ class ShortVideoErrorHandler {
 
     // 400 请求参数错误
     if (statusCode == 400) {
-      final message = details?.message ?? l10n.shortVideoSpaceErrorBadRequest;
+      final message = details?.message ??
+          (error.message.trim().isNotEmpty
+              ? error.message
+              : l10n.shortVideoSpaceErrorBadRequest);
       return ErrorHandlingResult(
         shouldRetry: false,
         userMessage: l10n.shortVideoSpaceErrorBadRequestWithContext(message, contextStr),
@@ -155,7 +159,7 @@ class ShortVideoErrorHandler {
     // 默认错误处理
     return ErrorHandlingResult(
       shouldRetry: false,
-      userMessage: l10n.shortVideoSpaceErrorDefaultMessage(contextStr, formatRustApiException(error)),
+      userMessage: l10n.shortVideoSpaceErrorDefaultMessage(contextStr, formatRustApiExceptionForDisplay(l10n, error)),
       severity: ErrorSeverity.error,
     );
   }

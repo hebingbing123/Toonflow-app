@@ -163,15 +163,15 @@ Future<NovelWorkbenchPagedResponse> fetchNovelWorkbenchPaged(
   return NovelWorkbenchPagedResponse(data: data, total: res.total);
 }
 
-/// Compat: batch add — sequential **`POST …/novels`** (empty **`data`** → success message, no HTTP).
-Future<String> appendNovelsUnderProject(
+/// Compat: batch add — sequential **`POST …/novels`** (empty **`data`** → no-op, no HTTP).
+Future<void> appendNovelsUnderProject(
   String accessToken,
   List<NovelWorkbenchAppendItem> data, {
   int? projectNumericId,
   String? projectUuid,
 }) async {
   if (data.isEmpty) {
-    return '新增原文成功';
+    return;
   }
   final projectId = await resolveNovelProjectUuid(
     accessToken,
@@ -188,10 +188,9 @@ Future<String> appendNovelsUnderProject(
       chapterData: item.chapterData,
     );
   }
-  return '新增原文成功';
 }
 
-Future<String> _deleteNovelByNumericIdScanningProjects(
+Future<void> _deleteNovelByNumericIdScanningProjects(
   String accessToken,
   int novelNumericId, {
   String? projectUuid,
@@ -207,13 +206,13 @@ Future<String> _deleteNovelByNumericIdScanningProjects(
       explicitProjectUuid,
       novelNumericId,
     );
-    return '删除原文成功';
+    return;
   }
   final projects = await project_api.fetchAllProjectsPaged(accessToken);
   for (final p in projects) {
     try {
       await deleteProjectNovelByProjectIds(accessToken, p.id, novelNumericId);
-      return '删除原文成功';
+      return;
     } on RustApiException catch (e) {
       if (e.statusCode == 404) {
         continue;
@@ -225,13 +224,13 @@ Future<String> _deleteNovelByNumericIdScanningProjects(
 }
 
 /// Compat: delete by **`app_novel`** numeric id (scans owned projects).
-Future<String> deleteNovelByNumericIdScanningProjects(
+Future<void> deleteNovelByNumericIdScanningProjects(
   String accessToken,
   int novelNumericId, {
   String? projectUuid,
 }
 ) async {
-  return _deleteNovelByNumericIdScanningProjects(
+  await _deleteNovelByNumericIdScanningProjects(
     accessToken,
     novelNumericId,
     projectUuid: projectUuid,
@@ -239,7 +238,7 @@ Future<String> deleteNovelByNumericIdScanningProjects(
 }
 
 /// UUID-first delete helper for callers that already hold **`app_project.id`**.
-Future<String> deleteNovelByProjectUuid(
+Future<void> deleteNovelByProjectUuid(
   String accessToken,
   String projectUuid,
   int novelNumericId,
@@ -248,14 +247,14 @@ Future<String> deleteNovelByProjectUuid(
   if (explicitProjectUuid.isEmpty) {
     throw ArgumentError('projectUuid is required');
   }
-  return _deleteNovelByNumericIdScanningProjects(
+  await _deleteNovelByNumericIdScanningProjects(
     accessToken,
     novelNumericId,
     projectUuid: explicitProjectUuid,
   );
 }
 
-Future<String> _patchNovelByNumericIdScanningProjects(
+Future<void> _patchNovelByNumericIdScanningProjects(
   String accessToken, {
   required int id,
   String? projectUuid,
@@ -287,7 +286,7 @@ Future<String> _patchNovelByNumericIdScanningProjects(
   final explicitProjectUuid = projectUuid?.trim();
   if (explicitProjectUuid != null && explicitProjectUuid.isNotEmpty) {
     await patchProjectNovelByProjectIds(accessToken, explicitProjectUuid, id, body);
-    return '更新原文成功';
+    return;
   }
   for (final p in projects) {
     try {
@@ -299,13 +298,13 @@ Future<String> _patchNovelByNumericIdScanningProjects(
       rethrow;
     }
     await patchProjectNovelByProjectIds(accessToken, p.id, id, body);
-    return '更新原文成功';
+    return;
   }
   throw RustApiException('not found', statusCode: 404);
 }
 
 /// Compat: update by numeric id (**`index`** may be int or numeric string).
-Future<String> updateNovelScanningProjects(
+Future<void> updateNovelScanningProjects(
   String accessToken, {
   required int id,
   String? projectUuid,
@@ -315,7 +314,7 @@ Future<String> updateNovelScanningProjects(
   required String chapterData,
   required String event,
 }) async {
-  return _patchNovelByNumericIdScanningProjects(
+  await _patchNovelByNumericIdScanningProjects(
     accessToken,
     id: id,
     projectUuid: projectUuid,
@@ -328,7 +327,7 @@ Future<String> updateNovelScanningProjects(
 }
 
 /// UUID-first update helper for callers that already hold **`app_project.id`**.
-Future<String> updateNovelByProjectUuid(
+Future<void> updateNovelByProjectUuid(
   String accessToken, {
   required String projectUuid,
   required int id,
@@ -342,7 +341,7 @@ Future<String> updateNovelByProjectUuid(
   if (explicitProjectUuid.isEmpty) {
     throw ArgumentError('projectUuid is required');
   }
-  return _patchNovelByNumericIdScanningProjects(
+  await _patchNovelByNumericIdScanningProjects(
     accessToken,
     id: id,
     projectUuid: explicitProjectUuid,
@@ -355,13 +354,13 @@ Future<String> updateNovelByProjectUuid(
 }
 
 /// Compat: batch delete — **`DELETE …/novels/{numeric_id}`** per id under **`projectUuid`**.
-Future<String> batchDeleteNovelsUnderProject(
+Future<void> batchDeleteNovelsUnderProject(
   String accessToken,
   String projectUuid,
   List<int> numericIds,
 ) async {
   if (numericIds.isEmpty) {
-    throw RustApiException('请先选择需要删除的内容', statusCode: 400);
+    throw RustApiException('batch_delete_ids_empty', statusCode: 400);
   }
   if (numericIds.length > 500) {
     throw RustApiException('too many ids', statusCode: 400);
@@ -380,5 +379,4 @@ Future<String> batchDeleteNovelsUnderProject(
   if (!any) {
     throw RustApiException('not found', statusCode: 404);
   }
-  return '删除原文成功';
 }

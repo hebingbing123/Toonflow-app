@@ -57,7 +57,7 @@ extension _HomePageProjectEditorHttpProjectProbe on _HomePageState {
                 setDialogState(() => projectProbeBusy[0] = true);
                 final pr = detail.project;
                 try {
-                  final msg = await postProjectEditProject(
+                  await postProjectEditProject(
                     token,
                     id: pr.numericId,
                     projectUuid: pr.id,
@@ -77,10 +77,7 @@ extension _HomePageProjectEditorHttpProjectProbe on _HomePageState {
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        l10n.projectEditorProbeProjectEditNoopResult(
-                          pr.numericId,
-                          msg,
-                        ),
+                        l10n.projectEditorProbeProjectEditNoopResult(pr.numericId),
                       ),
                     ),
                   );

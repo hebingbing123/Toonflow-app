@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../l10n/app_localizations.dart';
+import '../l10n/rust_api_error_format.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api/search/api.dart';
 import '../rust_api/search/saved_views.dart';
@@ -75,6 +76,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
   // Filters
   SearchFilters _filters = SearchFilters.empty();
   bool _showFilterPanel = false;
+  bool _didScheduleInitialSearch = false;
 
   // Keyboard navigation state
   int _selectedResultIndex = -1; // -1 means no selection
@@ -115,12 +117,26 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
       // First frame shows loading skeleton (avoid a flash of empty-state before setState).
       _isLoading = true;
     }
-    _performSearch();
     // Request focus for keyboard navigation
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
     });
     unawaited(_pullRemoteSavedViewsIntoPrefs());
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_didScheduleInitialSearch) {
+      return;
+    }
+    _didScheduleInitialSearch = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      unawaited(_performSearch());
+    });
   }
 
   @override
@@ -154,6 +170,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
     try {
       final response = await search(
         token,
+        l10n: l10n,
         query: widget.query,
         resultTypes: _filters.resultTypes.isEmpty
             ? null
@@ -176,7 +193,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
       if (!mounted) return;
 
       setState(() {
-        _error = e.message;
+        _error = formatRustApiExceptionForDisplay(l10n, e);
         _isLoading = false;
       });
     } catch (e) {

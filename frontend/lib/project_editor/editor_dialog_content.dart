@@ -155,7 +155,7 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
                   } on RustApiException catch (e) {
                     if (!ctx.mounted) return;
                     ScaffoldMessenger.of(ctx).showSnackBar(
-                      SnackBar(content: Text(formatRustApiException(e))),
+                      SnackBar(content: Text(formatRustApiExceptionForDisplay(l10n, e))),
                     );
                   } catch (e) {
                     if (!ctx.mounted) return;

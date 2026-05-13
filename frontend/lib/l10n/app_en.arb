@@ -4576,17 +4576,7 @@
       }
     }
   },
-  "projectEditorProbeGeneralUpdateProjectSnack": "compat updateProject (PATCH …/projects): {probeMsg} → restored ({restoreMsg})",
-  "@projectEditorProbeGeneralUpdateProjectSnack": {
-    "placeholders": {
-      "probeMsg": {
-        "type": "String"
-      },
-      "restoreMsg": {
-        "type": "String"
-      }
-    }
-  },
+  "projectEditorProbeGeneralUpdateProjectSnack": "compat updateProject (PATCH …/projects): intro probe + restore completed.",
   "projectEditorProbeGeneralPatchNameNoopSnack": "PATCH …/projects name noop → {name}",
   "@projectEditorProbeGeneralPatchNameNoopSnack": {
     "placeholders": {
@@ -4597,14 +4587,11 @@
   },
   "projectEditorProbeProjectBusyLabel": "project…",
   "projectEditorProbeProjectButtonGetProject": "POST project get-project",
-  "projectEditorProbeProjectEditNoopResult": "POST …/project/edit-project noop #{numericId}: {message}",
+  "projectEditorProbeProjectEditNoopResult": "POST …/project/edit-project noop #{numericId} completed.",
   "@projectEditorProbeProjectEditNoopResult": {
     "placeholders": {
       "numericId": {
         "type": "int"
-      },
-      "message": {
-        "type": "String"
       }
     }
   },
@@ -5291,14 +5278,11 @@
       }
     }
   },
-  "projectEditorNovelsActionBatchDeleteOk": "Batch deleted {count} chapters: {message}",
+  "projectEditorNovelsActionBatchDeleteOk": "Batch deleted {count} chapters.",
   "@projectEditorNovelsActionBatchDeleteOk": {
     "placeholders": {
       "count": {
         "type": "int"
-      },
-      "message": {
-        "type": "String"
       }
     }
   },
@@ -5422,26 +5406,16 @@
       }
     }
   },
-  "projectEditorNovelsProbeMutationAddNovelEmptySnackbar": "POST …/novels/add-novel (empty body): {detail}",
-  "@projectEditorNovelsProbeMutationAddNovelEmptySnackbar": {
-    "placeholders": {
-      "detail": {
-        "type": "String"
-      }
-    }
-  },
+  "projectEditorNovelsProbeMutationAddNovelEmptySnackbar": "POST …/novels/add-novel (empty body): no-op.",
   "projectEditorNovelsProbeMutationBatchDeleteUnexpected200Snackbar": "POST …/novels/batch-delete: unexpected 200 OK",
   "projectEditorNovelsProbeMutationBatchDeleteExpected400Snackbar": "POST …/novels/batch-delete [] → 400 (expected)",
   "projectEditorNovelsProbeMutationDeleteNovelUnexpected200Snackbar": "POST …/novels/delete-novel: unexpected 200 OK",
   "projectEditorNovelsProbeMutationDeleteNovelExpected400Snackbar": "POST …/novels/delete-novel id=0 → 400 (expected)",
-  "projectEditorNovelsProbeMutationUpdateNovelNoopSnackbar": "POST …/novels/update-novel noop #{id}: {detail}",
+  "projectEditorNovelsProbeMutationUpdateNovelNoopSnackbar": "POST …/novels/update-novel noop #{id} completed.",
   "@projectEditorNovelsProbeMutationUpdateNovelNoopSnackbar": {
     "placeholders": {
       "id": {
         "type": "int"
-      },
-      "detail": {
-        "type": "String"
       }
     }
   },
@@ -12459,6 +12433,86 @@
   "shortVideoPublishCalendarNextMonth": "Next month",
   "shortVideoPublishCalendarDraftCountEmpty": "—",
   "shortVideoPublishCalendarDraftCountOverflow": "9+",
+  "rustApiClientRetryAfterTryLater": "Try again in a moment",
+  "rustApiClientRetryAfterSeconds": "Retry in {seconds}s",
+  "@rustApiClientRetryAfterSeconds": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "rustApiClientRetryAfterMinutes": "Retry in {minutes} min",
+  "@rustApiClientRetryAfterMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "rustApiClientRetryAfterMinutesSeconds": "Retry in {minutes}m {seconds}s",
+  "@rustApiClientRetryAfterMinutesSeconds": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      },
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "rustApiClientRetryAfterHours": "Retry in {hours}h",
+  "@rustApiClientRetryAfterHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "rustApiClientRetryAfterHoursMinutes": "Retry in {hours}h {minutes}m",
+  "@rustApiClientRetryAfterHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "rustApiClientConcurrentLimitExceeded": "Too many concurrent operations for this resource. Wait for an existing task to finish, then try again.",
+  "rustApiClientQuotaOrRateWithWait": "Quota or rate limit reached. {wait}",
+  "@rustApiClientQuotaOrRateWithWait": {
+    "placeholders": {
+      "wait": {
+        "type": "String"
+      }
+    }
+  },
+  "rustApiClientTooFrequentWithWait": "Too many requests. {wait}",
+  "@rustApiClientTooFrequentWithWait": {
+    "placeholders": {
+      "wait": {
+        "type": "String"
+      }
+    }
+  },
+  "rustApiClientRecordNotFound": "Record not found.",
+  "rustApiClientRequestCancelled": "Request was cancelled.",
+  "rustApiClientUnknownError": "Something went wrong: {detail}",
+  "@rustApiClientUnknownError": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "rustApiClientSearchQueryTooShort": "Search text must be at least 2 characters.",
+  "rustApiClientSearchQueryTooLong": "Search text is too long (max 200 characters).",
+  "rustApiOutboundWebhookJobCompleted": "Job completed",
+  "rustApiOutboundWebhookJobFailed": "Job failed",
+  "rustApiOutboundWebhookProjectCreated": "Project created",
+  "rustApiOutboundWebhookWorkspaceMemberAdded": "Workspace member added",
   "shortVideoPublishCopyEditorSectionTitle": "Per-platform differentiated copy",
   "shortVideoPublishCopyFieldTitle": "Title",
   "shortVideoPublishCopyFieldDescription": "Description",

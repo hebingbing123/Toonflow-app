@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../../l10n/app_localizations.dart';
 import '../../config.dart';
 import '../core.dart';
 
@@ -199,6 +200,7 @@ class HistoryResponse {
 /// Throws [RustApiException] on error (400/403/500).
 Future<SearchResponse> search(
   String accessToken, {
+  required AppLocalizations l10n,
   required String query,
   List<ResultType>? resultTypes,
   int? page,
@@ -211,13 +213,13 @@ Future<SearchResponse> search(
   final trimmedQuery = query.trim();
   if (trimmedQuery.isEmpty || trimmedQuery.length < 2) {
     throw RustApiException(
-      '搜索关键词不能为空且至少需要2个字符',
+      l10n.rustApiClientSearchQueryTooShort,
       statusCode: 400,
     );
   }
   if (trimmedQuery.length > 200) {
     throw RustApiException(
-      '搜索关键词过长，请限制在200字符以内',
+      l10n.rustApiClientSearchQueryTooLong,
       statusCode: 400,
     );
   }
@@ -323,7 +325,7 @@ class CancellationToken {
   /// Execute a future with cancellation support
   Future<T> executeWithCancellation<T>(Future<T> Function() operation) async {
     if (_isCancelled) {
-      throw RustApiException('请求已取消', statusCode: 499);
+      throw RustApiException('Request was cancelled', statusCode: 499);
     }
 
     final operationFuture = operation();
@@ -335,7 +337,7 @@ class CancellationToken {
     ]);
 
     if (result.isCancelled) {
-      throw RustApiException('请求已取消', statusCode: 499);
+      throw RustApiException('Request was cancelled', statusCode: 499);
     }
 
     return result.value!;

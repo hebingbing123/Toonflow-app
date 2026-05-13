@@ -6337,12 +6337,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String projectEditorProbeGeneralUpdateProjectSnack(
-    String probeMsg,
-    String restoreMsg,
-  ) {
-    return 'compat updateProject (PATCH …/projects): $probeMsg → restored ($restoreMsg)';
-  }
+  String get projectEditorProbeGeneralUpdateProjectSnack =>
+      'compat updateProject (PATCH …/projects): intro probe + restore completed.';
 
   @override
   String projectEditorProbeGeneralPatchNameNoopSnack(String name) {
@@ -6357,11 +6353,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'POST project get-project';
 
   @override
-  String projectEditorProbeProjectEditNoopResult(
-    int numericId,
-    String message,
-  ) {
-    return 'POST …/project/edit-project noop #$numericId: $message';
+  String projectEditorProbeProjectEditNoopResult(int numericId) {
+    return 'POST …/project/edit-project noop #$numericId completed.';
   }
 
   @override
@@ -7010,8 +7003,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String projectEditorNovelsActionBatchDeleteOk(int count, String message) {
-    return 'Batch deleted $count chapters: $message';
+  String projectEditorNovelsActionBatchDeleteOk(int count) {
+    return 'Batch deleted $count chapters.';
   }
 
   @override
@@ -7194,9 +7187,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String projectEditorNovelsProbeMutationAddNovelEmptySnackbar(String detail) {
-    return 'POST …/novels/add-novel (empty body): $detail';
-  }
+  String get projectEditorNovelsProbeMutationAddNovelEmptySnackbar =>
+      'POST …/novels/add-novel (empty body): no-op.';
 
   @override
   String get projectEditorNovelsProbeMutationBatchDeleteUnexpected200Snackbar =>
@@ -7215,11 +7207,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'POST …/novels/delete-novel id=0 → 400 (expected)';
 
   @override
-  String projectEditorNovelsProbeMutationUpdateNovelNoopSnackbar(
-    int id,
-    String detail,
-  ) {
-    return 'POST …/novels/update-novel noop #$id: $detail';
+  String projectEditorNovelsProbeMutationUpdateNovelNoopSnackbar(int id) {
+    return 'POST …/novels/update-novel noop #$id completed.';
   }
 
   @override
@@ -16269,6 +16258,80 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shortVideoPublishCalendarDraftCountOverflow => '9+';
+
+  @override
+  String get rustApiClientRetryAfterTryLater => 'Try again in a moment';
+
+  @override
+  String rustApiClientRetryAfterSeconds(int seconds) {
+    return 'Retry in ${seconds}s';
+  }
+
+  @override
+  String rustApiClientRetryAfterMinutes(int minutes) {
+    return 'Retry in $minutes min';
+  }
+
+  @override
+  String rustApiClientRetryAfterMinutesSeconds(int minutes, int seconds) {
+    return 'Retry in ${minutes}m ${seconds}s';
+  }
+
+  @override
+  String rustApiClientRetryAfterHours(int hours) {
+    return 'Retry in ${hours}h';
+  }
+
+  @override
+  String rustApiClientRetryAfterHoursMinutes(int hours, int minutes) {
+    return 'Retry in ${hours}h ${minutes}m';
+  }
+
+  @override
+  String get rustApiClientConcurrentLimitExceeded =>
+      'Too many concurrent operations for this resource. Wait for an existing task to finish, then try again.';
+
+  @override
+  String rustApiClientQuotaOrRateWithWait(String wait) {
+    return 'Quota or rate limit reached. $wait';
+  }
+
+  @override
+  String rustApiClientTooFrequentWithWait(String wait) {
+    return 'Too many requests. $wait';
+  }
+
+  @override
+  String get rustApiClientRecordNotFound => 'Record not found.';
+
+  @override
+  String get rustApiClientRequestCancelled => 'Request was cancelled.';
+
+  @override
+  String rustApiClientUnknownError(String detail) {
+    return 'Something went wrong: $detail';
+  }
+
+  @override
+  String get rustApiClientSearchQueryTooShort =>
+      'Search text must be at least 2 characters.';
+
+  @override
+  String get rustApiClientSearchQueryTooLong =>
+      'Search text is too long (max 200 characters).';
+
+  @override
+  String get rustApiOutboundWebhookJobCompleted => 'Job completed';
+
+  @override
+  String get rustApiOutboundWebhookJobFailed => 'Job failed';
+
+  @override
+  String get rustApiOutboundWebhookProjectCreated => 'Project created';
+
+  @override
+  String get rustApiOutboundWebhookWorkspaceMemberAdded =>
+      'Workspace member added';
 
   @override
   String get shortVideoPublishCopyEditorSectionTitle =>

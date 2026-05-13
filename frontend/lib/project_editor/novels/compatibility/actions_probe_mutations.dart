@@ -51,7 +51,7 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
                 final l10n = AppLocalizations.of(ctx)!;
                 setDialogState(() => novelsBusy[0] = true);
                 try {
-                  final msg = await appendNovelsUnderProject(
+                  await appendNovelsUnderProject(
                     token,
                     const [],
                     projectUuid: p.id,
@@ -59,7 +59,7 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
                   if (!ctx.mounted) return;
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
-                      content: Text(l10n.projectEditorNovelsProbeMutationAddNovelEmptySnackbar(msg)),
+                      content: Text(l10n.projectEditorNovelsProbeMutationAddNovelEmptySnackbar),
                     ),
                   );
                 } on RustApiException catch (e) {
@@ -158,7 +158,7 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
                 setDialogState(() => novelsBusy[0] = true);
                 final n = novelsRef[0]!.items.first;
                 try {
-                  final msg = await updateNovelByProjectUuid(
+                  await updateNovelByProjectUuid(
                     token,
                     projectUuid: p.id,
                     id: n.numericId,
@@ -172,7 +172,7 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        l10n.projectEditorNovelsProbeMutationUpdateNovelNoopSnackbar(n.numericId, msg),
+                        l10n.projectEditorNovelsProbeMutationUpdateNovelNoopSnackbar(n.numericId),
                       ),
                     ),
                   );

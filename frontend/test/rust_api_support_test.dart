@@ -1,4 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
+import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/rust_api.dart';
 
 void main() {
@@ -19,6 +21,7 @@ void main() {
 
   test('agent memory cost overview parses counts and timestamps', () {
     final overview = AgentMemoryCostOverview.fromJson(<String, dynamic>{
+      'scope': 'user',
       'projectId': 7,
       'styleBibleCount': 1,
       'stageSummaryCount': 2,
@@ -29,6 +32,7 @@ void main() {
       'lastInjectedAt': '2026-05-01T10:00:00.000Z',
     });
 
+    expect(overview.scope, 'user');
     expect(overview.projectId, 7);
     expect(overview.styleBibleCount, 1);
     expect(overview.stageSummaryCount, 2);
@@ -56,7 +60,9 @@ void main() {
   });
 
   test('429 formatter includes human wait time from retryAfterMs', () {
-    final message = formatRustApiException(
+    final l10nZh = lookupAppLocalizations(const Locale('zh'));
+    final message = formatRustApiExceptionForDisplay(
+      l10nZh,
       RustApiException(
         '{"code":"quota_exceeded","message":"limit reached","retry_after_ms":61000}',
         statusCode: 429,
@@ -64,6 +70,22 @@ void main() {
     );
 
     expect(message, '配额或频率已用尽，1 分 1 秒后重试。');
-    expect(formatRetryAfterMs(0), '稍后重试');
+    expect(formatRetryAfterMsForDisplay(l10nZh, 0), '请稍后重试');
+  });
+
+  test('concurrent_limit_exceeded uses dedicated message not quota retry text', () {
+    final l10nZh = lookupAppLocalizations(const Locale('zh'));
+    final message = formatRustApiExceptionForDisplay(
+      l10nZh,
+      RustApiException(
+        '{"code":"concurrent_limit_exceeded","message":"too many in flight"}',
+        statusCode: 429,
+      ),
+    );
+
+    expect(
+      message,
+      '同时进行的工作区审计导出已达上限，请等待已有任务完成或结束后再试。',
+    );
   });
 }

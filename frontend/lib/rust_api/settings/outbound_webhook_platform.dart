@@ -1,3 +1,5 @@
+import '../../l10n/app_localizations.dart';
+
 /// Slugs aligned with backend `OUTBOUND_WEBHOOK_PLATFORM_EVENT_TYPES`.
 const List<String> kOutboundWebhookPlatformEventTypes = <String>[
   'job.completed',
@@ -7,16 +9,16 @@ const List<String> kOutboundWebhookPlatformEventTypes = <String>[
 ];
 
 /// UI label for [kOutboundWebhookPlatformEventTypes] entries.
-String outboundWebhookPlatformEventLabel(String slug) {
+String outboundWebhookPlatformEventLabel(AppLocalizations l10n, String slug) {
   switch (slug) {
     case 'job.completed':
-      return 'Job 完成';
+      return l10n.rustApiOutboundWebhookJobCompleted;
     case 'job.failed':
-      return 'Job 失败';
+      return l10n.rustApiOutboundWebhookJobFailed;
     case 'project.created':
-      return '项目创建';
+      return l10n.rustApiOutboundWebhookProjectCreated;
     case 'workspace.member.added':
-      return '工作区成员加入';
+      return l10n.rustApiOutboundWebhookWorkspaceMemberAdded;
     default:
       return slug;
   }

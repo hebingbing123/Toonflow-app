@@ -133,11 +133,12 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
       return;
     }
     if (!mounted) return;
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _loadingSuggestions = true;
     });
     try {
-      final response = await search(token, query: q, pageSize: 8, page: 1);
+      final response = await search(token, l10n: l10n, query: q, pageSize: 8, page: 1);
       if (!mounted) return;
       setState(() {
         _suggestions = response.results;

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../rust_api/settings/outbound_webhook_platform.dart';
 
 /// Multi-select chips for platform outbound webhook event types.
@@ -30,13 +31,14 @@ class OutboundWebhookEventChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Wrap(
       spacing: 6,
       runSpacing: 6,
       children: [
         for (final slug in kOutboundWebhookPlatformEventTypes)
           FilterChip(
-            label: Text(outboundWebhookPlatformEventLabel(slug)),
+            label: Text(outboundWebhookPlatformEventLabel(l10n, slug)),
             selected: selected.contains(slug),
             onSelected: enabled
                 ? (v) {

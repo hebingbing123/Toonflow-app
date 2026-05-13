@@ -6087,12 +6087,8 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String projectEditorProbeGeneralUpdateProjectSnack(
-    String probeMsg,
-    String restoreMsg,
-  ) {
-    return 'compat updateProject（PATCH projects）：$probeMsg → 已还原（$restoreMsg）';
-  }
+  String get projectEditorProbeGeneralUpdateProjectSnack =>
+      'compat updateProject（PATCH projects）：intro 探针 + 还原已完成。';
 
   @override
   String projectEditorProbeGeneralPatchNameNoopSnack(String name) {
@@ -6107,11 +6103,8 @@ class AppLocalizationsZh extends AppLocalizations {
       'POST project get-project';
 
   @override
-  String projectEditorProbeProjectEditNoopResult(
-    int numericId,
-    String message,
-  ) {
-    return 'POST …/project/edit-project noop #$numericId：$message';
+  String projectEditorProbeProjectEditNoopResult(int numericId) {
+    return 'POST …/project/edit-project noop #$numericId 已完成。';
   }
 
   @override
@@ -6737,8 +6730,8 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String projectEditorNovelsActionBatchDeleteOk(int count, String message) {
-    return '已批量删除 $count 条章节：$message';
+  String projectEditorNovelsActionBatchDeleteOk(int count) {
+    return '已批量删除 $count 条章节。';
   }
 
   @override
@@ -6907,9 +6900,8 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String projectEditorNovelsProbeMutationAddNovelEmptySnackbar(String detail) {
-    return 'POST …/novels/add-novel 空 data：$detail';
-  }
+  String get projectEditorNovelsProbeMutationAddNovelEmptySnackbar =>
+      'POST …/novels/add-novel 空 data：无操作。';
 
   @override
   String get projectEditorNovelsProbeMutationBatchDeleteUnexpected200Snackbar =>
@@ -6928,11 +6920,8 @@ class AppLocalizationsZh extends AppLocalizations {
       'POST …/novels/delete-novel id=0 → 400（预期）';
 
   @override
-  String projectEditorNovelsProbeMutationUpdateNovelNoopSnackbar(
-    int id,
-    String detail,
-  ) {
-    return 'POST …/novels/update-novel 空改 #$id：$detail';
+  String projectEditorNovelsProbeMutationUpdateNovelNoopSnackbar(int id) {
+    return 'POST …/novels/update-novel 空改 #$id 已完成。';
   }
 
   @override
@@ -15485,6 +15474,77 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get shortVideoPublishCalendarDraftCountOverflow => '9+';
+
+  @override
+  String get rustApiClientRetryAfterTryLater => '请稍后重试';
+
+  @override
+  String rustApiClientRetryAfterSeconds(int seconds) {
+    return '$seconds 秒后重试';
+  }
+
+  @override
+  String rustApiClientRetryAfterMinutes(int minutes) {
+    return '$minutes 分钟后重试';
+  }
+
+  @override
+  String rustApiClientRetryAfterMinutesSeconds(int minutes, int seconds) {
+    return '$minutes 分 $seconds 秒后重试';
+  }
+
+  @override
+  String rustApiClientRetryAfterHours(int hours) {
+    return '$hours 小时后重试';
+  }
+
+  @override
+  String rustApiClientRetryAfterHoursMinutes(int hours, int minutes) {
+    return '$hours 小时 $minutes 分钟后重试';
+  }
+
+  @override
+  String get rustApiClientConcurrentLimitExceeded =>
+      '同时进行的工作区审计导出已达上限，请等待已有任务完成或结束后再试。';
+
+  @override
+  String rustApiClientQuotaOrRateWithWait(String wait) {
+    return '配额或频率已用尽，$wait。';
+  }
+
+  @override
+  String rustApiClientTooFrequentWithWait(String wait) {
+    return '请求过于频繁，$wait。';
+  }
+
+  @override
+  String get rustApiClientRecordNotFound => '未找到对应记录。';
+
+  @override
+  String get rustApiClientRequestCancelled => '请求已取消。';
+
+  @override
+  String rustApiClientUnknownError(String detail) {
+    return '出现问题：$detail';
+  }
+
+  @override
+  String get rustApiClientSearchQueryTooShort => '搜索关键词不能为空且至少需要 2 个字符。';
+
+  @override
+  String get rustApiClientSearchQueryTooLong => '搜索关键词过长，请限制在 200 字符以内。';
+
+  @override
+  String get rustApiOutboundWebhookJobCompleted => '作业完成';
+
+  @override
+  String get rustApiOutboundWebhookJobFailed => '作业失败';
+
+  @override
+  String get rustApiOutboundWebhookProjectCreated => '项目创建';
+
+  @override
+  String get rustApiOutboundWebhookWorkspaceMemberAdded => '工作区成员加入';
 
   @override
   String get shortVideoPublishCopyEditorSectionTitle => '差异化文案（按平台）';

@@ -69,7 +69,7 @@ extension _HomePageProjectEditorHttpGeneralProbe on _HomePageState {
                   final probeIntro = origIntro.isEmpty
                       ? '[flutter general probe]'
                       : '$origIntro [flutter general probe]';
-                  final msg1 = await postGeneralUpdateProject(
+                  await postGeneralUpdateProject(
                     token,
                     <String, dynamic>{
                       'id': p.numericId,
@@ -82,7 +82,7 @@ extension _HomePageProjectEditorHttpGeneralProbe on _HomePageState {
                     'projectUuid': p.id,
                     if (origIntro.isEmpty) 'intro': null else 'intro': origIntro,
                   };
-                  final msg2 = await postGeneralUpdateProject(
+                  await postGeneralUpdateProject(
                     token,
                     restoreBody,
                   );
@@ -90,10 +90,7 @@ extension _HomePageProjectEditorHttpGeneralProbe on _HomePageState {
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        l10n.projectEditorProbeGeneralUpdateProjectSnack(
-                          msg1.toString(),
-                          msg2.toString(),
-                        ),
+                        l10n.projectEditorProbeGeneralUpdateProjectSnack,
                       ),
                     ),
                   );

@@ -35,7 +35,7 @@ String? projectUuidFromCompatBody(Map<String, dynamic> body) {
 /// [body] must include **`id`** (numeric project id) and at least one of **`intro`**,
 /// **`type`** (→ **`mode`**), **`artStyle`**, **`videoRatio`**, **`projectType`**
 /// (use **`null`** in the map to clear).
-Future<String> postGeneralUpdateProject(
+Future<void> postGeneralUpdateProject(
   String accessToken,
   Map<String, dynamic> body,
 ) async {
@@ -76,7 +76,6 @@ Future<String> postGeneralUpdateProject(
   }
 
   await updateProjectByProjectId(accessToken, projectId, patch);
-  return '修改成功';
 }
 
 /// Mirrors prior **`type` vs `mode`** merge: prefer non-empty **`mode`**, else **`type`**.
@@ -132,7 +131,7 @@ Future<List<ProjectRow>> postProjectGetProject(String accessToken) async {
 }
 
 /// [numericId] is `app_project` numeric id column. Uses **`DELETE /api/v1/projects/{project_id}`**.
-Future<String> postProjectDeleteProject(
+Future<void> postProjectDeleteProject(
   String accessToken,
   int numericId, {
   String? projectUuid,
@@ -140,18 +139,17 @@ Future<String> postProjectDeleteProject(
   final id = projectUuidOrNull(projectUuid);
   if (id != null) {
     await deleteProjectByProjectId(accessToken, id);
-    return '删除项目成功';
+    return;
   }
   if (numericId <= 0) {
     throw RustApiException('invalid id', statusCode: 400);
   }
   final resolvedId = await projectIdForNumericId(accessToken, numericId);
   await deleteProjectByProjectId(accessToken, resolvedId);
-  return '删除项目成功';
 }
 
 /// All fields required (may be empty strings). Uses **`POST /api/v1/projects`**.
-Future<String> postProjectAddProject(
+Future<void> postProjectAddProject(
   String accessToken, {
   required String projectType,
   required String name,
@@ -181,11 +179,10 @@ Future<String> postProjectAddProject(
     fields['mode'] = modeOut;
   }
   await createProject(accessToken, fields: fields);
-  return '新增项目成功';
 }
 
 /// [id] is `app_project` numeric id column. Uses **`PATCH /api/v1/projects/{project_id}`**.
-Future<String> postProjectEditProject(
+Future<void> postProjectEditProject(
   String accessToken, {
   required int id,
   String? projectUuid,
@@ -220,5 +217,4 @@ Future<String> postProjectEditProject(
     'image_quality': imageQuality,
     'mode': modeOut,
   });
-  return '编辑项目成功';
 }

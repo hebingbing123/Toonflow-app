@@ -753,10 +753,10 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     if (ids.isEmpty) {
       throw FormatException(l10n.projectEditorNovelsActionErrorIdsEmpty);
     }
-    final message = await batchDeleteNovelsUnderProject(token, project.id, ids);
+    await batchDeleteNovelsUnderProject(token, project.id, ids);
     await refreshWorkbench(setLocalState);
     applyInfoLine(
-      l10n.projectEditorNovelsActionBatchDeleteOk(ids.length, message),
+      l10n.projectEditorNovelsActionBatchDeleteOk(ids.length),
     );
   }
 

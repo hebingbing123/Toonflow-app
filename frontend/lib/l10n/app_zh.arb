@@ -4536,17 +4536,7 @@
       }
     }
   },
-  "projectEditorProbeGeneralUpdateProjectSnack": "compat updateProject（PATCH projects）：{probeMsg} → 已还原（{restoreMsg}）",
-  "@projectEditorProbeGeneralUpdateProjectSnack": {
-    "placeholders": {
-      "probeMsg": {
-        "type": "String"
-      },
-      "restoreMsg": {
-        "type": "String"
-      }
-    }
-  },
+  "projectEditorProbeGeneralUpdateProjectSnack": "compat updateProject（PATCH projects）：intro 探针 + 还原已完成。",
   "projectEditorProbeGeneralPatchNameNoopSnack": "PATCH …/projects name noop → {name}",
   "@projectEditorProbeGeneralPatchNameNoopSnack": {
     "placeholders": {
@@ -4557,14 +4547,11 @@
   },
   "projectEditorProbeProjectBusyLabel": "project…",
   "projectEditorProbeProjectButtonGetProject": "POST project get-project",
-  "projectEditorProbeProjectEditNoopResult": "POST …/project/edit-project noop #{numericId}：{message}",
+  "projectEditorProbeProjectEditNoopResult": "POST …/project/edit-project noop #{numericId} 已完成。",
   "@projectEditorProbeProjectEditNoopResult": {
     "placeholders": {
       "numericId": {
         "type": "int"
-      },
-      "message": {
-        "type": "String"
       }
     }
   },
@@ -5251,14 +5238,11 @@
       }
     }
   },
-  "projectEditorNovelsActionBatchDeleteOk": "已批量删除 {count} 条章节：{message}",
+  "projectEditorNovelsActionBatchDeleteOk": "已批量删除 {count} 条章节。",
   "@projectEditorNovelsActionBatchDeleteOk": {
     "placeholders": {
       "count": {
         "type": "int"
-      },
-      "message": {
-        "type": "String"
       }
     }
   },
@@ -5382,26 +5366,16 @@
       }
     }
   },
-  "projectEditorNovelsProbeMutationAddNovelEmptySnackbar": "POST …/novels/add-novel 空 data：{detail}",
-  "@projectEditorNovelsProbeMutationAddNovelEmptySnackbar": {
-    "placeholders": {
-      "detail": {
-        "type": "String"
-      }
-    }
-  },
+  "projectEditorNovelsProbeMutationAddNovelEmptySnackbar": "POST …/novels/add-novel 空 data：无操作。",
   "projectEditorNovelsProbeMutationBatchDeleteUnexpected200Snackbar": "POST …/novels/batch-delete：unexpected 200",
   "projectEditorNovelsProbeMutationBatchDeleteExpected400Snackbar": "POST …/novels/batch-delete [] → 400（预期）",
   "projectEditorNovelsProbeMutationDeleteNovelUnexpected200Snackbar": "POST …/novels/delete-novel：unexpected 200",
   "projectEditorNovelsProbeMutationDeleteNovelExpected400Snackbar": "POST …/novels/delete-novel id=0 → 400（预期）",
-  "projectEditorNovelsProbeMutationUpdateNovelNoopSnackbar": "POST …/novels/update-novel 空改 #{id}：{detail}",
+  "projectEditorNovelsProbeMutationUpdateNovelNoopSnackbar": "POST …/novels/update-novel 空改 #{id} 已完成。",
   "@projectEditorNovelsProbeMutationUpdateNovelNoopSnackbar": {
     "placeholders": {
       "id": {
         "type": "int"
-      },
-      "detail": {
-        "type": "String"
       }
     }
   },
@@ -12419,6 +12393,86 @@
   "shortVideoPublishCalendarNextMonth": "下一月",
   "shortVideoPublishCalendarDraftCountEmpty": "—",
   "shortVideoPublishCalendarDraftCountOverflow": "9+",
+  "rustApiClientRetryAfterTryLater": "请稍后重试",
+  "rustApiClientRetryAfterSeconds": "{seconds} 秒后重试",
+  "@rustApiClientRetryAfterSeconds": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "rustApiClientRetryAfterMinutes": "{minutes} 分钟后重试",
+  "@rustApiClientRetryAfterMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "rustApiClientRetryAfterMinutesSeconds": "{minutes} 分 {seconds} 秒后重试",
+  "@rustApiClientRetryAfterMinutesSeconds": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      },
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "rustApiClientRetryAfterHours": "{hours} 小时后重试",
+  "@rustApiClientRetryAfterHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "rustApiClientRetryAfterHoursMinutes": "{hours} 小时 {minutes} 分钟后重试",
+  "@rustApiClientRetryAfterHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "rustApiClientConcurrentLimitExceeded": "同时进行的工作区审计导出已达上限，请等待已有任务完成或结束后再试。",
+  "rustApiClientQuotaOrRateWithWait": "配额或频率已用尽，{wait}。",
+  "@rustApiClientQuotaOrRateWithWait": {
+    "placeholders": {
+      "wait": {
+        "type": "String"
+      }
+    }
+  },
+  "rustApiClientTooFrequentWithWait": "请求过于频繁，{wait}。",
+  "@rustApiClientTooFrequentWithWait": {
+    "placeholders": {
+      "wait": {
+        "type": "String"
+      }
+    }
+  },
+  "rustApiClientRecordNotFound": "未找到对应记录。",
+  "rustApiClientRequestCancelled": "请求已取消。",
+  "rustApiClientUnknownError": "出现问题：{detail}",
+  "@rustApiClientUnknownError": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "rustApiClientSearchQueryTooShort": "搜索关键词不能为空且至少需要 2 个字符。",
+  "rustApiClientSearchQueryTooLong": "搜索关键词过长，请限制在 200 字符以内。",
+  "rustApiOutboundWebhookJobCompleted": "作业完成",
+  "rustApiOutboundWebhookJobFailed": "作业失败",
+  "rustApiOutboundWebhookProjectCreated": "项目创建",
+  "rustApiOutboundWebhookWorkspaceMemberAdded": "工作区成员加入",
   "shortVideoPublishCopyEditorSectionTitle": "差异化文案（按平台）",
   "shortVideoPublishCopyFieldTitle": "标题",
   "shortVideoPublishCopyFieldDescription": "简介",

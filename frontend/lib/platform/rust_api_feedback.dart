@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/rust_api_error_format.dart';
 import '../rust_api/core.dart';
 
 /// Root [ScaffoldMessenger] for API errors when no local [BuildContext] is in scope.
@@ -12,13 +13,15 @@ bool isRustApiQuotaOrRateError(Object error) {
   if (error is! RustApiException) {
     return false;
   }
+  final code = RustApiErrorDetails.tryParse(error.message)?.code;
   return error.statusCode == 429 ||
-      RustApiErrorDetails.tryParse(error.message)?.code == 'quota_exceeded';
+      code == 'quota_exceeded' ||
+      code == 'concurrent_limit_exceeded';
 }
 
 String describeRustApiError(Object error) {
   if (error is RustApiException) {
-    return formatRustApiException(error);
+    return formatRustApiExceptionForDisplay(rustApiLookupL10nFromPlatform(), error);
   }
   return '$error';
 }
@@ -34,7 +37,7 @@ void reportRustApiError(
   }
 }
 
-/// Shows a SnackBar for [RustApiException] or any error using [formatRustApiException].
+/// Shows a SnackBar for [RustApiException] or any error using [formatRustApiExceptionForDisplay].
 void showRustApiErrorSnackBar(Object error) {
   final messenger = kRustApiRootScaffoldMessengerKey.currentState;
   if (messenger == null) {
