@@ -12417,6 +12417,8 @@
   },
   "shortVideoPublishCalendarPrevMonth": "上一月",
   "shortVideoPublishCalendarNextMonth": "下一月",
+  "shortVideoPublishCalendarDraftCountEmpty": "—",
+  "shortVideoPublishCalendarDraftCountOverflow": "9+",
   "shortVideoPublishCopyEditorSectionTitle": "差异化文案（按平台）",
   "shortVideoPublishCopyFieldTitle": "标题",
   "shortVideoPublishCopyFieldDescription": "简介",

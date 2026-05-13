@@ -16265,6 +16265,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shortVideoPublishCalendarNextMonth => 'Next month';
 
   @override
+  String get shortVideoPublishCalendarDraftCountEmpty => '—';
+
+  @override
+  String get shortVideoPublishCalendarDraftCountOverflow => '9+';
+
+  @override
   String get shortVideoPublishCopyEditorSectionTitle =>
       'Per-platform differentiated copy';
 

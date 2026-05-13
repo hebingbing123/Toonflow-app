@@ -24944,6 +24944,18 @@ abstract class AppLocalizations {
   /// **'Next month'**
   String get shortVideoPublishCalendarNextMonth;
 
+  /// No description provided for @shortVideoPublishCalendarDraftCountEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'—'**
+  String get shortVideoPublishCalendarDraftCountEmpty;
+
+  /// No description provided for @shortVideoPublishCalendarDraftCountOverflow.
+  ///
+  /// In en, this message translates to:
+  /// **'9+'**
+  String get shortVideoPublishCalendarDraftCountOverflow;
+
   /// No description provided for @shortVideoPublishCopyEditorSectionTitle.
   ///
   /// In en, this message translates to:

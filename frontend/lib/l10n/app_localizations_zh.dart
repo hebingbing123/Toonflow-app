@@ -15481,6 +15481,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shortVideoPublishCalendarNextMonth => '下一月';
 
   @override
+  String get shortVideoPublishCalendarDraftCountEmpty => '—';
+
+  @override
+  String get shortVideoPublishCalendarDraftCountOverflow => '9+';
+
+  @override
   String get shortVideoPublishCopyEditorSectionTitle => '差异化文案（按平台）';
 
   @override

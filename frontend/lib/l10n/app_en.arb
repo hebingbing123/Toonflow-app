@@ -12457,6 +12457,8 @@
   },
   "shortVideoPublishCalendarPrevMonth": "Previous month",
   "shortVideoPublishCalendarNextMonth": "Next month",
+  "shortVideoPublishCalendarDraftCountEmpty": "—",
+  "shortVideoPublishCalendarDraftCountOverflow": "9+",
   "shortVideoPublishCopyEditorSectionTitle": "Per-platform differentiated copy",
   "shortVideoPublishCopyFieldTitle": "Title",
   "shortVideoPublishCopyFieldDescription": "Description",

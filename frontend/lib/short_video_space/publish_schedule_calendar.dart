@@ -129,8 +129,10 @@ class _PublishScheduleCalendarState extends State<PublishScheduleCalendar> {
               fontWeight: isToday ? FontWeight.bold : FontWeight.w500,
             );
             final countLabel = c <= 0
-                ? '—'
-                : (c >= 10 ? '9+' : '$c');
+                ? l10n.shortVideoPublishCalendarDraftCountEmpty
+                : (c >= 10
+                    ? l10n.shortVideoPublishCalendarDraftCountOverflow
+                    : '$c');
 
             return Material(
               color: Colors.transparent,
