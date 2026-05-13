@@ -225,10 +225,11 @@ void main() {
   });
 
   test('mode and ratio labels stay human readable', () {
-    expect(shortVideoModeLabel(ShortVideoMode.animated), '动漫短剧');
-    expect(shortVideoModeLabel(ShortVideoMode.liveAction), '真人短剧');
-    expect(shortVideoVideoRatioLabel('16:9'), '横屏 16:9');
-    expect(shortVideoVideoRatioLabel('9:16'), '竖屏 9:16');
+    expect(shortVideoModeLabelL10n(zh, ShortVideoMode.animated), '动漫短剧');
+    expect(shortVideoModeLabelL10n(zh, ShortVideoMode.liveAction), '真人短剧');
+    expect(shortVideoVideoRatioLabelL10n(zh, '16:9'), '横屏 16:9');
+    expect(shortVideoVideoRatioLabelL10n(zh, '9:16'), '竖屏 9:16');
+    expect(shortVideoVideoRatioLabelL10n(zh, '1:1'), '方屏 1:1');
   });
 
   test('blocking reason labels map API codes to Chinese', () {

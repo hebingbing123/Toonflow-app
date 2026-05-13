@@ -11675,6 +11675,66 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get shortVideoProjectNotLoggedWriteback =>
+      'Not logged in; short video settings cannot be saved to a project yet.';
+
+  @override
+  String get shortVideoProjectEmptyList =>
+      'No projects yet. Create a short drama project in the project area first.';
+
+  @override
+  String shortVideoProjectLoadFailed(String error) {
+    return 'Failed to load projects: $error';
+  }
+
+  @override
+  String get shortVideoProjectCreateNeedLogin =>
+      'Please log in before creating a short drama project.';
+
+  @override
+  String get shortVideoProjectDefaultNameAnimated =>
+      'Animated short drama project';
+
+  @override
+  String get shortVideoProjectDefaultNameLive =>
+      'Live-action short drama project';
+
+  @override
+  String shortVideoProjectCreated(
+    int numericId,
+    String modeLabel,
+    String ratioLabel,
+  ) {
+    return 'Created project #$numericId: $modeLabel · $ratioLabel.';
+  }
+
+  @override
+  String shortVideoProjectCreateFailed(String error) {
+    return 'Create project failed: $error';
+  }
+
+  @override
+  String get shortVideoProjectSaveNeedSelection =>
+      'Please log in and select a project.';
+
+  @override
+  String shortVideoProjectSaved(
+    int numericId,
+    String modeLabel,
+    String ratioLabel,
+    String market,
+    int platformCount,
+    String duration,
+  ) {
+    return 'Saved project #$numericId: $modeLabel · $ratioLabel · market $market · $platformCount platforms · duration $duration';
+  }
+
+  @override
+  String shortVideoProjectSaveFailed(String error) {
+    return 'Save failed: $error';
+  }
+
+  @override
   String get shortVideoBatchThrottleMessage =>
       'You\'re doing that too often. Wait a moment and try again.';
 

@@ -8809,6 +8809,73 @@
       }
     }
   },
+  "shortVideoProjectNotLoggedWriteback": "Not logged in; short video settings cannot be saved to a project yet.",
+  "shortVideoProjectEmptyList": "No projects yet. Create a short drama project in the project area first.",
+  "shortVideoProjectLoadFailed": "Failed to load projects: {error}",
+  "@shortVideoProjectLoadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoProjectCreateNeedLogin": "Please log in before creating a short drama project.",
+  "shortVideoProjectDefaultNameAnimated": "Animated short drama project",
+  "shortVideoProjectDefaultNameLive": "Live-action short drama project",
+  "shortVideoProjectCreated": "Created project #{numericId}: {modeLabel} · {ratioLabel}.",
+  "@shortVideoProjectCreated": {
+    "placeholders": {
+      "numericId": {
+        "type": "int"
+      },
+      "modeLabel": {
+        "type": "String"
+      },
+      "ratioLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoProjectCreateFailed": "Create project failed: {error}",
+  "@shortVideoProjectCreateFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoProjectSaveNeedSelection": "Please log in and select a project.",
+  "shortVideoProjectSaved": "Saved project #{numericId}: {modeLabel} · {ratioLabel} · market {market} · {platformCount} platforms · duration {duration}",
+  "@shortVideoProjectSaved": {
+    "placeholders": {
+      "numericId": {
+        "type": "int"
+      },
+      "modeLabel": {
+        "type": "String"
+      },
+      "ratioLabel": {
+        "type": "String"
+      },
+      "market": {
+        "type": "String"
+      },
+      "platformCount": {
+        "type": "int"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoProjectSaveFailed": "Save failed: {error}",
+  "@shortVideoProjectSaveFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "shortVideoBatchThrottleMessage": "You're doing that too often. Wait a moment and try again.",
   "shortVideoBatchSelectAll": "Select all",
   "shortVideoBatchDeselectAll": "Deselect all",

@@ -18155,6 +18155,83 @@ abstract class AppLocalizations {
   /// **'Set current failed: {error}'**
   String shortVideoProductionSetCurrentFailed(String error);
 
+  /// No description provided for @shortVideoProjectNotLoggedWriteback.
+  ///
+  /// In en, this message translates to:
+  /// **'Not logged in; short video settings cannot be saved to a project yet.'**
+  String get shortVideoProjectNotLoggedWriteback;
+
+  /// No description provided for @shortVideoProjectEmptyList.
+  ///
+  /// In en, this message translates to:
+  /// **'No projects yet. Create a short drama project in the project area first.'**
+  String get shortVideoProjectEmptyList;
+
+  /// No description provided for @shortVideoProjectLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load projects: {error}'**
+  String shortVideoProjectLoadFailed(String error);
+
+  /// No description provided for @shortVideoProjectCreateNeedLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Please log in before creating a short drama project.'**
+  String get shortVideoProjectCreateNeedLogin;
+
+  /// No description provided for @shortVideoProjectDefaultNameAnimated.
+  ///
+  /// In en, this message translates to:
+  /// **'Animated short drama project'**
+  String get shortVideoProjectDefaultNameAnimated;
+
+  /// No description provided for @shortVideoProjectDefaultNameLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Live-action short drama project'**
+  String get shortVideoProjectDefaultNameLive;
+
+  /// No description provided for @shortVideoProjectCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Created project #{numericId}: {modeLabel} · {ratioLabel}.'**
+  String shortVideoProjectCreated(
+    int numericId,
+    String modeLabel,
+    String ratioLabel,
+  );
+
+  /// No description provided for @shortVideoProjectCreateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Create project failed: {error}'**
+  String shortVideoProjectCreateFailed(String error);
+
+  /// No description provided for @shortVideoProjectSaveNeedSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Please log in and select a project.'**
+  String get shortVideoProjectSaveNeedSelection;
+
+  /// No description provided for @shortVideoProjectSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved project #{numericId}: {modeLabel} · {ratioLabel} · market {market} · {platformCount} platforms · duration {duration}'**
+  String shortVideoProjectSaved(
+    int numericId,
+    String modeLabel,
+    String ratioLabel,
+    String market,
+    int platformCount,
+    String duration,
+  );
+
+  /// No description provided for @shortVideoProjectSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Save failed: {error}'**
+  String shortVideoProjectSaveFailed(String error);
+
   /// No description provided for @shortVideoBatchThrottleMessage.
   ///
   /// In en, this message translates to:

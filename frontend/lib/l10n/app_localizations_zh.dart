@@ -11149,6 +11149,60 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get shortVideoProjectNotLoggedWriteback => '当前未登录，暂时无法把短视频模式写回项目。';
+
+  @override
+  String get shortVideoProjectEmptyList => '还没有项目，可先去项目区创建一个短剧项目。';
+
+  @override
+  String shortVideoProjectLoadFailed(String error) {
+    return '读取项目失败：$error';
+  }
+
+  @override
+  String get shortVideoProjectCreateNeedLogin => '请先登录后再创建短剧项目。';
+
+  @override
+  String get shortVideoProjectDefaultNameAnimated => '动漫短剧项目';
+
+  @override
+  String get shortVideoProjectDefaultNameLive => '真人短剧项目';
+
+  @override
+  String shortVideoProjectCreated(
+    int numericId,
+    String modeLabel,
+    String ratioLabel,
+  ) {
+    return '已新建项目 #$numericId，并写入 $modeLabel · $ratioLabel。';
+  }
+
+  @override
+  String shortVideoProjectCreateFailed(String error) {
+    return '新建项目失败：$error';
+  }
+
+  @override
+  String get shortVideoProjectSaveNeedSelection => '请先登录并选择项目。';
+
+  @override
+  String shortVideoProjectSaved(
+    int numericId,
+    String modeLabel,
+    String ratioLabel,
+    String market,
+    int platformCount,
+    String duration,
+  ) {
+    return '已写回项目 #$numericId：$modeLabel · $ratioLabel · 市场 $market · 平台 $platformCount 个 · 时长 $duration';
+  }
+
+  @override
+  String shortVideoProjectSaveFailed(String error) {
+    return '保存失败：$error';
+  }
+
+  @override
   String get shortVideoBatchThrottleMessage => '操作过于频繁，请稍后再试。';
 
   @override

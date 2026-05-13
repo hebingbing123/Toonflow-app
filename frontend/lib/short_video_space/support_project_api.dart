@@ -1,3 +1,4 @@
+import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
 import 'support_models.dart';
 import 'view.dart';
@@ -48,18 +49,20 @@ String? shortVideoDirectionLabel(ProjectRow? project) {
   return null;
 }
 
-String shortVideoModeLabel(ShortVideoMode mode) {
-  return mode == ShortVideoMode.animated ? '动漫短剧' : '真人短剧';
+String shortVideoModeLabelL10n(AppLocalizations l10n, ShortVideoMode mode) {
+  return mode == ShortVideoMode.animated
+      ? l10n.shortVideoSpaceModeTitleAnimated
+      : l10n.shortVideoSpaceModeTitleLive;
 }
 
-String shortVideoVideoRatioLabel(String ratio) {
+String shortVideoVideoRatioLabelL10n(AppLocalizations l10n, String ratio) {
   switch (ratio) {
     case '16:9':
-      return '横屏 16:9';
+      return l10n.shortVideoSpaceAspectRatioLandscape169;
     case '1:1':
-      return '方屏 1:1';
+      return l10n.shortVideoSpaceAspectRatioSquare11;
     default:
-      return '竖屏 9:16';
+      return l10n.shortVideoSpaceAspectRatioPortrait916;
   }
 }
 

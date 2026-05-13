@@ -8,10 +8,11 @@ extension ShortVideoSpaceSectionProject on _ShortVideoSpaceSectionState {
   Future<void> _loadProjects() async {
     final token = widget.accessToken;
     if (token == null || token.isEmpty) {
+      final l10n = AppLocalizations.of(context)!;
       setState(() {
         _projects = const <ProjectRow>[];
         _selectedProjectId = null;
-        _projectConfigLine = '当前未登录，暂时无法把短视频模式写回项目。';
+        _projectConfigLine = l10n.shortVideoProjectNotLoggedWriteback;
       });
       return;
     }
@@ -33,23 +34,28 @@ extension ShortVideoSpaceSectionProject on _ShortVideoSpaceSectionState {
       _syncSelectedProjectContext();
       _loadProjectOverview();
       if (projects.isEmpty) {
+        final l10n = AppLocalizations.of(context)!;
         setState(() {
-          _projectConfigLine = '还没有项目，可先去项目区创建一个短剧项目。';
+          _projectConfigLine = l10n.shortVideoProjectEmptyList;
         });
       }
     } on RustApiException catch (e) {
       if (!mounted) {
         return;
       }
+      final l10n = AppLocalizations.of(context)!;
       setState(() {
-        _projectConfigLine = '读取项目失败：${e.statusCode ?? '-'}';
+        _projectConfigLine = l10n.shortVideoProjectLoadFailed(
+          '${e.statusCode ?? '-'}',
+        );
       });
     } catch (e) {
       if (!mounted) {
         return;
       }
+      final l10n = AppLocalizations.of(context)!;
       setState(() {
-        _projectConfigLine = '读取项目失败：$e';
+        _projectConfigLine = l10n.shortVideoProjectLoadFailed('$e');
       });
     } finally {
       if (mounted) {
@@ -130,8 +136,9 @@ extension ShortVideoSpaceSectionProject on _ShortVideoSpaceSectionState {
   Future<void> _createProjectFromSpace() async {
     final token = widget.accessToken;
     if (token == null || token.isEmpty) {
+      final l10n = AppLocalizations.of(context)!;
       setState(() {
-        _projectConfigLine = '请先登录后再创建短剧项目。';
+        _projectConfigLine = l10n.shortVideoProjectCreateNeedLogin;
       });
       return;
     }
@@ -139,7 +146,10 @@ extension ShortVideoSpaceSectionProject on _ShortVideoSpaceSectionState {
       _creatingProject = true;
       _projectConfigLine = null;
     });
-    final defaultName = _isAnimated ? '动漫短剧项目' : '真人短剧项目';
+    final l10n = AppLocalizations.of(context)!;
+    final defaultName = _isAnimated
+        ? l10n.shortVideoProjectDefaultNameAnimated
+        : l10n.shortVideoProjectDefaultNameLive;
     final storedMode = _isAnimated
         ? 'animated.short_drama'
         : 'live_action.short_drama';
@@ -165,11 +175,16 @@ extension ShortVideoSpaceSectionProject on _ShortVideoSpaceSectionState {
       if (!mounted) {
         return;
       }
+      final modeLabel = shortVideoModeLabelL10n(l10n, _mode);
+      final ratioLabel = shortVideoVideoRatioLabelL10n(l10n, _videoRatio);
       setState(() {
         _projects = [created, ..._projects].toList(growable: false);
         _selectedProjectId = created.id;
-        _projectConfigLine =
-            '已新建项目 #${created.numericId}，并写入 ${shortVideoModeLabel(_mode)} · ${shortVideoVideoRatioLabel(_videoRatio)}。';
+        _projectConfigLine = l10n.shortVideoProjectCreated(
+          created.numericId,
+          modeLabel,
+          ratioLabel,
+        );
       });
       _syncSelectedProjectContext();
       await _loadProjectOverview();
@@ -177,15 +192,19 @@ extension ShortVideoSpaceSectionProject on _ShortVideoSpaceSectionState {
       if (!mounted) {
         return;
       }
+      final errL10n = AppLocalizations.of(context)!;
       setState(() {
-        _projectConfigLine = '新建项目失败：${e.statusCode ?? '-'}';
+        _projectConfigLine = errL10n.shortVideoProjectCreateFailed(
+          '${e.statusCode ?? '-'}',
+        );
       });
     } catch (e) {
       if (!mounted) {
         return;
       }
+      final errL10n = AppLocalizations.of(context)!;
       setState(() {
-        _projectConfigLine = '新建项目失败：$e';
+        _projectConfigLine = errL10n.shortVideoProjectCreateFailed('$e');
       });
     } finally {
       if (mounted) {
@@ -200,8 +219,9 @@ extension ShortVideoSpaceSectionProject on _ShortVideoSpaceSectionState {
     final token = widget.accessToken;
     final project = _selectedProject;
     if (token == null || token.isEmpty || project == null) {
+      final l10n = AppLocalizations.of(context)!;
       setState(() {
-        _projectConfigLine = '请先登录并选择项目。';
+        _projectConfigLine = l10n.shortVideoProjectSaveNeedSelection;
       });
       return;
     }
@@ -232,13 +252,22 @@ extension ShortVideoSpaceSectionProject on _ShortVideoSpaceSectionState {
       if (!mounted) {
         return;
       }
+      final l10n = AppLocalizations.of(context)!;
+      final modeLabel = shortVideoModeLabelL10n(l10n, _mode);
+      final ratioLabel = shortVideoVideoRatioLabelL10n(l10n, _videoRatio);
       setState(() {
         _projects = _projects
             .map((row) => row.id == updated.id ? updated : row)
             .toList(growable: false);
         _selectedProjectId = updated.id;
-        _projectConfigLine =
-            '已写回项目 #${updated.numericId}：${shortVideoModeLabel(_mode)} · ${shortVideoVideoRatioLabel(_videoRatio)} · 市场 $_targetMarket · 平台 ${_targetPlatforms.length} 个 · 时长 $_durationStrategy';
+        _projectConfigLine = l10n.shortVideoProjectSaved(
+          updated.numericId,
+          modeLabel,
+          ratioLabel,
+          _targetMarket,
+          _targetPlatforms.length,
+          _durationStrategy,
+        );
       });
       _syncSelectedProjectContext();
       _loadProjectOverview();
@@ -246,15 +275,19 @@ extension ShortVideoSpaceSectionProject on _ShortVideoSpaceSectionState {
       if (!mounted) {
         return;
       }
+      final errL10n = AppLocalizations.of(context)!;
       setState(() {
-        _projectConfigLine = '保存失败：${e.statusCode ?? '-'}';
+        _projectConfigLine = errL10n.shortVideoProjectSaveFailed(
+          '${e.statusCode ?? '-'}',
+        );
       });
     } catch (e) {
       if (!mounted) {
         return;
       }
+      final errL10n = AppLocalizations.of(context)!;
       setState(() {
-        _projectConfigLine = '保存失败：$e';
+        _projectConfigLine = errL10n.shortVideoProjectSaveFailed('$e');
       });
     } finally {
       if (mounted) {
