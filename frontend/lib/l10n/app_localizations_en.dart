@@ -10061,6 +10061,211 @@ class AppLocalizationsEn extends AppLocalizations {
       'Live-action mode prioritizes character setup, scene references, clip footage, and voiceover manuals.';
 
   @override
+  String get shortVideoStageCard1Title => '1. Kickoff';
+
+  @override
+  String get shortVideoStageCard1Status => 'Available now';
+
+  @override
+  String get shortVideoStageCard1DetailAnimated =>
+      'From the project, align theme, art style, creative bible, and character assets.';
+
+  @override
+  String get shortVideoStageCard1DetailLive =>
+      'From the project, align theme, live references, creative bible, and character setup.';
+
+  @override
+  String get shortVideoStageCard2Title => '2. Generate script';
+
+  @override
+  String get shortVideoStageCard2Status => 'Available now';
+
+  @override
+  String get shortVideoStageCard2DetailAnimated =>
+      'Reuse the script workspace: context probes, sub-agents, and body writeback.';
+
+  @override
+  String get shortVideoStageCard2DetailLive =>
+      'Reuse the script workspace for scripts closer to VO, performance, and scene pacing.';
+
+  @override
+  String get shortVideoStageCard3Title => '3. Organize assets';
+
+  @override
+  String get shortVideoStageCard3Status => 'Good next focus';
+
+  @override
+  String get shortVideoStageCard3DetailAnimated =>
+      'Combine asset search, image generation, shot candidates, and narration drafts in one flow.';
+
+  @override
+  String get shortVideoStageCard3DetailLive =>
+      'Combine live references, shot candidates, narration drafts, and asset triage in one flow.';
+
+  @override
+  String get shortVideoStageCard4Title => '4. Delivery & review';
+
+  @override
+  String get shortVideoStageCard4Status => 'Basics in place';
+
+  @override
+  String get shortVideoStageCard4DetailAnimated =>
+      'Wire production workspace, task center, and quality review into a traceable delivery loop.';
+
+  @override
+  String get shortVideoStageCard4DetailLive =>
+      'Wire production workspace, task center, and quality review—prioritize cast consistency and realism checks.';
+
+  @override
+  String get shortVideoMigrationSummaryAnimated =>
+      'Start with one entry point, then deepen the chain. Wave 1 wires existing projects, scripts, production, tasks, and QA; wave 2 adds auto narration, subtitle styling, and one-click assembly.';
+
+  @override
+  String get shortVideoMigrationSummaryLive =>
+      'Live-action uses the same entry first. Wave 1 makes user choices explicit; later add live reference media, VO tone, shot realism, and delivery acceptance rules.';
+
+  @override
+  String get shortVideoFilterPanelSearchHint =>
+      'Search subtitles or narration… (Ctrl+F / Cmd+F)';
+
+  @override
+  String get shortVideoFilterPanelClearButton => 'Clear';
+
+  @override
+  String get shortVideoFilterPanelSavePresetButton => 'Save preset';
+
+  @override
+  String get shortVideoFilterPanelApplyPresetTooltip => 'Apply preset';
+
+  @override
+  String get shortVideoFilterPanelDeletePresetTooltip => 'Delete preset';
+
+  @override
+  String get shortVideoFilterPanelSearchScopeLabel => 'Search scope:';
+
+  @override
+  String get shortVideoFilterPanelSearchChipSubtitle => 'Subtitles';
+
+  @override
+  String get shortVideoFilterPanelSearchChipVoiceover => 'Narration';
+
+  @override
+  String get shortVideoFilterPanelStatusLabel => 'Status filters';
+
+  @override
+  String get shortVideoFilterPanelQualityLabel => 'Quality filters';
+
+  @override
+  String get shortVideoFilterPanelDropdownAll => 'All';
+
+  @override
+  String shortVideoFilterPanelDropdownSelectedCount(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String shortVideoFilterActiveTagSearch(String keyword) {
+    return 'Search: $keyword';
+  }
+
+  @override
+  String shortVideoFilterPresetPartSearch(String keyword) {
+    return 'Search: $keyword';
+  }
+
+  @override
+  String shortVideoFilterPresetPartStatusCount(int count) {
+    return '$count status filter(s)';
+  }
+
+  @override
+  String shortVideoFilterPresetPartQualityCount(int count) {
+    return '$count quality filter(s)';
+  }
+
+  @override
+  String get shortVideoFilterPresetSummaryEmpty => 'No active filters';
+
+  @override
+  String get shortVideoFilterSnackbarNoActiveFilters =>
+      'No active filters to save.';
+
+  @override
+  String shortVideoFilterSnackbarPresetSaved(String name) {
+    return 'Preset \"$name\" saved.';
+  }
+
+  @override
+  String shortVideoFilterSnackbarPresetApplied(String name) {
+    return 'Applied preset \"$name\".';
+  }
+
+  @override
+  String shortVideoFilterSnackbarPresetDeleted(String name) {
+    return 'Deleted preset \"$name\".';
+  }
+
+  @override
+  String get shortVideoFilterSaveDialogTitle => 'Save filter preset';
+
+  @override
+  String get shortVideoFilterSaveDialogNameLabel => 'Preset name';
+
+  @override
+  String get shortVideoFilterSaveDialogNameHint => 'e.g. enabled with video';
+
+  @override
+  String get shortVideoFilterStatusEnabled => 'Enabled';
+
+  @override
+  String get shortVideoFilterStatusDisabled => 'Disabled';
+
+  @override
+  String get shortVideoFilterStatusHasVideo => 'Has video';
+
+  @override
+  String get shortVideoFilterStatusNoVideo => 'No video';
+
+  @override
+  String get shortVideoFilterStatusHasDuration => 'Has duration';
+
+  @override
+  String get shortVideoFilterStatusNoDuration => 'No duration';
+
+  @override
+  String get shortVideoFilterStatusHasSubtitle => 'Has subtitles';
+
+  @override
+  String get shortVideoFilterStatusNoSubtitle => 'No subtitles';
+
+  @override
+  String get shortVideoFilterStatusHasVoiceover => 'Has narration';
+
+  @override
+  String get shortVideoFilterStatusNoVoiceover => 'No narration';
+
+  @override
+  String get shortVideoFilterStatusVoiceoverFailed => 'Narration failed';
+
+  @override
+  String get shortVideoFilterQualityHasBadExample => 'Has bad cases';
+
+  @override
+  String get shortVideoFilterQualityNoBadExample => 'No bad cases';
+
+  @override
+  String get shortVideoFilterQualityGenerationStage => 'Generation stage';
+
+  @override
+  String get shortVideoFilterQualityPostProductionStage => 'Post stage';
+
+  @override
+  String get shortVideoFilterQualityHasDegradation => 'Has degradation';
+
+  @override
+  String get shortVideoFilterQualityNoDegradation => 'No degradation';
+
+  @override
   String get shortVideoSpacePageTitle => 'Short video Space';
 
   @override

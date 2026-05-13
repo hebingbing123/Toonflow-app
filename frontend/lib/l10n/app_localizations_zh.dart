@@ -9607,6 +9607,205 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shortVideoReadinessIntroLive => '真人短剧更看重角色设定、场景参考、clip 镜头素材和口播手册。';
 
   @override
+  String get shortVideoStageCard1Title => '1. 立项';
+
+  @override
+  String get shortVideoStageCard1Status => '现在可用';
+
+  @override
+  String get shortVideoStageCard1DetailAnimated => '从项目开始收口题材、画风、创作手册和角色资产。';
+
+  @override
+  String get shortVideoStageCard1DetailLive => '从项目开始收口题材、真人参考、创作手册和角色设定。';
+
+  @override
+  String get shortVideoStageCard2Title => '2. 生成脚本';
+
+  @override
+  String get shortVideoStageCard2Status => '现在可用';
+
+  @override
+  String get shortVideoStageCard2DetailAnimated =>
+      '复用脚本工作区的上下文探测、子 Agent 和正文回写。';
+
+  @override
+  String get shortVideoStageCard2DetailLive => '复用脚本工作区生成更贴近口播、表演和场景调度的脚本版本。';
+
+  @override
+  String get shortVideoStageCard3Title => '3. 组织素材';
+
+  @override
+  String get shortVideoStageCard3Status => '适合下一步补齐';
+
+  @override
+  String get shortVideoStageCard3DetailAnimated =>
+      '把素材检索、资产出图、镜头候选和旁白草稿收成同一段流程。';
+
+  @override
+  String get shortVideoStageCard3DetailLive => '把真人参考图、镜头候选、旁白草稿和素材筛选收成同一段流程。';
+
+  @override
+  String get shortVideoStageCard4Title => '4. 出片与复核';
+
+  @override
+  String get shortVideoStageCard4Status => '基础已在';
+
+  @override
+  String get shortVideoStageCard4DetailAnimated =>
+      '挂接制作工作区、任务中心和质量评审，形成可追踪的成片闭环。';
+
+  @override
+  String get shortVideoStageCard4DetailLive =>
+      '挂接制作工作区、任务中心和质量评审，重点补演员一致性与真实感复核。';
+
+  @override
+  String get shortVideoMigrationSummaryAnimated =>
+      '先做单入口，再补链路。第一波只编排现有项目、脚本、制作、任务、质检能力；第二波再补自动旁白、字幕样式和一键成片。';
+
+  @override
+  String get shortVideoMigrationSummaryLive =>
+      '真人模式也先走同一入口。第一波先把用户选择显式化，后面再补真人参考素材、口播语气、镜头真实度和成片验收规则。';
+
+  @override
+  String get shortVideoFilterPanelSearchHint => '搜索字幕或旁白内容... (Ctrl+F / Cmd+F)';
+
+  @override
+  String get shortVideoFilterPanelClearButton => '清除';
+
+  @override
+  String get shortVideoFilterPanelSavePresetButton => '保存预设';
+
+  @override
+  String get shortVideoFilterPanelApplyPresetTooltip => '应用预设';
+
+  @override
+  String get shortVideoFilterPanelDeletePresetTooltip => '删除预设';
+
+  @override
+  String get shortVideoFilterPanelSearchScopeLabel => '搜索范围：';
+
+  @override
+  String get shortVideoFilterPanelSearchChipSubtitle => '字幕';
+
+  @override
+  String get shortVideoFilterPanelSearchChipVoiceover => '旁白';
+
+  @override
+  String get shortVideoFilterPanelStatusLabel => '状态过滤';
+
+  @override
+  String get shortVideoFilterPanelQualityLabel => '质量过滤';
+
+  @override
+  String get shortVideoFilterPanelDropdownAll => '全部';
+
+  @override
+  String shortVideoFilterPanelDropdownSelectedCount(int count) {
+    return '已选 $count 项';
+  }
+
+  @override
+  String shortVideoFilterActiveTagSearch(String keyword) {
+    return '搜索: $keyword';
+  }
+
+  @override
+  String shortVideoFilterPresetPartSearch(String keyword) {
+    return '搜索: $keyword';
+  }
+
+  @override
+  String shortVideoFilterPresetPartStatusCount(int count) {
+    return '$count个状态';
+  }
+
+  @override
+  String shortVideoFilterPresetPartQualityCount(int count) {
+    return '$count个质量';
+  }
+
+  @override
+  String get shortVideoFilterPresetSummaryEmpty => '无过滤条件';
+
+  @override
+  String get shortVideoFilterSnackbarNoActiveFilters => '当前没有活动的过滤条件';
+
+  @override
+  String shortVideoFilterSnackbarPresetSaved(String name) {
+    return '预设 \"$name\" 已保存';
+  }
+
+  @override
+  String shortVideoFilterSnackbarPresetApplied(String name) {
+    return '已应用预设 \"$name\"';
+  }
+
+  @override
+  String shortVideoFilterSnackbarPresetDeleted(String name) {
+    return '预设 \"$name\" 已删除';
+  }
+
+  @override
+  String get shortVideoFilterSaveDialogTitle => '保存过滤预设';
+
+  @override
+  String get shortVideoFilterSaveDialogNameLabel => '预设名称';
+
+  @override
+  String get shortVideoFilterSaveDialogNameHint => '例如：已启用且有视频';
+
+  @override
+  String get shortVideoFilterStatusEnabled => '已启用';
+
+  @override
+  String get shortVideoFilterStatusDisabled => '已禁用';
+
+  @override
+  String get shortVideoFilterStatusHasVideo => '有视频';
+
+  @override
+  String get shortVideoFilterStatusNoVideo => '无视频';
+
+  @override
+  String get shortVideoFilterStatusHasDuration => '有时长';
+
+  @override
+  String get shortVideoFilterStatusNoDuration => '无时长';
+
+  @override
+  String get shortVideoFilterStatusHasSubtitle => '有字幕';
+
+  @override
+  String get shortVideoFilterStatusNoSubtitle => '无字幕';
+
+  @override
+  String get shortVideoFilterStatusHasVoiceover => '有配音';
+
+  @override
+  String get shortVideoFilterStatusNoVoiceover => '无配音';
+
+  @override
+  String get shortVideoFilterStatusVoiceoverFailed => '配音失败';
+
+  @override
+  String get shortVideoFilterQualityHasBadExample => '有坏例';
+
+  @override
+  String get shortVideoFilterQualityNoBadExample => '无坏例';
+
+  @override
+  String get shortVideoFilterQualityGenerationStage => '生成阶段';
+
+  @override
+  String get shortVideoFilterQualityPostProductionStage => '后期阶段';
+
+  @override
+  String get shortVideoFilterQualityHasDegradation => '有退化';
+
+  @override
+  String get shortVideoFilterQualityNoDegradation => '无退化';
+
+  @override
   String get shortVideoSpacePageTitle => '短视频 Space';
 
   @override

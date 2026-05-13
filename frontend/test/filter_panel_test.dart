@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/l10n/app_localizations.dart';
+import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/short_video_space/components/filter_panel.dart';
 
 Finder _statusDropdownButton() => find.byWidgetPredicate(
@@ -29,6 +31,8 @@ Finder _checkedQualityMenuItem(String label) => find.ancestor(
 );
 
 void main() {
+  final zh = AppLocalizationsZh();
+
   group('FilterPanel', () {
     late List<FilterState> filterChangedCalls;
 
@@ -38,6 +42,9 @@ void main() {
 
     Widget createTestWidget({FilterState? initialFilter}) {
       return MaterialApp(
+        locale: const Locale('zh'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: FilterPanel(
             onFilterChanged: (filter) {
@@ -336,6 +343,9 @@ void main() {
 
     Widget createTestWidget({FilterState? initialFilter}) {
       return MaterialApp(
+        locale: const Locale('zh'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: FilterPanel(
             onFilterChanged: (filter) {
@@ -669,17 +679,17 @@ void main() {
 
   group('ShotStatusFilter', () {
     test('should have correct labels', () {
-      expect(ShotStatusFilter.enabled.label, '已启用');
-      expect(ShotStatusFilter.disabled.label, '已禁用');
-      expect(ShotStatusFilter.hasVideo.label, '有视频');
-      expect(ShotStatusFilter.noVideo.label, '无视频');
-      expect(ShotStatusFilter.hasDuration.label, '有时长');
-      expect(ShotStatusFilter.noDuration.label, '无时长');
-      expect(ShotStatusFilter.hasSubtitle.label, '有字幕');
-      expect(ShotStatusFilter.noSubtitle.label, '无字幕');
-      expect(ShotStatusFilter.hasVoiceover.label, '有配音');
-      expect(ShotStatusFilter.noVoiceover.label, '无配音');
-      expect(ShotStatusFilter.voiceoverFailed.label, '配音失败');
+      expect(ShotStatusFilter.enabled.localizedLabel(zh), '已启用');
+      expect(ShotStatusFilter.disabled.localizedLabel(zh), '已禁用');
+      expect(ShotStatusFilter.hasVideo.localizedLabel(zh), '有视频');
+      expect(ShotStatusFilter.noVideo.localizedLabel(zh), '无视频');
+      expect(ShotStatusFilter.hasDuration.localizedLabel(zh), '有时长');
+      expect(ShotStatusFilter.noDuration.localizedLabel(zh), '无时长');
+      expect(ShotStatusFilter.hasSubtitle.localizedLabel(zh), '有字幕');
+      expect(ShotStatusFilter.noSubtitle.localizedLabel(zh), '无字幕');
+      expect(ShotStatusFilter.hasVoiceover.localizedLabel(zh), '有配音');
+      expect(ShotStatusFilter.noVoiceover.localizedLabel(zh), '无配音');
+      expect(ShotStatusFilter.voiceoverFailed.localizedLabel(zh), '配音失败');
     });
 
     test('should have all expected values', () {
@@ -689,12 +699,12 @@ void main() {
 
   group('QualityFilter', () {
     test('should have correct labels', () {
-      expect(QualityFilter.hasBadExample.label, '有坏例');
-      expect(QualityFilter.noBadExample.label, '无坏例');
-      expect(QualityFilter.generationStage.label, '生成阶段');
-      expect(QualityFilter.postProductionStage.label, '后期阶段');
-      expect(QualityFilter.hasDegradation.label, '有退化');
-      expect(QualityFilter.noDegradation.label, '无退化');
+      expect(QualityFilter.hasBadExample.localizedLabel(zh), '有坏例');
+      expect(QualityFilter.noBadExample.localizedLabel(zh), '无坏例');
+      expect(QualityFilter.generationStage.localizedLabel(zh), '生成阶段');
+      expect(QualityFilter.postProductionStage.localizedLabel(zh), '后期阶段');
+      expect(QualityFilter.hasDegradation.localizedLabel(zh), '有退化');
+      expect(QualityFilter.noDegradation.localizedLabel(zh), '无退化');
     });
 
     test('should have all expected values', () {
@@ -704,14 +714,14 @@ void main() {
 
   group('FilterTag', () {
     test('should create filter tag with correct properties', () {
-      const tag = FilterTag(
+      final tag = FilterTag(
         type: FilterTagType.search,
-        label: '搜索: test',
+        label: zh.shortVideoFilterActiveTagSearch('test'),
         value: 'test',
       );
 
       expect(tag.type, FilterTagType.search);
-      expect(tag.label, '搜索: test');
+      expect(tag.label, zh.shortVideoFilterActiveTagSearch('test'));
       expect(tag.value, 'test');
     });
   });
@@ -751,7 +761,7 @@ void main() {
         filter: FilterState(searchKeyword: 'test'),
         createdAt: DateTime.now(),
       );
-      expect(preset1.description, '搜索: test');
+      expect(preset1.summarize(zh), '搜索: test');
 
       final preset2 = FilterPreset(
         name: 'Test',
@@ -760,7 +770,7 @@ void main() {
         ),
         createdAt: DateTime.now(),
       );
-      expect(preset2.description, '2个状态');
+      expect(preset2.summarize(zh), '2个状态');
 
       final preset3 = FilterPreset(
         name: 'Test',
@@ -771,14 +781,14 @@ void main() {
         ),
         createdAt: DateTime.now(),
       );
-      expect(preset3.description, '搜索: test, 1个状态, 1个质量');
+      expect(preset3.summarize(zh), '搜索: test, 1个状态, 1个质量');
 
       final preset4 = FilterPreset(
         name: 'Test',
         filter: FilterState.empty(),
         createdAt: DateTime.now(),
       );
-      expect(preset4.description, '无过滤条件');
+      expect(preset4.summarize(zh), '无过滤条件');
     });
 
     test('should serialize to JSON correctly', () {
@@ -864,6 +874,9 @@ void main() {
       List<FilterPreset>? presets,
     }) {
       return MaterialApp(
+        locale: const Locale('zh'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: FilterPanel(
             onFilterChanged: (filter) {

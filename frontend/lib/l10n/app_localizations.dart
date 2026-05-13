@@ -15744,6 +15744,360 @@ abstract class AppLocalizations {
   /// **'Live-action mode prioritizes character setup, scene references, clip footage, and voiceover manuals.'**
   String get shortVideoReadinessIntroLive;
 
+  /// No description provided for @shortVideoStageCard1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'1. Kickoff'**
+  String get shortVideoStageCard1Title;
+
+  /// No description provided for @shortVideoStageCard1Status.
+  ///
+  /// In en, this message translates to:
+  /// **'Available now'**
+  String get shortVideoStageCard1Status;
+
+  /// No description provided for @shortVideoStageCard1DetailAnimated.
+  ///
+  /// In en, this message translates to:
+  /// **'From the project, align theme, art style, creative bible, and character assets.'**
+  String get shortVideoStageCard1DetailAnimated;
+
+  /// No description provided for @shortVideoStageCard1DetailLive.
+  ///
+  /// In en, this message translates to:
+  /// **'From the project, align theme, live references, creative bible, and character setup.'**
+  String get shortVideoStageCard1DetailLive;
+
+  /// No description provided for @shortVideoStageCard2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'2. Generate script'**
+  String get shortVideoStageCard2Title;
+
+  /// No description provided for @shortVideoStageCard2Status.
+  ///
+  /// In en, this message translates to:
+  /// **'Available now'**
+  String get shortVideoStageCard2Status;
+
+  /// No description provided for @shortVideoStageCard2DetailAnimated.
+  ///
+  /// In en, this message translates to:
+  /// **'Reuse the script workspace: context probes, sub-agents, and body writeback.'**
+  String get shortVideoStageCard2DetailAnimated;
+
+  /// No description provided for @shortVideoStageCard2DetailLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Reuse the script workspace for scripts closer to VO, performance, and scene pacing.'**
+  String get shortVideoStageCard2DetailLive;
+
+  /// No description provided for @shortVideoStageCard3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'3. Organize assets'**
+  String get shortVideoStageCard3Title;
+
+  /// No description provided for @shortVideoStageCard3Status.
+  ///
+  /// In en, this message translates to:
+  /// **'Good next focus'**
+  String get shortVideoStageCard3Status;
+
+  /// No description provided for @shortVideoStageCard3DetailAnimated.
+  ///
+  /// In en, this message translates to:
+  /// **'Combine asset search, image generation, shot candidates, and narration drafts in one flow.'**
+  String get shortVideoStageCard3DetailAnimated;
+
+  /// No description provided for @shortVideoStageCard3DetailLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Combine live references, shot candidates, narration drafts, and asset triage in one flow.'**
+  String get shortVideoStageCard3DetailLive;
+
+  /// No description provided for @shortVideoStageCard4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'4. Delivery & review'**
+  String get shortVideoStageCard4Title;
+
+  /// No description provided for @shortVideoStageCard4Status.
+  ///
+  /// In en, this message translates to:
+  /// **'Basics in place'**
+  String get shortVideoStageCard4Status;
+
+  /// No description provided for @shortVideoStageCard4DetailAnimated.
+  ///
+  /// In en, this message translates to:
+  /// **'Wire production workspace, task center, and quality review into a traceable delivery loop.'**
+  String get shortVideoStageCard4DetailAnimated;
+
+  /// No description provided for @shortVideoStageCard4DetailLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Wire production workspace, task center, and quality review—prioritize cast consistency and realism checks.'**
+  String get shortVideoStageCard4DetailLive;
+
+  /// No description provided for @shortVideoMigrationSummaryAnimated.
+  ///
+  /// In en, this message translates to:
+  /// **'Start with one entry point, then deepen the chain. Wave 1 wires existing projects, scripts, production, tasks, and QA; wave 2 adds auto narration, subtitle styling, and one-click assembly.'**
+  String get shortVideoMigrationSummaryAnimated;
+
+  /// No description provided for @shortVideoMigrationSummaryLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Live-action uses the same entry first. Wave 1 makes user choices explicit; later add live reference media, VO tone, shot realism, and delivery acceptance rules.'**
+  String get shortVideoMigrationSummaryLive;
+
+  /// No description provided for @shortVideoFilterPanelSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search subtitles or narration… (Ctrl+F / Cmd+F)'**
+  String get shortVideoFilterPanelSearchHint;
+
+  /// No description provided for @shortVideoFilterPanelClearButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get shortVideoFilterPanelClearButton;
+
+  /// No description provided for @shortVideoFilterPanelSavePresetButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Save preset'**
+  String get shortVideoFilterPanelSavePresetButton;
+
+  /// No description provided for @shortVideoFilterPanelApplyPresetTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply preset'**
+  String get shortVideoFilterPanelApplyPresetTooltip;
+
+  /// No description provided for @shortVideoFilterPanelDeletePresetTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete preset'**
+  String get shortVideoFilterPanelDeletePresetTooltip;
+
+  /// No description provided for @shortVideoFilterPanelSearchScopeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Search scope:'**
+  String get shortVideoFilterPanelSearchScopeLabel;
+
+  /// No description provided for @shortVideoFilterPanelSearchChipSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtitles'**
+  String get shortVideoFilterPanelSearchChipSubtitle;
+
+  /// No description provided for @shortVideoFilterPanelSearchChipVoiceover.
+  ///
+  /// In en, this message translates to:
+  /// **'Narration'**
+  String get shortVideoFilterPanelSearchChipVoiceover;
+
+  /// No description provided for @shortVideoFilterPanelStatusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Status filters'**
+  String get shortVideoFilterPanelStatusLabel;
+
+  /// No description provided for @shortVideoFilterPanelQualityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality filters'**
+  String get shortVideoFilterPanelQualityLabel;
+
+  /// No description provided for @shortVideoFilterPanelDropdownAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get shortVideoFilterPanelDropdownAll;
+
+  /// No description provided for @shortVideoFilterPanelDropdownSelectedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String shortVideoFilterPanelDropdownSelectedCount(int count);
+
+  /// No description provided for @shortVideoFilterActiveTagSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search: {keyword}'**
+  String shortVideoFilterActiveTagSearch(String keyword);
+
+  /// No description provided for @shortVideoFilterPresetPartSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search: {keyword}'**
+  String shortVideoFilterPresetPartSearch(String keyword);
+
+  /// No description provided for @shortVideoFilterPresetPartStatusCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} status filter(s)'**
+  String shortVideoFilterPresetPartStatusCount(int count);
+
+  /// No description provided for @shortVideoFilterPresetPartQualityCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} quality filter(s)'**
+  String shortVideoFilterPresetPartQualityCount(int count);
+
+  /// No description provided for @shortVideoFilterPresetSummaryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No active filters'**
+  String get shortVideoFilterPresetSummaryEmpty;
+
+  /// No description provided for @shortVideoFilterSnackbarNoActiveFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'No active filters to save.'**
+  String get shortVideoFilterSnackbarNoActiveFilters;
+
+  /// No description provided for @shortVideoFilterSnackbarPresetSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Preset \"{name}\" saved.'**
+  String shortVideoFilterSnackbarPresetSaved(String name);
+
+  /// No description provided for @shortVideoFilterSnackbarPresetApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'Applied preset \"{name}\".'**
+  String shortVideoFilterSnackbarPresetApplied(String name);
+
+  /// No description provided for @shortVideoFilterSnackbarPresetDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted preset \"{name}\".'**
+  String shortVideoFilterSnackbarPresetDeleted(String name);
+
+  /// No description provided for @shortVideoFilterSaveDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save filter preset'**
+  String get shortVideoFilterSaveDialogTitle;
+
+  /// No description provided for @shortVideoFilterSaveDialogNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Preset name'**
+  String get shortVideoFilterSaveDialogNameLabel;
+
+  /// No description provided for @shortVideoFilterSaveDialogNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. enabled with video'**
+  String get shortVideoFilterSaveDialogNameHint;
+
+  /// No description provided for @shortVideoFilterStatusEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Enabled'**
+  String get shortVideoFilterStatusEnabled;
+
+  /// No description provided for @shortVideoFilterStatusDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Disabled'**
+  String get shortVideoFilterStatusDisabled;
+
+  /// No description provided for @shortVideoFilterStatusHasVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Has video'**
+  String get shortVideoFilterStatusHasVideo;
+
+  /// No description provided for @shortVideoFilterStatusNoVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'No video'**
+  String get shortVideoFilterStatusNoVideo;
+
+  /// No description provided for @shortVideoFilterStatusHasDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Has duration'**
+  String get shortVideoFilterStatusHasDuration;
+
+  /// No description provided for @shortVideoFilterStatusNoDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'No duration'**
+  String get shortVideoFilterStatusNoDuration;
+
+  /// No description provided for @shortVideoFilterStatusHasSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Has subtitles'**
+  String get shortVideoFilterStatusHasSubtitle;
+
+  /// No description provided for @shortVideoFilterStatusNoSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No subtitles'**
+  String get shortVideoFilterStatusNoSubtitle;
+
+  /// No description provided for @shortVideoFilterStatusHasVoiceover.
+  ///
+  /// In en, this message translates to:
+  /// **'Has narration'**
+  String get shortVideoFilterStatusHasVoiceover;
+
+  /// No description provided for @shortVideoFilterStatusNoVoiceover.
+  ///
+  /// In en, this message translates to:
+  /// **'No narration'**
+  String get shortVideoFilterStatusNoVoiceover;
+
+  /// No description provided for @shortVideoFilterStatusVoiceoverFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Narration failed'**
+  String get shortVideoFilterStatusVoiceoverFailed;
+
+  /// No description provided for @shortVideoFilterQualityHasBadExample.
+  ///
+  /// In en, this message translates to:
+  /// **'Has bad cases'**
+  String get shortVideoFilterQualityHasBadExample;
+
+  /// No description provided for @shortVideoFilterQualityNoBadExample.
+  ///
+  /// In en, this message translates to:
+  /// **'No bad cases'**
+  String get shortVideoFilterQualityNoBadExample;
+
+  /// No description provided for @shortVideoFilterQualityGenerationStage.
+  ///
+  /// In en, this message translates to:
+  /// **'Generation stage'**
+  String get shortVideoFilterQualityGenerationStage;
+
+  /// No description provided for @shortVideoFilterQualityPostProductionStage.
+  ///
+  /// In en, this message translates to:
+  /// **'Post stage'**
+  String get shortVideoFilterQualityPostProductionStage;
+
+  /// No description provided for @shortVideoFilterQualityHasDegradation.
+  ///
+  /// In en, this message translates to:
+  /// **'Has degradation'**
+  String get shortVideoFilterQualityHasDegradation;
+
+  /// No description provided for @shortVideoFilterQualityNoDegradation.
+  ///
+  /// In en, this message translates to:
+  /// **'No degradation'**
+  String get shortVideoFilterQualityNoDegradation;
+
   /// No description provided for @shortVideoSpacePageTitle.
   ///
   /// In en, this message translates to:

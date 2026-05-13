@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
+
 /// Filter panel component for short video assembly
 /// 
 /// Provides multi-dimensional filtering and search functionality:
@@ -177,8 +179,9 @@ class _FilterPanelState extends State<FilterPanel> {
   }
 
   void _savePreset() {
+    final l10n = AppLocalizations.of(context)!;
     if (_currentFilter.isEmpty) {
-      _showMessage('当前没有活动的过滤条件');
+      _showMessage(l10n.shortVideoFilterSnackbarNoActiveFilters);
       return;
     }
 
@@ -195,24 +198,26 @@ class _FilterPanelState extends State<FilterPanel> {
         );
         final updatedPresets = [...widget.presets, newPreset];
         widget.onPresetsChanged?.call(updatedPresets);
-        _showMessage('预设 "$name" 已保存');
+        _showMessage(l10n.shortVideoFilterSnackbarPresetSaved(name));
       }
     });
   }
 
   void _applyPreset(FilterPreset preset) {
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _currentFilter = preset.filter;
       _searchController.text = preset.filter.searchKeyword;
     });
     widget.onFilterChanged(_currentFilter);
-    _showMessage('已应用预设 "${preset.name}"');
+    _showMessage(l10n.shortVideoFilterSnackbarPresetApplied(preset.name));
   }
 
   void _deletePreset(FilterPreset preset) {
+    final l10n = AppLocalizations.of(context)!;
     final updatedPresets = widget.presets.where((p) => p != preset).toList();
     widget.onPresetsChanged?.call(updatedPresets);
-    _showMessage('预设 "${preset.name}" 已删除');
+    _showMessage(l10n.shortVideoFilterSnackbarPresetDeleted(preset.name));
   }
 
   void _showMessage(String message) {
@@ -224,14 +229,14 @@ class _FilterPanelState extends State<FilterPanel> {
     );
   }
 
-  List<FilterTag> _getActiveFilterTags() {
+  List<FilterTag> _getActiveFilterTags(AppLocalizations l10n) {
     final tags = <FilterTag>[];
 
     // Search keyword tag
     if (_currentFilter.searchKeyword.isNotEmpty) {
       tags.add(FilterTag(
         type: FilterTagType.search,
-        label: '搜索: ${_currentFilter.searchKeyword}',
+        label: l10n.shortVideoFilterActiveTagSearch(_currentFilter.searchKeyword),
         value: _currentFilter.searchKeyword,
       ));
     }
@@ -240,7 +245,7 @@ class _FilterPanelState extends State<FilterPanel> {
     for (final filter in _currentFilter.statusFilters) {
       tags.add(FilterTag(
         type: FilterTagType.status,
-        label: filter.label,
+        label: filter.localizedLabel(l10n),
         value: filter,
       ));
     }
@@ -249,7 +254,7 @@ class _FilterPanelState extends State<FilterPanel> {
     for (final filter in _currentFilter.qualityFilters) {
       tags.add(FilterTag(
         type: FilterTagType.quality,
-        label: filter.label,
+        label: filter.localizedLabel(l10n),
         value: filter,
       ));
     }
@@ -259,7 +264,8 @@ class _FilterPanelState extends State<FilterPanel> {
 
   @override
   Widget build(BuildContext context) {
-    final activeTags = _getActiveFilterTags();
+    final l10n = AppLocalizations.of(context)!;
+    final activeTags = _getActiveFilterTags(l10n);
     final hasActiveFilters = activeTags.isNotEmpty;
 
     return Container(
@@ -287,7 +293,7 @@ class _FilterPanelState extends State<FilterPanel> {
                   focusNode: _searchFocusNode,
                   onChanged: _onSearchChanged,
                   decoration: InputDecoration(
-                    hintText: '搜索字幕或旁白内容... (Ctrl+F / Cmd+F)',
+                    hintText: l10n.shortVideoFilterPanelSearchHint,
                     prefixIcon: const Icon(Icons.search),
                     suffixIcon: _searchController.text.isNotEmpty
                         ? IconButton(
@@ -333,7 +339,7 @@ class _FilterPanelState extends State<FilterPanel> {
                 OutlinedButton.icon(
                   onPressed: _clearAllFilters,
                   icon: const Icon(Icons.clear_all, size: 18),
-                  label: const Text('清除'),
+                  label: Text(l10n.shortVideoFilterPanelClearButton),
                 ),
               
               // Save preset button
@@ -343,14 +349,14 @@ class _FilterPanelState extends State<FilterPanel> {
                 OutlinedButton.icon(
                   onPressed: _savePreset,
                   icon: const Icon(Icons.bookmark_add, size: 18),
-                  label: const Text('保存预设'),
+                  label: Text(l10n.shortVideoFilterPanelSavePresetButton),
                 ),
 
               // Presets dropdown
               if (widget.presets.isNotEmpty) ...[
                 const SizedBox(width: 8),
                 PopupMenuButton<FilterPreset>(
-                  tooltip: '应用预设',
+                  tooltip: l10n.shortVideoFilterPanelApplyPresetTooltip,
                   icon: const Icon(Icons.bookmarks),
                   onSelected: _applyPreset,
                   itemBuilder: (context) => [
@@ -369,7 +375,7 @@ class _FilterPanelState extends State<FilterPanel> {
                                     style: Theme.of(context).textTheme.bodyMedium,
                                   ),
                                   Text(
-                                    preset.description,
+                                    preset.summarize(l10n),
                                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                                     ),
@@ -383,7 +389,7 @@ class _FilterPanelState extends State<FilterPanel> {
                                 Navigator.of(context).pop();
                                 _deletePreset(preset);
                               },
-                              tooltip: '删除预设',
+                              tooltip: l10n.shortVideoFilterPanelDeletePresetTooltip,
                             ),
                           ],
                         ),
@@ -399,16 +405,16 @@ class _FilterPanelState extends State<FilterPanel> {
             const SizedBox(height: 8),
             Row(
               children: [
-                const Text('搜索范围：'),
+                Text(l10n.shortVideoFilterPanelSearchScopeLabel),
                 const SizedBox(width: 8),
                 FilterChip(
-                  label: const Text('字幕'),
+                  label: Text(l10n.shortVideoFilterPanelSearchChipSubtitle),
                   selected: _currentFilter.searchInSubtitles,
                   onSelected: _onSearchInSubtitlesChanged,
                 ),
                 const SizedBox(width: 8),
                 FilterChip(
-                  label: const Text('旁白'),
+                  label: Text(l10n.shortVideoFilterPanelSearchChipVoiceover),
                   selected: _currentFilter.searchInVoiceover,
                   onSelected: _onSearchInVoiceoverChanged,
                 ),
@@ -450,10 +456,11 @@ class _StatusFilterDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return PopupMenuButton<ShotStatusFilter>(
       child: InputDecorator(
         decoration: InputDecoration(
-          labelText: '状态过滤',
+          labelText: l10n.shortVideoFilterPanelStatusLabel,
           border: const OutlineInputBorder(),
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
@@ -463,8 +470,8 @@ class _StatusFilterDropdown extends StatelessWidget {
         ),
         child: Text(
           selectedFilters.isEmpty
-              ? '全部'
-              : '已选 ${selectedFilters.length} 项',
+              ? l10n.shortVideoFilterPanelDropdownAll
+              : l10n.shortVideoFilterPanelDropdownSelectedCount(selectedFilters.length),
           style: Theme.of(context).textTheme.bodyMedium,
         ),
       ),
@@ -482,7 +489,7 @@ class _StatusFilterDropdown extends StatelessWidget {
           CheckedPopupMenuItem<ShotStatusFilter>(
             value: filter,
             checked: selectedFilters.contains(filter),
-            child: Text(filter.label),
+            child: Text(filter.localizedLabel(l10n)),
           ),
       ],
     );
@@ -501,10 +508,11 @@ class _QualityFilterDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return PopupMenuButton<QualityFilter>(
       child: InputDecorator(
         decoration: InputDecoration(
-          labelText: '质量过滤',
+          labelText: l10n.shortVideoFilterPanelQualityLabel,
           border: const OutlineInputBorder(),
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
@@ -514,8 +522,8 @@ class _QualityFilterDropdown extends StatelessWidget {
         ),
         child: Text(
           selectedFilters.isEmpty
-              ? '全部'
-              : '已选 ${selectedFilters.length} 项',
+              ? l10n.shortVideoFilterPanelDropdownAll
+              : l10n.shortVideoFilterPanelDropdownSelectedCount(selectedFilters.length),
           style: Theme.of(context).textTheme.bodyMedium,
         ),
       ),
@@ -533,7 +541,7 @@ class _QualityFilterDropdown extends StatelessWidget {
           CheckedPopupMenuItem<QualityFilter>(
             value: filter,
             checked: selectedFilters.contains(filter),
-            child: Text(filter.label),
+            child: Text(filter.localizedLabel(l10n)),
           ),
       ],
     );
@@ -597,35 +605,75 @@ class FilterState {
 
 /// Shot status filter enum
 enum ShotStatusFilter {
-  enabled('已启用'),
-  disabled('已禁用'),
-  hasVideo('有视频'),
-  noVideo('无视频'),
-  hasDuration('有时长'),
-  noDuration('无时长'),
-  hasSubtitle('有字幕'),
-  noSubtitle('无字幕'),
-  hasVoiceover('有配音'),
-  noVoiceover('无配音'),
-  voiceoverFailed('配音失败');
+  enabled,
+  disabled,
+  hasVideo,
+  noVideo,
+  hasDuration,
+  noDuration,
+  hasSubtitle,
+  noSubtitle,
+  hasVoiceover,
+  noVoiceover,
+  voiceoverFailed,
+}
 
-  const ShotStatusFilter(this.label);
-
-  final String label;
+extension ShotStatusFilterLocalization on ShotStatusFilter {
+  String localizedLabel(AppLocalizations l10n) {
+    switch (this) {
+      case ShotStatusFilter.enabled:
+        return l10n.shortVideoFilterStatusEnabled;
+      case ShotStatusFilter.disabled:
+        return l10n.shortVideoFilterStatusDisabled;
+      case ShotStatusFilter.hasVideo:
+        return l10n.shortVideoFilterStatusHasVideo;
+      case ShotStatusFilter.noVideo:
+        return l10n.shortVideoFilterStatusNoVideo;
+      case ShotStatusFilter.hasDuration:
+        return l10n.shortVideoFilterStatusHasDuration;
+      case ShotStatusFilter.noDuration:
+        return l10n.shortVideoFilterStatusNoDuration;
+      case ShotStatusFilter.hasSubtitle:
+        return l10n.shortVideoFilterStatusHasSubtitle;
+      case ShotStatusFilter.noSubtitle:
+        return l10n.shortVideoFilterStatusNoSubtitle;
+      case ShotStatusFilter.hasVoiceover:
+        return l10n.shortVideoFilterStatusHasVoiceover;
+      case ShotStatusFilter.noVoiceover:
+        return l10n.shortVideoFilterStatusNoVoiceover;
+      case ShotStatusFilter.voiceoverFailed:
+        return l10n.shortVideoFilterStatusVoiceoverFailed;
+    }
+  }
 }
 
 /// Quality filter enum
 enum QualityFilter {
-  hasBadExample('有坏例'),
-  noBadExample('无坏例'),
-  generationStage('生成阶段'),
-  postProductionStage('后期阶段'),
-  hasDegradation('有退化'),
-  noDegradation('无退化');
+  hasBadExample,
+  noBadExample,
+  generationStage,
+  postProductionStage,
+  hasDegradation,
+  noDegradation,
+}
 
-  const QualityFilter(this.label);
-
-  final String label;
+extension QualityFilterLocalization on QualityFilter {
+  String localizedLabel(AppLocalizations l10n) {
+    switch (this) {
+      case QualityFilter.hasBadExample:
+        return l10n.shortVideoFilterQualityHasBadExample;
+      case QualityFilter.noBadExample:
+        return l10n.shortVideoFilterQualityNoBadExample;
+      case QualityFilter.generationStage:
+        return l10n.shortVideoFilterQualityGenerationStage;
+      case QualityFilter.postProductionStage:
+        return l10n.shortVideoFilterQualityPostProductionStage;
+      case QualityFilter.hasDegradation:
+        return l10n.shortVideoFilterQualityHasDegradation;
+      case QualityFilter.noDegradation:
+        return l10n.shortVideoFilterQualityNoDegradation;
+    }
+  }
 }
 
 /// Filter tag model
@@ -665,23 +713,23 @@ class FilterPreset {
   /// Creation timestamp
   final DateTime createdAt;
 
-  /// Get preset description (summary of filters)
-  String get description {
+  /// Summary of filters for preset list rows
+  String summarize(AppLocalizations l10n) {
     final parts = <String>[];
-    
+
     if (filter.searchKeyword.isNotEmpty) {
-      parts.add('搜索: ${filter.searchKeyword}');
+      parts.add(l10n.shortVideoFilterPresetPartSearch(filter.searchKeyword));
     }
-    
+
     if (filter.statusFilters.isNotEmpty) {
-      parts.add('${filter.statusFilters.length}个状态');
+      parts.add(l10n.shortVideoFilterPresetPartStatusCount(filter.statusFilters.length));
     }
-    
+
     if (filter.qualityFilters.isNotEmpty) {
-      parts.add('${filter.qualityFilters.length}个质量');
+      parts.add(l10n.shortVideoFilterPresetPartQualityCount(filter.qualityFilters.length));
     }
-    
-    return parts.isEmpty ? '无过滤条件' : parts.join(', ');
+
+    return parts.isEmpty ? l10n.shortVideoFilterPresetSummaryEmpty : parts.join(', ');
   }
 
   /// Convert to JSON
@@ -750,15 +798,16 @@ class _SavePresetDialogState extends State<_SavePresetDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
-      title: const Text('保存过滤预设'),
+      title: Text(l10n.shortVideoFilterSaveDialogTitle),
       content: TextField(
         controller: _nameController,
         autofocus: true,
-        decoration: const InputDecoration(
-          labelText: '预设名称',
-          hintText: '例如：已启用且有视频',
-          border: OutlineInputBorder(),
+        decoration: InputDecoration(
+          labelText: l10n.shortVideoFilterSaveDialogNameLabel,
+          hintText: l10n.shortVideoFilterSaveDialogNameHint,
+          border: const OutlineInputBorder(),
         ),
         onSubmitted: (value) {
           if (value.trim().isNotEmpty) {
@@ -769,7 +818,7 @@ class _SavePresetDialogState extends State<_SavePresetDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('取消'),
+          child: Text(l10n.notificationsActionCancel),
         ),
         FilledButton(
           onPressed: () {
@@ -778,7 +827,7 @@ class _SavePresetDialogState extends State<_SavePresetDialog> {
               Navigator.of(context).pop(name);
             }
           },
-          child: const Text('保存'),
+          child: Text(l10n.notificationsActionSave),
         ),
       ],
     );

@@ -601,32 +601,32 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
     );
     final stageCards = <ShortVideoStageCardData>[
       ShortVideoStageCardData(
-        title: '1. 立项',
-        status: '现在可用',
+        title: l10n.shortVideoStageCard1Title,
+        status: l10n.shortVideoStageCard1Status,
         detail: _isAnimated
-            ? '从项目开始收口题材、画风、创作手册和角色资产。'
-            : '从项目开始收口题材、真人参考、创作手册和角色设定。',
+            ? l10n.shortVideoStageCard1DetailAnimated
+            : l10n.shortVideoStageCard1DetailLive,
       ),
       ShortVideoStageCardData(
-        title: '2. 生成脚本',
-        status: '现在可用',
+        title: l10n.shortVideoStageCard2Title,
+        status: l10n.shortVideoStageCard2Status,
         detail: _isAnimated
-            ? '复用脚本工作区的上下文探测、子 Agent 和正文回写。'
-            : '复用脚本工作区生成更贴近口播、表演和场景调度的脚本版本。',
+            ? l10n.shortVideoStageCard2DetailAnimated
+            : l10n.shortVideoStageCard2DetailLive,
       ),
       ShortVideoStageCardData(
-        title: '3. 组织素材',
-        status: '适合下一步补齐',
+        title: l10n.shortVideoStageCard3Title,
+        status: l10n.shortVideoStageCard3Status,
         detail: _isAnimated
-            ? '把素材检索、资产出图、镜头候选和旁白草稿收成同一段流程。'
-            : '把真人参考图、镜头候选、旁白草稿和素材筛选收成同一段流程。',
+            ? l10n.shortVideoStageCard3DetailAnimated
+            : l10n.shortVideoStageCard3DetailLive,
       ),
       ShortVideoStageCardData(
-        title: '4. 出片与复核',
-        status: '基础已在',
+        title: l10n.shortVideoStageCard4Title,
+        status: l10n.shortVideoStageCard4Status,
         detail: _isAnimated
-            ? '挂接制作工作区、任务中心和质量评审，形成可追踪的成片闭环。'
-            : '挂接制作工作区、任务中心和质量评审，重点补演员一致性与真实感复核。',
+            ? l10n.shortVideoStageCard4DetailAnimated
+            : l10n.shortVideoStageCard4DetailLive,
       ),
     ];
     return Focus(
@@ -782,8 +782,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         nextStepButtonLabel: nextStepPlan.buttonLabel,
         stageCards: stageCards,
         migrationSummary: _isAnimated
-            ? '先做单入口，再补链路。第一波只编排现有项目、脚本、制作、任务、质检能力；第二波再补自动旁白、字幕样式和一键成片。'
-            : '真人模式也先走同一入口。第一波先把用户选择显式化，后面再补真人参考素材、口播语气、镜头真实度和成片验收规则。',
+            ? l10n.shortVideoMigrationSummaryAnimated
+            : l10n.shortVideoMigrationSummaryLive,
         onOpenScriptWorkspace: () {
           _syncSelectedProjectContext();
           widget.onOpenScriptWorkspace();

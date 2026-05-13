@@ -7535,6 +7535,121 @@
   "shortVideoMetricClips": "Clips",
   "shortVideoReadinessIntroAnimated": "Animated mode prioritizes style, characters, and storyboard continuity.",
   "shortVideoReadinessIntroLive": "Live-action mode prioritizes character setup, scene references, clip footage, and voiceover manuals.",
+  "shortVideoStageCard1Title": "1. Kickoff",
+  "shortVideoStageCard1Status": "Available now",
+  "shortVideoStageCard1DetailAnimated": "From the project, align theme, art style, creative bible, and character assets.",
+  "shortVideoStageCard1DetailLive": "From the project, align theme, live references, creative bible, and character setup.",
+  "shortVideoStageCard2Title": "2. Generate script",
+  "shortVideoStageCard2Status": "Available now",
+  "shortVideoStageCard2DetailAnimated": "Reuse the script workspace: context probes, sub-agents, and body writeback.",
+  "shortVideoStageCard2DetailLive": "Reuse the script workspace for scripts closer to VO, performance, and scene pacing.",
+  "shortVideoStageCard3Title": "3. Organize assets",
+  "shortVideoStageCard3Status": "Good next focus",
+  "shortVideoStageCard3DetailAnimated": "Combine asset search, image generation, shot candidates, and narration drafts in one flow.",
+  "shortVideoStageCard3DetailLive": "Combine live references, shot candidates, narration drafts, and asset triage in one flow.",
+  "shortVideoStageCard4Title": "4. Delivery & review",
+  "shortVideoStageCard4Status": "Basics in place",
+  "shortVideoStageCard4DetailAnimated": "Wire production workspace, task center, and quality review into a traceable delivery loop.",
+  "shortVideoStageCard4DetailLive": "Wire production workspace, task center, and quality review—prioritize cast consistency and realism checks.",
+  "shortVideoMigrationSummaryAnimated": "Start with one entry point, then deepen the chain. Wave 1 wires existing projects, scripts, production, tasks, and QA; wave 2 adds auto narration, subtitle styling, and one-click assembly.",
+  "shortVideoMigrationSummaryLive": "Live-action uses the same entry first. Wave 1 makes user choices explicit; later add live reference media, VO tone, shot realism, and delivery acceptance rules.",
+  "shortVideoFilterPanelSearchHint": "Search subtitles or narration… (Ctrl+F / Cmd+F)",
+  "shortVideoFilterPanelClearButton": "Clear",
+  "shortVideoFilterPanelSavePresetButton": "Save preset",
+  "shortVideoFilterPanelApplyPresetTooltip": "Apply preset",
+  "shortVideoFilterPanelDeletePresetTooltip": "Delete preset",
+  "shortVideoFilterPanelSearchScopeLabel": "Search scope:",
+  "shortVideoFilterPanelSearchChipSubtitle": "Subtitles",
+  "shortVideoFilterPanelSearchChipVoiceover": "Narration",
+  "shortVideoFilterPanelStatusLabel": "Status filters",
+  "shortVideoFilterPanelQualityLabel": "Quality filters",
+  "shortVideoFilterPanelDropdownAll": "All",
+  "shortVideoFilterPanelDropdownSelectedCount": "{count} selected",
+  "@shortVideoFilterPanelDropdownSelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoFilterActiveTagSearch": "Search: {keyword}",
+  "@shortVideoFilterActiveTagSearch": {
+    "placeholders": {
+      "keyword": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoFilterPresetPartSearch": "Search: {keyword}",
+  "@shortVideoFilterPresetPartSearch": {
+    "placeholders": {
+      "keyword": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoFilterPresetPartStatusCount": "{count} status filter(s)",
+  "@shortVideoFilterPresetPartStatusCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoFilterPresetPartQualityCount": "{count} quality filter(s)",
+  "@shortVideoFilterPresetPartQualityCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoFilterPresetSummaryEmpty": "No active filters",
+  "shortVideoFilterSnackbarNoActiveFilters": "No active filters to save.",
+  "shortVideoFilterSnackbarPresetSaved": "Preset \"{name}\" saved.",
+  "@shortVideoFilterSnackbarPresetSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoFilterSnackbarPresetApplied": "Applied preset \"{name}\".",
+  "@shortVideoFilterSnackbarPresetApplied": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoFilterSnackbarPresetDeleted": "Deleted preset \"{name}\".",
+  "@shortVideoFilterSnackbarPresetDeleted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoFilterSaveDialogTitle": "Save filter preset",
+  "shortVideoFilterSaveDialogNameLabel": "Preset name",
+  "shortVideoFilterSaveDialogNameHint": "e.g. enabled with video",
+  "shortVideoFilterStatusEnabled": "Enabled",
+  "shortVideoFilterStatusDisabled": "Disabled",
+  "shortVideoFilterStatusHasVideo": "Has video",
+  "shortVideoFilterStatusNoVideo": "No video",
+  "shortVideoFilterStatusHasDuration": "Has duration",
+  "shortVideoFilterStatusNoDuration": "No duration",
+  "shortVideoFilterStatusHasSubtitle": "Has subtitles",
+  "shortVideoFilterStatusNoSubtitle": "No subtitles",
+  "shortVideoFilterStatusHasVoiceover": "Has narration",
+  "shortVideoFilterStatusNoVoiceover": "No narration",
+  "shortVideoFilterStatusVoiceoverFailed": "Narration failed",
+  "shortVideoFilterQualityHasBadExample": "Has bad cases",
+  "shortVideoFilterQualityNoBadExample": "No bad cases",
+  "shortVideoFilterQualityGenerationStage": "Generation stage",
+  "shortVideoFilterQualityPostProductionStage": "Post stage",
+  "shortVideoFilterQualityHasDegradation": "Has degradation",
+  "shortVideoFilterQualityNoDegradation": "No degradation",
   "shortVideoSpacePageTitle": "Short video Space",
   "shortVideoSpacePageSubtitle": "Inspired by MoneyPrinterTurbo-style pipelines, this entry gathers the path from theme to finished cuts, then wires script, assets, narration, subtitles, and QA into one flow.",
   "shortVideoSpaceSectionCreativeMode": "Creative mode",
