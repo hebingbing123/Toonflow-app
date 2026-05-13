@@ -158,12 +158,6 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.shortVideoPublishOpsDraftCreated)),
       );
-    } on RustApiException catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.shortVideoPublishOpsCreateDraftFailed(describeUserVisibleApiError(l10n, e)))),
-        );
-      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -239,7 +233,7 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.shortVideoPublishOpsJobSubmitted)),
       );
-    } on RustApiException catch (e) {
+    } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -249,12 +243,6 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
               ),
             ),
           ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.shortVideoPublishOpsEnqueueFailed(describeUserVisibleApiError(l10n, e)))),
         );
       }
     } finally {
@@ -293,15 +281,13 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
           ok++;
           final title = draft.title.trim().isEmpty ? draft.id : draft.title.trim();
           summary.add(l10n.shortVideoPublishOpsBatchLineOk(title));
-        } on RustApiException catch (e) {
+        } catch (e) {
           summary.add(
             l10n.shortVideoPublishOpsBatchLineFail(
               draft.id,
               describeUserVisibleApiError(l10n, e),
             ),
           );
-        } catch (e) {
-          summary.add(l10n.shortVideoPublishOpsBatchLineFail(draft.id, describeUserVisibleApiError(l10n, e)));
         }
       }
       await _refreshPublishSlice(project, token);
@@ -348,15 +334,13 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
           await retryPublishJob(token, project.id, job.id);
           ok++;
           summary.add(l10n.shortVideoPublishOpsBatchLineRetryOk(job.id.substring(0, 8)));
-        } on RustApiException catch (e) {
+        } catch (e) {
           summary.add(
             l10n.shortVideoPublishOpsBatchLineFail(
               job.id.substring(0, 8),
               describeUserVisibleApiError(l10n, e),
             ),
           );
-        } catch (e) {
-          summary.add(l10n.shortVideoPublishOpsBatchLineFail(job.id.substring(0, 8), describeUserVisibleApiError(l10n, e)));
         }
       }
       await _refreshPublishSlice(project, token);
@@ -407,12 +391,6 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.shortVideoPublishOpsSemiAutoConfirmed)),
       );
-    } on RustApiException catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.shortVideoPublishOpsConfirmFailed(describeUserVisibleApiError(l10n, e)))),
-        );
-      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

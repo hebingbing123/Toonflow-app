@@ -39,7 +39,7 @@ extension ShortVideoSpaceSectionProject on _ShortVideoSpaceSectionState {
           _projectConfigLine = l10n.shortVideoProjectEmptyList;
         });
       }
-    } on RustApiException catch (e) {
+    } catch (e) {
       if (!mounted) {
         return;
       }
@@ -48,14 +48,6 @@ extension ShortVideoSpaceSectionProject on _ShortVideoSpaceSectionState {
         _projectConfigLine = l10n.shortVideoProjectLoadFailed(
           describeUserVisibleApiError(l10n, e),
         );
-      });
-    } catch (e) {
-      if (!mounted) {
-        return;
-      }
-      final l10n = AppLocalizations.of(context)!;
-      setState(() {
-        _projectConfigLine = l10n.shortVideoProjectLoadFailed(describeUserVisibleApiError(l10n, e));
       });
     } finally {
       if (mounted) {
@@ -188,7 +180,7 @@ extension ShortVideoSpaceSectionProject on _ShortVideoSpaceSectionState {
       });
       _syncSelectedProjectContext();
       await _loadProjectOverview();
-    } on RustApiException catch (e) {
+    } catch (e) {
       if (!mounted) {
         return;
       }
@@ -197,14 +189,6 @@ extension ShortVideoSpaceSectionProject on _ShortVideoSpaceSectionState {
         _projectConfigLine = errL10n.shortVideoProjectCreateFailed(
           describeUserVisibleApiError(errL10n, e),
         );
-      });
-    } catch (e) {
-      if (!mounted) {
-        return;
-      }
-      final errL10n = AppLocalizations.of(context)!;
-      setState(() {
-        _projectConfigLine = errL10n.shortVideoProjectCreateFailed(describeUserVisibleApiError(errL10n, e));
       });
     } finally {
       if (mounted) {
@@ -271,7 +255,7 @@ extension ShortVideoSpaceSectionProject on _ShortVideoSpaceSectionState {
       });
       _syncSelectedProjectContext();
       _loadProjectOverview();
-    } on RustApiException catch (e) {
+    } catch (e) {
       if (!mounted) {
         return;
       }
@@ -280,14 +264,6 @@ extension ShortVideoSpaceSectionProject on _ShortVideoSpaceSectionState {
         _projectConfigLine = errL10n.shortVideoProjectSaveFailed(
           describeUserVisibleApiError(errL10n, e),
         );
-      });
-    } catch (e) {
-      if (!mounted) {
-        return;
-      }
-      final errL10n = AppLocalizations.of(context)!;
-      setState(() {
-        _projectConfigLine = errL10n.shortVideoProjectSaveFailed(describeUserVisibleApiError(errL10n, e));
       });
     } finally {
       if (mounted) {

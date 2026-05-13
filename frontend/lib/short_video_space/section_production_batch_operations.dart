@@ -88,13 +88,6 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
         );
 
         await refreshData();
-      } on RustApiException catch (e) {
-        showFeedback(
-          l10n.shortVideoBatchEnableFailedError(
-            describeUserVisibleApiError(l10n, e),
-          ),
-          isSuccess: false,
-        );
       } catch (e) {
         showFeedback(
           l10n.shortVideoBatchEnableFailedError(
@@ -178,13 +171,6 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
         );
 
         await refreshData();
-      } on RustApiException catch (e) {
-        showFeedback(
-          l10n.shortVideoBatchDisableFailedError(
-            describeUserVisibleApiError(l10n, e),
-          ),
-          isSuccess: false,
-        );
       } catch (e) {
         showFeedback(
           l10n.shortVideoBatchDisableFailedError(
@@ -413,13 +399,6 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
       );
 
       await refreshData();
-    } on RustApiException catch (e) {
-      showFeedback(
-        l10n.shortVideoBatchReplaceFailedError(
-          describeUserVisibleApiError(l10n, e),
-        ),
-        isSuccess: false,
-      );
     } catch (e) {
       showFeedback(
         l10n.shortVideoBatchReplaceFailedError(
@@ -602,23 +581,6 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
       totalProcessed = eligibleShots.length;
       totalSuccessful = response.succeeded;
       totalFailed = response.failed;
-    } on RustApiException catch (e) {
-      totalProcessed = eligibleShots.length;
-      totalFailed = eligibleShots.length;
-      for (final shot in eligibleShots) {
-        failedItems.add(
-          BatchOperationFailedItem(
-            shotId: shot.storyboardNumericId,
-            errorMessage: describeUserVisibleApiError(l10n, e),
-          ),
-        );
-      }
-      showFeedback(
-        l10n.shortVideoBatchVoiceoverGenFailedError(
-          describeUserVisibleApiError(l10n, e),
-        ),
-        isSuccess: false,
-      );
     } catch (e) {
       totalProcessed = eligibleShots.length;
       totalFailed = eligibleShots.length;
@@ -740,18 +702,6 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
           isSuccess: false,
         );
       }
-    } on RustApiException catch (e) {
-      // Close progress dialog
-      if (context.mounted) {
-        Navigator.of(context).pop();
-      }
-
-      showFeedback(
-        l10n.shortVideoBatchVoiceoverSingleFailedError(
-          describeUserVisibleApiError(l10n, e),
-        ),
-        isSuccess: false,
-      );
     } catch (e) {
       // Close progress dialog
       if (context.mounted) {
