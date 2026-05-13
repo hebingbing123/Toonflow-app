@@ -146,14 +146,6 @@ extension _StoryboardWorkbenchVideoActions on _StoryboardWorkbenchPanelState {
     _applyWorkbenchState(() => _saving = true);
     try {
       await action();
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-      _showWorkbenchFailureSnackBar(
-        actionSummary: l10n.storyboardActionOperationFailedSummary,
-        recommendedAction: _currentDiagnosis().recommendedAction,
-        error: e,
-        fallbackDetail: l10n.storyboardActionOperationFailedDetail,
-      );
     } on FormatException catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(

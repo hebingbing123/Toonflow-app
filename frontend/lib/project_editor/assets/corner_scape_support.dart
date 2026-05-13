@@ -153,15 +153,6 @@ class CornerScapeWorkbenchController {
         );
       });
       await loadPreview(setState);
-    } on RustApiException catch (e) {
-      setState(() {
-        session.summaryLine = l10n.projectEditorAssetsCornerScapeLoadFailed(
-          describeUserVisibleApiError(l10n, e),
-        );
-        session.selectedAssetNumericId = null;
-        session.selectedHistoryImageId = null;
-        session.selectedPreviewBytes = null;
-      });
     } catch (e) {
       setState(() {
         session.summaryLine = l10n.projectEditorAssetsCornerScapeLoadFailed(

@@ -72,25 +72,17 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
           ..addEntries(rows.map((row) => MapEntry(row.userId, row.role)));
         _loading = false;
       });
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _projectRows = const <ProjectMemberResponse>[];
-        _pendingRole.clear();
-        _loading = false;
-        if (e.statusCode == 403) {
-          _projectMembersForbidden = true;
-        } else {
-          _error = describeUserVisibleApiError(l10n, e);
-        }
-      });
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _projectRows = const <ProjectMemberResponse>[];
         _pendingRole.clear();
         _loading = false;
-        _error = describeUserVisibleApiError(l10n, e);
+        if (e is RustApiException && e.statusCode == 403) {
+          _projectMembersForbidden = true;
+        } else {
+          _error = describeUserVisibleApiError(l10n, e);
+        }
       });
     }
 
@@ -126,25 +118,17 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
         _loadingWorkspaceMembers = false;
         _selectedWorkspaceCandidateUserId = _defaultWorkspaceCandidateUserId(rows);
       });
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _workspaceRows = const <WorkspaceMemberResponse>[];
-        _loadingWorkspaceMembers = false;
-        _selectedWorkspaceCandidateUserId = null;
-        if (e.statusCode == 403) {
-          _workspaceMembersForbidden = true;
-        } else {
-          _workspaceMembersError = describeUserVisibleApiError(l10n, e);
-        }
-      });
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _workspaceRows = const <WorkspaceMemberResponse>[];
         _loadingWorkspaceMembers = false;
         _selectedWorkspaceCandidateUserId = null;
-        _workspaceMembersError = describeUserVisibleApiError(l10n, e);
+        if (e is RustApiException && e.statusCode == 403) {
+          _workspaceMembersForbidden = true;
+        } else {
+          _workspaceMembersError = describeUserVisibleApiError(l10n, e);
+        }
       });
     }
   }
@@ -210,9 +194,6 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
       _manualUserIdCtrl.clear();
       _showSnack(l10n.projectMembersSnackMemberAdded);
       await _reload();
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-      _showSnack(describeUserVisibleApiError(l10n, e));
     } catch (e) {
       if (!mounted) return;
       _showSnack(describeUserVisibleApiError(l10n, e));
@@ -242,9 +223,6 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
       if (!mounted) return;
       _showSnack(l10n.projectMembersSnackRoleUpdated);
       await _reload();
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-      _showSnack(describeUserVisibleApiError(l10n, e));
     } catch (e) {
       if (!mounted) return;
       _showSnack(describeUserVisibleApiError(l10n, e));
@@ -267,9 +245,6 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
       if (!mounted) return;
       _showSnack(l10n.projectMembersSnackAclRemoved);
       await _reload();
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-      _showSnack(describeUserVisibleApiError(l10n, e));
     } catch (e) {
       if (!mounted) return;
       _showSnack(describeUserVisibleApiError(l10n, e));

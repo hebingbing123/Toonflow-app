@@ -38,11 +38,6 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
               response.data.length > 4 ? '…' : '',
             );
       productionSummaryLoaded[0] = true;
-    } on RustApiException catch (e) {
-      productionSummaryLoaded[0] = false;
-      productionSummaryLine[0] = l10n.scriptEditorStoryboardsProductionReadFailed(
-        describeUserVisibleApiError(l10n, e),
-      );
     } catch (e) {
       productionSummaryLoaded[0] = false;
       productionSummaryLine[0] = l10n.scriptEditorStoryboardsProductionReadFailed(
