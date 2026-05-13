@@ -138,7 +138,9 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
             ),
             FilledButton(
               onPressed: () => Navigator.of(ctx).pop(ctrl.text.trim()),
-              child: Text(l10n.shortVideoSpaceProductionAssemblyWriteBackVersion),
+              child: Text(
+                l10n.shortVideoSpaceProductionAssemblyWriteBackVersion,
+              ),
             ),
           ],
         );
@@ -264,7 +266,9 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
               if (seedUrl.isEmpty) {
                 ScaffoldMessenger.maybeOf(ctx)?.showSnackBar(
                   SnackBar(
-                    content: Text(l10n.shortVideoSpaceProductionAssemblyNoVideoUrl),
+                    content: Text(
+                      l10n.shortVideoSpaceProductionAssemblyNoVideoUrl,
+                    ),
                   ),
                 );
                 return;
@@ -346,16 +350,14 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                 for (final entry in byScript.entries) {
                   final scriptNumericId = entry.key;
                   final orderedStoryboardIds = entry.value;
-                  Map<String, dynamic> flowData;
-                  try {
-                    flowData = await fetchProductionFlowDataV1(
+                  final flowData = await fallbackOnRustApiException(
+                    () => fetchProductionFlowDataV1(
                       token,
                       projectUuid: project.id,
                       episodesId: scriptNumericId,
-                    );
-                  } on RustApiException {
-                    flowData = <String, dynamic>{};
-                  }
+                    ),
+                    <String, dynamic>{},
+                  );
                   flowData['storyboard'] = orderedStoryboardIds
                       .map((id) => <String, dynamic>{'id': id})
                       .toList(growable: false);
@@ -736,7 +738,9 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(l10n.shortVideoSpaceProductionAssemblyBasicOpsDescription),
+                    Text(
+                      l10n.shortVideoSpaceProductionAssemblyBasicOpsDescription,
+                    ),
                     const SizedBox(height: 4),
                     Text(
                       l10n.shortVideoSpaceProductionAssemblyBasicOpsNote,
@@ -916,7 +920,9 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                 ? null
                                 : () => unawaited(persistReorder()),
                             icon: const Icon(Icons.save_outlined),
-                            label: Text(l10n.shortVideoSpaceProductionAssemblySaveReorder),
+                            label: Text(
+                              l10n.shortVideoSpaceProductionAssemblySaveReorder,
+                            ),
                           ),
                           OutlinedButton.icon(
                             onPressed: operationInProgress
@@ -929,7 +935,9 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                     setLocalState(() {});
                                   },
                             icon: const Icon(Icons.undo_outlined),
-                            label: Text(l10n.shortVideoSpaceProductionAssemblyUndoToOpen),
+                            label: Text(
+                              l10n.shortVideoSpaceProductionAssemblyUndoToOpen,
+                            ),
                           ),
                           OutlinedButton.icon(
                             onPressed: operationInProgress
@@ -943,7 +951,9 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                     ),
                                   ),
                             icon: const Icon(Icons.record_voice_over_outlined),
-                            label: Text(l10n.shortVideoSpaceProductionAssemblyVoiceoverTasks),
+                            label: Text(
+                              l10n.shortVideoSpaceProductionAssemblyVoiceoverTasks,
+                            ),
                           ),
                           // Undo/Redo buttons
                           _buildUndoRedoToolbar(),
@@ -1045,9 +1055,10 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
               });
             } catch (e) {
               setState(() {
-                errorMessage = dialogL10n.shortVideoSpaceProductionAssemblyLoadFailed(
-                  describeUserVisibleApiError(dialogL10n, e),
-                );
+                errorMessage = dialogL10n
+                    .shortVideoSpaceProductionAssemblyLoadFailed(
+                      describeUserVisibleApiError(dialogL10n, e),
+                    );
                 loading = false;
               });
             }
@@ -1105,7 +1116,9 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                   )
                   .toList(growable: false);
               return AlertDialog(
-                title: Text(l10n.shortVideoSpaceProductionAssemblyVoiceoverTaskCenterTitle),
+                title: Text(
+                  l10n.shortVideoSpaceProductionAssemblyVoiceoverTaskCenterTitle,
+                ),
                 content: SizedBox(
                   width: 760,
                   height: 420,
@@ -1119,18 +1132,26 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                             items: [
                               DropdownMenuItem(
                                 value: '',
-                                child: Text(l10n.shortVideoSpaceProductionAssemblyAllStatus),
+                                child: Text(
+                                  l10n.shortVideoSpaceProductionAssemblyAllStatus,
+                                ),
                               ),
                               DropdownMenuItem(
                                 value: 'queued',
                                 child: Text(
-                                  shortVideoPublishJobStatusLabel(l10n, 'queued'),
+                                  shortVideoPublishJobStatusLabel(
+                                    l10n,
+                                    'queued',
+                                  ),
                                 ),
                               ),
                               DropdownMenuItem(
                                 value: 'running',
                                 child: Text(
-                                  shortVideoPublishJobStatusLabel(l10n, 'running'),
+                                  shortVideoPublishJobStatusLabel(
+                                    l10n,
+                                    'running',
+                                  ),
                                 ),
                               ),
                               DropdownMenuItem(
@@ -1145,7 +1166,10 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                               DropdownMenuItem(
                                 value: 'failed',
                                 child: Text(
-                                  shortVideoPublishJobStatusLabel(l10n, 'failed'),
+                                  shortVideoPublishJobStatusLabel(
+                                    l10n,
+                                    'failed',
+                                  ),
                                 ),
                               ),
                               DropdownMenuItem(
@@ -1174,12 +1198,16 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                 ? null
                                 : () => unawaited(loadTasks()),
                             icon: const Icon(Icons.refresh_outlined),
-                            label: Text(l10n.shortVideoSpaceProductionAssemblyRefresh),
+                            label: Text(
+                              l10n.shortVideoSpaceProductionAssemblyRefresh,
+                            ),
                           ),
                           const SizedBox(width: 8),
                           FilterChip(
                             selected: groupedByShot,
-                            label: Text(l10n.shortVideoSpaceProductionAssemblyGroupByShot),
+                            label: Text(
+                              l10n.shortVideoSpaceProductionAssemblyGroupByShot,
+                            ),
                             onSelected: requestBusy
                                 ? null
                                 : (selected) {
@@ -1326,26 +1354,22 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                       task.status == 'failed' &&
                                       task.taskId.trim().isNotEmpty;
                                   final audioSuffix = hasAudio
-                                      ? l10n
-                                          .shortVideoSpaceProductionAssemblyTaskSubtitleAudioReady
+                                      ? l10n.shortVideoSpaceProductionAssemblyTaskSubtitleAudioReady
                                       : '';
                                   final errorSuffix =
                                       task.error != null &&
-                                              task.error!.isNotEmpty
-                                          ? l10n
-                                              .shortVideoSpaceProductionAssemblyTaskSubtitleError(
-                                                task.error!,
-                                              )
-                                          : '';
+                                          task.error!.isNotEmpty
+                                      ? l10n.shortVideoSpaceProductionAssemblyTaskSubtitleError(
+                                          task.error!,
+                                        )
+                                      : '';
                                   return ListTile(
                                     dense: true,
                                     title: Text(
                                       l10n.shortVideoSpaceProductionAssemblyTaskEntry(
                                         groupedByShot
-                                            ? l10n
-                                                .shortVideoSpaceProductionAssemblyLatestTask
-                                            : l10n
-                                                .shortVideoSpaceProductionAssemblyTask,
+                                            ? l10n.shortVideoSpaceProductionAssemblyLatestTask
+                                            : l10n.shortVideoSpaceProductionAssemblyTask,
                                         task.taskId.substring(0, 8),
                                         shortVideoPublishJobStatusLabel(
                                           l10n,
@@ -1390,8 +1414,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                               );
                                               if (!mounted) return;
                                               _showOperationFeedback(
-                                                l10n
-                                                    .shortVideoSpaceProductionAssemblyAudioLinkCopied,
+                                                l10n.shortVideoSpaceProductionAssemblyAudioLinkCopied,
                                                 isSuccess: true,
                                               );
                                             },
@@ -1412,10 +1435,11 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                                       );
                                                       if (!mounted) return;
                                                       _showOperationFeedback(
-                                                        l10n
-                                                            .shortVideoSpaceProductionAssemblyTaskCancelled(
-                                                          task.taskId
-                                                              .substring(0, 8),
+                                                        l10n.shortVideoSpaceProductionAssemblyTaskCancelled(
+                                                          task.taskId.substring(
+                                                            0,
+                                                            8,
+                                                          ),
                                                         ),
                                                         isSuccess: true,
                                                       );
@@ -1423,9 +1447,11 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                                     } catch (e) {
                                                       if (!mounted) return;
                                                       _showOperationFeedback(
-                                                        l10n
-                                                            .shortVideoSpaceProductionAssemblyCancelFailed(
-                                                          describeUserVisibleApiError(l10n, e),
+                                                        l10n.shortVideoSpaceProductionAssemblyCancelFailed(
+                                                          describeUserVisibleApiError(
+                                                            l10n,
+                                                            e,
+                                                          ),
                                                         ),
                                                         isSuccess: false,
                                                       );
@@ -1436,8 +1462,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                                     }
                                                   },
                                             child: Text(
-                                              l10n
-                                                  .shortVideoSpaceProductionAssemblyCancelTask,
+                                              l10n.shortVideoSpaceProductionAssemblyCancelTask,
                                             ),
                                           ),
                                         if (canRetry)
@@ -1482,8 +1507,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                                           );
                                                       if (!mounted) return;
                                                       _showOperationFeedback(
-                                                        l10n
-                                                            .shortVideoSpaceProductionAssemblyTaskRetried(
+                                                        l10n.shortVideoSpaceProductionAssemblyTaskRetried(
                                                           response.taskId
                                                               .substring(0, 8),
                                                         ),
@@ -1493,9 +1517,11 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                                     } catch (e) {
                                                       if (!mounted) return;
                                                       _showOperationFeedback(
-                                                        l10n
-                                                            .shortVideoSpaceProductionAssemblyRetryFailed(
-                                                          describeUserVisibleApiError(l10n, e),
+                                                        l10n.shortVideoSpaceProductionAssemblyRetryFailed(
+                                                          describeUserVisibleApiError(
+                                                            l10n,
+                                                            e,
+                                                          ),
                                                         ),
                                                         isSuccess: false,
                                                       );
@@ -1506,8 +1532,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                                     }
                                                   },
                                             child: Text(
-                                              l10n
-                                                  .shortVideoSpaceProductionAssemblyRetryTask,
+                                              l10n.shortVideoSpaceProductionAssemblyRetryTask,
                                             ),
                                           ),
                                       ],
@@ -1803,7 +1828,9 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                 setLocalState(() {});
                               }
                             : null,
-                        child: Text(l10n.shortVideoSpaceProductionAssemblyMoveUp),
+                        child: Text(
+                          l10n.shortVideoSpaceProductionAssemblyMoveUp,
+                        ),
                       ),
                       OutlinedButton(
                         onPressed: (canMoveDown && !operationInProgress)
@@ -1814,7 +1841,9 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                 setLocalState(() {});
                               }
                             : null,
-                        child: Text(l10n.shortVideoSpaceProductionAssemblyMoveDown),
+                        child: Text(
+                          l10n.shortVideoSpaceProductionAssemblyMoveDown,
+                        ),
                       ),
                       FilledButton.tonal(
                         onPressed: operationInProgress
@@ -1847,8 +1876,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                   context: ctx,
                                   builder: (dCtx) => AlertDialog(
                                     title: Text(
-                                      l10n
-                                          .shortVideoSpaceProductionAssemblySingleShotDurationTitle,
+                                      l10n.shortVideoSpaceProductionAssemblySingleShotDurationTitle,
                                     ),
                                     content: TextField(
                                       controller: ctrl,
@@ -1876,8 +1904,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                           Navigator.of(dCtx).pop(sec);
                                         },
                                         child: Text(
-                                          l10n
-                                              .shortVideoSpaceProductionAssemblyAlignAndWriteBack,
+                                          l10n.shortVideoSpaceProductionAssemblyAlignAndWriteBack,
                                         ),
                                       ),
                                     ],
@@ -1933,8 +1960,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                 },
                           icon: const Icon(Icons.record_voice_over),
                           label: Text(
-                            l10n
-                                .shortVideoSpaceProductionAssemblyGenerateVoiceover,
+                            l10n.shortVideoSpaceProductionAssemblyGenerateVoiceover,
                           ),
                         ),
                       // Preview voiceover audio button
@@ -1950,8 +1976,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                 },
                           icon: const Icon(Icons.play_circle_outline),
                           label: Text(
-                            l10n
-                                .shortVideoSpaceProductionAssemblyPreviewVoiceover,
+                            l10n.shortVideoSpaceProductionAssemblyPreviewVoiceover,
                           ),
                         ),
                     ],
@@ -1980,7 +2005,9 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
         builder: (ctx) {
           final l10n = AppLocalizations.of(ctx)!;
           return AlertDialog(
-            title: Text(l10n.shortVideoSpaceProductionAssemblyAssemblyStyleTitle),
+            title: Text(
+              l10n.shortVideoSpaceProductionAssemblyAssemblyStyleTitle,
+            ),
             content: SizedBox(
               width: 520,
               child: Column(
@@ -2001,8 +2028,8 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                     decoration: InputDecoration(
                       labelText: l10n
                           .shortVideoSpaceProductionAssemblyBgmStrategyLabel,
-                      hintText: l10n
-                          .shortVideoSpaceProductionAssemblyBgmStrategyHint,
+                      hintText:
+                          l10n.shortVideoSpaceProductionAssemblyBgmStrategyHint,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -2061,14 +2088,17 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                   } catch (e) {
                     if (!mounted) return;
                     _showOperationFeedback(
-                      rootL10n.shortVideoSpaceProductionAssemblyStyleWriteBackFailed(
-                        describeUserVisibleApiError(rootL10n, e),
-                      ),
+                      rootL10n
+                          .shortVideoSpaceProductionAssemblyStyleWriteBackFailed(
+                            describeUserVisibleApiError(rootL10n, e),
+                          ),
                       isSuccess: false,
                     );
                   }
                 },
-                child: Text(l10n.shortVideoSpaceProductionAssemblySaveAndRefresh),
+                child: Text(
+                  l10n.shortVideoSpaceProductionAssemblySaveAndRefresh,
+                ),
               ),
             ],
           );

@@ -74,21 +74,21 @@ void main() {
     expect(formatRetryAfterMsForDisplay(l10nZh, 0), '请稍后重试');
   });
 
-  test('concurrent_limit_exceeded uses dedicated message not quota retry text', () {
-    final l10nZh = lookupAppLocalizations(const Locale('zh'));
-    final message = formatRustApiExceptionForDisplay(
-      l10nZh,
-      RustApiException(
-        '{"code":"concurrent_limit_exceeded","message":"too many in flight"}',
-        statusCode: 429,
-      ),
-    );
+  test(
+    'concurrent_limit_exceeded uses dedicated message not quota retry text',
+    () {
+      final l10nZh = lookupAppLocalizations(const Locale('zh'));
+      final message = formatRustApiExceptionForDisplay(
+        l10nZh,
+        RustApiException(
+          '{"code":"concurrent_limit_exceeded","message":"too many in flight"}',
+          statusCode: 429,
+        ),
+      );
 
-    expect(
-      message,
-      '同时进行的工作区审计导出已达上限，请等待已有任务完成或结束后再试。',
-    );
-  });
+      expect(message, '同时进行的工作区审计导出已达上限，请等待已有任务完成或结束后再试。');
+    },
+  );
 
   test('reportRustOrDescribeApiError forwards RustApiException to sink', () {
     String? got;
@@ -117,15 +117,41 @@ void main() {
     expect(got!.isNotEmpty, true);
   });
 
-  test('showRustApiSnackBarIfRustThenDescribeUserVisible always delivers user-visible message', () {
-    final l10n = lookupAppLocalizations(const Locale('en'));
-    String? got;
-    showRustApiSnackBarIfRustThenDescribeUserVisible(
-      StateError('local'),
-      l10n: l10n,
-      onMessage: (m) => got = m,
+  test(
+    'showRustApiSnackBarIfRustThenDescribeUserVisible always delivers user-visible message',
+    () {
+      final l10n = lookupAppLocalizations(const Locale('en'));
+      String? got;
+      showRustApiSnackBarIfRustThenDescribeUserVisible(
+        StateError('local'),
+        l10n: l10n,
+        onMessage: (m) => got = m,
+      );
+      expect(got, isNotNull);
+      expect(got!.isNotEmpty, true);
+    },
+  );
+
+  test(
+    'fallbackOnRustApiException returns fallback when run throws RustApiException',
+    () async {
+      final v = await fallbackOnRustApiException(
+        () async => throw RustApiException('x', statusCode: 404),
+        7,
+      );
+      expect(v, 7);
+    },
+  );
+
+  test('fallbackOnRustApiException returns run result on success', () async {
+    final v = await fallbackOnRustApiException(() async => 42, 0);
+    expect(v, 42);
+  });
+
+  test('fallbackOnRustApiException propagates non-Rust errors', () async {
+    await expectLater(
+      fallbackOnRustApiException(() async => throw StateError('nope'), 0),
+      throwsA(isA<StateError>()),
     );
-    expect(got, isNotNull);
-    expect(got!.isNotEmpty, true);
   });
 }

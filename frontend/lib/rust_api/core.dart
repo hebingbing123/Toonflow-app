@@ -42,6 +42,19 @@ class RustApiException implements Exception {
   String toString() => 'RustApiException($statusCode): $message';
 }
 
+/// Runs [run] and returns its result; if it throws [RustApiException], returns [fallback] instead.
+/// Other errors are not caught.
+Future<T> fallbackOnRustApiException<T>(
+  Future<T> Function() run,
+  T fallback,
+) async {
+  try {
+    return await run();
+  } on RustApiException {
+    return fallback;
+  }
+}
+
 /// Treat **2xx** as success; otherwise throws [RustApiException.fromHttpResponse].
 void ensureHttpSuccess(http.Response res) {
   if (res.statusCode >= 200 && res.statusCode < 300) {

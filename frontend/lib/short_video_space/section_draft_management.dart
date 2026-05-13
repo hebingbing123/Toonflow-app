@@ -30,16 +30,14 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
 
       final firstScriptId = assembly.scripts.first.scriptNumericId;
 
-      Map<String, dynamic> flowData;
-      try {
-        flowData = await fetchProductionFlowDataV1(
+      final flowData = await fallbackOnRustApiException(
+        () => fetchProductionFlowDataV1(
           token,
           projectUuid: project.id,
           episodesId: firstScriptId,
-        );
-      } on RustApiException {
-        flowData = <String, dynamic>{};
-      }
+        ),
+        <String, dynamic>{},
+      );
 
       final versionsData =
           flowData['assembly_versions'] as Map<String, dynamic>?;
@@ -77,7 +75,9 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
         _showOperationFeedback(
-          l10n.shortVideoAssemblyDraftLoadFailed(describeUserVisibleApiError(l10n, e)),
+          l10n.shortVideoAssemblyDraftLoadFailed(
+            describeUserVisibleApiError(l10n, e),
+          ),
           isSuccess: false,
         );
       }
@@ -96,16 +96,14 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
       return;
     }
     final firstScriptId = assembly.scripts.first.scriptNumericId;
-    Map<String, dynamic> flowData;
-    try {
-      flowData = await fetchProductionFlowDataV1(
+    final flowData = await fallbackOnRustApiException(
+      () => fetchProductionFlowDataV1(
         token,
         projectUuid: project.id,
         episodesId: firstScriptId,
-      );
-    } on RustApiException {
-      flowData = <String, dynamic>{};
-    }
+      ),
+      <String, dynamic>{},
+    );
     final versionsData =
         flowData['assembly_versions'] as Map<String, dynamic>? ?? {};
     versionsData['drafts'] = _assemblyDrafts
@@ -229,16 +227,14 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
       }
 
       final firstScriptId = assembly.scripts.first.scriptNumericId;
-      Map<String, dynamic> flowData;
-      try {
-        flowData = await fetchProductionFlowDataV1(
+      final flowData = await fallbackOnRustApiException(
+        () => fetchProductionFlowDataV1(
           token,
           projectUuid: project.id,
           episodesId: firstScriptId,
-        );
-      } on RustApiException {
-        flowData = <String, dynamic>{};
-      }
+        ),
+        <String, dynamic>{},
+      );
 
       final newDraft = AssemblyDraft(
         id: 'draft_${DateTime.now().millisecondsSinceEpoch}',
@@ -288,7 +284,9 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
         _showOperationFeedback(
-          l10n.shortVideoAssemblyDraftSaveFailed(describeUserVisibleApiError(l10n, e)),
+          l10n.shortVideoAssemblyDraftSaveFailed(
+            describeUserVisibleApiError(l10n, e),
+          ),
           isSuccess: false,
         );
       }
@@ -323,7 +321,9 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
         _showOperationFeedback(
-          l10n.shortVideoAssemblyDraftRestoreFailed(describeUserVisibleApiError(l10n, e)),
+          l10n.shortVideoAssemblyDraftRestoreFailed(
+            describeUserVisibleApiError(l10n, e),
+          ),
           isSuccess: false,
         );
       }
@@ -347,16 +347,14 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
       }
 
       final firstScriptId = assembly.scripts.first.scriptNumericId;
-      Map<String, dynamic> flowData;
-      try {
-        flowData = await fetchProductionFlowDataV1(
+      final flowData = await fallbackOnRustApiException(
+        () => fetchProductionFlowDataV1(
           token,
           projectUuid: project.id,
           episodesId: firstScriptId,
-        );
-      } on RustApiException {
-        flowData = <String, dynamic>{};
-      }
+        ),
+        <String, dynamic>{},
+      );
 
       final versionsData =
           flowData['assembly_versions'] as Map<String, dynamic>? ?? {};
@@ -386,13 +384,18 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
       await _loadDraftsAndVersions();
 
       if (mounted) {
-        _showOperationFeedback(l10n.shortVideoAssemblyDraftDeleted, isSuccess: true);
+        _showOperationFeedback(
+          l10n.shortVideoAssemblyDraftDeleted,
+          isSuccess: true,
+        );
       }
     } catch (e) {
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
         _showOperationFeedback(
-          l10n.shortVideoAssemblyDraftDeleteFailed(describeUserVisibleApiError(l10n, e)),
+          l10n.shortVideoAssemblyDraftDeleteFailed(
+            describeUserVisibleApiError(l10n, e),
+          ),
           isSuccess: false,
         );
       }
@@ -461,7 +464,9 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
       if (mounted) {
         final l10nErr = AppLocalizations.of(context)!;
         _showOperationFeedback(
-          l10nErr.shortVideoAssemblyVersionCreateFailed(describeUserVisibleApiError(l10nErr, e)),
+          l10nErr.shortVideoAssemblyVersionCreateFailed(
+            describeUserVisibleApiError(l10nErr, e),
+          ),
           isSuccess: false,
         );
       }
@@ -502,7 +507,9 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
       if (mounted) {
         final l10nErr = AppLocalizations.of(context)!;
         _showOperationFeedback(
-          l10nErr.shortVideoAssemblyVersionSwitchFailed(describeUserVisibleApiError(l10nErr, e)),
+          l10nErr.shortVideoAssemblyVersionSwitchFailed(
+            describeUserVisibleApiError(l10nErr, e),
+          ),
           isSuccess: false,
         );
       }
@@ -552,13 +559,18 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
       }
 
       if (mounted) {
-        _showOperationFeedback(l10n.shortVideoAssemblyVersionDeleted, isSuccess: true);
+        _showOperationFeedback(
+          l10n.shortVideoAssemblyVersionDeleted,
+          isSuccess: true,
+        );
       }
     } catch (e) {
       if (mounted) {
         final l10nErr = AppLocalizations.of(context)!;
         _showOperationFeedback(
-          l10nErr.shortVideoAssemblyVersionDeleteFailed(describeUserVisibleApiError(l10nErr, e)),
+          l10nErr.shortVideoAssemblyVersionDeleteFailed(
+            describeUserVisibleApiError(l10nErr, e),
+          ),
           isSuccess: false,
         );
       }
