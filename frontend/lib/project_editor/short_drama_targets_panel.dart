@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
 
 /// Wave-1 Moneyprinter-style short-drama flags on the project row, editable
@@ -68,6 +69,8 @@ class _ShortDramaTargetsPanelState extends State<ShortDramaTargetsPanel> {
       : 'live_action.short_drama';
 
   Future<void> _save() async {
+    if (!mounted) return;
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _busy = true;
       _line = null;
@@ -80,7 +83,10 @@ class _ShortDramaTargetsPanelState extends State<ShortDramaTargetsPanel> {
       });
       if (!mounted) return;
       setState(() {
-        _line = '已写回短剧参数：${_flavorLabel()} · ${_ratioLabel()}';
+        _line = l10n.projectEditorShortDramaTargetsSaveSuccess(
+          _flavorLabel(l10n),
+          _ratioLabel(l10n),
+        );
       });
       final hook = widget.onSaved;
       if (hook != null) {
@@ -89,13 +95,15 @@ class _ShortDramaTargetsPanelState extends State<ShortDramaTargetsPanel> {
     } on RustApiException catch (e) {
       if (mounted) {
         setState(() {
-          _line = '保存失败：${e.statusCode ?? '-'}';
+          _line = l10n.projectEditorShortDramaTargetsSaveFailedHttp(
+            '${e.statusCode ?? '-'}',
+          );
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _line = '保存失败：$e';
+          _line = l10n.projectEditorShortDramaTargetsSaveFailed('$e');
         });
       }
     } finally {
@@ -105,22 +113,25 @@ class _ShortDramaTargetsPanelState extends State<ShortDramaTargetsPanel> {
     }
   }
 
-  String _flavorLabel() =>
-      _flavor == _ShortDramaFlavor.animated ? '动漫短剧' : '真人短剧';
+  String _flavorLabel(AppLocalizations l10n) =>
+      _flavor == _ShortDramaFlavor.animated
+      ? l10n.projectEditorShortDramaTargetsFlavorAnimated
+      : l10n.projectEditorShortDramaTargetsFlavorLiveAction;
 
-  String _ratioLabel() {
+  String _ratioLabel(AppLocalizations l10n) {
     switch (_videoRatio) {
       case '16:9':
-        return '横屏 16:9';
+        return l10n.projectEditorShortDramaTargetsRatioLandscape169;
       case '1:1':
-        return '方形 1:1';
+        return l10n.projectEditorShortDramaTargetsRatioSquare11;
       default:
-        return '竖屏 9:16';
+        return l10n.projectEditorShortDramaTargetsRatioPortrait916;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return Container(
       width: double.infinity,
@@ -133,27 +144,32 @@ class _ShortDramaTargetsPanelState extends State<ShortDramaTargetsPanel> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('短视频编排', style: theme.textTheme.titleSmall),
+          Text(
+            l10n.projectEditorShortDramaTargetsSectionTitle,
+            style: theme.textTheme.titleSmall,
+          ),
           const SizedBox(height: 4),
           Text(
-            '与短视频 Space 相同的项目级写回（PATCH …/projects），在此可从项目对话框直接调整。'
-            '首页「短剧生产平台链」可一键跳到脚本 / 制作 / 任务 / 作业 / 质量 / 短视频。',
+            l10n.projectEditorShortDramaTargetsSectionBody,
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.outline,
             ),
           ),
           const SizedBox(height: 12),
-          Text('短剧形态', style: theme.textTheme.labelLarge),
+          Text(
+            l10n.projectEditorShortDramaTargetsFlavorLabel,
+            style: theme.textTheme.labelLarge,
+          ),
           const SizedBox(height: 6),
           SegmentedButton<_ShortDramaFlavor>(
-            segments: const [
+            segments: [
               ButtonSegment(
                 value: _ShortDramaFlavor.animated,
-                label: Text('动漫短剧'),
+                label: Text(l10n.projectEditorShortDramaTargetsFlavorAnimated),
               ),
               ButtonSegment(
                 value: _ShortDramaFlavor.liveAction,
-                label: Text('真人短剧'),
+                label: Text(l10n.projectEditorShortDramaTargetsFlavorLiveAction),
               ),
             ],
             selected: {_flavor},
@@ -167,15 +183,27 @@ class _ShortDramaTargetsPanelState extends State<ShortDramaTargetsPanel> {
                   },
           ),
           const SizedBox(height: 12),
-          Text('画幅', style: theme.textTheme.labelLarge),
+          Text(
+            l10n.projectEditorShortDramaTargetsAspectLabel,
+            style: theme.textTheme.labelLarge,
+          ),
           const SizedBox(height: 6),
           DropdownButtonFormField<String>(
             initialValue: _videoRatio,
             decoration: const InputDecoration(isDense: true),
-            items: const [
-              DropdownMenuItem(value: '9:16', child: Text('竖屏 9:16')),
-              DropdownMenuItem(value: '16:9', child: Text('横屏 16:9')),
-              DropdownMenuItem(value: '1:1', child: Text('方形 1:1')),
+            items: [
+              DropdownMenuItem(
+                value: '9:16',
+                child: Text(l10n.projectEditorShortDramaTargetsRatioPortrait916),
+              ),
+              DropdownMenuItem(
+                value: '16:9',
+                child: Text(l10n.projectEditorShortDramaTargetsRatioLandscape169),
+              ),
+              DropdownMenuItem(
+                value: '1:1',
+                child: Text(l10n.projectEditorShortDramaTargetsRatioSquare11),
+              ),
             ],
             onChanged: _busy
                 ? null
@@ -199,7 +227,11 @@ class _ShortDramaTargetsPanelState extends State<ShortDramaTargetsPanel> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.save_outlined, size: 18),
-              label: Text(_busy ? '写回中…' : '写回短剧参数'),
+              label: Text(
+                _busy
+                    ? l10n.projectEditorShortDramaTargetsSaveBusy
+                    : l10n.projectEditorShortDramaTargetsSaveButton,
+              ),
             ),
           ),
           if (_line != null) ...[

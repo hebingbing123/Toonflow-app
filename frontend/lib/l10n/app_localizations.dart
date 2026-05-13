@@ -17605,6 +17605,174 @@ abstract class AppLocalizations {
   /// **'GET …/stats not loaded yet'**
   String get projectEditorBasicsStatsNotLoaded;
 
+  /// No description provided for @projectEditorAuditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Project activity'**
+  String get projectEditorAuditTitle;
+
+  /// No description provided for @projectEditorAuditSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Project configuration and ACL changes — see who changed this project.'**
+  String get projectEditorAuditSubtitle;
+
+  /// No description provided for @projectEditorAuditActionFilterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Action filter'**
+  String get projectEditorAuditActionFilterLabel;
+
+  /// No description provided for @projectEditorAuditActionAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get projectEditorAuditActionAll;
+
+  /// No description provided for @projectEditorAuditActionProjectUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Project updated'**
+  String get projectEditorAuditActionProjectUpdated;
+
+  /// No description provided for @projectEditorAuditActionMemberAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Member added (ACL)'**
+  String get projectEditorAuditActionMemberAdded;
+
+  /// No description provided for @projectEditorAuditActionMemberRoleChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Member role changed'**
+  String get projectEditorAuditActionMemberRoleChanged;
+
+  /// No description provided for @projectEditorAuditActionMemberRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Member removed (ACL)'**
+  String get projectEditorAuditActionMemberRemoved;
+
+  /// No description provided for @projectEditorAuditActionProjectCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Project created'**
+  String get projectEditorAuditActionProjectCreated;
+
+  /// No description provided for @projectEditorAuditActionProjectDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Project deleted'**
+  String get projectEditorAuditActionProjectDeleted;
+
+  /// No description provided for @projectEditorAuditSearchLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Search actor / target / fields / project name'**
+  String get projectEditorAuditSearchLabel;
+
+  /// No description provided for @projectEditorAuditEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No project activity to display.'**
+  String get projectEditorAuditEmpty;
+
+  /// No description provided for @projectEditorAuditLoadMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Load more'**
+  String get projectEditorAuditLoadMore;
+
+  /// No description provided for @projectEditorAuditRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get projectEditorAuditRefresh;
+
+  /// No description provided for @projectEditorShortDramaTargetsSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Short-video targets'**
+  String get projectEditorShortDramaTargetsSectionTitle;
+
+  /// No description provided for @projectEditorShortDramaTargetsSectionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'PATCH the same project-level fields as Short Video Space; adjust here from the project dialog.\nFrom home, use the short-drama production chain shortcut to jump to script / production / tasks / jobs / quality / short video.'**
+  String get projectEditorShortDramaTargetsSectionBody;
+
+  /// No description provided for @projectEditorShortDramaTargetsFlavorLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Short-drama format'**
+  String get projectEditorShortDramaTargetsFlavorLabel;
+
+  /// No description provided for @projectEditorShortDramaTargetsFlavorAnimated.
+  ///
+  /// In en, this message translates to:
+  /// **'Animated short drama'**
+  String get projectEditorShortDramaTargetsFlavorAnimated;
+
+  /// No description provided for @projectEditorShortDramaTargetsFlavorLiveAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Live-action short drama'**
+  String get projectEditorShortDramaTargetsFlavorLiveAction;
+
+  /// No description provided for @projectEditorShortDramaTargetsAspectLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Aspect ratio'**
+  String get projectEditorShortDramaTargetsAspectLabel;
+
+  /// No description provided for @projectEditorShortDramaTargetsRatioPortrait916.
+  ///
+  /// In en, this message translates to:
+  /// **'Portrait 9:16'**
+  String get projectEditorShortDramaTargetsRatioPortrait916;
+
+  /// No description provided for @projectEditorShortDramaTargetsRatioLandscape169.
+  ///
+  /// In en, this message translates to:
+  /// **'Landscape 16:9'**
+  String get projectEditorShortDramaTargetsRatioLandscape169;
+
+  /// No description provided for @projectEditorShortDramaTargetsRatioSquare11.
+  ///
+  /// In en, this message translates to:
+  /// **'Square 1:1'**
+  String get projectEditorShortDramaTargetsRatioSquare11;
+
+  /// No description provided for @projectEditorShortDramaTargetsSaveBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get projectEditorShortDramaTargetsSaveBusy;
+
+  /// No description provided for @projectEditorShortDramaTargetsSaveButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Save short-drama settings'**
+  String get projectEditorShortDramaTargetsSaveButton;
+
+  /// No description provided for @projectEditorShortDramaTargetsSaveSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved short-drama settings: {flavor} · {ratio}'**
+  String projectEditorShortDramaTargetsSaveSuccess(String flavor, String ratio);
+
+  /// No description provided for @projectEditorShortDramaTargetsSaveFailedHttp.
+  ///
+  /// In en, this message translates to:
+  /// **'Save failed: HTTP {code}'**
+  String projectEditorShortDramaTargetsSaveFailedHttp(String code);
+
+  /// No description provided for @projectEditorShortDramaTargetsSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Save failed: {error}'**
+  String projectEditorShortDramaTargetsSaveFailed(String error);
+
   /// No description provided for @projectEditorAssetEditImageNeedScriptSnack.
   ///
   /// In en, this message translates to:

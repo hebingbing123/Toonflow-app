@@ -10738,6 +10738,100 @@ class AppLocalizationsZh extends AppLocalizations {
   String get projectEditorBasicsStatsNotLoaded => 'GET …/stats 未加载';
 
   @override
+  String get projectEditorAuditTitle => '项目活动记录';
+
+  @override
+  String get projectEditorAuditSubtitle => '聚焦项目配置与 ACL 变更，方便回答「谁改了这个项目」。';
+
+  @override
+  String get projectEditorAuditActionFilterLabel => '动作过滤';
+
+  @override
+  String get projectEditorAuditActionAll => '全部';
+
+  @override
+  String get projectEditorAuditActionProjectUpdated => '项目修改';
+
+  @override
+  String get projectEditorAuditActionMemberAdded => '添加 ACL';
+
+  @override
+  String get projectEditorAuditActionMemberRoleChanged => '角色调整';
+
+  @override
+  String get projectEditorAuditActionMemberRemoved => '移除 ACL';
+
+  @override
+  String get projectEditorAuditActionProjectCreated => '项目创建';
+
+  @override
+  String get projectEditorAuditActionProjectDeleted => '项目删除';
+
+  @override
+  String get projectEditorAuditSearchLabel => '搜索 actor / target / 字段 / 项目名';
+
+  @override
+  String get projectEditorAuditEmpty => '当前没有可显示的项目活动记录。';
+
+  @override
+  String get projectEditorAuditLoadMore => '加载更多';
+
+  @override
+  String get projectEditorAuditRefresh => '刷新';
+
+  @override
+  String get projectEditorShortDramaTargetsSectionTitle => '短视频编排';
+
+  @override
+  String get projectEditorShortDramaTargetsSectionBody =>
+      '与短视频 Space 相同的项目级写回（PATCH …/projects），在此可从项目对话框直接调整。\n首页「短剧生产平台链」可一键跳到脚本 / 制作 / 任务 / 作业 / 质量 / 短视频。';
+
+  @override
+  String get projectEditorShortDramaTargetsFlavorLabel => '短剧形态';
+
+  @override
+  String get projectEditorShortDramaTargetsFlavorAnimated => '动漫短剧';
+
+  @override
+  String get projectEditorShortDramaTargetsFlavorLiveAction => '真人短剧';
+
+  @override
+  String get projectEditorShortDramaTargetsAspectLabel => '画幅';
+
+  @override
+  String get projectEditorShortDramaTargetsRatioPortrait916 => '竖屏 9:16';
+
+  @override
+  String get projectEditorShortDramaTargetsRatioLandscape169 => '横屏 16:9';
+
+  @override
+  String get projectEditorShortDramaTargetsRatioSquare11 => '方形 1:1';
+
+  @override
+  String get projectEditorShortDramaTargetsSaveBusy => '写回中…';
+
+  @override
+  String get projectEditorShortDramaTargetsSaveButton => '写回短剧参数';
+
+  @override
+  String projectEditorShortDramaTargetsSaveSuccess(
+    String flavor,
+    String ratio,
+  ) {
+    return '已写回短剧参数：$flavor · $ratio';
+  }
+
+  @override
+  String projectEditorShortDramaTargetsSaveFailedHttp(String code) {
+    return '保存失败：$code';
+  }
+
+  @override
+  String projectEditorShortDramaTargetsSaveFailed(String error) {
+    return '保存失败：$error';
+  }
+
+  @override
   String get projectEditorAssetEditImageNeedScriptSnack => '请先创建剧本再上传编辑图片。';
 
   @override

@@ -8296,6 +8296,58 @@
     }
   },
   "projectEditorBasicsStatsNotLoaded": "GET …/stats 未加载",
+  "projectEditorAuditTitle": "项目活动记录",
+  "projectEditorAuditSubtitle": "聚焦项目配置与 ACL 变更，方便回答「谁改了这个项目」。",
+  "projectEditorAuditActionFilterLabel": "动作过滤",
+  "projectEditorAuditActionAll": "全部",
+  "projectEditorAuditActionProjectUpdated": "项目修改",
+  "projectEditorAuditActionMemberAdded": "添加 ACL",
+  "projectEditorAuditActionMemberRoleChanged": "角色调整",
+  "projectEditorAuditActionMemberRemoved": "移除 ACL",
+  "projectEditorAuditActionProjectCreated": "项目创建",
+  "projectEditorAuditActionProjectDeleted": "项目删除",
+  "projectEditorAuditSearchLabel": "搜索 actor / target / 字段 / 项目名",
+  "projectEditorAuditEmpty": "当前没有可显示的项目活动记录。",
+  "projectEditorAuditLoadMore": "加载更多",
+  "projectEditorAuditRefresh": "刷新",
+  "projectEditorShortDramaTargetsSectionTitle": "短视频编排",
+  "projectEditorShortDramaTargetsSectionBody": "与短视频 Space 相同的项目级写回（PATCH …/projects），在此可从项目对话框直接调整。\n首页「短剧生产平台链」可一键跳到脚本 / 制作 / 任务 / 作业 / 质量 / 短视频。",
+  "projectEditorShortDramaTargetsFlavorLabel": "短剧形态",
+  "projectEditorShortDramaTargetsFlavorAnimated": "动漫短剧",
+  "projectEditorShortDramaTargetsFlavorLiveAction": "真人短剧",
+  "projectEditorShortDramaTargetsAspectLabel": "画幅",
+  "projectEditorShortDramaTargetsRatioPortrait916": "竖屏 9:16",
+  "projectEditorShortDramaTargetsRatioLandscape169": "横屏 16:9",
+  "projectEditorShortDramaTargetsRatioSquare11": "方形 1:1",
+  "projectEditorShortDramaTargetsSaveBusy": "写回中…",
+  "projectEditorShortDramaTargetsSaveButton": "写回短剧参数",
+  "projectEditorShortDramaTargetsSaveSuccess": "已写回短剧参数：{flavor} · {ratio}",
+  "@projectEditorShortDramaTargetsSaveSuccess": {
+    "placeholders": {
+      "flavor": {
+        "type": "String"
+      },
+      "ratio": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorShortDramaTargetsSaveFailedHttp": "保存失败：{code}",
+  "@projectEditorShortDramaTargetsSaveFailedHttp": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorShortDramaTargetsSaveFailed": "保存失败：{error}",
+  "@projectEditorShortDramaTargetsSaveFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "projectEditorAssetEditImageNeedScriptSnack": "请先创建剧本再上传编辑图片。",
   "projectEditorAssetEditImageDialogTitle": "上传编辑图片",
   "projectEditorAssetEditImageTargetScriptLabel": "目标剧本",

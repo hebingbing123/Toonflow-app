@@ -8336,6 +8336,58 @@
     }
   },
   "projectEditorBasicsStatsNotLoaded": "GET …/stats not loaded yet",
+  "projectEditorAuditTitle": "Project activity",
+  "projectEditorAuditSubtitle": "Project configuration and ACL changes — see who changed this project.",
+  "projectEditorAuditActionFilterLabel": "Action filter",
+  "projectEditorAuditActionAll": "All",
+  "projectEditorAuditActionProjectUpdated": "Project updated",
+  "projectEditorAuditActionMemberAdded": "Member added (ACL)",
+  "projectEditorAuditActionMemberRoleChanged": "Member role changed",
+  "projectEditorAuditActionMemberRemoved": "Member removed (ACL)",
+  "projectEditorAuditActionProjectCreated": "Project created",
+  "projectEditorAuditActionProjectDeleted": "Project deleted",
+  "projectEditorAuditSearchLabel": "Search actor / target / fields / project name",
+  "projectEditorAuditEmpty": "No project activity to display.",
+  "projectEditorAuditLoadMore": "Load more",
+  "projectEditorAuditRefresh": "Refresh",
+  "projectEditorShortDramaTargetsSectionTitle": "Short-video targets",
+  "projectEditorShortDramaTargetsSectionBody": "PATCH the same project-level fields as Short Video Space; adjust here from the project dialog.\nFrom home, use the short-drama production chain shortcut to jump to script / production / tasks / jobs / quality / short video.",
+  "projectEditorShortDramaTargetsFlavorLabel": "Short-drama format",
+  "projectEditorShortDramaTargetsFlavorAnimated": "Animated short drama",
+  "projectEditorShortDramaTargetsFlavorLiveAction": "Live-action short drama",
+  "projectEditorShortDramaTargetsAspectLabel": "Aspect ratio",
+  "projectEditorShortDramaTargetsRatioPortrait916": "Portrait 9:16",
+  "projectEditorShortDramaTargetsRatioLandscape169": "Landscape 16:9",
+  "projectEditorShortDramaTargetsRatioSquare11": "Square 1:1",
+  "projectEditorShortDramaTargetsSaveBusy": "Saving…",
+  "projectEditorShortDramaTargetsSaveButton": "Save short-drama settings",
+  "projectEditorShortDramaTargetsSaveSuccess": "Saved short-drama settings: {flavor} · {ratio}",
+  "@projectEditorShortDramaTargetsSaveSuccess": {
+    "placeholders": {
+      "flavor": {
+        "type": "String"
+      },
+      "ratio": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorShortDramaTargetsSaveFailedHttp": "Save failed: HTTP {code}",
+  "@projectEditorShortDramaTargetsSaveFailedHttp": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorShortDramaTargetsSaveFailed": "Save failed: {error}",
+  "@projectEditorShortDramaTargetsSaveFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "projectEditorAssetEditImageNeedScriptSnack": "Create a script before uploading an edit image.",
   "projectEditorAssetEditImageDialogTitle": "Upload edit image",
   "projectEditorAssetEditImageTargetScriptLabel": "Target script",

@@ -11272,6 +11272,107 @@ class AppLocalizationsEn extends AppLocalizations {
   String get projectEditorBasicsStatsNotLoaded => 'GET …/stats not loaded yet';
 
   @override
+  String get projectEditorAuditTitle => 'Project activity';
+
+  @override
+  String get projectEditorAuditSubtitle =>
+      'Project configuration and ACL changes — see who changed this project.';
+
+  @override
+  String get projectEditorAuditActionFilterLabel => 'Action filter';
+
+  @override
+  String get projectEditorAuditActionAll => 'All';
+
+  @override
+  String get projectEditorAuditActionProjectUpdated => 'Project updated';
+
+  @override
+  String get projectEditorAuditActionMemberAdded => 'Member added (ACL)';
+
+  @override
+  String get projectEditorAuditActionMemberRoleChanged => 'Member role changed';
+
+  @override
+  String get projectEditorAuditActionMemberRemoved => 'Member removed (ACL)';
+
+  @override
+  String get projectEditorAuditActionProjectCreated => 'Project created';
+
+  @override
+  String get projectEditorAuditActionProjectDeleted => 'Project deleted';
+
+  @override
+  String get projectEditorAuditSearchLabel =>
+      'Search actor / target / fields / project name';
+
+  @override
+  String get projectEditorAuditEmpty => 'No project activity to display.';
+
+  @override
+  String get projectEditorAuditLoadMore => 'Load more';
+
+  @override
+  String get projectEditorAuditRefresh => 'Refresh';
+
+  @override
+  String get projectEditorShortDramaTargetsSectionTitle =>
+      'Short-video targets';
+
+  @override
+  String get projectEditorShortDramaTargetsSectionBody =>
+      'PATCH the same project-level fields as Short Video Space; adjust here from the project dialog.\nFrom home, use the short-drama production chain shortcut to jump to script / production / tasks / jobs / quality / short video.';
+
+  @override
+  String get projectEditorShortDramaTargetsFlavorLabel => 'Short-drama format';
+
+  @override
+  String get projectEditorShortDramaTargetsFlavorAnimated =>
+      'Animated short drama';
+
+  @override
+  String get projectEditorShortDramaTargetsFlavorLiveAction =>
+      'Live-action short drama';
+
+  @override
+  String get projectEditorShortDramaTargetsAspectLabel => 'Aspect ratio';
+
+  @override
+  String get projectEditorShortDramaTargetsRatioPortrait916 => 'Portrait 9:16';
+
+  @override
+  String get projectEditorShortDramaTargetsRatioLandscape169 =>
+      'Landscape 16:9';
+
+  @override
+  String get projectEditorShortDramaTargetsRatioSquare11 => 'Square 1:1';
+
+  @override
+  String get projectEditorShortDramaTargetsSaveBusy => 'Saving…';
+
+  @override
+  String get projectEditorShortDramaTargetsSaveButton =>
+      'Save short-drama settings';
+
+  @override
+  String projectEditorShortDramaTargetsSaveSuccess(
+    String flavor,
+    String ratio,
+  ) {
+    return 'Saved short-drama settings: $flavor · $ratio';
+  }
+
+  @override
+  String projectEditorShortDramaTargetsSaveFailedHttp(String code) {
+    return 'Save failed: HTTP $code';
+  }
+
+  @override
+  String projectEditorShortDramaTargetsSaveFailed(String error) {
+    return 'Save failed: $error';
+  }
+
+  @override
   String get projectEditorAssetEditImageNeedScriptSnack =>
       'Create a script before uploading an edit image.';
 

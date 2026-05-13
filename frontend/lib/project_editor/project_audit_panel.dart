@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
 
 class ProjectAuditPanel extends StatefulWidget {
@@ -110,6 +111,7 @@ class _ProjectAuditPanelState extends State<ProjectAuditPanel> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final needle = _searchCtrl.text.trim().toLowerCase();
     final filtered = _rows
@@ -121,7 +123,7 @@ class _ProjectAuditPanelState extends State<ProjectAuditPanel> {
                   .join(' ');
           final haystack = <String>[
             row.action,
-            projectAuditActionLabel(row.action),
+            projectAuditActionLabel(l10n, row.action),
             row.actorUserId,
             row.targetUserId ?? '',
             '${row.details['role'] ?? ''}',
@@ -152,10 +154,10 @@ class _ProjectAuditPanelState extends State<ProjectAuditPanel> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('项目活动记录', style: theme.textTheme.titleSmall),
+                    Text(l10n.projectEditorAuditTitle, style: theme.textTheme.titleSmall),
                     const SizedBox(height: 4),
                     Text(
-                      '聚焦项目配置与 ACL 变更，方便回答“谁改了这个项目”。',
+                      l10n.projectEditorAuditSubtitle,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -168,35 +170,38 @@ class _ProjectAuditPanelState extends State<ProjectAuditPanel> {
                 width: 180,
                 child: DropdownButtonFormField<String>(
                   initialValue: _actionFilter ?? '',
-                  decoration: const InputDecoration(
-                    labelText: '动作过滤',
+                  decoration: InputDecoration(
+                    labelText: l10n.projectEditorAuditActionFilterLabel,
                     isDense: true,
                   ),
-                  items: const [
-                    DropdownMenuItem<String>(value: '', child: Text('全部')),
+                  items: [
+                    DropdownMenuItem<String>(
+                      value: '',
+                      child: Text(l10n.projectEditorAuditActionAll),
+                    ),
                     DropdownMenuItem<String>(
                       value: 'project_updated',
-                      child: Text('项目修改'),
+                      child: Text(l10n.projectEditorAuditActionProjectUpdated),
                     ),
                     DropdownMenuItem<String>(
                       value: 'project_member_added',
-                      child: Text('添加 ACL'),
+                      child: Text(l10n.projectEditorAuditActionMemberAdded),
                     ),
                     DropdownMenuItem<String>(
                       value: 'project_member_role_changed',
-                      child: Text('角色调整'),
+                      child: Text(l10n.projectEditorAuditActionMemberRoleChanged),
                     ),
                     DropdownMenuItem<String>(
                       value: 'project_member_removed',
-                      child: Text('移除 ACL'),
+                      child: Text(l10n.projectEditorAuditActionMemberRemoved),
                     ),
                     DropdownMenuItem<String>(
                       value: 'project_created',
-                      child: Text('项目创建'),
+                      child: Text(l10n.projectEditorAuditActionProjectCreated),
                     ),
                     DropdownMenuItem<String>(
                       value: 'project_deleted',
-                      child: Text('项目删除'),
+                      child: Text(l10n.projectEditorAuditActionProjectDeleted),
                     ),
                   ],
                   onChanged: (value) {
@@ -215,9 +220,9 @@ class _ProjectAuditPanelState extends State<ProjectAuditPanel> {
           TextField(
             controller: _searchCtrl,
             onChanged: (_) => setState(() {}),
-            decoration: const InputDecoration(
-              labelText: '搜索 actor / target / 字段 / 项目名',
-              prefixIcon: Icon(Icons.search),
+            decoration: InputDecoration(
+              labelText: l10n.projectEditorAuditSearchLabel,
+              prefixIcon: const Icon(Icons.search),
               isDense: true,
             ),
           ),
@@ -239,7 +244,7 @@ class _ProjectAuditPanelState extends State<ProjectAuditPanel> {
             )
           else if (filtered.isEmpty)
             Text(
-              '当前没有可显示的项目活动记录。',
+              l10n.projectEditorAuditEmpty,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -249,7 +254,7 @@ class _ProjectAuditPanelState extends State<ProjectAuditPanel> {
               (row) => ListTile(
                 contentPadding: EdgeInsets.zero,
                 dense: true,
-                title: Text(projectAuditActionLabel(row.action)),
+                title: Text(projectAuditActionLabel(l10n, row.action)),
                 subtitle: Text(
                   '${row.createdAt.toLocal().toIso8601String()}\n${buildProjectAuditSummary(row)}',
                 ),
@@ -269,12 +274,12 @@ class _ProjectAuditPanelState extends State<ProjectAuditPanel> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.expand_more, size: 18),
-                  label: const Text('加载更多'),
+                  label: Text(l10n.projectEditorAuditLoadMore),
                 ),
               TextButton.icon(
                 onPressed: _loading || _loadingMore ? null : _reload,
                 icon: const Icon(Icons.refresh, size: 18),
-                label: const Text('刷新'),
+                label: Text(l10n.projectEditorAuditRefresh),
               ),
             ],
           ),
@@ -284,20 +289,20 @@ class _ProjectAuditPanelState extends State<ProjectAuditPanel> {
   }
 }
 
-String projectAuditActionLabel(String action) {
+String projectAuditActionLabel(AppLocalizations l10n, String action) {
   switch (action) {
     case 'project_created':
-      return '创建项目';
+      return l10n.projectEditorAuditActionProjectCreated;
     case 'project_updated':
-      return '修改项目';
+      return l10n.projectEditorAuditActionProjectUpdated;
     case 'project_deleted':
-      return '删除项目';
+      return l10n.projectEditorAuditActionProjectDeleted;
     case 'project_member_added':
-      return '新增项目 ACL';
+      return l10n.projectEditorAuditActionMemberAdded;
     case 'project_member_role_changed':
-      return '调整项目 ACL';
+      return l10n.projectEditorAuditActionMemberRoleChanged;
     case 'project_member_removed':
-      return '移除项目 ACL';
+      return l10n.projectEditorAuditActionMemberRemoved;
     default:
       return action;
   }
