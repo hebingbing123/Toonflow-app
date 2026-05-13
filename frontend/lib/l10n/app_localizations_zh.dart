@@ -14071,7 +14071,7 @@ class AppLocalizationsZh extends AppLocalizations {
     int filtered,
     int visible,
   ) {
-    return '共 $total 条 · queued $queued · running $running · succeeded $succeeded · failed $failed · cancelled $cancelled · 展示 $filtered/$visible';
+    return '共 $total 条 · 排队 $queued · 执行中 $running · 成功 $succeeded · 失败 $failed · 已取消 $cancelled · 展示 $filtered/$visible';
   }
 
   @override

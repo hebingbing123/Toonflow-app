@@ -672,7 +672,12 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
     '${l10n.shortVideoSpacePublishPanelOverviewAwaiting(waitingConfirmCount)} · ${l10n.shortVideoSpacePublishPanelOverviewScheduled(scheduledDraftCount, drafts.length)}',
     if (audits.isNotEmpty)
       l10n.shortVideoSpacePublishPanelOverviewDeliveryModes(
-        audits.take(8).map((a) => a.deliveryMode).toSet().join(" / ")
+        audits
+            .take(8)
+            .map((a) => a.deliveryMode)
+            .toSet()
+            .map((m) => shortVideoDeliveryModeLabel(l10n, m))
+            .join(" / "),
       ),
     if (performanceAlerts.isNotEmpty)
       l10n.shortVideoSpacePublishPanelOverviewPerformanceAlerts(performanceAlerts.length),
@@ -687,7 +692,11 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
         ),
     ...audits.take(3).map((a) {
       final p = shortVideoPublishPlatformLabel(l10n, a.platformId);
-      return l10n.shortVideoSpacePublishPanelOverviewAudit(p, a.status, a.deliveryMode);
+      return l10n.shortVideoSpacePublishPanelOverviewAudit(
+        p,
+        shortVideoPublishJobStatusLabel(l10n, a.status),
+        shortVideoDeliveryModeLabel(l10n, a.deliveryMode),
+      );
     }),
     if (publishAutomationModesByPlatform.isNotEmpty)
       l10n.shortVideoSpacePublishPanelOverviewTargetAutomation(

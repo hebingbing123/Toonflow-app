@@ -1147,25 +1147,41 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                 value: '',
                                 child: Text(l10n.shortVideoSpaceProductionAssemblyAllStatus),
                               ),
-                              const DropdownMenuItem(
+                              DropdownMenuItem(
                                 value: 'queued',
-                                child: Text('queued'),
+                                child: Text(
+                                  shortVideoPublishJobStatusLabel(l10n, 'queued'),
+                                ),
                               ),
-                              const DropdownMenuItem(
+                              DropdownMenuItem(
                                 value: 'running',
-                                child: Text('running'),
+                                child: Text(
+                                  shortVideoPublishJobStatusLabel(l10n, 'running'),
+                                ),
                               ),
-                              const DropdownMenuItem(
+                              DropdownMenuItem(
                                 value: 'succeeded',
-                                child: Text('succeeded'),
+                                child: Text(
+                                  shortVideoPublishJobStatusLabel(
+                                    l10n,
+                                    'succeeded',
+                                  ),
+                                ),
                               ),
-                              const DropdownMenuItem(
+                              DropdownMenuItem(
                                 value: 'failed',
-                                child: Text('failed'),
+                                child: Text(
+                                  shortVideoPublishJobStatusLabel(l10n, 'failed'),
+                                ),
                               ),
-                              const DropdownMenuItem(
+                              DropdownMenuItem(
                                 value: 'cancelled',
-                                child: Text('cancelled'),
+                                child: Text(
+                                  shortVideoPublishJobStatusLabel(
+                                    l10n,
+                                    'cancelled',
+                                  ),
+                                ),
                               ),
                             ],
                             onChanged: requestBusy
@@ -1357,7 +1373,10 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                             : l10n
                                                 .shortVideoSpaceProductionAssemblyTask,
                                         task.taskId.substring(0, 8),
-                                        task.status,
+                                        shortVideoPublishJobStatusLabel(
+                                          l10n,
+                                          task.status,
+                                        ),
                                       ),
                                     ),
                                     subtitle: Text(

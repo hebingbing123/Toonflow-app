@@ -162,6 +162,26 @@ String shortVideoPublishPrepareSeverityLabel(
   }
 }
 
+/// Localized delivery mode for publish audit / overview strings (matches [DeliveryModeBadge]).
+String shortVideoDeliveryModeLabel(
+  AppLocalizations l10n,
+  String deliveryMode,
+) {
+  switch (deliveryMode.toLowerCase()) {
+    case 'live':
+      return l10n.shortVideoDeliveryModeLive;
+    case 'sandbox':
+      return l10n.shortVideoDeliveryModeSandbox;
+    case 'manual_bridge':
+      return l10n.shortVideoDeliveryModeManualBridge;
+    case 'unknown':
+      return l10n.shortVideoDeliveryModeUnknown;
+    default:
+      final d = deliveryMode.trim();
+      return d.isEmpty ? l10n.shortVideoDeliveryModeUnknown : d;
+  }
+}
+
 class ShortVideoProjectOption {
   const ShortVideoProjectOption({required this.id, required this.label});
 
@@ -510,35 +530,29 @@ class DeliveryModeBadge extends StatelessWidget {
     Color bgColor;
     Color textColor;
     IconData icon;
-    String label;
 
     switch (deliveryMode.toLowerCase()) {
       case 'live':
         bgColor = Colors.green.shade100;
         textColor = Colors.green.shade900;
         icon = Icons.check_circle;
-        label = l10n.shortVideoDeliveryModeLive;
         break;
       case 'sandbox':
         bgColor = Colors.grey.shade200;
         textColor = Colors.grey.shade800;
         icon = Icons.warning_amber;
-        label = l10n.shortVideoDeliveryModeSandbox;
         break;
       case 'manual_bridge':
         bgColor = Colors.blue.shade100;
         textColor = Colors.blue.shade900;
         icon = Icons.person;
-        label = l10n.shortVideoDeliveryModeManualBridge;
         break;
       default:
         bgColor = Colors.orange.shade100;
         textColor = Colors.orange.shade900;
         icon = Icons.help_outline;
-        label = deliveryMode.isEmpty
-            ? l10n.shortVideoDeliveryModeUnknown
-            : deliveryMode;
     }
+    final label = shortVideoDeliveryModeLabel(l10n, deliveryMode);
     
     if (small) {
       return Container(

@@ -11029,7 +11029,7 @@
     }
   },
   "shortVideoSpaceProductionAssemblyFilterTaskIdScriptShot": "筛选：任务ID / 剧本号 / 分镜号",
-  "shortVideoSpaceProductionAssemblyTaskSummary": "共 {total} 条 · queued {queued} · running {running} · succeeded {succeeded} · failed {failed} · cancelled {cancelled} · 展示 {filtered}/{visible}",
+  "shortVideoSpaceProductionAssemblyTaskSummary": "共 {total} 条 · 排队 {queued} · 执行中 {running} · 成功 {succeeded} · 失败 {failed} · 已取消 {cancelled} · 展示 {filtered}/{visible}",
   "@shortVideoSpaceProductionAssemblyTaskSummary": {
     "placeholders": {
       "total": {
