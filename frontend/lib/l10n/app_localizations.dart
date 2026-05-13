@@ -18164,6 +18164,12 @@ abstract class AppLocalizations {
   /// **'{path} · Current configuration'**
   String projectEditorBasicsStylePackPickerCurrentConfigRow(String path);
 
+  /// No description provided for @projectEditorBasicsStylePackOptionDisplay.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · {tag}'**
+  String projectEditorBasicsStylePackOptionDisplay(String name, String tag);
+
   /// No description provided for @projectEditorBasicsStylePackFootnoteNone.
   ///
   /// In en, this message translates to:
@@ -18193,6 +18199,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Next step: {step}'**
   String projectEditorBasicsHomeNextStep(String step);
+
+  /// No description provided for @projectEditorBasicsHomeChecklistItemDone.
+  ///
+  /// In en, this message translates to:
+  /// **'✓ {label}'**
+  String projectEditorBasicsHomeChecklistItemDone(String label);
+
+  /// No description provided for @projectEditorBasicsHomeChecklistItemTodo.
+  ///
+  /// In en, this message translates to:
+  /// **'○ {label}'**
+  String projectEditorBasicsHomeChecklistItemTodo(String label);
 
   /// No description provided for @projectEditorBasicsFieldNameClearLabel.
   ///

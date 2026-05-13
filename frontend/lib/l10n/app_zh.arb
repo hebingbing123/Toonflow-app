@@ -8700,6 +8700,17 @@
       }
     }
   },
+  "projectEditorBasicsStylePackOptionDisplay": "{name} · {tag}",
+  "@projectEditorBasicsStylePackOptionDisplay": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "tag": {
+        "type": "String"
+      }
+    }
+  },
   "projectEditorBasicsStylePackFootnoteNone": "未选择",
   "projectEditorBasicsStylePackFootnoteLegacy": "当前项目已配置旧路径或未收录风格包。",
   "projectEditorBasicsHomeSectionTitle": "项目首页",
@@ -8718,6 +8729,22 @@
   "@projectEditorBasicsHomeNextStep": {
     "placeholders": {
       "step": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorBasicsHomeChecklistItemDone": "✓ {label}",
+  "@projectEditorBasicsHomeChecklistItemDone": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorBasicsHomeChecklistItemTodo": "○ {label}",
+  "@projectEditorBasicsHomeChecklistItemTodo": {
+    "placeholders": {
+      "label": {
         "type": "String"
       }
     }

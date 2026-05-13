@@ -26,7 +26,7 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
       ...options.map(
         (option) => DropdownMenuItem<String>(
           value: option.path,
-          child: Text('${option.name} · ${option.tag}'),
+          child: Text(l10n.projectEditorBasicsStylePackOptionDisplay(option.name, option.tag)),
         ),
       ),
       if (hasSelectedOutsideList)
@@ -132,7 +132,9 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
                   (item) => Padding(
                     padding: const EdgeInsets.only(bottom: 4),
                     child: Text(
-                      '${item.done ? '✓' : '○'} ${item.label}',
+                      item.done
+                          ? l10n.projectEditorBasicsHomeChecklistItemDone(item.label)
+                          : l10n.projectEditorBasicsHomeChecklistItemTodo(item.label),
                       style: Theme.of(ctx).textTheme.bodySmall,
                     ),
                   ),

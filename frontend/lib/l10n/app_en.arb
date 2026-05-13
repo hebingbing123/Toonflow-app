@@ -8740,6 +8740,17 @@
       }
     }
   },
+  "projectEditorBasicsStylePackOptionDisplay": "{name} · {tag}",
+  "@projectEditorBasicsStylePackOptionDisplay": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "tag": {
+        "type": "String"
+      }
+    }
+  },
   "projectEditorBasicsStylePackFootnoteNone": "None selected",
   "projectEditorBasicsStylePackFootnoteLegacy": "This project uses a legacy pack path or a pack not listed in the catalog.",
   "projectEditorBasicsHomeSectionTitle": "Project home",
@@ -8758,6 +8769,22 @@
   "@projectEditorBasicsHomeNextStep": {
     "placeholders": {
       "step": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorBasicsHomeChecklistItemDone": "✓ {label}",
+  "@projectEditorBasicsHomeChecklistItemDone": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorBasicsHomeChecklistItemTodo": "○ {label}",
+  "@projectEditorBasicsHomeChecklistItemTodo": {
+    "placeholders": {
+      "label": {
         "type": "String"
       }
     }

@@ -1,7 +1,7 @@
 part of '../../../../home_page.dart';
 
 extension _HomePageProjectEditorScriptsBatchAddDialog on _HomePageState {
-  /// 处理批量新增剧本弹窗，避免 scripts section 混入过多表单细节。
+  /// Opens the batch-add-scripts dialog so the scripts section stays thin.
   Future<void> _openBatchAddScriptsDialog({
     required BuildContext ctx,
     required StateSetter setDialogState,

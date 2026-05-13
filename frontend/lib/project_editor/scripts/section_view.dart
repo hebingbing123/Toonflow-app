@@ -48,7 +48,7 @@ class ProjectScriptsSectionViewCallbacks {
   final void Function(ScriptBrief script)? onOpenScriptEditor;
 }
 
-/// 项目剧本区块视图，承载批量工作台入口、建议卡与剧本列表。
+/// Project editor scripts section: batch workbench entry, suggestions card, and script list.
 class ProjectScriptsSectionView extends StatelessWidget {
   const ProjectScriptsSectionView({
     super.key,

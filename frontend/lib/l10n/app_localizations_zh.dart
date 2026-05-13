@@ -11148,6 +11148,11 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String projectEditorBasicsStylePackOptionDisplay(String name, String tag) {
+    return '$name · $tag';
+  }
+
+  @override
   String get projectEditorBasicsStylePackFootnoteNone => '未选择';
 
   @override
@@ -11164,6 +11169,16 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String projectEditorBasicsHomeNextStep(String step) {
     return '下一步：$step';
+  }
+
+  @override
+  String projectEditorBasicsHomeChecklistItemDone(String label) {
+    return '✓ $label';
+  }
+
+  @override
+  String projectEditorBasicsHomeChecklistItemTodo(String label) {
+    return '○ $label';
   }
 
   @override
