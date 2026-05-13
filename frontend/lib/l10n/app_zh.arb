@@ -11705,6 +11705,162 @@
   },
   "shortVideoVersionComparisonBadgeOld": "旧",
   "shortVideoVersionComparisonBadgeNew": "新",
+  "shortVideoPublishPanelTitle": "发布准备",
+  "shortVideoPublishPanelResetDontShowAgain": "重置「不再提示」",
+  "shortVideoPublishPanelMatrixDomesticLabel": "国内平台矩阵（占位约束）",
+  "shortVideoPublishPanelMatrixOverseasLabel": "海外平台矩阵（占位约束）",
+  "shortVideoPublishPanelPrepareChecks": "发布准备校验",
+  "shortVideoPublishPanelDraftListHeading": "发布单（草稿）",
+  "shortVideoPublishPanelMultiSelectExit": "退出多选",
+  "shortVideoPublishPanelMultiSelectMode": "多选模式",
+  "shortVideoPublishPanelSelectedDraftCount": "已选择 {count} 张草稿",
+  "@shortVideoPublishPanelSelectedDraftCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishPanelSelectAll": "全选",
+  "shortVideoPublishPanelClearSelection": "清空",
+  "shortVideoPublishPanelBatchSchedule": "批量定时",
+  "shortVideoPublishPanelBatchPublish": "批量发布",
+  "shortVideoPublishPanelBatchArchive": "批量归档",
+  "shortVideoPublishPanelCompareDrafts": "对比草稿",
+  "shortVideoPublishPanelBatchValidationTitle": "批量验证结果",
+  "shortVideoPublishPanelBatchValidationSummary": "就绪：{ready} 张 · 阻塞：{blocked} 张",
+  "@shortVideoPublishPanelBatchValidationSummary": {
+    "placeholders": {
+      "ready": {
+        "type": "int"
+      },
+      "blocked": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishPanelCurrentDraftLabel": "当前操作草稿",
+  "shortVideoPublishPanelSelectDraftHint": "请选择要操作的草稿",
+  "shortVideoPublishPanelUntitledDraft": "（无标题）",
+  "shortVideoPublishPanelConfirmSemiAuto": "确认半自动发布（服务端闸门）",
+  "shortVideoPublishPanelAutomationByPlatform": "自动化模式（按平台）",
+  "shortVideoPublishPanelRefreshPublish": "刷新发布数据",
+  "shortVideoPublishPanelBootstrapDraft": "创建发布草稿并写入平台目标",
+  "shortVideoPublishPanelEnqueueJob": "投递发布作业",
+  "shortVideoPublishPanelEnqueueJobBlocked": "投递发布作业（存在阻塞项）",
+  "shortVideoPublishPanelEnqueueAllDrafts": "批量投递全部草稿",
+  "shortVideoPublishPanelEnqueueAllDraftsBlocked": "批量投递全部草稿（存在阻塞项）",
+  "shortVideoPublishPanelRetryFailedJobs": "批量重试失败作业",
+  "shortVideoPublishPanelSuggestCopy": "生成差异化文案",
+  "shortVideoPublishPanelClearSchedule": "清除定时（允许入队）",
+  "shortVideoPublishPanelScheduleCurrentDraft": "定时当前草稿…",
+  "shortVideoPublishPanelScheduleAllDrafts": "批量定时全部草稿…",
+  "shortVideoPublishPanelOpenTroubleshooting": "打开发布排障入口",
+  "shortVideoPublishPanelBatchResultSummary": "批量结果摘要",
+  "shortVideoPublishBatchSelectDraftsToSchedule": "请先选择要定时的草稿。",
+  "shortVideoPublishBatchScheduleValidateTitle": "批量定时验证",
+  "shortVideoPublishBatchReadyDraftsCount": "就绪：{count} 张草稿",
+  "@shortVideoPublishBatchReadyDraftsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishBatchBlockedDraftsCount": "阻塞：{count} 张草稿",
+  "@shortVideoPublishBatchBlockedDraftsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishBatchBlockedReasonsLabel": "阻塞原因：",
+  "shortVideoPublishBatchContinueScheduleReady": "继续定时就绪草稿",
+  "shortVideoPublishBatchScheduledCount": "已批量定时 {count} 张草稿：{iso}（UTC）",
+  "@shortVideoPublishBatchScheduledCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "iso": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishBatchScheduleFailedStatus": "批量定时失败：{statusCode}",
+  "@shortVideoPublishBatchScheduleFailedStatus": {
+    "placeholders": {
+      "statusCode": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishBatchScheduleFailed": "批量定时失败：{error}",
+  "@shortVideoPublishBatchScheduleFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishBatchSelectDraftsToPublish": "请先选择要发布的草稿。",
+  "shortVideoPublishBatchPublishValidateTitle": "批量发布验证",
+  "shortVideoPublishBatchContinuePublishReady": "继续发布就绪草稿",
+  "shortVideoPublishBatchPublishDone": "批量发布完成：成功 {succeeded}，失败 {failed}",
+  "@shortVideoPublishBatchPublishDone": {
+    "placeholders": {
+      "succeeded": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishBatchPublishFailedStatus": "批量发布失败：{statusCode}",
+  "@shortVideoPublishBatchPublishFailedStatus": {
+    "placeholders": {
+      "statusCode": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishBatchPublishFailed": "批量发布失败：{error}",
+  "@shortVideoPublishBatchPublishFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishBatchSelectDraftsToArchive": "请先选择要归档的草稿。",
+  "shortVideoPublishBatchArchivedCount": "已归档 {count} 张草稿",
+  "@shortVideoPublishBatchArchivedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishBatchArchiveFailedStatus": "批量归档失败：{statusCode}",
+  "@shortVideoPublishBatchArchiveFailedStatus": {
+    "placeholders": {
+      "statusCode": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishBatchArchiveFailed": "批量归档失败：{error}",
+  "@shortVideoPublishBatchArchiveFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishBatchCompareSelectCount": "请选择 2-4 张草稿进行对比。",
+  "shortVideoPublishBatchCompareStaleSelection": "部分选中草稿已不存在，请刷新发布区后重试。",
   "accountSectionTitle": "账户与隐私",
   "accountRiskyPrefsTooltip": "本机客户端偏好（删号、导出等「不再提示」与恢复确认）",
   "accountSectionSubtitle": "统一管理账户数据导出、下载留档和不可逆删号。导出任务会走平台 job 队列，可反复生成新版快照。",

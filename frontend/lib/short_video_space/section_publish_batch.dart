@@ -42,6 +42,7 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
   }
 
   Future<void> _batchScheduleDrafts(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     final token = widget.accessToken;
     final project = _selectedProject;
     if (token == null || token.isEmpty || project == null) {
@@ -49,11 +50,11 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
     }
     if (_selectedDraftIds.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请先选择要定时的草稿。')),
+        SnackBar(content: Text(l10n.shortVideoPublishBatchSelectDraftsToSchedule)),
       );
       return;
     }
-    
+
     // Validate first
     setState(() {
       _publishBusy = true;
@@ -64,56 +65,59 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
         project.id,
         draftIds: _selectedDraftIds.toList(),
       );
-      
+
       if (!context.mounted) {
         return;
       }
-      
+
       if (validation.blockedCount > 0) {
         final proceed = await showDialog<bool>(
           context: context,
-          builder: (ctx) => AlertDialog(
-            title: const Text('批量定时验证'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('就绪：${validation.readyCount} 张草稿'),
-                Text('阻塞：${validation.blockedCount} 张草稿'),
-                const SizedBox(height: 12),
-                const Text('阻塞原因：'),
-                ...validation.blockedDrafts.take(5).map((d) => Padding(
-                  padding: const EdgeInsets.only(left: 8, top: 4),
-                  child: Text(
-                    '${d.title.isEmpty ? d.draftId.substring(0, 8) : d.title}: ${d.blockingReasons.map((r) => r.message).join(", ")}',
-                    style: Theme.of(ctx).textTheme.bodySmall,
-                  ),
-                )),
+          builder: (ctx) {
+            final dlgL10n = AppLocalizations.of(ctx)!;
+            return AlertDialog(
+              title: Text(dlgL10n.shortVideoPublishBatchScheduleValidateTitle),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(dlgL10n.shortVideoPublishBatchReadyDraftsCount(validation.readyCount)),
+                  Text(dlgL10n.shortVideoPublishBatchBlockedDraftsCount(validation.blockedCount)),
+                  const SizedBox(height: 12),
+                  Text(dlgL10n.shortVideoPublishBatchBlockedReasonsLabel),
+                  ...validation.blockedDrafts.take(5).map((d) => Padding(
+                        padding: const EdgeInsets.only(left: 8, top: 4),
+                        child: Text(
+                          '${d.title.isEmpty ? d.draftId.substring(0, 8) : d.title}: ${d.blockingReasons.map((r) => r.message).join(", ")}',
+                          style: Theme.of(ctx).textTheme.bodySmall,
+                        ),
+                      )),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, false),
+                  child: Text(dlgL10n.notificationsActionCancel),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.pop(ctx, true),
+                  child: Text(dlgL10n.shortVideoPublishBatchContinueScheduleReady),
+                ),
               ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('取消'),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('继续定时就绪草稿'),
-              ),
-            ],
-          ),
+            );
+          },
         );
-        
+
         if (proceed != true || !context.mounted) {
           return;
         }
       }
-      
+
       final dt = await _pickScheduleDateTime(context);
       if (dt == null || !context.mounted) {
         return;
       }
-      
+
       final iso = dt.toUtc().toIso8601String();
       final res = await batchSchedulePublishDrafts(
         token,
@@ -121,17 +125,17 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
         draftIds: _selectedDraftIds.toList(),
         scheduledAtIso: iso,
       );
-      
+
       await _refreshPublishSlice(project, token);
-      
+
       if (!context.mounted) {
         return;
       }
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('已批量定时 ${res.updated} 张草稿：$iso（UTC）')),
+        SnackBar(content: Text(l10n.shortVideoPublishBatchScheduledCount(res.updated, iso))),
       );
-      
+
       setState(() {
         _multiSelectMode = false;
         _selectedDraftIds = <String>{};
@@ -140,13 +144,13 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
     } on RustApiException catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('批量定时失败：${e.statusCode}')),
+          SnackBar(content: Text(l10n.shortVideoPublishBatchScheduleFailedStatus(e.statusCode ?? 0))),
         );
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('批量定时失败：$e')),
+          SnackBar(content: Text(l10n.shortVideoPublishBatchScheduleFailed(e.toString()))),
         );
       }
     } finally {
@@ -159,6 +163,7 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
   }
 
   Future<void> _batchPublishDrafts() async {
+    final l10n = AppLocalizations.of(context)!;
     final token = widget.accessToken;
     final project = _selectedProject;
     if (token == null || token.isEmpty || project == null) {
@@ -166,11 +171,11 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
     }
     if (_selectedDraftIds.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请先选择要发布的草稿。')),
+        SnackBar(content: Text(l10n.shortVideoPublishBatchSelectDraftsToPublish)),
       );
       return;
     }
-    
+
     setState(() {
       _publishBusy = true;
     });
@@ -181,72 +186,75 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
         project.id,
         draftIds: _selectedDraftIds.toList(),
       );
-      
+
       setState(() {
         _batchValidation = validation;
       });
-      
+
       if (!mounted) {
         return;
       }
-      
+
       if (validation.blockedCount > 0) {
         final proceed = await showDialog<bool>(
           context: context,
-          builder: (ctx) => AlertDialog(
-            title: const Text('批量发布验证'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('就绪：${validation.readyCount} 张草稿'),
-                Text('阻塞：${validation.blockedCount} 张草稿'),
-                const SizedBox(height: 12),
-                const Text('阻塞原因：'),
-                ...validation.blockedDrafts.take(5).map((d) => Padding(
-                  padding: const EdgeInsets.only(left: 8, top: 4),
-                  child: Text(
-                    '${d.title.isEmpty ? d.draftId.substring(0, 8) : d.title}: ${d.blockingReasons.map((r) => r.message).join(", ")}',
-                    style: Theme.of(ctx).textTheme.bodySmall,
-                  ),
-                )),
+          builder: (ctx) {
+            final dlgL10n = AppLocalizations.of(ctx)!;
+            return AlertDialog(
+              title: Text(dlgL10n.shortVideoPublishBatchPublishValidateTitle),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(dlgL10n.shortVideoPublishBatchReadyDraftsCount(validation.readyCount)),
+                  Text(dlgL10n.shortVideoPublishBatchBlockedDraftsCount(validation.blockedCount)),
+                  const SizedBox(height: 12),
+                  Text(dlgL10n.shortVideoPublishBatchBlockedReasonsLabel),
+                  ...validation.blockedDrafts.take(5).map((d) => Padding(
+                        padding: const EdgeInsets.only(left: 8, top: 4),
+                        child: Text(
+                          '${d.title.isEmpty ? d.draftId.substring(0, 8) : d.title}: ${d.blockingReasons.map((r) => r.message).join(", ")}',
+                          style: Theme.of(ctx).textTheme.bodySmall,
+                        ),
+                      )),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, false),
+                  child: Text(dlgL10n.notificationsActionCancel),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.pop(ctx, true),
+                  child: Text(dlgL10n.shortVideoPublishBatchContinuePublishReady),
+                ),
               ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('取消'),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('继续发布就绪草稿'),
-              ),
-            ],
-          ),
+            );
+          },
         );
-        
+
         if (proceed != true || !mounted) {
           return;
         }
       }
-      
+
       final res = await batchPublishDrafts(
         token,
         project.id,
         draftIds: _selectedDraftIds.toList(),
         immediate: true,
       );
-      
+
       await _refreshPublishSlice(project, token);
-      
+
       if (!mounted) {
         return;
       }
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('批量发布完成：成功 ${res.successCount}，失败 ${res.failedCount}')),
+        SnackBar(content: Text(l10n.shortVideoPublishBatchPublishDone(res.successCount, res.failedCount))),
       );
-      
+
       setState(() {
         _multiSelectMode = false;
         _selectedDraftIds = <String>{};
@@ -255,13 +263,13 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
     } on RustApiException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('批量发布失败：${e.statusCode}')),
+          SnackBar(content: Text(l10n.shortVideoPublishBatchPublishFailedStatus(e.statusCode ?? 0))),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('批量发布失败：$e')),
+          SnackBar(content: Text(l10n.shortVideoPublishBatchPublishFailed(e.toString()))),
         );
       }
     } finally {
@@ -274,6 +282,7 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
   }
 
   Future<void> _batchArchiveDrafts() async {
+    final l10n = AppLocalizations.of(context)!;
     final token = widget.accessToken;
     final project = _selectedProject;
     if (token == null || token.isEmpty || project == null) {
@@ -281,21 +290,21 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
     }
     if (_selectedDraftIds.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请先选择要归档的草稿。')),
+        SnackBar(content: Text(l10n.shortVideoPublishBatchSelectDraftsToArchive)),
       );
       return;
     }
-    
+
     final proceed = await showBatchArchivePublishConfirmation(
       context,
       draftCount: _selectedDraftIds.length,
       showDontShowAgain: true,
     );
-    
+
     if (proceed != true || !mounted) {
       return;
     }
-    
+
     setState(() {
       _publishBusy = true;
     });
@@ -305,17 +314,17 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
         project.id,
         draftIds: _selectedDraftIds.toList(),
       );
-      
+
       await _refreshPublishSlice(project, token);
-      
+
       if (!mounted) {
         return;
       }
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('已归档 ${res.archivedCount} 张草稿')),
+        SnackBar(content: Text(l10n.shortVideoPublishBatchArchivedCount(res.archivedCount))),
       );
-      
+
       setState(() {
         _multiSelectMode = false;
         _selectedDraftIds = <String>{};
@@ -324,13 +333,13 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
     } on RustApiException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('批量归档失败：${e.statusCode}')),
+          SnackBar(content: Text(l10n.shortVideoPublishBatchArchiveFailedStatus(e.statusCode ?? 0))),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('批量归档失败：$e')),
+          SnackBar(content: Text(l10n.shortVideoPublishBatchArchiveFailed(e.toString()))),
         );
       }
     } finally {
@@ -343,9 +352,10 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
   }
 
   void _compareDrafts() {
+    final l10n = AppLocalizations.of(context)!;
     if (_selectedDraftIds.length < 2 || _selectedDraftIds.length > 4) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请选择 2-4 张草稿进行对比。')),
+        SnackBar(content: Text(l10n.shortVideoPublishBatchCompareSelectCount)),
       );
       return;
     }
@@ -362,7 +372,7 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
     }
     if (selected.length < 2) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('部分选中草稿已不存在，请刷新发布区后重试。')),
+        SnackBar(content: Text(l10n.shortVideoPublishBatchCompareStaleSelection)),
       );
       return;
     }

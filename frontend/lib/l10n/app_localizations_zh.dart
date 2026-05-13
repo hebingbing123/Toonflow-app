@@ -14685,6 +14685,201 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shortVideoVersionComparisonBadgeNew => '新';
 
   @override
+  String get shortVideoPublishPanelTitle => '发布准备';
+
+  @override
+  String get shortVideoPublishPanelResetDontShowAgain => '重置「不再提示」';
+
+  @override
+  String get shortVideoPublishPanelMatrixDomesticLabel => '国内平台矩阵（占位约束）';
+
+  @override
+  String get shortVideoPublishPanelMatrixOverseasLabel => '海外平台矩阵（占位约束）';
+
+  @override
+  String get shortVideoPublishPanelPrepareChecks => '发布准备校验';
+
+  @override
+  String get shortVideoPublishPanelDraftListHeading => '发布单（草稿）';
+
+  @override
+  String get shortVideoPublishPanelMultiSelectExit => '退出多选';
+
+  @override
+  String get shortVideoPublishPanelMultiSelectMode => '多选模式';
+
+  @override
+  String shortVideoPublishPanelSelectedDraftCount(int count) {
+    return '已选择 $count 张草稿';
+  }
+
+  @override
+  String get shortVideoPublishPanelSelectAll => '全选';
+
+  @override
+  String get shortVideoPublishPanelClearSelection => '清空';
+
+  @override
+  String get shortVideoPublishPanelBatchSchedule => '批量定时';
+
+  @override
+  String get shortVideoPublishPanelBatchPublish => '批量发布';
+
+  @override
+  String get shortVideoPublishPanelBatchArchive => '批量归档';
+
+  @override
+  String get shortVideoPublishPanelCompareDrafts => '对比草稿';
+
+  @override
+  String get shortVideoPublishPanelBatchValidationTitle => '批量验证结果';
+
+  @override
+  String shortVideoPublishPanelBatchValidationSummary(int ready, int blocked) {
+    return '就绪：$ready 张 · 阻塞：$blocked 张';
+  }
+
+  @override
+  String get shortVideoPublishPanelCurrentDraftLabel => '当前操作草稿';
+
+  @override
+  String get shortVideoPublishPanelSelectDraftHint => '请选择要操作的草稿';
+
+  @override
+  String get shortVideoPublishPanelUntitledDraft => '（无标题）';
+
+  @override
+  String get shortVideoPublishPanelConfirmSemiAuto => '确认半自动发布（服务端闸门）';
+
+  @override
+  String get shortVideoPublishPanelAutomationByPlatform => '自动化模式（按平台）';
+
+  @override
+  String get shortVideoPublishPanelRefreshPublish => '刷新发布数据';
+
+  @override
+  String get shortVideoPublishPanelBootstrapDraft => '创建发布草稿并写入平台目标';
+
+  @override
+  String get shortVideoPublishPanelEnqueueJob => '投递发布作业';
+
+  @override
+  String get shortVideoPublishPanelEnqueueJobBlocked => '投递发布作业（存在阻塞项）';
+
+  @override
+  String get shortVideoPublishPanelEnqueueAllDrafts => '批量投递全部草稿';
+
+  @override
+  String get shortVideoPublishPanelEnqueueAllDraftsBlocked => '批量投递全部草稿（存在阻塞项）';
+
+  @override
+  String get shortVideoPublishPanelRetryFailedJobs => '批量重试失败作业';
+
+  @override
+  String get shortVideoPublishPanelSuggestCopy => '生成差异化文案';
+
+  @override
+  String get shortVideoPublishPanelClearSchedule => '清除定时（允许入队）';
+
+  @override
+  String get shortVideoPublishPanelScheduleCurrentDraft => '定时当前草稿…';
+
+  @override
+  String get shortVideoPublishPanelScheduleAllDrafts => '批量定时全部草稿…';
+
+  @override
+  String get shortVideoPublishPanelOpenTroubleshooting => '打开发布排障入口';
+
+  @override
+  String get shortVideoPublishPanelBatchResultSummary => '批量结果摘要';
+
+  @override
+  String get shortVideoPublishBatchSelectDraftsToSchedule => '请先选择要定时的草稿。';
+
+  @override
+  String get shortVideoPublishBatchScheduleValidateTitle => '批量定时验证';
+
+  @override
+  String shortVideoPublishBatchReadyDraftsCount(int count) {
+    return '就绪：$count 张草稿';
+  }
+
+  @override
+  String shortVideoPublishBatchBlockedDraftsCount(int count) {
+    return '阻塞：$count 张草稿';
+  }
+
+  @override
+  String get shortVideoPublishBatchBlockedReasonsLabel => '阻塞原因：';
+
+  @override
+  String get shortVideoPublishBatchContinueScheduleReady => '继续定时就绪草稿';
+
+  @override
+  String shortVideoPublishBatchScheduledCount(int count, String iso) {
+    return '已批量定时 $count 张草稿：$iso（UTC）';
+  }
+
+  @override
+  String shortVideoPublishBatchScheduleFailedStatus(int statusCode) {
+    return '批量定时失败：$statusCode';
+  }
+
+  @override
+  String shortVideoPublishBatchScheduleFailed(String error) {
+    return '批量定时失败：$error';
+  }
+
+  @override
+  String get shortVideoPublishBatchSelectDraftsToPublish => '请先选择要发布的草稿。';
+
+  @override
+  String get shortVideoPublishBatchPublishValidateTitle => '批量发布验证';
+
+  @override
+  String get shortVideoPublishBatchContinuePublishReady => '继续发布就绪草稿';
+
+  @override
+  String shortVideoPublishBatchPublishDone(int succeeded, int failed) {
+    return '批量发布完成：成功 $succeeded，失败 $failed';
+  }
+
+  @override
+  String shortVideoPublishBatchPublishFailedStatus(int statusCode) {
+    return '批量发布失败：$statusCode';
+  }
+
+  @override
+  String shortVideoPublishBatchPublishFailed(String error) {
+    return '批量发布失败：$error';
+  }
+
+  @override
+  String get shortVideoPublishBatchSelectDraftsToArchive => '请先选择要归档的草稿。';
+
+  @override
+  String shortVideoPublishBatchArchivedCount(int count) {
+    return '已归档 $count 张草稿';
+  }
+
+  @override
+  String shortVideoPublishBatchArchiveFailedStatus(int statusCode) {
+    return '批量归档失败：$statusCode';
+  }
+
+  @override
+  String shortVideoPublishBatchArchiveFailed(String error) {
+    return '批量归档失败：$error';
+  }
+
+  @override
+  String get shortVideoPublishBatchCompareSelectCount => '请选择 2-4 张草稿进行对比。';
+
+  @override
+  String get shortVideoPublishBatchCompareStaleSelection =>
+      '部分选中草稿已不存在，请刷新发布区后重试。';
+
+  @override
   String get accountSectionTitle => '账户与隐私';
 
   @override

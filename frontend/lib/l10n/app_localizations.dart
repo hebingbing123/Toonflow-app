@@ -23685,6 +23685,342 @@ abstract class AppLocalizations {
   /// **'New'**
   String get shortVideoVersionComparisonBadgeNew;
 
+  /// No description provided for @shortVideoPublishPanelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish prep'**
+  String get shortVideoPublishPanelTitle;
+
+  /// No description provided for @shortVideoPublishPanelResetDontShowAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset \"don\'t show again\"'**
+  String get shortVideoPublishPanelResetDontShowAgain;
+
+  /// No description provided for @shortVideoPublishPanelMatrixDomesticLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Domestic platform matrix (placeholder constraints)'**
+  String get shortVideoPublishPanelMatrixDomesticLabel;
+
+  /// No description provided for @shortVideoPublishPanelMatrixOverseasLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Overseas platform matrix (placeholder constraints)'**
+  String get shortVideoPublishPanelMatrixOverseasLabel;
+
+  /// No description provided for @shortVideoPublishPanelPrepareChecks.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish prep validation'**
+  String get shortVideoPublishPanelPrepareChecks;
+
+  /// No description provided for @shortVideoPublishPanelDraftListHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish manifest (drafts)'**
+  String get shortVideoPublishPanelDraftListHeading;
+
+  /// No description provided for @shortVideoPublishPanelMultiSelectExit.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit multi-select'**
+  String get shortVideoPublishPanelMultiSelectExit;
+
+  /// No description provided for @shortVideoPublishPanelMultiSelectMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Multi-select mode'**
+  String get shortVideoPublishPanelMultiSelectMode;
+
+  /// No description provided for @shortVideoPublishPanelSelectedDraftCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected {count} draft(s)'**
+  String shortVideoPublishPanelSelectedDraftCount(int count);
+
+  /// No description provided for @shortVideoPublishPanelSelectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Select all'**
+  String get shortVideoPublishPanelSelectAll;
+
+  /// No description provided for @shortVideoPublishPanelClearSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get shortVideoPublishPanelClearSelection;
+
+  /// No description provided for @shortVideoPublishPanelBatchSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch schedule'**
+  String get shortVideoPublishPanelBatchSchedule;
+
+  /// No description provided for @shortVideoPublishPanelBatchPublish.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch publish'**
+  String get shortVideoPublishPanelBatchPublish;
+
+  /// No description provided for @shortVideoPublishPanelBatchArchive.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch archive'**
+  String get shortVideoPublishPanelBatchArchive;
+
+  /// No description provided for @shortVideoPublishPanelCompareDrafts.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare drafts'**
+  String get shortVideoPublishPanelCompareDrafts;
+
+  /// No description provided for @shortVideoPublishPanelBatchValidationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch validation results'**
+  String get shortVideoPublishPanelBatchValidationTitle;
+
+  /// No description provided for @shortVideoPublishPanelBatchValidationSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready: {ready} · Blocked: {blocked}'**
+  String shortVideoPublishPanelBatchValidationSummary(int ready, int blocked);
+
+  /// No description provided for @shortVideoPublishPanelCurrentDraftLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Active draft'**
+  String get shortVideoPublishPanelCurrentDraftLabel;
+
+  /// No description provided for @shortVideoPublishPanelSelectDraftHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a draft to operate on'**
+  String get shortVideoPublishPanelSelectDraftHint;
+
+  /// No description provided for @shortVideoPublishPanelUntitledDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'(Untitled)'**
+  String get shortVideoPublishPanelUntitledDraft;
+
+  /// No description provided for @shortVideoPublishPanelConfirmSemiAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm semi-auto publish (server gate)'**
+  String get shortVideoPublishPanelConfirmSemiAuto;
+
+  /// No description provided for @shortVideoPublishPanelAutomationByPlatform.
+  ///
+  /// In en, this message translates to:
+  /// **'Automation mode (per platform)'**
+  String get shortVideoPublishPanelAutomationByPlatform;
+
+  /// No description provided for @shortVideoPublishPanelRefreshPublish.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh publish data'**
+  String get shortVideoPublishPanelRefreshPublish;
+
+  /// No description provided for @shortVideoPublishPanelBootstrapDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Create publish draft and write platform targets'**
+  String get shortVideoPublishPanelBootstrapDraft;
+
+  /// No description provided for @shortVideoPublishPanelEnqueueJob.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit publish job'**
+  String get shortVideoPublishPanelEnqueueJob;
+
+  /// No description provided for @shortVideoPublishPanelEnqueueJobBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit publish job (blocked items)'**
+  String get shortVideoPublishPanelEnqueueJobBlocked;
+
+  /// No description provided for @shortVideoPublishPanelEnqueueAllDrafts.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit jobs for all drafts'**
+  String get shortVideoPublishPanelEnqueueAllDrafts;
+
+  /// No description provided for @shortVideoPublishPanelEnqueueAllDraftsBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit jobs for all drafts (blocked items)'**
+  String get shortVideoPublishPanelEnqueueAllDraftsBlocked;
+
+  /// No description provided for @shortVideoPublishPanelRetryFailedJobs.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry failed jobs in batch'**
+  String get shortVideoPublishPanelRetryFailedJobs;
+
+  /// No description provided for @shortVideoPublishPanelSuggestCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate differentiated copy'**
+  String get shortVideoPublishPanelSuggestCopy;
+
+  /// No description provided for @shortVideoPublishPanelClearSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear schedule (allow enqueue)'**
+  String get shortVideoPublishPanelClearSchedule;
+
+  /// No description provided for @shortVideoPublishPanelScheduleCurrentDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule current draft…'**
+  String get shortVideoPublishPanelScheduleCurrentDraft;
+
+  /// No description provided for @shortVideoPublishPanelScheduleAllDrafts.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule all drafts…'**
+  String get shortVideoPublishPanelScheduleAllDrafts;
+
+  /// No description provided for @shortVideoPublishPanelOpenTroubleshooting.
+  ///
+  /// In en, this message translates to:
+  /// **'Open publish troubleshooting entry'**
+  String get shortVideoPublishPanelOpenTroubleshooting;
+
+  /// No description provided for @shortVideoPublishPanelBatchResultSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch result summary'**
+  String get shortVideoPublishPanelBatchResultSummary;
+
+  /// No description provided for @shortVideoPublishBatchSelectDraftsToSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Select drafts to schedule first.'**
+  String get shortVideoPublishBatchSelectDraftsToSchedule;
+
+  /// No description provided for @shortVideoPublishBatchScheduleValidateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch schedule validation'**
+  String get shortVideoPublishBatchScheduleValidateTitle;
+
+  /// No description provided for @shortVideoPublishBatchReadyDraftsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready: {count} draft(s)'**
+  String shortVideoPublishBatchReadyDraftsCount(int count);
+
+  /// No description provided for @shortVideoPublishBatchBlockedDraftsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked: {count} draft(s)'**
+  String shortVideoPublishBatchBlockedDraftsCount(int count);
+
+  /// No description provided for @shortVideoPublishBatchBlockedReasonsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocking reasons:'**
+  String get shortVideoPublishBatchBlockedReasonsLabel;
+
+  /// No description provided for @shortVideoPublishBatchContinueScheduleReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue scheduling ready drafts'**
+  String get shortVideoPublishBatchContinueScheduleReady;
+
+  /// No description provided for @shortVideoPublishBatchScheduledCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch-scheduled {count} draft(s): {iso} (UTC)'**
+  String shortVideoPublishBatchScheduledCount(int count, String iso);
+
+  /// No description provided for @shortVideoPublishBatchScheduleFailedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch schedule failed: {statusCode}'**
+  String shortVideoPublishBatchScheduleFailedStatus(int statusCode);
+
+  /// No description provided for @shortVideoPublishBatchScheduleFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch schedule failed: {error}'**
+  String shortVideoPublishBatchScheduleFailed(String error);
+
+  /// No description provided for @shortVideoPublishBatchSelectDraftsToPublish.
+  ///
+  /// In en, this message translates to:
+  /// **'Select drafts to publish first.'**
+  String get shortVideoPublishBatchSelectDraftsToPublish;
+
+  /// No description provided for @shortVideoPublishBatchPublishValidateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch publish validation'**
+  String get shortVideoPublishBatchPublishValidateTitle;
+
+  /// No description provided for @shortVideoPublishBatchContinuePublishReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue publishing ready drafts'**
+  String get shortVideoPublishBatchContinuePublishReady;
+
+  /// No description provided for @shortVideoPublishBatchPublishDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch publish complete: {succeeded} succeeded, {failed} failed'**
+  String shortVideoPublishBatchPublishDone(int succeeded, int failed);
+
+  /// No description provided for @shortVideoPublishBatchPublishFailedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch publish failed: {statusCode}'**
+  String shortVideoPublishBatchPublishFailedStatus(int statusCode);
+
+  /// No description provided for @shortVideoPublishBatchPublishFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch publish failed: {error}'**
+  String shortVideoPublishBatchPublishFailed(String error);
+
+  /// No description provided for @shortVideoPublishBatchSelectDraftsToArchive.
+  ///
+  /// In en, this message translates to:
+  /// **'Select drafts to archive first.'**
+  String get shortVideoPublishBatchSelectDraftsToArchive;
+
+  /// No description provided for @shortVideoPublishBatchArchivedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived {count} drafts'**
+  String shortVideoPublishBatchArchivedCount(int count);
+
+  /// No description provided for @shortVideoPublishBatchArchiveFailedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch archive failed: {statusCode}'**
+  String shortVideoPublishBatchArchiveFailedStatus(int statusCode);
+
+  /// No description provided for @shortVideoPublishBatchArchiveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch archive failed: {error}'**
+  String shortVideoPublishBatchArchiveFailed(String error);
+
+  /// No description provided for @shortVideoPublishBatchCompareSelectCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Select 2–4 drafts to compare.'**
+  String get shortVideoPublishBatchCompareSelectCount;
+
+  /// No description provided for @shortVideoPublishBatchCompareStaleSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Some selected drafts no longer exist. Refresh the publish area and try again.'**
+  String get shortVideoPublishBatchCompareStaleSelection;
+
   /// No description provided for @accountSectionTitle.
   ///
   /// In en, this message translates to:

@@ -15421,6 +15421,226 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shortVideoVersionComparisonBadgeNew => 'New';
 
   @override
+  String get shortVideoPublishPanelTitle => 'Publish prep';
+
+  @override
+  String get shortVideoPublishPanelResetDontShowAgain =>
+      'Reset \"don\'t show again\"';
+
+  @override
+  String get shortVideoPublishPanelMatrixDomesticLabel =>
+      'Domestic platform matrix (placeholder constraints)';
+
+  @override
+  String get shortVideoPublishPanelMatrixOverseasLabel =>
+      'Overseas platform matrix (placeholder constraints)';
+
+  @override
+  String get shortVideoPublishPanelPrepareChecks => 'Publish prep validation';
+
+  @override
+  String get shortVideoPublishPanelDraftListHeading =>
+      'Publish manifest (drafts)';
+
+  @override
+  String get shortVideoPublishPanelMultiSelectExit => 'Exit multi-select';
+
+  @override
+  String get shortVideoPublishPanelMultiSelectMode => 'Multi-select mode';
+
+  @override
+  String shortVideoPublishPanelSelectedDraftCount(int count) {
+    return 'Selected $count draft(s)';
+  }
+
+  @override
+  String get shortVideoPublishPanelSelectAll => 'Select all';
+
+  @override
+  String get shortVideoPublishPanelClearSelection => 'Clear';
+
+  @override
+  String get shortVideoPublishPanelBatchSchedule => 'Batch schedule';
+
+  @override
+  String get shortVideoPublishPanelBatchPublish => 'Batch publish';
+
+  @override
+  String get shortVideoPublishPanelBatchArchive => 'Batch archive';
+
+  @override
+  String get shortVideoPublishPanelCompareDrafts => 'Compare drafts';
+
+  @override
+  String get shortVideoPublishPanelBatchValidationTitle =>
+      'Batch validation results';
+
+  @override
+  String shortVideoPublishPanelBatchValidationSummary(int ready, int blocked) {
+    return 'Ready: $ready · Blocked: $blocked';
+  }
+
+  @override
+  String get shortVideoPublishPanelCurrentDraftLabel => 'Active draft';
+
+  @override
+  String get shortVideoPublishPanelSelectDraftHint =>
+      'Select a draft to operate on';
+
+  @override
+  String get shortVideoPublishPanelUntitledDraft => '(Untitled)';
+
+  @override
+  String get shortVideoPublishPanelConfirmSemiAuto =>
+      'Confirm semi-auto publish (server gate)';
+
+  @override
+  String get shortVideoPublishPanelAutomationByPlatform =>
+      'Automation mode (per platform)';
+
+  @override
+  String get shortVideoPublishPanelRefreshPublish => 'Refresh publish data';
+
+  @override
+  String get shortVideoPublishPanelBootstrapDraft =>
+      'Create publish draft and write platform targets';
+
+  @override
+  String get shortVideoPublishPanelEnqueueJob => 'Submit publish job';
+
+  @override
+  String get shortVideoPublishPanelEnqueueJobBlocked =>
+      'Submit publish job (blocked items)';
+
+  @override
+  String get shortVideoPublishPanelEnqueueAllDrafts =>
+      'Submit jobs for all drafts';
+
+  @override
+  String get shortVideoPublishPanelEnqueueAllDraftsBlocked =>
+      'Submit jobs for all drafts (blocked items)';
+
+  @override
+  String get shortVideoPublishPanelRetryFailedJobs =>
+      'Retry failed jobs in batch';
+
+  @override
+  String get shortVideoPublishPanelSuggestCopy =>
+      'Generate differentiated copy';
+
+  @override
+  String get shortVideoPublishPanelClearSchedule =>
+      'Clear schedule (allow enqueue)';
+
+  @override
+  String get shortVideoPublishPanelScheduleCurrentDraft =>
+      'Schedule current draft…';
+
+  @override
+  String get shortVideoPublishPanelScheduleAllDrafts => 'Schedule all drafts…';
+
+  @override
+  String get shortVideoPublishPanelOpenTroubleshooting =>
+      'Open publish troubleshooting entry';
+
+  @override
+  String get shortVideoPublishPanelBatchResultSummary => 'Batch result summary';
+
+  @override
+  String get shortVideoPublishBatchSelectDraftsToSchedule =>
+      'Select drafts to schedule first.';
+
+  @override
+  String get shortVideoPublishBatchScheduleValidateTitle =>
+      'Batch schedule validation';
+
+  @override
+  String shortVideoPublishBatchReadyDraftsCount(int count) {
+    return 'Ready: $count draft(s)';
+  }
+
+  @override
+  String shortVideoPublishBatchBlockedDraftsCount(int count) {
+    return 'Blocked: $count draft(s)';
+  }
+
+  @override
+  String get shortVideoPublishBatchBlockedReasonsLabel => 'Blocking reasons:';
+
+  @override
+  String get shortVideoPublishBatchContinueScheduleReady =>
+      'Continue scheduling ready drafts';
+
+  @override
+  String shortVideoPublishBatchScheduledCount(int count, String iso) {
+    return 'Batch-scheduled $count draft(s): $iso (UTC)';
+  }
+
+  @override
+  String shortVideoPublishBatchScheduleFailedStatus(int statusCode) {
+    return 'Batch schedule failed: $statusCode';
+  }
+
+  @override
+  String shortVideoPublishBatchScheduleFailed(String error) {
+    return 'Batch schedule failed: $error';
+  }
+
+  @override
+  String get shortVideoPublishBatchSelectDraftsToPublish =>
+      'Select drafts to publish first.';
+
+  @override
+  String get shortVideoPublishBatchPublishValidateTitle =>
+      'Batch publish validation';
+
+  @override
+  String get shortVideoPublishBatchContinuePublishReady =>
+      'Continue publishing ready drafts';
+
+  @override
+  String shortVideoPublishBatchPublishDone(int succeeded, int failed) {
+    return 'Batch publish complete: $succeeded succeeded, $failed failed';
+  }
+
+  @override
+  String shortVideoPublishBatchPublishFailedStatus(int statusCode) {
+    return 'Batch publish failed: $statusCode';
+  }
+
+  @override
+  String shortVideoPublishBatchPublishFailed(String error) {
+    return 'Batch publish failed: $error';
+  }
+
+  @override
+  String get shortVideoPublishBatchSelectDraftsToArchive =>
+      'Select drafts to archive first.';
+
+  @override
+  String shortVideoPublishBatchArchivedCount(int count) {
+    return 'Archived $count drafts';
+  }
+
+  @override
+  String shortVideoPublishBatchArchiveFailedStatus(int statusCode) {
+    return 'Batch archive failed: $statusCode';
+  }
+
+  @override
+  String shortVideoPublishBatchArchiveFailed(String error) {
+    return 'Batch archive failed: $error';
+  }
+
+  @override
+  String get shortVideoPublishBatchCompareSelectCount =>
+      'Select 2–4 drafts to compare.';
+
+  @override
+  String get shortVideoPublishBatchCompareStaleSelection =>
+      'Some selected drafts no longer exist. Refresh the publish area and try again.';
+
+  @override
   String get accountSectionTitle => 'Account section title';
 
   @override

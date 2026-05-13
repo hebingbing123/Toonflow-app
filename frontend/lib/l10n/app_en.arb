@@ -11745,6 +11745,162 @@
   },
   "shortVideoVersionComparisonBadgeOld": "Old",
   "shortVideoVersionComparisonBadgeNew": "New",
+  "shortVideoPublishPanelTitle": "Publish prep",
+  "shortVideoPublishPanelResetDontShowAgain": "Reset \"don't show again\"",
+  "shortVideoPublishPanelMatrixDomesticLabel": "Domestic platform matrix (placeholder constraints)",
+  "shortVideoPublishPanelMatrixOverseasLabel": "Overseas platform matrix (placeholder constraints)",
+  "shortVideoPublishPanelPrepareChecks": "Publish prep validation",
+  "shortVideoPublishPanelDraftListHeading": "Publish manifest (drafts)",
+  "shortVideoPublishPanelMultiSelectExit": "Exit multi-select",
+  "shortVideoPublishPanelMultiSelectMode": "Multi-select mode",
+  "shortVideoPublishPanelSelectedDraftCount": "Selected {count} draft(s)",
+  "@shortVideoPublishPanelSelectedDraftCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishPanelSelectAll": "Select all",
+  "shortVideoPublishPanelClearSelection": "Clear",
+  "shortVideoPublishPanelBatchSchedule": "Batch schedule",
+  "shortVideoPublishPanelBatchPublish": "Batch publish",
+  "shortVideoPublishPanelBatchArchive": "Batch archive",
+  "shortVideoPublishPanelCompareDrafts": "Compare drafts",
+  "shortVideoPublishPanelBatchValidationTitle": "Batch validation results",
+  "shortVideoPublishPanelBatchValidationSummary": "Ready: {ready} · Blocked: {blocked}",
+  "@shortVideoPublishPanelBatchValidationSummary": {
+    "placeholders": {
+      "ready": {
+        "type": "int"
+      },
+      "blocked": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishPanelCurrentDraftLabel": "Active draft",
+  "shortVideoPublishPanelSelectDraftHint": "Select a draft to operate on",
+  "shortVideoPublishPanelUntitledDraft": "(Untitled)",
+  "shortVideoPublishPanelConfirmSemiAuto": "Confirm semi-auto publish (server gate)",
+  "shortVideoPublishPanelAutomationByPlatform": "Automation mode (per platform)",
+  "shortVideoPublishPanelRefreshPublish": "Refresh publish data",
+  "shortVideoPublishPanelBootstrapDraft": "Create publish draft and write platform targets",
+  "shortVideoPublishPanelEnqueueJob": "Submit publish job",
+  "shortVideoPublishPanelEnqueueJobBlocked": "Submit publish job (blocked items)",
+  "shortVideoPublishPanelEnqueueAllDrafts": "Submit jobs for all drafts",
+  "shortVideoPublishPanelEnqueueAllDraftsBlocked": "Submit jobs for all drafts (blocked items)",
+  "shortVideoPublishPanelRetryFailedJobs": "Retry failed jobs in batch",
+  "shortVideoPublishPanelSuggestCopy": "Generate differentiated copy",
+  "shortVideoPublishPanelClearSchedule": "Clear schedule (allow enqueue)",
+  "shortVideoPublishPanelScheduleCurrentDraft": "Schedule current draft…",
+  "shortVideoPublishPanelScheduleAllDrafts": "Schedule all drafts…",
+  "shortVideoPublishPanelOpenTroubleshooting": "Open publish troubleshooting entry",
+  "shortVideoPublishPanelBatchResultSummary": "Batch result summary",
+  "shortVideoPublishBatchSelectDraftsToSchedule": "Select drafts to schedule first.",
+  "shortVideoPublishBatchScheduleValidateTitle": "Batch schedule validation",
+  "shortVideoPublishBatchReadyDraftsCount": "Ready: {count} draft(s)",
+  "@shortVideoPublishBatchReadyDraftsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishBatchBlockedDraftsCount": "Blocked: {count} draft(s)",
+  "@shortVideoPublishBatchBlockedDraftsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishBatchBlockedReasonsLabel": "Blocking reasons:",
+  "shortVideoPublishBatchContinueScheduleReady": "Continue scheduling ready drafts",
+  "shortVideoPublishBatchScheduledCount": "Batch-scheduled {count} draft(s): {iso} (UTC)",
+  "@shortVideoPublishBatchScheduledCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "iso": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishBatchScheduleFailedStatus": "Batch schedule failed: {statusCode}",
+  "@shortVideoPublishBatchScheduleFailedStatus": {
+    "placeholders": {
+      "statusCode": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishBatchScheduleFailed": "Batch schedule failed: {error}",
+  "@shortVideoPublishBatchScheduleFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishBatchSelectDraftsToPublish": "Select drafts to publish first.",
+  "shortVideoPublishBatchPublishValidateTitle": "Batch publish validation",
+  "shortVideoPublishBatchContinuePublishReady": "Continue publishing ready drafts",
+  "shortVideoPublishBatchPublishDone": "Batch publish complete: {succeeded} succeeded, {failed} failed",
+  "@shortVideoPublishBatchPublishDone": {
+    "placeholders": {
+      "succeeded": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishBatchPublishFailedStatus": "Batch publish failed: {statusCode}",
+  "@shortVideoPublishBatchPublishFailedStatus": {
+    "placeholders": {
+      "statusCode": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishBatchPublishFailed": "Batch publish failed: {error}",
+  "@shortVideoPublishBatchPublishFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishBatchSelectDraftsToArchive": "Select drafts to archive first.",
+  "shortVideoPublishBatchArchivedCount": "Archived {count} drafts",
+  "@shortVideoPublishBatchArchivedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishBatchArchiveFailedStatus": "Batch archive failed: {statusCode}",
+  "@shortVideoPublishBatchArchiveFailedStatus": {
+    "placeholders": {
+      "statusCode": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPublishBatchArchiveFailed": "Batch archive failed: {error}",
+  "@shortVideoPublishBatchArchiveFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishBatchCompareSelectCount": "Select 2–4 drafts to compare.",
+  "shortVideoPublishBatchCompareStaleSelection": "Some selected drafts no longer exist. Refresh the publish area and try again.",
   "accountSectionTitle": "Account section title",
   "accountRiskyPrefsTooltip": "Account risky prefs tooltip",
   "accountSectionSubtitle": "Account section subtitle",

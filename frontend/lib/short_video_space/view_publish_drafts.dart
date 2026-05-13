@@ -12,11 +12,12 @@ class _PublishDraftsPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final outline = theme.colorScheme.outline;
-    
+    final l10n = AppLocalizations.of(context)!;
+
     if (!publishPanelUi.visible) {
       return const SizedBox.shrink();
     }
-    
+
     return _Panel(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -24,7 +25,7 @@ class _PublishDraftsPanel extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text('发布准备', style: theme.textTheme.titleSmall),
+              Text(l10n.shortVideoPublishPanelTitle, style: theme.textTheme.titleSmall),
               const Spacer(),
               if (publishPanelUi.onResetConfirmationDontShowAgain != null)
                 TextButton(
@@ -33,7 +34,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                       : () => publishPanelUi.onResetConfirmationDontShowAgain!
                           .call(context),
                   child: Text(
-                    '重置「不再提示」',
+                    l10n.shortVideoPublishPanelResetDontShowAgain,
                     style: theme.textTheme.labelSmall?.copyWith(
                       color: theme.colorScheme.primary,
                     ),
@@ -67,7 +68,7 @@ class _PublishDraftsPanel extends StatelessWidget {
             if (publishPanelUi.matrixDomesticLines.isNotEmpty) ...[
               const SizedBox(height: 10),
               Text(
-                '国内平台矩阵（占位约束）',
+                l10n.shortVideoPublishPanelMatrixDomesticLabel,
                 style: theme.textTheme.labelSmall?.copyWith(color: outline),
               ),
               const SizedBox(height: 6),
@@ -83,7 +84,7 @@ class _PublishDraftsPanel extends StatelessWidget {
             if (publishPanelUi.matrixOverseasLines.isNotEmpty) ...[
               const SizedBox(height: 10),
               Text(
-                '海外平台矩阵（占位约束）',
+                l10n.shortVideoPublishPanelMatrixOverseasLabel,
                 style: theme.textTheme.labelSmall?.copyWith(color: outline),
               ),
               const SizedBox(height: 6),
@@ -99,7 +100,7 @@ class _PublishDraftsPanel extends StatelessWidget {
             if (publishPanelUi.prepareLines.isNotEmpty) ...[
               const SizedBox(height: 10),
               Text(
-                '发布准备校验',
+                l10n.shortVideoPublishPanelPrepareChecks,
                 style: theme.textTheme.labelSmall?.copyWith(color: outline),
               ),
               const SizedBox(height: 6),
@@ -117,7 +118,7 @@ class _PublishDraftsPanel extends StatelessWidget {
               Row(
                 children: [
                   Text(
-                    '发布单（草稿）',
+                    l10n.shortVideoPublishPanelDraftListHeading,
                     style: theme.textTheme.labelSmall?.copyWith(color: outline),
                   ),
                   const Spacer(),
@@ -134,7 +135,9 @@ class _PublishDraftsPanel extends StatelessWidget {
                         size: 18,
                       ),
                       label: Text(
-                        publishPanelUi.multiSelectMode ? '退出多选' : '多选模式',
+                        publishPanelUi.multiSelectMode
+                            ? l10n.shortVideoPublishPanelMultiSelectExit
+                            : l10n.shortVideoPublishPanelMultiSelectMode,
                         style: theme.textTheme.labelSmall,
                       ),
                     ),
@@ -158,7 +161,9 @@ class _PublishDraftsPanel extends StatelessWidget {
                       Row(
                         children: [
                           Text(
-                            '已选择 ${publishPanelUi.selectedDraftIds.length} 张草稿',
+                            l10n.shortVideoPublishPanelSelectedDraftCount(
+                              publishPanelUi.selectedDraftIds.length,
+                            ),
                             style: theme.textTheme.labelMedium?.copyWith(
                               fontWeight: FontWeight.w600,
                             ),
@@ -168,13 +173,13 @@ class _PublishDraftsPanel extends StatelessWidget {
                             onPressed: publishPanelUi.publishBusy
                                 ? null
                                 : publishPanelUi.onSelectAllDrafts,
-                            child: const Text('全选'),
+                            child: Text(l10n.shortVideoPublishPanelSelectAll),
                           ),
                           TextButton(
                             onPressed: publishPanelUi.publishBusy
                                 ? null
                                 : publishPanelUi.onClearDraftSelection,
-                            child: const Text('清空'),
+                            child: Text(l10n.shortVideoPublishPanelClearSelection),
                           ),
                         ],
                       ),
@@ -190,7 +195,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                                     ? null
                                     : () => publishPanelUi.onBatchScheduleDrafts?.call(context),
                                 icon: const Icon(Icons.schedule, size: 18),
-                                label: const Text('批量定时'),
+                                label: Text(l10n.shortVideoPublishPanelBatchSchedule),
                               ),
                             if (publishPanelUi.onBatchPublishDrafts != null)
                               FilledButton.icon(
@@ -198,7 +203,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                                     ? null
                                     : publishPanelUi.onBatchPublishDrafts,
                                 icon: const Icon(Icons.publish, size: 18),
-                                label: const Text('批量发布'),
+                                label: Text(l10n.shortVideoPublishPanelBatchPublish),
                               ),
                             if (publishPanelUi.onBatchArchiveDrafts != null)
                               OutlinedButton.icon(
@@ -206,7 +211,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                                     ? null
                                     : publishPanelUi.onBatchArchiveDrafts,
                                 icon: const Icon(Icons.archive, size: 18),
-                                label: const Text('批量归档'),
+                                label: Text(l10n.shortVideoPublishPanelBatchArchive),
                               ),
                             if (publishPanelUi.onCompareDrafts != null)
                               OutlinedButton.icon(
@@ -214,7 +219,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                                     ? null
                                     : publishPanelUi.onCompareDrafts,
                                 icon: const Icon(Icons.compare, size: 18),
-                                label: const Text('对比草稿'),
+                                label: Text(l10n.shortVideoPublishPanelCompareDrafts),
                               ),
                           ],
                         ),
@@ -232,15 +237,17 @@ class _PublishDraftsPanel extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                '批量验证结果',
+                                l10n.shortVideoPublishPanelBatchValidationTitle,
                                 style: theme.textTheme.labelSmall?.copyWith(
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                '就绪：${publishPanelUi.batchValidation!.readyCount} 张 · '
-                                '阻塞：${publishPanelUi.batchValidation!.blockedCount} 张',
+                                l10n.shortVideoPublishPanelBatchValidationSummary(
+                                  publishPanelUi.batchValidation!.readyCount,
+                                  publishPanelUi.batchValidation!.blockedCount,
+                                ),
                                 style: theme.textTheme.bodySmall,
                               ),
                               if (publishPanelUi.batchValidation!.blockedDrafts.isNotEmpty) ...[
@@ -300,7 +307,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                 publishPanelUi.onSelectPublishDraft != null) ...[
               const SizedBox(height: 10),
               Text(
-                '当前操作草稿',
+                l10n.shortVideoPublishPanelCurrentDraftLabel,
                 style: theme.textTheme.labelSmall?.copyWith(color: outline),
               ),
               const SizedBox(height: 6),
@@ -312,14 +319,16 @@ class _PublishDraftsPanel extends StatelessWidget {
                 isExpanded: true,
                 hint: publishPanelUi.selectedPublishDraftId == null ||
                         publishPanelUi.selectedPublishDraftId!.trim().isEmpty
-                    ? const Text('请选择要操作的草稿')
+                    ? Text(l10n.shortVideoPublishPanelSelectDraftHint)
                     : null,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   isDense: true,
                 ),
                 items: publishPanelUi.publishDraftOptions.map((d) {
-                  final title = d.title.trim().isEmpty ? '（无标题）' : d.title.trim();
+                  final title = d.title.trim().isEmpty
+                      ? l10n.shortVideoPublishPanelUntitledDraft
+                      : d.title.trim();
                   return DropdownMenuItem<String>(
                     value: d.id,
                     child: Text('$title · ${d.draftStatus}'),
@@ -368,14 +377,14 @@ class _PublishDraftsPanel extends StatelessWidget {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.verified_outlined),
-                label: const Text('确认半自动发布（服务端闸门）'),
+                label: Text(l10n.shortVideoPublishPanelConfirmSemiAuto),
               ),
             ],
             if (publishPanelUi.publishAutomationModesByPlatform.isNotEmpty &&
                 publishPanelUi.onChangePublishAutomationMode != null) ...[
               const SizedBox(height: 12),
               Text(
-                '自动化模式（按平台）',
+                l10n.shortVideoPublishPanelAutomationByPlatform,
                 style: theme.textTheme.labelSmall?.copyWith(color: outline),
               ),
               const SizedBox(height: 6),
@@ -451,7 +460,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                           ? null
                           : publishPanelUi.onRefreshPublish,
                       icon: const Icon(Icons.refresh),
-                      label: const Text('刷新发布数据'),
+                      label: Text(l10n.shortVideoPublishPanelRefreshPublish),
                     ),
                   if (publishPanelUi.onBootstrapPublishDraft != null)
                     FilledButton.tonalIcon(
@@ -465,7 +474,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : const Icon(Icons.note_add_outlined),
-                      label: const Text('创建发布草稿并写入平台目标'),
+                      label: Text(l10n.shortVideoPublishPanelBootstrapDraft),
                     ),
                   if (publishPanelUi.onEnqueuePublishJob != null)
                     FilledButton.icon(
@@ -479,21 +488,29 @@ class _PublishDraftsPanel extends StatelessWidget {
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : const Icon(Icons.cloud_upload_outlined),
-                      label: Text(publishPanelUi.exportReady ? '投递发布作业' : '投递发布作业（存在阻塞项）'),
+                      label: Text(
+                        publishPanelUi.exportReady
+                            ? l10n.shortVideoPublishPanelEnqueueJob
+                            : l10n.shortVideoPublishPanelEnqueueJobBlocked,
+                      ),
                     ),
                   if (publishPanelUi.onEnqueueAllDrafts != null)
                     FilledButton.tonal(
                       onPressed: (publishPanelUi.publishBusy || !publishPanelUi.exportReady)
                           ? null
                           : publishPanelUi.onEnqueueAllDrafts,
-                      child: Text(publishPanelUi.exportReady ? '批量投递全部草稿' : '批量投递全部草稿（存在阻塞项）'),
+                      child: Text(
+                        publishPanelUi.exportReady
+                            ? l10n.shortVideoPublishPanelEnqueueAllDrafts
+                            : l10n.shortVideoPublishPanelEnqueueAllDraftsBlocked,
+                      ),
                     ),
                   if (publishPanelUi.onRetryFailedPublishJobs != null)
                     FilledButton.tonal(
                       onPressed: publishPanelUi.publishBusy
                           ? null
                           : publishPanelUi.onRetryFailedPublishJobs,
-                      child: const Text('批量重试失败作业'),
+                      child: Text(l10n.shortVideoPublishPanelRetryFailedJobs),
                     ),
                   if (publishPanelUi.onSuggestPublishCopy != null)
                     OutlinedButton.icon(
@@ -501,7 +518,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                           ? null
                           : publishPanelUi.onSuggestPublishCopy,
                       icon: const Icon(Icons.auto_awesome_outlined),
-                      label: const Text('生成差异化文案'),
+                      label: Text(l10n.shortVideoPublishPanelSuggestCopy),
                     ),
                   if (publishPanelUi.onClearPublishSchedule != null)
                     OutlinedButton.icon(
@@ -509,7 +526,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                           ? null
                           : publishPanelUi.onClearPublishSchedule,
                       icon: const Icon(Icons.schedule_outlined),
-                      label: const Text('清除定时（允许入队）'),
+                      label: Text(l10n.shortVideoPublishPanelClearSchedule),
                     ),
                   if (publishPanelUi.onScheduleFirstDraft != null &&
                       publishPanelUi.publishPrimaryDraftId.isNotEmpty)
@@ -518,7 +535,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                           ? null
                           : () => publishPanelUi.onScheduleFirstDraft?.call(context),
                       icon: const Icon(Icons.event_available_outlined),
-                      label: const Text('定时当前草稿…'),
+                      label: Text(l10n.shortVideoPublishPanelScheduleCurrentDraft),
                     ),
                   if (publishPanelUi.onScheduleAllDraftsSameTime != null &&
                       publishPanelUi.draftLines.length > 1)
@@ -527,7 +544,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                           ? null
                           : () => publishPanelUi.onScheduleAllDraftsSameTime?.call(context),
                       icon: const Icon(Icons.calendar_month_outlined),
-                      label: const Text('批量定时全部草稿…'),
+                      label: Text(l10n.shortVideoPublishPanelScheduleAllDrafts),
                     ),
                   if (publishPanelUi.onOpenPublishTroubleshooting != null)
                     OutlinedButton.icon(
@@ -535,7 +552,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                           ? null
                           : publishPanelUi.onOpenPublishTroubleshooting,
                       icon: const Icon(Icons.bug_report_outlined),
-                      label: const Text('打开发布排障入口'),
+                      label: Text(l10n.shortVideoPublishPanelOpenTroubleshooting),
                     ),
                 ],
               ),
@@ -543,7 +560,7 @@ class _PublishDraftsPanel extends StatelessWidget {
             if (publishPanelUi.publishBatchResultLines.isNotEmpty) ...[
               const SizedBox(height: 12),
               Text(
-                '批量结果摘要',
+                l10n.shortVideoPublishPanelBatchResultSummary,
                 style: theme.textTheme.labelSmall?.copyWith(color: outline),
               ),
               const SizedBox(height: 6),
