@@ -59,60 +59,73 @@ String summarizePlanEventCoverage({
 }
 
 String buildStorySkeletonSeedFromEvents({
+  required AppLocalizations l10n,
   required List<NovelEventRow> events,
   required List<NovelRow> novels,
 }) {
   final chapterCount = novels.length;
+  final chapterSpan = chapterCount >= 3 ? 3 : chapterCount;
   final header = <String>[
-    '开场钩子：',
+    l10n.projectScriptPlanSkeletonOpeningHookLabel,
     chapterCount == 0
-        ? '用一句话交代主角所处困局，并在前 30 秒抛出反常动作或危险信号。'
-        : '围绕前 ${chapterCount >= 3 ? 3 : chapterCount} 条章节快速建立人物处境，并在首屏给出强钩子。',
+        ? l10n.projectScriptPlanSkeletonOpeningHookZeroChapters
+        : l10n.projectScriptPlanSkeletonOpeningHookWithChapters(chapterSpan),
     '',
-    '核心推进：',
+    l10n.projectScriptPlanSkeletonCorePushLabel,
   ];
   final body = events.isEmpty
       ? <String>[
-          '- 先从章节中提炼 3-5 个关键事件节点，按“冲突升级 -> 误判 -> 反转”排序。',
-          '- 每个节点只保留推动人物关系或局势变化的动作，不要复述原文。',
+          l10n.projectScriptPlanSkeletonCoreEmptyLine1,
+          l10n.projectScriptPlanSkeletonCoreEmptyLine2,
         ]
       : events
             .take(6)
             .map(
-              (event) =>
-                  '- ${event.name}（章节 ${event.chapterIndexes.join(', ')}）：${event.detail.trim().isEmpty ? '补充该事件如何改变人物处境与下一步目标。' : event.detail.trim()}',
+              (event) => l10n.projectScriptPlanSkeletonEventLine(
+                event.name,
+                event.chapterIndexes.join(', '),
+                event.detail.trim().isEmpty
+                    ? l10n.projectScriptPlanSkeletonEventDetailFallback
+                    : event.detail.trim(),
+              ),
             )
             .toList();
-  final footer = <String>['', '结尾翻点：', '- 让最后一个节点留下未兑现的情绪账或更大的外部压力，形成下一集追更动机。'];
+  final footer = <String>[
+    '',
+    l10n.projectScriptPlanSkeletonClosingLabel,
+    l10n.projectScriptPlanSkeletonClosingBullet,
+  ];
   return [...header, ...body, ...footer].join('\n');
 }
 
 String buildAdaptationStrategySeedFromEvents({
+  required AppLocalizations l10n,
   required List<NovelEventRow> events,
   required List<NovelRow> novels,
 }) {
   final eventCount = events.length;
   final chapterCount = novels.length;
   return [
-    '人物策略：',
-    '- 主角情绪变化要有台阶，不要从头到尾同一强度；每次反应都对应具体刺激。',
-    '- 配角只保留能放大主角选择压力的人物，避免信息型路人。',
+    l10n.projectScriptPlanAdaptPeopleLabel,
+    l10n.projectScriptPlanAdaptPeopleLine1,
+    l10n.projectScriptPlanAdaptPeopleLine2,
     '',
-    '节奏策略：',
+    l10n.projectScriptPlanAdaptPacingLabel,
     eventCount == 0
-        ? '- 先按章节切出 3-5 个强动作节点，再压缩成短剧节奏。'
-        : '- 当前已有 $eventCount 条事件，优先保留冲突强、身份变化大、情绪反差明显的节点。',
+        ? l10n.projectScriptPlanAdaptPacingNoEvents
+        : l10n.projectScriptPlanAdaptPacingWithEvents(eventCount),
     chapterCount == 0
-        ? '- 保持单集只解决一个核心问题，并把更大的危机留到尾部。'
-        : '- 当前 $chapterCount 条章节不做平铺直叙，按“前快中压后翻”重排信息释放。',
+        ? l10n.projectScriptPlanAdaptPacingNoChapters
+        : l10n.projectScriptPlanAdaptPacingWithChapters(chapterCount),
     '',
-    '表达策略：',
-    '- 对话要口语化、有目的，避免解释剧情式复述。',
-    '- 画面与动作优先服务人物状态和情绪变化，不做空镜头堆砌。',
+    l10n.projectScriptPlanAdaptVoiceLabel,
+    l10n.projectScriptPlanAdaptVoiceLine1,
+    l10n.projectScriptPlanAdaptVoiceLine2,
   ].join('\n');
 }
 
 List<ScriptDraftPacket> buildScriptDraftPackets({
+  required AppLocalizations l10n,
   required List<NovelEventRow> events,
   required List<NovelRow> novels,
   required String storySkeleton,
@@ -141,8 +154,9 @@ List<ScriptDraftPacket> buildScriptDraftPackets({
         .map((event) => event.name.trim())
         .where((name) => name.isNotEmpty)
         .toList(growable: false);
-    final name = _resolveDraftName(existingScripts, index);
+    final name = _resolveDraftName(l10n, existingScripts, index);
     final content = _buildDraftContent(
+      l10n: l10n,
       packetName: name,
       chunk: chunk,
       chapterIndexes: chapterIndexes,
@@ -178,6 +192,7 @@ String summarizeScriptDraftPackets(
 }
 
 List<StructuredRewriteGuidance> buildStructuredRewriteGuidance({
+  required AppLocalizations l10n,
   required List<NovelEventRow> events,
   required List<NovelRow> novels,
   required String storySkeleton,
@@ -185,6 +200,7 @@ List<StructuredRewriteGuidance> buildStructuredRewriteGuidance({
   required List<ScriptAgentPlanScriptRow> existingScripts,
 }) {
   final drafts = buildScriptDraftPackets(
+    l10n: l10n,
     events: events,
     novels: novels,
     storySkeleton: storySkeleton,
@@ -204,6 +220,7 @@ List<StructuredRewriteGuidance> buildStructuredRewriteGuidance({
           chapterIndexes: draft.chapterIndexes,
           eventNames: draft.eventNames,
           content: _buildStructuredRewriteContent(
+            l10n: l10n,
             draft: draft,
             novelByChapter: novelByChapter,
             storySkeleton: storySkeleton,
@@ -294,17 +311,22 @@ List<_DraftChunk> _buildNovelChunks({
   return chunks;
 }
 
-String _resolveDraftName(List<ScriptAgentPlanScriptRow> existingScripts, int index) {
+String _resolveDraftName(
+  AppLocalizations l10n,
+  List<ScriptAgentPlanScriptRow> existingScripts,
+  int index,
+) {
   final existing = index < existingScripts.length
       ? existingScripts[index].name?.trim() ?? ''
       : '';
   if (existing.isNotEmpty) {
     return existing;
   }
-  return '第${index + 1}集';
+  return l10n.projectScriptPlanDraftEpisodeNumbered(index + 1);
 }
 
 String _buildDraftContent({
+  required AppLocalizations l10n,
   required String packetName,
   required _DraftChunk chunk,
   required List<int> chapterIndexes,
@@ -314,67 +336,84 @@ String _buildDraftContent({
   required String adaptationStrategy,
 }) {
   final chapterSummary = chapterIndexes.isEmpty
-      ? '待补章节依据'
+      ? l10n.projectScriptPlanDraftChapterPendingSummary
       : chapterIndexes
             .map((index) {
               final novel = novelByChapter[index];
               final title = novel?.chapter.trim();
-              return title == null || title.isEmpty ? '章节 $index' : '章节 $index《$title》';
+              return title == null || title.isEmpty
+                  ? l10n.projectScriptPlanDraftChapterSummaryPlainIndex(index)
+                  : l10n.projectScriptPlanDraftChapterSummaryTitled(index, title);
             })
             .join(' / ');
   final skeletonHint = _firstMeaningfulLine(
     storySkeleton,
-    fallback: '前段快速抛钩子，中段连续加压，尾段留下更大的情绪账。',
+    fallback: l10n.projectScriptPlanDraftSkeletonFallback,
   );
   final strategyHint = _firstMeaningfulLine(
     adaptationStrategy,
-    fallback: '对白口语化、动作带情绪、信息通过冲突释放。',
+    fallback: l10n.projectScriptPlanDraftStrategyFallback,
   );
   final beatLines = chunk.events.isEmpty
       ? chapterIndexes
             .map((index) {
               final novel = novelByChapter[index];
-              return '- 从 ${novel?.chapter.trim().isEmpty ?? true ? '章节 $index' : '《${novel!.chapter.trim()}》'} 提炼一个能推动关系或处境变化的动作节点。';
+              final plain = (novel?.chapter ?? '').trim().isEmpty;
+              return plain
+                  ? l10n.projectScriptPlanDraftBeatFromChapterPlain(index)
+                  : l10n.projectScriptPlanDraftBeatFromChapterTitled(
+                      novel!.chapter.trim(),
+                    );
             })
             .toList(growable: false)
       : chunk.events
             .map(
-              (event) => '- ${event.name.trim().isEmpty ? '关键事件' : event.name.trim()}：${event.detail.trim().isEmpty ? '补充该事件带来的情绪变化、行动选择和局势变化。' : event.detail.trim()}',
+              (event) {
+                final name = event.name.trim().isEmpty
+                    ? l10n.projectScriptPlanDraftEventNameFallback
+                    : event.name.trim();
+                final detail = event.detail.trim().isEmpty
+                    ? l10n.projectScriptPlanDraftEventDetailFallback
+                    : event.detail.trim();
+                return l10n.projectScriptPlanDraftEventBeat(name, detail);
+              },
             )
             .toList(growable: false);
   final scenePrompts = _buildScenePrompts(
+    l10n: l10n,
     chapterIndexes: chapterIndexes,
     novelByChapter: novelByChapter,
   );
   final endingHook = eventNames.isEmpty
-      ? '在最后一个动作后补一个未说透的发现、误会或反击前奏。'
-      : '把“${eventNames.last}”后的余波留到结尾，让人物以为稳住了，实际更危险。';
+      ? l10n.projectScriptPlanDraftEndingNoEvents
+      : l10n.projectScriptPlanDraftEndingAfterEvent(eventNames.last);
   return [
-    '【剧本定位】',
-    '$packetName：围绕 $chapterSummary 压缩成一集短剧，首屏先给冲突，结尾必须留钩子。',
+    l10n.projectScriptPlanDraftHdrPositioning,
+    l10n.projectScriptPlanDraftPositioningBody(packetName, chapterSummary),
     '',
-    '【骨架约束】',
+    l10n.projectScriptPlanDraftHdrSkeleton,
     skeletonHint,
     '',
-    '【改编口径】',
+    l10n.projectScriptPlanDraftHdrAdaptation,
     strategyHint,
     '',
-    '【剧情节拍】',
+    l10n.projectScriptPlanDraftHdrBeats,
     ...beatLines,
     '',
-    '【场次草稿】',
+    l10n.projectScriptPlanDraftHdrScenes,
     ...scenePrompts,
     '',
-    '【对白要求】',
-    '- 每段对白都带目的，不解释观众已经能从动作看懂的信息。',
-    '- 人物情绪要有起伏，先忍、再顶、再露底牌，避免全程一个腔调。',
+    l10n.projectScriptPlanDraftHdrDialogue,
+    l10n.projectScriptPlanDraftDialogueLine1,
+    l10n.projectScriptPlanDraftDialogueLine2,
     '',
-    '【结尾钩子】',
+    l10n.projectScriptPlanDraftHdrEnding,
     endingHook,
   ].join('\n');
 }
 
 String _buildStructuredRewriteContent({
+  required AppLocalizations l10n,
   required ScriptDraftPacket draft,
   required Map<int, NovelRow> novelByChapter,
   required String storySkeleton,
@@ -382,68 +421,92 @@ String _buildStructuredRewriteContent({
 }) {
   final skeletonHint = _firstMeaningfulLine(
     storySkeleton,
-    fallback: '先把主角困局和最大冲突抛到最前面，别平推背景说明。',
+    fallback: l10n.projectScriptPlanRewriteSkeletonFallback,
   );
   final strategyHint = _firstMeaningfulLine(
     adaptationStrategy,
-    fallback: '对白口语化、动作外化情绪、信息跟着冲突走。',
+    fallback: l10n.projectScriptPlanRewriteStrategyFallback,
   );
   final chapterLines = draft.chapterIndexes.isEmpty
-      ? const <String>['- 优先围绕最强冲突改写，不够戏剧性的原文说明直接压缩。']
+      ? <String>[l10n.projectScriptPlanRewriteChapterWhenNoIndexes]
       : draft.chapterIndexes.map((index) {
           final novel = novelByChapter[index];
           final excerpt = _compactText(novel?.chapterData ?? '', maxChars: 42);
           final title = novel?.chapter.trim();
-          return '- 章节 $index${title == null || title.isEmpty ? '' : '《$title》'}：${excerpt.isEmpty ? '只保留能推动冲突或人物关系变化的动作。' : '围绕“$excerpt”改成可拍的动作和情绪交锋。'}';
+          if (title == null || title.isEmpty) {
+            return excerpt.isEmpty
+                ? l10n.projectScriptPlanRewriteChapterPlainEmptyExcerpt(index)
+                : l10n.projectScriptPlanRewriteChapterPlainWithExcerpt(
+                    index,
+                    excerpt,
+                  );
+          }
+          return excerpt.isEmpty
+              ? l10n.projectScriptPlanRewriteChapterTitledEmptyExcerpt(index, title)
+              : l10n.projectScriptPlanRewriteChapterTitledWithExcerpt(
+                  index,
+                  title,
+                  excerpt,
+                );
         }).toList(growable: false);
   final eventLines = draft.eventNames.isEmpty
-      ? const <String>[
-          '- 先补出 3 个节点：抛钩子、压迫升级、尾部反转或悬念。',
-        ]
+      ? <String>[l10n.projectScriptPlanRewriteEventDefault]
       : draft.eventNames
-          .map((name) => '- 事件“$name”必须带来情绪或局势变化，不能只做信息通报。')
+          .map((name) => l10n.projectScriptPlanRewriteEventNamed(name))
           .toList(growable: false);
   return [
-    '【改写目标】',
+    l10n.projectScriptPlanRewriteHdrGoal,
     skeletonHint,
     '',
-    '【改写策略】',
+    l10n.projectScriptPlanRewriteHdrStrategy,
     strategyHint,
     '',
-    '【章节压缩指令】',
+    l10n.projectScriptPlanRewriteHdrChapters,
     ...chapterLines,
     '',
-    '【事件改写指令】',
+    l10n.projectScriptPlanRewriteHdrEvents,
     ...eventLines,
     '',
-    '【人物情绪】',
-    '- 主角每场都要有明确刺激、反应和下一步动作，情绪不能整集一个平面。',
-    '- 配角发言要推动主角选择，不留解释剧情的空对白。',
+    l10n.projectScriptPlanRewriteHdrPeople,
+    l10n.projectScriptPlanRewritePeopleLine1,
+    l10n.projectScriptPlanRewritePeopleLine2,
     '',
-    '【去 AI 味约束】',
-    '- 少写总结句、价值判断句和书面连接词，改成口语化冲突表达。',
-    '- 画面先写动作、视线、停顿、压迫感来源，再补必要对白。',
-    '- 同一场里不要连续三句都在解释背景，让信息藏进试探、误会和逼问。',
+    l10n.projectScriptPlanRewriteHdrDeAi,
+    l10n.projectScriptPlanRewriteDeAiLine1,
+    l10n.projectScriptPlanRewriteDeAiLine2,
+    l10n.projectScriptPlanRewriteDeAiLine3,
   ].join('\n');
 }
 
 List<String> _buildScenePrompts({
+  required AppLocalizations l10n,
   required List<int> chapterIndexes,
   required Map<int, NovelRow> novelByChapter,
 }) {
   if (chapterIndexes.isEmpty) {
-    return const <String>[
-      '- 场1：用一个反常动作或外部威胁开场，把主角直接推入选择。',
-      '- 场2：让关键关系失衡，冲突不要靠旁白解释。',
-      '- 场3：用情绪反转收尾，并留下下一集必须追的悬念。',
+    return <String>[
+      l10n.projectScriptPlanDraftSceneDefault1,
+      l10n.projectScriptPlanDraftSceneDefault2,
+      l10n.projectScriptPlanDraftSceneDefault3,
     ];
   }
   return List<String>.generate(chapterIndexes.length, (index) {
+    final sceneNumber = index + 1;
     final chapterIndex = chapterIndexes[index];
     final novel = novelByChapter[chapterIndex];
     final title = novel?.chapter.trim();
     final excerpt = _compactText(novel?.chapterData ?? '', maxChars: 56);
-    return '- 场${index + 1}：${title == null || title.isEmpty ? '章节 $chapterIndex' : '《$title》'}${excerpt.isEmpty ? '' : '，抓住“$excerpt”里的动作和情绪做可拍场面'}。';
+    if (title == null || title.isEmpty) {
+      return l10n.projectScriptPlanDraftSceneChapterOnly(sceneNumber, chapterIndex);
+    }
+    if (excerpt.isEmpty) {
+      return l10n.projectScriptPlanDraftSceneTitleNoExcerpt(sceneNumber, title);
+    }
+    return l10n.projectScriptPlanDraftSceneTitleWithExcerpt(
+      sceneNumber,
+      title,
+      excerpt,
+    );
   }, growable: false);
 }
 

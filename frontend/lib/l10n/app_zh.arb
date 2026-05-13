@@ -7945,6 +7945,255 @@
       }
     }
   },
+  "projectScriptPlanSkeletonOpeningHookLabel": "开场钩子：",
+  "projectScriptPlanSkeletonOpeningHookZeroChapters": "用一句话交代主角所处困局，并在前 30 秒抛出反常动作或危险信号。",
+  "projectScriptPlanSkeletonOpeningHookWithChapters": "围绕前 {chapterSpan} 条章节快速建立人物处境，并在首屏给出强钩子。",
+  "@projectScriptPlanSkeletonOpeningHookWithChapters": {
+    "placeholders": {
+      "chapterSpan": {
+        "type": "int"
+      }
+    }
+  },
+  "projectScriptPlanSkeletonCorePushLabel": "核心推进：",
+  "projectScriptPlanSkeletonCoreEmptyLine1": "- 先从章节中提炼 3-5 个关键事件节点，按“冲突升级 -> 误判 -> 反转”排序。",
+  "projectScriptPlanSkeletonCoreEmptyLine2": "- 每个节点只保留推动人物关系或局势变化的动作，不要复述原文。",
+  "projectScriptPlanSkeletonEventLine": "- {name}（章节 {chapterIndexes}）：{detail}",
+  "@projectScriptPlanSkeletonEventLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "chapterIndexes": {
+        "type": "String"
+      },
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "projectScriptPlanSkeletonEventDetailFallback": "补充该事件如何改变人物处境与下一步目标。",
+  "projectScriptPlanSkeletonClosingLabel": "结尾翻点：",
+  "projectScriptPlanSkeletonClosingBullet": "- 让最后一个节点留下未兑现的情绪账或更大的外部压力，形成下一集追更动机。",
+  "projectScriptPlanAdaptPeopleLabel": "人物策略：",
+  "projectScriptPlanAdaptPeopleLine1": "- 主角情绪变化要有台阶，不要从头到尾同一强度；每次反应都对应具体刺激。",
+  "projectScriptPlanAdaptPeopleLine2": "- 配角只保留能放大主角选择压力的人物，避免信息型路人。",
+  "projectScriptPlanAdaptPacingLabel": "节奏策略：",
+  "projectScriptPlanAdaptPacingNoEvents": "- 先按章节切出 3-5 个强动作节点，再压缩成短剧节奏。",
+  "projectScriptPlanAdaptPacingWithEvents": "- 当前已有 {eventCount} 条事件，优先保留冲突强、身份变化大、情绪反差明显的节点。",
+  "@projectScriptPlanAdaptPacingWithEvents": {
+    "placeholders": {
+      "eventCount": {
+        "type": "int"
+      }
+    }
+  },
+  "projectScriptPlanAdaptPacingNoChapters": "- 保持单集只解决一个核心问题，并把更大的危机留到尾部。",
+  "projectScriptPlanAdaptPacingWithChapters": "- 当前 {chapterCount} 条章节不做平铺直叙，按“前快中压后翻”重排信息释放。",
+  "@projectScriptPlanAdaptPacingWithChapters": {
+    "placeholders": {
+      "chapterCount": {
+        "type": "int"
+      }
+    }
+  },
+  "projectScriptPlanAdaptVoiceLabel": "表达策略：",
+  "projectScriptPlanAdaptVoiceLine1": "- 对话要口语化、有目的，避免解释剧情式复述。",
+  "projectScriptPlanAdaptVoiceLine2": "- 画面与动作优先服务人物状态和情绪变化，不做空镜头堆砌。",
+  "projectScriptPlanDraftEpisodeNumbered": "第{episodeNumber}集",
+  "@projectScriptPlanDraftEpisodeNumbered": {
+    "placeholders": {
+      "episodeNumber": {
+        "type": "int"
+      }
+    }
+  },
+  "projectScriptPlanDraftChapterPendingSummary": "待补章节依据",
+  "projectScriptPlanDraftChapterSummaryPlainIndex": "章节 {index}",
+  "@projectScriptPlanDraftChapterSummaryPlainIndex": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "projectScriptPlanDraftChapterSummaryTitled": "章节 {index}《{title}》",
+  "@projectScriptPlanDraftChapterSummaryTitled": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "projectScriptPlanDraftSkeletonFallback": "前段快速抛钩子，中段连续加压，尾段留下更大的情绪账。",
+  "projectScriptPlanDraftStrategyFallback": "对白口语化、动作带情绪、信息通过冲突释放。",
+  "projectScriptPlanDraftBeatFromChapterPlain": "- 从 章节 {index} 提炼一个能推动关系或处境变化的动作节点。",
+  "@projectScriptPlanDraftBeatFromChapterPlain": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "projectScriptPlanDraftBeatFromChapterTitled": "- 从 《{title}》 提炼一个能推动关系或处境变化的动作节点。",
+  "@projectScriptPlanDraftBeatFromChapterTitled": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "projectScriptPlanDraftEventNameFallback": "关键事件",
+  "projectScriptPlanDraftEventDetailFallback": "补充该事件带来的情绪变化、行动选择和局势变化。",
+  "projectScriptPlanDraftEventBeat": "- {name}：{detail}",
+  "@projectScriptPlanDraftEventBeat": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "projectScriptPlanDraftEndingNoEvents": "在最后一个动作后补一个未说透的发现、误会或反击前奏。",
+  "projectScriptPlanDraftEndingAfterEvent": "把“{eventName}”后的余波留到结尾，让人物以为稳住了，实际更危险。",
+  "@projectScriptPlanDraftEndingAfterEvent": {
+    "placeholders": {
+      "eventName": {
+        "type": "String"
+      }
+    }
+  },
+  "projectScriptPlanDraftHdrPositioning": "【剧本定位】",
+  "projectScriptPlanDraftPositioningBody": "{packetName}：围绕 {chapterSummary} 压缩成一集短剧，首屏先给冲突，结尾必须留钩子。",
+  "@projectScriptPlanDraftPositioningBody": {
+    "placeholders": {
+      "packetName": {
+        "type": "String"
+      },
+      "chapterSummary": {
+        "type": "String"
+      }
+    }
+  },
+  "projectScriptPlanDraftHdrSkeleton": "【骨架约束】",
+  "projectScriptPlanDraftHdrAdaptation": "【改编口径】",
+  "projectScriptPlanDraftHdrBeats": "【剧情节拍】",
+  "projectScriptPlanDraftHdrScenes": "【场次草稿】",
+  "projectScriptPlanDraftHdrDialogue": "【对白要求】",
+  "projectScriptPlanDraftDialogueLine1": "- 每段对白都带目的，不解释观众已经能从动作看懂的信息。",
+  "projectScriptPlanDraftDialogueLine2": "- 人物情绪要有起伏，先忍、再顶、再露底牌，避免全程一个腔调。",
+  "projectScriptPlanDraftHdrEnding": "【结尾钩子】",
+  "projectScriptPlanDraftSceneDefault1": "- 场1：用一个反常动作或外部威胁开场，把主角直接推入选择。",
+  "projectScriptPlanDraftSceneDefault2": "- 场2：让关键关系失衡，冲突不要靠旁白解释。",
+  "projectScriptPlanDraftSceneDefault3": "- 场3：用情绪反转收尾，并留下下一集必须追的悬念。",
+  "projectScriptPlanDraftSceneChapterOnly": "- 场{sceneNumber}：章节 {chapterIndex}。",
+  "@projectScriptPlanDraftSceneChapterOnly": {
+    "placeholders": {
+      "sceneNumber": {
+        "type": "int"
+      },
+      "chapterIndex": {
+        "type": "int"
+      }
+    }
+  },
+  "projectScriptPlanDraftSceneTitleNoExcerpt": "- 场{sceneNumber}：《{title}》。",
+  "@projectScriptPlanDraftSceneTitleNoExcerpt": {
+    "placeholders": {
+      "sceneNumber": {
+        "type": "int"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "projectScriptPlanDraftSceneTitleWithExcerpt": "- 场{sceneNumber}：《{title}》，抓住“{excerpt}”里的动作和情绪做可拍场面。",
+  "@projectScriptPlanDraftSceneTitleWithExcerpt": {
+    "placeholders": {
+      "sceneNumber": {
+        "type": "int"
+      },
+      "title": {
+        "type": "String"
+      },
+      "excerpt": {
+        "type": "String"
+      }
+    }
+  },
+  "projectScriptPlanRewriteSkeletonFallback": "先把主角困局和最大冲突抛到最前面，别平推背景说明。",
+  "projectScriptPlanRewriteStrategyFallback": "对白口语化、动作外化情绪、信息跟着冲突走。",
+  "projectScriptPlanRewriteChapterWhenNoIndexes": "- 优先围绕最强冲突改写，不够戏剧性的原文说明直接压缩。",
+  "projectScriptPlanRewriteChapterPlainEmptyExcerpt": "- 章节 {index}：只保留能推动冲突或人物关系变化的动作。",
+  "@projectScriptPlanRewriteChapterPlainEmptyExcerpt": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "projectScriptPlanRewriteChapterPlainWithExcerpt": "- 章节 {index}：围绕“{excerpt}”改成可拍的动作和情绪交锋。",
+  "@projectScriptPlanRewriteChapterPlainWithExcerpt": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "excerpt": {
+        "type": "String"
+      }
+    }
+  },
+  "projectScriptPlanRewriteChapterTitledEmptyExcerpt": "- 章节 {index}《{title}》：只保留能推动冲突或人物关系变化的动作。",
+  "@projectScriptPlanRewriteChapterTitledEmptyExcerpt": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "projectScriptPlanRewriteChapterTitledWithExcerpt": "- 章节 {index}《{title}》：围绕“{excerpt}”改成可拍的动作和情绪交锋。",
+  "@projectScriptPlanRewriteChapterTitledWithExcerpt": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "title": {
+        "type": "String"
+      },
+      "excerpt": {
+        "type": "String"
+      }
+    }
+  },
+  "projectScriptPlanRewriteEventDefault": "- 先补出 3 个节点：抛钩子、压迫升级、尾部反转或悬念。",
+  "projectScriptPlanRewriteEventNamed": "- 事件“{name}”必须带来情绪或局势变化，不能只做信息通报。",
+  "@projectScriptPlanRewriteEventNamed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "projectScriptPlanRewriteHdrGoal": "【改写目标】",
+  "projectScriptPlanRewriteHdrStrategy": "【改写策略】",
+  "projectScriptPlanRewriteHdrChapters": "【章节压缩指令】",
+  "projectScriptPlanRewriteHdrEvents": "【事件改写指令】",
+  "projectScriptPlanRewriteHdrPeople": "【人物情绪】",
+  "projectScriptPlanRewritePeopleLine1": "- 主角每场都要有明确刺激、反应和下一步动作，情绪不能整集一个平面。",
+  "projectScriptPlanRewritePeopleLine2": "- 配角发言要推动主角选择，不留解释剧情的空对白。",
+  "projectScriptPlanRewriteHdrDeAi": "【去 AI 味约束】",
+  "projectScriptPlanRewriteDeAiLine1": "- 少写总结句、价值判断句和书面连接词，改成口语化冲突表达。",
+  "projectScriptPlanRewriteDeAiLine2": "- 画面先写动作、视线、停顿、压迫感来源，再补必要对白。",
+  "projectScriptPlanRewriteDeAiLine3": "- 同一场里不要连续三句都在解释背景，让信息藏进试探、误会和逼问。",
   "projectScriptPlanWorkbenchTitle": "故事骨架与改编策略",
   "projectScriptPlanWorkbenchPlanMountedLine": "planId {planId} · 已挂载 {count} 条剧本{namesSuffix}",
   "@projectScriptPlanWorkbenchPlanMountedLine": {

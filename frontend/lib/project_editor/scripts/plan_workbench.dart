@@ -60,6 +60,7 @@ extension _HomePageProjectEditorScriptPlanWorkbench on _HomePageState {
 
     void fillStorySkeletonSeed(StateSetter setLocalState) {
       final seed = buildStorySkeletonSeedFromEvents(
+        l10n: l10n,
         events: eventRows,
         novels: novelRows,
       );
@@ -71,6 +72,7 @@ extension _HomePageProjectEditorScriptPlanWorkbench on _HomePageState {
 
     void fillAdaptationStrategySeed(StateSetter setLocalState) {
       final seed = buildAdaptationStrategySeedFromEvents(
+        l10n: l10n,
         events: eventRows,
         novels: novelRows,
       );
@@ -82,6 +84,7 @@ extension _HomePageProjectEditorScriptPlanWorkbench on _HomePageState {
 
     void generateDraftPackets(StateSetter setLocalState) {
       final nextDrafts = buildScriptDraftPackets(
+        l10n: l10n,
         events: eventRows,
         novels: novelRows,
         storySkeleton: storySkeletonCtrl.text,
@@ -99,6 +102,7 @@ extension _HomePageProjectEditorScriptPlanWorkbench on _HomePageState {
 
     void generateGuidance(StateSetter setLocalState) {
       final nextGuidance = buildStructuredRewriteGuidance(
+        l10n: l10n,
         events: eventRows,
         novels: novelRows,
         storySkeleton: storySkeletonCtrl.text,
@@ -177,6 +181,7 @@ extension _HomePageProjectEditorScriptPlanWorkbench on _HomePageState {
         if (!ctx.mounted) return;
         setLocalState(() {
           draftPackets = buildScriptDraftPackets(
+            l10n: l10n,
             events: eventRows,
             novels: novelRows,
             storySkeleton: storySkeletonCtrl.text,
@@ -185,6 +190,7 @@ extension _HomePageProjectEditorScriptPlanWorkbench on _HomePageState {
                 planData?.scriptRows ?? const <ScriptAgentPlanScriptRow>[],
           );
           guidanceRows = buildStructuredRewriteGuidance(
+            l10n: l10n,
             events: eventRows,
             novels: novelRows,
             storySkeleton: storySkeletonCtrl.text,

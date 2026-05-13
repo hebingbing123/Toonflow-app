@@ -62,6 +62,7 @@ void main() {
 
   test('buildStorySkeletonSeedFromEvents uses current event rows', () {
     final seed = buildStorySkeletonSeedFromEvents(
+      l10n: zh,
       events: const [
         NovelEventRow(
           id: 'e1',
@@ -82,6 +83,7 @@ void main() {
 
   test('buildAdaptationStrategySeed includes deterministic constraints', () {
     final seed = buildAdaptationStrategySeedFromEvents(
+      l10n: zh,
       events: const [],
       novels: const [],
     );
@@ -93,6 +95,7 @@ void main() {
 
   test('buildScriptDraftPackets derives draft scripts from events and plan', () {
     final drafts = buildScriptDraftPackets(
+      l10n: zh,
       events: const [
         NovelEventRow(
           id: 'e1',
@@ -176,6 +179,7 @@ void main() {
 
   test('buildStructuredRewriteGuidance adds anti-ai rewrite constraints', () {
     final guidanceRows = buildStructuredRewriteGuidance(
+      l10n: zh,
       events: const [
         NovelEventRow(
           id: 'e1',

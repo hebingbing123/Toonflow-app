@@ -7985,6 +7985,255 @@
       }
     }
   },
+  "projectScriptPlanSkeletonOpeningHookLabel": "Cold open hook:",
+  "projectScriptPlanSkeletonOpeningHookZeroChapters": "In one line, establish the protagonist's predicament and throw an abnormal action or danger signal in the first 30 seconds.",
+  "projectScriptPlanSkeletonOpeningHookWithChapters": "Use the first {chapterSpan} chapters to quickly establish the situation and land a strong hook on the first screen.",
+  "@projectScriptPlanSkeletonOpeningHookWithChapters": {
+    "placeholders": {
+      "chapterSpan": {
+        "type": "int"
+      }
+    }
+  },
+  "projectScriptPlanSkeletonCorePushLabel": "Core momentum:",
+  "projectScriptPlanSkeletonCoreEmptyLine1": "- Extract 3–5 key beats from chapters and order them as \"escalation → misread → reversal\".",
+  "projectScriptPlanSkeletonCoreEmptyLine2": "- Keep only actions that move relationships or the situation; do not retell the prose.",
+  "projectScriptPlanSkeletonEventLine": "- {name} (chapters {chapterIndexes}): {detail}",
+  "@projectScriptPlanSkeletonEventLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "chapterIndexes": {
+        "type": "String"
+      },
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "projectScriptPlanSkeletonEventDetailFallback": "Explain how this beat changes the character's situation and their next goal.",
+  "projectScriptPlanSkeletonClosingLabel": "End flip:",
+  "projectScriptPlanSkeletonClosingBullet": "- Leave the last beat with unpaid emotional debt or greater external pressure to drive the next episode.",
+  "projectScriptPlanAdaptPeopleLabel": "Character strategy:",
+  "projectScriptPlanAdaptPeopleLine1": "- Give the lead stepped emotional shifts; every reaction should map to a concrete stimulus.",
+  "projectScriptPlanAdaptPeopleLine2": "- Keep only supporting characters who increase the pressure on the lead's choices; drop exposition-only walk-ons.",
+  "projectScriptPlanAdaptPacingLabel": "Pacing strategy:",
+  "projectScriptPlanAdaptPacingNoEvents": "- Slice chapters into 3–5 strong action beats, then compress to short-drama pacing.",
+  "projectScriptPlanAdaptPacingWithEvents": "- With {eventCount} events on file, prioritize beats with strong conflict, identity shifts, and emotional contrast.",
+  "@projectScriptPlanAdaptPacingWithEvents": {
+    "placeholders": {
+      "eventCount": {
+        "type": "int"
+      }
+    }
+  },
+  "projectScriptPlanAdaptPacingNoChapters": "- Each episode solves one core problem and pushes the larger crisis to the tail.",
+  "projectScriptPlanAdaptPacingWithChapters": "- With {chapterCount} chapters, avoid flat narration; release information as \"fast open → sustained pressure → late flip\".",
+  "@projectScriptPlanAdaptPacingWithChapters": {
+    "placeholders": {
+      "chapterCount": {
+        "type": "int"
+      }
+    }
+  },
+  "projectScriptPlanAdaptVoiceLabel": "Voice strategy:",
+  "projectScriptPlanAdaptVoiceLine1": "- Dialogue should sound spoken and purposeful; avoid explaining plot the audience can already read from action.",
+  "projectScriptPlanAdaptVoiceLine2": "- Favor shots and action that serve emotional state; avoid empty montage stacking.",
+  "projectScriptPlanDraftEpisodeNumbered": "Episode {episodeNumber}",
+  "@projectScriptPlanDraftEpisodeNumbered": {
+    "placeholders": {
+      "episodeNumber": {
+        "type": "int"
+      }
+    }
+  },
+  "projectScriptPlanDraftChapterPendingSummary": "Chapter references TBD",
+  "projectScriptPlanDraftChapterSummaryPlainIndex": "Chapter {index}",
+  "@projectScriptPlanDraftChapterSummaryPlainIndex": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "projectScriptPlanDraftChapterSummaryTitled": "Chapter {index}《{title}》",
+  "@projectScriptPlanDraftChapterSummaryTitled": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "projectScriptPlanDraftSkeletonFallback": "Hook fast in the first block, keep pressure rising in the middle, leave a bigger emotional IOU at the end.",
+  "projectScriptPlanDraftStrategyFallback": "Spoken dialogue, emotion carried by action, exposition only through conflict.",
+  "projectScriptPlanDraftBeatFromChapterPlain": "- Pull one beat from chapter {index} that moves relationship or situation.",
+  "@projectScriptPlanDraftBeatFromChapterPlain": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "projectScriptPlanDraftBeatFromChapterTitled": "- Pull one beat from 《{title}》 that moves relationship or situation.",
+  "@projectScriptPlanDraftBeatFromChapterTitled": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "projectScriptPlanDraftEventNameFallback": "Key beat",
+  "projectScriptPlanDraftEventDetailFallback": "Add the emotional shift, choice, and situation change this beat causes.",
+  "projectScriptPlanDraftEventBeat": "- {name}: {detail}",
+  "@projectScriptPlanDraftEventBeat": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "projectScriptPlanDraftEndingNoEvents": "After the last action, add an unfinished discovery, misunderstanding, or prelude to a counterattack.",
+  "projectScriptPlanDraftEndingAfterEvent": "Leave the aftershock of \"{eventName}\" at the ending—characters think they are safe, but danger grows.",
+  "@projectScriptPlanDraftEndingAfterEvent": {
+    "placeholders": {
+      "eventName": {
+        "type": "String"
+      }
+    }
+  },
+  "projectScriptPlanDraftHdrPositioning": "【Series positioning】",
+  "projectScriptPlanDraftPositioningBody": "{packetName}: compress one short-drama episode around {chapterSummary}; open with conflict and end on a hook.",
+  "@projectScriptPlanDraftPositioningBody": {
+    "placeholders": {
+      "packetName": {
+        "type": "String"
+      },
+      "chapterSummary": {
+        "type": "String"
+      }
+    }
+  },
+  "projectScriptPlanDraftHdrSkeleton": "【Skeleton guardrails】",
+  "projectScriptPlanDraftHdrAdaptation": "【Adaptation stance】",
+  "projectScriptPlanDraftHdrBeats": "【Beat sheet】",
+  "projectScriptPlanDraftHdrScenes": "【Scene prompts】",
+  "projectScriptPlanDraftHdrDialogue": "【Dialogue requirements】",
+  "projectScriptPlanDraftDialogueLine1": "- Every line has intent; do not explain what action already shows.",
+  "projectScriptPlanDraftDialogueLine2": "- Emotions arc: hold, push, then reveal; avoid one-note delivery.",
+  "projectScriptPlanDraftHdrEnding": "【Closing hook】",
+  "projectScriptPlanDraftSceneDefault1": "- Scene 1: open with an abnormal action or external threat that forces a choice.",
+  "projectScriptPlanDraftSceneDefault2": "- Scene 2: unbalance the key relationship; do not explain conflict in narration.",
+  "projectScriptPlanDraftSceneDefault3": "- Scene 3: end on an emotional flip and a must-watch cliffhanger.",
+  "projectScriptPlanDraftSceneChapterOnly": "- Scene {sceneNumber}: chapter {chapterIndex}.",
+  "@projectScriptPlanDraftSceneChapterOnly": {
+    "placeholders": {
+      "sceneNumber": {
+        "type": "int"
+      },
+      "chapterIndex": {
+        "type": "int"
+      }
+    }
+  },
+  "projectScriptPlanDraftSceneTitleNoExcerpt": "- Scene {sceneNumber}: 《{title}》.",
+  "@projectScriptPlanDraftSceneTitleNoExcerpt": {
+    "placeholders": {
+      "sceneNumber": {
+        "type": "int"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "projectScriptPlanDraftSceneTitleWithExcerpt": "- Scene {sceneNumber}: 《{title}》, turn the action and emotion in \"{excerpt}\" into shootable beats.",
+  "@projectScriptPlanDraftSceneTitleWithExcerpt": {
+    "placeholders": {
+      "sceneNumber": {
+        "type": "int"
+      },
+      "title": {
+        "type": "String"
+      },
+      "excerpt": {
+        "type": "String"
+      }
+    }
+  },
+  "projectScriptPlanRewriteSkeletonFallback": "Put the lead's trap and biggest conflict up front; do not front-load flat exposition.",
+  "projectScriptPlanRewriteStrategyFallback": "Spoken dialogue, externalized emotion, information rides on conflict.",
+  "projectScriptPlanRewriteChapterWhenNoIndexes": "- Rewrite around the strongest conflict first; compress undramatic explanatory prose.",
+  "projectScriptPlanRewriteChapterPlainEmptyExcerpt": "- Chapter {index}: keep only actions that move conflict or relationships.",
+  "@projectScriptPlanRewriteChapterPlainEmptyExcerpt": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "projectScriptPlanRewriteChapterPlainWithExcerpt": "- Chapter {index}: turn \"{excerpt}\" into shootable action and emotional clashes.",
+  "@projectScriptPlanRewriteChapterPlainWithExcerpt": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "excerpt": {
+        "type": "String"
+      }
+    }
+  },
+  "projectScriptPlanRewriteChapterTitledEmptyExcerpt": "- Chapter {index}《{title}》: keep only actions that move conflict or relationships.",
+  "@projectScriptPlanRewriteChapterTitledEmptyExcerpt": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "projectScriptPlanRewriteChapterTitledWithExcerpt": "- Chapter {index}《{title}》: turn \"{excerpt}\" into shootable action and emotional clashes.",
+  "@projectScriptPlanRewriteChapterTitledWithExcerpt": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "title": {
+        "type": "String"
+      },
+      "excerpt": {
+        "type": "String"
+      }
+    }
+  },
+  "projectScriptPlanRewriteEventDefault": "- Add three nodes: hook, rising pressure, tail reversal or suspense.",
+  "projectScriptPlanRewriteEventNamed": "- Event \"{name}\" must change emotion or the board; no pure info dumps.",
+  "@projectScriptPlanRewriteEventNamed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "projectScriptPlanRewriteHdrGoal": "【Rewrite goal】",
+  "projectScriptPlanRewriteHdrStrategy": "【Rewrite strategy】",
+  "projectScriptPlanRewriteHdrChapters": "【Chapter compression】",
+  "projectScriptPlanRewriteHdrEvents": "【Event rewrite】",
+  "projectScriptPlanRewriteHdrPeople": "【Character emotion】",
+  "projectScriptPlanRewritePeopleLine1": "- Every scene gives the lead a clear stimulus, reaction, and next move; avoid flat emotion all episode.",
+  "projectScriptPlanRewritePeopleLine2": "- Supporting lines should force the lead's choices—no empty exposition dialogue.",
+  "projectScriptPlanRewriteHdrDeAi": "【Anti-LLM polish】",
+  "projectScriptPlanRewriteDeAiLine1": "- Cut summary lines, moralizing, and bookish connectors; replace with spoken conflict.",
+  "projectScriptPlanRewriteDeAiLine2": "- Lead with action, gaze, pauses, and sources of pressure before adding necessary dialogue.",
+  "projectScriptPlanRewriteDeAiLine3": "- Do not stack three straight lines explaining background; hide intel in probing, misunderstanding, and pressure.",
   "projectScriptPlanWorkbenchTitle": "Story skeleton & adaptation strategy",
   "projectScriptPlanWorkbenchPlanMountedLine": "planId {planId} · {count} script row(s) mounted{namesSuffix}",
   "@projectScriptPlanWorkbenchPlanMountedLine": {

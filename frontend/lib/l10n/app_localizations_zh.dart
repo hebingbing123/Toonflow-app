@@ -10193,6 +10193,308 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get projectScriptPlanSkeletonOpeningHookLabel => '开场钩子：';
+
+  @override
+  String get projectScriptPlanSkeletonOpeningHookZeroChapters =>
+      '用一句话交代主角所处困局，并在前 30 秒抛出反常动作或危险信号。';
+
+  @override
+  String projectScriptPlanSkeletonOpeningHookWithChapters(int chapterSpan) {
+    return '围绕前 $chapterSpan 条章节快速建立人物处境，并在首屏给出强钩子。';
+  }
+
+  @override
+  String get projectScriptPlanSkeletonCorePushLabel => '核心推进：';
+
+  @override
+  String get projectScriptPlanSkeletonCoreEmptyLine1 =>
+      '- 先从章节中提炼 3-5 个关键事件节点，按“冲突升级 -> 误判 -> 反转”排序。';
+
+  @override
+  String get projectScriptPlanSkeletonCoreEmptyLine2 =>
+      '- 每个节点只保留推动人物关系或局势变化的动作，不要复述原文。';
+
+  @override
+  String projectScriptPlanSkeletonEventLine(
+    String name,
+    String chapterIndexes,
+    String detail,
+  ) {
+    return '- $name（章节 $chapterIndexes）：$detail';
+  }
+
+  @override
+  String get projectScriptPlanSkeletonEventDetailFallback =>
+      '补充该事件如何改变人物处境与下一步目标。';
+
+  @override
+  String get projectScriptPlanSkeletonClosingLabel => '结尾翻点：';
+
+  @override
+  String get projectScriptPlanSkeletonClosingBullet =>
+      '- 让最后一个节点留下未兑现的情绪账或更大的外部压力，形成下一集追更动机。';
+
+  @override
+  String get projectScriptPlanAdaptPeopleLabel => '人物策略：';
+
+  @override
+  String get projectScriptPlanAdaptPeopleLine1 =>
+      '- 主角情绪变化要有台阶，不要从头到尾同一强度；每次反应都对应具体刺激。';
+
+  @override
+  String get projectScriptPlanAdaptPeopleLine2 =>
+      '- 配角只保留能放大主角选择压力的人物，避免信息型路人。';
+
+  @override
+  String get projectScriptPlanAdaptPacingLabel => '节奏策略：';
+
+  @override
+  String get projectScriptPlanAdaptPacingNoEvents =>
+      '- 先按章节切出 3-5 个强动作节点，再压缩成短剧节奏。';
+
+  @override
+  String projectScriptPlanAdaptPacingWithEvents(int eventCount) {
+    return '- 当前已有 $eventCount 条事件，优先保留冲突强、身份变化大、情绪反差明显的节点。';
+  }
+
+  @override
+  String get projectScriptPlanAdaptPacingNoChapters =>
+      '- 保持单集只解决一个核心问题，并把更大的危机留到尾部。';
+
+  @override
+  String projectScriptPlanAdaptPacingWithChapters(int chapterCount) {
+    return '- 当前 $chapterCount 条章节不做平铺直叙，按“前快中压后翻”重排信息释放。';
+  }
+
+  @override
+  String get projectScriptPlanAdaptVoiceLabel => '表达策略：';
+
+  @override
+  String get projectScriptPlanAdaptVoiceLine1 => '- 对话要口语化、有目的，避免解释剧情式复述。';
+
+  @override
+  String get projectScriptPlanAdaptVoiceLine2 =>
+      '- 画面与动作优先服务人物状态和情绪变化，不做空镜头堆砌。';
+
+  @override
+  String projectScriptPlanDraftEpisodeNumbered(int episodeNumber) {
+    return '第$episodeNumber集';
+  }
+
+  @override
+  String get projectScriptPlanDraftChapterPendingSummary => '待补章节依据';
+
+  @override
+  String projectScriptPlanDraftChapterSummaryPlainIndex(int index) {
+    return '章节 $index';
+  }
+
+  @override
+  String projectScriptPlanDraftChapterSummaryTitled(int index, String title) {
+    return '章节 $index《$title》';
+  }
+
+  @override
+  String get projectScriptPlanDraftSkeletonFallback =>
+      '前段快速抛钩子，中段连续加压，尾段留下更大的情绪账。';
+
+  @override
+  String get projectScriptPlanDraftStrategyFallback => '对白口语化、动作带情绪、信息通过冲突释放。';
+
+  @override
+  String projectScriptPlanDraftBeatFromChapterPlain(int index) {
+    return '- 从 章节 $index 提炼一个能推动关系或处境变化的动作节点。';
+  }
+
+  @override
+  String projectScriptPlanDraftBeatFromChapterTitled(String title) {
+    return '- 从 《$title》 提炼一个能推动关系或处境变化的动作节点。';
+  }
+
+  @override
+  String get projectScriptPlanDraftEventNameFallback => '关键事件';
+
+  @override
+  String get projectScriptPlanDraftEventDetailFallback =>
+      '补充该事件带来的情绪变化、行动选择和局势变化。';
+
+  @override
+  String projectScriptPlanDraftEventBeat(String name, String detail) {
+    return '- $name：$detail';
+  }
+
+  @override
+  String get projectScriptPlanDraftEndingNoEvents =>
+      '在最后一个动作后补一个未说透的发现、误会或反击前奏。';
+
+  @override
+  String projectScriptPlanDraftEndingAfterEvent(String eventName) {
+    return '把“$eventName”后的余波留到结尾，让人物以为稳住了，实际更危险。';
+  }
+
+  @override
+  String get projectScriptPlanDraftHdrPositioning => '【剧本定位】';
+
+  @override
+  String projectScriptPlanDraftPositioningBody(
+    String packetName,
+    String chapterSummary,
+  ) {
+    return '$packetName：围绕 $chapterSummary 压缩成一集短剧，首屏先给冲突，结尾必须留钩子。';
+  }
+
+  @override
+  String get projectScriptPlanDraftHdrSkeleton => '【骨架约束】';
+
+  @override
+  String get projectScriptPlanDraftHdrAdaptation => '【改编口径】';
+
+  @override
+  String get projectScriptPlanDraftHdrBeats => '【剧情节拍】';
+
+  @override
+  String get projectScriptPlanDraftHdrScenes => '【场次草稿】';
+
+  @override
+  String get projectScriptPlanDraftHdrDialogue => '【对白要求】';
+
+  @override
+  String get projectScriptPlanDraftDialogueLine1 =>
+      '- 每段对白都带目的，不解释观众已经能从动作看懂的信息。';
+
+  @override
+  String get projectScriptPlanDraftDialogueLine2 =>
+      '- 人物情绪要有起伏，先忍、再顶、再露底牌，避免全程一个腔调。';
+
+  @override
+  String get projectScriptPlanDraftHdrEnding => '【结尾钩子】';
+
+  @override
+  String get projectScriptPlanDraftSceneDefault1 =>
+      '- 场1：用一个反常动作或外部威胁开场，把主角直接推入选择。';
+
+  @override
+  String get projectScriptPlanDraftSceneDefault2 => '- 场2：让关键关系失衡，冲突不要靠旁白解释。';
+
+  @override
+  String get projectScriptPlanDraftSceneDefault3 =>
+      '- 场3：用情绪反转收尾，并留下下一集必须追的悬念。';
+
+  @override
+  String projectScriptPlanDraftSceneChapterOnly(
+    int sceneNumber,
+    int chapterIndex,
+  ) {
+    return '- 场$sceneNumber：章节 $chapterIndex。';
+  }
+
+  @override
+  String projectScriptPlanDraftSceneTitleNoExcerpt(
+    int sceneNumber,
+    String title,
+  ) {
+    return '- 场$sceneNumber：《$title》。';
+  }
+
+  @override
+  String projectScriptPlanDraftSceneTitleWithExcerpt(
+    int sceneNumber,
+    String title,
+    String excerpt,
+  ) {
+    return '- 场$sceneNumber：《$title》，抓住“$excerpt”里的动作和情绪做可拍场面。';
+  }
+
+  @override
+  String get projectScriptPlanRewriteSkeletonFallback =>
+      '先把主角困局和最大冲突抛到最前面，别平推背景说明。';
+
+  @override
+  String get projectScriptPlanRewriteStrategyFallback =>
+      '对白口语化、动作外化情绪、信息跟着冲突走。';
+
+  @override
+  String get projectScriptPlanRewriteChapterWhenNoIndexes =>
+      '- 优先围绕最强冲突改写，不够戏剧性的原文说明直接压缩。';
+
+  @override
+  String projectScriptPlanRewriteChapterPlainEmptyExcerpt(int index) {
+    return '- 章节 $index：只保留能推动冲突或人物关系变化的动作。';
+  }
+
+  @override
+  String projectScriptPlanRewriteChapterPlainWithExcerpt(
+    int index,
+    String excerpt,
+  ) {
+    return '- 章节 $index：围绕“$excerpt”改成可拍的动作和情绪交锋。';
+  }
+
+  @override
+  String projectScriptPlanRewriteChapterTitledEmptyExcerpt(
+    int index,
+    String title,
+  ) {
+    return '- 章节 $index《$title》：只保留能推动冲突或人物关系变化的动作。';
+  }
+
+  @override
+  String projectScriptPlanRewriteChapterTitledWithExcerpt(
+    int index,
+    String title,
+    String excerpt,
+  ) {
+    return '- 章节 $index《$title》：围绕“$excerpt”改成可拍的动作和情绪交锋。';
+  }
+
+  @override
+  String get projectScriptPlanRewriteEventDefault =>
+      '- 先补出 3 个节点：抛钩子、压迫升级、尾部反转或悬念。';
+
+  @override
+  String projectScriptPlanRewriteEventNamed(String name) {
+    return '- 事件“$name”必须带来情绪或局势变化，不能只做信息通报。';
+  }
+
+  @override
+  String get projectScriptPlanRewriteHdrGoal => '【改写目标】';
+
+  @override
+  String get projectScriptPlanRewriteHdrStrategy => '【改写策略】';
+
+  @override
+  String get projectScriptPlanRewriteHdrChapters => '【章节压缩指令】';
+
+  @override
+  String get projectScriptPlanRewriteHdrEvents => '【事件改写指令】';
+
+  @override
+  String get projectScriptPlanRewriteHdrPeople => '【人物情绪】';
+
+  @override
+  String get projectScriptPlanRewritePeopleLine1 =>
+      '- 主角每场都要有明确刺激、反应和下一步动作，情绪不能整集一个平面。';
+
+  @override
+  String get projectScriptPlanRewritePeopleLine2 => '- 配角发言要推动主角选择，不留解释剧情的空对白。';
+
+  @override
+  String get projectScriptPlanRewriteHdrDeAi => '【去 AI 味约束】';
+
+  @override
+  String get projectScriptPlanRewriteDeAiLine1 =>
+      '- 少写总结句、价值判断句和书面连接词，改成口语化冲突表达。';
+
+  @override
+  String get projectScriptPlanRewriteDeAiLine2 =>
+      '- 画面先写动作、视线、停顿、压迫感来源，再补必要对白。';
+
+  @override
+  String get projectScriptPlanRewriteDeAiLine3 =>
+      '- 同一场里不要连续三句都在解释背景，让信息藏进试探、误会和逼问。';
+
+  @override
   String get projectScriptPlanWorkbenchTitle => '故事骨架与改编策略';
 
   @override

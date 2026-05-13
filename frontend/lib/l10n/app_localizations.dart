@@ -16668,6 +16668,453 @@ abstract class AppLocalizations {
     String sampleSuffix,
   );
 
+  /// No description provided for @projectScriptPlanSkeletonOpeningHookLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cold open hook:'**
+  String get projectScriptPlanSkeletonOpeningHookLabel;
+
+  /// No description provided for @projectScriptPlanSkeletonOpeningHookZeroChapters.
+  ///
+  /// In en, this message translates to:
+  /// **'In one line, establish the protagonist\'s predicament and throw an abnormal action or danger signal in the first 30 seconds.'**
+  String get projectScriptPlanSkeletonOpeningHookZeroChapters;
+
+  /// No description provided for @projectScriptPlanSkeletonOpeningHookWithChapters.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the first {chapterSpan} chapters to quickly establish the situation and land a strong hook on the first screen.'**
+  String projectScriptPlanSkeletonOpeningHookWithChapters(int chapterSpan);
+
+  /// No description provided for @projectScriptPlanSkeletonCorePushLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Core momentum:'**
+  String get projectScriptPlanSkeletonCorePushLabel;
+
+  /// No description provided for @projectScriptPlanSkeletonCoreEmptyLine1.
+  ///
+  /// In en, this message translates to:
+  /// **'- Extract 3–5 key beats from chapters and order them as \"escalation → misread → reversal\".'**
+  String get projectScriptPlanSkeletonCoreEmptyLine1;
+
+  /// No description provided for @projectScriptPlanSkeletonCoreEmptyLine2.
+  ///
+  /// In en, this message translates to:
+  /// **'- Keep only actions that move relationships or the situation; do not retell the prose.'**
+  String get projectScriptPlanSkeletonCoreEmptyLine2;
+
+  /// No description provided for @projectScriptPlanSkeletonEventLine.
+  ///
+  /// In en, this message translates to:
+  /// **'- {name} (chapters {chapterIndexes}): {detail}'**
+  String projectScriptPlanSkeletonEventLine(
+    String name,
+    String chapterIndexes,
+    String detail,
+  );
+
+  /// No description provided for @projectScriptPlanSkeletonEventDetailFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Explain how this beat changes the character\'s situation and their next goal.'**
+  String get projectScriptPlanSkeletonEventDetailFallback;
+
+  /// No description provided for @projectScriptPlanSkeletonClosingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'End flip:'**
+  String get projectScriptPlanSkeletonClosingLabel;
+
+  /// No description provided for @projectScriptPlanSkeletonClosingBullet.
+  ///
+  /// In en, this message translates to:
+  /// **'- Leave the last beat with unpaid emotional debt or greater external pressure to drive the next episode.'**
+  String get projectScriptPlanSkeletonClosingBullet;
+
+  /// No description provided for @projectScriptPlanAdaptPeopleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Character strategy:'**
+  String get projectScriptPlanAdaptPeopleLabel;
+
+  /// No description provided for @projectScriptPlanAdaptPeopleLine1.
+  ///
+  /// In en, this message translates to:
+  /// **'- Give the lead stepped emotional shifts; every reaction should map to a concrete stimulus.'**
+  String get projectScriptPlanAdaptPeopleLine1;
+
+  /// No description provided for @projectScriptPlanAdaptPeopleLine2.
+  ///
+  /// In en, this message translates to:
+  /// **'- Keep only supporting characters who increase the pressure on the lead\'s choices; drop exposition-only walk-ons.'**
+  String get projectScriptPlanAdaptPeopleLine2;
+
+  /// No description provided for @projectScriptPlanAdaptPacingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pacing strategy:'**
+  String get projectScriptPlanAdaptPacingLabel;
+
+  /// No description provided for @projectScriptPlanAdaptPacingNoEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'- Slice chapters into 3–5 strong action beats, then compress to short-drama pacing.'**
+  String get projectScriptPlanAdaptPacingNoEvents;
+
+  /// No description provided for @projectScriptPlanAdaptPacingWithEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'- With {eventCount} events on file, prioritize beats with strong conflict, identity shifts, and emotional contrast.'**
+  String projectScriptPlanAdaptPacingWithEvents(int eventCount);
+
+  /// No description provided for @projectScriptPlanAdaptPacingNoChapters.
+  ///
+  /// In en, this message translates to:
+  /// **'- Each episode solves one core problem and pushes the larger crisis to the tail.'**
+  String get projectScriptPlanAdaptPacingNoChapters;
+
+  /// No description provided for @projectScriptPlanAdaptPacingWithChapters.
+  ///
+  /// In en, this message translates to:
+  /// **'- With {chapterCount} chapters, avoid flat narration; release information as \"fast open → sustained pressure → late flip\".'**
+  String projectScriptPlanAdaptPacingWithChapters(int chapterCount);
+
+  /// No description provided for @projectScriptPlanAdaptVoiceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice strategy:'**
+  String get projectScriptPlanAdaptVoiceLabel;
+
+  /// No description provided for @projectScriptPlanAdaptVoiceLine1.
+  ///
+  /// In en, this message translates to:
+  /// **'- Dialogue should sound spoken and purposeful; avoid explaining plot the audience can already read from action.'**
+  String get projectScriptPlanAdaptVoiceLine1;
+
+  /// No description provided for @projectScriptPlanAdaptVoiceLine2.
+  ///
+  /// In en, this message translates to:
+  /// **'- Favor shots and action that serve emotional state; avoid empty montage stacking.'**
+  String get projectScriptPlanAdaptVoiceLine2;
+
+  /// No description provided for @projectScriptPlanDraftEpisodeNumbered.
+  ///
+  /// In en, this message translates to:
+  /// **'Episode {episodeNumber}'**
+  String projectScriptPlanDraftEpisodeNumbered(int episodeNumber);
+
+  /// No description provided for @projectScriptPlanDraftChapterPendingSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter references TBD'**
+  String get projectScriptPlanDraftChapterPendingSummary;
+
+  /// No description provided for @projectScriptPlanDraftChapterSummaryPlainIndex.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter {index}'**
+  String projectScriptPlanDraftChapterSummaryPlainIndex(int index);
+
+  /// No description provided for @projectScriptPlanDraftChapterSummaryTitled.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter {index}《{title}》'**
+  String projectScriptPlanDraftChapterSummaryTitled(int index, String title);
+
+  /// No description provided for @projectScriptPlanDraftSkeletonFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Hook fast in the first block, keep pressure rising in the middle, leave a bigger emotional IOU at the end.'**
+  String get projectScriptPlanDraftSkeletonFallback;
+
+  /// No description provided for @projectScriptPlanDraftStrategyFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Spoken dialogue, emotion carried by action, exposition only through conflict.'**
+  String get projectScriptPlanDraftStrategyFallback;
+
+  /// No description provided for @projectScriptPlanDraftBeatFromChapterPlain.
+  ///
+  /// In en, this message translates to:
+  /// **'- Pull one beat from chapter {index} that moves relationship or situation.'**
+  String projectScriptPlanDraftBeatFromChapterPlain(int index);
+
+  /// No description provided for @projectScriptPlanDraftBeatFromChapterTitled.
+  ///
+  /// In en, this message translates to:
+  /// **'- Pull one beat from 《{title}》 that moves relationship or situation.'**
+  String projectScriptPlanDraftBeatFromChapterTitled(String title);
+
+  /// No description provided for @projectScriptPlanDraftEventNameFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Key beat'**
+  String get projectScriptPlanDraftEventNameFallback;
+
+  /// No description provided for @projectScriptPlanDraftEventDetailFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the emotional shift, choice, and situation change this beat causes.'**
+  String get projectScriptPlanDraftEventDetailFallback;
+
+  /// No description provided for @projectScriptPlanDraftEventBeat.
+  ///
+  /// In en, this message translates to:
+  /// **'- {name}: {detail}'**
+  String projectScriptPlanDraftEventBeat(String name, String detail);
+
+  /// No description provided for @projectScriptPlanDraftEndingNoEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'After the last action, add an unfinished discovery, misunderstanding, or prelude to a counterattack.'**
+  String get projectScriptPlanDraftEndingNoEvents;
+
+  /// No description provided for @projectScriptPlanDraftEndingAfterEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave the aftershock of \"{eventName}\" at the ending—characters think they are safe, but danger grows.'**
+  String projectScriptPlanDraftEndingAfterEvent(String eventName);
+
+  /// No description provided for @projectScriptPlanDraftHdrPositioning.
+  ///
+  /// In en, this message translates to:
+  /// **'【Series positioning】'**
+  String get projectScriptPlanDraftHdrPositioning;
+
+  /// No description provided for @projectScriptPlanDraftPositioningBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{packetName}: compress one short-drama episode around {chapterSummary}; open with conflict and end on a hook.'**
+  String projectScriptPlanDraftPositioningBody(
+    String packetName,
+    String chapterSummary,
+  );
+
+  /// No description provided for @projectScriptPlanDraftHdrSkeleton.
+  ///
+  /// In en, this message translates to:
+  /// **'【Skeleton guardrails】'**
+  String get projectScriptPlanDraftHdrSkeleton;
+
+  /// No description provided for @projectScriptPlanDraftHdrAdaptation.
+  ///
+  /// In en, this message translates to:
+  /// **'【Adaptation stance】'**
+  String get projectScriptPlanDraftHdrAdaptation;
+
+  /// No description provided for @projectScriptPlanDraftHdrBeats.
+  ///
+  /// In en, this message translates to:
+  /// **'【Beat sheet】'**
+  String get projectScriptPlanDraftHdrBeats;
+
+  /// No description provided for @projectScriptPlanDraftHdrScenes.
+  ///
+  /// In en, this message translates to:
+  /// **'【Scene prompts】'**
+  String get projectScriptPlanDraftHdrScenes;
+
+  /// No description provided for @projectScriptPlanDraftHdrDialogue.
+  ///
+  /// In en, this message translates to:
+  /// **'【Dialogue requirements】'**
+  String get projectScriptPlanDraftHdrDialogue;
+
+  /// No description provided for @projectScriptPlanDraftDialogueLine1.
+  ///
+  /// In en, this message translates to:
+  /// **'- Every line has intent; do not explain what action already shows.'**
+  String get projectScriptPlanDraftDialogueLine1;
+
+  /// No description provided for @projectScriptPlanDraftDialogueLine2.
+  ///
+  /// In en, this message translates to:
+  /// **'- Emotions arc: hold, push, then reveal; avoid one-note delivery.'**
+  String get projectScriptPlanDraftDialogueLine2;
+
+  /// No description provided for @projectScriptPlanDraftHdrEnding.
+  ///
+  /// In en, this message translates to:
+  /// **'【Closing hook】'**
+  String get projectScriptPlanDraftHdrEnding;
+
+  /// No description provided for @projectScriptPlanDraftSceneDefault1.
+  ///
+  /// In en, this message translates to:
+  /// **'- Scene 1: open with an abnormal action or external threat that forces a choice.'**
+  String get projectScriptPlanDraftSceneDefault1;
+
+  /// No description provided for @projectScriptPlanDraftSceneDefault2.
+  ///
+  /// In en, this message translates to:
+  /// **'- Scene 2: unbalance the key relationship; do not explain conflict in narration.'**
+  String get projectScriptPlanDraftSceneDefault2;
+
+  /// No description provided for @projectScriptPlanDraftSceneDefault3.
+  ///
+  /// In en, this message translates to:
+  /// **'- Scene 3: end on an emotional flip and a must-watch cliffhanger.'**
+  String get projectScriptPlanDraftSceneDefault3;
+
+  /// No description provided for @projectScriptPlanDraftSceneChapterOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'- Scene {sceneNumber}: chapter {chapterIndex}.'**
+  String projectScriptPlanDraftSceneChapterOnly(
+    int sceneNumber,
+    int chapterIndex,
+  );
+
+  /// No description provided for @projectScriptPlanDraftSceneTitleNoExcerpt.
+  ///
+  /// In en, this message translates to:
+  /// **'- Scene {sceneNumber}: 《{title}》.'**
+  String projectScriptPlanDraftSceneTitleNoExcerpt(
+    int sceneNumber,
+    String title,
+  );
+
+  /// No description provided for @projectScriptPlanDraftSceneTitleWithExcerpt.
+  ///
+  /// In en, this message translates to:
+  /// **'- Scene {sceneNumber}: 《{title}》, turn the action and emotion in \"{excerpt}\" into shootable beats.'**
+  String projectScriptPlanDraftSceneTitleWithExcerpt(
+    int sceneNumber,
+    String title,
+    String excerpt,
+  );
+
+  /// No description provided for @projectScriptPlanRewriteSkeletonFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Put the lead\'s trap and biggest conflict up front; do not front-load flat exposition.'**
+  String get projectScriptPlanRewriteSkeletonFallback;
+
+  /// No description provided for @projectScriptPlanRewriteStrategyFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Spoken dialogue, externalized emotion, information rides on conflict.'**
+  String get projectScriptPlanRewriteStrategyFallback;
+
+  /// No description provided for @projectScriptPlanRewriteChapterWhenNoIndexes.
+  ///
+  /// In en, this message translates to:
+  /// **'- Rewrite around the strongest conflict first; compress undramatic explanatory prose.'**
+  String get projectScriptPlanRewriteChapterWhenNoIndexes;
+
+  /// No description provided for @projectScriptPlanRewriteChapterPlainEmptyExcerpt.
+  ///
+  /// In en, this message translates to:
+  /// **'- Chapter {index}: keep only actions that move conflict or relationships.'**
+  String projectScriptPlanRewriteChapterPlainEmptyExcerpt(int index);
+
+  /// No description provided for @projectScriptPlanRewriteChapterPlainWithExcerpt.
+  ///
+  /// In en, this message translates to:
+  /// **'- Chapter {index}: turn \"{excerpt}\" into shootable action and emotional clashes.'**
+  String projectScriptPlanRewriteChapterPlainWithExcerpt(
+    int index,
+    String excerpt,
+  );
+
+  /// No description provided for @projectScriptPlanRewriteChapterTitledEmptyExcerpt.
+  ///
+  /// In en, this message translates to:
+  /// **'- Chapter {index}《{title}》: keep only actions that move conflict or relationships.'**
+  String projectScriptPlanRewriteChapterTitledEmptyExcerpt(
+    int index,
+    String title,
+  );
+
+  /// No description provided for @projectScriptPlanRewriteChapterTitledWithExcerpt.
+  ///
+  /// In en, this message translates to:
+  /// **'- Chapter {index}《{title}》: turn \"{excerpt}\" into shootable action and emotional clashes.'**
+  String projectScriptPlanRewriteChapterTitledWithExcerpt(
+    int index,
+    String title,
+    String excerpt,
+  );
+
+  /// No description provided for @projectScriptPlanRewriteEventDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'- Add three nodes: hook, rising pressure, tail reversal or suspense.'**
+  String get projectScriptPlanRewriteEventDefault;
+
+  /// No description provided for @projectScriptPlanRewriteEventNamed.
+  ///
+  /// In en, this message translates to:
+  /// **'- Event \"{name}\" must change emotion or the board; no pure info dumps.'**
+  String projectScriptPlanRewriteEventNamed(String name);
+
+  /// No description provided for @projectScriptPlanRewriteHdrGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'【Rewrite goal】'**
+  String get projectScriptPlanRewriteHdrGoal;
+
+  /// No description provided for @projectScriptPlanRewriteHdrStrategy.
+  ///
+  /// In en, this message translates to:
+  /// **'【Rewrite strategy】'**
+  String get projectScriptPlanRewriteHdrStrategy;
+
+  /// No description provided for @projectScriptPlanRewriteHdrChapters.
+  ///
+  /// In en, this message translates to:
+  /// **'【Chapter compression】'**
+  String get projectScriptPlanRewriteHdrChapters;
+
+  /// No description provided for @projectScriptPlanRewriteHdrEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'【Event rewrite】'**
+  String get projectScriptPlanRewriteHdrEvents;
+
+  /// No description provided for @projectScriptPlanRewriteHdrPeople.
+  ///
+  /// In en, this message translates to:
+  /// **'【Character emotion】'**
+  String get projectScriptPlanRewriteHdrPeople;
+
+  /// No description provided for @projectScriptPlanRewritePeopleLine1.
+  ///
+  /// In en, this message translates to:
+  /// **'- Every scene gives the lead a clear stimulus, reaction, and next move; avoid flat emotion all episode.'**
+  String get projectScriptPlanRewritePeopleLine1;
+
+  /// No description provided for @projectScriptPlanRewritePeopleLine2.
+  ///
+  /// In en, this message translates to:
+  /// **'- Supporting lines should force the lead\'s choices—no empty exposition dialogue.'**
+  String get projectScriptPlanRewritePeopleLine2;
+
+  /// No description provided for @projectScriptPlanRewriteHdrDeAi.
+  ///
+  /// In en, this message translates to:
+  /// **'【Anti-LLM polish】'**
+  String get projectScriptPlanRewriteHdrDeAi;
+
+  /// No description provided for @projectScriptPlanRewriteDeAiLine1.
+  ///
+  /// In en, this message translates to:
+  /// **'- Cut summary lines, moralizing, and bookish connectors; replace with spoken conflict.'**
+  String get projectScriptPlanRewriteDeAiLine1;
+
+  /// No description provided for @projectScriptPlanRewriteDeAiLine2.
+  ///
+  /// In en, this message translates to:
+  /// **'- Lead with action, gaze, pauses, and sources of pressure before adding necessary dialogue.'**
+  String get projectScriptPlanRewriteDeAiLine2;
+
+  /// No description provided for @projectScriptPlanRewriteDeAiLine3.
+  ///
+  /// In en, this message translates to:
+  /// **'- Do not stack three straight lines explaining background; hide intel in probing, misunderstanding, and pressure.'**
+  String get projectScriptPlanRewriteDeAiLine3;
+
   /// No description provided for @projectScriptPlanWorkbenchTitle.
   ///
   /// In en, this message translates to:

@@ -10693,6 +10693,313 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get projectScriptPlanSkeletonOpeningHookLabel => 'Cold open hook:';
+
+  @override
+  String get projectScriptPlanSkeletonOpeningHookZeroChapters =>
+      'In one line, establish the protagonist\'s predicament and throw an abnormal action or danger signal in the first 30 seconds.';
+
+  @override
+  String projectScriptPlanSkeletonOpeningHookWithChapters(int chapterSpan) {
+    return 'Use the first $chapterSpan chapters to quickly establish the situation and land a strong hook on the first screen.';
+  }
+
+  @override
+  String get projectScriptPlanSkeletonCorePushLabel => 'Core momentum:';
+
+  @override
+  String get projectScriptPlanSkeletonCoreEmptyLine1 =>
+      '- Extract 3–5 key beats from chapters and order them as \"escalation → misread → reversal\".';
+
+  @override
+  String get projectScriptPlanSkeletonCoreEmptyLine2 =>
+      '- Keep only actions that move relationships or the situation; do not retell the prose.';
+
+  @override
+  String projectScriptPlanSkeletonEventLine(
+    String name,
+    String chapterIndexes,
+    String detail,
+  ) {
+    return '- $name (chapters $chapterIndexes): $detail';
+  }
+
+  @override
+  String get projectScriptPlanSkeletonEventDetailFallback =>
+      'Explain how this beat changes the character\'s situation and their next goal.';
+
+  @override
+  String get projectScriptPlanSkeletonClosingLabel => 'End flip:';
+
+  @override
+  String get projectScriptPlanSkeletonClosingBullet =>
+      '- Leave the last beat with unpaid emotional debt or greater external pressure to drive the next episode.';
+
+  @override
+  String get projectScriptPlanAdaptPeopleLabel => 'Character strategy:';
+
+  @override
+  String get projectScriptPlanAdaptPeopleLine1 =>
+      '- Give the lead stepped emotional shifts; every reaction should map to a concrete stimulus.';
+
+  @override
+  String get projectScriptPlanAdaptPeopleLine2 =>
+      '- Keep only supporting characters who increase the pressure on the lead\'s choices; drop exposition-only walk-ons.';
+
+  @override
+  String get projectScriptPlanAdaptPacingLabel => 'Pacing strategy:';
+
+  @override
+  String get projectScriptPlanAdaptPacingNoEvents =>
+      '- Slice chapters into 3–5 strong action beats, then compress to short-drama pacing.';
+
+  @override
+  String projectScriptPlanAdaptPacingWithEvents(int eventCount) {
+    return '- With $eventCount events on file, prioritize beats with strong conflict, identity shifts, and emotional contrast.';
+  }
+
+  @override
+  String get projectScriptPlanAdaptPacingNoChapters =>
+      '- Each episode solves one core problem and pushes the larger crisis to the tail.';
+
+  @override
+  String projectScriptPlanAdaptPacingWithChapters(int chapterCount) {
+    return '- With $chapterCount chapters, avoid flat narration; release information as \"fast open → sustained pressure → late flip\".';
+  }
+
+  @override
+  String get projectScriptPlanAdaptVoiceLabel => 'Voice strategy:';
+
+  @override
+  String get projectScriptPlanAdaptVoiceLine1 =>
+      '- Dialogue should sound spoken and purposeful; avoid explaining plot the audience can already read from action.';
+
+  @override
+  String get projectScriptPlanAdaptVoiceLine2 =>
+      '- Favor shots and action that serve emotional state; avoid empty montage stacking.';
+
+  @override
+  String projectScriptPlanDraftEpisodeNumbered(int episodeNumber) {
+    return 'Episode $episodeNumber';
+  }
+
+  @override
+  String get projectScriptPlanDraftChapterPendingSummary =>
+      'Chapter references TBD';
+
+  @override
+  String projectScriptPlanDraftChapterSummaryPlainIndex(int index) {
+    return 'Chapter $index';
+  }
+
+  @override
+  String projectScriptPlanDraftChapterSummaryTitled(int index, String title) {
+    return 'Chapter $index《$title》';
+  }
+
+  @override
+  String get projectScriptPlanDraftSkeletonFallback =>
+      'Hook fast in the first block, keep pressure rising in the middle, leave a bigger emotional IOU at the end.';
+
+  @override
+  String get projectScriptPlanDraftStrategyFallback =>
+      'Spoken dialogue, emotion carried by action, exposition only through conflict.';
+
+  @override
+  String projectScriptPlanDraftBeatFromChapterPlain(int index) {
+    return '- Pull one beat from chapter $index that moves relationship or situation.';
+  }
+
+  @override
+  String projectScriptPlanDraftBeatFromChapterTitled(String title) {
+    return '- Pull one beat from 《$title》 that moves relationship or situation.';
+  }
+
+  @override
+  String get projectScriptPlanDraftEventNameFallback => 'Key beat';
+
+  @override
+  String get projectScriptPlanDraftEventDetailFallback =>
+      'Add the emotional shift, choice, and situation change this beat causes.';
+
+  @override
+  String projectScriptPlanDraftEventBeat(String name, String detail) {
+    return '- $name: $detail';
+  }
+
+  @override
+  String get projectScriptPlanDraftEndingNoEvents =>
+      'After the last action, add an unfinished discovery, misunderstanding, or prelude to a counterattack.';
+
+  @override
+  String projectScriptPlanDraftEndingAfterEvent(String eventName) {
+    return 'Leave the aftershock of \"$eventName\" at the ending—characters think they are safe, but danger grows.';
+  }
+
+  @override
+  String get projectScriptPlanDraftHdrPositioning => '【Series positioning】';
+
+  @override
+  String projectScriptPlanDraftPositioningBody(
+    String packetName,
+    String chapterSummary,
+  ) {
+    return '$packetName: compress one short-drama episode around $chapterSummary; open with conflict and end on a hook.';
+  }
+
+  @override
+  String get projectScriptPlanDraftHdrSkeleton => '【Skeleton guardrails】';
+
+  @override
+  String get projectScriptPlanDraftHdrAdaptation => '【Adaptation stance】';
+
+  @override
+  String get projectScriptPlanDraftHdrBeats => '【Beat sheet】';
+
+  @override
+  String get projectScriptPlanDraftHdrScenes => '【Scene prompts】';
+
+  @override
+  String get projectScriptPlanDraftHdrDialogue => '【Dialogue requirements】';
+
+  @override
+  String get projectScriptPlanDraftDialogueLine1 =>
+      '- Every line has intent; do not explain what action already shows.';
+
+  @override
+  String get projectScriptPlanDraftDialogueLine2 =>
+      '- Emotions arc: hold, push, then reveal; avoid one-note delivery.';
+
+  @override
+  String get projectScriptPlanDraftHdrEnding => '【Closing hook】';
+
+  @override
+  String get projectScriptPlanDraftSceneDefault1 =>
+      '- Scene 1: open with an abnormal action or external threat that forces a choice.';
+
+  @override
+  String get projectScriptPlanDraftSceneDefault2 =>
+      '- Scene 2: unbalance the key relationship; do not explain conflict in narration.';
+
+  @override
+  String get projectScriptPlanDraftSceneDefault3 =>
+      '- Scene 3: end on an emotional flip and a must-watch cliffhanger.';
+
+  @override
+  String projectScriptPlanDraftSceneChapterOnly(
+    int sceneNumber,
+    int chapterIndex,
+  ) {
+    return '- Scene $sceneNumber: chapter $chapterIndex.';
+  }
+
+  @override
+  String projectScriptPlanDraftSceneTitleNoExcerpt(
+    int sceneNumber,
+    String title,
+  ) {
+    return '- Scene $sceneNumber: 《$title》.';
+  }
+
+  @override
+  String projectScriptPlanDraftSceneTitleWithExcerpt(
+    int sceneNumber,
+    String title,
+    String excerpt,
+  ) {
+    return '- Scene $sceneNumber: 《$title》, turn the action and emotion in \"$excerpt\" into shootable beats.';
+  }
+
+  @override
+  String get projectScriptPlanRewriteSkeletonFallback =>
+      'Put the lead\'s trap and biggest conflict up front; do not front-load flat exposition.';
+
+  @override
+  String get projectScriptPlanRewriteStrategyFallback =>
+      'Spoken dialogue, externalized emotion, information rides on conflict.';
+
+  @override
+  String get projectScriptPlanRewriteChapterWhenNoIndexes =>
+      '- Rewrite around the strongest conflict first; compress undramatic explanatory prose.';
+
+  @override
+  String projectScriptPlanRewriteChapterPlainEmptyExcerpt(int index) {
+    return '- Chapter $index: keep only actions that move conflict or relationships.';
+  }
+
+  @override
+  String projectScriptPlanRewriteChapterPlainWithExcerpt(
+    int index,
+    String excerpt,
+  ) {
+    return '- Chapter $index: turn \"$excerpt\" into shootable action and emotional clashes.';
+  }
+
+  @override
+  String projectScriptPlanRewriteChapterTitledEmptyExcerpt(
+    int index,
+    String title,
+  ) {
+    return '- Chapter $index《$title》: keep only actions that move conflict or relationships.';
+  }
+
+  @override
+  String projectScriptPlanRewriteChapterTitledWithExcerpt(
+    int index,
+    String title,
+    String excerpt,
+  ) {
+    return '- Chapter $index《$title》: turn \"$excerpt\" into shootable action and emotional clashes.';
+  }
+
+  @override
+  String get projectScriptPlanRewriteEventDefault =>
+      '- Add three nodes: hook, rising pressure, tail reversal or suspense.';
+
+  @override
+  String projectScriptPlanRewriteEventNamed(String name) {
+    return '- Event \"$name\" must change emotion or the board; no pure info dumps.';
+  }
+
+  @override
+  String get projectScriptPlanRewriteHdrGoal => '【Rewrite goal】';
+
+  @override
+  String get projectScriptPlanRewriteHdrStrategy => '【Rewrite strategy】';
+
+  @override
+  String get projectScriptPlanRewriteHdrChapters => '【Chapter compression】';
+
+  @override
+  String get projectScriptPlanRewriteHdrEvents => '【Event rewrite】';
+
+  @override
+  String get projectScriptPlanRewriteHdrPeople => '【Character emotion】';
+
+  @override
+  String get projectScriptPlanRewritePeopleLine1 =>
+      '- Every scene gives the lead a clear stimulus, reaction, and next move; avoid flat emotion all episode.';
+
+  @override
+  String get projectScriptPlanRewritePeopleLine2 =>
+      '- Supporting lines should force the lead\'s choices—no empty exposition dialogue.';
+
+  @override
+  String get projectScriptPlanRewriteHdrDeAi => '【Anti-LLM polish】';
+
+  @override
+  String get projectScriptPlanRewriteDeAiLine1 =>
+      '- Cut summary lines, moralizing, and bookish connectors; replace with spoken conflict.';
+
+  @override
+  String get projectScriptPlanRewriteDeAiLine2 =>
+      '- Lead with action, gaze, pauses, and sources of pressure before adding necessary dialogue.';
+
+  @override
+  String get projectScriptPlanRewriteDeAiLine3 =>
+      '- Do not stack three straight lines explaining background; hide intel in probing, misunderstanding, and pressure.';
+
+  @override
   String get projectScriptPlanWorkbenchTitle =>
       'Story skeleton & adaptation strategy';
 
