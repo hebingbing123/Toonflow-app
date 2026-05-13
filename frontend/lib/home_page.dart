@@ -882,16 +882,17 @@ class _HomePageState extends State<HomePage> {
       });
       unawaited(_notificationsController.prime());
       unawaited(_skillsHarnessController.startAutoSessionWs());
-    } on RustApiException catch (error) {
-      if (_lastSessionAccessToken == token) {
+    } catch (error) {
+      if (_lastSessionAccessToken != token) {
+        return;
+      }
+      if (error is RustApiException) {
         reportRustApiError(
           error,
           onErrorChanged: _setSharedError,
           showGlobalSnackBar: false,
         );
-      }
-    } catch (error) {
-      if (_lastSessionAccessToken == token && mounted) {
+      } else if (mounted) {
         _setSharedError(
           describeUserVisibleApiError(AppLocalizations.of(context)!, error),
         );
