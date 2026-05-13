@@ -100,22 +100,6 @@ extension _StoryboardWorkbenchData on _StoryboardWorkbenchPanelState {
         _liveActionPerformanceNotesCtrl.text =
             productionRow.liveActionPerformanceNotes ?? '';
       });
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-      _applyWorkbenchState(() {
-        _productionError = normalizeStoryboardWorkbenchErrorMessage(
-          AppLocalizations.of(context)!,
-          describeUserVisibleApiError(l10n, e),
-        );
-        _setWorkbenchFailureNotice(
-          actionSummary: l10n.storyboardWorkbenchSyncProductionFailedSummary,
-          recommendedAction:
-              StoryboardWorkbenchRecommendedAction.syncProductionData,
-          error: e,
-          fallbackDetail:
-              l10n.storyboardWorkbenchSyncProductionFailedFallbackDetail,
-        );
-      });
     } catch (e) {
       if (!mounted) return;
       _applyWorkbenchState(() {
@@ -166,18 +150,6 @@ extension _StoryboardWorkbenchData on _StoryboardWorkbenchPanelState {
               ? '1080p'
               : model.resolutions.first;
         }
-      });
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-      _applyWorkbenchState(() {
-        _setWorkbenchFailureNotice(
-          actionSummary: l10n.storyboardWorkbenchRefreshVideoFailedSummary,
-          recommendedAction:
-              StoryboardWorkbenchRecommendedAction.refreshVideoData,
-          error: e,
-          fallbackDetail:
-              l10n.storyboardWorkbenchRefreshVideoFailedFallbackDetail,
-        );
       });
     } catch (e) {
       if (!mounted) return;

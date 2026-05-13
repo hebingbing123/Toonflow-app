@@ -68,16 +68,6 @@ extension _HomePageBuildProductSections on _HomePageState {
         ProductWorkspacePane.projects,
       );
       await _openProjectDetail(row);
-    } on RustApiException catch (error) {
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(
-            l10n.productComplianceOpenTargetFailed(
-              describeUserVisibleApiError(l10n, error),
-            ),
-          ),
-        ),
-      );
     } catch (error) {
       messenger.showSnackBar(
         SnackBar(
@@ -790,13 +780,6 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
         _applyResponse(res);
       });
       widget.onConfigSaved(res.effective);
-    } on RustApiException catch (e) {
-      if (!_isCurrentLoadRequest(requestEpoch, token, workspaceId)) {
-        return;
-      }
-      setState(() {
-        _error = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
-      });
     } catch (e) {
       if (!_isCurrentLoadRequest(requestEpoch, token, workspaceId)) {
         return;
@@ -844,13 +827,6 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
           ),
         ),
       );
-    } on RustApiException catch (e) {
-      if (!_isCurrentMutationContext(token, workspaceId)) {
-        return;
-      }
-      setState(() {
-        _error = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
-      });
     } catch (e) {
       if (!_isCurrentMutationContext(token, workspaceId)) {
         return;
@@ -902,13 +878,6 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
           ),
         ),
       );
-    } on RustApiException catch (e) {
-      if (!_isCurrentMutationContext(token, workspaceId)) {
-        return;
-      }
-      setState(() {
-        _error = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
-      });
     } catch (e) {
       if (!_isCurrentMutationContext(token, workspaceId)) {
         return;
@@ -961,13 +930,6 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
           ),
         ),
       );
-    } on RustApiException catch (e) {
-      if (!_isCurrentMutationContext(token, workspaceId)) {
-        return;
-      }
-      setState(() {
-        _error = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
-      });
     } catch (e) {
       if (!_isCurrentMutationContext(token, workspaceId)) {
         return;
@@ -1023,13 +985,6 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
           ),
         ),
       );
-    } on RustApiException catch (e) {
-      if (!_isCurrentMutationContext(token, workspaceId)) {
-        return;
-      }
-      setState(() {
-        _error = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
-      });
     } catch (e) {
       if (!_isCurrentMutationContext(token, workspaceId)) {
         return;

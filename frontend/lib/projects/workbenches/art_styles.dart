@@ -97,12 +97,6 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
           _ctrls.fileUrlCtrl.clear();
         });
       }
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _busy = false;
-        _statusLine = l10n.projectsArtWorkbenchStatusRefreshFailed(describeUserVisibleApiError(l10n, e));
-      });
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -130,13 +124,6 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
         _coverBytes = bytes;
         _loadingCover = false;
         _statusLine = l10n.projectsArtWorkbenchStatusReadCover(selected.numericId);
-      });
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _coverBytes = null;
-        _loadingCover = false;
-        _statusLine = l10n.projectsArtWorkbenchStatusReadCoverFailed(describeUserVisibleApiError(l10n, e));
       });
     } catch (e) {
       if (!mounted) return;
@@ -180,12 +167,6 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
           created.numericId,
         ),
       );
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _busy = false;
-        _statusLine = l10n.projectsArtWorkbenchStatusCreateFailed(describeUserVisibleApiError(l10n, e));
-      });
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -225,12 +206,6 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
           updated.numericId,
         ),
       );
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _busy = false;
-        _statusLine = l10n.projectsArtWorkbenchStatusSaveFailed(describeUserVisibleApiError(l10n, e));
-      });
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -260,12 +235,6 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
           selected.numericId,
         ),
       );
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _busy = false;
-        _statusLine = l10n.projectsArtWorkbenchStatusDeleteFailed(describeUserVisibleApiError(l10n, e));
-      });
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -295,12 +264,6 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
         _ctrls.promptCtrl.text = response.text;
         _busy = false;
         _statusLine = l10n.projectsArtWorkbenchStatusExtracted;
-      });
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _busy = false;
-        _statusLine = l10n.projectsArtWorkbenchStatusExtractFailed(describeUserVisibleApiError(l10n, e));
       });
     } catch (e) {
       if (!mounted) return;
