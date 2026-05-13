@@ -17,13 +17,14 @@ class _ProjectAssetsWorkbenchLaunchers extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('专项工作台', style: Theme.of(context).textTheme.titleSmall),
+        Text(l10n.projectEditorAssetsSpecializedWorkbenchesTitle, style: Theme.of(context).textTheme.titleSmall),
         const SizedBox(height: 4),
         Text(
-          '把图片管理、出图链路和历史图查询也统一挂到这里，资产主区只保留一个正式入口。',
+          l10n.projectEditorAssetsSpecializedWorkbenchesSubtitle,
           style: Theme.of(context).textTheme.bodySmall,
         ),
         const SizedBox(height: 8),
@@ -33,15 +34,15 @@ class _ProjectAssetsWorkbenchLaunchers extends StatelessWidget {
           children: [
             OutlinedButton(
               onPressed: localBusy || assetsBusy ? null : onOpenImagesWorkbench,
-              child: const Text('资产图片工作台'),
+              child: Text(l10n.projectEditorAssetImagesWorkbenchDialogTitle),
             ),
             OutlinedButton(
               onPressed: localBusy || assetsBusy ? null : onOpenGenerationWorkbench,
-              child: const Text('资产出图工作台'),
+              child: Text(l10n.projectEditorAssetGenerationTitle),
             ),
             OutlinedButton(
               onPressed: localBusy || assetsBusy ? null : onOpenHistoryWorkbench,
-              child: const Text('资产历史图工作台'),
+              child: Text(l10n.projectEditorAssetHistoryTitle),
             ),
           ],
         ),

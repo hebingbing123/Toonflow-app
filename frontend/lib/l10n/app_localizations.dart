@@ -3658,6 +3658,246 @@ abstract class AppLocalizations {
   /// **'{verb} failed: {detail}'**
   String projectsCreativeManualStatusOpFail(String verb, String detail);
 
+  /// No description provided for @projectMembersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Project member ACL'**
+  String get projectMembersTitle;
+
+  /// No description provided for @projectMembersAclEnabledIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'This project has explicit ACL enabled: regular members will only have access according to viewer / editor rows; workspace owner/admin still have full permissions.'**
+  String get projectMembersAclEnabledIntro;
+
+  /// No description provided for @projectMembersAclInheritedIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'This project is in workspace inheritance mode: regular members inherit original project access permissions. Adding the first explicit ACL row will switch the project to restricted mode.'**
+  String get projectMembersAclInheritedIntro;
+
+  /// No description provided for @projectMembersChipMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Mode'**
+  String get projectMembersChipMode;
+
+  /// No description provided for @projectMembersChipExplicitMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Explicit members'**
+  String get projectMembersChipExplicitMembers;
+
+  /// No description provided for @projectMembersChipCandidates.
+  ///
+  /// In en, this message translates to:
+  /// **'Candidate workspace members'**
+  String get projectMembersChipCandidates;
+
+  /// No description provided for @projectMembersForbiddenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Current account cannot manage project ACL'**
+  String get projectMembersForbiddenTitle;
+
+  /// No description provided for @projectMembersForbiddenBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Only workspace owner/admin or project owner can view and modify explicit project members. If you only need to continue editing other content, the current project will still work normally according to existing workspace / project permissions.'**
+  String get projectMembersForbiddenBody;
+
+  /// No description provided for @projectMembersAddSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add explicit member'**
+  String get projectMembersAddSectionTitle;
+
+  /// No description provided for @projectMembersAddSectionIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Prefer selecting from current workspace members; if you cannot access the workspace member list at the moment, you can also directly enter a user UUID for controlled supplementation.'**
+  String get projectMembersAddSectionIntro;
+
+  /// No description provided for @projectMembersFieldGrantRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Grant role'**
+  String get projectMembersFieldGrantRole;
+
+  /// No description provided for @projectMembersRoleViewer.
+  ///
+  /// In en, this message translates to:
+  /// **'viewer'**
+  String get projectMembersRoleViewer;
+
+  /// No description provided for @projectMembersRoleEditor.
+  ///
+  /// In en, this message translates to:
+  /// **'editor'**
+  String get projectMembersRoleEditor;
+
+  /// No description provided for @projectMembersLoadingWorkspaceMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading workspace members...'**
+  String get projectMembersLoadingWorkspaceMembers;
+
+  /// No description provided for @projectMembersForbiddenWorkspaceMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Current account does not have permission to read workspace member list; you can still directly enter user UUID for explicit ACL management.'**
+  String get projectMembersForbiddenWorkspaceMembers;
+
+  /// No description provided for @projectMembersNoWorkspaceContext.
+  ///
+  /// In en, this message translates to:
+  /// **'This project temporarily has no available workspace context, manual UUID entry is retained.'**
+  String get projectMembersNoWorkspaceContext;
+
+  /// No description provided for @projectMembersNoCandidates.
+  ///
+  /// In en, this message translates to:
+  /// **'Currently no regular workspace members can be directly added. owner/admin already have natural project access permissions, members with explicit rows are listed below.'**
+  String get projectMembersNoCandidates;
+
+  /// No description provided for @projectMembersFieldSelectFromWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Add from workspace members'**
+  String get projectMembersFieldSelectFromWorkspace;
+
+  /// No description provided for @projectMembersButtonAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get projectMembersButtonAdd;
+
+  /// No description provided for @projectMembersFieldManualUserId.
+  ///
+  /// In en, this message translates to:
+  /// **'Manually enter user UUID'**
+  String get projectMembersFieldManualUserId;
+
+  /// No description provided for @projectMembersFieldManualUserIdHint.
+  ///
+  /// In en, this message translates to:
+  /// **'00000000-0000-0000-0000-000000000000'**
+  String get projectMembersFieldManualUserIdHint;
+
+  /// No description provided for @projectMembersButtonAddByUuid.
+  ///
+  /// In en, this message translates to:
+  /// **'Add by UUID'**
+  String get projectMembersButtonAddByUuid;
+
+  /// No description provided for @projectMembersExplicitSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Explicit ACL rows'**
+  String get projectMembersExplicitSectionTitle;
+
+  /// No description provided for @projectMembersExplicitEmptyIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Currently no explicit project members. Project still works in workspace inheritance mode.'**
+  String get projectMembersExplicitEmptyIntro;
+
+  /// No description provided for @projectMembersExplicitNonEmptyIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'These rows are the viewer/editor rules actually enabled for the current project. After removing the last row, the project will return to inherited mode.'**
+  String get projectMembersExplicitNonEmptyIntro;
+
+  /// No description provided for @projectMembersExplicitEmptyState.
+  ///
+  /// In en, this message translates to:
+  /// **'No explicit ACL rows'**
+  String get projectMembersExplicitEmptyState;
+
+  /// No description provided for @projectMembersTooltipCopyUserId.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy user UUID'**
+  String get projectMembersTooltipCopyUserId;
+
+  /// No description provided for @projectMembersTagExplicitRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Explicit role'**
+  String get projectMembersTagExplicitRole;
+
+  /// No description provided for @projectMembersTagWorkspaceRole.
+  ///
+  /// In en, this message translates to:
+  /// **'workspace role'**
+  String get projectMembersTagWorkspaceRole;
+
+  /// No description provided for @projectMembersTagUpdatedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated at'**
+  String get projectMembersTagUpdatedAt;
+
+  /// No description provided for @projectMembersFieldUpdateRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Update role'**
+  String get projectMembersFieldUpdateRole;
+
+  /// No description provided for @projectMembersTooltipSaveRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Save role'**
+  String get projectMembersTooltipSaveRole;
+
+  /// No description provided for @projectMembersTooltipRemoveAcl.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove explicit ACL'**
+  String get projectMembersTooltipRemoveAcl;
+
+  /// No description provided for @projectMembersButtonRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get projectMembersButtonRefresh;
+
+  /// No description provided for @projectMembersSnackInvalidUuid.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid user UUID'**
+  String get projectMembersSnackInvalidUuid;
+
+  /// No description provided for @projectMembersSnackNoCandidates.
+  ///
+  /// In en, this message translates to:
+  /// **'Currently no workspace members can be directly added'**
+  String get projectMembersSnackNoCandidates;
+
+  /// No description provided for @projectMembersSnackMemberAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Project member added'**
+  String get projectMembersSnackMemberAdded;
+
+  /// No description provided for @projectMembersSnackRoleUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Role updated'**
+  String get projectMembersSnackRoleUpdated;
+
+  /// No description provided for @projectMembersSnackAclRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Explicit ACL removed'**
+  String get projectMembersSnackAclRemoved;
+
+  /// No description provided for @projectMembersSnackUserIdCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'User UUID copied'**
+  String get projectMembersSnackUserIdCopied;
+
   /// No description provided for @projectsCreativeManualKindDirector.
   ///
   /// In en, this message translates to:
@@ -17160,6 +17400,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Refreshing events…'**
   String get projectEditorNovelsEventsRefreshing;
+
+  /// No description provided for @projectEditorAssetsMainWorkbenchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Asset main workbench'**
+  String get projectEditorAssetsMainWorkbenchTitle;
+
+  /// No description provided for @projectEditorAssetsOverviewCardIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Consolidates asset CRUD, script linking, filtering, and uploads into one primary entry so the main area no longer stacks a row of fragmented buttons.'**
+  String get projectEditorAssetsOverviewCardIntro;
+
+  /// No description provided for @projectEditorAssetsMainWorkbenchDialogIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Consolidates asset CRUD, script linking, filtering, and upload entry points into one formal workbench so the main area no longer stacks a row of console-style buttons.'**
+  String get projectEditorAssetsMainWorkbenchDialogIntro;
+
+  /// No description provided for @projectEditorAssetsOverviewFilteringByScript.
+  ///
+  /// In en, this message translates to:
+  /// **'Filtering assets by script…'**
+  String get projectEditorAssetsOverviewFilteringByScript;
+
+  /// No description provided for @projectEditorAssetsOverviewScriptAssetsNotLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'This script\'s scoped assets are not loaded yet.'**
+  String get projectEditorAssetsOverviewScriptAssetsNotLoaded;
+
+  /// No description provided for @projectEditorAssetsOverviewFilterHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter asset list by script'**
+  String get projectEditorAssetsOverviewFilterHint;
+
+  /// No description provided for @projectEditorAssetsOverviewFilterOptionAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All (no script filter)'**
+  String get projectEditorAssetsOverviewFilterOptionAll;
+
+  /// No description provided for @projectEditorAssetsOverviewRefreshBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'Refreshing assets…'**
+  String get projectEditorAssetsOverviewRefreshBusy;
+
+  /// No description provided for @projectEditorAssetsOverviewRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh assets'**
+  String get projectEditorAssetsOverviewRefresh;
+
+  /// No description provided for @projectEditorAssetsOverviewOpenMainWorkbench.
+  ///
+  /// In en, this message translates to:
+  /// **'Open asset main workbench'**
+  String get projectEditorAssetsOverviewOpenMainWorkbench;
+
+  /// No description provided for @projectEditorAssetsSpecializedWorkbenchesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Specialized workbenches'**
+  String get projectEditorAssetsSpecializedWorkbenchesTitle;
+
+  /// No description provided for @projectEditorAssetsSpecializedWorkbenchesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Image management, image generation, and history queries are linked here too; the asset main area keeps a single formal entry.'**
+  String get projectEditorAssetsSpecializedWorkbenchesSubtitle;
+
+  /// No description provided for @projectEditorAssetsMainWorkbenchRefreshBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'Working…'**
+  String get projectEditorAssetsMainWorkbenchRefreshBusy;
+
+  /// No description provided for @projectEditorAssetsMainWorkbenchRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh workbench'**
+  String get projectEditorAssetsMainWorkbenchRefresh;
+
+  /// No description provided for @projectEditorAssetsMainWorkbenchClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get projectEditorAssetsMainWorkbenchClose;
 
   /// No description provided for @projectEditorAssetsWorkbenchNewAsset.
   ///

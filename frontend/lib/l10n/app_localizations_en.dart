@@ -2136,6 +2136,140 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get projectMembersTitle => 'Project member ACL';
+
+  @override
+  String get projectMembersAclEnabledIntro =>
+      'This project has explicit ACL enabled: regular members will only have access according to viewer / editor rows; workspace owner/admin still have full permissions.';
+
+  @override
+  String get projectMembersAclInheritedIntro =>
+      'This project is in workspace inheritance mode: regular members inherit original project access permissions. Adding the first explicit ACL row will switch the project to restricted mode.';
+
+  @override
+  String get projectMembersChipMode => 'Mode';
+
+  @override
+  String get projectMembersChipExplicitMembers => 'Explicit members';
+
+  @override
+  String get projectMembersChipCandidates => 'Candidate workspace members';
+
+  @override
+  String get projectMembersForbiddenTitle =>
+      'Current account cannot manage project ACL';
+
+  @override
+  String get projectMembersForbiddenBody =>
+      'Only workspace owner/admin or project owner can view and modify explicit project members. If you only need to continue editing other content, the current project will still work normally according to existing workspace / project permissions.';
+
+  @override
+  String get projectMembersAddSectionTitle => 'Add explicit member';
+
+  @override
+  String get projectMembersAddSectionIntro =>
+      'Prefer selecting from current workspace members; if you cannot access the workspace member list at the moment, you can also directly enter a user UUID for controlled supplementation.';
+
+  @override
+  String get projectMembersFieldGrantRole => 'Grant role';
+
+  @override
+  String get projectMembersRoleViewer => 'viewer';
+
+  @override
+  String get projectMembersRoleEditor => 'editor';
+
+  @override
+  String get projectMembersLoadingWorkspaceMembers =>
+      'Loading workspace members...';
+
+  @override
+  String get projectMembersForbiddenWorkspaceMembers =>
+      'Current account does not have permission to read workspace member list; you can still directly enter user UUID for explicit ACL management.';
+
+  @override
+  String get projectMembersNoWorkspaceContext =>
+      'This project temporarily has no available workspace context, manual UUID entry is retained.';
+
+  @override
+  String get projectMembersNoCandidates =>
+      'Currently no regular workspace members can be directly added. owner/admin already have natural project access permissions, members with explicit rows are listed below.';
+
+  @override
+  String get projectMembersFieldSelectFromWorkspace =>
+      'Add from workspace members';
+
+  @override
+  String get projectMembersButtonAdd => 'Add';
+
+  @override
+  String get projectMembersFieldManualUserId => 'Manually enter user UUID';
+
+  @override
+  String get projectMembersFieldManualUserIdHint =>
+      '00000000-0000-0000-0000-000000000000';
+
+  @override
+  String get projectMembersButtonAddByUuid => 'Add by UUID';
+
+  @override
+  String get projectMembersExplicitSectionTitle => 'Explicit ACL rows';
+
+  @override
+  String get projectMembersExplicitEmptyIntro =>
+      'Currently no explicit project members. Project still works in workspace inheritance mode.';
+
+  @override
+  String get projectMembersExplicitNonEmptyIntro =>
+      'These rows are the viewer/editor rules actually enabled for the current project. After removing the last row, the project will return to inherited mode.';
+
+  @override
+  String get projectMembersExplicitEmptyState => 'No explicit ACL rows';
+
+  @override
+  String get projectMembersTooltipCopyUserId => 'Copy user UUID';
+
+  @override
+  String get projectMembersTagExplicitRole => 'Explicit role';
+
+  @override
+  String get projectMembersTagWorkspaceRole => 'workspace role';
+
+  @override
+  String get projectMembersTagUpdatedAt => 'Updated at';
+
+  @override
+  String get projectMembersFieldUpdateRole => 'Update role';
+
+  @override
+  String get projectMembersTooltipSaveRole => 'Save role';
+
+  @override
+  String get projectMembersTooltipRemoveAcl => 'Remove explicit ACL';
+
+  @override
+  String get projectMembersButtonRefresh => 'Refresh';
+
+  @override
+  String get projectMembersSnackInvalidUuid => 'Please enter a valid user UUID';
+
+  @override
+  String get projectMembersSnackNoCandidates =>
+      'Currently no workspace members can be directly added';
+
+  @override
+  String get projectMembersSnackMemberAdded => 'Project member added';
+
+  @override
+  String get projectMembersSnackRoleUpdated => 'Role updated';
+
+  @override
+  String get projectMembersSnackAclRemoved => 'Explicit ACL removed';
+
+  @override
+  String get projectMembersSnackUserIdCopied => 'User UUID copied';
+
+  @override
   String get projectsCreativeManualKindDirector => 'Director manual';
 
   @override
@@ -10988,6 +11122,60 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get projectEditorNovelsEventsRefreshing => 'Refreshing events…';
+
+  @override
+  String get projectEditorAssetsMainWorkbenchTitle => 'Asset main workbench';
+
+  @override
+  String get projectEditorAssetsOverviewCardIntro =>
+      'Consolidates asset CRUD, script linking, filtering, and uploads into one primary entry so the main area no longer stacks a row of fragmented buttons.';
+
+  @override
+  String get projectEditorAssetsMainWorkbenchDialogIntro =>
+      'Consolidates asset CRUD, script linking, filtering, and upload entry points into one formal workbench so the main area no longer stacks a row of console-style buttons.';
+
+  @override
+  String get projectEditorAssetsOverviewFilteringByScript =>
+      'Filtering assets by script…';
+
+  @override
+  String get projectEditorAssetsOverviewScriptAssetsNotLoaded =>
+      'This script\'s scoped assets are not loaded yet.';
+
+  @override
+  String get projectEditorAssetsOverviewFilterHint =>
+      'Filter asset list by script';
+
+  @override
+  String get projectEditorAssetsOverviewFilterOptionAll =>
+      'All (no script filter)';
+
+  @override
+  String get projectEditorAssetsOverviewRefreshBusy => 'Refreshing assets…';
+
+  @override
+  String get projectEditorAssetsOverviewRefresh => 'Refresh assets';
+
+  @override
+  String get projectEditorAssetsOverviewOpenMainWorkbench =>
+      'Open asset main workbench';
+
+  @override
+  String get projectEditorAssetsSpecializedWorkbenchesTitle =>
+      'Specialized workbenches';
+
+  @override
+  String get projectEditorAssetsSpecializedWorkbenchesSubtitle =>
+      'Image management, image generation, and history queries are linked here too; the asset main area keeps a single formal entry.';
+
+  @override
+  String get projectEditorAssetsMainWorkbenchRefreshBusy => 'Working…';
+
+  @override
+  String get projectEditorAssetsMainWorkbenchRefresh => 'Refresh workbench';
+
+  @override
+  String get projectEditorAssetsMainWorkbenchClose => 'Close';
 
   @override
   String get projectEditorAssetsWorkbenchNewAsset => 'New asset';

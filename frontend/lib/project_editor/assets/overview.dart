@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../rust_api.dart';
 import 'support.dart';
 
@@ -48,6 +49,7 @@ class ProjectAssetsOverviewView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final bodySmall = theme.textTheme.bodySmall;
     final outline = theme.colorScheme.outline;
@@ -60,7 +62,7 @@ class ProjectAssetsOverviewView extends StatelessWidget {
           const SizedBox(height: 6),
           if (model.assetsScriptFilterLoading)
             Text(
-              '正在按剧本筛选资产…',
+              l10n.projectEditorAssetsOverviewFilteringByScript,
               style: bodySmall?.copyWith(color: outline),
             )
           else if (model.assetsForScript != null)
@@ -73,7 +75,7 @@ class ProjectAssetsOverviewView extends StatelessWidget {
             )
           else
             Text(
-              '当前剧本资产尚未加载',
+              l10n.projectEditorAssetsOverviewScriptAssetsNotLoaded,
               style: bodySmall?.copyWith(color: outline),
             ),
         ],
@@ -83,11 +85,11 @@ class ProjectAssetsOverviewView extends StatelessWidget {
             child: DropdownButton<int?>(
               value: model.filterScriptNumericId,
               isExpanded: true,
-              hint: const Text('按剧本筛选资产列表'),
+              hint: Text(l10n.projectEditorAssetsOverviewFilterHint),
               items: [
-                const DropdownMenuItem<int?>(
+                DropdownMenuItem<int?>(
                   value: null,
-                  child: Text('（全部，不按剧本筛选）'),
+                  child: Text(l10n.projectEditorAssetsOverviewFilterOptionAll),
                 ),
                 ...model.scriptList.map(
                   (script) => DropdownMenuItem<int?>(
@@ -117,7 +119,11 @@ class ProjectAssetsOverviewView extends StatelessWidget {
                         callbacks.onRefresh == null
                 ? null
                 : () => callbacks.onRefresh!(),
-            child: Text(model.assetsLoading ? '刷新资产…' : '刷新资产'),
+            child: Text(
+              model.assetsLoading
+                  ? l10n.projectEditorAssetsOverviewRefreshBusy
+                  : l10n.projectEditorAssetsOverviewRefresh,
+            ),
           ),
         ),
         const SizedBox(height: 8),
@@ -134,10 +140,10 @@ class ProjectAssetsOverviewView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('资产主工作台', style: theme.textTheme.titleSmall),
+              Text(l10n.projectEditorAssetsMainWorkbenchTitle, style: theme.textTheme.titleSmall),
               const SizedBox(height: 4),
               Text(
-                '把资产 CRUD、剧本关联、筛选与上传动作收口到一个正式入口，主区不再堆叠一排零散按钮。',
+                l10n.projectEditorAssetsOverviewCardIntro,
                 style: bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -150,7 +156,7 @@ class ProjectAssetsOverviewView extends StatelessWidget {
                         model.assetsScriptFilterLoading
                     ? null
                     : callbacks.onOpenWorkbench,
-                child: const Text('打开资产主工作台'),
+                child: Text(l10n.projectEditorAssetsOverviewOpenMainWorkbench),
               ),
             ],
           ),

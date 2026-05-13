@@ -32,8 +32,9 @@ AlertDialog buildProjectAssetsWorkbenchDialog({
   final dialogWidth = viewportWidth.isFinite
       ? viewportWidth.clamp(320.0, 780.0)
       : 780.0;
+  final l10n = AppLocalizations.of(dialogCtx)!;
   return AlertDialog(
-    title: const Text('资产主工作台'),
+    title: Text(l10n.projectEditorAssetsMainWorkbenchTitle),
     content: SizedBox(
       width: dialogWidth,
       child: SingleChildScrollView(
@@ -42,7 +43,7 @@ AlertDialog buildProjectAssetsWorkbenchDialog({
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '把资产 CRUD、剧本关联、筛选和上传入口收口到一个正式工作台，主区不再堆一排控制台式按钮。',
+              l10n.projectEditorAssetsMainWorkbenchDialogIntro,
               style: Theme.of(dialogCtx).textTheme.bodySmall,
             ),
             const SizedBox(height: 12),
@@ -91,9 +92,13 @@ AlertDialog buildProjectAssetsWorkbenchDialog({
     actions: [
       TextButton(
         onPressed: onRefresh,
-        child: Text(localBusy ? '处理中…' : '刷新工作台'),
+        child: Text(
+          localBusy
+              ? l10n.projectEditorAssetsMainWorkbenchRefreshBusy
+              : l10n.projectEditorAssetsMainWorkbenchRefresh,
+        ),
       ),
-      TextButton(onPressed: onClose, child: const Text('关闭')),
+      TextButton(onPressed: onClose, child: Text(l10n.projectEditorAssetsMainWorkbenchClose)),
     ],
   );
 }
