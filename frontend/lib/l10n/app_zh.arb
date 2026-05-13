@@ -214,6 +214,8 @@
   "notificationsComplianceCloseTooltip": "关闭",
   "notificationsComplianceExportHistoryTitle": "导出历史",
   "notificationsComplianceExportFormatFilter": "导出格式筛选",
+  "notificationsComplianceExportFormatJson": "JSON",
+  "notificationsComplianceExportFormatCsv": "CSV",
   "notificationsComplianceExportedStartIso": "导出时间起(ISO)",
   "notificationsComplianceExportedEndIso": "导出时间止(ISO)",
   "notificationsComplianceFilterExports": "筛选导出历史",

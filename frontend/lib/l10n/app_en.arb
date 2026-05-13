@@ -214,6 +214,8 @@
   "notificationsComplianceCloseTooltip": "Dismiss",
   "notificationsComplianceExportHistoryTitle": "Export history",
   "notificationsComplianceExportFormatFilter": "Export format filter",
+  "notificationsComplianceExportFormatJson": "JSON",
+  "notificationsComplianceExportFormatCsv": "CSV",
   "notificationsComplianceExportedStartIso": "Exported from (ISO)",
   "notificationsComplianceExportedEndIso": "Exported to (ISO)",
   "notificationsComplianceFilterExports": "Filter export history",

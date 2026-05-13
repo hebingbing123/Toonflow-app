@@ -1067,7 +1067,7 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('OpenFlow'),
+        title: Text(_appL10n?.appTitle ?? 'OpenFlow'),
         actions: [
           // Global Search Bar
           if (session != null)

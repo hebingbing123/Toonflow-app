@@ -427,6 +427,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get notificationsComplianceExportFormatFilter => '导出格式筛选';
 
   @override
+  String get notificationsComplianceExportFormatJson => 'JSON';
+
+  @override
+  String get notificationsComplianceExportFormatCsv => 'CSV';
+
+  @override
   String get notificationsComplianceExportedStartIso => '导出时间起(ISO)';
 
   @override

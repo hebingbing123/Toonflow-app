@@ -878,6 +878,18 @@ abstract class AppLocalizations {
   /// **'Export format filter'**
   String get notificationsComplianceExportFormatFilter;
 
+  /// No description provided for @notificationsComplianceExportFormatJson.
+  ///
+  /// In en, this message translates to:
+  /// **'JSON'**
+  String get notificationsComplianceExportFormatJson;
+
+  /// No description provided for @notificationsComplianceExportFormatCsv.
+  ///
+  /// In en, this message translates to:
+  /// **'CSV'**
+  String get notificationsComplianceExportFormatCsv;
+
   /// No description provided for @notificationsComplianceExportedStartIso.
   ///
   /// In en, this message translates to:

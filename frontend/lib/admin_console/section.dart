@@ -1219,7 +1219,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
                     ),
                   ),
                   if (project.archivedAt != null)
-                    const Chip(label: Text('archived')),
+                    Chip(label: Text(l10n.teamWorkspaceArchivedBadge)),
                   TextButton(
                     onPressed: () =>
                         widget.controller.loadProject(project.projectId),

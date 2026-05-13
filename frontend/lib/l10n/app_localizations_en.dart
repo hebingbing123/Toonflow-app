@@ -458,6 +458,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'Export format filter';
 
   @override
+  String get notificationsComplianceExportFormatJson => 'JSON';
+
+  @override
+  String get notificationsComplianceExportFormatCsv => 'CSV';
+
+  @override
   String get notificationsComplianceExportedStartIso => 'Exported from (ISO)';
 
   @override

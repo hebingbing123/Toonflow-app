@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../l10n/app_localizations.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
+import '../utils/localized_formatting.dart';
 import 'controller.dart';
 
 class NotificationsSection extends StatefulWidget {
@@ -609,11 +610,11 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                             ),
                             DropdownMenuItem(
                               value: 'json',
-                              child: const Text('JSON'),
+                              child: Text(l10n.notificationsComplianceExportFormatJson),
                             ),
                             DropdownMenuItem(
                               value: 'csv',
-                              child: const Text('CSV'),
+                              child: Text(l10n.notificationsComplianceExportFormatCsv),
                             ),
                           ],
                           onChanged: (value) {
@@ -1040,10 +1041,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
   }
 
   String _formatDateTime(DateTime value) {
-    final local = value.toLocal();
-    String twoDigits(int part) => part.toString().padLeft(2, '0');
-    return '${local.year}-${twoDigits(local.month)}-${twoDigits(local.day)} '
-        '${twoDigits(local.hour)}:${twoDigits(local.minute)}';
+    return LocalizedFormatting.formatShortDateTime(context, value);
   }
 
   void _saveClearedThrottlePolicy() {
