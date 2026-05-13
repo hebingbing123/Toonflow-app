@@ -34,7 +34,7 @@ void reportRustApiError(
   }
 }
 
-/// Shows a SnackBar for [RustApiException] or any error using [formatRustApiExceptionForDisplay].
+/// Shows a SnackBar using [describeRustApiError] (delegates to [describeUserVisibleApiError]).
 void showRustApiErrorSnackBar(Object error) {
   final messenger = kRustApiRootScaffoldMessengerKey.currentState;
   if (messenger == null) {

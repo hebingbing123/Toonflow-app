@@ -58,14 +58,6 @@ class _ProjectAuditPanelState extends State<ProjectAuditPanel> {
         _hasMore = page.hasMore;
         _loading = false;
       });
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _rows.clear();
-        _hasMore = false;
-        _loading = false;
-        _error = formatRustApiExceptionForDisplay(l10n, e);
-      });
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -95,12 +87,6 @@ class _ProjectAuditPanelState extends State<ProjectAuditPanel> {
         _rows.addAll(page.items);
         _hasMore = page.hasMore;
         _loadingMore = false;
-      });
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _loadingMore = false;
-        _error = formatRustApiExceptionForDisplay(l10n, e);
       });
     } catch (e) {
       if (!mounted) return;

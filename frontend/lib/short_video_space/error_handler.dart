@@ -162,7 +162,10 @@ class ShortVideoErrorHandler {
     // 默认错误处理
     return ErrorHandlingResult(
       shouldRetry: false,
-      userMessage: l10n.shortVideoSpaceErrorDefaultMessage(contextStr, formatRustApiExceptionForDisplay(l10n, error)),
+      userMessage: l10n.shortVideoSpaceErrorDefaultMessage(
+        contextStr,
+        describeUserVisibleApiError(l10n, error),
+      ),
       severity: ErrorSeverity.error,
     );
   }

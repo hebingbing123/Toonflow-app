@@ -112,12 +112,6 @@ class _TaskCenterWorkbenchDialogState
         _statusLine = l10n.taskCenterStatusLoadedTaskProjects(rows.length);
         _loadingProjects = false;
       });
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _statusLine = formatRustApiExceptionForDisplay(l10n, e);
-        _loadingProjects = false;
-      });
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -140,12 +134,6 @@ class _TaskCenterWorkbenchDialogState
         _categories = rows;
         _categoriesSummary = summarizeTaskCategories(l10n, rows);
         _statusLine = l10n.taskCenterStatusLoadedTaskCategories(rows.length);
-        _loadingCategories = false;
-      });
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _statusLine = formatRustApiExceptionForDisplay(l10n, e);
         _loadingCategories = false;
       });
     } catch (e) {
@@ -207,12 +195,6 @@ class _TaskCenterWorkbenchDialogState
         _statusLine = l10n.taskCenterStatusRefreshedTasks(jobs.length);
         _loadingTasks = false;
       });
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _statusLine = formatRustApiExceptionForDisplay(l10n, e);
-        _loadingTasks = false;
-      });
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -239,12 +221,6 @@ class _TaskCenterWorkbenchDialogState
       setState(() {
         _numericIdTaskDetailText = formatTaskJobDetails(row);
         _ctrls.uuidCtrl.text = row.id;
-        _loadingNumericIdTaskDetail = false;
-      });
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _statusLine = formatRustApiExceptionForDisplay(l10n, e);
         _loadingNumericIdTaskDetail = false;
       });
     } catch (e) {
@@ -275,12 +251,6 @@ class _TaskCenterWorkbenchDialogState
         _ctrls.numericTaskIdCtrl.text = row.numericTaskId.toString();
         _loadingUuidDetails = false;
       });
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _statusLine = formatRustApiExceptionForDisplay(l10n, e);
-        _loadingUuidDetails = false;
-      });
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -306,12 +276,6 @@ class _TaskCenterWorkbenchDialogState
         _mergeJobUpdate(updated, origin: l10n.taskCenterOriginRetrySubmitted);
         _retryingJobId = null;
       });
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _statusLine = formatRustApiExceptionForDisplay(l10n, e);
-        _retryingJobId = null;
-      });
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -335,12 +299,6 @@ class _TaskCenterWorkbenchDialogState
       if (!mounted) return;
       setState(() {
         _mergeJobUpdate(updated, origin: l10n.taskCenterOriginTaskCancelled);
-        _cancellingJobId = null;
-      });
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _statusLine = formatRustApiExceptionForDisplay(l10n, e);
         _cancellingJobId = null;
       });
     } catch (e) {
