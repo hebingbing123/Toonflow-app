@@ -180,7 +180,10 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
     } catch (error) {
       if (!mounted) return;
       setState(() {
-        _statusLine = l10n.benchmarkStatusFailed(label, '$error');
+        _statusLine = l10n.benchmarkStatusFailed(
+          label,
+          describeUserVisibleApiError(l10n, error),
+        );
       });
     } finally {
       if (mounted) {

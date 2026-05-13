@@ -44,7 +44,10 @@ class AdminConsoleController extends ChangeNotifier {
     }
     final needle = query.trim();
     if (needle.length < 2) {
-      _setError(_l10n?.adminConsoleErrSearchAtLeast2Chars ?? '请输入至少 2 个字符');
+      _setError(
+        _l10n?.adminConsoleErrSearchAtLeast2Chars ??
+            'Please enter at least 2 characters.',
+      );
       return;
     }
     searching = true;
@@ -55,7 +58,9 @@ class AdminConsoleController extends ChangeNotifier {
     } on RustApiException catch (error) {
       reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError('$error');
+      _setError(
+        describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error),
+      );
     } finally {
       searching = false;
       notifyListeners();
@@ -113,7 +118,9 @@ class AdminConsoleController extends ChangeNotifier {
     } on RustApiException catch (error) {
       reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError('$error');
+      _setError(
+        describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error),
+      );
     } finally {
       loadingDetail = false;
       notifyListeners();
@@ -136,7 +143,8 @@ class AdminConsoleController extends ChangeNotifier {
     if (operationalStatus == AdminOperationalStatusV1.suspended &&
         (normalizedReason == null || normalizedReason.isEmpty)) {
       _setError(
-        _l10n?.adminConsoleErrSuspendReasonRequired ?? '暂停用户时必须填写暂停原因',
+        _l10n?.adminConsoleErrSuspendReasonRequired ??
+            'A suspension reason is required.',
       );
       notifyListeners();
       return;
@@ -145,7 +153,7 @@ class AdminConsoleController extends ChangeNotifier {
         (dailyJobQuota == null || dailyJobQuota <= 0)) {
       _setError(
         _l10n?.adminConsoleErrDailyQuotaPositiveRequired ??
-            '设置日配额时必须填写大于 0 的整数',
+            'A positive integer is required when setting daily quota.',
       );
       notifyListeners();
       return;
@@ -198,7 +206,9 @@ class AdminConsoleController extends ChangeNotifier {
     } on RustApiException catch (error) {
       reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError('$error');
+      _setError(
+        describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error),
+      );
     } finally {
       savingGovernance = false;
       notifyListeners();
@@ -252,7 +262,9 @@ class AdminConsoleController extends ChangeNotifier {
     } on RustApiException catch (error) {
       reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError('$error');
+      _setError(
+        describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error),
+      );
     } finally {
       savingWorkspaceContext = false;
       notifyListeners();
@@ -272,7 +284,8 @@ class AdminConsoleController extends ChangeNotifier {
     if (opsNoteAction == AdminWorkspaceOpsNoteActionV1.set &&
         (trimmed == null || trimmed.isEmpty)) {
       _setError(
-        _l10n?.adminConsoleErrInternalNoteRequired ?? '设置内部备注时必须填写内容',
+        _l10n?.adminConsoleErrInternalNoteRequired ??
+            'Internal note content is required.',
       );
       notifyListeners();
       return;
@@ -319,7 +332,9 @@ class AdminConsoleController extends ChangeNotifier {
     } on RustApiException catch (error) {
       reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError('$error');
+      _setError(
+        describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error),
+      );
     } finally {
       savingGovernance = false;
       notifyListeners();
@@ -337,14 +352,18 @@ class AdminConsoleController extends ChangeNotifier {
     }
     final trimmedUserId = userId.trim();
     if (trimmedUserId.isEmpty) {
-      _setError(_l10n?.adminConsoleErrMemberUserIdRequired ?? '成员 userId 不能为空');
+      _setError(
+        _l10n?.adminConsoleErrMemberUserIdRequired ??
+            'Member userId cannot be empty.',
+      );
       notifyListeners();
       return;
     }
     if (action == AdminWorkspaceMemberRemediationActionV1.upsert &&
         role == null) {
       _setError(
-        _l10n?.adminConsoleErrMemberRoleRequired ?? '新增或更新成员时必须指定角色',
+        _l10n?.adminConsoleErrMemberRoleRequired ??
+            'A role is required when adding or updating a member.',
       );
       notifyListeners();
       return;
@@ -389,7 +408,9 @@ class AdminConsoleController extends ChangeNotifier {
     } on RustApiException catch (error) {
       reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError('$error');
+      _setError(
+        describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error),
+      );
     } finally {
       savingWorkspaceMembership = false;
       notifyListeners();
@@ -409,7 +430,8 @@ class AdminConsoleController extends ChangeNotifier {
     if (opsNoteAction == AdminWorkspaceOpsNoteActionV1.set &&
         (trimmed == null || trimmed.isEmpty)) {
       _setError(
-        _l10n?.adminConsoleErrInternalNoteRequired ?? '设置内部备注时必须填写内容',
+        _l10n?.adminConsoleErrInternalNoteRequired ??
+            'Internal note content is required.',
       );
       notifyListeners();
       return;
@@ -456,7 +478,9 @@ class AdminConsoleController extends ChangeNotifier {
     } on RustApiException catch (error) {
       reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError('$error');
+      _setError(
+        describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error),
+      );
     } finally {
       savingGovernance = false;
       notifyListeners();
@@ -474,7 +498,7 @@ class AdminConsoleController extends ChangeNotifier {
     if (trimmedTarget.isEmpty) {
       _setError(
         _l10n?.adminConsoleErrTargetOwnerUserIdRequired ??
-            '目标 owner userId 不能为空',
+            'Target owner userId cannot be empty.',
       );
       notifyListeners();
       return;
@@ -517,7 +541,9 @@ class AdminConsoleController extends ChangeNotifier {
     } on RustApiException catch (error) {
       reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError('$error');
+      _setError(
+        describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error),
+      );
     } finally {
       savingOwnershipRemediation = false;
       notifyListeners();
@@ -535,7 +561,7 @@ class AdminConsoleController extends ChangeNotifier {
     if (trimmedTarget.isEmpty) {
       _setError(
         _l10n?.adminConsoleErrTargetOwnerUserIdRequired ??
-            '目标 owner userId 不能为空',
+            'Target owner userId cannot be empty.',
       );
       notifyListeners();
       return;
@@ -578,7 +604,9 @@ class AdminConsoleController extends ChangeNotifier {
     } on RustApiException catch (error) {
       reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError('$error');
+      _setError(
+        describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error),
+      );
     } finally {
       savingOwnershipRemediation = false;
       notifyListeners();
@@ -596,7 +624,8 @@ class AdminConsoleController extends ChangeNotifier {
     }
     if (projectIds.isEmpty) {
       _setError(
-        _l10n?.adminConsoleErrAtLeastOneProjectRequired ?? '至少选择一个 project',
+        _l10n?.adminConsoleErrAtLeastOneProjectRequired ??
+            'Select at least one project.',
       );
       notifyListeners();
       return null;
@@ -605,7 +634,8 @@ class AdminConsoleController extends ChangeNotifier {
     if (opsNoteAction == AdminWorkspaceOpsNoteActionV1.set &&
         (trimmed == null || trimmed.isEmpty)) {
       _setError(
-        _l10n?.adminConsoleErrBatchNoteRequired ?? '批量写备注时必须填写内容',
+        _l10n?.adminConsoleErrBatchNoteRequired ??
+            'Batch note content is required.',
       );
       notifyListeners();
       return null;
@@ -677,7 +707,9 @@ class AdminConsoleController extends ChangeNotifier {
       reportRustApiError(error, onErrorChanged: _setError);
       return null;
     } catch (error) {
-      _setError('$error');
+      _setError(
+        describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error),
+      );
       return null;
     } finally {
       savingBatchGovernance = false;

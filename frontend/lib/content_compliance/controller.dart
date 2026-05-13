@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 
 import '../config.dart';
 import '../l10n/app_localizations.dart';
+import '../l10n/rust_api_error_format.dart';
 import '../platform/rust_api_feedback.dart';
 import '../rust_api/core.dart';
 import '../rust_api/settings/notifications.dart';
@@ -557,7 +558,9 @@ class ContentComplianceController extends ChangeNotifier {
     } on RustApiException catch (error) {
       reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError('$error');
+      _setError(
+        describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error),
+      );
     } finally {
       submittingReport = false;
       notifyListeners();
@@ -628,7 +631,9 @@ class ContentComplianceController extends ChangeNotifier {
       queue = ContentComplianceQueueResponseV1.fromJson(
         jsonDecode(res.body) as Map<String, dynamic>,
       );
-      _onAlertsChanged?.call(queue?.alerts ?? const <ContentComplianceQueueAlertV1>[]);
+      _onAlertsChanged?.call(
+        queue?.alerts ?? const <ContentComplianceQueueAlertV1>[],
+      );
       final accessToken = _accessTokenProvider()?.trim();
       if (accessToken != null && accessToken.isNotEmpty && queue != null) {
         await syncContentComplianceAlertsV1(
@@ -651,7 +656,9 @@ class ContentComplianceController extends ChangeNotifier {
     } on RustApiException catch (error) {
       reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError('$error');
+      _setError(
+        describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error),
+      );
     } finally {
       loadingQueue = false;
       notifyListeners();
@@ -710,7 +717,9 @@ class ContentComplianceController extends ChangeNotifier {
     } on RustApiException catch (error) {
       reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError('$error');
+      _setError(
+        describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error),
+      );
     } finally {
       mutatingQueue = false;
       notifyListeners();
@@ -818,7 +827,9 @@ class ContentComplianceController extends ChangeNotifier {
       reportRustApiError(error, onErrorChanged: _setError);
       return null;
     } catch (error) {
-      _setError('$error');
+      _setError(
+        describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error),
+      );
       return null;
     } finally {
       mutatingQueue = false;
@@ -838,7 +849,8 @@ class ContentComplianceController extends ChangeNotifier {
     final trimmedAssignee = assigneeLabel.trim();
     if (trimmedAssignee.isEmpty) {
       _setError(
-        _l10n?.contentComplianceErrAssigneeRequired ?? '改派 reviewer 不能为空',
+        _l10n?.contentComplianceErrAssigneeRequired ??
+            'Assignee reviewer cannot be empty.',
       );
       notifyListeners();
       return null;
@@ -874,7 +886,9 @@ class ContentComplianceController extends ChangeNotifier {
       reportRustApiError(error, onErrorChanged: _setError);
       return null;
     } catch (error) {
-      _setError('$error');
+      _setError(
+        describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error),
+      );
       return null;
     } finally {
       mutatingQueue = false;
@@ -922,7 +936,9 @@ class ContentComplianceController extends ChangeNotifier {
       reportRustApiError(error, onErrorChanged: _setError);
       return null;
     } catch (error) {
-      _setError('$error');
+      _setError(
+        describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error),
+      );
       return null;
     } finally {
       mutatingQueue = false;
@@ -971,7 +987,9 @@ class ContentComplianceController extends ChangeNotifier {
       reportRustApiError(error, onErrorChanged: _setError);
       return const <ContentComplianceAuditItemV1>[];
     } catch (error) {
-      _setError('$error');
+      _setError(
+        describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error),
+      );
       return const <ContentComplianceAuditItemV1>[];
     } finally {
       loadingAuditReportId = null;

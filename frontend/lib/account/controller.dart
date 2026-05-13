@@ -62,7 +62,7 @@ class AccountController extends ChangeNotifier {
     } on RustApiException catch (error) {
       reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError('$error');
+      _setError(describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error));
     } finally {
       loading = false;
       notifyListeners();
@@ -93,7 +93,7 @@ class AccountController extends ChangeNotifier {
     } on RustApiException catch (error) {
       reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError('$error');
+      _setError(describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error));
     } finally {
       creatingExport = false;
       notifyListeners();
@@ -123,7 +123,7 @@ class AccountController extends ChangeNotifier {
     } on RustApiException catch (error) {
       reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError('$error');
+      _setError(describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error));
     } finally {
       _downloadingJobIds.remove(item.id);
       notifyListeners();
@@ -153,7 +153,7 @@ class AccountController extends ChangeNotifier {
     } on RustApiException catch (error) {
       reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError('$error');
+      _setError(describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error));
     } finally {
       deletingAccount = false;
       notifyListeners();

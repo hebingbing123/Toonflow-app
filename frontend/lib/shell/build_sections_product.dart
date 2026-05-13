@@ -71,13 +71,21 @@ extension _HomePageBuildProductSections on _HomePageState {
     } on RustApiException catch (error) {
       messenger.showSnackBar(
         SnackBar(
-          content: Text(l10n.productComplianceOpenTargetFailed(error.message)),
+          content: Text(
+            l10n.productComplianceOpenTargetFailed(
+              describeUserVisibleApiError(l10n, error),
+            ),
+          ),
         ),
       );
     } catch (error) {
       messenger.showSnackBar(
         SnackBar(
-          content: Text(l10n.productComplianceOpenTargetFailed('$error')),
+          content: Text(
+            l10n.productComplianceOpenTargetFailed(
+              describeUserVisibleApiError(l10n, error),
+            ),
+          ),
         ),
       );
     }

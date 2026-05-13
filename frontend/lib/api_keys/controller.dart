@@ -60,7 +60,7 @@ class ApiKeysController extends ChangeNotifier {
     } on RustApiException catch (error) {
       reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError('$error');
+      _setError(describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error));
     } finally {
       loading = false;
       notifyListeners();
@@ -91,7 +91,7 @@ class ApiKeysController extends ChangeNotifier {
     } on RustApiException catch (error) {
       reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError('$error');
+      _setError(describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error));
     } finally {
       creating = false;
       notifyListeners();
@@ -159,7 +159,7 @@ class ApiKeysController extends ChangeNotifier {
     } on RustApiException catch (error) {
       reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError('$error');
+      _setError(describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error));
     } finally {
       busyKeyId = null;
       notifyListeners();
