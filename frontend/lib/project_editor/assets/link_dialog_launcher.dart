@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../../rust_api.dart';
 
 Future<void> openProjectAssetLinkDialog({
@@ -13,11 +14,12 @@ Future<void> openProjectAssetLinkDialog({
   required Future<void> Function() reloadAssetsAndStats,
   required bool unlink,
 }) async {
+  final l10n = AppLocalizations.of(ctx)!;
   final assets = assetsRef[0]?.items ?? const <AssetRow>[];
   if (scriptList.isEmpty || assets.isEmpty) {
     ScaffoldMessenger.of(
       ctx,
-    ).showSnackBar(const SnackBar(content: Text('请先准备至少一个剧本和一个资产')));
+    ).showSnackBar(SnackBar(content: Text(l10n.projectEditorAssetLinkNeedScriptAndAssetSnack)));
     return;
   }
 
@@ -28,8 +30,13 @@ Future<void> openProjectAssetLinkDialog({
     builder: (dialogCtx) {
       return StatefulBuilder(
         builder: (dialogCtx, setState) {
+          final dlgL10n = AppLocalizations.of(dialogCtx)!;
           return AlertDialog(
-            title: Text(unlink ? '取消剧本-资产关联' : '关联剧本与资产'),
+            title: Text(
+              unlink
+                  ? dlgL10n.projectEditorAssetLinkDialogTitleUnlink
+                  : dlgL10n.projectEditorAssetLinkDialogTitleLink,
+            ),
             content: SizedBox(
               width: 520,
               child: Column(
@@ -37,7 +44,9 @@ Future<void> openProjectAssetLinkDialog({
                 children: [
                   DropdownButtonFormField<int>(
                     initialValue: selectedScriptNumericId,
-                    decoration: const InputDecoration(labelText: '剧本'),
+                    decoration: InputDecoration(
+                      labelText: dlgL10n.projectEditorAssetLinkScriptLabel,
+                    ),
                     items: scriptList
                         .map(
                           (script) => DropdownMenuItem<int>(
@@ -57,7 +66,9 @@ Future<void> openProjectAssetLinkDialog({
                   const SizedBox(height: 8),
                   DropdownButtonFormField<int>(
                     initialValue: selectedAssetNumericId,
-                    decoration: const InputDecoration(labelText: '资产'),
+                    decoration: InputDecoration(
+                      labelText: dlgL10n.projectEditorAssetLinkAssetLabel,
+                    ),
                     items: assets
                         .map(
                           (asset) => DropdownMenuItem<int>(
@@ -80,11 +91,15 @@ Future<void> openProjectAssetLinkDialog({
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(dialogCtx).pop(false),
-                child: const Text('取消'),
+                child: Text(dlgL10n.storyboardEditorDialogCancel),
               ),
               FilledButton(
                 onPressed: () => Navigator.of(dialogCtx).pop(true),
-                child: Text(unlink ? '取消关联' : '确认关联'),
+                child: Text(
+                  unlink
+                      ? dlgL10n.projectEditorAssetLinkConfirmUnlink
+                      : dlgL10n.projectEditorAssetLinkConfirmLink,
+                ),
               ),
             ],
           );
@@ -119,20 +134,23 @@ Future<void> openProjectAssetLinkDialog({
       SnackBar(
         content: Text(
           unlink
-              ? '已取消关联 script#$selectedScriptNumericId · asset#$selectedAssetNumericId'
-              : '已关联 script#$selectedScriptNumericId · asset#$selectedAssetNumericId',
+              ? l10n.projectEditorAssetLinkSuccessUnlinked(
+                  selectedScriptNumericId,
+                  selectedAssetNumericId,
+                )
+              : l10n.projectEditorAssetLinkSuccessLinked(
+                  selectedScriptNumericId,
+                  selectedAssetNumericId,
+                ),
         ),
       ),
     );
-  } on RustApiException catch (e) {
-    if (ctx.mounted) {
-      setDialogState(() => assetsBusy[0] = false);
-      ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('$e')));
-    }
   } catch (e) {
     if (ctx.mounted) {
       setDialogState(() => assetsBusy[0] = false);
-      ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('$e')));
+      ScaffoldMessenger.of(ctx).showSnackBar(
+        SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
+      );
     }
   }
 }

@@ -95,15 +95,12 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
       ScaffoldMessenger.of(ctx).showSnackBar(
         SnackBar(content: Text(l10n.projectEditorAssetCrudCreateSuccessSnack)),
       );
-    } on RustApiException catch (e) {
-      if (ctx.mounted) {
-        setDialogState(() => assetsBusy[0] = false);
-        ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('$e')));
-      }
     } catch (e) {
       if (ctx.mounted) {
         setDialogState(() => assetsBusy[0] = false);
-        ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('$e')));
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
+        );
       }
     } finally {
       nameCtrl.dispose();
@@ -260,15 +257,12 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
           ),
         ),
       );
-    } on RustApiException catch (e) {
-      if (ctx.mounted) {
-        setDialogState(() => assetsBusy[0] = false);
-        ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('$e')));
-      }
     } catch (e) {
       if (ctx.mounted) {
         setDialogState(() => assetsBusy[0] = false);
-        ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('$e')));
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
+        );
       }
     } finally {
       nameCtrl.dispose();

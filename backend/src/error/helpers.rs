@@ -177,9 +177,21 @@ pub fn forbidden_i18n(en_msg: &str, zh_msg: &str) -> ApiError {
     ApiError::Forbidden(msg.to_string())
 }
 
-/// 权限不足（403）；与 [`forbidden_i18n`] 等价，便于语义化调用。
-pub fn insufficient_permissions_i18n(en_msg: &str, zh_msg: &str) -> ApiError {
-    forbidden_i18n(en_msg, zh_msg)
+/// 创建权限不足错误（带操作名称参数）。
+///
+/// 根据当前请求的 `Accept-Language` 偏好返回对应语言的错误消息。
+///
+/// # 示例
+///
+/// ```ignore
+/// return Err(insufficient_permissions_i18n("delete workspace"));
+/// return Err(insufficient_permissions_i18n("modify project settings"));
+/// ```
+pub fn insufficient_permissions_i18n(action: &str) -> ApiError {
+    ApiError::ForbiddenI18n {
+        en: format!("Insufficient permissions to {}", action),
+        zh: format!("权限不足，无法{}", action),
+    }
 }
 
 /// 验证数值为正数（> 0）。
@@ -278,6 +290,56 @@ pub fn version_conflict_i18n(resource: &str) -> ApiError {
     }
 }
 
+/// 创建并发修改错误（带资源名称参数）。
+///
+/// 根据当前请求的 `Accept-Language` 偏好返回对应语言的错误消息。
+///
+/// # 示例
+///
+/// ```ignore
+/// return Err(concurrent_modification_i18n("Timeline"));
+/// return Err(concurrent_modification_i18n("Project"));
+/// ```
+pub fn concurrent_modification_i18n(resource: &str) -> ApiError {
+    ApiError::ConflictI18n {
+        en: format!("{} is being modified by another operation", resource),
+        zh: format!("{} 正在被其他操作修改", resource),
+    }
+}
+
+/// 创建功能未启用错误（带功能名称参数）。
+///
+/// 根据当前请求的 `Accept-Language` 偏好返回对应语言的错误消息。
+///
+/// # 示例
+///
+/// ```ignore
+/// return Err(feature_not_enabled_i18n("billing"));
+/// return Err(feature_not_enabled_i18n("advanced_analytics"));
+/// ```
+pub fn feature_not_enabled_i18n(feature: &str) -> ApiError {
+    ApiError::ForbiddenI18n {
+        en: format!("Feature '{}' is not enabled", feature),
+        zh: format!("功能 '{}' 未启用", feature),
+    }
+}
+
+/// 创建工作区访问被拒绝错误（无参数）。
+///
+/// 根据当前请求的 `Accept-Language` 偏好返回对应语言的错误消息。
+///
+/// # 示例
+///
+/// ```ignore
+/// return Err(workspace_access_denied_i18n());
+/// ```
+pub fn workspace_access_denied_i18n() -> ApiError {
+    ApiError::ForbiddenI18n {
+        en: "Access to workspace denied".to_string(),
+        zh: "工作区访问被拒绝".to_string(),
+    }
+}
+
 /// 创建格式验证错误（带字段名和期望格式参数）。
 ///
 /// 根据当前请求的 `Accept-Language` 偏好返回对应语言的错误消息。
@@ -329,6 +391,25 @@ pub fn missing_field_i18n(field_name: &str) -> ApiError {
     ApiError::BadRequestI18n {
         en: format!("Missing required field '{}'", field_name),
         zh: format!("缺少必填字段 '{}'", field_name),
+    }
+}
+
+/// 创建带中英文消息的 NotImplemented 错误。
+///
+/// 根据当前请求的 `Accept-Language` 偏好返回对应语言的错误消息。
+///
+/// # 示例
+///
+/// ```ignore
+/// return Err(not_implemented_i18n(
+///     "feature not available",
+///     "功能不可用"
+/// ));
+/// ```
+pub fn not_implemented_i18n(en_msg: &str, zh_msg: &str) -> ApiError {
+    ApiError::NotImplementedI18n {
+        en: en_msg.to_string(),
+        zh: zh_msg.to_string(),
     }
 }
 
@@ -867,6 +948,76 @@ mod tests {
     }
 
     #[test]
+    fn concurrent_modification_i18n_en() {
+        let err = concurrent_modification_i18n("Timeline");
+        match err {
+            ApiError::ConflictI18n { en, zh } => {
+                assert_eq!(en, "Timeline is being modified by another operation");
+                assert_eq!(zh, "Timeline 正在被其他操作修改");
+            }
+            _ => panic!("expected ConflictI18n"),
+        }
+    }
+
+    #[test]
+    fn concurrent_modification_i18n_with_different_resource() {
+        let err = concurrent_modification_i18n("Project");
+        match err {
+            ApiError::ConflictI18n { en, zh } => {
+                assert_eq!(en, "Project is being modified by another operation");
+                assert_eq!(zh, "Project 正在被其他操作修改");
+            }
+            _ => panic!("expected ConflictI18n"),
+        }
+    }
+
+    #[tokio::test]
+    async fn concurrent_modification_i18n_response_en() {
+        use axum::body::to_bytes;
+        use axum::response::IntoResponse;
+
+        let err = concurrent_modification_i18n("Timeline");
+        let resp = err.into_response();
+
+        let bytes = to_bytes(resp.into_body(), 16 * 1024)
+            .await
+            .expect("body bytes");
+        let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
+
+        assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(409));
+        assert_eq!(json.get("code").and_then(|v| v.as_str()), Some("conflict"));
+        assert_eq!(
+            json.get("message").and_then(|v| v.as_str()),
+            Some("Timeline is being modified by another operation")
+        );
+    }
+
+    #[tokio::test]
+    async fn concurrent_modification_i18n_response_zh() {
+        use axum::body::to_bytes;
+        use axum::response::IntoResponse;
+
+        let resp = REQUEST_LOCALE
+            .scope(ApiLocale::Zh, async {
+                let err = concurrent_modification_i18n("Project");
+                err.into_response()
+            })
+            .await;
+
+        let bytes = to_bytes(resp.into_body(), 16 * 1024)
+            .await
+            .expect("body bytes");
+        let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
+
+        assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(409));
+        assert_eq!(json.get("code").and_then(|v| v.as_str()), Some("conflict"));
+        assert_eq!(
+            json.get("message").and_then(|v| v.as_str()),
+            Some("Project 正在被其他操作修改")
+        );
+    }
+
+    #[test]
     fn feature_not_enabled_i18n_en() {
         let err = feature_not_enabled_i18n("billing");
         match err {
@@ -953,6 +1104,243 @@ mod tests {
         assert_eq!(
             json.get("message").and_then(|v| v.as_str()),
             Some("功能 'advanced_analytics' 未启用")
+        );
+    }
+
+    #[test]
+    fn insufficient_permissions_i18n_en() {
+        let err = insufficient_permissions_i18n("delete workspace");
+        match err {
+            ApiError::ForbiddenI18n { en, zh } => {
+                assert_eq!(en, "Insufficient permissions to delete workspace");
+                assert_eq!(zh, "权限不足，无法delete workspace");
+            }
+            _ => panic!("expected ForbiddenI18n"),
+        }
+    }
+
+    #[test]
+    fn insufficient_permissions_i18n_with_different_actions() {
+        let test_cases = vec![
+            (
+                "delete workspace",
+                "Insufficient permissions to delete workspace",
+                "权限不足，无法delete workspace",
+            ),
+            (
+                "modify project settings",
+                "Insufficient permissions to modify project settings",
+                "权限不足，无法modify project settings",
+            ),
+            (
+                "access billing information",
+                "Insufficient permissions to access billing information",
+                "权限不足，无法access billing information",
+            ),
+            (
+                "create new project",
+                "Insufficient permissions to create new project",
+                "权限不足，无法create new project",
+            ),
+        ];
+
+        for (action, expected_en, expected_zh) in test_cases {
+            let err = insufficient_permissions_i18n(action);
+            match err {
+                ApiError::ForbiddenI18n { en, zh } => {
+                    assert_eq!(en, expected_en);
+                    assert_eq!(zh, expected_zh);
+                }
+                _ => panic!("expected ForbiddenI18n"),
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn insufficient_permissions_i18n_response_en() {
+        use axum::body::to_bytes;
+        use axum::response::IntoResponse;
+
+        let err = insufficient_permissions_i18n("delete workspace");
+        let resp = err.into_response();
+
+        let bytes = to_bytes(resp.into_body(), 16 * 1024)
+            .await
+            .expect("body bytes");
+        let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
+
+        assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(403));
+        assert_eq!(json.get("code").and_then(|v| v.as_str()), Some("forbidden"));
+        assert_eq!(
+            json.get("message").and_then(|v| v.as_str()),
+            Some("Insufficient permissions to delete workspace")
+        );
+    }
+
+    #[tokio::test]
+    async fn insufficient_permissions_i18n_response_zh() {
+        use axum::body::to_bytes;
+        use axum::response::IntoResponse;
+
+        let resp = REQUEST_LOCALE
+            .scope(ApiLocale::Zh, async {
+                let err = insufficient_permissions_i18n("modify project settings");
+                err.into_response()
+            })
+            .await;
+
+        let bytes = to_bytes(resp.into_body(), 16 * 1024)
+            .await
+            .expect("body bytes");
+        let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
+
+        assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(403));
+        assert_eq!(json.get("code").and_then(|v| v.as_str()), Some("forbidden"));
+        assert_eq!(
+            json.get("message").and_then(|v| v.as_str()),
+            Some("权限不足，无法modify project settings")
+        );
+    }
+
+    #[test]
+    fn workspace_access_denied_i18n_en() {
+        let err = workspace_access_denied_i18n();
+        match err {
+            ApiError::ForbiddenI18n { en, zh } => {
+                assert_eq!(en, "Access to workspace denied");
+                assert_eq!(zh, "工作区访问被拒绝");
+            }
+            _ => panic!("expected ForbiddenI18n"),
+        }
+    }
+
+    #[tokio::test]
+    async fn workspace_access_denied_i18n_response_en() {
+        use axum::body::to_bytes;
+        use axum::response::IntoResponse;
+
+        let err = workspace_access_denied_i18n();
+        let resp = err.into_response();
+
+        let bytes = to_bytes(resp.into_body(), 16 * 1024)
+            .await
+            .expect("body bytes");
+        let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
+
+        assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(403));
+        assert_eq!(json.get("code").and_then(|v| v.as_str()), Some("forbidden"));
+        assert_eq!(
+            json.get("message").and_then(|v| v.as_str()),
+            Some("Access to workspace denied")
+        );
+    }
+
+    #[tokio::test]
+    async fn workspace_access_denied_i18n_response_zh() {
+        use axum::body::to_bytes;
+        use axum::response::IntoResponse;
+
+        let resp = REQUEST_LOCALE
+            .scope(ApiLocale::Zh, async {
+                let err = workspace_access_denied_i18n();
+                err.into_response()
+            })
+            .await;
+
+        let bytes = to_bytes(resp.into_body(), 16 * 1024)
+            .await
+            .expect("body bytes");
+        let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
+
+        assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(403));
+        assert_eq!(json.get("code").and_then(|v| v.as_str()), Some("forbidden"));
+        assert_eq!(
+            json.get("message").and_then(|v| v.as_str()),
+            Some("工作区访问被拒绝")
+        );
+    }
+
+    #[test]
+    fn not_implemented_i18n_en() {
+        let err = not_implemented_i18n("feature not available", "功能不可用");
+        match err {
+            ApiError::NotImplementedI18n { en, zh } => {
+                assert_eq!(en, "feature not available");
+                assert_eq!(zh, "功能不可用");
+            }
+            _ => panic!("expected NotImplementedI18n"),
+        }
+    }
+
+    #[test]
+    fn not_implemented_i18n_with_different_messages() {
+        let test_cases = vec![
+            ("feature not available", "功能不可用"),
+            ("endpoint deprecated", "端点已弃用"),
+            ("under development", "开发中"),
+        ];
+
+        for (en_msg, zh_msg) in test_cases {
+            let err = not_implemented_i18n(en_msg, zh_msg);
+            match err {
+                ApiError::NotImplementedI18n { en, zh } => {
+                    assert_eq!(en, en_msg);
+                    assert_eq!(zh, zh_msg);
+                }
+                _ => panic!("expected NotImplementedI18n"),
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn not_implemented_i18n_response_en() {
+        use axum::body::to_bytes;
+        use axum::response::IntoResponse;
+
+        let err = not_implemented_i18n("feature not available", "功能不可用");
+        let resp = err.into_response();
+
+        let bytes = to_bytes(resp.into_body(), 16 * 1024)
+            .await
+            .expect("body bytes");
+        let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
+
+        assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(501));
+        assert_eq!(
+            json.get("code").and_then(|v| v.as_str()),
+            Some("not_implemented")
+        );
+        assert_eq!(
+            json.get("message").and_then(|v| v.as_str()),
+            Some("feature not available")
+        );
+    }
+
+    #[tokio::test]
+    async fn not_implemented_i18n_response_zh() {
+        use axum::body::to_bytes;
+        use axum::response::IntoResponse;
+
+        let resp = REQUEST_LOCALE
+            .scope(ApiLocale::Zh, async {
+                let err = not_implemented_i18n("feature not available", "功能不可用");
+                err.into_response()
+            })
+            .await;
+
+        let bytes = to_bytes(resp.into_body(), 16 * 1024)
+            .await
+            .expect("body bytes");
+        let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
+
+        assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(501));
+        assert_eq!(
+            json.get("code").and_then(|v| v.as_str()),
+            Some("not_implemented")
+        );
+        assert_eq!(
+            json.get("message").and_then(|v| v.as_str()),
+            Some("功能不可用")
         );
     }
 }

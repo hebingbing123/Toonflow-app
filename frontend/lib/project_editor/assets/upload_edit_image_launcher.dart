@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../../rust_api.dart';
 
 Future<void> openProjectAssetEditImageUploadDialog({
@@ -10,10 +11,11 @@ Future<void> openProjectAssetEditImageUploadDialog({
   required List<ScriptBrief> scriptList,
   required List<bool> assetsBusy,
 }) async {
+  final l10n = AppLocalizations.of(ctx)!;
   if (scriptList.isEmpty) {
     ScaffoldMessenger.of(
       ctx,
-    ).showSnackBar(const SnackBar(content: Text('请先创建剧本再上传编辑图片')));
+    ).showSnackBar(SnackBar(content: Text(l10n.projectEditorAssetEditImageNeedScriptSnack)));
     return;
   }
   final base64Ctrl = TextEditingController(text: 'data:image/png;base64,AA==');
@@ -24,8 +26,9 @@ Future<void> openProjectAssetEditImageUploadDialog({
       builder: (dialogCtx) {
         return StatefulBuilder(
           builder: (dialogCtx, setState) {
+            final dlgL10n = AppLocalizations.of(dialogCtx)!;
             return AlertDialog(
-              title: const Text('上传编辑图片'),
+              title: Text(dlgL10n.projectEditorAssetEditImageDialogTitle),
               content: SizedBox(
                 width: 520,
                 child: Column(
@@ -34,7 +37,9 @@ Future<void> openProjectAssetEditImageUploadDialog({
                   children: [
                     DropdownButtonFormField<int>(
                       initialValue: selectedScriptNumericId,
-                      decoration: const InputDecoration(labelText: '目标剧本'),
+                      decoration: InputDecoration(
+                        labelText: dlgL10n.projectEditorAssetEditImageTargetScriptLabel,
+                      ),
                       items: scriptList
                           .map(
                             (script) => DropdownMenuItem<int>(
@@ -56,9 +61,9 @@ Future<void> openProjectAssetEditImageUploadDialog({
                       controller: base64Ctrl,
                       minLines: 4,
                       maxLines: 7,
-                      decoration: const InputDecoration(
-                        labelText: '图片 data URI',
-                        helperText: '支持 jpeg/jpg/png 的 base64 data URI',
+                      decoration: InputDecoration(
+                        labelText: dlgL10n.projectEditorAssetEditImageDataUriLabel,
+                        helperText: dlgL10n.projectEditorAssetEditImageDataUriHelper,
                       ),
                     ),
                   ],
@@ -67,11 +72,11 @@ Future<void> openProjectAssetEditImageUploadDialog({
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(dialogCtx).pop(false),
-                  child: const Text('取消'),
+                  child: Text(dlgL10n.storyboardEditorDialogCancel),
                 ),
                 FilledButton(
                   onPressed: () => Navigator.of(dialogCtx).pop(true),
-                  child: const Text('上传'),
+                  child: Text(dlgL10n.projectEditorAssetEditImageUploadButton),
                 ),
               ],
             );
@@ -85,7 +90,7 @@ Future<void> openProjectAssetEditImageUploadDialog({
     if (payload.isEmpty) {
       ScaffoldMessenger.of(
         ctx,
-      ).showSnackBar(const SnackBar(content: Text('base64 data URI 不能为空')));
+      ).showSnackBar(SnackBar(content: Text(l10n.projectEditorAssetEditImageEmptyDataUriSnack)));
       return;
     }
 
@@ -100,16 +105,13 @@ Future<void> openProjectAssetEditImageUploadDialog({
     setDialogState(() => assetsBusy[0] = false);
     ScaffoldMessenger.of(
       ctx,
-    ).showSnackBar(SnackBar(content: Text('上传成功：${uploaded.url}')));
-  } on RustApiException catch (e) {
-    if (ctx.mounted) {
-      setDialogState(() => assetsBusy[0] = false);
-      ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('$e')));
-    }
+    ).showSnackBar(SnackBar(content: Text(l10n.projectEditorAssetEditImageUploadSuccess(uploaded.url))));
   } catch (e) {
     if (ctx.mounted) {
       setDialogState(() => assetsBusy[0] = false);
-      ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('$e')));
+      ScaffoldMessenger.of(ctx).showSnackBar(
+        SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
+      );
     }
   } finally {
     base64Ctrl.dispose();

@@ -166,17 +166,14 @@ extension _HomePageScriptEditorStoryboardsBatchAddDialog on _HomePageState {
           setBoardsState(() {});
         }
       }
-    } on RustApiException catch (e) {
-      if (ctx.mounted) {
-        actionBusy[0] = false;
-        setBoardsState(() {});
-        ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('$e')));
-      }
     } catch (e) {
       if (ctx.mounted) {
         actionBusy[0] = false;
         setBoardsState(() {});
-        ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('$e')));
+        final snackL10n = AppLocalizations.of(ctx)!;
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          SnackBar(content: Text(describeUserVisibleApiError(snackL10n, e))),
+        );
       }
     } finally {
       promptsCtrl.dispose();

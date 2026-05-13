@@ -67,6 +67,14 @@ String formatRustApiExceptionForDisplay(
   return l10n.rustApiClientUnknownError(error.toString());
 }
 
+/// User-visible message for API failures and other thrown values (e.g. [SnackBar]).
+String describeUserVisibleApiError(AppLocalizations l10n, Object error) {
+  if (error is RustApiException) {
+    return formatRustApiExceptionForDisplay(l10n, error);
+  }
+  return l10n.rustApiClientUnknownError(error.toString());
+}
+
 /// When no [BuildContext] is available (e.g. global snackbars), follow platform locale.
 AppLocalizations rustApiLookupL10nFromPlatform() {
   final loc = WidgetsBinding.instance.platformDispatcher.locale;

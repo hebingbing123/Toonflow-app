@@ -97,15 +97,12 @@ Future<void> openProjectAssetClipUploadDialog({
     ScaffoldMessenger.of(
       ctx,
     ).showSnackBar(SnackBar(content: Text(l10n.projectEditorAssetClipUploadSuccessSnack(response.message))));
-  } on RustApiException catch (e) {
-    if (ctx.mounted) {
-      setDialogState(() => assetsBusy[0] = false);
-      ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('$e')));
-    }
   } catch (e) {
     if (ctx.mounted) {
       setDialogState(() => assetsBusy[0] = false);
-      ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('$e')));
+      ScaffoldMessenger.of(ctx).showSnackBar(
+        SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
+      );
     }
   } finally {
     nameCtrl.dispose();

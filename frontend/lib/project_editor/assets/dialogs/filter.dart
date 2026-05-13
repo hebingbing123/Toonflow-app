@@ -156,15 +156,12 @@ extension _HomePageProjectEditorAssetsFilterDialogs on _HomePageState {
           ),
         ),
       );
-    } on RustApiException catch (e) {
-      if (ctx.mounted) {
-        setDialogState(() => assetsBusy[0] = false);
-        ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('$e')));
-      }
     } catch (e) {
       if (ctx.mounted) {
         setDialogState(() => assetsBusy[0] = false);
-        ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('$e')));
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
+        );
       }
     } finally {
       typeCtrl.dispose();

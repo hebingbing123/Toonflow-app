@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../l10n/app_localizations.dart';
-import '../../../../../rust_api.dart';
+import '../../../rust_api.dart';
 import 'workbench_view.dart';
 
 Future<void> openNovelEventsWorkbenchDialog({
@@ -102,17 +102,11 @@ Future<void> openNovelEventsWorkbenchDialog({
               setDialogState(() => novelsBusy[0] = true);
               try {
                 await action();
-              } on RustApiException catch (e) {
-                if (ctx.mounted) {
-                  ScaffoldMessenger.of(
-                    ctx,
-                  ).showSnackBar(SnackBar(content: Text('$e')));
-                }
               } catch (e) {
                 if (ctx.mounted) {
-                  ScaffoldMessenger.of(
-                    ctx,
-                  ).showSnackBar(SnackBar(content: Text('$e')));
+                  ScaffoldMessenger.of(ctx).showSnackBar(
+                    SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
+                  );
                 }
               } finally {
                 if (ctx.mounted) {

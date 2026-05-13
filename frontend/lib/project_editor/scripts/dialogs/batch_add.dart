@@ -121,15 +121,12 @@ extension _HomePageProjectEditorScriptsBatchAddDialog on _HomePageState {
       ScaffoldMessenger.of(
         ctx,
       ).showSnackBar(SnackBar(content: Text(l10n.projectEditorScriptsBatchAddSuccess(created.inserted))));
-    } on RustApiException catch (e) {
-      if (ctx.mounted) {
-        setDialogState(() => saving[0] = false);
-        ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('$e')));
-      }
     } catch (e) {
       if (ctx.mounted) {
         setDialogState(() => saving[0] = false);
-        ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('$e')));
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
+        );
       }
     } finally {
       countCtrl.dispose();
