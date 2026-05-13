@@ -8136,6 +8136,37 @@
     }
   },
   "projectEditorAssetGenWorkbenchAssetNoDescription": "无描述",
+  "projectEditorAssetDeleteDialogNoAssetsSnack": "当前没有可删除资产",
+  "projectEditorAssetDeleteDialogTitle": "删除资产",
+  "projectEditorAssetDeleteDialogTargetLabel": "目标资产",
+  "projectEditorAssetDeleteDialogCancel": "取消",
+  "projectEditorAssetDeleteDialogConfirm": "删除",
+  "projectEditorAssetDeleteSuccessSnack": "已删除资产 #{id}",
+  "@projectEditorAssetDeleteSuccessSnack": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorAssetClipUploadDialogTitle": "上传 Clip 资产",
+  "projectEditorAssetClipUploadNameLabel": "资产名称",
+  "projectEditorAssetClipUploadNameHelper": "建议使用可追踪的业务名称",
+  "projectEditorAssetClipUploadTypeLabel": "资产类型",
+  "projectEditorAssetClipUploadTypeHelper": "默认 clip；当前后端仅接受 clip",
+  "projectEditorAssetClipUploadImageDataLabel": "图片 data URI / base64",
+  "projectEditorAssetClipUploadImageDataHelper": "支持 data URI 或原始 base64（由后端校验）",
+  "projectEditorAssetClipUploadCancel": "取消",
+  "projectEditorAssetClipUploadUpload": "上传",
+  "projectEditorAssetClipUploadFieldsRequiredSnack": "名称、类型和图片数据不能为空",
+  "projectEditorAssetClipUploadSuccessSnack": "上传成功：{message}",
+  "@projectEditorAssetClipUploadSuccessSnack": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
   "projectEditorDeleteProjectTitle": "删除项目？",
   "projectEditorDeleteProjectBody": "将删除项目 #{id}、相关剧本/分镜（数据库级联），并清除该项目的智能体记忆。",
   "@projectEditorDeleteProjectBody": {

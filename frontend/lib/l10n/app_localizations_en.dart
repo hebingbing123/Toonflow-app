@@ -11132,6 +11132,67 @@ class AppLocalizationsEn extends AppLocalizations {
       'No description';
 
   @override
+  String get projectEditorAssetDeleteDialogNoAssetsSnack =>
+      'No assets available to delete.';
+
+  @override
+  String get projectEditorAssetDeleteDialogTitle => 'Delete asset';
+
+  @override
+  String get projectEditorAssetDeleteDialogTargetLabel => 'Target asset';
+
+  @override
+  String get projectEditorAssetDeleteDialogCancel => 'Cancel';
+
+  @override
+  String get projectEditorAssetDeleteDialogConfirm => 'Delete';
+
+  @override
+  String projectEditorAssetDeleteSuccessSnack(int id) {
+    return 'Deleted asset #$id';
+  }
+
+  @override
+  String get projectEditorAssetClipUploadDialogTitle => 'Upload clip asset';
+
+  @override
+  String get projectEditorAssetClipUploadNameLabel => 'Asset name';
+
+  @override
+  String get projectEditorAssetClipUploadNameHelper =>
+      'Use a traceable business name.';
+
+  @override
+  String get projectEditorAssetClipUploadTypeLabel => 'Asset type';
+
+  @override
+  String get projectEditorAssetClipUploadTypeHelper =>
+      'Defaults to clip; backend currently accepts clip only.';
+
+  @override
+  String get projectEditorAssetClipUploadImageDataLabel =>
+      'Image data URI / base64';
+
+  @override
+  String get projectEditorAssetClipUploadImageDataHelper =>
+      'Supports data URIs or raw base64 (validated by backend).';
+
+  @override
+  String get projectEditorAssetClipUploadCancel => 'Cancel';
+
+  @override
+  String get projectEditorAssetClipUploadUpload => 'Upload';
+
+  @override
+  String get projectEditorAssetClipUploadFieldsRequiredSnack =>
+      'Name, type, and image data cannot be empty.';
+
+  @override
+  String projectEditorAssetClipUploadSuccessSnack(String message) {
+    return 'Upload succeeded: $message';
+  }
+
+  @override
   String get projectEditorDeleteProjectTitle => 'Delete project?';
 
   @override

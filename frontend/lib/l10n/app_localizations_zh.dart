@@ -10598,6 +10598,64 @@ class AppLocalizationsZh extends AppLocalizations {
   String get projectEditorAssetGenWorkbenchAssetNoDescription => '无描述';
 
   @override
+  String get projectEditorAssetDeleteDialogNoAssetsSnack => '当前没有可删除资产';
+
+  @override
+  String get projectEditorAssetDeleteDialogTitle => '删除资产';
+
+  @override
+  String get projectEditorAssetDeleteDialogTargetLabel => '目标资产';
+
+  @override
+  String get projectEditorAssetDeleteDialogCancel => '取消';
+
+  @override
+  String get projectEditorAssetDeleteDialogConfirm => '删除';
+
+  @override
+  String projectEditorAssetDeleteSuccessSnack(int id) {
+    return '已删除资产 #$id';
+  }
+
+  @override
+  String get projectEditorAssetClipUploadDialogTitle => '上传 Clip 资产';
+
+  @override
+  String get projectEditorAssetClipUploadNameLabel => '资产名称';
+
+  @override
+  String get projectEditorAssetClipUploadNameHelper => '建议使用可追踪的业务名称';
+
+  @override
+  String get projectEditorAssetClipUploadTypeLabel => '资产类型';
+
+  @override
+  String get projectEditorAssetClipUploadTypeHelper => '默认 clip；当前后端仅接受 clip';
+
+  @override
+  String get projectEditorAssetClipUploadImageDataLabel =>
+      '图片 data URI / base64';
+
+  @override
+  String get projectEditorAssetClipUploadImageDataHelper =>
+      '支持 data URI 或原始 base64（由后端校验）';
+
+  @override
+  String get projectEditorAssetClipUploadCancel => '取消';
+
+  @override
+  String get projectEditorAssetClipUploadUpload => '上传';
+
+  @override
+  String get projectEditorAssetClipUploadFieldsRequiredSnack =>
+      '名称、类型和图片数据不能为空';
+
+  @override
+  String projectEditorAssetClipUploadSuccessSnack(String message) {
+    return '上传成功：$message';
+  }
+
+  @override
   String get projectEditorDeleteProjectTitle => '删除项目？';
 
   @override

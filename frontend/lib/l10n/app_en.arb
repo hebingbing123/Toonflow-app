@@ -8176,6 +8176,37 @@
     }
   },
   "projectEditorAssetGenWorkbenchAssetNoDescription": "No description",
+  "projectEditorAssetDeleteDialogNoAssetsSnack": "No assets available to delete.",
+  "projectEditorAssetDeleteDialogTitle": "Delete asset",
+  "projectEditorAssetDeleteDialogTargetLabel": "Target asset",
+  "projectEditorAssetDeleteDialogCancel": "Cancel",
+  "projectEditorAssetDeleteDialogConfirm": "Delete",
+  "projectEditorAssetDeleteSuccessSnack": "Deleted asset #{id}",
+  "@projectEditorAssetDeleteSuccessSnack": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorAssetClipUploadDialogTitle": "Upload clip asset",
+  "projectEditorAssetClipUploadNameLabel": "Asset name",
+  "projectEditorAssetClipUploadNameHelper": "Use a traceable business name.",
+  "projectEditorAssetClipUploadTypeLabel": "Asset type",
+  "projectEditorAssetClipUploadTypeHelper": "Defaults to clip; backend currently accepts clip only.",
+  "projectEditorAssetClipUploadImageDataLabel": "Image data URI / base64",
+  "projectEditorAssetClipUploadImageDataHelper": "Supports data URIs or raw base64 (validated by backend).",
+  "projectEditorAssetClipUploadCancel": "Cancel",
+  "projectEditorAssetClipUploadUpload": "Upload",
+  "projectEditorAssetClipUploadFieldsRequiredSnack": "Name, type, and image data cannot be empty.",
+  "projectEditorAssetClipUploadSuccessSnack": "Upload succeeded: {message}",
+  "@projectEditorAssetClipUploadSuccessSnack": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
   "projectEditorDeleteProjectTitle": "Delete project?",
   "projectEditorDeleteProjectBody": "Deletes project #{id}, related scripts/storyboards (DB cascade), and clears agent memory for this project.",
   "@projectEditorDeleteProjectBody": {

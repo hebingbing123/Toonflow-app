@@ -12,26 +12,30 @@ extension _HomePageProjectEditorAssetsDialogs on _HomePageState {
     required List<bool> assetsBusy,
     required Future<void> Function() reloadAssetsAndStats,
   }) async {
+    final l10n = AppLocalizations.of(ctx)!;
     final list = assetsRef[0]?.items ?? const <AssetRow>[];
     if (list.isEmpty) {
       ScaffoldMessenger.of(
         ctx,
-      ).showSnackBar(const SnackBar(content: Text('当前没有可删除资产')));
+      ).showSnackBar(SnackBar(content: Text(l10n.projectEditorAssetDeleteDialogNoAssetsSnack)));
       return;
     }
     var selectedAssetNumericId = list.first.numericId;
     final confirmed = await showDialog<bool>(
       context: ctx,
       builder: (dialogCtx) {
+        final dlgL10n = AppLocalizations.of(dialogCtx)!;
         return StatefulBuilder(
           builder: (dialogCtx, setState) {
             return AlertDialog(
-              title: const Text('删除资产'),
+              title: Text(dlgL10n.projectEditorAssetDeleteDialogTitle),
               content: SizedBox(
                 width: 420,
                 child: DropdownButtonFormField<int>(
                   initialValue: selectedAssetNumericId,
-                  decoration: const InputDecoration(labelText: '目标资产'),
+                  decoration: InputDecoration(
+                    labelText: dlgL10n.projectEditorAssetDeleteDialogTargetLabel,
+                  ),
                   items: list
                       .map(
                         (asset) => DropdownMenuItem<int>(
@@ -52,11 +56,11 @@ extension _HomePageProjectEditorAssetsDialogs on _HomePageState {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(dialogCtx).pop(false),
-                  child: const Text('取消'),
+                  child: Text(dlgL10n.projectEditorAssetDeleteDialogCancel),
                 ),
                 FilledButton(
                   onPressed: () => Navigator.of(dialogCtx).pop(true),
-                  child: const Text('删除'),
+                  child: Text(dlgL10n.projectEditorAssetDeleteDialogConfirm),
                 ),
               ],
             );
@@ -78,7 +82,7 @@ extension _HomePageProjectEditorAssetsDialogs on _HomePageState {
       setDialogState(() => assetsBusy[0] = false);
       ScaffoldMessenger.of(
         ctx,
-      ).showSnackBar(SnackBar(content: Text('已删除资产 #$selectedAssetNumericId')));
+      ).showSnackBar(SnackBar(content: Text(l10n.projectEditorAssetDeleteSuccessSnack(selectedAssetNumericId))));
     } on RustApiException catch (e) {
       if (ctx.mounted) {
         setDialogState(() => assetsBusy[0] = false);

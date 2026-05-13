@@ -17403,6 +17403,108 @@ abstract class AppLocalizations {
   /// **'No description'**
   String get projectEditorAssetGenWorkbenchAssetNoDescription;
 
+  /// No description provided for @projectEditorAssetDeleteDialogNoAssetsSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'No assets available to delete.'**
+  String get projectEditorAssetDeleteDialogNoAssetsSnack;
+
+  /// No description provided for @projectEditorAssetDeleteDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete asset'**
+  String get projectEditorAssetDeleteDialogTitle;
+
+  /// No description provided for @projectEditorAssetDeleteDialogTargetLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Target asset'**
+  String get projectEditorAssetDeleteDialogTargetLabel;
+
+  /// No description provided for @projectEditorAssetDeleteDialogCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get projectEditorAssetDeleteDialogCancel;
+
+  /// No description provided for @projectEditorAssetDeleteDialogConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get projectEditorAssetDeleteDialogConfirm;
+
+  /// No description provided for @projectEditorAssetDeleteSuccessSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted asset #{id}'**
+  String projectEditorAssetDeleteSuccessSnack(int id);
+
+  /// No description provided for @projectEditorAssetClipUploadDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload clip asset'**
+  String get projectEditorAssetClipUploadDialogTitle;
+
+  /// No description provided for @projectEditorAssetClipUploadNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Asset name'**
+  String get projectEditorAssetClipUploadNameLabel;
+
+  /// No description provided for @projectEditorAssetClipUploadNameHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a traceable business name.'**
+  String get projectEditorAssetClipUploadNameHelper;
+
+  /// No description provided for @projectEditorAssetClipUploadTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Asset type'**
+  String get projectEditorAssetClipUploadTypeLabel;
+
+  /// No description provided for @projectEditorAssetClipUploadTypeHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Defaults to clip; backend currently accepts clip only.'**
+  String get projectEditorAssetClipUploadTypeHelper;
+
+  /// No description provided for @projectEditorAssetClipUploadImageDataLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Image data URI / base64'**
+  String get projectEditorAssetClipUploadImageDataLabel;
+
+  /// No description provided for @projectEditorAssetClipUploadImageDataHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Supports data URIs or raw base64 (validated by backend).'**
+  String get projectEditorAssetClipUploadImageDataHelper;
+
+  /// No description provided for @projectEditorAssetClipUploadCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get projectEditorAssetClipUploadCancel;
+
+  /// No description provided for @projectEditorAssetClipUploadUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload'**
+  String get projectEditorAssetClipUploadUpload;
+
+  /// No description provided for @projectEditorAssetClipUploadFieldsRequiredSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Name, type, and image data cannot be empty.'**
+  String get projectEditorAssetClipUploadFieldsRequiredSnack;
+
+  /// No description provided for @projectEditorAssetClipUploadSuccessSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload succeeded: {message}'**
+  String projectEditorAssetClipUploadSuccessSnack(String message);
+
   /// No description provided for @projectEditorDeleteProjectTitle.
   ///
   /// In en, this message translates to:

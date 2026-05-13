@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../rust_api.dart';
 
 Future<void> openProjectAssetClipUploadDialog({
@@ -10,6 +11,7 @@ Future<void> openProjectAssetClipUploadDialog({
   required List<bool> assetsBusy,
   required Future<void> Function() reloadAssetsAndStats,
 }) async {
+  final l10n = AppLocalizations.of(ctx)!;
   final nameCtrl = TextEditingController(
     text: 'clip_${DateTime.now().millisecondsSinceEpoch}',
   );
@@ -19,8 +21,9 @@ Future<void> openProjectAssetClipUploadDialog({
     final confirmed = await showDialog<bool>(
       context: ctx,
       builder: (dialogCtx) {
+        final dlgL10n = AppLocalizations.of(dialogCtx)!;
         return AlertDialog(
-          title: const Text('上传 Clip 资产'),
+          title: Text(dlgL10n.projectEditorAssetClipUploadDialogTitle),
           content: SizedBox(
             width: 520,
             child: Column(
@@ -28,17 +31,17 @@ Future<void> openProjectAssetClipUploadDialog({
               children: [
                 TextField(
                   controller: nameCtrl,
-                  decoration: const InputDecoration(
-                    labelText: '资产名称',
-                    helperText: '建议使用可追踪的业务名称',
+                  decoration: InputDecoration(
+                    labelText: dlgL10n.projectEditorAssetClipUploadNameLabel,
+                    helperText: dlgL10n.projectEditorAssetClipUploadNameHelper,
                   ),
                 ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: typeCtrl,
-                  decoration: const InputDecoration(
-                    labelText: '资产类型',
-                    helperText: '默认 clip；当前后端仅接受 clip',
+                  decoration: InputDecoration(
+                    labelText: dlgL10n.projectEditorAssetClipUploadTypeLabel,
+                    helperText: dlgL10n.projectEditorAssetClipUploadTypeHelper,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -46,9 +49,9 @@ Future<void> openProjectAssetClipUploadDialog({
                   controller: base64Ctrl,
                   minLines: 4,
                   maxLines: 7,
-                  decoration: const InputDecoration(
-                    labelText: '图片 data URI / base64',
-                    helperText: '支持 data URI 或原始 base64（由后端校验）',
+                  decoration: InputDecoration(
+                    labelText: dlgL10n.projectEditorAssetClipUploadImageDataLabel,
+                    helperText: dlgL10n.projectEditorAssetClipUploadImageDataHelper,
                   ),
                 ),
               ],
@@ -57,11 +60,11 @@ Future<void> openProjectAssetClipUploadDialog({
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogCtx).pop(false),
-              child: const Text('取消'),
+              child: Text(dlgL10n.projectEditorAssetClipUploadCancel),
             ),
             FilledButton(
               onPressed: () => Navigator.of(dialogCtx).pop(true),
-              child: const Text('上传'),
+              child: Text(dlgL10n.projectEditorAssetClipUploadUpload),
             ),
           ],
         );
@@ -75,7 +78,7 @@ Future<void> openProjectAssetClipUploadDialog({
     if (name.isEmpty || type.isEmpty || base64Data.isEmpty) {
       ScaffoldMessenger.of(
         ctx,
-      ).showSnackBar(const SnackBar(content: Text('名称、类型和图片数据不能为空')));
+      ).showSnackBar(SnackBar(content: Text(l10n.projectEditorAssetClipUploadFieldsRequiredSnack)));
       return;
     }
 
@@ -93,7 +96,7 @@ Future<void> openProjectAssetClipUploadDialog({
     setDialogState(() => assetsBusy[0] = false);
     ScaffoldMessenger.of(
       ctx,
-    ).showSnackBar(SnackBar(content: Text('上传成功：${response.message}')));
+    ).showSnackBar(SnackBar(content: Text(l10n.projectEditorAssetClipUploadSuccessSnack(response.message))));
   } on RustApiException catch (e) {
     if (ctx.mounted) {
       setDialogState(() => assetsBusy[0] = false);
