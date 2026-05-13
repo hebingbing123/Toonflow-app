@@ -161,13 +161,6 @@ extension _HomePageScriptEditor on _HomePageState {
                                   ),
                                 ),
                               );
-                            } on RustApiException catch (e) {
-                              if (ctx.mounted) {
-                                setDialogState(() => saving[0] = false);
-                                ScaffoldMessenger.of(ctx).showSnackBar(
-                                  SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
-                                );
-                              }
                             } catch (e) {
                               if (ctx.mounted) {
                                 setDialogState(() => saving[0] = false);
@@ -221,13 +214,6 @@ extension _HomePageScriptEditor on _HomePageState {
                               );
                               if (!ctx.mounted) return;
                               Navigator.of(ctx).pop();
-                            } on RustApiException catch (e) {
-                              if (ctx.mounted) {
-                                setDialogState(() => saving[0] = false);
-                                ScaffoldMessenger.of(ctx).showSnackBar(
-                                  SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
-                                );
-                              }
                             } catch (e) {
                               if (ctx.mounted) {
                                 setDialogState(() => saving[0] = false);
@@ -249,9 +235,6 @@ extension _HomePageScriptEditor on _HomePageState {
           );
         },
       );
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-      _setErrorFromException(e);
     } catch (e) {
       if (!mounted) return;
       _setErrorFromException(e);

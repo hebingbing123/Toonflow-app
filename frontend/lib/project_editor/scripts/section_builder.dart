@@ -57,15 +57,6 @@ Widget buildProjectScriptsSection({
           diagnosis: nextDiagnosis,
         );
       });
-    } on RustApiException catch (e) {
-      if (ctx.mounted) {
-        setDialogState(() {
-          scriptTaskBusy[0] = false;
-          scriptTaskLine[0] = l10n.projectEditorScriptsWorkbenchExportAllFailed(
-            describeUserVisibleApiError(l10n, e),
-          );
-        });
-      }
     } catch (e) {
       if (ctx.mounted) {
         setDialogState(() {
@@ -113,15 +104,6 @@ Widget buildProjectScriptsSection({
           diagnosis: nextDiagnosis,
         );
       });
-    } on RustApiException catch (e) {
-      if (ctx.mounted) {
-        setDialogState(() {
-          scriptTaskBusy[0] = false;
-          scriptTaskLine[0] = l10n.projectEditorScriptsWorkbenchPollAllFailed(
-            describeUserVisibleApiError(l10n, e),
-          );
-        });
-      }
     } catch (e) {
       if (ctx.mounted) {
         setDialogState(() {
@@ -169,15 +151,6 @@ Widget buildProjectScriptsSection({
           diagnosis: nextDiagnosis,
         );
       });
-    } on RustApiException catch (e) {
-      if (ctx.mounted) {
-        setDialogState(() {
-          scriptTaskBusy[0] = false;
-          scriptTaskLine[0] = l10n.projectEditorScriptsWorkbenchExtractAllFailed(
-            describeUserVisibleApiError(l10n, e),
-          );
-        });
-      }
     } catch (e) {
       if (ctx.mounted) {
         setDialogState(() {
@@ -231,17 +204,6 @@ Widget buildProjectScriptsSection({
           ),
         ),
       );
-    } on RustApiException catch (e) {
-      if (ctx.mounted) {
-        setDialogState(() => saving[0] = false);
-        ScaffoldMessenger.of(
-          ctx,
-        ).showSnackBar(
-          SnackBar(
-            content: Text(describeUserVisibleApiError(l10n, e)),
-          ),
-        );
-      }
     } catch (e) {
       if (ctx.mounted) {
         setDialogState(() => saving[0] = false);

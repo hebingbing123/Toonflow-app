@@ -163,13 +163,6 @@ extension _HomePageStoryboardEditor on _HomePageState {
                                   content: Text(l10n.storyboardEditorDeletedSnack),
                                 ),
                               );
-                            } on RustApiException catch (e) {
-                              if (ctx.mounted) {
-                                setDialogState(() => saving[0] = false);
-                                ScaffoldMessenger.of(ctx).showSnackBar(
-                                  SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
-                                );
-                              }
                             } catch (e) {
                               if (ctx.mounted) {
                                 setDialogState(() => saving[0] = false);
@@ -248,13 +241,6 @@ extension _HomePageStoryboardEditor on _HomePageState {
                               await onStoryboardTreeMutated?.call();
                               if (!ctx.mounted) return;
                               Navigator.of(ctx).pop();
-                            } on RustApiException catch (e) {
-                              if (ctx.mounted) {
-                                setDialogState(() => saving[0] = false);
-                                ScaffoldMessenger.of(ctx).showSnackBar(
-                                  SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
-                                );
-                              }
                             } catch (e) {
                               if (ctx.mounted) {
                                 setDialogState(() => saving[0] = false);
@@ -276,9 +262,6 @@ extension _HomePageStoryboardEditor on _HomePageState {
           );
         },
       );
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-      _setErrorFromException(e);
     } catch (e) {
       if (!mounted) return;
       _setErrorFromException(e);

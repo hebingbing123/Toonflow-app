@@ -92,18 +92,12 @@ class _ShortDramaTargetsPanelState extends State<ShortDramaTargetsPanel> {
       if (hook != null) {
         await hook();
       }
-    } on RustApiException catch (e) {
+    } catch (e) {
       if (mounted) {
         setState(() {
           _line = l10n.projectEditorShortDramaTargetsSaveFailed(
             describeUserVisibleApiError(l10n, e),
           );
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _line = l10n.projectEditorShortDramaTargetsSaveFailed(describeUserVisibleApiError(l10n, e));
         });
       }
     } finally {

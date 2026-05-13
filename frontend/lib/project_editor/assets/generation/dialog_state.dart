@@ -174,12 +174,6 @@ class _AssetGenerationWorkbenchDialogState
         _focusedAssetNumericId = snapshotApply.focusedAssetNumericId;
         _statusLine = snapshotApply.statusLine;
       });
-    } on RustApiException catch (e) {
-      if (mounted) {
-        _updateWorkbenchState(
-          () => _statusLine = l10n.projectEditorAssetGenSyncSnapshotFailed(describeUserVisibleApiError(l10n, e)),
-        );
-      }
     } catch (e) {
       if (mounted) {
         _updateWorkbenchState(
@@ -196,13 +190,6 @@ class _AssetGenerationWorkbenchDialogState
     _updateWorkbenchState(() => _busyMutation = true);
     try {
       await action();
-    } on RustApiException catch (e) {
-      if (mounted) {
-        final loc = AppLocalizations.of(context)!;
-        _updateWorkbenchState(
-          () => _statusLine = describeUserVisibleApiError(loc, e),
-        );
-      }
     } on FormatException catch (e) {
       if (mounted) _updateWorkbenchState(() => _statusLine = e.message);
     } catch (e) {

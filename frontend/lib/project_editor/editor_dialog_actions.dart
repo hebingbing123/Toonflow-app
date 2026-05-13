@@ -64,13 +64,6 @@ extension _HomePageProjectEditorDialogActions on _HomePageState {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text(l10n.projectEditorDeleteProjectSnackbar)),
                   );
-                } on RustApiException catch (e) {
-                  if (ctx.mounted) {
-                    setDialogState(() => dialogState.saving[0] = false);
-                    ScaffoldMessenger.of(
-                      ctx,
-                    ).showSnackBar(SnackBar(content: Text(describeUserVisibleApiError(l10n, e))));
-                  }
                 } catch (e) {
                   if (ctx.mounted) {
                     setDialogState(() => dialogState.saving[0] = false);
@@ -129,13 +122,6 @@ extension _HomePageProjectEditorDialogActions on _HomePageState {
                   Navigator.of(ctx).pop();
                   if (!mounted) return;
                   await _projectsController.loadProjects();
-                } on RustApiException catch (e) {
-                  if (ctx.mounted) {
-                    setDialogState(() => dialogState.saving[0] = false);
-                    ScaffoldMessenger.of(
-                      ctx,
-                    ).showSnackBar(SnackBar(content: Text(describeUserVisibleApiError(l10n, e))));
-                  }
                 } catch (e) {
                   if (ctx.mounted) {
                     setDialogState(() => dialogState.saving[0] = false);
