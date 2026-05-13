@@ -48,37 +48,47 @@ class StoryboardExportBundleSummary {
     return '${minutes}m ${seconds}s';
   }
 
-  String get sidecarLabel =>
-      'manifest.json / storyboard.csv / timeline.json / subtitles.srt / voiceover_script.txt / voiceover_segments.json / assembly_plan.json';
+  String sidecarLabel(AppLocalizations l10n) =>
+      l10n.storyboardExportBundleSidecarList;
 
-  String get subtitleCoverageLabel =>
-      '字幕来源：$explicitSubtitleCount 条旁白文案'
-      ' / $promptFallbackSubtitleCount 条提示词回退'
-      ' / $placeholderSubtitleCount 条占位文本';
+  String subtitleCoverageLabel(AppLocalizations l10n) =>
+      l10n.storyboardExportBundleSubtitleCoverage(
+        explicitSubtitleCount,
+        promptFallbackSubtitleCount,
+        placeholderSubtitleCount,
+      );
 
-  String get voiceoverCoverageLabel {
+  String voiceoverCoverageLabel(AppLocalizations l10n) {
     final scriptedVoiceoverCount =
         explicitSubtitleCount + promptFallbackSubtitleCount;
-    return '旁白脚本：$scriptedVoiceoverCount 条可用文案 / '
-        '$placeholderSubtitleCount 条占位文案';
+    return l10n.storyboardExportBundleVoiceoverCoverage(
+      scriptedVoiceoverCount,
+      placeholderSubtitleCount,
+    );
   }
 
-  String get audioDeliveryLabel {
+  String audioDeliveryLabel(AppLocalizations l10n) {
     final readyCount = explicitSubtitleCount + promptFallbackSubtitleCount;
-    return '音频交付：$readyCount 条可直接配音 / '
-        '$placeholderSubtitleCount 条仍是占位文本';
+    return l10n.storyboardExportBundleAudioDelivery(
+      readyCount,
+      placeholderSubtitleCount,
+    );
   }
 
-  String get voiceoverJsonLabel {
+  String voiceoverJsonLabel(AppLocalizations l10n) {
     final readyCount = explicitSubtitleCount + promptFallbackSubtitleCount;
-    return '配音 JSON：$readyCount 条可直接投喂 / '
-        '$placeholderSubtitleCount 条仍需补文案';
+    return l10n.storyboardExportBundleVoiceoverJson(
+      readyCount,
+      placeholderSubtitleCount,
+    );
   }
 
-  String get assemblyPlanLabel {
+  String assemblyPlanLabel(AppLocalizations l10n) {
     final readyCount = explicitSubtitleCount + promptFallbackSubtitleCount;
-    return '成片计划：$readyCount 条镜头带可用音频 / '
-        '$placeholderSubtitleCount 条镜头仍待补音频';
+    return l10n.storyboardExportBundleAssemblyPlan(
+      readyCount,
+      placeholderSubtitleCount,
+    );
   }
 }
 

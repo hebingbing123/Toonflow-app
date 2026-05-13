@@ -231,7 +231,7 @@ extension _StoryboardBatchWorkbenchSections
             Text(
               l10n.scriptEditorStoryboardBatchExportEstimateContent(
                 exportEstimate.shotCount,
-                exportEstimate.sidecarLabel,
+                exportEstimate.sidecarLabel(l10n),
               ),
               style: Theme.of(context).textTheme.bodySmall,
             ),
@@ -243,23 +243,23 @@ extension _StoryboardBatchWorkbenchSections
               style: Theme.of(context).textTheme.bodySmall,
             ),
             Text(
-              exportEstimate.subtitleCoverageLabel,
+              exportEstimate.subtitleCoverageLabel(l10n),
               style: Theme.of(context).textTheme.bodySmall,
             ),
             Text(
-              exportEstimate.voiceoverCoverageLabel,
+              exportEstimate.voiceoverCoverageLabel(l10n),
               style: Theme.of(context).textTheme.bodySmall,
             ),
             Text(
-              exportEstimate.audioDeliveryLabel,
+              exportEstimate.audioDeliveryLabel(l10n),
               style: Theme.of(context).textTheme.bodySmall,
             ),
             Text(
-              exportEstimate.voiceoverJsonLabel,
+              exportEstimate.voiceoverJsonLabel(l10n),
               style: Theme.of(context).textTheme.bodySmall,
             ),
             Text(
-              exportEstimate.assemblyPlanLabel,
+              exportEstimate.assemblyPlanLabel(l10n),
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
@@ -286,7 +286,7 @@ extension _StoryboardBatchWorkbenchSections
             Text(
               l10n.scriptEditorStoryboardBatchExportContentLine(
                 _exportSummary!.shotCount,
-                _exportSummary!.sidecarLabel,
+                _exportSummary!.sidecarLabel(l10n),
               ),
               style: Theme.of(context).textTheme.bodySmall,
             ),
@@ -299,23 +299,23 @@ extension _StoryboardBatchWorkbenchSections
               style: Theme.of(context).textTheme.bodySmall,
             ),
             Text(
-              _exportSummary!.subtitleCoverageLabel,
+              _exportSummary!.subtitleCoverageLabel(l10n),
               style: Theme.of(context).textTheme.bodySmall,
             ),
             Text(
-              _exportSummary!.voiceoverCoverageLabel,
+              _exportSummary!.voiceoverCoverageLabel(l10n),
               style: Theme.of(context).textTheme.bodySmall,
             ),
             Text(
-              _exportSummary!.audioDeliveryLabel,
+              _exportSummary!.audioDeliveryLabel(l10n),
               style: Theme.of(context).textTheme.bodySmall,
             ),
             Text(
-              _exportSummary!.voiceoverJsonLabel,
+              _exportSummary!.voiceoverJsonLabel(l10n),
               style: Theme.of(context).textTheme.bodySmall,
             ),
             Text(
-              _exportSummary!.assemblyPlanLabel,
+              _exportSummary!.assemblyPlanLabel(l10n),
               style: Theme.of(context).textTheme.bodySmall,
             ),
             Text(

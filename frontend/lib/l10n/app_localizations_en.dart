@@ -10595,6 +10595,51 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get storyboardExportBundleSidecarList =>
+      'manifest.json / storyboard.csv / timeline.json / subtitles.srt / voiceover_script.txt / voiceover_segments.json / assembly_plan.json';
+
+  @override
+  String storyboardExportBundleSubtitleCoverage(
+    int explicitCount,
+    int promptFallbackCount,
+    int placeholderCount,
+  ) {
+    return 'Subtitle sources: $explicitCount narration line(s) / $promptFallbackCount prompt fallback(s) / $placeholderCount placeholder(s)';
+  }
+
+  @override
+  String storyboardExportBundleVoiceoverCoverage(
+    int scriptedCount,
+    int placeholderCount,
+  ) {
+    return 'Narration script: $scriptedCount usable line(s) / $placeholderCount placeholder line(s)';
+  }
+
+  @override
+  String storyboardExportBundleAudioDelivery(
+    int readyCount,
+    int placeholderCount,
+  ) {
+    return 'Audio delivery: $readyCount ready-to-dub line(s) / $placeholderCount still placeholder(s)';
+  }
+
+  @override
+  String storyboardExportBundleVoiceoverJson(
+    int readyCount,
+    int placeholderCount,
+  ) {
+    return 'Voiceover JSON: $readyCount line(s) ready to feed / $placeholderCount still need copy';
+  }
+
+  @override
+  String storyboardExportBundleAssemblyPlan(
+    int readyCount,
+    int placeholderCount,
+  ) {
+    return 'Assembly plan: $readyCount shot(s) with usable audio / $placeholderCount shot(s) still missing audio';
+  }
+
+  @override
   String scriptEditorStoryboardBatchDownloadLinkLine(String url) {
     return 'Download link: $url';
   }

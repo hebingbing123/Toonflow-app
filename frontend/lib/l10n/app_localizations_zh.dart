@@ -10104,6 +10104,51 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get storyboardExportBundleSidecarList =>
+      'manifest.json / storyboard.csv / timeline.json / subtitles.srt / voiceover_script.txt / voiceover_segments.json / assembly_plan.json';
+
+  @override
+  String storyboardExportBundleSubtitleCoverage(
+    int explicitCount,
+    int promptFallbackCount,
+    int placeholderCount,
+  ) {
+    return '字幕来源：$explicitCount 条旁白文案 / $promptFallbackCount 条提示词回退 / $placeholderCount 条占位文本';
+  }
+
+  @override
+  String storyboardExportBundleVoiceoverCoverage(
+    int scriptedCount,
+    int placeholderCount,
+  ) {
+    return '旁白脚本：$scriptedCount 条可用文案 / $placeholderCount 条占位文案';
+  }
+
+  @override
+  String storyboardExportBundleAudioDelivery(
+    int readyCount,
+    int placeholderCount,
+  ) {
+    return '音频交付：$readyCount 条可直接配音 / $placeholderCount 条仍是占位文本';
+  }
+
+  @override
+  String storyboardExportBundleVoiceoverJson(
+    int readyCount,
+    int placeholderCount,
+  ) {
+    return '配音 JSON：$readyCount 条可直接投喂 / $placeholderCount 条仍需补文案';
+  }
+
+  @override
+  String storyboardExportBundleAssemblyPlan(
+    int readyCount,
+    int placeholderCount,
+  ) {
+    return '成片计划：$readyCount 条镜头带可用音频 / $placeholderCount 条镜头仍待补音频';
+  }
+
+  @override
   String scriptEditorStoryboardBatchDownloadLinkLine(String url) {
     return '下载链接：$url';
   }

@@ -1,10 +1,12 @@
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/rust_api.dart';
 import 'package:openflow_app/storyboard_editor/support.dart';
 
 void main() {
+  final zh = AppLocalizationsZh();
   test('ProductionStoryboardItemV1 parses videoDesc payload', () {
     final item = ProductionStoryboardItemV1.fromJson(const {
       'id': 7,
@@ -74,11 +76,11 @@ void main() {
     expect(summary.explicitSubtitleCount, 1);
     expect(summary.promptFallbackSubtitleCount, 1);
     expect(summary.placeholderSubtitleCount, 0);
-    expect(summary.subtitleCoverageLabel, '字幕来源：1 条旁白文案 / 1 条提示词回退 / 0 条占位文本');
-    expect(summary.voiceoverCoverageLabel, '旁白脚本：2 条可用文案 / 0 条占位文案');
-    expect(summary.audioDeliveryLabel, '音频交付：2 条可直接配音 / 0 条仍是占位文本');
-    expect(summary.voiceoverJsonLabel, '配音 JSON：2 条可直接投喂 / 0 条仍需补文案');
-    expect(summary.assemblyPlanLabel, '成片计划：2 条镜头带可用音频 / 0 条镜头仍待补音频');
+    expect(summary.subtitleCoverageLabel(zh), '字幕来源：1 条旁白文案 / 1 条提示词回退 / 0 条占位文本');
+    expect(summary.voiceoverCoverageLabel(zh), '旁白脚本：2 条可用文案 / 0 条占位文案');
+    expect(summary.audioDeliveryLabel(zh), '音频交付：2 条可直接配音 / 0 条仍是占位文本');
+    expect(summary.voiceoverJsonLabel(zh), '配音 JSON：2 条可直接投喂 / 0 条仍需补文案');
+    expect(summary.assemblyPlanLabel(zh), '成片计划：2 条镜头带可用音频 / 0 条镜头仍待补音频');
     expect(summary.byteLength, 2048);
     expect(summary.includesTimeline, isTrue);
     expect(summary.includesSubtitles, isTrue);
@@ -107,10 +109,10 @@ void main() {
     expect(summary.explicitSubtitleCount, 0);
     expect(summary.promptFallbackSubtitleCount, 0);
     expect(summary.placeholderSubtitleCount, 1);
-    expect(summary.voiceoverCoverageLabel, '旁白脚本：0 条可用文案 / 1 条占位文案');
-    expect(summary.audioDeliveryLabel, '音频交付：0 条可直接配音 / 1 条仍是占位文本');
-    expect(summary.voiceoverJsonLabel, '配音 JSON：0 条可直接投喂 / 1 条仍需补文案');
-    expect(summary.assemblyPlanLabel, '成片计划：0 条镜头带可用音频 / 1 条镜头仍待补音频');
+    expect(summary.voiceoverCoverageLabel(zh), '旁白脚本：0 条可用文案 / 1 条占位文案');
+    expect(summary.audioDeliveryLabel(zh), '音频交付：0 条可直接配音 / 1 条仍是占位文本');
+    expect(summary.voiceoverJsonLabel(zh), '配音 JSON：0 条可直接投喂 / 1 条仍需补文案');
+    expect(summary.assemblyPlanLabel(zh), '成片计划：0 条镜头带可用音频 / 1 条镜头仍待补音频');
     expect(summary.byteLength, isNull);
   });
 }

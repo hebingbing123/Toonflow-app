@@ -16563,6 +16563,58 @@ abstract class AppLocalizations {
     String durationLabel,
   );
 
+  /// No description provided for @storyboardExportBundleSidecarList.
+  ///
+  /// In en, this message translates to:
+  /// **'manifest.json / storyboard.csv / timeline.json / subtitles.srt / voiceover_script.txt / voiceover_segments.json / assembly_plan.json'**
+  String get storyboardExportBundleSidecarList;
+
+  /// No description provided for @storyboardExportBundleSubtitleCoverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtitle sources: {explicitCount} narration line(s) / {promptFallbackCount} prompt fallback(s) / {placeholderCount} placeholder(s)'**
+  String storyboardExportBundleSubtitleCoverage(
+    int explicitCount,
+    int promptFallbackCount,
+    int placeholderCount,
+  );
+
+  /// No description provided for @storyboardExportBundleVoiceoverCoverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Narration script: {scriptedCount} usable line(s) / {placeholderCount} placeholder line(s)'**
+  String storyboardExportBundleVoiceoverCoverage(
+    int scriptedCount,
+    int placeholderCount,
+  );
+
+  /// No description provided for @storyboardExportBundleAudioDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio delivery: {readyCount} ready-to-dub line(s) / {placeholderCount} still placeholder(s)'**
+  String storyboardExportBundleAudioDelivery(
+    int readyCount,
+    int placeholderCount,
+  );
+
+  /// No description provided for @storyboardExportBundleVoiceoverJson.
+  ///
+  /// In en, this message translates to:
+  /// **'Voiceover JSON: {readyCount} line(s) ready to feed / {placeholderCount} still need copy'**
+  String storyboardExportBundleVoiceoverJson(
+    int readyCount,
+    int placeholderCount,
+  );
+
+  /// No description provided for @storyboardExportBundleAssemblyPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Assembly plan: {readyCount} shot(s) with usable audio / {placeholderCount} shot(s) still missing audio'**
+  String storyboardExportBundleAssemblyPlan(
+    int readyCount,
+    int placeholderCount,
+  );
+
   /// No description provided for @scriptEditorStoryboardBatchDownloadLinkLine.
   ///
   /// In en, this message translates to:

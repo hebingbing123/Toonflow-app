@@ -7881,6 +7881,65 @@
       }
     }
   },
+  "storyboardExportBundleSidecarList": "manifest.json / storyboard.csv / timeline.json / subtitles.srt / voiceover_script.txt / voiceover_segments.json / assembly_plan.json",
+  "storyboardExportBundleSubtitleCoverage": "Subtitle sources: {explicitCount} narration line(s) / {promptFallbackCount} prompt fallback(s) / {placeholderCount} placeholder(s)",
+  "@storyboardExportBundleSubtitleCoverage": {
+    "placeholders": {
+      "explicitCount": {
+        "type": "int"
+      },
+      "promptFallbackCount": {
+        "type": "int"
+      },
+      "placeholderCount": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardExportBundleVoiceoverCoverage": "Narration script: {scriptedCount} usable line(s) / {placeholderCount} placeholder line(s)",
+  "@storyboardExportBundleVoiceoverCoverage": {
+    "placeholders": {
+      "scriptedCount": {
+        "type": "int"
+      },
+      "placeholderCount": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardExportBundleAudioDelivery": "Audio delivery: {readyCount} ready-to-dub line(s) / {placeholderCount} still placeholder(s)",
+  "@storyboardExportBundleAudioDelivery": {
+    "placeholders": {
+      "readyCount": {
+        "type": "int"
+      },
+      "placeholderCount": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardExportBundleVoiceoverJson": "Voiceover JSON: {readyCount} line(s) ready to feed / {placeholderCount} still need copy",
+  "@storyboardExportBundleVoiceoverJson": {
+    "placeholders": {
+      "readyCount": {
+        "type": "int"
+      },
+      "placeholderCount": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardExportBundleAssemblyPlan": "Assembly plan: {readyCount} shot(s) with usable audio / {placeholderCount} shot(s) still missing audio",
+  "@storyboardExportBundleAssemblyPlan": {
+    "placeholders": {
+      "readyCount": {
+        "type": "int"
+      },
+      "placeholderCount": {
+        "type": "int"
+      }
+    }
+  },
   "scriptEditorStoryboardBatchDownloadLinkLine": "Download link: {url}",
   "@scriptEditorStoryboardBatchDownloadLinkLine": {
     "placeholders": {

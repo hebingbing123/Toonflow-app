@@ -7841,6 +7841,65 @@
       }
     }
   },
+  "storyboardExportBundleSidecarList": "manifest.json / storyboard.csv / timeline.json / subtitles.srt / voiceover_script.txt / voiceover_segments.json / assembly_plan.json",
+  "storyboardExportBundleSubtitleCoverage": "字幕来源：{explicitCount} 条旁白文案 / {promptFallbackCount} 条提示词回退 / {placeholderCount} 条占位文本",
+  "@storyboardExportBundleSubtitleCoverage": {
+    "placeholders": {
+      "explicitCount": {
+        "type": "int"
+      },
+      "promptFallbackCount": {
+        "type": "int"
+      },
+      "placeholderCount": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardExportBundleVoiceoverCoverage": "旁白脚本：{scriptedCount} 条可用文案 / {placeholderCount} 条占位文案",
+  "@storyboardExportBundleVoiceoverCoverage": {
+    "placeholders": {
+      "scriptedCount": {
+        "type": "int"
+      },
+      "placeholderCount": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardExportBundleAudioDelivery": "音频交付：{readyCount} 条可直接配音 / {placeholderCount} 条仍是占位文本",
+  "@storyboardExportBundleAudioDelivery": {
+    "placeholders": {
+      "readyCount": {
+        "type": "int"
+      },
+      "placeholderCount": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardExportBundleVoiceoverJson": "配音 JSON：{readyCount} 条可直接投喂 / {placeholderCount} 条仍需补文案",
+  "@storyboardExportBundleVoiceoverJson": {
+    "placeholders": {
+      "readyCount": {
+        "type": "int"
+      },
+      "placeholderCount": {
+        "type": "int"
+      }
+    }
+  },
+  "storyboardExportBundleAssemblyPlan": "成片计划：{readyCount} 条镜头带可用音频 / {placeholderCount} 条镜头仍待补音频",
+  "@storyboardExportBundleAssemblyPlan": {
+    "placeholders": {
+      "readyCount": {
+        "type": "int"
+      },
+      "placeholderCount": {
+        "type": "int"
+      }
+    }
+  },
   "scriptEditorStoryboardBatchDownloadLinkLine": "下载链接：{url}",
   "@scriptEditorStoryboardBatchDownloadLinkLine": {
     "placeholders": {
