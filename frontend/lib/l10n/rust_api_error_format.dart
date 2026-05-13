@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 
+import '../locale/app_locale_notifier.dart';
 import '../rust_api/core.dart';
 import 'app_localizations.dart';
 
@@ -75,9 +76,18 @@ String describeUserVisibleApiError(AppLocalizations l10n, Object error) {
   return l10n.rustApiClientUnknownError(error.toString());
 }
 
-/// When no [BuildContext] is available (e.g. global snackbars), follow platform locale.
+/// When no [BuildContext] is available (e.g. global snackbars, controllers).
+///
+/// Uses [AppLocaleNotifier] when the user pinned `en` or `zh`; otherwise
+/// follows the platform dispatcher (same idea as `locale: null` + resolution).
 AppLocalizations rustApiLookupL10nFromPlatform() {
-  final loc = WidgetsBinding.instance.platformDispatcher.locale;
-  final code = loc.languageCode == 'zh' ? 'zh' : 'en';
+  final explicit = AppLocaleNotifier.instance.localeOrNull;
+  final String code;
+  if (explicit != null) {
+    code = explicit.languageCode == 'zh' ? 'zh' : 'en';
+  } else {
+    final loc = WidgetsBinding.instance.platformDispatcher.locale;
+    code = loc.languageCode == 'zh' ? 'zh' : 'en';
+  }
   return lookupAppLocalizations(Locale(code));
 }

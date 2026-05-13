@@ -20,10 +20,7 @@ bool isRustApiQuotaOrRateError(Object error) {
 }
 
 String describeRustApiError(Object error) {
-  if (error is RustApiException) {
-    return formatRustApiExceptionForDisplay(rustApiLookupL10nFromPlatform(), error);
-  }
-  return '$error';
+  return describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error);
 }
 
 void reportRustApiError(
