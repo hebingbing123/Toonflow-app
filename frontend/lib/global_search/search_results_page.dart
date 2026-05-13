@@ -10,7 +10,6 @@ import '../l10n/rust_api_error_format.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api/search/api.dart';
 import '../rust_api/search/saved_views.dart';
-import '../rust_api/core.dart';
 import 'search_result_card.dart';
 import 'advanced_filter_panel.dart';
 
@@ -188,13 +187,6 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
         _response = response;
         _isLoading = false;
         _selectedResultIndex = -1; // Reset selection on new results
-      });
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-
-      setState(() {
-        _error = describeUserVisibleApiError(l10n, e);
-        _isLoading = false;
       });
     } catch (e) {
       if (!mounted) return;
