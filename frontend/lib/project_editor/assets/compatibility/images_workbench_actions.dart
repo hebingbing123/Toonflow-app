@@ -13,6 +13,7 @@ extension _HomePageProjectEditorAssetsImagesWorkbenchProbeActions
     required List<bool> assetsBusy,
     required Future<void> Function() reloadAssetsAndStats,
   }) {
+    final l10n = AppLocalizations.of(ctx)!;
     return [
       TextButton(
         onPressed:
@@ -35,8 +36,10 @@ extension _HomePageProjectEditorAssetsImagesWorkbenchProbeActions
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'POST …/workbench/image-bundle：tempAssets=${r.tempAssets.length} '
-                        'imageId=${r.imageId ?? "null"}',
+                        l10n.projectEditorAssetsProbeWbGetImageSnack(
+                          r.tempAssets.length,
+                          r.imageId?.toString() ?? 'null',
+                        ),
                       ),
                     ),
                   );
@@ -52,7 +55,7 @@ extension _HomePageProjectEditorAssetsImagesWorkbenchProbeActions
                   }
                 }
               },
-        child: const Text('POST get-image'),
+        child: Text(l10n.projectEditorAssetsProbeWbGetImageButton),
       ),
       TextButton(
         onPressed:
@@ -74,7 +77,7 @@ extension _HomePageProjectEditorAssetsImagesWorkbenchProbeActions
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'POST …/workbench/upload-clip：${r.message}',
+                        l10n.projectEditorAssetsProbeWbUploadClipSnack(r.message),
                       ),
                     ),
                   );
@@ -90,7 +93,7 @@ extension _HomePageProjectEditorAssetsImagesWorkbenchProbeActions
                   }
                 }
               },
-        child: const Text('POST upload-clip'),
+        child: Text(l10n.projectEditorAssetsProbeWbUploadClipButton),
       ),
       TextButton(
         onPressed:
@@ -105,12 +108,19 @@ extension _HomePageProjectEditorAssetsImagesWorkbenchProbeActions
                   );
                   if (!ctx.mounted) return;
                   final firstClip = r.data.isEmpty ? null : r.data.first;
+                  final suffix = firstClip == null
+                      ? ''
+                      : l10n.projectEditorAssetsProbeWbMaterialDataFirstClipSuffix(
+                          firstClip.name,
+                        );
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'POST …/workbench/material-data：'
-                        'clips=${r.data.length} videos=${r.video.length}'
-                        '${firstClip == null ? "" : " first=${firstClip.name}"}',
+                        l10n.projectEditorAssetsProbeWbMaterialDataSnack(
+                          r.data.length,
+                          r.video.length,
+                          suffix,
+                        ),
                       ),
                     ),
                   );
@@ -126,7 +136,7 @@ extension _HomePageProjectEditorAssetsImagesWorkbenchProbeActions
                   }
                 }
               },
-        child: const Text('POST get-material-data'),
+        child: Text(l10n.projectEditorAssetsProbeWbMaterialDataButton),
       ),
       TextButton(
         onPressed:
@@ -144,12 +154,20 @@ extension _HomePageProjectEditorAssetsImagesWorkbenchProbeActions
                   );
                   if (!ctx.mounted) return;
                   final first = r.data.isEmpty ? null : r.data.first;
+                  final suffix = first == null
+                      ? ''
+                      : l10n.projectEditorAssetsProbeWbBatchGenFirstSuffix(
+                          first.name,
+                          first.assetType,
+                        );
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'POST …/workbench/batch-generation-data：'
-                        'rows=${r.data.length}/${r.total}'
-                        '${first == null ? "" : " first=${first.name}(${first.assetType})"}',
+                        l10n.projectEditorAssetsProbeWbBatchGenSnack(
+                          r.data.length,
+                          r.total,
+                          suffix,
+                        ),
                       ),
                     ),
                   );
@@ -165,7 +183,7 @@ extension _HomePageProjectEditorAssetsImagesWorkbenchProbeActions
                   }
                 }
               },
-        child: const Text('POST batch-generation-data'),
+        child: Text(l10n.projectEditorAssetsProbeWbBatchGenDataButton),
       ),
       TextButton(
         onPressed:
@@ -183,12 +201,19 @@ extension _HomePageProjectEditorAssetsImagesWorkbenchProbeActions
                   );
                   if (!ctx.mounted) return;
                   final first = r.data.isEmpty ? null : r.data.first;
+                  final suffix = first == null
+                      ? ''
+                      : l10n.projectEditorAssetsProbeWbNestedFirstSuffix(
+                          first.sonAssets.length,
+                        );
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'POST …/workbench/nested：'
-                        'parents=${r.data.length}/${r.total}'
-                        '${first == null ? "" : " firstChildren=${first.sonAssets.length}"}',
+                        l10n.projectEditorAssetsProbeWbNestedSnack(
+                          r.data.length,
+                          r.total,
+                          suffix,
+                        ),
                       ),
                     ),
                   );
@@ -204,7 +229,7 @@ extension _HomePageProjectEditorAssetsImagesWorkbenchProbeActions
                   }
                 }
               },
-        child: const Text('POST get-assets-api'),
+        child: Text(l10n.projectEditorAssetsProbeWbGetAssetsApiButton),
       ),
       TextButton(
         onPressed:
@@ -229,10 +254,11 @@ extension _HomePageProjectEditorAssetsImagesWorkbenchProbeActions
                     SnackBar(
                       content: Text(
                         one == null
-                            ? 'POST …/workbench/polling-image-assets：0 rows'
-                            : 'POST …/workbench/polling-image-assets：'
-                                  'state=${one.state ?? "-"} '
-                                  'filePath=${one.filePath ?? "-"}',
+                            ? l10n.projectEditorAssetsProbeWbPollingImageZeroSnack
+                            : l10n.projectEditorAssetsProbeWbPollingImageRowSnack(
+                                one.state ?? '-',
+                                one.filePath ?? '-',
+                              ),
                       ),
                     ),
                   );
@@ -248,7 +274,7 @@ extension _HomePageProjectEditorAssetsImagesWorkbenchProbeActions
                   }
                 }
               },
-        child: const Text('POST polling-image-assets'),
+        child: Text(l10n.projectEditorAssetsProbeWbPollingImageButton),
       ),
       TextButton(
         onPressed:
@@ -273,10 +299,11 @@ extension _HomePageProjectEditorAssetsImagesWorkbenchProbeActions
                     SnackBar(
                       content: Text(
                         one == null
-                            ? 'POST …/workbench/polling-prompt-assets：0 rows'
-                            : 'POST …/workbench/polling-prompt-assets：'
-                                  'promptState=${one.promptState} '
-                                  'type=${one.assetType}',
+                            ? l10n.projectEditorAssetsProbeWbPollingPromptZeroSnack
+                            : l10n.projectEditorAssetsProbeWbPollingPromptRowSnack(
+                                one.promptState,
+                                one.assetType,
+                              ),
                       ),
                     ),
                   );
@@ -292,7 +319,7 @@ extension _HomePageProjectEditorAssetsImagesWorkbenchProbeActions
                   }
                 }
               },
-        child: const Text('POST polling-prompt-assets'),
+        child: Text(l10n.projectEditorAssetsProbeWbPollingPromptButton),
       ),
     ];
   }

@@ -1573,6 +1573,25 @@ class AppLocalizationsZh extends AppLocalizations {
   String get projectsDialogFieldName => '项目名';
 
   @override
+  String globalSearchNovelEventNavigated(String eventId) {
+    return '已定位到项目。请在项目详情中打开「小说与事件」查看大纲事件（事件 #$eventId）。';
+  }
+
+  @override
+  String globalSearchNovelChapterNavigated(String chapterIndex) {
+    return '已定位到项目。请在项目详情中打开「小说与事件」查看章节（章索引 $chapterIndex）。';
+  }
+
+  @override
+  String accountDeletedSummary(
+    int workspaceCount,
+    int projectCount,
+    int jobCount,
+  ) {
+    return '账号已删除：workspace $workspaceCount · project $projectCount · job $jobCount';
+  }
+
+  @override
   String get projectsDialogFieldIntro => '项目简介';
 
   @override
@@ -9999,6 +10018,85 @@ class AppLocalizationsZh extends AppLocalizations {
   String get projectScriptPlanWorkbenchSaving => '保存中…';
 
   @override
+  String get projectScriptPlanWorkbenchLoadingInitial => '正在加载方案…';
+
+  @override
+  String get projectScriptPlanWorkbenchRefreshingPlan => '正在刷新方案…';
+
+  @override
+  String projectScriptPlanWorkbenchLoadedPlan(String planId, int scriptCount) {
+    return '已加载方案 $planId · $scriptCount 条剧本行';
+  }
+
+  @override
+  String projectScriptPlanWorkbenchLoadFailed(String error) {
+    return '加载方案失败：$error';
+  }
+
+  @override
+  String get projectScriptPlanWorkbenchSkeletonDraftGenerated =>
+      '已从事件填充故事骨架草稿。';
+
+  @override
+  String get projectScriptPlanWorkbenchStrategyDraftGenerated =>
+      '已从事件填充改编策略草稿。';
+
+  @override
+  String get projectScriptPlanWorkbenchNoDraftsNoEvents =>
+      '暂无草稿包（请补充事件/小说或完善骨架/策略）。';
+
+  @override
+  String projectScriptPlanWorkbenchDraftsGenerated(int count) {
+    return '已生成 $count 个剧本草稿包。';
+  }
+
+  @override
+  String get projectScriptPlanWorkbenchNoGuidanceNoEvents =>
+      '暂无结构化指引（请补充事件/小说或完善骨架/策略）。';
+
+  @override
+  String projectScriptPlanWorkbenchGuidanceGenerated(int count) {
+    return '已生成 $count 条结构化指引。';
+  }
+
+  @override
+  String get projectScriptPlanWorkbenchSavingPlan => '正在保存方案…';
+
+  @override
+  String projectScriptPlanWorkbenchSaveFailedHttp(int status) {
+    return '保存失败（HTTP $status）';
+  }
+
+  @override
+  String get projectScriptPlanWorkbenchPlanSaved => '方案已保存。';
+
+  @override
+  String projectScriptPlanWorkbenchSaveFailed(String error) {
+    return '保存失败：$error';
+  }
+
+  @override
+  String get projectScriptPlanWorkbenchNeedDraftsFirst => '请先生成草稿包。';
+
+  @override
+  String get projectScriptPlanWorkbenchWritingDrafts => '正在写入剧本草稿…';
+
+  @override
+  String projectScriptPlanWorkbenchWriteFailedHttp(int status) {
+    return '写入失败（HTTP $status）';
+  }
+
+  @override
+  String projectScriptPlanWorkbenchDraftsWritten(int count) {
+    return '草稿已写入；已刷新，仍有 $count 个草稿包待处理。';
+  }
+
+  @override
+  String projectScriptPlanWorkbenchWriteDraftsFailed(String error) {
+    return '写入草稿失败：$error';
+  }
+
+  @override
   String shortVideoUndoEnableShot(int storyboardId) {
     return '启用镜头 #$storyboardId';
   }
@@ -10757,6 +10855,193 @@ class AppLocalizationsZh extends AppLocalizations {
     String state,
   ) {
     return 'POST→PATCH→DEL 资产图片：sort $sortBefore→$sortAfter state=$state 已删';
+  }
+
+  @override
+  String get projectEditorAssetsCornerScapeLoadingAll =>
+      '正在加载 corner-scape 资产（全部类型）…';
+
+  @override
+  String projectEditorAssetsCornerScapeLoadingTypes(String types) {
+    return '正在加载 corner-scape 资产（类型：$types）…';
+  }
+
+  @override
+  String projectEditorAssetsCornerScapeLoadFailed(String error) {
+    return '加载 corner-scape 资产失败：$error';
+  }
+
+  @override
+  String projectEditorAssetsWorkbenchFocusAssetSummary(
+    int id,
+    String name,
+    String type,
+  ) {
+    return '当前焦点资产：#$id $name · $type';
+  }
+
+  @override
+  String get projectEditorAssetsWorkbenchFocusAssetEmptyOption => '（当前无资产）';
+
+  @override
+  String get projectEditorAssetsWorkbenchFocusAssetLabel => '当前焦点资产';
+
+  @override
+  String get projectEditorAssetsWorkbenchFocusAssetHelper =>
+      '用于快速查看当前工作焦点；具体编辑在下方动作中完成。';
+
+  @override
+  String get projectEditorAssetsWorkbenchFocusScriptEmptyOption => '（当前无剧本）';
+
+  @override
+  String get projectEditorAssetsWorkbenchFocusScriptLabel => '当前焦点剧本';
+
+  @override
+  String get projectEditorAssetsWorkbenchFocusScriptHelper => '用于剧本-资产关联相关动作。';
+
+  @override
+  String get projectEditorAssetsProbeWbGetImageButton => 'POST get-image';
+
+  @override
+  String get projectEditorAssetsProbeWbUploadClipButton => 'POST upload-clip';
+
+  @override
+  String get projectEditorAssetsProbeWbMaterialDataButton =>
+      'POST get-material-data';
+
+  @override
+  String get projectEditorAssetsProbeWbBatchGenDataButton =>
+      'POST batch-generation-data';
+
+  @override
+  String get projectEditorAssetsProbeWbGetAssetsApiButton =>
+      'POST get-assets-api';
+
+  @override
+  String get projectEditorAssetsProbeWbPollingImageButton =>
+      'POST polling-image-assets';
+
+  @override
+  String get projectEditorAssetsProbeWbPollingPromptButton =>
+      'POST polling-prompt-assets';
+
+  @override
+  String projectEditorAssetsProbeWbGetImageSnack(
+    int tempAssets,
+    String imageId,
+  ) {
+    return 'POST …/workbench/image-bundle：tempAssets=$tempAssets imageId=$imageId';
+  }
+
+  @override
+  String projectEditorAssetsProbeWbUploadClipSnack(String message) {
+    return 'POST …/workbench/upload-clip：$message';
+  }
+
+  @override
+  String projectEditorAssetsProbeWbMaterialDataSnack(
+    int clips,
+    int videos,
+    String suffix,
+  ) {
+    return 'POST …/workbench/material-data：clips=$clips videos=$videos$suffix';
+  }
+
+  @override
+  String projectEditorAssetsProbeWbMaterialDataFirstClipSuffix(String name) {
+    return ' 首条=$name';
+  }
+
+  @override
+  String projectEditorAssetsProbeWbBatchGenSnack(
+    int rows,
+    int total,
+    String suffix,
+  ) {
+    return 'POST …/workbench/batch-generation-data：rows=$rows/$total$suffix';
+  }
+
+  @override
+  String projectEditorAssetsProbeWbBatchGenFirstSuffix(
+    String name,
+    String assetType,
+  ) {
+    return ' 首条=$name（$assetType）';
+  }
+
+  @override
+  String projectEditorAssetsProbeWbNestedSnack(
+    int parents,
+    int total,
+    String suffix,
+  ) {
+    return 'POST …/workbench/nested：parents=$parents/$total$suffix';
+  }
+
+  @override
+  String projectEditorAssetsProbeWbNestedFirstSuffix(int count) {
+    return ' firstChildren=$count';
+  }
+
+  @override
+  String get projectEditorAssetsProbeWbPollingImageZeroSnack =>
+      'POST …/workbench/polling-image-assets：0 条';
+
+  @override
+  String projectEditorAssetsProbeWbPollingImageRowSnack(
+    String state,
+    String filePath,
+  ) {
+    return 'POST …/workbench/polling-image-assets：state=$state filePath=$filePath';
+  }
+
+  @override
+  String get projectEditorAssetsProbeWbPollingPromptZeroSnack =>
+      'POST …/workbench/polling-prompt-assets：0 条';
+
+  @override
+  String projectEditorAssetsProbeWbPollingPromptRowSnack(
+    String promptState,
+    String assetType,
+  ) {
+    return 'POST …/workbench/polling-prompt-assets：promptState=$promptState type=$assetType';
+  }
+
+  @override
+  String get projectEditorAssetsProbeQueryPageButton => 'GET 分页 page=1&limit=2';
+
+  @override
+  String get projectEditorAssetsProbeQueryFilterButton => 'GET 筛选 type+name';
+
+  @override
+  String get projectEditorAssetsProbeQueryScriptScopedButton => 'GET 当前剧本+分页';
+
+  @override
+  String projectEditorAssetsProbeQueryPageSnack(
+    int total,
+    int pageCount,
+    String idPart,
+  ) {
+    return 'GET …/assets?page=1&limit=2：total=$total，本页 $pageCount 条$idPart';
+  }
+
+  @override
+  String projectEditorAssetsProbeQueryFilterSnack(
+    int total,
+    int returned,
+    String idPart,
+  ) {
+    return 'GET …/assets?asset_type=role&name=probe：total=$total，返回 $returned 条$idPart';
+  }
+
+  @override
+  String projectEditorAssetsProbeQueryScriptSnack(
+    int scriptId,
+    int total,
+    int pageCount,
+    String idPart,
+  ) {
+    return 'GET …/assets?script_numeric_id=$scriptId&page=1&limit=2：total=$total，本页 $pageCount 条$idPart';
   }
 
   @override

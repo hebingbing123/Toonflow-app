@@ -2910,6 +2910,28 @@ abstract class AppLocalizations {
   /// **'Name'**
   String get projectsDialogFieldName;
 
+  /// No description provided for @globalSearchNovelEventNavigated.
+  ///
+  /// In en, this message translates to:
+  /// **'Located project. Please open \"Novels & Events\" in project details to view the outline event (event #{eventId}).'**
+  String globalSearchNovelEventNavigated(String eventId);
+
+  /// No description provided for @globalSearchNovelChapterNavigated.
+  ///
+  /// In en, this message translates to:
+  /// **'Located project. Please open \"Novels & Events\" in project details to view the chapter (chapter index {chapterIndex}).'**
+  String globalSearchNovelChapterNavigated(String chapterIndex);
+
+  /// No description provided for @accountDeletedSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Account deleted: workspace {workspaceCount} · project {projectCount} · job {jobCount}'**
+  String accountDeletedSummary(
+    int workspaceCount,
+    int projectCount,
+    int jobCount,
+  );
+
   /// No description provided for @projectsDialogFieldIntro.
   ///
   /// In en, this message translates to:
@@ -16424,6 +16446,120 @@ abstract class AppLocalizations {
   /// **'Saving…'**
   String get projectScriptPlanWorkbenchSaving;
 
+  /// No description provided for @projectScriptPlanWorkbenchLoadingInitial.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading plan…'**
+  String get projectScriptPlanWorkbenchLoadingInitial;
+
+  /// No description provided for @projectScriptPlanWorkbenchRefreshingPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Refreshing plan…'**
+  String get projectScriptPlanWorkbenchRefreshingPlan;
+
+  /// No description provided for @projectScriptPlanWorkbenchLoadedPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Loaded plan {planId} · {scriptCount} script row(s)'**
+  String projectScriptPlanWorkbenchLoadedPlan(String planId, int scriptCount);
+
+  /// No description provided for @projectScriptPlanWorkbenchLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load plan: {error}'**
+  String projectScriptPlanWorkbenchLoadFailed(String error);
+
+  /// No description provided for @projectScriptPlanWorkbenchSkeletonDraftGenerated.
+  ///
+  /// In en, this message translates to:
+  /// **'Story skeleton draft filled from events.'**
+  String get projectScriptPlanWorkbenchSkeletonDraftGenerated;
+
+  /// No description provided for @projectScriptPlanWorkbenchStrategyDraftGenerated.
+  ///
+  /// In en, this message translates to:
+  /// **'Adaptation strategy draft filled from events.'**
+  String get projectScriptPlanWorkbenchStrategyDraftGenerated;
+
+  /// No description provided for @projectScriptPlanWorkbenchNoDraftsNoEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'No draft packets (add events/novels or refine skeleton/strategy).'**
+  String get projectScriptPlanWorkbenchNoDraftsNoEvents;
+
+  /// No description provided for @projectScriptPlanWorkbenchDraftsGenerated.
+  ///
+  /// In en, this message translates to:
+  /// **'Generated {count} script draft packet(s).'**
+  String projectScriptPlanWorkbenchDraftsGenerated(int count);
+
+  /// No description provided for @projectScriptPlanWorkbenchNoGuidanceNoEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'No structured guidance (add events/novels or refine skeleton/strategy).'**
+  String get projectScriptPlanWorkbenchNoGuidanceNoEvents;
+
+  /// No description provided for @projectScriptPlanWorkbenchGuidanceGenerated.
+  ///
+  /// In en, this message translates to:
+  /// **'Generated {count} structured guidance row(s).'**
+  String projectScriptPlanWorkbenchGuidanceGenerated(int count);
+
+  /// No description provided for @projectScriptPlanWorkbenchSavingPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving plan…'**
+  String get projectScriptPlanWorkbenchSavingPlan;
+
+  /// No description provided for @projectScriptPlanWorkbenchSaveFailedHttp.
+  ///
+  /// In en, this message translates to:
+  /// **'Save failed (HTTP {status})'**
+  String projectScriptPlanWorkbenchSaveFailedHttp(int status);
+
+  /// No description provided for @projectScriptPlanWorkbenchPlanSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan saved.'**
+  String get projectScriptPlanWorkbenchPlanSaved;
+
+  /// No description provided for @projectScriptPlanWorkbenchSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Save failed: {error}'**
+  String projectScriptPlanWorkbenchSaveFailed(String error);
+
+  /// No description provided for @projectScriptPlanWorkbenchNeedDraftsFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate draft packets first.'**
+  String get projectScriptPlanWorkbenchNeedDraftsFirst;
+
+  /// No description provided for @projectScriptPlanWorkbenchWritingDrafts.
+  ///
+  /// In en, this message translates to:
+  /// **'Writing script drafts…'**
+  String get projectScriptPlanWorkbenchWritingDrafts;
+
+  /// No description provided for @projectScriptPlanWorkbenchWriteFailedHttp.
+  ///
+  /// In en, this message translates to:
+  /// **'Write failed (HTTP {status})'**
+  String projectScriptPlanWorkbenchWriteFailedHttp(int status);
+
+  /// No description provided for @projectScriptPlanWorkbenchDraftsWritten.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrote drafts; refreshed with {count} packet(s) pending.'**
+  String projectScriptPlanWorkbenchDraftsWritten(int count);
+
+  /// No description provided for @projectScriptPlanWorkbenchWriteDraftsFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Write drafts failed: {error}'**
+  String projectScriptPlanWorkbenchWriteDraftsFailed(String error);
+
   /// No description provided for @shortVideoUndoEnableShot.
   ///
   /// In en, this message translates to:
@@ -17661,6 +17797,257 @@ abstract class AppLocalizations {
     int sortBefore,
     int sortAfter,
     String state,
+  );
+
+  /// No description provided for @projectEditorAssetsCornerScapeLoadingAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading corner-scape assets (all types)…'**
+  String get projectEditorAssetsCornerScapeLoadingAll;
+
+  /// No description provided for @projectEditorAssetsCornerScapeLoadingTypes.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading corner-scape assets (types: {types})…'**
+  String projectEditorAssetsCornerScapeLoadingTypes(String types);
+
+  /// No description provided for @projectEditorAssetsCornerScapeLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load corner-scape assets: {error}'**
+  String projectEditorAssetsCornerScapeLoadFailed(String error);
+
+  /// No description provided for @projectEditorAssetsWorkbenchFocusAssetSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Focused asset: #{id} {name} · {type}'**
+  String projectEditorAssetsWorkbenchFocusAssetSummary(
+    int id,
+    String name,
+    String type,
+  );
+
+  /// No description provided for @projectEditorAssetsWorkbenchFocusAssetEmptyOption.
+  ///
+  /// In en, this message translates to:
+  /// **'(No assets)'**
+  String get projectEditorAssetsWorkbenchFocusAssetEmptyOption;
+
+  /// No description provided for @projectEditorAssetsWorkbenchFocusAssetLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Focused asset'**
+  String get projectEditorAssetsWorkbenchFocusAssetLabel;
+
+  /// No description provided for @projectEditorAssetsWorkbenchFocusAssetHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick view of the current focus; edit in the actions below.'**
+  String get projectEditorAssetsWorkbenchFocusAssetHelper;
+
+  /// No description provided for @projectEditorAssetsWorkbenchFocusScriptEmptyOption.
+  ///
+  /// In en, this message translates to:
+  /// **'(No scripts)'**
+  String get projectEditorAssetsWorkbenchFocusScriptEmptyOption;
+
+  /// No description provided for @projectEditorAssetsWorkbenchFocusScriptLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Focused script'**
+  String get projectEditorAssetsWorkbenchFocusScriptLabel;
+
+  /// No description provided for @projectEditorAssetsWorkbenchFocusScriptHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Used for script–asset linking actions.'**
+  String get projectEditorAssetsWorkbenchFocusScriptHelper;
+
+  /// No description provided for @projectEditorAssetsProbeWbGetImageButton.
+  ///
+  /// In en, this message translates to:
+  /// **'POST get-image'**
+  String get projectEditorAssetsProbeWbGetImageButton;
+
+  /// No description provided for @projectEditorAssetsProbeWbUploadClipButton.
+  ///
+  /// In en, this message translates to:
+  /// **'POST upload-clip'**
+  String get projectEditorAssetsProbeWbUploadClipButton;
+
+  /// No description provided for @projectEditorAssetsProbeWbMaterialDataButton.
+  ///
+  /// In en, this message translates to:
+  /// **'POST get-material-data'**
+  String get projectEditorAssetsProbeWbMaterialDataButton;
+
+  /// No description provided for @projectEditorAssetsProbeWbBatchGenDataButton.
+  ///
+  /// In en, this message translates to:
+  /// **'POST batch-generation-data'**
+  String get projectEditorAssetsProbeWbBatchGenDataButton;
+
+  /// No description provided for @projectEditorAssetsProbeWbGetAssetsApiButton.
+  ///
+  /// In en, this message translates to:
+  /// **'POST get-assets-api'**
+  String get projectEditorAssetsProbeWbGetAssetsApiButton;
+
+  /// No description provided for @projectEditorAssetsProbeWbPollingImageButton.
+  ///
+  /// In en, this message translates to:
+  /// **'POST polling-image-assets'**
+  String get projectEditorAssetsProbeWbPollingImageButton;
+
+  /// No description provided for @projectEditorAssetsProbeWbPollingPromptButton.
+  ///
+  /// In en, this message translates to:
+  /// **'POST polling-prompt-assets'**
+  String get projectEditorAssetsProbeWbPollingPromptButton;
+
+  /// No description provided for @projectEditorAssetsProbeWbGetImageSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'POST …/workbench/image-bundle: tempAssets={tempAssets} imageId={imageId}'**
+  String projectEditorAssetsProbeWbGetImageSnack(
+    int tempAssets,
+    String imageId,
+  );
+
+  /// No description provided for @projectEditorAssetsProbeWbUploadClipSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'POST …/workbench/upload-clip: {message}'**
+  String projectEditorAssetsProbeWbUploadClipSnack(String message);
+
+  /// No description provided for @projectEditorAssetsProbeWbMaterialDataSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'POST …/workbench/material-data: clips={clips} videos={videos}{suffix}'**
+  String projectEditorAssetsProbeWbMaterialDataSnack(
+    int clips,
+    int videos,
+    String suffix,
+  );
+
+  /// No description provided for @projectEditorAssetsProbeWbMaterialDataFirstClipSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **' first={name}'**
+  String projectEditorAssetsProbeWbMaterialDataFirstClipSuffix(String name);
+
+  /// No description provided for @projectEditorAssetsProbeWbBatchGenSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'POST …/workbench/batch-generation-data: rows={rows}/{total}{suffix}'**
+  String projectEditorAssetsProbeWbBatchGenSnack(
+    int rows,
+    int total,
+    String suffix,
+  );
+
+  /// No description provided for @projectEditorAssetsProbeWbBatchGenFirstSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **' first={name}({assetType})'**
+  String projectEditorAssetsProbeWbBatchGenFirstSuffix(
+    String name,
+    String assetType,
+  );
+
+  /// No description provided for @projectEditorAssetsProbeWbNestedSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'POST …/workbench/nested: parents={parents}/{total}{suffix}'**
+  String projectEditorAssetsProbeWbNestedSnack(
+    int parents,
+    int total,
+    String suffix,
+  );
+
+  /// No description provided for @projectEditorAssetsProbeWbNestedFirstSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **' firstChildren={count}'**
+  String projectEditorAssetsProbeWbNestedFirstSuffix(int count);
+
+  /// No description provided for @projectEditorAssetsProbeWbPollingImageZeroSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'POST …/workbench/polling-image-assets: 0 rows'**
+  String get projectEditorAssetsProbeWbPollingImageZeroSnack;
+
+  /// No description provided for @projectEditorAssetsProbeWbPollingImageRowSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'POST …/workbench/polling-image-assets: state={state} filePath={filePath}'**
+  String projectEditorAssetsProbeWbPollingImageRowSnack(
+    String state,
+    String filePath,
+  );
+
+  /// No description provided for @projectEditorAssetsProbeWbPollingPromptZeroSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'POST …/workbench/polling-prompt-assets: 0 rows'**
+  String get projectEditorAssetsProbeWbPollingPromptZeroSnack;
+
+  /// No description provided for @projectEditorAssetsProbeWbPollingPromptRowSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'POST …/workbench/polling-prompt-assets: promptState={promptState} type={assetType}'**
+  String projectEditorAssetsProbeWbPollingPromptRowSnack(
+    String promptState,
+    String assetType,
+  );
+
+  /// No description provided for @projectEditorAssetsProbeQueryPageButton.
+  ///
+  /// In en, this message translates to:
+  /// **'GET paged assets (page=1, limit=2)'**
+  String get projectEditorAssetsProbeQueryPageButton;
+
+  /// No description provided for @projectEditorAssetsProbeQueryFilterButton.
+  ///
+  /// In en, this message translates to:
+  /// **'GET assets (type+name filter)'**
+  String get projectEditorAssetsProbeQueryFilterButton;
+
+  /// No description provided for @projectEditorAssetsProbeQueryScriptScopedButton.
+  ///
+  /// In en, this message translates to:
+  /// **'GET assets (current script + paging)'**
+  String get projectEditorAssetsProbeQueryScriptScopedButton;
+
+  /// No description provided for @projectEditorAssetsProbeQueryPageSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'GET …/assets?page=1&limit=2: total={total}, this page {pageCount}{idPart}'**
+  String projectEditorAssetsProbeQueryPageSnack(
+    int total,
+    int pageCount,
+    String idPart,
+  );
+
+  /// No description provided for @projectEditorAssetsProbeQueryFilterSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'GET …/assets?asset_type=role&name=probe: total={total}, returned {returned}{idPart}'**
+  String projectEditorAssetsProbeQueryFilterSnack(
+    int total,
+    int returned,
+    String idPart,
+  );
+
+  /// No description provided for @projectEditorAssetsProbeQueryScriptSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'GET …/assets?script_numeric_id={scriptId}&page=1&limit=2: total={total}, this page {pageCount}{idPart}'**
+  String projectEditorAssetsProbeQueryScriptSnack(
+    int scriptId,
+    int total,
+    int pageCount,
+    String idPart,
   );
 
   /// No description provided for @projectEditorDeleteProjectTitle.

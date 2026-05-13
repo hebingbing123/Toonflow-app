@@ -13,6 +13,7 @@ extension _HomePageProjectEditorAssetsCrudQueryProbe on _HomePageState {
     required List<bool> assetsBusy,
     required Future<void> Function() reloadAssetsAndStats,
   }) {
+    final l10n = AppLocalizations.of(ctx)!;
     return [
       TextButton(
         onPressed:
@@ -31,11 +32,15 @@ extension _HomePageProjectEditorAssetsCrudQueryProbe on _HomePageState {
                   final ids = page.items
                       .map((a) => '#${a.numericId}:${a.assetType}')
                       .join(', ');
+                  final idPart = ids.isEmpty ? '' : ' · $ids';
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'GET …/assets?page=1&limit=2：total=${page.total}，本页 ${page.items.length} 条'
-                        '${ids.isEmpty ? '' : ' · $ids'}',
+                        l10n.projectEditorAssetsProbeQueryPageSnack(
+                          page.total,
+                          page.items.length,
+                          idPart,
+                        ),
                       ),
                     ),
                   );
@@ -51,7 +56,7 @@ extension _HomePageProjectEditorAssetsCrudQueryProbe on _HomePageState {
                   }
                 }
               },
-        child: const Text('GET 分页 page=1&limit=2'),
+        child: Text(l10n.projectEditorAssetsProbeQueryPageButton),
       ),
       TextButton(
         onPressed:
@@ -71,11 +76,15 @@ extension _HomePageProjectEditorAssetsCrudQueryProbe on _HomePageState {
                       .take(4)
                       .map((a) => '#${a.numericId}:${a.name}')
                       .join(', ');
+                  final idPart = ids.isEmpty ? '' : ' · $ids';
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'GET …/assets?asset_type=role&name=probe：total=${r.total}，返回 ${r.items.length} 条'
-                        '${ids.isEmpty ? '' : ' · $ids'}',
+                        l10n.projectEditorAssetsProbeQueryFilterSnack(
+                          r.total,
+                          r.items.length,
+                          idPart,
+                        ),
                       ),
                     ),
                   );
@@ -91,7 +100,7 @@ extension _HomePageProjectEditorAssetsCrudQueryProbe on _HomePageState {
                   }
                 }
               },
-        child: const Text('GET 筛选 type+name'),
+        child: Text(l10n.projectEditorAssetsProbeQueryFilterButton),
       ),
       TextButton(
         onPressed:
@@ -115,11 +124,16 @@ extension _HomePageProjectEditorAssetsCrudQueryProbe on _HomePageState {
                   final ids = pg.items
                       .map((a) => '#${a.numericId}:${a.assetType}')
                       .join(', ');
+                  final idPart = ids.isEmpty ? '' : ' · $ids';
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'GET …/assets?script_numeric_id=$sid&page=1&limit=2：total=${pg.total}，本页 ${pg.items.length} 条'
-                        '${ids.isEmpty ? '' : ' · $ids'}',
+                        l10n.projectEditorAssetsProbeQueryScriptSnack(
+                          sid,
+                          pg.total,
+                          pg.items.length,
+                          idPart,
+                        ),
                       ),
                     ),
                   );
@@ -135,7 +149,7 @@ extension _HomePageProjectEditorAssetsCrudQueryProbe on _HomePageState {
                   }
                 }
               },
-        child: const Text('GET 当前剧本+分页'),
+        child: Text(l10n.projectEditorAssetsProbeQueryScriptScopedButton),
       ),
     ];
   }

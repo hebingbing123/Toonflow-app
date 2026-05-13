@@ -898,6 +898,36 @@
   "projectsRoleMember": "member",
   "projectsDialogCreateTitle": "新建项目",
   "projectsDialogFieldName": "项目名",
+  "globalSearchNovelEventNavigated": "已定位到项目。请在项目详情中打开「小说与事件」查看大纲事件（事件 #{eventId}）。",
+  "@globalSearchNovelEventNavigated": {
+    "placeholders": {
+      "eventId": {
+        "type": "String"
+      }
+    }
+  },
+  "globalSearchNovelChapterNavigated": "已定位到项目。请在项目详情中打开「小说与事件」查看章节（章索引 {chapterIndex}）。",
+  "@globalSearchNovelChapterNavigated": {
+    "placeholders": {
+      "chapterIndex": {
+        "type": "String"
+      }
+    }
+  },
+  "accountDeletedSummary": "账号已删除：workspace {workspaceCount} · project {projectCount} · job {jobCount}",
+  "@accountDeletedSummary": {
+    "placeholders": {
+      "workspaceCount": {
+        "type": "int"
+      },
+      "projectCount": {
+        "type": "int"
+      },
+      "jobCount": {
+        "type": "int"
+      }
+    }
+  },
   "projectsDialogFieldIntro": "项目简介",
   "projectsDialogSectionBrief": "项目立项",
   "projectsDialogFieldPremise": "Premise",
@@ -7712,6 +7742,91 @@
   "projectScriptPlanWorkbenchSavePlan": "保存方案",
   "projectScriptPlanWorkbenchRefreshing": "刷新中…",
   "projectScriptPlanWorkbenchSaving": "保存中…",
+  "projectScriptPlanWorkbenchLoadingInitial": "正在加载方案…",
+  "projectScriptPlanWorkbenchRefreshingPlan": "正在刷新方案…",
+  "projectScriptPlanWorkbenchLoadedPlan": "已加载方案 {planId} · {scriptCount} 条剧本行",
+  "@projectScriptPlanWorkbenchLoadedPlan": {
+    "placeholders": {
+      "planId": {
+        "type": "String"
+      },
+      "scriptCount": {
+        "type": "int"
+      }
+    }
+  },
+  "projectScriptPlanWorkbenchLoadFailed": "加载方案失败：{error}",
+  "@projectScriptPlanWorkbenchLoadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectScriptPlanWorkbenchSkeletonDraftGenerated": "已从事件填充故事骨架草稿。",
+  "projectScriptPlanWorkbenchStrategyDraftGenerated": "已从事件填充改编策略草稿。",
+  "projectScriptPlanWorkbenchNoDraftsNoEvents": "暂无草稿包（请补充事件/小说或完善骨架/策略）。",
+  "projectScriptPlanWorkbenchDraftsGenerated": "已生成 {count} 个剧本草稿包。",
+  "@projectScriptPlanWorkbenchDraftsGenerated": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectScriptPlanWorkbenchNoGuidanceNoEvents": "暂无结构化指引（请补充事件/小说或完善骨架/策略）。",
+  "projectScriptPlanWorkbenchGuidanceGenerated": "已生成 {count} 条结构化指引。",
+  "@projectScriptPlanWorkbenchGuidanceGenerated": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectScriptPlanWorkbenchSavingPlan": "正在保存方案…",
+  "projectScriptPlanWorkbenchSaveFailedHttp": "保存失败（HTTP {status}）",
+  "@projectScriptPlanWorkbenchSaveFailedHttp": {
+    "placeholders": {
+      "status": {
+        "type": "int"
+      }
+    }
+  },
+  "projectScriptPlanWorkbenchPlanSaved": "方案已保存。",
+  "projectScriptPlanWorkbenchSaveFailed": "保存失败：{error}",
+  "@projectScriptPlanWorkbenchSaveFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectScriptPlanWorkbenchNeedDraftsFirst": "请先生成草稿包。",
+  "projectScriptPlanWorkbenchWritingDrafts": "正在写入剧本草稿…",
+  "projectScriptPlanWorkbenchWriteFailedHttp": "写入失败（HTTP {status}）",
+  "@projectScriptPlanWorkbenchWriteFailedHttp": {
+    "placeholders": {
+      "status": {
+        "type": "int"
+      }
+    }
+  },
+  "projectScriptPlanWorkbenchDraftsWritten": "草稿已写入；已刷新，仍有 {count} 个草稿包待处理。",
+  "@projectScriptPlanWorkbenchDraftsWritten": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectScriptPlanWorkbenchWriteDraftsFailed": "写入草稿失败：{error}",
+  "@projectScriptPlanWorkbenchWriteDraftsFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "shortVideoUndoEnableShot": "启用镜头 #{storyboardId}",
   "@shortVideoUndoEnableShot": {
     "placeholders": {
@@ -8251,6 +8366,210 @@
         "type": "int"
       },
       "state": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetsCornerScapeLoadingAll": "正在加载 corner-scape 资产（全部类型）…",
+  "projectEditorAssetsCornerScapeLoadingTypes": "正在加载 corner-scape 资产（类型：{types}）…",
+  "@projectEditorAssetsCornerScapeLoadingTypes": {
+    "placeholders": {
+      "types": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetsCornerScapeLoadFailed": "加载 corner-scape 资产失败：{error}",
+  "@projectEditorAssetsCornerScapeLoadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetsWorkbenchFocusAssetSummary": "当前焦点资产：#{id} {name} · {type}",
+  "@projectEditorAssetsWorkbenchFocusAssetSummary": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      },
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetsWorkbenchFocusAssetEmptyOption": "（当前无资产）",
+  "projectEditorAssetsWorkbenchFocusAssetLabel": "当前焦点资产",
+  "projectEditorAssetsWorkbenchFocusAssetHelper": "用于快速查看当前工作焦点；具体编辑在下方动作中完成。",
+  "projectEditorAssetsWorkbenchFocusScriptEmptyOption": "（当前无剧本）",
+  "projectEditorAssetsWorkbenchFocusScriptLabel": "当前焦点剧本",
+  "projectEditorAssetsWorkbenchFocusScriptHelper": "用于剧本-资产关联相关动作。",
+  "projectEditorAssetsProbeWbGetImageButton": "POST get-image",
+  "projectEditorAssetsProbeWbUploadClipButton": "POST upload-clip",
+  "projectEditorAssetsProbeWbMaterialDataButton": "POST get-material-data",
+  "projectEditorAssetsProbeWbBatchGenDataButton": "POST batch-generation-data",
+  "projectEditorAssetsProbeWbGetAssetsApiButton": "POST get-assets-api",
+  "projectEditorAssetsProbeWbPollingImageButton": "POST polling-image-assets",
+  "projectEditorAssetsProbeWbPollingPromptButton": "POST polling-prompt-assets",
+  "projectEditorAssetsProbeWbGetImageSnack": "POST …/workbench/image-bundle：tempAssets={tempAssets} imageId={imageId}",
+  "@projectEditorAssetsProbeWbGetImageSnack": {
+    "placeholders": {
+      "tempAssets": {
+        "type": "int"
+      },
+      "imageId": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetsProbeWbUploadClipSnack": "POST …/workbench/upload-clip：{message}",
+  "@projectEditorAssetsProbeWbUploadClipSnack": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetsProbeWbMaterialDataSnack": "POST …/workbench/material-data：clips={clips} videos={videos}{suffix}",
+  "@projectEditorAssetsProbeWbMaterialDataSnack": {
+    "placeholders": {
+      "clips": {
+        "type": "int"
+      },
+      "videos": {
+        "type": "int"
+      },
+      "suffix": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetsProbeWbMaterialDataFirstClipSuffix": " 首条={name}",
+  "@projectEditorAssetsProbeWbMaterialDataFirstClipSuffix": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetsProbeWbBatchGenSnack": "POST …/workbench/batch-generation-data：rows={rows}/{total}{suffix}",
+  "@projectEditorAssetsProbeWbBatchGenSnack": {
+    "placeholders": {
+      "rows": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "suffix": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetsProbeWbBatchGenFirstSuffix": " 首条={name}（{assetType}）",
+  "@projectEditorAssetsProbeWbBatchGenFirstSuffix": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "assetType": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetsProbeWbNestedSnack": "POST …/workbench/nested：parents={parents}/{total}{suffix}",
+  "@projectEditorAssetsProbeWbNestedSnack": {
+    "placeholders": {
+      "parents": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "suffix": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetsProbeWbNestedFirstSuffix": " firstChildren={count}",
+  "@projectEditorAssetsProbeWbNestedFirstSuffix": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorAssetsProbeWbPollingImageZeroSnack": "POST …/workbench/polling-image-assets：0 条",
+  "projectEditorAssetsProbeWbPollingImageRowSnack": "POST …/workbench/polling-image-assets：state={state} filePath={filePath}",
+  "@projectEditorAssetsProbeWbPollingImageRowSnack": {
+    "placeholders": {
+      "state": {
+        "type": "String"
+      },
+      "filePath": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetsProbeWbPollingPromptZeroSnack": "POST …/workbench/polling-prompt-assets：0 条",
+  "projectEditorAssetsProbeWbPollingPromptRowSnack": "POST …/workbench/polling-prompt-assets：promptState={promptState} type={assetType}",
+  "@projectEditorAssetsProbeWbPollingPromptRowSnack": {
+    "placeholders": {
+      "promptState": {
+        "type": "String"
+      },
+      "assetType": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetsProbeQueryPageButton": "GET 分页 page=1&limit=2",
+  "projectEditorAssetsProbeQueryFilterButton": "GET 筛选 type+name",
+  "projectEditorAssetsProbeQueryScriptScopedButton": "GET 当前剧本+分页",
+  "projectEditorAssetsProbeQueryPageSnack": "GET …/assets?page=1&limit=2：total={total}，本页 {pageCount} 条{idPart}",
+  "@projectEditorAssetsProbeQueryPageSnack": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "pageCount": {
+        "type": "int"
+      },
+      "idPart": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetsProbeQueryFilterSnack": "GET …/assets?asset_type=role&name=probe：total={total}，返回 {returned} 条{idPart}",
+  "@projectEditorAssetsProbeQueryFilterSnack": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "returned": {
+        "type": "int"
+      },
+      "idPart": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetsProbeQueryScriptSnack": "GET …/assets?script_numeric_id={scriptId}&page=1&limit=2：total={total}，本页 {pageCount} 条{idPart}",
+  "@projectEditorAssetsProbeQueryScriptSnack": {
+    "placeholders": {
+      "scriptId": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "pageCount": {
+        "type": "int"
+      },
+      "idPart": {
         "type": "String"
       }
     }

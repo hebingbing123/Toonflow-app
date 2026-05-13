@@ -25,6 +25,7 @@ class _ProjectAssetsWorkbenchOverview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -44,7 +45,11 @@ class _ProjectAssetsWorkbenchOverview extends StatelessWidget {
               if (selectedAsset != null) ...[
                 const SizedBox(height: 6),
                 Text(
-                  '当前焦点资产：#${selectedAsset!.numericId} ${selectedAsset!.name} · ${selectedAsset!.assetType}',
+                  l10n.projectEditorAssetsWorkbenchFocusAssetSummary(
+                    selectedAsset!.numericId,
+                    selectedAsset!.name,
+                    selectedAsset!.assetType,
+                  ),
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],
@@ -54,12 +59,15 @@ class _ProjectAssetsWorkbenchOverview extends StatelessWidget {
         const SizedBox(height: 12),
         DropdownButtonFormField<int?>(
           initialValue: selectedAssetNumericId,
-          decoration: const InputDecoration(
-            labelText: '当前焦点资产',
-            helperText: '用于快速查看当前工作焦点；具体编辑在下方动作中完成。',
+          decoration: InputDecoration(
+            labelText: l10n.projectEditorAssetsWorkbenchFocusAssetLabel,
+            helperText: l10n.projectEditorAssetsWorkbenchFocusAssetHelper,
           ),
           items: [
-            const DropdownMenuItem<int?>(value: null, child: Text('（当前无资产）')),
+            DropdownMenuItem<int?>(
+              value: null,
+              child: Text(l10n.projectEditorAssetsWorkbenchFocusAssetEmptyOption),
+            ),
             ...assets.map(
               (asset) => DropdownMenuItem<int?>(
                 value: asset.numericId,
@@ -75,12 +83,15 @@ class _ProjectAssetsWorkbenchOverview extends StatelessWidget {
         const SizedBox(height: 8),
         DropdownButtonFormField<int?>(
           initialValue: selectedScriptNumericId,
-          decoration: const InputDecoration(
-            labelText: '当前焦点剧本',
-            helperText: '用于剧本-资产关联相关动作。',
+          decoration: InputDecoration(
+            labelText: l10n.projectEditorAssetsWorkbenchFocusScriptLabel,
+            helperText: l10n.projectEditorAssetsWorkbenchFocusScriptHelper,
           ),
           items: [
-            const DropdownMenuItem<int?>(value: null, child: Text('（当前无剧本）')),
+            DropdownMenuItem<int?>(
+              value: null,
+              child: Text(l10n.projectEditorAssetsWorkbenchFocusScriptEmptyOption),
+            ),
             ...scriptList.map(
               (script) => DropdownMenuItem<int?>(
                 value: script.numericId,
@@ -97,4 +108,3 @@ class _ProjectAssetsWorkbenchOverview extends StatelessWidget {
     );
   }
 }
-

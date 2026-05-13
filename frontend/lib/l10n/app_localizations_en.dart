@@ -1660,6 +1660,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get projectsDialogFieldName => 'Name';
 
   @override
+  String globalSearchNovelEventNavigated(String eventId) {
+    return 'Located project. Please open \"Novels & Events\" in project details to view the outline event (event #$eventId).';
+  }
+
+  @override
+  String globalSearchNovelChapterNavigated(String chapterIndex) {
+    return 'Located project. Please open \"Novels & Events\" in project details to view the chapter (chapter index $chapterIndex).';
+  }
+
+  @override
+  String accountDeletedSummary(
+    int workspaceCount,
+    int projectCount,
+    int jobCount,
+  ) {
+    return 'Account deleted: workspace $workspaceCount · project $projectCount · job $jobCount';
+  }
+
+  @override
   String get projectsDialogFieldIntro => 'Introduction';
 
   @override
@@ -10492,6 +10511,87 @@ class AppLocalizationsEn extends AppLocalizations {
   String get projectScriptPlanWorkbenchSaving => 'Saving…';
 
   @override
+  String get projectScriptPlanWorkbenchLoadingInitial => 'Loading plan…';
+
+  @override
+  String get projectScriptPlanWorkbenchRefreshingPlan => 'Refreshing plan…';
+
+  @override
+  String projectScriptPlanWorkbenchLoadedPlan(String planId, int scriptCount) {
+    return 'Loaded plan $planId · $scriptCount script row(s)';
+  }
+
+  @override
+  String projectScriptPlanWorkbenchLoadFailed(String error) {
+    return 'Failed to load plan: $error';
+  }
+
+  @override
+  String get projectScriptPlanWorkbenchSkeletonDraftGenerated =>
+      'Story skeleton draft filled from events.';
+
+  @override
+  String get projectScriptPlanWorkbenchStrategyDraftGenerated =>
+      'Adaptation strategy draft filled from events.';
+
+  @override
+  String get projectScriptPlanWorkbenchNoDraftsNoEvents =>
+      'No draft packets (add events/novels or refine skeleton/strategy).';
+
+  @override
+  String projectScriptPlanWorkbenchDraftsGenerated(int count) {
+    return 'Generated $count script draft packet(s).';
+  }
+
+  @override
+  String get projectScriptPlanWorkbenchNoGuidanceNoEvents =>
+      'No structured guidance (add events/novels or refine skeleton/strategy).';
+
+  @override
+  String projectScriptPlanWorkbenchGuidanceGenerated(int count) {
+    return 'Generated $count structured guidance row(s).';
+  }
+
+  @override
+  String get projectScriptPlanWorkbenchSavingPlan => 'Saving plan…';
+
+  @override
+  String projectScriptPlanWorkbenchSaveFailedHttp(int status) {
+    return 'Save failed (HTTP $status)';
+  }
+
+  @override
+  String get projectScriptPlanWorkbenchPlanSaved => 'Plan saved.';
+
+  @override
+  String projectScriptPlanWorkbenchSaveFailed(String error) {
+    return 'Save failed: $error';
+  }
+
+  @override
+  String get projectScriptPlanWorkbenchNeedDraftsFirst =>
+      'Generate draft packets first.';
+
+  @override
+  String get projectScriptPlanWorkbenchWritingDrafts =>
+      'Writing script drafts…';
+
+  @override
+  String projectScriptPlanWorkbenchWriteFailedHttp(int status) {
+    return 'Write failed (HTTP $status)';
+  }
+
+  @override
+  String projectScriptPlanWorkbenchDraftsWritten(int count) {
+    return 'Wrote drafts; refreshed with $count packet(s) pending.';
+  }
+
+  @override
+  String projectScriptPlanWorkbenchWriteDraftsFailed(String error) {
+    return 'Write drafts failed: $error';
+  }
+
+  @override
   String shortVideoUndoEnableShot(int storyboardId) {
     return 'Enable shot #$storyboardId';
   }
@@ -11306,6 +11406,198 @@ class AppLocalizationsEn extends AppLocalizations {
     String state,
   ) {
     return 'POST→PATCH→DEL image: sort $sortBefore→$sortAfter, state=$state, deleted';
+  }
+
+  @override
+  String get projectEditorAssetsCornerScapeLoadingAll =>
+      'Loading corner-scape assets (all types)…';
+
+  @override
+  String projectEditorAssetsCornerScapeLoadingTypes(String types) {
+    return 'Loading corner-scape assets (types: $types)…';
+  }
+
+  @override
+  String projectEditorAssetsCornerScapeLoadFailed(String error) {
+    return 'Failed to load corner-scape assets: $error';
+  }
+
+  @override
+  String projectEditorAssetsWorkbenchFocusAssetSummary(
+    int id,
+    String name,
+    String type,
+  ) {
+    return 'Focused asset: #$id $name · $type';
+  }
+
+  @override
+  String get projectEditorAssetsWorkbenchFocusAssetEmptyOption => '(No assets)';
+
+  @override
+  String get projectEditorAssetsWorkbenchFocusAssetLabel => 'Focused asset';
+
+  @override
+  String get projectEditorAssetsWorkbenchFocusAssetHelper =>
+      'Quick view of the current focus; edit in the actions below.';
+
+  @override
+  String get projectEditorAssetsWorkbenchFocusScriptEmptyOption =>
+      '(No scripts)';
+
+  @override
+  String get projectEditorAssetsWorkbenchFocusScriptLabel => 'Focused script';
+
+  @override
+  String get projectEditorAssetsWorkbenchFocusScriptHelper =>
+      'Used for script–asset linking actions.';
+
+  @override
+  String get projectEditorAssetsProbeWbGetImageButton => 'POST get-image';
+
+  @override
+  String get projectEditorAssetsProbeWbUploadClipButton => 'POST upload-clip';
+
+  @override
+  String get projectEditorAssetsProbeWbMaterialDataButton =>
+      'POST get-material-data';
+
+  @override
+  String get projectEditorAssetsProbeWbBatchGenDataButton =>
+      'POST batch-generation-data';
+
+  @override
+  String get projectEditorAssetsProbeWbGetAssetsApiButton =>
+      'POST get-assets-api';
+
+  @override
+  String get projectEditorAssetsProbeWbPollingImageButton =>
+      'POST polling-image-assets';
+
+  @override
+  String get projectEditorAssetsProbeWbPollingPromptButton =>
+      'POST polling-prompt-assets';
+
+  @override
+  String projectEditorAssetsProbeWbGetImageSnack(
+    int tempAssets,
+    String imageId,
+  ) {
+    return 'POST …/workbench/image-bundle: tempAssets=$tempAssets imageId=$imageId';
+  }
+
+  @override
+  String projectEditorAssetsProbeWbUploadClipSnack(String message) {
+    return 'POST …/workbench/upload-clip: $message';
+  }
+
+  @override
+  String projectEditorAssetsProbeWbMaterialDataSnack(
+    int clips,
+    int videos,
+    String suffix,
+  ) {
+    return 'POST …/workbench/material-data: clips=$clips videos=$videos$suffix';
+  }
+
+  @override
+  String projectEditorAssetsProbeWbMaterialDataFirstClipSuffix(String name) {
+    return ' first=$name';
+  }
+
+  @override
+  String projectEditorAssetsProbeWbBatchGenSnack(
+    int rows,
+    int total,
+    String suffix,
+  ) {
+    return 'POST …/workbench/batch-generation-data: rows=$rows/$total$suffix';
+  }
+
+  @override
+  String projectEditorAssetsProbeWbBatchGenFirstSuffix(
+    String name,
+    String assetType,
+  ) {
+    return ' first=$name($assetType)';
+  }
+
+  @override
+  String projectEditorAssetsProbeWbNestedSnack(
+    int parents,
+    int total,
+    String suffix,
+  ) {
+    return 'POST …/workbench/nested: parents=$parents/$total$suffix';
+  }
+
+  @override
+  String projectEditorAssetsProbeWbNestedFirstSuffix(int count) {
+    return ' firstChildren=$count';
+  }
+
+  @override
+  String get projectEditorAssetsProbeWbPollingImageZeroSnack =>
+      'POST …/workbench/polling-image-assets: 0 rows';
+
+  @override
+  String projectEditorAssetsProbeWbPollingImageRowSnack(
+    String state,
+    String filePath,
+  ) {
+    return 'POST …/workbench/polling-image-assets: state=$state filePath=$filePath';
+  }
+
+  @override
+  String get projectEditorAssetsProbeWbPollingPromptZeroSnack =>
+      'POST …/workbench/polling-prompt-assets: 0 rows';
+
+  @override
+  String projectEditorAssetsProbeWbPollingPromptRowSnack(
+    String promptState,
+    String assetType,
+  ) {
+    return 'POST …/workbench/polling-prompt-assets: promptState=$promptState type=$assetType';
+  }
+
+  @override
+  String get projectEditorAssetsProbeQueryPageButton =>
+      'GET paged assets (page=1, limit=2)';
+
+  @override
+  String get projectEditorAssetsProbeQueryFilterButton =>
+      'GET assets (type+name filter)';
+
+  @override
+  String get projectEditorAssetsProbeQueryScriptScopedButton =>
+      'GET assets (current script + paging)';
+
+  @override
+  String projectEditorAssetsProbeQueryPageSnack(
+    int total,
+    int pageCount,
+    String idPart,
+  ) {
+    return 'GET …/assets?page=1&limit=2: total=$total, this page $pageCount$idPart';
+  }
+
+  @override
+  String projectEditorAssetsProbeQueryFilterSnack(
+    int total,
+    int returned,
+    String idPart,
+  ) {
+    return 'GET …/assets?asset_type=role&name=probe: total=$total, returned $returned$idPart';
+  }
+
+  @override
+  String projectEditorAssetsProbeQueryScriptSnack(
+    int scriptId,
+    int total,
+    int pageCount,
+    String idPart,
+  ) {
+    return 'GET …/assets?script_numeric_id=$scriptId&page=1&limit=2: total=$total, this page $pageCount$idPart';
   }
 
   @override
