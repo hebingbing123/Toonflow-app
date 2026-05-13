@@ -549,7 +549,7 @@ Use this checklist to track migration progress across all backend modules:
 
 ### Resource Management
 - [x] `backend/src/settings/` - User and system settings ✅
-- [ ] `backend/src/workspaces/` - Workspace CRUD operations
+- [x] `backend/src/workspaces/` - Workspace CRUD operations ✅
 - [ ] `backend/src/projects/` - Project management
 - [ ] `backend/src/assets/` - Asset storage and retrieval
 
@@ -595,7 +595,7 @@ Track completed modules and remaining work:
 
 ### Phase 2: Module Migration (In Progress)
 - [x] Settings module ✅ (50 error sites migrated, tests added)
-- [ ] Workspaces module
+- [x] Workspaces module ✅ (13 error sites migrated: 9 Conflict, 4 Forbidden; 30 tests added)
 - [ ] Projects module
 - [ ] Assets module
 - [ ] Production module
@@ -604,6 +604,52 @@ Track completed modules and remaining work:
 - [ ] Harness module
 - [ ] Billing module
 - [ ] Remaining modules
+
+#### Workspaces Module Details
+
+**Files Modified:**
+- `backend/src/workspaces/http.rs` - Main HTTP handlers
+- `backend/src/workspaces/ops_stats.rs` - Operations statistics
+- `backend/src/workspaces/mod.rs` - Test module
+
+**Migration Statistics:**
+
+| Error Type | Count | Helper Functions Used |
+|------------|-------|----------------------|
+| Conflict   | 9     | `conflict_i18n()` |
+| Forbidden  | 4     | `forbidden_i18n()` |
+| **Total**  | **13** | |
+
+**Conflict Errors Migrated:**
+1. Cannot demote the last workspace owner
+2. Cannot remove the last workspace owner
+3. Cannot leave workspace as the last owner
+4. Target owner must differ from current owner
+5. Only the current primary owner may transfer ownership
+6. Target user must already be a workspace member
+7. Invite cannot be revoked (not pending)
+8. Invite cannot be resent (not pending)
+9. Invite is not pending
+10. Invite has expired
+
+**Forbidden Errors Migrated:**
+1. Workspace stats HTTP disabled
+2. Not a workspace member
+3. Requires workspace owner or admin
+4. Requires workspace owner
+
+**Test Coverage:**
+- 30 bilingual error message tests added
+- 19 tests for Conflict errors (9 error types × 2 languages + 1 variant test)
+- 8 tests for Forbidden errors (4 error types × 2 languages)
+- 3 additional tests for edge cases
+- All tests verify both English and Chinese messages
+- All tests verify correct HTTP status codes and error codes
+
+**Verification:**
+- ✅ `cargo test --lib workspaces` - All 44 tests passed
+- ✅ `yarn refactor:agent` - All checks passed
+- ✅ No remaining unmigrated error patterns found
 
 ### Phase 3: Verification & Documentation ✅
 - [x] Created migration guide
