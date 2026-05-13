@@ -115,16 +115,16 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
     } catch (e) {
       if (!mounted) return;
 
+      final msg = describeUserVisibleApiError(l10n, e);
       setState(() {
-        final loc = AppLocalizations.of(context)!;
-        _error = describeUserVisibleApiError(loc, e);
+        _error = msg;
         _loading = false;
       });
 
       // 显示错误提示
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.globalSearchClearHistoryFailed(describeUserVisibleApiError(l10n, e)))),
+          SnackBar(content: Text(l10n.globalSearchClearHistoryFailed(msg))),
         );
       }
     }
@@ -178,9 +178,9 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
           padding: const EdgeInsets.all(16.0),
           child: Text(
             l10n.globalSearchNoSearchHistory,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.grey,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: Colors.grey),
           ),
         ),
       );
@@ -213,9 +213,9 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
                 ),
                 trailing: Text(
                   _formatTime(entry.searchedAt),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: Colors.grey),
                 ),
                 onTap: () => widget.onHistorySelected(entry.query),
               );
@@ -229,9 +229,7 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
               onPressed: _handleClearHistory,
               icon: const Icon(Icons.delete_outline, size: 18),
               label: Text(l10n.globalSearchClearHistory),
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.red,
-              ),
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
             ),
           ),
         ],
