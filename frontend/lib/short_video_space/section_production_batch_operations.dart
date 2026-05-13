@@ -90,7 +90,9 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
         await refreshData();
       } on RustApiException catch (e) {
         showFeedback(
-          l10n.shortVideoBatchEnableFailedStatus('${e.statusCode ?? '-'}'),
+          l10n.shortVideoBatchEnableFailedError(
+            describeUserVisibleApiError(l10n, e),
+          ),
           isSuccess: false,
         );
       } catch (e) {
@@ -178,7 +180,9 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
         await refreshData();
       } on RustApiException catch (e) {
         showFeedback(
-          l10n.shortVideoBatchDisableFailedStatus('${e.statusCode ?? '-'}'),
+          l10n.shortVideoBatchDisableFailedError(
+            describeUserVisibleApiError(l10n, e),
+          ),
           isSuccess: false,
         );
       } catch (e) {
@@ -411,7 +415,9 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
       await refreshData();
     } on RustApiException catch (e) {
       showFeedback(
-        l10n.shortVideoBatchReplaceFailedStatus('${e.statusCode ?? '-'}'),
+        l10n.shortVideoBatchReplaceFailedError(
+          describeUserVisibleApiError(l10n, e),
+        ),
         isSuccess: false,
       );
     } catch (e) {
@@ -603,13 +609,14 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
         failedItems.add(
           BatchOperationFailedItem(
             shotId: shot.storyboardNumericId,
-            errorMessage:
-                '${e.statusCode ?? l10n.shortVideoRustApiUnknownError}: ${e.message}',
+            errorMessage: describeUserVisibleApiError(l10n, e),
           ),
         );
       }
       showFeedback(
-        l10n.shortVideoBatchVoiceoverGenFailedStatus('${e.statusCode ?? '-'}'),
+        l10n.shortVideoBatchVoiceoverGenFailedStatus(
+          describeUserVisibleApiError(l10n, e),
+        ),
         isSuccess: false,
       );
     } catch (e) {
@@ -740,9 +747,8 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
       }
 
       showFeedback(
-        l10n.shortVideoBatchVoiceoverSingleFailedStatus(
-          '${e.statusCode ?? '-'}',
-          e.message,
+        l10n.shortVideoBatchVoiceoverSingleFailedError(
+          describeUserVisibleApiError(l10n, e),
         ),
         isSuccess: false,
       );

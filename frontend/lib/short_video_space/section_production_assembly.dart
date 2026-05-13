@@ -245,7 +245,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                 if (!mounted) return;
                 _showOperationFeedback(
                   l10n.shortVideoSpaceProductionAssemblyDisableFailed(
-                    '${e.statusCode ?? '-'}',
+                    describeUserVisibleApiError(l10n, e),
                   ),
                   isSuccess: false,
                 );
@@ -327,7 +327,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                 if (!mounted) return;
                 _showOperationFeedback(
                   l10n.shortVideoSpaceProductionAssemblyWriteBackFailed(
-                    '${e.statusCode ?? '-'}',
+                    describeUserVisibleApiError(l10n, e),
                   ),
                   isSuccess: false,
                 );
@@ -391,7 +391,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                 if (!mounted) return;
                 _showOperationFeedback(
                   l10n.shortVideoSpaceProductionAssemblyReorderFailed(
-                    '${e.statusCode ?? '-'}',
+                    describeUserVisibleApiError(l10n, e),
                   ),
                   isSuccess: false,
                 );
@@ -466,7 +466,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                 if (!mounted) return;
                 _showOperationFeedback(
                   l10n.shortVideoSpaceProductionAssemblyAlignFailed(
-                    '${e.statusCode ?? '-'}',
+                    describeUserVisibleApiError(l10n, e),
                   ),
                   isSuccess: false,
                 );
@@ -1066,7 +1066,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
             } on RustApiException catch (e) {
               setState(() {
                 errorMessage = dialogL10n.shortVideoSpaceProductionAssemblyLoadFailed(
-                  '${e.statusCode ?? '-'}',
+                  describeUserVisibleApiError(dialogL10n, e),
                 );
                 loading = false;
               });
@@ -1455,7 +1455,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                                       _showOperationFeedback(
                                                         l10n
                                                             .shortVideoSpaceProductionAssemblyCancelFailed(
-                                                          '${e.statusCode ?? '-'}',
+                                                          describeUserVisibleApiError(l10n, e),
                                                         ),
                                                         isSuccess: false,
                                                       );
@@ -1536,7 +1536,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                                       _showOperationFeedback(
                                                         l10n
                                                             .shortVideoSpaceProductionAssemblyRetryFailed(
-                                                          '${e.statusCode ?? '-'}',
+                                                          describeUserVisibleApiError(l10n, e),
                                                         ),
                                                         isSuccess: false,
                                                       );
@@ -2112,7 +2112,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                     if (!mounted) return;
                     _showOperationFeedback(
                       rootL10n.shortVideoSpaceProductionAssemblyStyleWriteBackFailed(
-                        '${e.statusCode ?? '-'}',
+                        describeUserVisibleApiError(rootL10n, e),
                       ),
                       isSuccess: false,
                     );

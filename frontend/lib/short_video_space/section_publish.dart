@@ -242,7 +242,13 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
     } on RustApiException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.shortVideoPublishOpsEnqueueFailedStatus(e.statusCode ?? 0))),
+          SnackBar(
+            content: Text(
+              l10n.shortVideoPublishOpsEnqueueFailed(
+                describeUserVisibleApiError(l10n, e),
+              ),
+            ),
+          ),
         );
       }
     } catch (e) {
@@ -291,7 +297,7 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
           summary.add(
             l10n.shortVideoPublishOpsBatchLineFail(
               draft.id,
-              '${e.statusCode ?? '-'}',
+              describeUserVisibleApiError(l10n, e),
             ),
           );
         } catch (e) {
@@ -346,7 +352,7 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
           summary.add(
             l10n.shortVideoPublishOpsBatchLineFail(
               job.id.substring(0, 8),
-              '${e.statusCode ?? '-'}',
+              describeUserVisibleApiError(l10n, e),
             ),
           );
         } catch (e) {

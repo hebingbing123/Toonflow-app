@@ -46,7 +46,7 @@ extension ShortVideoSpaceSectionProject on _ShortVideoSpaceSectionState {
       final l10n = AppLocalizations.of(context)!;
       setState(() {
         _projectConfigLine = l10n.shortVideoProjectLoadFailed(
-          '${e.statusCode ?? '-'}',
+          describeUserVisibleApiError(l10n, e),
         );
       });
     } catch (e) {
@@ -195,7 +195,7 @@ extension ShortVideoSpaceSectionProject on _ShortVideoSpaceSectionState {
       final errL10n = AppLocalizations.of(context)!;
       setState(() {
         _projectConfigLine = errL10n.shortVideoProjectCreateFailed(
-          '${e.statusCode ?? '-'}',
+          describeUserVisibleApiError(errL10n, e),
         );
       });
     } catch (e) {
@@ -278,7 +278,7 @@ extension ShortVideoSpaceSectionProject on _ShortVideoSpaceSectionState {
       final errL10n = AppLocalizations.of(context)!;
       setState(() {
         _projectConfigLine = errL10n.shortVideoProjectSaveFailed(
-          '${e.statusCode ?? '-'}',
+          describeUserVisibleApiError(errL10n, e),
         );
       });
     } catch (e) {
