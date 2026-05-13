@@ -283,7 +283,7 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
                     .map(
                       (framerate) => DropdownMenuItem(
                         value: framerate,
-                        child: Text('$framerate FPS'),
+                        child: Text(l10n.shortVideoExportSettingsFramerateOption(framerate)),
                       ),
                     )
                     .toList(),

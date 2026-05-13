@@ -357,7 +357,13 @@ ShortVideoExportCheckPanelUi buildShortVideoExportCheckPanelUi({
       final routePart = reason.reworkRoute != null
           ? l10n.shortVideoPublishExportCheckReworkRouteSuffix(reason.reworkRoute!)
           : '';
-      qualityGateBlockingLines.add('${reason.code}: ${reason.message}$routePart');
+      qualityGateBlockingLines.add(
+        l10n.shortVideoPublishExportCheckQualityGateBlockingLine(
+          labelShortVideoBlockingReason(l10n, reason.code),
+          reason.message,
+          routePart,
+        ),
+      );
     }
   }
   final blockingLines = exportCheck.issues

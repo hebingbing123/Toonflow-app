@@ -10679,6 +10679,20 @@
       }
     }
   },
+  "shortVideoPublishExportCheckQualityGateBlockingLine": "{reasonLabel}: {message}{routeSuffix}",
+  "@shortVideoPublishExportCheckQualityGateBlockingLine": {
+    "placeholders": {
+      "reasonLabel": {
+        "type": "String"
+      },
+      "message": {
+        "type": "String"
+      },
+      "routeSuffix": {
+        "type": "String"
+      }
+    }
+  },
   "shortVideoSpacePublishExportCheckBlockingIssue": "Script #{scriptId} · Storyboard #{sbId}{sbIndex} · {label} · {detail}",
   "@shortVideoSpacePublishExportCheckBlockingIssue": {
     "placeholders": {
@@ -12200,6 +12214,14 @@
   "shortVideoExportSettingsResolutionLabel": "Resolution",
   "shortVideoExportSettingsBitrateLabel": "Bitrate",
   "shortVideoExportSettingsFramerateLabel": "Frame rate",
+  "shortVideoExportSettingsFramerateOption": "{framerate} FPS",
+  "@shortVideoExportSettingsFramerateOption": {
+    "placeholders": {
+      "framerate": {
+        "type": "int"
+      }
+    }
+  },
   "shortVideoExportSettingsEstimatedSize": "Estimated file size",
   "shortVideoExportSettingsBasedOnDuration": "Based on {seconds} seconds of video",
   "@shortVideoExportSettingsBasedOnDuration": {

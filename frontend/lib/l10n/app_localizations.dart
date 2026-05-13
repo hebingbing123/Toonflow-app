@@ -21996,6 +21996,16 @@ abstract class AppLocalizations {
   /// **'Quality gate: Unknown strategy \"{strategy}\".'**
   String shortVideoSpacePublishExportCheckQualityGateUnknown(String strategy);
 
+  /// No description provided for @shortVideoPublishExportCheckQualityGateBlockingLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{reasonLabel}: {message}{routeSuffix}'**
+  String shortVideoPublishExportCheckQualityGateBlockingLine(
+    String reasonLabel,
+    String message,
+    String routeSuffix,
+  );
+
   /// No description provided for @shortVideoSpacePublishExportCheckBlockingIssue.
   ///
   /// In en, this message translates to:
@@ -24356,6 +24366,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Frame rate'**
   String get shortVideoExportSettingsFramerateLabel;
+
+  /// No description provided for @shortVideoExportSettingsFramerateOption.
+  ///
+  /// In en, this message translates to:
+  /// **'{framerate} FPS'**
+  String shortVideoExportSettingsFramerateOption(int framerate);
 
   /// No description provided for @shortVideoExportSettingsEstimatedSize.
   ///

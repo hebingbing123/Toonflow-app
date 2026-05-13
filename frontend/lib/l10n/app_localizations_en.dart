@@ -14248,6 +14248,15 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String shortVideoPublishExportCheckQualityGateBlockingLine(
+    String reasonLabel,
+    String message,
+    String routeSuffix,
+  ) {
+    return '$reasonLabel: $message$routeSuffix';
+  }
+
+  @override
   String shortVideoSpacePublishExportCheckBlockingIssue(
     int scriptId,
     int sbId,
@@ -15886,6 +15895,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shortVideoExportSettingsFramerateLabel => 'Frame rate';
+
+  @override
+  String shortVideoExportSettingsFramerateOption(int framerate) {
+    return '$framerate FPS';
+  }
 
   @override
   String get shortVideoExportSettingsEstimatedSize => 'Estimated file size';

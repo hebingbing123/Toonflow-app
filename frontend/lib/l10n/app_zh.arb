@@ -10639,6 +10639,20 @@
       }
     }
   },
+  "shortVideoPublishExportCheckQualityGateBlockingLine": "{reasonLabel}：{message}{routeSuffix}",
+  "@shortVideoPublishExportCheckQualityGateBlockingLine": {
+    "placeholders": {
+      "reasonLabel": {
+        "type": "String"
+      },
+      "message": {
+        "type": "String"
+      },
+      "routeSuffix": {
+        "type": "String"
+      }
+    }
+  },
   "shortVideoSpacePublishExportCheckBlockingIssue": "剧本 #{scriptId} · 分镜 #{sbId}{sbIndex} · {label} · {detail}",
   "@shortVideoSpacePublishExportCheckBlockingIssue": {
     "placeholders": {
@@ -12160,6 +12174,14 @@
   "shortVideoExportSettingsResolutionLabel": "分辨率",
   "shortVideoExportSettingsBitrateLabel": "码率",
   "shortVideoExportSettingsFramerateLabel": "帧率",
+  "shortVideoExportSettingsFramerateOption": "{framerate} FPS",
+  "@shortVideoExportSettingsFramerateOption": {
+    "placeholders": {
+      "framerate": {
+        "type": "int"
+      }
+    }
+  },
   "shortVideoExportSettingsEstimatedSize": "预估文件大小",
   "shortVideoExportSettingsBasedOnDuration": "基于 {seconds} 秒视频时长",
   "@shortVideoExportSettingsBasedOnDuration": {
