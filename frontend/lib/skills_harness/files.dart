@@ -36,10 +36,6 @@ extension SkillsHarnessFileController on SkillsHarnessController {
           ],
         ),
       );
-    } on RustApiException catch (e) {
-      _setErrorFromException(e);
-      loadingSkillPreview = false;
-      _publish();
     } catch (e) {
       _setErrorFromException(e);
       loadingSkillPreview = false;
@@ -256,10 +252,6 @@ extension SkillsHarnessFileController on SkillsHarnessController {
           );
         },
       );
-    } on RustApiException catch (e) {
-      _setErrorFromException(e);
-      loadingSkillVersions = false;
-      _publish();
     } catch (e) {
       _setErrorFromException(e);
       loadingSkillVersions = false;
@@ -286,10 +278,6 @@ extension SkillsHarnessFileController on SkillsHarnessController {
       skillMutationLine =
           _l10n?.skillsHarnessPutResult(r.path, r.content.length) ??
           'PUT 200: ${r.path} (${r.content.length} chars written)';
-      _publish();
-    } on RustApiException catch (e) {
-      _setErrorFromException(e);
-      loadingSkillPut = false;
       _publish();
     } catch (e) {
       _setErrorFromException(e);
@@ -318,10 +306,6 @@ extension SkillsHarnessFileController on SkillsHarnessController {
           _l10n?.skillsHarnessPostResult(r.path, r.content.length) ??
           'POST 201: ${r.path} (${r.content.length} chars written)';
       _publish();
-    } on RustApiException catch (e) {
-      _setErrorFromException(e);
-      loadingSkillPost = false;
-      _publish();
     } catch (e) {
       _setErrorFromException(e);
       loadingSkillPost = false;
@@ -343,10 +327,6 @@ extension SkillsHarnessFileController on SkillsHarnessController {
       loadingSkillDelete = false;
       skillMutationLine =
           _l10n?.skillsHarnessDeleteResult(path) ?? 'DELETE 204: $path';
-      _publish();
-    } on RustApiException catch (e) {
-      _setErrorFromException(e);
-      loadingSkillDelete = false;
       _publish();
     } catch (e) {
       _setErrorFromException(e);
@@ -384,8 +364,6 @@ extension SkillsHarnessFileController on SkillsHarnessController {
           context,
         ).showSnackBar(SnackBar(content: Text(l10n.skillsHarnessRollbackDone)));
       }
-    } on RustApiException catch (e) {
-      _setErrorFromException(e);
     } catch (e) {
       _setErrorFromException(e);
     } finally {

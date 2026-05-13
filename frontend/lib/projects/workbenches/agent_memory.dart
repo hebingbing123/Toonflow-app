@@ -245,12 +245,6 @@ class _ProjectsAgentMemoryWorkbenchDialogState
         _statusLine = l10n.agentMemoryStatusProjectsRefreshed(rows.length);
         _loadingProjects = false;
       });
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _statusLine = describeUserVisibleApiError(l10n, e);
-        _loadingProjects = false;
-      });
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -302,12 +296,6 @@ class _ProjectsAgentMemoryWorkbenchDialogState
         );
         _loadingMemory = false;
       });
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _statusLine = describeUserVisibleApiError(l10n, e);
-        _loadingMemory = false;
-      });
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -345,12 +333,6 @@ class _ProjectsAgentMemoryWorkbenchDialogState
       setState(() {
         _costOverview = overview;
         _statusLine = l10n.agentMemoryStatusCostOverviewLoaded;
-        _loadingCostOverview = false;
-      });
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _statusLine = describeUserVisibleApiError(l10n, e);
         _loadingCostOverview = false;
       });
     } catch (e) {
@@ -411,12 +393,6 @@ class _ProjectsAgentMemoryWorkbenchDialogState
         _statusLine = l10n.agentMemoryStatusAppended(idDisplay);
         _appendingMemory = false;
       });
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _statusLine = describeUserVisibleApiError(l10n, e);
-        _appendingMemory = false;
-      });
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -457,12 +433,6 @@ class _ProjectsAgentMemoryWorkbenchDialogState
       if (!mounted) return;
       setState(() {
         _statusLine = l10n.agentMemoryStatusCleared(clearType);
-        _clearingMemory = false;
-      });
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _statusLine = describeUserVisibleApiError(l10n, e);
         _clearingMemory = false;
       });
     } catch (e) {
@@ -517,12 +487,6 @@ class _ProjectsAgentMemoryWorkbenchDialogState
           dupRows,
           visRows,
         );
-        _optimizingMemory = false;
-      });
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _statusLine = describeUserVisibleApiError(l10n, e);
         _optimizingMemory = false;
       });
     } catch (e) {

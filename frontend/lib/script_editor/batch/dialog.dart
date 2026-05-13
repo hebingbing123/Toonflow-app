@@ -179,15 +179,6 @@ class _StoryboardBatchWorkbenchDialogState
           diagnosis: _currentDiagnosis(),
         );
       });
-    } on RustApiException catch (e) {
-      if (mounted) {
-        final loc = AppLocalizations.of(context)!;
-        setState(
-          () => _statusLine = loc.scriptEditorStoryboardBatchLoadProductionFailed(
-            describeUserVisibleApiError(loc, e),
-          ),
-        );
-      }
     } catch (e) {
       if (mounted) {
         final loc = AppLocalizations.of(context)!;

@@ -104,14 +104,6 @@ class _ProjectsCreativeManualsWorkbenchDialogState
           _applyRow(target);
         }
       });
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _busy = false;
-        _statusLine = l10n.projectsCreativeManualStatusReloadFail(
-          describeUserVisibleApiError(l10n, e),
-        );
-      });
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -163,15 +155,6 @@ class _ProjectsCreativeManualsWorkbenchDialogState
           path,
         ),
       );
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _busy = false;
-        _statusLine = l10n.projectsCreativeManualStatusOpFail(
-          l10n.projectsCreativeManualVerbCreate,
-          describeUserVisibleApiError(l10n, e),
-        );
-      });
     } on FormatException catch (e) {
       if (!mounted) return;
       setState(() {
@@ -234,15 +217,6 @@ class _ProjectsCreativeManualsWorkbenchDialogState
           path,
         ),
       );
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _busy = false;
-        _statusLine = l10n.projectsCreativeManualStatusOpFail(
-          l10n.projectsCreativeManualVerbSave,
-          describeUserVisibleApiError(l10n, e),
-        );
-      });
     } on FormatException catch (e) {
       if (!mounted) return;
       setState(() {
@@ -289,15 +263,6 @@ class _ProjectsCreativeManualsWorkbenchDialogState
           selected.path,
         ),
       );
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _busy = false;
-        _statusLine = l10n.projectsCreativeManualStatusOpFail(
-          l10n.projectsCreativeManualVerbDelete,
-          describeUserVisibleApiError(l10n, e),
-        );
-      });
     } catch (e) {
       if (!mounted) return;
       setState(() {

@@ -211,8 +211,6 @@ class SkillsHarnessController extends ChangeNotifier {
       harnessToolsLine = r.tools
           .map((t) => '${t.name}: ${t.description}')
           .join('\n');
-    } on RustApiException catch (e) {
-      _setErrorFromException(e);
     } catch (e) {
       _setErrorFromException(e);
     } finally {
@@ -233,8 +231,6 @@ class SkillsHarnessController extends ChangeNotifier {
       userWasmValidateLine =
           _l10n?.skillsHarnessValidateResult('${r.validated}', r.sizeBytes) ??
           'validated=${r.validated}, size_bytes=${r.sizeBytes} (embedded probe)';
-    } on RustApiException catch (e) {
-      _setErrorFromException(e);
     } catch (e) {
       _setErrorFromException(e);
     } finally {
@@ -264,8 +260,6 @@ class SkillsHarnessController extends ChangeNotifier {
           ) ??
           'stored id=${r.id}, sha256=$shaShort, size=${r.sizeBytes}, at=${r.createdAt.toIso8601String()}';
       userWasmRevokeTargetId = r.id;
-    } on RustApiException catch (e) {
-      _setErrorFromException(e);
     } catch (e) {
       _setErrorFromException(e);
     } finally {
@@ -301,8 +295,6 @@ class SkillsHarnessController extends ChangeNotifier {
             '${r.items.length} stored module(s) — $preview${r.items.length > 5 ? ', …' : ''}';
         userWasmRevokeTargetId = r.items.first.id;
       }
-    } on RustApiException catch (e) {
-      _setErrorFromException(e);
     } catch (e) {
       _setErrorFromException(e);
     } finally {
@@ -328,8 +320,6 @@ class SkillsHarnessController extends ChangeNotifier {
           ) ??
           'revoked id=${r.id}, revoked_at=${r.revokedAt.toIso8601String()}';
       userWasmRevokeTargetId = null;
-    } on RustApiException catch (e) {
-      _setErrorFromException(e);
     } catch (e) {
       _setErrorFromException(e);
     } finally {
@@ -362,8 +352,6 @@ class SkillsHarnessController extends ChangeNotifier {
 
       // Reload so the list filtering (`revoked_at IS NULL`) is visibly verified.
       await loadUserWasmList();
-    } on RustApiException catch (e) {
-      _setErrorFromException(e);
     } catch (e) {
       _setErrorFromException(e);
     } finally {
@@ -388,8 +376,6 @@ class SkillsHarnessController extends ChangeNotifier {
             summary.totalBytes,
           ) ??
           'scope=${summary.scope} · ${summary.markdownFileCount} md files, ${summary.totalBytes} bytes total';
-    } on RustApiException catch (e) {
-      _setErrorFromException(e);
     } catch (e) {
       _setErrorFromException(e);
     } finally {
@@ -416,8 +402,6 @@ class SkillsHarnessController extends ChangeNotifier {
                 : sample,
           ) ??
           '${list.length} files; sample: ${sample.isEmpty ? '—' : sample}';
-    } on RustApiException catch (e) {
-      _setErrorFromException(e);
     } catch (e) {
       _setErrorFromException(e);
     } finally {

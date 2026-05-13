@@ -61,13 +61,6 @@ extension _HomePageScriptEditorEditImageWorkbench on _HomePageState {
             model.model,
           );
         });
-      } on RustApiException catch (e) {
-        setState(
-          () =>
-              statusLine = l10n.scriptEditorEditImageWorkbenchLoadFailed(
-                describeUserVisibleApiError(l10n, e),
-              ),
-        );
       } catch (e) {
         setState(
           () =>
@@ -87,8 +80,6 @@ extension _HomePageScriptEditorEditImageWorkbench on _HomePageState {
       setState(() => busy = true);
       try {
         await action();
-      } on RustApiException catch (e) {
-        setState(() => statusLine = describeUserVisibleApiError(l10n, e));
       } catch (e) {
         setState(() => statusLine = describeUserVisibleApiError(l10n, e));
       } finally {

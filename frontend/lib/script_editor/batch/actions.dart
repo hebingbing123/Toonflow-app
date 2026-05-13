@@ -9,11 +9,6 @@ extension _StoryboardBatchWorkbenchActions
     _applyBatchWorkbenchState(() => _busyMutation = true);
     try {
       await action();
-    } on RustApiException catch (e) {
-      if (mounted) {
-        final loc = AppLocalizations.of(context)!;
-        _applyBatchWorkbenchState(() => _statusLine = describeUserVisibleApiError(loc, e));
-      }
     } catch (e) {
       if (mounted) {
         final loc = AppLocalizations.of(context)!;
