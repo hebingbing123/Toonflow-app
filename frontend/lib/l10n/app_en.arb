@@ -5136,6 +5136,83 @@
       }
     }
   },
+  "projectEditorNovelsCompatibilitySectionTitle": "Compatibility checks",
+  "projectEditorNovelsCompatibilitySectionSubtitle": "Keeps legacy Electron-shaped endpoints and event regression hooks; collapsed by default.",
+  "projectEditorNovelsCompatibilitySectionProbeHint": "Novels HTTP probe checks",
+  "projectEditorNovelsProbeReadGetNovelButton": "POST get-novel",
+  "projectEditorNovelsProbeReadGetNovelSnackbarWithFirst": "POST …/novels/get-novel: total={total} · first #{id} {chapter}",
+  "@projectEditorNovelsProbeReadGetNovelSnackbarWithFirst": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "id": {
+        "type": "int"
+      },
+      "chapter": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsProbeReadGetNovelSnackbarTotalOnly": "POST …/novels/get-novel: total={total}",
+  "@projectEditorNovelsProbeReadGetNovelSnackbarTotalOnly": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsProbeReadGetNovelDataButton": "POST get-novel-data",
+  "projectEditorNovelsProbeReadGetNovelDataSnackbar": "POST …/novels/get-novel-data: {count} row(s)",
+  "@projectEditorNovelsProbeReadGetNovelDataSnackbar": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsProbeReadGetNovelIndexButton": "POST get-novel-index",
+  "projectEditorNovelsProbeReadGetNovelIndexSnackbar": "POST …/novels/get-novel-index: {count} row(s)",
+  "@projectEditorNovelsProbeReadGetNovelIndexSnackbar": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsProbeReadGetNovelEventStateButton": "POST get-novel-event-state",
+  "projectEditorNovelsProbeReadGetNovelEventStateSnackbar": "POST …/novels/get-novel-event-state: {count} row(s) with non-zero state",
+  "@projectEditorNovelsProbeReadGetNovelEventStateSnackbar": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsProbeEventsGetEventsButton": "POST events/get-events",
+  "projectEditorNovelsProbeEventsBatchDeleteEmptyButton": "POST events/batch-delete []",
+  "projectEditorNovelsProbeEventsGetEventsSnackbarWithFirst": "POST …/novels/events/get-events: total={total} · first #{id} {eventName}",
+  "@projectEditorNovelsProbeEventsGetEventsSnackbarWithFirst": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "id": {
+        "type": "int"
+      },
+      "eventName": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsProbeEventsGetEventsSnackbarTotalOnly": "POST …/novels/events/get-events: total={total}",
+  "@projectEditorNovelsProbeEventsGetEventsSnackbarTotalOnly": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "projectEditorNovelsWorkbenchSearchButton": "Search",
   "projectEditorNovelsWorkbenchSearchClearFilters": "Clear filters",
   "projectEditorNovelsWorkbenchSearchRefreshList": "Refresh list",

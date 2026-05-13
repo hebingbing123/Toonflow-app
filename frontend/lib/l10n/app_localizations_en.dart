@@ -6779,6 +6779,84 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get projectEditorNovelsCompatibilitySectionTitle =>
+      'Compatibility checks';
+
+  @override
+  String get projectEditorNovelsCompatibilitySectionSubtitle =>
+      'Keeps legacy Electron-shaped endpoints and event regression hooks; collapsed by default.';
+
+  @override
+  String get projectEditorNovelsCompatibilitySectionProbeHint =>
+      'Novels HTTP probe checks';
+
+  @override
+  String get projectEditorNovelsProbeReadGetNovelButton => 'POST get-novel';
+
+  @override
+  String projectEditorNovelsProbeReadGetNovelSnackbarWithFirst(
+    int total,
+    int id,
+    String chapter,
+  ) {
+    return 'POST …/novels/get-novel: total=$total · first #$id $chapter';
+  }
+
+  @override
+  String projectEditorNovelsProbeReadGetNovelSnackbarTotalOnly(int total) {
+    return 'POST …/novels/get-novel: total=$total';
+  }
+
+  @override
+  String get projectEditorNovelsProbeReadGetNovelDataButton =>
+      'POST get-novel-data';
+
+  @override
+  String projectEditorNovelsProbeReadGetNovelDataSnackbar(int count) {
+    return 'POST …/novels/get-novel-data: $count row(s)';
+  }
+
+  @override
+  String get projectEditorNovelsProbeReadGetNovelIndexButton =>
+      'POST get-novel-index';
+
+  @override
+  String projectEditorNovelsProbeReadGetNovelIndexSnackbar(int count) {
+    return 'POST …/novels/get-novel-index: $count row(s)';
+  }
+
+  @override
+  String get projectEditorNovelsProbeReadGetNovelEventStateButton =>
+      'POST get-novel-event-state';
+
+  @override
+  String projectEditorNovelsProbeReadGetNovelEventStateSnackbar(int count) {
+    return 'POST …/novels/get-novel-event-state: $count row(s) with non-zero state';
+  }
+
+  @override
+  String get projectEditorNovelsProbeEventsGetEventsButton =>
+      'POST events/get-events';
+
+  @override
+  String get projectEditorNovelsProbeEventsBatchDeleteEmptyButton =>
+      'POST events/batch-delete []';
+
+  @override
+  String projectEditorNovelsProbeEventsGetEventsSnackbarWithFirst(
+    int total,
+    int id,
+    String eventName,
+  ) {
+    return 'POST …/novels/events/get-events: total=$total · first #$id $eventName';
+  }
+
+  @override
+  String projectEditorNovelsProbeEventsGetEventsSnackbarTotalOnly(int total) {
+    return 'POST …/novels/events/get-events: total=$total';
+  }
+
+  @override
   String get projectEditorNovelsWorkbenchSearchButton => 'Search';
 
   @override

@@ -15,6 +15,7 @@ extension _HomePageProjectEditorNovelsProbeReadActions on _HomePageState {
         onPressed: disabled
             ? null
             : () async {
+                final l10n = AppLocalizations.of(ctx)!;
                 setDialogState(() => novelsBusy[0] = true);
                 try {
                   final pg = await fetchNovelWorkbenchPaged(
@@ -29,8 +30,12 @@ extension _HomePageProjectEditorNovelsProbeReadActions on _HomePageState {
                     SnackBar(
                       content: Text(
                         first != null
-                            ? 'POST …/novels/get-novel：total=${pg.total} · 首行 #${first.numericId} ${first.chapter}'
-                            : 'POST …/novels/get-novel：total=${pg.total}',
+                            ? l10n.projectEditorNovelsProbeReadGetNovelSnackbarWithFirst(
+                                pg.total,
+                                first.numericId,
+                                first.chapter,
+                              )
+                            : l10n.projectEditorNovelsProbeReadGetNovelSnackbarTotalOnly(pg.total),
                       ),
                     ),
                   );
@@ -46,12 +51,13 @@ extension _HomePageProjectEditorNovelsProbeReadActions on _HomePageState {
                   }
                 }
               },
-        child: const Text('POST get-novel'),
+        child: Text(AppLocalizations.of(ctx)!.projectEditorNovelsProbeReadGetNovelButton),
       ),
       TextButton(
         onPressed: disabled
             ? null
             : () async {
+                final l10n = AppLocalizations.of(ctx)!;
                 setDialogState(() => novelsBusy[0] = true);
                 try {
                   final rows = await fetchNovelWorkbenchFullRows(
@@ -61,7 +67,7 @@ extension _HomePageProjectEditorNovelsProbeReadActions on _HomePageState {
                   if (!ctx.mounted) return;
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
-                      content: Text('POST …/novels/get-novel-data：${rows.length} 条'),
+                      content: Text(l10n.projectEditorNovelsProbeReadGetNovelDataSnackbar(rows.length)),
                     ),
                   );
                 } on RustApiException catch (e) {
@@ -76,12 +82,13 @@ extension _HomePageProjectEditorNovelsProbeReadActions on _HomePageState {
                   }
                 }
               },
-        child: const Text('POST get-novel-data'),
+        child: Text(AppLocalizations.of(ctx)!.projectEditorNovelsProbeReadGetNovelDataButton),
       ),
       TextButton(
         onPressed: disabled
             ? null
             : () async {
+                final l10n = AppLocalizations.of(ctx)!;
                 setDialogState(() => novelsBusy[0] = true);
                 try {
                   final idx = await fetchNovelWorkbenchIndex(
@@ -91,7 +98,7 @@ extension _HomePageProjectEditorNovelsProbeReadActions on _HomePageState {
                   if (!ctx.mounted) return;
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
-                      content: Text('POST …/novels/get-novel-index：${idx.length} 条'),
+                      content: Text(l10n.projectEditorNovelsProbeReadGetNovelIndexSnackbar(idx.length)),
                     ),
                   );
                 } on RustApiException catch (e) {
@@ -106,12 +113,13 @@ extension _HomePageProjectEditorNovelsProbeReadActions on _HomePageState {
                   }
                 }
               },
-        child: const Text('POST get-novel-index'),
+        child: Text(AppLocalizations.of(ctx)!.projectEditorNovelsProbeReadGetNovelIndexButton),
       ),
       TextButton(
         onPressed: disabled || novelsRef[0] == null
             ? null
             : () async {
+                final l10n = AppLocalizations.of(ctx)!;
                 setDialogState(() => novelsBusy[0] = true);
                 try {
                   final ids = novelsRef[0]!.items.map((e) => e.numericId).toList();
@@ -124,7 +132,7 @@ extension _HomePageProjectEditorNovelsProbeReadActions on _HomePageState {
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'POST …/novels/get-novel-event-state：${rows.length} 条非 0 状态',
+                        l10n.projectEditorNovelsProbeReadGetNovelEventStateSnackbar(rows.length),
                       ),
                     ),
                   );
@@ -140,7 +148,7 @@ extension _HomePageProjectEditorNovelsProbeReadActions on _HomePageState {
                   }
                 }
               },
-        child: const Text('POST get-novel-event-state'),
+        child: Text(AppLocalizations.of(ctx)!.projectEditorNovelsProbeReadGetNovelEventStateButton),
       ),
     ];
   }

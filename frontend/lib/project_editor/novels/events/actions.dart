@@ -26,6 +26,7 @@ extension _HomePageProjectEditorNovelEventsActions on _HomePageState {
                 assetsScriptFilterLoading[0]
             ? null
             : () async {
+                final l10n = AppLocalizations.of(ctx)!;
                 setDialogState(() => novelsBusy[0] = true);
                 try {
                   final pg = await fetchNovelEventsPaged(
@@ -36,14 +37,15 @@ extension _HomePageProjectEditorNovelEventsActions on _HomePageState {
                   );
                   if (!ctx.mounted) return;
                   final first = pg.list.isNotEmpty ? pg.list.first : null;
+                  final snack = first != null
+                      ? l10n.projectEditorNovelsProbeEventsGetEventsSnackbarWithFirst(
+                          pg.total,
+                          first.numericId,
+                          first.eventName,
+                        )
+                      : l10n.projectEditorNovelsProbeEventsGetEventsSnackbarTotalOnly(pg.total);
                   ScaffoldMessenger.of(ctx).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        first != null
-                            ? 'POST …/novels/events/get-events：total=${pg.total} · 首条 #${first.numericId} ${first.eventName}'
-                            : 'POST …/novels/events/get-events：total=${pg.total}',
-                      ),
-                    ),
+                    SnackBar(content: Text(snack)),
                   );
                 } on RustApiException catch (e) {
                   if (ctx.mounted) {
@@ -57,7 +59,7 @@ extension _HomePageProjectEditorNovelEventsActions on _HomePageState {
                   }
                 }
               },
-        child: const Text('POST events/get-events'),
+        child: Text(AppLocalizations.of(ctx)!.projectEditorNovelsProbeEventsGetEventsButton),
       ),
       TextButton(
         onPressed:
@@ -69,6 +71,7 @@ extension _HomePageProjectEditorNovelEventsActions on _HomePageState {
                 assetsScriptFilterLoading[0]
             ? null
             : () async {
+                final l10n = AppLocalizations.of(ctx)!;
                 setDialogState(() => novelsBusy[0] = true);
                 try {
                   final pg = await fetchNovelEventsPaged(
@@ -79,14 +82,15 @@ extension _HomePageProjectEditorNovelEventsActions on _HomePageState {
                   );
                   if (!ctx.mounted) return;
                   final first = pg.list.isNotEmpty ? pg.list.first : null;
+                  final snack = first != null
+                      ? l10n.projectEditorNovelsProbeEventsGetEventsSnackbarWithFirst(
+                          pg.total,
+                          first.numericId,
+                          first.eventName,
+                        )
+                      : l10n.projectEditorNovelsProbeEventsGetEventsSnackbarTotalOnly(pg.total);
                   ScaffoldMessenger.of(ctx).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        first != null
-                            ? 'POST …/novels/events/get-events：total=${pg.total} · 首条 #${first.numericId} ${first.eventName}'
-                            : 'POST …/novels/events/get-events：total=${pg.total}',
-                      ),
-                    ),
+                    SnackBar(content: Text(snack)),
                   );
                 } on RustApiException catch (e) {
                   if (ctx.mounted) {
@@ -100,7 +104,7 @@ extension _HomePageProjectEditorNovelEventsActions on _HomePageState {
                   }
                 }
               },
-        child: const Text('POST events/batch-delete []'),
+        child: Text(AppLocalizations.of(ctx)!.projectEditorNovelsProbeEventsBatchDeleteEmptyButton),
       ),
     ];
   }

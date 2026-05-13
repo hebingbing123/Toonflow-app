@@ -6505,6 +6505,82 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get projectEditorNovelsCompatibilitySectionTitle => '兼容性检查';
+
+  @override
+  String get projectEditorNovelsCompatibilitySectionSubtitle =>
+      '保留旧 Electron 形接口与事件回归入口，默认折叠';
+
+  @override
+  String get projectEditorNovelsCompatibilitySectionProbeHint => '小说 HTTP 探测';
+
+  @override
+  String get projectEditorNovelsProbeReadGetNovelButton => 'POST get-novel';
+
+  @override
+  String projectEditorNovelsProbeReadGetNovelSnackbarWithFirst(
+    int total,
+    int id,
+    String chapter,
+  ) {
+    return 'POST …/novels/get-novel：total=$total · 首行 #$id $chapter';
+  }
+
+  @override
+  String projectEditorNovelsProbeReadGetNovelSnackbarTotalOnly(int total) {
+    return 'POST …/novels/get-novel：total=$total';
+  }
+
+  @override
+  String get projectEditorNovelsProbeReadGetNovelDataButton =>
+      'POST get-novel-data';
+
+  @override
+  String projectEditorNovelsProbeReadGetNovelDataSnackbar(int count) {
+    return 'POST …/novels/get-novel-data：$count 条';
+  }
+
+  @override
+  String get projectEditorNovelsProbeReadGetNovelIndexButton =>
+      'POST get-novel-index';
+
+  @override
+  String projectEditorNovelsProbeReadGetNovelIndexSnackbar(int count) {
+    return 'POST …/novels/get-novel-index：$count 条';
+  }
+
+  @override
+  String get projectEditorNovelsProbeReadGetNovelEventStateButton =>
+      'POST get-novel-event-state';
+
+  @override
+  String projectEditorNovelsProbeReadGetNovelEventStateSnackbar(int count) {
+    return 'POST …/novels/get-novel-event-state：$count 条非 0 状态';
+  }
+
+  @override
+  String get projectEditorNovelsProbeEventsGetEventsButton =>
+      'POST events/get-events';
+
+  @override
+  String get projectEditorNovelsProbeEventsBatchDeleteEmptyButton =>
+      'POST events/batch-delete []';
+
+  @override
+  String projectEditorNovelsProbeEventsGetEventsSnackbarWithFirst(
+    int total,
+    int id,
+    String eventName,
+  ) {
+    return 'POST …/novels/events/get-events：total=$total · 首条 #$id $eventName';
+  }
+
+  @override
+  String projectEditorNovelsProbeEventsGetEventsSnackbarTotalOnly(int total) {
+    return 'POST …/novels/events/get-events：total=$total';
+  }
+
+  @override
   String get projectEditorNovelsWorkbenchSearchButton => '搜索';
 
   @override

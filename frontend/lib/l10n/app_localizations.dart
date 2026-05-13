@@ -10902,6 +10902,110 @@ abstract class AppLocalizations {
     String detail,
   );
 
+  /// No description provided for @projectEditorNovelsCompatibilitySectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Compatibility checks'**
+  String get projectEditorNovelsCompatibilitySectionTitle;
+
+  /// No description provided for @projectEditorNovelsCompatibilitySectionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keeps legacy Electron-shaped endpoints and event regression hooks; collapsed by default.'**
+  String get projectEditorNovelsCompatibilitySectionSubtitle;
+
+  /// No description provided for @projectEditorNovelsCompatibilitySectionProbeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Novels HTTP probe checks'**
+  String get projectEditorNovelsCompatibilitySectionProbeHint;
+
+  /// No description provided for @projectEditorNovelsProbeReadGetNovelButton.
+  ///
+  /// In en, this message translates to:
+  /// **'POST get-novel'**
+  String get projectEditorNovelsProbeReadGetNovelButton;
+
+  /// No description provided for @projectEditorNovelsProbeReadGetNovelSnackbarWithFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'POST …/novels/get-novel: total={total} · first #{id} {chapter}'**
+  String projectEditorNovelsProbeReadGetNovelSnackbarWithFirst(
+    int total,
+    int id,
+    String chapter,
+  );
+
+  /// No description provided for @projectEditorNovelsProbeReadGetNovelSnackbarTotalOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'POST …/novels/get-novel: total={total}'**
+  String projectEditorNovelsProbeReadGetNovelSnackbarTotalOnly(int total);
+
+  /// No description provided for @projectEditorNovelsProbeReadGetNovelDataButton.
+  ///
+  /// In en, this message translates to:
+  /// **'POST get-novel-data'**
+  String get projectEditorNovelsProbeReadGetNovelDataButton;
+
+  /// No description provided for @projectEditorNovelsProbeReadGetNovelDataSnackbar.
+  ///
+  /// In en, this message translates to:
+  /// **'POST …/novels/get-novel-data: {count} row(s)'**
+  String projectEditorNovelsProbeReadGetNovelDataSnackbar(int count);
+
+  /// No description provided for @projectEditorNovelsProbeReadGetNovelIndexButton.
+  ///
+  /// In en, this message translates to:
+  /// **'POST get-novel-index'**
+  String get projectEditorNovelsProbeReadGetNovelIndexButton;
+
+  /// No description provided for @projectEditorNovelsProbeReadGetNovelIndexSnackbar.
+  ///
+  /// In en, this message translates to:
+  /// **'POST …/novels/get-novel-index: {count} row(s)'**
+  String projectEditorNovelsProbeReadGetNovelIndexSnackbar(int count);
+
+  /// No description provided for @projectEditorNovelsProbeReadGetNovelEventStateButton.
+  ///
+  /// In en, this message translates to:
+  /// **'POST get-novel-event-state'**
+  String get projectEditorNovelsProbeReadGetNovelEventStateButton;
+
+  /// No description provided for @projectEditorNovelsProbeReadGetNovelEventStateSnackbar.
+  ///
+  /// In en, this message translates to:
+  /// **'POST …/novels/get-novel-event-state: {count} row(s) with non-zero state'**
+  String projectEditorNovelsProbeReadGetNovelEventStateSnackbar(int count);
+
+  /// No description provided for @projectEditorNovelsProbeEventsGetEventsButton.
+  ///
+  /// In en, this message translates to:
+  /// **'POST events/get-events'**
+  String get projectEditorNovelsProbeEventsGetEventsButton;
+
+  /// No description provided for @projectEditorNovelsProbeEventsBatchDeleteEmptyButton.
+  ///
+  /// In en, this message translates to:
+  /// **'POST events/batch-delete []'**
+  String get projectEditorNovelsProbeEventsBatchDeleteEmptyButton;
+
+  /// No description provided for @projectEditorNovelsProbeEventsGetEventsSnackbarWithFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'POST …/novels/events/get-events: total={total} · first #{id} {eventName}'**
+  String projectEditorNovelsProbeEventsGetEventsSnackbarWithFirst(
+    int total,
+    int id,
+    String eventName,
+  );
+
+  /// No description provided for @projectEditorNovelsProbeEventsGetEventsSnackbarTotalOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'POST …/novels/events/get-events: total={total}'**
+  String projectEditorNovelsProbeEventsGetEventsSnackbarTotalOnly(int total);
+
   /// No description provided for @projectEditorNovelsWorkbenchSearchButton.
   ///
   /// In en, this message translates to:

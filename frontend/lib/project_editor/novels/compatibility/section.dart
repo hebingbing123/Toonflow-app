@@ -15,12 +15,13 @@ extension _HomePageProjectEditorNovelsProbe on _HomePageState {
     required List<bool> assetsLoading,
     required List<bool> assetsScriptFilterLoading,
   }) {
+    final l10n = AppLocalizations.of(ctx)!;
     return ExpansionTile(
       tilePadding: EdgeInsets.zero,
       childrenPadding: EdgeInsets.zero,
-      title: const Text('兼容性检查'),
+      title: Text(l10n.projectEditorNovelsCompatibilitySectionTitle),
       subtitle: Text(
-        '保留旧 Electron 形接口与事件回归入口，默认折叠',
+        l10n.projectEditorNovelsCompatibilitySectionSubtitle,
         style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
           color: Theme.of(ctx).colorScheme.outline,
         ),
@@ -29,7 +30,7 @@ extension _HomePageProjectEditorNovelsProbe on _HomePageState {
         Align(
           alignment: Alignment.centerLeft,
           child: Text(
-            'Novels HTTP probe checks',
+            l10n.projectEditorNovelsCompatibilitySectionProbeHint,
             style: Theme.of(ctx).textTheme.labelSmall?.copyWith(
               color: Theme.of(ctx).colorScheme.outline,
             ),
