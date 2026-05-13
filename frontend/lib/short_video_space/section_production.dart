@@ -57,17 +57,6 @@ extension _ShortVideoSpaceSectionProductionExtension
         );
       });
       await _loadProjectOverview();
-    } on RustApiException catch (e) {
-      if (!mounted) {
-        return;
-      }
-      setState(() {
-        _batchCandidateBusy = false;
-        _projectConfigLine =
-            AppLocalizations.of(context)!.shortVideoProductionBatchFailed(
-          describeUserVisibleApiError(AppLocalizations.of(context)!, e),
-        );
-      });
     } catch (e) {
       if (!mounted) {
         return;
@@ -315,39 +304,6 @@ extension _ShortVideoSpaceSectionProductionExtension
         _syncPublishAutomationModesFromMatrix();
       });
       await _loadDraftsAndVersions();
-    } on RustApiException catch (_) {
-      if (!mounted) {
-        return;
-      }
-      setState(() {
-        _projectStats = null;
-        _recentProjectTasks = null;
-        _qualityScopeInsight = null;
-        _badCaseStats = const <BadCaseStatItem>[];
-        _sceneAssetCount = 0;
-        _clipAssetCount = 0;
-        _shotReadiness = null;
-        _shotReadinessUnavailable = false;
-        _productionOverview = null;
-        _projectAssetsOverview = null;
-        _shortVideoAssembly = null;
-        _shortVideoExportCheck = null;
-        _candidateCompareRows = const <ProductionStoryboardItemV1>[];
-        _candidateCompareReviews = const <QualityReview>[];
-        _publishMatrix = null;
-        _publishUnavailable = false;
-        _publishDrafts = const <PublishDraftRow>[];
-        _publishPrepare = null;
-        _publishJobs = const <PublishJobRow>[];
-        _publishPerfAlerts = const <PublishPerformanceAlertRow>[];
-        _publishAuditRows = const <PublishAttemptAuditRow>[];
-        _publishAutomationModesByPlatform = <String, String>{};
-        _publishBusy = false;
-        _publishCopyEditorRevision = 0;
-        _assemblyDrafts = const <AssemblyDraft>[];
-        _assemblyVersions = const <AssemblyVersion>[];
-        _currentAssemblyVersionId = 'default';
-      });
     } catch (_) {
       if (!mounted) {
         return;
@@ -431,19 +387,11 @@ extension _ShortVideoSpaceSectionProductionExtension
             );
       });
       await _loadProjectOverview();
-    } on RustApiException catch (e) {
+    } catch (e) {
       if (!mounted) return;
       setState(() {
         _projectConfigLine = AppLocalizations.of(context)!
             .shortVideoProductionSetCurrentFailed(
-          describeUserVisibleApiError(AppLocalizations.of(context)!, e),
-        );
-      });
-    } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _projectConfigLine =
-            AppLocalizations.of(context)!.shortVideoProductionSetCurrentFailed(
           describeUserVisibleApiError(AppLocalizations.of(context)!, e),
         );
       });
