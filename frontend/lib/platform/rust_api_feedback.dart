@@ -72,3 +72,16 @@ void showRustApiErrorSnackBar(Object error) {
     ),
   );
 }
+
+/// When [error] is a [RustApiException], shows the root SnackBar; then calls [onMessage]
+/// with [describeUserVisibleApiError] using [l10n] (for Rust and non-Rust errors alike).
+void showRustApiSnackBarIfRustThenDescribeUserVisible(
+  Object error, {
+  required AppLocalizations l10n,
+  required void Function(String message) onMessage,
+}) {
+  if (error is RustApiException) {
+    showRustApiErrorSnackBar(error);
+  }
+  onMessage(describeUserVisibleApiError(l10n, error));
+}

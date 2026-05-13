@@ -116,4 +116,16 @@ void main() {
     expect(got, isNotNull);
     expect(got!.isNotEmpty, true);
   });
+
+  test('showRustApiSnackBarIfRustThenDescribeUserVisible always delivers user-visible message', () {
+    final l10n = lookupAppLocalizations(const Locale('en'));
+    String? got;
+    showRustApiSnackBarIfRustThenDescribeUserVisible(
+      StateError('local'),
+      l10n: l10n,
+      onMessage: (m) => got = m,
+    );
+    expect(got, isNotNull);
+    expect(got!.isNotEmpty, true);
+  });
 }

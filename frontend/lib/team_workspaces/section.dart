@@ -307,13 +307,17 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
       if (!mounted) {
         return;
       }
-      if (e is RustApiException) {
-        showRustApiErrorSnackBar(e);
-      }
-      setState(() {
-        _error = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
-        _loading = false;
-      });
+      final l10n = AppLocalizations.of(context)!;
+      showRustApiSnackBarIfRustThenDescribeUserVisible(
+        e,
+        l10n: l10n,
+        onMessage: (message) {
+          setState(() {
+            _error = message;
+            _loading = false;
+          });
+        },
+      );
     }
   }
 
