@@ -1715,3 +1715,841 @@ proptest! {
         }
     }
 }
+
+proptest! {
+    #![proptest_config(ProptestConfig::with_cases(10))]
+
+    /// **Property 12: Array Non-Empty Validation Correctness**
+    /// **Validates: Requirements 6.6**
+    ///
+    /// For any non-empty array, validate_array_not_empty SHALL return Ok,
+    /// and for any empty array, validate_array_not_empty SHALL return an
+    /// ApiError with appropriate bilingual message.
+    #[test]
+    fn prop_array_not_empty_validation_correctness(
+        // Generate arrays of various sizes
+        array_size in 0usize..50,
+        field_name in "[a-zA-Z_]{1,20}",
+    ) {
+        // Generate an array of the specified size
+        let array: Vec<i32> = (0..array_size).map(|i| i as i32).collect();
+
+        let result = validate_array_not_empty(&array, &field_name);
+
+        if array_size > 0 {
+            // Non-empty array - should pass
+            prop_assert!(result.is_ok(),
+                "non-empty array of size {} should pass validation", array_size);
+        } else {
+            // Empty array - should fail
+            prop_assert!(result.is_err(),
+                "empty array should fail validation");
+
+            // Verify the error contains the field name
+            if let Err(ApiError::BadRequestI18n { en, zh }) = result {
+                prop_assert!(en.contains(&field_name),
+                    "English error should contain field name");
+                prop_assert!(zh.contains(&field_name),
+                    "Chinese error should contain field name");
+                prop_assert!(en.contains("array"),
+                    "English error should mention 'array'");
+                prop_assert!(zh.contains("数组"),
+                    "Chinese error should mention '数组'");
+                prop_assert!(en.contains("empty"),
+                    "English error should mention 'empty'");
+                prop_assert!(zh.contains("空"),
+                    "Chinese error should mention '空'");
+            } else {
+                return Err(proptest::test_runner::TestCaseError::fail(
+                    "expected BadRequestI18n error"));
+            }
+        }
+    }
+
+    /// Test array non-empty validation with bilingual error messages
+    #[test]
+    fn prop_array_not_empty_validation_bilingual_messages(
+        field_name in "[a-zA-Z_]{1,20}",
+    ) {
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .expect("runtime");
+
+        let empty_array: Vec<i32> = vec![];
+
+        // Test English locale
+        let en_result = runtime.block_on(async {
+            REQUEST_LOCALE
+                .scope(ApiLocale::En, async {
+                    validate_array_not_empty(&empty_array, &field_name)
+                })
+                .await
+        });
+
+        prop_assert!(en_result.is_err(), "empty array should be rejected");
+        if let Err(ApiError::BadRequestI18n { en, .. }) = en_result {
+            prop_assert!(en.contains(&field_name),
+                "English error should contain field name");
+            prop_assert!(en.contains("Invalid value"),
+                "English error should contain 'Invalid value'");
+            prop_assert!(en.contains("array must not be empty"),
+                "English error should mention 'array must not be empty'");
+        }
+
+        // Test Chinese locale
+        let zh_result = runtime.block_on(async {
+            REQUEST_LOCALE
+                .scope(ApiLocale::Zh, async {
+                    validate_array_not_empty(&empty_array, &field_name)
+                })
+                .await
+        });
+
+        prop_assert!(zh_result.is_err(), "empty array should be rejected");
+        if let Err(ApiError::BadRequestI18n { zh, .. }) = zh_result {
+            prop_assert!(zh.contains(&field_name),
+                "Chinese error should contain field name");
+            prop_assert!(zh.contains("字段"),
+                "Chinese error should contain '字段'");
+            prop_assert!(zh.contains("数组不能为空"),
+                "Chinese error should mention '数组不能为空'");
+        }
+    }
+
+    /// Test that validate_array_not_empty accepts arrays with single element
+    #[test]
+    fn prop_array_not_empty_validation_accepts_single_element(
+        value in any::<i32>(),
+    ) {
+        let array = vec![value];
+
+        let result = validate_array_not_empty(&array, "test_field");
+        prop_assert!(result.is_ok(),
+            "array with single element should be accepted");
+    }
+
+    /// Test that validate_array_not_empty accepts arrays with multiple elements
+    #[test]
+    fn prop_array_not_empty_validation_accepts_multiple_elements(
+        size in 2usize..50,
+    ) {
+        let array: Vec<i32> = (0..size).map(|i| i as i32).collect();
+
+        let result = validate_array_not_empty(&array, "test_field");
+        prop_assert!(result.is_ok(),
+            "array with {} elements should be accepted", size);
+    }
+
+    /// Test that validate_array_not_empty works with different types
+    #[test]
+    fn prop_array_not_empty_validation_different_types(
+        string_array_size in 1usize..20,
+        bool_array_size in 1usize..20,
+    ) {
+        // Test with String array
+        let string_array: Vec<String> = (0..string_array_size)
+            .map(|i| format!("item_{}", i))
+            .collect();
+        let string_result = validate_array_not_empty(&string_array, "string_field");
+        prop_assert!(string_result.is_ok(),
+            "non-empty String array should be accepted");
+
+        // Test with bool array
+        let bool_array: Vec<bool> = (0..bool_array_size)
+            .map(|i| i % 2 == 0)
+            .collect();
+        let bool_result = validate_array_not_empty(&bool_array, "bool_field");
+        prop_assert!(bool_result.is_ok(),
+            "non-empty bool array should be accepted");
+
+        // Test with empty arrays
+        let empty_string_array: Vec<String> = vec![];
+        let empty_string_result = validate_array_not_empty(&empty_string_array, "string_field");
+        prop_assert!(empty_string_result.is_err(),
+            "empty String array should be rejected");
+
+        let empty_bool_array: Vec<bool> = vec![];
+        let empty_bool_result = validate_array_not_empty(&empty_bool_array, "bool_field");
+        prop_assert!(empty_bool_result.is_err(),
+            "empty bool array should be rejected");
+    }
+
+    /// Test that validate_array_not_empty rejects empty arrays consistently
+    #[test]
+    fn prop_array_not_empty_validation_rejects_empty(
+        field_name in "[a-zA-Z_]{1,20}",
+    ) {
+        // Test with different types of empty arrays
+        let empty_int_array: Vec<i32> = vec![];
+        let empty_string_array: Vec<String> = vec![];
+        let empty_bool_array: Vec<bool> = vec![];
+
+        let int_result = validate_array_not_empty(&empty_int_array, &field_name);
+        let string_result = validate_array_not_empty(&empty_string_array, &field_name);
+        let bool_result = validate_array_not_empty(&empty_bool_array, &field_name);
+
+        prop_assert!(int_result.is_err(), "empty i32 array should be rejected");
+        prop_assert!(string_result.is_err(), "empty String array should be rejected");
+        prop_assert!(bool_result.is_err(), "empty bool array should be rejected");
+
+        // Verify all errors contain the field name
+        if let Err(ApiError::BadRequestI18n { en, zh }) = int_result {
+            prop_assert!(en.contains(&field_name) && zh.contains(&field_name),
+                "error should contain field name");
+        }
+    }
+
+    /// Test that validate_array_not_empty error messages are consistent across locales
+    #[test]
+    fn prop_array_not_empty_validation_error_consistency(
+        field_name in "[a-zA-Z_]{1,20}",
+    ) {
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .expect("runtime");
+
+        let empty_array: Vec<i32> = vec![];
+
+        // Get error in both locales
+        let en_err = runtime.block_on(async {
+            REQUEST_LOCALE
+                .scope(ApiLocale::En, async {
+                    validate_array_not_empty(&empty_array, &field_name).unwrap_err()
+                })
+                .await
+        });
+
+        let zh_err = runtime.block_on(async {
+            REQUEST_LOCALE
+                .scope(ApiLocale::Zh, async {
+                    validate_array_not_empty(&empty_array, &field_name).unwrap_err()
+                })
+                .await
+        });
+
+        // Both should be BadRequestI18n variants
+        match (en_err, zh_err) {
+            (ApiError::BadRequestI18n { en, .. }, ApiError::BadRequestI18n { zh, .. }) => {
+                // Both should contain the same field name
+                prop_assert!(en.contains(&field_name) && zh.contains(&field_name),
+                    "both errors should contain field name");
+                // Messages should be different (different languages)
+                prop_assert!(en != zh, "English and Chinese messages should differ");
+                // English should contain "array must not be empty"
+                prop_assert!(en.contains("array must not be empty"),
+                    "English error should contain 'array must not be empty'");
+                // Chinese should contain "数组不能为空"
+                prop_assert!(zh.contains("数组不能为空"),
+                    "Chinese error should contain '数组不能为空'");
+            }
+            _ => return Err(proptest::test_runner::TestCaseError::fail(
+                "both errors should be BadRequestI18n variants")),
+        }
+    }
+
+    /// Test that validate_array_not_empty works with slices
+    #[test]
+    fn prop_array_not_empty_validation_with_slices(
+        size in 0usize..30,
+    ) {
+        let array: Vec<i32> = (0..size).map(|i| i as i32).collect();
+        let slice = &array[..];
+
+        let result = validate_array_not_empty(slice, "test_field");
+
+        if size > 0 {
+            prop_assert!(result.is_ok(),
+                "non-empty slice should be accepted");
+        } else {
+            prop_assert!(result.is_err(),
+                "empty slice should be rejected");
+        }
+    }
+}
+
+proptest! {
+    #![proptest_config(ProptestConfig::with_cases(10))]
+
+    /// **Property 13: Array Uniqueness Validation Correctness**
+    /// **Validates: Requirements 6.7**
+    ///
+    /// For any array where all elements are unique, validate_unique_items SHALL return Ok,
+    /// and for any array containing duplicate elements, validate_unique_items SHALL return
+    /// an ApiError with appropriate bilingual message.
+    #[test]
+    fn prop_array_uniqueness_validation_correctness(
+        // Generate arrays with unique elements
+        unique_array_size in 0usize..30,
+        // Generate arrays with duplicates
+        duplicate_count in 1usize..10,
+        field_name in "[a-zA-Z_]{1,20}",
+    ) {
+        // Test 1: Array with all unique elements should pass
+        let unique_array: Vec<i32> = (0..unique_array_size).map(|i| i as i32).collect();
+        let unique_result = validate_unique_items(&unique_array, &field_name);
+        prop_assert!(unique_result.is_ok(),
+            "array with {} unique elements should pass validation", unique_array_size);
+
+        // Test 2: Array with duplicates should fail
+        if duplicate_count > 0 {
+            let mut duplicate_array: Vec<i32> = vec![42]; // Start with one element
+            for _ in 0..duplicate_count {
+                duplicate_array.push(42); // Add duplicates
+            }
+
+            let duplicate_result = validate_unique_items(&duplicate_array, &field_name);
+            prop_assert!(duplicate_result.is_err(),
+                "array with {} duplicate elements should fail validation", duplicate_count + 1);
+
+            // Verify the error contains the field name
+            if let Err(ApiError::BadRequestI18n { en, zh }) = duplicate_result {
+                prop_assert!(en.contains(&field_name),
+                    "English error should contain field name");
+                prop_assert!(zh.contains(&field_name),
+                    "Chinese error should contain field name");
+                prop_assert!(en.contains("duplicate"),
+                    "English error should mention 'duplicate'");
+                prop_assert!(zh.contains("重复"),
+                    "Chinese error should mention '重复'");
+            } else {
+                return Err(proptest::test_runner::TestCaseError::fail(
+                    "expected BadRequestI18n error"));
+            }
+        }
+    }
+
+    /// Test array uniqueness validation with bilingual error messages
+    #[test]
+    fn prop_array_uniqueness_validation_bilingual_messages(
+        field_name in "[a-zA-Z_]{1,20}",
+        duplicate_value in any::<i32>(),
+    ) {
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .expect("runtime");
+
+        // Create array with duplicates
+        let duplicate_array = vec![duplicate_value, duplicate_value];
+
+        // Test English locale
+        let en_result = runtime.block_on(async {
+            REQUEST_LOCALE
+                .scope(ApiLocale::En, async {
+                    validate_unique_items(&duplicate_array, &field_name)
+                })
+                .await
+        });
+
+        prop_assert!(en_result.is_err(), "array with duplicates should be rejected");
+        if let Err(ApiError::BadRequestI18n { en, .. }) = en_result {
+            prop_assert!(en.contains(&field_name),
+                "English error should contain field name");
+            prop_assert!(en.contains("Invalid value"),
+                "English error should contain 'Invalid value'");
+            prop_assert!(en.contains("duplicate"),
+                "English error should mention 'duplicate'");
+        }
+
+        // Test Chinese locale
+        let zh_result = runtime.block_on(async {
+            REQUEST_LOCALE
+                .scope(ApiLocale::Zh, async {
+                    validate_unique_items(&duplicate_array, &field_name)
+                })
+                .await
+        });
+
+        prop_assert!(zh_result.is_err(), "array with duplicates should be rejected");
+        if let Err(ApiError::BadRequestI18n { zh, .. }) = zh_result {
+            prop_assert!(zh.contains(&field_name),
+                "Chinese error should contain field name");
+            prop_assert!(zh.contains("字段"),
+                "Chinese error should contain '字段'");
+            prop_assert!(zh.contains("重复"),
+                "Chinese error should mention '重复'");
+        }
+    }
+
+    /// Test that validate_unique_items accepts arrays with all unique elements
+    #[test]
+    fn prop_array_uniqueness_validation_accepts_unique(
+        size in 0usize..50,
+    ) {
+        let unique_array: Vec<i32> = (0..size).map(|i| i as i32).collect();
+
+        let result = validate_unique_items(&unique_array, "test_field");
+        prop_assert!(result.is_ok(),
+            "array with {} unique elements should be accepted", size);
+    }
+
+    /// Test that validate_unique_items rejects arrays with duplicates at different positions
+    #[test]
+    fn prop_array_uniqueness_validation_rejects_duplicates_at_any_position(
+        prefix_size in 0usize..10,
+        suffix_size in 0usize..10,
+        duplicate_value in any::<i32>(),
+    ) {
+        // Create array with unique prefix, duplicate in middle, and unique suffix
+        let mut array: Vec<i32> = Vec::new();
+
+        // Add unique prefix
+        for i in 0..prefix_size {
+            array.push(i as i32 * 1000); // Multiply to avoid collision with duplicate_value
+        }
+
+        // Add duplicate
+        array.push(duplicate_value);
+        array.push(duplicate_value);
+
+        // Add unique suffix
+        for i in 0..suffix_size {
+            array.push((i as i32 * 1000) + 500); // Offset to avoid collision
+        }
+
+        let result = validate_unique_items(&array, "test_field");
+        prop_assert!(result.is_err(),
+            "array with duplicates should be rejected regardless of position");
+    }
+
+    /// Test that validate_unique_items works with different types
+    #[test]
+    fn prop_array_uniqueness_validation_different_types(
+        string_count in 1usize..20,
+    ) {
+        // Test with String array - all unique
+        let unique_string_array: Vec<String> = (0..string_count)
+            .map(|i| format!("item_{}", i))
+            .collect();
+        let unique_string_result = validate_unique_items(&unique_string_array, "string_field");
+        prop_assert!(unique_string_result.is_ok(),
+            "array with unique strings should be accepted");
+
+        // Test with String array - with duplicates
+        let duplicate_string_array: Vec<String> = vec!["duplicate".to_string(), "duplicate".to_string()];
+        let duplicate_string_result = validate_unique_items(&duplicate_string_array, "string_field");
+        prop_assert!(duplicate_string_result.is_err(),
+            "array with duplicate strings should be rejected");
+
+        // Test with i32 array - all unique
+        let unique_int_array: Vec<i32> = (0..string_count).map(|i| i as i32).collect();
+        let unique_int_result = validate_unique_items(&unique_int_array, "int_field");
+        prop_assert!(unique_int_result.is_ok(),
+            "array with unique integers should be accepted");
+
+        // Test with i32 array - with duplicates
+        let duplicate_int_array: Vec<i32> = vec![1, 2, 3, 2, 4];
+        let duplicate_int_result = validate_unique_items(&duplicate_int_array, "int_field");
+        prop_assert!(duplicate_int_result.is_err(),
+            "array with duplicate integers should be rejected");
+    }
+
+    /// Test that validate_unique_items handles edge cases
+    #[test]
+    fn prop_array_uniqueness_validation_edge_cases(
+        value in any::<i32>(),
+    ) {
+        // Empty array should pass (no duplicates)
+        let empty_array: Vec<i32> = vec![];
+        let empty_result = validate_unique_items(&empty_array, "test_field");
+        prop_assert!(empty_result.is_ok(),
+            "empty array should be accepted (no duplicates)");
+
+        // Single element should pass
+        let single_array = vec![value];
+        let single_result = validate_unique_items(&single_array, "test_field");
+        prop_assert!(single_result.is_ok(),
+            "single element array should be accepted");
+
+        // Two identical elements should fail
+        let two_identical = vec![value, value];
+        let two_identical_result = validate_unique_items(&two_identical, "test_field");
+        prop_assert!(two_identical_result.is_err(),
+            "array with two identical elements should be rejected");
+
+        // Two different elements should pass
+        let two_different = vec![value, value.wrapping_add(1)];
+        let two_different_result = validate_unique_items(&two_different, "test_field");
+        prop_assert!(two_different_result.is_ok(),
+            "array with two different elements should be accepted");
+    }
+
+    /// Test that validate_unique_items detects multiple duplicates
+    #[test]
+    fn prop_array_uniqueness_validation_multiple_duplicates(
+        duplicate_count in 2usize..20,
+    ) {
+        // Create array with multiple occurrences of the same value
+        let array: Vec<i32> = vec![42; duplicate_count];
+
+        let result = validate_unique_items(&array, "test_field");
+        prop_assert!(result.is_err(),
+            "array with {} identical elements should be rejected", duplicate_count);
+    }
+
+    /// Test that validate_unique_items works with slices
+    #[test]
+    fn prop_array_uniqueness_validation_with_slices(
+        size in 0usize..30,
+        has_duplicate in any::<bool>(),
+    ) {
+        let mut array: Vec<i32> = (0..size).map(|i| i as i32).collect();
+
+        if has_duplicate && size > 0 {
+            // Add a duplicate by repeating the first element
+            array.push(0);
+        }
+
+        let slice = &array[..];
+        let result = validate_unique_items(slice, "test_field");
+
+        if has_duplicate && size > 0 {
+            prop_assert!(result.is_err(),
+                "slice with duplicates should be rejected");
+        } else {
+            prop_assert!(result.is_ok(),
+                "slice with unique elements should be accepted");
+        }
+    }
+
+    /// Test that validate_unique_items error messages are consistent across locales
+    #[test]
+    fn prop_array_uniqueness_validation_error_consistency(
+        field_name in "[a-zA-Z_]{1,20}",
+    ) {
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .expect("runtime");
+
+        let duplicate_array = vec![1, 2, 3, 2];
+
+        // Get errors in both locales
+        let en_err = runtime.block_on(async {
+            REQUEST_LOCALE
+                .scope(ApiLocale::En, async {
+                    validate_unique_items(&duplicate_array, &field_name).unwrap_err()
+                })
+                .await
+        });
+
+        let zh_err = runtime.block_on(async {
+            REQUEST_LOCALE
+                .scope(ApiLocale::Zh, async {
+                    validate_unique_items(&duplicate_array, &field_name).unwrap_err()
+                })
+                .await
+        });
+
+        // Both should be BadRequestI18n variants
+        match (en_err, zh_err) {
+            (ApiError::BadRequestI18n { en, .. }, ApiError::BadRequestI18n { zh, .. }) => {
+                // Both should contain the same field name
+                prop_assert!(en.contains(&field_name) && zh.contains(&field_name),
+                    "both errors should contain field name");
+                // Messages should be different (different languages)
+                prop_assert!(en != zh, "English and Chinese messages should differ");
+            }
+            _ => return Err(proptest::test_runner::TestCaseError::fail(
+                "both errors should be BadRequestI18n variants")),
+        }
+    }
+}
+
+proptest! {
+    #![proptest_config(ProptestConfig::with_cases(10))]
+
+    /// **Property 6: Validation Helper Language Consistency**
+    /// **Validates: Requirements 2.3, 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7**
+    ///
+    /// For any validation helper function (validate_uuid, validate_url, validate_email,
+    /// validate_json, validate_min_length, validate_array_not_empty, validate_unique_items)
+    /// and any invalid input, the error message language SHALL match the current REQUEST_LOCALE.
+    ///
+    /// This is a comprehensive property test that verifies all validation helpers respect
+    /// the locale setting and produce consistent bilingual error messages.
+    #[test]
+    fn prop_validation_helper_language_consistency(
+        field_name in "[a-zA-Z_]{1,20}",
+        // Generate various invalid inputs for different validators
+        invalid_uuid in "[a-zA-Z]{1,20}",
+        invalid_url in "[a-zA-Z]{1,20}",
+        invalid_email in prop::sample::select(vec!["notanemail", "missing-at", "@nodomain"]),
+        invalid_json in prop::sample::select(vec!["{unclosed", "not json", "undefined"]),
+        short_string in "[a-zA-Z]{0,3}",
+        min_len in 5usize..10,
+    ) {
+        // Test validate_uuid
+        let uuid_result = validate_uuid(&invalid_uuid, &field_name);
+        prop_assert!(uuid_result.is_err(), "invalid UUID should be rejected");
+        if let Err(ApiError::BadRequestI18n { en, zh }) = uuid_result {
+            prop_assert!(en.contains(&field_name), "English error should contain field name");
+            prop_assert!(zh.contains(&field_name), "Chinese error should contain field name");
+            prop_assert!(en.contains("Invalid format"), "English should contain 'Invalid format'");
+            prop_assert!(zh.contains("格式无效"), "Chinese should contain '格式无效'");
+            prop_assert!(en.contains("UUID"), "English should mention UUID");
+            prop_assert!(zh.contains("UUID"), "Chinese should mention UUID");
+        }
+
+        // Test validate_url
+        let url_result = validate_url(&invalid_url, &field_name);
+        prop_assert!(url_result.is_err(), "invalid URL should be rejected");
+        if let Err(ApiError::BadRequestI18n { en, zh }) = url_result {
+            prop_assert!(en.contains(&field_name), "English error should contain field name");
+            prop_assert!(zh.contains(&field_name), "Chinese error should contain field name");
+            prop_assert!(en.contains("Invalid format"), "English should contain 'Invalid format'");
+            prop_assert!(zh.contains("格式无效"), "Chinese should contain '格式无效'");
+            prop_assert!(en.contains("HTTP/HTTPS"), "English should mention HTTP/HTTPS");
+            prop_assert!(zh.contains("HTTP/HTTPS"), "Chinese should mention HTTP/HTTPS");
+        }
+
+        // Test validate_email
+        let email_result = validate_email(invalid_email, &field_name);
+        prop_assert!(email_result.is_err(), "invalid email should be rejected");
+        if let Err(ApiError::BadRequestI18n { en, zh }) = email_result {
+            prop_assert!(en.contains(&field_name), "English error should contain field name");
+            prop_assert!(zh.contains(&field_name), "Chinese error should contain field name");
+            prop_assert!(en.contains("Invalid format"), "English should contain 'Invalid format'");
+            prop_assert!(zh.contains("格式无效"), "Chinese should contain '格式无效'");
+            prop_assert!(en.contains("email"), "English should mention email");
+            prop_assert!(zh.contains("电子邮件"), "Chinese should mention email");
+        }
+
+        // Test validate_json
+        let json_result = validate_json(invalid_json, &field_name);
+        prop_assert!(json_result.is_err(), "invalid JSON should be rejected");
+        if let Err(ApiError::BadRequestI18n { en, zh }) = json_result {
+            prop_assert!(en.contains(&field_name), "English error should contain field name");
+            prop_assert!(zh.contains(&field_name), "Chinese error should contain field name");
+            prop_assert!(en.contains("Invalid format"), "English should contain 'Invalid format'");
+            prop_assert!(zh.contains("格式无效"), "Chinese should contain '格式无效'");
+            prop_assert!(en.contains("JSON"), "English should mention JSON");
+            prop_assert!(zh.contains("JSON"), "Chinese should mention JSON");
+        }
+
+        // Test validate_min_length
+        let min_len_result = validate_min_length(&short_string, min_len, &field_name);
+        prop_assert!(min_len_result.is_err(), "short string should be rejected");
+        if let Err(ApiError::BadRequestI18n { en, zh }) = min_len_result {
+            prop_assert!(en.contains(&field_name), "English error should contain field name");
+            prop_assert!(zh.contains(&field_name), "Chinese error should contain field name");
+            prop_assert!(en.contains("Invalid value"), "English should contain 'Invalid value'");
+            prop_assert!(zh.contains("字段"), "Chinese should contain '字段'");
+            prop_assert!(en.contains(&min_len.to_string()), "English should contain min_len");
+            prop_assert!(zh.contains(&min_len.to_string()), "Chinese should contain min_len");
+        }
+
+        // Test validate_array_not_empty
+        let empty_array: Vec<i32> = vec![];
+        let array_result = validate_array_not_empty(&empty_array, &field_name);
+        prop_assert!(array_result.is_err(), "empty array should be rejected");
+        if let Err(ApiError::BadRequestI18n { en, zh }) = array_result {
+            prop_assert!(en.contains(&field_name), "English error should contain field name");
+            prop_assert!(zh.contains(&field_name), "Chinese error should contain field name");
+            prop_assert!(en.contains("Invalid value"), "English should contain 'Invalid value'");
+            prop_assert!(zh.contains("字段"), "Chinese should contain '字段'");
+            prop_assert!(en.contains("array must not be empty"), "English should mention array");
+            prop_assert!(zh.contains("数组不能为空"), "Chinese should mention array");
+        }
+
+        // Test validate_unique_items
+        let duplicate_array = vec![42, 42];
+        let unique_result = validate_unique_items(&duplicate_array, &field_name);
+        prop_assert!(unique_result.is_err(), "array with duplicates should be rejected");
+        if let Err(ApiError::BadRequestI18n { en, zh }) = unique_result {
+            prop_assert!(en.contains(&field_name), "English error should contain field name");
+            prop_assert!(zh.contains(&field_name), "Chinese error should contain field name");
+            prop_assert!(en.contains("Invalid value"), "English should contain 'Invalid value'");
+            prop_assert!(zh.contains("字段"), "Chinese should contain '字段'");
+            prop_assert!(en.contains("duplicate"), "English should mention duplicate");
+            prop_assert!(zh.contains("重复"), "Chinese should mention duplicate");
+        }
+    }
+
+    /// Test that all validation helpers produce consistent error structure
+    #[test]
+    fn prop_validation_helper_error_structure_consistency(
+        field_name in "[a-zA-Z_]{1,20}",
+    ) {
+        // Collect errors from all validation helpers
+        let uuid_err = validate_uuid("invalid", &field_name).unwrap_err();
+        let url_err = validate_url("invalid", &field_name).unwrap_err();
+        let email_err = validate_email("invalid", &field_name).unwrap_err();
+        let json_err = validate_json("invalid", &field_name).unwrap_err();
+        let min_len_err = validate_min_length("", 5, &field_name).unwrap_err();
+        let array_err = validate_array_not_empty(&Vec::<i32>::new(), &field_name).unwrap_err();
+        let unique_err = validate_unique_items(&vec![1, 1], &field_name).unwrap_err();
+
+        // All should be BadRequestI18n variants
+        let errors = vec![
+            uuid_err, url_err, email_err, json_err,
+            min_len_err, array_err, unique_err,
+        ];
+
+        for err in errors {
+            match err {
+                ApiError::BadRequestI18n { en, zh } => {
+                    // Both messages should be non-empty
+                    prop_assert!(!en.is_empty(), "English message should not be empty");
+                    prop_assert!(!zh.is_empty(), "Chinese message should not be empty");
+                    // Both should contain the field name
+                    prop_assert!(en.contains(&field_name), "English should contain field name");
+                    prop_assert!(zh.contains(&field_name), "Chinese should contain field name");
+                    // Messages should be different (different languages)
+                    prop_assert!(en != zh, "English and Chinese messages should differ");
+                }
+                _ => return Err(proptest::test_runner::TestCaseError::fail(
+                    "all validation helpers should return BadRequestI18n errors")),
+            }
+        }
+    }
+
+    /// Test that validation helpers respect locale switching within the same test
+    #[test]
+    fn prop_validation_helper_locale_switching(
+        field_name in "[a-zA-Z_]{1,20}",
+    ) {
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .expect("runtime");
+
+        // Test that we can switch locales and get different messages
+        let en_uuid_err = runtime.block_on(async {
+            REQUEST_LOCALE
+                .scope(ApiLocale::En, async {
+                    validate_uuid("invalid", &field_name).unwrap_err()
+                })
+                .await
+        });
+
+        let zh_uuid_err = runtime.block_on(async {
+            REQUEST_LOCALE
+                .scope(ApiLocale::Zh, async {
+                    validate_uuid("invalid", &field_name).unwrap_err()
+                })
+                .await
+        });
+
+        // Both should be BadRequestI18n with the same structure
+        match (&en_uuid_err, &zh_uuid_err) {
+            (
+                ApiError::BadRequestI18n { en: en1, zh: zh1 },
+                ApiError::BadRequestI18n { en: en2, zh: zh2 },
+            ) => {
+                // The error variants should contain the same bilingual messages
+                // regardless of which locale was active when they were created
+                prop_assert_eq!(en1, en2, "English messages should be identical");
+                prop_assert_eq!(zh1, zh2, "Chinese messages should be identical");
+                prop_assert!(en1 != zh1, "English and Chinese should differ");
+            }
+            _ => return Err(proptest::test_runner::TestCaseError::fail(
+                "both errors should be BadRequestI18n variants")),
+        }
+    }
+
+    /// Test that validation helpers work correctly with various field names
+    #[test]
+    fn prop_validation_helper_field_name_handling(
+        field_name in "[a-zA-Z_][a-zA-Z0-9_]{0,30}",
+    ) {
+        // Test that all validation helpers correctly include the field name in errors
+        let uuid_err = validate_uuid("invalid", &field_name).unwrap_err();
+        let url_err = validate_url("invalid", &field_name).unwrap_err();
+        let email_err = validate_email("invalid", &field_name).unwrap_err();
+        let json_err = validate_json("invalid", &field_name).unwrap_err();
+        let min_len_err = validate_min_length("", 5, &field_name).unwrap_err();
+        let array_err = validate_array_not_empty(&Vec::<i32>::new(), &field_name).unwrap_err();
+        let unique_err = validate_unique_items(&vec![1, 1], &field_name).unwrap_err();
+
+        let errors = vec![
+            ("uuid", uuid_err),
+            ("url", url_err),
+            ("email", email_err),
+            ("json", json_err),
+            ("min_length", min_len_err),
+            ("array_not_empty", array_err),
+            ("unique_items", unique_err),
+        ];
+
+        for (validator_name, err) in errors {
+            match err {
+                ApiError::BadRequestI18n { en, zh } => {
+                    prop_assert!(en.contains(&field_name),
+                        "{} validator: English error should contain field name '{}'",
+                        validator_name, field_name);
+                    prop_assert!(zh.contains(&field_name),
+                        "{} validator: Chinese error should contain field name '{}'",
+                        validator_name, field_name);
+                }
+                _ => return Err(proptest::test_runner::TestCaseError::fail(
+                    format!("{} validator should return BadRequestI18n error", validator_name))),
+            }
+        }
+    }
+
+    /// Test that validation helpers produce deterministic errors for the same input
+    #[test]
+    fn prop_validation_helper_determinism(
+        field_name in "[a-zA-Z_]{1,20}",
+        iterations in 2usize..5,
+    ) {
+        // Run the same validation multiple times and verify we get identical errors
+        let mut uuid_errors = Vec::new();
+        let mut url_errors = Vec::new();
+        let mut email_errors = Vec::new();
+
+        for _ in 0..iterations {
+            uuid_errors.push(validate_uuid("invalid", &field_name).unwrap_err());
+            url_errors.push(validate_url("invalid", &field_name).unwrap_err());
+            email_errors.push(validate_email("invalid", &field_name).unwrap_err());
+        }
+
+        // All UUID errors should be identical
+        for i in 1..uuid_errors.len() {
+            match (&uuid_errors[0], &uuid_errors[i]) {
+                (
+                    ApiError::BadRequestI18n { en: en1, zh: zh1 },
+                    ApiError::BadRequestI18n { en: en2, zh: zh2 },
+                ) => {
+                    prop_assert_eq!(en1, en2, "UUID validation should be deterministic (English)");
+                    prop_assert_eq!(zh1, zh2, "UUID validation should be deterministic (Chinese)");
+                }
+                _ => return Err(proptest::test_runner::TestCaseError::fail(
+                    "UUID errors should be BadRequestI18n variants")),
+            }
+        }
+
+        // All URL errors should be identical
+        for i in 1..url_errors.len() {
+            match (&url_errors[0], &url_errors[i]) {
+                (
+                    ApiError::BadRequestI18n { en: en1, zh: zh1 },
+                    ApiError::BadRequestI18n { en: en2, zh: zh2 },
+                ) => {
+                    prop_assert_eq!(en1, en2, "URL validation should be deterministic (English)");
+                    prop_assert_eq!(zh1, zh2, "URL validation should be deterministic (Chinese)");
+                }
+                _ => return Err(proptest::test_runner::TestCaseError::fail(
+                    "URL errors should be BadRequestI18n variants")),
+            }
+        }
+
+        // All email errors should be identical
+        for i in 1..email_errors.len() {
+            match (&email_errors[0], &email_errors[i]) {
+                (
+                    ApiError::BadRequestI18n { en: en1, zh: zh1 },
+                    ApiError::BadRequestI18n { en: en2, zh: zh2 },
+                ) => {
+                    prop_assert_eq!(en1, en2, "Email validation should be deterministic (English)");
+                    prop_assert_eq!(zh1, zh2, "Email validation should be deterministic (Chinese)");
+                }
+                _ => return Err(proptest::test_runner::TestCaseError::fail(
+                    "Email errors should be BadRequestI18n variants")),
+            }
+        }
+    }
+}
