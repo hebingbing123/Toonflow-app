@@ -215,7 +215,9 @@ extension _HomePageBuildProductSections on _HomePageState {
         ShortVideoSpaceSection(
           accessToken: _session?.accessToken,
           initialProjectUuid:
-              _workspaceInputController.projectUuidController.text.trim().isEmpty
+              _workspaceInputController.projectUuidController.text
+                  .trim()
+                  .isEmpty
               ? null
               : _workspaceInputController.projectUuidController.text.trim(),
           onOpenProjects: () {
@@ -360,7 +362,9 @@ extension _HomePageBuildProductSections on _HomePageState {
           accessToken: _session?.accessToken,
           initialProjectNumericId: _productScopedProjectNumericId,
           initialProjectUuid:
-              _workspaceInputController.projectUuidController.text.trim().isEmpty
+              _workspaceInputController.projectUuidController.text
+                  .trim()
+                  .isEmpty
               ? null
               : _workspaceInputController.projectUuidController.text.trim(),
           onNavigateExportJobDeepLink: (TaskCenterExportJobDeepLink link) {
@@ -456,7 +460,9 @@ extension _HomePageBuildProductSections on _HomePageState {
             controller: _qualityReviewsController,
             initialProjectNumericId: _productScopedProjectNumericId,
             initialProjectUuid:
-                _workspaceInputController.projectUuidController.text.trim().isEmpty
+                _workspaceInputController.projectUuidController.text
+                    .trim()
+                    .isEmpty
                 ? null
                 : _workspaceInputController.projectUuidController.text.trim(),
             platformConfig: _platformConfig,
@@ -788,7 +794,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
         return;
       }
       setState(() {
-        _error = e.toString();
+        _error = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
       });
     } finally {
       if (_isCurrentLoadRequest(requestEpoch, token, workspaceId)) {
@@ -842,7 +848,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
         return;
       }
       setState(() {
-        _error = e.toString();
+        _error = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
       });
     } finally {
       if (mounted) {
@@ -900,7 +906,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
         return;
       }
       setState(() {
-        _error = e.toString();
+        _error = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
       });
     } finally {
       if (mounted) {
@@ -959,7 +965,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
         return;
       }
       setState(() {
-        _error = e.toString();
+        _error = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
       });
     } finally {
       if (mounted) {
@@ -1021,7 +1027,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
         return;
       }
       setState(() {
-        _error = e.toString();
+        _error = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
       });
     } finally {
       if (mounted) {
@@ -3046,7 +3052,12 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                   (entry) => ListTile(
                     dense: true,
                     contentPadding: EdgeInsets.zero,
-                    title: Text('${entry.action} · ${entry.webhookId}'),
+                    title: Text(
+                      l10n.opsWhActivityEntryTitle(
+                        entry.action,
+                        entry.webhookId,
+                      ),
+                    ),
                     subtitle: SelectableText(
                       '${entry.at.toLocal().toIso8601String()}\n${entry.summary}',
                       style: Theme.of(context).textTheme.bodySmall,
@@ -3094,9 +3105,13 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                                   visualDensity: VisualDensity.compact,
                                 ),
                               ),
-                            Text('id: ${wh.id}'),
-                            Text('createdAt: ${wh.createdAt}'),
-                            Text('updatedAt: ${wh.updatedAt ?? wh.createdAt}'),
+                            Text('${l10n.opsWhFieldId}: ${wh.id}'),
+                            Text(
+                              '${l10n.opsWhFieldCreatedAt}: ${wh.createdAt}',
+                            ),
+                            Text(
+                              '${l10n.opsWhFieldUpdatedAt}: ${wh.updatedAt ?? wh.createdAt}',
+                            ),
                             if (!wh.enabled)
                               Padding(
                                 padding: const EdgeInsets.only(top: 4),
@@ -3137,7 +3152,9 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                                     Padding(
                                       padding: const EdgeInsets.only(top: 4),
                                       child: Text(
-                                        'API: ${wh.eventTypes.join(', ')}',
+                                        l10n.opsWhApiEventTypes(
+                                          wh.eventTypes.join(', '),
+                                        ),
                                         style: Theme.of(
                                           context,
                                         ).textTheme.bodySmall,
@@ -3388,7 +3405,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
           TextField(
             controller: _billingEventTypeController,
             decoration: InputDecoration(
-              labelText: 'event_type',
+              labelText: l10n.billingAuditEventTypeLabel,
               hintText: l10n.billingAuditEventTypeHint,
             ),
           ),
@@ -3396,7 +3413,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
           TextField(
             controller: _billingProviderEventIdController,
             decoration: InputDecoration(
-              labelText: 'provider_event_id',
+              labelText: l10n.billingAuditProviderEventIdLabel,
               hintText: l10n.billingAuditProviderEventIdHint,
             ),
           ),
@@ -3404,7 +3421,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
           TextField(
             controller: _billingRawEventIdController,
             decoration: InputDecoration(
-              labelText: 'raw_event_id',
+              labelText: l10n.billingAuditRawEventIdLabel,
               hintText: l10n.billingAuditRawEventIdHint,
             ),
           ),
@@ -3412,7 +3429,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
           TextField(
             controller: _billingProviderEventIdPrefixController,
             decoration: InputDecoration(
-              labelText: 'provider_event_id_prefix',
+              labelText: l10n.billingAuditProviderEventIdPrefixLabel,
               hintText: l10n.billingAuditProviderPrefixHint,
             ),
           ),
@@ -3420,7 +3437,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
           TextField(
             controller: _billingRawEventIdPrefixController,
             decoration: InputDecoration(
-              labelText: 'raw_event_id_prefix',
+              labelText: l10n.billingAuditRawEventIdPrefixLabel,
               hintText: l10n.billingAuditRawPrefixHint,
             ),
           ),
@@ -3434,7 +3451,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                 child: TextField(
                   controller: _billingEventCreatedFromController,
                   decoration: InputDecoration(
-                    labelText: 'event_created_from',
+                    labelText: l10n.billingAuditEventCreatedFromLabel,
                     hintText: l10n.billingAuditEventCreatedFromHint,
                   ),
                 ),
@@ -3444,7 +3461,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                 child: TextField(
                   controller: _billingEventCreatedToController,
                   decoration: InputDecoration(
-                    labelText: 'event_created_to',
+                    labelText: l10n.billingAuditEventCreatedToLabel,
                     hintText: l10n.billingAuditEventCreatedToHint,
                   ),
                 ),
@@ -3454,7 +3471,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                 child: TextField(
                   controller: _billingCreatedFromController,
                   decoration: InputDecoration(
-                    labelText: 'created_from',
+                    labelText: l10n.billingAuditCreatedFromLabel,
                     hintText: l10n.billingAuditEventCreatedFromHint,
                   ),
                 ),
@@ -3464,7 +3481,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                 child: TextField(
                   controller: _billingCreatedToController,
                   decoration: InputDecoration(
-                    labelText: 'created_to',
+                    labelText: l10n.billingAuditCreatedToLabel,
                     hintText: l10n.billingAuditEventCreatedToHint,
                   ),
                 ),

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../config.dart';
-import '../rust_api/jobs/queue_stats.dart';
+import '../rust_api.dart';
 
 /// Read-only PG job queue stats when **`INTERNAL_OPS_TOKEN`** dart-define matches server env.
 class JobQueueStatsCard extends StatefulWidget {
@@ -30,8 +31,9 @@ class _JobQueueStatsCardState extends State<JobQueueStatsCard> {
       });
     } catch (e) {
       if (!mounted) return;
+      final l10n = AppLocalizations.of(context)!;
       setState(() {
-        _error = e.toString();
+        _error = describeUserVisibleApiError(l10n, e);
         _loading = false;
       });
     }

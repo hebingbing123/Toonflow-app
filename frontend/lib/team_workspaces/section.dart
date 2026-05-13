@@ -1526,7 +1526,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
         });
       } catch (e) {
         setModalState(() {
-          error = e.toString();
+          error = describeUserVisibleApiError(l10n, e);
           loading = false;
         });
       }
@@ -1636,7 +1636,12 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                       inviteEmailController.clear();
                                       await loadInvites(setModalState);
                                     } catch (e) {
-                                      setModalState(() => error = e.toString());
+                                      setModalState(
+                                        () => error = describeUserVisibleApiError(
+                                          l10n,
+                                          e,
+                                        ),
+                                      );
                                     } finally {
                                       setModalState(() => inviting = false);
                                     }
@@ -1876,7 +1881,11 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                                   });
                                                 } catch (e) {
                                                   setModalState(
-                                                    () => error = e.toString(),
+                                                    () => error =
+                                                        describeUserVisibleApiError(
+                                                      l10n,
+                                                      e,
+                                                    ),
                                                   );
                                                 } finally {
                                                   setModalState(
@@ -1916,7 +1925,11 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                                                   });
                                                 } catch (e) {
                                                   setModalState(
-                                                    () => error = e.toString(),
+                                                    () => error =
+                                                        describeUserVisibleApiError(
+                                                      l10n,
+                                                      e,
+                                                    ),
                                                   );
                                                 } finally {
                                                   setModalState(
