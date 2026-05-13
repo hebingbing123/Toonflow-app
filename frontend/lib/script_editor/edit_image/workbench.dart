@@ -65,14 +65,14 @@ extension _HomePageScriptEditorEditImageWorkbench on _HomePageState {
         setState(
           () =>
               statusLine = l10n.scriptEditorEditImageWorkbenchLoadFailed(
-                e.toString(),
+                describeUserVisibleApiError(l10n, e),
               ),
         );
       } catch (e) {
         setState(
           () =>
               statusLine = l10n.scriptEditorEditImageWorkbenchLoadFailed(
-                e.toString(),
+                describeUserVisibleApiError(l10n, e),
               ),
         );
       } finally {

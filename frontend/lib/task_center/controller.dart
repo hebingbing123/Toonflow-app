@@ -73,7 +73,9 @@ class TaskCenterController extends ChangeNotifier {
     } on RustApiException catch (e) {
       reportRustApiError(e, onErrorChanged: _onErrorChanged);
     } catch (e) {
-      _onErrorChanged(e.toString());
+      _onErrorChanged(
+        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), e),
+      );
     } finally {
       loadingTaskProjects = false;
       notifyListeners();
@@ -95,7 +97,9 @@ class TaskCenterController extends ChangeNotifier {
     } on RustApiException catch (e) {
       reportRustApiError(e, onErrorChanged: _onErrorChanged);
     } catch (e) {
-      _onErrorChanged(e.toString());
+      _onErrorChanged(
+        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), e),
+      );
     } finally {
       loadingTaskCategories = false;
       notifyListeners();
@@ -141,7 +145,9 @@ class TaskCenterController extends ChangeNotifier {
     } on RustApiException catch (e) {
       reportRustApiError(e, onErrorChanged: _onErrorChanged);
     } catch (e) {
-      _onErrorChanged(e.toString());
+      _onErrorChanged(
+        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), e),
+      );
     } finally {
       loadingTaskApi = false;
       notifyListeners();
@@ -170,7 +176,9 @@ class TaskCenterController extends ChangeNotifier {
     } on RustApiException catch (e) {
       reportRustApiError(e, onErrorChanged: _onErrorChanged);
     } catch (e) {
-      _onErrorChanged(e.toString());
+      _onErrorChanged(
+        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), e),
+      );
     } finally {
       loadingTaskDetailsByNumericId = false;
       notifyListeners();
@@ -199,7 +207,9 @@ class TaskCenterController extends ChangeNotifier {
     } on RustApiException catch (e) {
       reportRustApiError(e, onErrorChanged: _onErrorChanged);
     } catch (e) {
-      _onErrorChanged(e.toString());
+      _onErrorChanged(
+        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), e),
+      );
     } finally {
       loadingTaskDetailsUuid = false;
       notifyListeners();

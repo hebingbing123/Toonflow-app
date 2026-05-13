@@ -204,7 +204,10 @@ String buildStoryboardWorkbenchFailureNotice(
   required Object error,
   required String fallbackDetail,
 }) {
-  final reason = normalizeStoryboardWorkbenchErrorMessage(l10n, error.toString());
+  final reason = normalizeStoryboardWorkbenchErrorMessage(
+    l10n,
+    describeUserVisibleApiError(l10n, error),
+  );
   return buildStoryboardWorkbenchActionNotice(
     l10n,
     actionSummary: actionSummary,

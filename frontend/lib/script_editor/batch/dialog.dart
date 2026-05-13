@@ -184,7 +184,7 @@ class _StoryboardBatchWorkbenchDialogState
         final loc = AppLocalizations.of(context)!;
         setState(
           () => _statusLine = loc.scriptEditorStoryboardBatchLoadProductionFailed(
-            e.toString(),
+            describeUserVisibleApiError(loc, e),
           ),
         );
       }
@@ -193,7 +193,7 @@ class _StoryboardBatchWorkbenchDialogState
         final loc = AppLocalizations.of(context)!;
         setState(
           () => _statusLine = loc.scriptEditorStoryboardBatchLoadProductionFailed(
-            e.toString(),
+            describeUserVisibleApiError(loc, e),
           ),
         );
       }

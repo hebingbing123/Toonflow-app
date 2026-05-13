@@ -105,7 +105,7 @@ extension _StoryboardWorkbenchData on _StoryboardWorkbenchPanelState {
       _applyWorkbenchState(() {
         _productionError = normalizeStoryboardWorkbenchErrorMessage(
           AppLocalizations.of(context)!,
-          e.toString(),
+          describeUserVisibleApiError(l10n, e),
         );
         _setWorkbenchFailureNotice(
           actionSummary: l10n.storyboardWorkbenchSyncProductionFailedSummary,
@@ -121,7 +121,7 @@ extension _StoryboardWorkbenchData on _StoryboardWorkbenchPanelState {
       _applyWorkbenchState(() {
         _productionError = normalizeStoryboardWorkbenchErrorMessage(
           AppLocalizations.of(context)!,
-          e.toString(),
+          describeUserVisibleApiError(l10n, e),
         );
         _setWorkbenchFailureNotice(
           actionSummary: l10n.storyboardWorkbenchSyncProductionFailedSummary,

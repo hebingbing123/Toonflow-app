@@ -192,7 +192,7 @@ class _QualityReviewsWorkbenchDialogState
       });
     } on RustApiException catch (e) {
       if (!mounted) return;
-      setState(() => _statusLine = e.toString());
+      setState(() => _statusLine = describeUserVisibleApiError(l10n, e));
     } finally {
       if (mounted) {
         setState(() {
@@ -221,7 +221,7 @@ class _QualityReviewsWorkbenchDialogState
       });
     } on RustApiException catch (e) {
       if (!mounted) return;
-      setState(() => _statusLine = e.toString());
+      setState(() => _statusLine = describeUserVisibleApiError(l10n, e));
     } finally {
       if (mounted) {
         setState(() => _loadingStats = false);
@@ -249,7 +249,7 @@ class _QualityReviewsWorkbenchDialogState
       });
     } on RustApiException catch (e) {
       if (!mounted) return;
-      setState(() => _statusLine = e.toString());
+      setState(() => _statusLine = describeUserVisibleApiError(l10n, e));
     } finally {
       if (mounted) {
         setState(() => _loadingScopeInsights = false);
@@ -276,7 +276,7 @@ class _QualityReviewsWorkbenchDialogState
       });
     } on RustApiException catch (e) {
       if (!mounted) return;
-      setState(() => _statusLine = e.toString());
+      setState(() => _statusLine = describeUserVisibleApiError(l10n, e));
     } finally {
       if (mounted) {
         setState(() => _loadingStagePassRate = false);
@@ -309,7 +309,7 @@ class _QualityReviewsWorkbenchDialogState
       });
     } on RustApiException catch (e) {
       if (!mounted) return;
-      setState(() => _statusLine = e.toString());
+      setState(() => _statusLine = describeUserVisibleApiError(l10n, e));
     } finally {
       if (mounted) setState(() => _loadingBadCaseStats = false);
     }
@@ -344,7 +344,7 @@ class _QualityReviewsWorkbenchDialogState
       });
     } on RustApiException catch (e) {
       if (!mounted) return;
-      setState(() => _statusLine = e.toString());
+      setState(() => _statusLine = describeUserVisibleApiError(l10n, e));
     } finally {
       if (mounted) {
         setState(() => _loadingTokenEfficiency = false);
@@ -379,7 +379,7 @@ class _QualityReviewsWorkbenchDialogState
       });
     } on RustApiException catch (e) {
       if (!mounted) return;
-      setState(() => _statusLine = e.toString());
+      setState(() => _statusLine = describeUserVisibleApiError(l10n, e));
     } finally {
       if (mounted) {
         setState(() => _loadingTokenEfficiencySamples = false);
@@ -407,7 +407,7 @@ class _QualityReviewsWorkbenchDialogState
       });
     } on RustApiException catch (e) {
       if (!mounted) return;
-      setState(() => _statusLine = e.toString());
+      setState(() => _statusLine = describeUserVisibleApiError(l10n, e));
     } finally {
       if (mounted) {
         setState(() => _loadingReviewById = false);
@@ -493,7 +493,7 @@ class _QualityReviewsWorkbenchDialogState
       );
     } on RustApiException catch (e) {
       if (!mounted) return;
-      setState(() => _statusLine = e.toString());
+      setState(() => _statusLine = describeUserVisibleApiError(l10n, e));
     } finally {
       if (mounted) {
         setState(() => _creatingReview = false);

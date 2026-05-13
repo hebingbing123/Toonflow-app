@@ -216,7 +216,7 @@ class _ProjectsAgentMemoryWorkbenchDialogState
           );
       }
     }
-    return e.toString();
+    return describeUserVisibleApiError(l10n, e);
   }
 
   String _normalizedSelection(
@@ -248,7 +248,7 @@ class _ProjectsAgentMemoryWorkbenchDialogState
     } on RustApiException catch (e) {
       if (!mounted) return;
       setState(() {
-        _statusLine = e.toString();
+        _statusLine = describeUserVisibleApiError(l10n, e);
         _loadingProjects = false;
       });
     } catch (e) {
@@ -305,7 +305,7 @@ class _ProjectsAgentMemoryWorkbenchDialogState
     } on RustApiException catch (e) {
       if (!mounted) return;
       setState(() {
-        _statusLine = e.toString();
+        _statusLine = describeUserVisibleApiError(l10n, e);
         _loadingMemory = false;
       });
     } catch (e) {
@@ -350,7 +350,7 @@ class _ProjectsAgentMemoryWorkbenchDialogState
     } on RustApiException catch (e) {
       if (!mounted) return;
       setState(() {
-        _statusLine = e.toString();
+        _statusLine = describeUserVisibleApiError(l10n, e);
         _loadingCostOverview = false;
       });
     } catch (e) {
@@ -414,7 +414,7 @@ class _ProjectsAgentMemoryWorkbenchDialogState
     } on RustApiException catch (e) {
       if (!mounted) return;
       setState(() {
-        _statusLine = e.toString();
+        _statusLine = describeUserVisibleApiError(l10n, e);
         _appendingMemory = false;
       });
     } catch (e) {
@@ -462,7 +462,7 @@ class _ProjectsAgentMemoryWorkbenchDialogState
     } on RustApiException catch (e) {
       if (!mounted) return;
       setState(() {
-        _statusLine = e.toString();
+        _statusLine = describeUserVisibleApiError(l10n, e);
         _clearingMemory = false;
       });
     } catch (e) {
@@ -522,7 +522,7 @@ class _ProjectsAgentMemoryWorkbenchDialogState
     } on RustApiException catch (e) {
       if (!mounted) return;
       setState(() {
-        _statusLine = e.toString();
+        _statusLine = describeUserVisibleApiError(l10n, e);
         _optimizingMemory = false;
       });
     } catch (e) {
