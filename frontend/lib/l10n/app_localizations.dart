@@ -25048,6 +25048,114 @@ abstract class AppLocalizations {
   /// **'{mode}'**
   String shortVideoPublishAutomationModeRaw(String mode);
 
+  /// No description provided for @shortVideoPublishJobStatusQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Queued'**
+  String get shortVideoPublishJobStatusQueued;
+
+  /// No description provided for @shortVideoPublishJobStatusRetrying.
+  ///
+  /// In en, this message translates to:
+  /// **'Retrying'**
+  String get shortVideoPublishJobStatusRetrying;
+
+  /// No description provided for @shortVideoPublishJobStatusRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Running'**
+  String get shortVideoPublishJobStatusRunning;
+
+  /// No description provided for @shortVideoPublishJobStatusValidating.
+  ///
+  /// In en, this message translates to:
+  /// **'Validating'**
+  String get shortVideoPublishJobStatusValidating;
+
+  /// No description provided for @shortVideoPublishJobStatusUploading.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading'**
+  String get shortVideoPublishJobStatusUploading;
+
+  /// No description provided for @shortVideoPublishJobStatusAwaitingConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Awaiting confirmation'**
+  String get shortVideoPublishJobStatusAwaitingConfirmation;
+
+  /// No description provided for @shortVideoPublishJobStatusSucceeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Succeeded'**
+  String get shortVideoPublishJobStatusSucceeded;
+
+  /// No description provided for @shortVideoPublishJobStatusFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get shortVideoPublishJobStatusFailed;
+
+  /// No description provided for @shortVideoPublishJobStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get shortVideoPublishJobStatusCancelled;
+
+  /// No description provided for @shortVideoPublishJobStatusPartialFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Partially failed'**
+  String get shortVideoPublishJobStatusPartialFailed;
+
+  /// No description provided for @shortVideoPublishJobStatusPlatformProcessing.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform processing'**
+  String get shortVideoPublishJobStatusPlatformProcessing;
+
+  /// No description provided for @shortVideoPublishJobStatusIdle.
+  ///
+  /// In en, this message translates to:
+  /// **'Idle'**
+  String get shortVideoPublishJobStatusIdle;
+
+  /// No description provided for @shortVideoPublishJobStatusUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown status'**
+  String get shortVideoPublishJobStatusUnknown;
+
+  /// No description provided for @shortVideoPublishJobStatusRaw.
+  ///
+  /// In en, this message translates to:
+  /// **'{status}'**
+  String shortVideoPublishJobStatusRaw(String status);
+
+  /// No description provided for @shortVideoPublishPrepareSeverityBlocking.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocking'**
+  String get shortVideoPublishPrepareSeverityBlocking;
+
+  /// No description provided for @shortVideoPublishPrepareSeverityWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Warning'**
+  String get shortVideoPublishPrepareSeverityWarning;
+
+  /// No description provided for @shortVideoPublishPrepareSeverityUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown severity'**
+  String get shortVideoPublishPrepareSeverityUnknown;
+
+  /// No description provided for @shortVideoPublishPrepareSeverityRaw.
+  ///
+  /// In en, this message translates to:
+  /// **'{severity}'**
+  String shortVideoPublishPrepareSeverityRaw(String severity);
+
   /// No description provided for @accountSectionTitle.
   ///
   /// In en, this message translates to:

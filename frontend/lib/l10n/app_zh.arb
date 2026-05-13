@@ -12429,6 +12429,38 @@
       }
     }
   },
+  "shortVideoPublishJobStatusQueued": "排队中",
+  "shortVideoPublishJobStatusRetrying": "重试中",
+  "shortVideoPublishJobStatusRunning": "执行中",
+  "shortVideoPublishJobStatusValidating": "校验中",
+  "shortVideoPublishJobStatusUploading": "上传中",
+  "shortVideoPublishJobStatusAwaitingConfirmation": "待人工确认",
+  "shortVideoPublishJobStatusSucceeded": "成功",
+  "shortVideoPublishJobStatusFailed": "失败",
+  "shortVideoPublishJobStatusCancelled": "已取消",
+  "shortVideoPublishJobStatusPartialFailed": "部分失败",
+  "shortVideoPublishJobStatusPlatformProcessing": "平台处理中",
+  "shortVideoPublishJobStatusIdle": "空闲",
+  "shortVideoPublishJobStatusUnknown": "未知状态",
+  "shortVideoPublishJobStatusRaw": "{status}",
+  "@shortVideoPublishJobStatusRaw": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishPrepareSeverityBlocking": "阻断",
+  "shortVideoPublishPrepareSeverityWarning": "警告",
+  "shortVideoPublishPrepareSeverityUnknown": "未知严重度",
+  "shortVideoPublishPrepareSeverityRaw": "{severity}",
+  "@shortVideoPublishPrepareSeverityRaw": {
+    "placeholders": {
+      "severity": {
+        "type": "String"
+      }
+    }
+  },
   "accountSectionTitle": "账户与隐私",
   "accountRiskyPrefsTooltip": "本机客户端偏好（删号、导出等「不再提示」与恢复确认）",
   "accountSectionSubtitle": "统一管理账户数据导出、下载留档和不可逆删号。导出任务会走平台 job 队列，可反复生成新版快照。",

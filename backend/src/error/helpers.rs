@@ -177,6 +177,11 @@ pub fn forbidden_i18n(en_msg: &str, zh_msg: &str) -> ApiError {
     ApiError::Forbidden(msg.to_string())
 }
 
+/// 权限不足（403）；与 [`forbidden_i18n`] 等价，便于语义化调用。
+pub fn insufficient_permissions_i18n(en_msg: &str, zh_msg: &str) -> ApiError {
+    forbidden_i18n(en_msg, zh_msg)
+}
+
 /// 验证数值为正数（> 0）。
 ///
 /// # 示例
@@ -858,6 +863,96 @@ mod tests {
         assert_eq!(
             json.get("message").and_then(|v| v.as_str()),
             Some("project 'project-123' 已存在")
+        );
+    }
+
+    #[test]
+    fn feature_not_enabled_i18n_en() {
+        let err = feature_not_enabled_i18n("billing");
+        match err {
+            ApiError::ForbiddenI18n { en, zh } => {
+                assert_eq!(en, "Feature 'billing' is not enabled");
+                assert_eq!(zh, "功能 'billing' 未启用");
+            }
+            _ => panic!("expected ForbiddenI18n"),
+        }
+    }
+
+    #[test]
+    fn feature_not_enabled_i18n_with_different_features() {
+        let test_cases = vec![
+            (
+                "billing",
+                "Feature 'billing' is not enabled",
+                "功能 'billing' 未启用",
+            ),
+            (
+                "advanced_analytics",
+                "Feature 'advanced_analytics' is not enabled",
+                "功能 'advanced_analytics' 未启用",
+            ),
+            (
+                "export",
+                "Feature 'export' is not enabled",
+                "功能 'export' 未启用",
+            ),
+        ];
+
+        for (feature, expected_en, expected_zh) in test_cases {
+            let err = feature_not_enabled_i18n(feature);
+            match err {
+                ApiError::ForbiddenI18n { en, zh } => {
+                    assert_eq!(en, expected_en);
+                    assert_eq!(zh, expected_zh);
+                }
+                _ => panic!("expected ForbiddenI18n"),
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn feature_not_enabled_i18n_response_en() {
+        use axum::body::to_bytes;
+        use axum::response::IntoResponse;
+
+        let err = feature_not_enabled_i18n("billing");
+        let resp = err.into_response();
+
+        let bytes = to_bytes(resp.into_body(), 16 * 1024)
+            .await
+            .expect("body bytes");
+        let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
+
+        assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(403));
+        assert_eq!(json.get("code").and_then(|v| v.as_str()), Some("forbidden"));
+        assert_eq!(
+            json.get("message").and_then(|v| v.as_str()),
+            Some("Feature 'billing' is not enabled")
+        );
+    }
+
+    #[tokio::test]
+    async fn feature_not_enabled_i18n_response_zh() {
+        use axum::body::to_bytes;
+        use axum::response::IntoResponse;
+
+        let resp = REQUEST_LOCALE
+            .scope(ApiLocale::Zh, async {
+                let err = feature_not_enabled_i18n("advanced_analytics");
+                err.into_response()
+            })
+            .await;
+
+        let bytes = to_bytes(resp.into_body(), 16 * 1024)
+            .await
+            .expect("body bytes");
+        let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
+
+        assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(403));
+        assert_eq!(json.get("code").and_then(|v| v.as_str()), Some("forbidden"));
+        assert_eq!(
+            json.get("message").and_then(|v| v.as_str()),
+            Some("功能 'advanced_analytics' 未启用")
         );
     }
 }

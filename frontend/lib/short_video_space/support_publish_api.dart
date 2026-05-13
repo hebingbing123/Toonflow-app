@@ -559,7 +559,7 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
           l10n.shortVideoPublishMatrixPlatformRow(
             row.labelZh,
             row.platformId,
-            row.automationMode,
+            shortVideoPublishAutomationModeLabel(l10n, row.automationMode),
             row.titleMaxChars,
             row.tagsMax,
             row.descriptionMaxChars,
@@ -604,7 +604,7 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
     if (activeDraft != null && prepare != null) ...[
       if (prepare.ok) l10n.shortVideoSpacePublishPanelPrepareCheckOk,
       for (final issue in prepare.issues)
-        '${issue.severity}: ${issue.message}'
+        '${shortVideoPublishPrepareSeverityLabel(l10n, issue.severity)}: ${issue.message}'
             '${issue.platformId != null ? ' · ${issue.platformId}' : ''}',
     ] else if (activeDraft == null && drafts.length > 1)
       l10n.shortVideoSpacePublishPanelPrepareCheckMultipleDrafts
@@ -640,7 +640,8 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
             : j.id;
         final err = (j.errorMessage ?? '').trim();
         final errPart = err.isEmpty ? '' : l10n.shortVideoSpacePublishPanelJobError(err);
-        return '$short · ${j.status}$errPart';
+        final statusLabel = shortVideoPublishJobStatusLabel(l10n, j.status);
+        return '$short · $statusLabel$errPart';
       })
       .toList(growable: false);
   final succeededJobCount = jobs.where((j) => j.status == 'succeeded').length;
@@ -691,7 +692,10 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
     if (publishAutomationModesByPlatform.isNotEmpty)
       l10n.shortVideoSpacePublishPanelOverviewTargetAutomation(
         publishAutomationModesByPlatform.entries
-            .map((e) => "${labels[e.key] ?? e.key}=${e.value}")
+            .map(
+              (e) =>
+                  "${labels[e.key] ?? e.key}=${shortVideoPublishAutomationModeLabel(l10n, e.value)}",
+            )
             .join("；")
       ),
   ];

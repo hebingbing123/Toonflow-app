@@ -16317,6 +16317,66 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get shortVideoPublishJobStatusQueued => 'Queued';
+
+  @override
+  String get shortVideoPublishJobStatusRetrying => 'Retrying';
+
+  @override
+  String get shortVideoPublishJobStatusRunning => 'Running';
+
+  @override
+  String get shortVideoPublishJobStatusValidating => 'Validating';
+
+  @override
+  String get shortVideoPublishJobStatusUploading => 'Uploading';
+
+  @override
+  String get shortVideoPublishJobStatusAwaitingConfirmation =>
+      'Awaiting confirmation';
+
+  @override
+  String get shortVideoPublishJobStatusSucceeded => 'Succeeded';
+
+  @override
+  String get shortVideoPublishJobStatusFailed => 'Failed';
+
+  @override
+  String get shortVideoPublishJobStatusCancelled => 'Cancelled';
+
+  @override
+  String get shortVideoPublishJobStatusPartialFailed => 'Partially failed';
+
+  @override
+  String get shortVideoPublishJobStatusPlatformProcessing =>
+      'Platform processing';
+
+  @override
+  String get shortVideoPublishJobStatusIdle => 'Idle';
+
+  @override
+  String get shortVideoPublishJobStatusUnknown => 'Unknown status';
+
+  @override
+  String shortVideoPublishJobStatusRaw(String status) {
+    return '$status';
+  }
+
+  @override
+  String get shortVideoPublishPrepareSeverityBlocking => 'Blocking';
+
+  @override
+  String get shortVideoPublishPrepareSeverityWarning => 'Warning';
+
+  @override
+  String get shortVideoPublishPrepareSeverityUnknown => 'Unknown severity';
+
+  @override
+  String shortVideoPublishPrepareSeverityRaw(String severity) {
+    return '$severity';
+  }
+
+  @override
   String get accountSectionTitle => 'Account section title';
 
   @override

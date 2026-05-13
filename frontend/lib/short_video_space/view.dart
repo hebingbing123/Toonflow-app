@@ -111,6 +111,57 @@ String shortVideoPublishAutomationModeLabel(
   }
 }
 
+String shortVideoPublishJobStatusLabel(AppLocalizations l10n, String status) {
+  switch (status.trim()) {
+    case 'queued':
+      return l10n.shortVideoPublishJobStatusQueued;
+    case 'retrying':
+      return l10n.shortVideoPublishJobStatusRetrying;
+    case 'running':
+      return l10n.shortVideoPublishJobStatusRunning;
+    case 'validating':
+      return l10n.shortVideoPublishJobStatusValidating;
+    case 'uploading':
+      return l10n.shortVideoPublishJobStatusUploading;
+    case 'awaiting_confirmation':
+      return l10n.shortVideoPublishJobStatusAwaitingConfirmation;
+    case 'succeeded':
+      return l10n.shortVideoPublishJobStatusSucceeded;
+    case 'failed':
+      return l10n.shortVideoPublishJobStatusFailed;
+    case 'cancelled':
+      return l10n.shortVideoPublishJobStatusCancelled;
+    case 'partial_failed':
+      return l10n.shortVideoPublishJobStatusPartialFailed;
+    case 'platform_processing':
+      return l10n.shortVideoPublishJobStatusPlatformProcessing;
+    case 'idle':
+      return l10n.shortVideoPublishJobStatusIdle;
+    default:
+      final s = status.trim();
+      return s.isEmpty
+          ? l10n.shortVideoPublishJobStatusUnknown
+          : l10n.shortVideoPublishJobStatusRaw(s);
+  }
+}
+
+String shortVideoPublishPrepareSeverityLabel(
+  AppLocalizations l10n,
+  String severity,
+) {
+  switch (severity.trim()) {
+    case 'blocking':
+      return l10n.shortVideoPublishPrepareSeverityBlocking;
+    case 'warning':
+      return l10n.shortVideoPublishPrepareSeverityWarning;
+    default:
+      final s = severity.trim();
+      return s.isEmpty
+          ? l10n.shortVideoPublishPrepareSeverityUnknown
+          : l10n.shortVideoPublishPrepareSeverityRaw(s);
+  }
+}
+
 class ShortVideoProjectOption {
   const ShortVideoProjectOption({required this.id, required this.label});
 

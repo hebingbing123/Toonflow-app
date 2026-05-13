@@ -12469,6 +12469,38 @@
       }
     }
   },
+  "shortVideoPublishJobStatusQueued": "Queued",
+  "shortVideoPublishJobStatusRetrying": "Retrying",
+  "shortVideoPublishJobStatusRunning": "Running",
+  "shortVideoPublishJobStatusValidating": "Validating",
+  "shortVideoPublishJobStatusUploading": "Uploading",
+  "shortVideoPublishJobStatusAwaitingConfirmation": "Awaiting confirmation",
+  "shortVideoPublishJobStatusSucceeded": "Succeeded",
+  "shortVideoPublishJobStatusFailed": "Failed",
+  "shortVideoPublishJobStatusCancelled": "Cancelled",
+  "shortVideoPublishJobStatusPartialFailed": "Partially failed",
+  "shortVideoPublishJobStatusPlatformProcessing": "Platform processing",
+  "shortVideoPublishJobStatusIdle": "Idle",
+  "shortVideoPublishJobStatusUnknown": "Unknown status",
+  "shortVideoPublishJobStatusRaw": "{status}",
+  "@shortVideoPublishJobStatusRaw": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishPrepareSeverityBlocking": "Blocking",
+  "shortVideoPublishPrepareSeverityWarning": "Warning",
+  "shortVideoPublishPrepareSeverityUnknown": "Unknown severity",
+  "shortVideoPublishPrepareSeverityRaw": "{severity}",
+  "@shortVideoPublishPrepareSeverityRaw": {
+    "placeholders": {
+      "severity": {
+        "type": "String"
+      }
+    }
+  },
   "accountSectionTitle": "Account section title",
   "accountRiskyPrefsTooltip": "Account risky prefs tooltip",
   "accountSectionSubtitle": "Account section subtitle",

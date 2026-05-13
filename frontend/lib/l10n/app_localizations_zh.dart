@@ -15531,6 +15531,64 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get shortVideoPublishJobStatusQueued => '排队中';
+
+  @override
+  String get shortVideoPublishJobStatusRetrying => '重试中';
+
+  @override
+  String get shortVideoPublishJobStatusRunning => '执行中';
+
+  @override
+  String get shortVideoPublishJobStatusValidating => '校验中';
+
+  @override
+  String get shortVideoPublishJobStatusUploading => '上传中';
+
+  @override
+  String get shortVideoPublishJobStatusAwaitingConfirmation => '待人工确认';
+
+  @override
+  String get shortVideoPublishJobStatusSucceeded => '成功';
+
+  @override
+  String get shortVideoPublishJobStatusFailed => '失败';
+
+  @override
+  String get shortVideoPublishJobStatusCancelled => '已取消';
+
+  @override
+  String get shortVideoPublishJobStatusPartialFailed => '部分失败';
+
+  @override
+  String get shortVideoPublishJobStatusPlatformProcessing => '平台处理中';
+
+  @override
+  String get shortVideoPublishJobStatusIdle => '空闲';
+
+  @override
+  String get shortVideoPublishJobStatusUnknown => '未知状态';
+
+  @override
+  String shortVideoPublishJobStatusRaw(String status) {
+    return '$status';
+  }
+
+  @override
+  String get shortVideoPublishPrepareSeverityBlocking => '阻断';
+
+  @override
+  String get shortVideoPublishPrepareSeverityWarning => '警告';
+
+  @override
+  String get shortVideoPublishPrepareSeverityUnknown => '未知严重度';
+
+  @override
+  String shortVideoPublishPrepareSeverityRaw(String severity) {
+    return '$severity';
+  }
+
+  @override
   String get accountSectionTitle => '账户与隐私';
 
   @override
