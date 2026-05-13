@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../l10n/app_localizations.dart';
 import '../dialogs/confirmation_dialogs.dart';
 import 'version_comparison.dart';
 
@@ -171,13 +173,14 @@ class _VersionManagerState extends State<VersionManager> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final currentVersion = widget.versions.firstWhere(
       (v) => v.id == widget.currentVersionId,
       orElse: () => widget.versions.isNotEmpty
           ? widget.versions.first
           : AssemblyVersion(
               id: 'default',
-              name: '默认版本',
+              name: l10n.shortVideoVersionManagerDefaultVersion,
               createdAt: DateTime.now(),
               shotCount: 0,
               shotConfig: {},
@@ -194,35 +197,33 @@ class _VersionManagerState extends State<VersionManager> {
             mainAxisSize: MainAxisSize.min,
             children: [
               // 标题栏
-              Row(
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   Icon(Icons.history, size: 20, color: theme.colorScheme.primary),
-                  const SizedBox(width: 8),
                   Text(
-                    '版本管理',
+                    l10n.shortVideoVersionManagerTitle,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const Spacer(),
                   if (widget.versions.length >= 2)
                     FilledButton.tonalIcon(
                       onPressed: _isLoading ? null : _showCompareVersionsDialog,
                       icon: const Icon(Icons.compare_arrows, size: 18),
-                      label: const Text('对比版本'),
+                      label: Text(l10n.shortVideoVersionManagerCompareVersions),
                     ),
-                  if (widget.versions.length >= 2)
-                    const SizedBox(width: 8),
                   FilledButton.tonalIcon(
                     onPressed: _isLoading ? null : _showCreateVersionDialog,
                     icon: const Icon(Icons.add, size: 18),
-                    label: const Text('创建新版本'),
+                    label: Text(l10n.shortVideoVersionManagerCreateNewVersion),
                   ),
-                  const SizedBox(width: 8),
                   FilledButton.tonalIcon(
                     onPressed: _isLoading ? null : _showSaveDraftDialog,
                     icon: const Icon(Icons.save_outlined, size: 18),
-                    label: const Text('保存草稿'),
+                    label: Text(l10n.shortVideoVersionManagerSaveDraft),
                   ),
                 ],
               ),
@@ -286,7 +287,9 @@ class _VersionManagerState extends State<VersionManager> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '当前版本：${currentVersion.name}',
+                          l10n.shortVideoVersionManagerCurrentVersion(
+                            currentVersion.name,
+                          ),
                           style: theme.textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: theme.colorScheme.onPrimaryContainer,
@@ -294,8 +297,10 @@ class _VersionManagerState extends State<VersionManager> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '镜头数：${currentVersion.shotCount} · '
-                          '创建时间：${_formatDateTime(currentVersion.createdAt)}',
+                          l10n.shortVideoVersionManagerCurrentVersionMeta(
+                            currentVersion.shotCount,
+                            _formatDateTime(currentVersion.createdAt),
+                          ),
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.onPrimaryContainer,
                           ),
@@ -310,7 +315,7 @@ class _VersionManagerState extends State<VersionManager> {
 
             // 版本列表
             Text(
-              '所有版本 (${widget.versions.length})',
+              l10n.shortVideoVersionManagerAllVersions(widget.versions.length),
               style: theme.textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -322,7 +327,7 @@ class _VersionManagerState extends State<VersionManager> {
                 child: Padding(
                   padding: const EdgeInsets.all(24),
                   child: Text(
-                    '暂无版本，点击上方按钮创建第一个版本',
+                    l10n.shortVideoVersionManagerNoVersionsHint,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -361,8 +366,10 @@ class _VersionManagerState extends State<VersionManager> {
                         ),
                       ),
                       subtitle: Text(
-                        '镜头数：${version.shotCount} · '
-                        '创建时间：${_formatDateTime(version.createdAt)}',
+                        l10n.shortVideoVersionManagerVersionRowSubtitle(
+                          version.shotCount,
+                          _formatDateTime(version.createdAt),
+                        ),
                         style: theme.textTheme.bodySmall,
                       ),
                       trailing: Row(
@@ -371,14 +378,14 @@ class _VersionManagerState extends State<VersionManager> {
                           if (!isCurrent)
                             IconButton(
                               icon: const Icon(Icons.swap_horiz, size: 20),
-                              tooltip: '切换到此版本',
+                              tooltip: l10n.shortVideoVersionManagerTooltipSwitchVersion,
                               onPressed: _isLoading
                                   ? null
                                   : () => _handleSwitchVersion(version.id),
                             ),
                           IconButton(
                             icon: const Icon(Icons.delete_outline, size: 20),
-                            tooltip: '删除版本',
+                            tooltip: l10n.shortVideoVersionManagerTooltipDeleteVersion,
                             onPressed: _isLoading || isCurrent
                                 ? null
                                 : () => _handleDeleteVersion(version),
@@ -396,7 +403,10 @@ class _VersionManagerState extends State<VersionManager> {
             Row(
               children: [
                 Text(
-                  '草稿 (${widget.drafts.length}/10)',
+                  l10n.shortVideoVersionManagerDraftsHeader(
+                    widget.drafts.length,
+                    10,
+                  ),
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -406,7 +416,7 @@ class _VersionManagerState extends State<VersionManager> {
                   TextButton.icon(
                     onPressed: _isLoading ? null : _showDraftsDialog,
                     icon: const Icon(Icons.list, size: 18),
-                    label: const Text('查看全部'),
+                    label: Text(l10n.shortVideoVersionManagerViewAllDrafts),
                   ),
               ],
             ),
@@ -417,7 +427,7 @@ class _VersionManagerState extends State<VersionManager> {
                 child: Padding(
                   padding: const EdgeInsets.all(24),
                   child: Text(
-                    '暂无草稿，点击上方"保存草稿"按钮保存当前编辑状态',
+                    l10n.shortVideoVersionManagerNoDraftsHint,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -442,8 +452,10 @@ class _VersionManagerState extends State<VersionManager> {
                       ),
                       title: Text(draft.name),
                       subtitle: Text(
-                        '镜头数：${draft.shotCount} · '
-                        '保存时间：${_formatDateTime(draft.savedAt)}',
+                        l10n.shortVideoVersionManagerDraftRowSubtitle(
+                          draft.shotCount,
+                          _formatDateTime(draft.savedAt),
+                        ),
                         style: theme.textTheme.bodySmall,
                       ),
                       trailing: Row(
@@ -451,14 +463,14 @@ class _VersionManagerState extends State<VersionManager> {
                         children: [
                           IconButton(
                             icon: const Icon(Icons.restore, size: 20),
-                            tooltip: '恢复草稿',
+                            tooltip: l10n.shortVideoVersionManagerTooltipRestoreDraft,
                             onPressed: _isLoading
                                 ? null
                                 : () => _handleRestoreDraft(draft),
                           ),
                           IconButton(
                             icon: const Icon(Icons.delete_outline, size: 20),
-                            tooltip: '删除草稿',
+                            tooltip: l10n.shortVideoVersionManagerTooltipDeleteDraft,
                             onPressed: _isLoading
                                 ? null
                                 : () => _handleDeleteDraft(draft),
@@ -485,25 +497,26 @@ class _VersionManagerState extends State<VersionManager> {
 
   /// 显示创建版本对话框
   Future<void> _showCreateVersionDialog() async {
+    final l10n = AppLocalizations.of(context)!;
     final result = await showDialog<String>(
       context: context,
       builder: (context) {
         var draftName = '';
         return StatefulBuilder(
           builder: (dialogContext, setDialogState) => AlertDialog(
-            title: const Text('创建新版本'),
+            title: Text(l10n.shortVideoVersionManagerCreateVersionDialogTitle),
             content: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('新版本将复制当前镜头配置。'),
+                  Text(l10n.shortVideoVersionManagerCreateVersionDialogBody),
                   const SizedBox(height: 16),
                   TextField(
-                    decoration: const InputDecoration(
-                      labelText: '版本名称',
-                      hintText: '例如：优化版 v2',
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: l10n.shortVideoVersionManagerVersionNameLabel,
+                      hintText: l10n.shortVideoVersionManagerVersionNameHint,
+                      border: const OutlineInputBorder(),
                     ),
                     autofocus: true,
                     maxLength: 50,
@@ -525,7 +538,7 @@ class _VersionManagerState extends State<VersionManager> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(dialogContext).pop(),
-                child: const Text('取消'),
+                child: Text(l10n.notificationsActionCancel),
               ),
               FilledButton(
                 onPressed: () {
@@ -534,7 +547,7 @@ class _VersionManagerState extends State<VersionManager> {
                     Navigator.of(dialogContext).pop(name);
                   }
                 },
-                child: const Text('创建'),
+                child: Text(l10n.shortVideoVersionManagerCreateAction),
               ),
             ],
           ),
@@ -559,7 +572,10 @@ class _VersionManagerState extends State<VersionManager> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('版本 "$name" 创建成功'),
+            content: Text(
+              AppLocalizations.of(context)!
+                  .shortVideoVersionManagerSnackbarVersionCreated(name),
+            ),
             backgroundColor: Theme.of(context).colorScheme.primary,
           ),
         );
@@ -567,7 +583,8 @@ class _VersionManagerState extends State<VersionManager> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = '创建版本失败：$e';
+          _errorMessage = AppLocalizations.of(context)!
+              .shortVideoVersionManagerErrorVersionCreate('$e');
         });
       }
     } finally {
@@ -592,7 +609,10 @@ class _VersionManagerState extends State<VersionManager> {
         final version = widget.versions.firstWhere((v) => v.id == versionId);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('已切换到版本 "${version.name}"'),
+            content: Text(
+              AppLocalizations.of(context)!
+                  .shortVideoVersionManagerSnackbarVersionSwitched(version.name),
+            ),
             backgroundColor: Theme.of(context).colorScheme.primary,
           ),
         );
@@ -600,7 +620,8 @@ class _VersionManagerState extends State<VersionManager> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = '切换版本失败：$e';
+          _errorMessage = AppLocalizations.of(context)!
+              .shortVideoVersionManagerErrorVersionSwitch('$e');
         });
       }
     } finally {
@@ -635,7 +656,10 @@ class _VersionManagerState extends State<VersionManager> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('版本 "${version.name}" 已删除'),
+            content: Text(
+              AppLocalizations.of(context)!
+                  .shortVideoVersionManagerSnackbarVersionDeleted(version.name),
+            ),
             backgroundColor: Theme.of(context).colorScheme.primary,
           ),
         );
@@ -643,7 +667,8 @@ class _VersionManagerState extends State<VersionManager> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = '删除版本失败：$e';
+          _errorMessage = AppLocalizations.of(context)!
+              .shortVideoVersionManagerErrorVersionDelete('$e');
         });
       }
     } finally {
@@ -670,26 +695,24 @@ class _VersionManagerState extends State<VersionManager> {
     // 检查草稿数量限制
     if (widget.drafts.length >= 10) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         showDialog<void>(
           context: context,
           builder: (context) {
             return AlertDialog(
-              title: const Text('草稿数量已达上限'),
-              content: const Text(
-                '最多只能保存 10 个草稿。\n\n'
-                '请先删除一些旧草稿，然后再保存新草稿。',
-              ),
+              title: Text(l10n.shortVideoVersionManagerDraftLimitTitle),
+              content: Text(l10n.shortVideoVersionManagerDraftLimitBody),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('知道了'),
+                  child: Text(l10n.shortVideoVersionManagerGotIt),
                 ),
                 FilledButton(
                   onPressed: () {
                     Navigator.of(context).pop();
                     _showDraftsDialog();
                   },
-                  child: const Text('查看草稿'),
+                  child: Text(l10n.shortVideoVersionManagerViewDraftsList),
                 ),
               ],
             );
@@ -699,25 +722,26 @@ class _VersionManagerState extends State<VersionManager> {
       return;
     }
 
+    final l10n = AppLocalizations.of(context)!;
     final result = await showDialog<String>(
       context: context,
       builder: (context) {
         var draftName = '';
         return StatefulBuilder(
           builder: (dialogContext, setDialogState) => AlertDialog(
-            title: const Text('保存草稿'),
+            title: Text(l10n.shortVideoVersionManagerSaveDraftDialogTitle),
             content: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('草稿将保存当前编辑状态，方便稍后继续编辑。'),
+                  Text(l10n.shortVideoVersionManagerSaveDraftDialogBody),
                   const SizedBox(height: 16),
                   TextField(
-                    decoration: const InputDecoration(
-                      labelText: '草稿名称',
-                      hintText: '例如：实验性剪辑 v1',
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: l10n.shortVideoVersionManagerDraftNameLabel,
+                      hintText: l10n.shortVideoVersionManagerDraftNameHint,
+                      border: const OutlineInputBorder(),
                     ),
                     autofocus: true,
                     maxLength: 50,
@@ -739,7 +763,7 @@ class _VersionManagerState extends State<VersionManager> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(dialogContext).pop(),
-                child: const Text('取消'),
+                child: Text(l10n.notificationsActionCancel),
               ),
               FilledButton(
                 onPressed: () {
@@ -748,7 +772,7 @@ class _VersionManagerState extends State<VersionManager> {
                     Navigator.of(dialogContext).pop(name);
                   }
                 },
-                child: const Text('保存'),
+                child: Text(l10n.notificationsActionSave),
               ),
             ],
           ),
@@ -773,7 +797,10 @@ class _VersionManagerState extends State<VersionManager> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('草稿 "$name" 保存成功'),
+            content: Text(
+              AppLocalizations.of(context)!
+                  .shortVideoVersionManagerSnackbarDraftSaved(name),
+            ),
             backgroundColor: Theme.of(context).colorScheme.primary,
           ),
         );
@@ -781,7 +808,8 @@ class _VersionManagerState extends State<VersionManager> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = '保存草稿失败：$e';
+          _errorMessage = AppLocalizations.of(context)!
+              .shortVideoVersionManagerErrorDraftSave('$e');
         });
       }
     } finally {
@@ -795,18 +823,19 @@ class _VersionManagerState extends State<VersionManager> {
 
   /// 显示草稿列表对话框
   Future<void> _showDraftsDialog() async {
+    final l10n = AppLocalizations.of(context)!;
     await showDialog<void>(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('草稿列表'),
+          title: Text(l10n.shortVideoVersionManagerDraftListTitle),
           content: SizedBox(
             width: double.maxFinite,
             child: widget.drafts.isEmpty
-                ? const Padding(
-                    padding: EdgeInsets.all(24),
+                ? Padding(
+                    padding: const EdgeInsets.all(24),
                     child: Center(
-                      child: Text('暂无草稿'),
+                      child: Text(l10n.shortVideoVersionManagerNoDraftsInList),
                     ),
                   )
                 : ListView.builder(
@@ -825,8 +854,10 @@ class _VersionManagerState extends State<VersionManager> {
                           ),
                           title: Text(draft.name),
                           subtitle: Text(
-                            '镜头数：${draft.shotCount}\n'
-                            '保存时间：${_formatDateTime(draft.savedAt)}',
+                            l10n.shortVideoVersionManagerDraftListRowSubtitle(
+                              draft.shotCount,
+                              _formatDateTime(draft.savedAt),
+                            ),
                             style: theme.textTheme.bodySmall,
                           ),
                           trailing: Row(
@@ -834,7 +865,8 @@ class _VersionManagerState extends State<VersionManager> {
                             children: [
                               IconButton(
                                 icon: const Icon(Icons.restore, size: 20),
-                                tooltip: '恢复草稿',
+                                tooltip:
+                                    l10n.shortVideoVersionManagerTooltipRestoreDraft,
                                 onPressed: () {
                                   Navigator.of(context).pop();
                                   _handleRestoreDraft(draft);
@@ -842,7 +874,8 @@ class _VersionManagerState extends State<VersionManager> {
                               ),
                               IconButton(
                                 icon: const Icon(Icons.delete_outline, size: 20),
-                                tooltip: '删除草稿',
+                                tooltip:
+                                    l10n.shortVideoVersionManagerTooltipDeleteDraft,
                                 onPressed: () {
                                   Navigator.of(context).pop();
                                   _handleDeleteDraft(draft);
@@ -858,7 +891,7 @@ class _VersionManagerState extends State<VersionManager> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('关闭'),
+              child: Text(l10n.shortVideoSpaceProductionAssemblyClose),
             ),
           ],
         );
@@ -889,7 +922,10 @@ class _VersionManagerState extends State<VersionManager> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('草稿 "${draft.name}" 已恢复'),
+            content: Text(
+              AppLocalizations.of(context)!
+                  .shortVideoVersionManagerSnackbarDraftRestored(draft.name),
+            ),
             backgroundColor: Theme.of(context).colorScheme.primary,
           ),
         );
@@ -897,7 +933,8 @@ class _VersionManagerState extends State<VersionManager> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = '恢复草稿失败：$e';
+          _errorMessage = AppLocalizations.of(context)!
+              .shortVideoVersionManagerErrorDraftRestore('$e');
         });
       }
     } finally {
@@ -915,23 +952,23 @@ class _VersionManagerState extends State<VersionManager> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) {
+        final l10n = AppLocalizations.of(context)!;
         return AlertDialog(
-          title: const Text('确认删除'),
+          title: Text(l10n.shortVideoVersionManagerConfirmDeleteDraftTitle),
           content: Text(
-            '确定要删除草稿 "${draft.name}" 吗？\n\n'
-            '此操作无法撤销。',
+            l10n.shortVideoVersionManagerConfirmDeleteDraftBody(draft.name),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('取消'),
+              child: Text(l10n.notificationsActionCancel),
             ),
             FilledButton(
               onPressed: () => Navigator.of(context).pop(true),
               style: FilledButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.error,
               ),
-              child: const Text('删除'),
+              child: Text(l10n.notificationsActionDelete),
             ),
           ],
         );
@@ -952,7 +989,10 @@ class _VersionManagerState extends State<VersionManager> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('草稿 "${draft.name}" 已删除'),
+            content: Text(
+              AppLocalizations.of(context)!
+                  .shortVideoVersionManagerSnackbarDraftDeleted(draft.name),
+            ),
             backgroundColor: Theme.of(context).colorScheme.primary,
           ),
         );
@@ -960,7 +1000,8 @@ class _VersionManagerState extends State<VersionManager> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = '删除草稿失败：$e';
+          _errorMessage = AppLocalizations.of(context)!
+              .shortVideoVersionManagerErrorDraftDelete('$e');
         });
       }
     } finally {
@@ -987,15 +1028,16 @@ class _VersionManagerState extends State<VersionManager> {
       builder: (context) {
         return StatefulBuilder(
           builder: (dialogContext, setDialogState) {
+            final l10n = AppLocalizations.of(dialogContext)!;
             return AlertDialog(
-              title: const Text('选择要对比的版本'),
+              title: Text(l10n.shortVideoVersionManagerCompareDialogTitle),
               content: SizedBox(
                 width: double.maxFinite,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('选择基准版本（旧版本）：'),
+                    Text(l10n.shortVideoVersionManagerCompareBaseLabel),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
                       decoration: const InputDecoration(
@@ -1005,13 +1047,16 @@ class _VersionManagerState extends State<VersionManager> {
                           vertical: 8,
                         ),
                       ),
-                      hint: const Text('选择基准版本'),
+                      hint: Text(l10n.shortVideoVersionManagerCompareBaseHint),
                       initialValue: baseVersion?.id,
                       items: widget.versions.map((version) {
                         return DropdownMenuItem(
                           value: version.id,
                           child: Text(
-                            '${version.name} (${version.shotCount} 镜头)',
+                            l10n.shortVideoVersionManagerCompareVersionWithShots(
+                              version.name,
+                              version.shotCount,
+                            ),
                           ),
                         );
                       }).toList(),
@@ -1024,7 +1069,7 @@ class _VersionManagerState extends State<VersionManager> {
                       },
                     ),
                     const SizedBox(height: 16),
-                    const Text('选择对比版本（新版本）：'),
+                    Text(l10n.shortVideoVersionManagerCompareTargetLabel),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
                       decoration: const InputDecoration(
@@ -1034,13 +1079,16 @@ class _VersionManagerState extends State<VersionManager> {
                           vertical: 8,
                         ),
                       ),
-                      hint: const Text('选择对比版本'),
+                      hint: Text(l10n.shortVideoVersionManagerCompareTargetHint),
                       initialValue: compareVersion?.id,
                       items: widget.versions.map((version) {
                         return DropdownMenuItem(
                           value: version.id,
                           child: Text(
-                            '${version.name} (${version.shotCount} 镜头)',
+                            l10n.shortVideoVersionManagerCompareVersionWithShots(
+                              version.name,
+                              version.shotCount,
+                            ),
                           ),
                         );
                       }).toList(),
@@ -1058,18 +1106,18 @@ class _VersionManagerState extends State<VersionManager> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(dialogContext).pop(),
-                  child: const Text('取消'),
+                  child: Text(l10n.notificationsActionCancel),
                 ),
                 FilledButton(
-                  onPressed: baseVersion != null && 
-                             compareVersion != null && 
-                             baseVersion!.id != compareVersion!.id
+                  onPressed: baseVersion != null &&
+                          compareVersion != null &&
+                          baseVersion!.id != compareVersion!.id
                       ? () {
                           Navigator.of(dialogContext).pop();
                           _showVersionComparison(baseVersion!, compareVersion!);
                         }
                       : null,
-                  child: const Text('开始对比'),
+                  child: Text(l10n.shortVideoVersionManagerStartCompare),
                 ),
               ],
             );

@@ -11197,6 +11197,340 @@
       }
     }
   },
+  "shortVideoAssemblyDraftLoadFailed": "Failed to load drafts and versions: {error}",
+  "@shortVideoAssemblyDraftLoadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoAssemblyDraftNoShotsToApply": "No shot data available to apply.",
+  "shortVideoAssemblyDraftNoShotsToSave": "No shot data available to save.",
+  "shortVideoAssemblyDraftLimitReached": "Draft limit reached (maximum {max}).",
+  "@shortVideoAssemblyDraftLimitReached": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoAssemblyDraftNotFound": "Draft does not exist.",
+  "shortVideoAssemblyDraftNoDataToDelete": "No assembly data available to delete drafts.",
+  "shortVideoAssemblyDraftSaved": "Draft \"{name}\" saved successfully.",
+  "@shortVideoAssemblyDraftSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoAssemblyDraftSaveFailed": "Failed to save draft: {error}",
+  "@shortVideoAssemblyDraftSaveFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoAssemblyDraftRestored": "Draft \"{name}\" restored.",
+  "@shortVideoAssemblyDraftRestored": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoAssemblyDraftRestoreFailed": "Failed to restore draft: {error}",
+  "@shortVideoAssemblyDraftRestoreFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoAssemblyDraftDeleted": "Draft deleted.",
+  "shortVideoAssemblyDraftDeleteFailed": "Failed to delete draft: {error}",
+  "@shortVideoAssemblyDraftDeleteFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoAssemblyVersionNameEmpty": "Version name cannot be empty.",
+  "shortVideoAssemblyVersionNoAssembly": "No assembly data available.",
+  "shortVideoAssemblyVersionLimitReached": "Assembly versions at limit (maximum {max}).",
+  "@shortVideoAssemblyVersionLimitReached": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoAssemblyVersionCreated": "Created assembly version \"{name}\".",
+  "@shortVideoAssemblyVersionCreated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoAssemblyVersionCreateFailed": "Failed to create version: {error}",
+  "@shortVideoAssemblyVersionCreateFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoAssemblyVersionNotFound": "Version does not exist.",
+  "shortVideoAssemblyVersionSwitched": "Switched to version \"{name}\".",
+  "@shortVideoAssemblyVersionSwitched": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoAssemblyVersionSwitchFailed": "Failed to switch version: {error}",
+  "@shortVideoAssemblyVersionSwitchFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoAssemblyVersionKeepAtLeastOne": "Keep at least one assembly version snapshot.",
+  "shortVideoAssemblyVersionDeleted": "Version deleted.",
+  "shortVideoAssemblyVersionDeleteFailed": "Failed to delete version: {error}",
+  "@shortVideoAssemblyVersionDeleteFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionManagerDefaultVersion": "Default version",
+  "shortVideoVersionManagerTitle": "Version management",
+  "shortVideoVersionManagerCompareVersions": "Compare versions",
+  "shortVideoVersionManagerCreateNewVersion": "Create new version",
+  "shortVideoVersionManagerSaveDraft": "Save draft",
+  "shortVideoVersionManagerCurrentVersion": "Current version: {name}",
+  "@shortVideoVersionManagerCurrentVersion": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionManagerCurrentVersionMeta": "Shots: {shotCount} · Created: {dateTime}",
+  "@shortVideoVersionManagerCurrentVersionMeta": {
+    "placeholders": {
+      "shotCount": {
+        "type": "int"
+      },
+      "dateTime": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionManagerAllVersions": "All versions ({count})",
+  "@shortVideoVersionManagerAllVersions": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoVersionManagerNoVersionsHint": "No versions yet. Use the buttons above to create the first version.",
+  "shortVideoVersionManagerVersionRowSubtitle": "Shots: {shotCount} · Created: {dateTime}",
+  "@shortVideoVersionManagerVersionRowSubtitle": {
+    "placeholders": {
+      "shotCount": {
+        "type": "int"
+      },
+      "dateTime": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionManagerTooltipSwitchVersion": "Switch to this version",
+  "shortVideoVersionManagerTooltipDeleteVersion": "Delete version",
+  "shortVideoVersionManagerDraftsHeader": "Drafts ({count}/{max})",
+  "@shortVideoVersionManagerDraftsHeader": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoVersionManagerViewAllDrafts": "View all",
+  "shortVideoVersionManagerNoDraftsHint": "No drafts yet. Tap \"Save draft\" above to save your current editing state.",
+  "shortVideoVersionManagerDraftRowSubtitle": "Shots: {shotCount} · Saved: {dateTime}",
+  "@shortVideoVersionManagerDraftRowSubtitle": {
+    "placeholders": {
+      "shotCount": {
+        "type": "int"
+      },
+      "dateTime": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionManagerDraftListRowSubtitle": "Shots: {shotCount}\nSaved: {dateTime}",
+  "@shortVideoVersionManagerDraftListRowSubtitle": {
+    "placeholders": {
+      "shotCount": {
+        "type": "int"
+      },
+      "dateTime": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionManagerTooltipRestoreDraft": "Restore draft",
+  "shortVideoVersionManagerTooltipDeleteDraft": "Delete draft",
+  "shortVideoVersionManagerCreateVersionDialogTitle": "Create new version",
+  "shortVideoVersionManagerCreateVersionDialogBody": "The new version will copy the current shot configuration.",
+  "shortVideoVersionManagerVersionNameLabel": "Version name",
+  "shortVideoVersionManagerVersionNameHint": "e.g. Refined cut v2",
+  "shortVideoVersionManagerCreateAction": "Create",
+  "shortVideoVersionManagerDraftLimitTitle": "Draft limit reached",
+  "shortVideoVersionManagerDraftLimitBody": "You can keep at most 10 drafts.\n\nDelete some old drafts before saving a new one.",
+  "shortVideoVersionManagerGotIt": "Got it",
+  "shortVideoVersionManagerViewDraftsList": "View drafts",
+  "shortVideoVersionManagerSaveDraftDialogTitle": "Save draft",
+  "shortVideoVersionManagerSaveDraftDialogBody": "The draft saves your current editing state so you can continue later.",
+  "shortVideoVersionManagerDraftNameLabel": "Draft name",
+  "shortVideoVersionManagerDraftNameHint": "e.g. Experimental edit v1",
+  "shortVideoVersionManagerDraftListTitle": "Draft list",
+  "shortVideoVersionManagerNoDraftsInList": "No drafts",
+  "shortVideoVersionManagerSnackbarVersionCreated": "Version \"{name}\" created successfully.",
+  "@shortVideoVersionManagerSnackbarVersionCreated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionManagerErrorVersionCreate": "Failed to create version: {error}",
+  "@shortVideoVersionManagerErrorVersionCreate": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionManagerSnackbarVersionSwitched": "Switched to version \"{name}\".",
+  "@shortVideoVersionManagerSnackbarVersionSwitched": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionManagerErrorVersionSwitch": "Failed to switch version: {error}",
+  "@shortVideoVersionManagerErrorVersionSwitch": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionManagerSnackbarVersionDeleted": "Version \"{name}\" deleted.",
+  "@shortVideoVersionManagerSnackbarVersionDeleted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionManagerErrorVersionDelete": "Failed to delete version: {error}",
+  "@shortVideoVersionManagerErrorVersionDelete": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionManagerSnackbarDraftSaved": "Draft \"{name}\" saved successfully.",
+  "@shortVideoVersionManagerSnackbarDraftSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionManagerErrorDraftSave": "Failed to save draft: {error}",
+  "@shortVideoVersionManagerErrorDraftSave": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionManagerSnackbarDraftRestored": "Draft \"{name}\" restored.",
+  "@shortVideoVersionManagerSnackbarDraftRestored": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionManagerErrorDraftRestore": "Failed to restore draft: {error}",
+  "@shortVideoVersionManagerErrorDraftRestore": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionManagerConfirmDeleteDraftTitle": "Confirm delete",
+  "shortVideoVersionManagerConfirmDeleteDraftBody": "Delete draft \"{name}\"?\n\nThis action cannot be undone.",
+  "@shortVideoVersionManagerConfirmDeleteDraftBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionManagerSnackbarDraftDeleted": "Draft \"{name}\" deleted.",
+  "@shortVideoVersionManagerSnackbarDraftDeleted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionManagerErrorDraftDelete": "Failed to delete draft: {error}",
+  "@shortVideoVersionManagerErrorDraftDelete": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionManagerCompareDialogTitle": "Choose versions to compare",
+  "shortVideoVersionManagerCompareBaseLabel": "Base version (older):",
+  "shortVideoVersionManagerCompareBaseHint": "Choose base version",
+  "shortVideoVersionManagerCompareTargetLabel": "Compare version (newer):",
+  "shortVideoVersionManagerCompareTargetHint": "Choose compare version",
+  "shortVideoVersionManagerCompareVersionWithShots": "{versionName} ({shotCount} shots)",
+  "@shortVideoVersionManagerCompareVersionWithShots": {
+    "placeholders": {
+      "versionName": {
+        "type": "String"
+      },
+      "shotCount": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoVersionManagerStartCompare": "Compare",
   "accountSectionTitle": "Account section title",
   "accountRiskyPrefsTooltip": "Account risky prefs tooltip",
   "accountSectionSubtitle": "Account section subtitle",

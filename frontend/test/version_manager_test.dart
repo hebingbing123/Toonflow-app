@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/short_video_space/components/version_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -99,6 +100,9 @@ void main() {
 
     Widget createTestWidget() {
       return MaterialApp(
+        locale: const Locale('en'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: VersionManager(
             versions: testVersions,
@@ -130,16 +134,16 @@ void main() {
     testWidgets('should display version list', (WidgetTester tester) async {
       await tester.pumpWidget(createTestWidget());
 
-      expect(find.text('版本管理'), findsOneWidget);
+      expect(find.text('Version management'), findsOneWidget);
       expect(find.text('Version 1'), findsOneWidget);
       expect(find.text('Version 2'), findsOneWidget);
-      expect(find.text('所有版本 (2)'), findsOneWidget);
+      expect(find.text('All versions (2)'), findsOneWidget);
     });
 
     testWidgets('should highlight current version', (WidgetTester tester) async {
       await tester.pumpWidget(createTestWidget());
 
-      expect(find.text('当前版本：Version 1'), findsOneWidget);
+      expect(find.text('Current version: Version 1'), findsOneWidget);
       expect(find.byIcon(Icons.radio_button_checked), findsOneWidget);
       expect(find.byIcon(Icons.radio_button_unchecked), findsOneWidget);
     });
@@ -147,26 +151,26 @@ void main() {
     testWidgets('should show create version button', (WidgetTester tester) async {
       await tester.pumpWidget(createTestWidget());
 
-      expect(find.text('创建新版本'), findsOneWidget);
+      expect(find.text('Create new version'), findsOneWidget);
     });
 
     testWidgets('should open create version dialog', (WidgetTester tester) async {
       await tester.pumpWidget(createTestWidget());
 
-      await tester.tap(find.text('创建新版本'));
+      await tester.tap(find.text('Create new version'));
       await tester.pumpAndSettle();
 
-      expect(find.text('创建新版本'), findsNWidgets(2)); // Button + Dialog title
-      expect(find.text('版本名称'), findsOneWidget);
-      expect(find.text('取消'), findsOneWidget);
-      expect(find.text('创建'), findsOneWidget);
+      expect(find.text('Create new version'), findsNWidgets(2)); // Button + Dialog title
+      expect(find.text('Version name'), findsOneWidget);
+      expect(find.text('Cancel'), findsOneWidget);
+      expect(find.text('Create'), findsOneWidget);
     });
 
     testWidgets('should create version with valid name', (WidgetTester tester) async {
       await tester.pumpWidget(createTestWidget());
 
       // Open dialog
-      await tester.tap(find.text('创建新版本'));
+      await tester.tap(find.text('Create new version'));
       await tester.pumpAndSettle();
 
       // Enter version name
@@ -174,7 +178,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tap create button
-      await tester.tap(find.text('创建').last);
+      await tester.tap(find.text('Create').last);
       await tester.pumpAndSettle();
 
       expect(createVersionCalls, ['Version 3']);
@@ -184,11 +188,11 @@ void main() {
       await tester.pumpWidget(createTestWidget());
 
       // Open dialog
-      await tester.tap(find.text('创建新版本'));
+      await tester.tap(find.text('Create new version'));
       await tester.pumpAndSettle();
 
       // Tap create button without entering name
-      await tester.tap(find.text('创建').last);
+      await tester.tap(find.text('Create').last);
       await tester.pumpAndSettle();
 
       expect(createVersionCalls, isEmpty);
@@ -230,6 +234,9 @@ void main() {
     testWidgets('should show empty state when no versions', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
+          locale: const Locale('en'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: VersionManager(
               versions: const [],
@@ -246,7 +253,12 @@ void main() {
         ),
       );
 
-      expect(find.text('暂无版本，点击上方按钮创建第一个版本'), findsOneWidget);
+      expect(
+        find.text(
+          'No versions yet. Use the buttons above to create the first version.',
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('should show confirmation dialog before delete', 
@@ -258,8 +270,11 @@ void main() {
       await tester.tap(deleteButtons.last);
       await tester.pumpAndSettle();
 
-      expect(find.text('确认删除'), findsOneWidget);
-      expect(find.textContaining('确定要删除版本'), findsOneWidget);
+      expect(find.text('Confirm Delete'), findsOneWidget);
+      expect(
+        find.textContaining('Are you sure you want to delete version'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('should delete version after confirmation', 
@@ -272,7 +287,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Confirm deletion
-      await tester.tap(find.text('删除').last);
+      await tester.tap(find.text('Delete').last);
       await tester.pumpAndSettle();
 
       expect(deleteVersionCalls, ['v2']);
@@ -288,7 +303,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Cancel deletion
-      await tester.tap(find.text('取消').last);
+      await tester.tap(find.text('Cancel').last);
       await tester.pumpAndSettle();
 
       expect(deleteVersionCalls, isEmpty);
@@ -297,33 +312,38 @@ void main() {
     testWidgets('should show save draft button', (WidgetTester tester) async {
       await tester.pumpWidget(createTestWidget());
 
-      expect(find.text('保存草稿'), findsOneWidget);
+      expect(find.text('Save draft'), findsOneWidget);
     });
 
     testWidgets('should show empty draft state', (WidgetTester tester) async {
       await tester.pumpWidget(createTestWidget());
 
-      expect(find.text('草稿 (0/10)'), findsOneWidget);
-      expect(find.text('暂无草稿，点击上方"保存草稿"按钮保存当前编辑状态'), findsOneWidget);
+      expect(find.text('Drafts (0/10)'), findsOneWidget);
+      expect(
+        find.text(
+          'No drafts yet. Tap "Save draft" above to save your current editing state.',
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('should open save draft dialog', (WidgetTester tester) async {
       await tester.pumpWidget(createTestWidget());
 
-      await tester.tap(find.text('保存草稿'));
+      await tester.tap(find.text('Save draft'));
       await tester.pumpAndSettle();
 
-      expect(find.text('保存草稿'), findsNWidgets(2)); // Button + Dialog title
-      expect(find.text('草稿名称'), findsOneWidget);
-      expect(find.text('取消'), findsOneWidget);
-      expect(find.text('保存'), findsOneWidget);
+      expect(find.text('Save draft'), findsNWidgets(2)); // Button + Dialog title
+      expect(find.text('Draft name'), findsOneWidget);
+      expect(find.text('Cancel'), findsOneWidget);
+      expect(find.text('Save'), findsOneWidget);
     });
 
     testWidgets('should save draft with valid name', (WidgetTester tester) async {
       await tester.pumpWidget(createTestWidget());
 
       // Open dialog
-      await tester.tap(find.text('保存草稿'));
+      await tester.tap(find.text('Save draft'));
       await tester.pumpAndSettle();
 
       // Enter draft name
@@ -331,7 +351,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tap save button
-      await tester.tap(find.text('保存').last);
+      await tester.tap(find.text('Save').last);
       await tester.pumpAndSettle();
 
       expect(saveDraftCalls, ['Draft 1']);
@@ -354,11 +374,11 @@ void main() {
       await tester.pumpWidget(createTestWidget());
 
       // Try to save another draft
-      await tester.tap(find.text('保存草稿'));
+      await tester.tap(find.text('Save draft'));
       await tester.pumpAndSettle();
 
-      expect(find.text('草稿数量已达上限'), findsOneWidget);
-      expect(find.textContaining('最多只能保存'), findsOneWidget);
+      expect(find.text('Draft limit reached'), findsOneWidget);
+      expect(find.textContaining('You can keep at most 10 drafts'), findsOneWidget);
     });
 
     testWidgets('should display draft list', (WidgetTester tester) async {
@@ -381,7 +401,7 @@ void main() {
 
       await tester.pumpWidget(createTestWidget());
 
-      expect(find.text('草稿 (2/10)'), findsOneWidget);
+      expect(find.text('Drafts (2/10)'), findsOneWidget);
       expect(find.text('Draft 1'), findsOneWidget);
       expect(find.text('Draft 2'), findsOneWidget);
     });
@@ -422,8 +442,11 @@ void main() {
       await tester.tap(find.byIcon(Icons.restore));
       await tester.pumpAndSettle();
 
-      expect(find.text('确认恢复草稿'), findsOneWidget);
-      expect(find.textContaining('确定要恢复草稿'), findsOneWidget);
+      expect(find.text('Confirm Restore Draft'), findsOneWidget);
+      expect(
+        find.textContaining('Are you sure you want to restore draft'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('should restore draft after confirmation', 
@@ -445,7 +468,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Confirm restoration
-      await tester.tap(find.text('恢复').last);
+      await tester.tap(find.text('Restore').last);
       await tester.pumpAndSettle();
 
       expect(restoreDraftCalls, ['d1']);
@@ -466,7 +489,7 @@ void main() {
 
       await tester.pumpWidget(createTestWidget());
 
-      expect(find.text('查看全部'), findsOneWidget);
+      expect(find.text('View all'), findsOneWidget);
     });
 
     testWidgets('should open drafts dialog when view all tapped', 
@@ -484,10 +507,10 @@ void main() {
 
       await tester.pumpWidget(createTestWidget());
 
-      await tester.tap(find.text('查看全部'));
+      await tester.tap(find.text('View all'));
       await tester.pumpAndSettle();
 
-      expect(find.text('草稿列表'), findsOneWidget);
+      expect(find.text('Draft list'), findsOneWidget);
       // All 5 drafts should be visible in the dialog (but not in the main list)
       // The main list shows only 3, so we expect 5 total (3 in main + 5 in dialog - 3 duplicates = 5)
       expect(find.text('Draft 0'), findsNWidgets(2)); // One in main list, one in dialog
@@ -508,7 +531,7 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(createTestWidget());
 
-      expect(find.text('对比版本'), findsOneWidget);
+      expect(find.text('Compare versions'), findsOneWidget);
     });
 
     testWidgets('should not show compare button with single version', 
@@ -525,7 +548,7 @@ void main() {
 
       await tester.pumpWidget(createTestWidget());
 
-      expect(find.text('对比版本'), findsNothing);
+      expect(find.text('Compare versions'), findsNothing);
     });
 
     testWidgets('should delete draft after confirmation', 
@@ -548,7 +571,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Confirm deletion
-      await tester.tap(find.text('删除').last);
+      await tester.tap(find.text('Delete').last);
       await tester.pumpAndSettle();
 
       expect(deleteDraftCalls, ['d1']);

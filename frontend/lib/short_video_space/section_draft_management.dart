@@ -75,7 +75,11 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
       }
     } catch (e) {
       if (mounted) {
-        _showOperationFeedback('加载草稿和版本失败：$e', isSuccess: false);
+        final l10n = AppLocalizations.of(context)!;
+        _showOperationFeedback(
+          l10n.shortVideoAssemblyDraftLoadFailed('$e'),
+          isSuccess: false,
+        );
       }
     }
   }
@@ -153,7 +157,9 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
     }
     final assembly = _shortVideoAssembly;
     if (assembly == null || assembly.scripts.isEmpty) {
-      throw Exception('没有可应用的镜头数据');
+      throw Exception(
+        AppLocalizations.of(context)!.shortVideoAssemblyDraftNoShotsToApply,
+      );
     }
 
     for (final script in assembly.scripts) {
@@ -212,13 +218,14 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
     }
 
     try {
+      final l10n = AppLocalizations.of(context)!;
       final assembly = _shortVideoAssembly;
       if (assembly == null || assembly.scripts.isEmpty) {
-        throw Exception('没有可保存的镜头数据');
+        throw Exception(l10n.shortVideoAssemblyDraftNoShotsToSave);
       }
 
       if (_assemblyDrafts.length >= 10) {
-        throw Exception('草稿数量已达上限（最多 10 个）');
+        throw Exception(l10n.shortVideoAssemblyDraftLimitReached(10));
       }
 
       final firstScriptId = assembly.scripts.first.scriptNumericId;
@@ -272,11 +279,18 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
       await _loadDraftsAndVersions();
 
       if (mounted) {
-        _showOperationFeedback('草稿 "$name" 保存成功', isSuccess: true);
+        _showOperationFeedback(
+          l10n.shortVideoAssemblyDraftSaved(name),
+          isSuccess: true,
+        );
       }
     } catch (e) {
       if (mounted) {
-        _showOperationFeedback('保存草稿失败：$e', isSuccess: false);
+        final l10n = AppLocalizations.of(context)!;
+        _showOperationFeedback(
+          l10n.shortVideoAssemblyDraftSaveFailed('$e'),
+          isSuccess: false,
+        );
       }
       rethrow;
     }
@@ -291,19 +305,27 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
     }
 
     try {
+      final l10n = AppLocalizations.of(context)!;
       final draft = _assemblyDrafts.firstWhere(
         (d) => d.id == draftId,
-        orElse: () => throw Exception('草稿不存在'),
+        orElse: () => throw Exception(l10n.shortVideoAssemblyDraftNotFound),
       );
 
       await _applyAssemblyShotConfig(draft.shotConfig);
 
       if (mounted) {
-        _showOperationFeedback('草稿 "${draft.name}" 已恢复', isSuccess: true);
+        _showOperationFeedback(
+          l10n.shortVideoAssemblyDraftRestored(draft.name),
+          isSuccess: true,
+        );
       }
     } catch (e) {
       if (mounted) {
-        _showOperationFeedback('恢复草稿失败：$e', isSuccess: false);
+        final l10n = AppLocalizations.of(context)!;
+        _showOperationFeedback(
+          l10n.shortVideoAssemblyDraftRestoreFailed('$e'),
+          isSuccess: false,
+        );
       }
       rethrow;
     }
@@ -318,9 +340,10 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
     }
 
     try {
+      final l10n = AppLocalizations.of(context)!;
       final assembly = _shortVideoAssembly;
       if (assembly == null || assembly.scripts.isEmpty) {
-        throw Exception('没有可删除的草稿数据');
+        throw Exception(l10n.shortVideoAssemblyDraftNoDataToDelete);
       }
 
       final firstScriptId = assembly.scripts.first.scriptNumericId;
@@ -363,11 +386,15 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
       await _loadDraftsAndVersions();
 
       if (mounted) {
-        _showOperationFeedback('草稿已删除', isSuccess: true);
+        _showOperationFeedback(l10n.shortVideoAssemblyDraftDeleted, isSuccess: true);
       }
     } catch (e) {
       if (mounted) {
-        _showOperationFeedback('删除草稿失败：$e', isSuccess: false);
+        final l10n = AppLocalizations.of(context)!;
+        _showOperationFeedback(
+          l10n.shortVideoAssemblyDraftDeleteFailed('$e'),
+          isSuccess: false,
+        );
       }
       rethrow;
     }
@@ -375,23 +402,30 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
 
   Future<void> _handleCreateVersion(String name) async {
     final trimmed = name.trim();
+    final l10n = AppLocalizations.of(context)!;
     if (trimmed.isEmpty) {
       if (mounted) {
-        _showOperationFeedback('版本名称不能为空', isSuccess: false);
+        _showOperationFeedback(
+          l10n.shortVideoAssemblyVersionNameEmpty,
+          isSuccess: false,
+        );
       }
       return;
     }
     final assembly = _shortVideoAssembly;
     if (assembly == null || assembly.scripts.isEmpty) {
       if (mounted) {
-        _showOperationFeedback('没有可用的装配数据', isSuccess: false);
+        _showOperationFeedback(
+          l10n.shortVideoAssemblyVersionNoAssembly,
+          isSuccess: false,
+        );
       }
       return;
     }
     if (_assemblyVersions.length >= _kMaxAssemblyVersions) {
       if (mounted) {
         _showOperationFeedback(
-          '成片版本已达上限（最多 $_kMaxAssemblyVersions 个）',
+          l10n.shortVideoAssemblyVersionLimitReached(_kMaxAssemblyVersions),
           isSuccess: false,
         );
       }
@@ -418,11 +452,18 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
       }
       await _persistAssemblyBlockToFlow();
       if (mounted) {
-        _showOperationFeedback('已创建成片版本「$trimmed」', isSuccess: true);
+        _showOperationFeedback(
+          l10n.shortVideoAssemblyVersionCreated(trimmed),
+          isSuccess: true,
+        );
       }
     } catch (e) {
       if (mounted) {
-        _showOperationFeedback('创建版本失败：$e', isSuccess: false);
+        final l10nErr = AppLocalizations.of(context)!;
+        _showOperationFeedback(
+          l10nErr.shortVideoAssemblyVersionCreateFailed('$e'),
+          isSuccess: false,
+        );
       }
     }
   }
@@ -433,6 +474,7 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
       return;
     }
     try {
+      final l10n = AppLocalizations.of(context)!;
       AssemblyVersion? version;
       for (final v in _assemblyVersions) {
         if (v.id == id) {
@@ -441,7 +483,7 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
         }
       }
       if (version == null) {
-        throw Exception('版本不存在');
+        throw Exception(l10n.shortVideoAssemblyVersionNotFound);
       }
       await _applyAssemblyShotConfig(version.shotConfig);
       if (mounted) {
@@ -451,11 +493,18 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
       }
       await _persistAssemblyBlockToFlow();
       if (mounted) {
-        _showOperationFeedback('已切换到版本「${version.name}」', isSuccess: true);
+        _showOperationFeedback(
+          l10n.shortVideoAssemblyVersionSwitched(version.name),
+          isSuccess: true,
+        );
       }
     } catch (e) {
       if (mounted) {
-        _showOperationFeedback('切换版本失败：$e', isSuccess: false);
+        final l10nErr = AppLocalizations.of(context)!;
+        _showOperationFeedback(
+          l10nErr.shortVideoAssemblyVersionSwitchFailed('$e'),
+          isSuccess: false,
+        );
       }
     }
   }
@@ -467,16 +516,20 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
     }
     if (_assemblyVersions.length <= 1) {
       if (mounted) {
-        _showOperationFeedback('至少保留 1 个成片版本快照', isSuccess: false);
+        _showOperationFeedback(
+          AppLocalizations.of(context)!.shortVideoAssemblyVersionKeepAtLeastOne,
+          isSuccess: false,
+        );
       }
       return;
     }
 
     try {
+      final l10n = AppLocalizations.of(context)!;
       final removedWasCurrent = _currentAssemblyVersionId == id;
       final remaining = _assemblyVersions.where((v) => v.id != id).toList();
       if (remaining.length == _assemblyVersions.length) {
-        throw Exception('版本不存在');
+        throw Exception(l10n.shortVideoAssemblyVersionNotFound);
       }
       var newCurrent = _currentAssemblyVersionId;
       if (removedWasCurrent) {
@@ -499,11 +552,15 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
       }
 
       if (mounted) {
-        _showOperationFeedback('版本已删除', isSuccess: true);
+        _showOperationFeedback(l10n.shortVideoAssemblyVersionDeleted, isSuccess: true);
       }
     } catch (e) {
       if (mounted) {
-        _showOperationFeedback('删除版本失败：$e', isSuccess: false);
+        final l10nErr = AppLocalizations.of(context)!;
+        _showOperationFeedback(
+          l10nErr.shortVideoAssemblyVersionDeleteFailed('$e'),
+          isSuccess: false,
+        );
       }
     }
   }

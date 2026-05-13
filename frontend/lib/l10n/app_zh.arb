@@ -11157,6 +11157,340 @@
       }
     }
   },
+  "shortVideoAssemblyDraftLoadFailed": "加载草稿和版本失败：{error}",
+  "@shortVideoAssemblyDraftLoadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoAssemblyDraftNoShotsToApply": "没有可应用的镜头数据",
+  "shortVideoAssemblyDraftNoShotsToSave": "没有可保存的镜头数据",
+  "shortVideoAssemblyDraftLimitReached": "草稿数量已达上限（最多 {max} 个）",
+  "@shortVideoAssemblyDraftLimitReached": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoAssemblyDraftNotFound": "草稿不存在",
+  "shortVideoAssemblyDraftNoDataToDelete": "没有可删除的草稿数据",
+  "shortVideoAssemblyDraftSaved": "草稿「{name}」保存成功",
+  "@shortVideoAssemblyDraftSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoAssemblyDraftSaveFailed": "保存草稿失败：{error}",
+  "@shortVideoAssemblyDraftSaveFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoAssemblyDraftRestored": "草稿「{name}」已恢复",
+  "@shortVideoAssemblyDraftRestored": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoAssemblyDraftRestoreFailed": "恢复草稿失败：{error}",
+  "@shortVideoAssemblyDraftRestoreFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoAssemblyDraftDeleted": "草稿已删除",
+  "shortVideoAssemblyDraftDeleteFailed": "删除草稿失败：{error}",
+  "@shortVideoAssemblyDraftDeleteFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoAssemblyVersionNameEmpty": "版本名称不能为空",
+  "shortVideoAssemblyVersionNoAssembly": "没有可用的装配数据",
+  "shortVideoAssemblyVersionLimitReached": "成片版本已达上限（最多 {max} 个）",
+  "@shortVideoAssemblyVersionLimitReached": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoAssemblyVersionCreated": "已创建成片版本「{name}」",
+  "@shortVideoAssemblyVersionCreated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoAssemblyVersionCreateFailed": "创建版本失败：{error}",
+  "@shortVideoAssemblyVersionCreateFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoAssemblyVersionNotFound": "版本不存在",
+  "shortVideoAssemblyVersionSwitched": "已切换到版本「{name}」",
+  "@shortVideoAssemblyVersionSwitched": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoAssemblyVersionSwitchFailed": "切换版本失败：{error}",
+  "@shortVideoAssemblyVersionSwitchFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoAssemblyVersionKeepAtLeastOne": "至少保留 1 个成片版本快照",
+  "shortVideoAssemblyVersionDeleted": "版本已删除",
+  "shortVideoAssemblyVersionDeleteFailed": "删除版本失败：{error}",
+  "@shortVideoAssemblyVersionDeleteFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionManagerDefaultVersion": "默认版本",
+  "shortVideoVersionManagerTitle": "版本管理",
+  "shortVideoVersionManagerCompareVersions": "对比版本",
+  "shortVideoVersionManagerCreateNewVersion": "创建新版本",
+  "shortVideoVersionManagerSaveDraft": "保存草稿",
+  "shortVideoVersionManagerCurrentVersion": "当前版本：{name}",
+  "@shortVideoVersionManagerCurrentVersion": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionManagerCurrentVersionMeta": "镜头数：{shotCount} · 创建时间：{dateTime}",
+  "@shortVideoVersionManagerCurrentVersionMeta": {
+    "placeholders": {
+      "shotCount": {
+        "type": "int"
+      },
+      "dateTime": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionManagerAllVersions": "所有版本 ({count})",
+  "@shortVideoVersionManagerAllVersions": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoVersionManagerNoVersionsHint": "暂无版本，点击上方按钮创建第一个版本",
+  "shortVideoVersionManagerVersionRowSubtitle": "镜头数：{shotCount} · 创建时间：{dateTime}",
+  "@shortVideoVersionManagerVersionRowSubtitle": {
+    "placeholders": {
+      "shotCount": {
+        "type": "int"
+      },
+      "dateTime": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionManagerTooltipSwitchVersion": "切换到此版本",
+  "shortVideoVersionManagerTooltipDeleteVersion": "删除版本",
+  "shortVideoVersionManagerDraftsHeader": "草稿 ({count}/{max})",
+  "@shortVideoVersionManagerDraftsHeader": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoVersionManagerViewAllDrafts": "查看全部",
+  "shortVideoVersionManagerNoDraftsHint": "暂无草稿，点击上方「保存草稿」按钮保存当前编辑状态",
+  "shortVideoVersionManagerDraftRowSubtitle": "镜头数：{shotCount} · 保存时间：{dateTime}",
+  "@shortVideoVersionManagerDraftRowSubtitle": {
+    "placeholders": {
+      "shotCount": {
+        "type": "int"
+      },
+      "dateTime": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionManagerDraftListRowSubtitle": "镜头数：{shotCount}\n保存时间：{dateTime}",
+  "@shortVideoVersionManagerDraftListRowSubtitle": {
+    "placeholders": {
+      "shotCount": {
+        "type": "int"
+      },
+      "dateTime": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionManagerTooltipRestoreDraft": "恢复草稿",
+  "shortVideoVersionManagerTooltipDeleteDraft": "删除草稿",
+  "shortVideoVersionManagerCreateVersionDialogTitle": "创建新版本",
+  "shortVideoVersionManagerCreateVersionDialogBody": "新版本将复制当前镜头配置。",
+  "shortVideoVersionManagerVersionNameLabel": "版本名称",
+  "shortVideoVersionManagerVersionNameHint": "例如：优化版 v2",
+  "shortVideoVersionManagerCreateAction": "创建",
+  "shortVideoVersionManagerDraftLimitTitle": "草稿数量已达上限",
+  "shortVideoVersionManagerDraftLimitBody": "最多只能保存 10 个草稿。\n\n请先删除一些旧草稿，然后再保存新草稿。",
+  "shortVideoVersionManagerGotIt": "知道了",
+  "shortVideoVersionManagerViewDraftsList": "查看草稿",
+  "shortVideoVersionManagerSaveDraftDialogTitle": "保存草稿",
+  "shortVideoVersionManagerSaveDraftDialogBody": "草稿将保存当前编辑状态，方便稍后继续编辑。",
+  "shortVideoVersionManagerDraftNameLabel": "草稿名称",
+  "shortVideoVersionManagerDraftNameHint": "例如：实验性剪辑 v1",
+  "shortVideoVersionManagerDraftListTitle": "草稿列表",
+  "shortVideoVersionManagerNoDraftsInList": "暂无草稿",
+  "shortVideoVersionManagerSnackbarVersionCreated": "版本「{name}」创建成功",
+  "@shortVideoVersionManagerSnackbarVersionCreated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionManagerErrorVersionCreate": "创建版本失败：{error}",
+  "@shortVideoVersionManagerErrorVersionCreate": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionManagerSnackbarVersionSwitched": "已切换到版本「{name}」",
+  "@shortVideoVersionManagerSnackbarVersionSwitched": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionManagerErrorVersionSwitch": "切换版本失败：{error}",
+  "@shortVideoVersionManagerErrorVersionSwitch": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionManagerSnackbarVersionDeleted": "版本「{name}」已删除",
+  "@shortVideoVersionManagerSnackbarVersionDeleted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionManagerErrorVersionDelete": "删除版本失败：{error}",
+  "@shortVideoVersionManagerErrorVersionDelete": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionManagerSnackbarDraftSaved": "草稿「{name}」保存成功",
+  "@shortVideoVersionManagerSnackbarDraftSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionManagerErrorDraftSave": "保存草稿失败：{error}",
+  "@shortVideoVersionManagerErrorDraftSave": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionManagerSnackbarDraftRestored": "草稿「{name}」已恢复",
+  "@shortVideoVersionManagerSnackbarDraftRestored": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionManagerErrorDraftRestore": "恢复草稿失败：{error}",
+  "@shortVideoVersionManagerErrorDraftRestore": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionManagerConfirmDeleteDraftTitle": "确认删除",
+  "shortVideoVersionManagerConfirmDeleteDraftBody": "确定要删除草稿「{name}」吗？\n\n此操作无法撤销。",
+  "@shortVideoVersionManagerConfirmDeleteDraftBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionManagerSnackbarDraftDeleted": "草稿「{name}」已删除",
+  "@shortVideoVersionManagerSnackbarDraftDeleted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionManagerErrorDraftDelete": "删除草稿失败：{error}",
+  "@shortVideoVersionManagerErrorDraftDelete": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoVersionManagerCompareDialogTitle": "选择要对比的版本",
+  "shortVideoVersionManagerCompareBaseLabel": "选择基准版本（旧版本）：",
+  "shortVideoVersionManagerCompareBaseHint": "选择基准版本",
+  "shortVideoVersionManagerCompareTargetLabel": "选择对比版本（新版本）：",
+  "shortVideoVersionManagerCompareTargetHint": "选择对比版本",
+  "shortVideoVersionManagerCompareVersionWithShots": "{versionName}（{shotCount} 镜头）",
+  "@shortVideoVersionManagerCompareVersionWithShots": {
+    "placeholders": {
+      "versionName": {
+        "type": "String"
+      },
+      "shotCount": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoVersionManagerStartCompare": "开始对比",
   "accountSectionTitle": "账户与隐私",
   "accountRiskyPrefsTooltip": "本机客户端偏好（删号、导出等「不再提示」与恢复确认）",
   "accountSectionSubtitle": "统一管理账户数据导出、下载留档和不可逆删号。导出任务会走平台 job 队列，可反复生成新版快照。",

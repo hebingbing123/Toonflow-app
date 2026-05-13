@@ -22884,6 +22884,489 @@ abstract class AppLocalizations {
   /// **'Load failed: {error}'**
   String shortVideoSpaceProductionAssemblyLoadFailed(String error);
 
+  /// No description provided for @shortVideoAssemblyDraftLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load drafts and versions: {error}'**
+  String shortVideoAssemblyDraftLoadFailed(String error);
+
+  /// No description provided for @shortVideoAssemblyDraftNoShotsToApply.
+  ///
+  /// In en, this message translates to:
+  /// **'No shot data available to apply.'**
+  String get shortVideoAssemblyDraftNoShotsToApply;
+
+  /// No description provided for @shortVideoAssemblyDraftNoShotsToSave.
+  ///
+  /// In en, this message translates to:
+  /// **'No shot data available to save.'**
+  String get shortVideoAssemblyDraftNoShotsToSave;
+
+  /// No description provided for @shortVideoAssemblyDraftLimitReached.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft limit reached (maximum {max}).'**
+  String shortVideoAssemblyDraftLimitReached(int max);
+
+  /// No description provided for @shortVideoAssemblyDraftNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft does not exist.'**
+  String get shortVideoAssemblyDraftNotFound;
+
+  /// No description provided for @shortVideoAssemblyDraftNoDataToDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'No assembly data available to delete drafts.'**
+  String get shortVideoAssemblyDraftNoDataToDelete;
+
+  /// No description provided for @shortVideoAssemblyDraftSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft \"{name}\" saved successfully.'**
+  String shortVideoAssemblyDraftSaved(String name);
+
+  /// No description provided for @shortVideoAssemblyDraftSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save draft: {error}'**
+  String shortVideoAssemblyDraftSaveFailed(String error);
+
+  /// No description provided for @shortVideoAssemblyDraftRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft \"{name}\" restored.'**
+  String shortVideoAssemblyDraftRestored(String name);
+
+  /// No description provided for @shortVideoAssemblyDraftRestoreFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to restore draft: {error}'**
+  String shortVideoAssemblyDraftRestoreFailed(String error);
+
+  /// No description provided for @shortVideoAssemblyDraftDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft deleted.'**
+  String get shortVideoAssemblyDraftDeleted;
+
+  /// No description provided for @shortVideoAssemblyDraftDeleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete draft: {error}'**
+  String shortVideoAssemblyDraftDeleteFailed(String error);
+
+  /// No description provided for @shortVideoAssemblyVersionNameEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Version name cannot be empty.'**
+  String get shortVideoAssemblyVersionNameEmpty;
+
+  /// No description provided for @shortVideoAssemblyVersionNoAssembly.
+  ///
+  /// In en, this message translates to:
+  /// **'No assembly data available.'**
+  String get shortVideoAssemblyVersionNoAssembly;
+
+  /// No description provided for @shortVideoAssemblyVersionLimitReached.
+  ///
+  /// In en, this message translates to:
+  /// **'Assembly versions at limit (maximum {max}).'**
+  String shortVideoAssemblyVersionLimitReached(int max);
+
+  /// No description provided for @shortVideoAssemblyVersionCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Created assembly version \"{name}\".'**
+  String shortVideoAssemblyVersionCreated(String name);
+
+  /// No description provided for @shortVideoAssemblyVersionCreateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create version: {error}'**
+  String shortVideoAssemblyVersionCreateFailed(String error);
+
+  /// No description provided for @shortVideoAssemblyVersionNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Version does not exist.'**
+  String get shortVideoAssemblyVersionNotFound;
+
+  /// No description provided for @shortVideoAssemblyVersionSwitched.
+  ///
+  /// In en, this message translates to:
+  /// **'Switched to version \"{name}\".'**
+  String shortVideoAssemblyVersionSwitched(String name);
+
+  /// No description provided for @shortVideoAssemblyVersionSwitchFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to switch version: {error}'**
+  String shortVideoAssemblyVersionSwitchFailed(String error);
+
+  /// No description provided for @shortVideoAssemblyVersionKeepAtLeastOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep at least one assembly version snapshot.'**
+  String get shortVideoAssemblyVersionKeepAtLeastOne;
+
+  /// No description provided for @shortVideoAssemblyVersionDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Version deleted.'**
+  String get shortVideoAssemblyVersionDeleted;
+
+  /// No description provided for @shortVideoAssemblyVersionDeleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete version: {error}'**
+  String shortVideoAssemblyVersionDeleteFailed(String error);
+
+  /// No description provided for @shortVideoVersionManagerDefaultVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Default version'**
+  String get shortVideoVersionManagerDefaultVersion;
+
+  /// No description provided for @shortVideoVersionManagerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Version management'**
+  String get shortVideoVersionManagerTitle;
+
+  /// No description provided for @shortVideoVersionManagerCompareVersions.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare versions'**
+  String get shortVideoVersionManagerCompareVersions;
+
+  /// No description provided for @shortVideoVersionManagerCreateNewVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Create new version'**
+  String get shortVideoVersionManagerCreateNewVersion;
+
+  /// No description provided for @shortVideoVersionManagerSaveDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Save draft'**
+  String get shortVideoVersionManagerSaveDraft;
+
+  /// No description provided for @shortVideoVersionManagerCurrentVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Current version: {name}'**
+  String shortVideoVersionManagerCurrentVersion(String name);
+
+  /// No description provided for @shortVideoVersionManagerCurrentVersionMeta.
+  ///
+  /// In en, this message translates to:
+  /// **'Shots: {shotCount} · Created: {dateTime}'**
+  String shortVideoVersionManagerCurrentVersionMeta(
+    int shotCount,
+    String dateTime,
+  );
+
+  /// No description provided for @shortVideoVersionManagerAllVersions.
+  ///
+  /// In en, this message translates to:
+  /// **'All versions ({count})'**
+  String shortVideoVersionManagerAllVersions(int count);
+
+  /// No description provided for @shortVideoVersionManagerNoVersionsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'No versions yet. Use the buttons above to create the first version.'**
+  String get shortVideoVersionManagerNoVersionsHint;
+
+  /// No description provided for @shortVideoVersionManagerVersionRowSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shots: {shotCount} · Created: {dateTime}'**
+  String shortVideoVersionManagerVersionRowSubtitle(
+    int shotCount,
+    String dateTime,
+  );
+
+  /// No description provided for @shortVideoVersionManagerTooltipSwitchVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to this version'**
+  String get shortVideoVersionManagerTooltipSwitchVersion;
+
+  /// No description provided for @shortVideoVersionManagerTooltipDeleteVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete version'**
+  String get shortVideoVersionManagerTooltipDeleteVersion;
+
+  /// No description provided for @shortVideoVersionManagerDraftsHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Drafts ({count}/{max})'**
+  String shortVideoVersionManagerDraftsHeader(int count, int max);
+
+  /// No description provided for @shortVideoVersionManagerViewAllDrafts.
+  ///
+  /// In en, this message translates to:
+  /// **'View all'**
+  String get shortVideoVersionManagerViewAllDrafts;
+
+  /// No description provided for @shortVideoVersionManagerNoDraftsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'No drafts yet. Tap \"Save draft\" above to save your current editing state.'**
+  String get shortVideoVersionManagerNoDraftsHint;
+
+  /// No description provided for @shortVideoVersionManagerDraftRowSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shots: {shotCount} · Saved: {dateTime}'**
+  String shortVideoVersionManagerDraftRowSubtitle(
+    int shotCount,
+    String dateTime,
+  );
+
+  /// No description provided for @shortVideoVersionManagerDraftListRowSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shots: {shotCount}\nSaved: {dateTime}'**
+  String shortVideoVersionManagerDraftListRowSubtitle(
+    int shotCount,
+    String dateTime,
+  );
+
+  /// No description provided for @shortVideoVersionManagerTooltipRestoreDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore draft'**
+  String get shortVideoVersionManagerTooltipRestoreDraft;
+
+  /// No description provided for @shortVideoVersionManagerTooltipDeleteDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete draft'**
+  String get shortVideoVersionManagerTooltipDeleteDraft;
+
+  /// No description provided for @shortVideoVersionManagerCreateVersionDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create new version'**
+  String get shortVideoVersionManagerCreateVersionDialogTitle;
+
+  /// No description provided for @shortVideoVersionManagerCreateVersionDialogBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The new version will copy the current shot configuration.'**
+  String get shortVideoVersionManagerCreateVersionDialogBody;
+
+  /// No description provided for @shortVideoVersionManagerVersionNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Version name'**
+  String get shortVideoVersionManagerVersionNameLabel;
+
+  /// No description provided for @shortVideoVersionManagerVersionNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Refined cut v2'**
+  String get shortVideoVersionManagerVersionNameHint;
+
+  /// No description provided for @shortVideoVersionManagerCreateAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get shortVideoVersionManagerCreateAction;
+
+  /// No description provided for @shortVideoVersionManagerDraftLimitTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft limit reached'**
+  String get shortVideoVersionManagerDraftLimitTitle;
+
+  /// No description provided for @shortVideoVersionManagerDraftLimitBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can keep at most 10 drafts.\n\nDelete some old drafts before saving a new one.'**
+  String get shortVideoVersionManagerDraftLimitBody;
+
+  /// No description provided for @shortVideoVersionManagerGotIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get shortVideoVersionManagerGotIt;
+
+  /// No description provided for @shortVideoVersionManagerViewDraftsList.
+  ///
+  /// In en, this message translates to:
+  /// **'View drafts'**
+  String get shortVideoVersionManagerViewDraftsList;
+
+  /// No description provided for @shortVideoVersionManagerSaveDraftDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save draft'**
+  String get shortVideoVersionManagerSaveDraftDialogTitle;
+
+  /// No description provided for @shortVideoVersionManagerSaveDraftDialogBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The draft saves your current editing state so you can continue later.'**
+  String get shortVideoVersionManagerSaveDraftDialogBody;
+
+  /// No description provided for @shortVideoVersionManagerDraftNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft name'**
+  String get shortVideoVersionManagerDraftNameLabel;
+
+  /// No description provided for @shortVideoVersionManagerDraftNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Experimental edit v1'**
+  String get shortVideoVersionManagerDraftNameHint;
+
+  /// No description provided for @shortVideoVersionManagerDraftListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft list'**
+  String get shortVideoVersionManagerDraftListTitle;
+
+  /// No description provided for @shortVideoVersionManagerNoDraftsInList.
+  ///
+  /// In en, this message translates to:
+  /// **'No drafts'**
+  String get shortVideoVersionManagerNoDraftsInList;
+
+  /// No description provided for @shortVideoVersionManagerSnackbarVersionCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Version \"{name}\" created successfully.'**
+  String shortVideoVersionManagerSnackbarVersionCreated(String name);
+
+  /// No description provided for @shortVideoVersionManagerErrorVersionCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create version: {error}'**
+  String shortVideoVersionManagerErrorVersionCreate(String error);
+
+  /// No description provided for @shortVideoVersionManagerSnackbarVersionSwitched.
+  ///
+  /// In en, this message translates to:
+  /// **'Switched to version \"{name}\".'**
+  String shortVideoVersionManagerSnackbarVersionSwitched(String name);
+
+  /// No description provided for @shortVideoVersionManagerErrorVersionSwitch.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to switch version: {error}'**
+  String shortVideoVersionManagerErrorVersionSwitch(String error);
+
+  /// No description provided for @shortVideoVersionManagerSnackbarVersionDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Version \"{name}\" deleted.'**
+  String shortVideoVersionManagerSnackbarVersionDeleted(String name);
+
+  /// No description provided for @shortVideoVersionManagerErrorVersionDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete version: {error}'**
+  String shortVideoVersionManagerErrorVersionDelete(String error);
+
+  /// No description provided for @shortVideoVersionManagerSnackbarDraftSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft \"{name}\" saved successfully.'**
+  String shortVideoVersionManagerSnackbarDraftSaved(String name);
+
+  /// No description provided for @shortVideoVersionManagerErrorDraftSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save draft: {error}'**
+  String shortVideoVersionManagerErrorDraftSave(String error);
+
+  /// No description provided for @shortVideoVersionManagerSnackbarDraftRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft \"{name}\" restored.'**
+  String shortVideoVersionManagerSnackbarDraftRestored(String name);
+
+  /// No description provided for @shortVideoVersionManagerErrorDraftRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to restore draft: {error}'**
+  String shortVideoVersionManagerErrorDraftRestore(String error);
+
+  /// No description provided for @shortVideoVersionManagerConfirmDeleteDraftTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm delete'**
+  String get shortVideoVersionManagerConfirmDeleteDraftTitle;
+
+  /// No description provided for @shortVideoVersionManagerConfirmDeleteDraftBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete draft \"{name}\"?\n\nThis action cannot be undone.'**
+  String shortVideoVersionManagerConfirmDeleteDraftBody(String name);
+
+  /// No description provided for @shortVideoVersionManagerSnackbarDraftDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft \"{name}\" deleted.'**
+  String shortVideoVersionManagerSnackbarDraftDeleted(String name);
+
+  /// No description provided for @shortVideoVersionManagerErrorDraftDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete draft: {error}'**
+  String shortVideoVersionManagerErrorDraftDelete(String error);
+
+  /// No description provided for @shortVideoVersionManagerCompareDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose versions to compare'**
+  String get shortVideoVersionManagerCompareDialogTitle;
+
+  /// No description provided for @shortVideoVersionManagerCompareBaseLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Base version (older):'**
+  String get shortVideoVersionManagerCompareBaseLabel;
+
+  /// No description provided for @shortVideoVersionManagerCompareBaseHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose base version'**
+  String get shortVideoVersionManagerCompareBaseHint;
+
+  /// No description provided for @shortVideoVersionManagerCompareTargetLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare version (newer):'**
+  String get shortVideoVersionManagerCompareTargetLabel;
+
+  /// No description provided for @shortVideoVersionManagerCompareTargetHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose compare version'**
+  String get shortVideoVersionManagerCompareTargetHint;
+
+  /// No description provided for @shortVideoVersionManagerCompareVersionWithShots.
+  ///
+  /// In en, this message translates to:
+  /// **'{versionName} ({shotCount} shots)'**
+  String shortVideoVersionManagerCompareVersionWithShots(
+    String versionName,
+    int shotCount,
+  );
+
+  /// No description provided for @shortVideoVersionManagerStartCompare.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare'**
+  String get shortVideoVersionManagerStartCompare;
+
   /// No description provided for @accountSectionTitle.
   ///
   /// In en, this message translates to:

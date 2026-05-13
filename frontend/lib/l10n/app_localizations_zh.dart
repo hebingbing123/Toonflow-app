@@ -14160,6 +14160,326 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String shortVideoAssemblyDraftLoadFailed(String error) {
+    return '加载草稿和版本失败：$error';
+  }
+
+  @override
+  String get shortVideoAssemblyDraftNoShotsToApply => '没有可应用的镜头数据';
+
+  @override
+  String get shortVideoAssemblyDraftNoShotsToSave => '没有可保存的镜头数据';
+
+  @override
+  String shortVideoAssemblyDraftLimitReached(int max) {
+    return '草稿数量已达上限（最多 $max 个）';
+  }
+
+  @override
+  String get shortVideoAssemblyDraftNotFound => '草稿不存在';
+
+  @override
+  String get shortVideoAssemblyDraftNoDataToDelete => '没有可删除的草稿数据';
+
+  @override
+  String shortVideoAssemblyDraftSaved(String name) {
+    return '草稿「$name」保存成功';
+  }
+
+  @override
+  String shortVideoAssemblyDraftSaveFailed(String error) {
+    return '保存草稿失败：$error';
+  }
+
+  @override
+  String shortVideoAssemblyDraftRestored(String name) {
+    return '草稿「$name」已恢复';
+  }
+
+  @override
+  String shortVideoAssemblyDraftRestoreFailed(String error) {
+    return '恢复草稿失败：$error';
+  }
+
+  @override
+  String get shortVideoAssemblyDraftDeleted => '草稿已删除';
+
+  @override
+  String shortVideoAssemblyDraftDeleteFailed(String error) {
+    return '删除草稿失败：$error';
+  }
+
+  @override
+  String get shortVideoAssemblyVersionNameEmpty => '版本名称不能为空';
+
+  @override
+  String get shortVideoAssemblyVersionNoAssembly => '没有可用的装配数据';
+
+  @override
+  String shortVideoAssemblyVersionLimitReached(int max) {
+    return '成片版本已达上限（最多 $max 个）';
+  }
+
+  @override
+  String shortVideoAssemblyVersionCreated(String name) {
+    return '已创建成片版本「$name」';
+  }
+
+  @override
+  String shortVideoAssemblyVersionCreateFailed(String error) {
+    return '创建版本失败：$error';
+  }
+
+  @override
+  String get shortVideoAssemblyVersionNotFound => '版本不存在';
+
+  @override
+  String shortVideoAssemblyVersionSwitched(String name) {
+    return '已切换到版本「$name」';
+  }
+
+  @override
+  String shortVideoAssemblyVersionSwitchFailed(String error) {
+    return '切换版本失败：$error';
+  }
+
+  @override
+  String get shortVideoAssemblyVersionKeepAtLeastOne => '至少保留 1 个成片版本快照';
+
+  @override
+  String get shortVideoAssemblyVersionDeleted => '版本已删除';
+
+  @override
+  String shortVideoAssemblyVersionDeleteFailed(String error) {
+    return '删除版本失败：$error';
+  }
+
+  @override
+  String get shortVideoVersionManagerDefaultVersion => '默认版本';
+
+  @override
+  String get shortVideoVersionManagerTitle => '版本管理';
+
+  @override
+  String get shortVideoVersionManagerCompareVersions => '对比版本';
+
+  @override
+  String get shortVideoVersionManagerCreateNewVersion => '创建新版本';
+
+  @override
+  String get shortVideoVersionManagerSaveDraft => '保存草稿';
+
+  @override
+  String shortVideoVersionManagerCurrentVersion(String name) {
+    return '当前版本：$name';
+  }
+
+  @override
+  String shortVideoVersionManagerCurrentVersionMeta(
+    int shotCount,
+    String dateTime,
+  ) {
+    return '镜头数：$shotCount · 创建时间：$dateTime';
+  }
+
+  @override
+  String shortVideoVersionManagerAllVersions(int count) {
+    return '所有版本 ($count)';
+  }
+
+  @override
+  String get shortVideoVersionManagerNoVersionsHint => '暂无版本，点击上方按钮创建第一个版本';
+
+  @override
+  String shortVideoVersionManagerVersionRowSubtitle(
+    int shotCount,
+    String dateTime,
+  ) {
+    return '镜头数：$shotCount · 创建时间：$dateTime';
+  }
+
+  @override
+  String get shortVideoVersionManagerTooltipSwitchVersion => '切换到此版本';
+
+  @override
+  String get shortVideoVersionManagerTooltipDeleteVersion => '删除版本';
+
+  @override
+  String shortVideoVersionManagerDraftsHeader(int count, int max) {
+    return '草稿 ($count/$max)';
+  }
+
+  @override
+  String get shortVideoVersionManagerViewAllDrafts => '查看全部';
+
+  @override
+  String get shortVideoVersionManagerNoDraftsHint =>
+      '暂无草稿，点击上方「保存草稿」按钮保存当前编辑状态';
+
+  @override
+  String shortVideoVersionManagerDraftRowSubtitle(
+    int shotCount,
+    String dateTime,
+  ) {
+    return '镜头数：$shotCount · 保存时间：$dateTime';
+  }
+
+  @override
+  String shortVideoVersionManagerDraftListRowSubtitle(
+    int shotCount,
+    String dateTime,
+  ) {
+    return '镜头数：$shotCount\n保存时间：$dateTime';
+  }
+
+  @override
+  String get shortVideoVersionManagerTooltipRestoreDraft => '恢复草稿';
+
+  @override
+  String get shortVideoVersionManagerTooltipDeleteDraft => '删除草稿';
+
+  @override
+  String get shortVideoVersionManagerCreateVersionDialogTitle => '创建新版本';
+
+  @override
+  String get shortVideoVersionManagerCreateVersionDialogBody => '新版本将复制当前镜头配置。';
+
+  @override
+  String get shortVideoVersionManagerVersionNameLabel => '版本名称';
+
+  @override
+  String get shortVideoVersionManagerVersionNameHint => '例如：优化版 v2';
+
+  @override
+  String get shortVideoVersionManagerCreateAction => '创建';
+
+  @override
+  String get shortVideoVersionManagerDraftLimitTitle => '草稿数量已达上限';
+
+  @override
+  String get shortVideoVersionManagerDraftLimitBody =>
+      '最多只能保存 10 个草稿。\n\n请先删除一些旧草稿，然后再保存新草稿。';
+
+  @override
+  String get shortVideoVersionManagerGotIt => '知道了';
+
+  @override
+  String get shortVideoVersionManagerViewDraftsList => '查看草稿';
+
+  @override
+  String get shortVideoVersionManagerSaveDraftDialogTitle => '保存草稿';
+
+  @override
+  String get shortVideoVersionManagerSaveDraftDialogBody =>
+      '草稿将保存当前编辑状态，方便稍后继续编辑。';
+
+  @override
+  String get shortVideoVersionManagerDraftNameLabel => '草稿名称';
+
+  @override
+  String get shortVideoVersionManagerDraftNameHint => '例如：实验性剪辑 v1';
+
+  @override
+  String get shortVideoVersionManagerDraftListTitle => '草稿列表';
+
+  @override
+  String get shortVideoVersionManagerNoDraftsInList => '暂无草稿';
+
+  @override
+  String shortVideoVersionManagerSnackbarVersionCreated(String name) {
+    return '版本「$name」创建成功';
+  }
+
+  @override
+  String shortVideoVersionManagerErrorVersionCreate(String error) {
+    return '创建版本失败：$error';
+  }
+
+  @override
+  String shortVideoVersionManagerSnackbarVersionSwitched(String name) {
+    return '已切换到版本「$name」';
+  }
+
+  @override
+  String shortVideoVersionManagerErrorVersionSwitch(String error) {
+    return '切换版本失败：$error';
+  }
+
+  @override
+  String shortVideoVersionManagerSnackbarVersionDeleted(String name) {
+    return '版本「$name」已删除';
+  }
+
+  @override
+  String shortVideoVersionManagerErrorVersionDelete(String error) {
+    return '删除版本失败：$error';
+  }
+
+  @override
+  String shortVideoVersionManagerSnackbarDraftSaved(String name) {
+    return '草稿「$name」保存成功';
+  }
+
+  @override
+  String shortVideoVersionManagerErrorDraftSave(String error) {
+    return '保存草稿失败：$error';
+  }
+
+  @override
+  String shortVideoVersionManagerSnackbarDraftRestored(String name) {
+    return '草稿「$name」已恢复';
+  }
+
+  @override
+  String shortVideoVersionManagerErrorDraftRestore(String error) {
+    return '恢复草稿失败：$error';
+  }
+
+  @override
+  String get shortVideoVersionManagerConfirmDeleteDraftTitle => '确认删除';
+
+  @override
+  String shortVideoVersionManagerConfirmDeleteDraftBody(String name) {
+    return '确定要删除草稿「$name」吗？\n\n此操作无法撤销。';
+  }
+
+  @override
+  String shortVideoVersionManagerSnackbarDraftDeleted(String name) {
+    return '草稿「$name」已删除';
+  }
+
+  @override
+  String shortVideoVersionManagerErrorDraftDelete(String error) {
+    return '删除草稿失败：$error';
+  }
+
+  @override
+  String get shortVideoVersionManagerCompareDialogTitle => '选择要对比的版本';
+
+  @override
+  String get shortVideoVersionManagerCompareBaseLabel => '选择基准版本（旧版本）：';
+
+  @override
+  String get shortVideoVersionManagerCompareBaseHint => '选择基准版本';
+
+  @override
+  String get shortVideoVersionManagerCompareTargetLabel => '选择对比版本（新版本）：';
+
+  @override
+  String get shortVideoVersionManagerCompareTargetHint => '选择对比版本';
+
+  @override
+  String shortVideoVersionManagerCompareVersionWithShots(
+    String versionName,
+    int shotCount,
+  ) {
+    return '$versionName（$shotCount 镜头）';
+  }
+
+  @override
+  String get shortVideoVersionManagerStartCompare => '开始对比';
+
+  @override
   String get accountSectionTitle => '账户与隐私';
 
   @override

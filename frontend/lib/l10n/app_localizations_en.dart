@@ -14870,6 +14870,342 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String shortVideoAssemblyDraftLoadFailed(String error) {
+    return 'Failed to load drafts and versions: $error';
+  }
+
+  @override
+  String get shortVideoAssemblyDraftNoShotsToApply =>
+      'No shot data available to apply.';
+
+  @override
+  String get shortVideoAssemblyDraftNoShotsToSave =>
+      'No shot data available to save.';
+
+  @override
+  String shortVideoAssemblyDraftLimitReached(int max) {
+    return 'Draft limit reached (maximum $max).';
+  }
+
+  @override
+  String get shortVideoAssemblyDraftNotFound => 'Draft does not exist.';
+
+  @override
+  String get shortVideoAssemblyDraftNoDataToDelete =>
+      'No assembly data available to delete drafts.';
+
+  @override
+  String shortVideoAssemblyDraftSaved(String name) {
+    return 'Draft \"$name\" saved successfully.';
+  }
+
+  @override
+  String shortVideoAssemblyDraftSaveFailed(String error) {
+    return 'Failed to save draft: $error';
+  }
+
+  @override
+  String shortVideoAssemblyDraftRestored(String name) {
+    return 'Draft \"$name\" restored.';
+  }
+
+  @override
+  String shortVideoAssemblyDraftRestoreFailed(String error) {
+    return 'Failed to restore draft: $error';
+  }
+
+  @override
+  String get shortVideoAssemblyDraftDeleted => 'Draft deleted.';
+
+  @override
+  String shortVideoAssemblyDraftDeleteFailed(String error) {
+    return 'Failed to delete draft: $error';
+  }
+
+  @override
+  String get shortVideoAssemblyVersionNameEmpty =>
+      'Version name cannot be empty.';
+
+  @override
+  String get shortVideoAssemblyVersionNoAssembly =>
+      'No assembly data available.';
+
+  @override
+  String shortVideoAssemblyVersionLimitReached(int max) {
+    return 'Assembly versions at limit (maximum $max).';
+  }
+
+  @override
+  String shortVideoAssemblyVersionCreated(String name) {
+    return 'Created assembly version \"$name\".';
+  }
+
+  @override
+  String shortVideoAssemblyVersionCreateFailed(String error) {
+    return 'Failed to create version: $error';
+  }
+
+  @override
+  String get shortVideoAssemblyVersionNotFound => 'Version does not exist.';
+
+  @override
+  String shortVideoAssemblyVersionSwitched(String name) {
+    return 'Switched to version \"$name\".';
+  }
+
+  @override
+  String shortVideoAssemblyVersionSwitchFailed(String error) {
+    return 'Failed to switch version: $error';
+  }
+
+  @override
+  String get shortVideoAssemblyVersionKeepAtLeastOne =>
+      'Keep at least one assembly version snapshot.';
+
+  @override
+  String get shortVideoAssemblyVersionDeleted => 'Version deleted.';
+
+  @override
+  String shortVideoAssemblyVersionDeleteFailed(String error) {
+    return 'Failed to delete version: $error';
+  }
+
+  @override
+  String get shortVideoVersionManagerDefaultVersion => 'Default version';
+
+  @override
+  String get shortVideoVersionManagerTitle => 'Version management';
+
+  @override
+  String get shortVideoVersionManagerCompareVersions => 'Compare versions';
+
+  @override
+  String get shortVideoVersionManagerCreateNewVersion => 'Create new version';
+
+  @override
+  String get shortVideoVersionManagerSaveDraft => 'Save draft';
+
+  @override
+  String shortVideoVersionManagerCurrentVersion(String name) {
+    return 'Current version: $name';
+  }
+
+  @override
+  String shortVideoVersionManagerCurrentVersionMeta(
+    int shotCount,
+    String dateTime,
+  ) {
+    return 'Shots: $shotCount · Created: $dateTime';
+  }
+
+  @override
+  String shortVideoVersionManagerAllVersions(int count) {
+    return 'All versions ($count)';
+  }
+
+  @override
+  String get shortVideoVersionManagerNoVersionsHint =>
+      'No versions yet. Use the buttons above to create the first version.';
+
+  @override
+  String shortVideoVersionManagerVersionRowSubtitle(
+    int shotCount,
+    String dateTime,
+  ) {
+    return 'Shots: $shotCount · Created: $dateTime';
+  }
+
+  @override
+  String get shortVideoVersionManagerTooltipSwitchVersion =>
+      'Switch to this version';
+
+  @override
+  String get shortVideoVersionManagerTooltipDeleteVersion => 'Delete version';
+
+  @override
+  String shortVideoVersionManagerDraftsHeader(int count, int max) {
+    return 'Drafts ($count/$max)';
+  }
+
+  @override
+  String get shortVideoVersionManagerViewAllDrafts => 'View all';
+
+  @override
+  String get shortVideoVersionManagerNoDraftsHint =>
+      'No drafts yet. Tap \"Save draft\" above to save your current editing state.';
+
+  @override
+  String shortVideoVersionManagerDraftRowSubtitle(
+    int shotCount,
+    String dateTime,
+  ) {
+    return 'Shots: $shotCount · Saved: $dateTime';
+  }
+
+  @override
+  String shortVideoVersionManagerDraftListRowSubtitle(
+    int shotCount,
+    String dateTime,
+  ) {
+    return 'Shots: $shotCount\nSaved: $dateTime';
+  }
+
+  @override
+  String get shortVideoVersionManagerTooltipRestoreDraft => 'Restore draft';
+
+  @override
+  String get shortVideoVersionManagerTooltipDeleteDraft => 'Delete draft';
+
+  @override
+  String get shortVideoVersionManagerCreateVersionDialogTitle =>
+      'Create new version';
+
+  @override
+  String get shortVideoVersionManagerCreateVersionDialogBody =>
+      'The new version will copy the current shot configuration.';
+
+  @override
+  String get shortVideoVersionManagerVersionNameLabel => 'Version name';
+
+  @override
+  String get shortVideoVersionManagerVersionNameHint => 'e.g. Refined cut v2';
+
+  @override
+  String get shortVideoVersionManagerCreateAction => 'Create';
+
+  @override
+  String get shortVideoVersionManagerDraftLimitTitle => 'Draft limit reached';
+
+  @override
+  String get shortVideoVersionManagerDraftLimitBody =>
+      'You can keep at most 10 drafts.\n\nDelete some old drafts before saving a new one.';
+
+  @override
+  String get shortVideoVersionManagerGotIt => 'Got it';
+
+  @override
+  String get shortVideoVersionManagerViewDraftsList => 'View drafts';
+
+  @override
+  String get shortVideoVersionManagerSaveDraftDialogTitle => 'Save draft';
+
+  @override
+  String get shortVideoVersionManagerSaveDraftDialogBody =>
+      'The draft saves your current editing state so you can continue later.';
+
+  @override
+  String get shortVideoVersionManagerDraftNameLabel => 'Draft name';
+
+  @override
+  String get shortVideoVersionManagerDraftNameHint =>
+      'e.g. Experimental edit v1';
+
+  @override
+  String get shortVideoVersionManagerDraftListTitle => 'Draft list';
+
+  @override
+  String get shortVideoVersionManagerNoDraftsInList => 'No drafts';
+
+  @override
+  String shortVideoVersionManagerSnackbarVersionCreated(String name) {
+    return 'Version \"$name\" created successfully.';
+  }
+
+  @override
+  String shortVideoVersionManagerErrorVersionCreate(String error) {
+    return 'Failed to create version: $error';
+  }
+
+  @override
+  String shortVideoVersionManagerSnackbarVersionSwitched(String name) {
+    return 'Switched to version \"$name\".';
+  }
+
+  @override
+  String shortVideoVersionManagerErrorVersionSwitch(String error) {
+    return 'Failed to switch version: $error';
+  }
+
+  @override
+  String shortVideoVersionManagerSnackbarVersionDeleted(String name) {
+    return 'Version \"$name\" deleted.';
+  }
+
+  @override
+  String shortVideoVersionManagerErrorVersionDelete(String error) {
+    return 'Failed to delete version: $error';
+  }
+
+  @override
+  String shortVideoVersionManagerSnackbarDraftSaved(String name) {
+    return 'Draft \"$name\" saved successfully.';
+  }
+
+  @override
+  String shortVideoVersionManagerErrorDraftSave(String error) {
+    return 'Failed to save draft: $error';
+  }
+
+  @override
+  String shortVideoVersionManagerSnackbarDraftRestored(String name) {
+    return 'Draft \"$name\" restored.';
+  }
+
+  @override
+  String shortVideoVersionManagerErrorDraftRestore(String error) {
+    return 'Failed to restore draft: $error';
+  }
+
+  @override
+  String get shortVideoVersionManagerConfirmDeleteDraftTitle =>
+      'Confirm delete';
+
+  @override
+  String shortVideoVersionManagerConfirmDeleteDraftBody(String name) {
+    return 'Delete draft \"$name\"?\n\nThis action cannot be undone.';
+  }
+
+  @override
+  String shortVideoVersionManagerSnackbarDraftDeleted(String name) {
+    return 'Draft \"$name\" deleted.';
+  }
+
+  @override
+  String shortVideoVersionManagerErrorDraftDelete(String error) {
+    return 'Failed to delete draft: $error';
+  }
+
+  @override
+  String get shortVideoVersionManagerCompareDialogTitle =>
+      'Choose versions to compare';
+
+  @override
+  String get shortVideoVersionManagerCompareBaseLabel =>
+      'Base version (older):';
+
+  @override
+  String get shortVideoVersionManagerCompareBaseHint => 'Choose base version';
+
+  @override
+  String get shortVideoVersionManagerCompareTargetLabel =>
+      'Compare version (newer):';
+
+  @override
+  String get shortVideoVersionManagerCompareTargetHint =>
+      'Choose compare version';
+
+  @override
+  String shortVideoVersionManagerCompareVersionWithShots(
+    String versionName,
+    int shotCount,
+  ) {
+    return '$versionName ($shotCount shots)';
+  }
+
+  @override
+  String get shortVideoVersionManagerStartCompare => 'Compare';
+
+  @override
   String get accountSectionTitle => 'Account section title';
 
   @override
