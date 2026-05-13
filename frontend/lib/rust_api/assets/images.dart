@@ -104,16 +104,15 @@ Future<Uint8List?> fetchCornerScapeHistoryImagePreviewBytes(
       return null;
     }
   }
-  try {
-    return await fetchProjectAssetImageFileByProjectIds(
+  return await fallbackOnRustApiException<Uint8List?>(
+    () => fetchProjectAssetImageFileByProjectIds(
       accessToken,
       projectId,
       assetNumericId,
       img.id,
-    );
-  } on RustApiException {
-    return null;
-  }
+    ),
+    null,
+  );
 }
 
 /// `POST /api/v1/projects/{project_id}/assets/{asset_numeric_id}/images` — see `createProjectAssetImageByProjectIdV1`.
