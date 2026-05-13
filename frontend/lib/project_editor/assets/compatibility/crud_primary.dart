@@ -13,6 +13,7 @@ extension _HomePageProjectEditorAssetsCrudPrimaryProbe on _HomePageState {
     required List<bool> assetsBusy,
     required Future<void> Function() reloadAssetsAndStats,
   }) {
+    final l10n = AppLocalizations.of(ctx)!;
     return [
       TextButton(
         onPressed:
@@ -33,7 +34,7 @@ extension _HomePageProjectEditorAssetsCrudPrimaryProbe on _HomePageState {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(
                       ctx,
-                    ).showSnackBar(const SnackBar(content: Text('已新增测试资产')));
+                    ).showSnackBar(SnackBar(content: Text(l10n.projectEditorAssetsProbeCreateTestAssetSnack)));
                   }
                 } on RustApiException catch (e) {
                   if (ctx.mounted) {
@@ -47,7 +48,7 @@ extension _HomePageProjectEditorAssetsCrudPrimaryProbe on _HomePageState {
                   }
                 }
               },
-        child: const Text('新增资产'),
+        child: Text(l10n.projectEditorAssetsProbeCreateTestAssetButton),
       ),
       TextButton(
         onPressed:
@@ -70,7 +71,11 @@ extension _HomePageProjectEditorAssetsCrudPrimaryProbe on _HomePageState {
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        '已读取资产 #${first.numericId}：${row.name} (${row.assetType})',
+                        l10n.projectEditorAssetsProbeFetchFirstAssetSnack(
+                          first.numericId,
+                          row.name,
+                          row.assetType,
+                        ),
                       ),
                     ),
                   );
@@ -86,7 +91,7 @@ extension _HomePageProjectEditorAssetsCrudPrimaryProbe on _HomePageState {
                   }
                 }
               },
-        child: const Text('查看首条资产'),
+        child: Text(l10n.projectEditorAssetsProbeFetchFirstAssetButton),
       ),
       TextButton(
         onPressed:
@@ -110,7 +115,7 @@ extension _HomePageProjectEditorAssetsCrudPrimaryProbe on _HomePageState {
                   await reloadAssetsAndStats();
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(ctx).showSnackBar(
-                      const SnackBar(content: Text('已 PATCH 首条资产名称')),
+                      SnackBar(content: Text(l10n.projectEditorAssetsProbePatchFirstNameSnack)),
                     );
                   }
                 } on RustApiException catch (e) {
@@ -125,7 +130,7 @@ extension _HomePageProjectEditorAssetsCrudPrimaryProbe on _HomePageState {
                   }
                 }
               },
-        child: const Text('更新首条资产'),
+        child: Text(l10n.projectEditorAssetsProbePatchFirstNameButton),
       ),
       TextButton(
         onPressed:
@@ -148,7 +153,9 @@ extension _HomePageProjectEditorAssetsCrudPrimaryProbe on _HomePageState {
                   await reloadAssetsAndStats();
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(ctx).showSnackBar(
-                      SnackBar(content: Text('已 DELETE 资产 #${last.numericId}')),
+                      SnackBar(
+                        content: Text(l10n.projectEditorAssetDeleteSuccessSnack(last.numericId)),
+                      ),
                     );
                   }
                 } on RustApiException catch (e) {
@@ -163,7 +170,7 @@ extension _HomePageProjectEditorAssetsCrudPrimaryProbe on _HomePageState {
                   }
                 }
               },
-        child: const Text('删除末条资产'),
+        child: Text(l10n.projectEditorAssetsProbeDeleteLastAssetButton),
       ),
     ];
   }

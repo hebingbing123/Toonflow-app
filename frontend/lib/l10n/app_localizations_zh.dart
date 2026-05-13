@@ -10656,6 +10656,39 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get projectEditorAssetsProbeCreateTestAssetButton => '新增测试资产';
+
+  @override
+  String get projectEditorAssetsProbeCreateTestAssetSnack => '已新增测试资产';
+
+  @override
+  String get projectEditorAssetsProbeFetchFirstAssetButton => '查看首条资产';
+
+  @override
+  String projectEditorAssetsProbeFetchFirstAssetSnack(
+    int id,
+    String name,
+    String assetType,
+  ) {
+    return '已读取资产 #$id：$name（$assetType）';
+  }
+
+  @override
+  String get projectEditorAssetsProbePatchFirstNameButton => '更新首条资产';
+
+  @override
+  String get projectEditorAssetsProbePatchFirstNameSnack => '已 PATCH 首条资产名称';
+
+  @override
+  String get projectEditorAssetsProbeDeleteLastAssetButton => '删除末条资产';
+
+  @override
+  String get projectEditorAssetsProbeLinkFirstPairButton => '关联首剧本与首资产';
+
+  @override
+  String get projectEditorAssetsProbeUnlinkFirstPairButton => '取消首条关联';
+
+  @override
   String get projectEditorDeleteProjectTitle => '删除项目？';
 
   @override

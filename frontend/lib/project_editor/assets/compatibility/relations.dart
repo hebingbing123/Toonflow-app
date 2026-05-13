@@ -13,6 +13,7 @@ extension _HomePageProjectEditorAssetsLinksProbe on _HomePageState {
     required List<bool> assetsBusy,
     required Future<void> Function() reloadAssetsAndStats,
   }) {
+    final l10n = AppLocalizations.of(ctx)!;
     return [
       TextButton(
         onPressed:
@@ -39,7 +40,7 @@ extension _HomePageProjectEditorAssetsLinksProbe on _HomePageState {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(ctx).showSnackBar(
                       SnackBar(
-                        content: Text('已 PUT 关联 script#$sid · asset#$aid'),
+                        content: Text(l10n.projectEditorAssetLinkSuccessLinked(sid, aid)),
                       ),
                     );
                   }
@@ -55,7 +56,7 @@ extension _HomePageProjectEditorAssetsLinksProbe on _HomePageState {
                   }
                 }
               },
-        child: const Text('关联首剧本与首资产'),
+        child: Text(l10n.projectEditorAssetsProbeLinkFirstPairButton),
       ),
       TextButton(
         onPressed:
@@ -81,7 +82,9 @@ extension _HomePageProjectEditorAssetsLinksProbe on _HomePageState {
                   await reloadAssetsAndStats();
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(ctx).showSnackBar(
-                      const SnackBar(content: Text('已 DELETE 剧本–资产关联')),
+                      SnackBar(
+                        content: Text(l10n.projectEditorAssetLinkSuccessUnlinked(sid, aid)),
+                      ),
                     );
                   }
                 } on RustApiException catch (e) {
@@ -96,7 +99,7 @@ extension _HomePageProjectEditorAssetsLinksProbe on _HomePageState {
                   }
                 }
               },
-        child: const Text('取消首条关联'),
+        child: Text(l10n.projectEditorAssetsProbeUnlinkFirstPairButton),
       ),
     ];
   }

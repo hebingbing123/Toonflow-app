@@ -8207,6 +8207,28 @@
       }
     }
   },
+  "projectEditorAssetsProbeCreateTestAssetButton": "Create test asset",
+  "projectEditorAssetsProbeCreateTestAssetSnack": "Probe test asset created.",
+  "projectEditorAssetsProbeFetchFirstAssetButton": "Fetch first asset",
+  "projectEditorAssetsProbeFetchFirstAssetSnack": "Fetched asset #{id}: {name} ({assetType})",
+  "@projectEditorAssetsProbeFetchFirstAssetSnack": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      },
+      "assetType": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetsProbePatchFirstNameButton": "PATCH first asset name",
+  "projectEditorAssetsProbePatchFirstNameSnack": "Patched first asset name.",
+  "projectEditorAssetsProbeDeleteLastAssetButton": "Delete last asset",
+  "projectEditorAssetsProbeLinkFirstPairButton": "Link first script & first asset",
+  "projectEditorAssetsProbeUnlinkFirstPairButton": "Unlink first script–asset pair",
   "projectEditorDeleteProjectTitle": "Delete project?",
   "projectEditorDeleteProjectBody": "Deletes project #{id}, related scripts/storyboards (DB cascade), and clears agent memory for this project.",
   "@projectEditorDeleteProjectBody": {

@@ -8167,6 +8167,28 @@
       }
     }
   },
+  "projectEditorAssetsProbeCreateTestAssetButton": "新增测试资产",
+  "projectEditorAssetsProbeCreateTestAssetSnack": "已新增测试资产",
+  "projectEditorAssetsProbeFetchFirstAssetButton": "查看首条资产",
+  "projectEditorAssetsProbeFetchFirstAssetSnack": "已读取资产 #{id}：{name}（{assetType}）",
+  "@projectEditorAssetsProbeFetchFirstAssetSnack": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      },
+      "assetType": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorAssetsProbePatchFirstNameButton": "更新首条资产",
+  "projectEditorAssetsProbePatchFirstNameSnack": "已 PATCH 首条资产名称",
+  "projectEditorAssetsProbeDeleteLastAssetButton": "删除末条资产",
+  "projectEditorAssetsProbeLinkFirstPairButton": "关联首剧本与首资产",
+  "projectEditorAssetsProbeUnlinkFirstPairButton": "取消首条关联",
   "projectEditorDeleteProjectTitle": "删除项目？",
   "projectEditorDeleteProjectBody": "将删除项目 #{id}、相关剧本/分镜（数据库级联），并清除该项目的智能体记忆。",
   "@projectEditorDeleteProjectBody": {

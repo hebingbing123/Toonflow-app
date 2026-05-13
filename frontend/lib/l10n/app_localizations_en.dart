@@ -11193,6 +11193,47 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get projectEditorAssetsProbeCreateTestAssetButton =>
+      'Create test asset';
+
+  @override
+  String get projectEditorAssetsProbeCreateTestAssetSnack =>
+      'Probe test asset created.';
+
+  @override
+  String get projectEditorAssetsProbeFetchFirstAssetButton =>
+      'Fetch first asset';
+
+  @override
+  String projectEditorAssetsProbeFetchFirstAssetSnack(
+    int id,
+    String name,
+    String assetType,
+  ) {
+    return 'Fetched asset #$id: $name ($assetType)';
+  }
+
+  @override
+  String get projectEditorAssetsProbePatchFirstNameButton =>
+      'PATCH first asset name';
+
+  @override
+  String get projectEditorAssetsProbePatchFirstNameSnack =>
+      'Patched first asset name.';
+
+  @override
+  String get projectEditorAssetsProbeDeleteLastAssetButton =>
+      'Delete last asset';
+
+  @override
+  String get projectEditorAssetsProbeLinkFirstPairButton =>
+      'Link first script & first asset';
+
+  @override
+  String get projectEditorAssetsProbeUnlinkFirstPairButton =>
+      'Unlink first script–asset pair';
+
+  @override
   String get projectEditorDeleteProjectTitle => 'Delete project?';
 
   @override

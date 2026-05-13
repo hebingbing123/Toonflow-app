@@ -17505,6 +17505,64 @@ abstract class AppLocalizations {
   /// **'Upload succeeded: {message}'**
   String projectEditorAssetClipUploadSuccessSnack(String message);
 
+  /// No description provided for @projectEditorAssetsProbeCreateTestAssetButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Create test asset'**
+  String get projectEditorAssetsProbeCreateTestAssetButton;
+
+  /// No description provided for @projectEditorAssetsProbeCreateTestAssetSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Probe test asset created.'**
+  String get projectEditorAssetsProbeCreateTestAssetSnack;
+
+  /// No description provided for @projectEditorAssetsProbeFetchFirstAssetButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetch first asset'**
+  String get projectEditorAssetsProbeFetchFirstAssetButton;
+
+  /// No description provided for @projectEditorAssetsProbeFetchFirstAssetSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetched asset #{id}: {name} ({assetType})'**
+  String projectEditorAssetsProbeFetchFirstAssetSnack(
+    int id,
+    String name,
+    String assetType,
+  );
+
+  /// No description provided for @projectEditorAssetsProbePatchFirstNameButton.
+  ///
+  /// In en, this message translates to:
+  /// **'PATCH first asset name'**
+  String get projectEditorAssetsProbePatchFirstNameButton;
+
+  /// No description provided for @projectEditorAssetsProbePatchFirstNameSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Patched first asset name.'**
+  String get projectEditorAssetsProbePatchFirstNameSnack;
+
+  /// No description provided for @projectEditorAssetsProbeDeleteLastAssetButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete last asset'**
+  String get projectEditorAssetsProbeDeleteLastAssetButton;
+
+  /// No description provided for @projectEditorAssetsProbeLinkFirstPairButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Link first script & first asset'**
+  String get projectEditorAssetsProbeLinkFirstPairButton;
+
+  /// No description provided for @projectEditorAssetsProbeUnlinkFirstPairButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlink first script–asset pair'**
+  String get projectEditorAssetsProbeUnlinkFirstPairButton;
+
   /// No description provided for @projectEditorDeleteProjectTitle.
   ///
   /// In en, this message translates to:
