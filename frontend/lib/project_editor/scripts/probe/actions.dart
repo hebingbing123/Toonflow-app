@@ -46,7 +46,7 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                       ),
                     ),
                   );
-                } on RustApiException catch (e) {
+                } catch (e) {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(
                       ctx,
@@ -84,7 +84,7 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                       ),
                     ),
                   );
-                } on RustApiException catch (e) {
+                } catch (e) {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(
                       ctx,
@@ -121,7 +121,7 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                       ),
                     ),
                   );
-                } on RustApiException catch (e) {
+                } catch (e) {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(
                       ctx,
@@ -166,7 +166,7 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                       ),
                     ),
                   );
-                } on RustApiException catch (e) {
+                } catch (e) {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(
                       ctx,
@@ -203,7 +203,7 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                       ),
                     ),
                   );
-                } on RustApiException catch (e) {
+                } catch (e) {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(
                       ctx,
@@ -246,7 +246,7 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                       ),
                     ),
                   );
-                } on RustApiException catch (e) {
+                } catch (e) {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(
                       ctx,
@@ -287,7 +287,7 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                       ),
                     ),
                   );
-                } on RustApiException catch (e) {
+                } catch (e) {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(
                       ctx,

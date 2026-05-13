@@ -58,7 +58,7 @@ Future<void> _runAssetImageMutationRequest({
       setState: setState,
       successSummary: plan.successSummary,
     );
-  } on RustApiException catch (e) {
+  } catch (e) {
     _setAssetImageMutationFailure(
       l10n: scope.mutation.l10n,
       setState: setState,

@@ -141,9 +141,6 @@ extension _HomePageProjectEditor on _HomePageState {
           );
         },
       );
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-      _setErrorFromException(e);
     } catch (e) {
       if (!mounted) return;
       _setErrorFromException(e);

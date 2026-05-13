@@ -39,7 +39,7 @@ extension _HomePageProjectEditorNovelsProbeReadActions on _HomePageState {
                       ),
                     ),
                   );
-                } on RustApiException catch (e) {
+                } catch (e) {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(ctx).showSnackBar(
                       SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
@@ -70,7 +70,7 @@ extension _HomePageProjectEditorNovelsProbeReadActions on _HomePageState {
                       content: Text(l10n.projectEditorNovelsProbeReadGetNovelDataSnackbar(rows.length)),
                     ),
                   );
-                } on RustApiException catch (e) {
+                } catch (e) {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(ctx).showSnackBar(
                       SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
@@ -101,7 +101,7 @@ extension _HomePageProjectEditorNovelsProbeReadActions on _HomePageState {
                       content: Text(l10n.projectEditorNovelsProbeReadGetNovelIndexSnackbar(idx.length)),
                     ),
                   );
-                } on RustApiException catch (e) {
+                } catch (e) {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(ctx).showSnackBar(
                       SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
@@ -136,7 +136,7 @@ extension _HomePageProjectEditorNovelsProbeReadActions on _HomePageState {
                       ),
                     ),
                   );
-                } on RustApiException catch (e) {
+                } catch (e) {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(ctx).showSnackBar(
                       SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),

@@ -29,7 +29,7 @@ extension _HomePageProjectEditorHttpTasksProbe on _HomePageState {
                       content: Text(l10n.projectEditorProbeTasksCompatGetProjectResult(line)),
                     ),
                   );
-                } on RustApiException catch (e) {
+                } catch (e) {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(
                       ctx,
@@ -64,7 +64,7 @@ extension _HomePageProjectEditorHttpTasksProbe on _HomePageState {
                       content: Text(l10n.projectEditorProbeTasksCompatCategoriesResult(line)),
                     ),
                   );
-                } on RustApiException catch (e) {
+                } catch (e) {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(
                       ctx,
@@ -103,7 +103,7 @@ extension _HomePageProjectEditorHttpTasksProbe on _HomePageState {
                       ),
                     ),
                   );
-                } on RustApiException catch (e) {
+                } catch (e) {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(
                       ctx,
@@ -153,7 +153,7 @@ extension _HomePageProjectEditorHttpTasksProbe on _HomePageState {
                       ),
                     ),
                   );
-                } on RustApiException catch (e) {
+                } catch (e) {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(
                       ctx,

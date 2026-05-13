@@ -47,7 +47,7 @@ extension _HomePageProjectEditorNovelEventsActions on _HomePageState {
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(content: Text(snack)),
                   );
-                } on RustApiException catch (e) {
+                } catch (e) {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(
                       ctx,
@@ -92,7 +92,7 @@ extension _HomePageProjectEditorNovelEventsActions on _HomePageState {
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(content: Text(snack)),
                   );
-                } on RustApiException catch (e) {
+                } catch (e) {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(
                       ctx,

@@ -36,7 +36,7 @@ extension _HomePageProjectEditorAssetsCrudPrimaryProbe on _HomePageState {
                       ctx,
                     ).showSnackBar(SnackBar(content: Text(l10n.projectEditorAssetsProbeCreateTestAssetSnack)));
                   }
-                } on RustApiException catch (e) {
+                } catch (e) {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(
                       ctx,
@@ -79,7 +79,7 @@ extension _HomePageProjectEditorAssetsCrudPrimaryProbe on _HomePageState {
                       ),
                     ),
                   );
-                } on RustApiException catch (e) {
+                } catch (e) {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(
                       ctx,
@@ -118,7 +118,7 @@ extension _HomePageProjectEditorAssetsCrudPrimaryProbe on _HomePageState {
                       SnackBar(content: Text(l10n.projectEditorAssetsProbePatchFirstNameSnack)),
                     );
                   }
-                } on RustApiException catch (e) {
+                } catch (e) {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(
                       ctx,
@@ -158,7 +158,7 @@ extension _HomePageProjectEditorAssetsCrudPrimaryProbe on _HomePageState {
                       ),
                     );
                   }
-                } on RustApiException catch (e) {
+                } catch (e) {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(
                       ctx,

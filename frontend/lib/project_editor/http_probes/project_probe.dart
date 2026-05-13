@@ -29,7 +29,7 @@ extension _HomePageProjectEditorHttpProjectProbe on _HomePageState {
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(content: Text(l10n.projectEditorProbeProjectsCompatList(line))),
                   );
-                } on RustApiException catch (e) {
+                } catch (e) {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(
                       ctx,
@@ -81,7 +81,7 @@ extension _HomePageProjectEditorHttpProjectProbe on _HomePageState {
                       ),
                     ),
                   );
-                } on RustApiException catch (e) {
+                } catch (e) {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(
                       ctx,
@@ -128,6 +128,11 @@ extension _HomePageProjectEditorHttpProjectProbe on _HomePageState {
                       ctx,
                     ).showSnackBar(SnackBar(content: Text(describeUserVisibleApiError(l10n, e))));
                   }
+                } catch (e) {
+                  if (!ctx.mounted) return;
+                  ScaffoldMessenger.of(
+                    ctx,
+                  ).showSnackBar(SnackBar(content: Text(describeUserVisibleApiError(l10n, e))));
                 } finally {
                   if (ctx.mounted) {
                     setDialogState(() => projectProbeBusy[0] = false);
@@ -183,6 +188,11 @@ extension _HomePageProjectEditorHttpProjectProbe on _HomePageState {
                       ctx,
                     ).showSnackBar(SnackBar(content: Text(describeUserVisibleApiError(l10n, e))));
                   }
+                } catch (e) {
+                  if (!ctx.mounted) return;
+                  ScaffoldMessenger.of(
+                    ctx,
+                  ).showSnackBar(SnackBar(content: Text(describeUserVisibleApiError(l10n, e))));
                 } finally {
                   if (ctx.mounted) {
                     setDialogState(() => projectProbeBusy[0] = false);
@@ -254,7 +264,7 @@ extension _HomePageProjectEditorHttpProjectProbe on _HomePageState {
                       ),
                     ),
                   );
-                } on RustApiException catch (e) {
+                } catch (e) {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(
                       ctx,

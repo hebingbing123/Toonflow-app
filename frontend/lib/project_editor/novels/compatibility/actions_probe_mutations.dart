@@ -30,7 +30,7 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
                       content: Text(l10n.projectEditorNovelsProbeMutationGenerateEventsSnackbar(msg)),
                     ),
                   );
-                } on RustApiException catch (e) {
+                } catch (e) {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(ctx).showSnackBar(
                       SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
@@ -62,7 +62,7 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
                       content: Text(l10n.projectEditorNovelsProbeMutationAddNovelEmptySnackbar),
                     ),
                   );
-                } on RustApiException catch (e) {
+                } catch (e) {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(ctx).showSnackBar(
                       SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
@@ -105,6 +105,11 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
                       SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
                     );
                   }
+                } catch (e) {
+                  if (!ctx.mounted) return;
+                  ScaffoldMessenger.of(ctx).showSnackBar(
+                    SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
+                  );
                 } finally {
                   if (ctx.mounted) {
                     setDialogState(() => novelsBusy[0] = false);
@@ -142,6 +147,11 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
                       SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
                     );
                   }
+                } catch (e) {
+                  if (!ctx.mounted) return;
+                  ScaffoldMessenger.of(ctx).showSnackBar(
+                    SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
+                  );
                 } finally {
                   if (ctx.mounted) {
                     setDialogState(() => novelsBusy[0] = false);
@@ -176,7 +186,7 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
                       ),
                     ),
                   );
-                } on RustApiException catch (e) {
+                } catch (e) {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(ctx).showSnackBar(
                       SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),

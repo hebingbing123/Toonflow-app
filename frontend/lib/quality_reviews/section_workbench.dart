@@ -190,7 +190,7 @@ class _QualityReviewsWorkbenchDialogState
           _ctrls.reviewIdCtrl.text = rows.first.id;
         }
       });
-    } on RustApiException catch (e) {
+    } catch (e) {
       if (!mounted) return;
       setState(() => _statusLine = describeUserVisibleApiError(l10n, e));
     } finally {
@@ -219,7 +219,7 @@ class _QualityReviewsWorkbenchDialogState
         _statsSummary = summarizeQualityStatsRows(rows, l10n: l10n);
         _statusLine = l10n.qualityReviewsStatusRefreshedStats;
       });
-    } on RustApiException catch (e) {
+    } catch (e) {
       if (!mounted) return;
       setState(() => _statusLine = describeUserVisibleApiError(l10n, e));
     } finally {
@@ -247,7 +247,7 @@ class _QualityReviewsWorkbenchDialogState
         _scopeInsightsSummary = summarizeQualityScopeInsightRows(rows);
         _statusLine = l10n.qualityReviewsStatusRefreshedScopeLeaderboard;
       });
-    } on RustApiException catch (e) {
+    } catch (e) {
       if (!mounted) return;
       setState(() => _statusLine = describeUserVisibleApiError(l10n, e));
     } finally {
@@ -274,7 +274,7 @@ class _QualityReviewsWorkbenchDialogState
         _stageGradeRows = gradeRows;
         _statusLine = l10n.qualityReviewsStatusRefreshedStageAndGrade;
       });
-    } on RustApiException catch (e) {
+    } catch (e) {
       if (!mounted) return;
       setState(() => _statusLine = describeUserVisibleApiError(l10n, e));
     } finally {
@@ -307,7 +307,7 @@ class _QualityReviewsWorkbenchDialogState
                   .join(' | ');
         _statusLine = l10n.qualityReviewsStatusRefreshedBadCaseDistribution;
       });
-    } on RustApiException catch (e) {
+    } catch (e) {
       if (!mounted) return;
       setState(() => _statusLine = describeUserVisibleApiError(l10n, e));
     } finally {
@@ -342,7 +342,7 @@ class _QualityReviewsWorkbenchDialogState
         _refreshExecutionChecklist();
         _statusLine = l10n.qualityReviewsStatusRefreshedTokenAggregate;
       });
-    } on RustApiException catch (e) {
+    } catch (e) {
       if (!mounted) return;
       setState(() => _statusLine = describeUserVisibleApiError(l10n, e));
     } finally {
@@ -377,7 +377,7 @@ class _QualityReviewsWorkbenchDialogState
         );
         _statusLine = l10n.qualityReviewsStatusRefreshedTokenSavingSamples;
       });
-    } on RustApiException catch (e) {
+    } catch (e) {
       if (!mounted) return;
       setState(() => _statusLine = describeUserVisibleApiError(l10n, e));
     } finally {
@@ -405,7 +405,7 @@ class _QualityReviewsWorkbenchDialogState
         _reviewDetails = formatQualityReviewDetails(review, l10n: l10n);
         _statusLine = l10n.qualityReviewsStatusLoadedReviewDetails;
       });
-    } on RustApiException catch (e) {
+    } catch (e) {
       if (!mounted) return;
       setState(() => _statusLine = describeUserVisibleApiError(l10n, e));
     } finally {
@@ -491,7 +491,7 @@ class _QualityReviewsWorkbenchDialogState
         onlyDeliveryPriority: _filterDeliveryPriorityOnly,
         onlyAutoSource: _filterAutoSourceOnly,
       );
-    } on RustApiException catch (e) {
+    } catch (e) {
       if (!mounted) return;
       setState(() => _statusLine = describeUserVisibleApiError(l10n, e));
     } finally {
