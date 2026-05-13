@@ -5854,6 +5854,59 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String projectEditorScriptsSectionCountLine(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 条剧本',
+      one: '1 条剧本',
+      zero: '0 条剧本',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get projectEditorScriptsSectionIntroBody => '在项目下管理剧本，并进入剧本详情维护内容与分镜。';
+
+  @override
+  String get projectEditorScriptsSectionBatchWorkbenchTitle => '剧本批量工作台';
+
+  @override
+  String get projectEditorScriptsSectionBatchWorkbenchDescription =>
+      '把项目级剧本上下文读取、批量导出、提取状态轮询、素材抽取和批量创建收口到同一工作台，不再只靠全量快捷按钮。';
+
+  @override
+  String get projectEditorScriptsSectionOpenBatchWorkbench => '打开剧本批量工作台';
+
+  @override
+  String get projectEditorScriptsSectionOpenPlanWorkbench => '打开骨架工作台';
+
+  @override
+  String get projectEditorScriptsSectionSuggestionsTitle => '当前批量建议';
+
+  @override
+  String get projectEditorScriptsSectionBatchAdd => '批量新增剧本';
+
+  @override
+  String get projectEditorScriptsSectionExportAll => '导出全部剧本';
+
+  @override
+  String get projectEditorScriptsSectionPollAllExtract => '轮询全部提取状态';
+
+  @override
+  String get projectEditorScriptsSectionExtractAllMaterials => '提取全部剧本素材';
+
+  @override
+  String get projectEditorScriptsSectionCreateEmpty => '新建空剧本';
+
+  @override
+  String get projectEditorScriptsSectionCompatibilityTile => '兼容性检查';
+
+  @override
+  String get projectEditorScriptsSectionCompatibilitySubtitle =>
+      '保留旧剧本接口与导出/提取回归入口，默认折叠';
+
+  @override
   String get projectEditorProbeTasksZeroItems => '0 项';
 
   @override

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../rust_api.dart';
+import '../../l10n/app_localizations.dart';
 import '../../script_editor/support.dart';
 
 class ProjectScriptsSectionViewModel {
@@ -60,6 +61,7 @@ class ProjectScriptsSectionView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final outline = theme.colorScheme.outline;
     return Column(
@@ -67,12 +69,12 @@ class ProjectScriptsSectionView extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          '${model.scriptList.length} 条剧本',
+          l10n.projectEditorScriptsSectionCountLine(model.scriptList.length),
           style: theme.textTheme.labelLarge,
         ),
         const SizedBox(height: 4),
         Text(
-          '在项目下管理剧本，并进入剧本详情维护内容与分镜。',
+          l10n.projectEditorScriptsSectionIntroBody,
           style: theme.textTheme.bodySmall?.copyWith(color: outline),
         ),
         const SizedBox(height: 8),
@@ -89,10 +91,13 @@ class ProjectScriptsSectionView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('剧本批量工作台', style: theme.textTheme.titleSmall),
+              Text(
+                l10n.projectEditorScriptsSectionBatchWorkbenchTitle,
+                style: theme.textTheme.titleSmall,
+              ),
               const SizedBox(height: 4),
               Text(
-                '把项目级剧本上下文读取、批量导出、提取状态轮询、素材抽取和批量创建收口到同一工作台，不再只靠全量快捷按钮。',
+                l10n.projectEditorScriptsSectionBatchWorkbenchDescription,
                 style: theme.textTheme.bodySmall?.copyWith(color: outline),
               ),
               const SizedBox(height: 8),
@@ -104,13 +109,13 @@ class ProjectScriptsSectionView extends StatelessWidget {
                     onPressed: model.saving || model.scriptTaskBusy
                         ? null
                         : callbacks.onOpenWorkbench,
-                    child: const Text('打开剧本批量工作台'),
+                    child: Text(l10n.projectEditorScriptsSectionOpenBatchWorkbench),
                   ),
                   OutlinedButton(
                     onPressed: model.saving || model.scriptTaskBusy
                         ? null
                         : callbacks.onOpenPlanWorkbench,
-                    child: const Text('打开骨架工作台'),
+                    child: Text(l10n.projectEditorScriptsSectionOpenPlanWorkbench),
                   ),
                 ],
               ),
@@ -131,7 +136,10 @@ class ProjectScriptsSectionView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('当前批量建议', style: theme.textTheme.titleSmall),
+              Text(
+                l10n.projectEditorScriptsSectionSuggestionsTitle,
+                style: theme.textTheme.titleSmall,
+              ),
               const SizedBox(height: 4),
               Text(
                 model.overviewDiagnosis.summary,
@@ -157,7 +165,7 @@ class ProjectScriptsSectionView extends StatelessWidget {
           children: [
             TextButton(
               onPressed: model.saving ? null : callbacks.onOpenBatchAddDialog,
-              child: const Text('批量新增剧本'),
+              child: Text(l10n.projectEditorScriptsSectionBatchAdd),
             ),
             TextButton(
               onPressed:
@@ -166,7 +174,11 @@ class ProjectScriptsSectionView extends StatelessWidget {
                       model.scriptList.isEmpty
                   ? null
                   : callbacks.onExportAll,
-              child: Text(model.scriptTaskBusy ? '处理中…' : '导出全部剧本'),
+              child: Text(
+                model.scriptTaskBusy
+                    ? l10n.projectsBusyProcessing
+                    : l10n.projectEditorScriptsSectionExportAll,
+              ),
             ),
             TextButton(
               onPressed:
@@ -175,7 +187,7 @@ class ProjectScriptsSectionView extends StatelessWidget {
                       model.scriptList.isEmpty
                   ? null
                   : callbacks.onPollAll,
-              child: const Text('轮询全部提取状态'),
+              child: Text(l10n.projectEditorScriptsSectionPollAllExtract),
             ),
             TextButton(
               onPressed:
@@ -184,7 +196,7 @@ class ProjectScriptsSectionView extends StatelessWidget {
                       model.scriptList.isEmpty
                   ? null
                   : callbacks.onExtractAll,
-              child: const Text('提取全部剧本素材'),
+              child: Text(l10n.projectEditorScriptsSectionExtractAllMaterials),
             ),
           ],
         ),
@@ -199,15 +211,15 @@ class ProjectScriptsSectionView extends StatelessWidget {
           alignment: Alignment.centerLeft,
           child: TextButton(
             onPressed: model.saving ? null : callbacks.onCreateEmptyScript,
-            child: const Text('新建空剧本'),
+            child: Text(l10n.projectEditorScriptsSectionCreateEmpty),
           ),
         ),
         ExpansionTile(
           tilePadding: EdgeInsets.zero,
           childrenPadding: EdgeInsets.zero,
-          title: const Text('兼容性检查'),
+          title: Text(l10n.projectEditorScriptsSectionCompatibilityTile),
           subtitle: Text(
-            '保留旧剧本接口与导出/提取回归入口，默认折叠',
+            l10n.projectEditorScriptsSectionCompatibilitySubtitle,
             style: theme.textTheme.bodySmall?.copyWith(color: outline),
           ),
           children: [

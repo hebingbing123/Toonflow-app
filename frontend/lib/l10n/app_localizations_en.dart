@@ -6095,6 +6095,67 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String projectEditorScriptsSectionCountLine(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count scripts',
+      one: '1 script',
+      zero: '0 scripts',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get projectEditorScriptsSectionIntroBody =>
+      'Manage scripts under this project and open a script to edit content and storyboards.';
+
+  @override
+  String get projectEditorScriptsSectionBatchWorkbenchTitle =>
+      'Script batch workbench';
+
+  @override
+  String get projectEditorScriptsSectionBatchWorkbenchDescription =>
+      'Brings project-level script context reads, batch export, extract polling, asset extraction, and batch creation into one workbench instead of relying only on shortcut buttons.';
+
+  @override
+  String get projectEditorScriptsSectionOpenBatchWorkbench =>
+      'Open script batch workbench';
+
+  @override
+  String get projectEditorScriptsSectionOpenPlanWorkbench =>
+      'Open plan workbench';
+
+  @override
+  String get projectEditorScriptsSectionSuggestionsTitle =>
+      'Current batch suggestions';
+
+  @override
+  String get projectEditorScriptsSectionBatchAdd => 'Batch add scripts';
+
+  @override
+  String get projectEditorScriptsSectionExportAll => 'Export all scripts';
+
+  @override
+  String get projectEditorScriptsSectionPollAllExtract =>
+      'Poll extract state for all';
+
+  @override
+  String get projectEditorScriptsSectionExtractAllMaterials =>
+      'Extract materials for all scripts';
+
+  @override
+  String get projectEditorScriptsSectionCreateEmpty => 'Create empty script';
+
+  @override
+  String get projectEditorScriptsSectionCompatibilityTile =>
+      'Compatibility checks';
+
+  @override
+  String get projectEditorScriptsSectionCompatibilitySubtitle =>
+      'Legacy script APIs plus export/extract regression hooks; collapsed by default.';
+
+  @override
   String get projectEditorProbeTasksZeroItems => '0 items';
 
   @override

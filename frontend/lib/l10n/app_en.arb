@@ -4406,6 +4406,27 @@
       }
     }
   },
+  "projectEditorScriptsSectionCountLine": "{count, plural, =0{0 scripts}=1{1 script} other{{count} scripts}}",
+  "@projectEditorScriptsSectionCountLine": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorScriptsSectionIntroBody": "Manage scripts under this project and open a script to edit content and storyboards.",
+  "projectEditorScriptsSectionBatchWorkbenchTitle": "Script batch workbench",
+  "projectEditorScriptsSectionBatchWorkbenchDescription": "Brings project-level script context reads, batch export, extract polling, asset extraction, and batch creation into one workbench instead of relying only on shortcut buttons.",
+  "projectEditorScriptsSectionOpenBatchWorkbench": "Open script batch workbench",
+  "projectEditorScriptsSectionOpenPlanWorkbench": "Open plan workbench",
+  "projectEditorScriptsSectionSuggestionsTitle": "Current batch suggestions",
+  "projectEditorScriptsSectionBatchAdd": "Batch add scripts",
+  "projectEditorScriptsSectionExportAll": "Export all scripts",
+  "projectEditorScriptsSectionPollAllExtract": "Poll extract state for all",
+  "projectEditorScriptsSectionExtractAllMaterials": "Extract materials for all scripts",
+  "projectEditorScriptsSectionCreateEmpty": "Create empty script",
+  "projectEditorScriptsSectionCompatibilityTile": "Compatibility checks",
+  "projectEditorScriptsSectionCompatibilitySubtitle": "Legacy script APIs plus export/extract regression hooks; collapsed by default.",
   "projectEditorProbeTasksZeroItems": "0 items",
   "projectEditorProbeTasksZeroClasses": "0 classes",
   "projectEditorProbeTasksCompatGetTaskApi": "compat get-task-api (GET jobs/page): total={total} · {count} items on this page",

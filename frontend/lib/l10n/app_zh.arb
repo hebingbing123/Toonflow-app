@@ -4366,6 +4366,27 @@
       }
     }
   },
+  "projectEditorScriptsSectionCountLine": "{count, plural, =0{0 条剧本}=1{1 条剧本} other{{count} 条剧本}}",
+  "@projectEditorScriptsSectionCountLine": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorScriptsSectionIntroBody": "在项目下管理剧本，并进入剧本详情维护内容与分镜。",
+  "projectEditorScriptsSectionBatchWorkbenchTitle": "剧本批量工作台",
+  "projectEditorScriptsSectionBatchWorkbenchDescription": "把项目级剧本上下文读取、批量导出、提取状态轮询、素材抽取和批量创建收口到同一工作台，不再只靠全量快捷按钮。",
+  "projectEditorScriptsSectionOpenBatchWorkbench": "打开剧本批量工作台",
+  "projectEditorScriptsSectionOpenPlanWorkbench": "打开骨架工作台",
+  "projectEditorScriptsSectionSuggestionsTitle": "当前批量建议",
+  "projectEditorScriptsSectionBatchAdd": "批量新增剧本",
+  "projectEditorScriptsSectionExportAll": "导出全部剧本",
+  "projectEditorScriptsSectionPollAllExtract": "轮询全部提取状态",
+  "projectEditorScriptsSectionExtractAllMaterials": "提取全部剧本素材",
+  "projectEditorScriptsSectionCreateEmpty": "新建空剧本",
+  "projectEditorScriptsSectionCompatibilityTile": "兼容性检查",
+  "projectEditorScriptsSectionCompatibilitySubtitle": "保留旧剧本接口与导出/提取回归入口，默认折叠",
   "projectEditorProbeTasksZeroItems": "0 项",
   "projectEditorProbeTasksZeroClasses": "0 类",
   "projectEditorProbeTasksCompatGetTaskApi": "compat get-task-api（GET jobs/page）：total={total} · {count} 条本页",

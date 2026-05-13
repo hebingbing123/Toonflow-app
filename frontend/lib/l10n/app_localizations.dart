@@ -10003,6 +10003,90 @@ abstract class AppLocalizations {
   /// **'Created {count} scripts in batch'**
   String projectEditorScriptsBatchAddSuccess(int count);
 
+  /// No description provided for @projectEditorScriptsSectionCountLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{0 scripts}=1{1 script} other{{count} scripts}}'**
+  String projectEditorScriptsSectionCountLine(int count);
+
+  /// No description provided for @projectEditorScriptsSectionIntroBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage scripts under this project and open a script to edit content and storyboards.'**
+  String get projectEditorScriptsSectionIntroBody;
+
+  /// No description provided for @projectEditorScriptsSectionBatchWorkbenchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Script batch workbench'**
+  String get projectEditorScriptsSectionBatchWorkbenchTitle;
+
+  /// No description provided for @projectEditorScriptsSectionBatchWorkbenchDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Brings project-level script context reads, batch export, extract polling, asset extraction, and batch creation into one workbench instead of relying only on shortcut buttons.'**
+  String get projectEditorScriptsSectionBatchWorkbenchDescription;
+
+  /// No description provided for @projectEditorScriptsSectionOpenBatchWorkbench.
+  ///
+  /// In en, this message translates to:
+  /// **'Open script batch workbench'**
+  String get projectEditorScriptsSectionOpenBatchWorkbench;
+
+  /// No description provided for @projectEditorScriptsSectionOpenPlanWorkbench.
+  ///
+  /// In en, this message translates to:
+  /// **'Open plan workbench'**
+  String get projectEditorScriptsSectionOpenPlanWorkbench;
+
+  /// No description provided for @projectEditorScriptsSectionSuggestionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Current batch suggestions'**
+  String get projectEditorScriptsSectionSuggestionsTitle;
+
+  /// No description provided for @projectEditorScriptsSectionBatchAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch add scripts'**
+  String get projectEditorScriptsSectionBatchAdd;
+
+  /// No description provided for @projectEditorScriptsSectionExportAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Export all scripts'**
+  String get projectEditorScriptsSectionExportAll;
+
+  /// No description provided for @projectEditorScriptsSectionPollAllExtract.
+  ///
+  /// In en, this message translates to:
+  /// **'Poll extract state for all'**
+  String get projectEditorScriptsSectionPollAllExtract;
+
+  /// No description provided for @projectEditorScriptsSectionExtractAllMaterials.
+  ///
+  /// In en, this message translates to:
+  /// **'Extract materials for all scripts'**
+  String get projectEditorScriptsSectionExtractAllMaterials;
+
+  /// No description provided for @projectEditorScriptsSectionCreateEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Create empty script'**
+  String get projectEditorScriptsSectionCreateEmpty;
+
+  /// No description provided for @projectEditorScriptsSectionCompatibilityTile.
+  ///
+  /// In en, this message translates to:
+  /// **'Compatibility checks'**
+  String get projectEditorScriptsSectionCompatibilityTile;
+
+  /// No description provided for @projectEditorScriptsSectionCompatibilitySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Legacy script APIs plus export/extract regression hooks; collapsed by default.'**
+  String get projectEditorScriptsSectionCompatibilitySubtitle;
+
   /// No description provided for @projectEditorProbeTasksZeroItems.
   ///
   /// In en, this message translates to:
