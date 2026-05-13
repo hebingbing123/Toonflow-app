@@ -10779,6 +10779,129 @@ abstract class AppLocalizations {
   /// **'All sources'**
   String get projectEditorNovelsWorkbenchSearchIntakeSourceAll;
 
+  /// No description provided for @projectEditorNovelsIntakeStatusValueDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft'**
+  String get projectEditorNovelsIntakeStatusValueDraft;
+
+  /// No description provided for @projectEditorNovelsIntakeStatusValuePendingReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending review'**
+  String get projectEditorNovelsIntakeStatusValuePendingReview;
+
+  /// No description provided for @projectEditorNovelsIntakeStatusValueAdmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Admitted'**
+  String get projectEditorNovelsIntakeStatusValueAdmitted;
+
+  /// No description provided for @projectEditorNovelsIntakeStatusValueRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get projectEditorNovelsIntakeStatusValueRejected;
+
+  /// No description provided for @projectEditorNovelsIntakeSourceValueManual.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual'**
+  String get projectEditorNovelsIntakeSourceValueManual;
+
+  /// No description provided for @projectEditorNovelsIntakeSourceValueWholeBookImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Whole book import'**
+  String get projectEditorNovelsIntakeSourceValueWholeBookImport;
+
+  /// No description provided for @projectEditorNovelsIntakeSourceValueCrawlerClient.
+  ///
+  /// In en, this message translates to:
+  /// **'Crawler (client)'**
+  String get projectEditorNovelsIntakeSourceValueCrawlerClient;
+
+  /// No description provided for @projectEditorNovelsIntakeSourceValueCrawlerServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Crawler (server)'**
+  String get projectEditorNovelsIntakeSourceValueCrawlerServer;
+
+  /// No description provided for @projectEditorNovelsProbeMutationGenerateEventsButton.
+  ///
+  /// In en, this message translates to:
+  /// **'POST generate-events (top 3)'**
+  String get projectEditorNovelsProbeMutationGenerateEventsButton;
+
+  /// No description provided for @projectEditorNovelsProbeMutationAddNovelEmptyButton.
+  ///
+  /// In en, this message translates to:
+  /// **'POST add-novel []'**
+  String get projectEditorNovelsProbeMutationAddNovelEmptyButton;
+
+  /// No description provided for @projectEditorNovelsProbeMutationBatchDeleteEmptyButton.
+  ///
+  /// In en, this message translates to:
+  /// **'POST batch-delete []'**
+  String get projectEditorNovelsProbeMutationBatchDeleteEmptyButton;
+
+  /// No description provided for @projectEditorNovelsProbeMutationDeleteNovelZeroButton.
+  ///
+  /// In en, this message translates to:
+  /// **'POST delete-novel id=0'**
+  String get projectEditorNovelsProbeMutationDeleteNovelZeroButton;
+
+  /// No description provided for @projectEditorNovelsProbeMutationUpdateNovelNoopButton.
+  ///
+  /// In en, this message translates to:
+  /// **'POST update-novel (noop)'**
+  String get projectEditorNovelsProbeMutationUpdateNovelNoopButton;
+
+  /// No description provided for @projectEditorNovelsProbeMutationGenerateEventsSnackbar.
+  ///
+  /// In en, this message translates to:
+  /// **'POST …/novel-events/generate-events: {detail}'**
+  String projectEditorNovelsProbeMutationGenerateEventsSnackbar(String detail);
+
+  /// No description provided for @projectEditorNovelsProbeMutationAddNovelEmptySnackbar.
+  ///
+  /// In en, this message translates to:
+  /// **'POST …/novels/add-novel (empty body): {detail}'**
+  String projectEditorNovelsProbeMutationAddNovelEmptySnackbar(String detail);
+
+  /// No description provided for @projectEditorNovelsProbeMutationBatchDeleteUnexpected200Snackbar.
+  ///
+  /// In en, this message translates to:
+  /// **'POST …/novels/batch-delete: unexpected 200 OK'**
+  String get projectEditorNovelsProbeMutationBatchDeleteUnexpected200Snackbar;
+
+  /// No description provided for @projectEditorNovelsProbeMutationBatchDeleteExpected400Snackbar.
+  ///
+  /// In en, this message translates to:
+  /// **'POST …/novels/batch-delete [] → 400 (expected)'**
+  String get projectEditorNovelsProbeMutationBatchDeleteExpected400Snackbar;
+
+  /// No description provided for @projectEditorNovelsProbeMutationDeleteNovelUnexpected200Snackbar.
+  ///
+  /// In en, this message translates to:
+  /// **'POST …/novels/delete-novel: unexpected 200 OK'**
+  String get projectEditorNovelsProbeMutationDeleteNovelUnexpected200Snackbar;
+
+  /// No description provided for @projectEditorNovelsProbeMutationDeleteNovelExpected400Snackbar.
+  ///
+  /// In en, this message translates to:
+  /// **'POST …/novels/delete-novel id=0 → 400 (expected)'**
+  String get projectEditorNovelsProbeMutationDeleteNovelExpected400Snackbar;
+
+  /// No description provided for @projectEditorNovelsProbeMutationUpdateNovelNoopSnackbar.
+  ///
+  /// In en, this message translates to:
+  /// **'POST …/novels/update-novel noop #{id}: {detail}'**
+  String projectEditorNovelsProbeMutationUpdateNovelNoopSnackbar(
+    int id,
+    String detail,
+  );
+
   /// No description provided for @projectEditorNovelsWorkbenchSearchButton.
   ///
   /// In en, this message translates to:

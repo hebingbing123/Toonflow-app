@@ -44,13 +44,22 @@ extension _HomePageProjectEditorNovelWorkbenchSearchSection on _HomePageState {
                     value: '',
                     child: Text(l10n.projectEditorNovelsWorkbenchSearchIntakeStatusAll),
                   ),
-                  const DropdownMenuItem(value: 'draft', child: Text('draft')),
-                  const DropdownMenuItem(
-                    value: 'pending_review',
-                    child: Text('pending_review'),
+                  DropdownMenuItem(
+                    value: 'draft',
+                    child: Text(l10n.projectEditorNovelsIntakeStatusValueDraft),
                   ),
-                  const DropdownMenuItem(value: 'admitted', child: Text('admitted')),
-                  const DropdownMenuItem(value: 'rejected', child: Text('rejected')),
+                  DropdownMenuItem(
+                    value: 'pending_review',
+                    child: Text(l10n.projectEditorNovelsIntakeStatusValuePendingReview),
+                  ),
+                  DropdownMenuItem(
+                    value: 'admitted',
+                    child: Text(l10n.projectEditorNovelsIntakeStatusValueAdmitted),
+                  ),
+                  DropdownMenuItem(
+                    value: 'rejected',
+                    child: Text(l10n.projectEditorNovelsIntakeStatusValueRejected),
+                  ),
                 ],
                 onChanged: (value) {
                   searchIntakeStatusCtrl.text = value ?? '';
@@ -71,18 +80,21 @@ extension _HomePageProjectEditorNovelWorkbenchSearchSection on _HomePageState {
                     value: '',
                     child: Text(l10n.projectEditorNovelsWorkbenchSearchIntakeSourceAll),
                   ),
-                  const DropdownMenuItem(value: 'manual', child: Text('manual')),
-                  const DropdownMenuItem(
+                  DropdownMenuItem(
+                    value: 'manual',
+                    child: Text(l10n.projectEditorNovelsIntakeSourceValueManual),
+                  ),
+                  DropdownMenuItem(
                     value: 'whole_book_import',
-                    child: Text('whole_book_import'),
+                    child: Text(l10n.projectEditorNovelsIntakeSourceValueWholeBookImport),
                   ),
-                  const DropdownMenuItem(
+                  DropdownMenuItem(
                     value: 'crawler_client',
-                    child: Text('crawler_client'),
+                    child: Text(l10n.projectEditorNovelsIntakeSourceValueCrawlerClient),
                   ),
-                  const DropdownMenuItem(
+                  DropdownMenuItem(
                     value: 'crawler_server',
-                    child: Text('crawler_server'),
+                    child: Text(l10n.projectEditorNovelsIntakeSourceValueCrawlerServer),
                   ),
                 ],
                 onChanged: (value) {

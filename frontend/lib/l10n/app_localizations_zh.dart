@@ -6427,6 +6427,84 @@ class AppLocalizationsZh extends AppLocalizations {
   String get projectEditorNovelsWorkbenchSearchIntakeSourceAll => '全部来源';
 
   @override
+  String get projectEditorNovelsIntakeStatusValueDraft => '草稿';
+
+  @override
+  String get projectEditorNovelsIntakeStatusValuePendingReview => '待审核';
+
+  @override
+  String get projectEditorNovelsIntakeStatusValueAdmitted => '已通过';
+
+  @override
+  String get projectEditorNovelsIntakeStatusValueRejected => '已拒绝';
+
+  @override
+  String get projectEditorNovelsIntakeSourceValueManual => '手动';
+
+  @override
+  String get projectEditorNovelsIntakeSourceValueWholeBookImport => '整本导入';
+
+  @override
+  String get projectEditorNovelsIntakeSourceValueCrawlerClient => '爬虫（客户端）';
+
+  @override
+  String get projectEditorNovelsIntakeSourceValueCrawlerServer => '爬虫（服务端）';
+
+  @override
+  String get projectEditorNovelsProbeMutationGenerateEventsButton =>
+      'POST generate-events（前 3 条）';
+
+  @override
+  String get projectEditorNovelsProbeMutationAddNovelEmptyButton =>
+      'POST add-novel []';
+
+  @override
+  String get projectEditorNovelsProbeMutationBatchDeleteEmptyButton =>
+      'POST batch-delete []';
+
+  @override
+  String get projectEditorNovelsProbeMutationDeleteNovelZeroButton =>
+      'POST delete-novel id=0';
+
+  @override
+  String get projectEditorNovelsProbeMutationUpdateNovelNoopButton =>
+      'POST update-novel（空改）';
+
+  @override
+  String projectEditorNovelsProbeMutationGenerateEventsSnackbar(String detail) {
+    return 'POST …/novel-events/generate-events：$detail';
+  }
+
+  @override
+  String projectEditorNovelsProbeMutationAddNovelEmptySnackbar(String detail) {
+    return 'POST …/novels/add-novel 空 data：$detail';
+  }
+
+  @override
+  String get projectEditorNovelsProbeMutationBatchDeleteUnexpected200Snackbar =>
+      'POST …/novels/batch-delete：unexpected 200';
+
+  @override
+  String get projectEditorNovelsProbeMutationBatchDeleteExpected400Snackbar =>
+      'POST …/novels/batch-delete [] → 400（预期）';
+
+  @override
+  String get projectEditorNovelsProbeMutationDeleteNovelUnexpected200Snackbar =>
+      'POST …/novels/delete-novel：unexpected 200';
+
+  @override
+  String get projectEditorNovelsProbeMutationDeleteNovelExpected400Snackbar =>
+      'POST …/novels/delete-novel id=0 → 400（预期）';
+
+  @override
+  String projectEditorNovelsProbeMutationUpdateNovelNoopSnackbar(
+    int id,
+    String detail,
+  ) {
+    return 'POST …/novels/update-novel 空改 #$id：$detail';
+  }
+
+  @override
   String get projectEditorNovelsWorkbenchSearchButton => '搜索';
 
   @override

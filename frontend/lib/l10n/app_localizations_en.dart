@@ -6697,6 +6697,88 @@ class AppLocalizationsEn extends AppLocalizations {
   String get projectEditorNovelsWorkbenchSearchIntakeSourceAll => 'All sources';
 
   @override
+  String get projectEditorNovelsIntakeStatusValueDraft => 'Draft';
+
+  @override
+  String get projectEditorNovelsIntakeStatusValuePendingReview =>
+      'Pending review';
+
+  @override
+  String get projectEditorNovelsIntakeStatusValueAdmitted => 'Admitted';
+
+  @override
+  String get projectEditorNovelsIntakeStatusValueRejected => 'Rejected';
+
+  @override
+  String get projectEditorNovelsIntakeSourceValueManual => 'Manual';
+
+  @override
+  String get projectEditorNovelsIntakeSourceValueWholeBookImport =>
+      'Whole book import';
+
+  @override
+  String get projectEditorNovelsIntakeSourceValueCrawlerClient =>
+      'Crawler (client)';
+
+  @override
+  String get projectEditorNovelsIntakeSourceValueCrawlerServer =>
+      'Crawler (server)';
+
+  @override
+  String get projectEditorNovelsProbeMutationGenerateEventsButton =>
+      'POST generate-events (top 3)';
+
+  @override
+  String get projectEditorNovelsProbeMutationAddNovelEmptyButton =>
+      'POST add-novel []';
+
+  @override
+  String get projectEditorNovelsProbeMutationBatchDeleteEmptyButton =>
+      'POST batch-delete []';
+
+  @override
+  String get projectEditorNovelsProbeMutationDeleteNovelZeroButton =>
+      'POST delete-novel id=0';
+
+  @override
+  String get projectEditorNovelsProbeMutationUpdateNovelNoopButton =>
+      'POST update-novel (noop)';
+
+  @override
+  String projectEditorNovelsProbeMutationGenerateEventsSnackbar(String detail) {
+    return 'POST …/novel-events/generate-events: $detail';
+  }
+
+  @override
+  String projectEditorNovelsProbeMutationAddNovelEmptySnackbar(String detail) {
+    return 'POST …/novels/add-novel (empty body): $detail';
+  }
+
+  @override
+  String get projectEditorNovelsProbeMutationBatchDeleteUnexpected200Snackbar =>
+      'POST …/novels/batch-delete: unexpected 200 OK';
+
+  @override
+  String get projectEditorNovelsProbeMutationBatchDeleteExpected400Snackbar =>
+      'POST …/novels/batch-delete [] → 400 (expected)';
+
+  @override
+  String get projectEditorNovelsProbeMutationDeleteNovelUnexpected200Snackbar =>
+      'POST …/novels/delete-novel: unexpected 200 OK';
+
+  @override
+  String get projectEditorNovelsProbeMutationDeleteNovelExpected400Snackbar =>
+      'POST …/novels/delete-novel id=0 → 400 (expected)';
+
+  @override
+  String projectEditorNovelsProbeMutationUpdateNovelNoopSnackbar(
+    int id,
+    String detail,
+  ) {
+    return 'POST …/novels/update-novel noop #$id: $detail';
+  }
+
+  @override
   String get projectEditorNovelsWorkbenchSearchButton => 'Search';
 
   @override

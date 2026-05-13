@@ -5092,6 +5092,50 @@
   "projectEditorNovelsWorkbenchSearchIntakeStatusAll": "全部状态",
   "projectEditorNovelsWorkbenchSearchIntakeSourceLabel": "接入来源",
   "projectEditorNovelsWorkbenchSearchIntakeSourceAll": "全部来源",
+  "projectEditorNovelsIntakeStatusValueDraft": "草稿",
+  "projectEditorNovelsIntakeStatusValuePendingReview": "待审核",
+  "projectEditorNovelsIntakeStatusValueAdmitted": "已通过",
+  "projectEditorNovelsIntakeStatusValueRejected": "已拒绝",
+  "projectEditorNovelsIntakeSourceValueManual": "手动",
+  "projectEditorNovelsIntakeSourceValueWholeBookImport": "整本导入",
+  "projectEditorNovelsIntakeSourceValueCrawlerClient": "爬虫（客户端）",
+  "projectEditorNovelsIntakeSourceValueCrawlerServer": "爬虫（服务端）",
+  "projectEditorNovelsProbeMutationGenerateEventsButton": "POST generate-events（前 3 条）",
+  "projectEditorNovelsProbeMutationAddNovelEmptyButton": "POST add-novel []",
+  "projectEditorNovelsProbeMutationBatchDeleteEmptyButton": "POST batch-delete []",
+  "projectEditorNovelsProbeMutationDeleteNovelZeroButton": "POST delete-novel id=0",
+  "projectEditorNovelsProbeMutationUpdateNovelNoopButton": "POST update-novel（空改）",
+  "projectEditorNovelsProbeMutationGenerateEventsSnackbar": "POST …/novel-events/generate-events：{detail}",
+  "@projectEditorNovelsProbeMutationGenerateEventsSnackbar": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsProbeMutationAddNovelEmptySnackbar": "POST …/novels/add-novel 空 data：{detail}",
+  "@projectEditorNovelsProbeMutationAddNovelEmptySnackbar": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsProbeMutationBatchDeleteUnexpected200Snackbar": "POST …/novels/batch-delete：unexpected 200",
+  "projectEditorNovelsProbeMutationBatchDeleteExpected400Snackbar": "POST …/novels/batch-delete [] → 400（预期）",
+  "projectEditorNovelsProbeMutationDeleteNovelUnexpected200Snackbar": "POST …/novels/delete-novel：unexpected 200",
+  "projectEditorNovelsProbeMutationDeleteNovelExpected400Snackbar": "POST …/novels/delete-novel id=0 → 400（预期）",
+  "projectEditorNovelsProbeMutationUpdateNovelNoopSnackbar": "POST …/novels/update-novel 空改 #{id}：{detail}",
+  "@projectEditorNovelsProbeMutationUpdateNovelNoopSnackbar": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      },
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
   "projectEditorNovelsWorkbenchSearchButton": "搜索",
   "projectEditorNovelsWorkbenchSearchClearFilters": "清空筛选",
   "projectEditorNovelsWorkbenchSearchRefreshList": "刷新列表",

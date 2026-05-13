@@ -5092,6 +5092,50 @@
   "projectEditorNovelsWorkbenchSearchIntakeStatusAll": "All statuses",
   "projectEditorNovelsWorkbenchSearchIntakeSourceLabel": "Intake source",
   "projectEditorNovelsWorkbenchSearchIntakeSourceAll": "All sources",
+  "projectEditorNovelsIntakeStatusValueDraft": "Draft",
+  "projectEditorNovelsIntakeStatusValuePendingReview": "Pending review",
+  "projectEditorNovelsIntakeStatusValueAdmitted": "Admitted",
+  "projectEditorNovelsIntakeStatusValueRejected": "Rejected",
+  "projectEditorNovelsIntakeSourceValueManual": "Manual",
+  "projectEditorNovelsIntakeSourceValueWholeBookImport": "Whole book import",
+  "projectEditorNovelsIntakeSourceValueCrawlerClient": "Crawler (client)",
+  "projectEditorNovelsIntakeSourceValueCrawlerServer": "Crawler (server)",
+  "projectEditorNovelsProbeMutationGenerateEventsButton": "POST generate-events (top 3)",
+  "projectEditorNovelsProbeMutationAddNovelEmptyButton": "POST add-novel []",
+  "projectEditorNovelsProbeMutationBatchDeleteEmptyButton": "POST batch-delete []",
+  "projectEditorNovelsProbeMutationDeleteNovelZeroButton": "POST delete-novel id=0",
+  "projectEditorNovelsProbeMutationUpdateNovelNoopButton": "POST update-novel (noop)",
+  "projectEditorNovelsProbeMutationGenerateEventsSnackbar": "POST …/novel-events/generate-events: {detail}",
+  "@projectEditorNovelsProbeMutationGenerateEventsSnackbar": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsProbeMutationAddNovelEmptySnackbar": "POST …/novels/add-novel (empty body): {detail}",
+  "@projectEditorNovelsProbeMutationAddNovelEmptySnackbar": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorNovelsProbeMutationBatchDeleteUnexpected200Snackbar": "POST …/novels/batch-delete: unexpected 200 OK",
+  "projectEditorNovelsProbeMutationBatchDeleteExpected400Snackbar": "POST …/novels/batch-delete [] → 400 (expected)",
+  "projectEditorNovelsProbeMutationDeleteNovelUnexpected200Snackbar": "POST …/novels/delete-novel: unexpected 200 OK",
+  "projectEditorNovelsProbeMutationDeleteNovelExpected400Snackbar": "POST …/novels/delete-novel id=0 → 400 (expected)",
+  "projectEditorNovelsProbeMutationUpdateNovelNoopSnackbar": "POST …/novels/update-novel noop #{id}: {detail}",
+  "@projectEditorNovelsProbeMutationUpdateNovelNoopSnackbar": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      },
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
   "projectEditorNovelsWorkbenchSearchButton": "Search",
   "projectEditorNovelsWorkbenchSearchClearFilters": "Clear filters",
   "projectEditorNovelsWorkbenchSearchRefreshList": "Refresh list",

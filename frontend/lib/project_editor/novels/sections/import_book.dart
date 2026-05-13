@@ -365,14 +365,23 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
                   labelText:
                       l10n.projectEditorNovelsWorkbenchImportIntakeStatusAfterImportLabel,
                 ),
-                items: const [
-                  DropdownMenuItem(value: 'draft', child: Text('draft')),
+                items: [
+                  DropdownMenuItem(
+                    value: 'draft',
+                    child: Text(l10n.projectEditorNovelsIntakeStatusValueDraft),
+                  ),
                   DropdownMenuItem(
                     value: 'pending_review',
-                    child: Text('pending_review'),
+                    child: Text(l10n.projectEditorNovelsIntakeStatusValuePendingReview),
                   ),
-                  DropdownMenuItem(value: 'admitted', child: Text('admitted')),
-                  DropdownMenuItem(value: 'rejected', child: Text('rejected')),
+                  DropdownMenuItem(
+                    value: 'admitted',
+                    child: Text(l10n.projectEditorNovelsIntakeStatusValueAdmitted),
+                  ),
+                  DropdownMenuItem(
+                    value: 'rejected',
+                    child: Text(l10n.projectEditorNovelsIntakeStatusValueRejected),
+                  ),
                 ],
                 onChanged: (value) {
                   importIntakeStatusCtrl.text = value ?? 'pending_review';

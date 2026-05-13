@@ -15,6 +15,7 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
         onPressed: disabled || novelsRef[0] == null || novelsRef[0]!.items.isEmpty
             ? null
             : () async {
+                final l10n = AppLocalizations.of(ctx)!;
                 setDialogState(() => novelsBusy[0] = true);
                 try {
                   final ids = novelsRef[0]!.items.map((e) => e.numericId).toList();
@@ -26,7 +27,7 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
                   if (!ctx.mounted) return;
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
-                      content: Text('POST …/novel-events/generate-events：$msg'),
+                      content: Text(l10n.projectEditorNovelsProbeMutationGenerateEventsSnackbar(msg)),
                     ),
                   );
                 } on RustApiException catch (e) {
@@ -41,12 +42,13 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
                   }
                 }
               },
-        child: const Text('POST events/generate-events'),
+        child: Text(AppLocalizations.of(ctx)!.projectEditorNovelsProbeMutationGenerateEventsButton),
       ),
       TextButton(
         onPressed: disabled
             ? null
             : () async {
+                final l10n = AppLocalizations.of(ctx)!;
                 setDialogState(() => novelsBusy[0] = true);
                 try {
                   final msg = await appendNovelsUnderProject(
@@ -56,7 +58,9 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
                   );
                   if (!ctx.mounted) return;
                   ScaffoldMessenger.of(ctx).showSnackBar(
-                    SnackBar(content: Text('POST …/novels/add-novel 空 data：$msg')),
+                    SnackBar(
+                      content: Text(l10n.projectEditorNovelsProbeMutationAddNovelEmptySnackbar(msg)),
+                    ),
                   );
                 } on RustApiException catch (e) {
                   if (ctx.mounted) {
@@ -70,28 +74,29 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
                   }
                 }
               },
-        child: const Text('POST add-novel []'),
+        child: Text(AppLocalizations.of(ctx)!.projectEditorNovelsProbeMutationAddNovelEmptyButton),
       ),
       TextButton(
         onPressed: disabled
             ? null
             : () async {
+                final l10n = AppLocalizations.of(ctx)!;
                 setDialogState(() => novelsBusy[0] = true);
                 try {
                   await batchDeleteNovelsUnderProject(token, p.id, const []);
                   if (!ctx.mounted) return;
                   ScaffoldMessenger.of(ctx).showSnackBar(
-                    const SnackBar(
-                      content: Text('POST …/novels/batch-delete：unexpected 200'),
+                    SnackBar(
+                      content: Text(l10n.projectEditorNovelsProbeMutationBatchDeleteUnexpected200Snackbar),
                     ),
                   );
                 } on RustApiException catch (e) {
                   if (!ctx.mounted) return;
                   if (e.statusCode == 400) {
                     ScaffoldMessenger.of(ctx).showSnackBar(
-                      const SnackBar(
+                      SnackBar(
                         content: Text(
-                          'POST …/novels/batch-delete [] -> 400 (expected)',
+                          l10n.projectEditorNovelsProbeMutationBatchDeleteExpected400Snackbar,
                         ),
                       ),
                     );
@@ -106,28 +111,29 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
                   }
                 }
               },
-        child: const Text('POST batch-delete []'),
+        child: Text(AppLocalizations.of(ctx)!.projectEditorNovelsProbeMutationBatchDeleteEmptyButton),
       ),
       TextButton(
         onPressed: disabled
             ? null
             : () async {
+                final l10n = AppLocalizations.of(ctx)!;
                 setDialogState(() => novelsBusy[0] = true);
                 try {
                   await deleteNovelByProjectUuid(token, p.id, 0);
                   if (!ctx.mounted) return;
                   ScaffoldMessenger.of(ctx).showSnackBar(
-                    const SnackBar(
-                      content: Text('POST …/novels/delete-novel：unexpected 200'),
+                    SnackBar(
+                      content: Text(l10n.projectEditorNovelsProbeMutationDeleteNovelUnexpected200Snackbar),
                     ),
                   );
                 } on RustApiException catch (e) {
                   if (!ctx.mounted) return;
                   if (e.statusCode == 400) {
                     ScaffoldMessenger.of(ctx).showSnackBar(
-                      const SnackBar(
+                      SnackBar(
                         content: Text(
-                          'POST …/novels/delete-novel id=0 -> 400 (expected)',
+                          l10n.projectEditorNovelsProbeMutationDeleteNovelExpected400Snackbar,
                         ),
                       ),
                     );
@@ -142,12 +148,13 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
                   }
                 }
               },
-        child: const Text('POST delete-novel id=0'),
+        child: Text(AppLocalizations.of(ctx)!.projectEditorNovelsProbeMutationDeleteNovelZeroButton),
       ),
       TextButton(
         onPressed: disabled || novelsRef[0] == null || novelsRef[0]!.items.isEmpty
             ? null
             : () async {
+                final l10n = AppLocalizations.of(ctx)!;
                 setDialogState(() => novelsBusy[0] = true);
                 final n = novelsRef[0]!.items.first;
                 try {
@@ -165,7 +172,7 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'POST …/novels/update-novel noop #${n.numericId}：$msg',
+                        l10n.projectEditorNovelsProbeMutationUpdateNovelNoopSnackbar(n.numericId, msg),
                       ),
                     ),
                   );
@@ -181,7 +188,7 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
                   }
                 }
               },
-        child: const Text('POST update-novel (noop)'),
+        child: Text(AppLocalizations.of(ctx)!.projectEditorNovelsProbeMutationUpdateNovelNoopButton),
       ),
     ];
   }
