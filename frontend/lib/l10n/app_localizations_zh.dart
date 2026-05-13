@@ -11081,6 +11081,74 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shortVideoPreviewPlaylistComplete => '已播放完全部镜头';
 
   @override
+  String get shortVideoPreviewPlayerVideoUrlEmpty => '视频 URL 为空';
+
+  @override
+  String shortVideoPreviewPlayerLoadFailed(String error) {
+    return '视频加载失败：$error';
+  }
+
+  @override
+  String shortVideoPreviewPlayerShotLabel(int number) {
+    return '镜头 #$number';
+  }
+
+  @override
+  String get shortVideoPreviewPlayerOverallProgress => '总进度';
+
+  @override
+  String get shortVideoPreviewPlayerPreviousShot => '上一个镜头';
+
+  @override
+  String get shortVideoPreviewPlayerNextShot => '下一个镜头';
+
+  @override
+  String get shortVideoPreviewPlayerStop => '停止';
+
+  @override
+  String get shortVideoPreviewPlayerPlay => '播放';
+
+  @override
+  String get shortVideoPreviewPlayerPause => '暂停';
+
+  @override
+  String get shortVideoProductionBatchNoStoryboards => '还没有分镜，无法批量生成候选成片。';
+
+  @override
+  String get shortVideoProductionBatchNoScripts => '项目下没有剧本行，请先在项目区创建剧本后再试。';
+
+  @override
+  String shortVideoProductionBatchQueued(
+    int total,
+    int trackId,
+    String resolution,
+    int durationSeconds,
+    int skipped,
+  ) {
+    return '已排队 $total 条候选视频任务（轨道 #$trackId，$resolution，${durationSeconds}s）；跳过 $skipped 镜。';
+  }
+
+  @override
+  String shortVideoProductionBatchFailed(String error) {
+    return '批量候选成片失败：$error';
+  }
+
+  @override
+  String shortVideoProductionSetCurrentConfirming(int id) {
+    return '正在确认分镜 #$id 的当前视频版本…';
+  }
+
+  @override
+  String shortVideoProductionSetCurrentDone(int id) {
+    return '已确认分镜 #$id 的当前视频版本。';
+  }
+
+  @override
+  String shortVideoProductionSetCurrentFailed(String error) {
+    return '设当前失败：$error';
+  }
+
+  @override
   String get shortVideoBatchThrottleMessage => '操作过于频繁，请稍后再试。';
 
   @override

@@ -8732,6 +8732,83 @@
     }
   },
   "shortVideoPreviewPlaylistComplete": "Finished playing all shots",
+  "shortVideoPreviewPlayerVideoUrlEmpty": "Video URL is empty",
+  "shortVideoPreviewPlayerLoadFailed": "Failed to load video: {error}",
+  "@shortVideoPreviewPlayerLoadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPreviewPlayerShotLabel": "Shot #{number}",
+  "@shortVideoPreviewPlayerShotLabel": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPreviewPlayerOverallProgress": "Overall progress",
+  "shortVideoPreviewPlayerPreviousShot": "Previous shot",
+  "shortVideoPreviewPlayerNextShot": "Next shot",
+  "shortVideoPreviewPlayerStop": "Stop",
+  "shortVideoPreviewPlayerPlay": "Play",
+  "shortVideoPreviewPlayerPause": "Pause",
+  "shortVideoProductionBatchNoStoryboards": "No storyboards yet; cannot batch-generate candidate clips.",
+  "shortVideoProductionBatchNoScripts": "No script rows under this project; create a script in the project area first.",
+  "shortVideoProductionBatchQueued": "Queued {total} candidate video jobs (track #{trackId}, {resolution}, {durationSeconds}s); skipped {skipped} shots.",
+  "@shortVideoProductionBatchQueued": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "trackId": {
+        "type": "int"
+      },
+      "resolution": {
+        "type": "String"
+      },
+      "durationSeconds": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoProductionBatchFailed": "Batch candidate clips failed: {error}",
+  "@shortVideoProductionBatchFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoProductionSetCurrentConfirming": "Confirming current video version for shot #{id}…",
+  "@shortVideoProductionSetCurrentConfirming": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoProductionSetCurrentDone": "Confirmed current video version for shot #{id}.",
+  "@shortVideoProductionSetCurrentDone": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoProductionSetCurrentFailed": "Set current failed: {error}",
+  "@shortVideoProductionSetCurrentFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "shortVideoBatchThrottleMessage": "You're doing that too often. Wait a moment and try again.",
   "shortVideoBatchSelectAll": "Select all",
   "shortVideoBatchDeselectAll": "Deselect all",

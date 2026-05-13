@@ -162,7 +162,7 @@ void main() {
 
       await tester.pump();
 
-      expect(find.text('镜头 #5'), findsOneWidget);
+      expect(find.text('Shot #5'), findsOneWidget);
     });
 
     testWidgets('should display shot title when provided', (WidgetTester tester) async {
@@ -415,7 +415,7 @@ void main() {
       await tester.pump();
 
       // Should show total progress indicator
-      expect(find.text('总进度'), findsOneWidget);
+      expect(find.text('Overall progress'), findsOneWidget);
       expect(find.byIcon(Icons.playlist_play), findsOneWidget);
     });
 
@@ -472,7 +472,7 @@ void main() {
       await tester.pump();
 
       // Initially should show shot 1
-      expect(find.text('镜头 #1'), findsOneWidget);
+      expect(find.text('Shot #1'), findsOneWidget);
       expect(find.text('Shot 1'), findsOneWidget);
     });
 
@@ -524,7 +524,7 @@ void main() {
 
       // Should show error icon and message
       expect(find.byIcon(Icons.error_outline), findsOneWidget);
-      expect(find.text('视频 URL 为空'), findsOneWidget);
+      expect(find.text('Video URL is empty'), findsOneWidget);
     });
 
     testWidgets('should display error icon in error state', (WidgetTester tester) async {
@@ -693,7 +693,7 @@ void main() {
       await tester.tap(find.text('Show Dialog'));
       await tester.pumpAndSettle();
 
-      expect(find.text('关闭'), findsOneWidget);
+      expect(find.text('Close'), findsOneWidget);
     });
 
     testWidgets('should close dialog when close button tapped', (WidgetTester tester) async {
@@ -722,10 +722,10 @@ void main() {
       expect(find.byType(Dialog), findsOneWidget);
 
       // Use ensureVisible to scroll the close button into view if needed
-      await tester.ensureVisible(find.text('关闭'));
+      await tester.ensureVisible(find.text('Close'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('关闭'), warnIfMissed: false);
+      await tester.tap(find.text('Close'), warnIfMissed: false);
       await tester.pumpAndSettle();
 
       expect(find.byType(Dialog), findsNothing);

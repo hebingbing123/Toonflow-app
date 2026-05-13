@@ -14,7 +14,8 @@ extension _ShortVideoSpaceSectionProductionExtension
     }
     if ((stats?.storyboardCount ?? 0) <= 0) {
       setState(() {
-        _projectConfigLine = '还没有分镜，无法批量生成候选成片。';
+        _projectConfigLine =
+            AppLocalizations.of(context)!.shortVideoProductionBatchNoStoryboards;
       });
       return;
     }
@@ -30,7 +31,8 @@ extension _ShortVideoSpaceSectionProductionExtension
       if (detail.scripts.isEmpty) {
         setState(() {
           _batchCandidateBusy = false;
-          _projectConfigLine = '项目下没有剧本行，请先在项目区创建剧本后再试。';
+          _projectConfigLine =
+              AppLocalizations.of(context)!.shortVideoProductionBatchNoScripts;
         });
         return;
       }
@@ -43,10 +45,16 @@ extension _ShortVideoSpaceSectionProductionExtension
       if (!mounted) {
         return;
       }
+      final l10nQueued = AppLocalizations.of(context)!;
       setState(() {
         _batchCandidateBusy = false;
-        _projectConfigLine =
-            '已排队 ${res.generation.total} 条候选视频任务（轨道 #${res.appliedDefaults.trackId}，${res.appliedDefaults.resolution}，${res.appliedDefaults.duration}s）；跳过 ${res.skipped.length} 镜。';
+        _projectConfigLine = l10nQueued.shortVideoProductionBatchQueued(
+          res.generation.total,
+          res.appliedDefaults.trackId,
+          res.appliedDefaults.resolution,
+          res.appliedDefaults.duration,
+          res.skipped.length,
+        );
       });
       await _loadProjectOverview();
     } on RustApiException catch (e) {
@@ -55,7 +63,8 @@ extension _ShortVideoSpaceSectionProductionExtension
       }
       setState(() {
         _batchCandidateBusy = false;
-        _projectConfigLine = '批量候选成片失败：${e.statusCode ?? '-'}';
+        _projectConfigLine = AppLocalizations.of(context)!
+            .shortVideoProductionBatchFailed('${e.statusCode ?? '-'}');
       });
     } catch (e) {
       if (!mounted) {
@@ -63,7 +72,8 @@ extension _ShortVideoSpaceSectionProductionExtension
       }
       setState(() {
         _batchCandidateBusy = false;
-        _projectConfigLine = '批量候选成片失败：$e';
+        _projectConfigLine =
+            AppLocalizations.of(context)!.shortVideoProductionBatchFailed('$e');
       });
     }
   }
@@ -390,7 +400,10 @@ extension _ShortVideoSpaceSectionProductionExtension
       return;
     }
     setState(() {
-      _projectConfigLine = '正在确认分镜 #${row.id} 的当前视频版本…';
+      _projectConfigLine =
+          AppLocalizations.of(context)!.shortVideoProductionSetCurrentConfirming(
+            row.id,
+          );
     });
     try {
       await postWorkbenchStoryboardMediaOpV1(
@@ -408,18 +421,25 @@ extension _ShortVideoSpaceSectionProductionExtension
       );
       if (!mounted) return;
       setState(() {
-        _projectConfigLine = '已确认分镜 #${row.id} 的当前视频版本。';
+        _projectConfigLine =
+            AppLocalizations.of(context)!.shortVideoProductionSetCurrentDone(
+              row.id,
+            );
       });
       await _loadProjectOverview();
     } on RustApiException catch (e) {
       if (!mounted) return;
       setState(() {
-        _projectConfigLine = '设当前失败：${e.statusCode ?? '-'}';
+        _projectConfigLine = AppLocalizations.of(context)!
+            .shortVideoProductionSetCurrentFailed('${e.statusCode ?? '-'}');
       });
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _projectConfigLine = '设当前失败：$e';
+        _projectConfigLine =
+            AppLocalizations.of(context)!.shortVideoProductionSetCurrentFailed(
+              '$e',
+            );
       });
     }
   }

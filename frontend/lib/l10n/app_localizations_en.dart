@@ -11605,6 +11605,76 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shortVideoPreviewPlaylistComplete => 'Finished playing all shots';
 
   @override
+  String get shortVideoPreviewPlayerVideoUrlEmpty => 'Video URL is empty';
+
+  @override
+  String shortVideoPreviewPlayerLoadFailed(String error) {
+    return 'Failed to load video: $error';
+  }
+
+  @override
+  String shortVideoPreviewPlayerShotLabel(int number) {
+    return 'Shot #$number';
+  }
+
+  @override
+  String get shortVideoPreviewPlayerOverallProgress => 'Overall progress';
+
+  @override
+  String get shortVideoPreviewPlayerPreviousShot => 'Previous shot';
+
+  @override
+  String get shortVideoPreviewPlayerNextShot => 'Next shot';
+
+  @override
+  String get shortVideoPreviewPlayerStop => 'Stop';
+
+  @override
+  String get shortVideoPreviewPlayerPlay => 'Play';
+
+  @override
+  String get shortVideoPreviewPlayerPause => 'Pause';
+
+  @override
+  String get shortVideoProductionBatchNoStoryboards =>
+      'No storyboards yet; cannot batch-generate candidate clips.';
+
+  @override
+  String get shortVideoProductionBatchNoScripts =>
+      'No script rows under this project; create a script in the project area first.';
+
+  @override
+  String shortVideoProductionBatchQueued(
+    int total,
+    int trackId,
+    String resolution,
+    int durationSeconds,
+    int skipped,
+  ) {
+    return 'Queued $total candidate video jobs (track #$trackId, $resolution, ${durationSeconds}s); skipped $skipped shots.';
+  }
+
+  @override
+  String shortVideoProductionBatchFailed(String error) {
+    return 'Batch candidate clips failed: $error';
+  }
+
+  @override
+  String shortVideoProductionSetCurrentConfirming(int id) {
+    return 'Confirming current video version for shot #$id…';
+  }
+
+  @override
+  String shortVideoProductionSetCurrentDone(int id) {
+    return 'Confirmed current video version for shot #$id.';
+  }
+
+  @override
+  String shortVideoProductionSetCurrentFailed(String error) {
+    return 'Set current failed: $error';
+  }
+
+  @override
   String get shortVideoBatchThrottleMessage =>
       'You\'re doing that too often. Wait a moment and try again.';
 

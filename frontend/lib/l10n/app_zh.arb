@@ -8692,6 +8692,83 @@
     }
   },
   "shortVideoPreviewPlaylistComplete": "已播放完全部镜头",
+  "shortVideoPreviewPlayerVideoUrlEmpty": "视频 URL 为空",
+  "shortVideoPreviewPlayerLoadFailed": "视频加载失败：{error}",
+  "@shortVideoPreviewPlayerLoadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPreviewPlayerShotLabel": "镜头 #{number}",
+  "@shortVideoPreviewPlayerShotLabel": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPreviewPlayerOverallProgress": "总进度",
+  "shortVideoPreviewPlayerPreviousShot": "上一个镜头",
+  "shortVideoPreviewPlayerNextShot": "下一个镜头",
+  "shortVideoPreviewPlayerStop": "停止",
+  "shortVideoPreviewPlayerPlay": "播放",
+  "shortVideoPreviewPlayerPause": "暂停",
+  "shortVideoProductionBatchNoStoryboards": "还没有分镜，无法批量生成候选成片。",
+  "shortVideoProductionBatchNoScripts": "项目下没有剧本行，请先在项目区创建剧本后再试。",
+  "shortVideoProductionBatchQueued": "已排队 {total} 条候选视频任务（轨道 #{trackId}，{resolution}，{durationSeconds}s）；跳过 {skipped} 镜。",
+  "@shortVideoProductionBatchQueued": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "trackId": {
+        "type": "int"
+      },
+      "resolution": {
+        "type": "String"
+      },
+      "durationSeconds": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoProductionBatchFailed": "批量候选成片失败：{error}",
+  "@shortVideoProductionBatchFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoProductionSetCurrentConfirming": "正在确认分镜 #{id} 的当前视频版本…",
+  "@shortVideoProductionSetCurrentConfirming": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoProductionSetCurrentDone": "已确认分镜 #{id} 的当前视频版本。",
+  "@shortVideoProductionSetCurrentDone": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoProductionSetCurrentFailed": "设当前失败：{error}",
+  "@shortVideoProductionSetCurrentFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "shortVideoBatchThrottleMessage": "操作过于频繁，请稍后再试。",
   "shortVideoBatchSelectAll": "全选",
   "shortVideoBatchDeselectAll": "取消全选",

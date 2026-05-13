@@ -1,7 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../l10n/app_localizations.dart';
+
+AppLocalizations _previewPlayerL10n(BuildContext context) =>
+    AppLocalizations.of(context) ?? lookupAppLocalizations(const Locale('en'));
 
 /// 播放列表项，用于连续播放
 class ShotPreviewItem {
@@ -112,7 +117,11 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
     if (_isPlaylistMode) {
       _shotDurations = List.filled(widget.playlist!.length, Duration.zero);
     }
-    _initializePlayer();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        unawaited(_initializePlayer());
+      }
+    });
   }
 
   @override
@@ -160,9 +169,11 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
     });
 
     if (_currentVideoUrl.isEmpty) {
+      if (!mounted) return;
+      final l10n = _previewPlayerL10n(context);
       setState(() {
         _hasError = true;
-        _errorMessage = '视频 URL 为空';
+        _errorMessage = l10n.shortVideoPreviewPlayerVideoUrlEmpty;
       });
       return;
     }
@@ -199,9 +210,10 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
       }
     } catch (e) {
       if (!mounted) return;
+      final l10n = _previewPlayerL10n(context);
       setState(() {
         _hasError = true;
-        _errorMessage = '视频加载失败：$e';
+        _errorMessage = l10n.shortVideoPreviewPlayerLoadFailed('$e');
       });
     }
   }
@@ -410,6 +422,7 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = _previewPlayerL10n(context);
     return LayoutBuilder(
       builder: (context, constraints) => SingleChildScrollView(
         child: ConstrainedBox(
@@ -440,7 +453,9 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          '镜头 #$_currentShotNumber',
+                          l10n.shortVideoPreviewPlayerShotLabel(
+                            _currentShotNumber!,
+                          ),
                           style: Theme.of(context).textTheme.titleSmall
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
@@ -503,7 +518,7 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
                 color: Colors.black,
                 child: AspectRatio(
                   aspectRatio: 16 / 9,
-                  child: _buildVideoContent(),
+                  child: _buildVideoContent(context),
                 ),
               ),
 
@@ -530,7 +545,7 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            '总进度',
+                            l10n.shortVideoPreviewPlayerOverallProgress,
                             style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(
                                   color: Theme.of(
@@ -633,7 +648,7 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
                                 ? _playPreviousShot
                                 : null,
                             icon: const Icon(Icons.skip_previous),
-                            tooltip: '上一个镜头',
+                            tooltip: l10n.shortVideoPreviewPlayerPreviousShot,
                           ),
                           const SizedBox(width: 8),
                         ],
@@ -641,7 +656,7 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
                         IconButton(
                           onPressed: _isInitialized ? _stop : null,
                           icon: const Icon(Icons.stop),
-                          tooltip: '停止',
+                          tooltip: l10n.shortVideoPreviewPlayerStop,
                         ),
                         const SizedBox(width: 8),
                         IconButton(
@@ -650,7 +665,9 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
                             _isPlaying ? Icons.pause : Icons.play_arrow,
                           ),
                           iconSize: 32,
-                          tooltip: _isPlaying ? '暂停' : '播放',
+                          tooltip: _isPlaying
+                              ? l10n.shortVideoPreviewPlayerPause
+                              : l10n.shortVideoPreviewPlayerPlay,
                         ),
 
                         // 下一个镜头按钮（仅在播放列表模式下显示）
@@ -662,7 +679,7 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
                                 ? _playNextShot
                                 : null,
                             icon: const Icon(Icons.skip_next),
-                            tooltip: '下一个镜头',
+                            tooltip: l10n.shortVideoPreviewPlayerNextShot,
                           ),
                         ],
                       ],
@@ -677,7 +694,8 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
     );
   }
 
-  Widget _buildVideoContent() {
+  Widget _buildVideoContent(BuildContext context) {
+    final l10n = _previewPlayerL10n(context);
     if (_hasError) {
       return Center(
         child: Column(
@@ -690,11 +708,7 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
             ),
             const SizedBox(height: 16),
             Text(
-              _errorMessage ??
-                  (AppLocalizations.of(
-                        context,
-                      )?.shortVideoSpacePreviewVideoLoadFailed ??
-                      'Failed to load video'),
+              _errorMessage ?? l10n.shortVideoSpacePreviewVideoLoadFailed,
               style: TextStyle(color: Theme.of(context).colorScheme.error),
               textAlign: TextAlign.center,
             ),
@@ -764,7 +778,7 @@ class PreviewPlayerDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = _previewPlayerL10n(context);
     return Dialog(
       child: ConstrainedBox(
         constraints: BoxConstraints(

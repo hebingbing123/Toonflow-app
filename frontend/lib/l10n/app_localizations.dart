@@ -18053,6 +18053,108 @@ abstract class AppLocalizations {
   /// **'Finished playing all shots'**
   String get shortVideoPreviewPlaylistComplete;
 
+  /// No description provided for @shortVideoPreviewPlayerVideoUrlEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Video URL is empty'**
+  String get shortVideoPreviewPlayerVideoUrlEmpty;
+
+  /// No description provided for @shortVideoPreviewPlayerLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load video: {error}'**
+  String shortVideoPreviewPlayerLoadFailed(String error);
+
+  /// No description provided for @shortVideoPreviewPlayerShotLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Shot #{number}'**
+  String shortVideoPreviewPlayerShotLabel(int number);
+
+  /// No description provided for @shortVideoPreviewPlayerOverallProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Overall progress'**
+  String get shortVideoPreviewPlayerOverallProgress;
+
+  /// No description provided for @shortVideoPreviewPlayerPreviousShot.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous shot'**
+  String get shortVideoPreviewPlayerPreviousShot;
+
+  /// No description provided for @shortVideoPreviewPlayerNextShot.
+  ///
+  /// In en, this message translates to:
+  /// **'Next shot'**
+  String get shortVideoPreviewPlayerNextShot;
+
+  /// No description provided for @shortVideoPreviewPlayerStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get shortVideoPreviewPlayerStop;
+
+  /// No description provided for @shortVideoPreviewPlayerPlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Play'**
+  String get shortVideoPreviewPlayerPlay;
+
+  /// No description provided for @shortVideoPreviewPlayerPause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get shortVideoPreviewPlayerPause;
+
+  /// No description provided for @shortVideoProductionBatchNoStoryboards.
+  ///
+  /// In en, this message translates to:
+  /// **'No storyboards yet; cannot batch-generate candidate clips.'**
+  String get shortVideoProductionBatchNoStoryboards;
+
+  /// No description provided for @shortVideoProductionBatchNoScripts.
+  ///
+  /// In en, this message translates to:
+  /// **'No script rows under this project; create a script in the project area first.'**
+  String get shortVideoProductionBatchNoScripts;
+
+  /// No description provided for @shortVideoProductionBatchQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Queued {total} candidate video jobs (track #{trackId}, {resolution}, {durationSeconds}s); skipped {skipped} shots.'**
+  String shortVideoProductionBatchQueued(
+    int total,
+    int trackId,
+    String resolution,
+    int durationSeconds,
+    int skipped,
+  );
+
+  /// No description provided for @shortVideoProductionBatchFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch candidate clips failed: {error}'**
+  String shortVideoProductionBatchFailed(String error);
+
+  /// No description provided for @shortVideoProductionSetCurrentConfirming.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirming current video version for shot #{id}…'**
+  String shortVideoProductionSetCurrentConfirming(int id);
+
+  /// No description provided for @shortVideoProductionSetCurrentDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed current video version for shot #{id}.'**
+  String shortVideoProductionSetCurrentDone(int id);
+
+  /// No description provided for @shortVideoProductionSetCurrentFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Set current failed: {error}'**
+  String shortVideoProductionSetCurrentFailed(String error);
+
   /// No description provided for @shortVideoBatchThrottleMessage.
   ///
   /// In en, this message translates to:
