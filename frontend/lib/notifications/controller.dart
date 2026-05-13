@@ -254,6 +254,14 @@ class NotificationsController extends ChangeNotifier {
     _onErrorChanged(error);
   }
 
+  void _reportRustOrDescribe(Object error) {
+    if (error is RustApiException) {
+      reportRustApiError(error, onErrorChanged: _setError);
+    } else {
+      _setError(describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error));
+    }
+  }
+
   Future<void> prime() async {
     final token = _accessToken;
     if (token == null) {
@@ -281,10 +289,8 @@ class NotificationsController extends ChangeNotifier {
       final envelope = await fetchNotificationPreferencesExportV1(token);
       _preferences = envelope.preferences;
       _preferencesAudit = envelope.audit;
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError(describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error));
+      _reportRustOrDescribe(error);
     } finally {
       loadingPreferences = false;
       notifyListeners();
@@ -386,14 +392,8 @@ class NotificationsController extends ChangeNotifier {
       workspaceSharedExportHistoryHasMore = hasMore;
       workspaceSharedExportHistoryNextOffset =
           nextOffset ?? (offset + items.length);
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
-      if (offset == 0) {
-        workspaceSharedAuditExports =
-            const <WorkspaceSharedComplianceAuditExportRecordV1>[];
-      }
     } catch (error) {
-      _setError(describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error));
+      _reportRustOrDescribe(error);
       if (offset == 0) {
         workspaceSharedAuditExports =
             const <WorkspaceSharedComplianceAuditExportRecordV1>[];
@@ -476,11 +476,8 @@ class NotificationsController extends ChangeNotifier {
         );
         _setError(null);
         return path;
-      } on RustApiException catch (error) {
-        reportRustApiError(error, onErrorChanged: _setError);
-        return null;
       } catch (error) {
-        _setError(describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error));
+        _reportRustOrDescribe(error);
         return null;
       } finally {
         await reloadExportHistory();
@@ -514,11 +511,8 @@ class NotificationsController extends ChangeNotifier {
       );
       _setError(null);
       return path;
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
-      return null;
     } catch (error) {
-      _setError(describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error));
+      _reportRustOrDescribe(error);
       return null;
     } finally {
       await reloadExportHistory();
@@ -552,11 +546,8 @@ class NotificationsController extends ChangeNotifier {
           );
       _setError(null);
       return job;
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
-      return null;
     } catch (error) {
-      _setError(describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error));
+      _reportRustOrDescribe(error);
       return null;
     } finally {
       enqueueingWorkspaceSharedAuditAsyncExport = false;
@@ -673,10 +664,8 @@ class NotificationsController extends ChangeNotifier {
       workspaceSharedAuditHasMore = hasMore;
       workspaceSharedAuditNextOffset = nextOffset ?? items.length;
       _setError(null);
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError(describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error));
+      _reportRustOrDescribe(error);
     } finally {
       loadingWorkspaceSharedAudit = false;
       notifyListeners();
@@ -706,10 +695,8 @@ class NotificationsController extends ChangeNotifier {
       workspaceSharedAuditNextOffset =
           nextOffset ?? (workspaceSharedAuditNextOffset + items.length);
       _setError(null);
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError(describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error));
+      _reportRustOrDescribe(error);
     } finally {
       loadingWorkspaceSharedAudit = false;
       notifyListeners();
@@ -766,11 +753,8 @@ class NotificationsController extends ChangeNotifier {
           utf8.encode(content).length,
         ),
       );
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
-      return null;
     } catch (error) {
-      _setError(describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error));
+      _reportRustOrDescribe(error);
       return null;
     } finally {
       await reloadExportHistory();
@@ -806,11 +790,8 @@ class NotificationsController extends ChangeNotifier {
           utf8.encode(content).length,
         ),
       );
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
-      return null;
     } catch (error) {
-      _setError(describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error));
+      _reportRustOrDescribe(error);
       return null;
     } finally {
       await reloadExportHistory();
@@ -833,11 +814,8 @@ class NotificationsController extends ChangeNotifier {
         'recent': recent,
       };
       return const JsonEncoder.withIndent('  ').convert(payload);
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
-      return null;
     } catch (error) {
-      _setError(describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error));
+      _reportRustOrDescribe(error);
       return null;
     }
   }
@@ -908,11 +886,8 @@ class NotificationsController extends ChangeNotifier {
       await _loadPreferences(token);
       _setError(null);
       return count;
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
-      return null;
     } catch (error) {
-      _setError(describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error));
+      _reportRustOrDescribe(error);
       return null;
     } finally {
       savingPreferences = false;
@@ -935,10 +910,8 @@ class NotificationsController extends ChangeNotifier {
       );
       await _loadPreferences(token);
       _setError(null);
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError(describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error));
+      _reportRustOrDescribe(error);
     } finally {
       savingPreferences = false;
       notifyListeners();
@@ -973,10 +946,8 @@ class NotificationsController extends ChangeNotifier {
       );
       await _loadPreferences(token);
       _setError(null);
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError(describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error));
+      _reportRustOrDescribe(error);
     } finally {
       savingPreferences = false;
       notifyListeners();
@@ -1003,10 +974,8 @@ class NotificationsController extends ChangeNotifier {
       } else {
         _setError(null);
       }
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError(describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error));
+      _reportRustOrDescribe(error);
     } finally {
       savingPreferences = false;
       notifyListeners();
@@ -1027,10 +996,8 @@ class NotificationsController extends ChangeNotifier {
           await upsertContentComplianceClearedTemplateV1(token, template);
       await _loadPreferences(token);
       _setError(null);
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError(describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error));
+      _reportRustOrDescribe(error);
     } finally {
       savingPreferences = false;
       notifyListeners();
@@ -1049,10 +1016,8 @@ class NotificationsController extends ChangeNotifier {
           await deleteContentComplianceClearedTemplateV1(token, id);
       await _loadPreferences(token);
       _setError(null);
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError(describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error));
+      _reportRustOrDescribe(error);
     } finally {
       savingPreferences = false;
       notifyListeners();
@@ -1071,10 +1036,8 @@ class NotificationsController extends ChangeNotifier {
           await reorderContentComplianceClearedTemplatesV1(token, ids);
       await _loadPreferences(token);
       _setError(null);
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError(describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error));
+      _reportRustOrDescribe(error);
     } finally {
       savingPreferences = false;
       notifyListeners();
@@ -1102,10 +1065,8 @@ class NotificationsController extends ChangeNotifier {
         action: workspaceSharedAuditActionFilter,
       );
       _setError(null);
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError(describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error));
+      _reportRustOrDescribe(error);
     } finally {
       savingPreferences = false;
       notifyListeners();
@@ -1131,10 +1092,8 @@ class NotificationsController extends ChangeNotifier {
         action: workspaceSharedAuditActionFilter,
       );
       _setError(null);
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError(describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error));
+      _reportRustOrDescribe(error);
     } finally {
       savingPreferences = false;
       notifyListeners();
@@ -1157,10 +1116,8 @@ class NotificationsController extends ChangeNotifier {
       unreadCount = response.unreadCount;
       hasMore = response.hasMore;
       nextBeforeId = response.nextBeforeId;
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError(describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error));
+      _reportRustOrDescribe(error);
     } finally {
       loading = false;
       notifyListeners();
@@ -1183,10 +1140,8 @@ class NotificationsController extends ChangeNotifier {
       unreadCount = response.unreadCount;
       hasMore = response.hasMore;
       nextBeforeId = response.nextBeforeId;
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError(describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error));
+      _reportRustOrDescribe(error);
     } finally {
       loadingMore = false;
       notifyListeners();
@@ -1205,10 +1160,8 @@ class NotificationsController extends ChangeNotifier {
       _mergeUpdatedItems(response.items);
       unreadCount = response.unreadCount;
       notifyListeners();
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError(describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error));
+      _reportRustOrDescribe(error);
     }
   }
 
@@ -1246,10 +1199,8 @@ class NotificationsController extends ChangeNotifier {
                 : item,
           )
           .toList(growable: false);
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError(describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error));
+      _reportRustOrDescribe(error);
     } finally {
       markingAllRead = false;
       notifyListeners();

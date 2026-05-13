@@ -520,6 +520,16 @@ class ContentComplianceController extends ChangeNotifier {
 
   void _setError(String? value) => _onErrorChanged(value);
 
+  void _reportRustOrDescribe(Object error) {
+    if (error is RustApiException) {
+      reportRustApiError(error, onErrorChanged: _setError);
+    } else {
+      _setError(
+        describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error),
+      );
+    }
+  }
+
   Future<void> submitReport({
     required String targetType,
     required String targetId,
@@ -555,12 +565,8 @@ class ContentComplianceController extends ChangeNotifier {
       if (queueEnabled) {
         await loadQueue();
       }
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError(
-        describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error),
-      );
+      _reportRustOrDescribe(error);
     } finally {
       submittingReport = false;
       notifyListeners();
@@ -653,12 +659,8 @@ class ContentComplianceController extends ChangeNotifier {
               .toList(growable: false),
         );
       }
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError(
-        describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error),
-      );
+      _reportRustOrDescribe(error);
     } finally {
       loadingQueue = false;
       notifyListeners();
@@ -714,12 +716,8 @@ class ContentComplianceController extends ChangeNotifier {
           .timeout(const Duration(seconds: 15));
       ensureHttpSuccess(res);
       await loadQueue();
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
     } catch (error) {
-      _setError(
-        describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error),
-      );
+      _reportRustOrDescribe(error);
     } finally {
       mutatingQueue = false;
       notifyListeners();
@@ -823,13 +821,8 @@ class ContentComplianceController extends ChangeNotifier {
       );
       await loadQueue();
       return response;
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
-      return null;
     } catch (error) {
-      _setError(
-        describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error),
-      );
+      _reportRustOrDescribe(error);
       return null;
     } finally {
       mutatingQueue = false;
@@ -882,13 +875,8 @@ class ContentComplianceController extends ChangeNotifier {
       );
       await loadQueue();
       return response;
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
-      return null;
     } catch (error) {
-      _setError(
-        describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error),
-      );
+      _reportRustOrDescribe(error);
       return null;
     } finally {
       mutatingQueue = false;
@@ -932,13 +920,8 @@ class ContentComplianceController extends ChangeNotifier {
       );
       await loadQueue();
       return response;
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
-      return null;
     } catch (error) {
-      _setError(
-        describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error),
-      );
+      _reportRustOrDescribe(error);
       return null;
     } finally {
       mutatingQueue = false;
@@ -983,13 +966,8 @@ class ContentComplianceController extends ChangeNotifier {
             ),
           )
           .toList(growable: false);
-    } on RustApiException catch (error) {
-      reportRustApiError(error, onErrorChanged: _setError);
-      return const <ContentComplianceAuditItemV1>[];
     } catch (error) {
-      _setError(
-        describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), error),
-      );
+      _reportRustOrDescribe(error);
       return const <ContentComplianceAuditItemV1>[];
     } finally {
       loadingAuditReportId = null;
