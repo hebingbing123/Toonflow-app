@@ -115,9 +115,9 @@ extension _HomePageProjectEditorHttpProjectProbe on _HomePageState {
                       content: Text(l10n.projectEditorProbeProjectDeleteUnexpected200),
                     ),
                   );
-                } on RustApiException catch (e) {
+                } catch (e) {
                   if (!ctx.mounted) return;
-                  if (e.statusCode == 400) {
+                  if (e is RustApiException && e.statusCode == 400) {
                     ScaffoldMessenger.of(ctx).showSnackBar(
                       SnackBar(
                         content: Text(l10n.projectEditorProbeProjectDeleteExpected400),
@@ -128,11 +128,6 @@ extension _HomePageProjectEditorHttpProjectProbe on _HomePageState {
                       ctx,
                     ).showSnackBar(SnackBar(content: Text(describeUserVisibleApiError(l10n, e))));
                   }
-                } catch (e) {
-                  if (!ctx.mounted) return;
-                  ScaffoldMessenger.of(
-                    ctx,
-                  ).showSnackBar(SnackBar(content: Text(describeUserVisibleApiError(l10n, e))));
                 } finally {
                   if (ctx.mounted) {
                     setDialogState(() => projectProbeBusy[0] = false);
@@ -175,9 +170,9 @@ extension _HomePageProjectEditorHttpProjectProbe on _HomePageState {
                       content: Text(l10n.projectEditorProbeProjectEditUnexpected200),
                     ),
                   );
-                } on RustApiException catch (e) {
+                } catch (e) {
                   if (!ctx.mounted) return;
-                  if (e.statusCode == 400) {
+                  if (e is RustApiException && e.statusCode == 400) {
                     ScaffoldMessenger.of(ctx).showSnackBar(
                       SnackBar(
                         content: Text(l10n.projectEditorProbeProjectEditExpected400),
@@ -188,11 +183,6 @@ extension _HomePageProjectEditorHttpProjectProbe on _HomePageState {
                       ctx,
                     ).showSnackBar(SnackBar(content: Text(describeUserVisibleApiError(l10n, e))));
                   }
-                } catch (e) {
-                  if (!ctx.mounted) return;
-                  ScaffoldMessenger.of(
-                    ctx,
-                  ).showSnackBar(SnackBar(content: Text(describeUserVisibleApiError(l10n, e))));
                 } finally {
                   if (ctx.mounted) {
                     setDialogState(() => projectProbeBusy[0] = false);

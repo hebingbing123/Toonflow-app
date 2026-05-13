@@ -90,9 +90,9 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
                       content: Text(l10n.projectEditorNovelsProbeMutationBatchDeleteUnexpected200Snackbar),
                     ),
                   );
-                } on RustApiException catch (e) {
+                } catch (e) {
                   if (!ctx.mounted) return;
-                  if (e.statusCode == 400) {
+                  if (e is RustApiException && e.statusCode == 400) {
                     ScaffoldMessenger.of(ctx).showSnackBar(
                       SnackBar(
                         content: Text(
@@ -105,11 +105,6 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
                       SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
                     );
                   }
-                } catch (e) {
-                  if (!ctx.mounted) return;
-                  ScaffoldMessenger.of(ctx).showSnackBar(
-                    SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
-                  );
                 } finally {
                   if (ctx.mounted) {
                     setDialogState(() => novelsBusy[0] = false);
@@ -132,9 +127,9 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
                       content: Text(l10n.projectEditorNovelsProbeMutationDeleteNovelUnexpected200Snackbar),
                     ),
                   );
-                } on RustApiException catch (e) {
+                } catch (e) {
                   if (!ctx.mounted) return;
-                  if (e.statusCode == 400) {
+                  if (e is RustApiException && e.statusCode == 400) {
                     ScaffoldMessenger.of(ctx).showSnackBar(
                       SnackBar(
                         content: Text(
@@ -147,11 +142,6 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
                       SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
                     );
                   }
-                } catch (e) {
-                  if (!ctx.mounted) return;
-                  ScaffoldMessenger.of(ctx).showSnackBar(
-                    SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
-                  );
                 } finally {
                   if (ctx.mounted) {
                     setDialogState(() => novelsBusy[0] = false);
