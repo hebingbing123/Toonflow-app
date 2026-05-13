@@ -142,6 +142,7 @@ Future<void> openNovelWorkbenchDialog({
   final first = currentItems.isNotEmpty ? currentItems.first : null;
   final last = currentItems.isNotEmpty ? currentItems.last : null;
   final ctrls = _NovelWorkbenchControllers.fromItems(
+    l10n: l10n,
     currentItems: currentItems,
     first: first,
     last: last,

@@ -32,6 +32,7 @@ class _NovelWorkbenchControllers {
   });
 
   factory _NovelWorkbenchControllers.fromItems({
+    required AppLocalizations l10n,
     required List<NovelRow> currentItems,
     required NovelRow? first,
     required NovelRow? last,
@@ -50,9 +51,13 @@ class _NovelWorkbenchControllers {
       importIntakeStatusCtrl: TextEditingController(text: 'pending_review'),
       importIntakeNoteCtrl: TextEditingController(),
       createChapterCtrl: TextEditingController(
-        text: '章节_${DateTime.now().millisecondsSinceEpoch}',
+        text: l10n.projectEditorNovelsWorkbenchDefaultNewChapterTitle(
+          DateTime.now().millisecondsSinceEpoch,
+        ),
       ),
-      createBodyCtrl: TextEditingController(text: '在这里填写章节正文。'),
+      createBodyCtrl: TextEditingController(
+        text: l10n.projectEditorNovelsWorkbenchDefaultNewChapterBody,
+      ),
       selectedNovelIdCtrl: TextEditingController(
         text: first?.numericId.toString() ?? '',
       ),

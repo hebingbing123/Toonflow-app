@@ -4700,6 +4700,18 @@
   },
   "projectEditorAssetsWorkbenchNoAssetsYet": "This project has no assets yet. You can create one here.",
   "projectEditorAssetsSectionListNotLoaded": "Asset list not loaded yet.",
+  "projectEditorNovelsWorkbenchDefaultNewChapterTitle": "Chapter_{stamp}",
+  "@projectEditorNovelsWorkbenchDefaultNewChapterTitle": {
+    "placeholders": {
+      "stamp": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsWorkbenchDefaultNewChapterBody": "Enter chapter body here.",
+  "projectEditorStylePackTagArt": "Art",
+  "projectEditorStylePackTagStory": "Story",
+  "projectEditorStylePackNoDescriptionFallback": "No description yet",
   "projectEditorNovelsEventsDefaultCreateName": "Event_{stamp}",
   "@projectEditorNovelsEventsDefaultCreateName": {
     "placeholders": {

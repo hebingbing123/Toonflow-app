@@ -6196,6 +6196,23 @@ class AppLocalizationsZh extends AppLocalizations {
   String get projectEditorAssetsSectionListNotLoaded => '资产列表尚未加载';
 
   @override
+  String projectEditorNovelsWorkbenchDefaultNewChapterTitle(int stamp) {
+    return '章节_$stamp';
+  }
+
+  @override
+  String get projectEditorNovelsWorkbenchDefaultNewChapterBody => '在这里填写章节正文。';
+
+  @override
+  String get projectEditorStylePackTagArt => '画风';
+
+  @override
+  String get projectEditorStylePackTagStory => '故事';
+
+  @override
+  String get projectEditorStylePackNoDescriptionFallback => '暂无简介';
+
+  @override
   String projectEditorNovelsEventsDefaultCreateName(int stamp) {
     return '事件_$stamp';
   }

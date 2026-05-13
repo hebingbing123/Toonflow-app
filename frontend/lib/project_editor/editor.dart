@@ -4,6 +4,7 @@ extension _HomePageProjectEditor on _HomePageState {
   Future<void> _openProjectDetail(ProjectRow p) async {
     final token = _session?.accessToken;
     if (token == null) return;
+    final l10n = AppLocalizations.of(context)!;
     final nameCtrl = TextEditingController(text: p.name ?? '');
     final introCtrl = TextEditingController(text: p.intro ?? '');
     final premiseCtrl = TextEditingController();
@@ -29,7 +30,7 @@ extension _HomePageProjectEditor on _HomePageState {
         storyPacks: <_StylePackOption>[],
       );
       try {
-        stylePackCatalog = await _loadProjectStylePackCatalog(token);
+        stylePackCatalog = await _loadProjectStylePackCatalog(token, l10n);
       } catch (_) {
         stylePackCatalog = const _StylePackCatalog(
           artPacks: <_StylePackOption>[],
@@ -279,7 +280,10 @@ class _ProjectEditorDialogState {
   }
 }
 
-Future<_StylePackCatalog> _loadProjectStylePackCatalog(String token) async {
+Future<_StylePackCatalog> _loadProjectStylePackCatalog(
+  String token,
+  AppLocalizations l10n,
+) async {
   final visualManual = await fetchVisualManualV1(token);
   final directorManual = await postProjectQueryDirectorManual(token);
 
@@ -290,9 +294,10 @@ Future<_StylePackCatalog> _loadProjectStylePackCatalog(String token) async {
               path: style.stylePath,
               name: style.name,
               description: _stylePackDescriptionFromSlots(
+                l10n,
                 style.data.map((slot) => slot.data),
               ),
-              tag: '画风',
+              tag: l10n.projectEditorStylePackTagArt,
             ),
           )
           .toList()
@@ -305,9 +310,10 @@ Future<_StylePackCatalog> _loadProjectStylePackCatalog(String token) async {
               path: 'story_skills/${style.directorManual}',
               name: style.name,
               description: _stylePackDescriptionFromSlots(
+                l10n,
                 style.data.map((slot) => slot.data),
               ),
-              tag: '故事',
+              tag: l10n.projectEditorStylePackTagStory,
             ),
           )
           .toList()
@@ -316,7 +322,10 @@ Future<_StylePackCatalog> _loadProjectStylePackCatalog(String token) async {
   return _StylePackCatalog(artPacks: artPacks, storyPacks: storyPacks);
 }
 
-String _stylePackDescriptionFromSlots(Iterable<String> slots) {
+String _stylePackDescriptionFromSlots(
+  AppLocalizations l10n,
+  Iterable<String> slots,
+) {
   for (final raw in slots) {
     final lines = raw
         .split('\n')
@@ -334,7 +343,7 @@ String _stylePackDescriptionFromSlots(Iterable<String> slots) {
       return line.length <= 48 ? line : '${line.substring(0, 48)}...';
     }
   }
-  return '暂无简介';
+  return l10n.projectEditorStylePackNoDescriptionFallback;
 }
 
 // Project detail dialog widgets live in `editor_dialog_*.dart` parts to keep this file small.

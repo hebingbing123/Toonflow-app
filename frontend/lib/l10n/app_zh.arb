@@ -4660,6 +4660,18 @@
   },
   "projectEditorAssetsWorkbenchNoAssetsYet": "当前项目还没有资产，可直接在这里创建。",
   "projectEditorAssetsSectionListNotLoaded": "资产列表尚未加载",
+  "projectEditorNovelsWorkbenchDefaultNewChapterTitle": "章节_{stamp}",
+  "@projectEditorNovelsWorkbenchDefaultNewChapterTitle": {
+    "placeholders": {
+      "stamp": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorNovelsWorkbenchDefaultNewChapterBody": "在这里填写章节正文。",
+  "projectEditorStylePackTagArt": "画风",
+  "projectEditorStylePackTagStory": "故事",
+  "projectEditorStylePackNoDescriptionFallback": "暂无简介",
   "projectEditorNovelsEventsDefaultCreateName": "事件_{stamp}",
   "@projectEditorNovelsEventsDefaultCreateName": {
     "placeholders": {

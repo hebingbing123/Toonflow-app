@@ -6448,6 +6448,25 @@ class AppLocalizationsEn extends AppLocalizations {
       'Asset list not loaded yet.';
 
   @override
+  String projectEditorNovelsWorkbenchDefaultNewChapterTitle(int stamp) {
+    return 'Chapter_$stamp';
+  }
+
+  @override
+  String get projectEditorNovelsWorkbenchDefaultNewChapterBody =>
+      'Enter chapter body here.';
+
+  @override
+  String get projectEditorStylePackTagArt => 'Art';
+
+  @override
+  String get projectEditorStylePackTagStory => 'Story';
+
+  @override
+  String get projectEditorStylePackNoDescriptionFallback =>
+      'No description yet';
+
+  @override
   String projectEditorNovelsEventsDefaultCreateName(int stamp) {
     return 'Event_$stamp';
   }

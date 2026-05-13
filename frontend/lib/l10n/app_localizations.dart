@@ -10498,6 +10498,36 @@ abstract class AppLocalizations {
   /// **'Asset list not loaded yet.'**
   String get projectEditorAssetsSectionListNotLoaded;
 
+  /// No description provided for @projectEditorNovelsWorkbenchDefaultNewChapterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter_{stamp}'**
+  String projectEditorNovelsWorkbenchDefaultNewChapterTitle(int stamp);
+
+  /// No description provided for @projectEditorNovelsWorkbenchDefaultNewChapterBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter chapter body here.'**
+  String get projectEditorNovelsWorkbenchDefaultNewChapterBody;
+
+  /// No description provided for @projectEditorStylePackTagArt.
+  ///
+  /// In en, this message translates to:
+  /// **'Art'**
+  String get projectEditorStylePackTagArt;
+
+  /// No description provided for @projectEditorStylePackTagStory.
+  ///
+  /// In en, this message translates to:
+  /// **'Story'**
+  String get projectEditorStylePackTagStory;
+
+  /// No description provided for @projectEditorStylePackNoDescriptionFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'No description yet'**
+  String get projectEditorStylePackNoDescriptionFallback;
+
   /// No description provided for @projectEditorNovelsEventsDefaultCreateName.
   ///
   /// In en, this message translates to:
