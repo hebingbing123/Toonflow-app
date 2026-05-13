@@ -145,14 +145,20 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
     return fileSizeMB;
   }
 
-  String _formatFileSize(double sizeMB) {
+  String _formatFileSize(AppLocalizations l10n, double sizeMB) {
     if (sizeMB < 1) {
-      return '${(sizeMB * 1024).toStringAsFixed(0)} KB';
-    } else if (sizeMB < 1024) {
-      return '${sizeMB.toStringAsFixed(1)} MB';
-    } else {
-      return '${(sizeMB / 1024).toStringAsFixed(2)} GB';
+      return l10n.shortVideoSpaceDialogExportHistoryFileSizeKB(
+        (sizeMB * 1024).toStringAsFixed(0),
+      );
     }
+    if (sizeMB < 1024) {
+      return l10n.shortVideoSpaceDialogExportHistoryFileSizeMB(
+        sizeMB.toStringAsFixed(1),
+      );
+    }
+    return l10n.shortVideoSpaceDialogExportHistoryFileSizeGB(
+      (sizeMB / 1024).toStringAsFixed(2),
+    );
   }
 
   @override
@@ -325,7 +331,7 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      _formatFileSize(estimatedSize),
+                      _formatFileSize(l10n, estimatedSize),
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: Theme.of(context).colorScheme.onPrimaryContainer,
