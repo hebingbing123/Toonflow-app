@@ -8126,6 +8126,16 @@
   "projectEditorAssetGenWorkbenchBatchLimitLabel": "候选 limit",
   "projectEditorAssetGenWorkbenchCoverUrlLabel": "更新封面 URL（单选时可用）",
   "projectEditorAssetGenWorkbenchCoverUrlHelper": "用于 production/assets/update-assets-url",
+  "projectEditorAssetGenWorkbenchSelectionScopeGlobal": "当前按项目全量资产操作；可在主视图先切换「按剧本筛选」再进入工作台。",
+  "projectEditorAssetGenWorkbenchSelectionScopeFiltered": "当前主视图已按剧本 #{scriptId} 过滤资产，工作台默认沿用这批可见资产。",
+  "@projectEditorAssetGenWorkbenchSelectionScopeFiltered": {
+    "placeholders": {
+      "scriptId": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorAssetGenWorkbenchAssetNoDescription": "无描述",
   "projectEditorDeleteProjectTitle": "删除项目？",
   "projectEditorDeleteProjectBody": "将删除项目 #{id}、相关剧本/分镜（数据库级联），并清除该项目的智能体记忆。",
   "@projectEditorDeleteProjectBody": {

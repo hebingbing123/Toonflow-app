@@ -17,15 +17,17 @@ class _AssetGenerationSelectionPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final outline = Theme.of(context).colorScheme.outline;
     final bodySmall = Theme.of(context).textTheme.bodySmall;
+    final scopeHint = filterScriptNumericId == null
+        ? l10n.projectEditorAssetGenWorkbenchSelectionScopeGlobal
+        : l10n.projectEditorAssetGenWorkbenchSelectionScopeFiltered(filterScriptNumericId!);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          filterScriptNumericId == null
-              ? '当前按项目全量资产操作；可在主视图先切换"按剧本筛选"再进入工作台。'
-              : '当前主视图已按剧本 #$filterScriptNumericId 过滤资产，工作台默认沿用这批可见资产。',
+          scopeHint,
           style: bodySmall?.copyWith(color: outline),
         ),
         const SizedBox(height: 12),
@@ -47,7 +49,7 @@ class _AssetGenerationSelectionPanel extends StatelessWidget {
                     asset.assetType,
                     asset.description?.trim().isNotEmpty == true
                         ? asset.description!.trim()
-                        : '无描述',
+                        : l10n.projectEditorAssetGenWorkbenchAssetNoDescription,
                   ].join(' · '),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,

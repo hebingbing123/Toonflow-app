@@ -8166,6 +8166,16 @@
   "projectEditorAssetGenWorkbenchBatchLimitLabel": "Candidate limit",
   "projectEditorAssetGenWorkbenchCoverUrlLabel": "Cover URL update (single selection)",
   "projectEditorAssetGenWorkbenchCoverUrlHelper": "Used with production/assets/update-assets-url",
+  "projectEditorAssetGenWorkbenchSelectionScopeGlobal": "Operating on all project assets. Switch to \"filter by script\" in the main view before opening the workbench if you need script scope.",
+  "projectEditorAssetGenWorkbenchSelectionScopeFiltered": "Main view is filtered by script #{scriptId}; the workbench uses this visible set by default.",
+  "@projectEditorAssetGenWorkbenchSelectionScopeFiltered": {
+    "placeholders": {
+      "scriptId": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorAssetGenWorkbenchAssetNoDescription": "No description",
   "projectEditorDeleteProjectTitle": "Delete project?",
   "projectEditorDeleteProjectBody": "Deletes project #{id}, related scripts/storyboards (DB cascade), and clears agent memory for this project.",
   "@projectEditorDeleteProjectBody": {

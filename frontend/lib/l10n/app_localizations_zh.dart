@@ -10586,6 +10586,18 @@ class AppLocalizationsZh extends AppLocalizations {
       '用于 production/assets/update-assets-url';
 
   @override
+  String get projectEditorAssetGenWorkbenchSelectionScopeGlobal =>
+      '当前按项目全量资产操作；可在主视图先切换「按剧本筛选」再进入工作台。';
+
+  @override
+  String projectEditorAssetGenWorkbenchSelectionScopeFiltered(int scriptId) {
+    return '当前主视图已按剧本 #$scriptId 过滤资产，工作台默认沿用这批可见资产。';
+  }
+
+  @override
+  String get projectEditorAssetGenWorkbenchAssetNoDescription => '无描述';
+
+  @override
   String get projectEditorDeleteProjectTitle => '删除项目？';
 
   @override

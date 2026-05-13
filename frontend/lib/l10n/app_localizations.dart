@@ -17385,6 +17385,24 @@ abstract class AppLocalizations {
   /// **'Used with production/assets/update-assets-url'**
   String get projectEditorAssetGenWorkbenchCoverUrlHelper;
 
+  /// No description provided for @projectEditorAssetGenWorkbenchSelectionScopeGlobal.
+  ///
+  /// In en, this message translates to:
+  /// **'Operating on all project assets. Switch to \"filter by script\" in the main view before opening the workbench if you need script scope.'**
+  String get projectEditorAssetGenWorkbenchSelectionScopeGlobal;
+
+  /// No description provided for @projectEditorAssetGenWorkbenchSelectionScopeFiltered.
+  ///
+  /// In en, this message translates to:
+  /// **'Main view is filtered by script #{scriptId}; the workbench uses this visible set by default.'**
+  String projectEditorAssetGenWorkbenchSelectionScopeFiltered(int scriptId);
+
+  /// No description provided for @projectEditorAssetGenWorkbenchAssetNoDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No description'**
+  String get projectEditorAssetGenWorkbenchAssetNoDescription;
+
   /// No description provided for @projectEditorDeleteProjectTitle.
   ///
   /// In en, this message translates to:

@@ -11119,6 +11119,19 @@ class AppLocalizationsEn extends AppLocalizations {
       'Used with production/assets/update-assets-url';
 
   @override
+  String get projectEditorAssetGenWorkbenchSelectionScopeGlobal =>
+      'Operating on all project assets. Switch to \"filter by script\" in the main view before opening the workbench if you need script scope.';
+
+  @override
+  String projectEditorAssetGenWorkbenchSelectionScopeFiltered(int scriptId) {
+    return 'Main view is filtered by script #$scriptId; the workbench uses this visible set by default.';
+  }
+
+  @override
+  String get projectEditorAssetGenWorkbenchAssetNoDescription =>
+      'No description';
+
+  @override
   String get projectEditorDeleteProjectTitle => 'Delete project?';
 
   @override
