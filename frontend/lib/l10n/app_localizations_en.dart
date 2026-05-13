@@ -11172,6 +11172,106 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get projectEditorBasicsStylePackPickerNone => 'None selected';
+
+  @override
+  String projectEditorBasicsStylePackPickerCurrentConfigRow(String path) {
+    return '$path · Current configuration';
+  }
+
+  @override
+  String get projectEditorBasicsStylePackFootnoteNone => 'None selected';
+
+  @override
+  String get projectEditorBasicsStylePackFootnoteLegacy =>
+      'This project uses a legacy pack path or a pack not listed in the catalog.';
+
+  @override
+  String get projectEditorBasicsHomeSectionTitle => 'Project home';
+
+  @override
+  String projectEditorBasicsHomeReadinessLine(int score, String summary) {
+    return 'Readiness $score/100 · $summary';
+  }
+
+  @override
+  String projectEditorBasicsHomeNextStep(String step) {
+    return 'Next step: $step';
+  }
+
+  @override
+  String get projectEditorBasicsFieldNameClearLabel => 'Name (empty = clear)';
+
+  @override
+  String get projectEditorBasicsFieldIntroClearLabel => 'Intro (empty = clear)';
+
+  @override
+  String get projectEditorBasicsFieldPremise => 'Premise';
+
+  @override
+  String get projectEditorBasicsFieldTargetAudience => 'Target audience';
+
+  @override
+  String get projectEditorBasicsFieldEmotionalTone => 'Emotional tone';
+
+  @override
+  String get projectEditorBasicsFieldCoreHook => 'Core hook';
+
+  @override
+  String get projectEditorBasicsFieldVisualDirection => 'Visual direction';
+
+  @override
+  String get projectEditorBasicsFieldBrandName => 'Brand name';
+
+  @override
+  String get projectEditorBasicsFieldBrandPromise => 'Brand promise';
+
+  @override
+  String get projectEditorBasicsFieldVisualMotifsOnePerLine =>
+      'Visual motifs (one per line)';
+
+  @override
+  String get projectEditorBasicsFieldForbiddenOnePerLine =>
+      'Forbidden elements (one per line)';
+
+  @override
+  String get projectEditorBasicsFieldContinuityRulesOnePerLine =>
+      'Continuity rules (one per line)';
+
+  @override
+  String get projectEditorBasicsPitchSectionTitle => 'Project pitch';
+
+  @override
+  String get projectEditorBasicsBrandSectionTitle => 'Brand bible';
+
+  @override
+  String get projectEditorBasicsLabelArtStylePack => 'Art style pack';
+
+  @override
+  String get projectEditorBasicsLabelStoryStylePack => 'Story style pack';
+
+  @override
+  String get projectEditorBasicsCompatTitle => 'Compatibility checks';
+
+  @override
+  String get projectEditorBasicsCompatSubtitle =>
+      'Legacy general / project / tasks API regression entry points; collapsed by default.';
+
+  @override
+  String projectEditorBasicsStatsLine(
+    int scriptCount,
+    int storyboardCount,
+    int novelCount,
+    int roleCount,
+    int videoCount,
+  ) {
+    return 'GET …/stats: scripts $scriptCount · storyboards $storyboardCount · novels $novelCount · roles/videos $roleCount/$videoCount';
+  }
+
+  @override
+  String get projectEditorBasicsStatsNotLoaded => 'GET …/stats not loaded yet';
+
+  @override
   String get projectEditorAssetEditImageNeedScriptSnack =>
       'Create a script before uploading an edit image.';
 

@@ -8226,6 +8226,76 @@
       }
     }
   },
+  "projectEditorBasicsStylePackPickerNone": "未选择",
+  "projectEditorBasicsStylePackPickerCurrentConfigRow": "{path} · 当前配置",
+  "@projectEditorBasicsStylePackPickerCurrentConfigRow": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorBasicsStylePackFootnoteNone": "未选择",
+  "projectEditorBasicsStylePackFootnoteLegacy": "当前项目已配置旧路径或未收录风格包。",
+  "projectEditorBasicsHomeSectionTitle": "项目首页",
+  "projectEditorBasicsHomeReadinessLine": "就绪度 {score}/100 · {summary}",
+  "@projectEditorBasicsHomeReadinessLine": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      },
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorBasicsHomeNextStep": "下一步：{step}",
+  "@projectEditorBasicsHomeNextStep": {
+    "placeholders": {
+      "step": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorBasicsFieldNameClearLabel": "名称（留空则清空）",
+  "projectEditorBasicsFieldIntroClearLabel": "简介（留空则清空）",
+  "projectEditorBasicsFieldPremise": "故事前提",
+  "projectEditorBasicsFieldTargetAudience": "目标受众",
+  "projectEditorBasicsFieldEmotionalTone": "情绪基调",
+  "projectEditorBasicsFieldCoreHook": "核心钩子",
+  "projectEditorBasicsFieldVisualDirection": "视觉方向",
+  "projectEditorBasicsFieldBrandName": "品牌名称",
+  "projectEditorBasicsFieldBrandPromise": "品牌承诺",
+  "projectEditorBasicsFieldVisualMotifsOnePerLine": "视觉母题（每行一个）",
+  "projectEditorBasicsFieldForbiddenOnePerLine": "禁忌元素（每行一个）",
+  "projectEditorBasicsFieldContinuityRulesOnePerLine": "连续性规则（每行一个）",
+  "projectEditorBasicsPitchSectionTitle": "项目立项",
+  "projectEditorBasicsBrandSectionTitle": "品牌圣经",
+  "projectEditorBasicsLabelArtStylePack": "画风技能包",
+  "projectEditorBasicsLabelStoryStylePack": "故事风格包",
+  "projectEditorBasicsCompatTitle": "兼容性检查",
+  "projectEditorBasicsCompatSubtitle": "旧 general / project / tasks 接口回归入口，默认折叠",
+  "projectEditorBasicsStatsLine": "GET …/stats：剧本 {scriptCount} · 分镜 {storyboardCount} · 小说 {novelCount} · 角色/成片视频 {roleCount}/{videoCount}",
+  "@projectEditorBasicsStatsLine": {
+    "placeholders": {
+      "scriptCount": {
+        "type": "int"
+      },
+      "storyboardCount": {
+        "type": "int"
+      },
+      "novelCount": {
+        "type": "int"
+      },
+      "roleCount": {
+        "type": "int"
+      },
+      "videoCount": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorBasicsStatsNotLoaded": "GET …/stats 未加载",
   "projectEditorAssetEditImageNeedScriptSnack": "请先创建剧本再上传编辑图片。",
   "projectEditorAssetEditImageDialogTitle": "上传编辑图片",
   "projectEditorAssetEditImageTargetScriptLabel": "目标剧本",

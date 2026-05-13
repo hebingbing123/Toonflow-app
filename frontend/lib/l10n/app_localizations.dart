@@ -17437,6 +17437,174 @@ abstract class AppLocalizations {
   /// **'Updated asset #{id}'**
   String projectEditorAssetCrudEditSuccessSnack(int id);
 
+  /// No description provided for @projectEditorBasicsStylePackPickerNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None selected'**
+  String get projectEditorBasicsStylePackPickerNone;
+
+  /// No description provided for @projectEditorBasicsStylePackPickerCurrentConfigRow.
+  ///
+  /// In en, this message translates to:
+  /// **'{path} · Current configuration'**
+  String projectEditorBasicsStylePackPickerCurrentConfigRow(String path);
+
+  /// No description provided for @projectEditorBasicsStylePackFootnoteNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None selected'**
+  String get projectEditorBasicsStylePackFootnoteNone;
+
+  /// No description provided for @projectEditorBasicsStylePackFootnoteLegacy.
+  ///
+  /// In en, this message translates to:
+  /// **'This project uses a legacy pack path or a pack not listed in the catalog.'**
+  String get projectEditorBasicsStylePackFootnoteLegacy;
+
+  /// No description provided for @projectEditorBasicsHomeSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Project home'**
+  String get projectEditorBasicsHomeSectionTitle;
+
+  /// No description provided for @projectEditorBasicsHomeReadinessLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Readiness {score}/100 · {summary}'**
+  String projectEditorBasicsHomeReadinessLine(int score, String summary);
+
+  /// No description provided for @projectEditorBasicsHomeNextStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Next step: {step}'**
+  String projectEditorBasicsHomeNextStep(String step);
+
+  /// No description provided for @projectEditorBasicsFieldNameClearLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Name (empty = clear)'**
+  String get projectEditorBasicsFieldNameClearLabel;
+
+  /// No description provided for @projectEditorBasicsFieldIntroClearLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Intro (empty = clear)'**
+  String get projectEditorBasicsFieldIntroClearLabel;
+
+  /// No description provided for @projectEditorBasicsFieldPremise.
+  ///
+  /// In en, this message translates to:
+  /// **'Premise'**
+  String get projectEditorBasicsFieldPremise;
+
+  /// No description provided for @projectEditorBasicsFieldTargetAudience.
+  ///
+  /// In en, this message translates to:
+  /// **'Target audience'**
+  String get projectEditorBasicsFieldTargetAudience;
+
+  /// No description provided for @projectEditorBasicsFieldEmotionalTone.
+  ///
+  /// In en, this message translates to:
+  /// **'Emotional tone'**
+  String get projectEditorBasicsFieldEmotionalTone;
+
+  /// No description provided for @projectEditorBasicsFieldCoreHook.
+  ///
+  /// In en, this message translates to:
+  /// **'Core hook'**
+  String get projectEditorBasicsFieldCoreHook;
+
+  /// No description provided for @projectEditorBasicsFieldVisualDirection.
+  ///
+  /// In en, this message translates to:
+  /// **'Visual direction'**
+  String get projectEditorBasicsFieldVisualDirection;
+
+  /// No description provided for @projectEditorBasicsFieldBrandName.
+  ///
+  /// In en, this message translates to:
+  /// **'Brand name'**
+  String get projectEditorBasicsFieldBrandName;
+
+  /// No description provided for @projectEditorBasicsFieldBrandPromise.
+  ///
+  /// In en, this message translates to:
+  /// **'Brand promise'**
+  String get projectEditorBasicsFieldBrandPromise;
+
+  /// No description provided for @projectEditorBasicsFieldVisualMotifsOnePerLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Visual motifs (one per line)'**
+  String get projectEditorBasicsFieldVisualMotifsOnePerLine;
+
+  /// No description provided for @projectEditorBasicsFieldForbiddenOnePerLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Forbidden elements (one per line)'**
+  String get projectEditorBasicsFieldForbiddenOnePerLine;
+
+  /// No description provided for @projectEditorBasicsFieldContinuityRulesOnePerLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Continuity rules (one per line)'**
+  String get projectEditorBasicsFieldContinuityRulesOnePerLine;
+
+  /// No description provided for @projectEditorBasicsPitchSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Project pitch'**
+  String get projectEditorBasicsPitchSectionTitle;
+
+  /// No description provided for @projectEditorBasicsBrandSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Brand bible'**
+  String get projectEditorBasicsBrandSectionTitle;
+
+  /// No description provided for @projectEditorBasicsLabelArtStylePack.
+  ///
+  /// In en, this message translates to:
+  /// **'Art style pack'**
+  String get projectEditorBasicsLabelArtStylePack;
+
+  /// No description provided for @projectEditorBasicsLabelStoryStylePack.
+  ///
+  /// In en, this message translates to:
+  /// **'Story style pack'**
+  String get projectEditorBasicsLabelStoryStylePack;
+
+  /// No description provided for @projectEditorBasicsCompatTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Compatibility checks'**
+  String get projectEditorBasicsCompatTitle;
+
+  /// No description provided for @projectEditorBasicsCompatSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Legacy general / project / tasks API regression entry points; collapsed by default.'**
+  String get projectEditorBasicsCompatSubtitle;
+
+  /// No description provided for @projectEditorBasicsStatsLine.
+  ///
+  /// In en, this message translates to:
+  /// **'GET …/stats: scripts {scriptCount} · storyboards {storyboardCount} · novels {novelCount} · roles/videos {roleCount}/{videoCount}'**
+  String projectEditorBasicsStatsLine(
+    int scriptCount,
+    int storyboardCount,
+    int novelCount,
+    int roleCount,
+    int videoCount,
+  );
+
+  /// No description provided for @projectEditorBasicsStatsNotLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'GET …/stats not loaded yet'**
+  String get projectEditorBasicsStatsNotLoaded;
+
   /// No description provided for @projectEditorAssetEditImageNeedScriptSnack.
   ///
   /// In en, this message translates to:

@@ -8266,6 +8266,76 @@
       }
     }
   },
+  "projectEditorBasicsStylePackPickerNone": "None selected",
+  "projectEditorBasicsStylePackPickerCurrentConfigRow": "{path} · Current configuration",
+  "@projectEditorBasicsStylePackPickerCurrentConfigRow": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorBasicsStylePackFootnoteNone": "None selected",
+  "projectEditorBasicsStylePackFootnoteLegacy": "This project uses a legacy pack path or a pack not listed in the catalog.",
+  "projectEditorBasicsHomeSectionTitle": "Project home",
+  "projectEditorBasicsHomeReadinessLine": "Readiness {score}/100 · {summary}",
+  "@projectEditorBasicsHomeReadinessLine": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      },
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorBasicsHomeNextStep": "Next step: {step}",
+  "@projectEditorBasicsHomeNextStep": {
+    "placeholders": {
+      "step": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorBasicsFieldNameClearLabel": "Name (empty = clear)",
+  "projectEditorBasicsFieldIntroClearLabel": "Intro (empty = clear)",
+  "projectEditorBasicsFieldPremise": "Premise",
+  "projectEditorBasicsFieldTargetAudience": "Target audience",
+  "projectEditorBasicsFieldEmotionalTone": "Emotional tone",
+  "projectEditorBasicsFieldCoreHook": "Core hook",
+  "projectEditorBasicsFieldVisualDirection": "Visual direction",
+  "projectEditorBasicsFieldBrandName": "Brand name",
+  "projectEditorBasicsFieldBrandPromise": "Brand promise",
+  "projectEditorBasicsFieldVisualMotifsOnePerLine": "Visual motifs (one per line)",
+  "projectEditorBasicsFieldForbiddenOnePerLine": "Forbidden elements (one per line)",
+  "projectEditorBasicsFieldContinuityRulesOnePerLine": "Continuity rules (one per line)",
+  "projectEditorBasicsPitchSectionTitle": "Project pitch",
+  "projectEditorBasicsBrandSectionTitle": "Brand bible",
+  "projectEditorBasicsLabelArtStylePack": "Art style pack",
+  "projectEditorBasicsLabelStoryStylePack": "Story style pack",
+  "projectEditorBasicsCompatTitle": "Compatibility checks",
+  "projectEditorBasicsCompatSubtitle": "Legacy general / project / tasks API regression entry points; collapsed by default.",
+  "projectEditorBasicsStatsLine": "GET …/stats: scripts {scriptCount} · storyboards {storyboardCount} · novels {novelCount} · roles/videos {roleCount}/{videoCount}",
+  "@projectEditorBasicsStatsLine": {
+    "placeholders": {
+      "scriptCount": {
+        "type": "int"
+      },
+      "storyboardCount": {
+        "type": "int"
+      },
+      "novelCount": {
+        "type": "int"
+      },
+      "roleCount": {
+        "type": "int"
+      },
+      "videoCount": {
+        "type": "int"
+      }
+    }
+  },
+  "projectEditorBasicsStatsNotLoaded": "GET …/stats not loaded yet",
   "projectEditorAssetEditImageNeedScriptSnack": "Create a script before uploading an edit image.",
   "projectEditorAssetEditImageDialogTitle": "Upload edit image",
   "projectEditorAssetEditImageTargetScriptLabel": "Target script",

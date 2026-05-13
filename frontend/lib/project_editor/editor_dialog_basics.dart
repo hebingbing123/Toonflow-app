@@ -8,6 +8,7 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
     required String? selectedPath,
     required ValueChanged<String?> onChanged,
   }) {
+    final l10n = AppLocalizations.of(ctx)!;
     _StylePackOption? selected;
     for (final option in options) {
       if (option.path == selectedPath) {
@@ -18,7 +19,10 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
     final hasSelectedOutsideList =
         selectedPath != null && selected == null && selectedPath.isNotEmpty;
     final items = <DropdownMenuItem<String>>[
-      const DropdownMenuItem<String>(value: '', child: Text('未选择')),
+      DropdownMenuItem<String>(
+        value: '',
+        child: Text(l10n.projectEditorBasicsStylePackPickerNone),
+      ),
       ...options.map(
         (option) => DropdownMenuItem<String>(
           value: option.path,
@@ -28,7 +32,11 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
       if (hasSelectedOutsideList)
         DropdownMenuItem<String>(
           value: selectedPath,
-          child: Text('$selectedPath · 当前配置'),
+          child: Text(
+            l10n.projectEditorBasicsStylePackPickerCurrentConfigRow(
+              selectedPath,
+            ),
+          ),
         ),
     ];
 
@@ -46,7 +54,9 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
         const SizedBox(height: 4),
         Text(
           selected?.description ??
-              (hasSelectedOutsideList ? '当前项目已配置旧路径或未收录风格包。' : '未选择'),
+              (hasSelectedOutsideList
+                  ? l10n.projectEditorBasicsStylePackFootnoteLegacy
+                  : l10n.projectEditorBasicsStylePackFootnoteNone),
           style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
             color: Theme.of(ctx).colorScheme.outline,
           ),
@@ -75,6 +85,7 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
     required TextEditingController continuityCtrl,
     required _ProjectEditorDialogState dialogState,
   }) {
+    final l10n = AppLocalizations.of(ctx)!;
     final home = dialogState.homeRef[0];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -96,16 +107,24 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('项目首页', style: Theme.of(ctx).textTheme.titleSmall),
+                Text(
+                  l10n.projectEditorBasicsHomeSectionTitle,
+                  style: Theme.of(ctx).textTheme.titleSmall,
+                ),
                 const SizedBox(height: 6),
                 Text(
-                  'Readiness ${home.readinessScore}/100 · ${home.readinessSummary}',
+                  l10n.projectEditorBasicsHomeReadinessLine(
+                    home.readinessScore,
+                    home.readinessSummary,
+                  ),
                   style: Theme.of(ctx).textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 8),
                 if (home.onboarding.nextStep != null)
                   Text(
-                    '下一步：${home.onboarding.nextStep}',
+                    l10n.projectEditorBasicsHomeNextStep(
+                      home.onboarding.nextStep!,
+                    ),
                     style: Theme.of(ctx).textTheme.bodySmall,
                   ),
                 const SizedBox(height: 8),
@@ -125,81 +144,107 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
         ],
         TextField(
           controller: nameCtrl,
-          decoration: const InputDecoration(labelText: 'Name (empty = clear)'),
+          decoration: InputDecoration(
+            labelText: l10n.projectEditorBasicsFieldNameClearLabel,
+          ),
         ),
         const SizedBox(height: 12),
         TextField(
           controller: introCtrl,
           maxLines: 3,
-          decoration: const InputDecoration(labelText: 'Intro (empty = clear)'),
+          decoration: InputDecoration(
+            labelText: l10n.projectEditorBasicsFieldIntroClearLabel,
+          ),
         ),
         const SizedBox(height: 16),
-        Text('项目立项', style: Theme.of(ctx).textTheme.titleSmall),
+        Text(
+          l10n.projectEditorBasicsPitchSectionTitle,
+          style: Theme.of(ctx).textTheme.titleSmall,
+        ),
         const SizedBox(height: 8),
         TextField(
           controller: premiseCtrl,
           maxLines: 2,
-          decoration: const InputDecoration(labelText: 'Premise'),
+          decoration: InputDecoration(
+            labelText: l10n.projectEditorBasicsFieldPremise,
+          ),
         ),
         const SizedBox(height: 8),
         TextField(
           controller: audienceCtrl,
-          decoration: const InputDecoration(labelText: 'Target audience'),
+          decoration: InputDecoration(
+            labelText: l10n.projectEditorBasicsFieldTargetAudience,
+          ),
         ),
         const SizedBox(height: 8),
         TextField(
           controller: toneCtrl,
-          decoration: const InputDecoration(labelText: 'Emotional tone'),
+          decoration: InputDecoration(
+            labelText: l10n.projectEditorBasicsFieldEmotionalTone,
+          ),
         ),
         const SizedBox(height: 8),
         TextField(
           controller: hookCtrl,
-          decoration: const InputDecoration(labelText: 'Core hook'),
+          decoration: InputDecoration(
+            labelText: l10n.projectEditorBasicsFieldCoreHook,
+          ),
         ),
         const SizedBox(height: 8),
         TextField(
           controller: visualCtrl,
-          decoration: const InputDecoration(labelText: 'Visual direction'),
+          decoration: InputDecoration(
+            labelText: l10n.projectEditorBasicsFieldVisualDirection,
+          ),
         ),
         const SizedBox(height: 16),
-        Text('品牌圣经', style: Theme.of(ctx).textTheme.titleSmall),
+        Text(
+          l10n.projectEditorBasicsBrandSectionTitle,
+          style: Theme.of(ctx).textTheme.titleSmall,
+        ),
         const SizedBox(height: 8),
         TextField(
           controller: brandNameCtrl,
-          decoration: const InputDecoration(labelText: 'Brand name'),
+          decoration: InputDecoration(
+            labelText: l10n.projectEditorBasicsFieldBrandName,
+          ),
         ),
         const SizedBox(height: 8),
         TextField(
           controller: brandPromiseCtrl,
           maxLines: 2,
-          decoration: const InputDecoration(labelText: 'Brand promise'),
+          decoration: InputDecoration(
+            labelText: l10n.projectEditorBasicsFieldBrandPromise,
+          ),
         ),
         const SizedBox(height: 8),
         TextField(
           controller: visualMotifsCtrl,
           maxLines: 2,
-          decoration: const InputDecoration(labelText: 'Visual motifs (每行一个)'),
+          decoration: InputDecoration(
+            labelText: l10n.projectEditorBasicsFieldVisualMotifsOnePerLine,
+          ),
         ),
         const SizedBox(height: 8),
         TextField(
           controller: forbiddenCtrl,
           maxLines: 2,
-          decoration: const InputDecoration(
-            labelText: 'Forbidden elements (每行一个)',
+          decoration: InputDecoration(
+            labelText: l10n.projectEditorBasicsFieldForbiddenOnePerLine,
           ),
         ),
         const SizedBox(height: 8),
         TextField(
           controller: continuityCtrl,
           maxLines: 2,
-          decoration: const InputDecoration(
-            labelText: 'Continuity rules (每行一个)',
+          decoration: InputDecoration(
+            labelText: l10n.projectEditorBasicsFieldContinuityRulesOnePerLine,
           ),
         ),
         const SizedBox(height: 12),
         _buildStylePackPickerField(
           ctx: ctx,
-          label: '画风技能包',
+          label: l10n.projectEditorBasicsLabelArtStylePack,
           options: dialogState.artStylePackOptionsRef[0],
           selectedPath: dialogState.selectedArtStylePackRef[0],
           onChanged: (value) {
@@ -211,7 +256,7 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
         const SizedBox(height: 12),
         _buildStylePackPickerField(
           ctx: ctx,
-          label: '故事风格包',
+          label: l10n.projectEditorBasicsLabelStoryStylePack,
           options: dialogState.storyStylePackOptionsRef[0],
           selectedPath: dialogState.selectedStoryStylePackRef[0],
           onChanged: (value) {
@@ -233,9 +278,9 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
         ExpansionTile(
           tilePadding: EdgeInsets.zero,
           childrenPadding: EdgeInsets.zero,
-          title: const Text('兼容性检查'),
+          title: Text(l10n.projectEditorBasicsCompatTitle),
           subtitle: Text(
-            '旧 general / project / tasks 接口回归入口，默认折叠',
+            l10n.projectEditorBasicsCompatSubtitle,
             style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
               color: Theme.of(ctx).colorScheme.outline,
             ),
@@ -284,14 +329,18 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
         const SizedBox(height: 12),
         if (dialogState.statsRef[0] != null)
           Text(
-            'GET …/stats：剧本 ${dialogState.statsRef[0]!.scriptCount} · 分镜 '
-            '${dialogState.statsRef[0]!.storyboardCount} · 小说 ${dialogState.statsRef[0]!.novelCount} · 角色/成片视频 '
-            '${dialogState.statsRef[0]!.roleCount}/${dialogState.statsRef[0]!.videoCount}',
+            l10n.projectEditorBasicsStatsLine(
+              dialogState.statsRef[0]!.scriptCount,
+              dialogState.statsRef[0]!.storyboardCount,
+              dialogState.statsRef[0]!.novelCount,
+              dialogState.statsRef[0]!.roleCount,
+              dialogState.statsRef[0]!.videoCount,
+            ),
             style: Theme.of(ctx).textTheme.bodySmall,
           )
         else
           Text(
-            'GET …/stats 未加载',
+            l10n.projectEditorBasicsStatsNotLoaded,
             style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
               color: Theme.of(ctx).colorScheme.outline,
             ),

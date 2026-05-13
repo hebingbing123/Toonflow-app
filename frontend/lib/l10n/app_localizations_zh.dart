@@ -10642,6 +10642,102 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get projectEditorBasicsStylePackPickerNone => '未选择';
+
+  @override
+  String projectEditorBasicsStylePackPickerCurrentConfigRow(String path) {
+    return '$path · 当前配置';
+  }
+
+  @override
+  String get projectEditorBasicsStylePackFootnoteNone => '未选择';
+
+  @override
+  String get projectEditorBasicsStylePackFootnoteLegacy => '当前项目已配置旧路径或未收录风格包。';
+
+  @override
+  String get projectEditorBasicsHomeSectionTitle => '项目首页';
+
+  @override
+  String projectEditorBasicsHomeReadinessLine(int score, String summary) {
+    return '就绪度 $score/100 · $summary';
+  }
+
+  @override
+  String projectEditorBasicsHomeNextStep(String step) {
+    return '下一步：$step';
+  }
+
+  @override
+  String get projectEditorBasicsFieldNameClearLabel => '名称（留空则清空）';
+
+  @override
+  String get projectEditorBasicsFieldIntroClearLabel => '简介（留空则清空）';
+
+  @override
+  String get projectEditorBasicsFieldPremise => '故事前提';
+
+  @override
+  String get projectEditorBasicsFieldTargetAudience => '目标受众';
+
+  @override
+  String get projectEditorBasicsFieldEmotionalTone => '情绪基调';
+
+  @override
+  String get projectEditorBasicsFieldCoreHook => '核心钩子';
+
+  @override
+  String get projectEditorBasicsFieldVisualDirection => '视觉方向';
+
+  @override
+  String get projectEditorBasicsFieldBrandName => '品牌名称';
+
+  @override
+  String get projectEditorBasicsFieldBrandPromise => '品牌承诺';
+
+  @override
+  String get projectEditorBasicsFieldVisualMotifsOnePerLine => '视觉母题（每行一个）';
+
+  @override
+  String get projectEditorBasicsFieldForbiddenOnePerLine => '禁忌元素（每行一个）';
+
+  @override
+  String get projectEditorBasicsFieldContinuityRulesOnePerLine => '连续性规则（每行一个）';
+
+  @override
+  String get projectEditorBasicsPitchSectionTitle => '项目立项';
+
+  @override
+  String get projectEditorBasicsBrandSectionTitle => '品牌圣经';
+
+  @override
+  String get projectEditorBasicsLabelArtStylePack => '画风技能包';
+
+  @override
+  String get projectEditorBasicsLabelStoryStylePack => '故事风格包';
+
+  @override
+  String get projectEditorBasicsCompatTitle => '兼容性检查';
+
+  @override
+  String get projectEditorBasicsCompatSubtitle =>
+      '旧 general / project / tasks 接口回归入口，默认折叠';
+
+  @override
+  String projectEditorBasicsStatsLine(
+    int scriptCount,
+    int storyboardCount,
+    int novelCount,
+    int roleCount,
+    int videoCount,
+  ) {
+    return 'GET …/stats：剧本 $scriptCount · 分镜 $storyboardCount · 小说 $novelCount · 角色/成片视频 $roleCount/$videoCount';
+  }
+
+  @override
+  String get projectEditorBasicsStatsNotLoaded => 'GET …/stats 未加载';
+
+  @override
   String get projectEditorAssetEditImageNeedScriptSnack => '请先创建剧本再上传编辑图片。';
 
   @override
