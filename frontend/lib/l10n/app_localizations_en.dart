@@ -11029,6 +11029,96 @@ class AppLocalizationsEn extends AppLocalizations {
       'Create a script before starting asset image generation.';
 
   @override
+  String get projectEditorAssetGenWorkbenchSyncSummaryBusy => 'Syncing…';
+
+  @override
+  String get projectEditorAssetGenWorkbenchSyncSummary =>
+      'Sync workbench summary';
+
+  @override
+  String get projectEditorAssetGenWorkbenchLoadMaterialContext =>
+      'Load material context';
+
+  @override
+  String get projectEditorAssetGenWorkbenchLoadBatchCandidates =>
+      'Load batch candidates';
+
+  @override
+  String get projectEditorAssetGenWorkbenchSelectAllVisible =>
+      'Select all visible assets';
+
+  @override
+  String get projectEditorAssetGenWorkbenchRebuildSelectionByType =>
+      'Rebuild selection by type';
+
+  @override
+  String get projectEditorAssetGenWorkbenchClearSelection => 'Clear selection';
+
+  @override
+  String get projectEditorAssetGenWorkbenchMutationBusy => 'Working…';
+
+  @override
+  String get projectEditorAssetGenWorkbenchBatchGenerate =>
+      'Batch-generate images';
+
+  @override
+  String get projectEditorAssetGenWorkbenchPollImageStatuses =>
+      'Poll image statuses';
+
+  @override
+  String get projectEditorAssetGenWorkbenchPollPromptStatuses =>
+      'Poll prompt statuses';
+
+  @override
+  String get projectEditorAssetGenWorkbenchDeleteDerivatives =>
+      'Clear derivative images';
+
+  @override
+  String get projectEditorAssetGenWorkbenchUpdateCoverUrl => 'Update cover URL';
+
+  @override
+  String get projectEditorAssetGenWorkbenchScriptLabel =>
+      'Script for generation';
+
+  @override
+  String get projectEditorAssetGenWorkbenchScriptHelper =>
+      'Batch generation sends selected assets to this script context.';
+
+  @override
+  String get projectEditorAssetGenWorkbenchAssetTypeLabel =>
+      'Asset type filter';
+
+  @override
+  String get projectEditorAssetGenWorkbenchAssetTypeHelper =>
+      'Affects both production summary reads and the visible selection set.';
+
+  @override
+  String get projectEditorAssetGenWorkbenchAssetTypeAll => 'All types';
+
+  @override
+  String get projectEditorAssetGenWorkbenchModelOptionalLabel =>
+      'Model (optional)';
+
+  @override
+  String get projectEditorAssetGenWorkbenchResolutionOptionalLabel =>
+      'Resolution (optional)';
+
+  @override
+  String get projectEditorAssetGenWorkbenchBatchNameFilterOptionalLabel =>
+      'Batch candidate name filter (optional)';
+
+  @override
+  String get projectEditorAssetGenWorkbenchBatchLimitLabel => 'Candidate limit';
+
+  @override
+  String get projectEditorAssetGenWorkbenchCoverUrlLabel =>
+      'Cover URL update (single selection)';
+
+  @override
+  String get projectEditorAssetGenWorkbenchCoverUrlHelper =>
+      'Used with production/assets/update-assets-url';
+
+  @override
   String get projectEditorDeleteProjectTitle => 'Delete project?';
 
   @override

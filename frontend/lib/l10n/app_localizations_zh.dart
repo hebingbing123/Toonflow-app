@@ -10510,6 +10510,82 @@ class AppLocalizationsZh extends AppLocalizations {
   String get projectEditorAssetGenWorkbenchNeedScriptSnack => '请先创建剧本再发起资产出图。';
 
   @override
+  String get projectEditorAssetGenWorkbenchSyncSummaryBusy => '同步中…';
+
+  @override
+  String get projectEditorAssetGenWorkbenchSyncSummary => '同步当前工作台摘要';
+
+  @override
+  String get projectEditorAssetGenWorkbenchLoadMaterialContext => '读取素材上下文';
+
+  @override
+  String get projectEditorAssetGenWorkbenchLoadBatchCandidates => '读取批量候选';
+
+  @override
+  String get projectEditorAssetGenWorkbenchSelectAllVisible => '全选当前可见资产';
+
+  @override
+  String get projectEditorAssetGenWorkbenchRebuildSelectionByType => '按类型重建选择';
+
+  @override
+  String get projectEditorAssetGenWorkbenchClearSelection => '清空选择';
+
+  @override
+  String get projectEditorAssetGenWorkbenchMutationBusy => '处理中…';
+
+  @override
+  String get projectEditorAssetGenWorkbenchBatchGenerate => '批量发起资产出图';
+
+  @override
+  String get projectEditorAssetGenWorkbenchPollImageStatuses => '轮询图片状态';
+
+  @override
+  String get projectEditorAssetGenWorkbenchPollPromptStatuses => '轮询 prompt 状态';
+
+  @override
+  String get projectEditorAssetGenWorkbenchDeleteDerivatives => '清理衍生图';
+
+  @override
+  String get projectEditorAssetGenWorkbenchUpdateCoverUrl => '更新封面 URL';
+
+  @override
+  String get projectEditorAssetGenWorkbenchScriptLabel => '生成使用的剧本';
+
+  @override
+  String get projectEditorAssetGenWorkbenchScriptHelper =>
+      '批量出图会把所选资产投给这个剧本上下文';
+
+  @override
+  String get projectEditorAssetGenWorkbenchAssetTypeLabel => '资产类型筛选';
+
+  @override
+  String get projectEditorAssetGenWorkbenchAssetTypeHelper =>
+      '同时影响 production 摘要读取和可见选择集';
+
+  @override
+  String get projectEditorAssetGenWorkbenchAssetTypeAll => '（全部类型）';
+
+  @override
+  String get projectEditorAssetGenWorkbenchModelOptionalLabel => '模型（可选）';
+
+  @override
+  String get projectEditorAssetGenWorkbenchResolutionOptionalLabel => '分辨率（可选）';
+
+  @override
+  String get projectEditorAssetGenWorkbenchBatchNameFilterOptionalLabel =>
+      '批量候选名称过滤（可选）';
+
+  @override
+  String get projectEditorAssetGenWorkbenchBatchLimitLabel => '候选 limit';
+
+  @override
+  String get projectEditorAssetGenWorkbenchCoverUrlLabel => '更新封面 URL（单选时可用）';
+
+  @override
+  String get projectEditorAssetGenWorkbenchCoverUrlHelper =>
+      '用于 production/assets/update-assets-url';
+
+  @override
   String get projectEditorDeleteProjectTitle => '删除项目？';
 
   @override

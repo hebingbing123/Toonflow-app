@@ -33,6 +33,7 @@ class _AssetGenerationControlsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -41,9 +42,9 @@ class _AssetGenerationControlsPanel extends StatelessWidget {
             Expanded(
               child: DropdownButtonFormField<int>(
                 initialValue: selectedScriptNumericId,
-                decoration: const InputDecoration(
-                  labelText: '生成使用的剧本',
-                  helperText: '批量出图会把所选资产投给这个剧本上下文',
+                decoration: InputDecoration(
+                  labelText: l10n.projectEditorAssetGenWorkbenchScriptLabel,
+                  helperText: l10n.projectEditorAssetGenWorkbenchScriptHelper,
                 ),
                 items: scriptList
                     .map(
@@ -68,14 +69,14 @@ class _AssetGenerationControlsPanel extends StatelessWidget {
             Expanded(
               child: DropdownButtonFormField<String>(
                 initialValue: selectedType,
-                decoration: const InputDecoration(
-                  labelText: '资产类型筛选',
-                  helperText: '同时影响 production 摘要读取和可见选择集',
+                decoration: InputDecoration(
+                  labelText: l10n.projectEditorAssetGenWorkbenchAssetTypeLabel,
+                  helperText: l10n.projectEditorAssetGenWorkbenchAssetTypeHelper,
                 ),
                 items: <DropdownMenuItem<String>>[
-                  const DropdownMenuItem<String>(
+                  DropdownMenuItem<String>(
                     value: '',
-                    child: Text('（全部类型）'),
+                    child: Text(l10n.projectEditorAssetGenWorkbenchAssetTypeAll),
                   ),
                   ...typeSelections.keys.map(
                     (type) => DropdownMenuItem<String>(
@@ -95,14 +96,18 @@ class _AssetGenerationControlsPanel extends StatelessWidget {
             Expanded(
               child: TextField(
                 controller: modelCtrl,
-                decoration: const InputDecoration(labelText: '模型（可选）'),
+                decoration: InputDecoration(
+                  labelText: l10n.projectEditorAssetGenWorkbenchModelOptionalLabel,
+                ),
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: TextField(
                 controller: resolutionCtrl,
-                decoration: const InputDecoration(labelText: '分辨率（可选）'),
+                decoration: InputDecoration(
+                  labelText: l10n.projectEditorAssetGenWorkbenchResolutionOptionalLabel,
+                ),
               ),
             ),
           ],
@@ -113,7 +118,9 @@ class _AssetGenerationControlsPanel extends StatelessWidget {
             Expanded(
               child: TextField(
                 controller: batchNameCtrl,
-                decoration: const InputDecoration(labelText: '批量候选名称过滤（可选）'),
+                decoration: InputDecoration(
+                  labelText: l10n.projectEditorAssetGenWorkbenchBatchNameFilterOptionalLabel,
+                ),
               ),
             ),
             const SizedBox(width: 12),
@@ -122,7 +129,9 @@ class _AssetGenerationControlsPanel extends StatelessWidget {
               child: TextField(
                 controller: batchLimitCtrl,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: '候选 limit'),
+                decoration: InputDecoration(
+                  labelText: l10n.projectEditorAssetGenWorkbenchBatchLimitLabel,
+                ),
               ),
             ),
           ],
@@ -131,9 +140,9 @@ class _AssetGenerationControlsPanel extends StatelessWidget {
         TextField(
           controller: imageUrlCtrl,
           onChanged: onImageUrlChanged,
-          decoration: const InputDecoration(
-            labelText: '更新封面 URL（单选时可用）',
-            helperText: '用于 production/assets/update-assets-url',
+          decoration: InputDecoration(
+            labelText: l10n.projectEditorAssetGenWorkbenchCoverUrlLabel,
+            helperText: l10n.projectEditorAssetGenWorkbenchCoverUrlHelper,
           ),
         ),
       ],

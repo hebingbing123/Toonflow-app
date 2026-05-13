@@ -17241,6 +17241,150 @@ abstract class AppLocalizations {
   /// **'Create a script before starting asset image generation.'**
   String get projectEditorAssetGenWorkbenchNeedScriptSnack;
 
+  /// No description provided for @projectEditorAssetGenWorkbenchSyncSummaryBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing…'**
+  String get projectEditorAssetGenWorkbenchSyncSummaryBusy;
+
+  /// No description provided for @projectEditorAssetGenWorkbenchSyncSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync workbench summary'**
+  String get projectEditorAssetGenWorkbenchSyncSummary;
+
+  /// No description provided for @projectEditorAssetGenWorkbenchLoadMaterialContext.
+  ///
+  /// In en, this message translates to:
+  /// **'Load material context'**
+  String get projectEditorAssetGenWorkbenchLoadMaterialContext;
+
+  /// No description provided for @projectEditorAssetGenWorkbenchLoadBatchCandidates.
+  ///
+  /// In en, this message translates to:
+  /// **'Load batch candidates'**
+  String get projectEditorAssetGenWorkbenchLoadBatchCandidates;
+
+  /// No description provided for @projectEditorAssetGenWorkbenchSelectAllVisible.
+  ///
+  /// In en, this message translates to:
+  /// **'Select all visible assets'**
+  String get projectEditorAssetGenWorkbenchSelectAllVisible;
+
+  /// No description provided for @projectEditorAssetGenWorkbenchRebuildSelectionByType.
+  ///
+  /// In en, this message translates to:
+  /// **'Rebuild selection by type'**
+  String get projectEditorAssetGenWorkbenchRebuildSelectionByType;
+
+  /// No description provided for @projectEditorAssetGenWorkbenchClearSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear selection'**
+  String get projectEditorAssetGenWorkbenchClearSelection;
+
+  /// No description provided for @projectEditorAssetGenWorkbenchMutationBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'Working…'**
+  String get projectEditorAssetGenWorkbenchMutationBusy;
+
+  /// No description provided for @projectEditorAssetGenWorkbenchBatchGenerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch-generate images'**
+  String get projectEditorAssetGenWorkbenchBatchGenerate;
+
+  /// No description provided for @projectEditorAssetGenWorkbenchPollImageStatuses.
+  ///
+  /// In en, this message translates to:
+  /// **'Poll image statuses'**
+  String get projectEditorAssetGenWorkbenchPollImageStatuses;
+
+  /// No description provided for @projectEditorAssetGenWorkbenchPollPromptStatuses.
+  ///
+  /// In en, this message translates to:
+  /// **'Poll prompt statuses'**
+  String get projectEditorAssetGenWorkbenchPollPromptStatuses;
+
+  /// No description provided for @projectEditorAssetGenWorkbenchDeleteDerivatives.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear derivative images'**
+  String get projectEditorAssetGenWorkbenchDeleteDerivatives;
+
+  /// No description provided for @projectEditorAssetGenWorkbenchUpdateCoverUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Update cover URL'**
+  String get projectEditorAssetGenWorkbenchUpdateCoverUrl;
+
+  /// No description provided for @projectEditorAssetGenWorkbenchScriptLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Script for generation'**
+  String get projectEditorAssetGenWorkbenchScriptLabel;
+
+  /// No description provided for @projectEditorAssetGenWorkbenchScriptHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch generation sends selected assets to this script context.'**
+  String get projectEditorAssetGenWorkbenchScriptHelper;
+
+  /// No description provided for @projectEditorAssetGenWorkbenchAssetTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Asset type filter'**
+  String get projectEditorAssetGenWorkbenchAssetTypeLabel;
+
+  /// No description provided for @projectEditorAssetGenWorkbenchAssetTypeHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Affects both production summary reads and the visible selection set.'**
+  String get projectEditorAssetGenWorkbenchAssetTypeHelper;
+
+  /// No description provided for @projectEditorAssetGenWorkbenchAssetTypeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All types'**
+  String get projectEditorAssetGenWorkbenchAssetTypeAll;
+
+  /// No description provided for @projectEditorAssetGenWorkbenchModelOptionalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Model (optional)'**
+  String get projectEditorAssetGenWorkbenchModelOptionalLabel;
+
+  /// No description provided for @projectEditorAssetGenWorkbenchResolutionOptionalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolution (optional)'**
+  String get projectEditorAssetGenWorkbenchResolutionOptionalLabel;
+
+  /// No description provided for @projectEditorAssetGenWorkbenchBatchNameFilterOptionalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch candidate name filter (optional)'**
+  String get projectEditorAssetGenWorkbenchBatchNameFilterOptionalLabel;
+
+  /// No description provided for @projectEditorAssetGenWorkbenchBatchLimitLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Candidate limit'**
+  String get projectEditorAssetGenWorkbenchBatchLimitLabel;
+
+  /// No description provided for @projectEditorAssetGenWorkbenchCoverUrlLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cover URL update (single selection)'**
+  String get projectEditorAssetGenWorkbenchCoverUrlLabel;
+
+  /// No description provided for @projectEditorAssetGenWorkbenchCoverUrlHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Used with production/assets/update-assets-url'**
+  String get projectEditorAssetGenWorkbenchCoverUrlHelper;
+
   /// No description provided for @projectEditorDeleteProjectTitle.
   ///
   /// In en, this message translates to:
