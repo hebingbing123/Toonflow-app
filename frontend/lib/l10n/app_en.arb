@@ -4499,6 +4499,38 @@
       }
     }
   },
+  "projectEditorProbeGeneralBusyLabel": "general…",
+  "projectEditorProbeGeneralButtonGetSingleProject": "compat getSingleProject",
+  "projectEditorProbeGeneralButtonUpdateProject": "compat updateProject",
+  "projectEditorProbeGeneralButtonPatchProjectNameNoop": "PATCH …/projects (name noop)",
+  "projectEditorProbeGeneralGetSingleZeroRows": "0 rows",
+  "projectEditorProbeGeneralGetSingleSnack": "compat getSingleProject (GET …/projects filter numeric_id): {line}",
+  "@projectEditorProbeGeneralGetSingleSnack": {
+    "placeholders": {
+      "line": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorProbeGeneralUpdateProjectSnack": "compat updateProject (PATCH …/projects): {probeMsg} → restored ({restoreMsg})",
+  "@projectEditorProbeGeneralUpdateProjectSnack": {
+    "placeholders": {
+      "probeMsg": {
+        "type": "String"
+      },
+      "restoreMsg": {
+        "type": "String"
+      }
+    }
+  },
+  "projectEditorProbeGeneralPatchNameNoopSnack": "PATCH …/projects name noop → {name}",
+  "@projectEditorProbeGeneralPatchNameNoopSnack": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "projectEditorProbeProjectBusyLabel": "project…",
   "projectEditorProbeProjectButtonGetProject": "POST project get-project",
   "projectEditorProbeProjectEditNoopResult": "POST …/project/edit-project noop #{numericId}: {message}",

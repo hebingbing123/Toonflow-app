@@ -5985,6 +5985,42 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get projectEditorProbeGeneralBusyLabel => 'general…';
+
+  @override
+  String get projectEditorProbeGeneralButtonGetSingleProject =>
+      'compat getSingleProject';
+
+  @override
+  String get projectEditorProbeGeneralButtonUpdateProject =>
+      'compat updateProject';
+
+  @override
+  String get projectEditorProbeGeneralButtonPatchProjectNameNoop =>
+      'PATCH …/projects（name noop）';
+
+  @override
+  String get projectEditorProbeGeneralGetSingleZeroRows => '0 行';
+
+  @override
+  String projectEditorProbeGeneralGetSingleSnack(String line) {
+    return 'compat getSingleProject（GET projects 过滤 numeric_id）：$line';
+  }
+
+  @override
+  String projectEditorProbeGeneralUpdateProjectSnack(
+    String probeMsg,
+    String restoreMsg,
+  ) {
+    return 'compat updateProject（PATCH projects）：$probeMsg → 已还原（$restoreMsg）';
+  }
+
+  @override
+  String projectEditorProbeGeneralPatchNameNoopSnack(String name) {
+    return 'PATCH …/projects name noop → $name';
+  }
+
+  @override
   String get projectEditorProbeProjectBusyLabel => 'project…';
 
   @override

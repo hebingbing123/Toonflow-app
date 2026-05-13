@@ -12,6 +12,7 @@ extension _HomePageProjectEditorHttpGeneralProbe on _HomePageState {
     required List<bool> tasksProbeBusy,
     required List<bool> projectProbeBusy,
   }) {
+    final l10n = AppLocalizations.of(ctx)!;
     return [
       TextButton(
         onPressed:
@@ -28,11 +29,13 @@ extension _HomePageProjectEditorHttpGeneralProbe on _HomePageState {
                   );
                   if (!ctx.mounted) return;
                   final line = rows.isEmpty
-                      ? '0 行'
+                      ? l10n.projectEditorProbeGeneralGetSingleZeroRows
                       : rows.map((r) => '#${r.numericId} ${r.name ?? ""}').join('; ');
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
-                      content: Text('compat getSingleProject（GET projects 过滤 numeric_id）：$line'),
+                      content: Text(
+                        l10n.projectEditorProbeGeneralGetSingleSnack(line),
+                      ),
                     ),
                   );
                 } on RustApiException catch (e) {
@@ -48,7 +51,9 @@ extension _HomePageProjectEditorHttpGeneralProbe on _HomePageState {
                 }
               },
         child: Text(
-          generalProbeBusy[0] ? 'general…' : 'compat getSingleProject',
+          generalProbeBusy[0]
+              ? l10n.projectEditorProbeGeneralBusyLabel
+              : l10n.projectEditorProbeGeneralButtonGetSingleProject,
         ),
       ),
       TextButton(
@@ -85,7 +90,10 @@ extension _HomePageProjectEditorHttpGeneralProbe on _HomePageState {
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'compat updateProject（PATCH projects）：$msg1 → restored ($msg2)',
+                        l10n.projectEditorProbeGeneralUpdateProjectSnack(
+                          msg1.toString(),
+                          msg2.toString(),
+                        ),
                       ),
                     ),
                   );
@@ -102,7 +110,9 @@ extension _HomePageProjectEditorHttpGeneralProbe on _HomePageState {
                 }
               },
         child: Text(
-          generalProbeBusy[0] ? 'general…' : 'compat updateProject',
+          generalProbeBusy[0]
+              ? l10n.projectEditorProbeGeneralBusyLabel
+              : l10n.projectEditorProbeGeneralButtonUpdateProject,
         ),
       ),
       TextButton(
@@ -124,7 +134,9 @@ extension _HomePageProjectEditorHttpGeneralProbe on _HomePageState {
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'PATCH …/projects/{id} name noop → ${updated.name ?? "(null)"}',
+                        l10n.projectEditorProbeGeneralPatchNameNoopSnack(
+                          updated.name ?? '(null)',
+                        ),
                       ),
                     ),
                   );
@@ -141,7 +153,9 @@ extension _HomePageProjectEditorHttpGeneralProbe on _HomePageState {
                 }
               },
         child: Text(
-          generalProbeBusy[0] ? 'general…' : 'PATCH projects/{id} (name noop)',
+          generalProbeBusy[0]
+              ? l10n.projectEditorProbeGeneralBusyLabel
+              : l10n.projectEditorProbeGeneralButtonPatchProjectNameNoop,
         ),
       ),
     ];

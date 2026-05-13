@@ -10203,6 +10203,57 @@ abstract class AppLocalizations {
     String status,
   );
 
+  /// No description provided for @projectEditorProbeGeneralBusyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'general…'**
+  String get projectEditorProbeGeneralBusyLabel;
+
+  /// No description provided for @projectEditorProbeGeneralButtonGetSingleProject.
+  ///
+  /// In en, this message translates to:
+  /// **'compat getSingleProject'**
+  String get projectEditorProbeGeneralButtonGetSingleProject;
+
+  /// No description provided for @projectEditorProbeGeneralButtonUpdateProject.
+  ///
+  /// In en, this message translates to:
+  /// **'compat updateProject'**
+  String get projectEditorProbeGeneralButtonUpdateProject;
+
+  /// No description provided for @projectEditorProbeGeneralButtonPatchProjectNameNoop.
+  ///
+  /// In en, this message translates to:
+  /// **'PATCH …/projects (name noop)'**
+  String get projectEditorProbeGeneralButtonPatchProjectNameNoop;
+
+  /// No description provided for @projectEditorProbeGeneralGetSingleZeroRows.
+  ///
+  /// In en, this message translates to:
+  /// **'0 rows'**
+  String get projectEditorProbeGeneralGetSingleZeroRows;
+
+  /// No description provided for @projectEditorProbeGeneralGetSingleSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'compat getSingleProject (GET …/projects filter numeric_id): {line}'**
+  String projectEditorProbeGeneralGetSingleSnack(String line);
+
+  /// No description provided for @projectEditorProbeGeneralUpdateProjectSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'compat updateProject (PATCH …/projects): {probeMsg} → restored ({restoreMsg})'**
+  String projectEditorProbeGeneralUpdateProjectSnack(
+    String probeMsg,
+    String restoreMsg,
+  );
+
+  /// No description provided for @projectEditorProbeGeneralPatchNameNoopSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'PATCH …/projects name noop → {name}'**
+  String projectEditorProbeGeneralPatchNameNoopSnack(String name);
+
   /// No description provided for @projectEditorProbeProjectBusyLabel.
   ///
   /// In en, this message translates to:
