@@ -128,7 +128,9 @@ class AccountProbesController extends ChangeNotifier {
     } on RustApiException catch (error) {
       reportRustApiError(error, onErrorChanged: _onErrorChanged);
     } catch (error) {
-      _onErrorChanged(error.toString());
+      _onErrorChanged(
+        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
+      );
     } finally {
       loadingMe = false;
       notifyListeners();
@@ -152,7 +154,9 @@ class AccountProbesController extends ChangeNotifier {
     } on RustApiException catch (error) {
       reportRustApiError(error, onErrorChanged: _onErrorChanged);
     } catch (error) {
-      _onErrorChanged(error.toString());
+      _onErrorChanged(
+        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
+      );
     } finally {
       loadingUsageSummary = false;
       notifyListeners();
@@ -184,7 +188,9 @@ class AccountProbesController extends ChangeNotifier {
     } on RustApiException catch (error) {
       reportRustApiError(error, onErrorChanged: _onErrorChanged);
     } catch (error) {
-      _onErrorChanged(error.toString());
+      _onErrorChanged(
+        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
+      );
     } finally {
       loadingDevSwitchProbe = false;
       notifyListeners();
@@ -254,7 +260,9 @@ class AccountProbesController extends ChangeNotifier {
     } on RustApiException catch (error) {
       reportRustApiError(error, onErrorChanged: _onErrorChanged);
     } catch (error) {
-      _onErrorChanged(error.toString());
+      _onErrorChanged(
+        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
+      );
     } finally {
       loadingMemoryConfigProbe = false;
       notifyListeners();
@@ -285,7 +293,9 @@ class AccountProbesController extends ChangeNotifier {
     } on RustApiException catch (error) {
       reportRustApiError(error, onErrorChanged: _onErrorChanged);
     } catch (error) {
-      _onErrorChanged(error.toString());
+      _onErrorChanged(
+        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
+      );
     } finally {
       loadingAboutProbe = false;
       notifyListeners();

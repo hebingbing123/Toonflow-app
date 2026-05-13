@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../config.dart';
+import '../rust_api.dart';
 
 class AuthController extends ChangeNotifier {
   AuthController({required this.onErrorChanged, required this.onSignedOut});
@@ -38,7 +39,9 @@ class AuthController extends ChangeNotifier {
     } on AuthException catch (error) {
       onErrorChanged(error.message);
     } catch (error) {
-      onErrorChanged(error.toString());
+      onErrorChanged(
+        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
+      );
     }
   }
 
@@ -52,7 +55,9 @@ class AuthController extends ChangeNotifier {
     } on AuthException catch (error) {
       onErrorChanged(error.message);
     } catch (error) {
-      onErrorChanged(error.toString());
+      onErrorChanged(
+        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
+      );
     }
   }
 

@@ -891,8 +891,10 @@ class _HomePageState extends State<HomePage> {
         );
       }
     } catch (error) {
-      if (_lastSessionAccessToken == token) {
-        _setSharedError(error.toString());
+      if (_lastSessionAccessToken == token && mounted) {
+        _setSharedError(
+          describeUserVisibleApiError(AppLocalizations.of(context)!, error),
+        );
       }
     } finally {
       if (mounted && _lastSessionAccessToken == token) {

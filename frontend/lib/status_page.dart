@@ -66,16 +66,18 @@ class _StatusPageState extends State<StatusPage> {
       if (!mounted) {
         return;
       }
+      final l10n = AppLocalizations.of(context)!;
       setState(() {
-        _error = describeRustApiError(error);
+        _error = describeUserVisibleApiError(l10n, error);
         _loading = false;
       });
     } catch (error) {
       if (!mounted) {
         return;
       }
+      final l10n = AppLocalizations.of(context)!;
       setState(() {
-        _error = '$error';
+        _error = describeUserVisibleApiError(l10n, error);
         _loading = false;
       });
     }

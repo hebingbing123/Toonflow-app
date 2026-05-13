@@ -787,7 +787,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
         return;
       }
       setState(() {
-        _error = describeRustApiError(e);
+        _error = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
       });
     } catch (e) {
       if (!_isCurrentLoadRequest(requestEpoch, token, workspaceId)) {
@@ -841,7 +841,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
         return;
       }
       setState(() {
-        _error = describeRustApiError(e);
+        _error = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
       });
     } catch (e) {
       if (!_isCurrentMutationContext(token, workspaceId)) {
@@ -899,7 +899,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
         return;
       }
       setState(() {
-        _error = describeRustApiError(e);
+        _error = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
       });
     } catch (e) {
       if (!_isCurrentMutationContext(token, workspaceId)) {
@@ -958,7 +958,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
         return;
       }
       setState(() {
-        _error = describeRustApiError(e);
+        _error = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
       });
     } catch (e) {
       if (!_isCurrentMutationContext(token, workspaceId)) {
@@ -1020,7 +1020,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
         return;
       }
       setState(() {
-        _error = describeRustApiError(e);
+        _error = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
       });
     } catch (e) {
       if (!_isCurrentMutationContext(token, workspaceId)) {
@@ -1501,7 +1501,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         return;
       }
       setState(() {
-        _error = describeRustApiError(e);
+        _error = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
         _resp = null;
         _helpHubConfig = null;
       });
@@ -1595,7 +1595,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
           _resp = HelpHubLinksResponseV1(items: resp.effectiveItems);
         });
       } catch (e) {
-        errorText = describeRustApiError(e);
+        errorText = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
       } finally {
         if (mounted) {
           setState(() {
@@ -1881,7 +1881,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         return;
       }
       setState(() {
-        _webhooksError = describeRustApiError(e);
+        _webhooksError = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
         _webhooks = null;
       });
       _disposeAllWebhookWorkspaceDraftControllers();
@@ -2030,7 +2030,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         return;
       }
       setState(() {
-        _billingEventsError = describeRustApiError(e);
+        _billingEventsError = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
         if (!append) {
           _billingEventsPage = null;
           _billingEvents.clear();
@@ -2120,7 +2120,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         return;
       }
       setState(() {
-        _webhooksError = describeRustApiError(e);
+        _webhooksError = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
       });
     } finally {
       if (mounted) {
@@ -2200,7 +2200,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         return;
       }
       setState(() {
-        _webhooksError = describeRustApiError(e);
+        _webhooksError = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
       });
     } finally {
       if (mounted) {
@@ -2247,7 +2247,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         return;
       }
       setState(() {
-        _webhooksError = describeRustApiError(e);
+        _webhooksError = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
       });
     } finally {
       if (mounted) {
@@ -2316,7 +2316,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         return;
       }
       setState(() {
-        _webhooksError = describeRustApiError(e);
+        _webhooksError = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
       });
     } finally {
       if (mounted) {
@@ -2370,7 +2370,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         return;
       }
       setState(() {
-        _webhooksError = describeRustApiError(e);
+        _webhooksError = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
       });
     } finally {
       if (mounted) {
@@ -2467,7 +2467,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         return;
       }
       setState(() {
-        _webhooksError = describeRustApiError(e);
+        _webhooksError = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
       });
     } finally {
       if (mounted) {
@@ -2727,7 +2727,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         return;
       }
       setState(() {
-        _billingEventsError = describeRustApiError(e);
+        _billingEventsError = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
       });
     } finally {
       if (mounted) {

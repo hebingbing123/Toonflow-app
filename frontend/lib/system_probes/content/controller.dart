@@ -77,7 +77,9 @@ class ContentProbesController extends ChangeNotifier {
     } on RustApiException catch (error) {
       reportRustApiError(error, onErrorChanged: _onErrorChanged);
     } catch (error) {
-      _onErrorChanged(error.toString());
+      _onErrorChanged(
+        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
+      );
     } finally {
       loadingPromptsProbe = false;
       notifyListeners();
@@ -118,7 +120,9 @@ class ContentProbesController extends ChangeNotifier {
     } on RustApiException catch (error) {
       reportRustApiError(error, onErrorChanged: _onErrorChanged);
     } catch (error) {
-      _onErrorChanged(error.toString());
+      _onErrorChanged(
+        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
+      );
     } finally {
       loadingVisualManualProbe = false;
       notifyListeners();
@@ -152,7 +156,9 @@ class ContentProbesController extends ChangeNotifier {
     } on RustApiException catch (error) {
       reportRustApiError(error, onErrorChanged: _onErrorChanged);
     } catch (error) {
-      _onErrorChanged(error.toString());
+      _onErrorChanged(
+        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
+      );
     } finally {
       loadingDirectorManualProbe = false;
       notifyListeners();
@@ -181,7 +187,9 @@ class ContentProbesController extends ChangeNotifier {
     } on RustApiException catch (error) {
       reportRustApiError(error, onErrorChanged: _onErrorChanged);
     } catch (error) {
-      _onErrorChanged(error.toString());
+      _onErrorChanged(
+        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
+      );
     } finally {
       loadingSkillsBinaryProbe = false;
       notifyListeners();
@@ -227,7 +235,9 @@ class ContentProbesController extends ChangeNotifier {
     } on RustApiException catch (error) {
       reportRustApiError(error, onErrorChanged: _onErrorChanged);
     } catch (error) {
-      _onErrorChanged(error.toString());
+      _onErrorChanged(
+        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
+      );
     } finally {
       loadingTextModelDefault = false;
       notifyListeners();
@@ -248,7 +258,9 @@ class ContentProbesController extends ChangeNotifier {
     } on RustApiException catch (error) {
       reportRustApiError(error, onErrorChanged: _onErrorChanged);
     } catch (error) {
-      _onErrorChanged(error.toString());
+      _onErrorChanged(
+        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
+      );
     } finally {
       loadingModelDetail = false;
       notifyListeners();

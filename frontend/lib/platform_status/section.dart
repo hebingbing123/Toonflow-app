@@ -7,13 +7,10 @@ import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
 
 class PlatformStatusSection extends StatefulWidget {
-  const PlatformStatusSection({
-    super.key,
-    this.onOverallHealthChanged,
-  });
+  const PlatformStatusSection({super.key, this.onOverallHealthChanged});
 
   final void Function(bool overallHealthy, List<String> degradedEndpoints)?
-      onOverallHealthChanged;
+  onOverallHealthChanged;
 
   @override
   State<PlatformStatusSection> createState() => _PlatformStatusSectionState();
@@ -81,8 +78,9 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
         ready: results[1] as ReadyV1Response,
         sli: results[3] as SliStatusResponse,
       );
-      final nextDegradedEndpoints =
-          _degradedEndpointNames(results[4] as MetricsResponse);
+      final nextDegradedEndpoints = _degradedEndpointNames(
+        results[4] as MetricsResponse,
+      );
       final previousHealthy = _previousHealthy;
       setState(() {
         _health = results[0] as HealthResponse;
@@ -114,14 +112,14 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
         return;
       }
       setState(() {
-        _error = describeRustApiError(error);
+        _error = describeUserVisibleApiError(l10n, error);
       });
     } catch (error) {
       if (!mounted) {
         return;
       }
       setState(() {
-        _error = error.toString();
+        _error = describeUserVisibleApiError(l10n, error);
       });
     } finally {
       if (mounted) {
@@ -142,8 +140,9 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
 
   List<String> _degradedEndpointNames(MetricsResponse metrics) {
     return metrics.endpoints.entries
-        .where((e) =>
-            e.value.serverErrorCount > 0 || e.value.successRate < 0.995)
+        .where(
+          (e) => e.value.serverErrorCount > 0 || e.value.successRate < 0.995,
+        )
         .map((e) => e.key)
         .toList(growable: false);
   }
@@ -173,8 +172,9 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
     final sliStatus = _sliStatus;
     final metrics = _metrics;
     final endpointCount = metrics?.endpoints.length ?? 0;
-    final degradedEndpoints =
-        metrics == null ? 0 : _degradedEndpointNames(metrics).length;
+    final degradedEndpoints = metrics == null
+        ? 0
+        : _degradedEndpointNames(metrics).length;
     return Padding(
       padding: const EdgeInsets.only(top: 16),
       child: Column(
@@ -235,10 +235,7 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
             ],
           ),
           const SizedBox(height: 8),
-          Text(
-            l10n.platformStatusIntro,
-            style: theme.textTheme.bodySmall,
-          ),
+          Text(l10n.platformStatusIntro, style: theme.textTheme.bodySmall),
           const SizedBox(height: 8),
           Row(
             children: <Widget>[
@@ -319,15 +316,19 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
             ),
           if (sliStatus != null) ...<Widget>[
             const SizedBox(height: 12),
-            Text(l10n.platformStatusSliSnapshot, style: theme.textTheme.titleSmall),
-            const SizedBox(height: 8),
-            ...sliStatus.slis.take(5).map(
-              (sli) => _SliTile(snapshot: sli),
+            Text(
+              l10n.platformStatusSliSnapshot,
+              style: theme.textTheme.titleSmall,
             ),
+            const SizedBox(height: 8),
+            ...sliStatus.slis.take(5).map((sli) => _SliTile(snapshot: sli)),
           ],
           if (metrics != null) ...<Widget>[
             const SizedBox(height: 12),
-            Text(l10n.platformStatusHotEndpoints, style: theme.textTheme.titleSmall),
+            Text(
+              l10n.platformStatusHotEndpoints,
+              style: theme.textTheme.titleSmall,
+            ),
             const SizedBox(height: 8),
             ...metrics.endpoints.values
                 .toList(growable: false)
@@ -354,13 +355,14 @@ class _StatusChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: color.withValues(alpha: 0.6)),
       ),
-      child: Text('$title: $value'),
+      child: Text(l10n.platformStatusChipLabel(title, value)),
     );
   }
 }
@@ -413,7 +415,9 @@ class _EndpointTile extends StatelessWidget {
           endpoint.p95LatencyMs.toString(),
         ),
       ),
-      trailing: Text(l10n.platformStatusServerErrors(endpoint.serverErrorCount)),
+      trailing: Text(
+        l10n.platformStatusServerErrors(endpoint.serverErrorCount),
+      ),
     );
   }
 }

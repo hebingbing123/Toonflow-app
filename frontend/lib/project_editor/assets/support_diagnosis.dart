@@ -90,7 +90,10 @@ String buildAssetImagesWorkbenchFailureNotice({
   required Object error,
   required String fallbackDetail,
 }) {
-  final reason = normalizeAssetImagesWorkbenchErrorMessage(l10n, error.toString());
+  final reason = normalizeAssetImagesWorkbenchErrorMessage(
+    l10n,
+    describeUserVisibleApiError(l10n, error),
+  );
   final nextAction = describeAssetImagesWorkbenchRecommendedAction(
     l10n,
     recommendedAction,

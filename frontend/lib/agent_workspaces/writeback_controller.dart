@@ -159,7 +159,9 @@ class WorkspaceWritebackController {
         '写回成功：script ${updated.numericId} 已更新，source=$source，content 长度 $updatedLen。',
       );
     } catch (error) {
-      _onErrorChanged(error.toString());
+      _onErrorChanged(
+        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
+      );
     } finally {
       _operationController.setLoading(
         WorkspaceOperation.scriptResultWriteback,
@@ -222,7 +224,9 @@ class WorkspaceWritebackController {
         '写回成功：script-agent planData 已更新（project=$projectId，script_rows=${script.length}）。',
       );
     } catch (error) {
-      _onErrorChanged(error.toString());
+      _onErrorChanged(
+        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
+      );
     } finally {
       _operationController.setLoading(
         WorkspaceOperation.scriptPlanResultWriteback,
@@ -267,7 +271,9 @@ class WorkspaceWritebackController {
         '写回成功：script-agent update-data（plan_row_id=$planRowId，script_rows=${scriptRows.length}）。',
       );
     } catch (error) {
-      _onErrorChanged(error.toString());
+      _onErrorChanged(
+        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
+      );
     } finally {
       _operationController.setLoading(
         WorkspaceOperation.scriptPlanResultWriteback,
@@ -326,7 +332,9 @@ class WorkspaceWritebackController {
         payloadForWriteback = latestFlow[flowKey];
         writebackSource = 'get_flowData -> refreshed full flow[$flowKey]';
       } catch (error) {
-        _onErrorChanged(error.toString());
+        _onErrorChanged(
+        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
+      );
         return;
       }
     }
@@ -343,7 +351,9 @@ class WorkspaceWritebackController {
           payloadForWriteback = latestFlow[flowKey];
           writebackSource = '$toolName -> refreshed flow[$flowKey]';
         } catch (error) {
-          _onErrorChanged(error.toString());
+          _onErrorChanged(
+        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
+      );
           return;
         }
       } else {
@@ -384,7 +394,9 @@ class WorkspaceWritebackController {
         '回写成功：flow[$flowKey] 已保存到 project $projectId / script $scriptId（source=$writebackSource）。',
       );
     } catch (error) {
-      _onErrorChanged(error.toString());
+      _onErrorChanged(
+        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
+      );
     } finally {
       _operationController.setLoading(
         WorkspaceOperation.productionResultWriteback,

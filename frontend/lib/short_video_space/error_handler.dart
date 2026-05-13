@@ -71,7 +71,10 @@ class ShortVideoErrorHandler {
     final contextStr = context != null ? '（$context）' : '';
     return ErrorHandlingResult(
       shouldRetry: false,
-      userMessage: l10n.shortVideoSpaceErrorOperationFailed(contextStr, error.toString()),
+      userMessage: l10n.shortVideoSpaceErrorOperationFailed(
+        contextStr,
+        describeUserVisibleApiError(l10n, error),
+      ),
       severity: ErrorSeverity.error,
     );
   }
