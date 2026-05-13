@@ -14491,7 +14491,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shortVideoSpaceProductionAssemblyDurationNotSet => 'Not set';
 
   @override
-  String get shortVideoSpaceProductionAssemblySubtitleLabel => 'Subtitle:';
+  String get shortVideoSpaceProductionAssemblySubtitleLabel => ' · Subtitle:';
 
   @override
   String get shortVideoSpaceProductionAssemblySubtitleEmpty => 'Empty';
@@ -14630,7 +14630,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String shortVideoSpaceProductionAssemblyBatchRetryFailed(int count) {
-    return 'Batch retry failed ($count)';
+    return 'Batch retry ($count)';
   }
 
   @override

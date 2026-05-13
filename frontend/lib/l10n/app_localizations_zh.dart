@@ -13655,66 +13655,63 @@ class AppLocalizationsZh extends AppLocalizations {
       '半自动作业在 `awaiting_confirmation` 时需点「确认」；worker 骨架会写入 `publish_attempts` 占位成功记录。';
 
   @override
-  String get shortVideoSpaceProductionAssemblyExportCompleted =>
-      'Export completed.';
+  String get shortVideoSpaceProductionAssemblyExportCompleted => '导出已完成。';
 
   @override
   String get shortVideoSpaceProductionAssemblyExportNotCompleted =>
-      'Export not completed or cancelled.';
+      '导出未完成或已取消。';
 
   @override
   String shortVideoSpaceProductionAssemblyExportStartFailed(String error) {
-    return 'Export start failed: $error';
+    return '导出启动失败：$error';
   }
 
   @override
-  String get shortVideoSpaceProductionAssemblyReplaceVideoTitle =>
-      'Replace current video version';
+  String get shortVideoSpaceProductionAssemblyReplaceVideoTitle => '替换当前视频版本';
 
   @override
-  String get shortVideoSpaceProductionAssemblyVideoUrlLabel => 'Video URL';
+  String get shortVideoSpaceProductionAssemblyVideoUrlLabel => '视频 URL';
 
   @override
   String get shortVideoSpaceProductionAssemblyVideoUrlHint => 'https://...';
 
   @override
-  String get shortVideoSpaceProductionAssemblyCancel => 'Cancel';
+  String get shortVideoSpaceProductionAssemblyCancel => '取消';
 
   @override
-  String get shortVideoSpaceProductionAssemblyWriteBackVersion =>
-      'Write back current version';
+  String get shortVideoSpaceProductionAssemblyWriteBackVersion => '写回当前版本';
 
   @override
   String shortVideoSpaceProductionAssemblyShotDisabled(int storyboardId) {
-    return 'Shot #$storyboardId paused (cleared current video).';
+    return '分镜 #$storyboardId 已暂停（清空当前视频）。';
   }
 
   @override
   String shortVideoSpaceProductionAssemblyDisableFailed(String error) {
-    return 'Pause failed: $error';
+    return '暂停失败：$error';
   }
 
   @override
   String get shortVideoSpaceProductionAssemblyNoVideoUrl =>
-      'No available video URL, please enter replacement address first.';
+      '没有可用视频 URL，请先输入替换地址。';
 
   @override
   String shortVideoSpaceProductionAssemblyShotWriteBack(int storyboardId) {
-    return 'Shot #$storyboardId wrote back current video version.';
+    return '分镜 #$storyboardId 已写回当前视频版本。';
   }
 
   @override
   String shortVideoSpaceProductionAssemblyWriteBackFailed(String error) {
-    return 'Write back failed: $error';
+    return '写回失败：$error';
   }
 
   @override
   String get shortVideoSpaceProductionAssemblyReorderPersisted =>
-      'Persisted shot reorder (wrote back timeline and shot numbers by script).';
+      '已持久化镜头重排顺序（按剧本写回时间线与分镜序号）。';
 
   @override
   String shortVideoSpaceProductionAssemblyReorderFailed(String error) {
-    return 'Reorder persistence failed: $error';
+    return '重排持久化失败：$error';
   }
 
   @override
@@ -13722,66 +13719,64 @@ class AppLocalizationsZh extends AppLocalizations {
     int storyboardId,
     int duration,
   ) {
-    return 'Shot #$storyboardId aligned to ${duration}s.';
+    return '分镜 #$storyboardId 已对齐为 ${duration}s。';
   }
 
   @override
   String shortVideoSpaceProductionAssemblyAlignFailed(String error) {
-    return 'Duration alignment failed: $error';
+    return '时长对齐失败：$error';
   }
 
   @override
   String get shortVideoSpaceProductionAssemblySubtitleExistsDurationMissing =>
-      'Subtitle exists, but duration not explicit (suggest aligning duration first).';
+      '字幕存在，但时长未显式（建议先对齐时长）。';
 
   @override
   String get shortVideoSpaceProductionAssemblyDurationSetSubtitleEmpty =>
-      'Duration is set, but subtitle is empty (possible subtitle track gap).';
+      '时长已设定，但字幕为空（可能有字幕轨缺口）。';
 
   @override
   String get shortVideoSpaceProductionAssemblySubtitleExistsDurationAbnormal =>
-      'Subtitle exists, but duration is abnormal (<=0).';
+      '字幕存在，但时长异常（<=0）。';
 
   @override
   String get shortVideoSpaceProductionAssemblySubtitleDurationNoMismatch =>
-      'No obvious subtitle-duration mismatch.';
+      '字幕与时长未见明显错位。';
 
   @override
-  String get shortVideoSpaceProductionAssemblyBasicOpsTitle =>
-      'Basic shot operations';
+  String get shortVideoSpaceProductionAssemblyBasicOpsTitle => '镜头基础操作';
 
   @override
   String get shortVideoSpaceProductionAssemblyBasicOpsDescription =>
-      'Supports basic reordering (this panel view), enable/disable, and replace current video version.';
+      '支持基础重排（本次面板视图）、启停和替换当前视频版本。';
 
   @override
   String get shortVideoSpaceProductionAssemblyBasicOpsNote =>
-      'Enable/disable/replace writes back directly to J media slot; reorder is for this troubleshooting view only.';
+      '启停 / 替换会直接写回 J 媒体槽位；重排仅用于本次排障视图。';
 
   @override
   String shortVideoSpaceProductionAssemblyTotalDuration(
     int seconds,
     String formatted,
   ) {
-    return 'Total finished duration: ${seconds}s ($formatted)';
+    return '成片总时长：$seconds秒 ($formatted)';
   }
 
   @override
-  String get shortVideoSpaceProductionAssemblySaveReorder => 'Save reorder';
+  String get shortVideoSpaceProductionAssemblySaveReorder => '保存重排顺序';
 
   @override
-  String get shortVideoSpaceProductionAssemblyUndoToOpen => 'Undo to open time';
+  String get shortVideoSpaceProductionAssemblyUndoToOpen => '撤销到打开时';
 
   @override
-  String get shortVideoSpaceProductionAssemblyVoiceoverTasks =>
-      'Voiceover tasks';
+  String get shortVideoSpaceProductionAssemblyVoiceoverTasks => '配音任务';
 
   @override
-  String get shortVideoSpaceProductionAssemblyClose => 'Close';
+  String get shortVideoSpaceProductionAssemblyClose => '关闭';
 
   @override
   String get shortVideoSpaceProductionAssemblyNoShotsFiltered =>
-      'No shots under current filter conditions, try clearing search or relaxing criteria.';
+      '当前过滤条件下没有镜头，试试清空搜索或放宽条件。';
 
   @override
   String shortVideoSpaceProductionAssemblyScriptShotOrder(
@@ -13789,169 +13784,159 @@ class AppLocalizationsZh extends AppLocalizations {
     int storyboardId,
     int order,
   ) {
-    return 'Script #$scriptId · Shot #$storyboardId · Order $order';
+    return '剧本 #$scriptId · 分镜 #$storyboardId · 顺序 $order';
   }
 
   @override
-  String get shortVideoSpaceProductionAssemblyStatusPaused => 'Status: Paused';
+  String get shortVideoSpaceProductionAssemblyStatusPaused => '状态：暂停';
 
   @override
   String shortVideoSpaceProductionAssemblyStatusEnabled(String kind) {
-    return 'Status: Enabled ($kind)';
+    return '状态：启用（$kind）';
   }
 
   @override
-  String get shortVideoSpaceProductionAssemblyDurationLabel => 'Duration:';
+  String get shortVideoSpaceProductionAssemblyDurationLabel => '时长：';
 
   @override
-  String get shortVideoSpaceProductionAssemblyDurationNotSet => 'Not set';
+  String get shortVideoSpaceProductionAssemblyDurationNotSet => '未设定';
 
   @override
-  String get shortVideoSpaceProductionAssemblySubtitleLabel => 'Subtitle:';
+  String get shortVideoSpaceProductionAssemblySubtitleLabel => ' · 字幕：';
 
   @override
-  String get shortVideoSpaceProductionAssemblySubtitleEmpty => 'Empty';
+  String get shortVideoSpaceProductionAssemblySubtitleEmpty => '空';
 
   @override
   String get shortVideoSpaceProductionAssemblyVoiceoverScriptReady =>
-      'Voiceover script: ✓ Ready';
+      '配音文本：✓ 就绪';
 
   @override
   String get shortVideoSpaceProductionAssemblyVoiceoverScriptNotReady =>
-      'Voiceover script: ✗ Not ready';
+      '配音文本：✗ 未就绪';
 
   @override
   String get shortVideoSpaceProductionAssemblyVoiceoverAssetReady =>
-      'Voiceover asset: ✓ Ready';
+      '配音资产：✓ 就绪';
 
   @override
   String get shortVideoSpaceProductionAssemblyVoiceoverAssetNotReady =>
-      'Voiceover asset: ✗ Not ready';
+      '配音资产：✗ 未就绪';
 
   @override
-  String get shortVideoSpaceProductionAssemblyVoiceoverStatusLabel =>
-      'Voiceover status:';
+  String get shortVideoSpaceProductionAssemblyVoiceoverStatusLabel => '配音状态：';
 
   @override
-  String get shortVideoSpaceProductionAssemblyVoiceoverAudioLabel =>
-      'Voiceover audio:';
+  String get shortVideoSpaceProductionAssemblyVoiceoverAudioLabel => '配音音频：';
 
   @override
-  String get shortVideoSpaceProductionAssemblyVoiceoverErrorLabel =>
-      'Voiceover error:';
+  String get shortVideoSpaceProductionAssemblyVoiceoverErrorLabel => '配音错误：';
 
   @override
-  String get shortVideoSpaceProductionAssemblyMismatchCheckLabel =>
-      'Mismatch check:';
+  String get shortVideoSpaceProductionAssemblyMismatchCheckLabel => '错位检查：';
 
   @override
-  String get shortVideoSpaceProductionAssemblyMoveUp => 'Move up';
+  String get shortVideoSpaceProductionAssemblyMoveUp => '上移';
 
   @override
-  String get shortVideoSpaceProductionAssemblyMoveDown => 'Move down';
+  String get shortVideoSpaceProductionAssemblyMoveDown => '下移';
 
   @override
-  String get shortVideoSpaceProductionAssemblyEnable => 'Enable';
+  String get shortVideoSpaceProductionAssemblyEnable => '启用';
 
   @override
-  String get shortVideoSpaceProductionAssemblyPause => 'Pause';
+  String get shortVideoSpaceProductionAssemblyPause => '暂停';
 
   @override
-  String get shortVideoSpaceProductionAssemblyAlignDuration => 'Align duration';
+  String get shortVideoSpaceProductionAssemblyAlignDuration => '时长对齐';
 
   @override
-  String get shortVideoSpaceProductionAssemblyReplaceVersion =>
-      'Replace current version';
+  String get shortVideoSpaceProductionAssemblyReplaceVersion => '替换当前版本';
 
   @override
-  String get shortVideoSpaceProductionAssemblyGenerateVoiceover =>
-      'Generate voiceover';
+  String get shortVideoSpaceProductionAssemblyGenerateVoiceover => '生成配音';
 
   @override
-  String get shortVideoSpaceProductionAssemblyPreviewVoiceover =>
-      'Preview voiceover';
+  String get shortVideoSpaceProductionAssemblyPreviewVoiceover => '预览配音';
 
   @override
   String get shortVideoSpaceProductionAssemblySingleShotDurationTitle =>
-      'Single shot duration alignment';
+      '单镜头时长对齐';
 
   @override
   String get shortVideoSpaceProductionAssemblySingleShotDurationLabel =>
-      'Duration (seconds)';
+      '时长（秒）';
 
   @override
   String get shortVideoSpaceProductionAssemblySingleShotDurationHint =>
-      'Enter 1~300';
+      '输入 1~300';
 
   @override
-  String get shortVideoSpaceProductionAssemblyAlignAndWriteBack =>
-      'Align and write back';
+  String get shortVideoSpaceProductionAssemblyAlignAndWriteBack => '对齐并写回';
 
   @override
-  String get shortVideoSpaceProductionAssemblyAssemblyStyleTitle =>
-      'Assembly-level style adjustment';
+  String get shortVideoSpaceProductionAssemblyAssemblyStyleTitle => '成片级样式调整';
 
   @override
   String get shortVideoSpaceProductionAssemblySubtitleStyleLabel =>
-      'Subtitle style subtitle_style';
+      '字幕样式 subtitle_style';
 
   @override
   String get shortVideoSpaceProductionAssemblySubtitleStyleHint =>
-      'e.g. cinematic_cn_v2 (leave empty to fall back to default)';
+      '例如 cinematic_cn_v2（留空则回退默认）';
 
   @override
   String get shortVideoSpaceProductionAssemblyBgmStrategyLabel =>
-      'BGM strategy bgm_strategy';
+      'BGM 策略 bgm_strategy';
 
   @override
   String get shortVideoSpaceProductionAssemblyBgmStrategyHint =>
-      'e.g. pulse_light (leave empty to fall back to default)';
+      '例如 pulse_light（留空则回退默认）';
 
   @override
   String get shortVideoSpaceProductionAssemblyStyleNote =>
-      'After saving, will write back D7 default configuration and refresh effective values in assembly snapshot.';
+      '保存后会写回 D7 默认配置，并刷新成片装配快照中的生效值。';
 
   @override
-  String get shortVideoSpaceProductionAssemblySaveAndRefresh =>
-      'Save and refresh';
+  String get shortVideoSpaceProductionAssemblySaveAndRefresh => '保存并刷新';
 
   @override
   String shortVideoSpaceProductionAssemblyStyleUpdated(
     String subtitle,
     String bgm,
   ) {
-    return 'Updated assembly-level defaults: subtitle $subtitle · BGM $bgm';
+    return '已更新成片级默认：字幕 $subtitle · BGM $bgm';
   }
 
   @override
-  String get shortVideoSpaceProductionAssemblyStyleDefault => 'default';
+  String get shortVideoSpaceProductionAssemblyStyleDefault => '默认';
 
   @override
   String shortVideoSpaceProductionAssemblyStyleWriteBackFailed(String error) {
-    return 'Assembly style write back failed: $error';
+    return '成片样式写回失败：$error';
   }
 
   @override
   String get shortVideoSpaceProductionAssemblyVoiceoverTaskCenterTitle =>
-      'Voiceover task center';
+      '配音任务中心';
 
   @override
-  String get shortVideoSpaceProductionAssemblyAllStatus => 'All status';
+  String get shortVideoSpaceProductionAssemblyAllStatus => '全部状态';
 
   @override
-  String get shortVideoSpaceProductionAssemblyRefresh => 'Refresh';
+  String get shortVideoSpaceProductionAssemblyRefresh => '刷新';
 
   @override
-  String get shortVideoSpaceProductionAssemblyGroupByShot => 'Group by shot';
+  String get shortVideoSpaceProductionAssemblyGroupByShot => '按分镜聚合';
 
   @override
   String shortVideoSpaceProductionAssemblyBatchRetryFailed(int count) {
-    return 'Batch retry failed ($count)';
+    return '批量重试（$count）';
   }
 
   @override
   String get shortVideoSpaceProductionAssemblyFilterTaskIdScriptShot =>
-      'Filter: Task ID / Script # / Shot #';
+      '筛选：任务ID / 剧本号 / 分镜号';
 
   @override
   String shortVideoSpaceProductionAssemblyTaskSummary(
@@ -13964,12 +13949,11 @@ class AppLocalizationsZh extends AppLocalizations {
     int filtered,
     int visible,
   ) {
-    return 'Total $total · queued $queued · running $running · succeeded $succeeded · failed $failed · cancelled $cancelled · Showing $filtered/$visible';
+    return '共 $total 条 · queued $queued · running $running · succeeded $succeeded · failed $failed · cancelled $cancelled · 展示 $filtered/$visible';
   }
 
   @override
-  String get shortVideoSpaceProductionAssemblyNoVoiceoverTasks =>
-      'No voiceover tasks yet';
+  String get shortVideoSpaceProductionAssemblyNoVoiceoverTasks => '暂无配音任务';
 
   @override
   String shortVideoSpaceProductionAssemblyTaskEntry(
@@ -13977,14 +13961,14 @@ class AppLocalizationsZh extends AppLocalizations {
     String taskId,
     String status,
   ) {
-    return '$prefix $taskId · Status $status';
+    return '$prefix $taskId · 状态 $status';
   }
 
   @override
-  String get shortVideoSpaceProductionAssemblyLatestTask => 'Latest task';
+  String get shortVideoSpaceProductionAssemblyLatestTask => '最近任务';
 
   @override
-  String get shortVideoSpaceProductionAssemblyTask => 'Task';
+  String get shortVideoSpaceProductionAssemblyTask => '任务';
 
   @override
   String shortVideoSpaceProductionAssemblyTaskSubtitle(
@@ -13993,53 +13977,51 @@ class AppLocalizationsZh extends AppLocalizations {
     String audio,
     String error,
   ) {
-    return 'Script #$scriptId · Shot #$shotId$audio$error';
+    return '剧本 #$scriptId · 分镜 #$shotId$audio$error';
   }
 
   @override
   String get shortVideoSpaceProductionAssemblyTaskSubtitleAudioReady =>
-      ' · Audio ready';
+      ' · 音频就绪';
 
   @override
   String shortVideoSpaceProductionAssemblyTaskSubtitleError(String error) {
-    return ' · Error: $error';
+    return ' · 错误: $error';
   }
 
   @override
-  String get shortVideoSpaceProductionAssemblyPreviewAudio => 'Preview audio';
+  String get shortVideoSpaceProductionAssemblyPreviewAudio => '预览音频';
 
   @override
-  String get shortVideoSpaceProductionAssemblyCopyAudioLink =>
-      'Copy audio link';
+  String get shortVideoSpaceProductionAssemblyCopyAudioLink => '复制音频链接';
 
   @override
-  String get shortVideoSpaceProductionAssemblyAudioLinkCopied =>
-      'Audio link copied';
+  String get shortVideoSpaceProductionAssemblyAudioLinkCopied => '已复制音频链接';
 
   @override
-  String get shortVideoSpaceProductionAssemblyCancelTask => 'Cancel';
+  String get shortVideoSpaceProductionAssemblyCancelTask => '取消';
 
   @override
   String shortVideoSpaceProductionAssemblyTaskCancelled(String taskId) {
-    return 'Cancelled voiceover task $taskId';
+    return '已取消配音任务 $taskId';
   }
 
   @override
   String shortVideoSpaceProductionAssemblyCancelFailed(String error) {
-    return 'Cancel failed: $error';
+    return '取消失败：$error';
   }
 
   @override
-  String get shortVideoSpaceProductionAssemblyRetryTask => 'Retry';
+  String get shortVideoSpaceProductionAssemblyRetryTask => '重试';
 
   @override
   String shortVideoSpaceProductionAssemblyTaskRetried(String taskId) {
-    return 'Retried, task $taskId queued';
+    return '已重试，任务 $taskId 已入队';
   }
 
   @override
   String shortVideoSpaceProductionAssemblyRetryFailed(String error) {
-    return 'Retry failed: $error';
+    return '重试失败：$error';
   }
 
   @override
@@ -14047,12 +14029,12 @@ class AppLocalizationsZh extends AppLocalizations {
     int succeeded,
     int failed,
   ) {
-    return 'Batch retry completed: succeeded $succeeded, failed $failed';
+    return '批量重试完成：成功 $succeeded，失败 $failed';
   }
 
   @override
   String shortVideoSpaceProductionAssemblyLoadFailed(String error) {
-    return 'Load failed: $error';
+    return '加载失败：$error';
   }
 
   @override

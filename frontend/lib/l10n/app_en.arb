@@ -10863,7 +10863,7 @@
   },
   "shortVideoSpaceProductionAssemblyDurationLabel": "Duration:",
   "shortVideoSpaceProductionAssemblyDurationNotSet": "Not set",
-  "shortVideoSpaceProductionAssemblySubtitleLabel": "Subtitle:",
+  "shortVideoSpaceProductionAssemblySubtitleLabel": " · Subtitle:",
   "shortVideoSpaceProductionAssemblySubtitleEmpty": "Empty",
   "shortVideoSpaceProductionAssemblyVoiceoverScriptReady": "Voiceover script: ✓ Ready",
   "shortVideoSpaceProductionAssemblyVoiceoverScriptNotReady": "Voiceover script: ✗ Not ready",
@@ -10916,7 +10916,7 @@
   "shortVideoSpaceProductionAssemblyAllStatus": "All status",
   "shortVideoSpaceProductionAssemblyRefresh": "Refresh",
   "shortVideoSpaceProductionAssemblyGroupByShot": "Group by shot",
-  "shortVideoSpaceProductionAssemblyBatchRetryFailed": "Batch retry failed ({count})",
+  "shortVideoSpaceProductionAssemblyBatchRetryFailed": "Batch retry ({count})",
   "@shortVideoSpaceProductionAssemblyBatchRetryFailed": {
     "placeholders": {
       "count": {

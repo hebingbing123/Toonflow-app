@@ -10699,6 +10699,320 @@
     }
   },
   "shortVideoSpacePublishPanelDetail": "半自动作业在 `awaiting_confirmation` 时需点「确认」；worker 骨架会写入 `publish_attempts` 占位成功记录。",
+  "shortVideoSpaceProductionAssemblyExportCompleted": "导出已完成。",
+  "shortVideoSpaceProductionAssemblyExportNotCompleted": "导出未完成或已取消。",
+  "shortVideoSpaceProductionAssemblyExportStartFailed": "导出启动失败：{error}",
+  "@shortVideoSpaceProductionAssemblyExportStartFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceProductionAssemblyReplaceVideoTitle": "替换当前视频版本",
+  "shortVideoSpaceProductionAssemblyVideoUrlLabel": "视频 URL",
+  "shortVideoSpaceProductionAssemblyVideoUrlHint": "https://...",
+  "shortVideoSpaceProductionAssemblyCancel": "取消",
+  "shortVideoSpaceProductionAssemblyWriteBackVersion": "写回当前版本",
+  "shortVideoSpaceProductionAssemblyShotDisabled": "分镜 #{storyboardId} 已暂停（清空当前视频）。",
+  "@shortVideoSpaceProductionAssemblyShotDisabled": {
+    "placeholders": {
+      "storyboardId": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoSpaceProductionAssemblyDisableFailed": "暂停失败：{error}",
+  "@shortVideoSpaceProductionAssemblyDisableFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceProductionAssemblyNoVideoUrl": "没有可用视频 URL，请先输入替换地址。",
+  "shortVideoSpaceProductionAssemblyShotWriteBack": "分镜 #{storyboardId} 已写回当前视频版本。",
+  "@shortVideoSpaceProductionAssemblyShotWriteBack": {
+    "placeholders": {
+      "storyboardId": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoSpaceProductionAssemblyWriteBackFailed": "写回失败：{error}",
+  "@shortVideoSpaceProductionAssemblyWriteBackFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceProductionAssemblyReorderPersisted": "已持久化镜头重排顺序（按剧本写回时间线与分镜序号）。",
+  "shortVideoSpaceProductionAssemblyReorderFailed": "重排持久化失败：{error}",
+  "@shortVideoSpaceProductionAssemblyReorderFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceProductionAssemblyShotAligned": "分镜 #{storyboardId} 已对齐为 {duration}s。",
+  "@shortVideoSpaceProductionAssemblyShotAligned": {
+    "placeholders": {
+      "storyboardId": {
+        "type": "int"
+      },
+      "duration": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoSpaceProductionAssemblyAlignFailed": "时长对齐失败：{error}",
+  "@shortVideoSpaceProductionAssemblyAlignFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceProductionAssemblySubtitleExistsDurationMissing": "字幕存在，但时长未显式（建议先对齐时长）。",
+  "shortVideoSpaceProductionAssemblyDurationSetSubtitleEmpty": "时长已设定，但字幕为空（可能有字幕轨缺口）。",
+  "shortVideoSpaceProductionAssemblySubtitleExistsDurationAbnormal": "字幕存在，但时长异常（<=0）。",
+  "shortVideoSpaceProductionAssemblySubtitleDurationNoMismatch": "字幕与时长未见明显错位。",
+  "shortVideoSpaceProductionAssemblyBasicOpsTitle": "镜头基础操作",
+  "shortVideoSpaceProductionAssemblyBasicOpsDescription": "支持基础重排（本次面板视图）、启停和替换当前视频版本。",
+  "shortVideoSpaceProductionAssemblyBasicOpsNote": "启停 / 替换会直接写回 J 媒体槽位；重排仅用于本次排障视图。",
+  "shortVideoSpaceProductionAssemblyTotalDuration": "成片总时长：{seconds}秒 ({formatted})",
+  "@shortVideoSpaceProductionAssemblyTotalDuration": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      },
+      "formatted": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceProductionAssemblySaveReorder": "保存重排顺序",
+  "shortVideoSpaceProductionAssemblyUndoToOpen": "撤销到打开时",
+  "shortVideoSpaceProductionAssemblyVoiceoverTasks": "配音任务",
+  "shortVideoSpaceProductionAssemblyClose": "关闭",
+  "shortVideoSpaceProductionAssemblyNoShotsFiltered": "当前过滤条件下没有镜头，试试清空搜索或放宽条件。",
+  "shortVideoSpaceProductionAssemblyScriptShotOrder": "剧本 #{scriptId} · 分镜 #{storyboardId} · 顺序 {order}",
+  "@shortVideoSpaceProductionAssemblyScriptShotOrder": {
+    "placeholders": {
+      "scriptId": {
+        "type": "int"
+      },
+      "storyboardId": {
+        "type": "int"
+      },
+      "order": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoSpaceProductionAssemblyStatusPaused": "状态：暂停",
+  "shortVideoSpaceProductionAssemblyStatusEnabled": "状态：启用（{kind}）",
+  "@shortVideoSpaceProductionAssemblyStatusEnabled": {
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceProductionAssemblyDurationLabel": "时长：",
+  "shortVideoSpaceProductionAssemblyDurationNotSet": "未设定",
+  "shortVideoSpaceProductionAssemblySubtitleLabel": " · 字幕：",
+  "shortVideoSpaceProductionAssemblySubtitleEmpty": "空",
+  "shortVideoSpaceProductionAssemblyVoiceoverScriptReady": "配音文本：✓ 就绪",
+  "shortVideoSpaceProductionAssemblyVoiceoverScriptNotReady": "配音文本：✗ 未就绪",
+  "shortVideoSpaceProductionAssemblyVoiceoverAssetReady": "配音资产：✓ 就绪",
+  "shortVideoSpaceProductionAssemblyVoiceoverAssetNotReady": "配音资产：✗ 未就绪",
+  "shortVideoSpaceProductionAssemblyVoiceoverStatusLabel": "配音状态：",
+  "shortVideoSpaceProductionAssemblyVoiceoverAudioLabel": "配音音频：",
+  "shortVideoSpaceProductionAssemblyVoiceoverErrorLabel": "配音错误：",
+  "shortVideoSpaceProductionAssemblyMismatchCheckLabel": "错位检查：",
+  "shortVideoSpaceProductionAssemblyMoveUp": "上移",
+  "shortVideoSpaceProductionAssemblyMoveDown": "下移",
+  "shortVideoSpaceProductionAssemblyEnable": "启用",
+  "shortVideoSpaceProductionAssemblyPause": "暂停",
+  "shortVideoSpaceProductionAssemblyAlignDuration": "时长对齐",
+  "shortVideoSpaceProductionAssemblyReplaceVersion": "替换当前版本",
+  "shortVideoSpaceProductionAssemblyGenerateVoiceover": "生成配音",
+  "shortVideoSpaceProductionAssemblyPreviewVoiceover": "预览配音",
+  "shortVideoSpaceProductionAssemblySingleShotDurationTitle": "单镜头时长对齐",
+  "shortVideoSpaceProductionAssemblySingleShotDurationLabel": "时长（秒）",
+  "shortVideoSpaceProductionAssemblySingleShotDurationHint": "输入 1~300",
+  "shortVideoSpaceProductionAssemblyAlignAndWriteBack": "对齐并写回",
+  "shortVideoSpaceProductionAssemblyAssemblyStyleTitle": "成片级样式调整",
+  "shortVideoSpaceProductionAssemblySubtitleStyleLabel": "字幕样式 subtitle_style",
+  "shortVideoSpaceProductionAssemblySubtitleStyleHint": "例如 cinematic_cn_v2（留空则回退默认）",
+  "shortVideoSpaceProductionAssemblyBgmStrategyLabel": "BGM 策略 bgm_strategy",
+  "shortVideoSpaceProductionAssemblyBgmStrategyHint": "例如 pulse_light（留空则回退默认）",
+  "shortVideoSpaceProductionAssemblyStyleNote": "保存后会写回 D7 默认配置，并刷新成片装配快照中的生效值。",
+  "shortVideoSpaceProductionAssemblySaveAndRefresh": "保存并刷新",
+  "shortVideoSpaceProductionAssemblyStyleUpdated": "已更新成片级默认：字幕 {subtitle} · BGM {bgm}",
+  "@shortVideoSpaceProductionAssemblyStyleUpdated": {
+    "placeholders": {
+      "subtitle": {
+        "type": "String"
+      },
+      "bgm": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceProductionAssemblyStyleDefault": "默认",
+  "shortVideoSpaceProductionAssemblyStyleWriteBackFailed": "成片样式写回失败：{error}",
+  "@shortVideoSpaceProductionAssemblyStyleWriteBackFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceProductionAssemblyVoiceoverTaskCenterTitle": "配音任务中心",
+  "shortVideoSpaceProductionAssemblyAllStatus": "全部状态",
+  "shortVideoSpaceProductionAssemblyRefresh": "刷新",
+  "shortVideoSpaceProductionAssemblyGroupByShot": "按分镜聚合",
+  "shortVideoSpaceProductionAssemblyBatchRetryFailed": "批量重试（{count}）",
+  "@shortVideoSpaceProductionAssemblyBatchRetryFailed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoSpaceProductionAssemblyFilterTaskIdScriptShot": "筛选：任务ID / 剧本号 / 分镜号",
+  "shortVideoSpaceProductionAssemblyTaskSummary": "共 {total} 条 · queued {queued} · running {running} · succeeded {succeeded} · failed {failed} · cancelled {cancelled} · 展示 {filtered}/{visible}",
+  "@shortVideoSpaceProductionAssemblyTaskSummary": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "queued": {
+        "type": "int"
+      },
+      "running": {
+        "type": "int"
+      },
+      "succeeded": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      },
+      "cancelled": {
+        "type": "int"
+      },
+      "filtered": {
+        "type": "int"
+      },
+      "visible": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoSpaceProductionAssemblyNoVoiceoverTasks": "暂无配音任务",
+  "shortVideoSpaceProductionAssemblyTaskEntry": "{prefix} {taskId} · 状态 {status}",
+  "@shortVideoSpaceProductionAssemblyTaskEntry": {
+    "placeholders": {
+      "prefix": {
+        "type": "String"
+      },
+      "taskId": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceProductionAssemblyLatestTask": "最近任务",
+  "shortVideoSpaceProductionAssemblyTask": "任务",
+  "shortVideoSpaceProductionAssemblyTaskSubtitle": "剧本 #{scriptId} · 分镜 #{shotId}{audio}{error}",
+  "@shortVideoSpaceProductionAssemblyTaskSubtitle": {
+    "placeholders": {
+      "scriptId": {
+        "type": "String"
+      },
+      "shotId": {
+        "type": "String"
+      },
+      "audio": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceProductionAssemblyTaskSubtitleAudioReady": " · 音频就绪",
+  "shortVideoSpaceProductionAssemblyTaskSubtitleError": " · 错误: {error}",
+  "@shortVideoSpaceProductionAssemblyTaskSubtitleError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceProductionAssemblyPreviewAudio": "预览音频",
+  "shortVideoSpaceProductionAssemblyCopyAudioLink": "复制音频链接",
+  "shortVideoSpaceProductionAssemblyAudioLinkCopied": "已复制音频链接",
+  "shortVideoSpaceProductionAssemblyCancelTask": "取消",
+  "shortVideoSpaceProductionAssemblyTaskCancelled": "已取消配音任务 {taskId}",
+  "@shortVideoSpaceProductionAssemblyTaskCancelled": {
+    "placeholders": {
+      "taskId": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceProductionAssemblyCancelFailed": "取消失败：{error}",
+  "@shortVideoSpaceProductionAssemblyCancelFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceProductionAssemblyRetryTask": "重试",
+  "shortVideoSpaceProductionAssemblyTaskRetried": "已重试，任务 {taskId} 已入队",
+  "@shortVideoSpaceProductionAssemblyTaskRetried": {
+    "placeholders": {
+      "taskId": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceProductionAssemblyRetryFailed": "重试失败：{error}",
+  "@shortVideoSpaceProductionAssemblyRetryFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoSpaceProductionAssemblyBatchRetryCompleted": "批量重试完成：成功 {succeeded}，失败 {failed}",
+  "@shortVideoSpaceProductionAssemblyBatchRetryCompleted": {
+    "placeholders": {
+      "succeeded": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoSpaceProductionAssemblyLoadFailed": "加载失败：{error}",
+  "@shortVideoSpaceProductionAssemblyLoadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "accountSectionTitle": "账户与隐私",
   "accountRiskyPrefsTooltip": "本机客户端偏好（删号、导出等「不再提示」与恢复确认）",
   "accountSectionSubtitle": "统一管理账户数据导出、下载留档和不可逆删号。导出任务会走平台 job 队列，可反复生成新版快照。",

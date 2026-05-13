@@ -46,8 +46,15 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
       if (!mounted) {
         return;
       }
+      final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-        SnackBar(content: Text(completed ? '导出已完成。' : '导出未完成或已取消。')),
+        SnackBar(
+          content: Text(
+            completed
+                ? l10n.shortVideoSpaceProductionAssemblyExportCompleted
+                : l10n.shortVideoSpaceProductionAssemblyExportNotCompleted,
+          ),
+        ),
       );
       await _loadProjectOverview();
     } on RustApiException catch (e) {
@@ -59,9 +66,14 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
       if (!mounted) {
         return;
       }
-      ScaffoldMessenger.maybeOf(
-        context,
-      )?.showSnackBar(SnackBar(content: Text('导出启动失败：$e')));
+      final l10n = AppLocalizations.of(context)!;
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+        SnackBar(
+          content: Text(
+            l10n.shortVideoSpaceProductionAssemblyExportStartFailed('$e'),
+          ),
+        ),
+      );
     } finally {
       if (mounted) {
         setState(() {
@@ -101,27 +113,28 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
     String initialValue = '',
   }) async {
     final ctrl = TextEditingController(text: initialValue);
+    final l10n = AppLocalizations.of(context)!;
     final result = await showDialog<String>(
       context: context,
       builder: (ctx) {
         return AlertDialog(
-          title: const Text('替换当前视频版本'),
+          title: Text(l10n.shortVideoSpaceProductionAssemblyReplaceVideoTitle),
           content: TextField(
             controller: ctrl,
-            decoration: const InputDecoration(
-              labelText: '视频 URL',
-              hintText: 'https://...',
+            decoration: InputDecoration(
+              labelText: l10n.shortVideoSpaceProductionAssemblyVideoUrlLabel,
+              hintText: l10n.shortVideoSpaceProductionAssemblyVideoUrlHint,
             ),
             autofocus: true,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('取消'),
+              child: Text(l10n.shortVideoSpaceProductionAssemblyCancel),
             ),
             FilledButton(
               onPressed: () => Navigator.of(ctx).pop(ctrl.text.trim()),
-              child: const Text('写回当前版本'),
+              child: Text(l10n.shortVideoSpaceProductionAssemblyWriteBackVersion),
             ),
           ],
         );
@@ -200,6 +213,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
       builder: (ctx) {
         return StatefulBuilder(
           builder: (ctx, setLocalState) {
+            final l10n = AppLocalizations.of(ctx)!;
             Future<void> runDisable(_AssemblyClipDeskOpEntry item) async {
               try {
                 await postWorkbenchDeleteVideoV1(
@@ -219,7 +233,9 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
 
                 if (mounted) {
                   _showOperationFeedback(
-                    '分镜 #${item.storyboardNumericId} 已暂停（清空当前视频）。',
+                    l10n.shortVideoSpaceProductionAssemblyShotDisabled(
+                      item.storyboardNumericId,
+                    ),
                     isSuccess: true,
                   );
                 }
@@ -228,12 +244,17 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
               } on RustApiException catch (e) {
                 if (!mounted) return;
                 _showOperationFeedback(
-                  '暂停失败：${e.statusCode ?? '-'}',
+                  l10n.shortVideoSpaceProductionAssemblyDisableFailed(
+                    '${e.statusCode ?? '-'}',
+                  ),
                   isSuccess: false,
                 );
               } catch (e) {
                 if (!mounted) return;
-                _showOperationFeedback('暂停失败：$e', isSuccess: false);
+                _showOperationFeedback(
+                  l10n.shortVideoSpaceProductionAssemblyDisableFailed('$e'),
+                  isSuccess: false,
+                );
               }
             }
 
@@ -244,7 +265,9 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
               final seedUrl = (replacementUrl ?? item.selectedMediaUrl).trim();
               if (seedUrl.isEmpty) {
                 ScaffoldMessenger.maybeOf(ctx)?.showSnackBar(
-                  const SnackBar(content: Text('没有可用视频 URL，请先输入替换地址。')),
+                  SnackBar(
+                    content: Text(l10n.shortVideoSpaceProductionAssemblyNoVideoUrl),
+                  ),
                 );
                 return;
               }
@@ -292,7 +315,9 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                 }
                 if (mounted) {
                   _showOperationFeedback(
-                    '分镜 #${item.storyboardNumericId} 已写回当前视频版本。',
+                    l10n.shortVideoSpaceProductionAssemblyShotWriteBack(
+                      item.storyboardNumericId,
+                    ),
                     isSuccess: true,
                   );
                 }
@@ -301,12 +326,17 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
               } on RustApiException catch (e) {
                 if (!mounted) return;
                 _showOperationFeedback(
-                  '写回失败：${e.statusCode ?? '-'}',
+                  l10n.shortVideoSpaceProductionAssemblyWriteBackFailed(
+                    '${e.statusCode ?? '-'}',
+                  ),
                   isSuccess: false,
                 );
               } catch (e) {
                 if (!mounted) return;
-                _showOperationFeedback('写回失败：$e', isSuccess: false);
+                _showOperationFeedback(
+                  l10n.shortVideoSpaceProductionAssemblyWriteBackFailed('$e'),
+                  isSuccess: false,
+                );
               }
             }
 
@@ -352,7 +382,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                 }
                 if (mounted) {
                   _showOperationFeedback(
-                    '已持久化镜头重排顺序（按剧本写回时间线与分镜序号）。',
+                    l10n.shortVideoSpaceProductionAssemblyReorderPersisted,
                     isSuccess: true,
                   );
                 }
@@ -360,12 +390,17 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
               } on RustApiException catch (e) {
                 if (!mounted) return;
                 _showOperationFeedback(
-                  '重排持久化失败：${e.statusCode ?? '-'}',
+                  l10n.shortVideoSpaceProductionAssemblyReorderFailed(
+                    '${e.statusCode ?? '-'}',
+                  ),
                   isSuccess: false,
                 );
               } catch (e) {
                 if (!mounted) return;
-                _showOperationFeedback('重排持久化失败：$e', isSuccess: false);
+                _showOperationFeedback(
+                  l10n.shortVideoSpaceProductionAssemblyReorderFailed('$e'),
+                  isSuccess: false,
+                );
               } finally {
                 setLocalState(() {
                   operationInProgress = false;
@@ -418,7 +453,10 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                 }
                 if (mounted) {
                   _showOperationFeedback(
-                    '分镜 #${item.storyboardNumericId} 已对齐为 ${durationSeconds}s。',
+                    l10n.shortVideoSpaceProductionAssemblyShotAligned(
+                      item.storyboardNumericId,
+                      durationSeconds,
+                    ),
                     isSuccess: true,
                   );
                 }
@@ -427,12 +465,17 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
               } on RustApiException catch (e) {
                 if (!mounted) return;
                 _showOperationFeedback(
-                  '时长对齐失败：${e.statusCode ?? '-'}',
+                  l10n.shortVideoSpaceProductionAssemblyAlignFailed(
+                    '${e.statusCode ?? '-'}',
+                  ),
                   isSuccess: false,
                 );
               } catch (e) {
                 if (!mounted) return;
-                _showOperationFeedback('时长对齐失败：$e', isSuccess: false);
+                _showOperationFeedback(
+                  l10n.shortVideoSpaceProductionAssemblyAlignFailed('$e'),
+                  isSuccess: false,
+                );
               }
             }
 
@@ -448,20 +491,33 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
               final durationSec = parseDurationSeconds(item.durationText);
               final hasSubtitle = item.subtitleText.isNotEmpty;
               if (hasSubtitle && durationSec == null) {
-                return '字幕存在，但时长未显式（建议先对齐时长）。';
+                return l10n
+                    .shortVideoSpaceProductionAssemblySubtitleExistsDurationMissing;
               }
               if (!hasSubtitle && (durationSec ?? 0) > 0) {
-                return '时长已设定，但字幕为空（可能有字幕轨缺口）。';
+                return l10n
+                    .shortVideoSpaceProductionAssemblyDurationSetSubtitleEmpty;
               }
               if (hasSubtitle && (durationSec ?? 0) <= 0) {
-                return '字幕存在，但时长异常（<=0）。';
+                return l10n
+                    .shortVideoSpaceProductionAssemblySubtitleExistsDurationAbnormal;
               }
-              return '字幕与时长未见明显错位。';
+              return l10n
+                  .shortVideoSpaceProductionAssemblySubtitleDurationNoMismatch;
+            }
+
+            bool hasSubtitleDurationMismatch(_AssemblyClipDeskOpEntry item) {
+              final durationSec = parseDurationSeconds(item.durationText);
+              final hasSubtitle = item.subtitleText.isNotEmpty;
+              if (hasSubtitle && durationSec == null) return true;
+              if (!hasSubtitle && (durationSec ?? 0) > 0) return true;
+              if (hasSubtitle && (durationSec ?? 0) <= 0) return true;
+              return false;
             }
 
             bool hasQualityIssue(_AssemblyClipDeskOpEntry item) {
               return item.voiceoverState == 'failed' ||
-                  subtitleMismatchLine(item) != '字幕与时长未见明显错位。';
+                  hasSubtitleDurationMismatch(item);
             }
 
             bool matchesSearch(_AssemblyClipDeskOpEntry item) {
@@ -693,17 +749,17 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
             final visibleEntries = buildVisibleEntries();
 
             return AlertDialog(
-              title: const Text('镜头基础操作'),
+              title: Text(l10n.shortVideoSpaceProductionAssemblyBasicOpsTitle),
               content: SizedBox(
                 width: 760,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('支持基础重排（本次面板视图）、启停和替换当前视频版本。'),
+                    Text(l10n.shortVideoSpaceProductionAssemblyBasicOpsDescription),
                     const SizedBox(height: 4),
                     Text(
-                      '启停 / 替换会直接写回 J 媒体槽位；重排仅用于本次排障视图。',
+                      l10n.shortVideoSpaceProductionAssemblyBasicOpsNote,
                       style: Theme.of(ctx).textTheme.bodySmall,
                     ),
                     const SizedBox(height: 8),
@@ -725,7 +781,10 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            '成片总时长：$currentTotalDuration秒 ($currentTotalFormatted)',
+                            l10n.shortVideoSpaceProductionAssemblyTotalDuration(
+                              currentTotalDuration,
+                              currentTotalFormatted,
+                            ),
                             style: Theme.of(ctx).textTheme.titleSmall?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -877,7 +936,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                 ? null
                                 : () => unawaited(persistReorder()),
                             icon: const Icon(Icons.save_outlined),
-                            label: const Text('保存重排顺序'),
+                            label: Text(l10n.shortVideoSpaceProductionAssemblySaveReorder),
                           ),
                           OutlinedButton.icon(
                             onPressed: operationInProgress
@@ -890,7 +949,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                     setLocalState(() {});
                                   },
                             icon: const Icon(Icons.undo_outlined),
-                            label: const Text('撤销到打开时'),
+                            label: Text(l10n.shortVideoSpaceProductionAssemblyUndoToOpen),
                           ),
                           OutlinedButton.icon(
                             onPressed: operationInProgress
@@ -904,7 +963,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                     ),
                                   ),
                             icon: const Icon(Icons.record_voice_over_outlined),
-                            label: const Text('配音任务'),
+                            label: Text(l10n.shortVideoSpaceProductionAssemblyVoiceoverTasks),
                           ),
                           // Undo/Redo buttons
                           _buildUndoRedoToolbar(),
@@ -916,7 +975,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                       child: visibleEntries.isEmpty
                           ? Center(
                               child: Text(
-                                '当前过滤条件下没有镜头，试试清空搜索或放宽条件。',
+                                l10n.shortVideoSpaceProductionAssemblyNoShotsFiltered,
                                 style: Theme.of(ctx).textTheme.bodyMedium,
                               ),
                             )
@@ -928,6 +987,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                               operationInProgress: operationInProgress,
                               filterState: filterState,
                               ctx: ctx,
+                              l10n: l10n,
                               setLocalState: setLocalState,
                               runDisable: runDisable,
                               runEnableOrReplace: runEnableOrReplace,
@@ -943,7 +1003,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(ctx).pop(),
-                  child: const Text('关闭'),
+                  child: Text(l10n.shortVideoSpaceProductionAssemblyClose),
                 ),
               ],
             );
@@ -978,45 +1038,51 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
     StateSetter? updateDialogState;
     Timer? poller;
 
-    Future<void> loadTasks() async {
-      final setState = updateDialogState;
-      if (setState == null) return;
-      setState(() {
-        loading = true;
-      });
-      try {
-        final next = await getTtsTasksV1(
-          token,
-          projectId: projectId,
-          status: statusFilter.isEmpty ? null : statusFilter,
-          limit: 100,
-          offset: 0,
-        );
-        setState(() {
-          tasks = next;
-          errorMessage = null;
-          loading = false;
-        });
-      } on RustApiException catch (e) {
-        setState(() {
-          errorMessage = '加载失败：${e.statusCode ?? '-'}';
-          loading = false;
-        });
-      } catch (e) {
-        setState(() {
-          errorMessage = '加载失败：$e';
-          loading = false;
-        });
-      }
-    }
-
     try {
       await showDialog<void>(
         context: context,
         builder: (dialogContext) {
+          final dialogL10n = AppLocalizations.of(dialogContext)!;
+
+          Future<void> loadTasks() async {
+            final setState = updateDialogState;
+            if (setState == null) return;
+            setState(() {
+              loading = true;
+            });
+            try {
+              final next = await getTtsTasksV1(
+                token,
+                projectId: projectId,
+                status: statusFilter.isEmpty ? null : statusFilter,
+                limit: 100,
+                offset: 0,
+              );
+              setState(() {
+                tasks = next;
+                errorMessage = null;
+                loading = false;
+              });
+            } on RustApiException catch (e) {
+              setState(() {
+                errorMessage = dialogL10n.shortVideoSpaceProductionAssemblyLoadFailed(
+                  '${e.statusCode ?? '-'}',
+                );
+                loading = false;
+              });
+            } catch (e) {
+              setState(() {
+                errorMessage =
+                    dialogL10n.shortVideoSpaceProductionAssemblyLoadFailed('$e');
+                loading = false;
+              });
+            }
+          }
+
           return StatefulBuilder(
             builder: (ctx, setState) {
               updateDialogState = setState;
+              final l10n = dialogL10n;
               poller ??= Timer.periodic(
                 const Duration(seconds: 4),
                 (_) => unawaited(loadTasks()),
@@ -1065,7 +1131,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                   )
                   .toList(growable: false);
               return AlertDialog(
-                title: const Text('配音任务中心'),
+                title: Text(l10n.shortVideoSpaceProductionAssemblyVoiceoverTaskCenterTitle),
                 content: SizedBox(
                   width: 760,
                   height: 420,
@@ -1076,25 +1142,28 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                         children: [
                           DropdownButton<String>(
                             value: statusFilter,
-                            items: const [
-                              DropdownMenuItem(value: '', child: Text('全部状态')),
+                            items: [
                               DropdownMenuItem(
+                                value: '',
+                                child: Text(l10n.shortVideoSpaceProductionAssemblyAllStatus),
+                              ),
+                              const DropdownMenuItem(
                                 value: 'queued',
                                 child: Text('queued'),
                               ),
-                              DropdownMenuItem(
+                              const DropdownMenuItem(
                                 value: 'running',
                                 child: Text('running'),
                               ),
-                              DropdownMenuItem(
+                              const DropdownMenuItem(
                                 value: 'succeeded',
                                 child: Text('succeeded'),
                               ),
-                              DropdownMenuItem(
+                              const DropdownMenuItem(
                                 value: 'failed',
                                 child: Text('failed'),
                               ),
-                              DropdownMenuItem(
+                              const DropdownMenuItem(
                                 value: 'cancelled',
                                 child: Text('cancelled'),
                               ),
@@ -1115,12 +1184,12 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                 ? null
                                 : () => unawaited(loadTasks()),
                             icon: const Icon(Icons.refresh_outlined),
-                            label: const Text('刷新'),
+                            label: Text(l10n.shortVideoSpaceProductionAssemblyRefresh),
                           ),
                           const SizedBox(width: 8),
                           FilterChip(
                             selected: groupedByShot,
-                            label: const Text('按分镜聚合'),
+                            label: Text(l10n.shortVideoSpaceProductionAssemblyGroupByShot),
                             onSelected: requestBusy
                                 ? null
                                 : (selected) {
@@ -1172,7 +1241,10 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                     }
                                     if (!mounted) return;
                                     _showOperationFeedback(
-                                      '批量重试完成：成功 $succeeded，失败 $failed',
+                                      l10n.shortVideoSpaceProductionAssemblyBatchRetryCompleted(
+                                        succeeded,
+                                        failed,
+                                      ),
                                       isSuccess: failed == 0,
                                     );
                                     await loadTasks();
@@ -1182,7 +1254,9 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                   },
                             icon: const Icon(Icons.replay_outlined),
                             label: Text(
-                              '批量重试失败 (${retryableFilteredTasks.length})',
+                              l10n.shortVideoSpaceProductionAssemblyBatchRetryFailed(
+                                retryableFilteredTasks.length,
+                              ),
                             ),
                           ),
                         ],
@@ -1190,11 +1264,12 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                       const SizedBox(height: 8),
                       TextField(
                         enabled: !requestBusy,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           isDense: true,
-                          prefixIcon: Icon(Icons.search),
-                          hintText: '筛选：任务ID / 剧本号 / 分镜号',
-                          border: OutlineInputBorder(),
+                          prefixIcon: const Icon(Icons.search),
+                          hintText: l10n
+                              .shortVideoSpaceProductionAssemblyFilterTaskIdScriptShot,
+                          border: const OutlineInputBorder(),
                         ),
                         onChanged: (value) {
                           setState(() {
@@ -1214,13 +1289,16 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                       const SizedBox(height: 8),
                       if (!loading && tasks.isNotEmpty)
                         Text(
-                          '共 ${tasks.length} 条 · '
-                          'queued ${tasks.where((t) => t.status == "queued").length} · '
-                          'running ${tasks.where((t) => t.status == "running").length} · '
-                          'succeeded ${tasks.where((t) => t.status == "succeeded").length} · '
-                          'failed ${tasks.where((t) => t.status == "failed").length} · '
-                          'cancelled ${tasks.where((t) => t.status == "cancelled").length} · '
-                          '展示 ${filteredTasks.length}/${visibleTasks.length}',
+                          l10n.shortVideoSpaceProductionAssemblyTaskSummary(
+                            tasks.length,
+                            tasks.where((t) => t.status == 'queued').length,
+                            tasks.where((t) => t.status == 'running').length,
+                            tasks.where((t) => t.status == 'succeeded').length,
+                            tasks.where((t) => t.status == 'failed').length,
+                            tasks.where((t) => t.status == 'cancelled').length,
+                            filteredTasks.length,
+                            visibleTasks.length,
+                          ),
                           style: Theme.of(ctx).textTheme.bodySmall,
                         ),
                       if (!loading && tasks.isNotEmpty)
@@ -1229,7 +1307,11 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                         child: loading
                             ? const Center(child: CircularProgressIndicator())
                             : tasks.isEmpty
-                            ? const Center(child: Text('暂无配音任务'))
+                            ? Center(
+                                child: Text(
+                                  l10n.shortVideoSpaceProductionAssemblyNoVoiceoverTasks,
+                                ),
+                              )
                             : ListView.separated(
                                 itemCount: groupedByShot
                                     ? filteredTasks.length
@@ -1253,22 +1335,46 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                   final canRetry =
                                       task.status == 'failed' &&
                                       task.taskId.trim().isNotEmpty;
+                                  final audioSuffix = hasAudio
+                                      ? l10n
+                                          .shortVideoSpaceProductionAssemblyTaskSubtitleAudioReady
+                                      : '';
+                                  final errorSuffix =
+                                      task.error != null &&
+                                              task.error!.isNotEmpty
+                                          ? l10n
+                                              .shortVideoSpaceProductionAssemblyTaskSubtitleError(
+                                                task.error!,
+                                              )
+                                          : '';
                                   return ListTile(
                                     dense: true,
                                     title: Text(
-                                      '${groupedByShot ? "最近任务" : "任务"} ${task.taskId.substring(0, 8)} · 状态 ${task.status}',
+                                      l10n.shortVideoSpaceProductionAssemblyTaskEntry(
+                                        groupedByShot
+                                            ? l10n
+                                                .shortVideoSpaceProductionAssemblyLatestTask
+                                            : l10n
+                                                .shortVideoSpaceProductionAssemblyTask,
+                                        task.taskId.substring(0, 8),
+                                        task.status,
+                                      ),
                                     ),
                                     subtitle: Text(
-                                      '剧本 #${scriptNumeric ?? "-"} · 分镜 #${shotNumeric ?? "-"}'
-                                      '${task.audioUrl != null && task.audioUrl!.isNotEmpty ? ' · 音频就绪' : ''}'
-                                      '${task.error != null && task.error!.isNotEmpty ? ' · 错误: ${task.error}' : ''}',
+                                      l10n.shortVideoSpaceProductionAssemblyTaskSubtitle(
+                                        '${scriptNumeric ?? '-'}',
+                                        '${shotNumeric ?? '-'}',
+                                        audioSuffix,
+                                        errorSuffix,
+                                      ),
                                     ),
                                     trailing: Wrap(
                                       spacing: 4,
                                       children: [
                                         if (hasAudio)
                                           IconButton(
-                                            tooltip: '预览音频',
+                                            tooltip: l10n
+                                                .shortVideoSpaceProductionAssemblyPreviewAudio,
                                             onPressed: () {
                                               _showAudioPreviewDialog(
                                                 context: ctx,
@@ -1281,7 +1387,8 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                           ),
                                         if (hasAudio)
                                           IconButton(
-                                            tooltip: '复制音频链接',
+                                            tooltip: l10n
+                                                .shortVideoSpaceProductionAssemblyCopyAudioLink,
                                             onPressed: () async {
                                               await Clipboard.setData(
                                                 ClipboardData(
@@ -1290,7 +1397,8 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                               );
                                               if (!mounted) return;
                                               _showOperationFeedback(
-                                                '已复制音频链接',
+                                                l10n
+                                                    .shortVideoSpaceProductionAssemblyAudioLinkCopied,
                                                 isSuccess: true,
                                               );
                                             },
@@ -1311,7 +1419,11 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                                       );
                                                       if (!mounted) return;
                                                       _showOperationFeedback(
-                                                        '已取消配音任务 ${task.taskId.substring(0, 8)}',
+                                                        l10n
+                                                            .shortVideoSpaceProductionAssemblyTaskCancelled(
+                                                          task.taskId
+                                                              .substring(0, 8),
+                                                        ),
                                                         isSuccess: true,
                                                       );
                                                       await loadTasks();
@@ -1320,13 +1432,19 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                                     ) {
                                                       if (!mounted) return;
                                                       _showOperationFeedback(
-                                                        '取消失败：${e.statusCode ?? '-'}',
+                                                        l10n
+                                                            .shortVideoSpaceProductionAssemblyCancelFailed(
+                                                          '${e.statusCode ?? '-'}',
+                                                        ),
                                                         isSuccess: false,
                                                       );
                                                     } catch (e) {
                                                       if (!mounted) return;
                                                       _showOperationFeedback(
-                                                        '取消失败：$e',
+                                                        l10n
+                                                            .shortVideoSpaceProductionAssemblyCancelFailed(
+                                                          '$e',
+                                                        ),
                                                         isSuccess: false,
                                                       );
                                                     } finally {
@@ -1335,7 +1453,10 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                                       });
                                                     }
                                                   },
-                                            child: const Text('取消'),
+                                            child: Text(
+                                              l10n
+                                                  .shortVideoSpaceProductionAssemblyCancelTask,
+                                            ),
                                           ),
                                         if (canRetry)
                                           TextButton(
@@ -1379,7 +1500,11 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                                           );
                                                       if (!mounted) return;
                                                       _showOperationFeedback(
-                                                        '已重试，任务 ${response.taskId.substring(0, 8)} 已入队',
+                                                        l10n
+                                                            .shortVideoSpaceProductionAssemblyTaskRetried(
+                                                          response.taskId
+                                                              .substring(0, 8),
+                                                        ),
                                                         isSuccess: true,
                                                       );
                                                       await loadTasks();
@@ -1388,13 +1513,19 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                                     ) {
                                                       if (!mounted) return;
                                                       _showOperationFeedback(
-                                                        '重试失败：${e.statusCode ?? '-'}',
+                                                        l10n
+                                                            .shortVideoSpaceProductionAssemblyRetryFailed(
+                                                          '${e.statusCode ?? '-'}',
+                                                        ),
                                                         isSuccess: false,
                                                       );
                                                     } catch (e) {
                                                       if (!mounted) return;
                                                       _showOperationFeedback(
-                                                        '重试失败：$e',
+                                                        l10n
+                                                            .shortVideoSpaceProductionAssemblyRetryFailed(
+                                                          '$e',
+                                                        ),
                                                         isSuccess: false,
                                                       );
                                                     } finally {
@@ -1403,7 +1534,10 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                                       });
                                                     }
                                                   },
-                                            child: const Text('重试'),
+                                            child: Text(
+                                              l10n
+                                                  .shortVideoSpaceProductionAssemblyRetryTask,
+                                            ),
                                           ),
                                       ],
                                     ),
@@ -1417,7 +1551,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.of(ctx).pop(),
-                    child: const Text('关闭'),
+                    child: Text(l10n.shortVideoSpaceProductionAssemblyClose),
                   ),
                 ],
               );
@@ -1443,6 +1577,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
     required bool operationInProgress,
     required FilterState filterState,
     required BuildContext ctx,
+    required AppLocalizations l10n,
     required void Function(void Function()) setLocalState,
     required Future<void> Function(_AssemblyClipDeskOpEntry) runDisable,
     required Future<void> Function(
@@ -1474,6 +1609,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
               operationInProgress: operationInProgress,
               filterState: filterState,
               ctx: ctx,
+              l10n: l10n,
               setLocalState: setLocalState,
               runDisable: runDisable,
               runEnableOrReplace: runEnableOrReplace,
@@ -1505,6 +1641,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
             operationInProgress: operationInProgress,
             filterState: filterState,
             ctx: ctx,
+            l10n: l10n,
             setLocalState: setLocalState,
             runDisable: runDisable,
             runEnableOrReplace: runEnableOrReplace,
@@ -1527,6 +1664,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
     required bool operationInProgress,
     required FilterState filterState,
     required BuildContext ctx,
+    required AppLocalizations l10n,
     required void Function(void Function()) setLocalState,
     required Future<void> Function(_AssemblyClipDeskOpEntry) runDisable,
     required Future<void> Function(
@@ -1576,22 +1714,36 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '剧本 #${item.scriptNumericId} · 分镜 #${item.storyboardNumericId} · 顺序 ${actualIndex + 1}',
+                    l10n.shortVideoSpaceProductionAssemblyScriptShotOrder(
+                      item.scriptNumericId,
+                      item.storyboardNumericId,
+                      actualIndex + 1,
+                    ),
                   ),
                   const SizedBox(height: 4),
-                  Text(paused ? '状态：暂停' : '状态：启用（${item.selectedMediaKind}）'),
+                  Text(
+                    paused
+                        ? l10n.shortVideoSpaceProductionAssemblyStatusPaused
+                        : l10n.shortVideoSpaceProductionAssemblyStatusEnabled(
+                            item.selectedMediaKind,
+                          ),
+                  ),
                   const SizedBox(height: 2),
                   Row(
                     children: [
-                      const Text('时长：'),
+                      Text(l10n.shortVideoSpaceProductionAssemblyDurationLabel),
                       buildHighlightedText(
-                        item.durationText.isEmpty ? "未设定" : item.durationText,
+                        item.durationText.isEmpty
+                            ? l10n.shortVideoSpaceProductionAssemblyDurationNotSet
+                            : item.durationText,
                         filterState.searchKeyword,
                       ),
-                      const Text(' · 字幕：'),
+                      Text(l10n.shortVideoSpaceProductionAssemblySubtitleLabel),
                       Flexible(
                         child: buildHighlightedText(
-                          item.subtitleText.isEmpty ? "空" : item.subtitleText,
+                          item.subtitleText.isEmpty
+                              ? l10n.shortVideoSpaceProductionAssemblySubtitleEmpty
+                              : item.subtitleText,
                           filterState.searchInSubtitles
                               ? filterState.searchKeyword
                               : '',
@@ -1602,14 +1754,16 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                   const SizedBox(height: 2),
                   // 配音状态展示
                   Text(
-                    '配音文本：${item.voiceoverScriptReady ? "✓ 就绪" : "✗ 未就绪"} · '
-                    '配音资产：${item.voiceoverAssetReady ? "✓ 就绪" : "✗ 未就绪"}',
+                    '${item.voiceoverScriptReady ? l10n.shortVideoSpaceProductionAssemblyVoiceoverScriptReady : l10n.shortVideoSpaceProductionAssemblyVoiceoverScriptNotReady} · '
+                    '${item.voiceoverAssetReady ? l10n.shortVideoSpaceProductionAssemblyVoiceoverAssetReady : l10n.shortVideoSpaceProductionAssemblyVoiceoverAssetNotReady}',
                   ),
                   if (item.voiceoverState.isNotEmpty) ...[
                     const SizedBox(height: 2),
                     Row(
                       children: [
-                        const Text('配音状态：'),
+                        Text(
+                          l10n.shortVideoSpaceProductionAssemblyVoiceoverStatusLabel,
+                        ),
                         buildHighlightedText(
                           item.voiceoverState,
                           filterState.searchInVoiceover
@@ -1623,7 +1777,9 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                     const SizedBox(height: 2),
                     Row(
                       children: [
-                        const Text('配音音频：'),
+                        Text(
+                          l10n.shortVideoSpaceProductionAssemblyVoiceoverAudioLabel,
+                        ),
                         Flexible(
                           child: buildHighlightedText(
                             item.voiceoverAudioUrl,
@@ -1641,7 +1797,9 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                     const SizedBox(height: 2),
                     Row(
                       children: [
-                        const Text('配音错误：'),
+                        Text(
+                          l10n.shortVideoSpaceProductionAssemblyVoiceoverErrorLabel,
+                        ),
                         Flexible(
                           child: buildHighlightedText(
                             item.voiceoverError,
@@ -1657,7 +1815,9 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                     ),
                   ],
                   const SizedBox(height: 2),
-                  Text('错位检查：${subtitleMismatchLine(item)}'),
+                  Text(
+                    '${l10n.shortVideoSpaceProductionAssemblyMismatchCheckLabel}${subtitleMismatchLine(item)}',
+                  ),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
@@ -1672,7 +1832,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                 setLocalState(() {});
                               }
                             : null,
-                        child: const Text('上移'),
+                        child: Text(l10n.shortVideoSpaceProductionAssemblyMoveUp),
                       ),
                       OutlinedButton(
                         onPressed: (canMoveDown && !operationInProgress)
@@ -1683,7 +1843,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                 setLocalState(() {});
                               }
                             : null,
-                        child: const Text('下移'),
+                        child: Text(l10n.shortVideoSpaceProductionAssemblyMoveDown),
                       ),
                       FilledButton.tonal(
                         onPressed: operationInProgress
@@ -1695,7 +1855,11 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                   unawaited(runDisable(item));
                                 }
                               },
-                        child: Text(paused ? '启用' : '暂停'),
+                        child: Text(
+                          paused
+                              ? l10n.shortVideoSpaceProductionAssemblyEnable
+                              : l10n.shortVideoSpaceProductionAssemblyPause,
+                        ),
                       ),
                       OutlinedButton(
                         onPressed: operationInProgress
@@ -1711,20 +1875,27 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                 final picked = await showDialog<int>(
                                   context: ctx,
                                   builder: (dCtx) => AlertDialog(
-                                    title: const Text('单镜头时长对齐'),
+                                    title: Text(
+                                      l10n
+                                          .shortVideoSpaceProductionAssemblySingleShotDurationTitle,
+                                    ),
                                     content: TextField(
                                       controller: ctrl,
                                       keyboardType: TextInputType.number,
-                                      decoration: const InputDecoration(
-                                        labelText: '时长（秒）',
-                                        hintText: '输入 1~300',
+                                      decoration: InputDecoration(
+                                        labelText: l10n
+                                            .shortVideoSpaceProductionAssemblySingleShotDurationLabel,
+                                        hintText: l10n
+                                            .shortVideoSpaceProductionAssemblySingleShotDurationHint,
                                       ),
                                     ),
                                     actions: [
                                       TextButton(
                                         onPressed: () =>
                                             Navigator.of(dCtx).pop(),
-                                        child: const Text('取消'),
+                                        child: Text(
+                                          l10n.shortVideoSpaceProductionAssemblyCancel,
+                                        ),
                                       ),
                                       FilledButton(
                                         onPressed: () {
@@ -1733,7 +1904,10 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                           );
                                           Navigator.of(dCtx).pop(sec);
                                         },
-                                        child: const Text('对齐并写回'),
+                                        child: Text(
+                                          l10n
+                                              .shortVideoSpaceProductionAssemblyAlignAndWriteBack,
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -1746,7 +1920,9 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                 }
                                 unawaited(runAlignDuration(item, picked));
                               },
-                        child: const Text('时长对齐'),
+                        child: Text(
+                          l10n.shortVideoSpaceProductionAssemblyAlignDuration,
+                        ),
                       ),
                       OutlinedButton(
                         onPressed: operationInProgress
@@ -1767,7 +1943,9 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                   ),
                                 );
                               },
-                        child: const Text('替换当前版本'),
+                        child: Text(
+                          l10n.shortVideoSpaceProductionAssemblyReplaceVersion,
+                        ),
                       ),
                       // Generate voiceover button
                       if (item.voiceoverScriptReady)
@@ -1783,7 +1961,10 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                   setLocalState(() {});
                                 },
                           icon: const Icon(Icons.record_voice_over),
-                          label: const Text('生成配音'),
+                          label: Text(
+                            l10n
+                                .shortVideoSpaceProductionAssemblyGenerateVoiceover,
+                          ),
                         ),
                       // Preview voiceover audio button
                       if (item.voiceoverAudioUrl.isNotEmpty)
@@ -1797,7 +1978,10 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                   );
                                 },
                           icon: const Icon(Icons.play_circle_outline),
-                          label: const Text('预览配音'),
+                          label: Text(
+                            l10n
+                                .shortVideoSpaceProductionAssemblyPreviewVoiceover,
+                          ),
                         ),
                     ],
                   ),
@@ -1823,8 +2007,9 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
       await showDialog<void>(
         context: context,
         builder: (ctx) {
+          final l10n = AppLocalizations.of(ctx)!;
           return AlertDialog(
-            title: const Text('成片级样式调整'),
+            title: Text(l10n.shortVideoSpaceProductionAssemblyAssemblyStyleTitle),
             content: SizedBox(
               width: 520,
               child: Column(
@@ -1832,22 +2017,26 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                 children: [
                   TextField(
                     controller: subtitleCtrl,
-                    decoration: const InputDecoration(
-                      labelText: '字幕样式 subtitle_style',
-                      hintText: '例如 cinematic_cn_v2（留空则回退默认）',
+                    decoration: InputDecoration(
+                      labelText: l10n
+                          .shortVideoSpaceProductionAssemblySubtitleStyleLabel,
+                      hintText: l10n
+                          .shortVideoSpaceProductionAssemblySubtitleStyleHint,
                     ),
                   ),
                   const SizedBox(height: 12),
                   TextField(
                     controller: bgmCtrl,
-                    decoration: const InputDecoration(
-                      labelText: 'BGM 策略 bgm_strategy',
-                      hintText: '例如 pulse_light（留空则回退默认）',
+                    decoration: InputDecoration(
+                      labelText: l10n
+                          .shortVideoSpaceProductionAssemblyBgmStrategyLabel,
+                      hintText: l10n
+                          .shortVideoSpaceProductionAssemblyBgmStrategyHint,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '保存后会写回 D7 默认配置，并刷新成片装配快照中的生效值。',
+                    l10n.shortVideoSpaceProductionAssemblyStyleNote,
                     style: Theme.of(ctx).textTheme.bodySmall,
                   ),
                 ],
@@ -1856,13 +2045,15 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(),
-                child: const Text('取消'),
+                child: Text(l10n.shortVideoSpaceProductionAssemblyCancel),
               ),
               FilledButton(
                 onPressed: () async {
                   final nextSubtitle = subtitleCtrl.text.trim();
                   final nextBgm = bgmCtrl.text.trim();
                   Navigator.of(ctx).pop();
+                  if (!mounted) return;
+                  final rootL10n = AppLocalizations.of(context)!;
                   try {
                     final updated = await updateProjectByProjectId(
                       token,
@@ -1882,24 +2073,39 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                           .map((row) => row.id == updated.id ? updated : row)
                           .toList(growable: false);
                     });
+                    final subtitleDisplay = _subtitleStyle.trim().isEmpty
+                        ? rootL10n.shortVideoSpaceProductionAssemblyStyleDefault
+                        : _subtitleStyle.trim();
+                    final bgmDisplay = _bgmStrategy.trim().isEmpty
+                        ? rootL10n.shortVideoSpaceProductionAssemblyStyleDefault
+                        : _bgmStrategy.trim();
                     _showOperationFeedback(
-                      '已更新成片级默认：字幕 ${_subtitleStyle.trim().isEmpty ? "默认" : _subtitleStyle.trim()} · '
-                      'BGM ${_bgmStrategy.trim().isEmpty ? "默认" : _bgmStrategy.trim()}',
+                      rootL10n.shortVideoSpaceProductionAssemblyStyleUpdated(
+                        subtitleDisplay,
+                        bgmDisplay,
+                      ),
                       isSuccess: true,
                     );
                     await _loadProjectOverview();
                   } on RustApiException catch (e) {
                     if (!mounted) return;
                     _showOperationFeedback(
-                      '成片样式写回失败：${e.statusCode ?? '-'}',
+                      rootL10n.shortVideoSpaceProductionAssemblyStyleWriteBackFailed(
+                        '${e.statusCode ?? '-'}',
+                      ),
                       isSuccess: false,
                     );
                   } catch (e) {
                     if (!mounted) return;
-                    _showOperationFeedback('成片样式写回失败：$e', isSuccess: false);
+                    _showOperationFeedback(
+                      rootL10n.shortVideoSpaceProductionAssemblyStyleWriteBackFailed(
+                        '$e',
+                      ),
+                      isSuccess: false,
+                    );
                   }
                 },
-                child: const Text('保存并刷新'),
+                child: Text(l10n.shortVideoSpaceProductionAssemblySaveAndRefresh),
               ),
             ],
           );

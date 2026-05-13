@@ -22342,7 +22342,7 @@ abstract class AppLocalizations {
   /// No description provided for @shortVideoSpaceProductionAssemblySubtitleLabel.
   ///
   /// In en, this message translates to:
-  /// **'Subtitle:'**
+  /// **' · Subtitle:'**
   String get shortVideoSpaceProductionAssemblySubtitleLabel;
 
   /// No description provided for @shortVideoSpaceProductionAssemblySubtitleEmpty.
@@ -22561,7 +22561,7 @@ abstract class AppLocalizations {
   /// No description provided for @shortVideoSpaceProductionAssemblyBatchRetryFailed.
   ///
   /// In en, this message translates to:
-  /// **'Batch retry failed ({count})'**
+  /// **'Batch retry ({count})'**
   String shortVideoSpaceProductionAssemblyBatchRetryFailed(int count);
 
   /// No description provided for @shortVideoSpaceProductionAssemblyFilterTaskIdScriptShot.
