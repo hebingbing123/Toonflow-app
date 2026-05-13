@@ -15194,36 +15194,6 @@ abstract class AppLocalizations {
   /// **'Uncategorized'**
   String get shortVideoBadCaseUncategorized;
 
-  /// No description provided for @shortVideoTaskStatusQueued.
-  ///
-  /// In en, this message translates to:
-  /// **'Queued'**
-  String get shortVideoTaskStatusQueued;
-
-  /// No description provided for @shortVideoTaskStatusRunning.
-  ///
-  /// In en, this message translates to:
-  /// **'Running'**
-  String get shortVideoTaskStatusRunning;
-
-  /// No description provided for @shortVideoTaskStatusSucceeded.
-  ///
-  /// In en, this message translates to:
-  /// **'Succeeded'**
-  String get shortVideoTaskStatusSucceeded;
-
-  /// No description provided for @shortVideoTaskStatusFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed'**
-  String get shortVideoTaskStatusFailed;
-
-  /// No description provided for @shortVideoTaskStatusCancelled.
-  ///
-  /// In en, this message translates to:
-  /// **'Cancelled'**
-  String get shortVideoTaskStatusCancelled;
-
   /// No description provided for @shortVideoQualityNoSignalAnimated.
   ///
   /// In en, this message translates to:
@@ -22752,7 +22722,7 @@ abstract class AppLocalizations {
   /// No description provided for @shortVideoSpaceProductionAssemblyTaskSummary.
   ///
   /// In en, this message translates to:
-  /// **'Total {total} · queued {queued} · running {running} · succeeded {succeeded} · failed {failed} · cancelled {cancelled} · Showing {filtered}/{visible}'**
+  /// **'Total {total} · Queued: {queued} · Running: {running} · Succeeded: {succeeded} · Failed: {failed} · Cancelled: {cancelled} · Showing {filtered}/{visible}'**
   String shortVideoSpaceProductionAssemblyTaskSummary(
     int total,
     int queued,

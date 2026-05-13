@@ -7318,11 +7318,6 @@
   "shortVideoShotReadinessSelectProjectHint": "Select a short drama project to see server-side shot blocking rollup.",
   "shortVideoTaskUnnamed": "Unnamed task",
   "shortVideoBadCaseUncategorized": "Uncategorized",
-  "shortVideoTaskStatusQueued": "Queued",
-  "shortVideoTaskStatusRunning": "Running",
-  "shortVideoTaskStatusSucceeded": "Succeeded",
-  "shortVideoTaskStatusFailed": "Failed",
-  "shortVideoTaskStatusCancelled": "Cancelled",
   "shortVideoQualityNoSignalAnimated": "Quality reviews have not surfaced strong signals yet; we will highlight style consistency, character continuity, and pacing risks here.",
   "shortVideoQualityNoSignalLive": "Quality reviews have not surfaced strong signals yet; we will highlight performance naturalness, realism, and voiceover pacing here.",
   "shortVideoQualityInsightAnimated": "Auto/manual review pass rate is about {passRate}%; {badCount} bad cases logged—keep focusing on character consistency, visual continuity, and shot rhythm.",
@@ -11069,7 +11064,7 @@
     }
   },
   "shortVideoSpaceProductionAssemblyFilterTaskIdScriptShot": "Filter: Task ID / Script # / Shot #",
-  "shortVideoSpaceProductionAssemblyTaskSummary": "Total {total} · queued {queued} · running {running} · succeeded {succeeded} · failed {failed} · cancelled {cancelled} · Showing {filtered}/{visible}",
+  "shortVideoSpaceProductionAssemblyTaskSummary": "Total {total} · Queued: {queued} · Running: {running} · Succeeded: {succeeded} · Failed: {failed} · Cancelled: {cancelled} · Showing {filtered}/{visible}",
   "@shortVideoSpaceProductionAssemblyTaskSummary": {
     "placeholders": {
       "total": {

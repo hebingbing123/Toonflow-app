@@ -43,20 +43,7 @@ String shortVideoFormatTaskKind(AppLocalizations l10n, JobRow row) {
 }
 
 String shortVideoFormatTaskStatus(AppLocalizations l10n, JobRow row) {
-  switch (row.status) {
-    case 'queued':
-      return l10n.shortVideoTaskStatusQueued;
-    case 'running':
-      return l10n.shortVideoTaskStatusRunning;
-    case 'succeeded':
-      return l10n.shortVideoTaskStatusSucceeded;
-    case 'failed':
-      return l10n.shortVideoTaskStatusFailed;
-    case 'cancelled':
-      return l10n.shortVideoTaskStatusCancelled;
-    default:
-      return row.status;
-  }
+  return shortVideoPublishJobStatusLabel(l10n, row.status);
 }
 
 List<ShortVideoReadinessItem> buildShortVideoReadinessItems(

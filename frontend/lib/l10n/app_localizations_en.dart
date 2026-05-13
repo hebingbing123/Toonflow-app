@@ -9716,21 +9716,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shortVideoBadCaseUncategorized => 'Uncategorized';
 
   @override
-  String get shortVideoTaskStatusQueued => 'Queued';
-
-  @override
-  String get shortVideoTaskStatusRunning => 'Running';
-
-  @override
-  String get shortVideoTaskStatusSucceeded => 'Succeeded';
-
-  @override
-  String get shortVideoTaskStatusFailed => 'Failed';
-
-  @override
-  String get shortVideoTaskStatusCancelled => 'Cancelled';
-
-  @override
   String get shortVideoQualityNoSignalAnimated =>
       'Quality reviews have not surfaced strong signals yet; we will highlight style consistency, character continuity, and pacing risks here.';
 
@@ -14778,7 +14763,7 @@ class AppLocalizationsEn extends AppLocalizations {
     int filtered,
     int visible,
   ) {
-    return 'Total $total · queued $queued · running $running · succeeded $succeeded · failed $failed · cancelled $cancelled · Showing $filtered/$visible';
+    return 'Total $total · Queued: $queued · Running: $running · Succeeded: $succeeded · Failed: $failed · Cancelled: $cancelled · Showing $filtered/$visible';
   }
 
   @override

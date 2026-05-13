@@ -9282,21 +9282,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shortVideoBadCaseUncategorized => '未分类';
 
   @override
-  String get shortVideoTaskStatusQueued => '排队中';
-
-  @override
-  String get shortVideoTaskStatusRunning => '进行中';
-
-  @override
-  String get shortVideoTaskStatusSucceeded => '已完成';
-
-  @override
-  String get shortVideoTaskStatusFailed => '失败';
-
-  @override
-  String get shortVideoTaskStatusCancelled => '已取消';
-
-  @override
   String get shortVideoQualityNoSignalAnimated =>
       '质量评审还没有收敛出明显信号，后续会在这里提醒画风一致性、角色连续性和镜头节奏风险。';
 
