@@ -1,3 +1,5 @@
+// ignore_for_file: unused_element, unused_field
+
 // Example integration of cross-panel versioning in short_video_space
 //
 // This file demonstrates how to integrate the panel versioning system
@@ -9,6 +11,8 @@
 // The actual integration should be done in the main section.dart file.
 
 import 'package:flutter/material.dart';
+
+import '../l10n/app_localizations.dart';
 import 'panel_versioning.dart';
 import '../rust_api.dart';
 
@@ -44,22 +48,31 @@ class _ShortVideoSpaceSectionStateWithVersioning extends State<StatefulWidget>
       // Load production overview
       final productionOverview =
           await fetchProjectProductionOverviewByProjectId(token, projectId);
-      updatePanelVersion('production', productionOverview.dataVersion);
+      updatePanelVersion('production', 'v${productionOverview.schemaVersion}');
 
       // Load assets overview
-      final assetsOverview =
-          await fetchProjectAssetsOverviewByProjectId(token, projectId);
-      updatePanelVersion('assets', assetsOverview.dataVersion);
+      final assetsOverview = await fetchProjectAssetsOverviewByProjectId(
+        token,
+        projectId,
+      );
+      updatePanelVersion('assets', 'v${assetsOverview.schemaVersion}');
 
       // Load assembly
-      final assembly =
-          await fetchProjectShortVideoAssemblyByProjectId(token, projectId);
-      updatePanelVersion('assembly', assembly.dataVersion);
+      final assembly = await fetchProjectShortVideoAssemblyByProjectId(
+        token,
+        projectId,
+      );
+      updatePanelVersion('assembly', 'v${assembly.schemaVersion}');
 
       // Load export check
-      final exportCheck =
-          await fetchProjectShortVideoExportCheckByProjectId(token, projectId);
-      updatePanelVersion('export', exportCheck.dataVersion);
+      final exportCheck = await fetchProjectShortVideoExportCheckByProjectId(
+        token,
+        projectId,
+      );
+      updatePanelVersion(
+        'export',
+        exportCheck.dataVersion ?? 'v${exportCheck.schemaVersion}',
+      );
 
       // Check consistency after loading all panels
       final status = checkPanelConsistency();
@@ -97,36 +110,42 @@ class _ShortVideoSpaceSectionStateWithVersioning extends State<StatefulWidget>
     if (!status.consistent) {
       final result = await showDialog<bool>(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Stale Data Detected'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Some panels have outdated data. Refresh before proceeding?',
-              ),
-              const SizedBox(height: 16),
-              ...status.stalePanels.map((p) => Padding(
+        builder: (dialogContext) {
+          final l10n = AppLocalizations.of(dialogContext)!;
+          return AlertDialog(
+            title: Text(l10n.shortVideoPanelVersionDataInconsistencyTitle),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(l10n.shortVideoPanelVersionStaleDialogBody),
+                const SizedBox(height: 16),
+                ...status.stalePanels.map(
+                  (p) => Padding(
                     padding: const EdgeInsets.only(left: 8, top: 4),
                     child: Text(
-                      '• ${p.panel}: ${PanelVersionManager.formatAge(p.ageSeconds)}',
+                      l10n.shortVideoPanelVersionStaleRow(
+                        shortVideoPanelVersionPanelTitle(l10n, p.panel),
+                        PanelVersionManager.formatAge(p.ageSeconds, l10n),
+                      ),
                       style: const TextStyle(fontSize: 12),
                     ),
-                  )),
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(false),
+                child: Text(l10n.taskCenterCancel),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(dialogContext).pop(true),
+                child: Text(l10n.shortVideoPanelVersionRefreshAndContinue),
+              ),
             ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Refresh & Continue'),
-            ),
-          ],
-        ),
+          );
+        },
       );
 
       if (result == true) {
@@ -171,7 +190,9 @@ class _ShortVideoSpaceSectionStateWithVersioning extends State<StatefulWidget>
         // Example: Publish button with consistency check
         ElevatedButton(
           onPressed: () => _performPublishOperation(context),
-          child: const Text('Publish'),
+          child: Text(
+            AppLocalizations.of(context)!.shortVideoPanelVersionExamplePublish,
+          ),
         ),
       ],
     );
@@ -191,11 +212,13 @@ class PanelFreshnessIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (snapshot == null || !snapshot.hasVersion) {
+    final snap = snapshot;
+    if (snap == null || !snap.hasVersion) {
       return const SizedBox.shrink();
     }
 
-    final age = snapshot.ageSeconds;
+    final l10n = AppLocalizations.of(context)!;
+    final age = snap.ageSeconds;
     final severity = PanelVersionManager.getSeverity(age);
 
     Color color;
@@ -222,11 +245,8 @@ class PanelFreshnessIndicator extends StatelessWidget {
         Icon(icon, size: 14, color: color),
         const SizedBox(width: 4),
         Text(
-          PanelVersionManager.formatAge(age),
-          style: TextStyle(
-            fontSize: 11,
-            color: color,
-          ),
+          PanelVersionManager.formatAge(age, l10n),
+          style: TextStyle(fontSize: 11, color: color),
         ),
       ],
     );
@@ -248,25 +268,20 @@ class PanelHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Row(
       children: [
         Text(
           title,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(width: 8),
-        PanelFreshnessIndicator(
-          panelName: title,
-          snapshot: snapshot,
-        ),
+        PanelFreshnessIndicator(panelName: title, snapshot: snapshot),
         const Spacer(),
         IconButton(
           icon: const Icon(Icons.refresh, size: 20),
           onPressed: onRefresh,
-          tooltip: 'Refresh panel',
+          tooltip: l10n.shortVideoPanelVersionRefreshPanelTooltip,
         ),
       ],
     );

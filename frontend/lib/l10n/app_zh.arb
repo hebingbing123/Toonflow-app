@@ -10837,7 +10837,7 @@
       }
     }
   },
-  "shortVideoSpacePublishPanelDetail": "半自动作业在 `awaiting_confirmation` 时需点「确认」；worker 骨架会写入 `publish_attempts` 占位成功记录。",
+  "shortVideoSpacePublishPanelDetail": "半自动发布在「待确认」状态时会暂停，需你点击「确认」后继续；投递结果会写入发布稽核记录，便于追溯。",
   "shortVideoSpaceProductionAssemblyExportCompleted": "导出已完成。",
   "shortVideoSpaceProductionAssemblyExportNotCompleted": "导出未完成或已取消。",
   "shortVideoSpaceProductionAssemblyExportStartFailed": "导出启动失败：{error}",
@@ -12456,6 +12456,59 @@
       }
     }
   },
+  "shortVideoPanelVersionDataInconsistencyTitle": "检测到数据不一致",
+  "shortVideoPanelVersionStaleSummary": "部分面板可能展示较早的数据，约 {staleCount} 个视图版本落后。",
+  "@shortVideoPanelVersionStaleSummary": {
+    "placeholders": {
+      "staleCount": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPanelVersionRefresh": "刷新",
+  "shortVideoPanelVersionStaleRow": "• {panelName}：{relativeAge}",
+  "@shortVideoPanelVersionStaleRow": {
+    "placeholders": {
+      "panelName": {
+        "type": "String"
+      },
+      "relativeAge": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPanelVersionPanelProduction": "制作",
+  "shortVideoPanelVersionPanelAssets": "资产",
+  "shortVideoPanelVersionPanelAssembly": "成片装配",
+  "shortVideoPanelVersionPanelExport": "导出检查",
+  "shortVideoPanelVersionAgeSeconds": "{seconds} 秒前",
+  "@shortVideoPanelVersionAgeSeconds": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPanelVersionAgeMinutes": "{minutes} 分钟前",
+  "@shortVideoPanelVersionAgeMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPanelVersionAgeHours": "{hours} 小时前",
+  "@shortVideoPanelVersionAgeHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPanelVersionStaleDialogBody": "部分面板数据可能已过期，是否先刷新再继续？",
+  "shortVideoPanelVersionRefreshAndContinue": "刷新并继续",
+  "shortVideoPanelVersionExamplePublish": "发布",
+  "shortVideoPanelVersionRefreshPanelTooltip": "刷新此面板",
   "accountSectionTitle": "账户与隐私",
   "accountRiskyPrefsTooltip": "本机客户端偏好（删号、导出等「不再提示」与恢复确认）",
   "accountSectionSubtitle": "统一管理账户数据导出、下载留档和不可逆删号。导出任务会走平台 job 队列，可反复生成新版快照。",

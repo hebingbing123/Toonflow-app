@@ -14451,7 +14451,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shortVideoSpacePublishPanelDetail =>
-      'Semi-auto jobs need \"Confirm\" when in `awaiting_confirmation`; worker skeleton will write `publish_attempts` placeholder success records.';
+      'Semi-automatic publish jobs pause until you tap Confirm while the job is awaiting confirmation. Delivery results are recorded in the publish audit trail.';
 
   @override
   String get shortVideoSpaceProductionAssemblyExportCompleted =>
@@ -16360,6 +16360,63 @@ class AppLocalizationsEn extends AppLocalizations {
   String shortVideoPublishPrepareSeverityRaw(String severity) {
     return '$severity';
   }
+
+  @override
+  String get shortVideoPanelVersionDataInconsistencyTitle =>
+      'Data inconsistency detected';
+
+  @override
+  String shortVideoPanelVersionStaleSummary(int staleCount) {
+    return 'Some panels may be showing older data. $staleCount panel view(s) behind.';
+  }
+
+  @override
+  String get shortVideoPanelVersionRefresh => 'Refresh';
+
+  @override
+  String shortVideoPanelVersionStaleRow(String panelName, String relativeAge) {
+    return '• $panelName: $relativeAge';
+  }
+
+  @override
+  String get shortVideoPanelVersionPanelProduction => 'Production';
+
+  @override
+  String get shortVideoPanelVersionPanelAssets => 'Assets';
+
+  @override
+  String get shortVideoPanelVersionPanelAssembly => 'Assembly';
+
+  @override
+  String get shortVideoPanelVersionPanelExport => 'Export check';
+
+  @override
+  String shortVideoPanelVersionAgeSeconds(int seconds) {
+    return '${seconds}s ago';
+  }
+
+  @override
+  String shortVideoPanelVersionAgeMinutes(int minutes) {
+    return '$minutes min ago';
+  }
+
+  @override
+  String shortVideoPanelVersionAgeHours(int hours) {
+    return '$hours h ago';
+  }
+
+  @override
+  String get shortVideoPanelVersionStaleDialogBody =>
+      'Some panels have outdated data. Refresh before continuing?';
+
+  @override
+  String get shortVideoPanelVersionRefreshAndContinue => 'Refresh & continue';
+
+  @override
+  String get shortVideoPanelVersionExamplePublish => 'Publish';
+
+  @override
+  String get shortVideoPanelVersionRefreshPanelTooltip => 'Refresh panel';
 
   @override
   String get accountSectionTitle => 'Account section title';

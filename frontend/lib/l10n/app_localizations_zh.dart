@@ -13759,7 +13759,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get shortVideoSpacePublishPanelDetail =>
-      '半自动作业在 `awaiting_confirmation` 时需点「确认」；worker 骨架会写入 `publish_attempts` 占位成功记录。';
+      '半自动发布在「待确认」状态时会暂停，需你点击「确认」后继续；投递结果会写入发布稽核记录，便于追溯。';
 
   @override
   String get shortVideoSpaceProductionAssemblyExportCompleted => '导出已完成。';
@@ -15572,6 +15572,61 @@ class AppLocalizationsZh extends AppLocalizations {
   String shortVideoPublishPrepareSeverityRaw(String severity) {
     return '$severity';
   }
+
+  @override
+  String get shortVideoPanelVersionDataInconsistencyTitle => '检测到数据不一致';
+
+  @override
+  String shortVideoPanelVersionStaleSummary(int staleCount) {
+    return '部分面板可能展示较早的数据，约 $staleCount 个视图版本落后。';
+  }
+
+  @override
+  String get shortVideoPanelVersionRefresh => '刷新';
+
+  @override
+  String shortVideoPanelVersionStaleRow(String panelName, String relativeAge) {
+    return '• $panelName：$relativeAge';
+  }
+
+  @override
+  String get shortVideoPanelVersionPanelProduction => '制作';
+
+  @override
+  String get shortVideoPanelVersionPanelAssets => '资产';
+
+  @override
+  String get shortVideoPanelVersionPanelAssembly => '成片装配';
+
+  @override
+  String get shortVideoPanelVersionPanelExport => '导出检查';
+
+  @override
+  String shortVideoPanelVersionAgeSeconds(int seconds) {
+    return '$seconds 秒前';
+  }
+
+  @override
+  String shortVideoPanelVersionAgeMinutes(int minutes) {
+    return '$minutes 分钟前';
+  }
+
+  @override
+  String shortVideoPanelVersionAgeHours(int hours) {
+    return '$hours 小时前';
+  }
+
+  @override
+  String get shortVideoPanelVersionStaleDialogBody => '部分面板数据可能已过期，是否先刷新再继续？';
+
+  @override
+  String get shortVideoPanelVersionRefreshAndContinue => '刷新并继续';
+
+  @override
+  String get shortVideoPanelVersionExamplePublish => '发布';
+
+  @override
+  String get shortVideoPanelVersionRefreshPanelTooltip => '刷新此面板';
 
   @override
   String get accountSectionTitle => '账户与隐私';

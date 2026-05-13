@@ -5,15 +5,30 @@
 
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
+
+/// Localized display name for a tracked panel key (e.g. `production`, `export`).
+String shortVideoPanelVersionPanelTitle(AppLocalizations l10n, String panel) {
+  switch (panel) {
+    case 'production':
+      return l10n.shortVideoPanelVersionPanelProduction;
+    case 'assets':
+      return l10n.shortVideoPanelVersionPanelAssets;
+    case 'assembly':
+      return l10n.shortVideoPanelVersionPanelAssembly;
+    case 'export':
+      return l10n.shortVideoPanelVersionPanelExport;
+    default:
+      return panel;
+  }
+}
+
 /// Snapshot of a panel's data version and load time
 class PanelSnapshot {
   final String? dataVersion;
   final DateTime loadedAt;
 
-  PanelSnapshot({
-    required this.dataVersion,
-    required this.loadedAt,
-  });
+  PanelSnapshot({required this.dataVersion, required this.loadedAt});
 
   /// Age of this snapshot in seconds
   int get ageSeconds => DateTime.now().difference(loadedAt).inSeconds;
@@ -132,11 +147,13 @@ class PanelVersionManager {
         final ageSeconds = versionTime != null
             ? latestTime.difference(versionTime).inSeconds
             : 0;
-        stalePanels.add(StalePanelInfo(
-          panel: entry.key,
-          version: version,
-          ageSeconds: ageSeconds,
-        ));
+        stalePanels.add(
+          StalePanelInfo(
+            panel: entry.key,
+            version: version,
+            ageSeconds: ageSeconds,
+          ),
+        );
       }
     }
 
@@ -165,17 +182,17 @@ class PanelVersionManager {
     }
   }
 
-  /// Get human-readable age string
-  static String formatAge(int seconds) {
+  /// Get human-readable age string (localized).
+  static String formatAge(int seconds, AppLocalizations l10n) {
     if (seconds < 60) {
-      return '$seconds seconds ago';
-    } else if (seconds < 3600) {
-      final minutes = seconds ~/ 60;
-      return '$minutes minute${minutes == 1 ? '' : 's'} ago';
-    } else {
-      final hours = seconds ~/ 3600;
-      return '$hours hour${hours == 1 ? '' : 's'} ago';
+      return l10n.shortVideoPanelVersionAgeSeconds(seconds);
     }
+    if (seconds < 3600) {
+      final minutes = seconds ~/ 60;
+      return l10n.shortVideoPanelVersionAgeMinutes(minutes);
+    }
+    final hours = seconds ~/ 3600;
+    return l10n.shortVideoPanelVersionAgeHours(hours);
   }
 
   /// Get severity level based on age
@@ -191,11 +208,7 @@ class PanelVersionManager {
 }
 
 /// Severity level for stale data
-enum StaleSeverity {
-  info,
-  warning,
-  error,
-}
+enum StaleSeverity { info, warning, error }
 
 /// Widget to display consistency alert
 class PanelConsistencyAlert extends StatelessWidget {
@@ -214,6 +227,7 @@ class PanelConsistencyAlert extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
+    final l10n = AppLocalizations.of(context)!;
     final maxAge = status.stalePanels
         .map((p) => p.ageSeconds)
         .reduce((a, b) => a > b ? a : b);
@@ -258,7 +272,7 @@ class PanelConsistencyAlert extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Data Inconsistency Detected',
+                  l10n.shortVideoPanelVersionDataInconsistencyTitle,
                   style: TextStyle(
                     color: textColor,
                     fontWeight: FontWeight.bold,
@@ -267,25 +281,28 @@ class PanelConsistencyAlert extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Some panels are viewing older data. '
-                  '${status.stalePanels.length} panel${status.stalePanels.length == 1 ? '' : 's'} behind.',
-                  style: TextStyle(
-                    color: textColor,
-                    fontSize: 12,
+                  l10n.shortVideoPanelVersionStaleSummary(
+                    status.stalePanels.length,
                   ),
+                  style: TextStyle(color: textColor, fontSize: 12),
                 ),
                 if (status.stalePanels.isNotEmpty) ...[
                   const SizedBox(height: 8),
-                  ...status.stalePanels.map((p) => Padding(
-                        padding: const EdgeInsets.only(left: 8, top: 2),
-                        child: Text(
-                          '• ${p.panel}: ${PanelVersionManager.formatAge(p.ageSeconds)}',
-                          style: TextStyle(
-                            color: textColor.withValues(alpha: 0.8),
-                            fontSize: 11,
-                          ),
+                  ...status.stalePanels.map(
+                    (p) => Padding(
+                      padding: const EdgeInsets.only(left: 8, top: 2),
+                      child: Text(
+                        l10n.shortVideoPanelVersionStaleRow(
+                          shortVideoPanelVersionPanelTitle(l10n, p.panel),
+                          PanelVersionManager.formatAge(p.ageSeconds, l10n),
                         ),
-                      )),
+                        style: TextStyle(
+                          color: textColor.withValues(alpha: 0.8),
+                          fontSize: 11,
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ],
             ),
@@ -294,7 +311,7 @@ class PanelConsistencyAlert extends StatelessWidget {
           ElevatedButton.icon(
             onPressed: onRefresh,
             icon: const Icon(Icons.refresh, size: 16),
-            label: const Text('Refresh'),
+            label: Text(l10n.shortVideoPanelVersionRefresh),
             style: ElevatedButton.styleFrom(
               backgroundColor: textColor,
               foregroundColor: backgroundColor,

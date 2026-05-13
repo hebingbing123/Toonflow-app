@@ -22265,7 +22265,7 @@ abstract class AppLocalizations {
   /// No description provided for @shortVideoSpacePublishPanelDetail.
   ///
   /// In en, this message translates to:
-  /// **'Semi-auto jobs need \"Confirm\" when in `awaiting_confirmation`; worker skeleton will write `publish_attempts` placeholder success records.'**
+  /// **'Semi-automatic publish jobs pause until you tap Confirm while the job is awaiting confirmation. Delivery results are recorded in the publish audit trail.'**
   String get shortVideoSpacePublishPanelDetail;
 
   /// No description provided for @shortVideoSpaceProductionAssemblyExportCompleted.
@@ -25125,6 +25125,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{severity}'**
   String shortVideoPublishPrepareSeverityRaw(String severity);
+
+  /// No description provided for @shortVideoPanelVersionDataInconsistencyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Data inconsistency detected'**
+  String get shortVideoPanelVersionDataInconsistencyTitle;
+
+  /// No description provided for @shortVideoPanelVersionStaleSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Some panels may be showing older data. {staleCount} panel view(s) behind.'**
+  String shortVideoPanelVersionStaleSummary(int staleCount);
+
+  /// No description provided for @shortVideoPanelVersionRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get shortVideoPanelVersionRefresh;
+
+  /// No description provided for @shortVideoPanelVersionStaleRow.
+  ///
+  /// In en, this message translates to:
+  /// **'• {panelName}: {relativeAge}'**
+  String shortVideoPanelVersionStaleRow(String panelName, String relativeAge);
+
+  /// No description provided for @shortVideoPanelVersionPanelProduction.
+  ///
+  /// In en, this message translates to:
+  /// **'Production'**
+  String get shortVideoPanelVersionPanelProduction;
+
+  /// No description provided for @shortVideoPanelVersionPanelAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'Assets'**
+  String get shortVideoPanelVersionPanelAssets;
+
+  /// No description provided for @shortVideoPanelVersionPanelAssembly.
+  ///
+  /// In en, this message translates to:
+  /// **'Assembly'**
+  String get shortVideoPanelVersionPanelAssembly;
+
+  /// No description provided for @shortVideoPanelVersionPanelExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Export check'**
+  String get shortVideoPanelVersionPanelExport;
+
+  /// No description provided for @shortVideoPanelVersionAgeSeconds.
+  ///
+  /// In en, this message translates to:
+  /// **'{seconds}s ago'**
+  String shortVideoPanelVersionAgeSeconds(int seconds);
+
+  /// No description provided for @shortVideoPanelVersionAgeMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min ago'**
+  String shortVideoPanelVersionAgeMinutes(int minutes);
+
+  /// No description provided for @shortVideoPanelVersionAgeHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} h ago'**
+  String shortVideoPanelVersionAgeHours(int hours);
+
+  /// No description provided for @shortVideoPanelVersionStaleDialogBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Some panels have outdated data. Refresh before continuing?'**
+  String get shortVideoPanelVersionStaleDialogBody;
+
+  /// No description provided for @shortVideoPanelVersionRefreshAndContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh & continue'**
+  String get shortVideoPanelVersionRefreshAndContinue;
+
+  /// No description provided for @shortVideoPanelVersionExamplePublish.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish'**
+  String get shortVideoPanelVersionExamplePublish;
+
+  /// No description provided for @shortVideoPanelVersionRefreshPanelTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh panel'**
+  String get shortVideoPanelVersionRefreshPanelTooltip;
 
   /// No description provided for @accountSectionTitle.
   ///

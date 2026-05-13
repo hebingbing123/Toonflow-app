@@ -10877,7 +10877,7 @@
       }
     }
   },
-  "shortVideoSpacePublishPanelDetail": "Semi-auto jobs need \"Confirm\" when in `awaiting_confirmation`; worker skeleton will write `publish_attempts` placeholder success records.",
+  "shortVideoSpacePublishPanelDetail": "Semi-automatic publish jobs pause until you tap Confirm while the job is awaiting confirmation. Delivery results are recorded in the publish audit trail.",
   "shortVideoSpaceProductionAssemblyExportCompleted": "Export completed.",
   "shortVideoSpaceProductionAssemblyExportNotCompleted": "Export not completed or cancelled.",
   "shortVideoSpaceProductionAssemblyExportStartFailed": "Export start failed: {error}",
@@ -12496,6 +12496,59 @@
       }
     }
   },
+  "shortVideoPanelVersionDataInconsistencyTitle": "Data inconsistency detected",
+  "shortVideoPanelVersionStaleSummary": "Some panels may be showing older data. {staleCount} panel view(s) behind.",
+  "@shortVideoPanelVersionStaleSummary": {
+    "placeholders": {
+      "staleCount": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPanelVersionRefresh": "Refresh",
+  "shortVideoPanelVersionStaleRow": "• {panelName}: {relativeAge}",
+  "@shortVideoPanelVersionStaleRow": {
+    "placeholders": {
+      "panelName": {
+        "type": "String"
+      },
+      "relativeAge": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPanelVersionPanelProduction": "Production",
+  "shortVideoPanelVersionPanelAssets": "Assets",
+  "shortVideoPanelVersionPanelAssembly": "Assembly",
+  "shortVideoPanelVersionPanelExport": "Export check",
+  "shortVideoPanelVersionAgeSeconds": "{seconds}s ago",
+  "@shortVideoPanelVersionAgeSeconds": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPanelVersionAgeMinutes": "{minutes} min ago",
+  "@shortVideoPanelVersionAgeMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPanelVersionAgeHours": "{hours} h ago",
+  "@shortVideoPanelVersionAgeHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoPanelVersionStaleDialogBody": "Some panels have outdated data. Refresh before continuing?",
+  "shortVideoPanelVersionRefreshAndContinue": "Refresh & continue",
+  "shortVideoPanelVersionExamplePublish": "Publish",
+  "shortVideoPanelVersionRefreshPanelTooltip": "Refresh panel",
   "accountSectionTitle": "Account section title",
   "accountRiskyPrefsTooltip": "Account risky prefs tooltip",
   "accountSectionSubtitle": "Account section subtitle",
