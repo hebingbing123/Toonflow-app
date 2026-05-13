@@ -241,13 +241,13 @@ extension _StoryboardWorkbenchPatchActions on _StoryboardWorkbenchPanelState {
                               if (!ctx.mounted) return;
                               setDialogState(() => submitting = false);
                               ScaffoldMessenger.of(ctx).showSnackBar(
-                                SnackBar(content: Text(e.toString())),
+                                SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
                               );
                             } catch (e) {
                               if (!ctx.mounted) return;
                               setDialogState(() => submitting = false);
                               ScaffoldMessenger.of(ctx).showSnackBar(
-                                SnackBar(content: Text(e.toString())),
+                                SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
                               );
                             }
                           },

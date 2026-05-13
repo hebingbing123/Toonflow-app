@@ -60,18 +60,11 @@ class _ScriptWorkbenchPanelState extends State<_ScriptWorkbenchPanel> {
               );
       });
       widget.onExtractStateSynced(current?.extractState);
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-      setState(
-        () => _contextLine = l10n.projectEditorScriptsSingleWorkbenchContextReadFailed(
-          e.toString(),
-        ),
-      );
     } catch (e) {
       if (!mounted) return;
       setState(
         () => _contextLine = l10n.projectEditorScriptsSingleWorkbenchContextReadFailed(
-          e.toString(),
+          describeUserVisibleApiError(l10n, e),
         ),
       );
     } finally {
@@ -85,16 +78,14 @@ class _ScriptWorkbenchPanelState extends State<_ScriptWorkbenchPanel> {
     setState(() => _runningAction = true);
     try {
       await action();
-    } on RustApiException catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
     } catch (e) {
       if (!mounted) return;
+      final snackL10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
+      ).showSnackBar(
+        SnackBar(content: Text(describeUserVisibleApiError(snackL10n, e))),
+      );
     } finally {
       if (mounted) {
         setState(() => _runningAction = false);

@@ -62,7 +62,7 @@ Widget buildProjectScriptsSection({
         setDialogState(() {
           scriptTaskBusy[0] = false;
           scriptTaskLine[0] = l10n.projectEditorScriptsWorkbenchExportAllFailed(
-            e.toString(),
+            describeUserVisibleApiError(l10n, e),
           );
         });
       }
@@ -71,7 +71,7 @@ Widget buildProjectScriptsSection({
         setDialogState(() {
           scriptTaskBusy[0] = false;
           scriptTaskLine[0] = l10n.projectEditorScriptsWorkbenchExportAllFailed(
-            e.toString(),
+            describeUserVisibleApiError(l10n, e),
           );
         });
       }
@@ -118,7 +118,7 @@ Widget buildProjectScriptsSection({
         setDialogState(() {
           scriptTaskBusy[0] = false;
           scriptTaskLine[0] = l10n.projectEditorScriptsWorkbenchPollAllFailed(
-            e.toString(),
+            describeUserVisibleApiError(l10n, e),
           );
         });
       }
@@ -127,7 +127,7 @@ Widget buildProjectScriptsSection({
         setDialogState(() {
           scriptTaskBusy[0] = false;
           scriptTaskLine[0] = l10n.projectEditorScriptsWorkbenchPollAllFailed(
-            e.toString(),
+            describeUserVisibleApiError(l10n, e),
           );
         });
       }
@@ -174,7 +174,7 @@ Widget buildProjectScriptsSection({
         setDialogState(() {
           scriptTaskBusy[0] = false;
           scriptTaskLine[0] = l10n.projectEditorScriptsWorkbenchExtractAllFailed(
-            e.toString(),
+            describeUserVisibleApiError(l10n, e),
           );
         });
       }
@@ -183,7 +183,7 @@ Widget buildProjectScriptsSection({
         setDialogState(() {
           scriptTaskBusy[0] = false;
           scriptTaskLine[0] = l10n.projectEditorScriptsWorkbenchExtractAllFailed(
-            e.toString(),
+            describeUserVisibleApiError(l10n, e),
           );
         });
       }
@@ -236,14 +236,22 @@ Widget buildProjectScriptsSection({
         setDialogState(() => saving[0] = false);
         ScaffoldMessenger.of(
           ctx,
-        ).showSnackBar(SnackBar(content: Text(e.toString())));
+        ).showSnackBar(
+          SnackBar(
+            content: Text(describeUserVisibleApiError(l10n, e)),
+          ),
+        );
       }
     } catch (e) {
       if (ctx.mounted) {
         setDialogState(() => saving[0] = false);
         ScaffoldMessenger.of(
           ctx,
-        ).showSnackBar(SnackBar(content: Text(e.toString())));
+        ).showSnackBar(
+          SnackBar(
+            content: Text(describeUserVisibleApiError(l10n, e)),
+          ),
+        );
       }
     }
   }

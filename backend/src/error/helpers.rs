@@ -413,6 +413,26 @@ pub fn not_implemented_i18n(en_msg: &str, zh_msg: &str) -> ApiError {
     }
 }
 
+/// 创建已弃用端点错误（带替代端点参数）。
+///
+/// 根据当前请求的 `Accept-Language` 偏好返回对应语言的错误消息。
+///
+/// # 示例
+///
+/// ```ignore
+/// return Err(deprecated_endpoint_i18n("/api/v2/users"));
+/// return Err(deprecated_endpoint_i18n("/api/v2/projects"));
+/// ```
+pub fn deprecated_endpoint_i18n(alternative: &str) -> ApiError {
+    ApiError::NotImplementedI18n {
+        en: format!(
+            "This endpoint is deprecated. Please use {} instead",
+            alternative
+        ),
+        zh: format!("此端点已弃用。请改用 {}", alternative),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1341,6 +1361,105 @@ mod tests {
         assert_eq!(
             json.get("message").and_then(|v| v.as_str()),
             Some("功能不可用")
+        );
+    }
+
+    #[test]
+    fn deprecated_endpoint_i18n_en() {
+        let err = deprecated_endpoint_i18n("/api/v2/users");
+        match err {
+            ApiError::NotImplementedI18n { en, zh } => {
+                assert_eq!(
+                    en,
+                    "This endpoint is deprecated. Please use /api/v2/users instead"
+                );
+                assert_eq!(zh, "此端点已弃用。请改用 /api/v2/users");
+            }
+            _ => panic!("expected NotImplementedI18n"),
+        }
+    }
+
+    #[test]
+    fn deprecated_endpoint_i18n_with_different_alternatives() {
+        let test_cases = vec![
+            (
+                "/api/v2/users",
+                "This endpoint is deprecated. Please use /api/v2/users instead",
+                "此端点已弃用。请改用 /api/v2/users",
+            ),
+            (
+                "/api/v2/projects",
+                "This endpoint is deprecated. Please use /api/v2/projects instead",
+                "此端点已弃用。请改用 /api/v2/projects",
+            ),
+            (
+                "/api/v2/workspaces",
+                "This endpoint is deprecated. Please use /api/v2/workspaces instead",
+                "此端点已弃用。请改用 /api/v2/workspaces",
+            ),
+        ];
+
+        for (alternative, expected_en, expected_zh) in test_cases {
+            let err = deprecated_endpoint_i18n(alternative);
+            match err {
+                ApiError::NotImplementedI18n { en, zh } => {
+                    assert_eq!(en, expected_en);
+                    assert_eq!(zh, expected_zh);
+                }
+                _ => panic!("expected NotImplementedI18n"),
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn deprecated_endpoint_i18n_response_en() {
+        use axum::body::to_bytes;
+        use axum::response::IntoResponse;
+
+        let err = deprecated_endpoint_i18n("/api/v2/users");
+        let resp = err.into_response();
+
+        let bytes = to_bytes(resp.into_body(), 16 * 1024)
+            .await
+            .expect("body bytes");
+        let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
+
+        assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(501));
+        assert_eq!(
+            json.get("code").and_then(|v| v.as_str()),
+            Some("not_implemented")
+        );
+        assert_eq!(
+            json.get("message").and_then(|v| v.as_str()),
+            Some("This endpoint is deprecated. Please use /api/v2/users instead")
+        );
+    }
+
+    #[tokio::test]
+    async fn deprecated_endpoint_i18n_response_zh() {
+        use axum::body::to_bytes;
+        use axum::response::IntoResponse;
+
+        let resp = REQUEST_LOCALE
+            .scope(ApiLocale::Zh, async {
+                let err = deprecated_endpoint_i18n("/api/v2/projects");
+                err.into_response()
+            })
+            .await;
+
+        let bytes = to_bytes(resp.into_body(), 16 * 1024)
+            .await
+            .expect("body bytes");
+        let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
+
+        assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(501));
+        assert_eq!(
+            json.get("code").and_then(|v| v.as_str()),
+            Some("not_implemented")
+        );
+        assert_eq!(
+            json.get("message").and_then(|v| v.as_str()),
+            Some("此端点已弃用。请改用 /api/v2/projects")
         );
     }
 }

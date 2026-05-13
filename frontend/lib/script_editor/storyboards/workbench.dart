@@ -264,17 +264,14 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
           );
         },
       );
-    } on RustApiException catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(e.toString())));
-      }
     } catch (e) {
       if (mounted) {
+        final snackL10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text(e.toString())));
+        ).showSnackBar(
+          SnackBar(content: Text(describeUserVisibleApiError(snackL10n, e))),
+        );
       }
     }
   }

@@ -239,7 +239,7 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
 
       final l10n = AppLocalizations.of(context)!;
       setState(() {
-        _errorMessage = l10n.shortVideoSpaceDialogExportProgressFetchError(e.toString());
+        _errorMessage = l10n.shortVideoSpaceDialogExportProgressFetchError(describeUserVisibleApiError(l10n, e));
       });
     }
   }
@@ -290,7 +290,7 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
       final l10n = AppLocalizations.of(context)!;
       setState(() {
         _cancelling = false;
-        _errorMessage = l10n.shortVideoSpaceDialogExportProgressCancelFailed(e.toString());
+        _errorMessage = l10n.shortVideoSpaceDialogExportProgressCancelFailed(describeUserVisibleApiError(l10n, e));
       });
     }
   }

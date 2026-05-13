@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import '../l10n/rust_api_error_format.dart';
 import '../rust_api/search/api.dart';
+import '../utils/localized_formatting.dart';
 
 /// 搜索历史下拉列表组件
 ///
@@ -120,7 +122,7 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
       // 显示错误提示
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.globalSearchClearHistoryFailed(e.toString()))),
+          SnackBar(content: Text(l10n.globalSearchClearHistoryFailed(describeUserVisibleApiError(l10n, e)))),
         );
       }
     }
@@ -235,26 +237,11 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
     );
   }
 
-  /// 格式化时间显示
+  /// 格式化时间显示 - 使用本地化格式
   String _formatTime(String isoString) {
-    final l10n = AppLocalizations.of(context)!;
     try {
       final dateTime = DateTime.parse(isoString);
-      final now = DateTime.now();
-      final difference = now.difference(dateTime);
-
-      if (difference.inMinutes < 1) {
-        return l10n.globalSearchTimeJustNow;
-      } else if (difference.inHours < 1) {
-        return l10n.globalSearchTimeMinutesAgo(difference.inMinutes);
-      } else if (difference.inDays < 1) {
-        return l10n.globalSearchTimeHoursAgo(difference.inHours);
-      } else if (difference.inDays < 7) {
-        return l10n.globalSearchTimeDaysAgo(difference.inDays);
-      } else {
-        // 显示具体日期
-        return '${dateTime.month}/${dateTime.day}';
-      }
+      return LocalizedFormatting.formatRelativeTime(context, dateTime);
     } catch (_) {
       return '';
     }

@@ -16,8 +16,9 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
     required Future<void> Function() refreshData,
     BuildContext? dialogContext,
   }) async {
+    final l10n = AppLocalizations.of(context)!;
     if (selectedStoryboardIds.isEmpty) {
-      showFeedback('Select shots to enable first', isSuccess: false);
+      showFeedback(l10n.shortVideoBatchSelectShotsToEnableFirst, isSuccess: false);
       return;
     }
 
@@ -42,7 +43,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
 
     if (operations.isEmpty) {
       showFeedback(
-        'None of the selected shots have a usable video URL',
+        l10n.shortVideoBatchNoShotsWithVideoUrl,
         isSuccess: false,
       );
       return;
@@ -52,7 +53,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
     if (dialogContext != null && dialogContext.mounted) {
       await _showBatchOperationProgress(
         context: dialogContext,
-        title: 'Batch enable shots',
+        title: l10n.shortVideoBatchEnableTitle,
         operations: operations,
         executeOperation: (operation) async {
           await postWorkbenchSelectVideoV1(
@@ -65,7 +66,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
         },
         onComplete: (successful, failed, failedItems) async {
           showFeedback(
-            'Batch enable finished: succeeded $successful, failed $failed',
+            l10n.shortVideoBatchEnableFinished(successful, failed),
             isSuccess: failed == 0,
           );
           await refreshData();
@@ -82,18 +83,18 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
         );
 
         showFeedback(
-          'Batch enable finished: succeeded ${response.success}, failed ${response.failed}',
+          l10n.shortVideoBatchEnableFinished(response.success, response.failed),
           isSuccess: response.failed == 0,
         );
 
         await refreshData();
       } on RustApiException catch (e) {
         showFeedback(
-          'Batch enable failed: ${e.statusCode ?? '-'}',
+          l10n.shortVideoBatchEnableFailedStatus('${e.statusCode ?? '-'}'),
           isSuccess: false,
         );
       } catch (e) {
-        showFeedback('Batch enable failed: $e', isSuccess: false);
+        showFeedback(l10n.shortVideoBatchEnableFailedError('$e'), isSuccess: false);
       }
     }
   }
@@ -108,8 +109,9 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
     required Future<void> Function() refreshData,
     BuildContext? dialogContext,
   }) async {
+    final l10n = AppLocalizations.of(context)!;
     if (selectedStoryboardIds.isEmpty) {
-      showFeedback('Select shots to disable first', isSuccess: false);
+      showFeedback(l10n.shortVideoBatchSelectShotsToDisableFirst, isSuccess: false);
       return;
     }
 
@@ -135,7 +137,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
     if (dialogContext != null && dialogContext.mounted) {
       await _showBatchOperationProgress(
         context: dialogContext,
-        title: 'Batch disable shots',
+        title: l10n.shortVideoBatchDisableTitle,
         operations: operations,
         executeOperation: (operation) async {
           await postWorkbenchDeleteVideoV1(
@@ -147,7 +149,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
         },
         onComplete: (successful, failed, failedItems) async {
           showFeedback(
-            'Batch disable finished: succeeded $successful, failed $failed',
+            l10n.shortVideoBatchDisableFinished(successful, failed),
             isSuccess: failed == 0,
           );
           await refreshData();
@@ -164,18 +166,18 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
         );
 
         showFeedback(
-          'Batch disable finished: succeeded ${response.success}, failed ${response.failed}',
+          l10n.shortVideoBatchDisableFinished(response.success, response.failed),
           isSuccess: response.failed == 0,
         );
 
         await refreshData();
       } on RustApiException catch (e) {
         showFeedback(
-          'Batch disable failed: ${e.statusCode ?? '-'}',
+          l10n.shortVideoBatchDisableFailedStatus('${e.statusCode ?? '-'}'),
           isSuccess: false,
         );
       } catch (e) {
-        showFeedback('Batch disable failed: $e', isSuccess: false);
+        showFeedback(l10n.shortVideoBatchDisableFailedError('$e'), isSuccess: false);
       }
     }
   }
@@ -190,8 +192,9 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
     required Function(String message, {required bool isSuccess}) showFeedback,
     required Future<void> Function() refreshData,
   }) async {
+    final l10n = AppLocalizations.of(context)!;
     if (selectedStoryboardIds.isEmpty) {
-      showFeedback('Select shots to align duration first', isSuccess: false);
+      showFeedback(l10n.shortVideoBatchSelectShotsDurationFirst, isSuccess: false);
       return;
     }
 
@@ -199,31 +202,34 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
     final ctrl = TextEditingController();
     final duration = await showDialog<int>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Batch duration align'),
-        content: TextField(
-          controller: ctrl,
-          keyboardType: TextInputType.number,
-          decoration: const InputDecoration(
-            labelText: 'Duration (seconds)',
-            hintText: 'Enter 1–300',
+      builder: (ctx) {
+        final dlgL10n = AppLocalizations.of(ctx)!;
+        return AlertDialog(
+          title: Text(dlgL10n.shortVideoBatchDurationDialogTitle),
+          content: TextField(
+            controller: ctrl,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              labelText: dlgL10n.shortVideoBatchDurationLabel,
+              hintText: dlgL10n.shortVideoBatchDurationHint,
+            ),
+            autofocus: true,
           ),
-          autofocus: true,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () {
-              final sec = int.tryParse(ctrl.text.trim());
-              Navigator.of(ctx).pop(sec);
-            },
-            child: const Text('Align and save'),
-          ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: Text(dlgL10n.storyboardEditorDialogCancel),
+            ),
+            FilledButton(
+              onPressed: () {
+                final sec = int.tryParse(ctrl.text.trim());
+                Navigator.of(ctx).pop(sec);
+              },
+              child: Text(dlgL10n.shortVideoBatchAlignAndSave),
+            ),
+          ],
+        );
+      },
     );
     ctrl.dispose();
 
@@ -240,7 +246,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
     if (context.mounted) {
       await _showBatchOperationProgress(
         context: context,
-        title: 'Batch duration align',
+        title: l10n.shortVideoBatchDurationProgressTitle,
         operations: operations,
         executeOperation: (operation) async {
           await postStoryboardUpdateDurationV1(
@@ -253,7 +259,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
         },
         onComplete: (successful, failed, failedItems) async {
           showFeedback(
-            'Batch duration align finished: succeeded $successful, failed $failed',
+            l10n.shortVideoBatchDurationFinished(successful, failed),
             isSuccess: failed == 0,
           );
           await refreshData();
@@ -273,8 +279,9 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
     required Function(String message, {required bool isSuccess}) showFeedback,
     required Future<void> Function() refreshData,
   }) async {
+    final l10n = AppLocalizations.of(context)!;
     if (selectedStoryboardIds.isEmpty) {
-      showFeedback('Select shots to replace first', isSuccess: false);
+      showFeedback(l10n.shortVideoBatchSelectShotsReplaceFirst, isSuccess: false);
       return;
     }
 
@@ -283,52 +290,55 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
     final replacementCtrl = TextEditingController();
     final result = await showDialog<Map<String, String>>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Batch replace video URLs'),
-        content: SizedBox(
-          width: 500,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: patternCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Find pattern (regex supported)',
-                  hintText: 'e.g. /v1/',
+      builder: (ctx) {
+        final dlgL10n = AppLocalizations.of(ctx)!;
+        return AlertDialog(
+          title: Text(dlgL10n.shortVideoBatchReplaceDialogTitle),
+          content: SizedBox(
+            width: 500,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: patternCtrl,
+                  decoration: InputDecoration(
+                    labelText: dlgL10n.shortVideoBatchReplaceFindPatternLabel,
+                    hintText: dlgL10n.shortVideoBatchReplaceFindPatternHint,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: replacementCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Replace with',
-                  hintText: 'e.g. /v2/',
+                const SizedBox(height: 12),
+                TextField(
+                  controller: replacementCtrl,
+                  decoration: InputDecoration(
+                    labelText: dlgL10n.shortVideoBatchReplaceWithLabel,
+                    hintText: dlgL10n.shortVideoBatchReplaceWithHint,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Find-and-replace runs on each selected shot video URL',
-                style: Theme.of(ctx).textTheme.bodySmall,
-              ),
-            ],
+                const SizedBox(height: 8),
+                Text(
+                  dlgL10n.shortVideoBatchReplaceUrlDescription,
+                  style: Theme.of(ctx).textTheme.bodySmall,
+                ),
+              ],
+            ),
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () {
-              Navigator.of(ctx).pop({
-                'pattern': patternCtrl.text.trim(),
-                'replacement': replacementCtrl.text.trim(),
-              });
-            },
-            child: const Text('Apply replacement'),
-          ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: Text(dlgL10n.storyboardEditorDialogCancel),
+            ),
+            FilledButton(
+              onPressed: () {
+                Navigator.of(ctx).pop({
+                  'pattern': patternCtrl.text.trim(),
+                  'replacement': replacementCtrl.text.trim(),
+                });
+              },
+              child: Text(dlgL10n.shortVideoBatchApplyReplacement),
+            ),
+          ],
+        );
+      },
     );
     patternCtrl.dispose();
     replacementCtrl.dispose();
@@ -369,7 +379,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
 
     if (operations.isEmpty) {
       showFeedback(
-        'No shots to replace (pattern did not match)',
+        l10n.shortVideoBatchReplaceNoMatch,
         isSuccess: false,
       );
       return;
@@ -384,18 +394,18 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
       );
 
       showFeedback(
-        'Batch replace finished: succeeded ${response.success}, failed ${response.failed}',
+        l10n.shortVideoBatchReplaceFinished(response.success, response.failed),
         isSuccess: response.failed == 0,
       );
 
       await refreshData();
     } on RustApiException catch (e) {
       showFeedback(
-        'Batch replace failed: ${e.statusCode ?? '-'}',
+        l10n.shortVideoBatchReplaceFailedStatus('${e.statusCode ?? '-'}'),
         isSuccess: false,
       );
     } catch (e) {
-      showFeedback('Batch replace failed: $e', isSuccess: false);
+      showFeedback(l10n.shortVideoBatchReplaceFailedError('$e'), isSuccess: false);
     }
   }
 
@@ -408,15 +418,16 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
   }) async {
     final token = widget.accessToken;
     final project = _selectedProject;
+    final l10n = AppLocalizations.of(context)!;
 
     if (token == null || token.isEmpty || project == null) {
-      showFeedback('Cannot load project', isSuccess: false);
+      showFeedback(l10n.shortVideoBatchCannotLoadProject, isSuccess: false);
       return;
     }
 
     if (selectedStoryboardIds.isEmpty) {
       showFeedback(
-        'Select shots to generate voiceover first',
+        l10n.shortVideoBatchSelectShotsVoiceoverFirst,
         isSuccess: false,
       );
       return;
@@ -433,7 +444,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
 
     if (eligibleShots.isEmpty) {
       showFeedback(
-        'None of the selected shots have usable voiceover text',
+        l10n.shortVideoBatchNoVoiceoverTextSelected,
         isSuccess: false,
       );
       return;
@@ -479,13 +490,14 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
       builder: (dialogContext) {
         return StatefulBuilder(
           builder: (ctx, setDialogState) {
+            final dlgL10n = AppLocalizations.of(ctx)!;
             final progress = eligibleShots.isEmpty
                 ? 0.0
                 : totalProcessed / eligibleShots.length;
             final progressPercent = (progress * 100).toStringAsFixed(0);
 
             return AlertDialog(
-              title: const Text('Batch generate voiceover'),
+              title: Text(dlgL10n.shortVideoBatchGenerateVoiceoverTitle),
               content: SizedBox(
                 width: 480,
                 child: Column(
@@ -494,21 +506,28 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
                     LinearProgressIndicator(value: progress),
                     const SizedBox(height: 16),
                     Text(
-                      'Progress: $totalProcessed / ${eligibleShots.length} ($progressPercent%)',
+                      dlgL10n.shortVideoBatchVoiceoverQueueProgress(
+                        totalProcessed,
+                        eligibleShots.length,
+                        progressPercent,
+                      ),
                       style: Theme.of(ctx).textTheme.titleMedium,
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Succeeded: $totalSuccessful · failed: $totalFailed',
+                      dlgL10n.shortVideoBatchVoiceoverQueueStats(
+                        totalSuccessful,
+                        totalFailed,
+                      ),
                       style: Theme.of(ctx).textTheme.bodyMedium,
                     ),
                     if (failedItems.isNotEmpty) ...[
                       const SizedBox(height: 16),
                       const Divider(),
                       const SizedBox(height: 8),
-                      const Text(
-                        'Failed items:',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                      Text(
+                        dlgL10n.shortVideoBatchVoiceoverQueueFailedHeading,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
                       SizedBox(
@@ -521,7 +540,10 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 4),
                               child: Text(
-                                'Shot #${item.shotId}: ${item.errorMessage}',
+                                dlgL10n.shortVideoBatchVoiceoverQueueFailedLine(
+                                  item.shotId,
+                                  item.errorMessage,
+                                ),
                                 style: Theme.of(ctx).textTheme.bodySmall
                                     ?.copyWith(
                                       color: Theme.of(ctx).colorScheme.error,
@@ -539,7 +561,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
                 if (totalProcessed >= eligibleShots.length)
                   FilledButton(
                     onPressed: () => Navigator.of(ctx).pop(),
-                    child: const Text('Done'),
+                    child: Text(dlgL10n.shortVideoBatchVoiceoverQueueDone),
                   )
                 else
                   const SizedBox.shrink(),
@@ -566,12 +588,13 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
         failedItems.add(
           BatchOperationFailedItem(
             shotId: shot.storyboardNumericId,
-            errorMessage: '${e.statusCode ?? "unknown error"}: ${e.message}',
+            errorMessage:
+                '${e.statusCode ?? l10n.shortVideoRustApiUnknownError}: ${e.message}',
           ),
         );
       }
       showFeedback(
-        'Batch voiceover generation failed: ${e.statusCode ?? "-"}',
+        l10n.shortVideoBatchVoiceoverGenFailedStatus('${e.statusCode ?? '-'}'),
         isSuccess: false,
       );
     } catch (e) {
@@ -581,22 +604,27 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
         failedItems.add(
           BatchOperationFailedItem(
             shotId: shot.storyboardNumericId,
-            errorMessage: e.toString(),
+            errorMessage: describeUserVisibleApiError(l10n, e),
           ),
         );
       }
-      showFeedback('Batch voiceover generation failed: $e', isSuccess: false);
+      showFeedback(
+        l10n.shortVideoBatchVoiceoverGenFailedError(
+          describeUserVisibleApiError(l10n, e),
+        ),
+        isSuccess: false,
+      );
     }
 
     // Final feedback
     if (totalFailed == 0) {
       showFeedback(
-        'Batch voiceover done: enqueued jobs for $totalSuccessful shot(s)',
+        l10n.shortVideoBatchVoiceoverDoneJobs(totalSuccessful),
         isSuccess: true,
       );
     } else {
       showFeedback(
-        'Batch voiceover done: succeeded $totalSuccessful, failed $totalFailed',
+        l10n.shortVideoBatchVoiceoverDonePartial(totalSuccessful, totalFailed),
         isSuccess: false,
       );
     }
@@ -613,14 +641,15 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
   }) async {
     final token = widget.accessToken;
     final project = _selectedProject;
+    final l10n = AppLocalizations.of(context)!;
 
     if (token == null || token.isEmpty || project == null) {
-      showFeedback('Cannot load project', isSuccess: false);
+      showFeedback(l10n.shortVideoBatchCannotLoadProject, isSuccess: false);
       return;
     }
 
     if (!item.voiceoverScriptReady) {
-      showFeedback('This shot has no usable voiceover text', isSuccess: false);
+      showFeedback(l10n.shortVideoBatchShotNoVoiceoverText, isSuccess: false);
       return;
     }
 
@@ -643,12 +672,13 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) {
-        return const AlertDialog(
+        final dlgL10n = AppLocalizations.of(dialogContext)!;
+        return AlertDialog(
           content: Row(
             children: [
-              CircularProgressIndicator(),
-              SizedBox(width: 16),
-              Text('Generating voiceover...'),
+              const CircularProgressIndicator(),
+              const SizedBox(width: 16),
+              Expanded(child: Text(dlgL10n.shortVideoBatchGeneratingVoiceover)),
             ],
           ),
         );
@@ -676,7 +706,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
 
       if (response.taskId.isNotEmpty) {
         showFeedback(
-          'Shot #${item.storyboardNumericId} voiceover job enqueued',
+          l10n.shortVideoBatchVoiceoverJobEnqueued(item.storyboardNumericId),
           isSuccess: true,
         );
 
@@ -684,7 +714,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
         await _loadProjectOverview();
       } else {
         showFeedback(
-          'Voiceover generation failed: could not create task',
+          l10n.shortVideoBatchVoiceoverCouldNotCreateTask,
           isSuccess: false,
         );
       }
@@ -695,7 +725,10 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
       }
 
       showFeedback(
-        'Voiceover generation failed: ${e.statusCode ?? "-"} - ${e.message}',
+        l10n.shortVideoBatchVoiceoverSingleFailedStatus(
+          '${e.statusCode ?? '-'}',
+          e.message,
+        ),
         isSuccess: false,
       );
     } catch (e) {
@@ -704,7 +737,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
         Navigator.of(context).pop();
       }
 
-      showFeedback('Voiceover generation failed: $e', isSuccess: false);
+      showFeedback(l10n.shortVideoBatchVoiceoverSingleFailedError('$e'), isSuccess: false);
     }
   }
 
@@ -729,6 +762,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
     var failed = 0;
     final failedItems = <BatchOperationFailedItem>[];
     var isCancelled = false;
+    final l10n = AppLocalizations.of(context)!;
 
     await showDialog<void>(
       context: context,
@@ -747,9 +781,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
                 } catch (e) {
                   failed++;
                   final storyboardId = operation['storyboardId'] as int;
-                  final errorMessage = e is RustApiException
-                      ? 'Error code: ${e.statusCode ?? '-'}'
-                      : e.toString();
+                  final errorMessage = describeUserVisibleApiError(l10n, e);
                   failedItems.add(
                     BatchOperationFailedItem(
                       shotId: storyboardId,
@@ -808,7 +840,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
                       if (context.mounted) {
                         await _showBatchOperationProgress(
                           context: context,
-                          title: '$title (retry)',
+                          title: l10n.shortVideoBatchOperationRetryTitle(title),
                           operations: retryOperations,
                           executeOperation: executeOperation,
                           onComplete: onComplete,

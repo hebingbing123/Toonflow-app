@@ -69,14 +69,14 @@ extension _HomePageProjectEditorDialogActions on _HomePageState {
                     setDialogState(() => dialogState.saving[0] = false);
                     ScaffoldMessenger.of(
                       ctx,
-                    ).showSnackBar(SnackBar(content: Text(e.toString())));
+                    ).showSnackBar(SnackBar(content: Text(describeUserVisibleApiError(l10n, e))));
                   }
                 } catch (e) {
                   if (ctx.mounted) {
                     setDialogState(() => dialogState.saving[0] = false);
                     ScaffoldMessenger.of(
                       ctx,
-                    ).showSnackBar(SnackBar(content: Text(e.toString())));
+                    ).showSnackBar(SnackBar(content: Text(describeUserVisibleApiError(l10n, e))));
                   }
                 }
               },
@@ -134,14 +134,14 @@ extension _HomePageProjectEditorDialogActions on _HomePageState {
                     setDialogState(() => dialogState.saving[0] = false);
                     ScaffoldMessenger.of(
                       ctx,
-                    ).showSnackBar(SnackBar(content: Text(e.toString())));
+                    ).showSnackBar(SnackBar(content: Text(describeUserVisibleApiError(l10n, e))));
                   }
                 } catch (e) {
                   if (ctx.mounted) {
                     setDialogState(() => dialogState.saving[0] = false);
                     ScaffoldMessenger.of(
                       ctx,
-                    ).showSnackBar(SnackBar(content: Text(e.toString())));
+                    ).showSnackBar(SnackBar(content: Text(describeUserVisibleApiError(l10n, e))));
                   }
                 }
               },

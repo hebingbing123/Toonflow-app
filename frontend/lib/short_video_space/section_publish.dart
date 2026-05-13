@@ -167,7 +167,7 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.shortVideoPublishOpsCreateDraftFailed(e.toString()))),
+          SnackBar(content: Text(l10n.shortVideoPublishOpsCreateDraftFailed(describeUserVisibleApiError(l10n, e)))),
         );
       }
     } finally {
@@ -248,7 +248,7 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.shortVideoPublishOpsEnqueueFailed(e.toString()))),
+          SnackBar(content: Text(l10n.shortVideoPublishOpsEnqueueFailed(describeUserVisibleApiError(l10n, e)))),
         );
       }
     } finally {
@@ -295,7 +295,7 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
             ),
           );
         } catch (e) {
-          summary.add(l10n.shortVideoPublishOpsBatchLineFail(draft.id, e.toString()));
+          summary.add(l10n.shortVideoPublishOpsBatchLineFail(draft.id, describeUserVisibleApiError(l10n, e)));
         }
       }
       await _refreshPublishSlice(project, token);
@@ -350,7 +350,7 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
             ),
           );
         } catch (e) {
-          summary.add(l10n.shortVideoPublishOpsBatchLineFail(job.id.substring(0, 8), e.toString()));
+          summary.add(l10n.shortVideoPublishOpsBatchLineFail(job.id.substring(0, 8), describeUserVisibleApiError(l10n, e)));
         }
       }
       await _refreshPublishSlice(project, token);
@@ -410,7 +410,7 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.shortVideoPublishOpsConfirmFailed(e.toString()))),
+          SnackBar(content: Text(l10n.shortVideoPublishOpsConfirmFailed(describeUserVisibleApiError(l10n, e)))),
         );
       }
     } finally {

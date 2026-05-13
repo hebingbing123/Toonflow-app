@@ -150,7 +150,7 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.shortVideoPublishBatchScheduleFailed(e.toString()))),
+          SnackBar(content: Text(l10n.shortVideoPublishBatchScheduleFailed(describeUserVisibleApiError(l10n, e)))),
         );
       }
     } finally {
@@ -269,7 +269,7 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.shortVideoPublishBatchPublishFailed(e.toString()))),
+          SnackBar(content: Text(l10n.shortVideoPublishBatchPublishFailed(describeUserVisibleApiError(l10n, e)))),
         );
       }
     } finally {
@@ -339,7 +339,7 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.shortVideoPublishBatchArchiveFailed(e.toString()))),
+          SnackBar(content: Text(l10n.shortVideoPublishBatchArchiveFailed(describeUserVisibleApiError(l10n, e)))),
         );
       }
     } finally {

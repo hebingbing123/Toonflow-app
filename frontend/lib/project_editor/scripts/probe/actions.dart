@@ -50,7 +50,7 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(
                       ctx,
-                    ).showSnackBar(SnackBar(content: Text(e.toString())));
+                    ).showSnackBar(SnackBar(content: Text(describeUserVisibleApiError(l10n, e))));
                   }
                 } finally {
                   if (ctx.mounted) {
@@ -88,7 +88,7 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(
                       ctx,
-                    ).showSnackBar(SnackBar(content: Text(e.toString())));
+                    ).showSnackBar(SnackBar(content: Text(describeUserVisibleApiError(l10n, e))));
                   }
                 } finally {
                   if (ctx.mounted) {
@@ -125,7 +125,7 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(
                       ctx,
-                    ).showSnackBar(SnackBar(content: Text(e.toString())));
+                    ).showSnackBar(SnackBar(content: Text(describeUserVisibleApiError(l10n, e))));
                   }
                 } finally {
                   if (ctx.mounted) {
@@ -170,7 +170,7 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(
                       ctx,
-                    ).showSnackBar(SnackBar(content: Text(e.toString())));
+                    ).showSnackBar(SnackBar(content: Text(describeUserVisibleApiError(l10n, e))));
                   }
                 } finally {
                   if (ctx.mounted) {
@@ -207,7 +207,7 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(
                       ctx,
-                    ).showSnackBar(SnackBar(content: Text(e.toString())));
+                    ).showSnackBar(SnackBar(content: Text(describeUserVisibleApiError(l10n, e))));
                   }
                 } finally {
                   if (ctx.mounted) {
@@ -250,7 +250,7 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(
                       ctx,
-                    ).showSnackBar(SnackBar(content: Text(e.toString())));
+                    ).showSnackBar(SnackBar(content: Text(describeUserVisibleApiError(l10n, e))));
                   }
                 } finally {
                   if (ctx.mounted) {
@@ -291,7 +291,7 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(
                       ctx,
-                    ).showSnackBar(SnackBar(content: Text(e.toString())));
+                    ).showSnackBar(SnackBar(content: Text(describeUserVisibleApiError(l10n, e))));
                   }
                 } finally {
                   if (ctx.mounted) {

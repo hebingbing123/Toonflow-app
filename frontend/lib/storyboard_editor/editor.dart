@@ -167,14 +167,14 @@ extension _HomePageStoryboardEditor on _HomePageState {
                               if (ctx.mounted) {
                                 setDialogState(() => saving[0] = false);
                                 ScaffoldMessenger.of(ctx).showSnackBar(
-                                  SnackBar(content: Text(e.toString())),
+                                  SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
                                 );
                               }
                             } catch (e) {
                               if (ctx.mounted) {
                                 setDialogState(() => saving[0] = false);
                                 ScaffoldMessenger.of(ctx).showSnackBar(
-                                  SnackBar(content: Text(e.toString())),
+                                  SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
                                 );
                               }
                             }
@@ -252,14 +252,14 @@ extension _HomePageStoryboardEditor on _HomePageState {
                               if (ctx.mounted) {
                                 setDialogState(() => saving[0] = false);
                                 ScaffoldMessenger.of(ctx).showSnackBar(
-                                  SnackBar(content: Text(e.toString())),
+                                  SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
                                 );
                               }
                             } catch (e) {
                               if (ctx.mounted) {
                                 setDialogState(() => saving[0] = false);
                                 ScaffoldMessenger.of(ctx).showSnackBar(
-                                  SnackBar(content: Text(e.toString())),
+                                  SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
                                 );
                               }
                             }

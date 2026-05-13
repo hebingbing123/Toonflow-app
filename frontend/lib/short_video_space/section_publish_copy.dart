@@ -60,7 +60,7 @@ extension ShortVideoPublishCopy on _ShortVideoSpaceSectionState {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.shortVideoPublishCopySuggestFailed(e.toString()))),
+          SnackBar(content: Text(l10n.shortVideoPublishCopySuggestFailed(describeUserVisibleApiError(l10n, e)))),
         );
       }
     } finally {
@@ -130,7 +130,7 @@ extension ShortVideoPublishCopy on _ShortVideoSpaceSectionState {
       );
     } catch (e) {
       messenger?.showSnackBar(
-        SnackBar(content: Text(l10n.shortVideoPublishCopySaveFailed(e.toString()))),
+        SnackBar(content: Text(l10n.shortVideoPublishCopySaveFailed(describeUserVisibleApiError(l10n, e)))),
       );
     } finally {
       if (mounted) {

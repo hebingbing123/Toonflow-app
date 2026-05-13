@@ -104,7 +104,7 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
         final l10n = AppLocalizations.of(context)!;
         setState(() {
           _isLoading = false;
-          _errorMessage = l10n.shortVideoAudioPreviewLoadFailed(e.toString());
+          _errorMessage = l10n.shortVideoAudioPreviewLoadFailed(describeUserVisibleApiError(l10n, e));
         });
       }
     }
@@ -127,7 +127,7 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
         setState(() {
-          _errorMessage = l10n.shortVideoAudioPreviewPlaybackFailed(e.toString());
+          _errorMessage = l10n.shortVideoAudioPreviewPlaybackFailed(describeUserVisibleApiError(l10n, e));
         });
       }
     }
@@ -143,7 +143,7 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
         setState(() {
-          _errorMessage = l10n.shortVideoAudioPreviewStopFailed(e.toString());
+          _errorMessage = l10n.shortVideoAudioPreviewStopFailed(describeUserVisibleApiError(l10n, e));
         });
       }
     }
@@ -156,7 +156,7 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
         setState(() {
-          _errorMessage = l10n.shortVideoAudioPreviewSeekFailed(e.toString());
+          _errorMessage = l10n.shortVideoAudioPreviewSeekFailed(describeUserVisibleApiError(l10n, e));
         });
       }
     }
@@ -172,7 +172,7 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
         setState(() {
-          _errorMessage = l10n.shortVideoAudioPreviewVolumeFailed(e.toString());
+          _errorMessage = l10n.shortVideoAudioPreviewVolumeFailed(describeUserVisibleApiError(l10n, e));
         });
       }
     }
