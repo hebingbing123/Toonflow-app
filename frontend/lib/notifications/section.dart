@@ -1092,7 +1092,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     final shouldSave = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
-        final dl10n = AppLocalizations.of(dialogContext)!;
+        final dl10n = resolveAppLocalizationsForErrors(dialogContext);
         return AlertDialog(
           title: Text(dl10n.notificationsDialogSaveClearedTemplateTitle),
           content: Column(
@@ -1184,7 +1184,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     final shouldSave = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
-        final dl10n = AppLocalizations.of(dialogContext)!;
+        final dl10n = resolveAppLocalizationsForErrors(dialogContext);
         return AlertDialog(
           title: Text(
             dl10n.notificationsDialogSaveWorkspaceSharedTemplateTitle,
@@ -1278,7 +1278,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     final shouldSave = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
-        final dl10n = AppLocalizations.of(dialogContext)!;
+        final dl10n = resolveAppLocalizationsForErrors(dialogContext);
         return AlertDialog(
           title: Text(dl10n.notificationsDialogEditTemplateTitle(template.id)),
           content: Column(
@@ -1335,7 +1335,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     final shouldDelete = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
-        final dl10n = AppLocalizations.of(dialogContext)!;
+        final dl10n = resolveAppLocalizationsForErrors(dialogContext);
         return AlertDialog(
           title: Text(
             dl10n.notificationsDialogDeleteTemplateTitle(template.label),
@@ -1366,7 +1366,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     final shouldDelete = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
-        final dl10n = AppLocalizations.of(dialogContext)!;
+        final dl10n = resolveAppLocalizationsForErrors(dialogContext);
         return AlertDialog(
           title: Text(
             dl10n.notificationsDialogDeleteSharedTemplateTitle(template.label),
@@ -1403,7 +1403,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     final shouldSave = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
-        final dl10n = AppLocalizations.of(dialogContext)!;
+        final dl10n = resolveAppLocalizationsForErrors(dialogContext);
         return AlertDialog(
           title: Text(
             dl10n.notificationsDialogEditSharedTemplateTitle(template.id),
@@ -1602,7 +1602,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (stateContext, setDialogState) {
-          final dl10n = AppLocalizations.of(stateContext)!;
+          final dl10n = resolveAppLocalizationsForErrors(stateContext);
           return AlertDialog(
             title: Text(dl10n.notificationsDialogImportTemplatesJsonTitle),
             content: SizedBox(
