@@ -50,7 +50,7 @@ class ProductionWorkspaceStagesPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     if (stages.isEmpty) return const SizedBox.shrink();
-    final blockerSummary = summarizeProductionPrimaryBlocker(stages);
+    final blockerSummary = summarizeProductionPrimaryBlocker(stages, l10n);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -81,7 +81,7 @@ class ProductionWorkspaceStagesPanel extends StatelessWidget {
                           style: Theme.of(context).textTheme.labelLarge,
                         ),
                       ),
-                      Chip(label: Text(stage.status.legacyChineseLabel)),
+                      Chip(label: Text(stage.status.localizedLabel(l10n))),
                     ],
                   ),
                   Text(
@@ -111,7 +111,9 @@ class ProductionWorkspaceStagesPanel extends StatelessWidget {
                           onPressed: busy
                               ? null
                               : () => onRunStageDomainTool(stage),
-                          child: Text(productionStageDomainButtonLabel(stage)),
+                          child: Text(
+                            productionStageDomainButtonLabel(stage, l10n),
+                          ),
                         ),
                       if (stage.subAgentTool != null)
                         FilledButton(
@@ -119,7 +121,7 @@ class ProductionWorkspaceStagesPanel extends StatelessWidget {
                               ? null
                               : () => onRunStageSubAgent(stage),
                           child: Text(
-                            productionStageSubAgentButtonLabel(stage),
+                            productionStageSubAgentButtonLabel(stage, l10n),
                           ),
                         ),
                     ],

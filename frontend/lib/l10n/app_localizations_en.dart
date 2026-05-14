@@ -17065,6 +17065,218 @@ class AppLocalizationsEn extends AppLocalizations {
       'Agent workspace production stages title';
 
   @override
+  String get agentWorkspaceProductionStageFlowScriptPlan => 'Director plan';
+
+  @override
+  String get agentWorkspaceProductionStageFlowAssets => 'Asset prep';
+
+  @override
+  String get agentWorkspaceProductionStageFlowStoryboardTable =>
+      'Storyboard table';
+
+  @override
+  String get agentWorkspaceProductionStageFlowStoryboard => 'Storyboard frames';
+
+  @override
+  String get agentWorkspaceProductionStageStatusSupervisionNeedsRework =>
+      'Needs rework';
+
+  @override
+  String get agentWorkspaceProductionStageStatusSupervisionPendingRevision =>
+      'Needs revision';
+
+  @override
+  String get agentWorkspaceProductionStageStatusSupervisionCanAdvance =>
+      'Can advance';
+
+  @override
+  String get agentWorkspaceProductionStageStatusSupervisionApproved =>
+      'Approved';
+
+  @override
+  String get agentWorkspaceProductionStageStatusPendingGenerate =>
+      'Pending generation';
+
+  @override
+  String get agentWorkspaceProductionStageStatusPendingRefineScriptPlan =>
+      'Needs refinement';
+
+  @override
+  String get agentWorkspaceProductionStageStatusPendingReview =>
+      'Pending review';
+
+  @override
+  String get agentWorkspaceProductionStageStatusSuggestRefresh =>
+      'Refresh suggested';
+
+  @override
+  String get agentWorkspaceProductionStageStatusPendingRead => 'Pending read';
+
+  @override
+  String get agentWorkspaceProductionStageStatusPendingAssetPlan =>
+      'Pending asset plan';
+
+  @override
+  String get agentWorkspaceProductionStageStatusNeedsAssetImages =>
+      'Images needed';
+
+  @override
+  String get agentWorkspaceProductionStageStatusAssetsReady => 'Assets ready';
+
+  @override
+  String get agentWorkspaceProductionStageStatusAssetsScopedFromRefs =>
+      'Scoped from refs';
+
+  @override
+  String get agentWorkspaceProductionStageStatusWaitingScriptPlanDepth =>
+      'Waiting for director plan depth';
+
+  @override
+  String get agentWorkspaceProductionStageStatusAssetsNarrowedFromScriptPlan =>
+      'Narrowed from script plan';
+
+  @override
+  String get agentWorkspaceProductionStageStatusWaitingScriptPlan =>
+      'Waiting for director plan';
+
+  @override
+  String get agentWorkspaceProductionStageStatusStoryboardTableSampled =>
+      'Table sampled';
+
+  @override
+  String get agentWorkspaceProductionStageStatusStoryboardTableExpandRead =>
+      'Expand table read';
+
+  @override
+  String get agentWorkspaceProductionStageStatusBackfillScriptPlanFromTable =>
+      'Backfill director plan';
+
+  @override
+  String get agentWorkspaceProductionStageStatusNeedsStoryboardFrames =>
+      'Frames needed';
+
+  @override
+  String get agentWorkspaceProductionStageStatusStoryboardFramesPending =>
+      'Frames pending';
+
+  @override
+  String get agentWorkspaceProductionStageStatusStoryboardPendingVerify =>
+      'Pending verification';
+
+  @override
+  String get agentWorkspaceProductionStageStatusStoryboardComplete =>
+      'Complete';
+
+  @override
+  String get agentWorkspaceProductionStageStatusWaitingStoryboardTable =>
+      'Waiting for storyboard table';
+
+  @override
+  String
+  get agentWorkspaceProductionStageStatusWaitingStoryboardTableCoverage =>
+      'Waiting for table coverage';
+
+  @override
+  String get agentWorkspaceProductionDomainReadFlow => 'Read flow';
+
+  @override
+  String get agentWorkspaceProductionDomainExpandStoryboardTable =>
+      'Expand storyboard table read';
+
+  @override
+  String get agentWorkspaceProductionDomainReadScriptPlan =>
+      'Read director plan';
+
+  @override
+  String get agentWorkspaceProductionDomainRefreshScriptPlan =>
+      'Refresh director plan';
+
+  @override
+  String get agentWorkspaceProductionDomainRereadAffectedAssets =>
+      'Reread affected assets';
+
+  @override
+  String get agentWorkspaceProductionDomainRefreshAssets =>
+      'Refresh asset results';
+
+  @override
+  String get agentWorkspaceProductionDomainRereadPartialStoryboardTable =>
+      'Reread partial table';
+
+  @override
+  String get agentWorkspaceProductionDomainRefreshStoryboardTable =>
+      'Refresh storyboard table';
+
+  @override
+  String get agentWorkspaceProductionDomainRereadMissingFrames =>
+      'Reread missing-frame status';
+
+  @override
+  String get agentWorkspaceProductionDomainRefreshStoryboard =>
+      'Refresh storyboard results';
+
+  @override
+  String get agentWorkspaceProductionSubAgentRefineDirectorPlan =>
+      'Refine director plan';
+
+  @override
+  String get agentWorkspaceProductionSubAgentFillStoryboardTable =>
+      'Fill storyboard table';
+
+  @override
+  String get agentWorkspaceProductionSubAgentAdvanceStage => 'Advance stage';
+
+  @override
+  String agentWorkspaceProductionBlockerHeadline(
+    String title,
+    String status,
+    String reason,
+  ) {
+    return 'Current blocker: $title · $status; $reason';
+  }
+
+  @override
+  String get agentWorkspaceProductionBlockerExpandTable =>
+      'Expand the key storyboard table window before advancing downstream.';
+
+  @override
+  String agentWorkspaceProductionBlockerExpandTableWithCoverage(
+    String coverage,
+  ) {
+    return 'Expand the key storyboard table window first; $coverage.';
+  }
+
+  @override
+  String get agentWorkspaceProductionBlockerRefineScriptPlan =>
+      'The director plan still needs clearer per-scene emotion and visual intent; refine scriptPlan before splitting the table.';
+
+  @override
+  String get agentWorkspaceProductionBlockerExpandTableCoverage =>
+      'The storyboard table has a base but coverage is thin; widen reads before storyboard generation.';
+
+  @override
+  String agentWorkspaceProductionBlockerExpandTableCoverageWithDigest(
+    String coverage,
+  ) {
+    return 'The storyboard table has a base but coverage is thin; $coverage.';
+  }
+
+  @override
+  String agentWorkspaceProductionAppliedRefineDirectorPlan(String title) {
+    return 'Applied stage action: $title. Next, refine the director plan.';
+  }
+
+  @override
+  String agentWorkspaceProductionAppliedExpandStoryboardTable(String title) {
+    return 'Applied stage action: $title. Next, expand the key storyboard table window.';
+  }
+
+  @override
+  String agentWorkspaceProductionAppliedStageGeneric(String title) {
+    return 'Applied stage action: $title';
+  }
+
+  @override
   String agentWorkspaceProductionFlowChip(String flowKey) {
     return 'flow=$flowKey';
   }

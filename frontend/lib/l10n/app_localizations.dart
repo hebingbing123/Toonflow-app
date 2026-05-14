@@ -26165,6 +26165,116 @@ abstract class AppLocalizations {
   /// **'Agent workspace production stages title'**
   String get agentWorkspaceProductionStagesTitle;
 
+  String get agentWorkspaceProductionStageFlowScriptPlan;
+
+  String get agentWorkspaceProductionStageFlowAssets;
+
+  String get agentWorkspaceProductionStageFlowStoryboardTable;
+
+  String get agentWorkspaceProductionStageFlowStoryboard;
+
+  String get agentWorkspaceProductionStageStatusSupervisionNeedsRework;
+
+  String get agentWorkspaceProductionStageStatusSupervisionPendingRevision;
+
+  String get agentWorkspaceProductionStageStatusSupervisionCanAdvance;
+
+  String get agentWorkspaceProductionStageStatusSupervisionApproved;
+
+  String get agentWorkspaceProductionStageStatusPendingGenerate;
+
+  String get agentWorkspaceProductionStageStatusPendingRefineScriptPlan;
+
+  String get agentWorkspaceProductionStageStatusPendingReview;
+
+  String get agentWorkspaceProductionStageStatusSuggestRefresh;
+
+  String get agentWorkspaceProductionStageStatusPendingRead;
+
+  String get agentWorkspaceProductionStageStatusPendingAssetPlan;
+
+  String get agentWorkspaceProductionStageStatusNeedsAssetImages;
+
+  String get agentWorkspaceProductionStageStatusAssetsReady;
+
+  String get agentWorkspaceProductionStageStatusAssetsScopedFromRefs;
+
+  String get agentWorkspaceProductionStageStatusWaitingScriptPlanDepth;
+
+  String get agentWorkspaceProductionStageStatusAssetsNarrowedFromScriptPlan;
+
+  String get agentWorkspaceProductionStageStatusWaitingScriptPlan;
+
+  String get agentWorkspaceProductionStageStatusStoryboardTableSampled;
+
+  String get agentWorkspaceProductionStageStatusStoryboardTableExpandRead;
+
+  String get agentWorkspaceProductionStageStatusBackfillScriptPlanFromTable;
+
+  String get agentWorkspaceProductionStageStatusNeedsStoryboardFrames;
+
+  String get agentWorkspaceProductionStageStatusStoryboardFramesPending;
+
+  String get agentWorkspaceProductionStageStatusStoryboardPendingVerify;
+
+  String get agentWorkspaceProductionStageStatusStoryboardComplete;
+
+  String get agentWorkspaceProductionStageStatusWaitingStoryboardTable;
+
+  String get agentWorkspaceProductionStageStatusWaitingStoryboardTableCoverage;
+
+  String get agentWorkspaceProductionDomainReadFlow;
+
+  String get agentWorkspaceProductionDomainExpandStoryboardTable;
+
+  String get agentWorkspaceProductionDomainReadScriptPlan;
+
+  String get agentWorkspaceProductionDomainRefreshScriptPlan;
+
+  String get agentWorkspaceProductionDomainRereadAffectedAssets;
+
+  String get agentWorkspaceProductionDomainRefreshAssets;
+
+  String get agentWorkspaceProductionDomainRereadPartialStoryboardTable;
+
+  String get agentWorkspaceProductionDomainRefreshStoryboardTable;
+
+  String get agentWorkspaceProductionDomainRereadMissingFrames;
+
+  String get agentWorkspaceProductionDomainRefreshStoryboard;
+
+  String get agentWorkspaceProductionSubAgentRefineDirectorPlan;
+
+  String get agentWorkspaceProductionSubAgentFillStoryboardTable;
+
+  String get agentWorkspaceProductionSubAgentAdvanceStage;
+
+  String agentWorkspaceProductionBlockerHeadline(
+    String title,
+    String status,
+    String reason,
+  );
+
+  String get agentWorkspaceProductionBlockerExpandTable;
+
+  String agentWorkspaceProductionBlockerExpandTableWithCoverage(
+    String coverage,
+  );
+
+  String get agentWorkspaceProductionBlockerRefineScriptPlan;
+
+  String get agentWorkspaceProductionBlockerExpandTableCoverage;
+
+  String agentWorkspaceProductionBlockerExpandTableCoverageWithDigest(
+    String coverage,
+  );
+
+  String agentWorkspaceProductionAppliedRefineDirectorPlan(String title);
+
+  String agentWorkspaceProductionAppliedExpandStoryboardTable(String title);
+
+  String agentWorkspaceProductionAppliedStageGeneric(String title);
+
   /// No description provided for @agentWorkspaceProductionFlowChip.
   ///
   /// In en, this message translates to:

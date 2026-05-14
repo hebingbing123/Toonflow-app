@@ -46,7 +46,12 @@ extension _AgentWorkspaceProductionCardWorkflow
     if (prompt != null && prompt.isNotEmpty) {
       widget.productionPromptController.text = prompt;
     }
-    _setTaskStatus(summarizeAppliedProductionStageStatus(stage));
+    _setTaskStatus(
+      summarizeAppliedProductionStageStatus(
+        stage,
+        AppLocalizations.of(context)!,
+      ),
+    );
   }
 
   void _runWorkspaceStageDomainTool(ProductionWorkspaceStage stage) {

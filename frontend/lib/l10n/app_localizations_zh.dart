@@ -16251,6 +16251,194 @@ class AppLocalizationsZh extends AppLocalizations {
   String get agentWorkspaceProductionStagesTitle => '执行阶段';
 
   @override
+  String get agentWorkspaceProductionStageFlowScriptPlan => '导演计划';
+
+  @override
+  String get agentWorkspaceProductionStageFlowAssets => '资产准备';
+
+  @override
+  String get agentWorkspaceProductionStageFlowStoryboardTable => '分镜表';
+
+  @override
+  String get agentWorkspaceProductionStageFlowStoryboard => '分镜画面';
+
+  @override
+  String get agentWorkspaceProductionStageStatusSupervisionNeedsRework => '需返工';
+
+  @override
+  String get agentWorkspaceProductionStageStatusSupervisionPendingRevision =>
+      '待修订';
+
+  @override
+  String get agentWorkspaceProductionStageStatusSupervisionCanAdvance => '可推进';
+
+  @override
+  String get agentWorkspaceProductionStageStatusSupervisionApproved => '已通过';
+
+  @override
+  String get agentWorkspaceProductionStageStatusPendingGenerate => '待生成';
+
+  @override
+  String get agentWorkspaceProductionStageStatusPendingRefineScriptPlan =>
+      '待完善';
+
+  @override
+  String get agentWorkspaceProductionStageStatusPendingReview => '待审核';
+
+  @override
+  String get agentWorkspaceProductionStageStatusSuggestRefresh => '建议刷新';
+
+  @override
+  String get agentWorkspaceProductionStageStatusPendingRead => '待读取';
+
+  @override
+  String get agentWorkspaceProductionStageStatusPendingAssetPlan => '待规划';
+
+  @override
+  String get agentWorkspaceProductionStageStatusNeedsAssetImages => '需补图';
+
+  @override
+  String get agentWorkspaceProductionStageStatusAssetsReady => '已齐备';
+
+  @override
+  String get agentWorkspaceProductionStageStatusAssetsScopedFromRefs => '已定位';
+
+  @override
+  String get agentWorkspaceProductionStageStatusWaitingScriptPlanDepth =>
+      '等待导演计划完善';
+
+  @override
+  String get agentWorkspaceProductionStageStatusAssetsNarrowedFromScriptPlan =>
+      '已收紧';
+
+  @override
+  String get agentWorkspaceProductionStageStatusWaitingScriptPlan => '等待导演计划';
+
+  @override
+  String get agentWorkspaceProductionStageStatusStoryboardTableSampled => '已抽样';
+
+  @override
+  String get agentWorkspaceProductionStageStatusStoryboardTableExpandRead =>
+      '待扩读';
+
+  @override
+  String get agentWorkspaceProductionStageStatusBackfillScriptPlanFromTable =>
+      '回补导演计划';
+
+  @override
+  String get agentWorkspaceProductionStageStatusNeedsStoryboardFrames => '需补帧';
+
+  @override
+  String get agentWorkspaceProductionStageStatusStoryboardFramesPending =>
+      '待补帧';
+
+  @override
+  String get agentWorkspaceProductionStageStatusStoryboardPendingVerify =>
+      '待核对';
+
+  @override
+  String get agentWorkspaceProductionStageStatusStoryboardComplete => '已完成';
+
+  @override
+  String get agentWorkspaceProductionStageStatusWaitingStoryboardTable =>
+      '等待分镜表';
+
+  @override
+  String
+  get agentWorkspaceProductionStageStatusWaitingStoryboardTableCoverage =>
+      '等待分镜表完善';
+
+  @override
+  String get agentWorkspaceProductionDomainReadFlow => '读取 flow';
+
+  @override
+  String get agentWorkspaceProductionDomainExpandStoryboardTable => '扩读分镜表';
+
+  @override
+  String get agentWorkspaceProductionDomainReadScriptPlan => '读取导演计划';
+
+  @override
+  String get agentWorkspaceProductionDomainRefreshScriptPlan => '刷新导演计划';
+
+  @override
+  String get agentWorkspaceProductionDomainRereadAffectedAssets => '回读受影响资产';
+
+  @override
+  String get agentWorkspaceProductionDomainRefreshAssets => '刷新资产结果';
+
+  @override
+  String get agentWorkspaceProductionDomainRereadPartialStoryboardTable =>
+      '回读局部分镜表';
+
+  @override
+  String get agentWorkspaceProductionDomainRefreshStoryboardTable => '刷新分镜表';
+
+  @override
+  String get agentWorkspaceProductionDomainRereadMissingFrames => '回读缺帧状态';
+
+  @override
+  String get agentWorkspaceProductionDomainRefreshStoryboard => '刷新分镜结果';
+
+  @override
+  String get agentWorkspaceProductionSubAgentRefineDirectorPlan => '细化导演计划';
+
+  @override
+  String get agentWorkspaceProductionSubAgentFillStoryboardTable => '补分镜表';
+
+  @override
+  String get agentWorkspaceProductionSubAgentAdvanceStage => '推进阶段';
+
+  @override
+  String agentWorkspaceProductionBlockerHeadline(
+    String title,
+    String status,
+    String reason,
+  ) {
+    return '当前卡点：$title · $status；$reason';
+  }
+
+  @override
+  String get agentWorkspaceProductionBlockerExpandTable =>
+      '先继续扩读关键分镜表窗口，再决定是否推进下游出图。';
+
+  @override
+  String agentWorkspaceProductionBlockerExpandTableWithCoverage(
+    String coverage,
+  ) {
+    return '先继续扩读关键分镜表窗口；$coverage。';
+  }
+
+  @override
+  String get agentWorkspaceProductionBlockerRefineScriptPlan =>
+      '当前更缺导演计划里的分场景情绪/画面意图，先细化 scriptPlan 再拆分镜表。';
+
+  @override
+  String get agentWorkspaceProductionBlockerExpandTableCoverage =>
+      '分镜表已有基础内容，但覆盖还不够，先补齐关键镜头表再推进 storyboard。';
+
+  @override
+  String agentWorkspaceProductionBlockerExpandTableCoverageWithDigest(
+    String coverage,
+  ) {
+    return '分镜表已有基础内容，但覆盖还不够；$coverage。';
+  }
+
+  @override
+  String agentWorkspaceProductionAppliedRefineDirectorPlan(String title) {
+    return '已应用阶段动作：$title，下一步先细化导演计划。';
+  }
+
+  @override
+  String agentWorkspaceProductionAppliedExpandStoryboardTable(String title) {
+    return '已应用阶段动作：$title，下一步先扩读关键分镜表窗口。';
+  }
+
+  @override
+  String agentWorkspaceProductionAppliedStageGeneric(String title) {
+    return '已应用阶段动作：$title';
+  }
+
+  @override
   String agentWorkspaceProductionFlowChip(String flowKey) {
     return 'flow=$flowKey';
   }

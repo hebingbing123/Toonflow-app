@@ -322,15 +322,21 @@ String summarizeProductionStoryboardTableCoverage({
 
 String summarizeProductionPrimaryBlocker(
   List<ProductionWorkspaceStage> stages,
+  AppLocalizations l10n,
 ) {
   if (stages.isEmpty) return '';
   final blocker = stages.firstWhere(
     (stage) => !stage.status.isResolvedForPrimaryBlocker,
     orElse: () => stages.last,
   );
-  final explicitReason = _summarizeProductionBlockerReason(blocker);
+  final explicitReason = _summarizeProductionBlockerReason(blocker, l10n);
+  final statusLabel = blocker.status.localizedLabel(l10n);
   if (explicitReason.isNotEmpty) {
-    return '当前卡点：${blocker.title} · ${blocker.status.legacyChineseLabel}；$explicitReason';
+    return l10n.agentWorkspaceProductionBlockerHeadline(
+      blocker.title,
+      statusLabel,
+      explicitReason,
+    );
   }
   final normalizedDetail = blocker.detail
       .replaceAll(RegExp(r'\s+'), ' ')
@@ -338,24 +344,35 @@ String summarizeProductionPrimaryBlocker(
   final clippedDetail = normalizedDetail.length <= 72
       ? normalizedDetail
       : '${normalizedDetail.substring(0, 72)}...';
-  return '当前卡点：${blocker.title} · ${blocker.status.legacyChineseLabel}；$clippedDetail';
+  return l10n.agentWorkspaceProductionBlockerHeadline(
+    blocker.title,
+    statusLabel,
+    clippedDetail,
+  );
 }
 
-String _summarizeProductionBlockerReason(ProductionWorkspaceStage stage) {
+String _summarizeProductionBlockerReason(
+  ProductionWorkspaceStage stage,
+  AppLocalizations l10n,
+) {
   final detail = stage.detail.replaceAll(RegExp(r'\s+'), ' ').trim();
   switch (stage.status) {
     case ProductionWorkspaceStageStatus.storyboardTableExpandRead:
       final coverage = _extractProductionCoverageDigest(detail);
       return coverage.isEmpty
-          ? '先继续扩读关键分镜表窗口，再决定是否推进下游出图。'
-          : '先继续扩读关键分镜表窗口；$coverage。';
+          ? l10n.agentWorkspaceProductionBlockerExpandTable
+          : l10n.agentWorkspaceProductionBlockerExpandTableWithCoverage(
+              coverage,
+            );
     case ProductionWorkspaceStageStatus.backfillScriptPlanFromTable:
-      return '当前更缺导演计划里的分场景情绪/画面意图，先细化 scriptPlan 再拆分镜表。';
+      return l10n.agentWorkspaceProductionBlockerRefineScriptPlan;
     case ProductionWorkspaceStageStatus.waitingStoryboardTableCoverage:
       final coverage = _extractProductionCoverageDigest(detail);
       return coverage.isEmpty
-          ? '分镜表已有基础内容，但覆盖还不够，先补齐关键镜头表再推进 storyboard。'
-          : '分镜表已有基础内容，但覆盖还不够；$coverage。';
+          ? l10n.agentWorkspaceProductionBlockerExpandTableCoverage
+          : l10n.agentWorkspaceProductionBlockerExpandTableCoverageWithDigest(
+              coverage,
+            );
     default:
       return '';
   }
@@ -373,48 +390,56 @@ String _extractProductionCoverageDigest(String detail) {
   return '分镜表已读 $left/$right 行';
 }
 
-String productionStageDomainButtonLabel(ProductionWorkspaceStage stage) {
+String productionStageDomainButtonLabel(
+  ProductionWorkspaceStage stage,
+  AppLocalizations l10n,
+) {
   switch (stage.status) {
     case ProductionWorkspaceStageStatus.storyboardTableExpandRead:
     case ProductionWorkspaceStageStatus.waitingStoryboardTableCoverage:
-      return '扩读分镜表';
+      return l10n.agentWorkspaceProductionDomainExpandStoryboardTable;
     case ProductionWorkspaceStageStatus.backfillScriptPlanFromTable:
     case ProductionWorkspaceStageStatus.waitingScriptPlan:
     case ProductionWorkspaceStageStatus.waitingScriptPlanDepth:
-      return '读取导演计划';
+      return l10n.agentWorkspaceProductionDomainReadScriptPlan;
     case ProductionWorkspaceStageStatus.suggestRefresh:
       return switch (stage.flowKey) {
-        'scriptPlan' => '刷新导演计划',
+        'scriptPlan' => l10n.agentWorkspaceProductionDomainRefreshScriptPlan,
         'assets' => switch (stage.refreshHint) {
-          ProductionWorkspaceRefreshHint.rereadAffectedAssets => '回读受影响资产',
-          _ => '刷新资产结果',
+          ProductionWorkspaceRefreshHint.rereadAffectedAssets =>
+            l10n.agentWorkspaceProductionDomainRereadAffectedAssets,
+          _ => l10n.agentWorkspaceProductionDomainRefreshAssets,
         },
         'storyboardTable' => switch (stage.refreshHint) {
           ProductionWorkspaceRefreshHint.rereadPartialStoryboardTable =>
-            '回读局部分镜表',
-          _ => '刷新分镜表',
+            l10n.agentWorkspaceProductionDomainRereadPartialStoryboardTable,
+          _ => l10n.agentWorkspaceProductionDomainRefreshStoryboardTable,
         },
         'storyboard' => switch (stage.refreshHint) {
-          ProductionWorkspaceRefreshHint.rereadMissingFrameState => '回读缺帧状态',
-          _ => '刷新分镜结果',
+          ProductionWorkspaceRefreshHint.rereadMissingFrameState =>
+            l10n.agentWorkspaceProductionDomainRereadMissingFrames,
+          _ => l10n.agentWorkspaceProductionDomainRefreshStoryboard,
         },
-        _ => '读取 flow',
+        _ => l10n.agentWorkspaceProductionDomainReadFlow,
       };
     default:
-      return '读取 flow';
+      return l10n.agentWorkspaceProductionDomainReadFlow;
   }
 }
 
-String productionStageSubAgentButtonLabel(ProductionWorkspaceStage stage) {
+String productionStageSubAgentButtonLabel(
+  ProductionWorkspaceStage stage,
+  AppLocalizations l10n,
+) {
   if (stage.status ==
           ProductionWorkspaceStageStatus.backfillScriptPlanFromTable ||
       stage.subAgentTool == 'run_sub_agent_director_plan') {
-    return '细化导演计划';
+    return l10n.agentWorkspaceProductionSubAgentRefineDirectorPlan;
   }
   if (stage.subAgentTool == 'run_sub_agent_storyboard_table') {
-    return '补分镜表';
+    return l10n.agentWorkspaceProductionSubAgentFillStoryboardTable;
   }
-  return '推进阶段';
+  return l10n.agentWorkspaceProductionSubAgentAdvanceStage;
 }
 
 String productionRecipeDomainButtonLabel(ProductionWorkspaceRecipe recipe) {
@@ -468,15 +493,22 @@ String summarizeAppliedProductionRecipeStatus(
   return '已应用任务建议：$title';
 }
 
-String summarizeAppliedProductionStageStatus(ProductionWorkspaceStage stage) {
+String summarizeAppliedProductionStageStatus(
+  ProductionWorkspaceStage stage,
+  AppLocalizations l10n,
+) {
   switch (stage.status) {
     case ProductionWorkspaceStageStatus.backfillScriptPlanFromTable:
-      return '已应用阶段动作：${stage.title}，下一步先细化导演计划。';
+      return l10n.agentWorkspaceProductionAppliedRefineDirectorPlan(
+        stage.title,
+      );
     case ProductionWorkspaceStageStatus.storyboardTableExpandRead:
     case ProductionWorkspaceStageStatus.waitingStoryboardTableCoverage:
-      return '已应用阶段动作：${stage.title}，下一步先扩读关键分镜表窗口。';
+      return l10n.agentWorkspaceProductionAppliedExpandStoryboardTable(
+        stage.title,
+      );
     default:
-      return '已应用阶段动作：${stage.title}';
+      return l10n.agentWorkspaceProductionAppliedStageGeneric(stage.title);
   }
 }
 

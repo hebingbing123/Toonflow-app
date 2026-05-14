@@ -39,7 +39,9 @@ extension _AgentWorkspaceProductionCardSupport
   }
 
   List<ProductionWorkspaceStage> _buildWorkspaceStages() {
+    final l10n = AppLocalizations.of(context)!;
     return buildProductionWorkspaceStages(
+      l10n: l10n,
       toolName: widget.workspaceLastToolName,
       suggestedFlowKey: _suggestedFlowKeyLine,
       result: widget.workspaceLastToolResultData,

@@ -1,6 +1,7 @@
 part of 'flow_logic.dart';
 
 List<ProductionWorkspaceStage> buildProductionWorkspaceStages({
+  required AppLocalizations l10n,
   required String? toolName,
   required String? suggestedFlowKey,
   required Object? result,
@@ -22,12 +23,14 @@ List<ProductionWorkspaceStage> buildProductionWorkspaceStages({
 
   return <ProductionWorkspaceStage>[
     _buildScriptPlanStage(
+      l10n: l10n,
       activeKey: activeKey,
       flowSnapshot: flowSnapshot,
       toolName: normalizedTool,
       review: review,
     ),
     _buildAssetsStage(
+      l10n: l10n,
       activeKey: activeKey,
       flowSnapshot: flowSnapshot,
       toolName: normalizedTool,
@@ -36,6 +39,7 @@ List<ProductionWorkspaceStage> buildProductionWorkspaceStages({
       toolArguments: toolArguments,
     ),
     _buildStoryboardTableStage(
+      l10n: l10n,
       activeKey: activeKey,
       flowSnapshot: flowSnapshot,
       toolName: normalizedTool,
@@ -43,6 +47,7 @@ List<ProductionWorkspaceStage> buildProductionWorkspaceStages({
       toolArguments: toolArguments,
     ),
     _buildStoryboardStage(
+      l10n: l10n,
       activeKey: activeKey,
       flowSnapshot: flowSnapshot,
       toolName: normalizedTool,
@@ -115,6 +120,7 @@ String? _resolveProductionStageActiveKey({
 }
 
 ProductionWorkspaceStage _buildScriptPlanStage({
+  required AppLocalizations l10n,
   required String? activeKey,
   required Map<String, Object?> flowSnapshot,
   required String toolName,
@@ -123,7 +129,7 @@ ProductionWorkspaceStage _buildScriptPlanStage({
   if (review != null && review.target == 'scriptPlan') {
     final planningScriptArgs = buildProductionPlanningScriptArgs();
     return ProductionWorkspaceStage(
-      title: '导演计划',
+      title: l10n.agentWorkspaceProductionStageFlowScriptPlan,
       flowKey: 'scriptPlan',
       status: ProductionWorkspaceStageStatus.fromSupervisionReview(review),
       detail: _reviewDetail(review),
@@ -148,8 +154,8 @@ ProductionWorkspaceStage _buildScriptPlanStage({
   if (data is String) {
     final trimmed = data.trim();
     if (trimmed.isEmpty) {
-      return const ProductionWorkspaceStage(
-        title: '导演计划',
+      return ProductionWorkspaceStage(
+        title: l10n.agentWorkspaceProductionStageFlowScriptPlan,
         flowKey: 'scriptPlan',
         status: ProductionWorkspaceStageStatus.pendingGenerate,
         detail: 'scriptPlan 仍为空，先产出导演计划再推进资产与分镜。',
@@ -162,7 +168,7 @@ ProductionWorkspaceStage _buildScriptPlanStage({
     final scriptWindow = summarizeProductionPlanningScriptWindow();
     if (!_productionScriptPlanAdvanceReady(trimmed)) {
       return ProductionWorkspaceStage(
-        title: '导演计划',
+        title: l10n.agentWorkspaceProductionStageFlowScriptPlan,
         flowKey: 'scriptPlan',
         status: ProductionWorkspaceStageStatus.pendingRefineScriptPlan,
         detail:
@@ -172,7 +178,7 @@ ProductionWorkspaceStage _buildScriptPlanStage({
       );
     }
     return ProductionWorkspaceStage(
-      title: '导演计划',
+      title: l10n.agentWorkspaceProductionStageFlowScriptPlan,
       flowKey: 'scriptPlan',
       status: ProductionWorkspaceStageStatus.pendingReview,
       detail:
@@ -183,7 +189,7 @@ ProductionWorkspaceStage _buildScriptPlanStage({
   }
   if (activeKey == 'scriptPlan' || toolName == 'run_sub_agent_director_plan') {
     return ProductionWorkspaceStage(
-      title: '导演计划',
+      title: l10n.agentWorkspaceProductionStageFlowScriptPlan,
       flowKey: 'scriptPlan',
       status: ProductionWorkspaceStageStatus.suggestRefresh,
       detail: '导演计划刚变更或正在处理，建议先刷新导演计划，确认最新内容后再推进下游阶段。',
@@ -192,7 +198,7 @@ ProductionWorkspaceStage _buildScriptPlanStage({
     );
   }
   return ProductionWorkspaceStage(
-    title: '导演计划',
+    title: l10n.agentWorkspaceProductionStageFlowScriptPlan,
     flowKey: 'scriptPlan',
     status: ProductionWorkspaceStageStatus.pendingRead,
     detail: '先读取 scriptPlan，确认制作优先级与执行顺序。',
@@ -202,6 +208,7 @@ ProductionWorkspaceStage _buildScriptPlanStage({
 }
 
 ProductionWorkspaceStage _buildAssetsStage({
+  required AppLocalizations l10n,
   required String? activeKey,
   required Map<String, Object?> flowSnapshot,
   required String toolName,
@@ -213,7 +220,7 @@ ProductionWorkspaceStage _buildAssetsStage({
     final assetArgs = buildProductionReviewAssetArgs(review);
     final assetScope = summarizeProductionAssetScope(assetArgs);
     return ProductionWorkspaceStage(
-      title: '资产准备',
+      title: l10n.agentWorkspaceProductionStageFlowAssets,
       flowKey: 'assets',
       status: ProductionWorkspaceStageStatus.fromSupervisionReview(review),
       detail:
@@ -235,8 +242,8 @@ ProductionWorkspaceStage _buildAssetsStage({
   if (data is List) {
     final rows = data.whereType<Map<String, dynamic>>().toList(growable: false);
     if (rows.isEmpty) {
-      return const ProductionWorkspaceStage(
-        title: '资产准备',
+      return ProductionWorkspaceStage(
+        title: l10n.agentWorkspaceProductionStageFlowAssets,
         flowKey: 'assets',
         status: ProductionWorkspaceStageStatus.pendingAssetPlan,
         detail: 'assets 为空，先规划衍生素材并补齐最小可行资产集。',
@@ -253,7 +260,7 @@ ProductionWorkspaceStage _buildAssetsStage({
     final readiness = summarizeProductionAssetReadiness(rows);
     if (missingCount > 0) {
       return ProductionWorkspaceStage(
-        title: '资产准备',
+        title: l10n.agentWorkspaceProductionStageFlowAssets,
         flowKey: 'assets',
         status: ProductionWorkspaceStageStatus.needsAssetImages,
         detail: pendingScope.isEmpty
@@ -268,7 +275,7 @@ ProductionWorkspaceStage _buildAssetsStage({
       );
     }
     return ProductionWorkspaceStage(
-      title: '资产准备',
+      title: l10n.agentWorkspaceProductionStageFlowAssets,
       flowKey: 'assets',
       status: ProductionWorkspaceStageStatus.assetsReady,
       detail: '共 ${rows.length} 项资产，图像结果已齐，可继续检查 storyboard 与导演计划。$readiness。',
@@ -282,7 +289,7 @@ ProductionWorkspaceStage _buildAssetsStage({
   if (storyboardTableAssetArgs.containsKey('ids')) {
     final ids = storyboardTableAssetArgs['ids'] as List<int>;
     return ProductionWorkspaceStage(
-      title: '资产准备',
+      title: l10n.agentWorkspaceProductionStageFlowAssets,
       flowKey: 'assets',
       status: ProductionWorkspaceStageStatus.assetsScopedFromRefs,
       detail: '当前分镜表窗口引用了 ${ids.length} 项资产，优先核对这批素材更省 token。',
@@ -296,7 +303,7 @@ ProductionWorkspaceStage _buildAssetsStage({
   if (storyboardAssetArgs.containsKey('ids')) {
     final ids = storyboardAssetArgs['ids'] as List<int>;
     return ProductionWorkspaceStage(
-      title: '资产准备',
+      title: l10n.agentWorkspaceProductionStageFlowAssets,
       flowKey: 'assets',
       status: ProductionWorkspaceStageStatus.assetsScopedFromRefs,
       detail: '当前分镜窗口引用了 ${ids.length} 项资产，优先核对这批素材更省 token。',
@@ -319,7 +326,7 @@ ProductionWorkspaceStage _buildAssetsStage({
       toolName != 'run_sub_agent_derive_assets' &&
       toolName != 'run_sub_agent_generate_assets') {
     return ProductionWorkspaceStage(
-      title: '资产准备',
+      title: l10n.agentWorkspaceProductionStageFlowAssets,
       flowKey: 'assets',
       status: ProductionWorkspaceStageStatus.waitingScriptPlanDepth,
       detail: '当前 scriptPlan 已有内容但还不够完整，先补齐导演计划的关键维度，再规划 assets，避免素材准备跑偏。',
@@ -329,7 +336,7 @@ ProductionWorkspaceStage _buildAssetsStage({
   }
   if (flowSnapshot['scriptPlan'] is String) {
     return ProductionWorkspaceStage(
-      title: '资产准备',
+      title: l10n.agentWorkspaceProductionStageFlowAssets,
       flowKey: 'assets',
       status: ProductionWorkspaceStageStatus.assetsNarrowedFromScriptPlan,
       detail:
@@ -346,7 +353,7 @@ ProductionWorkspaceStage _buildAssetsStage({
       toolName != 'run_sub_agent_derive_assets' &&
       toolName != 'run_sub_agent_generate_assets') {
     return ProductionWorkspaceStage(
-      title: '资产准备',
+      title: l10n.agentWorkspaceProductionStageFlowAssets,
       flowKey: 'assets',
       status: ProductionWorkspaceStageStatus.waitingScriptPlan,
       detail: '先读取或生成 scriptPlan，再规划 assets，避免素材补齐脱离导演节奏与改写约束。',
@@ -378,7 +385,7 @@ ProductionWorkspaceStage _buildAssetsStage({
             toolName == 'run_sub_agent_generate_assets') &&
         refreshArgs.containsKey('ids');
     return ProductionWorkspaceStage(
-      title: '资产准备',
+      title: l10n.agentWorkspaceProductionStageFlowAssets,
       flowKey: 'assets',
       status: ProductionWorkspaceStageStatus.suggestRefresh,
       refreshHint: narrowAssetRefresh
@@ -392,7 +399,7 @@ ProductionWorkspaceStage _buildAssetsStage({
     );
   }
   return ProductionWorkspaceStage(
-    title: '资产准备',
+    title: l10n.agentWorkspaceProductionStageFlowAssets,
     flowKey: 'assets',
     status: ProductionWorkspaceStageStatus.pendingRead,
     detail: '读取 assets flow 后可判断是否需要继续做衍生资产或素材生成。',
@@ -402,6 +409,7 @@ ProductionWorkspaceStage _buildAssetsStage({
 }
 
 ProductionWorkspaceStage _buildStoryboardTableStage({
+  required AppLocalizations l10n,
   required String? activeKey,
   required Map<String, Object?> flowSnapshot,
   required String toolName,
@@ -410,7 +418,7 @@ ProductionWorkspaceStage _buildStoryboardTableStage({
 }) {
   if (review != null && review.target == 'storyboardTable') {
     return ProductionWorkspaceStage(
-      title: '分镜表',
+      title: l10n.agentWorkspaceProductionStageFlowStoryboardTable,
       flowKey: 'storyboardTable',
       status: ProductionWorkspaceStageStatus.fromSupervisionReview(review),
       detail: _reviewDetail(review),
@@ -458,8 +466,8 @@ ProductionWorkspaceStage _buildStoryboardTableStage({
   if (data is String) {
     final trimmed = data.trim();
     if (trimmed.isEmpty) {
-      return const ProductionWorkspaceStage(
-        title: '分镜表',
+      return ProductionWorkspaceStage(
+        title: l10n.agentWorkspaceProductionStageFlowStoryboardTable,
         flowKey: 'storyboardTable',
         status: ProductionWorkspaceStageStatus.pendingGenerate,
         detail: 'storyboardTable 为空，适合先补结构化镜头表。',
@@ -474,7 +482,7 @@ ProductionWorkspaceStage _buildStoryboardTableStage({
       if (assetCount > 0) '关联 $assetCount 项资产',
     ].join('，');
     return ProductionWorkspaceStage(
-      title: '分镜表',
+      title: l10n.agentWorkspaceProductionStageFlowStoryboardTable,
       flowKey: 'storyboardTable',
       status: ProductionWorkspaceStageStatus.pendingReview,
       detail:
@@ -493,7 +501,7 @@ ProductionWorkspaceStage _buildStoryboardTableStage({
         ? ProductionWorkspaceStageStatus.backfillScriptPlanFromTable
         : ProductionWorkspaceStageStatus.storyboardTableExpandRead;
     return ProductionWorkspaceStage(
-      title: '分镜表',
+      title: l10n.agentWorkspaceProductionStageFlowStoryboardTable,
       flowKey: 'storyboardTable',
       status: tableStatus,
       detail: advanceReady
@@ -513,7 +521,7 @@ ProductionWorkspaceStage _buildStoryboardTableStage({
       activeKey != 'storyboardTable' &&
       toolName != 'run_sub_agent_storyboard_table') {
     return ProductionWorkspaceStage(
-      title: '分镜表',
+      title: l10n.agentWorkspaceProductionStageFlowStoryboardTable,
       flowKey: 'storyboardTable',
       status: ProductionWorkspaceStageStatus.waitingScriptPlan,
       detail: '先读取或生成 scriptPlan，再拆分 storyboardTable，避免镜头表脱离导演计划。',
@@ -526,7 +534,7 @@ ProductionWorkspaceStage _buildStoryboardTableStage({
       activeKey != 'storyboardTable' &&
       toolName != 'run_sub_agent_storyboard_table') {
     return ProductionWorkspaceStage(
-      title: '分镜表',
+      title: l10n.agentWorkspaceProductionStageFlowStoryboardTable,
       flowKey: 'storyboardTable',
       status: ProductionWorkspaceStageStatus.waitingScriptPlanDepth,
       detail: '当前 scriptPlan 已有内容但还不够完整，先补齐导演计划的关键维度，再拆分 storyboardTable。',
@@ -540,7 +548,7 @@ ProductionWorkspaceStage _buildStoryboardTableStage({
         ? extractProductionStoryboardPromptScopeIds(toolName, toolArguments)
         : const <int>[];
     return ProductionWorkspaceStage(
-      title: '分镜表',
+      title: l10n.agentWorkspaceProductionStageFlowStoryboardTable,
       flowKey: 'storyboardTable',
       status: ProductionWorkspaceStageStatus.suggestRefresh,
       refreshHint: affectedIds.isEmpty
@@ -554,7 +562,7 @@ ProductionWorkspaceStage _buildStoryboardTableStage({
     );
   }
   return ProductionWorkspaceStage(
-    title: '分镜表',
+    title: l10n.agentWorkspaceProductionStageFlowStoryboardTable,
     flowKey: 'storyboardTable',
     status: ProductionWorkspaceStageStatus.pendingRead,
     detail: '需要时可读取 storyboardTable 审阅结构化镜头表。',
@@ -564,6 +572,7 @@ ProductionWorkspaceStage _buildStoryboardTableStage({
 }
 
 ProductionWorkspaceStage _buildStoryboardStage({
+  required AppLocalizations l10n,
   required String? activeKey,
   required Map<String, Object?> flowSnapshot,
   required String toolName,
@@ -604,7 +613,7 @@ ProductionWorkspaceStage _buildStoryboardStage({
               : '建议先读取紧凑 storyboard 状态，确认审核涉及的镜头。'
         : '审核已定位 ${storyboardIds.length} 个镜头，优先只看这批 storyboard 更省 token。${reviewScope.isEmpty ? '' : ' $reviewScope。'}';
     return ProductionWorkspaceStage(
-      title: '分镜画面',
+      title: l10n.agentWorkspaceProductionStageFlowStoryboard,
       flowKey: 'storyboard',
       status: review.nextAction == 'generate_storyboard'
           ? ProductionWorkspaceStageStatus.storyboardFramesPending
@@ -631,8 +640,8 @@ ProductionWorkspaceStage _buildStoryboardStage({
   if (data is List) {
     final rows = data.whereType<Map<String, dynamic>>().toList(growable: false);
     if (rows.isEmpty) {
-      return const ProductionWorkspaceStage(
-        title: '分镜画面',
+      return ProductionWorkspaceStage(
+        title: l10n.agentWorkspaceProductionStageFlowStoryboard,
         flowKey: 'storyboard',
         status: ProductionWorkspaceStageStatus.pendingGenerate,
         detail: 'storyboard 为空，先生成第一版分镜画面。',
@@ -656,7 +665,7 @@ ProductionWorkspaceStage _buildStoryboardStage({
       final idTail = missingIds.length > 6 ? ' 等 ${missingIds.length} 个镜头' : '';
       final reviewScope = summarizeProductionStoryboardReviewScope(missingIds);
       return ProductionWorkspaceStage(
-        title: '分镜画面',
+        title: l10n.agentWorkspaceProductionStageFlowStoryboard,
         flowKey: 'storyboard',
         status: ProductionWorkspaceStageStatus.needsStoryboardFrames,
         detail:
@@ -671,7 +680,7 @@ ProductionWorkspaceStage _buildStoryboardStage({
       );
     }
     return ProductionWorkspaceStage(
-      title: '分镜画面',
+      title: l10n.agentWorkspaceProductionStageFlowStoryboard,
       flowKey: 'storyboard',
       status: ProductionWorkspaceStageStatus.storyboardComplete,
       detail:
@@ -686,7 +695,7 @@ ProductionWorkspaceStage _buildStoryboardStage({
       toolName != 'run_sub_agent_storyboard_gen' &&
       toolName != 'run_sub_agent_storyboard_panel') {
     return ProductionWorkspaceStage(
-      title: '分镜画面',
+      title: l10n.agentWorkspaceProductionStageFlowStoryboard,
       flowKey: 'storyboard',
       status: ProductionWorkspaceStageStatus.waitingScriptPlan,
       detail: '先读取或生成 scriptPlan，再推进 storyboard，避免直接补图但情绪和镜头意图未定。',
@@ -701,7 +710,7 @@ ProductionWorkspaceStage _buildStoryboardStage({
       toolName != 'run_sub_agent_storyboard_gen' &&
       toolName != 'run_sub_agent_storyboard_panel') {
     return ProductionWorkspaceStage(
-      title: '分镜画面',
+      title: l10n.agentWorkspaceProductionStageFlowStoryboard,
       flowKey: 'storyboard',
       status: ProductionWorkspaceStageStatus.waitingScriptPlanDepth,
       detail:
@@ -717,7 +726,7 @@ ProductionWorkspaceStage _buildStoryboardStage({
       toolName != 'run_sub_agent_storyboard_gen' &&
       toolName != 'run_sub_agent_storyboard_panel') {
     return ProductionWorkspaceStage(
-      title: '分镜画面',
+      title: l10n.agentWorkspaceProductionStageFlowStoryboard,
       flowKey: 'storyboard',
       status: ProductionWorkspaceStageStatus.waitingStoryboardTable,
       detail: '先补 storyboardTable 再推进 storyboard，避免直接出图时镜头拆分和资产关联还没定型。',
@@ -734,7 +743,7 @@ ProductionWorkspaceStage _buildStoryboardStage({
       toolName != 'run_sub_agent_storyboard_gen' &&
       toolName != 'run_sub_agent_storyboard_panel') {
     return ProductionWorkspaceStage(
-      title: '分镜画面',
+      title: l10n.agentWorkspaceProductionStageFlowStoryboard,
       flowKey: 'storyboard',
       status: ProductionWorkspaceStageStatus.backfillScriptPlanFromTable,
       detail:
@@ -751,7 +760,7 @@ ProductionWorkspaceStage _buildStoryboardStage({
       toolName != 'run_sub_agent_storyboard_gen' &&
       toolName != 'run_sub_agent_storyboard_panel') {
     return ProductionWorkspaceStage(
-      title: '分镜画面',
+      title: l10n.agentWorkspaceProductionStageFlowStoryboard,
       flowKey: 'storyboard',
       status: ProductionWorkspaceStageStatus.waitingStoryboardTableCoverage,
       detail:
@@ -793,7 +802,7 @@ ProductionWorkspaceStage _buildStoryboardStage({
         ? ProductionWorkspaceRefreshHint.refreshStoryboardSnapshot
         : ProductionWorkspaceRefreshHint.rereadMissingFrameState;
     return ProductionWorkspaceStage(
-      title: '分镜画面',
+      title: l10n.agentWorkspaceProductionStageFlowStoryboard,
       flowKey: 'storyboard',
       status: ProductionWorkspaceStageStatus.suggestRefresh,
       refreshHint: storyboardRefreshHint,
@@ -810,7 +819,7 @@ ProductionWorkspaceStage _buildStoryboardStage({
     );
   }
   return ProductionWorkspaceStage(
-    title: '分镜画面',
+    title: l10n.agentWorkspaceProductionStageFlowStoryboard,
     flowKey: 'storyboard',
     status: ProductionWorkspaceStageStatus.pendingRead,
     detail: '读取 storyboard 后可判断是否需要继续补图或直接写回结果。',

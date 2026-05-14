@@ -393,6 +393,7 @@ void main() {
     'buildProductionWorkspaceStages narrows storyboard refresh after sub-agent run',
     () {
       final stages = buildProductionWorkspaceStages(
+        l10n: _zh,
         toolName: 'run_sub_agent_storyboard_gen',
         suggestedFlowKey: 'storyboard',
         result: <String, dynamic>{'result': '已完成'},
@@ -424,6 +425,7 @@ void main() {
     'buildProductionWorkspaceStages include focused asset ids in storyboard generation prompt',
     () {
       final stages = buildProductionWorkspaceStages(
+        l10n: _zh,
         toolName: 'get_flowData',
         suggestedFlowKey: 'storyboard',
         result: <String, dynamic>{
@@ -485,6 +487,7 @@ void main() {
     'buildProductionWorkspaceStages narrows storyboard table refresh after storyboard-table sub-agent run',
     () {
       final stages = buildProductionWorkspaceStages(
+        l10n: _zh,
         toolName: 'run_sub_agent_storyboard_table',
         suggestedFlowKey: 'storyboardTable',
         result: <String, dynamic>{'result': '已完成'},
@@ -704,6 +707,7 @@ void main() {
     'buildProductionWorkspaceStages inject script-plan execution hint into asset and storyboard prompts',
     () {
       final stages = buildProductionWorkspaceStages(
+        l10n: _zh,
         toolName: 'run_sub_agent_director_plan',
         suggestedFlowKey: null,
         result: <String, dynamic>{
@@ -1253,6 +1257,7 @@ void main() {
     'buildProductionWorkspaceStages shrinks check-script reads to focused window',
     () {
       final stages = buildProductionWorkspaceStages(
+        l10n: _zh,
         toolName: 'run_sub_agent_production_supervision',
         suggestedFlowKey: 'storyboardTable',
         result: <String, dynamic>{
@@ -1286,6 +1291,7 @@ void main() {
     'buildProductionWorkspaceStages reuses compact script window for script-plan revisions',
     () {
       final stages = buildProductionWorkspaceStages(
+        l10n: _zh,
         toolName: 'run_sub_agent_production_supervision',
         suggestedFlowKey: 'scriptPlan',
         result: <String, dynamic>{
@@ -1319,6 +1325,7 @@ void main() {
     'buildProductionWorkspaceStages promotes check-assets review into focused assets stage',
     () {
       final stages = buildProductionWorkspaceStages(
+        l10n: _zh,
         toolName: 'run_sub_agent_production_supervision',
         suggestedFlowKey: 'scriptPlan',
         result: <String, dynamic>{
@@ -1338,7 +1345,7 @@ void main() {
       final assetStage = stages.singleWhere(
         (stage) => stage.flowKey == 'assets',
       );
-      expect(assetStage.status.legacyChineseLabel, '可推进');
+      expect(assetStage.status.localizedLabel(_zh), '可推进');
       expect(assetStage.domainTool, 'get_flowData');
       expect(assetStage.domainArgs, <String, dynamic>{
         'key': 'assets',
@@ -1354,6 +1361,7 @@ void main() {
     'buildProductionWorkspaceStages marks thin script plan as incomplete before downstream advance',
     () {
       final stages = buildProductionWorkspaceStages(
+        l10n: _zh,
         toolName: 'get_flowData',
         suggestedFlowKey: 'scriptPlan',
         result: <String, dynamic>{
@@ -1369,7 +1377,7 @@ void main() {
       final scriptPlanStage = stages.firstWhere(
         (stage) => stage.flowKey == 'scriptPlan',
       );
-      expect(scriptPlanStage.status.legacyChineseLabel, '待完善');
+      expect(scriptPlanStage.status.localizedLabel(_zh), '待完善');
       expect(scriptPlanStage.subAgentTool, 'run_sub_agent_director_plan');
       expect(scriptPlanStage.detail, contains('至少 3 个规划维度'));
     },
@@ -1379,6 +1387,7 @@ void main() {
     'buildProductionWorkspaceStages narrows check-assets review to structured asset types',
     () {
       final stages = buildProductionWorkspaceStages(
+        l10n: _zh,
         toolName: 'run_sub_agent_production_supervision',
         suggestedFlowKey: 'scriptPlan',
         result: <String, dynamic>{
@@ -1398,7 +1407,7 @@ void main() {
       final assetStage = stages.singleWhere(
         (stage) => stage.flowKey == 'assets',
       );
-      expect(assetStage.status.legacyChineseLabel, '可推进');
+      expect(assetStage.status.localizedLabel(_zh), '可推进');
       expect(assetStage.domainArgs, <String, dynamic>{
         'key': 'assets',
         'assetTypes': <String>['role', 'scene'],
@@ -1413,6 +1422,7 @@ void main() {
     'buildProductionWorkspaceStages keeps review asset type scope in storyboard generation args',
     () {
       final stages = buildProductionWorkspaceStages(
+        l10n: _zh,
         toolName: 'run_sub_agent_production_supervision',
         suggestedFlowKey: 'storyboardTable',
         result: <String, dynamic>{
@@ -1675,6 +1685,7 @@ void main() {
 
   test('buildProductionWorkspaceStages marks assets with missing images', () {
     final stages = buildProductionWorkspaceStages(
+      l10n: _zh,
       toolName: 'get_flowData',
       suggestedFlowKey: 'assets',
       result: <String, dynamic>{
@@ -1700,7 +1711,7 @@ void main() {
     );
 
     final assetsStage = stages.firstWhere((stage) => stage.flowKey == 'assets');
-    expect(assetsStage.status.legacyChineseLabel, '需补图');
+    expect(assetsStage.status.localizedLabel(_zh), '需补图');
     expect(assetsStage.subAgentTool, 'run_sub_agent_generate_assets');
     expect(assetsStage.detail, contains('资产 #12, 21 仍缺图'));
     expect(assetsStage.detail, contains('主资产 1/2 已就绪'));
@@ -1755,6 +1766,7 @@ void main() {
     'buildProductionWorkspaceStages narrows asset reads from storyboard references',
     () {
       final stages = buildProductionWorkspaceStages(
+        l10n: _zh,
         toolName: 'get_flowData',
         suggestedFlowKey: 'storyboard',
         result: <String, dynamic>{
@@ -1774,7 +1786,7 @@ void main() {
       final assetsStage = stages.firstWhere(
         (stage) => stage.flowKey == 'assets',
       );
-      expect(assetsStage.status.legacyChineseLabel, '已定位');
+      expect(assetsStage.status.localizedLabel(_zh), '已定位');
       expect(assetsStage.domainTool, 'get_flowData');
       expect(assetsStage.domainArgs, <String, dynamic>{
         'key': 'assets',
@@ -1789,6 +1801,7 @@ void main() {
     'buildProductionWorkspaceStages marks storyboard as refresh-needed after generation',
     () {
       final stages = buildProductionWorkspaceStages(
+        l10n: _zh,
         toolName: 'generate_storyboard',
         suggestedFlowKey: 'storyboard',
         result: <String, dynamic>{'ok': true},
@@ -1797,7 +1810,7 @@ void main() {
       final storyboardStage = stages.firstWhere(
         (stage) => stage.flowKey == 'storyboard',
       );
-      expect(storyboardStage.status.legacyChineseLabel, '建议刷新');
+      expect(storyboardStage.status.localizedLabel(_zh), '建议刷新');
       expect(storyboardStage.domainTool, 'get_flowData');
       expect(storyboardStage.domainArgs, <String, dynamic>{
         'key': 'storyboard',
@@ -1820,6 +1833,7 @@ void main() {
     'buildProductionWorkspaceStages narrows storyboard refresh to generated ids',
     () {
       final stages = buildProductionWorkspaceStages(
+        l10n: _zh,
         toolName: 'generate_storyboard',
         suggestedFlowKey: 'storyboard',
         result: <String, dynamic>{
@@ -1852,6 +1866,7 @@ void main() {
     'buildProductionWorkspaceStages narrows asset refresh to generated ids',
     () {
       final stages = buildProductionWorkspaceStages(
+        l10n: _zh,
         toolName: 'generate_deriveAsset',
         suggestedFlowKey: 'assets',
         result: <String, dynamic>{
@@ -1901,6 +1916,7 @@ void main() {
     'buildProductionWorkspaceStages marks storyboard table as review-ready',
     () {
       final stages = buildProductionWorkspaceStages(
+        l10n: _zh,
         toolName: 'get_flowData',
         suggestedFlowKey: 'storyboardTable',
         result: <String, dynamic>{
@@ -1911,7 +1927,7 @@ void main() {
       final tableStage = stages.firstWhere(
         (stage) => stage.flowKey == 'storyboardTable',
       );
-      expect(tableStage.status.legacyChineseLabel, '待审核');
+      expect(tableStage.status.localizedLabel(_zh), '待审核');
       expect(tableStage.subAgentTool, 'run_sub_agent_production_supervision');
     },
   );
@@ -1920,6 +1936,7 @@ void main() {
     'buildProductionWorkspaceStages surfaces structured supervision state',
     () {
       final stages = buildProductionWorkspaceStages(
+        l10n: _zh,
         toolName: 'run_sub_agent_production_supervision',
         suggestedFlowKey: 'storyboardTable',
         result: <String, dynamic>{
@@ -1938,7 +1955,7 @@ void main() {
       final tableStage = stages.firstWhere(
         (stage) => stage.flowKey == 'storyboardTable',
       );
-      expect(tableStage.status.legacyChineseLabel, '可推进');
+      expect(tableStage.status.localizedLabel(_zh), '可推进');
       expect(tableStage.domainTool, 'get_flowData');
       expect(tableStage.domainArgs, <String, dynamic>{
         'key': 'script',
@@ -1953,6 +1970,7 @@ void main() {
     'buildProductionWorkspaceStages re-read focused storyboard table ids for revision',
     () {
       final stages = buildProductionWorkspaceStages(
+        l10n: _zh,
         toolName: 'run_sub_agent_production_supervision',
         suggestedFlowKey: 'storyboardTable',
         result: <String, dynamic>{
@@ -1992,6 +2010,7 @@ void main() {
     'buildProductionWorkspaceStages narrows storyboard checks to review storyboard ids',
     () {
       final stages = buildProductionWorkspaceStages(
+        l10n: _zh,
         toolName: 'run_sub_agent_production_supervision',
         suggestedFlowKey: 'storyboardTable',
         result: <String, dynamic>{
@@ -2011,7 +2030,7 @@ void main() {
       final storyboardStage = stages.firstWhere(
         (stage) => stage.flowKey == 'storyboard',
       );
-      expect(storyboardStage.status.legacyChineseLabel, '待核对');
+      expect(storyboardStage.status.localizedLabel(_zh), '待核对');
       expect(storyboardStage.domainTool, 'get_flowData');
       expect(storyboardStage.domainArgs, <String, dynamic>{
         'key': 'storyboard',
@@ -2033,6 +2052,7 @@ void main() {
     'buildProductionWorkspaceStages adds focused storyboard scope to revision prompt',
     () {
       final stages = buildProductionWorkspaceStages(
+        l10n: _zh,
         toolName: 'run_sub_agent_production_supervision',
         suggestedFlowKey: 'storyboardTable',
         result: <String, dynamic>{
@@ -2066,6 +2086,7 @@ void main() {
     'buildProductionWorkspaceStages narrows supervision asset checks to review asset ids',
     () {
       final stages = buildProductionWorkspaceStages(
+        l10n: _zh,
         toolName: 'run_sub_agent_production_supervision',
         suggestedFlowKey: 'scriptPlan',
         result: <String, dynamic>{
@@ -2098,6 +2119,7 @@ void main() {
     'buildProductionWorkspaceStages prefers storyboard table window args',
     () {
       final stages = buildProductionWorkspaceStages(
+        l10n: _zh,
         toolName: 'get_flowData',
         suggestedFlowKey: 'storyboardTable',
         result: <String, dynamic>{
@@ -2116,7 +2138,7 @@ void main() {
       final tableStage = stages.firstWhere(
         (stage) => stage.flowKey == 'storyboardTable',
       );
-      expect(tableStage.status.legacyChineseLabel, '待扩读');
+      expect(tableStage.status.localizedLabel(_zh), '待扩读');
       expect(tableStage.domainArgs, <String, dynamic>{
         'key': 'storyboardTable',
         'rowStart': 1,
@@ -2138,6 +2160,7 @@ void main() {
     'buildProductionWorkspaceStages keeps storyboard table as sampled when coverage is advance-ready',
     () {
       final stages = buildProductionWorkspaceStages(
+        l10n: _zh,
         toolName: 'get_flowData',
         suggestedFlowKey: 'storyboardTable',
         result: <String, dynamic>{
@@ -2156,7 +2179,7 @@ void main() {
       final tableStage = stages.firstWhere(
         (stage) => stage.flowKey == 'storyboardTable',
       );
-      expect(tableStage.status.legacyChineseLabel, '已抽样');
+      expect(tableStage.status.localizedLabel(_zh), '已抽样');
       expect(tableStage.detail, contains('适合继续审核或修订'));
     },
   );
@@ -2165,6 +2188,7 @@ void main() {
     'buildProductionWorkspaceStages routes storyboard-table sampling back to script plan when scene intent is thin',
     () {
       final stages = buildProductionWorkspaceStages(
+        l10n: _zh,
         toolName: null,
         suggestedFlowKey: null,
         result: <String, dynamic>{
@@ -2198,13 +2222,13 @@ void main() {
       final storyboardStage = stages.firstWhere(
         (stage) => stage.flowKey == 'storyboard',
       );
-      expect(tableStage.status.legacyChineseLabel, '回补导演计划');
+      expect(tableStage.status.localizedLabel(_zh), '回补导演计划');
       expect(tableStage.domainArgs, <String, dynamic>{
         'key': 'scriptPlan',
         'maxChars': 2200,
       });
       expect(tableStage.detail, contains('先回补导演计划'));
-      expect(storyboardStage.status.legacyChineseLabel, '回补导演计划');
+      expect(storyboardStage.status.localizedLabel(_zh), '回补导演计划');
       expect(storyboardStage.domainArgs, <String, dynamic>{
         'key': 'scriptPlan',
         'maxChars': 2200,
@@ -2217,6 +2241,7 @@ void main() {
     'buildProductionWorkspaceStages narrows asset reads from storyboard table markdown text',
     () {
       final stages = buildProductionWorkspaceStages(
+        l10n: _zh,
         toolName: 'get_flowData',
         suggestedFlowKey: 'storyboardTable',
         result: <String, dynamic>{
@@ -2232,7 +2257,7 @@ void main() {
       final assetsStage = stages.firstWhere(
         (stage) => stage.flowKey == 'assets',
       );
-      expect(assetsStage.status.legacyChineseLabel, '已定位');
+      expect(assetsStage.status.localizedLabel(_zh), '已定位');
       expect(assetsStage.domainArgs, <String, dynamic>{
         'key': 'assets',
         'ids': <int>[3, 9],
@@ -2246,6 +2271,7 @@ void main() {
     'buildProductionWorkspaceStages narrows asset reads from script plan scope',
     () {
       final stages = buildProductionWorkspaceStages(
+        l10n: _zh,
         toolName: 'get_flowData',
         suggestedFlowKey: 'scriptPlan',
         result: <String, dynamic>{
@@ -2265,7 +2291,7 @@ void main() {
       final assetsStage = stages.firstWhere(
         (stage) => stage.flowKey == 'assets',
       );
-      expect(assetsStage.status.legacyChineseLabel, '已收紧');
+      expect(assetsStage.status.localizedLabel(_zh), '已收紧');
       expect(assetsStage.domainArgs, <String, dynamic>{
         'key': 'assets',
         'assetTypes': <String>['role', 'scene', 'tool'],
@@ -2280,6 +2306,7 @@ void main() {
     'buildProductionWorkspaceStages prefers explicit asset ids from script plan',
     () {
       final stages = buildProductionWorkspaceStages(
+        l10n: _zh,
         toolName: 'get_flowData',
         suggestedFlowKey: 'scriptPlan',
         result: <String, dynamic>{
@@ -2299,7 +2326,7 @@ void main() {
       final assetsStage = stages.firstWhere(
         (stage) => stage.flowKey == 'assets',
       );
-      expect(assetsStage.status.legacyChineseLabel, '已收紧');
+      expect(assetsStage.status.localizedLabel(_zh), '已收紧');
       expect(assetsStage.domainArgs, <String, dynamic>{
         'key': 'assets',
         'ids': <int>[3, 9, 12],
@@ -2313,6 +2340,7 @@ void main() {
     'buildProductionWorkspaceStages blocks assets until script plan exists',
     () {
       final stages = buildProductionWorkspaceStages(
+        l10n: _zh,
         toolName: null,
         suggestedFlowKey: null,
         result: null,
@@ -2321,7 +2349,7 @@ void main() {
       final assetsStage = stages.firstWhere(
         (stage) => stage.flowKey == 'assets',
       );
-      expect(assetsStage.status.legacyChineseLabel, '等待导演计划');
+      expect(assetsStage.status.localizedLabel(_zh), '等待导演计划');
       expect(assetsStage.domainArgs, <String, dynamic>{
         'key': 'scriptPlan',
         'maxChars': 2200,
@@ -2333,6 +2361,7 @@ void main() {
     'buildProductionWorkspaceStages blocks storyboard table until script plan exists',
     () {
       final stages = buildProductionWorkspaceStages(
+        l10n: _zh,
         toolName: null,
         suggestedFlowKey: null,
         result: null,
@@ -2341,7 +2370,7 @@ void main() {
       final tableStage = stages.firstWhere(
         (stage) => stage.flowKey == 'storyboardTable',
       );
-      expect(tableStage.status.legacyChineseLabel, '等待导演计划');
+      expect(tableStage.status.localizedLabel(_zh), '等待导演计划');
       expect(tableStage.domainArgs, <String, dynamic>{
         'key': 'scriptPlan',
         'maxChars': 2200,
@@ -2353,6 +2382,7 @@ void main() {
     'buildProductionWorkspaceStages blocks downstream work until script plan is sufficiently complete',
     () {
       final stages = buildProductionWorkspaceStages(
+        l10n: _zh,
         toolName: 'get_flowData',
         suggestedFlowKey: 'scriptPlan',
         result: <String, dynamic>{
@@ -2374,9 +2404,9 @@ void main() {
       final storyboardStage = stages.firstWhere(
         (stage) => stage.flowKey == 'storyboard',
       );
-      expect(assetsStage.status.legacyChineseLabel, '等待导演计划完善');
-      expect(tableStage.status.legacyChineseLabel, '等待导演计划完善');
-      expect(storyboardStage.status.legacyChineseLabel, '等待导演计划完善');
+      expect(assetsStage.status.localizedLabel(_zh), '等待导演计划完善');
+      expect(tableStage.status.localizedLabel(_zh), '等待导演计划完善');
+      expect(storyboardStage.status.localizedLabel(_zh), '等待导演计划完善');
     },
   );
 
@@ -2384,6 +2414,7 @@ void main() {
     'buildProductionWorkspaceStages blocks storyboard until storyboard table exists',
     () {
       final stages = buildProductionWorkspaceStages(
+        l10n: _zh,
         toolName: 'get_flowData',
         suggestedFlowKey: 'scriptPlan',
         result: <String, dynamic>{
@@ -2403,7 +2434,7 @@ void main() {
       final storyboardStage = stages.firstWhere(
         (stage) => stage.flowKey == 'storyboard',
       );
-      expect(storyboardStage.status.legacyChineseLabel, '等待分镜表');
+      expect(storyboardStage.status.localizedLabel(_zh), '等待分镜表');
       expect(storyboardStage.domainArgs, <String, dynamic>{
         'key': 'storyboardTable',
         'fields': <String>[
@@ -2424,6 +2455,7 @@ void main() {
     'buildProductionWorkspaceStages allows storyboard-table gate only after stronger script plan coverage',
     () {
       final stages = buildProductionWorkspaceStages(
+        l10n: _zh,
         toolName: 'get_flowData',
         suggestedFlowKey: 'scriptPlan',
         result: <String, dynamic>{
@@ -2443,7 +2475,7 @@ void main() {
       final storyboardStage = stages.firstWhere(
         (stage) => stage.flowKey == 'storyboard',
       );
-      expect(storyboardStage.status.legacyChineseLabel, '等待分镜表');
+      expect(storyboardStage.status.localizedLabel(_zh), '等待分镜表');
     },
   );
 
@@ -2451,6 +2483,7 @@ void main() {
     'buildProductionWorkspaceStages blocks storyboard until storyboard table coverage is sufficient',
     () {
       final stages = buildProductionWorkspaceStages(
+        l10n: _zh,
         toolName: null,
         suggestedFlowKey: null,
         result: <String, dynamic>{
@@ -2481,7 +2514,7 @@ void main() {
       final storyboardStage = stages.firstWhere(
         (stage) => stage.flowKey == 'storyboard',
       );
-      expect(storyboardStage.status.legacyChineseLabel, '等待分镜表完善');
+      expect(storyboardStage.status.localizedLabel(_zh), '等待分镜表完善');
       expect(storyboardStage.domainArgs, <String, dynamic>{
         'key': 'storyboardTable',
         'fields': <String>[
@@ -2503,6 +2536,7 @@ void main() {
     'buildProductionWorkspaceStages allows storyboard to move past table gate when coverage is sufficient',
     () {
       final stages = buildProductionWorkspaceStages(
+        l10n: _zh,
         toolName: null,
         suggestedFlowKey: null,
         result: <String, dynamic>{
@@ -2533,7 +2567,7 @@ void main() {
       final storyboardStage = stages.firstWhere(
         (stage) => stage.flowKey == 'storyboard',
       );
-      expect(storyboardStage.status.legacyChineseLabel, '待读取');
+      expect(storyboardStage.status.localizedLabel(_zh), '待读取');
       expect(storyboardStage.domainTool, 'get_flowData');
       expect(storyboardStage.domainArgs, <String, dynamic>{
         'key': 'storyboard',
@@ -2555,6 +2589,7 @@ void main() {
     'buildProductionWorkspaceStages uses focused script window in missing storyboard prompt',
     () {
       final stages = buildProductionWorkspaceStages(
+        l10n: _zh,
         toolName: 'get_flowData',
         suggestedFlowKey: 'storyboard',
         result: <String, dynamic>{
@@ -2664,6 +2699,7 @@ void main() {
     'buildProductionWorkspaceStages summarizes missing storyboard ids and skips pure text rows',
     () {
       final stages = buildProductionWorkspaceStages(
+        l10n: _zh,
         toolName: 'get_flowData',
         suggestedFlowKey: 'storyboard',
         result: <String, dynamic>{
@@ -2682,7 +2718,7 @@ void main() {
       final storyboardStage = stages.firstWhere(
         (stage) => stage.flowKey == 'storyboard',
       );
-      expect(storyboardStage.status.legacyChineseLabel, '需补帧');
+      expect(storyboardStage.status.localizedLabel(_zh), '需补帧');
       expect(storyboardStage.detail, contains('#101'));
       expect(storyboardStage.detail, contains('纯文本模式'));
       expect(storyboardStage.detail, contains('画面结果 1/2 已就绪'));
@@ -2714,7 +2750,7 @@ void main() {
               status: ProductionWorkspaceStageStatus.needsAssetImages,
               detail: '资产 #12, 21 仍缺图，主资产 1/2 已就绪，衍生缺口 2 项。',
             ),
-          ]);
+          ], _zh);
 
       expect(summary, contains('当前卡点：资产准备 · 需补图'));
       expect(summary, contains('资产 #12, 21 仍缺图'));
@@ -2734,7 +2770,7 @@ void main() {
           detail:
               '已窗口读取 8/24 行关键列，但覆盖还不够，先扩读或补齐关键镜头表，再推进 storyboard。分镜表已读 8/24 行，待展开 16 行。',
         ),
-      ]);
+      ], _zh);
 
       expect(summary, '当前卡点：分镜表 · 待扩读；先继续扩读关键分镜表窗口；分镜表已读 8/24 行，待展开 16 行。');
     },
@@ -2753,7 +2789,7 @@ void main() {
           detail:
               'storyboardTable 已有基础内容，但当前 scriptPlan 对分场景情绪或画面意图交代还不够，先细化导演计划，再继续扩读分镜表并推进 storyboard。',
         ),
-      ]);
+      ], _zh);
 
       expect(
         summary,
@@ -2781,8 +2817,8 @@ void main() {
         subAgentTool: 'run_sub_agent_director_plan',
       );
 
-      expect(productionStageDomainButtonLabel(expandStage), '扩读分镜表');
-      expect(productionStageSubAgentButtonLabel(refineStage), '细化导演计划');
+      expect(productionStageDomainButtonLabel(expandStage, _zh), '扩读分镜表');
+      expect(productionStageSubAgentButtonLabel(refineStage, _zh), '细化导演计划');
     },
   );
 
@@ -2822,11 +2858,20 @@ void main() {
         domainTool: 'get_flowData',
       );
 
-      expect(productionStageDomainButtonLabel(scriptRefreshStage), '刷新导演计划');
-      expect(productionStageDomainButtonLabel(assetRefreshStage), '回读受影响资产');
-      expect(productionStageDomainButtonLabel(tableRefreshStage), '回读局部分镜表');
       expect(
-        productionStageDomainButtonLabel(storyboardRefreshStage),
+        productionStageDomainButtonLabel(scriptRefreshStage, _zh),
+        '刷新导演计划',
+      );
+      expect(
+        productionStageDomainButtonLabel(assetRefreshStage, _zh),
+        '回读受影响资产',
+      );
+      expect(
+        productionStageDomainButtonLabel(tableRefreshStage, _zh),
+        '回读局部分镜表',
+      );
+      expect(
+        productionStageDomainButtonLabel(storyboardRefreshStage, _zh),
         '回读缺帧状态',
       );
     },
@@ -2921,7 +2966,7 @@ void main() {
       );
 
       expect(
-        summarizeAppliedProductionStageStatus(stage),
+        summarizeAppliedProductionStageStatus(stage, _zh),
         '已应用阶段动作：分镜表，下一步先扩读关键分镜表窗口。',
       );
     },
