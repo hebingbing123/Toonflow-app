@@ -8,9 +8,10 @@
 
   python3 scripts/l10n_batch_pipeline.py scan --root frontend/lib
   python3 scripts/l10n_batch_pipeline.py apply --root frontend/lib --dry-run
-  python3 scripts/l10n_batch_pipeline.py apply --root frontend/lib
+  # 写入 ARB + Dart（结构模板可用 --no-translate；要机翻中文见 requirements_l10n_batch.txt）
+  python3 scripts/l10n_batch_pipeline.py apply --root frontend/lib --no-translate
 
-可选：pip install -r scripts/requirements_l10n_batch.txt 后自动中译（否则结构类模板 zh 与 en 相同）。
+可选：pip install -r scripts/requirements_l10n_batch.txt 后去掉 --no-translate 并联网机翻 zh。
 """
 
 from __future__ import annotations
