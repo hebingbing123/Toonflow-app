@@ -58,7 +58,7 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
   }
 
   Future<void> _reloadRows({int? preferredNumericId}) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     setState(() {
       _busy = true;
       _statusLine = l10n.projectsArtWorkbenchStatusRefreshing;
@@ -107,7 +107,7 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
   }
 
   Future<void> _loadCover() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final selected = _selected;
     if (selected == null) return;
     setState(() {
@@ -136,7 +136,7 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
   }
 
   Future<void> _createStyle() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final name = _ctrls.nameCtrl.text.trim();
     if (name.isEmpty) {
       setState(() => _statusLine = l10n.projectsArtWorkbenchStatusCreateNeedName);
@@ -177,7 +177,7 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
   }
 
   Future<void> _saveSelected() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final selected = _selected;
     if (selected == null) {
       setState(() => _statusLine = l10n.projectsArtWorkbenchStatusSaveNeedSelect);
@@ -216,7 +216,7 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
   }
 
   Future<void> _deleteSelected() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final selected = _selected;
     if (selected == null) {
       setState(() => _statusLine = l10n.projectsArtWorkbenchStatusDeleteNeedSelect);
@@ -245,7 +245,7 @@ class _ArtStylesWorkbenchDialogState extends State<_ArtStylesWorkbenchDialog> {
   }
 
   Future<void> _extractPrompt() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final images = parseArtStyleExtractImages(_ctrls.extractImagesCtrl.text);
     if (images.isEmpty) {
       setState(

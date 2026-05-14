@@ -307,7 +307,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
       if (!mounted) {
         return;
       }
-      final l10n = AppLocalizations.of(context)!;
+      final l10n = resolveAppLocalizationsForErrors(context);
       showRustApiSnackBarIfRustThenDescribeUserVisible(
         e,
         l10n: l10n,
@@ -322,7 +322,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
   }
 
   Future<void> _create() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final token = widget.accessToken;
     if (token == null || token.isEmpty) {
       return;
@@ -364,7 +364,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
   }
 
   Future<void> _acceptInvite() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final token = widget.accessToken;
     if (token == null || token.isEmpty) {
       return;
@@ -427,7 +427,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
   }
 
   Future<void> _openMembersDialog(WorkspaceListItem row) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final token = widget.accessToken;
     if (token == null || token.isEmpty) {
       return;
@@ -1434,7 +1434,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
   }
 
   Future<void> _openInvitesDialog(WorkspaceListItem row) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final token = widget.accessToken;
     if (token == null || token.isEmpty) {
       return;
@@ -1950,7 +1950,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
   }
 
   Future<void> _confirmArchive(WorkspaceListItem row) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final ok = await showDialog<bool>(
       context: context,
       builder: (BuildContext ctx) => AlertDialog(
@@ -1974,7 +1974,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
   }
 
   Future<void> _setArchive(WorkspaceListItem row, bool archive) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final token = widget.accessToken;
     if (token == null || token.isEmpty) {
       return;
@@ -2018,7 +2018,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
   }
 
   Future<void> _switchCurrentWorkspace(WorkspaceListItem row) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final token = widget.accessToken;
     if (token == null || token.isEmpty) {
       return;
@@ -2064,7 +2064,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final token = widget.accessToken;
     final theme = Theme.of(context);
     if (token == null || token.isEmpty) {

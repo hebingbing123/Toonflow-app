@@ -36,7 +36,7 @@ class _ScriptWorkbenchPanelState extends State<_ScriptWorkbenchPanel> {
   }
 
   Future<void> _refreshContext() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     setState(() {
       _loadingContext = true;
       _contextLine = null;
@@ -80,7 +80,7 @@ class _ScriptWorkbenchPanelState extends State<_ScriptWorkbenchPanel> {
       await action();
     } catch (e) {
       if (!mounted) return;
-      final snackL10n = AppLocalizations.of(context)!;
+      final snackL10n = resolveAppLocalizationsForErrors(context);
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(
@@ -94,7 +94,7 @@ class _ScriptWorkbenchPanelState extends State<_ScriptWorkbenchPanel> {
   }
 
   Future<void> _exportCurrentScript() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final zip = await exportScriptsZip(widget.token, [widget.scriptNumericId]);
     final diagnosis = diagnoseScriptWorkbench(
       l10n,
@@ -114,7 +114,7 @@ class _ScriptWorkbenchPanelState extends State<_ScriptWorkbenchPanel> {
   }
 
   Future<void> _pollExtractState() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final rows = await pollScriptExtractState(widget.token, [
       widget.scriptNumericId,
     ]);
@@ -153,7 +153,7 @@ class _ScriptWorkbenchPanelState extends State<_ScriptWorkbenchPanel> {
   }
 
   Future<void> _startExtractAssets() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final accepted = await startScriptAssetExtract(
       widget.token,
       projectUuid: widget.projectId,
@@ -187,7 +187,7 @@ class _ScriptWorkbenchPanelState extends State<_ScriptWorkbenchPanel> {
   }
 
   Future<void> _openEditImageWorkbench() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     await widget.onOpenEditImageWorkbench();
     if (!mounted) return;
     await _refreshWorkbench();
@@ -211,7 +211,7 @@ class _ScriptWorkbenchPanelState extends State<_ScriptWorkbenchPanel> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final relatedAssets = _scriptContext?.relatedAssets ?? const [];
     final errorReason = (_scriptContext?.errorReason ?? '').trim();
     final diagnosis = diagnoseScriptWorkbench(

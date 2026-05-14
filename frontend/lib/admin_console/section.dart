@@ -164,7 +164,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
     final result = widget.controller.searchResult;
     return Padding(
@@ -313,7 +313,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
   }
 
   Widget _userHitTile(BuildContext context, AdminUserSearchHitV1 item) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
     return ListTile(
       dense: true,
@@ -338,7 +338,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     BuildContext context,
     AdminWorkspaceSearchHitV1 item,
   ) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
     return ListTile(
       dense: true,
@@ -360,7 +360,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
   }
 
   Widget _projectHitTile(BuildContext context, AdminProjectSearchHitV1 item) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
     return ListTile(
       dense: true,
@@ -385,7 +385,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
   }
 
   Widget _jobTile(BuildContext context, AdminJobSummaryV1 item) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
     return ListTile(
       dense: true,
@@ -406,7 +406,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     BuildContext context,
     AdminUserDetailResponseV1 detail,
   ) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return _detailCard(
       context,
       title: detail.email ?? detail.userId,
@@ -480,7 +480,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     BuildContext context,
     AdminUserDetailResponseV1 detail,
   ) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -643,7 +643,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     BuildContext context,
     AdminUserDetailResponseV1 detail,
   ) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
     final currentWorkspaceId = detail.currentWorkspace?.workspaceId;
     final personalMembership = detail.memberships
@@ -736,7 +736,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     BuildContext context,
     AdminWorkspaceDetailResponseV1 detail,
   ) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
     final isPersonal = detail.workspaceType == 'personal';
     return Column(
@@ -896,7 +896,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     BuildContext context,
     AdminWorkspaceDetailResponseV1 detail,
   ) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1038,7 +1038,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     BuildContext context,
     AdminWorkspaceDetailResponseV1 detail,
   ) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
     final isPersonal = detail.workspaceType == 'personal';
     return Column(
@@ -1127,7 +1127,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     BuildContext context,
     AdminWorkspaceDetailResponseV1 detail,
   ) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
     final breakdown = detail.workspaceRoleBreakdown;
     return Column(
@@ -1237,7 +1237,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     BuildContext context,
     AdminWorkspaceDetailResponseV1 detail,
   ) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1395,7 +1395,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     BuildContext context,
     AdminWorkspaceDetailResponseV1 detail,
   ) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return _detailCard(
       context,
       title: detail.name,
@@ -1489,7 +1489,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     BuildContext context,
     AdminProjectDetailResponseV1 detail,
   ) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1545,7 +1545,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     BuildContext context,
     AdminProjectDetailResponseV1 detail,
   ) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1685,7 +1685,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     BuildContext context,
     AdminProjectDetailResponseV1 detail,
   ) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return _detailCard(
       context,
       title: detail.name?.trim().isNotEmpty == true
@@ -1817,7 +1817,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
   }
 
   Widget _kvWrap(BuildContext context, Map<String, String> rows) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return Wrap(
       spacing: 8,
       runSpacing: 8,
@@ -1836,7 +1836,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     required String title,
     required List<String> items,
   }) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1865,7 +1865,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     BuildContext context,
     AdminUserGovernanceAuditSummaryV1 item,
   ) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final nextStatus = item.nextState['operationalStatus'];
     final nextQuota = item.nextState['dailyJobQuotaOverride'];
     return l10n.adminConsoleAuditUserSummary(
@@ -1878,7 +1878,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     BuildContext context,
     AdminWorkspaceGovernanceAuditSummaryV1 item,
   ) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final action = item.nextState['action'];
     if (action == 'upsert' || action == 'remove') {
       final targetUserId =
@@ -1917,7 +1917,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
     BuildContext context,
     AdminProjectGovernanceAuditSummaryV1 item,
   ) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final newOwnerUserId = item.nextState['newOwnerUserId'];
     if (newOwnerUserId != null) {
       final previousOwnerUserId = item.nextState['previousOwnerUserId'];
