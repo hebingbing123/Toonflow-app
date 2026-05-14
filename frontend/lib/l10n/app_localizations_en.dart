@@ -191,6 +191,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shortVideoSpaceKeyboardShortcuts => 'Keyboard Shortcuts';
 
   @override
+  String get shortVideoSpaceShortcutKeysSave => 'Ctrl+S / Cmd+S';
+
+  @override
+  String get shortVideoSpaceShortcutKeysSelectAll => 'Ctrl+A / Cmd+A';
+
+  @override
+  String get shortVideoSpaceShortcutKeysFocusSearch => 'Ctrl+F / Cmd+F';
+
+  @override
+  String get shortVideoSpaceShortcutKeysUndo => 'Ctrl+Z / Cmd+Z';
+
+  @override
+  String get shortVideoSpaceShortcutKeysRedo => 'Ctrl+Shift+Z / Cmd+Shift+Z';
+
+  @override
   String get shortVideoSpaceClose => 'Close';
 
   @override
@@ -3353,6 +3368,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get globalSearchAllTime => 'All time';
+
+  @override
+  String globalSearchTypeCountChipLabel(String typeName, int count) {
+    return '$typeName $count';
+  }
+
+  @override
+  String globalSearchTypeSectionHeader(String typeName, int count) {
+    return '$typeName ($count)';
+  }
+
+  @override
+  String get globalSearchViewTitlePartSeparator => ' · ';
+
+  @override
+  String get globalSearchViewTitleTypesJoiner => '/';
+
+  @override
+  String globalSearchViewTitleTimeRange(String from, String to) {
+    return '$from~$to';
+  }
+
+  @override
+  String get globalSearchQueryTruncationSuffix => '…';
 
   @override
   String get globalSearchNeverUsed => 'never used';
@@ -15888,6 +15927,29 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String shortVideoMetricChipLine(String label, String value) {
     return '$label $value';
+  }
+
+  @override
+  String get shortVideoPublishPanelBlockingReasonsJoiner => ', ';
+
+  @override
+  String shortVideoPublishPanelBlockedDraftLine(String title, String reasons) {
+    return '$title: $reasons';
+  }
+
+  @override
+  String shortVideoPublishBatchResultBulletLine(String line) {
+    return '• $line';
+  }
+
+  @override
+  String shortVideoAudioVolumePercent(int percent) {
+    return '$percent%';
+  }
+
+  @override
+  String shortVideoVoiceoverSpeedMultiplier(String speed) {
+    return '${speed}x';
   }
 
   @override

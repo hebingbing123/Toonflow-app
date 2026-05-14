@@ -39,6 +39,10 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
   bool _isLoading = false;
   String? _errorMessage;
 
+  AppLocalizations get _l10n =>
+      AppLocalizations.of(context) ??
+      lookupAppLocalizations(const Locale('en'));
+
   @override
   void initState() {
     super.initState();
@@ -101,10 +105,11 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
       }
     } catch (e) {
       if (mounted) {
-        final l10n = AppLocalizations.of(context)!;
         setState(() {
           _isLoading = false;
-          _errorMessage = l10n.shortVideoAudioPreviewLoadFailed(describeUserVisibleApiError(l10n, e));
+          _errorMessage = _l10n.shortVideoAudioPreviewLoadFailed(
+            describeUserVisibleApiError(_l10n, e),
+          );
         });
       }
     }
@@ -125,9 +130,10 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
       }
     } catch (e) {
       if (mounted) {
-        final l10n = AppLocalizations.of(context)!;
         setState(() {
-          _errorMessage = l10n.shortVideoAudioPreviewPlaybackFailed(describeUserVisibleApiError(l10n, e));
+          _errorMessage = _l10n.shortVideoAudioPreviewPlaybackFailed(
+            describeUserVisibleApiError(_l10n, e),
+          );
         });
       }
     }
@@ -141,9 +147,10 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
       });
     } catch (e) {
       if (mounted) {
-        final l10n = AppLocalizations.of(context)!;
         setState(() {
-          _errorMessage = l10n.shortVideoAudioPreviewStopFailed(describeUserVisibleApiError(l10n, e));
+          _errorMessage = _l10n.shortVideoAudioPreviewStopFailed(
+            describeUserVisibleApiError(_l10n, e),
+          );
         });
       }
     }
@@ -154,9 +161,10 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
       await _audioPlayer.seek(position);
     } catch (e) {
       if (mounted) {
-        final l10n = AppLocalizations.of(context)!;
         setState(() {
-          _errorMessage = l10n.shortVideoAudioPreviewSeekFailed(describeUserVisibleApiError(l10n, e));
+          _errorMessage = _l10n.shortVideoAudioPreviewSeekFailed(
+            describeUserVisibleApiError(_l10n, e),
+          );
         });
       }
     }
@@ -170,9 +178,10 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
       });
     } catch (e) {
       if (mounted) {
-        final l10n = AppLocalizations.of(context)!;
         setState(() {
-          _errorMessage = l10n.shortVideoAudioPreviewVolumeFailed(describeUserVisibleApiError(l10n, e));
+          _errorMessage = _l10n.shortVideoAudioPreviewVolumeFailed(
+            describeUserVisibleApiError(_l10n, e),
+          );
         });
       }
     }
@@ -186,7 +195,7 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = _l10n;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -212,8 +221,8 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
                 child: Text(
                   l10n.shortVideoAudioPreviewTitle,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               if (widget.onClose != null)
@@ -258,9 +267,7 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
 
           // Loading indicator
           if (_isLoading) ...[
-            const Center(
-              child: CircularProgressIndicator(),
-            ),
+            const Center(child: CircularProgressIndicator()),
             const SizedBox(height: 8),
             Center(
               child: Text(
@@ -274,9 +281,9 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
               children: [
                 Text(
                   _formatDuration(_position),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontFamily: 'monospace',
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(fontFamily: 'monospace'),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
@@ -305,9 +312,9 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
                 const SizedBox(width: 8),
                 Text(
                   _formatDuration(_duration),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontFamily: 'monospace',
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(fontFamily: 'monospace'),
                 ),
               ],
             ),
@@ -351,8 +358,8 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
                   _volume == 0
                       ? Icons.volume_off
                       : _volume < 0.5
-                          ? Icons.volume_down
-                          : Icons.volume_up,
+                      ? Icons.volume_down
+                      : Icons.volume_up,
                   size: 20,
                 ),
                 const SizedBox(width: 8),
@@ -372,7 +379,9 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
                       min: 0,
                       max: 1,
                       divisions: 20,
-                      label: '${(_volume * 100).toInt()}%',
+                      label: AppLocalizations.of(context)!.shortVideoAudioVolumePercent(
+                        (_volume * 100).toInt(),
+                      ),
                       onChanged: _setVolume,
                     ),
                   ),
@@ -381,7 +390,9 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
                 SizedBox(
                   width: 40,
                   child: Text(
-                    '${(_volume * 100).toInt()}%',
+                    AppLocalizations.of(context)!.shortVideoAudioVolumePercent(
+                      (_volume * 100).toInt(),
+                    ),
                     textAlign: TextAlign.right,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),

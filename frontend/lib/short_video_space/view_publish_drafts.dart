@@ -256,8 +256,17 @@ class _PublishDraftsPanel extends StatelessWidget {
                                   (d) => Padding(
                                     padding: const EdgeInsets.only(top: 2),
                                     child: Text(
-                                      '${d.title.isEmpty ? d.draftId.substring(0, 8) : d.title}: '
-                                      '${d.blockingReasons.map((r) => r.message).join(", ")}',
+                                      l10n.shortVideoPublishPanelBlockedDraftLine(
+                                        d.title.isEmpty
+                                            ? d.draftId.substring(0, 8)
+                                            : d.title,
+                                        d.blockingReasons
+                                            .map((r) => r.message)
+                                            .join(
+                                              l10n
+                                                  .shortVideoPublishPanelBlockingReasonsJoiner,
+                                            ),
+                                      ),
                                       style: theme.textTheme.bodySmall?.copyWith(
                                         color: theme.colorScheme.error,
                                       ),
@@ -588,7 +597,7 @@ class _PublishDraftsPanel extends StatelessWidget {
               const SizedBox(height: 6),
               ...publishPanelUi.publishBatchResultLines.take(8).map(
                     (line) => Text(
-                      '• $line',
+                      l10n.shortVideoPublishBatchResultBulletLine(line),
                       style: theme.textTheme.bodySmall,
                     ),
                   ),

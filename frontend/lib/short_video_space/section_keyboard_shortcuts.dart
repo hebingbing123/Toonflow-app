@@ -156,27 +156,27 @@ extension _ShortVideoSpaceSectionKeyboardShortcutsExtension on _ShortVideoSpaceS
     
     return [
       KeyboardShortcutInfo(
-        keys: 'Ctrl+S / Cmd+S',
+        keys: l10n.shortVideoSpaceShortcutKeysSave,
         description: l10n.shortVideoSpaceSaveProjectConfig,
         category: l10n.shortVideoSpaceFileOperations,
       ),
       KeyboardShortcutInfo(
-        keys: 'Ctrl+A / Cmd+A',
+        keys: l10n.shortVideoSpaceShortcutKeysSelectAll,
         description: l10n.shortVideoSpaceSelectAllShots,
         category: l10n.shortVideoSpaceSelectionOperations,
       ),
       KeyboardShortcutInfo(
-        keys: 'Ctrl+F / Cmd+F',
+        keys: l10n.shortVideoSpaceShortcutKeysFocusSearch,
         description: l10n.shortVideoSpaceFocusSearch,
         category: l10n.shortVideoSpaceNavigation,
       ),
       KeyboardShortcutInfo(
-        keys: 'Ctrl+Z / Cmd+Z',
+        keys: l10n.shortVideoSpaceShortcutKeysUndo,
         description: l10n.shortVideoSpaceUndoOperation,
         category: l10n.shortVideoSpaceEditOperations,
       ),
       KeyboardShortcutInfo(
-        keys: 'Ctrl+Shift+Z / Cmd+Shift+Z',
+        keys: l10n.shortVideoSpaceShortcutKeysRedo,
         description: l10n.shortVideoSpaceRedoOperation,
         category: l10n.shortVideoSpaceEditOperations,
       ),

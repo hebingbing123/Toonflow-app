@@ -404,6 +404,36 @@ abstract class AppLocalizations {
   /// **'Keyboard Shortcuts'**
   String get shortVideoSpaceKeyboardShortcuts;
 
+  /// No description provided for @shortVideoSpaceShortcutKeysSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Ctrl+S / Cmd+S'**
+  String get shortVideoSpaceShortcutKeysSave;
+
+  /// No description provided for @shortVideoSpaceShortcutKeysSelectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Ctrl+A / Cmd+A'**
+  String get shortVideoSpaceShortcutKeysSelectAll;
+
+  /// No description provided for @shortVideoSpaceShortcutKeysFocusSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Ctrl+F / Cmd+F'**
+  String get shortVideoSpaceShortcutKeysFocusSearch;
+
+  /// No description provided for @shortVideoSpaceShortcutKeysUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Ctrl+Z / Cmd+Z'**
+  String get shortVideoSpaceShortcutKeysUndo;
+
+  /// No description provided for @shortVideoSpaceShortcutKeysRedo.
+  ///
+  /// In en, this message translates to:
+  /// **'Ctrl+Shift+Z / Cmd+Shift+Z'**
+  String get shortVideoSpaceShortcutKeysRedo;
+
   /// No description provided for @shortVideoSpaceClose.
   ///
   /// In en, this message translates to:
@@ -5598,6 +5628,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'All time'**
   String get globalSearchAllTime;
+
+  /// No description provided for @globalSearchTypeCountChipLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{typeName} {count}'**
+  String globalSearchTypeCountChipLabel(String typeName, int count);
+
+  /// No description provided for @globalSearchTypeSectionHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'{typeName} ({count})'**
+  String globalSearchTypeSectionHeader(String typeName, int count);
+
+  /// No description provided for @globalSearchViewTitlePartSeparator.
+  ///
+  /// In en, this message translates to:
+  /// **' · '**
+  String get globalSearchViewTitlePartSeparator;
+
+  /// No description provided for @globalSearchViewTitleTypesJoiner.
+  ///
+  /// In en, this message translates to:
+  /// **'/'**
+  String get globalSearchViewTitleTypesJoiner;
+
+  /// No description provided for @globalSearchViewTitleTimeRange.
+  ///
+  /// In en, this message translates to:
+  /// **'{from}~{to}'**
+  String globalSearchViewTitleTimeRange(String from, String to);
+
+  /// No description provided for @globalSearchQueryTruncationSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'…'**
+  String get globalSearchQueryTruncationSuffix;
 
   /// No description provided for @globalSearchNeverUsed.
   ///
@@ -24364,6 +24430,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{label} {value}'**
   String shortVideoMetricChipLine(String label, String value);
+
+  /// No description provided for @shortVideoPublishPanelBlockingReasonsJoiner.
+  ///
+  /// In en, this message translates to:
+  /// **', '**
+  String get shortVideoPublishPanelBlockingReasonsJoiner;
+
+  /// No description provided for @shortVideoPublishPanelBlockedDraftLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{title}: {reasons}'**
+  String shortVideoPublishPanelBlockedDraftLine(String title, String reasons);
+
+  /// No description provided for @shortVideoPublishBatchResultBulletLine.
+  ///
+  /// In en, this message translates to:
+  /// **'• {line}'**
+  String shortVideoPublishBatchResultBulletLine(String line);
+
+  /// No description provided for @shortVideoAudioVolumePercent.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}%'**
+  String shortVideoAudioVolumePercent(int percent);
+
+  /// No description provided for @shortVideoVoiceoverSpeedMultiplier.
+  ///
+  /// In en, this message translates to:
+  /// **'{speed}x'**
+  String shortVideoVoiceoverSpeedMultiplier(String speed);
 
   /// No description provided for @shortVideoPublishPanelConfirmSemiAuto.
   ///

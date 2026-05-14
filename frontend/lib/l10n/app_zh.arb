@@ -128,6 +128,11 @@
   "shortVideoSpaceNavigation": "导航",
   "shortVideoSpaceEditOperations": "编辑操作",
   "shortVideoSpaceKeyboardShortcuts": "键盘快捷键",
+  "shortVideoSpaceShortcutKeysSave": "Ctrl+S / Cmd+S",
+  "shortVideoSpaceShortcutKeysSelectAll": "Ctrl+A / Cmd+A",
+  "shortVideoSpaceShortcutKeysFocusSearch": "Ctrl+F / Cmd+F",
+  "shortVideoSpaceShortcutKeysUndo": "Ctrl+Z / Cmd+Z",
+  "shortVideoSpaceShortcutKeysRedo": "Ctrl+Shift+Z / Cmd+Shift+Z",
   "shortVideoSpaceClose": "关闭",
   "shortVideoSpaceCurrentProjectOverview": "当前项目概览",
   "shortVideoSpaceRecentBadCaseTrends": "最近坏例倾向",
@@ -2267,6 +2272,42 @@
   "globalSearchTimeStart": "起始",
   "globalSearchTimeNow": "至今",
   "globalSearchAllTime": "全部时间",
+  "globalSearchTypeCountChipLabel": "{typeName} {count}",
+  "@globalSearchTypeCountChipLabel": {
+    "placeholders": {
+      "typeName": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "globalSearchTypeSectionHeader": "{typeName}（{count}）",
+  "@globalSearchTypeSectionHeader": {
+    "placeholders": {
+      "typeName": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "globalSearchViewTitlePartSeparator": " · ",
+  "globalSearchViewTitleTypesJoiner": "、",
+  "globalSearchViewTitleTimeRange": "{from}～{to}",
+  "@globalSearchViewTitleTimeRange": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "globalSearchQueryTruncationSuffix": "…",
   "globalSearchNeverUsed": "未使用",
   "globalSearchSaveViewTitle": "保存搜索视图",
   "globalSearchViewNameField": "视图名称",
@@ -12334,6 +12375,42 @@
         "type": "String"
       },
       "value": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishPanelBlockingReasonsJoiner": "、",
+  "shortVideoPublishPanelBlockedDraftLine": "{title}：{reasons}",
+  "@shortVideoPublishPanelBlockedDraftLine": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "reasons": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishBatchResultBulletLine": "• {line}",
+  "@shortVideoPublishBatchResultBulletLine": {
+    "placeholders": {
+      "line": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoAudioVolumePercent": "{percent}%",
+  "@shortVideoAudioVolumePercent": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoVoiceoverSpeedMultiplier": "{speed}×",
+  "@shortVideoVoiceoverSpeedMultiplier": {
+    "placeholders": {
+      "speed": {
         "type": "String"
       }
     }

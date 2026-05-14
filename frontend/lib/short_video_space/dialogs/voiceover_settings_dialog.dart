@@ -265,7 +265,9 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
                   SizedBox(
                     width: 60,
                     child: Text(
-                      '${_selectedSpeed.toStringAsFixed(1)}x',
+                      AppLocalizations.of(context)!.shortVideoVoiceoverSpeedMultiplier(
+                        _selectedSpeed.toStringAsFixed(1),
+                      ),
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,

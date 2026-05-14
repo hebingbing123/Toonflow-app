@@ -290,19 +290,28 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
   String _buildDefaultViewTitle() {
     final l10n = AppLocalizations.of(context)!;
     final workspace = (widget.currentWorkspaceName ?? '').trim();
+    final typeJoiner = l10n.globalSearchViewTitleTypesJoiner;
     final typeSummary = _filters.resultTypes.isEmpty
         ? l10n.globalSearchAllTypes
-        : _filters.resultTypes.map(_getTypeDisplayName).join('/');
+        : _filters.resultTypes.map(_getTypeDisplayName).join(typeJoiner);
     final timeSummary = (_filters.timeFrom != null || _filters.timeTo != null)
-        ? '${_filters.timeFrom != null ? _formatFilterDate(_filters.timeFrom!) : l10n.globalSearchTimeStart}~${_filters.timeTo != null ? _formatFilterDate(_filters.timeTo!) : l10n.globalSearchTimeNow}'
+        ? l10n.globalSearchViewTitleTimeRange(
+            _filters.timeFrom != null
+                ? _formatFilterDate(_filters.timeFrom!)
+                : l10n.globalSearchTimeStart,
+            _filters.timeTo != null
+                ? _formatFilterDate(_filters.timeTo!)
+                : l10n.globalSearchTimeNow,
+          )
         : l10n.globalSearchAllTime;
     final querySummary = widget.query.length > 18
-        ? '${widget.query.substring(0, 18)}...'
+        ? '${widget.query.substring(0, 18)}${l10n.globalSearchQueryTruncationSuffix}'
         : widget.query;
+    final sep = l10n.globalSearchViewTitlePartSeparator;
     if (workspace.isNotEmpty) {
-      return '$workspace · $typeSummary · $timeSummary · $querySummary';
+      return [workspace, typeSummary, timeSummary, querySummary].join(sep);
     }
-    return '$typeSummary · $timeSummary · $querySummary';
+    return [typeSummary, timeSummary, querySummary].join(sep);
   }
 
   void _applyTemplate(_SearchViewTemplate template) {
@@ -962,7 +971,10 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                             FilterChip(
                               avatar: Icon(_getTypeIcon(type), size: 16),
                               label: Text(
-                                '${_getTypeDisplayName(type)} ${_groupResultsByType()[type]?.length ?? 0}',
+                                l10n.globalSearchTypeCountChipLabel(
+                                  _getTypeDisplayName(type),
+                                  _groupResultsByType()[type]?.length ?? 0,
+                                ),
                               ),
                               selected: _filters.resultTypes.contains(type),
                               onSelected: (_) => _toggleHeaderResultType(type),
@@ -1213,6 +1225,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
 
   /// Build type section header
   Widget _buildTypeHeader(ResultType type, int count) {
+    final l10n = AppLocalizations.of(context)!;
     return Row(
       children: [
         Icon(
@@ -1222,7 +1235,10 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
         ),
         const SizedBox(width: 8),
         Text(
-          '${_getTypeDisplayName(type)} ($count)',
+          l10n.globalSearchTypeSectionHeader(
+            _getTypeDisplayName(type),
+            count,
+          ),
           style: Theme.of(
             context,
           ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),

@@ -128,6 +128,11 @@
   "shortVideoSpaceNavigation": "Navigation",
   "shortVideoSpaceEditOperations": "Edit Operations",
   "shortVideoSpaceKeyboardShortcuts": "Keyboard Shortcuts",
+  "shortVideoSpaceShortcutKeysSave": "Ctrl+S / Cmd+S",
+  "shortVideoSpaceShortcutKeysSelectAll": "Ctrl+A / Cmd+A",
+  "shortVideoSpaceShortcutKeysFocusSearch": "Ctrl+F / Cmd+F",
+  "shortVideoSpaceShortcutKeysUndo": "Ctrl+Z / Cmd+Z",
+  "shortVideoSpaceShortcutKeysRedo": "Ctrl+Shift+Z / Cmd+Shift+Z",
   "shortVideoSpaceClose": "Close",
   "shortVideoSpaceCurrentProjectOverview": "Current Project Overview",
   "shortVideoSpaceRecentBadCaseTrends": "Recent Bad Case Trends",
@@ -2267,6 +2272,42 @@
   "globalSearchTimeStart": "start",
   "globalSearchTimeNow": "now",
   "globalSearchAllTime": "All time",
+  "globalSearchTypeCountChipLabel": "{typeName} {count}",
+  "@globalSearchTypeCountChipLabel": {
+    "placeholders": {
+      "typeName": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "globalSearchTypeSectionHeader": "{typeName} ({count})",
+  "@globalSearchTypeSectionHeader": {
+    "placeholders": {
+      "typeName": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "globalSearchViewTitlePartSeparator": " · ",
+  "globalSearchViewTitleTypesJoiner": "/",
+  "globalSearchViewTitleTimeRange": "{from}~{to}",
+  "@globalSearchViewTitleTimeRange": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "globalSearchQueryTruncationSuffix": "…",
   "globalSearchNeverUsed": "never used",
   "globalSearchSaveViewTitle": "Save search view",
   "globalSearchViewNameField": "View name",
@@ -12334,6 +12375,42 @@
         "type": "String"
       },
       "value": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishPanelBlockingReasonsJoiner": ", ",
+  "shortVideoPublishPanelBlockedDraftLine": "{title}: {reasons}",
+  "@shortVideoPublishPanelBlockedDraftLine": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "reasons": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoPublishBatchResultBulletLine": "• {line}",
+  "@shortVideoPublishBatchResultBulletLine": {
+    "placeholders": {
+      "line": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoAudioVolumePercent": "{percent}%",
+  "@shortVideoAudioVolumePercent": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "shortVideoVoiceoverSpeedMultiplier": "{speed}x",
+  "@shortVideoVoiceoverSpeedMultiplier": {
+    "placeholders": {
+      "speed": {
         "type": "String"
       }
     }
