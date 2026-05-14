@@ -21,7 +21,10 @@ bool isRustApiQuotaOrRateError(Object error) {
 }
 
 String describeRustApiError(Object error) {
-  return describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error);
+  return describeUserVisibleApiError(
+    rustApiLookupL10nFromPlatform(),
+    error,
+  );
 }
 
 void reportRustApiError(
@@ -37,7 +40,7 @@ void reportRustApiError(
 
 /// Same split as the common `on RustApiException` + `catch` pair: [RustApiException] goes through
 /// [reportRustApiError] (global SnackBar by default); anything else uses [describeUserVisibleApiError]
-/// with [l10n] when provided, otherwise [rustApiLookupL10nFromPlatform].
+/// with [l10n] when provided, otherwise English [lookupAppLocalizations] (stable in tests / headless).
 void reportRustOrDescribeApiError(
   Object error, {
   required void Function(String? error) onErrorChanged,
@@ -52,7 +55,10 @@ void reportRustOrDescribeApiError(
     );
   } else {
     onErrorChanged(
-      describeUserVisibleApiError(l10n ?? rustApiLookupL10nFromPlatform(), error),
+      describeUserVisibleApiError(
+        l10n ?? lookupAppLocalizations(const Locale('en')),
+        error,
+      ),
     );
   }
 }
