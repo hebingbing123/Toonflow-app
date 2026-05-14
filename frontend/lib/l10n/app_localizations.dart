@@ -2496,6 +2496,24 @@ abstract class AppLocalizations {
   /// **'All'**
   String get billingAuditAll;
 
+  /// No description provided for @billingAuditProviderAlipay.
+  ///
+  /// In en, this message translates to:
+  /// **'Alipay'**
+  String get billingAuditProviderAlipay;
+
+  /// No description provided for @billingAuditProviderPaddle.
+  ///
+  /// In en, this message translates to:
+  /// **'Paddle'**
+  String get billingAuditProviderPaddle;
+
+  /// No description provided for @billingAuditProviderStripe.
+  ///
+  /// In en, this message translates to:
+  /// **'Stripe'**
+  String get billingAuditProviderStripe;
+
   /// No description provided for @billingAuditSortLabel.
   ///
   /// In en, this message translates to:
@@ -14116,11 +14134,35 @@ abstract class AppLocalizations {
   /// **'Resolution'**
   String get storyboardVideoWorkbenchResolutionLabel;
 
+  /// No description provided for @storyboardVideoWorkbenchResolution1080p.
+  ///
+  /// In en, this message translates to:
+  /// **'1080p'**
+  String get storyboardVideoWorkbenchResolution1080p;
+
+  /// No description provided for @storyboardVideoWorkbenchResolution720p.
+  ///
+  /// In en, this message translates to:
+  /// **'720p'**
+  String get storyboardVideoWorkbenchResolution720p;
+
   /// No description provided for @storyboardVideoWorkbenchModeLabel.
   ///
   /// In en, this message translates to:
   /// **'Generation mode'**
   String get storyboardVideoWorkbenchModeLabel;
+
+  /// No description provided for @storyboardVideoWorkbenchModeFast.
+  ///
+  /// In en, this message translates to:
+  /// **'Fast'**
+  String get storyboardVideoWorkbenchModeFast;
+
+  /// No description provided for @storyboardVideoWorkbenchModeStandard.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard'**
+  String get storyboardVideoWorkbenchModeStandard;
 
   /// No description provided for @storyboardVideoWorkbenchModelLabel.
   ///
@@ -28615,6 +28657,18 @@ abstract class AppLocalizations {
   /// **'ID: {id}'**
   String opsWhFieldId(String id);
 
+  /// No description provided for @opsWhFieldSecret.
+  ///
+  /// In en, this message translates to:
+  /// **'Secret: {secret}'**
+  String opsWhFieldSecret(String secret);
+
+  /// No description provided for @opsWhFieldUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'URL: {url}'**
+  String opsWhFieldUrl(String url);
+
   /// No description provided for @opsWhFieldCreatedAt.
   ///
   /// In en, this message translates to:
@@ -29411,6 +29465,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sample type'**
   String get benchmarkLabelSampleType;
+
+  /// No description provided for @benchmarkExperimentSuiteCore.
+  ///
+  /// In en, this message translates to:
+  /// **'Core'**
+  String get benchmarkExperimentSuiteCore;
+
+  /// No description provided for @benchmarkExperimentSuiteFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Full'**
+  String get benchmarkExperimentSuiteFull;
+
+  /// No description provided for @benchmarkExperimentSuiteSmoke.
+  ///
+  /// In en, this message translates to:
+  /// **'Smoke'**
+  String get benchmarkExperimentSuiteSmoke;
+
+  /// No description provided for @benchmarkSampleTypeBadCase.
+  ///
+  /// In en, this message translates to:
+  /// **'Bad case'**
+  String get benchmarkSampleTypeBadCase;
+
+  /// No description provided for @benchmarkSampleTypeGolden.
+  ///
+  /// In en, this message translates to:
+  /// **'Golden'**
+  String get benchmarkSampleTypeGolden;
+
+  /// No description provided for @benchmarkSampleTypeRegressionGuard.
+  ///
+  /// In en, this message translates to:
+  /// **'Regression guard'**
+  String get benchmarkSampleTypeRegressionGuard;
 
   /// No description provided for @benchmarkLabelSampleSummary.
   ///

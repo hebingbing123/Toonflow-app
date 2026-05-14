@@ -72,12 +72,18 @@ class BenchmarkCasesWorkbench extends StatelessWidget {
                   decoration: InputDecoration(
                     labelText: l10n.benchmarkLabelSampleType,
                   ),
-                  items: const [
-                    DropdownMenuItem(value: 'bad_case', child: Text('bad_case')),
-                    DropdownMenuItem(value: 'golden', child: Text('golden')),
+                  items: [
+                    DropdownMenuItem(
+                      value: 'bad_case',
+                      child: Text(l10n.benchmarkSampleTypeBadCase),
+                    ),
+                    DropdownMenuItem(
+                      value: 'golden',
+                      child: Text(l10n.benchmarkSampleTypeGolden),
+                    ),
                     DropdownMenuItem(
                       value: 'regression_guard',
-                      child: Text('regression_guard'),
+                      child: Text(l10n.benchmarkSampleTypeRegressionGuard),
                     ),
                   ],
                   onChanged: busy ? null : (value) {

@@ -91,6 +91,17 @@ class _StoryboardVideoSection extends StatelessWidget {
   final ValueChanged<VideoItem> onSelectVideo;
   final VoidCallback onDeleteCurrentVideo;
 
+  String _storyboardResolutionMenuLabel(AppLocalizations l10n, String value) {
+    switch (value) {
+      case '1080p':
+        return l10n.storyboardVideoWorkbenchResolution1080p;
+      case '720p':
+        return l10n.storyboardVideoWorkbenchResolution720p;
+      default:
+        return value;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -102,10 +113,7 @@ class _StoryboardVideoSection extends StatelessWidget {
         : null;
     final repairSuggestions = promptDiagnostics == null
         ? const <String>[]
-        : buildStoryboardVideoPromptRepairSuggestions(
-            l10n,
-            promptDiagnostics!,
-          );
+        : buildStoryboardVideoPromptRepairSuggestions(l10n, promptDiagnostics!);
     final selectedVideoUrl = currentSelectedVideoUrl?.trim() ?? '';
     final hasSelectedVideo = selectedVideoUrl.isNotEmpty;
     return Column(
@@ -278,28 +286,19 @@ class _StoryboardVideoSection extends StatelessWidget {
         if (promptDiagnostics != null) ...[
           const SizedBox(height: 6),
           Text(
-            buildStoryboardVideoPromptDiagnosticsLine(
-              l10n,
-              promptDiagnostics!,
-            ),
+            buildStoryboardVideoPromptDiagnosticsLine(l10n, promptDiagnostics!),
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: 2),
           Text(
-            buildStoryboardVideoPromptSourceSummary(
-              l10n,
-              promptDiagnostics!,
-            ),
+            buildStoryboardVideoPromptSourceSummary(l10n, promptDiagnostics!),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: Theme.of(context).colorScheme.outline,
             ),
           ),
           const SizedBox(height: 2),
           Text(
-            buildStoryboardVideoPromptAnchorSummary(
-              l10n,
-              promptDiagnostics!,
-            ),
+            buildStoryboardVideoPromptAnchorSummary(l10n, promptDiagnostics!),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: Theme.of(context).colorScheme.outline,
             ),
@@ -358,13 +357,25 @@ class _StoryboardVideoSection extends StatelessWidget {
                           .map(
                             (item) => DropdownMenuItem(
                               value: item,
-                              child: Text(item),
+                              child: Text(
+                                _storyboardResolutionMenuLabel(l10n, item),
+                              ),
                             ),
                           )
                           .toList(growable: false)
-                    : const [
-                        DropdownMenuItem(value: '1080p', child: Text('1080p')),
-                        DropdownMenuItem(value: '720p', child: Text('720p')),
+                    : [
+                        DropdownMenuItem(
+                          value: '1080p',
+                          child: Text(
+                            l10n.storyboardVideoWorkbenchResolution1080p,
+                          ),
+                        ),
+                        DropdownMenuItem(
+                          value: '720p',
+                          child: Text(
+                            l10n.storyboardVideoWorkbenchResolution720p,
+                          ),
+                        ),
                       ],
                 onChanged: saving
                     ? null
@@ -385,9 +396,15 @@ class _StoryboardVideoSection extends StatelessWidget {
                 decoration: InputDecoration(
                   labelText: l10n.storyboardVideoWorkbenchModeLabel,
                 ),
-                items: const [
-                  DropdownMenuItem(value: 'standard', child: Text('standard')),
-                  DropdownMenuItem(value: 'fast', child: Text('fast')),
+                items: [
+                  DropdownMenuItem(
+                    value: 'standard',
+                    child: Text(l10n.storyboardVideoWorkbenchModeStandard),
+                  ),
+                  DropdownMenuItem(
+                    value: 'fast',
+                    child: Text(l10n.storyboardVideoWorkbenchModeFast),
+                  ),
                 ],
                 onChanged: saving
                     ? null

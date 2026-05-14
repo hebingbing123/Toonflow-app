@@ -714,6 +714,9 @@
   "opsWhDelete": "删除",
   "billingAuditTitle": "Billing Webhook 审计",
   "billingAuditProviderLabel": "Provider",
+  "billingAuditProviderStripe": "Stripe",
+  "billingAuditProviderAlipay": "支付宝",
+  "billingAuditProviderPaddle": "Paddle",
   "billingAuditAll": "全部",
   "billingAuditSortLabel": "排序",
   "billingAuditSortNewest": "最新优先",
@@ -6602,7 +6605,11 @@
   "storyboardVideoWorkbenchNegativePromptHelper": "会自动回填当前分镜的失败约束，可按需继续删减或补充。",
   "storyboardVideoWorkbenchDurationSecondsLabel": "时长（秒）",
   "storyboardVideoWorkbenchResolutionLabel": "分辨率",
+  "storyboardVideoWorkbenchResolution1080p": "1080p",
+  "storyboardVideoWorkbenchResolution720p": "720p",
   "storyboardVideoWorkbenchModeLabel": "生成模式",
+  "storyboardVideoWorkbenchModeStandard": "标准",
+  "storyboardVideoWorkbenchModeFast": "快速",
   "storyboardVideoWorkbenchModelLabel": "模型",
   "storyboardVideoWorkbenchModelLoading": "等待加载模型信息",
   "storyboardVideoWorkbenchIncludeAudioTitle": "生成视频时携带音频",
@@ -13502,6 +13509,8 @@
   "platformStatusChipLabel": "{title}: {value}",
   "opsWhActivityEntryTitle": "{action} · {webhookId}",
   "opsWhFieldId": "ID: {id}",
+  "opsWhFieldUrl": "网址：{url}",
+  "opsWhFieldSecret": "密钥：{secret}",
   "opsWhFieldCreatedAt": "创建时间: {createdAt}",
   "opsWhFieldUpdatedAt": "更新时间: {updatedAt}",
   "opsWhApiEventTypes": "API: {eventTypes}",
@@ -14548,6 +14557,20 @@
       }
     }
   },
+  "@opsWhFieldUrl": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "@opsWhFieldSecret": {
+    "placeholders": {
+      "secret": {
+        "type": "String"
+      }
+    }
+  },
   "@opsWhFieldCreatedAt": {
     "placeholders": {
       "createdAt": {
@@ -15045,6 +15068,12 @@
   "benchmarkPromoteCardTitle": "从质量评审提升样本",
   "benchmarkLabelQualityReviewId": "质量评审 ID",
   "benchmarkLabelSampleType": "样本类型",
+  "benchmarkSampleTypeBadCase": "坏例",
+  "benchmarkSampleTypeGolden": "黄金样本",
+  "benchmarkSampleTypeRegressionGuard": "回归守护",
+  "benchmarkExperimentSuiteSmoke": "冒烟",
+  "benchmarkExperimentSuiteCore": "核心",
+  "benchmarkExperimentSuiteFull": "全量",
   "benchmarkLabelSampleSummary": "样本摘要",
   "benchmarkLabelTagsCommaSeparated": "标签（逗号分隔）",
   "benchmarkButtonPromoteToSample": "提升为样本",

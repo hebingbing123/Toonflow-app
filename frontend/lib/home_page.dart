@@ -1075,7 +1075,10 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_appL10n?.appTitle ?? 'OpenFlow'),
+        title: Text(
+          _appL10n?.appTitle ??
+              lookupAppLocalizations(const Locale('en')).appTitle,
+        ),
         actions: [
           // Global Search Bar
           if (session != null)

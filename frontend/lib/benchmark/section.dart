@@ -561,12 +561,18 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
               decoration: InputDecoration(
                 labelText: l10n.benchmarkLabelSampleType,
               ),
-              items: const [
-                DropdownMenuItem(value: 'bad_case', child: Text('bad_case')),
-                DropdownMenuItem(value: 'golden', child: Text('golden')),
+              items: [
+                DropdownMenuItem(
+                  value: 'bad_case',
+                  child: Text(l10n.benchmarkSampleTypeBadCase),
+                ),
+                DropdownMenuItem(
+                  value: 'golden',
+                  child: Text(l10n.benchmarkSampleTypeGolden),
+                ),
                 DropdownMenuItem(
                   value: 'regression_guard',
-                  child: Text('regression_guard'),
+                  child: Text(l10n.benchmarkSampleTypeRegressionGuard),
                 ),
               ],
               onChanged: _busy
@@ -711,10 +717,19 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
               decoration: InputDecoration(
                 labelText: l10n.benchmarkLabelSampleTierSet,
               ),
-              items: const [
-                DropdownMenuItem(value: 'smoke', child: Text('smoke')),
-                DropdownMenuItem(value: 'core', child: Text('core')),
-                DropdownMenuItem(value: 'full', child: Text('full')),
+              items: [
+                DropdownMenuItem(
+                  value: 'smoke',
+                  child: Text(l10n.benchmarkExperimentSuiteSmoke),
+                ),
+                DropdownMenuItem(
+                  value: 'core',
+                  child: Text(l10n.benchmarkExperimentSuiteCore),
+                ),
+                DropdownMenuItem(
+                  value: 'full',
+                  child: Text(l10n.benchmarkExperimentSuiteFull),
+                ),
               ],
               onChanged: _busy
                   ? null

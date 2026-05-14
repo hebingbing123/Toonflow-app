@@ -1558,7 +1558,10 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
           _resp = HelpHubLinksResponseV1(items: resp.effectiveItems);
         });
       } catch (e) {
-        errorText = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
+        errorText = describeUserVisibleApiError(
+          AppLocalizations.of(context)!,
+          e,
+        );
       } finally {
         if (mounted) {
           setState(() {
@@ -1844,7 +1847,10 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         return;
       }
       setState(() {
-        _webhooksError = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
+        _webhooksError = describeUserVisibleApiError(
+          AppLocalizations.of(context)!,
+          e,
+        );
         _webhooks = null;
       });
       _disposeAllWebhookWorkspaceDraftControllers();
@@ -1993,7 +1999,10 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         return;
       }
       setState(() {
-        _billingEventsError = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
+        _billingEventsError = describeUserVisibleApiError(
+          AppLocalizations.of(context)!,
+          e,
+        );
         if (!append) {
           _billingEventsPage = null;
           _billingEvents.clear();
@@ -2083,7 +2092,10 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         return;
       }
       setState(() {
-        _webhooksError = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
+        _webhooksError = describeUserVisibleApiError(
+          AppLocalizations.of(context)!,
+          e,
+        );
       });
     } finally {
       if (mounted) {
@@ -2163,7 +2175,10 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         return;
       }
       setState(() {
-        _webhooksError = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
+        _webhooksError = describeUserVisibleApiError(
+          AppLocalizations.of(context)!,
+          e,
+        );
       });
     } finally {
       if (mounted) {
@@ -2210,7 +2225,10 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         return;
       }
       setState(() {
-        _webhooksError = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
+        _webhooksError = describeUserVisibleApiError(
+          AppLocalizations.of(context)!,
+          e,
+        );
       });
     } finally {
       if (mounted) {
@@ -2279,7 +2297,10 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         return;
       }
       setState(() {
-        _webhooksError = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
+        _webhooksError = describeUserVisibleApiError(
+          AppLocalizations.of(context)!,
+          e,
+        );
       });
     } finally {
       if (mounted) {
@@ -2333,7 +2354,10 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         return;
       }
       setState(() {
-        _webhooksError = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
+        _webhooksError = describeUserVisibleApiError(
+          AppLocalizations.of(context)!,
+          e,
+        );
       });
     } finally {
       if (mounted) {
@@ -2430,7 +2454,10 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         return;
       }
       setState(() {
-        _webhooksError = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
+        _webhooksError = describeUserVisibleApiError(
+          AppLocalizations.of(context)!,
+          e,
+        );
       });
     } finally {
       if (mounted) {
@@ -2690,7 +2717,10 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         return;
       }
       setState(() {
-        _billingEventsError = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
+        _billingEventsError = describeUserVisibleApiError(
+          AppLocalizations.of(context)!,
+          e,
+        );
       });
     } finally {
       if (mounted) {
@@ -2936,9 +2966,15 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                         ),
                       ],
                     ),
-                    SelectableText('id: ${_latestCreatedWebhook!.id}'),
-                    SelectableText('url: ${_latestCreatedWebhook!.url}'),
-                    SelectableText('secret: ${_latestCreatedWebhook!.secret}'),
+                    SelectableText(
+                      l10n.opsWhFieldId(_latestCreatedWebhook!.id),
+                    ),
+                    SelectableText(
+                      l10n.opsWhFieldUrl(_latestCreatedWebhook!.url),
+                    ),
+                    SelectableText(
+                      l10n.opsWhFieldSecret(_latestCreatedWebhook!.secret),
+                    ),
                     const SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
@@ -3300,17 +3336,17 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                       value: '',
                       child: Text(l10n.billingAuditAll),
                     ),
-                    const DropdownMenuItem(
+                    DropdownMenuItem(
                       value: 'stripe',
-                      child: Text('stripe'),
+                      child: Text(l10n.billingAuditProviderStripe),
                     ),
-                    const DropdownMenuItem(
+                    DropdownMenuItem(
                       value: 'alipay',
-                      child: Text('alipay'),
+                      child: Text(l10n.billingAuditProviderAlipay),
                     ),
-                    const DropdownMenuItem(
+                    DropdownMenuItem(
                       value: 'paddle',
-                      child: Text('paddle'),
+                      child: Text(l10n.billingAuditProviderPaddle),
                     ),
                   ],
                   onChanged: (value) {

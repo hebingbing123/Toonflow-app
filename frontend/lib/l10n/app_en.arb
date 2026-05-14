@@ -714,6 +714,9 @@
   "opsWhDelete": "Delete",
   "billingAuditTitle": "Billing webhook audit",
   "billingAuditProviderLabel": "Provider",
+  "billingAuditProviderStripe": "Stripe",
+  "billingAuditProviderAlipay": "Alipay",
+  "billingAuditProviderPaddle": "Paddle",
   "billingAuditAll": "All",
   "billingAuditSortLabel": "Sort",
   "billingAuditSortNewest": "Newest first",
@@ -6642,7 +6645,11 @@
   "storyboardVideoWorkbenchNegativePromptHelper": "Auto-filled from this shot’s failure constraints; trim or extend as needed.",
   "storyboardVideoWorkbenchDurationSecondsLabel": "Duration (seconds)",
   "storyboardVideoWorkbenchResolutionLabel": "Resolution",
+  "storyboardVideoWorkbenchResolution1080p": "1080p",
+  "storyboardVideoWorkbenchResolution720p": "720p",
   "storyboardVideoWorkbenchModeLabel": "Generation mode",
+  "storyboardVideoWorkbenchModeStandard": "Standard",
+  "storyboardVideoWorkbenchModeFast": "Fast",
   "storyboardVideoWorkbenchModelLabel": "Model",
   "storyboardVideoWorkbenchModelLoading": "Loading model info…",
   "storyboardVideoWorkbenchIncludeAudioTitle": "Include audio in generated video",
@@ -13542,6 +13549,8 @@
   "platformStatusChipLabel": "{title}: {value}",
   "opsWhActivityEntryTitle": "{action} · {webhookId}",
   "opsWhFieldId": "ID: {id}",
+  "opsWhFieldUrl": "URL: {url}",
+  "opsWhFieldSecret": "Secret: {secret}",
   "opsWhFieldCreatedAt": "创建时间: {createdAt}",
   "opsWhFieldUpdatedAt": "更新时间: {updatedAt}",
   "opsWhApiEventTypes": "API: {eventTypes}",
@@ -14588,6 +14597,20 @@
       }
     }
   },
+  "@opsWhFieldUrl": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "@opsWhFieldSecret": {
+    "placeholders": {
+      "secret": {
+        "type": "String"
+      }
+    }
+  },
   "@opsWhFieldCreatedAt": {
     "placeholders": {
       "createdAt": {
@@ -15085,6 +15108,12 @@
   "benchmarkPromoteCardTitle": "Promote sample from quality review",
   "benchmarkLabelQualityReviewId": "Quality review ID",
   "benchmarkLabelSampleType": "Sample type",
+  "benchmarkSampleTypeBadCase": "Bad case",
+  "benchmarkSampleTypeGolden": "Golden",
+  "benchmarkSampleTypeRegressionGuard": "Regression guard",
+  "benchmarkExperimentSuiteSmoke": "Smoke",
+  "benchmarkExperimentSuiteCore": "Core",
+  "benchmarkExperimentSuiteFull": "Full",
   "benchmarkLabelSampleSummary": "Sample summary",
   "benchmarkLabelTagsCommaSeparated": "Tags (comma-separated)",
   "benchmarkButtonPromoteToSample": "Promote to sample",

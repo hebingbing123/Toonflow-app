@@ -1324,6 +1324,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get billingAuditAll => '全部';
 
   @override
+  String get billingAuditProviderAlipay => '支付宝';
+
+  @override
+  String get billingAuditProviderPaddle => 'Paddle';
+
+  @override
+  String get billingAuditProviderStripe => 'Stripe';
+
+  @override
   String get billingAuditSortLabel => '排序';
 
   @override
@@ -8566,7 +8575,19 @@ class AppLocalizationsZh extends AppLocalizations {
   String get storyboardVideoWorkbenchResolutionLabel => '分辨率';
 
   @override
+  String get storyboardVideoWorkbenchResolution1080p => '1080p';
+
+  @override
+  String get storyboardVideoWorkbenchResolution720p => '720p';
+
+  @override
   String get storyboardVideoWorkbenchModeLabel => '生成模式';
+
+  @override
+  String get storyboardVideoWorkbenchModeStandard => '标准';
+
+  @override
+  String get storyboardVideoWorkbenchModeFast => '快速';
 
   @override
   String get storyboardVideoWorkbenchModelLabel => '模型';
@@ -19333,6 +19354,16 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String opsWhFieldSecret(String secret) {
+    return '密钥：$secret';
+  }
+
+  @override
+  String opsWhFieldUrl(String url) {
+    return '网址：$url';
+  }
+
+  @override
   String opsWhFieldCreatedAt(String createdAt) {
     return '创建时间: $createdAt';
   }
@@ -19815,6 +19846,24 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get benchmarkLabelSampleType => '样本类型';
+
+  @override
+  String get benchmarkExperimentSuiteCore => '核心';
+
+  @override
+  String get benchmarkExperimentSuiteFull => '全量';
+
+  @override
+  String get benchmarkExperimentSuiteSmoke => '冒烟';
+
+  @override
+  String get benchmarkSampleTypeBadCase => '坏例';
+
+  @override
+  String get benchmarkSampleTypeGolden => '黄金样本';
+
+  @override
+  String get benchmarkSampleTypeRegressionGuard => '回归守护';
 
   @override
   String get benchmarkLabelSampleSummary => '样本摘要';

@@ -39,7 +39,8 @@ class OpenFlowApp extends StatelessWidget {
       builder: (context, _) {
         return MaterialApp(
           onGenerateTitle: (ctx) =>
-              AppLocalizations.of(ctx)?.appTitle ?? 'OpenFlow',
+              AppLocalizations.of(ctx)?.appTitle ??
+              lookupAppLocalizations(const Locale('en')).appTitle,
           locale: AppLocaleNotifier.instance.localeOrNull,
           supportedLocales: AppLocalizations.supportedLocales,
           localizationsDelegates: AppLocalizations.localizationsDelegates,

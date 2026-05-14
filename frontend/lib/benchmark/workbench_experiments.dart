@@ -110,10 +110,19 @@ class BenchmarkExperimentsWorkbench extends StatelessWidget {
               decoration: InputDecoration(
                 labelText: l10n.benchmarkLabelSampleTierSet,
               ),
-              items: const [
-                DropdownMenuItem(value: 'smoke', child: Text('smoke')),
-                DropdownMenuItem(value: 'core', child: Text('core')),
-                DropdownMenuItem(value: 'full', child: Text('full')),
+              items: [
+                DropdownMenuItem(
+                  value: 'smoke',
+                  child: Text(l10n.benchmarkExperimentSuiteSmoke),
+                ),
+                DropdownMenuItem(
+                  value: 'core',
+                  child: Text(l10n.benchmarkExperimentSuiteCore),
+                ),
+                DropdownMenuItem(
+                  value: 'full',
+                  child: Text(l10n.benchmarkExperimentSuiteFull),
+                ),
               ],
               onChanged: busy ? null : (value) {
                 if (value != null) {
