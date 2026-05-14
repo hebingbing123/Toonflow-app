@@ -1689,22 +1689,33 @@ void main() {
       };
 
       final addSuggestions = buildProductionActionArgumentSuggestions(
+        l10n: _zh,
         selectedTool: 'add_deriveAsset',
         toolName: 'get_flowData',
         suggestedFlowKey: 'assets',
         result: result,
       );
       final deleteSuggestions = buildProductionActionArgumentSuggestions(
+        l10n: _zh,
         selectedTool: 'del_deriveAsset',
         toolName: 'get_flowData',
         suggestedFlowKey: 'assets',
         result: result,
       );
 
-      expect(addSuggestions.first.label, '新增到 #1');
+      expect(
+        addSuggestions.first.label,
+        _zh.agentWorkspaceProductionArgSuggestAddTo('1'),
+      );
       expect(addSuggestions.first.payload['assetsId'], 1);
-      expect(addSuggestions.first.payload['name'], '角色A-衍生');
-      expect(deleteSuggestions.first.label, '删除 #11');
+      expect(
+        addSuggestions.first.payload['name'],
+        _zh.agentWorkspaceProductionFlowRecipeArgDeriveNameFromParent('角色A'),
+      );
+      expect(
+        deleteSuggestions.first.label,
+        _zh.agentWorkspaceProductionArgSuggestDelete('11'),
+      );
       expect(deleteSuggestions.first.payload, <String, dynamic>{
         'assetsId': 1,
         'id': 11,
@@ -2915,40 +2926,51 @@ void main() {
   test(
     'production recipe button labels follow storyboard fallback actions',
     () {
-      const expandRecipe = ProductionWorkspaceRecipe(
-        title: '先看分镜表落地',
+      final expandRecipe = ProductionWorkspaceRecipe(
+        title:
+            _zh.agentWorkspaceProductionFlowRecipePreviewStoryboardTableTitle,
         detail: '先扩读关键窗口。',
         flowKey: 'storyboardTable',
         domainTool: 'get_flowData',
         domainArgs: <String, dynamic>{'key': 'storyboardTable'},
+        uiKind:
+            ProductionWorkspaceRecipeUiKind.previewStoryboardTableBeforeFrames,
       );
-      const refineRecipe = ProductionWorkspaceRecipe(
-        title: '补足分场景意图',
+      final refineRecipe = ProductionWorkspaceRecipe(
+        title: _zh.agentWorkspaceProductionFlowRecipeRefineSceneIntentTitle,
         detail: '先补导演计划。',
         flowKey: 'storyboardTable',
         subAgentTool: 'run_sub_agent_director_plan',
+        uiKind: ProductionWorkspaceRecipeUiKind.refineIntentBeforeTable,
       );
 
-      expect(productionRecipeDomainButtonLabel(expandRecipe), '扩读分镜表');
-      expect(productionRecipeSubAgentButtonLabel(refineRecipe), '细化导演计划');
+      expect(
+        productionRecipeDomainButtonLabel(expandRecipe, _zh),
+        _zh.agentWorkspaceProductionDomainExpandStoryboardTable,
+      );
+      expect(
+        productionRecipeSubAgentButtonLabel(refineRecipe, _zh),
+        _zh.agentWorkspaceProductionSubAgentRefineDirectorPlan,
+      );
     },
   );
 
   test(
     'production diagnosis headline explains script-plan refinement first',
     () {
-      const recipes = <ProductionWorkspaceRecipe>[
+      final recipes = <ProductionWorkspaceRecipe>[
         ProductionWorkspaceRecipe(
-          title: '补足分场景意图',
+          title: _zh.agentWorkspaceProductionFlowRecipeRefineSceneIntentTitle,
           detail: '先补导演计划。',
           flowKey: 'storyboardTable',
           subAgentTool: 'run_sub_agent_director_plan',
+          uiKind: ProductionWorkspaceRecipeUiKind.refineIntentBeforeTable,
         ),
       ];
 
       expect(
-        summarizeProductionDiagnosisHeadline(recipes),
-        '当前更建议先细化导演计划里的分场景情绪/画面意图，再继续拆分分镜表。',
+        summarizeProductionDiagnosisHeadline(recipes, _zh),
+        _zh.agentWorkspaceProductionFlowRecipeDiagnosisRefineIntentFirst,
       );
     },
   );
@@ -2956,18 +2978,21 @@ void main() {
   test(
     'production diagnosis headline explains storyboard-table expansion first',
     () {
-      const recipes = <ProductionWorkspaceRecipe>[
+      final recipes = <ProductionWorkspaceRecipe>[
         ProductionWorkspaceRecipe(
-          title: '先看分镜表落地',
+          title:
+              _zh.agentWorkspaceProductionFlowRecipePreviewStoryboardTableTitle,
           detail: '先扩读分镜表。',
           flowKey: 'storyboardTable',
           domainTool: 'get_flowData',
+          uiKind: ProductionWorkspaceRecipeUiKind
+              .previewStoryboardTableBeforeFrames,
         ),
       ];
 
       expect(
-        summarizeProductionDiagnosisHeadline(recipes),
-        '当前更建议先扩读关键分镜表窗口，再决定是否推进 storyboard。',
+        summarizeProductionDiagnosisHeadline(recipes, _zh),
+        _zh.agentWorkspaceProductionFlowRecipeDiagnosisExpandTableFirst,
       );
     },
   );
@@ -2975,16 +3000,17 @@ void main() {
   test(
     'applied production recipe status explains the next cheapest action',
     () {
-      const recipe = ProductionWorkspaceRecipe(
-        title: '补足分场景意图',
+      final recipe = ProductionWorkspaceRecipe(
+        title: _zh.agentWorkspaceProductionFlowRecipeRefineSceneIntentTitle,
         detail: '先补导演计划。',
         flowKey: 'storyboardTable',
         subAgentTool: 'run_sub_agent_director_plan',
+        uiKind: ProductionWorkspaceRecipeUiKind.refineIntentBeforeTable,
       );
 
       expect(
-        summarizeAppliedProductionRecipeStatus(recipe),
-        '已应用任务建议：补足分场景意图，下一步先细化导演计划。',
+        summarizeAppliedProductionRecipeStatus(recipe, _zh),
+        _zh.agentWorkspaceProductionRecipeAppliedFollowRefine(recipe.title),
       );
     },
   );

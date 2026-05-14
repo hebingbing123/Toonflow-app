@@ -8880,8 +8880,12 @@
   "shortVideoBatchSelectedCount": "Selected: {selected} / {total}",
   "@shortVideoBatchSelectedCount": {
     "placeholders": {
-      "selected": {"type": "int"},
-      "total": {"type": "int"}
+      "selected": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "shortVideoBatchOpEnable": "Batch enable",
@@ -8892,33 +8896,57 @@
   "shortVideoBatchProgressCompletedTotal": "Progress: {completed} / {total}",
   "@shortVideoBatchProgressCompletedTotal": {
     "placeholders": {
-      "completed": {"type": "int"},
-      "total": {"type": "int"}
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "shortVideoBatchProgressSucceededLabel": "Succeeded: {count}",
   "@shortVideoBatchProgressSucceededLabel": {
-    "placeholders": {"count": {"type": "int"}}
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "shortVideoBatchProgressFailedLabel": "Failed: {count}",
   "@shortVideoBatchProgressFailedLabel": {
-    "placeholders": {"count": {"type": "int"}}
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "shortVideoBatchProgressFailedHeading": "Failed items:",
   "shortVideoBatchProgressStoryboardLine": "Storyboard #{id}",
   "@shortVideoBatchProgressStoryboardLine": {
-    "placeholders": {"id": {"type": "int"}}
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
   },
   "shortVideoBatchProgressCancel": "Cancel",
   "shortVideoBatchProgressRetryFailed": "Retry failed",
   "shortVideoBatchProgressClose": "Close",
   "shortVideoBatchErrorCode": "Error code: {code}",
   "@shortVideoBatchErrorCode": {
-    "placeholders": {"code": {"type": "String"}}
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
   },
   "shortVideoBatchOperationRetryTitle": "{title} (retry)",
   "@shortVideoBatchOperationRetryTitle": {
-    "placeholders": {"title": {"type": "String"}}
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
   },
   "shortVideoBatchSelectShotsToEnableFirst": "Select shots to enable first.",
   "shortVideoBatchNoShotsWithVideoUrl": "None of the selected shots have a usable video URL.",
@@ -8926,34 +8954,58 @@
   "shortVideoBatchEnableFinished": "Batch enable finished: succeeded {successful}, failed {failed}",
   "@shortVideoBatchEnableFinished": {
     "placeholders": {
-      "successful": {"type": "int"},
-      "failed": {"type": "int"}
+      "successful": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
     }
   },
   "shortVideoBatchEnableFailedStatus": "Batch enable failed: {code}",
   "@shortVideoBatchEnableFailedStatus": {
-    "placeholders": {"code": {"type": "String"}}
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
   },
   "shortVideoBatchEnableFailedError": "Batch enable failed: {error}",
   "@shortVideoBatchEnableFailedError": {
-    "placeholders": {"error": {"type": "String"}}
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
   },
   "shortVideoBatchSelectShotsToDisableFirst": "Select shots to disable first.",
   "shortVideoBatchDisableTitle": "Batch disable shots",
   "shortVideoBatchDisableFinished": "Batch disable finished: succeeded {successful}, failed {failed}",
   "@shortVideoBatchDisableFinished": {
     "placeholders": {
-      "successful": {"type": "int"},
-      "failed": {"type": "int"}
+      "successful": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
     }
   },
   "shortVideoBatchDisableFailedStatus": "Batch disable failed: {code}",
   "@shortVideoBatchDisableFailedStatus": {
-    "placeholders": {"code": {"type": "String"}}
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
   },
   "shortVideoBatchDisableFailedError": "Batch disable failed: {error}",
   "@shortVideoBatchDisableFailedError": {
-    "placeholders": {"error": {"type": "String"}}
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
   },
   "shortVideoBatchSelectShotsDurationFirst": "Select shots to align duration first.",
   "shortVideoBatchDurationDialogTitle": "Batch duration align",
@@ -8964,8 +9016,12 @@
   "shortVideoBatchDurationFinished": "Batch duration align finished: succeeded {successful}, failed {failed}",
   "@shortVideoBatchDurationFinished": {
     "placeholders": {
-      "successful": {"type": "int"},
-      "failed": {"type": "int"}
+      "successful": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
     }
   },
   "shortVideoBatchSelectShotsReplaceFirst": "Select shots to replace first.",
@@ -8980,17 +9036,29 @@
   "shortVideoBatchReplaceFinished": "Batch replace finished: succeeded {successful}, failed {failed}",
   "@shortVideoBatchReplaceFinished": {
     "placeholders": {
-      "successful": {"type": "int"},
-      "failed": {"type": "int"}
+      "successful": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
     }
   },
   "shortVideoBatchReplaceFailedStatus": "Batch replace failed: {code}",
   "@shortVideoBatchReplaceFailedStatus": {
-    "placeholders": {"code": {"type": "String"}}
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
   },
   "shortVideoBatchReplaceFailedError": "Batch replace failed: {error}",
   "@shortVideoBatchReplaceFailedError": {
-    "placeholders": {"error": {"type": "String"}}
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
   },
   "shortVideoBatchCannotLoadProject": "Cannot load project.",
   "shortVideoBatchSelectShotsVoiceoverFirst": "Select shots to generate voiceover first.",
@@ -8999,63 +9067,105 @@
   "shortVideoBatchVoiceoverQueueProgress": "Progress: {done} / {total} ({percent}%)",
   "@shortVideoBatchVoiceoverQueueProgress": {
     "placeholders": {
-      "done": {"type": "int"},
-      "total": {"type": "int"},
-      "percent": {"type": "String"}
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "percent": {
+        "type": "String"
+      }
     }
   },
   "shortVideoBatchVoiceoverQueueStats": "Succeeded: {succeeded} · failed: {failed}",
   "@shortVideoBatchVoiceoverQueueStats": {
     "placeholders": {
-      "succeeded": {"type": "int"},
-      "failed": {"type": "int"}
+      "succeeded": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
     }
   },
   "shortVideoBatchVoiceoverQueueFailedHeading": "Failed items:",
   "shortVideoBatchVoiceoverQueueFailedLine": "Shot #{id}: {message}",
   "@shortVideoBatchVoiceoverQueueFailedLine": {
     "placeholders": {
-      "id": {"type": "int"},
-      "message": {"type": "String"}
+      "id": {
+        "type": "int"
+      },
+      "message": {
+        "type": "String"
+      }
     }
   },
   "shortVideoBatchVoiceoverQueueDone": "Done",
   "shortVideoBatchVoiceoverGenFailedStatus": "Batch voiceover generation failed: {code}",
   "@shortVideoBatchVoiceoverGenFailedStatus": {
-    "placeholders": {"code": {"type": "String"}}
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
   },
   "shortVideoBatchVoiceoverGenFailedError": "Batch voiceover generation failed: {error}",
   "@shortVideoBatchVoiceoverGenFailedError": {
-    "placeholders": {"error": {"type": "String"}}
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
   },
   "shortVideoBatchVoiceoverDoneJobs": "Batch voiceover done: enqueued jobs for {count} shot(s).",
   "@shortVideoBatchVoiceoverDoneJobs": {
-    "placeholders": {"count": {"type": "int"}}
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "shortVideoBatchVoiceoverDonePartial": "Batch voiceover done: succeeded {succeeded}, failed {failed}",
   "@shortVideoBatchVoiceoverDonePartial": {
     "placeholders": {
-      "succeeded": {"type": "int"},
-      "failed": {"type": "int"}
+      "succeeded": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
     }
   },
   "shortVideoBatchShotNoVoiceoverText": "This shot has no usable voiceover text.",
   "shortVideoBatchGeneratingVoiceover": "Generating voiceover…",
   "shortVideoBatchVoiceoverJobEnqueued": "Shot #{id} voiceover job enqueued.",
   "@shortVideoBatchVoiceoverJobEnqueued": {
-    "placeholders": {"id": {"type": "int"}}
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
   },
   "shortVideoBatchVoiceoverCouldNotCreateTask": "Voiceover generation failed: could not create task.",
   "shortVideoBatchVoiceoverSingleFailedStatus": "Voiceover generation failed: {code} — {message}",
   "@shortVideoBatchVoiceoverSingleFailedStatus": {
     "placeholders": {
-      "code": {"type": "String"},
-      "message": {"type": "String"}
+      "code": {
+        "type": "String"
+      },
+      "message": {
+        "type": "String"
+      }
     }
   },
   "shortVideoBatchVoiceoverSingleFailedError": "Voiceover generation failed: {error}",
   "@shortVideoBatchVoiceoverSingleFailedError": {
-    "placeholders": {"error": {"type": "String"}}
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
   },
   "shortVideoRustApiUnknownError": "unknown error",
   "shortVideoCandidateAssetConfirmationTitle": "Candidate asset confirmation",
@@ -9268,7 +9378,11 @@
   "projectEditorAssetEditImageEmptyDataUriSnack": "Base64 data URI cannot be empty.",
   "projectEditorAssetEditImageUploadSuccess": "Upload succeeded: {url}",
   "@projectEditorAssetEditImageUploadSuccess": {
-    "placeholders": {"url": {"type": "String"}}
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
   },
   "projectEditorAssetLinkNeedScriptAndAssetSnack": "Prepare at least one script and one asset first.",
   "projectEditorAssetLinkDialogTitleLink": "Link script and asset",
@@ -9280,15 +9394,23 @@
   "projectEditorAssetLinkSuccessLinked": "Linked script #{scriptId} · asset #{assetId}",
   "@projectEditorAssetLinkSuccessLinked": {
     "placeholders": {
-      "scriptId": {"type": "int"},
-      "assetId": {"type": "int"}
+      "scriptId": {
+        "type": "int"
+      },
+      "assetId": {
+        "type": "int"
+      }
     }
   },
   "projectEditorAssetLinkSuccessUnlinked": "Unlinked script #{scriptId} · asset #{assetId}",
   "@projectEditorAssetLinkSuccessUnlinked": {
     "placeholders": {
-      "scriptId": {"type": "int"},
-      "assetId": {"type": "int"}
+      "scriptId": {
+        "type": "int"
+      },
+      "assetId": {
+        "type": "int"
+      }
     }
   },
   "projectEditorAssetGenWorkbenchNeedAssetsSnack": "Load the asset list before opening the image generation workbench.",
@@ -10294,9 +10416,15 @@
   "agentWorkspaceWritebackScriptSuccess": "Writeback succeeded: script {numericId} updated, source={source}, content length {length}.",
   "@agentWorkspaceWritebackScriptSuccess": {
     "placeholders": {
-      "numericId": {"type": "int"},
-      "source": {"type": "String"},
-      "length": {"type": "int"}
+      "numericId": {
+        "type": "int"
+      },
+      "source": {
+        "type": "String"
+      },
+      "length": {
+        "type": "int"
+      }
     }
   },
   "agentWorkspaceWritebackPlanInputsInvalid": "Valid project id and planData writeback source are required",
@@ -10304,16 +10432,24 @@
   "agentWorkspaceWritebackPlanDataSetSuccess": "Writeback succeeded: script-agent planData updated (project={projectId}, script_rows={rowCount}).",
   "@agentWorkspaceWritebackPlanDataSetSuccess": {
     "placeholders": {
-      "projectId": {"type": "int"},
-      "rowCount": {"type": "int"}
+      "projectId": {
+        "type": "int"
+      },
+      "rowCount": {
+        "type": "int"
+      }
     }
   },
   "agentWorkspaceWritebackNeedPlanRowAndPlanData": "Plan row id and planData are required: fetch get_planData first (including plan row id)",
   "agentWorkspaceWritebackPlanDataUpdateSuccess": "Writeback succeeded: script-agent update-data (plan_row_id={planRowId}, script_rows={rowCount}).",
   "@agentWorkspaceWritebackPlanDataUpdateSuccess": {
     "placeholders": {
-      "planRowId": {"type": "int"},
-      "rowCount": {"type": "int"}
+      "planRowId": {
+        "type": "int"
+      },
+      "rowCount": {
+        "type": "int"
+      }
     }
   },
   "agentWorkspaceWritebackNeedToolResultFirst": "Run a tool and obtain a result before writeback",
@@ -10321,17 +10457,27 @@
   "agentWorkspaceWritebackCoreFlowOverwriteBlocked": "This tool result cannot overwrite core flow[{flowKey}]. Use an extension key (for example workspaceResult) or call get_flowData first.",
   "@agentWorkspaceWritebackCoreFlowOverwriteBlocked": {
     "placeholders": {
-      "flowKey": {"type": "String"}
+      "flowKey": {
+        "type": "String"
+      }
     }
   },
   "agentWorkspaceWritebackPayloadEmptyRefreshFlowKey": "Writeback payload is empty; refresh the flow key and try again",
   "agentWorkspaceWritebackFlowSaved": "Writeback succeeded: flow[{flowKey}] saved to project {projectId} / script {scriptId} (source={source}).",
   "@agentWorkspaceWritebackFlowSaved": {
     "placeholders": {
-      "flowKey": {"type": "String"},
-      "projectId": {"type": "int"},
-      "scriptId": {"type": "int"},
-      "source": {"type": "String"}
+      "flowKey": {
+        "type": "String"
+      },
+      "projectId": {
+        "type": "int"
+      },
+      "scriptId": {
+        "type": "int"
+      },
+      "source": {
+        "type": "String"
+      }
     }
   },
   "shortVideoSpaceDialogExportProgressTitle": "Export Progress",
@@ -15107,5 +15253,420 @@
         "type": "String"
       }
     }
-  }
+  },
+  "agentWorkspaceProductionFlowRecipeDiagnosisRefineIntentFirst": "Refine per-scene emotion and visual intent in the director plan before splitting the storyboard table.",
+  "agentWorkspaceProductionFlowRecipeDiagnosisExpandTableFirst": "Expand the key storyboard table window first, then decide whether to advance storyboard frames.",
+  "agentWorkspaceProductionFlowRecipeDiagnosisCheapestFirst": "Follow the first suggestion card and prioritize the cheapest next action.",
+  "agentWorkspaceProductionSupervisionSummaryFallback": "Continue based on the latest review conclusion.",
+  "agentWorkspaceProductionFlowRecipeSbGenRefreshTitle": "Refresh storyboard results",
+  "agentWorkspaceProductionFlowRecipeSbGenRereadTitle": "Reread missing-frame status",
+  "agentWorkspaceProductionFlowRecipeSbGenRefreshDetail": "Storyboard generation ran; refresh storyboard results before deciding whether to write back.",
+  "agentWorkspaceProductionFlowRecipeContinueDirectorTitle": "Continue director plan",
+  "agentWorkspaceProductionFlowRecipeContinueDirectorAfterSbDetail": "If storyboard results are still unstable, return to scriptPlan for another director decision round.",
+  "agentWorkspaceProductionFlowRecipeSbTableRefreshTitle": "Refresh storyboard table",
+  "agentWorkspaceProductionFlowRecipeSbTablePartialTitle": "Reread partial storyboard table",
+  "agentWorkspaceProductionFlowRecipeSbTableRefreshDetail": "The storyboard-table sub-agent ran; refresh the table before deciding whether to revise further.",
+  "agentWorkspaceProductionFlowRecipeSbTableCrosscheckTitle": "Cross-check storyboard results",
+  "agentWorkspaceProductionFlowRecipeSbTableCrosscheckDetailAll": "When needed, switch to storyboard to confirm table changes have propagated to rendered frames.",
+  "agentWorkspaceProductionFlowRecipeAssetsRefreshTitle": "Refresh asset results",
+  "agentWorkspaceProductionFlowRecipeAssetsRereadTitle": "Reread affected assets",
+  "agentWorkspaceProductionFlowRecipeAssetsRefreshDetail": "An asset action ran; refresh asset results before deciding whether to write back.",
+  "agentWorkspaceProductionFlowRecipeAssetsContinueSubTitle": "Continue asset sub-agent",
+  "agentWorkspaceProductionFlowRecipeAssetsContinueSubDetail": "If materials are still missing, chain the asset sub-agent for another generation round.",
+  "agentWorkspaceProductionFlowRecipeAssetsPlanFirstTitle": "Create an asset plan first",
+  "agentWorkspaceProductionFlowRecipeAssetsPlanFirstDetail": "Assets are empty; let the sub-agent fill in derived material planning first.",
+  "agentWorkspaceProductionFlowRecipeAssetsPlanFirstPrompt": "Given the current empty assets flow, plan a minimal viable derived material set and explain priorities.",
+  "agentWorkspaceProductionFlowRecipeAssetsContinueGenTitle": "Continue asset generation",
+  "agentWorkspaceProductionFlowRecipeAssetsContinueGenDetailGeneric": "Some materials still lack rendered images; run the asset generation sub-agent directly.",
+  "agentWorkspaceProductionFlowRecipeRefreshStoryboardNeedTitle": "Refresh storyboard needs",
+  "agentWorkspaceProductionFlowRecipeRefreshStoryboardNeedDetail": "After closing asset gaps, revisit storyboard to see whether the current approach still fits.",
+  "agentWorkspaceProductionFlowRecipeCheckStoryboardFlowTitle": "Check storyboard flow",
+  "agentWorkspaceProductionFlowRecipeCheckStoryboardFlowDetail": "Assets have baseline results; switch to storyboard to assess frame generation status.",
+  "agentWorkspaceProductionFlowRecipeTidyDirectorPlanTitle": "Tidy director plan",
+  "agentWorkspaceProductionFlowRecipeTidyDirectorPlanDetail": "If materials are mostly ready, generate the next director plan round to close out production pacing.",
+  "agentWorkspaceProductionFlowRecipeTidyDirectorPlanPrompt": "Combine current material status with scriptPlan and output the next director plan with execution priorities.",
+  "agentWorkspaceProductionFlowRecipeFirstStoryboardTitle": "Generate first storyboard pass",
+  "agentWorkspaceProductionFlowRecipeFirstStoryboardDetail": "Storyboard is empty; run the storyboard generation sub-agent to establish an initial shot set.",
+  "agentWorkspaceProductionFlowRecipeFirstStoryboardPrompt": "Generate a first-pass storyboard from the current production context with a minimal viable shot set.",
+  "agentWorkspaceProductionFlowRecipeFillStoryboardFramesTitle": "Continue filling storyboard frames",
+  "agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsTitle": "Verify linked assets",
+  "agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailFromRefs": "Focus on assets referenced by the current storyboard window to avoid unrelated material in frame fills.",
+  "agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailNoIds": "The storyboard digest has not resolved explicit asset IDs; fall back to a compact assets summary read.",
+  "agentWorkspaceProductionFlowRecipeCheckStoryboardTableTitle": "Check storyboard table",
+  "agentWorkspaceProductionFlowRecipeCheckStoryboardTableDetail": "When needed, review the structured storyboardTable before writeback.",
+  "agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailReadyIds": "Storyboard references explicit assets; verify this set is enough for upcoming director adjustments.",
+  "agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailReadyNoIds": "The storyboard digest did not resolve explicit asset IDs; read the compact assets summary first.",
+  "agentWorkspaceProductionFlowRecipeRefreshDirectorPlanTitle": "Refresh director plan",
+  "agentWorkspaceProductionFlowRecipeRefreshDirectorPlanDetail": "Storyboard has baseline results; return to scriptPlan to organize the next director decision round.",
+  "agentWorkspaceProductionFlowRecipeCreateDirectorPlanTitle": "Create director plan first",
+  "agentWorkspaceProductionFlowRecipeCreateDirectorPlanDetail": "scriptPlan is empty; establish a director plan before advancing assets or storyboard.",
+  "agentWorkspaceProductionFlowRecipeCreateDirectorPlanPrompt": "Generate a director plan from the current production context with execution priorities.",
+  "agentWorkspaceProductionFlowRecipeReviewDirectorPlanTitle": "Review director plan",
+  "agentWorkspaceProductionFlowRecipeReviewDirectorPlanDetail": "The director plan has content; a supervision review first surfaces pacing and asset issues cheaply.",
+  "agentWorkspaceProductionFlowRecipeReviewDirectorPlanPrompt": "Review the current director plan for plot coverage, asset fit, and pacing.",
+  "agentWorkspaceProductionFlowRecipeRereadScriptTitle": "Reread script evidence",
+  "agentWorkspaceProductionFlowRecipeCheckKeyAssetsTitle": "Check key assets",
+  "agentWorkspaceProductionFlowRecipeRefineSceneIntentTitle": "Refine per-scene intent",
+  "agentWorkspaceProductionFlowRecipePreviewStoryboardTableTitle": "Preview storyboard table first",
+  "agentWorkspaceProductionFlowRecipeRefineSceneIntentDetail": "The director plan still lacks clear per-scene emotion and visual intent; strengthen this before splitting storyboardTable to reduce rework.",
+  "agentWorkspaceProductionFlowRecipePreviewStoryboardTableDetail": "If the plan is stable, sample-check storyboardTable structure for fewer tokens before reading storyboard imagery.",
+  "agentWorkspaceProductionFlowRecipeRefineSceneIntentPrompt": "Continue refining scriptPlan: prioritize per-scene emotional progression, visual intent, and shot anchors before storyboardTable split.",
+  "agentWorkspaceProductionFlowRecipeCreateStoryboardTableTitle": "Create storyboard table",
+  "agentWorkspaceProductionFlowRecipeCreateStoryboardTableDetail": "storyboardTable is empty; use the storyboard-table sub-agent to add structure first.",
+  "agentWorkspaceProductionFlowRecipeCreateStoryboardTablePrompt": "Produce a structured storyboardTable with fields that are clear and writeback-friendly.",
+  "agentWorkspaceProductionFlowRecipeReviewStoryboardTableTitle": "Review storyboard table",
+  "agentWorkspaceProductionFlowRecipeReviewStoryboardTableDetail": "The table has content; supervision review first prevents bad structure from amplifying into storyboard.",
+  "agentWorkspaceProductionFlowRecipeReviewStoryboardTablePrompt": "Review the current storyboard table for coverage, asset links, and split granularity.",
+  "agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsTableRefs": "Focus on assets referenced by the current storyboard window to reduce unrelated context.",
+  "agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsTableNoIds": "This window did not resolve linked asset IDs; fall back to a compact assets summary read.",
+  "agentWorkspaceProductionFlowRecipeSwitchStoryboardResultsTitle": "Switch to storyboard results",
+  "agentWorkspaceProductionFlowRecipeSwitchStoryboardResultsDetailAll": "The table has content; continue checking whether storyboard imagery has caught up.",
+  "agentWorkspaceProductionFlowRecipeSampleStoryboardTableTitle": "Sample-read storyboard table",
+  "agentWorkspaceProductionFlowRecipeSampleStoryboardTableDetail": "Read the first 8 key columns first—usually enough to decide whether to keep reviewing or write back.",
+  "agentWorkspaceProductionFlowRecipeReviseDirectorPlanTitle": "Revise director plan",
+  "agentWorkspaceProductionFlowRecipeRecheckAssetSupportTitle": "Recheck asset support",
+  "agentWorkspaceProductionFlowRecipeRecheckAssetSupportDetail": "Director plans often stall on asset prep; reading assets first reduces rework.",
+  "agentWorkspaceProductionFlowRecipeVerifyAssetSupportTitle": "Verify asset support",
+  "agentWorkspaceProductionFlowRecipeRereadDirectorPlanTitle": "Reread director plan",
+  "agentWorkspaceProductionFlowRecipeRereadDirectorPlanAfterAssetsDetail": "After asset checks, return to a compact scriptPlan to see whether more revisions are needed before storyboard.",
+  "agentWorkspaceProductionFlowRecipeInspectStoryboardResultsTitle": "Inspect storyboard results",
+  "agentWorkspaceProductionFlowRecipeCompareStoryboardTableTitle": "Compare storyboard table",
+  "agentWorkspaceProductionFlowRecipeCompareStoryboardTableDetailGeneric": "Reread the key-column window first to avoid reloading the entire table into context.",
+  "agentWorkspaceProductionFlowRecipeRereadScriptNeedWindowDetail": "When needed, reread a compact script window to confirm shot rationale.",
+  "agentWorkspaceProductionFlowRecipeReviseStoryboardTableTitle": "Revise storyboard table",
+  "agentWorkspaceProductionFlowRecipeSampleRereadStoryboardTableTitle": "Sample-reread storyboard table",
+  "agentWorkspaceProductionFlowRecipeSampleRereadStoryboardTableDetailEmpty": "Read the key-column window first to avoid repeatedly loading the full table into context.",
+  "agentWorkspaceProductionFlowRecipeSampleRereadStoryboardTableDetailFocused": "Reread only the storyboard table rows for the focused shots from review; avoid returning to the full table window.",
+  "agentWorkspaceProductionFlowRecipeContinueStoryboardGenTitle": "Continue storyboard image generation",
+  "agentWorkspaceProductionFlowRecipeCompareStoryboardTableBeforeFillDetail": "Before filling frames, reread the key-column window to avoid rebuilding context for every shot.",
+  "agentWorkspaceProductionArgSuggestDeriveNameFallback": "New derived asset",
+  "agentWorkspaceProductionArgSuggestFillFirst": "Fill first item",
+  "agentWorkspaceProductionArgSuggestFillFirstThree": "Fill first 3 items",
+  "agentWorkspaceProductionArgSuggestFillAll": "Fill all",
+  "agentWorkspaceProductionFlowRecipeAssetsGenHadSummaryNote": "First review results for assets just generated, then decide whether to rerun.",
+  "@agentWorkspaceProductionArgSuggestAddTo": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionArgSuggestAddTo": "Add under #{id}",
+  "@agentWorkspaceProductionArgSuggestDelete": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionArgSuggestDelete": "Delete #{id}",
+  "@agentWorkspaceProductionFlowRecipeSbGenRereadDetail": {
+    "placeholders": {
+      "ids": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionFlowRecipeSbGenRereadDetail": "Storyboard generation ran; first reread missing-frame status for shots #{ids}.",
+  "@agentWorkspaceProductionFlowRecipeSbTablePartialDetail": {
+    "placeholders": {
+      "ids": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionFlowRecipeSbTablePartialDetail": "The storyboard-table sub-agent ran; first reread table rows for shots #{ids}.",
+  "@agentWorkspaceProductionFlowRecipeSbTableCrosscheckDetailFocused": {
+    "placeholders": {
+      "ids": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionFlowRecipeSbTableCrosscheckDetailFocused": "Prefer rereading storyboard results for shots #{ids} only so a table tweak does not widen to the whole sequence.",
+  "@agentWorkspaceProductionFlowRecipeAssetsRereadDetail": {
+    "placeholders": {
+      "ids": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionFlowRecipeAssetsRereadDetail": "Asset generation ran; first reread latest status for assets #{ids}.",
+  "@agentWorkspaceProductionFlowRecipeAssetsGenDetailScoped": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionFlowRecipeAssetsGenDetailScoped": "{scope} still lack images; prioritize patching only this derived set to save tokens.",
+  "@agentWorkspaceProductionFlowRecipeSbFillGapDetail": {
+    "placeholders": {
+      "idsLabel": {
+        "type": "String"
+      },
+      "idTail": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionFlowRecipeSbFillGapDetail": "Prioritize filling missing frames for shots #{idsLabel}{idTail}; avoid rerunning completed shots in bulk.",
+  "@agentWorkspaceProductionFlowRecipeRereadScriptScriptPlanDetail": {
+    "placeholders": {
+      "scriptWindow": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionFlowRecipeRereadScriptScriptPlanDetail": "Reread only {scriptWindow} first to align the director plan with the script pacing before expanding reads.",
+  "@agentWorkspaceProductionFlowRecipeCheckKeyAssetsDetailIds": {
+    "placeholders": {
+      "assetScope": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionFlowRecipeCheckKeyAssetsDetailIds": "The director plan calls out {assetScope}; verify precisely before expanding to other materials.",
+  "@agentWorkspaceProductionFlowRecipeCheckKeyAssetsDetailNoIds": {
+    "placeholders": {
+      "assetScope": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionFlowRecipeCheckKeyAssetsDetailNoIds": "The director plan has content; verify whether {assetScope} supports execution, then add more assets only if needed.",
+  "@agentWorkspaceProductionFlowRecipeContinueDirectorDetailIds": {
+    "placeholders": {
+      "assetScope": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionFlowRecipeContinueDirectorDetailIds": "Focus director decisions around {assetScope} so downstream storyboard and asset actions inherit these rewrite constraints first.",
+  "@agentWorkspaceProductionFlowRecipeContinueDirectorDetailNoIds": {
+    "placeholders": {
+      "assetScope": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionFlowRecipeContinueDirectorDetailNoIds": "Continue tightening director decisions around {assetScope} so downstream storyboard and asset actions inherit the current rewrite constraints.",
+  "@agentWorkspaceProductionFlowRecipeContinueDirectorPromptIds": {
+    "placeholders": {
+      "assetScope": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionFlowRecipeContinueDirectorPromptIds": "Continue tightening scriptPlan around {assetScope} for shot and material priorities so downstream storyboard execution inherits upstream rewrite constraints.",
+  "@agentWorkspaceProductionFlowRecipeContinueDirectorPromptNoIds": {
+    "placeholders": {
+      "assetScope": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionFlowRecipeContinueDirectorPromptNoIds": "Continue tightening scriptPlan around {assetScope} for shot and material priorities so downstream storyboard execution inherits upstream rewrite constraints.",
+  "@agentWorkspaceProductionFlowRecipeRereadScriptRevisePlanDetail": {
+    "placeholders": {
+      "scriptWindow": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionFlowRecipeRereadScriptRevisePlanDetail": "Before revising, reread only {scriptWindow} to avoid loading the entire script for scriptPlan.",
+  "@agentWorkspaceProductionFlowRecipeReviseDirectorPlanDetail": {
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionFlowRecipeReviseDirectorPlanDetail": "Review conclusion: {summary}",
+  "@agentWorkspaceProductionFlowRecipeReviseDirectorPlanPrompt": {
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionFlowRecipeReviseDirectorPlanPrompt": "Revise scriptPlan based on the latest review; prioritize fixing: {summary}",
+  "@agentWorkspaceProductionFlowRecipeVerifyAssetSupportDetail": {
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      },
+      "assetScope": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionFlowRecipeVerifyAssetSupportDetail": "Review conclusion: {summary}; first narrow to {assetScope} to confirm gaps in the director plan.",
+  "@agentWorkspaceProductionFlowRecipeInspectSbResultsDetail": {
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      },
+      "focusClause": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionFlowRecipeInspectSbResultsDetail": "Review conclusion: {summary}; first narrow to {focusClause}",
+  "@agentWorkspaceProductionFlowRecipeCompareStoryboardTableDetailFocus": {
+    "placeholders": {
+      "storyboardFocus": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionFlowRecipeCompareStoryboardTableDetailFocus": "Prefer rereading only the storyboard table rows for {storyboardFocus} to avoid returning to the full table.",
+  "@agentWorkspaceProductionFlowRecipeRereadScriptReviewDetail": {
+    "placeholders": {
+      "reviewScope": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionFlowRecipeRereadScriptReviewDetail": "If shot rationale must be checked, prefer only the partial range: {reviewScope}.",
+  "@agentWorkspaceProductionFlowRecipeInspectStoryboardResultsDetailScript": {
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      },
+      "reviewScope": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionFlowRecipeInspectStoryboardResultsDetailScript": "Review conclusion: {summary}; prefer only the partial range: {reviewScope}.",
+  "@agentWorkspaceProductionFlowRecipeSwitchStoryboardResultsDetailCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "agentWorkspaceProductionFlowRecipeSwitchStoryboardResultsDetailCount": "Prefer rereading only the {count} shots covered by the current storyboard table window; avoid falling back to a generic storyboard digest.",
+  "@agentWorkspaceProductionFlowRecipeCompareStoryboardTableBeforeFillDetailFocus": {
+    "placeholders": {
+      "storyboardFocus": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionFlowRecipeCompareStoryboardTableBeforeFillDetailFocus": "Before filling frames, reread only the storyboard table rows for {storyboardFocus}.",
+  "@agentWorkspaceProductionFlowRecipePromptStoryboardContinue": {
+    "placeholders": {
+      "body": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionFlowRecipePromptStoryboardContinue": "Continue advancing storyboard. {body}",
+  "@agentWorkspaceProductionFlowRecipePromptReviseStoryboardTable": {
+    "placeholders": {
+      "body": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionFlowRecipePromptReviseStoryboardTable": "Revise storyboardTable based on the latest review. {body}",
+  "@agentWorkspaceProductionFlowRecipePromptStoryboardFromReview": {
+    "placeholders": {
+      "body": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionFlowRecipePromptStoryboardFromReview": "Continue advancing storyboard based on the latest review conclusion. {body}",
+  "@agentWorkspaceProductionFlowRecipeShotCountTail": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "agentWorkspaceProductionFlowRecipeShotCountTail": " and {count} more shots",
+  "@agentWorkspaceProductionFlowRecipeInspectStoryboardResultsDetailSummaryOnly": {
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionFlowRecipeInspectStoryboardResultsDetailSummaryOnly": "Review conclusion: {summary}",
+  "@agentWorkspaceProductionFlowRecipeInspectStoryboardResultsDetailWithScope": {
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      },
+      "reviewScope": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionFlowRecipeInspectStoryboardResultsDetailWithScope": "Review conclusion: {summary}; {reviewScope}.",
+  "@agentWorkspaceProductionFlowRecipeArgDeriveNameFromParent": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionFlowRecipeArgDeriveNameFromParent": "{name}-derived",
+  "@agentWorkspaceProductionAssetReviewPromptFocused": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "priority": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionAssetReviewPromptFocused": "Please verify only these {count} assets against the current director plan; fill only necessary gaps and avoid bulk-reading unrelated assets.{priority}",
+  "@agentWorkspaceProductionAssetReviewPromptScoped": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      },
+      "priority": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionAssetReviewPromptScoped": "Please verify whether {scope} supports the current director plan; add minimal reads only if information is insufficient—do not bulk-read assets.{priority}",
+  "@agentWorkspaceProductionAssetReviewPromptPriority": {
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionAssetReviewPromptPriority": " Prioritize addressing: {summary}",
+  "@agentWorkspaceProductionRecipeAppliedFollowRefine": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionRecipeAppliedFollowRefine": "Applied suggestion: {title}. Next, refine the director plan.",
+  "@agentWorkspaceProductionRecipeAppliedFollowExpandTable": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionRecipeAppliedFollowExpandTable": "Applied suggestion: {title}. Next, expand the key storyboard table window.",
+  "@agentWorkspaceProductionRecipeAppliedGeneric": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionRecipeAppliedGeneric": "Applied suggestion: {title}"
 }

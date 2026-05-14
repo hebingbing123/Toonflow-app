@@ -977,7 +977,7 @@ void main() {
           tester,
           buttonType: FilledButton,
           cardText: '先生成资产计划',
-          buttonText: '运行子代理',
+          buttonText: '推进阶段',
         );
         await tester.pump();
 

@@ -180,7 +180,10 @@ class ProductionWorkspaceDiagnosisPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     if (recipes.isEmpty) return const SizedBox.shrink();
-    final diagnosisHeadline = summarizeProductionDiagnosisHeadline(recipes);
+    final diagnosisHeadline = summarizeProductionDiagnosisHeadline(
+      recipes,
+      l10n,
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -254,7 +257,7 @@ class ProductionWorkspaceDiagnosisPanel extends StatelessWidget {
                               ? null
                               : () => onRunRecipeDomainTool(recipe),
                           child: Text(
-                            productionRecipeDomainButtonLabel(recipe),
+                            productionRecipeDomainButtonLabel(recipe, l10n),
                           ),
                         ),
                       if (recipe.subAgentTool != null)
@@ -263,7 +266,7 @@ class ProductionWorkspaceDiagnosisPanel extends StatelessWidget {
                               ? null
                               : () => onRunRecipeSubAgent(recipe),
                           child: Text(
-                            productionRecipeSubAgentButtonLabel(recipe),
+                            productionRecipeSubAgentButtonLabel(recipe, l10n),
                           ),
                         ),
                     ],

@@ -122,8 +122,11 @@ extension _AgentWorkspaceProductionCardTemplates
     );
   }
 
-  List<ProductionWorkspaceArgumentSuggestion> _buildActionSuggestions() {
+  List<ProductionWorkspaceArgumentSuggestion> _buildActionSuggestions(
+    AppLocalizations l10n,
+  ) {
     return buildProductionActionArgumentSuggestions(
+      l10n: l10n,
       selectedTool: _selectedProductionTool,
       toolName: widget.workspaceLastToolName,
       suggestedFlowKey: _suggestedFlowKeyLine,
@@ -150,7 +153,8 @@ extension _AgentWorkspaceProductionCardTemplates
   }
 
   Widget _buildActionCandidateTemplates(BuildContext context) {
-    final suggestions = _buildActionSuggestions();
+    final l10n = AppLocalizations.of(context)!;
+    final suggestions = _buildActionSuggestions(l10n);
     if (suggestions.isEmpty) return const SizedBox.shrink();
     return ProductionWorkspaceActionCandidatesPanel(
       busy: widget.busy,

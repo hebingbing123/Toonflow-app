@@ -1,5 +1,14 @@
 part of '../support.dart';
 
+/// Stable UI routing for [ProductionWorkspaceRecipe] beyond localized
+/// [title] text (e.g. diagnosis headlines and button labels).
+enum ProductionWorkspaceRecipeUiKind {
+  generic,
+  refineIntentBeforeTable,
+  previewStoryboardTableBeforeFrames,
+  sampleStoryboardTable,
+}
+
 class ProductionWorkspaceRecipe {
   const ProductionWorkspaceRecipe({
     required this.title,
@@ -10,6 +19,7 @@ class ProductionWorkspaceRecipe {
     this.subAgentTool,
     this.subAgentArgs,
     this.prompt,
+    this.uiKind = ProductionWorkspaceRecipeUiKind.generic,
   });
 
   final String title;
@@ -20,6 +30,7 @@ class ProductionWorkspaceRecipe {
   final String? subAgentTool;
   final Map<String, dynamic>? subAgentArgs;
   final String? prompt;
+  final ProductionWorkspaceRecipeUiKind uiKind;
 }
 
 class ProductionWorkspaceStage {

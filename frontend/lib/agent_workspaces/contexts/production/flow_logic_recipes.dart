@@ -46,17 +46,22 @@ List<ProductionWorkspaceRecipe> buildProductionWorkspaceRecipes({
     );
     return <ProductionWorkspaceRecipe>[
       ProductionWorkspaceRecipe(
-        title: affectedIds.isEmpty ? '刷新分镜结果' : '回读缺帧状态',
+        title: affectedIds.isEmpty
+            ? l10n.agentWorkspaceProductionFlowRecipeSbGenRefreshTitle
+            : l10n.agentWorkspaceProductionFlowRecipeSbGenRereadTitle,
         detail: affectedIds.isEmpty
-            ? '分镜生成动作已执行，先刷新分镜结果，再决定是否写回。'
-            : '分镜生成动作已执行，先回读本次镜头 #${affectedIds.join(', ')} 的缺帧状态。',
+            ? l10n.agentWorkspaceProductionFlowRecipeSbGenRefreshDetail
+            : l10n.agentWorkspaceProductionFlowRecipeSbGenRereadDetail(
+                affectedIds.join(', '),
+              ),
         flowKey: 'storyboard',
         domainTool: 'get_flowData',
         domainArgs: buildProductionStoryboardGenerationArgs(ids: affectedIds),
       ),
       ProductionWorkspaceRecipe(
-        title: '继续导演计划',
-        detail: '如分镜结果还不稳定，回到 scriptPlan 生成下一轮导演决策。',
+        title: l10n.agentWorkspaceProductionFlowRecipeContinueDirectorTitle,
+        detail: l10n
+            .agentWorkspaceProductionFlowRecipeContinueDirectorAfterSbDetail,
         flowKey: 'scriptPlan',
         domainTool: 'get_flowData',
         subAgentTool: 'run_sub_agent_director_plan',
@@ -71,19 +76,25 @@ List<ProductionWorkspaceRecipe> buildProductionWorkspaceRecipes({
     );
     return <ProductionWorkspaceRecipe>[
       ProductionWorkspaceRecipe(
-        title: affectedIds.isEmpty ? '刷新分镜表' : '回读局部分镜表',
+        title: affectedIds.isEmpty
+            ? l10n.agentWorkspaceProductionFlowRecipeSbTableRefreshTitle
+            : l10n.agentWorkspaceProductionFlowRecipeSbTablePartialTitle,
         detail: affectedIds.isEmpty
-            ? '分镜表子代理已执行，先刷新分镜表，再决定是否继续修订。'
-            : '分镜表子代理已执行，先回读本次镜头 #${affectedIds.join(', ')} 对应的局部分镜表行。',
+            ? l10n.agentWorkspaceProductionFlowRecipeSbTableRefreshDetail
+            : l10n.agentWorkspaceProductionFlowRecipeSbTablePartialDetail(
+                affectedIds.join(', '),
+              ),
         flowKey: 'storyboardTable',
         domainTool: 'get_flowData',
         domainArgs: buildProductionStoryboardTableReadArgs(ids: affectedIds),
       ),
       ProductionWorkspaceRecipe(
-        title: '核对对应分镜',
+        title: l10n.agentWorkspaceProductionFlowRecipeSbTableCrosscheckTitle,
         detail: affectedIds.isEmpty
-            ? '必要时切回 storyboard，确认分镜表调整是否已经落实到画面结果。'
-            : '优先只回读镜头 #${affectedIds.join(', ')} 的 storyboard 结果，确认表格修改没有放大到整段。',
+            ? l10n.agentWorkspaceProductionFlowRecipeSbTableCrosscheckDetailAll
+            : l10n.agentWorkspaceProductionFlowRecipeSbTableCrosscheckDetailFocused(
+                affectedIds.join(', '),
+              ),
         flowKey: 'storyboard',
         domainTool: 'get_flowData',
         domainArgs: buildProductionStoryboardReviewArgs(ids: affectedIds),
@@ -108,24 +119,30 @@ List<ProductionWorkspaceRecipe> buildProductionWorkspaceRecipes({
         : const <int>[];
     return <ProductionWorkspaceRecipe>[
       ProductionWorkspaceRecipe(
-        title: affectedIds.isEmpty ? '刷新资产结果' : '回读受影响资产',
+        title: affectedIds.isEmpty
+            ? l10n.agentWorkspaceProductionFlowRecipeAssetsRefreshTitle
+            : l10n.agentWorkspaceProductionFlowRecipeAssetsRereadTitle,
         detail: affectedIds.isEmpty
-            ? '资产动作已执行，先刷新资产结果，再决定是否写回。'
-            : '资产生成动作已执行，先回读本次资产 #${affectedIds.join(', ')} 的最新状态。',
+            ? l10n.agentWorkspaceProductionFlowRecipeAssetsRefreshDetail
+            : l10n.agentWorkspaceProductionFlowRecipeAssetsRereadDetail(
+                affectedIds.join(', '),
+              ),
         flowKey: 'assets',
         domainTool: 'get_flowData',
         domainArgs: buildProductionAssetReadArgs(ids: affectedIds),
       ),
       ProductionWorkspaceRecipe(
-        title: '继续资产子代理',
-        detail: '若仍缺素材，可直接衔接资产子代理推进下一轮生成。',
+        title: l10n.agentWorkspaceProductionFlowRecipeAssetsContinueSubTitle,
+        detail: l10n.agentWorkspaceProductionFlowRecipeAssetsContinueSubDetail,
         flowKey: 'assets',
         subAgentTool: 'run_sub_agent_generate_assets',
         subAgentArgs: buildProductionSubAgentArgs(assetIds: affectedIds),
         prompt: buildProductionAssetGenerationPrompt(
           l10n: l10n,
           assetIds: affectedIds,
-          summary: affectedIds.isEmpty ? null : '先检查本次刚生成资产的结果再决定是否补跑',
+          summary: affectedIds.isEmpty
+              ? null
+              : l10n.agentWorkspaceProductionFlowRecipeAssetsGenHadSummaryNote,
         ),
       ),
     ];
@@ -139,13 +156,13 @@ List<ProductionWorkspaceRecipe> _buildAssetRecipes(
   Object? data,
 ) {
   if (data is List && data.isEmpty) {
-    return const <ProductionWorkspaceRecipe>[
+    return <ProductionWorkspaceRecipe>[
       ProductionWorkspaceRecipe(
-        title: '先生成资产计划',
-        detail: '当前 assets 为空，优先让子代理补齐衍生素材规划。',
+        title: l10n.agentWorkspaceProductionFlowRecipeAssetsPlanFirstTitle,
+        detail: l10n.agentWorkspaceProductionFlowRecipeAssetsPlanFirstDetail,
         flowKey: 'assets',
         subAgentTool: 'run_sub_agent_derive_assets',
-        prompt: '请基于当前空白 assets flow 规划最小可行的衍生素材集合，并说明优先级。',
+        prompt: l10n.agentWorkspaceProductionFlowRecipeAssetsPlanFirstPrompt,
       ),
     ];
   }
@@ -162,10 +179,12 @@ List<ProductionWorkspaceRecipe> _buildAssetRecipes(
     if (withoutUrl > 0) {
       return <ProductionWorkspaceRecipe>[
         ProductionWorkspaceRecipe(
-          title: '继续资产生成',
+          title: l10n.agentWorkspaceProductionFlowRecipeAssetsContinueGenTitle,
           detail: pendingScope.isEmpty
-              ? '仍有素材缺少图像结果，适合直接运行素材生成子代理。'
-              : '$pendingScope 仍缺图，优先只补这批衍生资产更省 token。',
+              ? l10n.agentWorkspaceProductionFlowRecipeAssetsContinueGenDetailGeneric
+              : l10n.agentWorkspaceProductionFlowRecipeAssetsGenDetailScoped(
+                  pendingScope,
+                ),
           flowKey: 'assets',
           subAgentTool: 'run_sub_agent_generate_assets',
           subAgentArgs: buildProductionSubAgentArgs(assetIds: pendingDeriveIds),
@@ -175,8 +194,10 @@ List<ProductionWorkspaceRecipe> _buildAssetRecipes(
           ),
         ),
         ProductionWorkspaceRecipe(
-          title: '刷新分镜需求',
-          detail: '素材缺口补齐后通常需要回看 storyboard 是否还能沿用当前方案。',
+          title:
+              l10n.agentWorkspaceProductionFlowRecipeRefreshStoryboardNeedTitle,
+          detail: l10n
+              .agentWorkspaceProductionFlowRecipeRefreshStoryboardNeedDetail,
           flowKey: 'storyboard',
           domainTool: 'get_flowData',
           domainArgs: buildProductionStoryboardReviewArgs(),
@@ -186,18 +207,18 @@ List<ProductionWorkspaceRecipe> _buildAssetRecipes(
   }
   return <ProductionWorkspaceRecipe>[
     ProductionWorkspaceRecipe(
-      title: '检查分镜 flow',
-      detail: '资产已具备基础结果，可切到 storyboard 评估镜头生成状态。',
+      title: l10n.agentWorkspaceProductionFlowRecipeCheckStoryboardFlowTitle,
+      detail: l10n.agentWorkspaceProductionFlowRecipeCheckStoryboardFlowDetail,
       flowKey: 'storyboard',
       domainTool: 'get_flowData',
       domainArgs: buildProductionStoryboardReviewArgs(),
     ),
     ProductionWorkspaceRecipe(
-      title: '整理导演计划',
-      detail: '若素材已基本齐全，可生成下一轮导演计划收束 production 节奏。',
+      title: l10n.agentWorkspaceProductionFlowRecipeTidyDirectorPlanTitle,
+      detail: l10n.agentWorkspaceProductionFlowRecipeTidyDirectorPlanDetail,
       flowKey: 'scriptPlan',
       subAgentTool: 'run_sub_agent_director_plan',
-      prompt: '请结合现有素材状态与 scriptPlan，输出下一轮导演计划与执行优先级。',
+      prompt: l10n.agentWorkspaceProductionFlowRecipeTidyDirectorPlanPrompt,
     ),
   ];
 }
@@ -207,13 +228,13 @@ List<ProductionWorkspaceRecipe> _buildStoryboardRecipes(
   Object? data,
 ) {
   if (data is List && data.isEmpty) {
-    return const <ProductionWorkspaceRecipe>[
+    return <ProductionWorkspaceRecipe>[
       ProductionWorkspaceRecipe(
-        title: '生成第一版分镜',
-        detail: '当前 storyboard 为空，优先运行分镜生成子代理建立初版镜头。',
+        title: l10n.agentWorkspaceProductionFlowRecipeFirstStoryboardTitle,
+        detail: l10n.agentWorkspaceProductionFlowRecipeFirstStoryboardDetail,
         flowKey: 'storyboard',
         subAgentTool: 'run_sub_agent_storyboard_gen',
-        prompt: '请基于当前 production 上下文生成第一版 storyboard，并保持最小可行镜头集。',
+        prompt: l10n.agentWorkspaceProductionFlowRecipeFirstStoryboardPrompt,
       ),
     ];
   }
@@ -227,32 +248,48 @@ List<ProductionWorkspaceRecipe> _buildStoryboardRecipes(
     );
     if (missingIds.isNotEmpty) {
       final idsLabel = missingIds.take(6).join(', ');
-      final idTail = missingIds.length > 6 ? ' 等 ${missingIds.length} 个镜头' : '';
+      final idTail = missingIds.length > 6
+          ? l10n.agentWorkspaceProductionFlowRecipeShotCountTail(
+              missingIds.length,
+            )
+          : '';
       return <ProductionWorkspaceRecipe>[
         ProductionWorkspaceRecipe(
-          title: '继续补齐分镜图',
-          detail: '优先只补缺帧镜头 #$idsLabel$idTail，避免把已完成镜头整批重跑。',
+          title:
+              l10n.agentWorkspaceProductionFlowRecipeFillStoryboardFramesTitle,
+          detail: l10n.agentWorkspaceProductionFlowRecipeSbFillGapDetail(
+            idTail,
+            idsLabel,
+          ),
           flowKey: 'storyboard',
           subAgentTool: 'run_sub_agent_storyboard_gen',
           subAgentArgs: buildProductionSubAgentArgs(
             storyboardIds: missingIds,
             assetIds: promptAssetIds,
           ),
-          prompt:
-              '请继续推进 storyboard。${buildProductionStoryboardGenerationPrompt(l10n: l10n, storyboardIds: missingIds, assetIds: promptAssetIds)}',
+          prompt: l10n
+              .agentWorkspaceProductionFlowRecipePromptStoryboardContinue(
+                buildProductionStoryboardGenerationPrompt(
+                  l10n: l10n,
+                  storyboardIds: missingIds,
+                  assetIds: promptAssetIds,
+                ),
+              ),
         ),
         ProductionWorkspaceRecipe(
-          title: '核对关联资产',
+          title: l10n.agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsTitle,
           detail: assetArgs.containsKey('ids')
-              ? '优先只看当前分镜窗口实际引用的资产，避免把无关素材带入分镜补图。'
-              : '当前分镜摘要尚未定位出明确资产 ID，退回紧凑 assets 摘要读取。',
+              ? l10n.agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailFromRefs
+              : l10n.agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailNoIds,
           flowKey: 'assets',
           domainTool: 'get_flowData',
           domainArgs: assetArgs,
         ),
         ProductionWorkspaceRecipe(
-          title: '检查分镜表',
-          detail: '必要时切到 storyboardTable 审阅结构化镜头表后再回写。',
+          title:
+              l10n.agentWorkspaceProductionFlowRecipeCheckStoryboardTableTitle,
+          detail:
+              l10n.agentWorkspaceProductionFlowRecipeCheckStoryboardTableDetail,
           flowKey: 'storyboardTable',
           domainTool: 'get_flowData',
           domainArgs: buildProductionStoryboardTableReadArgs(ids: missingIds),
@@ -261,27 +298,28 @@ List<ProductionWorkspaceRecipe> _buildStoryboardRecipes(
     }
     return <ProductionWorkspaceRecipe>[
       ProductionWorkspaceRecipe(
-        title: '核对关联资产',
+        title: l10n.agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsTitle,
         detail: assetArgs.containsKey('ids')
-            ? '分镜已引用明确资产，可先核对这批资产是否足够支撑后续导演调整。'
-            : '当前分镜摘要未定位出明确资产 ID，先读紧凑 assets 摘要即可。',
+            ? l10n.agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailReadyIds
+            : l10n.agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailReadyNoIds,
         flowKey: 'assets',
         domainTool: 'get_flowData',
         domainArgs: assetArgs,
       ),
       ProductionWorkspaceRecipe(
-        title: '刷新导演计划',
-        detail: '分镜已有基础结果，适合回到 scriptPlan 整理下一轮导演决策。',
+        title: l10n.agentWorkspaceProductionFlowRecipeRefreshDirectorPlanTitle,
+        detail:
+            l10n.agentWorkspaceProductionFlowRecipeRefreshDirectorPlanDetail,
         flowKey: 'scriptPlan',
         domainTool: 'get_flowData',
         subAgentTool: 'run_sub_agent_director_plan',
       ),
     ];
   }
-  return const <ProductionWorkspaceRecipe>[
+  return <ProductionWorkspaceRecipe>[
     ProductionWorkspaceRecipe(
-      title: '刷新导演计划',
-      detail: '分镜已有基础结果，适合回到 scriptPlan 整理下一轮导演决策。',
+      title: l10n.agentWorkspaceProductionFlowRecipeRefreshDirectorPlanTitle,
+      detail: l10n.agentWorkspaceProductionFlowRecipeRefreshDirectorPlanDetail,
       flowKey: 'scriptPlan',
       domainTool: 'get_flowData',
       subAgentTool: 'run_sub_agent_director_plan',
@@ -294,13 +332,13 @@ List<ProductionWorkspaceRecipe> _buildScriptPlanRecipes(
   Object? data,
 ) {
   if (data is String && data.trim().isEmpty) {
-    return const <ProductionWorkspaceRecipe>[
+    return <ProductionWorkspaceRecipe>[
       ProductionWorkspaceRecipe(
-        title: '先生成导演计划',
-        detail: '当前 scriptPlan 为空，优先建立导演计划再推进资产或分镜。',
+        title: l10n.agentWorkspaceProductionFlowRecipeCreateDirectorPlanTitle,
+        detail: l10n.agentWorkspaceProductionFlowRecipeCreateDirectorPlanDetail,
         flowKey: 'scriptPlan',
         subAgentTool: 'run_sub_agent_director_plan',
-        prompt: '请基于当前 production 上下文生成一版导演计划，并给出执行优先级。',
+        prompt: l10n.agentWorkspaceProductionFlowRecipeCreateDirectorPlanPrompt,
       ),
     ];
   }
@@ -313,45 +351,62 @@ List<ProductionWorkspaceRecipe> _buildScriptPlanRecipes(
       !_productionScriptPlanStoryboardReady(data);
   return <ProductionWorkspaceRecipe>[
     ProductionWorkspaceRecipe(
-      title: '审核导演计划',
-      detail: '导演计划已有内容，先做一次监督审核更容易在低成本阶段发现节奏和资产问题。',
+      title: l10n.agentWorkspaceProductionFlowRecipeReviewDirectorPlanTitle,
+      detail: l10n.agentWorkspaceProductionFlowRecipeReviewDirectorPlanDetail,
       flowKey: 'scriptPlan',
       subAgentTool: 'run_sub_agent_production_supervision',
-      prompt: '请审核当前导演规划，重点检查剧情覆盖、资产匹配与节奏合理性。',
+      prompt: l10n.agentWorkspaceProductionFlowRecipeReviewDirectorPlanPrompt,
     ),
     ProductionWorkspaceRecipe(
-      title: '回看剧本依据',
-      detail: '先只回看$scriptWindow，确认导演计划与原文节奏一致，再决定是否扩读。',
+      title: l10n.agentWorkspaceProductionFlowRecipeRereadScriptTitle,
+      detail: l10n
+          .agentWorkspaceProductionFlowRecipeRereadScriptScriptPlanDetail(
+            scriptWindow,
+          ),
       flowKey: 'script',
       domainTool: 'get_flowData',
       domainArgs: buildProductionPlanningScriptArgs(),
     ),
     ProductionWorkspaceRecipe(
-      title: '检查关键资产',
+      title: l10n.agentWorkspaceProductionFlowRecipeCheckKeyAssetsTitle,
       detail: assetArgs.containsKey('ids')
-          ? '导演计划已点名$assetScope，先精确核对再决定是否扩读其他素材。'
-          : '导演计划已有内容，先核对$assetScope是否支撑执行，信息不足时再补更多资产。',
+          ? l10n.agentWorkspaceProductionFlowRecipeCheckKeyAssetsDetailIds(
+              assetScope,
+            )
+          : l10n.agentWorkspaceProductionFlowRecipeCheckKeyAssetsDetailNoIds(
+              assetScope,
+            ),
       flowKey: 'assets',
       domainTool: 'get_flowData',
       domainArgs: assetArgs,
     ),
     ProductionWorkspaceRecipe(
-      title: '继续导演计划',
+      title: l10n.agentWorkspaceProductionFlowRecipeContinueDirectorTitle,
       detail: assetArgs.containsKey('ids')
-          ? '优先围绕$assetScope收束导演决策，让后续分镜和素材动作先继承这批受改写约束的重点。'
-          : '先围绕$assetScope继续收束导演决策，让后续分镜和素材动作继承当前改写约束。',
+          ? l10n.agentWorkspaceProductionFlowRecipeContinueDirectorDetailIds(
+              assetScope,
+            )
+          : l10n.agentWorkspaceProductionFlowRecipeContinueDirectorDetailNoIds(
+              assetScope,
+            ),
       flowKey: 'scriptPlan',
       subAgentTool: 'run_sub_agent_director_plan',
       subAgentArgs: directorPlanArgs,
       prompt: assetArgs.containsKey('ids')
-          ? '请在当前 scriptPlan 上继续收束导演计划，优先围绕$assetScope安排镜头和素材优先级，确保后续分镜执行继承上游改写约束。'
-          : '请在当前 scriptPlan 上继续收束导演计划，优先围绕$assetScope安排镜头和素材优先级，确保后续分镜执行继承上游改写约束。',
+          ? l10n.agentWorkspaceProductionFlowRecipeContinueDirectorPromptIds(
+              assetScope,
+            )
+          : l10n.agentWorkspaceProductionFlowRecipeContinueDirectorPromptNoIds(
+              assetScope,
+            ),
     ),
     ProductionWorkspaceRecipe(
-      title: needsStoryboardIntentRefinement ? '补足分场景意图' : '先看分镜表落地',
+      title: needsStoryboardIntentRefinement
+          ? l10n.agentWorkspaceProductionFlowRecipeRefineSceneIntentTitle
+          : l10n.agentWorkspaceProductionFlowRecipePreviewStoryboardTableTitle,
       detail: needsStoryboardIntentRefinement
-          ? '当前导演计划还缺少足够明确的分场景情绪/画面意图，先补这层再拆 storyboardTable，能减少后续反复返工。'
-          : '如计划已定，先抽样检查 storyboardTable 结构更省 token，再决定是否读取 storyboard 画面结果。',
+          ? l10n.agentWorkspaceProductionFlowRecipeRefineSceneIntentDetail
+          : l10n.agentWorkspaceProductionFlowRecipePreviewStoryboardTableDetail,
       flowKey: 'storyboardTable',
       domainTool: needsStoryboardIntentRefinement ? null : 'get_flowData',
       domainArgs: needsStoryboardIntentRefinement
@@ -362,8 +417,11 @@ List<ProductionWorkspaceRecipe> _buildScriptPlanRecipes(
           : null,
       subAgentArgs: needsStoryboardIntentRefinement ? directorPlanArgs : null,
       prompt: needsStoryboardIntentRefinement
-          ? '请继续细化当前 scriptPlan，优先补足分场景情绪推进、画面意图与镜头落点，再进入 storyboardTable 拆分。'
+          ? l10n.agentWorkspaceProductionFlowRecipeRefineSceneIntentPrompt
           : null,
+      uiKind: needsStoryboardIntentRefinement
+          ? ProductionWorkspaceRecipeUiKind.refineIntentBeforeTable
+          : ProductionWorkspaceRecipeUiKind.previewStoryboardTableBeforeFrames,
     ),
   ];
 }
@@ -373,13 +431,16 @@ List<ProductionWorkspaceRecipe> _buildStoryboardTableRecipes(
   Object? data,
 ) {
   if (data is String && data.trim().isEmpty) {
-    return const <ProductionWorkspaceRecipe>[
+    return <ProductionWorkspaceRecipe>[
       ProductionWorkspaceRecipe(
-        title: '生成分镜表',
-        detail: '当前 storyboardTable 为空，适合先用分镜表子代理补结构。',
+        title:
+            l10n.agentWorkspaceProductionFlowRecipeCreateStoryboardTableTitle,
+        detail:
+            l10n.agentWorkspaceProductionFlowRecipeCreateStoryboardTableDetail,
         flowKey: 'storyboardTable',
         subAgentTool: 'run_sub_agent_storyboard_table',
-        prompt: '请先产出结构化 storyboardTable，并保持字段清晰可回写。',
+        prompt:
+            l10n.agentWorkspaceProductionFlowRecipeCreateStoryboardTablePrompt,
       ),
     ];
   }
@@ -393,36 +454,43 @@ List<ProductionWorkspaceRecipe> _buildStoryboardTableRecipes(
   );
   return <ProductionWorkspaceRecipe>[
     ProductionWorkspaceRecipe(
-      title: '审核分镜表',
-      detail: '分镜表已有内容，先做监督审核可避免把错误结构继续放大到 storyboard。',
+      title: l10n.agentWorkspaceProductionFlowRecipeReviewStoryboardTableTitle,
+      detail:
+          l10n.agentWorkspaceProductionFlowRecipeReviewStoryboardTableDetail,
       flowKey: 'storyboardTable',
       subAgentTool: 'run_sub_agent_production_supervision',
-      prompt: '请审核当前分镜表，重点检查覆盖度、资产关联与拆分粒度。',
+      prompt:
+          l10n.agentWorkspaceProductionFlowRecipeReviewStoryboardTablePrompt,
     ),
     ProductionWorkspaceRecipe(
-      title: '核对关联资产',
+      title: l10n.agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsTitle,
       detail: assetArgs.containsKey('ids')
-          ? '优先只看当前分镜窗口实际引用的资产，减少无关素材上下文。'
-          : '当前窗口暂未解析出关联资产 ID，退回紧凑 assets 摘要读取。',
+          ? l10n.agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsTableRefs
+          : l10n.agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsTableNoIds,
       flowKey: 'assets',
       domainTool: 'get_flowData',
       domainArgs: assetArgs,
     ),
     ProductionWorkspaceRecipe(
-      title: '切回分镜结果',
+      title:
+          l10n.agentWorkspaceProductionFlowRecipeSwitchStoryboardResultsTitle,
       detail: storyboardIds.isEmpty
-          ? '分镜表已有内容，可继续查看 storyboard 画面结果是否跟上。'
-          : '优先只回看当前分镜表窗口对应的 ${storyboardIds.length} 个镜头，避免退回通用分镜摘要。',
+          ? l10n.agentWorkspaceProductionFlowRecipeSwitchStoryboardResultsDetailAll
+          : l10n.agentWorkspaceProductionFlowRecipeSwitchStoryboardResultsDetailCount(
+              storyboardIds.length,
+            ),
       flowKey: 'storyboard',
       domainTool: 'get_flowData',
       domainArgs: storyboardArgs,
     ),
     ProductionWorkspaceRecipe(
-      title: '抽样读取分镜表',
-      detail: '先只看前 8 行关键列，通常足够判断是否继续审核或回写。',
+      title: l10n.agentWorkspaceProductionFlowRecipeSampleStoryboardTableTitle,
+      detail:
+          l10n.agentWorkspaceProductionFlowRecipeSampleStoryboardTableDetail,
       flowKey: 'storyboardTable',
       domainTool: 'get_flowData',
       domainArgs: buildProductionStoryboardTableReadArgs(),
+      uiKind: ProductionWorkspaceRecipeUiKind.sampleStoryboardTable,
     ),
   ];
 }
@@ -455,7 +523,9 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
   AppLocalizations l10n,
   ProductionSupervisionReview review,
 ) {
-  final summary = review.summary.isEmpty ? '按审核结论继续推进。' : review.summary;
+  final summary = review.summary.isEmpty
+      ? l10n.agentWorkspaceProductionSupervisionSummaryFallback
+      : review.summary;
   final assetScope = summarizeProductionAssetReviewScope(l10n, review);
   final storyboardFocus = summarizeProductionStoryboardFocusIds(
     l10n,
@@ -469,23 +539,33 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
     case 'revise_scriptPlan':
       return <ProductionWorkspaceRecipe>[
         ProductionWorkspaceRecipe(
-          title: '修导演计划',
-          detail: '审核结论：$summary',
+          title: l10n.agentWorkspaceProductionFlowRecipeReviseDirectorPlanTitle,
+          detail: l10n
+              .agentWorkspaceProductionFlowRecipeReviseDirectorPlanDetail(
+                summary,
+              ),
           flowKey: 'scriptPlan',
           subAgentTool: 'run_sub_agent_director_plan',
-          prompt: '请根据最近审核意见修订 scriptPlan，优先解决：$summary',
+          prompt: l10n
+              .agentWorkspaceProductionFlowRecipeReviseDirectorPlanPrompt(
+                summary,
+              ),
         ),
         ProductionWorkspaceRecipe(
-          title: '回看剧本依据',
-          detail:
-              '修订前先只回看${summarizeProductionPlanningScriptWindow(l10n)}，避免为 scriptPlan 扩读整段剧本。',
+          title: l10n.agentWorkspaceProductionFlowRecipeRereadScriptTitle,
+          detail: l10n
+              .agentWorkspaceProductionFlowRecipeRereadScriptRevisePlanDetail(
+                summarizeProductionPlanningScriptWindow(l10n),
+              ),
           flowKey: 'script',
           domainTool: 'get_flowData',
           domainArgs: buildProductionPlanningScriptArgs(),
         ),
         ProductionWorkspaceRecipe(
-          title: '复查资产支撑',
-          detail: '导演计划常先卡在资产准备，先看 assets 能减少返工。',
+          title:
+              l10n.agentWorkspaceProductionFlowRecipeRecheckAssetSupportTitle,
+          detail:
+              l10n.agentWorkspaceProductionFlowRecipeRecheckAssetSupportDetail,
           flowKey: 'assets',
           domainTool: 'get_flowData',
           domainArgs: buildProductionReviewAssetArgs(review),
@@ -494,15 +574,20 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
     case 'check_assets':
       return <ProductionWorkspaceRecipe>[
         ProductionWorkspaceRecipe(
-          title: '核对资产支撑',
-          detail: '审核结论：$summary；优先只看$assetScope，确认导演计划缺口。',
+          title: l10n.agentWorkspaceProductionFlowRecipeVerifyAssetSupportTitle,
+          detail: l10n
+              .agentWorkspaceProductionFlowRecipeVerifyAssetSupportDetail(
+                assetScope,
+                summary,
+              ),
           flowKey: 'assets',
           domainTool: 'get_flowData',
           domainArgs: buildProductionReviewAssetArgs(review),
         ),
         ProductionWorkspaceRecipe(
-          title: '回看导演计划',
-          detail: '资产核对后回到精简 scriptPlan，确认是否还需要修订计划再推进分镜。',
+          title: l10n.agentWorkspaceProductionFlowRecipeRereadDirectorPlanTitle,
+          detail: l10n
+              .agentWorkspaceProductionFlowRecipeRereadDirectorPlanAfterAssetsDetail,
           flowKey: 'scriptPlan',
           domainTool: 'get_flowData',
           domainArgs: _scriptPlanCompactArgs(),
@@ -511,28 +596,39 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
     case 'check_storyboard':
       return <ProductionWorkspaceRecipe>[
         ProductionWorkspaceRecipe(
-          title: '检查分镜结果',
+          title: l10n
+              .agentWorkspaceProductionFlowRecipeInspectStoryboardResultsTitle,
           detail: storyboardFocus.isEmpty
-              ? '审核结论：$summary'
-              : '审核结论：$summary；优先只看$storyboardFocus。${reviewScope.isEmpty ? '' : ' $reviewScope。'}',
+              ? l10n.agentWorkspaceProductionFlowRecipeInspectStoryboardResultsDetailSummaryOnly(
+                  summary,
+                )
+              : l10n.agentWorkspaceProductionFlowRecipeInspectSbResultsDetail(
+                  '$storyboardFocus。${reviewScope.isEmpty ? '' : ' $reviewScope。'}',
+                  summary,
+                ),
           flowKey: 'storyboard',
           domainTool: 'get_flowData',
           domainArgs: buildProductionReviewStoryboardArgs(review),
         ),
         ProductionWorkspaceRecipe(
-          title: '对照分镜表',
+          title: l10n
+              .agentWorkspaceProductionFlowRecipeCompareStoryboardTableTitle,
           detail: storyboardFocus.isEmpty
-              ? '先复读关键列窗口，避免把整张分镜表重新带入上下文。'
-              : '优先只复读$storyboardFocus对应的分镜表行，避免退回整表。',
+              ? l10n.agentWorkspaceProductionFlowRecipeCompareStoryboardTableDetailGeneric
+              : l10n.agentWorkspaceProductionFlowRecipeCompareStoryboardTableDetailFocus(
+                  storyboardFocus,
+                ),
           flowKey: 'storyboardTable',
           domainTool: 'get_flowData',
           domainArgs: buildProductionReviewStoryboardTableArgs(review),
         ),
         ProductionWorkspaceRecipe(
-          title: '回看剧本依据',
+          title: l10n.agentWorkspaceProductionFlowRecipeRereadScriptTitle,
           detail: reviewScope.isEmpty
-              ? '需要时再回看紧凑剧本窗口，确认镜头依据。'
-              : '如需核对镜头依据，优先只用局部范围：$reviewScope。',
+              ? l10n.agentWorkspaceProductionFlowRecipeRereadScriptNeedWindowDetail
+              : l10n.agentWorkspaceProductionFlowRecipeRereadScriptReviewDetail(
+                  reviewScope,
+                ),
           flowKey: 'script',
           domainTool: 'get_flowData',
           domainArgs: buildProductionScriptReviewArgs(review: review),
@@ -541,8 +637,12 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
     case 'revise_storyboardTable':
       return <ProductionWorkspaceRecipe>[
         ProductionWorkspaceRecipe(
-          title: '修分镜表',
-          detail: '审核结论：$summary',
+          title:
+              l10n.agentWorkspaceProductionFlowRecipeReviseStoryboardTableTitle,
+          detail: l10n
+              .agentWorkspaceProductionFlowRecipeReviseDirectorPlanDetail(
+                summary,
+              ),
           flowKey: 'storyboardTable',
           subAgentTool: 'run_sub_agent_storyboard_table',
           subAgentArgs: buildProductionSubAgentArgs(
@@ -550,14 +650,17 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
             assetIds: review.assetIds,
             assetTypes: review.assetTypes,
           ),
-          prompt:
-              '请根据最近审核意见修订 storyboardTable。${buildProductionStoryboardTableRevisionPrompt(l10n, review)}',
+          prompt: l10n
+              .agentWorkspaceProductionFlowRecipePromptReviseStoryboardTable(
+                buildProductionStoryboardTableRevisionPrompt(l10n, review),
+              ),
         ),
         ProductionWorkspaceRecipe(
-          title: '抽样复读分镜表',
+          title: l10n
+              .agentWorkspaceProductionFlowRecipeSampleRereadStoryboardTableTitle,
           detail: review.storyboardIds.isEmpty
-              ? '先读取关键列窗口，避免把整张表反复带入上下文。'
-              : '先只复读审核聚焦镜头对应的分镜表行，避免回到整表窗口。',
+              ? l10n.agentWorkspaceProductionFlowRecipeSampleRereadStoryboardTableDetailEmpty
+              : l10n.agentWorkspaceProductionFlowRecipeSampleRereadStoryboardTableDetailFocused,
           flowKey: 'storyboardTable',
           domainTool: 'get_flowData',
           domainArgs: buildProductionReviewStoryboardTableArgs(review),
@@ -566,10 +669,15 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
     case 'check_script':
       return <ProductionWorkspaceRecipe>[
         ProductionWorkspaceRecipe(
-          title: '回看剧本依据',
+          title: l10n.agentWorkspaceProductionFlowRecipeRereadScriptTitle,
           detail: reviewScope.isEmpty
-              ? '审核结论：$summary'
-              : '审核结论：$summary；优先只用局部范围：$reviewScope。',
+              ? l10n.agentWorkspaceProductionFlowRecipeInspectStoryboardResultsDetailSummaryOnly(
+                  summary,
+                )
+              : l10n.agentWorkspaceProductionFlowRecipeInspectStoryboardResultsDetailScript(
+                  reviewScope,
+                  summary,
+                ),
           flowKey: 'script',
           domainTool: 'get_flowData',
           domainArgs: buildProductionScriptReviewArgs(review: review),
@@ -582,10 +690,16 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
       final promptAssetIds = review.assetIds;
       return <ProductionWorkspaceRecipe>[
         ProductionWorkspaceRecipe(
-          title: '继续生成分镜图',
+          title:
+              l10n.agentWorkspaceProductionFlowRecipeContinueStoryboardGenTitle,
           detail: reviewScope.isEmpty
-              ? '审核结论：$summary'
-              : '审核结论：$summary；$reviewScope。',
+              ? l10n.agentWorkspaceProductionFlowRecipeInspectStoryboardResultsDetailSummaryOnly(
+                  summary,
+                )
+              : l10n.agentWorkspaceProductionFlowRecipeInspectStoryboardResultsDetailWithScope(
+                  reviewScope,
+                  summary,
+                ),
           flowKey: 'storyboard',
           domainTool: 'get_flowData',
           domainArgs: storyboardArgs,
@@ -595,14 +709,24 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
             assetIds: promptAssetIds,
             assetTypes: review.assetTypes,
           ),
-          prompt:
-              '请基于最近审核结论继续推进 storyboard。${buildProductionStoryboardGenerationPrompt(l10n: l10n, storyboardIds: review.storyboardIds, assetIds: promptAssetIds, summary: summary)}',
+          prompt: l10n
+              .agentWorkspaceProductionFlowRecipePromptStoryboardFromReview(
+                buildProductionStoryboardGenerationPrompt(
+                  l10n: l10n,
+                  storyboardIds: review.storyboardIds,
+                  assetIds: promptAssetIds,
+                  summary: summary,
+                ),
+              ),
         ),
         ProductionWorkspaceRecipe(
-          title: '对照分镜表',
+          title: l10n
+              .agentWorkspaceProductionFlowRecipeCompareStoryboardTableTitle,
           detail: storyboardFocus.isEmpty
-              ? '补图前先复读关键列窗口，避免为整批镜头重建上下文。'
-              : '补图前先只复读$storyboardFocus对应的分镜表行。',
+              ? l10n.agentWorkspaceProductionFlowRecipeCompareStoryboardTableBeforeFillDetail
+              : l10n.agentWorkspaceProductionFlowRecipeCompareStoryboardTableBeforeFillDetailFocus(
+                  storyboardFocus,
+                ),
           flowKey: 'storyboardTable',
           domainTool: 'get_flowData',
           domainArgs: buildProductionReviewStoryboardTableArgs(review),

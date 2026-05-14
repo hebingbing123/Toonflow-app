@@ -159,9 +159,11 @@ class _AgentWorkspaceProductionCardState
               argumentTemplates: _argumentTemplates().isEmpty
                   ? null
                   : _buildArgumentTemplates(),
-              actionCandidatePanel: _buildActionSuggestions().isEmpty
-                  ? null
-                  : _buildActionCandidateTemplates(context),
+              actionCandidatePanel:
+                  _buildActionSuggestions(AppLocalizations.of(context)!)
+                          .isEmpty
+                      ? null
+                      : _buildActionCandidateTemplates(context),
             ),
             ProductionWorkspaceStatusPanel(
               resultSummaryLines: resultSummaryLines,

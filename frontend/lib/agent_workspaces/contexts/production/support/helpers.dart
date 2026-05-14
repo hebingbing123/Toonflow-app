@@ -531,55 +531,71 @@ String productionStageSubAgentButtonLabel(
   return l10n.agentWorkspaceProductionSubAgentAdvanceStage;
 }
 
-String productionRecipeDomainButtonLabel(ProductionWorkspaceRecipe recipe) {
-  final title = recipe.title.trim();
-  if (title == '抽样读取分镜表' || title == '先看分镜表落地') {
-    return '扩读分镜表';
+String productionRecipeDomainButtonLabel(
+  ProductionWorkspaceRecipe recipe,
+  AppLocalizations l10n,
+) {
+  switch (recipe.uiKind) {
+    case ProductionWorkspaceRecipeUiKind.sampleStoryboardTable:
+    case ProductionWorkspaceRecipeUiKind.previewStoryboardTableBeforeFrames:
+      return l10n.agentWorkspaceProductionDomainExpandStoryboardTable;
+    case ProductionWorkspaceRecipeUiKind.refineIntentBeforeTable:
+    case ProductionWorkspaceRecipeUiKind.generic:
+      break;
   }
   if (recipe.flowKey == 'scriptPlan' && recipe.domainTool == 'get_flowData') {
-    return '读取导演计划';
+    return l10n.agentWorkspaceProductionDomainReadScriptPlan;
   }
-  return '读取 flow';
+  return l10n.agentWorkspaceProductionDomainReadFlow;
 }
 
-String productionRecipeSubAgentButtonLabel(ProductionWorkspaceRecipe recipe) {
-  final title = recipe.title.trim();
-  if (title == '补足分场景意图' ||
-      recipe.subAgentTool == 'run_sub_agent_director_plan') {
-    return '细化导演计划';
+String productionRecipeSubAgentButtonLabel(
+  ProductionWorkspaceRecipe recipe,
+  AppLocalizations l10n,
+) {
+  if (recipe.subAgentTool == 'run_sub_agent_director_plan') {
+    return l10n.agentWorkspaceProductionSubAgentRefineDirectorPlan;
   }
   if (recipe.subAgentTool == 'run_sub_agent_storyboard_table') {
-    return '补分镜表';
+    return l10n.agentWorkspaceProductionSubAgentFillStoryboardTable;
   }
-  return '运行子代理';
+  return l10n.agentWorkspaceProductionSubAgentAdvanceStage;
 }
 
 String summarizeProductionDiagnosisHeadline(
   List<ProductionWorkspaceRecipe> recipes,
+  AppLocalizations l10n,
 ) {
   if (recipes.isEmpty) return '';
   final first = recipes.first;
-  final title = first.title.trim();
-  if (title == '补足分场景意图') {
-    return '当前更建议先细化导演计划里的分场景情绪/画面意图，再继续拆分分镜表。';
+  switch (first.uiKind) {
+    case ProductionWorkspaceRecipeUiKind.refineIntentBeforeTable:
+      return l10n.agentWorkspaceProductionFlowRecipeDiagnosisRefineIntentFirst;
+    case ProductionWorkspaceRecipeUiKind.previewStoryboardTableBeforeFrames:
+    case ProductionWorkspaceRecipeUiKind.sampleStoryboardTable:
+      return l10n.agentWorkspaceProductionFlowRecipeDiagnosisExpandTableFirst;
+    case ProductionWorkspaceRecipeUiKind.generic:
+      return l10n.agentWorkspaceProductionFlowRecipeDiagnosisCheapestFirst;
   }
-  if (title == '先看分镜表落地' || title == '抽样读取分镜表') {
-    return '当前更建议先扩读关键分镜表窗口，再决定是否推进 storyboard。';
-  }
-  return '当前建议按第一张卡开始推进，优先执行最靠前的低成本动作。';
 }
 
 String summarizeAppliedProductionRecipeStatus(
   ProductionWorkspaceRecipe recipe,
+  AppLocalizations l10n,
 ) {
-  final title = recipe.title.trim();
-  if (title == '补足分场景意图') {
-    return '已应用任务建议：$title，下一步先细化导演计划。';
+  switch (recipe.uiKind) {
+    case ProductionWorkspaceRecipeUiKind.refineIntentBeforeTable:
+      return l10n.agentWorkspaceProductionRecipeAppliedFollowRefine(
+        recipe.title,
+      );
+    case ProductionWorkspaceRecipeUiKind.previewStoryboardTableBeforeFrames:
+    case ProductionWorkspaceRecipeUiKind.sampleStoryboardTable:
+      return l10n.agentWorkspaceProductionRecipeAppliedFollowExpandTable(
+        recipe.title,
+      );
+    case ProductionWorkspaceRecipeUiKind.generic:
+      return l10n.agentWorkspaceProductionRecipeAppliedGeneric(recipe.title);
   }
-  if (title == '先看分镜表落地' || title == '抽样读取分镜表') {
-    return '已应用任务建议：$title，下一步先扩读关键分镜表窗口。';
-  }
-  return '已应用任务建议：$title';
 }
 
 String summarizeAppliedProductionStageStatus(
@@ -633,13 +649,18 @@ String buildProductionAssetReviewPrompt(
   final args = buildProductionReviewAssetArgs(review);
   final scope = summarizeProductionAssetScope(l10n, args);
   final summary = review.summary.trim();
-  final summaryLine = summary.isEmpty ? '' : '优先解决：$summary';
+  final priority = summary.isEmpty
+      ? ''
+      : l10n.agentWorkspaceProductionAssetReviewPromptPriority(summary);
   if (args['ids'] case final List ids when ids.isNotEmpty) {
     final normalizedIds =
         ids.map(_parseLooseInt).where((id) => id > 0).toSet().toList()..sort();
-    return '请优先只核对这 ${normalizedIds.length} 个资产是否支撑当前导演规划；仅补必要缺口，不扩读无关素材。$summaryLine';
+    return l10n.agentWorkspaceProductionAssetReviewPromptFocused(
+      normalizedIds.length,
+      priority,
+    );
   }
-  return '请先核对$scope是否支撑当前导演规划；信息不足时再最小补读，不要整包扩读 assets。$summaryLine';
+  return l10n.agentWorkspaceProductionAssetReviewPromptScoped(priority, scope);
 }
 
 String buildProductionAssetGenerationPrompt({

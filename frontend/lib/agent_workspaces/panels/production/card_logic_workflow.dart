@@ -23,7 +23,12 @@ extension _AgentWorkspaceProductionCardWorkflow
     if (prompt != null && prompt.isNotEmpty) {
       widget.productionPromptController.text = prompt;
     }
-    _setTaskStatus(summarizeAppliedProductionRecipeStatus(recipe));
+    _setTaskStatus(
+      summarizeAppliedProductionRecipeStatus(
+        recipe,
+        AppLocalizations.of(context)!,
+      ),
+    );
   }
 
   void _applyWorkspaceStage(ProductionWorkspaceStage stage) {

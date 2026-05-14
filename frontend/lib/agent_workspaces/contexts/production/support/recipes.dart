@@ -2,6 +2,7 @@ part of '../support.dart';
 
 List<ProductionWorkspaceArgumentSuggestion>
 buildProductionActionArgumentSuggestions({
+  required AppLocalizations l10n,
   required String? selectedTool,
   required String? toolName,
   required String? suggestedFlowKey,
@@ -16,11 +17,12 @@ buildProductionActionArgumentSuggestions({
   );
   switch (normalizedSelectedTool) {
     case 'add_deriveAsset':
-      return _buildAddDeriveAssetSuggestions(flowData);
+      return _buildAddDeriveAssetSuggestions(l10n, flowData);
     case 'del_deriveAsset':
-      return _buildDeleteDeriveAssetSuggestions(flowData);
+      return _buildDeleteDeriveAssetSuggestions(l10n, flowData);
     case 'generate_deriveAsset':
       return _buildIdSuggestions(
+        l10n,
         extractProductionActionCandidateIds(
           selectedTool: selectedTool,
           toolName: toolName,
@@ -31,6 +33,7 @@ buildProductionActionArgumentSuggestions({
       );
     case 'generate_storyboard':
       return _buildIdSuggestions(
+        l10n,
         extractProductionActionCandidateIds(
           selectedTool: selectedTool,
           toolName: toolName,
@@ -68,6 +71,7 @@ Object? _resolveProductionFlowData({
 }
 
 List<ProductionWorkspaceArgumentSuggestion> _buildAddDeriveAssetSuggestions(
+  AppLocalizations l10n,
   Object? flowData,
 ) {
   if (flowData is! List) {
@@ -80,11 +84,17 @@ List<ProductionWorkspaceArgumentSuggestion> _buildAddDeriveAssetSuggestions(
     final name = (row['name'] as String?)?.trim();
     suggestions.add(
       ProductionWorkspaceArgumentSuggestion(
-        label: '新增到 #${parentId.toInt()}',
+        label: l10n.agentWorkspaceProductionArgSuggestAddTo(
+          '${parentId.toInt()}',
+        ),
         payload: <String, dynamic>{
           'assetsId': parentId.toInt(),
           'id': null,
-          'name': name == null || name.isEmpty ? '新衍生资产' : '$name-衍生',
+          'name': name == null || name.isEmpty
+              ? l10n.agentWorkspaceProductionArgSuggestDeriveNameFallback
+              : l10n.agentWorkspaceProductionFlowRecipeArgDeriveNameFromParent(
+                  name,
+                ),
           'desc': '',
         },
       ),
@@ -226,6 +236,7 @@ Map<String, dynamic> buildProductionStoryboardGenerationArgs({
 }
 
 List<ProductionWorkspaceArgumentSuggestion> _buildDeleteDeriveAssetSuggestions(
+  AppLocalizations l10n,
   Object? flowData,
 ) {
   if (flowData is! List) {
@@ -242,7 +253,9 @@ List<ProductionWorkspaceArgumentSuggestion> _buildDeleteDeriveAssetSuggestions(
       if (deriveId is! num) continue;
       suggestions.add(
         ProductionWorkspaceArgumentSuggestion(
-          label: '删除 #${deriveId.toInt()}',
+          label: l10n.agentWorkspaceProductionArgSuggestDelete(
+            '${deriveId.toInt()}',
+          ),
           payload: <String, dynamic>{
             'assetsId': parentId.toInt(),
             'id': deriveId.toInt(),
@@ -257,21 +270,24 @@ List<ProductionWorkspaceArgumentSuggestion> _buildDeleteDeriveAssetSuggestions(
   return suggestions;
 }
 
-List<ProductionWorkspaceArgumentSuggestion> _buildIdSuggestions(List<int> ids) {
+List<ProductionWorkspaceArgumentSuggestion> _buildIdSuggestions(
+  AppLocalizations l10n,
+  List<int> ids,
+) {
   if (ids.isEmpty) return const <ProductionWorkspaceArgumentSuggestion>[];
   return <ProductionWorkspaceArgumentSuggestion>[
     ProductionWorkspaceArgumentSuggestion(
-      label: '填充首项',
+      label: l10n.agentWorkspaceProductionArgSuggestFillFirst,
       payload: <String, dynamic>{'ids': ids.take(1).toList(growable: false)},
     ),
     if (ids.length > 1)
       ProductionWorkspaceArgumentSuggestion(
-        label: '填充前 3 项',
+        label: l10n.agentWorkspaceProductionArgSuggestFillFirstThree,
         payload: <String, dynamic>{'ids': ids.take(3).toList(growable: false)},
       ),
     if (ids.length > 3)
       ProductionWorkspaceArgumentSuggestion(
-        label: '填充全部',
+        label: l10n.agentWorkspaceProductionArgSuggestFillAll,
         payload: <String, dynamic>{'ids': ids},
       ),
   ];

@@ -17277,6 +17277,628 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get agentWorkspaceProductionFlowRecipeDiagnosisRefineIntentFirst =>
+      r'Refine per-scene emotion and visual intent in the director plan before splitting the storyboard table.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeDiagnosisExpandTableFirst =>
+      r'Expand the key storyboard table window first, then decide whether to advance storyboard frames.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeDiagnosisCheapestFirst =>
+      r'Follow the first suggestion card and prioritize the cheapest next action.';
+
+  @override
+  String get agentWorkspaceProductionSupervisionSummaryFallback =>
+      r'Continue based on the latest review conclusion.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSbGenRefreshTitle =>
+      r'Refresh storyboard results';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSbGenRereadTitle =>
+      r'Reread missing-frame status';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSbGenRefreshDetail =>
+      r'Storyboard generation ran; refresh storyboard results before deciding whether to write back.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeContinueDirectorTitle =>
+      r'Continue director plan';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeContinueDirectorAfterSbDetail =>
+      r'If storyboard results are still unstable, return to scriptPlan for another director decision round.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSbTableRefreshTitle =>
+      r'Refresh storyboard table';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSbTablePartialTitle =>
+      r'Reread partial storyboard table';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSbTableRefreshDetail =>
+      r'The storyboard-table sub-agent ran; refresh the table before deciding whether to revise further.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSbTableCrosscheckTitle =>
+      r'Cross-check storyboard results';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSbTableCrosscheckDetailAll =>
+      r'When needed, switch to storyboard to confirm table changes have propagated to rendered frames.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsRefreshTitle =>
+      r'Refresh asset results';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsRereadTitle =>
+      r'Reread affected assets';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsRefreshDetail =>
+      r'An asset action ran; refresh asset results before deciding whether to write back.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsContinueSubTitle =>
+      r'Continue asset sub-agent';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsContinueSubDetail =>
+      r'If materials are still missing, chain the asset sub-agent for another generation round.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsPlanFirstTitle =>
+      r'Create an asset plan first';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsPlanFirstDetail =>
+      r'Assets are empty; let the sub-agent fill in derived material planning first.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsPlanFirstPrompt =>
+      r'Given the current empty assets flow, plan a minimal viable derived material set and explain priorities.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsContinueGenTitle =>
+      r'Continue asset generation';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsContinueGenDetailGeneric =>
+      r'Some materials still lack rendered images; run the asset generation sub-agent directly.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRefreshStoryboardNeedTitle =>
+      r'Refresh storyboard needs';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRefreshStoryboardNeedDetail =>
+      r'After closing asset gaps, revisit storyboard to see whether the current approach still fits.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCheckStoryboardFlowTitle =>
+      r'Check storyboard flow';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCheckStoryboardFlowDetail =>
+      r'Assets have baseline results; switch to storyboard to assess frame generation status.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeTidyDirectorPlanTitle =>
+      r'Tidy director plan';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeTidyDirectorPlanDetail =>
+      r'If materials are mostly ready, generate the next director plan round to close out production pacing.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeTidyDirectorPlanPrompt =>
+      r'Combine current material status with scriptPlan and output the next director plan with execution priorities.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeFirstStoryboardTitle =>
+      r'Generate first storyboard pass';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeFirstStoryboardDetail =>
+      r'Storyboard is empty; run the storyboard generation sub-agent to establish an initial shot set.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeFirstStoryboardPrompt =>
+      r'Generate a first-pass storyboard from the current production context with a minimal viable shot set.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeFillStoryboardFramesTitle =>
+      r'Continue filling storyboard frames';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsTitle =>
+      r'Verify linked assets';
+
+  @override
+  String
+  get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailFromRefs =>
+      r'Focus on assets referenced by the current storyboard window to avoid unrelated material in frame fills.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailNoIds =>
+      r'The storyboard digest has not resolved explicit asset IDs; fall back to a compact assets summary read.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCheckStoryboardTableTitle =>
+      r'Check storyboard table';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCheckStoryboardTableDetail =>
+      r'When needed, review the structured storyboardTable before writeback.';
+
+  @override
+  String
+  get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailReadyIds =>
+      r'Storyboard references explicit assets; verify this set is enough for upcoming director adjustments.';
+
+  @override
+  String
+  get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailReadyNoIds =>
+      r'The storyboard digest did not resolve explicit asset IDs; read the compact assets summary first.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRefreshDirectorPlanTitle =>
+      r'Refresh director plan';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRefreshDirectorPlanDetail =>
+      r'Storyboard has baseline results; return to scriptPlan to organize the next director decision round.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCreateDirectorPlanTitle =>
+      r'Create director plan first';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCreateDirectorPlanDetail =>
+      r'scriptPlan is empty; establish a director plan before advancing assets or storyboard.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCreateDirectorPlanPrompt =>
+      r'Generate a director plan from the current production context with execution priorities.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeReviewDirectorPlanTitle =>
+      r'Review director plan';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeReviewDirectorPlanDetail =>
+      r'The director plan has content; a supervision review first surfaces pacing and asset issues cheaply.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeReviewDirectorPlanPrompt =>
+      r'Review the current director plan for plot coverage, asset fit, and pacing.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRereadScriptTitle =>
+      r'Reread script evidence';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCheckKeyAssetsTitle =>
+      r'Check key assets';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRefineSceneIntentTitle =>
+      r'Refine per-scene intent';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipePreviewStoryboardTableTitle =>
+      r'Preview storyboard table first';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRefineSceneIntentDetail =>
+      r'The director plan still lacks clear per-scene emotion and visual intent; strengthen this before splitting storyboardTable to reduce rework.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipePreviewStoryboardTableDetail =>
+      r'If the plan is stable, sample-check storyboardTable structure for fewer tokens before reading storyboard imagery.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRefineSceneIntentPrompt =>
+      r'Continue refining scriptPlan: prioritize per-scene emotional progression, visual intent, and shot anchors before storyboardTable split.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCreateStoryboardTableTitle =>
+      r'Create storyboard table';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCreateStoryboardTableDetail =>
+      r'storyboardTable is empty; use the storyboard-table sub-agent to add structure first.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCreateStoryboardTablePrompt =>
+      r'Produce a structured storyboardTable with fields that are clear and writeback-friendly.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeReviewStoryboardTableTitle =>
+      r'Review storyboard table';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeReviewStoryboardTableDetail =>
+      r'The table has content; supervision review first prevents bad structure from amplifying into storyboard.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeReviewStoryboardTablePrompt =>
+      r'Review the current storyboard table for coverage, asset links, and split granularity.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsTableRefs =>
+      r'Focus on assets referenced by the current storyboard window to reduce unrelated context.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsTableNoIds =>
+      r'This window did not resolve linked asset IDs; fall back to a compact assets summary read.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSwitchStoryboardResultsTitle =>
+      r'Switch to storyboard results';
+
+  @override
+  String
+  get agentWorkspaceProductionFlowRecipeSwitchStoryboardResultsDetailAll =>
+      r'The table has content; continue checking whether storyboard imagery has caught up.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSampleStoryboardTableTitle =>
+      r'Sample-read storyboard table';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSampleStoryboardTableDetail =>
+      r'Read the first 8 key columns first—usually enough to decide whether to keep reviewing or write back.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeReviseDirectorPlanTitle =>
+      r'Revise director plan';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRecheckAssetSupportTitle =>
+      r'Recheck asset support';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRecheckAssetSupportDetail =>
+      r'Director plans often stall on asset prep; reading assets first reduces rework.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeVerifyAssetSupportTitle =>
+      r'Verify asset support';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRereadDirectorPlanTitle =>
+      r'Reread director plan';
+
+  @override
+  String
+  get agentWorkspaceProductionFlowRecipeRereadDirectorPlanAfterAssetsDetail =>
+      r'After asset checks, return to a compact scriptPlan to see whether more revisions are needed before storyboard.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeInspectStoryboardResultsTitle =>
+      r'Inspect storyboard results';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCompareStoryboardTableTitle =>
+      r'Compare storyboard table';
+
+  @override
+  String
+  get agentWorkspaceProductionFlowRecipeCompareStoryboardTableDetailGeneric =>
+      r'Reread the key-column window first to avoid reloading the entire table into context.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRereadScriptNeedWindowDetail =>
+      r'When needed, reread a compact script window to confirm shot rationale.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeReviseStoryboardTableTitle =>
+      r'Revise storyboard table';
+
+  @override
+  String
+  get agentWorkspaceProductionFlowRecipeSampleRereadStoryboardTableTitle =>
+      r'Sample-reread storyboard table';
+
+  @override
+  String
+  get agentWorkspaceProductionFlowRecipeSampleRereadStoryboardTableDetailEmpty =>
+      r'Read the key-column window first to avoid repeatedly loading the full table into context.';
+
+  @override
+  String
+  get agentWorkspaceProductionFlowRecipeSampleRereadStoryboardTableDetailFocused =>
+      r'Reread only the storyboard table rows for the focused shots from review; avoid returning to the full table window.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeContinueStoryboardGenTitle =>
+      r'Continue storyboard image generation';
+
+  @override
+  String
+  get agentWorkspaceProductionFlowRecipeCompareStoryboardTableBeforeFillDetail =>
+      r'Before filling frames, reread the key-column window to avoid rebuilding context for every shot.';
+
+  @override
+  String get agentWorkspaceProductionArgSuggestDeriveNameFallback =>
+      r'New derived asset';
+
+  @override
+  String get agentWorkspaceProductionArgSuggestFillFirst => r'Fill first item';
+
+  @override
+  String get agentWorkspaceProductionArgSuggestFillFirstThree =>
+      r'Fill first 3 items';
+
+  @override
+  String get agentWorkspaceProductionArgSuggestFillAll => r'Fill all';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsGenHadSummaryNote =>
+      r'First review results for assets just generated, then decide whether to rerun.';
+
+  @override
+  String agentWorkspaceProductionArgSuggestAddTo(String id) {
+    return 'Add under #${id}';
+  }
+
+  @override
+  String agentWorkspaceProductionArgSuggestDelete(String id) {
+    return 'Delete #${id}';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeSbGenRereadDetail(String ids) {
+    return 'Storyboard generation ran; first reread missing-frame status for shots #${ids}.';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeSbTablePartialDetail(String ids) {
+    return 'The storyboard-table sub-agent ran; first reread table rows for shots #${ids}.';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeSbTableCrosscheckDetailFocused(
+    String ids,
+  ) {
+    return 'Prefer rereading storyboard results for shots #${ids} only so a table tweak does not widen to the whole sequence.';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeAssetsRereadDetail(String ids) {
+    return 'Asset generation ran; first reread latest status for assets #${ids}.';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeAssetsGenDetailScoped(String scope) {
+    return '${scope} still lack images; prioritize patching only this derived set to save tokens.';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeSbFillGapDetail(
+    String idTail,
+    String idsLabel,
+  ) {
+    return 'Prioritize filling missing frames for shots #${idsLabel}${idTail}; avoid rerunning completed shots in bulk.';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeRereadScriptScriptPlanDetail(
+    String scriptWindow,
+  ) {
+    return 'Reread only ${scriptWindow} first to align the director plan with the script pacing before expanding reads.';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeCheckKeyAssetsDetailIds(
+    String assetScope,
+  ) {
+    return 'The director plan calls out ${assetScope}; verify precisely before expanding to other materials.';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeCheckKeyAssetsDetailNoIds(
+    String assetScope,
+  ) {
+    return 'The director plan has content; verify whether ${assetScope} supports execution, then add more assets only if needed.';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeContinueDirectorDetailIds(
+    String assetScope,
+  ) {
+    return 'Focus director decisions around ${assetScope} so downstream storyboard and asset actions inherit these rewrite constraints first.';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeContinueDirectorDetailNoIds(
+    String assetScope,
+  ) {
+    return 'Continue tightening director decisions around ${assetScope} so downstream storyboard and asset actions inherit the current rewrite constraints.';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeContinueDirectorPromptIds(
+    String assetScope,
+  ) {
+    return 'Continue tightening scriptPlan around ${assetScope} for shot and material priorities so downstream storyboard execution inherits upstream rewrite constraints.';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeContinueDirectorPromptNoIds(
+    String assetScope,
+  ) {
+    return 'Continue tightening scriptPlan around ${assetScope} for shot and material priorities so downstream storyboard execution inherits upstream rewrite constraints.';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeRereadScriptRevisePlanDetail(
+    String scriptWindow,
+  ) {
+    return 'Before revising, reread only ${scriptWindow} to avoid loading the entire script for scriptPlan.';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeReviseDirectorPlanDetail(
+    String summary,
+  ) {
+    return 'Review conclusion: ${summary}';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeReviseDirectorPlanPrompt(
+    String summary,
+  ) {
+    return 'Revise scriptPlan based on the latest review; prioritize fixing: ${summary}';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeVerifyAssetSupportDetail(
+    String assetScope,
+    String summary,
+  ) {
+    return 'Review conclusion: ${summary}; first narrow to ${assetScope} to confirm gaps in the director plan.';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeInspectSbResultsDetail(
+    String focusClause,
+    String summary,
+  ) {
+    return 'Review conclusion: ${summary}; first narrow to ${focusClause}';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeCompareStoryboardTableDetailFocus(
+    String storyboardFocus,
+  ) {
+    return 'Prefer rereading only the storyboard table rows for ${storyboardFocus} to avoid returning to the full table.';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeRereadScriptReviewDetail(
+    String reviewScope,
+  ) {
+    return 'If shot rationale must be checked, prefer only the partial range: ${reviewScope}.';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeInspectStoryboardResultsDetailScript(
+    String reviewScope,
+    String summary,
+  ) {
+    return 'Review conclusion: ${summary}; prefer only the partial range: ${reviewScope}.';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeSwitchStoryboardResultsDetailCount(
+    int count,
+  ) {
+    return 'Prefer rereading only the ${count} shots covered by the current storyboard table window; avoid falling back to a generic storyboard digest.';
+  }
+
+  @override
+  String
+  agentWorkspaceProductionFlowRecipeCompareStoryboardTableBeforeFillDetailFocus(
+    String storyboardFocus,
+  ) {
+    return 'Before filling frames, reread only the storyboard table rows for ${storyboardFocus}.';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipePromptStoryboardContinue(
+    String body,
+  ) {
+    return 'Continue advancing storyboard. ${body}';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipePromptReviseStoryboardTable(
+    String body,
+  ) {
+    return 'Revise storyboardTable based on the latest review. ${body}';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipePromptStoryboardFromReview(
+    String body,
+  ) {
+    return 'Continue advancing storyboard based on the latest review conclusion. ${body}';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeShotCountTail(int count) {
+    return ' and ${count} more shots';
+  }
+
+  @override
+  String
+  agentWorkspaceProductionFlowRecipeInspectStoryboardResultsDetailSummaryOnly(
+    String summary,
+  ) {
+    return 'Review conclusion: ${summary}';
+  }
+
+  @override
+  String
+  agentWorkspaceProductionFlowRecipeInspectStoryboardResultsDetailWithScope(
+    String reviewScope,
+    String summary,
+  ) {
+    return 'Review conclusion: ${summary}; ${reviewScope}.';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeArgDeriveNameFromParent(
+    String name,
+  ) {
+    return '${name}-derived';
+  }
+
+  @override
+  String agentWorkspaceProductionAssetReviewPromptFocused(
+    int count,
+    String priority,
+  ) {
+    return 'Please verify only these ${count} assets against the current director plan; fill only necessary gaps and avoid bulk-reading unrelated assets.${priority}';
+  }
+
+  @override
+  String agentWorkspaceProductionAssetReviewPromptScoped(
+    String priority,
+    String scope,
+  ) {
+    return 'Please verify whether ${scope} supports the current director plan; add minimal reads only if information is insufficient—do not bulk-read assets.${priority}';
+  }
+
+  @override
+  String agentWorkspaceProductionAssetReviewPromptPriority(String summary) {
+    return ' Prioritize addressing: ${summary}';
+  }
+
+  @override
+  String agentWorkspaceProductionRecipeAppliedFollowRefine(String title) {
+    return 'Applied suggestion: ${title}. Next, refine the director plan.';
+  }
+
+  @override
+  String agentWorkspaceProductionRecipeAppliedFollowExpandTable(String title) {
+    return 'Applied suggestion: ${title}. Next, expand the key storyboard table window.';
+  }
+
+  @override
+  String agentWorkspaceProductionRecipeAppliedGeneric(String title) {
+    return 'Applied suggestion: ${title}';
+  }
+
+  @override
   String agentWorkspaceProductionFlowChip(String flowKey) {
     return 'flow=$flowKey';
   }
