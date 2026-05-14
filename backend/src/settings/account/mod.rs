@@ -55,7 +55,10 @@ mod tests {
         );
         match err {
             ApiError::BadRequest(msg) => {
-                assert!(msg.contains("confirmPhrase must equal") || msg.contains("confirmPhrase 必须等于"));
+                assert!(
+                    msg.contains("confirmPhrase must equal")
+                        || msg.contains("confirmPhrase 必须等于")
+                );
             }
             _ => panic!("expected BadRequest variant"),
         }
@@ -75,7 +78,10 @@ mod tests {
         let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
 
         assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(400));
-        assert_eq!(json.get("code").and_then(|v| v.as_str()), Some("bad_request"));
+        assert_eq!(
+            json.get("code").and_then(|v| v.as_str()),
+            Some("bad_request")
+        );
         let message = json.get("message").and_then(|v| v.as_str()).unwrap();
         assert!(message.contains("confirmPhrase must equal"));
         assert!(message.contains(ACCOUNT_DELETE_CONFIRM_PHRASE));
@@ -99,7 +105,10 @@ mod tests {
         let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
 
         assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(400));
-        assert_eq!(json.get("code").and_then(|v| v.as_str()), Some("bad_request"));
+        assert_eq!(
+            json.get("code").and_then(|v| v.as_str()),
+            Some("bad_request")
+        );
         let message = json.get("message").and_then(|v| v.as_str()).unwrap();
         assert!(message.contains("confirmPhrase 必须等于"));
         assert!(message.contains(ACCOUNT_DELETE_CONFIRM_PHRASE));
@@ -136,7 +145,10 @@ mod tests {
         let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
 
         assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(400));
-        assert_eq!(json.get("code").and_then(|v| v.as_str()), Some("bad_request"));
+        assert_eq!(
+            json.get("code").and_then(|v| v.as_str()),
+            Some("bad_request")
+        );
         assert_eq!(
             json.get("message").and_then(|v| v.as_str()),
             Some("acknowledgeIrreversible must be true")
@@ -161,7 +173,10 @@ mod tests {
         let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
 
         assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(400));
-        assert_eq!(json.get("code").and_then(|v| v.as_str()), Some("bad_request"));
+        assert_eq!(
+            json.get("code").and_then(|v| v.as_str()),
+            Some("bad_request")
+        );
         assert_eq!(
             json.get("message").and_then(|v| v.as_str()),
             Some("acknowledgeIrreversible 必须为 true")

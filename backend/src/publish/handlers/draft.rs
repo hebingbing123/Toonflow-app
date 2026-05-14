@@ -209,6 +209,12 @@ pub(crate) async fn patch_publish_draft(
     if let Some(ref ds) = body.draft_status {
         validate_draft_status(ds.trim())?;
     }
+    if body.platform_copy.is_some() && body.platform_copy_fragment.is_some() {
+        return Err(bad_request_i18n(
+            "platform_copy and platform_copy_fragment cannot be provided together",
+            "platform_copy 和 platform_copy_fragment 不能同时提供",
+        ));
+    }
     if let Some(pid) = body.profile_id {
         if !profile_belongs_to_project(pool, pid, project_id).await? {
             return Err(bad_request_i18n(

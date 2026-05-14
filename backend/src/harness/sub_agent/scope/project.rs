@@ -175,7 +175,8 @@ pub(in crate::harness::sub_agent) fn scope_overlap_score(
 
 pub(in crate::harness::sub_agent) fn has_rework_reason(arguments: &Value) -> bool {
     arguments
-        .get("reason")
+        .get("reworkReason")
+        .or_else(|| arguments.get("reason"))
         .and_then(Value::as_str)
         .map(str::trim)
         .is_some_and(|value| !value.is_empty())

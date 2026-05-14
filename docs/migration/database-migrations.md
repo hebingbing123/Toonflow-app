@@ -16,14 +16,16 @@
 2. 仓库根目录：
    ```bash
    supabase start          # 本地全栈（含 Postgres、Auth 等），首次会拉镜像
-   # 或仅数据库：
-   supabase db start
+   # 或仅数据库（适合 sqlx::test / 搜索 API 等 DB 重度测试）：
+   yarn supabase:start:db
    ```
 3. 应用迁移（开发中改完 SQL 后常用）：
    ```bash
    supabase db reset       # 按当前 migrations 重建本地库（会清数据）
    ```
 4. 连接串：执行 `supabase status`，把 **DB URL** 配到 Rust 的 `DATABASE_URL`。
+
+如果只是为了跑数据库测试，优先用 `yarn supabase:start:db`。它会跳过 `vector`、`analytics`、`studio` 等不影响 `DATABASE_URL` 可用性的本地服务，通常比全栈启动更稳。
 
 新建迁移：
 

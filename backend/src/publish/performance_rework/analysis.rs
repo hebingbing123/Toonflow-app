@@ -120,16 +120,17 @@ pub async fn create_quality_review_for_low_performance(
             comments,
             model_params,
             next_action,
+            suggested_action,
             stage
         ) VALUES (
-            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14
+            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
         )
         RETURNING 
             id, user_id, project_id, script_id, target_type, target_id,
             source, overall_score, plot_coherence, character_consistency,
             dialogue_naturalness, pacing, faithfulness, visual_quality,
             passed, is_bad_case, bad_case_category, comments,
-            model_params, next_action, stage, grade, skill_version_hash,
+            model_params, next_action, suggested_action, stage, grade, skill_version_hash,
             created_at, updated_at
         "#,
     )
@@ -145,6 +146,7 @@ pub async fn create_quality_review_for_low_performance(
     .bind(Some("low_performance"))
     .bind(Some(recommendation.description()))
     .bind(sqlx::types::Json(model_params))
+    .bind(Some(next_action_str))
     .bind(Some(next_action_str))
     .bind(Some("video_generate"))
     .fetch_one(pool)

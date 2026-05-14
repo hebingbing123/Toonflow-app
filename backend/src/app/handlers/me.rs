@@ -48,7 +48,7 @@ struct UserProfileRow {
     billing_provider: Option<String>,
     subscription_status: Option<String>,
     subscription_current_period_end_at: Option<DateTime<Utc>>,
-    daily_job_quota: Option<i64>,
+    daily_job_quota: Option<i32>,
     memory_config: Option<sqlx::types::Json<MemoryConfig>>,
     current_workspace_id: Option<Uuid>,
 }
@@ -107,7 +107,7 @@ pub(crate) async fn me(
               billing_provider,
               subscription_status,
               subscription_current_period_end_at,
-              daily_job_quota,
+              daily_job_quota::bigint AS daily_job_quota,
               memory_config,
               current_workspace_id
             FROM app_user_profile
@@ -135,7 +135,7 @@ pub(crate) async fn me(
                 r.billing_provider,
                 r.subscription_status,
                 r.subscription_current_period_end_at,
-                r.daily_job_quota,
+                r.daily_job_quota.map(i64::from),
                 r.memory_config.map(|j| j.0),
                 r.current_workspace_id,
             ),

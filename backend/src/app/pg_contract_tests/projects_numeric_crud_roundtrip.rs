@@ -130,13 +130,13 @@ async fn project_numeric_crud_roundtrip() {
     let patch_body = json!({
         "name": updated_name,
         "intro": "updated intro",
-        "project_type": "feature",
-        "art_style": "charcoal",
-        "director_manual": "revised-manual",
-        "video_ratio": "16:9",
-        "image_model": "flux",
-        "video_model": "kling",
-        "image_quality": "standard",
+        "projectType": "feature",
+        "artStyle": "charcoal",
+        "directorManual": "revised-manual",
+        "videoRatio": "16:9",
+        "imageModel": "flux",
+        "videoModel": "kling",
+        "imageQuality": "standard",
         "mode": "live_action.short_drama",
     });
     let res = app

@@ -239,7 +239,7 @@ async fn query_workspace_subscription(
             id,
             workspace_type,
             plan_tier,
-            daily_job_quota,
+            daily_job_quota::bigint,
             billing_provider,
             billing_customer_id,
             billing_currency,

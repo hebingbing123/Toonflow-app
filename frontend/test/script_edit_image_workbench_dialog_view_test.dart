@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/script_editor/edit_image/workbench_view.dart';
 import 'package:openflow_app/rust_api.dart';
 
@@ -107,23 +109,35 @@ void main() {
     stepStatusCtrl.dispose();
   });
 
+  MaterialApp buildHarness(Widget child) {
+    return MaterialApp(
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('zh'),
+      home: Scaffold(body: child),
+    );
+  }
+
   testWidgets('edit image workbench view renders status and uploaded url', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: ScriptEditImageWorkbenchDialogView(
-            model: buildModel(
-              uploadCtrl: uploadCtrl,
-              flowIdCtrl: flowIdCtrl,
-              promptCtrl: promptCtrl,
-              modelCtrl: modelCtrl,
-              stepIdCtrl: stepIdCtrl,
-              stepStatusCtrl: stepStatusCtrl,
-            ),
-            callbacks: buildCallbacks(),
+      buildHarness(
+        ScriptEditImageWorkbenchDialogView(
+          model: buildModel(
+            uploadCtrl: uploadCtrl,
+            flowIdCtrl: flowIdCtrl,
+            promptCtrl: promptCtrl,
+            modelCtrl: modelCtrl,
+            stepIdCtrl: stepIdCtrl,
+            stepStatusCtrl: stepStatusCtrl,
           ),
+          callbacks: buildCallbacks(),
         ),
       ),
     );
@@ -142,21 +156,19 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: ScriptEditImageWorkbenchDialogView(
-            model: buildModel(
-              uploadCtrl: uploadCtrl,
-              flowIdCtrl: flowIdCtrl,
-              promptCtrl: promptCtrl,
-              modelCtrl: modelCtrl,
-              stepIdCtrl: stepIdCtrl,
-              stepStatusCtrl: stepStatusCtrl,
-              loading: true,
-              busy: true,
-            ),
-            callbacks: buildCallbacks(),
+      buildHarness(
+        ScriptEditImageWorkbenchDialogView(
+          model: buildModel(
+            uploadCtrl: uploadCtrl,
+            flowIdCtrl: flowIdCtrl,
+            promptCtrl: promptCtrl,
+            modelCtrl: modelCtrl,
+            stepIdCtrl: stepIdCtrl,
+            stepStatusCtrl: stepStatusCtrl,
+            loading: true,
+            busy: true,
           ),
+          callbacks: buildCallbacks(),
         ),
       ),
     );
@@ -181,26 +193,24 @@ void main() {
     ImageFlowStepV1? selectedStep;
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: ScriptEditImageWorkbenchDialogView(
-            model: buildModel(
-              uploadCtrl: uploadCtrl,
-              flowIdCtrl: flowIdCtrl,
-              promptCtrl: promptCtrl,
-              modelCtrl: modelCtrl,
-              stepIdCtrl: stepIdCtrl,
-              stepStatusCtrl: stepStatusCtrl,
-            ),
-            callbacks: buildCallbacks(
-              onRefresh: () async => refreshCalls += 1,
-              onUploadSourceImage: () async => uploadCalls += 1,
-              onGenerateFlowImage: () async => generateCalls += 1,
-              onSaveFlow: () async => saveCalls += 1,
-              onSelectStep: (step) => selectedStep = step,
-              onUpdateStepStatus: () async => updateCalls += 1,
-              onClose: () => closeCalls += 1,
-            ),
+      buildHarness(
+        ScriptEditImageWorkbenchDialogView(
+          model: buildModel(
+            uploadCtrl: uploadCtrl,
+            flowIdCtrl: flowIdCtrl,
+            promptCtrl: promptCtrl,
+            modelCtrl: modelCtrl,
+            stepIdCtrl: stepIdCtrl,
+            stepStatusCtrl: stepStatusCtrl,
+          ),
+          callbacks: buildCallbacks(
+            onRefresh: () async => refreshCalls += 1,
+            onUploadSourceImage: () async => uploadCalls += 1,
+            onGenerateFlowImage: () async => generateCalls += 1,
+            onSaveFlow: () async => saveCalls += 1,
+            onSelectStep: (step) => selectedStep = step,
+            onUpdateStepStatus: () async => updateCalls += 1,
+            onClose: () => closeCalls += 1,
           ),
         ),
       ),

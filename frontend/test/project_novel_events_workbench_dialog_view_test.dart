@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/project_editor/novels/events/workbench_view.dart';
 import 'package:openflow_app/rust_api.dart';
 
@@ -101,6 +103,14 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
         home: Scaffold(
           body: NovelEventsWorkbenchDialogView(
             model: buildDialogModel(
@@ -125,7 +135,7 @@ void main() {
     expect(find.text('新增事件'), findsNWidgets(2));
     expect(find.text('保存事件'), findsOneWidget);
     expect(find.text('批量删除事件'), findsOneWidget);
-    expect(find.textContaining('#11 · 开场冲突 · 章节索引 1/2'), findsOneWidget);
+    expect(find.textContaining('11 · 开场冲突 · 章节索引 1/2'), findsOneWidget);
   });
 
   testWidgets('novel events workbench view hides preview section when empty', (
@@ -133,6 +143,14 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
         home: Scaffold(
           body: NovelEventsWorkbenchDialogView(
             model: buildDialogModel(
@@ -162,6 +180,14 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('zh'),
           home: Scaffold(
             body: NovelEventsWorkbenchDialogView(
               model: buildDialogModel(

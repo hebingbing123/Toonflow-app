@@ -29,7 +29,9 @@ String labelShortVideoBlockingReasonLocalized(
     case 'blocking_job':
       return l10n.scriptEditorStoryboardsReadinessBlockingBlockingJob;
     default:
-      return l10n.scriptEditorStoryboardsReadinessBlockingUnknown(normalized);
+      return l10n.scriptEditorStoryboardsReadinessBlockingUnknown(
+        normalized.toUpperCase(),
+      );
   }
 }
 

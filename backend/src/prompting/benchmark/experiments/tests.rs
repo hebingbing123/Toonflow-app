@@ -44,6 +44,14 @@ mod cases {
     }
 
     #[test]
+    fn test_validate_stage_scope_duplicate() {
+        assert!(
+            validate_stage_scope(&["video_prompt".to_string(), "video_prompt".to_string()])
+                .is_err()
+        );
+    }
+
+    #[test]
     fn test_validate_variant_snapshot_complete() {
         let variant = CreateVariantBody {
             label: "test-variant".to_string(),
@@ -222,6 +230,177 @@ mod cases {
         assert!(result.is_err());
         let err_msg = result.unwrap_err().to_string();
         assert!(err_msg.contains("observation_policy_snapshot.observation_note_limit"));
+    }
+
+    #[test]
+    fn test_validate_variant_snapshot_empty_label() {
+        let variant = CreateVariantBody {
+            label: "   ".to_string(),
+            skill_snapshot: SkillSnapshot {
+                skill_files: vec![SkillFileSnapshot {
+                    path: "test.md".to_string(),
+                    hash: "abc".to_string(),
+                    content: None,
+                }],
+                version_tag: None,
+            },
+            prompt_snapshot: PromptSnapshot {
+                templates: vec![PromptTemplateSnapshot {
+                    stage: "video_prompt".to_string(),
+                    template_content: "test".to_string(),
+                    hash: "abc".to_string(),
+                }],
+                version_tag: None,
+            },
+            memory_budget_snapshot: MemoryBudgetSnapshot {
+                budget_tier: "lean".to_string(),
+                compression_rules: serde_json::json!({}),
+                retention_buckets: serde_json::json!({}),
+                observation_note_limit: Some(100),
+                character_memory_priority: None,
+            },
+            observation_policy_snapshot: ObservationPolicySnapshot {
+                negative_constraints: vec![],
+                observation_note_limit: 1,
+                auto_negative_source: None,
+                policy_version: None,
+            },
+            model_route_snapshot: ModelRouteSnapshot {
+                model_name: "gpt-4".to_string(),
+                temperature: None,
+                max_tokens: None,
+                routing_rules: None,
+            },
+            notes: None,
+        };
+
+        let result = validate_variant_snapshot(&variant);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().to_string().contains("label"));
+    }
+
+    #[test]
+    fn test_validate_variant_labels_duplicate_and_missing_baseline() {
+        let variant_a = CreateVariantBody {
+            label: "baseline".to_string(),
+            skill_snapshot: SkillSnapshot {
+                skill_files: vec![SkillFileSnapshot {
+                    path: "test.md".to_string(),
+                    hash: "abc123".to_string(),
+                    content: None,
+                }],
+                version_tag: None,
+            },
+            prompt_snapshot: PromptSnapshot {
+                templates: vec![PromptTemplateSnapshot {
+                    stage: "video_prompt".to_string(),
+                    template_content: "test".to_string(),
+                    hash: "abc".to_string(),
+                }],
+                version_tag: None,
+            },
+            memory_budget_snapshot: MemoryBudgetSnapshot {
+                budget_tier: "lean".to_string(),
+                compression_rules: serde_json::json!({}),
+                retention_buckets: serde_json::json!({}),
+                observation_note_limit: Some(100),
+                character_memory_priority: None,
+            },
+            observation_policy_snapshot: ObservationPolicySnapshot {
+                negative_constraints: vec![],
+                observation_note_limit: 1,
+                auto_negative_source: None,
+                policy_version: None,
+            },
+            model_route_snapshot: ModelRouteSnapshot {
+                model_name: "gpt-4".to_string(),
+                temperature: None,
+                max_tokens: None,
+                routing_rules: None,
+            },
+            notes: None,
+        };
+        let variant_b = CreateVariantBody {
+            label: "baseline".to_string(),
+            skill_snapshot: SkillSnapshot {
+                skill_files: vec![SkillFileSnapshot {
+                    path: "other.md".to_string(),
+                    hash: "def456".to_string(),
+                    content: None,
+                }],
+                version_tag: None,
+            },
+            prompt_snapshot: PromptSnapshot {
+                templates: vec![PromptTemplateSnapshot {
+                    stage: "storyboard_panel".to_string(),
+                    template_content: "other".to_string(),
+                    hash: "def".to_string(),
+                }],
+                version_tag: None,
+            },
+            memory_budget_snapshot: MemoryBudgetSnapshot {
+                budget_tier: "expanded".to_string(),
+                compression_rules: serde_json::json!({}),
+                retention_buckets: serde_json::json!({}),
+                observation_note_limit: Some(120),
+                character_memory_priority: None,
+            },
+            observation_policy_snapshot: ObservationPolicySnapshot {
+                negative_constraints: vec![],
+                observation_note_limit: 2,
+                auto_negative_source: None,
+                policy_version: None,
+            },
+            model_route_snapshot: ModelRouteSnapshot {
+                model_name: "gpt-4o-mini".to_string(),
+                temperature: None,
+                max_tokens: None,
+                routing_rules: None,
+            },
+            notes: None,
+        };
+
+        assert!(validate_variant_labels(&[variant_a], Some("missing")).is_err());
+        let variant_c = CreateVariantBody {
+            label: "baseline".to_string(),
+            skill_snapshot: SkillSnapshot {
+                skill_files: vec![SkillFileSnapshot {
+                    path: "test.md".to_string(),
+                    hash: "abc123".to_string(),
+                    content: None,
+                }],
+                version_tag: None,
+            },
+            prompt_snapshot: PromptSnapshot {
+                templates: vec![PromptTemplateSnapshot {
+                    stage: "video_prompt".to_string(),
+                    template_content: "test".to_string(),
+                    hash: "abc".to_string(),
+                }],
+                version_tag: None,
+            },
+            memory_budget_snapshot: MemoryBudgetSnapshot {
+                budget_tier: "lean".to_string(),
+                compression_rules: serde_json::json!({}),
+                retention_buckets: serde_json::json!({}),
+                observation_note_limit: Some(100),
+                character_memory_priority: None,
+            },
+            observation_policy_snapshot: ObservationPolicySnapshot {
+                negative_constraints: vec![],
+                observation_note_limit: 1,
+                auto_negative_source: None,
+                policy_version: None,
+            },
+            model_route_snapshot: ModelRouteSnapshot {
+                model_name: "gpt-4".to_string(),
+                temperature: None,
+                max_tokens: None,
+                routing_rules: None,
+            },
+            notes: None,
+        };
+        assert!(validate_variant_labels(&[variant_c, variant_b], None).is_err());
     }
 
     proptest! {

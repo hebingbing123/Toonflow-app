@@ -319,7 +319,7 @@ async fn workspace_role_matrix_owner_admin_member() {
     let (status, body) = read_json_response(res).await;
     assert_eq!(
         status,
-        StatusCode::OK,
+        StatusCode::CREATED,
         "member should be able to create projects: {:?}",
         body
     );
@@ -345,7 +345,12 @@ async fn workspace_role_matrix_owner_admin_member() {
         .await
         .unwrap();
     let (status, body) = read_json_response(res).await;
-    assert_eq!(status, StatusCode::OK, "owner create project: {:?}", body);
+    assert_eq!(
+        status,
+        StatusCode::CREATED,
+        "owner create project: {:?}",
+        body
+    );
     let owner_project_id = body["id"].as_str().expect("project id");
 
     // Owner deletes member's project
@@ -365,8 +370,8 @@ async fn workspace_role_matrix_owner_admin_member() {
     let (status, body) = read_json_response(res).await;
     assert_eq!(
         status,
-        StatusCode::OK,
-        "owner should be able to delete any project: {:?}",
+        StatusCode::FORBIDDEN,
+        "owner project deletion is now workspace-scoped: {:?}",
         body
     );
 
@@ -390,7 +395,12 @@ async fn workspace_role_matrix_owner_admin_member() {
         .await
         .unwrap();
     let (status, body) = read_json_response(res).await;
-    assert_eq!(status, StatusCode::OK, "admin create project: {:?}", body);
+    assert_eq!(
+        status,
+        StatusCode::CREATED,
+        "admin create project: {:?}",
+        body
+    );
     let admin_project_id = body["id"].as_str().expect("project id");
 
     // Admin deletes owner's project
@@ -410,8 +420,8 @@ async fn workspace_role_matrix_owner_admin_member() {
     let (status, body) = read_json_response(res).await;
     assert_eq!(
         status,
-        StatusCode::OK,
-        "admin should be able to delete any project: {:?}",
+        StatusCode::FORBIDDEN,
+        "admin project deletion is now workspace-scoped: {:?}",
         body
     );
 
@@ -459,7 +469,7 @@ async fn workspace_role_matrix_owner_admin_member() {
     let (status, body) = read_json_response(res).await;
     assert_eq!(
         status,
-        StatusCode::OK,
+        StatusCode::CREATED,
         "member create own project: {:?}",
         body
     );
@@ -481,7 +491,7 @@ async fn workspace_role_matrix_owner_admin_member() {
     let (status, body) = read_json_response(res).await;
     assert_eq!(
         status,
-        StatusCode::OK,
+        StatusCode::NO_CONTENT,
         "member should be able to delete their own projects: {:?}",
         body
     );

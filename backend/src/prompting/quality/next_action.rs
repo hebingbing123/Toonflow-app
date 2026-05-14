@@ -85,3 +85,19 @@ pub fn infer_next_action(review: &QualityReview, issue_types: &[IssueType]) -> N
 
     NextAction::Observe
 }
+
+/// 从 bad_case_category 直接映射规则化 suggested_action（需求 2.1）。
+pub fn infer_suggested_action_from_bad_case_category(
+    bad_case_category: Option<&str>,
+) -> Option<&'static str> {
+    match bad_case_category?.trim() {
+        "plot_hole" => Some(NextAction::RollbackToDirectorPlanning.as_str()),
+        "character_break" => Some(NextAction::UpdateCharacterAnchor.as_str()),
+        "storyboard_mismatch" => Some(NextAction::PatchStoryboardItems.as_str()),
+        "dialogue_issue" => Some(NextAction::AdjustVideoPrompt.as_str()),
+        "visual_error" => Some(NextAction::RetryVideoGeneration.as_str()),
+        "pacing_issue" => Some(NextAction::RegenerateStoryboard.as_str()),
+        "other" => Some(NextAction::ManualReview.as_str()),
+        _ => None,
+    }
+}

@@ -2,6 +2,27 @@ import '../../rust_api.dart';
 import '../l10n/app_localizations.dart';
 import 'support_models.dart';
 
+String? describeSuggestedRepairAction(String? action, {AppLocalizations? l10n}) {
+  switch (action?.trim()) {
+    case 'rollback_to_director_planning':
+      return '先回到导演规划，重排冲突和动机，再继续往下生成。';
+    case 'update_character_anchor':
+      return '先补角色锚点，明确外形、气质和情绪反应，再重试。';
+    case 'patch_storyboard_items':
+      return '先局部修分镜条目，把动作、视线和节奏补齐。';
+    case 'adjust_video_prompt':
+      return '先收紧 video prompt，把表演线索和情绪锚点写实。';
+    case 'retry_video_generation':
+      return '先保留当前约束，补关键负向限制后重试生成。';
+    case 'regenerate_storyboard':
+      return '先重做分镜节奏，拉开起伏和镜头层次。';
+    case 'manual_review':
+      return '先人工复核坏例原因，再决定返工入口。';
+    default:
+      return null;
+  }
+}
+
 List<String> buildQualityReviewRepairSuggestions(
   QualityReview row, {
   AppLocalizations? l10n,
@@ -12,6 +33,14 @@ List<String> buildQualityReviewRepairSuggestions(
 
   void addTagged(String tag, String suggestion) {
     if (tags.add(tag)) suggestions.add(suggestion);
+  }
+
+  final suggestedRepair = describeSuggestedRepairAction(
+    row.suggestedAction,
+    l10n: l10n,
+  );
+  if (suggestedRepair != null) {
+    addTagged('suggested_action', suggestedRepair);
   }
 
   final badCaseCategory = (row.badCaseCategory ?? '').toLowerCase();

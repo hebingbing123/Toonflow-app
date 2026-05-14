@@ -6,6 +6,8 @@ import 'package:openflow_app/team_workspaces/section.dart';
 import 'package:openflow_app/team_workspaces/strings.dart';
 
 void main() {
+  final zh = AppLocalizationsZh();
+
   WorkspaceMemberResponse member({
     required String userId,
     required String role,
@@ -84,7 +86,7 @@ void main() {
       role: 'member',
       status: 'pending',
     );
-    final text = formatWorkspaceInviteMeta(row);
+    final text = formatWorkspaceInviteMeta(row, l10n: zh);
     expect(text, contains('状态: 已过期'));
     expect(text, contains('过期:'));
     expect(text, contains('2026-01-08'));
@@ -119,7 +121,7 @@ void main() {
       role: 'member',
       status: 'pending',
     ).copyWithExpiresAt(DateTime.utc(2099, 1, 1));
-    expect(inviteStatusLabel(row), '有效');
+    expect(inviteStatusLabel(row, l10n: zh), '有效');
   });
 
   test('inviteStatusLabel shows revoked and accepted', () {
@@ -128,13 +130,13 @@ void main() {
       role: 'member',
       status: 'revoked',
     );
-    expect(inviteStatusLabel(revoked), '已撤销');
+    expect(inviteStatusLabel(revoked, l10n: zh), '已撤销');
     final accepted = invite(
       email: 'a@example.com',
       role: 'member',
       status: 'accepted',
     ).copyWithExpiresAt(DateTime.utc(2099, 1, 1));
-    expect(inviteStatusLabel(accepted), '已接受');
+    expect(inviteStatusLabel(accepted, l10n: zh), '已接受');
   });
 
   test('filterInvitesByExpiryVisibility hides expired by default', () {
@@ -366,7 +368,6 @@ void main() {
   });
 
   test('buildWorkspaceRowSemanticsLabel describes current archived state', () {
-    final zh = AppLocalizationsZh();
     final now = DateTime.utc(2026, 1, 1);
     final row = WorkspaceListItem(
       workspace: WorkspaceResponse(
@@ -393,7 +394,6 @@ void main() {
   });
 
   test('buildWorkspaceActionTooltip includes workspace name', () {
-    final zh = AppLocalizationsZh();
     expect(
       buildWorkspaceActionTooltip(
         l10n: zh,
@@ -407,7 +407,6 @@ void main() {
   test(
     'buildEnterpriseProjectsEmptyStateBody falls back when name missing',
     () {
-      final zh = AppLocalizationsZh();
       expect(
         buildEnterpriseProjectsEmptyStateBody(zh, 'Team Alpha'),
         contains('Team Alpha 还没有任何项目'),

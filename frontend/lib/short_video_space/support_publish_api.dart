@@ -62,11 +62,17 @@ String shortVideoExportIssueLabel(AppLocalizations l10n, String code) {
 }
 
 String shortVideoQualityStageLabelZh(BuildContext context, String stage) {
-  return shortVideoQualityStageLabel(resolveAppLocalizationsForErrors(context), stage);
+  return shortVideoQualityStageLabel(
+    resolveAppLocalizationsForErrors(context),
+    stage,
+  );
 }
 
 String shortVideoExportIssueLabelZh(BuildContext context, String code) {
-  return shortVideoExportIssueLabel(resolveAppLocalizationsForErrors(context), code);
+  return shortVideoExportIssueLabel(
+    resolveAppLocalizationsForErrors(context),
+    code,
+  );
 }
 
 int? _parseDurationSecondsLoose(String raw) {
@@ -87,6 +93,47 @@ String formatDurationHHMMSS(int totalSeconds) {
       '${secs.toString().padLeft(2, '0')}';
 }
 
+bool shortVideoPublishHasUsableData({
+  required PublishPlatformMatrixResponse? matrix,
+  required List<PublishDraftRow> drafts,
+  required PublishPrepareCheckResponse? prepare,
+  required List<PublishJobRow> jobs,
+  required List<PublishPerformanceAlertRow> performanceAlerts,
+  required List<PublishAttemptAuditRow> audits,
+}) {
+  return matrix != null ||
+      drafts.isNotEmpty ||
+      prepare != null ||
+      jobs.isNotEmpty ||
+      performanceAlerts.isNotEmpty ||
+      audits.isNotEmpty;
+}
+
+bool shortVideoPublishInteractionsAllowed({
+  required bool publishUnavailable,
+  required bool hasUsableData,
+}) {
+  return !publishUnavailable || hasUsableData;
+}
+
+Set<String> shortVideoFilterExistingDraftIds(
+  Set<String> selectedDraftIds,
+  List<PublishDraftRow> drafts,
+) {
+  if (selectedDraftIds.isEmpty || drafts.isEmpty) {
+    return drafts.isEmpty ? <String>{} : Set<String>.from(selectedDraftIds);
+  }
+  final existingIds = drafts.map((d) => d.id).toSet();
+  return selectedDraftIds.where(existingIds.contains).toSet();
+}
+
+bool shortVideoShouldKeepMultiSelectMode({
+  required bool multiSelectMode,
+  required List<PublishDraftRow> drafts,
+}) {
+  return multiSelectMode && drafts.length > 1;
+}
+
 /// Space 成片装配卡：消费 GET .../short-video-assembly
 ShortVideoAssemblyPanelUi buildShortVideoAssemblyPanelUi({
   required AppLocalizations l10n,
@@ -94,7 +141,6 @@ ShortVideoAssemblyPanelUi buildShortVideoAssemblyPanelUi({
   required bool loadingProjectOverview,
   required ProjectShortVideoAssembly? assembly,
 }) {
-  
   if (!projectSelected) {
     return const ShortVideoAssemblyPanelUi(visible: false);
   }
@@ -124,7 +170,9 @@ ShortVideoAssemblyPanelUi buildShortVideoAssemblyPanelUi({
   final defaultParts = <String>[
     (d.voiceProfile ?? '').trim().isEmpty
         ? l10n.shortVideoSpacePublishAssemblyVoiceProfileNotSet
-        : l10n.shortVideoSpacePublishAssemblyVoiceProfile(d.voiceProfile!.trim()),
+        : l10n.shortVideoSpacePublishAssemblyVoiceProfile(
+            d.voiceProfile!.trim(),
+          ),
     (d.subtitleStyle ?? '').trim().isEmpty
         ? l10n.shortVideoSpacePublishAssemblySubtitleDefault
         : l10n.shortVideoSpacePublishAssemblySubtitle(d.subtitleStyle!.trim()),
@@ -142,37 +190,48 @@ ShortVideoAssemblyPanelUi buildShortVideoAssemblyPanelUi({
     final name = (g.scriptName ?? '').trim();
     final title = name.isEmpty
         ? l10n.shortVideoSpacePublishAssemblyScriptTitle(g.scriptNumericId)
-        : l10n.shortVideoSpacePublishAssemblyScriptTitleNamed(g.scriptNumericId, name);
+        : l10n.shortVideoSpacePublishAssemblyScriptTitleNamed(
+            g.scriptNumericId,
+            name,
+          );
     final shots = g.shots;
     final withMedia = shots
         .where((sh) => (sh.selectedMediaUrl ?? '').trim().isNotEmpty)
         .length;
     final voReady = shots.where((sh) => sh.voiceoverAssetReady).length;
     scriptLines.add(
-      l10n.shortVideoSpacePublishAssemblyScriptSummary(title, shots.length, withMedia, voReady),
+      l10n.shortVideoSpacePublishAssemblyScriptSummary(
+        title,
+        shots.length,
+        withMedia,
+        voReady,
+      ),
     );
     for (final sh in shots.take(4)) {
-      final preview = (sh.selectedMediaUrl ?? '').trim().isNotEmpty 
-          ? l10n.shortVideoSpacePublishAssemblyShotPreviewYes 
+      final preview = (sh.selectedMediaUrl ?? '').trim().isNotEmpty
+          ? l10n.shortVideoSpacePublishAssemblyShotPreviewYes
           : l10n.shortVideoSpacePublishAssemblyShotPreviewNo;
       final duration = (sh.duration ?? '').trim();
       final subtitle = (sh.subtitleText ?? '').trim();
-      final subtitleState = subtitle.isEmpty 
-          ? l10n.shortVideoSpacePublishAssemblyShotSubtitleNo 
+      final subtitleState = subtitle.isEmpty
+          ? l10n.shortVideoSpacePublishAssemblyShotSubtitleNo
           : l10n.shortVideoSpacePublishAssemblyShotSubtitleYes;
-      final voiceover = sh.voiceoverAssetReady ||
+      final voiceover =
+          sh.voiceoverAssetReady ||
               (sh.voiceoverAudioUrl ?? '').trim().isNotEmpty
           ? l10n.shortVideoSpacePublishAssemblyShotVoiceoverYes
           : l10n.shortVideoSpacePublishAssemblyShotVoiceoverNo;
       final order = sh.sbIndex?.toString() ?? '${sh.storyboardNumericId}';
-      final bgm = (d.bgmStrategy ?? '').trim().isEmpty 
-          ? l10n.shortVideoSpacePublishAssemblyShotBgmDefault 
+      final bgm = (d.bgmStrategy ?? '').trim().isEmpty
+          ? l10n.shortVideoSpacePublishAssemblyShotBgmDefault
           : d.bgmStrategy!.trim();
       scriptLines.add(
         l10n.shortVideoSpacePublishAssemblyShotDetail(
           order,
           preview,
-          duration.isEmpty ? l10n.shortVideoSpacePublishAssemblyShotDurationUnknown : duration,
+          duration.isEmpty
+              ? l10n.shortVideoSpacePublishAssemblyShotDurationUnknown
+              : duration,
           subtitleState,
           voiceover,
           bgm,
@@ -186,7 +245,8 @@ ShortVideoAssemblyPanelUi buildShortVideoAssemblyPanelUi({
       if ((sh.subtitleText ?? '').trim().isNotEmpty) {
         shotsWithSubtitle += 1;
       }
-      if (sh.voiceoverAssetReady || (sh.voiceoverAudioUrl ?? '').trim().isNotEmpty) {
+      if (sh.voiceoverAssetReady ||
+          (sh.voiceoverAudioUrl ?? '').trim().isNotEmpty) {
         shotsWithVoiceover += 1;
       }
       final sec = _parseDurationSecondsLoose(sh.duration ?? '');
@@ -196,18 +256,24 @@ ShortVideoAssemblyPanelUi buildShortVideoAssemblyPanelUi({
       }
     }
     if (shots.length > 4) {
-      scriptLines.add(l10n.shortVideoSpacePublishAssemblyMoreShots(shots.length - 4));
+      scriptLines.add(
+        l10n.shortVideoSpacePublishAssemblyMoreShots(shots.length - 4),
+      );
     }
   }
   final q = assembly.candidateQualitySummary;
   final qualityLines = <String>[
-    l10n.shortVideoSpacePublishAssemblyQualityProjectBadCase(q.projectBadCaseTotal),
+    l10n.shortVideoSpacePublishAssemblyQualityProjectBadCase(
+      q.projectBadCaseTotal,
+    ),
     l10n.shortVideoSpacePublishAssemblyQualityAssemblyReviews(
       q.assemblyShotReviewTotal,
       q.assemblyShotBadCaseCount,
       q.assemblyShotsWithBadCase,
     ),
-    l10n.shortVideoSpacePublishAssemblyQualityLateStageBadCase(q.assemblyLateStageBadCaseCount),
+    l10n.shortVideoSpacePublishAssemblyQualityLateStageBadCase(
+      q.assemblyLateStageBadCaseCount,
+    ),
   ];
   final stageLines = q.badCasesByStage
       .take(6)
@@ -219,16 +285,23 @@ ShortVideoAssemblyPanelUi buildShortVideoAssemblyPanelUi({
       )
       .toList(growable: false);
   if (stageLines.isNotEmpty) {
-    qualityLines.add(l10n.shortVideoSpacePublishAssemblyQualityByStage(stageLines.join('；')));
+    qualityLines.add(
+      l10n.shortVideoSpacePublishAssemblyQualityByStage(stageLines.join('；')),
+    );
   }
   qualityLines.add(l10n.shortVideoSpacePublishAssemblyQualityTaskCenterHint);
-  
+
   final hasBgm = (d.bgmStrategy ?? '').trim().isNotEmpty;
-  final multiTrackTrackCount = 1 + (shotsWithSubtitle > 0 ? 1 : 0) + (shotsWithVoiceover > 0 ? 1 : 0) + (hasBgm ? 1 : 0);
+  final multiTrackTrackCount =
+      1 +
+      (shotsWithSubtitle > 0 ? 1 : 0) +
+      (shotsWithVoiceover > 0 ? 1 : 0) +
+      (hasBgm ? 1 : 0);
   final withinLimitedTracks = multiTrackTrackCount <= 4;
   final timelineMinutes = totalDurationSeconds / 60.0;
-  final overProfessionalBoundary = !withinLimitedTracks || timelineMinutes > 8.0;
-  
+  final overProfessionalBoundary =
+      !withinLimitedTracks || timelineMinutes > 8.0;
+
   final totalDurationFormatted = formatDurationHHMMSS(totalDurationSeconds);
   final headlineWithDuration = scripts.isEmpty
       ? l10n.shortVideoSpacePublishAssemblyNoScriptsHeadline
@@ -238,7 +311,7 @@ ShortVideoAssemblyPanelUi buildShortVideoAssemblyPanelUi({
           totalDurationSeconds,
           totalDurationFormatted,
         );
-  
+
   final multiTrackDecisionLines = <String>[
     l10n.shortVideoSpacePublishAssemblyMultiTrackEstimate(
       shotsWithSubtitle > 0 ? 1 : 0,
@@ -282,7 +355,6 @@ ShortVideoExportCheckPanelUi buildShortVideoExportCheckPanelUi({
   required bool loadingProjectOverview,
   required ProjectShortVideoExportCheck? exportCheck,
 }) {
-  
   if (!projectSelected) {
     return const ShortVideoExportCheckPanelUi(visible: false);
   }
@@ -318,8 +390,8 @@ ShortVideoExportCheckPanelUi buildShortVideoExportCheckPanelUi({
     ),
     ShortVideoMetricData(
       label: l10n.shortVideoSpacePublishExportCheckMetricExportable,
-      value: exportCheck.exportReady 
-          ? l10n.shortVideoSpacePublishExportCheckMetricYes 
+      value: exportCheck.exportReady
+          ? l10n.shortVideoSpacePublishExportCheckMetricYes
           : l10n.shortVideoSpacePublishExportCheckMetricNo,
     ),
   ];
@@ -327,39 +399,54 @@ ShortVideoExportCheckPanelUi buildShortVideoExportCheckPanelUi({
       ? l10n.shortVideoSpacePublishExportCheckReadyHeadline
       : l10n.shortVideoSpacePublishExportCheckBlockingHeadline;
   final qg = exportCheck.qualityGate;
-  
+
   // Build quality gate line based on strategy
   String qualityGateLine;
   if (qg.strategy == 'off') {
     qualityGateLine = l10n.shortVideoSpacePublishExportCheckQualityGateOff;
   } else if (qg.strategy == 'warn') {
     if (qg.pendingReviewBadCaseCount > 0) {
-      qualityGateLine = l10n.shortVideoSpacePublishExportCheckQualityGateWarnWithBadCase(qg.pendingReviewBadCaseCount);
+      qualityGateLine = l10n
+          .shortVideoSpacePublishExportCheckQualityGateWarnWithBadCase(
+            qg.pendingReviewBadCaseCount,
+          );
     } else {
-      qualityGateLine = l10n.shortVideoSpacePublishExportCheckQualityGateWarnNoBadCase;
+      qualityGateLine =
+          l10n.shortVideoSpacePublishExportCheckQualityGateWarnNoBadCase;
     }
   } else if (qg.strategy == 'block') {
     if (qg.enforced && qg.pendingReviewBadCaseCount > 0) {
-      qualityGateLine = l10n.shortVideoSpacePublishExportCheckQualityGateBlockEnforcedWithBadCase(qg.pendingReviewBadCaseCount);
+      qualityGateLine = l10n
+          .shortVideoSpacePublishExportCheckQualityGateBlockEnforcedWithBadCase(
+            qg.pendingReviewBadCaseCount,
+          );
     } else if (qg.pendingReviewBadCaseCount > 0) {
-      qualityGateLine = l10n.shortVideoSpacePublishExportCheckQualityGateBlockNotEnforcedWithBadCase(qg.pendingReviewBadCaseCount);
+      qualityGateLine = l10n
+          .shortVideoSpacePublishExportCheckQualityGateBlockNotEnforcedWithBadCase(
+            qg.pendingReviewBadCaseCount,
+          );
     } else {
-      qualityGateLine = l10n.shortVideoSpacePublishExportCheckQualityGateBlockNoBadCase;
+      qualityGateLine =
+          l10n.shortVideoSpacePublishExportCheckQualityGateBlockNoBadCase;
     }
   } else {
-    qualityGateLine = l10n.shortVideoSpacePublishExportCheckQualityGateUnknown(qg.strategy);
+    qualityGateLine = l10n.shortVideoSpacePublishExportCheckQualityGateUnknown(
+      qg.strategy,
+    );
   }
-  
+
   // Collect blocking reasons if in block mode
   final qualityGateBlockingLines = <String>[];
   if (qg.strategy == 'block' && qg.enforced && qg.blockingReasons != null) {
     for (final reason in qg.blockingReasons!) {
       final routePart = reason.reworkRoute != null
-          ? l10n.shortVideoPublishExportCheckReworkRouteSuffix(reason.reworkRoute!)
+          ? l10n.shortVideoPublishExportCheckReworkRouteSuffix(
+              reason.reworkRoute!,
+            )
           : '';
       qualityGateBlockingLines.add(
         l10n.shortVideoPublishExportCheckQualityGateBlockingLine(
-          labelShortVideoBlockingReason(l10n, reason.code),
+          reason.code.trim().toUpperCase(),
           reason.message,
           routePart,
         ),
@@ -371,8 +458,9 @@ ShortVideoExportCheckPanelUi buildShortVideoExportCheckPanelUi({
       .take(14)
       .map((i) {
         final sb = i.sbIndex;
-        final sbPart =
-            sb == null ? '' : l10n.shortVideoPublishExportCheckStoryboardIndexPart(sb);
+        final sbPart = sb == null
+            ? ''
+            : l10n.shortVideoPublishExportCheckStoryboardIndexPart(sb);
         return l10n.shortVideoSpacePublishExportCheckBlockingIssue(
           i.scriptNumericId,
           i.storyboardNumericId,
@@ -387,8 +475,9 @@ ShortVideoExportCheckPanelUi buildShortVideoExportCheckPanelUi({
       .take(14)
       .map((i) {
         final sb = i.sbIndex;
-        final sbPart =
-            sb == null ? '' : l10n.shortVideoPublishExportCheckStoryboardIndexPart(sb);
+        final sbPart = sb == null
+            ? ''
+            : l10n.shortVideoPublishExportCheckStoryboardIndexPart(sb);
         return l10n.shortVideoSpacePublishExportCheckBlockingIssue(
           i.scriptNumericId,
           i.storyboardNumericId,
@@ -423,7 +512,6 @@ ShortVideoCandidateCardUi buildShortVideoCandidateCardUi({
   VoidCallback? onBatchGenerateCandidateClips,
   bool batchGenerateCandidateClipsBusy = false,
 }) {
-  
   if (!projectSelected) {
     return const ShortVideoCandidateCardUi(visible: false);
   }
@@ -452,7 +540,9 @@ ShortVideoCandidateCardUi buildShortVideoCandidateCardUi({
   final headline = tracked == 0
       ? l10n.shortVideoSpacePublishCandidateNoTrackedHeadline
       : l10n.shortVideoSpacePublishCandidateTrackedHeadline;
-  final detail = l10n.shortVideoSpacePublishCandidateDetail(assetsOverview.totalCount);
+  final detail = l10n.shortVideoSpacePublishCandidateDetail(
+    assetsOverview.totalCount,
+  );
   return ShortVideoCandidateCardUi(
     visible: true,
     pending: pending,
@@ -495,7 +585,7 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
   Map<String, String> publishAutomationModesByPlatform =
       const <String, String>{},
   void Function(String platformId, String automationMode)?
-      onChangePublishAutomationMode,
+  onChangePublishAutomationMode,
   List<String> publishBatchResultLines = const <String>[],
   int publishCopyEditorRevision = 0,
   PublishPlatformCopyCommit? onCommitPublishPlatformCopy,
@@ -531,7 +621,17 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
       detail: l10n.shortVideoSpacePublishPanelLoadingDetail,
     );
   }
-  if (publishUnavailable) {
+  final hasPublishSliceData = shortVideoPublishHasUsableData(
+    matrix: matrix,
+    drafts: drafts,
+    prepare: prepare,
+    jobs: jobs,
+    performanceAlerts: performanceAlerts,
+    audits: audits,
+  );
+  final renderUnavailableCard = publishUnavailable && !hasPublishSliceData;
+
+  if (renderUnavailableCard) {
     return ShortVideoPublishPanelUi(
       visible: true,
       unavailable: true,
@@ -540,8 +640,10 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
           ? l10n.shortVideoSpacePublishPanelUnavailableExportGateMissing
           : (exportCheck.summary.blockingIssueCount <= 0
                 ? l10n.shortVideoSpacePublishPanelUnavailableExportGateNoBlocking
-                : l10n.shortVideoSpacePublishPanelUnavailableExportGateBlocking(exportCheck.summary.blockingIssueCount)),
-      exportReady: exportCheck?.exportReady ?? true,
+                : l10n.shortVideoSpacePublishPanelUnavailableExportGateBlocking(
+                    exportCheck.summary.blockingIssueCount,
+                  )),
+      exportReady: exportCheck?.exportReady ?? false,
       detail: l10n.shortVideoSpacePublishPanelUnavailableDetail,
       onRefreshPublish: onRefreshPublish,
       publishBusy: publishBusy,
@@ -553,9 +655,11 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
       ? l10n.shortVideoSpacePublishPanelExportGateUnavailable
       : (exportCheck.summary.blockingIssueCount <= 0
             ? l10n.shortVideoSpacePublishPanelExportGateReady
-            : l10n.shortVideoSpacePublishPanelExportGateBlocking(exportCheck.summary.blockingIssueCount));
-  
-  final exportReadyStatus = exportCheck?.exportReady ?? true;
+            : l10n.shortVideoSpacePublishPanelExportGateBlocking(
+                exportCheck.summary.blockingIssueCount,
+              ));
+
+  final exportReadyStatus = exportCheck?.exportReady ?? false;
 
   final matrixDomesticLines = <String>[];
   final matrixOverseasLines = <String>[];
@@ -582,7 +686,8 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
   }
 
   String? activeDraftId = selectedPublishDraftId;
-  final selectedOk = activeDraftId != null &&
+  final selectedOk =
+      activeDraftId != null &&
       activeDraftId.trim().isNotEmpty &&
       drafts.any((d) => d.id == activeDraftId);
   if (!selectedOk) {
@@ -599,11 +704,11 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
   }
 
   final prepareLines = <String>[
-    if (activeDraft != null) 
+    if (activeDraft != null)
       l10n.shortVideoSpacePublishPanelCurrentDraft(
-        activeDraft.title.trim().isEmpty 
-            ? l10n.shortVideoSpacePublishPanelDraftNoTitle 
-            : activeDraft.title.trim()
+        activeDraft.title.trim().isEmpty
+            ? l10n.shortVideoSpacePublishPanelDraftNoTitle
+            : activeDraft.title.trim(),
       )
     else if (drafts.isNotEmpty)
       l10n.shortVideoSpacePublishPanelSelectDraftWarning,
@@ -612,7 +717,9 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
       for (final issue in prepare.issues)
         '${shortVideoPublishPrepareSeverityLabel(l10n, issue.severity)}: ${issue.message}'
             '${issue.platformId != null ? ' · ${issue.platformId}' : ''}',
-    ] else if (activeDraft == null && drafts.length > 1)
+    ] else if (activeDraft != null)
+      l10n.shortVideoSpacePublishPanelPrepareCheckSelectFirst
+    else if (activeDraft == null && drafts.length > 1)
       l10n.shortVideoSpacePublishPanelPrepareCheckMultipleDrafts
     else if (activeDraft == null && drafts.isNotEmpty)
       l10n.shortVideoSpacePublishPanelPrepareCheckSelectFirst
@@ -621,31 +728,33 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
   ];
 
   final draftLines = drafts
-      .map(
-        (d) {
-          final title = d.title.trim().isEmpty 
-              ? l10n.shortVideoSpacePublishPanelDraftNoTitle 
-              : d.title.trim();
-          final videoMissing = (d.videoAssetKey ?? '').trim().isEmpty 
-              ? l10n.shortVideoSpacePublishPanelDraftMissingVideo 
-              : '';
-          final scheduled = (d.scheduledAt ?? '').trim().isEmpty 
-              ? '' 
-              : l10n.shortVideoSpacePublishPanelDraftScheduled(d.scheduledAt!);
-          final statusLabel =
-              shortVideoPublishDraftStatusLabel(l10n, d.draftStatus);
-          return '$title · $statusLabel$videoMissing$scheduled';
-        },
-      )
+      .map((d) {
+        final title = d.title.trim().isEmpty
+            ? l10n.shortVideoSpacePublishPanelDraftNoTitle
+            : d.title.trim();
+        final videoMissing = (d.videoAssetKey ?? '').trim().isEmpty
+            ? l10n.shortVideoSpacePublishPanelDraftMissingVideo
+            : '';
+        final scheduled = (d.scheduledAt ?? '').trim().isEmpty
+            ? ''
+            : l10n.shortVideoSpacePublishPanelDraftScheduled(d.scheduledAt!);
+        final statusLabel = shortVideoPublishDraftStatusLabel(
+          l10n,
+          d.draftStatus,
+        );
+        return '$title · $statusLabel$videoMissing$scheduled';
+      })
       .toList(growable: false);
 
   final jobLines = jobs
       .map((j) {
-        final short = j.id.length > 8 
-            ? l10n.shortVideoSpacePublishPanelJobShortId(j.id.substring(0, 8)) 
+        final short = j.id.length > 8
+            ? l10n.shortVideoSpacePublishPanelJobShortId(j.id.substring(0, 8))
             : j.id;
         final err = (j.errorMessage ?? '').trim();
-        final errPart = err.isEmpty ? '' : l10n.shortVideoSpacePublishPanelJobError(err);
+        final errPart = err.isEmpty
+            ? ''
+            : l10n.shortVideoSpacePublishPanelJobError(err);
         final statusLabel = shortVideoPublishJobStatusLabel(l10n, j.status);
         return '$short · $statusLabel$errPart';
       })
@@ -654,8 +763,9 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
   final failedJobCount = jobs
       .where((j) => j.status == 'failed' || j.status == 'partial_failed')
       .length;
-  final waitingConfirmCount =
-      jobs.where((j) => j.status == 'awaiting_confirmation').length;
+  final waitingConfirmCount = jobs
+      .where((j) => j.status == 'awaiting_confirmation')
+      .length;
   final scheduledDraftCount = drafts
       .where((d) => (d.scheduledAt ?? '').trim().isNotEmpty)
       .length;
@@ -686,7 +796,9 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
             .join(" / "),
       ),
     if (performanceAlerts.isNotEmpty)
-      l10n.shortVideoSpacePublishPanelOverviewPerformanceAlerts(performanceAlerts.length),
+      l10n.shortVideoSpacePublishPanelOverviewPerformanceAlerts(
+        performanceAlerts.length,
+      ),
     ...performanceAlerts
         .take(3)
         .map(
@@ -711,7 +823,7 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
               (e) =>
                   "${labels[e.key] ?? e.key}=${shortVideoPublishAutomationModeLabel(l10n, e.value)}",
             )
-            .join("；")
+            .join("；"),
       ),
   ];
 
@@ -756,9 +868,16 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
     jobsByDeliveryModeMap[mode] = (jobsByDeliveryModeMap[mode] ?? 0) + 1;
   }
 
+  final detail = publishUnavailable
+      ? '${l10n.shortVideoSpacePublishPanelDetail} ${l10n.shortVideoSpacePublishPanelUnavailableDetail}'
+      : l10n.shortVideoSpacePublishPanelDetail;
+
   return ShortVideoPublishPanelUi(
     visible: true,
-    headline: l10n.shortVideoSpacePublishPanelHeadline(drafts.length, jobs.length),
+    headline: l10n.shortVideoSpacePublishPanelHeadline(
+      drafts.length,
+      jobs.length,
+    ),
     exportGateHint: gate,
     exportReady: exportReadyStatus,
     matrixDomesticLines: matrixDomesticLines,
@@ -767,14 +886,13 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
     draftLines: draftLines,
     jobLines: jobLines,
     publishOverviewLines: publishOverviewLines,
-    detail: l10n.shortVideoSpacePublishPanelDetail,
+    detail: detail,
     onRefreshPublish: onRefreshPublish,
     publishBusy: publishBusy,
     onBootstrapPublishDraft: onBootstrapPublishDraft,
     onEnqueuePublishJob: onEnqueuePublishJob,
     awaitingSemiAutoJobId: awaitingId,
-    onConfirmSemiAuto:
-        awaitingId != null ? onConfirmSemiAuto : null,
+    onConfirmSemiAuto: awaitingId != null ? onConfirmSemiAuto : null,
     onSuggestPublishCopy: onSuggestPublishCopy,
     onClearPublishSchedule: onClearPublishSchedule,
     publishPrimaryDraftId: primaryDraftId,
@@ -795,8 +913,9 @@ ShortVideoPublishPanelUi buildShortVideoPublishPanelUi({
     selectedPublishDraftId: activeDraftId,
     onSelectPublishDraft: onSelectPublishDraft,
     publishScheduleCalendarDrafts: drafts.isEmpty ? null : drafts,
-    onPublishCalendarDayBulkSchedule:
-        drafts.isEmpty ? null : onPublishCalendarDayBulkSchedule,
+    onPublishCalendarDayBulkSchedule: drafts.isEmpty
+        ? null
+        : onPublishCalendarDayBulkSchedule,
     onOpenPublishTroubleshooting: onOpenPublishTroubleshooting,
     multiSelectMode: multiSelectMode,
     selectedDraftIds: selectedDraftIds,

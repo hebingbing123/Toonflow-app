@@ -54,6 +54,19 @@ pub(crate) async fn vendor_credential_test_lock() -> tokio::sync::MutexGuard<'st
         .await
 }
 
+/// Serialize billing webhook tests that read or write **`BILLING_WEBHOOK_SECRET`** (shared by smoke + PG contract tests).
+#[cfg(test)]
+static BILLING_WEBHOOK_TEST_MUTEX: std::sync::OnceLock<tokio::sync::Mutex<()>> =
+    std::sync::OnceLock::new();
+
+#[cfg(test)]
+pub(crate) async fn billing_webhook_test_lock() -> tokio::sync::MutexGuard<'static, ()> {
+    BILLING_WEBHOOK_TEST_MUTEX
+        .get_or_init(|| tokio::sync::Mutex::new(()))
+        .lock()
+        .await
+}
+
 #[cfg(test)]
 mod billing_webhook_events_list_env;
 

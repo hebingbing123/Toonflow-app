@@ -1,42 +1,56 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/short_video_space/section.dart';
 
 void main() {
   group('AudioPreviewPlayer', () {
-    testWidgets('renders with required properties', (WidgetTester tester) async {
+    Widget buildHarness(Widget child) {
+      return MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
+        home: Scaffold(body: child),
+      );
+    }
+
+    testWidgets('renders with required properties', (
+      WidgetTester tester,
+    ) async {
       // Requirements 5: Audio preview player component
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: AudioPreviewPlayer(
-              audioUrl: 'https://example.com/audio.mp3',
-            ),
-          ),
+        buildHarness(
+          const AudioPreviewPlayer(audioUrl: 'https://example.com/audio.mp3'),
         ),
       );
 
       // Verify basic UI elements are present
       expect(find.text('配音预览'), findsOneWidget);
       expect(find.byIcon(Icons.audiotrack), findsOneWidget);
-      
+
       // Wait a bit for initial render
       await tester.pump();
     });
 
-    testWidgets('displays close button when onClose is provided', (WidgetTester tester) async {
+    testWidgets('displays close button when onClose is provided', (
+      WidgetTester tester,
+    ) async {
       var closeCalled = false;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: AudioPreviewPlayer(
-              audioUrl: 'https://example.com/audio.mp3',
-              onClose: () {
-                closeCalled = true;
-              },
-            ),
+        buildHarness(
+          AudioPreviewPlayer(
+            audioUrl: 'https://example.com/audio.mp3',
+            onClose: () {
+              closeCalled = true;
+            },
           ),
         ),
       );
@@ -51,14 +65,12 @@ void main() {
       expect(closeCalled, isTrue);
     });
 
-    testWidgets('does not display close button when onClose is null', (WidgetTester tester) async {
+    testWidgets('does not display close button when onClose is null', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: AudioPreviewPlayer(
-              audioUrl: 'https://example.com/audio.mp3',
-            ),
-          ),
+        buildHarness(
+          const AudioPreviewPlayer(audioUrl: 'https://example.com/audio.mp3'),
         ),
       );
 
@@ -66,27 +78,31 @@ void main() {
       expect(find.byIcon(Icons.close), findsNothing);
     });
 
-    testWidgets('displays loading indicator initially', (WidgetTester tester) async {
+    testWidgets('displays loading indicator initially', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: AudioPreviewPlayer(
-              audioUrl: 'https://example.com/audio.mp3',
-            ),
-          ),
+        buildHarness(
+          const AudioPreviewPlayer(audioUrl: 'https://example.com/audio.mp3'),
         ),
       );
 
       // Verify loading indicator is shown
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
-      expect(find.text('正在加载音频...'), findsOneWidget);
+      expect(find.text('正在加载音频…'), findsOneWidget);
     });
 
     test('formats duration correctly', () {
       // Test duration formatting logic
       String formatDuration(Duration duration) {
-        final minutes = duration.inMinutes.remainder(60).toString().padLeft(2, '0');
-        final seconds = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
+        final minutes = duration.inMinutes
+            .remainder(60)
+            .toString()
+            .padLeft(2, '0');
+        final seconds = duration.inSeconds
+            .remainder(60)
+            .toString()
+            .padLeft(2, '0');
         return '$minutes:$seconds';
       }
 
@@ -107,12 +123,10 @@ void main() {
     testWidgets('respects autoPlay parameter', (WidgetTester tester) async {
       // Requirements 5: Auto-play functionality
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: AudioPreviewPlayer(
-              audioUrl: 'https://example.com/audio.mp3',
-              autoPlay: true,
-            ),
+        buildHarness(
+          const AudioPreviewPlayer(
+            audioUrl: 'https://example.com/audio.mp3',
+            autoPlay: true,
           ),
         ),
       );
@@ -121,19 +135,15 @@ void main() {
       final audioPlayer = tester.widget<AudioPreviewPlayer>(
         find.byType(AudioPreviewPlayer),
       );
-      
+
       expect(audioPlayer.autoPlay, isTrue);
     });
 
     testWidgets('has proper styling and layout', (WidgetTester tester) async {
       // Requirements 5: UI/UX requirements
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: AudioPreviewPlayer(
-              audioUrl: 'https://example.com/audio.mp3',
-            ),
-          ),
+        buildHarness(
+          const AudioPreviewPlayer(audioUrl: 'https://example.com/audio.mp3'),
         ),
       );
 
@@ -142,19 +152,17 @@ void main() {
       // Verify container has proper styling
       final container = find.byType(Container).first;
       expect(container, findsOneWidget);
-      
+
       // Verify column layout
       expect(find.byType(Column), findsWidgets);
     });
 
-    testWidgets('displays proper header with icon and title', (WidgetTester tester) async {
+    testWidgets('displays proper header with icon and title', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: AudioPreviewPlayer(
-              audioUrl: 'https://example.com/audio.mp3',
-            ),
-          ),
+        buildHarness(
+          const AudioPreviewPlayer(audioUrl: 'https://example.com/audio.mp3'),
         ),
       );
 
@@ -166,12 +174,8 @@ void main() {
     testWidgets('creates AudioPlayer instance', (WidgetTester tester) async {
       // Requirements 5: Audio playback functionality
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: AudioPreviewPlayer(
-              audioUrl: 'https://example.com/audio.mp3',
-            ),
-          ),
+        buildHarness(
+          const AudioPreviewPlayer(audioUrl: 'https://example.com/audio.mp3'),
         ),
       );
 
@@ -181,32 +185,26 @@ void main() {
       expect(find.byType(AudioPreviewPlayer), findsOneWidget);
     });
 
-    testWidgets('displays loading state before audio loads', (WidgetTester tester) async {
+    testWidgets('displays loading state before audio loads', (
+      WidgetTester tester,
+    ) async {
       // Requirements 5: Loading state
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: AudioPreviewPlayer(
-              audioUrl: 'https://example.com/audio.mp3',
-            ),
-          ),
+        buildHarness(
+          const AudioPreviewPlayer(audioUrl: 'https://example.com/audio.mp3'),
         ),
       );
 
       // Initial state should show loading
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
-      expect(find.text('正在加载音频...'), findsOneWidget);
+      expect(find.text('正在加载音频…'), findsOneWidget);
     });
 
     testWidgets('has proper container decoration', (WidgetTester tester) async {
       // Requirements 5: Visual design
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: AudioPreviewPlayer(
-              audioUrl: 'https://example.com/audio.mp3',
-            ),
-          ),
+        buildHarness(
+          const AudioPreviewPlayer(audioUrl: 'https://example.com/audio.mp3'),
         ),
       );
 
@@ -217,14 +215,14 @@ void main() {
       expect(containers, findsWidgets);
     });
 
-    testWidgets('displays header row with title and optional close button', (WidgetTester tester) async {
+    testWidgets('displays header row with title and optional close button', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: AudioPreviewPlayer(
-              audioUrl: 'https://example.com/audio.mp3',
-              onClose: () {},
-            ),
+        buildHarness(
+          AudioPreviewPlayer(
+            audioUrl: 'https://example.com/audio.mp3',
+            onClose: () {},
           ),
         ),
       );
@@ -250,7 +248,7 @@ void main() {
     test('AudioPreviewPlayer with all parameters', () {
       // Requirements 5: Complete API
       void closeCallback() {}
-      
+
       final player = AudioPreviewPlayer(
         audioUrl: 'https://example.com/audio.mp3',
         autoPlay: false,

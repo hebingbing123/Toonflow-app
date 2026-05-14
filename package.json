@@ -19,6 +19,11 @@
   },
   "scripts": {
     "lint": "tsc --noEmit",
+    "supabase:start:db": "bash scripts/supabase_start_db_local.sh",
+    "test:backend:me:db": "bash scripts/run_me_endpoint_tests.sh",
+    "test:backend:e2e:db": "bash scripts/run_e2e_regression_tests.sh",
+    "test:backend:search": "bash scripts/run_search_api_tests.sh",
+    "test:backend:search:db": "bash scripts/run_search_api_tests.sh --db",
     "refactor:agent": "bash scripts/agent-refactor-check.sh",
     "refactor:check": "bash scripts/refactor-check.sh",
     "refactor:quick": "bash scripts/refactor-check.sh --quick",

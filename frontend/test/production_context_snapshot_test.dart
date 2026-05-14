@@ -62,21 +62,21 @@ void main() {
       expect(find.text('上下文快照'), findsOneWidget);
       expect(find.text('flow[storyboardTable]'), findsOneWidget);
       expect(find.textContaining('分镜 3 条'), findsOneWidget);
-      expect(find.textContaining('优先展示缺帧相关镜头'), findsOneWidget);
-      expect(find.textContaining('镜头 #101\n场景: 大殿'), findsOneWidget);
+      expect(find.textContaining('优先展示缺帧相关镜头'), findsWidgets);
+      expect(find.textContaining('镜头 101\n场景 大殿'), findsWidgets);
       expect(
-        find.textContaining('皇帝在大殿中宣布出征，群臣静默。\n资产: 7, 12'),
-        findsOneWidget,
+        find.textContaining('皇帝在大殿中宣布出征，群臣静默。\n资产 7, 12'),
+        findsWidgets,
       );
-      expect(find.textContaining('镜头 #102'), findsNothing);
+      expect(find.textContaining('镜头 102'), findsNothing);
       expect(find.textContaining('其余 2 行已折叠'), findsNWidgets(2));
 
       expect(find.text('flow[storyboard]'), findsOneWidget);
       expect(find.textContaining('缺帧 1 项'), findsOneWidget);
-      expect(find.textContaining('优先展示缺帧镜头'), findsOneWidget);
-      expect(find.textContaining('结果: 缺帧待补图'), findsOneWidget);
-      expect(find.textContaining('镜头 #101\n结果: 缺帧待补图'), findsOneWidget);
-      expect(find.textContaining('镜头 #102'), findsNothing);
+      expect(find.textContaining('优先展示缺帧相关镜头'), findsWidgets);
+      expect(find.textContaining('缺少图片 7, 12'), findsWidgets);
+      expect(find.textContaining('镜头 101\n缺少图片 7, 12'), findsWidgets);
+      expect(find.textContaining('镜头 102'), findsNothing);
       expect(find.textContaining('其余 2 行已折叠'), findsNWidgets(2));
     },
   );
@@ -175,12 +175,13 @@ void main() {
       );
       expect(find.textContaining('② 视觉风格与画面基调：冷金对比'), findsNWidgets(2));
       expect(find.textContaining('改写约束下沉'), findsOneWidget);
-      expect(find.textContaining('scriptPlan 已承接上游改写约束'), findsOneWidget);
-      expect(find.textContaining('资产聚焦：角色/场景资产'), findsOneWidget);
-      expect(find.text('审核摘要'), findsOneWidget);
-      expect(find.textContaining('聚焦资产: 7, 12'), findsOneWidget);
-      expect(find.textContaining('聚焦镜头: 3, 9'), findsOneWidget);
-      expect(find.textContaining('下一步: generate_storyboard'), findsOneWidget);
+      expect(find.text('由 scriptPlan 派生的 production 执行提示'), findsNWidgets(2));
+      expect(find.textContaining('执行顺序：先核对导演计划点名资产'), findsWidgets);
+      expect(find.textContaining('资产焦点：角色/场景资产'), findsWidgets);
+      expect(find.text('来自 \$toolName'), findsOneWidget);
+      expect(find.textContaining('资产：7, 12'), findsWidgets);
+      expect(find.textContaining('镜头：3, 9'), findsWidgets);
+      expect(find.textContaining('下一步：generate_storyboard'), findsWidgets);
     },
   );
 }

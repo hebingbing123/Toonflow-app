@@ -116,13 +116,32 @@ void main() {
         passed: true,
         isBadCase: true,
         badCaseCategory: 'continuity',
+        suggestedAction: 'patch_storyboard_items',
       ),
     );
 
     expect(
       details,
-      'r1 · output · manual · target=job-1 · score=88 · passed=true · bad_case · category=continuity',
+      contains(
+        'r1 · output · manual · target=job-1 · score=88 · passed=true · bad_case · category=continuity · suggested_action=patch_storyboard_items',
+      ),
     );
+    expect(details, contains('suggestions=先局部修分镜条目，把动作、视线和节奏补齐。'));
+  });
+
+  test('QualityReview.fromJson parses suggestedAction', () {
+    final review = QualityReview.fromJson(const {
+      'id': 'r-json',
+      'createdAt': '2026-04-10T00:00:00Z',
+      'updatedAt': '2026-04-10T00:00:00Z',
+      'userId': 'u1',
+      'targetType': 'output',
+      'source': 'manual',
+      'isBadCase': true,
+      'suggestedAction': 'adjust_video_prompt',
+    });
+
+    expect(review.suggestedAction, 'adjust_video_prompt');
   });
 
   test(
@@ -239,6 +258,7 @@ void main() {
           overallScore: 78,
           isBadCase: false,
           comments: '情绪还不够自然，有点生硬',
+          suggestedAction: 'update_character_anchor',
           modelParams: {
             'diagnostics': {
               'promptChars': 430,
@@ -255,6 +275,7 @@ void main() {
         l10n: _zh,
       );
 
+      expect(suggestions.first, '先补角色锚点，明确外形、气质和情绪反应，再重试。');
       expect(suggestions, contains('当前主要命中项目级记忆，继续压词时先缩通用风格句，别动人物表演。'));
       expect(suggestions, contains('保留表演/语气记忆，补可演的情绪动作，别先删 delivery 记忆。'));
     },

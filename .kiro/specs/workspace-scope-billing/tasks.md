@@ -8,13 +8,13 @@ Cross-links: **requirements** → `.kiro/specs/workspace-scope-billing/requireme
 
 ## Tasks
 
-- [ ] **0. Program gates & ADR**
+- [x] **0. Program gates & ADR**
   - [x] 0.1 Record **billing attribution** decision (user → workspace or hybrid) with **effective date** and owner sign-off. → [ADR: Workspace Billing Attribution](../../../docs/plans/adr-workspace-billing-attribution.md)
   - [x] 0.2 Publish/update **client migration** notice (`docs/plans/workspace-migration-notice.md` or equivalent). → [Client Migration Notice](../../../docs/plans/workspace-billing-migration-notice.md)
   - [x] 0.3 Add ADR: **Option A vs B** (`app_workspace` columns vs `app_workspace_billing` table); personal vs enterprise rules; who sets `billing_scope`. → [ADR: Workspace Billing Storage Model](../../../docs/plans/adr-workspace-billing-storage-model.md)
   - _Requirements: 0.1, 0.2, 1.1_
 
-- [ ] **1. Database — additive schema**
+- [x] **1. Database — additive schema**
   - [x] 1.1 Create migration: workspace billing storage per ADR (nullable columns or new table + indexes).
   - [x] 1.2 Add migration for `app_generation_job.workspace_id` (nullable first if required) + index for aggregation.
   - [x] 1.3 Document rollback: `DROP` only for objects introduced in 1.1–1.2 (no user-column drops). → [`workspace-billing-schema-rollback.md`](../../../docs/plans/workspace-billing-schema-rollback.md)
@@ -39,7 +39,7 @@ Cross-links: **requirements** → `.kiro/specs/workspace-scope-billing/requireme
   - [x] 4.3 Add reconciliation hook (metric or nightly job) comparing legacy vs workspace-derived state during shadow period.
   - _Requirements: 5.1, 5.2, 5.3_
 
-- [ ] **5. GET /api/v1/me — v2**
+- [x] **5. GET /api/v1/me — v2**
   - [x] 5.1 Add OpenAPI models: `billing_scope`, nested v2 body; keep v1 schema stable.
   - [x] 5.2 Implement routing: `?v=2` **or** `Accept` negotiation (pick one in ADR). → [ADR: /me API Version Negotiation](../../../docs/plans/adr-me-api-version-negotiation.md)
   - [x] 5.3 Implement handler: load profile + current workspace + workspace billing; omit or null `current_workspace_billing` per rules.
@@ -52,12 +52,12 @@ Cross-links: **requirements** → `.kiro/specs/workspace-scope-billing/requireme
   - [x] 6.3 Feature flag or version gating aligned with migration notice.
   - _Requirements: 3.4, 3.5, 9.2_
 
-- [ ] **7. Related APIs — scope consistency (optional / phased)**
+- [x] **7. Related APIs — scope consistency (optional / phased)**
   - [x] 7.1 Inventory endpoints with `scope=user` in OpenAPI; product decision per endpoint. → [`endpoint-scope-inventory.md`](./endpoint-scope-inventory.md)
   - [x] 7.2 Implement workspace-scoped variants or document deferral in backlog. → Implementation: `backend/src/metering/usage/summary.rs`; Deferrals: [`endpoint-scope-deferrals.md`](./endpoint-scope-deferrals.md)
   - _Requirements: 6.1, 6.2, 6.3_
 
-- [ ] **8. Ops billing view (W8.3)**
+- [x] **8. Ops billing view (W8.3)**
   - [x] 8.1 Internal API or admin query: filter by `workspace_id` (subscription snapshot, job aggregates).
   - [x] 8.2 PII hygiene: aggregates only in exports/logs. → [PII Hygiene Audit](./pii-hygiene-audit.md), [Webhook Retention Policy](../../../docs/plans/billing-webhook-retention-policy.md), [Access Control Migration](../../../supabase/migrations/20260410000000_billing_webhook_payload_access_control.sql)
   - _Requirements: 7.1, 7.2, 7.3_

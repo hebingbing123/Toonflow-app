@@ -26,7 +26,7 @@ async fn project_edit_visual_manual_not_found_for_missing_style() {
     let (status, v) = post_json_bearer("/api/v1/project/edit-visual-manual", &token, body).await;
     assert_eq!(status, StatusCode::BAD_REQUEST);
     assert_eq!(v["code"], "bad_request");
-    assert_eq!(v["message"], "视觉手册不存在");
+    assert_eq!(v["message"], "Visual manual does not exist");
 }
 
 #[tokio::test]

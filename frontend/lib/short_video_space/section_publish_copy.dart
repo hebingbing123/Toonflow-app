@@ -49,12 +49,20 @@ extension ShortVideoPublishCopy on _ShortVideoSpaceSectionState {
         _publishCopyEditorRevision++;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.shortVideoPublishCopySuggestApplied(res.source))),
+        SnackBar(
+          content: Text(l10n.shortVideoPublishCopySuggestApplied(res.source)),
+        ),
       );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.shortVideoPublishCopySuggestFailed(describeUserVisibleApiError(l10n, e)))),
+          SnackBar(
+            content: Text(
+              l10n.shortVideoPublishCopySuggestFailed(
+                describeUserVisibleApiError(l10n, e),
+              ),
+            ),
+          ),
         );
       }
     } finally {
@@ -93,20 +101,19 @@ extension ShortVideoPublishCopy on _ShortVideoSpaceSectionState {
       _publishBusy = true;
     });
     try {
-      final draft = await fetchPublishDraft(token, project.id, draftId);
-      final copy = Map<String, dynamic>.from(draft.platformCopy ?? {});
       final tags = tagsComma
           .split(',')
           .map((s) => s.trim())
           .where((s) => s.isNotEmpty)
           .toList();
-      copy[platformId] = <String, dynamic>{
-        'title': title.trim(),
-        'description': description.trim(),
-        'tags': tags,
-      };
       await patchPublishDraft(token, project.id, draftId, <String, dynamic>{
-        'platform_copy': copy,
+        'platform_copy_fragment': <String, dynamic>{
+          platformId: <String, dynamic>{
+            'title': title.trim(),
+            'description': description.trim(),
+            'tags': tags,
+          },
+        },
       });
       if (!context.mounted) {
         return;
@@ -120,7 +127,13 @@ extension ShortVideoPublishCopy on _ShortVideoSpaceSectionState {
       );
     } catch (e) {
       messenger?.showSnackBar(
-        SnackBar(content: Text(l10n.shortVideoPublishCopySaveFailed(describeUserVisibleApiError(l10n, e)))),
+        SnackBar(
+          content: Text(
+            l10n.shortVideoPublishCopySaveFailed(
+              describeUserVisibleApiError(l10n, e),
+            ),
+          ),
+        ),
       );
     } finally {
       if (mounted) {

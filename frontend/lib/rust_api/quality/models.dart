@@ -33,6 +33,7 @@ class QualityReview {
     this.grade,
     this.skillFilePath,
     this.skillVersionHash,
+    this.suggestedAction,
   });
 
   final String id;
@@ -65,6 +66,7 @@ class QualityReview {
   final String? grade;
   final String? skillFilePath;
   final String? skillVersionHash;
+  final String? suggestedAction;
 
   factory QualityReview.fromJson(Map<String, dynamic> json) {
     int? asInt(String key) =>
@@ -104,6 +106,7 @@ class QualityReview {
       grade: json['grade'] as String?,
       skillFilePath: json['skillFilePath'] as String?,
       skillVersionHash: json['skillVersionHash'] as String?,
+      suggestedAction: json['suggestedAction'] as String?,
     );
   }
 }

@@ -2,7 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/project_editor/scripts/workbench/dialog_view.dart';
 import 'package:openflow_app/script_editor/support.dart';
+import 'package:openflow_app/l10n/app_localizations.dart';
+import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/rust_api.dart';
+
+Widget _appWithZh({required Widget child}) => MaterialApp(
+  localizationsDelegates: AppLocalizations.localizationsDelegates,
+  supportedLocales: AppLocalizations.supportedLocales,
+  locale: const Locale('zh'),
+  home: Scaffold(body: child),
+);
 
 ProjectScriptsWorkbenchDialogViewModel buildDialogModel({
   required TextEditingController filterCtrl,
@@ -66,6 +75,7 @@ ProjectScriptsWorkbenchDialogViewCallbacks buildDialogCallbacks({
 }
 
 void main() {
+  final zh = AppLocalizationsZh();
   late TextEditingController filterCtrl;
   late TextEditingController selectedIdsCtrl;
   late TextEditingController groupSizeCtrl;
@@ -95,29 +105,39 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: ProjectScriptsWorkbenchDialogView(
-            model: buildDialogModel(
-              filterCtrl: filterCtrl,
-              selectedIdsCtrl: selectedIdsCtrl,
-              groupSizeCtrl: groupSizeCtrl,
-              addCountCtrl: addCountCtrl,
-              addPrefixCtrl: addPrefixCtrl,
-              addBodyCtrl: addBodyCtrl,
-              scriptTaskLine: '已导出 1 条剧本。',
-            ),
-            callbacks: buildDialogCallbacks(),
+      _appWithZh(
+        child: ProjectScriptsWorkbenchDialogView(
+          model: buildDialogModel(
+            filterCtrl: filterCtrl,
+            selectedIdsCtrl: selectedIdsCtrl,
+            groupSizeCtrl: groupSizeCtrl,
+            addCountCtrl: addCountCtrl,
+            addPrefixCtrl: addPrefixCtrl,
+            addBodyCtrl: addBodyCtrl,
+            scriptTaskLine: '已导出 1 条剧本。',
           ),
+          callbacks: buildDialogCallbacks(),
         ),
       ),
     );
 
-    expect(find.text('剧本批量工作台'), findsOneWidget);
-    expect(find.text('读取剧本上下文'), findsOneWidget);
-    expect(find.text('导出所选剧本'), findsOneWidget);
-    expect(find.text('批量新增剧本'), findsOneWidget);
-    expect(find.text('上下文预览'), findsOneWidget);
+    expect(
+      find.text(zh.projectEditorScriptsWorkbenchDialogTitle),
+      findsOneWidget,
+    );
+    expect(
+      find.text(zh.projectEditorScriptsWorkbenchDialogReadScriptContext),
+      findsOneWidget,
+    );
+    expect(
+      find.text(zh.projectEditorScriptsWorkbenchRecommendExportSelected),
+      findsOneWidget,
+    );
+    expect(find.text(zh.projectEditorScriptsBatchAddTitle), findsOneWidget);
+    expect(
+      find.text(zh.projectEditorScriptsWorkbenchDialogContextPreviewHeading),
+      findsOneWidget,
+    );
     expect(find.textContaining('#7 第一集'), findsOneWidget);
     expect(find.text('已导出 1 条剧本。'), findsOneWidget);
   });
@@ -126,29 +146,27 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: ProjectScriptsWorkbenchDialogView(
-            model: buildDialogModel(
-              filterCtrl: filterCtrl,
-              selectedIdsCtrl: selectedIdsCtrl,
-              groupSizeCtrl: groupSizeCtrl,
-              addCountCtrl: addCountCtrl,
-              addPrefixCtrl: addPrefixCtrl,
-              addBodyCtrl: addBodyCtrl,
-              localBusy: true,
-            ),
-            callbacks: buildDialogCallbacks(
-              onReadContext: null,
-              onUsePreviewOrAll: null,
-              onReloadScripts: null,
-              onRunRecommendedAction: null,
-              onExportSelected: null,
-              onPollSelected: null,
-              onExtractSelected: null,
-              onBatchCreate: null,
-              onClose: null,
-            ),
+      _appWithZh(
+        child: ProjectScriptsWorkbenchDialogView(
+          model: buildDialogModel(
+            filterCtrl: filterCtrl,
+            selectedIdsCtrl: selectedIdsCtrl,
+            groupSizeCtrl: groupSizeCtrl,
+            addCountCtrl: addCountCtrl,
+            addPrefixCtrl: addPrefixCtrl,
+            addBodyCtrl: addBodyCtrl,
+            localBusy: true,
+          ),
+          callbacks: buildDialogCallbacks(
+            onReadContext: null,
+            onUsePreviewOrAll: null,
+            onReloadScripts: null,
+            onRunRecommendedAction: null,
+            onExportSelected: null,
+            onPollSelected: null,
+            onExtractSelected: null,
+            onBatchCreate: null,
+            onClose: null,
           ),
         ),
       ),
@@ -166,13 +184,23 @@ void main() {
     );
     expect(
       tester
-          .widget<FilledButton>(find.widgetWithText(FilledButton, '导出所选剧本'))
+          .widget<FilledButton>(
+            find.widgetWithText(
+              FilledButton,
+              zh.projectEditorScriptsWorkbenchRecommendExportSelected,
+            ),
+          )
           .onPressed,
       isNull,
     );
     expect(
       tester
-          .widget<TextButton>(find.widgetWithText(TextButton, '关闭'))
+          .widget<TextButton>(
+            find.widgetWithText(
+              TextButton,
+              zh.projectEditorScriptsWorkbenchDialogClose,
+            ),
+          )
           .onPressed,
       isNull,
     );
@@ -182,35 +210,36 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: ProjectScriptsWorkbenchDialogView(
-            model: buildDialogModel(
-              filterCtrl: filterCtrl,
-              selectedIdsCtrl: selectedIdsCtrl,
-              groupSizeCtrl: groupSizeCtrl,
-              addCountCtrl: addCountCtrl,
-              addPrefixCtrl: addPrefixCtrl,
-              addBodyCtrl: addBodyCtrl,
-              previewRows: const <ScriptWorkbenchDetailRow>[
-                ScriptWorkbenchDetailRow(
-                  numericId: 11,
-                  name: '第二集',
-                  extractState: 2,
-                  relatedAssets: <ScriptRelatedAssetBrief>[
-                    ScriptRelatedAssetBrief(numericId: 1, name: '角色 A'),
-                    ScriptRelatedAssetBrief(numericId: 2, name: '场景 B'),
-                  ],
-                ),
-              ],
-            ),
-            callbacks: buildDialogCallbacks(),
+      _appWithZh(
+        child: ProjectScriptsWorkbenchDialogView(
+          model: buildDialogModel(
+            filterCtrl: filterCtrl,
+            selectedIdsCtrl: selectedIdsCtrl,
+            groupSizeCtrl: groupSizeCtrl,
+            addCountCtrl: addCountCtrl,
+            addPrefixCtrl: addPrefixCtrl,
+            addBodyCtrl: addBodyCtrl,
+            previewRows: const <ScriptWorkbenchDetailRow>[
+              ScriptWorkbenchDetailRow(
+                numericId: 11,
+                name: '第二集',
+                extractState: 2,
+                relatedAssets: <ScriptRelatedAssetBrief>[
+                  ScriptRelatedAssetBrief(numericId: 1, name: '角色 A'),
+                  ScriptRelatedAssetBrief(numericId: 2, name: '场景 B'),
+                ],
+              ),
+            ],
           ),
+          callbacks: buildDialogCallbacks(),
         ),
       ),
     );
 
-    expect(find.text('使用当前预览'), findsOneWidget);
+    expect(
+      find.text(zh.projectEditorScriptsWorkbenchDialogUseCurrentPreview),
+      findsOneWidget,
+    );
     expect(
       find.textContaining('#11 第二集 · 提取状态 2 · 素材 角色 A、场景 B'),
       findsOneWidget,

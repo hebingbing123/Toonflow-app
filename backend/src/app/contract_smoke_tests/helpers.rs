@@ -27,9 +27,6 @@ pub(super) const MAX_PROBE_BYTES: usize = 512 * 1024;
 pub(super) const TEST_JWT_SECRET: &[u8] = b"contract-smoke-jwt-secret-bytes-32chars!";
 pub(super) const NIL_JOB_UUID: &str = "00000000-0000-0000-0000-000000000000";
 
-/// Serialize billing webhook tests that read or write **`BILLING_WEBHOOK_SECRET`** (avoids parallel **`cargo test`** flakes).
-pub(super) static BILLING_WEBHOOK_TEST_MUTEX: OnceLock<tokio::sync::Mutex<()>> = OnceLock::new();
-
 /// Serialize **`TOONFLOW_INTERNAL_OPS_TOKEN`** mutation in internal-ops contract tests.
 static INTERNAL_OPS_QUEUE_STATS_MUTEX: OnceLock<Mutex<()>> = OnceLock::new();
 
@@ -43,12 +40,8 @@ pub(super) fn internal_ops_token_test_lock() -> std::sync::MutexGuard<'static, (
 pub(super) fn internal_ops_queue_stats_test_lock() -> std::sync::MutexGuard<'static, ()> {
     internal_ops_token_test_lock()
 }
-pub(super) async fn billing_webhook_test_lock() -> tokio::sync::MutexGuard<'static, ()> {
-    BILLING_WEBHOOK_TEST_MUTEX
-        .get_or_init(|| tokio::sync::Mutex::new(()))
-        .lock()
-        .await
-}
+
+pub(super) use crate::app::billing_webhook_test_lock;
 
 pub(super) fn test_addr() -> SocketAddr {
     SocketAddr::from(([127, 0, 0, 1], 42_042))

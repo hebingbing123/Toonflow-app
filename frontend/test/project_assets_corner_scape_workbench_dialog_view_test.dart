@@ -1,11 +1,18 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
+import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/project_editor/assets/corner_scape_view.dart';
 import 'package:openflow_app/rust_api.dart';
+
+Widget _appWithZh({required Widget child}) => MaterialApp(
+  localizationsDelegates: AppLocalizations.localizationsDelegates,
+  supportedLocales: AppLocalizations.supportedLocales,
+  locale: const Locale('zh'),
+  home: Scaffold(body: child),
+);
 
 CornerScapeHistoryImage buildHistoryImage({
   required String id,
@@ -187,6 +194,7 @@ final Uint8List _transparentPng = Uint8List.fromList(<int>[
 ]);
 
 void main() {
+  final zh = AppLocalizationsZh();
   late TextEditingController typesCtrl;
 
   setUp(() {
@@ -201,31 +209,24 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: AppLocalizations.supportedLocales,
-        locale: const Locale('zh'),
-        home: Scaffold(
-          body: CornerScapeWorkbenchDialogView(
-            model: buildModel(
-              typesCtrl: typesCtrl,
-              selectedPreviewBytes: _transparentPng,
-            ),
-            callbacks: buildCallbacks(),
+      _appWithZh(
+        child: CornerScapeWorkbenchDialogView(
+          model: buildModel(
+            typesCtrl: typesCtrl,
+            selectedPreviewBytes: _transparentPng,
           ),
+          callbacks: buildCallbacks(),
         ),
       ),
     );
 
-    expect(find.text('资产历史图工作台'), findsOneWidget);
-    expect(find.text('查询历史图资产'), findsOneWidget);
+    expect(find.text(zh.projectEditorAssetHistoryTitle), findsOneWidget);
+    expect(find.text(zh.projectEditorAssetHistoryQueryButton), findsOneWidget);
     expect(find.textContaining('#21 女主角'), findsOneWidget);
-    expect(find.text('当前图片：sort=1 · state=ready'), findsOneWidget);
+    expect(
+      find.text(zh.projectEditorAssetHistoryCurrentImage(1, 'ready')),
+      findsOneWidget,
+    );
     expect(find.byType(Image), findsOneWidget);
   });
 
@@ -233,37 +234,30 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: AppLocalizations.supportedLocales,
-        locale: const Locale('zh'),
-        home: Scaffold(
-          body: CornerScapeWorkbenchDialogView(
-            model: buildModel(
-              typesCtrl: typesCtrl,
-              busy: true,
-              loading: true,
-              loadingPreview: true,
-              summaryLine: null,
-              assets: const <CornerScapeAssetItem>[],
-            ),
-            callbacks: buildCallbacks(),
+      _appWithZh(
+        child: CornerScapeWorkbenchDialogView(
+          model: buildModel(
+            typesCtrl: typesCtrl,
+            busy: true,
+            loading: true,
+            loadingPreview: true,
+            summaryLine: null,
+            assets: const <CornerScapeAssetItem>[],
           ),
+          callbacks: buildCallbacks(),
         ),
       ),
     );
 
     final button = tester.widget<FilledButton>(
-      find.widgetWithText(FilledButton, '加载中…'),
+      find.widgetWithText(FilledButton, zh.projectEditorAssetHistoryLoading),
     );
     expect(button.onPressed, isNull);
     expect(find.byType(CircularProgressIndicator), findsNothing);
-    expect(find.text('正在加载历史图资产…'), findsOneWidget);
+    expect(
+      find.text(zh.projectEditorAssetHistoryLoadingAssets),
+      findsOneWidget,
+    );
   });
 
   testWidgets('corner scape workbench view forwards interactions', (
@@ -276,41 +270,31 @@ void main() {
     var refreshed = false;
 
     await tester.pumpWidget(
-      MaterialApp(
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: AppLocalizations.supportedLocales,
-        locale: const Locale('zh'),
-        home: Scaffold(
-          body: CornerScapeWorkbenchDialogView(
-            model: buildModel(typesCtrl: typesCtrl),
-            callbacks: buildCallbacks(
-              onRefresh: () async {
-                refreshed = true;
-              },
-              onClearFilter: () async {
-                cleared = true;
-              },
-              onPresetType: (type) async {
-                presetType = type;
-              },
-              onAssetSelected: (assetNumericId) async {
-                tappedAssetId = assetNumericId;
-              },
-              onHistoryImageSelected: (historyImageId) async {
-                tappedHistoryImageId = historyImageId;
-              },
-            ),
+      _appWithZh(
+        child: CornerScapeWorkbenchDialogView(
+          model: buildModel(typesCtrl: typesCtrl),
+          callbacks: buildCallbacks(
+            onRefresh: () async {
+              refreshed = true;
+            },
+            onClearFilter: () async {
+              cleared = true;
+            },
+            onPresetType: (type) async {
+              presetType = type;
+            },
+            onAssetSelected: (assetNumericId) async {
+              tappedAssetId = assetNumericId;
+            },
+            onHistoryImageSelected: (historyImageId) async {
+              tappedHistoryImageId = historyImageId;
+            },
           ),
         ),
       ),
     );
 
-    await tester.tap(find.text('清空类型过滤'));
+    await tester.tap(find.text(zh.projectEditorAssetHistoryClearFilter));
     await tester.pump();
     await tester.tap(find.text('props'));
     await tester.pump();
@@ -321,8 +305,18 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.textContaining('#2 · done'));
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.widgetWithText(FilledButton, '查询历史图资产'));
-    await tester.tap(find.widgetWithText(FilledButton, '查询历史图资产'));
+    await tester.ensureVisible(
+      find.widgetWithText(
+        FilledButton,
+        zh.projectEditorAssetHistoryQueryButton,
+      ),
+    );
+    await tester.tap(
+      find.widgetWithText(
+        FilledButton,
+        zh.projectEditorAssetHistoryQueryButton,
+      ),
+    );
     await tester.pump();
 
     expect(cleared, isTrue);

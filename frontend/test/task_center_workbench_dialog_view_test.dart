@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
+import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/task_center/workbench_view.dart';
 import 'package:openflow_app/rust_api.dart';
+
+Widget _appWithZh({required Widget child}) => MaterialApp(
+  localizationsDelegates: AppLocalizations.localizationsDelegates,
+  supportedLocales: AppLocalizations.supportedLocales,
+  locale: const Locale('zh'),
+  home: Scaffold(body: child),
+);
 
 TaskCenterWorkbenchDialogViewModel buildDialogModel({
   required TextEditingController pageCtrl,
@@ -105,6 +113,7 @@ TaskCenterWorkbenchDialogViewCallbacks buildDialogCallbacks({
 }
 
 void main() {
+  final zh = AppLocalizationsZh();
   late TextEditingController pageCtrl;
   late TextEditingController limitCtrl;
   late TextEditingController stateCtrl;
@@ -142,37 +151,35 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        locale: const Locale('zh'),
-        home: Scaffold(
-          body: TaskCenterWorkbenchDialogView(
-            model: buildDialogModel(
-              pageCtrl: pageCtrl,
-              limitCtrl: limitCtrl,
-              stateCtrl: stateCtrl,
-              taskClassCtrl: taskClassCtrl,
-              projectIdCtrl: projectIdCtrl,
-              projectUuidCtrl: projectUuidCtrl,
-              numericTaskIdCtrl: numericTaskIdCtrl,
-              uuidCtrl: uuidCtrl,
-            ),
-            callbacks: buildDialogCallbacks(),
+      _appWithZh(
+        child: TaskCenterWorkbenchDialogView(
+          model: buildDialogModel(
+            pageCtrl: pageCtrl,
+            limitCtrl: limitCtrl,
+            stateCtrl: stateCtrl,
+            taskClassCtrl: taskClassCtrl,
+            projectIdCtrl: projectIdCtrl,
+            projectUuidCtrl: projectUuidCtrl,
+            numericTaskIdCtrl: numericTaskIdCtrl,
+            uuidCtrl: uuidCtrl,
           ),
+          callbacks: buildDialogCallbacks(),
         ),
       ),
     );
 
-    expect(find.text('任务工作台'), findsOneWidget);
-    expect(find.text('刷新任务项目'), findsOneWidget);
-    expect(find.text('按筛选加载任务'), findsOneWidget);
-    expect(find.textContaining('当前已接入实时任务更新'), findsOneWidget);
+    expect(find.text(zh.taskCenterWorkbenchTitle), findsOneWidget);
+    expect(find.text(zh.taskCenterReloadTaskProjects), findsOneWidget);
+    expect(find.text(zh.taskCenterLoadTasksByFilters), findsOneWidget);
+    expect(
+      find.textContaining(zh.taskCenterWorkbenchRealtimeConnected.trim()),
+      findsOneWidget,
+    );
     expect(find.text('1 个项目 · #7 春季短剧'), findsOneWidget);
     expect(find.text('2 个分类 · storyboard, render'), findsOneWidget);
     expect(find.text('1 条任务'), findsOneWidget);
-    expect(find.text('项目 UUID（可选）'), findsOneWidget);
-    expect(find.text('任务详情'), findsOneWidget);
+    expect(find.text(zh.taskCenterFieldProjectUuidOptional), findsOneWidget);
+    expect(find.text(zh.taskCenterTaskDetailsSection), findsOneWidget);
     expect(find.textContaining('#11 · job-11'), findsOneWidget);
     expect(find.text('状态：已刷新 1 条任务。'), findsOneWidget);
   });
@@ -181,29 +188,24 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        locale: const Locale('zh'),
-        home: Scaffold(
-          body: TaskCenterWorkbenchDialogView(
-            model: buildDialogModel(
-              pageCtrl: pageCtrl,
-              limitCtrl: limitCtrl,
-              stateCtrl: stateCtrl,
-              taskClassCtrl: taskClassCtrl,
-              projectIdCtrl: projectIdCtrl,
-              projectUuidCtrl: projectUuidCtrl,
-              numericTaskIdCtrl: numericTaskIdCtrl,
-              uuidCtrl: uuidCtrl,
-              loadingProjects: true,
-              loadingCategories: true,
-              loadingTasks: true,
-              loadingNumericIdTaskDetail: true,
-              loadingUuidDetails: true,
-            ),
-            callbacks: buildDialogCallbacks(),
+      _appWithZh(
+        child: TaskCenterWorkbenchDialogView(
+          model: buildDialogModel(
+            pageCtrl: pageCtrl,
+            limitCtrl: limitCtrl,
+            stateCtrl: stateCtrl,
+            taskClassCtrl: taskClassCtrl,
+            projectIdCtrl: projectIdCtrl,
+            projectUuidCtrl: projectUuidCtrl,
+            numericTaskIdCtrl: numericTaskIdCtrl,
+            uuidCtrl: uuidCtrl,
+            loadingProjects: true,
+            loadingCategories: true,
+            loadingTasks: true,
+            loadingNumericIdTaskDetail: true,
+            loadingUuidDetails: true,
           ),
+          callbacks: buildDialogCallbacks(),
         ),
       ),
     );
@@ -220,27 +222,22 @@ void main() {
     JobRow? retriedJob;
 
     await tester.pumpWidget(
-      MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        locale: const Locale('zh'),
-        home: Scaffold(
-          body: TaskCenterWorkbenchDialogView(
-            model: buildDialogModel(
-              pageCtrl: pageCtrl,
-              limitCtrl: limitCtrl,
-              stateCtrl: stateCtrl,
-              taskClassCtrl: taskClassCtrl,
-              projectIdCtrl: projectIdCtrl,
-              projectUuidCtrl: projectUuidCtrl,
-              numericTaskIdCtrl: numericTaskIdCtrl,
-              uuidCtrl: uuidCtrl,
-            ),
-            callbacks: buildDialogCallbacks(
-              onPickCategory: (value) => pickedCategory = value,
-              onPickJob: (job) => pickedJob = job,
-              onRetryFailedJob: (job) => retriedJob = job,
-            ),
+      _appWithZh(
+        child: TaskCenterWorkbenchDialogView(
+          model: buildDialogModel(
+            pageCtrl: pageCtrl,
+            limitCtrl: limitCtrl,
+            stateCtrl: stateCtrl,
+            taskClassCtrl: taskClassCtrl,
+            projectIdCtrl: projectIdCtrl,
+            projectUuidCtrl: projectUuidCtrl,
+            numericTaskIdCtrl: numericTaskIdCtrl,
+            uuidCtrl: uuidCtrl,
+          ),
+          callbacks: buildDialogCallbacks(
+            onPickCategory: (value) => pickedCategory = value,
+            onPickJob: (job) => pickedJob = job,
+            onRetryFailedJob: (job) => retriedJob = job,
           ),
         ),
       ),
@@ -249,8 +246,10 @@ void main() {
     await tester.ensureVisible(find.widgetWithText(ActionChip, 'storyboard'));
     await tester.tap(find.widgetWithText(ActionChip, 'storyboard'));
     await tester.pump();
-    await tester.ensureVisible(find.widgetWithText(TextButton, '重试'));
-    await tester.tap(find.widgetWithText(TextButton, '重试'));
+    await tester.ensureVisible(
+      find.widgetWithText(TextButton, zh.taskCenterRetry),
+    );
+    await tester.tap(find.widgetWithText(TextButton, zh.taskCenterRetry));
     await tester.pump();
     await tester.ensureVisible(find.byType(ListTile).first);
     await tester.tap(find.byType(ListTile).first);

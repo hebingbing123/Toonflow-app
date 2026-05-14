@@ -1,0 +1,549 @@
+  @override
+  String get agentWorkspaceProductionFlowRecipeDiagnosisRefineIntentFirst =>
+      r'当前更建议先细化导演计划里的分场景情绪/画面意图，再继续拆分分镜表。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeDiagnosisExpandTableFirst =>
+      r'当前更建议先扩读关键分镜表窗口，再决定是否推进 storyboard。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeDiagnosisCheapestFirst =>
+      r'当前建议按第一张卡开始推进，优先执行最靠前的低成本动作。';
+
+  @override
+  String get agentWorkspaceProductionSupervisionSummaryFallback =>
+      r'按审核结论继续推进。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSbGenRefreshTitle =>
+      r'刷新分镜结果';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSbGenRereadTitle =>
+      r'回读缺帧状态';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSbGenRefreshDetail =>
+      r'分镜生成动作已执行，先刷新分镜结果，再决定是否写回。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeContinueDirectorTitle =>
+      r'继续导演计划';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeContinueDirectorAfterSbDetail =>
+      r'如分镜结果还不稳定，回到 scriptPlan 生成下一轮导演决策。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSbTableRefreshTitle =>
+      r'刷新分镜表';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSbTablePartialTitle =>
+      r'回读局部分镜表';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSbTableRefreshDetail =>
+      r'分镜表子代理已执行，先刷新分镜表，再决定是否继续修订。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSbTableCrosscheckTitle =>
+      r'核对对应分镜';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSbTableCrosscheckDetailAll =>
+      r'必要时切回 storyboard，确认分镜表调整是否已经落实到画面结果。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsRefreshTitle =>
+      r'刷新资产结果';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsRereadTitle =>
+      r'回读受影响资产';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsRefreshDetail =>
+      r'资产动作已执行，先刷新资产结果，再决定是否写回。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsContinueSubTitle =>
+      r'继续资产子代理';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsContinueSubDetail =>
+      r'若仍缺素材，可直接衔接资产子代理推进下一轮生成。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsPlanFirstTitle =>
+      r'先生成资产计划';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsPlanFirstDetail =>
+      r'当前 assets 为空，优先让子代理补齐衍生素材规划。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsPlanFirstPrompt =>
+      r'请基于当前空白 assets flow 规划最小可行的衍生素材集合，并说明优先级。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsContinueGenTitle =>
+      r'继续资产生成';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsContinueGenDetailGeneric =>
+      r'仍有素材缺少图像结果，适合直接运行素材生成子代理。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRefreshStoryboardNeedTitle =>
+      r'刷新分镜需求';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRefreshStoryboardNeedDetail =>
+      r'素材缺口补齐后通常需要回看 storyboard 是否还能沿用当前方案。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCheckStoryboardFlowTitle =>
+      r'检查分镜 flow';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCheckStoryboardFlowDetail =>
+      r'资产已具备基础结果，可切到 storyboard 评估镜头生成状态。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeTidyDirectorPlanTitle =>
+      r'整理导演计划';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeTidyDirectorPlanDetail =>
+      r'若素材已基本齐全，可生成下一轮导演计划收束 production 节奏。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeTidyDirectorPlanPrompt =>
+      r'请结合现有素材状态与 scriptPlan，输出下一轮导演计划与执行优先级。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeFirstStoryboardTitle =>
+      r'生成第一版分镜';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeFirstStoryboardDetail =>
+      r'当前 storyboard 为空，优先运行分镜生成子代理建立初版镜头。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeFirstStoryboardPrompt =>
+      r'请基于当前 production 上下文生成第一版 storyboard，并保持最小可行镜头集。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeFillStoryboardFramesTitle =>
+      r'继续补齐分镜图';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsTitle =>
+      r'核对关联资产';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailFromRefs =>
+      r'优先只看当前分镜窗口实际引用的资产，避免把无关素材带入分镜补图。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailNoIds =>
+      r'当前分镜摘要尚未定位出明确资产 ID，退回紧凑 assets 摘要读取。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCheckStoryboardTableTitle =>
+      r'检查分镜表';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCheckStoryboardTableDetail =>
+      r'必要时切到 storyboardTable 审阅结构化镜头表后再回写。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailReadyIds =>
+      r'分镜已引用明确资产，可先核对这批资产是否足够支撑后续导演调整。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailReadyNoIds =>
+      r'当前分镜摘要未定位出明确资产 ID，先读紧凑 assets 摘要即可。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRefreshDirectorPlanTitle =>
+      r'刷新导演计划';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRefreshDirectorPlanDetail =>
+      r'分镜已有基础结果，适合回到 scriptPlan 整理下一轮导演决策。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCreateDirectorPlanTitle =>
+      r'先生成导演计划';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCreateDirectorPlanDetail =>
+      r'当前 scriptPlan 为空，优先建立导演计划再推进资产或分镜。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCreateDirectorPlanPrompt =>
+      r'请基于当前 production 上下文生成一版导演计划，并给出执行优先级。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeReviewDirectorPlanTitle =>
+      r'审核导演计划';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeReviewDirectorPlanDetail =>
+      r'导演计划已有内容，先做一次监督审核更容易在低成本阶段发现节奏和资产问题。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeReviewDirectorPlanPrompt =>
+      r'请审核当前导演规划，重点检查剧情覆盖、资产匹配与节奏合理性。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRereadScriptTitle =>
+      r'回看剧本依据';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCheckKeyAssetsTitle =>
+      r'检查关键资产';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRefineSceneIntentTitle =>
+      r'补足分场景意图';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipePreviewStoryboardTableTitle =>
+      r'先看分镜表落地';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRefineSceneIntentDetail =>
+      r'当前导演计划还缺少足够明确的分场景情绪/画面意图，先补这层再拆 storyboardTable，能减少后续反复返工。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipePreviewStoryboardTableDetail =>
+      r'如计划已定，先抽样检查 storyboardTable 结构更省 token，再决定是否读取 storyboard 画面结果。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRefineSceneIntentPrompt =>
+      r'请继续细化当前 scriptPlan，优先补足分场景情绪推进、画面意图与镜头落点，再进入 storyboardTable 拆分。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCreateStoryboardTableTitle =>
+      r'生成分镜表';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCreateStoryboardTableDetail =>
+      r'当前 storyboardTable 为空，适合先用分镜表子代理补结构。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCreateStoryboardTablePrompt =>
+      r'请先产出结构化 storyboardTable，并保持字段清晰可回写。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeReviewStoryboardTableTitle =>
+      r'审核分镜表';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeReviewStoryboardTableDetail =>
+      r'分镜表已有内容，先做监督审核可避免把错误结构继续放大到 storyboard。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeReviewStoryboardTablePrompt =>
+      r'请审核当前分镜表，重点检查覆盖度、资产关联与拆分粒度。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsTableRefs =>
+      r'优先只看当前分镜窗口实际引用的资产，减少无关素材上下文。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsTableNoIds =>
+      r'当前窗口暂未解析出关联资产 ID，退回紧凑 assets 摘要读取。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSwitchStoryboardResultsTitle =>
+      r'切回分镜结果';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSwitchStoryboardResultsDetailAll =>
+      r'分镜表已有内容，可继续查看 storyboard 画面结果是否跟上。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSampleStoryboardTableTitle =>
+      r'抽样读取分镜表';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSampleStoryboardTableDetail =>
+      r'先只看前 8 行关键列，通常足够判断是否继续审核或回写。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeReviseDirectorPlanTitle =>
+      r'修导演计划';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRecheckAssetSupportTitle =>
+      r'复查资产支撑';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRecheckAssetSupportDetail =>
+      r'导演计划常先卡在资产准备，先看 assets 能减少返工。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeVerifyAssetSupportTitle =>
+      r'核对资产支撑';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRereadDirectorPlanTitle =>
+      r'回看导演计划';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRereadDirectorPlanAfterAssetsDetail =>
+      r'资产核对后回到精简 scriptPlan，确认是否还需要修订计划再推进分镜。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeInspectStoryboardResultsTitle =>
+      r'检查分镜结果';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCompareStoryboardTableTitle =>
+      r'对照分镜表';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCompareStoryboardTableDetailGeneric =>
+      r'先复读关键列窗口，避免把整张分镜表重新带入上下文。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRereadScriptNeedWindowDetail =>
+      r'需要时再回看紧凑剧本窗口，确认镜头依据。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeReviseStoryboardTableTitle =>
+      r'修分镜表';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSampleRereadStoryboardTableTitle =>
+      r'抽样复读分镜表';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSampleRereadStoryboardTableDetailEmpty =>
+      r'先读取关键列窗口，避免把整张表反复带入上下文。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSampleRereadStoryboardTableDetailFocused =>
+      r'先只复读审核聚焦镜头对应的分镜表行，避免回到整表窗口。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeContinueStoryboardGenTitle =>
+      r'继续生成分镜图';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCompareStoryboardTableBeforeFillDetail =>
+      r'补图前先复读关键列窗口，避免为整批镜头重建上下文。';
+
+  @override
+  String get agentWorkspaceProductionArgSuggestDeriveNameFallback =>
+      r'新衍生资产';
+
+  @override
+  String get agentWorkspaceProductionArgSuggestFillFirst =>
+      r'填充首项';
+
+  @override
+  String get agentWorkspaceProductionArgSuggestFillFirstThree =>
+      r'填充前 3 项';
+
+  @override
+  String get agentWorkspaceProductionArgSuggestFillAll =>
+      r'填充全部';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsGenHadSummaryNote =>
+      r'先检查本次刚生成资产的结果再决定是否补跑';
+
+  @override
+  String agentWorkspaceProductionArgSuggestAddTo(String id) {
+    return '新增到 #${id}';
+  }
+
+  @override
+  String agentWorkspaceProductionArgSuggestDelete(String id) {
+    return '删除 #${id}';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeSbGenRereadDetail(String ids) {
+    return '分镜生成动作已执行，先回读本次镜头 #${ids} 的缺帧状态。';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeSbTablePartialDetail(String ids) {
+    return '分镜表子代理已执行，先回读本次镜头 #${ids} 对应的局部分镜表行。';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeSbTableCrosscheckDetailFocused(String ids) {
+    return '优先只回读镜头 #${ids} 的 storyboard 结果，确认表格修改没有放大到整段。';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeAssetsRereadDetail(String ids) {
+    return '资产生成动作已执行，先回读本次资产 #${ids} 的最新状态。';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeAssetsGenDetailScoped(String scope) {
+    return '${scope} 仍缺图，优先只补这批衍生资产更省 token。';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeSbFillGapDetail(String idTail, String idsLabel) {
+    return '优先只补缺帧镜头 #${idsLabel}${idTail}，避免把已完成镜头整批重跑。';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeRereadScriptScriptPlanDetail(String scriptWindow) {
+    return '先只回看${scriptWindow}，确认导演计划与原文节奏一致，再决定是否扩读。';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeCheckKeyAssetsDetailIds(String assetScope) {
+    return '导演计划已点名${assetScope}，先精确核对再决定是否扩读其他素材。';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeCheckKeyAssetsDetailNoIds(String assetScope) {
+    return '导演计划已有内容，先核对${assetScope}是否支撑执行，信息不足时再补更多资产。';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeContinueDirectorDetailIds(String assetScope) {
+    return '优先围绕${assetScope}收束导演决策，让后续分镜和素材动作先继承这批受改写约束的重点。';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeContinueDirectorDetailNoIds(String assetScope) {
+    return '先围绕${assetScope}继续收束导演决策，让后续分镜和素材动作继承当前改写约束。';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeContinueDirectorPromptIds(String assetScope) {
+    return '请在当前 scriptPlan 上继续收束导演计划，优先围绕${assetScope}安排镜头和素材优先级，确保后续分镜执行继承上游改写约束。';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeContinueDirectorPromptNoIds(String assetScope) {
+    return '请在当前 scriptPlan 上继续收束导演计划，优先围绕${assetScope}安排镜头和素材优先级，确保后续分镜执行继承上游改写约束。';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeRereadScriptRevisePlanDetail(String scriptWindow) {
+    return '修订前先只回看${scriptWindow}，避免为 scriptPlan 扩读整段剧本。';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeReviseDirectorPlanDetail(String summary) {
+    return '审核结论：${summary}';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeReviseDirectorPlanPrompt(String summary) {
+    return '请根据最近审核意见修订 scriptPlan，优先解决：${summary}';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeVerifyAssetSupportDetail(String assetScope, String summary) {
+    return '审核结论：${summary}；优先只看${assetScope}，确认导演计划缺口。';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeInspectSbResultsDetail(String focusClause, String summary) {
+    return '审核结论：${summary}；优先只看${focusClause}';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeCompareStoryboardTableDetailFocus(String storyboardFocus) {
+    return '优先只复读${storyboardFocus}对应的分镜表行，避免退回整表。';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeRereadScriptReviewDetail(String reviewScope) {
+    return '如需核对镜头依据，优先只用局部范围：${reviewScope}。';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeInspectStoryboardResultsDetailScript(String reviewScope, String summary) {
+    return '审核结论：${summary}；优先只用局部范围：${reviewScope}。';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeSwitchStoryboardResultsDetailCount(int count) {
+    return '优先只回看当前分镜表窗口对应的 ${count} 个镜头，避免退回通用分镜摘要。';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeCompareStoryboardTableBeforeFillDetailFocus(String storyboardFocus) {
+    return '补图前先只复读${storyboardFocus}对应的分镜表行。';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipePromptStoryboardContinue(String body) {
+    return '请继续推进 storyboard。${body}';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipePromptReviseStoryboardTable(String body) {
+    return '请根据最近审核意见修订 storyboardTable。${body}';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipePromptStoryboardFromReview(String body) {
+    return '请基于最近审核结论继续推进 storyboard。${body}';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeShotCountTail(int count) {
+    return ' 等 ${count} 个镜头';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeInspectStoryboardResultsDetailSummaryOnly(String summary) {
+    return '审核结论：${summary}';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeInspectStoryboardResultsDetailWithScope(String reviewScope, String summary) {
+    return '审核结论：${summary}；${reviewScope}。';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeArgDeriveNameFromParent(String name) {
+    return '${name}-衍生';
+  }
+
+  @override
+  String agentWorkspaceProductionAssetReviewPromptFocused(int count, String priority) {
+    return '请优先只核对这 ${count} 个资产是否支撑当前导演规划；仅补必要缺口，不扩读无关素材。${priority}';
+  }
+
+  @override
+  String agentWorkspaceProductionAssetReviewPromptScoped(String priority, String scope) {
+    return '请先核对${scope}是否支撑当前导演规划；信息不足时再最小补读，不要整包扩读 assets。${priority}';
+  }
+
+  @override
+  String agentWorkspaceProductionAssetReviewPromptPriority(String summary) {
+    return '优先解决：${summary}';
+  }
+
+  @override
+  String agentWorkspaceProductionRecipeAppliedFollowRefine(String title) {
+    return '已应用任务建议：${title}，下一步先细化导演计划。';
+  }
+
+  @override
+  String agentWorkspaceProductionRecipeAppliedFollowExpandTable(String title) {
+    return '已应用任务建议：${title}，下一步先扩读关键分镜表窗口。';
+  }
+
+  @override
+  String agentWorkspaceProductionRecipeAppliedGeneric(String title) {
+    return '已应用任务建议：${title}';
+  }

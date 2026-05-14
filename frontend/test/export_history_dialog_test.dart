@@ -274,7 +274,7 @@ void main() {
         createdAt: now,
         completedAt: null,
       );
-      expect(itemIncomplete.formattedDuration(_zh), '-');
+      expect(itemIncomplete.formattedDuration(_zh), '—');
     });
   });
 

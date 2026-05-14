@@ -5,66 +5,126 @@ part of 'section.dart';
 /// Core publish operations: draft management, job enqueueing, publish slice.
 extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
   Future<
-      ({
-        PublishPlatformMatrixResponse? matrix,
-        bool unavailable,
-        List<PublishDraftRow> drafts,
-        PublishPrepareCheckResponse? prepare,
-        List<PublishJobRow> jobs,
-        List<PublishPerformanceAlertRow> perfAlerts,
-        List<PublishAttemptAuditRow> audits,
-      })> _capturePublishSlice(
+    ({
+      PublishPlatformMatrixResponse? matrix,
+      bool matrixLoaded,
+      bool unavailable,
+      List<PublishDraftRow> drafts,
+      bool draftsLoaded,
+      PublishPrepareCheckResponse? prepare,
+      bool prepareLoaded,
+      List<PublishJobRow> jobs,
+      bool jobsLoaded,
+      List<PublishPerformanceAlertRow> perfAlerts,
+      bool perfAlertsLoaded,
+      List<PublishAttemptAuditRow> audits,
+      bool auditsLoaded,
+    })
+  >
+  _capturePublishSlice(
     ProjectRow project,
     String token,
     String? preferredDraftId,
   ) async {
+    var unavailable = false;
+
+    PublishPlatformMatrixResponse? matrix;
+    var matrixLoaded = false;
     try {
-      final matrix = await fetchPublishPlatformMatrix(token, project.id);
-      final drafts = await fetchPublishDrafts(token, project.id);
-      final jobs = await fetchPublishJobs(token, project.id);
-      final perfAlerts = await fetchPublishPerformanceAlerts(token, project.id);
-      final audits = await fetchPublishAudit(token, project.id, limit: 30);
-      PublishPrepareCheckResponse? prepare;
-      if (drafts.isNotEmpty) {
-        String? prepareDraftId;
-        if (drafts.length == 1) {
-          prepareDraftId = drafts.first.id;
-        } else {
-          final pref = preferredDraftId;
-          if (pref != null &&
-              pref.trim().isNotEmpty &&
-              drafts.any((d) => d.id == pref)) {
-            prepareDraftId = pref;
-          }
+      matrix = await fetchPublishPlatformMatrix(token, project.id);
+      matrixLoaded = true;
+    } catch (_) {
+      unavailable = true;
+    }
+
+    List<PublishDraftRow> drafts;
+    var draftsLoaded = false;
+    try {
+      drafts = await fetchPublishDrafts(token, project.id);
+      draftsLoaded = true;
+    } catch (_) {
+      unavailable = true;
+      drafts = <PublishDraftRow>[];
+    }
+
+    List<PublishJobRow> jobs;
+    var jobsLoaded = false;
+    try {
+      jobs = await fetchPublishJobs(token, project.id);
+      jobsLoaded = true;
+    } catch (_) {
+      unavailable = true;
+      jobs = <PublishJobRow>[];
+    }
+
+    List<PublishPerformanceAlertRow> perfAlerts;
+    var perfAlertsLoaded = false;
+    try {
+      perfAlerts = await fetchPublishPerformanceAlerts(token, project.id);
+      perfAlertsLoaded = true;
+    } catch (_) {
+      unavailable = true;
+      perfAlerts = <PublishPerformanceAlertRow>[];
+    }
+
+    List<PublishAttemptAuditRow> audits;
+    var auditsLoaded = false;
+    try {
+      audits = await fetchPublishAudit(token, project.id, limit: 30);
+      auditsLoaded = true;
+    } catch (_) {
+      unavailable = true;
+      audits = <PublishAttemptAuditRow>[];
+    }
+
+    PublishPrepareCheckResponse? prepare;
+    var prepareLoaded = false;
+    if (draftsLoaded && drafts.isEmpty) {
+      prepareLoaded = true;
+    }
+    if (draftsLoaded && drafts.isNotEmpty) {
+      String? prepareDraftId;
+      if (drafts.length == 1) {
+        prepareDraftId = drafts.first.id;
+      } else {
+        final pref = preferredDraftId;
+        if (pref != null &&
+            pref.trim().isNotEmpty &&
+            drafts.any((d) => d.id == pref)) {
+          prepareDraftId = pref;
         }
-        if (prepareDraftId != null) {
+      }
+      if (prepareDraftId == null) {
+        prepareLoaded = true;
+      } else {
+        try {
           prepare = await fetchPublishPrepareCheck(
             token,
             project.id,
             prepareDraftId,
           );
+          prepareLoaded = true;
+        } catch (_) {
+          unavailable = true;
         }
       }
-      return (
-        matrix: matrix,
-        unavailable: false,
-        drafts: drafts,
-        prepare: prepare,
-        jobs: jobs,
-        perfAlerts: perfAlerts,
-        audits: audits,
-      );
-    } catch (_) {
-      return (
-        matrix: null,
-        unavailable: true,
-        drafts: <PublishDraftRow>[],
-        prepare: null,
-        jobs: <PublishJobRow>[],
-        perfAlerts: <PublishPerformanceAlertRow>[],
-        audits: <PublishAttemptAuditRow>[],
-      );
     }
+
+    return (
+      matrix: matrix,
+      matrixLoaded: matrixLoaded,
+      unavailable: unavailable,
+      drafts: drafts,
+      draftsLoaded: draftsLoaded,
+      prepare: prepare,
+      prepareLoaded: prepareLoaded,
+      jobs: jobs,
+      jobsLoaded: jobsLoaded,
+      perfAlerts: perfAlerts,
+      perfAlertsLoaded: perfAlertsLoaded,
+      audits: audits,
+      auditsLoaded: auditsLoaded,
+    );
   }
 
   List<Map<String, dynamic>> _publishTargetMaps() {
@@ -106,23 +166,48 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
   }
 
   Future<void> _refreshPublishSlice(ProjectRow project, String token) async {
+    final requestId = _beginPublishRefreshRequest();
+    ProjectShortVideoExportCheck? exportCheckSnapshot = _shortVideoExportCheck;
+    try {
+      exportCheckSnapshot = await fetchProjectShortVideoExportCheckByProjectId(
+        token,
+        project.id,
+      );
+    } catch (_) {}
+
     final snapshot = await _capturePublishSlice(
       project,
       token,
       _selectedPublishDraftId,
     );
-    if (!mounted || _selectedProjectId != project.id) {
+    if (!mounted ||
+        _selectedProjectId != project.id ||
+        !_isLatestPublishRefreshRequest(requestId)) {
       return;
     }
     setState(() {
-      _publishMatrix = snapshot.matrix;
+      _shortVideoExportCheck = exportCheckSnapshot;
+      if (snapshot.matrixLoaded) {
+        _publishMatrix = snapshot.matrix;
+      }
       _publishUnavailable = snapshot.unavailable;
-      _publishDrafts = snapshot.drafts;
-      _syncSelectedPublishDraftWith(snapshot.drafts);
-      _publishPrepare = snapshot.prepare;
-      _publishJobs = snapshot.jobs;
-      _publishPerfAlerts = snapshot.perfAlerts;
-      _publishAuditRows = snapshot.audits;
+      if (snapshot.draftsLoaded) {
+        _publishDrafts = snapshot.drafts;
+        _syncSelectedPublishDraftWith(snapshot.drafts);
+        _syncSelectedDraftIdsWith(snapshot.drafts);
+      }
+      if (snapshot.prepareLoaded) {
+        _publishPrepare = snapshot.prepare;
+      }
+      if (snapshot.jobsLoaded) {
+        _publishJobs = snapshot.jobs;
+      }
+      if (snapshot.perfAlertsLoaded) {
+        _publishPerfAlerts = snapshot.perfAlerts;
+      }
+      if (snapshot.auditsLoaded) {
+        _publishAuditRows = snapshot.audits;
+      }
       _syncPublishAutomationModesFromMatrix();
     });
   }
@@ -139,12 +224,15 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
     });
     try {
       final title = (project.name ?? '').trim();
-      final created = await createPublishDraft(token, project.id, <String, dynamic>{
-        'title': title.isEmpty ? l10n.shortVideoPublishOpsDefaultDraftTitle : title,
-        'draft_status': 'editing',
-        'tags': <String>[],
-        'platform_copy': <String, dynamic>{},
-      });
+      final created =
+          await createPublishDraft(token, project.id, <String, dynamic>{
+            'title': title.isEmpty
+                ? l10n.shortVideoPublishOpsDefaultDraftTitle
+                : title,
+            'draft_status': 'editing',
+            'tags': <String>[],
+            'platform_copy': <String, dynamic>{},
+          });
       final draftId = created.id;
       final targets = _publishTargetMaps();
       if (targets.isNotEmpty) {
@@ -161,7 +249,13 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.shortVideoPublishOpsCreateDraftFailed(describeUserVisibleApiError(l10n, e)))),
+          SnackBar(
+            content: Text(
+              l10n.shortVideoPublishOpsCreateDraftFailed(
+                describeUserVisibleApiError(l10n, e),
+              ),
+            ),
+          ),
         );
       }
     } finally {
@@ -187,12 +281,15 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
       var drafts = await fetchPublishDrafts(token, project.id);
       if (drafts.isEmpty) {
         final title = (project.name ?? '').trim();
-        final created = await createPublishDraft(token, project.id, <String, dynamic>{
-          'title': title.isEmpty ? l10n.shortVideoPublishOpsDefaultDraftTitle : title,
-          'draft_status': 'editing',
-          'tags': <String>[],
-          'platform_copy': <String, dynamic>{},
-        });
+        final created =
+            await createPublishDraft(token, project.id, <String, dynamic>{
+              'title': title.isEmpty
+                  ? l10n.shortVideoPublishOpsDefaultDraftTitle
+                  : title,
+              'draft_status': 'editing',
+              'tags': <String>[],
+              'platform_copy': <String, dynamic>{},
+            });
         drafts = [created];
         if (mounted) {
           setState(() {
@@ -279,7 +376,9 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
           }
           await createPublishJob(token, project.id, draft.id);
           ok++;
-          final title = draft.title.trim().isEmpty ? draft.id : draft.title.trim();
+          final title = draft.title.trim().isEmpty
+              ? draft.id
+              : draft.title.trim();
           summary.add(l10n.shortVideoPublishOpsBatchLineOk(title));
         } catch (e) {
           summary.add(
@@ -298,7 +397,14 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
         _publishBatchResultLines = summary;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.shortVideoPublishOpsBatchEnqueueResult(ok, _publishDrafts.length))),
+        SnackBar(
+          content: Text(
+            l10n.shortVideoPublishOpsBatchEnqueueResult(
+              ok,
+              _publishDrafts.length,
+            ),
+          ),
+        ),
       );
     } finally {
       if (mounted) {
@@ -333,7 +439,9 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
         try {
           await retryPublishJob(token, project.id, job.id);
           ok++;
-          summary.add(l10n.shortVideoPublishOpsBatchLineRetryOk(job.id.substring(0, 8)));
+          summary.add(
+            l10n.shortVideoPublishOpsBatchLineRetryOk(job.id.substring(0, 8)),
+          );
         } catch (e) {
           summary.add(
             l10n.shortVideoPublishOpsBatchLineFail(
@@ -351,7 +459,11 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
         _publishBatchResultLines = summary;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.shortVideoPublishOpsBatchRetryResult(ok, failed.length))),
+        SnackBar(
+          content: Text(
+            l10n.shortVideoPublishOpsBatchRetryResult(ok, failed.length),
+          ),
+        ),
       );
     } finally {
       if (mounted) {
@@ -394,7 +506,13 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.shortVideoPublishOpsConfirmFailed(describeUserVisibleApiError(l10n, e)))),
+          SnackBar(
+            content: Text(
+              l10n.shortVideoPublishOpsConfirmFailed(
+                describeUserVisibleApiError(l10n, e),
+              ),
+            ),
+          ),
         );
       }
     } finally {

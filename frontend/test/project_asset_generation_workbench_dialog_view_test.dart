@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/project_editor/assets/generation/dialog_view.dart';
 import 'package:openflow_app/rust_api.dart';
 
@@ -137,37 +139,49 @@ void main() {
     batchLimitCtrl.dispose();
   });
 
+  Widget buildHarness(Widget child) {
+    return MaterialApp(
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('zh'),
+      home: Scaffold(body: child),
+    );
+  }
+
   testWidgets('asset generation workbench view renders shared scaffold', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: AssetGenerationWorkbenchDialogView(
-            model: buildDialogModel(
-              modelCtrl: modelCtrl,
-              resolutionCtrl: resolutionCtrl,
-              imageUrlCtrl: imageUrlCtrl,
-              batchNameCtrl: batchNameCtrl,
-              batchLimitCtrl: batchLimitCtrl,
-              productionData: const AssetsDataResponseV1(
-                assets: <AssetDataItemV1>[
-                  AssetDataItemV1(id: 7, name: '角色 A', type: 'role'),
-                ],
-                total: 1,
-              ),
-              pollingData: const AssetsPollingImageResponseV1(
-                statuses: <AssetImageStatusV1>[
-                  AssetImageStatusV1(
-                    assetId: 7,
-                    imageCount: 2,
-                    latestState: 'done',
-                  ),
-                ],
-              ),
+      buildHarness(
+        AssetGenerationWorkbenchDialogView(
+          model: buildDialogModel(
+            modelCtrl: modelCtrl,
+            resolutionCtrl: resolutionCtrl,
+            imageUrlCtrl: imageUrlCtrl,
+            batchNameCtrl: batchNameCtrl,
+            batchLimitCtrl: batchLimitCtrl,
+            productionData: const AssetsDataResponseV1(
+              assets: <AssetDataItemV1>[
+                AssetDataItemV1(id: 7, name: '角色 A', type: 'role'),
+              ],
+              total: 1,
             ),
-            callbacks: buildDialogCallbacks(),
+            pollingData: const AssetsPollingImageResponseV1(
+              statuses: <AssetImageStatusV1>[
+                AssetImageStatusV1(
+                  assetId: 7,
+                  imageCount: 2,
+                  latestState: 'done',
+                ),
+              ],
+            ),
           ),
+          callbacks: buildDialogCallbacks(),
         ),
       ),
     );
@@ -185,32 +199,30 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: AssetGenerationWorkbenchDialogView(
-            model: buildDialogModel(
-              modelCtrl: modelCtrl,
-              resolutionCtrl: resolutionCtrl,
-              imageUrlCtrl: imageUrlCtrl,
-              batchNameCtrl: batchNameCtrl,
-              batchLimitCtrl: batchLimitCtrl,
-              loadingSummary: true,
-              busyMutation: true,
-            ),
-            callbacks: buildDialogCallbacks(
-              onSyncWorkbenchSnapshot: null,
-              onLoadMaterialContext: null,
-              onLoadBatchCandidates: null,
-              onSelectAllVisible: null,
-              onRebuildSelectionByType: null,
-              onClearSelection: null,
-              onBatchGenerateImages: null,
-              onPollImageStatuses: null,
-              onPollPromptStatuses: null,
-              onDeleteDerivatives: null,
-              onUpdateImageUrl: null,
-              onClose: null,
-            ),
+      buildHarness(
+        AssetGenerationWorkbenchDialogView(
+          model: buildDialogModel(
+            modelCtrl: modelCtrl,
+            resolutionCtrl: resolutionCtrl,
+            imageUrlCtrl: imageUrlCtrl,
+            batchNameCtrl: batchNameCtrl,
+            batchLimitCtrl: batchLimitCtrl,
+            loadingSummary: true,
+            busyMutation: true,
+          ),
+          callbacks: buildDialogCallbacks(
+            onSyncWorkbenchSnapshot: null,
+            onLoadMaterialContext: null,
+            onLoadBatchCandidates: null,
+            onSelectAllVisible: null,
+            onRebuildSelectionByType: null,
+            onClearSelection: null,
+            onBatchGenerateImages: null,
+            onPollImageStatuses: null,
+            onPollPromptStatuses: null,
+            onDeleteDerivatives: null,
+            onUpdateImageUrl: null,
+            onClose: null,
           ),
         ),
       ),
@@ -241,20 +253,18 @@ void main() {
     'asset generation workbench view disables single update action without single selection',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: AssetGenerationWorkbenchDialogView(
-              model: buildDialogModel(
-                modelCtrl: modelCtrl,
-                resolutionCtrl: resolutionCtrl,
-                imageUrlCtrl: imageUrlCtrl,
-                batchNameCtrl: batchNameCtrl,
-                batchLimitCtrl: batchLimitCtrl,
-                selectedIds: const <int>[7, 8],
-                selectedSingleAssetId: null,
-              ),
-              callbacks: buildDialogCallbacks(),
+        buildHarness(
+          AssetGenerationWorkbenchDialogView(
+            model: buildDialogModel(
+              modelCtrl: modelCtrl,
+              resolutionCtrl: resolutionCtrl,
+              imageUrlCtrl: imageUrlCtrl,
+              batchNameCtrl: batchNameCtrl,
+              batchLimitCtrl: batchLimitCtrl,
+              selectedIds: const <int>[7, 8],
+              selectedSingleAssetId: null,
             ),
+            callbacks: buildDialogCallbacks(),
           ),
         ),
       );

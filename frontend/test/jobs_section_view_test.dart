@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/jobs/section_view.dart';
+import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/rust_api.dart';
 
 void noop() {}
@@ -116,6 +118,14 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
         home: Scaffold(
           body: JobsSectionView(
             model: buildModel(jobIdController: jobIdController),
@@ -143,10 +153,10 @@ void main() {
       find.widgetWithText(ListTile, 'flutter.probe · queued'),
       findsOneWidget,
     );
-    expect(find.textContaining('失败原因=provider timeout'), findsOneWidget);
-    expect(find.textContaining('claimed_by=worker-a'), findsOneWidget);
-    expect(find.widgetWithText(TextButton, '重试'), findsOneWidget);
-    expect(find.widgetWithText(TextButton, '取消'), findsOneWidget);
+    expect(find.textContaining('失败原因：provider timeout'), findsOneWidget);
+    expect(find.textContaining('认领者：worker-a'), findsOneWidget);
+    expect(find.widgetWithText(TextButton, 'jobs retry'), findsOneWidget);
+    expect(find.widgetWithText(TextButton, 'jobs cancel'), findsOneWidget);
   });
 
   testWidgets('jobs section view disables busy actions', (
@@ -154,6 +164,14 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
         home: Scaffold(
           body: JobsSectionView(
             model: buildModel(
@@ -201,6 +219,14 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
         home: Scaffold(
           body: JobsSectionView(
             model: buildModel(jobIdController: jobIdController),
@@ -216,9 +242,9 @@ void main() {
 
     await tester.tap(find.widgetWithText(ListTile, 'flutter.probe · failed'));
     await tester.pump();
-    await tester.tap(find.widgetWithText(TextButton, '重试'));
+    await tester.tap(find.widgetWithText(TextButton, 'jobs retry'));
     await tester.pump();
-    await tester.tap(find.widgetWithText(TextButton, '取消'));
+    await tester.tap(find.widgetWithText(TextButton, 'jobs cancel'));
     await tester.pump();
 
     expect(selectedJob?.id, 'job-1');
@@ -243,6 +269,14 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
         home: Scaffold(
           body: JobsSectionView(
             model: model,
@@ -255,7 +289,7 @@ void main() {
     expect(find.widgetWithText(ListTile, 'flutter.probe · failed'), findsOneWidget);
     expect(find.widgetWithText(ListTile, 'flutter.probe · running'), findsOneWidget);
     expect(find.widgetWithText(ListTile, 'flutter.probe · succeeded'), findsOneWidget);
-    expect(find.widgetWithText(TextButton, '重试'), findsOneWidget);
-    expect(find.widgetWithText(TextButton, '取消'), findsOneWidget);
+    expect(find.widgetWithText(TextButton, 'jobs retry'), findsOneWidget);
+    expect(find.widgetWithText(TextButton, 'jobs cancel'), findsOneWidget);
   });
 }

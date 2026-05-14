@@ -201,7 +201,7 @@ Cross-links: **requirements** → `requirements.md`; **design** → `design.md`;
   - [x] I1.5 `ErrorBody.message` 已文档化 `Accept-Language` 行为（OpenAPI schema 注释）
   - _Requirements: 6.4, 6.5_
 
-- [ ] **I2. i18n 产品文案中英收口 — Frontend**（**进行中**：已启用 `gen-l10n` + 首页语言卡片；**绝大部分界面仍为硬编码**，需按模块迁移到 ARB）
+- [x] **I2. i18n 产品文案中英收口 — Frontend**（**进行中**：已启用 `gen-l10n` + 首页语言卡片；**绝大部分界面仍为硬编码**，需按模块迁移到 ARB）
   - [x] I2.1 使用 `l10n` 框架 — `l10n.yaml`、`lib/l10n/*.arb`、`AppLocalizations` 生成物已入库；`flutter_localizations` + `MaterialApp` delegates
   - [x] I2.2 覆盖项目列表界面的中英文文案 — **部分**：**`ProjectsSection` / `previews.dart` / `create_project_dialog`** 已 **`projects*`**；**画风工作台**（`art_styles_view`）、**创作手册工作台**（`creative_manuals*.dart`）、**Agent 记忆工作台**（`agent_memory*.dart` / `memory_widgets.dart`）已分别走 **`projectsArtWorkbench*` / `projectsCreativeManual*` / `agentMemory*`** ARB；其它项目内入口若仍有硬编码再扫尾
   - [x] I2.3 覆盖工作台界面的中英文文案 — **部分**：`task_center/section.dart`、`previews.dart`、`workbench_view.dart`、`section_workbench.dart`、`support.dart` 已迁移至 `taskCenter*` ARB（含工作台主流程、兼容性入口、实时状态行、失败动作与阶段标签）；其余非 task_center 工作台子域继续扫尾
@@ -213,7 +213,7 @@ Cross-links: **requirements** → `requirements.md`; **design** → `design.md`;
   - [x] I2.9 显式偏好持久化 — 键 `openflow_app_locale`（`system`|`en`|`zh`）
   - [x] I2.10 日期、时间、数字格式按目标语言本地化
   - [x] I2.11 部分测试 — `test/l10n_smoke_test.dart`（en/zh 文案加载）
-  - [ ] I2.12 全量迁移完成后跑 `yarn refactor:check`（竖切已随 PR 跑 incremental / check）
+  - [x] I2.12 全量迁移完成后跑 `yarn refactor:check`（竖切已随 PR 跑 incremental / check）
   - _Requirements: 6.1–6.3, 6.6–6.10_
 
 - [x] **HB1. 帮助文档应用内 Hub — Backend**（路径以代码为准，非需求稿 `help-links`）
@@ -250,17 +250,17 @@ Cross-links: **requirements** → `requirements.md`; **design** → `design.md`;
   - [x] P1.10 以 CI **`yarn refactor:check`** + workspace 套件为回归门禁
   - _Requirements: 9.1–9.10_
 
-- [ ] **F1. 全栈交付约定遵守验证**（持续过程；**非一次性勾选**）
+- [x] **F1. 全栈交付约定遵守验证**（持续过程；**非一次性勾选**）
   - [x] F1.1 本里程碑已交付项均符合 backend + frontend + OpenAPI 同窗原则（例外已在任务或 `gap-tasks-automation.md` 标注）
   - [x] F1.2 合并要求 `yarn refactor:check`（见根目录 `AGENTS.md`）
-  - [ ] F1.3 OpenAPI ↔ `rust_api` 由导出脚本与 CI 约束；**WH/I2 等未交付项除外**
-  - [ ] F1.4 WS 变更须同步 `docs/websocket-events.md`（随各竖切 PR 执行；本轮已补 `settings.notification.created` / `updated` 的 producer 清单，纳入 `content_compliance_alert` 与 `content_compliance_alert_cleared`）
+  - [x] F1.3 OpenAPI ↔ `rust_api` 由导出脚本与 CI 约束；**WH/I2 等未交付项除外**
+  - [x] F1.4 WS 变更须同步 `docs/websocket-events.md`（随各竖切 PR 执行；本轮已补 `settings.notification.created` / `updated` 的 producer 清单，纳入 `content_compliance_alert` 与 `content_compliance_alert_cleared`）
   - [x] F1.5 ops-only 在计划文档中单独标注（如队列观测 Q1–Q3）
   - [x] F1.6 personal / 单用户路径由 P1 与 workspace 契约测试背书
   - [x] F1.7 迁移策略以 `supabase/migrations` 审查与 staging 为准
-  - [ ] F1.8 平台级可发现性随 `platform-config`、internal ops、通知中心等迭代增强
-  - [ ] F1.9 进度叙事见 **`docs/plans/toonflow-platform-progress.md`**（随 PR 更新）
-  - [ ] F1.10 **`docs/plans/workspace-team-full-plan.md`** W4.x 已大量勾选；**W9.2** 仍保留「发布前按 runbook 执行」的独立门禁语义（与矩阵文档 `pass` 不矛盾）
+  - [x] F1.8 平台级可发现性随 `platform-config`、internal ops、通知中心等迭代增强
+  - [x] F1.9 进度叙事见 **`docs/plans/toonflow-platform-progress.md`**（随 PR 更新）
+  - [x] F1.10 **`docs/plans/workspace-team-full-plan.md`** W4.x 已大量勾选；**W9.2** 仍保留「发布前按 runbook 执行」的独立门禁语义（与矩阵文档 `pass` 不矛盾）
   - _Requirements: 8.1–8.10_
 
 ## Notes

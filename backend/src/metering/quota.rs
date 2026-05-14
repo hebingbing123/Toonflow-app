@@ -91,7 +91,7 @@ pub async fn effective_daily_job_quota_for_user(
     // `daily_job_quota` column is added by migration 20260417120000_app_user_profile_quota.sql.
     let row: Option<(String, Option<i64>)> = sqlx::query_as(
         r#"
-        SELECT plan_tier, daily_job_quota
+        SELECT plan_tier, daily_job_quota::bigint
         FROM app_user_profile
         WHERE user_id = $1
         "#,

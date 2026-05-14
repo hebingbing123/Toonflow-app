@@ -42,6 +42,7 @@ void main() {
     );
 
     expect(find.byType(BenchmarkCasesWorkbench), findsOneWidget);
+    expect(find.text('拉取样本池'), findsOneWidget);
   });
 
   testWidgets('BenchmarkExperimentsWorkbench renders without error',
@@ -74,6 +75,7 @@ void main() {
     );
 
     expect(find.byType(BenchmarkExperimentsWorkbench), findsOneWidget);
+    expect(find.text('拉取实验列表'), findsOneWidget);
   });
 
   testWidgets('BenchmarkReviewQueueWorkbench renders without error',
@@ -97,6 +99,7 @@ void main() {
     );
 
     expect(find.byType(BenchmarkReviewQueueWorkbench), findsOneWidget);
+    expect(find.text('拉取复核队列'), findsOneWidget);
   });
 
   testWidgets('BenchmarkGateWorkbench renders without error', (tester) async {

@@ -87,7 +87,10 @@ mod tests {
         let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
 
         assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(400));
-        assert_eq!(json.get("code").and_then(|v| v.as_str()), Some("bad_request"));
+        assert_eq!(
+            json.get("code").and_then(|v| v.as_str()),
+            Some("bad_request")
+        );
         assert_eq!(
             json.get("message").and_then(|v| v.as_str()),
             Some("value must be \"0\" or \"1\"")
@@ -112,7 +115,10 @@ mod tests {
         let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
 
         assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(400));
-        assert_eq!(json.get("code").and_then(|v| v.as_str()), Some("bad_request"));
+        assert_eq!(
+            json.get("code").and_then(|v| v.as_str()),
+            Some("bad_request")
+        );
         assert_eq!(
             json.get("message").and_then(|v| v.as_str()),
             Some("value 必须为 \"0\" 或 \"1\"")

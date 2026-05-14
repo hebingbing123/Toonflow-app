@@ -35,9 +35,20 @@ class BenchmarkCasesWorkbench extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          l10n.benchmarkPromoteCardTitle,
-          style: Theme.of(context).textTheme.titleSmall,
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Text(
+                l10n.benchmarkPromoteCardTitle,
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+            ),
+            FilledButton.tonal(
+              onPressed: busy ? null : onFetchCases,
+              child: Text(l10n.benchmarkActionFetchSamplePool),
+            ),
+          ],
         ),
         const SizedBox(height: 8),
         TextField(

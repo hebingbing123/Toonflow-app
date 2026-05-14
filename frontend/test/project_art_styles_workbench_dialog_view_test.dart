@@ -3,8 +3,16 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
+import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/projects/workbenches/art_styles_view.dart';
 import 'package:openflow_app/rust_api.dart';
+
+Widget _appWithZh({required Widget child}) => MaterialApp(
+  localizationsDelegates: AppLocalizations.localizationsDelegates,
+  supportedLocales: AppLocalizations.supportedLocales,
+  locale: const Locale('zh'),
+  home: Scaffold(body: child),
+);
 
 ArtStyleRow buildStyle({
   required int numericId,
@@ -173,6 +181,7 @@ final Uint8List _transparentPng = Uint8List.fromList(<int>[
 ]);
 
 void main() {
+  final zh = AppLocalizationsZh();
   late TextEditingController nameCtrl;
   late TextEditingController labelCtrl;
   late TextEditingController promptCtrl;
@@ -201,28 +210,23 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        locale: const Locale('zh'),
-        home: Scaffold(
-          body: ArtStylesWorkbenchDialogView(
-            model: buildModel(
-              nameCtrl: nameCtrl,
-              labelCtrl: labelCtrl,
-              promptCtrl: promptCtrl,
-              fileUrlCtrl: fileUrlCtrl,
-              extractImagesCtrl: extractImagesCtrl,
-            ),
-            callbacks: buildCallbacks(),
+      _appWithZh(
+        child: ArtStylesWorkbenchDialogView(
+          model: buildModel(
+            nameCtrl: nameCtrl,
+            labelCtrl: labelCtrl,
+            promptCtrl: promptCtrl,
+            fileUrlCtrl: fileUrlCtrl,
+            extractImagesCtrl: extractImagesCtrl,
           ),
+          callbacks: buildCallbacks(),
         ),
       ),
     );
 
-    expect(find.text('画风工作台'), findsOneWidget);
-    expect(find.text('Prompt 抽取'), findsOneWidget);
-    expect(find.text('抽取 Prompt 到编辑区'), findsOneWidget);
+    expect(find.text(zh.projectsArtWorkbenchTitle), findsOneWidget);
+    expect(find.text(zh.projectsArtWorkbenchExtractTitle), findsOneWidget);
+    expect(find.text(zh.projectsArtWorkbenchExtractButton), findsOneWidget);
     expect(find.textContaining('#11 水墨古风'), findsOneWidget);
     expect(find.widgetWithText(TextField, '水墨古风'), findsOneWidget);
     expect(find.text('已刷新 2 条画风。'), findsOneWidget);
@@ -232,45 +236,46 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        locale: const Locale('zh'),
-        home: Scaffold(
-          body: ArtStylesWorkbenchDialogView(
-            model: buildModel(
-              nameCtrl: nameCtrl,
-              labelCtrl: labelCtrl,
-              promptCtrl: promptCtrl,
-              fileUrlCtrl: fileUrlCtrl,
-              extractImagesCtrl: extractImagesCtrl,
-              busy: true,
-              loadingCover: true,
-              statusLine: null,
-            ),
-            callbacks: buildCallbacks(),
+      _appWithZh(
+        child: ArtStylesWorkbenchDialogView(
+          model: buildModel(
+            nameCtrl: nameCtrl,
+            labelCtrl: labelCtrl,
+            promptCtrl: promptCtrl,
+            fileUrlCtrl: fileUrlCtrl,
+            extractImagesCtrl: extractImagesCtrl,
+            busy: true,
+            loadingCover: true,
+            statusLine: null,
           ),
+          callbacks: buildCallbacks(),
         ),
       ),
     );
 
-    expect(find.text('处理中…'), findsOneWidget);
-    expect(find.text('读取中…'), findsOneWidget);
+    expect(find.text(zh.projectsBusyProcessing), findsOneWidget);
+    expect(find.text(zh.projectsArtWorkbenchReadingCover), findsOneWidget);
     expect(
       tester
-          .widget<ButtonStyleButton>(disabledButtonWithText('处理中…'))
+          .widget<ButtonStyleButton>(
+            disabledButtonWithText(zh.projectsBusyProcessing),
+          )
           .onPressed,
       isNull,
     );
     expect(
       tester
-          .widget<ButtonStyleButton>(disabledButtonWithText('读取中…'))
+          .widget<ButtonStyleButton>(
+            disabledButtonWithText(zh.projectsArtWorkbenchReadingCover),
+          )
           .onPressed,
       isNull,
     );
     expect(
       tester
-          .widget<ButtonStyleButton>(disabledButtonWithText('新建画风'))
+          .widget<ButtonStyleButton>(
+            disabledButtonWithText(zh.projectsArtWorkbenchNew),
+          )
           .onPressed,
       isNull,
     );
@@ -283,31 +288,25 @@ void main() {
       var closeTapped = 0;
 
       await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          locale: const Locale('zh'),
-          home: Scaffold(
-            body: ArtStylesWorkbenchDialogView(
-              model: buildModel(
-                nameCtrl: nameCtrl,
-                labelCtrl: labelCtrl,
-                promptCtrl: promptCtrl,
-                fileUrlCtrl: fileUrlCtrl,
-                extractImagesCtrl: extractImagesCtrl,
-                coverBytes: _transparentPng,
-              ),
-              callbacks: buildCallbacks(
-                onApplySelection: (row, {bool loadCover = true}) =>
-                    picked = row,
-                onClose: () => closeTapped++,
-              ),
+        _appWithZh(
+          child: ArtStylesWorkbenchDialogView(
+            model: buildModel(
+              nameCtrl: nameCtrl,
+              labelCtrl: labelCtrl,
+              promptCtrl: promptCtrl,
+              fileUrlCtrl: fileUrlCtrl,
+              extractImagesCtrl: extractImagesCtrl,
+              coverBytes: _transparentPng,
+            ),
+            callbacks: buildCallbacks(
+              onApplySelection: (row, {bool loadCover = true}) => picked = row,
+              onClose: () => closeTapped++,
             ),
           ),
         ),
       );
 
-      await tester.tap(find.text('关闭'));
+      await tester.tap(find.text(zh.shortVideoSpaceClose));
       await tester.pump();
       expect(closeTapped, 1);
 
@@ -317,7 +316,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(picked?.numericId, 12);
-      expect(find.text('当前封面预览'), findsOneWidget);
+      expect(find.text(zh.projectsArtWorkbenchCoverPreview), findsOneWidget);
     },
   );
 }

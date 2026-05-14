@@ -310,11 +310,14 @@ async fn jobs_rest_roundtrip() {
         "usage summary should include scope field with value 'user': {usage_summary}"
     );
     assert!(
-        usage_summary["eventsLast24h"].as_i64().unwrap_or_default() >= 2,
+        usage_summary["events_last_24h"]
+            .as_i64()
+            .unwrap_or_default()
+            >= 2,
         "usage summary should see created job events: {usage_summary}"
     );
     assert!(
-        usage_summary["eventCountsLast7d"]["generation_job.created"]
+        usage_summary["event_counts_last_7d"]["generation_job.created"]
             .as_i64()
             .unwrap_or_default()
             >= 2,

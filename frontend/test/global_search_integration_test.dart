@@ -71,7 +71,7 @@ void main() {
 
         // 4. 验证导航到搜索结果页
         expect(find.byType(SearchResultsPage), findsOneWidget);
-        expect(find.text('搜索: test project'), findsOneWidget);
+        expect(find.text('搜索：test project'), findsOneWidget);
 
         // 5. 验证搜索结果页的基本结构
         expect(find.byType(AppBar), findsOneWidget);
@@ -254,7 +254,7 @@ void main() {
 
         // 验证用户 A 的搜索结果页渲染
         expect(find.byType(SearchResultsPage), findsOneWidget);
-        expect(find.text('搜索: project'), findsOneWidget);
+        expect(find.text('搜索：project'), findsOneWidget);
 
         // 切换到用户 B
         await tester.pumpWidget(
@@ -278,7 +278,7 @@ void main() {
 
         // 验证用户 B 的搜索结果页渲染
         expect(find.byType(SearchResultsPage), findsOneWidget);
-        expect(find.text('搜索: project'), findsOneWidget);
+        expect(find.text('搜索：project'), findsOneWidget);
 
         // 注意：实际的权限隔离由后端 API 保证
         // 前端测试验证不同 token 能正确传递到 API 调用

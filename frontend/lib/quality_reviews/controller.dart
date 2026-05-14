@@ -227,6 +227,7 @@ class QualityReviewsController extends ChangeNotifier {
         if (row.overallScore != null) 'score=${row.overallScore}',
         if (row.passed != null) 'passed=${row.passed}',
         if (row.badCaseCategory != null) 'badCase=${row.badCaseCategory}',
+        if (row.suggestedAction != null) 'suggested=${row.suggestedAction}',
       ].join(' · ');
     } catch (e) {
       reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10nResolved);

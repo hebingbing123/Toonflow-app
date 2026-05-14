@@ -374,6 +374,7 @@ mod tests {
             skill_file_path: None,
             skill_version_hash: None,
             next_action: None,
+            suggested_action: None,
         }
     }
 

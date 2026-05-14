@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/project_editor/assets/overview.dart';
 import 'package:openflow_app/rust_api.dart';
 
@@ -56,27 +58,39 @@ Finder disabledButtonWithText(String text) {
 }
 
 void main() {
+  Widget buildHarness(Widget child) {
+    return MaterialApp(
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('zh'),
+      home: Scaffold(body: child),
+    );
+  }
+
   testWidgets('project assets overview view renders summary and filters', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: ProjectAssetsOverviewView(
-            model: buildModel(
-              filterScriptNumericId: 11,
-              assetsForScript: const <AssetRow>[
-                AssetRow(id: 'asset-1', numericId: 7, name: '主角', assetType: 'role'),
-              ],
-            ),
-            callbacks: buildCallbacks(),
+      buildHarness(
+        ProjectAssetsOverviewView(
+          model: buildModel(
+            filterScriptNumericId: 11,
+            assetsForScript: const <AssetRow>[
+              AssetRow(id: 'asset-1', numericId: 7, name: '主角', assetType: 'role'),
+            ],
           ),
+          callbacks: buildCallbacks(),
         ),
       ),
     );
 
-    expect(find.textContaining('资产 2 条'), findsOneWidget);
-    expect(find.text('当前剧本 #11 下关联 1 条资产。'), findsOneWidget);
+    expect(find.textContaining('Assets 2 · props 1 · role 1'), findsOneWidget);
+    expect(find.text('Script #11 has 1 linked asset(s).'), findsOneWidget);
     expect(find.text('#11 第一幕'), findsOneWidget);
     expect(find.text('资产主工作台'), findsOneWidget);
     expect(find.text('打开资产主工作台'), findsOneWidget);
@@ -86,19 +100,17 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: ProjectAssetsOverviewView(
-            model: buildModel(
-              assetsLoading: true,
-              assetsScriptFilterLoading: true,
-              assetsBusy: true,
-            ),
-            callbacks: const ProjectAssetsOverviewViewCallbacks(
-              onFilterChanged: null,
-              onRefresh: null,
-              onOpenWorkbench: null,
-            ),
+      buildHarness(
+        ProjectAssetsOverviewView(
+          model: buildModel(
+            assetsLoading: true,
+            assetsScriptFilterLoading: true,
+            assetsBusy: true,
+          ),
+          callbacks: const ProjectAssetsOverviewViewCallbacks(
+            onFilterChanged: null,
+            onRefresh: null,
+            onOpenWorkbench: null,
           ),
         ),
       ),
@@ -120,15 +132,13 @@ void main() {
     var openWorkbenchCalls = 0;
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: ProjectAssetsOverviewView(
-            model: buildModel(),
-            callbacks: buildCallbacks(
-              onFilterChanged: (value) => changedScriptId = value,
-              onRefresh: () async => refreshCalls += 1,
-              onOpenWorkbench: () => openWorkbenchCalls += 1,
-            ),
+      buildHarness(
+        ProjectAssetsOverviewView(
+          model: buildModel(),
+          callbacks: buildCallbacks(
+            onFilterChanged: (value) => changedScriptId = value,
+            onRefresh: () async => refreshCalls += 1,
+            onOpenWorkbench: () => openWorkbenchCalls += 1,
           ),
         ),
       ),

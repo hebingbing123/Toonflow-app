@@ -2327,7 +2327,7 @@ pub async fn get_admin_workspace_billing(
               w.plan_tier,
               w.billing_currency,
               w.billing_provider,
-              w.daily_job_quota,
+              w.daily_job_quota::bigint AS daily_job_quota,
               (
                 SELECT COUNT(*)::bigint
                 FROM public.app_generation_job j
@@ -2374,7 +2374,7 @@ pub async fn get_admin_workspace_billing(
               w.plan_tier,
               w.billing_currency,
               w.billing_provider,
-              w.daily_job_quota,
+              w.daily_job_quota::bigint AS daily_job_quota,
               (
                 SELECT COUNT(*)::bigint
                 FROM public.app_generation_job j

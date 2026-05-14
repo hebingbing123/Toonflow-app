@@ -440,6 +440,23 @@ fn select_auto_memory_entries_rework_mode_keeps_compact_top_two_matches() {
 }
 
 #[test]
+fn select_auto_memory_entries_rework_reason_alias_also_enables_tighter_limit() {
+    let rows = select_auto_memory_entries(
+        &json!({"storyboardIds": [12], "reworkReason": "情绪不够"}),
+        Some("promptSeed=seed-12-current"),
+        vec![
+            "tool=a | scope=storyboardIds=12 | promptSeed=seed-12-current | summary=匹配1"
+                .to_string(),
+            "tool=b | scope=storyboardIds=12 | promptSeed=seed-12-current | summary=匹配2"
+                .to_string(),
+            "tool=c | scope=storyboardIds=12 | promptSeed=seed-12-current | summary=匹配3"
+                .to_string(),
+        ],
+    );
+    assert_eq!(rows.len(), 2);
+}
+
+#[test]
 fn compact_auto_memory_entry_for_scope_falls_back_to_review_target_and_next() {
     let current_scope = scope_signature_from_args(
         &json!({"storyboardIds": [12]}),

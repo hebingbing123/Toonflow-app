@@ -5,14 +5,14 @@ import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/short_video_space/section.dart';
 
 Widget _materialAppZh({required Widget home}) => MaterialApp(
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      locale: const Locale('zh'),
-      home: home,
-    );
+  localizationsDelegates: AppLocalizations.localizationsDelegates,
+  supportedLocales: AppLocalizations.supportedLocales,
+  locale: const Locale('zh'),
+  home: home,
+);
 
 /// **Validates: Requirements 3, 4, 5**
-/// 
+///
 /// Tests for TTS functionality including:
 /// - Parameter editing logic (VoiceoverSettings)
 /// - Voiceover generation call (single and batch)
@@ -34,23 +34,14 @@ void main() {
         speed: 1.5,
       );
 
-      expect(
-        VoiceoverSettings.fromJson(settings.toJson()),
-        settings,
-      );
-      expect(
-        settings.toString(),
-        contains('zh-CN-XiaoxiaoNeural'),
-      );
+      expect(VoiceoverSettings.fromJson(settings.toJson()), settings);
+      expect(settings.toString(), contains('zh-CN-XiaoxiaoNeural'));
     });
   });
 
   group('Voiceover helpers', () {
     test('exposes supported providers and provider-specific voices', () {
-      expect(
-        kSupportedVoiceoverProviders,
-        const ['openai', 'azure', 'google'],
-      );
+      expect(kSupportedVoiceoverProviders, const ['openai', 'azure', 'google']);
       expect(getAvailableVoiceoverVoices('openai'), contains('nova'));
       expect(
         getAvailableVoiceoverVoices('azure'),
@@ -72,8 +63,9 @@ void main() {
   });
 
   group('VoiceoverSettingsDialog', () {
-    testWidgets('renders initial values and keeps save hint visible',
-        (tester) async {
+    testWidgets('renders initial values and keeps save hint visible', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         _materialAppZh(
           home: const Scaffold(
@@ -89,13 +81,22 @@ void main() {
         ),
       );
 
-      expect(find.text('配音参数设置'), findsOneWidget);
-      expect(find.text('Azure TTS'), findsOneWidget);
-      expect(find.text('zh-CN-XiaoxiaoNeural'), findsOneWidget);
-      expect(find.text('愉悦 (Happy)'), findsOneWidget);
-      expect(find.text('1.5x'), findsWidgets);
       expect(
-        find.text('保存后将应用到新生成的配音。已生成的配音需要重新生成才能应用新参数。'),
+        find.text(zh.shortVideoSpaceDialogVoiceoverSettingsTitle),
+        findsOneWidget,
+      );
+      expect(
+        find.text(zh.shortVideoSpaceDialogVoiceoverSettingsProviderAzure),
+        findsOneWidget,
+      );
+      expect(find.text('zh-CN-XiaoxiaoNeural'), findsOneWidget);
+      expect(
+        find.text(zh.shortVideoSpaceDialogVoiceoverSettingsEmotionLabel),
+        findsOneWidget,
+      );
+      expect(find.byType(Slider), findsOneWidget);
+      expect(
+        find.text(zh.shortVideoSpaceDialogVoiceoverSettingsInfoMessage),
         findsOneWidget,
       );
     });
@@ -224,7 +225,7 @@ void main() {
       for (final provider in kSupportedVoiceoverProviders) {
         final settings = VoiceoverSettings(provider: provider);
         expect(settings.provider, provider);
-        
+
         // Verify each provider has available voices
         final voices = getAvailableVoiceoverVoices(provider);
         expect(voices, isNotEmpty);
@@ -280,31 +281,34 @@ void main() {
       expect(str, contains('1.5'));
     });
 
-    test('getAvailableVoiceoverVoices returns correct voices for each provider', () {
-      // OpenAI voices
-      final openAIVoices = getAvailableVoiceoverVoices('openai');
-      expect(openAIVoices, contains('alloy'));
-      expect(openAIVoices, contains('echo'));
-      expect(openAIVoices, contains('fable'));
-      expect(openAIVoices, contains('onyx'));
-      expect(openAIVoices, contains('nova'));
-      expect(openAIVoices, contains('shimmer'));
+    test(
+      'getAvailableVoiceoverVoices returns correct voices for each provider',
+      () {
+        // OpenAI voices
+        final openAIVoices = getAvailableVoiceoverVoices('openai');
+        expect(openAIVoices, contains('alloy'));
+        expect(openAIVoices, contains('echo'));
+        expect(openAIVoices, contains('fable'));
+        expect(openAIVoices, contains('onyx'));
+        expect(openAIVoices, contains('nova'));
+        expect(openAIVoices, contains('shimmer'));
 
-      // Azure voices
-      final azureVoices = getAvailableVoiceoverVoices('azure');
-      expect(azureVoices, contains('zh-CN-XiaoxiaoNeural'));
-      expect(azureVoices, contains('zh-CN-YunxiNeural'));
-      expect(azureVoices, contains('zh-CN-YunjianNeural'));
+        // Azure voices
+        final azureVoices = getAvailableVoiceoverVoices('azure');
+        expect(azureVoices, contains('zh-CN-XiaoxiaoNeural'));
+        expect(azureVoices, contains('zh-CN-YunxiNeural'));
+        expect(azureVoices, contains('zh-CN-YunjianNeural'));
 
-      // Google voices
-      final googleVoices = getAvailableVoiceoverVoices('google');
-      expect(googleVoices, contains('zh-CN-Standard-A'));
-      expect(googleVoices, contains('zh-CN-Wavenet-A'));
+        // Google voices
+        final googleVoices = getAvailableVoiceoverVoices('google');
+        expect(googleVoices, contains('zh-CN-Standard-A'));
+        expect(googleVoices, contains('zh-CN-Wavenet-A'));
 
-      // Unknown provider defaults to alloy
-      final unknownVoices = getAvailableVoiceoverVoices('unknown');
-      expect(unknownVoices, equals(['alloy']));
-    });
+        // Unknown provider defaults to alloy
+        final unknownVoices = getAvailableVoiceoverVoices('unknown');
+        expect(unknownVoices, equals(['alloy']));
+      },
+    );
 
     test('getVoiceoverDisplayName maps OpenAI voices correctly', () {
       expect(getVoiceoverDisplayName('alloy', zh), 'Alloy (中性)');
@@ -313,10 +317,13 @@ void main() {
       expect(getVoiceoverDisplayName('onyx', zh), 'Onyx (深沉)');
       expect(getVoiceoverDisplayName('nova', zh), 'Nova (女性)');
       expect(getVoiceoverDisplayName('shimmer', zh), 'Shimmer (柔和)');
-      
+
       // Unknown voices return as-is
       expect(getVoiceoverDisplayName('unknown', zh), 'unknown');
-      expect(getVoiceoverDisplayName('zh-CN-XiaoxiaoNeural', zh), 'zh-CN-XiaoxiaoNeural');
+      expect(
+        getVoiceoverDisplayName('zh-CN-XiaoxiaoNeural', zh),
+        'zh-CN-XiaoxiaoNeural',
+      );
     });
   });
 
@@ -343,15 +350,15 @@ void main() {
 
     test('VoiceoverSettings supports speed adjustments for preview', () {
       const baseSettings = VoiceoverSettings(speed: 1.0);
-      
+
       // Test slower preview
       final slowerSettings = baseSettings.copyWith(speed: 0.8);
       expect(slowerSettings.speed, 0.8);
-      
+
       // Test faster preview
       final fasterSettings = baseSettings.copyWith(speed: 1.5);
       expect(fasterSettings.speed, 1.5);
-      
+
       // Verify original is unchanged
       expect(baseSettings.speed, 1.0);
     });
@@ -361,26 +368,26 @@ void main() {
         provider: 'openai',
         voiceId: 'alloy',
       );
-      
+
       // Switch to different voice
       final newSettings = baseSettings.copyWith(voiceId: 'nova');
       expect(newSettings.voiceId, 'nova');
       expect(newSettings.provider, 'openai'); // Provider unchanged
-      
+
       // Verify original is unchanged
       expect(baseSettings.voiceId, 'alloy');
     });
 
     test('VoiceoverSettings supports emotion switching for preview', () {
       const baseSettings = VoiceoverSettings(emotion: 'neutral');
-      
+
       // Switch to different emotion
       final happySettings = baseSettings.copyWith(emotion: 'happy');
       expect(happySettings.emotion, 'happy');
-      
+
       final sadSettings = baseSettings.copyWith(emotion: 'sad');
       expect(sadSettings.emotion, 'sad');
-      
+
       // Verify original is unchanged
       expect(baseSettings.emotion, 'neutral');
     });
@@ -391,11 +398,11 @@ void main() {
       // Minimum speed
       const minSpeed = VoiceoverSettings(speed: 0.5);
       expect(minSpeed.speed, 0.5);
-      
+
       // Maximum speed
       const maxSpeed = VoiceoverSettings(speed: 2.0);
       expect(maxSpeed.speed, 2.0);
-      
+
       // Normal speed
       const normalSpeed = VoiceoverSettings(speed: 1.0);
       expect(normalSpeed.speed, 1.0);
@@ -407,21 +414,30 @@ void main() {
         provider: 'openai',
         voiceId: 'nova',
       );
-      expect(getAvailableVoiceoverVoices(openAISettings.provider), contains(openAISettings.voiceId));
-      
+      expect(
+        getAvailableVoiceoverVoices(openAISettings.provider),
+        contains(openAISettings.voiceId),
+      );
+
       // Azure voice with Azure provider
       const azureSettings = VoiceoverSettings(
         provider: 'azure',
         voiceId: 'zh-CN-XiaoxiaoNeural',
       );
-      expect(getAvailableVoiceoverVoices(azureSettings.provider), contains(azureSettings.voiceId));
-      
+      expect(
+        getAvailableVoiceoverVoices(azureSettings.provider),
+        contains(azureSettings.voiceId),
+      );
+
       // Google voice with Google provider
       const googleSettings = VoiceoverSettings(
         provider: 'google',
         voiceId: 'zh-CN-Wavenet-A',
       );
-      expect(getAvailableVoiceoverVoices(googleSettings.provider), contains(googleSettings.voiceId));
+      expect(
+        getAvailableVoiceoverVoices(googleSettings.provider),
+        contains(googleSettings.voiceId),
+      );
     });
 
     test('VoiceoverSettings JSON serialization handles null values', () {
@@ -431,9 +447,9 @@ void main() {
         'emotion': null,
         'speed': null,
       };
-      
+
       final settings = VoiceoverSettings.fromJson(json);
-      
+
       // Should use defaults
       expect(settings.provider, 'openai');
       expect(settings.voiceId, 'alloy');
@@ -446,9 +462,9 @@ void main() {
         'provider': 'azure',
         // Missing voiceId, emotion, speed
       };
-      
+
       final settings = VoiceoverSettings.fromJson(json);
-      
+
       // Should use provided value and defaults for missing
       expect(settings.provider, 'azure');
       expect(settings.voiceId, 'alloy'); // Default
@@ -463,23 +479,23 @@ void main() {
       const initial = VoiceoverSettings();
       expect(initial.provider, 'openai');
       expect(initial.voiceId, 'alloy');
-      
+
       // 2. User changes provider
       final withProvider = initial.copyWith(provider: 'azure');
       expect(withProvider.provider, 'azure');
-      
+
       // 3. User selects voice for new provider
       final withVoice = withProvider.copyWith(voiceId: 'zh-CN-XiaoxiaoNeural');
       expect(withVoice.voiceId, 'zh-CN-XiaoxiaoNeural');
-      
+
       // 4. User adjusts emotion
       final withEmotion = withVoice.copyWith(emotion: 'happy');
       expect(withEmotion.emotion, 'happy');
-      
+
       // 5. User adjusts speed
       final final_ = withEmotion.copyWith(speed: 1.3);
       expect(final_.speed, 1.3);
-      
+
       // 6. Serialize for API call
       final json = final_.toJson();
       expect(json['provider'], 'azure');
@@ -496,12 +512,12 @@ void main() {
         emotion: 'neutral',
         speed: 1.0,
       );
-      
+
       // Simulate applying to multiple shots
       final shot1Params = batchSettings.toJson();
       final shot2Params = batchSettings.toJson();
       final shot3Params = batchSettings.toJson();
-      
+
       expect(shot1Params, equals(shot2Params));
       expect(shot2Params, equals(shot3Params));
     });
@@ -514,10 +530,10 @@ void main() {
         emotion: 'happy',
         speed: 1.2,
       );
-      
+
       // 2. User likes preview and uses same settings for generation
       final generationSettings = previewSettings; // Same settings
-      
+
       expect(generationSettings.provider, previewSettings.provider);
       expect(generationSettings.voiceId, previewSettings.voiceId);
       expect(generationSettings.emotion, previewSettings.emotion);

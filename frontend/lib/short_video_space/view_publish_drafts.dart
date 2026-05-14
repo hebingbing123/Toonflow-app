@@ -1,10 +1,19 @@
 part of 'view.dart';
 
+class ShortVideoPublishDraftsPanel extends StatelessWidget {
+  const ShortVideoPublishDraftsPanel({super.key, required this.publishPanelUi});
+
+  final ShortVideoPublishPanelUi publishPanelUi;
+
+  @override
+  Widget build(BuildContext context) {
+    return _PublishDraftsPanel(publishPanelUi: publishPanelUi);
+  }
+}
+
 /// Draft list and management widget
 class _PublishDraftsPanel extends StatelessWidget {
-  const _PublishDraftsPanel({
-    required this.publishPanelUi,
-  });
+  const _PublishDraftsPanel({required this.publishPanelUi});
 
   final ShortVideoPublishPanelUi publishPanelUi;
 
@@ -25,14 +34,17 @@ class _PublishDraftsPanel extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(l10n.shortVideoPublishPanelTitle, style: theme.textTheme.titleSmall),
+              Text(
+                l10n.shortVideoPublishPanelTitle,
+                style: theme.textTheme.titleSmall,
+              ),
               const Spacer(),
               if (publishPanelUi.onResetConfirmationDontShowAgain != null)
                 TextButton(
                   onPressed: publishPanelUi.publishBusy
                       ? null
                       : () => publishPanelUi.onResetConfirmationDontShowAgain!
-                          .call(context),
+                            .call(context),
                   child: Text(
                     l10n.shortVideoPublishPanelResetDontShowAgain,
                     style: theme.textTheme.labelSmall?.copyWith(
@@ -75,10 +87,7 @@ class _PublishDraftsPanel extends StatelessWidget {
               for (final line in publishPanelUi.matrixDomesticLines)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 4),
-                  child: Text(
-                    line,
-                    style: theme.textTheme.bodySmall,
-                  ),
+                  child: Text(line, style: theme.textTheme.bodySmall),
                 ),
             ],
             if (publishPanelUi.matrixOverseasLines.isNotEmpty) ...[
@@ -91,10 +100,7 @@ class _PublishDraftsPanel extends StatelessWidget {
               for (final line in publishPanelUi.matrixOverseasLines)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 4),
-                  child: Text(
-                    line,
-                    style: theme.textTheme.bodySmall,
-                  ),
+                  child: Text(line, style: theme.textTheme.bodySmall),
                 ),
             ],
             if (publishPanelUi.prepareLines.isNotEmpty) ...[
@@ -107,10 +113,7 @@ class _PublishDraftsPanel extends StatelessWidget {
               for (final line in publishPanelUi.prepareLines)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 4),
-                  child: Text(
-                    line,
-                    style: theme.textTheme.bodySmall,
-                  ),
+                  child: Text(line, style: theme.textTheme.bodySmall),
                 ),
             ],
             if (publishPanelUi.draftLines.isNotEmpty) ...[
@@ -149,7 +152,9 @@ class _PublishDraftsPanel extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+                    color: theme.colorScheme.primaryContainer.withValues(
+                      alpha: 0.3,
+                    ),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: theme.colorScheme.primary.withValues(alpha: 0.3),
@@ -179,7 +184,9 @@ class _PublishDraftsPanel extends StatelessWidget {
                             onPressed: publishPanelUi.publishBusy
                                 ? null
                                 : publishPanelUi.onClearDraftSelection,
-                            child: Text(l10n.shortVideoPublishPanelClearSelection),
+                            child: Text(
+                              l10n.shortVideoPublishPanelClearSelection,
+                            ),
                           ),
                         ],
                       ),
@@ -193,9 +200,12 @@ class _PublishDraftsPanel extends StatelessWidget {
                               FilledButton.tonalIcon(
                                 onPressed: publishPanelUi.publishBusy
                                     ? null
-                                    : () => publishPanelUi.onBatchScheduleDrafts?.call(context),
+                                    : () => publishPanelUi.onBatchScheduleDrafts
+                                          ?.call(context),
                                 icon: const Icon(Icons.schedule, size: 18),
-                                label: Text(l10n.shortVideoPublishPanelBatchSchedule),
+                                label: Text(
+                                  l10n.shortVideoPublishPanelBatchSchedule,
+                                ),
                               ),
                             if (publishPanelUi.onBatchPublishDrafts != null)
                               FilledButton.icon(
@@ -203,7 +213,9 @@ class _PublishDraftsPanel extends StatelessWidget {
                                     ? null
                                     : publishPanelUi.onBatchPublishDrafts,
                                 icon: const Icon(Icons.publish, size: 18),
-                                label: Text(l10n.shortVideoPublishPanelBatchPublish),
+                                label: Text(
+                                  l10n.shortVideoPublishPanelBatchPublish,
+                                ),
                               ),
                             if (publishPanelUi.onBatchArchiveDrafts != null)
                               OutlinedButton.icon(
@@ -211,7 +223,9 @@ class _PublishDraftsPanel extends StatelessWidget {
                                     ? null
                                     : publishPanelUi.onBatchArchiveDrafts,
                                 icon: const Icon(Icons.archive, size: 18),
-                                label: Text(l10n.shortVideoPublishPanelBatchArchive),
+                                label: Text(
+                                  l10n.shortVideoPublishPanelBatchArchive,
+                                ),
                               ),
                             if (publishPanelUi.onCompareDrafts != null)
                               OutlinedButton.icon(
@@ -219,7 +233,9 @@ class _PublishDraftsPanel extends StatelessWidget {
                                     ? null
                                     : publishPanelUi.onCompareDrafts,
                                 icon: const Icon(Icons.compare, size: 18),
-                                label: Text(l10n.shortVideoPublishPanelCompareDrafts),
+                                label: Text(
+                                  l10n.shortVideoPublishPanelCompareDrafts,
+                                ),
                               ),
                           ],
                         ),
@@ -250,29 +266,34 @@ class _PublishDraftsPanel extends StatelessWidget {
                                 ),
                                 style: theme.textTheme.bodySmall,
                               ),
-                              if (publishPanelUi.batchValidation!.blockedDrafts.isNotEmpty) ...[
+                              if (publishPanelUi
+                                  .batchValidation!
+                                  .blockedDrafts
+                                  .isNotEmpty) ...[
                                 const SizedBox(height: 4),
-                                ...publishPanelUi.batchValidation!.blockedDrafts.take(3).map(
-                                  (d) => Padding(
-                                    padding: const EdgeInsets.only(top: 2),
-                                    child: Text(
-                                      l10n.shortVideoPublishPanelBlockedDraftLine(
-                                        d.title.isEmpty
-                                            ? d.draftId.substring(0, 8)
-                                            : d.title,
-                                        d.blockingReasons
-                                            .map((r) => r.message)
-                                            .join(
-                                              l10n
-                                                  .shortVideoPublishPanelBlockingReasonsJoiner,
-                                            ),
-                                      ),
-                                      style: theme.textTheme.bodySmall?.copyWith(
-                                        color: theme.colorScheme.error,
+                                ...publishPanelUi.batchValidation!.blockedDrafts
+                                    .take(3)
+                                    .map(
+                                      (d) => Padding(
+                                        padding: const EdgeInsets.only(top: 2),
+                                        child: Text(
+                                          l10n.shortVideoPublishPanelBlockedDraftLine(
+                                            d.title.isEmpty
+                                                ? d.draftId.substring(0, 8)
+                                                : d.title,
+                                            d.blockingReasons
+                                                .map((r) => r.message)
+                                                .join(
+                                                  l10n.shortVideoPublishPanelBlockingReasonsJoiner,
+                                                ),
+                                          ),
+                                          style: theme.textTheme.bodySmall
+                                              ?.copyWith(
+                                                color: theme.colorScheme.error,
+                                              ),
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ),
                               ],
                             ],
                           ),
@@ -284,7 +305,11 @@ class _PublishDraftsPanel extends StatelessWidget {
                 const SizedBox(height: 8),
               ],
               // P8: Draft list with checkboxes
-              for (var i = 0; i < publishPanelUi.publishDraftOptions.length; i++)
+              for (
+                var i = 0;
+                i < publishPanelUi.publishDraftOptions.length;
+                i++
+              )
                 Padding(
                   padding: const EdgeInsets.only(bottom: 4),
                   child: publishPanelUi.multiSelectMode
@@ -326,7 +351,8 @@ class _PublishDraftsPanel extends StatelessWidget {
                 ),
                 initialValue: publishPanelUi.selectedPublishDraftId,
                 isExpanded: true,
-                hint: publishPanelUi.selectedPublishDraftId == null ||
+                hint:
+                    publishPanelUi.selectedPublishDraftId == null ||
                         publishPanelUi.selectedPublishDraftId!.trim().isEmpty
                     ? Text(l10n.shortVideoPublishPanelSelectDraftHint)
                     : null,
@@ -334,22 +360,26 @@ class _PublishDraftsPanel extends StatelessWidget {
                   border: OutlineInputBorder(),
                   isDense: true,
                 ),
-                items: publishPanelUi.publishDraftOptions.map((d) {
-                  final title = d.title.trim().isEmpty
-                      ? l10n.shortVideoPublishPanelUntitledDraft
-                      : d.title.trim();
-                  final statusLabel =
-                      shortVideoPublishDraftStatusLabel(l10n, d.draftStatus);
-                  return DropdownMenuItem<String>(
-                    value: d.id,
-                    child: Text(
-                      l10n.shortVideoPublishDraftDropdownLabel(
-                        title,
-                        statusLabel,
-                      ),
-                    ),
-                  );
-                }).toList(growable: false),
+                items: publishPanelUi.publishDraftOptions
+                    .map((d) {
+                      final title = d.title.trim().isEmpty
+                          ? l10n.shortVideoPublishPanelUntitledDraft
+                          : d.title.trim();
+                      final statusLabel = shortVideoPublishDraftStatusLabel(
+                        l10n,
+                        d.draftStatus,
+                      );
+                      return DropdownMenuItem<String>(
+                        value: d.id,
+                        child: Text(
+                          l10n.shortVideoPublishDraftDropdownLabel(
+                            title,
+                            statusLabel,
+                          ),
+                        ),
+                      );
+                    })
+                    .toList(growable: false),
                 onChanged: publishPanelUi.publishBusy
                     ? null
                     : (v) {
@@ -509,7 +539,9 @@ class _PublishDraftsPanel extends StatelessWidget {
                     ),
                   if (publishPanelUi.onEnqueuePublishJob != null)
                     FilledButton.icon(
-                      onPressed: (publishPanelUi.publishBusy || !publishPanelUi.exportReady)
+                      onPressed:
+                          (publishPanelUi.publishBusy ||
+                              !publishPanelUi.exportReady)
                           ? null
                           : publishPanelUi.onEnqueuePublishJob,
                       icon: publishPanelUi.publishBusy
@@ -527,7 +559,9 @@ class _PublishDraftsPanel extends StatelessWidget {
                     ),
                   if (publishPanelUi.onEnqueueAllDrafts != null)
                     FilledButton.tonal(
-                      onPressed: (publishPanelUi.publishBusy || !publishPanelUi.exportReady)
+                      onPressed:
+                          (publishPanelUi.publishBusy ||
+                              !publishPanelUi.exportReady)
                           ? null
                           : publishPanelUi.onEnqueueAllDrafts,
                       child: Text(
@@ -564,16 +598,21 @@ class _PublishDraftsPanel extends StatelessWidget {
                     OutlinedButton.icon(
                       onPressed: publishPanelUi.publishBusy
                           ? null
-                          : () => publishPanelUi.onScheduleFirstDraft?.call(context),
+                          : () => publishPanelUi.onScheduleFirstDraft?.call(
+                              context,
+                            ),
                       icon: const Icon(Icons.event_available_outlined),
-                      label: Text(l10n.shortVideoPublishPanelScheduleCurrentDraft),
+                      label: Text(
+                        l10n.shortVideoPublishPanelScheduleCurrentDraft,
+                      ),
                     ),
                   if (publishPanelUi.onScheduleAllDraftsSameTime != null &&
                       publishPanelUi.draftLines.length > 1)
                     OutlinedButton.icon(
                       onPressed: publishPanelUi.publishBusy
                           ? null
-                          : () => publishPanelUi.onScheduleAllDraftsSameTime?.call(context),
+                          : () => publishPanelUi.onScheduleAllDraftsSameTime
+                                ?.call(context),
                       icon: const Icon(Icons.calendar_month_outlined),
                       label: Text(l10n.shortVideoPublishPanelScheduleAllDrafts),
                     ),
@@ -583,7 +622,9 @@ class _PublishDraftsPanel extends StatelessWidget {
                           ? null
                           : publishPanelUi.onOpenPublishTroubleshooting,
                       icon: const Icon(Icons.bug_report_outlined),
-                      label: Text(l10n.shortVideoPublishPanelOpenTroubleshooting),
+                      label: Text(
+                        l10n.shortVideoPublishPanelOpenTroubleshooting,
+                      ),
                     ),
                 ],
               ),
@@ -595,7 +636,9 @@ class _PublishDraftsPanel extends StatelessWidget {
                 style: theme.textTheme.labelSmall?.copyWith(color: outline),
               ),
               const SizedBox(height: 6),
-              ...publishPanelUi.publishBatchResultLines.take(8).map(
+              ...publishPanelUi.publishBatchResultLines
+                  .take(8)
+                  .map(
                     (line) => Text(
                       l10n.shortVideoPublishBatchResultBulletLine(line),
                       style: theme.textTheme.bodySmall,

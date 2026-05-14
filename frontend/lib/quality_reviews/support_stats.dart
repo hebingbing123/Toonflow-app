@@ -510,6 +510,7 @@ String formatQualityReviewCoreDetails(QualityReview row) {
     if (row.passed != null) 'passed=${row.passed}',
     if (row.isBadCase) 'bad_case',
     if (row.badCaseCategory != null) 'category=${row.badCaseCategory}',
+    if (row.suggestedAction != null) 'suggested_action=${row.suggestedAction}',
   ].join(' · ');
 }
 

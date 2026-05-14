@@ -26,7 +26,7 @@ async fn jobs_page_workspace_visibility_owner_and_member() {
     let owner_id = Uuid::new_v4();
     let owner_email = format!("owner-{}@test.com", owner_id);
     sqlx::query(
-        "INSERT INTO public.app_user (id, email, created_at, updated_at) 
+        "INSERT INTO auth.users (id, email, created_at, updated_at) 
          VALUES ($1, $2, NOW(), NOW())",
     )
     .bind(owner_id)
@@ -39,7 +39,7 @@ async fn jobs_page_workspace_visibility_owner_and_member() {
     let member_id = Uuid::new_v4();
     let member_email = format!("member-{}@test.com", member_id);
     sqlx::query(
-        "INSERT INTO public.app_user (id, email, created_at, updated_at) 
+        "INSERT INTO auth.users (id, email, created_at, updated_at) 
          VALUES ($1, $2, NOW(), NOW())",
     )
     .bind(member_id)
@@ -52,7 +52,7 @@ async fn jobs_page_workspace_visibility_owner_and_member() {
     let outsider_id = Uuid::new_v4();
     let outsider_email = format!("outsider-{}@test.com", outsider_id);
     sqlx::query(
-        "INSERT INTO public.app_user (id, email, created_at, updated_at) 
+        "INSERT INTO auth.users (id, email, created_at, updated_at) 
          VALUES ($1, $2, NOW(), NOW())",
     )
     .bind(outsider_id)
@@ -64,10 +64,11 @@ async fn jobs_page_workspace_visibility_owner_and_member() {
     // Create enterprise workspace
     let workspace_id = Uuid::new_v4();
     sqlx::query(
-        "INSERT INTO public.app_workspace (id, name, workspace_type, created_at, updated_at) 
-         VALUES ($1, $2, 'enterprise', NOW(), NOW())",
+        "INSERT INTO public.app_workspace (id, owner_user_id, name, workspace_type, created_at, updated_at) 
+         VALUES ($1, $2, $3, 'enterprise', NOW(), NOW())",
     )
     .bind(workspace_id)
+    .bind(owner_id)
     .bind("Test Workspace")
     .execute(&pool)
     .await
@@ -97,7 +98,7 @@ async fn jobs_page_workspace_visibility_owner_and_member() {
 
     // Create project in workspace
     let project_id = Uuid::new_v4();
-    let project_numeric_id = 9001;
+    let project_numeric_id = ((Uuid::new_v4().as_u128() % 900_000) as i32) + 1_000;
     sqlx::query(
         "INSERT INTO public.app_project (id, numeric_id, workspace_id, owner_user_id, name, created_at, updated_at) 
          VALUES ($1, $2, $3, $4, $5, NOW(), NOW())",
@@ -116,12 +117,13 @@ async fn jobs_page_workspace_visibility_owner_and_member() {
     sqlx::query(
         r#"
         INSERT INTO public.app_generation_job 
-        (id, owner_user_id, kind, status, payload, created_at, updated_at)
-        VALUES ($1, $2, 'test.job', 'queued', $3, NOW(), NOW())
+        (id, owner_user_id, workspace_id, kind, status, payload, created_at, updated_at)
+        VALUES ($1, $2, $3, 'test.job', 'queued', $4, NOW(), NOW())
         "#,
     )
     .bind(job_with_uuid_id)
     .bind(owner_id)
+    .bind(workspace_id)
     .bind(serde_json::json!({
         "project_uuid": project_id.to_string(),
         "workspace_id": workspace_id.to_string(),
@@ -135,12 +137,13 @@ async fn jobs_page_workspace_visibility_owner_and_member() {
     sqlx::query(
         r#"
         INSERT INTO public.app_generation_job 
-        (id, owner_user_id, kind, status, payload, created_at, updated_at)
-        VALUES ($1, $2, 'test.job', 'queued', $3, NOW(), NOW())
+        (id, owner_user_id, workspace_id, kind, status, payload, created_at, updated_at)
+        VALUES ($1, $2, $3, 'test.job', 'queued', $4, NOW(), NOW())
         "#,
     )
     .bind(job_with_numeric_id)
     .bind(owner_id)
+    .bind(workspace_id)
     .bind(serde_json::json!({
         "project_numeric_id": project_numeric_id,
         "workspace_id": workspace_id.to_string(),
@@ -154,12 +157,13 @@ async fn jobs_page_workspace_visibility_owner_and_member() {
     sqlx::query(
         r#"
         INSERT INTO public.app_generation_job 
-        (id, owner_user_id, kind, status, payload, created_at, updated_at)
-        VALUES ($1, $2, 'test.job', 'queued', $3, NOW(), NOW())
+        (id, owner_user_id, workspace_id, kind, status, payload, created_at, updated_at)
+        VALUES ($1, $2, $3, 'test.job', 'queued', $4, NOW(), NOW())
         "#,
     )
     .bind(job_with_both_id)
     .bind(owner_id)
+    .bind(workspace_id)
     .bind(serde_json::json!({
         "project_uuid": project_id.to_string(),
         "project_numeric_id": project_numeric_id,
@@ -174,12 +178,13 @@ async fn jobs_page_workspace_visibility_owner_and_member() {
     sqlx::query(
         r#"
         INSERT INTO public.app_generation_job 
-        (id, owner_user_id, kind, status, payload, created_at, updated_at)
-        VALUES ($1, $2, 'test.personal', 'queued', $3, NOW(), NOW())
+        (id, owner_user_id, workspace_id, kind, status, payload, created_at, updated_at)
+        VALUES ($1, $2, $3, 'test.personal', 'queued', $4, NOW(), NOW())
         "#,
     )
     .bind(personal_job_id)
     .bind(owner_id)
+    .bind(workspace_id)
     .bind(serde_json::json!({"note": "personal job"}))
     .execute(&pool)
     .await
@@ -379,7 +384,7 @@ async fn jobs_page_workspace_visibility_owner_and_member() {
         .bind(workspace_id)
         .execute(&pool)
         .await;
-    let _ = sqlx::query("DELETE FROM public.app_user WHERE id = ANY($1)")
+    let _ = sqlx::query("DELETE FROM auth.users WHERE id = ANY($1)")
         .bind([owner_id, member_id, outsider_id])
         .execute(&pool)
         .await;
@@ -403,7 +408,7 @@ async fn jobs_page_workspace_visibility_archived_project() {
     let owner_id = Uuid::new_v4();
     let owner_email = format!("owner-{}@test.com", owner_id);
     sqlx::query(
-        "INSERT INTO public.app_user (id, email, created_at, updated_at) 
+        "INSERT INTO auth.users (id, email, created_at, updated_at) 
          VALUES ($1, $2, NOW(), NOW())",
     )
     .bind(owner_id)
@@ -415,10 +420,11 @@ async fn jobs_page_workspace_visibility_archived_project() {
     // Create workspace
     let workspace_id = Uuid::new_v4();
     sqlx::query(
-        "INSERT INTO public.app_workspace (id, name, workspace_type, created_at, updated_at) 
-         VALUES ($1, $2, 'personal', NOW(), NOW())",
+        "INSERT INTO public.app_workspace (id, owner_user_id, name, workspace_type, created_at, updated_at) 
+         VALUES ($1, $2, $3, 'personal', NOW(), NOW())",
     )
     .bind(workspace_id)
+    .bind(owner_id)
     .bind("Test Workspace")
     .execute(&pool)
     .await
@@ -437,7 +443,7 @@ async fn jobs_page_workspace_visibility_archived_project() {
 
     // Create archived project
     let project_id = Uuid::new_v4();
-    let project_numeric_id = 9002;
+    let project_numeric_id = ((Uuid::new_v4().as_u128() % 900_000) as i32) + 1_000;
     sqlx::query(
         "INSERT INTO public.app_project (id, numeric_id, workspace_id, owner_user_id, name, archived_at, created_at, updated_at) 
          VALUES ($1, $2, $3, $4, $5, NOW(), NOW(), NOW())",
@@ -456,12 +462,13 @@ async fn jobs_page_workspace_visibility_archived_project() {
     sqlx::query(
         r#"
         INSERT INTO public.app_generation_job 
-        (id, owner_user_id, kind, status, payload, created_at, updated_at)
-        VALUES ($1, $2, 'test.job', 'queued', $3, NOW(), NOW())
+        (id, owner_user_id, workspace_id, kind, status, payload, created_at, updated_at)
+        VALUES ($1, $2, $3, 'test.job', 'queued', $4, NOW(), NOW())
         "#,
     )
     .bind(job_id)
     .bind(owner_id)
+    .bind(workspace_id)
     .bind(serde_json::json!({
         "project_uuid": project_id.to_string(),
         "project_numeric_id": project_numeric_id,
@@ -513,7 +520,7 @@ async fn jobs_page_workspace_visibility_archived_project() {
         .bind(workspace_id)
         .execute(&pool)
         .await;
-    let _ = sqlx::query("DELETE FROM public.app_user WHERE id = $1")
+    let _ = sqlx::query("DELETE FROM auth.users WHERE id = $1")
         .bind(owner_id)
         .execute(&pool)
         .await;
@@ -537,7 +544,7 @@ async fn jobs_detail_cancel_retry_workspace_permissions() {
     let owner_id = Uuid::new_v4();
     let owner_email = format!("owner-{}@test.com", owner_id);
     sqlx::query(
-        "INSERT INTO public.app_user (id, email, created_at, updated_at) 
+        "INSERT INTO auth.users (id, email, created_at, updated_at) 
          VALUES ($1, $2, NOW(), NOW())",
     )
     .bind(owner_id)
@@ -550,7 +557,7 @@ async fn jobs_detail_cancel_retry_workspace_permissions() {
     let member_id = Uuid::new_v4();
     let member_email = format!("member-{}@test.com", member_id);
     sqlx::query(
-        "INSERT INTO public.app_user (id, email, created_at, updated_at) 
+        "INSERT INTO auth.users (id, email, created_at, updated_at) 
          VALUES ($1, $2, NOW(), NOW())",
     )
     .bind(member_id)
@@ -563,7 +570,7 @@ async fn jobs_detail_cancel_retry_workspace_permissions() {
     let outsider_id = Uuid::new_v4();
     let outsider_email = format!("outsider-{}@test.com", outsider_id);
     sqlx::query(
-        "INSERT INTO public.app_user (id, email, created_at, updated_at) 
+        "INSERT INTO auth.users (id, email, created_at, updated_at) 
          VALUES ($1, $2, NOW(), NOW())",
     )
     .bind(outsider_id)
@@ -575,10 +582,11 @@ async fn jobs_detail_cancel_retry_workspace_permissions() {
     // Create enterprise workspace
     let workspace_id = Uuid::new_v4();
     sqlx::query(
-        "INSERT INTO public.app_workspace (id, name, workspace_type, created_at, updated_at) 
-         VALUES ($1, $2, 'enterprise', NOW(), NOW())",
+        "INSERT INTO public.app_workspace (id, owner_user_id, name, workspace_type, created_at, updated_at) 
+         VALUES ($1, $2, $3, 'enterprise', NOW(), NOW())",
     )
     .bind(workspace_id)
+    .bind(owner_id)
     .bind("Test Workspace")
     .execute(&pool)
     .await
@@ -608,7 +616,7 @@ async fn jobs_detail_cancel_retry_workspace_permissions() {
 
     // Create project in workspace
     let project_id = Uuid::new_v4();
-    let project_numeric_id = 9003;
+    let project_numeric_id = ((Uuid::new_v4().as_u128() % 900_000) as i32) + 1_000;
     sqlx::query(
         "INSERT INTO public.app_project (id, numeric_id, workspace_id, owner_user_id, name, created_at, updated_at) 
          VALUES ($1, $2, $3, $4, $5, NOW(), NOW())",
@@ -627,12 +635,13 @@ async fn jobs_detail_cancel_retry_workspace_permissions() {
     sqlx::query(
         r#"
         INSERT INTO public.app_generation_job 
-        (id, owner_user_id, kind, status, payload, created_at, updated_at)
-        VALUES ($1, $2, 'test.job', 'succeeded', $3, NOW(), NOW())
+        (id, owner_user_id, workspace_id, kind, status, payload, created_at, updated_at)
+        VALUES ($1, $2, $3, 'test.job', 'succeeded', $4, NOW(), NOW())
         "#,
     )
     .bind(detail_job_id)
     .bind(owner_id)
+    .bind(workspace_id)
     .bind(serde_json::json!({
         "project_uuid": project_id.to_string(),
         "workspace_id": workspace_id.to_string(),
@@ -646,12 +655,13 @@ async fn jobs_detail_cancel_retry_workspace_permissions() {
     sqlx::query(
         r#"
         INSERT INTO public.app_generation_job 
-        (id, owner_user_id, kind, status, payload, created_at, updated_at)
-        VALUES ($1, $2, 'test.job', 'queued', $3, NOW(), NOW())
+        (id, owner_user_id, workspace_id, kind, status, payload, created_at, updated_at)
+        VALUES ($1, $2, $3, 'test.job', 'queued', $4, NOW(), NOW())
         "#,
     )
     .bind(cancel_job_id)
     .bind(owner_id)
+    .bind(workspace_id)
     .bind(serde_json::json!({
         "project_uuid": project_id.to_string(),
         "workspace_id": workspace_id.to_string(),
@@ -665,12 +675,13 @@ async fn jobs_detail_cancel_retry_workspace_permissions() {
     sqlx::query(
         r#"
         INSERT INTO public.app_generation_job 
-        (id, owner_user_id, kind, status, payload, created_at, updated_at)
-        VALUES ($1, $2, 'test.job', 'failed', $3, NOW(), NOW())
+        (id, owner_user_id, workspace_id, kind, status, payload, created_at, updated_at)
+        VALUES ($1, $2, $3, 'test.job', 'failed', $4, NOW(), NOW())
         "#,
     )
     .bind(retry_job_id)
     .bind(owner_id)
+    .bind(workspace_id)
     .bind(serde_json::json!({
         "project_uuid": project_id.to_string(),
         "workspace_id": workspace_id.to_string(),
@@ -684,12 +695,13 @@ async fn jobs_detail_cancel_retry_workspace_permissions() {
     sqlx::query(
         r#"
         INSERT INTO public.app_generation_job 
-        (id, owner_user_id, kind, status, payload, created_at, updated_at)
-        VALUES ($1, $2, 'test.personal', 'queued', $3, NOW(), NOW())
+        (id, owner_user_id, workspace_id, kind, status, payload, created_at, updated_at)
+        VALUES ($1, $2, $3, 'test.personal', 'queued', $4, NOW(), NOW())
         "#,
     )
     .bind(personal_job_id)
     .bind(owner_id)
+    .bind(workspace_id)
     .bind(serde_json::json!({"note": "personal job"}))
     .execute(&pool)
     .await
@@ -801,12 +813,13 @@ async fn jobs_detail_cancel_retry_workspace_permissions() {
     sqlx::query(
         r#"
         INSERT INTO public.app_generation_job 
-        (id, owner_user_id, kind, status, payload, created_at, updated_at)
-        VALUES ($1, $2, 'test.job', 'queued', $3, NOW(), NOW())
+        (id, owner_user_id, workspace_id, kind, status, payload, created_at, updated_at)
+        VALUES ($1, $2, $3, 'test.job', 'queued', $4, NOW(), NOW())
         "#,
     )
     .bind(cancel_job_2_id)
     .bind(owner_id)
+    .bind(workspace_id)
     .bind(serde_json::json!({
         "project_uuid": project_id.to_string(),
         "workspace_id": workspace_id.to_string(),
@@ -865,12 +878,13 @@ async fn jobs_detail_cancel_retry_workspace_permissions() {
     sqlx::query(
         r#"
         INSERT INTO public.app_generation_job 
-        (id, owner_user_id, kind, status, payload, created_at, updated_at)
-        VALUES ($1, $2, 'test.job', 'failed', $3, NOW(), NOW())
+        (id, owner_user_id, workspace_id, kind, status, payload, created_at, updated_at)
+        VALUES ($1, $2, $3, 'test.job', 'failed', $4, NOW(), NOW())
         "#,
     )
     .bind(retry_job_2_id)
     .bind(owner_id)
+    .bind(workspace_id)
     .bind(serde_json::json!({
         "project_uuid": project_id.to_string(),
         "workspace_id": workspace_id.to_string(),
@@ -967,7 +981,7 @@ async fn jobs_detail_cancel_retry_workspace_permissions() {
         .bind(workspace_id)
         .execute(&pool)
         .await;
-    let _ = sqlx::query("DELETE FROM public.app_user WHERE id = ANY($1)")
+    let _ = sqlx::query("DELETE FROM auth.users WHERE id = ANY($1)")
         .bind([owner_id, member_id, outsider_id])
         .execute(&pool)
         .await;
@@ -991,7 +1005,7 @@ async fn jobs_detail_archived_project_permission() {
     let owner_id = Uuid::new_v4();
     let owner_email = format!("owner-{}@test.com", owner_id);
     sqlx::query(
-        "INSERT INTO public.app_user (id, email, created_at, updated_at) 
+        "INSERT INTO auth.users (id, email, created_at, updated_at) 
          VALUES ($1, $2, NOW(), NOW())",
     )
     .bind(owner_id)
@@ -1004,7 +1018,7 @@ async fn jobs_detail_archived_project_permission() {
     let member_id = Uuid::new_v4();
     let member_email = format!("member-{}@test.com", member_id);
     sqlx::query(
-        "INSERT INTO public.app_user (id, email, created_at, updated_at) 
+        "INSERT INTO auth.users (id, email, created_at, updated_at) 
          VALUES ($1, $2, NOW(), NOW())",
     )
     .bind(member_id)
@@ -1016,10 +1030,11 @@ async fn jobs_detail_archived_project_permission() {
     // Create workspace
     let workspace_id = Uuid::new_v4();
     sqlx::query(
-        "INSERT INTO public.app_workspace (id, name, workspace_type, created_at, updated_at) 
-         VALUES ($1, $2, 'enterprise', NOW(), NOW())",
+        "INSERT INTO public.app_workspace (id, owner_user_id, name, workspace_type, created_at, updated_at) 
+         VALUES ($1, $2, $3, 'enterprise', NOW(), NOW())",
     )
     .bind(workspace_id)
+    .bind(owner_id)
     .bind("Test Workspace")
     .execute(&pool)
     .await
@@ -1049,7 +1064,7 @@ async fn jobs_detail_archived_project_permission() {
 
     // Create archived project
     let project_id = Uuid::new_v4();
-    let project_numeric_id = 9004;
+    let project_numeric_id = ((Uuid::new_v4().as_u128() % 900_000) as i32) + 1_000;
     sqlx::query(
         "INSERT INTO public.app_project (id, numeric_id, workspace_id, owner_user_id, name, archived_at, created_at, updated_at) 
          VALUES ($1, $2, $3, $4, $5, NOW(), NOW(), NOW())",
@@ -1068,12 +1083,13 @@ async fn jobs_detail_archived_project_permission() {
     sqlx::query(
         r#"
         INSERT INTO public.app_generation_job 
-        (id, owner_user_id, kind, status, payload, created_at, updated_at)
-        VALUES ($1, $2, 'test.job', 'succeeded', $3, NOW(), NOW())
+        (id, owner_user_id, workspace_id, kind, status, payload, created_at, updated_at)
+        VALUES ($1, $2, $3, 'test.job', 'succeeded', $4, NOW(), NOW())
         "#,
     )
     .bind(job_id)
     .bind(owner_id)
+    .bind(workspace_id)
     .bind(serde_json::json!({
         "project_uuid": project_id.to_string(),
         "project_numeric_id": project_numeric_id,
@@ -1142,7 +1158,7 @@ async fn jobs_detail_archived_project_permission() {
         .bind(workspace_id)
         .execute(&pool)
         .await;
-    let _ = sqlx::query("DELETE FROM public.app_user WHERE id = ANY($1)")
+    let _ = sqlx::query("DELETE FROM auth.users WHERE id = ANY($1)")
         .bind([owner_id, member_id])
         .execute(&pool)
         .await;
@@ -1166,7 +1182,7 @@ async fn jobs_summary_workspace_visibility() {
     let owner_id = Uuid::new_v4();
     let owner_email = format!("owner-{}@test.com", owner_id);
     sqlx::query(
-        "INSERT INTO public.app_user (id, email, created_at, updated_at) 
+        "INSERT INTO auth.users (id, email, created_at, updated_at) 
          VALUES ($1, $2, NOW(), NOW())",
     )
     .bind(owner_id)
@@ -1179,7 +1195,7 @@ async fn jobs_summary_workspace_visibility() {
     let member_id = Uuid::new_v4();
     let member_email = format!("member-{}@test.com", member_id);
     sqlx::query(
-        "INSERT INTO public.app_user (id, email, created_at, updated_at) 
+        "INSERT INTO auth.users (id, email, created_at, updated_at) 
          VALUES ($1, $2, NOW(), NOW())",
     )
     .bind(member_id)
@@ -1191,10 +1207,11 @@ async fn jobs_summary_workspace_visibility() {
     // Create enterprise workspace
     let workspace_id = Uuid::new_v4();
     sqlx::query(
-        "INSERT INTO public.app_workspace (id, name, workspace_type, created_at, updated_at) 
-         VALUES ($1, $2, 'enterprise', NOW(), NOW())",
+        "INSERT INTO public.app_workspace (id, owner_user_id, name, workspace_type, created_at, updated_at) 
+         VALUES ($1, $2, $3, 'enterprise', NOW(), NOW())",
     )
     .bind(workspace_id)
+    .bind(owner_id)
     .bind("Test Workspace")
     .execute(&pool)
     .await
@@ -1224,7 +1241,7 @@ async fn jobs_summary_workspace_visibility() {
 
     // Create project in workspace
     let project_id = Uuid::new_v4();
-    let project_numeric_id = 9006;
+    let project_numeric_id = ((Uuid::new_v4().as_u128() % 900_000) as i32) + 1_000;
     sqlx::query(
         "INSERT INTO public.app_project (id, numeric_id, workspace_id, owner_user_id, name, created_at, updated_at) 
          VALUES ($1, $2, $3, $4, $5, NOW(), NOW())",
@@ -1243,12 +1260,13 @@ async fn jobs_summary_workspace_visibility() {
     sqlx::query(
         r#"
         INSERT INTO public.app_generation_job 
-        (id, owner_user_id, kind, status, payload, created_at, updated_at)
-        VALUES ($1, $2, 'test.job', 'queued', $3, NOW(), NOW())
+        (id, owner_user_id, workspace_id, kind, status, payload, created_at, updated_at)
+        VALUES ($1, $2, $3, 'test.job', 'queued', $4, NOW(), NOW())
         "#,
     )
     .bind(queued_job_id)
     .bind(owner_id)
+    .bind(workspace_id)
     .bind(serde_json::json!({
         "project_uuid": project_id.to_string(),
         "workspace_id": workspace_id.to_string(),
@@ -1261,12 +1279,13 @@ async fn jobs_summary_workspace_visibility() {
     sqlx::query(
         r#"
         INSERT INTO public.app_generation_job 
-        (id, owner_user_id, kind, status, payload, created_at, updated_at)
-        VALUES ($1, $2, 'test.job', 'succeeded', $3, NOW(), NOW())
+        (id, owner_user_id, workspace_id, kind, status, payload, created_at, updated_at)
+        VALUES ($1, $2, $3, 'test.job', 'succeeded', $4, NOW(), NOW())
         "#,
     )
     .bind(succeeded_job_id)
     .bind(owner_id)
+    .bind(workspace_id)
     .bind(serde_json::json!({
         "project_uuid": project_id.to_string(),
         "workspace_id": workspace_id.to_string(),
@@ -1280,12 +1299,13 @@ async fn jobs_summary_workspace_visibility() {
     sqlx::query(
         r#"
         INSERT INTO public.app_generation_job 
-        (id, owner_user_id, kind, status, payload, created_at, updated_at)
-        VALUES ($1, $2, 'test.personal', 'queued', $3, NOW(), NOW())
+        (id, owner_user_id, workspace_id, kind, status, payload, created_at, updated_at)
+        VALUES ($1, $2, $3, 'test.personal', 'queued', $4, NOW(), NOW())
         "#,
     )
     .bind(personal_job_id)
     .bind(owner_id)
+    .bind(workspace_id)
     .bind(serde_json::json!({"note": "personal job"}))
     .execute(&pool)
     .await
@@ -1302,7 +1322,7 @@ async fn jobs_summary_workspace_visibility() {
         .oneshot(
             Request::builder()
                 .method(Method::GET)
-                .uri("/api/v1/jobs/summary")
+                .uri("/api/v1/jobs/page?page=1&limit=100")
                 .header(header::AUTHORIZATION, format!("Bearer {owner_token}"))
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::empty())
@@ -1325,7 +1345,7 @@ async fn jobs_summary_workspace_visibility() {
         .oneshot(
             Request::builder()
                 .method(Method::GET)
-                .uri("/api/v1/jobs/summary")
+                .uri("/api/v1/jobs/page?page=1&limit=100")
                 .header(header::AUTHORIZATION, format!("Bearer {member_token}"))
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::empty())
@@ -1362,7 +1382,7 @@ async fn jobs_summary_workspace_visibility() {
         .bind(workspace_id)
         .execute(&pool)
         .await;
-    let _ = sqlx::query("DELETE FROM public.app_user WHERE id = ANY($1)")
+    let _ = sqlx::query("DELETE FROM auth.users WHERE id = ANY($1)")
         .bind([owner_id, member_id])
         .execute(&pool)
         .await;
@@ -1386,7 +1406,7 @@ async fn jobs_list_endpoint_workspace_visibility() {
     let owner_id = Uuid::new_v4();
     let owner_email = format!("owner-{}@test.com", owner_id);
     sqlx::query(
-        "INSERT INTO public.app_user (id, email, created_at, updated_at) 
+        "INSERT INTO auth.users (id, email, created_at, updated_at) 
          VALUES ($1, $2, NOW(), NOW())",
     )
     .bind(owner_id)
@@ -1399,7 +1419,7 @@ async fn jobs_list_endpoint_workspace_visibility() {
     let member_id = Uuid::new_v4();
     let member_email = format!("member-{}@test.com", member_id);
     sqlx::query(
-        "INSERT INTO public.app_user (id, email, created_at, updated_at) 
+        "INSERT INTO auth.users (id, email, created_at, updated_at) 
          VALUES ($1, $2, NOW(), NOW())",
     )
     .bind(member_id)
@@ -1411,10 +1431,11 @@ async fn jobs_list_endpoint_workspace_visibility() {
     // Create enterprise workspace
     let workspace_id = Uuid::new_v4();
     sqlx::query(
-        "INSERT INTO public.app_workspace (id, name, workspace_type, created_at, updated_at) 
-         VALUES ($1, $2, 'enterprise', NOW(), NOW())",
+        "INSERT INTO public.app_workspace (id, owner_user_id, name, workspace_type, created_at, updated_at) 
+         VALUES ($1, $2, $3, 'enterprise', NOW(), NOW())",
     )
     .bind(workspace_id)
+    .bind(owner_id)
     .bind("Test Workspace")
     .execute(&pool)
     .await
@@ -1444,7 +1465,7 @@ async fn jobs_list_endpoint_workspace_visibility() {
 
     // Create project in workspace
     let project_id = Uuid::new_v4();
-    let project_numeric_id = 9005;
+    let project_numeric_id = ((Uuid::new_v4().as_u128() % 900_000) as i32) + 1_000;
     sqlx::query(
         "INSERT INTO public.app_project (id, numeric_id, workspace_id, owner_user_id, name, created_at, updated_at) 
          VALUES ($1, $2, $3, $4, $5, NOW(), NOW())",
@@ -1463,12 +1484,13 @@ async fn jobs_list_endpoint_workspace_visibility() {
     sqlx::query(
         r#"
         INSERT INTO public.app_generation_job 
-        (id, owner_user_id, kind, status, payload, created_at, updated_at)
-        VALUES ($1, $2, 'test.job', 'succeeded', $3, NOW(), NOW())
+        (id, owner_user_id, workspace_id, kind, status, payload, created_at, updated_at)
+        VALUES ($1, $2, $3, 'test.job', 'succeeded', $4, NOW(), NOW())
         "#,
     )
     .bind(workspace_job_id)
     .bind(owner_id)
+    .bind(workspace_id)
     .bind(serde_json::json!({
         "project_uuid": project_id.to_string(),
         "workspace_id": workspace_id.to_string(),
@@ -1482,12 +1504,13 @@ async fn jobs_list_endpoint_workspace_visibility() {
     sqlx::query(
         r#"
         INSERT INTO public.app_generation_job 
-        (id, owner_user_id, kind, status, payload, created_at, updated_at)
-        VALUES ($1, $2, 'test.personal', 'queued', $3, NOW(), NOW())
+        (id, owner_user_id, workspace_id, kind, status, payload, created_at, updated_at)
+        VALUES ($1, $2, $3, 'test.personal', 'queued', $4, NOW(), NOW())
         "#,
     )
     .bind(personal_job_id)
     .bind(owner_id)
+    .bind(workspace_id)
     .bind(serde_json::json!({"note": "personal job"}))
     .execute(&pool)
     .await
@@ -1572,7 +1595,7 @@ async fn jobs_list_endpoint_workspace_visibility() {
         .bind(workspace_id)
         .execute(&pool)
         .await;
-    let _ = sqlx::query("DELETE FROM public.app_user WHERE id = ANY($1)")
+    let _ = sqlx::query("DELETE FROM auth.users WHERE id = ANY($1)")
         .bind([owner_id, member_id])
         .execute(&pool)
         .await;

@@ -5,6 +5,21 @@ use sqlx::FromRow;
 use utoipa::ToSchema;
 use uuid::Uuid;
 
+/// 创建复核队列项请求体
+#[derive(Debug, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CreateReviewQueueBody {
+    pub experiment_run_id: Uuid,
+    pub experiment_result_id: Option<Uuid>,
+    pub variant_id: Option<Uuid>,
+    pub case_id: Option<Uuid>,
+    pub stage: Option<String>,
+    pub review_type: Option<String>,
+    pub priority: Option<i32>,
+    pub prompt: Option<String>,
+    pub rubric_snapshot: Option<serde_json::Value>,
+}
+
 /// 人工复核队列项
 #[derive(Debug, FromRow, Serialize, ToSchema)]
 #[serde(rename_all = "camelCase")]

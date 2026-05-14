@@ -125,6 +125,7 @@ pub struct PatchPublishDraftBody {
     pub description: Option<String>,
     pub tags: Option<Vec<String>>,
     pub platform_copy: Option<Value>,
+    pub platform_copy_fragment: Option<Value>,
     pub scheduled_at: Option<DateTime<Utc>>,
     pub draft_status: Option<String>,
     pub metadata: Option<Value>,

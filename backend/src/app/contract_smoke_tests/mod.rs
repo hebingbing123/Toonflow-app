@@ -7,6 +7,7 @@
 mod helpers;
 
 mod asset_jobs_tasks_smoke;
+mod benchmark_smoke;
 mod health_models_billing_vendors;
 mod manuals_scripts_novels;
 mod production_http_smoke;

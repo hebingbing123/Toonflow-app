@@ -732,30 +732,6 @@
   "opsWhRecentActivity": "最近操作",
   "opsWhCopyActivityTooltip": "复制记录",
   "opsWhActivityRecordSuffix": " Webhook 操作记录",
-  "opsWhActivityActionCreated": "已创建",
-  "opsWhActivityActionDeleted": "已删除",
-  "opsWhActivityActionTestSuccess": "测试：成功",
-  "opsWhActivityActionTestFailed": "测试：失败",
-  "opsWhActivitySummaryDeleted": "已删除 Webhook",
-  "opsWhActivitySummaryTestOk": "HTTP {httpStatus}",
-  "@opsWhActivitySummaryTestOk": {
-    "placeholders": {
-      "httpStatus": {
-        "type": "String"
-      }
-    }
-  },
-  "opsWhActivitySummaryTestFail": "HTTP {httpStatus} · {errorDetail}",
-  "@opsWhActivitySummaryTestFail": {
-    "placeholders": {
-      "httpStatus": {
-        "type": "String"
-      },
-      "errorDetail": {
-        "type": "String"
-      }
-    }
-  },
   "opsWhChipLatestCreated": "最近创建",
   "opsWhChipDisabled": "已停用",
   "opsWhSubscribeHeading": "订阅事件",
@@ -6538,14 +6514,6 @@
   "scriptEditorStoryboardsReadinessBlockingMissingLiveActionPerformanceNotes": "表演 / 口播约束",
   "scriptEditorStoryboardsReadinessBlockingCandidatePending": "候选确认",
   "scriptEditorStoryboardsReadinessBlockingBlockingJob": "生成任务进行中",
-  "scriptEditorStoryboardsReadinessBlockingUnknown": "未识别的就绪阻塞项（{code}）",
-  "@scriptEditorStoryboardsReadinessBlockingUnknown": {
-    "placeholders": {
-      "code": {
-        "type": "String"
-      }
-    }
-  },
   "scriptEditorEditImageWorkbenchTitle": "编辑图片工作台",
   "scriptEditorEditImageWorkbenchIntro": "直接在脚本工作台内管理 edit-image flow、上传源图并发起生成，不再只停留在 production probe。",
   "scriptEditorEditImageWorkbenchSyncing": "同步中…",
@@ -15369,7 +15337,6 @@
       }
     }
   },
-  "apiKeysLastUsedIpUnknown": "未知",
   "apiKeysSourceLine": "来源 {source}",
   "@apiKeysSourceLine": {
     "placeholders": {

@@ -34,6 +34,21 @@ pub(crate) const TEST_JWT_SECRET: &[u8] = b"contract-smoke-jwt-secret-bytes-32ch
 /// JWT `sub` and `app_project.owner_user_id` for this run.
 pub(crate) const CONTRACT_USER_SUB: &str = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 
+pub(crate) async fn ensure_contract_auth_user(pool: &PgPool) {
+    let sub = Uuid::parse_str(CONTRACT_USER_SUB).unwrap();
+    sqlx::query(
+        r#"
+        INSERT INTO auth.users (id, email, encrypted_password, email_confirmed_at, created_at, updated_at)
+        VALUES ($1, 'test@example.com', 'contract-test-password', NOW(), NOW(), NOW())
+        ON CONFLICT (id) DO NOTHING
+        "#,
+    )
+    .bind(sub)
+    .execute(pool)
+    .await
+    .expect("ensure CONTRACT_USER_SUB exists in auth.users");
+}
+
 /// Isolated numeric ids for **`promote_staging_populates_assets_and_links`** (avoid API allocator range).
 pub(crate) const PROMO_IMPORT_USER: i32 = 5_010_000;
 pub(crate) const PROMO_PROJECT_LEG: i32 = 5_010_001;
@@ -130,7 +145,12 @@ pub(crate) async fn read_json_response(res: Response) -> (StatusCode, Value) {
     let v = if bytes.is_empty() {
         Value::Null
     } else {
-        serde_json::from_slice(&bytes).expect("response json")
+        serde_json::from_slice(&bytes).unwrap_or_else(|err| {
+            panic!(
+                "response json decode failed: {err}; body={}",
+                String::from_utf8_lossy(&bytes)
+            )
+        })
     };
     (status, v)
 }

@@ -1,7 +1,9 @@
 //! Tests for NextAction enum and inference logic (需求 I.4)
 
 use super::issue_type::IssueType;
-use super::next_action::{infer_next_action, NextAction};
+use super::next_action::{
+    infer_next_action, infer_suggested_action_from_bad_case_category, NextAction,
+};
 use super::types::QualityReview;
 use uuid::Uuid;
 
@@ -43,6 +45,7 @@ fn make_review(
         skill_file_path: None,
         skill_version_hash: None,
         next_action: None,
+        suggested_action: None,
     }
 }
 
@@ -173,4 +176,41 @@ fn test_next_action_deserialization() {
     let json = "\"adjust_video_prompt\"";
     let action: NextAction = serde_json::from_str(json).unwrap();
     assert_eq!(action, NextAction::AdjustVideoPrompt);
+}
+
+#[test]
+fn test_suggested_action_mapping_from_bad_case_category() {
+    assert_eq!(
+        infer_suggested_action_from_bad_case_category(Some("plot_hole")),
+        Some("rollback_to_director_planning")
+    );
+    assert_eq!(
+        infer_suggested_action_from_bad_case_category(Some("character_break")),
+        Some("update_character_anchor")
+    );
+    assert_eq!(
+        infer_suggested_action_from_bad_case_category(Some("storyboard_mismatch")),
+        Some("patch_storyboard_items")
+    );
+    assert_eq!(
+        infer_suggested_action_from_bad_case_category(Some("dialogue_issue")),
+        Some("adjust_video_prompt")
+    );
+    assert_eq!(
+        infer_suggested_action_from_bad_case_category(Some("visual_error")),
+        Some("retry_video_generation")
+    );
+    assert_eq!(
+        infer_suggested_action_from_bad_case_category(Some("pacing_issue")),
+        Some("regenerate_storyboard")
+    );
+    assert_eq!(
+        infer_suggested_action_from_bad_case_category(Some("other")),
+        Some("manual_review")
+    );
+    assert_eq!(
+        infer_suggested_action_from_bad_case_category(Some("unknown")),
+        None
+    );
+    assert_eq!(infer_suggested_action_from_bad_case_category(None), None);
 }

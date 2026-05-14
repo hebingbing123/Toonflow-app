@@ -166,6 +166,9 @@ pub(crate) async fn patch_draft_row(
     if let Some(ref tags) = body.tags {
         cur.tags.clone_from(tags);
     }
+    if let Some(ref fragment) = body.platform_copy_fragment {
+        cur.platform_copy = Json(merge_publish_platform_copy(&cur.platform_copy.0, fragment));
+    }
     if let Some(ref pc) = body.platform_copy {
         cur.platform_copy = Json(pc.clone());
     }

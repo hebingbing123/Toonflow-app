@@ -46,7 +46,7 @@ async fn project_edit_director_manual_not_found_for_missing_folder() {
     let (status, v) = post_json_bearer("/api/v1/project/edit-director-manual", &token, body).await;
     assert_eq!(status, StatusCode::BAD_REQUEST);
     assert_eq!(v["code"], "bad_request");
-    assert_eq!(v["message"], "导演手册不存在");
+    assert_eq!(v["message"], "Director manual does not exist");
 }
 
 #[tokio::test]

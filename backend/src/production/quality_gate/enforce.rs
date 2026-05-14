@@ -14,6 +14,7 @@ use crate::settings::agent_memory::{
 
 use super::strategy::QualityGateStrategy;
 use super::{
+    anti_ai::check_anti_ai_artifacts,
     attribution::{decision_prefers_patch_scope, decision_suggests_attribution},
     contains_any, issue,
     rules::{
@@ -318,6 +319,11 @@ pub(crate) async fn run_quality_gate(
             ) {
                 storyboard_states.push(state);
             }
+            issues.extend(check_anti_ai_artifacts(
+                &fields,
+                row.1.prompt.as_deref(),
+                &row_scope,
+            ));
         }
     }
     issues.extend(evaluate_storyboard_progression(&storyboard_states));

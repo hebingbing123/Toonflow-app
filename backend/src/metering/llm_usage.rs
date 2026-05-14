@@ -136,6 +136,8 @@ fn build_quality_review_usage_meta(review: &QualityReview) -> serde_json::Value 
         "passed": review.passed,
         "isBadCase": review.is_bad_case,
         "badCaseCategory": review.bad_case_category,
+        "nextAction": review.next_action,
+        "suggestedAction": review.suggested_action,
         "memoryDeliveryPriorityApplied": review.memory_delivery_priority_applied,
         "memoryBudgetTier": diagnostics.and_then(|value: &serde_json::Value| value.get("memoryBudgetTier")),
         "negativeBudgetTier": diagnostics.and_then(|value: &serde_json::Value| value.get("negativeBudgetTier")),
@@ -234,6 +236,7 @@ mod tests {
             skill_file_path: None,
             skill_version_hash: None,
             next_action: None,
+            suggested_action: None,
         };
 
         let meta = build_quality_review_usage_meta(&review);

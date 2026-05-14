@@ -22,10 +22,10 @@ async fn projects_patch_partial_fields_roundtrip() {
         r#"{{
             "name":"pg_general_project_{}",
             "intro":"before update",
-            "project_type":"movie",
-            "art_style":"orig-style",
-            "mode":"orig-mode",
-            "video_ratio":"9:16"
+            "projectType":"movie",
+            "artStyle":"orig-style",
+            "mode":"animated.short_drama",
+            "videoRatio":"9:16"
         }}"#,
         Uuid::new_v4().simple()
     );
@@ -64,7 +64,7 @@ async fn projects_patch_partial_fields_roundtrip() {
     assert_eq!(status, StatusCode::OK, "before_update={before_update}");
     let proj = &before_update["project"];
     assert_eq!(proj["intro"].as_str(), Some("before update"));
-    assert_eq!(proj["mode"].as_str(), Some("orig-mode"));
+    assert_eq!(proj["mode"].as_str(), Some("animated.short_drama"));
     assert_eq!(proj["art_style"].as_str(), Some("orig-style"));
 
     let res = app
@@ -94,7 +94,7 @@ async fn projects_patch_partial_fields_roundtrip() {
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::from(
-                    r#"{"intro":"after update","mode":"compat-mode","art_style":null,"video_ratio":"1:1","project_type":"series"}"#,
+                    r#"{"intro":"after update","mode":"live_action.short_drama","artStyle":"reframed-style","videoRatio":"1:1","projectType":"series"}"#,
                 ))
                 .unwrap(),
         )
@@ -103,8 +103,8 @@ async fn projects_patch_partial_fields_roundtrip() {
     let (status, patched) = read_json_response(res).await;
     assert_eq!(status, StatusCode::OK, "patched={patched}");
     assert_eq!(patched["intro"].as_str(), Some("after update"));
-    assert_eq!(patched["mode"].as_str(), Some("compat-mode"));
-    assert!(patched["art_style"].is_null());
+    assert_eq!(patched["mode"].as_str(), Some("live_action.short_drama"));
+    assert_eq!(patched["art_style"].as_str(), Some("reframed-style"));
     assert_eq!(patched["video_ratio"].as_str(), Some("1:1"));
     assert_eq!(patched["project_type"].as_str(), Some("series"));
 
@@ -130,8 +130,8 @@ async fn projects_patch_partial_fields_roundtrip() {
         "PATCH must preserve untouched fields"
     );
     assert_eq!(row["intro"].as_str(), Some("after update"));
-    assert_eq!(row["mode"].as_str(), Some("compat-mode"));
-    assert!(row["art_style"].is_null());
+    assert_eq!(row["mode"].as_str(), Some("live_action.short_drama"));
+    assert_eq!(row["art_style"].as_str(), Some("reframed-style"));
     assert_eq!(row["video_ratio"].as_str(), Some("1:1"));
     assert_eq!(row["project_type"].as_str(), Some("series"));
 
@@ -144,8 +144,8 @@ async fn projects_patch_partial_fields_roundtrip() {
     .await
     .expect("select updated project");
     assert_eq!(stored.0.as_deref(), Some("after update"));
-    assert_eq!(stored.1.as_deref(), Some("compat-mode"));
-    assert_eq!(stored.2, None);
+    assert_eq!(stored.1.as_deref(), Some("live_action.short_drama"));
+    assert_eq!(stored.2.as_deref(), Some("reframed-style"));
     assert_eq!(stored.3.as_deref(), Some("series"));
 
     let _ = sqlx::query("DELETE FROM public.app_project WHERE id = $1")

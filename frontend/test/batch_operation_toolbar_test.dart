@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/short_video_space/components/batch_operation_toolbar.dart';
 
 Finder findShotSelectionTapTarget() => find.byType(ShotSelectionCheckbox);
+
+Widget _appWithZh({required Widget child}) => MaterialApp(
+  localizationsDelegates: AppLocalizations.localizationsDelegates,
+  supportedLocales: AppLocalizations.supportedLocales,
+  locale: const Locale('zh'),
+  home: Scaffold(body: child),
+);
 
 void main() {
   group('BatchOperationToolbar', () {
@@ -11,45 +19,41 @@ void main() {
       final selectedIds = <int>{1, 2, 3};
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BatchOperationToolbar(
-              totalCount: 10,
-              selectedIds: selectedIds,
-              onSelectionChanged: (_) {},
-              onSelectAll: () {},
-              onDeselectAll: () {},
-              onBatchEnable: () {},
-              onBatchDisable: () {},
-              onBatchUpdateDuration: () {},
-              onBatchReplace: () {},
-              onBatchGenerateVoiceover: () {},
-            ),
+        _appWithZh(
+          child: BatchOperationToolbar(
+            totalCount: 10,
+            selectedIds: selectedIds,
+            onSelectionChanged: (_) {},
+            onSelectAll: () {},
+            onDeselectAll: () {},
+            onBatchEnable: () {},
+            onBatchDisable: () {},
+            onBatchUpdateDuration: () {},
+            onBatchReplace: () {},
+            onBatchGenerateVoiceover: () {},
           ),
         ),
       );
 
-      expect(find.text('已选择: 3 / 10'), findsOneWidget);
+      expect(find.text('已选择：3 / 10'), findsOneWidget);
     });
 
     testWidgets('shows select all button when not all selected', (
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BatchOperationToolbar(
-              totalCount: 10,
-              selectedIds: const {1, 2},
-              onSelectionChanged: (_) {},
-              onSelectAll: () {},
-              onDeselectAll: () {},
-              onBatchEnable: () {},
-              onBatchDisable: () {},
-              onBatchUpdateDuration: () {},
-              onBatchReplace: () {},
-              onBatchGenerateVoiceover: () {},
-            ),
+        _appWithZh(
+          child: BatchOperationToolbar(
+            totalCount: 10,
+            selectedIds: const {1, 2},
+            onSelectionChanged: (_) {},
+            onSelectAll: () {},
+            onDeselectAll: () {},
+            onBatchEnable: () {},
+            onBatchDisable: () {},
+            onBatchUpdateDuration: () {},
+            onBatchReplace: () {},
+            onBatchGenerateVoiceover: () {},
           ),
         ),
       );
@@ -62,20 +66,18 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BatchOperationToolbar(
-              totalCount: 3,
-              selectedIds: const {1, 2, 3},
-              onSelectionChanged: (_) {},
-              onSelectAll: () {},
-              onDeselectAll: () {},
-              onBatchEnable: () {},
-              onBatchDisable: () {},
-              onBatchUpdateDuration: () {},
-              onBatchReplace: () {},
-              onBatchGenerateVoiceover: () {},
-            ),
+        _appWithZh(
+          child: BatchOperationToolbar(
+            totalCount: 3,
+            selectedIds: const {1, 2, 3},
+            onSelectionChanged: (_) {},
+            onSelectAll: () {},
+            onDeselectAll: () {},
+            onBatchEnable: () {},
+            onBatchDisable: () {},
+            onBatchUpdateDuration: () {},
+            onBatchReplace: () {},
+            onBatchGenerateVoiceover: () {},
           ),
         ),
       );
@@ -90,22 +92,20 @@ void main() {
       var selectAllCalled = false;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BatchOperationToolbar(
-              totalCount: 10,
-              selectedIds: const {},
-              onSelectionChanged: (_) {},
-              onSelectAll: () {
-                selectAllCalled = true;
-              },
-              onDeselectAll: () {},
-              onBatchEnable: () {},
-              onBatchDisable: () {},
-              onBatchUpdateDuration: () {},
-              onBatchReplace: () {},
-              onBatchGenerateVoiceover: () {},
-            ),
+        _appWithZh(
+          child: BatchOperationToolbar(
+            totalCount: 10,
+            selectedIds: const {},
+            onSelectionChanged: (_) {},
+            onSelectAll: () {
+              selectAllCalled = true;
+            },
+            onDeselectAll: () {},
+            onBatchEnable: () {},
+            onBatchDisable: () {},
+            onBatchUpdateDuration: () {},
+            onBatchReplace: () {},
+            onBatchGenerateVoiceover: () {},
           ),
         ),
       );
@@ -120,22 +120,20 @@ void main() {
       var deselectAllCalled = false;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BatchOperationToolbar(
-              totalCount: 3,
-              selectedIds: const {1, 2, 3},
-              onSelectionChanged: (_) {},
-              onSelectAll: () {},
-              onDeselectAll: () {
-                deselectAllCalled = true;
-              },
-              onBatchEnable: () {},
-              onBatchDisable: () {},
-              onBatchUpdateDuration: () {},
-              onBatchReplace: () {},
-              onBatchGenerateVoiceover: () {},
-            ),
+        _appWithZh(
+          child: BatchOperationToolbar(
+            totalCount: 3,
+            selectedIds: const {1, 2, 3},
+            onSelectionChanged: (_) {},
+            onSelectAll: () {},
+            onDeselectAll: () {
+              deselectAllCalled = true;
+            },
+            onBatchEnable: () {},
+            onBatchDisable: () {},
+            onBatchUpdateDuration: () {},
+            onBatchReplace: () {},
+            onBatchGenerateVoiceover: () {},
           ),
         ),
       );
@@ -149,20 +147,18 @@ void main() {
     ) async {
       // Test with no selection
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BatchOperationToolbar(
-              totalCount: 10,
-              selectedIds: const {},
-              onSelectionChanged: (_) {},
-              onSelectAll: () {},
-              onDeselectAll: () {},
-              onBatchEnable: () {},
-              onBatchDisable: () {},
-              onBatchUpdateDuration: () {},
-              onBatchReplace: () {},
-              onBatchGenerateVoiceover: () {},
-            ),
+        _appWithZh(
+          child: BatchOperationToolbar(
+            totalCount: 10,
+            selectedIds: const {},
+            onSelectionChanged: (_) {},
+            onSelectAll: () {},
+            onDeselectAll: () {},
+            onBatchEnable: () {},
+            onBatchDisable: () {},
+            onBatchUpdateDuration: () {},
+            onBatchReplace: () {},
+            onBatchGenerateVoiceover: () {},
           ),
         ),
       );
@@ -170,25 +166,23 @@ void main() {
       expect(find.text('批量启用'), findsNothing);
       expect(find.text('批量禁用'), findsNothing);
       expect(find.text('时长对齐'), findsNothing);
-      expect(find.text('批量替换'), findsNothing);
+      expect(find.text('批量替换 URL'), findsNothing);
       expect(find.text('批量配音'), findsNothing);
 
       // Test with selection
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BatchOperationToolbar(
-              totalCount: 10,
-              selectedIds: const {1, 2},
-              onSelectionChanged: (_) {},
-              onSelectAll: () {},
-              onDeselectAll: () {},
-              onBatchEnable: () {},
-              onBatchDisable: () {},
-              onBatchUpdateDuration: () {},
-              onBatchReplace: () {},
-              onBatchGenerateVoiceover: () {},
-            ),
+        _appWithZh(
+          child: BatchOperationToolbar(
+            totalCount: 10,
+            selectedIds: const {1, 2},
+            onSelectionChanged: (_) {},
+            onSelectAll: () {},
+            onDeselectAll: () {},
+            onBatchEnable: () {},
+            onBatchDisable: () {},
+            onBatchUpdateDuration: () {},
+            onBatchReplace: () {},
+            onBatchGenerateVoiceover: () {},
           ),
         ),
       );
@@ -196,7 +190,7 @@ void main() {
       expect(find.text('批量启用'), findsOneWidget);
       expect(find.text('批量禁用'), findsOneWidget);
       expect(find.text('时长对齐'), findsOneWidget);
-      expect(find.text('批量替换'), findsOneWidget);
+      expect(find.text('批量替换 URL'), findsOneWidget);
       expect(find.text('批量配音'), findsOneWidget);
     });
 
@@ -206,22 +200,20 @@ void main() {
       var batchEnableCalled = false;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BatchOperationToolbar(
-              totalCount: 10,
-              selectedIds: const {1, 2},
-              onSelectionChanged: (_) {},
-              onSelectAll: () {},
-              onDeselectAll: () {},
-              onBatchEnable: () {
-                batchEnableCalled = true;
-              },
-              onBatchDisable: () {},
-              onBatchUpdateDuration: () {},
-              onBatchReplace: () {},
-              onBatchGenerateVoiceover: () {},
-            ),
+        _appWithZh(
+          child: BatchOperationToolbar(
+            totalCount: 10,
+            selectedIds: const {1, 2},
+            onSelectionChanged: (_) {},
+            onSelectAll: () {},
+            onDeselectAll: () {},
+            onBatchEnable: () {
+              batchEnableCalled = true;
+            },
+            onBatchDisable: () {},
+            onBatchUpdateDuration: () {},
+            onBatchReplace: () {},
+            onBatchGenerateVoiceover: () {},
           ),
         ),
       );
@@ -236,22 +228,20 @@ void main() {
       var batchDisableCalled = false;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BatchOperationToolbar(
-              totalCount: 10,
-              selectedIds: const {1, 2},
-              onSelectionChanged: (_) {},
-              onSelectAll: () {},
-              onDeselectAll: () {},
-              onBatchEnable: () {},
-              onBatchDisable: () {
-                batchDisableCalled = true;
-              },
-              onBatchUpdateDuration: () {},
-              onBatchReplace: () {},
-              onBatchGenerateVoiceover: () {},
-            ),
+        _appWithZh(
+          child: BatchOperationToolbar(
+            totalCount: 10,
+            selectedIds: const {1, 2},
+            onSelectionChanged: (_) {},
+            onSelectAll: () {},
+            onDeselectAll: () {},
+            onBatchEnable: () {},
+            onBatchDisable: () {
+              batchDisableCalled = true;
+            },
+            onBatchUpdateDuration: () {},
+            onBatchReplace: () {},
+            onBatchGenerateVoiceover: () {},
           ),
         ),
       );
@@ -266,22 +256,20 @@ void main() {
       var batchUpdateDurationCalled = false;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BatchOperationToolbar(
-              totalCount: 10,
-              selectedIds: const {1, 2},
-              onSelectionChanged: (_) {},
-              onSelectAll: () {},
-              onDeselectAll: () {},
-              onBatchEnable: () {},
-              onBatchDisable: () {},
-              onBatchUpdateDuration: () {
-                batchUpdateDurationCalled = true;
-              },
-              onBatchReplace: () {},
-              onBatchGenerateVoiceover: () {},
-            ),
+        _appWithZh(
+          child: BatchOperationToolbar(
+            totalCount: 10,
+            selectedIds: const {1, 2},
+            onSelectionChanged: (_) {},
+            onSelectAll: () {},
+            onDeselectAll: () {},
+            onBatchEnable: () {},
+            onBatchDisable: () {},
+            onBatchUpdateDuration: () {
+              batchUpdateDurationCalled = true;
+            },
+            onBatchReplace: () {},
+            onBatchGenerateVoiceover: () {},
           ),
         ),
       );
@@ -296,27 +284,25 @@ void main() {
       var batchReplaceCalled = false;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BatchOperationToolbar(
-              totalCount: 10,
-              selectedIds: const {1, 2},
-              onSelectionChanged: (_) {},
-              onSelectAll: () {},
-              onDeselectAll: () {},
-              onBatchEnable: () {},
-              onBatchDisable: () {},
-              onBatchUpdateDuration: () {},
-              onBatchReplace: () {
-                batchReplaceCalled = true;
-              },
-              onBatchGenerateVoiceover: () {},
-            ),
+        _appWithZh(
+          child: BatchOperationToolbar(
+            totalCount: 10,
+            selectedIds: const {1, 2},
+            onSelectionChanged: (_) {},
+            onSelectAll: () {},
+            onDeselectAll: () {},
+            onBatchEnable: () {},
+            onBatchDisable: () {},
+            onBatchUpdateDuration: () {},
+            onBatchReplace: () {
+              batchReplaceCalled = true;
+            },
+            onBatchGenerateVoiceover: () {},
           ),
         ),
       );
 
-      await tester.tap(find.text('批量替换'));
+      await tester.tap(find.text('批量替换 URL'));
       expect(batchReplaceCalled, isTrue);
     });
 
@@ -327,6 +313,9 @@ void main() {
 
         await tester.pumpWidget(
           MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('zh'),
             home: Scaffold(
               body: BatchOperationToolbar(
                 totalCount: 10,
@@ -355,21 +344,19 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BatchOperationToolbar(
-              totalCount: 10,
-              selectedIds: const {1, 2},
-              onSelectionChanged: (_) {},
-              onSelectAll: () {},
-              onDeselectAll: () {},
-              onBatchEnable: () {},
-              onBatchDisable: () {},
-              onBatchUpdateDuration: () {},
-              onBatchReplace: () {},
-              onBatchGenerateVoiceover: () {},
-              isOperationInProgress: true,
-            ),
+        _appWithZh(
+          child: BatchOperationToolbar(
+            totalCount: 10,
+            selectedIds: const {1, 2},
+            onSelectionChanged: (_) {},
+            onSelectAll: () {},
+            onDeselectAll: () {},
+            onBatchEnable: () {},
+            onBatchDisable: () {},
+            onBatchUpdateDuration: () {},
+            onBatchReplace: () {},
+            onBatchGenerateVoiceover: () {},
+            isOperationInProgress: true,
           ),
         ),
       );
@@ -410,21 +397,19 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BatchOperationToolbar(
-              totalCount: 10,
-              selectedIds: const {1, 2},
-              onSelectionChanged: (_) {},
-              onSelectAll: () {},
-              onDeselectAll: () {},
-              onBatchEnable: () {},
-              onBatchDisable: () {},
-              onBatchUpdateDuration: () {},
-              onBatchReplace: () {},
-              onBatchGenerateVoiceover: () {},
-              isOperationInProgress: true,
-            ),
+        _appWithZh(
+          child: BatchOperationToolbar(
+            totalCount: 10,
+            selectedIds: const {1, 2},
+            onSelectionChanged: (_) {},
+            onSelectAll: () {},
+            onDeselectAll: () {},
+            onBatchEnable: () {},
+            onBatchDisable: () {},
+            onBatchUpdateDuration: () {},
+            onBatchReplace: () {},
+            onBatchGenerateVoiceover: () {},
+            isOperationInProgress: true,
           ),
         ),
       );
@@ -436,20 +421,18 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BatchOperationToolbar(
-              totalCount: 3,
-              selectedIds: const {1, 2, 3},
-              onSelectionChanged: (_) {},
-              onSelectAll: () {},
-              onDeselectAll: () {},
-              onBatchEnable: () {},
-              onBatchDisable: () {},
-              onBatchUpdateDuration: () {},
-              onBatchReplace: () {},
-              onBatchGenerateVoiceover: () {},
-            ),
+        _appWithZh(
+          child: BatchOperationToolbar(
+            totalCount: 3,
+            selectedIds: const {1, 2, 3},
+            onSelectionChanged: (_) {},
+            onSelectAll: () {},
+            onDeselectAll: () {},
+            onBatchEnable: () {},
+            onBatchDisable: () {},
+            onBatchUpdateDuration: () {},
+            onBatchReplace: () {},
+            onBatchGenerateVoiceover: () {},
           ),
         ),
       );
@@ -462,20 +445,18 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BatchOperationToolbar(
-              totalCount: 3,
-              selectedIds: const {},
-              onSelectionChanged: (_) {},
-              onSelectAll: () {},
-              onDeselectAll: () {},
-              onBatchEnable: () {},
-              onBatchDisable: () {},
-              onBatchUpdateDuration: () {},
-              onBatchReplace: () {},
-              onBatchGenerateVoiceover: () {},
-            ),
+        _appWithZh(
+          child: BatchOperationToolbar(
+            totalCount: 3,
+            selectedIds: const {},
+            onSelectionChanged: (_) {},
+            onSelectAll: () {},
+            onDeselectAll: () {},
+            onBatchEnable: () {},
+            onBatchDisable: () {},
+            onBatchUpdateDuration: () {},
+            onBatchReplace: () {},
+            onBatchGenerateVoiceover: () {},
           ),
         ),
       );
@@ -491,23 +472,21 @@ void main() {
       var currentTime = DateTime(2026, 1, 1, 0, 0, 0);
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BatchOperationToolbar(
-              totalCount: 10,
-              selectedIds: const {1, 2},
-              onSelectionChanged: (_) {},
-              onSelectAll: () {},
-              onDeselectAll: () {},
-              onBatchEnable: () {
-                batchEnableCallCount++;
-              },
-              onBatchDisable: () {},
-              onBatchUpdateDuration: () {},
-              onBatchReplace: () {},
-              onBatchGenerateVoiceover: () {},
-              nowProvider: () => currentTime,
-            ),
+        _appWithZh(
+          child: BatchOperationToolbar(
+            totalCount: 10,
+            selectedIds: const {1, 2},
+            onSelectionChanged: (_) {},
+            onSelectAll: () {},
+            onDeselectAll: () {},
+            onBatchEnable: () {
+              batchEnableCallCount++;
+            },
+            onBatchDisable: () {},
+            onBatchUpdateDuration: () {},
+            onBatchReplace: () {},
+            onBatchGenerateVoiceover: () {},
+            nowProvider: () => currentTime,
           ),
         ),
       );
@@ -536,21 +515,19 @@ void main() {
     ) async {
       final currentTime = DateTime(2026, 1, 1, 0, 0, 0);
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BatchOperationToolbar(
-              totalCount: 10,
-              selectedIds: const {1, 2},
-              onSelectionChanged: (_) {},
-              onSelectAll: () {},
-              onDeselectAll: () {},
-              onBatchEnable: () {},
-              onBatchDisable: () {},
-              onBatchUpdateDuration: () {},
-              onBatchReplace: () {},
-              onBatchGenerateVoiceover: () {},
-              nowProvider: () => currentTime,
-            ),
+        _appWithZh(
+          child: BatchOperationToolbar(
+            totalCount: 10,
+            selectedIds: const {1, 2},
+            onSelectionChanged: (_) {},
+            onSelectAll: () {},
+            onDeselectAll: () {},
+            onBatchEnable: () {},
+            onBatchDisable: () {},
+            onBatchUpdateDuration: () {},
+            onBatchReplace: () {},
+            onBatchGenerateVoiceover: () {},
+            nowProvider: () => currentTime,
           ),
         ),
       );
@@ -564,7 +541,7 @@ void main() {
       await tester.tap(find.text('批量启用'));
       await tester.pump();
 
-      expect(find.text('操作过于频繁，请稍后再试'), findsOneWidget);
+      expect(find.text('操作过于频繁，请稍后再试。'), findsOneWidget);
     });
 
     testWidgets('throttles different batch operations independently', (
@@ -575,25 +552,23 @@ void main() {
       var currentTime = DateTime(2026, 1, 1, 0, 0, 0);
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BatchOperationToolbar(
-              totalCount: 10,
-              selectedIds: const {1, 2},
-              onSelectionChanged: (_) {},
-              onSelectAll: () {},
-              onDeselectAll: () {},
-              onBatchEnable: () {
-                batchEnableCallCount++;
-              },
-              onBatchDisable: () {
-                batchDisableCallCount++;
-              },
-              onBatchUpdateDuration: () {},
-              onBatchReplace: () {},
-              onBatchGenerateVoiceover: () {},
-              nowProvider: () => currentTime,
-            ),
+        _appWithZh(
+          child: BatchOperationToolbar(
+            totalCount: 10,
+            selectedIds: const {1, 2},
+            onSelectionChanged: (_) {},
+            onSelectAll: () {},
+            onDeselectAll: () {},
+            onBatchEnable: () {
+              batchEnableCallCount++;
+            },
+            onBatchDisable: () {
+              batchDisableCallCount++;
+            },
+            onBatchUpdateDuration: () {},
+            onBatchReplace: () {},
+            onBatchGenerateVoiceover: () {},
+            nowProvider: () => currentTime,
           ),
         ),
       );
@@ -624,23 +599,21 @@ void main() {
       var batchEnableCallCount = 0;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BatchOperationToolbar(
-              totalCount: 10,
-              selectedIds: const {1, 2},
-              onSelectionChanged: (_) {},
-              onSelectAll: () {},
-              onDeselectAll: () {},
-              onBatchEnable: () {
-                batchEnableCallCount++;
-              },
-              onBatchDisable: () {},
-              onBatchUpdateDuration: () {},
-              onBatchReplace: () {},
-              onBatchGenerateVoiceover: () {},
-              isOperationInProgress: true,
-            ),
+        _appWithZh(
+          child: BatchOperationToolbar(
+            totalCount: 10,
+            selectedIds: const {1, 2},
+            onSelectionChanged: (_) {},
+            onSelectAll: () {},
+            onDeselectAll: () {},
+            onBatchEnable: () {
+              batchEnableCallCount++;
+            },
+            onBatchDisable: () {},
+            onBatchUpdateDuration: () {},
+            onBatchReplace: () {},
+            onBatchGenerateVoiceover: () {},
+            isOperationInProgress: true,
           ),
         ),
       );
@@ -657,14 +630,12 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: ShotSelectionCheckbox(
-              shotId: 1,
-              isSelected: true,
-              onSelectionChanged: (_) {},
-              onRangeSelection: (shotId, isShiftPressed) {},
-            ),
+        _appWithZh(
+          child: ShotSelectionCheckbox(
+            shotId: 1,
+            isSelected: true,
+            onSelectionChanged: (_) {},
+            onRangeSelection: (shotId, isShiftPressed) {},
           ),
         ),
       );
@@ -680,17 +651,15 @@ void main() {
       var newValue = false;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: ShotSelectionCheckbox(
-              shotId: 1,
-              isSelected: false,
-              onSelectionChanged: (value) {
-                selectionChanged = true;
-                newValue = value;
-              },
-              onRangeSelection: (shotId, isShiftPressed) {},
-            ),
+        _appWithZh(
+          child: ShotSelectionCheckbox(
+            shotId: 1,
+            isSelected: false,
+            onSelectionChanged: (value) {
+              selectionChanged = true;
+              newValue = value;
+            },
+            onRangeSelection: (shotId, isShiftPressed) {},
           ),
         ),
       );
@@ -708,27 +677,27 @@ void main() {
       var isShiftPressed = false;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: ShotSelectionCheckbox(
-              shotId: 5,
-              isSelected: false,
-              onSelectionChanged: (_) {},
-              onRangeSelection: (id, shift) {
-                rangeSelectionCalled = true;
-                shotId = id;
-                isShiftPressed = shift;
-              },
-            ),
+        _appWithZh(
+          child: ShotSelectionCheckbox(
+            shotId: 5,
+            isSelected: false,
+            onSelectionChanged: (_) {},
+            onRangeSelection: (id, shift) {
+              rangeSelectionCalled = true;
+              shotId = id;
+              isShiftPressed = shift;
+            },
           ),
         ),
       );
 
       final focus = tester.widget<Focus>(
-        find.descendant(
-          of: find.byType(ShotSelectionCheckbox),
-          matching: find.byType(Focus),
-        ).first,
+        find
+            .descendant(
+              of: find.byType(ShotSelectionCheckbox),
+              matching: find.byType(Focus),
+            )
+            .first,
       );
       focus.onKeyEvent?.call(
         FocusNode(),
@@ -740,10 +709,12 @@ void main() {
       );
       await tester.pump();
       final gestureDetector = tester.widget<GestureDetector>(
-        find.descendant(
-          of: find.byType(ShotSelectionCheckbox),
-          matching: find.byType(GestureDetector),
-        ).first,
+        find
+            .descendant(
+              of: find.byType(ShotSelectionCheckbox),
+              matching: find.byType(GestureDetector),
+            )
+            .first,
       );
       gestureDetector.onTap?.call();
 
@@ -758,17 +729,15 @@ void main() {
       var selectionChanged = false;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: ShotSelectionCheckbox(
-              shotId: 1,
-              isSelected: false,
-              onSelectionChanged: (_) {
-                selectionChanged = true;
-              },
-              onRangeSelection: (shotId, isShiftPressed) {},
-              isEnabled: false,
-            ),
+        _appWithZh(
+          child: ShotSelectionCheckbox(
+            shotId: 1,
+            isSelected: false,
+            onSelectionChanged: (_) {
+              selectionChanged = true;
+            },
+            onRangeSelection: (shotId, isShiftPressed) {},
+            isEnabled: false,
           ),
         ),
       );
@@ -784,17 +753,15 @@ void main() {
       var newValue = false;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: ShotSelectionCheckbox(
-              shotId: 1,
-              isSelected: false,
-              onSelectionChanged: (value) {
-                selectionChanged = true;
-                newValue = value;
-              },
-              onRangeSelection: (shotId, isShiftPressed) {},
-            ),
+        _appWithZh(
+          child: ShotSelectionCheckbox(
+            shotId: 1,
+            isSelected: false,
+            onSelectionChanged: (value) {
+              selectionChanged = true;
+              newValue = value;
+            },
+            onRangeSelection: (shotId, isShiftPressed) {},
           ),
         ),
       );
@@ -816,23 +783,21 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BatchOperationProgressDialog(
-              title: '批量启用镜头',
-              total: 10,
-              completed: 5,
-              successful: 4,
-              failed: 1,
-            ),
+        _appWithZh(
+          child: BatchOperationProgressDialog(
+            title: '批量启用镜头',
+            total: 10,
+            completed: 5,
+            successful: 4,
+            failed: 1,
           ),
         ),
       );
 
       expect(find.text('批量启用镜头'), findsOneWidget);
-      expect(find.text('进度: 5 / 10'), findsOneWidget);
-      expect(find.text('成功: 4'), findsOneWidget);
-      expect(find.text('失败: 1'), findsOneWidget);
+      expect(find.text('进度：5 / 10'), findsOneWidget);
+      expect(find.text('成功：4'), findsOneWidget);
+      expect(find.text('失败：1'), findsOneWidget);
       expect(find.byType(LinearProgressIndicator), findsOneWidget);
     });
 
@@ -840,24 +805,22 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BatchOperationProgressDialog(
-              title: '批量启用镜头',
-              total: 10,
-              completed: 10,
-              successful: 8,
-              failed: 2,
-              failedItems: const [
-                BatchOperationFailedItem(shotId: 3, errorMessage: '视频 URL 无效'),
-                BatchOperationFailedItem(shotId: 7, errorMessage: '网络连接失败'),
-              ],
-            ),
+        _appWithZh(
+          child: BatchOperationProgressDialog(
+            title: '批量启用镜头',
+            total: 10,
+            completed: 10,
+            successful: 8,
+            failed: 2,
+            failedItems: const [
+              BatchOperationFailedItem(shotId: 3, errorMessage: '视频 URL 无效'),
+              BatchOperationFailedItem(shotId: 7, errorMessage: '网络连接失败'),
+            ],
           ),
         ),
       );
 
-      expect(find.text('失败项:'), findsOneWidget);
+      expect(find.text('失败项：'), findsOneWidget);
       expect(find.text('分镜 #3'), findsOneWidget);
       expect(find.text('视频 URL 无效'), findsOneWidget);
       expect(find.text('分镜 #7'), findsOneWidget);
@@ -870,19 +833,17 @@ void main() {
       var cancelCalled = false;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BatchOperationProgressDialog(
-              title: '批量启用镜头',
-              total: 10,
-              completed: 5,
-              successful: 5,
-              failed: 0,
-              isComplete: false,
-              onCancel: () {
-                cancelCalled = true;
-              },
-            ),
+        _appWithZh(
+          child: BatchOperationProgressDialog(
+            title: '批量启用镜头',
+            total: 10,
+            completed: 5,
+            successful: 5,
+            failed: 0,
+            isComplete: false,
+            onCancel: () {
+              cancelCalled = true;
+            },
           ),
         ),
       );
@@ -899,22 +860,20 @@ void main() {
       var retryFailedCalled = false;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BatchOperationProgressDialog(
-              title: '批量启用镜头',
-              total: 10,
-              completed: 10,
-              successful: 8,
-              failed: 2,
-              isComplete: true,
-              failedItems: const [
-                BatchOperationFailedItem(shotId: 3, errorMessage: '视频 URL 无效'),
-              ],
-              onRetryFailed: () {
-                retryFailedCalled = true;
-              },
-            ),
+        _appWithZh(
+          child: BatchOperationProgressDialog(
+            title: '批量启用镜头',
+            total: 10,
+            completed: 10,
+            successful: 8,
+            failed: 2,
+            isComplete: true,
+            failedItems: const [
+              BatchOperationFailedItem(shotId: 3, errorMessage: '视频 URL 无效'),
+            ],
+            onRetryFailed: () {
+              retryFailedCalled = true;
+            },
           ),
         ),
       );
@@ -929,16 +888,14 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BatchOperationProgressDialog(
-              title: '批量启用镜头',
-              total: 10,
-              completed: 10,
-              successful: 10,
-              failed: 0,
-              isComplete: true,
-            ),
+        _appWithZh(
+          child: BatchOperationProgressDialog(
+            title: '批量启用镜头',
+            total: 10,
+            completed: 10,
+            successful: 10,
+            failed: 0,
+            isComplete: true,
           ),
         ),
       );
@@ -948,15 +905,13 @@ void main() {
 
     testWidgets('calculates progress correctly', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BatchOperationProgressDialog(
-              title: '批量启用镜头',
-              total: 10,
-              completed: 5,
-              successful: 5,
-              failed: 0,
-            ),
+        _appWithZh(
+          child: BatchOperationProgressDialog(
+            title: '批量启用镜头',
+            total: 10,
+            completed: 5,
+            successful: 5,
+            failed: 0,
           ),
         ),
       );
@@ -969,15 +924,13 @@ void main() {
 
     testWidgets('handles zero total gracefully', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BatchOperationProgressDialog(
-              title: '批量启用镜头',
-              total: 0,
-              completed: 0,
-              successful: 0,
-              failed: 0,
-            ),
+        _appWithZh(
+          child: BatchOperationProgressDialog(
+            title: '批量启用镜头',
+            total: 0,
+            completed: 0,
+            successful: 0,
+            failed: 0,
           ),
         ),
       );

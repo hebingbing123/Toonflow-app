@@ -291,7 +291,7 @@ void main() {
           isA<RustApiException>().having(
             (e) => e.message,
             'message',
-            '请求已取消',
+            'Request was cancelled',
           ),
         ),
       );
@@ -327,7 +327,7 @@ void main() {
           isA<RustApiException>().having(
             (e) => e.message,
             'message',
-            '请求已取消',
+            'Request was cancelled',
           ),
         ),
       );

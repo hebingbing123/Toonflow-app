@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/short_video_space/components/filter_panel.dart';
 import 'package:openflow_app/short_video_space/components/batch_operation_toolbar.dart';
 
@@ -14,20 +16,32 @@ import 'package:openflow_app/short_video_space/components/batch_operation_toolba
 /// - Button state management during operations
 /// - Timer cleanup on widget disposal
 void main() {
+  Widget buildHarness(Widget child) {
+    return MaterialApp(
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('zh'),
+      home: Scaffold(body: child),
+    );
+  }
+
   group('FilterPanel Debouncing Tests', () {
     testWidgets('search input debounces with 300ms delay', (tester) async {
       var filterChangeCount = 0;
       FilterState? lastFilter;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: FilterPanel(
-              onFilterChanged: (filter) {
-                filterChangeCount++;
-                lastFilter = filter;
-              },
-            ),
+        buildHarness(
+          FilterPanel(
+            onFilterChanged: (filter) {
+              filterChangeCount++;
+              lastFilter = filter;
+            },
           ),
         ),
       );
@@ -61,13 +75,11 @@ void main() {
       var filterChangeCount = 0;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: FilterPanel(
-              onFilterChanged: (filter) {
-                filterChangeCount++;
-              },
-            ),
+        buildHarness(
+          FilterPanel(
+            onFilterChanged: (filter) {
+              filterChangeCount++;
+            },
           ),
         ),
       );
@@ -96,13 +108,11 @@ void main() {
       var filterChangeCount = 0;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: FilterPanel(
-              onFilterChanged: (filter) {
-                filterChangeCount++;
-              },
-            ),
+        buildHarness(
+          FilterPanel(
+            onFilterChanged: (filter) {
+              filterChangeCount++;
+            },
           ),
         ),
       );
@@ -127,11 +137,9 @@ void main() {
 
     testWidgets('clears search debounce timer on dispose', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: FilterPanel(
-              onFilterChanged: (filter) {},
-            ),
+        buildHarness(
+          FilterPanel(
+            onFilterChanged: (filter) {},
           ),
         ),
       );
@@ -141,7 +149,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
 
       // Dispose the widget before debounce completes
-      await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
+      await tester.pumpWidget(buildHarness(const SizedBox()));
 
       // Wait for what would have been the debounce period
       await tester.pump(const Duration(milliseconds: 300));
@@ -155,22 +163,20 @@ void main() {
       var batchEnableCallCount = 0;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BatchOperationToolbar(
-              totalCount: 10,
-              selectedIds: {1, 2, 3},
-              onSelectionChanged: (_) {},
-              onSelectAll: () {},
-              onDeselectAll: () {},
-              onBatchEnable: () {
-                batchEnableCallCount++;
-              },
-              onBatchDisable: () {},
-              onBatchUpdateDuration: () {},
-              onBatchReplace: () {},
-              onBatchGenerateVoiceover: () {},
-            ),
+        buildHarness(
+          BatchOperationToolbar(
+            totalCount: 10,
+            selectedIds: {1, 2, 3},
+            onSelectionChanged: (_) {},
+            onSelectAll: () {},
+            onDeselectAll: () {},
+            onBatchEnable: () {
+              batchEnableCallCount++;
+            },
+            onBatchDisable: () {},
+            onBatchUpdateDuration: () {},
+            onBatchReplace: () {},
+            onBatchGenerateVoiceover: () {},
           ),
         ),
       );
@@ -191,20 +197,18 @@ void main() {
 
     testWidgets('throttled operation shows snackbar message', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BatchOperationToolbar(
-              totalCount: 10,
-              selectedIds: {1, 2, 3},
-              onSelectionChanged: (_) {},
-              onSelectAll: () {},
-              onDeselectAll: () {},
-              onBatchEnable: () {},
-              onBatchDisable: () {},
-              onBatchUpdateDuration: () {},
-              onBatchReplace: () {},
-              onBatchGenerateVoiceover: () {},
-            ),
+        buildHarness(
+          BatchOperationToolbar(
+            totalCount: 10,
+            selectedIds: {1, 2, 3},
+            onSelectionChanged: (_) {},
+            onSelectAll: () {},
+            onDeselectAll: () {},
+            onBatchEnable: () {},
+            onBatchDisable: () {},
+            onBatchUpdateDuration: () {},
+            onBatchReplace: () {},
+            onBatchGenerateVoiceover: () {},
           ),
         ),
       );
@@ -220,30 +224,28 @@ void main() {
       await tester.pump();
 
       // Should show throttle message
-      expect(find.text('操作过于频繁，请稍后再试'), findsOneWidget);
+      expect(find.text('操作过于频繁，请稍后再试。'), findsOneWidget);
     });
 
     testWidgets('batch operations disabled when operation in progress', (tester) async {
       var callCount = 0;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BatchOperationToolbar(
-              totalCount: 10,
-              selectedIds: {1, 2, 3},
-              onSelectionChanged: (_) {},
-              onSelectAll: () {},
-              onDeselectAll: () {},
-              onBatchEnable: () {
-                callCount++;
-              },
-              onBatchDisable: () {},
-              onBatchUpdateDuration: () {},
-              onBatchReplace: () {},
-              onBatchGenerateVoiceover: () {},
-              isOperationInProgress: true, // Operation in progress
-            ),
+        buildHarness(
+          BatchOperationToolbar(
+            totalCount: 10,
+            selectedIds: {1, 2, 3},
+            onSelectionChanged: (_) {},
+            onSelectAll: () {},
+            onDeselectAll: () {},
+            onBatchEnable: () {
+              callCount++;
+            },
+            onBatchDisable: () {},
+            onBatchUpdateDuration: () {},
+            onBatchReplace: () {},
+            onBatchGenerateVoiceover: () {},
+            isOperationInProgress: true,
           ),
         ),
       );
@@ -268,21 +270,19 @@ void main() {
 
     testWidgets('shows loading indicator when operation in progress', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BatchOperationToolbar(
-              totalCount: 10,
-              selectedIds: {1, 2, 3},
-              onSelectionChanged: (_) {},
-              onSelectAll: () {},
-              onDeselectAll: () {},
-              onBatchEnable: () {},
-              onBatchDisable: () {},
-              onBatchUpdateDuration: () {},
-              onBatchReplace: () {},
-              onBatchGenerateVoiceover: () {},
-              isOperationInProgress: true,
-            ),
+        buildHarness(
+          BatchOperationToolbar(
+            totalCount: 10,
+            selectedIds: {1, 2, 3},
+            onSelectionChanged: (_) {},
+            onSelectAll: () {},
+            onDeselectAll: () {},
+            onBatchEnable: () {},
+            onBatchDisable: () {},
+            onBatchUpdateDuration: () {},
+            onBatchReplace: () {},
+            onBatchGenerateVoiceover: () {},
+            isOperationInProgress: true,
           ),
         ),
       );
@@ -295,21 +295,19 @@ void main() {
   group('Button State Management Tests', () {
     testWidgets('batch operation buttons disabled during operation', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BatchOperationToolbar(
-              totalCount: 10,
-              selectedIds: {1, 2, 3},
-              onSelectionChanged: (_) {},
-              onSelectAll: () {},
-              onDeselectAll: () {},
-              onBatchEnable: () {},
-              onBatchDisable: () {},
-              onBatchUpdateDuration: () {},
-              onBatchReplace: () {},
-              onBatchGenerateVoiceover: () {},
-              isOperationInProgress: true,
-            ),
+        buildHarness(
+          BatchOperationToolbar(
+            totalCount: 10,
+            selectedIds: {1, 2, 3},
+            onSelectionChanged: (_) {},
+            onSelectAll: () {},
+            onDeselectAll: () {},
+            onBatchEnable: () {},
+            onBatchDisable: () {},
+            onBatchUpdateDuration: () {},
+            onBatchReplace: () {},
+            onBatchGenerateVoiceover: () {},
+            isOperationInProgress: true,
           ),
         ),
       );
@@ -338,21 +336,19 @@ void main() {
 
     testWidgets('batch operation buttons enabled when not in progress', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BatchOperationToolbar(
-              totalCount: 10,
-              selectedIds: {1, 2, 3},
-              onSelectionChanged: (_) {},
-              onSelectAll: () {},
-              onDeselectAll: () {},
-              onBatchEnable: () {},
-              onBatchDisable: () {},
-              onBatchUpdateDuration: () {},
-              onBatchReplace: () {},
-              onBatchGenerateVoiceover: () {},
-              isOperationInProgress: false,
-            ),
+        buildHarness(
+          BatchOperationToolbar(
+            totalCount: 10,
+            selectedIds: {1, 2, 3},
+            onSelectionChanged: (_) {},
+            onSelectAll: () {},
+            onDeselectAll: () {},
+            onBatchEnable: () {},
+            onBatchDisable: () {},
+            onBatchUpdateDuration: () {},
+            onBatchReplace: () {},
+            onBatchGenerateVoiceover: () {},
+            isOperationInProgress: false,
           ),
         ),
       );
@@ -377,21 +373,19 @@ void main() {
 
     testWidgets('select all checkbox disabled during operation', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BatchOperationToolbar(
-              totalCount: 10,
-              selectedIds: {},
-              onSelectionChanged: (_) {},
-              onSelectAll: () {},
-              onDeselectAll: () {},
-              onBatchEnable: () {},
-              onBatchDisable: () {},
-              onBatchUpdateDuration: () {},
-              onBatchReplace: () {},
-              onBatchGenerateVoiceover: () {},
-              isOperationInProgress: true,
-            ),
+        buildHarness(
+          BatchOperationToolbar(
+            totalCount: 10,
+            selectedIds: {},
+            onSelectionChanged: (_) {},
+            onSelectAll: () {},
+            onDeselectAll: () {},
+            onBatchEnable: () {},
+            onBatchDisable: () {},
+            onBatchUpdateDuration: () {},
+            onBatchReplace: () {},
+            onBatchGenerateVoiceover: () {},
+            isOperationInProgress: true,
           ),
         ),
       );
@@ -405,11 +399,9 @@ void main() {
   group('FilterPanel Performance Tests', () {
     testWidgets('clears filter debounce timer on dispose', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: FilterPanel(
-              onFilterChanged: (filter) {},
-            ),
+        buildHarness(
+          FilterPanel(
+            onFilterChanged: (filter) {},
           ),
         ),
       );
@@ -420,7 +412,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Dispose the widget before debounce completes
-      await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
+      await tester.pumpWidget(buildHarness(const SizedBox()));
 
       // Wait for what would have been the debounce period
       await tester.pump(const Duration(milliseconds: 300));
@@ -434,13 +426,11 @@ void main() {
       var filterChangeCount = 0;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: FilterPanel(
-              onFilterChanged: (filter) {
-                filterChangeCount++;
-              },
-            ),
+        buildHarness(
+          FilterPanel(
+            onFilterChanged: (filter) {
+              filterChangeCount++;
+            },
           ),
         ),
       );
@@ -462,9 +452,9 @@ void main() {
 
     testWidgets('batch toolbar shows correct state', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Column(
+        buildHarness(
+          SingleChildScrollView(
+            child: Column(
               children: [
                 FilterPanel(
                   onFilterChanged: (filter) {},
@@ -492,7 +482,7 @@ void main() {
       expect(find.byType(BatchOperationToolbar), findsOneWidget);
       
       // Verify batch toolbar shows selection count
-      expect(find.text('已选择: 3 / 10'), findsOneWidget);
+      expect(find.text('已选择：3 / 10'), findsOneWidget);
     });
   });
 

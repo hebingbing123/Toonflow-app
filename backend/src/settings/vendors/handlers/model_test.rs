@@ -50,7 +50,9 @@ pub(crate) async fn post_vendor_model_test(
         || id.len() > MAX_VENDOR_MODEL_TEST_FIELD_LEN
     {
         return Err(bad_request_i18n(
-            &format!("modelName and id must be at most {MAX_VENDOR_MODEL_TEST_FIELD_LEN} chars each"),
+            &format!(
+                "modelName and id must be at most {MAX_VENDOR_MODEL_TEST_FIELD_LEN} chars each"
+            ),
             &format!("modelName 和 id 长度不能超过 {MAX_VENDOR_MODEL_TEST_FIELD_LEN} 个字符"),
         ));
     }

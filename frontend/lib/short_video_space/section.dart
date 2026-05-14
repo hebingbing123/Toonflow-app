@@ -106,6 +106,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   List<String> _publishBatchResultLines = const <String>[];
   bool _publishBusy = false;
   int _publishCopyEditorRevision = 0;
+
   /// Monotonic id so stale in-flight [_refreshPublishSlice] results are ignored.
   int _publishRefreshRequestId = 0;
   String? _selectedProjectId;
@@ -133,6 +134,11 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   String _ttsTaskCenterKeyword = '';
 
   bool get _isAnimated => _mode == ShortVideoMode.animated;
+
+  int _beginPublishRefreshRequest() => ++_publishRefreshRequestId;
+
+  bool _isLatestPublishRefreshRequest(int requestId) =>
+      requestId == _publishRefreshRequestId;
 
   ProjectRow? get _selectedProject {
     final projectId = _selectedProjectId;
@@ -369,7 +375,9 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       clipAssetCount: _clipAssetCount,
     );
     final shotReadinessUi = project == null
-        ? ShotReadinessUi(headline: l10n.shortVideoShotReadinessSelectProjectHint)
+        ? ShotReadinessUi(
+            headline: l10n.shortVideoShotReadinessSelectProjectHint,
+          )
         : buildShotReadinessUi(
             l10n: l10n,
             loadingProjectOverview: _loadingProjectOverview,

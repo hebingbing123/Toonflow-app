@@ -6,6 +6,10 @@ import '../l10n/app_localizations.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
 import 'support.dart';
+import 'workbench_cases.dart';
+import 'workbench_experiments.dart';
+import 'workbench_gate.dart';
+import 'workbench_review_queue.dart';
 
 class BenchmarkSection extends StatefulWidget {
   const BenchmarkSection({super.key, required this.accessToken});
@@ -539,429 +543,248 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
   }
 
   Widget _buildPromoteCard(BuildContext context, AppLocalizations l10n) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.benchmarkPromoteCardTitle,
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _qualityReviewIdCtrl,
-              decoration: InputDecoration(
-                labelText: l10n.benchmarkLabelQualityReviewId,
-              ),
-            ),
-            const SizedBox(height: 8),
-            DropdownButtonFormField<String>(
-              initialValue: _promoteCaseType,
-              decoration: InputDecoration(
-                labelText: l10n.benchmarkLabelSampleType,
-              ),
-              items: [
-                DropdownMenuItem(
-                  value: 'bad_case',
-                  child: Text(l10n.benchmarkSampleTypeBadCase),
-                ),
-                DropdownMenuItem(
-                  value: 'golden',
-                  child: Text(l10n.benchmarkSampleTypeGolden),
-                ),
-                DropdownMenuItem(
-                  value: 'regression_guard',
-                  child: Text(l10n.benchmarkSampleTypeRegressionGuard),
-                ),
-              ],
-              onChanged: _busy
-                  ? null
-                  : (value) {
-                      if (value == null) return;
-                      setState(() {
-                        _promoteCaseType = value;
-                      });
-                    },
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _promoteSummaryCtrl,
-              decoration: InputDecoration(
-                labelText: l10n.benchmarkLabelSampleSummary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _promoteTagsCtrl,
-              decoration: InputDecoration(
-                labelText: l10n.benchmarkLabelTagsCommaSeparated,
-              ),
-            ),
-            const SizedBox(height: 8),
-            FilledButton.tonal(
-              onPressed:
-                  _busy ||
-                      _qualityReviewIdCtrl.text.trim().isEmpty ||
-                      _promoteSummaryCtrl.text.trim().isEmpty
-                  ? null
-                  : () => _runAction(l10n, l10n.benchmarkActionPromoteFromReview, (token) async {
-                      final item = await promoteBenchmarkCaseFromReview(
-                        token,
-                        qualityReviewId: _qualityReviewIdCtrl.text.trim(),
-                        caseType: _promoteCaseType,
-                        summary: _promoteSummaryCtrl.text.trim(),
-                        issueTags: _parseCommaValues(_promoteTagsCtrl),
-                      );
-                      _cases = [item, ..._cases];
-                    }),
-              child: Text(l10n.benchmarkButtonPromoteToSample),
-            ),
-          ],
-        ),
+    return BenchmarkCasesWorkbench(
+      cases: _cases,
+      projectIdController: _projectIdCtrl,
+      qualityReviewIdController: _qualityReviewIdCtrl,
+      promoteSummaryController: _promoteSummaryCtrl,
+      promoteTagsController: _promoteTagsCtrl,
+      promoteCaseType: _promoteCaseType,
+      busy: _busy,
+      onFetchCases: () => _runAction(
+        l10n,
+        l10n.benchmarkActionFetchSamplePool,
+        (token) async {
+          _cases = await fetchBenchmarkCases(
+            token,
+            projectId: int.tryParse(_projectIdCtrl.text.trim()),
+          );
+        },
       ),
+      onPromoteCase: () => _runAction(
+        l10n,
+        l10n.benchmarkActionPromoteFromReview,
+        (token) async {
+          final item = await promoteBenchmarkCaseFromReview(
+            token,
+            qualityReviewId: _qualityReviewIdCtrl.text.trim(),
+            caseType: _promoteCaseType,
+            summary: _promoteSummaryCtrl.text.trim(),
+            issueTags: _parseCommaValues(_promoteTagsCtrl),
+          );
+          _cases = [item, ..._cases];
+        },
+      ),
+      onPromoteCaseTypeChanged: (value) {
+        setState(() {
+          _promoteCaseType = value;
+        });
+      },
     );
   }
 
   Widget _buildExperimentCard(BuildContext context, AppLocalizations l10n) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.benchmarkExperimentCardTitle,
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _experimentIdCtrl,
-              decoration: InputDecoration(
-                labelText: l10n.benchmarkLabelExperimentId,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                FilledButton.tonal(
-                  onPressed: _busy || _experimentIdCtrl.text.trim().isEmpty
-                      ? null
-                      : () => _runAction(l10n, l10n.benchmarkActionFetchExperimentDetail, (token) async {
-                          _experimentDetail =
-                              await fetchBenchmarkExperimentDetail(
-                                token,
-                                _experimentIdCtrl.text.trim(),
-                              );
-                        }),
-                  child: Text(l10n.benchmarkButtonLoadDetail),
-                ),
-                FilledButton.tonal(
-                  onPressed: _busy || _experimentIdCtrl.text.trim().isEmpty
-                      ? null
-                      : () => _runAction(l10n, l10n.benchmarkActionStartExperiment, (token) async {
-                          _experimentDetail = await startBenchmarkExperiment(
-                            token,
-                            _experimentIdCtrl.text.trim(),
-                          );
-                        }),
-                  child: Text(l10n.benchmarkButtonStart),
-                ),
-                FilledButton.tonal(
-                  onPressed: _busy || _experimentIdCtrl.text.trim().isEmpty
-                      ? null
-                      : () => _runAction(l10n, l10n.benchmarkActionCancelExperiment, (token) async {
-                          _experimentDetail = await cancelBenchmarkExperiment(
-                            token,
-                            _experimentIdCtrl.text.trim(),
-                          );
-                        }),
-                  child: Text(l10n.benchmarkButtonCancel),
-                ),
-                FilledButton.tonal(
-                  onPressed: _busy || _experimentIdCtrl.text.trim().isEmpty
-                      ? null
-                      : () => _runAction(l10n, l10n.benchmarkActionFetchRoi, (token) async {
-                          _roiSummary = await fetchBenchmarkExperimentRoi(
-                            token,
-                            _experimentIdCtrl.text.trim(),
-                          );
-                        }),
-                  child: Text(l10n.benchmarkActionFetchRoi),
-                ),
-                FilledButton.tonal(
-                  onPressed: _busy || _experimentIdCtrl.text.trim().isEmpty
-                      ? null
-                      : () => _runAction(l10n, l10n.benchmarkActionFetchGate, (token) async {
-                          _gateSummary = await fetchBenchmarkGate(
-                            token,
-                            _experimentIdCtrl.text.trim(),
-                          );
-                        }),
-                  child: Text(l10n.benchmarkActionFetchGate),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _experimentNameCtrl,
-              decoration: InputDecoration(
-                labelText: l10n.benchmarkLabelNewExperimentName,
-              ),
-            ),
-            const SizedBox(height: 8),
-            DropdownButtonFormField<String>(
-              initialValue: _sampleTier,
-              decoration: InputDecoration(
-                labelText: l10n.benchmarkLabelSampleTierSet,
-              ),
-              items: [
-                DropdownMenuItem(
-                  value: 'smoke',
-                  child: Text(l10n.benchmarkExperimentSuiteSmoke),
-                ),
-                DropdownMenuItem(
-                  value: 'core',
-                  child: Text(l10n.benchmarkExperimentSuiteCore),
-                ),
-                DropdownMenuItem(
-                  value: 'full',
-                  child: Text(l10n.benchmarkExperimentSuiteFull),
-                ),
-              ],
-              onChanged: _busy
-                  ? null
-                  : (value) {
-                      if (value == null) return;
-                      setState(() {
-                        _sampleTier = value;
-                      });
-                    },
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _stageScopeCtrl,
-              decoration: InputDecoration(
-                labelText: l10n.benchmarkLabelStageScopeComma,
-              ),
-              maxLines: 2,
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _baselineLabelCtrl,
-              decoration: InputDecoration(
-                labelText: l10n.benchmarkLabelBaselineVariantLabel,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _variantsJsonCtrl,
-              maxLines: 14,
-              decoration: InputDecoration(
-                labelText: l10n.benchmarkLabelVariantsJsonArray,
-              ),
-            ),
-            const SizedBox(height: 8),
-            FilledButton.tonal(
-              onPressed: _busy || _experimentNameCtrl.text.trim().isEmpty
-                  ? null
-                  : () => _runAction(l10n, l10n.benchmarkActionCreateExperiment, (token) async {
-                      final decoded = jsonDecode(_variantsJsonCtrl.text.trim());
-                      if (decoded is! List) {
-                        throw FormatException(
-                          l10n.benchmarkErrorVariantsMustBeJsonArray,
-                        );
-                      }
-                      final variants = decoded
-                          .whereType<Map>()
-                          .map(
-                            (item) => Map<String, dynamic>.from(
-                              item.cast<String, dynamic>(),
-                            ),
-                          )
-                          .toList(growable: false);
-                      final detail = await createBenchmarkExperiment(
-                        token,
-                        name: _experimentNameCtrl.text.trim(),
-                        sampleTier: _sampleTier,
-                        stageScope: _parseCommaValues(_stageScopeCtrl),
-                        variants: variants,
-                        baselineVariantLabel: _baselineLabelCtrl.text.trim(),
-                      );
-                      _experimentDetail = detail;
-                      _experimentIdCtrl.text = detail.experiment.id;
-                      _experiments = [detail.experiment, ..._experiments];
-                    }),
-              child: Text(l10n.benchmarkButtonCreateExperiment),
-            ),
-          ],
-        ),
+    return BenchmarkExperimentsWorkbench(
+      experiments: _experiments,
+      experimentDetail: _experimentDetail,
+      roiSummary: _roiSummary,
+      experimentIdController: _experimentIdCtrl,
+      experimentNameController: _experimentNameCtrl,
+      stageScopeController: _stageScopeCtrl,
+      baselineLabelController: _baselineLabelCtrl,
+      variantsJsonController: _variantsJsonCtrl,
+      sampleTier: _sampleTier,
+      busy: _busy,
+      onFetchExperiments: () => _runAction(
+        l10n,
+        l10n.benchmarkActionFetchExperiments,
+        (token) async {
+          _experiments = await fetchBenchmarkExperiments(token);
+        },
       ),
+      onFetchExperimentDetail: () => _runAction(
+        l10n,
+        l10n.benchmarkActionFetchExperimentDetail,
+        (token) async {
+          _experimentDetail = await fetchBenchmarkExperimentDetail(
+            token,
+            _experimentIdCtrl.text.trim(),
+          );
+        },
+      ),
+      onStartExperiment: () => _runAction(
+        l10n,
+        l10n.benchmarkActionStartExperiment,
+        (token) async {
+          _experimentDetail = await startBenchmarkExperiment(
+            token,
+            _experimentIdCtrl.text.trim(),
+          );
+        },
+      ),
+      onCancelExperiment: () => _runAction(
+        l10n,
+        l10n.benchmarkActionCancelExperiment,
+        (token) async {
+          _experimentDetail = await cancelBenchmarkExperiment(
+            token,
+            _experimentIdCtrl.text.trim(),
+          );
+        },
+      ),
+      onFetchRoi: () => _runAction(
+        l10n,
+        l10n.benchmarkActionFetchRoi,
+        (token) async {
+          _roiSummary = await fetchBenchmarkExperimentRoi(
+            token,
+            _experimentIdCtrl.text.trim(),
+          );
+        },
+      ),
+      onCreateExperiment: () => _runAction(
+        l10n,
+        l10n.benchmarkActionCreateExperiment,
+        (token) async {
+          final decoded = jsonDecode(_variantsJsonCtrl.text.trim());
+          if (decoded is! List) {
+            throw FormatException(l10n.benchmarkErrorVariantsMustBeJsonArray);
+          }
+          final variants = decoded
+              .whereType<Map>()
+              .map(
+                (item) =>
+                    Map<String, dynamic>.from(item.cast<String, dynamic>()),
+              )
+              .toList(growable: false);
+          final detail = await createBenchmarkExperiment(
+            token,
+            name: _experimentNameCtrl.text.trim(),
+            sampleTier: _sampleTier,
+            stageScope: _parseCommaValues(_stageScopeCtrl),
+            variants: variants,
+            baselineVariantLabel: _baselineLabelCtrl.text.trim(),
+          );
+          _experimentDetail = detail;
+          _experimentIdCtrl.text = detail.experiment.id;
+          _experiments = [detail.experiment, ..._experiments];
+        },
+      ),
+      onSampleTierChanged: (value) {
+        setState(() {
+          _sampleTier = value;
+        });
+      },
+      onExperimentSelected: (value) {
+        _experimentIdCtrl.text = value;
+        setState(() {});
+      },
     );
   }
 
   Widget _buildReviewCard(BuildContext context, AppLocalizations l10n) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.benchmarkReviewCardTitle,
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _reviewQueueIdCtrl,
-              decoration: InputDecoration(
-                labelText: l10n.benchmarkLabelReviewQueueId,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _reviewScoreJsonCtrl,
-              maxLines: 8,
-              decoration: InputDecoration(
-                labelText: l10n.benchmarkLabelSubmittedScoreJson,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                FilledButton.tonal(
-                  onPressed: _busy || _reviewQueueIdCtrl.text.trim().isEmpty
-                      ? null
-                      : () => _runAction(l10n, l10n.benchmarkActionSubmitReview, (token) async {
-                          final decoded = jsonDecode(
-                            _reviewScoreJsonCtrl.text.trim(),
-                          );
-                          if (decoded is! Map) {
-                            throw FormatException(
-                              l10n.benchmarkErrorSubmittedScoreMustBeObject,
-                            );
-                          }
-                          await submitBenchmarkReview(
-                            token,
-                            reviewQueueId: _reviewQueueIdCtrl.text.trim(),
-                            submittedScore: Map<String, dynamic>.from(
-                              decoded.cast<String, dynamic>(),
-                            ),
-                          );
-                          _reviewQueue = await fetchBenchmarkReviewQueue(token);
-                        }),
-                  child: Text(l10n.benchmarkActionSubmitReview),
-                ),
-                SizedBox(
-                  width: 280,
-                  child: TextField(
-                    controller: _reviewSkipReasonCtrl,
-                    decoration: InputDecoration(
-                      labelText: l10n.benchmarkLabelSkipReasonOptional,
-                    ),
-                  ),
-                ),
-                FilledButton.tonal(
-                  onPressed: _busy || _reviewQueueIdCtrl.text.trim().isEmpty
-                      ? null
-                      : () => _runAction(l10n, l10n.benchmarkActionSkipReview, (token) async {
-                          await skipBenchmarkReview(
-                            token,
-                            reviewQueueId: _reviewQueueIdCtrl.text.trim(),
-                            reason: _reviewSkipReasonCtrl.text.trim(),
-                          );
-                          _reviewQueue = await fetchBenchmarkReviewQueue(token);
-                        }),
-                  child: Text(l10n.benchmarkActionSkipReview),
-                ),
-              ],
-            ),
-          ],
-        ),
+    return BenchmarkReviewQueueWorkbench(
+      reviewQueue: _reviewQueue,
+      reviewQueueIdController: _reviewQueueIdCtrl,
+      reviewScoreJsonController: _reviewScoreJsonCtrl,
+      reviewSkipReasonController: _reviewSkipReasonCtrl,
+      busy: _busy,
+      onFetchReviewQueue: () => _runAction(
+        l10n,
+        l10n.benchmarkActionFetchReviewQueue,
+        (token) async {
+          _reviewQueue = await fetchBenchmarkReviewQueue(token);
+        },
       ),
+      onSubmitReview: () => _runAction(
+        l10n,
+        l10n.benchmarkActionSubmitReview,
+        (token) async {
+          final decoded = jsonDecode(_reviewScoreJsonCtrl.text.trim());
+          if (decoded is! Map) {
+            throw FormatException(l10n.benchmarkErrorSubmittedScoreMustBeObject);
+          }
+          await submitBenchmarkReview(
+            token,
+            reviewQueueId: _reviewQueueIdCtrl.text.trim(),
+            submittedScore: Map<String, dynamic>.from(
+              decoded.cast<String, dynamic>(),
+            ),
+          );
+          _reviewQueue = await fetchBenchmarkReviewQueue(token);
+        },
+      ),
+      onSkipReview: () => _runAction(
+        l10n,
+        l10n.benchmarkActionSkipReview,
+        (token) async {
+          await skipBenchmarkReview(
+            token,
+            reviewQueueId: _reviewQueueIdCtrl.text.trim(),
+            reason: _reviewSkipReasonCtrl.text.trim(),
+          );
+          _reviewQueue = await fetchBenchmarkReviewQueue(token);
+        },
+      ),
+      onReviewSelected: (value) {
+        _reviewQueueIdCtrl.text = value;
+        setState(() {});
+      },
     );
   }
 
   Widget _buildGateCard(BuildContext context, AppLocalizations l10n) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.benchmarkGateCardTitle,
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _gateVariantIdCtrl,
-              decoration: InputDecoration(
-                labelText: l10n.benchmarkLabelGateVariantId,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _gateDecisionCtrl,
-              decoration: InputDecoration(
-                labelText: l10n.benchmarkLabelGateDecisionOptionalAuto,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _gateNoteCtrl,
-              maxLines: 3,
-              decoration: InputDecoration(
-                labelText: l10n.benchmarkLabelGateDecisionNote,
-              ),
-            ),
-            const SizedBox(height: 8),
-            SwitchListTile.adaptive(
-              contentPadding: EdgeInsets.zero,
-              value: _promoteToBaseline,
-              title: Text(l10n.benchmarkGatePromoteBaselineTitle),
-              subtitle: Text(l10n.benchmarkGatePromoteBaselineSubtitle),
-              onChanged: _busy
-                  ? null
-                  : (value) {
-                      setState(() {
-                        _promoteToBaseline = value;
-                      });
-                    },
-            ),
-            const SizedBox(height: 8),
-            FilledButton.tonal(
-              onPressed:
-                  _busy ||
-                      _experimentIdCtrl.text.trim().isEmpty ||
-                      _gateVariantIdCtrl.text.trim().isEmpty
-                  ? null
-                  : () => _runAction(l10n, l10n.benchmarkActionSubmitGateDecision, (token) async {
-                      await submitBenchmarkGateDecision(
-                        token,
-                        experimentId: _experimentIdCtrl.text.trim(),
-                        variantId: _gateVariantIdCtrl.text.trim(),
-                        decision: _gateDecisionCtrl.text.trim().isEmpty
-                            ? null
-                            : _gateDecisionCtrl.text.trim(),
-                        rationaleNote: _gateNoteCtrl.text.trim(),
-                        promoteToBaseline: _promoteToBaseline,
-                      );
-                      _gateSummary = await fetchBenchmarkGate(
-                        token,
-                        _experimentIdCtrl.text.trim(),
-                      );
-                    }),
-              child: Text(l10n.benchmarkActionSubmitGateDecision),
-            ),
-          ],
-        ),
+    return BenchmarkGateWorkbench(
+      gateSummary: _gateSummary,
+      trends: _trends,
+      experimentIdController: _experimentIdCtrl,
+      gateVariantIdController: _gateVariantIdCtrl,
+      gateDecisionController: _gateDecisionCtrl,
+      gateNoteController: _gateNoteCtrl,
+      promoteToBaseline: _promoteToBaseline,
+      busy: _busy,
+      onFetchGate: () => _runAction(
+        l10n,
+        l10n.benchmarkActionFetchGate,
+        (token) async {
+          _gateSummary = await fetchBenchmarkGate(
+            token,
+            _experimentIdCtrl.text.trim(),
+          );
+        },
       ),
+      onFetchTrends: () => _runAction(
+        l10n,
+        l10n.benchmarkActionFetchTrends,
+        (token) async {
+          _trends = await fetchBenchmarkTrends(token);
+        },
+      ),
+      onSubmitGateDecision: () => _runAction(
+        l10n,
+        l10n.benchmarkActionSubmitGateDecision,
+        (token) async {
+          await submitBenchmarkGateDecision(
+            token,
+            experimentId: _experimentIdCtrl.text.trim(),
+            variantId: _gateVariantIdCtrl.text.trim(),
+            decision: _gateDecisionCtrl.text.trim().isEmpty
+                ? null
+                : _gateDecisionCtrl.text.trim(),
+            rationaleNote: _gateNoteCtrl.text.trim(),
+            promoteToBaseline: _promoteToBaseline,
+          );
+          _gateSummary = await fetchBenchmarkGate(
+            token,
+            _experimentIdCtrl.text.trim(),
+          );
+        },
+      ),
+      onPromoteToBaselineChanged: (value) {
+        setState(() {
+          _promoteToBaseline = value;
+        });
+      },
     );
   }
 

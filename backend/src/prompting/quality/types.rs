@@ -45,6 +45,8 @@ pub struct QualityReview {
     pub skill_version_hash: Option<String>,
     /// 下一步修复动作（需求 I.4）：typed field for rework action
     pub next_action: Option<String>,
+    /// 基于 bad_case_category 的规则化建议动作（需求 2.1）
+    pub suggested_action: Option<String>,
 }
 
 /// 创建质量评估请求体

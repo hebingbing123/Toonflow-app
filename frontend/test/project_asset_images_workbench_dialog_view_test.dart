@@ -7,6 +7,13 @@ import 'package:openflow_app/project_editor/assets/images/workbench_dialog_view.
 import 'package:openflow_app/project_editor/assets/support.dart';
 import 'package:openflow_app/rust_api.dart';
 
+Widget _appWithZh({required Widget child}) => MaterialApp(
+  localizationsDelegates: AppLocalizations.localizationsDelegates,
+  supportedLocales: AppLocalizations.supportedLocales,
+  locale: const Locale('zh'),
+  home: Scaffold(body: child),
+);
+
 AssetImagesWorkbenchDialogViewModel buildDialogModel({
   required TextEditingController createFilePathController,
   required TextEditingController createStateController,
@@ -104,37 +111,44 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        locale: const Locale('zh'),
-        home: Scaffold(
-          body: AssetImagesWorkbenchDialogView(
-            model: buildDialogModel(
-              createFilePathController: createFilePathController,
-              createStateController: createStateController,
-              createSortController: createSortController,
-              patchFilePathController: patchFilePathController,
-              patchStateController: patchStateController,
-              patchSortController: patchSortController,
-            ),
-            callbacks: buildDialogCallbacks(),
+      _appWithZh(
+        child: AssetImagesWorkbenchDialogView(
+          model: buildDialogModel(
+            createFilePathController: createFilePathController,
+            createStateController: createStateController,
+            createSortController: createSortController,
+            patchFilePathController: patchFilePathController,
+            patchStateController: patchStateController,
+            patchSortController: patchSortController,
           ),
+          callbacks: buildDialogCallbacks(),
         ),
       ),
     );
 
     final zh = lookupAppLocalizations(const Locale('zh'));
-    expect(find.text(zh.projectEditorAssetImagesWorkbenchDialogTitle), findsOneWidget);
+    expect(
+      find.text(zh.projectEditorAssetImagesWorkbenchDialogTitle),
+      findsOneWidget,
+    );
     expect(find.text(zh.projectEditorAssetImagesLoadImageList), findsOneWidget);
     expect(find.text(zh.projectEditorAssetImagesPreviewImage), findsOneWidget);
-    expect(find.widgetWithText(TextButton, zh.projectEditorAssetImagesAddImage), findsOneWidget);
     expect(
-      find.widgetWithText(TextButton, zh.projectEditorAssetImagesSaveCurrentImage),
+      find.widgetWithText(TextButton, zh.projectEditorAssetImagesAddImage),
       findsOneWidget,
     );
     expect(
-      find.widgetWithText(TextButton, zh.projectEditorAssetImagesDeleteCurrentImage),
+      find.widgetWithText(
+        TextButton,
+        zh.projectEditorAssetImagesSaveCurrentImage,
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.widgetWithText(
+        TextButton,
+        zh.projectEditorAssetImagesDeleteCurrentImage,
+      ),
       findsOneWidget,
     );
     expect(find.text('保存当前图片。'), findsOneWidget);
@@ -145,36 +159,34 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        locale: const Locale('zh'),
-        home: Scaffold(
-          body: AssetImagesWorkbenchDialogView(
-            model: buildDialogModel(
-              createFilePathController: createFilePathController,
-              createStateController: createStateController,
-              createSortController: createSortController,
-              patchFilePathController: patchFilePathController,
-              patchStateController: patchStateController,
-              patchSortController: patchSortController,
-              loadingList: true,
-              busyMutation: true,
-            ),
-            callbacks: buildDialogCallbacks(
-              recommendedAction: null,
-              reloadImages: null,
-              createImage: null,
-              patchImage: null,
-              deleteImage: null,
-            ),
+      _appWithZh(
+        child: AssetImagesWorkbenchDialogView(
+          model: buildDialogModel(
+            createFilePathController: createFilePathController,
+            createStateController: createStateController,
+            createSortController: createSortController,
+            patchFilePathController: patchFilePathController,
+            patchStateController: patchStateController,
+            patchSortController: patchSortController,
+            loadingList: true,
+            busyMutation: true,
+          ),
+          callbacks: buildDialogCallbacks(
+            recommendedAction: null,
+            reloadImages: null,
+            createImage: null,
+            patchImage: null,
+            deleteImage: null,
           ),
         ),
       ),
     );
 
     final zhBusy = lookupAppLocalizations(const Locale('zh'));
-    expect(find.text(zhBusy.projectEditorAssetImagesLoadingEllipsis), findsOneWidget);
+    expect(
+      find.text(zhBusy.projectEditorAssetImagesLoadingEllipsis),
+      findsOneWidget,
+    );
     expect(
       tester
           .widget<FilledButton>(
@@ -211,23 +223,18 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        locale: const Locale('zh'),
-        home: Scaffold(
-          body: AssetImagesWorkbenchDialogView(
-            model: buildDialogModel(
-              createFilePathController: createFilePathController,
-              createStateController: createStateController,
-              createSortController: createSortController,
-              patchFilePathController: patchFilePathController,
-              patchStateController: patchStateController,
-              patchSortController: patchSortController,
-              previewBytes: tinyTransparentPng,
-            ),
-            callbacks: buildDialogCallbacks(),
+      _appWithZh(
+        child: AssetImagesWorkbenchDialogView(
+          model: buildDialogModel(
+            createFilePathController: createFilePathController,
+            createStateController: createStateController,
+            createSortController: createSortController,
+            patchFilePathController: patchFilePathController,
+            patchStateController: patchStateController,
+            patchSortController: patchSortController,
+            previewBytes: tinyTransparentPng,
           ),
+          callbacks: buildDialogCallbacks(),
         ),
       ),
     );

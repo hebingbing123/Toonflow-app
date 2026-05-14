@@ -152,10 +152,7 @@ mod tests {
 
     #[test]
     fn admin_search_min_length_error_creates_correct_variant() {
-        let err = bad_request_i18n(
-            "q must be at least 2 characters",
-            "q 必须至少包含 2 个字符",
-        );
+        let err = bad_request_i18n("q must be at least 2 characters", "q 必须至少包含 2 个字符");
         match err {
             ApiError::BadRequest(msg) => {
                 assert!(
@@ -168,10 +165,7 @@ mod tests {
 
     #[tokio::test]
     async fn admin_search_min_length_error_response_en() {
-        let err = bad_request_i18n(
-            "q must be at least 2 characters",
-            "q 必须至少包含 2 个字符",
-        );
+        let err = bad_request_i18n("q must be at least 2 characters", "q 必须至少包含 2 个字符");
         let resp = err.into_response();
 
         let bytes = to_bytes(resp.into_body(), 16 * 1024)
@@ -180,7 +174,10 @@ mod tests {
         let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
 
         assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(400));
-        assert_eq!(json.get("code").and_then(|v| v.as_str()), Some("bad_request"));
+        assert_eq!(
+            json.get("code").and_then(|v| v.as_str()),
+            Some("bad_request")
+        );
         assert_eq!(
             json.get("message").and_then(|v| v.as_str()),
             Some("q must be at least 2 characters")
@@ -191,10 +188,8 @@ mod tests {
     async fn admin_search_min_length_error_response_zh() {
         let resp = REQUEST_LOCALE
             .scope(ApiLocale::Zh, async {
-                let err = bad_request_i18n(
-                    "q must be at least 2 characters",
-                    "q 必须至少包含 2 个字符",
-                );
+                let err =
+                    bad_request_i18n("q must be at least 2 characters", "q 必须至少包含 2 个字符");
                 err.into_response()
             })
             .await;
@@ -205,7 +200,10 @@ mod tests {
         let json: serde_json::Value = serde_json::from_slice(&bytes).expect("json body");
 
         assert_eq!(json.get("status").and_then(|v| v.as_u64()), Some(400));
-        assert_eq!(json.get("code").and_then(|v| v.as_str()), Some("bad_request"));
+        assert_eq!(
+            json.get("code").and_then(|v| v.as_str()),
+            Some("bad_request")
+        );
         assert_eq!(
             json.get("message").and_then(|v| v.as_str()),
             Some("q 必须至少包含 2 个字符")

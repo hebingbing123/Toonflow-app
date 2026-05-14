@@ -29,7 +29,10 @@ use super::{
         CreateExperimentBody, ExperimentDetail, ExperimentRun, ExperimentVariant,
         ListExperimentsQuery,
     },
-    validation::{validate_experiment_dependencies, validate_sample_tier, validate_stage_scope},
+    validation::{
+        validate_experiment_dependencies, validate_sample_tier, validate_stage_scope,
+        validate_variant_labels,
+    },
 };
 
 #[derive(Debug, Clone, Deserialize, Serialize, utoipa::ToSchema)]
@@ -150,6 +153,9 @@ pub async fn create_experiment(
             "至少需要一个变体",
         ));
     }
+
+    validate_variant_labels(&body.variants, body.baseline_variant_label.as_deref())
+        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
 
     // 校验每个变体的快照完整性
     for variant in &body.variants {

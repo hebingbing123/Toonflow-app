@@ -211,7 +211,7 @@ pub async fn get_effective_billing_context(
             type UserBillingRow = (String, Option<i64>, Option<String>, Option<String>);
             let row: Option<UserBillingRow> = sqlx::query_as(
                 r#"
-                SELECT plan_tier, daily_job_quota, billing_currency, billing_provider
+                SELECT plan_tier, daily_job_quota::bigint, billing_currency, billing_provider
                 FROM public.app_user_profile
                 WHERE user_id = $1
                 "#,
@@ -240,7 +240,7 @@ pub async fn get_effective_billing_context(
                 (Option<String>, Option<i64>, Option<String>, Option<String>);
             let row: Option<WorkspaceBillingRow> = sqlx::query_as(
                 r#"
-                SELECT plan_tier, daily_job_quota, billing_currency, billing_provider
+                SELECT plan_tier, daily_job_quota::bigint, billing_currency, billing_provider
                 FROM public.app_workspace
                 WHERE id = $1
                 "#,

@@ -725,7 +725,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
           if (item.lastUsedIp != null || item.lastUsedUserAgent != null)
             Text(
               l10n.apiKeysSourceLine(
-                '${item.lastUsedIp ?? l10n.apiKeysLastUsedIpUnknown}${item.lastUsedUserAgent == null ? '' : ' · ${item.lastUsedUserAgent}'}',
+                '${item.lastUsedIp ?? 'unknown'}${item.lastUsedUserAgent == null ? '' : ' · ${item.lastUsedUserAgent}'}',
               ),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,

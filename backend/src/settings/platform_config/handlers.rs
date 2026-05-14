@@ -89,10 +89,7 @@ pub(crate) async fn post_platform_config(
             let workspace = resolve_current_workspace_platform_config(pool, uid)
                 .await?
                 .ok_or_else(|| {
-                    bad_request_i18n(
-                        "current workspace is unavailable",
-                        "当前工作区不可用",
-                    )
+                    bad_request_i18n("current workspace is unavailable", "当前工作区不可用")
                 })?;
             if !workspace.summary.can_manage_override {
                 return Err(forbidden_i18n(

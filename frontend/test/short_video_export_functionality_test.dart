@@ -7,88 +7,94 @@ void main() {
   final zh = AppLocalizationsZh();
   group('Export Functionality Unit Tests', () {
     group('Export Settings Logic', () {
-      test('Export check correctly identifies ready state with no blocking issues', () {
-        final exportCheck = ProjectShortVideoExportCheck(
-          schemaVersion: 1,
-          dataVersion: '2024-01-01T00:00:00Z',
-          exportReady: true,
-          summary: const ShortVideoExportCheckSummary(
-            storyboardCount: 10,
-            blockingIssueCount: 0,
-            warningIssueCount: 0,
-          ),
-          issues: const [],
-          qualityGate: const ShortVideoExportQualityGate(
+      test(
+        'Export check correctly identifies ready state with no blocking issues',
+        () {
+          final exportCheck = ProjectShortVideoExportCheck(
             schemaVersion: 1,
-            strategy: 'off',
-            enforced: false,
-            pendingReviewBadCaseCount: 0,
-          ),
-        );
-
-        final ui = buildShortVideoExportCheckPanelUi(
-          l10n: zh,
-          projectSelected: true,
-          loadingProjectOverview: false,
-          exportCheck: exportCheck,
-        );
-
-        expect(ui.exportReady, true);
-        expect(ui.visible, true);
-        expect(ui.loading, false);
-        expect(ui.unavailable, false);
-        expect(ui.headline, contains('未发现阻塞级问题'));
-      });
-
-      test('Export check correctly identifies not ready state with blocking issues', () {
-        final exportCheck = ProjectShortVideoExportCheck(
-          schemaVersion: 1,
-          dataVersion: '2024-01-01T00:00:00Z',
-          exportReady: false,
-          summary: const ShortVideoExportCheckSummary(
-            storyboardCount: 10,
-            blockingIssueCount: 2,
-            warningIssueCount: 1,
-          ),
-          issues: const [
-            ShortVideoExportCheckIssue(
-              severity: 'blocking',
-              code: 'missing_selected_media',
-              detail: '未选择成片媒体',
-              scriptNumericId: 1,
-              storyboardId: '00000000-0000-0000-0000-000000000101',
-              storyboardNumericId: 101,
-              sbIndex: 1,
+            dataVersion: '2024-01-01T00:00:00Z',
+            exportReady: true,
+            summary: const ShortVideoExportCheckSummary(
+              storyboardCount: 10,
+              blockingIssueCount: 0,
+              warningIssueCount: 0,
             ),
-            ShortVideoExportCheckIssue(
-              severity: 'blocking',
-              code: 'duration_not_set',
-              detail: '时长未设定',
-              scriptNumericId: 1,
-              storyboardId: '00000000-0000-0000-0000-000000000102',
-              storyboardNumericId: 102,
-              sbIndex: 2,
+            issues: const [],
+            qualityGate: const ShortVideoExportQualityGate(
+              schemaVersion: 1,
+              strategy: 'off',
+              enforced: false,
+              pendingReviewBadCaseCount: 0,
             ),
-          ],
-          qualityGate: const ShortVideoExportQualityGate(
+          );
+
+          final ui = buildShortVideoExportCheckPanelUi(
+            l10n: zh,
+            projectSelected: true,
+            loadingProjectOverview: false,
+            exportCheck: exportCheck,
+          );
+
+          expect(ui.exportReady, true);
+          expect(ui.visible, true);
+          expect(ui.loading, false);
+          expect(ui.unavailable, false);
+          expect(ui.headline, contains('未发现阻塞级问题'));
+        },
+      );
+
+      test(
+        'Export check correctly identifies not ready state with blocking issues',
+        () {
+          final exportCheck = ProjectShortVideoExportCheck(
             schemaVersion: 1,
-            strategy: 'off',
-            enforced: false,
-            pendingReviewBadCaseCount: 0,
-          ),
-        );
+            dataVersion: '2024-01-01T00:00:00Z',
+            exportReady: false,
+            summary: const ShortVideoExportCheckSummary(
+              storyboardCount: 10,
+              blockingIssueCount: 2,
+              warningIssueCount: 1,
+            ),
+            issues: const [
+              ShortVideoExportCheckIssue(
+                severity: 'blocking',
+                code: 'missing_selected_media',
+                detail: '未选择成片媒体',
+                scriptNumericId: 1,
+                storyboardId: '00000000-0000-0000-0000-000000000101',
+                storyboardNumericId: 101,
+                sbIndex: 1,
+              ),
+              ShortVideoExportCheckIssue(
+                severity: 'blocking',
+                code: 'duration_not_set',
+                detail: '时长未设定',
+                scriptNumericId: 1,
+                storyboardId: '00000000-0000-0000-0000-000000000102',
+                storyboardNumericId: 102,
+                sbIndex: 2,
+              ),
+            ],
+            qualityGate: const ShortVideoExportQualityGate(
+              schemaVersion: 1,
+              strategy: 'off',
+              enforced: false,
+              pendingReviewBadCaseCount: 0,
+            ),
+          );
 
-        final ui = buildShortVideoExportCheckPanelUi(
-          l10n: zh,
-          projectSelected: true,
-          loadingProjectOverview: false,
-          exportCheck: exportCheck,
-        );
+          final ui = buildShortVideoExportCheckPanelUi(
+            l10n: zh,
+            projectSelected: true,
+            loadingProjectOverview: false,
+            exportCheck: exportCheck,
+          );
 
-        expect(ui.exportReady, false);
-        expect(ui.headline, contains('存在阻塞项'));
-        expect(ui.blockingLines, hasLength(2));
-      });
+          expect(ui.exportReady, false);
+          expect(ui.headline, contains('存在阻塞项'));
+          expect(ui.blockingLines, hasLength(2));
+        },
+      );
 
       test('Export settings correctly validates quality gate block mode', () {
         final exportCheck = ProjectShortVideoExportCheck(
@@ -129,7 +135,10 @@ void main() {
         expect(ui.qualityGateLine, contains('阻止导出，需先修复'));
         expect(ui.qualityGateBlockingLines, hasLength(1));
         expect(ui.qualityGateBlockingLines[0], contains('QUALITY_GATE_001'));
-        expect(ui.qualityGateBlockingLines[0], contains('[返工: /quality-review]'));
+        expect(
+          ui.qualityGateBlockingLines[0],
+          contains('[返工: /quality-review]'),
+        );
       });
 
       test('Export settings correctly validates quality gate warn mode', () {
@@ -195,17 +204,35 @@ void main() {
 
       test('Export settings correctly maps issue codes to Chinese labels', () {
         expect(shortVideoExportIssueLabel(zh, 'candidate_pending'), '候选待确认');
-        expect(shortVideoExportIssueLabel(zh, 'missing_selected_media'), '未选成片媒体');
-        expect(shortVideoExportIssueLabel(zh, 'selected_media_not_video'), '所选媒体非视频');
-        expect(shortVideoExportIssueLabel(zh, 'subtitle_placeholder'), '字幕 / 口播文案缺失');
+        expect(
+          shortVideoExportIssueLabel(zh, 'missing_selected_media'),
+          '未选成片媒体',
+        );
+        expect(
+          shortVideoExportIssueLabel(zh, 'selected_media_not_video'),
+          '所选媒体非视频',
+        );
+        expect(
+          shortVideoExportIssueLabel(zh, 'subtitle_placeholder'),
+          '字幕 / 口播文案缺失',
+        );
         expect(shortVideoExportIssueLabel(zh, 'subtitle_empty'), '字幕为空');
         expect(shortVideoExportIssueLabel(zh, 'voiceover_failed'), '旁白生成失败');
-        expect(shortVideoExportIssueLabel(zh, 'voiceover_audio_missing'), '旁白音频未就绪');
+        expect(
+          shortVideoExportIssueLabel(zh, 'voiceover_audio_missing'),
+          '旁白音频未就绪',
+        );
         expect(shortVideoExportIssueLabel(zh, 'voiceover_not_ready'), '配音未就绪');
-        expect(shortVideoExportIssueLabel(zh, 'duration_not_explicit'), '时长未标明（导出默认）');
+        expect(
+          shortVideoExportIssueLabel(zh, 'duration_not_explicit'),
+          '时长未标明（导出默认）',
+        );
         expect(shortVideoExportIssueLabel(zh, 'duration_not_set'), '时长未设定');
         expect(shortVideoExportIssueLabel(zh, 'duration_unparsable'), '时长格式异常');
-        expect(shortVideoExportIssueLabel(zh, 'completion_uncertain'), '成片状态未标「已完成」');
+        expect(
+          shortVideoExportIssueLabel(zh, 'completion_uncertain'),
+          '成片状态未标「已完成」',
+        );
         expect(shortVideoExportIssueLabel(zh, 'unknown_code'), 'unknown_code');
       });
     });
@@ -289,35 +316,38 @@ void main() {
         expect(ui.metrics[3].value, '是');
       });
 
-      test('Progress tracking correctly updates export ready status in metrics', () {
-        final exportCheck = ProjectShortVideoExportCheck(
-          schemaVersion: 1,
-          dataVersion: '2024-01-01T00:00:00Z',
-          exportReady: false,
-          summary: const ShortVideoExportCheckSummary(
-            storyboardCount: 10,
-            blockingIssueCount: 1,
-            warningIssueCount: 0,
-          ),
-          issues: const [],
-          qualityGate: const ShortVideoExportQualityGate(
+      test(
+        'Progress tracking correctly updates export ready status in metrics',
+        () {
+          final exportCheck = ProjectShortVideoExportCheck(
             schemaVersion: 1,
-            strategy: 'off',
-            enforced: false,
-            pendingReviewBadCaseCount: 0,
-          ),
-        );
+            dataVersion: '2024-01-01T00:00:00Z',
+            exportReady: false,
+            summary: const ShortVideoExportCheckSummary(
+              storyboardCount: 10,
+              blockingIssueCount: 1,
+              warningIssueCount: 0,
+            ),
+            issues: const [],
+            qualityGate: const ShortVideoExportQualityGate(
+              schemaVersion: 1,
+              strategy: 'off',
+              enforced: false,
+              pendingReviewBadCaseCount: 0,
+            ),
+          );
 
-        final ui = buildShortVideoExportCheckPanelUi(
-          l10n: zh,
-          projectSelected: true,
-          loadingProjectOverview: false,
-          exportCheck: exportCheck,
-        );
+          final ui = buildShortVideoExportCheckPanelUi(
+            l10n: zh,
+            projectSelected: true,
+            loadingProjectOverview: false,
+            exportCheck: exportCheck,
+          );
 
-        expect(ui.metrics[3].label, '可导出');
-        expect(ui.metrics[3].value, '否');
-      });
+          expect(ui.metrics[3].label, '可导出');
+          expect(ui.metrics[3].value, '否');
+        },
+      );
 
       test('Progress tracking correctly handles zero blocking issues', () {
         final exportCheck = ProjectShortVideoExportCheck(
@@ -462,65 +492,68 @@ void main() {
         expect(ui.warningLines[1], contains('配音未就绪'));
       });
 
-      test('History viewing correctly handles mixed blocking and warning issues', () {
-        final exportCheck = ProjectShortVideoExportCheck(
-          schemaVersion: 1,
-          dataVersion: '2024-01-01T00:00:00Z',
-          exportReady: false,
-          summary: const ShortVideoExportCheckSummary(
-            storyboardCount: 20,
-            blockingIssueCount: 3,
-            warningIssueCount: 5,
-          ),
-          issues: const [
-            ShortVideoExportCheckIssue(
-              severity: 'blocking',
-              code: 'missing_selected_media',
-              detail: '未选择成片媒体',
-              scriptNumericId: 1,
-              storyboardId: '00000000-0000-0000-0000-000000000101',
-              storyboardNumericId: 101,
-              sbIndex: 1,
-            ),
-            ShortVideoExportCheckIssue(
-              severity: 'warning',
-              code: 'subtitle_empty',
-              detail: '字幕为空',
-              scriptNumericId: 1,
-              storyboardId: '00000000-0000-0000-0000-000000000102',
-              storyboardNumericId: 102,
-              sbIndex: 2,
-            ),
-            ShortVideoExportCheckIssue(
-              severity: 'blocking',
-              code: 'duration_not_set',
-              detail: '时长未设定',
-              scriptNumericId: 2,
-              storyboardId: '00000000-0000-0000-0000-000000000201',
-              storyboardNumericId: 201,
-              sbIndex: 1,
-            ),
-          ],
-          qualityGate: const ShortVideoExportQualityGate(
+      test(
+        'History viewing correctly handles mixed blocking and warning issues',
+        () {
+          final exportCheck = ProjectShortVideoExportCheck(
             schemaVersion: 1,
-            strategy: 'warn',
-            enforced: false,
-            pendingReviewBadCaseCount: 2,
-          ),
-        );
+            dataVersion: '2024-01-01T00:00:00Z',
+            exportReady: false,
+            summary: const ShortVideoExportCheckSummary(
+              storyboardCount: 20,
+              blockingIssueCount: 3,
+              warningIssueCount: 5,
+            ),
+            issues: const [
+              ShortVideoExportCheckIssue(
+                severity: 'blocking',
+                code: 'missing_selected_media',
+                detail: '未选择成片媒体',
+                scriptNumericId: 1,
+                storyboardId: '00000000-0000-0000-0000-000000000101',
+                storyboardNumericId: 101,
+                sbIndex: 1,
+              ),
+              ShortVideoExportCheckIssue(
+                severity: 'warning',
+                code: 'subtitle_empty',
+                detail: '字幕为空',
+                scriptNumericId: 1,
+                storyboardId: '00000000-0000-0000-0000-000000000102',
+                storyboardNumericId: 102,
+                sbIndex: 2,
+              ),
+              ShortVideoExportCheckIssue(
+                severity: 'blocking',
+                code: 'duration_not_set',
+                detail: '时长未设定',
+                scriptNumericId: 2,
+                storyboardId: '00000000-0000-0000-0000-000000000201',
+                storyboardNumericId: 201,
+                sbIndex: 1,
+              ),
+            ],
+            qualityGate: const ShortVideoExportQualityGate(
+              schemaVersion: 1,
+              strategy: 'warn',
+              enforced: false,
+              pendingReviewBadCaseCount: 2,
+            ),
+          );
 
-        final ui = buildShortVideoExportCheckPanelUi(
-          l10n: zh,
-          projectSelected: true,
-          loadingProjectOverview: false,
-          exportCheck: exportCheck,
-        );
+          final ui = buildShortVideoExportCheckPanelUi(
+            l10n: zh,
+            projectSelected: true,
+            loadingProjectOverview: false,
+            exportCheck: exportCheck,
+          );
 
-        expect(ui.exportReady, false);
-        expect(ui.blockingLines, hasLength(2));
-        expect(ui.warningLines, hasLength(1));
-        expect(ui.qualityGateLine, contains('警告模式'));
-      });
+          expect(ui.exportReady, false);
+          expect(ui.blockingLines, hasLength(2));
+          expect(ui.warningLines, hasLength(1));
+          expect(ui.qualityGateLine, contains('警告模式'));
+        },
+      );
 
       test('History viewing limits blocking lines to 14 maximum', () {
         final issues = List<ShortVideoExportCheckIssue>.generate(
@@ -530,7 +563,8 @@ void main() {
             code: 'test_issue_$i',
             detail: '测试问题 $i',
             scriptNumericId: 1,
-            storyboardId: '00000000-0000-0000-0000-0000000001${i.toString().padLeft(2, '0')}',
+            storyboardId:
+                '00000000-0000-0000-0000-0000000001${i.toString().padLeft(2, '0')}',
             storyboardNumericId: 100 + i,
             sbIndex: i,
           ),
@@ -572,7 +606,8 @@ void main() {
             code: 'test_warning_$i',
             detail: '测试警告 $i',
             scriptNumericId: 1,
-            storyboardId: '00000000-0000-0000-0000-0000000001${i.toString().padLeft(2, '0')}',
+            storyboardId:
+                '00000000-0000-0000-0000-0000000001${i.toString().padLeft(2, '0')}',
             storyboardNumericId: 100 + i,
             sbIndex: i,
           ),
@@ -648,65 +683,71 @@ void main() {
         expect(ui.blockingLines[0], isNot(contains('序')));
       });
 
-      test('History viewing correctly displays detail message for ready state', () {
-        final exportCheck = ProjectShortVideoExportCheck(
-          schemaVersion: 1,
-          dataVersion: '2024-01-01T00:00:00Z',
-          exportReady: true,
-          summary: const ShortVideoExportCheckSummary(
-            storyboardCount: 10,
-            blockingIssueCount: 0,
-            warningIssueCount: 0,
-          ),
-          issues: const [],
-          qualityGate: const ShortVideoExportQualityGate(
+      test(
+        'History viewing correctly displays detail message for ready state',
+        () {
+          final exportCheck = ProjectShortVideoExportCheck(
             schemaVersion: 1,
-            strategy: 'off',
-            enforced: false,
-            pendingReviewBadCaseCount: 0,
-          ),
-        );
+            dataVersion: '2024-01-01T00:00:00Z',
+            exportReady: true,
+            summary: const ShortVideoExportCheckSummary(
+              storyboardCount: 10,
+              blockingIssueCount: 0,
+              warningIssueCount: 0,
+            ),
+            issues: const [],
+            qualityGate: const ShortVideoExportQualityGate(
+              schemaVersion: 1,
+              strategy: 'off',
+              enforced: false,
+              pendingReviewBadCaseCount: 0,
+            ),
+          );
 
-        final ui = buildShortVideoExportCheckPanelUi(
-          l10n: zh,
-          projectSelected: true,
-          loadingProjectOverview: false,
-          exportCheck: exportCheck,
-        );
+          final ui = buildShortVideoExportCheckPanelUi(
+            l10n: zh,
+            projectSelected: true,
+            loadingProjectOverview: false,
+            exportCheck: exportCheck,
+          );
 
-        expect(ui.detail, contains('阻塞计数为 0'));
-        expect(ui.detail, contains('服务端聚合路径上暂无硬阻塞'));
-      });
+          expect(ui.detail, contains('阻塞计数为 0'));
+          expect(ui.detail, contains('服务端聚合路径上暂无硬阻塞'));
+        },
+      );
 
-      test('History viewing correctly displays detail message for not ready state', () {
-        final exportCheck = ProjectShortVideoExportCheck(
-          schemaVersion: 1,
-          dataVersion: '2024-01-01T00:00:00Z',
-          exportReady: false,
-          summary: const ShortVideoExportCheckSummary(
-            storyboardCount: 10,
-            blockingIssueCount: 2,
-            warningIssueCount: 1,
-          ),
-          issues: const [],
-          qualityGate: const ShortVideoExportQualityGate(
+      test(
+        'History viewing correctly displays detail message for not ready state',
+        () {
+          final exportCheck = ProjectShortVideoExportCheck(
             schemaVersion: 1,
-            strategy: 'off',
-            enforced: false,
-            pendingReviewBadCaseCount: 0,
-          ),
-        );
+            dataVersion: '2024-01-01T00:00:00Z',
+            exportReady: false,
+            summary: const ShortVideoExportCheckSummary(
+              storyboardCount: 10,
+              blockingIssueCount: 2,
+              warningIssueCount: 1,
+            ),
+            issues: const [],
+            qualityGate: const ShortVideoExportQualityGate(
+              schemaVersion: 1,
+              strategy: 'off',
+              enforced: false,
+              pendingReviewBadCaseCount: 0,
+            ),
+          );
 
-        final ui = buildShortVideoExportCheckPanelUi(
-          l10n: zh,
-          projectSelected: true,
-          loadingProjectOverview: false,
-          exportCheck: exportCheck,
-        );
+          final ui = buildShortVideoExportCheckPanelUi(
+            l10n: zh,
+            projectSelected: true,
+            loadingProjectOverview: false,
+            exportCheck: exportCheck,
+          );
 
-        expect(ui.detail, contains('下方列出部分阻塞项'));
-        expect(ui.detail, contains('完整列表请在制作工作区逐镜核对'));
-      });
+          expect(ui.detail, contains('下方列出部分阻塞项'));
+          expect(ui.detail, contains('完整列表请在制作工作区逐镜核对'));
+        },
+      );
     });
   });
 }

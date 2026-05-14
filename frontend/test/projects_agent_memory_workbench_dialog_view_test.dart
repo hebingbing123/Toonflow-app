@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
+import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/projects/workbenches/agent_memory_view.dart';
 import 'package:openflow_app/rust_api.dart';
+
+Widget _appWithZh({required Widget child}) => MaterialApp(
+  localizationsDelegates: AppLocalizations.localizationsDelegates,
+  supportedLocales: AppLocalizations.supportedLocales,
+  locale: const Locale('zh'),
+  home: Scaffold(body: child),
+);
 
 ProjectRow buildProject({required int numericId, required String name}) {
   return ProjectRow(
@@ -41,7 +49,8 @@ ProjectsAgentMemoryWorkbenchDialogViewModel buildModel({
 }) {
   final resolvedMemoryTierCtrl =
       memoryTierCtrl ?? TextEditingController(text: 'message');
-  final resolvedScopeSignatureCtrl = scopeSignatureCtrl ?? TextEditingController();
+  final resolvedScopeSignatureCtrl =
+      scopeSignatureCtrl ?? TextEditingController();
   final resolvedAppendTypeCtrl =
       appendTypeCtrl ?? TextEditingController(text: 'summary');
   final resolvedAppendMemoryTierCtrl =
@@ -182,6 +191,7 @@ Finder disabledButtonWithText(String text) {
 }
 
 void main() {
+  final zh = AppLocalizationsZh();
   late TextEditingController projectIdCtrl;
   late TextEditingController agentTypeCtrl;
   late TextEditingController episodesIdCtrl;
@@ -232,34 +242,29 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        locale: const Locale('zh'),
-        home: Scaffold(
-          body: ProjectsAgentMemoryWorkbenchDialogView(
-            model: buildModel(
-              projectIdCtrl: projectIdCtrl,
-              agentTypeCtrl: agentTypeCtrl,
-              episodesIdCtrl: episodesIdCtrl,
-              queryTypeCtrl: queryTypeCtrl,
-              memoryTierCtrl: memoryTierCtrl,
-              scopeSignatureCtrl: scopeSignatureCtrl,
-              appendContentCtrl: appendContentCtrl,
-              appendRoleCtrl: appendRoleCtrl,
-              appendTypeCtrl: appendTypeCtrl,
-              appendMemoryTierCtrl: appendMemoryTierCtrl,
-              appendNameCtrl: appendNameCtrl,
-              clearTypeCtrl: clearTypeCtrl,
-              automationModeCtrl: automationModeCtrl,
-            ),
-            callbacks: buildCallbacks(),
+      _appWithZh(
+        child: ProjectsAgentMemoryWorkbenchDialogView(
+          model: buildModel(
+            projectIdCtrl: projectIdCtrl,
+            agentTypeCtrl: agentTypeCtrl,
+            episodesIdCtrl: episodesIdCtrl,
+            queryTypeCtrl: queryTypeCtrl,
+            memoryTierCtrl: memoryTierCtrl,
+            scopeSignatureCtrl: scopeSignatureCtrl,
+            appendContentCtrl: appendContentCtrl,
+            appendRoleCtrl: appendRoleCtrl,
+            appendTypeCtrl: appendTypeCtrl,
+            appendMemoryTierCtrl: appendMemoryTierCtrl,
+            appendNameCtrl: appendNameCtrl,
+            clearTypeCtrl: clearTypeCtrl,
+            automationModeCtrl: automationModeCtrl,
           ),
+          callbacks: buildCallbacks(),
         ),
       ),
     );
 
-    expect(find.text('Agent 记忆工作台'), findsOneWidget);
+    expect(find.text(zh.agentMemoryWorkbenchTitle), findsOneWidget);
     expect(find.textContaining('2 个项目 ·'), findsOneWidget);
     expect(find.text('已读取 2 条记忆。'), findsOneWidget);
     expect(find.text('summary / message / all'), findsNWidgets(2));
@@ -267,7 +272,7 @@ void main() {
       find.text('自动记忆按 项目 numeric ID + agent type + episodes id 独立隔离。'),
       findsOneWidget,
     );
-    expect(find.text('自动优化视频记忆'), findsOneWidget);
+    expect(find.text(zh.agentMemoryOptimizeVideo), findsOneWidget);
     expect(
       find.textContaining('自动优化只处理 productionAgent + episodes id 范围内'),
       findsOneWidget,
@@ -300,9 +305,9 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('2 条记忆'), findsOneWidget);
-    expect(find.text('追加记忆'), findsOneWidget);
-    expect(find.text('按当前 scope 追加记忆'), findsOneWidget);
-    expect(find.text('清理记忆'), findsOneWidget);
+    expect(find.text(zh.agentMemoryAppendSection), findsOneWidget);
+    expect(find.text(zh.agentMemoryAppendButton), findsOneWidget);
+    expect(find.text(zh.agentMemoryClearSection), findsOneWidget);
     expect(
       find.textContaining('selected_video_memory · user · '),
       findsOneWidget,
@@ -318,47 +323,42 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        locale: const Locale('zh'),
-        home: Scaffold(
-          body: ProjectsAgentMemoryWorkbenchDialogView(
-            model: buildModel(
-              projectIdCtrl: projectIdCtrl,
-              agentTypeCtrl: agentTypeCtrl,
-              episodesIdCtrl: episodesIdCtrl,
-              queryTypeCtrl: queryTypeCtrl,
-              appendContentCtrl: appendContentCtrl,
-              appendRoleCtrl: appendRoleCtrl,
-              clearTypeCtrl: clearTypeCtrl,
-              memoryRows: <dynamic>[
-                <String, Object?>{
-                  'id': 'memory-1',
-                  'name': 'selected_video_memory',
-                  'role': 'assistant',
-                  'content': <Map<String, String>>[
-                    <String, String>{
-                      'data':
-                          'storyboardIds=12 | delivery=表演克制压抑，避免读稿腔，保留真实停顿与呼吸 | note=表演克制压抑，避免读稿腔，保留真实停顿与呼吸',
-                    },
-                  ],
-                },
-                <String, Object?>{
-                  'id': 'memory-2',
-                  'name': 'selected_video_memory',
-                  'role': 'assistant',
-                  'content': <Map<String, String>>[
-                    <String, String>{
-                      'data':
-                          'storyboardIds=15 | delivery=表演克制压抑，避免读稿腔，保留真实停顿与呼吸 | note=表演克制压抑，避免读稿腔，保留真实停顿与呼吸',
-                    },
-                  ],
-                },
-              ],
-            ),
-            callbacks: buildCallbacks(),
+      _appWithZh(
+        child: ProjectsAgentMemoryWorkbenchDialogView(
+          model: buildModel(
+            projectIdCtrl: projectIdCtrl,
+            agentTypeCtrl: agentTypeCtrl,
+            episodesIdCtrl: episodesIdCtrl,
+            queryTypeCtrl: queryTypeCtrl,
+            appendContentCtrl: appendContentCtrl,
+            appendRoleCtrl: appendRoleCtrl,
+            clearTypeCtrl: clearTypeCtrl,
+            memoryRows: <dynamic>[
+              <String, Object?>{
+                'id': 'memory-1',
+                'name': 'selected_video_memory',
+                'role': 'assistant',
+                'content': <Map<String, String>>[
+                  <String, String>{
+                    'data':
+                        'storyboardIds=12 | delivery=表演克制压抑，避免读稿腔，保留真实停顿与呼吸 | note=表演克制压抑，避免读稿腔，保留真实停顿与呼吸',
+                  },
+                ],
+              },
+              <String, Object?>{
+                'id': 'memory-2',
+                'name': 'selected_video_memory',
+                'role': 'assistant',
+                'content': <Map<String, String>>[
+                  <String, String>{
+                    'data':
+                        'storyboardIds=15 | delivery=表演克制压抑，避免读稿腔，保留真实停顿与呼吸 | note=表演克制压抑，避免读稿腔，保留真实停顿与呼吸',
+                  },
+                ],
+              },
+            ],
           ),
+          callbacks: buildCallbacks(),
         ),
       ),
     );
@@ -371,33 +371,28 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        locale: const Locale('zh'),
-        home: Scaffold(
-          body: ProjectsAgentMemoryWorkbenchDialogView(
-            model: buildModel(
-              projectIdCtrl: projectIdCtrl,
-              agentTypeCtrl: agentTypeCtrl,
-              episodesIdCtrl: episodesIdCtrl,
-              queryTypeCtrl: queryTypeCtrl,
-              appendContentCtrl: appendContentCtrl,
-              appendRoleCtrl: appendRoleCtrl,
-              clearTypeCtrl: clearTypeCtrl,
-              memoryRows: List<dynamic>.generate(6, (index) {
-                return <String, Object?>{
-                  'id': 'memory-$index',
-                  'name': 'selected_video_memory',
-                  'role': 'assistant',
-                  'content': <Map<String, String>>[
-                    <String, String>{'data': '第 $index 条镜头表演记忆，保留强停顿与真实呼吸。'},
-                  ],
-                };
-              }),
-            ),
-            callbacks: buildCallbacks(),
+      _appWithZh(
+        child: ProjectsAgentMemoryWorkbenchDialogView(
+          model: buildModel(
+            projectIdCtrl: projectIdCtrl,
+            agentTypeCtrl: agentTypeCtrl,
+            episodesIdCtrl: episodesIdCtrl,
+            queryTypeCtrl: queryTypeCtrl,
+            appendContentCtrl: appendContentCtrl,
+            appendRoleCtrl: appendRoleCtrl,
+            clearTypeCtrl: clearTypeCtrl,
+            memoryRows: List<dynamic>.generate(6, (index) {
+              return <String, Object?>{
+                'id': 'memory-$index',
+                'name': 'selected_video_memory',
+                'role': 'assistant',
+                'content': <Map<String, String>>[
+                  <String, String>{'data': '第 $index 条镜头表演记忆，保留强停顿与真实呼吸。'},
+                ],
+              };
+            }),
           ),
+          callbacks: buildCallbacks(),
         ),
       ),
     );
@@ -412,58 +407,53 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        locale: const Locale('zh'),
-        home: Scaffold(
-          body: ProjectsAgentMemoryWorkbenchDialogView(
-            model: buildModel(
-              projectIdCtrl: projectIdCtrl,
-              agentTypeCtrl: agentTypeCtrl,
-              episodesIdCtrl: episodesIdCtrl,
-              queryTypeCtrl: queryTypeCtrl,
-              appendContentCtrl: appendContentCtrl,
-              appendRoleCtrl: appendRoleCtrl,
-              clearTypeCtrl: clearTypeCtrl,
-              memoryRows: <dynamic>[
-                <String, Object?>{
-                  'id': 'memory-1',
-                  'name': 'selected_video_memory',
-                  'role': 'assistant',
-                  'content': <Map<String, String>>[
-                    <String, String>{
-                      'data':
-                          'storyboardIds=12 | style=镜头近景，光影冷调逆光，机位压迫 | note=镜头近景，光影冷调逆光，机位压迫',
-                    },
-                  ],
-                },
-                <String, Object?>{
-                  'id': 'memory-2',
-                  'name': 'script_role_video_style_memory',
-                  'role': 'assistant',
-                  'content': <Map<String, String>>[
-                    <String, String>{
-                      'data':
-                          'sampleCount=4 | style=镜头稳定跟拍，光影阴天冷光，构图压迫 | note=镜头稳定跟拍，光影阴天冷光，构图压迫',
-                    },
-                  ],
-                },
-                <String, Object?>{
-                  'id': 'memory-3',
-                  'name': 'selected_video_memory',
-                  'role': 'assistant',
-                  'content': <Map<String, String>>[
-                    <String, String>{
-                      'data':
-                          'storyboardIds=12 | subject=林晚 | style=表演欲言又止，语气轻声克制，情绪强忍泪意 | note=表演欲言又止，语气轻声克制，情绪强忍泪意',
-                    },
-                  ],
-                },
-              ],
-            ),
-            callbacks: buildCallbacks(),
+      _appWithZh(
+        child: ProjectsAgentMemoryWorkbenchDialogView(
+          model: buildModel(
+            projectIdCtrl: projectIdCtrl,
+            agentTypeCtrl: agentTypeCtrl,
+            episodesIdCtrl: episodesIdCtrl,
+            queryTypeCtrl: queryTypeCtrl,
+            appendContentCtrl: appendContentCtrl,
+            appendRoleCtrl: appendRoleCtrl,
+            clearTypeCtrl: clearTypeCtrl,
+            memoryRows: <dynamic>[
+              <String, Object?>{
+                'id': 'memory-1',
+                'name': 'selected_video_memory',
+                'role': 'assistant',
+                'content': <Map<String, String>>[
+                  <String, String>{
+                    'data':
+                        'storyboardIds=12 | style=镜头近景，光影冷调逆光，机位压迫 | note=镜头近景，光影冷调逆光，机位压迫',
+                  },
+                ],
+              },
+              <String, Object?>{
+                'id': 'memory-2',
+                'name': 'script_role_video_style_memory',
+                'role': 'assistant',
+                'content': <Map<String, String>>[
+                  <String, String>{
+                    'data':
+                        'sampleCount=4 | style=镜头稳定跟拍，光影阴天冷光，构图压迫 | note=镜头稳定跟拍，光影阴天冷光，构图压迫',
+                  },
+                ],
+              },
+              <String, Object?>{
+                'id': 'memory-3',
+                'name': 'selected_video_memory',
+                'role': 'assistant',
+                'content': <Map<String, String>>[
+                  <String, String>{
+                    'data':
+                        'storyboardIds=12 | subject=林晚 | style=表演欲言又止，语气轻声克制，情绪强忍泪意 | note=表演欲言又止，语气轻声克制，情绪强忍泪意',
+                  },
+                ],
+              },
+            ],
           ),
+          callbacks: buildCallbacks(),
         ),
       ),
     );
@@ -490,8 +480,8 @@ void main() {
     );
     expect(find.textContaining('建议：视觉偏重记忆吃掉了更多预算'), findsOneWidget);
     expect(find.textContaining('· 视觉偏重 · 待压缩'), findsNWidgets(2));
-    expect(find.textContaining('storyboard 12'), findsNWidgets(2));
-    expect(find.textContaining('samples 4'), findsOneWidget);
+    expect(find.textContaining('分镜 12'), findsNWidgets(2));
+    expect(find.textContaining('样本 4'), findsOneWidget);
     expect(find.textContaining('subject 林晚'), findsOneWidget);
     expect(find.textContaining('signals 人物/情绪'), findsOneWidget);
   });
@@ -500,58 +490,53 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        locale: const Locale('zh'),
-        home: Scaffold(
-          body: ProjectsAgentMemoryWorkbenchDialogView(
-            model: buildModel(
-              projectIdCtrl: projectIdCtrl,
-              agentTypeCtrl: agentTypeCtrl,
-              episodesIdCtrl: episodesIdCtrl,
-              queryTypeCtrl: queryTypeCtrl,
-              appendContentCtrl: appendContentCtrl,
-              appendRoleCtrl: appendRoleCtrl,
-              clearTypeCtrl: clearTypeCtrl,
-              memoryRows: <dynamic>[
-                <String, Object?>{
-                  'id': 'memory-1',
-                  'name': 'rejected_video_negative_memory',
-                  'role': 'assistant',
-                  'content': <Map<String, String>>[
-                    <String, String>{
-                      'data':
-                          'storyboardIds=7 | rejectionCount=3 | riskTags=delivery/lip-sync | avoid=avoid blank expression or monotone delivery',
-                    },
-                  ],
-                },
-                <String, Object?>{
-                  'id': 'memory-2',
-                  'name': 'rejected_video_negative_memory',
-                  'role': 'assistant',
-                  'content': <Map<String, String>>[
-                    <String, String>{
-                      'data':
-                          'storyboardIds=8 | rejectionCount=2 | riskTags=emotion | avoid=avoid overly cold, oppressive, or frantic mood',
-                    },
-                  ],
-                },
-                <String, Object?>{
-                  'id': 'memory-3',
-                  'name': 'rejected_video_negative_memory',
-                  'role': 'assistant',
-                  'content': <Map<String, String>>[
-                    <String, String>{
-                      'data':
-                          'storyboardIds=9 | rejectionCount=2 | riskTags=identity | avoid=avoid face distortion, identity drift, costume drift',
-                    },
-                  ],
-                },
-              ],
-            ),
-            callbacks: buildCallbacks(),
+      _appWithZh(
+        child: ProjectsAgentMemoryWorkbenchDialogView(
+          model: buildModel(
+            projectIdCtrl: projectIdCtrl,
+            agentTypeCtrl: agentTypeCtrl,
+            episodesIdCtrl: episodesIdCtrl,
+            queryTypeCtrl: queryTypeCtrl,
+            appendContentCtrl: appendContentCtrl,
+            appendRoleCtrl: appendRoleCtrl,
+            clearTypeCtrl: clearTypeCtrl,
+            memoryRows: <dynamic>[
+              <String, Object?>{
+                'id': 'memory-1',
+                'name': 'rejected_video_negative_memory',
+                'role': 'assistant',
+                'content': <Map<String, String>>[
+                  <String, String>{
+                    'data':
+                        'storyboardIds=7 | rejectionCount=3 | riskTags=delivery/lip-sync | avoid=avoid blank expression or monotone delivery',
+                  },
+                ],
+              },
+              <String, Object?>{
+                'id': 'memory-2',
+                'name': 'rejected_video_negative_memory',
+                'role': 'assistant',
+                'content': <Map<String, String>>[
+                  <String, String>{
+                    'data':
+                        'storyboardIds=8 | rejectionCount=2 | riskTags=emotion | avoid=avoid overly cold, oppressive, or frantic mood',
+                  },
+                ],
+              },
+              <String, Object?>{
+                'id': 'memory-3',
+                'name': 'rejected_video_negative_memory',
+                'role': 'assistant',
+                'content': <Map<String, String>>[
+                  <String, String>{
+                    'data':
+                        'storyboardIds=9 | rejectionCount=2 | riskTags=identity | avoid=avoid face distortion, identity drift, costume drift',
+                  },
+                ],
+              },
+            ],
           ),
+          callbacks: buildCallbacks(),
         ),
       ),
     );
@@ -586,47 +571,42 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        locale: const Locale('zh'),
-        home: Scaffold(
-          body: ProjectsAgentMemoryWorkbenchDialogView(
-            model: buildModel(
-              projectIdCtrl: projectIdCtrl,
-              agentTypeCtrl: agentTypeCtrl,
-              episodesIdCtrl: episodesIdCtrl,
-              queryTypeCtrl: queryTypeCtrl,
-              appendContentCtrl: appendContentCtrl,
-              appendRoleCtrl: appendRoleCtrl,
-              clearTypeCtrl: clearTypeCtrl,
-              memoryRows: <dynamic>[
-                <String, Object?>{
-                  'id': 'memory-1',
-                  'name': 'selected_video_memory',
-                  'role': 'assistant',
-                  'content': <Map<String, String>>[
-                    <String, String>{
-                      'data':
-                          'storyboardIds=12 | style=镜头近景，光影冷调逆光，机位压迫 | note=镜头近景，光影冷调逆光，机位压迫',
-                    },
-                  ],
-                },
-                <String, Object?>{
-                  'id': 'memory-2',
-                  'name': 'script_role_video_style_memory',
-                  'role': 'assistant',
-                  'content': <Map<String, String>>[
-                    <String, String>{
-                      'data':
-                          'sampleCount=4 | style=镜头稳定跟拍，光影阴天冷光，构图压迫 | note=镜头稳定跟拍，光影阴天冷光，构图压迫',
-                    },
-                  ],
-                },
-              ],
-            ),
-            callbacks: buildCallbacks(),
+      _appWithZh(
+        child: ProjectsAgentMemoryWorkbenchDialogView(
+          model: buildModel(
+            projectIdCtrl: projectIdCtrl,
+            agentTypeCtrl: agentTypeCtrl,
+            episodesIdCtrl: episodesIdCtrl,
+            queryTypeCtrl: queryTypeCtrl,
+            appendContentCtrl: appendContentCtrl,
+            appendRoleCtrl: appendRoleCtrl,
+            clearTypeCtrl: clearTypeCtrl,
+            memoryRows: <dynamic>[
+              <String, Object?>{
+                'id': 'memory-1',
+                'name': 'selected_video_memory',
+                'role': 'assistant',
+                'content': <Map<String, String>>[
+                  <String, String>{
+                    'data':
+                        'storyboardIds=12 | style=镜头近景，光影冷调逆光，机位压迫 | note=镜头近景，光影冷调逆光，机位压迫',
+                  },
+                ],
+              },
+              <String, Object?>{
+                'id': 'memory-2',
+                'name': 'script_role_video_style_memory',
+                'role': 'assistant',
+                'content': <Map<String, String>>[
+                  <String, String>{
+                    'data':
+                        'sampleCount=4 | style=镜头稳定跟拍，光影阴天冷光，构图压迫 | note=镜头稳定跟拍，光影阴天冷光，构图压迫',
+                  },
+                ],
+              },
+            ],
           ),
+          callbacks: buildCallbacks(),
         ),
       ),
     );
@@ -650,36 +630,31 @@ void main() {
     'agent memory workbench view highlights keep-worthy delivery anchors',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          locale: const Locale('zh'),
-          home: Scaffold(
-            body: ProjectsAgentMemoryWorkbenchDialogView(
-              model: buildModel(
-                projectIdCtrl: projectIdCtrl,
-                agentTypeCtrl: agentTypeCtrl,
-                episodesIdCtrl: episodesIdCtrl,
-                queryTypeCtrl: queryTypeCtrl,
-                appendContentCtrl: appendContentCtrl,
-                appendRoleCtrl: appendRoleCtrl,
-                clearTypeCtrl: clearTypeCtrl,
-                memoryRows: <dynamic>[
-                  <String, Object?>{
-                    'id': 'memory-1',
-                    'name': 'selected_video_memory',
-                    'role': 'assistant',
-                    'content': <Map<String, String>>[
-                      <String, String>{
-                        'data':
-                            'storyboardIds=15 | subject=林晚 | riskTags=identity/dialogue/performance | style=表演呼吸发颤，语气低声克制，光影冷蓝窗光 | delivery=表演呼吸发颤低声克制',
-                      },
-                    ],
-                  },
-                ],
-              ),
-              callbacks: buildCallbacks(),
+        _appWithZh(
+          child: ProjectsAgentMemoryWorkbenchDialogView(
+            model: buildModel(
+              projectIdCtrl: projectIdCtrl,
+              agentTypeCtrl: agentTypeCtrl,
+              episodesIdCtrl: episodesIdCtrl,
+              queryTypeCtrl: queryTypeCtrl,
+              appendContentCtrl: appendContentCtrl,
+              appendRoleCtrl: appendRoleCtrl,
+              clearTypeCtrl: clearTypeCtrl,
+              memoryRows: <dynamic>[
+                <String, Object?>{
+                  'id': 'memory-1',
+                  'name': 'selected_video_memory',
+                  'role': 'assistant',
+                  'content': <Map<String, String>>[
+                    <String, String>{
+                      'data':
+                          'storyboardIds=15 | subject=林晚 | riskTags=identity/dialogue/performance | style=表演呼吸发颤，语气低声克制，光影冷蓝窗光 | delivery=表演呼吸发颤低声克制',
+                    },
+                  ],
+                },
+              ],
             ),
+            callbacks: buildCallbacks(),
           ),
         ),
       );
@@ -699,47 +674,42 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        locale: const Locale('zh'),
-        home: Scaffold(
-          body: ProjectsAgentMemoryWorkbenchDialogView(
-            model: buildModel(
-              projectIdCtrl: projectIdCtrl,
-              agentTypeCtrl: agentTypeCtrl,
-              episodesIdCtrl: episodesIdCtrl,
-              queryTypeCtrl: queryTypeCtrl,
-              appendContentCtrl: appendContentCtrl,
-              appendRoleCtrl: appendRoleCtrl,
-              clearTypeCtrl: clearTypeCtrl,
-              memoryRows: <dynamic>[
-                <String, Object?>{
-                  'id': 'keep-1',
-                  'name': 'selected_video_memory',
-                  'role': 'assistant',
-                  'content': <Map<String, String>>[
-                    <String, String>{
-                      'data':
-                          'storyboardIds=21 | subject=林晚 | style=表演欲言又止，语气轻声克制 | delivery=表演欲言又止轻声克制',
-                    },
-                  ],
-                },
-                <String, Object?>{
-                  'id': 'trim-1',
-                  'name': 'project_video_style_memory',
-                  'role': 'assistant',
-                  'content': <Map<String, String>>[
-                    <String, String>{
-                      'data':
-                          'sampleCount=6 | style=镜头稳定跟拍，光影阴天冷光，构图压迫 | note=镜头稳定跟拍，光影阴天冷光，构图压迫',
-                    },
-                  ],
-                },
-              ],
-            ),
-            callbacks: buildCallbacks(),
+      _appWithZh(
+        child: ProjectsAgentMemoryWorkbenchDialogView(
+          model: buildModel(
+            projectIdCtrl: projectIdCtrl,
+            agentTypeCtrl: agentTypeCtrl,
+            episodesIdCtrl: episodesIdCtrl,
+            queryTypeCtrl: queryTypeCtrl,
+            appendContentCtrl: appendContentCtrl,
+            appendRoleCtrl: appendRoleCtrl,
+            clearTypeCtrl: clearTypeCtrl,
+            memoryRows: <dynamic>[
+              <String, Object?>{
+                'id': 'keep-1',
+                'name': 'selected_video_memory',
+                'role': 'assistant',
+                'content': <Map<String, String>>[
+                  <String, String>{
+                    'data':
+                        'storyboardIds=21 | subject=林晚 | style=表演欲言又止，语气轻声克制 | delivery=表演欲言又止轻声克制',
+                  },
+                ],
+              },
+              <String, Object?>{
+                'id': 'trim-1',
+                'name': 'project_video_style_memory',
+                'role': 'assistant',
+                'content': <Map<String, String>>[
+                  <String, String>{
+                    'data':
+                        'sampleCount=6 | style=镜头稳定跟拍，光影阴天冷光，构图压迫 | note=镜头稳定跟拍，光影阴天冷光，构图压迫',
+                  },
+                ],
+              },
+            ],
           ),
+          callbacks: buildCallbacks(),
         ),
       ),
     );
@@ -753,28 +723,23 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        locale: const Locale('zh'),
-        home: Scaffold(
-          body: ProjectsAgentMemoryWorkbenchDialogView(
-            model: buildModel(
-              projectIdCtrl: projectIdCtrl,
-              agentTypeCtrl: agentTypeCtrl,
-              episodesIdCtrl: episodesIdCtrl,
-              queryTypeCtrl: queryTypeCtrl,
-              appendContentCtrl: appendContentCtrl,
-              appendRoleCtrl: appendRoleCtrl,
-              clearTypeCtrl: clearTypeCtrl,
-              loadingProjects: true,
-              loadingMemory: true,
-              appendingMemory: true,
-              clearingMemory: true,
-              optimizingMemory: true,
-            ),
-            callbacks: buildCallbacks(),
+      _appWithZh(
+        child: ProjectsAgentMemoryWorkbenchDialogView(
+          model: buildModel(
+            projectIdCtrl: projectIdCtrl,
+            agentTypeCtrl: agentTypeCtrl,
+            episodesIdCtrl: episodesIdCtrl,
+            queryTypeCtrl: queryTypeCtrl,
+            appendContentCtrl: appendContentCtrl,
+            appendRoleCtrl: appendRoleCtrl,
+            clearTypeCtrl: clearTypeCtrl,
+            loadingProjects: true,
+            loadingMemory: true,
+            appendingMemory: true,
+            clearingMemory: true,
+            optimizingMemory: true,
           ),
+          callbacks: buildCallbacks(),
         ),
       ),
     );
@@ -786,24 +751,19 @@ void main() {
     'agent memory workbench view gates optimize action to scoped production memory',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          locale: const Locale('zh'),
-          home: Scaffold(
-            body: ProjectsAgentMemoryWorkbenchDialogView(
-              model: buildModel(
-                projectIdCtrl: projectIdCtrl,
-                agentTypeCtrl: agentTypeCtrl,
-                episodesIdCtrl: episodesIdCtrl,
-                queryTypeCtrl: queryTypeCtrl,
-                appendContentCtrl: appendContentCtrl,
-                appendRoleCtrl: appendRoleCtrl,
-                clearTypeCtrl: clearTypeCtrl,
-                canOptimizeVideoMemory: false,
-              ),
-              callbacks: buildCallbacks(),
+        _appWithZh(
+          child: ProjectsAgentMemoryWorkbenchDialogView(
+            model: buildModel(
+              projectIdCtrl: projectIdCtrl,
+              agentTypeCtrl: agentTypeCtrl,
+              episodesIdCtrl: episodesIdCtrl,
+              queryTypeCtrl: queryTypeCtrl,
+              appendContentCtrl: appendContentCtrl,
+              appendRoleCtrl: appendRoleCtrl,
+              clearTypeCtrl: clearTypeCtrl,
+              canOptimizeVideoMemory: false,
             ),
+            callbacks: buildCallbacks(),
           ),
         ),
       );
@@ -827,29 +787,24 @@ void main() {
     var closeCalls = 0;
 
     await tester.pumpWidget(
-      MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        locale: const Locale('zh'),
-        home: Scaffold(
-          body: ProjectsAgentMemoryWorkbenchDialogView(
-            model: buildModel(
-              projectIdCtrl: projectIdCtrl,
-              agentTypeCtrl: agentTypeCtrl,
-              episodesIdCtrl: episodesIdCtrl,
-              queryTypeCtrl: queryTypeCtrl,
-              appendContentCtrl: appendContentCtrl,
-              appendRoleCtrl: appendRoleCtrl,
-              clearTypeCtrl: clearTypeCtrl,
-            ),
-            callbacks: buildCallbacks(
-              onReloadProjects: () async => reloadCalls += 1,
-              onQueryMemory: () async => queryCalls += 1,
-              onAppendMemory: () async => appendCalls += 1,
-              onClearMemory: () async => clearCalls += 1,
-              onOptimizeVideoMemory: () async => optimizeCalls += 1,
-              onClose: () => closeCalls += 1,
-            ),
+      _appWithZh(
+        child: ProjectsAgentMemoryWorkbenchDialogView(
+          model: buildModel(
+            projectIdCtrl: projectIdCtrl,
+            agentTypeCtrl: agentTypeCtrl,
+            episodesIdCtrl: episodesIdCtrl,
+            queryTypeCtrl: queryTypeCtrl,
+            appendContentCtrl: appendContentCtrl,
+            appendRoleCtrl: appendRoleCtrl,
+            clearTypeCtrl: clearTypeCtrl,
+          ),
+          callbacks: buildCallbacks(
+            onReloadProjects: () async => reloadCalls += 1,
+            onQueryMemory: () async => queryCalls += 1,
+            onAppendMemory: () async => appendCalls += 1,
+            onClearMemory: () async => clearCalls += 1,
+            onOptimizeVideoMemory: () async => optimizeCalls += 1,
+            onClose: () => closeCalls += 1,
           ),
         ),
       ),
@@ -864,7 +819,9 @@ void main() {
     await tester.ensureVisible(find.widgetWithText(FilledButton, '自动优化视频记忆'));
     await tester.tap(find.widgetWithText(FilledButton, '自动优化视频记忆'));
     await tester.pump();
-    await tester.ensureVisible(find.widgetWithText(FilledButton, '按当前 scope 追加记忆'));
+    await tester.ensureVisible(
+      find.widgetWithText(FilledButton, '按当前 scope 追加记忆'),
+    );
     await tester.tap(find.widgetWithText(FilledButton, '按当前 scope 追加记忆'));
     await tester.pump();
     await tester.ensureVisible(find.widgetWithText(FilledButton, '执行清理'));

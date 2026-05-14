@@ -153,7 +153,7 @@ pub(crate) async fn create_project(
           target_market, target_platforms, duration_strategy,
           voice_profile, subtitle_style, bgm_strategy
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, '{}'::jsonb, $15, $16, $17, $18, $19, $20, $21, $22, $23)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, '{}'::jsonb, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24)
         RETURNING id, workspace_id, numeric_id, name, intro, project_type,
                   image_model, image_quality, video_model, art_style,
                   director_manual, mode, video_ratio, create_time_ms,

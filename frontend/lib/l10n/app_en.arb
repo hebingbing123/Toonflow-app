@@ -732,30 +732,6 @@
   "opsWhRecentActivity": "Recent activity",
   "opsWhCopyActivityTooltip": "Copy record",
   "opsWhActivityRecordSuffix": " webhook activity",
-  "opsWhActivityActionCreated": "Created",
-  "opsWhActivityActionDeleted": "Deleted",
-  "opsWhActivityActionTestSuccess": "Test: succeeded",
-  "opsWhActivityActionTestFailed": "Test: failed",
-  "opsWhActivitySummaryDeleted": "Webhook deleted",
-  "opsWhActivitySummaryTestOk": "HTTP {httpStatus}",
-  "@opsWhActivitySummaryTestOk": {
-    "placeholders": {
-      "httpStatus": {
-        "type": "String"
-      }
-    }
-  },
-  "opsWhActivitySummaryTestFail": "HTTP {httpStatus} · {errorDetail}",
-  "@opsWhActivitySummaryTestFail": {
-    "placeholders": {
-      "httpStatus": {
-        "type": "String"
-      },
-      "errorDetail": {
-        "type": "String"
-      }
-    }
-  },
   "opsWhChipLatestCreated": "Latest created",
   "opsWhChipDisabled": "Disabled",
   "opsWhSubscribeHeading": "Subscribed events",
@@ -6538,14 +6514,6 @@
   "scriptEditorStoryboardsReadinessBlockingMissingLiveActionPerformanceNotes": "Performance / delivery notes",
   "scriptEditorStoryboardsReadinessBlockingCandidatePending": "Candidate confirmation",
   "scriptEditorStoryboardsReadinessBlockingBlockingJob": "Generation job running",
-  "scriptEditorStoryboardsReadinessBlockingUnknown": "Unrecognized requirement ({code})",
-  "@scriptEditorStoryboardsReadinessBlockingUnknown": {
-    "placeholders": {
-      "code": {
-        "type": "String"
-      }
-    }
-  },
   "scriptEditorEditImageWorkbenchTitle": "Edit image workbench",
   "scriptEditorEditImageWorkbenchIntro": "Manage the edit-image flow inside the script workbench—upload a source image and start generation instead of relying only on production probes.",
   "scriptEditorEditImageWorkbenchSyncing": "Syncing…",
@@ -15369,7 +15337,6 @@
       }
     }
   },
-  "apiKeysLastUsedIpUnknown": "Unknown",
   "apiKeysSourceLine": "Source {source}",
   "@apiKeysSourceLine": {
     "placeholders": {

@@ -40,7 +40,7 @@ pub(crate) fn check_anti_ai_artifacts(
     if prompt_has_conflict_pair(&full_text, &GAZE_CONFLICT_PAIRS) {
         issues.push(issue(
             QualityGateSeverity::Severe,
-            "gaze_direction_conflict",
+            "gaze_direction_error",
             &rework_suggestion("对话场景中双方视线方向冲突，先统一视线朝向再生成。"),
             scope,
         ));
@@ -60,7 +60,7 @@ pub(crate) fn check_anti_ai_artifacts(
     if prompt_has_conflict_pair(&full_text, &PHYSICAL_RELATION_CONFLICT_PAIRS) {
         issues.push(issue(
             QualityGateSeverity::Severe,
-            "physical_relation_conflict",
+            "physical_relation_error",
             &rework_suggestion("人物空间关系描述矛盾，先统一场景物理位置再生成。"),
             scope,
         ));
@@ -80,7 +80,7 @@ pub(crate) fn check_anti_ai_artifacts(
     if dialogue_emotion_mismatch(fields, prompt) {
         issues.push(issue(
             QualityGateSeverity::Minor,
-            "emotion_dialogue_mismatch",
+            "dialogue_emotion_mismatch",
             "台词情绪强度与镜头情绪描述不匹配，补充情绪动作细节或调整台词强度。",
             scope,
         ));
@@ -94,7 +94,7 @@ pub(crate) fn check_anti_ai_artifacts(
     {
         issues.push(issue(
             QualityGateSeverity::Minor,
-            "missing_emotion_peak",
+            "emotion_peak_missing",
             "高情绪场景缺少可感知的情绪峰值（眼神、呼吸、肢体），补充至少一个具体情绪锚点。",
             scope,
         ));
@@ -106,7 +106,7 @@ pub(crate) fn check_anti_ai_artifacts(
     {
         issues.push(issue(
             QualityGateSeverity::Minor,
-            "monotone_delivery_risk",
+            "monotone_dialogue_risk",
             "台词表演缺少语速/停顿/情绪意图线索，容易生成机械朗读感。",
             scope,
         ));
@@ -137,7 +137,7 @@ mod tests {
         let issues = check_anti_ai_artifacts(&fields, Some("林晚背对陈默站着"), "storyboardId=1");
         assert!(issues
             .iter()
-            .any(|i| i.issue_type == "gaze_direction_conflict"));
+            .any(|i| i.issue_type == "gaze_direction_error"));
         assert!(has_severe_anti_ai_issue(&issues));
     }
 
@@ -151,7 +151,7 @@ mod tests {
         let issues = check_anti_ai_artifacts(&fields, Some("林晚站着说话"), "storyboardId=2");
         assert!(issues
             .iter()
-            .any(|i| i.issue_type == "missing_emotion_peak"));
+            .any(|i| i.issue_type == "emotion_peak_missing"));
     }
 
     #[test]

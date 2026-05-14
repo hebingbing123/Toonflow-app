@@ -2295,7 +2295,6 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       if (!mounted) {
         return;
       }
-      final loc = resolveAppLocalizationsForErrors(context);
       setState(() {
         _webhookLastTestResultById.remove(id);
         _webhookDeliveries.remove(id);
@@ -2306,7 +2305,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         _appendWebhookActivity(
           action: 'deleted',
           webhookId: id,
-          summary: loc.opsWhActivitySummaryDeleted,
+          summary: 'webhook deleted',
         );
       });
       await _loadWebhooks();
@@ -2393,21 +2392,6 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     );
   }
 
-  String _webhookActivityActionLabel(AppLocalizations l10n, String action) {
-    switch (action) {
-      case 'created':
-        return l10n.opsWhActivityActionCreated;
-      case 'deleted':
-        return l10n.opsWhActivityActionDeleted;
-      case 'test_success':
-        return l10n.opsWhActivityActionTestSuccess;
-      case 'test_failed':
-        return l10n.opsWhActivityActionTestFailed;
-      default:
-        return action;
-    }
-  }
-
   String _webhookInventorySummary(AppLocalizations l10n) {
     return buildWebhookInventorySummary(
       l10n,
@@ -2461,28 +2445,24 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       if (!mounted) {
         return;
       }
-      final probeL10n = resolveAppLocalizationsForErrors(context);
-      final httpStatusLabel = res.httpStatus?.toString() ?? '-';
-      final errorDetail = res.error ?? probeL10n.globalSearchUnknownError;
       setState(() {
         _webhookLastTestResultById[id] = res;
         _appendWebhookActivity(
           action: res.delivered ? 'test_success' : 'test_failed',
           webhookId: id,
           summary: res.delivered
-              ? probeL10n.opsWhActivitySummaryTestOk(httpStatusLabel)
-              : probeL10n.opsWhActivitySummaryTestFail(
-                  httpStatusLabel,
-                  errorDetail,
-                ),
+              ? 'http=${res.httpStatus ?? "-"}'
+              : 'http=${res.httpStatus ?? "-"} error=${res.error ?? "unknown"}',
         );
       });
+      final testL10n = resolveAppLocalizationsForErrors(context);
+      final httpLabel = res.httpStatus?.toString() ?? '-';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
             res.delivered
-                ? probeL10n.opsWhSnackDeliverOk(httpStatusLabel)
-                : probeL10n.opsWhSnackDeliverFail(errorDetail),
+                ? testL10n.opsWhSnackDeliverOk(httpLabel)
+                : testL10n.opsWhSnackDeliverFail(res.error ?? 'unknown'),
           ),
         ),
       );
@@ -2514,10 +2494,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     if (result.delivered) {
       return l10n.opsWhLastTestOk(httpLabel);
     }
-    return l10n.opsWhLastTestFail(
-      httpLabel,
-      result.error ?? l10n.globalSearchUnknownError,
-    );
+    return l10n.opsWhLastTestFail(httpLabel, result.error ?? 'unknown');
   }
 
   String _formatBillingEventMeta(
@@ -3093,7 +3070,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                     contentPadding: EdgeInsets.zero,
                     title: Text(
                       l10n.opsWhActivityEntryTitle(
-                        _webhookActivityActionLabel(l10n, entry.action),
+                        entry.action,
                         entry.webhookId,
                       ),
                     ),
@@ -3104,7 +3081,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                     trailing: IconButton(
                       tooltip: l10n.opsWhCopyActivityTooltip,
                       onPressed: () => _copyBillingAuditText(
-                        '${_webhookActivityActionLabel(l10n, entry.action)}\n${entry.webhookId}\n${entry.summary}',
+                        '${entry.action}\n${entry.webhookId}\n${entry.summary}',
                         l10n.opsWhActivityRecordSuffix.trim(),
                       ),
                       icon: const Icon(Icons.copy_outlined),

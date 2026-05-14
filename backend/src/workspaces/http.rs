@@ -1766,7 +1766,7 @@ pub(crate) async fn resend_workspace_invite(
         UPDATE public.app_workspace_invite
         SET
           token = $3,
-          expires_at = NOW() + make_interval(hours => $4),
+          expires_at = NOW() + make_interval(hours => $4::int),
           updated_at = NOW()
         WHERE id = $1
           AND workspace_id = $2
@@ -1890,7 +1890,7 @@ pub(crate) async fn create_workspace_invite(
         INSERT INTO public.app_workspace_invite (
           workspace_id, email, token, role, invited_by, status, expires_at
         )
-        VALUES ($1, $2, $3, $4, $5, 'pending', NOW() + make_interval(hours => $6))
+        VALUES ($1, $2, $3, $4, $5, 'pending', NOW() + make_interval(hours => $6::int))
         RETURNING
           id, workspace_id, email, token, role, invited_by, status, expires_at,
           accepted_by, accepted_at, created_at, updated_at

@@ -31,6 +31,7 @@ else
 fi
 
 echo >&2 "Recovering: supabase start --ignore-health-check"
+echo >&2 "If you only need Postgres for DB-backed tests afterward, prefer: yarn supabase:start:db"
 supabase start --ignore-health-check --yes
 
 STORAGE_CTN="supabase_storage_$(basename "$ROOT")"

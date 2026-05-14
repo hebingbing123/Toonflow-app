@@ -1,0 +1,7 @@
+# Seeds for failure cases proptest has generated in the past. It is
+# automatically read and these particular cases re-run before any
+# novel cases are generated.
+#
+# It is recommended to check this file in to source control so that
+# everyone who runs the test benefits from these saved cases.
+cc cb7d21b6443c27a6f6e3d3cf66be4612d925c6b157d91bb4247368a33f85a4fb # shrinks to stage = StoryboardPanel, severities = [Severe], blocked_flag = false, strategy = Block

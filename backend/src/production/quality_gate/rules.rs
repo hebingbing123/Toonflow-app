@@ -204,6 +204,50 @@ fn find_anchor_for_subject<'a>(
         .find(|anchor| anchor_matches_subject(anchor, aliases))
 }
 
+fn appearance_anchor_fragments(anchor: &StyleBibleCharacterAnchor) -> Vec<String> {
+    let mut fragments = Vec::new();
+    for source in [&anchor.fixed_appearance, &anchor.emotion_expression] {
+        for fragment in source.split(['，', ',', '、', '；', ';', '/', '|']) {
+            let normalized = normalize_prompt_text(fragment);
+            if normalized.chars().count() >= 2 && !fragments.contains(&normalized) {
+                fragments.push(normalized);
+            }
+        }
+    }
+    for habit in &anchor.body_habits {
+        let normalized = normalize_prompt_text(habit);
+        if normalized.chars().count() >= 2 && !fragments.contains(&normalized) {
+            fragments.push(normalized);
+        }
+    }
+    fragments
+}
+
+fn appearance_anchor_similarity(
+    anchor: &StyleBibleCharacterAnchor,
+    scene_text: &str,
+) -> Option<f32> {
+    let fragments = appearance_anchor_fragments(anchor);
+    if fragments.len() < 2 {
+        return None;
+    }
+
+    let scene_mentions_identity_detail = first_matching_marker(scene_text, &HAIR_MARKERS).is_some()
+        || first_matching_marker(scene_text, &COSTUME_MARKERS).is_some()
+        || fragments
+            .iter()
+            .any(|fragment| scene_text.contains(fragment));
+    if !scene_mentions_identity_detail {
+        return None;
+    }
+
+    let matched = fragments
+        .iter()
+        .filter(|fragment| scene_text.contains(fragment.as_str()))
+        .count();
+    Some(matched as f32 / fragments.len() as f32)
+}
+
 fn appearance_drift_issue(
     anchor: &StyleBibleCharacterAnchor,
     scene_text: &str,
@@ -233,6 +277,19 @@ fn appearance_drift_issue(
                 QualityGateSeverity::Severe,
                 "costume_drift",
                 &rework_suggestion("人物衣着锚点发生突变，先统一服装与镜头连续性。"),
+                scope,
+            ));
+        }
+    }
+    if let Some(similarity) = appearance_anchor_similarity(anchor, scene_text) {
+        if similarity < 0.7 {
+            return Some(issue(
+                QualityGateSeverity::Minor,
+                "character_anchor_drift",
+                &format!(
+                    "人物锚点与当前镜头描述相似度仅 {:.0}%，建议补齐角色外观/表演锚点后再生成。",
+                    similarity * 100.0
+                ),
                 scope,
             ));
         }
@@ -546,4 +603,70 @@ pub(super) fn quality_review_comment_issues(comment: &str, scope: &str) -> Vec<Q
         ));
     }
     issues
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::production::workbench::video_prompt_memory::parse_structured_storyboard_description;
+
+    fn sample_anchor() -> StyleBibleCharacterAnchor {
+        StyleBibleCharacterAnchor {
+            name: "林晚".into(),
+            fixed_appearance: "黑长发，米白风衣".into(),
+            default_temperament: "克制隐忍".into(),
+            emotion_expression: "先抿唇再低声开口".into(),
+            relationship_positioning: String::new(),
+            body_habits: vec!["抿唇".into(), "指尖收紧".into()],
+        }
+    }
+
+    #[test]
+    fn appearance_similarity_warns_when_anchor_match_drops_below_threshold() {
+        let anchor = sample_anchor();
+        let issue = appearance_drift_issue(
+            &anchor,
+            &normalize_prompt_text("林晚黑长发，米白风衣，沉默站着"),
+            "storyboardId=7",
+        )
+        .expect("issue");
+        assert_eq!(issue.issue_type, "character_anchor_drift");
+        assert_eq!(issue.severity, QualityGateSeverity::Minor);
+    }
+
+    #[test]
+    fn evaluate_storyboard_progression_flags_flat_emotion_three_in_a_row() {
+        let make_state = |storyboard_id| StoryboardQualityState {
+            storyboard_id,
+            subject_key: "林晚".into(),
+            emotion_intensity: 2,
+            performance_signature: "强忍".into(),
+            action_signature: "看着".into(),
+        };
+        let issues =
+            evaluate_storyboard_progression(&[make_state(1), make_state(2), make_state(3)]);
+        assert!(issues
+            .iter()
+            .any(|issue| issue.issue_type == "emotion_progression_flat"));
+    }
+
+    #[test]
+    fn evaluate_structured_fields_keeps_gaze_conflict_severe() {
+        let fields = parse_structured_storyboard_description(
+            "（林晚、走廊、林晚、4秒、近景、固定、对视着陈默、平静、冷光、你敢再说一遍！、脚步声、A01）",
+        )
+        .unwrap();
+        let mut issues = Vec::new();
+        let _ = evaluate_structured_fields(
+            &fields,
+            Some("林晚背对陈默站着"),
+            "storyboardId=1",
+            &[sample_anchor()],
+            &mut issues,
+        );
+        assert!(issues
+            .iter()
+            .any(|issue| issue.issue_type == "gaze_direction_error"
+                && issue.severity == QualityGateSeverity::Severe));
+    }
 }

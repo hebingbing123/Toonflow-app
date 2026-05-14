@@ -1,13 +1,64 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../rust_api.dart';
 
-typedef PublishPlatformCopyCommit = Future<void> Function(
+typedef PublishPlatformCopyCommit =
+    Future<void> Function(
+      String platformId,
+      String title,
+      String description,
+      String tagsComma,
+    );
+
+bool publishPlatformCopyBlockChanged(
+  Map<String, dynamic> oldPlatformCopy,
+  Map<String, dynamic> newPlatformCopy,
   String platformId,
-  String title,
-  String description,
-  String tagsComma,
-);
+) {
+  Map<String, dynamic>? normalizeBlock(Map<String, dynamic> source) {
+    final raw = source[platformId];
+    if (raw is Map<String, dynamic>) {
+      return raw;
+    }
+    if (raw is Map) {
+      return Map<String, dynamic>.from(raw);
+    }
+    return null;
+  }
+
+  List<String> normalizeTags(Map<String, dynamic>? block) {
+    final tags = block?['tags'];
+    if (tags is! List) {
+      return const <String>[];
+    }
+    return tags.map((e) => '$e'.trim()).toList(growable: false);
+  }
+
+  final oldBlock = normalizeBlock(oldPlatformCopy);
+  final newBlock = normalizeBlock(newPlatformCopy);
+  final oldTitle = (oldBlock?['title'] as String?)?.trim() ?? '';
+  final newTitle = (newBlock?['title'] as String?)?.trim() ?? '';
+  if (oldTitle != newTitle) {
+    return true;
+  }
+  final oldDescription = (oldBlock?['description'] as String?)?.trim() ?? '';
+  final newDescription = (newBlock?['description'] as String?)?.trim() ?? '';
+  if (oldDescription != newDescription) {
+    return true;
+  }
+  final oldTags = normalizeTags(oldBlock);
+  final newTags = normalizeTags(newBlock);
+  if (oldTags.length != newTags.length) {
+    return true;
+  }
+  for (var i = 0; i < oldTags.length; i++) {
+    if (oldTags[i] != newTags[i]) {
+      return true;
+    }
+  }
+  return false;
+}
 
 /// Minimal per-platform `platform_copy` editor (F4): domestic / overseas chip groups and title, description, tags.
 class PublishPlatformCopyEditor extends StatefulWidget {
@@ -42,9 +93,9 @@ class _PublishPlatformCopyEditorState extends State<PublishPlatformCopyEditor> {
   late TextEditingController _tagsController;
 
   List<String> get _allIds => <String>[
-        ...widget.domesticPlatformIds,
-        ...widget.overseasPlatformIds,
-      ];
+    ...widget.domesticPlatformIds,
+    ...widget.overseasPlatformIds,
+  ];
 
   @override
   void initState() {
@@ -61,16 +112,24 @@ class _PublishPlatformCopyEditorState extends State<PublishPlatformCopyEditor> {
   void didUpdateWidget(covariant PublishPlatformCopyEditor oldWidget) {
     super.didUpdateWidget(oldWidget);
     final ids = _allIds;
-    if (oldWidget.draftId != widget.draftId ||
-        oldWidget.domesticPlatformIds != widget.domesticPlatformIds ||
-        oldWidget.overseasPlatformIds != widget.overseasPlatformIds) {
+    final platformGroupsChanged =
+        !listEquals(
+          oldWidget.domesticPlatformIds,
+          widget.domesticPlatformIds,
+        ) ||
+        !listEquals(oldWidget.overseasPlatformIds, widget.overseasPlatformIds);
+    if (oldWidget.draftId != widget.draftId || platformGroupsChanged) {
       if (!ids.contains(_platformId)) {
         _platformId = ids.isNotEmpty ? ids.first : '';
       }
       _loadFieldsForPlatform(_platformId);
       return;
     }
-    if (oldWidget.platformCopy != widget.platformCopy) {
+    if (publishPlatformCopyBlockChanged(
+      oldWidget.platformCopy,
+      widget.platformCopy,
+      _platformId,
+    )) {
       _loadFieldsForPlatform(_platformId);
     }
   }
@@ -135,7 +194,9 @@ class _PublishPlatformCopyEditorState extends State<PublishPlatformCopyEditor> {
       children: [
         Text(
           heading,
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(color: outline),
+          style: Theme.of(
+            context,
+          ).textTheme.labelSmall?.copyWith(color: outline),
         ),
         const SizedBox(height: 6),
         Wrap(

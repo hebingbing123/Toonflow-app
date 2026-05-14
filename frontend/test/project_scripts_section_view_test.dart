@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/project_editor/scripts/section_view.dart';
 import 'package:openflow_app/script_editor/support.dart';
 import 'package:openflow_app/rust_api.dart';
@@ -78,6 +80,14 @@ Widget buildHarness({
   required ProjectScriptsSectionViewCallbacks callbacks,
 }) {
   return MaterialApp(
+    localizationsDelegates: const [
+      AppLocalizations.delegate,
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
+    supportedLocales: AppLocalizations.supportedLocales,
+    locale: const Locale('zh'),
     home: Scaffold(
       body: SingleChildScrollView(
         child: ProjectScriptsSectionView(model: model, callbacks: callbacks),

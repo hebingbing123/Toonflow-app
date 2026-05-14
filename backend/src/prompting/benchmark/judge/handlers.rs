@@ -156,6 +156,7 @@ fn create_mock_review_from_manual_scores(
         skill_file_path: None,
         skill_version_hash: None,
         next_action: None,
+        suggested_action: None,
     };
 
     // 将手动分数映射回质量评审字段（简化映射）

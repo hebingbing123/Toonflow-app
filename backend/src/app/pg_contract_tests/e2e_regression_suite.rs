@@ -90,6 +90,7 @@ async fn test_e2e_project_creation_to_publish_workflow() {
         .connect(&url)
         .await
         .expect("connect DATABASE_URL");
+    ensure_contract_auth_user(&pool).await;
 
     let sub = Uuid::parse_str(CONTRACT_USER_SUB).unwrap();
     let token = jwt_fixture::encode_supabase_style(sub, secret.as_bytes());
@@ -122,8 +123,8 @@ async fn test_e2e_project_creation_to_publish_workflow() {
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::from(
                     json!({
-                        "title": "E2E Test Project",
-                        "description": "End-to-end regression test project"
+                        "name": "E2E Test Project",
+                        "intro": "End-to-end regression test project"
                     })
                     .to_string(),
                 ))
@@ -132,7 +133,9 @@ async fn test_e2e_project_creation_to_publish_workflow() {
         .await
         .unwrap();
     let (status, created) = read_json_response(res).await;
-    assert_eq!(status, StatusCode::CREATED, "project created");
+    if status != StatusCode::CREATED {
+        panic!("project created failed: status={status}, body={created}");
+    }
     ctx.project_id = created["numeric_id"].as_i64().expect("numeric_id") as i32;
     ctx.project_uuid = created["id"].as_str().expect("project uuid").to_string();
 
@@ -148,8 +151,7 @@ async fn test_e2e_project_creation_to_publish_workflow() {
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::from(
                     json!({
-                        "title": "E2E Test Script",
-                        "content": "Test script content"
+                        "name": "E2E Test Script"
                     })
                     .to_string(),
                 ))
@@ -158,45 +160,19 @@ async fn test_e2e_project_creation_to_publish_workflow() {
         .await
         .unwrap();
     let (status, script) = read_json_response(res).await;
-    assert_eq!(status, StatusCode::CREATED, "script created");
+    if status != StatusCode::CREATED {
+        panic!("script created failed: status={status}, body={script}");
+    }
     ctx.script_id = script["numeric_id"].as_i64().expect("script numeric_id") as i32;
     ctx.script_uuid = script["id"].as_str().expect("script uuid").to_string();
 
-    // Step 3: Create test assets
+    // Step 3: Create track for storyboard/video workflow
     let res = app
         .clone()
         .oneshot(
             Request::builder()
                 .method(Method::POST)
-                .uri("/api/v1/assets")
-                .header(header::AUTHORIZATION, format!("Bearer {token}"))
-                .header(header::CONTENT_TYPE, "application/json")
-                .extension(ConnectInfo(test_addr()))
-                .body(Body::from(
-                    json!({
-                        "projectId": ctx.project_id,
-                        "name": "Test Character",
-                        "type": "character",
-                        "prompt": "A test character for e2e testing"
-                    })
-                    .to_string(),
-                ))
-                .unwrap(),
-        )
-        .await
-        .unwrap();
-    let (status, asset) = read_json_response(res).await;
-    assert_eq!(status, StatusCode::CREATED, "asset created");
-    let asset_id = asset["numeric_id"].as_i64().expect("asset numeric_id") as i32;
-    ctx.asset_ids.push(asset_id);
-
-    // Step 4: Create storyboard
-    let res = app
-        .clone()
-        .oneshot(
-            Request::builder()
-                .method(Method::POST)
-                .uri("/api/v1/production/storyboard")
+                .uri("/api/v1/production/workbench/add-track")
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
@@ -204,9 +180,38 @@ async fn test_e2e_project_creation_to_publish_workflow() {
                     json!({
                         "projectId": ctx.project_id,
                         "scriptId": ctx.script_id,
-                        "videoDesc": "Test storyboard scene",
-                        "duration": 5,
-                        "track": 1
+                        "trackName": "Publish Workflow Track"
+                    })
+                    .to_string(),
+                ))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    let (status, track) = read_json_response(res).await;
+    assert_eq!(status, StatusCode::OK, "track created");
+    let track_id = track["trackId"].as_i64().expect("track id") as i32;
+
+    // Step 4: Create storyboard
+    let res = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .method(Method::POST)
+                .uri(format!(
+                    "/api/v1/projects/{}/scripts/{}/storyboards",
+                    ctx.project_uuid, ctx.script_id
+                ))
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .header(header::CONTENT_TYPE, "application/json")
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::from(
+                    json!({
+                        "prompt": "Test storyboard scene",
+                        "duration": "5",
+                        "track_id": track_id,
+                        "flow_id": 1,
+                        "sb_index": 0
                     })
                     .to_string(),
                 ))
@@ -227,16 +232,20 @@ async fn test_e2e_project_creation_to_publish_workflow() {
         .oneshot(
             Request::builder()
                 .method(Method::POST)
-                .uri("/api/v1/quality-reviews")
+                .uri("/api/v1/quality/reviews")
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::from(
                     json!({
                         "projectId": ctx.project_id,
-                        "stage": "storyboard",
+                        "scriptId": ctx.script_id,
+                        "targetType": "script",
+                        "targetId": format!("publish-flow-{}", ctx.script_id),
+                        "overallScore": 9,
+                        "passed": true,
                         "grade": "A",
-                        "notes": "E2E test quality review"
+                        "comments": "E2E test quality review"
                     })
                     .to_string(),
                 ))
@@ -245,7 +254,7 @@ async fn test_e2e_project_creation_to_publish_workflow() {
         .await
         .unwrap();
     let (status, review) = read_json_response(res).await;
-    assert_eq!(status, StatusCode::CREATED, "quality review created");
+    assert_eq!(status, StatusCode::OK, "quality review created");
     let review_id = Uuid::parse_str(review["id"].as_str().expect("review id")).unwrap();
     ctx.quality_review_ids.push(review_id);
 
@@ -255,16 +264,19 @@ async fn test_e2e_project_creation_to_publish_workflow() {
         .oneshot(
             Request::builder()
                 .method(Method::POST)
-                .uri("/api/v1/publish/drafts")
+                .uri(format!(
+                    "/api/v1/projects/{}/publish/drafts",
+                    ctx.project_uuid
+                ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::from(
                     json!({
-                        "projectId": ctx.project_id,
-                        "scriptId": ctx.script_id,
+                        "script_id": ctx.script_uuid,
                         "title": "E2E Test Draft",
-                        "description": "Test draft for e2e regression"
+                        "description": "Test draft for e2e regression",
+                        "draft_status": "editing"
                     })
                     .to_string(),
                 ))
@@ -273,7 +285,7 @@ async fn test_e2e_project_creation_to_publish_workflow() {
         .await
         .unwrap();
     let (status, draft) = read_json_response(res).await;
-    assert_eq!(status, StatusCode::CREATED, "draft created");
+    assert_eq!(status, StatusCode::OK, "draft created");
     let draft_id = Uuid::parse_str(draft["id"].as_str().expect("draft id")).unwrap();
     ctx.draft_ids.push(draft_id);
 
@@ -283,15 +295,19 @@ async fn test_e2e_project_creation_to_publish_workflow() {
         .oneshot(
             Request::builder()
                 .method(Method::POST)
-                .uri("/api/v1/publish/jobs")
+                .uri(format!(
+                    "/api/v1/projects/{}/publish/drafts/{}/jobs",
+                    ctx.project_uuid, draft_id
+                ))
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::from(
                     json!({
-                        "draftId": draft_id.to_string(),
-                        "platforms": ["douyin"],
-                        "deliveryMode": "sandbox"
+                        "payload": {
+                            "platforms": ["douyin"],
+                            "deliveryMode": "sandbox"
+                        }
                     })
                     .to_string(),
                 ))
@@ -300,7 +316,7 @@ async fn test_e2e_project_creation_to_publish_workflow() {
         .await
         .unwrap();
     let (status, job) = read_json_response(res).await;
-    assert_eq!(status, StatusCode::CREATED, "publish job created");
+    assert_eq!(status, StatusCode::OK, "publish job created");
     let job_id = Uuid::parse_str(job["id"].as_str().expect("job id")).unwrap();
     ctx.job_ids.push(job_id);
 
@@ -320,10 +336,11 @@ async fn test_e2e_project_creation_to_publish_workflow() {
         .unwrap();
     let (status, project_data) = read_json_response(res).await;
     assert_eq!(status, StatusCode::OK, "project data retrieved");
-    assert_eq!(
-        project_data["numeric_id"].as_i64().unwrap() as i32,
-        ctx.project_id
-    );
+    let fetched_project_id = project_data["project"]["numeric_id"]
+        .as_i64()
+        .unwrap_or_else(|| panic!("unexpected project payload: {project_data}"))
+        as i32;
+    assert_eq!(fetched_project_id, ctx.project_id);
 
     // Cleanup
     ctx.cleanup().await;
@@ -342,6 +359,7 @@ async fn test_e2e_video_generation_workflow() {
         .connect(&url)
         .await
         .expect("connect DATABASE_URL");
+    ensure_contract_auth_user(&pool).await;
 
     let sub = Uuid::parse_str(CONTRACT_USER_SUB).unwrap();
     let token = jwt_fixture::encode_supabase_style(sub, secret.as_bytes());
@@ -372,13 +390,15 @@ async fn test_e2e_video_generation_workflow() {
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(json!({"title": "Video Gen Test"}).to_string()))
+                .body(Body::from(json!({"name": "Video Gen Test"}).to_string()))
                 .unwrap(),
         )
         .await
         .unwrap();
     let (status, created) = read_json_response(res).await;
-    assert_eq!(status, StatusCode::CREATED);
+    if status != StatusCode::CREATED {
+        panic!("project create failed: status={status}, body={created}");
+    }
     ctx.project_id = created["numeric_id"].as_i64().unwrap() as i32;
     ctx.project_uuid = created["id"].as_str().unwrap().to_string();
 
@@ -391,14 +411,72 @@ async fn test_e2e_video_generation_workflow() {
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(json!({"title": "Test Script"}).to_string()))
+                .body(Body::from(json!({"name": "Test Script"}).to_string()))
                 .unwrap(),
         )
         .await
         .unwrap();
     let (status, script) = read_json_response(res).await;
-    assert_eq!(status, StatusCode::CREATED);
+    if status != StatusCode::CREATED {
+        panic!("script create failed: status={status}, body={script}");
+    }
     ctx.script_id = script["numeric_id"].as_i64().unwrap() as i32;
+
+    let res = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .method(Method::POST)
+                .uri("/api/v1/production/workbench/add-track")
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .header(header::CONTENT_TYPE, "application/json")
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::from(
+                    json!({
+                        "projectId": ctx.project_id,
+                        "scriptId": ctx.script_id,
+                        "trackName": "Primary Track"
+                    })
+                    .to_string(),
+                ))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    let (status, track) = read_json_response(res).await;
+    assert_eq!(status, StatusCode::OK, "track created");
+    let track_id = track["trackId"].as_i64().unwrap() as i32;
+
+    let res = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .method(Method::POST)
+                .uri(format!(
+                    "/api/v1/projects/{}/scripts/{}/storyboards",
+                    ctx.project_uuid, ctx.script_id
+                ))
+                .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                .header(header::CONTENT_TYPE, "application/json")
+                .extension(ConnectInfo(test_addr()))
+                .body(Body::from(
+                    json!({
+                        "prompt": "Video workflow storyboard",
+                        "duration": "5",
+                        "track_id": track_id,
+                        "flow_id": 1,
+                        "sb_index": 0
+                    })
+                    .to_string(),
+                ))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    let (status, storyboard) = read_json_response(res).await;
+    assert_eq!(status, StatusCode::CREATED, "storyboard created");
+    let storyboard_id = storyboard["numeric_id"].as_i64().unwrap() as i32;
+    ctx.storyboard_ids.push(storyboard_id);
 
     // Test video generation endpoint
     let res = app
@@ -414,13 +492,17 @@ async fn test_e2e_video_generation_workflow() {
                     json!({
                         "projectId": ctx.project_id,
                         "scriptId": ctx.script_id,
-                        "uploadData": [],
+                        "uploadData": [{
+                            "id": storyboard_id,
+                            "sources": "https://example.com/storyboard-frame.png",
+                            "prompt": "Video workflow storyboard"
+                        }],
                         "prompt": "test video generation",
                         "model": "test_model",
                         "mode": "test_mode",
                         "resolution": "720p",
                         "duration": 5,
-                        "trackId": 1
+                        "trackId": track_id
                     })
                     .to_string(),
                 ))
@@ -441,7 +523,7 @@ async fn test_e2e_video_generation_workflow() {
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from("{}"))
+                .body(Body::from(json!({"projectId": ctx.project_id}).to_string()))
                 .unwrap(),
         )
         .await
@@ -467,6 +549,7 @@ async fn test_e2e_quality_gate_enforcement() {
         .connect(&url)
         .await
         .expect("connect DATABASE_URL");
+    ensure_contract_auth_user(&pool).await;
 
     let sub = Uuid::parse_str(CONTRACT_USER_SUB).unwrap();
     let token = jwt_fixture::encode_supabase_style(sub, secret.as_bytes());
@@ -497,9 +580,7 @@ async fn test_e2e_quality_gate_enforcement() {
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
-                .body(Body::from(
-                    json!({"title": "Quality Gate Test"}).to_string(),
-                ))
+                .body(Body::from(json!({"name": "Quality Gate Test"}).to_string()))
                 .unwrap(),
         )
         .await
@@ -507,24 +588,33 @@ async fn test_e2e_quality_gate_enforcement() {
     let (status, created) = read_json_response(res).await;
     assert_eq!(status, StatusCode::CREATED);
     ctx.project_id = created["numeric_id"].as_i64().unwrap() as i32;
+    ctx.project_uuid = created["id"].as_str().unwrap().to_string();
 
-    // Test quality review creation with different grades
-    for grade in &["A", "B", "C", "D"] {
+    // Test quality review creation with different pass/fail outcomes
+    for (suffix, score, passed, is_bad_case) in [
+        ("excellent", 9, true, false),
+        ("good", 7, true, false),
+        ("needs-work", 5, false, false),
+        ("bad-case", 3, false, true),
+    ] {
         let res = app
             .clone()
             .oneshot(
                 Request::builder()
                     .method(Method::POST)
-                    .uri("/api/v1/quality-reviews")
+                    .uri("/api/v1/quality/reviews")
                     .header(header::AUTHORIZATION, format!("Bearer {token}"))
                     .header(header::CONTENT_TYPE, "application/json")
                     .extension(ConnectInfo(test_addr()))
                     .body(Body::from(
                         json!({
                             "projectId": ctx.project_id,
-                            "stage": "storyboard",
-                            "grade": grade,
-                            "notes": format!("Test grade {}", grade)
+                            "targetType": "script",
+                            "targetId": format!("quality-gate-{suffix}"),
+                            "overallScore": score,
+                            "passed": passed,
+                            "isBadCase": is_bad_case,
+                            "comments": format!("Test review {suffix}")
                         })
                         .to_string(),
                     ))
@@ -533,18 +623,18 @@ async fn test_e2e_quality_gate_enforcement() {
             .await
             .unwrap();
         let (status, review) = read_json_response(res).await;
-        assert_eq!(status, StatusCode::CREATED, "quality review created");
+        assert_eq!(status, StatusCode::OK, "quality review created");
         let review_id = Uuid::parse_str(review["id"].as_str().unwrap()).unwrap();
         ctx.quality_review_ids.push(review_id);
     }
 
-    // Test quality review stats
+    // Test quality review listing
     let res = app
         .clone()
         .oneshot(
             Request::builder()
                 .method(Method::GET)
-                .uri("/api/v1/quality-reviews/stats")
+                .uri("/api/v1/quality/reviews?targetType=script")
                 .header(header::AUTHORIZATION, format!("Bearer {token}"))
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::empty())
@@ -552,9 +642,13 @@ async fn test_e2e_quality_gate_enforcement() {
         )
         .await
         .unwrap();
-    let (status, stats) = read_json_response(res).await;
-    assert_eq!(status, StatusCode::OK, "quality stats retrieved");
-    assert!(stats.is_object());
+    let (status, reviews) = read_json_response(res).await;
+    assert_eq!(status, StatusCode::OK, "quality reviews retrieved");
+    let reviews = reviews.as_array().expect("reviews list");
+    assert!(
+        reviews.len() >= 4,
+        "expected at least the four created reviews, got {reviews:?}"
+    );
 
     // Cleanup
     ctx.cleanup().await;
@@ -584,7 +678,7 @@ async fn test_e2e_performance_monitoring() {
         .oneshot(
             Request::builder()
                 .method(Method::GET)
-                .uri("/metrics")
+                .uri("/api/v1/metrics")
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::empty())
                 .unwrap(),
@@ -624,6 +718,7 @@ async fn test_e2e_data_consistency_across_stages() {
         .connect(&url)
         .await
         .expect("connect DATABASE_URL");
+    ensure_contract_auth_user(&pool).await;
 
     let sub = Uuid::parse_str(CONTRACT_USER_SUB).unwrap();
     let token = jwt_fixture::encode_supabase_style(sub, secret.as_bytes());
@@ -655,7 +750,7 @@ async fn test_e2e_data_consistency_across_stages() {
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::from(
-                    json!({"title": "Consistency Test", "description": "Test data consistency"})
+                    json!({"name": "Consistency Test", "intro": "Test data consistency"})
                         .to_string(),
                 ))
                 .unwrap(),
@@ -683,9 +778,12 @@ async fn test_e2e_data_consistency_across_stages() {
         .unwrap();
     let (status, project_data) = read_json_response(res).await;
     assert_eq!(status, StatusCode::OK);
-    assert_eq!(project_data["title"].as_str().unwrap(), "Consistency Test");
     assert_eq!(
-        project_data["description"].as_str().unwrap(),
+        project_data["project"]["name"].as_str().unwrap(),
+        "Consistency Test"
+    );
+    assert_eq!(
+        project_data["project"]["intro"].as_str().unwrap(),
         "Test data consistency"
     );
 
@@ -700,7 +798,7 @@ async fn test_e2e_data_consistency_across_stages() {
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::from(
-                    json!({"title": "Updated Consistency Test"}).to_string(),
+                    json!({"name": "Updated Consistency Test"}).to_string(),
                 ))
                 .unwrap(),
         )
@@ -726,7 +824,7 @@ async fn test_e2e_data_consistency_across_stages() {
     let (status, project_data) = read_json_response(res).await;
     assert_eq!(status, StatusCode::OK);
     assert_eq!(
-        project_data["title"].as_str().unwrap(),
+        project_data["project"]["name"].as_str().unwrap(),
         "Updated Consistency Test"
     );
 

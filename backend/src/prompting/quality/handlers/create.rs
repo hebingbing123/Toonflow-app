@@ -12,7 +12,7 @@ use super::super::feedback::{
     maybe_write_quality_feedback_to_memory, QualityFeedbackMemoryOutcome,
 };
 use super::super::issue_type::infer_issue_types;
-use super::super::next_action::infer_next_action;
+use super::super::next_action::{infer_next_action, infer_suggested_action_from_bad_case_category};
 use super::super::types::{CreateQualityReviewBody, QualityReview};
 use super::super::validate::validate_create_review_body;
 
@@ -312,6 +312,9 @@ pub(crate) async fn create_review(
     // Infer next_action if not provided
     let next_action_str = body.next_action.as_deref();
 
+    let suggested_action =
+        infer_suggested_action_from_bad_case_category(body.bad_case_category.as_deref());
+
     let mut review = sqlx::query_as::<_, QualityReview>(
         r#"
         INSERT INTO app_quality_review (
@@ -320,8 +323,8 @@ pub(crate) async fn create_review(
             pacing, faithfulness, visual_quality, overall_score, passed,
             comments, skill_version, model_name, model_params, memory_delivery_priority_applied,
             is_bad_case, bad_case_category,
-            stage, grade, skill_file_path, skill_version_hash, next_action
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27)
+            stage, grade, skill_file_path, skill_version_hash, next_action, suggested_action
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28)
         RETURNING *
         "#,
     )
@@ -352,6 +355,7 @@ pub(crate) async fn create_review(
     .bind(&body.skill_file_path)
     .bind(&body.skill_version_hash)
     .bind(next_action_str)
+    .bind(suggested_action)
     .fetch_one(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;

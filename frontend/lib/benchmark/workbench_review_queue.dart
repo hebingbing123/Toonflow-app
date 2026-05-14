@@ -36,9 +36,20 @@ class BenchmarkReviewQueueWorkbench extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              l10n.benchmarkReviewCardTitle,
-              style: Theme.of(context).textTheme.titleSmall,
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    l10n.benchmarkReviewCardTitle,
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                ),
+                FilledButton.tonal(
+                  onPressed: busy ? null : onFetchReviewQueue,
+                  child: Text(l10n.benchmarkActionFetchReviewQueue),
+                ),
+              ],
             ),
             const SizedBox(height: 8),
             TextField(

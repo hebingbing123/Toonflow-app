@@ -86,6 +86,7 @@ pub async fn invoke_sub_agent_tool(
                 ctx.user_id,
                 project_numeric_id,
                 ctx.script_numeric_id,
+                tool_name,
                 agent_type,
                 arguments,
                 prompt_seed_scope.as_deref(),
