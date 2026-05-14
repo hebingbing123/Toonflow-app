@@ -54,6 +54,9 @@ class JobsController extends ChangeNotifier {
   String? get _accessToken => _accessTokenProvider();
   AppLocalizations? get _l10n => _l10nProvider();
 
+  AppLocalizations get _l10nResolved =>
+      _l10n ?? lookupAppLocalizations(const Locale('en'));
+
   void onJobIdChanged(String _) {
     notifyListeners();
   }
@@ -121,7 +124,7 @@ class JobsController extends ChangeNotifier {
     try {
       jobs = await fetchJobs(token, kind: kind, status: status);
     } catch (e) {
-      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
       loadingJobs = false;
       notifyListeners();
@@ -138,10 +141,10 @@ class JobsController extends ChangeNotifier {
     try {
       final kinds = await fetchJobKinds(token);
       jobKindsLine = kinds.isEmpty
-          ? _l10n?.jobsEmptyValue ?? '(empty)'
+          ? _l10nResolved.jobsEmptyValue
           : kinds.join(', ');
     } catch (e) {
-      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
       loadingJobKinds = false;
       notifyListeners();
@@ -158,16 +161,14 @@ class JobsController extends ChangeNotifier {
     try {
       final rows = await fetchJobKindSummaries(token);
       jobKindSummaryLine = rows.isEmpty
-          ? _l10n?.jobsEmptyValue ?? '(empty)'
+          ? _l10nResolved.jobsEmptyValue
           : rows
                 .map(
-                  (r) =>
-                      _l10n?.jobsKindCountEntry(r.kind, r.jobCount) ??
-                      '${r.kind}: ${r.jobCount}',
+                  (r) => _l10nResolved.jobsKindCountEntry(r.kind, r.jobCount),
                 )
                 .join(', ');
     } catch (e) {
-      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
       loadingJobKindSummary = false;
       notifyListeners();
@@ -184,16 +185,15 @@ class JobsController extends ChangeNotifier {
     try {
       final rows = await fetchJobStatusSummaries(token);
       jobStatusSummaryLine = rows.isEmpty
-          ? _l10n?.jobsEmptyValue ?? '(empty)'
+          ? _l10nResolved.jobsEmptyValue
           : rows
                 .map(
                   (r) =>
-                      _l10n?.jobsStatusCountEntry(r.status, r.jobCount) ??
-                      '${r.status}: ${r.jobCount}',
+                      _l10nResolved.jobsStatusCountEntry(r.status, r.jobCount),
                 )
                 .join(', ');
     } catch (e) {
-      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
       loadingJobStatusSummary = false;
       notifyListeners();
@@ -217,7 +217,7 @@ class JobsController extends ChangeNotifier {
       }
       jobByIdLine = _formatJobDetailLine(job);
     } catch (e) {
-      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
       loadingJobById = false;
       notifyListeners();
@@ -236,7 +236,7 @@ class JobsController extends ChangeNotifier {
       final updated = await cancelJob(token, job.id);
       _upsertJob(updated);
     } catch (e) {
-      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
       cancellingJobId = null;
       notifyListeners();
@@ -253,7 +253,7 @@ class JobsController extends ChangeNotifier {
       final updated = await retryJob(token, job.id);
       _upsertJob(updated);
     } catch (e) {
-      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
       retryingJobId = null;
       notifyListeners();
@@ -280,15 +280,13 @@ class JobsController extends ChangeNotifier {
       );
       if (firstJob.id != secondJob.id) {
         _setError(
-          _l10n?.jobsIdempotencyMismatch(firstJob.id, secondJob.id) ??
-              'POST /api/v1/jobs idempotency: expected same id, got '
-                  '${firstJob.id} vs ${secondJob.id}',
+          _l10nResolved.jobsIdempotencyMismatch(firstJob.id, secondJob.id),
         );
         return;
       }
       _upsertJob(secondJob);
     } catch (e) {
-      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
       creatingJob = false;
       notifyListeners();
@@ -368,17 +366,16 @@ class JobsController extends ChangeNotifier {
   String _formatJobDetailLine(JobRow job) {
     final parts = <String>[
       '${job.kind} · ${job.status}',
-      _l10n?.jobsUpdatedAt(job.updatedAt) ?? 'updated ${job.updatedAt}',
+      _l10nResolved.jobsUpdatedAt(job.updatedAt),
     ];
     if (job.claimedBy != null && job.claimedBy!.isNotEmpty) {
       parts.add(
-        _l10n?.jobsClaimedBy(job.claimedBy!) ?? 'claimed_by=${job.claimedBy}',
+        _l10nResolved.jobsClaimedBy(job.claimedBy!),
       );
     }
     if (job.errorMessage != null && job.errorMessage!.isNotEmpty) {
       parts.add(
-        _l10n?.jobsFailedReason(job.errorMessage!) ??
-            'error=${job.errorMessage}',
+        _l10nResolved.jobsFailedReason(job.errorMessage!),
       );
     }
     return parts.join(' · ');

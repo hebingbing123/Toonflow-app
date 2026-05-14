@@ -276,8 +276,7 @@ extension SkillsHarnessFileController on SkillsHarnessController {
       );
       loadingSkillPut = false;
       skillMutationLine =
-          _l10n?.skillsHarnessPutResult(r.path, r.content.length) ??
-          'PUT 200: ${r.path} (${r.content.length} chars written)';
+          _l10nResolved.skillsHarnessPutResult(r.path, r.content.length);
       _publish();
     } catch (e) {
       _setErrorFromException(e);
@@ -303,8 +302,7 @@ extension SkillsHarnessFileController on SkillsHarnessController {
       );
       loadingSkillPost = false;
       skillMutationLine =
-          _l10n?.skillsHarnessPostResult(r.path, r.content.length) ??
-          'POST 201: ${r.path} (${r.content.length} chars written)';
+          _l10nResolved.skillsHarnessPostResult(r.path, r.content.length);
       _publish();
     } catch (e) {
       _setErrorFromException(e);
@@ -326,7 +324,7 @@ extension SkillsHarnessFileController on SkillsHarnessController {
       await deleteSkillContent(token, path);
       loadingSkillDelete = false;
       skillMutationLine =
-          _l10n?.skillsHarnessDeleteResult(path) ?? 'DELETE 204: $path';
+          _l10nResolved.skillsHarnessDeleteResult(path);
       _publish();
     } catch (e) {
       _setErrorFromException(e);

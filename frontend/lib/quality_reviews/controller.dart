@@ -54,6 +54,8 @@ class QualityReviewsController extends ChangeNotifier {
   String? get _accessToken => _accessTokenProvider();
   AppLocalizations? get _l10n => _l10nProvider?.call();
 
+  AppLocalizations get _l10nResolved => qualityReviewsResolveL10n(_l10n);
+
   List<QualityDashboardTargetStat> _mapStatsRowsToDashboardStats(
     List<QualityStatsRow> rows,
   ) {
@@ -175,7 +177,7 @@ class QualityReviewsController extends ChangeNotifier {
         limit: 20,
       );
     } catch (e) {
-      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
       if (onlyBadCases) {
         loadingQualityBadCases = false;
@@ -200,7 +202,7 @@ class QualityReviewsController extends ChangeNotifier {
         await fetchSelectedQualityReview();
       }
     } catch (e) {
-      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
       creatingQualityReview = false;
       notifyListeners();
@@ -227,7 +229,7 @@ class QualityReviewsController extends ChangeNotifier {
         if (row.badCaseCategory != null) 'badCase=${row.badCaseCategory}',
       ].join(' · ');
     } catch (e) {
-      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
       loadingQualityReviewById = false;
       notifyListeners();
@@ -245,11 +247,11 @@ class QualityReviewsController extends ChangeNotifier {
       final rows = await fetchQualityStats(token);
       qualityStatsRows = _mapStatsRowsToDashboardStats(rows);
       qualityStatsLine = rows.isEmpty
-          ? qualityReviewsResolveL10n(_l10n).qualityReviewsEmpty
-          : summarizeQualityStatsRows(rows, maxItems: 4, l10n: _l10n);
+          ? _l10nResolved.qualityReviewsEmpty
+          : summarizeQualityStatsRows(rows, maxItems: 4, l10n: _l10nResolved);
       _refreshQualityDashboardLine();
     } catch (e) {
-      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
       loadingQualityStats = false;
       notifyListeners();
@@ -269,16 +271,16 @@ class QualityReviewsController extends ChangeNotifier {
       qualityStagePassRateRows = _mapStagePassRateRows(rows);
       qualityStageGradeRows = _mapStageGradeRows(gradeRows);
       qualityStagePassRateLine = rows.isEmpty
-          ? qualityReviewsResolveL10n(_l10n).qualityReviewsEmpty
-          : summarizeStagePassRateRows(rows, maxItems: 6, l10n: _l10n);
+          ? _l10nResolved.qualityReviewsEmpty
+          : summarizeStagePassRateRows(rows, maxItems: 6, l10n: _l10nResolved);
       qualityStageGradeLine = summarizeStageGradeDistributionRows(
         gradeRows,
         maxItems: 6,
-        l10n: _l10n,
+        l10n: _l10nResolved,
       );
       _refreshQualityDashboardLine();
     } catch (e) {
-      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
       loadingQualityStagePassRate = false;
       notifyListeners();
@@ -298,7 +300,7 @@ class QualityReviewsController extends ChangeNotifier {
     _setError(null);
     notifyListeners();
     try {
-      final loc = qualityReviewsResolveL10n(_l10n);
+      final loc = _l10nResolved;
       if (refreshReadModel) {
         final refresh = await refreshQualityDashboardReadModel(
           token,
@@ -359,32 +361,32 @@ class QualityReviewsController extends ChangeNotifier {
       qualityStageGradeLine = summarizeDashboardStageGradeDistributionRows(
         dashboard.stageGradeDistribution,
         maxItems: 6,
-        l10n: _l10n,
+        l10n: _l10nResolved,
       );
       qualityScopeInsightRows = dashboard.scopeInsights;
       qualityScopeInsightsLine = summarizeDashboardScopeInsightRows(
         dashboard.scopeInsights,
         maxItems: 4,
-        l10n: _l10n,
+        l10n: _l10nResolved,
       );
       qualityTokenEfficiencyRows = dashboard.tokenEfficiency;
       qualityTokenEfficiencyLine = summarizeDashboardTokenEfficiencyRows(
         dashboard.tokenEfficiency,
         maxItems: 4,
-        l10n: _l10n,
+        l10n: _l10nResolved,
       );
       qualityBadCaseStatItems = dashboard.badCaseStats;
       qualityBadCaseStatsLine = summarizeBadCaseStatItems(
         dashboard.badCaseStats,
         maxItems: 5,
-        l10n: _l10n,
+        l10n: _l10nResolved,
       );
       qualityDashboardFreshnessLine = _buildQualityDashboardFreshnessLine(
         dashboard.meta,
       );
       _refreshQualityDashboardLine();
     } catch (e) {
-      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
       loadingQualityDashboard = false;
       refreshingQualityDashboardReadModel = false;
@@ -393,7 +395,7 @@ class QualityReviewsController extends ChangeNotifier {
   }
 
   String _buildQualityDashboardFreshnessLine(QualityDashboardMeta meta) {
-    final loc = qualityReviewsResolveL10n(_l10n);
+    final loc = _l10nResolved;
     final age = meta.ageSeconds == null
         ? loc.qualityReviewsFreshnessUnknownAge
         : meta.ageSeconds! < 60
@@ -423,7 +425,7 @@ class QualityReviewsController extends ChangeNotifier {
       scopeInsightsSummary: qualityScopeInsightsLine,
       tokenEfficiencySummary: qualityTokenEfficiencyLine,
       badCaseStatsSummary: qualityBadCaseStatsLine,
-      l10n: _l10n,
+      l10n: _l10nResolved,
     );
   }
 

@@ -85,6 +85,9 @@ class SkillsHarnessController extends ChangeNotifier {
   String? get _accessToken => _accessTokenProvider();
   AppLocalizations? get _l10n => _l10nProvider();
 
+  AppLocalizations get _l10nResolved =>
+      _l10n ?? lookupAppLocalizations(const Locale('en'));
+
   bool get wsConnected => _ws != null;
 
   Future<void> startAutoSessionWs() async {
@@ -229,8 +232,10 @@ class SkillsHarnessController extends ChangeNotifier {
     try {
       final r = await validateHarnessUserWasm(token, kHarnessEmbeddedProbeWasm);
       userWasmValidateLine =
-          _l10n?.skillsHarnessValidateResult('${r.validated}', r.sizeBytes) ??
-          'validated=${r.validated}, size_bytes=${r.sizeBytes} (embedded probe)';
+          _l10nResolved.skillsHarnessValidateResult(
+            '${r.validated}',
+            r.sizeBytes,
+          );
     } catch (e) {
       _setErrorFromException(e);
     } finally {
@@ -252,13 +257,12 @@ class SkillsHarnessController extends ChangeNotifier {
           ? '${r.wasmSha256Hex.substring(0, 12)}…'
           : r.wasmSha256Hex;
       userWasmPersistLine =
-          _l10n?.skillsHarnessPersistResult(
+          _l10nResolved.skillsHarnessPersistResult(
             r.id,
             shaShort,
             r.sizeBytes,
             r.createdAt.toIso8601String(),
-          ) ??
-          'stored id=${r.id}, sha256=$shaShort, size=${r.sizeBytes}, at=${r.createdAt.toIso8601String()}';
+          );
       userWasmRevokeTargetId = r.id;
     } catch (e) {
       _setErrorFromException(e);
@@ -279,7 +283,7 @@ class SkillsHarnessController extends ChangeNotifier {
       final r = await listHarnessUserWasm(token);
       if (r.items.isEmpty) {
         userWasmListLine =
-            _l10n?.skillsHarnessStoredModulesEmpty ?? '0 stored module(s)';
+            _l10nResolved.skillsHarnessStoredModulesEmpty;
         userWasmRevokeTargetId = null;
       } else {
         final preview = r.items
@@ -287,12 +291,11 @@ class SkillsHarnessController extends ChangeNotifier {
             .map((row) => '${row.id}:${row.sizeBytes}b')
             .join(', ');
         userWasmListLine =
-            _l10n?.skillsHarnessStoredModulesSummary(
+            _l10nResolved.skillsHarnessStoredModulesSummary(
               r.items.length,
               preview,
               r.items.length > 5 ? ', …' : '',
-            ) ??
-            '${r.items.length} stored module(s) — $preview${r.items.length > 5 ? ', …' : ''}';
+            );
         userWasmRevokeTargetId = r.items.first.id;
       }
     } catch (e) {
@@ -314,11 +317,10 @@ class SkillsHarnessController extends ChangeNotifier {
     try {
       final r = await revokeHarnessUserWasm(token, id);
       userWasmRevokeLine =
-          _l10n?.skillsHarnessRevokeResult(
+          _l10nResolved.skillsHarnessRevokeResult(
             r.id,
             r.revokedAt.toIso8601String(),
-          ) ??
-          'revoked id=${r.id}, revoked_at=${r.revokedAt.toIso8601String()}';
+          );
       userWasmRevokeTargetId = null;
     } catch (e) {
       _setErrorFromException(e);
@@ -344,11 +346,10 @@ class SkillsHarnessController extends ChangeNotifier {
     try {
       final r = await revokeHarnessUserWasm(token, id);
       userWasmRevokeLine =
-          _l10n?.skillsHarnessRevokeResult(
+          _l10nResolved.skillsHarnessRevokeResult(
             r.id,
             r.revokedAt.toIso8601String(),
-          ) ??
-          'revoked id=${r.id}, revoked_at=${r.revokedAt.toIso8601String()}';
+          );
 
       // Reload so the list filtering (`revoked_at IS NULL`) is visibly verified.
       await loadUserWasmList();
@@ -370,12 +371,11 @@ class SkillsHarnessController extends ChangeNotifier {
     try {
       final summary = await fetchSkillsSummary(token);
       skillsAggregateLine =
-          _l10n?.skillsHarnessAggregateResult(
+          _l10nResolved.skillsHarnessAggregateResult(
             summary.scope,
             summary.markdownFileCount,
             summary.totalBytes,
-          ) ??
-          'scope=${summary.scope} · ${summary.markdownFileCount} md files, ${summary.totalBytes} bytes total';
+          );
     } catch (e) {
       _setErrorFromException(e);
     } finally {
@@ -395,13 +395,12 @@ class SkillsHarnessController extends ChangeNotifier {
       final list = await fetchSkills(token);
       final sample = list.take(5).map((m) => m.path).join(', ');
       skillsListSummary =
-          _l10n?.skillsHarnessListSummary(
+          _l10nResolved.skillsHarnessListSummary(
             list.length,
             sample.isEmpty
-                ? (_l10n?.skillsHarnessListSampleEmpty ?? '—')
+                ? _l10nResolved.skillsHarnessListSampleEmpty
                 : sample,
-          ) ??
-          '${list.length} files; sample: ${sample.isEmpty ? '—' : sample}';
+          );
     } catch (e) {
       _setErrorFromException(e);
     } finally {

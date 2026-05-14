@@ -493,6 +493,9 @@ class ContentComplianceController extends ChangeNotifier {
 
   AppLocalizations? get _l10n => _l10nProvider?.call();
 
+  AppLocalizations get _l10nResolved =>
+      _l10n ?? lookupAppLocalizations(const Locale('en'));
+
   bool submittingReport = false;
   bool loadingQueue = false;
   bool mutatingQueue = false;
@@ -555,7 +558,7 @@ class ContentComplianceController extends ChangeNotifier {
         await loadQueue();
       }
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
       submittingReport = false;
       notifyListeners();
@@ -649,7 +652,7 @@ class ContentComplianceController extends ChangeNotifier {
         );
       }
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
       loadingQueue = false;
       notifyListeners();
@@ -706,7 +709,7 @@ class ContentComplianceController extends ChangeNotifier {
       ensureHttpSuccess(res);
       await loadQueue();
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
       mutatingQueue = false;
       notifyListeners();
@@ -811,7 +814,7 @@ class ContentComplianceController extends ChangeNotifier {
       await loadQueue();
       return response;
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
       return null;
     } finally {
       mutatingQueue = false;
@@ -831,8 +834,7 @@ class ContentComplianceController extends ChangeNotifier {
     final trimmedAssignee = assigneeLabel.trim();
     if (trimmedAssignee.isEmpty) {
       _setError(
-        _l10n?.contentComplianceErrAssigneeRequired ??
-            'Assignee reviewer cannot be empty.',
+        _l10nResolved.contentComplianceErrAssigneeRequired,
       );
       notifyListeners();
       return null;
@@ -865,7 +867,7 @@ class ContentComplianceController extends ChangeNotifier {
       await loadQueue();
       return response;
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
       return null;
     } finally {
       mutatingQueue = false;
@@ -910,7 +912,7 @@ class ContentComplianceController extends ChangeNotifier {
       await loadQueue();
       return response;
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
       return null;
     } finally {
       mutatingQueue = false;
@@ -956,7 +958,7 @@ class ContentComplianceController extends ChangeNotifier {
           )
           .toList(growable: false);
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
       return const <ContentComplianceAuditItemV1>[];
     } finally {
       loadingAuditReportId = null;
