@@ -21,6 +21,7 @@ void main() {
       outputController: outputController,
       accessTokenProvider: () => 'token',
       onErrorChanged: (error) => lastError = error,
+      l10nProvider: () => null,
       clearWsLog: () => clearWsLogCalls++,
       resetWorkspaceOutputs: () => resetOutputCalls++,
       requestSender: (token, messages) async {
@@ -59,6 +60,7 @@ void main() {
         outputController: outputController,
         accessTokenProvider: () => 'token',
         onErrorChanged: (error) => lastError = error,
+        l10nProvider: () => null,
         clearWsLog: () {},
         resetWorkspaceOutputs: () {},
         requestSender: (token, messages) async {
@@ -94,6 +96,7 @@ void main() {
       outputController: outputController,
       accessTokenProvider: () => 'token',
       onErrorChanged: (error) => lastError = error,
+      l10nProvider: () => null,
       clearWsLog: () {},
       resetWorkspaceOutputs: () {},
       requestSender: (token, messages) async => true,
@@ -104,7 +107,7 @@ void main() {
     inputController.scriptPromptController.text = '';
     await controller.runScriptWorkspaceAgent();
 
-    expect(lastError, '请填写 projectUuid 或正整数 project_id');
+    expect(lastError, 'Enter a project UUID or a positive numeric project id');
     expect(operationController.hasPendingWork, isFalse);
   });
 
@@ -123,6 +126,7 @@ void main() {
         outputController: outputController,
         accessTokenProvider: () => 'token',
         onErrorChanged: (_) {},
+        l10nProvider: () => null,
         clearWsLog: () {},
         resetWorkspaceOutputs: () {},
         requestSender: (token, messages) async {
@@ -186,6 +190,7 @@ void main() {
       outputController: outputController,
       accessTokenProvider: () => 'token',
       onErrorChanged: (_) {},
+      l10nProvider: () => null,
       clearWsLog: () {},
       resetWorkspaceOutputs: () {},
       requestSender: (token, messages) async {
@@ -221,6 +226,7 @@ void main() {
       outputController: outputController,
       accessTokenProvider: () => 'token',
       onErrorChanged: (_) {},
+      l10nProvider: () => null,
       clearWsLog: () {},
       resetWorkspaceOutputs: () {},
       requestSender: (token, messages) async {
@@ -268,6 +274,7 @@ void main() {
       outputController: outputController,
       accessTokenProvider: () => 'token',
       onErrorChanged: (_) {},
+      l10nProvider: () => null,
       clearWsLog: () {},
       resetWorkspaceOutputs: () {},
       requestSender: (token, messages) async {
@@ -303,6 +310,7 @@ void main() {
       outputController: outputController,
       accessTokenProvider: () => 'token',
       onErrorChanged: (e) => lastError = e,
+      l10nProvider: () => null,
       clearWsLog: () {},
       resetWorkspaceOutputs: () {},
       requestSender: (token, messages) async => true,
@@ -314,6 +322,6 @@ void main() {
 
     await controller.runScriptWorkspaceAgent();
 
-    expect(lastError, 'workspaceUuid 格式无效');
+    expect(lastError, 'Invalid workspace UUID format');
   });
 }

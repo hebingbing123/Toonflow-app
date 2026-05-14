@@ -185,6 +185,7 @@ class _HomePageState extends State<HomePage> {
         outputController: _workspaceOutputController,
         accessTokenProvider: () => _session?.accessToken,
         onErrorChanged: _setSharedError,
+        l10nProvider: () => _appL10n,
         clearWsLog: _skillsHarnessController.wsLog.clear,
         resetWorkspaceOutputs: () {
           _workspaceOutputController.reset();
@@ -315,7 +316,7 @@ class _HomePageState extends State<HomePage> {
   late final ShellNavigationController _shellNavigationController =
       ShellNavigationController();
   late final WorkspaceOutputController _workspaceOutputController =
-      WorkspaceOutputController();
+      WorkspaceOutputController(l10nProvider: () => _appL10n);
   late final WorkspaceWsEventController _workspaceWsEventController =
       WorkspaceWsEventController(
         skillsHarnessBusyProvider: () => _skillsHarnessController.wsProbesBusy,

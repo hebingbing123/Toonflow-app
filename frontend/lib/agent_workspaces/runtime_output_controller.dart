@@ -2,9 +2,17 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
-import '../l10n/rust_api_error_format.dart';
+import '../l10n/app_localizations.dart';
 
 class WorkspaceOutputController extends ChangeNotifier {
+  WorkspaceOutputController({AppLocalizations? Function()? l10nProvider})
+    : _l10nProvider = l10nProvider;
+
+  final AppLocalizations? Function()? _l10nProvider;
+
+  AppLocalizations get _l10nResolved =>
+      _l10nProvider?.call() ?? lookupAppLocalizations(const Locale('en'));
+
   String _assistantText = '';
   String? _lastToolResultLine;
   String? _lastToolName;
@@ -133,8 +141,7 @@ class WorkspaceOutputController extends ChangeNotifier {
   }
 
   void markCancelled() {
-    _writebackLine =
-        rustApiLookupL10nFromPlatform().agentWorkspaceHarnessRunCancelledHint;
+    _writebackLine = _l10nResolved.agentWorkspaceHarnessRunCancelledHint;
     notifyListeners();
   }
 

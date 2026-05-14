@@ -1,7 +1,8 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
+
 import '../l10n/app_localizations.dart';
-import '../l10n/rust_api_error_format.dart';
 import 'input_controller.dart';
 import 'operation_controller.dart';
 import 'runtime_output_controller.dart';
@@ -11,6 +12,7 @@ part 'run_controller_helpers.dart';
 typedef WorkspaceRunAccessTokenProvider = String? Function();
 typedef WorkspaceRunErrorSink = void Function(String? error);
 typedef WorkspaceRunStateReset = void Function();
+typedef WorkspaceRunL10nProvider = AppLocalizations? Function();
 typedef WorkspaceRunRequestSender =
     Future<bool> Function(String token, List<Map<String, dynamic>> messages);
 
@@ -21,6 +23,7 @@ class WorkspaceRunController {
     required WorkspaceOutputController outputController,
     required WorkspaceRunAccessTokenProvider accessTokenProvider,
     required WorkspaceRunErrorSink onErrorChanged,
+    required WorkspaceRunL10nProvider l10nProvider,
     required WorkspaceRunStateReset clearWsLog,
     required WorkspaceRunStateReset resetWorkspaceOutputs,
     required WorkspaceRunRequestSender requestSender,
@@ -29,6 +32,7 @@ class WorkspaceRunController {
        _outputController = outputController,
        _accessTokenProvider = accessTokenProvider,
        _onErrorChanged = onErrorChanged,
+       _l10nProvider = l10nProvider,
        _clearWsLog = clearWsLog,
        _resetWorkspaceOutputs = resetWorkspaceOutputs,
        _requestSender = requestSender;
@@ -38,14 +42,18 @@ class WorkspaceRunController {
   final WorkspaceOutputController _outputController;
   final WorkspaceRunAccessTokenProvider _accessTokenProvider;
   final WorkspaceRunErrorSink _onErrorChanged;
+  final WorkspaceRunL10nProvider _l10nProvider;
   final WorkspaceRunStateReset _clearWsLog;
   final WorkspaceRunStateReset _resetWorkspaceOutputs;
   final WorkspaceRunRequestSender _requestSender;
 
+  AppLocalizations get _l10nResolved =>
+      _l10nProvider() ?? lookupAppLocalizations(const Locale('en'));
+
   Future<void> runScriptWorkspaceAgent() async {
     final token = _accessTokenProvider();
     if (token == null) return;
-    final loc = rustApiLookupL10nFromPlatform();
+    final loc = _l10nResolved;
     final proj = _parseProjectAttachInputs(_inputController, loc);
     if (proj.error != null) {
       _onErrorChanged(proj.error);
@@ -95,7 +103,7 @@ class WorkspaceRunController {
   Future<void> probeScriptDomainTool(String toolName, String rawArgs) async {
     final token = _accessTokenProvider();
     if (token == null) return;
-    final loc = rustApiLookupL10nFromPlatform();
+    final loc = _l10nResolved;
     final proj = _parseProjectAttachInputs(_inputController, loc);
     if (proj.error != null) {
       _onErrorChanged(proj.error);
@@ -165,7 +173,7 @@ class WorkspaceRunController {
   Future<void> runScriptSubAgentTool() async {
     final token = _accessTokenProvider();
     if (token == null) return;
-    final loc = rustApiLookupL10nFromPlatform();
+    final loc = _l10nResolved;
     final proj = _parseProjectAttachInputs(_inputController, loc);
     if (proj.error != null) {
       _onErrorChanged(proj.error);
@@ -224,7 +232,7 @@ class WorkspaceRunController {
   Future<void> runProductionWorkspaceAgent() async {
     final token = _accessTokenProvider();
     if (token == null) return;
-    final loc = rustApiLookupL10nFromPlatform();
+    final loc = _l10nResolved;
     final proj = _parseProjectAttachInputs(_inputController, loc);
     if (proj.error != null) {
       _onErrorChanged(proj.error);
@@ -281,7 +289,7 @@ class WorkspaceRunController {
   Future<void> probeProductionDomainTool() async {
     final token = _accessTokenProvider();
     if (token == null) return;
-    final loc = rustApiLookupL10nFromPlatform();
+    final loc = _l10nResolved;
     final proj = _parseProjectAttachInputs(_inputController, loc);
     if (proj.error != null) {
       _onErrorChanged(proj.error);
@@ -361,7 +369,7 @@ class WorkspaceRunController {
   Future<void> runProductionSubAgentTool() async {
     final token = _accessTokenProvider();
     if (token == null) return;
-    final loc = rustApiLookupL10nFromPlatform();
+    final loc = _l10nResolved;
     final proj = _parseProjectAttachInputs(_inputController, loc);
     if (proj.error != null) {
       _onErrorChanged(proj.error);
