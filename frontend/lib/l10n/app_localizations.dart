@@ -5986,8 +5986,26 @@ abstract class AppLocalizations {
   /// No description provided for @globalSearchSavedUsed.
   ///
   /// In en, this message translates to:
-  /// **'used={count}'**
+  /// **'Used {count} times'**
   String globalSearchSavedUsed(int count);
+
+  /// No description provided for @globalSearchSavedViewWorkspaceLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace: {name}'**
+  String globalSearchSavedViewWorkspaceLine(String name);
+
+  /// No description provided for @globalSearchSavedViewTypesLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Types: {types}'**
+  String globalSearchSavedViewTypesLine(String types);
+
+  /// No description provided for @globalSearchSavedViewLastUsedLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Last used: {when}'**
+  String globalSearchSavedViewLastUsedLine(String when);
 
   /// No description provided for @globalSearchTemplateRecent7d.
   ///
@@ -6006,6 +6024,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Scripts in last 30 days'**
   String get globalSearchTemplateScripts30d;
+
+  /// No description provided for @globalSearchTemplateAssets30d.
+  ///
+  /// In en, this message translates to:
+  /// **'Assets in last 30 days'**
+  String get globalSearchTemplateAssets30d;
 
   /// No description provided for @globalSearchClearSearchHistoryTitle.
   ///

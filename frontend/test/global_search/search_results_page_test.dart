@@ -1,14 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:openflow_app/global_search/search_results_page.dart';
 import 'package:openflow_app/global_search/advanced_filter_panel.dart';
+import 'package:openflow_app/global_search/search_results_page.dart';
+import 'package:openflow_app/l10n/app_localizations.dart';
+
+Widget materialAppWithL10n({
+  required Widget home,
+  Locale locale = const Locale('zh'),
+}) {
+  return MaterialApp(
+    localizationsDelegates: const [
+      AppLocalizations.delegate,
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
+    supportedLocales: AppLocalizations.supportedLocales,
+    locale: locale,
+    home: home,
+  );
+}
 
 void main() {
   group('SearchResultsPage', () {
     testWidgets('displays search query in app bar', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        materialAppWithL10n(
           home: SearchResultsPage(
             query: 'test query',
             accessToken: 'test-token',
@@ -16,17 +35,17 @@ void main() {
         ),
       );
 
-      // Verify query is displayed in app bar
-      expect(find.text('搜索: test query'), findsOneWidget);
+      await tester.pump();
+      final l10n = AppLocalizations.of(
+        tester.element(find.byType(SearchResultsPage)),
+      )!;
+      expect(find.text(l10n.globalSearchTitle('test query')), findsOneWidget);
     });
 
     testWidgets('displays loading state initially', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SearchResultsPage(
-            query: 'test',
-            accessToken: 'test-token',
-          ),
+        materialAppWithL10n(
+          home: SearchResultsPage(query: 'test', accessToken: 'test-token'),
         ),
       );
 
@@ -34,33 +53,31 @@ void main() {
       expect(find.byType(Card), findsWidgets);
     });
 
-    testWidgets('displays error state when access token is missing',
-        (tester) async {
+    testWidgets('displays error state when access token is missing', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: SearchResultsPage(
-            query: 'test',
-            accessToken: null,
-          ),
+        materialAppWithL10n(
+          home: SearchResultsPage(query: 'test', accessToken: null),
         ),
       );
 
       // Wait for state to update
       await tester.pumpAndSettle();
 
-      // Should show error message
-      expect(find.text('请先登录'), findsOneWidget);
+      final l10n = AppLocalizations.of(
+        tester.element(find.byType(SearchResultsPage)),
+      )!;
+      expect(find.text(l10n.globalSearchErrSignInFirst), findsOneWidget);
       expect(find.byIcon(Icons.error_outline), findsOneWidget);
     });
 
-    testWidgets('displays no results state when results are empty',
-        (tester) async {
+    testWidgets('displays no results state when results are empty', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SearchResultsPage(
-            query: 'test',
-            accessToken: 'test-token',
-          ),
+        materialAppWithL10n(
+          home: SearchResultsPage(query: 'test', accessToken: 'test-token'),
         ),
       );
 
@@ -73,14 +90,12 @@ void main() {
       expect(find.byType(SearchResultsPage), findsOneWidget);
     });
 
-    testWidgets('displays filter button with badge when filters are active',
-        (tester) async {
+    testWidgets('displays filter button with badge when filters are active', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SearchResultsPage(
-            query: 'test',
-            accessToken: 'test-token',
-          ),
+        materialAppWithL10n(
+          home: SearchResultsPage(query: 'test', accessToken: 'test-token'),
         ),
       );
 
@@ -89,14 +104,12 @@ void main() {
       expect(find.byType(Badge), findsOneWidget);
     });
 
-    testWidgets('displays pagination controls when results exist',
-        (tester) async {
+    testWidgets('displays pagination controls when results exist', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SearchResultsPage(
-            query: 'test',
-            accessToken: 'test-token',
-          ),
+        materialAppWithL10n(
+          home: SearchResultsPage(query: 'test', accessToken: 'test-token'),
         ),
       );
 
@@ -108,14 +121,12 @@ void main() {
       expect(find.byType(SearchResultsPage), findsOneWidget);
     });
 
-    testWidgets('previous page button is disabled on first page',
-        (tester) async {
+    testWidgets('previous page button is disabled on first page', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SearchResultsPage(
-            query: 'test',
-            accessToken: 'test-token',
-          ),
+        materialAppWithL10n(
+          home: SearchResultsPage(query: 'test', accessToken: 'test-token'),
         ),
       );
 
@@ -128,11 +139,8 @@ void main() {
 
     testWidgets('displays result count in header', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SearchResultsPage(
-            query: 'test',
-            accessToken: 'test-token',
-          ),
+        materialAppWithL10n(
+          home: SearchResultsPage(query: 'test', accessToken: 'test-token'),
         ),
       );
 
@@ -145,11 +153,8 @@ void main() {
 
     testWidgets('groups results by type', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SearchResultsPage(
-            query: 'test',
-            accessToken: 'test-token',
-          ),
+        materialAppWithL10n(
+          home: SearchResultsPage(query: 'test', accessToken: 'test-token'),
         ),
       );
 
@@ -159,14 +164,12 @@ void main() {
       expect(find.byType(SearchResultsPage), findsOneWidget);
     });
 
-    testWidgets('displays clear filters button when filters are active',
-        (tester) async {
+    testWidgets('displays clear filters button when filters are active', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SearchResultsPage(
-            query: 'test',
-            accessToken: 'test-token',
-          ),
+        materialAppWithL10n(
+          home: SearchResultsPage(query: 'test', accessToken: 'test-token'),
         ),
       );
 
@@ -177,14 +180,12 @@ void main() {
       expect(find.byType(SearchResultsPage), findsOneWidget);
     });
 
-    testWidgets('opens filter dialog when filter button is tapped',
-        (tester) async {
+    testWidgets('opens filter dialog when filter button is tapped', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SearchResultsPage(
-            query: 'test',
-            accessToken: 'test-token',
-          ),
+        materialAppWithL10n(
+          home: SearchResultsPage(query: 'test', accessToken: 'test-token'),
         ),
       );
 
@@ -205,11 +206,8 @@ void main() {
 
     testWidgets('filter dialog displays all result types', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SearchResultsPage(
-            query: 'test',
-            accessToken: 'test-token',
-          ),
+        materialAppWithL10n(
+          home: SearchResultsPage(query: 'test', accessToken: 'test-token'),
         ),
       );
 
@@ -231,11 +229,8 @@ void main() {
 
     testWidgets('filter dialog has apply and clear buttons', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SearchResultsPage(
-            query: 'test',
-            accessToken: 'test-token',
-          ),
+        materialAppWithL10n(
+          home: SearchResultsPage(query: 'test', accessToken: 'test-token'),
         ),
       );
 
@@ -256,29 +251,26 @@ void main() {
 
     testWidgets('displays retry button in error state', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: SearchResultsPage(
-            query: 'test',
-            accessToken: null,
-          ),
+        materialAppWithL10n(
+          home: SearchResultsPage(query: 'test', accessToken: null),
         ),
       );
 
       await tester.pumpAndSettle();
 
-      // Verify retry button is shown
-      expect(find.text('重试'), findsOneWidget);
+      final l10n = AppLocalizations.of(
+        tester.element(find.byType(SearchResultsPage)),
+      )!;
+      expect(find.text(l10n.globalSearchRetry), findsOneWidget);
       expect(find.byIcon(Icons.refresh), findsOneWidget);
     });
 
-    testWidgets('displays no results message when no results found',
-        (tester) async {
+    testWidgets('displays no results message when no results found', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SearchResultsPage(
-            query: 'test',
-            accessToken: 'test-token',
-          ),
+        materialAppWithL10n(
+          home: SearchResultsPage(query: 'test', accessToken: 'test-token'),
         ),
       );
 
@@ -288,10 +280,11 @@ void main() {
       expect(find.byType(SearchResultsPage), findsOneWidget);
     });
 
-    testWidgets('calls onNavigateToDetail when result is tapped',
-        (tester) async {
+    testWidgets('calls onNavigateToDetail when result is tapped', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        MaterialApp(
+        materialAppWithL10n(
           home: SearchResultsPage(
             query: 'test',
             accessToken: 'test-token',
@@ -306,14 +299,12 @@ void main() {
       expect(find.byType(SearchResultsPage), findsOneWidget);
     });
 
-    testWidgets('displays loading skeleton with multiple cards',
-        (tester) async {
+    testWidgets('displays loading skeleton with multiple cards', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SearchResultsPage(
-            query: 'test',
-            accessToken: 'test-token',
-          ),
+        materialAppWithL10n(
+          home: SearchResultsPage(query: 'test', accessToken: 'test-token'),
         ),
       );
 
@@ -323,11 +314,8 @@ void main() {
 
     testWidgets('pagination shows current page number', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SearchResultsPage(
-            query: 'test',
-            accessToken: 'test-token',
-          ),
+        materialAppWithL10n(
+          home: SearchResultsPage(query: 'test', accessToken: 'test-token'),
         ),
       );
 
@@ -339,11 +327,8 @@ void main() {
 
     testWidgets('displays type icons in group headers', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SearchResultsPage(
-            query: 'test',
-            accessToken: 'test-token',
-          ),
+        materialAppWithL10n(
+          home: SearchResultsPage(query: 'test', accessToken: 'test-token'),
         ),
       );
 
@@ -355,11 +340,8 @@ void main() {
 
     testWidgets('handles cancellation token on dispose', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SearchResultsPage(
-            query: 'test',
-            accessToken: 'test-token',
-          ),
+        materialAppWithL10n(
+          home: SearchResultsPage(query: 'test', accessToken: 'test-token'),
         ),
       );
 
@@ -374,11 +356,8 @@ void main() {
 
     testWidgets('displays search icon in header', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SearchResultsPage(
-            query: 'test',
-            accessToken: 'test-token',
-          ),
+        materialAppWithL10n(
+          home: SearchResultsPage(query: 'test', accessToken: 'test-token'),
         ),
       );
 
@@ -391,11 +370,8 @@ void main() {
 
     testWidgets('error state displays error icon', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: SearchResultsPage(
-            query: 'test',
-            accessToken: null,
-          ),
+        materialAppWithL10n(
+          home: SearchResultsPage(query: 'test', accessToken: null),
         ),
       );
 
@@ -407,11 +383,8 @@ void main() {
 
     testWidgets('no results state displays search_off icon', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SearchResultsPage(
-            query: 'test',
-            accessToken: 'test-token',
-          ),
+        materialAppWithL10n(
+          home: SearchResultsPage(query: 'test', accessToken: 'test-token'),
         ),
       );
 
@@ -423,11 +396,8 @@ void main() {
 
     testWidgets('filter badge shows count of active filters', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SearchResultsPage(
-            query: 'test',
-            accessToken: 'test-token',
-          ),
+        materialAppWithL10n(
+          home: SearchResultsPage(query: 'test', accessToken: 'test-token'),
         ),
       );
 
@@ -437,14 +407,12 @@ void main() {
       expect(find.byType(Badge), findsOneWidget);
     });
 
-    testWidgets('displays time range filter placeholder in dialog',
-        (tester) async {
+    testWidgets('displays time range filter placeholder in dialog', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SearchResultsPage(
-            query: 'test',
-            accessToken: 'test-token',
-          ),
+        materialAppWithL10n(
+          home: SearchResultsPage(query: 'test', accessToken: 'test-token'),
         ),
       );
 
@@ -466,11 +434,8 @@ void main() {
 
     testWidgets('skeleton screen shows proper structure', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SearchResultsPage(
-            query: 'test',
-            accessToken: 'test-token',
-          ),
+        materialAppWithL10n(
+          home: SearchResultsPage(query: 'test', accessToken: 'test-token'),
         ),
       );
 
@@ -481,11 +446,8 @@ void main() {
 
     testWidgets('pagination controls have proper tooltips', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SearchResultsPage(
-            query: 'test',
-            accessToken: 'test-token',
-          ),
+        materialAppWithL10n(
+          home: SearchResultsPage(query: 'test', accessToken: 'test-token'),
         ),
       );
 
@@ -497,11 +459,8 @@ void main() {
 
     testWidgets('displays proper Material design components', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SearchResultsPage(
-            query: 'test',
-            accessToken: 'test-token',
-          ),
+        materialAppWithL10n(
+          home: SearchResultsPage(query: 'test', accessToken: 'test-token'),
         ),
       );
 
@@ -517,11 +476,8 @@ void main() {
       final longQuery = 'This is a very long search query ' * 10;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: SearchResultsPage(
-            query: longQuery,
-            accessToken: 'test-token',
-          ),
+        materialAppWithL10n(
+          home: SearchResultsPage(query: longQuery, accessToken: 'test-token'),
         ),
       );
 
@@ -533,11 +489,8 @@ void main() {
 
     testWidgets('maintains state during filter changes', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SearchResultsPage(
-            query: 'test',
-            accessToken: 'test-token',
-          ),
+        materialAppWithL10n(
+          home: SearchResultsPage(query: 'test', accessToken: 'test-token'),
         ),
       );
 
@@ -563,14 +516,12 @@ void main() {
   });
 
   group('SearchResultsPage - Keyboard Navigation', () {
-    testWidgets('keyboard navigation is supported with arrow keys',
-        (tester) async {
+    testWidgets('keyboard navigation is supported with arrow keys', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SearchResultsPage(
-            query: 'test',
-            accessToken: 'test-token',
-          ),
+        materialAppWithL10n(
+          home: SearchResultsPage(query: 'test', accessToken: 'test-token'),
         ),
       );
 
@@ -584,11 +535,8 @@ void main() {
 
     testWidgets('arrow down key selects next result', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SearchResultsPage(
-            query: 'test',
-            accessToken: 'test-token',
-          ),
+        materialAppWithL10n(
+          home: SearchResultsPage(query: 'test', accessToken: 'test-token'),
         ),
       );
 
@@ -603,11 +551,8 @@ void main() {
 
     testWidgets('arrow up key selects previous result', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SearchResultsPage(
-            query: 'test',
-            accessToken: 'test-token',
-          ),
+        materialAppWithL10n(
+          home: SearchResultsPage(query: 'test', accessToken: 'test-token'),
         ),
       );
 
@@ -620,7 +565,7 @@ void main() {
 
     testWidgets('enter key opens selected result detail', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        materialAppWithL10n(
           home: SearchResultsPage(
             query: 'test',
             accessToken: 'test-token',
@@ -637,11 +582,8 @@ void main() {
 
     testWidgets('selected result has visual indication', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SearchResultsPage(
-            query: 'test',
-            accessToken: 'test-token',
-          ),
+        materialAppWithL10n(
+          home: SearchResultsPage(query: 'test', accessToken: 'test-token'),
         ),
       );
 
@@ -652,14 +594,12 @@ void main() {
       expect(find.byType(SearchResultsPage), findsOneWidget);
     });
 
-    testWidgets('keyboard navigation wraps around at boundaries',
-        (tester) async {
+    testWidgets('keyboard navigation wraps around at boundaries', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SearchResultsPage(
-            query: 'test',
-            accessToken: 'test-token',
-          ),
+        materialAppWithL10n(
+          home: SearchResultsPage(query: 'test', accessToken: 'test-token'),
         ),
       );
 
@@ -674,11 +614,8 @@ void main() {
 
     testWidgets('keyboard navigation resets on new search', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SearchResultsPage(
-            query: 'test',
-            accessToken: 'test-token',
-          ),
+        materialAppWithL10n(
+          home: SearchResultsPage(query: 'test', accessToken: 'test-token'),
         ),
       );
 
@@ -691,11 +628,8 @@ void main() {
 
     testWidgets('focus node is properly disposed', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SearchResultsPage(
-            query: 'test',
-            accessToken: 'test-token',
-          ),
+        materialAppWithL10n(
+          home: SearchResultsPage(query: 'test', accessToken: 'test-token'),
         ),
       );
 
@@ -708,10 +642,11 @@ void main() {
       expect(find.byType(SearchResultsPage), findsNothing);
     });
 
-    testWidgets('keyboard navigation only works when results exist',
-        (tester) async {
+    testWidgets('keyboard navigation only works when results exist', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        const MaterialApp(
+        materialAppWithL10n(
           home: SearchResultsPage(
             query: 'test',
             accessToken: null, // Will trigger error state
@@ -728,11 +663,8 @@ void main() {
 
     testWidgets('focus is requested on page load', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SearchResultsPage(
-            query: 'test',
-            accessToken: 'test-token',
-          ),
+        materialAppWithL10n(
+          home: SearchResultsPage(query: 'test', accessToken: 'test-token'),
         ),
       );
 

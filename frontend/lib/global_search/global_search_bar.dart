@@ -138,7 +138,13 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
       _loadingSuggestions = true;
     });
     try {
-      final response = await search(token, l10n: l10n, query: q, pageSize: 8, page: 1);
+      final response = await search(
+        token,
+        l10n: l10n,
+        query: q,
+        pageSize: 8,
+        page: 1,
+      );
       if (!mounted) return;
       setState(() {
         _suggestions = response.results;
@@ -221,9 +227,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(
         _savedSearchViewsKey,
-        jsonEncode(
-          remote.map((SearchSavedViewItem e) => e.toJson()).toList(),
-        ),
+        jsonEncode(remote.map((SearchSavedViewItem e) => e.toJson()).toList()),
       );
     } catch (_) {
       // Offline or API error — keep existing SharedPreferences snapshot.
@@ -699,7 +703,10 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                   if (showPinnedPanel) ...[
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
-                      child: Text(l10n.globalSearchPinnedViewsTitle, style: headerStyle),
+                      child: Text(
+                        l10n.globalSearchPinnedViewsTitle,
+                        style: headerStyle,
+                      ),
                     ),
                     ..._buildGroupedViewTiles(
                       context,
@@ -716,7 +723,10 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                   if (showRecentViewsPanel) ...[
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
-                      child: Text(l10n.globalSearchRecentViewsTitle, style: headerStyle),
+                      child: Text(
+                        l10n.globalSearchRecentViewsTitle,
+                        style: headerStyle,
+                      ),
                     ),
                     ..._buildGroupedViewTiles(
                       context,
@@ -735,7 +745,10 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                   if (showTemplatePanel) ...[
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
-                      child: Text(l10n.globalSearchQuickTemplatesTitle, style: headerStyle),
+                      child: Text(
+                        l10n.globalSearchQuickTemplatesTitle,
+                        style: headerStyle,
+                      ),
                     ),
                     Wrap(
                       spacing: 8,
@@ -749,7 +762,9 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                                 bottom: 8,
                               ),
                               child: ActionChip(
-                                label: Text(_quickTemplateLabel(l10n, template.id)),
+                                label: Text(
+                                  _quickTemplateLabel(l10n, template.id),
+                                ),
                                 onPressed: () => _openQuickTemplate(template),
                               ),
                             ),
@@ -765,7 +780,10 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                   if (showSuggestionsPanel) ...[
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
-                      child: Text(l10n.globalSearchLiveSuggestionsTitle, style: headerStyle),
+                      child: Text(
+                        l10n.globalSearchLiveSuggestionsTitle,
+                        style: headerStyle,
+                      ),
                     ),
                     ..._suggestions.map(
                       (r) => ListTile(
@@ -789,7 +807,8 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                             ResultType.script => l10n.globalSearchTypeScript,
                             ResultType.asset => l10n.globalSearchTypeAsset,
                             ResultType.novel => l10n.globalSearchTypeNovel,
-                            ResultType.novelEvent => l10n.globalSearchTypeNovelEvent,
+                            ResultType.novelEvent =>
+                              l10n.globalSearchTypeNovelEvent,
                           },
                           style: TextStyle(
                             fontSize: 12,
@@ -821,7 +840,10 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                   if (_showHistory) ...[
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
-                      child: Text(l10n.globalSearchRecentSearchTitle, style: headerStyle),
+                      child: Text(
+                        l10n.globalSearchRecentSearchTitle,
+                        style: headerStyle,
+                      ),
                     ),
                     ..._history.map(
                       (entry) => ListTile(
@@ -982,7 +1004,9 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
       Navigator.pushNamed(
         context,
         '/search',
-        arguments: {'query': query.isEmpty ? l10n.globalSearchTypeProject : query},
+        arguments: {
+          'query': query.isEmpty ? l10n.globalSearchTypeProject : query,
+        },
       );
     }
   }
@@ -995,6 +1019,8 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
         return l10n.globalSearchTemplateProjects30d;
       case 'scripts-30d':
         return l10n.globalSearchTemplateScripts30d;
+      case 'assets-30d':
+        return l10n.globalSearchTemplateAssets30d;
       default:
         return id;
     }
@@ -1030,7 +1056,11 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(l10n.globalSearchClearHistoryFailed(describeUserVisibleApiError(l10n, e))),
+            content: Text(
+              l10n.globalSearchClearHistoryFailed(
+                describeUserVisibleApiError(l10n, e),
+              ),
+            ),
             duration: const Duration(seconds: 3),
           ),
         );

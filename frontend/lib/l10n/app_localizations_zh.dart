@@ -3435,7 +3435,22 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String globalSearchSavedUsed(int count) {
-    return 'used=$count';
+    return '已使用 $count 次';
+  }
+
+  @override
+  String globalSearchSavedViewWorkspaceLine(String name) {
+    return '工作区：$name';
+  }
+
+  @override
+  String globalSearchSavedViewTypesLine(String types) {
+    return '类型：$types';
+  }
+
+  @override
+  String globalSearchSavedViewLastUsedLine(String when) {
+    return '最近：$when';
   }
 
   @override
@@ -3446,6 +3461,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get globalSearchTemplateScripts30d => '剧本近 30 天';
+
+  @override
+  String get globalSearchTemplateAssets30d => '资产近 30 天';
 
   @override
   String get globalSearchClearSearchHistoryTitle => '清除搜索历史';

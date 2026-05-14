@@ -3565,7 +3565,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String globalSearchSavedUsed(int count) {
-    return 'used=$count';
+    return 'Used $count times';
+  }
+
+  @override
+  String globalSearchSavedViewWorkspaceLine(String name) {
+    return 'Workspace: $name';
+  }
+
+  @override
+  String globalSearchSavedViewTypesLine(String types) {
+    return 'Types: $types';
+  }
+
+  @override
+  String globalSearchSavedViewLastUsedLine(String when) {
+    return 'Last used: $when';
   }
 
   @override
@@ -3576,6 +3591,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get globalSearchTemplateScripts30d => 'Scripts in last 30 days';
+
+  @override
+  String get globalSearchTemplateAssets30d => 'Assets in last 30 days';
 
   @override
   String get globalSearchClearSearchHistoryTitle => 'Clear search history';

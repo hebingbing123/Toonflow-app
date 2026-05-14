@@ -1,8 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:openflow_app/global_search/search_result_card.dart';
+import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/rust_api/search/api.dart';
+
+Widget materialAppWithL10n({
+  required Widget home,
+  Locale locale = const Locale('zh'),
+}) {
+  return MaterialApp(
+    localizationsDelegates: const [
+      AppLocalizations.delegate,
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
+    supportedLocales: AppLocalizations.supportedLocales,
+    locale: locale,
+    home: home,
+  );
+}
 
 void main() {
   group('SearchResultCard', () {
@@ -34,10 +53,8 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SearchResultCard(result: result),
-          ),
+        materialAppWithL10n(
+          home: Scaffold(body: SearchResultCard(result: result)),
         ),
       );
 
@@ -58,10 +75,8 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SearchResultCard(result: result),
-          ),
+        materialAppWithL10n(
+          home: Scaffold(body: SearchResultCard(result: result)),
         ),
       );
 
@@ -79,10 +94,8 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SearchResultCard(result: result),
-          ),
+        materialAppWithL10n(
+          home: Scaffold(body: SearchResultCard(result: result)),
         ),
       );
 
@@ -93,17 +106,14 @@ void main() {
       expect(find.text('资产'), findsOneWidget);
     });
 
-    testWidgets('parses and highlights <mark> tags in snippet',
-        (tester) async {
+    testWidgets('parses and highlights <mark> tags in snippet', (tester) async {
       final result = createTestResult(
         snippet: 'This is a <mark>highlighted</mark> snippet',
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SearchResultCard(result: result),
-          ),
+        materialAppWithL10n(
+          home: Scaffold(body: SearchResultCard(result: result)),
         ),
       );
 
@@ -121,10 +131,8 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SearchResultCard(result: result),
-          ),
+        materialAppWithL10n(
+          home: Scaffold(body: SearchResultCard(result: result)),
         ),
       );
 
@@ -139,10 +147,8 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SearchResultCard(result: result),
-          ),
+        materialAppWithL10n(
+          home: Scaffold(body: SearchResultCard(result: result)),
         ),
       );
 
@@ -152,15 +158,14 @@ void main() {
 
     testWidgets('displays formatted time for recent updates', (tester) async {
       // Create a result updated 2 hours ago
-      final twoHoursAgo =
-          DateTime.now().subtract(const Duration(hours: 2)).toIso8601String();
+      final twoHoursAgo = DateTime.now()
+          .subtract(const Duration(hours: 2))
+          .toIso8601String();
       final result = createTestResult(updatedAt: twoHoursAgo);
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SearchResultCard(result: result),
-          ),
+        materialAppWithL10n(
+          home: Scaffold(body: SearchResultCard(result: result)),
         ),
       );
 
@@ -170,15 +175,14 @@ void main() {
 
     testWidgets('displays formatted time for older updates', (tester) async {
       // Create a result updated 10 days ago
-      final tenDaysAgo =
-          DateTime.now().subtract(const Duration(days: 10)).toIso8601String();
+      final tenDaysAgo = DateTime.now()
+          .subtract(const Duration(days: 10))
+          .toIso8601String();
       final result = createTestResult(updatedAt: tenDaysAgo);
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SearchResultCard(result: result),
-          ),
+        materialAppWithL10n(
+          home: Scaffold(body: SearchResultCard(result: result)),
         ),
       );
 
@@ -191,7 +195,7 @@ void main() {
       bool wasTapped = false;
 
       await tester.pumpWidget(
-        MaterialApp(
+        materialAppWithL10n(
           home: Scaffold(
             body: SearchResultCard(
               result: result,
@@ -215,10 +219,8 @@ void main() {
       final result = createTestResult();
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SearchResultCard(result: result),
-          ),
+        materialAppWithL10n(
+          home: Scaffold(body: SearchResultCard(result: result)),
         ),
       );
 
@@ -235,12 +237,9 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
+        materialAppWithL10n(
           home: Scaffold(
-            body: SizedBox(
-              width: 400,
-              child: SearchResultCard(result: result),
-            ),
+            body: SizedBox(width: 400, child: SearchResultCard(result: result)),
           ),
         ),
       );
@@ -260,12 +259,9 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
+        materialAppWithL10n(
           home: Scaffold(
-            body: SizedBox(
-              width: 400,
-              child: SearchResultCard(result: result),
-            ),
+            body: SizedBox(width: 400, child: SearchResultCard(result: result)),
           ),
         ),
       );
@@ -283,10 +279,8 @@ void main() {
       final result = createTestResult();
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SearchResultCard(result: result),
-          ),
+        materialAppWithL10n(
+          home: Scaffold(body: SearchResultCard(result: result)),
         ),
       );
 
@@ -298,10 +292,8 @@ void main() {
       final result = createTestResult(snippet: '');
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SearchResultCard(result: result),
-          ),
+        materialAppWithL10n(
+          home: Scaffold(body: SearchResultCard(result: result)),
         ),
       );
 
@@ -314,10 +306,8 @@ void main() {
       final result = createTestResult(updatedAt: 'invalid-date');
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SearchResultCard(result: result),
-          ),
+        materialAppWithL10n(
+          home: Scaffold(body: SearchResultCard(result: result)),
         ),
       );
 

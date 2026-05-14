@@ -1,15 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:openflow_app/global_search/advanced_filter_panel.dart';
+import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/rust_api/search/api.dart';
+import 'package:openflow_app/utils/localized_formatting.dart';
+
+Widget materialAppWithL10n({
+  required Widget home,
+  Locale locale = const Locale('zh'),
+}) {
+  return MaterialApp(
+    localizationsDelegates: const [
+      AppLocalizations.delegate,
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
+    supportedLocales: AppLocalizations.supportedLocales,
+    locale: locale,
+    home: home,
+  );
+}
 
 void main() {
   group('AdvancedFilterPanel', () {
-    testWidgets('displays header with title and filter count badge',
-        (tester) async {
+    testWidgets('displays header with title and filter count badge', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        MaterialApp(
+        materialAppWithL10n(
           home: Scaffold(
             body: AdvancedFilterPanel(
               initialFilters: SearchFilters.empty(),
@@ -24,14 +45,15 @@ void main() {
       expect(find.byIcon(Icons.filter_list), findsOneWidget);
     });
 
-    testWidgets('displays active filter count badge when filters are active',
-        (tester) async {
+    testWidgets('displays active filter count badge when filters are active', (
+      tester,
+    ) async {
       final filters = SearchFilters(
         resultTypes: {ResultType.project, ResultType.script},
       );
 
       await tester.pumpWidget(
-        MaterialApp(
+        materialAppWithL10n(
           home: Scaffold(
             body: AdvancedFilterPanel(
               initialFilters: filters,
@@ -47,7 +69,7 @@ void main() {
 
     testWidgets('displays all result type checkboxes', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        materialAppWithL10n(
           home: Scaffold(
             body: AdvancedFilterPanel(
               initialFilters: SearchFilters.empty(),
@@ -70,7 +92,7 @@ void main() {
       SearchFilters? changedFilters;
 
       await tester.pumpWidget(
-        MaterialApp(
+        materialAppWithL10n(
           home: Scaffold(
             body: AdvancedFilterPanel(
               initialFilters: SearchFilters.empty(),
@@ -102,7 +124,7 @@ void main() {
 
     testWidgets('displays time range selection buttons', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        materialAppWithL10n(
           home: Scaffold(
             body: AdvancedFilterPanel(
               initialFilters: SearchFilters.empty(),
@@ -118,10 +140,11 @@ void main() {
       expect(find.text('选择结束日期'), findsOneWidget);
     });
 
-    testWidgets('opens date picker when start date button is tapped',
-        (tester) async {
+    testWidgets('opens date picker when start date button is tapped', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        MaterialApp(
+        materialAppWithL10n(
           home: Scaffold(
             body: AdvancedFilterPanel(
               initialFilters: SearchFilters.empty(),
@@ -140,10 +163,11 @@ void main() {
       expect(find.text('选择起始日期'), findsWidgets);
     });
 
-    testWidgets('opens date picker when end date button is tapped',
-        (tester) async {
+    testWidgets('opens date picker when end date button is tapped', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        MaterialApp(
+        materialAppWithL10n(
           home: Scaffold(
             body: AdvancedFilterPanel(
               initialFilters: SearchFilters.empty(),
@@ -171,7 +195,7 @@ void main() {
       final filters = SearchFilters(timeFrom: initialDate);
 
       await tester.pumpWidget(
-        MaterialApp(
+        materialAppWithL10n(
           home: Scaffold(
             body: AdvancedFilterPanel(
               initialFilters: filters,
@@ -181,19 +205,22 @@ void main() {
         ),
       );
 
-      // Verify formatted date is displayed
-      expect(find.text('起始: 2024-01-15'), findsOneWidget);
+      final panelCtx = tester.element(find.byType(AdvancedFilterPanel));
+      final l10n = AppLocalizations.of(panelCtx)!;
+      final formatted = LocalizedFormatting.formatShortDate(panelCtx, initialDate);
+      expect(find.text(l10n.globalSearchStartDateLabel(formatted)), findsOneWidget);
     });
 
-    testWidgets('displays clear time range button when dates are set',
-        (tester) async {
+    testWidgets('displays clear time range button when dates are set', (
+      tester,
+    ) async {
       final filters = SearchFilters(
         timeFrom: DateTime(2024, 1, 1),
         timeTo: DateTime(2024, 1, 31),
       );
 
       await tester.pumpWidget(
-        MaterialApp(
+        materialAppWithL10n(
           home: Scaffold(
             body: AdvancedFilterPanel(
               initialFilters: filters,
@@ -207,15 +234,16 @@ void main() {
       expect(find.text('清除时间范围'), findsOneWidget);
     });
 
-    testWidgets('clears time range when clear button is tapped',
-        (tester) async {
+    testWidgets('clears time range when clear button is tapped', (
+      tester,
+    ) async {
       final filters = SearchFilters(
         timeFrom: DateTime(2024, 1, 1),
         timeTo: DateTime(2024, 1, 31),
       );
 
       await tester.pumpWidget(
-        MaterialApp(
+        materialAppWithL10n(
           home: Scaffold(
             body: AdvancedFilterPanel(
               initialFilters: filters,
@@ -240,7 +268,7 @@ void main() {
 
     testWidgets('displays apply and clear filter buttons', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        materialAppWithL10n(
           home: Scaffold(
             body: AdvancedFilterPanel(
               initialFilters: SearchFilters.empty(),
@@ -255,12 +283,13 @@ void main() {
       expect(find.text('清除过滤'), findsOneWidget);
     });
 
-    testWidgets('calls onFiltersChanged when apply button is tapped',
-        (tester) async {
+    testWidgets('calls onFiltersChanged when apply button is tapped', (
+      tester,
+    ) async {
       SearchFilters? appliedFilters;
 
       await tester.pumpWidget(
-        MaterialApp(
+        materialAppWithL10n(
           home: Scaffold(
             body: AdvancedFilterPanel(
               initialFilters: SearchFilters.empty(),
@@ -282,7 +311,7 @@ void main() {
 
     testWidgets('shows snackbar when filters are applied', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        materialAppWithL10n(
           home: Scaffold(
             body: AdvancedFilterPanel(
               initialFilters: SearchFilters.empty(),
@@ -301,8 +330,9 @@ void main() {
       expect(find.text('已应用 0 个过滤条件'), findsOneWidget);
     });
 
-    testWidgets('clears all filters when clear button is tapped',
-        (tester) async {
+    testWidgets('clears all filters when clear button is tapped', (
+      tester,
+    ) async {
       SearchFilters? clearedFilters;
       final filters = SearchFilters(
         resultTypes: {ResultType.project},
@@ -310,7 +340,7 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
+        materialAppWithL10n(
           home: Scaffold(
             body: AdvancedFilterPanel(
               initialFilters: filters,
@@ -332,12 +362,10 @@ void main() {
     });
 
     testWidgets('shows snackbar when filters are cleared', (tester) async {
-      final filters = SearchFilters(
-        resultTypes: {ResultType.project},
-      );
+      final filters = SearchFilters(resultTypes: {ResultType.project});
 
       await tester.pumpWidget(
-        MaterialApp(
+        materialAppWithL10n(
           home: Scaffold(
             body: AdvancedFilterPanel(
               initialFilters: filters,
@@ -356,10 +384,11 @@ void main() {
       expect(find.text('已清除所有过滤条件'), findsOneWidget);
     });
 
-    testWidgets('disables clear button when no filters are active',
-        (tester) async {
+    testWidgets('disables clear button when no filters are active', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        MaterialApp(
+        materialAppWithL10n(
           home: Scaffold(
             body: AdvancedFilterPanel(
               initialFilters: SearchFilters.empty(),
@@ -380,7 +409,7 @@ void main() {
 
     testWidgets('uses desktop layout when isMobile is false', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        materialAppWithL10n(
           home: Scaffold(
             body: AdvancedFilterPanel(
               initialFilters: SearchFilters.empty(),
@@ -398,7 +427,7 @@ void main() {
 
     testWidgets('uses mobile layout when isMobile is true', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        materialAppWithL10n(
           home: Scaffold(
             body: AdvancedFilterPanel(
               initialFilters: SearchFilters.empty(),
@@ -415,12 +444,10 @@ void main() {
 
     testWidgets('updates when initialFilters prop changes', (tester) async {
       final filters1 = SearchFilters.empty();
-      final filters2 = SearchFilters(
-        resultTypes: {ResultType.project},
-      );
+      final filters2 = SearchFilters(resultTypes: {ResultType.project});
 
       await tester.pumpWidget(
-        MaterialApp(
+        materialAppWithL10n(
           home: Scaffold(
             body: AdvancedFilterPanel(
               initialFilters: filters1,
@@ -432,7 +459,7 @@ void main() {
 
       // Update with new filters
       await tester.pumpWidget(
-        MaterialApp(
+        materialAppWithL10n(
           home: Scaffold(
             body: AdvancedFilterPanel(
               initialFilters: filters2,
@@ -450,7 +477,7 @@ void main() {
 
     testWidgets('displays section titles with proper styling', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        materialAppWithL10n(
           home: Scaffold(
             body: AdvancedFilterPanel(
               initialFilters: SearchFilters.empty(),
@@ -467,7 +494,7 @@ void main() {
 
     testWidgets('displays icons for each result type', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        materialAppWithL10n(
           home: Scaffold(
             body: AdvancedFilterPanel(
               initialFilters: SearchFilters.empty(),
@@ -487,7 +514,7 @@ void main() {
 
     testWidgets('displays calendar icons for date buttons', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        materialAppWithL10n(
           home: Scaffold(
             body: AdvancedFilterPanel(
               initialFilters: SearchFilters.empty(),
@@ -503,7 +530,7 @@ void main() {
 
     testWidgets('displays action button icons', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        materialAppWithL10n(
           home: Scaffold(
             body: AdvancedFilterPanel(
               initialFilters: SearchFilters.empty(),
@@ -520,7 +547,7 @@ void main() {
 
     testWidgets('maintains scroll position in filter content', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        materialAppWithL10n(
           home: Scaffold(
             body: AdvancedFilterPanel(
               initialFilters: SearchFilters.empty(),
@@ -574,9 +601,7 @@ void main() {
     });
 
     test('hasActiveFilters returns true when filters are active', () {
-      final filters = SearchFilters(
-        resultTypes: {ResultType.project},
-      );
+      final filters = SearchFilters(resultTypes: {ResultType.project});
 
       expect(filters.hasActiveFilters, isTrue);
     });
@@ -589,9 +614,7 @@ void main() {
 
     test('copyWith creates new instance with updated values', () {
       final filters1 = SearchFilters.empty();
-      final filters2 = filters1.copyWith(
-        resultTypes: {ResultType.project},
-      );
+      final filters2 = filters1.copyWith(resultTypes: {ResultType.project});
 
       expect(filters2.resultTypes, contains(ResultType.project));
       expect(filters1.resultTypes, isEmpty);
@@ -622,12 +645,8 @@ void main() {
     });
 
     test('hashCode is consistent for equal objects', () {
-      final filters1 = SearchFilters(
-        resultTypes: {ResultType.project},
-      );
-      final filters2 = SearchFilters(
-        resultTypes: {ResultType.project},
-      );
+      final filters1 = SearchFilters(resultTypes: {ResultType.project});
+      final filters2 = SearchFilters(resultTypes: {ResultType.project});
 
       // Note: Set hashCode may vary, so we just verify they're both non-zero
       expect(filters1.hashCode, isNonZero);

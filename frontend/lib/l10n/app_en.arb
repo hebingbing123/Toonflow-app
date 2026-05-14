@@ -2383,10 +2383,7 @@
   "globalSearchInputHint": "Search projects, scripts, assets...",
   "globalSearchActionSearch": "Search",
   "globalSearchLocalClientPrefsTooltip": "Local client preferences (view silenced / restore confirmations)",
-  "globalSearchSavedUsed": "used={count}",
-  "globalSearchTemplateRecent7d": "Last 7 days",
-  "globalSearchTemplateProjects30d": "Projects in last 30 days",
-  "globalSearchTemplateScripts30d": "Scripts in last 30 days",
+  "globalSearchSavedUsed": "Used {count} times",
   "@globalSearchSavedUsed": {
     "placeholders": {
       "count": {
@@ -2394,6 +2391,34 @@
       }
     }
   },
+  "globalSearchSavedViewWorkspaceLine": "Workspace: {name}",
+  "@globalSearchSavedViewWorkspaceLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "globalSearchSavedViewTypesLine": "Types: {types}",
+  "@globalSearchSavedViewTypesLine": {
+    "placeholders": {
+      "types": {
+        "type": "String"
+      }
+    }
+  },
+  "globalSearchSavedViewLastUsedLine": "Last used: {when}",
+  "@globalSearchSavedViewLastUsedLine": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "globalSearchTemplateRecent7d": "Last 7 days",
+  "globalSearchTemplateProjects30d": "Projects in last 30 days",
+  "globalSearchTemplateScripts30d": "Scripts in last 30 days",
+  "globalSearchTemplateAssets30d": "Assets in last 30 days",
   "globalSearchClearSearchHistoryTitle": "Clear search history",
   "globalSearchClearSearchHistoryConfirm": "Clear all search history? This action cannot be undone.",
   "globalSearchLoadHistoryFailed": "Failed to load history",

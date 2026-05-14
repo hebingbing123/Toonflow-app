@@ -82,26 +82,41 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
   final FocusNode _focusNode = FocusNode();
 
   static const List<_SearchViewTemplate> _templates = <_SearchViewTemplate>[
-    _SearchViewTemplate(id: 'recent-7d', label: '近 7 天', daysBack: 7),
+    _SearchViewTemplate(id: 'recent-7d', daysBack: 7),
     _SearchViewTemplate(
       id: 'projects-30d',
-      label: '项目近 30 天',
       resultTypes: <ResultType>{ResultType.project},
       daysBack: 30,
     ),
     _SearchViewTemplate(
       id: 'scripts-30d',
-      label: '剧本近 30 天',
       resultTypes: <ResultType>{ResultType.script},
       daysBack: 30,
     ),
     _SearchViewTemplate(
       id: 'assets-30d',
-      label: '资产近 30 天',
       resultTypes: <ResultType>{ResultType.asset},
       daysBack: 30,
     ),
   ];
+
+  String _searchViewTemplateLabel(
+    AppLocalizations l10n,
+    _SearchViewTemplate template,
+  ) {
+    switch (template.id) {
+      case 'recent-7d':
+        return l10n.globalSearchTemplateRecent7d;
+      case 'projects-30d':
+        return l10n.globalSearchTemplateProjects30d;
+      case 'scripts-30d':
+        return l10n.globalSearchTemplateScripts30d;
+      case 'assets-30d':
+        return l10n.globalSearchTemplateAssets30d;
+      default:
+        return template.id;
+    }
+  }
 
   @override
   void initState() {
@@ -524,13 +539,26 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                       [
                         view.query,
                         if ((view.workspaceName ?? '').isNotEmpty)
-                          'workspace=${view.workspaceName}',
+                          l10n.globalSearchSavedViewWorkspaceLine(
+                            view.workspaceName!.trim(),
+                          ),
                         if (view.resultTypes.isNotEmpty)
-                          'type=${view.resultTypes.join(",")}',
+                          l10n.globalSearchSavedViewTypesLine(
+                            view.resultTypes.join(','),
+                          ),
                         if (view.timeFrom != null || view.timeTo != null)
-                          'time=${view.timeFrom != null ? _formatFilterDate(view.timeFrom!) : "..."} ~ ${view.timeTo != null ? _formatFilterDate(view.timeTo!) : "..."}',
-                        'used=${view.useCount}',
-                        'last=${_formatSavedViewTimestamp(view.lastUsedAt)}',
+                          l10n.globalSearchTimeChip(
+                            view.timeFrom != null
+                                ? _formatFilterDate(view.timeFrom!)
+                                : l10n.globalSearchTimeStart,
+                            view.timeTo != null
+                                ? _formatFilterDate(view.timeTo!)
+                                : l10n.globalSearchTimeNow,
+                          ),
+                        l10n.globalSearchSavedUsed(view.useCount),
+                        l10n.globalSearchSavedViewLastUsedLine(
+                          _formatSavedViewTimestamp(view.lastUsedAt),
+                        ),
                         if (view.pinned) l10n.globalSearchPinned,
                       ].join(' · '),
                     ),
@@ -724,9 +752,9 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
           if (!context.mounted) {
             return;
           }
-          final l10n = AppLocalizations.of(context)!;
+          final loc = AppLocalizations.of(context)!;
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.globalSearchNovelOrEventNavigatedHint)),
+            SnackBar(content: Text(loc.globalSearchNovelOrEventNavigatedHint)),
           );
           break;
       }
@@ -900,10 +928,10 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                             l10n.globalSearchTimeChip(
                               _filters.timeFrom != null
                                   ? _formatFilterDate(_filters.timeFrom!)
-                                  : '...',
+                                  : l10n.globalSearchTimeStart,
                               _filters.timeTo != null
                                   ? _formatFilterDate(_filters.timeTo!)
-                                  : '...',
+                                  : l10n.globalSearchTimeNow,
                             ),
                           ),
                         ),
@@ -952,7 +980,9 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                         children: _templates
                             .map(
                               (template) => ActionChip(
-                                label: Text(template.label),
+                                label: Text(
+                                  _searchViewTemplateLabel(l10n, template),
+                                ),
                                 onPressed: () => _applyTemplate(template),
                               ),
                             )
@@ -1392,13 +1422,11 @@ class _SavedSearchView {
 class _SearchViewTemplate {
   const _SearchViewTemplate({
     required this.id,
-    required this.label,
     this.resultTypes = const <ResultType>{},
     this.daysBack,
   });
 
   final String id;
-  final String label;
   final Set<ResultType> resultTypes;
   final int? daysBack;
 }
