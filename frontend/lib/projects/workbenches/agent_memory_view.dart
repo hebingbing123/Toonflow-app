@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../l10n/app_localizations.dart';
-import '../../../rust_api.dart';
+import '../../rust_api.dart';
 
 part 'agent_memory_view/memory_widgets.dart';
 
@@ -133,7 +133,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final outline = Theme.of(context).colorScheme.outline;
     final viewportWidth = MediaQuery.sizeOf(context).width;
     final dialogWidth = viewportWidth.isFinite

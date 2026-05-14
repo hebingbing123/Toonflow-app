@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
-import '../../rust_api.dart';
+import '../rust_api.dart';
 
 import 'support.dart';
 
@@ -123,7 +123,7 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final outline = Theme.of(context).colorScheme.outline;
     final viewportWidth = MediaQuery.sizeOf(context).width;
     final dialogWidth = viewportWidth.isFinite
@@ -507,7 +507,7 @@ class _VideoExportFailedSubtitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final outline = Theme.of(context).colorScheme.outline;
     final small = Theme.of(context).textTheme.bodySmall;
     final code = job.errorDetails == null
@@ -590,7 +590,7 @@ class _TaskFailedReworkActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final domainLink = tryParseTaskCenterDomainDeepLink(job);
     final canPartial = domainLink != null &&
         onNavigateDomainDeepLink != null &&

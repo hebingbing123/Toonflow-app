@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../rust_api.dart';
-import '../l10n/app_localizations.dart';
+import '../rust_api.dart';
 
 /// Groups the section-level review actions above the detailed workbench flow.
 class QualityReviewsActionsBar extends StatelessWidget {
@@ -42,7 +41,7 @@ class QualityReviewsActionsBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return Wrap(
       spacing: 8,
       runSpacing: 8,
@@ -138,7 +137,7 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final hasAnything =
         dashboardSummary != null ||
         refreshSummary != null ||
@@ -341,7 +340,7 @@ class QualityReviewsCompatibilityPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return ExpansionTile(
       tilePadding: EdgeInsets.zero,
       childrenPadding: EdgeInsets.zero,
@@ -397,7 +396,7 @@ class QualityReviewsListPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

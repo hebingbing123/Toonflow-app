@@ -5,10 +5,9 @@ import 'controller.dart';
 import 'previews.dart';
 import 'support.dart';
 import 'workbench_view.dart';
-import '../../rust_api.dart';
+import '../rust_api.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../config.dart';
-import '../l10n/app_localizations.dart';
 
 part 'section_workbench.dart';
 part 'section_workbench_controllers.dart';
@@ -70,7 +69,7 @@ class QualityReviewsSection extends StatelessWidget {
   }
 
   Future<void> _openQualityWorkbench(BuildContext context) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final token = accessToken;
     if (token == null || token.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -100,7 +99,7 @@ class QualityReviewsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final outline = Theme.of(context).colorScheme.outline;
     final reviewSummary = controller.qualityReviews == null
         ? l10n.qualityReviewsSummaryNotLoaded

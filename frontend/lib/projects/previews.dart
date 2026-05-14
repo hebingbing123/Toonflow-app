@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
-import '../../rust_api.dart';
+import '../rust_api.dart';
 
 String _projectAccessModeLabel(AppLocalizations l10n, String mode) {
   switch (mode) {
@@ -62,7 +62,7 @@ class ProjectsActionsBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return Wrap(
       spacing: 8,
       runSpacing: 8,
@@ -132,7 +132,7 @@ class ProjectsCompatibilityPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return ExpansionTile(
       tilePadding: EdgeInsets.zero,
       childrenPadding: EdgeInsets.zero,
@@ -173,7 +173,7 @@ class ProjectsSummaryPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -251,7 +251,7 @@ class ProjectsArtStylesPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -296,7 +296,7 @@ class ProjectsListPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -346,7 +346,7 @@ class _ProjectAccessBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final colorScheme = Theme.of(context).colorScheme;
     final restricted = project.projectAccessMode == 'restricted';
     return Container(

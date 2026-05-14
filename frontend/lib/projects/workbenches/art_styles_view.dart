@@ -2,8 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
-import '../../l10n/app_localizations.dart';
-import '../../../rust_api.dart';
+import '../../rust_api.dart';
 
 class ArtStylesWorkbenchDialogViewModel {
   const ArtStylesWorkbenchDialogViewModel({
@@ -68,7 +67,7 @@ class ArtStylesWorkbenchDialogView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final outline = Theme.of(context).colorScheme.outline;
     final viewportWidth = MediaQuery.sizeOf(context).width;
     final dialogWidth = viewportWidth.isFinite

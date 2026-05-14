@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../l10n/app_localizations.dart';
-import '../../rust_api.dart';
+import '../rust_api.dart';
 
 Future<Map<String, dynamic>?> showCreateProjectDialog(BuildContext context) {
   final nameController = TextEditingController();
@@ -20,7 +19,7 @@ Future<Map<String, dynamic>?> showCreateProjectDialog(BuildContext context) {
   return showDialog<Map<String, dynamic>>(
     context: context,
     builder: (dialogContext) {
-      final l10n = AppLocalizations.of(dialogContext)!;
+      final l10n = resolveAppLocalizationsForErrors(dialogContext);
       return AlertDialog(
         title: Text(l10n.projectsDialogCreateTitle),
         content: SizedBox(

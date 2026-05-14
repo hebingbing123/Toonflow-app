@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../l10n/app_localizations.dart';
-import '../../rust_api.dart';
+import '../rust_api.dart';
 import 'support.dart';
 
 part 'workbench_view/review_widgets.dart';
@@ -159,7 +159,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final outline = Theme.of(context).colorScheme.outline;
     final tokenEfficiencySummary = summarizeTokenEfficiencyFromQualityReviews(
       model.reviews,

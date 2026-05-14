@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../l10n/app_localizations.dart';
-import '../../rust_api.dart';
+import '../rust_api.dart';
 
 /// Keeps the top-level task center actions together before drill-down content.
 class TaskCenterActionsBar extends StatelessWidget {
@@ -18,7 +17,7 @@ class TaskCenterActionsBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return Wrap(
       spacing: 8,
       runSpacing: 8,
@@ -75,7 +74,7 @@ class TaskCenterCompatibilityPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return ExpansionTile(
       tilePadding: EdgeInsets.zero,
       childrenPadding: EdgeInsets.zero,
@@ -164,7 +163,7 @@ class TaskCenterJobsPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -205,7 +204,7 @@ class TaskCenterSummaryPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final bodySmall = Theme.of(
       context,
     ).textTheme.bodySmall?.copyWith(color: outlineColor);
@@ -237,7 +236,7 @@ class TaskCenterDetailsPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

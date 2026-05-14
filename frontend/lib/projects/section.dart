@@ -5,13 +5,12 @@ import 'package:flutter/material.dart';
 import 'create_project_dialog.dart';
 import 'controller.dart';
 import 'previews.dart';
-import '../l10n/app_localizations.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../team_workspaces/strings.dart';
 import 'workbenches/agent_memory.dart';
 import 'workbenches/art_styles_view.dart';
 import 'workbenches/creative_manuals.dart';
-import '../../rust_api.dart';
+import '../rust_api.dart';
 
 part 'workbenches/art_styles.dart';
 part 'workbenches/art_styles_helpers.dart';
@@ -43,7 +42,7 @@ class ProjectsSection extends StatelessWidget {
   Future<void> _openArtStylesWorkbench(BuildContext context) async {
     final token = accessToken;
     if (token == null || token.isEmpty) {
-      final l10n = AppLocalizations.of(context)!;
+      final l10n = resolveAppLocalizationsForErrors(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.projectsSnackSignInArtStyles)),
       );
@@ -62,7 +61,7 @@ class ProjectsSection extends StatelessWidget {
   Future<void> _openCreativeManualsWorkbench(BuildContext context) async {
     final token = accessToken;
     if (token == null || token.isEmpty) {
-      final l10n = AppLocalizations.of(context)!;
+      final l10n = resolveAppLocalizationsForErrors(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.projectsSnackSignInCreativeManuals)),
       );
@@ -78,7 +77,7 @@ class ProjectsSection extends StatelessWidget {
   Future<void> _openAgentMemoryWorkbench(BuildContext context) async {
     final token = accessToken;
     if (token == null || token.isEmpty) {
-      final l10n = AppLocalizations.of(context)!;
+      final l10n = resolveAppLocalizationsForErrors(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.projectsSnackSignInAgentMemory)),
       );
@@ -98,7 +97,7 @@ class ProjectsSection extends StatelessWidget {
     if (!context.mounted || fields == null) return;
     final created = await controller.createProjectWithFields(fields);
     if (!context.mounted || !created) return;
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(l10n.projectsSnackProjectCreated)),
     );
@@ -106,7 +105,7 @@ class ProjectsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final outline = Theme.of(context).colorScheme.outline;
     return AnimatedBuilder(
       animation: controller,

@@ -5,11 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../config.dart';
-import '../l10n/app_localizations.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import 'workbench_view.dart';
 import 'previews.dart';
-import '../../rust_api.dart';
+import '../rust_api.dart';
 import 'support.dart';
 
 part 'section_workbench.dart';
@@ -71,7 +70,7 @@ class TaskCenterSection extends StatelessWidget {
   final void Function(TaskCenterDomainDeepLink link)? onNavigateDomainDeepLink;
 
   Future<void> _openTaskWorkbench(BuildContext context) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final token = accessToken;
     if (token == null || token.isEmpty) {
       ScaffoldMessenger.of(
@@ -99,7 +98,7 @@ class TaskCenterSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final outline = Theme.of(context).colorScheme.outline;
     final projectSummary = taskProjects == null
         ? l10n.taskCenterProjectsNotLoaded
