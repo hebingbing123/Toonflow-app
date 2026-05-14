@@ -231,6 +231,7 @@ extension _AgentWorkspaceScriptCardLogic on _AgentWorkspaceScriptCardState {
   Widget _buildArgumentTemplates() {
     final templates = _argumentTemplates();
     final suggestions = buildScriptWorkspaceArgumentSuggestions(
+      l10n: AppLocalizations.of(context)!,
       selectedTool: widget.selectedScriptDomainTool,
       toolName: widget.workspaceLastToolName,
       result: widget.workspaceLastToolResultData,

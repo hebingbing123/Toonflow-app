@@ -21125,6 +21125,228 @@ abstract class AppLocalizations {
   /// **'model detail: {response}'**
   String authModelDetailResponse(String response);
 
+  /// No description provided for @authSupabaseAuthTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Supabase authentication'**
+  String get authSupabaseAuthTitle;
+
+  /// No description provided for @authEmailFieldLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get authEmailFieldLabel;
+
+  /// No description provided for @authPasswordFieldLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get authPasswordFieldLabel;
+
+  /// No description provided for @agentWorkspaceScriptArgFillFirstChapter.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill first chapter'**
+  String get agentWorkspaceScriptArgFillFirstChapter;
+
+  /// No description provided for @agentWorkspaceScriptArgFillFirstThreeChapters.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill first 3 chapters'**
+  String get agentWorkspaceScriptArgFillFirstThreeChapters;
+
+  /// No description provided for @agentWorkspaceScriptArgCarryChapterToEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'Carry chapter selection to events'**
+  String get agentWorkspaceScriptArgCarryChapterToEvents;
+
+  /// No description provided for @agentWorkspaceRunProjectUuidInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid project UUID format'**
+  String get agentWorkspaceRunProjectUuidInvalid;
+
+  /// No description provided for @agentWorkspaceRunProjectScopeRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a project UUID or a positive numeric project id'**
+  String get agentWorkspaceRunProjectScopeRequired;
+
+  /// No description provided for @agentWorkspaceRunWorkspaceUuidInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid workspace UUID format'**
+  String get agentWorkspaceRunWorkspaceUuidInvalid;
+
+  /// No description provided for @agentWorkspaceRunScriptUuidInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid script UUID format'**
+  String get agentWorkspaceRunScriptUuidInvalid;
+
+  /// No description provided for @agentWorkspaceRunScriptScopeRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a script UUID or a positive numeric script id'**
+  String get agentWorkspaceRunScriptScopeRequired;
+
+  /// No description provided for @agentWorkspaceRunPromptRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt cannot be empty'**
+  String get agentWorkspaceRunPromptRequired;
+
+  /// No description provided for @agentWorkspaceRunToolNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Tool name cannot be empty'**
+  String get agentWorkspaceRunToolNameRequired;
+
+  /// No description provided for @agentWorkspaceRunGetScriptContentNeedsScriptId.
+  ///
+  /// In en, this message translates to:
+  /// **'get_script_content requires a valid script id'**
+  String get agentWorkspaceRunGetScriptContentNeedsScriptId;
+
+  /// No description provided for @agentWorkspaceRunScriptArgsMustBeObject.
+  ///
+  /// In en, this message translates to:
+  /// **'Script tool arguments must be a JSON object'**
+  String get agentWorkspaceRunScriptArgsMustBeObject;
+
+  /// No description provided for @agentWorkspaceRunScriptArgsJsonInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to parse script tool arguments JSON'**
+  String get agentWorkspaceRunScriptArgsJsonInvalid;
+
+  /// No description provided for @agentWorkspaceRunPromptAndToolRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt and tool cannot be empty'**
+  String get agentWorkspaceRunPromptAndToolRequired;
+
+  /// No description provided for @agentWorkspaceRunProductionArgsMustBeObject.
+  ///
+  /// In en, this message translates to:
+  /// **'Production tool arguments must be a JSON object'**
+  String get agentWorkspaceRunProductionArgsMustBeObject;
+
+  /// No description provided for @agentWorkspaceRunProductionArgsJsonInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to parse production tool arguments JSON'**
+  String get agentWorkspaceRunProductionArgsJsonInvalid;
+
+  /// No description provided for @agentWorkspaceRunGetFlowDataNeedsKey.
+  ///
+  /// In en, this message translates to:
+  /// **'get_flowData requires a non-empty key'**
+  String get agentWorkspaceRunGetFlowDataNeedsKey;
+
+  /// No description provided for @agentWorkspaceRunProductionSubAgentArgsMustBeObject.
+  ///
+  /// In en, this message translates to:
+  /// **'Production sub-agent arguments must be a JSON object'**
+  String get agentWorkspaceRunProductionSubAgentArgsMustBeObject;
+
+  /// No description provided for @agentWorkspaceRunProductionSubAgentArgsJsonInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to parse production sub-agent arguments JSON'**
+  String get agentWorkspaceRunProductionSubAgentArgsJsonInvalid;
+
+  /// No description provided for @agentWorkspaceWritebackScriptInputsInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Valid project, script id, and writeback content are required'**
+  String get agentWorkspaceWritebackScriptInputsInvalid;
+
+  /// No description provided for @agentWorkspaceWritebackProjectNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Project not found'**
+  String get agentWorkspaceWritebackProjectNotFound;
+
+  /// No description provided for @agentWorkspaceWritebackScriptSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Writeback succeeded: script {numericId} updated, source={source}, content length {length}.'**
+  String agentWorkspaceWritebackScriptSuccess(
+    int numericId,
+    String source,
+    int length,
+  );
+
+  /// No description provided for @agentWorkspaceWritebackPlanInputsInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Valid project id and planData writeback source are required'**
+  String get agentWorkspaceWritebackPlanInputsInvalid;
+
+  /// No description provided for @agentWorkspaceWritebackPlanDataMissingData.
+  ///
+  /// In en, this message translates to:
+  /// **'planData result is missing the data field'**
+  String get agentWorkspaceWritebackPlanDataMissingData;
+
+  /// No description provided for @agentWorkspaceWritebackPlanDataSetSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Writeback succeeded: script-agent planData updated (project={projectId}, script_rows={rowCount}).'**
+  String agentWorkspaceWritebackPlanDataSetSuccess(int projectId, int rowCount);
+
+  /// No description provided for @agentWorkspaceWritebackNeedPlanRowAndPlanData.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan row id and planData are required: fetch get_planData first (including plan row id)'**
+  String get agentWorkspaceWritebackNeedPlanRowAndPlanData;
+
+  /// No description provided for @agentWorkspaceWritebackPlanDataUpdateSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Writeback succeeded: script-agent update-data (plan_row_id={planRowId}, script_rows={rowCount}).'**
+  String agentWorkspaceWritebackPlanDataUpdateSuccess(
+    int planRowId,
+    int rowCount,
+  );
+
+  /// No description provided for @agentWorkspaceWritebackNeedToolResultFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Run a tool and obtain a result before writeback'**
+  String get agentWorkspaceWritebackNeedToolResultFirst;
+
+  /// No description provided for @agentWorkspaceWritebackMissingToolSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing tool source; cannot write back safely'**
+  String get agentWorkspaceWritebackMissingToolSource;
+
+  /// No description provided for @agentWorkspaceWritebackCoreFlowOverwriteBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'This tool result cannot overwrite core flow[{flowKey}]. Use an extension key (for example workspaceResult) or call get_flowData first.'**
+  String agentWorkspaceWritebackCoreFlowOverwriteBlocked(String flowKey);
+
+  /// No description provided for @agentWorkspaceWritebackPayloadEmptyRefreshFlowKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Writeback payload is empty; refresh the flow key and try again'**
+  String get agentWorkspaceWritebackPayloadEmptyRefreshFlowKey;
+
+  /// No description provided for @agentWorkspaceWritebackFlowSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Writeback succeeded: flow[{flowKey}] saved to project {projectId} / script {scriptId} (source={source}).'**
+  String agentWorkspaceWritebackFlowSaved(
+    String flowKey,
+    int projectId,
+    int scriptId,
+    String source,
+  );
+
   /// No description provided for @shortVideoSpaceDialogExportProgressTitle.
   ///
   /// In en, this message translates to:

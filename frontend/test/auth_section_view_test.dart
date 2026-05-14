@@ -143,18 +143,18 @@ void main() {
       ),
     );
 
-    expect(find.text('Supabase Auth'), findsOneWidget);
+    expect(find.text('Supabase 登录'), findsOneWidget);
     if (kSupabaseConfigured) {
-      expect(find.text('Email'), findsOneWidget);
-      expect(find.text('Password'), findsOneWidget);
+      expect(find.text('邮箱'), findsOneWidget);
+      expect(find.text('密码'), findsOneWidget);
       expect(find.widgetWithText(FilledButton, '登录'), findsOneWidget);
       expect(find.widgetWithText(OutlinedButton, '注册'), findsOneWidget);
       expect(find.widgetWithText(TextButton, '退出'), findsNothing);
       expect(find.textContaining('GET /api/v1/me'), findsNothing);
     } else {
       expect(find.textContaining('未配置：运行示例'), findsOneWidget);
-      expect(find.text('Email'), findsNothing);
-      expect(find.text('Password'), findsNothing);
+      expect(find.text('邮箱'), findsNothing);
+      expect(find.text('密码'), findsNothing);
       expect(find.text('登录'), findsNothing);
       expect(find.text('注册'), findsNothing);
     }

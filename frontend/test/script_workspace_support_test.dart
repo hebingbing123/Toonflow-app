@@ -101,6 +101,7 @@ void main() {
     'buildScriptWorkspaceArgumentSuggestions offers novel id fill chips',
     () {
       final suggestions = buildScriptWorkspaceArgumentSuggestions(
+        l10n: _zh,
         selectedTool: 'get_novel_events',
         toolName: 'get_novel_text',
         result: <String, dynamic>{
@@ -111,7 +112,7 @@ void main() {
         },
       );
 
-      expect(suggestions.map((item) => item.label), contains('填充首章'));
+      expect(suggestions.map((item) => item.label), contains(_zh.agentWorkspaceScriptArgFillFirstChapter));
       expect(suggestions.first.payload, <String, dynamic>{
         'novelId': 21,
         'fields': <String>['numeric_id', 'name', 'detail'],

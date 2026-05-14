@@ -12999,6 +12999,150 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get authSupabaseAuthTitle => 'Supabase 登录';
+
+  @override
+  String get authEmailFieldLabel => '邮箱';
+
+  @override
+  String get authPasswordFieldLabel => '密码';
+
+  @override
+  String get agentWorkspaceScriptArgFillFirstChapter => '填充首章';
+
+  @override
+  String get agentWorkspaceScriptArgFillFirstThreeChapters => '填充前 3 章';
+
+  @override
+  String get agentWorkspaceScriptArgCarryChapterToEvents => '沿用章节到事件';
+
+  @override
+  String get agentWorkspaceRunProjectUuidInvalid => 'projectUuid 格式无效';
+
+  @override
+  String get agentWorkspaceRunProjectScopeRequired =>
+      '请填写 projectUuid 或正整数 project_id';
+
+  @override
+  String get agentWorkspaceRunWorkspaceUuidInvalid => 'workspaceUuid 格式无效';
+
+  @override
+  String get agentWorkspaceRunScriptUuidInvalid => 'scriptUuid 格式无效';
+
+  @override
+  String get agentWorkspaceRunScriptScopeRequired =>
+      '请填写 scriptUuid 或正整数 script_id';
+
+  @override
+  String get agentWorkspaceRunPromptRequired => 'prompt 必须有效';
+
+  @override
+  String get agentWorkspaceRunToolNameRequired => 'tool 名称必须有效';
+
+  @override
+  String get agentWorkspaceRunGetScriptContentNeedsScriptId =>
+      'get_script_content 需要有效 script_id';
+
+  @override
+  String get agentWorkspaceRunScriptArgsMustBeObject =>
+      'script tool arguments 必须是 JSON object';
+
+  @override
+  String get agentWorkspaceRunScriptArgsJsonInvalid =>
+      'script tool arguments JSON 解析失败';
+
+  @override
+  String get agentWorkspaceRunPromptAndToolRequired => 'prompt/tool 必须有效';
+
+  @override
+  String get agentWorkspaceRunProductionArgsMustBeObject =>
+      'production tool arguments 必须是 JSON object';
+
+  @override
+  String get agentWorkspaceRunProductionArgsJsonInvalid =>
+      'production tool arguments JSON 解析失败';
+
+  @override
+  String get agentWorkspaceRunGetFlowDataNeedsKey => 'get_flowData 需要有效 key';
+
+  @override
+  String get agentWorkspaceRunProductionSubAgentArgsMustBeObject =>
+      'production sub-agent arguments 必须是 JSON object';
+
+  @override
+  String get agentWorkspaceRunProductionSubAgentArgsJsonInvalid =>
+      'production sub-agent arguments JSON 解析失败';
+
+  @override
+  String get agentWorkspaceWritebackScriptInputsInvalid =>
+      'project_id/script_id 与可回写结果必须有效';
+
+  @override
+  String get agentWorkspaceWritebackProjectNotFound => '未找到项目';
+
+  @override
+  String agentWorkspaceWritebackScriptSuccess(
+    int numericId,
+    String source,
+    int length,
+  ) {
+    return '写回成功：script $numericId 已更新，source=$source，content 长度 $length。';
+  }
+
+  @override
+  String get agentWorkspaceWritebackPlanInputsInvalid =>
+      'project_id 与 planData 回写源必须有效';
+
+  @override
+  String get agentWorkspaceWritebackPlanDataMissingData =>
+      'planData 结果缺少 data 字段';
+
+  @override
+  String agentWorkspaceWritebackPlanDataSetSuccess(
+    int projectId,
+    int rowCount,
+  ) {
+    return '写回成功：script-agent planData 已更新（project=$projectId，script_rows=$rowCount）。';
+  }
+
+  @override
+  String get agentWorkspaceWritebackNeedPlanRowAndPlanData =>
+      '需要 planId 与 planData：请先拉取 get_planData（含 plan 行 id）';
+
+  @override
+  String agentWorkspaceWritebackPlanDataUpdateSuccess(
+    int planRowId,
+    int rowCount,
+  ) {
+    return '写回成功：script-agent update-data（plan_row_id=$planRowId，script_rows=$rowCount）。';
+  }
+
+  @override
+  String get agentWorkspaceWritebackNeedToolResultFirst => '需先执行工具并拿到结果后再回写';
+
+  @override
+  String get agentWorkspaceWritebackMissingToolSource => '缺少工具来源，无法安全回写';
+
+  @override
+  String agentWorkspaceWritebackCoreFlowOverwriteBlocked(String flowKey) {
+    return '该工具结果不能直接覆盖核心 flow[$flowKey]，请改用扩展 key（如 workspaceResult）或先 get_flowData';
+  }
+
+  @override
+  String get agentWorkspaceWritebackPayloadEmptyRefreshFlowKey =>
+      '回写数据为空，请先刷新对应 flow key 后重试';
+
+  @override
+  String agentWorkspaceWritebackFlowSaved(
+    String flowKey,
+    int projectId,
+    int scriptId,
+    String source,
+  ) {
+    return '回写成功：flow[$flowKey] 已保存到 project $projectId / script $scriptId（source=$source）。';
+  }
+
+  @override
   String get shortVideoSpaceDialogExportProgressTitle => '导出进度';
 
   @override

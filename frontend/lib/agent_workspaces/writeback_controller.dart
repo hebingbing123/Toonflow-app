@@ -116,6 +116,7 @@ class WorkspaceWritebackController {
   Future<void> writeBackScriptWorkspaceResult() async {
     final token = _accessTokenProvider();
     if (token == null) return;
+    final loc = rustApiLookupL10nFromPlatform();
     final projectUuid = _trimmedNonEmpty(
       _inputController.projectUuidController.text,
     );
@@ -135,7 +136,7 @@ class WorkspaceWritebackController {
     if ((projectUuid == null && projectNumericId == null) ||
         scriptId == null ||
         content.isEmpty) {
-      _onErrorChanged('project_id/script_id 与可回写结果必须有效');
+      _onErrorChanged(loc.agentWorkspaceWritebackScriptInputsInvalid);
       return;
     }
 
@@ -145,7 +146,7 @@ class WorkspaceWritebackController {
           projectUuid ??
           await _resolveProjectUuidFromNumericId(token, projectNumericId!);
       if (resolvedProjectUuid == null || resolvedProjectUuid.isEmpty) {
-        _onErrorChanged('未找到项目');
+        _onErrorChanged(loc.agentWorkspaceWritebackProjectNotFound);
         return;
       }
       final updated = await _updateScript(
@@ -156,7 +157,11 @@ class WorkspaceWritebackController {
       );
       final updatedLen = updated.content?.length ?? 0;
       _outputController.setWritebackLine(
-        '写回成功：script ${updated.numericId} 已更新，source=$source，content 长度 $updatedLen。',
+        loc.agentWorkspaceWritebackScriptSuccess(
+          updated.numericId,
+          source,
+          updatedLen,
+        ),
       );
     } catch (error) {
       _onErrorChanged(
@@ -173,6 +178,7 @@ class WorkspaceWritebackController {
   Future<void> writeBackScriptPlanWorkspaceResult() async {
     final token = _accessTokenProvider();
     if (token == null) return;
+    final loc = rustApiLookupL10nFromPlatform();
     final projectUuid = _trimmedNonEmpty(
       _inputController.projectUuidController.text,
     );
@@ -182,13 +188,13 @@ class WorkspaceWritebackController {
     final candidate = _outputController.scriptPlanWritebackCandidate;
     if ((projectNumericId == null && projectUuid == null) ||
         candidate == null) {
-      _onErrorChanged('project_id 与 planData 回写源必须有效');
+      _onErrorChanged(loc.agentWorkspaceWritebackPlanInputsInvalid);
       return;
     }
 
     final payload = _extractScriptPlanWritebackPayload(candidate);
     if (payload == null) {
-      _onErrorChanged('planData 结果缺少 data 字段');
+      _onErrorChanged(loc.agentWorkspaceWritebackPlanDataMissingData);
       return;
     }
     final rawScript = payload.rawScript;
@@ -204,7 +210,7 @@ class WorkspaceWritebackController {
         projectUuid: projectUuid,
       );
       if (projectId == null) {
-        _onErrorChanged('未找到项目');
+        _onErrorChanged(loc.agentWorkspaceWritebackProjectNotFound);
         return;
       }
       final status = await _setPlanData(
@@ -221,7 +227,7 @@ class WorkspaceWritebackController {
         );
       }
       _outputController.setWritebackLine(
-        '写回成功：script-agent planData 已更新（project=$projectId，script_rows=${script.length}）。',
+        loc.agentWorkspaceWritebackPlanDataSetSuccess(projectId, script.length),
       );
     } catch (error) {
       _onErrorChanged(
@@ -238,16 +244,17 @@ class WorkspaceWritebackController {
   Future<void> writeBackScriptPlanViaUpdateData() async {
     final token = _accessTokenProvider();
     if (token == null) return;
+    final loc = rustApiLookupL10nFromPlatform();
     final planRowId = _outputController.scriptPlanRowId;
     final candidate = _outputController.scriptPlanWritebackCandidate;
     if (planRowId == null || candidate == null) {
-      _onErrorChanged('需要 planId 与 planData：请先拉取 get_planData（含 plan 行 id）');
+      _onErrorChanged(loc.agentWorkspaceWritebackNeedPlanRowAndPlanData);
       return;
     }
 
     final payload = _extractScriptPlanWritebackPayload(candidate);
     if (payload == null) {
-      _onErrorChanged('planData 结果缺少 data 字段');
+      _onErrorChanged(loc.agentWorkspaceWritebackPlanDataMissingData);
       return;
     }
     final scriptRows = _normalizeScriptPlanRows(payload.rawScript);
@@ -268,7 +275,10 @@ class WorkspaceWritebackController {
         );
       }
       _outputController.setWritebackLine(
-        '写回成功：script-agent update-data（plan_row_id=$planRowId，script_rows=${scriptRows.length}）。',
+        loc.agentWorkspaceWritebackPlanDataUpdateSuccess(
+          planRowId,
+          scriptRows.length,
+        ),
       );
     } catch (error) {
       _onErrorChanged(
@@ -285,6 +295,7 @@ class WorkspaceWritebackController {
   Future<void> writeBackProductionFlowResult() async {
     final token = _accessTokenProvider();
     if (token == null) return;
+    final loc = rustApiLookupL10nFromPlatform();
     final projectUuid = _trimmedNonEmpty(
       _inputController.projectUuidController.text,
     );
@@ -301,11 +312,11 @@ class WorkspaceWritebackController {
         scriptId == null ||
         flowKey.isEmpty ||
         result == null) {
-      _onErrorChanged('需先执行工具并拿到结果后再回写');
+      _onErrorChanged(loc.agentWorkspaceWritebackNeedToolResultFirst);
       return;
     }
     if (toolName == null) {
-      _onErrorChanged('缺少工具来源，无法安全回写');
+      _onErrorChanged(loc.agentWorkspaceWritebackMissingToolSource);
       return;
     }
 
@@ -315,7 +326,7 @@ class WorkspaceWritebackController {
       projectUuid: projectUuid,
     );
     if (projectId == null) {
-      _onErrorChanged('未找到项目');
+      _onErrorChanged(loc.agentWorkspaceWritebackProjectNotFound);
       return;
     }
 
@@ -333,8 +344,8 @@ class WorkspaceWritebackController {
         writebackSource = 'get_flowData -> refreshed full flow[$flowKey]';
       } catch (error) {
         _onErrorChanged(
-        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
-      );
+          describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
+        );
         return;
       }
     }
@@ -352,20 +363,20 @@ class WorkspaceWritebackController {
           writebackSource = '$toolName -> refreshed flow[$flowKey]';
         } catch (error) {
           _onErrorChanged(
-        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
-      );
+            describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
+          );
           return;
         }
       } else {
         _onErrorChanged(
-          '该工具结果不能直接覆盖核心 flow[$flowKey]，请改用扩展 key（如 workspaceResult）或先 get_flowData',
+          loc.agentWorkspaceWritebackCoreFlowOverwriteBlocked(flowKey),
         );
         return;
       }
     }
 
     if (payloadForWriteback == null) {
-      _onErrorChanged('回写数据为空，请先刷新对应 flow key 后重试');
+      _onErrorChanged(loc.agentWorkspaceWritebackPayloadEmptyRefreshFlowKey);
       return;
     }
 
@@ -391,7 +402,12 @@ class WorkspaceWritebackController {
         );
       }
       _outputController.setWritebackLine(
-        '回写成功：flow[$flowKey] 已保存到 project $projectId / script $scriptId（source=$writebackSource）。',
+        loc.agentWorkspaceWritebackFlowSaved(
+          flowKey,
+          projectId,
+          scriptId,
+          writebackSource,
+        ),
       );
     } catch (error) {
       _onErrorChanged(

@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import '../l10n/app_localizations.dart';
+import '../l10n/rust_api_error_format.dart';
 import 'input_controller.dart';
 import 'operation_controller.dart';
 import 'runtime_output_controller.dart';
@@ -43,19 +45,20 @@ class WorkspaceRunController {
   Future<void> runScriptWorkspaceAgent() async {
     final token = _accessTokenProvider();
     if (token == null) return;
-    final proj = _parseProjectAttachInputs(_inputController);
+    final loc = rustApiLookupL10nFromPlatform();
+    final proj = _parseProjectAttachInputs(_inputController, loc);
     if (proj.error != null) {
       _onErrorChanged(proj.error);
       return;
     }
-    final wsScope = _parseOptionalWorkspaceUuid(_inputController);
+    final wsScope = _parseOptionalWorkspaceUuid(_inputController, loc);
     if (wsScope.error != null) {
       _onErrorChanged(wsScope.error);
       return;
     }
     final prompt = _inputController.scriptPromptController.text.trim();
     if (prompt.isEmpty) {
-      _onErrorChanged('prompt 必须有效');
+      _onErrorChanged(loc.agentWorkspaceRunPromptRequired);
       return;
     }
 
@@ -92,12 +95,13 @@ class WorkspaceRunController {
   Future<void> probeScriptDomainTool(String toolName, String rawArgs) async {
     final token = _accessTokenProvider();
     if (token == null) return;
-    final proj = _parseProjectAttachInputs(_inputController);
+    final loc = rustApiLookupL10nFromPlatform();
+    final proj = _parseProjectAttachInputs(_inputController, loc);
     if (proj.error != null) {
       _onErrorChanged(proj.error);
       return;
     }
-    final wsScope = _parseOptionalWorkspaceUuid(_inputController);
+    final wsScope = _parseOptionalWorkspaceUuid(_inputController, loc);
     if (wsScope.error != null) {
       _onErrorChanged(wsScope.error);
       return;
@@ -107,18 +111,18 @@ class WorkspaceRunController {
     );
     final normalizedTool = toolName.trim();
     if (normalizedTool.isEmpty) {
-      _onErrorChanged('tool 名称必须有效');
+      _onErrorChanged(loc.agentWorkspaceRunToolNameRequired);
       return;
     }
     if (normalizedTool == 'get_script_content' && scriptId == null) {
-      _onErrorChanged('get_script_content 需要有效 script_id');
+      _onErrorChanged(loc.agentWorkspaceRunGetScriptContentNeedsScriptId);
       return;
     }
 
     final args = _parseJsonObject(
       rawArgs,
-      objectError: 'script tool arguments 必须是 JSON object',
-      parseError: 'script tool arguments JSON 解析失败',
+      objectError: loc.agentWorkspaceRunScriptArgsMustBeObject,
+      parseError: loc.agentWorkspaceRunScriptArgsJsonInvalid,
       onErrorChanged: _onErrorChanged,
     );
     if (args == null) {
@@ -161,12 +165,13 @@ class WorkspaceRunController {
   Future<void> runScriptSubAgentTool() async {
     final token = _accessTokenProvider();
     if (token == null) return;
-    final proj = _parseProjectAttachInputs(_inputController);
+    final loc = rustApiLookupL10nFromPlatform();
+    final proj = _parseProjectAttachInputs(_inputController, loc);
     if (proj.error != null) {
       _onErrorChanged(proj.error);
       return;
     }
-    final wsScopeSub = _parseOptionalWorkspaceUuid(_inputController);
+    final wsScopeSub = _parseOptionalWorkspaceUuid(_inputController, loc);
     if (wsScopeSub.error != null) {
       _onErrorChanged(wsScopeSub.error);
       return;
@@ -177,7 +182,7 @@ class WorkspaceRunController {
     final prompt = _inputController.scriptPromptController.text.trim();
     final toolName = _inputController.scriptSubAgentToolController.text.trim();
     if (prompt.isEmpty || toolName.isEmpty) {
-      _onErrorChanged('prompt/tool 必须有效');
+      _onErrorChanged(loc.agentWorkspaceRunPromptAndToolRequired);
       return;
     }
 
@@ -219,24 +224,25 @@ class WorkspaceRunController {
   Future<void> runProductionWorkspaceAgent() async {
     final token = _accessTokenProvider();
     if (token == null) return;
-    final proj = _parseProjectAttachInputs(_inputController);
+    final loc = rustApiLookupL10nFromPlatform();
+    final proj = _parseProjectAttachInputs(_inputController, loc);
     if (proj.error != null) {
       _onErrorChanged(proj.error);
       return;
     }
-    final wsScopeProd = _parseOptionalWorkspaceUuid(_inputController);
+    final wsScopeProd = _parseOptionalWorkspaceUuid(_inputController, loc);
     if (wsScopeProd.error != null) {
       _onErrorChanged(wsScopeProd.error);
       return;
     }
-    final scr = _parseScriptAttachInputs(_inputController);
+    final scr = _parseScriptAttachInputs(_inputController, loc);
     if (scr.error != null) {
       _onErrorChanged(scr.error);
       return;
     }
     final prompt = _inputController.productionPromptController.text.trim();
     if (prompt.isEmpty) {
-      _onErrorChanged('prompt 必须有效');
+      _onErrorChanged(loc.agentWorkspaceRunPromptRequired);
       return;
     }
 
@@ -275,17 +281,18 @@ class WorkspaceRunController {
   Future<void> probeProductionDomainTool() async {
     final token = _accessTokenProvider();
     if (token == null) return;
-    final proj = _parseProjectAttachInputs(_inputController);
+    final loc = rustApiLookupL10nFromPlatform();
+    final proj = _parseProjectAttachInputs(_inputController, loc);
     if (proj.error != null) {
       _onErrorChanged(proj.error);
       return;
     }
-    final wsScopeFlow = _parseOptionalWorkspaceUuid(_inputController);
+    final wsScopeFlow = _parseOptionalWorkspaceUuid(_inputController, loc);
     if (wsScopeFlow.error != null) {
       _onErrorChanged(wsScopeFlow.error);
       return;
     }
-    final scr = _parseScriptAttachInputs(_inputController);
+    final scr = _parseScriptAttachInputs(_inputController, loc);
     if (scr.error != null) {
       _onErrorChanged(scr.error);
       return;
@@ -293,14 +300,14 @@ class WorkspaceRunController {
     final toolName = _inputController.productionDomainToolController.text
         .trim();
     if (toolName.isEmpty) {
-      _onErrorChanged('tool 名称必须有效');
+      _onErrorChanged(loc.agentWorkspaceRunToolNameRequired);
       return;
     }
 
     final args = _parseJsonObject(
       _inputController.productionDomainArgsController.text,
-      objectError: 'production tool arguments 必须是 JSON object',
-      parseError: 'production tool arguments JSON 解析失败',
+      objectError: loc.agentWorkspaceRunProductionArgsMustBeObject,
+      parseError: loc.agentWorkspaceRunProductionArgsJsonInvalid,
       onErrorChanged: _onErrorChanged,
     );
     if (args == null) {
@@ -309,7 +316,7 @@ class WorkspaceRunController {
     if (toolName == 'get_flowData') {
       final key = _inputController.productionFlowKeyController.text.trim();
       if (key.isEmpty) {
-        _onErrorChanged('get_flowData 需要有效 key');
+        _onErrorChanged(loc.agentWorkspaceRunGetFlowDataNeedsKey);
         return;
       }
       args.putIfAbsent('key', () => key);
@@ -354,17 +361,18 @@ class WorkspaceRunController {
   Future<void> runProductionSubAgentTool() async {
     final token = _accessTokenProvider();
     if (token == null) return;
-    final proj = _parseProjectAttachInputs(_inputController);
+    final loc = rustApiLookupL10nFromPlatform();
+    final proj = _parseProjectAttachInputs(_inputController, loc);
     if (proj.error != null) {
       _onErrorChanged(proj.error);
       return;
     }
-    final wsScopePa = _parseOptionalWorkspaceUuid(_inputController);
+    final wsScopePa = _parseOptionalWorkspaceUuid(_inputController, loc);
     if (wsScopePa.error != null) {
       _onErrorChanged(wsScopePa.error);
       return;
     }
-    final scr = _parseScriptAttachInputs(_inputController);
+    final scr = _parseScriptAttachInputs(_inputController, loc);
     if (scr.error != null) {
       _onErrorChanged(scr.error);
       return;
@@ -374,12 +382,12 @@ class WorkspaceRunController {
         .trim();
     final extraArgs = _parseJsonObject(
       _inputController.productionSubAgentArgsController.text,
-      objectError: 'production sub-agent arguments 必须是 JSON object',
-      parseError: 'production sub-agent arguments JSON 解析失败',
+      objectError: loc.agentWorkspaceRunProductionSubAgentArgsMustBeObject,
+      parseError: loc.agentWorkspaceRunProductionSubAgentArgsJsonInvalid,
       onErrorChanged: _onErrorChanged,
     );
     if (prompt.isEmpty || toolName.isEmpty || extraArgs == null) {
-      _onErrorChanged('prompt/tool 必须有效');
+      _onErrorChanged(loc.agentWorkspaceRunPromptAndToolRequired);
       return;
     }
 
@@ -388,10 +396,7 @@ class WorkspaceRunController {
       WorkspaceOperation.productionSubAgentRun,
       true,
     );
-    final arguments = <String, dynamic>{
-      'prompt': prompt,
-      ...extraArgs,
-    };
+    final arguments = <String, dynamic>{'prompt': prompt, ...extraArgs};
     final scriptNumeric = scr.scriptNumeric;
     if (scriptNumeric != null) {
       arguments['scriptId'] = scriptNumeric;

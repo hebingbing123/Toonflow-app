@@ -10265,6 +10265,73 @@
       }
     }
   },
+  "authSupabaseAuthTitle": "Supabase authentication",
+  "authEmailFieldLabel": "Email",
+  "authPasswordFieldLabel": "Password",
+  "agentWorkspaceScriptArgFillFirstChapter": "Fill first chapter",
+  "agentWorkspaceScriptArgFillFirstThreeChapters": "Fill first 3 chapters",
+  "agentWorkspaceScriptArgCarryChapterToEvents": "Carry chapter selection to events",
+  "agentWorkspaceRunProjectUuidInvalid": "Invalid project UUID format",
+  "agentWorkspaceRunProjectScopeRequired": "Enter a project UUID or a positive numeric project id",
+  "agentWorkspaceRunWorkspaceUuidInvalid": "Invalid workspace UUID format",
+  "agentWorkspaceRunScriptUuidInvalid": "Invalid script UUID format",
+  "agentWorkspaceRunScriptScopeRequired": "Enter a script UUID or a positive numeric script id",
+  "agentWorkspaceRunPromptRequired": "Prompt cannot be empty",
+  "agentWorkspaceRunToolNameRequired": "Tool name cannot be empty",
+  "agentWorkspaceRunGetScriptContentNeedsScriptId": "get_script_content requires a valid script id",
+  "agentWorkspaceRunScriptArgsMustBeObject": "Script tool arguments must be a JSON object",
+  "agentWorkspaceRunScriptArgsJsonInvalid": "Failed to parse script tool arguments JSON",
+  "agentWorkspaceRunPromptAndToolRequired": "Prompt and tool cannot be empty",
+  "agentWorkspaceRunProductionArgsMustBeObject": "Production tool arguments must be a JSON object",
+  "agentWorkspaceRunProductionArgsJsonInvalid": "Failed to parse production tool arguments JSON",
+  "agentWorkspaceRunGetFlowDataNeedsKey": "get_flowData requires a non-empty key",
+  "agentWorkspaceRunProductionSubAgentArgsMustBeObject": "Production sub-agent arguments must be a JSON object",
+  "agentWorkspaceRunProductionSubAgentArgsJsonInvalid": "Failed to parse production sub-agent arguments JSON",
+  "agentWorkspaceWritebackScriptInputsInvalid": "Valid project, script id, and writeback content are required",
+  "agentWorkspaceWritebackProjectNotFound": "Project not found",
+  "agentWorkspaceWritebackScriptSuccess": "Writeback succeeded: script {numericId} updated, source={source}, content length {length}.",
+  "@agentWorkspaceWritebackScriptSuccess": {
+    "placeholders": {
+      "numericId": {"type": "int"},
+      "source": {"type": "String"},
+      "length": {"type": "int"}
+    }
+  },
+  "agentWorkspaceWritebackPlanInputsInvalid": "Valid project id and planData writeback source are required",
+  "agentWorkspaceWritebackPlanDataMissingData": "planData result is missing the data field",
+  "agentWorkspaceWritebackPlanDataSetSuccess": "Writeback succeeded: script-agent planData updated (project={projectId}, script_rows={rowCount}).",
+  "@agentWorkspaceWritebackPlanDataSetSuccess": {
+    "placeholders": {
+      "projectId": {"type": "int"},
+      "rowCount": {"type": "int"}
+    }
+  },
+  "agentWorkspaceWritebackNeedPlanRowAndPlanData": "Plan row id and planData are required: fetch get_planData first (including plan row id)",
+  "agentWorkspaceWritebackPlanDataUpdateSuccess": "Writeback succeeded: script-agent update-data (plan_row_id={planRowId}, script_rows={rowCount}).",
+  "@agentWorkspaceWritebackPlanDataUpdateSuccess": {
+    "placeholders": {
+      "planRowId": {"type": "int"},
+      "rowCount": {"type": "int"}
+    }
+  },
+  "agentWorkspaceWritebackNeedToolResultFirst": "Run a tool and obtain a result before writeback",
+  "agentWorkspaceWritebackMissingToolSource": "Missing tool source; cannot write back safely",
+  "agentWorkspaceWritebackCoreFlowOverwriteBlocked": "This tool result cannot overwrite core flow[{flowKey}]. Use an extension key (for example workspaceResult) or call get_flowData first.",
+  "@agentWorkspaceWritebackCoreFlowOverwriteBlocked": {
+    "placeholders": {
+      "flowKey": {"type": "String"}
+    }
+  },
+  "agentWorkspaceWritebackPayloadEmptyRefreshFlowKey": "Writeback payload is empty; refresh the flow key and try again",
+  "agentWorkspaceWritebackFlowSaved": "Writeback succeeded: flow[{flowKey}] saved to project {projectId} / script {scriptId} (source={source}).",
+  "@agentWorkspaceWritebackFlowSaved": {
+    "placeholders": {
+      "flowKey": {"type": "String"},
+      "projectId": {"type": "int"},
+      "scriptId": {"type": "int"},
+      "source": {"type": "String"}
+    }
+  },
   "shortVideoSpaceDialogExportProgressTitle": "Export Progress",
   "shortVideoSpaceDialogExportProgressStatusQueued": "Queued",
   "shortVideoSpaceDialogExportProgressStatusProcessing": "Processing",

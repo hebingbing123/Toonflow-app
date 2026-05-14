@@ -106,6 +106,7 @@ List<int> extractScriptWorkspaceNovelIds(Object? result) {
 
 List<ScriptWorkspaceArgumentSuggestion>
 buildScriptWorkspaceArgumentSuggestions({
+  required AppLocalizations l10n,
   required String? selectedTool,
   required String? toolName,
   required Object? result,
@@ -121,7 +122,7 @@ buildScriptWorkspaceArgumentSuggestions({
   final source = toolName?.trim();
   final suggestions = <ScriptWorkspaceArgumentSuggestion>[
     ScriptWorkspaceArgumentSuggestion(
-      label: '填充首章',
+      label: l10n.agentWorkspaceScriptArgFillFirstChapter,
       payload: _buildSuggestedNovelPayload(
         normalizedSelectedTool,
         novelId: ids.first,
@@ -131,7 +132,7 @@ buildScriptWorkspaceArgumentSuggestions({
   if (ids.length > 1) {
     suggestions.add(
       ScriptWorkspaceArgumentSuggestion(
-        label: '填充前 3 章',
+        label: l10n.agentWorkspaceScriptArgFillFirstThreeChapters,
         payload: _buildSuggestedNovelPayload(
           normalizedSelectedTool,
           novelId: ids.take(3).first,
@@ -143,7 +144,7 @@ buildScriptWorkspaceArgumentSuggestions({
       normalizedSelectedTool == 'get_novel_events') {
     suggestions.add(
       ScriptWorkspaceArgumentSuggestion(
-        label: '沿用章节到事件',
+        label: l10n.agentWorkspaceScriptArgCarryChapterToEvents,
         payload: _buildSuggestedNovelPayload(
           normalizedSelectedTool,
           novelId: ids.first,

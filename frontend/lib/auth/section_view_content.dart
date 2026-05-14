@@ -9,12 +9,15 @@ class _AuthSectionContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Divider(height: 32),
-        Text('Supabase Auth', style: Theme.of(context).textTheme.titleMedium),
+        Text(
+          l10n.authSupabaseAuthTitle,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
         const SizedBox(height: 8),
         if (!kSupabaseConfigured)
           Text(
@@ -24,14 +27,14 @@ class _AuthSectionContent extends StatelessWidget {
         else ...[
           TextField(
             controller: model.emailController,
-            decoration: const InputDecoration(labelText: 'Email'),
+            decoration: InputDecoration(labelText: l10n.authEmailFieldLabel),
             keyboardType: TextInputType.emailAddress,
             autofillHints: const [AutofillHints.email],
           ),
           const SizedBox(height: 8),
           TextField(
             controller: model.passwordController,
-            decoration: const InputDecoration(labelText: 'Password'),
+            decoration: InputDecoration(labelText: l10n.authPasswordFieldLabel),
             obscureText: true,
             autofillHints: const [AutofillHints.password],
           ),
@@ -40,13 +43,23 @@ class _AuthSectionContent extends StatelessWidget {
             spacing: 8,
             runSpacing: 8,
             children: [
-              FilledButton(onPressed: callbacks.onSignIn, child: Text(l10n.authSignIn)),
-              OutlinedButton(onPressed: callbacks.onSignUp, child: Text(l10n.authSignUp)),
+              FilledButton(
+                onPressed: callbacks.onSignIn,
+                child: Text(l10n.authSignIn),
+              ),
+              OutlinedButton(
+                onPressed: callbacks.onSignUp,
+                child: Text(l10n.authSignUp),
+              ),
               if (model.signedIn)
-                TextButton(onPressed: callbacks.onSignOut, child: Text(l10n.authSignOut)),
+                TextButton(
+                  onPressed: callbacks.onSignOut,
+                  child: Text(l10n.authSignOut),
+                ),
             ],
           ),
-          if (model.signedIn) _AuthSignedInPanel(model: model, callbacks: callbacks),
+          if (model.signedIn)
+            _AuthSignedInPanel(model: model, callbacks: callbacks),
         ],
       ],
     );
@@ -62,7 +75,7 @@ class _AuthSignedInPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -71,7 +84,9 @@ class _AuthSignedInPanel extends StatelessWidget {
         const SizedBox(height: 8),
         FilledButton.tonal(
           onPressed: model.loadingMe ? null : callbacks.onCallMe,
-          child: Text(model.loadingMe ? l10n.authRequestInProgress : l10n.authGetMeBearer),
+          child: Text(
+            model.loadingMe ? l10n.authRequestInProgress : l10n.authGetMeBearer,
+          ),
         ),
         if (model.meBody != null) ...[
           const SizedBox(height: 8),
@@ -79,7 +94,9 @@ class _AuthSignedInPanel extends StatelessWidget {
         ],
         const SizedBox(height: 8),
         FilledButton.tonal(
-          onPressed: model.loadingDevSwitchProbe ? null : callbacks.onCallDevSwitchProbe,
+          onPressed: model.loadingDevSwitchProbe
+              ? null
+              : callbacks.onCallDevSwitchProbe,
           child: Text(
             model.loadingDevSwitchProbe
                 ? l10n.authRequestInProgress
@@ -92,8 +109,9 @@ class _AuthSignedInPanel extends StatelessWidget {
         ],
         const SizedBox(height: 8),
         FilledButton.tonal(
-          onPressed:
-              model.loadingMemoryConfigProbe ? null : callbacks.onCallMemoryConfigProbe,
+          onPressed: model.loadingMemoryConfigProbe
+              ? null
+              : callbacks.onCallMemoryConfigProbe,
           child: Text(
             model.loadingMemoryConfigProbe
                 ? l10n.authRequestInProgress
@@ -102,11 +120,15 @@ class _AuthSignedInPanel extends StatelessWidget {
         ),
         if (model.memoryConfigProbeBody != null) ...[
           const SizedBox(height: 8),
-          SelectableText(l10n.authMemoryConfigResponse(model.memoryConfigProbeBody!)),
+          SelectableText(
+            l10n.authMemoryConfigResponse(model.memoryConfigProbeBody!),
+          ),
         ],
         const SizedBox(height: 8),
         FilledButton.tonal(
-          onPressed: model.loadingAboutProbe ? null : callbacks.onCallAboutProbe,
+          onPressed: model.loadingAboutProbe
+              ? null
+              : callbacks.onCallAboutProbe,
           child: Text(
             model.loadingAboutProbe
                 ? l10n.authRequestInProgress
@@ -119,9 +141,13 @@ class _AuthSignedInPanel extends StatelessWidget {
         ],
         const SizedBox(height: 8),
         FilledButton.tonal(
-          onPressed: model.loadingUsageSummary ? null : callbacks.onCallUsageSummary,
+          onPressed: model.loadingUsageSummary
+              ? null
+              : callbacks.onCallUsageSummary,
           child: Text(
-            model.loadingUsageSummary ? l10n.authRequestInProgress : l10n.authUsageSummary,
+            model.loadingUsageSummary
+                ? l10n.authRequestInProgress
+                : l10n.authUsageSummary,
           ),
         ),
         if (model.usageSummaryBody != null) ...[
@@ -130,9 +156,13 @@ class _AuthSignedInPanel extends StatelessWidget {
         ],
         const SizedBox(height: 8),
         FilledButton.tonal(
-          onPressed: model.loadingPromptsProbe ? null : callbacks.onCallPromptsProbe,
+          onPressed: model.loadingPromptsProbe
+              ? null
+              : callbacks.onCallPromptsProbe,
           child: Text(
-            model.loadingPromptsProbe ? l10n.authRequestInProgress : l10n.authPromptsProbe,
+            model.loadingPromptsProbe
+                ? l10n.authRequestInProgress
+                : l10n.authPromptsProbe,
           ),
         ),
         if (model.promptsProbeBody != null) ...[
@@ -141,20 +171,26 @@ class _AuthSignedInPanel extends StatelessWidget {
         ],
         const SizedBox(height: 8),
         FilledButton.tonal(
-          onPressed:
-              model.loadingVisualManualProbe ? null : callbacks.onCallVisualManualProbe,
+          onPressed: model.loadingVisualManualProbe
+              ? null
+              : callbacks.onCallVisualManualProbe,
           child: Text(
-            model.loadingVisualManualProbe ? l10n.authRequestInProgress : l10n.authVisualManualProbe,
+            model.loadingVisualManualProbe
+                ? l10n.authRequestInProgress
+                : l10n.authVisualManualProbe,
           ),
         ),
         if (model.visualManualProbeBody != null) ...[
           const SizedBox(height: 8),
-          SelectableText(l10n.authVisualManualResponse(model.visualManualProbeBody!)),
+          SelectableText(
+            l10n.authVisualManualResponse(model.visualManualProbeBody!),
+          ),
         ],
         const SizedBox(height: 8),
         FilledButton.tonal(
-          onPressed:
-              model.loadingDirectorManualProbe ? null : callbacks.onCallDirectorManualProbe,
+          onPressed: model.loadingDirectorManualProbe
+              ? null
+              : callbacks.onCallDirectorManualProbe,
           child: Text(
             model.loadingDirectorManualProbe
                 ? l10n.authRequestInProgress
@@ -163,12 +199,15 @@ class _AuthSignedInPanel extends StatelessWidget {
         ),
         if (model.directorManualProbeBody != null) ...[
           const SizedBox(height: 8),
-          SelectableText(l10n.authDirectorManualResponse(model.directorManualProbeBody!)),
+          SelectableText(
+            l10n.authDirectorManualResponse(model.directorManualProbeBody!),
+          ),
         ],
         const SizedBox(height: 8),
         FilledButton.tonal(
-          onPressed:
-              model.loadingSkillsBinaryProbe ? null : callbacks.onCallSkillsBinaryProbe,
+          onPressed: model.loadingSkillsBinaryProbe
+              ? null
+              : callbacks.onCallSkillsBinaryProbe,
           child: Text(
             model.loadingSkillsBinaryProbe
                 ? l10n.authRequestInProgress
@@ -177,7 +216,9 @@ class _AuthSignedInPanel extends StatelessWidget {
         ),
         if (model.skillsBinaryProbeBody != null) ...[
           const SizedBox(height: 8),
-          SelectableText(l10n.authSkillsBinaryResponse(model.skillsBinaryProbeBody!)),
+          SelectableText(
+            l10n.authSkillsBinaryResponse(model.skillsBinaryProbeBody!),
+          ),
         ],
         const SizedBox(height: 8),
         Wrap(
@@ -185,7 +226,9 @@ class _AuthSignedInPanel extends StatelessWidget {
           runSpacing: 8,
           children: [
             FilledButton.tonal(
-              onPressed: model.loadingModelsCatalog ? null : callbacks.onCallModelsCatalog,
+              onPressed: model.loadingModelsCatalog
+                  ? null
+                  : callbacks.onCallModelsCatalog,
               child: Text(
                 model.loadingModelsCatalog
                     ? l10n.authRequestInProgress
@@ -193,8 +236,9 @@ class _AuthSignedInPanel extends StatelessWidget {
               ),
             ),
             FilledButton.tonal(
-              onPressed:
-                  model.loadingTextModelDefault ? null : callbacks.onCallTextModelDefault,
+              onPressed: model.loadingTextModelDefault
+                  ? null
+                  : callbacks.onCallTextModelDefault,
               child: Text(
                 model.loadingTextModelDefault
                     ? l10n.authRequestInProgress
@@ -202,7 +246,9 @@ class _AuthSignedInPanel extends StatelessWidget {
               ),
             ),
             FilledButton.tonal(
-              onPressed: model.loadingModelDetail ? null : callbacks.onCallModelDetail,
+              onPressed: model.loadingModelDetail
+                  ? null
+                  : callbacks.onCallModelDetail,
               child: Text(
                 model.loadingModelDetail
                     ? l10n.authRequestInProgress
@@ -217,7 +263,9 @@ class _AuthSignedInPanel extends StatelessWidget {
         ],
         if (model.textModelDefaultBody != null) ...[
           const SizedBox(height: 8),
-          SelectableText(l10n.authTextDefaultResponse(model.textModelDefaultBody!)),
+          SelectableText(
+            l10n.authTextDefaultResponse(model.textModelDefaultBody!),
+          ),
         ],
         if (model.modelDetailBody != null) ...[
           const SizedBox(height: 8),
@@ -227,4 +275,3 @@ class _AuthSignedInPanel extends StatelessWidget {
     );
   }
 }
-

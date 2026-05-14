@@ -13648,6 +13648,158 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get authSupabaseAuthTitle => 'Supabase authentication';
+
+  @override
+  String get authEmailFieldLabel => 'Email';
+
+  @override
+  String get authPasswordFieldLabel => 'Password';
+
+  @override
+  String get agentWorkspaceScriptArgFillFirstChapter => 'Fill first chapter';
+
+  @override
+  String get agentWorkspaceScriptArgFillFirstThreeChapters =>
+      'Fill first 3 chapters';
+
+  @override
+  String get agentWorkspaceScriptArgCarryChapterToEvents =>
+      'Carry chapter selection to events';
+
+  @override
+  String get agentWorkspaceRunProjectUuidInvalid =>
+      'Invalid project UUID format';
+
+  @override
+  String get agentWorkspaceRunProjectScopeRequired =>
+      'Enter a project UUID or a positive numeric project id';
+
+  @override
+  String get agentWorkspaceRunWorkspaceUuidInvalid =>
+      'Invalid workspace UUID format';
+
+  @override
+  String get agentWorkspaceRunScriptUuidInvalid => 'Invalid script UUID format';
+
+  @override
+  String get agentWorkspaceRunScriptScopeRequired =>
+      'Enter a script UUID or a positive numeric script id';
+
+  @override
+  String get agentWorkspaceRunPromptRequired => 'Prompt cannot be empty';
+
+  @override
+  String get agentWorkspaceRunToolNameRequired => 'Tool name cannot be empty';
+
+  @override
+  String get agentWorkspaceRunGetScriptContentNeedsScriptId =>
+      'get_script_content requires a valid script id';
+
+  @override
+  String get agentWorkspaceRunScriptArgsMustBeObject =>
+      'Script tool arguments must be a JSON object';
+
+  @override
+  String get agentWorkspaceRunScriptArgsJsonInvalid =>
+      'Failed to parse script tool arguments JSON';
+
+  @override
+  String get agentWorkspaceRunPromptAndToolRequired =>
+      'Prompt and tool cannot be empty';
+
+  @override
+  String get agentWorkspaceRunProductionArgsMustBeObject =>
+      'Production tool arguments must be a JSON object';
+
+  @override
+  String get agentWorkspaceRunProductionArgsJsonInvalid =>
+      'Failed to parse production tool arguments JSON';
+
+  @override
+  String get agentWorkspaceRunGetFlowDataNeedsKey =>
+      'get_flowData requires a non-empty key';
+
+  @override
+  String get agentWorkspaceRunProductionSubAgentArgsMustBeObject =>
+      'Production sub-agent arguments must be a JSON object';
+
+  @override
+  String get agentWorkspaceRunProductionSubAgentArgsJsonInvalid =>
+      'Failed to parse production sub-agent arguments JSON';
+
+  @override
+  String get agentWorkspaceWritebackScriptInputsInvalid =>
+      'Valid project, script id, and writeback content are required';
+
+  @override
+  String get agentWorkspaceWritebackProjectNotFound => 'Project not found';
+
+  @override
+  String agentWorkspaceWritebackScriptSuccess(
+    int numericId,
+    String source,
+    int length,
+  ) {
+    return 'Writeback succeeded: script $numericId updated, source=$source, content length $length.';
+  }
+
+  @override
+  String get agentWorkspaceWritebackPlanInputsInvalid =>
+      'Valid project id and planData writeback source are required';
+
+  @override
+  String get agentWorkspaceWritebackPlanDataMissingData =>
+      'planData result is missing the data field';
+
+  @override
+  String agentWorkspaceWritebackPlanDataSetSuccess(
+    int projectId,
+    int rowCount,
+  ) {
+    return 'Writeback succeeded: script-agent planData updated (project=$projectId, script_rows=$rowCount).';
+  }
+
+  @override
+  String get agentWorkspaceWritebackNeedPlanRowAndPlanData =>
+      'Plan row id and planData are required: fetch get_planData first (including plan row id)';
+
+  @override
+  String agentWorkspaceWritebackPlanDataUpdateSuccess(
+    int planRowId,
+    int rowCount,
+  ) {
+    return 'Writeback succeeded: script-agent update-data (plan_row_id=$planRowId, script_rows=$rowCount).';
+  }
+
+  @override
+  String get agentWorkspaceWritebackNeedToolResultFirst =>
+      'Run a tool and obtain a result before writeback';
+
+  @override
+  String get agentWorkspaceWritebackMissingToolSource =>
+      'Missing tool source; cannot write back safely';
+
+  @override
+  String agentWorkspaceWritebackCoreFlowOverwriteBlocked(String flowKey) {
+    return 'This tool result cannot overwrite core flow[$flowKey]. Use an extension key (for example workspaceResult) or call get_flowData first.';
+  }
+
+  @override
+  String get agentWorkspaceWritebackPayloadEmptyRefreshFlowKey =>
+      'Writeback payload is empty; refresh the flow key and try again';
+
+  @override
+  String agentWorkspaceWritebackFlowSaved(
+    String flowKey,
+    int projectId,
+    int scriptId,
+    String source,
+  ) {
+    return 'Writeback succeeded: flow[$flowKey] saved to project $projectId / script $scriptId (source=$source).';
+  }
+
+  @override
   String get shortVideoSpaceDialogExportProgressTitle => 'Export Progress';
 
   @override

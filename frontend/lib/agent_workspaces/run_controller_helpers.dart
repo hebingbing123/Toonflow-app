@@ -18,19 +18,25 @@ bool _looksLikeUuid(String raw) {
   ).hasMatch(t);
 }
 
-({String? projectUuid, int? projectNumeric, String? error}) _parseProjectAttachInputs(
+({String? projectUuid, int? projectNumeric, String? error})
+_parseProjectAttachInputs(
   WorkspaceInputController input,
+  AppLocalizations l10n,
 ) {
   final uuidRaw = _trimmedNonEmpty(input.projectUuidController.text);
   if (uuidRaw != null && !_looksLikeUuid(uuidRaw)) {
-    return (projectUuid: null, projectNumeric: null, error: 'projectUuid 格式无效');
+    return (
+      projectUuid: null,
+      projectNumeric: null,
+      error: l10n.agentWorkspaceRunProjectUuidInvalid,
+    );
   }
   final numeric = _parsePositiveInt(input.projectIdController.text);
   if (uuidRaw == null && numeric == null) {
     return (
       projectUuid: null,
       projectNumeric: null,
-      error: '请填写 projectUuid 或正整数 project_id',
+      error: l10n.agentWorkspaceRunProjectScopeRequired,
     );
   }
   return (projectUuid: uuidRaw, projectNumeric: numeric, error: null);
@@ -38,28 +44,38 @@ bool _looksLikeUuid(String raw) {
 
 ({String? workspaceUuid, String? error}) _parseOptionalWorkspaceUuid(
   WorkspaceInputController input,
+  AppLocalizations l10n,
 ) {
   final raw = _trimmedNonEmpty(input.workspaceUuidController.text);
   if (raw == null) return (workspaceUuid: null, error: null);
   if (!_looksLikeUuid(raw)) {
-    return (workspaceUuid: null, error: 'workspaceUuid 格式无效');
+    return (
+      workspaceUuid: null,
+      error: l10n.agentWorkspaceRunWorkspaceUuidInvalid,
+    );
   }
   return (workspaceUuid: raw, error: null);
 }
 
-({String? scriptUuid, int? scriptNumeric, String? error}) _parseScriptAttachInputs(
+({String? scriptUuid, int? scriptNumeric, String? error})
+_parseScriptAttachInputs(
   WorkspaceInputController input,
+  AppLocalizations l10n,
 ) {
   final uuidRaw = _trimmedNonEmpty(input.scriptUuidController.text);
   if (uuidRaw != null && !_looksLikeUuid(uuidRaw)) {
-    return (scriptUuid: null, scriptNumeric: null, error: 'scriptUuid 格式无效');
+    return (
+      scriptUuid: null,
+      scriptNumeric: null,
+      error: l10n.agentWorkspaceRunScriptUuidInvalid,
+    );
   }
   final numeric = _parsePositiveInt(input.scriptIdController.text);
   if (uuidRaw == null && numeric == null) {
     return (
       scriptUuid: null,
       scriptNumeric: null,
-      error: '请填写 scriptUuid 或正整数 script_id',
+      error: l10n.agentWorkspaceRunScriptScopeRequired,
     );
   }
   return (scriptUuid: uuidRaw, scriptNumeric: numeric, error: null);
