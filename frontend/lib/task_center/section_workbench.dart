@@ -83,7 +83,7 @@ class _TaskCenterWorkbenchDialogState
   }
 
   Future<void> _loadProjects() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     setState(() {
       _loadingProjects = true;
       _statusLine = null;
@@ -122,7 +122,7 @@ class _TaskCenterWorkbenchDialogState
   }
 
   Future<void> _loadCategories() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     setState(() {
       _loadingCategories = true;
       _statusLine = null;
@@ -146,7 +146,7 @@ class _TaskCenterWorkbenchDialogState
   }
 
   Future<void> _loadTasks() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final page = int.tryParse(_ctrls.pageCtrl.text.trim()) ?? 1;
     final limit = int.tryParse(_ctrls.limitCtrl.text.trim()) ?? 10;
     final state = _ctrls.stateCtrl.text.trim();
@@ -205,7 +205,7 @@ class _TaskCenterWorkbenchDialogState
   }
 
   Future<void> _loadNumericIdTaskDetail() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final taskId = int.tryParse(_ctrls.numericTaskIdCtrl.text.trim());
     if (taskId == null) {
       setState(() => _statusLine = l10n.taskCenterErrInvalidNumericTaskId);
@@ -233,7 +233,7 @@ class _TaskCenterWorkbenchDialogState
   }
 
   Future<void> _loadUuidDetails() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final taskId = _ctrls.uuidCtrl.text.trim();
     if (taskId.isEmpty) {
       setState(() => _statusLine = l10n.taskCenterErrFillTaskUuid);
@@ -261,7 +261,7 @@ class _TaskCenterWorkbenchDialogState
   }
 
   Future<void> _retryFailedJob(JobRow job) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     if (job.status != 'failed') {
       return;
     }
@@ -286,7 +286,7 @@ class _TaskCenterWorkbenchDialogState
   }
 
   Future<void> _cancelQueuedJob(JobRow job) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     if (job.status != 'queued' && job.status != 'running') {
       return;
     }
@@ -311,7 +311,7 @@ class _TaskCenterWorkbenchDialogState
   }
 
   Future<void> _runWritebackCompensation(JobRow job) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     setState(() {
       _ctrls.uuidCtrl.text = job.id;
       _ctrls.numericTaskIdCtrl.text = job.numericTaskId.toString();
@@ -368,7 +368,7 @@ class _TaskCenterWorkbenchDialogState
   }
 
   void _handleWsMessage(String raw) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     try {
       final decoded = jsonDecode(raw);
       if (decoded is! Map<String, dynamic> ||
@@ -389,7 +389,7 @@ class _TaskCenterWorkbenchDialogState
   }
 
   void _mergeJobUpdate(JobRow row, {required String origin}) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final nextJobs = List<JobRow>.from(_jobs);
     final index = nextJobs.indexWhere((item) => item.id == row.id);
     final matchesFilters = _matchesCurrentFilters(row);
@@ -436,7 +436,7 @@ class _TaskCenterWorkbenchDialogState
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final projectSummary = summarizeTaskProjects(l10n, _projects);
     final phaseFilter = _ctrls.productionPhaseCtrl.text.trim();
     final filteredJobs = phaseFilter.isEmpty

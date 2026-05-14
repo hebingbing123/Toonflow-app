@@ -170,10 +170,11 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
       });
     } catch (error) {
       if (!mounted) return;
+      final errL10n = resolveAppLocalizationsForErrors(context);
       setState(() {
         _statusLine = l10n.benchmarkStatusFailed(
           label,
-          describeUserVisibleApiError(l10n, error),
+          describeUserVisibleApiError(errL10n, error),
         );
       });
     } finally {
@@ -223,7 +224,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
   Widget build(BuildContext context) {
     final outline = Theme.of(context).colorScheme.outline;
     final projectId = int.tryParse(_projectIdCtrl.text.trim());
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

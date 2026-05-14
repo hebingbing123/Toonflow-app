@@ -196,7 +196,7 @@ class ShortVideoErrorHandler {
   }) {
     if (!context.mounted) return;
 
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final messenger = ScaffoldMessenger.of(context);
     final snackBar = SnackBar(
       content: Text(result.userMessage),
@@ -260,7 +260,6 @@ class ShortVideoErrorHandler {
     bool showErrorToUser = true,
   }) async {
     if (!context.mounted) return null;
-    final l10n = AppLocalizations.of(context)!;
     int attemptCount = 0;
 
     while (attemptCount <= maxRetries) {
@@ -268,6 +267,8 @@ class ShortVideoErrorHandler {
         return await operation();
       } catch (error) {
         attemptCount++;
+        if (!context.mounted) return null;
+        final l10n = resolveAppLocalizationsForErrors(context);
 
         final result = handleApiError(
           error,
@@ -318,7 +319,7 @@ class ShortVideoErrorHandler {
     int maxConcurrent = 5,
   }) async {
     if (!context.mounted) return (0, 0, <String>[]);
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     int completed = 0;
     int failed = 0;
     final List<String> failureDetails = [];
