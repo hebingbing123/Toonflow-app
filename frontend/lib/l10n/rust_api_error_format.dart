@@ -76,6 +76,16 @@ String describeUserVisibleApiError(AppLocalizations l10n, Object error) {
   return l10n.rustApiClientUnknownError(error.toString());
 }
 
+/// [AppLocalizations] from [context] when delegates are present; otherwise English lookup.
+///
+/// Prefer over [AppLocalizations.of]! in async error paths so tests and edge contexts
+/// without a full localization subtree do not throw; aligns with controller
+/// `_l10n ?? lookupAppLocalizations(const Locale('en'))` resolution.
+AppLocalizations resolveAppLocalizationsForErrors(BuildContext context) {
+  return AppLocalizations.of(context) ??
+      lookupAppLocalizations(const Locale('en'));
+}
+
 /// When no [BuildContext] is available (e.g. global snackbars, controllers).
 ///
 /// Uses [AppLocaleNotifier] when the user pinned `en` or `zh`; otherwise

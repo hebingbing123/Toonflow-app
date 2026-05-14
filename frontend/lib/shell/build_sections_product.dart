@@ -785,7 +785,10 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
         return;
       }
       setState(() {
-        _error = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
+        _error = describeUserVisibleApiError(
+          resolveAppLocalizationsForErrors(context),
+          e,
+        );
       });
     } finally {
       if (_isCurrentLoadRequest(requestEpoch, token, workspaceId)) {
@@ -832,7 +835,10 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
         return;
       }
       setState(() {
-        _error = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
+        _error = describeUserVisibleApiError(
+          resolveAppLocalizationsForErrors(context),
+          e,
+        );
       });
     } finally {
       if (mounted) {
@@ -883,7 +889,10 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
         return;
       }
       setState(() {
-        _error = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
+        _error = describeUserVisibleApiError(
+          resolveAppLocalizationsForErrors(context),
+          e,
+        );
       });
     } finally {
       if (mounted) {
@@ -935,7 +944,10 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
         return;
       }
       setState(() {
-        _error = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
+        _error = describeUserVisibleApiError(
+          resolveAppLocalizationsForErrors(context),
+          e,
+        );
       });
     } finally {
       if (mounted) {
@@ -990,7 +1002,10 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
         return;
       }
       setState(() {
-        _error = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
+        _error = describeUserVisibleApiError(
+          resolveAppLocalizationsForErrors(context),
+          e,
+        );
       });
     } finally {
       if (mounted) {
@@ -1464,7 +1479,10 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         return;
       }
       setState(() {
-        _error = describeUserVisibleApiError(AppLocalizations.of(context)!, e);
+        _error = describeUserVisibleApiError(
+          resolveAppLocalizationsForErrors(context),
+          e,
+        );
         _resp = null;
         _helpHubConfig = null;
       });

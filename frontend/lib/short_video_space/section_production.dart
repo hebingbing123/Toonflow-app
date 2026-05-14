@@ -61,11 +61,11 @@ extension _ShortVideoSpaceSectionProductionExtension
       if (!mounted) {
         return;
       }
+      final l10nErr = resolveAppLocalizationsForErrors(context);
       setState(() {
         _batchCandidateBusy = false;
-        _projectConfigLine =
-            AppLocalizations.of(context)!.shortVideoProductionBatchFailed(
-          describeUserVisibleApiError(AppLocalizations.of(context)!, e),
+        _projectConfigLine = l10nErr.shortVideoProductionBatchFailed(
+          describeUserVisibleApiError(l10nErr, e),
         );
       });
     }
@@ -389,10 +389,10 @@ extension _ShortVideoSpaceSectionProductionExtension
       await _loadProjectOverview();
     } catch (e) {
       if (!mounted) return;
+      final l10nErr = resolveAppLocalizationsForErrors(context);
       setState(() {
-        _projectConfigLine = AppLocalizations.of(context)!
-            .shortVideoProductionSetCurrentFailed(
-          describeUserVisibleApiError(AppLocalizations.of(context)!, e),
+        _projectConfigLine = l10nErr.shortVideoProductionSetCurrentFailed(
+          describeUserVisibleApiError(l10nErr, e),
         );
       });
     }

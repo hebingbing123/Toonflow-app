@@ -379,7 +379,7 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
                       min: 0,
                       max: 1,
                       divisions: 20,
-                      label: AppLocalizations.of(context)!.shortVideoAudioVolumePercent(
+                      label: l10n.shortVideoAudioVolumePercent(
                         (_volume * 100).toInt(),
                       ),
                       onChanged: _setVolume,
@@ -390,7 +390,7 @@ class _AudioPreviewPlayerState extends State<AudioPreviewPlayer> {
                 SizedBox(
                   width: 40,
                   child: Text(
-                    AppLocalizations.of(context)!.shortVideoAudioVolumePercent(
+                    l10n.shortVideoAudioVolumePercent(
                       (_volume * 100).toInt(),
                     ),
                     textAlign: TextAlign.right,
