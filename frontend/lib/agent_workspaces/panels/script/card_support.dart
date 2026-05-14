@@ -54,7 +54,9 @@ extension _AgentWorkspaceScriptCardSupport on _AgentWorkspaceScriptCardState {
   }
 
   List<ScriptWorkspaceRecipe> _buildWorkspaceRecipes() {
+    final l10n = AppLocalizations.of(context)!;
     return buildScriptWorkspaceRecipes(
+      l10n: l10n,
       toolName: widget.workspaceLastToolName,
       result: widget.workspaceLastToolResultData,
       scopeScriptId: _scopeScriptId,
@@ -62,7 +64,9 @@ extension _AgentWorkspaceScriptCardSupport on _AgentWorkspaceScriptCardState {
   }
 
   List<ScriptWorkspaceStage> _buildWorkspaceStages() {
+    final l10n = AppLocalizations.of(context)!;
     return buildScriptWorkspaceStages(
+      l10n: l10n,
       toolName: widget.workspaceLastToolName,
       result: widget.workspaceLastToolResultData,
       scopeScriptId: _scopeScriptId,

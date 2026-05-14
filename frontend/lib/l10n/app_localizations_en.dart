@@ -18379,6 +18379,279 @@ class AppLocalizationsEn extends AppLocalizations {
       'Agent workspace script apply suggestion';
 
   @override
+  String get agentWorkspaceScriptRecipeAddChapterMaterialDetail =>
+      "To keep revising, pull novel text and events instead of staring only at the current script.";
+  @override
+  String get agentWorkspaceScriptRecipeAddChapterMaterialTitle =>
+      "Add chapter material";
+  @override
+  String get agentWorkspaceScriptRecipeAddNovelTextWindowDetail =>
+      "When the review needs the original prose, read a bounded chapter window instead of whole chapters.";
+  @override
+  String get agentWorkspaceScriptRecipeAddNovelTextWindowTitle =>
+      "Add novel text window";
+  @override
+  String get agentWorkspaceScriptRecipeCompareExistingScriptDetail =>
+      "Use the current event chain to diff the existing body and spot missing beats faster.";
+  @override
+  String get agentWorkspaceScriptRecipeCompareExistingScriptTitle =>
+      "Compare with existing script";
+  @override
+  String get agentWorkspaceScriptRecipeDistillSkeletonFromEventsDetail =>
+      "Events are clear enough\u2014tighten into storySkeleton first.";
+  @override
+  String get agentWorkspaceScriptRecipeDistillSkeletonFromEventsPrompt =>
+      "From the current event list, distill a story skeleton with key conflict, turning points, and ending direction.";
+  @override
+  String get agentWorkspaceScriptRecipeDistillSkeletonFromEventsTitle =>
+      "Distill story skeleton";
+  @override
+  String get agentWorkspaceScriptRecipeFillAdaptationDetail =>
+      "Beyond the skeleton, adaptationStrategy is still missing\u2014tighten the adaptation path first.";
+  @override
+  String get agentWorkspaceScriptRecipeFillAdaptationPrompt =>
+      "From the existing story skeleton, complete adaptationStrategy with pacing, character arcs, and episode split rules.";
+  @override
+  String get agentWorkspaceScriptRecipeFillAdaptationTitle =>
+      "Fill adaptation strategy";
+  @override
+  String get agentWorkspaceScriptRecipeFillStorySkeletonDetail =>
+      "planData has no storySkeleton yet\u2014run the skeleton sub-agent first.";
+  @override
+  String get agentWorkspaceScriptRecipeFillStorySkeletonPrompt =>
+      "Generate a clear story skeleton from the current project context, highlighting main conflict and reversal beats.";
+  @override
+  String get agentWorkspaceScriptRecipeFillStorySkeletonTitle =>
+      "Fill story skeleton";
+  @override
+  String get agentWorkspaceScriptRecipeGenerateAdaptationFromTextDetail =>
+      "Chapter material is readable\u2014run the adaptation-strategy sub-agent for a tightened plan.";
+  @override
+  String get agentWorkspaceScriptRecipeGenerateAdaptationFromTextPrompt =>
+      "Summarize an adaptation strategy from the current chapter text with 3\u20135 actionable rewrite rules.";
+  @override
+  String get agentWorkspaceScriptRecipeGenerateAdaptationFromTextTitle =>
+      "Generate adaptation strategy";
+  @override
+  String get agentWorkspaceScriptRecipeGenerateNextScriptDetail =>
+      "Plan info is ready\u2014consume the planned script draft and required events first, then let the script sub-agent output the next write-back-ready body.";
+  @override
+  String get agentWorkspaceScriptRecipeGenerateNextScriptPrompt =>
+      "Read this episode\u2019s planData.script draft, storySkeleton, and adaptationStrategy first, then add the minimum target chapter events; only read the previous episode\u2019s tail or chapter text windows when details or transitions are insufficient, then output a complete script body ready to write back.";
+  @override
+  String get agentWorkspaceScriptRecipeGenerateNextScriptTitle =>
+      "Generate next script version";
+  @override
+  String get agentWorkspaceScriptRecipeGenerateScriptBodyDetail =>
+      "Body is empty\u2014run the script sub-agent for a first version.";
+  @override
+  String get agentWorkspaceScriptRecipeGenerateScriptBodyPrompt =>
+      "Read this episode\u2019s planData.script, storySkeleton, adaptationStrategy, and target chapter events first; only add text windows when details are insufficient, then produce a complete script body.";
+  @override
+  String get agentWorkspaceScriptRecipeGenerateScriptBodyTitle =>
+      "Generate script body";
+  @override
+  String get agentWorkspaceScriptRecipeGenerateScriptFromEventsDetail =>
+      "If the event chain is mostly complete, run the script sub-agent for write-back-ready body.";
+  @override
+  String get agentWorkspaceScriptRecipeGenerateScriptFromEventsPrompt =>
+      "Combine the current event outline and prefer reading planData.script, storySkeleton, and adaptationStrategy; only widen to chapter text when details are insufficient, then output a script body ready to write back.";
+  @override
+  String get agentWorkspaceScriptRecipeGenerateScriptFromEventsTitle =>
+      "Generate script draft";
+  @override
+  String get agentWorkspaceScriptRecipePreferEventsDetail =>
+      "When chapter text is empty, reading the event list first makes plot gaps easier to spot.";
+  @override
+  String get agentWorkspaceScriptRecipePreferEventsTitle =>
+      "Switch to event outline";
+  @override
+  String get agentWorkspaceScriptRecipePullChapterMaterialDetail =>
+      "No script draft in the plan yet\u2014read novel chapter text for context first.";
+  @override
+  String get agentWorkspaceScriptRecipePullChapterMaterialTitle =>
+      "Pull chapter material";
+  @override
+  String get agentWorkspaceScriptRecipePullChapterTextFirstDetail =>
+      "When the event list is empty, read chapter text first to tell missing data from missing extraction.";
+  @override
+  String get agentWorkspaceScriptRecipePullChapterTextFirstTitle =>
+      "Pull chapter text first";
+  @override
+  String get agentWorkspaceScriptRecipeReadMatchingEventsDetail =>
+      "Chapter text is in place\u2014pull the same chapter\u2019s events next to summarize conflict cleanly.";
+  @override
+  String get agentWorkspaceScriptRecipeReadMatchingEventsTitle =>
+      "Read matching events";
+  @override
+  String get agentWorkspaceScriptRecipeReadPlanScriptDraftDetail =>
+      "planData.script already has a draft for this episode\u2014consume that structured draft before widening novel reads to save tokens.";
+  @override
+  String get agentWorkspaceScriptRecipeReadPlanScriptDraftTitle =>
+      "Read planned script draft";
+  @override
+  String get agentWorkspaceScriptRecipeReadScriptBodyDetail =>
+      "After planData is ready, compare whether the current script body has drifted.";
+  @override
+  String get agentWorkspaceScriptRecipeReadScriptBodyTitle =>
+      "Read current script body";
+  @override
+  String get agentWorkspaceScriptRecipeRefreshPlanAfterBodyDetail =>
+      "After you have body text, revisit planData to see whether skeleton or strategy needs syncing.";
+  @override
+  String get agentWorkspaceScriptRecipeRefreshPlanAfterBodyTitle =>
+      "Refresh plan data";
+  @override
+  String get agentWorkspaceScriptRecipeRefreshPlanDataDetail =>
+      "If the body is empty and context feels thin, return to planData to verify skeleton and strategy.";
+  @override
+  String get agentWorkspaceScriptRecipeRefreshPlanDataTitle =>
+      "Refresh plan data";
+  @override
+  String get agentWorkspaceScriptRecipeRereadCurrentScriptDetail =>
+      "Re-read this episode\u2019s tail window first, then decide whether to keep revising.";
+  @override
+  String get agentWorkspaceScriptRecipeRereadCurrentScriptTitle =>
+      "Re-read current script";
+  @override
+  String get agentWorkspaceScriptRecipeReviewPreviousTailDetail =>
+      "After chapter material is clear, compare this episode\u2019s tail to spot transition gaps with fewer tokens.";
+  @override
+  String get agentWorkspaceScriptRecipeReviewPreviousTailTitle =>
+      "Review previous tail";
+  @override
+  String get agentWorkspaceScriptRecipeReviewTargetPeekDetail =>
+      "Read the review\u2019s primary content first, then decide whether to rerun the sub-agent.";
+  @override
+  String get agentWorkspaceScriptRecipeReviewTargetPeekTitle =>
+      "Peek review target";
+  @override
+  String get agentWorkspaceScriptRecipeReviseAdaptationDetail =>
+      "The review thinks the strategy conflicts with the skeleton or format\u2014revise strategy locally first.";
+  @override
+  String get agentWorkspaceScriptRecipeReviseAdaptationPrompt =>
+      "Read adaptationStrategy and storySkeleton first, then add event windows as needed, and revise adaptationStrategy toward the review.";
+  @override
+  String get agentWorkspaceScriptRecipeReviseAdaptationTitle =>
+      "Revise adaptation strategy";
+  @override
+  String get agentWorkspaceScriptRecipeReviseScriptDetail =>
+      "The review pinpointed script issues\u2014read this episode\u2019s tail window before targeted edits.";
+  @override
+  String get agentWorkspaceScriptRecipeReviseScriptPrompt =>
+      "Read this episode\u2019s tail window, storySkeleton, and adaptationStrategy first; if still insufficient, add chapter text windows, then revise this episode\u2019s script toward the review.";
+  @override
+  String get agentWorkspaceScriptRecipeReviseScriptTitle =>
+      "Revise script body";
+  @override
+  String get agentWorkspaceScriptRecipeReviseStorySkeletonDetail =>
+      "The review still sees skeleton gaps\u2014return to storySkeleton for targeted edits.";
+  @override
+  String get agentWorkspaceScriptRecipeReviseStorySkeletonPrompt =>
+      "Read storySkeleton and related event windows first; add chapter text windows only if information is still thin, then revise the skeleton toward the review.";
+  @override
+  String get agentWorkspaceScriptRecipeReviseStorySkeletonTitle =>
+      "Revise story skeleton";
+  @override
+  String get agentWorkspaceScriptRecipeVerifyEventsDetail =>
+      "The review suggests revisiting the event chain\u2014prefer novel events over full chapter text.";
+  @override
+  String get agentWorkspaceScriptRecipeVerifyEventsTitle =>
+      "Verify event outline";
+  @override
+  String get agentWorkspaceScriptStageDetailAdaptationPendingGen =>
+      "adaptationStrategy is missing\u2014tighten character and pacing strategy first.";
+  @override
+  String get agentWorkspaceScriptStageDetailAdaptationPendingRead =>
+      "Re-read planData to see whether adaptationStrategy exists.";
+  @override
+  String get agentWorkspaceScriptStageDetailAdaptationReady =>
+      "adaptationStrategy exists; continue reading chapter material or generate script body.";
+  @override
+  String get agentWorkspaceScriptStageDetailChapterMaterialEmptyNovel =>
+      "No novel context yet\u2014keep reading chapter text or event outlines.";
+  @override
+  String get agentWorkspaceScriptStageDetailChapterMaterialPendingRead =>
+      "Read chapter text or events first, then decide how to rewrite the script.";
+  @override
+  String agentWorkspaceScriptStageDetailChapterMaterialReady(int count) =>
+      "Read $count novel-context rows; continue generating script body or compare with the existing script.";
+  @override
+  String get agentWorkspaceScriptStageDetailReviewAdaptationEmpty =>
+      "Review already covers adaptationStrategy; continue revising using the suggestions.";
+  @override
+  String agentWorkspaceScriptStageDetailReviewConclusion(String summary) =>
+      "Review conclusion: $summary";
+  @override
+  String get agentWorkspaceScriptStageDetailReviewScriptEmpty =>
+      "Review already covers the script body; continue revising using the suggestions.";
+  @override
+  String get agentWorkspaceScriptStageDetailReviewStorySkeletonEmpty =>
+      "Review already covers storySkeleton; continue revising using the suggestions.";
+  @override
+  String get agentWorkspaceScriptStageDetailScriptBodyReady =>
+      "Script body exists; write back or keep editing using plan data.";
+  @override
+  String get agentWorkspaceScriptStageDetailScriptPendingGen =>
+      "Script body is empty\u2014run the script sub-agent to produce a first draft.";
+  @override
+  String get agentWorkspaceScriptStageDetailScriptPendingRead =>
+      "Read the current script body first, then decide whether to generate the next version.";
+  @override
+  String get agentWorkspaceScriptStageDetailStorySkeletonPendingGen =>
+      "Add a story skeleton first\u2014main conflict, turning points, and ending direction.";
+  @override
+  String get agentWorkspaceScriptStageDetailStorySkeletonPendingRead =>
+      "Read planData first to see whether storySkeleton is present.";
+  @override
+  String get agentWorkspaceScriptStageDetailStorySkeletonReady =>
+      "storySkeleton exists; continue tightening adaptationStrategy or compare with script body.";
+  @override
+  String get agentWorkspaceScriptStagePromptGenerateAdaptationStrategy =>
+      "From the existing story skeleton, complete adaptationStrategy with pacing, character arcs, and episode split rules.";
+  @override
+  String get agentWorkspaceScriptStagePromptGenerateScript =>
+      "Read this episode\u2019s plan and target chapter events; only read the previous episode\u2019s tail when continuing from it; otherwise add text windows on demand, then output a complete script body ready to write back.";
+  @override
+  String get agentWorkspaceScriptStagePromptGenerateStorySkeleton =>
+      "Generate a clear story skeleton from the current project context, highlighting main conflict and reversal beats.";
+  @override
+  String get agentWorkspaceScriptStagePromptReviseAdaptationStrategy =>
+      "Read adaptationStrategy and storySkeleton first, then revise adaptationStrategy locally based on the review.";
+  @override
+  String get agentWorkspaceScriptStagePromptReviseScript =>
+      "Read this episode\u2019s tail window, storySkeleton, and adaptationStrategy first; if still thin, add a chapter text window, then revise this episode\u2019s script toward the review.";
+  @override
+  String get agentWorkspaceScriptStagePromptReviseStorySkeleton =>
+      "Read storySkeleton and the related event window first, then revise the story skeleton locally based on the review.";
+  @override
+  String get agentWorkspaceScriptStageStatusCompleted => "Completed";
+  @override
+  String get agentWorkspaceScriptStageStatusNeedsRevision => "Needs revision";
+  @override
+  String get agentWorkspaceScriptStageStatusPendingGenerate =>
+      "Pending generation";
+  @override
+  String get agentWorkspaceScriptStageStatusPendingRead => "Pending read";
+  @override
+  String get agentWorkspaceScriptStageStatusReady => "Ready";
+  @override
+  String get agentWorkspaceScriptStageStatusReusable => "OK to keep";
+  @override
+  String get agentWorkspaceScriptStageStatusSupplementNeeded =>
+      "Needs more context";
+  @override
+  String get agentWorkspaceScriptStageTitleAdaptationStrategy =>
+      "Adaptation strategy";
+  @override
+  String get agentWorkspaceScriptStageTitleChapterMaterial =>
+      "Chapter material";
+  @override
+  String get agentWorkspaceScriptStageTitleScriptBody => "Script body";
+  @override
+  String get agentWorkspaceScriptStageTitleStorySkeleton => "Story skeleton";
+
+  @override
   String agentWorkspaceScriptContextSkeletonFocus(String focus) {
     return '骨架焦点：$focus';
   }
@@ -19644,6 +19917,44 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get benchmarkLabelGateDecisionOptionalAuto =>
       'Decision (empty uses auto decision)';
+
+  @override
+  String get benchmarkGateDecisionHint =>
+      'approved / approved_limited / blocked / needs_review';
+
+  @override
+  String benchmarkGateAssessmentsSummary(int count) {
+    return 'Gate assessments: $count variants';
+  }
+
+  @override
+  String benchmarkTrendsDataSummary(int weeks) {
+    return 'Trend data: $weeks weeks';
+  }
+
+  @override
+  String get shellJobQueueStatsTitle => 'Job queue stats (internal)';
+
+  @override
+  String get shellJobQueueStatsSubtitle =>
+      'Uses INTERNAL_OPS_TOKEN dart-define → GET /api/v1/jobs/queue/stats';
+
+  @override
+  String shellJobQueueStatsStatsLine(
+    String pending,
+    String claimable,
+    String running,
+    String dead,
+    String failed24h,
+    String oldestClaimable,
+  ) {
+    return 'pending=$pending claimable=$claimable running=$running dead=$dead failed_24h=$failed24h oldest_claimable_s=$oldestClaimable';
+  }
+
+  @override
+  String shellJobQueueStatsPendingByKind(String kinds) {
+    return 'pending_by_kind: $kinds';
+  }
 
   @override
   String get benchmarkLabelGateDecisionNote => 'Decision note';

@@ -41,6 +41,7 @@ class _JobQueueStatsCardState extends State<JobQueueStatsCard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -48,12 +49,12 @@ class _JobQueueStatsCardState extends State<JobQueueStatsCard> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Job queue stats (internal)',
+              l10n.shellJobQueueStatsTitle,
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
             Text(
-              'Uses INTERNAL_OPS_TOKEN dart-define → GET /api/v1/jobs/queue/stats',
+              l10n.shellJobQueueStatsSubtitle,
               style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: 12),
@@ -61,25 +62,36 @@ class _JobQueueStatsCardState extends State<JobQueueStatsCard> {
               children: [
                 FilledButton(
                   onPressed: _loading ? null : _load,
-                  child: Text(_loading ? 'Loading…' : 'Refresh'),
+                  child: Text(
+                    _loading ? l10n.helpHubLoading : l10n.helpHubRefresh,
+                  ),
                 ),
               ],
             ),
             if (_error != null) ...[
               const SizedBox(height: 8),
-              SelectableText(_error!, style: const TextStyle(color: Colors.red)),
+              SelectableText(
+                _error!,
+                style: const TextStyle(color: Colors.red),
+              ),
             ],
             if (_stats != null) ...[
               const SizedBox(height: 12),
               SelectableText(
-                'pending=${_stats!.pending} claimable=${_stats!.pendingClaimable} '
-                'running=${_stats!.running} dead=${_stats!.dead} '
-                'failed_24h=${_stats!.failedLast24h} '
-                'oldest_claimable_s=${_stats!.oldestClaimableQueuedAgeSecs ?? 'null'}',
+                l10n.shellJobQueueStatsStatsLine(
+                  '${_stats!.pending}',
+                  '${_stats!.pendingClaimable}',
+                  '${_stats!.running}',
+                  '${_stats!.dead}',
+                  '${_stats!.failedLast24h}',
+                  '${_stats!.oldestClaimableQueuedAgeSecs ?? 'null'}',
+                ),
               ),
               const SizedBox(height: 8),
               SelectableText(
-                'pending_by_kind: ${_stats!.pendingByKind}',
+                l10n.shellJobQueueStatsPendingByKind(
+                  '${_stats!.pendingByKind}',
+                ),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],

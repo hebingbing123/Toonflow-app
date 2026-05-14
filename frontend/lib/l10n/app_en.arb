@@ -13161,6 +13161,113 @@
   "agentWorkspaceScriptSummaryNovelTextCount": "novel text {count}",
   "agentWorkspaceScriptSummaryNovelEventsEmpty": "小说事件 {count} 条",
   "agentWorkspaceScriptSummaryNovelEventsCount": "novel events {count}",
+  "agentWorkspaceScriptStageTitleStorySkeleton": "Story skeleton",
+  "agentWorkspaceScriptStageTitleAdaptationStrategy": "Adaptation strategy",
+  "agentWorkspaceScriptStageTitleChapterMaterial": "Chapter material",
+  "agentWorkspaceScriptStageTitleScriptBody": "Script body",
+  "agentWorkspaceScriptStageStatusReady": "Ready",
+  "agentWorkspaceScriptStageStatusReusable": "OK to keep",
+  "agentWorkspaceScriptStageStatusNeedsRevision": "Needs revision",
+  "agentWorkspaceScriptStageStatusPendingGenerate": "Pending generation",
+  "agentWorkspaceScriptStageStatusPendingRead": "Pending read",
+  "agentWorkspaceScriptStageStatusSupplementNeeded": "Needs more context",
+  "agentWorkspaceScriptStageStatusCompleted": "Completed",
+  "agentWorkspaceScriptStageDetailStorySkeletonReady": "storySkeleton exists; continue tightening adaptationStrategy or compare with script body.",
+  "agentWorkspaceScriptStageDetailReviewStorySkeletonEmpty": "Review already covers storySkeleton; continue revising using the suggestions.",
+  "agentWorkspaceScriptStageDetailReviewAdaptationEmpty": "Review already covers adaptationStrategy; continue revising using the suggestions.",
+  "agentWorkspaceScriptStageDetailReviewScriptEmpty": "Review already covers the script body; continue revising using the suggestions.",
+  "@agentWorkspaceScriptStageDetailReviewConclusion": {
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceScriptStageDetailReviewConclusion": "Review conclusion: {summary}",
+  "agentWorkspaceScriptStagePromptReviseStorySkeleton": "Read storySkeleton and the related event window first, then revise the story skeleton locally based on the review.",
+  "agentWorkspaceScriptStageDetailStorySkeletonPendingGen": "Add a story skeleton first—main conflict, turning points, and ending direction.",
+  "agentWorkspaceScriptStagePromptGenerateStorySkeleton": "Generate a clear story skeleton from the current project context, highlighting main conflict and reversal beats.",
+  "agentWorkspaceScriptStageDetailStorySkeletonPendingRead": "Read planData first to see whether storySkeleton is present.",
+  "agentWorkspaceScriptStageDetailAdaptationReady": "adaptationStrategy exists; continue reading chapter material or generate script body.",
+  "agentWorkspaceScriptStagePromptReviseAdaptationStrategy": "Read adaptationStrategy and storySkeleton first, then revise adaptationStrategy locally based on the review.",
+  "agentWorkspaceScriptStageDetailAdaptationPendingGen": "adaptationStrategy is missing—tighten character and pacing strategy first.",
+  "agentWorkspaceScriptStagePromptGenerateAdaptationStrategy": "From the existing story skeleton, complete adaptationStrategy with pacing, character arcs, and episode split rules.",
+  "agentWorkspaceScriptStageDetailAdaptationPendingRead": "Re-read planData to see whether adaptationStrategy exists.",
+  "@agentWorkspaceScriptStageDetailChapterMaterialReady": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "agentWorkspaceScriptStageDetailChapterMaterialReady": "Read {count} novel-context rows; continue generating script body or compare with the existing script.",
+  "agentWorkspaceScriptStageDetailChapterMaterialEmptyNovel": "No novel context yet—keep reading chapter text or event outlines.",
+  "agentWorkspaceScriptStageDetailChapterMaterialPendingRead": "Read chapter text or events first, then decide how to rewrite the script.",
+  "agentWorkspaceScriptStageDetailScriptBodyReady": "Script body exists; write back or keep editing using plan data.",
+  "agentWorkspaceScriptStagePromptReviseScript": "Read this episode’s tail window, storySkeleton, and adaptationStrategy first; if still thin, add a chapter text window, then revise this episode’s script toward the review.",
+  "agentWorkspaceScriptStageDetailScriptPendingGen": "Script body is empty—run the script sub-agent to produce a first draft.",
+  "agentWorkspaceScriptStagePromptGenerateScript": "Read this episode’s plan and target chapter events; only read the previous episode’s tail when continuing from it; otherwise add text windows on demand, then output a complete script body ready to write back.",
+  "agentWorkspaceScriptStageDetailScriptPendingRead": "Read the current script body first, then decide whether to generate the next version.",
+  "agentWorkspaceScriptRecipeFillStorySkeletonTitle": "Fill story skeleton",
+  "agentWorkspaceScriptRecipeFillStorySkeletonDetail": "planData has no storySkeleton yet—run the skeleton sub-agent first.",
+  "agentWorkspaceScriptRecipeFillStorySkeletonPrompt": "Generate a clear story skeleton from the current project context, highlighting main conflict and reversal beats.",
+  "agentWorkspaceScriptRecipeFillAdaptationTitle": "Fill adaptation strategy",
+  "agentWorkspaceScriptRecipeFillAdaptationDetail": "Beyond the skeleton, adaptationStrategy is still missing—tighten the adaptation path first.",
+  "agentWorkspaceScriptRecipeFillAdaptationPrompt": "From the existing story skeleton, complete adaptationStrategy with pacing, character arcs, and episode split rules.",
+  "agentWorkspaceScriptRecipeReadScriptBodyTitle": "Read current script body",
+  "agentWorkspaceScriptRecipeReadScriptBodyDetail": "After planData is ready, compare whether the current script body has drifted.",
+  "agentWorkspaceScriptRecipeReadPlanScriptDraftTitle": "Read planned script draft",
+  "agentWorkspaceScriptRecipeReadPlanScriptDraftDetail": "planData.script already has a draft for this episode—consume that structured draft before widening novel reads to save tokens.",
+  "agentWorkspaceScriptRecipePullChapterMaterialTitle": "Pull chapter material",
+  "agentWorkspaceScriptRecipePullChapterMaterialDetail": "No script draft in the plan yet—read novel chapter text for context first.",
+  "agentWorkspaceScriptRecipeGenerateNextScriptTitle": "Generate next script version",
+  "agentWorkspaceScriptRecipeGenerateNextScriptDetail": "Plan info is ready—consume the planned script draft and required events first, then let the script sub-agent output the next write-back-ready body.",
+  "agentWorkspaceScriptRecipeGenerateNextScriptPrompt": "Read this episode’s planData.script draft, storySkeleton, and adaptationStrategy first, then add the minimum target chapter events; only read the previous episode’s tail or chapter text windows when details or transitions are insufficient, then output a complete script body ready to write back.",
+  "agentWorkspaceScriptRecipePreferEventsTitle": "Switch to event outline",
+  "agentWorkspaceScriptRecipePreferEventsDetail": "When chapter text is empty, reading the event list first makes plot gaps easier to spot.",
+  "agentWorkspaceScriptRecipeReadMatchingEventsTitle": "Read matching events",
+  "agentWorkspaceScriptRecipeReadMatchingEventsDetail": "Chapter text is in place—pull the same chapter’s events next to summarize conflict cleanly.",
+  "agentWorkspaceScriptRecipeGenerateAdaptationFromTextTitle": "Generate adaptation strategy",
+  "agentWorkspaceScriptRecipeGenerateAdaptationFromTextDetail": "Chapter material is readable—run the adaptation-strategy sub-agent for a tightened plan.",
+  "agentWorkspaceScriptRecipeGenerateAdaptationFromTextPrompt": "Summarize an adaptation strategy from the current chapter text with 3–5 actionable rewrite rules.",
+  "agentWorkspaceScriptRecipeReviewPreviousTailTitle": "Review previous tail",
+  "agentWorkspaceScriptRecipeReviewPreviousTailDetail": "After chapter material is clear, compare this episode’s tail to spot transition gaps with fewer tokens.",
+  "agentWorkspaceScriptRecipePullChapterTextFirstTitle": "Pull chapter text first",
+  "agentWorkspaceScriptRecipePullChapterTextFirstDetail": "When the event list is empty, read chapter text first to tell missing data from missing extraction.",
+  "agentWorkspaceScriptRecipeDistillSkeletonFromEventsTitle": "Distill story skeleton",
+  "agentWorkspaceScriptRecipeDistillSkeletonFromEventsDetail": "Events are clear enough—tighten into storySkeleton first.",
+  "agentWorkspaceScriptRecipeDistillSkeletonFromEventsPrompt": "From the current event list, distill a story skeleton with key conflict, turning points, and ending direction.",
+  "agentWorkspaceScriptRecipeGenerateScriptFromEventsTitle": "Generate script draft",
+  "agentWorkspaceScriptRecipeGenerateScriptFromEventsDetail": "If the event chain is mostly complete, run the script sub-agent for write-back-ready body.",
+  "agentWorkspaceScriptRecipeGenerateScriptFromEventsPrompt": "Combine the current event outline and prefer reading planData.script, storySkeleton, and adaptationStrategy; only widen to chapter text when details are insufficient, then output a script body ready to write back.",
+  "agentWorkspaceScriptRecipeCompareExistingScriptTitle": "Compare with existing script",
+  "agentWorkspaceScriptRecipeCompareExistingScriptDetail": "Use the current event chain to diff the existing body and spot missing beats faster.",
+  "agentWorkspaceScriptRecipeGenerateScriptBodyTitle": "Generate script body",
+  "agentWorkspaceScriptRecipeGenerateScriptBodyDetail": "Body is empty—run the script sub-agent for a first version.",
+  "agentWorkspaceScriptRecipeGenerateScriptBodyPrompt": "Read this episode’s planData.script, storySkeleton, adaptationStrategy, and target chapter events first; only add text windows when details are insufficient, then produce a complete script body.",
+  "agentWorkspaceScriptRecipeRefreshPlanDataTitle": "Refresh plan data",
+  "agentWorkspaceScriptRecipeRefreshPlanDataDetail": "If the body is empty and context feels thin, return to planData to verify skeleton and strategy.",
+  "agentWorkspaceScriptRecipeRefreshPlanAfterBodyTitle": "Refresh plan data",
+  "agentWorkspaceScriptRecipeRefreshPlanAfterBodyDetail": "After you have body text, revisit planData to see whether skeleton or strategy needs syncing.",
+  "agentWorkspaceScriptRecipeAddChapterMaterialTitle": "Add chapter material",
+  "agentWorkspaceScriptRecipeAddChapterMaterialDetail": "To keep revising, pull novel text and events instead of staring only at the current script.",
+  "agentWorkspaceScriptRecipeReviseStorySkeletonTitle": "Revise story skeleton",
+  "agentWorkspaceScriptRecipeReviseStorySkeletonDetail": "The review still sees skeleton gaps—return to storySkeleton for targeted edits.",
+  "agentWorkspaceScriptRecipeReviseStorySkeletonPrompt": "Read storySkeleton and related event windows first; add chapter text windows only if information is still thin, then revise the skeleton toward the review.",
+  "agentWorkspaceScriptRecipeReviseAdaptationTitle": "Revise adaptation strategy",
+  "agentWorkspaceScriptRecipeReviseAdaptationDetail": "The review thinks the strategy conflicts with the skeleton or format—revise strategy locally first.",
+  "agentWorkspaceScriptRecipeReviseAdaptationPrompt": "Read adaptationStrategy and storySkeleton first, then add event windows as needed, and revise adaptationStrategy toward the review.",
+  "agentWorkspaceScriptRecipeReviseScriptTitle": "Revise script body",
+  "agentWorkspaceScriptRecipeReviseScriptDetail": "The review pinpointed script issues—read this episode’s tail window before targeted edits.",
+  "agentWorkspaceScriptRecipeReviseScriptPrompt": "Read this episode’s tail window, storySkeleton, and adaptationStrategy first; if still insufficient, add chapter text windows, then revise this episode’s script toward the review.",
+  "agentWorkspaceScriptRecipeVerifyEventsTitle": "Verify event outline",
+  "agentWorkspaceScriptRecipeVerifyEventsDetail": "The review suggests revisiting the event chain—prefer novel events over full chapter text.",
+  "agentWorkspaceScriptRecipeAddNovelTextWindowTitle": "Add novel text window",
+  "agentWorkspaceScriptRecipeAddNovelTextWindowDetail": "When the review needs the original prose, read a bounded chapter window instead of whole chapters.",
+  "agentWorkspaceScriptRecipeRereadCurrentScriptTitle": "Re-read current script",
+  "agentWorkspaceScriptRecipeRereadCurrentScriptDetail": "Re-read this episode’s tail window first, then decide whether to keep revising.",
+  "agentWorkspaceScriptRecipeReviewTargetPeekTitle": "Peek review target",
+  "agentWorkspaceScriptRecipeReviewTargetPeekDetail": "Read the review’s primary content first, then decide whether to rerun the sub-agent.",
   "agentWorkspaceScopeProjectIdLabel": "Agent workspace scope project id label",
   "agentWorkspaceScopeScriptIdLabel": "Agent workspace scope script id label",
   "agentWorkspaceScopeProjectUuidLabel": "Agent workspace scope project uuid label",
@@ -14853,7 +14960,57 @@
   "benchmarkGateCardTitle": "Gate decision",
   "benchmarkLabelGateVariantId": "Variant ID",
   "benchmarkLabelGateDecisionOptionalAuto": "Decision (empty uses auto decision)",
+  "benchmarkGateDecisionHint": "approved / approved_limited / blocked / needs_review",
+  "@benchmarkGateAssessmentsSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "benchmarkGateAssessmentsSummary": "Gate assessments: {count} variants",
+  "@benchmarkTrendsDataSummary": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "benchmarkTrendsDataSummary": "Trend data: {weeks} weeks",
   "benchmarkLabelGateDecisionNote": "Decision note",
+  "shellJobQueueStatsTitle": "Job queue stats (internal)",
+  "shellJobQueueStatsSubtitle": "Uses INTERNAL_OPS_TOKEN dart-define → GET /api/v1/jobs/queue/stats",
+  "@shellJobQueueStatsStatsLine": {
+    "placeholders": {
+      "pending": {
+        "type": "String"
+      },
+      "claimable": {
+        "type": "String"
+      },
+      "running": {
+        "type": "String"
+      },
+      "dead": {
+        "type": "String"
+      },
+      "failed24h": {
+        "type": "String"
+      },
+      "oldestClaimable": {
+        "type": "String"
+      }
+    }
+  },
+  "shellJobQueueStatsStatsLine": "pending={pending} claimable={claimable} running={running} dead={dead} failed_24h={failed24h} oldest_claimable_s={oldestClaimable}",
+  "@shellJobQueueStatsPendingByKind": {
+    "placeholders": {
+      "kinds": {
+        "type": "String"
+      }
+    }
+  },
+  "shellJobQueueStatsPendingByKind": "pending_by_kind: {kinds}",
   "benchmarkGatePromoteBaselineTitle": "Also promote as new baseline",
   "benchmarkGatePromoteBaselineSubtitle": "Only applies to approved / approved_limited",
   "benchmarkAbCardTitle": "A/B comparison",

@@ -21,6 +21,7 @@ void main() {
     'buildScriptWorkspaceRecipes suggests next actions for planData gaps',
     () {
       final recipes = buildScriptWorkspaceRecipes(
+        l10n: _zh,
         toolName: 'get_planData',
         result: <String, dynamic>{
           'data': <String, dynamic>{
@@ -32,9 +33,18 @@ void main() {
         scopeScriptId: 9,
       );
 
-      expect(recipes.map((recipe) => recipe.title), contains('补故事骨架'));
-      expect(recipes.map((recipe) => recipe.title), contains('补改编策略'));
-      expect(recipes.map((recipe) => recipe.title), contains('读取当前剧本正文'));
+      expect(
+        recipes.map((recipe) => recipe.title),
+        contains(_zh.agentWorkspaceScriptRecipeFillStorySkeletonTitle),
+      );
+      expect(
+        recipes.map((recipe) => recipe.title),
+        contains(_zh.agentWorkspaceScriptRecipeFillAdaptationTitle),
+      );
+      expect(
+        recipes.map((recipe) => recipe.title),
+        contains(_zh.agentWorkspaceScriptRecipeReadScriptBodyTitle),
+      );
     },
   );
 
@@ -42,26 +52,28 @@ void main() {
     'buildScriptWorkspaceRecipes prefers plan script drafts before wider reads',
     () {
       final recipes = buildScriptWorkspaceRecipes(
+        l10n: _zh,
         toolName: 'get_planData',
         result: <String, dynamic>{
           'data': <String, dynamic>{
             'storySkeleton': '三幕骨架',
             'adaptationStrategy': '先压后扬',
             'script': const <Map<String, dynamic>>[
-              <String, dynamic>{
-                'id': 9,
-                'name': '第9集',
-                'content': '计划剧本草稿',
-              },
+              <String, dynamic>{'id': 9, 'name': '第9集', 'content': '计划剧本草稿'},
             ],
           },
         },
         scopeScriptId: 9,
       );
 
-      expect(recipes.map((recipe) => recipe.title), contains('读取计划剧本草稿'));
+      expect(
+        recipes.map((recipe) => recipe.title),
+        contains(_zh.agentWorkspaceScriptRecipeReadPlanScriptDraftTitle),
+      );
       final readPlanDraft = recipes.firstWhere(
-        (recipe) => recipe.title == '读取计划剧本草稿',
+        (recipe) =>
+            recipe.title ==
+            _zh.agentWorkspaceScriptRecipeReadPlanScriptDraftTitle,
       );
       expect(readPlanDraft.domainTool, 'get_planData');
       expect(readPlanDraft.args, <String, dynamic>{
@@ -81,15 +93,19 @@ void main() {
   );
 
   test('summarizeScriptResultSnapshot marks rewrite guidance as ready', () {
-    final lines = summarizeScriptResultSnapshot(_zh, 'get_planData', <String, dynamic>{
-      'data': <String, dynamic>{
-        'storySkeleton': '三幕骨架',
-        'adaptationStrategy': '先压后扬',
-        'script': const <Map<String, dynamic>>[
-          <String, dynamic>{'name': '第1集', 'content': '计划剧本草稿'},
-        ],
+    final lines = summarizeScriptResultSnapshot(
+      _zh,
+      'get_planData',
+      <String, dynamic>{
+        'data': <String, dynamic>{
+          'storySkeleton': '三幕骨架',
+          'adaptationStrategy': '先压后扬',
+          'script': const <Map<String, dynamic>>[
+            <String, dynamic>{'name': '第1集', 'content': '计划剧本草稿'},
+          ],
+        },
       },
-    });
+    );
 
     expect(lines, contains('故事骨架已就绪'));
     expect(lines, contains('改编策略已就绪'));
@@ -112,7 +128,10 @@ void main() {
         },
       );
 
-      expect(suggestions.map((item) => item.label), contains(_zh.agentWorkspaceScriptArgFillFirstChapter));
+      expect(
+        suggestions.map((item) => item.label),
+        contains(_zh.agentWorkspaceScriptArgFillFirstChapter),
+      );
       expect(suggestions.first.payload, <String, dynamic>{
         'novelId': 21,
         'fields': <String>['numeric_id', 'name', 'detail'],
@@ -145,6 +164,7 @@ void main() {
     'buildScriptWorkspaceRecipes uses structured supervision next action',
     () {
       final recipes = buildScriptWorkspaceRecipes(
+        l10n: _zh,
         toolName: 'run_supervision_agent',
         result: <String, dynamic>{
           'review': <String, dynamic>{
@@ -160,7 +180,10 @@ void main() {
         scopeScriptId: 8,
       );
 
-      expect(recipes.first.title, '修剧本正文');
+      expect(
+        recipes.first.title,
+        _zh.agentWorkspaceScriptRecipeReviseScriptTitle,
+      );
       expect(recipes.first.subAgentTool, 'run_sub_agent_script');
       expect(recipes.first.args, <String, dynamic>{
         'scriptId': 8,
@@ -171,33 +194,38 @@ void main() {
     },
   );
 
-  test('previous script tail args only exist when there is a previous episode', () {
-    final recipes = buildScriptWorkspaceRecipes(
-      toolName: 'get_planData',
-      result: <String, dynamic>{
-        'data': <String, dynamic>{
-          'storySkeleton': 'ready',
-          'adaptationStrategy': 'ready',
-          'script': const <Map<String, dynamic>>[],
+  test(
+    'previous script tail args only exist when there is a previous episode',
+    () {
+      final recipes = buildScriptWorkspaceRecipes(
+        l10n: _zh,
+        toolName: 'get_planData',
+        result: <String, dynamic>{
+          'data': <String, dynamic>{
+            'storySkeleton': 'ready',
+            'adaptationStrategy': 'ready',
+            'script': const <Map<String, dynamic>>[],
+          },
         },
-      },
-      scopeScriptId: 1,
-    );
+        scopeScriptId: 1,
+      );
 
-    expect(
-      recipes.any(
-        (recipe) =>
-            recipe.args?['relativeOffset'] == -1 &&
-            recipe.domainTool == 'get_script_content',
-      ),
-      isFalse,
-    );
-  });
+      expect(
+        recipes.any(
+          (recipe) =>
+              recipe.args?['relativeOffset'] == -1 &&
+              recipe.domainTool == 'get_script_content',
+        ),
+        isFalse,
+      );
+    },
+  );
 
   test(
     'buildScriptWorkspaceStages marks missing story skeleton as pending',
     () {
       final stages = buildScriptWorkspaceStages(
+        l10n: _zh,
         toolName: 'get_planData',
         result: <String, dynamic>{
           'data': <String, dynamic>{
@@ -208,21 +236,33 @@ void main() {
         scopeScriptId: 9,
       );
 
-      final skeletonStage = stages.firstWhere((stage) => stage.title == '故事骨架');
-      expect(skeletonStage.statusLabel, '待生成');
+      final skeletonStage = stages.firstWhere(
+        (stage) =>
+            stage.title == _zh.agentWorkspaceScriptStageTitleStorySkeleton,
+      );
+      expect(
+        skeletonStage.statusLabel,
+        _zh.agentWorkspaceScriptStageStatusPendingGenerate,
+      );
       expect(skeletonStage.subAgentTool, 'run_sub_agent_storySkeleton');
     },
   );
 
   test('buildScriptWorkspaceStages marks script content as completed', () {
     final stages = buildScriptWorkspaceStages(
+      l10n: _zh,
       toolName: 'get_script_content',
       result: <String, dynamic>{'content': '第 1 场，站台重逢。'},
       scopeScriptId: 8,
     );
 
-    final scriptStage = stages.firstWhere((stage) => stage.title == '剧本正文');
-    expect(scriptStage.statusLabel, '已完成');
+    final scriptStage = stages.firstWhere(
+      (stage) => stage.title == _zh.agentWorkspaceScriptStageTitleScriptBody,
+    );
+    expect(
+      scriptStage.statusLabel,
+      _zh.agentWorkspaceScriptStageStatusCompleted,
+    );
     expect(scriptStage.domainTool, 'get_script_content');
   });
 
@@ -230,6 +270,7 @@ void main() {
     'buildScriptWorkspaceStages surfaces script review as revise-needed',
     () {
       final stages = buildScriptWorkspaceStages(
+        l10n: _zh,
         toolName: 'run_supervision_agent',
         result: <String, dynamic>{
           'review': <String, dynamic>{
@@ -245,8 +286,13 @@ void main() {
         scopeScriptId: 8,
       );
 
-      final scriptStage = stages.firstWhere((stage) => stage.title == '剧本正文');
-      expect(scriptStage.statusLabel, '待修订');
+      final scriptStage = stages.firstWhere(
+        (stage) => stage.title == _zh.agentWorkspaceScriptStageTitleScriptBody,
+      );
+      expect(
+        scriptStage.statusLabel,
+        _zh.agentWorkspaceScriptStageStatusNeedsRevision,
+      );
       expect(scriptStage.subAgentTool, 'run_sub_agent_script');
       expect(scriptStage.args, <String, dynamic>{
         'scriptId': 8,
@@ -257,35 +303,44 @@ void main() {
     },
   );
 
-  test('buildScriptWorkspaceRecipes narrows novel/event reads with field subsets', () {
-    final textRecipes = buildScriptWorkspaceRecipes(
-      toolName: 'get_script_content',
-      result: <String, dynamic>{'content': '已有剧本内容'},
-      scopeScriptId: 8,
-    );
-    final textRecipe = textRecipes.firstWhere((recipe) => recipe.title == '补章节材料');
-    expect(textRecipe.args, <String, dynamic>{
-      'fields': <String>['numeric_id', 'chapter', 'chapter_data'],
-      'lineStart': 1,
-      'lineEnd': 80,
-      'maxChars': 1800,
-      'limit': 1,
-    });
+  test(
+    'buildScriptWorkspaceRecipes narrows novel/event reads with field subsets',
+    () {
+      final textRecipes = buildScriptWorkspaceRecipes(
+        l10n: _zh,
+        toolName: 'get_script_content',
+        result: <String, dynamic>{'content': '已有剧本内容'},
+        scopeScriptId: 8,
+      );
+      final textRecipe = textRecipes.firstWhere(
+        (recipe) =>
+            recipe.title ==
+            _zh.agentWorkspaceScriptRecipeAddChapterMaterialTitle,
+      );
+      expect(textRecipe.args, <String, dynamic>{
+        'fields': <String>['numeric_id', 'chapter', 'chapter_data'],
+        'lineStart': 1,
+        'lineEnd': 80,
+        'maxChars': 1800,
+        'limit': 1,
+      });
 
-    final novelRecipes = buildScriptWorkspaceRecipes(
-      toolName: 'get_novel_text',
-      result: <String, dynamic>{
-        'items': <Map<String, dynamic>>[
-          <String, dynamic>{'numeric_id': 21},
-        ],
-      },
-      scopeScriptId: 8,
-    );
-    expect(novelRecipes.first.args, <String, dynamic>{
-      'novelId': 21,
-      'fields': <String>['numeric_id', 'name', 'detail'],
-      'limit': 8,
-      'maxChars': 1200,
-    });
-  });
+      final novelRecipes = buildScriptWorkspaceRecipes(
+        l10n: _zh,
+        toolName: 'get_novel_text',
+        result: <String, dynamic>{
+          'items': <Map<String, dynamic>>[
+            <String, dynamic>{'numeric_id': 21},
+          ],
+        },
+        scopeScriptId: 8,
+      );
+      expect(novelRecipes.first.args, <String, dynamic>{
+        'novelId': 21,
+        'fields': <String>['numeric_id', 'name', 'detail'],
+        'limit': 8,
+        'maxChars': 1200,
+      });
+    },
+  );
 }

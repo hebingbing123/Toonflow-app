@@ -17498,6 +17498,282 @@ class AppLocalizationsZh extends AppLocalizations {
   String get agentWorkspaceScriptApplySuggestion => '应用建议';
 
   @override
+  String get agentWorkspaceScriptRecipeAddChapterMaterialDetail =>
+      "\u5982\u679c\u8981\u7ee7\u7eed\u6539\u7a3f\uff0c\u53ef\u5148\u62c9\u5c0f\u8bf4\u6b63\u6587\u4e0e\u4e8b\u4ef6\uff0c\u907f\u514d\u53ea\u76ef\u7740\u5f53\u524d script\u3002";
+  @override
+  String get agentWorkspaceScriptRecipeAddChapterMaterialTitle =>
+      "\u8865\u7ae0\u8282\u6750\u6599";
+  @override
+  String get agentWorkspaceScriptRecipeAddNovelTextWindowDetail =>
+      "\u5ba1\u6838\u9700\u8981\u8ffd\u6eaf\u539f\u6587\u65f6\uff0c\u5148\u8bfb\u53d6\u7ae0\u8282\u7a97\u53e3\uff0c\u907f\u514d\u6574\u7ae0\u642c\u8fd0\u3002";
+  @override
+  String get agentWorkspaceScriptRecipeAddNovelTextWindowTitle =>
+      "\u8865\u539f\u6587\u7ae0\u8282\u7a97\u53e3";
+  @override
+  String get agentWorkspaceScriptRecipeCompareExistingScriptDetail =>
+      "\u7528\u5f53\u524d\u4e8b\u4ef6\u94fe\u8def\u53cd\u67e5\u73b0\u6709\u6b63\u6587\uff0c\u80fd\u66f4\u5feb\u5b9a\u4f4d\u7f3a\u573a\u6216\u51b2\u7a81\u504f\u79fb\u3002";
+  @override
+  String get agentWorkspaceScriptRecipeCompareExistingScriptTitle =>
+      "\u5bf9\u6bd4\u73b0\u6709\u5267\u672c";
+  @override
+  String get agentWorkspaceScriptRecipeDistillSkeletonFromEventsDetail =>
+      "\u4e8b\u4ef6\u8109\u7edc\u5df2\u6e05\u6670\uff0c\u9002\u5408\u5148\u6536\u675f\u6210 storySkeleton\u3002";
+  @override
+  String get agentWorkspaceScriptRecipeDistillSkeletonFromEventsPrompt =>
+      "\u8bf7\u57fa\u4e8e\u5f53\u524d\u4e8b\u4ef6\u5217\u8868\u63d0\u70bc\u6545\u4e8b\u9aa8\u67b6\uff0c\u4fdd\u7559\u5173\u952e\u51b2\u7a81\u3001\u8f6c\u6298\u4e0e\u7ed3\u5c40\u8d70\u5411\u3002";
+  @override
+  String get agentWorkspaceScriptRecipeDistillSkeletonFromEventsTitle =>
+      "\u6574\u7406\u6545\u4e8b\u9aa8\u67b6";
+  @override
+  String get agentWorkspaceScriptRecipeFillAdaptationDetail =>
+      "\u9aa8\u67b6\u4e4b\u5916\u8fd8\u7f3a adaptationStrategy\uff0c\u9002\u5408\u5148\u6536\u675f\u6539\u7f16\u8def\u5f84\u3002";
+  @override
+  String get agentWorkspaceScriptRecipeFillAdaptationPrompt =>
+      "\u8bf7\u57fa\u4e8e\u73b0\u6709\u6545\u4e8b\u9aa8\u67b6\u8865\u9f50\u6539\u7f16\u7b56\u7565\uff0c\u7a81\u51fa\u8282\u594f\u3001\u4eba\u7269\u5f27\u5149\u4e0e\u96c6\u6570\u62c6\u5206\u539f\u5219\u3002";
+  @override
+  String get agentWorkspaceScriptRecipeFillAdaptationTitle =>
+      "\u8865\u6539\u7f16\u7b56\u7565";
+  @override
+  String get agentWorkspaceScriptRecipeFillStorySkeletonDetail =>
+      "planData \u8fd8\u6ca1\u6709 storySkeleton\uff0c\u5148\u8ba9\u9aa8\u67b6\u5b50\u4ee3\u7406\u8865\u7ed3\u6784\u3002";
+  @override
+  String get agentWorkspaceScriptRecipeFillStorySkeletonPrompt =>
+      "\u8bf7\u57fa\u4e8e\u5f53\u524d\u9879\u76ee\u4e0a\u4e0b\u6587\u751f\u6210\u4e00\u7248\u6e05\u6670\u7684\u6545\u4e8b\u9aa8\u67b6\uff0c\u5e76\u7a81\u51fa\u4e3b\u51b2\u7a81\u4e0e\u53cd\u8f6c\u8282\u70b9\u3002";
+  @override
+  String get agentWorkspaceScriptRecipeFillStorySkeletonTitle =>
+      "\u8865\u6545\u4e8b\u9aa8\u67b6";
+  @override
+  String get agentWorkspaceScriptRecipeGenerateAdaptationFromTextDetail =>
+      "\u7ae0\u8282\u6750\u6599\u5df2\u7ecf\u53ef\u8bfb\uff0c\u9002\u5408\u76f4\u63a5\u8ba9\u6539\u7f16\u7b56\u7565\u5b50\u4ee3\u7406\u7ed9\u51fa\u6536\u675f\u65b9\u6848\u3002";
+  @override
+  String get agentWorkspaceScriptRecipeGenerateAdaptationFromTextPrompt =>
+      "\u8bf7\u57fa\u4e8e\u5f53\u524d\u7ae0\u8282\u6587\u672c\u603b\u7ed3\u6539\u7f16\u7b56\u7565\uff0c\u8f93\u51fa 3 \u5230 5 \u6761\u53ef\u76f4\u63a5\u6267\u884c\u7684\u6539\u5199\u539f\u5219\u3002";
+  @override
+  String get agentWorkspaceScriptRecipeGenerateAdaptationFromTextTitle =>
+      "\u751f\u6210\u6539\u7f16\u7b56\u7565";
+  @override
+  String get agentWorkspaceScriptRecipeGenerateNextScriptDetail =>
+      "\u8ba1\u5212\u4fe1\u606f\u5df2\u5177\u5907\uff0c\u5148\u6d88\u8d39\u8ba1\u5212\u5267\u672c\u8349\u7a3f\u548c\u5fc5\u8981\u4e8b\u4ef6\uff0c\u518d\u8ba9 script \u5b50\u4ee3\u7406\u8f93\u51fa\u4e0b\u4e00\u7248\u53ef\u5199\u56de\u6b63\u6587\u3002";
+  @override
+  String get agentWorkspaceScriptRecipeGenerateNextScriptPrompt =>
+      "\u8bf7\u5148\u8bfb\u53d6\u5f53\u524d\u96c6 planData.script \u8349\u7a3f\u3001storySkeleton\u3001adaptationStrategy\uff0c\u518d\u8865\u6700\u5c11\u7684\u76ee\u6807\u7ae0\u8282\u4e8b\u4ef6\uff1b\u53ea\u6709\u7ec6\u8282\u6216\u8854\u63a5\u4e0d\u8db3\u65f6\u624d\u8865\u8bfb\u4e0a\u4e00\u96c6\u5c3e\u6bb5\u6216\u7ae0\u8282\u6b63\u6587\u7a97\u53e3\uff0c\u7136\u540e\u8f93\u51fa\u53ef\u76f4\u63a5\u5199\u56de\u7684\u5b8c\u6574\u5267\u672c\u6b63\u6587\u3002";
+  @override
+  String get agentWorkspaceScriptRecipeGenerateNextScriptTitle =>
+      "\u751f\u6210\u4e0b\u4e00\u7248\u5267\u672c";
+  @override
+  String get agentWorkspaceScriptRecipeGenerateScriptBodyDetail =>
+      "\u5f53\u524d\u6b63\u6587\u4e3a\u7a7a\uff0c\u76f4\u63a5\u8ba9 script \u5b50\u4ee3\u7406\u4ea7\u51fa\u9996\u7248\u5185\u5bb9\u66f4\u5408\u9002\u3002";
+  @override
+  String get agentWorkspaceScriptRecipeGenerateScriptBodyPrompt =>
+      "\u8bf7\u5148\u8bfb\u53d6\u5f53\u524d\u96c6 planData.script\u3001storySkeleton\u3001adaptationStrategy \u4e0e\u76ee\u6807\u7ae0\u8282\u4e8b\u4ef6\uff1b\u53ea\u6709\u7ec6\u8282\u4e0d\u8db3\u65f6\u518d\u8865\u8bfb\u6b63\u6587\u7a97\u53e3\uff0c\u7136\u540e\u751f\u6210\u4e00\u7248\u5b8c\u6574\u5267\u672c\u6b63\u6587\u3002";
+  @override
+  String get agentWorkspaceScriptRecipeGenerateScriptBodyTitle =>
+      "\u751f\u6210\u5267\u672c\u6b63\u6587";
+  @override
+  String get agentWorkspaceScriptRecipeGenerateScriptFromEventsDetail =>
+      "\u5982\u679c\u4e8b\u4ef6\u94fe\u8def\u57fa\u672c\u9f50\u5168\uff0c\u53ef\u76f4\u63a5\u8ba9 script \u5b50\u4ee3\u7406\u751f\u6210\u53ef\u5199\u56de\u6b63\u6587\u3002";
+  @override
+  String get agentWorkspaceScriptRecipeGenerateScriptFromEventsPrompt =>
+      "\u8bf7\u5148\u7ed3\u5408\u5f53\u524d\u4e8b\u4ef6\u8109\u7edc\uff0c\u5e76\u4f18\u5148\u8bfb\u53d6 planData.script\u3001storySkeleton \u4e0e adaptationStrategy\uff1b\u53ea\u6709\u7ec6\u8282\u4e0d\u8db3\u65f6\u518d\u8865\u7ae0\u8282\u6b63\u6587\u7a97\u53e3\uff0c\u751f\u6210\u4e00\u7248\u53ef\u76f4\u63a5\u5199\u56de\u7684\u5267\u672c\u6b63\u6587\u3002";
+  @override
+  String get agentWorkspaceScriptRecipeGenerateScriptFromEventsTitle =>
+      "\u751f\u6210\u5267\u672c\u521d\u7a3f";
+  @override
+  String get agentWorkspaceScriptRecipePreferEventsDetail =>
+      "\u7ae0\u8282\u6587\u672c\u4e3a\u7a7a\u65f6\uff0c\u5148\u8bfb\u4e8b\u4ef6\u5217\u8868\u66f4\u5bb9\u6613\u5b9a\u4f4d\u5267\u60c5\u9aa8\u67b6\u7f3a\u53e3\u3002";
+  @override
+  String get agentWorkspaceScriptRecipePreferEventsTitle =>
+      "\u6539\u770b\u4e8b\u4ef6\u8109\u7edc";
+  @override
+  String get agentWorkspaceScriptRecipePullChapterMaterialDetail =>
+      "\u8ba1\u5212\u91cc\u8fd8\u6ca1\u6709\u5267\u672c\u8349\u7a3f\uff0c\u5148\u8bfb\u53d6\u5c0f\u8bf4\u7ae0\u8282\u6587\u672c\u8865\u4e0a\u4e0b\u6587\u3002";
+  @override
+  String get agentWorkspaceScriptRecipePullChapterMaterialTitle =>
+      "\u62c9\u53d6\u7ae0\u8282\u6750\u6599";
+  @override
+  String get agentWorkspaceScriptRecipePullChapterTextFirstDetail =>
+      "\u4e8b\u4ef6\u5217\u8868\u4e3a\u7a7a\u65f6\uff0c\u5148\u8bfb\u7ae0\u8282\u6587\u672c\u66f4\u5bb9\u6613\u5224\u65ad\u662f\u6570\u636e\u7a7a\u8fd8\u662f\u4e8b\u4ef6\u672a\u62bd\u53d6\u3002";
+  @override
+  String get agentWorkspaceScriptRecipePullChapterTextFirstTitle =>
+      "\u5148\u62c9\u7ae0\u8282\u6b63\u6587";
+  @override
+  String get agentWorkspaceScriptRecipeReadMatchingEventsDetail =>
+      "\u7ae0\u8282\u6587\u672c\u5df2\u5230\u4f4d\uff0c\u7ee7\u7eed\u6309\u540c\u4e00\u7ae0\u8282\u62c9\u53d6\u4e8b\u4ef6\u8109\u7edc\u66f4\u5229\u4e8e\u603b\u7ed3\u51b2\u7a81\u3002";
+  @override
+  String get agentWorkspaceScriptRecipeReadMatchingEventsTitle =>
+      "\u8bfb\u53d6\u5bf9\u5e94\u4e8b\u4ef6";
+  @override
+  String get agentWorkspaceScriptRecipeReadPlanScriptDraftDetail =>
+      "planData.script \u5df2\u6709\u5f53\u524d\u96c6\u8349\u7a3f\uff0c\u5148\u6d88\u8d39\u8fd9\u4efd\u7ed3\u6784\u5316\u8349\u7a3f\uff0c\u518d\u51b3\u5b9a\u662f\u5426\u8865\u8bfb\u7ae0\u8282\u6b63\u6587\u66f4\u7701 token\u3002";
+  @override
+  String get agentWorkspaceScriptRecipeReadPlanScriptDraftTitle =>
+      "\u8bfb\u53d6\u8ba1\u5212\u5267\u672c\u8349\u7a3f";
+  @override
+  String get agentWorkspaceScriptRecipeReadScriptBodyDetail =>
+      "planData \u5df2\u51c6\u5907\u597d\u540e\uff0c\u4e0b\u4e00\u6b65\u901a\u5e38\u8981\u5bf9\u6bd4\u5f53\u524d script \u6b63\u6587\u662f\u5426\u504f\u79bb\u3002";
+  @override
+  String get agentWorkspaceScriptRecipeReadScriptBodyTitle =>
+      "\u8bfb\u53d6\u5f53\u524d\u5267\u672c\u6b63\u6587";
+  @override
+  String get agentWorkspaceScriptRecipeRefreshPlanAfterBodyDetail =>
+      "\u5df2\u6709\u6b63\u6587\u540e\uff0c\u901a\u5e38\u8981\u56de\u770b planData \u5224\u65ad\u662f\u5426\u9700\u8981\u540c\u6b65\u9aa8\u67b6\u6216\u7b56\u7565\u3002";
+  @override
+  String get agentWorkspaceScriptRecipeRefreshPlanAfterBodyTitle =>
+      "\u5237\u65b0\u8ba1\u5212\u6570\u636e";
+  @override
+  String get agentWorkspaceScriptRecipeRefreshPlanDataDetail =>
+      "\u82e5\u6b63\u6587\u4e3a\u7a7a\u4e14\u4e0a\u4e0b\u6587\u4e0d\u5b8c\u6574\uff0c\u4e5f\u53ef\u5148\u56de\u5230 planData \u6821\u9a8c\u9aa8\u67b6\u4e0e\u7b56\u7565\u3002";
+  @override
+  String get agentWorkspaceScriptRecipeRefreshPlanDataTitle =>
+      "\u5237\u65b0\u8ba1\u5212\u6570\u636e";
+  @override
+  String get agentWorkspaceScriptRecipeRereadCurrentScriptDetail =>
+      "\u5148\u91cd\u65b0\u8bfb\u53d6\u5f53\u524d\u96c6\u5c3e\u6bb5\u7a97\u53e3\uff0c\u518d\u51b3\u5b9a\u662f\u5426\u7ee7\u7eed\u6539\u7a3f\u3002";
+  @override
+  String get agentWorkspaceScriptRecipeRereadCurrentScriptTitle =>
+      "\u56de\u770b\u5f53\u524d\u5267\u672c";
+  @override
+  String get agentWorkspaceScriptRecipeReviewPreviousTailDetail =>
+      "\u5728\u7ae0\u8282\u6750\u6599\u660e\u786e\u540e\uff0c\u5bf9\u7167\u5f53\u524d\u96c6\u5c3e\u6bb5\u66f4\u5bb9\u6613\u5b9a\u4f4d\u8854\u63a5\u7f3a\u53e3\u4e14 token \u66f4\u7701\u3002";
+  @override
+  String get agentWorkspaceScriptRecipeReviewPreviousTailTitle =>
+      "\u56de\u770b\u4e0a\u4e00\u7248\u5c3e\u6bb5";
+  @override
+  String get agentWorkspaceScriptRecipeReviewTargetPeekDetail =>
+      "\u5148\u8bfb\u53d6\u5ba1\u6838\u6307\u5411\u7684\u6838\u5fc3\u5185\u5bb9\uff0c\u518d\u51b3\u5b9a\u662f\u5426\u91cd\u8dd1\u5b50\u4ee3\u7406\u3002";
+  @override
+  String get agentWorkspaceScriptRecipeReviewTargetPeekTitle =>
+      "\u56de\u770b\u5ba1\u6838\u5bf9\u8c61";
+  @override
+  String get agentWorkspaceScriptRecipeReviseAdaptationDetail =>
+      "\u5ba1\u6838\u8ba4\u4e3a\u7b56\u7565\u4e0e\u9aa8\u67b6\u6216\u8f7d\u4f53\u7ea6\u675f\u4e0d\u4e00\u81f4\uff0c\u9002\u5408\u5148\u5c40\u90e8\u4fee\u7b56\u7565\u3002";
+  @override
+  String get agentWorkspaceScriptRecipeReviseAdaptationPrompt =>
+      "\u8bf7\u5148\u8bfb\u53d6 adaptationStrategy \u4e0e storySkeleton\uff0c\u518d\u6309\u9700\u8865\u4e8b\u4ef6\u7a97\u53e3\uff0c\u9488\u5bf9\u5ba1\u6838\u95ee\u9898\u5c40\u90e8\u4fee\u8ba2\u6539\u7f16\u7b56\u7565\u3002";
+  @override
+  String get agentWorkspaceScriptRecipeReviseAdaptationTitle =>
+      "\u4fee\u6539\u7f16\u7b56\u7565";
+  @override
+  String get agentWorkspaceScriptRecipeReviseScriptDetail =>
+      "\u5ba1\u6838\u5df2\u5b9a\u4f4d\u5267\u672c\u6b63\u6587\u95ee\u9898\uff0c\u5148\u8bfb\u53d6\u5f53\u524d\u96c6\u5c3e\u6bb5\u7a97\u53e3\u518d\u5b9a\u5411\u6539\u7a3f\u3002";
+  @override
+  String get agentWorkspaceScriptRecipeReviseScriptPrompt =>
+      "\u8bf7\u5148\u8bfb\u53d6\u5f53\u524d\u96c6\u5c3e\u6bb5\u7a97\u53e3\u3001storySkeleton\u3001adaptationStrategy\uff1b\u5982\u4ecd\u4e0d\u8db3\u518d\u8865\u8bfb\u7ae0\u8282\u6b63\u6587\u7a97\u53e3\uff0c\u5e76\u9488\u5bf9\u5ba1\u6838\u95ee\u9898\u5b9a\u5411\u4fee\u8ba2\u672c\u96c6\u5267\u672c\u3002";
+  @override
+  String get agentWorkspaceScriptRecipeReviseScriptTitle =>
+      "\u4fee\u5267\u672c\u6b63\u6587";
+  @override
+  String get agentWorkspaceScriptRecipeReviseStorySkeletonDetail =>
+      "\u5ba1\u6838\u6307\u51fa\u9aa8\u67b6\u4ecd\u6709\u7f3a\u53e3\uff0c\u5148\u56de\u5230 storySkeleton \u505a\u5b9a\u5411\u4fee\u8ba2\u3002";
+  @override
+  String get agentWorkspaceScriptRecipeReviseStorySkeletonPrompt =>
+      "\u8bf7\u5148\u8bfb\u53d6 storySkeleton \u4e0e\u76f8\u5173\u4e8b\u4ef6\u7a97\u53e3\uff0c\u4fe1\u606f\u4e0d\u8db3\u518d\u8865\u7ae0\u8282\u6b63\u6587\u7a97\u53e3\uff0c\u9488\u5bf9\u5ba1\u6838\u95ee\u9898\u5c40\u90e8\u4fee\u8ba2\u6545\u4e8b\u9aa8\u67b6\u3002";
+  @override
+  String get agentWorkspaceScriptRecipeReviseStorySkeletonTitle =>
+      "\u4fee\u6545\u4e8b\u9aa8\u67b6";
+  @override
+  String get agentWorkspaceScriptRecipeVerifyEventsDetail =>
+      "\u5ba1\u6838\u5efa\u8bae\u56de\u770b\u4e8b\u4ef6\u94fe\u8def\uff0c\u4f18\u5148\u8bfb\u53d6\u5c0f\u8bf4\u4e8b\u4ef6\u800c\u4e0d\u662f\u6574\u7ae0\u539f\u6587\u3002";
+  @override
+  String get agentWorkspaceScriptRecipeVerifyEventsTitle =>
+      "\u6838\u5bf9\u4e8b\u4ef6\u8109\u7edc";
+  @override
+  String get agentWorkspaceScriptStageDetailAdaptationPendingGen =>
+      "\u5f53\u524d\u7f3a\u5c11 adaptationStrategy\uff0c\u9002\u5408\u5148\u6536\u675f\u4eba\u7269\u4e0e\u8282\u594f\u7b56\u7565\u3002";
+  @override
+  String get agentWorkspaceScriptStageDetailAdaptationPendingRead =>
+      "\u56de\u770b planData\uff0c\u5224\u65ad adaptationStrategy \u662f\u5426\u5df2\u5177\u5907\u3002";
+  @override
+  String get agentWorkspaceScriptStageDetailAdaptationReady =>
+      "adaptationStrategy \u5df2\u5b58\u5728\uff0c\u53ef\u7ee7\u7eed\u8bfb\u53d6\u7ae0\u8282\u6750\u6599\u6216\u751f\u6210\u6b63\u6587\u3002";
+  @override
+  String get agentWorkspaceScriptStageDetailChapterMaterialEmptyNovel =>
+      "\u5c0f\u8bf4\u4e0a\u4e0b\u6587\u4e3a\u7a7a\uff0c\u5efa\u8bae\u7ee7\u7eed\u8bfb\u53d6\u7ae0\u8282\u6b63\u6587\u6216\u4e8b\u4ef6\u8109\u7edc\u3002";
+  @override
+  String get agentWorkspaceScriptStageDetailChapterMaterialPendingRead =>
+      "\u5148\u8bfb\u53d6\u7ae0\u8282\u6b63\u6587\u6216\u4e8b\u4ef6\u5217\u8868\uff0c\u518d\u51b3\u5b9a\u5982\u4f55\u6539\u5199\u5267\u672c\u3002";
+  @override
+  String agentWorkspaceScriptStageDetailChapterMaterialReady(int count) =>
+      "\u5df2\u8bfb\u53d6 $count \u6761\u5c0f\u8bf4\u4e0a\u4e0b\u6587\uff0c\u53ef\u7ee7\u7eed\u751f\u6210\u5267\u672c\u6b63\u6587\u6216\u5bf9\u7167\u73b0\u6709 script\u3002";
+  @override
+  String get agentWorkspaceScriptStageDetailReviewAdaptationEmpty =>
+      "\u5ba1\u6838\u5df2\u8986\u76d6 adaptationStrategy\uff0c\u53ef\u6309\u5efa\u8bae\u7ee7\u7eed\u4fee\u8ba2\u3002";
+  @override
+  String agentWorkspaceScriptStageDetailReviewConclusion(String summary) =>
+      "\u5ba1\u6838\u7ed3\u8bba\uff1a$summary";
+  @override
+  String get agentWorkspaceScriptStageDetailReviewScriptEmpty =>
+      "\u5ba1\u6838\u5df2\u8986\u76d6\u5267\u672c\u6b63\u6587\uff0c\u53ef\u6309\u5efa\u8bae\u7ee7\u7eed\u6539\u7a3f\u3002";
+  @override
+  String get agentWorkspaceScriptStageDetailReviewStorySkeletonEmpty =>
+      "\u5ba1\u6838\u5df2\u8986\u76d6 storySkeleton\uff0c\u53ef\u6309\u5efa\u8bae\u7ee7\u7eed\u4fee\u8ba2\u3002";
+  @override
+  String get agentWorkspaceScriptStageDetailScriptBodyReady =>
+      "\u5f53\u524d script \u6b63\u6587\u5df2\u5b58\u5728\uff0c\u53ef\u76f4\u63a5\u5199\u56de\u6216\u56de\u770b\u8ba1\u5212\u6570\u636e\u7ee7\u7eed\u6539\u7a3f\u3002";
+  @override
+  String get agentWorkspaceScriptStageDetailScriptPendingGen =>
+      "\u5f53\u524d script \u6b63\u6587\u4e3a\u7a7a\uff0c\u9002\u5408\u76f4\u63a5\u8fd0\u884c script \u5b50\u4ee3\u7406\u751f\u6210\u9996\u7248\u5185\u5bb9\u3002";
+  @override
+  String get agentWorkspaceScriptStageDetailScriptPendingRead =>
+      "\u8bfb\u53d6\u5f53\u524d\u5267\u672c\u6b63\u6587\uff0c\u518d\u5224\u65ad\u662f\u5426\u9700\u8981\u76f4\u63a5\u751f\u6210\u4e0b\u4e00\u7248\u3002";
+  @override
+  String get agentWorkspaceScriptStageDetailStorySkeletonPendingGen =>
+      "\u5148\u8865\u6545\u4e8b\u9aa8\u67b6\uff0c\u660e\u786e\u4e3b\u51b2\u7a81\u3001\u8f6c\u6298\u4e0e\u7ed3\u5c40\u8d70\u5411\u3002";
+  @override
+  String get agentWorkspaceScriptStageDetailStorySkeletonPendingRead =>
+      "\u5148\u8bfb\u53d6 planData\uff0c\u786e\u8ba4 storySkeleton \u662f\u5426\u9f50\u5907\u3002";
+  @override
+  String get agentWorkspaceScriptStageDetailStorySkeletonReady =>
+      "storySkeleton \u5df2\u5b58\u5728\uff0c\u53ef\u7ee7\u7eed\u6536\u675f\u6539\u7f16\u7b56\u7565\u6216\u5bf9\u7167\u5267\u672c\u6b63\u6587\u3002";
+  @override
+  String get agentWorkspaceScriptStagePromptGenerateAdaptationStrategy =>
+      "\u8bf7\u57fa\u4e8e\u73b0\u6709\u6545\u4e8b\u9aa8\u67b6\u8865\u9f50\u6539\u7f16\u7b56\u7565\uff0c\u7a81\u51fa\u8282\u594f\u3001\u4eba\u7269\u5f27\u5149\u4e0e\u96c6\u6570\u62c6\u5206\u539f\u5219\u3002";
+  @override
+  String get agentWorkspaceScriptStagePromptGenerateScript =>
+      "\u8bf7\u5148\u8bfb\u53d6\u5f53\u524d\u96c6\u8ba1\u5212\u4e0e\u76ee\u6807\u7ae0\u8282\u4e8b\u4ef6\uff1b\u53ea\u6709\u5728\u627f\u63a5\u4e0a\u4e00\u96c6\u65f6\u624d\u8865\u8bfb\u4e0a\u4e00\u96c6\u5c3e\u6bb5\uff0c\u5176\u4f59\u7ec6\u8282\u518d\u6309\u9700\u8865\u6b63\u6587\u7a97\u53e3\uff0c\u751f\u6210\u4e0b\u4e00\u7248\u5267\u672c\u6b63\u6587\u5e76\u8f93\u51fa\u53ef\u76f4\u63a5\u5199\u56de\u7684\u5b8c\u6574\u5185\u5bb9\u3002";
+  @override
+  String get agentWorkspaceScriptStagePromptGenerateStorySkeleton =>
+      "\u8bf7\u57fa\u4e8e\u5f53\u524d\u9879\u76ee\u4e0a\u4e0b\u6587\u751f\u6210\u4e00\u7248\u6e05\u6670\u7684\u6545\u4e8b\u9aa8\u67b6\uff0c\u5e76\u7a81\u51fa\u4e3b\u51b2\u7a81\u4e0e\u53cd\u8f6c\u8282\u70b9\u3002";
+  @override
+  String get agentWorkspaceScriptStagePromptReviseAdaptationStrategy =>
+      "\u8bf7\u5148\u8bfb\u53d6 adaptationStrategy \u4e0e storySkeleton\uff0c\u518d\u9488\u5bf9\u5ba1\u6838\u610f\u89c1\u5c40\u90e8\u4fee\u8ba2\u6539\u7f16\u7b56\u7565\u3002";
+  @override
+  String get agentWorkspaceScriptStagePromptReviseScript =>
+      "\u8bf7\u5148\u8bfb\u53d6\u5f53\u524d\u96c6\u5c3e\u6bb5\u7a97\u53e3\u3001storySkeleton\u3001adaptationStrategy\uff1b\u5982\u4ecd\u4e0d\u8db3\u518d\u8865\u8bfb\u7ae0\u8282\u6b63\u6587\u7a97\u53e3\uff0c\u5e76\u9488\u5bf9\u5ba1\u6838\u610f\u89c1\u5b9a\u5411\u4fee\u8ba2\u672c\u96c6\u5267\u672c\u3002";
+  @override
+  String get agentWorkspaceScriptStagePromptReviseStorySkeleton =>
+      "\u8bf7\u5148\u8bfb\u53d6 storySkeleton \u4e0e\u76f8\u5173\u4e8b\u4ef6\u7a97\u53e3\uff0c\u518d\u9488\u5bf9\u5ba1\u6838\u610f\u89c1\u5c40\u90e8\u4fee\u8ba2\u6545\u4e8b\u9aa8\u67b6\u3002";
+  @override
+  String get agentWorkspaceScriptStageStatusCompleted => "\u5df2\u5b8c\u6210";
+  @override
+  String get agentWorkspaceScriptStageStatusNeedsRevision =>
+      "\u5f85\u4fee\u8ba2";
+  @override
+  String get agentWorkspaceScriptStageStatusPendingGenerate =>
+      "\u5f85\u751f\u6210";
+  @override
+  String get agentWorkspaceScriptStageStatusPendingRead => "\u5f85\u8bfb\u53d6";
+  @override
+  String get agentWorkspaceScriptStageStatusReady => "\u5df2\u5c31\u7eea";
+  @override
+  String get agentWorkspaceScriptStageStatusReusable => "\u53ef\u6cbf\u7528";
+  @override
+  String get agentWorkspaceScriptStageStatusSupplementNeeded =>
+      "\u5f85\u8865\u5145";
+  @override
+  String get agentWorkspaceScriptStageTitleAdaptationStrategy =>
+      "\u6539\u7f16\u7b56\u7565";
+  @override
+  String get agentWorkspaceScriptStageTitleChapterMaterial =>
+      "\u7ae0\u8282\u6750\u6599";
+  @override
+  String get agentWorkspaceScriptStageTitleScriptBody =>
+      "\u5267\u672c\u6b63\u6587";
+  @override
+  String get agentWorkspaceScriptStageTitleStorySkeleton =>
+      "\u6545\u4e8b\u9aa8\u67b6";
+
+  @override
   String agentWorkspaceScriptContextSkeletonFocus(String focus) {
     return '骨架焦点：$focus';
   }
@@ -18716,6 +18992,44 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get benchmarkLabelGateDecisionOptionalAuto =>
       '决策（留空则使用 auto decision）';
+
+  @override
+  String get benchmarkGateDecisionHint =>
+      'approved / approved_limited / blocked / needs_review';
+
+  @override
+  String benchmarkGateAssessmentsSummary(int count) {
+    return '放行门评估：$count 个变体';
+  }
+
+  @override
+  String benchmarkTrendsDataSummary(int weeks) {
+    return '趋势数据：$weeks 周';
+  }
+
+  @override
+  String get shellJobQueueStatsTitle => '任务队列统计（内部）';
+
+  @override
+  String get shellJobQueueStatsSubtitle =>
+      '使用 INTERNAL_OPS_TOKEN dart-define → GET /api/v1/jobs/queue/stats';
+
+  @override
+  String shellJobQueueStatsStatsLine(
+    String pending,
+    String claimable,
+    String running,
+    String dead,
+    String failed24h,
+    String oldestClaimable,
+  ) {
+    return 'pending=$pending claimable=$claimable running=$running dead=$dead failed_24h=$failed24h oldest_claimable_s=$oldestClaimable';
+  }
+
+  @override
+  String shellJobQueueStatsPendingByKind(String kinds) {
+    return 'pending_by_kind: $kinds';
+  }
 
   @override
   String get benchmarkLabelGateDecisionNote => '决策说明';

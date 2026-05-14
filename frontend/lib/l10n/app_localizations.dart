@@ -27229,6 +27229,100 @@ abstract class AppLocalizations {
   /// **'Agent workspace script apply suggestion'**
   String get agentWorkspaceScriptApplySuggestion;
 
+  String get agentWorkspaceScriptRecipeAddChapterMaterialDetail;
+  String get agentWorkspaceScriptRecipeAddChapterMaterialTitle;
+  String get agentWorkspaceScriptRecipeAddNovelTextWindowDetail;
+  String get agentWorkspaceScriptRecipeAddNovelTextWindowTitle;
+  String get agentWorkspaceScriptRecipeCompareExistingScriptDetail;
+  String get agentWorkspaceScriptRecipeCompareExistingScriptTitle;
+  String get agentWorkspaceScriptRecipeDistillSkeletonFromEventsDetail;
+  String get agentWorkspaceScriptRecipeDistillSkeletonFromEventsPrompt;
+  String get agentWorkspaceScriptRecipeDistillSkeletonFromEventsTitle;
+  String get agentWorkspaceScriptRecipeFillAdaptationDetail;
+  String get agentWorkspaceScriptRecipeFillAdaptationPrompt;
+  String get agentWorkspaceScriptRecipeFillAdaptationTitle;
+  String get agentWorkspaceScriptRecipeFillStorySkeletonDetail;
+  String get agentWorkspaceScriptRecipeFillStorySkeletonPrompt;
+  String get agentWorkspaceScriptRecipeFillStorySkeletonTitle;
+  String get agentWorkspaceScriptRecipeGenerateAdaptationFromTextDetail;
+  String get agentWorkspaceScriptRecipeGenerateAdaptationFromTextPrompt;
+  String get agentWorkspaceScriptRecipeGenerateAdaptationFromTextTitle;
+  String get agentWorkspaceScriptRecipeGenerateNextScriptDetail;
+  String get agentWorkspaceScriptRecipeGenerateNextScriptPrompt;
+  String get agentWorkspaceScriptRecipeGenerateNextScriptTitle;
+  String get agentWorkspaceScriptRecipeGenerateScriptBodyDetail;
+  String get agentWorkspaceScriptRecipeGenerateScriptBodyPrompt;
+  String get agentWorkspaceScriptRecipeGenerateScriptBodyTitle;
+  String get agentWorkspaceScriptRecipeGenerateScriptFromEventsDetail;
+  String get agentWorkspaceScriptRecipeGenerateScriptFromEventsPrompt;
+  String get agentWorkspaceScriptRecipeGenerateScriptFromEventsTitle;
+  String get agentWorkspaceScriptRecipePreferEventsDetail;
+  String get agentWorkspaceScriptRecipePreferEventsTitle;
+  String get agentWorkspaceScriptRecipePullChapterMaterialDetail;
+  String get agentWorkspaceScriptRecipePullChapterMaterialTitle;
+  String get agentWorkspaceScriptRecipePullChapterTextFirstDetail;
+  String get agentWorkspaceScriptRecipePullChapterTextFirstTitle;
+  String get agentWorkspaceScriptRecipeReadMatchingEventsDetail;
+  String get agentWorkspaceScriptRecipeReadMatchingEventsTitle;
+  String get agentWorkspaceScriptRecipeReadPlanScriptDraftDetail;
+  String get agentWorkspaceScriptRecipeReadPlanScriptDraftTitle;
+  String get agentWorkspaceScriptRecipeReadScriptBodyDetail;
+  String get agentWorkspaceScriptRecipeReadScriptBodyTitle;
+  String get agentWorkspaceScriptRecipeRefreshPlanAfterBodyDetail;
+  String get agentWorkspaceScriptRecipeRefreshPlanAfterBodyTitle;
+  String get agentWorkspaceScriptRecipeRefreshPlanDataDetail;
+  String get agentWorkspaceScriptRecipeRefreshPlanDataTitle;
+  String get agentWorkspaceScriptRecipeRereadCurrentScriptDetail;
+  String get agentWorkspaceScriptRecipeRereadCurrentScriptTitle;
+  String get agentWorkspaceScriptRecipeReviewPreviousTailDetail;
+  String get agentWorkspaceScriptRecipeReviewPreviousTailTitle;
+  String get agentWorkspaceScriptRecipeReviewTargetPeekDetail;
+  String get agentWorkspaceScriptRecipeReviewTargetPeekTitle;
+  String get agentWorkspaceScriptRecipeReviseAdaptationDetail;
+  String get agentWorkspaceScriptRecipeReviseAdaptationPrompt;
+  String get agentWorkspaceScriptRecipeReviseAdaptationTitle;
+  String get agentWorkspaceScriptRecipeReviseScriptDetail;
+  String get agentWorkspaceScriptRecipeReviseScriptPrompt;
+  String get agentWorkspaceScriptRecipeReviseScriptTitle;
+  String get agentWorkspaceScriptRecipeReviseStorySkeletonDetail;
+  String get agentWorkspaceScriptRecipeReviseStorySkeletonPrompt;
+  String get agentWorkspaceScriptRecipeReviseStorySkeletonTitle;
+  String get agentWorkspaceScriptRecipeVerifyEventsDetail;
+  String get agentWorkspaceScriptRecipeVerifyEventsTitle;
+  String get agentWorkspaceScriptStageDetailAdaptationPendingGen;
+  String get agentWorkspaceScriptStageDetailAdaptationPendingRead;
+  String get agentWorkspaceScriptStageDetailAdaptationReady;
+  String get agentWorkspaceScriptStageDetailChapterMaterialEmptyNovel;
+  String get agentWorkspaceScriptStageDetailChapterMaterialPendingRead;
+  String agentWorkspaceScriptStageDetailChapterMaterialReady(int count);
+  String get agentWorkspaceScriptStageDetailReviewAdaptationEmpty;
+  String agentWorkspaceScriptStageDetailReviewConclusion(String summary);
+  String get agentWorkspaceScriptStageDetailReviewScriptEmpty;
+  String get agentWorkspaceScriptStageDetailReviewStorySkeletonEmpty;
+  String get agentWorkspaceScriptStageDetailScriptBodyReady;
+  String get agentWorkspaceScriptStageDetailScriptPendingGen;
+  String get agentWorkspaceScriptStageDetailScriptPendingRead;
+  String get agentWorkspaceScriptStageDetailStorySkeletonPendingGen;
+  String get agentWorkspaceScriptStageDetailStorySkeletonPendingRead;
+  String get agentWorkspaceScriptStageDetailStorySkeletonReady;
+  String get agentWorkspaceScriptStagePromptGenerateAdaptationStrategy;
+  String get agentWorkspaceScriptStagePromptGenerateScript;
+  String get agentWorkspaceScriptStagePromptGenerateStorySkeleton;
+  String get agentWorkspaceScriptStagePromptReviseAdaptationStrategy;
+  String get agentWorkspaceScriptStagePromptReviseScript;
+  String get agentWorkspaceScriptStagePromptReviseStorySkeleton;
+  String get agentWorkspaceScriptStageStatusCompleted;
+  String get agentWorkspaceScriptStageStatusNeedsRevision;
+  String get agentWorkspaceScriptStageStatusPendingGenerate;
+  String get agentWorkspaceScriptStageStatusPendingRead;
+  String get agentWorkspaceScriptStageStatusReady;
+  String get agentWorkspaceScriptStageStatusReusable;
+  String get agentWorkspaceScriptStageStatusSupplementNeeded;
+  String get agentWorkspaceScriptStageTitleAdaptationStrategy;
+  String get agentWorkspaceScriptStageTitleChapterMaterial;
+  String get agentWorkspaceScriptStageTitleScriptBody;
+  String get agentWorkspaceScriptStageTitleStorySkeleton;
+
   /// No description provided for @agentWorkspaceScriptContextSkeletonFocus.
   ///
   /// In en, this message translates to:
@@ -29171,6 +29265,55 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Decision (empty uses auto decision)'**
   String get benchmarkLabelGateDecisionOptionalAuto;
+
+  /// No description provided for @benchmarkGateDecisionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'approved / approved_limited / blocked / needs_review'**
+  String get benchmarkGateDecisionHint;
+
+  /// No description provided for @benchmarkGateAssessmentsSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Gate assessments: {count} variants'**
+  String benchmarkGateAssessmentsSummary(int count);
+
+  /// No description provided for @benchmarkTrendsDataSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Trend data: {weeks} weeks'**
+  String benchmarkTrendsDataSummary(int weeks);
+
+  /// No description provided for @shellJobQueueStatsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Job queue stats (internal)'**
+  String get shellJobQueueStatsTitle;
+
+  /// No description provided for @shellJobQueueStatsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Uses INTERNAL_OPS_TOKEN dart-define → GET /api/v1/jobs/queue/stats'**
+  String get shellJobQueueStatsSubtitle;
+
+  /// No description provided for @shellJobQueueStatsStatsLine.
+  ///
+  /// In en, this message translates to:
+  /// **'pending={pending} claimable={claimable} running={running} dead={dead} failed_24h={failed24h} oldest_claimable_s={oldestClaimable}'**
+  String shellJobQueueStatsStatsLine(
+    String pending,
+    String claimable,
+    String running,
+    String dead,
+    String failed24h,
+    String oldestClaimable,
+  );
+
+  /// No description provided for @shellJobQueueStatsPendingByKind.
+  ///
+  /// In en, this message translates to:
+  /// **'pending_by_kind: {kinds}'**
+  String shellJobQueueStatsPendingByKind(String kinds);
 
   /// No description provided for @benchmarkLabelGateDecisionNote.
   ///
