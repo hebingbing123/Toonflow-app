@@ -137,6 +137,7 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
       widget.loadingProductionResultWriteback;
 
   Widget _buildPaneBody(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     switch (_pane) {
       case AgentWorkspacePane.script:
         return AgentWorkspaceScriptCard(
@@ -146,7 +147,7 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
           scriptSubAgentToolController: widget.scriptSubAgentToolController,
           scriptDomainToolPresets: _scriptDomainToolPresets,
           scriptSubAgentPresets: _scriptSubAgentPresets,
-          scriptPromptPresets: _scriptPromptPresets,
+          scriptPromptPresets: agentWorkspaceScriptPromptPresets(l10n),
           selectedScriptDomainTool: _selectedScriptDomainTool,
           loadingScriptWorkspaceRun: widget.loadingScriptWorkspaceRun,
           loadingScriptDomainProbe: widget.loadingScriptDomainProbe,
@@ -198,7 +199,7 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
           productionSubAgentToolController:
               widget.productionSubAgentToolController,
           flowKeyController: widget.flowKeyController,
-          productionPromptPresets: _productionPromptPresets,
+          productionPromptPresets: agentWorkspaceProductionPromptPresets(l10n),
           productionDomainToolPresets: _productionDomainToolPresets,
           productionSubAgentPresets: _productionSubAgentPresets,
           flowKeyPresets: _flowKeyPresets,

@@ -1,25 +1,24 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
+
 class WorkspaceInputController {
   final TextEditingController projectIdController = TextEditingController();
+
   /// Preferred project key on WebSocket attach (**`app_project.id`**).
   final TextEditingController projectUuidController = TextEditingController();
   final TextEditingController scriptIdController = TextEditingController();
+
   /// Preferred script key for production attach (**`app_script.id`**).
   final TextEditingController scriptUuidController = TextEditingController();
+
   /// **`app_project.workspace_id`** for optional **`workspaceUuid`** on WS attach (team / REST 对齐).
   final TextEditingController workspaceUuidController = TextEditingController();
-  final TextEditingController scriptPromptController = TextEditingController(
-    text:
-        '先用 get_planData 读取 planData.script、storySkeleton、adaptationStrategy 的必要片段，再读目标章节事件；只有细节不足时才补正文窗口，最后给出下一轮 script 建议。',
-  );
+  final TextEditingController scriptPromptController = TextEditingController();
   final TextEditingController scriptDomainArgsController =
       TextEditingController(text: '{}');
-  final TextEditingController
-  productionPromptController = TextEditingController(
-    text:
-        '先调用 get_flowData key=scriptPlan 读取紧凑导演规划，再按需补最小化 assets 或 storyboardTable，上来不要整包读取 production flow。',
-  );
+  final TextEditingController productionPromptController =
+      TextEditingController();
   final TextEditingController productionFlowKeyController =
       TextEditingController(text: 'scriptPlan');
   final TextEditingController productionDomainToolController =
@@ -122,6 +121,12 @@ class WorkspaceInputController {
       return;
     }
     productionFlowKeyController.text = normalized;
+  }
+
+  void applyLocalizedPromptDefaults(AppLocalizations l10n) {
+    scriptPromptController.text = l10n.agentWorkspaceDefaultScriptPrompt;
+    productionPromptController.text =
+        l10n.agentWorkspaceDefaultProductionPrompt;
   }
 
   void dispose() {

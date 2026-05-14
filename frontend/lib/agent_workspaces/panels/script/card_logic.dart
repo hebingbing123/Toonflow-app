@@ -14,28 +14,31 @@ extension _AgentWorkspaceScriptCardLogic on _AgentWorkspaceScriptCardState {
   }
 
   bool _validateJsonArgs(String raw) {
+    final l10n = AppLocalizations.of(context)!;
     final normalized = raw.trim();
     if (normalized.isEmpty) return true;
     try {
       final decoded = jsonDecode(normalized);
       if (decoded is Map<String, dynamic>) return true;
-      _setTaskStatus('拦截：剧本工具参数必须是 JSON object。');
+      _setTaskStatus(l10n.agentWorkspaceScriptInterceptArgsMustBeJsonObject);
       return false;
     } catch (_) {
-      _setTaskStatus('拦截：剧本工具参数 JSON 解析失败。');
+      _setTaskStatus(l10n.agentWorkspaceScriptInterceptArgsJsonParseFailed);
       return false;
     }
   }
 
   bool _validatePrompt(String action) {
+    final l10n = AppLocalizations.of(context)!;
     if (widget.scriptPromptController.text.trim().isNotEmpty) return true;
-    _setTaskStatus('拦截：$action 需要非空工作区提示词。');
+    _setTaskStatus(l10n.agentWorkspaceScriptInterceptPromptRequired(action));
     return false;
   }
 
   bool _validateScriptProbe() {
+    final l10n = AppLocalizations.of(context)!;
     if (widget.selectedScriptDomainTool.trim().isEmpty) {
-      _setTaskStatus('拦截：读取前需要选择剧本域工具。');
+      _setTaskStatus(l10n.agentWorkspaceScriptInterceptSelectDomainToolFirst);
       return false;
     }
     if (!_validateJsonArgs(widget.scriptDomainArgsController.text)) {
@@ -43,13 +46,16 @@ extension _AgentWorkspaceScriptCardLogic on _AgentWorkspaceScriptCardState {
     }
     if (widget.selectedScriptDomainTool == 'get_script_content' &&
         _scopeScriptId == null) {
-      _setTaskStatus('拦截：get_script_content 需要有效剧本 ID。');
+      _setTaskStatus(
+        l10n.agentWorkspaceScriptInterceptGetScriptContentNeedsScriptId,
+      );
       return false;
     }
     return true;
   }
 
   bool _normalizeArgsForProbe() {
+    final l10n = AppLocalizations.of(context)!;
     final raw = widget.scriptDomainArgsController.text.trim();
     final Map<String, dynamic> normalized;
     if (raw.isEmpty) {
@@ -57,7 +63,7 @@ extension _AgentWorkspaceScriptCardLogic on _AgentWorkspaceScriptCardState {
     } else {
       final decoded = jsonDecode(raw);
       if (decoded is! Map<String, dynamic>) {
-        _setTaskStatus('拦截：剧本工具参数必须是 JSON object。');
+        _setTaskStatus(l10n.agentWorkspaceScriptInterceptArgsMustBeJsonObject);
         return false;
       }
       normalized = Map<String, dynamic>.from(decoded);
@@ -65,14 +71,18 @@ extension _AgentWorkspaceScriptCardLogic on _AgentWorkspaceScriptCardState {
     if (widget.selectedScriptDomainTool == 'get_script_content') {
       final scriptId = _scopeScriptId;
       if (scriptId == null) {
-        _setTaskStatus('拦截：get_script_content 需要有效剧本 ID。');
+        _setTaskStatus(
+          l10n.agentWorkspaceScriptInterceptGetScriptContentNeedsScriptId,
+        );
         return false;
       }
       if (normalized['scriptId'] != scriptId) {
         normalized['scriptId'] = scriptId;
         widget.scriptDomainArgsController.text = jsonEncode(normalized);
         _setTaskStatus(
-          '已同步：get_script_content arguments.scriptId -> $scriptId',
+          l10n.agentWorkspaceScriptSyncedScriptContentScriptId(
+            scriptId.toString(),
+          ),
         );
       }
       return true;
@@ -82,47 +92,53 @@ extension _AgentWorkspaceScriptCardLogic on _AgentWorkspaceScriptCardState {
   }
 
   bool _validateSubAgentTool() {
+    final l10n = AppLocalizations.of(context)!;
     if (widget.scriptSubAgentToolController.text.trim().isEmpty) {
-      _setTaskStatus('拦截：运行子代理前需要选择剧本子代理工具。');
+      _setTaskStatus(l10n.agentWorkspaceScriptInterceptSelectSubAgentToolFirst);
       return false;
     }
-    return _validatePrompt('运行子代理');
+    return _validatePrompt(l10n.agentWorkspaceScriptActionRunSubAgent);
   }
 
-  List<({String label, String args})> _argumentTemplates() {
+  List<({String label, String args})> _argumentTemplates(
+    AppLocalizations l10n,
+  ) {
     switch (widget.selectedScriptDomainTool) {
       case 'get_script_content':
         final scriptId = _scopeScriptId ?? 1;
         return <({String label, String args})>[
           (
-            label: '模板: 当前剧本窗口',
+            label: l10n.agentWorkspaceScriptArgTemplateCurrentWindow,
             args:
                 '{"scriptId":$scriptId,"lineStart":1,"lineEnd":80,"maxChars":2200}',
           ),
           (
-            label: '模板: 当前剧本尾段',
+            label: l10n.agentWorkspaceScriptArgTemplateCurrentTail,
             args:
                 '{"scriptId":$scriptId,"lineStart":61,"lineEnd":120,"maxChars":1600}',
           ),
           if ((_scopeScriptId ?? 1) > 1)
             (
-              label: '模板: 上一集尾段',
+              label: l10n.agentWorkspaceScriptArgTemplatePreviousEpisodeTail,
               args:
                   '{"relativeOffset":-1,"lineStart":61,"lineEnd":120,"maxChars":1600}',
             ),
         ];
       case 'get_planData':
         return <({String label, String args})>[
-          (label: '模板: 骨架片段', args: '{"key":"storySkeleton","maxChars":1600}'),
           (
-            label: '模板: 策略片段',
+            label: l10n.agentWorkspaceScriptArgTemplateStorySkeletonSlice,
+            args: '{"key":"storySkeleton","maxChars":1600}',
+          ),
+          (
+            label: l10n.agentWorkspaceScriptArgTemplateAdaptationSlice,
             args: '{"key":"adaptationStrategy","maxChars":1600}',
           ),
         ];
       case 'get_novel_text':
         return <({String label, String args})>[
           (
-            label: '模板: 正文窗口',
+            label: l10n.agentWorkspaceScriptArgTemplateNovelTextWindow,
             args:
                 '{"fields":["numeric_id","chapter","chapter_data"],"lineStart":1,"lineEnd":80,"maxChars":1800,"limit":1}',
           ),
@@ -130,66 +146,83 @@ extension _AgentWorkspaceScriptCardLogic on _AgentWorkspaceScriptCardState {
       case 'get_novel_events':
         return <({String label, String args})>[
           (
-            label: '模板: 事件窗口',
+            label: l10n.agentWorkspaceScriptArgTemplateNovelEventsWindow,
             args:
                 '{"fields":["numeric_id","name","detail"],"limit":8,"maxChars":1200}',
           ),
         ];
       default:
-        return <({String label, String args})>[(label: '模板: 空参数', args: '{}')];
+        return <({String label, String args})>[
+          (label: l10n.agentWorkspaceScriptArgTemplateEmptyArgs, args: '{}'),
+        ];
     }
   }
 
   void _applyToolArgsTemplate(String args, String label) {
+    final l10n = AppLocalizations.of(context)!;
     widget.scriptDomainArgsController.text = args;
-    _setTaskStatus('已填充参数模板：$label');
+    _setTaskStatus(l10n.agentWorkspaceFilledArgTemplate(label));
   }
 
   void _runScriptWorkspace() {
-    if (!_validatePrompt('运行剧本工作流')) return;
+    final l10n = AppLocalizations.of(context)!;
+    if (!_validatePrompt(l10n.agentWorkspaceScriptActionRunWorkflow)) return;
     widget.onRunScriptWorkspace();
-    _setTaskStatus('已触发：运行剧本工作流');
+    _setTaskStatus(l10n.agentWorkspaceScriptTriggeredRunWorkflow);
   }
 
   void _probeScriptDomainTool() {
     if (!_validateScriptProbe()) return;
     if (!_normalizeArgsForProbe()) return;
     widget.onProbeScriptDomainTool();
-    _setTaskStatus('已触发：读取剧本上下文 (${widget.selectedScriptDomainTool})');
+    final l10n = AppLocalizations.of(context)!;
+    _setTaskStatus(
+      l10n.agentWorkspaceScriptTriggeredProbeContext(
+        widget.selectedScriptDomainTool,
+      ),
+    );
   }
 
   void _runScriptSubAgentTool() {
     if (!_validateSubAgentTool()) return;
     widget.onRunScriptSubAgentTool();
+    final l10n = AppLocalizations.of(context)!;
     final tool = widget.scriptSubAgentToolController.text.trim();
-    _setTaskStatus('已触发：运行子代理 ($tool)');
+    _setTaskStatus(l10n.agentWorkspaceScriptTriggeredRunSubAgent(tool));
   }
 
   void _writeBackScriptResult() {
+    final l10n = AppLocalizations.of(context)!;
     if (!_canWriteBackScriptResult) {
-      _setTaskStatus('拦截：暂无剧本结果可写回。');
+      _setTaskStatus(l10n.agentWorkspaceScriptInterceptNoScriptWritebackResult);
       return;
     }
     widget.onWriteBackScriptResult();
-    _setTaskStatus('已触发：写回剧本');
+    _setTaskStatus(l10n.agentWorkspaceScriptTriggeredWritebackScript);
   }
 
   void _writeBackScriptPlanResult() {
+    final l10n = AppLocalizations.of(context)!;
     if (!_canWriteBackScriptPlanResult) {
-      _setTaskStatus('拦截：暂无 planData 结果可写回。');
+      _setTaskStatus(
+        l10n.agentWorkspaceScriptInterceptNoPlanDataWritebackResult,
+      );
       return;
     }
     widget.onWriteBackScriptPlanResult();
-    _setTaskStatus('已触发：写回计划数据');
+    _setTaskStatus(l10n.agentWorkspaceScriptTriggeredWritebackPlanData);
   }
 
   void _writeBackScriptPlanViaUpdateData() {
+    final l10n = AppLocalizations.of(context)!;
     if (!_canWriteBackScriptPlanViaUpdateData) {
-      _setTaskStatus('拦截：需要 planId（拉取 get_planData）与 planData。');
+      _setTaskStatus(
+        l10n.agentWorkspaceScriptInterceptPlanWritebackNeedsPlanId,
+      );
       return;
     }
     widget.onWriteBackScriptPlanViaUpdateData();
-    _setTaskStatus('已触发：update-data 写回计划行');
+    _setTaskStatus(l10n.agentWorkspaceScriptTriggeredPlanRowUpdateData);
   }
 
   Widget _buildPromptTemplates() {
@@ -201,6 +234,7 @@ extension _AgentWorkspaceScriptCardLogic on _AgentWorkspaceScriptCardState {
   }
 
   Widget _buildGuidedTasks() {
+    final l10n = AppLocalizations.of(context)!;
     return ScriptWorkspaceGuidedTasksPanel(
       busy: widget.busy,
       canWriteBackScriptResult: _canWriteBackScriptResult,
@@ -219,7 +253,7 @@ extension _AgentWorkspaceScriptCardLogic on _AgentWorkspaceScriptCardState {
       },
       onGenerateDraft: () {
         _applyScriptPromptIfEmpty(
-          '请先读取当前集计划与目标章节事件；只有在衔接需要时才补读上一集尾段，其他细节再按需补章节正文窗口，然后生成下一版剧本正文并输出可直接写回的完整内容。',
+          l10n.agentWorkspaceScriptGuidedGenerateDraftPrompt,
         );
         widget.onScriptSubAgentChanged('run_sub_agent_script');
         _runScriptSubAgentTool();
@@ -228,10 +262,10 @@ extension _AgentWorkspaceScriptCardLogic on _AgentWorkspaceScriptCardState {
     );
   }
 
-  Widget _buildArgumentTemplates() {
-    final templates = _argumentTemplates();
+  Widget _buildArgumentTemplates(AppLocalizations l10n) {
+    final templates = _argumentTemplates(l10n);
     final suggestions = buildScriptWorkspaceArgumentSuggestions(
-      l10n: AppLocalizations.of(context)!,
+      l10n: l10n,
       selectedTool: widget.selectedScriptDomainTool,
       toolName: widget.workspaceLastToolName,
       result: widget.workspaceLastToolResultData,
@@ -257,6 +291,7 @@ extension _AgentWorkspaceScriptCardLogic on _AgentWorkspaceScriptCardState {
   }
 
   void _applyWorkspaceRecipe(ScriptWorkspaceRecipe recipe) {
+    final l10n = AppLocalizations.of(context)!;
     if (recipe.domainTool != null && recipe.domainTool!.trim().isNotEmpty) {
       widget.onScriptDomainToolChanged(recipe.domainTool!.trim());
       widget.scriptDomainArgsController.text = jsonEncode(
@@ -270,7 +305,7 @@ extension _AgentWorkspaceScriptCardLogic on _AgentWorkspaceScriptCardState {
     if (prompt != null && prompt.isNotEmpty) {
       widget.scriptPromptController.text = prompt;
     }
-    _setTaskStatus('已应用任务建议：${recipe.title}');
+    _setTaskStatus(l10n.agentWorkspaceScriptAppliedRecipe(recipe.title));
   }
 
   void _runWorkspaceRecipeDomainTool(ScriptWorkspaceRecipe recipe) {
@@ -288,6 +323,7 @@ extension _AgentWorkspaceScriptCardLogic on _AgentWorkspaceScriptCardState {
   }
 
   void _applyWorkspaceStage(ScriptWorkspaceStage stage) {
+    final l10n = AppLocalizations.of(context)!;
     if (stage.domainTool != null && stage.domainTool!.trim().isNotEmpty) {
       widget.onScriptDomainToolChanged(stage.domainTool!.trim());
       widget.scriptDomainArgsController.text = jsonEncode(
@@ -301,7 +337,7 @@ extension _AgentWorkspaceScriptCardLogic on _AgentWorkspaceScriptCardState {
     if (prompt != null && prompt.isNotEmpty) {
       widget.scriptPromptController.text = prompt;
     }
-    _setTaskStatus('已应用阶段动作：${stage.title}');
+    _setTaskStatus(l10n.agentWorkspaceScriptAppliedStage(stage.title));
   }
 
   void _runWorkspaceStageDomainTool(ScriptWorkspaceStage stage) {

@@ -17,37 +17,55 @@ extension _AgentWorkspaceProductionCardLogic
   }
 
   String? get _runningTaskLine {
-    if (widget.loadingProductionWorkspaceRun) return '执行中：运行制作工作流';
-    if (widget.loadingProductionFlowProbe) return '执行中：读取制作工具结果';
-    if (widget.loadingProductionSubAgentRun) return '执行中：运行子代理';
-    if (widget.loadingProductionResultWriteback) return '执行中：写回工具结果';
+    final l10n = AppLocalizations.of(context)!;
+    if (widget.loadingProductionWorkspaceRun) {
+      return l10n.agentWorkspaceProductionRunningRunWorkflow;
+    }
+    if (widget.loadingProductionFlowProbe) {
+      return l10n.agentWorkspaceProductionRunningProbeTool;
+    }
+    if (widget.loadingProductionSubAgentRun) {
+      return l10n.agentWorkspaceProductionRunningSubAgent;
+    }
+    if (widget.loadingProductionResultWriteback) {
+      return l10n.agentWorkspaceProductionRunningWriteback;
+    }
     return null;
   }
 
   bool _validateJsonArgs(String raw) {
+    final l10n = AppLocalizations.of(context)!;
     final normalized = raw.trim();
     if (normalized.isEmpty) return true;
     try {
       final decoded = jsonDecode(normalized);
       if (decoded is Map<String, dynamic>) return true;
-      _setTaskStatus('拦截：制作工具参数必须是 JSON object。');
+      _setTaskStatus(
+        l10n.agentWorkspaceProductionInterceptArgsMustBeJsonObject,
+      );
       return false;
     } catch (_) {
-      _setTaskStatus('拦截：制作工具参数 JSON 解析失败。');
+      _setTaskStatus(l10n.agentWorkspaceProductionInterceptArgsJsonParseFailed);
       return false;
     }
   }
 
   bool _validatePrompt(String action) {
+    final l10n = AppLocalizations.of(context)!;
     if (widget.productionPromptController.text.trim().isNotEmpty) return true;
-    _setTaskStatus('拦截：$action 需要非空工作区提示词。');
+    _setTaskStatus(
+      l10n.agentWorkspaceProductionInterceptPromptRequired(action),
+    );
     return false;
   }
 
   bool _validateFlowProbe() {
+    final l10n = AppLocalizations.of(context)!;
     final tool = widget.productionDomainToolController.text.trim();
     if (tool.isEmpty) {
-      _setTaskStatus('拦截：读取前需要选择制作域工具。');
+      _setTaskStatus(
+        l10n.agentWorkspaceProductionInterceptSelectDomainToolFirst,
+      );
       return false;
     }
     if (!_validateJsonArgs(widget.productionDomainArgsController.text)) {
@@ -55,13 +73,14 @@ extension _AgentWorkspaceProductionCardLogic
     }
     if (tool == 'get_flowData' &&
         widget.flowKeyController.text.trim().isEmpty) {
-      _setTaskStatus('拦截：get_flowData 需要有效 flow key。');
+      _setTaskStatus(l10n.agentWorkspaceProductionInterceptGetFlowDataNeedsKey);
       return false;
     }
     return true;
   }
 
   bool _normalizeArgsForProbe() {
+    final l10n = AppLocalizations.of(context)!;
     final tool = widget.productionDomainToolController.text.trim();
     final raw = widget.productionDomainArgsController.text.trim();
     if (raw.isEmpty) {
@@ -71,7 +90,9 @@ extension _AgentWorkspaceProductionCardLogic
       widget.productionDomainArgsController.text.trim(),
     );
     if (decoded is! Map<String, dynamic>) {
-      _setTaskStatus('拦截：制作工具参数必须是 JSON object。');
+      _setTaskStatus(
+        l10n.agentWorkspaceProductionInterceptArgsMustBeJsonObject,
+      );
       return false;
     }
     if (tool != 'get_flowData') {
@@ -84,56 +105,69 @@ extension _AgentWorkspaceProductionCardLogic
     }
     normalized['key'] = key;
     widget.productionDomainArgsController.text = jsonEncode(normalized);
-    _setTaskStatus('已同步：get_flowData arguments.key -> $key');
+    _setTaskStatus(l10n.agentWorkspaceProductionSyncedFlowDataKey(key));
     return true;
   }
 
   bool _validateSubAgentTool() {
+    final l10n = AppLocalizations.of(context)!;
     if (widget.productionSubAgentToolController.text.trim().isEmpty) {
-      _setTaskStatus('拦截：运行子代理前需要选择制作子代理工具。');
+      _setTaskStatus(
+        l10n.agentWorkspaceProductionInterceptSelectSubAgentToolFirst,
+      );
       return false;
     }
     if (!_validateJsonArgs(widget.productionSubAgentArgsController.text)) {
       return false;
     }
-    return _validatePrompt('运行子代理');
+    return _validatePrompt(l10n.agentWorkspaceProductionActionRunSubAgent);
   }
 
   void _runProductionWorkspace() {
-    if (!_validatePrompt('运行制作工作流')) return;
+    final l10n = AppLocalizations.of(context)!;
+    if (!_validatePrompt(l10n.agentWorkspaceProductionActionRunWorkflow)) {
+      return;
+    }
     widget.onRunProductionWorkspace();
-    _setTaskStatus('已触发：运行制作工作流');
+    _setTaskStatus(l10n.agentWorkspaceProductionTriggeredRunWorkflow);
   }
 
   void _probeProductionDomainTool() {
     if (!_validateFlowProbe()) return;
     if (!_normalizeArgsForProbe()) return;
     widget.onProbeProductionDomainTool();
+    final l10n = AppLocalizations.of(context)!;
     final tool = widget.productionDomainToolController.text.trim();
     final key = widget.flowKeyController.text.trim();
     final suffix = tool == 'get_flowData' ? ' key=$key' : '';
-    _setTaskStatus('已触发：读取制作工具 ($tool$suffix)');
+    _setTaskStatus(
+      l10n.agentWorkspaceProductionTriggeredProbeContext('$tool$suffix'),
+    );
   }
 
   void _runProductionSubAgentTool() {
     if (!_validateSubAgentTool()) return;
     widget.onRunProductionSubAgentTool();
+    final l10n = AppLocalizations.of(context)!;
     final tool = widget.productionSubAgentToolController.text.trim();
-    _setTaskStatus('已触发：运行子代理 ($tool)');
+    _setTaskStatus(l10n.agentWorkspaceProductionTriggeredRunSubAgentTool(tool));
   }
 
   void _writeBackProductionFlowResult() {
+    final l10n = AppLocalizations.of(context)!;
     if (widget.workspaceLastToolResultLine == null) {
-      _setTaskStatus('拦截：暂无工具结果可写回。');
+      _setTaskStatus(l10n.agentWorkspaceProductionInterceptNoToolWriteback);
       return;
     }
     if (widget.flowKeyController.text.trim().isEmpty) {
-      _setTaskStatus('拦截：写回前请提供有效 flow key。');
+      _setTaskStatus(
+        l10n.agentWorkspaceProductionInterceptWritebackNeedsFlowKey,
+      );
       return;
     }
     widget.onWriteBackProductionFlowResult();
     final key = widget.flowKeyController.text.trim();
-    _setTaskStatus('已触发：写回工具结果 -> flow[$key]');
+    _setTaskStatus(l10n.agentWorkspaceProductionTriggeredWritebackFlow(key));
   }
 
   void _applyProductionPromptIfEmpty(String prompt) {
@@ -157,6 +191,7 @@ extension _AgentWorkspaceProductionCardLogic
       widget.productionDomainToolController.text.trim();
 
   Widget _buildGuidedTasks() {
+    final l10n = AppLocalizations.of(context)!;
     return ProductionWorkspaceGuidedTasksPanel(
       busy: widget.busy,
       hasLastResult: widget.workspaceLastToolResultLine != null,
@@ -166,7 +201,9 @@ extension _AgentWorkspaceProductionCardLogic
         _probeProductionDomainTool();
       },
       onRunAssetsSubAgent: () {
-        _applyProductionPromptIfEmpty('请基于当前资产 flow 给出下一轮衍生素材生成建议，并执行最小可行推进。');
+        _applyProductionPromptIfEmpty(
+          l10n.agentWorkspaceProductionGuidedDeriveAssetsPrompt,
+        );
         widget.onProductionSubAgentChanged('run_sub_agent_derive_assets');
         _applySuggestedSubAgentArgs('run_sub_agent_derive_assets');
         _runProductionSubAgentTool();
@@ -179,7 +216,9 @@ extension _AgentWorkspaceProductionCardLogic
       onWriteBackFlow: _writeBackProductionFlowResult,
       onRunStoryboardSubAgent: () {
         widget.onFlowKeyChanged('storyboard');
-        _applyProductionPromptIfEmpty('请基于当前分镜 flow 输出下一轮分镜生成计划，并执行最小可行生成动作。');
+        _applyProductionPromptIfEmpty(
+          l10n.agentWorkspaceProductionGuidedStoryboardGenPrompt,
+        );
         widget.onProductionSubAgentChanged('run_sub_agent_storyboard_gen');
         _applySuggestedSubAgentArgs('run_sub_agent_storyboard_gen');
         _runProductionSubAgentTool();
@@ -187,7 +226,7 @@ extension _AgentWorkspaceProductionCardLogic
       onRunDirectorPlanSubAgent: () {
         widget.onFlowKeyChanged('scriptPlan');
         _applyProductionPromptIfEmpty(
-          '请结合 scriptPlan 与现有素材状态，产出下一轮导演计划并给出执行优先级。',
+          l10n.agentWorkspaceProductionGuidedDirectorPlanPrompt,
         );
         widget.onProductionSubAgentChanged('run_sub_agent_director_plan');
         _applySuggestedSubAgentArgs('run_sub_agent_director_plan');

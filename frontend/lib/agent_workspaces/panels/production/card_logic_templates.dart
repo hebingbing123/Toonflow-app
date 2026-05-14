@@ -50,17 +50,22 @@ extension _AgentWorkspaceProductionCardTemplates
     }
   }
 
-  List<({String label, Map<String, dynamic> args})> _argumentTemplates() {
+  List<({String label, Map<String, dynamic> args})> _argumentTemplates(
+    AppLocalizations l10n,
+  ) {
     switch (_selectedProductionTool) {
       case 'get_flowData':
         return <({String label, Map<String, dynamic> args})>[
-          (label: '模板: 紧凑读取', args: _flowDataArgsTemplate()),
           (
-            label: '模板: 导演计划',
+            label: l10n.agentWorkspaceProductionArgTemplateCompactRead,
+            args: _flowDataArgsTemplate(),
+          ),
+          (
+            label: l10n.agentWorkspaceProductionArgTemplateDirectorPlan,
             args: <String, dynamic>{'key': 'scriptPlan', 'maxChars': 2200},
           ),
           (
-            label: '模板: 资产摘要',
+            label: l10n.agentWorkspaceProductionArgTemplateAssetSummary,
             args: <String, dynamic>{
               'key': 'assets',
               'fields': <String>[
@@ -80,7 +85,7 @@ extension _AgentWorkspaceProductionCardTemplates
       case 'generate_deriveAsset':
         return <({String label, Map<String, dynamic> args})>[
           (
-            label: '模板: ID 列表',
+            label: l10n.agentWorkspaceProductionArgTemplateIdList,
             args: <String, dynamic>{
               'ids': <int>[1],
             },
@@ -89,7 +94,7 @@ extension _AgentWorkspaceProductionCardTemplates
       case 'generate_storyboard':
         return <({String label, Map<String, dynamic> args})>[
           (
-            label: '模板: 分镜 ID',
+            label: l10n.agentWorkspaceProductionArgTemplateStoryboardIds,
             args: <String, dynamic>{
               'ids': <int>[1],
             },
@@ -100,13 +105,17 @@ extension _AgentWorkspaceProductionCardTemplates
     }
   }
 
-  void _applyToolArgsTemplate(Map<String, dynamic> args, String label) {
+  void _applyToolArgsTemplate(
+    AppLocalizations l10n,
+    Map<String, dynamic> args,
+    String label,
+  ) {
     widget.productionDomainArgsController.text = jsonEncode(args);
-    _setTaskStatus('已填充参数模板：$label');
+    _setTaskStatus(l10n.agentWorkspaceFilledArgTemplate(label));
   }
 
-  Widget _buildArgumentTemplates() {
-    final templates = _argumentTemplates();
+  Widget _buildArgumentTemplates(AppLocalizations l10n) {
+    final templates = _argumentTemplates(l10n);
     if (templates.isEmpty) return const SizedBox.shrink();
     return ProductionWorkspaceArgumentTemplatesPanel(
       busy: widget.busy,
@@ -118,7 +127,8 @@ extension _AgentWorkspaceProductionCardTemplates
             ),
           )
           .toList(growable: false),
-      onApplyTemplate: _applyToolArgsTemplate,
+      onApplyTemplate: (payload, label) =>
+          _applyToolArgsTemplate(l10n, payload, label),
     );
   }
 
@@ -146,21 +156,25 @@ extension _AgentWorkspaceProductionCardTemplates
   }
 
   void _applyActionSuggestion(
+    AppLocalizations l10n,
     ProductionWorkspaceArgumentSuggestion suggestion,
   ) {
     widget.productionDomainArgsController.text = jsonEncode(suggestion.payload);
-    _setTaskStatus('已填充候选参数：${suggestion.label}');
+    _setTaskStatus(l10n.agentWorkspaceFilledCandidateArgs(suggestion.label));
   }
 
-  Widget _buildActionCandidateTemplates(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+  Widget _buildActionCandidateTemplates(
+    BuildContext context,
+    AppLocalizations l10n,
+  ) {
     final suggestions = _buildActionSuggestions(l10n);
     if (suggestions.isEmpty) return const SizedBox.shrink();
     return ProductionWorkspaceActionCandidatesPanel(
       busy: widget.busy,
       suggestions: suggestions,
       candidateIds: _buildActionCandidateIds(),
-      onApplySuggestion: _applyActionSuggestion,
+      onApplySuggestion: (suggestion) =>
+          _applyActionSuggestion(l10n, suggestion),
     );
   }
 }

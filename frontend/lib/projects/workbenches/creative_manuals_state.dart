@@ -2,7 +2,7 @@ part of 'creative_manuals.dart';
 
 class _ProjectsCreativeManualsWorkbenchDialogState
     extends State<ProjectsCreativeManualsWorkbenchDialog> {
-  late final _CreativeManualsWorkbenchControllers _ctrls;
+  _CreativeManualsWorkbenchControllers? _ctrls;
 
   _CreativeManualKind _kind = _CreativeManualKind.director;
   List<_CreativeManualRow> _directorRows = const <_CreativeManualRow>[];
@@ -15,14 +15,16 @@ class _ProjectsCreativeManualsWorkbenchDialogState
       _kind == _CreativeManualKind.director ? _directorRows : _visualRows;
 
   @override
-  void initState() {
-    super.initState();
-    _ctrls = _CreativeManualsWorkbenchControllers.create();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _ctrls ??= _CreativeManualsWorkbenchControllers.create(
+      AppLocalizations.of(context)!.projectsCreativeManualDefaultSlotsTemplate,
+    );
   }
 
   @override
   void dispose() {
-    _ctrls.dispose();
+    _ctrls?.dispose();
     super.dispose();
   }
 
@@ -43,18 +45,25 @@ class _ProjectsCreativeManualsWorkbenchDialogState
   }
 
   void _clearForm() {
-    _ctrls.nameCtrl.clear();
-    _ctrls.pathCtrl.clear();
-    _ctrls.imagesCtrl.clear();
-    _ctrls.slotsCtrl.text = _defaultCreativeManualSlotsText;
+    final l10n = AppLocalizations.of(context)!;
+    final ctrls = _ctrls!;
+    ctrls.nameCtrl.clear();
+    ctrls.pathCtrl.clear();
+    ctrls.imagesCtrl.clear();
+    ctrls.slotsCtrl.text = l10n.projectsCreativeManualDefaultSlotsTemplate;
   }
 
   void _applyRow(_CreativeManualRow row) {
+    final l10n = AppLocalizations.of(context)!;
+    final ctrls = _ctrls!;
     _selected = row;
-    _ctrls.nameCtrl.text = row.name;
-    _ctrls.pathCtrl.text = row.path;
-    _ctrls.imagesCtrl.text = row.images.join('\n');
-    _ctrls.slotsCtrl.text = encodeCreativeManualSlots(row.slots);
+    ctrls.nameCtrl.text = row.name;
+    ctrls.pathCtrl.text = row.path;
+    ctrls.imagesCtrl.text = row.images.join('\n');
+    ctrls.slotsCtrl.text = encodeCreativeManualSlots(
+      row.slots,
+      emptyDefault: l10n.projectsCreativeManualDefaultSlotsTemplate,
+    );
   }
 
   Future<void> _reloadAll({String? preferredPath}) async {
@@ -117,14 +126,16 @@ class _ProjectsCreativeManualsWorkbenchDialogState
 
   Future<void> _createCurrentKind() async {
     final l10n = AppLocalizations.of(context)!;
-    final name = _ctrls.nameCtrl.text.trim();
-    final path = _ctrls.pathCtrl.text.trim();
+    final name = _ctrls!.nameCtrl.text.trim();
+    final path = _ctrls!.pathCtrl.text.trim();
     if (name.isEmpty || path.isEmpty) {
-      setState(() => _statusLine = l10n.projectsCreativeManualStatusCreateNeedFields);
+      setState(
+        () => _statusLine = l10n.projectsCreativeManualStatusCreateNeedFields,
+      );
       return;
     }
-    final slots = parseCreativeManualSlots(_ctrls.slotsCtrl.text);
-    final images = parseCreativeManualImages(_ctrls.imagesCtrl.text);
+    final slots = parseCreativeManualSlots(_ctrls!.slotsCtrl.text);
+    final images = parseCreativeManualImages(_ctrls!.imagesCtrl.text);
     setState(() {
       _busy = true;
       _statusLine = l10n.projectsCreativeManualStatusCreating;
@@ -175,18 +186,22 @@ class _ProjectsCreativeManualsWorkbenchDialogState
 
   Future<void> _saveCurrentKind() async {
     final l10n = AppLocalizations.of(context)!;
-    final path = _ctrls.pathCtrl.text.trim();
-    final name = _ctrls.nameCtrl.text.trim();
+    final path = _ctrls!.pathCtrl.text.trim();
+    final name = _ctrls!.nameCtrl.text.trim();
     if (_selected == null) {
-      setState(() => _statusLine = l10n.projectsCreativeManualStatusSaveNeedSelect);
+      setState(
+        () => _statusLine = l10n.projectsCreativeManualStatusSaveNeedSelect,
+      );
       return;
     }
     if (name.isEmpty || path.isEmpty) {
-      setState(() => _statusLine = l10n.projectsCreativeManualStatusSaveNeedFields);
+      setState(
+        () => _statusLine = l10n.projectsCreativeManualStatusSaveNeedFields,
+      );
       return;
     }
-    final slots = parseCreativeManualSlots(_ctrls.slotsCtrl.text);
-    final images = parseCreativeManualImages(_ctrls.imagesCtrl.text);
+    final slots = parseCreativeManualSlots(_ctrls!.slotsCtrl.text);
+    final images = parseCreativeManualImages(_ctrls!.imagesCtrl.text);
     setState(() {
       _busy = true;
       _statusLine = l10n.projectsCreativeManualStatusSaving;
@@ -239,7 +254,9 @@ class _ProjectsCreativeManualsWorkbenchDialogState
     final l10n = AppLocalizations.of(context)!;
     final selected = _selected;
     if (selected == null) {
-      setState(() => _statusLine = l10n.projectsCreativeManualStatusDeleteNeedSelect);
+      setState(
+        () => _statusLine = l10n.projectsCreativeManualStatusDeleteNeedSelect,
+      );
       return;
     }
     setState(() {
@@ -278,16 +295,17 @@ class _ProjectsCreativeManualsWorkbenchDialogState
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final ctrls = _ctrls!;
     return CreativeManualsWorkbenchView(
       kind: _kind,
       busy: _busy,
       activeRows: _activeRows,
       selected: _selected,
       statusLine: _statusLine,
-      nameCtrl: _ctrls.nameCtrl,
-      pathCtrl: _ctrls.pathCtrl,
-      imagesCtrl: _ctrls.imagesCtrl,
-      slotsCtrl: _ctrls.slotsCtrl,
+      nameCtrl: ctrls.nameCtrl,
+      pathCtrl: ctrls.pathCtrl,
+      imagesCtrl: ctrls.imagesCtrl,
+      slotsCtrl: ctrls.slotsCtrl,
       pathLabel: _kind == _CreativeManualKind.director
           ? l10n.projectsCreativeManualPathDirectorFolder
           : l10n.projectsCreativeManualPathVisual,

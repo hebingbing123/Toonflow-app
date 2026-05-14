@@ -156,14 +156,12 @@ class _AgentWorkspaceProductionCardState
               onProductionSubAgentChanged: widget.onProductionSubAgentChanged,
               onRunProductionSubAgentTool: _runProductionSubAgentTool,
               onWriteBackProductionFlowResult: _writeBackProductionFlowResult,
-              argumentTemplates: _argumentTemplates().isEmpty
+              argumentTemplates: _argumentTemplates(l10n).isEmpty
                   ? null
-                  : _buildArgumentTemplates(),
-              actionCandidatePanel:
-                  _buildActionSuggestions(AppLocalizations.of(context)!)
-                          .isEmpty
-                      ? null
-                      : _buildActionCandidateTemplates(context),
+                  : _buildArgumentTemplates(l10n),
+              actionCandidatePanel: _buildActionSuggestions(l10n).isEmpty
+                  ? null
+                  : _buildActionCandidateTemplates(context, l10n),
             ),
             ProductionWorkspaceStatusPanel(
               resultSummaryLines: resultSummaryLines,

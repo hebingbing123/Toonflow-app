@@ -1,6 +1,7 @@
 part of '../../../home_page.dart';
 
-extension _HomePageSystemProbesModelsCatalogSettingsProbeCore on _HomePageState {
+extension _HomePageSystemProbesModelsCatalogSettingsProbeCore
+    on _HomePageState {
   Future<({int status, VendorMutationResponseV1? body})>
   _runSettingsBaselineProbes({
     required String token,
@@ -97,7 +98,7 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeCore on _HomePageState 
     final deployModel = await postSettingsAgentDeployModelV1(
       token,
       id: agentDeployId,
-      name: '剧本Agent',
+      name: 'script-agent-probe',
       model: 'x',
       modelName: 'y',
       vendorId: null,
@@ -136,10 +137,7 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeCore on _HomePageState 
     final scriptId = scope.scriptId;
     final scriptAgentSetPlan = projectId == null
         ? 404
-        : await postScriptAgentSetPlanDataV1(
-            token,
-            projectId: projectId,
-          );
+        : await postScriptAgentSetPlanDataV1(token, projectId: projectId);
     _expectProbeStatus(
       label: 'POST script-agent/set-plan-data',
       status: scriptAgentSetPlan,

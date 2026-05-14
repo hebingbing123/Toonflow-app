@@ -3723,6 +3723,7 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'One slot per line: label|value|data'**
   String get projectsCreativeManualFieldSlotsHelper;
+  String get projectsCreativeManualDefaultSlotsTemplate;
 
   /// No description provided for @projectsCreativeManualSummaryTitle.
   ///
@@ -26471,6 +26472,80 @@ abstract class AppLocalizations {
   String agentWorkspaceProductionRecipeAppliedFollowRefine(String title);
   String agentWorkspaceProductionRecipeAppliedFollowExpandTable(String title);
   String agentWorkspaceProductionRecipeAppliedGeneric(String title);
+
+  String get agentWorkspaceDefaultScriptPrompt;
+  String get agentWorkspaceDefaultProductionPrompt;
+  String get agentWorkspaceScriptArgTemplateCurrentWindow;
+  String get agentWorkspaceScriptArgTemplateCurrentTail;
+  String get agentWorkspaceScriptArgTemplatePreviousEpisodeTail;
+  String get agentWorkspaceScriptArgTemplateStorySkeletonSlice;
+  String get agentWorkspaceScriptArgTemplateAdaptationSlice;
+  String get agentWorkspaceScriptArgTemplateNovelTextWindow;
+  String get agentWorkspaceScriptArgTemplateNovelEventsWindow;
+  String get agentWorkspaceScriptArgTemplateEmptyArgs;
+  String get agentWorkspaceProductionArgTemplateCompactRead;
+  String get agentWorkspaceProductionArgTemplateDirectorPlan;
+  String get agentWorkspaceProductionArgTemplateAssetSummary;
+  String get agentWorkspaceProductionArgTemplateIdList;
+  String get agentWorkspaceProductionArgTemplateStoryboardIds;
+  String agentWorkspaceFilledArgTemplate(String label);
+  String agentWorkspaceFilledCandidateArgs(String label);
+  String get agentWorkspaceScriptInterceptArgsMustBeJsonObject;
+  String get agentWorkspaceScriptInterceptArgsJsonParseFailed;
+  String agentWorkspaceScriptInterceptPromptRequired(String action);
+  String get agentWorkspaceScriptInterceptSelectDomainToolFirst;
+  String get agentWorkspaceScriptInterceptGetScriptContentNeedsScriptId;
+  String agentWorkspaceScriptSyncedScriptContentScriptId(String scriptId);
+  String get agentWorkspaceScriptInterceptSelectSubAgentToolFirst;
+  String get agentWorkspaceScriptActionRunWorkflow;
+  String get agentWorkspaceScriptActionRunSubAgent;
+  String get agentWorkspaceScriptTriggeredRunWorkflow;
+  String agentWorkspaceScriptTriggeredProbeContext(String tool);
+  String agentWorkspaceScriptTriggeredRunSubAgent(String tool);
+  String get agentWorkspaceScriptInterceptNoScriptWritebackResult;
+  String get agentWorkspaceScriptTriggeredWritebackScript;
+  String get agentWorkspaceScriptInterceptNoPlanDataWritebackResult;
+  String get agentWorkspaceScriptTriggeredWritebackPlanData;
+  String get agentWorkspaceScriptInterceptPlanWritebackNeedsPlanId;
+  String get agentWorkspaceScriptTriggeredPlanRowUpdateData;
+  String agentWorkspaceScriptAppliedRecipe(String title);
+  String agentWorkspaceScriptAppliedStage(String title);
+  String get agentWorkspaceScriptGuidedGenerateDraftPrompt;
+  String get agentWorkspaceScriptPresetPlotSkeletonLabel;
+  String get agentWorkspaceScriptPresetPlotSkeletonPrompt;
+  String get agentWorkspaceScriptPresetChapterAdaptLabel;
+  String get agentWorkspaceScriptPresetChapterAdaptPrompt;
+  String get agentWorkspaceProductionPresetDirectorPlanLabel;
+  String get agentWorkspaceProductionPresetDirectorPlanPrompt;
+  String get agentWorkspaceProductionPresetAssetInventoryLabel;
+  String get agentWorkspaceProductionPresetAssetInventoryPrompt;
+  String get agentWorkspaceProductionPresetStoryboardProgressLabel;
+  String get agentWorkspaceProductionPresetStoryboardProgressPrompt;
+  String get agentWorkspaceProductionPresetProductionReviewLabel;
+  String get agentWorkspaceProductionPresetProductionReviewPrompt;
+
+  String get agentWorkspaceProductionRunningRunWorkflow;
+  String get agentWorkspaceProductionRunningProbeTool;
+  String get agentWorkspaceProductionRunningSubAgent;
+  String get agentWorkspaceProductionRunningWriteback;
+  String get agentWorkspaceProductionInterceptArgsMustBeJsonObject;
+  String get agentWorkspaceProductionInterceptArgsJsonParseFailed;
+  String agentWorkspaceProductionInterceptPromptRequired(String action);
+  String get agentWorkspaceProductionInterceptSelectDomainToolFirst;
+  String get agentWorkspaceProductionInterceptGetFlowDataNeedsKey;
+  String agentWorkspaceProductionSyncedFlowDataKey(String key);
+  String get agentWorkspaceProductionInterceptSelectSubAgentToolFirst;
+  String get agentWorkspaceProductionActionRunWorkflow;
+  String get agentWorkspaceProductionActionRunSubAgent;
+  String get agentWorkspaceProductionTriggeredRunWorkflow;
+  String agentWorkspaceProductionTriggeredProbeContext(String detail);
+  String agentWorkspaceProductionTriggeredRunSubAgentTool(String tool);
+  String get agentWorkspaceProductionInterceptNoToolWriteback;
+  String get agentWorkspaceProductionInterceptWritebackNeedsFlowKey;
+  String agentWorkspaceProductionTriggeredWritebackFlow(String key);
+  String get agentWorkspaceProductionGuidedDeriveAssetsPrompt;
+  String get agentWorkspaceProductionGuidedStoryboardGenPrompt;
+  String get agentWorkspaceProductionGuidedDirectorPlanPrompt;
 
   /// No description provided for @agentWorkspaceProductionFlowChip.
   ///

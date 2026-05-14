@@ -3174,6 +3174,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get projectsCreativeManualVerbDelete => 'Delete';
 
   @override
+  String get projectsCreativeManualDefaultSlotsTemplate =>
+      'Scene|scene|\nRole|role|';
+
+  @override
   String get projectsArtWorkbenchStatusRefreshing => 'Refreshing art styles…';
 
   @override
@@ -17897,6 +17901,319 @@ class AppLocalizationsEn extends AppLocalizations {
   String agentWorkspaceProductionRecipeAppliedGeneric(String title) {
     return 'Applied suggestion: ${title}';
   }
+
+  @override
+  String get agentWorkspaceDefaultScriptPrompt =>
+      'First use get_planData to read the necessary slices of planData.script, '
+      'storySkeleton, and adaptationStrategy, then read the target chapter events; '
+      'only widen into novel text when details are missing, and finally propose the '
+      'next round of script suggestions.';
+
+  @override
+  String get agentWorkspaceDefaultProductionPrompt =>
+      'Call get_flowData key=scriptPlan for a compact director plan first, then add '
+      'minimal assets or storyboardTable reads as needed—avoid pulling the whole '
+      'production flow upfront.';
+
+  @override
+  String get agentWorkspaceScriptArgTemplateCurrentWindow =>
+      'Template: current script window';
+
+  @override
+  String get agentWorkspaceScriptArgTemplateCurrentTail =>
+      'Template: current script tail';
+
+  @override
+  String get agentWorkspaceScriptArgTemplatePreviousEpisodeTail =>
+      'Template: previous episode tail';
+
+  @override
+  String get agentWorkspaceScriptArgTemplateStorySkeletonSlice =>
+      'Template: story skeleton slice';
+
+  @override
+  String get agentWorkspaceScriptArgTemplateAdaptationSlice =>
+      'Template: adaptation slice';
+
+  @override
+  String get agentWorkspaceScriptArgTemplateNovelTextWindow =>
+      'Template: novel text window';
+
+  @override
+  String get agentWorkspaceScriptArgTemplateNovelEventsWindow =>
+      'Template: novel events window';
+
+  @override
+  String get agentWorkspaceScriptArgTemplateEmptyArgs => 'Template: empty args';
+
+  @override
+  String get agentWorkspaceProductionArgTemplateCompactRead =>
+      'Template: compact read';
+
+  @override
+  String get agentWorkspaceProductionArgTemplateDirectorPlan =>
+      'Template: director plan';
+
+  @override
+  String get agentWorkspaceProductionArgTemplateAssetSummary =>
+      'Template: asset summary';
+
+  @override
+  String get agentWorkspaceProductionArgTemplateIdList => 'Template: ID list';
+
+  @override
+  String get agentWorkspaceProductionArgTemplateStoryboardIds =>
+      'Template: storyboard IDs';
+
+  @override
+  String agentWorkspaceFilledArgTemplate(String label) {
+    return 'Filled argument template: $label';
+  }
+
+  @override
+  String agentWorkspaceFilledCandidateArgs(String label) {
+    return 'Filled candidate arguments: $label';
+  }
+
+  @override
+  String get agentWorkspaceScriptInterceptArgsMustBeJsonObject =>
+      'Blocked: script tool arguments must be a JSON object.';
+
+  @override
+  String get agentWorkspaceScriptInterceptArgsJsonParseFailed =>
+      'Blocked: failed to parse script tool arguments JSON.';
+
+  @override
+  String agentWorkspaceScriptInterceptPromptRequired(String action) {
+    return 'Blocked: $action requires a non-empty workspace prompt.';
+  }
+
+  @override
+  String get agentWorkspaceScriptInterceptSelectDomainToolFirst =>
+      'Blocked: select a script domain tool before reading context.';
+
+  @override
+  String get agentWorkspaceScriptInterceptGetScriptContentNeedsScriptId =>
+      'Blocked: get_script_content requires a valid script id.';
+
+  @override
+  String agentWorkspaceScriptSyncedScriptContentScriptId(String scriptId) {
+    return 'Synced: get_script_content arguments.scriptId -> $scriptId';
+  }
+
+  @override
+  String get agentWorkspaceScriptInterceptSelectSubAgentToolFirst =>
+      'Blocked: select a script sub-agent tool before running.';
+
+  @override
+  String get agentWorkspaceScriptActionRunWorkflow =>
+      'Run script workspace workflow';
+
+  @override
+  String get agentWorkspaceScriptActionRunSubAgent => 'Run sub-agent';
+
+  @override
+  String get agentWorkspaceScriptTriggeredRunWorkflow =>
+      'Triggered: run script workspace workflow';
+
+  @override
+  String agentWorkspaceScriptTriggeredProbeContext(String tool) {
+    return 'Triggered: read script context ($tool)';
+  }
+
+  @override
+  String agentWorkspaceScriptTriggeredRunSubAgent(String tool) {
+    return 'Triggered: run sub-agent ($tool)';
+  }
+
+  @override
+  String get agentWorkspaceScriptInterceptNoScriptWritebackResult =>
+      'Blocked: no script result available to write back.';
+
+  @override
+  String get agentWorkspaceScriptTriggeredWritebackScript =>
+      'Triggered: write back script';
+
+  @override
+  String get agentWorkspaceScriptInterceptNoPlanDataWritebackResult =>
+      'Blocked: no planData result available to write back.';
+
+  @override
+  String get agentWorkspaceScriptTriggeredWritebackPlanData =>
+      'Triggered: write back plan data';
+
+  @override
+  String get agentWorkspaceScriptInterceptPlanWritebackNeedsPlanId =>
+      'Blocked: plan id (fetch get_planData) and planData are required.';
+
+  @override
+  String get agentWorkspaceScriptTriggeredPlanRowUpdateData =>
+      'Triggered: update-data writeback for plan row';
+
+  @override
+  String agentWorkspaceScriptAppliedRecipe(String title) {
+    return 'Applied recipe suggestion: $title';
+  }
+
+  @override
+  String agentWorkspaceScriptAppliedStage(String title) {
+    return 'Applied stage action: $title';
+  }
+
+  @override
+  String get agentWorkspaceScriptGuidedGenerateDraftPrompt =>
+      'First read the current episode plan and target chapter events; only widen '
+      'into the previous episode tail when continuity needs it, then add novel text '
+      'windows as needed, generate the next script body, and output full content '
+      'ready for writeback.';
+
+  @override
+  String get agentWorkspaceScriptPresetPlotSkeletonLabel => 'Plot skeleton';
+
+  @override
+  String get agentWorkspaceScriptPresetPlotSkeletonPrompt =>
+      'Read get_planData slices of planData.script, storySkeleton, and adaptationStrategy '
+      'first, then add the smallest get_novel_events or script window reads needed to '
+      'summarize current plot skeleton gaps.';
+
+  @override
+  String get agentWorkspaceScriptPresetChapterAdaptLabel =>
+      'Chapter adaptation';
+
+  @override
+  String get agentWorkspaceScriptPresetChapterAdaptPrompt =>
+      'Use get_planData to read the planned script draft and adaptation strategy, '
+      'combine get_novel_text and get_script_content window slices, and propose '
+      'chapter rewrite suggestions with three actionable script edits.';
+
+  @override
+  String get agentWorkspaceProductionPresetDirectorPlanLabel => 'Director plan';
+
+  @override
+  String get agentWorkspaceProductionPresetDirectorPlanPrompt =>
+      'Call get_flowData key=scriptPlan for a compact director plan first, then decide '
+      'whether to continue with assets or storyboardTable.';
+
+  @override
+  String get agentWorkspaceProductionPresetAssetInventoryLabel =>
+      'Asset inventory';
+
+  @override
+  String get agentWorkspaceProductionPresetAssetInventoryPrompt =>
+      'Call get_flowData key=assets with a minimal field subset, inventory current '
+      'assets, and suggest the next production tasks.';
+
+  @override
+  String get agentWorkspaceProductionPresetStoryboardProgressLabel =>
+      'Storyboard progress';
+
+  @override
+  String get agentWorkspaceProductionPresetStoryboardProgressPrompt =>
+      'Read get_flowData key=storyboard for compact shot status, assess storyboard '
+      'completion, and suggest the next generate_storyboard run.';
+
+  @override
+  String get agentWorkspaceProductionPresetProductionReviewLabel =>
+      'Production review';
+
+  @override
+  String get agentWorkspaceProductionPresetProductionReviewPrompt =>
+      'Read get_flowData key=scriptPlan or storyboardTable first, then call production '
+      'supervision to review current production results.';
+
+  @override
+  String get agentWorkspaceProductionRunningRunWorkflow =>
+      'Running: production workspace workflow';
+
+  @override
+  String get agentWorkspaceProductionRunningProbeTool =>
+      'Running: read production tool result';
+
+  @override
+  String get agentWorkspaceProductionRunningSubAgent => 'Running: sub-agent';
+
+  @override
+  String get agentWorkspaceProductionRunningWriteback =>
+      'Running: write back tool result';
+
+  @override
+  String get agentWorkspaceProductionInterceptArgsMustBeJsonObject =>
+      'Blocked: production tool arguments must be a JSON object.';
+
+  @override
+  String get agentWorkspaceProductionInterceptArgsJsonParseFailed =>
+      'Blocked: failed to parse production tool arguments JSON.';
+
+  @override
+  String agentWorkspaceProductionInterceptPromptRequired(String action) {
+    return 'Blocked: $action requires a non-empty workspace prompt.';
+  }
+
+  @override
+  String get agentWorkspaceProductionInterceptSelectDomainToolFirst =>
+      'Blocked: select a production domain tool before reading.';
+
+  @override
+  String get agentWorkspaceProductionInterceptGetFlowDataNeedsKey =>
+      'Blocked: get_flowData requires a non-empty flow key.';
+
+  @override
+  String agentWorkspaceProductionSyncedFlowDataKey(String key) {
+    return 'Synced: get_flowData arguments.key -> $key';
+  }
+
+  @override
+  String get agentWorkspaceProductionInterceptSelectSubAgentToolFirst =>
+      'Blocked: select a production sub-agent tool before running.';
+
+  @override
+  String get agentWorkspaceProductionActionRunWorkflow =>
+      'Run production workspace workflow';
+
+  @override
+  String get agentWorkspaceProductionActionRunSubAgent => 'Run sub-agent';
+
+  @override
+  String get agentWorkspaceProductionTriggeredRunWorkflow =>
+      'Triggered: run production workspace workflow';
+
+  @override
+  String agentWorkspaceProductionTriggeredProbeContext(String detail) {
+    return 'Triggered: read production tool ($detail)';
+  }
+
+  @override
+  String agentWorkspaceProductionTriggeredRunSubAgentTool(String tool) {
+    return 'Triggered: run sub-agent ($tool)';
+  }
+
+  @override
+  String get agentWorkspaceProductionInterceptNoToolWriteback =>
+      'Blocked: no tool result available to write back.';
+
+  @override
+  String get agentWorkspaceProductionInterceptWritebackNeedsFlowKey =>
+      'Blocked: provide a valid flow key before writeback.';
+
+  @override
+  String agentWorkspaceProductionTriggeredWritebackFlow(String key) {
+    return 'Triggered: write back tool result -> flow[$key]';
+  }
+
+  @override
+  String get agentWorkspaceProductionGuidedDeriveAssetsPrompt =>
+      'Based on the current assets flow, propose the next round of derived asset '
+      'generation and take the smallest viable next step.';
+
+  @override
+  String get agentWorkspaceProductionGuidedStoryboardGenPrompt =>
+      'Based on the current storyboard flow, outline the next storyboard generation '
+      'plan and take the smallest viable generation action.';
+
+  @override
+  String get agentWorkspaceProductionGuidedDirectorPlanPrompt =>
+      'Combine scriptPlan with current asset status, produce the next director plan '
+      'round, and list execution priorities.';
 
   @override
   String agentWorkspaceProductionFlowChip(String flowKey) {

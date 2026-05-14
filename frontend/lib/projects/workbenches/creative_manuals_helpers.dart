@@ -2,8 +2,6 @@
 
 part of 'creative_manuals.dart';
 
-const String _defaultCreativeManualSlotsText = '场景|scene|\n角色|role|';
-
 List<String> parseCreativeManualImages(String raw) {
   return raw
       .split(RegExp(r'[\n,]+'))
@@ -34,11 +32,16 @@ List<DirectorManualDataSlot> parseCreativeManualSlots(String raw) {
   return slots;
 }
 
-String encodeCreativeManualSlots(List<DirectorManualDataSlot> slots) {
+String encodeCreativeManualSlots(
+  List<DirectorManualDataSlot> slots, {
+  required String emptyDefault,
+}) {
   if (slots.isEmpty) {
-    return _defaultCreativeManualSlotsText;
+    return emptyDefault;
   }
-  return slots.map((slot) => '${slot.label}|${slot.value}|${slot.data}').join('\n');
+  return slots
+      .map((slot) => '${slot.label}|${slot.value}|${slot.data}')
+      .join('\n');
 }
 
 String creativeManualKindLabel(
@@ -49,4 +52,3 @@ String creativeManualKindLabel(
       ? l10n.projectsCreativeManualKindDirector
       : l10n.projectsCreativeManualKindVisual;
 }
-

@@ -3052,6 +3052,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get projectsCreativeManualVerbDelete => '删除';
 
   @override
+  String get projectsCreativeManualDefaultSlotsTemplate =>
+      '场景|scene|\n角色|role|';
+
+  @override
   String get projectsArtWorkbenchStatusRefreshing => '刷新画风列表中…';
 
   @override
@@ -17050,6 +17054,276 @@ class AppLocalizationsZh extends AppLocalizations {
   String agentWorkspaceProductionRecipeAppliedGeneric(String title) {
     return '已应用任务建议：${title}';
   }
+
+  @override
+  String get agentWorkspaceDefaultScriptPrompt =>
+      '先用 get_planData 读取 planData.script、storySkeleton、adaptationStrategy 的必要片段，再读目标章节事件；只有细节不足时才补正文窗口，最后给出下一轮 script 建议。';
+
+  @override
+  String get agentWorkspaceDefaultProductionPrompt =>
+      '先调用 get_flowData key=scriptPlan 读取紧凑导演规划，再按需补最小化 assets 或 storyboardTable，上来不要整包读取 production flow。';
+
+  @override
+  String get agentWorkspaceScriptArgTemplateCurrentWindow => '模板: 当前剧本窗口';
+
+  @override
+  String get agentWorkspaceScriptArgTemplateCurrentTail => '模板: 当前剧本尾段';
+
+  @override
+  String get agentWorkspaceScriptArgTemplatePreviousEpisodeTail => '模板: 上一集尾段';
+
+  @override
+  String get agentWorkspaceScriptArgTemplateStorySkeletonSlice => '模板: 骨架片段';
+
+  @override
+  String get agentWorkspaceScriptArgTemplateAdaptationSlice => '模板: 策略片段';
+
+  @override
+  String get agentWorkspaceScriptArgTemplateNovelTextWindow => '模板: 正文窗口';
+
+  @override
+  String get agentWorkspaceScriptArgTemplateNovelEventsWindow => '模板: 事件窗口';
+
+  @override
+  String get agentWorkspaceScriptArgTemplateEmptyArgs => '模板: 空参数';
+
+  @override
+  String get agentWorkspaceProductionArgTemplateCompactRead => '模板: 紧凑读取';
+
+  @override
+  String get agentWorkspaceProductionArgTemplateDirectorPlan => '模板: 导演计划';
+
+  @override
+  String get agentWorkspaceProductionArgTemplateAssetSummary => '模板: 资产摘要';
+
+  @override
+  String get agentWorkspaceProductionArgTemplateIdList => '模板: ID 列表';
+
+  @override
+  String get agentWorkspaceProductionArgTemplateStoryboardIds => '模板: 分镜 ID';
+
+  @override
+  String agentWorkspaceFilledArgTemplate(String label) {
+    return '已填充参数模板：$label';
+  }
+
+  @override
+  String agentWorkspaceFilledCandidateArgs(String label) {
+    return '已填充候选参数：$label';
+  }
+
+  @override
+  String get agentWorkspaceScriptInterceptArgsMustBeJsonObject =>
+      '拦截：剧本工具参数必须是 JSON object。';
+
+  @override
+  String get agentWorkspaceScriptInterceptArgsJsonParseFailed =>
+      '拦截：剧本工具参数 JSON 解析失败。';
+
+  @override
+  String agentWorkspaceScriptInterceptPromptRequired(String action) {
+    return '拦截：$action 需要非空工作区提示词。';
+  }
+
+  @override
+  String get agentWorkspaceScriptInterceptSelectDomainToolFirst =>
+      '拦截：读取前需要选择剧本域工具。';
+
+  @override
+  String get agentWorkspaceScriptInterceptGetScriptContentNeedsScriptId =>
+      '拦截：get_script_content 需要有效剧本 ID。';
+
+  @override
+  String agentWorkspaceScriptSyncedScriptContentScriptId(String scriptId) {
+    return '已同步：get_script_content arguments.scriptId -> $scriptId';
+  }
+
+  @override
+  String get agentWorkspaceScriptInterceptSelectSubAgentToolFirst =>
+      '拦截：运行子代理前需要选择剧本子代理工具。';
+
+  @override
+  String get agentWorkspaceScriptActionRunWorkflow => '运行剧本工作流';
+
+  @override
+  String get agentWorkspaceScriptActionRunSubAgent => '运行子代理';
+
+  @override
+  String get agentWorkspaceScriptTriggeredRunWorkflow => '已触发：运行剧本工作流';
+
+  @override
+  String agentWorkspaceScriptTriggeredProbeContext(String tool) {
+    return '已触发：读取剧本上下文 ($tool)';
+  }
+
+  @override
+  String agentWorkspaceScriptTriggeredRunSubAgent(String tool) {
+    return '已触发：运行子代理 ($tool)';
+  }
+
+  @override
+  String get agentWorkspaceScriptInterceptNoScriptWritebackResult =>
+      '拦截：暂无剧本结果可写回。';
+
+  @override
+  String get agentWorkspaceScriptTriggeredWritebackScript => '已触发：写回剧本';
+
+  @override
+  String get agentWorkspaceScriptInterceptNoPlanDataWritebackResult =>
+      '拦截：暂无 planData 结果可写回。';
+
+  @override
+  String get agentWorkspaceScriptTriggeredWritebackPlanData => '已触发：写回计划数据';
+
+  @override
+  String get agentWorkspaceScriptInterceptPlanWritebackNeedsPlanId =>
+      '拦截：需要 planId（拉取 get_planData）与 planData。';
+
+  @override
+  String get agentWorkspaceScriptTriggeredPlanRowUpdateData =>
+      '已触发：update-data 写回计划行';
+
+  @override
+  String agentWorkspaceScriptAppliedRecipe(String title) {
+    return '已应用任务建议：$title';
+  }
+
+  @override
+  String agentWorkspaceScriptAppliedStage(String title) {
+    return '已应用阶段动作：$title';
+  }
+
+  @override
+  String get agentWorkspaceScriptGuidedGenerateDraftPrompt =>
+      '请先读取当前集计划与目标章节事件；只有在衔接需要时才补读上一集尾段，其他细节再按需补章节正文窗口，然后生成下一版剧本正文并输出可直接写回的完整内容。';
+
+  @override
+  String get agentWorkspaceScriptPresetPlotSkeletonLabel => '剧情骨架';
+
+  @override
+  String get agentWorkspaceScriptPresetPlotSkeletonPrompt =>
+      '先读取 get_planData 的 planData.script、storySkeleton、adaptationStrategy 片段，再补最少的 get_novel_events 或剧本窗口，总结当前剧情骨架缺口。';
+
+  @override
+  String get agentWorkspaceScriptPresetChapterAdaptLabel => '章节改编';
+
+  @override
+  String get agentWorkspaceScriptPresetChapterAdaptPrompt =>
+      '先用 get_planData 读取计划剧本草稿与改编策略，再结合 get_novel_text 与 get_script_content 的窗口片段，对当前章节做改写建议，输出 3 条可执行脚本改写项。';
+
+  @override
+  String get agentWorkspaceProductionPresetDirectorPlanLabel => '导演计划';
+
+  @override
+  String get agentWorkspaceProductionPresetDirectorPlanPrompt =>
+      '先调用 get_flowData key=scriptPlan，读取紧凑导演规划，再决定是否继续读 assets 或 storyboardTable。';
+
+  @override
+  String get agentWorkspaceProductionPresetAssetInventoryLabel => '资产盘点';
+
+  @override
+  String get agentWorkspaceProductionPresetAssetInventoryPrompt =>
+      '先调用 get_flowData key=assets 并读取最小字段子集，盘点现有资产状态并给出下一步 production 任务建议。';
+
+  @override
+  String get agentWorkspaceProductionPresetStoryboardProgressLabel => '分镜推进';
+
+  @override
+  String get agentWorkspaceProductionPresetStoryboardProgressPrompt =>
+      '读取 get_flowData key=storyboard 的紧凑镜头状态，评估当前分镜完成度并给出下一次 generate_storyboard 的执行建议。';
+
+  @override
+  String get agentWorkspaceProductionPresetProductionReviewLabel => '制作审核';
+
+  @override
+  String get agentWorkspaceProductionPresetProductionReviewPrompt =>
+      '请先读取 get_flowData key=scriptPlan 或 storyboardTable，再调用 production supervision 审核当前制作结果。';
+
+  @override
+  String get agentWorkspaceProductionRunningRunWorkflow => '执行中：运行制作工作流';
+
+  @override
+  String get agentWorkspaceProductionRunningProbeTool => '执行中：读取制作工具结果';
+
+  @override
+  String get agentWorkspaceProductionRunningSubAgent => '执行中：运行子代理';
+
+  @override
+  String get agentWorkspaceProductionRunningWriteback => '执行中：写回工具结果';
+
+  @override
+  String get agentWorkspaceProductionInterceptArgsMustBeJsonObject =>
+      '拦截：制作工具参数必须是 JSON object。';
+
+  @override
+  String get agentWorkspaceProductionInterceptArgsJsonParseFailed =>
+      '拦截：制作工具参数 JSON 解析失败。';
+
+  @override
+  String agentWorkspaceProductionInterceptPromptRequired(String action) {
+    return '拦截：$action 需要非空工作区提示词。';
+  }
+
+  @override
+  String get agentWorkspaceProductionInterceptSelectDomainToolFirst =>
+      '拦截：读取前需要选择制作域工具。';
+
+  @override
+  String get agentWorkspaceProductionInterceptGetFlowDataNeedsKey =>
+      '拦截：get_flowData 需要有效 flow key。';
+
+  @override
+  String agentWorkspaceProductionSyncedFlowDataKey(String key) {
+    return '已同步：get_flowData arguments.key -> $key';
+  }
+
+  @override
+  String get agentWorkspaceProductionInterceptSelectSubAgentToolFirst =>
+      '拦截：运行子代理前需要选择制作子代理工具。';
+
+  @override
+  String get agentWorkspaceProductionActionRunWorkflow => '运行制作工作流';
+
+  @override
+  String get agentWorkspaceProductionActionRunSubAgent => '运行子代理';
+
+  @override
+  String get agentWorkspaceProductionTriggeredRunWorkflow => '已触发：运行制作工作流';
+
+  @override
+  String agentWorkspaceProductionTriggeredProbeContext(String detail) {
+    return '已触发：读取制作工具 ($detail)';
+  }
+
+  @override
+  String agentWorkspaceProductionTriggeredRunSubAgentTool(String tool) {
+    return '已触发：运行子代理 ($tool)';
+  }
+
+  @override
+  String get agentWorkspaceProductionInterceptNoToolWriteback =>
+      '拦截：暂无工具结果可写回。';
+
+  @override
+  String get agentWorkspaceProductionInterceptWritebackNeedsFlowKey =>
+      '拦截：写回前请提供有效 flow key。';
+
+  @override
+  String agentWorkspaceProductionTriggeredWritebackFlow(String key) {
+    return '已触发：写回工具结果 -> flow[$key]';
+  }
+
+  @override
+  String get agentWorkspaceProductionGuidedDeriveAssetsPrompt =>
+      '请基于当前资产 flow 给出下一轮衍生素材生成建议，并执行最小可行推进。';
+
+  @override
+  String get agentWorkspaceProductionGuidedStoryboardGenPrompt =>
+      '请基于当前分镜 flow 输出下一轮分镜生成计划，并执行最小可行生成动作。';
+
+  @override
+  String get agentWorkspaceProductionGuidedDirectorPlanPrompt =>
+      '请结合 scriptPlan 与现有素材状态，产出下一轮导演计划并给出执行优先级。';
 
   @override
   String agentWorkspaceProductionFlowChip(String flowKey) {

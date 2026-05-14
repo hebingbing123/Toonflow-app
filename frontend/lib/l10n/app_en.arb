@@ -15668,5 +15668,169 @@
       }
     }
   },
-  "agentWorkspaceProductionRecipeAppliedGeneric": "Applied suggestion: {title}"
+  "agentWorkspaceProductionRecipeAppliedGeneric": "Applied suggestion: {title}",
+  "agentWorkspaceDefaultScriptPrompt": "First use get_planData to read the necessary slices of planData.script, storySkeleton, and adaptationStrategy, then read the target chapter events; only widen into novel text when details are missing, and finally propose the next round of script suggestions.",
+  "agentWorkspaceDefaultProductionPrompt": "Call get_flowData key=scriptPlan for a compact director plan first, then add minimal assets or storyboardTable reads as needed—avoid pulling the whole production flow upfront.",
+  "agentWorkspaceScriptArgTemplateCurrentWindow": "Template: current script window",
+  "agentWorkspaceScriptArgTemplateCurrentTail": "Template: current script tail",
+  "agentWorkspaceScriptArgTemplatePreviousEpisodeTail": "Template: previous episode tail",
+  "agentWorkspaceScriptArgTemplateStorySkeletonSlice": "Template: story skeleton slice",
+  "agentWorkspaceScriptArgTemplateAdaptationSlice": "Template: adaptation slice",
+  "agentWorkspaceScriptArgTemplateNovelTextWindow": "Template: novel text window",
+  "agentWorkspaceScriptArgTemplateNovelEventsWindow": "Template: novel events window",
+  "agentWorkspaceScriptArgTemplateEmptyArgs": "Template: empty args",
+  "agentWorkspaceProductionArgTemplateCompactRead": "Template: compact read",
+  "agentWorkspaceProductionArgTemplateDirectorPlan": "Template: director plan",
+  "agentWorkspaceProductionArgTemplateAssetSummary": "Template: asset summary",
+  "agentWorkspaceProductionArgTemplateIdList": "Template: ID list",
+  "agentWorkspaceProductionArgTemplateStoryboardIds": "Template: storyboard IDs",
+  "@agentWorkspaceFilledArgTemplate": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceFilledArgTemplate": "Filled argument template: {label}",
+  "@agentWorkspaceFilledCandidateArgs": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceFilledCandidateArgs": "Filled candidate arguments: {label}",
+  "agentWorkspaceScriptInterceptArgsMustBeJsonObject": "Blocked: script tool arguments must be a JSON object.",
+  "agentWorkspaceScriptInterceptArgsJsonParseFailed": "Blocked: failed to parse script tool arguments JSON.",
+  "@agentWorkspaceScriptInterceptPromptRequired": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceScriptInterceptPromptRequired": "Blocked: {action} requires a non-empty workspace prompt.",
+  "agentWorkspaceScriptInterceptSelectDomainToolFirst": "Blocked: select a script domain tool before reading context.",
+  "agentWorkspaceScriptInterceptGetScriptContentNeedsScriptId": "Blocked: get_script_content requires a valid script id.",
+  "@agentWorkspaceScriptSyncedScriptContentScriptId": {
+    "placeholders": {
+      "scriptId": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceScriptSyncedScriptContentScriptId": "Synced: get_script_content arguments.scriptId -> {scriptId}",
+  "agentWorkspaceScriptInterceptSelectSubAgentToolFirst": "Blocked: select a script sub-agent tool before running.",
+  "agentWorkspaceScriptActionRunWorkflow": "Run script workspace workflow",
+  "agentWorkspaceScriptActionRunSubAgent": "Run sub-agent",
+  "agentWorkspaceScriptTriggeredRunWorkflow": "Triggered: run script workspace workflow",
+  "@agentWorkspaceScriptTriggeredProbeContext": {
+    "placeholders": {
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceScriptTriggeredProbeContext": "Triggered: read script context ({tool})",
+  "@agentWorkspaceScriptTriggeredRunSubAgent": {
+    "placeholders": {
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceScriptTriggeredRunSubAgent": "Triggered: run sub-agent ({tool})",
+  "agentWorkspaceScriptInterceptNoScriptWritebackResult": "Blocked: no script result available to write back.",
+  "agentWorkspaceScriptTriggeredWritebackScript": "Triggered: write back script",
+  "agentWorkspaceScriptInterceptNoPlanDataWritebackResult": "Blocked: no planData result available to write back.",
+  "agentWorkspaceScriptTriggeredWritebackPlanData": "Triggered: write back plan data",
+  "agentWorkspaceScriptInterceptPlanWritebackNeedsPlanId": "Blocked: plan id (fetch get_planData) and planData are required.",
+  "agentWorkspaceScriptTriggeredPlanRowUpdateData": "Triggered: update-data writeback for plan row",
+  "@agentWorkspaceScriptAppliedRecipe": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceScriptAppliedRecipe": "Applied recipe suggestion: {title}",
+  "@agentWorkspaceScriptAppliedStage": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceScriptAppliedStage": "Applied stage action: {title}",
+  "agentWorkspaceScriptGuidedGenerateDraftPrompt": "First read the current episode plan and target chapter events; only widen into the previous episode tail when continuity needs it, then add novel text windows as needed, generate the next script body, and output full content ready for writeback.",
+  "agentWorkspaceScriptPresetPlotSkeletonLabel": "Plot skeleton",
+  "agentWorkspaceScriptPresetPlotSkeletonPrompt": "Read get_planData slices of planData.script, storySkeleton, and adaptationStrategy first, then add the smallest get_novel_events or script window reads needed to summarize current plot skeleton gaps.",
+  "agentWorkspaceScriptPresetChapterAdaptLabel": "Chapter adaptation",
+  "agentWorkspaceScriptPresetChapterAdaptPrompt": "Use get_planData to read the planned script draft and adaptation strategy, combine get_novel_text and get_script_content window slices, and propose chapter rewrite suggestions with three actionable script edits.",
+  "agentWorkspaceProductionPresetDirectorPlanLabel": "Director plan",
+  "agentWorkspaceProductionPresetDirectorPlanPrompt": "Call get_flowData key=scriptPlan for a compact director plan first, then decide whether to continue with assets or storyboardTable.",
+  "agentWorkspaceProductionPresetAssetInventoryLabel": "Asset inventory",
+  "agentWorkspaceProductionPresetAssetInventoryPrompt": "Call get_flowData key=assets with a minimal field subset, inventory current assets, and suggest the next production tasks.",
+  "agentWorkspaceProductionPresetStoryboardProgressLabel": "Storyboard progress",
+  "agentWorkspaceProductionPresetStoryboardProgressPrompt": "Read get_flowData key=storyboard for compact shot status, assess storyboard completion, and suggest the next generate_storyboard run.",
+  "agentWorkspaceProductionPresetProductionReviewLabel": "Production review",
+  "agentWorkspaceProductionPresetProductionReviewPrompt": "Read get_flowData key=scriptPlan or storyboardTable first, then call production supervision to review current production results.",
+  "agentWorkspaceProductionRunningRunWorkflow": "Running: production workspace workflow",
+  "agentWorkspaceProductionRunningProbeTool": "Running: read production tool result",
+  "agentWorkspaceProductionRunningSubAgent": "Running: sub-agent",
+  "agentWorkspaceProductionRunningWriteback": "Running: write back tool result",
+  "agentWorkspaceProductionInterceptArgsMustBeJsonObject": "Blocked: production tool arguments must be a JSON object.",
+  "agentWorkspaceProductionInterceptArgsJsonParseFailed": "Blocked: failed to parse production tool arguments JSON.",
+  "@agentWorkspaceProductionInterceptPromptRequired": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionInterceptPromptRequired": "Blocked: {action} requires a non-empty workspace prompt.",
+  "agentWorkspaceProductionInterceptSelectDomainToolFirst": "Blocked: select a production domain tool before reading.",
+  "agentWorkspaceProductionInterceptGetFlowDataNeedsKey": "Blocked: get_flowData requires a non-empty flow key.",
+  "@agentWorkspaceProductionSyncedFlowDataKey": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionSyncedFlowDataKey": "Synced: get_flowData arguments.key -> {key}",
+  "agentWorkspaceProductionInterceptSelectSubAgentToolFirst": "Blocked: select a production sub-agent tool before running.",
+  "agentWorkspaceProductionActionRunWorkflow": "Run production workspace workflow",
+  "agentWorkspaceProductionActionRunSubAgent": "Run sub-agent",
+  "agentWorkspaceProductionTriggeredRunWorkflow": "Triggered: run production workspace workflow",
+  "@agentWorkspaceProductionTriggeredProbeContext": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionTriggeredProbeContext": "Triggered: read production tool ({detail})",
+  "@agentWorkspaceProductionTriggeredRunSubAgentTool": {
+    "placeholders": {
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionTriggeredRunSubAgentTool": "Triggered: run sub-agent ({tool})",
+  "agentWorkspaceProductionInterceptNoToolWriteback": "Blocked: no tool result available to write back.",
+  "agentWorkspaceProductionInterceptWritebackNeedsFlowKey": "Blocked: provide a valid flow key before writeback.",
+  "@agentWorkspaceProductionTriggeredWritebackFlow": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionTriggeredWritebackFlow": "Triggered: write back tool result -> flow[{key}]",
+  "agentWorkspaceProductionGuidedDeriveAssetsPrompt": "Based on the current assets flow, propose the next round of derived asset generation and take the smallest viable next step.",
+  "agentWorkspaceProductionGuidedStoryboardGenPrompt": "Based on the current storyboard flow, outline the next storyboard generation plan and take the smallest viable generation action.",
+  "agentWorkspaceProductionGuidedDirectorPlanPrompt": "Combine scriptPlan with current asset status, produce the next director plan round, and list execution priorities.",
+  "projectsCreativeManualDefaultSlotsTemplate": "Scene|scene|\nRole|role|"
 }

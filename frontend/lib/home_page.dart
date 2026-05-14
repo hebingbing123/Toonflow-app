@@ -176,6 +176,7 @@ class _HomePageState extends State<HomePage> {
   PlatformConfigToggleSetV1 _platformConfig =
       PlatformConfigToggleSetV1.defaults;
   final _workspaceInputController = WorkspaceInputController();
+  bool _workspacePromptDefaultsSeeded = false;
   final _workspaceOperationController = WorkspaceOperationController();
   late final WorkspaceRunController _workspaceRunController =
       WorkspaceRunController(
@@ -1065,6 +1066,11 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     _appL10n = AppLocalizations.of(context);
+    final l10n = _appL10n;
+    if (l10n != null && !_workspacePromptDefaultsSeeded) {
+      _workspacePromptDefaultsSeeded = true;
+      _workspaceInputController.applyLocalizedPromptDefaults(l10n);
+    }
     final session = _authController.session;
 
     return Scaffold(

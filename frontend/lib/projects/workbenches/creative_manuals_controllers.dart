@@ -8,12 +8,12 @@ class _CreativeManualsWorkbenchControllers {
     required this.slotsCtrl,
   });
 
-  factory _CreativeManualsWorkbenchControllers.create() {
+  factory _CreativeManualsWorkbenchControllers.create(String initialSlotsText) {
     return _CreativeManualsWorkbenchControllers(
       nameCtrl: TextEditingController(),
       pathCtrl: TextEditingController(),
       imagesCtrl: TextEditingController(),
-      slotsCtrl: TextEditingController(text: _defaultCreativeManualSlotsText),
+      slotsCtrl: TextEditingController(text: initialSlotsText),
     );
   }
 
@@ -29,4 +29,3 @@ class _CreativeManualsWorkbenchControllers {
     slotsCtrl.dispose();
   }
 }
-

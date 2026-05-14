@@ -216,7 +216,7 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
                   _writeBackScriptPlanViaUpdateData,
             ),
             const SizedBox(height: 8),
-            _buildArgumentTemplates(),
+            _buildArgumentTemplates(l10n),
             ScriptWorkspaceStatusPanel(
               resultSummaryLines: resultSummaryLines,
               workspaceAssistantText: widget.workspaceAssistantText,
