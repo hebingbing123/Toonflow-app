@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/agent_workspaces/controls.dart';
 import 'package:openflow_app/agent_workspaces/section.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
+import 'package:openflow_app/l10n/app_localizations_zh.dart';
 
 Finder _cardContaining(String text) =>
     find.ancestor(of: find.text(text), matching: find.byType(Card)).first;
@@ -330,6 +331,8 @@ Future<void> _pumpSection(
 }
 
 void main() {
+  final zh = AppLocalizationsZh();
+
   group('Shared pane behavior', () {
     testWidgets('Agent workspace pane switching keeps core content visible', (
       WidgetTester tester,
@@ -359,14 +362,17 @@ void main() {
         workspaceWritebackLine: 'writeback done',
       );
 
-      expect(find.text('剧本工作区'), findsOneWidget);
+      expect(find.text(zh.agentWorkspaceScriptCardTitle), findsOneWidget);
 
       await _switchPane(tester, AgentWorkspacePane.production);
-      expect(find.text('运行制作工作流'), findsOneWidget);
+      expect(find.text(zh.agentWorkspaceProductionRunWorkflow), findsOneWidget);
 
       await _switchPane(tester, AgentWorkspacePane.activity);
-      expect(find.text('最新助手文本'), findsOneWidget);
-      expect(find.textContaining('最新：harness.tool.result'), findsOneWidget);
+      expect(find.text(zh.agentWorkspaceActivityLatestAssistantText), findsOneWidget);
+      expect(
+        find.textContaining(zh.agentWorkspaceActivityLatest('harness.tool.result')),
+        findsOneWidget,
+      );
     });
   });
 
@@ -413,12 +419,12 @@ void main() {
         onWriteBackScriptResult: () => writeBackCalls += 1,
       );
 
-      await tester.tap(find.text('1) 拉取 planData'));
+      await tester.tap(find.text(zh.agentWorkspaceScriptStepFetchPlanData));
       await tester.pump();
       expect(lastProbedTool, 'get_planData');
       expect(lastProbedArgs, '{"key":"storySkeleton","maxChars":1600}');
 
-      await tester.tap(find.text('2) 拉取剧本正文'));
+      await tester.tap(find.text(zh.agentWorkspaceScriptStepFetchContent));
       await tester.pump();
       expect(lastProbedTool, 'get_script_content');
       expect(
@@ -426,7 +432,7 @@ void main() {
         '{"scriptId":2,"lineStart":61,"lineEnd":120,"maxChars":1600}',
       );
 
-      await tester.tap(find.text('3) 生成剧本草稿'));
+      await tester.tap(find.text(zh.agentWorkspaceScriptStepGenerateDraft));
       await tester.pump();
       expect(runSubAgentCalls, 1);
       expect(
@@ -435,10 +441,10 @@ void main() {
       );
       expect(
         controllers.scriptPromptController.text,
-        '请先读取当前集计划与目标章节事件；只有在衔接需要时才补读上一集尾段，其他细节再按需补章节正文窗口，然后生成下一版剧本正文并输出可直接写回的完整内容。',
+        zh.agentWorkspaceScriptGuidedGenerateDraftPrompt,
       );
 
-      await tester.tap(find.text('4) 写回剧本').first);
+      await tester.tap(find.text(zh.agentWorkspaceScriptStepWriteback).first);
       await tester.pump();
       expect(writeBackCalls, 1);
     });
@@ -470,13 +476,19 @@ void main() {
         },
       );
 
-      expect(find.text('上下文快照'), findsOneWidget);
-      expect(find.text('故事骨架'), findsWidgets);
+      expect(find.text(zh.agentWorkspaceScriptContextSnapshotTitle), findsOneWidget);
+      expect(find.text(zh.agentWorkspaceScriptStageTitleStorySkeleton), findsWidgets);
       expect(find.textContaining('主角失去记忆后踏上回乡之路'), findsNWidgets(2));
-      expect(find.text('改编策略'), findsWidgets);
+      expect(find.text(zh.agentWorkspaceScriptStageTitleAdaptationStrategy), findsWidgets);
       expect(find.textContaining('聚焦母女关系'), findsNWidgets(2));
-      expect(find.textContaining('下游消费提示'), findsWidgets);
-      expect(find.textContaining('骨架焦点'), findsOneWidget);
+      expect(
+        find.textContaining(zh.agentWorkspaceScriptContextRewriteConstraints),
+        findsWidgets,
+      );
+      expect(
+        find.textContaining(zh.agentWorkspaceScriptContextSkeletonFocus('')),
+        findsOneWidget,
+      );
       expect(find.textContaining('script rows'), findsWidgets);
       expect(find.textContaining('第一集'), findsOneWidget);
       expect(find.textContaining('get_script_content'), findsWidgets);
@@ -547,8 +559,8 @@ void main() {
 
       expect(find.textContaining('get_novel_text'), findsWidgets);
       expect(find.textContaining('雨夜归乡'), findsOneWidget);
-      expect(find.text('下一步建议'), findsOneWidget);
-      expect(find.text('读取对应事件'), findsOneWidget);
+      expect(find.text(zh.agentWorkspaceScriptDiagnosisTitle), findsOneWidget);
+      expect(find.text(zh.agentWorkspaceScriptRecipeReadMatchingEventsTitle), findsOneWidget);
 
       await _selectDropdownValue(
         tester,
@@ -556,13 +568,13 @@ void main() {
         nextValue: 'get_novel_events',
       );
 
-      expect(find.text('填充首章'), findsOneWidget);
+      expect(find.text(zh.agentWorkspaceScriptArgFillFirstChapter), findsOneWidget);
 
       await _tapButtonInCard(
         tester,
         buttonType: FilledButton,
-        cardText: '读取对应事件',
-        buttonText: '读取剧本上下文',
+        cardText: zh.agentWorkspaceScriptRecipeReadMatchingEventsTitle,
+        buttonText: zh.agentWorkspaceScriptReadContext,
       );
       await tester.pump();
       expect(lastTool, 'get_novel_events');
@@ -571,7 +583,7 @@ void main() {
         '{"novelId":21,"fields":["numeric_id","name","detail"],"limit":8,"maxChars":1200}',
       );
 
-      await tester.tap(find.widgetWithText(FilledButton, '运行子代理').last);
+      await tester.tap(find.widgetWithText(FilledButton, zh.agentWorkspaceScriptRunSubAgent).last);
       await tester.pump();
       expect(subAgentCalls, 1);
       expect(
@@ -617,10 +629,14 @@ void main() {
         onRunScriptSubAgentTool: () => scriptSubAgentCalls += 1,
       );
 
-      expect(find.text('执行阶段'), findsOneWidget);
-      expect(find.text('待生成'), findsWidgets);
+      expect(find.text(zh.agentWorkspaceScriptStagesTitle), findsOneWidget);
+      expect(find.text(zh.agentWorkspaceScriptStageStatusPendingGenerate), findsWidgets);
 
-      final advanceStageButton = _buttonInCard(FilledButton, '故事骨架', '推进阶段');
+      final advanceStageButton = _buttonInCard(
+        FilledButton,
+        zh.agentWorkspaceScriptStageTitleStorySkeleton,
+        zh.agentWorkspaceScriptAdvanceStage,
+      );
       await tester.ensureVisible(advanceStageButton);
       await tester.tap(advanceStageButton);
       await tester.pump();
@@ -631,7 +647,11 @@ void main() {
       );
       expect(controllers.scriptPromptController.text, isNotEmpty);
 
-      final readContextButton = _buttonInCard(FilledButton, '章节材料', '读取剧本上下文');
+      final readContextButton = _buttonInCard(
+        FilledButton,
+        zh.agentWorkspaceScriptStageTitleChapterMaterial,
+        zh.agentWorkspaceScriptReadContext,
+      );
       await tester.ensureVisible(readContextButton);
       await tester.tap(readContextButton);
       await tester.pump();
@@ -660,13 +680,13 @@ void main() {
         onProbeScriptDomainTool: (_, _) => probeCalls += 1,
       );
 
-      final probeButton = find.widgetWithText(FilledButton, '读取剧本上下文').first;
+      final probeButton = find.widgetWithText(FilledButton, zh.agentWorkspaceScriptReadContext).first;
       await tester.ensureVisible(probeButton);
       await tester.tap(probeButton);
       await tester.pump();
 
       expect(probeCalls, 0);
-      expect(find.text('拦截：剧本工具参数 JSON 解析失败。'), findsOneWidget);
+      expect(find.text(zh.agentWorkspaceScriptInterceptArgsJsonParseFailed), findsOneWidget);
     });
 
     testWidgets('Script argument templates and probe sync render', (
@@ -709,18 +729,18 @@ void main() {
         nextValue: 'get_script_content',
       );
 
-      expect(find.text('模板: 当前剧本窗口'), findsOneWidget);
+      expect(find.text(zh.agentWorkspaceScriptArgTemplateCurrentWindow), findsOneWidget);
       expect(find.text('tool=get_script_content'), findsOneWidget);
       expect(find.text('plan.scriptRows=1'), findsOneWidget);
 
-      await tester.tap(find.text('模板: 当前剧本窗口'));
+      await tester.tap(find.text(zh.agentWorkspaceScriptArgTemplateCurrentWindow));
       await tester.pump();
       expect(
         controllers.scriptDomainArgsController.text,
         '{"scriptId":9,"lineStart":1,"lineEnd":80,"maxChars":2200}',
       );
 
-      final probeButton = find.widgetWithText(FilledButton, '读取剧本上下文').last;
+      final probeButton = find.widgetWithText(FilledButton, zh.agentWorkspaceScriptReadContext).last;
       await tester.ensureVisible(probeButton);
       await tester.tap(probeButton);
       await tester.pump();
@@ -773,13 +793,13 @@ void main() {
 
       await _switchPane(tester, AgentWorkspacePane.production);
 
-      await tester.tap(find.text('1) 拉取资产 flow'));
+      await tester.tap(find.text(zh.agentWorkspaceProductionStepPullAssetsFlow));
       await tester.pump();
       expect(controllers.flowKeyController.text, 'assets');
       expect(controllers.productionDomainToolController.text, 'get_flowData');
       expect(productionProbeCalls, 1);
 
-      await tester.tap(find.text('2) 运行资产子代理'));
+      await tester.tap(find.text(zh.agentWorkspaceProductionStepRunAssetsSubAgent));
       await tester.pump();
       expect(
         controllers.productionSubAgentToolController.text,
@@ -792,16 +812,16 @@ void main() {
       expect(controllers.productionPromptController.text, isNotEmpty);
       expect(productionSubAgentCalls, 1);
 
-      await tester.tap(find.text('3) 拉取分镜 flow'));
+      await tester.tap(find.text(zh.agentWorkspaceProductionStepPullStoryboardFlow));
       await tester.pump();
       expect(controllers.flowKeyController.text, 'storyboard');
       expect(productionProbeCalls, 2);
 
-      await tester.tap(find.text('4) 写回 flow'));
+      await tester.tap(find.text(zh.agentWorkspaceProductionStepWritebackFlow));
       await tester.pump();
       expect(productionWriteBackCalls, 1);
 
-      await tester.tap(find.text('5) 运行分镜子代理'));
+      await tester.tap(find.text(zh.agentWorkspaceProductionStepRunStoryboardSubAgent));
       await tester.pump();
       expect(controllers.flowKeyController.text, 'storyboard');
       expect(
@@ -814,7 +834,7 @@ void main() {
       );
       expect(productionSubAgentCalls, 2);
 
-      await tester.tap(find.text('6) 运行导演计划子代理'));
+      await tester.tap(find.text(zh.agentWorkspaceProductionStepRunDirectorPlanSubAgent));
       await tester.pump();
       expect(controllers.flowKeyController.text, 'scriptPlan');
       expect(
@@ -893,13 +913,13 @@ void main() {
 
       await _switchPane(tester, AgentWorkspacePane.production);
 
-      final probeButton = find.widgetWithText(FilledButton, '读取制作工具');
+      final probeButton = find.widgetWithText(FilledButton, zh.agentWorkspaceProductionReadTool);
       await tester.ensureVisible(probeButton);
       await tester.tap(probeButton);
       await tester.pump();
 
       expect(productionProbeCalls, 0);
-      expect(find.text('拦截：制作工具参数 JSON 解析失败。'), findsOneWidget);
+      expect(find.text(zh.agentWorkspaceProductionInterceptArgsJsonParseFailed), findsOneWidget);
     });
 
     testWidgets('Production argument templates and result summary render', (
@@ -927,19 +947,25 @@ void main() {
 
       await _switchPane(tester, AgentWorkspacePane.production);
 
-      await tester.tap(find.text('模板: 导演计划'));
+      await tester.tap(find.text(zh.agentWorkspaceProductionArgTemplateDirectorPlan));
       await tester.pump();
       expect(
         controllers.productionDomainArgsController.text,
         '{"key":"scriptPlan","maxChars":2200}',
       );
 
-      expect(find.text('结果摘要'), findsOneWidget);
+      expect(find.text(zh.agentWorkspaceProductionResultSummary), findsOneWidget);
       expect(find.text('tool=get_flowData'), findsOneWidget);
-      expect(find.text('对象 keys=2 个'), findsOneWidget);
-      expect(find.text('storyboard: 2 项'), findsOneWidget);
-      expect(find.text('assets: 3 项'), findsOneWidget);
-      expect(find.text('上下文快照'), findsOneWidget);
+      expect(find.text(zh.agentWorkspaceProductionSummaryObjectKeyCount(2)), findsOneWidget);
+      expect(
+        find.text(zh.agentWorkspaceProductionSummaryObjectListEntry('storyboard', 2)),
+        findsOneWidget,
+      );
+      expect(
+        find.text(zh.agentWorkspaceProductionSummaryObjectListEntry('assets', 3)),
+        findsOneWidget,
+      );
+      expect(find.text(zh.agentWorkspaceProductionContextSnapshotTitle), findsOneWidget);
       expect(find.text('flow[storyboard]'), findsOneWidget);
       expect(find.text('flow[assets]'), findsOneWidget);
     });
@@ -968,16 +994,19 @@ void main() {
 
         await _switchPane(tester, AgentWorkspacePane.production);
 
-        expect(find.text('下一步建议'), findsOneWidget);
-        expect(find.text('先生成资产计划'), findsOneWidget);
-        expect(find.text('执行提示'), findsWidgets);
-        expect(find.textContaining('空白 assets flow'), findsWidgets);
+        expect(find.text(zh.agentWorkspaceProductionDiagnosisTitle), findsOneWidget);
+        expect(find.text(zh.agentWorkspaceProductionFlowRecipeAssetsPlanFirstTitle), findsOneWidget);
+        expect(find.text(zh.agentWorkspaceProductionPromptPreviewTitle), findsWidgets);
+        expect(
+          find.textContaining(zh.agentWorkspaceProductionFlowRecipeAssetsPlanFirstPrompt),
+          findsWidgets,
+        );
 
         await _tapButtonInCard(
           tester,
           buttonType: FilledButton,
-          cardText: '先生成资产计划',
-          buttonText: '推进阶段',
+          cardText: zh.agentWorkspaceProductionFlowRecipeAssetsPlanFirstTitle,
+          buttonText: zh.agentWorkspaceProductionSubAgentAdvanceStage,
         );
         await tester.pump();
 
@@ -989,19 +1018,29 @@ void main() {
         );
         expect(
           controllers.productionPromptController.text,
-          contains('空白 assets flow'),
+          contains(zh.agentWorkspaceProductionFlowRecipeAssetsPlanFirstPrompt),
         );
 
         await _tapButtonInCard(
           tester,
           buttonType: OutlinedButton,
-          cardText: '先生成资产计划',
-          buttonText: '应用建议',
+          cardText: zh.agentWorkspaceProductionFlowRecipeAssetsPlanFirstTitle,
+          buttonText: zh.agentWorkspaceProductionApplySuggestion,
         );
         await tester.pump();
-        expect(find.textContaining('已应用任务建议：先生成资产计划'), findsOneWidget);
+        expect(
+          find.textContaining(
+            zh.agentWorkspaceProductionRecipeAppliedGeneric(
+              zh.agentWorkspaceProductionFlowRecipeAssetsPlanFirstTitle,
+            ),
+          ),
+          findsOneWidget,
+        );
 
-        final useFlowKeyButton = find.widgetWithText(OutlinedButton, '使用该 key');
+        final useFlowKeyButton = find.widgetWithText(
+          OutlinedButton,
+          zh.agentWorkspaceProductionUseSuggestedFlowKey,
+        );
         await tester.ensureVisible(useFlowKeyButton);
         await tester.tap(useFlowKeyButton);
         await tester.pump();
@@ -1034,7 +1073,7 @@ void main() {
         workspaceSuggestedFlowKey: 'scriptPlan',
       );
 
-      expect(find.text('工具返回文本'), findsOneWidget);
+      expect(find.text(zh.agentWorkspaceProductionContextToolText), findsOneWidget);
       expect(find.textContaining('导演计划：先补资产'), findsWidgets);
     });
 
@@ -1068,10 +1107,15 @@ void main() {
         );
 
         expect(find.text('flow[storyboard]'), findsOneWidget);
-        expect(find.textContaining('缺帧 1 项'), findsWidgets);
-        expect(find.textContaining('镜头 #101'), findsWidgets);
-        expect(find.textContaining('纯文本模式'), findsWidgets);
-        expect(find.textContaining('镜头 #102'), findsNothing);
+        expect(find.textContaining(zh.agentWorkspaceProductionSummaryMissingFrames(1)), findsWidgets);
+        expect(find.textContaining(zh.agentWorkspaceProductionStoryboardShotsHashShort(101)), findsWidgets);
+        expect(
+          find.textContaining(
+            zh.agentWorkspaceProductionStageDetailStoryboardMissingSkipped(1),
+          ),
+          findsWidgets,
+        );
+        expect(find.textContaining(zh.agentWorkspaceProductionStoryboardShotsHashShort(102)), findsNothing);
       },
     );
 
@@ -1097,7 +1141,7 @@ void main() {
       );
 
       await _switchPane(tester, AgentWorkspacePane.production);
-      final probeButton = find.widgetWithText(FilledButton, '读取制作工具');
+      final probeButton = find.widgetWithText(FilledButton, zh.agentWorkspaceProductionReadTool);
       await tester.ensureVisible(probeButton);
       await tester.tap(probeButton);
       await tester.pump();
@@ -1136,10 +1180,13 @@ void main() {
         workspaceSuggestedFlowKey: 'storyboard',
       );
 
-      expect(find.text('当前结果候选参数'), findsOneWidget);
-      expect(find.text('候选 3 项：101, 102, 103'), findsOneWidget);
+      expect(find.text(zh.agentWorkspaceProductionCurrentCandidateArgs), findsOneWidget);
+      expect(
+        find.text(zh.agentWorkspaceProductionCandidateIds(3, '101, 102, 103')),
+        findsOneWidget,
+      );
 
-      final fillButton = find.text('填充前 3 项');
+      final fillButton = find.text(zh.agentWorkspaceProductionArgSuggestFillFirstThree);
       await tester.ensureVisible(fillButton);
       await tester.tap(fillButton);
       await tester.pump();
@@ -1148,7 +1195,14 @@ void main() {
         controllers.productionDomainArgsController.text,
         '{"ids":[101,102,103]}',
       );
-      expect(find.textContaining('已填充候选参数：填充前 3 项'), findsOneWidget);
+      expect(
+        find.textContaining(
+          zh.agentWorkspaceFilledCandidateArgs(
+            zh.agentWorkspaceProductionArgSuggestFillFirstThree,
+          ),
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets(
@@ -1182,10 +1236,13 @@ void main() {
           workspaceSuggestedFlowKey: 'storyboardTable',
         );
 
-        expect(find.text('当前结果候选参数'), findsOneWidget);
-        expect(find.text('候选 2 项：3, 9'), findsOneWidget);
+        expect(find.text(zh.agentWorkspaceProductionCurrentCandidateArgs), findsOneWidget);
+        expect(
+          find.text(zh.agentWorkspaceProductionCandidateIds(2, '3, 9')),
+          findsOneWidget,
+        );
 
-        final fillButton = find.text('填充前 3 项');
+        final fillButton = find.text(zh.agentWorkspaceProductionArgSuggestFillFirstThree);
         await tester.ensureVisible(fillButton);
         await tester.tap(fillButton);
         await tester.pump();
@@ -1194,7 +1251,14 @@ void main() {
           controllers.productionDomainArgsController.text,
           '{"ids":[3,9]}',
         );
-        expect(find.textContaining('已填充候选参数：填充前 3 项'), findsOneWidget);
+        expect(
+          find.textContaining(
+            zh.agentWorkspaceFilledCandidateArgs(
+              zh.agentWorkspaceProductionArgSuggestFillFirstThree,
+            ),
+          ),
+          findsOneWidget,
+        );
       },
     );
 
@@ -1223,14 +1287,26 @@ void main() {
         onRunProductionSubAgentTool: () => productionSubAgentCalls += 1,
       );
 
-      expect(find.text('执行阶段'), findsOneWidget);
-      expect(find.textContaining('当前卡点：导演计划 · 待读取'), findsOneWidget);
-      expect(find.text('等待导演计划'), findsWidgets);
-      expect(find.text('资产准备'), findsOneWidget);
-      expect(find.text('执行提示'), findsWidgets);
-      expect(find.textContaining('最小可行的衍生素材集合'), findsWidgets);
+      expect(find.text(zh.agentWorkspaceProductionStagesTitle), findsOneWidget);
+      expect(
+        find.textContaining(
+          '当前卡点：${zh.agentWorkspaceProductionStageFlowScriptPlan} · ${zh.agentWorkspaceScriptStageStatusPendingRead}',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text(zh.agentWorkspaceProductionStageStatusWaitingScriptPlan), findsWidgets);
+      expect(find.text(zh.agentWorkspaceProductionStageFlowAssets), findsOneWidget);
+      expect(find.text(zh.agentWorkspaceProductionPromptPreviewTitle), findsWidgets);
+      expect(
+        find.textContaining(zh.agentWorkspaceProductionFlowRecipeAssetsPlanFirstPrompt),
+        findsWidgets,
+      );
 
-      final advanceStageButton = _buttonInCard(FilledButton, '资产准备', '推进阶段');
+      final advanceStageButton = _buttonInCard(
+        FilledButton,
+        zh.agentWorkspaceProductionStageFlowAssets,
+        zh.agentWorkspaceProductionSubAgentAdvanceStage,
+      );
       await tester.ensureVisible(advanceStageButton);
       await tester.tap(advanceStageButton);
       await tester.pump();
@@ -1241,7 +1317,11 @@ void main() {
       );
       expect(controllers.productionPromptController.text, isNotEmpty);
 
-      final readFlowButton = _buttonInCard(FilledButton, '导演计划', '读取 flow');
+      final readFlowButton = _buttonInCard(
+        FilledButton,
+        zh.agentWorkspaceProductionStageFlowScriptPlan,
+        zh.agentWorkspaceProductionDomainReadFlow,
+      );
       await tester.ensureVisible(readFlowButton);
       await tester.tap(readFlowButton);
       await tester.pump();
