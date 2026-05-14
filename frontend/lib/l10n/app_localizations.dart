@@ -2472,6 +2472,48 @@ abstract class AppLocalizations {
   /// **' webhook activity'**
   String get opsWhActivityRecordSuffix;
 
+  /// No description provided for @opsWhActivityActionCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Created'**
+  String get opsWhActivityActionCreated;
+
+  /// No description provided for @opsWhActivityActionDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted'**
+  String get opsWhActivityActionDeleted;
+
+  /// No description provided for @opsWhActivityActionTestSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Test: succeeded'**
+  String get opsWhActivityActionTestSuccess;
+
+  /// No description provided for @opsWhActivityActionTestFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Test: failed'**
+  String get opsWhActivityActionTestFailed;
+
+  /// No description provided for @opsWhActivitySummaryDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Webhook deleted'**
+  String get opsWhActivitySummaryDeleted;
+
+  /// No description provided for @opsWhActivitySummaryTestOk.
+  ///
+  /// In en, this message translates to:
+  /// **'HTTP {httpStatus}'**
+  String opsWhActivitySummaryTestOk(String httpStatus);
+
+  /// No description provided for @opsWhActivitySummaryTestFail.
+  ///
+  /// In en, this message translates to:
+  /// **'HTTP {httpStatus} · {errorDetail}'**
+  String opsWhActivitySummaryTestFail(String httpStatus, String errorDetail);
+
   /// No description provided for @opsWhChipLatestCreated.
   ///
   /// In en, this message translates to:
@@ -30391,6 +30433,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Last used {lastUsedAt} · {method} {path}'**
   String apiKeysLastUsedLine(String lastUsedAt, String method, String path);
+
+  /// No description provided for @apiKeysLastUsedIpUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get apiKeysLastUsedIpUnknown;
 
   /// No description provided for @apiKeysSourceLine.
   ///

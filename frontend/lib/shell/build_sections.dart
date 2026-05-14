@@ -228,7 +228,7 @@ extension _HomePageBuildSections on _HomePageState {
   List<Widget> _buildErrorSection(BuildContext context) {
     if (_error == null) return const [];
     final err = _error!;
-    final line = AppLocalizations.of(context)?.errorLine(err) ?? 'Error: $err';
+    final line = resolveAppLocalizationsForErrors(context).errorLine(err);
     return [
       const SizedBox(height: 16),
       Text(line, style: TextStyle(color: Theme.of(context).colorScheme.error)),

@@ -732,6 +732,30 @@
   "opsWhRecentActivity": "Recent activity",
   "opsWhCopyActivityTooltip": "Copy record",
   "opsWhActivityRecordSuffix": " webhook activity",
+  "opsWhActivityActionCreated": "Created",
+  "opsWhActivityActionDeleted": "Deleted",
+  "opsWhActivityActionTestSuccess": "Test: succeeded",
+  "opsWhActivityActionTestFailed": "Test: failed",
+  "opsWhActivitySummaryDeleted": "Webhook deleted",
+  "opsWhActivitySummaryTestOk": "HTTP {httpStatus}",
+  "@opsWhActivitySummaryTestOk": {
+    "placeholders": {
+      "httpStatus": {
+        "type": "String"
+      }
+    }
+  },
+  "opsWhActivitySummaryTestFail": "HTTP {httpStatus} · {errorDetail}",
+  "@opsWhActivitySummaryTestFail": {
+    "placeholders": {
+      "httpStatus": {
+        "type": "String"
+      },
+      "errorDetail": {
+        "type": "String"
+      }
+    }
+  },
   "opsWhChipLatestCreated": "Latest created",
   "opsWhChipDisabled": "Disabled",
   "opsWhSubscribeHeading": "Subscribed events",
@@ -15337,6 +15361,7 @@
       }
     }
   },
+  "apiKeysLastUsedIpUnknown": "Unknown",
   "apiKeysSourceLine": "Source {source}",
   "@apiKeysSourceLine": {
     "placeholders": {

@@ -1396,6 +1396,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get opsWhActivityRecordSuffix => ' webhook activity';
 
   @override
+  String get opsWhActivityActionCreated => 'Created';
+
+  @override
+  String get opsWhActivityActionDeleted => 'Deleted';
+
+  @override
+  String get opsWhActivityActionTestSuccess => 'Test: succeeded';
+
+  @override
+  String get opsWhActivityActionTestFailed => 'Test: failed';
+
+  @override
+  String get opsWhActivitySummaryDeleted => 'Webhook deleted';
+
+  @override
+  String opsWhActivitySummaryTestOk(String httpStatus) {
+    return 'HTTP $httpStatus';
+  }
+
+  @override
+  String opsWhActivitySummaryTestFail(String httpStatus, String errorDetail) {
+    return 'HTTP $httpStatus · $errorDetail';
+  }
+
+  @override
   String get opsWhChipLatestCreated => 'Latest created';
 
   @override
@@ -20079,6 +20104,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String apiKeysLastUsedLine(String lastUsedAt, String method, String path) {
     return 'Last used $lastUsedAt · $method $path';
   }
+
+  @override
+  String get apiKeysLastUsedIpUnknown => 'Unknown';
 
   @override
   String apiKeysSourceLine(String source) {

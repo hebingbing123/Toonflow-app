@@ -1318,6 +1318,31 @@ class AppLocalizationsZh extends AppLocalizations {
   String get opsWhActivityRecordSuffix => ' Webhook 操作记录';
 
   @override
+  String get opsWhActivityActionCreated => '已创建';
+
+  @override
+  String get opsWhActivityActionDeleted => '已删除';
+
+  @override
+  String get opsWhActivityActionTestSuccess => '测试：成功';
+
+  @override
+  String get opsWhActivityActionTestFailed => '测试：失败';
+
+  @override
+  String get opsWhActivitySummaryDeleted => '已删除 Webhook';
+
+  @override
+  String opsWhActivitySummaryTestOk(String httpStatus) {
+    return 'HTTP $httpStatus';
+  }
+
+  @override
+  String opsWhActivitySummaryTestFail(String httpStatus, String errorDetail) {
+    return 'HTTP $httpStatus · $errorDetail';
+  }
+
+  @override
   String get opsWhChipLatestCreated => '最近创建';
 
   @override
@@ -19120,6 +19145,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String apiKeysLastUsedLine(String lastUsedAt, String method, String path) {
     return '最近使用 $lastUsedAt · $method $path';
   }
+
+  @override
+  String get apiKeysLastUsedIpUnknown => '未知';
 
   @override
   String apiKeysSourceLine(String source) {
