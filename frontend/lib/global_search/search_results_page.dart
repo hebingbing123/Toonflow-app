@@ -162,7 +162,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
 
   /// Perform search with current filters and pagination
   Future<void> _performSearch() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final token = widget.accessToken;
     if (token == null || token.isEmpty) {
       setState(() {

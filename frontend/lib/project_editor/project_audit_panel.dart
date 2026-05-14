@@ -39,7 +39,6 @@ class _ProjectAuditPanelState extends State<ProjectAuditPanel> {
   }
 
   Future<void> _reload() async {
-    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _loading = true;
       _error = null;
@@ -60,18 +59,18 @@ class _ProjectAuditPanelState extends State<ProjectAuditPanel> {
       });
     } catch (e) {
       if (!mounted) return;
+      final l10nErr = resolveAppLocalizationsForErrors(context);
       setState(() {
         _rows.clear();
         _hasMore = false;
         _loading = false;
-        _error = describeUserVisibleApiError(l10n, e);
+        _error = describeUserVisibleApiError(l10nErr, e);
       });
     }
   }
 
   Future<void> _loadMore() async {
     if (_loadingMore || !_hasMore) return;
-    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _loadingMore = true;
     });
@@ -90,9 +89,10 @@ class _ProjectAuditPanelState extends State<ProjectAuditPanel> {
       });
     } catch (e) {
       if (!mounted) return;
+      final l10nErr = resolveAppLocalizationsForErrors(context);
       setState(() {
         _loadingMore = false;
-        _error = describeUserVisibleApiError(l10n, e);
+        _error = describeUserVisibleApiError(l10nErr, e);
       });
     }
   }

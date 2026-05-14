@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../l10n/app_localizations.dart';
 import '../l10n/rust_api_error_format.dart';
 import '../rust_api/search/api.dart';
 import '../utils/localized_formatting.dart';
@@ -55,8 +54,8 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
     } catch (e) {
       if (!mounted) return;
 
+      final loc = resolveAppLocalizationsForErrors(context);
       setState(() {
-        final loc = AppLocalizations.of(context)!;
         _error = describeUserVisibleApiError(loc, e);
         _loading = false;
       });
@@ -64,7 +63,7 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
   }
 
   Future<void> _handleClearHistory() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     // Confirm before clearing
     final confirmed = await showDialog<bool>(
       context: context,
@@ -111,7 +110,8 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
     } catch (e) {
       if (!mounted) return;
 
-      final msg = describeUserVisibleApiError(l10n, e);
+      final loc = resolveAppLocalizationsForErrors(context);
+      final msg = describeUserVisibleApiError(loc, e);
       setState(() {
         _error = msg;
         _loading = false;
@@ -120,7 +120,7 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
       // Error feedback
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.globalSearchClearHistoryFailed(msg))),
+          SnackBar(content: Text(loc.globalSearchClearHistoryFailed(msg))),
         );
       }
     }
@@ -128,7 +128,7 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     if (_loading) {
       return const Card(
         child: Padding(

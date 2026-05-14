@@ -31,7 +31,7 @@ class _JobQueueStatsCardState extends State<JobQueueStatsCard> {
       });
     } catch (e) {
       if (!mounted) return;
-      final l10n = AppLocalizations.of(context)!;
+      final l10n = resolveAppLocalizationsForErrors(context);
       setState(() {
         _error = describeUserVisibleApiError(l10n, e);
         _loading = false;
