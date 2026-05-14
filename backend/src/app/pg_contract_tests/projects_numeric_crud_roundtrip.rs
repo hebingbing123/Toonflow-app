@@ -1,6 +1,6 @@
 use super::*;
 
-use serde_json::{json, Value};
+use serde_json::json;
 
 #[tokio::test]
 #[ignore = "needs DATABASE_URL + SUPABASE_JWT_SECRET and migrated schema; e.g. supabase db reset; cargo test pg_contract_tests -- --ignored"]
@@ -27,14 +27,14 @@ async fn project_numeric_crud_roundtrip() {
     let create_body = json!({
         "name": initial_name,
         "intro": "seed intro",
-        "project_type": "short-drama",
-        "art_style": "ink",
-        "director_manual": "story-manual",
-        "video_ratio": "9:16",
-        "image_model": "dalle-3",
-        "video_model": "runway",
-        "image_quality": "hd",
-        "mode": "novel",
+        "projectType": "short-drama",
+        "artStyle": "ink",
+        "directorManual": "story-manual",
+        "videoRatio": "9:16",
+        "imageModel": "dalle-3",
+        "videoModel": "runway",
+        "imageQuality": "hd",
+        "mode": "animated.short_drama",
     });
     let res = app
         .clone()
@@ -92,7 +92,7 @@ async fn project_numeric_crud_roundtrip() {
     );
     assert_eq!(created_row["intro"].as_str(), Some("seed intro"));
     assert_eq!(created_row["project_type"].as_str(), Some("short-drama"));
-    assert_eq!(created_row["mode"].as_str(), Some("novel"));
+    assert_eq!(created_row["mode"].as_str(), Some("animated.short_drama"));
     assert_eq!(created_row["art_style"].as_str(), Some("ink"));
     assert_eq!(
         created_row["director_manual"].as_str(),
@@ -111,7 +111,7 @@ async fn project_numeric_crud_roundtrip() {
     .fetch_optional(&pool)
     .await
     .expect("select initial mode");
-    assert_eq!(stored_mode.as_deref(), Some("novel"));
+    assert_eq!(stored_mode.as_deref(), Some("animated.short_drama"));
 
     let stored_workspace_id: Option<Uuid> = sqlx::query_scalar(
         "SELECT workspace_id FROM public.app_project WHERE owner_user_id = $1 AND numeric_id = $2",
@@ -129,15 +129,15 @@ async fn project_numeric_crud_roundtrip() {
 
     let patch_body = json!({
         "name": updated_name,
-        "intro": Value::Null,
+        "intro": "updated intro",
         "project_type": "feature",
-        "art_style": Value::Null,
+        "art_style": "charcoal",
         "director_manual": "revised-manual",
         "video_ratio": "16:9",
         "image_model": "flux",
         "video_model": "kling",
         "image_quality": "standard",
-        "mode": "professional",
+        "mode": "live_action.short_drama",
     });
     let res = app
         .clone()
@@ -180,10 +180,10 @@ async fn project_numeric_crud_roundtrip() {
         .cloned()
         .expect("edited project row");
     assert_eq!(edited_row["name"].as_str(), Some(updated_name.as_str()));
-    assert!(edited_row["intro"].is_null());
+    assert_eq!(edited_row["intro"].as_str(), Some("updated intro"));
     assert_eq!(edited_row["project_type"].as_str(), Some("feature"));
-    assert_eq!(edited_row["mode"].as_str(), Some("professional"));
-    assert!(edited_row["art_style"].is_null());
+    assert_eq!(edited_row["mode"].as_str(), Some("live_action.short_drama"));
+    assert_eq!(edited_row["art_style"].as_str(), Some("charcoal"));
     assert_eq!(
         edited_row["director_manual"].as_str(),
         Some("revised-manual")
@@ -201,7 +201,7 @@ async fn project_numeric_crud_roundtrip() {
     .fetch_optional(&pool)
     .await
     .expect("select edited mode");
-    assert_eq!(stored_mode.as_deref(), Some("professional"));
+    assert_eq!(stored_mode.as_deref(), Some("live_action.short_drama"));
 
     let res = app
         .clone()

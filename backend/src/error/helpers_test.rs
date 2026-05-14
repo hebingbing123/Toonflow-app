@@ -1623,7 +1623,7 @@ proptest! {
         min_len in 2usize..50,
     ) {
         // Generate a string shorter than min_len (at least 1 char shorter)
-        let short_len = if min_len > 1 { min_len - 1 } else { 0 };
+        let short_len = min_len.saturating_sub(1);
         let short_value = "a".repeat(short_len);
 
         let result = validate_min_length(&short_value, min_len, "test_field");
@@ -1994,10 +1994,7 @@ proptest! {
 
         // Test 2: Array with duplicates should fail
         if duplicate_count > 0 {
-            let mut duplicate_array: Vec<i32> = vec![42]; // Start with one element
-            for _ in 0..duplicate_count {
-                duplicate_array.push(42); // Add duplicates
-            }
+            let duplicate_array: Vec<i32> = vec![42; duplicate_count + 1];
 
             let duplicate_result = validate_unique_items(&duplicate_array, &field_name);
             prop_assert!(duplicate_result.is_err(),
@@ -2380,7 +2377,7 @@ proptest! {
         let json_err = validate_json("invalid", &field_name).unwrap_err();
         let min_len_err = validate_min_length("", 5, &field_name).unwrap_err();
         let array_err = validate_array_not_empty(&Vec::<i32>::new(), &field_name).unwrap_err();
-        let unique_err = validate_unique_items(&vec![1, 1], &field_name).unwrap_err();
+        let unique_err = validate_unique_items(&[1, 1], &field_name).unwrap_err();
 
         // All should be BadRequestI18n variants
         let errors = vec![
@@ -2462,7 +2459,7 @@ proptest! {
         let json_err = validate_json("invalid", &field_name).unwrap_err();
         let min_len_err = validate_min_length("", 5, &field_name).unwrap_err();
         let array_err = validate_array_not_empty(&Vec::<i32>::new(), &field_name).unwrap_err();
-        let unique_err = validate_unique_items(&vec![1, 1], &field_name).unwrap_err();
+        let unique_err = validate_unique_items(&[1, 1], &field_name).unwrap_err();
 
         let errors = vec![
             ("uuid", uuid_err),
