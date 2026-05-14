@@ -964,6 +964,7 @@
   "projectsCompatibilityTitle": "Compatibility check",
   "projectsCompatibilitySubtitle": "Keeps the first-project Agent memory probe as a regression entry point (collapsed by default).",
   "projectsCompatibilityProbeMemory": "Probe first project memory",
+  "projectsProbeMemoryLoadProjectsFirst": "Load the project list first (the Agent memory probe needs a project).",
   "projectsSummaryLine": "Project summary: {body}",
   "@projectsSummaryLine": {
     "placeholders": {

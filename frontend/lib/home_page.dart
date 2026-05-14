@@ -900,7 +900,7 @@ class _HomePageState extends State<HomePage> {
         reportRustOrDescribeApiError(
           error,
           onErrorChanged: _setSharedError,
-          l10n: AppLocalizations.of(context),
+          l10n: _appL10n ?? lookupAppLocalizations(const Locale('en')),
           showGlobalSnackBar: false,
         );
       }

@@ -3054,6 +3054,12 @@ abstract class AppLocalizations {
   /// **'Probe first project memory'**
   String get projectsCompatibilityProbeMemory;
 
+  /// No description provided for @projectsProbeMemoryLoadProjectsFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Load the project list first (the Agent memory probe needs a project).'**
+  String get projectsProbeMemoryLoadProjectsFirst;
+
   /// No description provided for @projectsSummaryLine.
   ///
   /// In en, this message translates to:

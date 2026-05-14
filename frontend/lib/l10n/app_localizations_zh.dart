@@ -1648,6 +1648,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get projectsCompatibilityProbeMemory => '查询首个项目记忆';
 
   @override
+  String get projectsProbeMemoryLoadProjectsFirst =>
+      '请先加载项目列表（Agent 记忆探针需要项目）。';
+
+  @override
   String projectsSummaryLine(String body) {
     return '项目摘要：$body';
   }

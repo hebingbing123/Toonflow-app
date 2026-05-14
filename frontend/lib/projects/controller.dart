@@ -100,7 +100,7 @@ class ProjectsController extends ChangeNotifier {
     if (token == null) return;
     final currentProjects = projects;
     if (currentProjects == null || currentProjects.isEmpty) {
-      _setError('Load projects first (agent memory needs a project id).');
+      _setError(_l10nResolved.projectsProbeMemoryLoadProjectsFirst);
       return;
     }
     final first = currentProjects.first;

@@ -102,7 +102,7 @@ class TaskCenterController extends ChangeNotifier {
     try {
       final rows = await postTasksGetTaskCategories(token);
       taskCategoriesLine = rows.isEmpty
-          ? '(empty)'
+          ? _l10nResolved.jobsEmptyValue
           : rows.map((row) => row.taskClass).join(', ');
     } catch (e) {
       reportRustOrDescribeApiError(

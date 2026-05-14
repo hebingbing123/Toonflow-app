@@ -964,6 +964,7 @@
   "projectsCompatibilityTitle": "兼容性检查",
   "projectsCompatibilitySubtitle": "保留首项目 Agent memory probe 作为回归入口，默认折叠",
   "projectsCompatibilityProbeMemory": "查询首个项目记忆",
+  "projectsProbeMemoryLoadProjectsFirst": "请先加载项目列表（Agent 记忆探针需要项目）。",
   "projectsSummaryLine": "项目摘要：{body}",
   "@projectsSummaryLine": {
     "placeholders": {

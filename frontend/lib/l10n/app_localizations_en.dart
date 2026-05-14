@@ -1733,6 +1733,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get projectsCompatibilityProbeMemory => 'Probe first project memory';
 
   @override
+  String get projectsProbeMemoryLoadProjectsFirst =>
+      'Load the project list first (the Agent memory probe needs a project).';
+
+  @override
   String projectsSummaryLine(String body) {
     return 'Project summary: $body';
   }
