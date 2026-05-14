@@ -1718,10 +1718,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get projectsCompatibilityProbeMemory => 'Probe first project memory';
 
   @override
-  String get projectsSummaryLinePrefix => 'Project summary: ';
+  String projectsSummaryLine(String body) {
+    return 'Project summary: $body';
+  }
 
   @override
-  String get projectsArtStylesLinePrefix => 'Art styles: ';
+  String projectsArtStylesLine(String body) {
+    return 'Art styles: $body';
+  }
 
   @override
   String projectsArtStyleCount(int count) {
@@ -15875,6 +15879,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shortVideoPublishPanelUntitledDraft => '(Untitled)';
+
+  @override
+  String shortVideoPublishDraftDropdownLabel(String title, String status) {
+    return '$title · $status';
+  }
+
+  @override
+  String shortVideoMetricChipLine(String label, String value) {
+    return '$label $value';
+  }
 
   @override
   String get shortVideoPublishPanelConfirmSemiAuto =>

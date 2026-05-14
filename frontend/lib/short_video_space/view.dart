@@ -1291,7 +1291,13 @@ class _MetricChip extends StatelessWidget {
         border: Border.all(color: theme.colorScheme.outline),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Text('$label $value', style: theme.textTheme.labelMedium),
+      child: Text(
+        AppLocalizations.of(context)!.shortVideoMetricChipLine(
+          label,
+          value,
+        ),
+        style: theme.textTheme.labelMedium,
+      ),
     );
   }
 }

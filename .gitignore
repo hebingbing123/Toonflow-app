@@ -69,7 +69,7 @@ frontend/.flutter-plugins
 frontend/*.iml
 frontend/.packages
 
-# Flutter l10n batch scanner output (regenerate with scripts/l10n_batch_pipeline.py scan)
+# Local-only Flutter tooling output (optional)
 frontend/.l10n_batch/
 
 # Cursor IDE (local)

@@ -333,7 +333,12 @@ class _PublishDraftsPanel extends StatelessWidget {
                       shortVideoPublishDraftStatusLabel(l10n, d.draftStatus);
                   return DropdownMenuItem<String>(
                     value: d.id,
-                    child: Text('$title · $statusLabel'),
+                    child: Text(
+                      l10n.shortVideoPublishDraftDropdownLabel(
+                        title,
+                        statusLabel,
+                      ),
+                    ),
                   );
                 }).toList(growable: false),
                 onChanged: publishPanelUi.publishBusy

@@ -959,8 +959,22 @@
   "projectsCompatibilityTitle": "兼容性检查",
   "projectsCompatibilitySubtitle": "保留首项目 Agent memory probe 作为回归入口，默认折叠",
   "projectsCompatibilityProbeMemory": "查询首个项目记忆",
-  "projectsSummaryLinePrefix": "项目摘要：",
-  "projectsArtStylesLinePrefix": "美术风格：",
+  "projectsSummaryLine": "项目摘要：{body}",
+  "@projectsSummaryLine": {
+    "placeholders": {
+      "body": {
+        "type": "String"
+      }
+    }
+  },
+  "projectsArtStylesLine": "美术风格：{body}",
+  "@projectsArtStylesLine": {
+    "placeholders": {
+      "body": {
+        "type": "String"
+      }
+    }
+  },
   "projectsArtStyleCount": "{count, plural, other{{count} 条画风}}",
   "@projectsArtStyleCount": {
     "placeholders": {
@@ -12302,6 +12316,28 @@
   "shortVideoPublishPanelCurrentDraftLabel": "当前操作草稿",
   "shortVideoPublishPanelSelectDraftHint": "请选择要操作的草稿",
   "shortVideoPublishPanelUntitledDraft": "（无标题）",
+  "shortVideoPublishDraftDropdownLabel": "{title} · {status}",
+  "@shortVideoPublishDraftDropdownLabel": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoMetricChipLine": "{label} {value}",
+  "@shortVideoMetricChipLine": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
   "shortVideoPublishPanelConfirmSemiAuto": "确认半自动发布（服务端闸门）",
   "shortVideoPublishPanelAutomationByPlatform": "自动化模式（按平台）",
   "shortVideoPublishPanelRefreshPublish": "刷新发布数据",

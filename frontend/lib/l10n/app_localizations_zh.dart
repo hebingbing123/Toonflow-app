@@ -1633,10 +1633,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get projectsCompatibilityProbeMemory => '查询首个项目记忆';
 
   @override
-  String get projectsSummaryLinePrefix => '项目摘要：';
+  String projectsSummaryLine(String body) {
+    return '项目摘要：$body';
+  }
 
   @override
-  String get projectsArtStylesLinePrefix => '美术风格：';
+  String projectsArtStylesLine(String body) {
+    return '美术风格：$body';
+  }
 
   @override
   String projectsArtStyleCount(int count) {
@@ -15118,6 +15122,16 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get shortVideoPublishPanelUntitledDraft => '（无标题）';
+
+  @override
+  String shortVideoPublishDraftDropdownLabel(String title, String status) {
+    return '$title · $status';
+  }
+
+  @override
+  String shortVideoMetricChipLine(String label, String value) {
+    return '$label $value';
+  }
 
   @override
   String get shortVideoPublishPanelConfirmSemiAuto => '确认半自动发布（服务端闸门）';

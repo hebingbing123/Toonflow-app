@@ -179,13 +179,11 @@ class ProjectsSummaryPreview extends StatelessWidget {
       children: [
         if (projectsSummaryLine != null) ...[
           const SizedBox(height: 8),
-          SelectableText(
-            '${l10n.projectsSummaryLinePrefix}$projectsSummaryLine',
-          ),
+          SelectableText(l10n.projectsSummaryLine(projectsSummaryLine!)),
         ],
         if (artStylesLine != null) ...[
           const SizedBox(height: 8),
-          SelectableText('${l10n.projectsArtStylesLinePrefix}$artStylesLine'),
+          SelectableText(l10n.projectsArtStylesLine(artStylesLine!)),
         ],
       ],
     );

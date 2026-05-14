@@ -3024,17 +3024,17 @@ abstract class AppLocalizations {
   /// **'Probe first project memory'**
   String get projectsCompatibilityProbeMemory;
 
-  /// No description provided for @projectsSummaryLinePrefix.
+  /// No description provided for @projectsSummaryLine.
   ///
   /// In en, this message translates to:
-  /// **'Project summary: '**
-  String get projectsSummaryLinePrefix;
+  /// **'Project summary: {body}'**
+  String projectsSummaryLine(String body);
 
-  /// No description provided for @projectsArtStylesLinePrefix.
+  /// No description provided for @projectsArtStylesLine.
   ///
   /// In en, this message translates to:
-  /// **'Art styles: '**
-  String get projectsArtStylesLinePrefix;
+  /// **'Art styles: {body}'**
+  String projectsArtStylesLine(String body);
 
   /// No description provided for @projectsArtStyleCount.
   ///
@@ -24352,6 +24352,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'(Untitled)'**
   String get shortVideoPublishPanelUntitledDraft;
+
+  /// No description provided for @shortVideoPublishDraftDropdownLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{title} · {status}'**
+  String shortVideoPublishDraftDropdownLabel(String title, String status);
+
+  /// No description provided for @shortVideoMetricChipLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} {value}'**
+  String shortVideoMetricChipLine(String label, String value);
 
   /// No description provided for @shortVideoPublishPanelConfirmSemiAuto.
   ///

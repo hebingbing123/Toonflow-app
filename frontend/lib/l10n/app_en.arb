@@ -959,8 +959,22 @@
   "projectsCompatibilityTitle": "Compatibility check",
   "projectsCompatibilitySubtitle": "Keeps the first-project Agent memory probe as a regression entry point (collapsed by default).",
   "projectsCompatibilityProbeMemory": "Probe first project memory",
-  "projectsSummaryLinePrefix": "Project summary: ",
-  "projectsArtStylesLinePrefix": "Art styles: ",
+  "projectsSummaryLine": "Project summary: {body}",
+  "@projectsSummaryLine": {
+    "placeholders": {
+      "body": {
+        "type": "String"
+      }
+    }
+  },
+  "projectsArtStylesLine": "Art styles: {body}",
+  "@projectsArtStylesLine": {
+    "placeholders": {
+      "body": {
+        "type": "String"
+      }
+    }
+  },
   "projectsArtStyleCount": "{count, plural, one{1 art style} other{{count} art styles}}",
   "@projectsArtStyleCount": {
     "placeholders": {
@@ -12302,6 +12316,28 @@
   "shortVideoPublishPanelCurrentDraftLabel": "Active draft",
   "shortVideoPublishPanelSelectDraftHint": "Select a draft to operate on",
   "shortVideoPublishPanelUntitledDraft": "(Untitled)",
+  "shortVideoPublishDraftDropdownLabel": "{title} · {status}",
+  "@shortVideoPublishDraftDropdownLabel": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "shortVideoMetricChipLine": "{label} {value}",
+  "@shortVideoMetricChipLine": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
   "shortVideoPublishPanelConfirmSemiAuto": "Confirm semi-auto publish (server gate)",
   "shortVideoPublishPanelAutomationByPlatform": "Automation mode (per platform)",
   "shortVideoPublishPanelRefreshPublish": "Refresh publish data",
