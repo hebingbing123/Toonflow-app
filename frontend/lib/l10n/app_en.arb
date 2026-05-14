@@ -6538,6 +6538,14 @@
   "scriptEditorStoryboardsReadinessBlockingMissingLiveActionPerformanceNotes": "Performance / delivery notes",
   "scriptEditorStoryboardsReadinessBlockingCandidatePending": "Candidate confirmation",
   "scriptEditorStoryboardsReadinessBlockingBlockingJob": "Generation job running",
+  "scriptEditorStoryboardsReadinessBlockingUnknown": "Unrecognized requirement ({code})",
+  "@scriptEditorStoryboardsReadinessBlockingUnknown": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
   "scriptEditorEditImageWorkbenchTitle": "Edit image workbench",
   "scriptEditorEditImageWorkbenchIntro": "Manage the edit-image flow inside the script workbench—upload a source image and start generation instead of relying only on production probes.",
   "scriptEditorEditImageWorkbenchSyncing": "Syncing…",

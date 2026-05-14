@@ -8285,6 +8285,11 @@ class AppLocalizationsZh extends AppLocalizations {
   String get scriptEditorStoryboardsReadinessBlockingBlockingJob => '生成任务进行中';
 
   @override
+  String scriptEditorStoryboardsReadinessBlockingUnknown(String code) {
+    return '未识别的就绪阻塞项（$code）';
+  }
+
+  @override
   String get scriptEditorEditImageWorkbenchTitle => '编辑图片工作台';
 
   @override

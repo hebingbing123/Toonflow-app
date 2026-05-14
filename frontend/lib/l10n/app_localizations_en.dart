@@ -8642,6 +8642,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Generation job running';
 
   @override
+  String scriptEditorStoryboardsReadinessBlockingUnknown(String code) {
+    return 'Unrecognized requirement ($code)';
+  }
+
+  @override
   String get scriptEditorEditImageWorkbenchTitle => 'Edit image workbench';
 
   @override

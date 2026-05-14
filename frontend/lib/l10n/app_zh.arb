@@ -6538,6 +6538,14 @@
   "scriptEditorStoryboardsReadinessBlockingMissingLiveActionPerformanceNotes": "表演 / 口播约束",
   "scriptEditorStoryboardsReadinessBlockingCandidatePending": "候选确认",
   "scriptEditorStoryboardsReadinessBlockingBlockingJob": "生成任务进行中",
+  "scriptEditorStoryboardsReadinessBlockingUnknown": "未识别的就绪阻塞项（{code}）",
+  "@scriptEditorStoryboardsReadinessBlockingUnknown": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
   "scriptEditorEditImageWorkbenchTitle": "编辑图片工作台",
   "scriptEditorEditImageWorkbenchIntro": "直接在脚本工作台内管理 edit-image flow、上传源图并发起生成，不再只停留在 production probe。",
   "scriptEditorEditImageWorkbenchSyncing": "同步中…",

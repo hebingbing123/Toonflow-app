@@ -13637,6 +13637,12 @@ abstract class AppLocalizations {
   /// **'Generation job running'**
   String get scriptEditorStoryboardsReadinessBlockingBlockingJob;
 
+  /// No description provided for @scriptEditorStoryboardsReadinessBlockingUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unrecognized requirement ({code})'**
+  String scriptEditorStoryboardsReadinessBlockingUnknown(String code);
+
   /// No description provided for @scriptEditorEditImageWorkbenchTitle.
   ///
   /// In en, this message translates to:
