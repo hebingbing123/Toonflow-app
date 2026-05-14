@@ -1,18 +1,24 @@
 #!/usr/bin/env python3
 """
-批量 i18n：扫描 Text/SelectableText 的「整段插值字符串」→ 合并 app_en/app_zh.arb → 回写 Dart。
+批量 i18n：扫描 Text/SelectableText 的「整段 ${} 插值字符串」→ 生成 ARB 草案与替换清单 →（审阅后）再合并 ARB / 再改 Dart。
 
-只处理：单行、首个参数为带 `${expr}` 的引号字符串（无嵌套引号）。`${l10n.x}$suffix` 等非 `${}` 的 `$` 会跳过。相同「字面量片段序列 + 占位符个数」共用一条 ARB。
+只处理：单行、首个参数为带 `${expr}` 的引号字符串（无嵌套引号）。`${l10n.x}$suffix` 等非 `${}` 的 `$` 会跳过。
 
-用法::
+推荐流程（先审阅、后落库）::
 
-  python3 scripts/l10n_batch_pipeline.py scan --root frontend/lib
-  python3 scripts/l10n_batch_pipeline.py scan --root frontend/lib --subtree project_editor
-  python3 scripts/l10n_batch_pipeline.py apply --root frontend/lib --dry-run
-  # 写入 ARB + Dart（结构模板可用 --no-translate；要机翻中文见 requirements_l10n_batch.txt）
-  python3 scripts/l10n_batch_pipeline.py apply --root frontend/lib --no-translate
+  python3 scripts/l10n_batch_pipeline.py prepare --root frontend/lib [--subtree shell]
+  # 查看 frontend/.l10n_batch/prepare_manifest.json 与 prepare_report.md
 
-可选：pip install -r scripts/requirements_l10n_batch.txt 后去掉 --no-translate 并联网机翻 zh。
+  python3 scripts/l10n_batch_pipeline.py merge-arb
+  cd frontend && flutter gen-l10n
+
+  python3 scripts/l10n_batch_pipeline.py replace-dart
+
+一键（不推荐，易跳过审阅）::
+
+  python3 scripts/l10n_batch_pipeline.py apply-all --confirm --no-translate
+
+可选机翻：pip install -r scripts/requirements_l10n_batch.txt 后 prepare 时勿加 --no-translate。
 """
 
 from __future__ import annotations
@@ -21,14 +27,24 @@ import argparse
 import hashlib
 import json
 import re
+import sys
 from collections import OrderedDict, defaultdict
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 
-# 只匹配到闭合引号为止，不吞 style: 等后续参数
 _STR_RE = re.compile(
     r"(?P<widget>Text|SelectableText)\s*\(\s*(?P<q>['\"])(?P<body>.*?)(?P=q)"
 )
+
+MANIFEST_NAME = "prepare_manifest.json"
+REPORT_NAME = "prepare_report.md"
+
+
+def _manifest_path(repo: Path, p: Path | None) -> Path:
+    if p is None:
+        return repo / "frontend" / ".l10n_batch" / MANIFEST_NAME
+    return p if p.is_absolute() else repo / p
 
 
 def _repo_root() -> Path:
@@ -103,7 +119,6 @@ def _should_skip_body(body: str) -> bool:
         return True
     if re.fullmatch(r"[\d.]+", body.strip()):
         return True
-    # `$foo` 非 `${...}` 的插值（如 `'${l10n.x}$suffix'`）本流水线不处理
     if re.search(r"\$(?!\{)", body):
         return True
     return False
@@ -156,7 +171,6 @@ def scan_lib(lib_root: Path, subtree: str | None = None) -> list[Occurrence]:
                 if parsed is None:
                     continue
                 literals, exprs = parsed
-                # 字符串内转义引号暂不支持
                 if m.group("q") in literals or any(
                     m.group("q") in lit for lit in literals
                 ):
@@ -200,8 +214,10 @@ def _merge_arb(
     arb_path: Path,
     additions: OrderedDict[str, str],
     meta: OrderedDict[str, dict],
-) -> None:
+) -> int:
+    """返回新写入的键数量。"""
     data = _load_arb(arb_path)
+    n = 0
     for k, v in additions.items():
         if k in data:
             continue
@@ -209,14 +225,106 @@ def _merge_arb(
         mk = f"@{k}"
         if mk in meta and meta[mk]:
             data[mk] = dict(meta[mk])
+        n += 1
     _save_arb(arb_path, data)
+    return n
 
 
 def _replacement_snippet(o: Occurrence) -> str:
-    # 匹配结束在闭合引号处，原行在引号后仍有 `)` 关闭 Text( —— 此处不再输出最外层 `)`
     args = ", ".join(o.exprs)
     inner = f"l10n.{o.l10n_key}({args})" if args else f"l10n.{o.l10n_key}()"
     return f"{o.widget}({inner}"
+
+
+def _build_plan(
+    occ: list[Occurrence],
+    *,
+    no_translate: bool,
+    translate_tokens: bool,
+) -> tuple[
+    OrderedDict[str, str],
+    OrderedDict[str, str],
+    OrderedDict[str, dict],
+    dict[tuple[Path, int], tuple[str, str]],
+]:
+    by_norm: dict[str, tuple[list[str], list[str], str, list[str]]] = {}
+    for o in occ:
+        if o.norm not in by_norm:
+            by_norm[o.norm] = (o.literals, o.exprs, o.l10n_key, o.ph_types)
+
+    additions_en: OrderedDict[str, str] = OrderedDict()
+    additions_zh: OrderedDict[str, str] = OrderedDict()
+    meta: OrderedDict[str, dict] = OrderedDict()
+
+    for _norm, (literals, exprs, key, types) in by_norm.items():
+        msg_en, mmeta = _arb_message_and_meta(literals, exprs, types)
+        additions_en[key] = msg_en
+        meta[f"@{key}"] = mmeta
+        sample = "".join(literals)
+        if no_translate:
+            zh_msg = msg_en
+        elif re.search(r"[A-Za-z]{4,}", sample) or translate_tokens:
+            zh_msg = _translate_zh(msg_en)
+        else:
+            zh_msg = msg_en
+        additions_zh[key] = zh_msg
+
+    line_edits: dict[tuple[Path, int], tuple[str, str]] = {}
+    by_line: dict[tuple[Path, int], list[Occurrence]] = defaultdict(list)
+    for o in occ:
+        by_line[(o.path, o.line_no)].append(o)
+    for key, items in by_line.items():
+        old_line = items[0].line
+        new_line = old_line
+        for o in sorted(items, key=lambda x: x.match_start, reverse=True):
+            new_line = (
+                new_line[: o.match_start]
+                + _replacement_snippet(o)
+                + new_line[o.match_end :]
+            )
+        line_edits[key] = (old_line, new_line)
+
+    return additions_en, additions_zh, meta, line_edits
+
+
+def _write_report(
+    path: Path,
+    occ: list[Occurrence],
+    additions_en: OrderedDict[str, str],
+    line_edits: dict[tuple[Path, int], tuple[str, str]],
+) -> None:
+    lines = [
+        "# l10n batch prepare 报告",
+        "",
+        f"- 扫描命中: **{len(occ)}** 处",
+        f"- 去重后 ARB 模板: **{len(additions_en)}** 条",
+        f"- 将修改行数: **{len(line_edits)}**",
+        "",
+        "## 新增 EN 键（摘要）",
+        "",
+    ]
+    for k, v in list(additions_en.items())[:40]:
+        lines.append(f"- `{k}` → `{v}`")
+    if len(additions_en) > 40:
+        lines.append(f"- … 共 {len(additions_en)} 条，详见 manifest")
+    lines += ["", "## 逐行替换预览", ""]
+    for (p, ln), (old, new) in sorted(
+        line_edits.items(), key=lambda x: (str(x[0][0]), x[0][1])
+    ):
+        rel = p.relative_to(_repo_root())
+        lines.append(f"### `{rel}`:{ln}")
+        lines.append("")
+        lines.append("```dart")
+        lines.append(old)
+        lines.append("```")
+        lines.append("")
+        lines.append("→")
+        lines.append("")
+        lines.append("```dart")
+        lines.append(new)
+        lines.append("```")
+        lines.append("")
+    path.write_text("\n".join(lines), encoding="utf-8")
 
 
 def cmd_scan(args: argparse.Namespace) -> int:
@@ -240,113 +348,197 @@ def cmd_scan(args: argparse.Namespace) -> int:
     return 0
 
 
-def cmd_apply(args: argparse.Namespace) -> int:
-    import sys
-
-    root = _repo_root() / args.root
-    occ = scan_lib(root, args.subtree)
-    by_norm: dict[str, tuple[list[str], list[str], str, list[str]]] = {}
-    for o in occ:
-        if o.norm not in by_norm:
-            by_norm[o.norm] = (o.literals, o.exprs, o.l10n_key, o.ph_types)
-
-    additions_en: OrderedDict[str, str] = OrderedDict()
-    additions_zh: OrderedDict[str, str] = OrderedDict()
-    meta: OrderedDict[str, dict] = OrderedDict()
-
-    for _norm, (literals, exprs, key, types) in by_norm.items():
-        msg_en, mmeta = _arb_message_and_meta(literals, exprs, types)
-        additions_en[key] = msg_en
-        meta[f"@{key}"] = mmeta
-        sample = "".join(literals)
-        if args.no_translate:
-            zh_msg = msg_en
-        elif re.search(r"[A-Za-z]{4,}", sample) or args.translate_tokens:
-            zh_msg = _translate_zh(msg_en)
-        else:
-            zh_msg = msg_en
-        additions_zh[key] = zh_msg
-
-    by_line: dict[tuple[Path, int], list[Occurrence]] = defaultdict(list)
-    for o in occ:
-        by_line[(o.path, o.line_no)].append(o)
-
+def cmd_prepare(args: argparse.Namespace) -> int:
     repo = _repo_root()
+    root = repo / args.root
+    occ = scan_lib(root, args.subtree)
+    additions_en, additions_zh, meta, line_edits = _build_plan(
+        occ,
+        no_translate=args.no_translate,
+        translate_tokens=args.translate_tokens,
+    )
+
+    out_dir = repo / "frontend" / ".l10n_batch"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    manifest_path = out_dir / MANIFEST_NAME
+
+    line_edits_json = [
+        {
+            "file": str(p.relative_to(repo)).replace("\\", "/"),
+            "line": ln,
+            "old_line": old,
+            "new_line": new,
+        }
+        for (p, ln), (old, new) in sorted(
+            line_edits.items(), key=lambda x: (str(x[0][0]), x[0][1])
+        )
+    ]
+
+    manifest = {
+        "version": 1,
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "root": str(args.root).replace("\\", "/"),
+        "subtree": args.subtree,
+        "no_translate": args.no_translate,
+        "translate_tokens": args.translate_tokens,
+        "arb_additions_en": dict(additions_en),
+        "arb_additions_zh": dict(additions_zh),
+        "arb_meta": dict(meta),
+        "line_edits": line_edits_json,
+        "occurrences": [
+            {
+                "file": str(o.path.relative_to(repo)).replace("\\", "/"),
+                "line": o.line_no,
+                "key": o.l10n_key,
+                "body": o.body,
+                "exprs": o.exprs,
+            }
+            for o in occ
+        ],
+    }
+    manifest_path.write_text(
+        json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    report_path = out_dir / REPORT_NAME
+    _write_report(report_path, occ, additions_en, line_edits)
+
+    print(
+        f"prepare: {len(occ)} hits, {len(additions_en)} ARB templates, "
+        f"{len(line_edits)} lines to edit"
+    )
+    print(f"  manifest -> {manifest_path.relative_to(repo)}")
+    print(f"  report    -> {report_path.relative_to(repo)}")
+    print("审阅后执行: merge-arb → flutter gen-l10n → replace-dart")
+    return 0
+
+
+def _load_manifest(path: Path) -> dict:
+    if not path.is_file():
+        print(f"找不到 manifest: {path}", file=sys.stderr)
+        raise SystemExit(2)
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def cmd_merge_arb(args: argparse.Namespace) -> int:
+    repo = _repo_root()
+    mp = _manifest_path(repo, args.manifest)
+    data = _load_manifest(mp)
+    additions_en = OrderedDict(data.get("arb_additions_en", {}))
+    additions_zh = OrderedDict(data.get("arb_additions_zh", {}))
+    meta = OrderedDict(data.get("arb_meta", {}))
+
     en_path = repo / "frontend/lib/l10n/app_en.arb"
     zh_path = repo / "frontend/lib/l10n/app_zh.arb"
+    n1 = _merge_arb(en_path, additions_en, meta)
+    n2 = _merge_arb(zh_path, additions_zh, meta)
+    print(f"merge-arb: app_en 新增 {n1} 键, app_zh 新增 {n2} 键（已存在则跳过）")
+    print("下一步: cd frontend && flutter gen-l10n")
+    return 0
 
-    print(f"New ARB templates: {len(by_norm)}; occurrences: {len(occ)}")
-    if args.dry_run:
-        for k, v in list(additions_en.items())[:12]:
-            print(f"  {k}: {v!r}")
+
+def cmd_replace_dart(args: argparse.Namespace) -> int:
+    repo = _repo_root()
+    mp = _manifest_path(repo, args.manifest)
+    data = _load_manifest(mp)
+    edits = data.get("line_edits", [])
+    if not edits:
+        print("manifest 中无 line_edits，跳过")
         return 0
 
-    _merge_arb(en_path, additions_en, meta)
-    _merge_arb(zh_path, additions_zh, meta)
-
-    changed_files: set[Path] = set()
-    for (path, line_no), items in sorted(by_line.items()):
-        items.sort(key=lambda x: x.match_start, reverse=True)
-        base_line = items[0].line
-        new_line = base_line
-        for o in sorted(items, key=lambda x: x.match_start, reverse=True):
-            new_line = (
-                new_line[: o.match_start]
-                + _replacement_snippet(o)
-                + new_line[o.match_end :]
-            )
-
-        all_lines = path.read_text(encoding="utf-8").splitlines(keepends=True)
-        idx = line_no - 1
-        cur = all_lines[idx]
-        if cur.rstrip("\n\r") != base_line.rstrip("\n\r"):
-            print(f"SKIP stale {path}:{line_no}", file=sys.stderr)
+    touched = 0
+    for ed in edits:
+        rel = ed["file"]
+        line_no = int(ed["line"])
+        old_line = ed["old_line"]
+        new_line = ed["new_line"]
+        path = repo / rel
+        if not path.is_file():
+            print(f"SKIP 无文件: {rel}", file=sys.stderr)
             continue
-        nl = "\n" if cur.endswith("\n") else ""
-        if cur.endswith("\r\n"):
-            nl = "\r\n"
-        all_lines[idx] = new_line + nl
-        path.write_text("".join(all_lines), encoding="utf-8")
-        changed_files.add(path)
+        lines = path.read_text(encoding="utf-8").splitlines(keepends=True)
+        idx = line_no - 1
+        if idx < 0 or idx >= len(lines):
+            print(f"SKIP 行号越界 {rel}:{line_no}", file=sys.stderr)
+            continue
+        cur = lines[idx]
+        if cur.rstrip("\n\r") != old_line.rstrip("\n\r"):
+            print(
+                f"SKIP 行已变化（请重新 prepare）{rel}:{line_no}\n"
+                f"  期望: {old_line[:120]!r}…\n"
+                f"  实际: {cur.rstrip()[:120]!r}…",
+                file=sys.stderr,
+            )
+            continue
+        nl = "\r\n" if cur.endswith("\r\n") else ("\n" if cur.endswith("\n") else "")
+        lines[idx] = new_line + nl
+        path.write_text("".join(lines), encoding="utf-8")
+        touched += 1
+    print(f"replace-dart: 已更新 {touched} 行（共 {len(edits)} 条计划）")
+    return 0
 
-    print(f"Updated ARB; touched {len(changed_files)} dart files")
+
+def cmd_apply_all(args: argparse.Namespace) -> int:
+    if not args.confirm:
+        print("拒绝：apply-all 必须带 --confirm（请先 prepare 并审阅 manifest）", file=sys.stderr)
+        return 2
+    repo = _repo_root()
+    mp = _manifest_path(repo, args.manifest)
+    if not mp.is_file():
+        print(f"找不到 manifest，请先运行 prepare: {mp}", file=sys.stderr)
+        return 2
+
+    class _A:
+        manifest = mp
+
+    args_m = _A()
+    cmd_merge_arb(args_m)
+    cmd_replace_dart(args_m)
     return 0
 
 
 def main() -> int:
-    import sys
-
     ap = argparse.ArgumentParser(description=__doc__)
     sub = ap.add_subparsers(dest="cmd", required=True)
 
     p_scan = sub.add_parser("scan")
     p_scan.add_argument("--root", default="frontend/lib")
-    p_scan.add_argument(
-        "--subtree",
-        default=None,
-        help="仅扫描 lib 下相对子路径，如 project_editor 或 shell",
-    )
+    p_scan.add_argument("--subtree", default=None)
     p_scan.set_defaults(func=cmd_scan)
 
-    p_apply = sub.add_parser("apply")
-    p_apply.add_argument("--root", default="frontend/lib")
-    p_apply.add_argument(
-        "--subtree",
+    p_prep = sub.add_parser("prepare")
+    p_prep.add_argument("--root", default="frontend/lib")
+    p_prep.add_argument("--subtree", default=None)
+    p_prep.add_argument("--no-translate", action="store_true")
+    p_prep.add_argument("--translate-tokens", action="store_true")
+    p_prep.set_defaults(func=cmd_prepare)
+
+    p_merge = sub.add_parser("merge-arb")
+    p_merge.add_argument(
+        "--manifest",
+        type=Path,
         default=None,
-        help="仅处理 lib 下相对子路径（与 scan 一致）",
+        help="prepare 生成的 manifest（默认 frontend/.l10n_batch/prepare_manifest.json）",
     )
-    p_apply.add_argument("--dry-run", action="store_true")
-    p_apply.add_argument(
-        "--no-translate",
+    p_merge.set_defaults(func=cmd_merge_arb)
+
+    p_rep = sub.add_parser("replace-dart")
+    p_rep.add_argument(
+        "--manifest",
+        type=Path,
+        default=None,
+        help="与 merge-arb 使用的同一份 manifest",
+    )
+    p_rep.set_defaults(func=cmd_replace_dart)
+
+    p_all = sub.add_parser("apply-all")
+    p_all.add_argument("--manifest", type=Path, default=None)
+    p_all.add_argument(
+        "--confirm",
         action="store_true",
-        help="zh 与 en 使用同一模板字符串",
+        help="确认已审阅 manifest 后再执行 merge-arb + replace-dart",
     )
-    p_apply.add_argument(
-        "--translate-tokens",
-        action="store_true",
-        help="对无长英文的模板也调用在线翻译",
-    )
-    p_apply.set_defaults(func=cmd_apply)
+    p_all.set_defaults(func=cmd_apply_all)
 
     args = ap.parse_args()
     return int(args.func(args))
