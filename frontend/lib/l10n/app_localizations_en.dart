@@ -6728,6 +6728,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get projectEditorNovelEventsRegressionProbeCaption =>
+      'Novel events regression checks';
+
+  @override
   String get projectEditorAssetsWorkbenchNoAssetsYet =>
       'This project has no assets yet. You can create one here.';
 
@@ -19956,6 +19960,26 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get apiKeysChipExpired => 'Expired';
+
+  @override
+  String apiKeysStatActive(int count) {
+    return 'Active $count';
+  }
+
+  @override
+  String apiKeysStatRevoked(int count) {
+    return 'Revoked $count';
+  }
+
+  @override
+  String apiKeysStatTotal(int count) {
+    return 'Total $count';
+  }
+
+  @override
+  String apiKeysPublicIdLine(String value) {
+    return 'publicId: $value';
+  }
 
   @override
   String get apiKeysCopyPublicIdTooltip => 'Copy publicId';

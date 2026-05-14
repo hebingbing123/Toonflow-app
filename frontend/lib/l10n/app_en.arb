@@ -5053,6 +5053,7 @@
       }
     }
   },
+  "projectEditorNovelEventsRegressionProbeCaption": "Novel events regression checks",
   "projectEditorAssetsWorkbenchNoAssetsYet": "This project has no assets yet. You can create one here.",
   "projectEditorAssetsSectionListNotLoaded": "Asset list not loaded yet.",
   "projectEditorNovelsWorkbenchDefaultNewChapterTitle": "Chapter_{stamp}",
@@ -15159,6 +15160,38 @@
   "apiKeysChipActive": "Active",
   "apiKeysChipRevoked": "Revoked",
   "apiKeysChipExpired": "Expired",
+  "apiKeysStatActive": "Active {count}",
+  "@apiKeysStatActive": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "apiKeysStatRevoked": "Revoked {count}",
+  "@apiKeysStatRevoked": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "apiKeysStatTotal": "Total {count}",
+  "@apiKeysStatTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "apiKeysPublicIdLine": "publicId: {value}",
+  "@apiKeysPublicIdLine": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
   "apiKeysCopyPublicIdTooltip": "Copy publicId",
   "apiKeysCopiedPublicIdSnack": "Copied publicId",
   "apiKeysMetaLine": "Created {createdAt} · Updated {updatedAt} · Used {useCount} times",

@@ -1443,6 +1443,46 @@
       }
     }
   },
+  "projectMembersTitle": "项目成员 ACL",
+  "projectMembersAclEnabledIntro": "本项目已启用显式 ACL：普通成员仅按下方只读/编辑行获得访问；工作区拥有者/管理员仍保留完整权限。",
+  "projectMembersAclInheritedIntro": "本项目处于工作区继承模式：普通成员沿用原项目访问权限。添加第一条显式 ACL 行后，将切换为受限模式。",
+  "projectMembersChipMode": "模式",
+  "projectMembersChipExplicitMembers": "显式成员",
+  "projectMembersChipCandidates": "候选工作区成员",
+  "projectMembersForbiddenTitle": "当前账号无法管理项目 ACL",
+  "projectMembersForbiddenBody": "仅工作区拥有者/管理员或项目拥有者可查看与修改显式项目成员。若你只需继续编辑其他内容，当前项目仍将按既有工作区/项目权限正常可用。",
+  "projectMembersAddSectionTitle": "添加显式成员",
+  "projectMembersAddSectionIntro": "建议优先从当前工作区成员中选择；若暂时无法拉取工作区成员列表，也可直接输入用户 UUID 进行受控补录。",
+  "projectMembersFieldGrantRole": "授予角色",
+  "projectMembersRoleViewer": "只读（viewer）",
+  "projectMembersRoleEditor": "编辑（editor）",
+  "projectMembersLoadingWorkspaceMembers": "正在加载工作区成员…",
+  "projectMembersForbiddenWorkspaceMembers": "当前账号无权读取工作区成员列表；仍可手动输入用户 UUID 管理显式 ACL。",
+  "projectMembersNoWorkspaceContext": "本项目暂时无可用工作区上下文，已保留手动 UUID 录入。",
+  "projectMembersNoCandidates": "当前没有可直接添加的普通工作区成员。owner/admin 已具备自然项目访问权限；已建立显式行的成员请见下方列表。",
+  "projectMembersFieldSelectFromWorkspace": "从工作区成员添加",
+  "projectMembersButtonAdd": "添加",
+  "projectMembersFieldManualUserId": "手动输入用户 UUID",
+  "projectMembersFieldManualUserIdHint": "00000000-0000-0000-0000-000000000000",
+  "projectMembersButtonAddByUuid": "按 UUID 添加",
+  "projectMembersExplicitSectionTitle": "显式 ACL 行",
+  "projectMembersExplicitEmptyIntro": "当前尚无显式项目成员。项目仍处于工作区继承模式。",
+  "projectMembersExplicitNonEmptyIntro": "以下为当前项目实际启用的只读/编辑规则。删除最后一行后，项目将恢复为继承模式。",
+  "projectMembersExplicitEmptyState": "暂无显式 ACL 行",
+  "projectMembersTooltipCopyUserId": "复制用户 UUID",
+  "projectMembersTagExplicitRole": "显式角色",
+  "projectMembersTagWorkspaceRole": "工作区角色",
+  "projectMembersTagUpdatedAt": "更新时间",
+  "projectMembersFieldUpdateRole": "更新角色",
+  "projectMembersTooltipSaveRole": "保存角色",
+  "projectMembersTooltipRemoveAcl": "移除显式 ACL",
+  "projectMembersButtonRefresh": "刷新",
+  "projectMembersSnackInvalidUuid": "请输入有效的用户 UUID",
+  "projectMembersSnackNoCandidates": "当前没有可直接添加的工作区成员",
+  "projectMembersSnackMemberAdded": "已添加项目成员",
+  "projectMembersSnackRoleUpdated": "角色已更新",
+  "projectMembersSnackAclRemoved": "已移除显式 ACL",
+  "projectMembersSnackUserIdCopied": "用户 UUID 已复制",
   "projectsCreativeManualKindDirector": "导演手册",
   "projectsCreativeManualKindVisual": "视觉手册",
   "projectsCreativeManualInvalidSlotLine": "槽位格式无效（应为 label|value|data）：{line}",
@@ -5013,6 +5053,7 @@
       }
     }
   },
+  "projectEditorNovelEventsRegressionProbeCaption": "小说事件回归检查",
   "projectEditorAssetsWorkbenchNoAssetsYet": "当前项目还没有资产，可直接在这里创建。",
   "projectEditorAssetsSectionListNotLoaded": "资产列表尚未加载",
   "projectEditorNovelsWorkbenchDefaultNewChapterTitle": "章节_{stamp}",
@@ -15119,6 +15160,38 @@
   "apiKeysChipActive": "生效",
   "apiKeysChipRevoked": "已撤销",
   "apiKeysChipExpired": "已过期",
+  "apiKeysStatActive": "活跃 {count}",
+  "@apiKeysStatActive": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "apiKeysStatRevoked": "已吊销 {count}",
+  "@apiKeysStatRevoked": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "apiKeysStatTotal": "合计 {count}",
+  "@apiKeysStatTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "apiKeysPublicIdLine": "publicId：{value}",
+  "@apiKeysPublicIdLine": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
   "apiKeysCopyPublicIdTooltip": "复制 publicId",
   "apiKeysCopiedPublicIdSnack": "已复制 publicId",
   "apiKeysMetaLine": "创建 {createdAt} · 更新 {updatedAt} · 使用 {useCount} 次",

@@ -2194,138 +2194,133 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get projectMembersTitle => 'Project member ACL';
+  String get projectMembersTitle => '项目成员 ACL';
 
   @override
   String get projectMembersAclEnabledIntro =>
-      'This project has explicit ACL enabled: regular members will only have access according to viewer / editor rows; workspace owner/admin still have full permissions.';
+      '本项目已启用显式 ACL：普通成员仅按下方只读/编辑行获得访问；工作区拥有者/管理员仍保留完整权限。';
 
   @override
   String get projectMembersAclInheritedIntro =>
-      'This project is in workspace inheritance mode: regular members inherit original project access permissions. Adding the first explicit ACL row will switch the project to restricted mode.';
+      '本项目处于工作区继承模式：普通成员沿用原项目访问权限。添加第一条显式 ACL 行后，将切换为受限模式。';
 
   @override
-  String get projectMembersChipMode => 'Mode';
+  String get projectMembersChipMode => '模式';
 
   @override
-  String get projectMembersChipExplicitMembers => 'Explicit members';
+  String get projectMembersChipExplicitMembers => '显式成员';
 
   @override
-  String get projectMembersChipCandidates => 'Candidate workspace members';
+  String get projectMembersChipCandidates => '候选工作区成员';
 
   @override
-  String get projectMembersForbiddenTitle =>
-      'Current account cannot manage project ACL';
+  String get projectMembersForbiddenTitle => '当前账号无法管理项目 ACL';
 
   @override
   String get projectMembersForbiddenBody =>
-      'Only workspace owner/admin or project owner can view and modify explicit project members. If you only need to continue editing other content, the current project will still work normally according to existing workspace / project permissions.';
+      '仅工作区拥有者/管理员或项目拥有者可查看与修改显式项目成员。若你只需继续编辑其他内容，当前项目仍将按既有工作区/项目权限正常可用。';
 
   @override
-  String get projectMembersAddSectionTitle => 'Add explicit member';
+  String get projectMembersAddSectionTitle => '添加显式成员';
 
   @override
   String get projectMembersAddSectionIntro =>
-      'Prefer selecting from current workspace members; if you cannot access the workspace member list at the moment, you can also directly enter a user UUID for controlled supplementation.';
+      '建议优先从当前工作区成员中选择；若暂时无法拉取工作区成员列表，也可直接输入用户 UUID 进行受控补录。';
 
   @override
-  String get projectMembersFieldGrantRole => 'Grant role';
+  String get projectMembersFieldGrantRole => '授予角色';
 
   @override
-  String get projectMembersRoleViewer => 'viewer';
+  String get projectMembersRoleViewer => '只读（viewer）';
 
   @override
-  String get projectMembersRoleEditor => 'editor';
+  String get projectMembersRoleEditor => '编辑（editor）';
 
   @override
-  String get projectMembersLoadingWorkspaceMembers =>
-      'Loading workspace members...';
+  String get projectMembersLoadingWorkspaceMembers => '正在加载工作区成员…';
 
   @override
   String get projectMembersForbiddenWorkspaceMembers =>
-      'Current account does not have permission to read workspace member list; you can still directly enter user UUID for explicit ACL management.';
+      '当前账号无权读取工作区成员列表；仍可手动输入用户 UUID 管理显式 ACL。';
 
   @override
   String get projectMembersNoWorkspaceContext =>
-      'This project temporarily has no available workspace context, manual UUID entry is retained.';
+      '本项目暂时无可用工作区上下文，已保留手动 UUID 录入。';
 
   @override
   String get projectMembersNoCandidates =>
-      'Currently no regular workspace members can be directly added. owner/admin already have natural project access permissions, members with explicit rows are listed below.';
+      '当前没有可直接添加的普通工作区成员。owner/admin 已具备自然项目访问权限；已建立显式行的成员请见下方列表。';
 
   @override
-  String get projectMembersFieldSelectFromWorkspace =>
-      'Add from workspace members';
+  String get projectMembersFieldSelectFromWorkspace => '从工作区成员添加';
 
   @override
-  String get projectMembersButtonAdd => 'Add';
+  String get projectMembersButtonAdd => '添加';
 
   @override
-  String get projectMembersFieldManualUserId => 'Manually enter user UUID';
+  String get projectMembersFieldManualUserId => '手动输入用户 UUID';
 
   @override
   String get projectMembersFieldManualUserIdHint =>
       '00000000-0000-0000-0000-000000000000';
 
   @override
-  String get projectMembersButtonAddByUuid => 'Add by UUID';
+  String get projectMembersButtonAddByUuid => '按 UUID 添加';
 
   @override
-  String get projectMembersExplicitSectionTitle => 'Explicit ACL rows';
+  String get projectMembersExplicitSectionTitle => '显式 ACL 行';
 
   @override
-  String get projectMembersExplicitEmptyIntro =>
-      'Currently no explicit project members. Project still works in workspace inheritance mode.';
+  String get projectMembersExplicitEmptyIntro => '当前尚无显式项目成员。项目仍处于工作区继承模式。';
 
   @override
   String get projectMembersExplicitNonEmptyIntro =>
-      'These rows are the viewer/editor rules actually enabled for the current project. After removing the last row, the project will return to inherited mode.';
+      '以下为当前项目实际启用的只读/编辑规则。删除最后一行后，项目将恢复为继承模式。';
 
   @override
-  String get projectMembersExplicitEmptyState => 'No explicit ACL rows';
+  String get projectMembersExplicitEmptyState => '暂无显式 ACL 行';
 
   @override
-  String get projectMembersTooltipCopyUserId => 'Copy user UUID';
+  String get projectMembersTooltipCopyUserId => '复制用户 UUID';
 
   @override
-  String get projectMembersTagExplicitRole => 'Explicit role';
+  String get projectMembersTagExplicitRole => '显式角色';
 
   @override
-  String get projectMembersTagWorkspaceRole => 'workspace role';
+  String get projectMembersTagWorkspaceRole => '工作区角色';
 
   @override
-  String get projectMembersTagUpdatedAt => 'Updated at';
+  String get projectMembersTagUpdatedAt => '更新时间';
 
   @override
-  String get projectMembersFieldUpdateRole => 'Update role';
+  String get projectMembersFieldUpdateRole => '更新角色';
 
   @override
-  String get projectMembersTooltipSaveRole => 'Save role';
+  String get projectMembersTooltipSaveRole => '保存角色';
 
   @override
-  String get projectMembersTooltipRemoveAcl => 'Remove explicit ACL';
+  String get projectMembersTooltipRemoveAcl => '移除显式 ACL';
 
   @override
-  String get projectMembersButtonRefresh => 'Refresh';
+  String get projectMembersButtonRefresh => '刷新';
 
   @override
-  String get projectMembersSnackInvalidUuid => 'Please enter a valid user UUID';
+  String get projectMembersSnackInvalidUuid => '请输入有效的用户 UUID';
 
   @override
-  String get projectMembersSnackNoCandidates =>
-      'Currently no workspace members can be directly added';
+  String get projectMembersSnackNoCandidates => '当前没有可直接添加的工作区成员';
 
   @override
-  String get projectMembersSnackMemberAdded => 'Project member added';
+  String get projectMembersSnackMemberAdded => '已添加项目成员';
 
   @override
-  String get projectMembersSnackRoleUpdated => 'Role updated';
+  String get projectMembersSnackRoleUpdated => '角色已更新';
 
   @override
-  String get projectMembersSnackAclRemoved => 'Explicit ACL removed';
+  String get projectMembersSnackAclRemoved => '已移除显式 ACL';
 
   @override
-  String get projectMembersSnackUserIdCopied => 'User UUID copied';
+  String get projectMembersSnackUserIdCopied => '用户 UUID 已复制';
 
   @override
   String get projectsCreativeManualKindDirector => '导演手册';
@@ -6476,6 +6471,9 @@ class AppLocalizationsZh extends AppLocalizations {
   ) {
     return '事件 $count 条 · $visible$suffix';
   }
+
+  @override
+  String get projectEditorNovelEventsRegressionProbeCaption => '小说事件回归检查';
 
   @override
   String get projectEditorAssetsWorkbenchNoAssetsYet => '当前项目还没有资产，可直接在这里创建。';
@@ -19003,6 +19001,26 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get apiKeysChipExpired => '已过期';
+
+  @override
+  String apiKeysStatActive(int count) {
+    return '活跃 $count';
+  }
+
+  @override
+  String apiKeysStatRevoked(int count) {
+    return '已吊销 $count';
+  }
+
+  @override
+  String apiKeysStatTotal(int count) {
+    return '合计 $count';
+  }
+
+  @override
+  String apiKeysPublicIdLine(String value) {
+    return 'publicId：$value';
+  }
 
   @override
   String get apiKeysCopyPublicIdTooltip => '复制 publicId';

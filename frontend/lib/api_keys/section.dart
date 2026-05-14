@@ -589,9 +589,15 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
             spacing: 8,
             runSpacing: 8,
             children: [
-              Chip(label: Text('active ${widget.controller.activeCount}')),
-              Chip(label: Text('revoked ${widget.controller.revokedCount}')),
-              Chip(label: Text('total ${widget.controller.items.length}')),
+              Chip(
+                label: Text(l10n.apiKeysStatActive(widget.controller.activeCount)),
+              ),
+              Chip(
+                label: Text(l10n.apiKeysStatRevoked(widget.controller.revokedCount)),
+              ),
+              Chip(
+                label: Text(l10n.apiKeysStatTotal(widget.controller.items.length)),
+              ),
             ],
           ),
           const SizedBox(height: 10),
@@ -689,7 +695,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
           SelectableText(item.keyHint),
           const SizedBox(height: 4),
           Text(
-            'publicId: ${item.publicId}',
+            l10n.apiKeysPublicIdLine(item.publicId),
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),

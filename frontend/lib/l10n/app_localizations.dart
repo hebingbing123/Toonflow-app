@@ -10907,6 +10907,12 @@ abstract class AppLocalizations {
     String suffix,
   );
 
+  /// No description provided for @projectEditorNovelEventsRegressionProbeCaption.
+  ///
+  /// In en, this message translates to:
+  /// **'Novel events regression checks'**
+  String get projectEditorNovelEventsRegressionProbeCaption;
+
   /// No description provided for @projectEditorAssetsWorkbenchNoAssetsYet.
   ///
   /// In en, this message translates to:
@@ -30217,6 +30223,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Expired'**
   String get apiKeysChipExpired;
+
+  /// No description provided for @apiKeysStatActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active {count}'**
+  String apiKeysStatActive(int count);
+
+  /// No description provided for @apiKeysStatRevoked.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoked {count}'**
+  String apiKeysStatRevoked(int count);
+
+  /// No description provided for @apiKeysStatTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total {count}'**
+  String apiKeysStatTotal(int count);
+
+  /// No description provided for @apiKeysPublicIdLine.
+  ///
+  /// In en, this message translates to:
+  /// **'publicId: {value}'**
+  String apiKeysPublicIdLine(String value);
 
   /// No description provided for @apiKeysCopyPublicIdTooltip.
   ///
