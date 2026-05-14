@@ -106,6 +106,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   List<String> _publishBatchResultLines = const <String>[];
   bool _publishBusy = false;
   int _publishCopyEditorRevision = 0;
+  /// Monotonic id so stale in-flight [_refreshPublishSlice] results are ignored.
+  int _publishRefreshRequestId = 0;
   String? _selectedProjectId;
   String? _projectConfigLine;
   bool? _operationFeedbackIsSuccess;
