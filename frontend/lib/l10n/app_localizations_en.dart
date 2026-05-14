@@ -17610,6 +17610,45 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String agentWorkspaceProductionPromptProductionPrioritySummary(
+    String summary,
+  ) {
+    return 'Prioritize: $summary';
+  }
+
+  @override
+  String agentWorkspaceProductionPromptScriptPlanExecutionHint(
+    String sections,
+  ) {
+    return 'Carry forward from scriptPlan: $sections. Keep emotional progression coherent; avoid blunt exposition.';
+  }
+
+  @override
+  String agentWorkspaceProductionStageDetailStoryboardSupervisionCombined(
+    String reviewDetail,
+    String scope,
+  ) {
+    return '$reviewDetail$scope';
+  }
+
+  @override
+  String agentWorkspaceProductionStagePromptAssetsGenerateNoIds(
+    String priority,
+    String execution,
+  ) {
+    return 'Using the latest assets flow, decide which derived assets still lack images; generate only the minimum needed for real gaps; do not rerun finished work or expand reads to unrelated assets.$priority$execution';
+  }
+
+  @override
+  String agentWorkspaceProductionStagePromptAssetsGenerateFocused(
+    int count,
+    String priority,
+    String execution,
+  ) {
+    return 'Prioritize verifying and generating only these $count assets; skip any that already have results and fill only remaining gaps; do not expand unrelated asset reads.$priority$execution';
+  }
+
+  @override
   String agentWorkspaceProductionPromptStoryboardGenBody(
     String scope,
     String contextHint,

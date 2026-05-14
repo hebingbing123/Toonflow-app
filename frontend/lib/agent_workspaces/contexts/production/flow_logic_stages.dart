@@ -250,6 +250,7 @@ ProductionWorkspaceStage _buildAssetsStage({
     flowSnapshot['scriptPlan'],
   );
   final executionHint = buildProductionScriptPlanExecutionHint(
+    l10n,
     flowSnapshot['scriptPlan'],
   );
   if (data is List) {
@@ -293,6 +294,7 @@ ProductionWorkspaceStage _buildAssetsStage({
         subAgentTool: 'run_sub_agent_generate_assets',
         subAgentArgs: buildProductionSubAgentArgs(assetIds: pendingDeriveIds),
         prompt: buildProductionAssetGenerationPrompt(
+          l10n: l10n,
           assetIds: pendingDeriveIds,
           executionHint: executionHint,
         ),
@@ -671,6 +673,7 @@ ProductionWorkspaceStage _buildStoryboardStage({
     flowSnapshot['scriptPlan'],
   );
   final executionHint = buildProductionScriptPlanExecutionHint(
+    l10n,
     flowSnapshot['scriptPlan'],
   );
   if (review != null &&
@@ -702,7 +705,12 @@ ProductionWorkspaceStage _buildStoryboardStage({
       status: review.nextAction == 'generate_storyboard'
           ? ProductionWorkspaceStageStatus.storyboardFramesPending
           : ProductionWorkspaceStageStatus.storyboardPendingVerify,
-      detail: '${_reviewDetail(l10n, review)} $scopeLine',
+      detail: scopeLine.isEmpty
+          ? _reviewDetail(l10n, review)
+          : l10n.agentWorkspaceProductionStageDetailStoryboardSupervisionCombined(
+              _reviewDetail(l10n, review),
+              ' $scopeLine',
+            ),
       domainTool: 'get_flowData',
       domainArgs: storyboardArgs,
       subAgentTool: review.nextAction == 'generate_storyboard'

@@ -12924,6 +12924,58 @@
   "agentWorkspaceProductionPromptStoryboardContextLead": "To verify references, {parts}.",
   "agentWorkspaceProductionPromptStoryboardNote": "Note: {summary}",
   "agentWorkspaceProductionPromptExecutionConstraint": "Execution constraint: {hint}",
+  "@agentWorkspaceProductionPromptProductionPrioritySummary": {
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionPromptProductionPrioritySummary": "Prioritize: {summary}",
+  "@agentWorkspaceProductionPromptScriptPlanExecutionHint": {
+    "placeholders": {
+      "sections": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionPromptScriptPlanExecutionHint": "Carry forward from scriptPlan: {sections}. Keep emotional progression coherent; avoid blunt exposition.",
+  "@agentWorkspaceProductionStageDetailStoryboardSupervisionCombined": {
+    "placeholders": {
+      "reviewDetail": {
+        "type": "String"
+      },
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionStageDetailStoryboardSupervisionCombined": "{reviewDetail}{scope}",
+  "@agentWorkspaceProductionStagePromptAssetsGenerateFocused": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "priority": {
+        "type": "String"
+      },
+      "execution": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionStagePromptAssetsGenerateFocused": "Prioritize verifying and generating only these {count} assets; skip any that already have results and fill only remaining gaps; do not expand unrelated asset reads.{priority}{execution}",
+  "@agentWorkspaceProductionStagePromptAssetsGenerateNoIds": {
+    "placeholders": {
+      "priority": {
+        "type": "String"
+      },
+      "execution": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionStagePromptAssetsGenerateNoIds": "Using the latest assets flow, decide which derived assets still lack images; generate only the minimum needed for real gaps; do not rerun finished work or expand reads to unrelated assets.{priority}{execution}",
   "agentWorkspaceProductionPromptStoryboardGenBody": "{scope}; do not rerun finished shots or shouldGenerateImage=false rows. {contextHint}{assetHint}{note}{execution}",
   "agentWorkspaceProductionPromptStoryboardTableRevisionBody": "{scope} storyboardTable rows; keep other rows unchanged. {contextHint}{assetHint}{solve}",
   "agentWorkspaceProductionPromptStoryboardTableSolve": "Fix first: {summary}",

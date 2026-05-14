@@ -304,10 +304,14 @@ String summarizeProductionAssetReadiness(
     l10n.agentWorkspaceProductionAssetReadinessRoots(readyRoots, rows.length),
   ];
   if (pendingDeriveCount > 0) {
-    parts.add(l10n.agentWorkspaceProductionAssetReadinessDeriveGap(pendingDeriveCount));
+    parts.add(
+      l10n.agentWorkspaceProductionAssetReadinessDeriveGap(pendingDeriveCount),
+    );
   }
   if (rootMissingCount > 0) {
-    parts.add(l10n.agentWorkspaceProductionAssetReadinessRootMissing(rootMissingCount));
+    parts.add(
+      l10n.agentWorkspaceProductionAssetReadinessRootMissing(rootMissingCount),
+    );
   }
   return parts.join(l10n.agentWorkspaceProductionClauseJoiner);
 }
@@ -329,13 +333,20 @@ String summarizeProductionStoryboardReadiness(
   final missingCount = extractProductionStoryboardMissingImageIds(rows).length;
   final pureTextCount = rows.length - targetCount;
   final parts = <String>[
-    l10n.agentWorkspaceProductionStoryboardReadinessFrames(readyCount, targetCount),
+    l10n.agentWorkspaceProductionStoryboardReadinessFrames(
+      readyCount,
+      targetCount,
+    ),
   ];
   if (missingCount > 0) {
-    parts.add(l10n.agentWorkspaceProductionStoryboardReadinessMissing(missingCount));
+    parts.add(
+      l10n.agentWorkspaceProductionStoryboardReadinessMissing(missingCount),
+    );
   }
   if (pureTextCount > 0) {
-    parts.add(l10n.agentWorkspaceProductionStoryboardReadinessTextOnly(pureTextCount));
+    parts.add(
+      l10n.agentWorkspaceProductionStoryboardReadinessTextOnly(pureTextCount),
+    );
   }
   return parts.join(l10n.agentWorkspaceProductionClauseJoiner);
 }
@@ -349,7 +360,9 @@ String summarizeProductionStoryboardTableCoverage(
     return l10n.agentWorkspaceProductionStoryboardTableCoverageUnread;
   }
   if (totalRows <= 0) {
-    return l10n.agentWorkspaceProductionStoryboardTableCoverageRowsOnly(sampledRows);
+    return l10n.agentWorkspaceProductionStoryboardTableCoverageRowsOnly(
+      sampledRows,
+    );
   }
   final remaining = (totalRows - sampledRows).clamp(0, totalRows);
   if (remaining > 0) {
@@ -414,9 +427,10 @@ String _summarizeProductionBlockerReason(
           coverage,
         );
       case ProductionWorkspaceStageStatus.waitingStoryboardTableCoverage:
-        return l10n.agentWorkspaceProductionBlockerExpandTableCoverageWithDigest(
-          coverage,
-        );
+        return l10n
+            .agentWorkspaceProductionBlockerExpandTableCoverageWithDigest(
+              coverage,
+            );
       default:
         break;
     }
@@ -588,6 +602,7 @@ String summarizeAppliedProductionStageStatus(
 }
 
 String buildProductionScriptPlanExecutionHint(
+  AppLocalizations l10n,
   Object? flowData, {
   int maxSections = 2,
 }) {
@@ -605,7 +620,10 @@ String buildProductionScriptPlanExecutionHint(
   if (compactSections.isEmpty) {
     return '';
   }
-  return '承接 scriptPlan：${compactSections.join('；')}。人物情绪保持递进，避免生硬直述。';
+  final joined = compactSections.join(
+    l10n.agentWorkspaceProductionSentenceJoinerSemicolon,
+  );
+  return l10n.agentWorkspaceProductionPromptScriptPlanExecutionHint(joined);
 }
 
 String buildProductionAssetReviewPrompt(
@@ -625,23 +643,35 @@ String buildProductionAssetReviewPrompt(
 }
 
 String buildProductionAssetGenerationPrompt({
+  required AppLocalizations l10n,
   required List<int> assetIds,
   String? summary,
   String? executionHint,
 }) {
   final ids = assetIds.where((id) => id > 0).toSet().toList()..sort();
   final normalizedSummary = summary?.trim() ?? '';
-  final summaryLine = normalizedSummary.isEmpty
+  final priority = normalizedSummary.isEmpty
       ? ''
-      : '优先解决：$normalizedSummary';
+      : l10n.agentWorkspaceProductionPromptProductionPrioritySummary(
+          normalizedSummary,
+        );
   final normalizedExecutionHint = executionHint?.trim() ?? '';
-  final executionLine = normalizedExecutionHint.isEmpty
+  final execution = normalizedExecutionHint.isEmpty
       ? ''
-      : '执行约束：$normalizedExecutionHint';
+      : l10n.agentWorkspaceProductionPromptExecutionConstraint(
+          normalizedExecutionHint,
+        );
   if (ids.isEmpty) {
-    return '请基于最新 assets flow 判断哪些衍生资产仍缺图，只对真实缺口发起最小可行生成，不要重跑已有结果或扩读无关素材。$summaryLine$executionLine';
+    return l10n.agentWorkspaceProductionStagePromptAssetsGenerateNoIds(
+      priority,
+      execution,
+    );
   }
-  return '请优先只核对并生成这 ${ids.length} 个资产；若其中已有结果则跳过，只补剩余缺口，不要扩读无关 assets。$summaryLine$executionLine';
+  return l10n.agentWorkspaceProductionStagePromptAssetsGenerateFocused(
+    ids.length,
+    priority,
+    execution,
+  );
 }
 
 Map<String, dynamic> buildProductionSubAgentArgs({

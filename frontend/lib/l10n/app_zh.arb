@@ -12884,6 +12884,58 @@
   "agentWorkspaceProductionPromptStoryboardContextLead": "如需核对依据，{parts}。",
   "agentWorkspaceProductionPromptStoryboardNote": "注意：{summary}",
   "agentWorkspaceProductionPromptExecutionConstraint": "执行约束：{hint}",
+  "@agentWorkspaceProductionPromptProductionPrioritySummary": {
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionPromptProductionPrioritySummary": "优先解决：{summary}",
+  "@agentWorkspaceProductionPromptScriptPlanExecutionHint": {
+    "placeholders": {
+      "sections": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionPromptScriptPlanExecutionHint": "承接 scriptPlan：{sections}。人物情绪保持递进，避免生硬直述。",
+  "@agentWorkspaceProductionStageDetailStoryboardSupervisionCombined": {
+    "placeholders": {
+      "reviewDetail": {
+        "type": "String"
+      },
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionStageDetailStoryboardSupervisionCombined": "{reviewDetail}{scope}",
+  "@agentWorkspaceProductionStagePromptAssetsGenerateFocused": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "priority": {
+        "type": "String"
+      },
+      "execution": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionStagePromptAssetsGenerateFocused": "请优先只核对并生成这 {count} 个资产；若其中已有结果则跳过，只补剩余缺口，不要扩读无关 assets。{priority}{execution}",
+  "@agentWorkspaceProductionStagePromptAssetsGenerateNoIds": {
+    "placeholders": {
+      "priority": {
+        "type": "String"
+      },
+      "execution": {
+        "type": "String"
+      }
+    }
+  },
+  "agentWorkspaceProductionStagePromptAssetsGenerateNoIds": "请基于最新 assets flow 判断哪些衍生资产仍缺图，只对真实缺口发起最小可行生成，不要重跑已有结果或扩读无关素材。{priority}{execution}",
   "agentWorkspaceProductionPromptStoryboardGenBody": "{scope}，不要重跑已有结果或 shouldGenerateImage=false 的镜头。{contextHint}{assetHint}{note}{execution}",
   "agentWorkspaceProductionPromptStoryboardTableRevisionBody": "{scope} 对应的 storyboardTable 行，保持其余行不动。{contextHint}{assetHint}{solve}",
   "agentWorkspaceProductionPromptStoryboardTableSolve": "优先解决：{summary}",

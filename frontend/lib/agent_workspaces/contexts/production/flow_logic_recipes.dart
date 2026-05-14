@@ -123,6 +123,7 @@ List<ProductionWorkspaceRecipe> buildProductionWorkspaceRecipes({
         subAgentTool: 'run_sub_agent_generate_assets',
         subAgentArgs: buildProductionSubAgentArgs(assetIds: affectedIds),
         prompt: buildProductionAssetGenerationPrompt(
+          l10n: l10n,
           assetIds: affectedIds,
           summary: affectedIds.isEmpty ? null : '先检查本次刚生成资产的结果再决定是否补跑',
         ),
@@ -133,7 +134,10 @@ List<ProductionWorkspaceRecipe> buildProductionWorkspaceRecipes({
   return const <ProductionWorkspaceRecipe>[];
 }
 
-List<ProductionWorkspaceRecipe> _buildAssetRecipes(AppLocalizations l10n, Object? data) {
+List<ProductionWorkspaceRecipe> _buildAssetRecipes(
+  AppLocalizations l10n,
+  Object? data,
+) {
   if (data is List && data.isEmpty) {
     return const <ProductionWorkspaceRecipe>[
       ProductionWorkspaceRecipe(
@@ -151,7 +155,10 @@ List<ProductionWorkspaceRecipe> _buildAssetRecipes(AppLocalizations l10n, Object
       return !productionFlowEntryHasMediaResult(row);
     }).length;
     final pendingDeriveIds = extractProductionPendingDeriveAssetIds(rows);
-    final pendingScope = summarizeProductionAssetFocusIds(l10n, pendingDeriveIds);
+    final pendingScope = summarizeProductionAssetFocusIds(
+      l10n,
+      pendingDeriveIds,
+    );
     if (withoutUrl > 0) {
       return <ProductionWorkspaceRecipe>[
         ProductionWorkspaceRecipe(
@@ -163,6 +170,7 @@ List<ProductionWorkspaceRecipe> _buildAssetRecipes(AppLocalizations l10n, Object
           subAgentTool: 'run_sub_agent_generate_assets',
           subAgentArgs: buildProductionSubAgentArgs(assetIds: pendingDeriveIds),
           prompt: buildProductionAssetGenerationPrompt(
+            l10n: l10n,
             assetIds: pendingDeriveIds,
           ),
         ),
@@ -194,7 +202,10 @@ List<ProductionWorkspaceRecipe> _buildAssetRecipes(AppLocalizations l10n, Object
   ];
 }
 
-List<ProductionWorkspaceRecipe> _buildStoryboardRecipes(AppLocalizations l10n, Object? data) {
+List<ProductionWorkspaceRecipe> _buildStoryboardRecipes(
+  AppLocalizations l10n,
+  Object? data,
+) {
   if (data is List && data.isEmpty) {
     return const <ProductionWorkspaceRecipe>[
       ProductionWorkspaceRecipe(
@@ -278,7 +289,10 @@ List<ProductionWorkspaceRecipe> _buildStoryboardRecipes(AppLocalizations l10n, O
   ];
 }
 
-List<ProductionWorkspaceRecipe> _buildScriptPlanRecipes(AppLocalizations l10n, Object? data) {
+List<ProductionWorkspaceRecipe> _buildScriptPlanRecipes(
+  AppLocalizations l10n,
+  Object? data,
+) {
   if (data is String && data.trim().isEmpty) {
     return const <ProductionWorkspaceRecipe>[
       ProductionWorkspaceRecipe(
@@ -354,7 +368,10 @@ List<ProductionWorkspaceRecipe> _buildScriptPlanRecipes(AppLocalizations l10n, O
   ];
 }
 
-List<ProductionWorkspaceRecipe> _buildStoryboardTableRecipes(AppLocalizations l10n, Object? data) {
+List<ProductionWorkspaceRecipe> _buildStoryboardTableRecipes(
+  AppLocalizations l10n,
+  Object? data,
+) {
   if (data is String && data.trim().isEmpty) {
     return const <ProductionWorkspaceRecipe>[
       ProductionWorkspaceRecipe(

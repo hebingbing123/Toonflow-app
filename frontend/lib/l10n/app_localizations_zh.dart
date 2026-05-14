@@ -16761,6 +16761,45 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String agentWorkspaceProductionPromptProductionPrioritySummary(
+    String summary,
+  ) {
+    return '优先解决：${summary}';
+  }
+
+  @override
+  String agentWorkspaceProductionPromptScriptPlanExecutionHint(
+    String sections,
+  ) {
+    return '承接 scriptPlan：${sections}。人物情绪保持递进，避免生硬直述。';
+  }
+
+  @override
+  String agentWorkspaceProductionStageDetailStoryboardSupervisionCombined(
+    String reviewDetail,
+    String scope,
+  ) {
+    return '${reviewDetail}${scope}';
+  }
+
+  @override
+  String agentWorkspaceProductionStagePromptAssetsGenerateNoIds(
+    String priority,
+    String execution,
+  ) {
+    return '请基于最新 assets flow 判断哪些衍生资产仍缺图，只对真实缺口发起最小可行生成，不要重跑已有结果或扩读无关素材。${priority}${execution}';
+  }
+
+  @override
+  String agentWorkspaceProductionStagePromptAssetsGenerateFocused(
+    int count,
+    String priority,
+    String execution,
+  ) {
+    return '请优先只核对并生成这 ${count} 个资产；若其中已有结果则跳过，只补剩余缺口，不要扩读无关 assets。${priority}${execution}';
+  }
+
+  @override
   String agentWorkspaceProductionPromptStoryboardGenBody(
     String scope,
     String contextHint,

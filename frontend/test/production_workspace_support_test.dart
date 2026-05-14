@@ -680,6 +680,7 @@ void main() {
 
   test('buildProductionAssetGenerationPrompt caps long asset id lists', () {
     final prompt = buildProductionAssetGenerationPrompt(
+      l10n: _zh,
       assetIds: const <int>[9, 1, 7, 3, 5, 11, 13, 15, 17],
     );
 
@@ -690,7 +691,7 @@ void main() {
   test(
     'buildProductionScriptPlanExecutionHint compacts rewrite constraints for downstream prompts',
     () {
-      final hint = buildProductionScriptPlanExecutionHint('''
+      final hint = buildProductionScriptPlanExecutionHint(_zh, '''
 <scriptPlan>
 ① 主题立意与叙事核心
 女主复仇线要压住爽感，前两场快速立目标，但情绪不能像念提纲。

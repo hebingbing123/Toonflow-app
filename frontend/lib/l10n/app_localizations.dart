@@ -26555,6 +26555,28 @@ abstract class AppLocalizations {
 
   String agentWorkspaceProductionPromptExecutionConstraint(String hint);
 
+  String agentWorkspaceProductionPromptProductionPrioritySummary(
+    String summary,
+  );
+
+  String agentWorkspaceProductionPromptScriptPlanExecutionHint(String sections);
+
+  String agentWorkspaceProductionStageDetailStoryboardSupervisionCombined(
+    String reviewDetail,
+    String scope,
+  );
+
+  String agentWorkspaceProductionStagePromptAssetsGenerateNoIds(
+    String priority,
+    String execution,
+  );
+
+  String agentWorkspaceProductionStagePromptAssetsGenerateFocused(
+    int count,
+    String priority,
+    String execution,
+  );
+
   String agentWorkspaceProductionPromptStoryboardGenBody(
     String scope,
     String contextHint,
