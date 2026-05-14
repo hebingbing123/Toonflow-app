@@ -16,7 +16,7 @@ class _StoryboardPreviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final outline = Theme.of(context).colorScheme.outline;
     final imageUrl = productionRow?.url?.trim();
     final narrationSource = describeStoryboardNarrationSource(
@@ -200,7 +200,7 @@ class _StoryboardShortVideoReadinessStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
     final outline = theme.colorScheme.outline;
     final steps = _steps(l10n, readiness);

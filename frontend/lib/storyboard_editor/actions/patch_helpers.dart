@@ -2,7 +2,7 @@ part of '../../home_page.dart';
 
 extension _StoryboardWorkbenchPatchActions on _StoryboardWorkbenchPanelState {
   Future<void> _openPatchRegenerationDialog() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final scopeCtrl = TextEditingController(text: 'storyboard_item');
     final idsCtrl = TextEditingController(
       text: widget.storyNumericId.toString(),

@@ -32,7 +32,7 @@ extension _HomePageStoryboardEditor on _HomePageState {
 
           return StatefulBuilder(
             builder: (ctx, setDialogState) {
-              final l10n = AppLocalizations.of(ctx)!;
+              final l10n = resolveAppLocalizationsForErrors(ctx);
               final viewportWidth = MediaQuery.sizeOf(ctx).width;
               final dialogWidth = viewportWidth.isFinite
                   ? viewportWidth.clamp(320.0, 720.0)

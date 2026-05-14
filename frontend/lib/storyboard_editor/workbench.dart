@@ -64,7 +64,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
   bool _autoQualityReviewOnGeneratePrompt = false;
 
   StoryboardWorkbenchDiagnosis _currentDiagnosis() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return diagnoseStoryboardWorkbench(
       l10n,
       scriptStoryboard: widget.scriptStoryboard,
@@ -81,7 +81,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
   }
 
   void _setWorkbenchFollowUp(String actionSummary) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     _workbenchLine = buildStoryboardWorkbenchFollowUp(
       l10n,
       actionSummary: actionSummary,
@@ -94,7 +94,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
     required StoryboardWorkbenchRecommendedAction recommendedAction,
     required String detail,
   }) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     _workbenchLine = buildStoryboardWorkbenchActionNotice(
       l10n,
       actionSummary: actionSummary,
@@ -109,7 +109,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
     required Object error,
     required String fallbackDetail,
   }) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     _workbenchLine = buildStoryboardWorkbenchFailureNotice(
       l10n,
       actionSummary: actionSummary,
@@ -125,7 +125,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
     required Object error,
     required String fallbackDetail,
   }) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final notice = buildStoryboardWorkbenchFailureNotice(
       l10n,
       actionSummary: actionSummary,
@@ -219,7 +219,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final viewState = _buildWorkbenchViewState();
 
     return Column(

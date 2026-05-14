@@ -106,7 +106,8 @@ String describeStoryboardWorkbenchRecommendedAction(
     case StoryboardWorkbenchRecommendedAction.prepareVideoTrack:
       return l10n.scriptEditorStoryboardsVideoRecommendPrepareVideoTrack;
     case StoryboardWorkbenchRecommendedAction.generateDefaultVideoPrompt:
-      return l10n.scriptEditorStoryboardsVideoRecommendGenerateDefaultVideoPrompt;
+      return l10n
+          .scriptEditorStoryboardsVideoRecommendGenerateDefaultVideoPrompt;
     case StoryboardWorkbenchRecommendedAction.refreshVideoData:
       return l10n.scriptEditorStoryboardsVideoRecommendRefreshVideoData;
     case StoryboardWorkbenchRecommendedAction.submitVideoGeneration:
@@ -187,10 +188,9 @@ String normalizeStoryboardWorkbenchErrorMessage(
   if (trimmed.isEmpty) {
     return l10n.scriptEditorStoryboardsVideoErrorNoExtraDetail;
   }
-  final normalized = trimmed.replaceFirst(
-    RegExp(r'^RustApiException\([^)]*\):\s*'),
-    '',
-  );
+  final normalized = trimmed
+      .replaceFirst(RegExp(r'^(Unknown error:|出现问题：)\s*'), '')
+      .replaceFirst(RegExp(r'^RustApiException\([^)]*\):\s*'), '');
   if (normalized.isEmpty) {
     return l10n.scriptEditorStoryboardsVideoErrorNoExtraDetail;
   }

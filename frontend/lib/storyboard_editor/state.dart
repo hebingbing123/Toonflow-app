@@ -20,7 +20,7 @@ extension _StoryboardWorkbenchState on _StoryboardWorkbenchPanelState {
     StoryboardWorkbenchDiagnosis diagnosis,
     List<int> knownTrackIds,
   ) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     VoidCallback? recommendedAction;
     var recommendedActionLabel =
         describeStoryboardWorkbenchRecommendedAction(

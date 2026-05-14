@@ -4,7 +4,7 @@ part of '../../home_page.dart';
 /// focused on state ownership and section composition.
 extension _StoryboardWorkbenchData on _StoryboardWorkbenchPanelState {
   Future<void> _refreshExportJobStatus() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final jobId = _latestExportJobId?.trim();
     if (jobId == null || jobId.isEmpty) {
       throw FormatException(l10n.storyboardWorkbenchErrNoExportJobSubmitted);
@@ -42,7 +42,7 @@ extension _StoryboardWorkbenchData on _StoryboardWorkbenchPanelState {
     bool syncImageUrl = false,
     bool syncTrackId = false,
   }) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     _applyWorkbenchState(() {
       _loadingProduction = true;
       _productionError = null;
@@ -104,7 +104,7 @@ extension _StoryboardWorkbenchData on _StoryboardWorkbenchPanelState {
       if (!mounted) return;
       _applyWorkbenchState(() {
         _productionError = normalizeStoryboardWorkbenchErrorMessage(
-          AppLocalizations.of(context)!,
+          l10n,
           describeUserVisibleApiError(l10n, e),
         );
         _setWorkbenchFailureNotice(
@@ -124,7 +124,7 @@ extension _StoryboardWorkbenchData on _StoryboardWorkbenchPanelState {
   }
 
   Future<void> _refreshWorkbenchData() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     _applyWorkbenchState(() {
       _loadingWorkbench = true;
       _setWorkbenchActionNotice(

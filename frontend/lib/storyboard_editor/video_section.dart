@@ -104,7 +104,7 @@ class _StoryboardVideoSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final latestExportUrl = (latestExportJob?.result?['export_url'] as String?)
         ?.trim();
     final resolvedExportUrl =
