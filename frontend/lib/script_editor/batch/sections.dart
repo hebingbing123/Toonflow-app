@@ -5,7 +5,7 @@ part of '../../../home_page.dart';
 extension _StoryboardBatchWorkbenchSections
     on _StoryboardBatchWorkbenchDialogState {
   Widget _buildBatchWorkbenchTopActions() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return Wrap(
       spacing: 8,
       runSpacing: 8,
@@ -33,7 +33,7 @@ extension _StoryboardBatchWorkbenchSections
   }
 
   Widget _buildBatchWorkbenchPromptSection() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return Row(
       children: [
         Expanded(
@@ -59,7 +59,7 @@ extension _StoryboardBatchWorkbenchSections
   }
 
   Widget _buildBatchWorkbenchModelSection() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return Row(
       children: [
         Expanded(
@@ -87,7 +87,7 @@ extension _StoryboardBatchWorkbenchSections
     required List<int> selected,
     required int? singleSelectedId,
   }) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final canQuickGenerate =
         _selectedIds.isNotEmpty || _readyStoryboardIds().isNotEmpty;
     return Column(
@@ -143,7 +143,7 @@ extension _StoryboardBatchWorkbenchSections
   Widget _buildBatchWorkbenchBoardsList({
     required Map<int, ProductionStoryboardItemV1> productionMap,
   }) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return ListView.builder(
       itemCount: widget.boardsList.length,
       itemBuilder: (context, index) {
@@ -197,7 +197,7 @@ extension _StoryboardBatchWorkbenchSections
     required BuildContext context,
     required int? singleSelectedId,
   }) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final exportEstimate = _currentExportEstimate();
     return Container(
       padding: const EdgeInsets.all(12),

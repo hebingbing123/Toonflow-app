@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../l10n/app_localizations.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
 import '../utils/localized_formatting.dart';
@@ -70,7 +69,7 @@ class _AccountSectionState extends State<AccountSection> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final canDelete =
         _acknowledgeIrreversible &&
         _confirmController.text.trim() == 'DELETE MY ACCOUNT' &&
@@ -112,7 +111,7 @@ class _AccountSectionState extends State<AccountSection> {
 
   Widget _buildExportPanel(BuildContext context) {
     final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -204,7 +203,7 @@ class _AccountSectionState extends State<AccountSection> {
 
   Widget _buildExportRow(BuildContext context, AccountExportJobRecordV1 item) {
     final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final downloading = widget.controller.isDownloading(item.id);
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -304,7 +303,7 @@ class _AccountSectionState extends State<AccountSection> {
 
   Widget _buildDeletePanel(BuildContext context, bool canDelete) {
     final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -376,7 +375,7 @@ class _AccountSectionState extends State<AccountSection> {
   }
 
   String _statusLabel(String status) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     switch (status) {
       case 'queued':
         return l10n.accountExportStatusQueued;

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../l10n/app_localizations.dart';
+import '../rust_api.dart';
 
 class OverviewSectionViewModel {
   const OverviewSectionViewModel({
@@ -58,7 +58,7 @@ class OverviewSectionView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final busy = l10n.workspaceDebugOverviewProbeBusy;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
