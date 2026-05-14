@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../l10n/app_localizations.dart';
-import '../rust_api/search/api.dart';
+import '../rust_api.dart';
 import '../utils/localized_formatting.dart';
 
 /// Advanced filter panel for search results
@@ -70,7 +69,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
 
   /// Set time range start date
   Future<void> _selectStartDate() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final picked = await showDatePicker(
       context: context,
       initialDate: _currentFilters.timeFrom ?? DateTime.now(),
@@ -90,7 +89,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
 
   /// Set time range end date
   Future<void> _selectEndDate() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final picked = await showDatePicker(
       context: context,
       initialDate: _currentFilters.timeTo ?? DateTime.now(),
@@ -121,7 +120,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
 
   /// Apply current filters
   void _applyFilters() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     widget.onFiltersChanged(_currentFilters);
     
     // Show feedback
@@ -135,7 +134,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
 
   /// Clear all filters
   void _clearAllFilters() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     setState(() {
       _currentFilters = SearchFilters.empty();
     });
@@ -227,7 +226,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
 
   /// Build header section
   Widget _buildHeader() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final activeCount = _currentFilters.activeFilterCount;
     
     return Container(
@@ -270,7 +269,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
 
   /// Build filter content
   Widget _buildFilterContent() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -302,7 +301,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
 
   /// Build result type filter checkboxes
   Widget _buildResultTypeFilters() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return Column(
       children: [
         CheckboxListTile(
@@ -381,7 +380,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
 
   /// Build time range filter controls
   Widget _buildTimeRangeFilters() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -437,7 +436,7 @@ class _AdvancedFilterPanelState extends State<AdvancedFilterPanel> {
 
   /// Build action buttons
   Widget _buildActionButtons() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final hasActiveFilters = _currentFilters.hasActiveFilters;
     
     return Container(

@@ -58,7 +58,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
   }
 
   Future<void> _createKey() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final displayName = _displayNameController.text.trim();
     if (displayName.isEmpty) {
       _showSnackBar(l10n.apiKeysSnackFillName);
@@ -101,7 +101,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
   }
 
   Future<DateTime?> _pickExpiryDate({DateTime? initialDate}) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final now = DateTime.now();
     final picked = await showDatePicker(
       context: context,
@@ -125,7 +125,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
   }
 
   Future<void> _showRotateDialog(ApiKeyRecordV1 item) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     var expiryPreset = _ExpiryPreset.none;
     DateTime? customDate;
     final action = await showDialog<String>(
@@ -278,7 +278,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
   }
 
   Future<void> _showRevokeDialog(ApiKeyRecordV1 item) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final reasonController = TextEditingController();
     try {
       final confirmed = await showDialog<bool>(
@@ -332,7 +332,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return Padding(
       padding: const EdgeInsets.only(top: 16),
       child: Column(

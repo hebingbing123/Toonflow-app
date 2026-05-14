@@ -94,7 +94,7 @@ class _StoryboardBatchWorkbenchDialogState
 
   StoryboardBatchWorkbenchDiagnosis _currentDiagnosis() =>
       diagnoseStoryboardBatchWorkbench(
-        AppLocalizations.of(context)!,
+        resolveAppLocalizationsForErrors(context),
         selectedIds: _selectedIds,
         boards: widget.boardsList,
         productionRows: _productionRows,
@@ -160,7 +160,7 @@ class _StoryboardBatchWorkbenchDialogState
           ? nextSelectedIds.first
           : null;
       if (!mounted) return;
-      final l10n = AppLocalizations.of(context)!;
+      final l10n = resolveAppLocalizationsForErrors(context);
       setState(() {
         _productionRows = filtered;
         _selectedIds
@@ -181,7 +181,7 @@ class _StoryboardBatchWorkbenchDialogState
       });
     } catch (e) {
       if (mounted) {
-        final loc = AppLocalizations.of(context)!;
+        final loc = resolveAppLocalizationsForErrors(context);
         setState(
           () => _statusLine = loc.scriptEditorStoryboardBatchLoadProductionFailed(
             describeUserVisibleApiError(loc, e),
@@ -195,7 +195,7 @@ class _StoryboardBatchWorkbenchDialogState
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final productionMap = _productionById();
     final selected = _sortedSelection();
     final singleSelectedId = selected.length == 1 ? selected.first : null;

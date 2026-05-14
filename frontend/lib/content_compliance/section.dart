@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../l10n/app_localizations.dart';
+import '../rust_api.dart';
 import 'controller.dart';
 
 class ContentComplianceSection extends StatefulWidget {
@@ -487,7 +488,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
   Future<void> _runTopAlertPrimaryAction(
     ContentComplianceQueueAlertV1 alert,
   ) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     switch (alert.stage) {
       case 'critical_unclaimed':
         final count = _selectCriticalUnclaimedFromCurrentQueue();
@@ -571,7 +572,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
   Future<void> _runTopAlertSecondaryAction(
     ContentComplianceQueueAlertV1 alert,
   ) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     switch (alert.stage) {
       case 'critical_unclaimed':
         final count = _selectCriticalUnclaimedFromCurrentQueue();
@@ -631,7 +632,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
   Future<void> _runEffectiveTopPrimaryAction(
     ContentComplianceQueueAlertV1 alert,
   ) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final secondaryLabel = _topAlertSecondaryLabel(l10n, alert);
     if (_preferSecondaryAsPrimaryStages.contains(alert.stage) &&
         secondaryLabel != null) {
@@ -644,7 +645,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
   Future<void> _runEffectiveTopSecondaryAction(
     ContentComplianceQueueAlertV1 alert,
   ) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final secondaryLabel = _topAlertSecondaryLabel(l10n, alert);
     if (secondaryLabel == null) {
       return;
@@ -817,7 +818,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
     if (_selectedReportIds.isEmpty) {
       return;
     }
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final verb = switch (action) {
       'claim' => l10n.contentComplianceBulkClaim,
       'resolve' => l10n.contentComplianceBulkResolve,
@@ -957,7 +958,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
     if (_selectedReportIds.isEmpty) {
       return;
     }
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final assignee = _reassignReviewerController.text.trim();
     if (assignee.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -1015,7 +1016,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
   }
 
   Future<void> _runAutoRebalance({required bool dryRun}) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final queue = widget.controller.queue;
     if (queue == null) {
       return;
@@ -1096,7 +1097,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
   }
 
   Future<void> _showAuditDialog(ContentComplianceReportItemV1 item) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final rows = await widget.controller.fetchReportAudit(item.id);
     if (!mounted) {
       return;
@@ -1171,7 +1172,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
     final queue = widget.controller.queue;
     return Padding(
