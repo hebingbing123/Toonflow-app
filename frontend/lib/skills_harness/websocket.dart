@@ -25,7 +25,7 @@ extension SkillsHarnessWebSocketController on SkillsHarnessController {
           }
           publishWsConnection(false);
           _setError(
-            'ws: ${describeUserVisibleApiError(_l10n ?? rustApiLookupL10nFromPlatform(), e)}',
+            'ws: ${describeUserVisibleApiError(_l10nResolved, e)}',
           );
           resetWsBusyFlags();
           scheduleSessionWsReconnect();

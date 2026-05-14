@@ -190,8 +190,7 @@ class SkillsHarnessController extends ChangeNotifier {
   }
 
   void _setErrorFromException(Object error) {
-    final loc = _l10n ?? rustApiLookupL10nFromPlatform();
-    _setError(describeUserVisibleApiError(loc, error));
+    _setError(describeUserVisibleApiError(_l10nResolved, error));
   }
 
   void publishWsConnection(bool connected) {
