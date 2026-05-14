@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import '../../../l10n/app_localizations.dart';
+import '../../../rust_api.dart';
 import '../../panel_support.dart';
 import '../../prompt_preset.dart';
 import '../../contexts/production/action_panels.dart';
@@ -97,7 +98,7 @@ class _AgentWorkspaceProductionCardState
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final resultSummaryLines = _buildResultSummaryLines();
     return Card(
       child: Padding(

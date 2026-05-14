@@ -334,8 +334,8 @@ String summarizeProductionStoryboardReadiness(
   final pureTextCount = rows.length - targetCount;
   final parts = <String>[
     l10n.agentWorkspaceProductionStoryboardReadinessFrames(
-      readyCount,
       targetCount,
+      readyCount,
     ),
   ];
   if (missingCount > 0) {
@@ -367,9 +367,9 @@ String summarizeProductionStoryboardTableCoverage(
   final remaining = (totalRows - sampledRows).clamp(0, totalRows);
   if (remaining > 0) {
     return l10n.agentWorkspaceProductionStoryboardTableCoverageWithPending(
+      remaining,
       sampledRows,
       totalRows,
-      remaining,
     );
   }
   return l10n.agentWorkspaceProductionStoryboardTableCoverageProgress(
@@ -391,9 +391,9 @@ String summarizeProductionPrimaryBlocker(
   final statusLabel = blocker.status.localizedLabel(l10n);
   if (explicitReason.isNotEmpty) {
     return l10n.agentWorkspaceProductionBlockerHeadline(
-      blocker.title,
-      statusLabel,
       explicitReason,
+      statusLabel,
+      blocker.title,
     );
   }
   final normalizedDetail = blocker.detail
@@ -403,9 +403,9 @@ String summarizeProductionPrimaryBlocker(
       ? normalizedDetail
       : '${normalizedDetail.substring(0, 72)}...';
   return l10n.agentWorkspaceProductionBlockerHeadline(
-    blocker.title,
-    statusLabel,
     clippedDetail,
+    statusLabel,
+    blocker.title,
   );
 }
 

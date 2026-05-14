@@ -3,7 +3,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../l10n/app_localizations.dart';
+import '../../../rust_api.dart';
 import 'support.dart';
 
 /// Renders the "执行阶段" stage board.
@@ -24,7 +24,7 @@ class ProductionWorkspaceStagesPanel extends StatelessWidget {
   final ValueChanged<ProductionWorkspaceStage> onRunStageSubAgent;
 
   Widget _buildPromptPreview(BuildContext context, String prompt) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(10),
@@ -48,7 +48,7 @@ class ProductionWorkspaceStagesPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     if (stages.isEmpty) return const SizedBox.shrink();
     final blockerSummary = summarizeProductionPrimaryBlocker(stages, l10n);
     return Column(
@@ -154,7 +154,7 @@ class ProductionWorkspaceDiagnosisPanel extends StatelessWidget {
   final ValueChanged<ProductionWorkspaceRecipe> onRunRecipeSubAgent;
 
   Widget _buildPromptPreview(BuildContext context, String prompt) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(10),
@@ -178,7 +178,7 @@ class ProductionWorkspaceDiagnosisPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     if (recipes.isEmpty) return const SizedBox.shrink();
     final diagnosisHeadline = summarizeProductionDiagnosisHeadline(
       recipes,
@@ -306,7 +306,7 @@ class ProductionWorkspaceGuidedTasksPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return Wrap(
       spacing: 8,
       runSpacing: 8,

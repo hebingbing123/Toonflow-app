@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../l10n/app_localizations.dart';
+import '../../../rust_api.dart';
 import '../../prompt_preset.dart';
 import 'support.dart';
 
@@ -101,7 +101,7 @@ class ProductionWorkspaceControlsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -274,7 +274,7 @@ class ProductionWorkspaceArgumentTemplatesPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -319,7 +319,7 @@ class ProductionWorkspaceActionCandidatesPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[

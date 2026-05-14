@@ -3,7 +3,7 @@ part of 'card.dart';
 extension _AgentWorkspaceProductionCardSupport
     on _AgentWorkspaceProductionCardState {
   List<String> _buildResultSummaryLines() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final toolName = widget.workspaceLastToolName?.trim();
     final result = widget.workspaceLastToolResultData;
     final lines = <String>[
@@ -31,7 +31,7 @@ extension _AgentWorkspaceProductionCardSupport
 
   List<ProductionWorkspaceRecipe> _buildWorkspaceRecipes() {
     return buildProductionWorkspaceRecipes(
-      l10n: AppLocalizations.of(context)!,
+      l10n: resolveAppLocalizationsForErrors(context),
       toolName: widget.workspaceLastToolName,
       suggestedFlowKey: _suggestedFlowKeyLine,
       result: widget.workspaceLastToolResultData,
@@ -40,7 +40,7 @@ extension _AgentWorkspaceProductionCardSupport
   }
 
   List<ProductionWorkspaceStage> _buildWorkspaceStages() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return buildProductionWorkspaceStages(
       l10n: l10n,
       toolName: widget.workspaceLastToolName,

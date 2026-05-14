@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
-import '../../../l10n/app_localizations.dart';
+import '../../../rust_api.dart';
 
 class AgentWorkspaceActivityPanel extends StatelessWidget {
   const AgentWorkspaceActivityPanel({
@@ -48,7 +48,7 @@ class AgentWorkspaceActivityPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final latest = wsLog.isEmpty ? null : wsLog.last;
     final eventType = latest == null ? null : _extractEventType(latest);
     final lines = wsLog.reversed.take(20).toList(growable: false);

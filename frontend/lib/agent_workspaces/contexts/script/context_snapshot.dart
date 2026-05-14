@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../l10n/app_localizations.dart';
+import '../../../rust_api.dart';
 
 /// Renders the context snapshot cards for the script workspace.
 /// Extracted from [AgentWorkspaceScriptCard] to keep file size manageable.
@@ -66,7 +67,7 @@ class ScriptContextSnapshotView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context).textTheme;
     final sections = <Widget>[];
     final planData = workspaceScriptPlanWritebackCandidate;

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import '../../../l10n/app_localizations.dart';
+import '../../../rust_api.dart';
 import 'flow_logic.dart';
 import 'support.dart';
 
@@ -304,7 +305,7 @@ class ProductionContextSnapshotView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final result = workspaceLastToolResultData;
     final toolName = workspaceLastToolName?.trim();
     final suggestedFlowKey = workspaceSuggestedFlowKey?.trim();

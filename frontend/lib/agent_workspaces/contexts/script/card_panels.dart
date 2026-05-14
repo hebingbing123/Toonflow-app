@@ -3,7 +3,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../l10n/app_localizations.dart';
+import '../../../rust_api.dart';
 import 'support.dart';
 
 /// Renders the "执行阶段" stage board for the script workspace.
@@ -25,7 +25,7 @@ class ScriptWorkspaceStagesPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     if (stages.isEmpty) return const SizedBox.shrink();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -114,7 +114,7 @@ class ScriptWorkspaceDiagnosisPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     if (recipes.isEmpty) return const SizedBox.shrink();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

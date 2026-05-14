@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
+import '../rust_api.dart';
 import 'controls.dart';
 import 'contexts/production/support.dart';
 import 'prompt_preset.dart';

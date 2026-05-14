@@ -398,9 +398,9 @@ Map<String, dynamic> buildProductionPlanningScriptArgs() {
 String summarizeProductionPlanningScriptWindow(AppLocalizations l10n) {
   final window = buildProductionPlanningScriptWindow();
   return l10n.agentWorkspaceProductionPlanningScriptWindow(
-    window.lineStart,
     window.lineEnd,
     window.maxChars,
+    window.lineStart,
   );
 }
 
@@ -429,9 +429,9 @@ String summarizeProductionStoryboardScriptWindow(
   if (ids.isEmpty) return '';
   final focusWindow = buildProductionStoryboardScriptFocusWindow(ids);
   return l10n.agentWorkspaceProductionStoryboardScriptWindow(
-    focusWindow.lineStart,
     focusWindow.lineEnd,
     focusWindow.maxChars,
+    focusWindow.lineStart,
   );
 }
 

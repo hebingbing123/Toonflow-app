@@ -17,7 +17,7 @@ extension _AgentWorkspaceProductionCardLogic
   }
 
   String? get _runningTaskLine {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     if (widget.loadingProductionWorkspaceRun) {
       return l10n.agentWorkspaceProductionRunningRunWorkflow;
     }
@@ -34,7 +34,7 @@ extension _AgentWorkspaceProductionCardLogic
   }
 
   bool _validateJsonArgs(String raw) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final normalized = raw.trim();
     if (normalized.isEmpty) return true;
     try {
@@ -51,7 +51,7 @@ extension _AgentWorkspaceProductionCardLogic
   }
 
   bool _validatePrompt(String action) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     if (widget.productionPromptController.text.trim().isNotEmpty) return true;
     _setTaskStatus(
       l10n.agentWorkspaceProductionInterceptPromptRequired(action),
@@ -60,7 +60,7 @@ extension _AgentWorkspaceProductionCardLogic
   }
 
   bool _validateFlowProbe() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final tool = widget.productionDomainToolController.text.trim();
     if (tool.isEmpty) {
       _setTaskStatus(
@@ -80,7 +80,7 @@ extension _AgentWorkspaceProductionCardLogic
   }
 
   bool _normalizeArgsForProbe() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final tool = widget.productionDomainToolController.text.trim();
     final raw = widget.productionDomainArgsController.text.trim();
     if (raw.isEmpty) {
@@ -110,7 +110,7 @@ extension _AgentWorkspaceProductionCardLogic
   }
 
   bool _validateSubAgentTool() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     if (widget.productionSubAgentToolController.text.trim().isEmpty) {
       _setTaskStatus(
         l10n.agentWorkspaceProductionInterceptSelectSubAgentToolFirst,
@@ -124,7 +124,7 @@ extension _AgentWorkspaceProductionCardLogic
   }
 
   void _runProductionWorkspace() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     if (!_validatePrompt(l10n.agentWorkspaceProductionActionRunWorkflow)) {
       return;
     }
@@ -136,7 +136,7 @@ extension _AgentWorkspaceProductionCardLogic
     if (!_validateFlowProbe()) return;
     if (!_normalizeArgsForProbe()) return;
     widget.onProbeProductionDomainTool();
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final tool = widget.productionDomainToolController.text.trim();
     final key = widget.flowKeyController.text.trim();
     final suffix = tool == 'get_flowData' ? ' key=$key' : '';
@@ -148,13 +148,13 @@ extension _AgentWorkspaceProductionCardLogic
   void _runProductionSubAgentTool() {
     if (!_validateSubAgentTool()) return;
     widget.onRunProductionSubAgentTool();
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final tool = widget.productionSubAgentToolController.text.trim();
     _setTaskStatus(l10n.agentWorkspaceProductionTriggeredRunSubAgentTool(tool));
   }
 
   void _writeBackProductionFlowResult() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     if (widget.workspaceLastToolResultLine == null) {
       _setTaskStatus(l10n.agentWorkspaceProductionInterceptNoToolWriteback);
       return;
@@ -191,7 +191,7 @@ extension _AgentWorkspaceProductionCardLogic
       widget.productionDomainToolController.text.trim();
 
   Widget _buildGuidedTasks() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return ProductionWorkspaceGuidedTasksPanel(
       busy: widget.busy,
       hasLastResult: widget.workspaceLastToolResultLine != null,

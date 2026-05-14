@@ -2,7 +2,7 @@ part of 'card.dart';
 
 extension _AgentWorkspaceScriptCardSupport on _AgentWorkspaceScriptCardState {
   List<String> _buildResultSummaryLines() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final lines = <String>[
       'tool=${widget.selectedScriptDomainTool}',
       if (_scriptWritebackSourceLine != null)
@@ -54,7 +54,7 @@ extension _AgentWorkspaceScriptCardSupport on _AgentWorkspaceScriptCardState {
   }
 
   List<ScriptWorkspaceRecipe> _buildWorkspaceRecipes() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return buildScriptWorkspaceRecipes(
       l10n: l10n,
       toolName: widget.workspaceLastToolName,
@@ -64,7 +64,7 @@ extension _AgentWorkspaceScriptCardSupport on _AgentWorkspaceScriptCardState {
   }
 
   List<ScriptWorkspaceStage> _buildWorkspaceStages() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return buildScriptWorkspaceStages(
       l10n: l10n,
       toolName: widget.workspaceLastToolName,

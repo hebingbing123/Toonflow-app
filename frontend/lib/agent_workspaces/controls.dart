@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../l10n/app_localizations.dart';
+import '../rust_api.dart';
 
 enum AgentWorkspacePane { script, production, activity }
 
@@ -23,7 +23,7 @@ class AgentWorkspaceScopeInputs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
@@ -97,7 +97,7 @@ class AgentWorkspacePaneSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final tabs = <(AgentWorkspacePane, String)>[
       (AgentWorkspacePane.script, l10n.agentWorkspacePaneScript),
       (AgentWorkspacePane.production, l10n.agentWorkspacePaneProduction),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../l10n/app_localizations.dart';
+import '../../../rust_api.dart';
 import '../../prompt_preset.dart';
 
 class ScriptWorkspaceArgumentTemplateEntry {
@@ -34,7 +34,7 @@ class ScriptWorkspaceGuidedTasksPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return Wrap(
       spacing: 8,
       runSpacing: 8,
@@ -147,7 +147,7 @@ class ScriptWorkspaceControlsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[

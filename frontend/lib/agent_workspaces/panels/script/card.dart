@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import '../../../l10n/app_localizations.dart';
+import '../../../rust_api.dart';
 import '../../panel_support.dart';
 import '../../prompt_preset.dart';
 import '../../contexts/script/action_panels.dart';
@@ -102,7 +103,7 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
       widget.workspaceScriptPlanRowId != null;
 
   String? get _scriptWritebackSourceLine {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final source = widget.workspaceScriptWritebackSource?.trim();
     if (source != null && source.isNotEmpty) return source;
     if (widget.workspaceAssistantText.trim().isNotEmpty) {
@@ -112,7 +113,7 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
   }
 
   String? get _scriptPlanWritebackLine {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final candidate = widget.workspaceScriptPlanWritebackCandidate;
     if (candidate == null) return null;
     final data = candidate['data'];
@@ -127,7 +128,7 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
   }
 
   String? get _runningTaskLine {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     if (widget.loadingScriptWorkspaceRun) {
       return l10n.agentWorkspaceScriptRunningWorkflow;
     }
@@ -159,7 +160,7 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final resultSummaryLines = _buildResultSummaryLines();
     return Card(
       child: Padding(

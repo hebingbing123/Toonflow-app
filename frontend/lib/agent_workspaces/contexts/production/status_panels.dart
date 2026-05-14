@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../l10n/app_localizations.dart';
+import '../../../rust_api.dart';
 
 /// Groups status, result summaries, and suggested flow-key hints for production.
 class ProductionWorkspaceStatusPanel extends StatelessWidget {
@@ -25,7 +25,7 @@ class ProductionWorkspaceStatusPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final bodySmall = Theme.of(context).textTheme.bodySmall;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

@@ -14,7 +14,7 @@ extension _AgentWorkspaceScriptCardLogic on _AgentWorkspaceScriptCardState {
   }
 
   bool _validateJsonArgs(String raw) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final normalized = raw.trim();
     if (normalized.isEmpty) return true;
     try {
@@ -29,14 +29,14 @@ extension _AgentWorkspaceScriptCardLogic on _AgentWorkspaceScriptCardState {
   }
 
   bool _validatePrompt(String action) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     if (widget.scriptPromptController.text.trim().isNotEmpty) return true;
     _setTaskStatus(l10n.agentWorkspaceScriptInterceptPromptRequired(action));
     return false;
   }
 
   bool _validateScriptProbe() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     if (widget.selectedScriptDomainTool.trim().isEmpty) {
       _setTaskStatus(l10n.agentWorkspaceScriptInterceptSelectDomainToolFirst);
       return false;
@@ -55,7 +55,7 @@ extension _AgentWorkspaceScriptCardLogic on _AgentWorkspaceScriptCardState {
   }
 
   bool _normalizeArgsForProbe() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final raw = widget.scriptDomainArgsController.text.trim();
     final Map<String, dynamic> normalized;
     if (raw.isEmpty) {
@@ -92,7 +92,7 @@ extension _AgentWorkspaceScriptCardLogic on _AgentWorkspaceScriptCardState {
   }
 
   bool _validateSubAgentTool() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     if (widget.scriptSubAgentToolController.text.trim().isEmpty) {
       _setTaskStatus(l10n.agentWorkspaceScriptInterceptSelectSubAgentToolFirst);
       return false;
@@ -159,13 +159,13 @@ extension _AgentWorkspaceScriptCardLogic on _AgentWorkspaceScriptCardState {
   }
 
   void _applyToolArgsTemplate(String args, String label) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     widget.scriptDomainArgsController.text = args;
     _setTaskStatus(l10n.agentWorkspaceFilledArgTemplate(label));
   }
 
   void _runScriptWorkspace() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     if (!_validatePrompt(l10n.agentWorkspaceScriptActionRunWorkflow)) return;
     widget.onRunScriptWorkspace();
     _setTaskStatus(l10n.agentWorkspaceScriptTriggeredRunWorkflow);
@@ -175,7 +175,7 @@ extension _AgentWorkspaceScriptCardLogic on _AgentWorkspaceScriptCardState {
     if (!_validateScriptProbe()) return;
     if (!_normalizeArgsForProbe()) return;
     widget.onProbeScriptDomainTool();
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     _setTaskStatus(
       l10n.agentWorkspaceScriptTriggeredProbeContext(
         widget.selectedScriptDomainTool,
@@ -186,13 +186,13 @@ extension _AgentWorkspaceScriptCardLogic on _AgentWorkspaceScriptCardState {
   void _runScriptSubAgentTool() {
     if (!_validateSubAgentTool()) return;
     widget.onRunScriptSubAgentTool();
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final tool = widget.scriptSubAgentToolController.text.trim();
     _setTaskStatus(l10n.agentWorkspaceScriptTriggeredRunSubAgent(tool));
   }
 
   void _writeBackScriptResult() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     if (!_canWriteBackScriptResult) {
       _setTaskStatus(l10n.agentWorkspaceScriptInterceptNoScriptWritebackResult);
       return;
@@ -202,7 +202,7 @@ extension _AgentWorkspaceScriptCardLogic on _AgentWorkspaceScriptCardState {
   }
 
   void _writeBackScriptPlanResult() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     if (!_canWriteBackScriptPlanResult) {
       _setTaskStatus(
         l10n.agentWorkspaceScriptInterceptNoPlanDataWritebackResult,
@@ -214,7 +214,7 @@ extension _AgentWorkspaceScriptCardLogic on _AgentWorkspaceScriptCardState {
   }
 
   void _writeBackScriptPlanViaUpdateData() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     if (!_canWriteBackScriptPlanViaUpdateData) {
       _setTaskStatus(
         l10n.agentWorkspaceScriptInterceptPlanWritebackNeedsPlanId,
@@ -234,7 +234,7 @@ extension _AgentWorkspaceScriptCardLogic on _AgentWorkspaceScriptCardState {
   }
 
   Widget _buildGuidedTasks() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return ScriptWorkspaceGuidedTasksPanel(
       busy: widget.busy,
       canWriteBackScriptResult: _canWriteBackScriptResult,
@@ -291,7 +291,7 @@ extension _AgentWorkspaceScriptCardLogic on _AgentWorkspaceScriptCardState {
   }
 
   void _applyWorkspaceRecipe(ScriptWorkspaceRecipe recipe) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     if (recipe.domainTool != null && recipe.domainTool!.trim().isNotEmpty) {
       widget.onScriptDomainToolChanged(recipe.domainTool!.trim());
       widget.scriptDomainArgsController.text = jsonEncode(
@@ -323,7 +323,7 @@ extension _AgentWorkspaceScriptCardLogic on _AgentWorkspaceScriptCardState {
   }
 
   void _applyWorkspaceStage(ScriptWorkspaceStage stage) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     if (stage.domainTool != null && stage.domainTool!.trim().isNotEmpty) {
       widget.onScriptDomainToolChanged(stage.domainTool!.trim());
       widget.scriptDomainArgsController.text = jsonEncode(

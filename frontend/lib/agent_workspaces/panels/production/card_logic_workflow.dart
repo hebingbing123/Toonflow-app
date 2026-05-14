@@ -26,7 +26,7 @@ extension _AgentWorkspaceProductionCardWorkflow
     _setTaskStatus(
       summarizeAppliedProductionRecipeStatus(
         recipe,
-        AppLocalizations.of(context)!,
+        resolveAppLocalizationsForErrors(context),
       ),
     );
   }
@@ -54,7 +54,7 @@ extension _AgentWorkspaceProductionCardWorkflow
     _setTaskStatus(
       summarizeAppliedProductionStageStatus(
         stage,
-        AppLocalizations.of(context)!,
+        resolveAppLocalizationsForErrors(context),
       ),
     );
   }

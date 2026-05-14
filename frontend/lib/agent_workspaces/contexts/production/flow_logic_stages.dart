@@ -282,14 +282,14 @@ ProductionWorkspaceStage _buildAssetsStage({
         status: ProductionWorkspaceStageStatus.needsAssetImages,
         detail: pendingScope.isEmpty
             ? l10n.agentWorkspaceProductionStageDetailAssetsMissingGeneric(
-                rows.length,
                 missingCount,
                 readiness,
+                rows.length,
               )
             : l10n.agentWorkspaceProductionStageDetailAssetsMissingFocused(
-                rows.length,
                 pendingScope,
                 readiness,
+                rows.length,
               ),
         subAgentTool: 'run_sub_agent_generate_assets',
         subAgentArgs: buildProductionSubAgentArgs(assetIds: pendingDeriveIds),

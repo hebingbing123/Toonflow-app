@@ -137,7 +137,7 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
       widget.loadingProductionResultWriteback;
 
   Widget _buildPaneBody(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     switch (_pane) {
       case AgentWorkspacePane.script:
         return AgentWorkspaceScriptCard(
@@ -257,7 +257,7 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
 
   /// Agent 工作区外层视图，负责标题、范围输入与 pane 壳层布局。
   Widget _buildAgentWorkspacesSectionView(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final title = widget.sectionTitle ?? l10n.agentWorkspaceSectionTitle;
     final description =
         widget.sectionDescription ?? l10n.agentWorkspaceSectionDescription;
