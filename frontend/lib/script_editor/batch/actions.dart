@@ -11,7 +11,7 @@ extension _StoryboardBatchWorkbenchActions
       await action();
     } catch (e) {
       if (mounted) {
-        final loc = AppLocalizations.of(context)!;
+        final loc = resolveAppLocalizationsForErrors(context);
         _applyBatchWorkbenchState(() => _statusLine = describeUserVisibleApiError(loc, e));
       }
     } finally {
@@ -52,7 +52,7 @@ extension _StoryboardBatchWorkbenchActions
       );
     }
     if (items.isEmpty) {
-      final loc = AppLocalizations.of(context)!;
+      final loc = resolveAppLocalizationsForErrors(context);
       throw FormatException(loc.scriptEditorStoryboardBatchNoPromptsError);
     }
     final response = await postStoryboardBatchGenerateImageV1(
@@ -69,7 +69,7 @@ extension _StoryboardBatchWorkbenchActions
     );
     await _refreshProduction();
     if (mounted) {
-      final l10n = AppLocalizations.of(context)!;
+      final l10n = resolveAppLocalizationsForErrors(context);
       _applyBatchWorkbenchState(() {
         _statusLine = buildStoryboardBatchWorkbenchFollowUp(
           l10n,
@@ -90,7 +90,7 @@ extension _StoryboardBatchWorkbenchActions
   }
 
   void _selectReadyStoryboards() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final productionMap = _productionById();
     _applyBatchWorkbenchState(() {
       _selectedIds
@@ -117,7 +117,7 @@ extension _StoryboardBatchWorkbenchActions
   }
 
   void _clearSelection() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     _applyBatchWorkbenchState(() {
       _selectedIds.clear();
       _clearSelectionScopedOutputs();
@@ -137,7 +137,7 @@ extension _StoryboardBatchWorkbenchActions
       storyboardId: storyboardId,
     );
     if (mounted) {
-      final l10n = AppLocalizations.of(context)!;
+      final l10n = resolveAppLocalizationsForErrors(context);
       _applyBatchWorkbenchState(() {
         _previewUrl = preview.imageUrl;
         _statusLine = buildStoryboardBatchWorkbenchFollowUp(
@@ -159,7 +159,7 @@ extension _StoryboardBatchWorkbenchActions
       storyboardId: storyboardId,
     );
     if (mounted) {
-      final l10n = AppLocalizations.of(context)!;
+      final l10n = resolveAppLocalizationsForErrors(context);
       _applyBatchWorkbenchState(() {
         _downloadUrl = preview.previewUrl;
         _statusLine = buildStoryboardBatchWorkbenchFollowUp(
@@ -189,7 +189,7 @@ extension _StoryboardBatchWorkbenchActions
       zip: zip,
     );
     if (mounted) {
-      final l10n = AppLocalizations.of(context)!;
+      final l10n = resolveAppLocalizationsForErrors(context);
       _applyBatchWorkbenchState(() {
         _exportSummary = summary;
         _statusLine = buildStoryboardBatchWorkbenchFollowUp(

@@ -137,7 +137,7 @@ class _QualityReviewsWorkbenchDialogState
     bool onlyDeliveryPriority = false,
     bool onlyAutoSource = false,
   }) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     setState(() {
       if (onlyBadCases) {
         _loadingBadCases = true;
@@ -207,7 +207,7 @@ class _QualityReviewsWorkbenchDialogState
   }
 
   Future<void> _loadStats() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     setState(() {
       _loadingStats = true;
       _statusLine = null;
@@ -230,7 +230,7 @@ class _QualityReviewsWorkbenchDialogState
   }
 
   Future<void> _loadScopeInsights() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     setState(() {
       _loadingScopeInsights = true;
       _statusLine = null;
@@ -258,7 +258,7 @@ class _QualityReviewsWorkbenchDialogState
   }
 
   Future<void> _loadStagePassRate() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     setState(() {
       _loadingStagePassRate = true;
       _statusLine = null;
@@ -285,7 +285,7 @@ class _QualityReviewsWorkbenchDialogState
   }
 
   Future<void> _loadBadCaseStats() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     setState(() {
       _loadingBadCaseStats = true;
       _statusLine = null;
@@ -316,7 +316,7 @@ class _QualityReviewsWorkbenchDialogState
   }
 
   Future<void> _loadTokenEfficiency() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     setState(() {
       _loadingTokenEfficiency = true;
       _statusLine = null;
@@ -353,7 +353,7 @@ class _QualityReviewsWorkbenchDialogState
   }
 
   Future<void> _loadTokenEfficiencySamples() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     setState(() {
       _loadingTokenEfficiencySamples = true;
       _statusLine = null;
@@ -388,7 +388,7 @@ class _QualityReviewsWorkbenchDialogState
   }
 
   Future<void> _loadReviewById() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final reviewId = _ctrls.reviewIdCtrl.text.trim();
     if (reviewId.isEmpty) {
       setState(() => _statusLine = l10n.qualityReviewsErrInputReviewIdFirst);
@@ -416,7 +416,7 @@ class _QualityReviewsWorkbenchDialogState
   }
 
   Future<void> _createReview() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final targetType = _ctrls.createTargetTypeCtrl.text.trim();
     final source = _ctrls.createSourceCtrl.text.trim();
     final projectId = int.tryParse(_ctrls.createProjectIdCtrl.text.trim());
@@ -503,7 +503,7 @@ class _QualityReviewsWorkbenchDialogState
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return QualityReviewsWorkbenchDialogView(
       model: QualityReviewsWorkbenchDialogViewModel(
         reviews: _reviews,

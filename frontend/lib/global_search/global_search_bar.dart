@@ -133,7 +133,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
       return;
     }
     if (!mounted) return;
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     setState(() {
       _loadingSuggestions = true;
     });
@@ -329,7 +329,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
   }
 
   String _workspaceGroupLabel(String? workspaceName) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final trimmed = (workspaceName ?? '').trim();
     final current = (widget.currentWorkspaceName ?? '').trim();
     if (trimmed.isEmpty) {
@@ -347,7 +347,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
     required IconData icon,
   }) {
     final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final pinActionLabel = view.pinned
         ? l10n.globalSearchUnpin
         : l10n.globalSearchPinnedViewsTitle;
@@ -468,7 +468,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
   }
 
   Future<void> _renameSavedView(_PinnedSearchView view) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final controller = TextEditingController(text: view.title);
     final approved = await showDialog<bool>(
       context: context,
@@ -563,7 +563,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
   }
 
   Future<void> _toggleSavedViewPin(_PinnedSearchView view) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final updated = await _mutateSavedViews((list) {
       final now = DateTime.now().toUtc().toIso8601String();
       var changed = false;
@@ -599,7 +599,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
   }
 
   Future<void> _deleteSavedView(_PinnedSearchView view) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -647,7 +647,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
 
   /// Show history dropdown overlay
   void _showOverlay() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     _removeOverlay();
 
     final queryLen = _controller.text.trim().length;
@@ -980,7 +980,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
   }
 
   void _openQuickTemplate(_QuickSearchTemplate template) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     _hideHistory();
     _focusNode.unfocus();
     final now = DateTime.now();
@@ -1028,7 +1028,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
 
   /// Clear all search history
   Future<void> _clearHistory() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final token = widget.accessToken;
     if (token == null || token.isEmpty) {
       return;
@@ -1076,7 +1076,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
 
   /// Perform search and navigate to results page
   void _performSearch() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final query = _controller.text.trim();
 
     if (query.length < _minQueryLength) {
@@ -1147,7 +1147,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
 
     return Focus(

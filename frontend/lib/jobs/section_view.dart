@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../l10n/app_localizations.dart';
 import '../../local_prefs/risky_operation_confirm_prefs.dart';
 import '../../rust_api.dart';
 
@@ -82,7 +81,7 @@ class JobsSectionView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final outline = Theme.of(context).colorScheme.outline;
     return SingleChildScrollView(
       child: Column(
