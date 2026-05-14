@@ -241,9 +241,10 @@ class _HomePageState extends State<HomePage> {
   late final TaskCenterController _taskCenterController = TaskCenterController(
     accessTokenProvider: () => _session?.accessToken,
     onErrorChanged: _setSharedError,
-    projectIdTextProvider: () => _workspaceInputController.projectIdController.text,
-    projectUuidTextProvider:
-        () => _workspaceInputController.projectUuidController.text,
+    projectIdTextProvider: () =>
+        _workspaceInputController.projectIdController.text,
+    projectUuidTextProvider: () =>
+        _workspaceInputController.projectUuidController.text,
   );
 
   late final QualityReviewsController _qualityReviewsController =
@@ -562,7 +563,8 @@ class _HomePageState extends State<HomePage> {
                 : null;
           });
         }
-        if (id.trim().isNotEmpty || (projectNumeric != null && projectNumeric > 0)) {
+        if (id.trim().isNotEmpty ||
+            (projectNumeric != null && projectNumeric > 0)) {
           _workspaceInputController.applyProjectScopeRef(
             projectNumericId: projectNumeric,
             projectUuid: id,
@@ -886,15 +888,12 @@ class _HomePageState extends State<HomePage> {
       if (_lastSessionAccessToken != token) {
         return;
       }
-      if (error is RustApiException) {
-        reportRustApiError(
+      if (mounted) {
+        reportRustOrDescribeApiError(
           error,
           onErrorChanged: _setSharedError,
+          l10n: AppLocalizations.of(context),
           showGlobalSnackBar: false,
-        );
-      } else if (mounted) {
-        _setSharedError(
-          describeUserVisibleApiError(AppLocalizations.of(context)!, error),
         );
       }
     } finally {

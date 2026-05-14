@@ -86,7 +86,13 @@ AppLocalizations rustApiLookupL10nFromPlatform() {
   if (explicit != null) {
     code = explicit.languageCode == 'zh' ? 'zh' : 'en';
   } else {
-    final loc = WidgetsBinding.instance.platformDispatcher.locale;
+    Locale loc;
+    try {
+      loc = WidgetsBinding.instance.platformDispatcher.locale;
+    } catch (_) {
+      // Unit tests / headless contexts may run before binding init; default en.
+      loc = const Locale('en');
+    }
     code = loc.languageCode == 'zh' ? 'zh' : 'en';
   }
   return lookupAppLocalizations(Locale(code));

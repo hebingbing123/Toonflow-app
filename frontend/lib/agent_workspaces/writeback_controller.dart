@@ -131,8 +131,9 @@ class WorkspaceWritebackController {
     final useToolCandidate = toolCandidate != null && toolCandidate.isNotEmpty;
     final content = useToolCandidate ? toolCandidate : assistantText;
     final source = useToolCandidate
-        ? (_outputController.scriptWritebackSource ?? 'tool:get_script_content')
-        : 'assistant stream';
+        ? (_outputController.scriptWritebackSource ??
+              loc.agentWorkspaceScriptWritebackSourceToolGetScriptContent)
+        : loc.agentWorkspaceScriptWritebackSourceAssistant;
     if ((projectUuid == null && projectNumericId == null) ||
         scriptId == null ||
         content.isEmpty) {

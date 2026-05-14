@@ -21257,6 +21257,18 @@ abstract class AppLocalizations {
   /// **'Failed to parse production sub-agent arguments JSON'**
   String get agentWorkspaceRunProductionSubAgentArgsJsonInvalid;
 
+  /// No description provided for @agentWorkspaceHarnessRunCancelledHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Run was cancelled. Review the log, then decide whether to write back.'**
+  String get agentWorkspaceHarnessRunCancelledHint;
+
+  /// No description provided for @agentWorkspaceScriptWritebackSourceToolGetScriptContent.
+  ///
+  /// In en, this message translates to:
+  /// **'tool:get_script_content'**
+  String get agentWorkspaceScriptWritebackSourceToolGetScriptContent;
+
   /// No description provided for @agentWorkspaceWritebackScriptInputsInvalid.
   ///
   /// In en, this message translates to:
@@ -27093,7 +27105,7 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceScriptWritebackSourceAssistant.
   ///
   /// In en, this message translates to:
-  /// **'Agent workspace script writeback source assistant'**
+  /// **'Assistant output'**
   String get agentWorkspaceScriptWritebackSourceAssistant;
 
   /// No description provided for @agentWorkspaceScriptPlanHint.

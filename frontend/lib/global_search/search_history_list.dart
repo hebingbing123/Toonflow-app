@@ -5,11 +5,7 @@ import '../l10n/rust_api_error_format.dart';
 import '../rust_api/search/api.dart';
 import '../utils/localized_formatting.dart';
 
-/// 搜索历史下拉列表组件
-///
-/// 在搜索框获得焦点时显示最近 5 条历史记录
-/// 点击历史记录自动填充并触发搜索
-/// 提供「清除历史」按钮
+/// Search history dropdown: shows recent queries on focus, tap to fill and search, clear button.
 class SearchHistoryList extends StatefulWidget {
   const SearchHistoryList({
     super.key,
@@ -52,7 +48,7 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
       if (!mounted) return;
 
       setState(() {
-        // 只显示最近的 maxItems 条记录
+        // Keep only the most recent maxItems entries
         _history = history.take(widget.maxItems).toList();
         _loading = false;
       });
@@ -69,7 +65,7 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
 
   Future<void> _handleClearHistory() async {
     final l10n = AppLocalizations.of(context)!;
-    // 显示确认对话框
+    // Confirm before clearing
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -106,7 +102,7 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
 
       widget.onClearHistory();
 
-      // 显示成功提示
+      // Success feedback
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(l10n.globalSearchHistoryCleared)),
@@ -121,7 +117,7 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
         _loading = false;
       });
 
-      // 显示错误提示
+      // Error feedback
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(l10n.globalSearchClearHistoryFailed(msg))),
@@ -191,7 +187,7 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // 历史记录列表
+          // History rows
           ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -222,7 +218,7 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
             },
           ),
           const Divider(height: 1),
-          // 清除历史按钮
+          // Clear history
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
             child: TextButton.icon(
@@ -237,7 +233,7 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
     );
   }
 
-  /// 格式化时间显示 - 使用本地化格式
+  /// Relative time label using locale-aware formatting.
   String _formatTime(String isoString) {
     try {
       final dateTime = DateTime.parse(isoString);

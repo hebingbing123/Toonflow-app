@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
+import '../l10n/rust_api_error_format.dart';
+
 class WorkspaceOutputController extends ChangeNotifier {
   String _assistantText = '';
   String? _lastToolResultLine;
@@ -131,7 +133,8 @@ class WorkspaceOutputController extends ChangeNotifier {
   }
 
   void markCancelled() {
-    _writebackLine = '当前运行已取消，可检查日志后决定是否写回。';
+    _writebackLine =
+        rustApiLookupL10nFromPlatform().agentWorkspaceHarnessRunCancelledHint;
     notifyListeners();
   }
 

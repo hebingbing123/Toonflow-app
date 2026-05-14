@@ -91,7 +91,10 @@ void main() {
       );
 
       expect(outputController.assistantText, 'hello');
-      expect(outputController.writebackLine, contains('当前运行已取消'));
+      expect(
+        outputController.writebackLine,
+        anyOf(contains('当前运行已取消'), contains('Run was cancelled')),
+      );
     },
   );
 

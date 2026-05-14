@@ -38,7 +38,10 @@ void main() {
         controller.scriptPlanWritebackCandidate,
         containsPair('planId', 17),
       );
-      expect(controller.writebackLine, contains('当前运行已取消'));
+      expect(
+        controller.writebackLine,
+        anyOf(contains('当前运行已取消'), contains('Run was cancelled')),
+      );
     },
   );
 }

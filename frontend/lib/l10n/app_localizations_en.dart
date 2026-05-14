@@ -13729,6 +13729,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'Failed to parse production sub-agent arguments JSON';
 
   @override
+  String get agentWorkspaceHarnessRunCancelledHint =>
+      'Run was cancelled. Review the log, then decide whether to write back.';
+
+  @override
+  String get agentWorkspaceScriptWritebackSourceToolGetScriptContent =>
+      'tool:get_script_content';
+
+  @override
   String get agentWorkspaceWritebackScriptInputsInvalid =>
       'Valid project, script id, and writeback content are required';
 
@@ -17750,8 +17758,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Agent workspace guided tasks title';
 
   @override
-  String get agentWorkspaceScriptWritebackSourceAssistant =>
-      'Agent workspace script writeback source assistant';
+  String get agentWorkspaceScriptWritebackSourceAssistant => 'Assistant output';
 
   @override
   String agentWorkspaceScriptPlanHint(int pid) {

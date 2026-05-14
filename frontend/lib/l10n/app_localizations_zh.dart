@@ -13074,6 +13074,13 @@ class AppLocalizationsZh extends AppLocalizations {
       'production sub-agent arguments JSON 解析失败';
 
   @override
+  String get agentWorkspaceHarnessRunCancelledHint => '当前运行已取消，可检查日志后决定是否写回。';
+
+  @override
+  String get agentWorkspaceScriptWritebackSourceToolGetScriptContent =>
+      'tool:get_script_content';
+
+  @override
   String get agentWorkspaceWritebackScriptInputsInvalid =>
       'project_id/script_id 与可回写结果必须有效';
 
@@ -16873,7 +16880,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get agentWorkspaceGuidedTasksTitle => '引导任务';
 
   @override
-  String get agentWorkspaceScriptWritebackSourceAssistant => 'assistant stream';
+  String get agentWorkspaceScriptWritebackSourceAssistant => '助手主输出';
 
   @override
   String agentWorkspaceScriptPlanHint(int pid) {

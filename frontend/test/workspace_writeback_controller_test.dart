@@ -50,7 +50,11 @@ void main() {
 
     expect(lastError, isNull);
     expect(updatedContent, 'new script body');
-    expect(outputController.writebackLine, contains('script 8 已更新'));
+    expect(outputController.writebackLine, contains('script 8'));
+    expect(
+      outputController.writebackLine,
+      anyOf(contains('已更新'), contains('updated')),
+    );
     expect(operationController.loadingScriptResultWriteback, isFalse);
   });
 
@@ -100,7 +104,11 @@ void main() {
       expect(lastError, isNull);
       expect(fetchProjectsCalls, 0);
       expect(updatedProjectId, '550e8400-e29b-41d4-a716-446655440000');
-      expect(outputController.writebackLine, contains('script 12 已更新'));
+      expect(outputController.writebackLine, contains('script 12'));
+      expect(
+        outputController.writebackLine,
+        anyOf(contains('已更新'), contains('updated')),
+      );
       expect(operationController.loadingScriptResultWriteback, isFalse);
     },
   );
@@ -270,7 +278,13 @@ void main() {
 
       await controller.writeBackProductionFlowResult();
 
-      expect(lastError, contains('不能直接覆盖核心 flow[assets]'));
+      expect(
+        lastError,
+        anyOf(
+          contains('不能直接覆盖核心 flow[assets]'),
+          contains('cannot overwrite core flow[assets]'),
+        ),
+      );
       expect(operationController.loadingProductionResultWriteback, isFalse);
     },
   );
