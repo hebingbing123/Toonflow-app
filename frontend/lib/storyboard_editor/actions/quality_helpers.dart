@@ -1,16 +1,8 @@
 part of '../../home_page.dart';
 
 extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
-  Future<void> _notifyStoryboardMutated() async {
-    final callback = widget.onStoryboardMutated;
-    if (callback == null) {
-      return;
-    }
-    await callback();
-  }
-
   Future<void> _readCurrentPreview() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final preview = await postStoryboardPreviewImageV1(
       widget.token,
       projectUuid: widget.projectId,
@@ -30,7 +22,7 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
   }
 
   Future<void> _saveImageUrl() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final imageUrl = _imageUrlCtrl.text.trim();
     if (imageUrl.isEmpty) {
       throw FormatException(l10n.storyboardActionErrImageUrlRequired);
@@ -52,7 +44,7 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
   }
 
   Future<void> _saveLiveActionReference() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final referenceShotUrls = _liveActionReferenceShotsCtrl.text
         .split(RegExp(r'[\n,]'))
         .map((value) => value.trim())
@@ -84,7 +76,7 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
   }
 
   Future<void> _clearCurrentFrame() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     await postStoryboardRemoveFrameV1(
       widget.token,
       projectUuid: widget.projectId,
@@ -101,7 +93,7 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
   }
 
   Future<void> _addTrack() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final name = _trackNameCtrl.text.trim();
     if (name.isEmpty) {
       throw FormatException(l10n.storyboardActionErrTrackNameRequired);
@@ -125,7 +117,7 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
   }
 
   Future<void> _deleteTrack() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final trackId = int.tryParse(_trackIdCtrl.text.trim());
     if (trackId == null || trackId <= 0) {
       throw FormatException(l10n.storyboardActionErrTrackIdInvalid);
@@ -148,7 +140,7 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
   }
 
   Future<void> _generateVideoPrompt() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final request = _buildCurrentVideoPromptRequest();
     final imageUrl = _currentStoryboardSourceImage();
     final generated = await postWorkbenchGenerateVideoPromptV1(
@@ -178,7 +170,7 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
   }
 
   Future<void> _selectVideo(VideoItem video) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final media = await postWorkbenchStoryboardMediaOpV1(
       widget.token,
       buildStoryboardMediaOpBodyV1(
@@ -202,7 +194,7 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
   }
 
   Future<void> _deleteCurrentVideo() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final response = await postWorkbenchDeleteVideoV1(
       widget.token,
       projectUuid: widget.projectId,
@@ -220,7 +212,7 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
   }
 
   void _prepareVideoTrack(List<int> knownTrackIds) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     _applyWorkbenchState(() {
       final currentTrackId = int.tryParse(_trackIdCtrl.text.trim());
       if (currentTrackId != null && currentTrackId > 0) {
@@ -244,7 +236,7 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
   }
 
   Future<void> _syncProductionDataAction() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     await _refreshProductionData(syncImageUrl: true, syncTrackId: true);
     if (!mounted) return;
     _applyWorkbenchState(() {
@@ -253,7 +245,7 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
   }
 
   Future<void> _refreshVideoDataAction() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     await _refreshWorkbenchData();
     if (!mounted) return;
     _applyWorkbenchState(() {

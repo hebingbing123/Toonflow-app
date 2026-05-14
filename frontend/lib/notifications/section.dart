@@ -124,7 +124,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final needle = _searchController.text.trim().toLowerCase();
     final filtered = widget.controller.items
         .where((item) {
@@ -1045,7 +1045,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
   }
 
   void _saveClearedThrottlePolicy() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final globalRaw = _clearedThrottleController.text.trim();
     final globalMinutes = int.tryParse(globalRaw);
     if (globalMinutes == null || globalMinutes < 1 || globalMinutes > 1440) {
@@ -1144,7 +1144,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
       if (!mounted) {
         return;
       }
-      final l10n = AppLocalizations.of(context)!;
+      final l10n = resolveAppLocalizationsForErrors(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(l10n.notificationsSnackTemplateIdAndNameRequired),
@@ -1235,7 +1235,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
       if (!mounted) {
         return;
       }
-      final l10n = AppLocalizations.of(context)!;
+      final l10n = resolveAppLocalizationsForErrors(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(l10n.notificationsSnackTemplateIdAndNameRequired),
@@ -1497,7 +1497,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     if (!mounted) {
       return;
     }
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(l10n.notificationsSnackExportFiltersReused)),
     );
@@ -1511,7 +1511,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     if (!mounted || path == null) {
       return;
     }
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(l10n.notificationsSnackDownloadedByHistory(path))),
     );
@@ -1526,7 +1526,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     if (job == null) {
       return;
     }
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(l10n.notificationsSnackExportQueued(job.numericTaskId)),
@@ -1541,7 +1541,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     if (!mounted || savedPath == null) {
       return;
     }
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(l10n.notificationsSnackSharedAuditJsonSaved(savedPath)),
@@ -1555,7 +1555,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     if (!mounted || savedPath == null) {
       return;
     }
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(l10n.notificationsSnackSharedAuditCsvSaved(savedPath)),
@@ -1589,7 +1589,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     if (!mounted) {
       return;
     }
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(l10n.notificationsSnackTemplatesJsonCopied)),
     );
@@ -1671,7 +1671,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     if (!mounted || count == null) {
       return;
     }
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(l10n.notificationsSnackImportDone(count))),
     );

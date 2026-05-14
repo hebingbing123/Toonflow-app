@@ -88,7 +88,7 @@ extension _StoryboardWorkbenchVideoActions on _StoryboardWorkbenchPanelState {
   }
 
   void _applyPromptRepairSuggestions() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final repaired = _repairCurrentPromptFromDiagnostics();
     if (repaired == null) {
       return;
@@ -141,33 +141,8 @@ extension _StoryboardWorkbenchVideoActions on _StoryboardWorkbenchPanelState {
     );
   }
 
-  Future<void> _runDialogAction(Future<void> Function() action) async {
-    final l10n = AppLocalizations.of(context)!;
-    _applyWorkbenchState(() => _saving = true);
-    try {
-      await action();
-    } on FormatException catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.message)));
-    } catch (e) {
-      if (!mounted) return;
-      _showWorkbenchFailureSnackBar(
-        actionSummary: l10n.storyboardActionOperationFailedSummary,
-        recommendedAction: _currentDiagnosis().recommendedAction,
-        error: e,
-        fallbackDetail: l10n.storyboardActionOperationFailedDetail,
-      );
-    } finally {
-      if (mounted) {
-        _applyWorkbenchState(() => _saving = false);
-      }
-    }
-  }
-
   Future<void> _submitVideoGeneration() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final sourceImage = _currentStoryboardSourceImage();
     if (sourceImage == null) {
       throw FormatException(l10n.storyboardActionErrNeedSourceImageOrPreview);
@@ -242,7 +217,9 @@ extension _StoryboardWorkbenchVideoActions on _StoryboardWorkbenchPanelState {
                     response.total,
                     dedupe,
                   )
-                : l10n.storyboardActionVideoJobsSubmittedTotalOnly(response.total)
+                : l10n.storyboardActionVideoJobsSubmittedTotalOnly(
+                    response.total,
+                  )
           : repairedCh
           ? l10n.storyboardActionVideoJobsSubmittedRepairFinal(
               response.total,
@@ -261,7 +238,7 @@ extension _StoryboardWorkbenchVideoActions on _StoryboardWorkbenchPanelState {
   }
 
   Future<void> _generateVoiceover() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final response = await postWorkbenchGenerateVoiceoverV1(
       widget.token,
       projectUuid: widget.projectId,
@@ -285,7 +262,7 @@ extension _StoryboardWorkbenchVideoActions on _StoryboardWorkbenchPanelState {
   }
 
   Future<void> _saveVideoDescription() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final response = await updateStoryboardByProjectAndNumericId(
       widget.token,
       widget.projectId,
@@ -310,7 +287,7 @@ extension _StoryboardWorkbenchVideoActions on _StoryboardWorkbenchPanelState {
   }
 
   Future<void> _exportCurrentVideoJob() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final candidates = _storyboardVideos();
     final selected = widget.scriptStoryboard.filePath;
     final sourceUrl = (selected ?? '').trim().isNotEmpty
@@ -342,9 +319,7 @@ extension _StoryboardWorkbenchVideoActions on _StoryboardWorkbenchPanelState {
       _latestExportJobId = job.id;
       _latestExportJob = job;
       _latestExportWritebackSynced = false;
-      _setWorkbenchFollowUp(
-        l10n.storyboardActionExportJobEnqueued(job.id),
-      );
+      _setWorkbenchFollowUp(l10n.storyboardActionExportJobEnqueued(job.id));
     });
   }
 }
