@@ -16,6 +16,7 @@ ProjectsController buildController({
   final controller = ProjectsController(
     accessTokenProvider: () => 'token',
     onErrorChanged: (_) {},
+    l10nProvider: () => null,
   );
   controller.projects = projects;
   controller.artStyles = artStyles;

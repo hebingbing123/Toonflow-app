@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
 
 typedef ApiKeysAccessTokenProvider = String? Function();
 typedef ApiKeysErrorSink = void Function(String? error);
+typedef ApiKeysL10nProvider = AppLocalizations? Function();
 
 class ApiKeysController extends ChangeNotifier {
   ApiKeysController({
     required ApiKeysAccessTokenProvider accessTokenProvider,
     required ApiKeysErrorSink onErrorChanged,
+    required ApiKeysL10nProvider l10nProvider,
   }) : _accessTokenProvider = accessTokenProvider,
-       _onErrorChanged = onErrorChanged;
+       _onErrorChanged = onErrorChanged,
+       _l10nProvider = l10nProvider;
 
   final ApiKeysAccessTokenProvider _accessTokenProvider;
   final ApiKeysErrorSink _onErrorChanged;
+  final ApiKeysL10nProvider _l10nProvider;
 
   bool loading = false;
   bool creating = false;
@@ -26,6 +31,10 @@ class ApiKeysController extends ChangeNotifier {
   bool _primed = false;
 
   String? get _accessToken => _accessTokenProvider();
+  AppLocalizations? get _l10n => _l10nProvider();
+
+  AppLocalizations get _l10nResolved =>
+      _l10n ?? lookupAppLocalizations(const Locale('en'));
 
   void _setError(String? value) => _onErrorChanged(value);
 
@@ -58,7 +67,11 @@ class ApiKeysController extends ChangeNotifier {
       revokedCount = list.revokedCount;
       auditItems = audit.items;
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError);
+      reportRustOrDescribeApiError(
+        error,
+        onErrorChanged: _setError,
+        l10n: _l10nResolved,
+      );
     } finally {
       loading = false;
       notifyListeners();
@@ -87,7 +100,11 @@ class ApiKeysController extends ChangeNotifier {
       latestPlaintextToken = created.plaintextToken;
       await refresh();
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError);
+      reportRustOrDescribeApiError(
+        error,
+        onErrorChanged: _setError,
+        l10n: _l10nResolved,
+      );
     } finally {
       creating = false;
       notifyListeners();
@@ -153,7 +170,11 @@ class ApiKeysController extends ChangeNotifier {
     try {
       await action();
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError);
+      reportRustOrDescribeApiError(
+        error,
+        onErrorChanged: _setError,
+        l10n: _l10nResolved,
+      );
     } finally {
       busyKeyId = null;
       notifyListeners();

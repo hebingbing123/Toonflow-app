@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../rust_api.dart';
 
 typedef AccountProbesAccessTokenProvider = String? Function();
@@ -7,6 +8,7 @@ typedef AccountProbesErrorSink = void Function(String? error);
 typedef AccountProbesScopeTextProvider = String Function();
 typedef AccountProbesFetchProjects =
     Future<List<ProjectRow>> Function(String token);
+typedef AccountProbesL10nProvider = AppLocalizations? Function();
 
 class AccountProbeClearScope {
   const AccountProbeClearScope({
@@ -55,12 +57,14 @@ class AccountProbesController extends ChangeNotifier {
   AccountProbesController({
     required AccountProbesAccessTokenProvider accessTokenProvider,
     required AccountProbesErrorSink onErrorChanged,
+    required AccountProbesL10nProvider l10nProvider,
     AccountProbesScopeTextProvider? projectIdTextProvider,
     AccountProbesScopeTextProvider? projectUuidTextProvider,
     AccountProbesScopeTextProvider? scriptIdTextProvider,
     AccountProbesFetchProjects fetchProjects = fetchProjects,
   }) : _accessTokenProvider = accessTokenProvider,
        _onErrorChanged = onErrorChanged,
+       _l10nProvider = l10nProvider,
        _projectIdTextProvider = projectIdTextProvider ?? _emptyScopeText,
        _projectUuidTextProvider = projectUuidTextProvider ?? _emptyScopeText,
        _scriptIdTextProvider = scriptIdTextProvider ?? _emptyScopeText,
@@ -68,6 +72,7 @@ class AccountProbesController extends ChangeNotifier {
 
   final AccountProbesAccessTokenProvider _accessTokenProvider;
   final AccountProbesErrorSink _onErrorChanged;
+  final AccountProbesL10nProvider _l10nProvider;
   final AccountProbesScopeTextProvider _projectIdTextProvider;
   final AccountProbesScopeTextProvider _projectUuidTextProvider;
   final AccountProbesScopeTextProvider _scriptIdTextProvider;
@@ -85,6 +90,10 @@ class AccountProbesController extends ChangeNotifier {
   String? usageSummaryBody;
 
   String? get _accessToken => _accessTokenProvider();
+  AppLocalizations? get _l10n => _l10nProvider();
+
+  AppLocalizations get _l10nResolved =>
+      _l10n ?? lookupAppLocalizations(const Locale('en'));
 
   void reset() {
     loadingMe = false;
@@ -126,7 +135,11 @@ class AccountProbesController extends ChangeNotifier {
       }
       meBody = parts.join(' · ');
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _onErrorChanged);
+      reportRustOrDescribeApiError(
+        error,
+        onErrorChanged: _onErrorChanged,
+        l10n: _l10nResolved,
+      );
     } finally {
       loadingMe = false;
       notifyListeners();
@@ -148,7 +161,11 @@ class AccountProbesController extends ChangeNotifier {
           'events_last_7d=${summary.eventsLast7d} · '
           'event_counts_last_7d=${summary.eventCountsLast7d}';
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _onErrorChanged);
+      reportRustOrDescribeApiError(
+        error,
+        onErrorChanged: _onErrorChanged,
+        l10n: _l10nResolved,
+      );
     } finally {
       loadingUsageSummary = false;
       notifyListeners();
@@ -178,7 +195,11 @@ class AccountProbesController extends ChangeNotifier {
           'PUT body {value:$target} -> ${updated.value} · '
           'GET value=${after.value}';
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _onErrorChanged);
+      reportRustOrDescribeApiError(
+        error,
+        onErrorChanged: _onErrorChanged,
+        l10n: _l10nResolved,
+      );
     } finally {
       loadingDevSwitchProbe = false;
       notifyListeners();
@@ -246,7 +267,11 @@ class AccountProbesController extends ChangeNotifier {
       };
       memoryConfigProbeBody = '$line · clear-agent-memories -> $clearNote';
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _onErrorChanged);
+      reportRustOrDescribeApiError(
+        error,
+        onErrorChanged: _onErrorChanged,
+        l10n: _l10nResolved,
+      );
     } finally {
       loadingMemoryConfigProbe = false;
       notifyListeners();
@@ -275,7 +300,11 @@ class AccountProbesController extends ChangeNotifier {
           'latest=${checkUpdate.latestVersion} · '
           'download-app -> $downloadStatus';
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _onErrorChanged);
+      reportRustOrDescribeApiError(
+        error,
+        onErrorChanged: _onErrorChanged,
+        l10n: _l10nResolved,
+      );
     } finally {
       loadingAboutProbe = false;
       notifyListeners();

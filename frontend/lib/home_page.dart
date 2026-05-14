@@ -195,6 +195,7 @@ class _HomePageState extends State<HomePage> {
   late final ProjectsController _projectsController = ProjectsController(
     accessTokenProvider: () => _session?.accessToken,
     onErrorChanged: _setSharedError,
+    l10nProvider: () => _appL10n,
   );
 
   late final JobsController _jobsController = JobsController(
@@ -231,6 +232,7 @@ class _HomePageState extends State<HomePage> {
   late final ApiKeysController _apiKeysController = ApiKeysController(
     accessTokenProvider: () => _session?.accessToken,
     onErrorChanged: _setSharedError,
+    l10nProvider: () => _appL10n,
   );
 
   late final NotificationsController _notificationsController =
@@ -243,6 +245,7 @@ class _HomePageState extends State<HomePage> {
   late final TaskCenterController _taskCenterController = TaskCenterController(
     accessTokenProvider: () => _session?.accessToken,
     onErrorChanged: _setSharedError,
+    l10nProvider: () => _appL10n,
     projectIdTextProvider: () =>
         _workspaceInputController.projectIdController.text,
     projectUuidTextProvider: () =>
@@ -258,6 +261,7 @@ class _HomePageState extends State<HomePage> {
 
   late final OverviewController _overviewController = OverviewController(
     onErrorChanged: _setSharedError,
+    l10nProvider: () => _appL10n,
   );
 
   late final AdminConsoleController _adminConsoleController =
@@ -276,6 +280,7 @@ class _HomePageState extends State<HomePage> {
       AccountProbesController(
         accessTokenProvider: () => _session?.accessToken,
         onErrorChanged: _setSharedError,
+        l10nProvider: () => _appL10n,
         projectIdTextProvider: () =>
             _workspaceInputController.projectIdController.text,
         projectUuidTextProvider: () =>
@@ -288,6 +293,7 @@ class _HomePageState extends State<HomePage> {
       ContentProbesController(
         accessTokenProvider: () => _session?.accessToken,
         onErrorChanged: _setSharedError,
+        l10nProvider: () => _appL10n,
       );
 
   late final ModelsCatalogController _modelsCatalogController =

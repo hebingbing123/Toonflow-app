@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../rust_api.dart';
 
 typedef ContentProbesAccessTokenProvider = String? Function();
 typedef ContentProbesErrorSink = void Function(String? error);
+typedef ContentProbesL10nProvider = AppLocalizations? Function();
 
 class ContentProbesController extends ChangeNotifier {
   ContentProbesController({
     required ContentProbesAccessTokenProvider accessTokenProvider,
     required ContentProbesErrorSink onErrorChanged,
+    required ContentProbesL10nProvider l10nProvider,
   }) : _accessTokenProvider = accessTokenProvider,
-       _onErrorChanged = onErrorChanged;
+       _onErrorChanged = onErrorChanged,
+       _l10nProvider = l10nProvider;
 
   final ContentProbesAccessTokenProvider _accessTokenProvider;
   final ContentProbesErrorSink _onErrorChanged;
+  final ContentProbesL10nProvider _l10nProvider;
 
   bool loadingPromptsProbe = false;
   bool loadingVisualManualProbe = false;
@@ -29,6 +34,10 @@ class ContentProbesController extends ChangeNotifier {
   String? modelDetailBody;
 
   String? get _accessToken => _accessTokenProvider();
+  AppLocalizations? get _l10n => _l10nProvider();
+
+  AppLocalizations get _l10nResolved =>
+      _l10n ?? lookupAppLocalizations(const Locale('en'));
 
   void reset() {
     loadingPromptsProbe = false;
@@ -75,7 +84,11 @@ class ContentProbesController extends ChangeNotifier {
       promptsProbeBody =
           'count=${rows.length} · types=$types · data_chars_total=$totalChars$roundtrip';
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _onErrorChanged);
+      reportRustOrDescribeApiError(
+        error,
+        onErrorChanged: _onErrorChanged,
+        l10n: _l10nResolved,
+      );
     } finally {
       loadingPromptsProbe = false;
       notifyListeners();
@@ -114,7 +127,11 @@ class ContentProbesController extends ChangeNotifier {
           'GET+POST styles=${manual.styles.length} · slots_data_chars_total=$totalChars · image_paths=$totalImages'
           '${sample.isEmpty ? '' : ' · sample: $sample'}';
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _onErrorChanged);
+      reportRustOrDescribeApiError(
+        error,
+        onErrorChanged: _onErrorChanged,
+        l10n: _l10nResolved,
+      );
     } finally {
       loadingVisualManualProbe = false;
       notifyListeners();
@@ -146,7 +163,11 @@ class ContentProbesController extends ChangeNotifier {
           'folders=${list.data.length} · slot_data_chars=$slotChars · image_paths=$imagePaths'
           '${sample.isEmpty ? '' : ' · sample: $sample'}';
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _onErrorChanged);
+      reportRustOrDescribeApiError(
+        error,
+        onErrorChanged: _onErrorChanged,
+        l10n: _l10nResolved,
+      );
     } finally {
       loadingDirectorManualProbe = false;
       notifyListeners();
@@ -173,7 +194,11 @@ class ContentProbesController extends ChangeNotifier {
       skillsBinaryProbeBody =
           'path=$path · bytes=${bytes.length} · png_magic=$magicOk';
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _onErrorChanged);
+      reportRustOrDescribeApiError(
+        error,
+        onErrorChanged: _onErrorChanged,
+        l10n: _l10nResolved,
+      );
     } finally {
       loadingSkillsBinaryProbe = false;
       notifyListeners();
@@ -217,7 +242,11 @@ class ContentProbesController extends ChangeNotifier {
           '${patched == null ? ' · PATCH skipped (single text model)' : ' · PATCH=$alternative'}'
           ' · reset=${reset.defaultModelId}';
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _onErrorChanged);
+      reportRustOrDescribeApiError(
+        error,
+        onErrorChanged: _onErrorChanged,
+        l10n: _l10nResolved,
+      );
     } finally {
       loadingTextModelDefault = false;
       notifyListeners();
@@ -236,7 +265,11 @@ class ContentProbesController extends ChangeNotifier {
       modelDetailBody =
           '${detail.name} (${detail.modelName}) type=${detail.type} · vendor ${detail.vendorName} [${detail.vendorId}]';
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _onErrorChanged);
+      reportRustOrDescribeApiError(
+        error,
+        onErrorChanged: _onErrorChanged,
+        l10n: _l10nResolved,
+      );
     } finally {
       loadingModelDetail = false;
       notifyListeners();

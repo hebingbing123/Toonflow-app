@@ -1,14 +1,25 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
 
 typedef OverviewErrorSink = void Function(String? error);
+typedef OverviewL10nProvider = AppLocalizations? Function();
 
 class OverviewController extends ChangeNotifier {
-  OverviewController({required OverviewErrorSink onErrorChanged})
-    : _onErrorChanged = onErrorChanged;
+  OverviewController({
+    required OverviewErrorSink onErrorChanged,
+    required OverviewL10nProvider l10nProvider,
+  }) : _onErrorChanged = onErrorChanged,
+       _l10nProvider = l10nProvider;
 
   final OverviewErrorSink _onErrorChanged;
+  final OverviewL10nProvider _l10nProvider;
+
+  AppLocalizations? get _l10n => _l10nProvider();
+
+  AppLocalizations get _l10nResolved =>
+      _l10n ?? lookupAppLocalizations(const Locale('en'));
 
   bool loadingHealth = false;
   bool loadingHealthRoot = false;
@@ -48,7 +59,11 @@ class OverviewController extends ChangeNotifier {
       final response = await fetchHealthV1();
       healthBody = 'status=${response.status} service=${response.service}';
     } catch (e) {
-      reportRustOrDescribeApiError(e, onErrorChanged: _setError);
+      reportRustOrDescribeApiError(
+        e,
+        onErrorChanged: _setError,
+        l10n: _l10nResolved,
+      );
     } finally {
       loadingHealth = false;
       notifyListeners();
@@ -64,7 +79,11 @@ class OverviewController extends ChangeNotifier {
       final response = await fetchHealthRoot();
       healthRootBody = 'status=${response.status} service=${response.service}';
     } catch (e) {
-      reportRustOrDescribeApiError(e, onErrorChanged: _setError);
+      reportRustOrDescribeApiError(
+        e,
+        onErrorChanged: _setError,
+        l10n: _l10nResolved,
+      );
     } finally {
       loadingHealthRoot = false;
       notifyListeners();
@@ -80,7 +99,11 @@ class OverviewController extends ChangeNotifier {
       final response = await fetchPingV1();
       pingBody = 'ok=${response.ok}';
     } catch (e) {
-      reportRustOrDescribeApiError(e, onErrorChanged: _setError);
+      reportRustOrDescribeApiError(
+        e,
+        onErrorChanged: _setError,
+        l10n: _l10nResolved,
+      );
     } finally {
       loadingPing = false;
       notifyListeners();
@@ -103,7 +126,11 @@ class OverviewController extends ChangeNotifier {
       }
       versionBody = parts.join(' · ');
     } catch (e) {
-      reportRustOrDescribeApiError(e, onErrorChanged: _setError);
+      reportRustOrDescribeApiError(
+        e,
+        onErrorChanged: _setError,
+        l10n: _l10nResolved,
+      );
     } finally {
       loadingVersion = false;
       notifyListeners();
@@ -119,7 +146,11 @@ class OverviewController extends ChangeNotifier {
       final response = await fetchReadyV1();
       readyBody = 'status=${response.status}, database=${response.database}';
     } catch (e) {
-      reportRustOrDescribeApiError(e, onErrorChanged: _setError);
+      reportRustOrDescribeApiError(
+        e,
+        onErrorChanged: _setError,
+        l10n: _l10nResolved,
+      );
     } finally {
       loadingReady = false;
       notifyListeners();

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../../rust_api.dart';
 
 typedef ProjectsAccessTokenProvider = String? Function();
 typedef ProjectsErrorSink = void Function(String? error);
+typedef ProjectsL10nProvider = AppLocalizations? Function();
 
 ({String? projectUuid, int? projectId}) agentMemoryProjectRefFromRow(
   ProjectRow row,
@@ -22,11 +24,14 @@ class ProjectsController extends ChangeNotifier {
   ProjectsController({
     required ProjectsAccessTokenProvider accessTokenProvider,
     required ProjectsErrorSink onErrorChanged,
+    required ProjectsL10nProvider l10nProvider,
   }) : _accessTokenProvider = accessTokenProvider,
-       _onErrorChanged = onErrorChanged;
+       _onErrorChanged = onErrorChanged,
+       _l10nProvider = l10nProvider;
 
   final ProjectsAccessTokenProvider _accessTokenProvider;
   final ProjectsErrorSink _onErrorChanged;
+  final ProjectsL10nProvider _l10nProvider;
 
   bool loadingProjects = false;
   bool loadingProjectsSummary = false;
@@ -40,6 +45,10 @@ class ProjectsController extends ChangeNotifier {
   String? agentMemoryBody;
 
   String? get _accessToken => _accessTokenProvider();
+  AppLocalizations? get _l10n => _l10nProvider();
+
+  AppLocalizations get _l10nResolved =>
+      _l10n ?? lookupAppLocalizations(const Locale('en'));
 
   void _setError(String? error) {
     _onErrorChanged(error);
@@ -74,7 +83,11 @@ class ProjectsController extends ChangeNotifier {
       await loadProjects();
       return true;
     } catch (e) {
-      reportRustOrDescribeApiError(e, onErrorChanged: _setError);
+      reportRustOrDescribeApiError(
+        e,
+        onErrorChanged: _setError,
+        l10n: _l10nResolved,
+      );
     } finally {
       creatingProject = false;
       notifyListeners();
@@ -120,7 +133,11 @@ class ProjectsController extends ChangeNotifier {
       agentMemoryBody =
           '${rows.length} message(s) for project ${first.id}$appendBit';
     } catch (e) {
-      reportRustOrDescribeApiError(e, onErrorChanged: _setError);
+      reportRustOrDescribeApiError(
+        e,
+        onErrorChanged: _setError,
+        l10n: _l10nResolved,
+      );
     } finally {
       loadingAgentMemory = false;
       notifyListeners();
@@ -137,7 +154,11 @@ class ProjectsController extends ChangeNotifier {
     try {
       projects = await fetchProjects(token);
     } catch (e) {
-      reportRustOrDescribeApiError(e, onErrorChanged: _setError);
+      reportRustOrDescribeApiError(
+        e,
+        onErrorChanged: _setError,
+        l10n: _l10nResolved,
+      );
     } finally {
       loadingProjects = false;
       notifyListeners();
@@ -156,7 +177,11 @@ class ProjectsController extends ChangeNotifier {
       projectsSummaryLine =
           'projects=${summary.projectCount} scripts=${summary.scriptCount} storyboards=${summary.storyboardCount} novels=${summary.novelCount} roles=${summary.roleCount} art_styles=${summary.artStyleCount} assets=${summary.assetCount} videos=${summary.videoCount}';
     } catch (e) {
-      reportRustOrDescribeApiError(e, onErrorChanged: _setError);
+      reportRustOrDescribeApiError(
+        e,
+        onErrorChanged: _setError,
+        l10n: _l10nResolved,
+      );
     } finally {
       loadingProjectsSummary = false;
       notifyListeners();
@@ -193,7 +218,11 @@ class ProjectsController extends ChangeNotifier {
       artStyles = response.items;
       artStylesLine = line;
     } catch (e) {
-      reportRustOrDescribeApiError(e, onErrorChanged: _setError);
+      reportRustOrDescribeApiError(
+        e,
+        onErrorChanged: _setError,
+        l10n: _l10nResolved,
+      );
     } finally {
       loadingArtStyles = false;
       notifyListeners();

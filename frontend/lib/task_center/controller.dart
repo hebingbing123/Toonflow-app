@@ -1,24 +1,29 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
 
 typedef TaskCenterAccessTokenProvider = String? Function();
 typedef TaskCenterErrorSink = void Function(String? error);
 typedef TaskCenterScopeTextProvider = String Function();
+typedef TaskCenterL10nProvider = AppLocalizations? Function();
 
 class TaskCenterController extends ChangeNotifier {
   TaskCenterController({
     required TaskCenterAccessTokenProvider accessTokenProvider,
     required TaskCenterErrorSink onErrorChanged,
+    required TaskCenterL10nProvider l10nProvider,
     TaskCenterScopeTextProvider? projectIdTextProvider,
     TaskCenterScopeTextProvider? projectUuidTextProvider,
   }) : _accessTokenProvider = accessTokenProvider,
        _onErrorChanged = onErrorChanged,
+       _l10nProvider = l10nProvider,
        _projectIdTextProvider = projectIdTextProvider ?? _emptyScopeText,
        _projectUuidTextProvider = projectUuidTextProvider ?? _emptyScopeText;
 
   final TaskCenterAccessTokenProvider _accessTokenProvider;
   final TaskCenterErrorSink _onErrorChanged;
+  final TaskCenterL10nProvider _l10nProvider;
   final TaskCenterScopeTextProvider _projectIdTextProvider;
   final TaskCenterScopeTextProvider _projectUuidTextProvider;
 
@@ -61,6 +66,11 @@ class TaskCenterController extends ChangeNotifier {
     notifyListeners();
   }
 
+  AppLocalizations? get _l10n => _l10nProvider();
+
+  AppLocalizations get _l10nResolved =>
+      _l10n ?? lookupAppLocalizations(const Locale('en'));
+
   Future<void> loadTaskProjects() async {
     final token = _accessTokenProvider();
     if (token == null) return;
@@ -71,7 +81,11 @@ class TaskCenterController extends ChangeNotifier {
     try {
       taskProjects = await postTasksGetProject(token);
     } catch (e) {
-      reportRustOrDescribeApiError(e, onErrorChanged: _onErrorChanged);
+      reportRustOrDescribeApiError(
+        e,
+        onErrorChanged: _onErrorChanged,
+        l10n: _l10nResolved,
+      );
     } finally {
       loadingTaskProjects = false;
       notifyListeners();
@@ -91,7 +105,11 @@ class TaskCenterController extends ChangeNotifier {
           ? '(empty)'
           : rows.map((row) => row.taskClass).join(', ');
     } catch (e) {
-      reportRustOrDescribeApiError(e, onErrorChanged: _onErrorChanged);
+      reportRustOrDescribeApiError(
+        e,
+        onErrorChanged: _onErrorChanged,
+        l10n: _l10nResolved,
+      );
     } finally {
       loadingTaskCategories = false;
       notifyListeners();
@@ -135,7 +153,11 @@ class TaskCenterController extends ChangeNotifier {
           ' · total=${rows.total} · page_rows=${rows.data.length}'
           '${sample.isEmpty ? '' : ' · sample: $sample'}';
     } catch (e) {
-      reportRustOrDescribeApiError(e, onErrorChanged: _onErrorChanged);
+      reportRustOrDescribeApiError(
+        e,
+        onErrorChanged: _onErrorChanged,
+        l10n: _l10nResolved,
+      );
     } finally {
       loadingTaskApi = false;
       notifyListeners();
@@ -162,7 +184,11 @@ class TaskCenterController extends ChangeNotifier {
       taskDetailNumericIdLine =
           'taskId=${row.numericTaskId} -> ${row.kind} · ${row.status} · uuid=${row.id}';
     } catch (e) {
-      reportRustOrDescribeApiError(e, onErrorChanged: _onErrorChanged);
+      reportRustOrDescribeApiError(
+        e,
+        onErrorChanged: _onErrorChanged,
+        l10n: _l10nResolved,
+      );
     } finally {
       loadingTaskDetailsByNumericId = false;
       notifyListeners();
@@ -189,7 +215,11 @@ class TaskCenterController extends ChangeNotifier {
       }
       taskDetailUuidLine = parts.join(' · ');
     } catch (e) {
-      reportRustOrDescribeApiError(e, onErrorChanged: _onErrorChanged);
+      reportRustOrDescribeApiError(
+        e,
+        onErrorChanged: _onErrorChanged,
+        l10n: _l10nResolved,
+      );
     } finally {
       loadingTaskDetailsUuid = false;
       notifyListeners();
