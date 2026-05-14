@@ -34,6 +34,10 @@ class AdminConsoleController extends ChangeNotifier {
   String get _internalOpsToken => kInternalOpsToken;
   AppLocalizations? get _l10n => _l10nProvider?.call();
 
+  /// UI 未挂上 [AppLocalizations] 时回退到英文生成类，避免在 controller 内硬编码英文句子。
+  AppLocalizations get _l10nResolved =>
+      _l10n ?? lookupAppLocalizations(const Locale('en'));
+
   bool get enabled => _internalOpsToken.trim().isNotEmpty;
 
   void _setError(String? value) => _onErrorChanged(value);
@@ -44,10 +48,7 @@ class AdminConsoleController extends ChangeNotifier {
     }
     final needle = query.trim();
     if (needle.length < 2) {
-      _setError(
-        _l10n?.adminConsoleErrSearchAtLeast2Chars ??
-            'Please enter at least 2 characters.',
-      );
+      _setError(_l10nResolved.adminConsoleErrSearchAtLeast2Chars);
       return;
     }
     searching = true;
@@ -56,7 +57,7 @@ class AdminConsoleController extends ChangeNotifier {
     try {
       searchResult = await fetchAdminSearchV1(_internalOpsToken, query: needle);
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
       searching = false;
       notifyListeners();
@@ -112,7 +113,7 @@ class AdminConsoleController extends ChangeNotifier {
     try {
       await action();
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
       loadingDetail = false;
       notifyListeners();
@@ -134,19 +135,13 @@ class AdminConsoleController extends ChangeNotifier {
     final normalizedNote = opsNote?.trim();
     if (operationalStatus == AdminOperationalStatusV1.suspended &&
         (normalizedReason == null || normalizedReason.isEmpty)) {
-      _setError(
-        _l10n?.adminConsoleErrSuspendReasonRequired ??
-            'A suspension reason is required.',
-      );
+      _setError(_l10nResolved.adminConsoleErrSuspendReasonRequired);
       notifyListeners();
       return;
     }
     if (dailyJobQuotaAction == AdminQuotaOverrideActionV1.set &&
         (dailyJobQuota == null || dailyJobQuota <= 0)) {
-      _setError(
-        _l10n?.adminConsoleErrDailyQuotaPositiveRequired ??
-            'A positive integer is required when setting daily quota.',
-      );
+      _setError(_l10nResolved.adminConsoleErrDailyQuotaPositiveRequired);
       notifyListeners();
       return;
     }
@@ -196,7 +191,7 @@ class AdminConsoleController extends ChangeNotifier {
         );
       }
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
       savingGovernance = false;
       notifyListeners();
@@ -248,7 +243,7 @@ class AdminConsoleController extends ChangeNotifier {
         );
       }
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
       savingWorkspaceContext = false;
       notifyListeners();
@@ -267,10 +262,7 @@ class AdminConsoleController extends ChangeNotifier {
     final trimmed = opsNote?.trim();
     if (opsNoteAction == AdminWorkspaceOpsNoteActionV1.set &&
         (trimmed == null || trimmed.isEmpty)) {
-      _setError(
-        _l10n?.adminConsoleErrInternalNoteRequired ??
-            'Internal note content is required.',
-      );
+      _setError(_l10nResolved.adminConsoleErrInternalNoteRequired);
       notifyListeners();
       return;
     }
@@ -314,7 +306,7 @@ class AdminConsoleController extends ChangeNotifier {
         );
       }
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
       savingGovernance = false;
       notifyListeners();
@@ -332,19 +324,13 @@ class AdminConsoleController extends ChangeNotifier {
     }
     final trimmedUserId = userId.trim();
     if (trimmedUserId.isEmpty) {
-      _setError(
-        _l10n?.adminConsoleErrMemberUserIdRequired ??
-            'Member userId cannot be empty.',
-      );
+      _setError(_l10nResolved.adminConsoleErrMemberUserIdRequired);
       notifyListeners();
       return;
     }
     if (action == AdminWorkspaceMemberRemediationActionV1.upsert &&
         role == null) {
-      _setError(
-        _l10n?.adminConsoleErrMemberRoleRequired ??
-            'A role is required when adding or updating a member.',
-      );
+      _setError(_l10nResolved.adminConsoleErrMemberRoleRequired);
       notifyListeners();
       return;
     }
@@ -386,7 +372,7 @@ class AdminConsoleController extends ChangeNotifier {
         );
       }
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
       savingWorkspaceMembership = false;
       notifyListeners();
@@ -405,10 +391,7 @@ class AdminConsoleController extends ChangeNotifier {
     final trimmed = opsNote?.trim();
     if (opsNoteAction == AdminWorkspaceOpsNoteActionV1.set &&
         (trimmed == null || trimmed.isEmpty)) {
-      _setError(
-        _l10n?.adminConsoleErrInternalNoteRequired ??
-            'Internal note content is required.',
-      );
+      _setError(_l10nResolved.adminConsoleErrInternalNoteRequired);
       notifyListeners();
       return;
     }
@@ -452,7 +435,7 @@ class AdminConsoleController extends ChangeNotifier {
         );
       }
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
       savingGovernance = false;
       notifyListeners();
@@ -468,10 +451,7 @@ class AdminConsoleController extends ChangeNotifier {
     }
     final trimmedTarget = targetUserId.trim();
     if (trimmedTarget.isEmpty) {
-      _setError(
-        _l10n?.adminConsoleErrTargetOwnerUserIdRequired ??
-            'Target owner userId cannot be empty.',
-      );
+      _setError(_l10nResolved.adminConsoleErrTargetOwnerUserIdRequired);
       notifyListeners();
       return;
     }
@@ -511,7 +491,7 @@ class AdminConsoleController extends ChangeNotifier {
         );
       }
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
       savingOwnershipRemediation = false;
       notifyListeners();
@@ -527,10 +507,7 @@ class AdminConsoleController extends ChangeNotifier {
     }
     final trimmedTarget = targetUserId.trim();
     if (trimmedTarget.isEmpty) {
-      _setError(
-        _l10n?.adminConsoleErrTargetOwnerUserIdRequired ??
-            'Target owner userId cannot be empty.',
-      );
+      _setError(_l10nResolved.adminConsoleErrTargetOwnerUserIdRequired);
       notifyListeners();
       return;
     }
@@ -570,7 +547,7 @@ class AdminConsoleController extends ChangeNotifier {
         );
       }
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
       savingOwnershipRemediation = false;
       notifyListeners();
@@ -587,20 +564,14 @@ class AdminConsoleController extends ChangeNotifier {
       return null;
     }
     if (projectIds.isEmpty) {
-      _setError(
-        _l10n?.adminConsoleErrAtLeastOneProjectRequired ??
-            'Select at least one project.',
-      );
+      _setError(_l10nResolved.adminConsoleErrAtLeastOneProjectRequired);
       notifyListeners();
       return null;
     }
     final trimmed = opsNote?.trim();
     if (opsNoteAction == AdminWorkspaceOpsNoteActionV1.set &&
         (trimmed == null || trimmed.isEmpty)) {
-      _setError(
-        _l10n?.adminConsoleErrBatchNoteRequired ??
-            'Batch note content is required.',
-      );
+      _setError(_l10nResolved.adminConsoleErrBatchNoteRequired);
       notifyListeners();
       return null;
     }
@@ -668,7 +639,7 @@ class AdminConsoleController extends ChangeNotifier {
       }
       return response;
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
       return null;
     } finally {
       savingBatchGovernance = false;
