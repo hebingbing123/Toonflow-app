@@ -65,7 +65,7 @@ void main() {
       expect(lines, contains('列表 3 项'));
       expect(lines, contains('画面结果 1/2 已就绪，待补帧 1 项，纯文本 1 项'));
       expect(lines, contains('需要图片 2'));
-      expect(lines, contains('缺少帧 1 项'));
+      expect(lines, contains('缺帧 1 项'));
       expect(lines, contains('纯文本 1'));
     },
   );
@@ -168,19 +168,15 @@ void main() {
   test(
     'summarizeProductionFlowValue marks script plan rewrite constraints as landed',
     () {
-      final lines = summarizeProductionFlowValue(
-        _zh,
-        '''
+      final lines = summarizeProductionFlowValue(_zh, '''
 <scriptPlan>
 ① 主题立意与叙事核心
 女主复仇线要压住爽感，并保证前两场快速立住目标。
 </scriptPlan>
-''',
-        flowKey: 'scriptPlan',
-      );
+''', flowKey: 'scriptPlan');
 
       expect(lines, contains('计划章节 1'));
-      expect(lines, contains('已承接改写约束'));
+      expect(lines, contains('改写约束下沉'));
     },
   );
 
@@ -734,7 +730,9 @@ void main() {
         },
       );
 
-      final assetStage = stages.firstWhere((stage) => stage.flowKey == 'assets');
+      final assetStage = stages.firstWhere(
+        (stage) => stage.flowKey == 'assets',
+      );
       final storyboardStage = stages.firstWhere(
         (stage) => stage.flowKey == 'storyboard',
       );
@@ -1340,7 +1338,7 @@ void main() {
       final assetStage = stages.singleWhere(
         (stage) => stage.flowKey == 'assets',
       );
-      expect(assetStage.statusLabel, '可推进');
+      expect(assetStage.status.legacyChineseLabel, '可推进');
       expect(assetStage.domainTool, 'get_flowData');
       expect(assetStage.domainArgs, <String, dynamic>{
         'key': 'assets',
@@ -1371,7 +1369,7 @@ void main() {
       final scriptPlanStage = stages.firstWhere(
         (stage) => stage.flowKey == 'scriptPlan',
       );
-      expect(scriptPlanStage.statusLabel, '待完善');
+      expect(scriptPlanStage.status.legacyChineseLabel, '待完善');
       expect(scriptPlanStage.subAgentTool, 'run_sub_agent_director_plan');
       expect(scriptPlanStage.detail, contains('至少 3 个规划维度'));
     },
@@ -1400,7 +1398,7 @@ void main() {
       final assetStage = stages.singleWhere(
         (stage) => stage.flowKey == 'assets',
       );
-      expect(assetStage.statusLabel, '可推进');
+      expect(assetStage.status.legacyChineseLabel, '可推进');
       expect(assetStage.domainArgs, <String, dynamic>{
         'key': 'assets',
         'assetTypes': <String>['role', 'scene'],
@@ -1702,7 +1700,7 @@ void main() {
     );
 
     final assetsStage = stages.firstWhere((stage) => stage.flowKey == 'assets');
-    expect(assetsStage.statusLabel, '需补图');
+    expect(assetsStage.status.legacyChineseLabel, '需补图');
     expect(assetsStage.subAgentTool, 'run_sub_agent_generate_assets');
     expect(assetsStage.detail, contains('资产 #12, 21 仍缺图'));
     expect(assetsStage.detail, contains('主资产 1/2 已就绪'));
@@ -1776,7 +1774,7 @@ void main() {
       final assetsStage = stages.firstWhere(
         (stage) => stage.flowKey == 'assets',
       );
-      expect(assetsStage.statusLabel, '已定位');
+      expect(assetsStage.status.legacyChineseLabel, '已定位');
       expect(assetsStage.domainTool, 'get_flowData');
       expect(assetsStage.domainArgs, <String, dynamic>{
         'key': 'assets',
@@ -1799,7 +1797,7 @@ void main() {
       final storyboardStage = stages.firstWhere(
         (stage) => stage.flowKey == 'storyboard',
       );
-      expect(storyboardStage.statusLabel, '建议刷新');
+      expect(storyboardStage.status.legacyChineseLabel, '建议刷新');
       expect(storyboardStage.domainTool, 'get_flowData');
       expect(storyboardStage.domainArgs, <String, dynamic>{
         'key': 'storyboard',
@@ -1913,7 +1911,7 @@ void main() {
       final tableStage = stages.firstWhere(
         (stage) => stage.flowKey == 'storyboardTable',
       );
-      expect(tableStage.statusLabel, '待审核');
+      expect(tableStage.status.legacyChineseLabel, '待审核');
       expect(tableStage.subAgentTool, 'run_sub_agent_production_supervision');
     },
   );
@@ -1940,7 +1938,7 @@ void main() {
       final tableStage = stages.firstWhere(
         (stage) => stage.flowKey == 'storyboardTable',
       );
-      expect(tableStage.statusLabel, '可推进');
+      expect(tableStage.status.legacyChineseLabel, '可推进');
       expect(tableStage.domainTool, 'get_flowData');
       expect(tableStage.domainArgs, <String, dynamic>{
         'key': 'script',
@@ -2013,7 +2011,7 @@ void main() {
       final storyboardStage = stages.firstWhere(
         (stage) => stage.flowKey == 'storyboard',
       );
-      expect(storyboardStage.statusLabel, '待核对');
+      expect(storyboardStage.status.legacyChineseLabel, '待核对');
       expect(storyboardStage.domainTool, 'get_flowData');
       expect(storyboardStage.domainArgs, <String, dynamic>{
         'key': 'storyboard',
@@ -2118,7 +2116,7 @@ void main() {
       final tableStage = stages.firstWhere(
         (stage) => stage.flowKey == 'storyboardTable',
       );
-      expect(tableStage.statusLabel, '待扩读');
+      expect(tableStage.status.legacyChineseLabel, '待扩读');
       expect(tableStage.domainArgs, <String, dynamic>{
         'key': 'storyboardTable',
         'rowStart': 1,
@@ -2158,7 +2156,7 @@ void main() {
       final tableStage = stages.firstWhere(
         (stage) => stage.flowKey == 'storyboardTable',
       );
-      expect(tableStage.statusLabel, '已抽样');
+      expect(tableStage.status.legacyChineseLabel, '已抽样');
       expect(tableStage.detail, contains('适合继续审核或修订'));
     },
   );
@@ -2200,13 +2198,13 @@ void main() {
       final storyboardStage = stages.firstWhere(
         (stage) => stage.flowKey == 'storyboard',
       );
-      expect(tableStage.statusLabel, '回补导演计划');
+      expect(tableStage.status.legacyChineseLabel, '回补导演计划');
       expect(tableStage.domainArgs, <String, dynamic>{
         'key': 'scriptPlan',
         'maxChars': 2200,
       });
       expect(tableStage.detail, contains('先回补导演计划'));
-      expect(storyboardStage.statusLabel, '回补导演计划');
+      expect(storyboardStage.status.legacyChineseLabel, '回补导演计划');
       expect(storyboardStage.domainArgs, <String, dynamic>{
         'key': 'scriptPlan',
         'maxChars': 2200,
@@ -2234,7 +2232,7 @@ void main() {
       final assetsStage = stages.firstWhere(
         (stage) => stage.flowKey == 'assets',
       );
-      expect(assetsStage.statusLabel, '已定位');
+      expect(assetsStage.status.legacyChineseLabel, '已定位');
       expect(assetsStage.domainArgs, <String, dynamic>{
         'key': 'assets',
         'ids': <int>[3, 9],
@@ -2267,7 +2265,7 @@ void main() {
       final assetsStage = stages.firstWhere(
         (stage) => stage.flowKey == 'assets',
       );
-      expect(assetsStage.statusLabel, '已收紧');
+      expect(assetsStage.status.legacyChineseLabel, '已收紧');
       expect(assetsStage.domainArgs, <String, dynamic>{
         'key': 'assets',
         'assetTypes': <String>['role', 'scene', 'tool'],
@@ -2301,7 +2299,7 @@ void main() {
       final assetsStage = stages.firstWhere(
         (stage) => stage.flowKey == 'assets',
       );
-      expect(assetsStage.statusLabel, '已收紧');
+      expect(assetsStage.status.legacyChineseLabel, '已收紧');
       expect(assetsStage.domainArgs, <String, dynamic>{
         'key': 'assets',
         'ids': <int>[3, 9, 12],
@@ -2320,8 +2318,10 @@ void main() {
         result: null,
       );
 
-      final assetsStage = stages.firstWhere((stage) => stage.flowKey == 'assets');
-      expect(assetsStage.statusLabel, '等待导演计划');
+      final assetsStage = stages.firstWhere(
+        (stage) => stage.flowKey == 'assets',
+      );
+      expect(assetsStage.status.legacyChineseLabel, '等待导演计划');
       expect(assetsStage.domainArgs, <String, dynamic>{
         'key': 'scriptPlan',
         'maxChars': 2200,
@@ -2341,7 +2341,7 @@ void main() {
       final tableStage = stages.firstWhere(
         (stage) => stage.flowKey == 'storyboardTable',
       );
-      expect(tableStage.statusLabel, '等待导演计划');
+      expect(tableStage.status.legacyChineseLabel, '等待导演计划');
       expect(tableStage.domainArgs, <String, dynamic>{
         'key': 'scriptPlan',
         'maxChars': 2200,
@@ -2365,16 +2365,18 @@ void main() {
         },
       );
 
-      final assetsStage = stages.firstWhere((stage) => stage.flowKey == 'assets');
+      final assetsStage = stages.firstWhere(
+        (stage) => stage.flowKey == 'assets',
+      );
       final tableStage = stages.firstWhere(
         (stage) => stage.flowKey == 'storyboardTable',
       );
       final storyboardStage = stages.firstWhere(
         (stage) => stage.flowKey == 'storyboard',
       );
-      expect(assetsStage.statusLabel, '等待导演计划完善');
-      expect(tableStage.statusLabel, '等待导演计划完善');
-      expect(storyboardStage.statusLabel, '等待导演计划完善');
+      expect(assetsStage.status.legacyChineseLabel, '等待导演计划完善');
+      expect(tableStage.status.legacyChineseLabel, '等待导演计划完善');
+      expect(storyboardStage.status.legacyChineseLabel, '等待导演计划完善');
     },
   );
 
@@ -2401,7 +2403,7 @@ void main() {
       final storyboardStage = stages.firstWhere(
         (stage) => stage.flowKey == 'storyboard',
       );
-      expect(storyboardStage.statusLabel, '等待分镜表');
+      expect(storyboardStage.status.legacyChineseLabel, '等待分镜表');
       expect(storyboardStage.domainArgs, <String, dynamic>{
         'key': 'storyboardTable',
         'fields': <String>[
@@ -2441,7 +2443,7 @@ void main() {
       final storyboardStage = stages.firstWhere(
         (stage) => stage.flowKey == 'storyboard',
       );
-      expect(storyboardStage.statusLabel, '等待分镜表');
+      expect(storyboardStage.status.legacyChineseLabel, '等待分镜表');
     },
   );
 
@@ -2479,7 +2481,7 @@ void main() {
       final storyboardStage = stages.firstWhere(
         (stage) => stage.flowKey == 'storyboard',
       );
-      expect(storyboardStage.statusLabel, '等待分镜表完善');
+      expect(storyboardStage.status.legacyChineseLabel, '等待分镜表完善');
       expect(storyboardStage.domainArgs, <String, dynamic>{
         'key': 'storyboardTable',
         'fields': <String>[
@@ -2531,7 +2533,7 @@ void main() {
       final storyboardStage = stages.firstWhere(
         (stage) => stage.flowKey == 'storyboard',
       );
-      expect(storyboardStage.statusLabel, '待读取');
+      expect(storyboardStage.status.legacyChineseLabel, '待读取');
       expect(storyboardStage.domainTool, 'get_flowData');
       expect(storyboardStage.domainArgs, <String, dynamic>{
         'key': 'storyboard',
@@ -2680,7 +2682,7 @@ void main() {
       final storyboardStage = stages.firstWhere(
         (stage) => stage.flowKey == 'storyboard',
       );
-      expect(storyboardStage.statusLabel, '需补帧');
+      expect(storyboardStage.status.legacyChineseLabel, '需补帧');
       expect(storyboardStage.detail, contains('#101'));
       expect(storyboardStage.detail, contains('纯文本模式'));
       expect(storyboardStage.detail, contains('画面结果 1/2 已就绪'));
@@ -2695,194 +2697,235 @@ void main() {
     );
   });
 
-  test('summarizeProductionPrimaryBlocker picks the first unresolved stage', () {
-    final summary = summarizeProductionPrimaryBlocker(
-      const <ProductionWorkspaceStage>[
-        ProductionWorkspaceStage(
-          title: '导演计划',
-          flowKey: 'scriptPlan',
-          statusLabel: '已完成',
-          detail: '导演计划可继续沿用。',
-        ),
-        ProductionWorkspaceStage(
-          title: '资产准备',
-          flowKey: 'assets',
-          statusLabel: '需补图',
-          detail: '资产 #12, 21 仍缺图，主资产 1/2 已就绪，衍生缺口 2 项。',
-        ),
-      ],
-    );
+  test(
+    'summarizeProductionPrimaryBlocker picks the first unresolved stage',
+    () {
+      final summary =
+          summarizeProductionPrimaryBlocker(const <ProductionWorkspaceStage>[
+            ProductionWorkspaceStage(
+              title: '导演计划',
+              flowKey: 'scriptPlan',
+              status: ProductionWorkspaceStageStatus.storyboardComplete,
+              detail: '导演计划可继续沿用。',
+            ),
+            ProductionWorkspaceStage(
+              title: '资产准备',
+              flowKey: 'assets',
+              status: ProductionWorkspaceStageStatus.needsAssetImages,
+              detail: '资产 #12, 21 仍缺图，主资产 1/2 已就绪，衍生缺口 2 项。',
+            ),
+          ]);
 
-    expect(summary, contains('当前卡点：资产准备 · 需补图'));
-    expect(summary, contains('资产 #12, 21 仍缺图'));
-  });
+      expect(summary, contains('当前卡点：资产准备 · 需补图'));
+      expect(summary, contains('资产 #12, 21 仍缺图'));
+    },
+  );
 
-  test('summarizeProductionPrimaryBlocker explains storyboard table expansion', () {
-    final summary = summarizeProductionPrimaryBlocker(
-      const <ProductionWorkspaceStage>[
+  test(
+    'summarizeProductionPrimaryBlocker explains storyboard table expansion',
+    () {
+      final summary = summarizeProductionPrimaryBlocker(const <
+        ProductionWorkspaceStage
+      >[
         ProductionWorkspaceStage(
           title: '分镜表',
           flowKey: 'storyboardTable',
-          statusLabel: '待扩读',
-          detail: '已窗口读取 8/24 行关键列，但覆盖还不够，先扩读或补齐关键镜头表，再推进 storyboard。分镜表已读 8/24 行，待展开 16 行。',
+          status: ProductionWorkspaceStageStatus.storyboardTableExpandRead,
+          detail:
+              '已窗口读取 8/24 行关键列，但覆盖还不够，先扩读或补齐关键镜头表，再推进 storyboard。分镜表已读 8/24 行，待展开 16 行。',
         ),
-      ],
-    );
+      ]);
 
-    expect(summary, '当前卡点：分镜表 · 待扩读；先继续扩读关键分镜表窗口；分镜表已读 8/24 行，待展开 16 行。');
-  });
+      expect(summary, '当前卡点：分镜表 · 待扩读；先继续扩读关键分镜表窗口；分镜表已读 8/24 行，待展开 16 行。');
+    },
+  );
 
-  test('summarizeProductionPrimaryBlocker explains when to refine script plan', () {
-    final summary = summarizeProductionPrimaryBlocker(
-      const <ProductionWorkspaceStage>[
+  test(
+    'summarizeProductionPrimaryBlocker explains when to refine script plan',
+    () {
+      final summary = summarizeProductionPrimaryBlocker(const <
+        ProductionWorkspaceStage
+      >[
         ProductionWorkspaceStage(
           title: '分镜画面',
           flowKey: 'storyboard',
-          statusLabel: '回补导演计划',
-          detail: 'storyboardTable 已有基础内容，但当前 scriptPlan 对分场景情绪或画面意图交代还不够，先细化导演计划，再继续扩读分镜表并推进 storyboard。',
+          status: ProductionWorkspaceStageStatus.backfillScriptPlanFromTable,
+          detail:
+              'storyboardTable 已有基础内容，但当前 scriptPlan 对分场景情绪或画面意图交代还不够，先细化导演计划，再继续扩读分镜表并推进 storyboard。',
         ),
-      ],
-    );
+      ]);
 
-    expect(summary, '当前卡点：分镜画面 · 回补导演计划；当前更缺导演计划里的分场景情绪/画面意图，先细化 scriptPlan 再拆分镜表。');
-  });
+      expect(
+        summary,
+        '当前卡点：分镜画面 · 回补导演计划；当前更缺导演计划里的分场景情绪/画面意图，先细化 scriptPlan 再拆分镜表。',
+      );
+    },
+  );
 
-  test('production stage button labels follow storyboard-table fallback states', () {
-    const expandStage = ProductionWorkspaceStage(
-      title: '分镜表',
-      flowKey: 'storyboardTable',
-      statusLabel: '待扩读',
-      detail: '先扩读关键镜头表。',
-      domainTool: 'get_flowData',
-      domainArgs: <String, dynamic>{'key': 'storyboardTable'},
-    );
-    const refineStage = ProductionWorkspaceStage(
-      title: '分镜画面',
-      flowKey: 'storyboard',
-      statusLabel: '回补导演计划',
-      detail: '先细化导演计划。',
-      subAgentTool: 'run_sub_agent_director_plan',
-    );
+  test(
+    'production stage button labels follow storyboard-table fallback states',
+    () {
+      const expandStage = ProductionWorkspaceStage(
+        title: '分镜表',
+        flowKey: 'storyboardTable',
+        status: ProductionWorkspaceStageStatus.storyboardTableExpandRead,
+        detail: '先扩读关键镜头表。',
+        domainTool: 'get_flowData',
+        domainArgs: <String, dynamic>{'key': 'storyboardTable'},
+      );
+      const refineStage = ProductionWorkspaceStage(
+        title: '分镜画面',
+        flowKey: 'storyboard',
+        status: ProductionWorkspaceStageStatus.backfillScriptPlanFromTable,
+        detail: '先细化导演计划。',
+        subAgentTool: 'run_sub_agent_director_plan',
+      );
 
-    expect(productionStageDomainButtonLabel(expandStage), '扩读分镜表');
-    expect(productionStageSubAgentButtonLabel(refineStage), '细化导演计划');
-  });
+      expect(productionStageDomainButtonLabel(expandStage), '扩读分镜表');
+      expect(productionStageSubAgentButtonLabel(refineStage), '细化导演计划');
+    },
+  );
 
-  test('production stage button labels specialize refresh actions by scope', () {
-    const scriptRefreshStage = ProductionWorkspaceStage(
-      title: '导演计划',
-      flowKey: 'scriptPlan',
-      statusLabel: '建议刷新',
-      detail: '导演计划刚变更或正在处理，建议重新读取 scriptPlan 确认最新内容。',
-      domainTool: 'get_flowData',
-    );
-    const assetRefreshStage = ProductionWorkspaceStage(
-      title: '资产准备',
-      flowKey: 'assets',
-      statusLabel: '建议刷新',
-      detail: '资产生成动作刚执行，建议先只回读本次受影响资产，确认结果后再决定是否扩读。',
-      domainTool: 'get_flowData',
-    );
-    const tableRefreshStage = ProductionWorkspaceStage(
-      title: '分镜表',
-      flowKey: 'storyboardTable',
-      statusLabel: '建议刷新',
-      detail: '分镜表刚变更，建议先只回读镜头 #3, 9 对应的 storyboardTable 行。',
-      domainTool: 'get_flowData',
-    );
-    const storyboardRefreshStage = ProductionWorkspaceStage(
-      title: '分镜画面',
-      flowKey: 'storyboard',
-      statusLabel: '建议刷新',
-      detail: '分镜动作刚执行，建议先只回读本次镜头 #3, 9 的补图状态。',
-      domainTool: 'get_flowData',
-    );
+  test(
+    'production stage button labels specialize refresh actions by scope',
+    () {
+      const scriptRefreshStage = ProductionWorkspaceStage(
+        title: '导演计划',
+        flowKey: 'scriptPlan',
+        status: ProductionWorkspaceStageStatus.suggestRefresh,
+        detail: '导演计划刚变更或正在处理，建议重新读取 scriptPlan 确认最新内容。',
+        domainTool: 'get_flowData',
+      );
+      const assetRefreshStage = ProductionWorkspaceStage(
+        title: '资产准备',
+        flowKey: 'assets',
+        status: ProductionWorkspaceStageStatus.suggestRefresh,
+        refreshHint: ProductionWorkspaceRefreshHint.rereadAffectedAssets,
+        detail: '资产生成动作刚执行，建议先只回读本次受影响资产，确认结果后再决定是否扩读。',
+        domainTool: 'get_flowData',
+      );
+      const tableRefreshStage = ProductionWorkspaceStage(
+        title: '分镜表',
+        flowKey: 'storyboardTable',
+        status: ProductionWorkspaceStageStatus.suggestRefresh,
+        refreshHint:
+            ProductionWorkspaceRefreshHint.rereadPartialStoryboardTable,
+        detail: '分镜表刚变更，建议先只回读镜头 #3, 9 对应的 storyboardTable 行。',
+        domainTool: 'get_flowData',
+      );
+      const storyboardRefreshStage = ProductionWorkspaceStage(
+        title: '分镜画面',
+        flowKey: 'storyboard',
+        status: ProductionWorkspaceStageStatus.suggestRefresh,
+        refreshHint: ProductionWorkspaceRefreshHint.rereadMissingFrameState,
+        detail: '分镜动作刚执行，建议先只回读本次镜头 #3, 9 的补图状态。',
+        domainTool: 'get_flowData',
+      );
 
-    expect(productionStageDomainButtonLabel(scriptRefreshStage), '刷新导演计划');
-    expect(productionStageDomainButtonLabel(assetRefreshStage), '回读受影响资产');
-    expect(productionStageDomainButtonLabel(tableRefreshStage), '回读局部分镜表');
-    expect(productionStageDomainButtonLabel(storyboardRefreshStage), '回读缺帧状态');
-  });
+      expect(productionStageDomainButtonLabel(scriptRefreshStage), '刷新导演计划');
+      expect(productionStageDomainButtonLabel(assetRefreshStage), '回读受影响资产');
+      expect(productionStageDomainButtonLabel(tableRefreshStage), '回读局部分镜表');
+      expect(
+        productionStageDomainButtonLabel(storyboardRefreshStage),
+        '回读缺帧状态',
+      );
+    },
+  );
 
-  test('production recipe button labels follow storyboard fallback actions', () {
-    const expandRecipe = ProductionWorkspaceRecipe(
-      title: '先看分镜表落地',
-      detail: '先扩读关键窗口。',
-      flowKey: 'storyboardTable',
-      domainTool: 'get_flowData',
-      domainArgs: <String, dynamic>{'key': 'storyboardTable'},
-    );
-    const refineRecipe = ProductionWorkspaceRecipe(
-      title: '补足分场景意图',
-      detail: '先补导演计划。',
-      flowKey: 'storyboardTable',
-      subAgentTool: 'run_sub_agent_director_plan',
-    );
-
-    expect(productionRecipeDomainButtonLabel(expandRecipe), '扩读分镜表');
-    expect(productionRecipeSubAgentButtonLabel(refineRecipe), '细化导演计划');
-  });
-
-  test('production diagnosis headline explains script-plan refinement first', () {
-    const recipes = <ProductionWorkspaceRecipe>[
-      ProductionWorkspaceRecipe(
+  test(
+    'production recipe button labels follow storyboard fallback actions',
+    () {
+      const expandRecipe = ProductionWorkspaceRecipe(
+        title: '先看分镜表落地',
+        detail: '先扩读关键窗口。',
+        flowKey: 'storyboardTable',
+        domainTool: 'get_flowData',
+        domainArgs: <String, dynamic>{'key': 'storyboardTable'},
+      );
+      const refineRecipe = ProductionWorkspaceRecipe(
         title: '补足分场景意图',
         detail: '先补导演计划。',
         flowKey: 'storyboardTable',
         subAgentTool: 'run_sub_agent_director_plan',
-      ),
-    ];
+      );
 
-    expect(
-      summarizeProductionDiagnosisHeadline(recipes),
-      '当前更建议先细化导演计划里的分场景情绪/画面意图，再继续拆分分镜表。',
-    );
-  });
+      expect(productionRecipeDomainButtonLabel(expandRecipe), '扩读分镜表');
+      expect(productionRecipeSubAgentButtonLabel(refineRecipe), '细化导演计划');
+    },
+  );
 
-  test('production diagnosis headline explains storyboard-table expansion first', () {
-    const recipes = <ProductionWorkspaceRecipe>[
-      ProductionWorkspaceRecipe(
-        title: '先看分镜表落地',
-        detail: '先扩读分镜表。',
+  test(
+    'production diagnosis headline explains script-plan refinement first',
+    () {
+      const recipes = <ProductionWorkspaceRecipe>[
+        ProductionWorkspaceRecipe(
+          title: '补足分场景意图',
+          detail: '先补导演计划。',
+          flowKey: 'storyboardTable',
+          subAgentTool: 'run_sub_agent_director_plan',
+        ),
+      ];
+
+      expect(
+        summarizeProductionDiagnosisHeadline(recipes),
+        '当前更建议先细化导演计划里的分场景情绪/画面意图，再继续拆分分镜表。',
+      );
+    },
+  );
+
+  test(
+    'production diagnosis headline explains storyboard-table expansion first',
+    () {
+      const recipes = <ProductionWorkspaceRecipe>[
+        ProductionWorkspaceRecipe(
+          title: '先看分镜表落地',
+          detail: '先扩读分镜表。',
+          flowKey: 'storyboardTable',
+          domainTool: 'get_flowData',
+        ),
+      ];
+
+      expect(
+        summarizeProductionDiagnosisHeadline(recipes),
+        '当前更建议先扩读关键分镜表窗口，再决定是否推进 storyboard。',
+      );
+    },
+  );
+
+  test(
+    'applied production recipe status explains the next cheapest action',
+    () {
+      const recipe = ProductionWorkspaceRecipe(
+        title: '补足分场景意图',
+        detail: '先补导演计划。',
         flowKey: 'storyboardTable',
+        subAgentTool: 'run_sub_agent_director_plan',
+      );
+
+      expect(
+        summarizeAppliedProductionRecipeStatus(recipe),
+        '已应用任务建议：补足分场景意图，下一步先细化导演计划。',
+      );
+    },
+  );
+
+  test(
+    'applied production stage status explains storyboard-table expansion',
+    () {
+      const stage = ProductionWorkspaceStage(
+        title: '分镜表',
+        flowKey: 'storyboardTable',
+        status: ProductionWorkspaceStageStatus.storyboardTableExpandRead,
+        detail: '先扩读分镜表。',
         domainTool: 'get_flowData',
-      ),
-    ];
+      );
 
-    expect(
-      summarizeProductionDiagnosisHeadline(recipes),
-      '当前更建议先扩读关键分镜表窗口，再决定是否推进 storyboard。',
-    );
-  });
-
-  test('applied production recipe status explains the next cheapest action', () {
-    const recipe = ProductionWorkspaceRecipe(
-      title: '补足分场景意图',
-      detail: '先补导演计划。',
-      flowKey: 'storyboardTable',
-      subAgentTool: 'run_sub_agent_director_plan',
-    );
-
-    expect(
-      summarizeAppliedProductionRecipeStatus(recipe),
-      '已应用任务建议：补足分场景意图，下一步先细化导演计划。',
-    );
-  });
-
-  test('applied production stage status explains storyboard-table expansion', () {
-    const stage = ProductionWorkspaceStage(
-      title: '分镜表',
-      flowKey: 'storyboardTable',
-      statusLabel: '待扩读',
-      detail: '先扩读分镜表。',
-      domainTool: 'get_flowData',
-    );
-
-    expect(
-      summarizeAppliedProductionStageStatus(stage),
-      '已应用阶段动作：分镜表，下一步先扩读关键分镜表窗口。',
-    );
-  });
+      expect(
+        summarizeAppliedProductionStageStatus(stage),
+        '已应用阶段动作：分镜表，下一步先扩读关键分镜表窗口。',
+      );
+    },
+  );
 
   test(
     'summarizeProductionFlowValue surfaces storyboard table coverage digest',
@@ -2892,7 +2935,10 @@ void main() {
         'rowCount': 8,
         'totalRows': 24,
         'rows': <Map<String, dynamic>>[
-          <String, dynamic>{'id': '1', 'associateAssetsIds': <int>[3]},
+          <String, dynamic>{
+            'id': '1',
+            'associateAssetsIds': <int>[3],
+          },
         ],
       }, flowKey: 'storyboardTable');
 

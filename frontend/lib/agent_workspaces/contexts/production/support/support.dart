@@ -26,7 +26,8 @@ class ProductionWorkspaceStage {
   const ProductionWorkspaceStage({
     required this.title,
     required this.flowKey,
-    required this.statusLabel,
+    required this.status,
+    this.refreshHint,
     required this.detail,
     this.domainTool,
     this.domainArgs,
@@ -37,7 +38,8 @@ class ProductionWorkspaceStage {
 
   final String title;
   final String flowKey;
-  final String statusLabel;
+  final ProductionWorkspaceStageStatus status;
+  final ProductionWorkspaceRefreshHint? refreshHint;
   final String detail;
   final String? domainTool;
   final Map<String, dynamic>? domainArgs;

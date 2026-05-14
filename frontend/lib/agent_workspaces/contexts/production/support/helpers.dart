@@ -267,7 +267,9 @@ String summarizeProductionAssetFocusIds(
 String summarizeProductionAssetReadiness(List<Map<String, dynamic>> rows) {
   if (rows.isEmpty) return '资产为空';
   final readyRoots = rows.where(productionFlowEntryHasMediaResult).length;
-  final pendingDeriveCount = extractProductionPendingDeriveAssetIds(rows).length;
+  final pendingDeriveCount = extractProductionPendingDeriveAssetIds(
+    rows,
+  ).length;
   final rootMissingCount = rows.length - readyRoots;
   final parts = <String>['主资产 $readyRoots/${rows.length} 已就绪'];
   if (pendingDeriveCount > 0) {
@@ -281,7 +283,9 @@ String summarizeProductionAssetReadiness(List<Map<String, dynamic>> rows) {
 
 String summarizeProductionStoryboardReadiness(List<Map<String, dynamic>> rows) {
   if (rows.isEmpty) return '分镜为空';
-  final targetCount = rows.where(productionStoryboardEntryNeedsImageGeneration).length;
+  final targetCount = rows
+      .where(productionStoryboardEntryNeedsImageGeneration)
+      .length;
   final readyCount = rows.where((row) {
     return productionStoryboardEntryNeedsImageGeneration(row) &&
         productionFlowEntryHasMediaResult(row);
@@ -316,77 +320,94 @@ String summarizeProductionStoryboardTableCoverage({
   return parts.join('，');
 }
 
-String summarizeProductionPrimaryBlocker(List<ProductionWorkspaceStage> stages) {
+String summarizeProductionPrimaryBlocker(
+  List<ProductionWorkspaceStage> stages,
+) {
   if (stages.isEmpty) return '';
-  const resolvedStatuses = <String>{'已齐备', '已完成', '已抽样'};
   final blocker = stages.firstWhere(
-    (stage) => !resolvedStatuses.contains(stage.statusLabel.trim()),
+    (stage) => !stage.status.isResolvedForPrimaryBlocker,
     orElse: () => stages.last,
   );
   final explicitReason = _summarizeProductionBlockerReason(blocker);
   if (explicitReason.isNotEmpty) {
-    return '当前卡点：${blocker.title} · ${blocker.statusLabel}；$explicitReason';
+    return '当前卡点：${blocker.title} · ${blocker.status.legacyChineseLabel}；$explicitReason';
   }
-  final normalizedDetail = blocker.detail.replaceAll(RegExp(r'\s+'), ' ').trim();
+  final normalizedDetail = blocker.detail
+      .replaceAll(RegExp(r'\s+'), ' ')
+      .trim();
   final clippedDetail = normalizedDetail.length <= 72
       ? normalizedDetail
       : '${normalizedDetail.substring(0, 72)}...';
-  return '当前卡点：${blocker.title} · ${blocker.statusLabel}；$clippedDetail';
+  return '当前卡点：${blocker.title} · ${blocker.status.legacyChineseLabel}；$clippedDetail';
 }
 
 String _summarizeProductionBlockerReason(ProductionWorkspaceStage stage) {
-  final status = stage.statusLabel.trim();
   final detail = stage.detail.replaceAll(RegExp(r'\s+'), ' ').trim();
-  if (status == '待扩读') {
-    final coverage = _extractProductionCoverageDigest(detail);
-    return coverage.isEmpty ? '先继续扩读关键分镜表窗口，再决定是否推进下游出图。' : '先继续扩读关键分镜表窗口；$coverage。';
+  switch (stage.status) {
+    case ProductionWorkspaceStageStatus.storyboardTableExpandRead:
+      final coverage = _extractProductionCoverageDigest(detail);
+      return coverage.isEmpty
+          ? '先继续扩读关键分镜表窗口，再决定是否推进下游出图。'
+          : '先继续扩读关键分镜表窗口；$coverage。';
+    case ProductionWorkspaceStageStatus.backfillScriptPlanFromTable:
+      return '当前更缺导演计划里的分场景情绪/画面意图，先细化 scriptPlan 再拆分镜表。';
+    case ProductionWorkspaceStageStatus.waitingStoryboardTableCoverage:
+      final coverage = _extractProductionCoverageDigest(detail);
+      return coverage.isEmpty
+          ? '分镜表已有基础内容，但覆盖还不够，先补齐关键镜头表再推进 storyboard。'
+          : '分镜表已有基础内容，但覆盖还不够；$coverage。';
+    default:
+      return '';
   }
-  if (status == '回补导演计划') {
-    return '当前更缺导演计划里的分场景情绪/画面意图，先细化 scriptPlan 再拆分镜表。';
-  }
-  if (status == '等待分镜表完善') {
-    final coverage = _extractProductionCoverageDigest(detail);
-    return coverage.isEmpty ? '分镜表已有基础内容，但覆盖还不够，先补齐关键镜头表再推进 storyboard。' : '分镜表已有基础内容，但覆盖还不够；$coverage。';
-  }
-  return '';
 }
 
 String _extractProductionCoverageDigest(String detail) {
-  final match = RegExp(r'分镜表已读 \d+/\d+ 行(?:，待展开 \d+ 行)?').firstMatch(detail);
-  return match?.group(0) ?? '';
+  final ratioMatch = RegExp(r'(\d+)\s*/\s*(\d+)').firstMatch(detail);
+  if (ratioMatch == null) return '';
+  final left = ratioMatch.group(1)!;
+  final right = ratioMatch.group(2)!;
+  final expandMatch = RegExp(r'待展开\s*(\d+)\s*行').firstMatch(detail);
+  if (expandMatch != null) {
+    return '分镜表已读 $left/$right 行，待展开 ${expandMatch.group(1)} 行';
+  }
+  return '分镜表已读 $left/$right 行';
 }
 
 String productionStageDomainButtonLabel(ProductionWorkspaceStage stage) {
-  final status = stage.statusLabel.trim();
-  final detail = stage.detail.replaceAll(RegExp(r'\s+'), ' ').trim();
-  if (status == '待扩读' || status == '等待分镜表完善') {
-    return '扩读分镜表';
+  switch (stage.status) {
+    case ProductionWorkspaceStageStatus.storyboardTableExpandRead:
+    case ProductionWorkspaceStageStatus.waitingStoryboardTableCoverage:
+      return '扩读分镜表';
+    case ProductionWorkspaceStageStatus.backfillScriptPlanFromTable:
+    case ProductionWorkspaceStageStatus.waitingScriptPlan:
+    case ProductionWorkspaceStageStatus.waitingScriptPlanDepth:
+      return '读取导演计划';
+    case ProductionWorkspaceStageStatus.suggestRefresh:
+      return switch (stage.flowKey) {
+        'scriptPlan' => '刷新导演计划',
+        'assets' => switch (stage.refreshHint) {
+          ProductionWorkspaceRefreshHint.rereadAffectedAssets => '回读受影响资产',
+          _ => '刷新资产结果',
+        },
+        'storyboardTable' => switch (stage.refreshHint) {
+          ProductionWorkspaceRefreshHint.rereadPartialStoryboardTable =>
+            '回读局部分镜表',
+          _ => '刷新分镜表',
+        },
+        'storyboard' => switch (stage.refreshHint) {
+          ProductionWorkspaceRefreshHint.rereadMissingFrameState => '回读缺帧状态',
+          _ => '刷新分镜结果',
+        },
+        _ => '读取 flow',
+      };
+    default:
+      return '读取 flow';
   }
-  if (status == '回补导演计划' ||
-      status == '等待导演计划' ||
-      status == '等待导演计划完善') {
-    return '读取导演计划';
-  }
-  if (status == '建议刷新') {
-    if (stage.flowKey == 'scriptPlan') {
-      return '刷新导演计划';
-    }
-    if (stage.flowKey == 'assets') {
-      return detail.contains('受影响资产') ? '回读受影响资产' : '刷新资产结果';
-    }
-    if (stage.flowKey == 'storyboardTable') {
-      return detail.contains('镜头 #') ? '回读局部分镜表' : '刷新分镜表';
-    }
-    if (stage.flowKey == 'storyboard') {
-      return detail.contains('补图状态') ? '回读缺帧状态' : '刷新分镜结果';
-    }
-  }
-  return '读取 flow';
 }
 
 String productionStageSubAgentButtonLabel(ProductionWorkspaceStage stage) {
-  final status = stage.statusLabel.trim();
-  if (status == '回补导演计划' ||
+  if (stage.status ==
+          ProductionWorkspaceStageStatus.backfillScriptPlanFromTable ||
       stage.subAgentTool == 'run_sub_agent_director_plan') {
     return '细化导演计划';
   }
@@ -434,7 +455,9 @@ String summarizeProductionDiagnosisHeadline(
   return '当前建议按第一张卡开始推进，优先执行最靠前的低成本动作。';
 }
 
-String summarizeAppliedProductionRecipeStatus(ProductionWorkspaceRecipe recipe) {
+String summarizeAppliedProductionRecipeStatus(
+  ProductionWorkspaceRecipe recipe,
+) {
   final title = recipe.title.trim();
   if (title == '补足分场景意图') {
     return '已应用任务建议：$title，下一步先细化导演计划。';
@@ -446,14 +469,15 @@ String summarizeAppliedProductionRecipeStatus(ProductionWorkspaceRecipe recipe) 
 }
 
 String summarizeAppliedProductionStageStatus(ProductionWorkspaceStage stage) {
-  final status = stage.statusLabel.trim();
-  if (status == '回补导演计划') {
-    return '已应用阶段动作：${stage.title}，下一步先细化导演计划。';
+  switch (stage.status) {
+    case ProductionWorkspaceStageStatus.backfillScriptPlanFromTable:
+      return '已应用阶段动作：${stage.title}，下一步先细化导演计划。';
+    case ProductionWorkspaceStageStatus.storyboardTableExpandRead:
+    case ProductionWorkspaceStageStatus.waitingStoryboardTableCoverage:
+      return '已应用阶段动作：${stage.title}，下一步先扩读关键分镜表窗口。';
+    default:
+      return '已应用阶段动作：${stage.title}';
   }
-  if (status == '待扩读' || status == '等待分镜表完善') {
-    return '已应用阶段动作：${stage.title}，下一步先扩读关键分镜表窗口。';
-  }
-  return '已应用阶段动作：${stage.title}';
 }
 
 String buildProductionScriptPlanExecutionHint(

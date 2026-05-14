@@ -125,7 +125,7 @@ ProductionWorkspaceStage _buildScriptPlanStage({
     return ProductionWorkspaceStage(
       title: '导演计划',
       flowKey: 'scriptPlan',
-      statusLabel: _reviewStatusLabel(review),
+      status: ProductionWorkspaceStageStatus.fromSupervisionReview(review),
       detail: _reviewDetail(review),
       domainTool: switch (review.nextAction) {
         'check_assets' || 'revise_scriptPlan' => 'get_flowData',
@@ -151,7 +151,7 @@ ProductionWorkspaceStage _buildScriptPlanStage({
       return const ProductionWorkspaceStage(
         title: '导演计划',
         flowKey: 'scriptPlan',
-        statusLabel: '待生成',
+        status: ProductionWorkspaceStageStatus.pendingGenerate,
         detail: 'scriptPlan 仍为空，先产出导演计划再推进资产与分镜。',
         subAgentTool: 'run_sub_agent_director_plan',
         prompt: '请基于当前 production 上下文生成一版导演计划，并给出执行优先级。',
@@ -164,7 +164,7 @@ ProductionWorkspaceStage _buildScriptPlanStage({
       return ProductionWorkspaceStage(
         title: '导演计划',
         flowKey: 'scriptPlan',
-        statusLabel: '待完善',
+        status: ProductionWorkspaceStageStatus.pendingRefineScriptPlan,
         detail:
             '已读取 scriptPlan，$sectionLine当前约 ${trimmed.length} 字；下游暂不放行，建议先补到至少 3 个规划维度，再进入审核与 assets/storyboard 主链。',
         subAgentTool: 'run_sub_agent_director_plan',
@@ -174,7 +174,7 @@ ProductionWorkspaceStage _buildScriptPlanStage({
     return ProductionWorkspaceStage(
       title: '导演计划',
       flowKey: 'scriptPlan',
-      statusLabel: '待审核',
+      status: ProductionWorkspaceStageStatus.pendingReview,
       detail:
           '已读取 scriptPlan，$sectionLine当前约 ${trimmed.length} 字；复核时先只回看$scriptWindow，再做导演规划审核并推进 assets 与 storyboard。',
       subAgentTool: 'run_sub_agent_production_supervision',
@@ -185,7 +185,7 @@ ProductionWorkspaceStage _buildScriptPlanStage({
     return ProductionWorkspaceStage(
       title: '导演计划',
       flowKey: 'scriptPlan',
-      statusLabel: '建议刷新',
+      status: ProductionWorkspaceStageStatus.suggestRefresh,
       detail: '导演计划刚变更或正在处理，建议先刷新导演计划，确认最新内容后再推进下游阶段。',
       domainTool: 'get_flowData',
       domainArgs: _scriptPlanCompactArgs(),
@@ -194,7 +194,7 @@ ProductionWorkspaceStage _buildScriptPlanStage({
   return ProductionWorkspaceStage(
     title: '导演计划',
     flowKey: 'scriptPlan',
-    statusLabel: '待读取',
+    status: ProductionWorkspaceStageStatus.pendingRead,
     detail: '先读取 scriptPlan，确认制作优先级与执行顺序。',
     domainTool: 'get_flowData',
     domainArgs: _scriptPlanCompactArgs(),
@@ -215,7 +215,7 @@ ProductionWorkspaceStage _buildAssetsStage({
     return ProductionWorkspaceStage(
       title: '资产准备',
       flowKey: 'assets',
-      statusLabel: _reviewStatusLabel(review),
+      status: ProductionWorkspaceStageStatus.fromSupervisionReview(review),
       detail:
           '${_reviewDetail(review)} 优先只核对$assetScope，确认后回到 scriptPlan 收束导演计划。',
       domainTool: 'get_flowData',
@@ -223,7 +223,9 @@ ProductionWorkspaceStage _buildAssetsStage({
     );
   }
   final data = flowSnapshot['assets'];
-  final scriptPlanReady = _productionScriptPlanReady(flowSnapshot['scriptPlan']);
+  final scriptPlanReady = _productionScriptPlanReady(
+    flowSnapshot['scriptPlan'],
+  );
   final scriptPlanAdvanceReady = _productionScriptPlanAdvanceReady(
     flowSnapshot['scriptPlan'],
   );
@@ -236,7 +238,7 @@ ProductionWorkspaceStage _buildAssetsStage({
       return const ProductionWorkspaceStage(
         title: '资产准备',
         flowKey: 'assets',
-        statusLabel: '待规划',
+        status: ProductionWorkspaceStageStatus.pendingAssetPlan,
         detail: 'assets 为空，先规划衍生素材并补齐最小可行资产集。',
         subAgentTool: 'run_sub_agent_derive_assets',
         prompt: '请基于当前空白 assets flow 规划最小可行的衍生素材集合，并说明优先级。',
@@ -253,7 +255,7 @@ ProductionWorkspaceStage _buildAssetsStage({
       return ProductionWorkspaceStage(
         title: '资产准备',
         flowKey: 'assets',
-        statusLabel: '需补图',
+        status: ProductionWorkspaceStageStatus.needsAssetImages,
         detail: pendingScope.isEmpty
             ? '共 ${rows.length} 项资产，仍有 $missingCount 项缺少图像结果，适合继续运行素材生成。$readiness。'
             : '共 ${rows.length} 项资产，$pendingScope 仍缺图，优先只补这批衍生资产更省 token。$readiness。',
@@ -268,7 +270,7 @@ ProductionWorkspaceStage _buildAssetsStage({
     return ProductionWorkspaceStage(
       title: '资产准备',
       flowKey: 'assets',
-      statusLabel: '已齐备',
+      status: ProductionWorkspaceStageStatus.assetsReady,
       detail: '共 ${rows.length} 项资产，图像结果已齐，可继续检查 storyboard 与导演计划。$readiness。',
       domainTool: 'get_flowData',
       domainArgs: _assetsCompactArgs(),
@@ -282,7 +284,7 @@ ProductionWorkspaceStage _buildAssetsStage({
     return ProductionWorkspaceStage(
       title: '资产准备',
       flowKey: 'assets',
-      statusLabel: '已定位',
+      status: ProductionWorkspaceStageStatus.assetsScopedFromRefs,
       detail: '当前分镜表窗口引用了 ${ids.length} 项资产，优先核对这批素材更省 token。',
       domainTool: 'get_flowData',
       domainArgs: storyboardTableAssetArgs,
@@ -296,7 +298,7 @@ ProductionWorkspaceStage _buildAssetsStage({
     return ProductionWorkspaceStage(
       title: '资产准备',
       flowKey: 'assets',
-      statusLabel: '已定位',
+      status: ProductionWorkspaceStageStatus.assetsScopedFromRefs,
       detail: '当前分镜窗口引用了 ${ids.length} 项资产，优先核对这批素材更省 token。',
       domainTool: 'get_flowData',
       domainArgs: storyboardAssetArgs,
@@ -319,7 +321,7 @@ ProductionWorkspaceStage _buildAssetsStage({
     return ProductionWorkspaceStage(
       title: '资产准备',
       flowKey: 'assets',
-      statusLabel: '等待导演计划完善',
+      status: ProductionWorkspaceStageStatus.waitingScriptPlanDepth,
       detail: '当前 scriptPlan 已有内容但还不够完整，先补齐导演计划的关键维度，再规划 assets，避免素材准备跑偏。',
       domainTool: 'get_flowData',
       domainArgs: _scriptPlanCompactArgs(),
@@ -329,7 +331,7 @@ ProductionWorkspaceStage _buildAssetsStage({
     return ProductionWorkspaceStage(
       title: '资产准备',
       flowKey: 'assets',
-      statusLabel: '已收紧',
+      status: ProductionWorkspaceStageStatus.assetsNarrowedFromScriptPlan,
       detail:
           '已从 scriptPlan 收紧到$scriptPlanAssetScope，优先核对这批素材更省 token；信息不足时再扩读。',
       domainTool: 'get_flowData',
@@ -346,7 +348,7 @@ ProductionWorkspaceStage _buildAssetsStage({
     return ProductionWorkspaceStage(
       title: '资产准备',
       flowKey: 'assets',
-      statusLabel: '等待导演计划',
+      status: ProductionWorkspaceStageStatus.waitingScriptPlan,
       detail: '先读取或生成 scriptPlan，再规划 assets，避免素材补齐脱离导演节奏与改写约束。',
       domainTool: 'get_flowData',
       domainArgs: _scriptPlanCompactArgs(),
@@ -371,14 +373,18 @@ ProductionWorkspaceStage _buildAssetsStage({
             ),
           )
         : _assetsCompactArgs();
+    final narrowAssetRefresh =
+        (toolName == 'generate_deriveAsset' ||
+            toolName == 'run_sub_agent_generate_assets') &&
+        refreshArgs.containsKey('ids');
     return ProductionWorkspaceStage(
       title: '资产准备',
       flowKey: 'assets',
-      statusLabel: '建议刷新',
-      detail:
-          (toolName == 'generate_deriveAsset' ||
-                  toolName == 'run_sub_agent_generate_assets') &&
-              refreshArgs.containsKey('ids')
+      status: ProductionWorkspaceStageStatus.suggestRefresh,
+      refreshHint: narrowAssetRefresh
+          ? ProductionWorkspaceRefreshHint.rereadAffectedAssets
+          : ProductionWorkspaceRefreshHint.refreshAssetsSnapshot,
+      detail: narrowAssetRefresh
           ? '资产生成动作刚执行，建议先回读本次受影响资产，确认结果后再决定是否扩读。'
           : '资产相关动作刚执行，建议先刷新资产结果，确认最新状态后再决定是否继续补素材。',
       domainTool: 'get_flowData',
@@ -388,7 +394,7 @@ ProductionWorkspaceStage _buildAssetsStage({
   return ProductionWorkspaceStage(
     title: '资产准备',
     flowKey: 'assets',
-    statusLabel: '待读取',
+    status: ProductionWorkspaceStageStatus.pendingRead,
     detail: '读取 assets flow 后可判断是否需要继续做衍生资产或素材生成。',
     domainTool: 'get_flowData',
     domainArgs: _assetsCompactArgs(),
@@ -406,7 +412,7 @@ ProductionWorkspaceStage _buildStoryboardTableStage({
     return ProductionWorkspaceStage(
       title: '分镜表',
       flowKey: 'storyboardTable',
-      statusLabel: _reviewStatusLabel(review),
+      status: ProductionWorkspaceStageStatus.fromSupervisionReview(review),
       detail: _reviewDetail(review),
       domainTool: switch (review.nextAction) {
         'check_script' => 'get_flowData',
@@ -440,7 +446,9 @@ ProductionWorkspaceStage _buildStoryboardTableStage({
     );
   }
   final data = flowSnapshot['storyboardTable'];
-  final scriptPlanReady = _productionScriptPlanReady(flowSnapshot['scriptPlan']);
+  final scriptPlanReady = _productionScriptPlanReady(
+    flowSnapshot['scriptPlan'],
+  );
   final scriptPlanAdvanceReady = _productionScriptPlanAdvanceReady(
     flowSnapshot['scriptPlan'],
   );
@@ -453,7 +461,7 @@ ProductionWorkspaceStage _buildStoryboardTableStage({
       return const ProductionWorkspaceStage(
         title: '分镜表',
         flowKey: 'storyboardTable',
-        statusLabel: '待生成',
+        status: ProductionWorkspaceStageStatus.pendingGenerate,
         detail: 'storyboardTable 为空，适合先补结构化镜头表。',
         subAgentTool: 'run_sub_agent_storyboard_table',
         prompt: '请先产出结构化 storyboardTable，并保持字段清晰可回写。',
@@ -468,7 +476,7 @@ ProductionWorkspaceStage _buildStoryboardTableStage({
     return ProductionWorkspaceStage(
       title: '分镜表',
       flowKey: 'storyboardTable',
-      statusLabel: '待审核',
+      status: ProductionWorkspaceStageStatus.pendingReview,
       detail:
           'storyboardTable 已有内容，${digest.isEmpty ? '' : '$digest，'}约 ${trimmed.length} 字，建议先做分镜表审核再推进 storyboard 画面结果。${summarizeProductionStoryboardTableCoverage(sampledRows: rowCount, totalRows: rowCount)}。',
       subAgentTool: 'run_sub_agent_production_supervision',
@@ -479,20 +487,20 @@ ProductionWorkspaceStage _buildStoryboardTableStage({
     final rowCount = _readInt(data['rowCount']);
     final totalRows = _readInt(data['totalRows']);
     final advanceReady = _productionStoryboardTableAdvanceReady(data);
+    final tableStatus = advanceReady
+        ? ProductionWorkspaceStageStatus.storyboardTableSampled
+        : scriptPlanReady && !scriptPlanStoryboardReady
+        ? ProductionWorkspaceStageStatus.backfillScriptPlanFromTable
+        : ProductionWorkspaceStageStatus.storyboardTableExpandRead;
     return ProductionWorkspaceStage(
       title: '分镜表',
       flowKey: 'storyboardTable',
-      statusLabel: advanceReady
-          ? '已抽样'
+      status: tableStatus,
+      detail: advanceReady
+          ? '已窗口读取 $rowCount/$totalRows 行关键列，适合继续审核或修订 storyboardTable。${summarizeProductionStoryboardTableCoverage(sampledRows: rowCount, totalRows: totalRows)}。'
           : scriptPlanReady && !scriptPlanStoryboardReady
-          ? '回补导演计划'
-          : '待扩读',
-      detail:
-          advanceReady
-              ? '已窗口读取 $rowCount/$totalRows 行关键列，适合继续审核或修订 storyboardTable。${summarizeProductionStoryboardTableCoverage(sampledRows: rowCount, totalRows: totalRows)}。'
-              : scriptPlanReady && !scriptPlanStoryboardReady
-              ? '已窗口读取 $rowCount/$totalRows 行关键列，但当前 scriptPlan 还缺少足够明确的分场景情绪或画面意图，先回补导演计划，再继续扩读 storyboardTable。${summarizeProductionStoryboardTableCoverage(sampledRows: rowCount, totalRows: totalRows)}。'
-              : '已窗口读取 $rowCount/$totalRows 行关键列，但覆盖还不够，先扩读或补齐关键镜头表，再推进 storyboard。${summarizeProductionStoryboardTableCoverage(sampledRows: rowCount, totalRows: totalRows)}。',
+          ? '已窗口读取 $rowCount/$totalRows 行关键列，但当前 scriptPlan 还缺少足够明确的分场景情绪或画面意图，先回补导演计划，再继续扩读 storyboardTable。${summarizeProductionStoryboardTableCoverage(sampledRows: rowCount, totalRows: totalRows)}。'
+          : '已窗口读取 $rowCount/$totalRows 行关键列，但覆盖还不够，先扩读或补齐关键镜头表，再推进 storyboard。${summarizeProductionStoryboardTableCoverage(sampledRows: rowCount, totalRows: totalRows)}。',
       domainTool: 'get_flowData',
       domainArgs: scriptPlanReady && !scriptPlanStoryboardReady
           ? _scriptPlanCompactArgs()
@@ -507,7 +515,7 @@ ProductionWorkspaceStage _buildStoryboardTableStage({
     return ProductionWorkspaceStage(
       title: '分镜表',
       flowKey: 'storyboardTable',
-      statusLabel: '等待导演计划',
+      status: ProductionWorkspaceStageStatus.waitingScriptPlan,
       detail: '先读取或生成 scriptPlan，再拆分 storyboardTable，避免镜头表脱离导演计划。',
       domainTool: 'get_flowData',
       domainArgs: _scriptPlanCompactArgs(),
@@ -520,7 +528,7 @@ ProductionWorkspaceStage _buildStoryboardTableStage({
     return ProductionWorkspaceStage(
       title: '分镜表',
       flowKey: 'storyboardTable',
-      statusLabel: '等待导演计划完善',
+      status: ProductionWorkspaceStageStatus.waitingScriptPlanDepth,
       detail: '当前 scriptPlan 已有内容但还不够完整，先补齐导演计划的关键维度，再拆分 storyboardTable。',
       domainTool: 'get_flowData',
       domainArgs: _scriptPlanCompactArgs(),
@@ -534,7 +542,10 @@ ProductionWorkspaceStage _buildStoryboardTableStage({
     return ProductionWorkspaceStage(
       title: '分镜表',
       flowKey: 'storyboardTable',
-      statusLabel: '建议刷新',
+      status: ProductionWorkspaceStageStatus.suggestRefresh,
+      refreshHint: affectedIds.isEmpty
+          ? ProductionWorkspaceRefreshHint.refreshStoryboardTableSnapshot
+          : ProductionWorkspaceRefreshHint.rereadPartialStoryboardTable,
       detail: affectedIds.isEmpty
           ? '分镜表刚变更或正在处理，建议先刷新分镜表，再判断是否继续审核或修订。'
           : '分镜表刚变更，建议先回读镜头 #${affectedIds.join(', ')} 对应的局部分镜表行。',
@@ -545,7 +556,7 @@ ProductionWorkspaceStage _buildStoryboardTableStage({
   return ProductionWorkspaceStage(
     title: '分镜表',
     flowKey: 'storyboardTable',
-    statusLabel: '待读取',
+    status: ProductionWorkspaceStageStatus.pendingRead,
     detail: '需要时可读取 storyboardTable 审阅结构化镜头表。',
     domainTool: 'get_flowData',
     domainArgs: buildProductionStoryboardTableReadArgs(),
@@ -561,7 +572,9 @@ ProductionWorkspaceStage _buildStoryboardStage({
   required Object? result,
   required Map<String, dynamic>? toolArguments,
 }) {
-  final scriptPlanReady = _productionScriptPlanReady(flowSnapshot['scriptPlan']);
+  final scriptPlanReady = _productionScriptPlanReady(
+    flowSnapshot['scriptPlan'],
+  );
   final scriptPlanAdvanceReady = _productionScriptPlanAdvanceReady(
     flowSnapshot['scriptPlan'],
   );
@@ -593,7 +606,9 @@ ProductionWorkspaceStage _buildStoryboardStage({
     return ProductionWorkspaceStage(
       title: '分镜画面',
       flowKey: 'storyboard',
-      statusLabel: review.nextAction == 'generate_storyboard' ? '待补帧' : '待核对',
+      status: review.nextAction == 'generate_storyboard'
+          ? ProductionWorkspaceStageStatus.storyboardFramesPending
+          : ProductionWorkspaceStageStatus.storyboardPendingVerify,
       detail: '${_reviewDetail(review)} $scopeLine',
       domainTool: 'get_flowData',
       domainArgs: storyboardArgs,
@@ -619,7 +634,7 @@ ProductionWorkspaceStage _buildStoryboardStage({
       return const ProductionWorkspaceStage(
         title: '分镜画面',
         flowKey: 'storyboard',
-        statusLabel: '待生成',
+        status: ProductionWorkspaceStageStatus.pendingGenerate,
         detail: 'storyboard 为空，先生成第一版分镜画面。',
         subAgentTool: 'run_sub_agent_storyboard_gen',
         prompt: '请基于当前 production 上下文生成第一版 storyboard，并保持最小可行镜头集。',
@@ -643,7 +658,7 @@ ProductionWorkspaceStage _buildStoryboardStage({
       return ProductionWorkspaceStage(
         title: '分镜画面',
         flowKey: 'storyboard',
-        statusLabel: '需补帧',
+        status: ProductionWorkspaceStageStatus.needsStoryboardFrames,
         detail:
             '需出图 ${targetRows.length} 个镜头，仍有 $missingCount 个缺少画面结果（#$idsLabel$idTail）${skippedCount > 0 ? '；另有 $skippedCount 个镜头为纯文本模式，无需出图。' : '。'}${reviewScope.isEmpty ? '' : ' $reviewScope。'} $readiness。',
         subAgentTool: 'run_sub_agent_storyboard_gen',
@@ -658,7 +673,7 @@ ProductionWorkspaceStage _buildStoryboardStage({
     return ProductionWorkspaceStage(
       title: '分镜画面',
       flowKey: 'storyboard',
-      statusLabel: '已完成',
+      status: ProductionWorkspaceStageStatus.storyboardComplete,
       detail:
           '需出图 ${targetRows.length} 个镜头，画面结果齐备${skippedCount > 0 ? '；另有 $skippedCount 个纯文本镜头按设计无需出图' : ''}，可准备写回或继续导演计划。$readiness。',
       domainTool: 'get_flowData',
@@ -673,7 +688,7 @@ ProductionWorkspaceStage _buildStoryboardStage({
     return ProductionWorkspaceStage(
       title: '分镜画面',
       flowKey: 'storyboard',
-      statusLabel: '等待导演计划',
+      status: ProductionWorkspaceStageStatus.waitingScriptPlan,
       detail: '先读取或生成 scriptPlan，再推进 storyboard，避免直接补图但情绪和镜头意图未定。',
       domainTool: 'get_flowData',
       domainArgs: _scriptPlanCompactArgs(),
@@ -688,8 +703,9 @@ ProductionWorkspaceStage _buildStoryboardStage({
     return ProductionWorkspaceStage(
       title: '分镜画面',
       flowKey: 'storyboard',
-      statusLabel: '等待导演计划完善',
-      detail: '当前 scriptPlan 已有内容但还不够完整，先补齐导演计划的关键维度，再推进 storyboard，避免补图时情绪和镜头意图仍发散。',
+      status: ProductionWorkspaceStageStatus.waitingScriptPlanDepth,
+      detail:
+          '当前 scriptPlan 已有内容但还不够完整，先补齐导演计划的关键维度，再推进 storyboard，避免补图时情绪和镜头意图仍发散。',
       domainTool: 'get_flowData',
       domainArgs: _scriptPlanCompactArgs(),
     );
@@ -703,7 +719,7 @@ ProductionWorkspaceStage _buildStoryboardStage({
     return ProductionWorkspaceStage(
       title: '分镜画面',
       flowKey: 'storyboard',
-      statusLabel: '等待分镜表',
+      status: ProductionWorkspaceStageStatus.waitingStoryboardTable,
       detail: '先补 storyboardTable 再推进 storyboard，避免直接出图时镜头拆分和资产关联还没定型。',
       domainTool: 'get_flowData',
       domainArgs: buildProductionStoryboardTableReadArgs(),
@@ -720,8 +736,9 @@ ProductionWorkspaceStage _buildStoryboardStage({
     return ProductionWorkspaceStage(
       title: '分镜画面',
       flowKey: 'storyboard',
-      statusLabel: '回补导演计划',
-      detail: 'storyboardTable 已有基础内容，但当前 scriptPlan 对分场景情绪或画面意图交代还不够，先细化导演计划，再继续扩读分镜表并推进 storyboard。',
+      status: ProductionWorkspaceStageStatus.backfillScriptPlanFromTable,
+      detail:
+          'storyboardTable 已有基础内容，但当前 scriptPlan 对分场景情绪或画面意图交代还不够，先细化导演计划，再继续扩读分镜表并推进 storyboard。',
       domainTool: 'get_flowData',
       domainArgs: _scriptPlanCompactArgs(),
     );
@@ -736,8 +753,9 @@ ProductionWorkspaceStage _buildStoryboardStage({
     return ProductionWorkspaceStage(
       title: '分镜画面',
       flowKey: 'storyboard',
-      statusLabel: '等待分镜表完善',
-      detail: 'storyboardTable 已有基础内容，但覆盖还不够，先扩读或补齐关键镜头表，再推进 storyboard，避免在镜头拆分未定型时直接出图。',
+      status: ProductionWorkspaceStageStatus.waitingStoryboardTableCoverage,
+      detail:
+          'storyboardTable 已有基础内容，但覆盖还不够，先扩读或补齐关键镜头表，再推进 storyboard，避免在镜头拆分未定型时直接出图。',
       domainTool: 'get_flowData',
       domainArgs: buildProductionStoryboardTableReadArgs(),
     );
@@ -765,10 +783,20 @@ ProductionWorkspaceStage _buildStoryboardStage({
             toolName == 'run_sub_agent_storyboard_panel'
         ? buildProductionStoryboardGenerationArgs(ids: affectedIds)
         : buildProductionStoryboardReviewArgs();
+    final narrowStoryboardTools =
+        toolName == 'generate_storyboard' ||
+        toolName == 'run_sub_agent_storyboard_gen' ||
+        toolName == 'run_sub_agent_storyboard_panel';
+    final storyboardRefreshHint = !narrowStoryboardTools
+        ? ProductionWorkspaceRefreshHint.refreshStoryboardSnapshot
+        : affectedIds.isEmpty
+        ? ProductionWorkspaceRefreshHint.refreshStoryboardSnapshot
+        : ProductionWorkspaceRefreshHint.rereadMissingFrameState;
     return ProductionWorkspaceStage(
       title: '分镜画面',
       flowKey: 'storyboard',
-      statusLabel: '建议刷新',
+      status: ProductionWorkspaceStageStatus.suggestRefresh,
+      refreshHint: storyboardRefreshHint,
       detail:
           toolName == 'generate_storyboard' ||
               toolName == 'run_sub_agent_storyboard_gen' ||
@@ -784,18 +812,11 @@ ProductionWorkspaceStage _buildStoryboardStage({
   return ProductionWorkspaceStage(
     title: '分镜画面',
     flowKey: 'storyboard',
-    statusLabel: '待读取',
+    status: ProductionWorkspaceStageStatus.pendingRead,
     detail: '读取 storyboard 后可判断是否需要继续补图或直接写回结果。',
     domainTool: 'get_flowData',
     domainArgs: buildProductionStoryboardReviewArgs(),
   );
-}
-
-String _reviewStatusLabel(ProductionSupervisionReview review) {
-  if (review.severeCount > 0 || review.grade == 'D') return '需返工';
-  if (review.grade == 'C') return '待修订';
-  if (review.grade == 'B') return '可推进';
-  return '已通过';
 }
 
 String _reviewDetail(ProductionSupervisionReview review) {
@@ -847,7 +868,8 @@ bool _productionScriptPlanStoryboardReady(Object? value) {
 
 bool _productionStoryboardTableReady(Object? value) {
   if (value is String) {
-    return value.trim().isNotEmpty && countProductionStoryboardTableRows(value) > 0;
+    return value.trim().isNotEmpty &&
+        countProductionStoryboardTableRows(value) > 0;
   }
   if (value is Map<String, dynamic>) {
     final rowCount = _readInt(value['rowCount']);
@@ -859,7 +881,8 @@ bool _productionStoryboardTableReady(Object? value) {
 
 bool _productionStoryboardTableAdvanceReady(Object? value) {
   if (value is String) {
-    return value.trim().isNotEmpty && countProductionStoryboardTableRows(value) >= 3;
+    return value.trim().isNotEmpty &&
+        countProductionStoryboardTableRows(value) >= 3;
   }
   if (value is Map<String, dynamic>) {
     final rowCount = _readInt(value['rowCount']);

@@ -81,7 +81,7 @@ class ProductionWorkspaceStagesPanel extends StatelessWidget {
                           style: Theme.of(context).textTheme.labelLarge,
                         ),
                       ),
-                      Chip(label: Text(stage.statusLabel)),
+                      Chip(label: Text(stage.status.legacyChineseLabel)),
                     ],
                   ),
                   Text(
