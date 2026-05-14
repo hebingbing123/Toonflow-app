@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """
-批量 i18n：扫描 Text / SelectableText 的首参字符串字面量 → 生成 ARB 草案与对照表 →（审阅后）merge-arb → replace-dart。
+批量 i18n：扫描 UI 相关字符串字面量 → 生成 ARB 草案与对照表 →（审阅后）merge-arb → replace-dart。
 
-命中两类：
+命中几类：
 
-1. **插值模板**：含 Dart 字符串插值 ``${expr}`` 或 ``$identifier``（单行 `'`/`"` 或三引号）。
-2. **纯字面量**（prepare 默认开启）：无 Dart 插值，但含英文词（≥4 字母）或中文；可用 `--no-plain-literals` 关闭，或 `--max-plain N` 限制条数。
+1. **首参字符串**：``Text`` / ``SelectableText`` 的首个字符串字面量（单行 `'`/`"` 或三引号）。
+2. **命名参数字符串**：常见 Material 表单/提示参数（如 ``labelText: '…'``、``hintText: '…'`` 等，单行）。
+3. **纯字面量**（prepare 默认开启）：无 Dart 插值、且像用户可见文案（字母 ≥2 或中文等）；可用 ``--no-plain-literals`` 关闭，或 ``--max-plain N`` 限制条数。
 
 推荐流程::
 
@@ -21,6 +22,8 @@
   python3 scripts/l10n_batch_pipeline.py apply-all --confirm [--no-translate]
 
 可选机翻：pip install -r scripts/requirements_l10n_batch.txt 后 prepare 勿加 --no-translate。
+
+注意：放宽后会命中 ``name:``/``title:`` 等处的调试、探测、内部标识串，**务必在对照表审阅后再 merge-arb**。
 """
 
 from __future__ import annotations
@@ -41,6 +44,25 @@ _STR_RE = re.compile(
     r"(?<![A-Za-z0-9_])(?P<widget>Text|SelectableText)\s*\(\s*(?P<q>['\"])(?P<body>.*?)(?P=q)"
 )
 _WIDGET_OPEN = re.compile(r"(?<![A-Za-z0-9_])(Text|SelectableText)\s*\(")
+
+# 常见「命名参数: '文案'」扫描（单行）；长名在前减少歧义
+_NAMED_UI_PARAM_ALT = (
+    "semanticLabel|"
+    "helperText|counterText|labelText|errorText|hintText|placeholder|"
+    "buttonText|continueLabel|cancelLabel|confirmLabel|displayName|"
+    "description|subtitle|tooltip|message|content|header|footer|title|"
+    "name|label"
+)
+_NAMED_STR_RE = re.compile(
+    rf"(?<![A-Za-z0-9_])(?P<param>{_NAMED_UI_PARAM_ALT})\s*:\s*(?P<q>['\"])(?P<body>.*?)(?P=q)"
+)
+
+_LINE_HAS_WIDGET_STR = re.compile(
+    r"(?<![A-Za-z0-9_])(?:Text|SelectableText)\s*\("
+)
+_LINE_HAS_NAMED_STR = re.compile(
+    rf"(?<![A-Za-z0-9_])(?:{_NAMED_UI_PARAM_ALT})\s*:\s*['\"]"
+)
 
 MANIFEST_NAME = "prepare_manifest.json"
 REPORT_NAME = "prepare_report.md"
@@ -182,8 +204,8 @@ def _should_skip_body(body: str) -> bool:
 
 
 def _plain_literal_candidate(body: str) -> bool:
-    """无 Dart 字符串插值的可见文案候选（略保守，避免扫到纯符号/数字）。"""
-    if "${" in body:
+    """无 Dart 字符串插值的可见文案候选（偏宽：便于人工在对照表里筛）。"""
+    if _parse_interpolation_body(body) is not None:
         return False
     t = body.strip()
     if len(t) < 2 or len(t) > 480:
@@ -194,7 +216,16 @@ def _plain_literal_candidate(body: str) -> bool:
         return False
     if re.fullmatch(r"[\s.…·,/|:_\-+=#\\0-9]+", t):
         return False
-    return bool(re.search(r"[A-Za-z]{4,}", t) or re.search(r"[\u4e00-\u9fff]", t))
+    if re.fullmatch(r"#[0-9A-Fa-f]{3,8}", t):
+        return False
+    # 全大写常量/枚举名（如 ERROR_NETWORK）
+    if re.fullmatch(r"[A-Z][A-Z0-9_]+", t) and len(t) >= 3:
+        return False
+    if re.search(r"[\u4e00-\u9fff]", t):
+        return True
+    if re.search(r"[A-Za-z]{2,}", t):
+        return True
+    return False
 
 
 def _overlaps(a: Occurrence, b: Occurrence) -> bool:
@@ -205,8 +236,10 @@ def _dedupe_span_priority(occ: list[Occurrence]) -> list[Occurrence]:
     prio = {
         "triple_quote": 0,
         "single_line": 1,
+        "single_line_named": 1,
         "triple_quote_literal": 2,
         "single_line_literal": 3,
+        "single_line_named_literal": 3,
     }
     by_path: dict[Path, list[Occurrence]] = defaultdict(list)
     for o in occ:
@@ -249,22 +282,24 @@ def _cap_plain_literals(occ: list[Occurrence], max_plain: int) -> list[Occurrenc
     return interp + plain
 
 
-def _replacement_snippet(widget: str, key: str, exprs: list[str]) -> str:
-    args = ", ".join(exprs)
-    inner = f"l10n.{key}({args})" if args else f"l10n.{key}()"
+def _replacement_snippet(o: Occurrence) -> str:
+    args = ", ".join(o.exprs)
+    inner = f"l10n.{o.l10n_key}({args})" if args else f"l10n.{o.l10n_key}()"
+    if o.is_named_param:
+        return f"{o.widget}: {inner}"
     # old_span 止于字符串字面量结束引号，不包含 Text(…) 的闭合「)」；故此处也不闭合最外层。
-    return f"{widget}({inner}"
+    return f"{o.widget}({inner}"
 
 
 @dataclass
 class Occurrence:
     path: Path
-    kind: str  # single_line | triple_quote | single_line_literal | triple_quote_literal
+    kind: str  # single_line | single_line_named | triple_quote | *_literal
     span_start: int
     span_end: int
     line_start: int
     line_end: int
-    widget: str
+    widget: str  # Text / SelectableText，或命名参数名（如 labelText）
     body: str
     literals: list[str]
     exprs: list[str]
@@ -272,6 +307,7 @@ class Occurrence:
     l10n_key: str
     ph_types: list[str]
     old_span: str
+    is_named_param: bool = False
 
 
 def _dedupe_occurrences(occ: list[Occurrence]) -> list[Occurrence]:
@@ -287,10 +323,47 @@ def scan_file(
 ) -> list[Occurrence]:
     out: list[Occurrence] = []
 
-    # 1) 单行 Text('...${}...')
+    def _emit_single_line(
+        *,
+        kind: str,
+        widget: str,
+        body: str,
+        literals: list[str],
+        exprs: list[str],
+        s0: int,
+        s1: int,
+        is_named_param: bool,
+    ) -> None:
+        norm = _normalize_template(literals, len(exprs))
+        key = _stable_key(norm)
+        types = [_infer_placeholder_type(e) for e in exprs]
+        out.append(
+            Occurrence(
+                path=path,
+                kind=kind,
+                span_start=s0,
+                span_end=s1,
+                line_start=_line_at(text, s0),
+                line_end=_line_at(text, s0),
+                widget=widget,
+                body=body,
+                literals=literals,
+                exprs=exprs,
+                norm=norm,
+                l10n_key=key,
+                ph_types=types,
+                old_span=text[s0:s1],
+                is_named_param=is_named_param,
+            )
+        )
+
+    # 1) 单行：Text / SelectableText 首参 + 常见命名参数字符串
     off = 0
     for line in text.splitlines(keepends=True):
-        if "Text(" not in line and "SelectableText(" not in line:
+        if not (
+            _LINE_HAS_WIDGET_STR.search(line) is not None
+            or _LINE_HAS_NAMED_STR.search(line) is not None
+        ):
             off += len(line)
             continue
         for m in _STR_RE.finditer(line):
@@ -304,39 +377,56 @@ def scan_file(
                     m.group("q") in lit for lit in literals
                 ):
                     continue
-                norm = _normalize_template(literals, len(exprs))
-                key = _stable_key(norm)
-                types = [_infer_placeholder_type(e) for e in exprs]
                 kind = "single_line"
             elif include_plain_literals and _plain_literal_candidate(body):
                 literals = [body]
                 exprs = []
-                norm = _normalize_template(literals, 0)
-                key = _stable_key(norm)
-                types = []
                 kind = "single_line_literal"
             else:
                 continue
             ws = m.group("widget")
             s0 = off + m.start()
             s1 = off + m.end()
-            out.append(
-                Occurrence(
-                    path=path,
-                    kind=kind,
-                    span_start=s0,
-                    span_end=s1,
-                    line_start=_line_at(text, s0),
-                    line_end=_line_at(text, s0),
-                    widget=ws,
-                    body=body,
-                    literals=literals,
-                    exprs=exprs,
-                    norm=norm,
-                    l10n_key=key,
-                    ph_types=types,
-                    old_span=text[s0:s1],
-                )
+            _emit_single_line(
+                kind=kind,
+                widget=ws,
+                body=body,
+                literals=literals,
+                exprs=exprs,
+                s0=s0,
+                s1=s1,
+                is_named_param=False,
+            )
+        for m in _NAMED_STR_RE.finditer(line):
+            body = m.group("body")
+            if _should_skip_body(body):
+                continue
+            parsed = _parse_interpolation_body(body)
+            param = m.group("param")
+            if parsed is not None:
+                literals, exprs = parsed
+                if m.group("q") in literals or any(
+                    m.group("q") in lit for lit in literals
+                ):
+                    continue
+                kind = "single_line_named"
+            elif include_plain_literals and _plain_literal_candidate(body):
+                literals = [body]
+                exprs = []
+                kind = "single_line_named_literal"
+            else:
+                continue
+            s0 = off + m.start()
+            s1 = off + m.end()
+            _emit_single_line(
+                kind=kind,
+                widget=param,
+                body=body,
+                literals=literals,
+                exprs=exprs,
+                s0=s0,
+                s1=s1,
+                is_named_param=True,
             )
         off += len(line)
 
@@ -383,6 +473,7 @@ def scan_file(
                 l10n_key=key,
                 ph_types=types,
                 old_span=text[s0:s1],
+                is_named_param=False,
             )
         )
 
@@ -394,7 +485,7 @@ def scan_lib(
     subtree: str | None = None,
     *,
     include_plain_literals: bool = True,
-    max_plain: int = 2000,
+    max_plain: int = 12000,
 ) -> list[Occurrence]:
     skip = {"l10n", "generated", ".dart_tool"}
     out: list[Occurrence] = []
@@ -489,7 +580,7 @@ def _build_plan(
         sample = "".join(literals)
         if no_translate:
             zh_msg = msg_en
-        elif re.search(r"[A-Za-z]{4,}", sample) or translate_tokens:
+        elif re.search(r"[A-Za-z]{2,}", sample) or translate_tokens:
             zh_msg = _translate_zh(msg_en)
         else:
             zh_msg = msg_en
@@ -498,7 +589,7 @@ def _build_plan(
     occ_new: list[tuple[Occurrence, str]] = []
     char_edits: list[dict] = []
     for o in occ:
-        new_span = _replacement_snippet(o.widget, o.l10n_key, o.exprs)
+        new_span = _replacement_snippet(o)
         occ_new.append((o, new_span))
         char_edits.append(
             {
@@ -511,6 +602,7 @@ def _build_plan(
                 "line_end": o.line_end,
                 "kind": o.kind,
                 "key": o.l10n_key,
+                "is_named_param": o.is_named_param,
             }
         )
 
@@ -547,8 +639,7 @@ def _write_mapping_table_md(
         )
     if not rows:
         lines.append(
-            "| — | — | — | *无命中：当前规则下无单行/三引号且含 `${}` 的 Text/SelectableText；"
-            "可换 `--subtree` 或扩展脚本规则。* | — | — | — | — |"
+            "| — | — | — | *无命中：可换 `--subtree`、提高 `--max-plain`，或继续扩展 `l10n_batch_pipeline.py` 中命名参数列表。* | — | — | — | — |"
         )
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
@@ -648,6 +739,8 @@ def cmd_scan(args: argparse.Namespace) -> int:
             "key": o.l10n_key,
             "body": o.body,
             "exprs": o.exprs,
+            "is_named_param": o.is_named_param,
+            "widget": o.widget,
         }
         for o in occ
     ]
@@ -702,6 +795,8 @@ def cmd_prepare(args: argparse.Namespace) -> int:
                 "key": o.l10n_key,
                 "body": o.body,
                 "exprs": o.exprs,
+                "is_named_param": o.is_named_param,
+                "widget": o.widget,
             }
             for o in occ
         ],
@@ -849,13 +944,13 @@ def main() -> int:
     p_scan.add_argument(
         "--no-plain-literals",
         action="store_true",
-        help="仅扫描含 ${} 的插值模板（不含纯字面量）",
+        help="不扫描「无 Dart 插值的纯字面量」及 named 字面量分支（仅保留含 $ / ${} 的模板）",
     )
     p_scan.add_argument(
         "--max-plain",
         type=int,
-        default=2000,
-        help="纯字面量命中条数上限（插值类不受限）",
+        default=12000,
+        help="纯字面量命中条数上限（含 single_line_named_literal；插值类不受限）",
     )
     p_scan.set_defaults(func=cmd_scan)
 
@@ -863,7 +958,7 @@ def main() -> int:
     p_prep.add_argument("--root", default="frontend/lib")
     p_prep.add_argument("--subtree", default=None)
     p_prep.add_argument("--no-plain-literals", action="store_true")
-    p_prep.add_argument("--max-plain", type=int, default=2000)
+    p_prep.add_argument("--max-plain", type=int, default=12000)
     p_prep.add_argument("--no-translate", action="store_true")
     p_prep.add_argument("--translate-tokens", action="store_true")
     p_prep.set_defaults(func=cmd_prepare)
