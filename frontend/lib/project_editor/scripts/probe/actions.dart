@@ -10,7 +10,7 @@ extension _HomePageProjectEditorScriptsProbe on _HomePageState {
     required List<bool> scriptProbeBusy,
     required List<ScriptBrief> scriptList,
   }) {
-    final l10n = AppLocalizations.of(ctx)!;
+    final l10n = resolveAppLocalizationsForErrors(ctx);
     return [
       TextButton(
         onPressed: scriptProbeBusy[0] || saving[0]

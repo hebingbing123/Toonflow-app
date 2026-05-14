@@ -1,20 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../l10n/app_localizations.dart';
+import '../l10n/rust_api_error_format.dart';
 
 /// Utility class for localized date, time, and number formatting
 /// Implements task I2.10: 日期、时间、数字格式按目标语言本地化
 class LocalizedFormatting {
   /// Get the appropriate locale for formatting based on the current app locale
   static Locale _getFormattingLocale(BuildContext context) {
-    final appLocalizations = AppLocalizations.of(context);
-    if (appLocalizations == null) {
-      return const Locale('en');
-    }
-
-    // Use the locale from AppLocalizations
-    final locale = Localizations.localeOf(context);
-    return locale;
+    return Localizations.maybeLocaleOf(context) ??
+        Locale(resolveAppLocalizationsForErrors(context).localeName);
   }
 
   /// Format a DateTime as a localized date string
@@ -109,7 +103,7 @@ class LocalizedFormatting {
   /// Format a relative time (e.g., "2 hours ago", "刚刚")
   /// This uses the existing ARB keys for consistency
   static String formatRelativeTime(BuildContext context, DateTime dateTime) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final now = DateTime.now();
     final difference = now.difference(dateTime);
 
@@ -129,7 +123,7 @@ class LocalizedFormatting {
 
   /// Format file size with localized number formatting
   static String formatFileSize(BuildContext context, int bytes) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final suffixes = <String>[
       l10n.localizedFormattingByteSuffix,
       l10n.localizedFormattingKilobyteSuffix,
@@ -159,7 +153,7 @@ class LocalizedFormatting {
   /// Chinese: 2小时30分钟
   /// English: 2h 30m
   static String formatDuration(BuildContext context, Duration duration) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
 
     final hours = duration.inHours;
     final minutes = duration.inMinutes.remainder(60);

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../l10n/app_localizations.dart';
+import '../l10n/rust_api_error_format.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 
 class HarnessSection extends StatelessWidget {
@@ -113,7 +113,7 @@ class HarnessSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

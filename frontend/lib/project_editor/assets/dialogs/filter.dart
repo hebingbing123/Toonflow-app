@@ -17,7 +17,7 @@ extension _HomePageProjectEditorAssetsFilterDialogs on _HomePageState {
     final pageCtrl = TextEditingController(text: '1');
     final limitCtrl = TextEditingController(text: '20');
     int? selectedScriptNumericId = assetsFilterScriptNumericId[0];
-    final l10n = AppLocalizations.of(ctx)!;
+    final l10n = resolveAppLocalizationsForErrors(ctx);
     try {
       final confirmed = await showDialog<bool>(
         context: ctx,

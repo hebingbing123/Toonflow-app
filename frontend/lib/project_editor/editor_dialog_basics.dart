@@ -8,7 +8,7 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
     required String? selectedPath,
     required ValueChanged<String?> onChanged,
   }) {
-    final l10n = AppLocalizations.of(ctx)!;
+    final l10n = resolveAppLocalizationsForErrors(ctx);
     _StylePackOption? selected;
     for (final option in options) {
       if (option.path == selectedPath) {
@@ -85,7 +85,7 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
     required TextEditingController continuityCtrl,
     required _ProjectEditorDialogState dialogState,
   }) {
-    final l10n = AppLocalizations.of(ctx)!;
+    final l10n = resolveAppLocalizationsForErrors(ctx);
     final home = dialogState.homeRef[0];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

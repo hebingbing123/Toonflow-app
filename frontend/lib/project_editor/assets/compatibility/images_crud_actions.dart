@@ -12,7 +12,7 @@ extension _HomePageProjectEditorAssetsImagesCrudProbeActions on _HomePageState {
     required List<bool> assetsBusy,
     required Future<void> Function() reloadAssetsAndStats,
   }) {
-    final l10n = AppLocalizations.of(ctx)!;
+    final l10n = resolveAppLocalizationsForErrors(ctx);
     return [
       TextButton(
         onPressed:

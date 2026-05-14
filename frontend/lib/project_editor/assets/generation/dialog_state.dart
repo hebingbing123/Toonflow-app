@@ -43,7 +43,7 @@ class _AssetGenerationWorkbenchDialogState
   List<int> _sortedSelection() => sortUniqueAssetNumericIds(_selectedIds);
 
   void _applySelection(Iterable<int> ids, String label) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final result = _buildSelectionApplyResult(
       l10n: l10n,
       ids: ids,
@@ -60,7 +60,7 @@ class _AssetGenerationWorkbenchDialogState
   }
 
   void _applyScopedSelection(Iterable<int> candidateIds, String label) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final result = _buildScopedSelectionApplyResult(
       l10n: l10n,
       candidateIds: candidateIds,
@@ -80,7 +80,7 @@ class _AssetGenerationWorkbenchDialogState
     String nextType,
     List<AssetRow> visible,
   ) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final result = _buildTypeChangeSelectionResult(
       l10n: l10n,
       nextType: nextType,
@@ -121,7 +121,7 @@ class _AssetGenerationWorkbenchDialogState
     required bool includeProductionSummary,
     String? lead,
   }) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     _updateWorkbenchState(() {
       _loadingSummary = true;
       _statusLine = _buildSnapshotLoadingStatusLine(l10n, lead);
@@ -194,7 +194,7 @@ class _AssetGenerationWorkbenchDialogState
       if (mounted) _updateWorkbenchState(() => _statusLine = e.message);
     } catch (e) {
       if (mounted) {
-        final loc = AppLocalizations.of(context)!;
+        final loc = resolveAppLocalizationsForErrors(context);
         _updateWorkbenchState(
           () => _statusLine = describeUserVisibleApiError(loc, e),
         );
@@ -207,7 +207,7 @@ class _AssetGenerationWorkbenchDialogState
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final visible = widget.visibleAssets();
     final scopedAssets = _filterAssetsByType(visible, _selectedType);
     final typeSelections = collectAssetIdsByType(visible);

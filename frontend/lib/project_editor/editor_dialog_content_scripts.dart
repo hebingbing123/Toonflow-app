@@ -9,7 +9,7 @@ extension _HomePageProjectEditorDialogContentScripts on _HomePageState {
     required _ProjectEditorDialogState dialogState,
     required List<ScriptBrief> scriptList,
   }) {
-    final l10n = AppLocalizations.of(ctx)!;
+    final l10n = resolveAppLocalizationsForErrors(ctx);
     return buildProjectScriptsSection(
       ctx: ctx,
       l10n: l10n,

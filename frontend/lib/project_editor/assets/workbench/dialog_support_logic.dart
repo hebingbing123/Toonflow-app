@@ -80,7 +80,7 @@ class ProjectAssetsWorkbenchController {
 
   Future<void> refreshWorkbench(StateSetter setLocalState) =>
       refreshProjectAssetsWorkbench(
-        l10n: AppLocalizations.of(ctx)!,
+        l10n: resolveAppLocalizationsForErrors(ctx),
         reloadAssetsAndStats: reloadAssetsAndStats,
         assetsRef: assetsRef,
         selectedAssetNumericId: session.selectedAssetNumericId,

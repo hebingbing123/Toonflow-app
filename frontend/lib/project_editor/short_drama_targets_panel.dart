@@ -70,7 +70,7 @@ class _ShortDramaTargetsPanelState extends State<ShortDramaTargetsPanel> {
 
   Future<void> _save() async {
     if (!mounted) return;
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     setState(() {
       _busy = true;
       _line = null;
@@ -125,7 +125,7 @@ class _ShortDramaTargetsPanelState extends State<ShortDramaTargetsPanel> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
     return Container(
       width: double.infinity,

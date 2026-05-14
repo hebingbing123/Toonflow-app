@@ -32,7 +32,7 @@ AlertDialog buildProjectAssetsWorkbenchDialog({
   final dialogWidth = viewportWidth.isFinite
       ? viewportWidth.clamp(320.0, 780.0)
       : 780.0;
-  final l10n = AppLocalizations.of(dialogCtx)!;
+  final l10n = resolveAppLocalizationsForErrors(dialogCtx);
   return AlertDialog(
     title: Text(l10n.projectEditorAssetsMainWorkbenchTitle),
     content: SizedBox(

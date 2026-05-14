@@ -8,7 +8,7 @@ extension _HomePageProjectEditorDialogContentNovels on _HomePageState {
     required ProjectRow p,
     required _ProjectEditorDialogState dialogState,
   }) {
-    final l10n = AppLocalizations.of(ctx)!;
+    final l10n = resolveAppLocalizationsForErrors(ctx);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,

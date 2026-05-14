@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../l10n/app_localizations.dart';
-import '../../../rust_api.dart';
+import '../../rust_api.dart';
 
 Future<void> openProjectAssetClipUploadDialog({
   required BuildContext ctx,
@@ -11,7 +10,7 @@ Future<void> openProjectAssetClipUploadDialog({
   required List<bool> assetsBusy,
   required Future<void> Function() reloadAssetsAndStats,
 }) async {
-  final l10n = AppLocalizations.of(ctx)!;
+  final l10n = resolveAppLocalizationsForErrors(ctx);
   final nameCtrl = TextEditingController(
     text: 'clip_${DateTime.now().millisecondsSinceEpoch}',
   );
@@ -21,7 +20,7 @@ Future<void> openProjectAssetClipUploadDialog({
     final confirmed = await showDialog<bool>(
       context: ctx,
       builder: (dialogCtx) {
-        final dlgL10n = AppLocalizations.of(dialogCtx)!;
+        final dlgL10n = resolveAppLocalizationsForErrors(dialogCtx);
         return AlertDialog(
           title: Text(dlgL10n.projectEditorAssetClipUploadDialogTitle),
           content: SizedBox(

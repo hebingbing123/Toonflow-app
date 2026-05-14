@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../l10n/app_localizations.dart';
-import '../../../rust_api.dart';
+import '../../rust_api.dart';
 
 Future<void> openProjectAssetEditImageUploadDialog({
   required BuildContext ctx,
@@ -11,7 +10,7 @@ Future<void> openProjectAssetEditImageUploadDialog({
   required List<ScriptBrief> scriptList,
   required List<bool> assetsBusy,
 }) async {
-  final l10n = AppLocalizations.of(ctx)!;
+  final l10n = resolveAppLocalizationsForErrors(ctx);
   if (scriptList.isEmpty) {
     ScaffoldMessenger.of(
       ctx,
@@ -26,7 +25,7 @@ Future<void> openProjectAssetEditImageUploadDialog({
       builder: (dialogCtx) {
         return StatefulBuilder(
           builder: (dialogCtx, setState) {
-            final dlgL10n = AppLocalizations.of(dialogCtx)!;
+            final dlgL10n = resolveAppLocalizationsForErrors(dialogCtx);
             return AlertDialog(
               title: Text(dlgL10n.projectEditorAssetEditImageDialogTitle),
               content: SizedBox(

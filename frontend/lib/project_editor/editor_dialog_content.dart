@@ -93,7 +93,7 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
     required String token,
     required ProjectRow p,
   }) {
-    final l10n = AppLocalizations.of(ctx)!;
+    final l10n = resolveAppLocalizationsForErrors(ctx);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
 
 /// Widget for managing benchmark experiments
@@ -48,7 +47,7 @@ class BenchmarkExperimentsWorkbench extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(12),

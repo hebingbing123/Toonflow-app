@@ -99,7 +99,7 @@ class _ProjectAuditPanelState extends State<ProjectAuditPanel> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
     final needle = _searchCtrl.text.trim().toLowerCase();
     final filtered = _rows

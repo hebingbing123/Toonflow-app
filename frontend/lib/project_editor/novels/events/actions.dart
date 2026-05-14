@@ -26,7 +26,7 @@ extension _HomePageProjectEditorNovelEventsActions on _HomePageState {
                 assetsScriptFilterLoading[0]
             ? null
             : () async {
-                final l10n = AppLocalizations.of(ctx)!;
+                final l10n = resolveAppLocalizationsForErrors(ctx);
                 setDialogState(() => novelsBusy[0] = true);
                 try {
                   final pg = await fetchNovelEventsPaged(
@@ -59,7 +59,7 @@ extension _HomePageProjectEditorNovelEventsActions on _HomePageState {
                   }
                 }
               },
-        child: Text(AppLocalizations.of(ctx)!.projectEditorNovelsProbeEventsGetEventsButton),
+        child: Text(resolveAppLocalizationsForErrors(ctx).projectEditorNovelsProbeEventsGetEventsButton),
       ),
       TextButton(
         onPressed:
@@ -71,7 +71,7 @@ extension _HomePageProjectEditorNovelEventsActions on _HomePageState {
                 assetsScriptFilterLoading[0]
             ? null
             : () async {
-                final l10n = AppLocalizations.of(ctx)!;
+                final l10n = resolveAppLocalizationsForErrors(ctx);
                 setDialogState(() => novelsBusy[0] = true);
                 try {
                   final pg = await fetchNovelEventsPaged(
@@ -104,7 +104,7 @@ extension _HomePageProjectEditorNovelEventsActions on _HomePageState {
                   }
                 }
               },
-        child: Text(AppLocalizations.of(ctx)!.projectEditorNovelsProbeEventsBatchDeleteEmptyButton),
+        child: Text(resolveAppLocalizationsForErrors(ctx).projectEditorNovelsProbeEventsBatchDeleteEmptyButton),
       ),
     ];
   }

@@ -17,7 +17,7 @@ class _AssetGenerationSelectionPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final outline = Theme.of(context).colorScheme.outline;
     final bodySmall = Theme.of(context).textTheme.bodySmall;
     final scopeHint = filterScriptNumericId == null

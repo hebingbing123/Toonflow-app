@@ -15,7 +15,7 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
         onPressed: disabled || novelsRef[0] == null || novelsRef[0]!.items.isEmpty
             ? null
             : () async {
-                final l10n = AppLocalizations.of(ctx)!;
+                final l10n = resolveAppLocalizationsForErrors(ctx);
                 setDialogState(() => novelsBusy[0] = true);
                 try {
                   final ids = novelsRef[0]!.items.map((e) => e.numericId).toList();
@@ -42,13 +42,13 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
                   }
                 }
               },
-        child: Text(AppLocalizations.of(ctx)!.projectEditorNovelsProbeMutationGenerateEventsButton),
+        child: Text(resolveAppLocalizationsForErrors(ctx).projectEditorNovelsProbeMutationGenerateEventsButton),
       ),
       TextButton(
         onPressed: disabled
             ? null
             : () async {
-                final l10n = AppLocalizations.of(ctx)!;
+                final l10n = resolveAppLocalizationsForErrors(ctx);
                 setDialogState(() => novelsBusy[0] = true);
                 try {
                   await appendNovelsUnderProject(
@@ -74,13 +74,13 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
                   }
                 }
               },
-        child: Text(AppLocalizations.of(ctx)!.projectEditorNovelsProbeMutationAddNovelEmptyButton),
+        child: Text(resolveAppLocalizationsForErrors(ctx).projectEditorNovelsProbeMutationAddNovelEmptyButton),
       ),
       TextButton(
         onPressed: disabled
             ? null
             : () async {
-                final l10n = AppLocalizations.of(ctx)!;
+                final l10n = resolveAppLocalizationsForErrors(ctx);
                 setDialogState(() => novelsBusy[0] = true);
                 try {
                   await batchDeleteNovelsUnderProject(token, p.id, const []);
@@ -111,13 +111,13 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
                   }
                 }
               },
-        child: Text(AppLocalizations.of(ctx)!.projectEditorNovelsProbeMutationBatchDeleteEmptyButton),
+        child: Text(resolveAppLocalizationsForErrors(ctx).projectEditorNovelsProbeMutationBatchDeleteEmptyButton),
       ),
       TextButton(
         onPressed: disabled
             ? null
             : () async {
-                final l10n = AppLocalizations.of(ctx)!;
+                final l10n = resolveAppLocalizationsForErrors(ctx);
                 setDialogState(() => novelsBusy[0] = true);
                 try {
                   await deleteNovelByProjectUuid(token, p.id, 0);
@@ -148,13 +148,13 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
                   }
                 }
               },
-        child: Text(AppLocalizations.of(ctx)!.projectEditorNovelsProbeMutationDeleteNovelZeroButton),
+        child: Text(resolveAppLocalizationsForErrors(ctx).projectEditorNovelsProbeMutationDeleteNovelZeroButton),
       ),
       TextButton(
         onPressed: disabled || novelsRef[0] == null || novelsRef[0]!.items.isEmpty
             ? null
             : () async {
-                final l10n = AppLocalizations.of(ctx)!;
+                final l10n = resolveAppLocalizationsForErrors(ctx);
                 setDialogState(() => novelsBusy[0] = true);
                 final n = novelsRef[0]!.items.first;
                 try {
@@ -188,7 +188,7 @@ extension _HomePageProjectEditorNovelsProbeMutationActions on _HomePageState {
                   }
                 }
               },
-        child: Text(AppLocalizations.of(ctx)!.projectEditorNovelsProbeMutationUpdateNovelNoopButton),
+        child: Text(resolveAppLocalizationsForErrors(ctx).projectEditorNovelsProbeMutationUpdateNovelNoopButton),
       ),
     ];
   }

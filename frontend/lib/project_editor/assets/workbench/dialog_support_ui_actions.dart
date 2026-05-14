@@ -33,7 +33,7 @@ class _ProjectAssetsWorkbenchActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final canMutateAssets = !(localBusy || assetsBusy || assets.isEmpty);
     final canLinkScripts =
         !(localBusy ||

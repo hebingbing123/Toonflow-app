@@ -10,7 +10,7 @@ extension _HomePageProjectEditorHttpTasksProbe on _HomePageState {
     required List<bool> tasksProbeBusy,
     required List<bool> projectProbeBusy,
   }) {
-    final l10n = AppLocalizations.of(ctx)!;
+    final l10n = resolveAppLocalizationsForErrors(ctx);
     return [
       TextButton(
         onPressed:

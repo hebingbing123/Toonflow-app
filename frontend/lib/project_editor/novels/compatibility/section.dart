@@ -15,7 +15,7 @@ extension _HomePageProjectEditorNovelsProbe on _HomePageState {
     required List<bool> assetsLoading,
     required List<bool> assetsScriptFilterLoading,
   }) {
-    final l10n = AppLocalizations.of(ctx)!;
+    final l10n = resolveAppLocalizationsForErrors(ctx);
     return ExpansionTile(
       tilePadding: EdgeInsets.zero,
       childrenPadding: EdgeInsets.zero,

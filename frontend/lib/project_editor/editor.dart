@@ -4,7 +4,7 @@ extension _HomePageProjectEditor on _HomePageState {
   Future<void> _openProjectDetail(ProjectRow p) async {
     final token = _session?.accessToken;
     if (token == null) return;
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final nameCtrl = TextEditingController(text: p.name ?? '');
     final introCtrl = TextEditingController(text: p.intro ?? '');
     final premiseCtrl = TextEditingController();

@@ -12,7 +12,7 @@ extension _HomePageProjectEditorScriptsBatchAddDialog on _HomePageState {
     required List<ScriptBrief> scriptList,
     required List<ProjectStats?> statsRef,
   }) async {
-    final l10n = AppLocalizations.of(ctx)!;
+    final l10n = resolveAppLocalizationsForErrors(ctx);
     final countCtrl = TextEditingController(text: '3');
     final namePrefixCtrl = TextEditingController(text: l10n.projectEditorScriptsBatchAddDefaultPrefix);
     final scriptDataCtrl = TextEditingController(text: l10n.projectEditorScriptsBatchAddDefaultContent);

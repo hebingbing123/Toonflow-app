@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../l10n/app_localizations.dart';
-import '../../../rust_api.dart';
+import '../../rust_api.dart';
 
 Future<void> openProjectAssetLinkDialog({
   required BuildContext ctx,
@@ -14,7 +13,7 @@ Future<void> openProjectAssetLinkDialog({
   required Future<void> Function() reloadAssetsAndStats,
   required bool unlink,
 }) async {
-  final l10n = AppLocalizations.of(ctx)!;
+  final l10n = resolveAppLocalizationsForErrors(ctx);
   final assets = assetsRef[0]?.items ?? const <AssetRow>[];
   if (scriptList.isEmpty || assets.isEmpty) {
     ScaffoldMessenger.of(
@@ -30,7 +29,7 @@ Future<void> openProjectAssetLinkDialog({
     builder: (dialogCtx) {
       return StatefulBuilder(
         builder: (dialogCtx, setState) {
-          final dlgL10n = AppLocalizations.of(dialogCtx)!;
+          final dlgL10n = resolveAppLocalizationsForErrors(dialogCtx);
           return AlertDialog(
             title: Text(
               unlink

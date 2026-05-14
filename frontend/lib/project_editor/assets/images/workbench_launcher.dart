@@ -87,7 +87,7 @@ Future<void> openAssetImagesWorkbenchDialog({
 }) async {
   final assets = assetsRef[0]?.items ?? const <AssetRow>[];
   if (assets.isEmpty) {
-    final l10n = AppLocalizations.of(ctx)!;
+    final l10n = resolveAppLocalizationsForErrors(ctx);
     ScaffoldMessenger.of(ctx).showSnackBar(
       SnackBar(content: Text(l10n.projectEditorAssetImagesCreateAssetFirst)),
     );
@@ -117,7 +117,7 @@ Future<void> openAssetImagesWorkbenchDialog({
                 setState: setState,
               );
             }
-            final l10n = AppLocalizations.of(dialogCtx)!;
+            final l10n = resolveAppLocalizationsForErrors(dialogCtx);
             final dialogState = deps.captureDialogState(l10n: l10n, assets: assets);
             final callbacks = deps.controller.buildDialogCallbacks(
               setState: setState,

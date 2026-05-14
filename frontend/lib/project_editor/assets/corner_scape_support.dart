@@ -2,8 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
-import '../../l10n/app_localizations.dart';
-import '../../../rust_api.dart';
+import '../../rust_api.dart';
 import 'support.dart';
 
 class CornerScapeWorkbenchSession {
@@ -106,7 +105,7 @@ class CornerScapeWorkbenchController {
   }
 
   Future<void> refreshAssets(StateSetter setState) async {
-    final l10n = AppLocalizations.of(ctx)!;
+    final l10n = resolveAppLocalizationsForErrors(ctx);
     final activeTypes = parseCornerScapeTypesInput(session.typesCtrl.text);
     setDialogState(() => assetsBusy[0] = true);
     setState(() {

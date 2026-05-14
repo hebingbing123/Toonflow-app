@@ -6,7 +6,7 @@ extension _HomePageProjectEditorScriptPlanWorkbench on _HomePageState {
     required String token,
     required ProjectRow project,
   }) async {
-    final l10n = AppLocalizations.of(ctx)!;
+    final l10n = resolveAppLocalizationsForErrors(ctx);
     final storySkeletonCtrl = TextEditingController();
     final adaptationStrategyCtrl = TextEditingController();
     ScriptAgentPlanData? planData;

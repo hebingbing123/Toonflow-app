@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../l10n/app_localizations.dart';
 import '../../../rust_api.dart';
 import '../support.dart';
 import 'dialog.dart';
@@ -27,7 +26,7 @@ Future<void> openAssetGenerationWorkbenchDialog({
   }
 
   final seededAssets = visibleAssets();
-  final l10n = AppLocalizations.of(ctx)!;
+  final l10n = resolveAppLocalizationsForErrors(ctx);
   if (seededAssets.isEmpty) {
     ScaffoldMessenger.of(
       ctx,

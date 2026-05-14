@@ -15,7 +15,7 @@ extension _HomePageProjectEditorNovelsProbeReadActions on _HomePageState {
         onPressed: disabled
             ? null
             : () async {
-                final l10n = AppLocalizations.of(ctx)!;
+                final l10n = resolveAppLocalizationsForErrors(ctx);
                 setDialogState(() => novelsBusy[0] = true);
                 try {
                   final pg = await fetchNovelWorkbenchPaged(
@@ -51,13 +51,13 @@ extension _HomePageProjectEditorNovelsProbeReadActions on _HomePageState {
                   }
                 }
               },
-        child: Text(AppLocalizations.of(ctx)!.projectEditorNovelsProbeReadGetNovelButton),
+        child: Text(resolveAppLocalizationsForErrors(ctx).projectEditorNovelsProbeReadGetNovelButton),
       ),
       TextButton(
         onPressed: disabled
             ? null
             : () async {
-                final l10n = AppLocalizations.of(ctx)!;
+                final l10n = resolveAppLocalizationsForErrors(ctx);
                 setDialogState(() => novelsBusy[0] = true);
                 try {
                   final rows = await fetchNovelWorkbenchFullRows(
@@ -82,13 +82,13 @@ extension _HomePageProjectEditorNovelsProbeReadActions on _HomePageState {
                   }
                 }
               },
-        child: Text(AppLocalizations.of(ctx)!.projectEditorNovelsProbeReadGetNovelDataButton),
+        child: Text(resolveAppLocalizationsForErrors(ctx).projectEditorNovelsProbeReadGetNovelDataButton),
       ),
       TextButton(
         onPressed: disabled
             ? null
             : () async {
-                final l10n = AppLocalizations.of(ctx)!;
+                final l10n = resolveAppLocalizationsForErrors(ctx);
                 setDialogState(() => novelsBusy[0] = true);
                 try {
                   final idx = await fetchNovelWorkbenchIndex(
@@ -113,13 +113,13 @@ extension _HomePageProjectEditorNovelsProbeReadActions on _HomePageState {
                   }
                 }
               },
-        child: Text(AppLocalizations.of(ctx)!.projectEditorNovelsProbeReadGetNovelIndexButton),
+        child: Text(resolveAppLocalizationsForErrors(ctx).projectEditorNovelsProbeReadGetNovelIndexButton),
       ),
       TextButton(
         onPressed: disabled || novelsRef[0] == null
             ? null
             : () async {
-                final l10n = AppLocalizations.of(ctx)!;
+                final l10n = resolveAppLocalizationsForErrors(ctx);
                 setDialogState(() => novelsBusy[0] = true);
                 try {
                   final ids = novelsRef[0]!.items.map((e) => e.numericId).toList();
@@ -148,7 +148,7 @@ extension _HomePageProjectEditorNovelsProbeReadActions on _HomePageState {
                   }
                 }
               },
-        child: Text(AppLocalizations.of(ctx)!.projectEditorNovelsProbeReadGetNovelEventStateButton),
+        child: Text(resolveAppLocalizationsForErrors(ctx).projectEditorNovelsProbeReadGetNovelEventStateButton),
       ),
     ];
   }

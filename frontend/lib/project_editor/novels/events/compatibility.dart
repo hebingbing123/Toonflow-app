@@ -20,7 +20,7 @@ extension _HomePageProjectEditorNovelEventsProbe on _HomePageState {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          AppLocalizations.of(ctx)!.projectEditorNovelEventsRegressionProbeCaption,
+          resolveAppLocalizationsForErrors(ctx).projectEditorNovelEventsRegressionProbeCaption,
           style: Theme.of(ctx).textTheme.labelSmall?.copyWith(
             color: Theme.of(ctx).colorScheme.outline,
           ),

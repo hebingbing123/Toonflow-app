@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../l10n/app_localizations.dart';
 import '../../../rust_api.dart';
 import 'workbench_view.dart';
 
@@ -20,7 +19,7 @@ Future<void> openNovelEventsWorkbenchDialog({
   })
   chapterIndexesToNumericIds,
 }) async {
-  final l10n = AppLocalizations.of(ctx)!;
+  final l10n = resolveAppLocalizationsForErrors(ctx);
   final chapters = novelsRef[0]?.items ?? const <NovelRow>[];
   final events = novelEventsRef[0]?.items ?? const <NovelEventRow>[];
   final firstEvent = events.isNotEmpty ? events.first : null;

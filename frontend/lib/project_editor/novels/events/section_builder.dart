@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../l10n/app_localizations.dart';
 import '../../../rust_api.dart';
 import '../support.dart';
 
@@ -16,7 +15,7 @@ Widget buildProjectNovelEventsWorkbenchSection({
   required Future<void> Function() openWorkbench,
   required Future<void> Function() refreshEvents,
 }) {
-  final l10n = AppLocalizations.of(ctx)!;
+  final l10n = resolveAppLocalizationsForErrors(ctx);
   final first = events.isNotEmpty ? events.first : null;
   final summaryLine = summarizeNovelEventRows(l10n, events);
   final disabled =

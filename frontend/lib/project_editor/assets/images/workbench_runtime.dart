@@ -62,7 +62,7 @@ class AssetImagesWorkbenchMutationContext {
   final ValueChanged<bool> onBusyMutationChanged;
   final Future<void> Function() reloadAssetsAndStats;
 
-  AppLocalizations get l10n => AppLocalizations.of(ctx)!;
+  AppLocalizations get l10n => resolveAppLocalizationsForErrors(ctx);
 }
 
 class AssetImagesWorkbenchScope {

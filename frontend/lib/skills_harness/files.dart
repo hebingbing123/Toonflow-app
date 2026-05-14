@@ -2,7 +2,7 @@ part of 'controller.dart';
 
 extension SkillsHarnessFileController on SkillsHarnessController {
   Future<void> previewSkillFile(BuildContext context) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final token = _accessToken;
     if (token == null) return;
     final path = skillPathController.text.trim();
@@ -44,7 +44,7 @@ extension SkillsHarnessFileController on SkillsHarnessController {
   }
 
   Future<void> showSkillVersionHistory(BuildContext context) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final token = _accessToken;
     if (token == null) return;
     final path = skillPathController.text.trim();
@@ -338,7 +338,7 @@ extension SkillsHarnessFileController on SkillsHarnessController {
     required String path,
     required SkillVersion version,
   }) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final token = _accessToken;
     if (token == null) return;
     rollingBackSkillVersion = true;

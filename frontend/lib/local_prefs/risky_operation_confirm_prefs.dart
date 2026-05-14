@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../l10n/app_localizations.dart';
+import '../l10n/rust_api_error_format.dart';
 
 /// SharedPreferences keys for client-side "don't show again" on destructive flows.
 class RiskyOperationConfirmPreferenceKeys {
@@ -63,10 +64,7 @@ Future<List<String>> listActiveRiskyOperationConfirmDontShowLabels(
 Future<void> showActiveRiskyOperationConfirmPrefsSummary(
   BuildContext context,
 ) async {
-  final l10n = AppLocalizations.of(context);
-  if (l10n == null) {
-    return;
-  }
+  final l10n = resolveAppLocalizationsForErrors(context);
   final active = await listActiveRiskyOperationConfirmDontShowLabels(l10n);
   if (!context.mounted) {
     return;
@@ -74,7 +72,7 @@ Future<void> showActiveRiskyOperationConfirmPrefsSummary(
   await showDialog<void>(
     context: context,
     builder: (ctx) {
-      final dl10n = AppLocalizations.of(ctx)!;
+      final dl10n = resolveAppLocalizationsForErrors(ctx);
       return AlertDialog(
         title: Text(dl10n.riskyPrefsSummaryDialogTitle),
         content: SingleChildScrollView(
@@ -128,10 +126,7 @@ Future<void> showActiveRiskyOperationConfirmPrefsSummary(
 Future<bool?> showResetRiskyOperationConfirmPrefsDialog(
   BuildContext context,
 ) async {
-  final l10n = AppLocalizations.of(context);
-  if (l10n == null) {
-    return null;
-  }
+  final l10n = resolveAppLocalizationsForErrors(context);
   final active = await listActiveRiskyOperationConfirmDontShowLabels(l10n);
 
   if (!context.mounted) {
@@ -141,7 +136,7 @@ Future<bool?> showResetRiskyOperationConfirmPrefsDialog(
   return showDialog<bool>(
     context: context,
     builder: (ctx) {
-      final dl10n = AppLocalizations.of(ctx)!;
+      final dl10n = resolveAppLocalizationsForErrors(ctx);
       return AlertDialog(
         title: Text(dl10n.riskyPrefsResetDialogTitle),
         content: SingleChildScrollView(
@@ -207,10 +202,7 @@ Future<void> runResetRiskyOperationConfirmPrefsFlow(
   if (!context.mounted) {
     return;
   }
-  final l10n = AppLocalizations.of(context);
-  if (l10n == null) {
-    return;
-  }
+  final l10n = resolveAppLocalizationsForErrors(context);
   ScaffoldMessenger.of(
     context,
   ).showSnackBar(SnackBar(content: Text(l10n.riskyPrefsResetSuccessSnack)));
@@ -235,7 +227,7 @@ class RiskyOperationConfirmPrefsOverflowMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return PopupMenuButton<_RiskyPrefsOverflowValue>(
       tooltip: tooltip ?? l10n.riskyPrefsMenuDefaultTooltip,
       icon: Icon(icon),
@@ -247,7 +239,7 @@ class RiskyOperationConfirmPrefsOverflowMenu extends StatelessWidget {
         }
       },
       itemBuilder: (menuContext) {
-        final ml10n = AppLocalizations.of(menuContext)!;
+        final ml10n = resolveAppLocalizationsForErrors(menuContext);
         return [
           PopupMenuItem(
             value: _RiskyPrefsOverflowValue.viewActiveSilences,

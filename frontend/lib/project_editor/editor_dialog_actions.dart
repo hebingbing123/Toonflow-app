@@ -20,7 +20,7 @@ extension _HomePageProjectEditorDialogActions on _HomePageState {
     required TextEditingController forbiddenCtrl,
     required TextEditingController continuityCtrl,
   }) {
-    final l10n = AppLocalizations.of(ctx)!;
+    final l10n = resolveAppLocalizationsForErrors(ctx);
     return [
       TextButton(
         onPressed: dialogState.saving[0] ? null : () => Navigator.of(ctx).pop(),
@@ -33,7 +33,7 @@ extension _HomePageProjectEditorDialogActions on _HomePageState {
                 final ok = await showDialog<bool>(
                   context: ctx,
                   builder: (c) {
-                    final dlgL10n = AppLocalizations.of(c)!;
+                    final dlgL10n = resolveAppLocalizationsForErrors(c);
                     return AlertDialog(
                       title: Text(dlgL10n.projectEditorDeleteProjectTitle),
                       content: Text(

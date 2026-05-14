@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../l10n/app_localizations.dart';
 import '../../rust_api.dart';
 import 'plan_workbench_support.dart';
 
@@ -64,7 +63,7 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
     final planData = model.planData;
     return AlertDialog(

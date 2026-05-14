@@ -52,7 +52,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
   }
 
   Future<void> _reload() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     setState(() {
       _loading = true;
       _error = null;
@@ -102,7 +102,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
       return;
     }
 
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
 
     setState(() {
       _loadingWorkspaceMembers = true;
@@ -161,7 +161,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
     final raw = _manualUserIdCtrl.text.trim();
     if (raw.isEmpty) return;
     if (!_looksLikeUuid(raw)) {
-      final l10n = AppLocalizations.of(context)!;
+      final l10n = resolveAppLocalizationsForErrors(context);
       _showSnack(l10n.projectMembersSnackInvalidUuid);
       return;
     }
@@ -171,7 +171,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
   Future<void> _addWorkspaceCandidate() async {
     final userId = _selectedWorkspaceCandidateUserId;
     if (userId == null || userId.isEmpty) {
-      final l10n = AppLocalizations.of(context)!;
+      final l10n = resolveAppLocalizationsForErrors(context);
       _showSnack(l10n.projectMembersSnackNoCandidates);
       return;
     }
@@ -179,7 +179,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
   }
 
   Future<void> _createMember(String userId, {required String role}) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     setState(() {
       _adding = true;
     });
@@ -209,7 +209,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
   Future<void> _saveRow(String userId) async {
     final role = _pendingRole[userId];
     if (role == null) return;
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     setState(() {
       _savingUsers.add(userId);
     });
@@ -236,7 +236,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
   }
 
   Future<void> _remove(String userId) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     setState(() {
       _removingUsers.add(userId);
     });
@@ -259,7 +259,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
 
   void _copyUserId(String userId) {
     Clipboard.setData(ClipboardData(text: userId));
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     _showSnack(l10n.projectMembersSnackUserIdCopied);
   }
 
@@ -269,7 +269,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
     final assignableCandidates = _assignableWorkspaceCandidates;
     final selectedCandidateStillValid = assignableCandidates.any(

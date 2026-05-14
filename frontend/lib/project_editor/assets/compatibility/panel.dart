@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../l10n/app_localizations.dart';
-import '../../../../rust_api.dart';
+import '../../../rust_api.dart';
 
 /// Renders collapsed asset probe actions for project editor diagnostics.
 class ProjectAssetsCompatibilityPanel extends StatelessWidget {
@@ -42,7 +41,7 @@ class ProjectAssetsCompatibilityPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return ExpansionTile(
       tilePadding: EdgeInsets.zero,
       childrenPadding: EdgeInsets.zero,

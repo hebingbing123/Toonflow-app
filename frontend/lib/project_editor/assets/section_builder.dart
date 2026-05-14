@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../l10n/app_localizations.dart';
 import '../../rust_api.dart';
 import 'compatibility/panel.dart';
 import 'overview.dart';
@@ -24,7 +23,7 @@ Widget buildProjectAssetsSection({
   required List<Widget> Function() buildRelationActions,
   required List<Widget> Function() buildQueryActions,
 }) {
-  final l10n = AppLocalizations.of(ctx)!;
+  final l10n = resolveAppLocalizationsForErrors(ctx);
   final visibleAssets = assetsRef[0]?.items ?? const <AssetRow>[];
   final assetsForScript = assetsForScriptRef[0]?.items;
   return Column(

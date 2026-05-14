@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../l10n/app_localizations.dart';
 
 import '../../../../rust_api.dart';
 import 'support.dart';
@@ -24,7 +23,7 @@ class AssetGenerationWorkbenchDialogView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return AlertDialog(
       title: Text(l10n.projectEditorAssetGenerationTitle),
       content: SizedBox(

@@ -33,7 +33,7 @@ class _AssetGenerationStatusPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final outline = Theme.of(context).colorScheme.outline;
     final bodySmall = Theme.of(context).textTheme.bodySmall;
     return Column(

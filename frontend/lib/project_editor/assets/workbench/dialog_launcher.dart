@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../l10n/app_localizations.dart';
-import '../../../../rust_api.dart';
+import '../../../rust_api.dart';
 import '../support.dart';
 import 'dialog_support.dart';
 
@@ -40,7 +39,7 @@ Future<void> openProjectAssetsWorkbenchDialog({
   )
   onOpenHistoryWorkbench,
 }) async {
-  final l10n = AppLocalizations.of(ctx)!;
+  final l10n = resolveAppLocalizationsForErrors(ctx);
   final visibleAssets = assetsRef[0]?.items ?? const <AssetRow>[];
   final initialStatusLine = visibleAssets.isEmpty
       ? l10n.projectEditorAssetsWorkbenchNoAssetsYet

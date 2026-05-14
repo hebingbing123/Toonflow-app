@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../l10n/app_localizations.dart';
+import '../../../../rust_api.dart';
 import '../support.dart';
 import 'workbench_dialog_view.dart';
 
@@ -9,7 +10,7 @@ List<Widget> buildAssetImagesWorkbenchSections(
   required AssetImagesWorkbenchDialogViewModel model,
   required AssetImagesWorkbenchDialogViewCallbacks callbacks,
 }) {
-  final l10n = AppLocalizations.of(context)!;
+  final l10n = resolveAppLocalizationsForErrors(context);
   final sections = <Widget>[
     _buildAssetField(l10n: l10n, model: model, callbacks: callbacks),
     _buildDiagnosisCard(context, l10n: l10n, model: model, callbacks: callbacks),

@@ -206,7 +206,7 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
       await action();
     } catch (e) {
       if (ctx.mounted) {
-        final l10n = AppLocalizations.of(ctx)!;
+        final l10n = resolveAppLocalizationsForErrors(ctx);
         ScaffoldMessenger.of(ctx).showSnackBar(
           SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
         );

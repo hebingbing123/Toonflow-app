@@ -10,7 +10,7 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
     required List<bool> assetsBusy,
     required Future<void> Function() reloadAssetsAndStats,
   }) async {
-    final l10n = AppLocalizations.of(ctx)!;
+    final l10n = resolveAppLocalizationsForErrors(ctx);
     final nameCtrl = TextEditingController();
     final typeCtrl = TextEditingController(text: 'role');
     final descriptionCtrl = TextEditingController();
@@ -18,7 +18,7 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
       final confirmed = await showDialog<bool>(
         context: ctx,
         builder: (dialogCtx) {
-          final dlgL10n = AppLocalizations.of(dialogCtx)!;
+          final dlgL10n = resolveAppLocalizationsForErrors(dialogCtx);
           return AlertDialog(
             title: Text(dlgL10n.projectEditorAssetCrudCreateTitle),
             content: SizedBox(
@@ -119,7 +119,7 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
     required List<bool> assetsBusy,
     required Future<void> Function() reloadAssetsAndStats,
   }) async {
-    final l10n = AppLocalizations.of(ctx)!;
+    final l10n = resolveAppLocalizationsForErrors(ctx);
     final list = assetsRef[0]?.items ?? const <AssetRow>[];
     if (list.isEmpty) {
       ScaffoldMessenger.of(ctx).showSnackBar(
@@ -137,7 +137,7 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
       final confirmed = await showDialog<bool>(
         context: ctx,
         builder: (dialogCtx) {
-          final dlgL10n = AppLocalizations.of(dialogCtx)!;
+          final dlgL10n = resolveAppLocalizationsForErrors(dialogCtx);
           return StatefulBuilder(
             builder: (dialogCtx, setState) {
               return AlertDialog(
