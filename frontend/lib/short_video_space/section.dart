@@ -179,6 +179,13 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
     _selectedPublishDraftId = null;
   }
 
+  void _syncSelectedDraftIdsWith(List<PublishDraftRow> drafts) {
+    _selectedDraftIds = shortVideoFilterExistingDraftIds(
+      _selectedDraftIds,
+      drafts,
+    );
+  }
+
   /// 与 [_activePublishDraft] 一致，但基于本次 API 返回的列表（投递前 state 可能未刷新）。
   String? _resolvePublishDraftIdFromList(List<PublishDraftRow> drafts) {
     if (drafts.isEmpty) {
