@@ -12,7 +12,8 @@ String labelShortVideoBlockingReasonLocalized(
     case 'missing_prompt_context':
       return l10n.scriptEditorStoryboardsReadinessBlockingMissingPromptContext;
     case 'missing_reference_visual':
-      return l10n.scriptEditorStoryboardsReadinessBlockingMissingReferenceVisual;
+      return l10n
+          .scriptEditorStoryboardsReadinessBlockingMissingReferenceVisual;
     case 'missing_live_action_reference_shot':
       return l10n
           .scriptEditorStoryboardsReadinessBlockingMissingLiveActionReferenceShot;
@@ -24,7 +25,10 @@ String labelShortVideoBlockingReasonLocalized(
     case 'blocking_job':
       return l10n.scriptEditorStoryboardsReadinessBlockingBlockingJob;
     default:
-      return l10n.scriptEditorStoryboardsReadinessBlockingUnknown(code);
+      final trimmed = code.trim();
+      return l10n.scriptEditorStoryboardsReadinessBlockingUnknown(
+        trimmed.isEmpty ? '—' : trimmed,
+      );
   }
 }
 
