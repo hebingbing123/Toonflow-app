@@ -66,7 +66,7 @@ class _StatusPageState extends State<StatusPage> {
       if (!mounted) {
         return;
       }
-      final l10n = AppLocalizations.of(context)!;
+      final l10n = resolveAppLocalizationsForErrors(context);
       setState(() {
         _error = describeUserVisibleApiError(l10n, error);
         _loading = false;

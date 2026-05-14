@@ -54,7 +54,7 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
   }
 
   Future<void> _refresh() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     if (_loading) {
       return;
     }

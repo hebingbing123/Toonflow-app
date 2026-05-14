@@ -35,4 +35,42 @@ void main() {
     expect(s, contains('5'));
     expect(s, contains('秒'));
   });
+
+  testWidgets('resolveAppLocalizationsForErrors falls back to English without delegates',
+      (WidgetTester tester) async {
+    late AppLocalizations resolved;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Builder(
+          builder: (context) {
+            resolved = resolveAppLocalizationsForErrors(context);
+            return const SizedBox.shrink();
+          },
+        ),
+      ),
+    );
+    final en = lookupAppLocalizations(const Locale('en'));
+    expect(resolved.rustApiClientRecordNotFound, en.rustApiClientRecordNotFound);
+  });
+
+  testWidgets('resolveAppLocalizationsForErrors follows MaterialApp locale when delegates exist',
+      (WidgetTester tester) async {
+    late AppLocalizations resolved;
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('zh'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Builder(
+          builder: (context) {
+            resolved = resolveAppLocalizationsForErrors(context);
+            return const SizedBox.shrink();
+          },
+        ),
+      ),
+    );
+    final zh = lookupAppLocalizations(const Locale('zh'));
+    expect(resolved.rustApiClientRecordNotFound, zh.rustApiClientRecordNotFound);
+  });
 }
