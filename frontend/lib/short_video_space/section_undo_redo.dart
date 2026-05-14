@@ -16,7 +16,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
       return false;
     }
 
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     try {
       final success = await _operationHistory.undo();
       if (success) {
@@ -61,7 +61,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
       return false;
     }
 
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     try {
       final success = await _operationHistory.redo();
       if (success) {
@@ -136,7 +136,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
       return;
     }
 
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final operation = Operation(
       type: 'enable',
       timestamp: DateTime.now(),
@@ -185,7 +185,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
       return;
     }
 
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final operation = Operation(
       type: 'disable',
       timestamp: DateTime.now(),
@@ -235,7 +235,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
       return;
     }
 
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final operation = Operation(
       type: 'duration',
       timestamp: DateTime.now(),
@@ -285,7 +285,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
       return;
     }
 
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final operation = Operation(
       type: 'replace',
       timestamp: DateTime.now(),
@@ -333,7 +333,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
       return;
     }
 
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final operation = Operation(
       type: 'batch_enable',
       timestamp: DateTime.now(),
@@ -378,7 +378,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
       return;
     }
 
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final operation = Operation(
       type: 'batch_disable',
       timestamp: DateTime.now(),
@@ -423,7 +423,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
       return;
     }
 
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final operation = Operation(
       type: 'batch_duration',
       timestamp: DateTime.now(),
@@ -469,7 +469,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
       return;
     }
 
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final operation = Operation(
       type: 'batch_replace',
       timestamp: DateTime.now(),
@@ -507,7 +507,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
 
   /// Builds undo/redo toolbar buttons
   Widget _buildUndoRedoToolbar() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final canUndo = _operationHistory.canUndo;
     final canRedo = _operationHistory.canRedo;
     final undoDescription = _operationHistory.peekUndo()?.localizedDescription(l10n);
@@ -556,7 +556,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
     await showDialog<void>(
       context: context,
       builder: (ctx) {
-        final l10n = AppLocalizations.of(ctx)!;
+        final l10n = resolveAppLocalizationsForErrors(ctx);
         final summary = _operationHistory.getSummary(l10n);
         return AlertDialog(
           title: Text(l10n.shortVideoOperationHistoryTitle),
@@ -761,7 +761,7 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
 
   /// Formats operation timestamp for display
   String _formatOperationTimestamp(DateTime timestamp) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final now = DateTime.now();
     final difference = now.difference(timestamp);
 

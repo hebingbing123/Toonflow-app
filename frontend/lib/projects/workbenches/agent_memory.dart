@@ -229,7 +229,7 @@ class _ProjectsAgentMemoryWorkbenchDialogState
   }
 
   Future<void> _reloadProjects() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     setState(() {
       _loadingProjects = true;
       _statusLine = null;
@@ -255,7 +255,7 @@ class _ProjectsAgentMemoryWorkbenchDialogState
   }
 
   Future<void> _queryMemory() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final agentType = _agentTypeCtrl.text.trim();
     final memoryType = _queryType;
     final memoryTier = _memoryTier;
@@ -306,7 +306,7 @@ class _ProjectsAgentMemoryWorkbenchDialogState
   }
 
   Future<void> _loadCostOverview() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final agentType = _agentTypeCtrl.text.trim();
     final ref = _agentMemoryProjectRef();
     if ((ref.projectUuid == null || ref.projectUuid!.isEmpty) &&
@@ -345,7 +345,7 @@ class _ProjectsAgentMemoryWorkbenchDialogState
   }
 
   Future<void> _appendMemory() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final agentType = _agentTypeCtrl.text.trim();
     final content = _appendContentCtrl.text.trim();
     final role = _appendRoleCtrl.text.trim();
@@ -403,7 +403,7 @@ class _ProjectsAgentMemoryWorkbenchDialogState
   }
 
   Future<void> _clearMemory() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final agentType = _agentTypeCtrl.text.trim();
     final clearType = _clearType;
     final ref = _agentMemoryProjectRef();
@@ -445,7 +445,7 @@ class _ProjectsAgentMemoryWorkbenchDialogState
   }
 
   Future<void> _optimizeVideoMemory() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final agentType = _agentTypeCtrl.text.trim();
     final episodesId = _episodesId;
     final ref = _agentMemoryProjectRef();

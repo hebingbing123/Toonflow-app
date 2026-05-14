@@ -239,7 +239,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   @override
   Widget build(BuildContext context) {
     final project = _selectedProject;
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final visualLabel = shortVideoVisualStyleLabel(project, l10n);
     final directionLabel = shortVideoDirectionLabel(project, l10n);
     final modeTitle = _isAnimated

@@ -18,7 +18,7 @@ class _ProjectsCreativeManualsWorkbenchDialogState
   void didChangeDependencies() {
     super.didChangeDependencies();
     _ctrls ??= _CreativeManualsWorkbenchControllers.create(
-      AppLocalizations.of(context)!.projectsCreativeManualDefaultSlotsTemplate,
+      resolveAppLocalizationsForErrors(context).projectsCreativeManualDefaultSlotsTemplate,
     );
   }
 
@@ -45,7 +45,7 @@ class _ProjectsCreativeManualsWorkbenchDialogState
   }
 
   void _clearForm() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final ctrls = _ctrls!;
     ctrls.nameCtrl.clear();
     ctrls.pathCtrl.clear();
@@ -54,7 +54,7 @@ class _ProjectsCreativeManualsWorkbenchDialogState
   }
 
   void _applyRow(_CreativeManualRow row) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final ctrls = _ctrls!;
     _selected = row;
     ctrls.nameCtrl.text = row.name;
@@ -67,7 +67,7 @@ class _ProjectsCreativeManualsWorkbenchDialogState
   }
 
   Future<void> _reloadAll({String? preferredPath}) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     setState(() {
       _busy = true;
       _statusLine = l10n.projectsCreativeManualStatusRefreshing;
@@ -125,7 +125,7 @@ class _ProjectsCreativeManualsWorkbenchDialogState
   }
 
   Future<void> _createCurrentKind() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final name = _ctrls!.nameCtrl.text.trim();
     final path = _ctrls!.pathCtrl.text.trim();
     if (name.isEmpty || path.isEmpty) {
@@ -185,7 +185,7 @@ class _ProjectsCreativeManualsWorkbenchDialogState
   }
 
   Future<void> _saveCurrentKind() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final path = _ctrls!.pathCtrl.text.trim();
     final name = _ctrls!.nameCtrl.text.trim();
     if (_selected == null) {
@@ -251,7 +251,7 @@ class _ProjectsCreativeManualsWorkbenchDialogState
   }
 
   Future<void> _deleteCurrentKind() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final selected = _selected;
     if (selected == null) {
       setState(
@@ -294,7 +294,7 @@ class _ProjectsCreativeManualsWorkbenchDialogState
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final ctrls = _ctrls!;
     return CreativeManualsWorkbenchView(
       kind: _kind,

@@ -8,7 +8,7 @@ extension ShortVideoSpaceSectionProject on _ShortVideoSpaceSectionState {
   Future<void> _loadProjects() async {
     final token = widget.accessToken;
     if (token == null || token.isEmpty) {
-      final l10n = AppLocalizations.of(context)!;
+      final l10n = resolveAppLocalizationsForErrors(context);
       setState(() {
         _projects = const <ProjectRow>[];
         _selectedProjectId = null;
@@ -34,7 +34,7 @@ extension ShortVideoSpaceSectionProject on _ShortVideoSpaceSectionState {
       _syncSelectedProjectContext();
       _loadProjectOverview();
       if (projects.isEmpty) {
-        final l10n = AppLocalizations.of(context)!;
+        final l10n = resolveAppLocalizationsForErrors(context);
         setState(() {
           _projectConfigLine = l10n.shortVideoProjectEmptyList;
         });
@@ -43,7 +43,7 @@ extension ShortVideoSpaceSectionProject on _ShortVideoSpaceSectionState {
       if (!mounted) {
         return;
       }
-      final l10n = AppLocalizations.of(context)!;
+      final l10n = resolveAppLocalizationsForErrors(context);
       setState(() {
         _projectConfigLine = l10n.shortVideoProjectLoadFailed(
           describeUserVisibleApiError(l10n, e),
@@ -128,7 +128,7 @@ extension ShortVideoSpaceSectionProject on _ShortVideoSpaceSectionState {
   Future<void> _createProjectFromSpace() async {
     final token = widget.accessToken;
     if (token == null || token.isEmpty) {
-      final l10n = AppLocalizations.of(context)!;
+      final l10n = resolveAppLocalizationsForErrors(context);
       setState(() {
         _projectConfigLine = l10n.shortVideoProjectCreateNeedLogin;
       });
@@ -138,7 +138,7 @@ extension ShortVideoSpaceSectionProject on _ShortVideoSpaceSectionState {
       _creatingProject = true;
       _projectConfigLine = null;
     });
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final defaultName = _isAnimated
         ? l10n.shortVideoProjectDefaultNameAnimated
         : l10n.shortVideoProjectDefaultNameLive;
@@ -184,7 +184,7 @@ extension ShortVideoSpaceSectionProject on _ShortVideoSpaceSectionState {
       if (!mounted) {
         return;
       }
-      final errL10n = AppLocalizations.of(context)!;
+      final errL10n = resolveAppLocalizationsForErrors(context);
       setState(() {
         _projectConfigLine = errL10n.shortVideoProjectCreateFailed(
           describeUserVisibleApiError(errL10n, e),
@@ -203,7 +203,7 @@ extension ShortVideoSpaceSectionProject on _ShortVideoSpaceSectionState {
     final token = widget.accessToken;
     final project = _selectedProject;
     if (token == null || token.isEmpty || project == null) {
-      final l10n = AppLocalizations.of(context)!;
+      final l10n = resolveAppLocalizationsForErrors(context);
       setState(() {
         _projectConfigLine = l10n.shortVideoProjectSaveNeedSelection;
       });
@@ -236,7 +236,7 @@ extension ShortVideoSpaceSectionProject on _ShortVideoSpaceSectionState {
       if (!mounted) {
         return;
       }
-      final l10n = AppLocalizations.of(context)!;
+      final l10n = resolveAppLocalizationsForErrors(context);
       final modeLabel = shortVideoModeLabelL10n(l10n, _mode);
       final ratioLabel = shortVideoVideoRatioLabelL10n(l10n, _videoRatio);
       setState(() {
@@ -259,7 +259,7 @@ extension ShortVideoSpaceSectionProject on _ShortVideoSpaceSectionState {
       if (!mounted) {
         return;
       }
-      final errL10n = AppLocalizations.of(context)!;
+      final errL10n = resolveAppLocalizationsForErrors(context);
       setState(() {
         _projectConfigLine = errL10n.shortVideoProjectSaveFailed(
           describeUserVisibleApiError(errL10n, e),
@@ -275,7 +275,7 @@ extension ShortVideoSpaceSectionProject on _ShortVideoSpaceSectionState {
   }
 
   VoidCallback _nextStepAction() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final plan = buildShortVideoNextStepPlan(
       l10n: l10n,
       isAnimated: _isAnimated,
