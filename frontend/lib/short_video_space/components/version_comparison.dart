@@ -10,7 +10,9 @@ String _formatVersionComparisonValue(AppLocalizations l10n, dynamic value) {
   if (value is String) return value;
   if (value is num) return value.toString();
   if (value is bool) {
-    return value ? l10n.shortVideoVersionComparisonValueYes : l10n.shortVideoVersionComparisonValueNo;
+    return value
+        ? l10n.shortVideoVersionComparisonValueYes
+        : l10n.shortVideoVersionComparisonValueNo;
   }
   if (value is List) {
     return l10n.shortVideoVersionComparisonValueList(value.length);
@@ -23,8 +25,8 @@ String _formatVersionComparisonValue(AppLocalizations l10n, dynamic value) {
 
 /// 版本对比差异类型
 enum DifferenceType {
-  added,    // 新增
-  removed,  // 删除
+  added, // 新增
+  removed, // 删除
   modified, // 修改
   unchanged, // 未变化
 }
@@ -78,7 +80,7 @@ class ComparisonStatistics {
   final int unchangedCount;
 
   int get changedCount => addedCount + removedCount + modifiedCount;
-  
+
   double get changePercentage {
     if (totalShots == 0) return 0.0;
     return (changedCount / totalShots) * 100;
@@ -131,7 +133,8 @@ class _VersionComparisonState extends State<VersionComparison> {
   /// 计算两个版本之间的差异
   void _computeDifferences() {
     final baseShots = widget.baseVersion.shotConfig['shots'] as List? ?? [];
-    final compareShots = widget.compareVersion.shotConfig['shots'] as List? ?? [];
+    final compareShots =
+        widget.compareVersion.shotConfig['shots'] as List? ?? [];
 
     final differences = <ShotDifference>[];
     final baseShotMap = <String, dynamic>{};
@@ -163,10 +166,9 @@ class _VersionComparisonState extends State<VersionComparison> {
 
       if (!baseShotMap.containsKey(shotId)) {
         // 新增的镜头
-        differences.add(ShotDifference(
-          shotId: shotId,
-          type: DifferenceType.added,
-        ));
+        differences.add(
+          ShotDifference(shotId: shotId, type: DifferenceType.added),
+        );
       } else {
         // 检查是否有修改
         final baseShot = baseShotMap[shotId] as Map<String, dynamic>;
@@ -178,23 +180,27 @@ class _VersionComparisonState extends State<VersionComparison> {
     // 查找删除的镜头
     for (final shotId in baseShotMap.keys) {
       if (!compareShotMap.containsKey(shotId)) {
-        differences.add(ShotDifference(
-          shotId: shotId,
-          type: DifferenceType.removed,
-        ));
+        differences.add(
+          ShotDifference(shotId: shotId, type: DifferenceType.removed),
+        );
       }
     }
 
     // 计算统计信息
-    final addedCount = differences.where((d) => d.type == DifferenceType.added).length;
-    final removedCount = differences.where((d) => d.type == DifferenceType.removed).length;
+    final addedCount = differences
+        .where((d) => d.type == DifferenceType.added)
+        .length;
+    final removedCount = differences
+        .where((d) => d.type == DifferenceType.removed)
+        .length;
     final modifiedShotIds = differences
         .where((d) => d.type == DifferenceType.modified)
         .map((d) => d.shotId)
         .toSet();
     final modifiedCount = modifiedShotIds.length;
     final totalShots = compareShotMap.length + removedCount;
-    final unchangedCount = totalShots - addedCount - removedCount - modifiedCount;
+    final unchangedCount =
+        totalShots - addedCount - removedCount - modifiedCount;
 
     setState(() {
       _differences = differences;
@@ -222,13 +228,15 @@ class _VersionComparisonState extends State<VersionComparison> {
       final compareValue = compareShot[key];
 
       if (baseValue != compareValue) {
-        differences.add(ShotDifference(
-          shotId: shotId,
-          type: DifferenceType.modified,
-          fieldName: key,
-          oldValue: baseValue,
-          newValue: compareValue,
-        ));
+        differences.add(
+          ShotDifference(
+            shotId: shotId,
+            type: DifferenceType.modified,
+            fieldName: key,
+            oldValue: baseValue,
+            newValue: compareValue,
+          ),
+        );
       }
     }
 
@@ -242,7 +250,9 @@ class _VersionComparisonState extends State<VersionComparison> {
 
     // 仅显示变化
     if (_showOnlyChanges) {
-      filtered = filtered.where((d) => d.type != DifferenceType.unchanged).toList();
+      filtered = filtered
+          .where((d) => d.type != DifferenceType.unchanged)
+          .toList();
     }
 
     // 搜索过滤
@@ -291,7 +301,11 @@ class _VersionComparisonState extends State<VersionComparison> {
         final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(l10n.shortVideoVersionComparisonExportFailed(describeUserVisibleApiError(l10n, e))),
+            content: Text(
+              l10n.shortVideoVersionComparisonExportFailed(
+                describeUserVisibleApiError(l10n, e),
+              ),
+            ),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -315,7 +329,9 @@ class _VersionComparisonState extends State<VersionComparison> {
     buffer.writeln(l10n.shortVideoVersionComparisonReportVersionInfo);
     buffer.writeln();
     buffer.writeln(
-      l10n.shortVideoVersionComparisonReportBaseVersionLine(widget.baseVersion.name),
+      l10n.shortVideoVersionComparisonReportBaseVersionLine(
+        widget.baseVersion.name,
+      ),
     );
     buffer.writeln(
       l10n.shortVideoVersionComparisonReportCreatedAt(
@@ -323,11 +339,15 @@ class _VersionComparisonState extends State<VersionComparison> {
       ),
     );
     buffer.writeln(
-      l10n.shortVideoVersionComparisonReportShotCount(widget.baseVersion.shotCount),
+      l10n.shortVideoVersionComparisonReportShotCount(
+        widget.baseVersion.shotCount,
+      ),
     );
     buffer.writeln();
     buffer.writeln(
-      l10n.shortVideoVersionComparisonReportCompareVersionLine(widget.compareVersion.name),
+      l10n.shortVideoVersionComparisonReportCompareVersionLine(
+        widget.compareVersion.name,
+      ),
     );
     buffer.writeln(
       l10n.shortVideoVersionComparisonReportCreatedAt(
@@ -335,17 +355,31 @@ class _VersionComparisonState extends State<VersionComparison> {
       ),
     );
     buffer.writeln(
-      l10n.shortVideoVersionComparisonReportShotCount(widget.compareVersion.shotCount),
+      l10n.shortVideoVersionComparisonReportShotCount(
+        widget.compareVersion.shotCount,
+      ),
     );
     buffer.writeln();
 
     buffer.writeln(l10n.shortVideoVersionComparisonReportStatistics);
     buffer.writeln();
-    buffer.writeln(l10n.shortVideoVersionComparisonReportTotalShots(_statistics.totalShots));
-    buffer.writeln(l10n.shortVideoVersionComparisonReportAdded(_statistics.addedCount));
-    buffer.writeln(l10n.shortVideoVersionComparisonReportRemoved(_statistics.removedCount));
-    buffer.writeln(l10n.shortVideoVersionComparisonReportModified(_statistics.modifiedCount));
-    buffer.writeln(l10n.shortVideoVersionComparisonReportUnchanged(_statistics.unchangedCount));
+    buffer.writeln(
+      l10n.shortVideoVersionComparisonReportTotalShots(_statistics.totalShots),
+    );
+    buffer.writeln(
+      l10n.shortVideoVersionComparisonReportAdded(_statistics.addedCount),
+    );
+    buffer.writeln(
+      l10n.shortVideoVersionComparisonReportRemoved(_statistics.removedCount),
+    );
+    buffer.writeln(
+      l10n.shortVideoVersionComparisonReportModified(_statistics.modifiedCount),
+    );
+    buffer.writeln(
+      l10n.shortVideoVersionComparisonReportUnchanged(
+        _statistics.unchangedCount,
+      ),
+    );
     buffer.writeln(
       l10n.shortVideoVersionComparisonReportChangeRate(
         '${_statistics.changePercentage.toStringAsFixed(1)}%',
@@ -356,24 +390,38 @@ class _VersionComparisonState extends State<VersionComparison> {
     buffer.writeln(l10n.shortVideoVersionComparisonReportDetails);
     buffer.writeln();
 
-    final added = _differences.where((d) => d.type == DifferenceType.added).toList();
-    final removed = _differences.where((d) => d.type == DifferenceType.removed).toList();
-    final modified = _differences.where((d) => d.type == DifferenceType.modified).toList();
+    final added = _differences
+        .where((d) => d.type == DifferenceType.added)
+        .toList();
+    final removed = _differences
+        .where((d) => d.type == DifferenceType.removed)
+        .toList();
+    final modified = _differences
+        .where((d) => d.type == DifferenceType.modified)
+        .toList();
 
     if (added.isNotEmpty) {
-      buffer.writeln(l10n.shortVideoVersionComparisonReportSectionAdded(added.length));
+      buffer.writeln(
+        l10n.shortVideoVersionComparisonReportSectionAdded(added.length),
+      );
       buffer.writeln();
       for (final diff in added) {
-        buffer.writeln(l10n.shortVideoVersionComparisonReportShotItem(diff.shotId));
+        buffer.writeln(
+          l10n.shortVideoVersionComparisonReportShotItem(diff.shotId),
+        );
       }
       buffer.writeln();
     }
 
     if (removed.isNotEmpty) {
-      buffer.writeln(l10n.shortVideoVersionComparisonReportSectionRemoved(removed.length));
+      buffer.writeln(
+        l10n.shortVideoVersionComparisonReportSectionRemoved(removed.length),
+      );
       buffer.writeln();
       for (final diff in removed) {
-        buffer.writeln(l10n.shortVideoVersionComparisonReportShotItem(diff.shotId));
+        buffer.writeln(
+          l10n.shortVideoVersionComparisonReportShotItem(diff.shotId),
+        );
       }
       buffer.writeln();
     }
@@ -388,11 +436,15 @@ class _VersionComparisonState extends State<VersionComparison> {
       }
 
       for (final entry in modifiedByShot.entries) {
-        buffer.writeln(l10n.shortVideoVersionComparisonReportShotHeading(entry.key));
+        buffer.writeln(
+          l10n.shortVideoVersionComparisonReportShotHeading(entry.key),
+        );
         buffer.writeln();
         for (final diff in entry.value) {
           final field = diff.fieldName ?? '';
-          buffer.writeln(l10n.shortVideoVersionComparisonReportFieldLine(field));
+          buffer.writeln(
+            l10n.shortVideoVersionComparisonReportFieldLine(field),
+          );
           buffer.writeln(
             l10n.shortVideoVersionComparisonReportOldValue(
               _formatVersionComparisonValue(l10n, diff.oldValue),
@@ -408,9 +460,11 @@ class _VersionComparisonState extends State<VersionComparison> {
       }
     }
 
-    buffer.writeln('---');
+    buffer.writeln(l10n.shortVideoVersionComparisonReportSeparator);
     buffer.writeln(
-      l10n.shortVideoVersionComparisonReportGeneratedFooter(_formatDateTime(DateTime.now())),
+      l10n.shortVideoVersionComparisonReportGeneratedFooter(
+        _formatDateTime(DateTime.now()),
+      ),
     );
 
     return buffer.toString();
@@ -445,7 +499,9 @@ class _VersionComparisonState extends State<VersionComparison> {
                   Navigator.of(context).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(dialogL10n.shortVideoVersionComparisonClipboardCopied),
+                      content: Text(
+                        dialogL10n.shortVideoVersionComparisonClipboardCopied,
+                      ),
                     ),
                   );
                 }
@@ -485,7 +541,11 @@ class _VersionComparisonState extends State<VersionComparison> {
             // 标题栏
             Row(
               children: [
-                Icon(Icons.compare_arrows, size: 24, color: theme.colorScheme.primary),
+                Icon(
+                  Icons.compare_arrows,
+                  size: 24,
+                  color: theme.colorScheme.primary,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -559,7 +619,8 @@ class _VersionComparisonState extends State<VersionComparison> {
                       child: _StatisticItem(
                         icon: Icons.percent,
                         label: l10n.shortVideoVersionComparisonStatChangeRate,
-                        value: '${_statistics.changePercentage.toStringAsFixed(1)}%',
+                        value:
+                            '${_statistics.changePercentage.toStringAsFixed(1)}%',
                         color: theme.colorScheme.primary,
                       ),
                     ),
@@ -599,7 +660,9 @@ class _VersionComparisonState extends State<VersionComparison> {
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     FilterChip(
-                      label: Text(l10n.shortVideoVersionComparisonShowChangesOnly),
+                      label: Text(
+                        l10n.shortVideoVersionComparisonShowChangesOnly,
+                      ),
                       selected: _showOnlyChanges,
                       onSelected: (selected) {
                         setState(() {
@@ -607,7 +670,9 @@ class _VersionComparisonState extends State<VersionComparison> {
                         });
                       },
                       avatar: Icon(
-                        _showOnlyChanges ? Icons.filter_alt : Icons.filter_alt_outlined,
+                        _showOnlyChanges
+                            ? Icons.filter_alt
+                            : Icons.filter_alt_outlined,
                         size: 18,
                       ),
                     ),
@@ -712,9 +777,7 @@ class _StatisticItem extends StatelessWidget {
 
 /// 差异列表项组件
 class _DifferenceListItem extends StatelessWidget {
-  const _DifferenceListItem({
-    required this.difference,
-  });
+  const _DifferenceListItem({required this.difference});
 
   final ShotDifference difference;
 
@@ -751,10 +814,7 @@ class _DifferenceListItem extends StatelessWidget {
     final typeColor = _getTypeColor(context);
 
     return ListTile(
-      leading: Icon(
-        _getTypeIcon(),
-        color: typeColor,
-      ),
+      leading: Icon(_getTypeIcon(), color: typeColor),
       title: Row(
         children: [
           Text(
@@ -780,7 +840,9 @@ class _DifferenceListItem extends StatelessWidget {
           ),
         ],
       ),
-      subtitle: difference.type == DifferenceType.modified && difference.fieldName != null
+      subtitle:
+          difference.type == DifferenceType.modified &&
+              difference.fieldName != null
           ? Padding(
               padding: const EdgeInsets.only(top: 8),
               child: Column(
@@ -789,20 +851,29 @@ class _DifferenceListItem extends StatelessWidget {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.red.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
                           l10n.shortVideoVersionComparisonBadgeOld,
-                          style: const TextStyle(fontSize: 10, color: Colors.red),
+                          style: const TextStyle(
+                            fontSize: 10,
+                            color: Colors.red,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          _formatVersionComparisonValue(l10n, difference.oldValue),
+                          _formatVersionComparisonValue(
+                            l10n,
+                            difference.oldValue,
+                          ),
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: Colors.red.shade700,
                             decoration: TextDecoration.lineThrough,
@@ -817,20 +888,29 @@ class _DifferenceListItem extends StatelessWidget {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.green.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
                           l10n.shortVideoVersionComparisonBadgeNew,
-                          style: const TextStyle(fontSize: 10, color: Colors.green),
+                          style: const TextStyle(
+                            fontSize: 10,
+                            color: Colors.green,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          _formatVersionComparisonValue(l10n, difference.newValue),
+                          _formatVersionComparisonValue(
+                            l10n,
+                            difference.newValue,
+                          ),
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: Colors.green.shade700,
                             fontWeight: FontWeight.w500,

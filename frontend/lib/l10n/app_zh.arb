@@ -5,6 +5,37 @@
   "localeSystem": "跟随系统",
   "localeEnglish": "English",
   "localeChinese": "简体中文",
+  "localizedFormattingFileSizeZero": "0 B",
+  "localizedFormattingByteSuffix": "B",
+  "localizedFormattingKilobyteSuffix": "KB",
+  "localizedFormattingMegabyteSuffix": "MB",
+  "localizedFormattingGigabyteSuffix": "GB",
+  "localizedFormattingTerabyteSuffix": "TB",
+  "localizedFormattingDurationHours": "{count}小时",
+  "@localizedFormattingDurationHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "localizedFormattingDurationMinutes": "{count}分钟",
+  "@localizedFormattingDurationMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "localizedFormattingDurationSeconds": "{count}秒",
+  "@localizedFormattingDurationSeconds": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "localizedFormattingDurationZero": "0秒",
   "workspaceModeTitle": "工作区模式",
   "workspaceModeProduct": "产品工作区",
   "workspaceModeDebug": "运维与调试",
@@ -1528,6 +1559,22 @@
   "agentMemoryTierStageSummary": "阶段摘要",
   "agentMemoryTierDeltaMemory": "增量记忆",
   "agentMemoryTierMessage": "普通消息",
+  "agentMemoryScopeStoryboardIds": "分镜 {ids}",
+  "@agentMemoryScopeStoryboardIds": {
+    "placeholders": {
+      "ids": {
+        "type": "String"
+      }
+    }
+  },
+  "agentMemoryScopeSampleCount": "样本 {count}",
+  "@agentMemoryScopeSampleCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "agentMemoryClassNegative": "坏例约束",
   "agentMemoryClassDeliveryVisual": "表演+视觉",
   "agentMemoryClassDeliveryFirst": "表演优先",
@@ -2841,6 +2888,224 @@
   "qualityReviewsDiagnosticLabel": "诊断",
   "qualityReviewsWritebackLabel": "回写",
   "qualityReviewsSuggestionsLabel": "建议",
+  "qualityReviewsAbbrevNotAvailable": "暂无",
+  "qualityReviewsStatDeliveryNa": "投放侧无数据",
+  "qualityReviewsStatNonNa": "非投放侧无数据",
+  "qualityReviewsStatDeliveryPassRate": "投放 {rate}%",
+  "@qualityReviewsStatDeliveryPassRate": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsStatNonPassRate": "非投放 {rate}%",
+  "@qualityReviewsStatNonPassRate": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsWorkbenchStagePassRateRow": "{date} {targetType}：通过率 {passPct}%（{deliveryPart}，{nonDeliveryPart}）",
+  "@qualityReviewsWorkbenchStagePassRateRow": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "targetType": {
+        "type": "String"
+      },
+      "passPct": {
+        "type": "String"
+      },
+      "deliveryPart": {
+        "type": "String"
+      },
+      "nonDeliveryPart": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsWorkbenchQualityStatRow": "{targetType}：共 {totalReviews} 条，通过率 {passPct}%（{deliveryPart}，{nonDeliveryPart}）",
+  "@qualityReviewsWorkbenchQualityStatRow": {
+    "placeholders": {
+      "targetType": {
+        "type": "String"
+      },
+      "totalReviews": {
+        "type": "int"
+      },
+      "passPct": {
+        "type": "String"
+      },
+      "deliveryPart": {
+        "type": "String"
+      },
+      "nonDeliveryPart": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsScopeInsightSlimChars": "压缩 {chars} 字符/{rows}{unit}",
+  "@qualityReviewsScopeInsightSlimChars": {
+    "placeholders": {
+      "chars": {
+        "type": "int"
+      },
+      "rows": {
+        "type": "int"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsSummaryScopeLine": "范围：{value}",
+  "@qualityReviewsSummaryScopeLine": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsSummaryTokenLine": "Token：{value}",
+  "@qualityReviewsSummaryTokenLine": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsWorkbenchDashboardTokenRow": "{targetType}：提示词 {prompt} 字符，记忆 {memory} 字符，投放记忆 {delivery} 字符 · 动作 {action}",
+  "@qualityReviewsWorkbenchDashboardTokenRow": {
+    "placeholders": {
+      "targetType": {
+        "type": "String"
+      },
+      "prompt": {
+        "type": "String"
+      },
+      "memory": {
+        "type": "String"
+      },
+      "delivery": {
+        "type": "String"
+      },
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsTokenEfficiencyStatLine": "{targetType}：提示词 {prompt}，基础 {base}，记忆 {memory}（占比 {memoryShare}%，投放 {delivery}/{deliveryShare}%，命中 {hitRate}%）",
+  "@qualityReviewsTokenEfficiencyStatLine": {
+    "placeholders": {
+      "targetType": {
+        "type": "String"
+      },
+      "prompt": {
+        "type": "String"
+      },
+      "base": {
+        "type": "String"
+      },
+      "memory": {
+        "type": "String"
+      },
+      "memoryShare": {
+        "type": "String"
+      },
+      "delivery": {
+        "type": "String"
+      },
+      "deliveryShare": {
+        "type": "String"
+      },
+      "hitRate": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsTokenEfficiencySampleLine": "{date} {targetType}：提示词 {prompt}，基础 {base}，记忆 {memory}（占比 {memoryShare}%，{deliveryFlag}）",
+  "@qualityReviewsTokenEfficiencySampleLine": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "targetType": {
+        "type": "String"
+      },
+      "prompt": {
+        "type": "String"
+      },
+      "base": {
+        "type": "String"
+      },
+      "memory": {
+        "type": "String"
+      },
+      "memoryShare": {
+        "type": "String"
+      },
+      "deliveryFlag": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsWorkbenchStageGradeRow": "{stage}：A{a}/B{b}/C{c}/D{d} · 通过率 {passPct}%",
+  "@qualityReviewsWorkbenchStageGradeRow": {
+    "placeholders": {
+      "stage": {
+        "type": "String"
+      },
+      "a": {
+        "type": "int"
+      },
+      "b": {
+        "type": "int"
+      },
+      "c": {
+        "type": "int"
+      },
+      "d": {
+        "type": "int"
+      },
+      "passPct": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsPreviewListTitle": "{targetType} · {source} · 分数={score}",
+  "@qualityReviewsPreviewListTitle": {
+    "placeholders": {
+      "targetType": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      },
+      "score": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsPreviewDetailTarget": "目标={targetId}",
+  "@qualityReviewsPreviewDetailTarget": {
+    "placeholders": {
+      "targetId": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsPreviewDetailPassed": "通过={passed}",
+  "@qualityReviewsPreviewDetailPassed": {
+    "placeholders": {
+      "passed": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsPreviewDetailBadCase": "坏例",
   "qualityReviewsNegativeConstraintReviewAndBadCase": "负向约束=评审+坏例记忆",
   "qualityReviewsNegativeConstraintRecentReviews": "负向约束=近期评审",
   "qualityReviewsNegativeConstraintBadCaseMemory": "负向约束=坏例记忆",
@@ -8722,6 +8987,17 @@
       }
     }
   },
+  "shortVideoPreviewPlayerPlaylistPosition": "（{current}/{total}）",
+  "@shortVideoPreviewPlayerPlaylistPosition": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "shortVideoPreviewPlayerOverallProgress": "总进度",
   "shortVideoPreviewPlayerPreviousShot": "上一个镜头",
   "shortVideoPreviewPlayerNextShot": "下一个镜头",
@@ -11745,6 +12021,7 @@
   },
   "shortVideoVersionComparisonDiffModifiedGeneric": "修改",
   "shortVideoVersionComparisonDiffUnchanged": "未变化",
+  "shortVideoVersionComparisonReportSeparator": "---",
   "shortVideoVersionComparisonReportTitle": "# 版本对比报告",
   "shortVideoVersionComparisonReportVersionInfo": "## 版本信息",
   "shortVideoVersionComparisonReportBaseVersionLine": "**基准版本（旧）：** {name}",

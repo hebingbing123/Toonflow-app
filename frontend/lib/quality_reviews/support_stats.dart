@@ -1,5 +1,6 @@
 import '../../rust_api.dart';
 import '../l10n/app_localizations.dart';
+import 'quality_reviews_l10n.dart';
 import 'support_models.dart';
 import 'support_filters.dart';
 import 'support_actions.dart';
@@ -9,10 +10,10 @@ String summarizeQualityTokenEfficiencyRows(
   int maxItems = 3,
   AppLocalizations? l10n,
 }) {
+  final loc = qualityReviewsResolveL10n(l10n);
   final items = rows.toList(growable: false);
   if (items.isEmpty) {
-    return l10n?.qualityReviewsNoTokenEfficiencyStats ??
-        'No token efficiency stats yet';
+    return loc.qualityReviewsNoTokenEfficiencyStats;
   }
   final visible = items
       .take(maxItems)
@@ -27,11 +28,20 @@ String summarizeQualityTokenEfficiencyRows(
         );
         final hitRate = row.deliveryPriorityHitRatePercent.toStringAsFixed(1);
         final parts = <String>[
-          '${row.targetType}: prompt=$prompt, base=$base, memory=$memory ($share%, delivery=$delivery/$deliveryShare%, hit=$hitRate%)',
+          loc.qualityReviewsTokenEfficiencyStatLine(
+            row.targetType,
+            prompt,
+            base,
+            memory,
+            share,
+            delivery,
+            deliveryShare,
+            hitRate,
+          ),
         ];
         final memoryAction = _qualityTokenEfficiencyMemoryActionSummary(
           row,
-          l10n: l10n,
+          l10n: loc,
         );
         if (memoryAction != null) {
           parts.add(memoryAction);
@@ -45,29 +55,21 @@ String summarizeQualityTokenEfficiencyRows(
 
 String? _qualityTokenEfficiencyMemoryActionSummary(
   QualityTokenEfficiencyRow row, {
-  AppLocalizations? l10n,
+  required AppLocalizations l10n,
 }) {
   String? label;
   switch (row.memoryAction) {
     case 'keep_delivery_memory':
-      label =
-          l10n?.qualityReviewsActionKeepDeliveryMemory ??
-          'action=keep delivery memory';
+      label = l10n.qualityReviewsActionKeepDeliveryMemory;
       break;
     case 'reuse_negative_memory':
-      label =
-          l10n?.qualityReviewsActionReuseNegativeMemory ??
-          'action=reuse negative constraints';
+      label = l10n.qualityReviewsActionReuseNegativeMemory;
       break;
     case 'trim_generic_style_memory':
-      label =
-          l10n?.qualityReviewsActionTrimGenericStyle ??
-          'action=trim generic style memory';
+      label = l10n.qualityReviewsActionTrimGenericStyle;
       break;
     case 'promote_selected_memory':
-      label =
-          l10n?.qualityReviewsActionPromoteSelectedMemory ??
-          'action=promote selected memory';
+      label = l10n.qualityReviewsActionPromoteSelectedMemory;
       break;
     default:
       label = null;
@@ -77,7 +79,7 @@ String? _qualityTokenEfficiencyMemoryActionSummary(
   final focus = row.memoryFocus.trim();
   final parts = <String>[label];
   if (focus.isNotEmpty && focus != 'observe') {
-    parts.add('${l10n?.qualityReviewsFocusLabel ?? 'focus'}=$focus');
+    parts.add('${l10n.qualityReviewsFocusLabel}=$focus');
   }
   if (reason.isNotEmpty) {
     parts.add(reason);
@@ -90,10 +92,10 @@ String summarizeQualityTokenEfficiencySamples(
   int maxItems = 4,
   AppLocalizations? l10n,
 }) {
+  final loc = qualityReviewsResolveL10n(l10n);
   final items = rows.toList(growable: false);
   if (items.isEmpty) {
-    return l10n?.qualityReviewsNoTokenEfficiencySamples ??
-        'No token efficiency samples yet';
+    return loc.qualityReviewsNoTokenEfficiencySamples;
   }
   final visible = items
       .take(maxItems)
@@ -102,9 +104,17 @@ String summarizeQualityTokenEfficiencySamples(
             ? row.createdAt.substring(5, 16).replaceFirst('T', ' ')
             : row.createdAt;
         final deliveryFlag = row.memoryDeliveryPriorityApplied
-            ? (l10n?.qualityReviewsDeliveryPriority ?? 'delivery-priority')
-            : (l10n?.qualityReviewsRegular ?? 'regular');
-        return '$date ${row.targetType}: prompt=${row.promptChars}, base=${row.nonMemoryPromptChars}, memory=${row.memoryStyleChars} (${row.memorySharePercent.toStringAsFixed(1)}%, $deliveryFlag)';
+            ? loc.qualityReviewsDeliveryPriority
+            : loc.qualityReviewsRegular;
+        return loc.qualityReviewsTokenEfficiencySampleLine(
+          date,
+          row.targetType,
+          '${row.promptChars}',
+          '${row.nonMemoryPromptChars}',
+          '${row.memoryStyleChars}',
+          row.memorySharePercent.toStringAsFixed(1),
+          deliveryFlag,
+        );
       })
       .join(' | ');
   final suffix = items.length > maxItems ? ' | …' : '';
@@ -116,25 +126,27 @@ String summarizeQualityReviews(
   int maxItems = 4,
   AppLocalizations? l10n,
 }) {
+  final loc = qualityReviewsResolveL10n(l10n);
   final items = rows.toList(growable: false);
   if (items.isEmpty) {
-    return l10n?.qualityReviewsNoReviews ?? 'No quality reviews yet';
+    return loc.qualityReviewsNoReviews;
   }
   final autoCount = items.where((row) => row.source == 'auto').length;
   final visible = items
       .take(maxItems)
       .map((row) {
-        final score = row.overallScore?.toString() ?? 'n/a';
+        final score =
+            row.overallScore?.toString() ??
+            loc.qualityReviewsAbbrevNotAvailable;
         return '${row.targetType}:${row.source}:$score';
       })
       .join(', ');
   final suffix = items.length > maxItems ? '…' : '';
-  return l10n?.qualityReviewsSummaryLine(
-        items.length,
-        autoCount,
-        '$visible$suffix',
-      ) ??
-      'Reviews ${items.length} · auto $autoCount · $visible$suffix';
+  return loc.qualityReviewsSummaryLine(
+    items.length,
+    autoCount,
+    '$visible$suffix',
+  );
 }
 
 String summarizeQualityStatsRows(
@@ -142,20 +154,31 @@ String summarizeQualityStatsRows(
   int maxItems = 3,
   AppLocalizations? l10n,
 }) {
+  final loc = qualityReviewsResolveL10n(l10n);
   final items = rows.toList(growable: false);
   if (items.isEmpty) {
-    return l10n?.qualityReviewsNoQualityStats ?? 'No quality stats yet';
+    return loc.qualityReviewsNoQualityStats;
   }
   final visible = items
       .take(maxItems)
       .map((row) {
         final delivery = row.deliveryPriorityTotalReviews == 0
-            ? 'delivery=n/a'
-            : 'delivery=${row.deliveryPriorityPassRatePercent.toStringAsFixed(1)}%';
+            ? loc.qualityReviewsStatDeliveryNa
+            : loc.qualityReviewsStatDeliveryPassRate(
+                row.deliveryPriorityPassRatePercent.toStringAsFixed(1),
+              );
         final nonDelivery = row.nonDeliveryPriorityTotalReviews == 0
-            ? 'non=n/a'
-            : 'non=${row.nonDeliveryPriorityPassRatePercent.toStringAsFixed(1)}%';
-        return '${row.targetType}: total=${row.totalReviews}, pass=${row.passRatePercent.toStringAsFixed(1)}% ($delivery, $nonDelivery)';
+            ? loc.qualityReviewsStatNonNa
+            : loc.qualityReviewsStatNonPassRate(
+                row.nonDeliveryPriorityPassRatePercent.toStringAsFixed(1),
+              );
+        return loc.qualityReviewsWorkbenchQualityStatRow(
+          row.targetType,
+          row.totalReviews,
+          row.passRatePercent.toStringAsFixed(1),
+          delivery,
+          nonDelivery,
+        );
       })
       .join(' | ');
   final suffix = items.length > maxItems ? ' | …' : '';
@@ -167,31 +190,26 @@ String summarizeQualityScopeInsightRows(
   int maxItems = 3,
   AppLocalizations? l10n,
 }) {
+  final loc = qualityReviewsResolveL10n(l10n);
   final items = rows.toList(growable: false);
   if (items.isEmpty) {
-    return l10n?.qualityReviewsNoScopeLeaderboard ?? 'No scope leaderboard yet';
+    return loc.qualityReviewsNoScopeLeaderboard;
   }
   final visible = items
       .take(maxItems)
       .map((row) {
         final parts = <String>[
-          '${row.scopeLabel} ${row.totalReviews}${l10n?.qualityReviewsItemUnit ?? ' items'}',
+          '${row.scopeLabel} ${row.totalReviews}${loc.qualityReviewsItemUnit}',
           'pass=${row.passRatePercent.toStringAsFixed(1)}%',
         ];
         if (row.badCaseCount > 0) {
-          parts.add(
-            '${l10n?.qualityReviewsFilterBadCase ?? 'bad case'}${row.badCaseCount}',
-          );
+          parts.add('${loc.qualityReviewsFilterBadCase}${row.badCaseCount}');
         }
         if (row.dialogueRiskCount > 0) {
-          parts.add(
-            '${l10n?.qualityReviewsEmotionRisk ?? 'emotion'}${row.dialogueRiskCount}',
-          );
+          parts.add('${loc.qualityReviewsEmotionRisk}${row.dialogueRiskCount}');
         }
         if (row.visualRiskCount > 0) {
-          parts.add(
-            '${l10n?.qualityReviewsRealismRisk ?? 'realism'}${row.visualRiskCount}',
-          );
+          parts.add('${loc.qualityReviewsRealismRisk}${row.visualRiskCount}');
         }
         if (row.autoReviews > 0) {
           parts.add(
@@ -199,43 +217,45 @@ String summarizeQualityScopeInsightRows(
           );
           if (row.memoryRemovedChars > 0 || row.memoryRemovedRows > 0) {
             parts.add(
-              'slim ${row.memoryRemovedChars}c/${row.memoryRemovedRows}${l10n?.qualityReviewsItemUnit ?? ' items'}',
+              loc.qualityReviewsScopeInsightSlimChars(
+                row.memoryRemovedChars,
+                row.memoryRemovedRows,
+                loc.qualityReviewsItemUnit,
+              ),
             );
           }
         }
         if (row.feedbackSelectedMemoryPromotions > 0) {
           parts.add(
-            '${l10n?.qualityReviewsPromotionsLabel ?? 'promotions'}${row.feedbackSelectedMemoryPromotions}',
+            '${loc.qualityReviewsPromotionsLabel}${row.feedbackSelectedMemoryPromotions}',
           );
         }
         if (row.feedbackRejectedMemoryWrites > 0) {
           parts.add(
-            '${l10n?.qualityReviewsBadCaseWriteback ?? 'bad-case writeback'}${row.feedbackRejectedMemoryWrites}',
+            '${loc.qualityReviewsBadCaseWriteback}${row.feedbackRejectedMemoryWrites}',
           );
         }
         if (row.feedbackSummaryMemoryWrites > 0) {
           parts.add(
-            '${l10n?.qualityReviewsSummaryWriteback ?? 'summary writeback'}${row.feedbackSummaryMemoryWrites}',
+            '${loc.qualityReviewsSummaryWriteback}${row.feedbackSummaryMemoryWrites}',
           );
         }
         if (row.feedbackMemoryRemovedChars > 0 ||
             row.feedbackMemoryRemovedRows > 0) {
           parts.add(
-            '${l10n?.qualityReviewsWritebackSlim ?? 'writeback slim'} ${row.feedbackMemoryRemovedChars}c/${row.feedbackMemoryRemovedRows}${l10n?.qualityReviewsItemUnit ?? ' items'}',
+            '${loc.qualityReviewsWritebackSlim} ${row.feedbackMemoryRemovedChars}c/${row.feedbackMemoryRemovedRows}${loc.qualityReviewsItemUnit}',
           );
         }
         final focusSummary = summarizeFeedbackFocusTags(
           row.feedbackFocusTags,
-          l10n: l10n,
+          l10n: loc,
         );
         if (focusSummary != null) {
-          parts.add(
-            '${l10n?.qualityReviewsFocusWatch ?? 'watch'}=$focusSummary',
-          );
+          parts.add('${loc.qualityReviewsFocusWatch}=$focusSummary');
         }
         final memoryAction = _qualityScopeInsightMemoryActionSummary(
           row,
-          l10n: l10n,
+          l10n: loc,
         );
         if (memoryAction != null) {
           parts.add(memoryAction);
@@ -249,29 +269,21 @@ String summarizeQualityScopeInsightRows(
 
 String? _qualityScopeInsightMemoryActionSummary(
   QualityScopeInsightRow row, {
-  AppLocalizations? l10n,
+  required AppLocalizations l10n,
 }) {
   String? label;
   switch (row.memoryAction) {
     case 'keep_delivery_memory':
-      label =
-          l10n?.qualityReviewsActionKeepDeliveryMemory ??
-          'action=keep delivery memory';
+      label = l10n.qualityReviewsActionKeepDeliveryMemory;
       break;
     case 'reuse_negative_memory':
-      label =
-          l10n?.qualityReviewsActionReuseNegativeMemory ??
-          'action=reuse negative constraints';
+      label = l10n.qualityReviewsActionReuseNegativeMemory;
       break;
     case 'trim_generic_style_memory':
-      label =
-          l10n?.qualityReviewsActionTrimGenericStyle ??
-          'action=trim generic style memory';
+      label = l10n.qualityReviewsActionTrimGenericStyle;
       break;
     case 'promote_selected_memory':
-      label =
-          l10n?.qualityReviewsActionPromoteSelectedMemory ??
-          'action=promote selected memory';
+      label = l10n.qualityReviewsActionPromoteSelectedMemory;
       break;
     default:
       label = null;
@@ -281,7 +293,7 @@ String? _qualityScopeInsightMemoryActionSummary(
   final focus = row.memoryFocus.trim();
   final parts = <String>[label];
   if (focus.isNotEmpty && focus != 'observe') {
-    parts.add('${l10n?.qualityReviewsFocusLabel ?? 'focus'}=$focus');
+    parts.add('${l10n.qualityReviewsFocusLabel}=$focus');
   }
   if (reason.isNotEmpty) {
     parts.add(reason);
@@ -294,9 +306,10 @@ String summarizeStagePassRateRows(
   int maxItems = 4,
   AppLocalizations? l10n,
 }) {
+  final loc = qualityReviewsResolveL10n(l10n);
   final items = rows.toList(growable: false);
   if (items.isEmpty) {
-    return l10n?.qualityReviewsNoStagePassRate ?? 'No stage pass rates yet';
+    return loc.qualityReviewsNoStagePassRate;
   }
   final visible = items
       .take(maxItems)
@@ -304,14 +317,26 @@ String summarizeStagePassRateRows(
         final date = row.reviewDate.length >= 10
             ? row.reviewDate.substring(0, 10)
             : row.reviewDate;
-        final passRate = row.passRatePercent?.toStringAsFixed(1) ?? 'n/a';
+        final passRate =
+            row.passRatePercent?.toStringAsFixed(1) ??
+            loc.qualityReviewsAbbrevNotAvailable;
         final delivery = row.deliveryPriorityTotalReviews == 0
-            ? 'delivery=n/a'
-            : 'delivery=${row.deliveryPriorityPassRatePercent.toStringAsFixed(1)}%';
+            ? loc.qualityReviewsStatDeliveryNa
+            : loc.qualityReviewsStatDeliveryPassRate(
+                row.deliveryPriorityPassRatePercent.toStringAsFixed(1),
+              );
         final nonDelivery = row.nonDeliveryPriorityTotalReviews == 0
-            ? 'non=n/a'
-            : 'non=${row.nonDeliveryPriorityPassRatePercent.toStringAsFixed(1)}%';
-        return '$date ${row.targetType}:$passRate% ($delivery, $nonDelivery)';
+            ? loc.qualityReviewsStatNonNa
+            : loc.qualityReviewsStatNonPassRate(
+                row.nonDeliveryPriorityPassRatePercent.toStringAsFixed(1),
+              );
+        return loc.qualityReviewsWorkbenchStagePassRateRow(
+          date,
+          row.targetType,
+          passRate,
+          delivery,
+          nonDelivery,
+        );
       })
       .join(' | ');
   final suffix = items.length > maxItems ? ' | …' : '';
@@ -323,16 +348,22 @@ String summarizeStageGradeDistributionRows(
   int maxItems = 4,
   AppLocalizations? l10n,
 }) {
+  final loc = qualityReviewsResolveL10n(l10n);
   final items = rows.toList(growable: false);
   if (items.isEmpty) {
-    return l10n?.qualityReviewsNoStageGradeDistribution ??
-        'No stage grade distribution yet';
+    return loc.qualityReviewsNoStageGradeDistribution;
   }
   final visible = items
       .take(maxItems)
       .map(
-        (row) =>
-            '${row.stage}: A${row.gradeACount}/B${row.gradeBCount}/C${row.gradeCCount}/D${row.gradeDCount} · pass=${row.passRatePercent.toStringAsFixed(1)}%',
+        (row) => loc.qualityReviewsWorkbenchStageGradeRow(
+          row.stage,
+          row.gradeACount,
+          row.gradeBCount,
+          row.gradeCCount,
+          row.gradeDCount,
+          row.passRatePercent.toStringAsFixed(1),
+        ),
       )
       .join(' | ');
   final suffix = items.length > maxItems ? ' | …' : '';
@@ -344,16 +375,22 @@ String summarizeDashboardStageGradeDistributionRows(
   int maxItems = 4,
   AppLocalizations? l10n,
 }) {
+  final loc = qualityReviewsResolveL10n(l10n);
   final items = rows.toList(growable: false);
   if (items.isEmpty) {
-    return l10n?.qualityReviewsNoStageGradeDistribution ??
-        'No stage grade distribution yet';
+    return loc.qualityReviewsNoStageGradeDistribution;
   }
   final visible = items
       .take(maxItems)
       .map(
-        (row) =>
-            '${row.stage}: A${row.gradeACount}/B${row.gradeBCount}/C${row.gradeCCount}/D${row.gradeDCount} · pass=${row.passRatePercent.toStringAsFixed(1)}%',
+        (row) => loc.qualityReviewsWorkbenchStageGradeRow(
+          row.stage,
+          row.gradeACount,
+          row.gradeBCount,
+          row.gradeCCount,
+          row.gradeDCount,
+          row.passRatePercent.toStringAsFixed(1),
+        ),
       )
       .join(' | ');
   final suffix = items.length > maxItems ? ' | …' : '';
@@ -365,15 +402,16 @@ String summarizeDashboardScopeInsightRows(
   int maxItems = 4,
   AppLocalizations? l10n,
 }) {
+  final loc = qualityReviewsResolveL10n(l10n);
   final items = rows.toList(growable: false);
   if (items.isEmpty) {
-    return l10n?.qualityReviewsNoScopeLeaderboard ?? 'No scope leaderboard yet';
+    return loc.qualityReviewsNoScopeLeaderboard;
   }
   final visible = items
       .take(maxItems)
       .map(
         (row) =>
-            '${row.scopeLabel} ${row.totalReviews}${l10n?.qualityReviewsItemUnit ?? ' items'} · pass=${row.passRatePercent.toStringAsFixed(1)}% · ${l10n?.qualityReviewsFilterBadCase ?? 'bad case'}${row.badCaseCount}',
+            '${row.scopeLabel} ${row.totalReviews}${loc.qualityReviewsItemUnit} · pass=${row.passRatePercent.toStringAsFixed(1)}% · ${loc.qualityReviewsFilterBadCase}${row.badCaseCount}',
       )
       .join(' | ');
   final suffix = items.length > maxItems ? ' | …' : '';
@@ -385,16 +423,21 @@ String summarizeDashboardTokenEfficiencyRows(
   int maxItems = 4,
   AppLocalizations? l10n,
 }) {
+  final loc = qualityReviewsResolveL10n(l10n);
   final items = rows.toList(growable: false);
   if (items.isEmpty) {
-    return l10n?.qualityReviewsNoTokenEfficiencyStats ??
-        'No token efficiency stats yet';
+    return loc.qualityReviewsNoTokenEfficiencyStats;
   }
   final visible = items
       .take(maxItems)
       .map(
-        (row) =>
-            '${row.targetType}: prompt=${row.avgPromptChars.toStringAsFixed(0)}, memory=${row.avgMemoryStyleChars.toStringAsFixed(0)}, delivery=${row.avgMemoryDeliveryChars.toStringAsFixed(0)} · action=${row.memoryAction}',
+        (row) => loc.qualityReviewsWorkbenchDashboardTokenRow(
+          row.targetType,
+          row.avgPromptChars.toStringAsFixed(0),
+          row.avgMemoryStyleChars.toStringAsFixed(0),
+          row.avgMemoryDeliveryChars.toStringAsFixed(0),
+          row.memoryAction,
+        ),
       )
       .join(' | ');
   final suffix = items.length > maxItems ? ' | …' : '';
@@ -406,15 +449,16 @@ String summarizeBadCaseStatItems(
   int maxItems = 4,
   AppLocalizations? l10n,
 }) {
+  final loc = qualityReviewsResolveL10n(l10n);
   final rows = items.toList(growable: false);
   if (rows.isEmpty) {
-    return l10n?.qualityReviewsNoBadCaseHotspots ?? 'No bad-case hotspots yet';
+    return loc.qualityReviewsNoBadCaseHotspots;
   }
   final visible = rows
       .take(maxItems)
       .map(
         (row) =>
-            '${row.badCaseCategory ?? (l10n?.qualityReviewsUncategorized ?? 'Uncategorized')} ${row.count}${l10n?.qualityReviewsItemUnit ?? ' items'} · pass=${row.passRatePercent.toStringAsFixed(1)}% · avg=${row.avgScore.toStringAsFixed(1)}',
+            '${row.badCaseCategory ?? loc.qualityReviewsUncategorized} ${row.count}${loc.qualityReviewsItemUnit} · pass=${row.passRatePercent.toStringAsFixed(1)}% · avg=${row.avgScore.toStringAsFixed(1)}',
       )
       .join(' | ');
   final suffix = rows.length > maxItems ? ' | …' : '';
@@ -430,19 +474,20 @@ String? buildQualityDashboardSummary({
   String? badCaseStatsSummary,
   AppLocalizations? l10n,
 }) {
+  final loc = qualityReviewsResolveL10n(l10n);
   final parts = <String>[
     if (statsSummary != null && statsSummary.isNotEmpty)
-      '${l10n?.qualityReviewsSummaryStatsPrefix ?? 'Stats'}: $statsSummary',
+      '${loc.qualityReviewsSummaryStatsPrefix}: $statsSummary',
     if (stagePassRateSummary != null && stagePassRateSummary.isNotEmpty)
-      '${l10n?.qualityReviewsSummaryStagePrefix ?? 'Stage'}: $stagePassRateSummary',
+      '${loc.qualityReviewsSummaryStagePrefix}: $stagePassRateSummary',
     if (stageGradeSummary != null && stageGradeSummary.isNotEmpty)
-      '${l10n?.qualityReviewsSummaryGradePrefix ?? 'Grade'}: $stageGradeSummary',
+      '${loc.qualityReviewsSummaryGradePrefix}: $stageGradeSummary',
     if (scopeInsightsSummary != null && scopeInsightsSummary.isNotEmpty)
-      'Scope: $scopeInsightsSummary',
+      loc.qualityReviewsSummaryScopeLine(scopeInsightsSummary),
     if (tokenEfficiencySummary != null && tokenEfficiencySummary.isNotEmpty)
-      'Token: $tokenEfficiencySummary',
+      loc.qualityReviewsSummaryTokenLine(tokenEfficiencySummary),
     if (badCaseStatsSummary != null && badCaseStatsSummary.isNotEmpty)
-      '${l10n?.qualityReviewsSummaryBadCasePrefix ?? 'Bad case'}: $badCaseStatsSummary',
+      '${loc.qualityReviewsSummaryBadCasePrefix}: $badCaseStatsSummary',
   ];
   if (parts.isEmpty) {
     return null;
@@ -469,26 +514,20 @@ String formatQualityReviewCoreDetails(QualityReview row) {
 }
 
 String formatQualityReviewDetails(QualityReview row, {AppLocalizations? l10n}) {
+  final loc = qualityReviewsResolveL10n(l10n);
   final parts = [formatQualityReviewCoreDetails(row)];
   final diagnosticSummary = summarizeQualityReviewPromptDiagnostics(row);
   if (diagnosticSummary != null) {
-    parts.add(
-      '${l10n?.qualityReviewsDiagnosticLabel ?? 'diagnostic'}=$diagnosticSummary',
-    );
+    parts.add('${loc.qualityReviewsDiagnosticLabel}=$diagnosticSummary');
   }
   final writebackSummary = summarizeQualityReviewMemoryWriteback(row);
   if (writebackSummary != null) {
-    parts.add(
-      '${l10n?.qualityReviewsWritebackLabel ?? 'writeback'}=$writebackSummary',
-    );
+    parts.add('${loc.qualityReviewsWritebackLabel}=$writebackSummary');
   }
-  final repairSuggestions = buildQualityReviewRepairSuggestions(
-    row,
-    l10n: l10n,
-  );
+  final repairSuggestions = buildQualityReviewRepairSuggestions(row, l10n: loc);
   if (repairSuggestions.isNotEmpty) {
     parts.add(
-      '${l10n?.qualityReviewsSuggestionsLabel ?? 'suggestions'}=${repairSuggestions.join(' / ')}',
+      '${loc.qualityReviewsSuggestionsLabel}=${repairSuggestions.join(' / ')}',
     );
   }
   return parts.join(' · ');

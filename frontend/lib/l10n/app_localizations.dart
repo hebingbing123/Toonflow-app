@@ -128,6 +128,26 @@ abstract class AppLocalizations {
   /// **'Simplified Chinese'**
   String get localeChinese;
 
+  String get localizedFormattingFileSizeZero;
+
+  String get localizedFormattingByteSuffix;
+
+  String get localizedFormattingKilobyteSuffix;
+
+  String get localizedFormattingMegabyteSuffix;
+
+  String get localizedFormattingGigabyteSuffix;
+
+  String get localizedFormattingTerabyteSuffix;
+
+  String localizedFormattingDurationHours(int count);
+
+  String localizedFormattingDurationMinutes(int count);
+
+  String localizedFormattingDurationSeconds(int count);
+
+  String get localizedFormattingDurationZero;
+
   /// No description provided for @workspaceModeTitle.
   ///
   /// In en, this message translates to:
@@ -4411,6 +4431,10 @@ abstract class AppLocalizations {
   /// **'Messages'**
   String get agentMemoryTierMessage;
 
+  String agentMemoryScopeStoryboardIds(String ids);
+
+  String agentMemoryScopeSampleCount(String count);
+
   /// No description provided for @agentMemoryClassNegative.
   ///
   /// In en, this message translates to:
@@ -6975,6 +6999,88 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'suggestions'**
   String get qualityReviewsSuggestionsLabel;
+
+  String get qualityReviewsAbbrevNotAvailable;
+
+  String get qualityReviewsStatDeliveryNa;
+
+  String get qualityReviewsStatNonNa;
+
+  String qualityReviewsStatDeliveryPassRate(String rate);
+
+  String qualityReviewsStatNonPassRate(String rate);
+
+  String qualityReviewsWorkbenchStagePassRateRow(
+    String date,
+    String targetType,
+    String passPct,
+    String deliveryPart,
+    String nonDeliveryPart,
+  );
+
+  String qualityReviewsWorkbenchQualityStatRow(
+    String targetType,
+    int totalReviews,
+    String passPct,
+    String deliveryPart,
+    String nonDeliveryPart,
+  );
+
+  String qualityReviewsScopeInsightSlimChars(int chars, int rows, String unit);
+
+  String qualityReviewsSummaryScopeLine(String value);
+
+  String qualityReviewsSummaryTokenLine(String value);
+
+  String qualityReviewsWorkbenchDashboardTokenRow(
+    String targetType,
+    String prompt,
+    String memory,
+    String delivery,
+    String action,
+  );
+
+  String qualityReviewsTokenEfficiencyStatLine(
+    String targetType,
+    String prompt,
+    String base,
+    String memory,
+    String memoryShare,
+    String delivery,
+    String deliveryShare,
+    String hitRate,
+  );
+
+  String qualityReviewsTokenEfficiencySampleLine(
+    String date,
+    String targetType,
+    String prompt,
+    String base,
+    String memory,
+    String memoryShare,
+    String deliveryFlag,
+  );
+
+  String qualityReviewsWorkbenchStageGradeRow(
+    String stage,
+    int a,
+    int b,
+    int c,
+    int d,
+    String passPct,
+  );
+
+  String qualityReviewsPreviewListTitle(
+    String targetType,
+    String source,
+    String score,
+  );
+
+  String qualityReviewsPreviewDetailTarget(String targetId);
+
+  String qualityReviewsPreviewDetailPassed(String passed);
+
+  String get qualityReviewsPreviewDetailBadCase;
 
   /// No description provided for @qualityReviewsNegativeConstraintReviewAndBadCase.
   ///
@@ -18132,6 +18238,8 @@ abstract class AppLocalizations {
   /// **'Shot #{number}'**
   String shortVideoPreviewPlayerShotLabel(int number);
 
+  String shortVideoPreviewPlayerPlaylistPosition(int current, int total);
+
   /// No description provided for @shortVideoPreviewPlayerOverallProgress.
   ///
   /// In en, this message translates to:
@@ -23701,6 +23809,8 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unchanged'**
   String get shortVideoVersionComparisonDiffUnchanged;
+
+  String get shortVideoVersionComparisonReportSeparator;
 
   /// No description provided for @shortVideoVersionComparisonReportTitle.
   ///

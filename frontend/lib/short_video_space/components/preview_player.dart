@@ -214,7 +214,9 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
       final l10n = _previewPlayerL10n(context);
       setState(() {
         _hasError = true;
-        _errorMessage = l10n.shortVideoPreviewPlayerLoadFailed(describeUserVisibleApiError(l10n, e));
+        _errorMessage = l10n.shortVideoPreviewPlayerLoadFailed(
+          describeUserVisibleApiError(l10n, e),
+        );
       });
     }
   }
@@ -464,7 +466,10 @@ class _PreviewPlayerState extends State<PreviewPlayer> {
                       if (_isPlaylistMode) ...[
                         const SizedBox(width: 8),
                         Text(
-                          '(${_currentShotIndex + 1}/${widget.playlist!.length})',
+                          l10n.shortVideoPreviewPlayerPlaylistPosition(
+                            _currentShotIndex + 1,
+                            widget.playlist!.length,
+                          ),
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(
                                 color: Theme.of(

@@ -57,7 +57,10 @@ void main() {
       ),
     ], l10n: _zh);
 
-    expect(summary, 'output: total=12, pass=75.0% (delivery=75.0%, non=75.0%)');
+    expect(
+      summary,
+      'output：共 12 条，通过率 75.0%（投放 75.0%，非投放 75.0%）',
+    );
   });
 
   test('summarizeQualityScopeInsightRows formats scope triage preview', () {
@@ -95,7 +98,7 @@ void main() {
 
     expect(
       summary,
-      'P12/S7 4条 · pass=50.0% · 坏例2 · 情绪2 · 真实感1 · auto=480/92/38 · slim 140c/3条 · 晋升2 · 坏例回写1 · 回写slim 88c/2条 · 关注=台词真实/情绪层次 · 动作=保留表演记忆 · 焦点=selected_video_memory · Keep scoped acting memory and keep trimming generic style first.',
+      'P12/S7 4条 · pass=50.0% · 坏例2 · 情绪2 · 真实感1 · auto=480/92/38 · 压缩 140 字符/3条 · 晋升2 · 坏例回写1 · 回写slim 88c/2条 · 关注=台词真实/情绪层次 · 动作=保留表演记忆 · 焦点=selected_video_memory · Keep scoped acting memory and keep trimming generic style first.',
     );
   });
 
@@ -621,7 +624,7 @@ void main() {
 
     expect(
       summary,
-      'storyboard: prompt=420, base=348, memory=72 (17.1%, delivery=32/7.6%, hit=66.7%) · 动作=压项目泛风格 · 焦点=project_video_style_memory · Project-wide style memory is eating budget; trim generic visual/style lines first.',
+      'storyboard：提示词 420，基础 348，记忆 72（占比 17.1%，投放 32/7.6%，命中 66.7%） · 动作=压项目泛风格 · 焦点=project_video_style_memory · Project-wide style memory is eating budget; trim generic visual/style lines first.',
     );
   });
 
@@ -763,7 +766,7 @@ void main() {
 
       expect(
         summary,
-        '04-28 09:30 storyboard: prompt=436, base=356, memory=80 (18.3%, delivery优先)',
+        '04-28 09:30 storyboard：提示词 436，基础 356，记忆 80（占比 18.3%，delivery优先）',
       );
     },
   );

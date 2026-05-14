@@ -473,7 +473,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                       ...group.rows.take(6).map((item) {
                         final preview =
                             memoryPreviewById[item.id] ??
-                            _buildAgentMemoryPreview(item);
+                            _buildAgentMemoryPreview(item, l10n);
                         final titleSegments = <String>[
                           if (preview.memoryName.isNotEmpty) preview.memoryName,
                           preview.role,

@@ -5,6 +5,37 @@
   "localeSystem": "System default",
   "localeEnglish": "English",
   "localeChinese": "Simplified Chinese",
+  "localizedFormattingFileSizeZero": "0 B",
+  "localizedFormattingByteSuffix": "B",
+  "localizedFormattingKilobyteSuffix": "KB",
+  "localizedFormattingMegabyteSuffix": "MB",
+  "localizedFormattingGigabyteSuffix": "GB",
+  "localizedFormattingTerabyteSuffix": "TB",
+  "localizedFormattingDurationHours": "{count}h",
+  "@localizedFormattingDurationHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "localizedFormattingDurationMinutes": "{count}m",
+  "@localizedFormattingDurationMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "localizedFormattingDurationSeconds": "{count}s",
+  "@localizedFormattingDurationSeconds": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "localizedFormattingDurationZero": "0s",
   "workspaceModeTitle": "Workspace mode",
   "workspaceModeProduct": "Product workspace",
   "workspaceModeDebug": "Ops and debug",
@@ -1565,6 +1596,22 @@
   "agentMemoryTierStageSummary": "Stage summary",
   "agentMemoryTierDeltaMemory": "Delta memory",
   "agentMemoryTierMessage": "Messages",
+  "agentMemoryScopeStoryboardIds": "storyboard {ids}",
+  "@agentMemoryScopeStoryboardIds": {
+    "placeholders": {
+      "ids": {
+        "type": "String"
+      }
+    }
+  },
+  "agentMemoryScopeSampleCount": "samples {count}",
+  "@agentMemoryScopeSampleCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "agentMemoryClassNegative": "Negative constraints",
   "agentMemoryClassDeliveryVisual": "Delivery + visual",
   "agentMemoryClassDeliveryFirst": "Delivery-first",
@@ -2881,6 +2928,224 @@
   "qualityReviewsDiagnosticLabel": "diagnostic",
   "qualityReviewsWritebackLabel": "writeback",
   "qualityReviewsSuggestionsLabel": "suggestions",
+  "qualityReviewsAbbrevNotAvailable": "n/a",
+  "qualityReviewsStatDeliveryNa": "delivery=n/a",
+  "qualityReviewsStatNonNa": "non=n/a",
+  "qualityReviewsStatDeliveryPassRate": "delivery={rate}%",
+  "@qualityReviewsStatDeliveryPassRate": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsStatNonPassRate": "non={rate}%",
+  "@qualityReviewsStatNonPassRate": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsWorkbenchStagePassRateRow": "{date} {targetType}:{passPct}% ({deliveryPart}, {nonDeliveryPart})",
+  "@qualityReviewsWorkbenchStagePassRateRow": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "targetType": {
+        "type": "String"
+      },
+      "passPct": {
+        "type": "String"
+      },
+      "deliveryPart": {
+        "type": "String"
+      },
+      "nonDeliveryPart": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsWorkbenchQualityStatRow": "{targetType}: total={totalReviews}, pass={passPct}%, ({deliveryPart}, {nonDeliveryPart})",
+  "@qualityReviewsWorkbenchQualityStatRow": {
+    "placeholders": {
+      "targetType": {
+        "type": "String"
+      },
+      "totalReviews": {
+        "type": "int"
+      },
+      "passPct": {
+        "type": "String"
+      },
+      "deliveryPart": {
+        "type": "String"
+      },
+      "nonDeliveryPart": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsScopeInsightSlimChars": "slim {chars}c/{rows}{unit}",
+  "@qualityReviewsScopeInsightSlimChars": {
+    "placeholders": {
+      "chars": {
+        "type": "int"
+      },
+      "rows": {
+        "type": "int"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsSummaryScopeLine": "Scope: {value}",
+  "@qualityReviewsSummaryScopeLine": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsSummaryTokenLine": "Token: {value}",
+  "@qualityReviewsSummaryTokenLine": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsWorkbenchDashboardTokenRow": "{targetType}: prompt={prompt}, memory={memory}, delivery={delivery} · action={action}",
+  "@qualityReviewsWorkbenchDashboardTokenRow": {
+    "placeholders": {
+      "targetType": {
+        "type": "String"
+      },
+      "prompt": {
+        "type": "String"
+      },
+      "memory": {
+        "type": "String"
+      },
+      "delivery": {
+        "type": "String"
+      },
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsTokenEfficiencyStatLine": "{targetType}: prompt={prompt}, base={base}, memory={memory} ({memoryShare}%, delivery={delivery}/{deliveryShare}%, hit={hitRate}%)",
+  "@qualityReviewsTokenEfficiencyStatLine": {
+    "placeholders": {
+      "targetType": {
+        "type": "String"
+      },
+      "prompt": {
+        "type": "String"
+      },
+      "base": {
+        "type": "String"
+      },
+      "memory": {
+        "type": "String"
+      },
+      "memoryShare": {
+        "type": "String"
+      },
+      "delivery": {
+        "type": "String"
+      },
+      "deliveryShare": {
+        "type": "String"
+      },
+      "hitRate": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsTokenEfficiencySampleLine": "{date} {targetType}: prompt={prompt}, base={base}, memory={memory} ({memoryShare}%, {deliveryFlag})",
+  "@qualityReviewsTokenEfficiencySampleLine": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "targetType": {
+        "type": "String"
+      },
+      "prompt": {
+        "type": "String"
+      },
+      "base": {
+        "type": "String"
+      },
+      "memory": {
+        "type": "String"
+      },
+      "memoryShare": {
+        "type": "String"
+      },
+      "deliveryFlag": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsWorkbenchStageGradeRow": "{stage}: A{a}/B{b}/C{c}/D{d} · pass={passPct}%",
+  "@qualityReviewsWorkbenchStageGradeRow": {
+    "placeholders": {
+      "stage": {
+        "type": "String"
+      },
+      "a": {
+        "type": "int"
+      },
+      "b": {
+        "type": "int"
+      },
+      "c": {
+        "type": "int"
+      },
+      "d": {
+        "type": "int"
+      },
+      "passPct": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsPreviewListTitle": "{targetType} · {source} · score={score}",
+  "@qualityReviewsPreviewListTitle": {
+    "placeholders": {
+      "targetType": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      },
+      "score": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsPreviewDetailTarget": "target={targetId}",
+  "@qualityReviewsPreviewDetailTarget": {
+    "placeholders": {
+      "targetId": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsPreviewDetailPassed": "passed={passed}",
+  "@qualityReviewsPreviewDetailPassed": {
+    "placeholders": {
+      "passed": {
+        "type": "String"
+      }
+    }
+  },
+  "qualityReviewsPreviewDetailBadCase": "bad_case",
   "qualityReviewsNegativeConstraintReviewAndBadCase": "negative constraint=reviews+bad-case memory",
   "qualityReviewsNegativeConstraintRecentReviews": "negative constraint=recent reviews",
   "qualityReviewsNegativeConstraintBadCaseMemory": "negative constraint=bad-case memory",
@@ -8762,6 +9027,17 @@
       }
     }
   },
+  "shortVideoPreviewPlayerPlaylistPosition": "({current}/{total})",
+  "@shortVideoPreviewPlayerPlaylistPosition": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "shortVideoPreviewPlayerOverallProgress": "Overall progress",
   "shortVideoPreviewPlayerPreviousShot": "Previous shot",
   "shortVideoPreviewPlayerNextShot": "Next shot",
@@ -11785,6 +12061,7 @@
   },
   "shortVideoVersionComparisonDiffModifiedGeneric": "Modified",
   "shortVideoVersionComparisonDiffUnchanged": "Unchanged",
+  "shortVideoVersionComparisonReportSeparator": "---",
   "shortVideoVersionComparisonReportTitle": "# Version comparison report",
   "shortVideoVersionComparisonReportVersionInfo": "## Version info",
   "shortVideoVersionComparisonReportBaseVersionLine": "**Base (old):** {name}",

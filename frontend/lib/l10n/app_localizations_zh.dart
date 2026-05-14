@@ -24,6 +24,42 @@ class AppLocalizationsZh extends AppLocalizations {
   String get localeChinese => '简体中文';
 
   @override
+  String get localizedFormattingFileSizeZero => '0 B';
+
+  @override
+  String get localizedFormattingByteSuffix => 'B';
+
+  @override
+  String get localizedFormattingKilobyteSuffix => 'KB';
+
+  @override
+  String get localizedFormattingMegabyteSuffix => 'MB';
+
+  @override
+  String get localizedFormattingGigabyteSuffix => 'GB';
+
+  @override
+  String get localizedFormattingTerabyteSuffix => 'TB';
+
+  @override
+  String localizedFormattingDurationHours(int count) {
+    return '${count}小时';
+  }
+
+  @override
+  String localizedFormattingDurationMinutes(int count) {
+    return '${count}分钟';
+  }
+
+  @override
+  String localizedFormattingDurationSeconds(int count) {
+    return '${count}秒';
+  }
+
+  @override
+  String get localizedFormattingDurationZero => '0秒';
+
+  @override
   String get workspaceModeTitle => '工作区模式';
 
   @override
@@ -2479,6 +2515,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get agentMemoryTierMessage => '普通消息';
 
   @override
+  String agentMemoryScopeStoryboardIds(String ids) {
+    return '分镜 $ids';
+  }
+
+  @override
+  String agentMemoryScopeSampleCount(String count) {
+    return '样本 $count';
+  }
+
+  @override
   String get agentMemoryClassNegative => '坏例约束';
 
   @override
@@ -4028,6 +4074,134 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get qualityReviewsSuggestionsLabel => '建议';
+
+  @override
+  String get qualityReviewsAbbrevNotAvailable => '暂无';
+
+  @override
+  String get qualityReviewsStatDeliveryNa => '投放侧无数据';
+
+  @override
+  String get qualityReviewsStatNonNa => '非投放侧无数据';
+
+  @override
+  String qualityReviewsStatDeliveryPassRate(String rate) {
+    return '投放 $rate%';
+  }
+
+  @override
+  String qualityReviewsStatNonPassRate(String rate) {
+    return '非投放 $rate%';
+  }
+
+  @override
+  String qualityReviewsWorkbenchStagePassRateRow(
+    String date,
+    String targetType,
+    String passPct,
+    String deliveryPart,
+    String nonDeliveryPart,
+  ) {
+    return '$date $targetType：通过率 $passPct%（$deliveryPart，$nonDeliveryPart）';
+  }
+
+  @override
+  String qualityReviewsWorkbenchQualityStatRow(
+    String targetType,
+    int totalReviews,
+    String passPct,
+    String deliveryPart,
+    String nonDeliveryPart,
+  ) {
+    return '$targetType：共 $totalReviews 条，通过率 $passPct%（$deliveryPart，$nonDeliveryPart）';
+  }
+
+  @override
+  String qualityReviewsScopeInsightSlimChars(int chars, int rows, String unit) {
+    return '压缩 $chars 字符/$rows$unit';
+  }
+
+  @override
+  String qualityReviewsSummaryScopeLine(String value) {
+    return '范围：$value';
+  }
+
+  @override
+  String qualityReviewsSummaryTokenLine(String value) {
+    return 'Token：$value';
+  }
+
+  @override
+  String qualityReviewsWorkbenchDashboardTokenRow(
+    String targetType,
+    String prompt,
+    String memory,
+    String delivery,
+    String action,
+  ) {
+    return '$targetType：提示词 $prompt 字符，记忆 $memory 字符，投放记忆 $delivery 字符 · 动作 $action';
+  }
+
+  @override
+  String qualityReviewsTokenEfficiencyStatLine(
+    String targetType,
+    String prompt,
+    String base,
+    String memory,
+    String memoryShare,
+    String delivery,
+    String deliveryShare,
+    String hitRate,
+  ) {
+    return '$targetType：提示词 $prompt，基础 $base，记忆 $memory（占比 $memoryShare%，投放 $delivery/$deliveryShare%，命中 $hitRate%）';
+  }
+
+  @override
+  String qualityReviewsTokenEfficiencySampleLine(
+    String date,
+    String targetType,
+    String prompt,
+    String base,
+    String memory,
+    String memoryShare,
+    String deliveryFlag,
+  ) {
+    return '$date $targetType：提示词 $prompt，基础 $base，记忆 $memory（占比 $memoryShare%，$deliveryFlag）';
+  }
+
+  @override
+  String qualityReviewsWorkbenchStageGradeRow(
+    String stage,
+    int a,
+    int b,
+    int c,
+    int d,
+    String passPct,
+  ) {
+    return '$stage：A$a/B$b/C$c/D$d · 通过率 $passPct%';
+  }
+
+  @override
+  String qualityReviewsPreviewListTitle(
+    String targetType,
+    String source,
+    String score,
+  ) {
+    return '$targetType · $source · 分数=$score';
+  }
+
+  @override
+  String qualityReviewsPreviewDetailTarget(String targetId) {
+    return '目标=$targetId';
+  }
+
+  @override
+  String qualityReviewsPreviewDetailPassed(String passed) {
+    return '通过=$passed';
+  }
+
+  @override
+  String get qualityReviewsPreviewDetailBadCase => '坏例';
 
   @override
   String get qualityReviewsNegativeConstraintReviewAndBadCase => '负向约束=评审+坏例记忆';
@@ -11129,6 +11303,11 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String shortVideoPreviewPlayerPlaylistPosition(int current, int total) {
+    return '（$current/$total）';
+  }
+
+  @override
   String get shortVideoPreviewPlayerOverallProgress => '总进度';
 
   @override
@@ -14690,6 +14869,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get shortVideoVersionComparisonDiffUnchanged => '未变化';
+
+  @override
+  String get shortVideoVersionComparisonReportSeparator => '---';
 
   @override
   String get shortVideoVersionComparisonReportTitle => '# 版本对比报告';

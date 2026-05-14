@@ -11,7 +11,7 @@ class LocalizedFormatting {
     if (appLocalizations == null) {
       return const Locale('en');
     }
-    
+
     // Use the locale from AppLocalizations
     final locale = Localizations.localeOf(context);
     return locale;
@@ -94,7 +94,11 @@ class LocalizedFormatting {
   }
 
   /// Format a number with a specific number of decimal places
-  static String formatDecimal(BuildContext context, num number, int decimalPlaces) {
+  static String formatDecimal(
+    BuildContext context,
+    num number,
+    int decimalPlaces,
+  ) {
     final locale = _getFormattingLocale(context);
     final formatter = NumberFormat.decimalPattern(locale.toString());
     formatter.minimumFractionDigits = decimalPlaces;
@@ -124,24 +128,30 @@ class LocalizedFormatting {
   }
 
   /// Format file size with localized number formatting
-  /// Chinese: 1,234 KB
-  /// English: 1,234 KB
   static String formatFileSize(BuildContext context, int bytes) {
-    const suffixes = ['B', 'KB', 'MB', 'GB', 'TB'];
-    if (bytes == 0) return '0 B';
-    
+    final l10n = AppLocalizations.of(context)!;
+    final suffixes = <String>[
+      l10n.localizedFormattingByteSuffix,
+      l10n.localizedFormattingKilobyteSuffix,
+      l10n.localizedFormattingMegabyteSuffix,
+      l10n.localizedFormattingGigabyteSuffix,
+      l10n.localizedFormattingTerabyteSuffix,
+    ];
+
+    if (bytes == 0) return l10n.localizedFormattingFileSizeZero;
+
     int i = 0;
     double size = bytes.toDouble();
-    
+
     while (size >= 1024 && i < suffixes.length - 1) {
       size /= 1024;
       i++;
     }
-    
-    final formattedSize = size < 10 && i > 0 
+
+    final formattedSize = size < 10 && i > 0
         ? formatDecimal(context, size, 1)
         : formatNumber(context, size.round());
-    
+
     return '$formattedSize ${suffixes[i]}';
   }
 
@@ -149,31 +159,32 @@ class LocalizedFormatting {
   /// Chinese: 2小时30分钟
   /// English: 2h 30m
   static String formatDuration(BuildContext context, Duration duration) {
-    final locale = _getFormattingLocale(context);
-    final isZh = locale.languageCode == 'zh';
-    
+    final l10n = AppLocalizations.of(context)!;
+
     final hours = duration.inHours;
     final minutes = duration.inMinutes.remainder(60);
     final seconds = duration.inSeconds.remainder(60);
-    
+
     final parts = <String>[];
-    
+
     if (hours > 0) {
-      parts.add(isZh ? '$hours小时' : '${hours}h');
+      parts.add(l10n.localizedFormattingDurationHours(hours));
     }
-    
+
     if (minutes > 0) {
-      parts.add(isZh ? '$minutes分钟' : '${minutes}m');
+      parts.add(l10n.localizedFormattingDurationMinutes(minutes));
     }
-    
+
     if (seconds > 0 && hours == 0) {
-      parts.add(isZh ? '$seconds秒' : '${seconds}s');
+      parts.add(l10n.localizedFormattingDurationSeconds(seconds));
     }
-    
+
     if (parts.isEmpty) {
-      return isZh ? '0秒' : '0s';
+      return l10n.localizedFormattingDurationZero;
     }
-    
-    return parts.join(isZh ? '' : ' ');
+
+    final locale = _getFormattingLocale(context);
+    final joiner = locale.languageCode == 'zh' ? '' : ' ';
+    return parts.join(joiner);
   }
 }

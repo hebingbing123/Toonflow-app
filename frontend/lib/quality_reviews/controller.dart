@@ -245,7 +245,7 @@ class QualityReviewsController extends ChangeNotifier {
       final rows = await fetchQualityStats(token);
       qualityStatsRows = _mapStatsRowsToDashboardStats(rows);
       qualityStatsLine = rows.isEmpty
-          ? (_l10n?.qualityReviewsEmpty ?? '(empty)')
+          ? qualityReviewsResolveL10n(_l10n).qualityReviewsEmpty
           : summarizeQualityStatsRows(rows, maxItems: 4, l10n: _l10n);
       _refreshQualityDashboardLine();
     } catch (e) {
@@ -269,7 +269,7 @@ class QualityReviewsController extends ChangeNotifier {
       qualityStagePassRateRows = _mapStagePassRateRows(rows);
       qualityStageGradeRows = _mapStageGradeRows(gradeRows);
       qualityStagePassRateLine = rows.isEmpty
-          ? (_l10n?.qualityReviewsEmpty ?? '(empty)')
+          ? qualityReviewsResolveL10n(_l10n).qualityReviewsEmpty
           : summarizeStagePassRateRows(rows, maxItems: 6, l10n: _l10n);
       qualityStageGradeLine = summarizeStageGradeDistributionRows(
         gradeRows,
@@ -298,6 +298,7 @@ class QualityReviewsController extends ChangeNotifier {
     _setError(null);
     notifyListeners();
     try {
+      final loc = qualityReviewsResolveL10n(_l10n);
       if (refreshReadModel) {
         final refresh = await refreshQualityDashboardReadModel(
           token,
@@ -308,15 +309,13 @@ class QualityReviewsController extends ChangeNotifier {
           19,
         );
         qualityDashboardRefreshLine = refresh.performed
-            ? (_l10n?.qualityReviewsDashboardRefreshPerformed(
-                    refresh.rowCount,
-                    refresh.sourceReviewCount,
-                    refresh.sourceUsageCount,
-                    timeStr,
-                  ) ??
-                  'Snapshot refreshed: ${refresh.rowCount} review facts · reviews=${refresh.sourceReviewCount} · usage=${refresh.sourceUsageCount} · $timeStr')
-            : (_l10n?.qualityReviewsDashboardRefreshSkipped(timeStr) ??
-                  'Snapshot unchanged · fresh snapshot skipped refresh · $timeStr');
+            ? loc.qualityReviewsDashboardRefreshPerformed(
+                refresh.rowCount,
+                refresh.sourceReviewCount,
+                refresh.sourceUsageCount,
+                timeStr,
+              )
+            : loc.qualityReviewsDashboardRefreshSkipped(timeStr);
       }
       final dashboard = await fetchQualityDashboard(
         token,
@@ -324,25 +323,23 @@ class QualityReviewsController extends ChangeNotifier {
         scriptId: null,
       );
 
-      final l10n = _l10n;
       qualityDashboardMeta = dashboard.meta;
       qualityStatsRows = dashboard.stats;
       final scopePrefix = dashboard.stats.isNotEmpty
-          ? (l10n?.qualityReviewsDashboardStatsScopePrefix(
-                  dashboard.stats.first.scope,
-                ) ??
-                'scope=${dashboard.stats.first.scope} · ')
+          ? loc.qualityReviewsDashboardStatsScopePrefix(
+              dashboard.stats.first.scope,
+            )
           : '';
       qualityStatsLine = dashboard.stats.isEmpty
-          ? (l10n?.qualityReviewsNoQualityStats ?? 'No quality stats yet')
+          ? loc.qualityReviewsNoQualityStats
           : '$scopePrefix${dashboard.stats.map((row) {
               final passPct = row.passRatePercent.toStringAsFixed(1);
               final avgScore = row.avgOverallScore.toStringAsFixed(1);
-              return l10n?.qualityReviewsDashboardTargetStatRow(row.targetType, row.totalReviews, passPct, avgScore) ?? '${row.targetType}: total=${row.totalReviews}, pass=$passPct%, avg=$avgScore';
+              return loc.qualityReviewsDashboardTargetStatRow(row.targetType, row.totalReviews, passPct, avgScore);
             }).join(' | ')}';
       qualityStagePassRateRows = dashboard.stagePassRate;
       qualityStagePassRateLine = dashboard.stagePassRate.isEmpty
-          ? (l10n?.qualityReviewsNoStagePassRate ?? 'No stage pass rates yet')
+          ? loc.qualityReviewsNoStagePassRate
           : dashboard.stagePassRate
                 .map((row) {
                   final date = row.reviewDate.toIso8601String().substring(
@@ -350,13 +347,12 @@ class QualityReviewsController extends ChangeNotifier {
                     10,
                   );
                   final passPct = row.passRatePercent.toStringAsFixed(1);
-                  return l10n?.qualityReviewsDashboardStagePassRateRow(
-                        date,
-                        row.targetType,
-                        passPct,
-                        row.totalReviews,
-                      ) ??
-                      '$date ${row.targetType}: pass=$passPct%, total=${row.totalReviews}';
+                  return loc.qualityReviewsDashboardStagePassRateRow(
+                    date,
+                    row.targetType,
+                    passPct,
+                    row.totalReviews,
+                  );
                 })
                 .join(' | ');
       qualityStageGradeRows = dashboard.stageGradeDistribution;
@@ -397,24 +393,24 @@ class QualityReviewsController extends ChangeNotifier {
   }
 
   String _buildQualityDashboardFreshnessLine(QualityDashboardMeta meta) {
-    final l10n = _l10n;
+    final loc = qualityReviewsResolveL10n(_l10n);
     final age = meta.ageSeconds == null
-        ? (l10n?.qualityReviewsFreshnessUnknownAge ?? 'unknown_age')
+        ? loc.qualityReviewsFreshnessUnknownAge
         : meta.ageSeconds! < 60
         ? '${meta.ageSeconds}s'
         : '${(meta.ageSeconds! / 60).floor()}m';
     final refreshedAt = meta.refreshedAt == null
-        ? (l10n?.qualityReviewsFreshnessNever ?? 'never')
+        ? loc.qualityReviewsFreshnessNever
         : meta.refreshedAt!.toLocal().toString().substring(0, 19);
     final reviewMax = meta.sourceMaxReviewCreatedAt == null
-        ? (l10n?.qualityReviewsFreshnessNone ?? 'none')
+        ? loc.qualityReviewsFreshnessNone
         : meta.sourceMaxReviewCreatedAt!.toLocal().toString().substring(0, 19);
     final usageMax = meta.sourceMaxUsageCreatedAt == null
-        ? (l10n?.qualityReviewsFreshnessNone ?? 'none')
+        ? loc.qualityReviewsFreshnessNone
         : meta.sourceMaxUsageCreatedAt!.toLocal().toString().substring(0, 19);
     final verdict = meta.stale
-        ? (l10n?.qualityReviewsFreshnessStale ?? 'STALE')
-        : (l10n?.qualityReviewsFreshnessFresh ?? 'fresh');
+        ? loc.qualityReviewsFreshnessStale
+        : loc.qualityReviewsFreshnessFresh;
     final reason = meta.staleReason == null ? '' : ' · ${meta.staleReason}';
     return '$verdict · age=$age · refreshed=$refreshedAt · snapshot=${meta.snapshotRowCount} · source reviews=${meta.sourceReviewCount} @ $reviewMax · usage=${meta.sourceUsageCount} @ $usageMax$reason';
   }

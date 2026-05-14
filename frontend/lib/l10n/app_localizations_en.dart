@@ -24,6 +24,42 @@ class AppLocalizationsEn extends AppLocalizations {
   String get localeChinese => 'Simplified Chinese';
 
   @override
+  String get localizedFormattingFileSizeZero => '0 B';
+
+  @override
+  String get localizedFormattingByteSuffix => 'B';
+
+  @override
+  String get localizedFormattingKilobyteSuffix => 'KB';
+
+  @override
+  String get localizedFormattingMegabyteSuffix => 'MB';
+
+  @override
+  String get localizedFormattingGigabyteSuffix => 'GB';
+
+  @override
+  String get localizedFormattingTerabyteSuffix => 'TB';
+
+  @override
+  String localizedFormattingDurationHours(int count) {
+    return '${count}h';
+  }
+
+  @override
+  String localizedFormattingDurationMinutes(int count) {
+    return '${count}m';
+  }
+
+  @override
+  String localizedFormattingDurationSeconds(int count) {
+    return '${count}s';
+  }
+
+  @override
+  String get localizedFormattingDurationZero => '0s';
+
+  @override
   String get workspaceModeTitle => 'Workspace mode';
 
   @override
@@ -2580,6 +2616,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get agentMemoryTierMessage => 'Messages';
 
   @override
+  String agentMemoryScopeStoryboardIds(String ids) {
+    return 'storyboard $ids';
+  }
+
+  @override
+  String agentMemoryScopeSampleCount(String count) {
+    return 'samples $count';
+  }
+
+  @override
   String get agentMemoryClassNegative => 'Negative constraints';
 
   @override
@@ -4185,6 +4231,134 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get qualityReviewsSuggestionsLabel => 'suggestions';
+
+  @override
+  String get qualityReviewsAbbrevNotAvailable => 'n/a';
+
+  @override
+  String get qualityReviewsStatDeliveryNa => 'delivery=n/a';
+
+  @override
+  String get qualityReviewsStatNonNa => 'non=n/a';
+
+  @override
+  String qualityReviewsStatDeliveryPassRate(String rate) {
+    return 'delivery=$rate%';
+  }
+
+  @override
+  String qualityReviewsStatNonPassRate(String rate) {
+    return 'non=$rate%';
+  }
+
+  @override
+  String qualityReviewsWorkbenchStagePassRateRow(
+    String date,
+    String targetType,
+    String passPct,
+    String deliveryPart,
+    String nonDeliveryPart,
+  ) {
+    return '$date $targetType:$passPct% ($deliveryPart, $nonDeliveryPart)';
+  }
+
+  @override
+  String qualityReviewsWorkbenchQualityStatRow(
+    String targetType,
+    int totalReviews,
+    String passPct,
+    String deliveryPart,
+    String nonDeliveryPart,
+  ) {
+    return '$targetType: total=$totalReviews, pass=$passPct%, ($deliveryPart, $nonDeliveryPart)';
+  }
+
+  @override
+  String qualityReviewsScopeInsightSlimChars(int chars, int rows, String unit) {
+    return 'slim ${chars}c/${rows}$unit';
+  }
+
+  @override
+  String qualityReviewsSummaryScopeLine(String value) {
+    return 'Scope: $value';
+  }
+
+  @override
+  String qualityReviewsSummaryTokenLine(String value) {
+    return 'Token: $value';
+  }
+
+  @override
+  String qualityReviewsWorkbenchDashboardTokenRow(
+    String targetType,
+    String prompt,
+    String memory,
+    String delivery,
+    String action,
+  ) {
+    return '$targetType: prompt=$prompt, memory=$memory, delivery=$delivery · action=$action';
+  }
+
+  @override
+  String qualityReviewsTokenEfficiencyStatLine(
+    String targetType,
+    String prompt,
+    String base,
+    String memory,
+    String memoryShare,
+    String delivery,
+    String deliveryShare,
+    String hitRate,
+  ) {
+    return '$targetType: prompt=$prompt, base=$base, memory=$memory ($memoryShare%, delivery=$delivery/$deliveryShare%, hit=$hitRate%)';
+  }
+
+  @override
+  String qualityReviewsTokenEfficiencySampleLine(
+    String date,
+    String targetType,
+    String prompt,
+    String base,
+    String memory,
+    String memoryShare,
+    String deliveryFlag,
+  ) {
+    return '$date $targetType: prompt=$prompt, base=$base, memory=$memory ($memoryShare%, $deliveryFlag)';
+  }
+
+  @override
+  String qualityReviewsWorkbenchStageGradeRow(
+    String stage,
+    int a,
+    int b,
+    int c,
+    int d,
+    String passPct,
+  ) {
+    return '$stage: A$a/B$b/C$c/D$d · pass=$passPct%';
+  }
+
+  @override
+  String qualityReviewsPreviewListTitle(
+    String targetType,
+    String source,
+    String score,
+  ) {
+    return '$targetType · $source · score=$score';
+  }
+
+  @override
+  String qualityReviewsPreviewDetailTarget(String targetId) {
+    return 'target=$targetId';
+  }
+
+  @override
+  String qualityReviewsPreviewDetailPassed(String passed) {
+    return 'passed=$passed';
+  }
+
+  @override
+  String get qualityReviewsPreviewDetailBadCase => 'bad_case';
 
   @override
   String get qualityReviewsNegativeConstraintReviewAndBadCase =>
@@ -11653,6 +11827,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String shortVideoPreviewPlayerPlaylistPosition(int current, int total) {
+    return '($current/$total)';
+  }
+
+  @override
   String get shortVideoPreviewPlayerOverallProgress => 'Overall progress';
 
   @override
@@ -15425,6 +15604,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shortVideoVersionComparisonDiffUnchanged => 'Unchanged';
+
+  @override
+  String get shortVideoVersionComparisonReportSeparator => '---';
 
   @override
   String get shortVideoVersionComparisonReportTitle =>

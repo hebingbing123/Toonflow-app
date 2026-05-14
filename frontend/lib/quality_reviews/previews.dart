@@ -413,15 +413,24 @@ class QualityReviewsListPreview extends StatelessWidget {
                 dense: true,
                 contentPadding: EdgeInsets.zero,
                 title: Text(
-                  '${review.targetType} · ${review.source} · score=${review.overallScore ?? "n/a"}',
+                  l10n.qualityReviewsPreviewListTitle(
+                    review.targetType,
+                    review.source,
+                    review.overallScore?.toString() ??
+                        l10n.qualityReviewsAbbrevNotAvailable,
+                  ),
                 ),
                 subtitle: Text(
                   [
                     review.id,
                     if (review.targetId != null && review.targetId!.isNotEmpty)
-                      'target=${review.targetId}',
-                    if (review.passed != null) 'passed=${review.passed}',
-                    if (review.isBadCase) 'bad_case',
+                      l10n.qualityReviewsPreviewDetailTarget(review.targetId!),
+                    if (review.passed != null)
+                      l10n.qualityReviewsPreviewDetailPassed(
+                        review.passed!.toString(),
+                      ),
+                    if (review.isBadCase)
+                      l10n.qualityReviewsPreviewDetailBadCase,
                   ].join(' · '),
                 ),
                 trailing: const Icon(Icons.chevron_right),

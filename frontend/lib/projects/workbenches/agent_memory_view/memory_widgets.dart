@@ -56,8 +56,10 @@ class _AgentMemoryPreview {
   final int charCount;
   final String normalizedPrefix;
   final bool isDuplicated;
+
   /// Internal classification slug (see `_memCls*`).
   final String classificationLabel;
+
   /// Internal action slug (see `_memAct*`).
   final String actionLabel;
   final String scopeLabel;
@@ -106,7 +108,7 @@ _AgentMemoryInsights _buildAgentMemoryInsights(
   AppLocalizations l10n,
 ) {
   final rawPreviews = rows
-      .map(_buildAgentMemoryPreview)
+      .map((row) => _buildAgentMemoryPreview(row, l10n))
       .toList(growable: false);
   if (rawPreviews.isEmpty) {
     return const _AgentMemoryInsights(
@@ -343,8 +345,8 @@ List<_MemoryTierGroup> _buildMemoryTierGroups(
         final groupRows = grouped[tier]!
           ..sort((left, right) {
             final previewOrder = _compareAgentMemoryPreviewPriority(
-              _buildAgentMemoryPreview(left),
-              _buildAgentMemoryPreview(right),
+              _buildAgentMemoryPreview(left, l10n),
+              _buildAgentMemoryPreview(right, l10n),
             );
             if (previewOrder != 0) {
               return previewOrder;
@@ -439,6 +441,7 @@ class _MemoryBucketStats {
   final String memoryName;
   final int rowCount;
   final int charCount;
+
   /// Internal action slug.
   final String actionLabel;
 
@@ -508,9 +511,7 @@ String? _buildScopedExecutionChecklist(
   ].join(' / ');
   final steps = <String>[
     l10n.agentMemoryChecklistScope(
-      scopeLabel.isEmpty
-          ? l10n.agentMemoryChecklistScopeFallback
-          : scopeLabel,
+      scopeLabel.isEmpty ? l10n.agentMemoryChecklistScopeFallback : scopeLabel,
     ),
   ];
   for (final bucket in insights.topBuckets) {
@@ -566,7 +567,10 @@ int _actionPriority(String actionLabel) {
   }
 }
 
-_AgentMemoryPreview _buildAgentMemoryPreview(AgentMemoryHistoryItem row) {
+_AgentMemoryPreview _buildAgentMemoryPreview(
+  AgentMemoryHistoryItem row,
+  AppLocalizations l10n,
+) {
   final memoryName = row.name ?? '';
   final role = row.role;
   final content = row.plainTextContent;
@@ -580,7 +584,7 @@ _AgentMemoryPreview _buildAgentMemoryPreview(AgentMemoryHistoryItem row) {
     content,
     classificationLabel,
   );
-  final scopeLabel = _memoryScopeLabel(content);
+  final scopeLabel = _memoryScopeLabel(content, l10n);
   final subjectLabel = _extractMemoryKeyValue(content, 'subject') ?? '';
   final signalLabel = _memorySignalLabel(content, classificationLabel);
   return _AgentMemoryPreview(
@@ -767,14 +771,14 @@ String _formatSignalLabelDisplay(AppLocalizations l10n, String raw) {
   return out.join('/');
 }
 
-String _memoryScopeLabel(String content) {
+String _memoryScopeLabel(String content, AppLocalizations l10n) {
   final storyboardIds = _extractMemoryKeyValue(content, 'storyboardIds');
   if (storyboardIds != null && storyboardIds.isNotEmpty) {
-    return 'storyboard $storyboardIds';
+    return l10n.agentMemoryScopeStoryboardIds(storyboardIds);
   }
   final sampleCount = _extractMemoryKeyValue(content, 'sampleCount');
   if (sampleCount != null && sampleCount.isNotEmpty) {
-    return 'samples $sampleCount';
+    return l10n.agentMemoryScopeSampleCount(sampleCount);
   }
   return '';
 }
