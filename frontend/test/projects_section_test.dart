@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
+import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/projects/controller.dart';
 import 'package:openflow_app/projects/section.dart';
 import 'package:openflow_app/rust_api.dart';
@@ -41,6 +42,8 @@ Widget buildTestApp(Widget child) {
 }
 
 void main() {
+  final zh = AppLocalizationsZh();
+
   testWidgets('projects section exposes art styles workbench entry', (
     WidgetTester tester,
   ) async {
@@ -70,10 +73,10 @@ void main() {
       ),
     );
 
-    expect(find.text('打开画风工作台'), findsOneWidget);
-    expect(find.text('打开创作手册工作台'), findsOneWidget);
-    expect(find.text('打开记忆工作台'), findsOneWidget);
-    expect(find.text('1 条画风'), findsOneWidget);
+    expect(find.text(zh.projectsOpenArtStylesWorkbench), findsOneWidget);
+    expect(find.text(zh.projectsOpenCreativeManualsWorkbench), findsOneWidget);
+    expect(find.text(zh.projectsOpenAgentMemoryWorkbench), findsOneWidget);
+    expect(find.text(zh.projectsArtStyleCount(1)), findsOneWidget);
     expect(find.text('水墨古风'), findsOneWidget);
     controller.dispose();
   });
@@ -106,10 +109,10 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('打开画风工作台'));
+    await tester.tap(find.text(zh.projectsOpenArtStylesWorkbench));
     await tester.pumpAndSettle();
 
-    expect(find.text('画风工作台'), findsOneWidget);
+    expect(find.text(zh.projectsArtWorkbenchTitle), findsOneWidget);
     expect(find.byType(Dialog), findsOneWidget);
     controller.dispose();
   });
@@ -132,10 +135,10 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('打开创作手册工作台'));
+    await tester.tap(find.text(zh.projectsOpenCreativeManualsWorkbench));
     await tester.pumpAndSettle();
 
-    expect(find.text('创作手册工作台'), findsOneWidget);
+    expect(find.text(zh.projectsCreativeManualTitle), findsOneWidget);
     expect(find.byType(Dialog), findsOneWidget);
     controller.dispose();
   });
@@ -158,13 +161,13 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('新建空项目'));
+    await tester.tap(find.text(zh.projectsCreateEmptyProject));
     await tester.pumpAndSettle();
 
-    expect(find.text('新建项目'), findsOneWidget);
-    expect(find.widgetWithText(TextField, '项目名'), findsOneWidget);
-    expect(find.widgetWithText(TextField, 'Premise'), findsOneWidget);
-    expect(find.widgetWithText(TextField, 'Brand name'), findsOneWidget);
+    expect(find.text(zh.projectsDialogCreateTitle), findsOneWidget);
+    expect(find.widgetWithText(TextField, zh.projectsDialogFieldName), findsOneWidget);
+    expect(find.widgetWithText(TextField, zh.projectsDialogFieldPremise), findsOneWidget);
+    expect(find.widgetWithText(TextField, zh.projectsDialogFieldBrandName), findsOneWidget);
     controller.dispose();
   });
 
@@ -195,10 +198,10 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('打开记忆工作台'));
+    await tester.tap(find.text(zh.projectsOpenAgentMemoryWorkbench));
     await tester.pumpAndSettle();
 
-    expect(find.text('Agent 记忆工作台'), findsOneWidget);
+    expect(find.text(zh.agentMemoryWorkbenchTitle), findsOneWidget);
     expect(find.byType(Dialog), findsOneWidget);
     controller.dispose();
   });
@@ -224,12 +227,12 @@ void main() {
       ),
     );
 
-    expect(find.text('当前团队空间还没有项目'), findsOneWidget);
+    expect(find.text(zh.projectsEnterpriseEmptyTitle), findsOneWidget);
     expect(find.textContaining('Team Alpha'), findsOneWidget);
-    expect(find.text('先创建空项目'), findsOneWidget);
-    expect(find.text('打开团队工作区'), findsOneWidget);
+    expect(find.text(zh.projectsCreateFirstEmpty), findsOneWidget);
+    expect(find.text(zh.projectsOpenTeamWorkspaces), findsOneWidget);
 
-    await tester.tap(find.text('打开团队工作区'));
+    await tester.tap(find.text(zh.projectsOpenTeamWorkspaces));
     await tester.pump();
     expect(openedTeamWorkspaces, 1);
     controller.dispose();

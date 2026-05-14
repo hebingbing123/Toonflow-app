@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
+import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/quality_reviews/controller.dart';
 import 'package:openflow_app/quality_reviews/section.dart';
 import 'package:openflow_app/rust_api.dart';
@@ -34,6 +35,8 @@ QualityReviewsController buildController({
 }
 
 void main() {
+  final zh = AppLocalizationsZh();
+
   testWidgets('quality section exposes workbench entry and summary', (
     WidgetTester tester,
   ) async {
@@ -64,8 +67,11 @@ void main() {
       ),
     );
 
-    expect(find.text('打开质量工作台'), findsOneWidget);
-    expect(find.text('评审 1 条 · auto 0 条 · output:manual:82'), findsOneWidget);
+    expect(find.text(zh.qualityReviewsOpenWorkbench), findsOneWidget);
+    expect(
+      find.text(zh.qualityReviewsSummaryLine(1, 0, 'output:manual:82')),
+      findsOneWidget,
+    );
     controller.dispose();
   });
 
@@ -102,10 +108,10 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('打开质量工作台'));
+    await tester.tap(find.text(zh.qualityReviewsOpenWorkbench));
     await tester.pumpAndSettle();
 
-    expect(find.text('质量工作台'), findsOneWidget);
+    expect(find.text(zh.qualityReviewsWorkbenchTitle), findsOneWidget);
     expect(find.byType(Dialog), findsOneWidget);
   });
 
@@ -137,14 +143,14 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('打开质量工作台'));
+    await tester.tap(find.text(zh.qualityReviewsOpenWorkbench));
     await tester.pumpAndSettle();
 
-    expect(find.text('质量工作台'), findsOneWidget);
+    expect(find.text(zh.qualityReviewsWorkbenchTitle), findsOneWidget);
     expect(find.byType(Dialog), findsOneWidget);
     expect(
       find.text(
-        '范围种子：projectUuid=project-uuid-9 -> projectId=9',
+        zh.qualityReviewsScopeSeedLine('projectUuid=project-uuid-9 -> projectId=9'),
       ),
       findsOneWidget,
     );

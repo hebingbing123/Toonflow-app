@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
+import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/task_center/section.dart';
 import 'package:openflow_app/rust_api.dart';
 
@@ -14,6 +15,8 @@ Widget _taskCenterTestApp(Widget child) {
 }
 
 void main() {
+  final zh = AppLocalizationsZh();
+
   testWidgets('task center exposes workbench entry and summary', (
     WidgetTester tester,
   ) async {
@@ -64,10 +67,13 @@ void main() {
       ),
     );
 
-    expect(find.text('打开任务工作台'), findsOneWidget);
-    expect(find.text('1 个项目 · #9 古风短剧'), findsOneWidget);
+    expect(find.text(zh.taskCenterOpenWorkbench), findsOneWidget);
     expect(
-      find.text('1 条任务 · #101 asset.generate.image:queued'),
+      find.text(zh.taskCenterProjectsSummary(1, '#9 古风短剧', '')),
+      findsOneWidget,
+    );
+    expect(
+      find.text(zh.taskCenterJobsSummary(1, '#101 asset.generate.image:queued', '')),
       findsOneWidget,
     );
   });
@@ -127,10 +133,10 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('打开任务工作台'));
+    await tester.tap(find.text(zh.taskCenterOpenWorkbench));
     await tester.pumpAndSettle();
 
-    expect(find.text('任务工作台'), findsOneWidget);
+    expect(find.text(zh.taskCenterWorkbenchTitle), findsOneWidget);
     expect(find.byType(Dialog), findsOneWidget);
   });
 }
