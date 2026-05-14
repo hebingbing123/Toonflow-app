@@ -128,24 +128,64 @@ abstract class AppLocalizations {
   /// **'Simplified Chinese'**
   String get localeChinese;
 
+  /// No description provided for @localizedFormattingFileSizeZero.
+  ///
+  /// In en, this message translates to:
+  /// **'0 B'**
   String get localizedFormattingFileSizeZero;
 
+  /// No description provided for @localizedFormattingByteSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'B'**
   String get localizedFormattingByteSuffix;
 
+  /// No description provided for @localizedFormattingKilobyteSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'KB'**
   String get localizedFormattingKilobyteSuffix;
 
+  /// No description provided for @localizedFormattingMegabyteSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'MB'**
   String get localizedFormattingMegabyteSuffix;
 
+  /// No description provided for @localizedFormattingGigabyteSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'GB'**
   String get localizedFormattingGigabyteSuffix;
 
+  /// No description provided for @localizedFormattingTerabyteSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'TB'**
   String get localizedFormattingTerabyteSuffix;
 
+  /// No description provided for @localizedFormattingDurationHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}h'**
   String localizedFormattingDurationHours(int count);
 
+  /// No description provided for @localizedFormattingDurationMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}m'**
   String localizedFormattingDurationMinutes(int count);
 
+  /// No description provided for @localizedFormattingDurationSeconds.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}s'**
   String localizedFormattingDurationSeconds(int count);
 
+  /// No description provided for @localizedFormattingDurationZero.
+  ///
+  /// In en, this message translates to:
+  /// **'0s'**
   String get localizedFormattingDurationZero;
 
   /// No description provided for @workspaceModeTitle.
@@ -2510,11 +2550,11 @@ abstract class AppLocalizations {
   /// **'Provider'**
   String get billingAuditProviderLabel;
 
-  /// No description provided for @billingAuditAll.
+  /// No description provided for @billingAuditProviderStripe.
   ///
   /// In en, this message translates to:
-  /// **'All'**
-  String get billingAuditAll;
+  /// **'Stripe'**
+  String get billingAuditProviderStripe;
 
   /// No description provided for @billingAuditProviderAlipay.
   ///
@@ -2528,11 +2568,11 @@ abstract class AppLocalizations {
   /// **'Paddle'**
   String get billingAuditProviderPaddle;
 
-  /// No description provided for @billingAuditProviderStripe.
+  /// No description provided for @billingAuditAll.
   ///
   /// In en, this message translates to:
-  /// **'Stripe'**
-  String get billingAuditProviderStripe;
+  /// **'All'**
+  String get billingAuditAll;
 
   /// No description provided for @billingAuditSortLabel.
   ///
@@ -3767,7 +3807,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'One slot per line: label|value|data'**
   String get projectsCreativeManualFieldSlotsHelper;
-  String get projectsCreativeManualDefaultSlotsTemplate;
 
   /// No description provided for @projectsCreativeManualSummaryTitle.
   ///
@@ -4431,8 +4470,16 @@ abstract class AppLocalizations {
   /// **'Messages'**
   String get agentMemoryTierMessage;
 
+  /// No description provided for @agentMemoryScopeStoryboardIds.
+  ///
+  /// In en, this message translates to:
+  /// **'storyboard {ids}'**
   String agentMemoryScopeStoryboardIds(String ids);
 
+  /// No description provided for @agentMemoryScopeSampleCount.
+  ///
+  /// In en, this message translates to:
+  /// **'samples {count}'**
   String agentMemoryScopeSampleCount(String count);
 
   /// No description provided for @agentMemoryClassNegative.
@@ -7000,16 +7047,40 @@ abstract class AppLocalizations {
   /// **'suggestions'**
   String get qualityReviewsSuggestionsLabel;
 
+  /// No description provided for @qualityReviewsAbbrevNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'n/a'**
   String get qualityReviewsAbbrevNotAvailable;
 
+  /// No description provided for @qualityReviewsStatDeliveryNa.
+  ///
+  /// In en, this message translates to:
+  /// **'delivery=n/a'**
   String get qualityReviewsStatDeliveryNa;
 
+  /// No description provided for @qualityReviewsStatNonNa.
+  ///
+  /// In en, this message translates to:
+  /// **'non=n/a'**
   String get qualityReviewsStatNonNa;
 
+  /// No description provided for @qualityReviewsStatDeliveryPassRate.
+  ///
+  /// In en, this message translates to:
+  /// **'delivery={rate}%'**
   String qualityReviewsStatDeliveryPassRate(String rate);
 
+  /// No description provided for @qualityReviewsStatNonPassRate.
+  ///
+  /// In en, this message translates to:
+  /// **'non={rate}%'**
   String qualityReviewsStatNonPassRate(String rate);
 
+  /// No description provided for @qualityReviewsWorkbenchStagePassRateRow.
+  ///
+  /// In en, this message translates to:
+  /// **'{date} {targetType}:{passPct}% ({deliveryPart}, {nonDeliveryPart})'**
   String qualityReviewsWorkbenchStagePassRateRow(
     String date,
     String targetType,
@@ -7018,6 +7089,10 @@ abstract class AppLocalizations {
     String nonDeliveryPart,
   );
 
+  /// No description provided for @qualityReviewsWorkbenchQualityStatRow.
+  ///
+  /// In en, this message translates to:
+  /// **'{targetType}: total={totalReviews}, pass={passPct}%, ({deliveryPart}, {nonDeliveryPart})'**
   String qualityReviewsWorkbenchQualityStatRow(
     String targetType,
     int totalReviews,
@@ -7026,12 +7101,28 @@ abstract class AppLocalizations {
     String nonDeliveryPart,
   );
 
+  /// No description provided for @qualityReviewsScopeInsightSlimChars.
+  ///
+  /// In en, this message translates to:
+  /// **'slim {chars}c/{rows}{unit}'**
   String qualityReviewsScopeInsightSlimChars(int chars, int rows, String unit);
 
+  /// No description provided for @qualityReviewsSummaryScopeLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Scope: {value}'**
   String qualityReviewsSummaryScopeLine(String value);
 
+  /// No description provided for @qualityReviewsSummaryTokenLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Token: {value}'**
   String qualityReviewsSummaryTokenLine(String value);
 
+  /// No description provided for @qualityReviewsWorkbenchDashboardTokenRow.
+  ///
+  /// In en, this message translates to:
+  /// **'{targetType}: prompt={prompt}, memory={memory}, delivery={delivery} · action={action}'**
   String qualityReviewsWorkbenchDashboardTokenRow(
     String targetType,
     String prompt,
@@ -7040,6 +7131,10 @@ abstract class AppLocalizations {
     String action,
   );
 
+  /// No description provided for @qualityReviewsTokenEfficiencyStatLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{targetType}: prompt={prompt}, base={base}, memory={memory} ({memoryShare}%, delivery={delivery}/{deliveryShare}%, hit={hitRate}%)'**
   String qualityReviewsTokenEfficiencyStatLine(
     String targetType,
     String prompt,
@@ -7051,6 +7146,10 @@ abstract class AppLocalizations {
     String hitRate,
   );
 
+  /// No description provided for @qualityReviewsTokenEfficiencySampleLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{date} {targetType}: prompt={prompt}, base={base}, memory={memory} ({memoryShare}%, {deliveryFlag})'**
   String qualityReviewsTokenEfficiencySampleLine(
     String date,
     String targetType,
@@ -7061,6 +7160,10 @@ abstract class AppLocalizations {
     String deliveryFlag,
   );
 
+  /// No description provided for @qualityReviewsWorkbenchStageGradeRow.
+  ///
+  /// In en, this message translates to:
+  /// **'{stage}: A{a}/B{b}/C{c}/D{d} · pass={passPct}%'**
   String qualityReviewsWorkbenchStageGradeRow(
     String stage,
     int a,
@@ -7070,16 +7173,32 @@ abstract class AppLocalizations {
     String passPct,
   );
 
+  /// No description provided for @qualityReviewsPreviewListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{targetType} · {source} · score={score}'**
   String qualityReviewsPreviewListTitle(
     String targetType,
     String source,
     String score,
   );
 
+  /// No description provided for @qualityReviewsPreviewDetailTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'target={targetId}'**
   String qualityReviewsPreviewDetailTarget(String targetId);
 
+  /// No description provided for @qualityReviewsPreviewDetailPassed.
+  ///
+  /// In en, this message translates to:
+  /// **'passed={passed}'**
   String qualityReviewsPreviewDetailPassed(String passed);
 
+  /// No description provided for @qualityReviewsPreviewDetailBadCase.
+  ///
+  /// In en, this message translates to:
+  /// **'bad_case'**
   String get qualityReviewsPreviewDetailBadCase;
 
   /// No description provided for @qualityReviewsNegativeConstraintReviewAndBadCase.
@@ -12169,7 +12288,7 @@ abstract class AppLocalizations {
   /// No description provided for @projectEditorNovelsWorkbenchImportRawPasteHelper.
   ///
   /// In en, this message translates to:
-  /// **'Auto-split by headings like “Chapter 12”, “第3回”, “第五集”.'**
+  /// **'Auto-split by headings like “Chapter 12”, “Episode 5”, or other chapter/act markers in your manuscript.'**
   String get projectEditorNovelsWorkbenchImportRawPasteHelper;
 
   /// No description provided for @projectEditorNovelsWorkbenchImportBatchSizeLabel.
@@ -13997,7 +14116,7 @@ abstract class AppLocalizations {
   /// No description provided for @storyboardEditorDeleteConfirmBody.
   ///
   /// In en, this message translates to:
-  /// **'确定要删除分镜 {id} 吗？'**
+  /// **'Delete shot {id}?'**
   String storyboardEditorDeleteConfirmBody(int id);
 
   /// No description provided for @storyboardEditorDialogCancel.
@@ -14069,7 +14188,7 @@ abstract class AppLocalizations {
   /// No description provided for @storyboardVideoWorkbenchTrackIdHelperKnown.
   ///
   /// In en, this message translates to:
-  /// **'已知轨道 ID：{ids}'**
+  /// **'Known track IDs: {ids}'**
   String storyboardVideoWorkbenchTrackIdHelperKnown(String ids);
 
   /// No description provided for @storyboardVideoWorkbenchNewTrackNameLabel.
@@ -14264,17 +14383,17 @@ abstract class AppLocalizations {
   /// **'Generation mode'**
   String get storyboardVideoWorkbenchModeLabel;
 
-  /// No description provided for @storyboardVideoWorkbenchModeFast.
-  ///
-  /// In en, this message translates to:
-  /// **'Fast'**
-  String get storyboardVideoWorkbenchModeFast;
-
   /// No description provided for @storyboardVideoWorkbenchModeStandard.
   ///
   /// In en, this message translates to:
   /// **'Standard'**
   String get storyboardVideoWorkbenchModeStandard;
+
+  /// No description provided for @storyboardVideoWorkbenchModeFast.
+  ///
+  /// In en, this message translates to:
+  /// **'Fast'**
+  String get storyboardVideoWorkbenchModeFast;
 
   /// No description provided for @storyboardVideoWorkbenchModelLabel.
   ///
@@ -18238,6 +18357,10 @@ abstract class AppLocalizations {
   /// **'Shot #{number}'**
   String shortVideoPreviewPlayerShotLabel(int number);
 
+  /// No description provided for @shortVideoPreviewPlayerPlaylistPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'({current}/{total})'**
   String shortVideoPreviewPlayerPlaylistPosition(int current, int total);
 
   /// No description provided for @shortVideoPreviewPlayerOverallProgress.
@@ -23810,6 +23933,10 @@ abstract class AppLocalizations {
   /// **'Unchanged'**
   String get shortVideoVersionComparisonDiffUnchanged;
 
+  /// No description provided for @shortVideoVersionComparisonReportSeparator.
+  ///
+  /// In en, this message translates to:
+  /// **'---'**
   String get shortVideoVersionComparisonReportSeparator;
 
   /// No description provided for @shortVideoVersionComparisonReportTitle.
@@ -25832,7 +25959,7 @@ abstract class AppLocalizations {
   /// No description provided for @accountExportActiveCount.
   ///
   /// In en, this message translates to:
-  /// **'进行中 {count}'**
+  /// **'In progress: {count}'**
   String accountExportActiveCount(int count);
 
   /// No description provided for @accountExportCopyLastSavedPath.
@@ -25850,7 +25977,7 @@ abstract class AppLocalizations {
   /// No description provided for @accountExportDefaultFileName.
   ///
   /// In en, this message translates to:
-  /// **'账户导出 #{numericTaskId}'**
+  /// **'Account export #{numericTaskId}'**
   String accountExportDefaultFileName(int numericTaskId);
 
   /// No description provided for @accountExportTaskLine.
@@ -25862,13 +25989,13 @@ abstract class AppLocalizations {
   /// No description provided for @accountExportSizeLine.
   ///
   /// In en, this message translates to:
-  /// **'大小 {size}'**
+  /// **'Size: {size}'**
   String accountExportSizeLine(String size);
 
   /// No description provided for @accountExportSavedSnack.
   ///
   /// In en, this message translates to:
-  /// **'已保存到 {path}'**
+  /// **'Saved to {path}'**
   String accountExportSavedSnack(String path);
 
   /// No description provided for @accountExportDownload.
@@ -25988,7 +26115,7 @@ abstract class AppLocalizations {
   /// No description provided for @adminConsoleChipMember.
   ///
   /// In en, this message translates to:
-  /// **'成员 {count}'**
+  /// **'Members: {count}'**
   String adminConsoleChipMember(int count);
 
   /// No description provided for @adminConsoleArchivedLabel.
@@ -26016,19 +26143,19 @@ abstract class AppLocalizations {
   /// No description provided for @adminConsoleChipScript.
   ///
   /// In en, this message translates to:
-  /// **'剧本 {count}'**
+  /// **'Scripts: {count}'**
   String adminConsoleChipScript(int count);
 
   /// No description provided for @adminConsoleChipAsset.
   ///
   /// In en, this message translates to:
-  /// **'资产 {count}'**
+  /// **'Assets: {count}'**
   String adminConsoleChipAsset(int count);
 
   /// No description provided for @adminConsoleChipJob.
   ///
   /// In en, this message translates to:
-  /// **'作业 {count}'**
+  /// **'Jobs: {count}'**
   String adminConsoleChipJob(int count);
 
   /// No description provided for @adminConsoleAclMemberItem.
@@ -26324,386 +26451,319 @@ abstract class AppLocalizations {
   /// **'Agent workspace production stages title'**
   String get agentWorkspaceProductionStagesTitle;
 
+  /// No description provided for @agentWorkspaceProductionStageFlowScriptPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Director plan'**
   String get agentWorkspaceProductionStageFlowScriptPlan;
 
+  /// No description provided for @agentWorkspaceProductionStageFlowAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'Asset prep'**
   String get agentWorkspaceProductionStageFlowAssets;
 
+  /// No description provided for @agentWorkspaceProductionStageFlowStoryboardTable.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard table'**
   String get agentWorkspaceProductionStageFlowStoryboardTable;
 
+  /// No description provided for @agentWorkspaceProductionStageFlowStoryboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard frames'**
   String get agentWorkspaceProductionStageFlowStoryboard;
 
+  /// No description provided for @agentWorkspaceProductionStageStatusSupervisionNeedsRework.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs rework'**
   String get agentWorkspaceProductionStageStatusSupervisionNeedsRework;
 
+  /// No description provided for @agentWorkspaceProductionStageStatusSupervisionPendingRevision.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs revision'**
   String get agentWorkspaceProductionStageStatusSupervisionPendingRevision;
 
+  /// No description provided for @agentWorkspaceProductionStageStatusSupervisionCanAdvance.
+  ///
+  /// In en, this message translates to:
+  /// **'Can advance'**
   String get agentWorkspaceProductionStageStatusSupervisionCanAdvance;
 
+  /// No description provided for @agentWorkspaceProductionStageStatusSupervisionApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
   String get agentWorkspaceProductionStageStatusSupervisionApproved;
 
+  /// No description provided for @agentWorkspaceProductionStageStatusPendingGenerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending generation'**
   String get agentWorkspaceProductionStageStatusPendingGenerate;
 
+  /// No description provided for @agentWorkspaceProductionStageStatusPendingRefineScriptPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs refinement'**
   String get agentWorkspaceProductionStageStatusPendingRefineScriptPlan;
 
+  /// No description provided for @agentWorkspaceProductionStageStatusPendingReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending review'**
   String get agentWorkspaceProductionStageStatusPendingReview;
 
+  /// No description provided for @agentWorkspaceProductionStageStatusSuggestRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh suggested'**
   String get agentWorkspaceProductionStageStatusSuggestRefresh;
 
+  /// No description provided for @agentWorkspaceProductionStageStatusPendingRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending read'**
   String get agentWorkspaceProductionStageStatusPendingRead;
 
+  /// No description provided for @agentWorkspaceProductionStageStatusPendingAssetPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending asset plan'**
   String get agentWorkspaceProductionStageStatusPendingAssetPlan;
 
+  /// No description provided for @agentWorkspaceProductionStageStatusNeedsAssetImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Images needed'**
   String get agentWorkspaceProductionStageStatusNeedsAssetImages;
 
+  /// No description provided for @agentWorkspaceProductionStageStatusAssetsReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Assets ready'**
   String get agentWorkspaceProductionStageStatusAssetsReady;
 
+  /// No description provided for @agentWorkspaceProductionStageStatusAssetsScopedFromRefs.
+  ///
+  /// In en, this message translates to:
+  /// **'Scoped from refs'**
   String get agentWorkspaceProductionStageStatusAssetsScopedFromRefs;
 
+  /// No description provided for @agentWorkspaceProductionStageStatusWaitingScriptPlanDepth.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for director plan depth'**
   String get agentWorkspaceProductionStageStatusWaitingScriptPlanDepth;
 
+  /// No description provided for @agentWorkspaceProductionStageStatusAssetsNarrowedFromScriptPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Narrowed from script plan'**
   String get agentWorkspaceProductionStageStatusAssetsNarrowedFromScriptPlan;
 
+  /// No description provided for @agentWorkspaceProductionStageStatusWaitingScriptPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for director plan'**
   String get agentWorkspaceProductionStageStatusWaitingScriptPlan;
 
+  /// No description provided for @agentWorkspaceProductionStageStatusStoryboardTableSampled.
+  ///
+  /// In en, this message translates to:
+  /// **'Table sampled'**
   String get agentWorkspaceProductionStageStatusStoryboardTableSampled;
 
+  /// No description provided for @agentWorkspaceProductionStageStatusStoryboardTableExpandRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand table read'**
   String get agentWorkspaceProductionStageStatusStoryboardTableExpandRead;
 
+  /// No description provided for @agentWorkspaceProductionStageStatusBackfillScriptPlanFromTable.
+  ///
+  /// In en, this message translates to:
+  /// **'Backfill director plan'**
   String get agentWorkspaceProductionStageStatusBackfillScriptPlanFromTable;
 
+  /// No description provided for @agentWorkspaceProductionStageStatusNeedsStoryboardFrames.
+  ///
+  /// In en, this message translates to:
+  /// **'Frames needed'**
   String get agentWorkspaceProductionStageStatusNeedsStoryboardFrames;
 
+  /// No description provided for @agentWorkspaceProductionStageStatusStoryboardFramesPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Frames pending'**
   String get agentWorkspaceProductionStageStatusStoryboardFramesPending;
 
+  /// No description provided for @agentWorkspaceProductionStageStatusStoryboardPendingVerify.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending verification'**
   String get agentWorkspaceProductionStageStatusStoryboardPendingVerify;
 
+  /// No description provided for @agentWorkspaceProductionStageStatusStoryboardComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete'**
   String get agentWorkspaceProductionStageStatusStoryboardComplete;
 
+  /// No description provided for @agentWorkspaceProductionStageStatusWaitingStoryboardTable.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for storyboard table'**
   String get agentWorkspaceProductionStageStatusWaitingStoryboardTable;
 
+  /// No description provided for @agentWorkspaceProductionStageStatusWaitingStoryboardTableCoverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for table coverage'**
   String get agentWorkspaceProductionStageStatusWaitingStoryboardTableCoverage;
 
+  /// No description provided for @agentWorkspaceProductionDomainReadFlow.
+  ///
+  /// In en, this message translates to:
+  /// **'Read flow'**
   String get agentWorkspaceProductionDomainReadFlow;
 
+  /// No description provided for @agentWorkspaceProductionDomainExpandStoryboardTable.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand storyboard table read'**
   String get agentWorkspaceProductionDomainExpandStoryboardTable;
 
+  /// No description provided for @agentWorkspaceProductionDomainReadScriptPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Read director plan'**
   String get agentWorkspaceProductionDomainReadScriptPlan;
 
+  /// No description provided for @agentWorkspaceProductionDomainRefreshScriptPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh director plan'**
   String get agentWorkspaceProductionDomainRefreshScriptPlan;
 
+  /// No description provided for @agentWorkspaceProductionDomainRereadAffectedAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'Reread affected assets'**
   String get agentWorkspaceProductionDomainRereadAffectedAssets;
 
+  /// No description provided for @agentWorkspaceProductionDomainRefreshAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh asset results'**
   String get agentWorkspaceProductionDomainRefreshAssets;
 
+  /// No description provided for @agentWorkspaceProductionDomainRereadPartialStoryboardTable.
+  ///
+  /// In en, this message translates to:
+  /// **'Reread partial table'**
   String get agentWorkspaceProductionDomainRereadPartialStoryboardTable;
 
+  /// No description provided for @agentWorkspaceProductionDomainRefreshStoryboardTable.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh storyboard table'**
   String get agentWorkspaceProductionDomainRefreshStoryboardTable;
 
+  /// No description provided for @agentWorkspaceProductionDomainRereadMissingFrames.
+  ///
+  /// In en, this message translates to:
+  /// **'Reread missing-frame status'**
   String get agentWorkspaceProductionDomainRereadMissingFrames;
 
+  /// No description provided for @agentWorkspaceProductionDomainRefreshStoryboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh storyboard results'**
   String get agentWorkspaceProductionDomainRefreshStoryboard;
 
+  /// No description provided for @agentWorkspaceProductionSubAgentRefineDirectorPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Refine director plan'**
   String get agentWorkspaceProductionSubAgentRefineDirectorPlan;
 
+  /// No description provided for @agentWorkspaceProductionSubAgentFillStoryboardTable.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill storyboard table'**
   String get agentWorkspaceProductionSubAgentFillStoryboardTable;
 
+  /// No description provided for @agentWorkspaceProductionSubAgentAdvanceStage.
+  ///
+  /// In en, this message translates to:
+  /// **'Advance stage'**
   String get agentWorkspaceProductionSubAgentAdvanceStage;
 
+  /// No description provided for @agentWorkspaceProductionBlockerHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Current blocker: {title} · {status}; {reason}'**
   String agentWorkspaceProductionBlockerHeadline(
-    String title,
-    String status,
-    String reason,
+    Object reason,
+    Object status,
+    Object title,
   );
 
+  /// No description provided for @agentWorkspaceProductionBlockerExpandTable.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand the key storyboard table window before advancing downstream.'**
   String get agentWorkspaceProductionBlockerExpandTable;
 
+  /// No description provided for @agentWorkspaceProductionBlockerExpandTableWithCoverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand the key storyboard table window first; {coverage}.'**
   String agentWorkspaceProductionBlockerExpandTableWithCoverage(
-    String coverage,
+    Object coverage,
   );
 
+  /// No description provided for @agentWorkspaceProductionBlockerRefineScriptPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'The director plan still needs clearer per-scene emotion and visual intent; refine scriptPlan before splitting the table.'**
   String get agentWorkspaceProductionBlockerRefineScriptPlan;
 
+  /// No description provided for @agentWorkspaceProductionBlockerExpandTableCoverage.
+  ///
+  /// In en, this message translates to:
+  /// **'The storyboard table has a base but coverage is thin; widen reads before storyboard generation.'**
   String get agentWorkspaceProductionBlockerExpandTableCoverage;
 
+  /// No description provided for @agentWorkspaceProductionBlockerExpandTableCoverageWithDigest.
+  ///
+  /// In en, this message translates to:
+  /// **'The storyboard table has a base but coverage is thin; {coverage}.'**
   String agentWorkspaceProductionBlockerExpandTableCoverageWithDigest(
-    String coverage,
+    Object coverage,
   );
 
-  String agentWorkspaceProductionAppliedRefineDirectorPlan(String title);
+  /// No description provided for @agentWorkspaceProductionAppliedRefineDirectorPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Applied stage action: {title}. Next, refine the director plan.'**
+  String agentWorkspaceProductionAppliedRefineDirectorPlan(Object title);
 
-  String agentWorkspaceProductionAppliedExpandStoryboardTable(String title);
+  /// No description provided for @agentWorkspaceProductionAppliedExpandStoryboardTable.
+  ///
+  /// In en, this message translates to:
+  /// **'Applied stage action: {title}. Next, expand the key storyboard table window.'**
+  String agentWorkspaceProductionAppliedExpandStoryboardTable(Object title);
 
-  String agentWorkspaceProductionAppliedStageGeneric(String title);
-
-  String get agentWorkspaceProductionFlowRecipeDiagnosisRefineIntentFirst;
-  String get agentWorkspaceProductionFlowRecipeDiagnosisExpandTableFirst;
-  String get agentWorkspaceProductionFlowRecipeDiagnosisCheapestFirst;
-  String get agentWorkspaceProductionSupervisionSummaryFallback;
-  String get agentWorkspaceProductionFlowRecipeSbGenRefreshTitle;
-  String get agentWorkspaceProductionFlowRecipeSbGenRereadTitle;
-  String get agentWorkspaceProductionFlowRecipeSbGenRefreshDetail;
-  String get agentWorkspaceProductionFlowRecipeContinueDirectorTitle;
-  String get agentWorkspaceProductionFlowRecipeContinueDirectorAfterSbDetail;
-  String get agentWorkspaceProductionFlowRecipeSbTableRefreshTitle;
-  String get agentWorkspaceProductionFlowRecipeSbTablePartialTitle;
-  String get agentWorkspaceProductionFlowRecipeSbTableRefreshDetail;
-  String get agentWorkspaceProductionFlowRecipeSbTableCrosscheckTitle;
-  String get agentWorkspaceProductionFlowRecipeSbTableCrosscheckDetailAll;
-  String get agentWorkspaceProductionFlowRecipeAssetsRefreshTitle;
-  String get agentWorkspaceProductionFlowRecipeAssetsRereadTitle;
-  String get agentWorkspaceProductionFlowRecipeAssetsRefreshDetail;
-  String get agentWorkspaceProductionFlowRecipeAssetsContinueSubTitle;
-  String get agentWorkspaceProductionFlowRecipeAssetsContinueSubDetail;
-  String get agentWorkspaceProductionFlowRecipeAssetsPlanFirstTitle;
-  String get agentWorkspaceProductionFlowRecipeAssetsPlanFirstDetail;
-  String get agentWorkspaceProductionFlowRecipeAssetsPlanFirstPrompt;
-  String get agentWorkspaceProductionFlowRecipeAssetsContinueGenTitle;
-  String get agentWorkspaceProductionFlowRecipeAssetsContinueGenDetailGeneric;
-  String get agentWorkspaceProductionFlowRecipeRefreshStoryboardNeedTitle;
-  String get agentWorkspaceProductionFlowRecipeRefreshStoryboardNeedDetail;
-  String get agentWorkspaceProductionFlowRecipeCheckStoryboardFlowTitle;
-  String get agentWorkspaceProductionFlowRecipeCheckStoryboardFlowDetail;
-  String get agentWorkspaceProductionFlowRecipeTidyDirectorPlanTitle;
-  String get agentWorkspaceProductionFlowRecipeTidyDirectorPlanDetail;
-  String get agentWorkspaceProductionFlowRecipeTidyDirectorPlanPrompt;
-  String get agentWorkspaceProductionFlowRecipeFirstStoryboardTitle;
-  String get agentWorkspaceProductionFlowRecipeFirstStoryboardDetail;
-  String get agentWorkspaceProductionFlowRecipeFirstStoryboardPrompt;
-  String get agentWorkspaceProductionFlowRecipeFillStoryboardFramesTitle;
-  String get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsTitle;
-  String get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailFromRefs;
-  String get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailNoIds;
-  String get agentWorkspaceProductionFlowRecipeCheckStoryboardTableTitle;
-  String get agentWorkspaceProductionFlowRecipeCheckStoryboardTableDetail;
-  String get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailReadyIds;
-  String
-  get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailReadyNoIds;
-  String get agentWorkspaceProductionFlowRecipeRefreshDirectorPlanTitle;
-  String get agentWorkspaceProductionFlowRecipeRefreshDirectorPlanDetail;
-  String get agentWorkspaceProductionFlowRecipeCreateDirectorPlanTitle;
-  String get agentWorkspaceProductionFlowRecipeCreateDirectorPlanDetail;
-  String get agentWorkspaceProductionFlowRecipeCreateDirectorPlanPrompt;
-  String get agentWorkspaceProductionFlowRecipeReviewDirectorPlanTitle;
-  String get agentWorkspaceProductionFlowRecipeReviewDirectorPlanDetail;
-  String get agentWorkspaceProductionFlowRecipeReviewDirectorPlanPrompt;
-  String get agentWorkspaceProductionFlowRecipeRereadScriptTitle;
-  String get agentWorkspaceProductionFlowRecipeCheckKeyAssetsTitle;
-  String get agentWorkspaceProductionFlowRecipeRefineSceneIntentTitle;
-  String get agentWorkspaceProductionFlowRecipePreviewStoryboardTableTitle;
-  String get agentWorkspaceProductionFlowRecipeRefineSceneIntentDetail;
-  String get agentWorkspaceProductionFlowRecipePreviewStoryboardTableDetail;
-  String get agentWorkspaceProductionFlowRecipeRefineSceneIntentPrompt;
-  String get agentWorkspaceProductionFlowRecipeCreateStoryboardTableTitle;
-  String get agentWorkspaceProductionFlowRecipeCreateStoryboardTableDetail;
-  String get agentWorkspaceProductionFlowRecipeCreateStoryboardTablePrompt;
-  String get agentWorkspaceProductionFlowRecipeReviewStoryboardTableTitle;
-  String get agentWorkspaceProductionFlowRecipeReviewStoryboardTableDetail;
-  String get agentWorkspaceProductionFlowRecipeReviewStoryboardTablePrompt;
-  String get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsTableRefs;
-  String get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsTableNoIds;
-  String get agentWorkspaceProductionFlowRecipeSwitchStoryboardResultsTitle;
-  String get agentWorkspaceProductionFlowRecipeSwitchStoryboardResultsDetailAll;
-  String get agentWorkspaceProductionFlowRecipeSampleStoryboardTableTitle;
-  String get agentWorkspaceProductionFlowRecipeSampleStoryboardTableDetail;
-  String get agentWorkspaceProductionFlowRecipeReviseDirectorPlanTitle;
-  String get agentWorkspaceProductionFlowRecipeRecheckAssetSupportTitle;
-  String get agentWorkspaceProductionFlowRecipeRecheckAssetSupportDetail;
-  String get agentWorkspaceProductionFlowRecipeVerifyAssetSupportTitle;
-  String get agentWorkspaceProductionFlowRecipeRereadDirectorPlanTitle;
-  String
-  get agentWorkspaceProductionFlowRecipeRereadDirectorPlanAfterAssetsDetail;
-  String get agentWorkspaceProductionFlowRecipeInspectStoryboardResultsTitle;
-  String get agentWorkspaceProductionFlowRecipeCompareStoryboardTableTitle;
-  String
-  get agentWorkspaceProductionFlowRecipeCompareStoryboardTableDetailGeneric;
-  String get agentWorkspaceProductionFlowRecipeRereadScriptNeedWindowDetail;
-  String get agentWorkspaceProductionFlowRecipeReviseStoryboardTableTitle;
-  String get agentWorkspaceProductionFlowRecipeSampleRereadStoryboardTableTitle;
-  String
-  get agentWorkspaceProductionFlowRecipeSampleRereadStoryboardTableDetailEmpty;
-  String
-  get agentWorkspaceProductionFlowRecipeSampleRereadStoryboardTableDetailFocused;
-  String get agentWorkspaceProductionFlowRecipeContinueStoryboardGenTitle;
-  String
-  get agentWorkspaceProductionFlowRecipeCompareStoryboardTableBeforeFillDetail;
-  String get agentWorkspaceProductionArgSuggestDeriveNameFallback;
-  String get agentWorkspaceProductionArgSuggestFillFirst;
-  String get agentWorkspaceProductionArgSuggestFillFirstThree;
-  String get agentWorkspaceProductionArgSuggestFillAll;
-  String get agentWorkspaceProductionFlowRecipeAssetsGenHadSummaryNote;
-  String agentWorkspaceProductionArgSuggestAddTo(String id);
-  String agentWorkspaceProductionArgSuggestDelete(String id);
-  String agentWorkspaceProductionFlowRecipeSbGenRereadDetail(String ids);
-  String agentWorkspaceProductionFlowRecipeSbTablePartialDetail(String ids);
-  String agentWorkspaceProductionFlowRecipeSbTableCrosscheckDetailFocused(
-    String ids,
-  );
-  String agentWorkspaceProductionFlowRecipeAssetsRereadDetail(String ids);
-  String agentWorkspaceProductionFlowRecipeAssetsGenDetailScoped(String scope);
-  String agentWorkspaceProductionFlowRecipeSbFillGapDetail(
-    String idTail,
-    String idsLabel,
-  );
-  String agentWorkspaceProductionFlowRecipeRereadScriptScriptPlanDetail(
-    String scriptWindow,
-  );
-  String agentWorkspaceProductionFlowRecipeCheckKeyAssetsDetailIds(
-    String assetScope,
-  );
-  String agentWorkspaceProductionFlowRecipeCheckKeyAssetsDetailNoIds(
-    String assetScope,
-  );
-  String agentWorkspaceProductionFlowRecipeContinueDirectorDetailIds(
-    String assetScope,
-  );
-  String agentWorkspaceProductionFlowRecipeContinueDirectorDetailNoIds(
-    String assetScope,
-  );
-  String agentWorkspaceProductionFlowRecipeContinueDirectorPromptIds(
-    String assetScope,
-  );
-  String agentWorkspaceProductionFlowRecipeContinueDirectorPromptNoIds(
-    String assetScope,
-  );
-  String agentWorkspaceProductionFlowRecipeRereadScriptRevisePlanDetail(
-    String scriptWindow,
-  );
-  String agentWorkspaceProductionFlowRecipeReviseDirectorPlanDetail(
-    String summary,
-  );
-  String agentWorkspaceProductionFlowRecipeReviseDirectorPlanPrompt(
-    String summary,
-  );
-  String agentWorkspaceProductionFlowRecipeVerifyAssetSupportDetail(
-    String assetScope,
-    String summary,
-  );
-  String agentWorkspaceProductionFlowRecipeInspectSbResultsDetail(
-    String focusClause,
-    String summary,
-  );
-  String agentWorkspaceProductionFlowRecipeCompareStoryboardTableDetailFocus(
-    String storyboardFocus,
-  );
-  String agentWorkspaceProductionFlowRecipeRereadScriptReviewDetail(
-    String reviewScope,
-  );
-  String agentWorkspaceProductionFlowRecipeInspectStoryboardResultsDetailScript(
-    String reviewScope,
-    String summary,
-  );
-  String agentWorkspaceProductionFlowRecipeSwitchStoryboardResultsDetailCount(
-    int count,
-  );
-  String
-  agentWorkspaceProductionFlowRecipeCompareStoryboardTableBeforeFillDetailFocus(
-    String storyboardFocus,
-  );
-  String agentWorkspaceProductionFlowRecipePromptStoryboardContinue(
-    String body,
-  );
-  String agentWorkspaceProductionFlowRecipePromptReviseStoryboardTable(
-    String body,
-  );
-  String agentWorkspaceProductionFlowRecipePromptStoryboardFromReview(
-    String body,
-  );
-  String agentWorkspaceProductionFlowRecipeShotCountTail(int count);
-  String
-  agentWorkspaceProductionFlowRecipeInspectStoryboardResultsDetailSummaryOnly(
-    String summary,
-  );
-  String
-  agentWorkspaceProductionFlowRecipeInspectStoryboardResultsDetailWithScope(
-    String reviewScope,
-    String summary,
-  );
-  String agentWorkspaceProductionFlowRecipeArgDeriveNameFromParent(String name);
-  String agentWorkspaceProductionAssetReviewPromptFocused(
-    int count,
-    String priority,
-  );
-  String agentWorkspaceProductionAssetReviewPromptScoped(
-    String priority,
-    String scope,
-  );
-  String agentWorkspaceProductionAssetReviewPromptPriority(String summary);
-  String agentWorkspaceProductionRecipeAppliedFollowRefine(String title);
-  String agentWorkspaceProductionRecipeAppliedFollowExpandTable(String title);
-  String agentWorkspaceProductionRecipeAppliedGeneric(String title);
-
-  String get agentWorkspaceDefaultScriptPrompt;
-  String get agentWorkspaceDefaultProductionPrompt;
-  String get agentWorkspaceScriptArgTemplateCurrentWindow;
-  String get agentWorkspaceScriptArgTemplateCurrentTail;
-  String get agentWorkspaceScriptArgTemplatePreviousEpisodeTail;
-  String get agentWorkspaceScriptArgTemplateStorySkeletonSlice;
-  String get agentWorkspaceScriptArgTemplateAdaptationSlice;
-  String get agentWorkspaceScriptArgTemplateNovelTextWindow;
-  String get agentWorkspaceScriptArgTemplateNovelEventsWindow;
-  String get agentWorkspaceScriptArgTemplateEmptyArgs;
-  String get agentWorkspaceProductionArgTemplateCompactRead;
-  String get agentWorkspaceProductionArgTemplateDirectorPlan;
-  String get agentWorkspaceProductionArgTemplateAssetSummary;
-  String get agentWorkspaceProductionArgTemplateIdList;
-  String get agentWorkspaceProductionArgTemplateStoryboardIds;
-  String agentWorkspaceFilledArgTemplate(String label);
-  String agentWorkspaceFilledCandidateArgs(String label);
-  String get agentWorkspaceScriptInterceptArgsMustBeJsonObject;
-  String get agentWorkspaceScriptInterceptArgsJsonParseFailed;
-  String agentWorkspaceScriptInterceptPromptRequired(String action);
-  String get agentWorkspaceScriptInterceptSelectDomainToolFirst;
-  String get agentWorkspaceScriptInterceptGetScriptContentNeedsScriptId;
-  String agentWorkspaceScriptSyncedScriptContentScriptId(String scriptId);
-  String get agentWorkspaceScriptInterceptSelectSubAgentToolFirst;
-  String get agentWorkspaceScriptActionRunWorkflow;
-  String get agentWorkspaceScriptActionRunSubAgent;
-  String get agentWorkspaceScriptTriggeredRunWorkflow;
-  String agentWorkspaceScriptTriggeredProbeContext(String tool);
-  String agentWorkspaceScriptTriggeredRunSubAgent(String tool);
-  String get agentWorkspaceScriptInterceptNoScriptWritebackResult;
-  String get agentWorkspaceScriptTriggeredWritebackScript;
-  String get agentWorkspaceScriptInterceptNoPlanDataWritebackResult;
-  String get agentWorkspaceScriptTriggeredWritebackPlanData;
-  String get agentWorkspaceScriptInterceptPlanWritebackNeedsPlanId;
-  String get agentWorkspaceScriptTriggeredPlanRowUpdateData;
-  String agentWorkspaceScriptAppliedRecipe(String title);
-  String agentWorkspaceScriptAppliedStage(String title);
-  String get agentWorkspaceScriptGuidedGenerateDraftPrompt;
-  String get agentWorkspaceScriptPresetPlotSkeletonLabel;
-  String get agentWorkspaceScriptPresetPlotSkeletonPrompt;
-  String get agentWorkspaceScriptPresetChapterAdaptLabel;
-  String get agentWorkspaceScriptPresetChapterAdaptPrompt;
-  String get agentWorkspaceProductionPresetDirectorPlanLabel;
-  String get agentWorkspaceProductionPresetDirectorPlanPrompt;
-  String get agentWorkspaceProductionPresetAssetInventoryLabel;
-  String get agentWorkspaceProductionPresetAssetInventoryPrompt;
-  String get agentWorkspaceProductionPresetStoryboardProgressLabel;
-  String get agentWorkspaceProductionPresetStoryboardProgressPrompt;
-  String get agentWorkspaceProductionPresetProductionReviewLabel;
-  String get agentWorkspaceProductionPresetProductionReviewPrompt;
-
-  String get agentWorkspaceProductionRunningRunWorkflow;
-  String get agentWorkspaceProductionRunningProbeTool;
-  String get agentWorkspaceProductionRunningSubAgent;
-  String get agentWorkspaceProductionRunningWriteback;
-  String get agentWorkspaceProductionInterceptArgsMustBeJsonObject;
-  String get agentWorkspaceProductionInterceptArgsJsonParseFailed;
-  String agentWorkspaceProductionInterceptPromptRequired(String action);
-  String get agentWorkspaceProductionInterceptSelectDomainToolFirst;
-  String get agentWorkspaceProductionInterceptGetFlowDataNeedsKey;
-  String agentWorkspaceProductionSyncedFlowDataKey(String key);
-  String get agentWorkspaceProductionInterceptSelectSubAgentToolFirst;
-  String get agentWorkspaceProductionActionRunWorkflow;
-  String get agentWorkspaceProductionActionRunSubAgent;
-  String get agentWorkspaceProductionTriggeredRunWorkflow;
-  String agentWorkspaceProductionTriggeredProbeContext(String detail);
-  String agentWorkspaceProductionTriggeredRunSubAgentTool(String tool);
-  String get agentWorkspaceProductionInterceptNoToolWriteback;
-  String get agentWorkspaceProductionInterceptWritebackNeedsFlowKey;
-  String agentWorkspaceProductionTriggeredWritebackFlow(String key);
-  String get agentWorkspaceProductionGuidedDeriveAssetsPrompt;
-  String get agentWorkspaceProductionGuidedStoryboardGenPrompt;
-  String get agentWorkspaceProductionGuidedDirectorPlanPrompt;
+  /// No description provided for @agentWorkspaceProductionAppliedStageGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Applied stage action: {title}'**
+  String agentWorkspaceProductionAppliedStageGeneric(Object title);
 
   /// No description provided for @agentWorkspaceProductionFlowChip.
   ///
@@ -26786,25 +26846,25 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionPromptRewriteFocus.
   ///
   /// In en, this message translates to:
-  /// **'改写焦点：{focus}'**
+  /// **'Rewrite focus: {focus}'**
   String agentWorkspaceProductionPromptRewriteFocus(String focus);
 
   /// No description provided for @agentWorkspaceProductionPromptVisualPacing.
   ///
   /// In en, this message translates to:
-  /// **'视觉节奏：{pacing}'**
+  /// **'Visual pacing: {pacing}'**
   String agentWorkspaceProductionPromptVisualPacing(String pacing);
 
   /// No description provided for @agentWorkspaceProductionPromptExtraConstraint.
   ///
   /// In en, this message translates to:
-  /// **'额外约束：{constraint}'**
+  /// **'Extra constraints: {constraint}'**
   String agentWorkspaceProductionPromptExtraConstraint(String constraint);
 
   /// No description provided for @agentWorkspaceProductionPromptAssetFocus.
   ///
   /// In en, this message translates to:
-  /// **'资产焦点：{scope}'**
+  /// **'Asset focus: {scope}'**
   String agentWorkspaceProductionPromptAssetFocus(String scope);
 
   /// No description provided for @agentWorkspaceProductionPromptExecutionOrder.
@@ -26828,13 +26888,13 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionReviewTarget.
   ///
   /// In en, this message translates to:
-  /// **'目标：{target}'**
+  /// **'Target: {target}'**
   String agentWorkspaceProductionReviewTarget(String target);
 
   /// No description provided for @agentWorkspaceProductionReviewGrade.
   ///
   /// In en, this message translates to:
-  /// **'等级：{grade}'**
+  /// **'Grade: {grade}'**
   String agentWorkspaceProductionReviewGrade(String grade);
 
   /// No description provided for @agentWorkspaceProductionReviewIssues.
@@ -26850,410 +26910,875 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionReviewNextStep.
   ///
   /// In en, this message translates to:
-  /// **'下一步：{nextAction}'**
+  /// **'Next step: {nextAction}'**
   String agentWorkspaceProductionReviewNextStep(String nextAction);
 
   /// No description provided for @agentWorkspaceProductionReviewAssetIds.
   ///
   /// In en, this message translates to:
-  /// **'资产：{assetIds}'**
+  /// **'Assets: {assetIds}'**
   String agentWorkspaceProductionReviewAssetIds(String assetIds);
 
   /// No description provided for @agentWorkspaceProductionReviewAssetScope.
   ///
   /// In en, this message translates to:
-  /// **'资产范围：{scope}'**
+  /// **'Asset scope: {scope}'**
   String agentWorkspaceProductionReviewAssetScope(String scope);
 
   /// No description provided for @agentWorkspaceProductionReviewStoryboardIds.
   ///
   /// In en, this message translates to:
-  /// **'镜头：{ids}'**
+  /// **'Shots: {ids}'**
   String agentWorkspaceProductionReviewStoryboardIds(String ids);
 
   /// No description provided for @agentWorkspaceProductionReviewSummary.
   ///
   /// In en, this message translates to:
-  /// **'结论：{summary}'**
+  /// **'Summary: {summary}'**
   String agentWorkspaceProductionReviewSummary(String summary);
 
   /// No description provided for @agentWorkspaceProductionShotLabel.
   ///
   /// In en, this message translates to:
-  /// **'镜头 {id}'**
+  /// **'Shot {id}'**
   String agentWorkspaceProductionShotLabel(int id);
 
   /// No description provided for @agentWorkspaceProductionSceneLabel.
   ///
   /// In en, this message translates to:
-  /// **'场景 {scene}'**
+  /// **'Scene {scene}'**
   String agentWorkspaceProductionSceneLabel(String scene);
 
+  /// No description provided for @agentWorkspaceProductionClauseJoiner.
+  ///
+  /// In en, this message translates to:
+  /// **', '**
   String get agentWorkspaceProductionClauseJoiner;
 
+  /// No description provided for @agentWorkspaceProductionSentenceJoinerSemicolon.
+  ///
+  /// In en, this message translates to:
+  /// **'; '**
   String get agentWorkspaceProductionSentenceJoinerSemicolon;
 
+  /// No description provided for @agentWorkspaceProductionAssetTypeRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Characters'**
   String get agentWorkspaceProductionAssetTypeRole;
 
+  /// No description provided for @agentWorkspaceProductionAssetTypeScene.
+  ///
+  /// In en, this message translates to:
+  /// **'Scenes'**
   String get agentWorkspaceProductionAssetTypeScene;
 
+  /// No description provided for @agentWorkspaceProductionAssetTypeTool.
+  ///
+  /// In en, this message translates to:
+  /// **'Props'**
   String get agentWorkspaceProductionAssetTypeTool;
 
-  String agentWorkspaceProductionAssetScopeIds(String ids);
+  /// No description provided for @agentWorkspaceProductionAssetScopeIds.
+  ///
+  /// In en, this message translates to:
+  /// **'Assets #{ids}'**
+  String agentWorkspaceProductionAssetScopeIds(Object ids);
 
-  String agentWorkspaceProductionAssetScopeTypes(String types);
+  /// No description provided for @agentWorkspaceProductionAssetScopeTypes.
+  ///
+  /// In en, this message translates to:
+  /// **'{types} assets'**
+  String agentWorkspaceProductionAssetScopeTypes(Object types);
 
+  /// No description provided for @agentWorkspaceProductionAssetScopeCompact.
+  ///
+  /// In en, this message translates to:
+  /// **'Compact asset read'**
   String get agentWorkspaceProductionAssetScopeCompact;
 
-  String agentWorkspaceProductionAssetFocusIdsShort(String visible);
+  /// No description provided for @agentWorkspaceProductionAssetFocusIdsShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Assets #{visible}'**
+  String agentWorkspaceProductionAssetFocusIdsShort(Object visible);
 
-  String agentWorkspaceProductionAssetFocusIdsMore(String visible, int total);
+  /// No description provided for @agentWorkspaceProductionAssetFocusIdsMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Assets #{visible} and {total} more'**
+  String agentWorkspaceProductionAssetFocusIdsMore(
+    Object total,
+    Object visible,
+  );
 
+  /// No description provided for @agentWorkspaceProductionAssetReadinessEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No assets loaded'**
   String get agentWorkspaceProductionAssetReadinessEmpty;
 
-  String agentWorkspaceProductionAssetReadinessRoots(int ready, int total);
+  /// No description provided for @agentWorkspaceProductionAssetReadinessRoots.
+  ///
+  /// In en, this message translates to:
+  /// **'Main assets {ready}/{total} ready'**
+  String agentWorkspaceProductionAssetReadinessRoots(
+    Object ready,
+    Object total,
+  );
 
-  String agentWorkspaceProductionAssetReadinessDeriveGap(int count);
+  /// No description provided for @agentWorkspaceProductionAssetReadinessDeriveGap.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} derived assets still need images'**
+  String agentWorkspaceProductionAssetReadinessDeriveGap(Object count);
 
-  String agentWorkspaceProductionAssetReadinessRootMissing(int count);
+  /// No description provided for @agentWorkspaceProductionAssetReadinessRootMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} main assets still need images'**
+  String agentWorkspaceProductionAssetReadinessRootMissing(Object count);
 
+  /// No description provided for @agentWorkspaceProductionStoryboardReadinessEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard list is empty'**
   String get agentWorkspaceProductionStoryboardReadinessEmpty;
 
+  /// No description provided for @agentWorkspaceProductionStoryboardReadinessFrames.
+  ///
+  /// In en, this message translates to:
+  /// **'Rendered frames {ready}/{needed} ready'**
   String agentWorkspaceProductionStoryboardReadinessFrames(
-    int ready,
-    int needed,
+    Object needed,
+    Object ready,
   );
 
-  String agentWorkspaceProductionStoryboardReadinessMissing(int count);
+  /// No description provided for @agentWorkspaceProductionStoryboardReadinessMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} shots still need frames'**
+  String agentWorkspaceProductionStoryboardReadinessMissing(Object count);
 
-  String agentWorkspaceProductionStoryboardReadinessTextOnly(int count);
+  /// No description provided for @agentWorkspaceProductionStoryboardReadinessTextOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} text-only shots'**
+  String agentWorkspaceProductionStoryboardReadinessTextOnly(Object count);
 
+  /// No description provided for @agentWorkspaceProductionStoryboardTableCoverageUnread.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard table not loaded yet'**
   String get agentWorkspaceProductionStoryboardTableCoverageUnread;
 
-  String agentWorkspaceProductionStoryboardTableCoverageRowsOnly(int count);
+  /// No description provided for @agentWorkspaceProductionStoryboardTableCoverageRowsOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard table: read {count} rows'**
+  String agentWorkspaceProductionStoryboardTableCoverageRowsOnly(Object count);
 
+  /// No description provided for @agentWorkspaceProductionStoryboardTableCoverageProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard table: read {sampled}/{total} rows'**
   String agentWorkspaceProductionStoryboardTableCoverageProgress(
-    int sampled,
-    int total,
+    Object sampled,
+    Object total,
   );
 
+  /// No description provided for @agentWorkspaceProductionStoryboardTableCoverageWithPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard table: read {sampled}/{total} rows; {remaining} rows still to expand'**
   String agentWorkspaceProductionStoryboardTableCoverageWithPending(
-    int sampled,
-    int total,
-    int remaining,
+    Object remaining,
+    Object sampled,
+    Object total,
   );
 
+  /// No description provided for @agentWorkspaceProductionPlanningScriptWindow.
+  ///
+  /// In en, this message translates to:
+  /// **'Script lines {start}–{end} (≤{maxChars} chars)'**
   String agentWorkspaceProductionPlanningScriptWindow(
-    int start,
-    int end,
-    int maxChars,
+    Object end,
+    Object maxChars,
+    Object start,
   );
 
-  String agentWorkspaceProductionStoryboardShotsHashShort(String ids);
+  /// No description provided for @agentWorkspaceProductionStoryboardShotsHashShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Shots #{ids}'**
+  String agentWorkspaceProductionStoryboardShotsHashShort(Object ids);
 
-  String agentWorkspaceProductionStoryboardShotsHashMore(String ids, int total);
+  /// No description provided for @agentWorkspaceProductionStoryboardShotsHashMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Shots #{ids} and {total} more'**
+  String agentWorkspaceProductionStoryboardShotsHashMore(
+    Object ids,
+    Object total,
+  );
 
+  /// No description provided for @agentWorkspaceProductionStoryboardScriptWindow.
+  ///
+  /// In en, this message translates to:
+  /// **'Script lines {start}–{end} (≤{maxChars} chars)'**
   String agentWorkspaceProductionStoryboardScriptWindow(
-    int start,
-    int end,
-    int maxChars,
+    Object end,
+    Object maxChars,
+    Object start,
   );
 
-  String agentWorkspaceProductionStoryboardTableRereadShots(String shots);
+  /// No description provided for @agentWorkspaceProductionStoryboardTableRereadShots.
+  ///
+  /// In en, this message translates to:
+  /// **'In the storyboard table, reread rows for {shots} only'**
+  String agentWorkspaceProductionStoryboardTableRereadShots(Object shots);
 
-  String agentWorkspaceProductionStoryboardReviewScriptGlue(String window);
+  /// No description provided for @agentWorkspaceProductionStoryboardReviewScriptGlue.
+  ///
+  /// In en, this message translates to:
+  /// **'For script, reread only {window}'**
+  String agentWorkspaceProductionStoryboardReviewScriptGlue(Object window);
 
-  String agentWorkspaceProductionPromptStoryboardShotCount(int count);
+  /// No description provided for @agentWorkspaceProductionPromptStoryboardShotCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus on these {count} shots first'**
+  String agentWorkspaceProductionPromptStoryboardShotCount(Object count);
 
+  /// No description provided for @agentWorkspaceProductionPromptStoryboardFallbackMissingFrames.
+  ///
+  /// In en, this message translates to:
+  /// **'Only fill shots that still lack rendered frames'**
   String get agentWorkspaceProductionPromptStoryboardFallbackMissingFrames;
 
+  /// No description provided for @agentWorkspaceProductionPromptStoryboardFallbackRevision.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix the storyboard-table issues called out in the latest review'**
   String get agentWorkspaceProductionPromptStoryboardFallbackRevision;
 
+  /// No description provided for @agentWorkspaceProductionPromptStoryboardContextEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'To verify references, first reread the same storyboardTable rows and the compact script window.'**
   String get agentWorkspaceProductionPromptStoryboardContextEmpty;
 
+  /// No description provided for @agentWorkspaceProductionPromptStoryboardContextTable.
+  ///
+  /// In en, this message translates to:
+  /// **'First reread storyboardTable rows for {tableFocus} only'**
   String agentWorkspaceProductionPromptStoryboardContextTable(
-    String tableFocus,
+    Object tableFocus,
   );
 
+  /// No description provided for @agentWorkspaceProductionPromptStoryboardContextScript.
+  ///
+  /// In en, this message translates to:
+  /// **'For script, reread only {scriptWindow}'**
   String agentWorkspaceProductionPromptStoryboardContextScript(
-    String scriptWindow,
+    Object scriptWindow,
   );
 
-  String agentWorkspaceProductionPromptStoryboardContextLead(String parts);
+  /// No description provided for @agentWorkspaceProductionPromptStoryboardContextLead.
+  ///
+  /// In en, this message translates to:
+  /// **'To verify references, {parts}.'**
+  String agentWorkspaceProductionPromptStoryboardContextLead(Object parts);
 
-  String agentWorkspaceProductionPromptStoryboardNote(String summary);
+  /// No description provided for @agentWorkspaceProductionPromptStoryboardNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note: {summary}'**
+  String agentWorkspaceProductionPromptStoryboardNote(Object summary);
 
-  String agentWorkspaceProductionPromptExecutionConstraint(String hint);
+  /// No description provided for @agentWorkspaceProductionPromptExecutionConstraint.
+  ///
+  /// In en, this message translates to:
+  /// **'Execution constraint: {hint}'**
+  String agentWorkspaceProductionPromptExecutionConstraint(Object hint);
 
+  /// No description provided for @agentWorkspaceProductionPromptProductionPrioritySummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Prioritize: {summary}'**
   String agentWorkspaceProductionPromptProductionPrioritySummary(
     String summary,
   );
 
+  /// No description provided for @agentWorkspaceProductionPromptScriptPlanExecutionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Carry forward from scriptPlan: {sections}. Keep emotional progression coherent; avoid blunt exposition.'**
   String agentWorkspaceProductionPromptScriptPlanExecutionHint(String sections);
 
+  /// No description provided for @agentWorkspaceProductionStageDetailStoryboardSupervisionCombined.
+  ///
+  /// In en, this message translates to:
+  /// **'{reviewDetail}{scope}'**
   String agentWorkspaceProductionStageDetailStoryboardSupervisionCombined(
     String reviewDetail,
     String scope,
   );
 
-  String agentWorkspaceProductionStagePromptAssetsGenerateNoIds(
-    String priority,
-    String execution,
-  );
-
+  /// No description provided for @agentWorkspaceProductionStagePromptAssetsGenerateFocused.
+  ///
+  /// In en, this message translates to:
+  /// **'Prioritize verifying and generating only these {count} assets; skip any that already have results and fill only remaining gaps; do not expand unrelated asset reads.{priority}{execution}'**
   String agentWorkspaceProductionStagePromptAssetsGenerateFocused(
     int count,
     String priority,
     String execution,
   );
 
-  String agentWorkspaceProductionPromptStoryboardGenBody(
-    String scope,
-    String contextHint,
-    String assetHint,
-    String note,
+  /// No description provided for @agentWorkspaceProductionStagePromptAssetsGenerateNoIds.
+  ///
+  /// In en, this message translates to:
+  /// **'Using the latest assets flow, decide which derived assets still lack images; generate only the minimum needed for real gaps; do not rerun finished work or expand reads to unrelated assets.{priority}{execution}'**
+  String agentWorkspaceProductionStagePromptAssetsGenerateNoIds(
+    String priority,
     String execution,
   );
 
-  String agentWorkspaceProductionPromptStoryboardTableRevisionBody(
-    String scope,
-    String contextHint,
-    String assetHint,
-    String solve,
+  /// No description provided for @agentWorkspaceProductionPromptStoryboardGenBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{scope}; do not rerun finished shots or shouldGenerateImage=false rows. {contextHint}{assetHint}{note}{execution}'**
+  String agentWorkspaceProductionPromptStoryboardGenBody(
+    Object assetHint,
+    Object contextHint,
+    Object execution,
+    Object note,
+    Object scope,
   );
 
-  String agentWorkspaceProductionPromptStoryboardTableSolve(String summary);
+  /// No description provided for @agentWorkspaceProductionPromptStoryboardTableRevisionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{scope} storyboardTable rows; keep other rows unchanged. {contextHint}{assetHint}{solve}'**
+  String agentWorkspaceProductionPromptStoryboardTableRevisionBody(
+    Object assetHint,
+    Object contextHint,
+    Object scope,
+    Object solve,
+  );
 
-  String agentWorkspaceProductionPromptStoryboardAssetHint(int count);
+  /// No description provided for @agentWorkspaceProductionPromptStoryboardTableSolve.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix first: {summary}'**
+  String agentWorkspaceProductionPromptStoryboardTableSolve(Object summary);
 
+  /// No description provided for @agentWorkspaceProductionPromptStoryboardAssetHint.
+  ///
+  /// In en, this message translates to:
+  /// **'If you need to verify art, only review these {count} linked assets.'**
+  String agentWorkspaceProductionPromptStoryboardAssetHint(Object count);
+
+  /// No description provided for @agentWorkspaceProductionStageReviewSummaryFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow the review outcome for the next step.'**
   String get agentWorkspaceProductionStageReviewSummaryFallback;
 
+  /// No description provided for @agentWorkspaceProductionStageReviewBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Review grade {grade}: {severe} severe · {medium} medium · {minor} minor. {summary}{storyboardScope}{assetScope}'**
   String agentWorkspaceProductionStageReviewBody(
-    String grade,
-    int severe,
-    int medium,
-    int minor,
-    String summary,
-    String storyboardScope,
-    String assetScope,
+    Object assetScope,
+    Object grade,
+    Object medium,
+    Object minor,
+    Object severe,
+    Object storyboardScope,
+    Object summary,
   );
 
-  String agentWorkspaceProductionStageReviewStoryboardScope(String scope);
+  /// No description provided for @agentWorkspaceProductionStageReviewStoryboardScope.
+  ///
+  /// In en, this message translates to:
+  /// **' Local scope: {scope}.'**
+  String agentWorkspaceProductionStageReviewStoryboardScope(Object scope);
 
-  String agentWorkspaceProductionStageReviewAssetScope(String scope);
+  /// No description provided for @agentWorkspaceProductionStageReviewAssetScope.
+  ///
+  /// In en, this message translates to:
+  /// **' Asset scope: {scope}.'**
+  String agentWorkspaceProductionStageReviewAssetScope(Object scope);
 
-  String agentWorkspaceProductionStageDetailScriptPlanSectionLine(int count);
+  /// No description provided for @agentWorkspaceProductionStageDetailScriptPlanSectionLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}/6 planning dimensions covered, '**
+  String agentWorkspaceProductionStageDetailScriptPlanSectionLine(Object count);
 
-  String agentWorkspaceProductionStagePromptReviseScriptPlan(String summary);
+  /// No description provided for @agentWorkspaceProductionStagePromptReviseScriptPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Revise scriptPlan using the latest review notes; prioritize: {summary}'**
+  String agentWorkspaceProductionStagePromptReviseScriptPlan(Object summary);
 
+  /// No description provided for @agentWorkspaceProductionStageDetailScriptPlanEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'scriptPlan is still empty—produce a director plan before advancing assets and storyboard.'**
   String get agentWorkspaceProductionStageDetailScriptPlanEmpty;
 
+  /// No description provided for @agentWorkspaceProductionStagePromptScriptPlanEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate a director plan from the current production context and list execution priorities.'**
   String get agentWorkspaceProductionStagePromptScriptPlanEmpty;
 
+  /// No description provided for @agentWorkspaceProductionStageDetailScriptPlanRefine.
+  ///
+  /// In en, this message translates to:
+  /// **'scriptPlan loaded; {sectionLine}about {chars} characters. Downstream is still gated—add at least 3 planning dimensions before review and the main assets/storyboard chain.'**
   String agentWorkspaceProductionStageDetailScriptPlanRefine(
-    String sectionLine,
-    int chars,
+    Object chars,
+    Object sectionLine,
   );
 
+  /// No description provided for @agentWorkspaceProductionStagePromptScriptPlanRefine.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep refining scriptPlan until at least 3 planning dimensions are filled in, including emotional progression, asset dependencies, and shot intent.'**
   String get agentWorkspaceProductionStagePromptScriptPlanRefine;
 
+  /// No description provided for @agentWorkspaceProductionStageDetailScriptPlanReview.
+  ///
+  /// In en, this message translates to:
+  /// **'scriptPlan loaded; {sectionLine}about {chars} characters. During review, first reread only {scriptWindow}, then supervise the director plan before advancing assets and storyboard.'**
   String agentWorkspaceProductionStageDetailScriptPlanReview(
-    String sectionLine,
-    int chars,
-    String scriptWindow,
+    Object chars,
+    Object scriptWindow,
+    Object sectionLine,
   );
 
+  /// No description provided for @agentWorkspaceProductionStagePromptScriptPlanReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Review the current director plan for plot coverage, asset fit, and pacing.'**
   String get agentWorkspaceProductionStagePromptScriptPlanReview;
 
+  /// No description provided for @agentWorkspaceProductionStageDetailScriptPlanRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'The director plan just changed or is still processing—refresh scriptPlan and confirm the latest content before advancing downstream.'**
   String get agentWorkspaceProductionStageDetailScriptPlanRefresh;
 
+  /// No description provided for @agentWorkspaceProductionStageDetailScriptPlanPendingRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Read scriptPlan first to confirm production priorities and execution order.'**
   String get agentWorkspaceProductionStageDetailScriptPlanPendingRead;
 
+  /// No description provided for @agentWorkspaceProductionStageDetailAssetsAfterReview.
+  ///
+  /// In en, this message translates to:
+  /// **'{reviewDetail} Verify only {assetScope}, then return to scriptPlan to finalize the director plan.'**
   String agentWorkspaceProductionStageDetailAssetsAfterReview(
-    String reviewDetail,
-    String assetScope,
+    Object assetScope,
+    Object reviewDetail,
   );
 
+  /// No description provided for @agentWorkspaceProductionStageDetailAssetsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'assets is empty—plan derived assets and fill a minimal viable set.'**
   String get agentWorkspaceProductionStageDetailAssetsEmpty;
 
+  /// No description provided for @agentWorkspaceProductionStagePromptAssetsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan the smallest viable derived-asset set for the current empty assets flow and explain priorities.'**
   String get agentWorkspaceProductionStagePromptAssetsEmpty;
 
+  /// No description provided for @agentWorkspaceProductionStageDetailAssetsMissingGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'{total} assets total; {missing} still lack rendered images—continue asset generation. {readiness}'**
   String agentWorkspaceProductionStageDetailAssetsMissingGeneric(
-    int total,
-    int missing,
-    String readiness,
+    Object missing,
+    Object readiness,
+    Object total,
   );
 
+  /// No description provided for @agentWorkspaceProductionStageDetailAssetsMissingFocused.
+  ///
+  /// In en, this message translates to:
+  /// **'{total} assets total; {pendingScope} still lack images—prioritize only this batch to save tokens. {readiness}'**
   String agentWorkspaceProductionStageDetailAssetsMissingFocused(
-    int total,
-    String pendingScope,
-    String readiness,
+    Object pendingScope,
+    Object readiness,
+    Object total,
   );
 
+  /// No description provided for @agentWorkspaceProductionStageDetailAssetsReady.
+  ///
+  /// In en, this message translates to:
+  /// **'All {total} assets have images—continue checking storyboard and the director plan. {readiness}'**
   String agentWorkspaceProductionStageDetailAssetsReady(
-    int total,
-    String readiness,
+    Object readiness,
+    Object total,
   );
 
-  String agentWorkspaceProductionStageDetailAssetsScopedTable(int count);
+  /// No description provided for @agentWorkspaceProductionStageDetailAssetsScopedTable.
+  ///
+  /// In en, this message translates to:
+  /// **'The storyboard-table window references {count} assets—verify this batch first to save tokens.'**
+  String agentWorkspaceProductionStageDetailAssetsScopedTable(Object count);
 
-  String agentWorkspaceProductionStageDetailAssetsScopedStoryboard(int count);
+  /// No description provided for @agentWorkspaceProductionStageDetailAssetsScopedStoryboard.
+  ///
+  /// In en, this message translates to:
+  /// **'The storyboard window references {count} assets—verify this batch first to save tokens.'**
+  String agentWorkspaceProductionStageDetailAssetsScopedStoryboard(
+    Object count,
+  );
 
+  /// No description provided for @agentWorkspaceProductionStageDetailAssetsWaitScriptDepth.
+  ///
+  /// In en, this message translates to:
+  /// **'scriptPlan exists but is not deep enough yet—finish key director-plan dimensions before planning assets to avoid wasted prep.'**
   String get agentWorkspaceProductionStageDetailAssetsWaitScriptDepth;
 
+  /// No description provided for @agentWorkspaceProductionStageDetailAssetsNarrowedScriptPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Tightened reads from scriptPlan to {scope}; verify this batch first to save tokens; widen only if information is still insufficient.'**
   String agentWorkspaceProductionStageDetailAssetsNarrowedScriptPlan(
-    String scope,
+    Object scope,
   );
 
+  /// No description provided for @agentWorkspaceProductionStageDetailAssetsWaitScript.
+  ///
+  /// In en, this message translates to:
+  /// **'Read or generate scriptPlan before planning assets so prep stays aligned with director pacing and rewrite constraints.'**
   String get agentWorkspaceProductionStageDetailAssetsWaitScript;
 
+  /// No description provided for @agentWorkspaceProductionStageDetailAssetsRefreshNarrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Asset generation just ran—reread the affected assets first, confirm results, then decide whether to widen reads.'**
   String get agentWorkspaceProductionStageDetailAssetsRefreshNarrow;
 
+  /// No description provided for @agentWorkspaceProductionStageDetailAssetsRefreshWide.
+  ///
+  /// In en, this message translates to:
+  /// **'An asset action just ran—refresh asset results, confirm the latest state, then decide whether to keep filling gaps.'**
   String get agentWorkspaceProductionStageDetailAssetsRefreshWide;
 
+  /// No description provided for @agentWorkspaceProductionStageDetailAssetsPendingRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Read the assets flow to decide whether to continue derived assets or generation.'**
   String get agentWorkspaceProductionStageDetailAssetsPendingRead;
 
+  /// No description provided for @agentWorkspaceProductionStagePromptStoryboardTableReviseLead.
+  ///
+  /// In en, this message translates to:
+  /// **'Revise storyboardTable using the latest review notes. {tail}'**
   String agentWorkspaceProductionStagePromptStoryboardTableReviseLead(
-    String tail,
+    Object tail,
   );
 
+  /// No description provided for @agentWorkspaceProductionStageDetailStoryboardTableEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'storyboardTable is empty—add a structured shot list first.'**
   String get agentWorkspaceProductionStageDetailStoryboardTableEmpty;
 
+  /// No description provided for @agentWorkspaceProductionStagePromptStoryboardTableEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Produce a structured storyboardTable with clear fields for safe writeback.'**
   String get agentWorkspaceProductionStagePromptStoryboardTableEmpty;
 
+  /// No description provided for @agentWorkspaceProductionStageDetailStoryboardTableString.
+  ///
+  /// In en, this message translates to:
+  /// **'storyboardTable has content{rowDigest}about {chars} characters—supervise the table before pushing storyboard renders. {coverage}'**
   String agentWorkspaceProductionStageDetailStoryboardTableString(
-    String rowDigest,
-    int chars,
-    String coverage,
+    Object chars,
+    Object coverage,
+    Object rowDigest,
   );
 
-  String agentWorkspaceProductionStageDigestStoryboardTableRows(int rowCount);
+  /// No description provided for @agentWorkspaceProductionStageDigestStoryboardTableRows.
+  ///
+  /// In en, this message translates to:
+  /// **'{rowCount} rows'**
+  String agentWorkspaceProductionStageDigestStoryboardTableRows(
+    Object rowCount,
+  );
 
+  /// No description provided for @agentWorkspaceProductionStageDigestStoryboardTableAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'{assetCount} linked assets'**
   String agentWorkspaceProductionStageDigestStoryboardTableAssets(
-    int assetCount,
+    Object assetCount,
   );
 
+  /// No description provided for @agentWorkspaceProductionStageDetailStoryboardTableWindowReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Window-read {sampled}/{total} key columns—continue reviewing or revising storyboardTable. {coverage}'**
   String agentWorkspaceProductionStageDetailStoryboardTableWindowReady(
-    int sampled,
-    int total,
-    String coverage,
+    Object coverage,
+    Object sampled,
+    Object total,
   );
 
+  /// No description provided for @agentWorkspaceProductionStageDetailStoryboardTableWindowBackfill.
+  ///
+  /// In en, this message translates to:
+  /// **'Window-read {sampled}/{total} key columns, but scriptPlan still lacks clear per-scene emotion or visual intent—backfill the director plan before widening storyboardTable reads. {coverage}'**
   String agentWorkspaceProductionStageDetailStoryboardTableWindowBackfill(
-    int sampled,
-    int total,
-    String coverage,
+    Object coverage,
+    Object sampled,
+    Object total,
   );
 
+  /// No description provided for @agentWorkspaceProductionStageDetailStoryboardTableWindowExpand.
+  ///
+  /// In en, this message translates to:
+  /// **'Window-read {sampled}/{total} key columns, but coverage is still thin—expand or fill critical rows before storyboard. {coverage}'**
   String agentWorkspaceProductionStageDetailStoryboardTableWindowExpand(
-    int sampled,
-    int total,
-    String coverage,
+    Object coverage,
+    Object sampled,
+    Object total,
   );
 
+  /// No description provided for @agentWorkspaceProductionStagePromptStoryboardTableReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Review the storyboard table for coverage, asset links, and shot granularity.'**
   String get agentWorkspaceProductionStagePromptStoryboardTableReview;
 
+  /// No description provided for @agentWorkspaceProductionStageDetailStoryboardTableWaitScript.
+  ///
+  /// In en, this message translates to:
+  /// **'Read or generate scriptPlan before splitting storyboardTable so the shot list stays anchored to the director plan.'**
   String get agentWorkspaceProductionStageDetailStoryboardTableWaitScript;
 
+  /// No description provided for @agentWorkspaceProductionStageDetailStoryboardTableWaitScriptDepth.
+  ///
+  /// In en, this message translates to:
+  /// **'scriptPlan exists but is not deep enough yet—finish key director-plan dimensions before splitting storyboardTable.'**
   String get agentWorkspaceProductionStageDetailStoryboardTableWaitScriptDepth;
 
+  /// No description provided for @agentWorkspaceProductionStageDetailStoryboardTableRefreshWide.
+  ///
+  /// In en, this message translates to:
+  /// **'The storyboard table just changed or is still processing—refresh it before deciding whether to keep reviewing or revising.'**
   String get agentWorkspaceProductionStageDetailStoryboardTableRefreshWide;
 
+  /// No description provided for @agentWorkspaceProductionStageDetailStoryboardTableRefreshNarrow.
+  ///
+  /// In en, this message translates to:
+  /// **'The storyboard table just changed—reread storyboardTable rows for shots #{ids} only.'**
   String agentWorkspaceProductionStageDetailStoryboardTableRefreshNarrow(
-    String ids,
+    Object ids,
   );
 
+  /// No description provided for @agentWorkspaceProductionStageDetailStoryboardTablePendingRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Read storyboardTable when you need to review the structured shot list.'**
   String get agentWorkspaceProductionStageDetailStoryboardTablePendingRead;
 
+  /// No description provided for @agentWorkspaceProductionStageDetailStoryboardSupervisionGenerateScopeEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Read missing-frame status with a compact storyboard fetch before doing the smallest possible fill-in.'**
   String
   get agentWorkspaceProductionStageDetailStoryboardSupervisionGenerateScopeEmpty;
 
+  /// No description provided for @agentWorkspaceProductionStageDetailStoryboardSupervisionCheckScopeEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Read a compact storyboard snapshot first to see which shots the review targets.'**
   String
   get agentWorkspaceProductionStageDetailStoryboardSupervisionCheckScopeEmpty;
 
+  /// No description provided for @agentWorkspaceProductionStageDetailStoryboardSupervisionScoped.
+  ///
+  /// In en, this message translates to:
+  /// **'The review targets {count} shots—focus on this storyboard batch first to save tokens.{reviewScope}'**
   String agentWorkspaceProductionStageDetailStoryboardSupervisionScoped(
-    int count,
-    String reviewScope,
+    Object count,
+    Object reviewScope,
   );
 
+  /// No description provided for @agentWorkspaceProductionSupervisionReviewScopeAppend.
+  ///
+  /// In en, this message translates to:
+  /// **' {reviewScope}.'**
   String agentWorkspaceProductionSupervisionReviewScopeAppend(
     String reviewScope,
   );
 
+  /// No description provided for @agentWorkspaceProductionStagePromptStoryboardSupervisionGenerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue storyboard work from the latest review. {tail}'**
   String agentWorkspaceProductionStagePromptStoryboardSupervisionGenerate(
-    String tail,
+    Object tail,
   );
 
+  /// No description provided for @agentWorkspaceProductionStageDetailStoryboardEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'storyboard is empty—generate a first-pass storyboard.'**
   String get agentWorkspaceProductionStageDetailStoryboardEmpty;
 
+  /// No description provided for @agentWorkspaceProductionStagePromptStoryboardEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate a first-pass storyboard from the current production context with a minimal viable shot set.'**
   String get agentWorkspaceProductionStagePromptStoryboardEmpty;
 
+  /// No description provided for @agentWorkspaceProductionStageDetailStoryboardMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'{needImageCount} shots need renders; {missingCount} still lack images (#{idsPreview}{idsTail}){skippedClause}{reviewClause} {readiness}'**
   String agentWorkspaceProductionStageDetailStoryboardMissing(
-    int needImageCount,
-    int missingCount,
-    String idsPreview,
-    String idsTail,
-    String skippedClause,
-    String reviewClause,
-    String readiness,
+    Object idsPreview,
+    Object idsTail,
+    Object missingCount,
+    Object needImageCount,
+    Object readiness,
+    Object reviewClause,
+    Object skippedClause,
   );
 
-  String agentWorkspaceProductionStageDetailStoryboardMissingIdsTail(int total);
+  /// No description provided for @agentWorkspaceProductionStageDetailStoryboardMissingIdsTail.
+  ///
+  /// In en, this message translates to:
+  /// **' ({total} shots total)'**
+  String agentWorkspaceProductionStageDetailStoryboardMissingIdsTail(
+    Object total,
+  );
 
-  String agentWorkspaceProductionStageDetailStoryboardMissingSkipped(int count);
+  /// No description provided for @agentWorkspaceProductionStageDetailStoryboardMissingSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'; {count} text-only shots are intentionally image-free'**
+  String agentWorkspaceProductionStageDetailStoryboardMissingSkipped(
+    Object count,
+  );
 
+  /// No description provided for @agentWorkspaceProductionStageDetailStoryboardMissingReview.
+  ///
+  /// In en, this message translates to:
+  /// **' {reviewScope}'**
   String agentWorkspaceProductionStageDetailStoryboardMissingReview(
-    String reviewScope,
+    Object reviewScope,
   );
 
-  String agentWorkspaceProductionStagePromptStoryboardContinue(String tail);
+  /// No description provided for @agentWorkspaceProductionStagePromptStoryboardContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue storyboard work. {tail}'**
+  String agentWorkspaceProductionStagePromptStoryboardContinue(Object tail);
 
+  /// No description provided for @agentWorkspaceProductionStageDetailStoryboardComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'{needImageCount} shots need renders; all required frames are present{skippedClause}, ready to write back or continue the director plan. {readiness}'**
   String agentWorkspaceProductionStageDetailStoryboardComplete(
-    int needImageCount,
-    String skippedClause,
-    String readiness,
+    Object needImageCount,
+    Object readiness,
+    Object skippedClause,
   );
 
+  /// No description provided for @agentWorkspaceProductionStageDetailStoryboardCompleteSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'; {count} text-only shots are intentionally image-free'**
   String agentWorkspaceProductionStageDetailStoryboardCompleteSkipped(
-    int count,
+    Object count,
   );
 
+  /// No description provided for @agentWorkspaceProductionStageDetailStoryboardWaitScript.
+  ///
+  /// In en, this message translates to:
+  /// **'Read or generate scriptPlan before storyboard so you do not render shots while emotion and intent are still unsettled.'**
   String get agentWorkspaceProductionStageDetailStoryboardWaitScript;
 
+  /// No description provided for @agentWorkspaceProductionStageDetailStoryboardWaitScriptDepth.
+  ///
+  /// In en, this message translates to:
+  /// **'scriptPlan exists but is not deep enough yet—deepen the director plan before storyboard so emotion and shot intent are not still drifting when you render.'**
   String get agentWorkspaceProductionStageDetailStoryboardWaitScriptDepth;
 
+  /// No description provided for @agentWorkspaceProductionStageDetailStoryboardWaitTable.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill storyboardTable before storyboard so shot splits and asset links are stable before rendering.'**
   String get agentWorkspaceProductionStageDetailStoryboardWaitTable;
 
+  /// No description provided for @agentWorkspaceProductionStageDetailStoryboardBackfillFromTable.
+  ///
+  /// In en, this message translates to:
+  /// **'storyboardTable has a base, but scriptPlan still needs clearer per-scene emotion or visual intent—refine the director plan, widen the table read, then advance storyboard.'**
   String get agentWorkspaceProductionStageDetailStoryboardBackfillFromTable;
 
+  /// No description provided for @agentWorkspaceProductionStageDetailStoryboardWaitTableCoverage.
+  ///
+  /// In en, this message translates to:
+  /// **'storyboardTable has a base but coverage is still thin—expand critical rows before storyboard to avoid rendering while shot splits are still unstable.'**
   String get agentWorkspaceProductionStageDetailStoryboardWaitTableCoverage;
 
+  /// No description provided for @agentWorkspaceProductionStageDetailStoryboardRefreshGenWide.
+  ///
+  /// In en, this message translates to:
+  /// **'A storyboard action just ran—refresh storyboard results before deciding whether to keep filling frames or write back.'**
   String get agentWorkspaceProductionStageDetailStoryboardRefreshGenWide;
 
+  /// No description provided for @agentWorkspaceProductionStageDetailStoryboardRefreshGenNarrow.
+  ///
+  /// In en, this message translates to:
+  /// **'A storyboard action just ran—reread missing-frame status for shots #{ids} first.'**
   String agentWorkspaceProductionStageDetailStoryboardRefreshGenNarrow(
-    String ids,
+    Object ids,
   );
 
+  /// No description provided for @agentWorkspaceProductionStageDetailStoryboardRefreshOther.
+  ///
+  /// In en, this message translates to:
+  /// **'A storyboard action just ran—refresh storyboard results before deciding whether to write back.'**
   String get agentWorkspaceProductionStageDetailStoryboardRefreshOther;
 
+  /// No description provided for @agentWorkspaceProductionStageDetailStoryboardPendingRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Read storyboard to decide whether to keep filling frames or write results back.'**
   String get agentWorkspaceProductionStageDetailStoryboardPendingRead;
 
   /// No description provided for @agentWorkspaceProductionDurationLabel.
   ///
   /// In en, this message translates to:
-  /// **'时长 {duration}'**
+  /// **'Duration: {duration}'**
   String agentWorkspaceProductionDurationLabel(String duration);
 
   /// No description provided for @agentWorkspaceProductionAssetsLabel.
   ///
   /// In en, this message translates to:
-  /// **'资产 {assets}'**
+  /// **'Assets: {assets}'**
   String agentWorkspaceProductionAssetsLabel(String assets);
 
   /// No description provided for @agentWorkspaceProductionStateLabel.
   ///
   /// In en, this message translates to:
-  /// **'状态 {state}'**
+  /// **'State: {state}'**
   String agentWorkspaceProductionStateLabel(String state);
 
   /// No description provided for @agentWorkspaceProductionModeTextOnly.
@@ -27271,13 +27796,13 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionResultMissingImage.
   ///
   /// In en, this message translates to:
-  /// **'缺少图片 {assets}'**
+  /// **'Missing images: {assets}'**
   String agentWorkspaceProductionResultMissingImage(String assets);
 
   /// No description provided for @agentWorkspaceProductionContextFromTool.
   ///
   /// In en, this message translates to:
-  /// **'来自工具 {toolName}'**
+  /// **'From tool {toolName}'**
   String agentWorkspaceProductionContextFromTool(String toolName);
 
   /// No description provided for @agentWorkspaceProductionContextDerivedRewrite.
@@ -27319,19 +27844,19 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceSummaryReturnedList.
   ///
   /// In en, this message translates to:
-  /// **'返回列表 {count} 项'**
+  /// **'Returned list ({count} items)'**
   String agentWorkspaceSummaryReturnedList(int count);
 
   /// No description provided for @agentWorkspaceSummaryReturnedText.
   ///
   /// In en, this message translates to:
-  /// **'返回文本 {chars} 字'**
+  /// **'Returned text ({chars} chars)'**
   String agentWorkspaceSummaryReturnedText(int chars);
 
   /// No description provided for @agentWorkspaceProductionSummaryItems.
   ///
   /// In en, this message translates to:
-  /// **'返回 items {count} 项'**
+  /// **'Returned items: {count}'**
   String agentWorkspaceProductionSummaryItems(int count);
 
   /// No description provided for @agentWorkspaceProductionSummaryReviewHeadline.
@@ -27362,19 +27887,19 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionSummaryFocusedAssetScope.
   ///
   /// In en, this message translates to:
-  /// **'聚焦资产范围 {scope}'**
+  /// **'Focused asset scope: {scope}'**
   String agentWorkspaceProductionSummaryFocusedAssetScope(String scope);
 
   /// No description provided for @agentWorkspaceProductionSummaryFocusedShots.
   ///
   /// In en, this message translates to:
-  /// **'聚焦镜头 {count} 项'**
+  /// **'Focused shots: {count}'**
   String agentWorkspaceProductionSummaryFocusedShots(int count);
 
   /// No description provided for @agentWorkspaceSummaryReturnedObjectKeys.
   ///
   /// In en, this message translates to:
-  /// **'返回对象 keys={keys}'**
+  /// **'Returned object keys={keys}'**
   String agentWorkspaceSummaryReturnedObjectKeys(String keys);
 
   /// No description provided for @agentWorkspaceProductionSummaryFlowEmpty.
@@ -27404,7 +27929,7 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionSummaryPlanSections.
   ///
   /// In en, this message translates to:
-  /// **'计划章节 {count}'**
+  /// **'Plan sections: {count}'**
   String agentWorkspaceProductionSummaryPlanSections(int count);
 
   /// No description provided for @agentWorkspaceProductionSummaryRewriteInherited.
@@ -27428,25 +27953,25 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionSummaryListCount.
   ///
   /// In en, this message translates to:
-  /// **'列表 {count} 项'**
+  /// **'List: {count} items'**
   String agentWorkspaceProductionSummaryListCount(int count);
 
   /// No description provided for @agentWorkspaceProductionSummaryPrompts.
   ///
   /// In en, this message translates to:
-  /// **'提示词 {count}'**
+  /// **'Prompts: {count}'**
   String agentWorkspaceProductionSummaryPrompts(int count);
 
   /// No description provided for @agentWorkspaceProductionSummaryMediaUrls.
   ///
   /// In en, this message translates to:
-  /// **'媒体 URL {count}'**
+  /// **'Media URLs: {count}'**
   String agentWorkspaceProductionSummaryMediaUrls(int count);
 
   /// No description provided for @agentWorkspaceProductionSummaryNeedImages.
   ///
   /// In en, this message translates to:
-  /// **'需要图片 {count}'**
+  /// **'Need images: {count}'**
   String agentWorkspaceProductionSummaryNeedImages(int count);
 
   /// No description provided for @agentWorkspaceProductionSummaryMissingFrames.
@@ -27458,7 +27983,7 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionSummaryTextOnlyCount.
   ///
   /// In en, this message translates to:
-  /// **'纯文本 {count}'**
+  /// **'Text-only: {count}'**
   String agentWorkspaceProductionSummaryTextOnlyCount(int count);
 
   /// No description provided for @agentWorkspaceProductionSummaryStateTypes.
@@ -27470,7 +27995,7 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionSummaryObjectKeyCount.
   ///
   /// In en, this message translates to:
-  /// **'对象 keys={count} 个'**
+  /// **'Object keys: {count}'**
   String agentWorkspaceProductionSummaryObjectKeyCount(int count);
 
   /// No description provided for @agentWorkspaceProductionSummaryObjectListEntry.
@@ -27488,7 +28013,7 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceProductionSummaryReturnedType.
   ///
   /// In en, this message translates to:
-  /// **'返回 {type}'**
+  /// **'Returned {type}'**
   String agentWorkspaceProductionSummaryReturnedType(String type);
 
   /// No description provided for @agentWorkspaceProductionIdleHint.
@@ -27659,110 +28184,16 @@ abstract class AppLocalizations {
   /// **'Agent workspace script apply suggestion'**
   String get agentWorkspaceScriptApplySuggestion;
 
-  String get agentWorkspaceScriptRecipeAddChapterMaterialDetail;
-  String get agentWorkspaceScriptRecipeAddChapterMaterialTitle;
-  String get agentWorkspaceScriptRecipeAddNovelTextWindowDetail;
-  String get agentWorkspaceScriptRecipeAddNovelTextWindowTitle;
-  String get agentWorkspaceScriptRecipeCompareExistingScriptDetail;
-  String get agentWorkspaceScriptRecipeCompareExistingScriptTitle;
-  String get agentWorkspaceScriptRecipeDistillSkeletonFromEventsDetail;
-  String get agentWorkspaceScriptRecipeDistillSkeletonFromEventsPrompt;
-  String get agentWorkspaceScriptRecipeDistillSkeletonFromEventsTitle;
-  String get agentWorkspaceScriptRecipeFillAdaptationDetail;
-  String get agentWorkspaceScriptRecipeFillAdaptationPrompt;
-  String get agentWorkspaceScriptRecipeFillAdaptationTitle;
-  String get agentWorkspaceScriptRecipeFillStorySkeletonDetail;
-  String get agentWorkspaceScriptRecipeFillStorySkeletonPrompt;
-  String get agentWorkspaceScriptRecipeFillStorySkeletonTitle;
-  String get agentWorkspaceScriptRecipeGenerateAdaptationFromTextDetail;
-  String get agentWorkspaceScriptRecipeGenerateAdaptationFromTextPrompt;
-  String get agentWorkspaceScriptRecipeGenerateAdaptationFromTextTitle;
-  String get agentWorkspaceScriptRecipeGenerateNextScriptDetail;
-  String get agentWorkspaceScriptRecipeGenerateNextScriptPrompt;
-  String get agentWorkspaceScriptRecipeGenerateNextScriptTitle;
-  String get agentWorkspaceScriptRecipeGenerateScriptBodyDetail;
-  String get agentWorkspaceScriptRecipeGenerateScriptBodyPrompt;
-  String get agentWorkspaceScriptRecipeGenerateScriptBodyTitle;
-  String get agentWorkspaceScriptRecipeGenerateScriptFromEventsDetail;
-  String get agentWorkspaceScriptRecipeGenerateScriptFromEventsPrompt;
-  String get agentWorkspaceScriptRecipeGenerateScriptFromEventsTitle;
-  String get agentWorkspaceScriptRecipePreferEventsDetail;
-  String get agentWorkspaceScriptRecipePreferEventsTitle;
-  String get agentWorkspaceScriptRecipePullChapterMaterialDetail;
-  String get agentWorkspaceScriptRecipePullChapterMaterialTitle;
-  String get agentWorkspaceScriptRecipePullChapterTextFirstDetail;
-  String get agentWorkspaceScriptRecipePullChapterTextFirstTitle;
-  String get agentWorkspaceScriptRecipeReadMatchingEventsDetail;
-  String get agentWorkspaceScriptRecipeReadMatchingEventsTitle;
-  String get agentWorkspaceScriptRecipeReadPlanScriptDraftDetail;
-  String get agentWorkspaceScriptRecipeReadPlanScriptDraftTitle;
-  String get agentWorkspaceScriptRecipeReadScriptBodyDetail;
-  String get agentWorkspaceScriptRecipeReadScriptBodyTitle;
-  String get agentWorkspaceScriptRecipeRefreshPlanAfterBodyDetail;
-  String get agentWorkspaceScriptRecipeRefreshPlanAfterBodyTitle;
-  String get agentWorkspaceScriptRecipeRefreshPlanDataDetail;
-  String get agentWorkspaceScriptRecipeRefreshPlanDataTitle;
-  String get agentWorkspaceScriptRecipeRereadCurrentScriptDetail;
-  String get agentWorkspaceScriptRecipeRereadCurrentScriptTitle;
-  String get agentWorkspaceScriptRecipeReviewPreviousTailDetail;
-  String get agentWorkspaceScriptRecipeReviewPreviousTailTitle;
-  String get agentWorkspaceScriptRecipeReviewTargetPeekDetail;
-  String get agentWorkspaceScriptRecipeReviewTargetPeekTitle;
-  String get agentWorkspaceScriptRecipeReviseAdaptationDetail;
-  String get agentWorkspaceScriptRecipeReviseAdaptationPrompt;
-  String get agentWorkspaceScriptRecipeReviseAdaptationTitle;
-  String get agentWorkspaceScriptRecipeReviseScriptDetail;
-  String get agentWorkspaceScriptRecipeReviseScriptPrompt;
-  String get agentWorkspaceScriptRecipeReviseScriptTitle;
-  String get agentWorkspaceScriptRecipeReviseStorySkeletonDetail;
-  String get agentWorkspaceScriptRecipeReviseStorySkeletonPrompt;
-  String get agentWorkspaceScriptRecipeReviseStorySkeletonTitle;
-  String get agentWorkspaceScriptRecipeVerifyEventsDetail;
-  String get agentWorkspaceScriptRecipeVerifyEventsTitle;
-  String get agentWorkspaceScriptStageDetailAdaptationPendingGen;
-  String get agentWorkspaceScriptStageDetailAdaptationPendingRead;
-  String get agentWorkspaceScriptStageDetailAdaptationReady;
-  String get agentWorkspaceScriptStageDetailChapterMaterialEmptyNovel;
-  String get agentWorkspaceScriptStageDetailChapterMaterialPendingRead;
-  String agentWorkspaceScriptStageDetailChapterMaterialReady(int count);
-  String get agentWorkspaceScriptStageDetailReviewAdaptationEmpty;
-  String agentWorkspaceScriptStageDetailReviewConclusion(String summary);
-  String get agentWorkspaceScriptStageDetailReviewScriptEmpty;
-  String get agentWorkspaceScriptStageDetailReviewStorySkeletonEmpty;
-  String get agentWorkspaceScriptStageDetailScriptBodyReady;
-  String get agentWorkspaceScriptStageDetailScriptPendingGen;
-  String get agentWorkspaceScriptStageDetailScriptPendingRead;
-  String get agentWorkspaceScriptStageDetailStorySkeletonPendingGen;
-  String get agentWorkspaceScriptStageDetailStorySkeletonPendingRead;
-  String get agentWorkspaceScriptStageDetailStorySkeletonReady;
-  String get agentWorkspaceScriptStagePromptGenerateAdaptationStrategy;
-  String get agentWorkspaceScriptStagePromptGenerateScript;
-  String get agentWorkspaceScriptStagePromptGenerateStorySkeleton;
-  String get agentWorkspaceScriptStagePromptReviseAdaptationStrategy;
-  String get agentWorkspaceScriptStagePromptReviseScript;
-  String get agentWorkspaceScriptStagePromptReviseStorySkeleton;
-  String get agentWorkspaceScriptStageStatusCompleted;
-  String get agentWorkspaceScriptStageStatusNeedsRevision;
-  String get agentWorkspaceScriptStageStatusPendingGenerate;
-  String get agentWorkspaceScriptStageStatusPendingRead;
-  String get agentWorkspaceScriptStageStatusReady;
-  String get agentWorkspaceScriptStageStatusReusable;
-  String get agentWorkspaceScriptStageStatusSupplementNeeded;
-  String get agentWorkspaceScriptStageTitleAdaptationStrategy;
-  String get agentWorkspaceScriptStageTitleChapterMaterial;
-  String get agentWorkspaceScriptStageTitleScriptBody;
-  String get agentWorkspaceScriptStageTitleStorySkeleton;
-
   /// No description provided for @agentWorkspaceScriptContextSkeletonFocus.
   ///
   /// In en, this message translates to:
-  /// **'骨架焦点：{focus}'**
+  /// **'Story skeleton focus: {focus}'**
   String agentWorkspaceScriptContextSkeletonFocus(String focus);
 
   /// No description provided for @agentWorkspaceScriptContextAdaptationFocus.
   ///
   /// In en, this message translates to:
-  /// **'改编焦点：{focus}'**
+  /// **'Adaptation focus: {focus}'**
   String agentWorkspaceScriptContextAdaptationFocus(String focus);
 
   /// No description provided for @agentWorkspaceScriptContextExecutionOrder.
@@ -27962,7 +28393,7 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceScriptSummaryScriptEmpty.
   ///
   /// In en, this message translates to:
-  /// **'剧本正文 {chars} 字'**
+  /// **'Script body: {chars} chars'**
   String agentWorkspaceScriptSummaryScriptEmpty(int chars);
 
   /// No description provided for @agentWorkspaceScriptSummaryScriptChars.
@@ -27974,7 +28405,7 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceScriptSummaryNovelTextEmpty.
   ///
   /// In en, this message translates to:
-  /// **'章节材料 {count} 条'**
+  /// **'Chapter material: {count} entries'**
   String agentWorkspaceScriptSummaryNovelTextEmpty(int count);
 
   /// No description provided for @agentWorkspaceScriptSummaryNovelTextCount.
@@ -27986,7 +28417,7 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceScriptSummaryNovelEventsEmpty.
   ///
   /// In en, this message translates to:
-  /// **'小说事件 {count} 条'**
+  /// **'Novel events: {count}'**
   String agentWorkspaceScriptSummaryNovelEventsEmpty(int count);
 
   /// No description provided for @agentWorkspaceScriptSummaryNovelEventsCount.
@@ -27994,6 +28425,564 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'novel events {count}'**
   String agentWorkspaceScriptSummaryNovelEventsCount(int count);
+
+  /// No description provided for @agentWorkspaceScriptStageTitleStorySkeleton.
+  ///
+  /// In en, this message translates to:
+  /// **'Story skeleton'**
+  String get agentWorkspaceScriptStageTitleStorySkeleton;
+
+  /// No description provided for @agentWorkspaceScriptStageTitleAdaptationStrategy.
+  ///
+  /// In en, this message translates to:
+  /// **'Adaptation strategy'**
+  String get agentWorkspaceScriptStageTitleAdaptationStrategy;
+
+  /// No description provided for @agentWorkspaceScriptStageTitleChapterMaterial.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter material'**
+  String get agentWorkspaceScriptStageTitleChapterMaterial;
+
+  /// No description provided for @agentWorkspaceScriptStageTitleScriptBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Script body'**
+  String get agentWorkspaceScriptStageTitleScriptBody;
+
+  /// No description provided for @agentWorkspaceScriptStageStatusReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready'**
+  String get agentWorkspaceScriptStageStatusReady;
+
+  /// No description provided for @agentWorkspaceScriptStageStatusReusable.
+  ///
+  /// In en, this message translates to:
+  /// **'OK to keep'**
+  String get agentWorkspaceScriptStageStatusReusable;
+
+  /// No description provided for @agentWorkspaceScriptStageStatusNeedsRevision.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs revision'**
+  String get agentWorkspaceScriptStageStatusNeedsRevision;
+
+  /// No description provided for @agentWorkspaceScriptStageStatusPendingGenerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending generation'**
+  String get agentWorkspaceScriptStageStatusPendingGenerate;
+
+  /// No description provided for @agentWorkspaceScriptStageStatusPendingRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending read'**
+  String get agentWorkspaceScriptStageStatusPendingRead;
+
+  /// No description provided for @agentWorkspaceScriptStageStatusSupplementNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs more context'**
+  String get agentWorkspaceScriptStageStatusSupplementNeeded;
+
+  /// No description provided for @agentWorkspaceScriptStageStatusCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get agentWorkspaceScriptStageStatusCompleted;
+
+  /// No description provided for @agentWorkspaceScriptStageDetailStorySkeletonReady.
+  ///
+  /// In en, this message translates to:
+  /// **'storySkeleton exists; continue tightening adaptationStrategy or compare with script body.'**
+  String get agentWorkspaceScriptStageDetailStorySkeletonReady;
+
+  /// No description provided for @agentWorkspaceScriptStageDetailReviewStorySkeletonEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Review already covers storySkeleton; continue revising using the suggestions.'**
+  String get agentWorkspaceScriptStageDetailReviewStorySkeletonEmpty;
+
+  /// No description provided for @agentWorkspaceScriptStageDetailReviewAdaptationEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Review already covers adaptationStrategy; continue revising using the suggestions.'**
+  String get agentWorkspaceScriptStageDetailReviewAdaptationEmpty;
+
+  /// No description provided for @agentWorkspaceScriptStageDetailReviewScriptEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Review already covers the script body; continue revising using the suggestions.'**
+  String get agentWorkspaceScriptStageDetailReviewScriptEmpty;
+
+  /// No description provided for @agentWorkspaceScriptStageDetailReviewConclusion.
+  ///
+  /// In en, this message translates to:
+  /// **'Review conclusion: {summary}'**
+  String agentWorkspaceScriptStageDetailReviewConclusion(String summary);
+
+  /// No description provided for @agentWorkspaceScriptStagePromptReviseStorySkeleton.
+  ///
+  /// In en, this message translates to:
+  /// **'Read storySkeleton and the related event window first, then revise the story skeleton locally based on the review.'**
+  String get agentWorkspaceScriptStagePromptReviseStorySkeleton;
+
+  /// No description provided for @agentWorkspaceScriptStageDetailStorySkeletonPendingGen.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a story skeleton first—main conflict, turning points, and ending direction.'**
+  String get agentWorkspaceScriptStageDetailStorySkeletonPendingGen;
+
+  /// No description provided for @agentWorkspaceScriptStagePromptGenerateStorySkeleton.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate a clear story skeleton from the current project context, highlighting main conflict and reversal beats.'**
+  String get agentWorkspaceScriptStagePromptGenerateStorySkeleton;
+
+  /// No description provided for @agentWorkspaceScriptStageDetailStorySkeletonPendingRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Read planData first to see whether storySkeleton is present.'**
+  String get agentWorkspaceScriptStageDetailStorySkeletonPendingRead;
+
+  /// No description provided for @agentWorkspaceScriptStageDetailAdaptationReady.
+  ///
+  /// In en, this message translates to:
+  /// **'adaptationStrategy exists; continue reading chapter material or generate script body.'**
+  String get agentWorkspaceScriptStageDetailAdaptationReady;
+
+  /// No description provided for @agentWorkspaceScriptStagePromptReviseAdaptationStrategy.
+  ///
+  /// In en, this message translates to:
+  /// **'Read adaptationStrategy and storySkeleton first, then revise adaptationStrategy locally based on the review.'**
+  String get agentWorkspaceScriptStagePromptReviseAdaptationStrategy;
+
+  /// No description provided for @agentWorkspaceScriptStageDetailAdaptationPendingGen.
+  ///
+  /// In en, this message translates to:
+  /// **'adaptationStrategy is missing—tighten character and pacing strategy first.'**
+  String get agentWorkspaceScriptStageDetailAdaptationPendingGen;
+
+  /// No description provided for @agentWorkspaceScriptStagePromptGenerateAdaptationStrategy.
+  ///
+  /// In en, this message translates to:
+  /// **'From the existing story skeleton, complete adaptationStrategy with pacing, character arcs, and episode split rules.'**
+  String get agentWorkspaceScriptStagePromptGenerateAdaptationStrategy;
+
+  /// No description provided for @agentWorkspaceScriptStageDetailAdaptationPendingRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-read planData to see whether adaptationStrategy exists.'**
+  String get agentWorkspaceScriptStageDetailAdaptationPendingRead;
+
+  /// No description provided for @agentWorkspaceScriptStageDetailChapterMaterialReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Read {count} novel-context rows; continue generating script body or compare with the existing script.'**
+  String agentWorkspaceScriptStageDetailChapterMaterialReady(int count);
+
+  /// No description provided for @agentWorkspaceScriptStageDetailChapterMaterialEmptyNovel.
+  ///
+  /// In en, this message translates to:
+  /// **'No novel context yet—keep reading chapter text or event outlines.'**
+  String get agentWorkspaceScriptStageDetailChapterMaterialEmptyNovel;
+
+  /// No description provided for @agentWorkspaceScriptStageDetailChapterMaterialPendingRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Read chapter text or events first, then decide how to rewrite the script.'**
+  String get agentWorkspaceScriptStageDetailChapterMaterialPendingRead;
+
+  /// No description provided for @agentWorkspaceScriptStageDetailScriptBodyReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Script body exists; write back or keep editing using plan data.'**
+  String get agentWorkspaceScriptStageDetailScriptBodyReady;
+
+  /// No description provided for @agentWorkspaceScriptStagePromptReviseScript.
+  ///
+  /// In en, this message translates to:
+  /// **'Read this episode’s tail window, storySkeleton, and adaptationStrategy first; if still thin, add a chapter text window, then revise this episode’s script toward the review.'**
+  String get agentWorkspaceScriptStagePromptReviseScript;
+
+  /// No description provided for @agentWorkspaceScriptStageDetailScriptPendingGen.
+  ///
+  /// In en, this message translates to:
+  /// **'Script body is empty—run the script sub-agent to produce a first draft.'**
+  String get agentWorkspaceScriptStageDetailScriptPendingGen;
+
+  /// No description provided for @agentWorkspaceScriptStagePromptGenerateScript.
+  ///
+  /// In en, this message translates to:
+  /// **'Read this episode’s plan and target chapter events; only read the previous episode’s tail when continuing from it; otherwise add text windows on demand, then output a complete script body ready to write back.'**
+  String get agentWorkspaceScriptStagePromptGenerateScript;
+
+  /// No description provided for @agentWorkspaceScriptStageDetailScriptPendingRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Read the current script body first, then decide whether to generate the next version.'**
+  String get agentWorkspaceScriptStageDetailScriptPendingRead;
+
+  /// No description provided for @agentWorkspaceScriptRecipeFillStorySkeletonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill story skeleton'**
+  String get agentWorkspaceScriptRecipeFillStorySkeletonTitle;
+
+  /// No description provided for @agentWorkspaceScriptRecipeFillStorySkeletonDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'planData has no storySkeleton yet—run the skeleton sub-agent first.'**
+  String get agentWorkspaceScriptRecipeFillStorySkeletonDetail;
+
+  /// No description provided for @agentWorkspaceScriptRecipeFillStorySkeletonPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate a clear story skeleton from the current project context, highlighting main conflict and reversal beats.'**
+  String get agentWorkspaceScriptRecipeFillStorySkeletonPrompt;
+
+  /// No description provided for @agentWorkspaceScriptRecipeFillAdaptationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill adaptation strategy'**
+  String get agentWorkspaceScriptRecipeFillAdaptationTitle;
+
+  /// No description provided for @agentWorkspaceScriptRecipeFillAdaptationDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Beyond the skeleton, adaptationStrategy is still missing—tighten the adaptation path first.'**
+  String get agentWorkspaceScriptRecipeFillAdaptationDetail;
+
+  /// No description provided for @agentWorkspaceScriptRecipeFillAdaptationPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'From the existing story skeleton, complete adaptationStrategy with pacing, character arcs, and episode split rules.'**
+  String get agentWorkspaceScriptRecipeFillAdaptationPrompt;
+
+  /// No description provided for @agentWorkspaceScriptRecipeReadScriptBodyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Read current script body'**
+  String get agentWorkspaceScriptRecipeReadScriptBodyTitle;
+
+  /// No description provided for @agentWorkspaceScriptRecipeReadScriptBodyDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'After planData is ready, compare whether the current script body has drifted.'**
+  String get agentWorkspaceScriptRecipeReadScriptBodyDetail;
+
+  /// No description provided for @agentWorkspaceScriptRecipeReadPlanScriptDraftTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Read planned script draft'**
+  String get agentWorkspaceScriptRecipeReadPlanScriptDraftTitle;
+
+  /// No description provided for @agentWorkspaceScriptRecipeReadPlanScriptDraftDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'planData.script already has a draft for this episode—consume that structured draft before widening novel reads to save tokens.'**
+  String get agentWorkspaceScriptRecipeReadPlanScriptDraftDetail;
+
+  /// No description provided for @agentWorkspaceScriptRecipePullChapterMaterialTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pull chapter material'**
+  String get agentWorkspaceScriptRecipePullChapterMaterialTitle;
+
+  /// No description provided for @agentWorkspaceScriptRecipePullChapterMaterialDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'No script draft in the plan yet—read novel chapter text for context first.'**
+  String get agentWorkspaceScriptRecipePullChapterMaterialDetail;
+
+  /// No description provided for @agentWorkspaceScriptRecipeGenerateNextScriptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate next script version'**
+  String get agentWorkspaceScriptRecipeGenerateNextScriptTitle;
+
+  /// No description provided for @agentWorkspaceScriptRecipeGenerateNextScriptDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan info is ready—consume the planned script draft and required events first, then let the script sub-agent output the next write-back-ready body.'**
+  String get agentWorkspaceScriptRecipeGenerateNextScriptDetail;
+
+  /// No description provided for @agentWorkspaceScriptRecipeGenerateNextScriptPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Read this episode’s planData.script draft, storySkeleton, and adaptationStrategy first, then add the minimum target chapter events; only read the previous episode’s tail or chapter text windows when details or transitions are insufficient, then output a complete script body ready to write back.'**
+  String get agentWorkspaceScriptRecipeGenerateNextScriptPrompt;
+
+  /// No description provided for @agentWorkspaceScriptRecipePreferEventsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to event outline'**
+  String get agentWorkspaceScriptRecipePreferEventsTitle;
+
+  /// No description provided for @agentWorkspaceScriptRecipePreferEventsDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'When chapter text is empty, reading the event list first makes plot gaps easier to spot.'**
+  String get agentWorkspaceScriptRecipePreferEventsDetail;
+
+  /// No description provided for @agentWorkspaceScriptRecipeReadMatchingEventsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Read matching events'**
+  String get agentWorkspaceScriptRecipeReadMatchingEventsTitle;
+
+  /// No description provided for @agentWorkspaceScriptRecipeReadMatchingEventsDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter text is in place—pull the same chapter’s events next to summarize conflict cleanly.'**
+  String get agentWorkspaceScriptRecipeReadMatchingEventsDetail;
+
+  /// No description provided for @agentWorkspaceScriptRecipeGenerateAdaptationFromTextTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate adaptation strategy'**
+  String get agentWorkspaceScriptRecipeGenerateAdaptationFromTextTitle;
+
+  /// No description provided for @agentWorkspaceScriptRecipeGenerateAdaptationFromTextDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter material is readable—run the adaptation-strategy sub-agent for a tightened plan.'**
+  String get agentWorkspaceScriptRecipeGenerateAdaptationFromTextDetail;
+
+  /// No description provided for @agentWorkspaceScriptRecipeGenerateAdaptationFromTextPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Summarize an adaptation strategy from the current chapter text with 3–5 actionable rewrite rules.'**
+  String get agentWorkspaceScriptRecipeGenerateAdaptationFromTextPrompt;
+
+  /// No description provided for @agentWorkspaceScriptRecipeReviewPreviousTailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review previous tail'**
+  String get agentWorkspaceScriptRecipeReviewPreviousTailTitle;
+
+  /// No description provided for @agentWorkspaceScriptRecipeReviewPreviousTailDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'After chapter material is clear, compare this episode’s tail to spot transition gaps with fewer tokens.'**
+  String get agentWorkspaceScriptRecipeReviewPreviousTailDetail;
+
+  /// No description provided for @agentWorkspaceScriptRecipePullChapterTextFirstTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pull chapter text first'**
+  String get agentWorkspaceScriptRecipePullChapterTextFirstTitle;
+
+  /// No description provided for @agentWorkspaceScriptRecipePullChapterTextFirstDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'When the event list is empty, read chapter text first to tell missing data from missing extraction.'**
+  String get agentWorkspaceScriptRecipePullChapterTextFirstDetail;
+
+  /// No description provided for @agentWorkspaceScriptRecipeDistillSkeletonFromEventsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Distill story skeleton'**
+  String get agentWorkspaceScriptRecipeDistillSkeletonFromEventsTitle;
+
+  /// No description provided for @agentWorkspaceScriptRecipeDistillSkeletonFromEventsDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Events are clear enough—tighten into storySkeleton first.'**
+  String get agentWorkspaceScriptRecipeDistillSkeletonFromEventsDetail;
+
+  /// No description provided for @agentWorkspaceScriptRecipeDistillSkeletonFromEventsPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'From the current event list, distill a story skeleton with key conflict, turning points, and ending direction.'**
+  String get agentWorkspaceScriptRecipeDistillSkeletonFromEventsPrompt;
+
+  /// No description provided for @agentWorkspaceScriptRecipeGenerateScriptFromEventsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate script draft'**
+  String get agentWorkspaceScriptRecipeGenerateScriptFromEventsTitle;
+
+  /// No description provided for @agentWorkspaceScriptRecipeGenerateScriptFromEventsDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'If the event chain is mostly complete, run the script sub-agent for write-back-ready body.'**
+  String get agentWorkspaceScriptRecipeGenerateScriptFromEventsDetail;
+
+  /// No description provided for @agentWorkspaceScriptRecipeGenerateScriptFromEventsPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Combine the current event outline and prefer reading planData.script, storySkeleton, and adaptationStrategy; only widen to chapter text when details are insufficient, then output a script body ready to write back.'**
+  String get agentWorkspaceScriptRecipeGenerateScriptFromEventsPrompt;
+
+  /// No description provided for @agentWorkspaceScriptRecipeCompareExistingScriptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare with existing script'**
+  String get agentWorkspaceScriptRecipeCompareExistingScriptTitle;
+
+  /// No description provided for @agentWorkspaceScriptRecipeCompareExistingScriptDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the current event chain to diff the existing body and spot missing beats faster.'**
+  String get agentWorkspaceScriptRecipeCompareExistingScriptDetail;
+
+  /// No description provided for @agentWorkspaceScriptRecipeGenerateScriptBodyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate script body'**
+  String get agentWorkspaceScriptRecipeGenerateScriptBodyTitle;
+
+  /// No description provided for @agentWorkspaceScriptRecipeGenerateScriptBodyDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Body is empty—run the script sub-agent for a first version.'**
+  String get agentWorkspaceScriptRecipeGenerateScriptBodyDetail;
+
+  /// No description provided for @agentWorkspaceScriptRecipeGenerateScriptBodyPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Read this episode’s planData.script, storySkeleton, adaptationStrategy, and target chapter events first; only add text windows when details are insufficient, then produce a complete script body.'**
+  String get agentWorkspaceScriptRecipeGenerateScriptBodyPrompt;
+
+  /// No description provided for @agentWorkspaceScriptRecipeRefreshPlanDataTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh plan data'**
+  String get agentWorkspaceScriptRecipeRefreshPlanDataTitle;
+
+  /// No description provided for @agentWorkspaceScriptRecipeRefreshPlanDataDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'If the body is empty and context feels thin, return to planData to verify skeleton and strategy.'**
+  String get agentWorkspaceScriptRecipeRefreshPlanDataDetail;
+
+  /// No description provided for @agentWorkspaceScriptRecipeRefreshPlanAfterBodyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh plan data'**
+  String get agentWorkspaceScriptRecipeRefreshPlanAfterBodyTitle;
+
+  /// No description provided for @agentWorkspaceScriptRecipeRefreshPlanAfterBodyDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'After you have body text, revisit planData to see whether skeleton or strategy needs syncing.'**
+  String get agentWorkspaceScriptRecipeRefreshPlanAfterBodyDetail;
+
+  /// No description provided for @agentWorkspaceScriptRecipeAddChapterMaterialTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add chapter material'**
+  String get agentWorkspaceScriptRecipeAddChapterMaterialTitle;
+
+  /// No description provided for @agentWorkspaceScriptRecipeAddChapterMaterialDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'To keep revising, pull novel text and events instead of staring only at the current script.'**
+  String get agentWorkspaceScriptRecipeAddChapterMaterialDetail;
+
+  /// No description provided for @agentWorkspaceScriptRecipeReviseStorySkeletonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Revise story skeleton'**
+  String get agentWorkspaceScriptRecipeReviseStorySkeletonTitle;
+
+  /// No description provided for @agentWorkspaceScriptRecipeReviseStorySkeletonDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'The review still sees skeleton gaps—return to storySkeleton for targeted edits.'**
+  String get agentWorkspaceScriptRecipeReviseStorySkeletonDetail;
+
+  /// No description provided for @agentWorkspaceScriptRecipeReviseStorySkeletonPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Read storySkeleton and related event windows first; add chapter text windows only if information is still thin, then revise the skeleton toward the review.'**
+  String get agentWorkspaceScriptRecipeReviseStorySkeletonPrompt;
+
+  /// No description provided for @agentWorkspaceScriptRecipeReviseAdaptationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Revise adaptation strategy'**
+  String get agentWorkspaceScriptRecipeReviseAdaptationTitle;
+
+  /// No description provided for @agentWorkspaceScriptRecipeReviseAdaptationDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'The review thinks the strategy conflicts with the skeleton or format—revise strategy locally first.'**
+  String get agentWorkspaceScriptRecipeReviseAdaptationDetail;
+
+  /// No description provided for @agentWorkspaceScriptRecipeReviseAdaptationPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Read adaptationStrategy and storySkeleton first, then add event windows as needed, and revise adaptationStrategy toward the review.'**
+  String get agentWorkspaceScriptRecipeReviseAdaptationPrompt;
+
+  /// No description provided for @agentWorkspaceScriptRecipeReviseScriptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Revise script body'**
+  String get agentWorkspaceScriptRecipeReviseScriptTitle;
+
+  /// No description provided for @agentWorkspaceScriptRecipeReviseScriptDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'The review pinpointed script issues—read this episode’s tail window before targeted edits.'**
+  String get agentWorkspaceScriptRecipeReviseScriptDetail;
+
+  /// No description provided for @agentWorkspaceScriptRecipeReviseScriptPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Read this episode’s tail window, storySkeleton, and adaptationStrategy first; if still insufficient, add chapter text windows, then revise this episode’s script toward the review.'**
+  String get agentWorkspaceScriptRecipeReviseScriptPrompt;
+
+  /// No description provided for @agentWorkspaceScriptRecipeVerifyEventsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify event outline'**
+  String get agentWorkspaceScriptRecipeVerifyEventsTitle;
+
+  /// No description provided for @agentWorkspaceScriptRecipeVerifyEventsDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'The review suggests revisiting the event chain—prefer novel events over full chapter text.'**
+  String get agentWorkspaceScriptRecipeVerifyEventsDetail;
+
+  /// No description provided for @agentWorkspaceScriptRecipeAddNovelTextWindowTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add novel text window'**
+  String get agentWorkspaceScriptRecipeAddNovelTextWindowTitle;
+
+  /// No description provided for @agentWorkspaceScriptRecipeAddNovelTextWindowDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'When the review needs the original prose, read a bounded chapter window instead of whole chapters.'**
+  String get agentWorkspaceScriptRecipeAddNovelTextWindowDetail;
+
+  /// No description provided for @agentWorkspaceScriptRecipeRereadCurrentScriptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-read current script'**
+  String get agentWorkspaceScriptRecipeRereadCurrentScriptTitle;
+
+  /// No description provided for @agentWorkspaceScriptRecipeRereadCurrentScriptDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-read this episode’s tail window first, then decide whether to keep revising.'**
+  String get agentWorkspaceScriptRecipeRereadCurrentScriptDetail;
+
+  /// No description provided for @agentWorkspaceScriptRecipeReviewTargetPeekTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Peek review target'**
+  String get agentWorkspaceScriptRecipeReviewTargetPeekTitle;
+
+  /// No description provided for @agentWorkspaceScriptRecipeReviewTargetPeekDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Read the review’s primary content first, then decide whether to rerun the sub-agent.'**
+  String get agentWorkspaceScriptRecipeReviewTargetPeekDetail;
 
   /// No description provided for @agentWorkspaceScopeProjectIdLabel.
   ///
@@ -28052,7 +29041,7 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceActivityLatest.
   ///
   /// In en, this message translates to:
-  /// **'最新：{eventType}'**
+  /// **'Latest: {eventType}'**
   String agentWorkspaceActivityLatest(String eventType);
 
   /// No description provided for @agentWorkspaceActivityLatestToolResult.
@@ -28100,7 +29089,7 @@ abstract class AppLocalizations {
   /// No description provided for @agentWorkspaceScriptPlanWritebackReady.
   ///
   /// In en, this message translates to:
-  /// **'计划回写就绪：{planHint}，{scriptCount} 条剧本'**
+  /// **'Plan write-back ready: {planHint}; {scriptCount} script(s)'**
   String agentWorkspaceScriptPlanWritebackReady(
     String planHint,
     int scriptCount,
@@ -28343,13 +29332,13 @@ abstract class AppLocalizations {
   /// No description provided for @contentComplianceMetricPending.
   ///
   /// In en, this message translates to:
-  /// **'待处理 {count}'**
+  /// **'Pending: {count}'**
   String contentComplianceMetricPending(int count);
 
   /// No description provided for @contentComplianceMetricClaimed.
   ///
   /// In en, this message translates to:
-  /// **'已认领 {count}'**
+  /// **'Claimed: {count}'**
   String contentComplianceMetricClaimed(int count);
 
   /// No description provided for @contentComplianceMetricResolved.
@@ -28373,25 +29362,31 @@ abstract class AppLocalizations {
   /// No description provided for @contentComplianceMetricHigh.
   ///
   /// In en, this message translates to:
-  /// **'高优先级 {count}'**
+  /// **'High priority: {count}'**
   String contentComplianceMetricHigh(int count);
+
+  /// No description provided for @contentComplianceMetricOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'overdue {count}'**
+  String contentComplianceMetricOverdue(int count);
 
   /// No description provided for @contentComplianceOldestHours.
   ///
   /// In en, this message translates to:
-  /// **'最旧 {hours}h'**
+  /// **'Oldest: {hours}h'**
   String contentComplianceOldestHours(int hours);
 
   /// No description provided for @contentComplianceCapacityPerReviewer.
   ///
   /// In en, this message translates to:
-  /// **'容量 {capacity}/reviewer'**
+  /// **'Capacity: {capacity}/reviewer'**
   String contentComplianceCapacityPerReviewer(int capacity);
 
   /// No description provided for @contentComplianceOwnerCounts.
   ///
   /// In en, this message translates to:
-  /// **'待处理 {pending} · 已认领 {claimed}'**
+  /// **'Pending {pending} · Claimed {claimed}'**
   String contentComplianceOwnerCounts(int pending, int claimed);
 
   /// No description provided for @contentComplianceOwnerDetail.
@@ -28409,8 +29404,13 @@ abstract class AppLocalizations {
   /// No description provided for @contentComplianceWorkspaceDetail.
   ///
   /// In en, this message translates to:
-  /// **'critical {critical} · high {high} · SLA {sla}'**
-  String contentComplianceWorkspaceDetail(int critical, int high, String sla);
+  /// **'critical {critical} · high {high} · breached {breached} · oldest {oldestHours}h'**
+  String contentComplianceWorkspaceDetail(
+    int critical,
+    int high,
+    int breached,
+    int oldestHours,
+  );
 
   /// No description provided for @contentComplianceReportInfo.
   ///
@@ -28421,6 +29421,91 @@ abstract class AppLocalizations {
     String reportedAt,
     String detail,
   );
+
+  /// No description provided for @contentComplianceActorInternalOps.
+  ///
+  /// In en, this message translates to:
+  /// **'Internal ops'**
+  String get contentComplianceActorInternalOps;
+
+  /// No description provided for @contentComplianceItemLineCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Created {createdAt}'**
+  String contentComplianceItemLineCreated(String createdAt);
+
+  /// No description provided for @contentComplianceItemLineClaimed.
+  ///
+  /// In en, this message translates to:
+  /// **'Claimed by {actor}'**
+  String contentComplianceItemLineClaimed(String actor);
+
+  /// No description provided for @contentComplianceItemLineClaimedWithTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Claimed by {actor} @ {claimedAt}'**
+  String contentComplianceItemLineClaimedWithTime(
+    String actor,
+    String claimedAt,
+  );
+
+  /// No description provided for @contentComplianceItemLineOutcome.
+  ///
+  /// In en, this message translates to:
+  /// **'{status} · {resolutionBy}'**
+  String contentComplianceItemLineOutcome(String status, String resolutionBy);
+
+  /// No description provided for @contentComplianceItemLineOutcomeWithTime.
+  ///
+  /// In en, this message translates to:
+  /// **'{status} · {resolutionBy} @ {resolvedAt}'**
+  String contentComplianceItemLineOutcomeWithTime(
+    String status,
+    String resolutionBy,
+    String resolvedAt,
+  );
+
+  /// No description provided for @contentComplianceAuditVerbClaim.
+  ///
+  /// In en, this message translates to:
+  /// **'claim'**
+  String get contentComplianceAuditVerbClaim;
+
+  /// No description provided for @contentComplianceAuditVerbResolve.
+  ///
+  /// In en, this message translates to:
+  /// **'resolve'**
+  String get contentComplianceAuditVerbResolve;
+
+  /// No description provided for @contentComplianceAuditVerbDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'dismiss'**
+  String get contentComplianceAuditVerbDismiss;
+
+  /// No description provided for @contentComplianceAuditVerbReassign.
+  ///
+  /// In en, this message translates to:
+  /// **'reassign'**
+  String get contentComplianceAuditVerbReassign;
+
+  /// No description provided for @contentComplianceAuditVerbAutoRebalance.
+  ///
+  /// In en, this message translates to:
+  /// **'auto-rebalance'**
+  String get contentComplianceAuditVerbAutoRebalance;
+
+  /// No description provided for @contentComplianceAuditStatusChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'{from} → {to}'**
+  String contentComplianceAuditStatusChanged(String from, String to);
+
+  /// No description provided for @contentComplianceAuditDispositionEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Disposition: {value}'**
+  String contentComplianceAuditDispositionEntry(String value);
 
   /// No description provided for @contentComplianceResolutionLine.
   ///
@@ -28509,13 +29594,13 @@ abstract class AppLocalizations {
   /// No description provided for @jobsClaimedBy.
   ///
   /// In en, this message translates to:
-  /// **'认领者：{claimedBy}'**
+  /// **'Claimed by: {claimedBy}'**
   String jobsClaimedBy(String claimedBy);
 
   /// No description provided for @jobsFailedReason.
   ///
   /// In en, this message translates to:
-  /// **'失败原因：{reason}'**
+  /// **'Failure reason: {reason}'**
   String jobsFailedReason(String reason);
 
   /// No description provided for @jobsTitle.
@@ -28617,31 +29702,31 @@ abstract class AppLocalizations {
   /// No description provided for @jobsDetailLabel.
   ///
   /// In en, this message translates to:
-  /// **'作业详情：{detail}'**
+  /// **'Job detail: {detail}'**
   String jobsDetailLabel(String detail);
 
   /// No description provided for @jobsKindsLabel.
   ///
   /// In en, this message translates to:
-  /// **'作业类型：{kinds}'**
+  /// **'Job kinds: {kinds}'**
   String jobsKindsLabel(String kinds);
 
   /// No description provided for @jobsKindSummaryLabel.
   ///
   /// In en, this message translates to:
-  /// **'类型汇总：{summary}'**
+  /// **'Kind summary: {summary}'**
   String jobsKindSummaryLabel(String summary);
 
   /// No description provided for @jobsStatusSummaryLabel.
   ///
   /// In en, this message translates to:
-  /// **'状态汇总：{summary}'**
+  /// **'Status summary: {summary}'**
   String jobsStatusSummaryLabel(String summary);
 
   /// No description provided for @jobsCountLabel.
   ///
   /// In en, this message translates to:
-  /// **'{count} 条作业'**
+  /// **'{count} job(s)'**
   String jobsCountLabel(int count);
 
   /// No description provided for @jobsRetry.
@@ -28773,28 +29858,28 @@ abstract class AppLocalizations {
   /// **'ID: {id}'**
   String opsWhFieldId(String id);
 
-  /// No description provided for @opsWhFieldSecret.
-  ///
-  /// In en, this message translates to:
-  /// **'Secret: {secret}'**
-  String opsWhFieldSecret(String secret);
-
   /// No description provided for @opsWhFieldUrl.
   ///
   /// In en, this message translates to:
   /// **'URL: {url}'**
   String opsWhFieldUrl(String url);
 
+  /// No description provided for @opsWhFieldSecret.
+  ///
+  /// In en, this message translates to:
+  /// **'Secret: {secret}'**
+  String opsWhFieldSecret(String secret);
+
   /// No description provided for @opsWhFieldCreatedAt.
   ///
   /// In en, this message translates to:
-  /// **'创建时间: {createdAt}'**
+  /// **'Created: {createdAt}'**
   String opsWhFieldCreatedAt(String createdAt);
 
   /// No description provided for @opsWhFieldUpdatedAt.
   ///
   /// In en, this message translates to:
-  /// **'更新时间: {updatedAt}'**
+  /// **'Updated: {updatedAt}'**
   String opsWhFieldUpdatedAt(String updatedAt);
 
   /// No description provided for @opsWhApiEventTypes.
@@ -28860,13 +29945,13 @@ abstract class AppLocalizations {
   /// No description provided for @notificationsFilterCount.
   ///
   /// In en, this message translates to:
-  /// **'筛选 {count}'**
+  /// **'Filtered: {count}'**
   String notificationsFilterCount(int count);
 
   /// No description provided for @notificationsUnreadCount.
   ///
   /// In en, this message translates to:
-  /// **'未读 {count}'**
+  /// **'Unread: {count}'**
   String notificationsUnreadCount(int count);
 
   /// No description provided for @apiKeysSnackFillName.
@@ -29582,24 +30667,6 @@ abstract class AppLocalizations {
   /// **'Sample type'**
   String get benchmarkLabelSampleType;
 
-  /// No description provided for @benchmarkExperimentSuiteCore.
-  ///
-  /// In en, this message translates to:
-  /// **'Core'**
-  String get benchmarkExperimentSuiteCore;
-
-  /// No description provided for @benchmarkExperimentSuiteFull.
-  ///
-  /// In en, this message translates to:
-  /// **'Full'**
-  String get benchmarkExperimentSuiteFull;
-
-  /// No description provided for @benchmarkExperimentSuiteSmoke.
-  ///
-  /// In en, this message translates to:
-  /// **'Smoke'**
-  String get benchmarkExperimentSuiteSmoke;
-
   /// No description provided for @benchmarkSampleTypeBadCase.
   ///
   /// In en, this message translates to:
@@ -29617,6 +30684,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Regression guard'**
   String get benchmarkSampleTypeRegressionGuard;
+
+  /// No description provided for @benchmarkExperimentSuiteSmoke.
+  ///
+  /// In en, this message translates to:
+  /// **'Smoke'**
+  String get benchmarkExperimentSuiteSmoke;
+
+  /// No description provided for @benchmarkExperimentSuiteCore.
+  ///
+  /// In en, this message translates to:
+  /// **'Core'**
+  String get benchmarkExperimentSuiteCore;
+
+  /// No description provided for @benchmarkExperimentSuiteFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Full'**
+  String get benchmarkExperimentSuiteFull;
 
   /// No description provided for @benchmarkLabelSampleSummary.
   ///
@@ -29762,6 +30847,12 @@ abstract class AppLocalizations {
   /// **'Trend data: {weeks} weeks'**
   String benchmarkTrendsDataSummary(int weeks);
 
+  /// No description provided for @benchmarkLabelGateDecisionNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Decision note'**
+  String get benchmarkLabelGateDecisionNote;
+
   /// No description provided for @shellJobQueueStatsTitle.
   ///
   /// In en, this message translates to:
@@ -29792,12 +30883,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'pending_by_kind: {kinds}'**
   String shellJobQueueStatsPendingByKind(String kinds);
-
-  /// No description provided for @benchmarkLabelGateDecisionNote.
-  ///
-  /// In en, this message translates to:
-  /// **'Decision note'**
-  String get benchmarkLabelGateDecisionNote;
 
   /// No description provided for @benchmarkGatePromoteBaselineTitle.
   ///
@@ -29976,6 +31061,1280 @@ abstract class AppLocalizations {
     String quality,
     String tokens,
   );
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeDiagnosisRefineIntentFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Refine per-scene emotion and visual intent in the director plan before splitting the storyboard table.'**
+  String get agentWorkspaceProductionFlowRecipeDiagnosisRefineIntentFirst;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeDiagnosisExpandTableFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand the key storyboard table window first, then decide whether to advance storyboard frames.'**
+  String get agentWorkspaceProductionFlowRecipeDiagnosisExpandTableFirst;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeDiagnosisCheapestFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow the first suggestion card and prioritize the cheapest next action.'**
+  String get agentWorkspaceProductionFlowRecipeDiagnosisCheapestFirst;
+
+  /// No description provided for @agentWorkspaceProductionSupervisionSummaryFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue based on the latest review conclusion.'**
+  String get agentWorkspaceProductionSupervisionSummaryFallback;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeSbGenRefreshTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh storyboard results'**
+  String get agentWorkspaceProductionFlowRecipeSbGenRefreshTitle;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeSbGenRereadTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reread missing-frame status'**
+  String get agentWorkspaceProductionFlowRecipeSbGenRereadTitle;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeSbGenRefreshDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard generation ran; refresh storyboard results before deciding whether to write back.'**
+  String get agentWorkspaceProductionFlowRecipeSbGenRefreshDetail;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeContinueDirectorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue director plan'**
+  String get agentWorkspaceProductionFlowRecipeContinueDirectorTitle;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeContinueDirectorAfterSbDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'If storyboard results are still unstable, return to scriptPlan for another director decision round.'**
+  String get agentWorkspaceProductionFlowRecipeContinueDirectorAfterSbDetail;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeSbTableRefreshTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh storyboard table'**
+  String get agentWorkspaceProductionFlowRecipeSbTableRefreshTitle;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeSbTablePartialTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reread partial storyboard table'**
+  String get agentWorkspaceProductionFlowRecipeSbTablePartialTitle;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeSbTableRefreshDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'The storyboard-table sub-agent ran; refresh the table before deciding whether to revise further.'**
+  String get agentWorkspaceProductionFlowRecipeSbTableRefreshDetail;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeSbTableCrosscheckTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cross-check storyboard results'**
+  String get agentWorkspaceProductionFlowRecipeSbTableCrosscheckTitle;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeSbTableCrosscheckDetailAll.
+  ///
+  /// In en, this message translates to:
+  /// **'When needed, switch to storyboard to confirm table changes have propagated to rendered frames.'**
+  String get agentWorkspaceProductionFlowRecipeSbTableCrosscheckDetailAll;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeAssetsRefreshTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh asset results'**
+  String get agentWorkspaceProductionFlowRecipeAssetsRefreshTitle;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeAssetsRereadTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reread affected assets'**
+  String get agentWorkspaceProductionFlowRecipeAssetsRereadTitle;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeAssetsRefreshDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'An asset action ran; refresh asset results before deciding whether to write back.'**
+  String get agentWorkspaceProductionFlowRecipeAssetsRefreshDetail;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeAssetsContinueSubTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue asset sub-agent'**
+  String get agentWorkspaceProductionFlowRecipeAssetsContinueSubTitle;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeAssetsContinueSubDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'If materials are still missing, chain the asset sub-agent for another generation round.'**
+  String get agentWorkspaceProductionFlowRecipeAssetsContinueSubDetail;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeAssetsPlanFirstTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create an asset plan first'**
+  String get agentWorkspaceProductionFlowRecipeAssetsPlanFirstTitle;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeAssetsPlanFirstDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Assets are empty; let the sub-agent fill in derived material planning first.'**
+  String get agentWorkspaceProductionFlowRecipeAssetsPlanFirstDetail;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeAssetsPlanFirstPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Given the current empty assets flow, plan a minimal viable derived material set and explain priorities.'**
+  String get agentWorkspaceProductionFlowRecipeAssetsPlanFirstPrompt;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeAssetsContinueGenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue asset generation'**
+  String get agentWorkspaceProductionFlowRecipeAssetsContinueGenTitle;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeAssetsContinueGenDetailGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Some materials still lack rendered images; run the asset generation sub-agent directly.'**
+  String get agentWorkspaceProductionFlowRecipeAssetsContinueGenDetailGeneric;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeRefreshStoryboardNeedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh storyboard needs'**
+  String get agentWorkspaceProductionFlowRecipeRefreshStoryboardNeedTitle;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeRefreshStoryboardNeedDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'After closing asset gaps, revisit storyboard to see whether the current approach still fits.'**
+  String get agentWorkspaceProductionFlowRecipeRefreshStoryboardNeedDetail;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeCheckStoryboardFlowTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check storyboard flow'**
+  String get agentWorkspaceProductionFlowRecipeCheckStoryboardFlowTitle;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeCheckStoryboardFlowDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Assets have baseline results; switch to storyboard to assess frame generation status.'**
+  String get agentWorkspaceProductionFlowRecipeCheckStoryboardFlowDetail;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeTidyDirectorPlanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tidy director plan'**
+  String get agentWorkspaceProductionFlowRecipeTidyDirectorPlanTitle;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeTidyDirectorPlanDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'If materials are mostly ready, generate the next director plan round to close out production pacing.'**
+  String get agentWorkspaceProductionFlowRecipeTidyDirectorPlanDetail;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeTidyDirectorPlanPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Combine current material status with scriptPlan and output the next director plan with execution priorities.'**
+  String get agentWorkspaceProductionFlowRecipeTidyDirectorPlanPrompt;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeFirstStoryboardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate first storyboard pass'**
+  String get agentWorkspaceProductionFlowRecipeFirstStoryboardTitle;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeFirstStoryboardDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard is empty; run the storyboard generation sub-agent to establish an initial shot set.'**
+  String get agentWorkspaceProductionFlowRecipeFirstStoryboardDetail;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeFirstStoryboardPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate a first-pass storyboard from the current production context with a minimal viable shot set.'**
+  String get agentWorkspaceProductionFlowRecipeFirstStoryboardPrompt;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeFillStoryboardFramesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue filling storyboard frames'**
+  String get agentWorkspaceProductionFlowRecipeFillStoryboardFramesTitle;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify linked assets'**
+  String get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsTitle;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailFromRefs.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus on assets referenced by the current storyboard window to avoid unrelated material in frame fills.'**
+  String get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailFromRefs;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailNoIds.
+  ///
+  /// In en, this message translates to:
+  /// **'The storyboard digest has not resolved explicit asset IDs; fall back to a compact assets summary read.'**
+  String get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailNoIds;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeCheckStoryboardTableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check storyboard table'**
+  String get agentWorkspaceProductionFlowRecipeCheckStoryboardTableTitle;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeCheckStoryboardTableDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'When needed, review the structured storyboardTable before writeback.'**
+  String get agentWorkspaceProductionFlowRecipeCheckStoryboardTableDetail;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailReadyIds.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard references explicit assets; verify this set is enough for upcoming director adjustments.'**
+  String get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailReadyIds;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailReadyNoIds.
+  ///
+  /// In en, this message translates to:
+  /// **'The storyboard digest did not resolve explicit asset IDs; read the compact assets summary first.'**
+  String
+  get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailReadyNoIds;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeRefreshDirectorPlanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh director plan'**
+  String get agentWorkspaceProductionFlowRecipeRefreshDirectorPlanTitle;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeRefreshDirectorPlanDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard has baseline results; return to scriptPlan to organize the next director decision round.'**
+  String get agentWorkspaceProductionFlowRecipeRefreshDirectorPlanDetail;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeCreateDirectorPlanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create director plan first'**
+  String get agentWorkspaceProductionFlowRecipeCreateDirectorPlanTitle;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeCreateDirectorPlanDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'scriptPlan is empty; establish a director plan before advancing assets or storyboard.'**
+  String get agentWorkspaceProductionFlowRecipeCreateDirectorPlanDetail;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeCreateDirectorPlanPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate a director plan from the current production context with execution priorities.'**
+  String get agentWorkspaceProductionFlowRecipeCreateDirectorPlanPrompt;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeReviewDirectorPlanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review director plan'**
+  String get agentWorkspaceProductionFlowRecipeReviewDirectorPlanTitle;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeReviewDirectorPlanDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'The director plan has content; a supervision review first surfaces pacing and asset issues cheaply.'**
+  String get agentWorkspaceProductionFlowRecipeReviewDirectorPlanDetail;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeReviewDirectorPlanPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Review the current director plan for plot coverage, asset fit, and pacing.'**
+  String get agentWorkspaceProductionFlowRecipeReviewDirectorPlanPrompt;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeRereadScriptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reread script evidence'**
+  String get agentWorkspaceProductionFlowRecipeRereadScriptTitle;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeCheckKeyAssetsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check key assets'**
+  String get agentWorkspaceProductionFlowRecipeCheckKeyAssetsTitle;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeRefineSceneIntentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Refine per-scene intent'**
+  String get agentWorkspaceProductionFlowRecipeRefineSceneIntentTitle;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipePreviewStoryboardTableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview storyboard table first'**
+  String get agentWorkspaceProductionFlowRecipePreviewStoryboardTableTitle;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeRefineSceneIntentDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'The director plan still lacks clear per-scene emotion and visual intent; strengthen this before splitting storyboardTable to reduce rework.'**
+  String get agentWorkspaceProductionFlowRecipeRefineSceneIntentDetail;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipePreviewStoryboardTableDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'If the plan is stable, sample-check storyboardTable structure for fewer tokens before reading storyboard imagery.'**
+  String get agentWorkspaceProductionFlowRecipePreviewStoryboardTableDetail;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeRefineSceneIntentPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue refining scriptPlan: prioritize per-scene emotional progression, visual intent, and shot anchors before storyboardTable split.'**
+  String get agentWorkspaceProductionFlowRecipeRefineSceneIntentPrompt;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeCreateStoryboardTableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create storyboard table'**
+  String get agentWorkspaceProductionFlowRecipeCreateStoryboardTableTitle;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeCreateStoryboardTableDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'storyboardTable is empty; use the storyboard-table sub-agent to add structure first.'**
+  String get agentWorkspaceProductionFlowRecipeCreateStoryboardTableDetail;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeCreateStoryboardTablePrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Produce a structured storyboardTable with fields that are clear and writeback-friendly.'**
+  String get agentWorkspaceProductionFlowRecipeCreateStoryboardTablePrompt;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeReviewStoryboardTableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review storyboard table'**
+  String get agentWorkspaceProductionFlowRecipeReviewStoryboardTableTitle;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeReviewStoryboardTableDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'The table has content; supervision review first prevents bad structure from amplifying into storyboard.'**
+  String get agentWorkspaceProductionFlowRecipeReviewStoryboardTableDetail;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeReviewStoryboardTablePrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Review the current storyboard table for coverage, asset links, and split granularity.'**
+  String get agentWorkspaceProductionFlowRecipeReviewStoryboardTablePrompt;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsTableRefs.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus on assets referenced by the current storyboard window to reduce unrelated context.'**
+  String get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsTableRefs;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsTableNoIds.
+  ///
+  /// In en, this message translates to:
+  /// **'This window did not resolve linked asset IDs; fall back to a compact assets summary read.'**
+  String get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsTableNoIds;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeSwitchStoryboardResultsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to storyboard results'**
+  String get agentWorkspaceProductionFlowRecipeSwitchStoryboardResultsTitle;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeSwitchStoryboardResultsDetailAll.
+  ///
+  /// In en, this message translates to:
+  /// **'The table has content; continue checking whether storyboard imagery has caught up.'**
+  String get agentWorkspaceProductionFlowRecipeSwitchStoryboardResultsDetailAll;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeSampleStoryboardTableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sample-read storyboard table'**
+  String get agentWorkspaceProductionFlowRecipeSampleStoryboardTableTitle;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeSampleStoryboardTableDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Read the first 8 key columns first—usually enough to decide whether to keep reviewing or write back.'**
+  String get agentWorkspaceProductionFlowRecipeSampleStoryboardTableDetail;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeReviseDirectorPlanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Revise director plan'**
+  String get agentWorkspaceProductionFlowRecipeReviseDirectorPlanTitle;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeRecheckAssetSupportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recheck asset support'**
+  String get agentWorkspaceProductionFlowRecipeRecheckAssetSupportTitle;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeRecheckAssetSupportDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Director plans often stall on asset prep; reading assets first reduces rework.'**
+  String get agentWorkspaceProductionFlowRecipeRecheckAssetSupportDetail;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeVerifyAssetSupportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify asset support'**
+  String get agentWorkspaceProductionFlowRecipeVerifyAssetSupportTitle;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeRereadDirectorPlanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reread director plan'**
+  String get agentWorkspaceProductionFlowRecipeRereadDirectorPlanTitle;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeRereadDirectorPlanAfterAssetsDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'After asset checks, return to a compact scriptPlan to see whether more revisions are needed before storyboard.'**
+  String
+  get agentWorkspaceProductionFlowRecipeRereadDirectorPlanAfterAssetsDetail;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeInspectStoryboardResultsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Inspect storyboard results'**
+  String get agentWorkspaceProductionFlowRecipeInspectStoryboardResultsTitle;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeCompareStoryboardTableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare storyboard table'**
+  String get agentWorkspaceProductionFlowRecipeCompareStoryboardTableTitle;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeCompareStoryboardTableDetailGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Reread the key-column window first to avoid reloading the entire table into context.'**
+  String
+  get agentWorkspaceProductionFlowRecipeCompareStoryboardTableDetailGeneric;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeRereadScriptNeedWindowDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'When needed, reread a compact script window to confirm shot rationale.'**
+  String get agentWorkspaceProductionFlowRecipeRereadScriptNeedWindowDetail;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeReviseStoryboardTableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Revise storyboard table'**
+  String get agentWorkspaceProductionFlowRecipeReviseStoryboardTableTitle;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeSampleRereadStoryboardTableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sample-reread storyboard table'**
+  String get agentWorkspaceProductionFlowRecipeSampleRereadStoryboardTableTitle;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeSampleRereadStoryboardTableDetailEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Read the key-column window first to avoid repeatedly loading the full table into context.'**
+  String
+  get agentWorkspaceProductionFlowRecipeSampleRereadStoryboardTableDetailEmpty;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeSampleRereadStoryboardTableDetailFocused.
+  ///
+  /// In en, this message translates to:
+  /// **'Reread only the storyboard table rows for the focused shots from review; avoid returning to the full table window.'**
+  String
+  get agentWorkspaceProductionFlowRecipeSampleRereadStoryboardTableDetailFocused;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeContinueStoryboardGenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue storyboard image generation'**
+  String get agentWorkspaceProductionFlowRecipeContinueStoryboardGenTitle;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeCompareStoryboardTableBeforeFillDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Before filling frames, reread the key-column window to avoid rebuilding context for every shot.'**
+  String
+  get agentWorkspaceProductionFlowRecipeCompareStoryboardTableBeforeFillDetail;
+
+  /// No description provided for @agentWorkspaceProductionArgSuggestDeriveNameFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'New derived asset'**
+  String get agentWorkspaceProductionArgSuggestDeriveNameFallback;
+
+  /// No description provided for @agentWorkspaceProductionArgSuggestFillFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill first item'**
+  String get agentWorkspaceProductionArgSuggestFillFirst;
+
+  /// No description provided for @agentWorkspaceProductionArgSuggestFillFirstThree.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill first 3 items'**
+  String get agentWorkspaceProductionArgSuggestFillFirstThree;
+
+  /// No description provided for @agentWorkspaceProductionArgSuggestFillAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill all'**
+  String get agentWorkspaceProductionArgSuggestFillAll;
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeAssetsGenHadSummaryNote.
+  ///
+  /// In en, this message translates to:
+  /// **'First review results for assets just generated, then decide whether to rerun.'**
+  String get agentWorkspaceProductionFlowRecipeAssetsGenHadSummaryNote;
+
+  /// No description provided for @agentWorkspaceProductionArgSuggestAddTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Add under #{id}'**
+  String agentWorkspaceProductionArgSuggestAddTo(String id);
+
+  /// No description provided for @agentWorkspaceProductionArgSuggestDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete #{id}'**
+  String agentWorkspaceProductionArgSuggestDelete(String id);
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeSbGenRereadDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard generation ran; first reread missing-frame status for shots #{ids}.'**
+  String agentWorkspaceProductionFlowRecipeSbGenRereadDetail(String ids);
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeSbTablePartialDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'The storyboard-table sub-agent ran; first reread table rows for shots #{ids}.'**
+  String agentWorkspaceProductionFlowRecipeSbTablePartialDetail(String ids);
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeSbTableCrosscheckDetailFocused.
+  ///
+  /// In en, this message translates to:
+  /// **'Prefer rereading storyboard results for shots #{ids} only so a table tweak does not widen to the whole sequence.'**
+  String agentWorkspaceProductionFlowRecipeSbTableCrosscheckDetailFocused(
+    String ids,
+  );
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeAssetsRereadDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Asset generation ran; first reread latest status for assets #{ids}.'**
+  String agentWorkspaceProductionFlowRecipeAssetsRereadDetail(String ids);
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeAssetsGenDetailScoped.
+  ///
+  /// In en, this message translates to:
+  /// **'{scope} still lack images; prioritize patching only this derived set to save tokens.'**
+  String agentWorkspaceProductionFlowRecipeAssetsGenDetailScoped(String scope);
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeSbFillGapDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Prioritize filling missing frames for shots #{idsLabel}{idTail}; avoid rerunning completed shots in bulk.'**
+  String agentWorkspaceProductionFlowRecipeSbFillGapDetail(
+    String idsLabel,
+    String idTail,
+  );
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeRereadScriptScriptPlanDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Reread only {scriptWindow} first to align the director plan with the script pacing before expanding reads.'**
+  String agentWorkspaceProductionFlowRecipeRereadScriptScriptPlanDetail(
+    String scriptWindow,
+  );
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeCheckKeyAssetsDetailIds.
+  ///
+  /// In en, this message translates to:
+  /// **'The director plan calls out {assetScope}; verify precisely before expanding to other materials.'**
+  String agentWorkspaceProductionFlowRecipeCheckKeyAssetsDetailIds(
+    String assetScope,
+  );
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeCheckKeyAssetsDetailNoIds.
+  ///
+  /// In en, this message translates to:
+  /// **'The director plan has content; verify whether {assetScope} supports execution, then add more assets only if needed.'**
+  String agentWorkspaceProductionFlowRecipeCheckKeyAssetsDetailNoIds(
+    String assetScope,
+  );
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeContinueDirectorDetailIds.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus director decisions around {assetScope} so downstream storyboard and asset actions inherit these rewrite constraints first.'**
+  String agentWorkspaceProductionFlowRecipeContinueDirectorDetailIds(
+    String assetScope,
+  );
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeContinueDirectorDetailNoIds.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue tightening director decisions around {assetScope} so downstream storyboard and asset actions inherit the current rewrite constraints.'**
+  String agentWorkspaceProductionFlowRecipeContinueDirectorDetailNoIds(
+    String assetScope,
+  );
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeContinueDirectorPromptIds.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue tightening scriptPlan around {assetScope} for shot and material priorities so downstream storyboard execution inherits upstream rewrite constraints.'**
+  String agentWorkspaceProductionFlowRecipeContinueDirectorPromptIds(
+    String assetScope,
+  );
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeContinueDirectorPromptNoIds.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue tightening scriptPlan around {assetScope} for shot and material priorities so downstream storyboard execution inherits upstream rewrite constraints.'**
+  String agentWorkspaceProductionFlowRecipeContinueDirectorPromptNoIds(
+    String assetScope,
+  );
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeRereadScriptRevisePlanDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Before revising, reread only {scriptWindow} to avoid loading the entire script for scriptPlan.'**
+  String agentWorkspaceProductionFlowRecipeRereadScriptRevisePlanDetail(
+    String scriptWindow,
+  );
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeReviseDirectorPlanDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Review conclusion: {summary}'**
+  String agentWorkspaceProductionFlowRecipeReviseDirectorPlanDetail(
+    String summary,
+  );
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeReviseDirectorPlanPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Revise scriptPlan based on the latest review; prioritize fixing: {summary}'**
+  String agentWorkspaceProductionFlowRecipeReviseDirectorPlanPrompt(
+    String summary,
+  );
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeVerifyAssetSupportDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Review conclusion: {summary}; first narrow to {assetScope} to confirm gaps in the director plan.'**
+  String agentWorkspaceProductionFlowRecipeVerifyAssetSupportDetail(
+    String summary,
+    String assetScope,
+  );
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeInspectSbResultsDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Review conclusion: {summary}; first narrow to {focusClause}'**
+  String agentWorkspaceProductionFlowRecipeInspectSbResultsDetail(
+    String summary,
+    String focusClause,
+  );
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeCompareStoryboardTableDetailFocus.
+  ///
+  /// In en, this message translates to:
+  /// **'Prefer rereading only the storyboard table rows for {storyboardFocus} to avoid returning to the full table.'**
+  String agentWorkspaceProductionFlowRecipeCompareStoryboardTableDetailFocus(
+    String storyboardFocus,
+  );
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeRereadScriptReviewDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'If shot rationale must be checked, prefer only the partial range: {reviewScope}.'**
+  String agentWorkspaceProductionFlowRecipeRereadScriptReviewDetail(
+    String reviewScope,
+  );
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeInspectStoryboardResultsDetailScript.
+  ///
+  /// In en, this message translates to:
+  /// **'Review conclusion: {summary}; prefer only the partial range: {reviewScope}.'**
+  String agentWorkspaceProductionFlowRecipeInspectStoryboardResultsDetailScript(
+    String summary,
+    String reviewScope,
+  );
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeSwitchStoryboardResultsDetailCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Prefer rereading only the {count} shots covered by the current storyboard table window; avoid falling back to a generic storyboard digest.'**
+  String agentWorkspaceProductionFlowRecipeSwitchStoryboardResultsDetailCount(
+    int count,
+  );
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeCompareStoryboardTableBeforeFillDetailFocus.
+  ///
+  /// In en, this message translates to:
+  /// **'Before filling frames, reread only the storyboard table rows for {storyboardFocus}.'**
+  String
+  agentWorkspaceProductionFlowRecipeCompareStoryboardTableBeforeFillDetailFocus(
+    String storyboardFocus,
+  );
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipePromptStoryboardContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue advancing storyboard. {body}'**
+  String agentWorkspaceProductionFlowRecipePromptStoryboardContinue(
+    String body,
+  );
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipePromptReviseStoryboardTable.
+  ///
+  /// In en, this message translates to:
+  /// **'Revise storyboardTable based on the latest review. {body}'**
+  String agentWorkspaceProductionFlowRecipePromptReviseStoryboardTable(
+    String body,
+  );
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipePromptStoryboardFromReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue advancing storyboard based on the latest review conclusion. {body}'**
+  String agentWorkspaceProductionFlowRecipePromptStoryboardFromReview(
+    String body,
+  );
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeShotCountTail.
+  ///
+  /// In en, this message translates to:
+  /// **' and {count} more shots'**
+  String agentWorkspaceProductionFlowRecipeShotCountTail(int count);
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeInspectStoryboardResultsDetailSummaryOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Review conclusion: {summary}'**
+  String
+  agentWorkspaceProductionFlowRecipeInspectStoryboardResultsDetailSummaryOnly(
+    String summary,
+  );
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeInspectStoryboardResultsDetailWithScope.
+  ///
+  /// In en, this message translates to:
+  /// **'Review conclusion: {summary}; {reviewScope}.'**
+  String
+  agentWorkspaceProductionFlowRecipeInspectStoryboardResultsDetailWithScope(
+    String summary,
+    String reviewScope,
+  );
+
+  /// No description provided for @agentWorkspaceProductionFlowRecipeArgDeriveNameFromParent.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}-derived'**
+  String agentWorkspaceProductionFlowRecipeArgDeriveNameFromParent(String name);
+
+  /// No description provided for @agentWorkspaceProductionAssetReviewPromptFocused.
+  ///
+  /// In en, this message translates to:
+  /// **'Please verify only these {count} assets against the current director plan; fill only necessary gaps and avoid bulk-reading unrelated assets.{priority}'**
+  String agentWorkspaceProductionAssetReviewPromptFocused(
+    int count,
+    String priority,
+  );
+
+  /// No description provided for @agentWorkspaceProductionAssetReviewPromptScoped.
+  ///
+  /// In en, this message translates to:
+  /// **'Please verify whether {scope} supports the current director plan; add minimal reads only if information is insufficient—do not bulk-read assets.{priority}'**
+  String agentWorkspaceProductionAssetReviewPromptScoped(
+    String scope,
+    String priority,
+  );
+
+  /// No description provided for @agentWorkspaceProductionAssetReviewPromptPriority.
+  ///
+  /// In en, this message translates to:
+  /// **' Prioritize addressing: {summary}'**
+  String agentWorkspaceProductionAssetReviewPromptPriority(String summary);
+
+  /// No description provided for @agentWorkspaceProductionRecipeAppliedFollowRefine.
+  ///
+  /// In en, this message translates to:
+  /// **'Applied suggestion: {title}. Next, refine the director plan.'**
+  String agentWorkspaceProductionRecipeAppliedFollowRefine(String title);
+
+  /// No description provided for @agentWorkspaceProductionRecipeAppliedFollowExpandTable.
+  ///
+  /// In en, this message translates to:
+  /// **'Applied suggestion: {title}. Next, expand the key storyboard table window.'**
+  String agentWorkspaceProductionRecipeAppliedFollowExpandTable(String title);
+
+  /// No description provided for @agentWorkspaceProductionRecipeAppliedGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Applied suggestion: {title}'**
+  String agentWorkspaceProductionRecipeAppliedGeneric(String title);
+
+  /// No description provided for @agentWorkspaceDefaultScriptPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'First use get_planData to read the necessary slices of planData.script, storySkeleton, and adaptationStrategy, then read the target chapter events; only widen into novel text when details are missing, and finally propose the next round of script suggestions.'**
+  String get agentWorkspaceDefaultScriptPrompt;
+
+  /// No description provided for @agentWorkspaceDefaultProductionPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Call get_flowData key=scriptPlan for a compact director plan first, then add minimal assets or storyboardTable reads as needed—avoid pulling the whole production flow upfront.'**
+  String get agentWorkspaceDefaultProductionPrompt;
+
+  /// No description provided for @agentWorkspaceScriptArgTemplateCurrentWindow.
+  ///
+  /// In en, this message translates to:
+  /// **'Template: current script window'**
+  String get agentWorkspaceScriptArgTemplateCurrentWindow;
+
+  /// No description provided for @agentWorkspaceScriptArgTemplateCurrentTail.
+  ///
+  /// In en, this message translates to:
+  /// **'Template: current script tail'**
+  String get agentWorkspaceScriptArgTemplateCurrentTail;
+
+  /// No description provided for @agentWorkspaceScriptArgTemplatePreviousEpisodeTail.
+  ///
+  /// In en, this message translates to:
+  /// **'Template: previous episode tail'**
+  String get agentWorkspaceScriptArgTemplatePreviousEpisodeTail;
+
+  /// No description provided for @agentWorkspaceScriptArgTemplateStorySkeletonSlice.
+  ///
+  /// In en, this message translates to:
+  /// **'Template: story skeleton slice'**
+  String get agentWorkspaceScriptArgTemplateStorySkeletonSlice;
+
+  /// No description provided for @agentWorkspaceScriptArgTemplateAdaptationSlice.
+  ///
+  /// In en, this message translates to:
+  /// **'Template: adaptation slice'**
+  String get agentWorkspaceScriptArgTemplateAdaptationSlice;
+
+  /// No description provided for @agentWorkspaceScriptArgTemplateNovelTextWindow.
+  ///
+  /// In en, this message translates to:
+  /// **'Template: novel text window'**
+  String get agentWorkspaceScriptArgTemplateNovelTextWindow;
+
+  /// No description provided for @agentWorkspaceScriptArgTemplateNovelEventsWindow.
+  ///
+  /// In en, this message translates to:
+  /// **'Template: novel events window'**
+  String get agentWorkspaceScriptArgTemplateNovelEventsWindow;
+
+  /// No description provided for @agentWorkspaceScriptArgTemplateEmptyArgs.
+  ///
+  /// In en, this message translates to:
+  /// **'Template: empty args'**
+  String get agentWorkspaceScriptArgTemplateEmptyArgs;
+
+  /// No description provided for @agentWorkspaceProductionArgTemplateCompactRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Template: compact read'**
+  String get agentWorkspaceProductionArgTemplateCompactRead;
+
+  /// No description provided for @agentWorkspaceProductionArgTemplateDirectorPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Template: director plan'**
+  String get agentWorkspaceProductionArgTemplateDirectorPlan;
+
+  /// No description provided for @agentWorkspaceProductionArgTemplateAssetSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Template: asset summary'**
+  String get agentWorkspaceProductionArgTemplateAssetSummary;
+
+  /// No description provided for @agentWorkspaceProductionArgTemplateIdList.
+  ///
+  /// In en, this message translates to:
+  /// **'Template: ID list'**
+  String get agentWorkspaceProductionArgTemplateIdList;
+
+  /// No description provided for @agentWorkspaceProductionArgTemplateStoryboardIds.
+  ///
+  /// In en, this message translates to:
+  /// **'Template: storyboard IDs'**
+  String get agentWorkspaceProductionArgTemplateStoryboardIds;
+
+  /// No description provided for @agentWorkspaceFilledArgTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Filled argument template: {label}'**
+  String agentWorkspaceFilledArgTemplate(String label);
+
+  /// No description provided for @agentWorkspaceFilledCandidateArgs.
+  ///
+  /// In en, this message translates to:
+  /// **'Filled candidate arguments: {label}'**
+  String agentWorkspaceFilledCandidateArgs(String label);
+
+  /// No description provided for @agentWorkspaceScriptInterceptArgsMustBeJsonObject.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked: script tool arguments must be a JSON object.'**
+  String get agentWorkspaceScriptInterceptArgsMustBeJsonObject;
+
+  /// No description provided for @agentWorkspaceScriptInterceptArgsJsonParseFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked: failed to parse script tool arguments JSON.'**
+  String get agentWorkspaceScriptInterceptArgsJsonParseFailed;
+
+  /// No description provided for @agentWorkspaceScriptInterceptPromptRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked: {action} requires a non-empty workspace prompt.'**
+  String agentWorkspaceScriptInterceptPromptRequired(String action);
+
+  /// No description provided for @agentWorkspaceScriptInterceptSelectDomainToolFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked: select a script domain tool before reading context.'**
+  String get agentWorkspaceScriptInterceptSelectDomainToolFirst;
+
+  /// No description provided for @agentWorkspaceScriptInterceptGetScriptContentNeedsScriptId.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked: get_script_content requires a valid script id.'**
+  String get agentWorkspaceScriptInterceptGetScriptContentNeedsScriptId;
+
+  /// No description provided for @agentWorkspaceScriptSyncedScriptContentScriptId.
+  ///
+  /// In en, this message translates to:
+  /// **'Synced: get_script_content arguments.scriptId -> {scriptId}'**
+  String agentWorkspaceScriptSyncedScriptContentScriptId(String scriptId);
+
+  /// No description provided for @agentWorkspaceScriptInterceptSelectSubAgentToolFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked: select a script sub-agent tool before running.'**
+  String get agentWorkspaceScriptInterceptSelectSubAgentToolFirst;
+
+  /// No description provided for @agentWorkspaceScriptActionRunWorkflow.
+  ///
+  /// In en, this message translates to:
+  /// **'Run script workspace workflow'**
+  String get agentWorkspaceScriptActionRunWorkflow;
+
+  /// No description provided for @agentWorkspaceScriptActionRunSubAgent.
+  ///
+  /// In en, this message translates to:
+  /// **'Run sub-agent'**
+  String get agentWorkspaceScriptActionRunSubAgent;
+
+  /// No description provided for @agentWorkspaceScriptTriggeredRunWorkflow.
+  ///
+  /// In en, this message translates to:
+  /// **'Triggered: run script workspace workflow'**
+  String get agentWorkspaceScriptTriggeredRunWorkflow;
+
+  /// No description provided for @agentWorkspaceScriptTriggeredProbeContext.
+  ///
+  /// In en, this message translates to:
+  /// **'Triggered: read script context ({tool})'**
+  String agentWorkspaceScriptTriggeredProbeContext(String tool);
+
+  /// No description provided for @agentWorkspaceScriptTriggeredRunSubAgent.
+  ///
+  /// In en, this message translates to:
+  /// **'Triggered: run sub-agent ({tool})'**
+  String agentWorkspaceScriptTriggeredRunSubAgent(String tool);
+
+  /// No description provided for @agentWorkspaceScriptInterceptNoScriptWritebackResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked: no script result available to write back.'**
+  String get agentWorkspaceScriptInterceptNoScriptWritebackResult;
+
+  /// No description provided for @agentWorkspaceScriptTriggeredWritebackScript.
+  ///
+  /// In en, this message translates to:
+  /// **'Triggered: write back script'**
+  String get agentWorkspaceScriptTriggeredWritebackScript;
+
+  /// No description provided for @agentWorkspaceScriptInterceptNoPlanDataWritebackResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked: no planData result available to write back.'**
+  String get agentWorkspaceScriptInterceptNoPlanDataWritebackResult;
+
+  /// No description provided for @agentWorkspaceScriptTriggeredWritebackPlanData.
+  ///
+  /// In en, this message translates to:
+  /// **'Triggered: write back plan data'**
+  String get agentWorkspaceScriptTriggeredWritebackPlanData;
+
+  /// No description provided for @agentWorkspaceScriptInterceptPlanWritebackNeedsPlanId.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked: plan id (fetch get_planData) and planData are required.'**
+  String get agentWorkspaceScriptInterceptPlanWritebackNeedsPlanId;
+
+  /// No description provided for @agentWorkspaceScriptTriggeredPlanRowUpdateData.
+  ///
+  /// In en, this message translates to:
+  /// **'Triggered: update-data writeback for plan row'**
+  String get agentWorkspaceScriptTriggeredPlanRowUpdateData;
+
+  /// No description provided for @agentWorkspaceScriptAppliedRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Applied recipe suggestion: {title}'**
+  String agentWorkspaceScriptAppliedRecipe(String title);
+
+  /// No description provided for @agentWorkspaceScriptAppliedStage.
+  ///
+  /// In en, this message translates to:
+  /// **'Applied stage action: {title}'**
+  String agentWorkspaceScriptAppliedStage(String title);
+
+  /// No description provided for @agentWorkspaceScriptGuidedGenerateDraftPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'First read the current episode plan and target chapter events; only widen into the previous episode tail when continuity needs it, then add novel text windows as needed, generate the next script body, and output full content ready for writeback.'**
+  String get agentWorkspaceScriptGuidedGenerateDraftPrompt;
+
+  /// No description provided for @agentWorkspaceScriptPresetPlotSkeletonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Plot skeleton'**
+  String get agentWorkspaceScriptPresetPlotSkeletonLabel;
+
+  /// No description provided for @agentWorkspaceScriptPresetPlotSkeletonPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Read get_planData slices of planData.script, storySkeleton, and adaptationStrategy first, then add the smallest get_novel_events or script window reads needed to summarize current plot skeleton gaps.'**
+  String get agentWorkspaceScriptPresetPlotSkeletonPrompt;
+
+  /// No description provided for @agentWorkspaceScriptPresetChapterAdaptLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter adaptation'**
+  String get agentWorkspaceScriptPresetChapterAdaptLabel;
+
+  /// No description provided for @agentWorkspaceScriptPresetChapterAdaptPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Use get_planData to read the planned script draft and adaptation strategy, combine get_novel_text and get_script_content window slices, and propose chapter rewrite suggestions with three actionable script edits.'**
+  String get agentWorkspaceScriptPresetChapterAdaptPrompt;
+
+  /// No description provided for @agentWorkspaceProductionPresetDirectorPlanLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Director plan'**
+  String get agentWorkspaceProductionPresetDirectorPlanLabel;
+
+  /// No description provided for @agentWorkspaceProductionPresetDirectorPlanPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Call get_flowData key=scriptPlan for a compact director plan first, then decide whether to continue with assets or storyboardTable.'**
+  String get agentWorkspaceProductionPresetDirectorPlanPrompt;
+
+  /// No description provided for @agentWorkspaceProductionPresetAssetInventoryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Asset inventory'**
+  String get agentWorkspaceProductionPresetAssetInventoryLabel;
+
+  /// No description provided for @agentWorkspaceProductionPresetAssetInventoryPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Call get_flowData key=assets with a minimal field subset, inventory current assets, and suggest the next production tasks.'**
+  String get agentWorkspaceProductionPresetAssetInventoryPrompt;
+
+  /// No description provided for @agentWorkspaceProductionPresetStoryboardProgressLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard progress'**
+  String get agentWorkspaceProductionPresetStoryboardProgressLabel;
+
+  /// No description provided for @agentWorkspaceProductionPresetStoryboardProgressPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Read get_flowData key=storyboard for compact shot status, assess storyboard completion, and suggest the next generate_storyboard run.'**
+  String get agentWorkspaceProductionPresetStoryboardProgressPrompt;
+
+  /// No description provided for @agentWorkspaceProductionPresetProductionReviewLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Production review'**
+  String get agentWorkspaceProductionPresetProductionReviewLabel;
+
+  /// No description provided for @agentWorkspaceProductionPresetProductionReviewPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Read get_flowData key=scriptPlan or storyboardTable first, then call production supervision to review current production results.'**
+  String get agentWorkspaceProductionPresetProductionReviewPrompt;
+
+  /// No description provided for @agentWorkspaceProductionRunningRunWorkflow.
+  ///
+  /// In en, this message translates to:
+  /// **'Running: production workspace workflow'**
+  String get agentWorkspaceProductionRunningRunWorkflow;
+
+  /// No description provided for @agentWorkspaceProductionRunningProbeTool.
+  ///
+  /// In en, this message translates to:
+  /// **'Running: read production tool result'**
+  String get agentWorkspaceProductionRunningProbeTool;
+
+  /// No description provided for @agentWorkspaceProductionRunningSubAgent.
+  ///
+  /// In en, this message translates to:
+  /// **'Running: sub-agent'**
+  String get agentWorkspaceProductionRunningSubAgent;
+
+  /// No description provided for @agentWorkspaceProductionRunningWriteback.
+  ///
+  /// In en, this message translates to:
+  /// **'Running: write back tool result'**
+  String get agentWorkspaceProductionRunningWriteback;
+
+  /// No description provided for @agentWorkspaceProductionInterceptArgsMustBeJsonObject.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked: production tool arguments must be a JSON object.'**
+  String get agentWorkspaceProductionInterceptArgsMustBeJsonObject;
+
+  /// No description provided for @agentWorkspaceProductionInterceptArgsJsonParseFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked: failed to parse production tool arguments JSON.'**
+  String get agentWorkspaceProductionInterceptArgsJsonParseFailed;
+
+  /// No description provided for @agentWorkspaceProductionInterceptPromptRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked: {action} requires a non-empty workspace prompt.'**
+  String agentWorkspaceProductionInterceptPromptRequired(String action);
+
+  /// No description provided for @agentWorkspaceProductionInterceptSelectDomainToolFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked: select a production domain tool before reading.'**
+  String get agentWorkspaceProductionInterceptSelectDomainToolFirst;
+
+  /// No description provided for @agentWorkspaceProductionInterceptGetFlowDataNeedsKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked: get_flowData requires a non-empty flow key.'**
+  String get agentWorkspaceProductionInterceptGetFlowDataNeedsKey;
+
+  /// No description provided for @agentWorkspaceProductionSyncedFlowDataKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Synced: get_flowData arguments.key -> {key}'**
+  String agentWorkspaceProductionSyncedFlowDataKey(String key);
+
+  /// No description provided for @agentWorkspaceProductionInterceptSelectSubAgentToolFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked: select a production sub-agent tool before running.'**
+  String get agentWorkspaceProductionInterceptSelectSubAgentToolFirst;
+
+  /// No description provided for @agentWorkspaceProductionActionRunWorkflow.
+  ///
+  /// In en, this message translates to:
+  /// **'Run production workspace workflow'**
+  String get agentWorkspaceProductionActionRunWorkflow;
+
+  /// No description provided for @agentWorkspaceProductionActionRunSubAgent.
+  ///
+  /// In en, this message translates to:
+  /// **'Run sub-agent'**
+  String get agentWorkspaceProductionActionRunSubAgent;
+
+  /// No description provided for @agentWorkspaceProductionTriggeredRunWorkflow.
+  ///
+  /// In en, this message translates to:
+  /// **'Triggered: run production workspace workflow'**
+  String get agentWorkspaceProductionTriggeredRunWorkflow;
+
+  /// No description provided for @agentWorkspaceProductionTriggeredProbeContext.
+  ///
+  /// In en, this message translates to:
+  /// **'Triggered: read production tool ({detail})'**
+  String agentWorkspaceProductionTriggeredProbeContext(String detail);
+
+  /// No description provided for @agentWorkspaceProductionTriggeredRunSubAgentTool.
+  ///
+  /// In en, this message translates to:
+  /// **'Triggered: run sub-agent ({tool})'**
+  String agentWorkspaceProductionTriggeredRunSubAgentTool(String tool);
+
+  /// No description provided for @agentWorkspaceProductionInterceptNoToolWriteback.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked: no tool result available to write back.'**
+  String get agentWorkspaceProductionInterceptNoToolWriteback;
+
+  /// No description provided for @agentWorkspaceProductionInterceptWritebackNeedsFlowKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked: provide a valid flow key before writeback.'**
+  String get agentWorkspaceProductionInterceptWritebackNeedsFlowKey;
+
+  /// No description provided for @agentWorkspaceProductionTriggeredWritebackFlow.
+  ///
+  /// In en, this message translates to:
+  /// **'Triggered: write back tool result -> flow[{key}]'**
+  String agentWorkspaceProductionTriggeredWritebackFlow(String key);
+
+  /// No description provided for @agentWorkspaceProductionGuidedDeriveAssetsPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Based on the current assets flow, propose the next round of derived asset generation and take the smallest viable next step.'**
+  String get agentWorkspaceProductionGuidedDeriveAssetsPrompt;
+
+  /// No description provided for @agentWorkspaceProductionGuidedStoryboardGenPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Based on the current storyboard flow, outline the next storyboard generation plan and take the smallest viable generation action.'**
+  String get agentWorkspaceProductionGuidedStoryboardGenPrompt;
+
+  /// No description provided for @agentWorkspaceProductionGuidedDirectorPlanPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Combine scriptPlan with current asset status, produce the next director plan round, and list execution priorities.'**
+  String get agentWorkspaceProductionGuidedDirectorPlanPrompt;
+
+  /// No description provided for @projectsCreativeManualDefaultSlotsTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Scene|scene|\nRole|role|'**
+  String get projectsCreativeManualDefaultSlotsTemplate;
 }
 
 class _AppLocalizationsDelegate

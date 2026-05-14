@@ -43,17 +43,17 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String localizedFormattingDurationHours(int count) {
-    return '${count}小时';
+    return '$count小时';
   }
 
   @override
   String localizedFormattingDurationMinutes(int count) {
-    return '${count}分钟';
+    return '$count分钟';
   }
 
   @override
   String localizedFormattingDurationSeconds(int count) {
-    return '${count}秒';
+    return '$count秒';
   }
 
   @override
@@ -1357,7 +1357,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get billingAuditProviderLabel => 'Provider';
 
   @override
-  String get billingAuditAll => '全部';
+  String get billingAuditProviderStripe => 'Stripe';
 
   @override
   String get billingAuditProviderAlipay => '支付宝';
@@ -1366,7 +1366,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get billingAuditProviderPaddle => 'Paddle';
 
   @override
-  String get billingAuditProviderStripe => 'Stripe';
+  String get billingAuditAll => '全部';
 
   @override
   String get billingAuditSortLabel => '排序';
@@ -3110,10 +3110,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get projectsCreativeManualVerbDelete => '删除';
-
-  @override
-  String get projectsCreativeManualDefaultSlotsTemplate =>
-      '场景|scene|\n角色|role|';
 
   @override
   String get projectsArtWorkbenchStatusRefreshing => '刷新画风列表中…';
@@ -16602,9 +16598,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionBlockerHeadline(
-    String title,
-    String status,
-    String reason,
+    Object reason,
+    Object status,
+    Object title,
   ) {
     return '当前卡点：$title · $status；$reason';
   }
@@ -16615,7 +16611,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionBlockerExpandTableWithCoverage(
-    String coverage,
+    Object coverage,
   ) {
     return '先继续扩读关键分镜表窗口；$coverage。';
   }
@@ -16630,908 +16626,25 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionBlockerExpandTableCoverageWithDigest(
-    String coverage,
+    Object coverage,
   ) {
     return '分镜表已有基础内容，但覆盖还不够；$coverage。';
   }
 
   @override
-  String agentWorkspaceProductionAppliedRefineDirectorPlan(String title) {
+  String agentWorkspaceProductionAppliedRefineDirectorPlan(Object title) {
     return '已应用阶段动作：$title，下一步先细化导演计划。';
   }
 
   @override
-  String agentWorkspaceProductionAppliedExpandStoryboardTable(String title) {
+  String agentWorkspaceProductionAppliedExpandStoryboardTable(Object title) {
     return '已应用阶段动作：$title，下一步先扩读关键分镜表窗口。';
   }
 
   @override
-  String agentWorkspaceProductionAppliedStageGeneric(String title) {
+  String agentWorkspaceProductionAppliedStageGeneric(Object title) {
     return '已应用阶段动作：$title';
   }
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeDiagnosisRefineIntentFirst =>
-      r'当前更建议先细化导演计划里的分场景情绪/画面意图，再继续拆分分镜表。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeDiagnosisExpandTableFirst =>
-      r'当前更建议先扩读关键分镜表窗口，再决定是否推进 storyboard。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeDiagnosisCheapestFirst =>
-      r'当前建议按第一张卡开始推进，优先执行最靠前的低成本动作。';
-
-  @override
-  String get agentWorkspaceProductionSupervisionSummaryFallback =>
-      r'按审核结论继续推进。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeSbGenRefreshTitle => r'刷新分镜结果';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeSbGenRereadTitle => r'回读缺帧状态';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeSbGenRefreshDetail =>
-      r'分镜生成动作已执行，先刷新分镜结果，再决定是否写回。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeContinueDirectorTitle =>
-      r'继续导演计划';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeContinueDirectorAfterSbDetail =>
-      r'如分镜结果还不稳定，回到 scriptPlan 生成下一轮导演决策。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeSbTableRefreshTitle => r'刷新分镜表';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeSbTablePartialTitle =>
-      r'回读局部分镜表';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeSbTableRefreshDetail =>
-      r'分镜表子代理已执行，先刷新分镜表，再决定是否继续修订。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeSbTableCrosscheckTitle =>
-      r'核对对应分镜';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeSbTableCrosscheckDetailAll =>
-      r'必要时切回 storyboard，确认分镜表调整是否已经落实到画面结果。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeAssetsRefreshTitle => r'刷新资产结果';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeAssetsRereadTitle => r'回读受影响资产';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeAssetsRefreshDetail =>
-      r'资产动作已执行，先刷新资产结果，再决定是否写回。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeAssetsContinueSubTitle =>
-      r'继续资产子代理';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeAssetsContinueSubDetail =>
-      r'若仍缺素材，可直接衔接资产子代理推进下一轮生成。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeAssetsPlanFirstTitle =>
-      r'先生成资产计划';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeAssetsPlanFirstDetail =>
-      r'当前 assets 为空，优先让子代理补齐衍生素材规划。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeAssetsPlanFirstPrompt =>
-      r'请基于当前空白 assets flow 规划最小可行的衍生素材集合，并说明优先级。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeAssetsContinueGenTitle =>
-      r'继续资产生成';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeAssetsContinueGenDetailGeneric =>
-      r'仍有素材缺少图像结果，适合直接运行素材生成子代理。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeRefreshStoryboardNeedTitle =>
-      r'刷新分镜需求';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeRefreshStoryboardNeedDetail =>
-      r'素材缺口补齐后通常需要回看 storyboard 是否还能沿用当前方案。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeCheckStoryboardFlowTitle =>
-      r'检查分镜 flow';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeCheckStoryboardFlowDetail =>
-      r'资产已具备基础结果，可切到 storyboard 评估镜头生成状态。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeTidyDirectorPlanTitle =>
-      r'整理导演计划';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeTidyDirectorPlanDetail =>
-      r'若素材已基本齐全，可生成下一轮导演计划收束 production 节奏。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeTidyDirectorPlanPrompt =>
-      r'请结合现有素材状态与 scriptPlan，输出下一轮导演计划与执行优先级。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeFirstStoryboardTitle =>
-      r'生成第一版分镜';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeFirstStoryboardDetail =>
-      r'当前 storyboard 为空，优先运行分镜生成子代理建立初版镜头。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeFirstStoryboardPrompt =>
-      r'请基于当前 production 上下文生成第一版 storyboard，并保持最小可行镜头集。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeFillStoryboardFramesTitle =>
-      r'继续补齐分镜图';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsTitle =>
-      r'核对关联资产';
-
-  @override
-  String
-  get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailFromRefs =>
-      r'优先只看当前分镜窗口实际引用的资产，避免把无关素材带入分镜补图。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailNoIds =>
-      r'当前分镜摘要尚未定位出明确资产 ID，退回紧凑 assets 摘要读取。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeCheckStoryboardTableTitle =>
-      r'检查分镜表';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeCheckStoryboardTableDetail =>
-      r'必要时切到 storyboardTable 审阅结构化镜头表后再回写。';
-
-  @override
-  String
-  get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailReadyIds =>
-      r'分镜已引用明确资产，可先核对这批资产是否足够支撑后续导演调整。';
-
-  @override
-  String
-  get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailReadyNoIds =>
-      r'当前分镜摘要未定位出明确资产 ID，先读紧凑 assets 摘要即可。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeRefreshDirectorPlanTitle =>
-      r'刷新导演计划';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeRefreshDirectorPlanDetail =>
-      r'分镜已有基础结果，适合回到 scriptPlan 整理下一轮导演决策。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeCreateDirectorPlanTitle =>
-      r'先生成导演计划';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeCreateDirectorPlanDetail =>
-      r'当前 scriptPlan 为空，优先建立导演计划再推进资产或分镜。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeCreateDirectorPlanPrompt =>
-      r'请基于当前 production 上下文生成一版导演计划，并给出执行优先级。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeReviewDirectorPlanTitle =>
-      r'审核导演计划';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeReviewDirectorPlanDetail =>
-      r'导演计划已有内容，先做一次监督审核更容易在低成本阶段发现节奏和资产问题。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeReviewDirectorPlanPrompt =>
-      r'请审核当前导演规划，重点检查剧情覆盖、资产匹配与节奏合理性。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeRereadScriptTitle => r'回看剧本依据';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeCheckKeyAssetsTitle => r'检查关键资产';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeRefineSceneIntentTitle =>
-      r'补足分场景意图';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipePreviewStoryboardTableTitle =>
-      r'先看分镜表落地';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeRefineSceneIntentDetail =>
-      r'当前导演计划还缺少足够明确的分场景情绪/画面意图，先补这层再拆 storyboardTable，能减少后续反复返工。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipePreviewStoryboardTableDetail =>
-      r'如计划已定，先抽样检查 storyboardTable 结构更省 token，再决定是否读取 storyboard 画面结果。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeRefineSceneIntentPrompt =>
-      r'请继续细化当前 scriptPlan，优先补足分场景情绪推进、画面意图与镜头落点，再进入 storyboardTable 拆分。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeCreateStoryboardTableTitle =>
-      r'生成分镜表';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeCreateStoryboardTableDetail =>
-      r'当前 storyboardTable 为空，适合先用分镜表子代理补结构。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeCreateStoryboardTablePrompt =>
-      r'请先产出结构化 storyboardTable，并保持字段清晰可回写。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeReviewStoryboardTableTitle =>
-      r'审核分镜表';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeReviewStoryboardTableDetail =>
-      r'分镜表已有内容，先做监督审核可避免把错误结构继续放大到 storyboard。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeReviewStoryboardTablePrompt =>
-      r'请审核当前分镜表，重点检查覆盖度、资产关联与拆分粒度。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsTableRefs =>
-      r'优先只看当前分镜窗口实际引用的资产，减少无关素材上下文。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsTableNoIds =>
-      r'当前窗口暂未解析出关联资产 ID，退回紧凑 assets 摘要读取。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeSwitchStoryboardResultsTitle =>
-      r'切回分镜结果';
-
-  @override
-  String
-  get agentWorkspaceProductionFlowRecipeSwitchStoryboardResultsDetailAll =>
-      r'分镜表已有内容，可继续查看 storyboard 画面结果是否跟上。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeSampleStoryboardTableTitle =>
-      r'抽样读取分镜表';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeSampleStoryboardTableDetail =>
-      r'先只看前 8 行关键列，通常足够判断是否继续审核或回写。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeReviseDirectorPlanTitle =>
-      r'修导演计划';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeRecheckAssetSupportTitle =>
-      r'复查资产支撑';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeRecheckAssetSupportDetail =>
-      r'导演计划常先卡在资产准备，先看 assets 能减少返工。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeVerifyAssetSupportTitle =>
-      r'核对资产支撑';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeRereadDirectorPlanTitle =>
-      r'回看导演计划';
-
-  @override
-  String
-  get agentWorkspaceProductionFlowRecipeRereadDirectorPlanAfterAssetsDetail =>
-      r'资产核对后回到精简 scriptPlan，确认是否还需要修订计划再推进分镜。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeInspectStoryboardResultsTitle =>
-      r'检查分镜结果';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeCompareStoryboardTableTitle =>
-      r'对照分镜表';
-
-  @override
-  String
-  get agentWorkspaceProductionFlowRecipeCompareStoryboardTableDetailGeneric =>
-      r'先复读关键列窗口，避免把整张分镜表重新带入上下文。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeRereadScriptNeedWindowDetail =>
-      r'需要时再回看紧凑剧本窗口，确认镜头依据。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeReviseStoryboardTableTitle =>
-      r'修分镜表';
-
-  @override
-  String
-  get agentWorkspaceProductionFlowRecipeSampleRereadStoryboardTableTitle =>
-      r'抽样复读分镜表';
-
-  @override
-  String
-  get agentWorkspaceProductionFlowRecipeSampleRereadStoryboardTableDetailEmpty =>
-      r'先读取关键列窗口，避免把整张表反复带入上下文。';
-
-  @override
-  String
-  get agentWorkspaceProductionFlowRecipeSampleRereadStoryboardTableDetailFocused =>
-      r'先只复读审核聚焦镜头对应的分镜表行，避免回到整表窗口。';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeContinueStoryboardGenTitle =>
-      r'继续生成分镜图';
-
-  @override
-  String
-  get agentWorkspaceProductionFlowRecipeCompareStoryboardTableBeforeFillDetail =>
-      r'补图前先复读关键列窗口，避免为整批镜头重建上下文。';
-
-  @override
-  String get agentWorkspaceProductionArgSuggestDeriveNameFallback => r'新衍生资产';
-
-  @override
-  String get agentWorkspaceProductionArgSuggestFillFirst => r'填充首项';
-
-  @override
-  String get agentWorkspaceProductionArgSuggestFillFirstThree => r'填充前 3 项';
-
-  @override
-  String get agentWorkspaceProductionArgSuggestFillAll => r'填充全部';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeAssetsGenHadSummaryNote =>
-      r'先检查本次刚生成资产的结果再决定是否补跑';
-
-  @override
-  String agentWorkspaceProductionArgSuggestAddTo(String id) {
-    return '新增到 #${id}';
-  }
-
-  @override
-  String agentWorkspaceProductionArgSuggestDelete(String id) {
-    return '删除 #${id}';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeSbGenRereadDetail(String ids) {
-    return '分镜生成动作已执行，先回读本次镜头 #${ids} 的缺帧状态。';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeSbTablePartialDetail(String ids) {
-    return '分镜表子代理已执行，先回读本次镜头 #${ids} 对应的局部分镜表行。';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeSbTableCrosscheckDetailFocused(
-    String ids,
-  ) {
-    return '优先只回读镜头 #${ids} 的 storyboard 结果，确认表格修改没有放大到整段。';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeAssetsRereadDetail(String ids) {
-    return '资产生成动作已执行，先回读本次资产 #${ids} 的最新状态。';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeAssetsGenDetailScoped(String scope) {
-    return '${scope} 仍缺图，优先只补这批衍生资产更省 token。';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeSbFillGapDetail(
-    String idTail,
-    String idsLabel,
-  ) {
-    return '优先只补缺帧镜头 #${idsLabel}${idTail}，避免把已完成镜头整批重跑。';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeRereadScriptScriptPlanDetail(
-    String scriptWindow,
-  ) {
-    return '先只回看${scriptWindow}，确认导演计划与原文节奏一致，再决定是否扩读。';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeCheckKeyAssetsDetailIds(
-    String assetScope,
-  ) {
-    return '导演计划已点名${assetScope}，先精确核对再决定是否扩读其他素材。';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeCheckKeyAssetsDetailNoIds(
-    String assetScope,
-  ) {
-    return '导演计划已有内容，先核对${assetScope}是否支撑执行，信息不足时再补更多资产。';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeContinueDirectorDetailIds(
-    String assetScope,
-  ) {
-    return '优先围绕${assetScope}收束导演决策，让后续分镜和素材动作先继承这批受改写约束的重点。';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeContinueDirectorDetailNoIds(
-    String assetScope,
-  ) {
-    return '先围绕${assetScope}继续收束导演决策，让后续分镜和素材动作继承当前改写约束。';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeContinueDirectorPromptIds(
-    String assetScope,
-  ) {
-    return '请在当前 scriptPlan 上继续收束导演计划，优先围绕${assetScope}安排镜头和素材优先级，确保后续分镜执行继承上游改写约束。';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeContinueDirectorPromptNoIds(
-    String assetScope,
-  ) {
-    return '请在当前 scriptPlan 上继续收束导演计划，优先围绕${assetScope}安排镜头和素材优先级，确保后续分镜执行继承上游改写约束。';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeRereadScriptRevisePlanDetail(
-    String scriptWindow,
-  ) {
-    return '修订前先只回看${scriptWindow}，避免为 scriptPlan 扩读整段剧本。';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeReviseDirectorPlanDetail(
-    String summary,
-  ) {
-    return '审核结论：${summary}';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeReviseDirectorPlanPrompt(
-    String summary,
-  ) {
-    return '请根据最近审核意见修订 scriptPlan，优先解决：${summary}';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeVerifyAssetSupportDetail(
-    String assetScope,
-    String summary,
-  ) {
-    return '审核结论：${summary}；优先只看${assetScope}，确认导演计划缺口。';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeInspectSbResultsDetail(
-    String focusClause,
-    String summary,
-  ) {
-    return '审核结论：${summary}；优先只看${focusClause}';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeCompareStoryboardTableDetailFocus(
-    String storyboardFocus,
-  ) {
-    return '优先只复读${storyboardFocus}对应的分镜表行，避免退回整表。';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeRereadScriptReviewDetail(
-    String reviewScope,
-  ) {
-    return '如需核对镜头依据，优先只用局部范围：${reviewScope}。';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeInspectStoryboardResultsDetailScript(
-    String reviewScope,
-    String summary,
-  ) {
-    return '审核结论：${summary}；优先只用局部范围：${reviewScope}。';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeSwitchStoryboardResultsDetailCount(
-    int count,
-  ) {
-    return '优先只回看当前分镜表窗口对应的 ${count} 个镜头，避免退回通用分镜摘要。';
-  }
-
-  @override
-  String
-  agentWorkspaceProductionFlowRecipeCompareStoryboardTableBeforeFillDetailFocus(
-    String storyboardFocus,
-  ) {
-    return '补图前先只复读${storyboardFocus}对应的分镜表行。';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipePromptStoryboardContinue(
-    String body,
-  ) {
-    return '请继续推进 storyboard。${body}';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipePromptReviseStoryboardTable(
-    String body,
-  ) {
-    return '请根据最近审核意见修订 storyboardTable。${body}';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipePromptStoryboardFromReview(
-    String body,
-  ) {
-    return '请基于最近审核结论继续推进 storyboard。${body}';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeShotCountTail(int count) {
-    return ' 等 ${count} 个镜头';
-  }
-
-  @override
-  String
-  agentWorkspaceProductionFlowRecipeInspectStoryboardResultsDetailSummaryOnly(
-    String summary,
-  ) {
-    return '审核结论：${summary}';
-  }
-
-  @override
-  String
-  agentWorkspaceProductionFlowRecipeInspectStoryboardResultsDetailWithScope(
-    String reviewScope,
-    String summary,
-  ) {
-    return '审核结论：${summary}；${reviewScope}。';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeArgDeriveNameFromParent(
-    String name,
-  ) {
-    return '${name}-衍生';
-  }
-
-  @override
-  String agentWorkspaceProductionAssetReviewPromptFocused(
-    int count,
-    String priority,
-  ) {
-    return '请优先只核对这 ${count} 个资产是否支撑当前导演规划；仅补必要缺口，不扩读无关素材。${priority}';
-  }
-
-  @override
-  String agentWorkspaceProductionAssetReviewPromptScoped(
-    String priority,
-    String scope,
-  ) {
-    return '请先核对${scope}是否支撑当前导演规划；信息不足时再最小补读，不要整包扩读 assets。${priority}';
-  }
-
-  @override
-  String agentWorkspaceProductionAssetReviewPromptPriority(String summary) {
-    return '优先解决：${summary}';
-  }
-
-  @override
-  String agentWorkspaceProductionRecipeAppliedFollowRefine(String title) {
-    return '已应用任务建议：${title}，下一步先细化导演计划。';
-  }
-
-  @override
-  String agentWorkspaceProductionRecipeAppliedFollowExpandTable(String title) {
-    return '已应用任务建议：${title}，下一步先扩读关键分镜表窗口。';
-  }
-
-  @override
-  String agentWorkspaceProductionRecipeAppliedGeneric(String title) {
-    return '已应用任务建议：${title}';
-  }
-
-  @override
-  String get agentWorkspaceDefaultScriptPrompt =>
-      '先用 get_planData 读取 planData.script、storySkeleton、adaptationStrategy 的必要片段，再读目标章节事件；只有细节不足时才补正文窗口，最后给出下一轮 script 建议。';
-
-  @override
-  String get agentWorkspaceDefaultProductionPrompt =>
-      '先调用 get_flowData key=scriptPlan 读取紧凑导演规划，再按需补最小化 assets 或 storyboardTable，上来不要整包读取 production flow。';
-
-  @override
-  String get agentWorkspaceScriptArgTemplateCurrentWindow => '模板: 当前剧本窗口';
-
-  @override
-  String get agentWorkspaceScriptArgTemplateCurrentTail => '模板: 当前剧本尾段';
-
-  @override
-  String get agentWorkspaceScriptArgTemplatePreviousEpisodeTail => '模板: 上一集尾段';
-
-  @override
-  String get agentWorkspaceScriptArgTemplateStorySkeletonSlice => '模板: 骨架片段';
-
-  @override
-  String get agentWorkspaceScriptArgTemplateAdaptationSlice => '模板: 策略片段';
-
-  @override
-  String get agentWorkspaceScriptArgTemplateNovelTextWindow => '模板: 正文窗口';
-
-  @override
-  String get agentWorkspaceScriptArgTemplateNovelEventsWindow => '模板: 事件窗口';
-
-  @override
-  String get agentWorkspaceScriptArgTemplateEmptyArgs => '模板: 空参数';
-
-  @override
-  String get agentWorkspaceProductionArgTemplateCompactRead => '模板: 紧凑读取';
-
-  @override
-  String get agentWorkspaceProductionArgTemplateDirectorPlan => '模板: 导演计划';
-
-  @override
-  String get agentWorkspaceProductionArgTemplateAssetSummary => '模板: 资产摘要';
-
-  @override
-  String get agentWorkspaceProductionArgTemplateIdList => '模板: ID 列表';
-
-  @override
-  String get agentWorkspaceProductionArgTemplateStoryboardIds => '模板: 分镜 ID';
-
-  @override
-  String agentWorkspaceFilledArgTemplate(String label) {
-    return '已填充参数模板：$label';
-  }
-
-  @override
-  String agentWorkspaceFilledCandidateArgs(String label) {
-    return '已填充候选参数：$label';
-  }
-
-  @override
-  String get agentWorkspaceScriptInterceptArgsMustBeJsonObject =>
-      '拦截：剧本工具参数必须是 JSON object。';
-
-  @override
-  String get agentWorkspaceScriptInterceptArgsJsonParseFailed =>
-      '拦截：剧本工具参数 JSON 解析失败。';
-
-  @override
-  String agentWorkspaceScriptInterceptPromptRequired(String action) {
-    return '拦截：$action 需要非空工作区提示词。';
-  }
-
-  @override
-  String get agentWorkspaceScriptInterceptSelectDomainToolFirst =>
-      '拦截：读取前需要选择剧本域工具。';
-
-  @override
-  String get agentWorkspaceScriptInterceptGetScriptContentNeedsScriptId =>
-      '拦截：get_script_content 需要有效剧本 ID。';
-
-  @override
-  String agentWorkspaceScriptSyncedScriptContentScriptId(String scriptId) {
-    return '已同步：get_script_content arguments.scriptId -> $scriptId';
-  }
-
-  @override
-  String get agentWorkspaceScriptInterceptSelectSubAgentToolFirst =>
-      '拦截：运行子代理前需要选择剧本子代理工具。';
-
-  @override
-  String get agentWorkspaceScriptActionRunWorkflow => '运行剧本工作流';
-
-  @override
-  String get agentWorkspaceScriptActionRunSubAgent => '运行子代理';
-
-  @override
-  String get agentWorkspaceScriptTriggeredRunWorkflow => '已触发：运行剧本工作流';
-
-  @override
-  String agentWorkspaceScriptTriggeredProbeContext(String tool) {
-    return '已触发：读取剧本上下文 ($tool)';
-  }
-
-  @override
-  String agentWorkspaceScriptTriggeredRunSubAgent(String tool) {
-    return '已触发：运行子代理 ($tool)';
-  }
-
-  @override
-  String get agentWorkspaceScriptInterceptNoScriptWritebackResult =>
-      '拦截：暂无剧本结果可写回。';
-
-  @override
-  String get agentWorkspaceScriptTriggeredWritebackScript => '已触发：写回剧本';
-
-  @override
-  String get agentWorkspaceScriptInterceptNoPlanDataWritebackResult =>
-      '拦截：暂无 planData 结果可写回。';
-
-  @override
-  String get agentWorkspaceScriptTriggeredWritebackPlanData => '已触发：写回计划数据';
-
-  @override
-  String get agentWorkspaceScriptInterceptPlanWritebackNeedsPlanId =>
-      '拦截：需要 planId（拉取 get_planData）与 planData。';
-
-  @override
-  String get agentWorkspaceScriptTriggeredPlanRowUpdateData =>
-      '已触发：update-data 写回计划行';
-
-  @override
-  String agentWorkspaceScriptAppliedRecipe(String title) {
-    return '已应用任务建议：$title';
-  }
-
-  @override
-  String agentWorkspaceScriptAppliedStage(String title) {
-    return '已应用阶段动作：$title';
-  }
-
-  @override
-  String get agentWorkspaceScriptGuidedGenerateDraftPrompt =>
-      '请先读取当前集计划与目标章节事件；只有在衔接需要时才补读上一集尾段，其他细节再按需补章节正文窗口，然后生成下一版剧本正文并输出可直接写回的完整内容。';
-
-  @override
-  String get agentWorkspaceScriptPresetPlotSkeletonLabel => '剧情骨架';
-
-  @override
-  String get agentWorkspaceScriptPresetPlotSkeletonPrompt =>
-      '先读取 get_planData 的 planData.script、storySkeleton、adaptationStrategy 片段，再补最少的 get_novel_events 或剧本窗口，总结当前剧情骨架缺口。';
-
-  @override
-  String get agentWorkspaceScriptPresetChapterAdaptLabel => '章节改编';
-
-  @override
-  String get agentWorkspaceScriptPresetChapterAdaptPrompt =>
-      '先用 get_planData 读取计划剧本草稿与改编策略，再结合 get_novel_text 与 get_script_content 的窗口片段，对当前章节做改写建议，输出 3 条可执行脚本改写项。';
-
-  @override
-  String get agentWorkspaceProductionPresetDirectorPlanLabel => '导演计划';
-
-  @override
-  String get agentWorkspaceProductionPresetDirectorPlanPrompt =>
-      '先调用 get_flowData key=scriptPlan，读取紧凑导演规划，再决定是否继续读 assets 或 storyboardTable。';
-
-  @override
-  String get agentWorkspaceProductionPresetAssetInventoryLabel => '资产盘点';
-
-  @override
-  String get agentWorkspaceProductionPresetAssetInventoryPrompt =>
-      '先调用 get_flowData key=assets 并读取最小字段子集，盘点现有资产状态并给出下一步 production 任务建议。';
-
-  @override
-  String get agentWorkspaceProductionPresetStoryboardProgressLabel => '分镜推进';
-
-  @override
-  String get agentWorkspaceProductionPresetStoryboardProgressPrompt =>
-      '读取 get_flowData key=storyboard 的紧凑镜头状态，评估当前分镜完成度并给出下一次 generate_storyboard 的执行建议。';
-
-  @override
-  String get agentWorkspaceProductionPresetProductionReviewLabel => '制作审核';
-
-  @override
-  String get agentWorkspaceProductionPresetProductionReviewPrompt =>
-      '请先读取 get_flowData key=scriptPlan 或 storyboardTable，再调用 production supervision 审核当前制作结果。';
-
-  @override
-  String get agentWorkspaceProductionRunningRunWorkflow => '执行中：运行制作工作流';
-
-  @override
-  String get agentWorkspaceProductionRunningProbeTool => '执行中：读取制作工具结果';
-
-  @override
-  String get agentWorkspaceProductionRunningSubAgent => '执行中：运行子代理';
-
-  @override
-  String get agentWorkspaceProductionRunningWriteback => '执行中：写回工具结果';
-
-  @override
-  String get agentWorkspaceProductionInterceptArgsMustBeJsonObject =>
-      '拦截：制作工具参数必须是 JSON object。';
-
-  @override
-  String get agentWorkspaceProductionInterceptArgsJsonParseFailed =>
-      '拦截：制作工具参数 JSON 解析失败。';
-
-  @override
-  String agentWorkspaceProductionInterceptPromptRequired(String action) {
-    return '拦截：$action 需要非空工作区提示词。';
-  }
-
-  @override
-  String get agentWorkspaceProductionInterceptSelectDomainToolFirst =>
-      '拦截：读取前需要选择制作域工具。';
-
-  @override
-  String get agentWorkspaceProductionInterceptGetFlowDataNeedsKey =>
-      '拦截：get_flowData 需要有效 flow key。';
-
-  @override
-  String agentWorkspaceProductionSyncedFlowDataKey(String key) {
-    return '已同步：get_flowData arguments.key -> $key';
-  }
-
-  @override
-  String get agentWorkspaceProductionInterceptSelectSubAgentToolFirst =>
-      '拦截：运行子代理前需要选择制作子代理工具。';
-
-  @override
-  String get agentWorkspaceProductionActionRunWorkflow => '运行制作工作流';
-
-  @override
-  String get agentWorkspaceProductionActionRunSubAgent => '运行子代理';
-
-  @override
-  String get agentWorkspaceProductionTriggeredRunWorkflow => '已触发：运行制作工作流';
-
-  @override
-  String agentWorkspaceProductionTriggeredProbeContext(String detail) {
-    return '已触发：读取制作工具 ($detail)';
-  }
-
-  @override
-  String agentWorkspaceProductionTriggeredRunSubAgentTool(String tool) {
-    return '已触发：运行子代理 ($tool)';
-  }
-
-  @override
-  String get agentWorkspaceProductionInterceptNoToolWriteback =>
-      '拦截：暂无工具结果可写回。';
-
-  @override
-  String get agentWorkspaceProductionInterceptWritebackNeedsFlowKey =>
-      '拦截：写回前请提供有效 flow key。';
-
-  @override
-  String agentWorkspaceProductionTriggeredWritebackFlow(String key) {
-    return '已触发：写回工具结果 -> flow[$key]';
-  }
-
-  @override
-  String get agentWorkspaceProductionGuidedDeriveAssetsPrompt =>
-      '请基于当前资产 flow 给出下一轮衍生素材生成建议，并执行最小可行推进。';
-
-  @override
-  String get agentWorkspaceProductionGuidedStoryboardGenPrompt =>
-      '请基于当前分镜 flow 输出下一轮分镜生成计划，并执行最小可行生成动作。';
-
-  @override
-  String get agentWorkspaceProductionGuidedDirectorPlanPrompt =>
-      '请结合 scriptPlan 与现有素材状态，产出下一轮导演计划并给出执行优先级。';
 
   @override
   String agentWorkspaceProductionFlowChip(String flowKey) {
@@ -17682,44 +16795,50 @@ class AppLocalizationsZh extends AppLocalizations {
   String get agentWorkspaceProductionAssetTypeTool => '道具';
 
   @override
-  String agentWorkspaceProductionAssetScopeIds(String ids) {
-    return '资产 #${ids}';
+  String agentWorkspaceProductionAssetScopeIds(Object ids) {
+    return '资产 #$ids';
   }
 
   @override
-  String agentWorkspaceProductionAssetScopeTypes(String types) {
-    return '${types}资产';
+  String agentWorkspaceProductionAssetScopeTypes(Object types) {
+    return '$types资产';
   }
 
   @override
   String get agentWorkspaceProductionAssetScopeCompact => '紧凑资产摘要';
 
   @override
-  String agentWorkspaceProductionAssetFocusIdsShort(String visible) {
-    return '资产 #${visible}';
+  String agentWorkspaceProductionAssetFocusIdsShort(Object visible) {
+    return '资产 #$visible';
   }
 
   @override
-  String agentWorkspaceProductionAssetFocusIdsMore(String visible, int total) {
-    return '资产 #${visible} 等 ${total} 项';
+  String agentWorkspaceProductionAssetFocusIdsMore(
+    Object total,
+    Object visible,
+  ) {
+    return '资产 #$visible 等 $total 项';
   }
 
   @override
   String get agentWorkspaceProductionAssetReadinessEmpty => '资产为空';
 
   @override
-  String agentWorkspaceProductionAssetReadinessRoots(int ready, int total) {
-    return '主资产 ${ready}/${total} 已就绪';
+  String agentWorkspaceProductionAssetReadinessRoots(
+    Object ready,
+    Object total,
+  ) {
+    return '主资产 $ready/$total 已就绪';
   }
 
   @override
-  String agentWorkspaceProductionAssetReadinessDeriveGap(int count) {
-    return '衍生缺口 ${count} 项';
+  String agentWorkspaceProductionAssetReadinessDeriveGap(Object count) {
+    return '衍生缺口 $count 项';
   }
 
   @override
-  String agentWorkspaceProductionAssetReadinessRootMissing(int count) {
-    return '主资产待补 ${count} 项';
+  String agentWorkspaceProductionAssetReadinessRootMissing(Object count) {
+    return '主资产待补 $count 项';
   }
 
   @override
@@ -17727,91 +16846,91 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionStoryboardReadinessFrames(
-    int ready,
-    int needed,
+    Object needed,
+    Object ready,
   ) {
-    return '画面结果 ${ready}/${needed} 已就绪';
+    return '画面结果 $ready/$needed 已就绪';
   }
 
   @override
-  String agentWorkspaceProductionStoryboardReadinessMissing(int count) {
-    return '待补帧 ${count} 项';
+  String agentWorkspaceProductionStoryboardReadinessMissing(Object count) {
+    return '待补帧 $count 项';
   }
 
   @override
-  String agentWorkspaceProductionStoryboardReadinessTextOnly(int count) {
-    return '纯文本 ${count} 项';
+  String agentWorkspaceProductionStoryboardReadinessTextOnly(Object count) {
+    return '纯文本 $count 项';
   }
 
   @override
   String get agentWorkspaceProductionStoryboardTableCoverageUnread => '分镜表未读取';
 
   @override
-  String agentWorkspaceProductionStoryboardTableCoverageRowsOnly(int count) {
-    return '分镜表已读 ${count} 行';
+  String agentWorkspaceProductionStoryboardTableCoverageRowsOnly(Object count) {
+    return '分镜表已读 $count 行';
   }
 
   @override
   String agentWorkspaceProductionStoryboardTableCoverageProgress(
-    int sampled,
-    int total,
+    Object sampled,
+    Object total,
   ) {
-    return '分镜表已读 ${sampled}/${total} 行';
+    return '分镜表已读 $sampled/$total 行';
   }
 
   @override
   String agentWorkspaceProductionStoryboardTableCoverageWithPending(
-    int sampled,
-    int total,
-    int remaining,
+    Object remaining,
+    Object sampled,
+    Object total,
   ) {
-    return '分镜表已读 ${sampled}/${total} 行，待展开 ${remaining} 行';
+    return '分镜表已读 $sampled/$total 行，待展开 $remaining 行';
   }
 
   @override
   String agentWorkspaceProductionPlanningScriptWindow(
-    int start,
-    int end,
-    int maxChars,
+    Object end,
+    Object maxChars,
+    Object start,
   ) {
-    return '剧本 ${start}-${end} 行（<=${maxChars} 字）';
+    return '剧本 $start-$end 行（<=$maxChars 字）';
   }
 
   @override
-  String agentWorkspaceProductionStoryboardShotsHashShort(String ids) {
-    return '镜头 #${ids}';
+  String agentWorkspaceProductionStoryboardShotsHashShort(Object ids) {
+    return '镜头 #$ids';
   }
 
   @override
   String agentWorkspaceProductionStoryboardShotsHashMore(
-    String ids,
-    int total,
+    Object ids,
+    Object total,
   ) {
-    return '镜头 #${ids} 等 ${total} 个';
+    return '镜头 #$ids 等 $total 个';
   }
 
   @override
   String agentWorkspaceProductionStoryboardScriptWindow(
-    int start,
-    int end,
-    int maxChars,
+    Object end,
+    Object maxChars,
+    Object start,
   ) {
-    return '剧本 ${start}-${end} 行（<=${maxChars} 字）';
+    return '剧本 $start-$end 行（<=$maxChars 字）';
   }
 
   @override
-  String agentWorkspaceProductionStoryboardTableRereadShots(String shots) {
-    return '分镜表仅回看${shots}对应行';
+  String agentWorkspaceProductionStoryboardTableRereadShots(Object shots) {
+    return '分镜表仅回看$shots对应行';
   }
 
   @override
-  String agentWorkspaceProductionStoryboardReviewScriptGlue(String window) {
-    return '剧本仅回看${window}';
+  String agentWorkspaceProductionStoryboardReviewScriptGlue(Object window) {
+    return '剧本仅回看$window';
   }
 
   @override
-  String agentWorkspaceProductionPromptStoryboardShotCount(int count) {
-    return '优先处理这 ${count} 个镜头';
+  String agentWorkspaceProductionPromptStoryboardShotCount(Object count) {
+    return '优先处理这 $count 个镜头';
   }
 
   @override
@@ -17828,45 +16947,45 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionPromptStoryboardContextTable(
-    String tableFocus,
+    Object tableFocus,
   ) {
-    return '先只回看${tableFocus}对应的 storyboardTable 行';
+    return '先只回看$tableFocus对应的 storyboardTable 行';
   }
 
   @override
   String agentWorkspaceProductionPromptStoryboardContextScript(
-    String scriptWindow,
+    Object scriptWindow,
   ) {
-    return '剧本仅回看${scriptWindow}';
+    return '剧本仅回看$scriptWindow';
   }
 
   @override
-  String agentWorkspaceProductionPromptStoryboardContextLead(String parts) {
-    return '如需核对依据，${parts}。';
+  String agentWorkspaceProductionPromptStoryboardContextLead(Object parts) {
+    return '如需核对依据，$parts。';
   }
 
   @override
-  String agentWorkspaceProductionPromptStoryboardNote(String summary) {
-    return '注意：${summary}';
+  String agentWorkspaceProductionPromptStoryboardNote(Object summary) {
+    return '注意：$summary';
   }
 
   @override
-  String agentWorkspaceProductionPromptExecutionConstraint(String hint) {
-    return '执行约束：${hint}';
+  String agentWorkspaceProductionPromptExecutionConstraint(Object hint) {
+    return '执行约束：$hint';
   }
 
   @override
   String agentWorkspaceProductionPromptProductionPrioritySummary(
     String summary,
   ) {
-    return '优先解决：${summary}';
+    return '优先解决：$summary';
   }
 
   @override
   String agentWorkspaceProductionPromptScriptPlanExecutionHint(
     String sections,
   ) {
-    return '承接 scriptPlan：${sections}。人物情绪保持递进，避免生硬直述。';
+    return '承接 scriptPlan：$sections。人物情绪保持递进，避免生硬直述。';
   }
 
   @override
@@ -17874,15 +16993,7 @@ class AppLocalizationsZh extends AppLocalizations {
     String reviewDetail,
     String scope,
   ) {
-    return '${reviewDetail}${scope}';
-  }
-
-  @override
-  String agentWorkspaceProductionStagePromptAssetsGenerateNoIds(
-    String priority,
-    String execution,
-  ) {
-    return '请基于最新 assets flow 判断哪些衍生资产仍缺图，只对真实缺口发起最小可行生成，不要重跑已有结果或扩读无关素材。${priority}${execution}';
+    return '$reviewDetail$scope';
   }
 
   @override
@@ -17891,38 +17002,46 @@ class AppLocalizationsZh extends AppLocalizations {
     String priority,
     String execution,
   ) {
-    return '请优先只核对并生成这 ${count} 个资产；若其中已有结果则跳过，只补剩余缺口，不要扩读无关 assets。${priority}${execution}';
+    return '请优先只核对并生成这 $count 个资产；若其中已有结果则跳过，只补剩余缺口，不要扩读无关 assets。$priority$execution';
+  }
+
+  @override
+  String agentWorkspaceProductionStagePromptAssetsGenerateNoIds(
+    String priority,
+    String execution,
+  ) {
+    return '请基于最新 assets flow 判断哪些衍生资产仍缺图，只对真实缺口发起最小可行生成，不要重跑已有结果或扩读无关素材。$priority$execution';
   }
 
   @override
   String agentWorkspaceProductionPromptStoryboardGenBody(
-    String scope,
-    String contextHint,
-    String assetHint,
-    String note,
-    String execution,
+    Object assetHint,
+    Object contextHint,
+    Object execution,
+    Object note,
+    Object scope,
   ) {
-    return '${scope}，不要重跑已有结果或 shouldGenerateImage=false 的镜头。${contextHint}${assetHint}${note}${execution}';
+    return '$scope，不要重跑已有结果或 shouldGenerateImage=false 的镜头。$contextHint$assetHint$note$execution';
   }
 
   @override
   String agentWorkspaceProductionPromptStoryboardTableRevisionBody(
-    String scope,
-    String contextHint,
-    String assetHint,
-    String solve,
+    Object assetHint,
+    Object contextHint,
+    Object scope,
+    Object solve,
   ) {
-    return '${scope} 对应的 storyboardTable 行，保持其余行不动。${contextHint}${assetHint}${solve}';
+    return '$scope 对应的 storyboardTable 行，保持其余行不动。$contextHint$assetHint$solve';
   }
 
   @override
-  String agentWorkspaceProductionPromptStoryboardTableSolve(String summary) {
-    return '优先解决：${summary}';
+  String agentWorkspaceProductionPromptStoryboardTableSolve(Object summary) {
+    return '优先解决：$summary';
   }
 
   @override
-  String agentWorkspaceProductionPromptStoryboardAssetHint(int count) {
-    return '如需核对素材，仅看这 ${count} 个关联资产。';
+  String agentWorkspaceProductionPromptStoryboardAssetHint(Object count) {
+    return '如需核对素材，仅看这 $count 个关联资产。';
   }
 
   @override
@@ -17931,35 +17050,37 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionStageReviewBody(
-    String grade,
-    int severe,
-    int medium,
-    int minor,
-    String summary,
-    String storyboardScope,
-    String assetScope,
+    Object assetScope,
+    Object grade,
+    Object medium,
+    Object minor,
+    Object severe,
+    Object storyboardScope,
+    Object summary,
   ) {
-    return '审核等级 ${grade}，严重 ${severe} / 中等 ${medium} / 轻微 ${minor}。${summary}${storyboardScope}${assetScope}';
+    return '审核等级 $grade，严重 $severe / 中等 $medium / 轻微 $minor。$summary$storyboardScope$assetScope';
   }
 
   @override
-  String agentWorkspaceProductionStageReviewStoryboardScope(String scope) {
-    return ' 局部范围：${scope}。';
+  String agentWorkspaceProductionStageReviewStoryboardScope(Object scope) {
+    return ' 局部范围：$scope。';
   }
 
   @override
-  String agentWorkspaceProductionStageReviewAssetScope(String scope) {
-    return ' 资产范围：${scope}。';
+  String agentWorkspaceProductionStageReviewAssetScope(Object scope) {
+    return ' 资产范围：$scope。';
   }
 
   @override
-  String agentWorkspaceProductionStageDetailScriptPlanSectionLine(int count) {
-    return '已覆盖 ${count}/6 个规划维度，';
+  String agentWorkspaceProductionStageDetailScriptPlanSectionLine(
+    Object count,
+  ) {
+    return '已覆盖 $count/6 个规划维度，';
   }
 
   @override
-  String agentWorkspaceProductionStagePromptReviseScriptPlan(String summary) {
-    return '请根据最近审核意见修订 scriptPlan，优先解决：${summary}';
+  String agentWorkspaceProductionStagePromptReviseScriptPlan(Object summary) {
+    return '请根据最近审核意见修订 scriptPlan，优先解决：$summary';
   }
 
   @override
@@ -17972,10 +17093,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionStageDetailScriptPlanRefine(
-    String sectionLine,
-    int chars,
+    Object chars,
+    Object sectionLine,
   ) {
-    return '已读取 scriptPlan，${sectionLine}当前约 ${chars} 字；下游暂不放行，建议先补到至少 3 个规划维度，再进入审核与 assets/storyboard 主链。';
+    return '已读取 scriptPlan，$sectionLine当前约 $chars 字；下游暂不放行，建议先补到至少 3 个规划维度，再进入审核与 assets/storyboard 主链。';
   }
 
   @override
@@ -17984,11 +17105,11 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionStageDetailScriptPlanReview(
-    String sectionLine,
-    int chars,
-    String scriptWindow,
+    Object chars,
+    Object scriptWindow,
+    Object sectionLine,
   ) {
-    return '已读取 scriptPlan，${sectionLine}当前约 ${chars} 字；复核时先只回看${scriptWindow}，再做导演规划审核并推进 assets 与 storyboard。';
+    return '已读取 scriptPlan，$sectionLine当前约 $chars 字；复核时先只回看$scriptWindow，再做导演规划审核并推进 assets 与 storyboard。';
   }
 
   @override
@@ -18005,10 +17126,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionStageDetailAssetsAfterReview(
-    String reviewDetail,
-    String assetScope,
+    Object assetScope,
+    Object reviewDetail,
   ) {
-    return '${reviewDetail} 优先只核对${assetScope}，确认后回到 scriptPlan 收束导演计划。';
+    return '$reviewDetail 优先只核对$assetScope，确认后回到 scriptPlan 收束导演计划。';
   }
 
   @override
@@ -18021,38 +17142,40 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionStageDetailAssetsMissingGeneric(
-    int total,
-    int missing,
-    String readiness,
+    Object missing,
+    Object readiness,
+    Object total,
   ) {
-    return '共 ${total} 项资产，仍有 ${missing} 项缺少图像结果，适合继续运行素材生成。${readiness}';
+    return '共 $total 项资产，仍有 $missing 项缺少图像结果，适合继续运行素材生成。$readiness';
   }
 
   @override
   String agentWorkspaceProductionStageDetailAssetsMissingFocused(
-    int total,
-    String pendingScope,
-    String readiness,
+    Object pendingScope,
+    Object readiness,
+    Object total,
   ) {
-    return '共 ${total} 项资产，${pendingScope} 仍缺图，优先只补这批衍生资产更省 token。${readiness}';
+    return '共 $total 项资产，$pendingScope 仍缺图，优先只补这批衍生资产更省 token。$readiness';
   }
 
   @override
   String agentWorkspaceProductionStageDetailAssetsReady(
-    int total,
-    String readiness,
+    Object readiness,
+    Object total,
   ) {
-    return '共 ${total} 项资产，图像结果已齐，可继续检查 storyboard 与导演计划。${readiness}';
+    return '共 $total 项资产，图像结果已齐，可继续检查 storyboard 与导演计划。$readiness';
   }
 
   @override
-  String agentWorkspaceProductionStageDetailAssetsScopedTable(int count) {
-    return '当前分镜表窗口引用了 ${count} 项资产，优先核对这批素材更省 token。';
+  String agentWorkspaceProductionStageDetailAssetsScopedTable(Object count) {
+    return '当前分镜表窗口引用了 $count 项资产，优先核对这批素材更省 token。';
   }
 
   @override
-  String agentWorkspaceProductionStageDetailAssetsScopedStoryboard(int count) {
-    return '当前分镜窗口引用了 ${count} 项资产，优先核对这批素材更省 token。';
+  String agentWorkspaceProductionStageDetailAssetsScopedStoryboard(
+    Object count,
+  ) {
+    return '当前分镜窗口引用了 $count 项资产，优先核对这批素材更省 token。';
   }
 
   @override
@@ -18061,9 +17184,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionStageDetailAssetsNarrowedScriptPlan(
-    String scope,
+    Object scope,
   ) {
-    return '已从 scriptPlan 收紧到${scope}，优先核对这批素材更省 token；信息不足时再扩读。';
+    return '已从 scriptPlan 收紧到$scope，优先核对这批素材更省 token；信息不足时再扩读。';
   }
 
   @override
@@ -18084,9 +17207,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionStagePromptStoryboardTableReviseLead(
-    String tail,
+    Object tail,
   ) {
-    return '请根据最近审核意见修订 storyboardTable。${tail}';
+    return '请根据最近审核意见修订 storyboardTable。$tail';
   }
 
   @override
@@ -18099,50 +17222,52 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionStageDetailStoryboardTableString(
-    String rowDigest,
-    int chars,
-    String coverage,
+    Object chars,
+    Object coverage,
+    Object rowDigest,
   ) {
-    return 'storyboardTable 已有内容，${rowDigest}约 ${chars} 字，建议先做分镜表审核再推进 storyboard 画面结果。${coverage}';
+    return 'storyboardTable 已有内容，$rowDigest约 $chars 字，建议先做分镜表审核再推进 storyboard 画面结果。$coverage';
   }
 
   @override
-  String agentWorkspaceProductionStageDigestStoryboardTableRows(int rowCount) {
-    return '共 ${rowCount} 行';
+  String agentWorkspaceProductionStageDigestStoryboardTableRows(
+    Object rowCount,
+  ) {
+    return '共 $rowCount 行';
   }
 
   @override
   String agentWorkspaceProductionStageDigestStoryboardTableAssets(
-    int assetCount,
+    Object assetCount,
   ) {
-    return '关联 ${assetCount} 项资产';
+    return '关联 $assetCount 项资产';
   }
 
   @override
   String agentWorkspaceProductionStageDetailStoryboardTableWindowReady(
-    int sampled,
-    int total,
-    String coverage,
+    Object coverage,
+    Object sampled,
+    Object total,
   ) {
-    return '已窗口读取 ${sampled}/${total} 行关键列，适合继续审核或修订 storyboardTable。${coverage}';
+    return '已窗口读取 $sampled/$total 行关键列，适合继续审核或修订 storyboardTable。$coverage';
   }
 
   @override
   String agentWorkspaceProductionStageDetailStoryboardTableWindowBackfill(
-    int sampled,
-    int total,
-    String coverage,
+    Object coverage,
+    Object sampled,
+    Object total,
   ) {
-    return '已窗口读取 ${sampled}/${total} 行关键列，但当前 scriptPlan 还缺少足够明确的分场景情绪或画面意图，先回补导演计划，再继续扩读 storyboardTable。${coverage}';
+    return '已窗口读取 $sampled/$total 行关键列，但当前 scriptPlan 还缺少足够明确的分场景情绪或画面意图，先回补导演计划，再继续扩读 storyboardTable。$coverage';
   }
 
   @override
   String agentWorkspaceProductionStageDetailStoryboardTableWindowExpand(
-    int sampled,
-    int total,
-    String coverage,
+    Object coverage,
+    Object sampled,
+    Object total,
   ) {
-    return '已窗口读取 ${sampled}/${total} 行关键列，但覆盖还不够，先扩读或补齐关键镜头表，再推进 storyboard。${coverage}';
+    return '已窗口读取 $sampled/$total 行关键列，但覆盖还不够，先扩读或补齐关键镜头表，再推进 storyboard。$coverage';
   }
 
   @override
@@ -18164,9 +17289,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionStageDetailStoryboardTableRefreshNarrow(
-    String ids,
+    Object ids,
   ) {
-    return '分镜表刚变更，建议先回读镜头 #${ids} 对应的局部分镜表行。';
+    return '分镜表刚变更，建议先回读镜头 #$ids 对应的局部分镜表行。';
   }
 
   @override
@@ -18185,24 +17310,24 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionStageDetailStoryboardSupervisionScoped(
-    int count,
-    String reviewScope,
+    Object count,
+    Object reviewScope,
   ) {
-    return '审核已定位 ${count} 个镜头，优先只看这批 storyboard 更省 token。${reviewScope}';
+    return '审核已定位 $count 个镜头，优先只看这批 storyboard 更省 token。$reviewScope';
   }
 
   @override
   String agentWorkspaceProductionSupervisionReviewScopeAppend(
     String reviewScope,
   ) {
-    return ' ${reviewScope}。';
+    return ' $reviewScope。';
   }
 
   @override
   String agentWorkspaceProductionStagePromptStoryboardSupervisionGenerate(
-    String tail,
+    Object tail,
   ) {
-    return '请根据最近审核意见继续推进 storyboard。${tail}';
+    return '请根据最近审核意见继续推进 storyboard。$tail';
   }
 
   @override
@@ -18215,57 +17340,57 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionStageDetailStoryboardMissing(
-    int needImageCount,
-    int missingCount,
-    String idsPreview,
-    String idsTail,
-    String skippedClause,
-    String reviewClause,
-    String readiness,
+    Object idsPreview,
+    Object idsTail,
+    Object missingCount,
+    Object needImageCount,
+    Object readiness,
+    Object reviewClause,
+    Object skippedClause,
   ) {
-    return '需出图 ${needImageCount} 个镜头，仍有 ${missingCount} 个缺少画面结果（#${idsPreview}${idsTail}）${skippedClause}${reviewClause} ${readiness}';
+    return '需出图 $needImageCount 个镜头，仍有 $missingCount 个缺少画面结果（#$idsPreview$idsTail）$skippedClause$reviewClause $readiness';
   }
 
   @override
   String agentWorkspaceProductionStageDetailStoryboardMissingIdsTail(
-    int total,
+    Object total,
   ) {
-    return ' 等 ${total} 个镜头';
+    return ' 等 $total 个镜头';
   }
 
   @override
   String agentWorkspaceProductionStageDetailStoryboardMissingSkipped(
-    int count,
+    Object count,
   ) {
-    return '；另有 ${count} 个镜头为纯文本模式，无需出图。';
+    return '；另有 $count 个镜头为纯文本模式，无需出图。';
   }
 
   @override
   String agentWorkspaceProductionStageDetailStoryboardMissingReview(
-    String reviewScope,
+    Object reviewScope,
   ) {
-    return ' ${reviewScope}';
+    return ' $reviewScope';
   }
 
   @override
-  String agentWorkspaceProductionStagePromptStoryboardContinue(String tail) {
-    return '请继续推进 storyboard。${tail}';
+  String agentWorkspaceProductionStagePromptStoryboardContinue(Object tail) {
+    return '请继续推进 storyboard。$tail';
   }
 
   @override
   String agentWorkspaceProductionStageDetailStoryboardComplete(
-    int needImageCount,
-    String skippedClause,
-    String readiness,
+    Object needImageCount,
+    Object readiness,
+    Object skippedClause,
   ) {
-    return '需出图 ${needImageCount} 个镜头，画面结果齐备${skippedClause}，可准备写回或继续导演计划。 ${readiness}';
+    return '需出图 $needImageCount 个镜头，画面结果齐备$skippedClause，可准备写回或继续导演计划。 $readiness';
   }
 
   @override
   String agentWorkspaceProductionStageDetailStoryboardCompleteSkipped(
-    int count,
+    Object count,
   ) {
-    return '；另有 ${count} 个纯文本镜头按设计无需出图';
+    return '；另有 $count 个纯文本镜头按设计无需出图';
   }
 
   @override
@@ -18294,9 +17419,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionStageDetailStoryboardRefreshGenNarrow(
-    String ids,
+    Object ids,
   ) {
-    return '分镜动作刚执行，建议先回读本次镜头 #${ids} 的缺帧状态。';
+    return '分镜动作刚执行，建议先回读本次镜头 #$ids 的缺帧状态。';
   }
 
   @override
@@ -18593,282 +17718,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get agentWorkspaceScriptApplySuggestion => '应用建议';
 
   @override
-  String get agentWorkspaceScriptRecipeAddChapterMaterialDetail =>
-      "\u5982\u679c\u8981\u7ee7\u7eed\u6539\u7a3f\uff0c\u53ef\u5148\u62c9\u5c0f\u8bf4\u6b63\u6587\u4e0e\u4e8b\u4ef6\uff0c\u907f\u514d\u53ea\u76ef\u7740\u5f53\u524d script\u3002";
-  @override
-  String get agentWorkspaceScriptRecipeAddChapterMaterialTitle =>
-      "\u8865\u7ae0\u8282\u6750\u6599";
-  @override
-  String get agentWorkspaceScriptRecipeAddNovelTextWindowDetail =>
-      "\u5ba1\u6838\u9700\u8981\u8ffd\u6eaf\u539f\u6587\u65f6\uff0c\u5148\u8bfb\u53d6\u7ae0\u8282\u7a97\u53e3\uff0c\u907f\u514d\u6574\u7ae0\u642c\u8fd0\u3002";
-  @override
-  String get agentWorkspaceScriptRecipeAddNovelTextWindowTitle =>
-      "\u8865\u539f\u6587\u7ae0\u8282\u7a97\u53e3";
-  @override
-  String get agentWorkspaceScriptRecipeCompareExistingScriptDetail =>
-      "\u7528\u5f53\u524d\u4e8b\u4ef6\u94fe\u8def\u53cd\u67e5\u73b0\u6709\u6b63\u6587\uff0c\u80fd\u66f4\u5feb\u5b9a\u4f4d\u7f3a\u573a\u6216\u51b2\u7a81\u504f\u79fb\u3002";
-  @override
-  String get agentWorkspaceScriptRecipeCompareExistingScriptTitle =>
-      "\u5bf9\u6bd4\u73b0\u6709\u5267\u672c";
-  @override
-  String get agentWorkspaceScriptRecipeDistillSkeletonFromEventsDetail =>
-      "\u4e8b\u4ef6\u8109\u7edc\u5df2\u6e05\u6670\uff0c\u9002\u5408\u5148\u6536\u675f\u6210 storySkeleton\u3002";
-  @override
-  String get agentWorkspaceScriptRecipeDistillSkeletonFromEventsPrompt =>
-      "\u8bf7\u57fa\u4e8e\u5f53\u524d\u4e8b\u4ef6\u5217\u8868\u63d0\u70bc\u6545\u4e8b\u9aa8\u67b6\uff0c\u4fdd\u7559\u5173\u952e\u51b2\u7a81\u3001\u8f6c\u6298\u4e0e\u7ed3\u5c40\u8d70\u5411\u3002";
-  @override
-  String get agentWorkspaceScriptRecipeDistillSkeletonFromEventsTitle =>
-      "\u6574\u7406\u6545\u4e8b\u9aa8\u67b6";
-  @override
-  String get agentWorkspaceScriptRecipeFillAdaptationDetail =>
-      "\u9aa8\u67b6\u4e4b\u5916\u8fd8\u7f3a adaptationStrategy\uff0c\u9002\u5408\u5148\u6536\u675f\u6539\u7f16\u8def\u5f84\u3002";
-  @override
-  String get agentWorkspaceScriptRecipeFillAdaptationPrompt =>
-      "\u8bf7\u57fa\u4e8e\u73b0\u6709\u6545\u4e8b\u9aa8\u67b6\u8865\u9f50\u6539\u7f16\u7b56\u7565\uff0c\u7a81\u51fa\u8282\u594f\u3001\u4eba\u7269\u5f27\u5149\u4e0e\u96c6\u6570\u62c6\u5206\u539f\u5219\u3002";
-  @override
-  String get agentWorkspaceScriptRecipeFillAdaptationTitle =>
-      "\u8865\u6539\u7f16\u7b56\u7565";
-  @override
-  String get agentWorkspaceScriptRecipeFillStorySkeletonDetail =>
-      "planData \u8fd8\u6ca1\u6709 storySkeleton\uff0c\u5148\u8ba9\u9aa8\u67b6\u5b50\u4ee3\u7406\u8865\u7ed3\u6784\u3002";
-  @override
-  String get agentWorkspaceScriptRecipeFillStorySkeletonPrompt =>
-      "\u8bf7\u57fa\u4e8e\u5f53\u524d\u9879\u76ee\u4e0a\u4e0b\u6587\u751f\u6210\u4e00\u7248\u6e05\u6670\u7684\u6545\u4e8b\u9aa8\u67b6\uff0c\u5e76\u7a81\u51fa\u4e3b\u51b2\u7a81\u4e0e\u53cd\u8f6c\u8282\u70b9\u3002";
-  @override
-  String get agentWorkspaceScriptRecipeFillStorySkeletonTitle =>
-      "\u8865\u6545\u4e8b\u9aa8\u67b6";
-  @override
-  String get agentWorkspaceScriptRecipeGenerateAdaptationFromTextDetail =>
-      "\u7ae0\u8282\u6750\u6599\u5df2\u7ecf\u53ef\u8bfb\uff0c\u9002\u5408\u76f4\u63a5\u8ba9\u6539\u7f16\u7b56\u7565\u5b50\u4ee3\u7406\u7ed9\u51fa\u6536\u675f\u65b9\u6848\u3002";
-  @override
-  String get agentWorkspaceScriptRecipeGenerateAdaptationFromTextPrompt =>
-      "\u8bf7\u57fa\u4e8e\u5f53\u524d\u7ae0\u8282\u6587\u672c\u603b\u7ed3\u6539\u7f16\u7b56\u7565\uff0c\u8f93\u51fa 3 \u5230 5 \u6761\u53ef\u76f4\u63a5\u6267\u884c\u7684\u6539\u5199\u539f\u5219\u3002";
-  @override
-  String get agentWorkspaceScriptRecipeGenerateAdaptationFromTextTitle =>
-      "\u751f\u6210\u6539\u7f16\u7b56\u7565";
-  @override
-  String get agentWorkspaceScriptRecipeGenerateNextScriptDetail =>
-      "\u8ba1\u5212\u4fe1\u606f\u5df2\u5177\u5907\uff0c\u5148\u6d88\u8d39\u8ba1\u5212\u5267\u672c\u8349\u7a3f\u548c\u5fc5\u8981\u4e8b\u4ef6\uff0c\u518d\u8ba9 script \u5b50\u4ee3\u7406\u8f93\u51fa\u4e0b\u4e00\u7248\u53ef\u5199\u56de\u6b63\u6587\u3002";
-  @override
-  String get agentWorkspaceScriptRecipeGenerateNextScriptPrompt =>
-      "\u8bf7\u5148\u8bfb\u53d6\u5f53\u524d\u96c6 planData.script \u8349\u7a3f\u3001storySkeleton\u3001adaptationStrategy\uff0c\u518d\u8865\u6700\u5c11\u7684\u76ee\u6807\u7ae0\u8282\u4e8b\u4ef6\uff1b\u53ea\u6709\u7ec6\u8282\u6216\u8854\u63a5\u4e0d\u8db3\u65f6\u624d\u8865\u8bfb\u4e0a\u4e00\u96c6\u5c3e\u6bb5\u6216\u7ae0\u8282\u6b63\u6587\u7a97\u53e3\uff0c\u7136\u540e\u8f93\u51fa\u53ef\u76f4\u63a5\u5199\u56de\u7684\u5b8c\u6574\u5267\u672c\u6b63\u6587\u3002";
-  @override
-  String get agentWorkspaceScriptRecipeGenerateNextScriptTitle =>
-      "\u751f\u6210\u4e0b\u4e00\u7248\u5267\u672c";
-  @override
-  String get agentWorkspaceScriptRecipeGenerateScriptBodyDetail =>
-      "\u5f53\u524d\u6b63\u6587\u4e3a\u7a7a\uff0c\u76f4\u63a5\u8ba9 script \u5b50\u4ee3\u7406\u4ea7\u51fa\u9996\u7248\u5185\u5bb9\u66f4\u5408\u9002\u3002";
-  @override
-  String get agentWorkspaceScriptRecipeGenerateScriptBodyPrompt =>
-      "\u8bf7\u5148\u8bfb\u53d6\u5f53\u524d\u96c6 planData.script\u3001storySkeleton\u3001adaptationStrategy \u4e0e\u76ee\u6807\u7ae0\u8282\u4e8b\u4ef6\uff1b\u53ea\u6709\u7ec6\u8282\u4e0d\u8db3\u65f6\u518d\u8865\u8bfb\u6b63\u6587\u7a97\u53e3\uff0c\u7136\u540e\u751f\u6210\u4e00\u7248\u5b8c\u6574\u5267\u672c\u6b63\u6587\u3002";
-  @override
-  String get agentWorkspaceScriptRecipeGenerateScriptBodyTitle =>
-      "\u751f\u6210\u5267\u672c\u6b63\u6587";
-  @override
-  String get agentWorkspaceScriptRecipeGenerateScriptFromEventsDetail =>
-      "\u5982\u679c\u4e8b\u4ef6\u94fe\u8def\u57fa\u672c\u9f50\u5168\uff0c\u53ef\u76f4\u63a5\u8ba9 script \u5b50\u4ee3\u7406\u751f\u6210\u53ef\u5199\u56de\u6b63\u6587\u3002";
-  @override
-  String get agentWorkspaceScriptRecipeGenerateScriptFromEventsPrompt =>
-      "\u8bf7\u5148\u7ed3\u5408\u5f53\u524d\u4e8b\u4ef6\u8109\u7edc\uff0c\u5e76\u4f18\u5148\u8bfb\u53d6 planData.script\u3001storySkeleton \u4e0e adaptationStrategy\uff1b\u53ea\u6709\u7ec6\u8282\u4e0d\u8db3\u65f6\u518d\u8865\u7ae0\u8282\u6b63\u6587\u7a97\u53e3\uff0c\u751f\u6210\u4e00\u7248\u53ef\u76f4\u63a5\u5199\u56de\u7684\u5267\u672c\u6b63\u6587\u3002";
-  @override
-  String get agentWorkspaceScriptRecipeGenerateScriptFromEventsTitle =>
-      "\u751f\u6210\u5267\u672c\u521d\u7a3f";
-  @override
-  String get agentWorkspaceScriptRecipePreferEventsDetail =>
-      "\u7ae0\u8282\u6587\u672c\u4e3a\u7a7a\u65f6\uff0c\u5148\u8bfb\u4e8b\u4ef6\u5217\u8868\u66f4\u5bb9\u6613\u5b9a\u4f4d\u5267\u60c5\u9aa8\u67b6\u7f3a\u53e3\u3002";
-  @override
-  String get agentWorkspaceScriptRecipePreferEventsTitle =>
-      "\u6539\u770b\u4e8b\u4ef6\u8109\u7edc";
-  @override
-  String get agentWorkspaceScriptRecipePullChapterMaterialDetail =>
-      "\u8ba1\u5212\u91cc\u8fd8\u6ca1\u6709\u5267\u672c\u8349\u7a3f\uff0c\u5148\u8bfb\u53d6\u5c0f\u8bf4\u7ae0\u8282\u6587\u672c\u8865\u4e0a\u4e0b\u6587\u3002";
-  @override
-  String get agentWorkspaceScriptRecipePullChapterMaterialTitle =>
-      "\u62c9\u53d6\u7ae0\u8282\u6750\u6599";
-  @override
-  String get agentWorkspaceScriptRecipePullChapterTextFirstDetail =>
-      "\u4e8b\u4ef6\u5217\u8868\u4e3a\u7a7a\u65f6\uff0c\u5148\u8bfb\u7ae0\u8282\u6587\u672c\u66f4\u5bb9\u6613\u5224\u65ad\u662f\u6570\u636e\u7a7a\u8fd8\u662f\u4e8b\u4ef6\u672a\u62bd\u53d6\u3002";
-  @override
-  String get agentWorkspaceScriptRecipePullChapterTextFirstTitle =>
-      "\u5148\u62c9\u7ae0\u8282\u6b63\u6587";
-  @override
-  String get agentWorkspaceScriptRecipeReadMatchingEventsDetail =>
-      "\u7ae0\u8282\u6587\u672c\u5df2\u5230\u4f4d\uff0c\u7ee7\u7eed\u6309\u540c\u4e00\u7ae0\u8282\u62c9\u53d6\u4e8b\u4ef6\u8109\u7edc\u66f4\u5229\u4e8e\u603b\u7ed3\u51b2\u7a81\u3002";
-  @override
-  String get agentWorkspaceScriptRecipeReadMatchingEventsTitle =>
-      "\u8bfb\u53d6\u5bf9\u5e94\u4e8b\u4ef6";
-  @override
-  String get agentWorkspaceScriptRecipeReadPlanScriptDraftDetail =>
-      "planData.script \u5df2\u6709\u5f53\u524d\u96c6\u8349\u7a3f\uff0c\u5148\u6d88\u8d39\u8fd9\u4efd\u7ed3\u6784\u5316\u8349\u7a3f\uff0c\u518d\u51b3\u5b9a\u662f\u5426\u8865\u8bfb\u7ae0\u8282\u6b63\u6587\u66f4\u7701 token\u3002";
-  @override
-  String get agentWorkspaceScriptRecipeReadPlanScriptDraftTitle =>
-      "\u8bfb\u53d6\u8ba1\u5212\u5267\u672c\u8349\u7a3f";
-  @override
-  String get agentWorkspaceScriptRecipeReadScriptBodyDetail =>
-      "planData \u5df2\u51c6\u5907\u597d\u540e\uff0c\u4e0b\u4e00\u6b65\u901a\u5e38\u8981\u5bf9\u6bd4\u5f53\u524d script \u6b63\u6587\u662f\u5426\u504f\u79bb\u3002";
-  @override
-  String get agentWorkspaceScriptRecipeReadScriptBodyTitle =>
-      "\u8bfb\u53d6\u5f53\u524d\u5267\u672c\u6b63\u6587";
-  @override
-  String get agentWorkspaceScriptRecipeRefreshPlanAfterBodyDetail =>
-      "\u5df2\u6709\u6b63\u6587\u540e\uff0c\u901a\u5e38\u8981\u56de\u770b planData \u5224\u65ad\u662f\u5426\u9700\u8981\u540c\u6b65\u9aa8\u67b6\u6216\u7b56\u7565\u3002";
-  @override
-  String get agentWorkspaceScriptRecipeRefreshPlanAfterBodyTitle =>
-      "\u5237\u65b0\u8ba1\u5212\u6570\u636e";
-  @override
-  String get agentWorkspaceScriptRecipeRefreshPlanDataDetail =>
-      "\u82e5\u6b63\u6587\u4e3a\u7a7a\u4e14\u4e0a\u4e0b\u6587\u4e0d\u5b8c\u6574\uff0c\u4e5f\u53ef\u5148\u56de\u5230 planData \u6821\u9a8c\u9aa8\u67b6\u4e0e\u7b56\u7565\u3002";
-  @override
-  String get agentWorkspaceScriptRecipeRefreshPlanDataTitle =>
-      "\u5237\u65b0\u8ba1\u5212\u6570\u636e";
-  @override
-  String get agentWorkspaceScriptRecipeRereadCurrentScriptDetail =>
-      "\u5148\u91cd\u65b0\u8bfb\u53d6\u5f53\u524d\u96c6\u5c3e\u6bb5\u7a97\u53e3\uff0c\u518d\u51b3\u5b9a\u662f\u5426\u7ee7\u7eed\u6539\u7a3f\u3002";
-  @override
-  String get agentWorkspaceScriptRecipeRereadCurrentScriptTitle =>
-      "\u56de\u770b\u5f53\u524d\u5267\u672c";
-  @override
-  String get agentWorkspaceScriptRecipeReviewPreviousTailDetail =>
-      "\u5728\u7ae0\u8282\u6750\u6599\u660e\u786e\u540e\uff0c\u5bf9\u7167\u5f53\u524d\u96c6\u5c3e\u6bb5\u66f4\u5bb9\u6613\u5b9a\u4f4d\u8854\u63a5\u7f3a\u53e3\u4e14 token \u66f4\u7701\u3002";
-  @override
-  String get agentWorkspaceScriptRecipeReviewPreviousTailTitle =>
-      "\u56de\u770b\u4e0a\u4e00\u7248\u5c3e\u6bb5";
-  @override
-  String get agentWorkspaceScriptRecipeReviewTargetPeekDetail =>
-      "\u5148\u8bfb\u53d6\u5ba1\u6838\u6307\u5411\u7684\u6838\u5fc3\u5185\u5bb9\uff0c\u518d\u51b3\u5b9a\u662f\u5426\u91cd\u8dd1\u5b50\u4ee3\u7406\u3002";
-  @override
-  String get agentWorkspaceScriptRecipeReviewTargetPeekTitle =>
-      "\u56de\u770b\u5ba1\u6838\u5bf9\u8c61";
-  @override
-  String get agentWorkspaceScriptRecipeReviseAdaptationDetail =>
-      "\u5ba1\u6838\u8ba4\u4e3a\u7b56\u7565\u4e0e\u9aa8\u67b6\u6216\u8f7d\u4f53\u7ea6\u675f\u4e0d\u4e00\u81f4\uff0c\u9002\u5408\u5148\u5c40\u90e8\u4fee\u7b56\u7565\u3002";
-  @override
-  String get agentWorkspaceScriptRecipeReviseAdaptationPrompt =>
-      "\u8bf7\u5148\u8bfb\u53d6 adaptationStrategy \u4e0e storySkeleton\uff0c\u518d\u6309\u9700\u8865\u4e8b\u4ef6\u7a97\u53e3\uff0c\u9488\u5bf9\u5ba1\u6838\u95ee\u9898\u5c40\u90e8\u4fee\u8ba2\u6539\u7f16\u7b56\u7565\u3002";
-  @override
-  String get agentWorkspaceScriptRecipeReviseAdaptationTitle =>
-      "\u4fee\u6539\u7f16\u7b56\u7565";
-  @override
-  String get agentWorkspaceScriptRecipeReviseScriptDetail =>
-      "\u5ba1\u6838\u5df2\u5b9a\u4f4d\u5267\u672c\u6b63\u6587\u95ee\u9898\uff0c\u5148\u8bfb\u53d6\u5f53\u524d\u96c6\u5c3e\u6bb5\u7a97\u53e3\u518d\u5b9a\u5411\u6539\u7a3f\u3002";
-  @override
-  String get agentWorkspaceScriptRecipeReviseScriptPrompt =>
-      "\u8bf7\u5148\u8bfb\u53d6\u5f53\u524d\u96c6\u5c3e\u6bb5\u7a97\u53e3\u3001storySkeleton\u3001adaptationStrategy\uff1b\u5982\u4ecd\u4e0d\u8db3\u518d\u8865\u8bfb\u7ae0\u8282\u6b63\u6587\u7a97\u53e3\uff0c\u5e76\u9488\u5bf9\u5ba1\u6838\u95ee\u9898\u5b9a\u5411\u4fee\u8ba2\u672c\u96c6\u5267\u672c\u3002";
-  @override
-  String get agentWorkspaceScriptRecipeReviseScriptTitle =>
-      "\u4fee\u5267\u672c\u6b63\u6587";
-  @override
-  String get agentWorkspaceScriptRecipeReviseStorySkeletonDetail =>
-      "\u5ba1\u6838\u6307\u51fa\u9aa8\u67b6\u4ecd\u6709\u7f3a\u53e3\uff0c\u5148\u56de\u5230 storySkeleton \u505a\u5b9a\u5411\u4fee\u8ba2\u3002";
-  @override
-  String get agentWorkspaceScriptRecipeReviseStorySkeletonPrompt =>
-      "\u8bf7\u5148\u8bfb\u53d6 storySkeleton \u4e0e\u76f8\u5173\u4e8b\u4ef6\u7a97\u53e3\uff0c\u4fe1\u606f\u4e0d\u8db3\u518d\u8865\u7ae0\u8282\u6b63\u6587\u7a97\u53e3\uff0c\u9488\u5bf9\u5ba1\u6838\u95ee\u9898\u5c40\u90e8\u4fee\u8ba2\u6545\u4e8b\u9aa8\u67b6\u3002";
-  @override
-  String get agentWorkspaceScriptRecipeReviseStorySkeletonTitle =>
-      "\u4fee\u6545\u4e8b\u9aa8\u67b6";
-  @override
-  String get agentWorkspaceScriptRecipeVerifyEventsDetail =>
-      "\u5ba1\u6838\u5efa\u8bae\u56de\u770b\u4e8b\u4ef6\u94fe\u8def\uff0c\u4f18\u5148\u8bfb\u53d6\u5c0f\u8bf4\u4e8b\u4ef6\u800c\u4e0d\u662f\u6574\u7ae0\u539f\u6587\u3002";
-  @override
-  String get agentWorkspaceScriptRecipeVerifyEventsTitle =>
-      "\u6838\u5bf9\u4e8b\u4ef6\u8109\u7edc";
-  @override
-  String get agentWorkspaceScriptStageDetailAdaptationPendingGen =>
-      "\u5f53\u524d\u7f3a\u5c11 adaptationStrategy\uff0c\u9002\u5408\u5148\u6536\u675f\u4eba\u7269\u4e0e\u8282\u594f\u7b56\u7565\u3002";
-  @override
-  String get agentWorkspaceScriptStageDetailAdaptationPendingRead =>
-      "\u56de\u770b planData\uff0c\u5224\u65ad adaptationStrategy \u662f\u5426\u5df2\u5177\u5907\u3002";
-  @override
-  String get agentWorkspaceScriptStageDetailAdaptationReady =>
-      "adaptationStrategy \u5df2\u5b58\u5728\uff0c\u53ef\u7ee7\u7eed\u8bfb\u53d6\u7ae0\u8282\u6750\u6599\u6216\u751f\u6210\u6b63\u6587\u3002";
-  @override
-  String get agentWorkspaceScriptStageDetailChapterMaterialEmptyNovel =>
-      "\u5c0f\u8bf4\u4e0a\u4e0b\u6587\u4e3a\u7a7a\uff0c\u5efa\u8bae\u7ee7\u7eed\u8bfb\u53d6\u7ae0\u8282\u6b63\u6587\u6216\u4e8b\u4ef6\u8109\u7edc\u3002";
-  @override
-  String get agentWorkspaceScriptStageDetailChapterMaterialPendingRead =>
-      "\u5148\u8bfb\u53d6\u7ae0\u8282\u6b63\u6587\u6216\u4e8b\u4ef6\u5217\u8868\uff0c\u518d\u51b3\u5b9a\u5982\u4f55\u6539\u5199\u5267\u672c\u3002";
-  @override
-  String agentWorkspaceScriptStageDetailChapterMaterialReady(int count) =>
-      "\u5df2\u8bfb\u53d6 $count \u6761\u5c0f\u8bf4\u4e0a\u4e0b\u6587\uff0c\u53ef\u7ee7\u7eed\u751f\u6210\u5267\u672c\u6b63\u6587\u6216\u5bf9\u7167\u73b0\u6709 script\u3002";
-  @override
-  String get agentWorkspaceScriptStageDetailReviewAdaptationEmpty =>
-      "\u5ba1\u6838\u5df2\u8986\u76d6 adaptationStrategy\uff0c\u53ef\u6309\u5efa\u8bae\u7ee7\u7eed\u4fee\u8ba2\u3002";
-  @override
-  String agentWorkspaceScriptStageDetailReviewConclusion(String summary) =>
-      "\u5ba1\u6838\u7ed3\u8bba\uff1a$summary";
-  @override
-  String get agentWorkspaceScriptStageDetailReviewScriptEmpty =>
-      "\u5ba1\u6838\u5df2\u8986\u76d6\u5267\u672c\u6b63\u6587\uff0c\u53ef\u6309\u5efa\u8bae\u7ee7\u7eed\u6539\u7a3f\u3002";
-  @override
-  String get agentWorkspaceScriptStageDetailReviewStorySkeletonEmpty =>
-      "\u5ba1\u6838\u5df2\u8986\u76d6 storySkeleton\uff0c\u53ef\u6309\u5efa\u8bae\u7ee7\u7eed\u4fee\u8ba2\u3002";
-  @override
-  String get agentWorkspaceScriptStageDetailScriptBodyReady =>
-      "\u5f53\u524d script \u6b63\u6587\u5df2\u5b58\u5728\uff0c\u53ef\u76f4\u63a5\u5199\u56de\u6216\u56de\u770b\u8ba1\u5212\u6570\u636e\u7ee7\u7eed\u6539\u7a3f\u3002";
-  @override
-  String get agentWorkspaceScriptStageDetailScriptPendingGen =>
-      "\u5f53\u524d script \u6b63\u6587\u4e3a\u7a7a\uff0c\u9002\u5408\u76f4\u63a5\u8fd0\u884c script \u5b50\u4ee3\u7406\u751f\u6210\u9996\u7248\u5185\u5bb9\u3002";
-  @override
-  String get agentWorkspaceScriptStageDetailScriptPendingRead =>
-      "\u8bfb\u53d6\u5f53\u524d\u5267\u672c\u6b63\u6587\uff0c\u518d\u5224\u65ad\u662f\u5426\u9700\u8981\u76f4\u63a5\u751f\u6210\u4e0b\u4e00\u7248\u3002";
-  @override
-  String get agentWorkspaceScriptStageDetailStorySkeletonPendingGen =>
-      "\u5148\u8865\u6545\u4e8b\u9aa8\u67b6\uff0c\u660e\u786e\u4e3b\u51b2\u7a81\u3001\u8f6c\u6298\u4e0e\u7ed3\u5c40\u8d70\u5411\u3002";
-  @override
-  String get agentWorkspaceScriptStageDetailStorySkeletonPendingRead =>
-      "\u5148\u8bfb\u53d6 planData\uff0c\u786e\u8ba4 storySkeleton \u662f\u5426\u9f50\u5907\u3002";
-  @override
-  String get agentWorkspaceScriptStageDetailStorySkeletonReady =>
-      "storySkeleton \u5df2\u5b58\u5728\uff0c\u53ef\u7ee7\u7eed\u6536\u675f\u6539\u7f16\u7b56\u7565\u6216\u5bf9\u7167\u5267\u672c\u6b63\u6587\u3002";
-  @override
-  String get agentWorkspaceScriptStagePromptGenerateAdaptationStrategy =>
-      "\u8bf7\u57fa\u4e8e\u73b0\u6709\u6545\u4e8b\u9aa8\u67b6\u8865\u9f50\u6539\u7f16\u7b56\u7565\uff0c\u7a81\u51fa\u8282\u594f\u3001\u4eba\u7269\u5f27\u5149\u4e0e\u96c6\u6570\u62c6\u5206\u539f\u5219\u3002";
-  @override
-  String get agentWorkspaceScriptStagePromptGenerateScript =>
-      "\u8bf7\u5148\u8bfb\u53d6\u5f53\u524d\u96c6\u8ba1\u5212\u4e0e\u76ee\u6807\u7ae0\u8282\u4e8b\u4ef6\uff1b\u53ea\u6709\u5728\u627f\u63a5\u4e0a\u4e00\u96c6\u65f6\u624d\u8865\u8bfb\u4e0a\u4e00\u96c6\u5c3e\u6bb5\uff0c\u5176\u4f59\u7ec6\u8282\u518d\u6309\u9700\u8865\u6b63\u6587\u7a97\u53e3\uff0c\u751f\u6210\u4e0b\u4e00\u7248\u5267\u672c\u6b63\u6587\u5e76\u8f93\u51fa\u53ef\u76f4\u63a5\u5199\u56de\u7684\u5b8c\u6574\u5185\u5bb9\u3002";
-  @override
-  String get agentWorkspaceScriptStagePromptGenerateStorySkeleton =>
-      "\u8bf7\u57fa\u4e8e\u5f53\u524d\u9879\u76ee\u4e0a\u4e0b\u6587\u751f\u6210\u4e00\u7248\u6e05\u6670\u7684\u6545\u4e8b\u9aa8\u67b6\uff0c\u5e76\u7a81\u51fa\u4e3b\u51b2\u7a81\u4e0e\u53cd\u8f6c\u8282\u70b9\u3002";
-  @override
-  String get agentWorkspaceScriptStagePromptReviseAdaptationStrategy =>
-      "\u8bf7\u5148\u8bfb\u53d6 adaptationStrategy \u4e0e storySkeleton\uff0c\u518d\u9488\u5bf9\u5ba1\u6838\u610f\u89c1\u5c40\u90e8\u4fee\u8ba2\u6539\u7f16\u7b56\u7565\u3002";
-  @override
-  String get agentWorkspaceScriptStagePromptReviseScript =>
-      "\u8bf7\u5148\u8bfb\u53d6\u5f53\u524d\u96c6\u5c3e\u6bb5\u7a97\u53e3\u3001storySkeleton\u3001adaptationStrategy\uff1b\u5982\u4ecd\u4e0d\u8db3\u518d\u8865\u8bfb\u7ae0\u8282\u6b63\u6587\u7a97\u53e3\uff0c\u5e76\u9488\u5bf9\u5ba1\u6838\u610f\u89c1\u5b9a\u5411\u4fee\u8ba2\u672c\u96c6\u5267\u672c\u3002";
-  @override
-  String get agentWorkspaceScriptStagePromptReviseStorySkeleton =>
-      "\u8bf7\u5148\u8bfb\u53d6 storySkeleton \u4e0e\u76f8\u5173\u4e8b\u4ef6\u7a97\u53e3\uff0c\u518d\u9488\u5bf9\u5ba1\u6838\u610f\u89c1\u5c40\u90e8\u4fee\u8ba2\u6545\u4e8b\u9aa8\u67b6\u3002";
-  @override
-  String get agentWorkspaceScriptStageStatusCompleted => "\u5df2\u5b8c\u6210";
-  @override
-  String get agentWorkspaceScriptStageStatusNeedsRevision =>
-      "\u5f85\u4fee\u8ba2";
-  @override
-  String get agentWorkspaceScriptStageStatusPendingGenerate =>
-      "\u5f85\u751f\u6210";
-  @override
-  String get agentWorkspaceScriptStageStatusPendingRead => "\u5f85\u8bfb\u53d6";
-  @override
-  String get agentWorkspaceScriptStageStatusReady => "\u5df2\u5c31\u7eea";
-  @override
-  String get agentWorkspaceScriptStageStatusReusable => "\u53ef\u6cbf\u7528";
-  @override
-  String get agentWorkspaceScriptStageStatusSupplementNeeded =>
-      "\u5f85\u8865\u5145";
-  @override
-  String get agentWorkspaceScriptStageTitleAdaptationStrategy =>
-      "\u6539\u7f16\u7b56\u7565";
-  @override
-  String get agentWorkspaceScriptStageTitleChapterMaterial =>
-      "\u7ae0\u8282\u6750\u6599";
-  @override
-  String get agentWorkspaceScriptStageTitleScriptBody =>
-      "\u5267\u672c\u6b63\u6587";
-  @override
-  String get agentWorkspaceScriptStageTitleStorySkeleton =>
-      "\u6545\u4e8b\u9aa8\u67b6";
-
-  @override
   String agentWorkspaceScriptContextSkeletonFocus(String focus) {
     return '骨架焦点：$focus';
   }
@@ -19027,6 +17876,347 @@ class AppLocalizationsZh extends AppLocalizations {
   String agentWorkspaceScriptSummaryNovelEventsCount(int count) {
     return '小说事件 $count 条';
   }
+
+  @override
+  String get agentWorkspaceScriptStageTitleStorySkeleton => '故事骨架';
+
+  @override
+  String get agentWorkspaceScriptStageTitleAdaptationStrategy => '改编策略';
+
+  @override
+  String get agentWorkspaceScriptStageTitleChapterMaterial => '章节材料';
+
+  @override
+  String get agentWorkspaceScriptStageTitleScriptBody => '剧本正文';
+
+  @override
+  String get agentWorkspaceScriptStageStatusReady => '已就绪';
+
+  @override
+  String get agentWorkspaceScriptStageStatusReusable => '可沿用';
+
+  @override
+  String get agentWorkspaceScriptStageStatusNeedsRevision => '待修订';
+
+  @override
+  String get agentWorkspaceScriptStageStatusPendingGenerate => '待生成';
+
+  @override
+  String get agentWorkspaceScriptStageStatusPendingRead => '待读取';
+
+  @override
+  String get agentWorkspaceScriptStageStatusSupplementNeeded => '待补充';
+
+  @override
+  String get agentWorkspaceScriptStageStatusCompleted => '已完成';
+
+  @override
+  String get agentWorkspaceScriptStageDetailStorySkeletonReady =>
+      'storySkeleton 已存在，可继续收束改编策略或对照剧本正文。';
+
+  @override
+  String get agentWorkspaceScriptStageDetailReviewStorySkeletonEmpty =>
+      '审核已覆盖 storySkeleton，可按建议继续修订。';
+
+  @override
+  String get agentWorkspaceScriptStageDetailReviewAdaptationEmpty =>
+      '审核已覆盖 adaptationStrategy，可按建议继续修订。';
+
+  @override
+  String get agentWorkspaceScriptStageDetailReviewScriptEmpty =>
+      '审核已覆盖剧本正文，可按建议继续改稿。';
+
+  @override
+  String agentWorkspaceScriptStageDetailReviewConclusion(String summary) {
+    return '审核结论：$summary';
+  }
+
+  @override
+  String get agentWorkspaceScriptStagePromptReviseStorySkeleton =>
+      '请先读取 storySkeleton 与相关事件窗口，再针对审核意见局部修订故事骨架。';
+
+  @override
+  String get agentWorkspaceScriptStageDetailStorySkeletonPendingGen =>
+      '先补故事骨架，明确主冲突、转折与结局走向。';
+
+  @override
+  String get agentWorkspaceScriptStagePromptGenerateStorySkeleton =>
+      '请基于当前项目上下文生成一版清晰的故事骨架，并突出主冲突与反转节点。';
+
+  @override
+  String get agentWorkspaceScriptStageDetailStorySkeletonPendingRead =>
+      '先读取 planData，确认 storySkeleton 是否齐备。';
+
+  @override
+  String get agentWorkspaceScriptStageDetailAdaptationReady =>
+      'adaptationStrategy 已存在，可继续读取章节材料或生成正文。';
+
+  @override
+  String get agentWorkspaceScriptStagePromptReviseAdaptationStrategy =>
+      '请先读取 adaptationStrategy 与 storySkeleton，再针对审核意见局部修订改编策略。';
+
+  @override
+  String get agentWorkspaceScriptStageDetailAdaptationPendingGen =>
+      '当前缺少 adaptationStrategy，适合先收束人物与节奏策略。';
+
+  @override
+  String get agentWorkspaceScriptStagePromptGenerateAdaptationStrategy =>
+      '请基于现有故事骨架补齐改编策略，突出节奏、人物弧光与集数拆分原则。';
+
+  @override
+  String get agentWorkspaceScriptStageDetailAdaptationPendingRead =>
+      '回看 planData，判断 adaptationStrategy 是否已具备。';
+
+  @override
+  String agentWorkspaceScriptStageDetailChapterMaterialReady(int count) {
+    return '已读取 $count 条小说上下文，可继续生成剧本正文或对照现有 script。';
+  }
+
+  @override
+  String get agentWorkspaceScriptStageDetailChapterMaterialEmptyNovel =>
+      '小说上下文为空，建议继续读取章节正文或事件脉络。';
+
+  @override
+  String get agentWorkspaceScriptStageDetailChapterMaterialPendingRead =>
+      '先读取章节正文或事件列表，再决定如何改写剧本。';
+
+  @override
+  String get agentWorkspaceScriptStageDetailScriptBodyReady =>
+      '当前 script 正文已存在，可直接写回或回看计划数据继续改稿。';
+
+  @override
+  String get agentWorkspaceScriptStagePromptReviseScript =>
+      '请先读取当前集尾段窗口、storySkeleton、adaptationStrategy；如仍不足再补读章节正文窗口，并针对审核意见定向修订本集剧本。';
+
+  @override
+  String get agentWorkspaceScriptStageDetailScriptPendingGen =>
+      '当前 script 正文为空，适合直接运行 script 子代理生成首版内容。';
+
+  @override
+  String get agentWorkspaceScriptStagePromptGenerateScript =>
+      '请先读取当前集计划与目标章节事件；只有在承接上一集时才补读上一集尾段，其余细节再按需补正文窗口，生成下一版剧本正文并输出可直接写回的完整内容。';
+
+  @override
+  String get agentWorkspaceScriptStageDetailScriptPendingRead =>
+      '读取当前剧本正文，再判断是否需要直接生成下一版。';
+
+  @override
+  String get agentWorkspaceScriptRecipeFillStorySkeletonTitle => '补故事骨架';
+
+  @override
+  String get agentWorkspaceScriptRecipeFillStorySkeletonDetail =>
+      'planData 还没有 storySkeleton，先让骨架子代理补结构。';
+
+  @override
+  String get agentWorkspaceScriptRecipeFillStorySkeletonPrompt =>
+      '请基于当前项目上下文生成一版清晰的故事骨架，并突出主冲突与反转节点。';
+
+  @override
+  String get agentWorkspaceScriptRecipeFillAdaptationTitle => '补改编策略';
+
+  @override
+  String get agentWorkspaceScriptRecipeFillAdaptationDetail =>
+      '骨架之外还缺 adaptationStrategy，适合先收束改编路径。';
+
+  @override
+  String get agentWorkspaceScriptRecipeFillAdaptationPrompt =>
+      '请基于现有故事骨架补齐改编策略，突出节奏、人物弧光与集数拆分原则。';
+
+  @override
+  String get agentWorkspaceScriptRecipeReadScriptBodyTitle => '读取当前剧本正文';
+
+  @override
+  String get agentWorkspaceScriptRecipeReadScriptBodyDetail =>
+      'planData 已准备好后，下一步通常要对比当前 script 正文是否偏离。';
+
+  @override
+  String get agentWorkspaceScriptRecipeReadPlanScriptDraftTitle => '读取计划剧本草稿';
+
+  @override
+  String get agentWorkspaceScriptRecipeReadPlanScriptDraftDetail =>
+      'planData.script 已有当前集草稿，先消费这份结构化草稿，再决定是否补读章节正文更省 token。';
+
+  @override
+  String get agentWorkspaceScriptRecipePullChapterMaterialTitle => '拉取章节材料';
+
+  @override
+  String get agentWorkspaceScriptRecipePullChapterMaterialDetail =>
+      '计划里还没有剧本草稿，先读取小说章节文本补上下文。';
+
+  @override
+  String get agentWorkspaceScriptRecipeGenerateNextScriptTitle => '生成下一版剧本';
+
+  @override
+  String get agentWorkspaceScriptRecipeGenerateNextScriptDetail =>
+      '计划信息已具备，先消费计划剧本草稿和必要事件，再让 script 子代理输出下一版可写回正文。';
+
+  @override
+  String get agentWorkspaceScriptRecipeGenerateNextScriptPrompt =>
+      '请先读取当前集 planData.script 草稿、storySkeleton、adaptationStrategy，再补最少的目标章节事件；只有细节或衔接不足时才补读上一集尾段或章节正文窗口，然后输出可直接写回的完整剧本正文。';
+
+  @override
+  String get agentWorkspaceScriptRecipePreferEventsTitle => '改看事件脉络';
+
+  @override
+  String get agentWorkspaceScriptRecipePreferEventsDetail =>
+      '章节文本为空时，先读事件列表更容易定位剧情骨架缺口。';
+
+  @override
+  String get agentWorkspaceScriptRecipeReadMatchingEventsTitle => '读取对应事件';
+
+  @override
+  String get agentWorkspaceScriptRecipeReadMatchingEventsDetail =>
+      '章节文本已到位，继续按同一章节拉取事件脉络更利于总结冲突。';
+
+  @override
+  String get agentWorkspaceScriptRecipeGenerateAdaptationFromTextTitle =>
+      '生成改编策略';
+
+  @override
+  String get agentWorkspaceScriptRecipeGenerateAdaptationFromTextDetail =>
+      '章节材料已经可读，适合直接让改编策略子代理给出收束方案。';
+
+  @override
+  String get agentWorkspaceScriptRecipeGenerateAdaptationFromTextPrompt =>
+      '请基于当前章节文本总结改编策略，输出 3 到 5 条可直接执行的改写原则。';
+
+  @override
+  String get agentWorkspaceScriptRecipeReviewPreviousTailTitle => '回看上一版尾段';
+
+  @override
+  String get agentWorkspaceScriptRecipeReviewPreviousTailDetail =>
+      '在章节材料明确后，对照当前集尾段更容易定位衔接缺口且 token 更省。';
+
+  @override
+  String get agentWorkspaceScriptRecipePullChapterTextFirstTitle => '先拉章节正文';
+
+  @override
+  String get agentWorkspaceScriptRecipePullChapterTextFirstDetail =>
+      '事件列表为空时，先读章节文本更容易判断是数据空还是事件未抽取。';
+
+  @override
+  String get agentWorkspaceScriptRecipeDistillSkeletonFromEventsTitle =>
+      '整理故事骨架';
+
+  @override
+  String get agentWorkspaceScriptRecipeDistillSkeletonFromEventsDetail =>
+      '事件脉络已清晰，适合先收束成 storySkeleton。';
+
+  @override
+  String get agentWorkspaceScriptRecipeDistillSkeletonFromEventsPrompt =>
+      '请基于当前事件列表提炼故事骨架，保留关键冲突、转折与结局走向。';
+
+  @override
+  String get agentWorkspaceScriptRecipeGenerateScriptFromEventsTitle =>
+      '生成剧本初稿';
+
+  @override
+  String get agentWorkspaceScriptRecipeGenerateScriptFromEventsDetail =>
+      '如果事件链路基本齐全，可直接让 script 子代理生成可写回正文。';
+
+  @override
+  String get agentWorkspaceScriptRecipeGenerateScriptFromEventsPrompt =>
+      '请先结合当前事件脉络，并优先读取 planData.script、storySkeleton 与 adaptationStrategy；只有细节不足时再补章节正文窗口，生成一版可直接写回的剧本正文。';
+
+  @override
+  String get agentWorkspaceScriptRecipeCompareExistingScriptTitle => '对比现有剧本';
+
+  @override
+  String get agentWorkspaceScriptRecipeCompareExistingScriptDetail =>
+      '用当前事件链路反查现有正文，能更快定位缺场或冲突偏移。';
+
+  @override
+  String get agentWorkspaceScriptRecipeGenerateScriptBodyTitle => '生成剧本正文';
+
+  @override
+  String get agentWorkspaceScriptRecipeGenerateScriptBodyDetail =>
+      '当前正文为空，直接让 script 子代理产出首版内容更合适。';
+
+  @override
+  String get agentWorkspaceScriptRecipeGenerateScriptBodyPrompt =>
+      '请先读取当前集 planData.script、storySkeleton、adaptationStrategy 与目标章节事件；只有细节不足时再补读正文窗口，然后生成一版完整剧本正文。';
+
+  @override
+  String get agentWorkspaceScriptRecipeRefreshPlanDataTitle => '刷新计划数据';
+
+  @override
+  String get agentWorkspaceScriptRecipeRefreshPlanDataDetail =>
+      '若正文为空且上下文不完整，也可先回到 planData 校验骨架与策略。';
+
+  @override
+  String get agentWorkspaceScriptRecipeRefreshPlanAfterBodyTitle => '刷新计划数据';
+
+  @override
+  String get agentWorkspaceScriptRecipeRefreshPlanAfterBodyDetail =>
+      '已有正文后，通常要回看 planData 判断是否需要同步骨架或策略。';
+
+  @override
+  String get agentWorkspaceScriptRecipeAddChapterMaterialTitle => '补章节材料';
+
+  @override
+  String get agentWorkspaceScriptRecipeAddChapterMaterialDetail =>
+      '如果要继续改稿，可先拉小说正文与事件，避免只盯着当前 script。';
+
+  @override
+  String get agentWorkspaceScriptRecipeReviseStorySkeletonTitle => '修故事骨架';
+
+  @override
+  String get agentWorkspaceScriptRecipeReviseStorySkeletonDetail =>
+      '审核指出骨架仍有缺口，先回到 storySkeleton 做定向修订。';
+
+  @override
+  String get agentWorkspaceScriptRecipeReviseStorySkeletonPrompt =>
+      '请先读取 storySkeleton 与相关事件窗口，信息不足再补章节正文窗口，针对审核问题局部修订故事骨架。';
+
+  @override
+  String get agentWorkspaceScriptRecipeReviseAdaptationTitle => '修改编策略';
+
+  @override
+  String get agentWorkspaceScriptRecipeReviseAdaptationDetail =>
+      '审核认为策略与骨架或载体约束不一致，适合先局部修策略。';
+
+  @override
+  String get agentWorkspaceScriptRecipeReviseAdaptationPrompt =>
+      '请先读取 adaptationStrategy 与 storySkeleton，再按需补事件窗口，针对审核问题局部修订改编策略。';
+
+  @override
+  String get agentWorkspaceScriptRecipeReviseScriptTitle => '修剧本正文';
+
+  @override
+  String get agentWorkspaceScriptRecipeReviseScriptDetail =>
+      '审核已定位剧本正文问题，先读取当前集尾段窗口再定向改稿。';
+
+  @override
+  String get agentWorkspaceScriptRecipeReviseScriptPrompt =>
+      '请先读取当前集尾段窗口、storySkeleton、adaptationStrategy；如仍不足再补读章节正文窗口，并针对审核问题定向修订本集剧本。';
+
+  @override
+  String get agentWorkspaceScriptRecipeVerifyEventsTitle => '核对事件脉络';
+
+  @override
+  String get agentWorkspaceScriptRecipeVerifyEventsDetail =>
+      '审核建议回看事件链路，优先读取小说事件而不是整章原文。';
+
+  @override
+  String get agentWorkspaceScriptRecipeAddNovelTextWindowTitle => '补原文章节窗口';
+
+  @override
+  String get agentWorkspaceScriptRecipeAddNovelTextWindowDetail =>
+      '审核需要追溯原文时，先读取章节窗口，避免整章搬运。';
+
+  @override
+  String get agentWorkspaceScriptRecipeRereadCurrentScriptTitle => '回看当前剧本';
+
+  @override
+  String get agentWorkspaceScriptRecipeRereadCurrentScriptDetail =>
+      '先重新读取当前集尾段窗口，再决定是否继续改稿。';
+
+  @override
+  String get agentWorkspaceScriptRecipeReviewTargetPeekTitle => '回看审核对象';
+
+  @override
+  String get agentWorkspaceScriptRecipeReviewTargetPeekDetail =>
+      '先读取审核指向的核心内容，再决定是否重跑子代理。';
 
   @override
   String get agentWorkspaceScopeProjectIdLabel => '项目 ID（numeric）';
@@ -19271,6 +18461,11 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String contentComplianceMetricOverdue(int count) {
+    return '逾期 $count';
+  }
+
+  @override
   String contentComplianceOldestHours(int hours) {
     return '最旧 ${hours}h';
   }
@@ -19292,12 +18487,17 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String contentComplianceWorkspaceCounts(int open, int pending, int claimed) {
-    return 'open $open · pending $pending · claimed $claimed';
+    return '打开 $open · 待处理 $pending · 已认领 $claimed';
   }
 
   @override
-  String contentComplianceWorkspaceDetail(int critical, int high, String sla) {
-    return 'critical $critical · high $high · SLA $sla';
+  String contentComplianceWorkspaceDetail(
+    int critical,
+    int high,
+    int breached,
+    int oldestHours,
+  ) {
+    return '严重 $critical · 高优先级 $high · SLA 违约 $breached · 最久 ${oldestHours}h';
   }
 
   @override
@@ -19306,12 +18506,72 @@ class AppLocalizationsZh extends AppLocalizations {
     String reportedAt,
     String detail,
   ) {
-    return 'reporter $reporter · $reportedAt · $detail';
+    return '上报人 $reporter · $reportedAt · $detail';
+  }
+
+  @override
+  String get contentComplianceActorInternalOps => '内部运营';
+
+  @override
+  String contentComplianceItemLineCreated(String createdAt) {
+    return '创建于 $createdAt';
+  }
+
+  @override
+  String contentComplianceItemLineClaimed(String actor) {
+    return '认领人 $actor';
+  }
+
+  @override
+  String contentComplianceItemLineClaimedWithTime(
+    String actor,
+    String claimedAt,
+  ) {
+    return '认领人 $actor · $claimedAt';
+  }
+
+  @override
+  String contentComplianceItemLineOutcome(String status, String resolutionBy) {
+    return '$status · $resolutionBy';
+  }
+
+  @override
+  String contentComplianceItemLineOutcomeWithTime(
+    String status,
+    String resolutionBy,
+    String resolvedAt,
+  ) {
+    return '$status · $resolutionBy · $resolvedAt';
+  }
+
+  @override
+  String get contentComplianceAuditVerbClaim => '认领';
+
+  @override
+  String get contentComplianceAuditVerbResolve => '结案';
+
+  @override
+  String get contentComplianceAuditVerbDismiss => '忽略';
+
+  @override
+  String get contentComplianceAuditVerbReassign => '改派';
+
+  @override
+  String get contentComplianceAuditVerbAutoRebalance => '自动再平衡';
+
+  @override
+  String contentComplianceAuditStatusChanged(String from, String to) {
+    return '$from → $to';
+  }
+
+  @override
+  String contentComplianceAuditDispositionEntry(String value) {
+    return '处置：$value';
   }
 
   @override
   String contentComplianceResolutionLine(String note) {
-    return 'resolution: $note';
+    return '处理说明：$note';
   }
 
   @override
@@ -19541,13 +18801,13 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String opsWhFieldSecret(String secret) {
-    return '密钥：$secret';
+  String opsWhFieldUrl(String url) {
+    return '网址：$url';
   }
 
   @override
-  String opsWhFieldUrl(String url) {
-    return '网址：$url';
+  String opsWhFieldSecret(String secret) {
+    return '密钥：$secret';
   }
 
   @override
@@ -20035,15 +19295,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get benchmarkLabelSampleType => '样本类型';
 
   @override
-  String get benchmarkExperimentSuiteCore => '核心';
-
-  @override
-  String get benchmarkExperimentSuiteFull => '全量';
-
-  @override
-  String get benchmarkExperimentSuiteSmoke => '冒烟';
-
-  @override
   String get benchmarkSampleTypeBadCase => '坏例';
 
   @override
@@ -20051,6 +19302,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get benchmarkSampleTypeRegressionGuard => '回归守护';
+
+  @override
+  String get benchmarkExperimentSuiteSmoke => '冒烟';
+
+  @override
+  String get benchmarkExperimentSuiteCore => '核心';
+
+  @override
+  String get benchmarkExperimentSuiteFull => '全量';
 
   @override
   String get benchmarkLabelSampleSummary => '样本摘要';
@@ -20131,6 +19391,9 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get benchmarkLabelGateDecisionNote => '决策说明';
+
+  @override
   String get shellJobQueueStatsTitle => '任务队列统计（内部）';
 
   @override
@@ -20153,9 +19416,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String shellJobQueueStatsPendingByKind(String kinds) {
     return 'pending_by_kind: $kinds';
   }
-
-  @override
-  String get benchmarkLabelGateDecisionNote => '决策说明';
 
   @override
   String get benchmarkGatePromoteBaselineTitle => '同时提升为新基线';
@@ -20264,4 +19524,889 @@ class AppLocalizationsZh extends AppLocalizations {
   ) {
     return '趋势 $weeks 周 · 最新 $weekStart 质量 $quality / token $tokens';
   }
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeDiagnosisRefineIntentFirst =>
+      '当前更建议先细化导演计划里的分场景情绪/画面意图，再继续拆分分镜表。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeDiagnosisExpandTableFirst =>
+      '当前更建议先扩读关键分镜表窗口，再决定是否推进 storyboard。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeDiagnosisCheapestFirst =>
+      '当前建议按第一张卡开始推进，优先执行最靠前的低成本动作。';
+
+  @override
+  String get agentWorkspaceProductionSupervisionSummaryFallback => '按审核结论继续推进。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSbGenRefreshTitle => '刷新分镜结果';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSbGenRereadTitle => '回读缺帧状态';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSbGenRefreshDetail =>
+      '分镜生成动作已执行，先刷新分镜结果，再决定是否写回。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeContinueDirectorTitle =>
+      '继续导演计划';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeContinueDirectorAfterSbDetail =>
+      '如分镜结果还不稳定，回到 scriptPlan 生成下一轮导演决策。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSbTableRefreshTitle => '刷新分镜表';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSbTablePartialTitle => '回读局部分镜表';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSbTableRefreshDetail =>
+      '分镜表子代理已执行，先刷新分镜表，再决定是否继续修订。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSbTableCrosscheckTitle =>
+      '核对对应分镜';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSbTableCrosscheckDetailAll =>
+      '必要时切回 storyboard，确认分镜表调整是否已经落实到画面结果。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsRefreshTitle => '刷新资产结果';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsRereadTitle => '回读受影响资产';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsRefreshDetail =>
+      '资产动作已执行，先刷新资产结果，再决定是否写回。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsContinueSubTitle =>
+      '继续资产子代理';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsContinueSubDetail =>
+      '若仍缺素材，可直接衔接资产子代理推进下一轮生成。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsPlanFirstTitle =>
+      '先生成资产计划';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsPlanFirstDetail =>
+      '当前 assets 为空，优先让子代理补齐衍生素材规划。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsPlanFirstPrompt =>
+      '请基于当前空白 assets flow 规划最小可行的衍生素材集合，并说明优先级。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsContinueGenTitle =>
+      '继续资产生成';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsContinueGenDetailGeneric =>
+      '仍有素材缺少图像结果，适合直接运行素材生成子代理。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRefreshStoryboardNeedTitle =>
+      '刷新分镜需求';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRefreshStoryboardNeedDetail =>
+      '素材缺口补齐后通常需要回看 storyboard 是否还能沿用当前方案。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCheckStoryboardFlowTitle =>
+      '检查分镜 flow';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCheckStoryboardFlowDetail =>
+      '资产已具备基础结果，可切到 storyboard 评估镜头生成状态。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeTidyDirectorPlanTitle =>
+      '整理导演计划';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeTidyDirectorPlanDetail =>
+      '若素材已基本齐全，可生成下一轮导演计划收束 production 节奏。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeTidyDirectorPlanPrompt =>
+      '请结合现有素材状态与 scriptPlan，输出下一轮导演计划与执行优先级。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeFirstStoryboardTitle =>
+      '生成第一版分镜';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeFirstStoryboardDetail =>
+      '当前 storyboard 为空，优先运行分镜生成子代理建立初版镜头。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeFirstStoryboardPrompt =>
+      '请基于当前 production 上下文生成第一版 storyboard，并保持最小可行镜头集。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeFillStoryboardFramesTitle =>
+      '继续补齐分镜图';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsTitle =>
+      '核对关联资产';
+
+  @override
+  String
+  get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailFromRefs =>
+      '优先只看当前分镜窗口实际引用的资产，避免把无关素材带入分镜补图。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailNoIds =>
+      '当前分镜摘要尚未定位出明确资产 ID，退回紧凑 assets 摘要读取。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCheckStoryboardTableTitle =>
+      '检查分镜表';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCheckStoryboardTableDetail =>
+      '必要时切到 storyboardTable 审阅结构化镜头表后再回写。';
+
+  @override
+  String
+  get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailReadyIds =>
+      '分镜已引用明确资产，可先核对这批资产是否足够支撑后续导演调整。';
+
+  @override
+  String
+  get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailReadyNoIds =>
+      '当前分镜摘要未定位出明确资产 ID，先读紧凑 assets 摘要即可。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRefreshDirectorPlanTitle =>
+      '刷新导演计划';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRefreshDirectorPlanDetail =>
+      '分镜已有基础结果，适合回到 scriptPlan 整理下一轮导演决策。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCreateDirectorPlanTitle =>
+      '先生成导演计划';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCreateDirectorPlanDetail =>
+      '当前 scriptPlan 为空，优先建立导演计划再推进资产或分镜。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCreateDirectorPlanPrompt =>
+      '请基于当前 production 上下文生成一版导演计划，并给出执行优先级。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeReviewDirectorPlanTitle =>
+      '审核导演计划';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeReviewDirectorPlanDetail =>
+      '导演计划已有内容，先做一次监督审核更容易在低成本阶段发现节奏和资产问题。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeReviewDirectorPlanPrompt =>
+      '请审核当前导演规划，重点检查剧情覆盖、资产匹配与节奏合理性。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRereadScriptTitle => '回看剧本依据';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCheckKeyAssetsTitle => '检查关键资产';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRefineSceneIntentTitle =>
+      '补足分场景意图';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipePreviewStoryboardTableTitle =>
+      '先看分镜表落地';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRefineSceneIntentDetail =>
+      '当前导演计划还缺少足够明确的分场景情绪/画面意图，先补这层再拆 storyboardTable，能减少后续反复返工。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipePreviewStoryboardTableDetail =>
+      '如计划已定，先抽样检查 storyboardTable 结构更省 token，再决定是否读取 storyboard 画面结果。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRefineSceneIntentPrompt =>
+      '请继续细化当前 scriptPlan，优先补足分场景情绪推进、画面意图与镜头落点，再进入 storyboardTable 拆分。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCreateStoryboardTableTitle =>
+      '生成分镜表';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCreateStoryboardTableDetail =>
+      '当前 storyboardTable 为空，适合先用分镜表子代理补结构。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCreateStoryboardTablePrompt =>
+      '请先产出结构化 storyboardTable，并保持字段清晰可回写。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeReviewStoryboardTableTitle =>
+      '审核分镜表';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeReviewStoryboardTableDetail =>
+      '分镜表已有内容，先做监督审核可避免把错误结构继续放大到 storyboard。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeReviewStoryboardTablePrompt =>
+      '请审核当前分镜表，重点检查覆盖度、资产关联与拆分粒度。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsTableRefs =>
+      '优先只看当前分镜窗口实际引用的资产，减少无关素材上下文。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsTableNoIds =>
+      '当前窗口暂未解析出关联资产 ID，退回紧凑 assets 摘要读取。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSwitchStoryboardResultsTitle =>
+      '切回分镜结果';
+
+  @override
+  String
+  get agentWorkspaceProductionFlowRecipeSwitchStoryboardResultsDetailAll =>
+      '分镜表已有内容，可继续查看 storyboard 画面结果是否跟上。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSampleStoryboardTableTitle =>
+      '抽样读取分镜表';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSampleStoryboardTableDetail =>
+      '先只看前 8 行关键列，通常足够判断是否继续审核或回写。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeReviseDirectorPlanTitle =>
+      '修导演计划';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRecheckAssetSupportTitle =>
+      '复查资产支撑';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRecheckAssetSupportDetail =>
+      '导演计划常先卡在资产准备，先看 assets 能减少返工。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeVerifyAssetSupportTitle =>
+      '核对资产支撑';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRereadDirectorPlanTitle =>
+      '回看导演计划';
+
+  @override
+  String
+  get agentWorkspaceProductionFlowRecipeRereadDirectorPlanAfterAssetsDetail =>
+      '资产核对后回到精简 scriptPlan，确认是否还需要修订计划再推进分镜。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeInspectStoryboardResultsTitle =>
+      '检查分镜结果';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCompareStoryboardTableTitle =>
+      '对照分镜表';
+
+  @override
+  String
+  get agentWorkspaceProductionFlowRecipeCompareStoryboardTableDetailGeneric =>
+      '先复读关键列窗口，避免把整张分镜表重新带入上下文。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRereadScriptNeedWindowDetail =>
+      '需要时再回看紧凑剧本窗口，确认镜头依据。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeReviseStoryboardTableTitle =>
+      '修分镜表';
+
+  @override
+  String
+  get agentWorkspaceProductionFlowRecipeSampleRereadStoryboardTableTitle =>
+      '抽样复读分镜表';
+
+  @override
+  String
+  get agentWorkspaceProductionFlowRecipeSampleRereadStoryboardTableDetailEmpty =>
+      '先读取关键列窗口，避免把整张表反复带入上下文。';
+
+  @override
+  String
+  get agentWorkspaceProductionFlowRecipeSampleRereadStoryboardTableDetailFocused =>
+      '先只复读审核聚焦镜头对应的分镜表行，避免回到整表窗口。';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeContinueStoryboardGenTitle =>
+      '继续生成分镜图';
+
+  @override
+  String
+  get agentWorkspaceProductionFlowRecipeCompareStoryboardTableBeforeFillDetail =>
+      '补图前先复读关键列窗口，避免为整批镜头重建上下文。';
+
+  @override
+  String get agentWorkspaceProductionArgSuggestDeriveNameFallback => '新衍生资产';
+
+  @override
+  String get agentWorkspaceProductionArgSuggestFillFirst => '填充首项';
+
+  @override
+  String get agentWorkspaceProductionArgSuggestFillFirstThree => '填充前 3 项';
+
+  @override
+  String get agentWorkspaceProductionArgSuggestFillAll => '填充全部';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsGenHadSummaryNote =>
+      '先检查本次刚生成资产的结果再决定是否补跑';
+
+  @override
+  String agentWorkspaceProductionArgSuggestAddTo(String id) {
+    return '新增到 #$id';
+  }
+
+  @override
+  String agentWorkspaceProductionArgSuggestDelete(String id) {
+    return '删除 #$id';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeSbGenRereadDetail(String ids) {
+    return '分镜生成动作已执行，先回读本次镜头 #$ids 的缺帧状态。';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeSbTablePartialDetail(String ids) {
+    return '分镜表子代理已执行，先回读本次镜头 #$ids 对应的局部分镜表行。';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeSbTableCrosscheckDetailFocused(
+    String ids,
+  ) {
+    return '优先只回读镜头 #$ids 的 storyboard 结果，确认表格修改没有放大到整段。';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeAssetsRereadDetail(String ids) {
+    return '资产生成动作已执行，先回读本次资产 #$ids 的最新状态。';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeAssetsGenDetailScoped(String scope) {
+    return '$scope 仍缺图，优先只补这批衍生资产更省 token。';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeSbFillGapDetail(
+    String idsLabel,
+    String idTail,
+  ) {
+    return '优先只补缺帧镜头 #$idsLabel$idTail，避免把已完成镜头整批重跑。';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeRereadScriptScriptPlanDetail(
+    String scriptWindow,
+  ) {
+    return '先只回看$scriptWindow，确认导演计划与原文节奏一致，再决定是否扩读。';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeCheckKeyAssetsDetailIds(
+    String assetScope,
+  ) {
+    return '导演计划已点名$assetScope，先精确核对再决定是否扩读其他素材。';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeCheckKeyAssetsDetailNoIds(
+    String assetScope,
+  ) {
+    return '导演计划已有内容，先核对$assetScope是否支撑执行，信息不足时再补更多资产。';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeContinueDirectorDetailIds(
+    String assetScope,
+  ) {
+    return '优先围绕$assetScope收束导演决策，让后续分镜和素材动作先继承这批受改写约束的重点。';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeContinueDirectorDetailNoIds(
+    String assetScope,
+  ) {
+    return '先围绕$assetScope继续收束导演决策，让后续分镜和素材动作继承当前改写约束。';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeContinueDirectorPromptIds(
+    String assetScope,
+  ) {
+    return '请在当前 scriptPlan 上继续收束导演计划，优先围绕$assetScope安排镜头和素材优先级，确保后续分镜执行继承上游改写约束。';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeContinueDirectorPromptNoIds(
+    String assetScope,
+  ) {
+    return '请在当前 scriptPlan 上继续收束导演计划，优先围绕$assetScope安排镜头和素材优先级，确保后续分镜执行继承上游改写约束。';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeRereadScriptRevisePlanDetail(
+    String scriptWindow,
+  ) {
+    return '修订前先只回看$scriptWindow，避免为 scriptPlan 扩读整段剧本。';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeReviseDirectorPlanDetail(
+    String summary,
+  ) {
+    return '审核结论：$summary';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeReviseDirectorPlanPrompt(
+    String summary,
+  ) {
+    return '请根据最近审核意见修订 scriptPlan，优先解决：$summary';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeVerifyAssetSupportDetail(
+    String summary,
+    String assetScope,
+  ) {
+    return '审核结论：$summary；优先只看$assetScope，确认导演计划缺口。';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeInspectSbResultsDetail(
+    String summary,
+    String focusClause,
+  ) {
+    return '审核结论：$summary；优先只看$focusClause';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeCompareStoryboardTableDetailFocus(
+    String storyboardFocus,
+  ) {
+    return '优先只复读$storyboardFocus对应的分镜表行，避免退回整表。';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeRereadScriptReviewDetail(
+    String reviewScope,
+  ) {
+    return '如需核对镜头依据，优先只用局部范围：$reviewScope。';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeInspectStoryboardResultsDetailScript(
+    String summary,
+    String reviewScope,
+  ) {
+    return '审核结论：$summary；优先只用局部范围：$reviewScope。';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeSwitchStoryboardResultsDetailCount(
+    int count,
+  ) {
+    return '优先只回看当前分镜表窗口对应的 $count 个镜头，避免退回通用分镜摘要。';
+  }
+
+  @override
+  String
+  agentWorkspaceProductionFlowRecipeCompareStoryboardTableBeforeFillDetailFocus(
+    String storyboardFocus,
+  ) {
+    return '补图前先只复读$storyboardFocus对应的分镜表行。';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipePromptStoryboardContinue(
+    String body,
+  ) {
+    return '请继续推进 storyboard。$body';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipePromptReviseStoryboardTable(
+    String body,
+  ) {
+    return '请根据最近审核意见修订 storyboardTable。$body';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipePromptStoryboardFromReview(
+    String body,
+  ) {
+    return '请基于最近审核结论继续推进 storyboard。$body';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeShotCountTail(int count) {
+    return ' 等 $count 个镜头';
+  }
+
+  @override
+  String
+  agentWorkspaceProductionFlowRecipeInspectStoryboardResultsDetailSummaryOnly(
+    String summary,
+  ) {
+    return '审核结论：$summary';
+  }
+
+  @override
+  String
+  agentWorkspaceProductionFlowRecipeInspectStoryboardResultsDetailWithScope(
+    String summary,
+    String reviewScope,
+  ) {
+    return '审核结论：$summary；$reviewScope。';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeArgDeriveNameFromParent(
+    String name,
+  ) {
+    return '$name-衍生';
+  }
+
+  @override
+  String agentWorkspaceProductionAssetReviewPromptFocused(
+    int count,
+    String priority,
+  ) {
+    return '请优先只核对这 $count 个资产是否支撑当前导演规划；仅补必要缺口，不扩读无关素材。$priority';
+  }
+
+  @override
+  String agentWorkspaceProductionAssetReviewPromptScoped(
+    String scope,
+    String priority,
+  ) {
+    return '请先核对$scope是否支撑当前导演规划；信息不足时再最小补读，不要整包扩读 assets。$priority';
+  }
+
+  @override
+  String agentWorkspaceProductionAssetReviewPromptPriority(String summary) {
+    return '优先解决：$summary';
+  }
+
+  @override
+  String agentWorkspaceProductionRecipeAppliedFollowRefine(String title) {
+    return '已应用任务建议：$title，下一步先细化导演计划。';
+  }
+
+  @override
+  String agentWorkspaceProductionRecipeAppliedFollowExpandTable(String title) {
+    return '已应用任务建议：$title，下一步先扩读关键分镜表窗口。';
+  }
+
+  @override
+  String agentWorkspaceProductionRecipeAppliedGeneric(String title) {
+    return '已应用任务建议：$title';
+  }
+
+  @override
+  String get agentWorkspaceDefaultScriptPrompt =>
+      '先用 get_planData 读取 planData.script、storySkeleton、adaptationStrategy 的必要片段，再读目标章节事件；只有细节不足时才补正文窗口，最后给出下一轮 script 建议。';
+
+  @override
+  String get agentWorkspaceDefaultProductionPrompt =>
+      '先调用 get_flowData key=scriptPlan 读取紧凑导演规划，再按需补最小化 assets 或 storyboardTable，上来不要整包读取 production flow。';
+
+  @override
+  String get agentWorkspaceScriptArgTemplateCurrentWindow => '模板: 当前剧本窗口';
+
+  @override
+  String get agentWorkspaceScriptArgTemplateCurrentTail => '模板: 当前剧本尾段';
+
+  @override
+  String get agentWorkspaceScriptArgTemplatePreviousEpisodeTail => '模板: 上一集尾段';
+
+  @override
+  String get agentWorkspaceScriptArgTemplateStorySkeletonSlice => '模板: 骨架片段';
+
+  @override
+  String get agentWorkspaceScriptArgTemplateAdaptationSlice => '模板: 策略片段';
+
+  @override
+  String get agentWorkspaceScriptArgTemplateNovelTextWindow => '模板: 正文窗口';
+
+  @override
+  String get agentWorkspaceScriptArgTemplateNovelEventsWindow => '模板: 事件窗口';
+
+  @override
+  String get agentWorkspaceScriptArgTemplateEmptyArgs => '模板: 空参数';
+
+  @override
+  String get agentWorkspaceProductionArgTemplateCompactRead => '模板: 紧凑读取';
+
+  @override
+  String get agentWorkspaceProductionArgTemplateDirectorPlan => '模板: 导演计划';
+
+  @override
+  String get agentWorkspaceProductionArgTemplateAssetSummary => '模板: 资产摘要';
+
+  @override
+  String get agentWorkspaceProductionArgTemplateIdList => '模板: ID 列表';
+
+  @override
+  String get agentWorkspaceProductionArgTemplateStoryboardIds => '模板: 分镜 ID';
+
+  @override
+  String agentWorkspaceFilledArgTemplate(String label) {
+    return '已填充参数模板：$label';
+  }
+
+  @override
+  String agentWorkspaceFilledCandidateArgs(String label) {
+    return '已填充候选参数：$label';
+  }
+
+  @override
+  String get agentWorkspaceScriptInterceptArgsMustBeJsonObject =>
+      '拦截：剧本工具参数必须是 JSON object。';
+
+  @override
+  String get agentWorkspaceScriptInterceptArgsJsonParseFailed =>
+      '拦截：剧本工具参数 JSON 解析失败。';
+
+  @override
+  String agentWorkspaceScriptInterceptPromptRequired(String action) {
+    return '拦截：$action 需要非空工作区提示词。';
+  }
+
+  @override
+  String get agentWorkspaceScriptInterceptSelectDomainToolFirst =>
+      '拦截：读取前需要选择剧本域工具。';
+
+  @override
+  String get agentWorkspaceScriptInterceptGetScriptContentNeedsScriptId =>
+      '拦截：get_script_content 需要有效剧本 ID。';
+
+  @override
+  String agentWorkspaceScriptSyncedScriptContentScriptId(String scriptId) {
+    return '已同步：get_script_content arguments.scriptId -> $scriptId';
+  }
+
+  @override
+  String get agentWorkspaceScriptInterceptSelectSubAgentToolFirst =>
+      '拦截：运行子代理前需要选择剧本子代理工具。';
+
+  @override
+  String get agentWorkspaceScriptActionRunWorkflow => '运行剧本工作流';
+
+  @override
+  String get agentWorkspaceScriptActionRunSubAgent => '运行子代理';
+
+  @override
+  String get agentWorkspaceScriptTriggeredRunWorkflow => '已触发：运行剧本工作流';
+
+  @override
+  String agentWorkspaceScriptTriggeredProbeContext(String tool) {
+    return '已触发：读取剧本上下文 ($tool)';
+  }
+
+  @override
+  String agentWorkspaceScriptTriggeredRunSubAgent(String tool) {
+    return '已触发：运行子代理 ($tool)';
+  }
+
+  @override
+  String get agentWorkspaceScriptInterceptNoScriptWritebackResult =>
+      '拦截：暂无剧本结果可写回。';
+
+  @override
+  String get agentWorkspaceScriptTriggeredWritebackScript => '已触发：写回剧本';
+
+  @override
+  String get agentWorkspaceScriptInterceptNoPlanDataWritebackResult =>
+      '拦截：暂无 planData 结果可写回。';
+
+  @override
+  String get agentWorkspaceScriptTriggeredWritebackPlanData => '已触发：写回计划数据';
+
+  @override
+  String get agentWorkspaceScriptInterceptPlanWritebackNeedsPlanId =>
+      '拦截：需要 planId（拉取 get_planData）与 planData。';
+
+  @override
+  String get agentWorkspaceScriptTriggeredPlanRowUpdateData =>
+      '已触发：update-data 写回计划行';
+
+  @override
+  String agentWorkspaceScriptAppliedRecipe(String title) {
+    return '已应用任务建议：$title';
+  }
+
+  @override
+  String agentWorkspaceScriptAppliedStage(String title) {
+    return '已应用阶段动作：$title';
+  }
+
+  @override
+  String get agentWorkspaceScriptGuidedGenerateDraftPrompt =>
+      '请先读取当前集计划与目标章节事件；只有在衔接需要时才补读上一集尾段，其他细节再按需补章节正文窗口，然后生成下一版剧本正文并输出可直接写回的完整内容。';
+
+  @override
+  String get agentWorkspaceScriptPresetPlotSkeletonLabel => '剧情骨架';
+
+  @override
+  String get agentWorkspaceScriptPresetPlotSkeletonPrompt =>
+      '先读取 get_planData 的 planData.script、storySkeleton、adaptationStrategy 片段，再补最少的 get_novel_events 或剧本窗口，总结当前剧情骨架缺口。';
+
+  @override
+  String get agentWorkspaceScriptPresetChapterAdaptLabel => '章节改编';
+
+  @override
+  String get agentWorkspaceScriptPresetChapterAdaptPrompt =>
+      '先用 get_planData 读取计划剧本草稿与改编策略，再结合 get_novel_text 与 get_script_content 的窗口片段，对当前章节做改写建议，输出 3 条可执行脚本改写项。';
+
+  @override
+  String get agentWorkspaceProductionPresetDirectorPlanLabel => '导演计划';
+
+  @override
+  String get agentWorkspaceProductionPresetDirectorPlanPrompt =>
+      '先调用 get_flowData key=scriptPlan，读取紧凑导演规划，再决定是否继续读 assets 或 storyboardTable。';
+
+  @override
+  String get agentWorkspaceProductionPresetAssetInventoryLabel => '资产盘点';
+
+  @override
+  String get agentWorkspaceProductionPresetAssetInventoryPrompt =>
+      '先调用 get_flowData key=assets 并读取最小字段子集，盘点现有资产状态并给出下一步 production 任务建议。';
+
+  @override
+  String get agentWorkspaceProductionPresetStoryboardProgressLabel => '分镜推进';
+
+  @override
+  String get agentWorkspaceProductionPresetStoryboardProgressPrompt =>
+      '读取 get_flowData key=storyboard 的紧凑镜头状态，评估当前分镜完成度并给出下一次 generate_storyboard 的执行建议。';
+
+  @override
+  String get agentWorkspaceProductionPresetProductionReviewLabel => '制作审核';
+
+  @override
+  String get agentWorkspaceProductionPresetProductionReviewPrompt =>
+      '请先读取 get_flowData key=scriptPlan 或 storyboardTable，再调用 production supervision 审核当前制作结果。';
+
+  @override
+  String get agentWorkspaceProductionRunningRunWorkflow => '执行中：运行制作工作流';
+
+  @override
+  String get agentWorkspaceProductionRunningProbeTool => '执行中：读取制作工具结果';
+
+  @override
+  String get agentWorkspaceProductionRunningSubAgent => '执行中：运行子代理';
+
+  @override
+  String get agentWorkspaceProductionRunningWriteback => '执行中：写回工具结果';
+
+  @override
+  String get agentWorkspaceProductionInterceptArgsMustBeJsonObject =>
+      '拦截：制作工具参数必须是 JSON object。';
+
+  @override
+  String get agentWorkspaceProductionInterceptArgsJsonParseFailed =>
+      '拦截：制作工具参数 JSON 解析失败。';
+
+  @override
+  String agentWorkspaceProductionInterceptPromptRequired(String action) {
+    return '拦截：$action 需要非空工作区提示词。';
+  }
+
+  @override
+  String get agentWorkspaceProductionInterceptSelectDomainToolFirst =>
+      '拦截：读取前需要选择制作域工具。';
+
+  @override
+  String get agentWorkspaceProductionInterceptGetFlowDataNeedsKey =>
+      '拦截：get_flowData 需要有效 flow key。';
+
+  @override
+  String agentWorkspaceProductionSyncedFlowDataKey(String key) {
+    return '已同步：get_flowData arguments.key -> $key';
+  }
+
+  @override
+  String get agentWorkspaceProductionInterceptSelectSubAgentToolFirst =>
+      '拦截：运行子代理前需要选择制作子代理工具。';
+
+  @override
+  String get agentWorkspaceProductionActionRunWorkflow => '运行制作工作流';
+
+  @override
+  String get agentWorkspaceProductionActionRunSubAgent => '运行子代理';
+
+  @override
+  String get agentWorkspaceProductionTriggeredRunWorkflow => '已触发：运行制作工作流';
+
+  @override
+  String agentWorkspaceProductionTriggeredProbeContext(String detail) {
+    return '已触发：读取制作工具 ($detail)';
+  }
+
+  @override
+  String agentWorkspaceProductionTriggeredRunSubAgentTool(String tool) {
+    return '已触发：运行子代理 ($tool)';
+  }
+
+  @override
+  String get agentWorkspaceProductionInterceptNoToolWriteback =>
+      '拦截：暂无工具结果可写回。';
+
+  @override
+  String get agentWorkspaceProductionInterceptWritebackNeedsFlowKey =>
+      '拦截：写回前请提供有效 flow key。';
+
+  @override
+  String agentWorkspaceProductionTriggeredWritebackFlow(String key) {
+    return '已触发：写回工具结果 -> flow[$key]';
+  }
+
+  @override
+  String get agentWorkspaceProductionGuidedDeriveAssetsPrompt =>
+      '请基于当前资产 flow 给出下一轮衍生素材生成建议，并执行最小可行推进。';
+
+  @override
+  String get agentWorkspaceProductionGuidedStoryboardGenPrompt =>
+      '请基于当前分镜 flow 输出下一轮分镜生成计划，并执行最小可行生成动作。';
+
+  @override
+  String get agentWorkspaceProductionGuidedDirectorPlanPrompt =>
+      '请结合 scriptPlan 与现有素材状态，产出下一轮导演计划并给出执行优先级。';
+
+  @override
+  String get projectsCreativeManualDefaultSlotsTemplate =>
+      '场景|scene|\n角色|role|';
 }

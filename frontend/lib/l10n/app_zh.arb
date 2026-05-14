@@ -13729,14 +13729,99 @@
   "contentComplianceMetricDismissed": "已忽略 {count}",
   "contentComplianceMetricCritical": "严重 {count}",
   "contentComplianceMetricHigh": "高优先级 {count}",
+  "contentComplianceMetricOverdue": "逾期 {count}",
+  "@contentComplianceMetricOverdue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "contentComplianceOldestHours": "最旧 {hours}h",
   "contentComplianceCapacityPerReviewer": "容量 {capacity}/reviewer",
   "contentComplianceOwnerCounts": "待处理 {pending} · 已认领 {claimed}",
   "contentComplianceOwnerDetail": "详情 {detail}",
-  "contentComplianceWorkspaceCounts": "open {open} · pending {pending} · claimed {claimed}",
-  "contentComplianceWorkspaceDetail": "critical {critical} · high {high} · SLA {sla}",
-  "contentComplianceReportInfo": "reporter {reporter} · {reportedAt} · {detail}",
-  "contentComplianceResolutionLine": "resolution: {note}",
+  "contentComplianceWorkspaceCounts": "打开 {open} · 待处理 {pending} · 已认领 {claimed}",
+  "contentComplianceWorkspaceDetail": "严重 {critical} · 高优先级 {high} · SLA 违约 {breached} · 最久 {oldestHours}h",
+  "contentComplianceReportInfo": "上报人 {reporter} · {reportedAt} · {detail}",
+  "contentComplianceActorInternalOps": "内部运营",
+  "contentComplianceItemLineCreated": "创建于 {createdAt}",
+  "@contentComplianceItemLineCreated": {
+    "placeholders": {
+      "createdAt": {
+        "type": "String"
+      }
+    }
+  },
+  "contentComplianceItemLineClaimed": "认领人 {actor}",
+  "@contentComplianceItemLineClaimed": {
+    "placeholders": {
+      "actor": {
+        "type": "String"
+      }
+    }
+  },
+  "contentComplianceItemLineClaimedWithTime": "认领人 {actor} · {claimedAt}",
+  "@contentComplianceItemLineClaimedWithTime": {
+    "placeholders": {
+      "actor": {
+        "type": "String"
+      },
+      "claimedAt": {
+        "type": "String"
+      }
+    }
+  },
+  "contentComplianceItemLineOutcome": "{status} · {resolutionBy}",
+  "@contentComplianceItemLineOutcome": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      },
+      "resolutionBy": {
+        "type": "String"
+      }
+    }
+  },
+  "contentComplianceItemLineOutcomeWithTime": "{status} · {resolutionBy} · {resolvedAt}",
+  "@contentComplianceItemLineOutcomeWithTime": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      },
+      "resolutionBy": {
+        "type": "String"
+      },
+      "resolvedAt": {
+        "type": "String"
+      }
+    }
+  },
+  "contentComplianceAuditVerbClaim": "认领",
+  "contentComplianceAuditVerbResolve": "结案",
+  "contentComplianceAuditVerbDismiss": "忽略",
+  "contentComplianceAuditVerbReassign": "改派",
+  "contentComplianceAuditVerbAutoRebalance": "自动再平衡",
+  "contentComplianceAuditStatusChanged": "{from} → {to}",
+  "@contentComplianceAuditStatusChanged": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "contentComplianceAuditDispositionEntry": "处置：{value}",
+  "@contentComplianceAuditDispositionEntry": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "contentComplianceResolutionLine": "处理说明：{note}",
   "contentComplianceActionClaim": "content compliance action claim",
   "contentComplianceActionResolve": "resolve",
   "contentComplianceActionDismiss": "dismiss",
@@ -14652,8 +14737,11 @@
       "high": {
         "type": "int"
       },
-      "sla": {
-        "type": "String"
+      "breached": {
+        "type": "int"
+      },
+      "oldestHours": {
+        "type": "int"
       }
     }
   },

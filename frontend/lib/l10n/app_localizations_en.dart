@@ -1435,7 +1435,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get billingAuditProviderLabel => 'Provider';
 
   @override
-  String get billingAuditAll => 'All';
+  String get billingAuditProviderStripe => 'Stripe';
 
   @override
   String get billingAuditProviderAlipay => 'Alipay';
@@ -1444,7 +1444,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get billingAuditProviderPaddle => 'Paddle';
 
   @override
-  String get billingAuditProviderStripe => 'Stripe';
+  String get billingAuditAll => 'All';
 
   @override
   String get billingAuditSortLabel => 'Sort';
@@ -3234,10 +3234,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get projectsCreativeManualVerbDelete => 'Delete';
 
   @override
-  String get projectsCreativeManualDefaultSlotsTemplate =>
-      'Scene|scene|\nRole|role|';
-
-  @override
   String get projectsArtWorkbenchStatusRefreshing => 'Refreshing art styles…';
 
   @override
@@ -4275,7 +4271,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String qualityReviewsScopeInsightSlimChars(int chars, int rows, String unit) {
-    return 'slim ${chars}c/${rows}$unit';
+    return 'slim ${chars}c/$rows$unit';
   }
 
   @override
@@ -17440,9 +17436,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionBlockerHeadline(
-    String title,
-    String status,
-    String reason,
+    Object reason,
+    Object status,
+    Object title,
   ) {
     return 'Current blocker: $title · $status; $reason';
   }
@@ -17453,7 +17449,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionBlockerExpandTableWithCoverage(
-    String coverage,
+    Object coverage,
   ) {
     return 'Expand the key storyboard table window first; $coverage.';
   }
@@ -17468,960 +17464,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionBlockerExpandTableCoverageWithDigest(
-    String coverage,
+    Object coverage,
   ) {
     return 'The storyboard table has a base but coverage is thin; $coverage.';
   }
 
   @override
-  String agentWorkspaceProductionAppliedRefineDirectorPlan(String title) {
+  String agentWorkspaceProductionAppliedRefineDirectorPlan(Object title) {
     return 'Applied stage action: $title. Next, refine the director plan.';
   }
 
   @override
-  String agentWorkspaceProductionAppliedExpandStoryboardTable(String title) {
+  String agentWorkspaceProductionAppliedExpandStoryboardTable(Object title) {
     return 'Applied stage action: $title. Next, expand the key storyboard table window.';
   }
 
   @override
-  String agentWorkspaceProductionAppliedStageGeneric(String title) {
+  String agentWorkspaceProductionAppliedStageGeneric(Object title) {
     return 'Applied stage action: $title';
   }
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeDiagnosisRefineIntentFirst =>
-      r'Refine per-scene emotion and visual intent in the director plan before splitting the storyboard table.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeDiagnosisExpandTableFirst =>
-      r'Expand the key storyboard table window first, then decide whether to advance storyboard frames.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeDiagnosisCheapestFirst =>
-      r'Follow the first suggestion card and prioritize the cheapest next action.';
-
-  @override
-  String get agentWorkspaceProductionSupervisionSummaryFallback =>
-      r'Continue based on the latest review conclusion.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeSbGenRefreshTitle =>
-      r'Refresh storyboard results';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeSbGenRereadTitle =>
-      r'Reread missing-frame status';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeSbGenRefreshDetail =>
-      r'Storyboard generation ran; refresh storyboard results before deciding whether to write back.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeContinueDirectorTitle =>
-      r'Continue director plan';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeContinueDirectorAfterSbDetail =>
-      r'If storyboard results are still unstable, return to scriptPlan for another director decision round.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeSbTableRefreshTitle =>
-      r'Refresh storyboard table';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeSbTablePartialTitle =>
-      r'Reread partial storyboard table';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeSbTableRefreshDetail =>
-      r'The storyboard-table sub-agent ran; refresh the table before deciding whether to revise further.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeSbTableCrosscheckTitle =>
-      r'Cross-check storyboard results';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeSbTableCrosscheckDetailAll =>
-      r'When needed, switch to storyboard to confirm table changes have propagated to rendered frames.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeAssetsRefreshTitle =>
-      r'Refresh asset results';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeAssetsRereadTitle =>
-      r'Reread affected assets';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeAssetsRefreshDetail =>
-      r'An asset action ran; refresh asset results before deciding whether to write back.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeAssetsContinueSubTitle =>
-      r'Continue asset sub-agent';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeAssetsContinueSubDetail =>
-      r'If materials are still missing, chain the asset sub-agent for another generation round.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeAssetsPlanFirstTitle =>
-      r'Create an asset plan first';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeAssetsPlanFirstDetail =>
-      r'Assets are empty; let the sub-agent fill in derived material planning first.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeAssetsPlanFirstPrompt =>
-      r'Given the current empty assets flow, plan a minimal viable derived material set and explain priorities.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeAssetsContinueGenTitle =>
-      r'Continue asset generation';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeAssetsContinueGenDetailGeneric =>
-      r'Some materials still lack rendered images; run the asset generation sub-agent directly.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeRefreshStoryboardNeedTitle =>
-      r'Refresh storyboard needs';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeRefreshStoryboardNeedDetail =>
-      r'After closing asset gaps, revisit storyboard to see whether the current approach still fits.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeCheckStoryboardFlowTitle =>
-      r'Check storyboard flow';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeCheckStoryboardFlowDetail =>
-      r'Assets have baseline results; switch to storyboard to assess frame generation status.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeTidyDirectorPlanTitle =>
-      r'Tidy director plan';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeTidyDirectorPlanDetail =>
-      r'If materials are mostly ready, generate the next director plan round to close out production pacing.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeTidyDirectorPlanPrompt =>
-      r'Combine current material status with scriptPlan and output the next director plan with execution priorities.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeFirstStoryboardTitle =>
-      r'Generate first storyboard pass';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeFirstStoryboardDetail =>
-      r'Storyboard is empty; run the storyboard generation sub-agent to establish an initial shot set.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeFirstStoryboardPrompt =>
-      r'Generate a first-pass storyboard from the current production context with a minimal viable shot set.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeFillStoryboardFramesTitle =>
-      r'Continue filling storyboard frames';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsTitle =>
-      r'Verify linked assets';
-
-  @override
-  String
-  get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailFromRefs =>
-      r'Focus on assets referenced by the current storyboard window to avoid unrelated material in frame fills.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailNoIds =>
-      r'The storyboard digest has not resolved explicit asset IDs; fall back to a compact assets summary read.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeCheckStoryboardTableTitle =>
-      r'Check storyboard table';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeCheckStoryboardTableDetail =>
-      r'When needed, review the structured storyboardTable before writeback.';
-
-  @override
-  String
-  get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailReadyIds =>
-      r'Storyboard references explicit assets; verify this set is enough for upcoming director adjustments.';
-
-  @override
-  String
-  get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailReadyNoIds =>
-      r'The storyboard digest did not resolve explicit asset IDs; read the compact assets summary first.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeRefreshDirectorPlanTitle =>
-      r'Refresh director plan';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeRefreshDirectorPlanDetail =>
-      r'Storyboard has baseline results; return to scriptPlan to organize the next director decision round.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeCreateDirectorPlanTitle =>
-      r'Create director plan first';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeCreateDirectorPlanDetail =>
-      r'scriptPlan is empty; establish a director plan before advancing assets or storyboard.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeCreateDirectorPlanPrompt =>
-      r'Generate a director plan from the current production context with execution priorities.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeReviewDirectorPlanTitle =>
-      r'Review director plan';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeReviewDirectorPlanDetail =>
-      r'The director plan has content; a supervision review first surfaces pacing and asset issues cheaply.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeReviewDirectorPlanPrompt =>
-      r'Review the current director plan for plot coverage, asset fit, and pacing.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeRereadScriptTitle =>
-      r'Reread script evidence';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeCheckKeyAssetsTitle =>
-      r'Check key assets';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeRefineSceneIntentTitle =>
-      r'Refine per-scene intent';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipePreviewStoryboardTableTitle =>
-      r'Preview storyboard table first';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeRefineSceneIntentDetail =>
-      r'The director plan still lacks clear per-scene emotion and visual intent; strengthen this before splitting storyboardTable to reduce rework.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipePreviewStoryboardTableDetail =>
-      r'If the plan is stable, sample-check storyboardTable structure for fewer tokens before reading storyboard imagery.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeRefineSceneIntentPrompt =>
-      r'Continue refining scriptPlan: prioritize per-scene emotional progression, visual intent, and shot anchors before storyboardTable split.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeCreateStoryboardTableTitle =>
-      r'Create storyboard table';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeCreateStoryboardTableDetail =>
-      r'storyboardTable is empty; use the storyboard-table sub-agent to add structure first.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeCreateStoryboardTablePrompt =>
-      r'Produce a structured storyboardTable with fields that are clear and writeback-friendly.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeReviewStoryboardTableTitle =>
-      r'Review storyboard table';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeReviewStoryboardTableDetail =>
-      r'The table has content; supervision review first prevents bad structure from amplifying into storyboard.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeReviewStoryboardTablePrompt =>
-      r'Review the current storyboard table for coverage, asset links, and split granularity.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsTableRefs =>
-      r'Focus on assets referenced by the current storyboard window to reduce unrelated context.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsTableNoIds =>
-      r'This window did not resolve linked asset IDs; fall back to a compact assets summary read.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeSwitchStoryboardResultsTitle =>
-      r'Switch to storyboard results';
-
-  @override
-  String
-  get agentWorkspaceProductionFlowRecipeSwitchStoryboardResultsDetailAll =>
-      r'The table has content; continue checking whether storyboard imagery has caught up.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeSampleStoryboardTableTitle =>
-      r'Sample-read storyboard table';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeSampleStoryboardTableDetail =>
-      r'Read the first 8 key columns first—usually enough to decide whether to keep reviewing or write back.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeReviseDirectorPlanTitle =>
-      r'Revise director plan';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeRecheckAssetSupportTitle =>
-      r'Recheck asset support';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeRecheckAssetSupportDetail =>
-      r'Director plans often stall on asset prep; reading assets first reduces rework.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeVerifyAssetSupportTitle =>
-      r'Verify asset support';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeRereadDirectorPlanTitle =>
-      r'Reread director plan';
-
-  @override
-  String
-  get agentWorkspaceProductionFlowRecipeRereadDirectorPlanAfterAssetsDetail =>
-      r'After asset checks, return to a compact scriptPlan to see whether more revisions are needed before storyboard.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeInspectStoryboardResultsTitle =>
-      r'Inspect storyboard results';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeCompareStoryboardTableTitle =>
-      r'Compare storyboard table';
-
-  @override
-  String
-  get agentWorkspaceProductionFlowRecipeCompareStoryboardTableDetailGeneric =>
-      r'Reread the key-column window first to avoid reloading the entire table into context.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeRereadScriptNeedWindowDetail =>
-      r'When needed, reread a compact script window to confirm shot rationale.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeReviseStoryboardTableTitle =>
-      r'Revise storyboard table';
-
-  @override
-  String
-  get agentWorkspaceProductionFlowRecipeSampleRereadStoryboardTableTitle =>
-      r'Sample-reread storyboard table';
-
-  @override
-  String
-  get agentWorkspaceProductionFlowRecipeSampleRereadStoryboardTableDetailEmpty =>
-      r'Read the key-column window first to avoid repeatedly loading the full table into context.';
-
-  @override
-  String
-  get agentWorkspaceProductionFlowRecipeSampleRereadStoryboardTableDetailFocused =>
-      r'Reread only the storyboard table rows for the focused shots from review; avoid returning to the full table window.';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeContinueStoryboardGenTitle =>
-      r'Continue storyboard image generation';
-
-  @override
-  String
-  get agentWorkspaceProductionFlowRecipeCompareStoryboardTableBeforeFillDetail =>
-      r'Before filling frames, reread the key-column window to avoid rebuilding context for every shot.';
-
-  @override
-  String get agentWorkspaceProductionArgSuggestDeriveNameFallback =>
-      r'New derived asset';
-
-  @override
-  String get agentWorkspaceProductionArgSuggestFillFirst => r'Fill first item';
-
-  @override
-  String get agentWorkspaceProductionArgSuggestFillFirstThree =>
-      r'Fill first 3 items';
-
-  @override
-  String get agentWorkspaceProductionArgSuggestFillAll => r'Fill all';
-
-  @override
-  String get agentWorkspaceProductionFlowRecipeAssetsGenHadSummaryNote =>
-      r'First review results for assets just generated, then decide whether to rerun.';
-
-  @override
-  String agentWorkspaceProductionArgSuggestAddTo(String id) {
-    return 'Add under #${id}';
-  }
-
-  @override
-  String agentWorkspaceProductionArgSuggestDelete(String id) {
-    return 'Delete #${id}';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeSbGenRereadDetail(String ids) {
-    return 'Storyboard generation ran; first reread missing-frame status for shots #${ids}.';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeSbTablePartialDetail(String ids) {
-    return 'The storyboard-table sub-agent ran; first reread table rows for shots #${ids}.';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeSbTableCrosscheckDetailFocused(
-    String ids,
-  ) {
-    return 'Prefer rereading storyboard results for shots #${ids} only so a table tweak does not widen to the whole sequence.';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeAssetsRereadDetail(String ids) {
-    return 'Asset generation ran; first reread latest status for assets #${ids}.';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeAssetsGenDetailScoped(String scope) {
-    return '${scope} still lack images; prioritize patching only this derived set to save tokens.';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeSbFillGapDetail(
-    String idTail,
-    String idsLabel,
-  ) {
-    return 'Prioritize filling missing frames for shots #${idsLabel}${idTail}; avoid rerunning completed shots in bulk.';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeRereadScriptScriptPlanDetail(
-    String scriptWindow,
-  ) {
-    return 'Reread only ${scriptWindow} first to align the director plan with the script pacing before expanding reads.';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeCheckKeyAssetsDetailIds(
-    String assetScope,
-  ) {
-    return 'The director plan calls out ${assetScope}; verify precisely before expanding to other materials.';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeCheckKeyAssetsDetailNoIds(
-    String assetScope,
-  ) {
-    return 'The director plan has content; verify whether ${assetScope} supports execution, then add more assets only if needed.';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeContinueDirectorDetailIds(
-    String assetScope,
-  ) {
-    return 'Focus director decisions around ${assetScope} so downstream storyboard and asset actions inherit these rewrite constraints first.';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeContinueDirectorDetailNoIds(
-    String assetScope,
-  ) {
-    return 'Continue tightening director decisions around ${assetScope} so downstream storyboard and asset actions inherit the current rewrite constraints.';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeContinueDirectorPromptIds(
-    String assetScope,
-  ) {
-    return 'Continue tightening scriptPlan around ${assetScope} for shot and material priorities so downstream storyboard execution inherits upstream rewrite constraints.';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeContinueDirectorPromptNoIds(
-    String assetScope,
-  ) {
-    return 'Continue tightening scriptPlan around ${assetScope} for shot and material priorities so downstream storyboard execution inherits upstream rewrite constraints.';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeRereadScriptRevisePlanDetail(
-    String scriptWindow,
-  ) {
-    return 'Before revising, reread only ${scriptWindow} to avoid loading the entire script for scriptPlan.';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeReviseDirectorPlanDetail(
-    String summary,
-  ) {
-    return 'Review conclusion: ${summary}';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeReviseDirectorPlanPrompt(
-    String summary,
-  ) {
-    return 'Revise scriptPlan based on the latest review; prioritize fixing: ${summary}';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeVerifyAssetSupportDetail(
-    String assetScope,
-    String summary,
-  ) {
-    return 'Review conclusion: ${summary}; first narrow to ${assetScope} to confirm gaps in the director plan.';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeInspectSbResultsDetail(
-    String focusClause,
-    String summary,
-  ) {
-    return 'Review conclusion: ${summary}; first narrow to ${focusClause}';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeCompareStoryboardTableDetailFocus(
-    String storyboardFocus,
-  ) {
-    return 'Prefer rereading only the storyboard table rows for ${storyboardFocus} to avoid returning to the full table.';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeRereadScriptReviewDetail(
-    String reviewScope,
-  ) {
-    return 'If shot rationale must be checked, prefer only the partial range: ${reviewScope}.';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeInspectStoryboardResultsDetailScript(
-    String reviewScope,
-    String summary,
-  ) {
-    return 'Review conclusion: ${summary}; prefer only the partial range: ${reviewScope}.';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeSwitchStoryboardResultsDetailCount(
-    int count,
-  ) {
-    return 'Prefer rereading only the ${count} shots covered by the current storyboard table window; avoid falling back to a generic storyboard digest.';
-  }
-
-  @override
-  String
-  agentWorkspaceProductionFlowRecipeCompareStoryboardTableBeforeFillDetailFocus(
-    String storyboardFocus,
-  ) {
-    return 'Before filling frames, reread only the storyboard table rows for ${storyboardFocus}.';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipePromptStoryboardContinue(
-    String body,
-  ) {
-    return 'Continue advancing storyboard. ${body}';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipePromptReviseStoryboardTable(
-    String body,
-  ) {
-    return 'Revise storyboardTable based on the latest review. ${body}';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipePromptStoryboardFromReview(
-    String body,
-  ) {
-    return 'Continue advancing storyboard based on the latest review conclusion. ${body}';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeShotCountTail(int count) {
-    return ' and ${count} more shots';
-  }
-
-  @override
-  String
-  agentWorkspaceProductionFlowRecipeInspectStoryboardResultsDetailSummaryOnly(
-    String summary,
-  ) {
-    return 'Review conclusion: ${summary}';
-  }
-
-  @override
-  String
-  agentWorkspaceProductionFlowRecipeInspectStoryboardResultsDetailWithScope(
-    String reviewScope,
-    String summary,
-  ) {
-    return 'Review conclusion: ${summary}; ${reviewScope}.';
-  }
-
-  @override
-  String agentWorkspaceProductionFlowRecipeArgDeriveNameFromParent(
-    String name,
-  ) {
-    return '${name}-derived';
-  }
-
-  @override
-  String agentWorkspaceProductionAssetReviewPromptFocused(
-    int count,
-    String priority,
-  ) {
-    return 'Please verify only these ${count} assets against the current director plan; fill only necessary gaps and avoid bulk-reading unrelated assets.${priority}';
-  }
-
-  @override
-  String agentWorkspaceProductionAssetReviewPromptScoped(
-    String priority,
-    String scope,
-  ) {
-    return 'Please verify whether ${scope} supports the current director plan; add minimal reads only if information is insufficient—do not bulk-read assets.${priority}';
-  }
-
-  @override
-  String agentWorkspaceProductionAssetReviewPromptPriority(String summary) {
-    return ' Prioritize addressing: ${summary}';
-  }
-
-  @override
-  String agentWorkspaceProductionRecipeAppliedFollowRefine(String title) {
-    return 'Applied suggestion: ${title}. Next, refine the director plan.';
-  }
-
-  @override
-  String agentWorkspaceProductionRecipeAppliedFollowExpandTable(String title) {
-    return 'Applied suggestion: ${title}. Next, expand the key storyboard table window.';
-  }
-
-  @override
-  String agentWorkspaceProductionRecipeAppliedGeneric(String title) {
-    return 'Applied suggestion: ${title}';
-  }
-
-  @override
-  String get agentWorkspaceDefaultScriptPrompt =>
-      'First use get_planData to read the necessary slices of planData.script, '
-      'storySkeleton, and adaptationStrategy, then read the target chapter events; '
-      'only widen into novel text when details are missing, and finally propose the '
-      'next round of script suggestions.';
-
-  @override
-  String get agentWorkspaceDefaultProductionPrompt =>
-      'Call get_flowData key=scriptPlan for a compact director plan first, then add '
-      'minimal assets or storyboardTable reads as needed—avoid pulling the whole '
-      'production flow upfront.';
-
-  @override
-  String get agentWorkspaceScriptArgTemplateCurrentWindow =>
-      'Template: current script window';
-
-  @override
-  String get agentWorkspaceScriptArgTemplateCurrentTail =>
-      'Template: current script tail';
-
-  @override
-  String get agentWorkspaceScriptArgTemplatePreviousEpisodeTail =>
-      'Template: previous episode tail';
-
-  @override
-  String get agentWorkspaceScriptArgTemplateStorySkeletonSlice =>
-      'Template: story skeleton slice';
-
-  @override
-  String get agentWorkspaceScriptArgTemplateAdaptationSlice =>
-      'Template: adaptation slice';
-
-  @override
-  String get agentWorkspaceScriptArgTemplateNovelTextWindow =>
-      'Template: novel text window';
-
-  @override
-  String get agentWorkspaceScriptArgTemplateNovelEventsWindow =>
-      'Template: novel events window';
-
-  @override
-  String get agentWorkspaceScriptArgTemplateEmptyArgs => 'Template: empty args';
-
-  @override
-  String get agentWorkspaceProductionArgTemplateCompactRead =>
-      'Template: compact read';
-
-  @override
-  String get agentWorkspaceProductionArgTemplateDirectorPlan =>
-      'Template: director plan';
-
-  @override
-  String get agentWorkspaceProductionArgTemplateAssetSummary =>
-      'Template: asset summary';
-
-  @override
-  String get agentWorkspaceProductionArgTemplateIdList => 'Template: ID list';
-
-  @override
-  String get agentWorkspaceProductionArgTemplateStoryboardIds =>
-      'Template: storyboard IDs';
-
-  @override
-  String agentWorkspaceFilledArgTemplate(String label) {
-    return 'Filled argument template: $label';
-  }
-
-  @override
-  String agentWorkspaceFilledCandidateArgs(String label) {
-    return 'Filled candidate arguments: $label';
-  }
-
-  @override
-  String get agentWorkspaceScriptInterceptArgsMustBeJsonObject =>
-      'Blocked: script tool arguments must be a JSON object.';
-
-  @override
-  String get agentWorkspaceScriptInterceptArgsJsonParseFailed =>
-      'Blocked: failed to parse script tool arguments JSON.';
-
-  @override
-  String agentWorkspaceScriptInterceptPromptRequired(String action) {
-    return 'Blocked: $action requires a non-empty workspace prompt.';
-  }
-
-  @override
-  String get agentWorkspaceScriptInterceptSelectDomainToolFirst =>
-      'Blocked: select a script domain tool before reading context.';
-
-  @override
-  String get agentWorkspaceScriptInterceptGetScriptContentNeedsScriptId =>
-      'Blocked: get_script_content requires a valid script id.';
-
-  @override
-  String agentWorkspaceScriptSyncedScriptContentScriptId(String scriptId) {
-    return 'Synced: get_script_content arguments.scriptId -> $scriptId';
-  }
-
-  @override
-  String get agentWorkspaceScriptInterceptSelectSubAgentToolFirst =>
-      'Blocked: select a script sub-agent tool before running.';
-
-  @override
-  String get agentWorkspaceScriptActionRunWorkflow =>
-      'Run script workspace workflow';
-
-  @override
-  String get agentWorkspaceScriptActionRunSubAgent => 'Run sub-agent';
-
-  @override
-  String get agentWorkspaceScriptTriggeredRunWorkflow =>
-      'Triggered: run script workspace workflow';
-
-  @override
-  String agentWorkspaceScriptTriggeredProbeContext(String tool) {
-    return 'Triggered: read script context ($tool)';
-  }
-
-  @override
-  String agentWorkspaceScriptTriggeredRunSubAgent(String tool) {
-    return 'Triggered: run sub-agent ($tool)';
-  }
-
-  @override
-  String get agentWorkspaceScriptInterceptNoScriptWritebackResult =>
-      'Blocked: no script result available to write back.';
-
-  @override
-  String get agentWorkspaceScriptTriggeredWritebackScript =>
-      'Triggered: write back script';
-
-  @override
-  String get agentWorkspaceScriptInterceptNoPlanDataWritebackResult =>
-      'Blocked: no planData result available to write back.';
-
-  @override
-  String get agentWorkspaceScriptTriggeredWritebackPlanData =>
-      'Triggered: write back plan data';
-
-  @override
-  String get agentWorkspaceScriptInterceptPlanWritebackNeedsPlanId =>
-      'Blocked: plan id (fetch get_planData) and planData are required.';
-
-  @override
-  String get agentWorkspaceScriptTriggeredPlanRowUpdateData =>
-      'Triggered: update-data writeback for plan row';
-
-  @override
-  String agentWorkspaceScriptAppliedRecipe(String title) {
-    return 'Applied recipe suggestion: $title';
-  }
-
-  @override
-  String agentWorkspaceScriptAppliedStage(String title) {
-    return 'Applied stage action: $title';
-  }
-
-  @override
-  String get agentWorkspaceScriptGuidedGenerateDraftPrompt =>
-      'First read the current episode plan and target chapter events; only widen '
-      'into the previous episode tail when continuity needs it, then add novel text '
-      'windows as needed, generate the next script body, and output full content '
-      'ready for writeback.';
-
-  @override
-  String get agentWorkspaceScriptPresetPlotSkeletonLabel => 'Plot skeleton';
-
-  @override
-  String get agentWorkspaceScriptPresetPlotSkeletonPrompt =>
-      'Read get_planData slices of planData.script, storySkeleton, and adaptationStrategy '
-      'first, then add the smallest get_novel_events or script window reads needed to '
-      'summarize current plot skeleton gaps.';
-
-  @override
-  String get agentWorkspaceScriptPresetChapterAdaptLabel =>
-      'Chapter adaptation';
-
-  @override
-  String get agentWorkspaceScriptPresetChapterAdaptPrompt =>
-      'Use get_planData to read the planned script draft and adaptation strategy, '
-      'combine get_novel_text and get_script_content window slices, and propose '
-      'chapter rewrite suggestions with three actionable script edits.';
-
-  @override
-  String get agentWorkspaceProductionPresetDirectorPlanLabel => 'Director plan';
-
-  @override
-  String get agentWorkspaceProductionPresetDirectorPlanPrompt =>
-      'Call get_flowData key=scriptPlan for a compact director plan first, then decide '
-      'whether to continue with assets or storyboardTable.';
-
-  @override
-  String get agentWorkspaceProductionPresetAssetInventoryLabel =>
-      'Asset inventory';
-
-  @override
-  String get agentWorkspaceProductionPresetAssetInventoryPrompt =>
-      'Call get_flowData key=assets with a minimal field subset, inventory current '
-      'assets, and suggest the next production tasks.';
-
-  @override
-  String get agentWorkspaceProductionPresetStoryboardProgressLabel =>
-      'Storyboard progress';
-
-  @override
-  String get agentWorkspaceProductionPresetStoryboardProgressPrompt =>
-      'Read get_flowData key=storyboard for compact shot status, assess storyboard '
-      'completion, and suggest the next generate_storyboard run.';
-
-  @override
-  String get agentWorkspaceProductionPresetProductionReviewLabel =>
-      'Production review';
-
-  @override
-  String get agentWorkspaceProductionPresetProductionReviewPrompt =>
-      'Read get_flowData key=scriptPlan or storyboardTable first, then call production '
-      'supervision to review current production results.';
-
-  @override
-  String get agentWorkspaceProductionRunningRunWorkflow =>
-      'Running: production workspace workflow';
-
-  @override
-  String get agentWorkspaceProductionRunningProbeTool =>
-      'Running: read production tool result';
-
-  @override
-  String get agentWorkspaceProductionRunningSubAgent => 'Running: sub-agent';
-
-  @override
-  String get agentWorkspaceProductionRunningWriteback =>
-      'Running: write back tool result';
-
-  @override
-  String get agentWorkspaceProductionInterceptArgsMustBeJsonObject =>
-      'Blocked: production tool arguments must be a JSON object.';
-
-  @override
-  String get agentWorkspaceProductionInterceptArgsJsonParseFailed =>
-      'Blocked: failed to parse production tool arguments JSON.';
-
-  @override
-  String agentWorkspaceProductionInterceptPromptRequired(String action) {
-    return 'Blocked: $action requires a non-empty workspace prompt.';
-  }
-
-  @override
-  String get agentWorkspaceProductionInterceptSelectDomainToolFirst =>
-      'Blocked: select a production domain tool before reading.';
-
-  @override
-  String get agentWorkspaceProductionInterceptGetFlowDataNeedsKey =>
-      'Blocked: get_flowData requires a non-empty flow key.';
-
-  @override
-  String agentWorkspaceProductionSyncedFlowDataKey(String key) {
-    return 'Synced: get_flowData arguments.key -> $key';
-  }
-
-  @override
-  String get agentWorkspaceProductionInterceptSelectSubAgentToolFirst =>
-      'Blocked: select a production sub-agent tool before running.';
-
-  @override
-  String get agentWorkspaceProductionActionRunWorkflow =>
-      'Run production workspace workflow';
-
-  @override
-  String get agentWorkspaceProductionActionRunSubAgent => 'Run sub-agent';
-
-  @override
-  String get agentWorkspaceProductionTriggeredRunWorkflow =>
-      'Triggered: run production workspace workflow';
-
-  @override
-  String agentWorkspaceProductionTriggeredProbeContext(String detail) {
-    return 'Triggered: read production tool ($detail)';
-  }
-
-  @override
-  String agentWorkspaceProductionTriggeredRunSubAgentTool(String tool) {
-    return 'Triggered: run sub-agent ($tool)';
-  }
-
-  @override
-  String get agentWorkspaceProductionInterceptNoToolWriteback =>
-      'Blocked: no tool result available to write back.';
-
-  @override
-  String get agentWorkspaceProductionInterceptWritebackNeedsFlowKey =>
-      'Blocked: provide a valid flow key before writeback.';
-
-  @override
-  String agentWorkspaceProductionTriggeredWritebackFlow(String key) {
-    return 'Triggered: write back tool result -> flow[$key]';
-  }
-
-  @override
-  String get agentWorkspaceProductionGuidedDeriveAssetsPrompt =>
-      'Based on the current assets flow, propose the next round of derived asset '
-      'generation and take the smallest viable next step.';
-
-  @override
-  String get agentWorkspaceProductionGuidedStoryboardGenPrompt =>
-      'Based on the current storyboard flow, outline the next storyboard generation '
-      'plan and take the smallest viable generation action.';
-
-  @override
-  String get agentWorkspaceProductionGuidedDirectorPlanPrompt =>
-      'Combine scriptPlan with current asset status, produce the next director plan '
-      'round, and list execution priorities.';
 
   @override
   String agentWorkspaceProductionFlowChip(String flowKey) {
@@ -18581,12 +17642,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get agentWorkspaceProductionAssetTypeTool => 'Props';
 
   @override
-  String agentWorkspaceProductionAssetScopeIds(String ids) {
+  String agentWorkspaceProductionAssetScopeIds(Object ids) {
     return 'Assets #$ids';
   }
 
   @override
-  String agentWorkspaceProductionAssetScopeTypes(String types) {
+  String agentWorkspaceProductionAssetScopeTypes(Object types) {
     return '$types assets';
   }
 
@@ -18594,12 +17655,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get agentWorkspaceProductionAssetScopeCompact => 'Compact asset read';
 
   @override
-  String agentWorkspaceProductionAssetFocusIdsShort(String visible) {
+  String agentWorkspaceProductionAssetFocusIdsShort(Object visible) {
     return 'Assets #$visible';
   }
 
   @override
-  String agentWorkspaceProductionAssetFocusIdsMore(String visible, int total) {
+  String agentWorkspaceProductionAssetFocusIdsMore(
+    Object total,
+    Object visible,
+  ) {
     return 'Assets #$visible and $total more';
   }
 
@@ -18607,17 +17671,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get agentWorkspaceProductionAssetReadinessEmpty => 'No assets loaded';
 
   @override
-  String agentWorkspaceProductionAssetReadinessRoots(int ready, int total) {
+  String agentWorkspaceProductionAssetReadinessRoots(
+    Object ready,
+    Object total,
+  ) {
     return 'Main assets $ready/$total ready';
   }
 
   @override
-  String agentWorkspaceProductionAssetReadinessDeriveGap(int count) {
+  String agentWorkspaceProductionAssetReadinessDeriveGap(Object count) {
     return '$count derived assets still need images';
   }
 
   @override
-  String agentWorkspaceProductionAssetReadinessRootMissing(int count) {
+  String agentWorkspaceProductionAssetReadinessRootMissing(Object count) {
     return '$count main assets still need images';
   }
 
@@ -18627,19 +17694,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionStoryboardReadinessFrames(
-    int ready,
-    int needed,
+    Object needed,
+    Object ready,
   ) {
     return 'Rendered frames $ready/$needed ready';
   }
 
   @override
-  String agentWorkspaceProductionStoryboardReadinessMissing(int count) {
+  String agentWorkspaceProductionStoryboardReadinessMissing(Object count) {
     return '$count shots still need frames';
   }
 
   @override
-  String agentWorkspaceProductionStoryboardReadinessTextOnly(int count) {
+  String agentWorkspaceProductionStoryboardReadinessTextOnly(Object count) {
     return '$count text-only shots';
   }
 
@@ -18648,70 +17715,70 @@ class AppLocalizationsEn extends AppLocalizations {
       'Storyboard table not loaded yet';
 
   @override
-  String agentWorkspaceProductionStoryboardTableCoverageRowsOnly(int count) {
+  String agentWorkspaceProductionStoryboardTableCoverageRowsOnly(Object count) {
     return 'Storyboard table: read $count rows';
   }
 
   @override
   String agentWorkspaceProductionStoryboardTableCoverageProgress(
-    int sampled,
-    int total,
+    Object sampled,
+    Object total,
   ) {
     return 'Storyboard table: read $sampled/$total rows';
   }
 
   @override
   String agentWorkspaceProductionStoryboardTableCoverageWithPending(
-    int sampled,
-    int total,
-    int remaining,
+    Object remaining,
+    Object sampled,
+    Object total,
   ) {
     return 'Storyboard table: read $sampled/$total rows; $remaining rows still to expand';
   }
 
   @override
   String agentWorkspaceProductionPlanningScriptWindow(
-    int start,
-    int end,
-    int maxChars,
+    Object end,
+    Object maxChars,
+    Object start,
   ) {
     return 'Script lines $start–$end (≤$maxChars chars)';
   }
 
   @override
-  String agentWorkspaceProductionStoryboardShotsHashShort(String ids) {
+  String agentWorkspaceProductionStoryboardShotsHashShort(Object ids) {
     return 'Shots #$ids';
   }
 
   @override
   String agentWorkspaceProductionStoryboardShotsHashMore(
-    String ids,
-    int total,
+    Object ids,
+    Object total,
   ) {
     return 'Shots #$ids and $total more';
   }
 
   @override
   String agentWorkspaceProductionStoryboardScriptWindow(
-    int start,
-    int end,
-    int maxChars,
+    Object end,
+    Object maxChars,
+    Object start,
   ) {
     return 'Script lines $start–$end (≤$maxChars chars)';
   }
 
   @override
-  String agentWorkspaceProductionStoryboardTableRereadShots(String shots) {
+  String agentWorkspaceProductionStoryboardTableRereadShots(Object shots) {
     return 'In the storyboard table, reread rows for $shots only';
   }
 
   @override
-  String agentWorkspaceProductionStoryboardReviewScriptGlue(String window) {
+  String agentWorkspaceProductionStoryboardReviewScriptGlue(Object window) {
     return 'For script, reread only $window';
   }
 
   @override
-  String agentWorkspaceProductionPromptStoryboardShotCount(int count) {
+  String agentWorkspaceProductionPromptStoryboardShotCount(Object count) {
     return 'Focus on these $count shots first';
   }
 
@@ -18729,30 +17796,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionPromptStoryboardContextTable(
-    String tableFocus,
+    Object tableFocus,
   ) {
     return 'First reread storyboardTable rows for $tableFocus only';
   }
 
   @override
   String agentWorkspaceProductionPromptStoryboardContextScript(
-    String scriptWindow,
+    Object scriptWindow,
   ) {
     return 'For script, reread only $scriptWindow';
   }
 
   @override
-  String agentWorkspaceProductionPromptStoryboardContextLead(String parts) {
+  String agentWorkspaceProductionPromptStoryboardContextLead(Object parts) {
     return 'To verify references, $parts.';
   }
 
   @override
-  String agentWorkspaceProductionPromptStoryboardNote(String summary) {
+  String agentWorkspaceProductionPromptStoryboardNote(Object summary) {
     return 'Note: $summary';
   }
 
   @override
-  String agentWorkspaceProductionPromptExecutionConstraint(String hint) {
+  String agentWorkspaceProductionPromptExecutionConstraint(Object hint) {
     return 'Execution constraint: $hint';
   }
 
@@ -18779,14 +17846,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String agentWorkspaceProductionStagePromptAssetsGenerateNoIds(
-    String priority,
-    String execution,
-  ) {
-    return 'Using the latest assets flow, decide which derived assets still lack images; generate only the minimum needed for real gaps; do not rerun finished work or expand reads to unrelated assets.$priority$execution';
-  }
-
-  @override
   String agentWorkspaceProductionStagePromptAssetsGenerateFocused(
     int count,
     String priority,
@@ -18796,33 +17855,41 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String agentWorkspaceProductionPromptStoryboardGenBody(
-    String scope,
-    String contextHint,
-    String assetHint,
-    String note,
+  String agentWorkspaceProductionStagePromptAssetsGenerateNoIds(
+    String priority,
     String execution,
+  ) {
+    return 'Using the latest assets flow, decide which derived assets still lack images; generate only the minimum needed for real gaps; do not rerun finished work or expand reads to unrelated assets.$priority$execution';
+  }
+
+  @override
+  String agentWorkspaceProductionPromptStoryboardGenBody(
+    Object assetHint,
+    Object contextHint,
+    Object execution,
+    Object note,
+    Object scope,
   ) {
     return '$scope; do not rerun finished shots or shouldGenerateImage=false rows. $contextHint$assetHint$note$execution';
   }
 
   @override
   String agentWorkspaceProductionPromptStoryboardTableRevisionBody(
-    String scope,
-    String contextHint,
-    String assetHint,
-    String solve,
+    Object assetHint,
+    Object contextHint,
+    Object scope,
+    Object solve,
   ) {
     return '$scope storyboardTable rows; keep other rows unchanged. $contextHint$assetHint$solve';
   }
 
   @override
-  String agentWorkspaceProductionPromptStoryboardTableSolve(String summary) {
+  String agentWorkspaceProductionPromptStoryboardTableSolve(Object summary) {
     return 'Fix first: $summary';
   }
 
   @override
-  String agentWorkspaceProductionPromptStoryboardAssetHint(int count) {
+  String agentWorkspaceProductionPromptStoryboardAssetHint(Object count) {
     return 'If you need to verify art, only review these $count linked assets.';
   }
 
@@ -18832,34 +17899,36 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionStageReviewBody(
-    String grade,
-    int severe,
-    int medium,
-    int minor,
-    String summary,
-    String storyboardScope,
-    String assetScope,
+    Object assetScope,
+    Object grade,
+    Object medium,
+    Object minor,
+    Object severe,
+    Object storyboardScope,
+    Object summary,
   ) {
     return 'Review grade $grade: $severe severe · $medium medium · $minor minor. $summary$storyboardScope$assetScope';
   }
 
   @override
-  String agentWorkspaceProductionStageReviewStoryboardScope(String scope) {
+  String agentWorkspaceProductionStageReviewStoryboardScope(Object scope) {
     return ' Local scope: $scope.';
   }
 
   @override
-  String agentWorkspaceProductionStageReviewAssetScope(String scope) {
+  String agentWorkspaceProductionStageReviewAssetScope(Object scope) {
     return ' Asset scope: $scope.';
   }
 
   @override
-  String agentWorkspaceProductionStageDetailScriptPlanSectionLine(int count) {
+  String agentWorkspaceProductionStageDetailScriptPlanSectionLine(
+    Object count,
+  ) {
     return '$count/6 planning dimensions covered, ';
   }
 
   @override
-  String agentWorkspaceProductionStagePromptReviseScriptPlan(String summary) {
+  String agentWorkspaceProductionStagePromptReviseScriptPlan(Object summary) {
     return 'Revise scriptPlan using the latest review notes; prioritize: $summary';
   }
 
@@ -18873,8 +17942,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionStageDetailScriptPlanRefine(
-    String sectionLine,
-    int chars,
+    Object chars,
+    Object sectionLine,
   ) {
     return 'scriptPlan loaded; ${sectionLine}about $chars characters. Downstream is still gated—add at least 3 planning dimensions before review and the main assets/storyboard chain.';
   }
@@ -18885,9 +17954,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionStageDetailScriptPlanReview(
-    String sectionLine,
-    int chars,
-    String scriptWindow,
+    Object chars,
+    Object scriptWindow,
+    Object sectionLine,
   ) {
     return 'scriptPlan loaded; ${sectionLine}about $chars characters. During review, first reread only $scriptWindow, then supervise the director plan before advancing assets and storyboard.';
   }
@@ -18906,8 +17975,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionStageDetailAssetsAfterReview(
-    String reviewDetail,
-    String assetScope,
+    Object assetScope,
+    Object reviewDetail,
   ) {
     return '$reviewDetail Verify only $assetScope, then return to scriptPlan to finalize the director plan.';
   }
@@ -18922,37 +17991,39 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionStageDetailAssetsMissingGeneric(
-    int total,
-    int missing,
-    String readiness,
+    Object missing,
+    Object readiness,
+    Object total,
   ) {
     return '$total assets total; $missing still lack rendered images—continue asset generation. $readiness';
   }
 
   @override
   String agentWorkspaceProductionStageDetailAssetsMissingFocused(
-    int total,
-    String pendingScope,
-    String readiness,
+    Object pendingScope,
+    Object readiness,
+    Object total,
   ) {
     return '$total assets total; $pendingScope still lack images—prioritize only this batch to save tokens. $readiness';
   }
 
   @override
   String agentWorkspaceProductionStageDetailAssetsReady(
-    int total,
-    String readiness,
+    Object readiness,
+    Object total,
   ) {
     return 'All $total assets have images—continue checking storyboard and the director plan. $readiness';
   }
 
   @override
-  String agentWorkspaceProductionStageDetailAssetsScopedTable(int count) {
+  String agentWorkspaceProductionStageDetailAssetsScopedTable(Object count) {
     return 'The storyboard-table window references $count assets—verify this batch first to save tokens.';
   }
 
   @override
-  String agentWorkspaceProductionStageDetailAssetsScopedStoryboard(int count) {
+  String agentWorkspaceProductionStageDetailAssetsScopedStoryboard(
+    Object count,
+  ) {
     return 'The storyboard window references $count assets—verify this batch first to save tokens.';
   }
 
@@ -18962,7 +18033,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionStageDetailAssetsNarrowedScriptPlan(
-    String scope,
+    Object scope,
   ) {
     return 'Tightened reads from scriptPlan to $scope; verify this batch first to save tokens; widen only if information is still insufficient.';
   }
@@ -18985,7 +18056,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionStagePromptStoryboardTableReviseLead(
-    String tail,
+    Object tail,
   ) {
     return 'Revise storyboardTable using the latest review notes. $tail';
   }
@@ -19000,48 +18071,50 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionStageDetailStoryboardTableString(
-    String rowDigest,
-    int chars,
-    String coverage,
+    Object chars,
+    Object coverage,
+    Object rowDigest,
   ) {
-    return 'storyboardTable has content$rowDigest about $chars characters—supervise the table before pushing storyboard renders. $coverage';
+    return 'storyboardTable has content${rowDigest}about $chars characters—supervise the table before pushing storyboard renders. $coverage';
   }
 
   @override
-  String agentWorkspaceProductionStageDigestStoryboardTableRows(int rowCount) {
+  String agentWorkspaceProductionStageDigestStoryboardTableRows(
+    Object rowCount,
+  ) {
     return '$rowCount rows';
   }
 
   @override
   String agentWorkspaceProductionStageDigestStoryboardTableAssets(
-    int assetCount,
+    Object assetCount,
   ) {
     return '$assetCount linked assets';
   }
 
   @override
   String agentWorkspaceProductionStageDetailStoryboardTableWindowReady(
-    int sampled,
-    int total,
-    String coverage,
+    Object coverage,
+    Object sampled,
+    Object total,
   ) {
     return 'Window-read $sampled/$total key columns—continue reviewing or revising storyboardTable. $coverage';
   }
 
   @override
   String agentWorkspaceProductionStageDetailStoryboardTableWindowBackfill(
-    int sampled,
-    int total,
-    String coverage,
+    Object coverage,
+    Object sampled,
+    Object total,
   ) {
     return 'Window-read $sampled/$total key columns, but scriptPlan still lacks clear per-scene emotion or visual intent—backfill the director plan before widening storyboardTable reads. $coverage';
   }
 
   @override
   String agentWorkspaceProductionStageDetailStoryboardTableWindowExpand(
-    int sampled,
-    int total,
-    String coverage,
+    Object coverage,
+    Object sampled,
+    Object total,
   ) {
     return 'Window-read $sampled/$total key columns, but coverage is still thin—expand or fill critical rows before storyboard. $coverage';
   }
@@ -19065,7 +18138,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionStageDetailStoryboardTableRefreshNarrow(
-    String ids,
+    Object ids,
   ) {
     return 'The storyboard table just changed—reread storyboardTable rows for shots #$ids only.';
   }
@@ -19086,8 +18159,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionStageDetailStoryboardSupervisionScoped(
-    int count,
-    String reviewScope,
+    Object count,
+    Object reviewScope,
   ) {
     return 'The review targets $count shots—focus on this storyboard batch first to save tokens.$reviewScope';
   }
@@ -19101,7 +18174,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionStagePromptStoryboardSupervisionGenerate(
-    String tail,
+    Object tail,
   ) {
     return 'Continue storyboard work from the latest review. $tail';
   }
@@ -19116,55 +18189,55 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionStageDetailStoryboardMissing(
-    int needImageCount,
-    int missingCount,
-    String idsPreview,
-    String idsTail,
-    String skippedClause,
-    String reviewClause,
-    String readiness,
+    Object idsPreview,
+    Object idsTail,
+    Object missingCount,
+    Object needImageCount,
+    Object readiness,
+    Object reviewClause,
+    Object skippedClause,
   ) {
     return '$needImageCount shots need renders; $missingCount still lack images (#$idsPreview$idsTail)$skippedClause$reviewClause $readiness';
   }
 
   @override
   String agentWorkspaceProductionStageDetailStoryboardMissingIdsTail(
-    int total,
+    Object total,
   ) {
     return ' ($total shots total)';
   }
 
   @override
   String agentWorkspaceProductionStageDetailStoryboardMissingSkipped(
-    int count,
+    Object count,
   ) {
     return '; $count text-only shots are intentionally image-free';
   }
 
   @override
   String agentWorkspaceProductionStageDetailStoryboardMissingReview(
-    String reviewScope,
+    Object reviewScope,
   ) {
     return ' $reviewScope';
   }
 
   @override
-  String agentWorkspaceProductionStagePromptStoryboardContinue(String tail) {
+  String agentWorkspaceProductionStagePromptStoryboardContinue(Object tail) {
     return 'Continue storyboard work. $tail';
   }
 
   @override
   String agentWorkspaceProductionStageDetailStoryboardComplete(
-    int needImageCount,
-    String skippedClause,
-    String readiness,
+    Object needImageCount,
+    Object readiness,
+    Object skippedClause,
   ) {
     return '$needImageCount shots need renders; all required frames are present$skippedClause, ready to write back or continue the director plan. $readiness';
   }
 
   @override
   String agentWorkspaceProductionStageDetailStoryboardCompleteSkipped(
-    int count,
+    Object count,
   ) {
     return '; $count text-only shots are intentionally image-free';
   }
@@ -19195,7 +18268,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionStageDetailStoryboardRefreshGenNarrow(
-    String ids,
+    Object ids,
   ) {
     return 'A storyboard action just ran—reread missing-frame status for shots #$ids first.';
   }
@@ -19526,279 +18599,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Agent workspace script apply suggestion';
 
   @override
-  String get agentWorkspaceScriptRecipeAddChapterMaterialDetail =>
-      "To keep revising, pull novel text and events instead of staring only at the current script.";
-  @override
-  String get agentWorkspaceScriptRecipeAddChapterMaterialTitle =>
-      "Add chapter material";
-  @override
-  String get agentWorkspaceScriptRecipeAddNovelTextWindowDetail =>
-      "When the review needs the original prose, read a bounded chapter window instead of whole chapters.";
-  @override
-  String get agentWorkspaceScriptRecipeAddNovelTextWindowTitle =>
-      "Add novel text window";
-  @override
-  String get agentWorkspaceScriptRecipeCompareExistingScriptDetail =>
-      "Use the current event chain to diff the existing body and spot missing beats faster.";
-  @override
-  String get agentWorkspaceScriptRecipeCompareExistingScriptTitle =>
-      "Compare with existing script";
-  @override
-  String get agentWorkspaceScriptRecipeDistillSkeletonFromEventsDetail =>
-      "Events are clear enough\u2014tighten into storySkeleton first.";
-  @override
-  String get agentWorkspaceScriptRecipeDistillSkeletonFromEventsPrompt =>
-      "From the current event list, distill a story skeleton with key conflict, turning points, and ending direction.";
-  @override
-  String get agentWorkspaceScriptRecipeDistillSkeletonFromEventsTitle =>
-      "Distill story skeleton";
-  @override
-  String get agentWorkspaceScriptRecipeFillAdaptationDetail =>
-      "Beyond the skeleton, adaptationStrategy is still missing\u2014tighten the adaptation path first.";
-  @override
-  String get agentWorkspaceScriptRecipeFillAdaptationPrompt =>
-      "From the existing story skeleton, complete adaptationStrategy with pacing, character arcs, and episode split rules.";
-  @override
-  String get agentWorkspaceScriptRecipeFillAdaptationTitle =>
-      "Fill adaptation strategy";
-  @override
-  String get agentWorkspaceScriptRecipeFillStorySkeletonDetail =>
-      "planData has no storySkeleton yet\u2014run the skeleton sub-agent first.";
-  @override
-  String get agentWorkspaceScriptRecipeFillStorySkeletonPrompt =>
-      "Generate a clear story skeleton from the current project context, highlighting main conflict and reversal beats.";
-  @override
-  String get agentWorkspaceScriptRecipeFillStorySkeletonTitle =>
-      "Fill story skeleton";
-  @override
-  String get agentWorkspaceScriptRecipeGenerateAdaptationFromTextDetail =>
-      "Chapter material is readable\u2014run the adaptation-strategy sub-agent for a tightened plan.";
-  @override
-  String get agentWorkspaceScriptRecipeGenerateAdaptationFromTextPrompt =>
-      "Summarize an adaptation strategy from the current chapter text with 3\u20135 actionable rewrite rules.";
-  @override
-  String get agentWorkspaceScriptRecipeGenerateAdaptationFromTextTitle =>
-      "Generate adaptation strategy";
-  @override
-  String get agentWorkspaceScriptRecipeGenerateNextScriptDetail =>
-      "Plan info is ready\u2014consume the planned script draft and required events first, then let the script sub-agent output the next write-back-ready body.";
-  @override
-  String get agentWorkspaceScriptRecipeGenerateNextScriptPrompt =>
-      "Read this episode\u2019s planData.script draft, storySkeleton, and adaptationStrategy first, then add the minimum target chapter events; only read the previous episode\u2019s tail or chapter text windows when details or transitions are insufficient, then output a complete script body ready to write back.";
-  @override
-  String get agentWorkspaceScriptRecipeGenerateNextScriptTitle =>
-      "Generate next script version";
-  @override
-  String get agentWorkspaceScriptRecipeGenerateScriptBodyDetail =>
-      "Body is empty\u2014run the script sub-agent for a first version.";
-  @override
-  String get agentWorkspaceScriptRecipeGenerateScriptBodyPrompt =>
-      "Read this episode\u2019s planData.script, storySkeleton, adaptationStrategy, and target chapter events first; only add text windows when details are insufficient, then produce a complete script body.";
-  @override
-  String get agentWorkspaceScriptRecipeGenerateScriptBodyTitle =>
-      "Generate script body";
-  @override
-  String get agentWorkspaceScriptRecipeGenerateScriptFromEventsDetail =>
-      "If the event chain is mostly complete, run the script sub-agent for write-back-ready body.";
-  @override
-  String get agentWorkspaceScriptRecipeGenerateScriptFromEventsPrompt =>
-      "Combine the current event outline and prefer reading planData.script, storySkeleton, and adaptationStrategy; only widen to chapter text when details are insufficient, then output a script body ready to write back.";
-  @override
-  String get agentWorkspaceScriptRecipeGenerateScriptFromEventsTitle =>
-      "Generate script draft";
-  @override
-  String get agentWorkspaceScriptRecipePreferEventsDetail =>
-      "When chapter text is empty, reading the event list first makes plot gaps easier to spot.";
-  @override
-  String get agentWorkspaceScriptRecipePreferEventsTitle =>
-      "Switch to event outline";
-  @override
-  String get agentWorkspaceScriptRecipePullChapterMaterialDetail =>
-      "No script draft in the plan yet\u2014read novel chapter text for context first.";
-  @override
-  String get agentWorkspaceScriptRecipePullChapterMaterialTitle =>
-      "Pull chapter material";
-  @override
-  String get agentWorkspaceScriptRecipePullChapterTextFirstDetail =>
-      "When the event list is empty, read chapter text first to tell missing data from missing extraction.";
-  @override
-  String get agentWorkspaceScriptRecipePullChapterTextFirstTitle =>
-      "Pull chapter text first";
-  @override
-  String get agentWorkspaceScriptRecipeReadMatchingEventsDetail =>
-      "Chapter text is in place\u2014pull the same chapter\u2019s events next to summarize conflict cleanly.";
-  @override
-  String get agentWorkspaceScriptRecipeReadMatchingEventsTitle =>
-      "Read matching events";
-  @override
-  String get agentWorkspaceScriptRecipeReadPlanScriptDraftDetail =>
-      "planData.script already has a draft for this episode\u2014consume that structured draft before widening novel reads to save tokens.";
-  @override
-  String get agentWorkspaceScriptRecipeReadPlanScriptDraftTitle =>
-      "Read planned script draft";
-  @override
-  String get agentWorkspaceScriptRecipeReadScriptBodyDetail =>
-      "After planData is ready, compare whether the current script body has drifted.";
-  @override
-  String get agentWorkspaceScriptRecipeReadScriptBodyTitle =>
-      "Read current script body";
-  @override
-  String get agentWorkspaceScriptRecipeRefreshPlanAfterBodyDetail =>
-      "After you have body text, revisit planData to see whether skeleton or strategy needs syncing.";
-  @override
-  String get agentWorkspaceScriptRecipeRefreshPlanAfterBodyTitle =>
-      "Refresh plan data";
-  @override
-  String get agentWorkspaceScriptRecipeRefreshPlanDataDetail =>
-      "If the body is empty and context feels thin, return to planData to verify skeleton and strategy.";
-  @override
-  String get agentWorkspaceScriptRecipeRefreshPlanDataTitle =>
-      "Refresh plan data";
-  @override
-  String get agentWorkspaceScriptRecipeRereadCurrentScriptDetail =>
-      "Re-read this episode\u2019s tail window first, then decide whether to keep revising.";
-  @override
-  String get agentWorkspaceScriptRecipeRereadCurrentScriptTitle =>
-      "Re-read current script";
-  @override
-  String get agentWorkspaceScriptRecipeReviewPreviousTailDetail =>
-      "After chapter material is clear, compare this episode\u2019s tail to spot transition gaps with fewer tokens.";
-  @override
-  String get agentWorkspaceScriptRecipeReviewPreviousTailTitle =>
-      "Review previous tail";
-  @override
-  String get agentWorkspaceScriptRecipeReviewTargetPeekDetail =>
-      "Read the review\u2019s primary content first, then decide whether to rerun the sub-agent.";
-  @override
-  String get agentWorkspaceScriptRecipeReviewTargetPeekTitle =>
-      "Peek review target";
-  @override
-  String get agentWorkspaceScriptRecipeReviseAdaptationDetail =>
-      "The review thinks the strategy conflicts with the skeleton or format\u2014revise strategy locally first.";
-  @override
-  String get agentWorkspaceScriptRecipeReviseAdaptationPrompt =>
-      "Read adaptationStrategy and storySkeleton first, then add event windows as needed, and revise adaptationStrategy toward the review.";
-  @override
-  String get agentWorkspaceScriptRecipeReviseAdaptationTitle =>
-      "Revise adaptation strategy";
-  @override
-  String get agentWorkspaceScriptRecipeReviseScriptDetail =>
-      "The review pinpointed script issues\u2014read this episode\u2019s tail window before targeted edits.";
-  @override
-  String get agentWorkspaceScriptRecipeReviseScriptPrompt =>
-      "Read this episode\u2019s tail window, storySkeleton, and adaptationStrategy first; if still insufficient, add chapter text windows, then revise this episode\u2019s script toward the review.";
-  @override
-  String get agentWorkspaceScriptRecipeReviseScriptTitle =>
-      "Revise script body";
-  @override
-  String get agentWorkspaceScriptRecipeReviseStorySkeletonDetail =>
-      "The review still sees skeleton gaps\u2014return to storySkeleton for targeted edits.";
-  @override
-  String get agentWorkspaceScriptRecipeReviseStorySkeletonPrompt =>
-      "Read storySkeleton and related event windows first; add chapter text windows only if information is still thin, then revise the skeleton toward the review.";
-  @override
-  String get agentWorkspaceScriptRecipeReviseStorySkeletonTitle =>
-      "Revise story skeleton";
-  @override
-  String get agentWorkspaceScriptRecipeVerifyEventsDetail =>
-      "The review suggests revisiting the event chain\u2014prefer novel events over full chapter text.";
-  @override
-  String get agentWorkspaceScriptRecipeVerifyEventsTitle =>
-      "Verify event outline";
-  @override
-  String get agentWorkspaceScriptStageDetailAdaptationPendingGen =>
-      "adaptationStrategy is missing\u2014tighten character and pacing strategy first.";
-  @override
-  String get agentWorkspaceScriptStageDetailAdaptationPendingRead =>
-      "Re-read planData to see whether adaptationStrategy exists.";
-  @override
-  String get agentWorkspaceScriptStageDetailAdaptationReady =>
-      "adaptationStrategy exists; continue reading chapter material or generate script body.";
-  @override
-  String get agentWorkspaceScriptStageDetailChapterMaterialEmptyNovel =>
-      "No novel context yet\u2014keep reading chapter text or event outlines.";
-  @override
-  String get agentWorkspaceScriptStageDetailChapterMaterialPendingRead =>
-      "Read chapter text or events first, then decide how to rewrite the script.";
-  @override
-  String agentWorkspaceScriptStageDetailChapterMaterialReady(int count) =>
-      "Read $count novel-context rows; continue generating script body or compare with the existing script.";
-  @override
-  String get agentWorkspaceScriptStageDetailReviewAdaptationEmpty =>
-      "Review already covers adaptationStrategy; continue revising using the suggestions.";
-  @override
-  String agentWorkspaceScriptStageDetailReviewConclusion(String summary) =>
-      "Review conclusion: $summary";
-  @override
-  String get agentWorkspaceScriptStageDetailReviewScriptEmpty =>
-      "Review already covers the script body; continue revising using the suggestions.";
-  @override
-  String get agentWorkspaceScriptStageDetailReviewStorySkeletonEmpty =>
-      "Review already covers storySkeleton; continue revising using the suggestions.";
-  @override
-  String get agentWorkspaceScriptStageDetailScriptBodyReady =>
-      "Script body exists; write back or keep editing using plan data.";
-  @override
-  String get agentWorkspaceScriptStageDetailScriptPendingGen =>
-      "Script body is empty\u2014run the script sub-agent to produce a first draft.";
-  @override
-  String get agentWorkspaceScriptStageDetailScriptPendingRead =>
-      "Read the current script body first, then decide whether to generate the next version.";
-  @override
-  String get agentWorkspaceScriptStageDetailStorySkeletonPendingGen =>
-      "Add a story skeleton first\u2014main conflict, turning points, and ending direction.";
-  @override
-  String get agentWorkspaceScriptStageDetailStorySkeletonPendingRead =>
-      "Read planData first to see whether storySkeleton is present.";
-  @override
-  String get agentWorkspaceScriptStageDetailStorySkeletonReady =>
-      "storySkeleton exists; continue tightening adaptationStrategy or compare with script body.";
-  @override
-  String get agentWorkspaceScriptStagePromptGenerateAdaptationStrategy =>
-      "From the existing story skeleton, complete adaptationStrategy with pacing, character arcs, and episode split rules.";
-  @override
-  String get agentWorkspaceScriptStagePromptGenerateScript =>
-      "Read this episode\u2019s plan and target chapter events; only read the previous episode\u2019s tail when continuing from it; otherwise add text windows on demand, then output a complete script body ready to write back.";
-  @override
-  String get agentWorkspaceScriptStagePromptGenerateStorySkeleton =>
-      "Generate a clear story skeleton from the current project context, highlighting main conflict and reversal beats.";
-  @override
-  String get agentWorkspaceScriptStagePromptReviseAdaptationStrategy =>
-      "Read adaptationStrategy and storySkeleton first, then revise adaptationStrategy locally based on the review.";
-  @override
-  String get agentWorkspaceScriptStagePromptReviseScript =>
-      "Read this episode\u2019s tail window, storySkeleton, and adaptationStrategy first; if still thin, add a chapter text window, then revise this episode\u2019s script toward the review.";
-  @override
-  String get agentWorkspaceScriptStagePromptReviseStorySkeleton =>
-      "Read storySkeleton and the related event window first, then revise the story skeleton locally based on the review.";
-  @override
-  String get agentWorkspaceScriptStageStatusCompleted => "Completed";
-  @override
-  String get agentWorkspaceScriptStageStatusNeedsRevision => "Needs revision";
-  @override
-  String get agentWorkspaceScriptStageStatusPendingGenerate =>
-      "Pending generation";
-  @override
-  String get agentWorkspaceScriptStageStatusPendingRead => "Pending read";
-  @override
-  String get agentWorkspaceScriptStageStatusReady => "Ready";
-  @override
-  String get agentWorkspaceScriptStageStatusReusable => "OK to keep";
-  @override
-  String get agentWorkspaceScriptStageStatusSupplementNeeded =>
-      "Needs more context";
-  @override
-  String get agentWorkspaceScriptStageTitleAdaptationStrategy =>
-      "Adaptation strategy";
-  @override
-  String get agentWorkspaceScriptStageTitleChapterMaterial =>
-      "Chapter material";
-  @override
-  String get agentWorkspaceScriptStageTitleScriptBody => "Script body";
-  @override
-  String get agentWorkspaceScriptStageTitleStorySkeleton => "Story skeleton";
-
-  @override
   String agentWorkspaceScriptContextSkeletonFocus(String focus) {
     return 'Story skeleton focus: $focus';
   }
@@ -19973,6 +18773,373 @@ class AppLocalizationsEn extends AppLocalizations {
   String agentWorkspaceScriptSummaryNovelEventsCount(int count) {
     return 'novel events $count';
   }
+
+  @override
+  String get agentWorkspaceScriptStageTitleStorySkeleton => 'Story skeleton';
+
+  @override
+  String get agentWorkspaceScriptStageTitleAdaptationStrategy =>
+      'Adaptation strategy';
+
+  @override
+  String get agentWorkspaceScriptStageTitleChapterMaterial =>
+      'Chapter material';
+
+  @override
+  String get agentWorkspaceScriptStageTitleScriptBody => 'Script body';
+
+  @override
+  String get agentWorkspaceScriptStageStatusReady => 'Ready';
+
+  @override
+  String get agentWorkspaceScriptStageStatusReusable => 'OK to keep';
+
+  @override
+  String get agentWorkspaceScriptStageStatusNeedsRevision => 'Needs revision';
+
+  @override
+  String get agentWorkspaceScriptStageStatusPendingGenerate =>
+      'Pending generation';
+
+  @override
+  String get agentWorkspaceScriptStageStatusPendingRead => 'Pending read';
+
+  @override
+  String get agentWorkspaceScriptStageStatusSupplementNeeded =>
+      'Needs more context';
+
+  @override
+  String get agentWorkspaceScriptStageStatusCompleted => 'Completed';
+
+  @override
+  String get agentWorkspaceScriptStageDetailStorySkeletonReady =>
+      'storySkeleton exists; continue tightening adaptationStrategy or compare with script body.';
+
+  @override
+  String get agentWorkspaceScriptStageDetailReviewStorySkeletonEmpty =>
+      'Review already covers storySkeleton; continue revising using the suggestions.';
+
+  @override
+  String get agentWorkspaceScriptStageDetailReviewAdaptationEmpty =>
+      'Review already covers adaptationStrategy; continue revising using the suggestions.';
+
+  @override
+  String get agentWorkspaceScriptStageDetailReviewScriptEmpty =>
+      'Review already covers the script body; continue revising using the suggestions.';
+
+  @override
+  String agentWorkspaceScriptStageDetailReviewConclusion(String summary) {
+    return 'Review conclusion: $summary';
+  }
+
+  @override
+  String get agentWorkspaceScriptStagePromptReviseStorySkeleton =>
+      'Read storySkeleton and the related event window first, then revise the story skeleton locally based on the review.';
+
+  @override
+  String get agentWorkspaceScriptStageDetailStorySkeletonPendingGen =>
+      'Add a story skeleton first—main conflict, turning points, and ending direction.';
+
+  @override
+  String get agentWorkspaceScriptStagePromptGenerateStorySkeleton =>
+      'Generate a clear story skeleton from the current project context, highlighting main conflict and reversal beats.';
+
+  @override
+  String get agentWorkspaceScriptStageDetailStorySkeletonPendingRead =>
+      'Read planData first to see whether storySkeleton is present.';
+
+  @override
+  String get agentWorkspaceScriptStageDetailAdaptationReady =>
+      'adaptationStrategy exists; continue reading chapter material or generate script body.';
+
+  @override
+  String get agentWorkspaceScriptStagePromptReviseAdaptationStrategy =>
+      'Read adaptationStrategy and storySkeleton first, then revise adaptationStrategy locally based on the review.';
+
+  @override
+  String get agentWorkspaceScriptStageDetailAdaptationPendingGen =>
+      'adaptationStrategy is missing—tighten character and pacing strategy first.';
+
+  @override
+  String get agentWorkspaceScriptStagePromptGenerateAdaptationStrategy =>
+      'From the existing story skeleton, complete adaptationStrategy with pacing, character arcs, and episode split rules.';
+
+  @override
+  String get agentWorkspaceScriptStageDetailAdaptationPendingRead =>
+      'Re-read planData to see whether adaptationStrategy exists.';
+
+  @override
+  String agentWorkspaceScriptStageDetailChapterMaterialReady(int count) {
+    return 'Read $count novel-context rows; continue generating script body or compare with the existing script.';
+  }
+
+  @override
+  String get agentWorkspaceScriptStageDetailChapterMaterialEmptyNovel =>
+      'No novel context yet—keep reading chapter text or event outlines.';
+
+  @override
+  String get agentWorkspaceScriptStageDetailChapterMaterialPendingRead =>
+      'Read chapter text or events first, then decide how to rewrite the script.';
+
+  @override
+  String get agentWorkspaceScriptStageDetailScriptBodyReady =>
+      'Script body exists; write back or keep editing using plan data.';
+
+  @override
+  String get agentWorkspaceScriptStagePromptReviseScript =>
+      'Read this episode’s tail window, storySkeleton, and adaptationStrategy first; if still thin, add a chapter text window, then revise this episode’s script toward the review.';
+
+  @override
+  String get agentWorkspaceScriptStageDetailScriptPendingGen =>
+      'Script body is empty—run the script sub-agent to produce a first draft.';
+
+  @override
+  String get agentWorkspaceScriptStagePromptGenerateScript =>
+      'Read this episode’s plan and target chapter events; only read the previous episode’s tail when continuing from it; otherwise add text windows on demand, then output a complete script body ready to write back.';
+
+  @override
+  String get agentWorkspaceScriptStageDetailScriptPendingRead =>
+      'Read the current script body first, then decide whether to generate the next version.';
+
+  @override
+  String get agentWorkspaceScriptRecipeFillStorySkeletonTitle =>
+      'Fill story skeleton';
+
+  @override
+  String get agentWorkspaceScriptRecipeFillStorySkeletonDetail =>
+      'planData has no storySkeleton yet—run the skeleton sub-agent first.';
+
+  @override
+  String get agentWorkspaceScriptRecipeFillStorySkeletonPrompt =>
+      'Generate a clear story skeleton from the current project context, highlighting main conflict and reversal beats.';
+
+  @override
+  String get agentWorkspaceScriptRecipeFillAdaptationTitle =>
+      'Fill adaptation strategy';
+
+  @override
+  String get agentWorkspaceScriptRecipeFillAdaptationDetail =>
+      'Beyond the skeleton, adaptationStrategy is still missing—tighten the adaptation path first.';
+
+  @override
+  String get agentWorkspaceScriptRecipeFillAdaptationPrompt =>
+      'From the existing story skeleton, complete adaptationStrategy with pacing, character arcs, and episode split rules.';
+
+  @override
+  String get agentWorkspaceScriptRecipeReadScriptBodyTitle =>
+      'Read current script body';
+
+  @override
+  String get agentWorkspaceScriptRecipeReadScriptBodyDetail =>
+      'After planData is ready, compare whether the current script body has drifted.';
+
+  @override
+  String get agentWorkspaceScriptRecipeReadPlanScriptDraftTitle =>
+      'Read planned script draft';
+
+  @override
+  String get agentWorkspaceScriptRecipeReadPlanScriptDraftDetail =>
+      'planData.script already has a draft for this episode—consume that structured draft before widening novel reads to save tokens.';
+
+  @override
+  String get agentWorkspaceScriptRecipePullChapterMaterialTitle =>
+      'Pull chapter material';
+
+  @override
+  String get agentWorkspaceScriptRecipePullChapterMaterialDetail =>
+      'No script draft in the plan yet—read novel chapter text for context first.';
+
+  @override
+  String get agentWorkspaceScriptRecipeGenerateNextScriptTitle =>
+      'Generate next script version';
+
+  @override
+  String get agentWorkspaceScriptRecipeGenerateNextScriptDetail =>
+      'Plan info is ready—consume the planned script draft and required events first, then let the script sub-agent output the next write-back-ready body.';
+
+  @override
+  String get agentWorkspaceScriptRecipeGenerateNextScriptPrompt =>
+      'Read this episode’s planData.script draft, storySkeleton, and adaptationStrategy first, then add the minimum target chapter events; only read the previous episode’s tail or chapter text windows when details or transitions are insufficient, then output a complete script body ready to write back.';
+
+  @override
+  String get agentWorkspaceScriptRecipePreferEventsTitle =>
+      'Switch to event outline';
+
+  @override
+  String get agentWorkspaceScriptRecipePreferEventsDetail =>
+      'When chapter text is empty, reading the event list first makes plot gaps easier to spot.';
+
+  @override
+  String get agentWorkspaceScriptRecipeReadMatchingEventsTitle =>
+      'Read matching events';
+
+  @override
+  String get agentWorkspaceScriptRecipeReadMatchingEventsDetail =>
+      'Chapter text is in place—pull the same chapter’s events next to summarize conflict cleanly.';
+
+  @override
+  String get agentWorkspaceScriptRecipeGenerateAdaptationFromTextTitle =>
+      'Generate adaptation strategy';
+
+  @override
+  String get agentWorkspaceScriptRecipeGenerateAdaptationFromTextDetail =>
+      'Chapter material is readable—run the adaptation-strategy sub-agent for a tightened plan.';
+
+  @override
+  String get agentWorkspaceScriptRecipeGenerateAdaptationFromTextPrompt =>
+      'Summarize an adaptation strategy from the current chapter text with 3–5 actionable rewrite rules.';
+
+  @override
+  String get agentWorkspaceScriptRecipeReviewPreviousTailTitle =>
+      'Review previous tail';
+
+  @override
+  String get agentWorkspaceScriptRecipeReviewPreviousTailDetail =>
+      'After chapter material is clear, compare this episode’s tail to spot transition gaps with fewer tokens.';
+
+  @override
+  String get agentWorkspaceScriptRecipePullChapterTextFirstTitle =>
+      'Pull chapter text first';
+
+  @override
+  String get agentWorkspaceScriptRecipePullChapterTextFirstDetail =>
+      'When the event list is empty, read chapter text first to tell missing data from missing extraction.';
+
+  @override
+  String get agentWorkspaceScriptRecipeDistillSkeletonFromEventsTitle =>
+      'Distill story skeleton';
+
+  @override
+  String get agentWorkspaceScriptRecipeDistillSkeletonFromEventsDetail =>
+      'Events are clear enough—tighten into storySkeleton first.';
+
+  @override
+  String get agentWorkspaceScriptRecipeDistillSkeletonFromEventsPrompt =>
+      'From the current event list, distill a story skeleton with key conflict, turning points, and ending direction.';
+
+  @override
+  String get agentWorkspaceScriptRecipeGenerateScriptFromEventsTitle =>
+      'Generate script draft';
+
+  @override
+  String get agentWorkspaceScriptRecipeGenerateScriptFromEventsDetail =>
+      'If the event chain is mostly complete, run the script sub-agent for write-back-ready body.';
+
+  @override
+  String get agentWorkspaceScriptRecipeGenerateScriptFromEventsPrompt =>
+      'Combine the current event outline and prefer reading planData.script, storySkeleton, and adaptationStrategy; only widen to chapter text when details are insufficient, then output a script body ready to write back.';
+
+  @override
+  String get agentWorkspaceScriptRecipeCompareExistingScriptTitle =>
+      'Compare with existing script';
+
+  @override
+  String get agentWorkspaceScriptRecipeCompareExistingScriptDetail =>
+      'Use the current event chain to diff the existing body and spot missing beats faster.';
+
+  @override
+  String get agentWorkspaceScriptRecipeGenerateScriptBodyTitle =>
+      'Generate script body';
+
+  @override
+  String get agentWorkspaceScriptRecipeGenerateScriptBodyDetail =>
+      'Body is empty—run the script sub-agent for a first version.';
+
+  @override
+  String get agentWorkspaceScriptRecipeGenerateScriptBodyPrompt =>
+      'Read this episode’s planData.script, storySkeleton, adaptationStrategy, and target chapter events first; only add text windows when details are insufficient, then produce a complete script body.';
+
+  @override
+  String get agentWorkspaceScriptRecipeRefreshPlanDataTitle =>
+      'Refresh plan data';
+
+  @override
+  String get agentWorkspaceScriptRecipeRefreshPlanDataDetail =>
+      'If the body is empty and context feels thin, return to planData to verify skeleton and strategy.';
+
+  @override
+  String get agentWorkspaceScriptRecipeRefreshPlanAfterBodyTitle =>
+      'Refresh plan data';
+
+  @override
+  String get agentWorkspaceScriptRecipeRefreshPlanAfterBodyDetail =>
+      'After you have body text, revisit planData to see whether skeleton or strategy needs syncing.';
+
+  @override
+  String get agentWorkspaceScriptRecipeAddChapterMaterialTitle =>
+      'Add chapter material';
+
+  @override
+  String get agentWorkspaceScriptRecipeAddChapterMaterialDetail =>
+      'To keep revising, pull novel text and events instead of staring only at the current script.';
+
+  @override
+  String get agentWorkspaceScriptRecipeReviseStorySkeletonTitle =>
+      'Revise story skeleton';
+
+  @override
+  String get agentWorkspaceScriptRecipeReviseStorySkeletonDetail =>
+      'The review still sees skeleton gaps—return to storySkeleton for targeted edits.';
+
+  @override
+  String get agentWorkspaceScriptRecipeReviseStorySkeletonPrompt =>
+      'Read storySkeleton and related event windows first; add chapter text windows only if information is still thin, then revise the skeleton toward the review.';
+
+  @override
+  String get agentWorkspaceScriptRecipeReviseAdaptationTitle =>
+      'Revise adaptation strategy';
+
+  @override
+  String get agentWorkspaceScriptRecipeReviseAdaptationDetail =>
+      'The review thinks the strategy conflicts with the skeleton or format—revise strategy locally first.';
+
+  @override
+  String get agentWorkspaceScriptRecipeReviseAdaptationPrompt =>
+      'Read adaptationStrategy and storySkeleton first, then add event windows as needed, and revise adaptationStrategy toward the review.';
+
+  @override
+  String get agentWorkspaceScriptRecipeReviseScriptTitle =>
+      'Revise script body';
+
+  @override
+  String get agentWorkspaceScriptRecipeReviseScriptDetail =>
+      'The review pinpointed script issues—read this episode’s tail window before targeted edits.';
+
+  @override
+  String get agentWorkspaceScriptRecipeReviseScriptPrompt =>
+      'Read this episode’s tail window, storySkeleton, and adaptationStrategy first; if still insufficient, add chapter text windows, then revise this episode’s script toward the review.';
+
+  @override
+  String get agentWorkspaceScriptRecipeVerifyEventsTitle =>
+      'Verify event outline';
+
+  @override
+  String get agentWorkspaceScriptRecipeVerifyEventsDetail =>
+      'The review suggests revisiting the event chain—prefer novel events over full chapter text.';
+
+  @override
+  String get agentWorkspaceScriptRecipeAddNovelTextWindowTitle =>
+      'Add novel text window';
+
+  @override
+  String get agentWorkspaceScriptRecipeAddNovelTextWindowDetail =>
+      'When the review needs the original prose, read a bounded chapter window instead of whole chapters.';
+
+  @override
+  String get agentWorkspaceScriptRecipeRereadCurrentScriptTitle =>
+      'Re-read current script';
+
+  @override
+  String get agentWorkspaceScriptRecipeRereadCurrentScriptDetail =>
+      'Re-read this episode’s tail window first, then decide whether to keep revising.';
+
+  @override
+  String get agentWorkspaceScriptRecipeReviewTargetPeekTitle =>
+      'Peek review target';
+
+  @override
+  String get agentWorkspaceScriptRecipeReviewTargetPeekDetail =>
+      'Read the review’s primary content first, then decide whether to rerun the sub-agent.';
 
   @override
   String get agentWorkspaceScopeProjectIdLabel =>
@@ -20232,6 +19399,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String contentComplianceMetricOverdue(int count) {
+    return 'overdue $count';
+  }
+
+  @override
   String contentComplianceOldestHours(int hours) {
     return 'Oldest: ${hours}h';
   }
@@ -20257,8 +19429,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String contentComplianceWorkspaceDetail(int critical, int high, String sla) {
-    return 'critical $critical · high $high · SLA $sla';
+  String contentComplianceWorkspaceDetail(
+    int critical,
+    int high,
+    int breached,
+    int oldestHours,
+  ) {
+    return 'critical $critical · high $high · breached $breached · oldest ${oldestHours}h';
   }
 
   @override
@@ -20268,6 +19445,66 @@ class AppLocalizationsEn extends AppLocalizations {
     String detail,
   ) {
     return 'reporter $reporter · $reportedAt · $detail';
+  }
+
+  @override
+  String get contentComplianceActorInternalOps => 'Internal ops';
+
+  @override
+  String contentComplianceItemLineCreated(String createdAt) {
+    return 'Created $createdAt';
+  }
+
+  @override
+  String contentComplianceItemLineClaimed(String actor) {
+    return 'Claimed by $actor';
+  }
+
+  @override
+  String contentComplianceItemLineClaimedWithTime(
+    String actor,
+    String claimedAt,
+  ) {
+    return 'Claimed by $actor @ $claimedAt';
+  }
+
+  @override
+  String contentComplianceItemLineOutcome(String status, String resolutionBy) {
+    return '$status · $resolutionBy';
+  }
+
+  @override
+  String contentComplianceItemLineOutcomeWithTime(
+    String status,
+    String resolutionBy,
+    String resolvedAt,
+  ) {
+    return '$status · $resolutionBy @ $resolvedAt';
+  }
+
+  @override
+  String get contentComplianceAuditVerbClaim => 'claim';
+
+  @override
+  String get contentComplianceAuditVerbResolve => 'resolve';
+
+  @override
+  String get contentComplianceAuditVerbDismiss => 'dismiss';
+
+  @override
+  String get contentComplianceAuditVerbReassign => 'reassign';
+
+  @override
+  String get contentComplianceAuditVerbAutoRebalance => 'auto-rebalance';
+
+  @override
+  String contentComplianceAuditStatusChanged(String from, String to) {
+    return '$from → $to';
+  }
+
+  @override
+  String contentComplianceAuditDispositionEntry(String value) {
+    return 'Disposition: $value';
   }
 
   @override
@@ -20509,13 +19746,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String opsWhFieldSecret(String secret) {
-    return 'Secret: $secret';
+  String opsWhFieldUrl(String url) {
+    return 'URL: $url';
   }
 
   @override
-  String opsWhFieldUrl(String url) {
-    return 'URL: $url';
+  String opsWhFieldSecret(String secret) {
+    return 'Secret: $secret';
   }
 
   @override
@@ -21012,15 +20249,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get benchmarkLabelSampleType => 'Sample type';
 
   @override
-  String get benchmarkExperimentSuiteCore => 'Core';
-
-  @override
-  String get benchmarkExperimentSuiteFull => 'Full';
-
-  @override
-  String get benchmarkExperimentSuiteSmoke => 'Smoke';
-
-  @override
   String get benchmarkSampleTypeBadCase => 'Bad case';
 
   @override
@@ -21028,6 +20256,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get benchmarkSampleTypeRegressionGuard => 'Regression guard';
+
+  @override
+  String get benchmarkExperimentSuiteSmoke => 'Smoke';
+
+  @override
+  String get benchmarkExperimentSuiteCore => 'Core';
+
+  @override
+  String get benchmarkExperimentSuiteFull => 'Full';
 
   @override
   String get benchmarkLabelSampleSummary => 'Sample summary';
@@ -21108,6 +20345,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get benchmarkLabelGateDecisionNote => 'Decision note';
+
+  @override
   String get shellJobQueueStatsTitle => 'Job queue stats (internal)';
 
   @override
@@ -21130,9 +20370,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String shellJobQueueStatsPendingByKind(String kinds) {
     return 'pending_by_kind: $kinds';
   }
-
-  @override
-  String get benchmarkLabelGateDecisionNote => 'Decision note';
 
   @override
   String get benchmarkGatePromoteBaselineTitle =>
@@ -21245,4 +20482,924 @@ class AppLocalizationsEn extends AppLocalizations {
   ) {
     return '$weeks weeks · latest $weekStart quality $quality / token $tokens';
   }
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeDiagnosisRefineIntentFirst =>
+      'Refine per-scene emotion and visual intent in the director plan before splitting the storyboard table.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeDiagnosisExpandTableFirst =>
+      'Expand the key storyboard table window first, then decide whether to advance storyboard frames.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeDiagnosisCheapestFirst =>
+      'Follow the first suggestion card and prioritize the cheapest next action.';
+
+  @override
+  String get agentWorkspaceProductionSupervisionSummaryFallback =>
+      'Continue based on the latest review conclusion.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSbGenRefreshTitle =>
+      'Refresh storyboard results';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSbGenRereadTitle =>
+      'Reread missing-frame status';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSbGenRefreshDetail =>
+      'Storyboard generation ran; refresh storyboard results before deciding whether to write back.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeContinueDirectorTitle =>
+      'Continue director plan';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeContinueDirectorAfterSbDetail =>
+      'If storyboard results are still unstable, return to scriptPlan for another director decision round.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSbTableRefreshTitle =>
+      'Refresh storyboard table';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSbTablePartialTitle =>
+      'Reread partial storyboard table';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSbTableRefreshDetail =>
+      'The storyboard-table sub-agent ran; refresh the table before deciding whether to revise further.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSbTableCrosscheckTitle =>
+      'Cross-check storyboard results';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSbTableCrosscheckDetailAll =>
+      'When needed, switch to storyboard to confirm table changes have propagated to rendered frames.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsRefreshTitle =>
+      'Refresh asset results';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsRereadTitle =>
+      'Reread affected assets';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsRefreshDetail =>
+      'An asset action ran; refresh asset results before deciding whether to write back.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsContinueSubTitle =>
+      'Continue asset sub-agent';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsContinueSubDetail =>
+      'If materials are still missing, chain the asset sub-agent for another generation round.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsPlanFirstTitle =>
+      'Create an asset plan first';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsPlanFirstDetail =>
+      'Assets are empty; let the sub-agent fill in derived material planning first.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsPlanFirstPrompt =>
+      'Given the current empty assets flow, plan a minimal viable derived material set and explain priorities.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsContinueGenTitle =>
+      'Continue asset generation';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsContinueGenDetailGeneric =>
+      'Some materials still lack rendered images; run the asset generation sub-agent directly.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRefreshStoryboardNeedTitle =>
+      'Refresh storyboard needs';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRefreshStoryboardNeedDetail =>
+      'After closing asset gaps, revisit storyboard to see whether the current approach still fits.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCheckStoryboardFlowTitle =>
+      'Check storyboard flow';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCheckStoryboardFlowDetail =>
+      'Assets have baseline results; switch to storyboard to assess frame generation status.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeTidyDirectorPlanTitle =>
+      'Tidy director plan';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeTidyDirectorPlanDetail =>
+      'If materials are mostly ready, generate the next director plan round to close out production pacing.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeTidyDirectorPlanPrompt =>
+      'Combine current material status with scriptPlan and output the next director plan with execution priorities.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeFirstStoryboardTitle =>
+      'Generate first storyboard pass';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeFirstStoryboardDetail =>
+      'Storyboard is empty; run the storyboard generation sub-agent to establish an initial shot set.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeFirstStoryboardPrompt =>
+      'Generate a first-pass storyboard from the current production context with a minimal viable shot set.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeFillStoryboardFramesTitle =>
+      'Continue filling storyboard frames';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsTitle =>
+      'Verify linked assets';
+
+  @override
+  String
+  get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailFromRefs =>
+      'Focus on assets referenced by the current storyboard window to avoid unrelated material in frame fills.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailNoIds =>
+      'The storyboard digest has not resolved explicit asset IDs; fall back to a compact assets summary read.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCheckStoryboardTableTitle =>
+      'Check storyboard table';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCheckStoryboardTableDetail =>
+      'When needed, review the structured storyboardTable before writeback.';
+
+  @override
+  String
+  get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailReadyIds =>
+      'Storyboard references explicit assets; verify this set is enough for upcoming director adjustments.';
+
+  @override
+  String
+  get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailReadyNoIds =>
+      'The storyboard digest did not resolve explicit asset IDs; read the compact assets summary first.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRefreshDirectorPlanTitle =>
+      'Refresh director plan';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRefreshDirectorPlanDetail =>
+      'Storyboard has baseline results; return to scriptPlan to organize the next director decision round.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCreateDirectorPlanTitle =>
+      'Create director plan first';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCreateDirectorPlanDetail =>
+      'scriptPlan is empty; establish a director plan before advancing assets or storyboard.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCreateDirectorPlanPrompt =>
+      'Generate a director plan from the current production context with execution priorities.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeReviewDirectorPlanTitle =>
+      'Review director plan';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeReviewDirectorPlanDetail =>
+      'The director plan has content; a supervision review first surfaces pacing and asset issues cheaply.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeReviewDirectorPlanPrompt =>
+      'Review the current director plan for plot coverage, asset fit, and pacing.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRereadScriptTitle =>
+      'Reread script evidence';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCheckKeyAssetsTitle =>
+      'Check key assets';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRefineSceneIntentTitle =>
+      'Refine per-scene intent';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipePreviewStoryboardTableTitle =>
+      'Preview storyboard table first';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRefineSceneIntentDetail =>
+      'The director plan still lacks clear per-scene emotion and visual intent; strengthen this before splitting storyboardTable to reduce rework.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipePreviewStoryboardTableDetail =>
+      'If the plan is stable, sample-check storyboardTable structure for fewer tokens before reading storyboard imagery.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRefineSceneIntentPrompt =>
+      'Continue refining scriptPlan: prioritize per-scene emotional progression, visual intent, and shot anchors before storyboardTable split.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCreateStoryboardTableTitle =>
+      'Create storyboard table';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCreateStoryboardTableDetail =>
+      'storyboardTable is empty; use the storyboard-table sub-agent to add structure first.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCreateStoryboardTablePrompt =>
+      'Produce a structured storyboardTable with fields that are clear and writeback-friendly.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeReviewStoryboardTableTitle =>
+      'Review storyboard table';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeReviewStoryboardTableDetail =>
+      'The table has content; supervision review first prevents bad structure from amplifying into storyboard.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeReviewStoryboardTablePrompt =>
+      'Review the current storyboard table for coverage, asset links, and split granularity.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsTableRefs =>
+      'Focus on assets referenced by the current storyboard window to reduce unrelated context.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsTableNoIds =>
+      'This window did not resolve linked asset IDs; fall back to a compact assets summary read.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSwitchStoryboardResultsTitle =>
+      'Switch to storyboard results';
+
+  @override
+  String
+  get agentWorkspaceProductionFlowRecipeSwitchStoryboardResultsDetailAll =>
+      'The table has content; continue checking whether storyboard imagery has caught up.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSampleStoryboardTableTitle =>
+      'Sample-read storyboard table';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeSampleStoryboardTableDetail =>
+      'Read the first 8 key columns first—usually enough to decide whether to keep reviewing or write back.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeReviseDirectorPlanTitle =>
+      'Revise director plan';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRecheckAssetSupportTitle =>
+      'Recheck asset support';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRecheckAssetSupportDetail =>
+      'Director plans often stall on asset prep; reading assets first reduces rework.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeVerifyAssetSupportTitle =>
+      'Verify asset support';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRereadDirectorPlanTitle =>
+      'Reread director plan';
+
+  @override
+  String
+  get agentWorkspaceProductionFlowRecipeRereadDirectorPlanAfterAssetsDetail =>
+      'After asset checks, return to a compact scriptPlan to see whether more revisions are needed before storyboard.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeInspectStoryboardResultsTitle =>
+      'Inspect storyboard results';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeCompareStoryboardTableTitle =>
+      'Compare storyboard table';
+
+  @override
+  String
+  get agentWorkspaceProductionFlowRecipeCompareStoryboardTableDetailGeneric =>
+      'Reread the key-column window first to avoid reloading the entire table into context.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeRereadScriptNeedWindowDetail =>
+      'When needed, reread a compact script window to confirm shot rationale.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeReviseStoryboardTableTitle =>
+      'Revise storyboard table';
+
+  @override
+  String
+  get agentWorkspaceProductionFlowRecipeSampleRereadStoryboardTableTitle =>
+      'Sample-reread storyboard table';
+
+  @override
+  String
+  get agentWorkspaceProductionFlowRecipeSampleRereadStoryboardTableDetailEmpty =>
+      'Read the key-column window first to avoid repeatedly loading the full table into context.';
+
+  @override
+  String
+  get agentWorkspaceProductionFlowRecipeSampleRereadStoryboardTableDetailFocused =>
+      'Reread only the storyboard table rows for the focused shots from review; avoid returning to the full table window.';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeContinueStoryboardGenTitle =>
+      'Continue storyboard image generation';
+
+  @override
+  String
+  get agentWorkspaceProductionFlowRecipeCompareStoryboardTableBeforeFillDetail =>
+      'Before filling frames, reread the key-column window to avoid rebuilding context for every shot.';
+
+  @override
+  String get agentWorkspaceProductionArgSuggestDeriveNameFallback =>
+      'New derived asset';
+
+  @override
+  String get agentWorkspaceProductionArgSuggestFillFirst => 'Fill first item';
+
+  @override
+  String get agentWorkspaceProductionArgSuggestFillFirstThree =>
+      'Fill first 3 items';
+
+  @override
+  String get agentWorkspaceProductionArgSuggestFillAll => 'Fill all';
+
+  @override
+  String get agentWorkspaceProductionFlowRecipeAssetsGenHadSummaryNote =>
+      'First review results for assets just generated, then decide whether to rerun.';
+
+  @override
+  String agentWorkspaceProductionArgSuggestAddTo(String id) {
+    return 'Add under #$id';
+  }
+
+  @override
+  String agentWorkspaceProductionArgSuggestDelete(String id) {
+    return 'Delete #$id';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeSbGenRereadDetail(String ids) {
+    return 'Storyboard generation ran; first reread missing-frame status for shots #$ids.';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeSbTablePartialDetail(String ids) {
+    return 'The storyboard-table sub-agent ran; first reread table rows for shots #$ids.';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeSbTableCrosscheckDetailFocused(
+    String ids,
+  ) {
+    return 'Prefer rereading storyboard results for shots #$ids only so a table tweak does not widen to the whole sequence.';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeAssetsRereadDetail(String ids) {
+    return 'Asset generation ran; first reread latest status for assets #$ids.';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeAssetsGenDetailScoped(String scope) {
+    return '$scope still lack images; prioritize patching only this derived set to save tokens.';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeSbFillGapDetail(
+    String idsLabel,
+    String idTail,
+  ) {
+    return 'Prioritize filling missing frames for shots #$idsLabel$idTail; avoid rerunning completed shots in bulk.';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeRereadScriptScriptPlanDetail(
+    String scriptWindow,
+  ) {
+    return 'Reread only $scriptWindow first to align the director plan with the script pacing before expanding reads.';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeCheckKeyAssetsDetailIds(
+    String assetScope,
+  ) {
+    return 'The director plan calls out $assetScope; verify precisely before expanding to other materials.';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeCheckKeyAssetsDetailNoIds(
+    String assetScope,
+  ) {
+    return 'The director plan has content; verify whether $assetScope supports execution, then add more assets only if needed.';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeContinueDirectorDetailIds(
+    String assetScope,
+  ) {
+    return 'Focus director decisions around $assetScope so downstream storyboard and asset actions inherit these rewrite constraints first.';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeContinueDirectorDetailNoIds(
+    String assetScope,
+  ) {
+    return 'Continue tightening director decisions around $assetScope so downstream storyboard and asset actions inherit the current rewrite constraints.';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeContinueDirectorPromptIds(
+    String assetScope,
+  ) {
+    return 'Continue tightening scriptPlan around $assetScope for shot and material priorities so downstream storyboard execution inherits upstream rewrite constraints.';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeContinueDirectorPromptNoIds(
+    String assetScope,
+  ) {
+    return 'Continue tightening scriptPlan around $assetScope for shot and material priorities so downstream storyboard execution inherits upstream rewrite constraints.';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeRereadScriptRevisePlanDetail(
+    String scriptWindow,
+  ) {
+    return 'Before revising, reread only $scriptWindow to avoid loading the entire script for scriptPlan.';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeReviseDirectorPlanDetail(
+    String summary,
+  ) {
+    return 'Review conclusion: $summary';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeReviseDirectorPlanPrompt(
+    String summary,
+  ) {
+    return 'Revise scriptPlan based on the latest review; prioritize fixing: $summary';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeVerifyAssetSupportDetail(
+    String summary,
+    String assetScope,
+  ) {
+    return 'Review conclusion: $summary; first narrow to $assetScope to confirm gaps in the director plan.';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeInspectSbResultsDetail(
+    String summary,
+    String focusClause,
+  ) {
+    return 'Review conclusion: $summary; first narrow to $focusClause';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeCompareStoryboardTableDetailFocus(
+    String storyboardFocus,
+  ) {
+    return 'Prefer rereading only the storyboard table rows for $storyboardFocus to avoid returning to the full table.';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeRereadScriptReviewDetail(
+    String reviewScope,
+  ) {
+    return 'If shot rationale must be checked, prefer only the partial range: $reviewScope.';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeInspectStoryboardResultsDetailScript(
+    String summary,
+    String reviewScope,
+  ) {
+    return 'Review conclusion: $summary; prefer only the partial range: $reviewScope.';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeSwitchStoryboardResultsDetailCount(
+    int count,
+  ) {
+    return 'Prefer rereading only the $count shots covered by the current storyboard table window; avoid falling back to a generic storyboard digest.';
+  }
+
+  @override
+  String
+  agentWorkspaceProductionFlowRecipeCompareStoryboardTableBeforeFillDetailFocus(
+    String storyboardFocus,
+  ) {
+    return 'Before filling frames, reread only the storyboard table rows for $storyboardFocus.';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipePromptStoryboardContinue(
+    String body,
+  ) {
+    return 'Continue advancing storyboard. $body';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipePromptReviseStoryboardTable(
+    String body,
+  ) {
+    return 'Revise storyboardTable based on the latest review. $body';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipePromptStoryboardFromReview(
+    String body,
+  ) {
+    return 'Continue advancing storyboard based on the latest review conclusion. $body';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeShotCountTail(int count) {
+    return ' and $count more shots';
+  }
+
+  @override
+  String
+  agentWorkspaceProductionFlowRecipeInspectStoryboardResultsDetailSummaryOnly(
+    String summary,
+  ) {
+    return 'Review conclusion: $summary';
+  }
+
+  @override
+  String
+  agentWorkspaceProductionFlowRecipeInspectStoryboardResultsDetailWithScope(
+    String summary,
+    String reviewScope,
+  ) {
+    return 'Review conclusion: $summary; $reviewScope.';
+  }
+
+  @override
+  String agentWorkspaceProductionFlowRecipeArgDeriveNameFromParent(
+    String name,
+  ) {
+    return '$name-derived';
+  }
+
+  @override
+  String agentWorkspaceProductionAssetReviewPromptFocused(
+    int count,
+    String priority,
+  ) {
+    return 'Please verify only these $count assets against the current director plan; fill only necessary gaps and avoid bulk-reading unrelated assets.$priority';
+  }
+
+  @override
+  String agentWorkspaceProductionAssetReviewPromptScoped(
+    String scope,
+    String priority,
+  ) {
+    return 'Please verify whether $scope supports the current director plan; add minimal reads only if information is insufficient—do not bulk-read assets.$priority';
+  }
+
+  @override
+  String agentWorkspaceProductionAssetReviewPromptPriority(String summary) {
+    return ' Prioritize addressing: $summary';
+  }
+
+  @override
+  String agentWorkspaceProductionRecipeAppliedFollowRefine(String title) {
+    return 'Applied suggestion: $title. Next, refine the director plan.';
+  }
+
+  @override
+  String agentWorkspaceProductionRecipeAppliedFollowExpandTable(String title) {
+    return 'Applied suggestion: $title. Next, expand the key storyboard table window.';
+  }
+
+  @override
+  String agentWorkspaceProductionRecipeAppliedGeneric(String title) {
+    return 'Applied suggestion: $title';
+  }
+
+  @override
+  String get agentWorkspaceDefaultScriptPrompt =>
+      'First use get_planData to read the necessary slices of planData.script, storySkeleton, and adaptationStrategy, then read the target chapter events; only widen into novel text when details are missing, and finally propose the next round of script suggestions.';
+
+  @override
+  String get agentWorkspaceDefaultProductionPrompt =>
+      'Call get_flowData key=scriptPlan for a compact director plan first, then add minimal assets or storyboardTable reads as needed—avoid pulling the whole production flow upfront.';
+
+  @override
+  String get agentWorkspaceScriptArgTemplateCurrentWindow =>
+      'Template: current script window';
+
+  @override
+  String get agentWorkspaceScriptArgTemplateCurrentTail =>
+      'Template: current script tail';
+
+  @override
+  String get agentWorkspaceScriptArgTemplatePreviousEpisodeTail =>
+      'Template: previous episode tail';
+
+  @override
+  String get agentWorkspaceScriptArgTemplateStorySkeletonSlice =>
+      'Template: story skeleton slice';
+
+  @override
+  String get agentWorkspaceScriptArgTemplateAdaptationSlice =>
+      'Template: adaptation slice';
+
+  @override
+  String get agentWorkspaceScriptArgTemplateNovelTextWindow =>
+      'Template: novel text window';
+
+  @override
+  String get agentWorkspaceScriptArgTemplateNovelEventsWindow =>
+      'Template: novel events window';
+
+  @override
+  String get agentWorkspaceScriptArgTemplateEmptyArgs => 'Template: empty args';
+
+  @override
+  String get agentWorkspaceProductionArgTemplateCompactRead =>
+      'Template: compact read';
+
+  @override
+  String get agentWorkspaceProductionArgTemplateDirectorPlan =>
+      'Template: director plan';
+
+  @override
+  String get agentWorkspaceProductionArgTemplateAssetSummary =>
+      'Template: asset summary';
+
+  @override
+  String get agentWorkspaceProductionArgTemplateIdList => 'Template: ID list';
+
+  @override
+  String get agentWorkspaceProductionArgTemplateStoryboardIds =>
+      'Template: storyboard IDs';
+
+  @override
+  String agentWorkspaceFilledArgTemplate(String label) {
+    return 'Filled argument template: $label';
+  }
+
+  @override
+  String agentWorkspaceFilledCandidateArgs(String label) {
+    return 'Filled candidate arguments: $label';
+  }
+
+  @override
+  String get agentWorkspaceScriptInterceptArgsMustBeJsonObject =>
+      'Blocked: script tool arguments must be a JSON object.';
+
+  @override
+  String get agentWorkspaceScriptInterceptArgsJsonParseFailed =>
+      'Blocked: failed to parse script tool arguments JSON.';
+
+  @override
+  String agentWorkspaceScriptInterceptPromptRequired(String action) {
+    return 'Blocked: $action requires a non-empty workspace prompt.';
+  }
+
+  @override
+  String get agentWorkspaceScriptInterceptSelectDomainToolFirst =>
+      'Blocked: select a script domain tool before reading context.';
+
+  @override
+  String get agentWorkspaceScriptInterceptGetScriptContentNeedsScriptId =>
+      'Blocked: get_script_content requires a valid script id.';
+
+  @override
+  String agentWorkspaceScriptSyncedScriptContentScriptId(String scriptId) {
+    return 'Synced: get_script_content arguments.scriptId -> $scriptId';
+  }
+
+  @override
+  String get agentWorkspaceScriptInterceptSelectSubAgentToolFirst =>
+      'Blocked: select a script sub-agent tool before running.';
+
+  @override
+  String get agentWorkspaceScriptActionRunWorkflow =>
+      'Run script workspace workflow';
+
+  @override
+  String get agentWorkspaceScriptActionRunSubAgent => 'Run sub-agent';
+
+  @override
+  String get agentWorkspaceScriptTriggeredRunWorkflow =>
+      'Triggered: run script workspace workflow';
+
+  @override
+  String agentWorkspaceScriptTriggeredProbeContext(String tool) {
+    return 'Triggered: read script context ($tool)';
+  }
+
+  @override
+  String agentWorkspaceScriptTriggeredRunSubAgent(String tool) {
+    return 'Triggered: run sub-agent ($tool)';
+  }
+
+  @override
+  String get agentWorkspaceScriptInterceptNoScriptWritebackResult =>
+      'Blocked: no script result available to write back.';
+
+  @override
+  String get agentWorkspaceScriptTriggeredWritebackScript =>
+      'Triggered: write back script';
+
+  @override
+  String get agentWorkspaceScriptInterceptNoPlanDataWritebackResult =>
+      'Blocked: no planData result available to write back.';
+
+  @override
+  String get agentWorkspaceScriptTriggeredWritebackPlanData =>
+      'Triggered: write back plan data';
+
+  @override
+  String get agentWorkspaceScriptInterceptPlanWritebackNeedsPlanId =>
+      'Blocked: plan id (fetch get_planData) and planData are required.';
+
+  @override
+  String get agentWorkspaceScriptTriggeredPlanRowUpdateData =>
+      'Triggered: update-data writeback for plan row';
+
+  @override
+  String agentWorkspaceScriptAppliedRecipe(String title) {
+    return 'Applied recipe suggestion: $title';
+  }
+
+  @override
+  String agentWorkspaceScriptAppliedStage(String title) {
+    return 'Applied stage action: $title';
+  }
+
+  @override
+  String get agentWorkspaceScriptGuidedGenerateDraftPrompt =>
+      'First read the current episode plan and target chapter events; only widen into the previous episode tail when continuity needs it, then add novel text windows as needed, generate the next script body, and output full content ready for writeback.';
+
+  @override
+  String get agentWorkspaceScriptPresetPlotSkeletonLabel => 'Plot skeleton';
+
+  @override
+  String get agentWorkspaceScriptPresetPlotSkeletonPrompt =>
+      'Read get_planData slices of planData.script, storySkeleton, and adaptationStrategy first, then add the smallest get_novel_events or script window reads needed to summarize current plot skeleton gaps.';
+
+  @override
+  String get agentWorkspaceScriptPresetChapterAdaptLabel =>
+      'Chapter adaptation';
+
+  @override
+  String get agentWorkspaceScriptPresetChapterAdaptPrompt =>
+      'Use get_planData to read the planned script draft and adaptation strategy, combine get_novel_text and get_script_content window slices, and propose chapter rewrite suggestions with three actionable script edits.';
+
+  @override
+  String get agentWorkspaceProductionPresetDirectorPlanLabel => 'Director plan';
+
+  @override
+  String get agentWorkspaceProductionPresetDirectorPlanPrompt =>
+      'Call get_flowData key=scriptPlan for a compact director plan first, then decide whether to continue with assets or storyboardTable.';
+
+  @override
+  String get agentWorkspaceProductionPresetAssetInventoryLabel =>
+      'Asset inventory';
+
+  @override
+  String get agentWorkspaceProductionPresetAssetInventoryPrompt =>
+      'Call get_flowData key=assets with a minimal field subset, inventory current assets, and suggest the next production tasks.';
+
+  @override
+  String get agentWorkspaceProductionPresetStoryboardProgressLabel =>
+      'Storyboard progress';
+
+  @override
+  String get agentWorkspaceProductionPresetStoryboardProgressPrompt =>
+      'Read get_flowData key=storyboard for compact shot status, assess storyboard completion, and suggest the next generate_storyboard run.';
+
+  @override
+  String get agentWorkspaceProductionPresetProductionReviewLabel =>
+      'Production review';
+
+  @override
+  String get agentWorkspaceProductionPresetProductionReviewPrompt =>
+      'Read get_flowData key=scriptPlan or storyboardTable first, then call production supervision to review current production results.';
+
+  @override
+  String get agentWorkspaceProductionRunningRunWorkflow =>
+      'Running: production workspace workflow';
+
+  @override
+  String get agentWorkspaceProductionRunningProbeTool =>
+      'Running: read production tool result';
+
+  @override
+  String get agentWorkspaceProductionRunningSubAgent => 'Running: sub-agent';
+
+  @override
+  String get agentWorkspaceProductionRunningWriteback =>
+      'Running: write back tool result';
+
+  @override
+  String get agentWorkspaceProductionInterceptArgsMustBeJsonObject =>
+      'Blocked: production tool arguments must be a JSON object.';
+
+  @override
+  String get agentWorkspaceProductionInterceptArgsJsonParseFailed =>
+      'Blocked: failed to parse production tool arguments JSON.';
+
+  @override
+  String agentWorkspaceProductionInterceptPromptRequired(String action) {
+    return 'Blocked: $action requires a non-empty workspace prompt.';
+  }
+
+  @override
+  String get agentWorkspaceProductionInterceptSelectDomainToolFirst =>
+      'Blocked: select a production domain tool before reading.';
+
+  @override
+  String get agentWorkspaceProductionInterceptGetFlowDataNeedsKey =>
+      'Blocked: get_flowData requires a non-empty flow key.';
+
+  @override
+  String agentWorkspaceProductionSyncedFlowDataKey(String key) {
+    return 'Synced: get_flowData arguments.key -> $key';
+  }
+
+  @override
+  String get agentWorkspaceProductionInterceptSelectSubAgentToolFirst =>
+      'Blocked: select a production sub-agent tool before running.';
+
+  @override
+  String get agentWorkspaceProductionActionRunWorkflow =>
+      'Run production workspace workflow';
+
+  @override
+  String get agentWorkspaceProductionActionRunSubAgent => 'Run sub-agent';
+
+  @override
+  String get agentWorkspaceProductionTriggeredRunWorkflow =>
+      'Triggered: run production workspace workflow';
+
+  @override
+  String agentWorkspaceProductionTriggeredProbeContext(String detail) {
+    return 'Triggered: read production tool ($detail)';
+  }
+
+  @override
+  String agentWorkspaceProductionTriggeredRunSubAgentTool(String tool) {
+    return 'Triggered: run sub-agent ($tool)';
+  }
+
+  @override
+  String get agentWorkspaceProductionInterceptNoToolWriteback =>
+      'Blocked: no tool result available to write back.';
+
+  @override
+  String get agentWorkspaceProductionInterceptWritebackNeedsFlowKey =>
+      'Blocked: provide a valid flow key before writeback.';
+
+  @override
+  String agentWorkspaceProductionTriggeredWritebackFlow(String key) {
+    return 'Triggered: write back tool result -> flow[$key]';
+  }
+
+  @override
+  String get agentWorkspaceProductionGuidedDeriveAssetsPrompt =>
+      'Based on the current assets flow, propose the next round of derived asset generation and take the smallest viable next step.';
+
+  @override
+  String get agentWorkspaceProductionGuidedStoryboardGenPrompt =>
+      'Based on the current storyboard flow, outline the next storyboard generation plan and take the smallest viable generation action.';
+
+  @override
+  String get agentWorkspaceProductionGuidedDirectorPlanPrompt =>
+      'Combine scriptPlan with current asset status, produce the next director plan round, and list execution priorities.';
+
+  @override
+  String get projectsCreativeManualDefaultSlotsTemplate =>
+      'Scene|scene|\nRole|role|';
 }

@@ -123,36 +123,112 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
     }
   }
 
-  List<String> _buildAuditLines(ContentComplianceReportItemV1 item) {
-    final lines = <String>['created ${item.createdAt}'];
+  String _actorDisplay(AppLocalizations l10n, String? label) {
+    final v = (label ?? '').trim();
+    if (v.isEmpty || v == 'internal_ops') {
+      return l10n.contentComplianceActorInternalOps;
+    }
+    return v;
+  }
+
+  List<String> _buildAuditLines(
+    AppLocalizations l10n,
+    ContentComplianceReportItemV1 item,
+  ) {
+    final lines = <String>[
+      l10n.contentComplianceItemLineCreated(item.createdAt),
+    ];
     if ((item.claimedByLabel ?? '').isNotEmpty ||
         (item.claimedAt ?? '').isNotEmpty) {
-      lines.add(
-        'claimed ${item.claimedByLabel ?? 'internal_ops'}'
-        '${(item.claimedAt ?? '').isNotEmpty ? ' @ ${item.claimedAt}' : ''}',
-      );
+      final actor = _actorDisplay(l10n, item.claimedByLabel);
+      final claimedAt = (item.claimedAt ?? '').trim();
+      if (claimedAt.isEmpty) {
+        lines.add(l10n.contentComplianceItemLineClaimed(actor));
+      } else {
+        lines.add(
+          l10n.contentComplianceItemLineClaimedWithTime(actor, claimedAt),
+        );
+      }
     }
     if ((item.resolutionLabel ?? '').isNotEmpty ||
         (item.resolvedAt ?? '').isNotEmpty) {
-      lines.add(
-        '${item.status} ${item.resolutionLabel ?? 'internal_ops'}'
-        '${(item.resolvedAt ?? '').isNotEmpty ? ' @ ${item.resolvedAt}' : ''}',
-      );
+      final status = _statusLabel(l10n, item.status);
+      final resolutionBy = _actorDisplay(l10n, item.resolutionLabel);
+      final resolvedAt = (item.resolvedAt ?? '').trim();
+      if (resolvedAt.isEmpty) {
+        lines.add(l10n.contentComplianceItemLineOutcome(status, resolutionBy));
+      } else {
+        lines.add(
+          l10n.contentComplianceItemLineOutcomeWithTime(
+            status,
+            resolutionBy,
+            resolvedAt,
+          ),
+        );
+      }
     }
     return lines;
   }
 
-  String _auditSummary(ContentComplianceAuditItemV1 item) {
+  String _auditActionLabel(AppLocalizations l10n, String action) {
+    switch (action.trim()) {
+      case 'claim':
+        return l10n.contentComplianceAuditVerbClaim;
+      case 'resolve':
+        return l10n.contentComplianceAuditVerbResolve;
+      case 'dismiss':
+        return l10n.contentComplianceAuditVerbDismiss;
+      case 'reassign':
+        return l10n.contentComplianceAuditVerbReassign;
+      case 'auto_rebalance':
+      case 'auto-rebalance':
+        return l10n.contentComplianceAuditVerbAutoRebalance;
+      default:
+        return action;
+    }
+  }
+
+  String _fmtAuditStatusRef(AppLocalizations l10n, String? raw) {
+    final t = (raw ?? '').trim();
+    if (t.isEmpty || t == '-') {
+      return '—';
+    }
+    return _statusLabel(l10n, t);
+  }
+
+  String _dispositionCodeLabel(AppLocalizations l10n, String code) {
+    switch (code) {
+      case 'none':
+        return l10n.contentComplianceDispositionNone;
+      case 'archive_project':
+        return l10n.contentComplianceDispositionArchiveProject;
+      case 'suspend_user':
+        return l10n.contentComplianceDispositionSuspendUser;
+      default:
+        return code;
+    }
+  }
+
+  String _auditSummary(
+    AppLocalizations l10n,
+    ContentComplianceAuditItemV1 item,
+  ) {
     final parts = <String>[
-      item.action,
+      _auditActionLabel(l10n, item.action),
       if ((item.fromStatus ?? '').isNotEmpty ||
           (item.toStatus ?? '').isNotEmpty)
-        '${item.fromStatus ?? '-'} -> ${item.toStatus ?? '-'}',
-      item.actorLabel,
-      if ((item.disposition ?? '').isNotEmpty)
-        'disposition=${item.disposition}',
+        l10n.contentComplianceAuditStatusChanged(
+          _fmtAuditStatusRef(l10n, item.fromStatus),
+          _fmtAuditStatusRef(l10n, item.toStatus),
+        ),
+      if (item.actorLabel.trim().isNotEmpty)
+        _actorDisplay(l10n, item.actorLabel),
+      if ((item.disposition ?? '').trim().isNotEmpty)
+        l10n.contentComplianceAuditDispositionEntry(
+          _dispositionCodeLabel(l10n, item.disposition!.trim()),
+        ),
     ];
-    return parts.join(' · ');
+    return parts.where((s) => s.isNotEmpty).join(' · ');
   }
 
   String _auditDetails(ContentComplianceAuditItemV1 item) {
@@ -1055,7 +1131,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      _auditSummary(audit),
+                                      _auditSummary(l10n, audit),
                                       style: theme.textTheme.titleSmall,
                                     ),
                                     const SizedBox(height: 6),
@@ -2077,9 +2153,15 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                   Text(
                                     l10n.contentComplianceOwnerDetail(
                                       [
-                                        'critical ${owner.criticalOpenCount}',
-                                        'overdue ${owner.overdueCount}',
-                                        '${owner.oldestOpenAgeHours}h oldest',
+                                        l10n.contentComplianceMetricCritical(
+                                          owner.criticalOpenCount,
+                                        ),
+                                        l10n.contentComplianceMetricOverdue(
+                                          owner.overdueCount,
+                                        ),
+                                        l10n.contentComplianceOldestHours(
+                                          owner.oldestOpenAgeHours,
+                                        ),
                                         if (owner.overCapacity)
                                           l10n.contentComplianceOverCapacitySuffix(
                                             owner.overCapacityBy,
@@ -2173,7 +2255,8 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                                     l10n.contentComplianceWorkspaceDetail(
                                       workspace.criticalOpenCount,
                                       workspace.highOpenCount,
-                                      'breached ${workspace.slaBreachedCount} · ${workspace.oldestOpenAgeHours}h',
+                                      workspace.slaBreachedCount,
+                                      workspace.oldestOpenAgeHours,
                                     ),
                                     style: theme.textTheme.bodySmall?.copyWith(
                                       color: theme.colorScheme.onSurfaceVariant,
@@ -2279,7 +2362,7 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
                             ),
                             const SizedBox(height: 6),
                             Text(
-                              _buildAuditLines(item).join('\n'),
+                              _buildAuditLines(l10n, item).join('\n'),
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: theme.colorScheme.onSurfaceVariant,
                               ),

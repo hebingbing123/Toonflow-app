@@ -13769,13 +13769,98 @@
   "contentComplianceMetricDismissed": "dismissed {count}",
   "contentComplianceMetricCritical": "critical {count}",
   "contentComplianceMetricHigh": "High priority: {count}",
+  "contentComplianceMetricOverdue": "overdue {count}",
+  "@contentComplianceMetricOverdue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "contentComplianceOldestHours": "Oldest: {hours}h",
   "contentComplianceCapacityPerReviewer": "Capacity: {capacity}/reviewer",
   "contentComplianceOwnerCounts": "Pending {pending} · Claimed {claimed}",
   "contentComplianceOwnerDetail": "detail {detail}",
   "contentComplianceWorkspaceCounts": "open {open} · pending {pending} · claimed {claimed}",
-  "contentComplianceWorkspaceDetail": "critical {critical} · high {high} · SLA {sla}",
+  "contentComplianceWorkspaceDetail": "critical {critical} · high {high} · breached {breached} · oldest {oldestHours}h",
   "contentComplianceReportInfo": "reporter {reporter} · {reportedAt} · {detail}",
+  "contentComplianceActorInternalOps": "Internal ops",
+  "contentComplianceItemLineCreated": "Created {createdAt}",
+  "@contentComplianceItemLineCreated": {
+    "placeholders": {
+      "createdAt": {
+        "type": "String"
+      }
+    }
+  },
+  "contentComplianceItemLineClaimed": "Claimed by {actor}",
+  "@contentComplianceItemLineClaimed": {
+    "placeholders": {
+      "actor": {
+        "type": "String"
+      }
+    }
+  },
+  "contentComplianceItemLineClaimedWithTime": "Claimed by {actor} @ {claimedAt}",
+  "@contentComplianceItemLineClaimedWithTime": {
+    "placeholders": {
+      "actor": {
+        "type": "String"
+      },
+      "claimedAt": {
+        "type": "String"
+      }
+    }
+  },
+  "contentComplianceItemLineOutcome": "{status} · {resolutionBy}",
+  "@contentComplianceItemLineOutcome": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      },
+      "resolutionBy": {
+        "type": "String"
+      }
+    }
+  },
+  "contentComplianceItemLineOutcomeWithTime": "{status} · {resolutionBy} @ {resolvedAt}",
+  "@contentComplianceItemLineOutcomeWithTime": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      },
+      "resolutionBy": {
+        "type": "String"
+      },
+      "resolvedAt": {
+        "type": "String"
+      }
+    }
+  },
+  "contentComplianceAuditVerbClaim": "claim",
+  "contentComplianceAuditVerbResolve": "resolve",
+  "contentComplianceAuditVerbDismiss": "dismiss",
+  "contentComplianceAuditVerbReassign": "reassign",
+  "contentComplianceAuditVerbAutoRebalance": "auto-rebalance",
+  "contentComplianceAuditStatusChanged": "{from} → {to}",
+  "@contentComplianceAuditStatusChanged": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "contentComplianceAuditDispositionEntry": "Disposition: {value}",
+  "@contentComplianceAuditDispositionEntry": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
   "contentComplianceResolutionLine": "resolution: {note}",
   "contentComplianceActionClaim": "Content compliance action claim",
   "contentComplianceActionResolve": "Content compliance action resolve",
@@ -14692,8 +14777,11 @@
       "high": {
         "type": "int"
       },
-      "sla": {
-        "type": "String"
+      "breached": {
+        "type": "int"
+      },
+      "oldestHours": {
+        "type": "int"
       }
     }
   },
