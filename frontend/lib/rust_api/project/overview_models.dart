@@ -442,9 +442,23 @@ class StoryboardShortVideoReadiness {
       candidateCleared: json['candidate_cleared'] as bool,
       noBlockingJob: json['no_blocking_job'] as bool,
       readyForGeneration: json['ready_for_generation'] as bool,
-      blockingReasons: reasons.map((e) => e.toString()).toList(),
+      blockingReasons: reasons.map(_parseShortVideoBlockingReasonFromJson).toList(),
     );
   }
+}
+
+String _parseShortVideoBlockingReasonFromJson(dynamic e) {
+  if (e is String) {
+    return e.trim();
+  }
+  if (e is Map) {
+    final m = Map<String, dynamic>.from(e);
+    final c = m['code'] ?? m['reason'] ?? m['kind'];
+    if (c is String) {
+      return c.trim();
+    }
+  }
+  return e.toString();
 }
 
 class ProjectShortVideoReadiness {

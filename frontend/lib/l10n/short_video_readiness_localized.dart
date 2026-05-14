@@ -6,7 +6,11 @@ String labelShortVideoBlockingReasonLocalized(
   AppLocalizations l10n,
   String code,
 ) {
-  switch (code) {
+  final normalized = code.trim().toLowerCase();
+  if (normalized.isEmpty) {
+    return l10n.scriptEditorStoryboardsReadinessBlockingUnknown('—');
+  }
+  switch (normalized) {
     case 'missing_basic_slot':
       return l10n.scriptEditorStoryboardsReadinessBlockingMissingBasicSlot;
     case 'missing_prompt_context':
@@ -25,10 +29,7 @@ String labelShortVideoBlockingReasonLocalized(
     case 'blocking_job':
       return l10n.scriptEditorStoryboardsReadinessBlockingBlockingJob;
     default:
-      final trimmed = code.trim();
-      return l10n.scriptEditorStoryboardsReadinessBlockingUnknown(
-        trimmed.isEmpty ? '—' : trimmed,
-      );
+      return l10n.scriptEditorStoryboardsReadinessBlockingUnknown(normalized);
   }
 }
 
