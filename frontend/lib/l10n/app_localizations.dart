@@ -3217,6 +3217,12 @@ abstract class AppLocalizations {
   /// **'Retry'**
   String get shortVideoSpaceErrorRetryButton;
 
+  /// No description provided for @shortVideoSpaceErrorContextWrap.
+  ///
+  /// In en, this message translates to:
+  /// **' ({context})'**
+  String shortVideoSpaceErrorContextWrap(String context);
+
   /// No description provided for @shortVideoSpaceDialogExportHistoryTitle.
   ///
   /// In en, this message translates to:

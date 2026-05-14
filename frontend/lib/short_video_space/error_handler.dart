@@ -58,7 +58,9 @@ class ShortVideoErrorHandler {
     }
 
     if (error is TimeoutException) {
-      final contextStr = context != null ? '（$context）' : '';
+      final contextStr = context != null
+          ? l10n.shortVideoSpaceErrorContextWrap(context)
+          : '';
       return ErrorHandlingResult(
         shouldRetry: true,
         userMessage: l10n.shortVideoSpaceErrorTimeout(contextStr),
@@ -68,7 +70,9 @@ class ShortVideoErrorHandler {
     }
 
     // 通用错误
-    final contextStr = context != null ? '（$context）' : '';
+    final contextStr = context != null
+        ? l10n.shortVideoSpaceErrorContextWrap(context)
+        : '';
     return ErrorHandlingResult(
       shouldRetry: false,
       userMessage: l10n.shortVideoSpaceErrorOperationFailed(
@@ -87,12 +91,16 @@ class ShortVideoErrorHandler {
   }) {
     final statusCode = error.statusCode;
     final details = RustApiErrorDetails.tryParse(error.message);
-    final contextStr = context != null ? '（$context）' : '';
+    final contextStr = context != null
+        ? l10n.shortVideoSpaceErrorContextWrap(context)
+        : '';
 
     if (details?.code == 'concurrent_limit_exceeded') {
       return ErrorHandlingResult(
         shouldRetry: false,
-        userMessage: l10n.shortVideoSpaceErrorConcurrentLimitExceeded(contextStr),
+        userMessage: l10n.shortVideoSpaceErrorConcurrentLimitExceeded(
+          contextStr,
+        ),
         severity: ErrorSeverity.warning,
       );
     }
@@ -103,7 +111,10 @@ class ShortVideoErrorHandler {
       final waitText = formatRetryAfterMsForDisplay(l10n, waitMs);
       return ErrorHandlingResult(
         shouldRetry: true,
-        userMessage: l10n.shortVideoSpaceErrorRateLimitWithWait(contextStr, waitText),
+        userMessage: l10n.shortVideoSpaceErrorRateLimitWithWait(
+          contextStr,
+          waitText,
+        ),
         retryDelayMs: waitMs,
         severity: ErrorSeverity.warning,
       );
@@ -129,13 +140,17 @@ class ShortVideoErrorHandler {
 
     // 400 请求参数错误
     if (statusCode == 400) {
-      final message = details?.message ??
+      final message =
+          details?.message ??
           (error.message.trim().isNotEmpty
               ? error.message
               : l10n.shortVideoSpaceErrorBadRequest);
       return ErrorHandlingResult(
         shouldRetry: false,
-        userMessage: l10n.shortVideoSpaceErrorBadRequestWithContext(message, contextStr),
+        userMessage: l10n.shortVideoSpaceErrorBadRequestWithContext(
+          message,
+          contextStr,
+        ),
         severity: ErrorSeverity.error,
       );
     }
@@ -154,7 +169,10 @@ class ShortVideoErrorHandler {
     if (details != null) {
       return ErrorHandlingResult(
         shouldRetry: false,
-        userMessage: l10n.shortVideoSpaceErrorDetailedMessage(details.message, contextStr),
+        userMessage: l10n.shortVideoSpaceErrorDetailedMessage(
+          details.message,
+          contextStr,
+        ),
         severity: ErrorSeverity.error,
       );
     }
@@ -315,7 +333,11 @@ class ShortVideoErrorHandler {
             await op();
             return (true, null);
           } catch (error) {
-            final result = handleApiError(error, context: operationName, l10n: l10n);
+            final result = handleApiError(
+              error,
+              context: operationName,
+              l10n: l10n,
+            );
             return (false, result.userMessage);
           }
         }),
@@ -408,7 +430,9 @@ class ErrorLogger {
     }
 
     // 在调试模式下打印到控制台
-    debugPrint('ERROR [${entry.timestamp}] ${entry.context ?? 'Unknown'}: $error');
+    debugPrint(
+      'ERROR [${entry.timestamp}] ${entry.context ?? 'Unknown'}: $error',
+    );
   }
 
   /// 获取所有错误日志

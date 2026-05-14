@@ -1773,6 +1773,11 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shortVideoSpaceErrorRetryButton => '重试';
 
   @override
+  String shortVideoSpaceErrorContextWrap(String context) {
+    return '（$context）';
+  }
+
+  @override
   String get shortVideoSpaceDialogExportHistoryTitle => '导出历史';
 
   @override

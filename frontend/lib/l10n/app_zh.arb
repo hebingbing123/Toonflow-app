@@ -1102,6 +1102,14 @@
     }
   },
   "shortVideoSpaceErrorRetryButton": "重试",
+  "shortVideoSpaceErrorContextWrap": "（{context}）",
+  "@shortVideoSpaceErrorContextWrap": {
+    "placeholders": {
+      "context": {
+        "type": "String"
+      }
+    }
+  },
   "shortVideoSpaceDialogExportHistoryTitle": "导出历史",
   "shortVideoSpaceDialogExportHistoryRefresh": "刷新",
   "shortVideoSpaceDialogExportHistoryStatusLabel": "状态",

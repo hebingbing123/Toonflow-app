@@ -1860,6 +1860,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shortVideoSpaceErrorRetryButton => 'Retry';
 
   @override
+  String shortVideoSpaceErrorContextWrap(String context) {
+    return ' ($context)';
+  }
+
+  @override
   String get shortVideoSpaceDialogExportHistoryTitle => 'Export History';
 
   @override
@@ -7530,7 +7535,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get projectEditorNovelsWorkbenchImportRawPasteHelper =>
-      'Auto-split by headings like “Chapter 12”, “第3回”, “第五集”.';
+      'Auto-split by headings like “Chapter 12”, “Episode 5”, or other chapter/act markers in your manuscript.';
 
   @override
   String get projectEditorNovelsWorkbenchImportBatchSizeLabel =>
@@ -8804,7 +8809,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String storyboardEditorDeleteConfirmBody(int id) {
-    return '确定要删除分镜 $id 吗？';
+    return 'Delete shot $id?';
   }
 
   @override
@@ -8845,7 +8850,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String storyboardVideoWorkbenchTrackIdHelperKnown(String ids) {
-    return '已知轨道 ID：$ids';
+    return 'Known track IDs: $ids';
   }
 
   @override
@@ -16742,7 +16747,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String accountExportActiveCount(int count) {
-    return '进行中 $count';
+    return 'In progress: $count';
   }
 
   @override
@@ -16754,7 +16759,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String accountExportDefaultFileName(int numericTaskId) {
-    return '账户导出 #$numericTaskId';
+    return 'Account export #$numericTaskId';
   }
 
   @override
@@ -16764,12 +16769,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String accountExportSizeLine(String size) {
-    return '大小 $size';
+    return 'Size: $size';
   }
 
   @override
   String accountExportSavedSnack(String path) {
-    return '已保存到 $path';
+    return 'Saved to $path';
   }
 
   @override
@@ -16848,7 +16853,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String adminConsoleChipMember(int count) {
-    return '成员 $count';
+    return 'Members: $count';
   }
 
   @override
@@ -16874,17 +16879,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String adminConsoleChipScript(int count) {
-    return '剧本 $count';
+    return 'Scripts: $count';
   }
 
   @override
   String adminConsoleChipAsset(int count) {
-    return '资产 $count';
+    return 'Assets: $count';
   }
 
   @override
   String adminConsoleChipJob(int count) {
-    return '作业 $count';
+    return 'Jobs: $count';
   }
 
   @override
@@ -18293,22 +18298,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionPromptRewriteFocus(String focus) {
-    return '改写焦点：$focus';
+    return 'Rewrite focus: $focus';
   }
 
   @override
   String agentWorkspaceProductionPromptVisualPacing(String pacing) {
-    return '视觉节奏：$pacing';
+    return 'Visual pacing: $pacing';
   }
 
   @override
   String agentWorkspaceProductionPromptExtraConstraint(String constraint) {
-    return '额外约束：$constraint';
+    return 'Extra constraints: $constraint';
   }
 
   @override
   String agentWorkspaceProductionPromptAssetFocus(String scope) {
-    return '资产焦点：$scope';
+    return 'Asset focus: $scope';
   }
 
   @override
@@ -18326,12 +18331,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionReviewTarget(String target) {
-    return '目标：$target';
+    return 'Target: $target';
   }
 
   @override
   String agentWorkspaceProductionReviewGrade(String grade) {
-    return '等级：$grade';
+    return 'Grade: $grade';
   }
 
   @override
@@ -18345,37 +18350,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionReviewNextStep(String nextAction) {
-    return '下一步：$nextAction';
+    return 'Next step: $nextAction';
   }
 
   @override
   String agentWorkspaceProductionReviewAssetIds(String assetIds) {
-    return '资产：$assetIds';
+    return 'Assets: $assetIds';
   }
 
   @override
   String agentWorkspaceProductionReviewAssetScope(String scope) {
-    return '资产范围：$scope';
+    return 'Asset scope: $scope';
   }
 
   @override
   String agentWorkspaceProductionReviewStoryboardIds(String ids) {
-    return '镜头：$ids';
+    return 'Shots: $ids';
   }
 
   @override
   String agentWorkspaceProductionReviewSummary(String summary) {
-    return '结论：$summary';
+    return 'Summary: $summary';
   }
 
   @override
   String agentWorkspaceProductionShotLabel(int id) {
-    return '镜头 $id';
+    return 'Shot $id';
   }
 
   @override
   String agentWorkspaceProductionSceneLabel(String scene) {
-    return '场景 $scene';
+    return 'Scene $scene';
   }
 
   @override
@@ -19023,17 +19028,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionDurationLabel(String duration) {
-    return '时长 $duration';
+    return 'Duration: $duration';
   }
 
   @override
   String agentWorkspaceProductionAssetsLabel(String assets) {
-    return '资产 $assets';
+    return 'Assets: $assets';
   }
 
   @override
   String agentWorkspaceProductionStateLabel(String state) {
-    return '状态 $state';
+    return 'State: $state';
   }
 
   @override
@@ -19046,12 +19051,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionResultMissingImage(String assets) {
-    return '缺少图片 $assets';
+    return 'Missing images: $assets';
   }
 
   @override
   String agentWorkspaceProductionContextFromTool(String toolName) {
-    return '来自工具 $toolName';
+    return 'From tool $toolName';
   }
 
   @override
@@ -19080,17 +19085,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceSummaryReturnedList(int count) {
-    return '返回列表 $count 项';
+    return 'Returned list ($count items)';
   }
 
   @override
   String agentWorkspaceSummaryReturnedText(int chars) {
-    return '返回文本 $chars 字';
+    return 'Returned text ($chars chars)';
   }
 
   @override
   String agentWorkspaceProductionSummaryItems(int count) {
-    return '返回 items $count 项';
+    return 'Returned items: $count';
   }
 
   @override
@@ -19117,17 +19122,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionSummaryFocusedAssetScope(String scope) {
-    return '聚焦资产范围 $scope';
+    return 'Focused asset scope: $scope';
   }
 
   @override
   String agentWorkspaceProductionSummaryFocusedShots(int count) {
-    return '聚焦镜头 $count 项';
+    return 'Focused shots: $count';
   }
 
   @override
   String agentWorkspaceSummaryReturnedObjectKeys(String keys) {
-    return '返回对象 keys=$keys';
+    return 'Returned object keys=$keys';
   }
 
   @override
@@ -19150,7 +19155,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionSummaryPlanSections(int count) {
-    return '计划章节 $count';
+    return 'Plan sections: $count';
   }
 
   @override
@@ -19169,22 +19174,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionSummaryListCount(int count) {
-    return '列表 $count 项';
+    return 'List: $count items';
   }
 
   @override
   String agentWorkspaceProductionSummaryPrompts(int count) {
-    return '提示词 $count';
+    return 'Prompts: $count';
   }
 
   @override
   String agentWorkspaceProductionSummaryMediaUrls(int count) {
-    return '媒体 URL $count';
+    return 'Media URLs: $count';
   }
 
   @override
   String agentWorkspaceProductionSummaryNeedImages(int count) {
-    return '需要图片 $count';
+    return 'Need images: $count';
   }
 
   @override
@@ -19194,7 +19199,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionSummaryTextOnlyCount(int count) {
-    return '纯文本 $count';
+    return 'Text-only: $count';
   }
 
   @override
@@ -19204,7 +19209,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionSummaryObjectKeyCount(int count) {
-    return '对象 keys=$count 个';
+    return 'Object keys: $count';
   }
 
   @override
@@ -19219,7 +19224,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceProductionSummaryReturnedType(String type) {
-    return '返回 $type';
+    return 'Returned $type';
   }
 
   @override
@@ -19613,12 +19618,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceScriptContextSkeletonFocus(String focus) {
-    return '骨架焦点：$focus';
+    return 'Story skeleton focus: $focus';
   }
 
   @override
   String agentWorkspaceScriptContextAdaptationFocus(String focus) {
-    return '改编焦点：$focus';
+    return 'Adaptation focus: $focus';
   }
 
   @override
@@ -19759,7 +19764,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceScriptSummaryScriptEmpty(int chars) {
-    return '剧本正文 $chars 字';
+    return 'Script body: $chars chars';
   }
 
   @override
@@ -19769,7 +19774,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceScriptSummaryNovelTextEmpty(int count) {
-    return '章节材料 $count 条';
+    return 'Chapter material: $count entries';
   }
 
   @override
@@ -19779,7 +19784,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceScriptSummaryNovelEventsEmpty(int count) {
-    return '小说事件 $count 条';
+    return 'Novel events: $count';
   }
 
   @override
@@ -19821,7 +19826,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String agentWorkspaceActivityLatest(String eventType) {
-    return '最新：$eventType';
+    return 'Latest: $eventType';
   }
 
   @override
@@ -19858,7 +19863,7 @@ class AppLocalizationsEn extends AppLocalizations {
     String planHint,
     int scriptCount,
   ) {
-    return '计划回写就绪：$planHint，$scriptCount 条剧本';
+    return 'Plan write-back ready: $planHint; $scriptCount script(s)';
   }
 
   @override
@@ -20016,12 +20021,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String contentComplianceMetricPending(int count) {
-    return '待处理 $count';
+    return 'Pending: $count';
   }
 
   @override
   String contentComplianceMetricClaimed(int count) {
-    return '已认领 $count';
+    return 'Claimed: $count';
   }
 
   @override
@@ -20041,22 +20046,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String contentComplianceMetricHigh(int count) {
-    return '高优先级 $count';
+    return 'High priority: $count';
   }
 
   @override
   String contentComplianceOldestHours(int hours) {
-    return '最旧 ${hours}h';
+    return 'Oldest: ${hours}h';
   }
 
   @override
   String contentComplianceCapacityPerReviewer(int capacity) {
-    return '容量 $capacity/reviewer';
+    return 'Capacity: $capacity/reviewer';
   }
 
   @override
   String contentComplianceOwnerCounts(int pending, int claimed) {
-    return '待处理 $pending · 已认领 $claimed';
+    return 'Pending $pending · Claimed $claimed';
   }
 
   @override
@@ -20144,12 +20149,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String jobsClaimedBy(String claimedBy) {
-    return '认领者：$claimedBy';
+    return 'Claimed by: $claimedBy';
   }
 
   @override
   String jobsFailedReason(String reason) {
-    return '失败原因：$reason';
+    return 'Failure reason: $reason';
   }
 
   @override
@@ -20202,27 +20207,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String jobsDetailLabel(String detail) {
-    return '作业详情：$detail';
+    return 'Job detail: $detail';
   }
 
   @override
   String jobsKindsLabel(String kinds) {
-    return '作业类型：$kinds';
+    return 'Job kinds: $kinds';
   }
 
   @override
   String jobsKindSummaryLabel(String summary) {
-    return '类型汇总：$summary';
+    return 'Kind summary: $summary';
   }
 
   @override
   String jobsStatusSummaryLabel(String summary) {
-    return '状态汇总：$summary';
+    return 'Status summary: $summary';
   }
 
   @override
   String jobsCountLabel(int count) {
-    return '$count 条作业';
+    return '$count job(s)';
   }
 
   @override
@@ -20333,12 +20338,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String opsWhFieldCreatedAt(String createdAt) {
-    return '创建时间: $createdAt';
+    return 'Created: $createdAt';
   }
 
   @override
   String opsWhFieldUpdatedAt(String updatedAt) {
-    return '更新时间: $updatedAt';
+    return 'Updated: $updatedAt';
   }
 
   @override
@@ -20380,12 +20385,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String notificationsFilterCount(int count) {
-    return '筛选 $count';
+    return 'Filtered: $count';
   }
 
   @override
   String notificationsUnreadCount(int count) {
-    return '未读 $count';
+    return 'Unread: $count';
   }
 
   @override
