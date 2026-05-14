@@ -34,6 +34,8 @@ class ProductionWorkspaceStage {
     this.subAgentTool,
     this.subAgentArgs,
     this.prompt,
+    this.storyboardTableCoverageSampledRows,
+    this.storyboardTableCoverageTotalRows,
   });
 
   final String title;
@@ -46,6 +48,11 @@ class ProductionWorkspaceStage {
   final String? subAgentTool;
   final Map<String, dynamic>? subAgentArgs;
   final String? prompt;
+
+  /// When set, [summarizeProductionPrimaryBlocker] can derive table coverage
+  /// text without parsing localized [detail].
+  final int? storyboardTableCoverageSampledRows;
+  final int? storyboardTableCoverageTotalRows;
 }
 
 class ProductionSupervisionReview {
@@ -377,12 +384,17 @@ Map<String, dynamic> buildProductionPlanningScriptArgs() {
   };
 }
 
-String summarizeProductionPlanningScriptWindow() {
+String summarizeProductionPlanningScriptWindow(AppLocalizations l10n) {
   final window = buildProductionPlanningScriptWindow();
-  return '剧本 ${window.lineStart}-${window.lineEnd} 行（<=${window.maxChars} 字）';
+  return l10n.agentWorkspaceProductionPlanningScriptWindow(
+    window.lineStart,
+    window.lineEnd,
+    window.maxChars,
+  );
 }
 
 String summarizeProductionStoryboardFocusIds(
+  AppLocalizations l10n,
   List<int> storyboardIds, {
   int previewCount = 6,
 }) {
@@ -390,101 +402,161 @@ String summarizeProductionStoryboardFocusIds(
   if (ids.isEmpty) return '';
   final visible = ids.take(previewCount).join(', ');
   if (ids.length <= previewCount) {
-    return '镜头 #$visible';
+    return l10n.agentWorkspaceProductionStoryboardShotsHashShort(visible);
   }
-  return '镜头 #$visible 等 ${ids.length} 个';
+  return l10n.agentWorkspaceProductionStoryboardShotsHashMore(
+    visible,
+    ids.length,
+  );
 }
 
-String summarizeProductionStoryboardScriptWindow(List<int> storyboardIds) {
+String summarizeProductionStoryboardScriptWindow(
+  AppLocalizations l10n,
+  List<int> storyboardIds,
+) {
   final ids = storyboardIds.where((id) => id > 0).toSet().toList()..sort();
   if (ids.isEmpty) return '';
   final focusWindow = buildProductionStoryboardScriptFocusWindow(ids);
-  return '剧本 ${focusWindow.lineStart}-${focusWindow.lineEnd} 行（<=${focusWindow.maxChars} 字）';
+  return l10n.agentWorkspaceProductionStoryboardScriptWindow(
+    focusWindow.lineStart,
+    focusWindow.lineEnd,
+    focusWindow.maxChars,
+  );
 }
 
-String summarizeProductionStoryboardTableFocus(List<int> storyboardIds) {
-  final focus = summarizeProductionStoryboardFocusIds(storyboardIds);
+String summarizeProductionStoryboardTableFocus(
+  AppLocalizations l10n,
+  List<int> storyboardIds,
+) {
+  final focus = summarizeProductionStoryboardFocusIds(l10n, storyboardIds);
   if (focus.isEmpty) return '';
-  return '分镜表仅回看$focus对应行';
+  return l10n.agentWorkspaceProductionStoryboardTableRereadShots(focus);
 }
 
-String summarizeProductionStoryboardReviewScope(List<int> storyboardIds) {
-  final tableFocus = summarizeProductionStoryboardTableFocus(storyboardIds);
-  final scriptWindow = summarizeProductionStoryboardScriptWindow(storyboardIds);
+String summarizeProductionStoryboardReviewScope(
+  AppLocalizations l10n,
+  List<int> storyboardIds,
+) {
+  final tableFocus = summarizeProductionStoryboardTableFocus(
+    l10n,
+    storyboardIds,
+  );
+  final scriptWindow = summarizeProductionStoryboardScriptWindow(
+    l10n,
+    storyboardIds,
+  );
   final pieces = <String>[
     if (tableFocus.isNotEmpty) tableFocus,
-    if (scriptWindow.isNotEmpty) '剧本仅回看$scriptWindow',
+    if (scriptWindow.isNotEmpty)
+      l10n.agentWorkspaceProductionStoryboardReviewScriptGlue(scriptWindow),
   ];
-  return pieces.join('；');
+  return pieces.join(l10n.agentWorkspaceProductionSentenceJoinerSemicolon);
 }
 
 String buildProductionStoryboardPromptScope(
+  AppLocalizations l10n,
   List<int> storyboardIds, {
   required String fallback,
 }) {
   final ids = storyboardIds.where((id) => id > 0).toSet().toList()..sort();
   if (ids.isEmpty) return fallback;
-  return '优先处理这 ${ids.length} 个镜头';
+  return l10n.agentWorkspaceProductionPromptStoryboardShotCount(ids.length);
 }
 
-String buildProductionStoryboardPromptContextHint(List<int> storyboardIds) {
+String buildProductionStoryboardPromptContextHint(
+  AppLocalizations l10n,
+  List<int> storyboardIds,
+) {
   final ids = storyboardIds.where((id) => id > 0).toSet().toList()..sort();
   if (ids.isEmpty) {
-    return '如需核对依据，先只回看同批 storyboardTable 行和局部剧本窗口。';
+    return l10n.agentWorkspaceProductionPromptStoryboardContextEmpty;
   }
-  final tableFocus = summarizeProductionStoryboardFocusIds(ids);
-  final scriptWindow = summarizeProductionStoryboardScriptWindow(ids);
-  final pieces = <String>[
-    if (tableFocus.isNotEmpty) '先只回看$tableFocus对应的 storyboardTable 行',
-    if (scriptWindow.isNotEmpty) '剧本仅回看$scriptWindow',
+  final tableFocus = summarizeProductionStoryboardFocusIds(l10n, ids);
+  final scriptWindow = summarizeProductionStoryboardScriptWindow(l10n, ids);
+  final parts = <String>[
+    if (tableFocus.isNotEmpty)
+      l10n.agentWorkspaceProductionPromptStoryboardContextTable(tableFocus),
+    if (scriptWindow.isNotEmpty)
+      l10n.agentWorkspaceProductionPromptStoryboardContextScript(scriptWindow),
   ];
-  if (pieces.isEmpty) {
-    return '如需核对依据，先只回看同批 storyboardTable 行和局部剧本窗口。';
+  if (parts.isEmpty) {
+    return l10n.agentWorkspaceProductionPromptStoryboardContextEmpty;
   }
-  return '如需核对依据，${pieces.join('，')}。';
+  return l10n.agentWorkspaceProductionPromptStoryboardContextLead(
+    parts.join(l10n.agentWorkspaceProductionClauseJoiner),
+  );
 }
 
-String buildProductionStoryboardAssetHint(List<int> assetIds) {
+String buildProductionStoryboardAssetHint(
+  AppLocalizations l10n,
+  List<int> assetIds,
+) {
   final ids = assetIds.where((id) => id > 0).toSet().toList()..sort();
   if (ids.isEmpty) return '';
-  return '如需核对素材，仅看这 ${ids.length} 个关联资产。';
+  return l10n.agentWorkspaceProductionPromptStoryboardAssetHint(ids.length);
 }
 
 String buildProductionStoryboardGenerationPrompt({
+  required AppLocalizations l10n,
   required List<int> storyboardIds,
   List<int> assetIds = const <int>[],
   String? summary,
   String? executionHint,
 }) {
   final scope = buildProductionStoryboardPromptScope(
+    l10n,
     storyboardIds,
-    fallback: '优先只补缺少画面结果的镜头',
+    fallback:
+        l10n.agentWorkspaceProductionPromptStoryboardFallbackMissingFrames,
   );
-  final contextHint = buildProductionStoryboardPromptContextHint(storyboardIds);
-  final assetHint = buildProductionStoryboardAssetHint(assetIds);
+  final contextHint = buildProductionStoryboardPromptContextHint(
+    l10n,
+    storyboardIds,
+  );
+  final assetHint = buildProductionStoryboardAssetHint(l10n, assetIds);
   final normalizedSummary = summary?.trim() ?? '';
-  final summaryLine = normalizedSummary.isEmpty ? '' : '注意：$normalizedSummary';
+  final summaryLine = normalizedSummary.isEmpty
+      ? ''
+      : l10n.agentWorkspaceProductionPromptStoryboardNote(normalizedSummary);
   final normalizedExecutionHint = executionHint?.trim() ?? '';
   final executionLine = normalizedExecutionHint.isEmpty
       ? ''
-      : '执行约束：$normalizedExecutionHint';
-  return '$scope，不要重跑已有结果或 shouldGenerateImage=false 的镜头。$contextHint$assetHint$summaryLine$executionLine';
+      : l10n.agentWorkspaceProductionPromptExecutionConstraint(
+          normalizedExecutionHint,
+        );
+  return l10n.agentWorkspaceProductionPromptStoryboardGenBody(
+    scope,
+    contextHint,
+    assetHint,
+    summaryLine,
+    executionLine,
+  );
 }
 
 String buildProductionStoryboardTableRevisionPrompt(
+  AppLocalizations l10n,
   ProductionSupervisionReview review,
 ) {
   final summary = review.summary.trim();
   final scope = buildProductionStoryboardPromptScope(
+    l10n,
     review.storyboardIds,
-    fallback: '优先修订当前审核聚焦的分镜表问题',
+    fallback: l10n.agentWorkspaceProductionPromptStoryboardFallbackRevision,
   );
   final contextHint = buildProductionStoryboardPromptContextHint(
+    l10n,
     review.storyboardIds,
   );
-  final assetHint = buildProductionStoryboardAssetHint(review.assetIds);
-  final summaryLine = summary.isEmpty ? '' : '优先解决：$summary';
-  return '$scope 对应的 storyboardTable 行，保持其余行不动。$contextHint$assetHint$summaryLine';
+  final assetHint = buildProductionStoryboardAssetHint(l10n, review.assetIds);
+  final solve = summary.isEmpty
+      ? ''
+      : l10n.agentWorkspaceProductionPromptStoryboardTableSolve(summary);
+  return l10n.agentWorkspaceProductionPromptStoryboardTableRevisionBody(
+    scope,
+    contextHint,
+    assetHint,
+    solve,
+  );
 }
 
 ProductionStoryboardScriptFocusWindow

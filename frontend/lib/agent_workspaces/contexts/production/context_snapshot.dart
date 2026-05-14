@@ -112,6 +112,7 @@ class ProductionContextSnapshotView extends StatelessWidget {
       return '';
     }
     final assetScope = summarizeProductionAssetScope(
+      l10n,
       buildProductionScriptPlanAssetArgs(body),
     );
     final lines = <String>[
@@ -224,7 +225,7 @@ class ProductionContextSnapshotView extends StatelessWidget {
         l10n.agentWorkspaceProductionReviewAssetIds(review.assetIds.join(', ')),
       if (review.assetIds.isEmpty && review.assetTypes.isNotEmpty)
         l10n.agentWorkspaceProductionReviewAssetScope(
-          summarizeProductionAssetTypeScope(review.assetTypes),
+          summarizeProductionAssetTypeScope(l10n, review.assetTypes),
         ),
       if (review.storyboardIds.isNotEmpty)
         l10n.agentWorkspaceProductionReviewStoryboardIds(

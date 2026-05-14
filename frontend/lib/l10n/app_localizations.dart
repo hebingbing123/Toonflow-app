@@ -26459,6 +26459,333 @@ abstract class AppLocalizations {
   /// **'场景 {scene}'**
   String agentWorkspaceProductionSceneLabel(String scene);
 
+  String get agentWorkspaceProductionClauseJoiner;
+
+  String get agentWorkspaceProductionSentenceJoinerSemicolon;
+
+  String get agentWorkspaceProductionAssetTypeRole;
+
+  String get agentWorkspaceProductionAssetTypeScene;
+
+  String get agentWorkspaceProductionAssetTypeTool;
+
+  String agentWorkspaceProductionAssetScopeIds(String ids);
+
+  String agentWorkspaceProductionAssetScopeTypes(String types);
+
+  String get agentWorkspaceProductionAssetScopeCompact;
+
+  String agentWorkspaceProductionAssetFocusIdsShort(String visible);
+
+  String agentWorkspaceProductionAssetFocusIdsMore(String visible, int total);
+
+  String get agentWorkspaceProductionAssetReadinessEmpty;
+
+  String agentWorkspaceProductionAssetReadinessRoots(int ready, int total);
+
+  String agentWorkspaceProductionAssetReadinessDeriveGap(int count);
+
+  String agentWorkspaceProductionAssetReadinessRootMissing(int count);
+
+  String get agentWorkspaceProductionStoryboardReadinessEmpty;
+
+  String agentWorkspaceProductionStoryboardReadinessFrames(
+    int ready,
+    int needed,
+  );
+
+  String agentWorkspaceProductionStoryboardReadinessMissing(int count);
+
+  String agentWorkspaceProductionStoryboardReadinessTextOnly(int count);
+
+  String get agentWorkspaceProductionStoryboardTableCoverageUnread;
+
+  String agentWorkspaceProductionStoryboardTableCoverageRowsOnly(int count);
+
+  String agentWorkspaceProductionStoryboardTableCoverageProgress(
+    int sampled,
+    int total,
+  );
+
+  String agentWorkspaceProductionStoryboardTableCoverageWithPending(
+    int sampled,
+    int total,
+    int remaining,
+  );
+
+  String agentWorkspaceProductionPlanningScriptWindow(
+    int start,
+    int end,
+    int maxChars,
+  );
+
+  String agentWorkspaceProductionStoryboardShotsHashShort(String ids);
+
+  String agentWorkspaceProductionStoryboardShotsHashMore(String ids, int total);
+
+  String agentWorkspaceProductionStoryboardScriptWindow(
+    int start,
+    int end,
+    int maxChars,
+  );
+
+  String agentWorkspaceProductionStoryboardTableRereadShots(String shots);
+
+  String agentWorkspaceProductionStoryboardReviewScriptGlue(String window);
+
+  String agentWorkspaceProductionPromptStoryboardShotCount(int count);
+
+  String get agentWorkspaceProductionPromptStoryboardFallbackMissingFrames;
+
+  String get agentWorkspaceProductionPromptStoryboardFallbackRevision;
+
+  String get agentWorkspaceProductionPromptStoryboardContextEmpty;
+
+  String agentWorkspaceProductionPromptStoryboardContextTable(
+    String tableFocus,
+  );
+
+  String agentWorkspaceProductionPromptStoryboardContextScript(
+    String scriptWindow,
+  );
+
+  String agentWorkspaceProductionPromptStoryboardContextLead(String parts);
+
+  String agentWorkspaceProductionPromptStoryboardNote(String summary);
+
+  String agentWorkspaceProductionPromptExecutionConstraint(String hint);
+
+  String agentWorkspaceProductionPromptStoryboardGenBody(
+    String scope,
+    String contextHint,
+    String assetHint,
+    String note,
+    String execution,
+  );
+
+  String agentWorkspaceProductionPromptStoryboardTableRevisionBody(
+    String scope,
+    String contextHint,
+    String assetHint,
+    String solve,
+  );
+
+  String agentWorkspaceProductionPromptStoryboardTableSolve(String summary);
+
+  String agentWorkspaceProductionPromptStoryboardAssetHint(int count);
+
+  String get agentWorkspaceProductionStageReviewSummaryFallback;
+
+  String agentWorkspaceProductionStageReviewBody(
+    String grade,
+    int severe,
+    int medium,
+    int minor,
+    String summary,
+    String storyboardScope,
+    String assetScope,
+  );
+
+  String agentWorkspaceProductionStageReviewStoryboardScope(String scope);
+
+  String agentWorkspaceProductionStageReviewAssetScope(String scope);
+
+  String agentWorkspaceProductionStageDetailScriptPlanSectionLine(int count);
+
+  String agentWorkspaceProductionStagePromptReviseScriptPlan(String summary);
+
+  String get agentWorkspaceProductionStageDetailScriptPlanEmpty;
+
+  String get agentWorkspaceProductionStagePromptScriptPlanEmpty;
+
+  String agentWorkspaceProductionStageDetailScriptPlanRefine(
+    String sectionLine,
+    int chars,
+  );
+
+  String get agentWorkspaceProductionStagePromptScriptPlanRefine;
+
+  String agentWorkspaceProductionStageDetailScriptPlanReview(
+    String sectionLine,
+    int chars,
+    String scriptWindow,
+  );
+
+  String get agentWorkspaceProductionStagePromptScriptPlanReview;
+
+  String get agentWorkspaceProductionStageDetailScriptPlanRefresh;
+
+  String get agentWorkspaceProductionStageDetailScriptPlanPendingRead;
+
+  String agentWorkspaceProductionStageDetailAssetsAfterReview(
+    String reviewDetail,
+    String assetScope,
+  );
+
+  String get agentWorkspaceProductionStageDetailAssetsEmpty;
+
+  String get agentWorkspaceProductionStagePromptAssetsEmpty;
+
+  String agentWorkspaceProductionStageDetailAssetsMissingGeneric(
+    int total,
+    int missing,
+    String readiness,
+  );
+
+  String agentWorkspaceProductionStageDetailAssetsMissingFocused(
+    int total,
+    String pendingScope,
+    String readiness,
+  );
+
+  String agentWorkspaceProductionStageDetailAssetsReady(
+    int total,
+    String readiness,
+  );
+
+  String agentWorkspaceProductionStageDetailAssetsScopedTable(int count);
+
+  String agentWorkspaceProductionStageDetailAssetsScopedStoryboard(int count);
+
+  String get agentWorkspaceProductionStageDetailAssetsWaitScriptDepth;
+
+  String agentWorkspaceProductionStageDetailAssetsNarrowedScriptPlan(
+    String scope,
+  );
+
+  String get agentWorkspaceProductionStageDetailAssetsWaitScript;
+
+  String get agentWorkspaceProductionStageDetailAssetsRefreshNarrow;
+
+  String get agentWorkspaceProductionStageDetailAssetsRefreshWide;
+
+  String get agentWorkspaceProductionStageDetailAssetsPendingRead;
+
+  String agentWorkspaceProductionStagePromptStoryboardTableReviseLead(
+    String tail,
+  );
+
+  String get agentWorkspaceProductionStageDetailStoryboardTableEmpty;
+
+  String get agentWorkspaceProductionStagePromptStoryboardTableEmpty;
+
+  String agentWorkspaceProductionStageDetailStoryboardTableString(
+    String rowDigest,
+    int chars,
+    String coverage,
+  );
+
+  String agentWorkspaceProductionStageDigestStoryboardTableRows(int rowCount);
+
+  String agentWorkspaceProductionStageDigestStoryboardTableAssets(
+    int assetCount,
+  );
+
+  String agentWorkspaceProductionStageDetailStoryboardTableWindowReady(
+    int sampled,
+    int total,
+    String coverage,
+  );
+
+  String agentWorkspaceProductionStageDetailStoryboardTableWindowBackfill(
+    int sampled,
+    int total,
+    String coverage,
+  );
+
+  String agentWorkspaceProductionStageDetailStoryboardTableWindowExpand(
+    int sampled,
+    int total,
+    String coverage,
+  );
+
+  String get agentWorkspaceProductionStagePromptStoryboardTableReview;
+
+  String get agentWorkspaceProductionStageDetailStoryboardTableWaitScript;
+
+  String get agentWorkspaceProductionStageDetailStoryboardTableWaitScriptDepth;
+
+  String get agentWorkspaceProductionStageDetailStoryboardTableRefreshWide;
+
+  String agentWorkspaceProductionStageDetailStoryboardTableRefreshNarrow(
+    String ids,
+  );
+
+  String get agentWorkspaceProductionStageDetailStoryboardTablePendingRead;
+
+  String
+  get agentWorkspaceProductionStageDetailStoryboardSupervisionGenerateScopeEmpty;
+
+  String
+  get agentWorkspaceProductionStageDetailStoryboardSupervisionCheckScopeEmpty;
+
+  String agentWorkspaceProductionStageDetailStoryboardSupervisionScoped(
+    int count,
+    String reviewScope,
+  );
+
+  String agentWorkspaceProductionSupervisionReviewScopeAppend(
+    String reviewScope,
+  );
+
+  String agentWorkspaceProductionStagePromptStoryboardSupervisionGenerate(
+    String tail,
+  );
+
+  String get agentWorkspaceProductionStageDetailStoryboardEmpty;
+
+  String get agentWorkspaceProductionStagePromptStoryboardEmpty;
+
+  String agentWorkspaceProductionStageDetailStoryboardMissing(
+    int needImageCount,
+    int missingCount,
+    String idsPreview,
+    String idsTail,
+    String skippedClause,
+    String reviewClause,
+    String readiness,
+  );
+
+  String agentWorkspaceProductionStageDetailStoryboardMissingIdsTail(int total);
+
+  String agentWorkspaceProductionStageDetailStoryboardMissingSkipped(int count);
+
+  String agentWorkspaceProductionStageDetailStoryboardMissingReview(
+    String reviewScope,
+  );
+
+  String agentWorkspaceProductionStagePromptStoryboardContinue(String tail);
+
+  String agentWorkspaceProductionStageDetailStoryboardComplete(
+    int needImageCount,
+    String skippedClause,
+    String readiness,
+  );
+
+  String agentWorkspaceProductionStageDetailStoryboardCompleteSkipped(
+    int count,
+  );
+
+  String get agentWorkspaceProductionStageDetailStoryboardWaitScript;
+
+  String get agentWorkspaceProductionStageDetailStoryboardWaitScriptDepth;
+
+  String get agentWorkspaceProductionStageDetailStoryboardWaitTable;
+
+  String get agentWorkspaceProductionStageDetailStoryboardBackfillFromTable;
+
+  String get agentWorkspaceProductionStageDetailStoryboardWaitTableCoverage;
+
+  String get agentWorkspaceProductionStageDetailStoryboardRefreshGenWide;
+
+  String agentWorkspaceProductionStageDetailStoryboardRefreshGenNarrow(
+    String ids,
+  );
+
+  String get agentWorkspaceProductionStageDetailStoryboardRefreshOther;
+
+  String get agentWorkspaceProductionStageDetailStoryboardPendingRead;
+
   /// No description provided for @agentWorkspaceProductionDurationLabel.
   ///
   /// In en, this message translates to:

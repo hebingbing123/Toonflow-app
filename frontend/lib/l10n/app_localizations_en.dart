@@ -17419,6 +17419,610 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get agentWorkspaceProductionClauseJoiner => ', ';
+
+  @override
+  String get agentWorkspaceProductionSentenceJoinerSemicolon => '; ';
+
+  @override
+  String get agentWorkspaceProductionAssetTypeRole => 'Characters';
+
+  @override
+  String get agentWorkspaceProductionAssetTypeScene => 'Scenes';
+
+  @override
+  String get agentWorkspaceProductionAssetTypeTool => 'Props';
+
+  @override
+  String agentWorkspaceProductionAssetScopeIds(String ids) {
+    return 'Assets #$ids';
+  }
+
+  @override
+  String agentWorkspaceProductionAssetScopeTypes(String types) {
+    return '$types assets';
+  }
+
+  @override
+  String get agentWorkspaceProductionAssetScopeCompact => 'Compact asset read';
+
+  @override
+  String agentWorkspaceProductionAssetFocusIdsShort(String visible) {
+    return 'Assets #$visible';
+  }
+
+  @override
+  String agentWorkspaceProductionAssetFocusIdsMore(String visible, int total) {
+    return 'Assets #$visible and $total more';
+  }
+
+  @override
+  String get agentWorkspaceProductionAssetReadinessEmpty => 'No assets loaded';
+
+  @override
+  String agentWorkspaceProductionAssetReadinessRoots(int ready, int total) {
+    return 'Main assets $ready/$total ready';
+  }
+
+  @override
+  String agentWorkspaceProductionAssetReadinessDeriveGap(int count) {
+    return '$count derived assets still need images';
+  }
+
+  @override
+  String agentWorkspaceProductionAssetReadinessRootMissing(int count) {
+    return '$count main assets still need images';
+  }
+
+  @override
+  String get agentWorkspaceProductionStoryboardReadinessEmpty =>
+      'Storyboard list is empty';
+
+  @override
+  String agentWorkspaceProductionStoryboardReadinessFrames(
+    int ready,
+    int needed,
+  ) {
+    return 'Rendered frames $ready/$needed ready';
+  }
+
+  @override
+  String agentWorkspaceProductionStoryboardReadinessMissing(int count) {
+    return '$count shots still need frames';
+  }
+
+  @override
+  String agentWorkspaceProductionStoryboardReadinessTextOnly(int count) {
+    return '$count text-only shots';
+  }
+
+  @override
+  String get agentWorkspaceProductionStoryboardTableCoverageUnread =>
+      'Storyboard table not loaded yet';
+
+  @override
+  String agentWorkspaceProductionStoryboardTableCoverageRowsOnly(int count) {
+    return 'Storyboard table: read $count rows';
+  }
+
+  @override
+  String agentWorkspaceProductionStoryboardTableCoverageProgress(
+    int sampled,
+    int total,
+  ) {
+    return 'Storyboard table: read $sampled/$total rows';
+  }
+
+  @override
+  String agentWorkspaceProductionStoryboardTableCoverageWithPending(
+    int sampled,
+    int total,
+    int remaining,
+  ) {
+    return 'Storyboard table: read $sampled/$total rows; $remaining rows still to expand';
+  }
+
+  @override
+  String agentWorkspaceProductionPlanningScriptWindow(
+    int start,
+    int end,
+    int maxChars,
+  ) {
+    return 'Script lines $start–$end (≤$maxChars chars)';
+  }
+
+  @override
+  String agentWorkspaceProductionStoryboardShotsHashShort(String ids) {
+    return 'Shots #$ids';
+  }
+
+  @override
+  String agentWorkspaceProductionStoryboardShotsHashMore(
+    String ids,
+    int total,
+  ) {
+    return 'Shots #$ids and $total more';
+  }
+
+  @override
+  String agentWorkspaceProductionStoryboardScriptWindow(
+    int start,
+    int end,
+    int maxChars,
+  ) {
+    return 'Script lines $start–$end (≤$maxChars chars)';
+  }
+
+  @override
+  String agentWorkspaceProductionStoryboardTableRereadShots(String shots) {
+    return 'In the storyboard table, reread rows for $shots only';
+  }
+
+  @override
+  String agentWorkspaceProductionStoryboardReviewScriptGlue(String window) {
+    return 'For script, reread only $window';
+  }
+
+  @override
+  String agentWorkspaceProductionPromptStoryboardShotCount(int count) {
+    return 'Focus on these $count shots first';
+  }
+
+  @override
+  String get agentWorkspaceProductionPromptStoryboardFallbackMissingFrames =>
+      'Only fill shots that still lack rendered frames';
+
+  @override
+  String get agentWorkspaceProductionPromptStoryboardFallbackRevision =>
+      'Fix the storyboard-table issues called out in the latest review';
+
+  @override
+  String get agentWorkspaceProductionPromptStoryboardContextEmpty =>
+      'To verify references, first reread the same storyboardTable rows and the compact script window.';
+
+  @override
+  String agentWorkspaceProductionPromptStoryboardContextTable(
+    String tableFocus,
+  ) {
+    return 'First reread storyboardTable rows for $tableFocus only';
+  }
+
+  @override
+  String agentWorkspaceProductionPromptStoryboardContextScript(
+    String scriptWindow,
+  ) {
+    return 'For script, reread only $scriptWindow';
+  }
+
+  @override
+  String agentWorkspaceProductionPromptStoryboardContextLead(String parts) {
+    return 'To verify references, $parts.';
+  }
+
+  @override
+  String agentWorkspaceProductionPromptStoryboardNote(String summary) {
+    return 'Note: $summary';
+  }
+
+  @override
+  String agentWorkspaceProductionPromptExecutionConstraint(String hint) {
+    return 'Execution constraint: $hint';
+  }
+
+  @override
+  String agentWorkspaceProductionPromptStoryboardGenBody(
+    String scope,
+    String contextHint,
+    String assetHint,
+    String note,
+    String execution,
+  ) {
+    return '$scope; do not rerun finished shots or shouldGenerateImage=false rows. $contextHint$assetHint$note$execution';
+  }
+
+  @override
+  String agentWorkspaceProductionPromptStoryboardTableRevisionBody(
+    String scope,
+    String contextHint,
+    String assetHint,
+    String solve,
+  ) {
+    return '$scope storyboardTable rows; keep other rows unchanged. $contextHint$assetHint$solve';
+  }
+
+  @override
+  String agentWorkspaceProductionPromptStoryboardTableSolve(String summary) {
+    return 'Fix first: $summary';
+  }
+
+  @override
+  String agentWorkspaceProductionPromptStoryboardAssetHint(int count) {
+    return 'If you need to verify art, only review these $count linked assets.';
+  }
+
+  @override
+  String get agentWorkspaceProductionStageReviewSummaryFallback =>
+      'Follow the review outcome for the next step.';
+
+  @override
+  String agentWorkspaceProductionStageReviewBody(
+    String grade,
+    int severe,
+    int medium,
+    int minor,
+    String summary,
+    String storyboardScope,
+    String assetScope,
+  ) {
+    return 'Review grade $grade: $severe severe · $medium medium · $minor minor. $summary$storyboardScope$assetScope';
+  }
+
+  @override
+  String agentWorkspaceProductionStageReviewStoryboardScope(String scope) {
+    return ' Local scope: $scope.';
+  }
+
+  @override
+  String agentWorkspaceProductionStageReviewAssetScope(String scope) {
+    return ' Asset scope: $scope.';
+  }
+
+  @override
+  String agentWorkspaceProductionStageDetailScriptPlanSectionLine(int count) {
+    return '$count/6 planning dimensions covered, ';
+  }
+
+  @override
+  String agentWorkspaceProductionStagePromptReviseScriptPlan(String summary) {
+    return 'Revise scriptPlan using the latest review notes; prioritize: $summary';
+  }
+
+  @override
+  String get agentWorkspaceProductionStageDetailScriptPlanEmpty =>
+      'scriptPlan is still empty—produce a director plan before advancing assets and storyboard.';
+
+  @override
+  String get agentWorkspaceProductionStagePromptScriptPlanEmpty =>
+      'Generate a director plan from the current production context and list execution priorities.';
+
+  @override
+  String agentWorkspaceProductionStageDetailScriptPlanRefine(
+    String sectionLine,
+    int chars,
+  ) {
+    return 'scriptPlan loaded; ${sectionLine}about $chars characters. Downstream is still gated—add at least 3 planning dimensions before review and the main assets/storyboard chain.';
+  }
+
+  @override
+  String get agentWorkspaceProductionStagePromptScriptPlanRefine =>
+      'Keep refining scriptPlan until at least 3 planning dimensions are filled in, including emotional progression, asset dependencies, and shot intent.';
+
+  @override
+  String agentWorkspaceProductionStageDetailScriptPlanReview(
+    String sectionLine,
+    int chars,
+    String scriptWindow,
+  ) {
+    return 'scriptPlan loaded; ${sectionLine}about $chars characters. During review, first reread only $scriptWindow, then supervise the director plan before advancing assets and storyboard.';
+  }
+
+  @override
+  String get agentWorkspaceProductionStagePromptScriptPlanReview =>
+      'Review the current director plan for plot coverage, asset fit, and pacing.';
+
+  @override
+  String get agentWorkspaceProductionStageDetailScriptPlanRefresh =>
+      'The director plan just changed or is still processing—refresh scriptPlan and confirm the latest content before advancing downstream.';
+
+  @override
+  String get agentWorkspaceProductionStageDetailScriptPlanPendingRead =>
+      'Read scriptPlan first to confirm production priorities and execution order.';
+
+  @override
+  String agentWorkspaceProductionStageDetailAssetsAfterReview(
+    String reviewDetail,
+    String assetScope,
+  ) {
+    return '$reviewDetail Verify only $assetScope, then return to scriptPlan to finalize the director plan.';
+  }
+
+  @override
+  String get agentWorkspaceProductionStageDetailAssetsEmpty =>
+      'assets is empty—plan derived assets and fill a minimal viable set.';
+
+  @override
+  String get agentWorkspaceProductionStagePromptAssetsEmpty =>
+      'Plan the smallest viable derived-asset set for the current empty assets flow and explain priorities.';
+
+  @override
+  String agentWorkspaceProductionStageDetailAssetsMissingGeneric(
+    int total,
+    int missing,
+    String readiness,
+  ) {
+    return '$total assets total; $missing still lack rendered images—continue asset generation. $readiness';
+  }
+
+  @override
+  String agentWorkspaceProductionStageDetailAssetsMissingFocused(
+    int total,
+    String pendingScope,
+    String readiness,
+  ) {
+    return '$total assets total; $pendingScope still lack images—prioritize only this batch to save tokens. $readiness';
+  }
+
+  @override
+  String agentWorkspaceProductionStageDetailAssetsReady(
+    int total,
+    String readiness,
+  ) {
+    return 'All $total assets have images—continue checking storyboard and the director plan. $readiness';
+  }
+
+  @override
+  String agentWorkspaceProductionStageDetailAssetsScopedTable(int count) {
+    return 'The storyboard-table window references $count assets—verify this batch first to save tokens.';
+  }
+
+  @override
+  String agentWorkspaceProductionStageDetailAssetsScopedStoryboard(int count) {
+    return 'The storyboard window references $count assets—verify this batch first to save tokens.';
+  }
+
+  @override
+  String get agentWorkspaceProductionStageDetailAssetsWaitScriptDepth =>
+      'scriptPlan exists but is not deep enough yet—finish key director-plan dimensions before planning assets to avoid wasted prep.';
+
+  @override
+  String agentWorkspaceProductionStageDetailAssetsNarrowedScriptPlan(
+    String scope,
+  ) {
+    return 'Tightened reads from scriptPlan to $scope; verify this batch first to save tokens; widen only if information is still insufficient.';
+  }
+
+  @override
+  String get agentWorkspaceProductionStageDetailAssetsWaitScript =>
+      'Read or generate scriptPlan before planning assets so prep stays aligned with director pacing and rewrite constraints.';
+
+  @override
+  String get agentWorkspaceProductionStageDetailAssetsRefreshNarrow =>
+      'Asset generation just ran—reread the affected assets first, confirm results, then decide whether to widen reads.';
+
+  @override
+  String get agentWorkspaceProductionStageDetailAssetsRefreshWide =>
+      'An asset action just ran—refresh asset results, confirm the latest state, then decide whether to keep filling gaps.';
+
+  @override
+  String get agentWorkspaceProductionStageDetailAssetsPendingRead =>
+      'Read the assets flow to decide whether to continue derived assets or generation.';
+
+  @override
+  String agentWorkspaceProductionStagePromptStoryboardTableReviseLead(
+    String tail,
+  ) {
+    return 'Revise storyboardTable using the latest review notes. $tail';
+  }
+
+  @override
+  String get agentWorkspaceProductionStageDetailStoryboardTableEmpty =>
+      'storyboardTable is empty—add a structured shot list first.';
+
+  @override
+  String get agentWorkspaceProductionStagePromptStoryboardTableEmpty =>
+      'Produce a structured storyboardTable with clear fields for safe writeback.';
+
+  @override
+  String agentWorkspaceProductionStageDetailStoryboardTableString(
+    String rowDigest,
+    int chars,
+    String coverage,
+  ) {
+    return 'storyboardTable has content$rowDigest about $chars characters—supervise the table before pushing storyboard renders. $coverage';
+  }
+
+  @override
+  String agentWorkspaceProductionStageDigestStoryboardTableRows(int rowCount) {
+    return '$rowCount rows';
+  }
+
+  @override
+  String agentWorkspaceProductionStageDigestStoryboardTableAssets(
+    int assetCount,
+  ) {
+    return '$assetCount linked assets';
+  }
+
+  @override
+  String agentWorkspaceProductionStageDetailStoryboardTableWindowReady(
+    int sampled,
+    int total,
+    String coverage,
+  ) {
+    return 'Window-read $sampled/$total key columns—continue reviewing or revising storyboardTable. $coverage';
+  }
+
+  @override
+  String agentWorkspaceProductionStageDetailStoryboardTableWindowBackfill(
+    int sampled,
+    int total,
+    String coverage,
+  ) {
+    return 'Window-read $sampled/$total key columns, but scriptPlan still lacks clear per-scene emotion or visual intent—backfill the director plan before widening storyboardTable reads. $coverage';
+  }
+
+  @override
+  String agentWorkspaceProductionStageDetailStoryboardTableWindowExpand(
+    int sampled,
+    int total,
+    String coverage,
+  ) {
+    return 'Window-read $sampled/$total key columns, but coverage is still thin—expand or fill critical rows before storyboard. $coverage';
+  }
+
+  @override
+  String get agentWorkspaceProductionStagePromptStoryboardTableReview =>
+      'Review the storyboard table for coverage, asset links, and shot granularity.';
+
+  @override
+  String get agentWorkspaceProductionStageDetailStoryboardTableWaitScript =>
+      'Read or generate scriptPlan before splitting storyboardTable so the shot list stays anchored to the director plan.';
+
+  @override
+  String
+  get agentWorkspaceProductionStageDetailStoryboardTableWaitScriptDepth =>
+      'scriptPlan exists but is not deep enough yet—finish key director-plan dimensions before splitting storyboardTable.';
+
+  @override
+  String get agentWorkspaceProductionStageDetailStoryboardTableRefreshWide =>
+      'The storyboard table just changed or is still processing—refresh it before deciding whether to keep reviewing or revising.';
+
+  @override
+  String agentWorkspaceProductionStageDetailStoryboardTableRefreshNarrow(
+    String ids,
+  ) {
+    return 'The storyboard table just changed—reread storyboardTable rows for shots #$ids only.';
+  }
+
+  @override
+  String get agentWorkspaceProductionStageDetailStoryboardTablePendingRead =>
+      'Read storyboardTable when you need to review the structured shot list.';
+
+  @override
+  String
+  get agentWorkspaceProductionStageDetailStoryboardSupervisionGenerateScopeEmpty =>
+      'Read missing-frame status with a compact storyboard fetch before doing the smallest possible fill-in.';
+
+  @override
+  String
+  get agentWorkspaceProductionStageDetailStoryboardSupervisionCheckScopeEmpty =>
+      'Read a compact storyboard snapshot first to see which shots the review targets.';
+
+  @override
+  String agentWorkspaceProductionStageDetailStoryboardSupervisionScoped(
+    int count,
+    String reviewScope,
+  ) {
+    return 'The review targets $count shots—focus on this storyboard batch first to save tokens.$reviewScope';
+  }
+
+  @override
+  String agentWorkspaceProductionSupervisionReviewScopeAppend(
+    String reviewScope,
+  ) {
+    return ' $reviewScope.';
+  }
+
+  @override
+  String agentWorkspaceProductionStagePromptStoryboardSupervisionGenerate(
+    String tail,
+  ) {
+    return 'Continue storyboard work from the latest review. $tail';
+  }
+
+  @override
+  String get agentWorkspaceProductionStageDetailStoryboardEmpty =>
+      'storyboard is empty—generate a first-pass storyboard.';
+
+  @override
+  String get agentWorkspaceProductionStagePromptStoryboardEmpty =>
+      'Generate a first-pass storyboard from the current production context with a minimal viable shot set.';
+
+  @override
+  String agentWorkspaceProductionStageDetailStoryboardMissing(
+    int needImageCount,
+    int missingCount,
+    String idsPreview,
+    String idsTail,
+    String skippedClause,
+    String reviewClause,
+    String readiness,
+  ) {
+    return '$needImageCount shots need renders; $missingCount still lack images (#$idsPreview$idsTail)$skippedClause$reviewClause $readiness';
+  }
+
+  @override
+  String agentWorkspaceProductionStageDetailStoryboardMissingIdsTail(
+    int total,
+  ) {
+    return ' ($total shots total)';
+  }
+
+  @override
+  String agentWorkspaceProductionStageDetailStoryboardMissingSkipped(
+    int count,
+  ) {
+    return '; $count text-only shots are intentionally image-free';
+  }
+
+  @override
+  String agentWorkspaceProductionStageDetailStoryboardMissingReview(
+    String reviewScope,
+  ) {
+    return ' $reviewScope';
+  }
+
+  @override
+  String agentWorkspaceProductionStagePromptStoryboardContinue(String tail) {
+    return 'Continue storyboard work. $tail';
+  }
+
+  @override
+  String agentWorkspaceProductionStageDetailStoryboardComplete(
+    int needImageCount,
+    String skippedClause,
+    String readiness,
+  ) {
+    return '$needImageCount shots need renders; all required frames are present$skippedClause, ready to write back or continue the director plan. $readiness';
+  }
+
+  @override
+  String agentWorkspaceProductionStageDetailStoryboardCompleteSkipped(
+    int count,
+  ) {
+    return '; $count text-only shots are intentionally image-free';
+  }
+
+  @override
+  String get agentWorkspaceProductionStageDetailStoryboardWaitScript =>
+      'Read or generate scriptPlan before storyboard so you do not render shots while emotion and intent are still unsettled.';
+
+  @override
+  String get agentWorkspaceProductionStageDetailStoryboardWaitScriptDepth =>
+      'scriptPlan exists but is not deep enough yet—deepen the director plan before storyboard so emotion and shot intent are not still drifting when you render.';
+
+  @override
+  String get agentWorkspaceProductionStageDetailStoryboardWaitTable =>
+      'Fill storyboardTable before storyboard so shot splits and asset links are stable before rendering.';
+
+  @override
+  String get agentWorkspaceProductionStageDetailStoryboardBackfillFromTable =>
+      'storyboardTable has a base, but scriptPlan still needs clearer per-scene emotion or visual intent—refine the director plan, widen the table read, then advance storyboard.';
+
+  @override
+  String get agentWorkspaceProductionStageDetailStoryboardWaitTableCoverage =>
+      'storyboardTable has a base but coverage is still thin—expand critical rows before storyboard to avoid rendering while shot splits are still unstable.';
+
+  @override
+  String get agentWorkspaceProductionStageDetailStoryboardRefreshGenWide =>
+      'A storyboard action just ran—refresh storyboard results before deciding whether to keep filling frames or write back.';
+
+  @override
+  String agentWorkspaceProductionStageDetailStoryboardRefreshGenNarrow(
+    String ids,
+  ) {
+    return 'A storyboard action just ran—reread missing-frame status for shots #$ids first.';
+  }
+
+  @override
+  String get agentWorkspaceProductionStageDetailStoryboardRefreshOther =>
+      'A storyboard action just ran—refresh storyboard results before deciding whether to write back.';
+
+  @override
+  String get agentWorkspaceProductionStageDetailStoryboardPendingRead =>
+      'Read storyboard to decide whether to keep filling frames or write results back.';
+
+  @override
   String agentWorkspaceProductionDurationLabel(String duration) {
     return '时长 $duration';
   }

@@ -130,15 +130,6 @@ String _normalizeProductionAssetType(Object? value) {
   };
 }
 
-String _productionAssetTypeLabel(String value) {
-  return switch (value) {
-    'role' => '角色',
-    'scene' => '场景',
-    'tool' => '道具',
-    _ => value,
-  };
-}
-
 List<String> productionStoryboardFields() => <String>[
   'id',
   'index',

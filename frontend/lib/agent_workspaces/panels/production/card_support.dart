@@ -31,6 +31,7 @@ extension _AgentWorkspaceProductionCardSupport
 
   List<ProductionWorkspaceRecipe> _buildWorkspaceRecipes() {
     return buildProductionWorkspaceRecipes(
+      l10n: AppLocalizations.of(context)!,
       toolName: widget.workspaceLastToolName,
       suggestedFlowKey: _suggestedFlowKeyLine,
       result: widget.workspaceLastToolResultData,

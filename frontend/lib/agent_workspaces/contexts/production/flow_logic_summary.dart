@@ -32,9 +32,11 @@ List<String> summarizeProductionResultSnapshot(
   final review = parseProductionSupervisionReview(result);
   if (review != null) {
     final focusedShots = summarizeProductionStoryboardFocusIds(
+      l10n,
       review.storyboardIds,
     );
     final reviewScope = summarizeProductionStoryboardReviewScope(
+      l10n,
       review.storyboardIds,
     );
     return <String>[
@@ -53,7 +55,7 @@ List<String> summarizeProductionResultSnapshot(
         ),
       if (review.assetIds.isEmpty && review.assetTypes.isNotEmpty)
         l10n.agentWorkspaceProductionSummaryFocusedAssetScope(
-          summarizeProductionAssetTypeScope(review.assetTypes),
+          summarizeProductionAssetTypeScope(l10n, review.assetTypes),
         ),
       if (review.storyboardIds.isNotEmpty)
         l10n.agentWorkspaceProductionSummaryFocusedShots(
@@ -156,7 +158,7 @@ List<String> summarizeProductionFlowValue(
         lines.add(l10n.agentWorkspaceProductionSummaryMediaUrls(withUrl));
       }
       if (normalizedKey == 'assets') {
-        lines.add(summarizeProductionAssetReadiness(rows));
+        lines.add(summarizeProductionAssetReadiness(l10n, rows));
       }
       if (normalizedKey == 'storyboard') {
         final targetCount = rows
@@ -164,7 +166,7 @@ List<String> summarizeProductionFlowValue(
             .length;
         final missingIds = extractProductionStoryboardMissingImageIds(rows);
         final skippedCount = rows.length - targetCount;
-        lines.add(summarizeProductionStoryboardReadiness(rows));
+        lines.add(summarizeProductionStoryboardReadiness(l10n, rows));
         if (targetCount > 0) {
           lines.add(
             l10n.agentWorkspaceProductionSummaryNeedImages(targetCount),
@@ -199,6 +201,7 @@ List<String> summarizeProductionFlowValue(
       final assetCount = extractProductionReferencedAssetIds(value).length;
       return <String>[
         summarizeProductionStoryboardTableCoverage(
+          l10n,
           sampledRows: sampledRows > 0 ? sampledRows : rowCount,
           totalRows: rowCount > 0
               ? rowCount

@@ -74,6 +74,7 @@ void main() {
     'buildProductionWorkspaceRecipes suggests derive-assets for empty assets',
     () {
       final recipes = buildProductionWorkspaceRecipes(
+        l10n: _zh,
         toolName: 'get_flowData',
         suggestedFlowKey: 'assets',
         result: <String, dynamic>{'data': <dynamic>[]},
@@ -89,6 +90,7 @@ void main() {
     'buildProductionWorkspaceRecipes suggests storyboard generation when images missing',
     () {
       final recipes = buildProductionWorkspaceRecipes(
+        l10n: _zh,
         toolName: 'get_flowData',
         suggestedFlowKey: 'storyboard',
         result: <String, dynamic>{
@@ -121,6 +123,7 @@ void main() {
 
   test('buildProductionWorkspaceRecipes suggests supervising script plan', () {
     final recipes = buildProductionWorkspaceRecipes(
+      l10n: _zh,
       toolName: 'get_flowData',
       suggestedFlowKey: 'scriptPlan',
       result: <String, dynamic>{'data': '<scriptPlan>已有导演规划</scriptPlan>'},
@@ -184,6 +187,7 @@ void main() {
     'buildProductionWorkspaceRecipes adds tool asset scope when script plan mentions props',
     () {
       final recipes = buildProductionWorkspaceRecipes(
+        l10n: _zh,
         toolName: 'get_flowData',
         suggestedFlowKey: 'scriptPlan',
         result: <String, dynamic>{
@@ -210,6 +214,7 @@ void main() {
     'buildProductionWorkspaceRecipes narrows script plan asset checks to explicit ids',
     () {
       final recipes = buildProductionWorkspaceRecipes(
+        l10n: _zh,
         toolName: 'get_flowData',
         suggestedFlowKey: 'scriptPlan',
         result: <String, dynamic>{
@@ -243,7 +248,10 @@ void main() {
         'lineEnd': 48,
         'maxChars': 1400,
       });
-      expect(summarizeProductionPlanningScriptWindow(), '剧本 1-48 行（<=1400 字）');
+      expect(
+        summarizeProductionPlanningScriptWindow(_zh),
+        '剧本 1-48 行（<=1400 字）',
+      );
     },
   );
 
@@ -251,6 +259,7 @@ void main() {
     'buildProductionWorkspaceRecipes adds compact script reread before script-plan follow-ups',
     () {
       final recipes = buildProductionWorkspaceRecipes(
+        l10n: _zh,
         toolName: 'get_flowData',
         suggestedFlowKey: 'scriptPlan',
         result: <String, dynamic>{'data': '<scriptPlan>已有导演规划</scriptPlan>'},
@@ -273,6 +282,7 @@ void main() {
     'buildProductionWorkspaceRecipes asks to refine scene intent before reading storyboard table',
     () {
       final recipes = buildProductionWorkspaceRecipes(
+        l10n: _zh,
         toolName: 'get_flowData',
         suggestedFlowKey: 'scriptPlan',
         result: <String, dynamic>{
@@ -372,6 +382,7 @@ void main() {
     'buildProductionWorkspaceRecipes narrows asset refresh after asset sub-agent run',
     () {
       final recipes = buildProductionWorkspaceRecipes(
+        l10n: _zh,
         toolName: 'run_sub_agent_generate_assets',
         suggestedFlowKey: 'assets',
         result: <String, dynamic>{'result': '已完成'},
@@ -457,6 +468,7 @@ void main() {
     'buildProductionWorkspaceRecipes narrows storyboard refresh after storyboard panel sub-agent run',
     () {
       final recipes = buildProductionWorkspaceRecipes(
+        l10n: _zh,
         toolName: 'run_sub_agent_storyboard_panel',
         suggestedFlowKey: 'storyboard',
         result: <String, dynamic>{'result': '已完成'},
@@ -520,6 +532,7 @@ void main() {
     'buildProductionWorkspaceRecipes narrows storyboard table refresh after storyboard-table sub-agent run',
     () {
       final recipes = buildProductionWorkspaceRecipes(
+        l10n: _zh,
         toolName: 'run_sub_agent_storyboard_table',
         suggestedFlowKey: 'storyboardTable',
         result: <String, dynamic>{'result': '已完成'},
@@ -614,6 +627,7 @@ void main() {
     'buildProductionStoryboardTableRevisionPrompt includes focused asset ids',
     () {
       final prompt = buildProductionStoryboardTableRevisionPrompt(
+        _zh,
         const ProductionSupervisionReview(
           target: 'storyboardTable',
           grade: 'C',
@@ -649,7 +663,7 @@ void main() {
   });
 
   test('buildProductionStoryboardAssetHint caps long asset id lists', () {
-    final hint = buildProductionStoryboardAssetHint(const <int>[
+    final hint = buildProductionStoryboardAssetHint(_zh, const <int>[
       9,
       1,
       7,
@@ -695,6 +709,7 @@ void main() {
     'buildProductionStoryboardGenerationPrompt caps long storyboard id lists',
     () {
       final prompt = buildProductionStoryboardGenerationPrompt(
+        l10n: _zh,
         storyboardIds: const <int>[9, 1, 7, 3, 5, 11, 13, 15, 17],
       );
 
@@ -779,6 +794,7 @@ void main() {
     'buildProductionWorkspaceRecipes narrows storyboard table asset checks to referenced ids',
     () {
       final recipes = buildProductionWorkspaceRecipes(
+        l10n: _zh,
         toolName: 'get_flowData',
         suggestedFlowKey: 'storyboardTable',
         result: <String, dynamic>{
@@ -823,6 +839,7 @@ void main() {
     'buildProductionWorkspaceRecipes keeps full storyboard scope in sub-agent args while prompt stays compact',
     () {
       final recipes = buildProductionWorkspaceRecipes(
+        l10n: _zh,
         toolName: 'get_flowData',
         suggestedFlowKey: 'storyboard',
         result: <String, dynamic>{
@@ -850,6 +867,7 @@ void main() {
     'buildProductionWorkspaceRecipes narrows storyboard table asset checks from markdown text',
     () {
       final recipes = buildProductionWorkspaceRecipes(
+        l10n: _zh,
         toolName: 'get_flowData',
         suggestedFlowKey: 'storyboardTable',
         result: <String, dynamic>{
@@ -888,6 +906,7 @@ void main() {
     'buildProductionWorkspaceRecipes uses structured supervision next action',
     () {
       final recipes = buildProductionWorkspaceRecipes(
+        l10n: _zh,
         toolName: 'run_sub_agent_production_supervision',
         suggestedFlowKey: 'storyboardTable',
         result: <String, dynamic>{
@@ -925,6 +944,7 @@ void main() {
     'buildProductionWorkspaceRecipes keeps review asset type scope in storyboard follow-up sub-agent args',
     () {
       final recipes = buildProductionWorkspaceRecipes(
+        l10n: _zh,
         toolName: 'run_sub_agent_production_supervision',
         suggestedFlowKey: 'storyboardTable',
         result: <String, dynamic>{
@@ -953,6 +973,7 @@ void main() {
     'buildProductionWorkspaceRecipes keeps check-assets follow-up focused and returns to script plan',
     () {
       final recipes = buildProductionWorkspaceRecipes(
+        l10n: _zh,
         toolName: 'run_sub_agent_production_supervision',
         suggestedFlowKey: 'scriptPlan',
         result: <String, dynamic>{
@@ -989,6 +1010,7 @@ void main() {
     'buildProductionWorkspaceRecipes re-reads focused storyboard table ids after supervision',
     () {
       final recipes = buildProductionWorkspaceRecipes(
+        l10n: _zh,
         toolName: 'run_sub_agent_production_supervision',
         suggestedFlowKey: 'storyboardTable',
         result: <String, dynamic>{
@@ -1024,6 +1046,7 @@ void main() {
     'buildProductionWorkspaceRecipes narrows storyboard table reads to missing storyboard ids',
     () {
       final recipes = buildProductionWorkspaceRecipes(
+        l10n: _zh,
         toolName: 'get_flowData',
         suggestedFlowKey: 'storyboard',
         result: <String, dynamic>{
@@ -1069,6 +1092,7 @@ void main() {
     'buildProductionWorkspaceRecipes falls back to storyboard table window without focused ids',
     () {
       final recipes = buildProductionWorkspaceRecipes(
+        l10n: _zh,
         toolName: 'run_sub_agent_production_supervision',
         suggestedFlowKey: 'storyboardTable',
         result: <String, dynamic>{
@@ -1104,6 +1128,7 @@ void main() {
     'buildProductionWorkspaceRecipes shrinks check-script reads to focused window',
     () {
       final recipes = buildProductionWorkspaceRecipes(
+        l10n: _zh,
         toolName: 'run_sub_agent_production_supervision',
         suggestedFlowKey: 'storyboardTable',
         result: <String, dynamic>{
@@ -1134,6 +1159,7 @@ void main() {
     'buildProductionWorkspaceRecipes narrows check-storyboard follow-ups to focused rows and script window',
     () {
       final recipes = buildProductionWorkspaceRecipes(
+        l10n: _zh,
         toolName: 'run_sub_agent_production_supervision',
         suggestedFlowKey: 'storyboardTable',
         result: <String, dynamic>{
@@ -1189,6 +1215,7 @@ void main() {
     'buildProductionWorkspaceRecipes adds focused storyboard table reread before generation',
     () {
       final recipes = buildProductionWorkspaceRecipes(
+        l10n: _zh,
         toolName: 'run_sub_agent_production_supervision',
         suggestedFlowKey: 'storyboardTable',
         result: <String, dynamic>{
@@ -1231,6 +1258,7 @@ void main() {
     'buildProductionWorkspaceRecipes adds focused storyboard scope to revision prompt',
     () {
       final recipes = buildProductionWorkspaceRecipes(
+        l10n: _zh,
         toolName: 'run_sub_agent_production_supervision',
         suggestedFlowKey: 'storyboardTable',
         result: <String, dynamic>{
@@ -1726,6 +1754,7 @@ void main() {
     'buildProductionWorkspaceRecipes narrows asset generation prompt to pending derive ids',
     () {
       final recipes = buildProductionWorkspaceRecipes(
+        l10n: _zh,
         toolName: 'get_flowData',
         suggestedFlowKey: 'assets',
         result: <String, dynamic>{
@@ -1892,6 +1921,7 @@ void main() {
     'buildProductionWorkspaceRecipes narrows asset refresh to generated ids',
     () {
       final recipes = buildProductionWorkspaceRecipes(
+        l10n: _zh,
         toolName: 'generate_deriveAsset',
         suggestedFlowKey: 'assets',
         result: <String, dynamic>{
@@ -2728,7 +2758,11 @@ void main() {
 
   test('summarizeProductionStoryboardTableCoverage reports remaining rows', () {
     expect(
-      summarizeProductionStoryboardTableCoverage(sampledRows: 8, totalRows: 24),
+      summarizeProductionStoryboardTableCoverage(
+        _zh,
+        sampledRows: 8,
+        totalRows: 24,
+      ),
       '分镜表已读 8/24 行，待展开 16 行',
     );
   });
@@ -2994,6 +3028,7 @@ void main() {
 
   test('supervision check assets recipe keeps compact asset read args', () {
     final recipes = buildProductionWorkspaceRecipes(
+      l10n: _zh,
       toolName: 'run_sub_agent_production_supervision',
       suggestedFlowKey: 'scriptPlan',
       result: <String, dynamic>{
@@ -3024,6 +3059,7 @@ void main() {
     'supervision check assets recipe narrows to structured review asset ids',
     () {
       final recipes = buildProductionWorkspaceRecipes(
+        l10n: _zh,
         toolName: 'run_sub_agent_production_supervision',
         suggestedFlowKey: 'scriptPlan',
         result: <String, dynamic>{
@@ -3056,6 +3092,7 @@ void main() {
     'supervision check assets recipe narrows to structured review asset types',
     () {
       final recipes = buildProductionWorkspaceRecipes(
+        l10n: _zh,
         toolName: 'run_sub_agent_production_supervision',
         suggestedFlowKey: 'scriptPlan',
         result: <String, dynamic>{
@@ -3086,6 +3123,7 @@ void main() {
     'supervision storyboard recipes narrow to structured review storyboard ids',
     () {
       final checkRecipes = buildProductionWorkspaceRecipes(
+        l10n: _zh,
         toolName: 'run_sub_agent_production_supervision',
         suggestedFlowKey: 'storyboardTable',
         result: <String, dynamic>{
@@ -3135,6 +3173,7 @@ void main() {
       });
 
       final generateRecipes = buildProductionWorkspaceRecipes(
+        l10n: _zh,
         toolName: 'run_sub_agent_production_supervision',
         suggestedFlowKey: 'storyboardTable',
         result: <String, dynamic>{
@@ -3183,6 +3222,7 @@ void main() {
     'supervision generate storyboard recipe falls back to minimal generation read',
     () {
       final recipes = buildProductionWorkspaceRecipes(
+        l10n: _zh,
         toolName: 'run_sub_agent_production_supervision',
         suggestedFlowKey: 'storyboardTable',
         result: <String, dynamic>{

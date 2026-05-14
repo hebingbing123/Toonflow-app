@@ -16572,6 +16572,608 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get agentWorkspaceProductionClauseJoiner => '，';
+
+  @override
+  String get agentWorkspaceProductionSentenceJoinerSemicolon => '；';
+
+  @override
+  String get agentWorkspaceProductionAssetTypeRole => '角色';
+
+  @override
+  String get agentWorkspaceProductionAssetTypeScene => '场景';
+
+  @override
+  String get agentWorkspaceProductionAssetTypeTool => '道具';
+
+  @override
+  String agentWorkspaceProductionAssetScopeIds(String ids) {
+    return '资产 #${ids}';
+  }
+
+  @override
+  String agentWorkspaceProductionAssetScopeTypes(String types) {
+    return '${types}资产';
+  }
+
+  @override
+  String get agentWorkspaceProductionAssetScopeCompact => '紧凑资产摘要';
+
+  @override
+  String agentWorkspaceProductionAssetFocusIdsShort(String visible) {
+    return '资产 #${visible}';
+  }
+
+  @override
+  String agentWorkspaceProductionAssetFocusIdsMore(String visible, int total) {
+    return '资产 #${visible} 等 ${total} 项';
+  }
+
+  @override
+  String get agentWorkspaceProductionAssetReadinessEmpty => '资产为空';
+
+  @override
+  String agentWorkspaceProductionAssetReadinessRoots(int ready, int total) {
+    return '主资产 ${ready}/${total} 已就绪';
+  }
+
+  @override
+  String agentWorkspaceProductionAssetReadinessDeriveGap(int count) {
+    return '衍生缺口 ${count} 项';
+  }
+
+  @override
+  String agentWorkspaceProductionAssetReadinessRootMissing(int count) {
+    return '主资产待补 ${count} 项';
+  }
+
+  @override
+  String get agentWorkspaceProductionStoryboardReadinessEmpty => '分镜为空';
+
+  @override
+  String agentWorkspaceProductionStoryboardReadinessFrames(
+    int ready,
+    int needed,
+  ) {
+    return '画面结果 ${ready}/${needed} 已就绪';
+  }
+
+  @override
+  String agentWorkspaceProductionStoryboardReadinessMissing(int count) {
+    return '待补帧 ${count} 项';
+  }
+
+  @override
+  String agentWorkspaceProductionStoryboardReadinessTextOnly(int count) {
+    return '纯文本 ${count} 项';
+  }
+
+  @override
+  String get agentWorkspaceProductionStoryboardTableCoverageUnread => '分镜表未读取';
+
+  @override
+  String agentWorkspaceProductionStoryboardTableCoverageRowsOnly(int count) {
+    return '分镜表已读 ${count} 行';
+  }
+
+  @override
+  String agentWorkspaceProductionStoryboardTableCoverageProgress(
+    int sampled,
+    int total,
+  ) {
+    return '分镜表已读 ${sampled}/${total} 行';
+  }
+
+  @override
+  String agentWorkspaceProductionStoryboardTableCoverageWithPending(
+    int sampled,
+    int total,
+    int remaining,
+  ) {
+    return '分镜表已读 ${sampled}/${total} 行，待展开 ${remaining} 行';
+  }
+
+  @override
+  String agentWorkspaceProductionPlanningScriptWindow(
+    int start,
+    int end,
+    int maxChars,
+  ) {
+    return '剧本 ${start}-${end} 行（<=${maxChars} 字）';
+  }
+
+  @override
+  String agentWorkspaceProductionStoryboardShotsHashShort(String ids) {
+    return '镜头 #${ids}';
+  }
+
+  @override
+  String agentWorkspaceProductionStoryboardShotsHashMore(
+    String ids,
+    int total,
+  ) {
+    return '镜头 #${ids} 等 ${total} 个';
+  }
+
+  @override
+  String agentWorkspaceProductionStoryboardScriptWindow(
+    int start,
+    int end,
+    int maxChars,
+  ) {
+    return '剧本 ${start}-${end} 行（<=${maxChars} 字）';
+  }
+
+  @override
+  String agentWorkspaceProductionStoryboardTableRereadShots(String shots) {
+    return '分镜表仅回看${shots}对应行';
+  }
+
+  @override
+  String agentWorkspaceProductionStoryboardReviewScriptGlue(String window) {
+    return '剧本仅回看${window}';
+  }
+
+  @override
+  String agentWorkspaceProductionPromptStoryboardShotCount(int count) {
+    return '优先处理这 ${count} 个镜头';
+  }
+
+  @override
+  String get agentWorkspaceProductionPromptStoryboardFallbackMissingFrames =>
+      '优先只补缺少画面结果的镜头';
+
+  @override
+  String get agentWorkspaceProductionPromptStoryboardFallbackRevision =>
+      '优先修订当前审核聚焦的分镜表问题';
+
+  @override
+  String get agentWorkspaceProductionPromptStoryboardContextEmpty =>
+      '如需核对依据，先只回看同批 storyboardTable 行和局部剧本窗口。';
+
+  @override
+  String agentWorkspaceProductionPromptStoryboardContextTable(
+    String tableFocus,
+  ) {
+    return '先只回看${tableFocus}对应的 storyboardTable 行';
+  }
+
+  @override
+  String agentWorkspaceProductionPromptStoryboardContextScript(
+    String scriptWindow,
+  ) {
+    return '剧本仅回看${scriptWindow}';
+  }
+
+  @override
+  String agentWorkspaceProductionPromptStoryboardContextLead(String parts) {
+    return '如需核对依据，${parts}。';
+  }
+
+  @override
+  String agentWorkspaceProductionPromptStoryboardNote(String summary) {
+    return '注意：${summary}';
+  }
+
+  @override
+  String agentWorkspaceProductionPromptExecutionConstraint(String hint) {
+    return '执行约束：${hint}';
+  }
+
+  @override
+  String agentWorkspaceProductionPromptStoryboardGenBody(
+    String scope,
+    String contextHint,
+    String assetHint,
+    String note,
+    String execution,
+  ) {
+    return '${scope}，不要重跑已有结果或 shouldGenerateImage=false 的镜头。${contextHint}${assetHint}${note}${execution}';
+  }
+
+  @override
+  String agentWorkspaceProductionPromptStoryboardTableRevisionBody(
+    String scope,
+    String contextHint,
+    String assetHint,
+    String solve,
+  ) {
+    return '${scope} 对应的 storyboardTable 行，保持其余行不动。${contextHint}${assetHint}${solve}';
+  }
+
+  @override
+  String agentWorkspaceProductionPromptStoryboardTableSolve(String summary) {
+    return '优先解决：${summary}';
+  }
+
+  @override
+  String agentWorkspaceProductionPromptStoryboardAssetHint(int count) {
+    return '如需核对素材，仅看这 ${count} 个关联资产。';
+  }
+
+  @override
+  String get agentWorkspaceProductionStageReviewSummaryFallback =>
+      '请按审核结果推进下一步。';
+
+  @override
+  String agentWorkspaceProductionStageReviewBody(
+    String grade,
+    int severe,
+    int medium,
+    int minor,
+    String summary,
+    String storyboardScope,
+    String assetScope,
+  ) {
+    return '审核等级 ${grade}，严重 ${severe} / 中等 ${medium} / 轻微 ${minor}。${summary}${storyboardScope}${assetScope}';
+  }
+
+  @override
+  String agentWorkspaceProductionStageReviewStoryboardScope(String scope) {
+    return ' 局部范围：${scope}。';
+  }
+
+  @override
+  String agentWorkspaceProductionStageReviewAssetScope(String scope) {
+    return ' 资产范围：${scope}。';
+  }
+
+  @override
+  String agentWorkspaceProductionStageDetailScriptPlanSectionLine(int count) {
+    return '已覆盖 ${count}/6 个规划维度，';
+  }
+
+  @override
+  String agentWorkspaceProductionStagePromptReviseScriptPlan(String summary) {
+    return '请根据最近审核意见修订 scriptPlan，优先解决：${summary}';
+  }
+
+  @override
+  String get agentWorkspaceProductionStageDetailScriptPlanEmpty =>
+      'scriptPlan 仍为空，先产出导演计划再推进资产与分镜。';
+
+  @override
+  String get agentWorkspaceProductionStagePromptScriptPlanEmpty =>
+      '请基于当前 production 上下文生成一版导演计划，并给出执行优先级。';
+
+  @override
+  String agentWorkspaceProductionStageDetailScriptPlanRefine(
+    String sectionLine,
+    int chars,
+  ) {
+    return '已读取 scriptPlan，${sectionLine}当前约 ${chars} 字；下游暂不放行，建议先补到至少 3 个规划维度，再进入审核与 assets/storyboard 主链。';
+  }
+
+  @override
+  String get agentWorkspaceProductionStagePromptScriptPlanRefine =>
+      '请继续完善当前 scriptPlan，至少补齐 3 个规划维度，并明确情绪推进、资产依赖与镜头意图。';
+
+  @override
+  String agentWorkspaceProductionStageDetailScriptPlanReview(
+    String sectionLine,
+    int chars,
+    String scriptWindow,
+  ) {
+    return '已读取 scriptPlan，${sectionLine}当前约 ${chars} 字；复核时先只回看${scriptWindow}，再做导演规划审核并推进 assets 与 storyboard。';
+  }
+
+  @override
+  String get agentWorkspaceProductionStagePromptScriptPlanReview =>
+      '请审核当前导演规划，重点检查剧情覆盖、资产匹配与节奏合理性。';
+
+  @override
+  String get agentWorkspaceProductionStageDetailScriptPlanRefresh =>
+      '导演计划刚变更或正在处理，建议先刷新导演计划，确认最新内容后再推进下游阶段。';
+
+  @override
+  String get agentWorkspaceProductionStageDetailScriptPlanPendingRead =>
+      '先读取 scriptPlan，确认制作优先级与执行顺序。';
+
+  @override
+  String agentWorkspaceProductionStageDetailAssetsAfterReview(
+    String reviewDetail,
+    String assetScope,
+  ) {
+    return '${reviewDetail} 优先只核对${assetScope}，确认后回到 scriptPlan 收束导演计划。';
+  }
+
+  @override
+  String get agentWorkspaceProductionStageDetailAssetsEmpty =>
+      'assets 为空，先规划衍生素材并补齐最小可行资产集。';
+
+  @override
+  String get agentWorkspaceProductionStagePromptAssetsEmpty =>
+      '请基于当前空白 assets flow 规划最小可行的衍生素材集合，并说明优先级。';
+
+  @override
+  String agentWorkspaceProductionStageDetailAssetsMissingGeneric(
+    int total,
+    int missing,
+    String readiness,
+  ) {
+    return '共 ${total} 项资产，仍有 ${missing} 项缺少图像结果，适合继续运行素材生成。${readiness}';
+  }
+
+  @override
+  String agentWorkspaceProductionStageDetailAssetsMissingFocused(
+    int total,
+    String pendingScope,
+    String readiness,
+  ) {
+    return '共 ${total} 项资产，${pendingScope} 仍缺图，优先只补这批衍生资产更省 token。${readiness}';
+  }
+
+  @override
+  String agentWorkspaceProductionStageDetailAssetsReady(
+    int total,
+    String readiness,
+  ) {
+    return '共 ${total} 项资产，图像结果已齐，可继续检查 storyboard 与导演计划。${readiness}';
+  }
+
+  @override
+  String agentWorkspaceProductionStageDetailAssetsScopedTable(int count) {
+    return '当前分镜表窗口引用了 ${count} 项资产，优先核对这批素材更省 token。';
+  }
+
+  @override
+  String agentWorkspaceProductionStageDetailAssetsScopedStoryboard(int count) {
+    return '当前分镜窗口引用了 ${count} 项资产，优先核对这批素材更省 token。';
+  }
+
+  @override
+  String get agentWorkspaceProductionStageDetailAssetsWaitScriptDepth =>
+      '当前 scriptPlan 已有内容但还不够完整，先补齐导演计划的关键维度，再规划 assets，避免素材准备跑偏。';
+
+  @override
+  String agentWorkspaceProductionStageDetailAssetsNarrowedScriptPlan(
+    String scope,
+  ) {
+    return '已从 scriptPlan 收紧到${scope}，优先核对这批素材更省 token；信息不足时再扩读。';
+  }
+
+  @override
+  String get agentWorkspaceProductionStageDetailAssetsWaitScript =>
+      '先读取或生成 scriptPlan，再规划 assets，避免素材补齐脱离导演节奏与改写约束。';
+
+  @override
+  String get agentWorkspaceProductionStageDetailAssetsRefreshNarrow =>
+      '资产生成动作刚执行，建议先回读本次受影响资产，确认结果后再决定是否扩读。';
+
+  @override
+  String get agentWorkspaceProductionStageDetailAssetsRefreshWide =>
+      '资产相关动作刚执行，建议先刷新资产结果，确认最新状态后再决定是否继续补素材。';
+
+  @override
+  String get agentWorkspaceProductionStageDetailAssetsPendingRead =>
+      '读取 assets flow 后可判断是否需要继续做衍生资产或素材生成。';
+
+  @override
+  String agentWorkspaceProductionStagePromptStoryboardTableReviseLead(
+    String tail,
+  ) {
+    return '请根据最近审核意见修订 storyboardTable。${tail}';
+  }
+
+  @override
+  String get agentWorkspaceProductionStageDetailStoryboardTableEmpty =>
+      'storyboardTable 为空，适合先补结构化镜头表。';
+
+  @override
+  String get agentWorkspaceProductionStagePromptStoryboardTableEmpty =>
+      '请先产出结构化 storyboardTable，并保持字段清晰可回写。';
+
+  @override
+  String agentWorkspaceProductionStageDetailStoryboardTableString(
+    String rowDigest,
+    int chars,
+    String coverage,
+  ) {
+    return 'storyboardTable 已有内容，${rowDigest}约 ${chars} 字，建议先做分镜表审核再推进 storyboard 画面结果。${coverage}';
+  }
+
+  @override
+  String agentWorkspaceProductionStageDigestStoryboardTableRows(int rowCount) {
+    return '共 ${rowCount} 行';
+  }
+
+  @override
+  String agentWorkspaceProductionStageDigestStoryboardTableAssets(
+    int assetCount,
+  ) {
+    return '关联 ${assetCount} 项资产';
+  }
+
+  @override
+  String agentWorkspaceProductionStageDetailStoryboardTableWindowReady(
+    int sampled,
+    int total,
+    String coverage,
+  ) {
+    return '已窗口读取 ${sampled}/${total} 行关键列，适合继续审核或修订 storyboardTable。${coverage}';
+  }
+
+  @override
+  String agentWorkspaceProductionStageDetailStoryboardTableWindowBackfill(
+    int sampled,
+    int total,
+    String coverage,
+  ) {
+    return '已窗口读取 ${sampled}/${total} 行关键列，但当前 scriptPlan 还缺少足够明确的分场景情绪或画面意图，先回补导演计划，再继续扩读 storyboardTable。${coverage}';
+  }
+
+  @override
+  String agentWorkspaceProductionStageDetailStoryboardTableWindowExpand(
+    int sampled,
+    int total,
+    String coverage,
+  ) {
+    return '已窗口读取 ${sampled}/${total} 行关键列，但覆盖还不够，先扩读或补齐关键镜头表，再推进 storyboard。${coverage}';
+  }
+
+  @override
+  String get agentWorkspaceProductionStagePromptStoryboardTableReview =>
+      '请审核当前分镜表，重点检查覆盖度、资产关联与拆分粒度。';
+
+  @override
+  String get agentWorkspaceProductionStageDetailStoryboardTableWaitScript =>
+      '先读取或生成 scriptPlan，再拆分 storyboardTable，避免镜头表脱离导演计划。';
+
+  @override
+  String
+  get agentWorkspaceProductionStageDetailStoryboardTableWaitScriptDepth =>
+      '当前 scriptPlan 已有内容但还不够完整，先补齐导演计划的关键维度，再拆分 storyboardTable。';
+
+  @override
+  String get agentWorkspaceProductionStageDetailStoryboardTableRefreshWide =>
+      '分镜表刚变更或正在处理，建议先刷新分镜表，再判断是否继续审核或修订。';
+
+  @override
+  String agentWorkspaceProductionStageDetailStoryboardTableRefreshNarrow(
+    String ids,
+  ) {
+    return '分镜表刚变更，建议先回读镜头 #${ids} 对应的局部分镜表行。';
+  }
+
+  @override
+  String get agentWorkspaceProductionStageDetailStoryboardTablePendingRead =>
+      '需要时可读取 storyboardTable 审阅结构化镜头表。';
+
+  @override
+  String
+  get agentWorkspaceProductionStageDetailStoryboardSupervisionGenerateScopeEmpty =>
+      '建议先读取缺帧镜头状态，再最小化补图。';
+
+  @override
+  String
+  get agentWorkspaceProductionStageDetailStoryboardSupervisionCheckScopeEmpty =>
+      '建议先读取紧凑 storyboard 状态，确认审核涉及的镜头。';
+
+  @override
+  String agentWorkspaceProductionStageDetailStoryboardSupervisionScoped(
+    int count,
+    String reviewScope,
+  ) {
+    return '审核已定位 ${count} 个镜头，优先只看这批 storyboard 更省 token。${reviewScope}';
+  }
+
+  @override
+  String agentWorkspaceProductionSupervisionReviewScopeAppend(
+    String reviewScope,
+  ) {
+    return ' ${reviewScope}。';
+  }
+
+  @override
+  String agentWorkspaceProductionStagePromptStoryboardSupervisionGenerate(
+    String tail,
+  ) {
+    return '请根据最近审核意见继续推进 storyboard。${tail}';
+  }
+
+  @override
+  String get agentWorkspaceProductionStageDetailStoryboardEmpty =>
+      'storyboard 为空，先生成第一版分镜画面。';
+
+  @override
+  String get agentWorkspaceProductionStagePromptStoryboardEmpty =>
+      '请基于当前 production 上下文生成第一版 storyboard，并保持最小可行镜头集。';
+
+  @override
+  String agentWorkspaceProductionStageDetailStoryboardMissing(
+    int needImageCount,
+    int missingCount,
+    String idsPreview,
+    String idsTail,
+    String skippedClause,
+    String reviewClause,
+    String readiness,
+  ) {
+    return '需出图 ${needImageCount} 个镜头，仍有 ${missingCount} 个缺少画面结果（#${idsPreview}${idsTail}）${skippedClause}${reviewClause} ${readiness}';
+  }
+
+  @override
+  String agentWorkspaceProductionStageDetailStoryboardMissingIdsTail(
+    int total,
+  ) {
+    return ' 等 ${total} 个镜头';
+  }
+
+  @override
+  String agentWorkspaceProductionStageDetailStoryboardMissingSkipped(
+    int count,
+  ) {
+    return '；另有 ${count} 个镜头为纯文本模式，无需出图。';
+  }
+
+  @override
+  String agentWorkspaceProductionStageDetailStoryboardMissingReview(
+    String reviewScope,
+  ) {
+    return ' ${reviewScope}';
+  }
+
+  @override
+  String agentWorkspaceProductionStagePromptStoryboardContinue(String tail) {
+    return '请继续推进 storyboard。${tail}';
+  }
+
+  @override
+  String agentWorkspaceProductionStageDetailStoryboardComplete(
+    int needImageCount,
+    String skippedClause,
+    String readiness,
+  ) {
+    return '需出图 ${needImageCount} 个镜头，画面结果齐备${skippedClause}，可准备写回或继续导演计划。 ${readiness}';
+  }
+
+  @override
+  String agentWorkspaceProductionStageDetailStoryboardCompleteSkipped(
+    int count,
+  ) {
+    return '；另有 ${count} 个纯文本镜头按设计无需出图';
+  }
+
+  @override
+  String get agentWorkspaceProductionStageDetailStoryboardWaitScript =>
+      '先读取或生成 scriptPlan，再推进 storyboard，避免直接补图但情绪和镜头意图未定。';
+
+  @override
+  String get agentWorkspaceProductionStageDetailStoryboardWaitScriptDepth =>
+      '当前 scriptPlan 已有内容但还不够完整，先补齐导演计划的关键维度，再推进 storyboard，避免补图时情绪和镜头意图仍发散。';
+
+  @override
+  String get agentWorkspaceProductionStageDetailStoryboardWaitTable =>
+      '先补 storyboardTable 再推进 storyboard，避免直接出图时镜头拆分和资产关联还没定型。';
+
+  @override
+  String get agentWorkspaceProductionStageDetailStoryboardBackfillFromTable =>
+      'storyboardTable 已有基础内容，但当前 scriptPlan 对分场景情绪或画面意图交代还不够，先细化导演计划，再继续扩读分镜表并推进 storyboard。';
+
+  @override
+  String get agentWorkspaceProductionStageDetailStoryboardWaitTableCoverage =>
+      'storyboardTable 已有基础内容，但覆盖还不够，先扩读或补齐关键镜头表，再推进 storyboard，避免在镜头拆分未定型时直接出图。';
+
+  @override
+  String get agentWorkspaceProductionStageDetailStoryboardRefreshGenWide =>
+      '分镜动作刚执行，建议先刷新分镜结果，再决定是否继续补帧或写回。';
+
+  @override
+  String agentWorkspaceProductionStageDetailStoryboardRefreshGenNarrow(
+    String ids,
+  ) {
+    return '分镜动作刚执行，建议先回读本次镜头 #${ids} 的缺帧状态。';
+  }
+
+  @override
+  String get agentWorkspaceProductionStageDetailStoryboardRefreshOther =>
+      '分镜动作刚执行，建议先刷新分镜结果，再决定是否写回。';
+
+  @override
+  String get agentWorkspaceProductionStageDetailStoryboardPendingRead =>
+      '读取 storyboard 后可判断是否需要继续补图或直接写回结果。';
+
+  @override
   String agentWorkspaceProductionDurationLabel(String duration) {
     return '时长 $duration';
   }

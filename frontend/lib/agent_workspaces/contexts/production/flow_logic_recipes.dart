@@ -1,6 +1,7 @@
 part of 'flow_logic.dart';
 
 List<ProductionWorkspaceRecipe> buildProductionWorkspaceRecipes({
+  required AppLocalizations l10n,
   required String? toolName,
   required String? suggestedFlowKey,
   required Object? result,
@@ -13,7 +14,7 @@ List<ProductionWorkspaceRecipe> buildProductionWorkspaceRecipes({
   final review = parseProductionSupervisionReview(result);
   if (normalizedTool == 'run_sub_agent_production_supervision' &&
       review != null) {
-    return _buildSupervisionRecipes(review);
+    return _buildSupervisionRecipes(l10n, review);
   }
   final normalizedKey = suggestedFlowKey?.trim() ?? '';
 
@@ -21,13 +22,13 @@ List<ProductionWorkspaceRecipe> buildProductionWorkspaceRecipes({
     final data = result['data'];
     switch (normalizedKey) {
       case 'assets':
-        return _buildAssetRecipes(data);
+        return _buildAssetRecipes(l10n, data);
       case 'storyboard':
-        return _buildStoryboardRecipes(data);
+        return _buildStoryboardRecipes(l10n, data);
       case 'scriptPlan':
-        return _buildScriptPlanRecipes(data);
+        return _buildScriptPlanRecipes(l10n, data);
       case 'storyboardTable':
-        return _buildStoryboardTableRecipes(data);
+        return _buildStoryboardTableRecipes(l10n, data);
       default:
         return const <ProductionWorkspaceRecipe>[];
     }
@@ -132,7 +133,7 @@ List<ProductionWorkspaceRecipe> buildProductionWorkspaceRecipes({
   return const <ProductionWorkspaceRecipe>[];
 }
 
-List<ProductionWorkspaceRecipe> _buildAssetRecipes(Object? data) {
+List<ProductionWorkspaceRecipe> _buildAssetRecipes(AppLocalizations l10n, Object? data) {
   if (data is List && data.isEmpty) {
     return const <ProductionWorkspaceRecipe>[
       ProductionWorkspaceRecipe(
@@ -150,7 +151,7 @@ List<ProductionWorkspaceRecipe> _buildAssetRecipes(Object? data) {
       return !productionFlowEntryHasMediaResult(row);
     }).length;
     final pendingDeriveIds = extractProductionPendingDeriveAssetIds(rows);
-    final pendingScope = summarizeProductionAssetFocusIds(pendingDeriveIds);
+    final pendingScope = summarizeProductionAssetFocusIds(l10n, pendingDeriveIds);
     if (withoutUrl > 0) {
       return <ProductionWorkspaceRecipe>[
         ProductionWorkspaceRecipe(
@@ -193,7 +194,7 @@ List<ProductionWorkspaceRecipe> _buildAssetRecipes(Object? data) {
   ];
 }
 
-List<ProductionWorkspaceRecipe> _buildStoryboardRecipes(Object? data) {
+List<ProductionWorkspaceRecipe> _buildStoryboardRecipes(AppLocalizations l10n, Object? data) {
   if (data is List && data.isEmpty) {
     return const <ProductionWorkspaceRecipe>[
       ProductionWorkspaceRecipe(
@@ -227,7 +228,7 @@ List<ProductionWorkspaceRecipe> _buildStoryboardRecipes(Object? data) {
             assetIds: promptAssetIds,
           ),
           prompt:
-              '请继续推进 storyboard。${buildProductionStoryboardGenerationPrompt(storyboardIds: missingIds, assetIds: promptAssetIds)}',
+              '请继续推进 storyboard。${buildProductionStoryboardGenerationPrompt(l10n: l10n, storyboardIds: missingIds, assetIds: promptAssetIds)}',
         ),
         ProductionWorkspaceRecipe(
           title: '核对关联资产',
@@ -277,7 +278,7 @@ List<ProductionWorkspaceRecipe> _buildStoryboardRecipes(Object? data) {
   ];
 }
 
-List<ProductionWorkspaceRecipe> _buildScriptPlanRecipes(Object? data) {
+List<ProductionWorkspaceRecipe> _buildScriptPlanRecipes(AppLocalizations l10n, Object? data) {
   if (data is String && data.trim().isEmpty) {
     return const <ProductionWorkspaceRecipe>[
       ProductionWorkspaceRecipe(
@@ -290,8 +291,8 @@ List<ProductionWorkspaceRecipe> _buildScriptPlanRecipes(Object? data) {
     ];
   }
   final assetArgs = buildProductionScriptPlanAssetArgs(data);
-  final assetScope = summarizeProductionAssetScope(assetArgs);
-  final scriptWindow = summarizeProductionPlanningScriptWindow();
+  final assetScope = summarizeProductionAssetScope(l10n, assetArgs);
+  final scriptWindow = summarizeProductionPlanningScriptWindow(l10n);
   final directorPlanArgs = buildProductionScriptPlanSubAgentArgs(data);
   final needsStoryboardIntentRefinement =
       _productionScriptPlanAdvanceReady(data) &&
@@ -353,7 +354,7 @@ List<ProductionWorkspaceRecipe> _buildScriptPlanRecipes(Object? data) {
   ];
 }
 
-List<ProductionWorkspaceRecipe> _buildStoryboardTableRecipes(Object? data) {
+List<ProductionWorkspaceRecipe> _buildStoryboardTableRecipes(AppLocalizations l10n, Object? data) {
   if (data is String && data.trim().isEmpty) {
     return const <ProductionWorkspaceRecipe>[
       ProductionWorkspaceRecipe(
@@ -434,14 +435,17 @@ bool _hasStoryboardTableData(Object? data) {
 }
 
 List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
+  AppLocalizations l10n,
   ProductionSupervisionReview review,
 ) {
   final summary = review.summary.isEmpty ? '按审核结论继续推进。' : review.summary;
-  final assetScope = summarizeProductionAssetReviewScope(review);
+  final assetScope = summarizeProductionAssetReviewScope(l10n, review);
   final storyboardFocus = summarizeProductionStoryboardFocusIds(
+    l10n,
     review.storyboardIds,
   );
   final reviewScope = summarizeProductionStoryboardReviewScope(
+    l10n,
     review.storyboardIds,
   );
   switch (review.nextAction) {
@@ -457,7 +461,7 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
         ProductionWorkspaceRecipe(
           title: '回看剧本依据',
           detail:
-              '修订前先只回看${summarizeProductionPlanningScriptWindow()}，避免为 scriptPlan 扩读整段剧本。',
+              '修订前先只回看${summarizeProductionPlanningScriptWindow(l10n)}，避免为 scriptPlan 扩读整段剧本。',
           flowKey: 'script',
           domainTool: 'get_flowData',
           domainArgs: buildProductionPlanningScriptArgs(),
@@ -530,7 +534,7 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
             assetTypes: review.assetTypes,
           ),
           prompt:
-              '请根据最近审核意见修订 storyboardTable。${buildProductionStoryboardTableRevisionPrompt(review)}',
+              '请根据最近审核意见修订 storyboardTable。${buildProductionStoryboardTableRevisionPrompt(l10n, review)}',
         ),
         ProductionWorkspaceRecipe(
           title: '抽样复读分镜表',
@@ -575,7 +579,7 @@ List<ProductionWorkspaceRecipe> _buildSupervisionRecipes(
             assetTypes: review.assetTypes,
           ),
           prompt:
-              '请基于最近审核结论继续推进 storyboard。${buildProductionStoryboardGenerationPrompt(storyboardIds: review.storyboardIds, assetIds: promptAssetIds, summary: summary)}',
+              '请基于最近审核结论继续推进 storyboard。${buildProductionStoryboardGenerationPrompt(l10n: l10n, storyboardIds: review.storyboardIds, assetIds: promptAssetIds, summary: summary)}',
         ),
         ProductionWorkspaceRecipe(
           title: '对照分镜表',

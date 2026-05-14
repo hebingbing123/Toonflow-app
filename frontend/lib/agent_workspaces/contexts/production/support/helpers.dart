@@ -219,39 +219,65 @@ List<String> extractProductionScriptPlanAssetTypes(Object? flowData) {
   return sortedTypes;
 }
 
-String summarizeProductionAssetScope(Map<String, dynamic> args) {
+String _productionAssetTypeLabelL10n(AppLocalizations l10n, String value) {
+  return switch (value) {
+    'role' => l10n.agentWorkspaceProductionAssetTypeRole,
+    'scene' => l10n.agentWorkspaceProductionAssetTypeScene,
+    'tool' => l10n.agentWorkspaceProductionAssetTypeTool,
+    _ => value,
+  };
+}
+
+String summarizeProductionAssetScope(
+  AppLocalizations l10n,
+  Map<String, dynamic> args,
+) {
   final ids = args['ids'];
   if (ids is List && ids.isNotEmpty) {
     final numericIds =
         ids.map(_parseLooseInt).where((id) => id > 0).toSet().toList()..sort();
     if (numericIds.isNotEmpty) {
-      return '资产 #${numericIds.join(', ')}';
+      return l10n.agentWorkspaceProductionAssetScopeIds(numericIds.join(', '));
     }
   }
   final assetTypes = args['assetTypes'];
   if (assetTypes is List) {
     final labels = assetTypes
-        .map((value) => value is String ? _productionAssetTypeLabel(value) : '')
+        .map(
+          (value) =>
+              value is String ? _productionAssetTypeLabelL10n(l10n, value) : '',
+        )
         .where((value) => value.isNotEmpty)
         .toList(growable: false);
     if (labels.isNotEmpty) {
-      return '${labels.join('/')}资产';
+      return l10n.agentWorkspaceProductionAssetScopeTypes(labels.join('/'));
     }
   }
-  return '紧凑资产摘要';
+  return l10n.agentWorkspaceProductionAssetScopeCompact;
 }
 
-String summarizeProductionAssetReviewScope(ProductionSupervisionReview review) {
-  return summarizeProductionAssetScope(buildProductionReviewAssetArgs(review));
-}
-
-String summarizeProductionAssetTypeScope(List<String> assetTypes) {
+String summarizeProductionAssetReviewScope(
+  AppLocalizations l10n,
+  ProductionSupervisionReview review,
+) {
   return summarizeProductionAssetScope(
+    l10n,
+    buildProductionReviewAssetArgs(review),
+  );
+}
+
+String summarizeProductionAssetTypeScope(
+  AppLocalizations l10n,
+  List<String> assetTypes,
+) {
+  return summarizeProductionAssetScope(
+    l10n,
     buildProductionAssetTypeReadArgs(assetTypes: assetTypes),
   );
 }
 
 String summarizeProductionAssetFocusIds(
+  AppLocalizations l10n,
   List<int> assetIds, {
   int previewCount = 6,
 }) {
@@ -259,30 +285,40 @@ String summarizeProductionAssetFocusIds(
   if (ids.isEmpty) return '';
   final visible = ids.take(previewCount).join(', ');
   if (ids.length <= previewCount) {
-    return '资产 #$visible';
+    return l10n.agentWorkspaceProductionAssetFocusIdsShort(visible);
   }
-  return '资产 #$visible 等 ${ids.length} 项';
+  return l10n.agentWorkspaceProductionAssetFocusIdsMore(visible, ids.length);
 }
 
-String summarizeProductionAssetReadiness(List<Map<String, dynamic>> rows) {
-  if (rows.isEmpty) return '资产为空';
+String summarizeProductionAssetReadiness(
+  AppLocalizations l10n,
+  List<Map<String, dynamic>> rows,
+) {
+  if (rows.isEmpty) return l10n.agentWorkspaceProductionAssetReadinessEmpty;
   final readyRoots = rows.where(productionFlowEntryHasMediaResult).length;
   final pendingDeriveCount = extractProductionPendingDeriveAssetIds(
     rows,
   ).length;
   final rootMissingCount = rows.length - readyRoots;
-  final parts = <String>['主资产 $readyRoots/${rows.length} 已就绪'];
+  final parts = <String>[
+    l10n.agentWorkspaceProductionAssetReadinessRoots(readyRoots, rows.length),
+  ];
   if (pendingDeriveCount > 0) {
-    parts.add('衍生缺口 $pendingDeriveCount 项');
+    parts.add(l10n.agentWorkspaceProductionAssetReadinessDeriveGap(pendingDeriveCount));
   }
   if (rootMissingCount > 0) {
-    parts.add('主资产待补 $rootMissingCount 项');
+    parts.add(l10n.agentWorkspaceProductionAssetReadinessRootMissing(rootMissingCount));
   }
-  return parts.join('，');
+  return parts.join(l10n.agentWorkspaceProductionClauseJoiner);
 }
 
-String summarizeProductionStoryboardReadiness(List<Map<String, dynamic>> rows) {
-  if (rows.isEmpty) return '分镜为空';
+String summarizeProductionStoryboardReadiness(
+  AppLocalizations l10n,
+  List<Map<String, dynamic>> rows,
+) {
+  if (rows.isEmpty) {
+    return l10n.agentWorkspaceProductionStoryboardReadinessEmpty;
+  }
   final targetCount = rows
       .where(productionStoryboardEntryNeedsImageGeneration)
       .length;
@@ -292,32 +328,41 @@ String summarizeProductionStoryboardReadiness(List<Map<String, dynamic>> rows) {
   }).length;
   final missingCount = extractProductionStoryboardMissingImageIds(rows).length;
   final pureTextCount = rows.length - targetCount;
-  final parts = <String>['画面结果 $readyCount/$targetCount 已就绪'];
+  final parts = <String>[
+    l10n.agentWorkspaceProductionStoryboardReadinessFrames(readyCount, targetCount),
+  ];
   if (missingCount > 0) {
-    parts.add('待补帧 $missingCount 项');
+    parts.add(l10n.agentWorkspaceProductionStoryboardReadinessMissing(missingCount));
   }
   if (pureTextCount > 0) {
-    parts.add('纯文本 $pureTextCount 项');
+    parts.add(l10n.agentWorkspaceProductionStoryboardReadinessTextOnly(pureTextCount));
   }
-  return parts.join('，');
+  return parts.join(l10n.agentWorkspaceProductionClauseJoiner);
 }
 
-String summarizeProductionStoryboardTableCoverage({
+String summarizeProductionStoryboardTableCoverage(
+  AppLocalizations l10n, {
   required int sampledRows,
   required int totalRows,
 }) {
   if (sampledRows <= 0 && totalRows <= 0) {
-    return '分镜表未读取';
+    return l10n.agentWorkspaceProductionStoryboardTableCoverageUnread;
   }
   if (totalRows <= 0) {
-    return '分镜表已读 $sampledRows 行';
+    return l10n.agentWorkspaceProductionStoryboardTableCoverageRowsOnly(sampledRows);
   }
   final remaining = (totalRows - sampledRows).clamp(0, totalRows);
-  final parts = <String>['分镜表已读 $sampledRows/$totalRows 行'];
   if (remaining > 0) {
-    parts.add('待展开 $remaining 行');
+    return l10n.agentWorkspaceProductionStoryboardTableCoverageWithPending(
+      sampledRows,
+      totalRows,
+      remaining,
+    );
   }
-  return parts.join('，');
+  return l10n.agentWorkspaceProductionStoryboardTableCoverageProgress(
+    sampledRows,
+    totalRows,
+  );
 }
 
 String summarizeProductionPrimaryBlocker(
@@ -355,6 +400,27 @@ String _summarizeProductionBlockerReason(
   ProductionWorkspaceStage stage,
   AppLocalizations l10n,
 ) {
+  final sampled = stage.storyboardTableCoverageSampledRows;
+  final total = stage.storyboardTableCoverageTotalRows;
+  if (sampled != null && total != null && total > 0) {
+    final coverage = summarizeProductionStoryboardTableCoverage(
+      l10n,
+      sampledRows: sampled,
+      totalRows: total,
+    );
+    switch (stage.status) {
+      case ProductionWorkspaceStageStatus.storyboardTableExpandRead:
+        return l10n.agentWorkspaceProductionBlockerExpandTableWithCoverage(
+          coverage,
+        );
+      case ProductionWorkspaceStageStatus.waitingStoryboardTableCoverage:
+        return l10n.agentWorkspaceProductionBlockerExpandTableCoverageWithDigest(
+          coverage,
+        );
+      default:
+        break;
+    }
+  }
   final detail = stage.detail.replaceAll(RegExp(r'\s+'), ' ').trim();
   switch (stage.status) {
     case ProductionWorkspaceStageStatus.storyboardTableExpandRead:
@@ -383,9 +449,18 @@ String _extractProductionCoverageDigest(String detail) {
   if (ratioMatch == null) return '';
   final left = ratioMatch.group(1)!;
   final right = ratioMatch.group(2)!;
-  final expandMatch = RegExp(r'待展开\s*(\d+)\s*行').firstMatch(detail);
-  if (expandMatch != null) {
-    return '分镜表已读 $left/$right 行，待展开 ${expandMatch.group(1)} 行';
+  final expandMatchZh = RegExp(r'待展开\s*(\d+)\s*行').firstMatch(detail);
+  if (expandMatchZh != null) {
+    return '分镜表已读 $left/$right 行，待展开 ${expandMatchZh.group(1)} 行';
+  }
+  final expandMatchEn = RegExp(
+    r'(\d+)\s+rows\s+still\s+to\s+expand',
+  ).firstMatch(detail);
+  if (expandMatchEn != null) {
+    return 'Storyboard table: read $left/$right rows; ${expandMatchEn.group(1)} rows still to expand';
+  }
+  if (detail.contains('Storyboard table: read') && detail.contains('rows')) {
+    return 'Storyboard table: read $left/$right rows';
   }
   return '分镜表已读 $left/$right 行';
 }
@@ -533,9 +608,12 @@ String buildProductionScriptPlanExecutionHint(
   return '承接 scriptPlan：${compactSections.join('；')}。人物情绪保持递进，避免生硬直述。';
 }
 
-String buildProductionAssetReviewPrompt(ProductionSupervisionReview review) {
+String buildProductionAssetReviewPrompt(
+  AppLocalizations l10n,
+  ProductionSupervisionReview review,
+) {
   final args = buildProductionReviewAssetArgs(review);
-  final scope = summarizeProductionAssetScope(args);
+  final scope = summarizeProductionAssetScope(l10n, args);
   final summary = review.summary.trim();
   final summaryLine = summary.isEmpty ? '' : '优先解决：$summary';
   if (args['ids'] case final List ids when ids.isNotEmpty) {
