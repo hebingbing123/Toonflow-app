@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
 
 typedef PublishCalendarDayCallback = void Function(
@@ -51,7 +50,7 @@ class _PublishScheduleCalendarState extends State<PublishScheduleCalendar> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
     final outline =
         theme.colorScheme.outlineVariant.withValues(alpha: 0.7);

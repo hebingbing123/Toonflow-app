@@ -12,7 +12,7 @@ class _PublishCalendarPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final outline = theme.colorScheme.outline;
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     
     if (!publishPanelUi.visible ||
         publishPanelUi.loading ||

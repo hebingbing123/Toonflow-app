@@ -237,7 +237,7 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
       _pollTimer?.cancel();
       _pollTimer = null;
 
-      final l10n = AppLocalizations.of(context)!;
+      final l10n = resolveAppLocalizationsForErrors(context);
       setState(() {
         _errorMessage = l10n.shortVideoSpaceDialogExportProgressFetchError(describeUserVisibleApiError(l10n, e));
       });
@@ -248,7 +248,7 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
   Future<ExportTaskProgress> _fetchExportProgress(String taskId) async {
     final token = widget.accessToken?.trim();
     if (token == null || token.isEmpty) {
-      final l10n = AppLocalizations.of(context)!;
+      final l10n = resolveAppLocalizationsForErrors(context);
       throw Exception(l10n.shortVideoSpaceDialogExportProgressSessionExpired);
     }
     final task = await getExportTaskByIdV1(token, taskId);
@@ -287,7 +287,7 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
     } catch (e) {
       if (!mounted) return;
 
-      final l10n = AppLocalizations.of(context)!;
+      final l10n = resolveAppLocalizationsForErrors(context);
       setState(() {
         _cancelling = false;
         _errorMessage = l10n.shortVideoSpaceDialogExportProgressCancelFailed(describeUserVisibleApiError(l10n, e));
@@ -299,7 +299,7 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
   Future<void> _cancelExportTask(String taskId) async {
     final token = widget.accessToken?.trim();
     if (token == null || token.isEmpty) {
-      final l10n = AppLocalizations.of(context)!;
+      final l10n = resolveAppLocalizationsForErrors(context);
       throw Exception(l10n.shortVideoSpaceDialogExportProgressSessionExpired);
     }
     await postExportCancelV1(token, taskId);
@@ -309,7 +309,7 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
   Widget build(BuildContext context) {
     final progress = _progress;
     final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
 
     return AlertDialog(
       title: Row(

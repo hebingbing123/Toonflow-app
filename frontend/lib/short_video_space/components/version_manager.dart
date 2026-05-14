@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../l10n/app_localizations.dart';
 import '../../rust_api.dart';
 import '../dialogs/confirmation_dialogs.dart';
 import 'version_comparison.dart';
@@ -174,7 +173,7 @@ class _VersionManagerState extends State<VersionManager> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final currentVersion = widget.versions.firstWhere(
       (v) => v.id == widget.currentVersionId,
       orElse: () => widget.versions.isNotEmpty
@@ -498,7 +497,7 @@ class _VersionManagerState extends State<VersionManager> {
 
   /// 显示创建版本对话框
   Future<void> _showCreateVersionDialog() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final result = await showDialog<String>(
       context: context,
       builder: (context) {
@@ -574,7 +573,7 @@ class _VersionManagerState extends State<VersionManager> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              AppLocalizations.of(context)!
+              resolveAppLocalizationsForErrors(context)
                   .shortVideoVersionManagerSnackbarVersionCreated(name),
             ),
             backgroundColor: Theme.of(context).colorScheme.primary,
@@ -613,7 +612,7 @@ class _VersionManagerState extends State<VersionManager> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              AppLocalizations.of(context)!
+              resolveAppLocalizationsForErrors(context)
                   .shortVideoVersionManagerSnackbarVersionSwitched(version.name),
             ),
             backgroundColor: Theme.of(context).colorScheme.primary,
@@ -662,7 +661,7 @@ class _VersionManagerState extends State<VersionManager> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              AppLocalizations.of(context)!
+              resolveAppLocalizationsForErrors(context)
                   .shortVideoVersionManagerSnackbarVersionDeleted(version.name),
             ),
             backgroundColor: Theme.of(context).colorScheme.primary,
@@ -702,7 +701,7 @@ class _VersionManagerState extends State<VersionManager> {
     // 检查草稿数量限制
     if (widget.drafts.length >= 10) {
       if (mounted) {
-        final l10n = AppLocalizations.of(context)!;
+        final l10n = resolveAppLocalizationsForErrors(context);
         showDialog<void>(
           context: context,
           builder: (context) {
@@ -729,7 +728,7 @@ class _VersionManagerState extends State<VersionManager> {
       return;
     }
 
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final result = await showDialog<String>(
       context: context,
       builder: (context) {
@@ -805,7 +804,7 @@ class _VersionManagerState extends State<VersionManager> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              AppLocalizations.of(context)!
+              resolveAppLocalizationsForErrors(context)
                   .shortVideoVersionManagerSnackbarDraftSaved(name),
             ),
             backgroundColor: Theme.of(context).colorScheme.primary,
@@ -832,7 +831,7 @@ class _VersionManagerState extends State<VersionManager> {
 
   /// 显示草稿列表对话框
   Future<void> _showDraftsDialog() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     await showDialog<void>(
       context: context,
       builder: (context) {
@@ -932,7 +931,7 @@ class _VersionManagerState extends State<VersionManager> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              AppLocalizations.of(context)!
+              resolveAppLocalizationsForErrors(context)
                   .shortVideoVersionManagerSnackbarDraftRestored(draft.name),
             ),
             backgroundColor: Theme.of(context).colorScheme.primary,
@@ -963,7 +962,7 @@ class _VersionManagerState extends State<VersionManager> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) {
-        final l10n = AppLocalizations.of(context)!;
+        final l10n = resolveAppLocalizationsForErrors(context);
         return AlertDialog(
           title: Text(l10n.shortVideoVersionManagerConfirmDeleteDraftTitle),
           content: Text(
@@ -1001,7 +1000,7 @@ class _VersionManagerState extends State<VersionManager> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              AppLocalizations.of(context)!
+              resolveAppLocalizationsForErrors(context)
                   .shortVideoVersionManagerSnackbarDraftDeleted(draft.name),
             ),
             backgroundColor: Theme.of(context).colorScheme.primary,
@@ -1041,7 +1040,7 @@ class _VersionManagerState extends State<VersionManager> {
       builder: (context) {
         return StatefulBuilder(
           builder: (dialogContext, setDialogState) {
-            final l10n = AppLocalizations.of(dialogContext)!;
+            final l10n = resolveAppLocalizationsForErrors(dialogContext);
             return AlertDialog(
               title: Text(l10n.shortVideoVersionManagerCompareDialogTitle),
               content: SizedBox(

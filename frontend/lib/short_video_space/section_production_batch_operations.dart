@@ -16,7 +16,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
     required Future<void> Function() refreshData,
     BuildContext? dialogContext,
   }) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     if (selectedStoryboardIds.isEmpty) {
       showFeedback(l10n.shortVideoBatchSelectShotsToEnableFirst, isSuccess: false);
       return;
@@ -109,7 +109,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
     required Future<void> Function() refreshData,
     BuildContext? dialogContext,
   }) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     if (selectedStoryboardIds.isEmpty) {
       showFeedback(l10n.shortVideoBatchSelectShotsToDisableFirst, isSuccess: false);
       return;
@@ -192,7 +192,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
     required Function(String message, {required bool isSuccess}) showFeedback,
     required Future<void> Function() refreshData,
   }) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     if (selectedStoryboardIds.isEmpty) {
       showFeedback(l10n.shortVideoBatchSelectShotsDurationFirst, isSuccess: false);
       return;
@@ -203,7 +203,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
     final duration = await showDialog<int>(
       context: context,
       builder: (ctx) {
-        final dlgL10n = AppLocalizations.of(ctx)!;
+        final dlgL10n = resolveAppLocalizationsForErrors(ctx);
         return AlertDialog(
           title: Text(dlgL10n.shortVideoBatchDurationDialogTitle),
           content: TextField(
@@ -279,7 +279,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
     required Function(String message, {required bool isSuccess}) showFeedback,
     required Future<void> Function() refreshData,
   }) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     if (selectedStoryboardIds.isEmpty) {
       showFeedback(l10n.shortVideoBatchSelectShotsReplaceFirst, isSuccess: false);
       return;
@@ -291,7 +291,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
     final result = await showDialog<Map<String, String>>(
       context: context,
       builder: (ctx) {
-        final dlgL10n = AppLocalizations.of(ctx)!;
+        final dlgL10n = resolveAppLocalizationsForErrors(ctx);
         return AlertDialog(
           title: Text(dlgL10n.shortVideoBatchReplaceDialogTitle),
           content: SizedBox(
@@ -418,7 +418,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
   }) async {
     final token = widget.accessToken;
     final project = _selectedProject;
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
 
     if (token == null || token.isEmpty || project == null) {
       showFeedback(l10n.shortVideoBatchCannotLoadProject, isSuccess: false);
@@ -490,7 +490,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
       builder: (dialogContext) {
         return StatefulBuilder(
           builder: (ctx, setDialogState) {
-            final dlgL10n = AppLocalizations.of(ctx)!;
+            final dlgL10n = resolveAppLocalizationsForErrors(ctx);
             final progress = eligibleShots.isEmpty
                 ? 0.0
                 : totalProcessed / eligibleShots.length;
@@ -625,7 +625,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
   }) async {
     final token = widget.accessToken;
     final project = _selectedProject;
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
 
     if (token == null || token.isEmpty || project == null) {
       showFeedback(l10n.shortVideoBatchCannotLoadProject, isSuccess: false);
@@ -656,7 +656,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) {
-        final dlgL10n = AppLocalizations.of(dialogContext)!;
+        final dlgL10n = resolveAppLocalizationsForErrors(dialogContext);
         return AlertDialog(
           content: Row(
             children: [
@@ -738,7 +738,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
     var failed = 0;
     final failedItems = <BatchOperationFailedItem>[];
     var isCancelled = false;
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
 
     await showDialog<void>(
       context: context,

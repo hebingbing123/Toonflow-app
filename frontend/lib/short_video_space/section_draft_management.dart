@@ -73,7 +73,7 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
       }
     } catch (e) {
       if (mounted) {
-        final l10n = AppLocalizations.of(context)!;
+        final l10n = resolveAppLocalizationsForErrors(context);
         _showOperationFeedback(
           l10n.shortVideoAssemblyDraftLoadFailed(
             describeUserVisibleApiError(l10n, e),
@@ -156,7 +156,7 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
     final assembly = _shortVideoAssembly;
     if (assembly == null || assembly.scripts.isEmpty) {
       throw Exception(
-        AppLocalizations.of(context)!.shortVideoAssemblyDraftNoShotsToApply,
+        resolveAppLocalizationsForErrors(context).shortVideoAssemblyDraftNoShotsToApply,
       );
     }
 
@@ -216,7 +216,7 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
     }
 
     try {
-      final l10n = AppLocalizations.of(context)!;
+      final l10n = resolveAppLocalizationsForErrors(context);
       final assembly = _shortVideoAssembly;
       if (assembly == null || assembly.scripts.isEmpty) {
         throw Exception(l10n.shortVideoAssemblyDraftNoShotsToSave);
@@ -282,7 +282,7 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
       }
     } catch (e) {
       if (mounted) {
-        final l10n = AppLocalizations.of(context)!;
+        final l10n = resolveAppLocalizationsForErrors(context);
         _showOperationFeedback(
           l10n.shortVideoAssemblyDraftSaveFailed(
             describeUserVisibleApiError(l10n, e),
@@ -303,7 +303,7 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
     }
 
     try {
-      final l10n = AppLocalizations.of(context)!;
+      final l10n = resolveAppLocalizationsForErrors(context);
       final draft = _assemblyDrafts.firstWhere(
         (d) => d.id == draftId,
         orElse: () => throw Exception(l10n.shortVideoAssemblyDraftNotFound),
@@ -319,7 +319,7 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
       }
     } catch (e) {
       if (mounted) {
-        final l10n = AppLocalizations.of(context)!;
+        final l10n = resolveAppLocalizationsForErrors(context);
         _showOperationFeedback(
           l10n.shortVideoAssemblyDraftRestoreFailed(
             describeUserVisibleApiError(l10n, e),
@@ -340,7 +340,7 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
     }
 
     try {
-      final l10n = AppLocalizations.of(context)!;
+      final l10n = resolveAppLocalizationsForErrors(context);
       final assembly = _shortVideoAssembly;
       if (assembly == null || assembly.scripts.isEmpty) {
         throw Exception(l10n.shortVideoAssemblyDraftNoDataToDelete);
@@ -391,7 +391,7 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
       }
     } catch (e) {
       if (mounted) {
-        final l10n = AppLocalizations.of(context)!;
+        final l10n = resolveAppLocalizationsForErrors(context);
         _showOperationFeedback(
           l10n.shortVideoAssemblyDraftDeleteFailed(
             describeUserVisibleApiError(l10n, e),
@@ -405,7 +405,7 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
 
   Future<void> _handleCreateVersion(String name) async {
     final trimmed = name.trim();
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     if (trimmed.isEmpty) {
       if (mounted) {
         _showOperationFeedback(
@@ -462,7 +462,7 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
       }
     } catch (e) {
       if (mounted) {
-        final l10nErr = AppLocalizations.of(context)!;
+        final l10nErr = resolveAppLocalizationsForErrors(context);
         _showOperationFeedback(
           l10nErr.shortVideoAssemblyVersionCreateFailed(
             describeUserVisibleApiError(l10nErr, e),
@@ -479,7 +479,7 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
       return;
     }
     try {
-      final l10n = AppLocalizations.of(context)!;
+      final l10n = resolveAppLocalizationsForErrors(context);
       AssemblyVersion? version;
       for (final v in _assemblyVersions) {
         if (v.id == id) {
@@ -505,7 +505,7 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
       }
     } catch (e) {
       if (mounted) {
-        final l10nErr = AppLocalizations.of(context)!;
+        final l10nErr = resolveAppLocalizationsForErrors(context);
         _showOperationFeedback(
           l10nErr.shortVideoAssemblyVersionSwitchFailed(
             describeUserVisibleApiError(l10nErr, e),
@@ -524,7 +524,7 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
     if (_assemblyVersions.length <= 1) {
       if (mounted) {
         _showOperationFeedback(
-          AppLocalizations.of(context)!.shortVideoAssemblyVersionKeepAtLeastOne,
+          resolveAppLocalizationsForErrors(context).shortVideoAssemblyVersionKeepAtLeastOne,
           isSuccess: false,
         );
       }
@@ -532,7 +532,7 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
     }
 
     try {
-      final l10n = AppLocalizations.of(context)!;
+      final l10n = resolveAppLocalizationsForErrors(context);
       final removedWasCurrent = _currentAssemblyVersionId == id;
       final remaining = _assemblyVersions.where((v) => v.id != id).toList();
       if (remaining.length == _assemblyVersions.length) {
@@ -566,7 +566,7 @@ extension _ShortVideoSpaceSectionDraftManagementExtension
       }
     } catch (e) {
       if (mounted) {
-        final l10nErr = AppLocalizations.of(context)!;
+        final l10nErr = resolveAppLocalizationsForErrors(context);
         _showOperationFeedback(
           l10nErr.shortVideoAssemblyVersionDeleteFailed(
             describeUserVisibleApiError(l10nErr, e),

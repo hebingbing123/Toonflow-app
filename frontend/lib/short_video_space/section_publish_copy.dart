@@ -5,7 +5,7 @@ part of 'section.dart';
 /// Publish copy: suggestion, editing, platform-specific copy.
 extension ShortVideoPublishCopy on _ShortVideoSpaceSectionState {
   Future<void> _suggestPublishCopy() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final token = widget.accessToken;
     final project = _selectedProject;
     if (token == null || token.isEmpty || project == null) {
@@ -74,7 +74,7 @@ extension ShortVideoPublishCopy on _ShortVideoSpaceSectionState {
     String description,
     String tagsComma,
   ) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     if (_publishDrafts.isEmpty) {
       return;
     }

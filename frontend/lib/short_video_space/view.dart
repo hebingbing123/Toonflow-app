@@ -525,7 +525,7 @@ class DeliveryModeBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
 
     Color bgColor;
     Color textColor;
@@ -752,7 +752,7 @@ class ShortVideoSpaceView extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final outline = theme.colorScheme.outline;
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1100,7 +1100,7 @@ class _ModeSegmentedButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return SegmentedButton<ShortVideoMode>(
       segments: [
         ButtonSegment(
@@ -1177,7 +1177,7 @@ class _CandidateCompareCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final outline = theme.colorScheme.outline;
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final header = item.scriptNumericId != null
         ? l10n.shortVideoCandidateCompareStoryboardWithScript(
             item.storyboardNumericId,
@@ -1292,7 +1292,7 @@ class _MetricChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
-        AppLocalizations.of(context)!.shortVideoMetricChipLine(
+        resolveAppLocalizationsForErrors(context).shortVideoMetricChipLine(
           label,
           value,
         ),

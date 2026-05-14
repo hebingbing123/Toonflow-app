@@ -15,7 +15,7 @@ extension _ShortVideoSpaceSectionProductionExtension
     if ((stats?.storyboardCount ?? 0) <= 0) {
       setState(() {
         _projectConfigLine =
-            AppLocalizations.of(context)!.shortVideoProductionBatchNoStoryboards;
+            resolveAppLocalizationsForErrors(context).shortVideoProductionBatchNoStoryboards;
       });
       return;
     }
@@ -32,7 +32,7 @@ extension _ShortVideoSpaceSectionProductionExtension
         setState(() {
           _batchCandidateBusy = false;
           _projectConfigLine =
-              AppLocalizations.of(context)!.shortVideoProductionBatchNoScripts;
+              resolveAppLocalizationsForErrors(context).shortVideoProductionBatchNoScripts;
         });
         return;
       }
@@ -45,7 +45,7 @@ extension _ShortVideoSpaceSectionProductionExtension
       if (!mounted) {
         return;
       }
-      final l10nQueued = AppLocalizations.of(context)!;
+      final l10nQueued = resolveAppLocalizationsForErrors(context);
       setState(() {
         _batchCandidateBusy = false;
         _projectConfigLine = l10nQueued.shortVideoProductionBatchQueued(
@@ -361,7 +361,7 @@ extension _ShortVideoSpaceSectionProductionExtension
     }
     setState(() {
       _projectConfigLine =
-          AppLocalizations.of(context)!.shortVideoProductionSetCurrentConfirming(
+          resolveAppLocalizationsForErrors(context).shortVideoProductionSetCurrentConfirming(
             row.id,
           );
     });
@@ -382,7 +382,7 @@ extension _ShortVideoSpaceSectionProductionExtension
       if (!mounted) return;
       setState(() {
         _projectConfigLine =
-            AppLocalizations.of(context)!.shortVideoProductionSetCurrentDone(
+            resolveAppLocalizationsForErrors(context).shortVideoProductionSetCurrentDone(
               row.id,
             );
       });

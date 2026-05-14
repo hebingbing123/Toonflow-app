@@ -245,7 +245,7 @@ class _VersionComparisonState extends State<VersionComparison> {
 
   /// 过滤差异列表
   List<ShotDifference> get _filteredDifferences {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     var filtered = _differences;
 
     // 仅显示变化
@@ -275,7 +275,7 @@ class _VersionComparisonState extends State<VersionComparison> {
     });
 
     try {
-      final l10n = AppLocalizations.of(context)!;
+      final l10n = resolveAppLocalizationsForErrors(context);
       final report = _generateReportText(l10n);
 
       // 复制到剪贴板
@@ -298,7 +298,7 @@ class _VersionComparisonState extends State<VersionComparison> {
       }
     } catch (e) {
       if (mounted) {
-        final l10n = AppLocalizations.of(context)!;
+        final l10n = resolveAppLocalizationsForErrors(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -475,7 +475,7 @@ class _VersionComparisonState extends State<VersionComparison> {
     showDialog<void>(
       context: context,
       builder: (context) {
-        final dialogL10n = AppLocalizations.of(context)!;
+        final dialogL10n = resolveAppLocalizationsForErrors(context);
         return AlertDialog(
           title: Text(dialogL10n.shortVideoVersionComparisonReportDialogTitle),
           content: SizedBox(
@@ -527,7 +527,7 @@ class _VersionComparisonState extends State<VersionComparison> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final filteredDiffs = _filteredDifferences;
 
     return Dialog(
@@ -810,7 +810,7 @@ class _DifferenceListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final typeColor = _getTypeColor(context);
 
     return ListTile(

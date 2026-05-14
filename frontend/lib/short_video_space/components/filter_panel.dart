@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../../rust_api.dart';
 
 /// Filter panel component for short video assembly
 /// 
@@ -179,7 +180,7 @@ class _FilterPanelState extends State<FilterPanel> {
   }
 
   void _savePreset() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     if (_currentFilter.isEmpty) {
       _showMessage(l10n.shortVideoFilterSnackbarNoActiveFilters);
       return;
@@ -204,7 +205,7 @@ class _FilterPanelState extends State<FilterPanel> {
   }
 
   void _applyPreset(FilterPreset preset) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     setState(() {
       _currentFilter = preset.filter;
       _searchController.text = preset.filter.searchKeyword;
@@ -214,7 +215,7 @@ class _FilterPanelState extends State<FilterPanel> {
   }
 
   void _deletePreset(FilterPreset preset) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final updatedPresets = widget.presets.where((p) => p != preset).toList();
     widget.onPresetsChanged?.call(updatedPresets);
     _showMessage(l10n.shortVideoFilterSnackbarPresetDeleted(preset.name));
@@ -264,7 +265,7 @@ class _FilterPanelState extends State<FilterPanel> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final activeTags = _getActiveFilterTags(l10n);
     final hasActiveFilters = activeTags.isNotEmpty;
 
@@ -456,7 +457,7 @@ class _StatusFilterDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return PopupMenuButton<ShotStatusFilter>(
       child: InputDecorator(
         decoration: InputDecoration(
@@ -508,7 +509,7 @@ class _QualityFilterDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return PopupMenuButton<QualityFilter>(
       child: InputDecorator(
         decoration: InputDecoration(
@@ -798,7 +799,7 @@ class _SavePresetDialogState extends State<_SavePresetDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return AlertDialog(
       title: Text(l10n.shortVideoFilterSaveDialogTitle),
       content: TextField(

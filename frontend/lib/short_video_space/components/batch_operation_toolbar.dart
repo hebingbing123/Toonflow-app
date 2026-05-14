@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../l10n/app_localizations.dart';
+import '../../rust_api.dart';
 
 /// Batch operation toolbar component for short video assembly
 /// 
@@ -87,7 +87,7 @@ class _BatchOperationToolbarState extends State<BatchOperationToolbar> {
       return true;
     }
     
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(l10n.shortVideoBatchThrottleMessage),
@@ -105,7 +105,7 @@ class _BatchOperationToolbarState extends State<BatchOperationToolbar> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final hasSelection = widget.selectedIds.isNotEmpty;
     final isAllSelected = widget.selectedIds.length == widget.totalCount && widget.totalCount > 0;
 
@@ -394,7 +394,7 @@ class BatchOperationProgressDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final progress = total > 0 ? completed / total : 0.0;
     final hasFailures = failedItems.isNotEmpty;
 

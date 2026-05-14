@@ -40,7 +40,7 @@ extension ShortVideoPublishScheduling on _ShortVideoSpaceSectionState {
     ProjectRow project,
     String token,
   ) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     if (_publishDrafts.isEmpty) {
       return;
     }
@@ -89,7 +89,7 @@ extension ShortVideoPublishScheduling on _ShortVideoSpaceSectionState {
     ProjectRow project,
     String token,
   ) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     if (_publishDrafts.length < 2) {
       return;
     }
@@ -163,7 +163,7 @@ extension ShortVideoPublishScheduling on _ShortVideoSpaceSectionState {
       builder: (dialogCtx) {
         return StatefulBuilder(
           builder: (ctx, setLocal) {
-            final dlgL10n = AppLocalizations.of(ctx)!;
+            final dlgL10n = resolveAppLocalizationsForErrors(ctx);
             final dayLabel =
                 '${dayLocal.year}-${dayLocal.month.toString().padLeft(2, '0')}-${dayLocal.day.toString().padLeft(2, '0')}';
             return AlertDialog(
@@ -214,7 +214,7 @@ extension ShortVideoPublishScheduling on _ShortVideoSpaceSectionState {
     if (dt == null || !context.mounted) {
       return;
     }
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final ids = _publishDrafts
         .where(
           (d) =>
@@ -257,7 +257,7 @@ extension ShortVideoPublishScheduling on _ShortVideoSpaceSectionState {
   }
 
   Future<void> _clearPublishSchedule() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final token = widget.accessToken;
     final project = _selectedProject;
     if (token == null || token.isEmpty || project == null) {

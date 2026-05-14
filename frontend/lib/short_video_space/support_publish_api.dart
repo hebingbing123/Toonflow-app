@@ -62,11 +62,11 @@ String shortVideoExportIssueLabel(AppLocalizations l10n, String code) {
 }
 
 String shortVideoQualityStageLabelZh(BuildContext context, String stage) {
-  return shortVideoQualityStageLabel(AppLocalizations.of(context)!, stage);
+  return shortVideoQualityStageLabel(resolveAppLocalizationsForErrors(context), stage);
 }
 
 String shortVideoExportIssueLabelZh(BuildContext context, String code) {
-  return shortVideoExportIssueLabel(AppLocalizations.of(context)!, code);
+  return shortVideoExportIssueLabel(resolveAppLocalizationsForErrors(context), code);
 }
 
 int? _parseDurationSecondsLoose(String raw) {

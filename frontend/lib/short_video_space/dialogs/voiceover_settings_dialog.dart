@@ -115,7 +115,7 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
   @override
   Widget build(BuildContext context) {
     final availableVoices = getAvailableVoiceoverVoices(_selectedProvider);
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
 
     return AlertDialog(
       title: Text(l10n.shortVideoSpaceDialogVoiceoverSettingsTitle),
@@ -265,7 +265,7 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
                   SizedBox(
                     width: 60,
                     child: Text(
-                      AppLocalizations.of(context)!.shortVideoVoiceoverSpeedMultiplier(
+                      resolveAppLocalizationsForErrors(context).shortVideoVoiceoverSpeedMultiplier(
                         _selectedSpeed.toStringAsFixed(1),
                       ),
                       textAlign: TextAlign.center,

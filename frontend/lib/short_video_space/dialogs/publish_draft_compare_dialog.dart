@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../l10n/app_localizations.dart';
-import '../../rust_api/project/publish_models.dart';
+import '../../rust_api.dart';
 import '../view.dart' show shortVideoPublishDraftStatusLabel;
 
 /// Side-by-side comparison for 2–4 [PublishDraftRow] (title, copy, schedule, assets).
@@ -88,7 +87,7 @@ class _PublishDraftCompareDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final platformIds = _allPlatformIdsSorted(drafts);
 
     return AlertDialog(
@@ -189,7 +188,7 @@ class _DraftCompareCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return Card(
       margin: EdgeInsets.zero,
       child: Padding(
@@ -273,7 +272,7 @@ class _PlatformCopyCompareSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return Card(
       margin: EdgeInsets.zero,
       child: Padding(

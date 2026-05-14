@@ -128,7 +128,7 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
   }
 
   Future<void> _bootstrapPublishDraft() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final token = widget.accessToken;
     final project = _selectedProject;
     if (token == null || token.isEmpty || project == null) {
@@ -174,7 +174,7 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
   }
 
   Future<void> _enqueuePublishJob() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final token = widget.accessToken;
     final project = _selectedProject;
     if (token == null || token.isEmpty || project == null) {
@@ -255,7 +255,7 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
   }
 
   Future<void> _enqueueAllDraftJobs() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final token = widget.accessToken;
     final project = _selectedProject;
     if (token == null || token.isEmpty || project == null) {
@@ -310,7 +310,7 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
   }
 
   Future<void> _retryFailedPublishJobs() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final token = widget.accessToken;
     final project = _selectedProject;
     if (token == null || token.isEmpty || project == null) {
@@ -363,7 +363,7 @@ extension ShortVideoPublishOperations on _ShortVideoSpaceSectionState {
   }
 
   Future<void> _confirmSemiAutoPublish() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final token = widget.accessToken;
     final project = _selectedProject;
     if (token == null || token.isEmpty || project == null) {

@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../local_prefs/risky_operation_confirm_prefs.dart';
+import '../../rust_api.dart';
 
 /// Confirmation dialog utilities for short video editing operations
 ///
@@ -285,7 +286,7 @@ class _DeleteVersionConfirmationDialogState
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return AlertDialog(
       title: Text(l10n.shortVideoSpaceDialogConfirmDeleteVersionTitle),
       content: Column(
@@ -352,7 +353,7 @@ class _BatchDisableConfirmationDialogState
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return AlertDialog(
       title: Text(l10n.shortVideoSpaceDialogConfirmBatchDisableTitle),
       content: Column(
@@ -416,7 +417,7 @@ class _RestoreDraftConfirmationDialogState
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return AlertDialog(
       title: Text(l10n.shortVideoSpaceDialogConfirmRestoreDraftTitle),
       content: Column(
@@ -476,7 +477,7 @@ class _CancelExportConfirmationDialogState
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return AlertDialog(
       title: Text(l10n.shortVideoSpaceDialogConfirmCancelExportTitle),
       content: Column(
@@ -538,7 +539,7 @@ class _BatchArchivePublishConfirmationDialogState
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return AlertDialog(
       title: Text(l10n.shortVideoSpaceDialogConfirmBatchArchiveTitle),
       content: Column(

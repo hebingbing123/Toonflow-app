@@ -6,6 +6,7 @@
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import '../rust_api.dart';
 
 /// Localized display name for a tracked panel key (e.g. `production`, `export`).
 String shortVideoPanelVersionPanelTitle(AppLocalizations l10n, String panel) {
@@ -227,7 +228,7 @@ class PanelConsistencyAlert extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final maxAge = status.stalePanels
         .map((p) => p.ageSeconds)
         .reduce((a, b) => a > b ? a : b);

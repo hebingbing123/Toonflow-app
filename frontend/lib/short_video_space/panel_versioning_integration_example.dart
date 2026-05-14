@@ -111,7 +111,7 @@ class _ShortVideoSpaceSectionStateWithVersioning extends State<StatefulWidget>
       final result = await showDialog<bool>(
         context: context,
         builder: (dialogContext) {
-          final l10n = AppLocalizations.of(dialogContext)!;
+          final l10n = resolveAppLocalizationsForErrors(dialogContext);
           return AlertDialog(
             title: Text(l10n.shortVideoPanelVersionDataInconsistencyTitle),
             content: Column(
@@ -191,7 +191,7 @@ class _ShortVideoSpaceSectionStateWithVersioning extends State<StatefulWidget>
         ElevatedButton(
           onPressed: () => _performPublishOperation(context),
           child: Text(
-            AppLocalizations.of(context)!.shortVideoPanelVersionExamplePublish,
+            resolveAppLocalizationsForErrors(context).shortVideoPanelVersionExamplePublish,
           ),
         ),
       ],
@@ -217,7 +217,7 @@ class PanelFreshnessIndicator extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final age = snap.ageSeconds;
     final severity = PanelVersionManager.getSeverity(age);
 
@@ -268,7 +268,7 @@ class PanelHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return Row(
       children: [
         Text(

@@ -163,7 +163,7 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final estimatedSize = _calculateEstimatedFileSize();
 
     return AlertDialog(

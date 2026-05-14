@@ -233,7 +233,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
     } catch (e) {
       if (!mounted) return;
 
-      final l10n = AppLocalizations.of(context)!;
+      final l10n = resolveAppLocalizationsForErrors(context);
       setState(() {
         _errorMessage = l10n.shortVideoSpaceDialogExportHistoryLoadError(describeUserVisibleApiError(l10n, e));
         _loading = false;
@@ -253,7 +253,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
         throw StateError('ExportHistoryDialog._fetchExportHistory: not mounted');
       }
       throw Exception(
-        AppLocalizations.of(context)!.shortVideoSpaceDialogExportHistorySessionExpired,
+        resolveAppLocalizationsForErrors(context).shortVideoSpaceDialogExportHistorySessionExpired,
       );
     }
     final String? status = switch (statusFilter) {
@@ -339,7 +339,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
 
       if (!mounted) return;
 
-      final l10n = AppLocalizations.of(context)!;
+      final l10n = resolveAppLocalizationsForErrors(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -353,7 +353,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
     } catch (e) {
       if (!mounted) return;
 
-      final l10n = AppLocalizations.of(context)!;
+      final l10n = resolveAppLocalizationsForErrors(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(l10n.shortVideoSpaceDialogExportHistoryDownloadFailed(describeUserVisibleApiError(l10n, e))),
@@ -378,7 +378,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
 
     return AlertDialog(
       title: Row(
@@ -483,7 +483,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
   }
 
   Widget _buildHistoryList(ThemeData theme) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     
     if (_loading) {
       return const Center(
@@ -558,7 +558,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
   }
 
   Widget _buildHistoryItem(ExportHistoryItem item, ThemeData theme) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final isDownloading = _downloadingTasks.contains(item.taskId);
 
     return ListTile(
@@ -717,7 +717,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
   }
 
   String _formatDateTime(DateTime dateTime) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final now = DateTime.now();
     final difference = now.difference(dateTime);
 

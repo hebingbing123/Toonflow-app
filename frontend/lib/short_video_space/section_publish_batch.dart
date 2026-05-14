@@ -42,7 +42,7 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
   }
 
   Future<void> _batchScheduleDrafts(BuildContext context) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final token = widget.accessToken;
     final project = _selectedProject;
     if (token == null || token.isEmpty || project == null) {
@@ -74,7 +74,7 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
         final proceed = await showDialog<bool>(
           context: context,
           builder: (ctx) {
-            final dlgL10n = AppLocalizations.of(ctx)!;
+            final dlgL10n = resolveAppLocalizationsForErrors(ctx);
             return AlertDialog(
               title: Text(dlgL10n.shortVideoPublishBatchScheduleValidateTitle),
               content: Column(
@@ -157,7 +157,7 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
   }
 
   Future<void> _batchPublishDrafts() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final token = widget.accessToken;
     final project = _selectedProject;
     if (token == null || token.isEmpty || project == null) {
@@ -193,7 +193,7 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
         final proceed = await showDialog<bool>(
           context: context,
           builder: (ctx) {
-            final dlgL10n = AppLocalizations.of(ctx)!;
+            final dlgL10n = resolveAppLocalizationsForErrors(ctx);
             return AlertDialog(
               title: Text(dlgL10n.shortVideoPublishBatchPublishValidateTitle),
               content: Column(
@@ -270,7 +270,7 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
   }
 
   Future<void> _batchArchiveDrafts() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final token = widget.accessToken;
     final project = _selectedProject;
     if (token == null || token.isEmpty || project == null) {
@@ -334,7 +334,7 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
   }
 
   void _compareDrafts() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     if (_selectedDraftIds.length < 2 || _selectedDraftIds.length > 4) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.shortVideoPublishBatchCompareSelectCount)),

@@ -79,7 +79,7 @@ extension _ShortVideoSpaceSectionKeyboardShortcutsExtension on _ShortVideoSpaceS
   void _handleSaveShortcut() {
     final project = _selectedProject;
     final token = widget.accessToken;
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
 
     if (project == null || token == null || token.isEmpty) {
       _showOperationFeedback(
@@ -110,7 +110,7 @@ extension _ShortVideoSpaceSectionKeyboardShortcutsExtension on _ShortVideoSpaceS
   /// Note: The actual selection logic is handled in the dialog's local state.
   /// This method broadcasts a notification that can be listened to by the dialog.
   void _handleSelectAllShortcut() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     
     // Since the batch selection state is managed within the dialog's StatefulBuilder,
     // we need to use a notification or callback mechanism.
@@ -130,7 +130,7 @@ extension _ShortVideoSpaceSectionKeyboardShortcutsExtension on _ShortVideoSpaceS
   /// Focuses the search input field in the filter panel if it exists.
   void _handleFocusSearchShortcut() {
     final focusNode = _ShortVideoSpaceSectionKeyboardShortcutsExtension._searchFocusNode;
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     
     if (focusNode != null && focusNode.canRequestFocus) {
       focusNode.requestFocus();
@@ -152,7 +152,7 @@ extension _ShortVideoSpaceSectionKeyboardShortcutsExtension on _ShortVideoSpaceS
   /// Returns a list of shortcut descriptions for display in help dialogs
   /// or documentation.
   List<KeyboardShortcutInfo> getAvailableShortcuts() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     
     return [
       KeyboardShortcutInfo(
@@ -188,7 +188,7 @@ extension _ShortVideoSpaceSectionKeyboardShortcutsExtension on _ShortVideoSpaceS
   Future<void> _showKeyboardShortcutsDialog() async {
     final shortcuts = getAvailableShortcuts();
     final groupedShortcuts = <String, List<KeyboardShortcutInfo>>{};
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
 
     // Group shortcuts by category
     for (final shortcut in shortcuts) {

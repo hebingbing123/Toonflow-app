@@ -46,7 +46,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
       if (!mounted) {
         return;
       }
-      final l10n = AppLocalizations.of(context)!;
+      final l10n = resolveAppLocalizationsForErrors(context);
       ScaffoldMessenger.maybeOf(context)?.showSnackBar(
         SnackBar(
           content: Text(
@@ -61,7 +61,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
       if (!mounted) {
         return;
       }
-      final l10n = AppLocalizations.of(context)!;
+      final l10n = resolveAppLocalizationsForErrors(context);
       reportRustOrDescribeApiError(
         e,
         l10n: l10n,
@@ -117,7 +117,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
     String initialValue = '',
   }) async {
     final ctrl = TextEditingController(text: initialValue);
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final result = await showDialog<String>(
       context: context,
       builder: (ctx) {
@@ -219,7 +219,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
       builder: (ctx) {
         return StatefulBuilder(
           builder: (ctx, setLocalState) {
-            final l10n = AppLocalizations.of(ctx)!;
+            final l10n = resolveAppLocalizationsForErrors(ctx);
             Future<void> runDisable(_AssemblyClipDeskOpEntry item) async {
               try {
                 await postWorkbenchDeleteVideoV1(
@@ -1032,7 +1032,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
       await showDialog<void>(
         context: context,
         builder: (dialogContext) {
-          final dialogL10n = AppLocalizations.of(dialogContext)!;
+          final dialogL10n = resolveAppLocalizationsForErrors(dialogContext);
 
           Future<void> loadTasks() async {
             final setState = updateDialogState;
@@ -2003,7 +2003,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
       await showDialog<void>(
         context: context,
         builder: (ctx) {
-          final l10n = AppLocalizations.of(ctx)!;
+          final l10n = resolveAppLocalizationsForErrors(ctx);
           return AlertDialog(
             title: Text(
               l10n.shortVideoSpaceProductionAssemblyAssemblyStyleTitle,
@@ -2051,7 +2051,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                   final nextBgm = bgmCtrl.text.trim();
                   Navigator.of(ctx).pop();
                   if (!mounted) return;
-                  final rootL10n = AppLocalizations.of(context)!;
+                  final rootL10n = resolveAppLocalizationsForErrors(context);
                   try {
                     final updated = await updateProjectByProjectId(
                       token,
