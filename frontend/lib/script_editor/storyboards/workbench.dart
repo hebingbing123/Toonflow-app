@@ -108,7 +108,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                 WidgetsBinding.instance.addPostFrameCallback((_) async {
                   if (!ctx2.mounted) return;
                   await _reloadProductionStoryboardSummary(
-                    l10n: AppLocalizations.of(ctx2)!,
+                    l10n: resolveAppLocalizationsForErrors(ctx2),
                     token: token,
                     projectId: projectId,
                     scriptNumericId: scriptNumericId,
@@ -119,7 +119,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                   );
                 });
               }
-              final l10n = AppLocalizations.of(ctx2)!;
+              final l10n = resolveAppLocalizationsForErrors(ctx2);
               final diagnosis = diagnoseStoryboardList(
                 l10n,
                 boards: boardsList,
@@ -199,7 +199,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                           );
                           if (!ctx2.mounted) return;
                           await _reloadProductionStoryboardSummary(
-                            l10n: AppLocalizations.of(ctx2)!,
+                            l10n: resolveAppLocalizationsForErrors(ctx2),
                             token: token,
                             projectId: projectId,
                             scriptNumericId: scriptNumericId,
@@ -213,7 +213,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                       actionBusy[0] || productionSummaryLoading[0]
                       ? null
                       : () => _reloadProductionStoryboardSummary(
-                          l10n: AppLocalizations.of(ctx2)!,
+                          l10n: resolveAppLocalizationsForErrors(ctx2),
                           token: token,
                           projectId: projectId,
                           scriptNumericId: scriptNumericId,
@@ -240,7 +240,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                         );
                         if (!ctx2.mounted) return;
                         await _reloadProductionStoryboardSummary(
-                          l10n: AppLocalizations.of(ctx2)!,
+                          l10n: resolveAppLocalizationsForErrors(ctx2),
                           token: token,
                           projectId: projectId,
                           scriptNumericId: scriptNumericId,
@@ -261,7 +261,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
       );
     } catch (e) {
       if (mounted) {
-        final snackL10n = AppLocalizations.of(context)!;
+        final snackL10n = resolveAppLocalizationsForErrors(context);
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(

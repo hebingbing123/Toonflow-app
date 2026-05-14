@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../l10n/app_localizations.dart';
 import '../../../rust_api.dart';
 
 class ScriptEditImageWorkbenchDialogViewModel {
@@ -66,7 +65,7 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
     final outline = theme.colorScheme.outline;
     final viewportWidth = MediaQuery.sizeOf(context).width;
@@ -155,7 +154,8 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
                     child: TextField(
                       controller: model.flowIdCtrl,
                       decoration: InputDecoration(
-                        labelText: l10n.scriptEditorEditImageWorkbenchFlowIdLabel,
+                        labelText:
+                            l10n.scriptEditorEditImageWorkbenchFlowIdLabel,
                       ),
                     ),
                   ),
@@ -164,8 +164,8 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
                     child: TextField(
                       controller: model.modelCtrl,
                       decoration: InputDecoration(
-                        labelText:
-                            l10n.scriptEditorEditImageWorkbenchModelOptionalLabel,
+                        labelText: l10n
+                            .scriptEditorEditImageWorkbenchModelOptionalLabel,
                       ),
                     ),
                   ),
@@ -243,7 +243,8 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
                     child: TextField(
                       controller: model.stepIdCtrl,
                       decoration: InputDecoration(
-                        labelText: l10n.scriptEditorEditImageWorkbenchStepIdLabel,
+                        labelText:
+                            l10n.scriptEditorEditImageWorkbenchStepIdLabel,
                       ),
                     ),
                   ),
@@ -252,7 +253,8 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
                     child: TextField(
                       controller: model.stepStatusCtrl,
                       decoration: InputDecoration(
-                        labelText: l10n.scriptEditorEditImageWorkbenchNewStatusLabel,
+                        labelText:
+                            l10n.scriptEditorEditImageWorkbenchNewStatusLabel,
                         helperText:
                             l10n.scriptEditorEditImageWorkbenchNewStatusHelper,
                       ),

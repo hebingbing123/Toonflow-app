@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../l10n/app_localizations.dart';
 import '../../rust_api.dart';
 import 'support.dart';
 
@@ -65,7 +64,7 @@ class ScriptWorkbenchPanelView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
     final outline = theme.colorScheme.outline;
     return Container(

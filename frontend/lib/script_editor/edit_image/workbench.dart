@@ -6,7 +6,7 @@ extension _HomePageScriptEditorEditImageWorkbench on _HomePageState {
     required String projectId,
     required int scriptNumericId,
   }) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final uploadCtrl = TextEditingController();
     final flowIdCtrl = TextEditingController();
     final promptCtrl = TextEditingController();

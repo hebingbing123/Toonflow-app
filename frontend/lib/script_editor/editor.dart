@@ -23,7 +23,7 @@ extension _HomePageScriptEditor on _HomePageState {
       await showDialog<void>(
         context: context,
         builder: (ctx) {
-          final l10n = AppLocalizations.of(ctx)!;
+          final l10n = resolveAppLocalizationsForErrors(ctx);
           return StatefulBuilder(
             builder: (ctx, setDialogState) {
               final saving = <bool>[false];
@@ -109,7 +109,7 @@ extension _HomePageScriptEditor on _HomePageState {
                             final ok = await showDialog<bool>(
                               context: ctx,
                               builder: (c) {
-                                final confirmL10n = AppLocalizations.of(c)!;
+                                final confirmL10n = resolveAppLocalizationsForErrors(c);
                                 return AlertDialog(
                                   title: Text(
                                     confirmL10n.scriptEditorDeleteConfirmTitle,
@@ -156,7 +156,7 @@ extension _HomePageScriptEditor on _HomePageState {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(
-                                    AppLocalizations.of(context)!
+                                    resolveAppLocalizationsForErrors(context)
                                         .scriptEditorDeletedSnackBar,
                                   ),
                                 ),

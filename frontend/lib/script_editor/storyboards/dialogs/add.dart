@@ -20,7 +20,7 @@ extension _HomePageScriptEditorStoryboardsAddDialog on _HomePageState {
       final confirmed = await showDialog<bool>(
         context: ctx,
         builder: (dialogCtx) {
-          final l10n = AppLocalizations.of(dialogCtx)!;
+          final l10n = resolveAppLocalizationsForErrors(dialogCtx);
           return AlertDialog(
             title: Text(l10n.scriptEditorStoryboardAddDialogTitle),
             content: SizedBox(
@@ -66,7 +66,7 @@ extension _HomePageScriptEditorStoryboardsAddDialog on _HomePageState {
         },
       );
       if (confirmed != true || !ctx.mounted) return;
-      final flowL10n = AppLocalizations.of(ctx)!;
+      final flowL10n = resolveAppLocalizationsForErrors(ctx);
       final prompt = promptCtrl.text.trim();
       if (prompt.isEmpty) {
         ScaffoldMessenger.of(ctx).showSnackBar(
@@ -156,7 +156,7 @@ extension _HomePageScriptEditorStoryboardsAddDialog on _HomePageState {
       if (ctx.mounted) {
         actionBusy[0] = false;
         setBoardsState(() {});
-        final snackL10n = AppLocalizations.of(ctx)!;
+        final snackL10n = resolveAppLocalizationsForErrors(ctx);
         ScaffoldMessenger.of(ctx).showSnackBar(
           SnackBar(content: Text(describeUserVisibleApiError(snackL10n, e))),
         );
