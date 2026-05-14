@@ -29687,6 +29687,12 @@ abstract class AppLocalizations {
   /// **'Jobs empty value'**
   String get jobsEmptyValue;
 
+  /// No description provided for @systemProbesDataEmptyMarker.
+  ///
+  /// In en, this message translates to:
+  /// **'(empty)'**
+  String get systemProbesDataEmptyMarker;
+
   /// No description provided for @jobsKindCountEntry.
   ///
   /// In en, this message translates to:

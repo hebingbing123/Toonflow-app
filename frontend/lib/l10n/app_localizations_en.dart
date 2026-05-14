@@ -19631,6 +19631,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get jobsEmptyValue => 'Jobs empty value';
 
   @override
+  String get systemProbesDataEmptyMarker => '(empty)';
+
+  @override
   String jobsKindCountEntry(String kind, int jobCount) {
     return '$kind: $jobCount';
   }

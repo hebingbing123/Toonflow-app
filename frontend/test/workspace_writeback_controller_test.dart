@@ -21,6 +21,7 @@ void main() {
       operationController: operationController,
       accessTokenProvider: () => 'token',
       onErrorChanged: (error) => lastError = error,
+      l10nProvider: () => null,
       fetchProjects: (token, projectNumericId) async => const <ProjectRow>[
         ProjectRow(
           id: 'project-uuid',
@@ -75,6 +76,7 @@ void main() {
         operationController: operationController,
         accessTokenProvider: () => 'token',
         onErrorChanged: (error) => lastError = error,
+        l10nProvider: () => null,
         fetchProjects: (token, projectNumericId) async {
           fetchProjectsCalls += 1;
           return const <ProjectRow>[];
@@ -130,6 +132,7 @@ void main() {
         operationController: operationController,
         accessTokenProvider: () => 'token',
         onErrorChanged: (error) => lastError = error,
+        l10nProvider: () => null,
         fetchAllProjects: (token) async {
           fetchAllProjectsCalls += 1;
           return const <ProjectRow>[
@@ -196,6 +199,7 @@ void main() {
         operationController: operationController,
         accessTokenProvider: () => 'token',
         onErrorChanged: (error) => lastError = error,
+        l10nProvider: () => null,
         fetchAllProjects: (token) async {
           fetchAllProjectsCalls += 1;
           return const <ProjectRow>[
@@ -266,6 +270,7 @@ void main() {
         operationController: operationController,
         accessTokenProvider: () => 'token',
         onErrorChanged: (error) => lastError = error,
+        l10nProvider: () => null,
       );
 
       inputController.projectIdController.text = '1';

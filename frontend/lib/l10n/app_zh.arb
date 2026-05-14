@@ -13986,6 +13986,7 @@
   "contentComplianceDispositionSuspendUser": "suspend_user",
   "contentComplianceFieldResolutionNote": "resolution note",
   "jobsEmptyValue": "jobs empty value",
+  "systemProbesDataEmptyMarker": "（空）",
   "jobsKindCountEntry": "{kind}：{jobCount}",
   "jobsStatusCountEntry": "{status}：{jobCount}",
   "jobsIdempotencyMismatch": "POST /api/v1/jobs 幂等：期望同一 id，实际 {firstId} 与 {secondId}",

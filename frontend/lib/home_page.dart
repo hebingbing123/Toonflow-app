@@ -300,6 +300,7 @@ class _HomePageState extends State<HomePage> {
       ModelsCatalogController(
         accessTokenProvider: () => _session?.accessToken,
         onErrorChanged: _setSharedError,
+        l10nProvider: () => _appL10n,
         runSettingsAndAssetsProbes: _runModelsCatalogSettingsAndAssetsProbes,
         runProductionProbes: _runModelsCatalogProductionProbes,
         formatProbeStatusMap: _formatProbeStatusMap,
@@ -308,6 +309,7 @@ class _HomePageState extends State<HomePage> {
   late final AuthController _authController = AuthController(
     onErrorChanged: _setSharedError,
     onSignedOut: _handleSignedOut,
+    l10nProvider: () => _appL10n,
   );
 
   late final ShellNavigationController _shellNavigationController =
@@ -351,6 +353,7 @@ class _HomePageState extends State<HomePage> {
         operationController: _workspaceOperationController,
         accessTokenProvider: () => _session?.accessToken,
         onErrorChanged: _setSharedError,
+        l10nProvider: () => _appL10n,
       );
 
   late final SkillsHarnessController _skillsHarnessController =

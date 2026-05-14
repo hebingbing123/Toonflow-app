@@ -1,3 +1,6 @@
+import 'package:flutter/material.dart';
+
+import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
 import 'input_controller.dart';
 import 'operation_controller.dart';
@@ -7,6 +10,7 @@ part 'writeback_controller_helpers.dart';
 
 typedef WorkspaceWritebackAccessTokenProvider = String? Function();
 typedef WorkspaceWritebackErrorSink = void Function(String? error);
+typedef WorkspaceWritebackL10nProvider = AppLocalizations? Function();
 typedef WorkspaceWritebackFetchProjects =
     Future<List<ProjectRow>> Function(String token, int projectNumericId);
 typedef WorkspaceWritebackFetchAllProjects =
@@ -55,6 +59,7 @@ class WorkspaceWritebackController {
     required WorkspaceOperationController operationController,
     required WorkspaceWritebackAccessTokenProvider accessTokenProvider,
     required WorkspaceWritebackErrorSink onErrorChanged,
+    required WorkspaceWritebackL10nProvider l10nProvider,
     WorkspaceWritebackFetchProjects fetchProjects = postGeneralGetSingleProject,
     WorkspaceWritebackFetchAllProjects fetchAllProjects = fetchProjects,
     WorkspaceWritebackUpdateScript updateScript =
@@ -70,6 +75,7 @@ class WorkspaceWritebackController {
        _operationController = operationController,
        _accessTokenProvider = accessTokenProvider,
        _onErrorChanged = onErrorChanged,
+       _l10nProvider = l10nProvider,
        _fetchProjects = fetchProjects,
        _fetchAllProjects = fetchAllProjects,
        _updateScript = updateScript,
@@ -83,6 +89,7 @@ class WorkspaceWritebackController {
   final WorkspaceOperationController _operationController;
   final WorkspaceWritebackAccessTokenProvider _accessTokenProvider;
   final WorkspaceWritebackErrorSink _onErrorChanged;
+  final WorkspaceWritebackL10nProvider _l10nProvider;
   final WorkspaceWritebackFetchProjects _fetchProjects;
   final WorkspaceWritebackFetchAllProjects _fetchAllProjects;
   final WorkspaceWritebackUpdateScript _updateScript;
@@ -113,10 +120,13 @@ class WorkspaceWritebackController {
         'run_sub_agent_director_plan': 'scriptPlan',
       };
 
+  AppLocalizations get _l10nResolved =>
+      _l10nProvider() ?? lookupAppLocalizations(const Locale('en'));
+
   Future<void> writeBackScriptWorkspaceResult() async {
     final token = _accessTokenProvider();
     if (token == null) return;
-    final loc = rustApiLookupL10nFromPlatform();
+    final loc = _l10nResolved;
     final projectUuid = _trimmedNonEmpty(
       _inputController.projectUuidController.text,
     );
@@ -166,7 +176,7 @@ class WorkspaceWritebackController {
       );
     } catch (error) {
       _onErrorChanged(
-        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
+        describeUserVisibleApiError(_l10nResolved, error),
       );
     } finally {
       _operationController.setLoading(
@@ -179,7 +189,7 @@ class WorkspaceWritebackController {
   Future<void> writeBackScriptPlanWorkspaceResult() async {
     final token = _accessTokenProvider();
     if (token == null) return;
-    final loc = rustApiLookupL10nFromPlatform();
+    final loc = _l10nResolved;
     final projectUuid = _trimmedNonEmpty(
       _inputController.projectUuidController.text,
     );
@@ -232,7 +242,7 @@ class WorkspaceWritebackController {
       );
     } catch (error) {
       _onErrorChanged(
-        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
+        describeUserVisibleApiError(_l10nResolved, error),
       );
     } finally {
       _operationController.setLoading(
@@ -245,7 +255,7 @@ class WorkspaceWritebackController {
   Future<void> writeBackScriptPlanViaUpdateData() async {
     final token = _accessTokenProvider();
     if (token == null) return;
-    final loc = rustApiLookupL10nFromPlatform();
+    final loc = _l10nResolved;
     final planRowId = _outputController.scriptPlanRowId;
     final candidate = _outputController.scriptPlanWritebackCandidate;
     if (planRowId == null || candidate == null) {
@@ -283,7 +293,7 @@ class WorkspaceWritebackController {
       );
     } catch (error) {
       _onErrorChanged(
-        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
+        describeUserVisibleApiError(_l10nResolved, error),
       );
     } finally {
       _operationController.setLoading(
@@ -296,7 +306,7 @@ class WorkspaceWritebackController {
   Future<void> writeBackProductionFlowResult() async {
     final token = _accessTokenProvider();
     if (token == null) return;
-    final loc = rustApiLookupL10nFromPlatform();
+    final loc = _l10nResolved;
     final projectUuid = _trimmedNonEmpty(
       _inputController.projectUuidController.text,
     );
@@ -345,7 +355,7 @@ class WorkspaceWritebackController {
         writebackSource = 'get_flowData -> refreshed full flow[$flowKey]';
       } catch (error) {
         _onErrorChanged(
-          describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
+          describeUserVisibleApiError(_l10nResolved, error),
         );
         return;
       }
@@ -364,7 +374,7 @@ class WorkspaceWritebackController {
           writebackSource = '$toolName -> refreshed flow[$flowKey]';
         } catch (error) {
           _onErrorChanged(
-            describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
+            describeUserVisibleApiError(_l10nResolved, error),
           );
           return;
         }
@@ -412,7 +422,7 @@ class WorkspaceWritebackController {
       );
     } catch (error) {
       _onErrorChanged(
-        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
+        describeUserVisibleApiError(_l10nResolved, error),
       );
     } finally {
       _operationController.setLoading(

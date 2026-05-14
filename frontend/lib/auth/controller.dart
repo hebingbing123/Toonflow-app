@@ -4,13 +4,24 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../config.dart';
+import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
 
+typedef AuthL10nProvider = AppLocalizations? Function();
+
 class AuthController extends ChangeNotifier {
-  AuthController({required this.onErrorChanged, required this.onSignedOut});
+  AuthController({
+    required this.onErrorChanged,
+    required this.onSignedOut,
+    required AuthL10nProvider l10nProvider,
+  }) : _l10nProvider = l10nProvider;
 
   final void Function(String? error) onErrorChanged;
   final Future<void> Function() onSignedOut;
+  final AuthL10nProvider _l10nProvider;
+
+  AppLocalizations get _l10nResolved =>
+      _l10nProvider() ?? lookupAppLocalizations(const Locale('en'));
 
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -40,7 +51,7 @@ class AuthController extends ChangeNotifier {
       onErrorChanged(error.message);
     } catch (error) {
       onErrorChanged(
-        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
+        describeUserVisibleApiError(_l10nResolved, error),
       );
     }
   }
@@ -56,7 +67,7 @@ class AuthController extends ChangeNotifier {
       onErrorChanged(error.message);
     } catch (error) {
       onErrorChanged(
-        describeUserVisibleApiError(rustApiLookupL10nFromPlatform(), error),
+        describeUserVisibleApiError(_l10nResolved, error),
       );
     }
   }

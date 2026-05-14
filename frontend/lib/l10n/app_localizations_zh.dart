@@ -18680,6 +18680,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get jobsEmptyValue => 'jobs empty value';
 
   @override
+  String get systemProbesDataEmptyMarker => '（空）';
+
+  @override
   String jobsKindCountEntry(String kind, int jobCount) {
     return '$kind：$jobCount';
   }
