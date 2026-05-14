@@ -3104,12 +3104,12 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                                   visualDensity: VisualDensity.compact,
                                 ),
                               ),
-                            Text('${l10n.opsWhFieldId}: ${wh.id}'),
+                            Text(l10n.opsWhFieldId(wh.id)),
+                            Text(l10n.opsWhFieldCreatedAt(wh.createdAt)),
                             Text(
-                              '${l10n.opsWhFieldCreatedAt}: ${wh.createdAt}',
-                            ),
-                            Text(
-                              '${l10n.opsWhFieldUpdatedAt}: ${wh.updatedAt ?? wh.createdAt}',
+                              l10n.opsWhFieldUpdatedAt(
+                                wh.updatedAt ?? wh.createdAt,
+                              ),
                             ),
                             if (!wh.enabled)
                               Padding(

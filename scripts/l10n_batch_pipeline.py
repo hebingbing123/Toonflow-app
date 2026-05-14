@@ -2,11 +2,12 @@
 """
 批量 i18n：扫描 Text/SelectableText 的「整段插值字符串」→ 合并 app_en/app_zh.arb → 回写 Dart。
 
-只处理：单行、首个参数为带 `${expr}` 的引号字符串（无嵌套引号）。相同「字面量片段序列 + 占位符个数」共用一条 ARB。
+只处理：单行、首个参数为带 `${expr}` 的引号字符串（无嵌套引号）。`${l10n.x}$suffix` 等非 `${}` 的 `$` 会跳过。相同「字面量片段序列 + 占位符个数」共用一条 ARB。
 
 用法::
 
   python3 scripts/l10n_batch_pipeline.py scan --root frontend/lib
+  python3 scripts/l10n_batch_pipeline.py scan --root frontend/lib --subtree project_editor
   python3 scripts/l10n_batch_pipeline.py apply --root frontend/lib --dry-run
   # 写入 ARB + Dart（结构模板可用 --no-translate；要机翻中文见 requirements_l10n_batch.txt）
   python3 scripts/l10n_batch_pipeline.py apply --root frontend/lib --no-translate
@@ -102,7 +103,8 @@ def _should_skip_body(body: str) -> bool:
         return True
     if re.fullmatch(r"[\d.]+", body.strip()):
         return True
-    if "l10n." in body:
+    # `$foo` 非 `${...}` 的插值（如 `'${l10n.x}$suffix'`）本流水线不处理
+    if re.search(r"\$(?!\{)", body):
         return True
     return False
 
@@ -123,12 +125,22 @@ class Occurrence:
     ph_types: list[str]
 
 
-def scan_lib(lib_root: Path) -> list[Occurrence]:
+def scan_lib(lib_root: Path, subtree: str | None = None) -> list[Occurrence]:
     skip = {"l10n", "generated", ".dart_tool"}
     out: list[Occurrence] = []
+    lib_root = lib_root.resolve()
+    sub = (
+        subtree.strip().replace("\\", "/").rstrip("/")
+        if (subtree and subtree.strip())
+        else None
+    )
     for path in sorted(lib_root.rglob("*.dart")):
         if any(p in path.parts for p in skip):
             continue
+        if sub is not None:
+            rel = path.relative_to(lib_root).as_posix()
+            if rel != sub and not rel.startswith(sub + "/"):
+                continue
         try:
             line_list = path.read_text(encoding="utf-8").splitlines()
         except OSError:
@@ -209,7 +221,7 @@ def _replacement_snippet(o: Occurrence) -> str:
 
 def cmd_scan(args: argparse.Namespace) -> int:
     root = _repo_root() / args.root
-    occ = scan_lib(root)
+    occ = scan_lib(root, args.subtree)
     out_path = _repo_root() / "frontend" / ".l10n_batch" / "scan.json"
     out_path.parent.mkdir(parents=True, exist_ok=True)
     payload = [
@@ -232,7 +244,7 @@ def cmd_apply(args: argparse.Namespace) -> int:
     import sys
 
     root = _repo_root() / args.root
-    occ = scan_lib(root)
+    occ = scan_lib(root, args.subtree)
     by_norm: dict[str, tuple[list[str], list[str], str, list[str]]] = {}
     for o in occ:
         if o.norm not in by_norm:
@@ -309,10 +321,20 @@ def main() -> int:
 
     p_scan = sub.add_parser("scan")
     p_scan.add_argument("--root", default="frontend/lib")
+    p_scan.add_argument(
+        "--subtree",
+        default=None,
+        help="仅扫描 lib 下相对子路径，如 project_editor 或 shell",
+    )
     p_scan.set_defaults(func=cmd_scan)
 
     p_apply = sub.add_parser("apply")
     p_apply.add_argument("--root", default="frontend/lib")
+    p_apply.add_argument(
+        "--subtree",
+        default=None,
+        help="仅处理 lib 下相对子路径（与 scan 一致）",
+    )
     p_apply.add_argument("--dry-run", action="store_true")
     p_apply.add_argument(
         "--no-translate",
