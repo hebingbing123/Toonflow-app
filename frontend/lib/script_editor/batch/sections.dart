@@ -178,7 +178,7 @@ extension _StoryboardBatchWorkbenchSections
                     }
                   });
                 },
-          title: Text('#${row.numericId}'),
+          title: Text(l10n.l10nBatch_46f00a087b(row.numericId)),
           subtitle: Text(
             [
               _storyboardMetaLine(l10n, row, productionRow),

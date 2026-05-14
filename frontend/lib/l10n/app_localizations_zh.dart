@@ -20427,4 +20427,34 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get projectsCreativeManualDefaultSlotsTemplate =>
       '场景|scene|\n角色|role|';
+
+  @override
+  String l10nBatch_078b5e4699(String p0, String p1) {
+    return '$p0: $p1';
+  }
+
+  @override
+  String l10nBatch_c084376ea9(String p0, String p1) {
+    return '$p0 · $p1';
+  }
+
+  @override
+  String l10nBatch_775383c7b6(int p0) {
+    return '$p0';
+  }
+
+  @override
+  String l10nBatch_a242ae1254(int p0, String p1) {
+    return '#$p0 $p1';
+  }
+
+  @override
+  String l10nBatch_46f00a087b(int p0) {
+    return '#$p0';
+  }
+
+  @override
+  String l10nBatch_978d9d9f6f(int p0, String p1) {
+    return '#$p0 · $p1';
+  }
 }

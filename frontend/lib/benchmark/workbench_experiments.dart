@@ -177,7 +177,7 @@ class BenchmarkExperimentsWorkbench extends StatelessWidget {
                     (item) => ListTile(
                       dense: true,
                       contentPadding: EdgeInsets.zero,
-                      title: Text('${item.name} · ${item.status}'),
+                      title: Text(l10n.l10nBatch_c084376ea9(item.name, item.status)),
                       subtitle: Text(
                         l10n.benchmarkExperimentRowSubtitle(
                           item.sampleTier,

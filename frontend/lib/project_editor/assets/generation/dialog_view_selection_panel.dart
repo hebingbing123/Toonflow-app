@@ -43,7 +43,7 @@ class _AssetGenerationSelectionPanel extends StatelessWidget {
                 onChanged: busy
                     ? null
                     : (checked) => onToggleAsset(asset, checked == true),
-                title: Text('#${asset.numericId} ${asset.name}'),
+                title: Text(l10n.l10nBatch_a242ae1254(asset.numericId, asset.name)),
                 subtitle: Text(
                   [
                     asset.assetType,

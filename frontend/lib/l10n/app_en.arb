@@ -16267,5 +16267,65 @@
   "agentWorkspaceProductionGuidedDeriveAssetsPrompt": "Based on the current assets flow, propose the next round of derived asset generation and take the smallest viable next step.",
   "agentWorkspaceProductionGuidedStoryboardGenPrompt": "Based on the current storyboard flow, outline the next storyboard generation plan and take the smallest viable generation action.",
   "agentWorkspaceProductionGuidedDirectorPlanPrompt": "Combine scriptPlan with current asset status, produce the next director plan round, and list execution priorities.",
-  "projectsCreativeManualDefaultSlotsTemplate": "Scene|scene|\nRole|role|"
+  "projectsCreativeManualDefaultSlotsTemplate": "Scene|scene|\nRole|role|",
+  "l10nBatch_078b5e4699": "{p0}: {p1}",
+  "@l10nBatch_078b5e4699": {
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      },
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "l10nBatch_c084376ea9": "{p0} · {p1}",
+  "@l10nBatch_c084376ea9": {
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      },
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "l10nBatch_775383c7b6": "{p0}",
+  "@l10nBatch_775383c7b6": {
+    "placeholders": {
+      "p0": {
+        "type": "int"
+      }
+    }
+  },
+  "l10nBatch_a242ae1254": "#{p0} {p1}",
+  "@l10nBatch_a242ae1254": {
+    "placeholders": {
+      "p0": {
+        "type": "int"
+      },
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "l10nBatch_46f00a087b": "#{p0}",
+  "@l10nBatch_46f00a087b": {
+    "placeholders": {
+      "p0": {
+        "type": "int"
+      }
+    }
+  },
+  "l10nBatch_978d9d9f6f": "#{p0} · {p1}",
+  "@l10nBatch_978d9d9f6f": {
+    "placeholders": {
+      "p0": {
+        "type": "int"
+      },
+      "p1": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -154,7 +154,7 @@ class _PublishScheduleCalendarState extends State<PublishScheduleCalendar> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text('${day.day}', style: labelStyle),
+                        Text(l10n.l10nBatch_775383c7b6(day.day), style: labelStyle),
                         const SizedBox(height: 2),
                         Text(
                           countLabel,

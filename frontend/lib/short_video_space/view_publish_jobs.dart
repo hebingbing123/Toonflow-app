@@ -44,7 +44,7 @@ class _PublishJobsPanel extends StatelessWidget {
                       children: [
                         DeliveryModeBadge(deliveryMode: e.key, small: true),
                         const SizedBox(width: 4),
-                        Text('${e.value}', style: theme.textTheme.labelSmall),
+                        Text(l10n.l10nBatch_775383c7b6(e.value), style: theme.textTheme.labelSmall),
                       ],
                     ),
                     selected: isSelected,

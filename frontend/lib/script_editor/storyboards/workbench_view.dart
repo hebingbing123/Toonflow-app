@@ -199,7 +199,7 @@ class StoryboardsWorkbenchDialogView extends StatelessWidget {
                           ];
                           return ListTile(
                             contentPadding: EdgeInsets.zero,
-                            title: Text('#${board.numericId}'),
+                            title: Text(l10n.l10nBatch_46f00a087b(board.numericId)),
                             subtitle: Text(
                               [
                                 if ((board.prompt ?? '').trim().isNotEmpty)

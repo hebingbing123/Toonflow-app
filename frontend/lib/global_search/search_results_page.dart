@@ -854,7 +854,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
             IconButton(
               icon: Badge(
                 isLabelVisible: _filters.hasActiveFilters,
-                label: Text('${_filters.activeFilterCount}'),
+                label: Text(l10n.l10nBatch_775383c7b6(_filters.activeFilterCount)),
                 child: const Icon(Icons.filter_list),
               ),
               onPressed: isMobile

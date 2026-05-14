@@ -1824,7 +1824,7 @@ class _AdminConsoleSectionState extends State<AdminConsoleSection> {
       children: rows.entries
           .map(
             (entry) => Chip(
-              label: Text('${_fieldLabel(l10n, entry.key)}: ${entry.value}'),
+              label: Text(l10n.l10nBatch_078b5e4699(_fieldLabel(l10n, entry.key), entry.value)),
             ),
           )
           .toList(growable: false),

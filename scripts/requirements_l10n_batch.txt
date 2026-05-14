@@ -1,0 +1,2 @@
+# Optional: auto zh for scripts/l10n_batch_pipeline.py apply
+deep-translator>=1.11.4

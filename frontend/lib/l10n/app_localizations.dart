@@ -32365,6 +32365,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Scene|scene|\nRole|role|'**
   String get projectsCreativeManualDefaultSlotsTemplate;
+
+  /// No description provided for @l10nBatch_078b5e4699.
+  ///
+  /// In en, this message translates to:
+  /// **'{p0}: {p1}'**
+  String l10nBatch_078b5e4699(String p0, String p1);
+
+  /// No description provided for @l10nBatch_c084376ea9.
+  ///
+  /// In en, this message translates to:
+  /// **'{p0} · {p1}'**
+  String l10nBatch_c084376ea9(String p0, String p1);
+
+  /// No description provided for @l10nBatch_775383c7b6.
+  ///
+  /// In en, this message translates to:
+  /// **'{p0}'**
+  String l10nBatch_775383c7b6(int p0);
+
+  /// No description provided for @l10nBatch_a242ae1254.
+  ///
+  /// In en, this message translates to:
+  /// **'#{p0} {p1}'**
+  String l10nBatch_a242ae1254(int p0, String p1);
+
+  /// No description provided for @l10nBatch_46f00a087b.
+  ///
+  /// In en, this message translates to:
+  /// **'#{p0}'**
+  String l10nBatch_46f00a087b(int p0);
+
+  /// No description provided for @l10nBatch_978d9d9f6f.
+  ///
+  /// In en, this message translates to:
+  /// **'#{p0} · {p1}'**
+  String l10nBatch_978d9d9f6f(int p0, String p1);
 }
 
 class _AppLocalizationsDelegate

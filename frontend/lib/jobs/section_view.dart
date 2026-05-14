@@ -251,7 +251,7 @@ class JobsSectionView extends StatelessWidget {
                   (job) => ListTile(
                     dense: true,
                     contentPadding: EdgeInsets.zero,
-                    title: Text('${job.kind} · ${job.status}'),
+                    title: Text(l10n.l10nBatch_c084376ea9(job.kind, job.status)),
                     subtitle: Text(
                       [
                         job.id,
