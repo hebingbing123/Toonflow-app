@@ -92,6 +92,10 @@ class NotificationsController extends ChangeNotifier {
   String? get _accessToken => _accessTokenProvider();
   AppLocalizations? get _l10n => _l10nProvider();
 
+  /// UI 未注入 [AppLocalizations] 时回退到英文生成类，避免本文件硬编码英文产品句。
+  AppLocalizations get _l10nResolved =>
+      _l10n ?? lookupAppLocalizations(const Locale('en'));
+
   void ingestWsNotificationEvent(NotificationRecordV1 item) {
     final hadItem = items.any((existing) => existing.id == item.id);
     final previous = hadItem
@@ -109,12 +113,10 @@ class NotificationsController extends ChangeNotifier {
   }
 
   void setRealtimeConnection(bool connected) {
-    final l10n = _l10n;
     _setError(
       connected
           ? null
-          : (l10n?.notificationsRealtimeDisconnected ??
-                'Realtime notifications disconnected. You can still refresh manually.'),
+          : _l10nResolved.notificationsRealtimeDisconnected,
     );
   }
 
@@ -122,22 +124,17 @@ class NotificationsController extends ChangeNotifier {
     required bool healthy,
     required List<String> degradedEndpoints,
   }) {
-    final l10n = _l10n;
+    final l10n = _l10nResolved;
     final title = healthy
-        ? (l10n?.notificationsPlatformStatusRecovered ??
-              'Platform status recovered')
-        : (l10n?.notificationsPlatformStatusDegraded ??
-              'Platform status degraded');
+        ? l10n.notificationsPlatformStatusRecovered
+        : l10n.notificationsPlatformStatusDegraded;
     final message = healthy
-        ? (l10n?.notificationsPlatformStatusRecoveredMessage ??
-              'The status page detected that key endpoints recovered.')
+        ? l10n.notificationsPlatformStatusRecoveredMessage
         : degradedEndpoints.isEmpty
-        ? (l10n?.notificationsPlatformStatusDegradedMessage ??
-              'The status page detected key endpoint failures.')
-        : (l10n?.notificationsPlatformStatusAffectedEndpoints(
-                degradedEndpoints.join('、'),
-              ) ??
-              'Affected endpoints: ${degradedEndpoints.join(', ')}');
+        ? l10n.notificationsPlatformStatusDegradedMessage
+        : l10n.notificationsPlatformStatusAffectedEndpoints(
+            degradedEndpoints.join('、'),
+          );
     final now = DateTime.now();
     final synthetic = NotificationRecordV1(
       id: -now.microsecondsSinceEpoch,
@@ -203,8 +200,7 @@ class NotificationsController extends ChangeNotifier {
         jobId: null,
         notificationType: 'content_compliance_alert',
         title:
-            _l10n?.notificationsComplianceAlertTitle(alert.title) ??
-            'Content compliance alert: ${alert.title}',
+            _l10nResolved.notificationsComplianceAlertTitle(alert.title),
         message: alert.message,
         linkPath: '/product/content-compliance?escalationStage=${alert.stage}',
         payload: <String, dynamic>{
@@ -246,8 +242,7 @@ class NotificationsController extends ChangeNotifier {
   }
 
   String _unsupportedDownloadMessage(String fileName, int bytes) {
-    return _l10n?.notificationsDownloadUnsupported(fileName, bytes) ??
-        'Downloads are not supported on this platform: $fileName ($bytes bytes).';
+    return _l10nResolved.notificationsDownloadUnsupported(fileName, bytes);
   }
 
   void _setError(String? error) {
@@ -282,7 +277,7 @@ class NotificationsController extends ChangeNotifier {
       _preferences = envelope.preferences;
       _preferencesAudit = envelope.audit;
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
       loadingPreferences = false;
       notifyListeners();
@@ -385,7 +380,7 @@ class NotificationsController extends ChangeNotifier {
       workspaceSharedExportHistoryNextOffset =
           nextOffset ?? (offset + items.length);
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
       if (offset == 0) {
         workspaceSharedAuditExports =
             const <WorkspaceSharedComplianceAuditExportRecordV1>[];
@@ -469,7 +464,7 @@ class NotificationsController extends ChangeNotifier {
         _setError(null);
         return path;
       } catch (error) {
-        reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
+        reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
         return null;
       } finally {
         await reloadExportHistory();
@@ -504,7 +499,7 @@ class NotificationsController extends ChangeNotifier {
       _setError(null);
       return path;
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
       return null;
     } finally {
       await reloadExportHistory();
@@ -539,7 +534,7 @@ class NotificationsController extends ChangeNotifier {
       _setError(null);
       return job;
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
       return null;
     } finally {
       enqueueingWorkspaceSharedAuditAsyncExport = false;
@@ -586,8 +581,7 @@ class NotificationsController extends ChangeNotifier {
         if (job.downloadReady || job.status == 'succeeded') {
           await reloadExportHistory();
           workspaceSharedAsyncExportInfo =
-              _l10n?.notificationsComplianceSharedAsyncExportCompleted ??
-              'Workspace shared audit background export completed. Export history refreshed.';
+              _l10nResolved.notificationsComplianceSharedAsyncExportCompleted;
           notifyListeners();
           return;
         }
@@ -596,22 +590,22 @@ class NotificationsController extends ChangeNotifier {
           final tid = job.numericTaskId;
           if (job.status == 'cancelled') {
             _setError(
-              _l10n?.notificationsComplianceSharedAsyncExportCancelled(tid) ??
-                  'Workspace shared audit background export cancelled (task #$tid).',
+              _l10nResolved.notificationsComplianceSharedAsyncExportCancelled(
+                tid,
+              ),
             );
           } else {
             final detail = (job.errorMessage ?? '').trim();
             _setError(
               detail.isEmpty
-                  ? (_l10n?.notificationsComplianceSharedAsyncExportFailed(
-                          tid,
-                        ) ??
-                        'Workspace shared audit background export failed (task #$tid).')
-                  : (_l10n?.notificationsComplianceSharedAsyncExportFailedWithDetail(
-                          tid,
-                          detail,
-                        ) ??
-                        'Workspace shared audit background export failed (task #$tid): $detail'),
+                  ? _l10nResolved.notificationsComplianceSharedAsyncExportFailed(
+                      tid,
+                    )
+                  : _l10nResolved
+                      .notificationsComplianceSharedAsyncExportFailedWithDetail(
+                      tid,
+                      detail,
+                    ),
             );
           }
           await reloadExportHistory();
@@ -625,8 +619,7 @@ class NotificationsController extends ChangeNotifier {
     if (_accessToken == snapshotToken) {
       await reloadExportHistory();
       workspaceSharedAsyncExportInfo =
-          _l10n?.notificationsComplianceSharedAsyncExportTimedOut ??
-          'Background export did not confirm completion within about 3 minutes and may still be queued. Check "Filter export history" shortly.';
+          _l10nResolved.notificationsComplianceSharedAsyncExportTimedOut;
       notifyListeners();
     }
   }
@@ -657,7 +650,7 @@ class NotificationsController extends ChangeNotifier {
       workspaceSharedAuditNextOffset = nextOffset ?? items.length;
       _setError(null);
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
       loadingWorkspaceSharedAudit = false;
       notifyListeners();
@@ -688,7 +681,7 @@ class NotificationsController extends ChangeNotifier {
           nextOffset ?? (workspaceSharedAuditNextOffset + items.length);
       _setError(null);
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
       loadingWorkspaceSharedAudit = false;
       notifyListeners();
@@ -746,7 +739,7 @@ class NotificationsController extends ChangeNotifier {
         ),
       );
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
       return null;
     } finally {
       await reloadExportHistory();
@@ -783,7 +776,7 @@ class NotificationsController extends ChangeNotifier {
         ),
       );
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
       return null;
     } finally {
       await reloadExportHistory();
@@ -807,7 +800,7 @@ class NotificationsController extends ChangeNotifier {
       };
       return const JsonEncoder.withIndent('  ').convert(payload);
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
       return null;
     }
   }
@@ -825,18 +818,15 @@ class NotificationsController extends ChangeNotifier {
       final decoded = jsonDecode(rawJson);
       if (decoded is! Map<String, dynamic>) {
         _setError(
-          _l10n?.notificationsImportJsonObjectRequired ??
-              'Imported content must be a JSON object.',
+          _l10nResolved.notificationsImportJsonObjectRequired,
         );
         return null;
       }
       parsed = decoded;
     } catch (error) {
-      final loc = _l10n ?? rustApiLookupL10nFromPlatform();
-      final detail = describeUserVisibleApiError(loc, error);
+      final detail = describeUserVisibleApiError(_l10nResolved, error);
       _setError(
-        _l10n?.notificationsImportJsonParseFailed(detail) ??
-            'Failed to parse imported JSON: $detail',
+        _l10nResolved.notificationsImportJsonParseFailed(detail),
       );
       return null;
     }
@@ -879,7 +869,7 @@ class NotificationsController extends ChangeNotifier {
       _setError(null);
       return count;
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
       return null;
     } finally {
       savingPreferences = false;
@@ -903,7 +893,7 @@ class NotificationsController extends ChangeNotifier {
       await _loadPreferences(token);
       _setError(null);
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
       savingPreferences = false;
       notifyListeners();
@@ -939,7 +929,7 @@ class NotificationsController extends ChangeNotifier {
       await _loadPreferences(token);
       _setError(null);
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
       savingPreferences = false;
       notifyListeners();
@@ -960,14 +950,13 @@ class NotificationsController extends ChangeNotifier {
       await _loadPreferences(token);
       if (!applied) {
         _setError(
-          _l10n?.notificationsUnknownTemplate(templateId) ??
-              'Unknown template: $templateId',
+          _l10nResolved.notificationsUnknownTemplate(templateId),
         );
       } else {
         _setError(null);
       }
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
       savingPreferences = false;
       notifyListeners();
@@ -989,7 +978,7 @@ class NotificationsController extends ChangeNotifier {
       await _loadPreferences(token);
       _setError(null);
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
       savingPreferences = false;
       notifyListeners();
@@ -1009,7 +998,7 @@ class NotificationsController extends ChangeNotifier {
       await _loadPreferences(token);
       _setError(null);
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
       savingPreferences = false;
       notifyListeners();
@@ -1029,7 +1018,7 @@ class NotificationsController extends ChangeNotifier {
       await _loadPreferences(token);
       _setError(null);
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
       savingPreferences = false;
       notifyListeners();
@@ -1058,7 +1047,7 @@ class NotificationsController extends ChangeNotifier {
       );
       _setError(null);
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
       savingPreferences = false;
       notifyListeners();
@@ -1085,7 +1074,7 @@ class NotificationsController extends ChangeNotifier {
       );
       _setError(null);
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
       savingPreferences = false;
       notifyListeners();
@@ -1109,7 +1098,7 @@ class NotificationsController extends ChangeNotifier {
       hasMore = response.hasMore;
       nextBeforeId = response.nextBeforeId;
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
       loading = false;
       notifyListeners();
@@ -1133,7 +1122,7 @@ class NotificationsController extends ChangeNotifier {
       hasMore = response.hasMore;
       nextBeforeId = response.nextBeforeId;
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
       loadingMore = false;
       notifyListeners();
@@ -1153,7 +1142,7 @@ class NotificationsController extends ChangeNotifier {
       unreadCount = response.unreadCount;
       notifyListeners();
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
     }
   }
 
@@ -1192,7 +1181,7 @@ class NotificationsController extends ChangeNotifier {
           )
           .toList(growable: false);
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10n);
+      reportRustOrDescribeApiError(error, onErrorChanged: _setError, l10n: _l10nResolved);
     } finally {
       markingAllRead = false;
       notifyListeners();
