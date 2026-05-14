@@ -225,6 +225,7 @@ class _HomePageState extends State<HomePage> {
   late final AccountController _accountController = AccountController(
     accessTokenProvider: () => _session?.accessToken,
     onErrorChanged: _setSharedError,
+    l10nProvider: () => _appL10n,
   );
 
   late final ApiKeysController _apiKeysController = ApiKeysController(

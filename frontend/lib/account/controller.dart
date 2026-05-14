@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
 import 'download_stub.dart'
     if (dart.library.html) 'download_web.dart'
@@ -7,16 +8,20 @@ import 'download_stub.dart'
 
 typedef AccountAccessTokenProvider = String? Function();
 typedef AccountErrorSink = void Function(String? error);
+typedef AccountL10nProvider = AppLocalizations? Function();
 
 class AccountController extends ChangeNotifier {
   AccountController({
     required AccountAccessTokenProvider accessTokenProvider,
     required AccountErrorSink onErrorChanged,
+    required AccountL10nProvider l10nProvider,
   }) : _accessTokenProvider = accessTokenProvider,
-       _onErrorChanged = onErrorChanged;
+       _onErrorChanged = onErrorChanged,
+       _l10nProvider = l10nProvider;
 
   final AccountAccessTokenProvider _accessTokenProvider;
   final AccountErrorSink _onErrorChanged;
+  final AccountL10nProvider _l10nProvider;
 
   bool loading = false;
   bool creatingExport = false;
@@ -31,6 +36,10 @@ class AccountController extends ChangeNotifier {
   bool _primed = false;
 
   String? get _accessToken => _accessTokenProvider();
+  AppLocalizations? get _l10n => _l10nProvider();
+
+  AppLocalizations get _l10nResolved =>
+      _l10n ?? lookupAppLocalizations(const Locale('en'));
 
   bool isDownloading(String jobId) => _downloadingJobIds.contains(jobId);
 
@@ -60,7 +69,11 @@ class AccountController extends ChangeNotifier {
       items = response.items;
       activeCount = response.activeCount;
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError);
+      reportRustOrDescribeApiError(
+        error,
+        onErrorChanged: _setError,
+        l10n: _l10nResolved,
+      );
     } finally {
       loading = false;
       notifyListeners();
@@ -89,7 +102,11 @@ class AccountController extends ChangeNotifier {
           ? 1
           : 0;
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError);
+      reportRustOrDescribeApiError(
+        error,
+        onErrorChanged: _setError,
+        l10n: _l10nResolved,
+      );
     } finally {
       creatingExport = false;
       notifyListeners();
@@ -117,7 +134,11 @@ class AccountController extends ChangeNotifier {
       lastSavedPath = savedPath;
       return savedPath;
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError);
+      reportRustOrDescribeApiError(
+        error,
+        onErrorChanged: _setError,
+        l10n: _l10nResolved,
+      );
     } finally {
       _downloadingJobIds.remove(item.id);
       notifyListeners();
@@ -145,7 +166,11 @@ class AccountController extends ChangeNotifier {
       lastDeleteResponse = response;
       return response;
     } catch (error) {
-      reportRustOrDescribeApiError(error, onErrorChanged: _setError);
+      reportRustOrDescribeApiError(
+        error,
+        onErrorChanged: _setError,
+        l10n: _l10nResolved,
+      );
     } finally {
       deletingAccount = false;
       notifyListeners();
