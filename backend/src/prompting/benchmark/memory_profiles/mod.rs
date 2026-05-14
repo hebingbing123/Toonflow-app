@@ -17,8 +17,8 @@ mod tests;
 
 pub(crate) use handlers::{__path_get_experiment_roi, __path_list_memory_profiles};
 pub use types::{
-    MemoryBudgetProfileSnapshot, RoiEvidenceSummary, SampleRoiDetail, StageRoiBreakdown,
-    VariantCostDelta, VariantRoiComparison,
+    CompressionRules, MemoryBudgetProfileSnapshot, RetentionBuckets, RoiEvidenceSummary,
+    SampleRoiDetail, StageRoiBreakdown, VariantCostDelta, VariantRoiComparison,
 };
 
 pub fn routes() -> Router<AppState> {
