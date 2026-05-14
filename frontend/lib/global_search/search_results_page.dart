@@ -261,7 +261,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
   }
 
   Future<void> _copySearchLink() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final queryParts = <String>[
       'q=${Uri.encodeQueryComponent(widget.query)}',
       ..._filters.resultTypes.map(
@@ -288,7 +288,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
   }
 
   String _buildDefaultViewTitle() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final workspace = (widget.currentWorkspaceName ?? '').trim();
     final typeJoiner = l10n.globalSearchViewTitleTypesJoiner;
     final typeSummary = _filters.resultTypes.isEmpty
@@ -430,7 +430,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
   }
 
   String _formatSavedViewTimestamp(DateTime? value) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     if (value == null) {
       return l10n.globalSearchNeverUsed;
     }
@@ -439,7 +439,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
   }
 
   Future<void> _saveCurrentView() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final titleController = TextEditingController(
       text: _buildDefaultViewTitle(),
     );
@@ -521,7 +521,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
   }
 
   Future<void> _openSavedViews() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final views = _sortSavedViews(await _loadSavedViews());
     if (!mounted) {
       return;
@@ -705,7 +705,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
 
   /// Get display name for result type
   String _getTypeDisplayName(ResultType type) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     switch (type) {
       case ResultType.project:
         return l10n.globalSearchTypeProject;
@@ -761,7 +761,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
           if (!context.mounted) {
             return;
           }
-          final loc = AppLocalizations.of(context)!;
+          final loc = resolveAppLocalizationsForErrors(context);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(loc.globalSearchNovelOrEventNavigatedHint)),
           );
@@ -833,7 +833,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
     final isMobile = MediaQuery.of(context).size.width < 600;
 
@@ -1124,7 +1124,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
 
   /// Build error state with retry button
   Widget _buildErrorState() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -1163,7 +1163,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
 
   /// Build no results state
   Widget _buildNoResultsState() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -1225,7 +1225,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
 
   /// Build type section header
   Widget _buildTypeHeader(ResultType type, int count) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return Row(
       children: [
         Icon(
@@ -1260,7 +1260,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
 
   /// Build pagination controls
   Widget _buildPaginationControls() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
     final hasMore = _response?.hasMore ?? false;
     final canGoPrevious = _currentPage > 1;
