@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../l10n/app_localizations.dart';
-import '../rust_api/settings/outbound_webhook_platform.dart';
+import '../rust_api.dart';
 
 /// Multi-select chips for platform outbound webhook event types.
 class OutboundWebhookEventChips extends StatelessWidget {
@@ -31,7 +30,7 @@ class OutboundWebhookEventChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return Wrap(
       spacing: 6,
       runSpacing: 6,

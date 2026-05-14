@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'config.dart';
-import 'l10n/app_localizations.dart';
 import 'local_prefs/risky_operation_confirm_prefs.dart';
 import 'rust_api.dart';
 
@@ -77,7 +76,7 @@ class _StatusPageState extends State<StatusPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.statusPageTitle),

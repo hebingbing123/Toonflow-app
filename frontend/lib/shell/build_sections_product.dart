@@ -9,7 +9,7 @@ extension _HomePageBuildProductSections on _HomePageState {
     if (!mounted) {
       return;
     }
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final messenger = ScaffoldMessenger.of(context);
     switch (item.targetType) {
       case 'user':
@@ -197,7 +197,7 @@ extension _HomePageBuildProductSections on _HomePageState {
   }
 
   List<Widget> _buildProductSections(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return <Widget>[
       _buildProductPaneSelector(context),
       if (_shellNavigationController.productWorkspacePane ==
@@ -524,7 +524,7 @@ class _ProductPaneSelectorState extends State<_ProductPaneSelector> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final paneEntries = <(ProductWorkspacePane, String, int?)>[
       (
         ProductWorkspacePane.shortVideoSpace,
@@ -757,9 +757,9 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
     final token = widget.accessToken;
     final workspaceId = widget.currentWorkspaceId;
     if (token == null || token.isEmpty) {
-      final l10n = AppLocalizations.of(context);
+      final l10n = resolveAppLocalizationsForErrors(context);
       setState(() {
-        _error = l10n?.platformConfigPleaseSignIn ?? 'Please sign in first';
+        _error = l10n.platformConfigPleaseSignIn;
         _response = null;
         _userDraft = null;
         _workspaceDraft = null;
@@ -826,7 +826,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
       messenger.showSnackBar(
         SnackBar(
           content: Text(
-            AppLocalizations.of(context)!.platformConfigSnackUserSaved,
+            resolveAppLocalizationsForErrors(context).platformConfigSnackUserSaved,
           ),
         ),
       );
@@ -880,7 +880,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
       messenger.showSnackBar(
         SnackBar(
           content: Text(
-            AppLocalizations.of(context)!.platformConfigSnackUserReset,
+            resolveAppLocalizationsForErrors(context).platformConfigSnackUserReset,
           ),
         ),
       );
@@ -935,7 +935,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
       messenger.showSnackBar(
         SnackBar(
           content: Text(
-            AppLocalizations.of(context)!.platformConfigSnackWorkspaceSaved,
+            resolveAppLocalizationsForErrors(context).platformConfigSnackWorkspaceSaved,
           ),
         ),
       );
@@ -993,7 +993,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
       messenger.showSnackBar(
         SnackBar(
           content: Text(
-            AppLocalizations.of(context)!.platformConfigSnackWorkspaceReset,
+            resolveAppLocalizationsForErrors(context).platformConfigSnackWorkspaceReset,
           ),
         ),
       );
@@ -1050,7 +1050,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
     if (!mounted) {
       return;
     }
-    final loc = AppLocalizations.of(context)!;
+    final loc = resolveAppLocalizationsForErrors(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(loc.platformConfigSnackCopyJsonDone)),
     );
@@ -1138,7 +1138,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final userDraft = _userDraft;
     final workspaceDraft = _workspaceDraft;
     final workspace = _response?.currentWorkspace;
@@ -1577,7 +1577,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         });
       } catch (e) {
         errorText = describeUserVisibleApiError(
-          AppLocalizations.of(context)!,
+          resolveAppLocalizationsForErrors(context),
           e,
         );
       } finally {
@@ -1592,7 +1592,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     await showDialog<void>(
       context: context,
       builder: (ctx) {
-        final dl10n = AppLocalizations.of(ctx)!;
+        final dl10n = resolveAppLocalizationsForErrors(ctx);
         return StatefulBuilder(
           builder: (ctx, setInner) {
             final canManageWorkspace =
@@ -1866,7 +1866,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       }
       setState(() {
         _webhooksError = describeUserVisibleApiError(
-          AppLocalizations.of(context)!,
+          resolveAppLocalizationsForErrors(context),
           e,
         );
         _webhooks = null;
@@ -2018,7 +2018,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       }
       setState(() {
         _billingEventsError = describeUserVisibleApiError(
-          AppLocalizations.of(context)!,
+          resolveAppLocalizationsForErrors(context),
           e,
         );
         if (!append) {
@@ -2041,7 +2041,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     if (token == null || token.isEmpty) {
       return;
     }
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final url = _webhookUrlController.text.trim();
     if (url.isEmpty) {
       setState(() {
@@ -2101,7 +2101,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context)!.opsWhSnackCreated),
+          content: Text(resolveAppLocalizationsForErrors(context).opsWhSnackCreated),
         ),
       );
       await _loadWebhooks();
@@ -2111,7 +2111,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       }
       setState(() {
         _webhooksError = describeUserVisibleApiError(
-          AppLocalizations.of(context)!,
+          resolveAppLocalizationsForErrors(context),
           e,
         );
       });
@@ -2143,9 +2143,8 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
           return;
         }
         setState(() {
-          _webhooksError = AppLocalizations.of(
-            context,
-          )!.opsWhErrorWorkspaceIdPatch;
+          _webhooksError = resolveAppLocalizationsForErrors(context)
+              .opsWhErrorWorkspaceIdPatch;
         });
         return;
       }
@@ -2165,7 +2164,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       if (!mounted) {
         return;
       }
-      final patchL10n = AppLocalizations.of(context)!;
+      final patchL10n = resolveAppLocalizationsForErrors(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -2194,7 +2193,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       }
       setState(() {
         _webhooksError = describeUserVisibleApiError(
-          AppLocalizations.of(context)!,
+          resolveAppLocalizationsForErrors(context),
           e,
         );
       });
@@ -2234,7 +2233,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context)!.opsWhSnackEventsUpdated),
+          content: Text(resolveAppLocalizationsForErrors(context).opsWhSnackEventsUpdated),
         ),
       );
       await _loadWebhooks();
@@ -2244,7 +2243,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       }
       setState(() {
         _webhooksError = describeUserVisibleApiError(
-          AppLocalizations.of(context)!,
+          resolveAppLocalizationsForErrors(context),
           e,
         );
       });
@@ -2266,7 +2265,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
-        final dl10n = AppLocalizations.of(dialogContext)!;
+        final dl10n = resolveAppLocalizationsForErrors(dialogContext);
         return AlertDialog(
           title: Text(dl10n.opsWhDeleteTitle),
           content: SelectableText(dl10n.opsWhDeleteBody(id)),
@@ -2316,7 +2315,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       }
       setState(() {
         _webhooksError = describeUserVisibleApiError(
-          AppLocalizations.of(context)!,
+          resolveAppLocalizationsForErrors(context),
           e,
         );
       });
@@ -2373,7 +2372,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       }
       setState(() {
         _webhooksError = describeUserVisibleApiError(
-          AppLocalizations.of(context)!,
+          resolveAppLocalizationsForErrors(context),
           e,
         );
       });
@@ -2456,7 +2455,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
               : 'http=${res.httpStatus ?? "-"} error=${res.error ?? "unknown"}',
         );
       });
-      final testL10n = AppLocalizations.of(context)!;
+      final testL10n = resolveAppLocalizationsForErrors(context);
       final httpLabel = res.httpStatus?.toString() ?? '-';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -2473,7 +2472,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       }
       setState(() {
         _webhooksError = describeUserVisibleApiError(
-          AppLocalizations.of(context)!,
+          resolveAppLocalizationsForErrors(context),
           e,
         );
       });
@@ -2599,14 +2598,14 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     if (!mounted) {
       return;
     }
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(l10n.billingAuditQuerySummaryCopied)),
     );
   }
 
   Future<void> _copyBillingEventsSnapshotSummary() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     await Clipboard.setData(
       ClipboardData(text: _billingEventsSnapshotSummary(l10n)),
     );
@@ -2623,7 +2622,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     if (!mounted) {
       return;
     }
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(l10n.billingCopiedWithLabel(labelForSnack))),
     );
@@ -2726,7 +2725,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       if (!mounted) {
         return;
       }
-      final l10n = AppLocalizations.of(context)!;
+      final l10n = resolveAppLocalizationsForErrors(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.billingAuditFullCsvCopied(all.length))),
       );
@@ -2736,7 +2735,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       }
       setState(() {
         _billingEventsError = describeUserVisibleApiError(
-          AppLocalizations.of(context)!,
+          resolveAppLocalizationsForErrors(context),
           e,
         );
       });
@@ -2751,7 +2750,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final outboundWebhookEmptyMsg = _webhooks == null
         ? null
         : describeOutboundWebhookEmptyState(

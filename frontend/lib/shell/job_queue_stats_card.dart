@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../l10n/app_localizations.dart';
 import '../config.dart';
 import '../rust_api.dart';
 
@@ -41,7 +40,7 @@ class _JobQueueStatsCardState extends State<JobQueueStatsCard> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),

@@ -680,7 +680,8 @@ class _HomePageState extends State<HomePage> {
       }
       _selectProductPaneWithGate(
         ProductWorkspacePane.jobs,
-        disabledReason: AppLocalizations.of(context)!.productPaneDisabledJobs,
+        disabledReason:
+            resolveAppLocalizationsForErrors(context).productPaneDisabledJobs,
       );
       return;
     }

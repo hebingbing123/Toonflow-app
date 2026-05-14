@@ -9,7 +9,7 @@ extension _HomePageBuildDebugSections on _HomePageState {
     if (!mounted) {
       return;
     }
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final messenger = ScaffoldMessenger.of(context);
     _shellNavigationController.selectHomeSectionMode(HomeSectionMode.debug);
     switch (item.targetType) {

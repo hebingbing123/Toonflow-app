@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../l10n/app_localizations.dart';
+import '../rust_api.dart';
 import 'navigation_controller.dart';
 
 /// Platform-level entry points for the short-drama production chain (Moneyprinter-style),
@@ -20,7 +20,7 @@ class PlatformShortDramaPipelineStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final steps = <(ProductWorkspacePane, String, IconData)>[
       (ProductWorkspacePane.projects, l10n.productPipelineStripProjects, Icons.folder_special_outlined),
       (ProductWorkspacePane.scriptWorkspace, l10n.productPipelineStripScripts, Icons.menu_book_outlined),

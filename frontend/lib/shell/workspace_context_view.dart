@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import '../rust_api.dart';
 
 class WorkspaceContextView extends StatelessWidget {
   const WorkspaceContextView({
@@ -27,7 +28,7 @@ class WorkspaceContextView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = resolveAppLocalizationsForErrors(context);
     final workspaceLine = loading
         ? l10n.workspaceContextLoading
         : (workspaceName?.trim().isNotEmpty == true
