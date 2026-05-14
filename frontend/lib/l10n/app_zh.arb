@@ -12316,7 +12316,7 @@
   "shortVideoPublishPanelCurrentDraftLabel": "当前操作草稿",
   "shortVideoPublishPanelSelectDraftHint": "请选择要操作的草稿",
   "shortVideoPublishPanelUntitledDraft": "（无标题）",
-  "shortVideoPublishDraftDropdownLabel": "{title} · {status}",
+  "shortVideoPublishDraftDropdownLabel": "{title}｜{status}",
   "@shortVideoPublishDraftDropdownLabel": {
     "placeholders": {
       "title": {

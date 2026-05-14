@@ -15125,7 +15125,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String shortVideoPublishDraftDropdownLabel(String title, String status) {
-    return '$title · $status';
+    return '$title｜$status';
   }
 
   @override
