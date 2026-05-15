@@ -46,6 +46,7 @@ class _QualityReviewsWorkbenchDialogState
   String? _tokenEfficiencySamplesSummary;
   String? _stagePassRateSummary;
   String? _badCaseStatsSummary;
+  List<BadCaseStatItem> _badCaseStatItems = const <BadCaseStatItem>[];
   String? _reviewDetails;
   bool _loadingReviews = false;
   bool _loadingBadCases = false;
@@ -447,6 +448,7 @@ class _QualityReviewsWorkbenchDialogState
       final items = await fetchBadCaseStats(widget.accessToken, limit: 5);
       if (!mounted) return;
       setState(() {
+        _badCaseStatItems = items;
         _badCaseStatsSummary = items.isEmpty
             ? l10n.qualityReviewsNoBadCaseData
             : items
@@ -669,6 +671,7 @@ class _QualityReviewsWorkbenchDialogState
         stagePassRateSummary: _stagePassRateSummary,
         stageGradeRows: _stageGradeRows,
         badCaseStatsSummary: _badCaseStatsSummary,
+        badCaseStatItems: _badCaseStatItems,
         reviewDetails: _reviewDetails,
         statusLine: _statusLine,
         initialProjectScopeSummary: widget.initialProjectScopeSummary,

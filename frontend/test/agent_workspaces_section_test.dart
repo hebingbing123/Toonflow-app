@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/agent_workspaces/controls.dart';
+import 'package:openflow_app/agent_workspaces/input_controller.dart';
 import 'package:openflow_app/agent_workspaces/section.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/l10n/app_localizations_zh.dart';
@@ -94,6 +95,8 @@ class _WorkspaceControllers {
     String scriptSubAgentTool = 'run_sub_agent_storySkeleton',
     String productionSubAgentTool = 'run_sub_agent_director_plan',
   }) : projectIdController = TextEditingController(text: projectId),
+       scriptDomainFocusRevision = ValueNotifier<int>(0),
+       productionDomainFocusRevision = ValueNotifier<int>(0),
        scriptIdController = TextEditingController(text: scriptId),
        scriptPromptController = TextEditingController(text: scriptPrompt),
        scriptDomainToolController = TextEditingController(
@@ -123,6 +126,8 @@ class _WorkspaceControllers {
        );
 
   final TextEditingController projectIdController;
+  final ValueNotifier<int> scriptDomainFocusRevision;
+  final ValueNotifier<int> productionDomainFocusRevision;
   final TextEditingController scriptIdController;
   final TextEditingController scriptPromptController;
   final TextEditingController scriptDomainToolController;
@@ -137,6 +142,8 @@ class _WorkspaceControllers {
 
   void dispose() {
     projectIdController.dispose();
+    scriptDomainFocusRevision.dispose();
+    productionDomainFocusRevision.dispose();
     scriptIdController.dispose();
     scriptPromptController.dispose();
     scriptDomainToolController.dispose();
@@ -206,9 +213,11 @@ AgentWorkspacesSection _buildSection({
     projectIdController: controllers.projectIdController,
     scriptIdController: controllers.scriptIdController,
     scriptPromptController: controllers.scriptPromptController,
+    scriptDomainFocusRevision: controllers.scriptDomainFocusRevision,
     scriptDomainToolController: controllers.scriptDomainToolController,
     scriptDomainArgsController: controllers.scriptDomainArgsController,
     productionPromptController: controllers.productionPromptController,
+    productionDomainFocusRevision: controllers.productionDomainFocusRevision,
     flowKeyController: controllers.flowKeyController,
     productionDomainToolController: controllers.productionDomainToolController,
     productionDomainArgsController: controllers.productionDomainArgsController,
@@ -375,86 +384,92 @@ void main() {
       expect(find.text(zh.agentWorkspaceProductionRunWorkflow), findsOneWidget);
 
       await _switchPane(tester, AgentWorkspacePane.activity);
-      expect(find.text(zh.agentWorkspaceActivityLatestAssistantText), findsOneWidget);
       expect(
-        find.textContaining(zh.agentWorkspaceActivityLatest('harness.tool.result')),
+        find.text(zh.agentWorkspaceActivityLatestAssistantText),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining(
+          zh.agentWorkspaceActivityLatest('harness.tool.result'),
+        ),
         findsOneWidget,
       );
     });
   });
 
   group('Script workspace behavior', () {
-    testWidgets('Script guided tasks trigger probe/sub-agent/writeback actions', (
-      WidgetTester tester,
-    ) async {
-      final controllers = _WorkspaceControllers();
+    testWidgets(
+      'Script guided tasks trigger probe/sub-agent/writeback actions',
+      (WidgetTester tester) async {
+        final controllers = _WorkspaceControllers();
 
-      String? lastProbedTool;
-      String? lastProbedArgs;
-      var runSubAgentCalls = 0;
-      var writeBackCalls = 0;
+        String? lastProbedTool;
+        String? lastProbedArgs;
+        var runSubAgentCalls = 0;
+        var writeBackCalls = 0;
 
-      _addWorkspaceTearDown(tester, controllers);
+        _addWorkspaceTearDown(tester, controllers);
 
-      await _pumpSection(
-        tester,
-        controllers: controllers,
-        workspaceScriptWritebackCandidate: 'candidate',
-        workspaceLastToolResultLine: 'get_flowData => storyboard',
-        workspaceLastToolName: 'get_flowData',
-        workspaceLastToolResultData: const <String, dynamic>{
-          'data': <Map<String, dynamic>>[
-            <String, dynamic>{
-              'id': 101,
-              'shouldGenerateImage': true,
-              'associateAssetsIds': <int>[7, 12],
-            },
-            <String, dynamic>{
-              'id': 102,
-              'src': 'https://example.com/102.png',
-              'shouldGenerateImage': true,
-              'associateAssetsIds': <int>[30],
-            },
-          ],
-        },
-        workspaceSuggestedFlowKey: 'storyboard',
-        onProbeScriptDomainTool: (String toolName, String rawArgs) {
-          lastProbedTool = toolName;
-          lastProbedArgs = rawArgs;
-        },
-        onRunScriptSubAgentTool: () => runSubAgentCalls += 1,
-        onWriteBackScriptResult: () => writeBackCalls += 1,
-      );
+        await _pumpSection(
+          tester,
+          controllers: controllers,
+          workspaceScriptWritebackCandidate: 'candidate',
+          workspaceLastToolResultLine: 'get_flowData => storyboard',
+          workspaceLastToolName: 'get_flowData',
+          workspaceLastToolResultData: const <String, dynamic>{
+            'data': <Map<String, dynamic>>[
+              <String, dynamic>{
+                'id': 101,
+                'shouldGenerateImage': true,
+                'associateAssetsIds': <int>[7, 12],
+              },
+              <String, dynamic>{
+                'id': 102,
+                'src': 'https://example.com/102.png',
+                'shouldGenerateImage': true,
+                'associateAssetsIds': <int>[30],
+              },
+            ],
+          },
+          workspaceSuggestedFlowKey: 'storyboard',
+          onProbeScriptDomainTool: (String toolName, String rawArgs) {
+            lastProbedTool = toolName;
+            lastProbedArgs = rawArgs;
+          },
+          onRunScriptSubAgentTool: () => runSubAgentCalls += 1,
+          onWriteBackScriptResult: () => writeBackCalls += 1,
+        );
 
-      await tester.tap(find.text(zh.agentWorkspaceScriptStepFetchPlanData));
-      await tester.pump();
-      expect(lastProbedTool, 'get_planData');
-      expect(lastProbedArgs, '{"key":"storySkeleton","maxChars":1600}');
+        await tester.tap(find.text(zh.agentWorkspaceScriptStepFetchPlanData));
+        await tester.pump();
+        expect(lastProbedTool, 'get_planData');
+        expect(lastProbedArgs, '{"key":"storySkeleton","maxChars":1600}');
 
-      await tester.tap(find.text(zh.agentWorkspaceScriptStepFetchContent));
-      await tester.pump();
-      expect(lastProbedTool, 'get_script_content');
-      expect(
-        lastProbedArgs,
-        '{"scriptId":2,"lineStart":61,"lineEnd":120,"maxChars":1600}',
-      );
+        await tester.tap(find.text(zh.agentWorkspaceScriptStepFetchContent));
+        await tester.pump();
+        expect(lastProbedTool, 'get_script_content');
+        expect(
+          lastProbedArgs,
+          '{"scriptId":2,"lineStart":61,"lineEnd":120,"maxChars":1600}',
+        );
 
-      await tester.tap(find.text(zh.agentWorkspaceScriptStepGenerateDraft));
-      await tester.pump();
-      expect(runSubAgentCalls, 1);
-      expect(
-        controllers.scriptSubAgentToolController.text,
-        'run_sub_agent_script',
-      );
-      expect(
-        controllers.scriptPromptController.text,
-        zh.agentWorkspaceScriptGuidedGenerateDraftPrompt,
-      );
+        await tester.tap(find.text(zh.agentWorkspaceScriptStepGenerateDraft));
+        await tester.pump();
+        expect(runSubAgentCalls, 1);
+        expect(
+          controllers.scriptSubAgentToolController.text,
+          'run_sub_agent_script',
+        );
+        expect(
+          controllers.scriptPromptController.text,
+          zh.agentWorkspaceScriptGuidedGenerateDraftPrompt,
+        );
 
-      await tester.tap(find.text(zh.agentWorkspaceScriptStepWriteback).first);
-      await tester.pump();
-      expect(writeBackCalls, 1);
-    });
+        await tester.tap(find.text(zh.agentWorkspaceScriptStepWriteback).first);
+        await tester.pump();
+        expect(writeBackCalls, 1);
+      },
+    );
 
     testWidgets('Script pane renders planData and tool context snapshots', (
       WidgetTester tester,
@@ -483,10 +498,19 @@ void main() {
         },
       );
 
-      expect(find.text(zh.agentWorkspaceScriptContextSnapshotTitle), findsOneWidget);
-      expect(find.text(zh.agentWorkspaceScriptStageTitleStorySkeleton), findsWidgets);
+      expect(
+        find.text(zh.agentWorkspaceScriptContextSnapshotTitle),
+        findsOneWidget,
+      );
+      expect(
+        find.text(zh.agentWorkspaceScriptStageTitleStorySkeleton),
+        findsWidgets,
+      );
       expect(find.textContaining('主角失去记忆后踏上回乡之路'), findsNWidgets(2));
-      expect(find.text(zh.agentWorkspaceScriptStageTitleAdaptationStrategy), findsWidgets);
+      expect(
+        find.text(zh.agentWorkspaceScriptStageTitleAdaptationStrategy),
+        findsWidgets,
+      );
       expect(find.textContaining('聚焦母女关系'), findsNWidgets(2));
       expect(
         find.textContaining(zh.agentWorkspaceScriptContextRewriteConstraints),
@@ -501,6 +525,44 @@ void main() {
       expect(find.textContaining('get_script_content'), findsWidgets);
       expect(find.textContaining('第 1 场：站台'), findsOneWidget);
     });
+
+    testWidgets(
+      'Script pane plan writeback hint counts only normalized script rows',
+      (WidgetTester tester) async {
+        final controllers = _WorkspaceControllers(
+          scriptPrompt: 'script prompt',
+        );
+        _addWorkspaceTearDown(tester, controllers);
+
+        await _pumpSection(
+          tester,
+          controllers: controllers,
+          workspaceScriptPlanRowId: 55,
+          workspaceScriptPlanWritebackCandidate: const <String, dynamic>{
+            'data': <String, dynamic>{
+              'storySkeleton': '骨架',
+              'adaptationStrategy': '策略',
+              'script': <Map<String, dynamic>>[
+                <String, dynamic>{'numeric_id': 3, 'content': 'row 3'},
+                <String, dynamic>{'id': 4, 'content': 'row 4', 'name': 'extra'},
+                <String, dynamic>{'id': 0, 'content': 'skip me'},
+                <String, dynamic>{'numeric_id': 5, 'content': 9},
+              ],
+            },
+          },
+        );
+
+        expect(
+          find.text(
+            zh.agentWorkspaceScriptPlanWritebackReady(
+              zh.agentWorkspaceScriptPlanHint(55),
+              2,
+            ),
+          ),
+          findsOneWidget,
+        );
+      },
+    );
 
     testWidgets('Script pane renders novel event snapshot from tool result', (
       WidgetTester tester,
@@ -567,7 +629,10 @@ void main() {
       expect(find.textContaining('get_novel_text'), findsWidgets);
       expect(find.textContaining('雨夜归乡'), findsOneWidget);
       expect(find.text(zh.agentWorkspaceScriptDiagnosisTitle), findsOneWidget);
-      expect(find.text(zh.agentWorkspaceScriptRecipeReadMatchingEventsTitle), findsOneWidget);
+      expect(
+        find.text(zh.agentWorkspaceScriptRecipeReadMatchingEventsTitle),
+        findsOneWidget,
+      );
 
       await _selectDropdownValue(
         tester,
@@ -575,7 +640,10 @@ void main() {
         nextValue: 'get_novel_events',
       );
 
-      expect(find.text(zh.agentWorkspaceScriptArgFillFirstChapter), findsOneWidget);
+      expect(
+        find.text(zh.agentWorkspaceScriptArgFillFirstChapter),
+        findsOneWidget,
+      );
 
       await _tapButtonInCard(
         tester,
@@ -590,7 +658,11 @@ void main() {
         '{"novelId":21,"fields":["numeric_id","name","detail"],"limit":8,"maxChars":1200}',
       );
 
-      await tester.tap(find.widgetWithText(FilledButton, zh.agentWorkspaceScriptRunSubAgent).last);
+      await tester.tap(
+        find
+            .widgetWithText(FilledButton, zh.agentWorkspaceScriptRunSubAgent)
+            .last,
+      );
       await tester.pump();
       expect(subAgentCalls, 1);
       expect(
@@ -637,7 +709,10 @@ void main() {
       );
 
       expect(find.text(zh.agentWorkspaceScriptStagesTitle), findsOneWidget);
-      expect(find.text(zh.agentWorkspaceScriptStageStatusPendingGenerate), findsWidgets);
+      expect(
+        find.text(zh.agentWorkspaceScriptStageStatusPendingGenerate),
+        findsWidgets,
+      );
 
       final advanceStageButton = _buttonInCard(
         FilledButton,
@@ -687,13 +762,18 @@ void main() {
         onProbeScriptDomainTool: (_, _) => probeCalls += 1,
       );
 
-      final probeButton = find.widgetWithText(FilledButton, zh.agentWorkspaceScriptReadContext).first;
+      final probeButton = find
+          .widgetWithText(FilledButton, zh.agentWorkspaceScriptReadContext)
+          .first;
       await tester.ensureVisible(probeButton);
       await tester.tap(probeButton);
       await tester.pump();
 
       expect(probeCalls, 0);
-      expect(find.text(zh.agentWorkspaceScriptInterceptArgsJsonParseFailed), findsOneWidget);
+      expect(
+        find.text(zh.agentWorkspaceScriptInterceptArgsJsonParseFailed),
+        findsOneWidget,
+      );
     });
 
     testWidgets('Script argument templates and probe sync render', (
@@ -736,18 +816,25 @@ void main() {
         nextValue: 'get_script_content',
       );
 
-      expect(find.text(zh.agentWorkspaceScriptArgTemplateCurrentWindow), findsOneWidget);
+      expect(
+        find.text(zh.agentWorkspaceScriptArgTemplateCurrentWindow),
+        findsOneWidget,
+      );
       expect(find.text('tool=get_script_content'), findsOneWidget);
       expect(find.text('plan.scriptRows=1'), findsOneWidget);
 
-      await tester.tap(find.text(zh.agentWorkspaceScriptArgTemplateCurrentWindow));
+      await tester.tap(
+        find.text(zh.agentWorkspaceScriptArgTemplateCurrentWindow),
+      );
       await tester.pump();
       expect(
         controllers.scriptDomainArgsController.text,
         '{"scriptId":9,"lineStart":1,"lineEnd":80,"maxChars":2200}',
       );
 
-      final probeButton = find.widgetWithText(FilledButton, zh.agentWorkspaceScriptReadContext).last;
+      final probeButton = find
+          .widgetWithText(FilledButton, zh.agentWorkspaceScriptReadContext)
+          .first;
       await tester.ensureVisible(probeButton);
       await tester.tap(probeButton);
       await tester.pump();
@@ -782,8 +869,6 @@ void main() {
       expect(find.text('tool=get_planData'), findsOneWidget);
 
       controllers.scriptDomainToolController.text = 'get_script_content';
-      controllers.scriptDomainArgsController.text =
-          '{"scriptId":9,"lineStart":61,"lineEnd":120,"maxChars":1600}';
 
       await _pumpAgentWorkspacesSection(
         tester,
@@ -797,10 +882,14 @@ void main() {
       );
 
       expect(find.text('tool=get_script_content'), findsOneWidget);
+      expect(
+        controllers.scriptDomainArgsController.text,
+        '{"scriptId":9,"lineStart":1,"lineEnd":80,"maxChars":2200}',
+      );
 
       final probeButton = find
           .widgetWithText(FilledButton, zh.agentWorkspaceScriptReadContext)
-          .last;
+          .first;
       await tester.ensureVisible(probeButton);
       await tester.tap(probeButton);
       await tester.pump();
@@ -808,9 +897,118 @@ void main() {
       expect(lastTool, 'get_script_content');
       expect(
         lastArgs,
-        '{"scriptId":9,"lineStart":61,"lineEnd":120,"maxChars":1600}',
+        '{"scriptId":9,"lineStart":1,"lineEnd":80,"maxChars":2200}',
       );
     });
+
+    testWidgets(
+      'Script domain focus helper preserves custom args across external updates',
+      (WidgetTester tester) async {
+        final inputController = WorkspaceInputController();
+        addTearDown(inputController.dispose);
+        inputController.scriptIdController.text = '9';
+
+        final controllers = _WorkspaceControllers(scriptId: '9');
+        _addWorkspaceTearDown(tester, controllers);
+        controllers.scriptDomainToolController.text =
+            inputController.scriptDomainToolController.text;
+        controllers.scriptDomainArgsController.text =
+            inputController.scriptDomainArgsController.text;
+        controllers.scriptSubAgentToolController.text =
+            inputController.scriptSubAgentToolController.text;
+        controllers.scriptPromptController.text =
+            inputController.scriptPromptController.text;
+
+        String? lastTool;
+        String? lastArgs;
+
+        await _pumpAgentWorkspacesSection(
+          tester,
+          _buildSection(
+            controllers: controllers,
+            onProbeScriptDomainTool: (tool, args) {
+              lastTool = tool;
+              lastArgs = args;
+            },
+          ),
+        );
+
+        inputController.applyScriptDomainFocus(
+          domainTool: 'get_script_content',
+          rawDomainArgs:
+              '{"scriptId":9,"lineStart":61,"lineEnd":120,"maxChars":1600}',
+          subAgentTool: 'run_sub_agent_script',
+          prompt: 'repair this tail window',
+        );
+        controllers.scriptDomainFocusRevision.value =
+            inputController.scriptDomainFocusRevision.value;
+        controllers.scriptDomainToolController.text =
+            inputController.scriptDomainToolController.text;
+        controllers.scriptDomainArgsController.text =
+            inputController.scriptDomainArgsController.text;
+        controllers.scriptSubAgentToolController.text =
+            inputController.scriptSubAgentToolController.text;
+        controllers.scriptPromptController.text =
+            inputController.scriptPromptController.text;
+
+        await _pumpAgentWorkspacesSection(
+          tester,
+          _buildSection(
+            controllers: controllers,
+            onProbeScriptDomainTool: (tool, args) {
+              lastTool = tool;
+              lastArgs = args;
+            },
+          ),
+        );
+
+        expect(find.text('tool=get_script_content'), findsOneWidget);
+        expect(
+          controllers.scriptDomainArgsController.text,
+          '{"scriptId":9,"lineStart":61,"lineEnd":120,"maxChars":1600}',
+        );
+
+        final probeButton = find
+            .widgetWithText(FilledButton, zh.agentWorkspaceScriptReadContext)
+            .first;
+        await tester.ensureVisible(probeButton);
+        await tester.tap(probeButton);
+        await tester.pump();
+
+        expect(lastTool, 'get_script_content');
+        expect(
+          lastArgs,
+          '{"scriptId":9,"lineStart":61,"lineEnd":120,"maxChars":1600}',
+        );
+      },
+    );
+
+    testWidgets(
+      'Script focus revision skips preset backfill for empty object args',
+      (WidgetTester tester) async {
+        final controllers = _WorkspaceControllers(scriptId: '9');
+        _addWorkspaceTearDown(tester, controllers);
+
+        await _pumpAgentWorkspacesSection(
+          tester,
+          _buildSection(controllers: controllers),
+        );
+
+        expect(find.text('tool=get_planData'), findsOneWidget);
+
+        controllers.scriptDomainToolController.text = 'get_script_content';
+        controllers.scriptDomainArgsController.text = '{}';
+        controllers.scriptDomainFocusRevision.value++;
+
+        await _pumpAgentWorkspacesSection(
+          tester,
+          _buildSection(controllers: controllers),
+        );
+
+        expect(find.text('tool=get_script_content'), findsOneWidget);
+        expect(controllers.scriptDomainArgsController.text, '{}');
+      },
+    );
   });
 
   group('Production workspace behavior', () {
@@ -853,13 +1051,17 @@ void main() {
 
       await _switchPane(tester, AgentWorkspacePane.production);
 
-      await tester.tap(find.text(zh.agentWorkspaceProductionStepPullAssetsFlow));
+      await tester.tap(
+        find.text(zh.agentWorkspaceProductionStepPullAssetsFlow),
+      );
       await tester.pump();
       expect(controllers.flowKeyController.text, 'assets');
       expect(controllers.productionDomainToolController.text, 'get_flowData');
       expect(productionProbeCalls, 1);
 
-      await tester.tap(find.text(zh.agentWorkspaceProductionStepRunAssetsSubAgent));
+      await tester.tap(
+        find.text(zh.agentWorkspaceProductionStepRunAssetsSubAgent),
+      );
       await tester.pump();
       expect(
         controllers.productionSubAgentToolController.text,
@@ -872,7 +1074,9 @@ void main() {
       expect(controllers.productionPromptController.text, isNotEmpty);
       expect(productionSubAgentCalls, 1);
 
-      await tester.tap(find.text(zh.agentWorkspaceProductionStepPullStoryboardFlow));
+      await tester.tap(
+        find.text(zh.agentWorkspaceProductionStepPullStoryboardFlow),
+      );
       await tester.pump();
       expect(controllers.flowKeyController.text, 'storyboard');
       expect(productionProbeCalls, 2);
@@ -881,7 +1085,9 @@ void main() {
       await tester.pump();
       expect(productionWriteBackCalls, 1);
 
-      await tester.tap(find.text(zh.agentWorkspaceProductionStepRunStoryboardSubAgent));
+      await tester.tap(
+        find.text(zh.agentWorkspaceProductionStepRunStoryboardSubAgent),
+      );
       await tester.pump();
       expect(controllers.flowKeyController.text, 'storyboard');
       expect(
@@ -894,7 +1100,9 @@ void main() {
       );
       expect(productionSubAgentCalls, 2);
 
-      await tester.tap(find.text(zh.agentWorkspaceProductionStepRunDirectorPlanSubAgent));
+      await tester.tap(
+        find.text(zh.agentWorkspaceProductionStepRunDirectorPlanSubAgent),
+      );
       await tester.pump();
       expect(controllers.flowKeyController.text, 'scriptPlan');
       expect(
@@ -973,13 +1181,19 @@ void main() {
 
       await _switchPane(tester, AgentWorkspacePane.production);
 
-      final probeButton = find.widgetWithText(FilledButton, zh.agentWorkspaceProductionReadTool);
+      final probeButton = find.widgetWithText(
+        FilledButton,
+        zh.agentWorkspaceProductionReadTool,
+      );
       await tester.ensureVisible(probeButton);
       await tester.tap(probeButton);
       await tester.pump();
 
       expect(productionProbeCalls, 0);
-      expect(find.text(zh.agentWorkspaceProductionInterceptArgsJsonParseFailed), findsOneWidget);
+      expect(
+        find.text(zh.agentWorkspaceProductionInterceptArgsJsonParseFailed),
+        findsOneWidget,
+      );
     });
 
     testWidgets('Production argument templates and result summary render', (
@@ -1007,25 +1221,40 @@ void main() {
 
       await _switchPane(tester, AgentWorkspacePane.production);
 
-      await tester.tap(find.text(zh.agentWorkspaceProductionArgTemplateDirectorPlan));
+      await tester.tap(
+        find.text(zh.agentWorkspaceProductionArgTemplateDirectorPlan),
+      );
       await tester.pump();
       expect(
         controllers.productionDomainArgsController.text,
         '{"key":"scriptPlan","maxChars":2200}',
       );
 
-      expect(find.text(zh.agentWorkspaceProductionResultSummary), findsOneWidget);
+      expect(
+        find.text(zh.agentWorkspaceProductionResultSummary),
+        findsOneWidget,
+      );
       expect(find.text('tool=get_flowData'), findsOneWidget);
-      expect(find.text(zh.agentWorkspaceProductionSummaryObjectKeyCount(2)), findsOneWidget);
       expect(
-        find.text(zh.agentWorkspaceProductionSummaryObjectListEntry('storyboard', 2)),
+        find.text(zh.agentWorkspaceProductionSummaryObjectKeyCount(2)),
         findsOneWidget,
       );
       expect(
-        find.text(zh.agentWorkspaceProductionSummaryObjectListEntry('assets', 3)),
+        find.text(
+          zh.agentWorkspaceProductionSummaryObjectListEntry('storyboard', 2),
+        ),
         findsOneWidget,
       );
-      expect(find.text(zh.agentWorkspaceProductionContextSnapshotTitle), findsOneWidget);
+      expect(
+        find.text(
+          zh.agentWorkspaceProductionSummaryObjectListEntry('assets', 3),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.text(zh.agentWorkspaceProductionContextSnapshotTitle),
+        findsOneWidget,
+      );
       expect(find.text('flow[storyboard]'), findsOneWidget);
       expect(find.text('flow[assets]'), findsOneWidget);
     });
@@ -1054,11 +1283,22 @@ void main() {
 
         await _switchPane(tester, AgentWorkspacePane.production);
 
-        expect(find.text(zh.agentWorkspaceProductionDiagnosisTitle), findsOneWidget);
-        expect(find.text(zh.agentWorkspaceProductionFlowRecipeAssetsPlanFirstTitle), findsOneWidget);
-        expect(find.text(zh.agentWorkspaceProductionPromptPreviewTitle), findsWidgets);
         expect(
-          find.textContaining(zh.agentWorkspaceProductionFlowRecipeAssetsPlanFirstPrompt),
+          find.text(zh.agentWorkspaceProductionDiagnosisTitle),
+          findsOneWidget,
+        );
+        expect(
+          find.text(zh.agentWorkspaceProductionFlowRecipeAssetsPlanFirstTitle),
+          findsOneWidget,
+        );
+        expect(
+          find.text(zh.agentWorkspaceProductionPromptPreviewTitle),
+          findsWidgets,
+        );
+        expect(
+          find.textContaining(
+            zh.agentWorkspaceProductionFlowRecipeAssetsPlanFirstPrompt,
+          ),
           findsWidgets,
         );
 
@@ -1133,7 +1373,10 @@ void main() {
         workspaceSuggestedFlowKey: 'scriptPlan',
       );
 
-      expect(find.text(zh.agentWorkspaceProductionContextToolText), findsOneWidget);
+      expect(
+        find.text(zh.agentWorkspaceProductionContextToolText),
+        findsOneWidget,
+      );
       expect(find.textContaining('导演计划：先补资产'), findsWidgets);
     });
 
@@ -1167,15 +1410,30 @@ void main() {
         );
 
         expect(find.text('flow[storyboard]'), findsOneWidget);
-        expect(find.textContaining(zh.agentWorkspaceProductionSummaryMissingFrames(1)), findsWidgets);
-        expect(find.textContaining(zh.agentWorkspaceProductionStoryboardShotsHashShort(101)), findsWidgets);
+        expect(
+          find.textContaining(
+            zh.agentWorkspaceProductionSummaryMissingFrames(1),
+          ),
+          findsWidgets,
+        );
+        expect(
+          find.textContaining(
+            zh.agentWorkspaceProductionStoryboardShotsHashShort(101),
+          ),
+          findsWidgets,
+        );
         expect(
           find.textContaining(
             zh.agentWorkspaceProductionStageDetailStoryboardMissingSkipped(1),
           ),
           findsWidgets,
         );
-        expect(find.textContaining(zh.agentWorkspaceProductionStoryboardShotsHashShort(102)), findsNothing);
+        expect(
+          find.textContaining(
+            zh.agentWorkspaceProductionStoryboardShotsHashShort(102),
+          ),
+          findsNothing,
+        );
       },
     );
 
@@ -1201,7 +1459,10 @@ void main() {
       );
 
       await _switchPane(tester, AgentWorkspacePane.production);
-      final probeButton = find.widgetWithText(FilledButton, zh.agentWorkspaceProductionReadTool);
+      final probeButton = find.widgetWithText(
+        FilledButton,
+        zh.agentWorkspaceProductionReadTool,
+      );
       await tester.ensureVisible(probeButton);
       await tester.tap(probeButton);
       await tester.pump();
@@ -1212,6 +1473,129 @@ void main() {
         '{"key":"storyboard"}',
       );
     });
+
+    testWidgets(
+      'Production domain focus helper preserves custom args across external updates',
+      (WidgetTester tester) async {
+        final inputController = WorkspaceInputController();
+        addTearDown(inputController.dispose);
+        inputController.scriptIdController.text = '9';
+
+        final controllers = _WorkspaceControllers(scriptId: '9');
+        _addWorkspaceTearDown(tester, controllers);
+        controllers.flowKeyController.text =
+            inputController.productionFlowKeyController.text;
+        controllers.productionDomainToolController.text =
+            inputController.productionDomainToolController.text;
+        controllers.productionDomainArgsController.text =
+            inputController.productionDomainArgsController.text;
+        controllers.productionSubAgentToolController.text =
+            inputController.productionSubAgentToolController.text;
+        controllers.productionSubAgentArgsController.text =
+            inputController.productionSubAgentArgsController.text;
+        controllers.productionPromptController.text =
+            inputController.productionPromptController.text;
+
+        var productionProbeCalls = 0;
+
+        await _pumpSection(
+          tester,
+          controllers: controllers,
+          initialPane: AgentWorkspacePane.production,
+          onProbeProductionDomainTool: () => productionProbeCalls += 1,
+        );
+
+        inputController.applyProductionDomainFocus(
+          flowKey: 'storyboard',
+          domainTool: 'generate_storyboard',
+          rawDomainArgs: '{"ids":[9,12]}',
+          subAgentTool: 'run_sub_agent_storyboard_gen',
+          rawSubAgentArgs: '{"storyboardIds":[9,12]}',
+          prompt: 'repair these storyboard shots',
+        );
+        controllers.productionDomainFocusRevision.value =
+            inputController.productionDomainFocusRevision.value;
+        controllers.flowKeyController.text =
+            inputController.productionFlowKeyController.text;
+        controllers.productionDomainToolController.text =
+            inputController.productionDomainToolController.text;
+        controllers.productionDomainArgsController.text =
+            inputController.productionDomainArgsController.text;
+        controllers.productionSubAgentToolController.text =
+            inputController.productionSubAgentToolController.text;
+        controllers.productionSubAgentArgsController.text =
+            inputController.productionSubAgentArgsController.text;
+        controllers.productionPromptController.text =
+            inputController.productionPromptController.text;
+
+        await _pumpSection(
+          tester,
+          controllers: controllers,
+          initialPane: AgentWorkspacePane.production,
+          onProbeProductionDomainTool: () => productionProbeCalls += 1,
+        );
+
+        expect(controllers.flowKeyController.text, 'storyboard');
+        expect(
+          controllers.productionDomainToolController.text,
+          'generate_storyboard',
+        );
+        expect(
+          controllers.productionDomainArgsController.text,
+          '{"ids":[9,12]}',
+        );
+        expect(
+          controllers.productionSubAgentArgsController.text,
+          '{"storyboardIds":[9,12]}',
+        );
+
+        final probeButton = find.widgetWithText(
+          FilledButton,
+          zh.agentWorkspaceProductionReadTool,
+        );
+        await tester.ensureVisible(probeButton);
+        await tester.tap(probeButton);
+        await tester.pump();
+
+        expect(productionProbeCalls, 1);
+        expect(
+          controllers.productionDomainArgsController.text,
+          '{"ids":[9,12]}',
+        );
+      },
+    );
+
+    testWidgets(
+      'Production focus revision skips preset backfill for empty object args',
+      (WidgetTester tester) async {
+        final controllers = _WorkspaceControllers(scriptId: '9');
+        _addWorkspaceTearDown(tester, controllers);
+
+        await _pumpSection(
+          tester,
+          controllers: controllers,
+          initialPane: AgentWorkspacePane.production,
+        );
+
+        expect(controllers.flowKeyController.text, 'assets');
+        expect(controllers.productionDomainToolController.text, 'get_flowData');
+
+        controllers.flowKeyController.text = 'storyboard';
+        controllers.productionDomainToolController.text = 'get_flowData';
+        controllers.productionDomainArgsController.text = '{}';
+        controllers.productionDomainFocusRevision.value++;
+
+        await _pumpSection(
+          tester,
+          controllers: controllers,
+          initialPane: AgentWorkspacePane.production,
+        );
+
+        expect(controllers.flowKeyController.text, 'storyboard');
+        expect(controllers.productionDomainToolController.text, 'get_flowData');
+        expect(controllers.productionDomainArgsController.text, '{}');
+      },
+    );
 
     // Production candidate extraction.
     testWidgets('Production pane fills candidate storyboard ids from flow', (
@@ -1240,13 +1624,18 @@ void main() {
         workspaceSuggestedFlowKey: 'storyboard',
       );
 
-      expect(find.text(zh.agentWorkspaceProductionCurrentCandidateArgs), findsOneWidget);
+      expect(
+        find.text(zh.agentWorkspaceProductionCurrentCandidateArgs),
+        findsOneWidget,
+      );
       expect(
         find.text(zh.agentWorkspaceProductionCandidateIds(3, '101, 102, 103')),
         findsOneWidget,
       );
 
-      final fillButton = find.text(zh.agentWorkspaceProductionArgSuggestFillFirstThree);
+      final fillButton = find.text(
+        zh.agentWorkspaceProductionArgSuggestFillFirstThree,
+      );
       await tester.ensureVisible(fillButton);
       await tester.tap(fillButton);
       await tester.pump();
@@ -1296,13 +1685,18 @@ void main() {
           workspaceSuggestedFlowKey: 'storyboardTable',
         );
 
-        expect(find.text(zh.agentWorkspaceProductionCurrentCandidateArgs), findsOneWidget);
+        expect(
+          find.text(zh.agentWorkspaceProductionCurrentCandidateArgs),
+          findsOneWidget,
+        );
         expect(
           find.text(zh.agentWorkspaceProductionCandidateIds(2, '3, 9')),
           findsOneWidget,
         );
 
-        final fillButton = find.text(zh.agentWorkspaceProductionArgSuggestFillFirstThree);
+        final fillButton = find.text(
+          zh.agentWorkspaceProductionArgSuggestFillFirstThree,
+        );
         await tester.ensureVisible(fillButton);
         await tester.tap(fillButton);
         await tester.pump();
@@ -1354,11 +1748,22 @@ void main() {
         ),
         findsOneWidget,
       );
-      expect(find.text(zh.agentWorkspaceProductionStageStatusWaitingScriptPlan), findsWidgets);
-      expect(find.text(zh.agentWorkspaceProductionStageFlowAssets), findsOneWidget);
-      expect(find.text(zh.agentWorkspaceProductionPromptPreviewTitle), findsWidgets);
       expect(
-        find.textContaining(zh.agentWorkspaceProductionFlowRecipeAssetsPlanFirstPrompt),
+        find.text(zh.agentWorkspaceProductionStageStatusWaitingScriptPlan),
+        findsWidgets,
+      );
+      expect(
+        find.text(zh.agentWorkspaceProductionStageFlowAssets),
+        findsOneWidget,
+      );
+      expect(
+        find.text(zh.agentWorkspaceProductionPromptPreviewTitle),
+        findsWidgets,
+      );
+      expect(
+        find.textContaining(
+          zh.agentWorkspaceProductionFlowRecipeAssetsPlanFirstPrompt,
+        ),
         findsWidgets,
       );
 

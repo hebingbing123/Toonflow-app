@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import 'workspace_scope_utils.dart';
 
 class WorkspaceOutputController extends ChangeNotifier {
   WorkspaceOutputController({AppLocalizations? Function()? l10nProvider})
@@ -99,8 +100,10 @@ class WorkspaceOutputController extends ChangeNotifier {
   void recordToolResult(String name, Object? result, {String? currentFlowKey}) {
     _lastToolName = name;
     _lastToolResultData = result;
+    Map<String, dynamic>? invocationArguments;
     if (_pendingToolName == name && _pendingToolArguments != null) {
-      _lastToolArguments = Map<String, dynamic>.from(_pendingToolArguments!);
+      invocationArguments = Map<String, dynamic>.from(_pendingToolArguments!);
+      _lastToolArguments = invocationArguments;
     } else {
       _lastToolArguments = null;
     }
@@ -109,6 +112,7 @@ class WorkspaceOutputController extends ChangeNotifier {
     _suggestedFlowKey = _suggestFlowKeyFromToolName(
       name,
       currentFlowKey: currentFlowKey,
+      invocationArguments: invocationArguments,
     );
     if (name == 'get_script_content') {
       final content = _extractScriptContentFromToolResult(result);
@@ -116,6 +120,9 @@ class WorkspaceOutputController extends ChangeNotifier {
         _scriptWritebackCandidate = _trimWorkspaceText(content);
         _scriptWritebackSource =
             'tool:get_script_content (${content.length} chars)';
+      } else {
+        _scriptWritebackCandidate = null;
+        _scriptWritebackSource = null;
       }
     }
     if (name == 'run_sub_agent_script') {
@@ -124,6 +131,9 @@ class WorkspaceOutputController extends ChangeNotifier {
         _scriptWritebackCandidate = _trimWorkspaceText(content);
         _scriptWritebackSource =
             'tool:run_sub_agent_script (${content.length} chars)';
+      } else {
+        _scriptWritebackCandidate = null;
+        _scriptWritebackSource = null;
       }
     }
     if (name == 'get_planData') {
@@ -131,6 +141,9 @@ class WorkspaceOutputController extends ChangeNotifier {
         result,
       );
       _scriptPlanRowId = _extractScriptPlanRowIdFromToolResult(result);
+      if (_scriptPlanWritebackCandidate == null) {
+        _scriptPlanRowId = null;
+      }
     }
     final encoded = jsonEncode(result);
     final summary = encoded.length > 320
@@ -164,27 +177,64 @@ class WorkspaceOutputController extends ChangeNotifier {
   }
 
   Map<String, dynamic>? _extractScriptPlanDataFromToolResult(Object? result) {
-    if (result is Map<String, dynamic>) {
-      final data = result['data'];
-      if (data is Map<String, dynamic>) {
-        return result;
-      }
+    if (result is! Map<String, dynamic>) {
+      return null;
     }
-    return null;
+    final normalizedData = _extractNormalizedScriptPlanData(result);
+    if (normalizedData == null) {
+      return null;
+    }
+    final planId = _extractScriptPlanRowIdFromToolResult(result);
+    final normalized = <String, dynamic>{'data': normalizedData};
+    if (planId != null) {
+      normalized['planId'] = planId;
+    }
+    return normalized;
   }
 
   int? _extractScriptPlanRowIdFromToolResult(Object? result) {
     if (result is! Map<String, dynamic>) {
       return null;
     }
-    final raw = result['planId'];
-    if (raw is int) {
-      return raw;
+    final rawData = result['data'];
+    final nestedData = rawData is Map<String, dynamic> ? rawData : null;
+    return toPositiveIntValue(result['planId']) ??
+        toPositiveIntValue(nestedData?['id']);
+  }
+
+  Map<String, dynamic>? _extractNormalizedScriptPlanData(
+    Map<String, dynamic> result,
+  ) {
+    final rawData = result['data'];
+    Map<String, dynamic>? candidate;
+    if (rawData is Map<String, dynamic>) {
+      final nested = rawData['data'];
+      if (nested is Map<String, dynamic>) {
+        candidate = nested;
+      } else {
+        candidate = rawData;
+      }
     }
-    if (raw is num) {
-      return raw.toInt();
+    if (candidate == null) {
+      return null;
     }
-    return null;
+    final storySkeleton =
+        (candidate['storySkeleton'] as String?) ??
+        (candidate['story_skeleton'] as String?);
+    final adaptationStrategy =
+        (candidate['adaptationStrategy'] as String?) ??
+        (candidate['adaptation_strategy'] as String?);
+    final normalized = <String, dynamic>{};
+    if (storySkeleton != null) {
+      normalized['storySkeleton'] = storySkeleton;
+    }
+    if (adaptationStrategy != null) {
+      normalized['adaptationStrategy'] = adaptationStrategy;
+    }
+    if (candidate.containsKey('script')) {
+      normalized['script'] = candidate['script'];
+    }
+    return normalized;
   }
 
   String? _extractSubAgentResultText(Object? result) {
@@ -198,9 +248,18 @@ class WorkspaceOutputController extends ChangeNotifier {
     return null;
   }
 
-  String? _suggestFlowKeyFromToolName(String name, {String? currentFlowKey}) {
+  String? _suggestFlowKeyFromToolName(
+    String name, {
+    String? currentFlowKey,
+    Map<String, dynamic>? invocationArguments,
+  }) {
     switch (name) {
       case 'get_flowData':
+        final invocationKey = invocationArguments?['key'];
+        if (invocationKey is String) {
+          final normalized = invocationKey.trim();
+          if (normalized.isNotEmpty) return normalized;
+        }
         final key = currentFlowKey?.trim();
         if (key != null && key.isNotEmpty) return key;
         return 'workspaceResult';

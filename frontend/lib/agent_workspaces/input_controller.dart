@@ -17,12 +17,16 @@ class WorkspaceInputController {
   /// **`app_project.workspace_id`** for optional **`workspaceUuid`** on WS attach (team / REST 对齐).
   final TextEditingController workspaceUuidController = TextEditingController();
   final TextEditingController scriptPromptController = TextEditingController();
+  final ValueNotifier<int> scriptDomainFocusRevision = ValueNotifier<int>(0);
   final TextEditingController scriptDomainToolController =
       TextEditingController(text: 'get_planData');
   final TextEditingController scriptDomainArgsController =
       TextEditingController(text: '{}');
   final TextEditingController productionPromptController =
       TextEditingController();
+  final ValueNotifier<int> productionDomainFocusRevision = ValueNotifier<int>(
+    0,
+  );
   final TextEditingController productionFlowKeyController =
       TextEditingController(text: 'scriptPlan');
   final TextEditingController productionDomainToolController =
@@ -36,6 +40,67 @@ class WorkspaceInputController {
   final TextEditingController productionSubAgentArgsController =
       TextEditingController(text: '{}');
 
+  void _setTrimmedOrClear(TextEditingController controller, String? value) {
+    final normalized = value?.trim();
+    if (normalized == null || normalized.isEmpty) {
+      controller.clear();
+      return;
+    }
+    controller.text = normalized;
+  }
+
+  void _setTrimmedIfPresent(TextEditingController controller, String? value) {
+    final normalized = value?.trim();
+    if (normalized == null || normalized.isEmpty) {
+      return;
+    }
+    controller.text = normalized;
+  }
+
+  void _setPositiveIntOrClear(
+    TextEditingController controller,
+    int? numericValue,
+  ) {
+    if (numericValue != null && numericValue > 0) {
+      controller.text = numericValue.toString();
+    } else {
+      controller.clear();
+    }
+  }
+
+  void _setRawJsonOrEncodedMap(
+    TextEditingController controller, {
+    Map<String, dynamic>? jsonMap,
+    String? rawJson,
+  }) {
+    if (rawJson != null) {
+      final normalized = rawJson.trim();
+      controller.text = normalized.isEmpty ? '{}' : normalized;
+      return;
+    }
+    if (jsonMap != null) {
+      controller.text = jsonEncode(jsonMap);
+    }
+  }
+
+  void _bumpRevision(ValueNotifier<int> revision) {
+    revision.value++;
+  }
+
+  void _applyProjectScopeValues({
+    int? projectNumericId,
+    int? scriptNumericId,
+    String? projectUuid,
+    String? scriptUuid,
+    String? workspaceId,
+  }) {
+    _setPositiveIntOrClear(projectIdController, projectNumericId);
+    _setTrimmedOrClear(projectUuidController, projectUuid);
+    _setTrimmedOrClear(workspaceUuidController, workspaceId);
+    _setPositiveIntOrClear(scriptIdController, scriptNumericId);
+    _setTrimmedOrClear(scriptUuidController, scriptUuid);
+  }
+
   void applyProjectScope(
     int projectNumericId, {
     int? scriptNumericId,
@@ -43,34 +108,13 @@ class WorkspaceInputController {
     String? scriptUuid,
     String? workspaceId,
   }) {
-    projectIdController.text = projectNumericId.toString();
-    final u = projectUuid?.trim();
-    if (u != null && u.isNotEmpty) {
-      projectUuidController.text = u;
-    } else {
-      projectUuidController.clear();
-    }
-    final w = workspaceId?.trim();
-    if (w != null && w.isNotEmpty) {
-      workspaceUuidController.text = w;
-    } else {
-      workspaceUuidController.clear();
-    }
-    if (scriptNumericId != null && scriptNumericId > 0) {
-      scriptIdController.text = scriptNumericId.toString();
-    } else {
-      scriptIdController.clear();
-    }
-    if (scriptUuid != null) {
-      final su = scriptUuid.trim();
-      if (su.isEmpty) {
-        scriptUuidController.clear();
-      } else {
-        scriptUuidController.text = su;
-      }
-    } else {
-      scriptUuidController.clear();
-    }
+    _applyProjectScopeValues(
+      projectNumericId: projectNumericId,
+      scriptNumericId: scriptNumericId,
+      projectUuid: projectUuid,
+      scriptUuid: scriptUuid,
+      workspaceId: workspaceId,
+    );
   }
 
   void applyProjectScopeRef({
@@ -80,38 +124,13 @@ class WorkspaceInputController {
     String? scriptUuid,
     String? workspaceId,
   }) {
-    if (projectNumericId != null && projectNumericId > 0) {
-      projectIdController.text = projectNumericId.toString();
-    } else {
-      projectIdController.clear();
-    }
-    final u = projectUuid?.trim();
-    if (u != null && u.isNotEmpty) {
-      projectUuidController.text = u;
-    } else {
-      projectUuidController.clear();
-    }
-    final w = workspaceId?.trim();
-    if (w != null && w.isNotEmpty) {
-      workspaceUuidController.text = w;
-    } else {
-      workspaceUuidController.clear();
-    }
-    if (scriptNumericId != null && scriptNumericId > 0) {
-      scriptIdController.text = scriptNumericId.toString();
-    } else {
-      scriptIdController.clear();
-    }
-    if (scriptUuid != null) {
-      final su = scriptUuid.trim();
-      if (su.isEmpty) {
-        scriptUuidController.clear();
-      } else {
-        scriptUuidController.text = su;
-      }
-    } else {
-      scriptUuidController.clear();
-    }
+    _applyProjectScopeValues(
+      projectNumericId: projectNumericId,
+      scriptNumericId: scriptNumericId,
+      projectUuid: projectUuid,
+      scriptUuid: scriptUuid,
+      workspaceId: workspaceId,
+    );
   }
 
   void clearScriptScope() {
@@ -120,11 +139,29 @@ class WorkspaceInputController {
   }
 
   void applySuggestedProductionFlowKey(String? flowKey) {
-    final normalized = flowKey?.trim();
-    if (normalized == null || normalized.isEmpty) {
+    _setTrimmedIfPresent(productionFlowKeyController, flowKey);
+  }
+
+  void applyScriptDomainFocus({
+    required String domainTool,
+    Map<String, dynamic>? domainArgs,
+    String? rawDomainArgs,
+    String? subAgentTool,
+    String? prompt,
+  }) {
+    final normalizedTool = domainTool.trim();
+    if (normalizedTool.isEmpty) {
       return;
     }
-    productionFlowKeyController.text = normalized;
+    scriptDomainToolController.text = normalizedTool;
+    _setRawJsonOrEncodedMap(
+      scriptDomainArgsController,
+      jsonMap: domainArgs,
+      rawJson: rawDomainArgs,
+    );
+    _setTrimmedIfPresent(scriptSubAgentToolController, subAgentTool);
+    _setTrimmedIfPresent(scriptPromptController, prompt);
+    _bumpRevision(scriptDomainFocusRevision);
   }
 
   void applyScriptRepairFocus({
@@ -139,20 +176,52 @@ class WorkspaceInputController {
         normalizedStage == 'director_planning' ||
         normalizedAction == 'rollback_to_director_planning';
     if (prefersAdaptationStrategy) {
-      scriptDomainToolController.text = 'get_planData';
-      scriptDomainArgsController.text = jsonEncode(<String, dynamic>{
-        'key': 'adaptationStrategy',
-        'maxChars': 1600,
-      });
-      scriptSubAgentToolController.text = 'run_sub_agent_adaptationStrategy';
+      applyScriptDomainFocus(
+        domainTool: 'get_planData',
+        domainArgs: <String, dynamic>{
+          'key': 'adaptationStrategy',
+          'maxChars': 1600,
+        },
+        subAgentTool: 'run_sub_agent_adaptationStrategy',
+      );
       return;
     }
-    scriptDomainToolController.text = 'get_planData';
-    scriptDomainArgsController.text = jsonEncode(<String, dynamic>{
-      'key': 'storySkeleton',
-      'maxChars': 1600,
-    });
-    scriptSubAgentToolController.text = 'run_sub_agent_storySkeleton';
+    applyScriptDomainFocus(
+      domainTool: 'get_planData',
+      domainArgs: <String, dynamic>{'key': 'storySkeleton', 'maxChars': 1600},
+      subAgentTool: 'run_sub_agent_storySkeleton',
+    );
+  }
+
+  void applyProductionDomainFocus({
+    String? flowKey,
+    required String domainTool,
+    Map<String, dynamic>? domainArgs,
+    String? rawDomainArgs,
+    String? subAgentTool,
+    Map<String, dynamic>? subAgentArgs,
+    String? rawSubAgentArgs,
+    String? prompt,
+  }) {
+    _setTrimmedIfPresent(productionFlowKeyController, flowKey);
+    final normalizedTool = domainTool.trim();
+    if (normalizedTool.isEmpty) {
+      return;
+    }
+    productionDomainToolController.text = normalizedTool;
+    _setRawJsonOrEncodedMap(
+      productionDomainArgsController,
+      jsonMap: domainArgs,
+      rawJson: rawDomainArgs,
+    );
+    _setTrimmedIfPresent(productionSubAgentToolController, subAgentTool);
+    _setRawJsonOrEncodedMap(
+      productionSubAgentArgsController,
+      jsonMap: subAgentArgs,
+      rawJson: rawSubAgentArgs,
+    );
+    _setTrimmedIfPresent(productionPromptController, prompt);
+    _bumpRevision(productionDomainFocusRevision);
   }
 
   void applyProductionStoryboardFocus({
@@ -160,7 +229,6 @@ class WorkspaceInputController {
     int? storyboardNumericId,
     String? suggestedAction,
   }) {
-    productionFlowKeyController.text = 'storyboard';
     final normalizedAction = suggestedAction?.trim();
     final storyboardIds = storyboardNumericId != null && storyboardNumericId > 0
         ? <int>[storyboardNumericId]
@@ -174,37 +242,44 @@ class WorkspaceInputController {
         normalizedAction == 'adjust_video_prompt';
 
     if (usesStoryboardGenerationTool) {
-      productionDomainToolController.text = 'generate_storyboard';
-      productionDomainArgsController.text = jsonEncode(<String, dynamic>{
-        'ids': storyboardIds.isEmpty ? <int>[1] : storyboardIds,
-      });
-      productionSubAgentToolController.text = 'run_sub_agent_storyboard_gen';
+      applyProductionDomainFocus(
+        flowKey: 'storyboard',
+        domainTool: 'generate_storyboard',
+        domainArgs: <String, dynamic>{
+          'ids': storyboardIds.isEmpty ? <int>[1] : storyboardIds,
+        },
+        subAgentTool: 'run_sub_agent_storyboard_gen',
+        subAgentArgs: <String, dynamic>{
+          if (storyboardIds.isNotEmpty) 'storyboardIds': storyboardIds,
+        },
+      );
     } else {
-      productionDomainToolController.text = 'get_flowData';
-      productionDomainArgsController.text = jsonEncode(<String, dynamic>{
-        'key': 'storyboard',
-        'fields': <String>[
-          'id',
-          'index',
-          'duration',
-          'src',
-          'state',
-          'associateAssetsIds',
-          'shouldGenerateImage',
-        ],
-        if (storyboardIds.isNotEmpty) 'ids': storyboardIds else 'limit': 12,
-        if (scriptNumericId != null && scriptNumericId > 0)
-          'scriptId': scriptNumericId,
-      });
-      if (usesStoryboardPanelSubAgent) {
-        productionSubAgentToolController.text =
-            'run_sub_agent_storyboard_panel';
-      }
+      applyProductionDomainFocus(
+        flowKey: 'storyboard',
+        domainTool: 'get_flowData',
+        domainArgs: <String, dynamic>{
+          'key': 'storyboard',
+          'fields': <String>[
+            'id',
+            'index',
+            'duration',
+            'src',
+            'state',
+            'associateAssetsIds',
+            'shouldGenerateImage',
+          ],
+          if (storyboardIds.isNotEmpty) 'ids': storyboardIds else 'limit': 12,
+          if (scriptNumericId != null && scriptNumericId > 0)
+            'scriptId': scriptNumericId,
+        },
+        subAgentTool: usesStoryboardPanelSubAgent
+            ? 'run_sub_agent_storyboard_panel'
+            : null,
+        subAgentArgs: <String, dynamic>{
+          if (storyboardIds.isNotEmpty) 'storyboardIds': storyboardIds,
+        },
+      );
     }
-
-    productionSubAgentArgsController.text = jsonEncode(<String, dynamic>{
-      if (storyboardIds.isNotEmpty) 'storyboardIds': storyboardIds,
-    });
   }
 
   void applyLocalizedPromptDefaults(AppLocalizations l10n) {
@@ -220,9 +295,11 @@ class WorkspaceInputController {
     scriptIdController.dispose();
     scriptUuidController.dispose();
     scriptPromptController.dispose();
+    scriptDomainFocusRevision.dispose();
     scriptDomainToolController.dispose();
     scriptDomainArgsController.dispose();
     productionPromptController.dispose();
+    productionDomainFocusRevision.dispose();
     productionFlowKeyController.dispose();
     productionDomainToolController.dispose();
     productionDomainArgsController.dispose();

@@ -11,9 +11,26 @@ List<Map<String, dynamic>> _extractResultItems(Object? result) {
 
 Map<String, dynamic>? _extractPlanDataMap(Map<String, dynamic>? result) {
   if (result == null) return null;
-  final data = result['data'];
-  if (data is Map<String, dynamic>) return data;
-  return null;
+  final rawData = result['data'];
+  if (rawData is! Map<String, dynamic>) return null;
+  final candidate = rawData['data'];
+  final data = candidate is Map<String, dynamic> ? candidate : rawData;
+  final storySkeleton =
+      (data['storySkeleton'] as String?) ?? (data['story_skeleton'] as String?);
+  final adaptationStrategy =
+      (data['adaptationStrategy'] as String?) ??
+      (data['adaptation_strategy'] as String?);
+  final normalized = <String, dynamic>{};
+  if (storySkeleton != null) {
+    normalized['storySkeleton'] = storySkeleton;
+  }
+  if (adaptationStrategy != null) {
+    normalized['adaptationStrategy'] = adaptationStrategy;
+  }
+  if (data.containsKey('script')) {
+    normalized['script'] = data['script'];
+  }
+  return normalized;
 }
 
 Map<String, dynamic>? _buildNovelStageArgs(

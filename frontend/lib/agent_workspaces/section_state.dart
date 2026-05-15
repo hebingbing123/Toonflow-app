@@ -7,6 +7,11 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
   late final TextEditingController _effectiveScriptUuidController;
   late final TextEditingController _effectiveWorkspaceUuidController;
   late final bool _ownsUuidScopeControllers;
+  late String _lastScriptDomainToolName;
+  late int _lastScriptDomainFocusRevision;
+  late String _lastProductionDomainToolName;
+  late String _lastProductionFlowKey;
+  late int _lastProductionDomainFocusRevision;
 
   TextEditingController get _productionSubAgentArgsController =>
       widget.productionSubAgentArgsController ??
@@ -46,6 +51,13 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
         ),
       ]);
     }
+    _lastScriptDomainToolName = widget.scriptDomainToolController.text.trim();
+    _lastScriptDomainFocusRevision = widget.scriptDomainFocusRevision.value;
+    _lastProductionDomainToolName = widget.productionDomainToolController.text
+        .trim();
+    _lastProductionFlowKey = widget.flowKeyController.text.trim();
+    _lastProductionDomainFocusRevision =
+        widget.productionDomainFocusRevision.value;
     _ensurePresetDefaults();
   }
 
@@ -85,6 +97,119 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
     if (_productionSubAgentArgsController.text.trim().isEmpty) {
       _productionSubAgentArgsController.text = '{}';
     }
+    _syncScriptDomainArgsWithExternalToolChange();
+    _syncProductionDomainArgsWithExternalChange();
+  }
+
+  String _trimmedControllerText(TextEditingController controller) =>
+      controller.text.trim();
+
+  void _setTrimmedTextIfPresent(
+    TextEditingController controller,
+    String? value,
+  ) {
+    final normalized = value?.trim();
+    if (normalized == null || normalized.isEmpty) {
+      return;
+    }
+    controller.text = normalized;
+  }
+
+  void _setJsonTextIfPresent(
+    TextEditingController controller,
+    Map<String, dynamic>? value,
+  ) {
+    if (value == null) {
+      return;
+    }
+    controller.text = jsonEncode(value);
+  }
+
+  void _recordScriptFocusRevision() {
+    _lastScriptDomainToolName = _trimmedControllerText(
+      widget.scriptDomainToolController,
+    );
+    widget.scriptDomainFocusRevision.value++;
+    _lastScriptDomainFocusRevision = widget.scriptDomainFocusRevision.value;
+  }
+
+  void _recordProductionFocusRevision() {
+    _lastProductionDomainToolName = _trimmedControllerText(
+      widget.productionDomainToolController,
+    );
+    _lastProductionFlowKey = _trimmedControllerText(widget.flowKeyController);
+    widget.productionDomainFocusRevision.value++;
+    _lastProductionDomainFocusRevision =
+        widget.productionDomainFocusRevision.value;
+  }
+
+  bool _shouldSkipExternalPresetSync({
+    required int currentRevision,
+    required int lastRevision,
+    required VoidCallback updateTracking,
+  }) {
+    if (currentRevision == lastRevision) {
+      return false;
+    }
+    updateTracking();
+    return true;
+  }
+
+  void _recordScriptSyncState({String? toolName, int? revision}) {
+    _lastScriptDomainToolName =
+        toolName ?? _trimmedControllerText(widget.scriptDomainToolController);
+    _lastScriptDomainFocusRevision =
+        revision ?? widget.scriptDomainFocusRevision.value;
+  }
+
+  void _recordProductionSyncState({
+    String? toolName,
+    String? flowKey,
+    int? revision,
+  }) {
+    _lastProductionDomainToolName =
+        toolName ??
+        _trimmedControllerText(widget.productionDomainToolController);
+    _lastProductionFlowKey =
+        flowKey ?? _trimmedControllerText(widget.flowKeyController);
+    _lastProductionDomainFocusRevision =
+        revision ?? widget.productionDomainFocusRevision.value;
+  }
+
+  void _syncScriptDomainArgsWithExternalToolChange() {
+    final currentTool = _trimmedControllerText(
+      widget.scriptDomainToolController,
+    );
+    final currentRevision = widget.scriptDomainFocusRevision.value;
+    if (_shouldSkipExternalPresetSync(
+      currentRevision: currentRevision,
+      lastRevision: _lastScriptDomainFocusRevision,
+      updateTracking: () => _recordScriptSyncState(
+        toolName: currentTool,
+        revision: currentRevision,
+      ),
+    )) {
+      return;
+    }
+    if (currentTool.isEmpty || currentTool == _lastScriptDomainToolName) {
+      _recordScriptSyncState(toolName: currentTool, revision: currentRevision);
+      return;
+    }
+    final currentArgs = widget.scriptDomainArgsController.text;
+    final shouldApplyPreset =
+        _isDefaultJsonObject(currentArgs) ||
+        _matchesScriptToolArgsPresetText(
+          raw: currentArgs,
+          toolName: _lastScriptDomainToolName,
+          scriptIdText: widget.scriptIdController.text,
+        );
+    if (shouldApplyPreset) {
+      widget.scriptDomainArgsController.text = _buildScriptToolArgsPresetText(
+        toolName: currentTool,
+        scriptIdText: widget.scriptIdController.text,
+      );
+    }
+    _recordScriptSyncState(toolName: currentTool, revision: currentRevision);
   }
 
   void _maybeApplyScriptToolArgsPreset(String toolName) {
@@ -98,6 +223,19 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
     );
   }
 
+  void _applyScriptFocus({
+    String? domainTool,
+    Map<String, dynamic>? domainArgs,
+    String? subAgentTool,
+    String? prompt,
+  }) {
+    _setTrimmedTextIfPresent(widget.scriptDomainToolController, domainTool);
+    _setJsonTextIfPresent(widget.scriptDomainArgsController, domainArgs);
+    _setTrimmedTextIfPresent(widget.scriptSubAgentToolController, subAgentTool);
+    _setTrimmedTextIfPresent(widget.scriptPromptController, prompt);
+    _recordScriptFocusRevision();
+  }
+
   void _maybeApplyProductionToolArgsPreset(String toolName) {
     final current = widget.productionDomainArgsController.text;
     if (!_isDefaultJsonObject(current)) {
@@ -109,6 +247,58 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
           scriptIdText: widget.scriptIdController.text,
           flowKeyText: widget.flowKeyController.text,
         );
+  }
+
+  void _syncProductionDomainArgsWithExternalChange() {
+    final currentTool = _trimmedControllerText(
+      widget.productionDomainToolController,
+    );
+    final currentFlowKey = _trimmedControllerText(widget.flowKeyController);
+    final currentRevision = widget.productionDomainFocusRevision.value;
+    if (_shouldSkipExternalPresetSync(
+      currentRevision: currentRevision,
+      lastRevision: _lastProductionDomainFocusRevision,
+      updateTracking: () => _recordProductionSyncState(
+        toolName: currentTool,
+        flowKey: currentFlowKey,
+        revision: currentRevision,
+      ),
+    )) {
+      return;
+    }
+    final toolChanged =
+        currentTool.isNotEmpty && currentTool != _lastProductionDomainToolName;
+    final flowKeyChanged = currentFlowKey != _lastProductionFlowKey;
+    if (!toolChanged && !flowKeyChanged) {
+      _recordProductionSyncState(
+        toolName: currentTool,
+        flowKey: currentFlowKey,
+        revision: currentRevision,
+      );
+      return;
+    }
+    final currentArgs = widget.productionDomainArgsController.text;
+    final shouldApplyPreset =
+        _isDefaultJsonObject(currentArgs) ||
+        _matchesProductionToolArgsPresetText(
+          raw: currentArgs,
+          toolName: _lastProductionDomainToolName,
+          scriptIdText: widget.scriptIdController.text,
+          flowKeyText: _lastProductionFlowKey,
+        );
+    if (shouldApplyPreset) {
+      widget.productionDomainArgsController.text =
+          _buildProductionToolArgsPresetText(
+            toolName: currentTool,
+            scriptIdText: widget.scriptIdController.text,
+            flowKeyText: currentFlowKey,
+          );
+    }
+    _recordProductionSyncState(
+      toolName: currentTool,
+      flowKey: currentFlowKey,
+      revision: currentRevision,
+    );
   }
 
   void _maybeApplyProductionSubAgentArgsPreset(String toolName) {
@@ -125,6 +315,65 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
         toolArguments: widget.workspaceLastToolArguments,
       ),
     );
+  }
+
+  void _applyProductionFocus({
+    String? flowKey,
+    String? domainTool,
+    Map<String, dynamic>? domainArgs,
+    String? subAgentTool,
+    Map<String, dynamic>? subAgentArgs,
+    String? prompt,
+  }) {
+    _setTrimmedTextIfPresent(widget.flowKeyController, flowKey);
+    _setTrimmedTextIfPresent(widget.productionDomainToolController, domainTool);
+    _setJsonTextIfPresent(widget.productionDomainArgsController, domainArgs);
+    _setTrimmedTextIfPresent(
+      widget.productionSubAgentToolController,
+      subAgentTool,
+    );
+    _setJsonTextIfPresent(_productionSubAgentArgsController, subAgentArgs);
+    _setTrimmedTextIfPresent(widget.productionPromptController, prompt);
+    _recordProductionFocusRevision();
+  }
+
+  void _selectScriptPrompt(String prompt) {
+    widget.scriptPromptController.text = prompt;
+  }
+
+  void _changeScriptDomainTool(String value) {
+    widget.scriptDomainToolController.text = value;
+    _lastScriptDomainToolName = value.trim();
+    _maybeApplyScriptToolArgsPreset(value);
+  }
+
+  void _changeScriptSubAgentTool(String value) {
+    widget.scriptSubAgentToolController.text = value;
+  }
+
+  void _selectProductionPrompt(String prompt) {
+    widget.productionPromptController.text = prompt;
+  }
+
+  void _changeProductionDomainTool(String value) {
+    widget.productionDomainToolController.text = value;
+    _lastProductionDomainToolName = value.trim();
+    _maybeApplyProductionToolArgsPreset(value);
+  }
+
+  void _changeProductionFlowKey(String value) {
+    widget.flowKeyController.text = value;
+    _lastProductionFlowKey = value.trim();
+    if (_trimmedControllerText(widget.productionDomainToolController) ==
+        'get_flowData') {
+      _maybeApplyProductionToolArgsPreset('get_flowData');
+    }
+  }
+
+  void _changeProductionSubAgentTool(String value) {
+    widget.productionSubAgentToolController.text = value;
+    _productionSubAgentArgsController.text = '{}';
+    _maybeApplyProductionSubAgentArgsPreset(value);
   }
 
   bool get _busy =>
@@ -150,7 +399,8 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
           scriptDomainToolPresets: _scriptDomainToolPresets,
           scriptSubAgentPresets: _scriptSubAgentPresets,
           scriptPromptPresets: agentWorkspaceScriptPromptPresets(l10n),
-          selectedScriptDomainTool: widget.scriptDomainToolController.text.trim(),
+          selectedScriptDomainTool: widget.scriptDomainToolController.text
+              .trim(),
           loadingScriptWorkspaceRun: widget.loadingScriptWorkspaceRun,
           loadingScriptDomainProbe: widget.loadingScriptDomainProbe,
           loadingScriptSubAgentRun: widget.loadingScriptSubAgentRun,
@@ -169,13 +419,10 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
           workspaceLastToolResultData: widget.workspaceLastToolResultData,
           workspaceWritebackLine: widget.workspaceWritebackLine,
           onSelectPrompt: (String prompt) {
-            setState(() => widget.scriptPromptController.text = prompt);
+            setState(() => _selectScriptPrompt(prompt));
           },
           onScriptDomainToolChanged: (String value) {
-            setState(() {
-              widget.scriptDomainToolController.text = value;
-              _maybeApplyScriptToolArgsPreset(value);
-            });
+            setState(() => _changeScriptDomainTool(value));
           },
           onRunScriptWorkspace: widget.onRunScriptWorkspace,
           onProbeScriptDomainTool: () => widget.onProbeScriptDomainTool(
@@ -183,13 +430,29 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
             widget.scriptDomainArgsController.text,
           ),
           onScriptSubAgentChanged: (String value) {
-            setState(() => widget.scriptSubAgentToolController.text = value);
+            setState(() => _changeScriptSubAgentTool(value));
           },
           onRunScriptSubAgentTool: widget.onRunScriptSubAgentTool,
           onWriteBackScriptResult: widget.onWriteBackScriptResult,
           onWriteBackScriptPlanResult: widget.onWriteBackScriptPlanResult,
           onWriteBackScriptPlanViaUpdateData:
               widget.onWriteBackScriptPlanViaUpdateData,
+          onApplyScriptFocus:
+              ({
+                String? domainTool,
+                Map<String, dynamic>? domainArgs,
+                String? subAgentTool,
+                String? prompt,
+              }) {
+                setState(() {
+                  _applyScriptFocus(
+                    domainTool: domainTool,
+                    domainArgs: domainArgs,
+                    subAgentTool: subAgentTool,
+                    prompt: prompt,
+                  );
+                });
+              },
         );
       case AgentWorkspacePane.production:
         return AgentWorkspaceProductionCard(
@@ -216,36 +479,43 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
           workspaceLastToolArguments: widget.workspaceLastToolArguments,
           workspaceSuggestedFlowKey: widget.workspaceSuggestedFlowKey,
           onSelectPrompt: (String prompt) {
-            setState(() => widget.productionPromptController.text = prompt);
+            setState(() => _selectProductionPrompt(prompt));
           },
           onProductionDomainToolChanged: (String value) {
-            setState(() {
-              widget.productionDomainToolController.text = value;
-              _maybeApplyProductionToolArgsPreset(value);
-            });
+            setState(() => _changeProductionDomainTool(value));
           },
           onFlowKeyChanged: (String value) {
-            setState(() {
-              widget.flowKeyController.text = value;
-              if (widget.productionDomainToolController.text.trim() ==
-                  'get_flowData') {
-                _maybeApplyProductionToolArgsPreset('get_flowData');
-              }
-            });
+            setState(() => _changeProductionFlowKey(value));
           },
           onRunProductionWorkspace: widget.onRunProductionWorkspace,
           onProbeProductionDomainTool: widget.onProbeProductionDomainTool,
           onProductionSubAgentChanged: (String value) {
-            setState(() {
-              widget.productionSubAgentToolController.text = value;
-              _productionSubAgentArgsController.text = '{}';
-              _maybeApplyProductionSubAgentArgsPreset(value);
-            });
+            setState(() => _changeProductionSubAgentTool(value));
           },
           onRunProductionSubAgentTool: widget.onRunProductionSubAgentTool,
           onWriteBackProductionFlowResult:
               widget.onWriteBackProductionFlowResult,
           onApplySuggestedFlowKey: widget.onApplySuggestedFlowKey,
+          onApplyProductionFocus:
+              ({
+                String? flowKey,
+                String? domainTool,
+                Map<String, dynamic>? domainArgs,
+                String? subAgentTool,
+                Map<String, dynamic>? subAgentArgs,
+                String? prompt,
+              }) {
+                setState(() {
+                  _applyProductionFocus(
+                    flowKey: flowKey,
+                    domainTool: domainTool,
+                    domainArgs: domainArgs,
+                    subAgentTool: subAgentTool,
+                    subAgentArgs: subAgentArgs,
+                    prompt: prompt,
+                  );
+                });
+              },
         );
       case AgentWorkspacePane.activity:
         return AgentWorkspaceActivityPanel(

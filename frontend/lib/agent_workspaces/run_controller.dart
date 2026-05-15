@@ -6,6 +6,7 @@ import '../l10n/app_localizations.dart';
 import 'input_controller.dart';
 import 'operation_controller.dart';
 import 'runtime_output_controller.dart';
+import 'workspace_scope_utils.dart';
 
 part 'run_controller_helpers.dart';
 
@@ -54,14 +55,9 @@ class WorkspaceRunController {
     final token = _accessTokenProvider();
     if (token == null) return;
     final loc = _l10nResolved;
-    final proj = _parseProjectAttachInputs(_inputController, loc);
-    if (proj.error != null) {
-      _onErrorChanged(proj.error);
-      return;
-    }
-    final wsScope = _parseOptionalWorkspaceUuid(_inputController, loc);
-    if (wsScope.error != null) {
-      _onErrorChanged(wsScope.error);
+    final scope = _readScriptAttachScope(_inputController, loc);
+    if (scope.error != null) {
+      _onErrorChanged(scope.error);
       return;
     }
     final prompt = _inputController.scriptPromptController.text.trim();
@@ -76,21 +72,13 @@ class WorkspaceRunController {
       true,
     );
     final sent = await _requestSender(token, <Map<String, dynamic>>[
-      <String, dynamic>{
-        'type': 'agent.script.attach',
-        'schema_version': 1,
-        'payload': _scriptAttachPayload(
-          isolationKey: 'flutter-script-workspace',
-          projectUuid: proj.projectUuid,
-          projectNumeric: proj.projectNumeric,
-          workspaceUuid: wsScope.workspaceUuid,
-        ),
-      },
-      <String, dynamic>{
-        'type': 'harness.agent.run',
-        'schema_version': 1,
-        'payload': <String, dynamic>{'content': prompt, 'max_tool_rounds': 12},
-      },
+      _scriptAttachMessage(
+        isolationKey: 'flutter-script-workspace',
+        projectUuid: scope.projectUuid,
+        projectNumeric: scope.projectNumeric,
+        workspaceUuid: scope.workspaceUuid,
+      ),
+      _agentRunMessage(prompt),
     ]);
     if (!sent) {
       _operationController.setLoading(
@@ -104,19 +92,12 @@ class WorkspaceRunController {
     final token = _accessTokenProvider();
     if (token == null) return;
     final loc = _l10nResolved;
-    final proj = _parseProjectAttachInputs(_inputController, loc);
-    if (proj.error != null) {
-      _onErrorChanged(proj.error);
+    final scope = _readScriptAttachScope(_inputController, loc);
+    if (scope.error != null) {
+      _onErrorChanged(scope.error);
       return;
     }
-    final wsScope = _parseOptionalWorkspaceUuid(_inputController, loc);
-    if (wsScope.error != null) {
-      _onErrorChanged(wsScope.error);
-      return;
-    }
-    final scriptId = _parsePositiveInt(
-      _inputController.scriptIdController.text,
-    );
+    final scriptId = parsePositiveInt(_inputController.scriptIdController.text);
     final normalizedTool = toolName.trim();
     if (normalizedTool.isEmpty) {
       _onErrorChanged(loc.agentWorkspaceRunToolNameRequired);
@@ -143,21 +124,13 @@ class WorkspaceRunController {
     _prepareWorkspaceRun();
     _operationController.setLoading(WorkspaceOperation.scriptDomainProbe, true);
     final sent = await _requestSender(token, <Map<String, dynamic>>[
-      <String, dynamic>{
-        'type': 'agent.script.attach',
-        'schema_version': 1,
-        'payload': _scriptAttachPayload(
-          isolationKey: 'flutter-script-domain-probe',
-          projectUuid: proj.projectUuid,
-          projectNumeric: proj.projectNumeric,
-          workspaceUuid: wsScope.workspaceUuid,
-        ),
-      },
-      <String, dynamic>{
-        'type': 'harness.tool.invoke',
-        'schema_version': 1,
-        'payload': <String, dynamic>{'name': normalizedTool, 'arguments': args},
-      },
+      _scriptAttachMessage(
+        isolationKey: 'flutter-script-domain-probe',
+        projectUuid: scope.projectUuid,
+        projectNumeric: scope.projectNumeric,
+        workspaceUuid: scope.workspaceUuid,
+      ),
+      _toolInvokeMessage(normalizedTool, args),
     ]);
     if (sent) {
       _outputController.recordToolInvocation(toolName, args);
@@ -174,19 +147,12 @@ class WorkspaceRunController {
     final token = _accessTokenProvider();
     if (token == null) return;
     final loc = _l10nResolved;
-    final proj = _parseProjectAttachInputs(_inputController, loc);
-    if (proj.error != null) {
-      _onErrorChanged(proj.error);
+    final scope = _readScriptAttachScope(_inputController, loc);
+    if (scope.error != null) {
+      _onErrorChanged(scope.error);
       return;
     }
-    final wsScopeSub = _parseOptionalWorkspaceUuid(_inputController, loc);
-    if (wsScopeSub.error != null) {
-      _onErrorChanged(wsScopeSub.error);
-      return;
-    }
-    final scriptId = _parsePositiveInt(
-      _inputController.scriptIdController.text,
-    );
+    final scriptId = parsePositiveInt(_inputController.scriptIdController.text);
     final prompt = _inputController.scriptPromptController.text.trim();
     final toolName = _inputController.scriptSubAgentToolController.text.trim();
     if (prompt.isEmpty || toolName.isEmpty) {
@@ -205,22 +171,17 @@ class WorkspaceRunController {
       lastToolArguments: _outputController.lastToolArguments,
     );
     final sent = await _requestSender(token, <Map<String, dynamic>>[
-      <String, dynamic>{
-        'type': 'agent.script.attach',
-        'schema_version': 1,
-        'payload': _scriptAttachPayload(
-          isolationKey: 'flutter-script-sub-agent-tool',
-          projectUuid: proj.projectUuid,
-          projectNumeric: proj.projectNumeric,
-          workspaceUuid: wsScopeSub.workspaceUuid,
-        ),
-      },
-      <String, dynamic>{
-        'type': 'harness.tool.invoke',
-        'schema_version': 1,
-        'payload': <String, dynamic>{'name': toolName, 'arguments': arguments},
-      },
+      _scriptAttachMessage(
+        isolationKey: 'flutter-script-sub-agent-tool',
+        projectUuid: scope.projectUuid,
+        projectNumeric: scope.projectNumeric,
+        workspaceUuid: scope.workspaceUuid,
+      ),
+      _toolInvokeMessage(toolName, arguments),
     ]);
+    if (sent) {
+      _outputController.recordToolInvocation(toolName, arguments);
+    }
     if (!sent) {
       _operationController.setLoading(
         WorkspaceOperation.scriptSubAgentRun,
@@ -233,19 +194,9 @@ class WorkspaceRunController {
     final token = _accessTokenProvider();
     if (token == null) return;
     final loc = _l10nResolved;
-    final proj = _parseProjectAttachInputs(_inputController, loc);
-    if (proj.error != null) {
-      _onErrorChanged(proj.error);
-      return;
-    }
-    final wsScopeProd = _parseOptionalWorkspaceUuid(_inputController, loc);
-    if (wsScopeProd.error != null) {
-      _onErrorChanged(wsScopeProd.error);
-      return;
-    }
-    final scr = _parseScriptAttachInputs(_inputController, loc);
-    if (scr.error != null) {
-      _onErrorChanged(scr.error);
+    final scope = _readProductionAttachScope(_inputController, loc);
+    if (scope.error != null) {
+      _onErrorChanged(scope.error);
       return;
     }
     final prompt = _inputController.productionPromptController.text.trim();
@@ -260,23 +211,15 @@ class WorkspaceRunController {
       true,
     );
     final sent = await _requestSender(token, <Map<String, dynamic>>[
-      <String, dynamic>{
-        'type': 'agent.production.attach',
-        'schema_version': 1,
-        'payload': _productionAttachPayload(
-          isolationKey: 'flutter-production-workspace',
-          projectUuid: proj.projectUuid,
-          projectNumeric: proj.projectNumeric,
-          scriptUuid: scr.scriptUuid,
-          scriptNumeric: scr.scriptNumeric,
-          workspaceUuid: wsScopeProd.workspaceUuid,
-        ),
-      },
-      <String, dynamic>{
-        'type': 'harness.agent.run',
-        'schema_version': 1,
-        'payload': <String, dynamic>{'content': prompt, 'max_tool_rounds': 12},
-      },
+      _productionAttachMessage(
+        isolationKey: 'flutter-production-workspace',
+        projectUuid: scope.projectUuid,
+        projectNumeric: scope.projectNumeric,
+        scriptUuid: scope.scriptUuid,
+        scriptNumeric: scope.scriptNumeric,
+        workspaceUuid: scope.workspaceUuid,
+      ),
+      _agentRunMessage(prompt),
     ]);
     if (!sent) {
       _operationController.setLoading(
@@ -290,19 +233,9 @@ class WorkspaceRunController {
     final token = _accessTokenProvider();
     if (token == null) return;
     final loc = _l10nResolved;
-    final proj = _parseProjectAttachInputs(_inputController, loc);
-    if (proj.error != null) {
-      _onErrorChanged(proj.error);
-      return;
-    }
-    final wsScopeFlow = _parseOptionalWorkspaceUuid(_inputController, loc);
-    if (wsScopeFlow.error != null) {
-      _onErrorChanged(wsScopeFlow.error);
-      return;
-    }
-    final scr = _parseScriptAttachInputs(_inputController, loc);
-    if (scr.error != null) {
-      _onErrorChanged(scr.error);
+    final scope = _readProductionAttachScope(_inputController, loc);
+    if (scope.error != null) {
+      _onErrorChanged(scope.error);
       return;
     }
     final toolName = _inputController.productionDomainToolController.text
@@ -328,7 +261,7 @@ class WorkspaceRunController {
         return;
       }
       args.putIfAbsent('key', () => key);
-      final scriptNumeric = scr.scriptNumeric;
+      final scriptNumeric = scope.scriptNumeric;
       if (scriptNumeric != null) {
         args.putIfAbsent('scriptId', () => scriptNumeric);
       }
@@ -340,24 +273,19 @@ class WorkspaceRunController {
       true,
     );
     final sent = await _requestSender(token, <Map<String, dynamic>>[
-      <String, dynamic>{
-        'type': 'agent.production.attach',
-        'schema_version': 1,
-        'payload': _productionAttachPayload(
-          isolationKey: 'flutter-production-flow-probe',
-          projectUuid: proj.projectUuid,
-          projectNumeric: proj.projectNumeric,
-          scriptUuid: scr.scriptUuid,
-          scriptNumeric: scr.scriptNumeric,
-          workspaceUuid: wsScopeFlow.workspaceUuid,
-        ),
-      },
-      <String, dynamic>{
-        'type': 'harness.tool.invoke',
-        'schema_version': 1,
-        'payload': <String, dynamic>{'name': toolName, 'arguments': args},
-      },
+      _productionAttachMessage(
+        isolationKey: 'flutter-production-flow-probe',
+        projectUuid: scope.projectUuid,
+        projectNumeric: scope.projectNumeric,
+        scriptUuid: scope.scriptUuid,
+        scriptNumeric: scope.scriptNumeric,
+        workspaceUuid: scope.workspaceUuid,
+      ),
+      _toolInvokeMessage(toolName, args),
     ]);
+    if (sent) {
+      _outputController.recordToolInvocation(toolName, args);
+    }
     if (!sent) {
       _operationController.setLoading(
         WorkspaceOperation.productionFlowProbe,
@@ -370,19 +298,9 @@ class WorkspaceRunController {
     final token = _accessTokenProvider();
     if (token == null) return;
     final loc = _l10nResolved;
-    final proj = _parseProjectAttachInputs(_inputController, loc);
-    if (proj.error != null) {
-      _onErrorChanged(proj.error);
-      return;
-    }
-    final wsScopePa = _parseOptionalWorkspaceUuid(_inputController, loc);
-    if (wsScopePa.error != null) {
-      _onErrorChanged(wsScopePa.error);
-      return;
-    }
-    final scr = _parseScriptAttachInputs(_inputController, loc);
-    if (scr.error != null) {
-      _onErrorChanged(scr.error);
+    final scope = _readProductionAttachScope(_inputController, loc);
+    if (scope.error != null) {
+      _onErrorChanged(scope.error);
       return;
     }
     final prompt = _inputController.productionPromptController.text.trim();
@@ -405,28 +323,20 @@ class WorkspaceRunController {
       true,
     );
     final arguments = <String, dynamic>{'prompt': prompt, ...extraArgs};
-    final scriptNumeric = scr.scriptNumeric;
+    final scriptNumeric = scope.scriptNumeric;
     if (scriptNumeric != null) {
       arguments['scriptId'] = scriptNumeric;
     }
     final sent = await _requestSender(token, <Map<String, dynamic>>[
-      <String, dynamic>{
-        'type': 'agent.production.attach',
-        'schema_version': 1,
-        'payload': _productionAttachPayload(
-          isolationKey: 'flutter-production-sub-agent-tool',
-          projectUuid: proj.projectUuid,
-          projectNumeric: proj.projectNumeric,
-          scriptUuid: scr.scriptUuid,
-          scriptNumeric: scr.scriptNumeric,
-          workspaceUuid: wsScopePa.workspaceUuid,
-        ),
-      },
-      <String, dynamic>{
-        'type': 'harness.tool.invoke',
-        'schema_version': 1,
-        'payload': <String, dynamic>{'name': toolName, 'arguments': arguments},
-      },
+      _productionAttachMessage(
+        isolationKey: 'flutter-production-sub-agent-tool',
+        projectUuid: scope.projectUuid,
+        projectNumeric: scope.projectNumeric,
+        scriptUuid: scope.scriptUuid,
+        scriptNumeric: scope.scriptNumeric,
+        workspaceUuid: scope.workspaceUuid,
+      ),
+      _toolInvokeMessage(toolName, arguments),
     ]);
     if (sent) {
       _outputController.recordToolInvocation(toolName, arguments);

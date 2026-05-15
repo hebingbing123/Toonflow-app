@@ -1,21 +1,58 @@
 part of 'run_controller.dart';
 
-int? _parsePositiveInt(String raw) {
-  final value = int.tryParse(raw.trim());
-  if (value == null || value <= 0) return null;
-  return value;
+class _ScriptAttachScope {
+  const _ScriptAttachScope({
+    required this.projectUuid,
+    required this.projectNumeric,
+    required this.workspaceUuid,
+    required this.error,
+  });
+
+  final String? projectUuid;
+  final int? projectNumeric;
+  final String? workspaceUuid;
+  final String? error;
 }
 
-String? _trimmedNonEmpty(String raw) {
-  final t = raw.trim();
-  return t.isEmpty ? null : t;
+class _ProductionAttachScope {
+  const _ProductionAttachScope({
+    required this.projectUuid,
+    required this.projectNumeric,
+    required this.scriptUuid,
+    required this.scriptNumeric,
+    required this.workspaceUuid,
+    required this.error,
+  });
+
+  final String? projectUuid;
+  final int? projectNumeric;
+  final String? scriptUuid;
+  final int? scriptNumeric;
+  final String? workspaceUuid;
+  final String? error;
 }
 
-bool _looksLikeUuid(String raw) {
-  final t = raw.trim();
-  return RegExp(
-    r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$',
-  ).hasMatch(t);
+void _putTrimmedIfPresent(
+  Map<String, dynamic> payload,
+  String key,
+  String? value,
+) {
+  final normalized = value?.trim();
+  if (normalized == null || normalized.isEmpty) {
+    return;
+  }
+  payload[key] = normalized;
+}
+
+void _putPositiveIntIfPresent(
+  Map<String, dynamic> payload,
+  String key,
+  int? value,
+) {
+  if (value == null || value <= 0) {
+    return;
+  }
+  payload[key] = value;
 }
 
 ({String? projectUuid, int? projectNumeric, String? error})
@@ -23,15 +60,15 @@ _parseProjectAttachInputs(
   WorkspaceInputController input,
   AppLocalizations l10n,
 ) {
-  final uuidRaw = _trimmedNonEmpty(input.projectUuidController.text);
-  if (uuidRaw != null && !_looksLikeUuid(uuidRaw)) {
+  final uuidRaw = trimmedNonEmpty(input.projectUuidController.text);
+  if (uuidRaw != null && !looksLikeUuid(uuidRaw)) {
     return (
       projectUuid: null,
       projectNumeric: null,
       error: l10n.agentWorkspaceRunProjectUuidInvalid,
     );
   }
-  final numeric = _parsePositiveInt(input.projectIdController.text);
+  final numeric = parsePositiveInt(input.projectIdController.text);
   if (uuidRaw == null && numeric == null) {
     return (
       projectUuid: null,
@@ -46,9 +83,9 @@ _parseProjectAttachInputs(
   WorkspaceInputController input,
   AppLocalizations l10n,
 ) {
-  final raw = _trimmedNonEmpty(input.workspaceUuidController.text);
+  final raw = trimmedNonEmpty(input.workspaceUuidController.text);
   if (raw == null) return (workspaceUuid: null, error: null);
-  if (!_looksLikeUuid(raw)) {
+  if (!looksLikeUuid(raw)) {
     return (
       workspaceUuid: null,
       error: l10n.agentWorkspaceRunWorkspaceUuidInvalid,
@@ -57,20 +94,42 @@ _parseProjectAttachInputs(
   return (workspaceUuid: raw, error: null);
 }
 
+_ScriptAttachScope _readScriptAttachScope(
+  WorkspaceInputController input,
+  AppLocalizations l10n,
+) {
+  final proj = _parseProjectAttachInputs(input, l10n);
+  if (proj.error != null) {
+    return _ScriptAttachScope(
+      projectUuid: null,
+      projectNumeric: null,
+      workspaceUuid: null,
+      error: proj.error,
+    );
+  }
+  final workspace = _parseOptionalWorkspaceUuid(input, l10n);
+  return _ScriptAttachScope(
+    projectUuid: proj.projectUuid,
+    projectNumeric: proj.projectNumeric,
+    workspaceUuid: workspace.workspaceUuid,
+    error: workspace.error,
+  );
+}
+
 ({String? scriptUuid, int? scriptNumeric, String? error})
 _parseScriptAttachInputs(
   WorkspaceInputController input,
   AppLocalizations l10n,
 ) {
-  final uuidRaw = _trimmedNonEmpty(input.scriptUuidController.text);
-  if (uuidRaw != null && !_looksLikeUuid(uuidRaw)) {
+  final uuidRaw = trimmedNonEmpty(input.scriptUuidController.text);
+  if (uuidRaw != null && !looksLikeUuid(uuidRaw)) {
     return (
       scriptUuid: null,
       scriptNumeric: null,
       error: l10n.agentWorkspaceRunScriptUuidInvalid,
     );
   }
-  final numeric = _parsePositiveInt(input.scriptIdController.text);
+  final numeric = parsePositiveInt(input.scriptIdController.text);
   if (uuidRaw == null && numeric == null) {
     return (
       scriptUuid: null,
@@ -81,25 +140,44 @@ _parseScriptAttachInputs(
   return (scriptUuid: uuidRaw, scriptNumeric: numeric, error: null);
 }
 
+_ProductionAttachScope _readProductionAttachScope(
+  WorkspaceInputController input,
+  AppLocalizations l10n,
+) {
+  final scriptScope = _readScriptAttachScope(input, l10n);
+  if (scriptScope.error != null) {
+    return _ProductionAttachScope(
+      projectUuid: null,
+      projectNumeric: null,
+      scriptUuid: null,
+      scriptNumeric: null,
+      workspaceUuid: null,
+      error: scriptScope.error,
+    );
+  }
+  final script = _parseScriptAttachInputs(input, l10n);
+  return _ProductionAttachScope(
+    projectUuid: scriptScope.projectUuid,
+    projectNumeric: scriptScope.projectNumeric,
+    scriptUuid: script.scriptUuid,
+    scriptNumeric: script.scriptNumeric,
+    workspaceUuid: scriptScope.workspaceUuid,
+    error: script.error,
+  );
+}
+
 Map<String, dynamic> _scriptAttachPayload({
   required String isolationKey,
   String? projectUuid,
   int? projectNumeric,
   String? workspaceUuid,
 }) {
-  final payload = <String, dynamic>{'isolation_key': isolationKey};
-  final u = projectUuid?.trim();
-  if (u != null && u.isNotEmpty) {
-    payload['projectUuid'] = u;
-  }
-  if (projectNumeric != null && projectNumeric > 0) {
-    payload['project_id'] = projectNumeric;
-  }
-  final wu = workspaceUuid?.trim();
-  if (wu != null && wu.isNotEmpty) {
-    payload['workspaceUuid'] = wu;
-  }
-  return payload;
+  return _attachScopePayload(
+    isolationKey: isolationKey,
+    projectUuid: projectUuid,
+    projectNumeric: projectNumeric,
+    workspaceUuid: workspaceUuid,
+  );
 }
 
 Map<String, dynamic> _productionAttachPayload({
@@ -110,20 +188,94 @@ Map<String, dynamic> _productionAttachPayload({
   int? scriptNumeric,
   String? workspaceUuid,
 }) {
-  final payload = _scriptAttachPayload(
+  final payload = _attachScopePayload(
     isolationKey: isolationKey,
     projectUuid: projectUuid,
     projectNumeric: projectNumeric,
     workspaceUuid: workspaceUuid,
   );
-  final su = scriptUuid?.trim();
-  if (su != null && su.isNotEmpty) {
-    payload['scriptUuid'] = su;
-  }
-  if (scriptNumeric != null && scriptNumeric > 0) {
-    payload['script_id'] = scriptNumeric;
-  }
+  _putTrimmedIfPresent(payload, 'scriptUuid', scriptUuid);
+  _putPositiveIntIfPresent(payload, 'script_id', scriptNumeric);
   return payload;
+}
+
+Map<String, dynamic> _attachScopePayload({
+  required String isolationKey,
+  String? projectUuid,
+  int? projectNumeric,
+  String? workspaceUuid,
+}) {
+  final payload = <String, dynamic>{'isolation_key': isolationKey};
+  _putTrimmedIfPresent(payload, 'projectUuid', projectUuid);
+  _putPositiveIntIfPresent(payload, 'project_id', projectNumeric);
+  _putTrimmedIfPresent(payload, 'workspaceUuid', workspaceUuid);
+  return payload;
+}
+
+Map<String, dynamic> _workspaceMessage(
+  String type,
+  Map<String, dynamic> payload,
+) {
+  return <String, dynamic>{
+    'type': type,
+    'schema_version': 1,
+    'payload': payload,
+  };
+}
+
+Map<String, dynamic> _agentRunMessage(String prompt) {
+  return _workspaceMessage('harness.agent.run', <String, dynamic>{
+    'content': prompt,
+    'max_tool_rounds': 12,
+  });
+}
+
+Map<String, dynamic> _toolInvokeMessage(
+  String toolName,
+  Map<String, dynamic> arguments,
+) {
+  return _workspaceMessage('harness.tool.invoke', <String, dynamic>{
+    'name': toolName,
+    'arguments': arguments,
+  });
+}
+
+Map<String, dynamic> _scriptAttachMessage({
+  required String isolationKey,
+  String? projectUuid,
+  int? projectNumeric,
+  String? workspaceUuid,
+}) {
+  return _workspaceMessage(
+    'agent.script.attach',
+    _scriptAttachPayload(
+      isolationKey: isolationKey,
+      projectUuid: projectUuid,
+      projectNumeric: projectNumeric,
+      workspaceUuid: workspaceUuid,
+    ),
+  );
+}
+
+Map<String, dynamic> _productionAttachMessage({
+  required String isolationKey,
+  String? projectUuid,
+  int? projectNumeric,
+  String? scriptUuid,
+  int? scriptNumeric,
+  String? workspaceUuid,
+}) {
+  return _workspaceMessage(
+    'agent.production.attach',
+    _productionAttachPayload(
+      isolationKey: isolationKey,
+      projectUuid: projectUuid,
+      projectNumeric: projectNumeric,
+      scriptUuid: scriptUuid,
+      scriptNumeric: scriptNumeric,
+      workspaceUuid: workspaceUuid,
+    ),
+  );
 }
 
 Map<String, dynamic> _buildScriptSubAgentArguments({
@@ -197,7 +349,7 @@ List<int> _extractNovelIdsFromWorkspaceContext({
   required Map<String, dynamic>? lastToolArguments,
 }) {
   final ids = <int>{};
-  final argumentNovelId = _toPositiveInt(lastToolArguments?['novelId']);
+  final argumentNovelId = toPositiveIntValue(lastToolArguments?['novelId']);
   if (argumentNovelId != null) {
     ids.add(argumentNovelId);
   }
@@ -214,7 +366,7 @@ List<int> _extractNovelIdsFromWorkspaceContext({
     return ids.toList()..sort();
   }
   for (final row in items.whereType<Map<String, dynamic>>()) {
-    final novelId = _toPositiveInt(
+    final novelId = toPositiveIntValue(
       row['numeric_id'] ?? row['numericId'] ?? row['id'],
     );
     if (novelId != null) {
@@ -231,21 +383,6 @@ int? _extractRelativeScriptOffset(Map<String, dynamic>? arguments) {
     final offset = value.toInt();
     if (offset == -1 || offset == 1) {
       return offset;
-    }
-  }
-  return null;
-}
-
-int? _toPositiveInt(Object? value) {
-  if (value is int && value > 0) return value;
-  if (value is num) {
-    final normalized = value.toInt();
-    if (normalized > 0) return normalized;
-  }
-  if (value is String) {
-    final normalized = int.tryParse(value.trim());
-    if (normalized != null && normalized > 0) {
-      return normalized;
     }
   }
   return null;

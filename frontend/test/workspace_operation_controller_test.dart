@@ -24,6 +24,13 @@ void main() {
       expect(controller.loadingScriptWorkspaceRun, isFalse);
       expect(controller.loadingScriptResultWriteback, isTrue);
 
+      controller.setLoading(WorkspaceOperation.scriptDomainProbe, true);
+      controller.setLoading(WorkspaceOperation.productionSubAgentRun, true);
+      controller.resetWsOperations();
+      expect(controller.loadingScriptDomainProbe, isFalse);
+      expect(controller.loadingProductionSubAgentRun, isFalse);
+      expect(controller.loadingScriptResultWriteback, isTrue);
+
       controller.reset();
       expect(controller.hasPendingWork, isFalse);
       expect(controller.loadingScriptResultWriteback, isFalse);

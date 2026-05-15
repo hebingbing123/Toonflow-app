@@ -132,6 +132,22 @@ String _buildScriptToolArgsPresetText({
   return jsonEncode(preset);
 }
 
+bool _matchesScriptToolArgsPresetText({
+  required String raw,
+  required String toolName,
+  required String scriptIdText,
+}) {
+  final trimmed = raw.trim();
+  if (trimmed.isEmpty) {
+    return true;
+  }
+  return trimmed ==
+      _buildScriptToolArgsPresetText(
+        toolName: toolName,
+        scriptIdText: scriptIdText,
+      );
+}
+
 String _buildProductionToolArgsPresetText({
   required String toolName,
   required String scriptIdText,
@@ -220,4 +236,22 @@ String _buildProductionToolArgsPresetText({
       break;
   }
   return jsonEncode(preset);
+}
+
+bool _matchesProductionToolArgsPresetText({
+  required String raw,
+  required String toolName,
+  required String scriptIdText,
+  required String flowKeyText,
+}) {
+  final trimmed = raw.trim();
+  if (trimmed.isEmpty) {
+    return true;
+  }
+  return trimmed ==
+      _buildProductionToolArgsPresetText(
+        toolName: toolName,
+        scriptIdText: scriptIdText,
+        flowKeyText: flowKeyText,
+      );
 }

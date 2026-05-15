@@ -5,6 +5,7 @@ import '../rust_api.dart';
 import 'input_controller.dart';
 import 'operation_controller.dart';
 import 'runtime_output_controller.dart';
+import 'workspace_scope_utils.dart';
 
 part 'writeback_controller_helpers.dart';
 
@@ -127,26 +128,12 @@ class WorkspaceWritebackController {
     final token = _accessTokenProvider();
     if (token == null) return;
     final loc = _l10nResolved;
-    final projectUuid = _trimmedNonEmpty(
-      _inputController.projectUuidController.text,
+    final request = _readScriptWritebackRequest(
+      _inputController,
+      _outputController,
+      loc,
     );
-    final projectNumericId = _parsePositiveInt(
-      _inputController.projectIdController.text,
-    );
-    final scriptId = _parsePositiveInt(
-      _inputController.scriptIdController.text,
-    );
-    final toolCandidate = _outputController.scriptWritebackCandidate?.trim();
-    final assistantText = _outputController.assistantText.trim();
-    final useToolCandidate = toolCandidate != null && toolCandidate.isNotEmpty;
-    final content = useToolCandidate ? toolCandidate : assistantText;
-    final source = useToolCandidate
-        ? (_outputController.scriptWritebackSource ??
-              loc.agentWorkspaceScriptWritebackSourceToolGetScriptContent)
-        : loc.agentWorkspaceScriptWritebackSourceAssistant;
-    if ((projectUuid == null && projectNumericId == null) ||
-        scriptId == null ||
-        content.isEmpty) {
+    if (!request.isValid) {
       _onErrorChanged(loc.agentWorkspaceWritebackScriptInputsInvalid);
       return;
     }
@@ -154,30 +141,31 @@ class WorkspaceWritebackController {
     _beginWriteback(WorkspaceOperation.scriptResultWriteback);
     try {
       final resolvedProjectUuid =
-          projectUuid ??
-          await _resolveProjectUuidFromNumericId(token, projectNumericId!);
-      if (resolvedProjectUuid == null || resolvedProjectUuid.isEmpty) {
-        _onErrorChanged(loc.agentWorkspaceWritebackProjectNotFound);
+          request.projectScope.projectUuid ??
+          await _resolveRequiredProjectUuidFromNumericId(
+            token,
+            request.projectScope.projectNumericId!,
+            loc,
+          );
+      if (resolvedProjectUuid == null) {
         return;
       }
       final updated = await _updateScript(
         token,
         resolvedProjectUuid,
-        scriptId,
-        <String, dynamic>{'content': content},
+        request.scriptId!,
+        <String, dynamic>{'content': request.content},
       );
       final updatedLen = updated.content?.length ?? 0;
       _outputController.setWritebackLine(
         loc.agentWorkspaceWritebackScriptSuccess(
           updated.numericId,
-          source,
+          request.source,
           updatedLen,
         ),
       );
     } catch (error) {
-      _onErrorChanged(
-        describeUserVisibleApiError(_l10nResolved, error),
-      );
+      _onErrorChanged(describeUserVisibleApiError(_l10nResolved, error));
     } finally {
       _operationController.setLoading(
         WorkspaceOperation.scriptResultWriteback,
@@ -190,38 +178,29 @@ class WorkspaceWritebackController {
     final token = _accessTokenProvider();
     if (token == null) return;
     final loc = _l10nResolved;
-    final projectUuid = _trimmedNonEmpty(
-      _inputController.projectUuidController.text,
-    );
-    final projectNumericId = _parsePositiveInt(
-      _inputController.projectIdController.text,
-    );
+    final projectScope = _readProjectScope(_inputController);
     final candidate = _outputController.scriptPlanWritebackCandidate;
-    if ((projectNumericId == null && projectUuid == null) ||
-        candidate == null) {
+    if (!projectScope.hasProjectScope || candidate == null) {
       _onErrorChanged(loc.agentWorkspaceWritebackPlanInputsInvalid);
       return;
     }
 
-    final payload = _extractScriptPlanWritebackPayload(candidate);
-    if (payload == null) {
+    final request = _readScriptPlanWritebackRequest(candidate);
+    if (!request.hasPayload) {
       _onErrorChanged(loc.agentWorkspaceWritebackPlanDataMissingData);
       return;
     }
-    final rawScript = payload.rawScript;
-    final script = rawScript is List
-        ? rawScript.whereType<Map<String, dynamic>>().toList(growable: false)
-        : const <Map<String, dynamic>>[];
+    final payload = request.payload!;
 
     _beginWriteback(WorkspaceOperation.scriptPlanResultWriteback);
     try {
-      final projectId = await _resolveProjectNumericId(
+      final projectId = await _resolveRequiredProjectNumericId(
         token,
-        projectNumericId: projectNumericId,
-        projectUuid: projectUuid,
+        loc,
+        projectNumericId: projectScope.projectNumericId,
+        projectUuid: projectScope.projectUuid,
       );
       if (projectId == null) {
-        _onErrorChanged(loc.agentWorkspaceWritebackProjectNotFound);
         return;
       }
       final status = await _setPlanData(
@@ -229,7 +208,7 @@ class WorkspaceWritebackController {
         projectId: projectId,
         storySkeleton: payload.storySkeleton,
         adaptationStrategy: payload.adaptationStrategy,
-        script: script,
+        script: request.normalizedScriptRows,
       );
       if (status != 200) {
         throw RustApiException(
@@ -238,12 +217,13 @@ class WorkspaceWritebackController {
         );
       }
       _outputController.setWritebackLine(
-        loc.agentWorkspaceWritebackPlanDataSetSuccess(projectId, script.length),
+        loc.agentWorkspaceWritebackPlanDataSetSuccess(
+          projectId,
+          request.normalizedScriptRows.length,
+        ),
       );
     } catch (error) {
-      _onErrorChanged(
-        describeUserVisibleApiError(_l10nResolved, error),
-      );
+      _onErrorChanged(describeUserVisibleApiError(_l10nResolved, error));
     } finally {
       _operationController.setLoading(
         WorkspaceOperation.scriptPlanResultWriteback,
@@ -263,12 +243,12 @@ class WorkspaceWritebackController {
       return;
     }
 
-    final payload = _extractScriptPlanWritebackPayload(candidate);
-    if (payload == null) {
+    final request = _readScriptPlanWritebackRequest(candidate);
+    if (!request.hasPayload) {
       _onErrorChanged(loc.agentWorkspaceWritebackPlanDataMissingData);
       return;
     }
-    final scriptRows = _normalizeScriptPlanRows(payload.rawScript);
+    final payload = request.payload!;
 
     _beginWriteback(WorkspaceOperation.scriptPlanResultWriteback);
     try {
@@ -277,7 +257,7 @@ class WorkspaceWritebackController {
         id: planRowId,
         storySkeleton: payload.storySkeleton,
         adaptationStrategy: payload.adaptationStrategy,
-        script: scriptRows,
+        script: request.normalizedScriptRows,
       );
       if (status != 200) {
         throw RustApiException(
@@ -288,13 +268,11 @@ class WorkspaceWritebackController {
       _outputController.setWritebackLine(
         loc.agentWorkspaceWritebackPlanDataUpdateSuccess(
           planRowId,
-          scriptRows.length,
+          request.normalizedScriptRows.length,
         ),
       );
     } catch (error) {
-      _onErrorChanged(
-        describeUserVisibleApiError(_l10nResolved, error),
-      );
+      _onErrorChanged(describeUserVisibleApiError(_l10nResolved, error));
     } finally {
       _operationController.setLoading(
         WorkspaceOperation.scriptPlanResultWriteback,
@@ -307,19 +285,12 @@ class WorkspaceWritebackController {
     final token = _accessTokenProvider();
     if (token == null) return;
     final loc = _l10nResolved;
-    final projectUuid = _trimmedNonEmpty(
-      _inputController.projectUuidController.text,
-    );
-    final projectNumericId = _parsePositiveInt(
-      _inputController.projectIdController.text,
-    );
-    final scriptId = _parsePositiveInt(
-      _inputController.scriptIdController.text,
-    );
+    final projectScope = _readProjectScope(_inputController);
+    final scriptId = parsePositiveInt(_inputController.scriptIdController.text);
     final flowKey = _inputController.productionFlowKeyController.text.trim();
     final toolName = _outputController.lastToolName;
     final result = _outputController.lastToolResultData;
-    if ((projectNumericId == null && projectUuid == null) ||
+    if (!projectScope.hasProjectScope ||
         scriptId == null ||
         flowKey.isEmpty ||
         result == null) {
@@ -331,75 +302,42 @@ class WorkspaceWritebackController {
       return;
     }
 
-    final projectId = await _resolveProjectNumericId(
-      token,
-      projectNumericId: projectNumericId,
-      projectUuid: projectUuid,
-    );
-    if (projectId == null) {
-      _onErrorChanged(loc.agentWorkspaceWritebackProjectNotFound);
-      return;
-    }
-
-    Object? payloadForWriteback = result;
-    var writebackSource = toolName;
-    if (toolName == 'get_flowData' &&
-        _coreProductionFlowKeys.contains(flowKey)) {
-      try {
-        final latestFlow = await _fetchProductionFlow(
-          token,
-          projectId: projectId,
-          episodesId: scriptId,
-        );
-        payloadForWriteback = latestFlow[flowKey];
-        writebackSource = 'get_flowData -> refreshed full flow[$flowKey]';
-      } catch (error) {
-        _onErrorChanged(
-          describeUserVisibleApiError(_l10nResolved, error),
-        );
-        return;
-      }
-    }
-    if (toolName != 'get_flowData' &&
-        _coreProductionFlowKeys.contains(flowKey)) {
-      final refreshableKey = _toolRefreshableCoreFlowKey[toolName];
-      if (refreshableKey == flowKey) {
-        try {
-          final latestFlow = await _fetchProductionFlow(
-            token,
-            projectId: projectId,
-            episodesId: scriptId,
-          );
-          payloadForWriteback = latestFlow[flowKey];
-          writebackSource = '$toolName -> refreshed flow[$flowKey]';
-        } catch (error) {
-          _onErrorChanged(
-            describeUserVisibleApiError(_l10nResolved, error),
-          );
-          return;
-        }
-      } else {
-        _onErrorChanged(
-          loc.agentWorkspaceWritebackCoreFlowOverwriteBlocked(flowKey),
-        );
-        return;
-      }
-    }
-
-    if (payloadForWriteback == null) {
-      _onErrorChanged(loc.agentWorkspaceWritebackPayloadEmptyRefreshFlowKey);
-      return;
-    }
-
     _beginWriteback(WorkspaceOperation.productionResultWriteback);
     try {
+      final projectId = await _resolveRequiredProjectNumericId(
+        token,
+        loc,
+        projectNumericId: projectScope.projectNumericId,
+        projectUuid: projectScope.projectUuid,
+      );
+      if (projectId == null) {
+        return;
+      }
+
+      final payloadForWriteback = await _resolveProductionFlowWritebackPayload(
+        token: token,
+        loc: loc,
+        projectId: projectId,
+        scriptId: scriptId,
+        flowKey: flowKey,
+        toolName: toolName,
+        result: result,
+      );
+      if (payloadForWriteback == null) {
+        return;
+      }
+      if (payloadForWriteback.data == null) {
+        _onErrorChanged(loc.agentWorkspaceWritebackPayloadEmptyRefreshFlowKey);
+        return;
+      }
+
       final fullFlow = await _fetchProductionFlow(
         token,
         projectId: projectId,
         episodesId: scriptId,
       );
       final merged = Map<String, dynamic>.from(fullFlow);
-      merged[flowKey] = payloadForWriteback;
+      merged[flowKey] = payloadForWriteback.data;
       final status = await _saveProductionFlow(
         token,
         projectId: projectId,
@@ -417,13 +355,11 @@ class WorkspaceWritebackController {
           flowKey,
           projectId,
           scriptId,
-          writebackSource,
+          payloadForWriteback.source,
         ),
       );
     } catch (error) {
-      _onErrorChanged(
-        describeUserVisibleApiError(_l10nResolved, error),
-      );
+      _onErrorChanged(describeUserVisibleApiError(_l10nResolved, error));
     } finally {
       _operationController.setLoading(
         WorkspaceOperation.productionResultWriteback,
@@ -441,6 +377,22 @@ class WorkspaceWritebackController {
       return null;
     }
     return projects.first.id;
+  }
+
+  Future<String?> _resolveRequiredProjectUuidFromNumericId(
+    String token,
+    int projectNumericId,
+    AppLocalizations loc,
+  ) async {
+    final projectUuid = await _resolveProjectUuidFromNumericId(
+      token,
+      projectNumericId,
+    );
+    if (projectUuid == null || projectUuid.isEmpty) {
+      _onErrorChanged(loc.agentWorkspaceWritebackProjectNotFound);
+      return null;
+    }
+    return projectUuid;
   }
 
   Future<int?> _resolveProjectNumericId(
@@ -461,6 +413,74 @@ class WorkspaceWritebackController {
       }
     }
     return null;
+  }
+
+  Future<int?> _resolveRequiredProjectNumericId(
+    String token,
+    AppLocalizations loc, {
+    int? projectNumericId,
+    String? projectUuid,
+  }) async {
+    final resolvedProjectId = await _resolveProjectNumericId(
+      token,
+      projectNumericId: projectNumericId,
+      projectUuid: projectUuid,
+    );
+    if (resolvedProjectId == null) {
+      _onErrorChanged(loc.agentWorkspaceWritebackProjectNotFound);
+      return null;
+    }
+    return resolvedProjectId;
+  }
+
+  Future<_ProductionFlowWritebackPayload?>
+  _resolveProductionFlowWritebackPayload({
+    required String token,
+    required AppLocalizations loc,
+    required int projectId,
+    required int scriptId,
+    required String flowKey,
+    required String toolName,
+    required Object? result,
+  }) async {
+    final overwriteBlockedMessage = _productionFlowOverwriteBlockedMessage(
+      toolName: toolName,
+      flowKey: flowKey,
+      coreFlowKeys: _coreProductionFlowKeys,
+      refreshableCoreFlowKeyByTool: _toolRefreshableCoreFlowKey,
+      l10n: loc,
+    );
+    if (overwriteBlockedMessage != null) {
+      _onErrorChanged(overwriteBlockedMessage);
+      return null;
+    }
+
+    if (!_shouldRefreshProductionFlowPayload(
+      toolName: toolName,
+      flowKey: flowKey,
+      coreFlowKeys: _coreProductionFlowKeys,
+      refreshableCoreFlowKeyByTool: _toolRefreshableCoreFlowKey,
+    )) {
+      return _ProductionFlowWritebackPayload(data: result, source: toolName);
+    }
+
+    try {
+      final latestFlow = await _fetchProductionFlow(
+        token,
+        projectId: projectId,
+        episodesId: scriptId,
+      );
+      return _ProductionFlowWritebackPayload(
+        data: latestFlow[flowKey],
+        source: _productionFlowRefreshSource(
+          toolName: toolName,
+          flowKey: flowKey,
+        ),
+      );
+    } catch (error) {
+      _onErrorChanged(describeUserVisibleApiError(_l10nResolved, error));
+      return null;
+    }
   }
 
   void _beginWriteback(WorkspaceOperation operation) {

@@ -40,7 +40,7 @@ List<ScriptWorkspaceRecipe> _buildPlanDataRecipes(
   Map<String, dynamic> result, {
   required int? scopeScriptId,
 }) {
-  final data = result['data'];
+  final data = _extractPlanDataMap(result);
   if (data is! Map<String, dynamic>) {
     return const <ScriptWorkspaceRecipe>[];
   }

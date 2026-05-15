@@ -13,138 +13,87 @@ enum WorkspaceOperation {
 }
 
 class WorkspaceOperationController extends ChangeNotifier {
-  bool _loadingScriptWorkspaceRun = false;
-  bool _loadingProductionWorkspaceRun = false;
-  bool _loadingProductionFlowProbe = false;
-  bool _loadingScriptDomainProbe = false;
-  bool _loadingScriptSubAgentRun = false;
-  bool _loadingProductionSubAgentRun = false;
-  bool _loadingScriptResultWriteback = false;
-  bool _loadingScriptPlanResultWriteback = false;
-  bool _loadingProductionResultWriteback = false;
+  static const Set<WorkspaceOperation> _toolOperations = <WorkspaceOperation>{
+    WorkspaceOperation.productionFlowProbe,
+    WorkspaceOperation.scriptDomainProbe,
+    WorkspaceOperation.scriptSubAgentRun,
+    WorkspaceOperation.productionSubAgentRun,
+  };
 
-  bool get loadingScriptWorkspaceRun => _loadingScriptWorkspaceRun;
-  bool get loadingProductionWorkspaceRun => _loadingProductionWorkspaceRun;
-  bool get loadingProductionFlowProbe => _loadingProductionFlowProbe;
-  bool get loadingScriptDomainProbe => _loadingScriptDomainProbe;
-  bool get loadingScriptSubAgentRun => _loadingScriptSubAgentRun;
-  bool get loadingProductionSubAgentRun => _loadingProductionSubAgentRun;
-  bool get loadingScriptResultWriteback => _loadingScriptResultWriteback;
+  static const Set<WorkspaceOperation> _agentOperations = <WorkspaceOperation>{
+    WorkspaceOperation.scriptWorkspaceRun,
+    WorkspaceOperation.productionWorkspaceRun,
+  };
+
+  static const Set<WorkspaceOperation> _wsOperations = <WorkspaceOperation>{
+    ..._agentOperations,
+    ..._toolOperations,
+  };
+
+  static const Set<WorkspaceOperation> _allOperations = <WorkspaceOperation>{
+    WorkspaceOperation.scriptWorkspaceRun,
+    WorkspaceOperation.productionWorkspaceRun,
+    WorkspaceOperation.productionFlowProbe,
+    WorkspaceOperation.scriptDomainProbe,
+    WorkspaceOperation.scriptSubAgentRun,
+    WorkspaceOperation.productionSubAgentRun,
+    WorkspaceOperation.scriptResultWriteback,
+    WorkspaceOperation.scriptPlanResultWriteback,
+    WorkspaceOperation.productionResultWriteback,
+  };
+
+  final Set<WorkspaceOperation> _activeOperations = <WorkspaceOperation>{};
+
+  bool get loadingScriptWorkspaceRun =>
+      _activeOperations.contains(WorkspaceOperation.scriptWorkspaceRun);
+  bool get loadingProductionWorkspaceRun =>
+      _activeOperations.contains(WorkspaceOperation.productionWorkspaceRun);
+  bool get loadingProductionFlowProbe =>
+      _activeOperations.contains(WorkspaceOperation.productionFlowProbe);
+  bool get loadingScriptDomainProbe =>
+      _activeOperations.contains(WorkspaceOperation.scriptDomainProbe);
+  bool get loadingScriptSubAgentRun =>
+      _activeOperations.contains(WorkspaceOperation.scriptSubAgentRun);
+  bool get loadingProductionSubAgentRun =>
+      _activeOperations.contains(WorkspaceOperation.productionSubAgentRun);
+  bool get loadingScriptResultWriteback =>
+      _activeOperations.contains(WorkspaceOperation.scriptResultWriteback);
   bool get loadingScriptPlanResultWriteback =>
-      _loadingScriptPlanResultWriteback;
+      _activeOperations.contains(WorkspaceOperation.scriptPlanResultWriteback);
   bool get loadingProductionResultWriteback =>
-      _loadingProductionResultWriteback;
+      _activeOperations.contains(WorkspaceOperation.productionResultWriteback);
 
-  bool get hasPendingWork =>
-      _loadingScriptWorkspaceRun ||
-      _loadingProductionWorkspaceRun ||
-      _loadingProductionFlowProbe ||
-      _loadingScriptDomainProbe ||
-      _loadingScriptSubAgentRun ||
-      _loadingProductionSubAgentRun ||
-      _loadingScriptResultWriteback ||
-      _loadingScriptPlanResultWriteback ||
-      _loadingProductionResultWriteback;
+  bool get hasPendingWork => _activeOperations.isNotEmpty;
 
   void setLoading(WorkspaceOperation operation, bool value) {
-    switch (operation) {
-      case WorkspaceOperation.scriptWorkspaceRun:
-        if (_loadingScriptWorkspaceRun == value) return;
-        _loadingScriptWorkspaceRun = value;
-      case WorkspaceOperation.productionWorkspaceRun:
-        if (_loadingProductionWorkspaceRun == value) return;
-        _loadingProductionWorkspaceRun = value;
-      case WorkspaceOperation.productionFlowProbe:
-        if (_loadingProductionFlowProbe == value) return;
-        _loadingProductionFlowProbe = value;
-      case WorkspaceOperation.scriptDomainProbe:
-        if (_loadingScriptDomainProbe == value) return;
-        _loadingScriptDomainProbe = value;
-      case WorkspaceOperation.scriptSubAgentRun:
-        if (_loadingScriptSubAgentRun == value) return;
-        _loadingScriptSubAgentRun = value;
-      case WorkspaceOperation.productionSubAgentRun:
-        if (_loadingProductionSubAgentRun == value) return;
-        _loadingProductionSubAgentRun = value;
-      case WorkspaceOperation.scriptResultWriteback:
-        if (_loadingScriptResultWriteback == value) return;
-        _loadingScriptResultWriteback = value;
-      case WorkspaceOperation.scriptPlanResultWriteback:
-        if (_loadingScriptPlanResultWriteback == value) return;
-        _loadingScriptPlanResultWriteback = value;
-      case WorkspaceOperation.productionResultWriteback:
-        if (_loadingProductionResultWriteback == value) return;
-        _loadingProductionResultWriteback = value;
+    final changed = value
+        ? _activeOperations.add(operation)
+        : _activeOperations.remove(operation);
+    if (changed) {
+      notifyListeners();
     }
-    notifyListeners();
   }
 
   void clearToolOperations() {
-    _applyBatchUpdate(() {
-      _loadingScriptDomainProbe = false;
-      _loadingProductionFlowProbe = false;
-      _loadingScriptSubAgentRun = false;
-      _loadingProductionSubAgentRun = false;
-    });
+    _clearOperations(_toolOperations);
   }
 
   void clearAgentOperations() {
-    _applyBatchUpdate(() {
-      _loadingScriptWorkspaceRun = false;
-      _loadingProductionWorkspaceRun = false;
-    });
+    _clearOperations(_agentOperations);
   }
 
   void resetWsOperations() {
-    _applyBatchUpdate(() {
-      _loadingScriptWorkspaceRun = false;
-      _loadingProductionWorkspaceRun = false;
-      _loadingProductionFlowProbe = false;
-      _loadingScriptDomainProbe = false;
-      _loadingScriptSubAgentRun = false;
-      _loadingProductionSubAgentRun = false;
-    });
+    _clearOperations(_wsOperations);
   }
 
   void reset() {
-    _applyBatchUpdate(() {
-      _loadingScriptWorkspaceRun = false;
-      _loadingProductionWorkspaceRun = false;
-      _loadingProductionFlowProbe = false;
-      _loadingScriptDomainProbe = false;
-      _loadingScriptSubAgentRun = false;
-      _loadingProductionSubAgentRun = false;
-      _loadingScriptResultWriteback = false;
-      _loadingScriptPlanResultWriteback = false;
-      _loadingProductionResultWriteback = false;
-    });
+    _clearOperations(_allOperations);
   }
 
-  void _applyBatchUpdate(VoidCallback apply) {
-    final before = (
-      _loadingScriptWorkspaceRun,
-      _loadingProductionWorkspaceRun,
-      _loadingProductionFlowProbe,
-      _loadingScriptDomainProbe,
-      _loadingScriptSubAgentRun,
-      _loadingProductionSubAgentRun,
-      _loadingScriptResultWriteback,
-      _loadingScriptPlanResultWriteback,
-      _loadingProductionResultWriteback,
-    );
-    apply();
-    final after = (
-      _loadingScriptWorkspaceRun,
-      _loadingProductionWorkspaceRun,
-      _loadingProductionFlowProbe,
-      _loadingScriptDomainProbe,
-      _loadingScriptSubAgentRun,
-      _loadingProductionSubAgentRun,
-      _loadingScriptResultWriteback,
-      _loadingScriptPlanResultWriteback,
-      _loadingProductionResultWriteback,
-    );
-    if (before != after) {
+  void _clearOperations(Set<WorkspaceOperation> operations) {
+    final before = _activeOperations.length;
+    _activeOperations.removeAll(operations);
+    if (_activeOperations.length != before) {
       notifyListeners();
     }
   }

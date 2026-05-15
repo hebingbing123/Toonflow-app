@@ -2,6 +2,14 @@ part of 'card.dart';
 
 extension _AgentWorkspaceProductionCardTemplates
     on _AgentWorkspaceProductionCardState {
+  void _applyProductionDomainArgsPayload(
+    Map<String, dynamic> args,
+    String statusMessage,
+  ) {
+    widget.productionDomainArgsController.text = jsonEncode(args);
+    _setTaskStatus(statusMessage);
+  }
+
   Map<String, dynamic> _flowDataArgsTemplate() {
     final flowKey = widget.flowKeyController.text.trim();
     switch (flowKey.isEmpty ? 'scriptPlan' : flowKey) {
@@ -110,8 +118,10 @@ extension _AgentWorkspaceProductionCardTemplates
     Map<String, dynamic> args,
     String label,
   ) {
-    widget.productionDomainArgsController.text = jsonEncode(args);
-    _setTaskStatus(l10n.agentWorkspaceFilledArgTemplate(label));
+    _applyProductionDomainArgsPayload(
+      args,
+      l10n.agentWorkspaceFilledArgTemplate(label),
+    );
   }
 
   Widget _buildArgumentTemplates(AppLocalizations l10n) {
@@ -159,8 +169,10 @@ extension _AgentWorkspaceProductionCardTemplates
     AppLocalizations l10n,
     ProductionWorkspaceArgumentSuggestion suggestion,
   ) {
-    widget.productionDomainArgsController.text = jsonEncode(suggestion.payload);
-    _setTaskStatus(l10n.agentWorkspaceFilledCandidateArgs(suggestion.label));
+    _applyProductionDomainArgsPayload(
+      suggestion.payload,
+      l10n.agentWorkspaceFilledCandidateArgs(suggestion.label),
+    );
   }
 
   Widget _buildActionCandidateTemplates(

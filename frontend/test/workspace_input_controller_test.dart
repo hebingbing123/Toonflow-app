@@ -136,6 +136,30 @@ void main() {
     );
   });
 
+  test(
+    'workspace input controller applyProjectScopeRef replaces stale uuid and script scope',
+    () {
+      final controller = WorkspaceInputController();
+      addTearDown(controller.dispose);
+
+      controller.applyProjectScope(
+        99,
+        scriptNumericId: 3,
+        projectUuid: '550e8400-e29b-41d4-a716-446655440001',
+        scriptUuid: '6ba7b810-9dad-11d1-80b4-00c04fd430c8',
+        workspaceId: 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee',
+      );
+
+      controller.applyProjectScopeRef(projectNumericId: 101);
+
+      expect(controller.projectIdController.text, '101');
+      expect(controller.projectUuidController.text, isEmpty);
+      expect(controller.scriptIdController.text, isEmpty);
+      expect(controller.scriptUuidController.text, isEmpty);
+      expect(controller.workspaceUuidController.text, isEmpty);
+    },
+  );
+
   test('workspace input controller can focus production storyboard scope', () {
     final controller = WorkspaceInputController();
     addTearDown(controller.dispose);
@@ -157,6 +181,98 @@ void main() {
     );
   });
 
+  test('workspace input controller applies script domain focus atomically', () {
+    final controller = WorkspaceInputController();
+    addTearDown(controller.dispose);
+
+    expect(controller.scriptDomainFocusRevision.value, 0);
+
+    controller.applyScriptDomainFocus(
+      domainTool: 'get_script_content',
+      rawDomainArgs:
+          '{"scriptId":42,"lineStart":61,"lineEnd":120,"maxChars":1600}',
+      subAgentTool: 'run_sub_agent_script',
+      prompt: 'repair this tail window',
+    );
+
+    expect(controller.scriptDomainToolController.text, 'get_script_content');
+    expect(
+      controller.scriptDomainArgsController.text,
+      '{"scriptId":42,"lineStart":61,"lineEnd":120,"maxChars":1600}',
+    );
+    expect(
+      controller.scriptSubAgentToolController.text,
+      'run_sub_agent_script',
+    );
+    expect(controller.scriptPromptController.text, 'repair this tail window');
+    expect(controller.scriptDomainFocusRevision.value, 1);
+  });
+
+  test(
+    'workspace input controller applies production domain focus atomically',
+    () {
+      final controller = WorkspaceInputController();
+      addTearDown(controller.dispose);
+
+      expect(controller.productionDomainFocusRevision.value, 0);
+
+      controller.applyProductionDomainFocus(
+        flowKey: 'storyboard',
+        domainTool: 'generate_storyboard',
+        rawDomainArgs: '{"ids":[9,12]}',
+        subAgentTool: 'run_sub_agent_storyboard_gen',
+        rawSubAgentArgs: '{"storyboardIds":[9,12]}',
+        prompt: 'repair these storyboard shots',
+      );
+
+      expect(controller.productionFlowKeyController.text, 'storyboard');
+      expect(
+        controller.productionDomainToolController.text,
+        'generate_storyboard',
+      );
+      expect(controller.productionDomainArgsController.text, '{"ids":[9,12]}');
+      expect(
+        controller.productionSubAgentToolController.text,
+        'run_sub_agent_storyboard_gen',
+      );
+      expect(
+        controller.productionSubAgentArgsController.text,
+        '{"storyboardIds":[9,12]}',
+      );
+      expect(
+        controller.productionPromptController.text,
+        'repair these storyboard shots',
+      );
+      expect(controller.productionDomainFocusRevision.value, 1);
+    },
+  );
+
+  test(
+    'workspace input controller normalizes blank raw focus args to empty objects',
+    () {
+      final controller = WorkspaceInputController();
+      addTearDown(controller.dispose);
+
+      controller.applyScriptDomainFocus(
+        domainTool: 'get_planData',
+        rawDomainArgs: '   ',
+      );
+      expect(controller.scriptDomainArgsController.text, '{}');
+      expect(controller.scriptDomainFocusRevision.value, 1);
+
+      controller.applyProductionDomainFocus(
+        flowKey: 'storyboard',
+        domainTool: 'generate_storyboard',
+        rawDomainArgs: '   ',
+        rawSubAgentArgs: '   ',
+        subAgentTool: 'run_sub_agent_storyboard_gen',
+      );
+      expect(controller.productionDomainArgsController.text, '{}');
+      expect(controller.productionSubAgentArgsController.text, '{}');
+      expect(controller.productionDomainFocusRevision.value, 1);
+    },
+  );
+
   test(
     'workspace input controller maps rollback action to script planning focus',
     () {
@@ -168,10 +284,7 @@ void main() {
         suggestedAction: 'rollback_to_director_planning',
       );
 
-      expect(
-        controller.scriptDomainToolController.text,
-        'get_planData',
-      );
+      expect(controller.scriptDomainToolController.text, 'get_planData');
       expect(
         controller.scriptDomainArgsController.text,
         '{"key":"adaptationStrategy","maxChars":1600}',
@@ -194,10 +307,7 @@ void main() {
         stage: 'director_planning',
       );
 
-      expect(
-        controller.scriptDomainToolController.text,
-        'get_planData',
-      );
+      expect(controller.scriptDomainToolController.text, 'get_planData');
       expect(
         controller.scriptDomainArgsController.text,
         '{"key":"adaptationStrategy","maxChars":1600}',
@@ -220,10 +330,7 @@ void main() {
         stage: 'story_skeleton',
       );
 
-      expect(
-        controller.scriptDomainToolController.text,
-        'get_planData',
-      );
+      expect(controller.scriptDomainToolController.text, 'get_planData');
       expect(
         controller.scriptDomainArgsController.text,
         '{"key":"storySkeleton","maxChars":1600}',
@@ -243,10 +350,7 @@ void main() {
 
       controller.applyScriptRepairFocus(scriptNumericId: 42);
 
-      expect(
-        controller.scriptDomainToolController.text,
-        'get_planData',
-      );
+      expect(controller.scriptDomainToolController.text, 'get_planData');
       expect(
         controller.scriptDomainArgsController.text,
         '{"key":"storySkeleton","maxChars":1600}',

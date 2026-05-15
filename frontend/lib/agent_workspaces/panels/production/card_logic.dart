@@ -170,20 +170,31 @@ extension _AgentWorkspaceProductionCardLogic
     _setTaskStatus(l10n.agentWorkspaceProductionTriggeredWritebackFlow(key));
   }
 
-  void _applyProductionPromptIfEmpty(String prompt) {
-    if (widget.productionPromptController.text.trim().isNotEmpty) return;
-    widget.productionPromptController.text = prompt;
-  }
-
-  void _applySuggestedSubAgentArgs(String toolName) {
-    widget.productionSubAgentArgsController.text = jsonEncode(
-      buildProductionSuggestedSubAgentArgs(
-        subAgentTool: toolName,
-        toolName: widget.workspaceLastToolName,
-        suggestedFlowKey: widget.workspaceSuggestedFlowKey,
-        result: widget.workspaceLastToolResultData,
-        toolArguments: widget.workspaceLastToolArguments,
-      ),
+  void _applySuggestedProductionFocus({
+    required String flowKey,
+    String? domainTool,
+    String? subAgentTool,
+    String? prompt,
+  }) {
+    widget.onApplyProductionFocus(
+      flowKey: flowKey,
+      domainTool: domainTool,
+      domainArgs: domainTool == null
+          ? null
+          : domainTool == 'get_flowData'
+          ? <String, dynamic>{'key': flowKey}
+          : <String, dynamic>{},
+      subAgentTool: subAgentTool,
+      subAgentArgs: subAgentTool == null
+          ? null
+          : buildProductionSuggestedSubAgentArgs(
+              subAgentTool: subAgentTool,
+              toolName: widget.workspaceLastToolName,
+              suggestedFlowKey: widget.workspaceSuggestedFlowKey,
+              result: widget.workspaceLastToolResultData,
+              toolArguments: widget.workspaceLastToolArguments,
+            ),
+      prompt: prompt,
     );
   }
 
@@ -196,40 +207,48 @@ extension _AgentWorkspaceProductionCardLogic
       busy: widget.busy,
       hasLastResult: widget.workspaceLastToolResultLine != null,
       onPullAssetsFlow: () {
-        widget.onFlowKeyChanged('assets');
-        widget.onProductionDomainToolChanged('get_flowData');
+        _applySuggestedProductionFocus(
+          flowKey: 'assets',
+          domainTool: 'get_flowData',
+        );
         _probeProductionDomainTool();
       },
       onRunAssetsSubAgent: () {
-        _applyProductionPromptIfEmpty(
-          l10n.agentWorkspaceProductionGuidedDeriveAssetsPrompt,
+        _applySuggestedProductionFocus(
+          flowKey: 'assets',
+          subAgentTool: 'run_sub_agent_derive_assets',
+          prompt: widget.productionPromptController.text.trim().isNotEmpty
+              ? null
+              : l10n.agentWorkspaceProductionGuidedDeriveAssetsPrompt,
         );
-        widget.onProductionSubAgentChanged('run_sub_agent_derive_assets');
-        _applySuggestedSubAgentArgs('run_sub_agent_derive_assets');
         _runProductionSubAgentTool();
       },
       onPullStoryboardFlow: () {
-        widget.onFlowKeyChanged('storyboard');
-        widget.onProductionDomainToolChanged('get_flowData');
+        _applySuggestedProductionFocus(
+          flowKey: 'storyboard',
+          domainTool: 'get_flowData',
+        );
         _probeProductionDomainTool();
       },
       onWriteBackFlow: _writeBackProductionFlowResult,
       onRunStoryboardSubAgent: () {
-        widget.onFlowKeyChanged('storyboard');
-        _applyProductionPromptIfEmpty(
-          l10n.agentWorkspaceProductionGuidedStoryboardGenPrompt,
+        _applySuggestedProductionFocus(
+          flowKey: 'storyboard',
+          subAgentTool: 'run_sub_agent_storyboard_gen',
+          prompt: widget.productionPromptController.text.trim().isNotEmpty
+              ? null
+              : l10n.agentWorkspaceProductionGuidedStoryboardGenPrompt,
         );
-        widget.onProductionSubAgentChanged('run_sub_agent_storyboard_gen');
-        _applySuggestedSubAgentArgs('run_sub_agent_storyboard_gen');
         _runProductionSubAgentTool();
       },
       onRunDirectorPlanSubAgent: () {
-        widget.onFlowKeyChanged('scriptPlan');
-        _applyProductionPromptIfEmpty(
-          l10n.agentWorkspaceProductionGuidedDirectorPlanPrompt,
+        _applySuggestedProductionFocus(
+          flowKey: 'scriptPlan',
+          subAgentTool: 'run_sub_agent_director_plan',
+          prompt: widget.productionPromptController.text.trim().isNotEmpty
+              ? null
+              : l10n.agentWorkspaceProductionGuidedDirectorPlanPrompt,
         );
-        widget.onProductionSubAgentChanged('run_sub_agent_director_plan');
-        _applySuggestedSubAgentArgs('run_sub_agent_director_plan');
         _runProductionSubAgentTool();
       },
     );

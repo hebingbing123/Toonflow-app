@@ -3,6 +3,12 @@ import 'package:flutter/material.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../rust_api.dart';
 
+String _displayString(Object? raw) {
+  if (raw == null) return '';
+  if (raw is String) return raw.trim();
+  return raw.toString().trim();
+}
+
 /// Renders the context snapshot cards for the script workspace.
 /// Extracted from [AgentWorkspaceScriptCard] to keep file size manageable.
 class ScriptContextSnapshotView extends StatelessWidget {
@@ -138,20 +144,14 @@ class ScriptContextSnapshotView extends StatelessWidget {
           final lines = scriptRows
               .take(4)
               .map((Map<String, dynamic> row) {
-                final name =
-                    ((row['name'] as String?) ?? (row['scriptName'] as String?))
-                            ?.trim()
-                            .isNotEmpty ==
-                        true
-                    ? (((row['name'] as String?) ??
-                              (row['scriptName'] as String?))!)
-                          .trim()
+                final nameRaw = row['name'] ?? row['scriptName'];
+                final nameTrimmed = _displayString(nameRaw);
+                final name = nameTrimmed.isNotEmpty
+                    ? nameTrimmed
                     : l10n.agentWorkspaceScriptContextUntitledScript;
-                final content =
-                    ((row['content'] as String?) ??
-                            (row['scriptData'] as String?))
-                        ?.trim() ??
-                    '';
+                final content = _displayString(
+                  row['content'] ?? row['scriptData'],
+                );
                 final preview = content.isEmpty
                     ? l10n.agentWorkspaceScriptContextNoBody
                     : _previewText(content, maxChars: 220);

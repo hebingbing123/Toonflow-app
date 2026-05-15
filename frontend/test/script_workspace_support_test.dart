@@ -114,6 +114,69 @@ void main() {
   });
 
   test(
+    'script workspace support normalizes wrapped persisted plan data across surfaces',
+    () {
+      final persistedPlanResult = <String, dynamic>{
+        'data': <String, dynamic>{
+          'id': '18',
+          'data': <String, dynamic>{
+            'story_skeleton': '三幕骨架',
+            'adaptation_strategy': '先压后扬',
+            'script': const <Map<String, dynamic>>[
+              <String, dynamic>{'id': 9, 'name': '第9集', 'content': '计划剧本草稿'},
+            ],
+          },
+        },
+      };
+
+      final summaryLines = summarizeScriptResultSnapshot(
+        _zh,
+        'get_planData',
+        persistedPlanResult,
+      );
+      final recipes = buildScriptWorkspaceRecipes(
+        l10n: _zh,
+        toolName: 'get_planData',
+        result: persistedPlanResult,
+        scopeScriptId: 9,
+      );
+      final stages = buildScriptWorkspaceStages(
+        l10n: _zh,
+        toolName: 'get_planData',
+        result: persistedPlanResult,
+        scopeScriptId: 9,
+      );
+
+      expect(summaryLines, contains('故事骨架已就绪'));
+      expect(summaryLines, contains('改编策略已就绪'));
+      expect(
+        recipes.map((recipe) => recipe.title),
+        contains(_zh.agentWorkspaceScriptRecipeReadPlanScriptDraftTitle),
+      );
+      expect(
+        stages
+            .firstWhere(
+              (stage) =>
+                  stage.title ==
+                  _zh.agentWorkspaceScriptStageTitleStorySkeleton,
+            )
+            .statusLabel,
+        _zh.agentWorkspaceScriptStageStatusReady,
+      );
+      expect(
+        stages
+            .firstWhere(
+              (stage) =>
+                  stage.title ==
+                  _zh.agentWorkspaceScriptStageTitleAdaptationStrategy,
+            )
+            .statusLabel,
+        _zh.agentWorkspaceScriptStageStatusReady,
+      );
+    },
+  );
+
+  test(
     'buildScriptWorkspaceArgumentSuggestions offers novel id fill chips',
     () {
       final suggestions = buildScriptWorkspaceArgumentSuggestions(

@@ -19,6 +19,7 @@ class QualityReviewsWorkbenchDialogViewModel {
     required this.stagePassRateSummary,
     required this.stageGradeRows,
     required this.badCaseStatsSummary,
+    required this.badCaseStatItems,
     required this.reviewDetails,
     required this.statusLine,
     required this.initialProjectScopeSummary,
@@ -70,6 +71,7 @@ class QualityReviewsWorkbenchDialogViewModel {
   final String? stagePassRateSummary;
   final List<StageGradeDistributionRow> stageGradeRows;
   final String? badCaseStatsSummary;
+  final List<BadCaseStatItem> badCaseStatItems;
   final String? reviewDetails;
   final String? statusLine;
   final String? initialProjectScopeSummary;
@@ -787,6 +789,20 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                   l10n.qualityReviewsSummaryBadCaseDistribution(
                     model.badCaseStatsSummary!,
                   ),
+                ),
+              ],
+              if (model.loadingBadCaseStats ||
+                  model.badCaseStatItems.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Text(
+                  l10n.qualityReviewsLoadBadCaseDistribution,
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
+                const SizedBox(height: 4),
+                BadCaseStatsPanel(
+                  items: model.badCaseStatItems,
+                  loading: model.loadingBadCaseStats,
+                  l10n: l10n,
                 ),
               ],
               if (model.stageGradeRows.isNotEmpty) ...[

@@ -18,6 +18,16 @@ part 'card_logic.dart';
 part 'card_logic_templates.dart';
 part 'card_logic_workflow.dart';
 
+typedef ApplyProductionWorkspaceFocus =
+    void Function({
+      String? flowKey,
+      String? domainTool,
+      Map<String, dynamic>? domainArgs,
+      String? subAgentTool,
+      Map<String, dynamic>? subAgentArgs,
+      String? prompt,
+    });
+
 class AgentWorkspaceProductionCard extends StatefulWidget {
   const AgentWorkspaceProductionCard({
     super.key,
@@ -50,6 +60,7 @@ class AgentWorkspaceProductionCard extends StatefulWidget {
     required this.onRunProductionSubAgentTool,
     required this.onWriteBackProductionFlowResult,
     required this.onApplySuggestedFlowKey,
+    required this.onApplyProductionFocus,
   });
 
   final bool busy;
@@ -81,6 +92,7 @@ class AgentWorkspaceProductionCard extends StatefulWidget {
   final VoidCallback onRunProductionSubAgentTool;
   final VoidCallback onWriteBackProductionFlowResult;
   final VoidCallback onApplySuggestedFlowKey;
+  final ApplyProductionWorkspaceFocus onApplyProductionFocus;
 
   @override
   State<AgentWorkspaceProductionCard> createState() =>

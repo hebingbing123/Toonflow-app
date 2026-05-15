@@ -28,9 +28,11 @@ class AgentWorkspacesSection extends StatefulWidget {
     this.scriptUuidController,
     this.workspaceUuidController,
     required this.scriptPromptController,
+    required this.scriptDomainFocusRevision,
     required this.scriptDomainToolController,
     required this.scriptDomainArgsController,
     required this.productionPromptController,
+    required this.productionDomainFocusRevision,
     required this.flowKeyController,
     required this.productionDomainToolController,
     required this.productionDomainArgsController,
@@ -85,9 +87,11 @@ class AgentWorkspacesSection extends StatefulWidget {
   /// When **`projectUuidController`** / **`scriptUuidController`** are supplied together, this must be non-null (WS **`workspaceUuid`**).
   final TextEditingController? workspaceUuidController;
   final TextEditingController scriptPromptController;
+  final ValueNotifier<int> scriptDomainFocusRevision;
   final TextEditingController scriptDomainToolController;
   final TextEditingController scriptDomainArgsController;
   final TextEditingController productionPromptController;
+  final ValueNotifier<int> productionDomainFocusRevision;
   final TextEditingController flowKeyController;
   final TextEditingController productionDomainToolController;
   final TextEditingController productionDomainArgsController;

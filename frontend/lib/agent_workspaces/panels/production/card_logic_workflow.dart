@@ -3,26 +3,28 @@ part of 'card.dart';
 extension _AgentWorkspaceProductionCardWorkflow
     on _AgentWorkspaceProductionCardState {
   void _applyWorkspaceRecipe(ProductionWorkspaceRecipe recipe) {
-    widget.onFlowKeyChanged(recipe.flowKey);
-    if (recipe.domainTool != null && recipe.domainTool!.trim().isNotEmpty) {
-      widget.onProductionDomainToolChanged(recipe.domainTool!.trim());
-      widget.productionDomainArgsController.text = jsonEncode(
-        recipe.domainArgs ??
-            (recipe.domainTool == 'get_flowData'
-                ? _flowDataArgsTemplate()
-                : <String, dynamic>{'key': recipe.flowKey}),
-      );
-    }
-    if (recipe.subAgentTool != null && recipe.subAgentTool!.trim().isNotEmpty) {
-      widget.onProductionSubAgentChanged(recipe.subAgentTool!.trim());
-      widget.productionSubAgentArgsController.text = jsonEncode(
-        recipe.subAgentArgs ?? const <String, dynamic>{},
-      );
-    }
+    final domainTool = recipe.domainTool?.trim();
+    final subAgentTool = recipe.subAgentTool?.trim();
     final prompt = recipe.prompt?.trim();
-    if (prompt != null && prompt.isNotEmpty) {
-      widget.productionPromptController.text = prompt;
-    }
+    widget.onApplyProductionFocus(
+      flowKey: recipe.flowKey,
+      domainTool: domainTool != null && domainTool.isNotEmpty
+          ? domainTool
+          : null,
+      domainArgs: domainTool == null || domainTool.isEmpty
+          ? null
+          : recipe.domainArgs ??
+                (domainTool == 'get_flowData'
+                    ? _flowDataArgsTemplate()
+                    : <String, dynamic>{'key': recipe.flowKey}),
+      subAgentTool: subAgentTool != null && subAgentTool.isNotEmpty
+          ? subAgentTool
+          : null,
+      subAgentArgs: subAgentTool == null || subAgentTool.isEmpty
+          ? null
+          : recipe.subAgentArgs ?? const <String, dynamic>{},
+      prompt: prompt != null && prompt.isNotEmpty ? prompt : null,
+    );
     _setTaskStatus(
       summarizeAppliedProductionRecipeStatus(
         recipe,
@@ -32,25 +34,25 @@ extension _AgentWorkspaceProductionCardWorkflow
   }
 
   void _applyWorkspaceStage(ProductionWorkspaceStage stage) {
-    widget.onFlowKeyChanged(stage.flowKey);
-    if (stage.domainTool != null && stage.domainTool!.trim().isNotEmpty) {
-      widget.onProductionDomainToolChanged(stage.domainTool!.trim());
-      if (stage.domainTool == 'get_flowData') {
-        widget.productionDomainArgsController.text = jsonEncode(
-          stage.domainArgs ?? _flowDataArgsTemplate(),
-        );
-      }
-    }
-    if (stage.subAgentTool != null && stage.subAgentTool!.trim().isNotEmpty) {
-      widget.onProductionSubAgentChanged(stage.subAgentTool!.trim());
-      widget.productionSubAgentArgsController.text = jsonEncode(
-        stage.subAgentArgs ?? const <String, dynamic>{},
-      );
-    }
+    final domainTool = stage.domainTool?.trim();
+    final subAgentTool = stage.subAgentTool?.trim();
     final prompt = stage.prompt?.trim();
-    if (prompt != null && prompt.isNotEmpty) {
-      widget.productionPromptController.text = prompt;
-    }
+    widget.onApplyProductionFocus(
+      flowKey: stage.flowKey,
+      domainTool: domainTool != null && domainTool.isNotEmpty
+          ? domainTool
+          : null,
+      domainArgs: domainTool == 'get_flowData'
+          ? stage.domainArgs ?? _flowDataArgsTemplate()
+          : null,
+      subAgentTool: subAgentTool != null && subAgentTool.isNotEmpty
+          ? subAgentTool
+          : null,
+      subAgentArgs: subAgentTool == null || subAgentTool.isEmpty
+          ? null
+          : stage.subAgentArgs ?? const <String, dynamic>{},
+      prompt: prompt != null && prompt.isNotEmpty ? prompt : null,
+    );
     _setTaskStatus(
       summarizeAppliedProductionStageStatus(
         stage,

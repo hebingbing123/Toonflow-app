@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 import '../../rust_api.dart';
 import '../l10n/app_localizations.dart';
 import 'quality_reviews_l10n.dart';
@@ -532,4 +534,47 @@ String formatQualityReviewDetails(QualityReview row, {AppLocalizations? l10n}) {
     );
   }
   return parts.join(' · ');
+}
+
+/// Structured bad-case distribution for the quality workbench (Task 14).
+class BadCaseStatsPanel extends StatelessWidget {
+  const BadCaseStatsPanel({
+    super.key,
+    required this.items,
+    required this.loading,
+    required this.l10n,
+  });
+
+  final List<BadCaseStatItem> items;
+  final bool loading;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    if (loading) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 8),
+        child: LinearProgressIndicator(minHeight: 2),
+      );
+    }
+    if (items.isEmpty) {
+      return Text(l10n.qualityReviewsNoBadCaseData);
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (final e in items)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: SelectableText(
+              '${l10n.qualityReviewsBadCaseStatsLine(
+                e.badCaseCategory ?? l10n.qualityReviewsUncategorized,
+                e.count,
+                e.passRatePercent.toStringAsFixed(1),
+              )} · avg ${e.avgScore.toStringAsFixed(1)}',
+            ),
+          ),
+      ],
+    );
+  }
 }

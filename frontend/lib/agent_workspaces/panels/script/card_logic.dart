@@ -1,9 +1,18 @@
 part of 'card.dart';
 
 extension _AgentWorkspaceScriptCardLogic on _AgentWorkspaceScriptCardState {
-  void _applyScriptPromptIfEmpty(String prompt) {
-    if (widget.scriptPromptController.text.trim().isNotEmpty) return;
-    widget.scriptPromptController.text = prompt;
+  void _applySuggestedScriptFocus({
+    String? domainTool,
+    Map<String, dynamic>? domainArgs,
+    String? subAgentTool,
+    String? prompt,
+  }) {
+    widget.onApplyScriptFocus(
+      domainTool: domainTool,
+      domainArgs: domainArgs,
+      subAgentTool: subAgentTool,
+      prompt: prompt,
+    );
   }
 
   String _previewText(String value, {required int maxChars}) {
@@ -158,10 +167,17 @@ extension _AgentWorkspaceScriptCardLogic on _AgentWorkspaceScriptCardState {
     }
   }
 
+  void _applyScriptDomainArgsText(String args, String statusMessage) {
+    widget.scriptDomainArgsController.text = args;
+    _setTaskStatus(statusMessage);
+  }
+
   void _applyToolArgsTemplate(String args, String label) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    widget.scriptDomainArgsController.text = args;
-    _setTaskStatus(l10n.agentWorkspaceFilledArgTemplate(label));
+    _applyScriptDomainArgsText(
+      args,
+      l10n.agentWorkspaceFilledArgTemplate(label),
+    );
   }
 
   void _runScriptWorkspace() {
@@ -239,23 +255,35 @@ extension _AgentWorkspaceScriptCardLogic on _AgentWorkspaceScriptCardState {
       busy: widget.busy,
       canWriteBackScriptResult: _canWriteBackScriptResult,
       onFetchPlanData: () {
-        widget.onScriptDomainToolChanged('get_planData');
-        widget.scriptDomainArgsController.text =
-            '{"key":"storySkeleton","maxChars":1600}';
+        _applySuggestedScriptFocus(
+          domainTool: 'get_planData',
+          domainArgs: <String, dynamic>{
+            'key': 'storySkeleton',
+            'maxChars': 1600,
+          },
+        );
         _probeScriptDomainTool();
       },
       onFetchScriptContent: () {
-        widget.onScriptDomainToolChanged('get_script_content');
         final scriptId = _scopeScriptId ?? 1;
-        widget.scriptDomainArgsController.text =
-            '{"scriptId":$scriptId,"lineStart":61,"lineEnd":120,"maxChars":1600}';
+        _applySuggestedScriptFocus(
+          domainTool: 'get_script_content',
+          domainArgs: <String, dynamic>{
+            'scriptId': scriptId,
+            'lineStart': 61,
+            'lineEnd': 120,
+            'maxChars': 1600,
+          },
+        );
         _probeScriptDomainTool();
       },
       onGenerateDraft: () {
-        _applyScriptPromptIfEmpty(
-          l10n.agentWorkspaceScriptGuidedGenerateDraftPrompt,
+        _applySuggestedScriptFocus(
+          subAgentTool: 'run_sub_agent_script',
+          prompt: widget.scriptPromptController.text.trim().isNotEmpty
+              ? null
+              : l10n.agentWorkspaceScriptGuidedGenerateDraftPrompt,
         );
-        widget.onScriptSubAgentChanged('run_sub_agent_script');
         _runScriptSubAgentTool();
       },
       onWriteBackScript: _writeBackScriptResult,
@@ -292,19 +320,21 @@ extension _AgentWorkspaceScriptCardLogic on _AgentWorkspaceScriptCardState {
 
   void _applyWorkspaceRecipe(ScriptWorkspaceRecipe recipe) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    if (recipe.domainTool != null && recipe.domainTool!.trim().isNotEmpty) {
-      widget.onScriptDomainToolChanged(recipe.domainTool!.trim());
-      widget.scriptDomainArgsController.text = jsonEncode(
-        recipe.args ?? <String, dynamic>{},
-      );
-    }
-    if (recipe.subAgentTool != null && recipe.subAgentTool!.trim().isNotEmpty) {
-      widget.onScriptSubAgentChanged(recipe.subAgentTool!.trim());
-    }
     final prompt = recipe.prompt?.trim();
-    if (prompt != null && prompt.isNotEmpty) {
-      widget.scriptPromptController.text = prompt;
-    }
+    final domainTool = recipe.domainTool?.trim();
+    final subAgentTool = recipe.subAgentTool?.trim();
+    _applySuggestedScriptFocus(
+      domainTool: domainTool != null && domainTool.isNotEmpty
+          ? domainTool
+          : null,
+      domainArgs: domainTool != null && domainTool.isNotEmpty
+          ? recipe.args ?? <String, dynamic>{}
+          : null,
+      subAgentTool: subAgentTool != null && subAgentTool.isNotEmpty
+          ? subAgentTool
+          : null,
+      prompt: prompt != null && prompt.isNotEmpty ? prompt : null,
+    );
     _setTaskStatus(l10n.agentWorkspaceScriptAppliedRecipe(recipe.title));
   }
 
@@ -324,19 +354,21 @@ extension _AgentWorkspaceScriptCardLogic on _AgentWorkspaceScriptCardState {
 
   void _applyWorkspaceStage(ScriptWorkspaceStage stage) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    if (stage.domainTool != null && stage.domainTool!.trim().isNotEmpty) {
-      widget.onScriptDomainToolChanged(stage.domainTool!.trim());
-      widget.scriptDomainArgsController.text = jsonEncode(
-        stage.args ?? <String, dynamic>{},
-      );
-    }
-    if (stage.subAgentTool != null && stage.subAgentTool!.trim().isNotEmpty) {
-      widget.onScriptSubAgentChanged(stage.subAgentTool!.trim());
-    }
     final prompt = stage.prompt?.trim();
-    if (prompt != null && prompt.isNotEmpty) {
-      widget.scriptPromptController.text = prompt;
-    }
+    final domainTool = stage.domainTool?.trim();
+    final subAgentTool = stage.subAgentTool?.trim();
+    _applySuggestedScriptFocus(
+      domainTool: domainTool != null && domainTool.isNotEmpty
+          ? domainTool
+          : null,
+      domainArgs: domainTool != null && domainTool.isNotEmpty
+          ? stage.args ?? <String, dynamic>{}
+          : null,
+      subAgentTool: subAgentTool != null && subAgentTool.isNotEmpty
+          ? subAgentTool
+          : null,
+      prompt: prompt != null && prompt.isNotEmpty ? prompt : null,
+    );
     _setTaskStatus(l10n.agentWorkspaceScriptAppliedStage(stage.title));
   }
 

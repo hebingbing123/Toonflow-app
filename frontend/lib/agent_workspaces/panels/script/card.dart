@@ -15,6 +15,14 @@ import '../../contexts/script/support.dart';
 part 'card_support.dart';
 part 'card_logic.dart';
 
+typedef ApplyScriptWorkspaceFocus =
+    void Function({
+      String? domainTool,
+      Map<String, dynamic>? domainArgs,
+      String? subAgentTool,
+      String? prompt,
+    });
+
 class AgentWorkspaceScriptCard extends StatefulWidget {
   const AgentWorkspaceScriptCard({
     super.key,
@@ -49,6 +57,7 @@ class AgentWorkspaceScriptCard extends StatefulWidget {
     required this.onWriteBackScriptResult,
     required this.onWriteBackScriptPlanResult,
     required this.onWriteBackScriptPlanViaUpdateData,
+    required this.onApplyScriptFocus,
   });
 
   final bool busy;
@@ -82,6 +91,7 @@ class AgentWorkspaceScriptCard extends StatefulWidget {
   final VoidCallback onWriteBackScriptResult;
   final VoidCallback onWriteBackScriptPlanResult;
   final VoidCallback onWriteBackScriptPlanViaUpdateData;
+  final ApplyScriptWorkspaceFocus onApplyScriptFocus;
 
   @override
   State<AgentWorkspaceScriptCard> createState() =>
@@ -120,7 +130,11 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
     if (data is! Map<String, dynamic>) return null;
     final scriptRaw = data['script'];
     final scriptCount = scriptRaw is List
-        ? scriptRaw.whereType<Map<String, dynamic>>().length
+        ? scriptRaw.whereType<Map<String, dynamic>>().where((row) {
+            final scriptId = _toPositiveIntValue(row['numeric_id'] ?? row['id']);
+            final content = row['content'];
+            return scriptId != null && content is String;
+          }).length
         : 0;
     final pid = widget.workspaceScriptPlanRowId;
     final planHint = pid != null ? l10n.agentWorkspaceScriptPlanHint(pid) : '';
@@ -143,6 +157,21 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
     }
     if (widget.loadingScriptPlanResultWriteback) {
       return l10n.agentWorkspaceScriptRunningWritebackPlan;
+    }
+    return null;
+  }
+
+  int? _toPositiveIntValue(Object? raw) {
+    if (raw is int) return raw > 0 ? raw : null;
+    if (raw is num) {
+      final normalized = raw.toInt();
+      return normalized > 0 ? normalized : null;
+    }
+    if (raw is String) {
+      final parsed = int.tryParse(raw.trim());
+      if (parsed != null && parsed > 0) {
+        return parsed;
+      }
     }
     return null;
   }

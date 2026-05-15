@@ -76,6 +76,7 @@ QualityReviewsWorkbenchDialogViewModel buildDialogModel({
     stagePassRateSummary: 'storyboard: 100%',
     stageGradeRows: const [],
     badCaseStatsSummary: null,
+    badCaseStatItems: const <BadCaseStatItem>[],
     reviewDetails: 'review-1 · output · manual',
     statusLine: '已读取评审详情',
     initialProjectScopeSummary: 'projectUuid=project-uuid-7 -> projectId=7',

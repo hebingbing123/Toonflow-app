@@ -1,7 +1,11 @@
-//! Anti-AI artifact detection: anchor drift, emotion progression, gaze consistency.
+//! Anti-AI artifact detection: gaze / limbs / physical coherence, dialogue–emotion fit,
+//! monotone delivery, and repetitive motion.
 //!
-//! Provides `check_anti_ai_artifacts` — a focused pass over structured storyboard
-//! fields that flags the most common "one-glance AI" problems before high-cost stages.
+//! **Related checks in `rules.rs` / `enforce.rs`:** StyleBible 外貌锚点、`character_anchor_drift`、
+//! `face_identity_drift`、`costume_drift` 由 `evaluate_structured_fields` 处理；同一角色连续 3 条分镜
+//! 情绪强度不变（`emotion_progression_flat`）与表演状态重复由 `evaluate_storyboard_progression` 处理。
+//! `run_quality_gate` 发现问题时通过 `persist_precheck_memory` 写入 `delta_memory`（含 `preferredPatchScope`），
+//! 供局部返工与后续 Agent 轮次消费。
 
 use crate::production::workbench::video_prompt_memory::StructuredStoryboardDescription;
 

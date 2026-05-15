@@ -36,7 +36,7 @@ List<String> summarizeScriptResultSnapshot(
         ),
       ];
     case 'get_planData':
-      final data = result['data'];
+      final data = _extractPlanDataMap(result);
       if (data is! Map<String, dynamic>) {
         return <String>[l10n.agentWorkspaceScriptSummaryPlanDataMissing];
       }

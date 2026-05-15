@@ -43,7 +43,7 @@
   - 测试：`flutter test test/storyboard_workbench_support_test.dart`
   - _需求: 1.7_
 
-- [ ] 6. 后端补完质量评审驱动优化（bad-case-stats + suggested_action）
+- [x] 6. 后端补完质量评审驱动优化（bad-case-stats + suggested_action）
   - 在 `prompting/quality/` 新增 `bad_case_stats.rs`：按 `bad_case_category` 聚合 top-5
   - 在 `types.rs` 为 `QualityReview` 补充 `suggested_action` 字段，写入时自动映射
   - 新增 `GET /api/v1/quality/bad-case-stats?projectId=&limit=5` 端点
@@ -51,7 +51,7 @@
   - 测试：`cargo test -p backend -- prompting::quality::tests`
   - _需求: 2.1_
 
-- [ ] 7. 补完 Benchmark 后端缺失模块（review_queue / observation_assets / memory_profiles / promotion_gate）
+- [x] 7. 补完 Benchmark 后端缺失模块（review_queue / observation_assets / memory_profiles / promotion_gate）
   - `benchmark/review_queue/`：mod.rs + handlers.rs（create/submit/skip）+ types.rs
   - `benchmark/observation_assets/`：mod.rs + handlers.rs（ingest/govern/counters）+ types.rs
   - `benchmark/memory_profiles/`：mod.rs + snapshot.rs + roi.rs
@@ -60,14 +60,14 @@
   - 测试：每个模块只写一个 smoke test（创建 + 读取）
   - _需求: 2.2_
 
-- [ ] 8. 前端 Benchmark 工作台
+- [x] 8. 前端 Benchmark 工作台
   - 新建 `frontend/lib/rust_api/benchmark/`：index.dart + api.dart + models.dart
   - 新建 `frontend/lib/benchmark/`：section.dart + workbench_cases.dart + workbench_experiments.dart + workbench_review_queue.dart + workbench_gate.dart
   - 在 `shell/build_sections_product.dart` 注册新 section
   - 测试：`flutter test test/benchmark_workbench_support_test.dart`（最小 widget test）
   - _需求: 2.3_
 
-- [ ] 9. 强化反 AI 痕迹检测（anti_ai.rs）
+- [x] 9. 强化反 AI 痕迹检测（anti_ai.rs）
   - 人物锚点漂移检测（对比 StyleBible 角色锚点，相似度 < 70% 触发警告）
   - 情绪递进检测（连续 3 帧相同情绪强度 → 写入 delta_memory）
   - 视线方向一致性（对话场景双方视线必须相对）
@@ -75,20 +75,20 @@
   - 测试：`cargo test -p backend -- production::quality_gate::anti_ai`
   - _需求: 3.1_
 
-- [ ] 10. 强化视频提示词情绪真实感
+- [x] 10. 强化视频提示词情绪真实感
   - `data/prompt_defaults/videoPromptGeneration.txt` 补充 10 种情绪具象化规则
   - 视频提示词生成逻辑增加情绪强度梯度校验
   - `data/skills/production_agent_execution.md` 补充"情绪具象化"执行规则（≤ 200 字）
   - 测试：无需自动化测试（prompt 文件修改）
   - _需求: 3.2_
 
-- [ ] 11. Token 优化 — 收紧记忆注入范围
+- [x] 11. Token 优化 — 收紧记忆注入范围
   - `sub_agent/memory.rs`（Task 2 拆出）：style_bible 按角色名过滤，stage_summary 按阶段过滤，返工注入收紧
   - `metering/llm_usage.rs` meta 字段补记 `context_chars_injected` 和 `rework_mode`
   - 测试：`cargo test -p backend -- settings::agent_memory`
   - _需求: 4.1_
 
-- [ ] 12. 属性测试补全（Benchmark 隔离与放行门，6 个属性）
+- [x] 12. 属性测试补全（Benchmark 隔离与放行门，6 个属性）
   - 属性 1：基线样本隔离性
   - 属性 2：实验变体快照完整性
   - 属性 3：ROI 对比同样本约束
@@ -99,7 +99,7 @@
   - 测试：`cargo test -p backend -- prompting::benchmark`
   - _需求: 5.1_
 
-- [ ] 13. 最小契约测试（bad-case-stats + review-queue + promotion-gate）
+- [x] 13. 最小契约测试（bad-case-stats + review-queue + promotion-gate）
   - bad-case-stats roundtrip（写入 3 条 → 查询 → 验证 top-1）
   - review-queue roundtrip（create → submit → 验证回写）
   - promotion-gate/evaluate（守卫样本退化 → 验证 blocked）
@@ -107,21 +107,21 @@
   - 测试：`cargo test -p backend -- app::pg_contract_tests::ops_suite`
   - _需求: 5.2_
 
-- [ ] 14. 前端质量评审补完 bad-case-stats 展示
+- [x] 14. 前端质量评审补完 bad-case-stats 展示
   - `rust_api/quality/stats.dart` 新增 `fetchBadCaseStats()`
   - `quality_reviews/support_stats.dart` 新增 `BadCaseStatsPanel` widget
   - `quality_reviews/section_workbench.dart` 接入该 panel
   - 测试：`flutter test test/quality_reviews_section_test.dart`
   - _需求: 2.4_
 
-- [ ] 15. Review — 检查三个 spec 是否有缺失功能
+- [x] 15. Review — 检查三个 spec 是否有缺失功能
   - 逐一检查 drama-platform-completion requirements 18 组需求
   - 逐一检查 drama-quality-benchmark-ops requirements 9 组需求
   - 逐一检查 ai-drama-quality-optimization requirements 所有需求
   - 输出缺口清单（或确认无缺口）
   - 测试：无需自动化测试
 
-- [ ] 16. 全量门禁（refactor-check.sh + cargo test + flutter test）
+- [x] 16. 全量门禁（refactor-check.sh + cargo test + flutter test）
   - `bash scripts/refactor-check.sh`
   - `cargo test` 全量后端测试
   - `flutter test` 全量前端测试

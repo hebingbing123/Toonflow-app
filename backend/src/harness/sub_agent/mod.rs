@@ -12,7 +12,8 @@ use sqlx::PgPool;
 
 use crate::error::ApiError;
 use crate::harness::HarnessContext;
-use crate::llm::chat_completion_assistant_text;
+use crate::llm::chat_completion_with_usage;
+use crate::metering::llm_usage::record_llm_usage;
 use crate::production::{enforce_quality_gate, run_quality_gate, QualityGateStage};
 use crate::prompting::skills::{read_skill_markdown, read_skill_markdown_section};
 
@@ -99,6 +100,7 @@ pub async fn invoke_sub_agent_tool(
         "Use the narrowest tool call that can solve the task before requesting broader context.",
     );
     let rework_context_note = build_rework_context_note(arguments);
+    let rework_mode = rework_context_note.is_some();
     if tool_name == "run_sub_agent_storyboard_panel" {
         if let (Some(pool), Some(project_numeric_id), Some(script_numeric_id)) = (
             ctx.pool.as_ref(),
@@ -128,6 +130,10 @@ pub async fn invoke_sub_agent_tool(
         json!({"role":"system","content":system}),
         json!({"role":"assistant","content":context_note}),
     ];
+    let context_chars_injected = memory_note
+        .as_deref()
+        .map(|text| text.chars().count())
+        .unwrap_or(0);
     if let Some(memory_note) = memory_note {
         messages.push(json!({"role":"assistant","content":memory_note}));
     }
@@ -140,9 +146,44 @@ pub async fn invoke_sub_agent_tool(
     messages
         .push(json!({"role":"assistant","content":format!("Execution hint: {execution_note}")}));
     messages.push(json!({"role":"user","content":prompt}));
-    let text = match chat_completion_assistant_text(cfg, client, messages).await {
-        Ok(text) => text,
+    let prompt_chars = messages
+        .iter()
+        .filter_map(|message| message.get("content"))
+        .filter_map(Value::as_str)
+        .map(|text| text.chars().count() as i64)
+        .sum::<i64>();
+    let usage_meta = json!({
+        "toolName": tool_name,
+        "agentType": agent_memory_type_for_tool(tool_name),
+        "projectNumericId": ctx.project_numeric_id,
+        "scriptNumericId": ctx.script_numeric_id,
+        "contextCharsInjected": context_chars_injected,
+        "reworkMode": rework_mode,
+    });
+    let result = match chat_completion_with_usage(cfg, client, messages).await {
+        Ok(result) => result,
         Err(error) => {
+            if let (Some(pool), Some(project_numeric_id)) =
+                (ctx.pool.as_ref(), ctx.project_numeric_id)
+            {
+                record_llm_usage(
+                    pool,
+                    ctx.user_id,
+                    Some(project_numeric_id),
+                    ctx.script_numeric_id,
+                    None,
+                    "harness.sub_agent",
+                    &cfg.model,
+                    Some(resolve_llm_provider(cfg.base_url.as_str())),
+                    None,
+                    Some(prompt_chars),
+                    false,
+                    Some(&error),
+                    None,
+                    usage_meta.clone(),
+                )
+                .await;
+            }
             if let (Some(pool), Some(project_numeric_id), Some(agent_type)) = (
                 ctx.pool.as_ref(),
                 ctx.project_numeric_id,
@@ -166,6 +207,26 @@ pub async fn invoke_sub_agent_tool(
             return Err(InvokeError::LlmError(error));
         }
     };
+    if let (Some(pool), Some(project_numeric_id)) = (ctx.pool.as_ref(), ctx.project_numeric_id) {
+        record_llm_usage(
+            pool,
+            ctx.user_id,
+            Some(project_numeric_id),
+            ctx.script_numeric_id,
+            None,
+            "harness.sub_agent",
+            result.model.as_deref().unwrap_or(cfg.model.as_str()),
+            Some(resolve_llm_provider(cfg.base_url.as_str())),
+            result.usage.as_ref(),
+            Some(prompt_chars),
+            true,
+            None,
+            None,
+            usage_meta,
+        )
+        .await;
+    }
+    let text = result.content;
     let review = match tool_name {
         "run_supervision_agent" | "run_sub_agent_production_supervision" => {
             parse_review_summary(&text)
@@ -214,6 +275,16 @@ pub async fn invoke_sub_agent_tool(
         "result": text,
         "review": review,
     }))
+}
+
+fn resolve_llm_provider(base_url: &str) -> &'static str {
+    if base_url.contains("anthropic") {
+        "anthropic"
+    } else if base_url.contains("openai") {
+        "openai"
+    } else {
+        "custom"
+    }
 }
 
 fn sub_agent_prompt_from_args(tool_name: &str, arguments: &Value) -> Result<String, InvokeError> {

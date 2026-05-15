@@ -166,12 +166,16 @@ extension _HomePageBuildProductSections on _HomePageState {
       workspaceUuidController:
           _workspaceInputController.workspaceUuidController,
       scriptPromptController: _workspaceInputController.scriptPromptController,
+      scriptDomainFocusRevision:
+          _workspaceInputController.scriptDomainFocusRevision,
       scriptDomainToolController:
           _workspaceInputController.scriptDomainToolController,
       scriptDomainArgsController:
           _workspaceInputController.scriptDomainArgsController,
       productionPromptController:
           _workspaceInputController.productionPromptController,
+      productionDomainFocusRevision:
+          _workspaceInputController.productionDomainFocusRevision,
       flowKeyController: _workspaceInputController.productionFlowKeyController,
       productionDomainToolController:
           _workspaceInputController.productionDomainToolController,
