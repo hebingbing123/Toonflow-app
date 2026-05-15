@@ -10,10 +10,6 @@ pub(in crate::harness::sub_agent) use project::*;
 
 pub(in crate::harness::sub_agent) const AUTO_MEMORY_SUMMARY_LIMIT: i64 = 3;
 pub(in crate::harness::sub_agent) const AUTO_MEMORY_FALLBACK_LIMIT: usize = 1;
-pub(in crate::harness::sub_agent) const AUTO_MEMORY_REWORK_LIMIT: usize = 2;
-pub(in crate::harness::sub_agent) const AUTO_MEMORY_KEEP_ROWS: i64 = 8;
-pub(in crate::harness::sub_agent) const AUTO_MEMORY_MAX_CHARS: usize = 320;
-pub(in crate::harness::sub_agent) const AUTO_MEMORY_FETCH_LIMIT: i64 = AUTO_MEMORY_KEEP_ROWS;
 pub(in crate::harness::sub_agent) const REWORK_REASON_MAX_CHARS: usize = 120;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]

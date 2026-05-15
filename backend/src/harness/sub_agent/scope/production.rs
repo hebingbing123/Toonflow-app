@@ -2,9 +2,10 @@
 
 use serde_json::Value;
 
+use super::super::memory_limits::auto_memory_max_chars;
 use super::{
     contains_any, normalize_whitespace, parse_asset_type_list, parse_positive_id_list,
-    truncate_chars, ScopeSignature, AUTO_MEMORY_MAX_CHARS, REWORK_REASON_MAX_CHARS,
+    truncate_chars, ScopeSignature, REWORK_REASON_MAX_CHARS,
 };
 
 pub(in crate::harness::sub_agent) fn production_scope_note(arguments: &Value) -> Option<String> {
@@ -250,7 +251,7 @@ pub(in crate::harness::sub_agent) fn compact_auto_memory_summary_text(
         .collect::<Vec<_>>()
         .join("，");
     let compacted = normalize_whitespace(compacted.trim());
-    (!compacted.is_empty()).then_some(truncate_chars(&compacted, AUTO_MEMORY_MAX_CHARS))
+    (!compacted.is_empty()).then_some(truncate_chars(&compacted, auto_memory_max_chars()))
 }
 
 pub(in crate::harness::sub_agent) fn compact_auto_memory_review_text(

@@ -8,19 +8,20 @@ use crate::harness::invoke::InvokeError;
 use crate::production::{storyboard_prompt_seed, StoryboardPromptSeedRow};
 use crate::settings::agent_memory::replace_named_summary_memory_with_scope;
 
+use super::memory_limits::{
+    auto_memory_fetch_limit, auto_memory_keep_rows, auto_memory_max_chars,
+    auto_memory_rework_limit, stage_summary_note_max_chars, style_bible_note_max_chars,
+};
 use super::scope::{
     compact_auto_memory_entry_for_scope, compact_auto_memory_summary_text,
     dedupe_auto_memory_entries, parse_positive_id_list, scope_signature_from_args,
     scope_signature_json, scope_summary, select_auto_memory_entries, summarize_result_excerpt,
-    truncate_chars, AUTO_MEMORY_FETCH_LIMIT, AUTO_MEMORY_KEEP_ROWS, AUTO_MEMORY_MAX_CHARS,
-    AUTO_MEMORY_REWORK_LIMIT,
+    truncate_chars,
 };
 use super::spec::{stage_label_for_tool, stage_summary_name_for_tool};
 
 const STYLE_BIBLE_AGENT_TYPE: &str = "productionAgent";
 const STYLE_BIBLE_NAME: &str = "style_bible:project";
-const STYLE_BIBLE_NOTE_MAX_CHARS: usize = 420;
-const STAGE_SUMMARY_NOTE_MAX_CHARS: usize = 220;
 
 #[derive(Debug, sqlx::FromRow)]
 pub(super) struct AutoMemoryRow {
@@ -159,7 +160,7 @@ pub(super) async fn load_auto_memory_note(
     .bind(project_numeric_id)
     .bind(episodes_id)
     .bind(agent_type)
-    .bind(AUTO_MEMORY_FETCH_LIMIT)
+    .bind(auto_memory_fetch_limit())
     .fetch_all(pool)
     .await
     .map_err(|e| InvokeError::DatabaseError(e.to_string()))?;
@@ -175,14 +176,19 @@ pub(super) async fn load_auto_memory_note(
     let rows = dedupe_auto_memory_entries(rows);
     // 返工模式下注入上限收紧为 1 倍（非返工为 2 倍）
     let char_budget = if is_rework {
-        AUTO_MEMORY_MAX_CHARS
+        auto_memory_max_chars()
     } else {
-        AUTO_MEMORY_MAX_CHARS * AUTO_MEMORY_REWORK_LIMIT
+        auto_memory_max_chars() * auto_memory_rework_limit()
     };
     let mut chars = 0usize;
     let items = rows
         .into_iter()
-        .map(|entry| format!("- {}", truncate_chars(entry.trim(), AUTO_MEMORY_MAX_CHARS)))
+        .map(|entry| {
+            format!(
+                "- {}",
+                truncate_chars(entry.trim(), auto_memory_max_chars())
+            )
+        })
         .filter(|entry| {
             let next = chars + entry.chars().count();
             if next > char_budget {
@@ -453,7 +459,7 @@ fn build_filtered_style_bible_note(
     }
     Some(truncate_chars(
         &lines.join("\n"),
-        STYLE_BIBLE_NOTE_MAX_CHARS,
+        style_bible_note_max_chars(),
     ))
 }
 
@@ -554,7 +560,7 @@ async fn load_stage_summary_note(
         .map_err(|e| InvokeError::DatabaseError(e.to_string()))?
         .flatten(),
     };
-    Ok(latest.map(|content| truncate_chars(content.trim(), STAGE_SUMMARY_NOTE_MAX_CHARS)))
+    Ok(latest.map(|content| truncate_chars(content.trim(), stage_summary_note_max_chars())))
 }
 
 async fn should_persist_auto_memory_snapshot(
@@ -632,7 +638,7 @@ pub(super) async fn persist_auto_memory_snapshot(
     .bind(project_numeric_id)
     .bind(episodes_id)
     .bind(agent_type)
-    .bind(AUTO_MEMORY_KEEP_ROWS)
+    .bind(auto_memory_keep_rows())
     .execute(pool)
     .await
     .map_err(|e| InvokeError::DatabaseError(e.to_string()))?;
@@ -687,7 +693,7 @@ pub(super) fn build_auto_memory_snapshot(
         let summary = summarize_result_excerpt(result_text)?;
         parts.push(format!("result={summary}"));
     }
-    Some(truncate_chars(&parts.join(" | "), AUTO_MEMORY_MAX_CHARS))
+    Some(truncate_chars(&parts.join(" | "), auto_memory_max_chars()))
 }
 
 fn summarize_stage_failure(error: &InvokeError) -> String {
@@ -743,7 +749,7 @@ pub(super) fn build_stage_summary_content(
     if let Some(error) = error {
         parts.push(format!("reason={}", summarize_stage_failure(error)));
     }
-    Some(truncate_chars(&parts.join(" | "), 320))
+    Some(truncate_chars(&parts.join(" | "), auto_memory_max_chars()))
 }
 
 #[allow(clippy::too_many_arguments)]

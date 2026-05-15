@@ -2,10 +2,11 @@
 
 use serde_json::{json, Value};
 
+use super::super::memory_limits::auto_memory_rework_limit;
 use super::{
     parse_asset_type_list, parse_focus_section_list, parse_positive_id_list,
     parse_relative_script_offset, parse_storyboard_prompt_seed_scope, ScopeSignature,
-    AUTO_MEMORY_FALLBACK_LIMIT, AUTO_MEMORY_REWORK_LIMIT, AUTO_MEMORY_SUMMARY_LIMIT,
+    AUTO_MEMORY_FALLBACK_LIMIT, AUTO_MEMORY_SUMMARY_LIMIT,
 };
 
 fn parse_scope_list(segment: Option<&str>) -> Vec<i64> {
@@ -196,7 +197,7 @@ pub(in crate::harness::sub_agent) fn select_auto_memory_entries(
         return rows
             .into_iter()
             .take(if rework_mode {
-                AUTO_MEMORY_REWORK_LIMIT.min(AUTO_MEMORY_FALLBACK_LIMIT.max(1))
+                auto_memory_rework_limit().min(AUTO_MEMORY_FALLBACK_LIMIT.max(1))
             } else {
                 AUTO_MEMORY_FALLBACK_LIMIT
             })
@@ -221,7 +222,7 @@ pub(in crate::harness::sub_agent) fn select_auto_memory_entries(
             .into_iter()
             .map(|(_, _, _, row)| row)
             .take(if rework_mode {
-                AUTO_MEMORY_REWORK_LIMIT.min(AUTO_MEMORY_FALLBACK_LIMIT.max(1))
+                auto_memory_rework_limit().min(AUTO_MEMORY_FALLBACK_LIMIT.max(1))
             } else {
                 AUTO_MEMORY_FALLBACK_LIMIT
             })
@@ -262,7 +263,7 @@ pub(in crate::harness::sub_agent) fn select_auto_memory_entries(
                 })
         })
         .take(if rework_mode {
-            AUTO_MEMORY_REWORK_LIMIT
+            auto_memory_rework_limit()
         } else {
             AUTO_MEMORY_SUMMARY_LIMIT as usize
         })

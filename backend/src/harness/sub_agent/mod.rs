@@ -1,6 +1,7 @@
 //! Sub-agent orchestration: routes tool calls to LLM with skill docs, memory, and quality gates.
 
 mod memory;
+mod memory_limits;
 mod scope;
 mod spec;
 
