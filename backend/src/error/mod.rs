@@ -67,6 +67,7 @@
 //! ```
 
 mod api_error;
+pub mod billing_errors;
 pub mod helpers;
 pub mod locale;
 

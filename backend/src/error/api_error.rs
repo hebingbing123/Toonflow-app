@@ -64,6 +64,22 @@ pub enum ApiError {
     /// HTTP **429** — user has exceeded their plan quota (e.g. daily job limit for Free tier).
     /// Automatically adds `Retry-After` header (seconds) and `retry_after_ms` in body.
     QuotaExceeded(String),
+    QuotaExceededI18n {
+        en: String,
+        zh: String,
+    },
+    SubscriptionExpiredI18n {
+        en: String,
+        zh: String,
+    },
+    PaymentFailedI18n {
+        en: String,
+        zh: String,
+    },
+    SubscriptionPastDueI18n {
+        en: String,
+        zh: String,
+    },
     /// HTTP **429** — too many in-flight operations (e.g. concurrent export jobs). Not a daily quota:
     /// **no** `Retry-After` / `retry_after_ms` (client should poll job status or retry later).
     ConcurrentLimitExceeded(String),
@@ -254,6 +270,42 @@ impl IntoResponse for ApiError {
                     "Quota exceeded"
                 );
             }
+            ApiError::QuotaExceededI18n { en, .. } => {
+                tracing::info!(
+                    target: "toonflow.api.error",
+                    error_type = "quota_exceeded",
+                    status = 429,
+                    message = %en,
+                    "Quota exceeded (bilingual)"
+                );
+            }
+            ApiError::SubscriptionExpiredI18n { en, .. } => {
+                tracing::info!(
+                    target: "toonflow.api.error",
+                    error_type = "subscription_expired",
+                    status = 403,
+                    message = %en,
+                    "Subscription expired (bilingual)"
+                );
+            }
+            ApiError::PaymentFailedI18n { en, .. } => {
+                tracing::info!(
+                    target: "toonflow.api.error",
+                    error_type = "payment_failed",
+                    status = 403,
+                    message = %en,
+                    "Payment failed (bilingual)"
+                );
+            }
+            ApiError::SubscriptionPastDueI18n { en, .. } => {
+                tracing::info!(
+                    target: "toonflow.api.error",
+                    error_type = "subscription_past_due",
+                    status = 403,
+                    message = %en,
+                    "Subscription past due (bilingual)"
+                );
+            }
             ApiError::ConcurrentLimitExceeded(msg) => {
                 tracing::info!(
                     target: "toonflow.api.error",
@@ -312,7 +364,10 @@ impl IntoResponse for ApiError {
             }
         }
 
-        let is_quota = matches!(&self, ApiError::QuotaExceeded(_));
+        let is_quota = matches!(
+            &self,
+            ApiError::QuotaExceeded(_) | ApiError::QuotaExceededI18n { .. }
+        );
         let loc = current_locale();
 
         let (status, code, message, details) = match self {
@@ -393,6 +448,34 @@ impl IntoResponse for ApiError {
             }
             ApiError::QuotaExceeded(msg) => {
                 (StatusCode::TOO_MANY_REQUESTS, "quota_exceeded", msg, None)
+            }
+            ApiError::QuotaExceededI18n { en, zh } => {
+                let msg = match loc {
+                    ApiLocale::En => en,
+                    ApiLocale::Zh => zh,
+                };
+                (StatusCode::TOO_MANY_REQUESTS, "quota_exceeded", msg, None)
+            }
+            ApiError::SubscriptionExpiredI18n { en, zh } => {
+                let msg = match loc {
+                    ApiLocale::En => en,
+                    ApiLocale::Zh => zh,
+                };
+                (StatusCode::FORBIDDEN, "subscription_expired", msg, None)
+            }
+            ApiError::PaymentFailedI18n { en, zh } => {
+                let msg = match loc {
+                    ApiLocale::En => en,
+                    ApiLocale::Zh => zh,
+                };
+                (StatusCode::FORBIDDEN, "payment_failed", msg, None)
+            }
+            ApiError::SubscriptionPastDueI18n { en, zh } => {
+                let msg = match loc {
+                    ApiLocale::En => en,
+                    ApiLocale::Zh => zh,
+                };
+                (StatusCode::FORBIDDEN, "subscription_past_due", msg, None)
             }
             ApiError::ConcurrentLimitExceeded(msg) => (
                 StatusCode::TOO_MANY_REQUESTS,

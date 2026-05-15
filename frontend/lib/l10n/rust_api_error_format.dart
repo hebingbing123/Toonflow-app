@@ -37,6 +37,18 @@ String formatRustApiExceptionForDisplay(
     if (details.code == 'concurrent_limit_exceeded') {
       return l10n.rustApiClientConcurrentLimitExceeded;
     }
+    if (details.code == 'subscription_expired') {
+      return l10n.billingErrorSubscriptionExpired;
+    }
+    if (details.code == 'payment_failed') {
+      return l10n.billingErrorPaymentFailed;
+    }
+    if (details.code == 'subscription_past_due') {
+      return l10n.billingErrorSubscriptionPastDue;
+    }
+    if (details.code.startsWith('billing_')) {
+      return l10n.rustApiClientUnknownError(error.toString());
+    }
     if (error.statusCode == 429 || details.code == 'quota_exceeded') {
       final waitMs = details.retryAfterMs ?? error.retryAfterMsHint;
       final waitText = waitMs == null

@@ -32575,6 +32575,33 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'#{p0} · {p1}'**
   String l10nBatch_978d9d9f6f(int p0, String p1);
+
+  String get billingNotificationSubscriptionActivated;
+  String get billingNotificationSubscriptionPastDue;
+  String get billingNotificationSubscriptionCanceled;
+  String get billingNotificationPaymentFailed;
+  String get billingNotificationSubscriptionExpired;
+  String get billingNotificationSubscriptionTrialing;
+  String get billingNotificationUnknown;
+  String get billingSubscriptionStatusActive;
+  String get billingSubscriptionStatusPastDue;
+  String get billingSubscriptionStatusCanceled;
+  String get billingSubscriptionStatusTrialing;
+  String get billingSubscriptionStatusPaused;
+  String get billingSubscriptionStatusUnpaid;
+  String get billingSubscriptionStatusUnknown;
+  String get billingQuotaExceededTitle;
+  String billingQuotaExceededFree(String plan);
+  String billingQuotaExceededPro(String plan);
+  String get billingQuotaResetHint;
+  String get billingUpgradePlan;
+  String get billingErrorPaymentFailed;
+  String get billingErrorSubscriptionExpired;
+  String get billingErrorSubscriptionPastDue;
+  String get billingPlanTierFree;
+  String get billingPlanTierPro;
+  String get billingPlanTierEnterprise;
+  String get billingPlanTierUnknown;
 }
 
 class _AppLocalizationsDelegate

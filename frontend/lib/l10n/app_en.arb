@@ -6514,6 +6514,14 @@
   "scriptEditorStoryboardsReadinessBlockingMissingLiveActionPerformanceNotes": "Performance / delivery notes",
   "scriptEditorStoryboardsReadinessBlockingCandidatePending": "Candidate confirmation",
   "scriptEditorStoryboardsReadinessBlockingBlockingJob": "Generation job running",
+  "scriptEditorStoryboardsReadinessBlockingUnknown": "Unknown blocker ({code})",
+  "@scriptEditorStoryboardsReadinessBlockingUnknown": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
   "scriptEditorEditImageWorkbenchTitle": "Edit image workbench",
   "scriptEditorEditImageWorkbenchIntro": "Manage the edit-image flow inside the script workbench—upload a source image and start generation instead of relying only on production probes.",
   "scriptEditorEditImageWorkbenchSyncing": "Syncing…",
@@ -16442,5 +16450,45 @@
         "type": "String"
       }
     }
-  }
+  },
+  "billingNotificationSubscriptionActivated": "Subscription activated",
+  "billingNotificationSubscriptionPastDue": "Subscription past due",
+  "billingNotificationSubscriptionCanceled": "Subscription canceled",
+  "billingNotificationPaymentFailed": "Payment failed",
+  "billingNotificationSubscriptionExpired": "Subscription expired",
+  "billingNotificationSubscriptionTrialing": "Subscription trial started",
+  "billingNotificationUnknown": "Billing event",
+  "billingSubscriptionStatusActive": "Active",
+  "billingSubscriptionStatusPastDue": "Past due",
+  "billingSubscriptionStatusCanceled": "Canceled",
+  "billingSubscriptionStatusTrialing": "Trial",
+  "billingSubscriptionStatusPaused": "Paused",
+  "billingSubscriptionStatusUnpaid": "Unpaid",
+  "billingSubscriptionStatusUnknown": "Unknown status",
+  "billingQuotaExceededTitle": "Daily quota reached",
+  "billingQuotaExceededFree": "You've reached the daily limit for the {plan} plan. Upgrade to continue.",
+  "@billingQuotaExceededFree": {
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      }
+    }
+  },
+  "billingQuotaExceededPro": "You've reached the daily limit for the {plan} plan. Contact support or wait for the quota to reset.",
+  "@billingQuotaExceededPro": {
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      }
+    }
+  },
+  "billingQuotaResetHint": "Quota resets daily at midnight UTC.",
+  "billingUpgradePlan": "Upgrade Plan",
+  "billingErrorPaymentFailed": "Payment failed. Please update your payment method to continue.",
+  "billingErrorSubscriptionExpired": "Your subscription has expired. Please renew to continue.",
+  "billingErrorSubscriptionPastDue": "Your subscription payment is past due. Please update your payment method.",
+  "billingPlanTierFree": "Free",
+  "billingPlanTierPro": "Pro",
+  "billingPlanTierEnterprise": "Enterprise",
+  "billingPlanTierUnknown": "Unknown plan"
 }

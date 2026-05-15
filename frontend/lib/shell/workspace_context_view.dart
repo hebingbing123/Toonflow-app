@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import '../l10n/billing_l10n_helpers.dart';
 import '../rust_api.dart';
 
 class WorkspaceContextView extends StatelessWidget {
@@ -101,8 +102,7 @@ class WorkspaceContextView extends StatelessWidget {
     final theme = Theme.of(context);
     final quota = workspaceDailyJobQuota;
     final today = workspaceJobsToday ?? 0;
-    final quotaText =
-        quota == null ? l10n.workspaceBillingUnlimited : '$quota';
+    final quotaText = quota == null ? l10n.workspaceBillingUnlimited : '$quota';
     final usagePercent = quota != null && quota > 0
         ? (today / quota * 100).clamp(0, 100).toStringAsFixed(0)
         : '0';
@@ -136,7 +136,7 @@ class WorkspaceContextView extends StatelessWidget {
                 children: [
                   Text(
                     l10n.workspaceBillingPlan(
-                      workspacePlanTier ?? l10n.workspaceBillingUnknownTier,
+                      planTierDisplayName(l10n, workspacePlanTier),
                     ),
                     style: theme.textTheme.bodySmall,
                   ),
@@ -188,4 +188,3 @@ class WorkspaceContextView extends StatelessWidget {
     );
   }
 }
-

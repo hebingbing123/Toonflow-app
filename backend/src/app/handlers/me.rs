@@ -61,7 +61,8 @@ struct UserProfileRow {
     summary = "Current user from JWT plus SaaS profile when database is configured",
     description = "Always returns JWT `sub` (and `email` when present in claims). When **`DATABASE_URL`** is set, loads **`plan_tier`** / billing fields from **`app_user_profile`** (defaults to **`plan_tier: free`** when no row).\nIncludes `subscription_status` and `subscription_current_period_end_at` when present in profile.\nAlso returns **`daily_job_quota`** (effective cap; `null` = unlimited) and **`jobs_today`** (UTC-day count) when the database is connected — clients can use these to render quota progress without a separate call.\n\n**Versioning (Task 5.2)**: Add `?v=2` query parameter for v2 response with nested `user` + `current_workspace_billing` fields.",
     params(
-        ("v" = Option<String>, Query, description = "API version: '2' for v2 response, omit or '1' for v1 (default)")
+        ("v" = Option<String>, Query, description = "API version: '2' for v2 response, omit or '1' for v1 (default)"),
+        ("Accept-Language" = Option<String>, Header, description = "Preferred language for localized error `message` fields. Supports `en` and `zh`; defaults to `en`. Machine-readable `code` fields remain stable.")
     ),
     security(("bearerAuth" = [])),
     responses(

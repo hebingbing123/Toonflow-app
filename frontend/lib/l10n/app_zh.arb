@@ -6514,6 +6514,14 @@
   "scriptEditorStoryboardsReadinessBlockingMissingLiveActionPerformanceNotes": "表演 / 口播约束",
   "scriptEditorStoryboardsReadinessBlockingCandidatePending": "候选确认",
   "scriptEditorStoryboardsReadinessBlockingBlockingJob": "生成任务进行中",
+  "scriptEditorStoryboardsReadinessBlockingUnknown": "未知阻塞项（{code}）",
+  "@scriptEditorStoryboardsReadinessBlockingUnknown": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
   "scriptEditorEditImageWorkbenchTitle": "编辑图片工作台",
   "scriptEditorEditImageWorkbenchIntro": "直接在脚本工作台内管理 edit-image flow、上传源图并发起生成，不再只停留在 production probe。",
   "scriptEditorEditImageWorkbenchSyncing": "同步中…",
@@ -16442,5 +16450,45 @@
         "type": "String"
       }
     }
-  }
+  },
+  "billingNotificationSubscriptionActivated": "订阅已激活",
+  "billingNotificationSubscriptionPastDue": "订阅逾期未付",
+  "billingNotificationSubscriptionCanceled": "订阅已取消",
+  "billingNotificationPaymentFailed": "付款失败",
+  "billingNotificationSubscriptionExpired": "订阅已过期",
+  "billingNotificationSubscriptionTrialing": "订阅试用已开始",
+  "billingNotificationUnknown": "计费事件",
+  "billingSubscriptionStatusActive": "已激活",
+  "billingSubscriptionStatusPastDue": "逾期未付",
+  "billingSubscriptionStatusCanceled": "已取消",
+  "billingSubscriptionStatusTrialing": "试用中",
+  "billingSubscriptionStatusPaused": "已暂停",
+  "billingSubscriptionStatusUnpaid": "未付款",
+  "billingSubscriptionStatusUnknown": "未知状态",
+  "billingQuotaExceededTitle": "每日配额已用尽",
+  "billingQuotaExceededFree": "您已达到 {plan} 套餐的每日限额，升级以继续使用。",
+  "@billingQuotaExceededFree": {
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      }
+    }
+  },
+  "billingQuotaExceededPro": "您已达到 {plan} 套餐的每日限额，请联系支持或等待配额重置。",
+  "@billingQuotaExceededPro": {
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      }
+    }
+  },
+  "billingQuotaResetHint": "配额每日 UTC 零点重置。",
+  "billingUpgradePlan": "升级套餐",
+  "billingErrorPaymentFailed": "付款失败，请更新支付方式以继续使用。",
+  "billingErrorSubscriptionExpired": "您的订阅已过期，请续订以继续使用。",
+  "billingErrorSubscriptionPastDue": "您的订阅付款已逾期，请更新支付方式。",
+  "billingPlanTierFree": "免费版",
+  "billingPlanTierPro": "专业版",
+  "billingPlanTierEnterprise": "企业版",
+  "billingPlanTierUnknown": "未知套餐"
 }

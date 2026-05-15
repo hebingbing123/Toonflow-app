@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../l10n/app_localizations.dart';
+import '../l10n/billing_l10n_helpers.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
 import '../utils/localized_formatting.dart';
@@ -610,11 +611,15 @@ class _NotificationsSectionState extends State<NotificationsSection> {
                             ),
                             DropdownMenuItem(
                               value: 'json',
-                              child: Text(l10n.notificationsComplianceExportFormatJson),
+                              child: Text(
+                                l10n.notificationsComplianceExportFormatJson,
+                              ),
                             ),
                             DropdownMenuItem(
                               value: 'csv',
-                              child: Text(l10n.notificationsComplianceExportFormatCsv),
+                              child: Text(
+                                l10n.notificationsComplianceExportFormatCsv,
+                              ),
                             ),
                           ],
                           onChanged: (value) {
@@ -1035,7 +1040,17 @@ class _NotificationsSectionState extends State<NotificationsSection> {
         return l10n.notificationsRecordContentComplianceAlert;
       case 'content_compliance_alert_cleared':
         return l10n.notificationsRecordContentComplianceCleared;
+      case 'billing_subscription_activated':
+      case 'billing_subscription_past_due':
+      case 'billing_subscription_canceled':
+      case 'billing_payment_failed':
+      case 'billing_subscription_expired':
+      case 'billing_subscription_trialing':
+        return billingNotificationTypeLabel(l10n, notificationType);
       default:
+        if (notificationType.startsWith('billing_')) {
+          return l10n.billingNotificationUnknown;
+        }
         return notificationType;
     }
   }

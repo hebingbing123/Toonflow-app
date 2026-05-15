@@ -20573,4 +20573,58 @@ class AppLocalizationsZh extends AppLocalizations {
   String l10nBatch_978d9d9f6f(int p0, String p1) {
     return '#$p0 · $p1';
   }
+
+  @override
+  String get billingNotificationSubscriptionActivated => '订阅已激活';
+  @override
+  String get billingNotificationSubscriptionPastDue => '订阅逾期未付';
+  @override
+  String get billingNotificationSubscriptionCanceled => '订阅已取消';
+  @override
+  String get billingNotificationPaymentFailed => '付款失败';
+  @override
+  String get billingNotificationSubscriptionExpired => '订阅已过期';
+  @override
+  String get billingNotificationSubscriptionTrialing => '订阅试用已开始';
+  @override
+  String get billingNotificationUnknown => '计费事件';
+  @override
+  String get billingSubscriptionStatusActive => '已激活';
+  @override
+  String get billingSubscriptionStatusPastDue => '逾期未付';
+  @override
+  String get billingSubscriptionStatusCanceled => '已取消';
+  @override
+  String get billingSubscriptionStatusTrialing => '试用中';
+  @override
+  String get billingSubscriptionStatusPaused => '已暂停';
+  @override
+  String get billingSubscriptionStatusUnpaid => '未付款';
+  @override
+  String get billingSubscriptionStatusUnknown => '未知状态';
+  @override
+  String get billingQuotaExceededTitle => '每日配额已用尽';
+  @override
+  String billingQuotaExceededFree(String plan) => '您已达到 $plan 套餐的每日限额，升级以继续使用。';
+  @override
+  String billingQuotaExceededPro(String plan) =>
+      '您已达到 $plan 套餐的每日限额，请联系支持或等待配额重置。';
+  @override
+  String get billingQuotaResetHint => '配额每日 UTC 零点重置。';
+  @override
+  String get billingUpgradePlan => '升级套餐';
+  @override
+  String get billingErrorPaymentFailed => '付款失败，请更新支付方式以继续使用。';
+  @override
+  String get billingErrorSubscriptionExpired => '您的订阅已过期，请续订以继续使用。';
+  @override
+  String get billingErrorSubscriptionPastDue => '您的订阅付款已逾期，请更新支付方式。';
+  @override
+  String get billingPlanTierFree => '免费版';
+  @override
+  String get billingPlanTierPro => '专业版';
+  @override
+  String get billingPlanTierEnterprise => '企业版';
+  @override
+  String get billingPlanTierUnknown => '未知套餐';
 }

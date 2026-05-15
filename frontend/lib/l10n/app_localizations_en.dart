@@ -21572,4 +21572,64 @@ class AppLocalizationsEn extends AppLocalizations {
   String l10nBatch_978d9d9f6f(int p0, String p1) {
     return '#$p0 · $p1';
   }
+
+  @override
+  String get billingNotificationSubscriptionActivated =>
+      'Subscription activated';
+  @override
+  String get billingNotificationSubscriptionPastDue => 'Subscription past due';
+  @override
+  String get billingNotificationSubscriptionCanceled => 'Subscription canceled';
+  @override
+  String get billingNotificationPaymentFailed => 'Payment failed';
+  @override
+  String get billingNotificationSubscriptionExpired => 'Subscription expired';
+  @override
+  String get billingNotificationSubscriptionTrialing =>
+      'Subscription trial started';
+  @override
+  String get billingNotificationUnknown => 'Billing event';
+  @override
+  String get billingSubscriptionStatusActive => 'Active';
+  @override
+  String get billingSubscriptionStatusPastDue => 'Past due';
+  @override
+  String get billingSubscriptionStatusCanceled => 'Canceled';
+  @override
+  String get billingSubscriptionStatusTrialing => 'Trial';
+  @override
+  String get billingSubscriptionStatusPaused => 'Paused';
+  @override
+  String get billingSubscriptionStatusUnpaid => 'Unpaid';
+  @override
+  String get billingSubscriptionStatusUnknown => 'Unknown status';
+  @override
+  String get billingQuotaExceededTitle => 'Daily quota reached';
+  @override
+  String billingQuotaExceededFree(String plan) =>
+      'You\'ve reached the daily limit for the $plan plan. Upgrade to continue.';
+  @override
+  String billingQuotaExceededPro(String plan) =>
+      'You\'ve reached the daily limit for the $plan plan. Contact support or wait for the quota to reset.';
+  @override
+  String get billingQuotaResetHint => 'Quota resets daily at midnight UTC.';
+  @override
+  String get billingUpgradePlan => 'Upgrade Plan';
+  @override
+  String get billingErrorPaymentFailed =>
+      'Payment failed. Please update your payment method to continue.';
+  @override
+  String get billingErrorSubscriptionExpired =>
+      'Your subscription has expired. Please renew to continue.';
+  @override
+  String get billingErrorSubscriptionPastDue =>
+      'Your subscription payment is past due. Please update your payment method.';
+  @override
+  String get billingPlanTierFree => 'Free';
+  @override
+  String get billingPlanTierPro => 'Pro';
+  @override
+  String get billingPlanTierEnterprise => 'Enterprise';
+  @override
+  String get billingPlanTierUnknown => 'Unknown plan';
 }

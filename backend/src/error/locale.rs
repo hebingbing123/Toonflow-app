@@ -26,7 +26,7 @@ pub fn preferred_locale_from_headers(headers: &HeaderMap) -> ApiLocale {
     preferred_locale_from_accept_language_str(s)
 }
 
-fn preferred_locale_from_accept_language_str(s: &str) -> ApiLocale {
+pub fn preferred_locale_from_accept_language_str(s: &str) -> ApiLocale {
     let mut best_zh = -1.0_f32;
     let mut best_en = -1.0_f32;
 

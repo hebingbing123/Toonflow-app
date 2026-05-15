@@ -15,7 +15,7 @@ use std::sync::LazyLock;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::error::ApiError;
+use crate::error::{billing_errors::quota_exceeded_billing_i18n, ApiError};
 
 /// Quota denial metrics for observability (Task 3.4).
 struct QuotaMetrics {
@@ -83,12 +83,10 @@ fn free_daily_jobs_limit() -> i64 {
 /// 2. Tier default from env / constant
 ///
 /// Returns `None` if the user has an unlimited quota (e.g. `enterprise` tier with no cap).
-pub async fn effective_daily_job_quota_for_user(
+pub async fn effective_daily_job_quota_and_tier_for_user(
     pool: &PgPool,
     user_id: Uuid,
-) -> Result<Option<i64>, sqlx::Error> {
-    // Fetch plan_tier and optional per-user override in one query.
-    // `daily_job_quota` column is added by migration 20260417120000_app_user_profile_quota.sql.
+) -> Result<(Option<i64>, String), sqlx::Error> {
     let row: Option<(String, Option<i64>)> = sqlx::query_as(
         r#"
         SELECT plan_tier, daily_job_quota::bigint
@@ -102,22 +100,29 @@ pub async fn effective_daily_job_quota_for_user(
 
     let (tier, per_user_override) = row.unwrap_or_else(|| ("free".to_string(), None));
 
-    // Per-user override wins regardless of tier.
     if let Some(cap) = per_user_override {
-        return Ok(Some(cap));
+        return Ok((Some(cap), tier));
     }
 
-    // Tier-based defaults.
     let cap = match tier.as_str() {
         "free" => Some(free_daily_jobs_limit()),
-        "creator" => Some(free_daily_jobs_limit() * 40), // ~800/day
-        "pro" => Some(free_daily_jobs_limit() * 125),    // ~2500/day
-        "studio" => Some(free_daily_jobs_limit() * 400), // ~8000/day
-        "enterprise" => None,                            // unlimited
-        _ => Some(free_daily_jobs_limit()),              // unknown tier → free default
+        "creator" => Some(free_daily_jobs_limit() * 40),
+        "pro" => Some(free_daily_jobs_limit() * 125),
+        "studio" => Some(free_daily_jobs_limit() * 400),
+        "enterprise" => None,
+        _ => Some(free_daily_jobs_limit()),
     };
 
-    Ok(cap)
+    Ok((cap, tier))
+}
+
+pub async fn effective_daily_job_quota_for_user(
+    pool: &PgPool,
+    user_id: Uuid,
+) -> Result<Option<i64>, sqlx::Error> {
+    effective_daily_job_quota_and_tier_for_user(pool, user_id)
+        .await
+        .map(|(cap, _)| cap)
 }
 
 /// Count jobs created by `user_id` in the current natural UTC day (midnight-to-now).
@@ -162,12 +167,11 @@ async fn workspace_jobs_today(pool: &PgPool, workspace_id: Uuid) -> Result<i64, 
 /// and is used when `billing_scope = User`. New code should use
 /// `check_daily_job_quota_with_context()` which respects workspace-scope billing.
 pub async fn check_daily_job_quota(pool: &PgPool, user_id: Uuid) -> Result<(), ApiError> {
-    let cap = effective_daily_job_quota_for_user(pool, user_id)
+    let (cap, plan_tier) = effective_daily_job_quota_and_tier_for_user(pool, user_id)
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     let Some(limit) = cap else {
-        // Unlimited tier.
         return Ok(());
     };
 
@@ -176,9 +180,7 @@ pub async fn check_daily_job_quota(pool: &PgPool, user_id: Uuid) -> Result<(), A
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     if used >= limit {
-        return Err(ApiError::QuotaExceeded(format!(
-            "Daily generation job limit of {limit} reached for your plan. Resets at midnight UTC."
-        )));
+        return Err(quota_exceeded_billing_i18n(limit as u64, &plan_tier));
     }
 
     Ok(())
@@ -248,9 +250,10 @@ pub async fn check_daily_job_quota_with_context(
             "Daily job quota exceeded"
         );
 
-        return Err(ApiError::QuotaExceeded(format!(
-            "Daily generation job limit of {limit} reached for your plan. Resets at midnight UTC."
-        )));
+        return Err(quota_exceeded_billing_i18n(
+            limit as u64,
+            &context.plan_tier,
+        ));
     }
 
     Ok(())

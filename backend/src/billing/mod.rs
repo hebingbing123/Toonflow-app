@@ -91,6 +91,9 @@ struct BillingWebhookResponse {
     operation_id = "postBillingWebhookV1",
     tag = "webhooks",
     request_body(content = serde_json::Value, content_type = "application/json", description = "Provider-specific billing JSON payload"),
+    params(
+        ("Accept-Language" = Option<String>, Header, description = "Preferred language for localized error `message` fields. Supports `en` and `zh`; defaults to `en`. Machine-readable `code` fields remain stable.")
+    ),
     responses(
         (status = 200, description = "Accepted (or duplicate replay)", body = BillingWebhookResponse),
         (status = 400, description = "Invalid JSON", body = crate::error::ErrorBody),
