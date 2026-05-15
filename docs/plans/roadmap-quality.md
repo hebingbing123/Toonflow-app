@@ -47,6 +47,7 @@
 | **目标** | 固定一组 `quality_review_id` 或导出 fixture，发版前对比通过率或人工 spot-check。 |
 | **依赖** | WP-A 或现有 `bad_case` 字段语义稳定。 |
 | **PR 切片** | （1）**必做**：导出工具（`scripts/` 或 `backend` 只读子命令）；（2）**必做**：`.github/workflows/` 定时或 `workflow_dispatch` job；（3）**必做**：golden 集更新说明与 CODEOWNER/review 规则。 |
+| **CI 现状（增量）** | PR 门禁：`ci.yml` → `supabase-migrations` 已对本地 Supabase 跑至少一条 ignored 契约（`settings_workspace_shared_audit_export` 名过滤）。**补充**：**`.github/workflows/pg-contract-subset.yml`** — 每周 + `workflow_dispatch`，对同一本地栈再跑小集合（项目创建/统计/删除、`promote_staging`、`art_styles_crud`、同上 settings 过滤）；托管库跑法见该 workflow 文件头注释中的可选 secrets 名（默认无需 secrets）。 |
 | **触点** | `backend/src/prompting/quality/handlers/bad_case_frequency.rs`；CI `ci.yml`。 |
 | **测试** | CI job 失败时输出 diff（哪些 id 退化）。 |
 | **回滚** | 仅故障或模板错误时暂停 job；**正常运行须保持 workflow 启用**，避免「必做门禁」名存实亡。 |

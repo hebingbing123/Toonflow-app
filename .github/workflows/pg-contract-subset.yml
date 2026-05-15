@@ -1,0 +1,80 @@
+# PostgreSQL contract tests — **subset** (ignored `#[ignore]` tests).
+#
+# Triggers: manual (`workflow_dispatch`) and weekly schedule. Complements PR CI
+# (`ci.yml` → `supabase-migrations` job) which already runs at least one ignored
+# contract test against local Supabase.
+#
+# ---------------------------------------------------------------------------
+# Secrets (optional — **default job uses no repository secrets**)
+# ---------------------------------------------------------------------------
+# This workflow starts **local** Postgres via Supabase CLI and sets:
+#   DATABASE_URL, SUPABASE_JWT_SECRET from `supabase status -o env` (JWT_SECRET, DB_URL).
+#
+# To run the **same test commands** against a **hosted** Postgres (e.g. staging)
+# you would fork this job or add a matrix leg that **does not** call `supabase db start`,
+# and instead inject (GitHub **Actions secrets** — never commit values):
+#   PG_CONTRACT_DATABASE_URL   — connection string to a DB with migrations applied
+#   PG_CONTRACT_SUPABASE_JWT_SECRET — signing secret aligned with tokens used in tests
+# Optional for webhook-heavy subsets only:
+#   PG_CONTRACT_BILLING_WEBHOOK_SECRET — see `billing_webhook_*` pg_contract tests
+# ---------------------------------------------------------------------------
+
+name: PG contract subset
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Weekly smoke (UTC); adjust cron if it collides with maintenance windows.
+    - cron: "0 6 * * 1"
+
+concurrency:
+  group: pg-contract-subset-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  pg-contract-subset:
+    name: PG contract subset (local Supabase)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: backend
+
+      - name: Start local Postgres and apply supabase/migrations
+        run: |
+          set -euo pipefail
+          supabase db start
+          supabase db reset --yes --no-seed
+
+      - name: Export DATABASE_URL + SUPABASE_JWT_SECRET from Supabase CLI
+        run: |
+          set -euo pipefail
+          eval "$(supabase status -o env)"
+          echo "DATABASE_URL=${DB_URL:?missing DB_URL from supabase status}" >> "$GITHUB_ENV"
+          echo "SUPABASE_JWT_SECRET=${JWT_SECRET:?missing JWT_SECRET from supabase status}" >> "$GITHUB_ENV"
+
+      # High-leverage, relatively fast roundtrips (core project + promotion + art styles).
+      # Each line is an independent `cargo test` name filter on lib tests.
+      - name: Run pg_contract subset (ignored)
+        run: |
+          set -euo pipefail
+          cd backend
+          for filter in \
+            projects_create_stats_delete_roundtrip \
+            promote_staging_populates_assets_and_links \
+            art_styles_crud_roundtrip \
+            settings_workspace_shared_audit_export
+          do
+            echo "=== cargo test ${filter} (ignored) ==="
+            cargo test "${filter}" -- --ignored --nocapture --test-threads=1
+          done
