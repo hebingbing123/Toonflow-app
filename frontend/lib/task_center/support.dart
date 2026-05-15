@@ -101,6 +101,8 @@ class TaskCenterDomainDeepLink {
     this.projectUuid,
     this.scriptNumericId,
     this.storyboardNumericId,
+    this.stage,
+    this.suggestedAction,
     this.workspaceId,
     this.publishDraftId,
   });
@@ -110,6 +112,8 @@ class TaskCenterDomainDeepLink {
   final String? projectUuid;
   final int? scriptNumericId;
   final int? storyboardNumericId;
+  final String? stage;
+  final String? suggestedAction;
   final String? workspaceId;
   final String? publishDraftId;
 }
@@ -259,6 +263,10 @@ TaskCenterDomainDeepLink? tryParseTaskCenterDomainDeepLink(JobRow job) {
       taskCenterDeepLinkString(result, 'workspace_id') ??
       taskCenterDeepLinkString(result, 'workspaceId') ??
       taskCenterDeepLinkString(payload, 'workspace_id');
+  final stage =
+      taskCenterDeepLinkString(links, 'stage') ??
+      taskCenterDeepLinkString(result, 'stage') ??
+      taskCenterDeepLinkString(payload, 'stage');
   final publishDraftId =
       (links['publish_draft_id'] ??
               links['publishDraftId'] ??
@@ -286,6 +294,7 @@ TaskCenterDomainDeepLink? tryParseTaskCenterDomainDeepLink(JobRow job) {
     projectUuid: projectUuid,
     scriptNumericId: script,
     storyboardNumericId: storyboard,
+    stage: stage,
     workspaceId: workspaceId,
     publishDraftId: publishDraftId,
   );

@@ -246,7 +246,7 @@ void main() {
       ),
       '真人参考镜头',
     );
-    expect(labelShortVideoBlockingReason(zh, 'unknown_code'), 'unknown_code');
+    expect(labelShortVideoBlockingReason(zh, 'unknown_code'), '未识别的就绪阻塞项（UNKNOWN_CODE）');
   });
 
   test('export check issue codes map to Chinese labels', () {

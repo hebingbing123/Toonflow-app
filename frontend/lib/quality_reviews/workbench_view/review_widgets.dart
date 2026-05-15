@@ -11,6 +11,16 @@ const List<String> _qualityStageOptions = <String>[
 ];
 
 const List<String> _qualityGradeOptions = <String>['all', 'A', 'B', 'C', 'D'];
+const List<String> _qualitySuggestedActionOptions = <String>[
+  'all',
+  'rollback_to_director_planning',
+  'update_character_anchor',
+  'patch_storyboard_items',
+  'adjust_video_prompt',
+  'retry_video_generation',
+  'regenerate_storyboard',
+  'manual_review',
+];
 
 String _qualityStageLabel(String stage, AppLocalizations l10n) {
   switch (stage) {
@@ -46,5 +56,26 @@ Color _qualityGradeColor(BuildContext context, String grade) {
       return scheme.errorContainer;
     default:
       return scheme.surfaceContainerHighest;
+  }
+}
+
+String _qualitySuggestedActionLabel(String action) {
+  switch (action) {
+    case 'rollback_to_director_planning':
+      return 'rollback director';
+    case 'update_character_anchor':
+      return 'update anchor';
+    case 'patch_storyboard_items':
+      return 'patch storyboard';
+    case 'adjust_video_prompt':
+      return 'adjust prompt';
+    case 'retry_video_generation':
+      return 'retry video';
+    case 'regenerate_storyboard':
+      return 'regen storyboard';
+    case 'manual_review':
+      return 'manual review';
+    default:
+      return action;
   }
 }

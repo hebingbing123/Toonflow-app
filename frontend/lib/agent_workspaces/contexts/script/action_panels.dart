@@ -175,6 +175,9 @@ class ScriptWorkspaceControlsPanel extends StatelessWidget {
             SizedBox(
               width: 220,
               child: DropdownButtonFormField<String>(
+                key: ValueKey<String?>(
+                  'script-domain-tool-${selectedScriptDomainTool ?? ''}',
+                ),
                 isExpanded: true,
                 initialValue: selectedScriptDomainTool,
                 items: scriptDomainToolPresets

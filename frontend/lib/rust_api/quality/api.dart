@@ -18,6 +18,7 @@ Future<List<QualityReview>> fetchQualityReviews(
   bool? memoryDeliveryPriorityApplied,
   String? stage,
   String? grade,
+  String? suggestedAction,
   int? limit,
   int? offset,
 }) async {
@@ -52,6 +53,9 @@ Future<List<QualityReview>> fetchQualityReviews(
   }
   if (grade != null && grade.isNotEmpty) {
     query['grade'] = grade;
+  }
+  if (suggestedAction != null && suggestedAction.isNotEmpty) {
+    query['suggestedAction'] = suggestedAction;
   }
   if (limit != null) {
     query['limit'] = '$limit';

@@ -5,20 +5,24 @@ class _QualityReviewsWorkbenchDialog extends StatefulWidget {
   const _QualityReviewsWorkbenchDialog({
     required this.accessToken,
     required this.initialProjectNumericId,
+    required this.initialProjectUuid,
     required this.initialProjectScopeSummary,
     required this.initialReviews,
     required this.initialReviewDetails,
     required this.initialStatsSummary,
     required this.initialStagePassRateSummary,
+    required this.onNavigateDomainDeepLink,
   });
 
   final String accessToken;
   final int? initialProjectNumericId;
+  final String? initialProjectUuid;
   final String? initialProjectScopeSummary;
   final List<QualityReview> initialReviews;
   final String? initialReviewDetails;
   final String? initialStatsSummary;
   final String? initialStagePassRateSummary;
+  final void Function(TaskCenterDomainDeepLink link)? onNavigateDomainDeepLink;
 
   @override
   State<_QualityReviewsWorkbenchDialog> createState() =>
@@ -70,6 +74,11 @@ class _QualityReviewsWorkbenchDialogState
     return value.isEmpty || value == 'all' ? null : value;
   }
 
+  String? get _suggestedActionFilterValue {
+    final value = _ctrls.suggestedActionFilterCtrl.text.trim();
+    return value.isEmpty || value == 'all' ? null : value;
+  }
+
   String? _activeFilterQuerySummary() {
     final query = <String, String>{};
     final projectId = _ctrls.projectIdFilterCtrl.text.trim();
@@ -84,6 +93,9 @@ class _QualityReviewsWorkbenchDialogState
     if (jobId.isNotEmpty) query['jobId'] = jobId;
     if (_stageFilterValue != null) query['stage'] = _stageFilterValue!;
     if (_gradeFilterValue != null) query['grade'] = _gradeFilterValue!;
+    if (_suggestedActionFilterValue != null) {
+      query['suggestedAction'] = _suggestedActionFilterValue!;
+    }
     if (_filterBadCasesOnly) query['isBadCase'] = 'true';
     if (_filterDeliveryPriorityOnly) {
       query['memoryDeliveryPriorityApplied'] = 'true';
@@ -132,6 +144,143 @@ class _QualityReviewsWorkbenchDialogState
     );
   }
 
+  int? _qualityReviewStoryboardId(QualityReview review) {
+    final targetId = review.targetId?.trim();
+    final storyboardId = targetId == null ? null : int.tryParse(targetId);
+    if (storyboardId != null && storyboardId > 0) {
+      return storyboardId;
+    }
+    final diagnostics = review.modelParams?['diagnostics'];
+    if (diagnostics is Map<String, dynamic>) {
+      final scopedId = diagnostics['storyboardId'];
+      if (scopedId is num && scopedId.toInt() > 0) {
+        return scopedId.toInt();
+      }
+      if (scopedId is String) {
+        final parsed = int.tryParse(scopedId);
+        if (parsed != null && parsed > 0) {
+          return parsed;
+        }
+      }
+    }
+    return null;
+  }
+
+  String? _qualityReviewProjectUuid(QualityReview review) {
+    final projectUuid = widget.initialProjectUuid?.trim();
+    if (projectUuid == null || projectUuid.isEmpty) {
+      return null;
+    }
+    if (review.projectId != null &&
+        widget.initialProjectNumericId != null &&
+        review.projectId == widget.initialProjectNumericId) {
+      return projectUuid;
+    }
+    return null;
+  }
+
+  TaskCenterDomainDeepLink? _buildSuggestedActionLink(QualityReview review) {
+    final action = review.suggestedAction?.trim();
+    final projectId = review.projectId ?? widget.initialProjectNumericId;
+    final projectUuid = _qualityReviewProjectUuid(review);
+    final scriptId = review.scriptId;
+    final storyboardId = _qualityReviewStoryboardId(review);
+    if (projectId == null && projectUuid == null) {
+      return null;
+    }
+    final storyboardScopedActions = <String>{
+      'update_character_anchor',
+      'patch_storyboard_items',
+      'adjust_video_prompt',
+      'retry_video_generation',
+      'regenerate_storyboard',
+    };
+    if (action != null &&
+        storyboardScopedActions.contains(action) &&
+        storyboardId != null) {
+      return TaskCenterDomainDeepLink(
+        target: TaskCenterDomainDeepLinkTarget.storyboard,
+        projectNumericId: projectId,
+        projectUuid: projectUuid,
+        scriptNumericId: scriptId,
+        storyboardNumericId: storyboardId,
+        stage: review.stage?.trim(),
+        suggestedAction: action,
+      );
+    }
+    if (scriptId != null) {
+      return TaskCenterDomainDeepLink(
+        target: TaskCenterDomainDeepLinkTarget.script,
+        projectNumericId: projectId,
+        projectUuid: projectUuid,
+        scriptNumericId: scriptId,
+        storyboardNumericId: storyboardId,
+        stage: review.stage?.trim(),
+        suggestedAction: action,
+      );
+    }
+    return TaskCenterDomainDeepLink(
+      target: TaskCenterDomainDeepLinkTarget.project,
+      projectNumericId: projectId,
+      projectUuid: projectUuid,
+      storyboardNumericId: storyboardId,
+      stage: review.stage?.trim(),
+      suggestedAction: action,
+    );
+  }
+
+  String _buildSuggestedActionClipboardSummary(
+    dynamic l10n,
+    QualityReview review,
+  ) {
+    final parts = <String>[
+      'suggestedAction=${review.suggestedAction?.trim().isNotEmpty == true ? review.suggestedAction!.trim() : 'manual_review'}',
+      if (review.projectId != null) 'projectId=${review.projectId}',
+      if (review.scriptId != null) 'scriptId=${review.scriptId}',
+      if (_qualityReviewStoryboardId(review) != null)
+        'storyboardId=${_qualityReviewStoryboardId(review)}',
+      'targetType=${review.targetType}',
+      if ((review.stage ?? '').trim().isNotEmpty)
+        'stage=${review.stage!.trim()}',
+      if ((review.grade ?? '').trim().isNotEmpty)
+        'grade=${review.grade!.trim()}',
+      if ((review.comments ?? '').trim().isNotEmpty)
+        'comments=${review.comments!.trim()}',
+      if (review.isBadCase) l10n.qualityReviewsFilterBadCase,
+    ];
+    return parts.join('\n');
+  }
+
+  Future<void> _applySuggestedAction(QualityReview review) async {
+    final l10n = resolveAppLocalizationsForErrors(context);
+    final action = review.suggestedAction?.trim();
+    if (action == null || action.isEmpty) {
+      setState(() {
+        _statusLine = 'This review has no suggested action to apply.';
+      });
+      return;
+    }
+    final link = _buildSuggestedActionLink(review);
+    final clipboardSummary = _buildSuggestedActionClipboardSummary(
+      l10n,
+      review,
+    );
+    await Clipboard.setData(ClipboardData(text: clipboardSummary));
+    if (!mounted) return;
+    if (link == null || widget.onNavigateDomainDeepLink == null) {
+      setState(() {
+        _statusLine = 'Copied rework brief for $action.';
+      });
+      return;
+    }
+    widget.onNavigateDomainDeepLink!(link);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Opened ${link.target.name} scope for $action.')),
+    );
+    Navigator.of(context).pop();
+  }
+
   Future<void> _loadReviews({
     required bool onlyBadCases,
     bool onlyDeliveryPriority = false,
@@ -159,6 +308,7 @@ class _QualityReviewsWorkbenchDialogState
         memoryDeliveryPriorityApplied: onlyDeliveryPriority ? true : null,
         stage: _stageFilterValue,
         grade: _gradeFilterValue,
+        suggestedAction: _suggestedActionFilterValue,
         limit: 20,
       );
       if (!mounted) return;
@@ -179,6 +329,9 @@ class _QualityReviewsWorkbenchDialogState
         }
         if (_gradeFilterValue != null) {
           labels.add(l10n.qualityReviewsFilterGrade(_gradeFilterValue!));
+        }
+        if (_suggestedActionFilterValue != null) {
+          labels.add('suggested=${_suggestedActionFilterValue!}');
         }
         _statusLine = labels.isEmpty
             ? l10n.qualityReviewsStatusLoadedReviews(rows.length)
@@ -543,6 +696,7 @@ class _QualityReviewsWorkbenchDialogState
         jobIdFilterCtrl: _ctrls.jobIdFilterCtrl,
         stageFilterCtrl: _ctrls.stageFilterCtrl,
         gradeFilterCtrl: _ctrls.gradeFilterCtrl,
+        suggestedActionFilterCtrl: _ctrls.suggestedActionFilterCtrl,
         reviewIdCtrl: _ctrls.reviewIdCtrl,
         createProjectIdCtrl: _ctrls.createProjectIdCtrl,
         createScriptIdCtrl: _ctrls.createScriptIdCtrl,
@@ -612,6 +766,9 @@ class _QualityReviewsWorkbenchDialogState
             _ctrls.reviewIdCtrl.text = review.id;
             _reviewDetails = formatQualityReviewDetails(review, l10n: l10n);
           });
+        },
+        onApplySuggestedAction: (review) {
+          _applySuggestedAction(review);
         },
         onClose: () => Navigator.of(context).pop(),
       ),

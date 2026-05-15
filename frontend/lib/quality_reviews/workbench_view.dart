@@ -46,6 +46,7 @@ class QualityReviewsWorkbenchDialogViewModel {
     required this.jobIdFilterCtrl,
     required this.stageFilterCtrl,
     required this.gradeFilterCtrl,
+    required this.suggestedActionFilterCtrl,
     required this.reviewIdCtrl,
     required this.createProjectIdCtrl,
     required this.createScriptIdCtrl,
@@ -96,6 +97,7 @@ class QualityReviewsWorkbenchDialogViewModel {
   final TextEditingController jobIdFilterCtrl;
   final TextEditingController stageFilterCtrl;
   final TextEditingController gradeFilterCtrl;
+  final TextEditingController suggestedActionFilterCtrl;
   final TextEditingController reviewIdCtrl;
   final TextEditingController createProjectIdCtrl;
   final TextEditingController createScriptIdCtrl;
@@ -126,6 +128,7 @@ class QualityReviewsWorkbenchDialogViewCallbacks {
     required this.onCreatePassedChanged,
     required this.onCreateBadCaseChanged,
     required this.onSelectReview,
+    required this.onApplySuggestedAction,
     required this.onClose,
   });
 
@@ -144,6 +147,7 @@ class QualityReviewsWorkbenchDialogViewCallbacks {
   final ValueChanged<bool> onCreatePassedChanged;
   final ValueChanged<bool> onCreateBadCaseChanged;
   final ValueChanged<QualityReview> onSelectReview;
+  final ValueChanged<QualityReview> onApplySuggestedAction;
   final VoidCallback onClose;
 }
 
@@ -185,6 +189,10 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
       model.reviews,
       l10n: l10n,
     );
+    final suggestedActionSummary = summarizeSuggestedActionHotspotsFromReviews(
+      model.reviews,
+      l10n: l10n,
+    );
     final activeFilters = [
       if (model.filterBadCasesOnly) l10n.qualityReviewsFilterBadCase,
       if (model.filterDeliveryPriorityOnly)
@@ -198,6 +206,9 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
       if (model.gradeFilterCtrl.text.trim().isNotEmpty &&
           model.gradeFilterCtrl.text.trim() != 'all')
         l10n.qualityReviewsFilterGrade(model.gradeFilterCtrl.text.trim()),
+      if (model.suggestedActionFilterCtrl.text.trim().isNotEmpty &&
+          model.suggestedActionFilterCtrl.text.trim() != 'all')
+        'suggested=${model.suggestedActionFilterCtrl.text.trim()}',
     ];
     final viewportWidth = MediaQuery.sizeOf(context).width;
     final dialogWidth = viewportWidth.isFinite
@@ -400,6 +411,33 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 8),
+              DropdownButtonFormField<String>(
+                initialValue:
+                    model.suggestedActionFilterCtrl.text.trim().isEmpty
+                    ? 'all'
+                    : model.suggestedActionFilterCtrl.text.trim(),
+                decoration: const InputDecoration(
+                  labelText: 'Suggested action',
+                ),
+                items: _qualitySuggestedActionOptions
+                    .map(
+                      (value) => DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(
+                          value == 'all'
+                              ? l10n.qualityReviewsAll
+                              : _qualitySuggestedActionLabel(value),
+                        ),
+                      ),
+                    )
+                    .toList(growable: false),
+                onChanged: (value) {
+                  if (value != null) {
+                    model.suggestedActionFilterCtrl.text = value;
+                  }
+                },
               ),
               const SizedBox(height: 8),
               Wrap(
@@ -814,6 +852,12 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                   l10n.qualityReviewsRepairSuggestions(repairPlanSummary),
                 ),
               ],
+              if (suggestedActionSummary != null) ...[
+                const SizedBox(height: 12),
+                SelectableText(
+                  'Suggested action hotspots: $suggestedActionSummary',
+                ),
+              ],
               if (tokenEfficiencySummary != null) ...[
                 const SizedBox(height: 12),
                 SelectableText(
@@ -927,6 +971,18 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                               visualDensity: VisualDensity.compact,
                             ),
                           ),
+                        if ((review.suggestedAction ?? '').trim().isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: Chip(
+                              label: Text(
+                                _qualitySuggestedActionLabel(
+                                  review.suggestedAction!.trim(),
+                                ),
+                              ),
+                              visualDensity: VisualDensity.compact,
+                            ),
+                          ),
                         if (writebackSummary != null)
                           Padding(
                             padding: EdgeInsets.only(right: 8),
@@ -934,6 +990,14 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                               label: Text(l10n.qualityReviewsMemoryTag),
                               visualDensity: VisualDensity.compact,
                             ),
+                          ),
+                        if ((review.suggestedAction ?? '').trim().isNotEmpty)
+                          IconButton(
+                            tooltip: 'Apply suggested action',
+                            visualDensity: VisualDensity.compact,
+                            onPressed: () =>
+                                callbacks.onApplySuggestedAction(review),
+                            icon: const Icon(Icons.open_in_new_rounded),
                           ),
                         const Icon(Icons.chevron_right),
                       ],

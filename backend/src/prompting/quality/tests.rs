@@ -174,6 +174,7 @@ fn validate_list_reviews_query_rejects_invalid_target_type() {
         stage: None,
         grade: None,
         next_action: None,
+        suggested_action: None,
         limit: None,
         offset: None,
     };
@@ -323,11 +324,16 @@ fn list_reviews_query_accepts_stage_and_grade_filters() {
     let json = json!({
         "projectId": 1,
         "stage": "director_planning",
-        "grade": "B"
+        "grade": "B",
+        "suggestedAction": "patch_storyboard_items"
     });
     let query: ListQualityReviewsQuery = serde_json::from_value(json).unwrap();
     assert_eq!(query.stage.as_deref(), Some("director_planning"));
     assert_eq!(query.grade.as_deref(), Some("B"));
+    assert_eq!(
+        query.suggested_action.as_deref(),
+        Some("patch_storyboard_items")
+    );
 }
 
 proptest! {

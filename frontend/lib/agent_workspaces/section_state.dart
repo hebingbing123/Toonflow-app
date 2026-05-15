@@ -7,7 +7,6 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
   late final TextEditingController _effectiveScriptUuidController;
   late final TextEditingController _effectiveWorkspaceUuidController;
   late final bool _ownsUuidScopeControllers;
-  String _selectedScriptDomainTool = _scriptDomainToolPresets.first;
 
   TextEditingController get _productionSubAgentArgsController =>
       widget.productionSubAgentArgsController ??
@@ -62,6 +61,9 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
   void _ensurePresetDefaults() {
     if (widget.scriptSubAgentToolController.text.trim().isEmpty) {
       widget.scriptSubAgentToolController.text = _scriptSubAgentPresets.first;
+    }
+    if (widget.scriptDomainToolController.text.trim().isEmpty) {
+      widget.scriptDomainToolController.text = _scriptDomainToolPresets.first;
     }
     if (widget.scriptDomainArgsController.text.trim().isEmpty) {
       widget.scriptDomainArgsController.text = '{}';
@@ -148,7 +150,7 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
           scriptDomainToolPresets: _scriptDomainToolPresets,
           scriptSubAgentPresets: _scriptSubAgentPresets,
           scriptPromptPresets: agentWorkspaceScriptPromptPresets(l10n),
-          selectedScriptDomainTool: _selectedScriptDomainTool,
+          selectedScriptDomainTool: widget.scriptDomainToolController.text.trim(),
           loadingScriptWorkspaceRun: widget.loadingScriptWorkspaceRun,
           loadingScriptDomainProbe: widget.loadingScriptDomainProbe,
           loadingScriptSubAgentRun: widget.loadingScriptSubAgentRun,
@@ -171,13 +173,13 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
           },
           onScriptDomainToolChanged: (String value) {
             setState(() {
-              _selectedScriptDomainTool = value;
+              widget.scriptDomainToolController.text = value;
               _maybeApplyScriptToolArgsPreset(value);
             });
           },
           onRunScriptWorkspace: widget.onRunScriptWorkspace,
           onProbeScriptDomainTool: () => widget.onProbeScriptDomainTool(
-            _selectedScriptDomainTool,
+            widget.scriptDomainToolController.text.trim(),
             widget.scriptDomainArgsController.text,
           ),
           onScriptSubAgentChanged: (String value) {

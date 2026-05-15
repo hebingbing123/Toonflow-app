@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/quality_reviews/workbench_view.dart';
 import 'package:openflow_app/rust_api.dart';
+
 Widget _buildTestApp(Widget child) {
   return MaterialApp(
     localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -12,7 +13,6 @@ Widget _buildTestApp(Widget child) {
   );
 }
 
-
 QualityReviewsWorkbenchDialogViewModel buildDialogModel({
   required TextEditingController projectIdFilterCtrl,
   required TextEditingController scriptIdFilterCtrl,
@@ -21,6 +21,7 @@ QualityReviewsWorkbenchDialogViewModel buildDialogModel({
   required TextEditingController jobIdFilterCtrl,
   required TextEditingController stageFilterCtrl,
   required TextEditingController gradeFilterCtrl,
+  required TextEditingController suggestedActionFilterCtrl,
   required TextEditingController reviewIdCtrl,
   required TextEditingController createProjectIdCtrl,
   required TextEditingController createScriptIdCtrl,
@@ -43,6 +44,7 @@ QualityReviewsWorkbenchDialogViewModel buildDialogModel({
       overallScore: 82,
       passed: true,
       isBadCase: false,
+      suggestedAction: 'patch_storyboard_items',
     ),
   ],
   bool filterBadCasesOnly = false,
@@ -101,6 +103,7 @@ QualityReviewsWorkbenchDialogViewModel buildDialogModel({
     jobIdFilterCtrl: jobIdFilterCtrl,
     stageFilterCtrl: stageFilterCtrl,
     gradeFilterCtrl: gradeFilterCtrl,
+    suggestedActionFilterCtrl: suggestedActionFilterCtrl,
     reviewIdCtrl: reviewIdCtrl,
     createProjectIdCtrl: createProjectIdCtrl,
     createScriptIdCtrl: createScriptIdCtrl,
@@ -130,6 +133,7 @@ QualityReviewsWorkbenchDialogViewCallbacks buildDialogCallbacks({
   ValueChanged<bool>? onCreatePassedChanged,
   ValueChanged<bool>? onCreateBadCaseChanged,
   ValueChanged<QualityReview>? onSelectReview,
+  ValueChanged<QualityReview>? onApplySuggestedAction,
   VoidCallback? onClose = noop,
 }) {
   return QualityReviewsWorkbenchDialogViewCallbacks(
@@ -148,6 +152,7 @@ QualityReviewsWorkbenchDialogViewCallbacks buildDialogCallbacks({
     onCreatePassedChanged: onCreatePassedChanged ?? (_) {},
     onCreateBadCaseChanged: onCreateBadCaseChanged ?? (_) {},
     onSelectReview: onSelectReview ?? (_) {},
+    onApplySuggestedAction: onApplySuggestedAction ?? (_) {},
     onClose: onClose ?? noop,
   );
 }
@@ -158,6 +163,7 @@ void main() {
   late TextEditingController jobIdFilterCtrl;
   late TextEditingController stageFilterCtrl;
   late TextEditingController gradeFilterCtrl;
+  late TextEditingController suggestedActionFilterCtrl;
   late TextEditingController projectIdFilterCtrl;
   late TextEditingController scriptIdFilterCtrl;
   late TextEditingController reviewIdCtrl;
@@ -180,6 +186,7 @@ void main() {
     jobIdFilterCtrl = TextEditingController(text: 'job-1');
     stageFilterCtrl = TextEditingController();
     gradeFilterCtrl = TextEditingController();
+    suggestedActionFilterCtrl = TextEditingController(text: 'all');
     reviewIdCtrl = TextEditingController(text: 'review-1');
     createProjectIdCtrl = TextEditingController(text: '7');
     createScriptIdCtrl = TextEditingController(text: '11');
@@ -201,6 +208,7 @@ void main() {
     jobIdFilterCtrl.dispose();
     stageFilterCtrl.dispose();
     gradeFilterCtrl.dispose();
+    suggestedActionFilterCtrl.dispose();
     reviewIdCtrl.dispose();
     createProjectIdCtrl.dispose();
     createScriptIdCtrl.dispose();
@@ -221,25 +229,26 @@ void main() {
       _buildTestApp(
         QualityReviewsWorkbenchDialogView(
           model: buildDialogModel(
-              projectIdFilterCtrl: projectIdFilterCtrl,
-              scriptIdFilterCtrl: scriptIdFilterCtrl,
-              targetTypeFilterCtrl: targetTypeFilterCtrl,
-              targetIdFilterCtrl: targetIdFilterCtrl,
-              jobIdFilterCtrl: jobIdFilterCtrl,
-              stageFilterCtrl: stageFilterCtrl,
-              gradeFilterCtrl: gradeFilterCtrl,
-              reviewIdCtrl: reviewIdCtrl,
-              createProjectIdCtrl: createProjectIdCtrl,
-              createScriptIdCtrl: createScriptIdCtrl,
-              createTargetTypeCtrl: createTargetTypeCtrl,
-              createTargetIdCtrl: createTargetIdCtrl,
-              createSourceCtrl: createSourceCtrl,
-              createScoreCtrl: createScoreCtrl,
-              createStageCtrl: createStageCtrl,
-              createGradeCtrl: createGradeCtrl,
-              createCommentsCtrl: createCommentsCtrl,
-              createBadCaseCategoryCtrl: createBadCaseCategoryCtrl,
-            ),
+            projectIdFilterCtrl: projectIdFilterCtrl,
+            scriptIdFilterCtrl: scriptIdFilterCtrl,
+            targetTypeFilterCtrl: targetTypeFilterCtrl,
+            targetIdFilterCtrl: targetIdFilterCtrl,
+            jobIdFilterCtrl: jobIdFilterCtrl,
+            stageFilterCtrl: stageFilterCtrl,
+            gradeFilterCtrl: gradeFilterCtrl,
+            suggestedActionFilterCtrl: suggestedActionFilterCtrl,
+            reviewIdCtrl: reviewIdCtrl,
+            createProjectIdCtrl: createProjectIdCtrl,
+            createScriptIdCtrl: createScriptIdCtrl,
+            createTargetTypeCtrl: createTargetTypeCtrl,
+            createTargetIdCtrl: createTargetIdCtrl,
+            createSourceCtrl: createSourceCtrl,
+            createScoreCtrl: createScoreCtrl,
+            createStageCtrl: createStageCtrl,
+            createGradeCtrl: createGradeCtrl,
+            createCommentsCtrl: createCommentsCtrl,
+            createBadCaseCategoryCtrl: createBadCaseCategoryCtrl,
+          ),
           callbacks: buildDialogCallbacks(),
         ),
       ),
@@ -283,34 +292,35 @@ void main() {
       _buildTestApp(
         QualityReviewsWorkbenchDialogView(
           model: buildDialogModel(
-              projectIdFilterCtrl: projectIdFilterCtrl,
-              scriptIdFilterCtrl: scriptIdFilterCtrl,
-              targetTypeFilterCtrl: targetTypeFilterCtrl,
-              targetIdFilterCtrl: targetIdFilterCtrl,
-              jobIdFilterCtrl: jobIdFilterCtrl,
-              stageFilterCtrl: stageFilterCtrl,
-              gradeFilterCtrl: gradeFilterCtrl,
-              reviewIdCtrl: reviewIdCtrl,
-              createProjectIdCtrl: createProjectIdCtrl,
-              createScriptIdCtrl: createScriptIdCtrl,
-              createTargetTypeCtrl: createTargetTypeCtrl,
-              createTargetIdCtrl: createTargetIdCtrl,
-              createSourceCtrl: createSourceCtrl,
-              createScoreCtrl: createScoreCtrl,
-              createStageCtrl: createStageCtrl,
-              createGradeCtrl: createGradeCtrl,
-              createCommentsCtrl: createCommentsCtrl,
-              createBadCaseCategoryCtrl: createBadCaseCategoryCtrl,
-              loadingReviews: true,
-              loadingBadCases: true,
-              loadingStats: true,
-              loadingScopeInsights: true,
-              loadingTokenEfficiency: true,
-              loadingTokenEfficiencySamples: true,
-              loadingStagePassRate: true,
-              loadingReviewById: true,
-              creatingReview: true,
-            ),
+            projectIdFilterCtrl: projectIdFilterCtrl,
+            scriptIdFilterCtrl: scriptIdFilterCtrl,
+            targetTypeFilterCtrl: targetTypeFilterCtrl,
+            targetIdFilterCtrl: targetIdFilterCtrl,
+            jobIdFilterCtrl: jobIdFilterCtrl,
+            stageFilterCtrl: stageFilterCtrl,
+            gradeFilterCtrl: gradeFilterCtrl,
+            suggestedActionFilterCtrl: suggestedActionFilterCtrl,
+            reviewIdCtrl: reviewIdCtrl,
+            createProjectIdCtrl: createProjectIdCtrl,
+            createScriptIdCtrl: createScriptIdCtrl,
+            createTargetTypeCtrl: createTargetTypeCtrl,
+            createTargetIdCtrl: createTargetIdCtrl,
+            createSourceCtrl: createSourceCtrl,
+            createScoreCtrl: createScoreCtrl,
+            createStageCtrl: createStageCtrl,
+            createGradeCtrl: createGradeCtrl,
+            createCommentsCtrl: createCommentsCtrl,
+            createBadCaseCategoryCtrl: createBadCaseCategoryCtrl,
+            loadingReviews: true,
+            loadingBadCases: true,
+            loadingStats: true,
+            loadingScopeInsights: true,
+            loadingTokenEfficiency: true,
+            loadingTokenEfficiencySamples: true,
+            loadingStagePassRate: true,
+            loadingReviewById: true,
+            creatingReview: true,
+          ),
           callbacks: buildDialogCallbacks(),
         ),
       ),
@@ -347,26 +357,27 @@ void main() {
       _buildTestApp(
         QualityReviewsWorkbenchDialogView(
           model: buildDialogModel(
-              projectIdFilterCtrl: projectIdFilterCtrl,
-              scriptIdFilterCtrl: scriptIdFilterCtrl,
-              targetTypeFilterCtrl: targetTypeFilterCtrl,
-              targetIdFilterCtrl: targetIdFilterCtrl,
-              jobIdFilterCtrl: jobIdFilterCtrl,
-              stageFilterCtrl: stageFilterCtrl,
-              gradeFilterCtrl: gradeFilterCtrl,
-              reviewIdCtrl: reviewIdCtrl,
-              createProjectIdCtrl: createProjectIdCtrl,
-              createScriptIdCtrl: createScriptIdCtrl,
-              createTargetTypeCtrl: createTargetTypeCtrl,
-              createTargetIdCtrl: createTargetIdCtrl,
-              createSourceCtrl: createSourceCtrl,
-              createScoreCtrl: createScoreCtrl,
-              createStageCtrl: createStageCtrl,
-              createGradeCtrl: createGradeCtrl,
-              createCommentsCtrl: createCommentsCtrl,
-              createBadCaseCategoryCtrl: createBadCaseCategoryCtrl,
-              filterBadCasesOnly: true,
-            ),
+            projectIdFilterCtrl: projectIdFilterCtrl,
+            scriptIdFilterCtrl: scriptIdFilterCtrl,
+            targetTypeFilterCtrl: targetTypeFilterCtrl,
+            targetIdFilterCtrl: targetIdFilterCtrl,
+            jobIdFilterCtrl: jobIdFilterCtrl,
+            stageFilterCtrl: stageFilterCtrl,
+            gradeFilterCtrl: gradeFilterCtrl,
+            suggestedActionFilterCtrl: suggestedActionFilterCtrl,
+            reviewIdCtrl: reviewIdCtrl,
+            createProjectIdCtrl: createProjectIdCtrl,
+            createScriptIdCtrl: createScriptIdCtrl,
+            createTargetTypeCtrl: createTargetTypeCtrl,
+            createTargetIdCtrl: createTargetIdCtrl,
+            createSourceCtrl: createSourceCtrl,
+            createScoreCtrl: createScoreCtrl,
+            createStageCtrl: createStageCtrl,
+            createGradeCtrl: createGradeCtrl,
+            createCommentsCtrl: createCommentsCtrl,
+            createBadCaseCategoryCtrl: createBadCaseCategoryCtrl,
+            filterBadCasesOnly: true,
+          ),
           callbacks: buildDialogCallbacks(
             onSelectReview: (review) => selectedReview = review,
           ),
@@ -385,76 +396,123 @@ void main() {
   });
 
   testWidgets(
+    'quality reviews workbench view forwards suggested action apply',
+    (WidgetTester tester) async {
+      QualityReview? appliedReview;
+
+      await tester.pumpWidget(
+        _buildTestApp(
+          QualityReviewsWorkbenchDialogView(
+            model: buildDialogModel(
+              projectIdFilterCtrl: projectIdFilterCtrl,
+              scriptIdFilterCtrl: scriptIdFilterCtrl,
+              targetTypeFilterCtrl: targetTypeFilterCtrl,
+              targetIdFilterCtrl: targetIdFilterCtrl,
+              jobIdFilterCtrl: jobIdFilterCtrl,
+              stageFilterCtrl: stageFilterCtrl,
+              gradeFilterCtrl: gradeFilterCtrl,
+              suggestedActionFilterCtrl: suggestedActionFilterCtrl,
+              reviewIdCtrl: reviewIdCtrl,
+              createProjectIdCtrl: createProjectIdCtrl,
+              createScriptIdCtrl: createScriptIdCtrl,
+              createTargetTypeCtrl: createTargetTypeCtrl,
+              createTargetIdCtrl: createTargetIdCtrl,
+              createSourceCtrl: createSourceCtrl,
+              createScoreCtrl: createScoreCtrl,
+              createStageCtrl: createStageCtrl,
+              createGradeCtrl: createGradeCtrl,
+              createCommentsCtrl: createCommentsCtrl,
+              createBadCaseCategoryCtrl: createBadCaseCategoryCtrl,
+            ),
+            callbacks: buildDialogCallbacks(
+              onApplySuggestedAction: (review) => appliedReview = review,
+            ),
+          ),
+        ),
+      );
+
+      final actionButton = find.byTooltip('Apply suggested action');
+      await tester.ensureVisible(actionButton);
+      await tester.tap(actionButton);
+      await tester.pump();
+
+      expect(appliedReview?.id, 'review-1');
+      expect(appliedReview?.suggestedAction, 'patch_storyboard_items');
+    },
+  );
+
+  testWidgets(
     'quality reviews workbench view shows prompt diagnostics for auto reviews',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         _buildTestApp(
           QualityReviewsWorkbenchDialogView(
             model: buildDialogModel(
-                projectIdFilterCtrl: projectIdFilterCtrl,
-                scriptIdFilterCtrl: scriptIdFilterCtrl,
-                targetTypeFilterCtrl: targetTypeFilterCtrl,
-                targetIdFilterCtrl: targetIdFilterCtrl,
-                jobIdFilterCtrl: jobIdFilterCtrl,
-                stageFilterCtrl: stageFilterCtrl,
-                gradeFilterCtrl: gradeFilterCtrl,
-                reviewIdCtrl: reviewIdCtrl,
-                createProjectIdCtrl: createProjectIdCtrl,
-                createScriptIdCtrl: createScriptIdCtrl,
-                createTargetTypeCtrl: createTargetTypeCtrl,
-                createTargetIdCtrl: createTargetIdCtrl,
-                createSourceCtrl: createSourceCtrl,
-                createScoreCtrl: createScoreCtrl,
-                createStageCtrl: createStageCtrl,
-                createGradeCtrl: createGradeCtrl,
-                createCommentsCtrl: createCommentsCtrl,
-                createBadCaseCategoryCtrl: createBadCaseCategoryCtrl,
-                reviews: const [
-                  QualityReview(
-                    id: 'review-auto-1',
-                    createdAt: '2026-04-14T08:00:00Z',
-                    updatedAt: '2026-04-14T08:00:00Z',
-                    userId: 'user-1',
-                    projectId: 7,
-                    scriptId: 11,
-                    targetType: 'storyboard',
-                    source: 'auto',
-                    overallScore: 93,
-                    dialogueNaturalness: 76,
-                    visualQuality: 78,
-                    passed: true,
-                    isBadCase: false,
-                    comments: '台词略生硬，画面有点不自然',
-                    memoryDeliveryPriorityApplied: true,
-                    modelParams: {
-                      'diagnostics': {
-                        'promptChars': 430,
-                        'memoryStyleChars': 90,
-                        'memoryVisualChars': 26,
-                        'memoryDeliveryChars': 44,
-                        'memoryOptimizationApplied': true,
-                        'memoryOptimizationRemovedChars': 96,
-                        'memoryOptimizationRemovedRows': 2,
-                        'memoryOptimizationRemovedVisualRows': 1,
-                        'memoryOptimizationRemovedDuplicateRows': 1,
-                        'memoryDeliveryPriorityApplied': true,
-                        'autoNegativeSource': 'review+rejected_memory',
-                        'directorManualYieldedToMemory': true,
-                        'feedbackMemory': {
-                          'action': 'promoted_selected_memory',
-                          'storyboardId': 19,
-                          'memoryName': 'selected_video_memory',
-                          'clearedMemoryName': 'rejected_video_negative_memory',
-                          'removedRows': 2,
-                          'removedChars': 96,
-                          'removedVisualRows': 1,
-                          'removedDuplicateRows': 1,
-                        },
+              projectIdFilterCtrl: projectIdFilterCtrl,
+              scriptIdFilterCtrl: scriptIdFilterCtrl,
+              targetTypeFilterCtrl: targetTypeFilterCtrl,
+              targetIdFilterCtrl: targetIdFilterCtrl,
+              jobIdFilterCtrl: jobIdFilterCtrl,
+              stageFilterCtrl: stageFilterCtrl,
+              gradeFilterCtrl: gradeFilterCtrl,
+              suggestedActionFilterCtrl: suggestedActionFilterCtrl,
+              reviewIdCtrl: reviewIdCtrl,
+              createProjectIdCtrl: createProjectIdCtrl,
+              createScriptIdCtrl: createScriptIdCtrl,
+              createTargetTypeCtrl: createTargetTypeCtrl,
+              createTargetIdCtrl: createTargetIdCtrl,
+              createSourceCtrl: createSourceCtrl,
+              createScoreCtrl: createScoreCtrl,
+              createStageCtrl: createStageCtrl,
+              createGradeCtrl: createGradeCtrl,
+              createCommentsCtrl: createCommentsCtrl,
+              createBadCaseCategoryCtrl: createBadCaseCategoryCtrl,
+              reviews: const [
+                QualityReview(
+                  id: 'review-auto-1',
+                  createdAt: '2026-04-14T08:00:00Z',
+                  updatedAt: '2026-04-14T08:00:00Z',
+                  userId: 'user-1',
+                  projectId: 7,
+                  scriptId: 11,
+                  targetType: 'storyboard',
+                  source: 'auto',
+                  overallScore: 93,
+                  dialogueNaturalness: 76,
+                  visualQuality: 78,
+                  passed: true,
+                  isBadCase: false,
+                  comments: '台词略生硬，画面有点不自然',
+                  memoryDeliveryPriorityApplied: true,
+                  modelParams: {
+                    'diagnostics': {
+                      'promptChars': 430,
+                      'memoryStyleChars': 90,
+                      'memoryVisualChars': 26,
+                      'memoryDeliveryChars': 44,
+                      'memoryOptimizationApplied': true,
+                      'memoryOptimizationRemovedChars': 96,
+                      'memoryOptimizationRemovedRows': 2,
+                      'memoryOptimizationRemovedVisualRows': 1,
+                      'memoryOptimizationRemovedDuplicateRows': 1,
+                      'memoryDeliveryPriorityApplied': true,
+                      'autoNegativeSource': 'review+rejected_memory',
+                      'directorManualYieldedToMemory': true,
+                      'feedbackMemory': {
+                        'action': 'promoted_selected_memory',
+                        'storyboardId': 19,
+                        'memoryName': 'selected_video_memory',
+                        'clearedMemoryName': 'rejected_video_negative_memory',
+                        'removedRows': 2,
+                        'removedChars': 96,
+                        'removedVisualRows': 1,
+                        'removedDuplicateRows': 1,
                       },
                     },
-                  ),
-                ],
-              ),
+                  },
+                ),
+              ],
+            ),
             callbacks: buildDialogCallbacks(),
           ),
         ),

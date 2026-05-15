@@ -84,6 +84,7 @@ class _WorkspaceControllers {
     String projectId = '1',
     String scriptId = '2',
     String scriptPrompt = '',
+    String scriptDomainTool = 'get_planData',
     String scriptDomainArgs = '{}',
     String productionPrompt = '',
     String flowKey = 'assets',
@@ -95,6 +96,9 @@ class _WorkspaceControllers {
   }) : projectIdController = TextEditingController(text: projectId),
        scriptIdController = TextEditingController(text: scriptId),
        scriptPromptController = TextEditingController(text: scriptPrompt),
+       scriptDomainToolController = TextEditingController(
+         text: scriptDomainTool,
+       ),
        scriptDomainArgsController = TextEditingController(
          text: scriptDomainArgs,
        ),
@@ -121,6 +125,7 @@ class _WorkspaceControllers {
   final TextEditingController projectIdController;
   final TextEditingController scriptIdController;
   final TextEditingController scriptPromptController;
+  final TextEditingController scriptDomainToolController;
   final TextEditingController scriptDomainArgsController;
   final TextEditingController productionPromptController;
   final TextEditingController flowKeyController;
@@ -134,6 +139,7 @@ class _WorkspaceControllers {
     projectIdController.dispose();
     scriptIdController.dispose();
     scriptPromptController.dispose();
+    scriptDomainToolController.dispose();
     scriptDomainArgsController.dispose();
     productionPromptController.dispose();
     flowKeyController.dispose();
@@ -200,6 +206,7 @@ AgentWorkspacesSection _buildSection({
     projectIdController: controllers.projectIdController,
     scriptIdController: controllers.scriptIdController,
     scriptPromptController: controllers.scriptPromptController,
+    scriptDomainToolController: controllers.scriptDomainToolController,
     scriptDomainArgsController: controllers.scriptDomainArgsController,
     productionPromptController: controllers.productionPromptController,
     flowKeyController: controllers.flowKeyController,
@@ -749,6 +756,59 @@ void main() {
       expect(
         lastArgs,
         '{"scriptId":9,"lineStart":1,"lineEnd":80,"maxChars":2200}',
+      );
+    });
+
+    testWidgets('Script domain tool follows external controller updates', (
+      WidgetTester tester,
+    ) async {
+      final controllers = _WorkspaceControllers(scriptId: '9');
+      String? lastTool;
+      String? lastArgs;
+
+      _addWorkspaceTearDown(tester, controllers);
+
+      await _pumpAgentWorkspacesSection(
+        tester,
+        _buildSection(
+          controllers: controllers,
+          onProbeScriptDomainTool: (tool, args) {
+            lastTool = tool;
+            lastArgs = args;
+          },
+        ),
+      );
+
+      expect(find.text('tool=get_planData'), findsOneWidget);
+
+      controllers.scriptDomainToolController.text = 'get_script_content';
+      controllers.scriptDomainArgsController.text =
+          '{"scriptId":9,"lineStart":61,"lineEnd":120,"maxChars":1600}';
+
+      await _pumpAgentWorkspacesSection(
+        tester,
+        _buildSection(
+          controllers: controllers,
+          onProbeScriptDomainTool: (tool, args) {
+            lastTool = tool;
+            lastArgs = args;
+          },
+        ),
+      );
+
+      expect(find.text('tool=get_script_content'), findsOneWidget);
+
+      final probeButton = find
+          .widgetWithText(FilledButton, zh.agentWorkspaceScriptReadContext)
+          .last;
+      await tester.ensureVisible(probeButton);
+      await tester.tap(probeButton);
+      await tester.pump();
+
+      expect(lastTool, 'get_script_content');
+      expect(
+        lastArgs,
+        '{"scriptId":9,"lineStart":61,"lineEnd":120,"maxChars":1600}',
       );
     });
   });

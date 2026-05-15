@@ -177,7 +177,11 @@ class QualityReviewsController extends ChangeNotifier {
         limit: 20,
       );
     } catch (e) {
-      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10nResolved);
+      reportRustOrDescribeApiError(
+        e,
+        onErrorChanged: _setError,
+        l10n: _l10nResolved,
+      );
     } finally {
       if (onlyBadCases) {
         loadingQualityBadCases = false;
@@ -202,7 +206,11 @@ class QualityReviewsController extends ChangeNotifier {
         await fetchSelectedQualityReview();
       }
     } catch (e) {
-      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10nResolved);
+      reportRustOrDescribeApiError(
+        e,
+        onErrorChanged: _setError,
+        l10n: _l10nResolved,
+      );
     } finally {
       creatingQualityReview = false;
       notifyListeners();
@@ -230,7 +238,11 @@ class QualityReviewsController extends ChangeNotifier {
         if (row.suggestedAction != null) 'suggested=${row.suggestedAction}',
       ].join(' · ');
     } catch (e) {
-      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10nResolved);
+      reportRustOrDescribeApiError(
+        e,
+        onErrorChanged: _setError,
+        l10n: _l10nResolved,
+      );
     } finally {
       loadingQualityReviewById = false;
       notifyListeners();
@@ -252,7 +264,11 @@ class QualityReviewsController extends ChangeNotifier {
           : summarizeQualityStatsRows(rows, maxItems: 4, l10n: _l10nResolved);
       _refreshQualityDashboardLine();
     } catch (e) {
-      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10nResolved);
+      reportRustOrDescribeApiError(
+        e,
+        onErrorChanged: _setError,
+        l10n: _l10nResolved,
+      );
     } finally {
       loadingQualityStats = false;
       notifyListeners();
@@ -281,7 +297,11 @@ class QualityReviewsController extends ChangeNotifier {
       );
       _refreshQualityDashboardLine();
     } catch (e) {
-      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10nResolved);
+      reportRustOrDescribeApiError(
+        e,
+        onErrorChanged: _setError,
+        l10n: _l10nResolved,
+      );
     } finally {
       loadingQualityStagePassRate = false;
       notifyListeners();
@@ -387,7 +407,11 @@ class QualityReviewsController extends ChangeNotifier {
       );
       _refreshQualityDashboardLine();
     } catch (e) {
-      reportRustOrDescribeApiError(e, onErrorChanged: _setError, l10n: _l10nResolved);
+      reportRustOrDescribeApiError(
+        e,
+        onErrorChanged: _setError,
+        l10n: _l10nResolved,
+      );
     } finally {
       loadingQualityDashboard = false;
       refreshingQualityDashboardReadModel = false;

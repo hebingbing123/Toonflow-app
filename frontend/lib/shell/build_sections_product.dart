@@ -3,6 +3,51 @@
 part of '../../home_page.dart';
 
 extension _HomePageBuildProductSections on _HomePageState {
+  void _applyDomainDeepLink(TaskCenterDomainDeepLink link) {
+    if (link.projectNumericId != null || link.projectUuid != null) {
+      setState(() {
+        _productScopedProjectNumericId = link.projectNumericId;
+      });
+    }
+    _workspaceInputController.applyProjectScopeRef(
+      projectNumericId: link.projectNumericId,
+      scriptNumericId: link.scriptNumericId,
+      projectUuid: link.projectUuid,
+      workspaceId: link.workspaceId,
+    );
+    if (link.target == TaskCenterDomainDeepLinkTarget.storyboard) {
+      _workspaceInputController.applyProductionStoryboardFocus(
+        scriptNumericId: link.scriptNumericId,
+        storyboardNumericId: link.storyboardNumericId,
+        suggestedAction: link.suggestedAction,
+      );
+    } else if (link.target == TaskCenterDomainDeepLinkTarget.script) {
+      _workspaceInputController.applyScriptRepairFocus(
+        scriptNumericId: link.scriptNumericId,
+        stage: link.stage,
+        suggestedAction: link.suggestedAction,
+      );
+    }
+    switch (link.target) {
+      case TaskCenterDomainDeepLinkTarget.publish:
+      case TaskCenterDomainDeepLinkTarget.project:
+        _shellNavigationController.selectProductWorkspacePane(
+          ProductWorkspacePane.shortVideoSpace,
+        );
+        break;
+      case TaskCenterDomainDeepLinkTarget.script:
+        _shellNavigationController.selectProductWorkspacePane(
+          ProductWorkspacePane.scriptWorkspace,
+        );
+        break;
+      case TaskCenterDomainDeepLinkTarget.storyboard:
+        _shellNavigationController.selectProductWorkspacePane(
+          ProductWorkspacePane.productionWorkspace,
+        );
+        break;
+    }
+  }
+
   Future<void> _openComplianceProductTarget(
     ContentComplianceReportItemV1 item,
   ) async {
@@ -121,6 +166,8 @@ extension _HomePageBuildProductSections on _HomePageState {
       workspaceUuidController:
           _workspaceInputController.workspaceUuidController,
       scriptPromptController: _workspaceInputController.scriptPromptController,
+      scriptDomainToolController:
+          _workspaceInputController.scriptDomainToolController,
       scriptDomainArgsController:
           _workspaceInputController.scriptDomainArgsController,
       productionPromptController:
@@ -384,35 +431,7 @@ extension _HomePageBuildProductSections on _HomePageState {
             );
           },
           onNavigateDomainDeepLink: (TaskCenterDomainDeepLink link) {
-            if (link.projectNumericId != null || link.projectUuid != null) {
-              setState(() {
-                _productScopedProjectNumericId = link.projectNumericId;
-              });
-            }
-            _workspaceInputController.applyProjectScopeRef(
-              projectNumericId: link.projectNumericId,
-              scriptNumericId: link.scriptNumericId,
-              projectUuid: link.projectUuid,
-              workspaceId: link.workspaceId,
-            );
-            switch (link.target) {
-              case TaskCenterDomainDeepLinkTarget.publish:
-              case TaskCenterDomainDeepLinkTarget.project:
-                _shellNavigationController.selectProductWorkspacePane(
-                  ProductWorkspacePane.shortVideoSpace,
-                );
-                break;
-              case TaskCenterDomainDeepLinkTarget.script:
-                _shellNavigationController.selectProductWorkspacePane(
-                  ProductWorkspacePane.scriptWorkspace,
-                );
-                break;
-              case TaskCenterDomainDeepLinkTarget.storyboard:
-                _shellNavigationController.selectProductWorkspacePane(
-                  ProductWorkspacePane.productionWorkspace,
-                );
-                break;
-            }
+            _applyDomainDeepLink(link);
           },
           loadingTaskProjects: _taskCenterController.loadingTaskProjects,
           loadingTaskCategories: _taskCenterController.loadingTaskCategories,
@@ -464,6 +483,9 @@ extension _HomePageBuildProductSections on _HomePageState {
                 ? null
                 : _workspaceInputController.projectUuidController.text.trim(),
             platformConfig: _platformConfig,
+            onNavigateDomainDeepLink: (TaskCenterDomainDeepLink link) {
+              _applyDomainDeepLink(link);
+            },
           ),
         ),
       if (_shellNavigationController.productWorkspacePane ==
@@ -826,7 +848,9 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
       messenger.showSnackBar(
         SnackBar(
           content: Text(
-            resolveAppLocalizationsForErrors(context).platformConfigSnackUserSaved,
+            resolveAppLocalizationsForErrors(
+              context,
+            ).platformConfigSnackUserSaved,
           ),
         ),
       );
@@ -880,7 +904,9 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
       messenger.showSnackBar(
         SnackBar(
           content: Text(
-            resolveAppLocalizationsForErrors(context).platformConfigSnackUserReset,
+            resolveAppLocalizationsForErrors(
+              context,
+            ).platformConfigSnackUserReset,
           ),
         ),
       );
@@ -935,7 +961,9 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
       messenger.showSnackBar(
         SnackBar(
           content: Text(
-            resolveAppLocalizationsForErrors(context).platformConfigSnackWorkspaceSaved,
+            resolveAppLocalizationsForErrors(
+              context,
+            ).platformConfigSnackWorkspaceSaved,
           ),
         ),
       );
@@ -993,7 +1021,9 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
       messenger.showSnackBar(
         SnackBar(
           content: Text(
-            resolveAppLocalizationsForErrors(context).platformConfigSnackWorkspaceReset,
+            resolveAppLocalizationsForErrors(
+              context,
+            ).platformConfigSnackWorkspaceReset,
           ),
         ),
       );
@@ -2101,7 +2131,9 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(resolveAppLocalizationsForErrors(context).opsWhSnackCreated),
+          content: Text(
+            resolveAppLocalizationsForErrors(context).opsWhSnackCreated,
+          ),
         ),
       );
       await _loadWebhooks();
@@ -2143,8 +2175,9 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
           return;
         }
         setState(() {
-          _webhooksError = resolveAppLocalizationsForErrors(context)
-              .opsWhErrorWorkspaceIdPatch;
+          _webhooksError = resolveAppLocalizationsForErrors(
+            context,
+          ).opsWhErrorWorkspaceIdPatch;
         });
         return;
       }
@@ -2233,7 +2266,9 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(resolveAppLocalizationsForErrors(context).opsWhSnackEventsUpdated),
+          content: Text(
+            resolveAppLocalizationsForErrors(context).opsWhSnackEventsUpdated,
+          ),
         ),
       );
       await _loadWebhooks();

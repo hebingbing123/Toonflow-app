@@ -91,6 +91,7 @@ void main() {
             'project_numeric_id': 12,
             'project_id': '550e8400-e29b-41d4-a716-446655440444',
             'script_numeric_id': 5,
+            'stage': 'director_planning',
             'workspace_id': '550e8400-e29b-41d4-a716-446655440555',
           },
         },
@@ -104,6 +105,7 @@ void main() {
       expect(link.projectNumericId, 12);
       expect(link.projectUuid, '550e8400-e29b-41d4-a716-446655440444');
       expect(link.scriptNumericId, 5);
+      expect(link.stage, 'director_planning');
       expect(link.workspaceId, '550e8400-e29b-41d4-a716-446655440555');
     },
   );

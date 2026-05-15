@@ -57,10 +57,7 @@ void main() {
       ),
     ], l10n: _zh);
 
-    expect(
-      summary,
-      'output：共 12 条，通过率 75.0%（投放 75.0%，非投放 75.0%）',
-    );
+    expect(summary, 'output：共 12 条，通过率 75.0%（投放 75.0%，非投放 75.0%）');
   });
 
   test('summarizeQualityScopeInsightRows formats scope triage preview', () {
@@ -278,6 +275,47 @@ void main() {
       expect(suggestions.first, '先补角色锚点，明确外形、气质和情绪反应，再重试。');
       expect(suggestions, contains('当前主要命中项目级记忆，继续压词时先缩通用风格句，别动人物表演。'));
       expect(suggestions, contains('保留表演/语气记忆，补可演的情绪动作，别先删 delivery 记忆。'));
+    },
+  );
+
+  test(
+    'summarizeSuggestedActionHotspotsFromReviews ranks repeated actions',
+    () {
+      final summary = summarizeSuggestedActionHotspotsFromReviews(const [
+        QualityReview(
+          id: 'r1',
+          createdAt: '2026-04-10T00:00:00Z',
+          updatedAt: '2026-04-10T00:00:00Z',
+          userId: 'u1',
+          targetType: 'storyboard',
+          source: 'auto',
+          isBadCase: true,
+          suggestedAction: 'patch_storyboard_items',
+        ),
+        QualityReview(
+          id: 'r2',
+          createdAt: '2026-04-10T00:00:00Z',
+          updatedAt: '2026-04-10T00:00:00Z',
+          userId: 'u1',
+          targetType: 'storyboard',
+          source: 'auto',
+          isBadCase: true,
+          suggestedAction: 'patch_storyboard_items',
+        ),
+        QualityReview(
+          id: 'r3',
+          createdAt: '2026-04-10T00:00:00Z',
+          updatedAt: '2026-04-10T00:00:00Z',
+          userId: 'u1',
+          targetType: 'output',
+          source: 'manual',
+          isBadCase: true,
+          suggestedAction: 'adjust_video_prompt',
+        ),
+      ], l10n: _zh);
+
+      expect(summary, contains('先局部修分镜条目，把动作、视线和节奏补齐。 2x'));
+      expect(summary, contains('先收紧 video prompt，把表演线索和情绪锚点写实。 1x'));
     },
   );
 

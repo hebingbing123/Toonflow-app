@@ -2,7 +2,10 @@ import '../../rust_api.dart';
 import '../l10n/app_localizations.dart';
 import 'support_models.dart';
 
-String? describeSuggestedRepairAction(String? action, {AppLocalizations? l10n}) {
+String? describeSuggestedRepairAction(
+  String? action, {
+  AppLocalizations? l10n,
+}) {
   switch (action?.trim()) {
     case 'rollback_to_director_planning':
       return '先回到导演规划，重排冲突和动机，再继续往下生成。';
@@ -239,6 +242,34 @@ String? summarizeQualityRepairPlanFromReviews(
             l10n?.qualityReviewsRepairPlanCount(entry.key, entry.value) ??
             '${entry.key} ${entry.value} times',
       )
+      .join(' | ');
+}
+
+String? summarizeSuggestedActionHotspotsFromReviews(
+  Iterable<QualityReview> rows, {
+  int maxItems = 4,
+  AppLocalizations? l10n,
+}) {
+  final counts = <String, int>{};
+  for (final row in rows) {
+    final action = row.suggestedAction?.trim();
+    if (action == null || action.isEmpty) continue;
+    counts.update(action, (count) => count + 1, ifAbsent: () => 1);
+  }
+  if (counts.isEmpty) return null;
+  final ranked = counts.entries.toList()
+    ..sort((a, b) {
+      final byCount = b.value.compareTo(a.value);
+      if (byCount != 0) return byCount;
+      return a.key.compareTo(b.key);
+    });
+  return ranked
+      .take(maxItems)
+      .map((entry) {
+        final summary = describeSuggestedRepairAction(entry.key, l10n: l10n);
+        final label = summary ?? entry.key;
+        return '$label ${entry.value}x';
+      })
       .join(' | ');
 }
 

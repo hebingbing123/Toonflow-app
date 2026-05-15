@@ -8,6 +8,7 @@ import 'workbench_view.dart';
 import '../rust_api.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../config.dart';
+import '../task_center/support.dart';
 
 part 'section_workbench.dart';
 part 'section_workbench_controllers.dart';
@@ -21,6 +22,7 @@ class QualityReviewsSection extends StatelessWidget {
     this.initialProjectUuid,
     required this.platformConfig,
     this.fetchProjectsOverride,
+    this.onNavigateDomainDeepLink,
   });
 
   final String? accessToken;
@@ -30,6 +32,7 @@ class QualityReviewsSection extends StatelessWidget {
   final PlatformConfigToggleSetV1 platformConfig;
   final Future<List<ProjectRow>> Function(String accessToken)?
   fetchProjectsOverride;
+  final void Function(TaskCenterDomainDeepLink link)? onNavigateDomainDeepLink;
 
   String? _buildInitialProjectScopeSummary({
     required int? resolvedProjectNumericId,
@@ -86,6 +89,7 @@ class QualityReviewsSection extends StatelessWidget {
       builder: (dialogCtx) => _QualityReviewsWorkbenchDialog(
         accessToken: token,
         initialProjectNumericId: resolvedProjectNumericId,
+        initialProjectUuid: initialProjectUuid,
         initialProjectScopeSummary: _buildInitialProjectScopeSummary(
           resolvedProjectNumericId: resolvedProjectNumericId,
         ),
@@ -93,6 +97,7 @@ class QualityReviewsSection extends StatelessWidget {
         initialReviewDetails: controller.qualityReviewByIdLine,
         initialStatsSummary: controller.qualityStatsLine,
         initialStagePassRateSummary: controller.qualityStagePassRateLine,
+        onNavigateDomainDeepLink: onNavigateDomainDeepLink,
       ),
     );
   }

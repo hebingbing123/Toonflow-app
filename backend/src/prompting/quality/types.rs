@@ -105,6 +105,8 @@ pub struct ListQualityReviewsQuery {
     pub grade: Option<String>,
     /// 按下一步动作过滤（需求 I.4）
     pub next_action: Option<String>,
+    /// 按规则化建议动作过滤（需求 2.1）
+    pub suggested_action: Option<String>,
     pub limit: Option<i64>,
     pub offset: Option<i64>,
 }

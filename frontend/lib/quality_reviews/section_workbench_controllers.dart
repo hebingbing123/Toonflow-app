@@ -9,6 +9,7 @@ class _QualityReviewsWorkbenchControllers {
     required this.jobIdFilterCtrl,
     required this.stageFilterCtrl,
     required this.gradeFilterCtrl,
+    required this.suggestedActionFilterCtrl,
     required this.reviewIdCtrl,
     required this.createProjectIdCtrl,
     required this.createScriptIdCtrl,
@@ -34,6 +35,7 @@ class _QualityReviewsWorkbenchControllers {
       jobIdFilterCtrl: TextEditingController(),
       stageFilterCtrl: TextEditingController(text: 'all'),
       gradeFilterCtrl: TextEditingController(text: 'all'),
+      suggestedActionFilterCtrl: TextEditingController(text: 'all'),
       reviewIdCtrl: TextEditingController(),
       createProjectIdCtrl: TextEditingController(text: initialProjectText),
       createScriptIdCtrl: TextEditingController(),
@@ -59,6 +61,7 @@ class _QualityReviewsWorkbenchControllers {
   final TextEditingController jobIdFilterCtrl;
   final TextEditingController stageFilterCtrl;
   final TextEditingController gradeFilterCtrl;
+  final TextEditingController suggestedActionFilterCtrl;
   final TextEditingController reviewIdCtrl;
   final TextEditingController createProjectIdCtrl;
   final TextEditingController createScriptIdCtrl;
@@ -79,6 +82,7 @@ class _QualityReviewsWorkbenchControllers {
     jobIdFilterCtrl.dispose();
     stageFilterCtrl.dispose();
     gradeFilterCtrl.dispose();
+    suggestedActionFilterCtrl.dispose();
     reviewIdCtrl.dispose();
     createProjectIdCtrl.dispose();
     createScriptIdCtrl.dispose();

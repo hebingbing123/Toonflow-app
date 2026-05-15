@@ -14,6 +14,7 @@ void main() {
       expect(controller.productionDomainToolController.text, 'get_flowData');
       expect(controller.productionPromptController.text, isEmpty);
       expect(controller.scriptPromptController.text, isEmpty);
+      expect(controller.scriptDomainToolController.text, 'get_planData');
       expect(
         controller.scriptSubAgentToolController.text,
         'run_sub_agent_storySkeleton',
@@ -134,4 +135,183 @@ void main() {
       'bbbbbbbb-cccc-4ddd-8eee-ffffffffffff',
     );
   });
+
+  test('workspace input controller can focus production storyboard scope', () {
+    final controller = WorkspaceInputController();
+    addTearDown(controller.dispose);
+
+    controller.applyProductionStoryboardFocus(
+      scriptNumericId: 42,
+      storyboardNumericId: 9,
+    );
+
+    expect(controller.productionFlowKeyController.text, 'storyboard');
+    expect(controller.productionDomainToolController.text, 'get_flowData');
+    expect(
+      controller.productionDomainArgsController.text,
+      '{"key":"storyboard","fields":["id","index","duration","src","state","associateAssetsIds","shouldGenerateImage"],"ids":[9],"scriptId":42}',
+    );
+    expect(
+      controller.productionSubAgentArgsController.text,
+      '{"storyboardIds":[9]}',
+    );
+  });
+
+  test(
+    'workspace input controller maps rollback action to script planning focus',
+    () {
+      final controller = WorkspaceInputController();
+      addTearDown(controller.dispose);
+
+      controller.applyScriptRepairFocus(
+        scriptNumericId: 42,
+        suggestedAction: 'rollback_to_director_planning',
+      );
+
+      expect(
+        controller.scriptDomainToolController.text,
+        'get_planData',
+      );
+      expect(
+        controller.scriptDomainArgsController.text,
+        '{"key":"adaptationStrategy","maxChars":1600}',
+      );
+      expect(
+        controller.scriptSubAgentToolController.text,
+        'run_sub_agent_adaptationStrategy',
+      );
+    },
+  );
+
+  test(
+    'workspace input controller maps director-planning stage to adaptation strategy focus',
+    () {
+      final controller = WorkspaceInputController();
+      addTearDown(controller.dispose);
+
+      controller.applyScriptRepairFocus(
+        scriptNumericId: 42,
+        stage: 'director_planning',
+      );
+
+      expect(
+        controller.scriptDomainToolController.text,
+        'get_planData',
+      );
+      expect(
+        controller.scriptDomainArgsController.text,
+        '{"key":"adaptationStrategy","maxChars":1600}',
+      );
+      expect(
+        controller.scriptSubAgentToolController.text,
+        'run_sub_agent_adaptationStrategy',
+      );
+    },
+  );
+
+  test(
+    'workspace input controller maps story-skeleton stage to story skeleton focus',
+    () {
+      final controller = WorkspaceInputController();
+      addTearDown(controller.dispose);
+
+      controller.applyScriptRepairFocus(
+        scriptNumericId: 42,
+        stage: 'story_skeleton',
+      );
+
+      expect(
+        controller.scriptDomainToolController.text,
+        'get_planData',
+      );
+      expect(
+        controller.scriptDomainArgsController.text,
+        '{"key":"storySkeleton","maxChars":1600}',
+      );
+      expect(
+        controller.scriptSubAgentToolController.text,
+        'run_sub_agent_storySkeleton',
+      );
+    },
+  );
+
+  test(
+    'workspace input controller defaults script repair focus to story skeleton',
+    () {
+      final controller = WorkspaceInputController();
+      addTearDown(controller.dispose);
+
+      controller.applyScriptRepairFocus(scriptNumericId: 42);
+
+      expect(
+        controller.scriptDomainToolController.text,
+        'get_planData',
+      );
+      expect(
+        controller.scriptDomainArgsController.text,
+        '{"key":"storySkeleton","maxChars":1600}',
+      );
+      expect(
+        controller.scriptSubAgentToolController.text,
+        'run_sub_agent_storySkeleton',
+      );
+    },
+  );
+
+  test(
+    'workspace input controller maps patch storyboard action to panel tool',
+    () {
+      final controller = WorkspaceInputController();
+      addTearDown(controller.dispose);
+
+      controller.applyProductionStoryboardFocus(
+        scriptNumericId: 42,
+        storyboardNumericId: 9,
+        suggestedAction: 'patch_storyboard_items',
+      );
+
+      expect(controller.productionFlowKeyController.text, 'storyboard');
+      expect(controller.productionDomainToolController.text, 'get_flowData');
+      expect(
+        controller.productionSubAgentToolController.text,
+        'run_sub_agent_storyboard_panel',
+      );
+      expect(
+        controller.productionDomainArgsController.text,
+        '{"key":"storyboard","fields":["id","index","duration","src","state","associateAssetsIds","shouldGenerateImage"],"ids":[9],"scriptId":42}',
+      );
+      expect(
+        controller.productionSubAgentArgsController.text,
+        '{"storyboardIds":[9]}',
+      );
+    },
+  );
+
+  test(
+    'workspace input controller maps regenerate action to storyboard generation tool',
+    () {
+      final controller = WorkspaceInputController();
+      addTearDown(controller.dispose);
+
+      controller.applyProductionStoryboardFocus(
+        storyboardNumericId: 9,
+        suggestedAction: 'regenerate_storyboard',
+      );
+
+      expect(controller.productionFlowKeyController.text, 'storyboard');
+      expect(
+        controller.productionDomainToolController.text,
+        'generate_storyboard',
+      );
+      expect(
+        controller.productionSubAgentToolController.text,
+        'run_sub_agent_storyboard_gen',
+      );
+      expect(controller.productionDomainArgsController.text, '{"ids":[9]}');
+      expect(
+        controller.productionSubAgentArgsController.text,
+        '{"storyboardIds":[9]}',
+      );
+    },
+  );
 }

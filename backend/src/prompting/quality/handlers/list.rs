@@ -87,6 +87,10 @@ pub(crate) async fn list_reviews(
         qb.push(" AND next_action = ");
         qb.push_bind(next_action);
     }
+    if let Some(suggested_action) = &query.suggested_action {
+        qb.push(" AND suggested_action = ");
+        qb.push_bind(suggested_action);
+    }
     qb.push(" ORDER BY created_at DESC LIMIT ");
     qb.push_bind(limit);
     qb.push(" OFFSET ");
