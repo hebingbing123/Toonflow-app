@@ -29,13 +29,13 @@
   - 测试：`cargo check` 编译通过
   - _需求: 1.3, 1.4, 1.5_
 
-- [ ] 4. 拆分前端 quality_reviews/support.dart（45KB）
-  - 拆分为：support_models.dart + support_filters.dart + support_stats.dart + support_actions.dart
+- [x] 4. 拆分前端 quality_reviews/support.dart（45KB）
+  - 拆分为：support_models.dart + support_filters.dart（barrel：diagnostics / memory / scope 子模块）+ support_stats.dart + support_actions.dart
   - support.dart 改为 barrel（export 上述四个文件）
   - 测试：`flutter test test/quality_reviews_workbench_support_test.dart`
   - _需求: 1.6_
 
-- [ ] 5. 拆分前端 storyboard_editor/actions.dart（31KB，part of home_page）
+- [x] 5. 拆分前端 storyboard_editor/actions.dart（31KB，part of home_page）
   - 新建 `storyboard_editor/actions/patch_helpers.dart`（局部返工 dialog 逻辑）
   - 新建 `storyboard_editor/actions/video_helpers.dart`（视频生成/预览逻辑）
   - 新建 `storyboard_editor/actions/quality_helpers.dart`（质量门控触发逻辑）
