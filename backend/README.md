@@ -79,7 +79,9 @@ Electron 形 workbench 新建分镜（**`POST /api/v1/production/storyboard/add`
 
 ### LLM（WebSocket `agent.chat.send`）
 
-Harness **子代理 auto-memory 注入**（`app_agent_memory` 摘要 / style bible / stage summary 等）可在本地通过 **`TOONFLOW_AUTO_MEMORY_*`** 环境变量调节字符上限与行数，无需改代码；缺省与历史常量一致，详见 `backend/src/harness/sub_agent/memory_limits.rs` 顶部表格。修改后需**重启进程**。
+Harness **子代理 auto-memory 注入**（`app_agent_memory` 摘要 / style bible / stage summary 等）可在本地通过环境变量调节字符上限与行数，无需改代码；缺省与历史常量一致，详见 `backend/src/harness/sub_agent/memory_limits.rs` 顶部表格。修改后需**重启进程**。
+
+相关变量（均有安全上下限，见源码）：**`TOONFLOW_AUTO_MEMORY_MAX_CHARS`**、**`TOONFLOW_AUTO_MEMORY_KEEP_ROWS`**、**`TOONFLOW_AUTO_MEMORY_FETCH_LIMIT`**、**`TOONFLOW_AUTO_MEMORY_REWORK_LIMIT`**、**`TOONFLOW_STYLE_BIBLE_NOTE_MAX_CHARS`**、**`TOONFLOW_STAGE_SUMMARY_NOTE_MAX_CHARS`**；旧名 **`TOONFLOW_AUTO_MEMORY_STYLE_BIBLE_NOTE_MAX_CHARS`** / **`TOONFLOW_AUTO_MEMORY_STAGE_SUMMARY_NOTE_MAX_CHARS`** 仍兼容。
 
 设置 **`OPENAI_API_KEY`**（或 **`LLM_API_KEY`**）后，对话走 OpenAI 兼容 **`chat/completions` 流式**（可用 **`OPENAI_BASE_URL`**、**`LLM_MODEL`** 覆盖默认）。未配置时 `agent.chat.send` 返回 `error.occurred`（`llm_not_configured`）。**`POST /api/v1/art-styles/extract-prompt`** 使用同一密钥走**非流式**多模态 **`chat/completions`**（需 vision 模型，如默认 **`gpt-4o-mini`**）。
 
