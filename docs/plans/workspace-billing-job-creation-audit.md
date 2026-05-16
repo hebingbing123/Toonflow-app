@@ -227,12 +227,15 @@ This ensures quota enforcement aligns with billing attribution (Requirement 4).
 ### Unit Tests
 - `backend/src/jobs/billing_workspace.rs`: Documents resolution priority order
 
-### Integration Tests Needed (Task 9.1)
-- [ ] Project-based job → uses project's workspace_id
-- [ ] Non-project job with current_workspace_id → uses current workspace
-- [ ] Non-project job without current_workspace_id → uses personal workspace
-- [ ] Archived current workspace → falls back to personal workspace
-- [ ] Invalid current_workspace_id → falls back to personal workspace
+### Integration Tests (Task 9.1)
+
+Covered by `backend/src/app/pg_contract_tests/business_suite/job_workspace_attribution_roundtrip.rs`.
+
+- [x] Project-based job → uses project's workspace_id
+- [x] Non-project job with current_workspace_id → uses current workspace
+- [x] Non-project job without current_workspace_id → uses personal workspace
+- [x] Archived current workspace → falls back to personal workspace
+- [x] Invalid current_workspace_id → falls back to personal workspace
 
 ## Related Tasks
 
