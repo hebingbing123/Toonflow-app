@@ -272,21 +272,19 @@ fn apply_compact_flow_defaults(request: FlowReadRequest<'_>) -> FlowReadDefaults
     };
 
     match request.key {
-        "script" => {
+        "script"
             if defaults.line_start.is_none()
                 && defaults.line_end.is_none()
-                && defaults.max_chars.is_none()
-            {
-                defaults.max_chars = Some(1800);
-            }
+                && defaults.max_chars.is_none() =>
+        {
+            defaults.max_chars = Some(1800);
         }
-        "scriptPlan" => {
+        "scriptPlan"
             if defaults.line_start.is_none()
                 && defaults.line_end.is_none()
-                && defaults.max_chars.is_none()
-            {
-                defaults.max_chars = Some(2200);
-            }
+                && defaults.max_chars.is_none() =>
+        {
+            defaults.max_chars = Some(2200);
         }
         "storyboardTable" => {
             if defaults.fields.is_none() {

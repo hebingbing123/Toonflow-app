@@ -439,41 +439,21 @@ pub(super) fn score_review_negative_fragment_bias(
     };
 
     match negative_fragment_family(fragment) {
-        "performance_delivery" | "lip_sync_mismatch" => {
-            if pressure.prefer_delivery_memory_recall {
-                28
-            } else {
-                0
-            }
+        "performance_delivery" | "lip_sync_mismatch" if pressure.prefer_delivery_memory_recall => {
+            28
         }
-        "character_consistency" => {
-            if pressure.prefer_visual_continuity_memory_recall {
-                12
-            } else {
-                0
-            }
+        "character_consistency" if pressure.prefer_visual_continuity_memory_recall => 12,
+        "lighting_backlight" | "lighting_reflection"
+            if pressure.prefer_visual_continuity_memory_recall =>
+        {
+            10
         }
-        "lighting_backlight" | "lighting_reflection" => {
-            if pressure.prefer_visual_continuity_memory_recall {
-                10
-            } else {
-                0
-            }
+        "flicker_motion_jitter" | "shot_change_framing" | "camera_framing" | "rushed_motion"
+            if pressure.prefer_visual_continuity_memory_recall =>
+        {
+            8
         }
-        "flicker_motion_jitter" | "shot_change_framing" | "camera_framing" | "rushed_motion" => {
-            if pressure.prefer_visual_continuity_memory_recall {
-                8
-            } else {
-                0
-            }
-        }
-        "mood_tone" => {
-            if pressure.prefer_delivery_memory_recall {
-                6
-            } else {
-                0
-            }
-        }
+        "mood_tone" if pressure.prefer_delivery_memory_recall => 6,
         _ => 0,
     }
 }

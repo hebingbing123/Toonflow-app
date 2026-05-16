@@ -268,10 +268,10 @@ pub(in crate::production::workbench::meta::generate) fn trim_video_prompt_observ
     for (idx, row) in rows.into_iter().enumerate() {
         match row.name.as_str() {
             "rejected_video_negative_memory" => rejection_candidates.push((idx, row)),
-            "script_video_style_memory" | "selected_video_memory" => {
-                if selected_memory_row_matches_subject_candidates(&row, subject_candidates) {
-                    script_style_candidates.push((idx, row))
-                }
+            "script_video_style_memory" | "selected_video_memory"
+                if selected_memory_row_matches_subject_candidates(&row, subject_candidates) =>
+            {
+                script_style_candidates.push((idx, row))
             }
             "script_role_video_style_memory" => script_role_style_candidates.push((idx, row)),
             "project_video_style_memory" => project_style_candidates.push((idx, row)),

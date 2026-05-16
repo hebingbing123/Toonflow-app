@@ -34,10 +34,10 @@ pub(in crate::production::workbench::meta::generate) fn trim_video_prompt_memory
 
     for (idx, row) in rows.into_iter().enumerate() {
         match row.name.as_str() {
-            "selected_video_memory" => {
-                if selected_memory_row_matches_subject_candidates(&row, subject_candidates) {
-                    selected_candidates.push((idx, row))
-                }
+            "selected_video_memory"
+                if selected_memory_row_matches_subject_candidates(&row, subject_candidates) =>
+            {
+                selected_candidates.push((idx, row))
             }
             "auto_scope_memory" => auto_scope_candidates.push((idx, row)),
             "script_video_style_memory" => script_style_candidates.push((idx, row)),
