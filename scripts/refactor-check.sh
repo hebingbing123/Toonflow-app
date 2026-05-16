@@ -171,7 +171,8 @@ if [ "$MODE" = "full" ] || [ "$BACKEND_CHANGED" = true ]; then
   if [ "$MODE" = "full" ]; then
     echo "==> backend/ (test)"
     step_start
-    (cd backend && cargo test -- --test-threads=1)
+    # -j 1: serialize integration test binaries so sqlx::test DB setup does not race on shared template DB.
+    (cd backend && cargo test -j 1 -- --test-threads=1)
     step_finish "backend test"
   else
     echo "==> Skipping backend tests (quick/incremental mode)"

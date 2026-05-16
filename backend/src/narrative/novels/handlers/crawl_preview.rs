@@ -772,6 +772,7 @@ fn classify_import_error(err: &ApiError) -> (String, String) {
         ApiError::Conflict(msg) => ("conflict".into(), msg.clone()),
         ApiError::ConflictWithDetails { message, .. } => ("conflict".into(), message.clone()),
         ApiError::DatabaseError(msg) => ("database_error".into(), msg.clone()),
+        ApiError::BadRequestWithDetails { code, en, .. } => ((*code).into(), en.clone()),
         ApiError::QuotaExceeded(msg) => ("quota_exceeded".into(), msg.clone()),
         ApiError::QuotaExceededI18n { en, .. } => ("quota_exceeded".into(), en.clone()),
         ApiError::SubscriptionExpiredI18n { en, .. } => ("subscription_expired".into(), en.clone()),

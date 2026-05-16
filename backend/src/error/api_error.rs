@@ -50,6 +50,12 @@ pub enum ApiError {
         details: serde_json::Value,
     },
     BadRequest(String),
+    BadRequestWithDetails {
+        code: &'static str,
+        en: String,
+        zh: String,
+        details: Option<serde_json::Value>,
+    },
     DatabaseError(String),
     /// `BILLING_WEBHOOK_SECRET` unset — webhook ingestion disabled.
     WebhookNotConfigured,
@@ -244,6 +250,18 @@ impl IntoResponse for ApiError {
                     "Bad request"
                 );
             }
+            ApiError::BadRequestWithDetails {
+                code, en, details, ..
+            } => {
+                tracing::info!(
+                    target: "toonflow.api.error",
+                    error_type = %code,
+                    status = 400,
+                    message = %en,
+                    details = ?details,
+                    "Bad request with details"
+                );
+            }
             ApiError::InvalidWebhookSignature => {
                 tracing::warn!(
                     target: "toonflow.api.error",
@@ -408,6 +426,18 @@ impl IntoResponse for ApiError {
                 (StatusCode::CONFLICT, "conflict", message, Some(details))
             }
             ApiError::BadRequest(msg) => (StatusCode::BAD_REQUEST, "bad_request", msg, None),
+            ApiError::BadRequestWithDetails {
+                code,
+                en,
+                zh,
+                details,
+            } => {
+                let msg = match loc {
+                    ApiLocale::En => en,
+                    ApiLocale::Zh => zh,
+                };
+                (StatusCode::BAD_REQUEST, code, msg, details)
+            }
             ApiError::DatabaseError(msg) => {
                 (StatusCode::SERVICE_UNAVAILABLE, "database_error", msg, None)
             }

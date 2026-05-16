@@ -50,6 +50,7 @@ mod tests {
             model_params: Some(json!({})),
             memory_delivery_priority_applied: Some(true),
             reviewer_id: None,
+            dimension_scores: None,
             is_bad_case: true,
             bad_case_category: Some("dialogue_issue".into()),
             stage: Some("storyboard_table".into()),

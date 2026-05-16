@@ -15,6 +15,16 @@ name = "reconcile-billing"
 path = "src/bin/reconcile_billing.rs"
 test = false
 
+[[bin]]
+name = "quality-export"
+path = "src/bin/quality_export.rs"
+test = false
+
+[[bin]]
+name = "quality-regression-check"
+path = "src/bin/quality_regression_check.rs"
+test = false
+
 [dependencies]
 anyhow = "1"
 aes-gcm = "0.10"

@@ -9,6 +9,7 @@ use axum::{
 
 use crate::state::AppState;
 
+pub mod dimension;
 mod feedback;
 mod feedback_generic;
 mod feedback_memory;

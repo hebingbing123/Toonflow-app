@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
+import 'dimension_score_form.dart';
 import 'support.dart';
 
 part 'workbench_view/review_widgets.dart';
@@ -21,6 +22,8 @@ class QualityReviewsWorkbenchDialogViewModel {
     required this.badCaseStatsSummary,
     required this.badCaseStatItems,
     required this.reviewDetails,
+    required this.selectedReview,
+    required this.createDimensionScores,
     required this.statusLine,
     required this.initialProjectScopeSummary,
     required this.activeFilterQuerySummary,
@@ -73,6 +76,8 @@ class QualityReviewsWorkbenchDialogViewModel {
   final String? badCaseStatsSummary;
   final List<BadCaseStatItem> badCaseStatItems;
   final String? reviewDetails;
+  final QualityReview? selectedReview;
+  final Map<String, int>? createDimensionScores;
   final String? statusLine;
   final String? initialProjectScopeSummary;
   final String? activeFilterQuerySummary;
@@ -127,6 +132,7 @@ class QualityReviewsWorkbenchDialogViewCallbacks {
     required this.onLoadBadCaseStats,
     required this.onLoadReviewById,
     required this.onCreateReview,
+    required this.onCreateDimensionScoresChanged,
     required this.onCreatePassedChanged,
     required this.onCreateBadCaseChanged,
     required this.onSelectReview,
@@ -146,6 +152,7 @@ class QualityReviewsWorkbenchDialogViewCallbacks {
   final VoidCallback onLoadBadCaseStats;
   final VoidCallback onLoadReviewById;
   final VoidCallback onCreateReview;
+  final ValueChanged<Map<String, int>?> onCreateDimensionScoresChanged;
   final ValueChanged<bool> onCreatePassedChanged;
   final ValueChanged<bool> onCreateBadCaseChanged;
   final ValueChanged<QualityReview> onSelectReview;
@@ -630,6 +637,11 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
+              DimensionScoreFormWidget(
+                initialScores: model.createDimensionScores,
+                onChanged: callbacks.onCreateDimensionScoresChanged,
+              ),
+              const SizedBox(height: 8),
               Row(
                 children: [
                   Expanded(
@@ -704,6 +716,12 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                 const SizedBox(height: 12),
                 SelectableText(
                   l10n.qualityReviewsSummaryReviewDetails(model.reviewDetails!),
+                ),
+              ],
+              if (model.selectedReview != null) ...[
+                const SizedBox(height: 8),
+                DimensionScoreDisplayWidget(
+                  scores: model.selectedReview!.dimensionScores,
                 ),
               ],
               if (model.statsSummary != null) ...[
@@ -997,6 +1015,17 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                                 ),
                               ),
                               visualDensity: VisualDensity.compact,
+                            ),
+                          ),
+                        if (hasDimensionRisk(review.dimensionScores))
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: Chip(
+                              label: const Text('维度风险'),
+                              visualDensity: VisualDensity.compact,
+                              backgroundColor: Theme.of(
+                                context,
+                              ).colorScheme.errorContainer,
                             ),
                           ),
                         if (writebackSummary != null)

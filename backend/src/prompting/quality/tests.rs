@@ -495,6 +495,7 @@ mod task15_tests {
             model_params: None,
             memory_delivery_priority_applied: None,
             reviewer_id: None,
+            dimension_scores: None,
             is_bad_case: false,
             bad_case_category: None,
             stage: None,

@@ -53,7 +53,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Workspace billing'), findsOneWidget);
-      expect(find.text('Plan: enterprise'), findsOneWidget);
+      expect(find.text('Plan: Enterprise'), findsOneWidget);
       expect(find.text('Daily quota: 1000'), findsOneWidget);
       expect(find.text('250 / 1000'), findsOneWidget);
       expect(find.text('25% used'), findsOneWidget);
@@ -125,7 +125,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Workspace billing'), findsOneWidget);
-      expect(find.text('Plan: enterprise'), findsOneWidget);
+      expect(find.text('Plan: Enterprise'), findsOneWidget);
       expect(find.text('Daily quota: Unlimited'), findsOneWidget);
       expect(find.text('500 / Unlimited'), findsOneWidget);
 

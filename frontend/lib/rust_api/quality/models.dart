@@ -27,6 +27,7 @@ class QualityReview {
     this.modelParams,
     this.memoryDeliveryPriorityApplied,
     this.reviewerId,
+    this.dimensionScores,
     required this.isBadCase,
     this.badCaseCategory,
     this.stage,
@@ -60,6 +61,7 @@ class QualityReview {
   final Map<String, dynamic>? modelParams;
   final bool? memoryDeliveryPriorityApplied;
   final String? reviewerId;
+  final Map<String, int>? dimensionScores;
   final bool isBadCase;
   final String? badCaseCategory;
   final String? stage;
@@ -100,6 +102,7 @@ class QualityReview {
       memoryDeliveryPriorityApplied:
           json['memoryDeliveryPriorityApplied'] as bool?,
       reviewerId: json['reviewerId'] as String?,
+      dimensionScores: _readDimensionScores(json['dimensionScores']),
       isBadCase: json['isBadCase'] as bool? ?? false,
       badCaseCategory: json['badCaseCategory'] as String?,
       stage: json['stage'] as String?,
@@ -132,6 +135,7 @@ class CreateQualityReviewBody {
     this.modelName,
     this.modelParams,
     this.memoryDeliveryPriorityApplied,
+    this.dimensionScores,
     this.isBadCase,
     this.badCaseCategory,
     this.stage,
@@ -159,6 +163,7 @@ class CreateQualityReviewBody {
   final String? modelName;
   final Map<String, dynamic>? modelParams;
   final bool? memoryDeliveryPriorityApplied;
+  final Map<String, int>? dimensionScores;
   final bool? isBadCase;
   final String? badCaseCategory;
   final String? stage;
@@ -192,6 +197,7 @@ class CreateQualityReviewBody {
     put('modelName', modelName);
     put('modelParams', modelParams);
     put('memoryDeliveryPriorityApplied', memoryDeliveryPriorityApplied);
+    put('dimensionScores', dimensionScores);
     put('isBadCase', isBadCase);
     put('badCaseCategory', badCaseCategory);
     put('stage', stage);
@@ -200,6 +206,14 @@ class CreateQualityReviewBody {
     put('skillVersionHash', skillVersionHash);
     return map;
   }
+}
+
+Map<String, int>? _readDimensionScores(Object? value) {
+  if (value == null) {
+    return null;
+  }
+  final raw = Map<String, dynamic>.from(value as Map);
+  return raw.map((key, value) => MapEntry(key, (value as num).toInt()));
 }
 
 Uri qualityUri(String path, {Map<String, String>? queryParameters}) {

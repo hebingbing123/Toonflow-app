@@ -132,8 +132,8 @@
     - _Requirements: 7.4_
 
 - [x] 9. Final Checkpoint — 全量门禁验证
-  - `yarn refactor:agent --quick`：`flutter analyze` + `cargo clippy` 通过；`test/l10n/*` 全绿；`cargo test --lib billing_errors` 全绿。
-  - 注：工作区若含未完成的 `quality_regression_check` 二进制，全量 `cargo test -p toonflow-server` 可能因该 bin 编译失败；与 billing-i18n 无关。
+  - `yarn refactor:agent --full`：OpenAPI 导出、`cargo fmt`/`clippy -D warnings`、全量 `cargo test`（含 `-j 1 -- --test-threads=1` 串行集成测试）、Flutter `analyze`/`test` 已通过（2026-05）。
+  - 计费 UI 展示名称随 L10n 后，相关 Widget 测试需断言本地化文案（如英文 `Plan: Enterprise`），与 `billingPlanTier*` ARB 一致。
 
 ---
 

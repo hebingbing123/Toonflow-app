@@ -149,6 +149,7 @@ fn create_mock_review_from_manual_scores(
         model_params: None,
         memory_delivery_priority_applied: None,
         reviewer_id: None,
+        dimension_scores: None,
         is_bad_case: false,
         bad_case_category: None,
         stage: None,

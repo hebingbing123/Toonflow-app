@@ -48,6 +48,8 @@ class _QualityReviewsWorkbenchDialogState
   String? _badCaseStatsSummary;
   List<BadCaseStatItem> _badCaseStatItems = const <BadCaseStatItem>[];
   String? _reviewDetails;
+  QualityReview? _selectedReview;
+  Map<String, int>? _createDimensionScores;
   bool _loadingReviews = false;
   bool _loadingBadCases = false;
   bool _loadingStats = false;
@@ -558,6 +560,7 @@ class _QualityReviewsWorkbenchDialogState
       if (!mounted) return;
       setState(() {
         _reviewDetails = formatQualityReviewDetails(review, l10n: l10n);
+        _selectedReview = review;
         _statusLine = l10n.qualityReviewsStatusLoadedReviewDetails;
       });
     } catch (e) {
@@ -620,6 +623,7 @@ class _QualityReviewsWorkbenchDialogState
           comments: _ctrls.createCommentsCtrl.text.trim().isEmpty
               ? null
               : _ctrls.createCommentsCtrl.text.trim(),
+          dimensionScores: _createDimensionScores,
           isBadCase: _createBadCase,
           badCaseCategory: _ctrls.createBadCaseCategoryCtrl.text.trim().isEmpty
               ? null
@@ -633,6 +637,7 @@ class _QualityReviewsWorkbenchDialogState
       setState(() {
         _ctrls.reviewIdCtrl.text = created.id;
         _reviewDetails = formatQualityReviewDetails(created, l10n: l10n);
+        _selectedReview = created;
         final writesScopedMemory =
             (projectId != null && scriptId != null) &&
             (_createBadCase ||
@@ -673,6 +678,8 @@ class _QualityReviewsWorkbenchDialogState
         badCaseStatsSummary: _badCaseStatsSummary,
         badCaseStatItems: _badCaseStatItems,
         reviewDetails: _reviewDetails,
+        selectedReview: _selectedReview,
+        createDimensionScores: _createDimensionScores,
         statusLine: _statusLine,
         initialProjectScopeSummary: widget.initialProjectScopeSummary,
         activeFilterQuerySummary: _activeFilterQuerySummary(),
@@ -761,6 +768,8 @@ class _QualityReviewsWorkbenchDialogState
         onCreateReview: () {
           _createReview();
         },
+        onCreateDimensionScoresChanged: (scores) =>
+            setState(() => _createDimensionScores = scores),
         onCreatePassedChanged: (value) => setState(() => _createPassed = value),
         onCreateBadCaseChanged: (value) =>
             setState(() => _createBadCase = value),
@@ -768,6 +777,7 @@ class _QualityReviewsWorkbenchDialogState
           setState(() {
             _ctrls.reviewIdCtrl.text = review.id;
             _reviewDetails = formatQualityReviewDetails(review, l10n: l10n);
+            _selectedReview = review;
           });
         },
         onApplySuggestedAction: (review) {

@@ -2,6 +2,7 @@
 
 use crate::error::{bad_request_i18n, ApiError};
 
+use super::dimension::validate_dimension_scores;
 use super::types::{CreateQualityReviewBody, ListQualityReviewsQuery};
 
 const VALID_TARGET_TYPES: &[&str] = &["storyboard", "script", "video", "asset", "output"];
@@ -225,6 +226,14 @@ pub(super) fn validate_create_review_body(body: &CreateQualityReviewBody) -> Res
                 ));
             }
         }
+    }
+
+    if let Some(scores) = body
+        .dimension_scores
+        .as_ref()
+        .filter(|value| !value.is_null())
+    {
+        validate_dimension_scores(scores)?;
     }
 
     Ok(())

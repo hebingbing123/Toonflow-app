@@ -32,6 +32,7 @@ pub struct QualityReview {
     pub model_params: Option<serde_json::Value>,
     pub memory_delivery_priority_applied: Option<bool>,
     pub reviewer_id: Option<Uuid>,
+    pub dimension_scores: Option<serde_json::Value>,
     pub is_bad_case: bool,
     pub bad_case_category: Option<String>,
     /// 生成阶段（需求 6.3）：story_skeleton / adaptation_strategy / director_planning /
@@ -72,6 +73,7 @@ pub struct CreateQualityReviewBody {
     pub model_name: Option<String>,
     pub model_params: Option<serde_json::Value>,
     pub memory_delivery_priority_applied: Option<bool>,
+    pub dimension_scores: Option<serde_json::Value>,
     pub is_bad_case: Option<bool>,
     pub bad_case_category: Option<String>,
     /// 生成阶段（需求 6.3）

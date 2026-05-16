@@ -38,6 +38,7 @@ fn make_review(
         model_params: None,
         memory_delivery_priority_applied: None,
         reviewer_id: None,
+        dimension_scores: None,
         is_bad_case,
         bad_case_category: None,
         stage: Some("storyboard_panel".to_string()),
