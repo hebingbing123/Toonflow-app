@@ -150,7 +150,7 @@ sum by (field) (rate(billing_reconciliation_mismatch_total[24h]))
    - **Historical**: Pre-dual-write data (requires backfill)
 
 **Weekly**:
-1. Run manual reconciliation check: `cargo run --bin reconcile_billing`
+1. Run manual reconciliation check: `cargo run --bin reconcile-billing`
 2. Export mismatch summary for trend analysis
 3. Update cutover readiness dashboard
 

@@ -212,7 +212,7 @@ This checklist validates the **workspace-scope billing migration** in staging be
 - [ ] **Run backfill in dry-run mode**
   ```bash
   cargo run --bin backfill-job-workspace-id -- \
-    --dry-run true \
+    --dry-run \
     --batch-size 100
   ```
 
@@ -224,10 +224,7 @@ This checklist validates the **workspace-scope billing migration** in staging be
 - [ ] **Run backfill for real (small batch)**
   ```bash
   cargo run --bin backfill-job-workspace-id -- \
-    --dry-run false \
-    --batch-size 10 \
-    --start-date 2024-01-01 \
-    --end-date 2024-01-31
+    --batch-size 10
   ```
 
 - [ ] **Verify backfill results**

@@ -170,11 +170,14 @@ export TOONFLOW_BILLING_DUAL_WRITE_ENABLED=false
 
 3. **Backfill historical jobs**:
    ```bash
-   # Run backfill script with batching
+   # Preview the backfill first
    cargo run --bin backfill-job-workspace-id -- \
-     --batch-size 1000 \
-     --dry-run false \
-     --start-date 2024-01-01
+     --dry-run \
+     --batch-size 1000
+
+   # Apply the backfill after reviewing the dry-run output
+   cargo run --bin backfill-job-workspace-id -- \
+     --batch-size 1000
    ```
 
 #### Success Criteria
