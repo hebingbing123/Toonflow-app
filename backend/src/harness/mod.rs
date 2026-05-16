@@ -15,15 +15,18 @@
 pub mod http;
 
 pub use http::HarnessOpenApi;
+pub mod alert;
 pub mod invoke;
 pub mod isolate;
 pub mod observe;
 pub mod permissions;
 mod sub_agent;
 pub mod tools;
+pub(crate) mod user_wasm_audit;
 pub(crate) mod user_wasm_db;
 #[cfg(test)]
 mod user_wasm_env_lock;
+pub(crate) mod user_wasm_probe;
 #[cfg(test)]
 pub use user_wasm_env_lock::user_wasm_test_env_lock;
 pub(crate) mod wasm_runtime;

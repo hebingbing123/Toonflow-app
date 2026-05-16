@@ -67,6 +67,13 @@ pub(crate) async fn dispatch_client_text(
         return;
     };
 
+    let span = tracing::info_span!(
+        "harness.session",
+        user_id = %sess.user_id,
+        workspace_id = ?sess.workspace_id
+    );
+    let _session_enter = span.enter();
+
     let project_numeric_id = sess.project_id.and_then(|v| i32::try_from(v).ok());
     let script_numeric_id = sess.script_id.and_then(|v| i32::try_from(v).ok());
     let ctx = HarnessContext::with_runtime_scope(

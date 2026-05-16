@@ -36,6 +36,9 @@ async fn main() {
         .await
         .expect("failed to initialize app state (check DATABASE_URL)");
 
+    let harness_alert_cfg = std::sync::Arc::new(harness::alert::WasmAlertConfig::from_env());
+    harness::alert::spawn_harness_alert_eval_task(state.clone(), harness_alert_cfg);
+
     let port: u16 = std::env::var("PORT")
         .ok()
         .and_then(|s| s.parse().ok())

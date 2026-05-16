@@ -3,13 +3,16 @@
 //! - **`TOONFLOW_OTEL_EXPORT_ENABLED`**: `1` / `true` / `yes` / `on` 时启用 OTLP gRPC 导出。
 //! - **`OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`** 或 **`OTEL_EXPORTER_OTLP_ENDPOINT`**：collector 地址（默认 `http://127.0.0.1:4317`）。
 //! - **`OTEL_SERVICE_NAME`**：可选；默认 `toonflow-server`。
+//! - **`TOONFLOW_OTEL_SAMPLE_RATE`**：导出启用时，`TraceIdRatioBased` 采样率；缺失或不可解析回落 **1.0**；`≤ 0` 回落 **0.01** 并记警告；`> 1` 钳制为 **1.0**。
+
+pub mod pii_filter;
 
 use opentelemetry::global;
 use opentelemetry::KeyValue;
 use opentelemetry_otlp::WithExportConfig;
 use opentelemetry_sdk::propagation::TraceContextPropagator;
 use opentelemetry_sdk::resource::Resource;
-use opentelemetry_sdk::trace::SdkTracerProvider;
+use opentelemetry_sdk::trace::{Sampler, SdkTracerProvider};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter, Registry};
 
 #[inline]
@@ -50,20 +53,64 @@ fn otel_service_name() -> String {
         .unwrap_or_else(|| "toonflow-server".to_string())
 }
 
+/// OTLP 导出路径使用的采样率（仅在 [`try_init_otel_tracer_provider`] 中调用；导出未启用时不读该变量）。
+#[must_use]
+pub(crate) fn parse_otel_sample_rate_for_export() -> f64 {
+    match std::env::var("TOONFLOW_OTEL_SAMPLE_RATE") {
+        Err(_) => 1.0,
+        Ok(raw) => {
+            let t = raw.trim();
+            match t.parse::<f64>() {
+                Err(_) => 1.0,
+                Ok(v) if v <= 0.0 => {
+                    tracing::warn!(
+                        target: "toonflow.telemetry",
+                        event = "otel_sample_rate_invalid",
+                        value = %t,
+                        "non-positive OTEL sample rate; using 0.01"
+                    );
+                    0.01
+                }
+                Ok(v) if v > 1.0 => {
+                    tracing::warn!(
+                        target: "toonflow.telemetry",
+                        event = "otel_sample_rate_invalid",
+                        value = %t,
+                        "OTEL sample rate > 1; clamping to 1.0"
+                    );
+                    1.0
+                }
+                Ok(v) => v,
+            }
+        }
+    }
+}
+
 fn try_init_otel_tracer_provider() -> anyhow::Result<()> {
     let endpoint = resolve_otlp_grpc_endpoint();
-    let exporter = opentelemetry_otlp::SpanExporter::builder()
+    let inner_exporter = opentelemetry_otlp::SpanExporter::builder()
         .with_tonic()
         .with_endpoint(endpoint.clone())
         .build()
         .map_err(|e| anyhow::anyhow!("{e}"))?;
 
+    let exporter = pii_filter::PiiRedactingSpanExporter::new(inner_exporter);
+
     let resource = Resource::builder()
         .with_attributes(vec![KeyValue::new("service.name", otel_service_name())])
         .build();
 
+    let rate = parse_otel_sample_rate_for_export();
+    tracing::info!(
+        target: "toonflow.telemetry",
+        event = "otel_sample_rate_resolved",
+        sample_rate = rate,
+        "TOONFLOW_OTEL_SAMPLE_RATE resolved"
+    );
+
     let provider = SdkTracerProvider::builder()
         .with_resource(resource)
+        .with_sampler(Sampler::TraceIdRatioBased(rate))
         .with_batch_exporter(exporter)
         .build();
 
@@ -116,7 +163,7 @@ pub fn init_tracing_subscriber() {
     tracing::info!(
         target: "toonflow.telemetry",
         endpoint = %resolve_otlp_grpc_endpoint(),
-        "TOONFLOW_OTEL_EXPORT_ENABLED: OTLP gRPC trace export initialized"
+        "TOONFLOW_OTEL_EXPORT_ENABLED: OTLP gRPC trace export initialized (PII-redacting exporter)"
     );
 }
 
@@ -151,6 +198,24 @@ mod tests {
         assert_eq!(resolve_otlp_grpc_endpoint().as_str(), "http://traces:4317");
         std::env::remove_var("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT");
         std::env::remove_var("OTEL_EXPORTER_OTLP_ENDPOINT");
+    }
+
+    #[test]
+    fn otel_sample_rate_clamps_and_defaults() {
+        let _g = ENV_MUTEX.lock().expect("lock");
+        std::env::remove_var("TOONFLOW_OTEL_SAMPLE_RATE");
+        assert_eq!(parse_otel_sample_rate_for_export(), 1.0);
+        std::env::set_var("TOONFLOW_OTEL_SAMPLE_RATE", "not-a-float");
+        assert_eq!(parse_otel_sample_rate_for_export(), 1.0);
+        std::env::set_var("TOONFLOW_OTEL_SAMPLE_RATE", "0");
+        assert_eq!(parse_otel_sample_rate_for_export(), 0.01);
+        std::env::set_var("TOONFLOW_OTEL_SAMPLE_RATE", "-1");
+        assert_eq!(parse_otel_sample_rate_for_export(), 0.01);
+        std::env::set_var("TOONFLOW_OTEL_SAMPLE_RATE", "9");
+        assert_eq!(parse_otel_sample_rate_for_export(), 1.0);
+        std::env::set_var("TOONFLOW_OTEL_SAMPLE_RATE", "0.25");
+        assert_eq!(parse_otel_sample_rate_for_export(), 0.25);
+        std::env::remove_var("TOONFLOW_OTEL_SAMPLE_RATE");
     }
 
     #[test]

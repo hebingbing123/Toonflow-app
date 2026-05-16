@@ -32,6 +32,11 @@ const CATALOG: &[HarnessToolInfo] = &[
             "Runs an embedded WebAssembly module via the wasmi interpreter (sandbox MVP); returns JSON like { \"ok\": true, \"value\": 42 }.",
     },
     HarnessToolInfo {
+        name: "wasm.user.probe",
+        description:
+            "Runs owner-scoped WASM from **`app_harness_user_wasm`** (active row only). WS args: `{ \"wasmId\": \"<uuid>\", \"requestId\": \"...\" }`; audited in **`app_harness_user_wasm_audit`**.",
+    },
+    HarnessToolInfo {
         name: "get_planData",
         description:
             "Script-agent parity read: returns project-scoped plan data; supports key/line/field filters to avoid loading the full workspace when not needed.",

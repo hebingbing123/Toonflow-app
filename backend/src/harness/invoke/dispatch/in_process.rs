@@ -18,6 +18,10 @@ pub(super) fn dispatch_in_process(
         "wasm.probe" => {
             super::super::super::wasm_runtime::invoke_probe().map_err(InvokeError::WasmFailed)
         }
+        "wasm.user.probe" => Err(InvokeError::NotImplemented {
+            tool: "wasm.user.probe".into(),
+            hint: "use WebSocket harness.tool.invoke (async path)".into(),
+        }),
         "skills.read" => {
             let path = arguments
                 .get("path")

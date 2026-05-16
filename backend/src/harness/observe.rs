@@ -135,6 +135,49 @@ pub fn harness_user_wasm_revoke_http(user_id: Uuid, wasm_id: Uuid) {
     tracing::debug!(%user_id, %wasm_id, "harness.http.user_wasm_revoke");
 }
 
+/// Structured signal for user-WASM failure paths (logs + alert aggregation).
+#[inline]
+pub fn harness_user_wasm_signal(
+    signal_name: &'static str,
+    user_id: Uuid,
+    workspace_id: Option<Uuid>,
+    request_id: Option<&str>,
+    wasm_id: Option<Uuid>,
+    outcome: &'static str,
+    error_code: Option<&str>,
+) {
+    let rid = request_id
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+        .unwrap_or("");
+    let ec = error_code.unwrap_or("");
+    match workspace_id {
+        Some(ws) => tracing::info!(
+            target: "harness.user_wasm.signal",
+            event = "harness_user_wasm_signal",
+            signal_name,
+            user_id = %user_id,
+            workspace_id = %ws,
+            wasm_id = ?wasm_id,
+            request_id = rid,
+            outcome,
+            error_code = ec,
+            "harness user wasm signal"
+        ),
+        None => tracing::info!(
+            target: "harness.user_wasm.signal",
+            event = "harness_user_wasm_signal",
+            signal_name,
+            user_id = %user_id,
+            wasm_id = ?wasm_id,
+            request_id = rid,
+            outcome,
+            error_code = ec,
+            "harness user wasm signal"
+        ),
+    }
+}
+
 /// REST **`/api/v1/agents/memory/*`** (parity with Electron agent memory).
 pub fn memory_http(user_id: Uuid, numeric_project_id: i32, op: &'static str) {
     tracing::debug!(%user_id, numeric_project_id, %op, "harness.memory.http");

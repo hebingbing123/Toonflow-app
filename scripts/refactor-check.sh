@@ -171,8 +171,20 @@ if [ "$MODE" = "full" ] || [ "$BACKEND_CHANGED" = true ]; then
   if [ "$MODE" = "full" ]; then
     echo "==> backend/ (test)"
     step_start
-    # -j 1: serialize integration test binaries so sqlx::test DB setup does not race on shared template DB.
-    (cd backend && cargo test -j 1 -- --test-threads=1)
+    (
+      cd backend
+      # Unit tests (library crate).
+      cargo test -p toonflow-server --lib -j 1 -- --test-threads=1
+      # Each integration test binary runs in its own process; running them one-by-one
+      # avoids sqlx::test racing on the shared template DB registry (`databases_pkey`).
+      shopt -s nullglob
+      for test_rs in tests/*.rs; do
+        name=$(basename "$test_rs" .rs)
+        echo "==> backend integration test crate: $name"
+        cargo test -p toonflow-server --test "$name" -j 1 -- --test-threads=1
+      done
+      cargo test -p toonflow-server --doc -j 1 -- --test-threads=1
+    )
     step_finish "backend test"
   else
     echo "==> Skipping backend tests (quick/incremental mode)"

@@ -109,4 +109,27 @@ mod tests {
             .unwrap_err();
         assert_eq!(err.code(), "invalid_payload");
     }
+
+    #[tokio::test]
+    async fn wasm_user_probe_requires_wasm_id() {
+        let err = invoke_tool_async(&ctx(), "wasm.user.probe", &json!({}))
+            .await
+            .unwrap_err();
+        assert_eq!(err.code(), "invalid_payload");
+    }
+
+    #[tokio::test]
+    async fn wasm_user_probe_requires_database_pool() {
+        let err = invoke_tool_async(&ctx(), "wasm.user.probe", &json!({ "wasmId": Uuid::nil() }))
+            .await
+            .unwrap_err();
+        assert_eq!(err.code(), "database_error");
+    }
+
+    #[test]
+    fn wasm_user_probe_sync_invoke_returns_not_implemented() {
+        let err =
+            invoke_tool(&ctx(), "wasm.user.probe", &json!({ "wasmId": Uuid::nil() })).unwrap_err();
+        assert_eq!(err.code(), "tool_not_implemented");
+    }
 }

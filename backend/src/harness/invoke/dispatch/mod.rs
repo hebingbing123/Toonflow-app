@@ -62,6 +62,9 @@ pub async fn invoke_tool_async(
                 .map_err(|e| InvokeError::WasmFailed(format!("join: {e}")))?;
             r.map_err(InvokeError::WasmFailed)
         }
+        "wasm.user.probe" => {
+            super::super::user_wasm_probe::invoke_wasm_user_probe_tool(ctx, arguments).await
+        }
         _ => dispatch_in_process(ctx, name, arguments),
     }
 }

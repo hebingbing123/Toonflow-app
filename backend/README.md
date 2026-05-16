@@ -33,6 +33,7 @@ cargo run --bin toonflow-server
 
 - **`OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`** 或 **`OTEL_EXPORTER_OTLP_ENDPOINT`**：collector 地址（默认 **`http://127.0.0.1:4317`**，与 OpenTelemetry Collector gRPC 端口一致）。
 - **`OTEL_SERVICE_NAME`**：`service.name` resource（默认 **`toonflow-server`**）。
+- **`TOONFLOW_OTEL_SAMPLE_RATE`**：OTel 导出启用时的 trace 采样率，范围 **`(0.0, 1.0]`**；缺失或不可解析默认 **`1.0`**，小于等于 **`0`** 时使用 **`0.01`** 防止生产静默关闭。
 
 仍使用 **`RUST_LOG`**（`tracing_subscriber::EnvFilter`）控制控制台日志级别；OTel 导出与控制台是相互叠加的两个 sink。
 
@@ -116,6 +117,18 @@ WebSocket（JSON 信封见合并 OpenAPI 中 **`GET /api/v1/ws`**；仓库 **`do
 - `GET ws://127.0.0.1:8666/api/v1/ws` — 可选查询参数 `access_token=<jwt>`；否则首帧发 `session.auth`
 - 鉴权后可发 **`harness.tool.invoke`**（`schema_version` 1，`payload.name` / 可选 `arguments`）；**`echo`** 回显参数；**`isolated.echo`** 与 `echo` 语义相同但在**子进程**中执行（进程隔离；并发与复用见上文 **`HARNESS_ISOLATE_*`**；集成测试通常将 **`HARNESS_ISOLATE_RUNNER_EXE`** 设为 **`CARGO_BIN_EXE_toonflow-server`**）。**可观测（WP‑D）**：每条 **`isolated.echo`** 结束前有 **`tracing`** 行（**`target = harness.isolate.metrics`**、**`event = harness_isolate_invoke`**：`queued_ahead`、`semaphore_wait_ms`、`child_execution_ms`、`available_slots_snapshot`/`max_slots`、`reuse_hit`、`process_reuse_hits_total`）；**`GET /api/v1/ready`** 与 **`metrics_snapshot()`** 均含累计字段（含 **`total_process_reuse_hits`**；池关闭时复用为 **0**）；**`skills.read`** 需 `arguments.path`（相对 `data/skills`，规则同 `GET /api/v1/skills/content`）；**`wasm.probe`** 在进程内用 **wasmi** 执行构建期生成的最小 WASM（`build.rs` → `OUT_DIR/probe.wasm`）；运维可设 **`HARNESS_WASM_PROBE_DISABLED=1`**（或 **`true`** / **`yes`** / **`on`**）拒绝 **`wasm.probe`** 调用；**WP‑C（用户上传 WASM，薄切片）**：投递前可复用 **`validate_user_wasm_upload`** + **`HARNESS_USER_WASM_MAX_BYTES`**（默认 524288，无效或 **`0`** 回退默认）做体量与解析校验（见 `harness/wasm_runtime.rs`）；目录见 `GET /api/v1/harness/tools`
 - 已 attach **`agent.script.attach` / `agent.production.attach`** 且配置 LLM 密钥时，可发 **`harness.agent.run`**（`payload.content`，可选 **`max_tool_rounds`** 默认 8、限制 1–32；可选 **`payload.stream`**，WP‑E）：服务端多轮 OpenAI **tools** 调用与 Harness 工具闭环，最终仍发 **`chat.message.*`** 文本信封。若 **`payload.stream=true`**，须 **`HARNESS_AGENT_STREAMING_TOOLS=1`**（否则 WS 返回 **`not_implemented`**）；启用后当前仍走同一套非流式 completion + 工具循环（流式 token 事件后续里程碑）。
+
+Harness 用户 WASM 告警评估默认每 **60 秒**运行一次（设 **`HARNESS_USER_WASM_ALERT_EVAL_INTERVAL_SECS=0`** 可关闭），读取 **`app_harness_user_wasm_audit`** 的滚动窗口并写入通知中心：
+
+- **`HARNESS_USER_WASM_ALERT_VALIDATE_FAIL_RATE`**：validate / object-store 失败率阈值，默认 **`0.1`**。
+- **`HARNESS_USER_WASM_ALERT_INVOKE_FAIL_RATE`**：`invoke_wasm_failed` 阈值，默认 **`0.1`**。
+- **`HARNESS_USER_WASM_ALERT_FUEL_EXHAUSTION_RATE`**：`invoke_wasm_timeout` 阈值，默认 **`0.2`**。
+- **`HARNESS_USER_WASM_ALERT_WINDOW_SECS`**：评估窗口秒数，默认 **`300`**。
+- **`HARNESS_USER_WASM_ALERT_MIN_EVENTS`**：触发阈值前的最小样本量，默认 **`5`**。
+- **`HARNESS_ALERT_WEBHOOK_URL`**：可选；触发/恢复时异步 POST 告警 JSON，失败仅记录日志。
+- **`HARNESS_ALERT_OPS_USER_ID`**：可选；通知中心接收人 UUID，缺省使用 nil UUID 作为系统操作员哨兵。
+
+告警排障步骤与 SQL / 日志查询模板见 [`docs/plans/harness-wasm-alert-runbook.md`](../docs/plans/harness-wasm-alert-runbook.md)。
 
 技能 Markdown（只读，Bearer JWT）：
 

@@ -405,7 +405,7 @@ mod tests {
         ) {
             let scores_json = serde_json::to_value(&dim_scores).unwrap();
             let result = pass_threshold_met(overall_score, Some(&scores_json));
-            let expected = overall_score.map_or(false, |s| s >= 6)
+            let expected = overall_score.is_some_and(|s| s >= 6)
                 && dim_scores.values().all(|&v| v > 3);
             prop_assert_eq!(result, expected);
         }

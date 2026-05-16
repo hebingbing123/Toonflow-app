@@ -47,6 +47,16 @@ pub async fn handle_harness_tool_invoke(
         return;
     }
     let args = p.arguments.unwrap_or_else(|| json!({}));
+
+    let span = tracing::info_span!(
+        "harness.tool.invoke",
+        tool_name = name,
+        user_id = %ctx.user_id,
+        workspace_id = ?ctx.workspace_id,
+        request_id = request_id.unwrap_or("")
+    );
+    let _tool_enter = span.enter();
+
     match invoke::invoke_tool_async(ctx, name, &args).await {
         Ok(result) => {
             // Successful tool invocations answer with the same raw WS envelope family;

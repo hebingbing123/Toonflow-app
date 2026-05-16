@@ -59,7 +59,14 @@ jobs:
         run: |
           set -euo pipefail
           cd backend
-          cargo test -j 1 -- --test-threads=1
+          cargo test -p toonflow-server --lib -j 1 -- --test-threads=1
+          shopt -s nullglob
+          for test_rs in tests/*.rs; do
+            name=$(basename "$test_rs" .rs)
+            echo "==> integration test crate: $name"
+            cargo test -p toonflow-server --test "$name" -j 1 -- --test-threads=1
+          done
+          cargo test -p toonflow-server --doc -j 1 -- --test-threads=1
 
   frontend-flutter:
     name: Frontend Flutter

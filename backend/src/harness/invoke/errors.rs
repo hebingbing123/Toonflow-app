@@ -16,6 +16,10 @@ pub enum InvokeError {
     IsolationFailed(String),
     /// WASM interpreter failure (`wasm.probe`).
     WasmFailed(String),
+    /// User WASM wall-clock timeout (`wasm.user.probe`).
+    WasmTimeout,
+    /// Owner-scoped WASM row missing or revoked (`wasm.user.probe`).
+    NotFound(String),
     /// Postgres-backed domain tools require a configured pool.
     DatabaseUnavailable,
     /// Domain tools require project/script context and/or arguments.
@@ -54,6 +58,8 @@ impl InvokeError {
             InvokeError::SkillUnavailable => "skill_unavailable",
             InvokeError::IsolationFailed(_) => "isolation_failed",
             InvokeError::WasmFailed(_) => "wasm_failed",
+            InvokeError::WasmTimeout => "wasm_timeout",
+            InvokeError::NotFound(_) => "not_found",
             InvokeError::DatabaseUnavailable => "database_error",
             InvokeError::MissingContext(_) => "invalid_state",
             InvokeError::DatabaseError(_) => "database_error",
@@ -75,6 +81,8 @@ impl InvokeError {
             }
             InvokeError::IsolationFailed(m) => m.clone(),
             InvokeError::WasmFailed(m) => m.clone(),
+            InvokeError::WasmTimeout => "user wasm invoke timed out".into(),
+            InvokeError::NotFound(m) => m.clone(),
             InvokeError::DatabaseUnavailable => "DATABASE_URL not configured".into(),
             InvokeError::MissingContext(m) => m.clone(),
             InvokeError::DatabaseError(m) => m.clone(),
