@@ -596,7 +596,7 @@ This checklist validates the **workspace-scope billing migration** in staging be
 - [ ] **Alerts configured**:
   - [ ] `billing_webhook_dual_write_mismatch_total > 0`
   - [ ] `quota_denied_total{scope=workspace}` spike (>2x baseline)
-  - [ ] `workspace_billing_reconciliation_errors_total > 10/day`
+  - [ ] `billing_reconciliation_mismatch_total{field=...} > 10/day`
 
 ### 9.3 Team Readiness
 

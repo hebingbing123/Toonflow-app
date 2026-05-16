@@ -71,7 +71,7 @@ Before cutover, ensure ops team understands:
   - [ ] `billing_webhook_dual_write_mismatch_total`
   - [ ] `quota_denied_total{scope=user|workspace}`
   - [ ] `me_v2_requests_total`
-  - [ ] `workspace_billing_reconciliation_errors_total`
+  - [ ] `billing_reconciliation_mismatch_total{field=...}`
 
 #### Validation Queries
 
@@ -392,7 +392,7 @@ See **[Rollback Runbook](#rollback-runbook)** below.
 |--------|-----------|--------|
 | `billing_webhook_dual_write_mismatch_total` | > 0 | Investigate within 1 hour |
 | `quota_denied_total{scope=workspace}` spike | > 2x baseline | Check workspace quota config |
-| `workspace_billing_reconciliation_errors_total` | > 10/day | Review reconciliation job logs |
+| `billing_reconciliation_mismatch_total{field=...}` | > 10/day | Review reconciliation job logs |
 | `me_v2_requests_total` | Track adoption | Inform rollout pacing |
 
 ### Dashboards
