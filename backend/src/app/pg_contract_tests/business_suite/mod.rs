@@ -2,6 +2,7 @@ mod art_styles_base64_cover_roundtrip;
 mod art_styles_crud_roundtrip;
 mod billing_webhook_dual_write_roundtrip;
 mod billing_webhook_events_roundtrip;
+mod job_workspace_attribution_roundtrip;
 mod jobs_rest_roundtrip;
 mod me_current_workspace_switch_roundtrip;
 mod me_profile_subscription_and_jobs_today_roundtrip;
