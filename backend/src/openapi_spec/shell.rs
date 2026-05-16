@@ -1,0 +1,131 @@
+//! OpenAPI document shell: `info`, `servers`, `tags`, and `components.securitySchemes` only.
+//!
+//! Reusable HTTP schemas are registered via domain `OpenApi` merges (see [`super::combined_openapi`]).
+
+use utoipa::openapi::{
+    security::{ApiKey, ApiKeyValue, HttpAuthScheme, HttpBuilder, SecurityScheme},
+    ComponentsBuilder, InfoBuilder, OpenApi, Paths, ServerBuilder, Tag,
+};
+
+pub(super) fn openapi_shell() -> OpenApi {
+    let mut api = OpenApi::new(
+        InfoBuilder::new()
+            .title("Toonflow API")
+            .version("1.0.0")
+            .description(Some(
+                "HTTP under `/api/v1` (use tags below). Typical calls use `Authorization: Bearer <Supabase access_token>`. Settings can also mint user API keys, and authenticated product routes accept `X-API-Key: tfk_...` for server-to-server automation.",
+            ))
+            .build(),
+        Paths::new(),
+    );
+
+    api.servers = Some(vec![ServerBuilder::new()
+        .url("http://127.0.0.1:8666")
+        .description(Some("Local dev (default `PORT`; override with env)"))
+        .build()]);
+
+    api.tags = Some(vec![
+        tag(
+            "system",
+            "Health, readiness, and lightweight probes (incl. Electron-era test-route parity)",
+        ),
+        tag("session", "Auth probe (Supabase JWT)"),
+        tag("projects", "User-owned projects (Postgres + RLS)"),
+        tag(
+            "assets",
+            "Script-linked assets per project (`app_asset`, `app_script_asset`; Postgres + RLS); corner-scape listing for Electron-era UI parity",
+        ),
+        tag("scripts", "Scripts under owned projects (Postgres + RLS)"),
+        tag(
+            "storyboards",
+            "Storyboards under owned scripts (Postgres + RLS)",
+        ),
+        tag(
+            "production",
+            "Production workbench over Postgres-backed storyboards, assets, edit-image flow, and video routes",
+        ),
+        tag(
+            "novels",
+            "Novel source chapters per project (`app_novel`; Postgres + RLS)",
+        ),
+        tag(
+            "art_styles",
+            "Per-user art style presets (`app_art_style`; Postgres + RLS); Electron `o_artStyle` subset with local base64 cover persistence instead of OSS upload",
+        ),
+        tag(
+            "skills",
+            "Markdown skills under `backend/data/skills` (read; PUT overwrite; POST create; DELETE remove one file); visual manual (`GET`/`POST /api/v1/visual-manual`) from bundled `art_skills`",
+        ),
+        tag(
+            "websocket",
+            "Real-time JSON on `GET /api/v1/ws` (Upgrade); full wire protocol is the **description** of that operation below",
+        ),
+        tag(
+            "harness",
+            "Harness tool catalog over HTTP; tool execution over WebSocket (`harness.tool.invoke` — see **`GET /api/v1/ws`** in this spec)",
+        ),
+        tag(
+            "jobs",
+            "Long-running generation jobs (`app_generation_job`; Postgres + RLS)",
+        ),
+        tag(
+            "usage",
+            "Per-user usage counts (`app_usage_event`; Postgres + RLS)",
+        ),
+        tag(
+            "prompts",
+            "Per-user prompt templates (`app_user_prompt`; Postgres + RLS); Electron `/api/setting/promptManage/getPrompt` / `updatePrompt`",
+        ),
+        tag(
+            "models",
+            "Static vendor/model catalog (`backend/data/models_catalog.json`); Electron `modelSelect` parity without `o_vendorConfig`",
+        ),
+        tag(
+            "agents",
+            "Per-user agent memory (`app_agent_memory`; Postgres + RLS); Electron `/api/agents/getMemory` / `clearMemory` parity",
+        ),
+        tag(
+            "webhooks",
+            "Server-to-server billing webhooks (HMAC); not browser CORS flows",
+        ),
+        tag(
+            "settings",
+            "Server-backed settings without SQLite `o_setting` (env-driven, in-memory snapshots, or future Postgres)",
+        ),
+        tag(
+            "publish",
+            "Short-video publish profiles, drafts, platform targets, and publish jobs (`app_publish_*`; Postgres + RLS)",
+        ),
+        tag(
+            "search",
+            "全局搜索：跨项目、剧本、资产的全文搜索（PostgreSQL tsvector + GIN 索引）",
+        ),
+    ]);
+
+    let bearer = HttpBuilder::new()
+        .scheme(HttpAuthScheme::Bearer)
+        .bearer_format("JWT")
+        .description(Some(
+            "Supabase-issued access token (`Authorization: Bearer <jwt>`).\n\n\
+             Rust validates signature/claims per Supabase project settings (see architecture plan 4.2).\n",
+        ))
+        .build();
+
+    api.components = Some(
+        ComponentsBuilder::new()
+            .security_scheme("bearerAuth", SecurityScheme::Http(bearer))
+            .security_scheme(
+                "apiKeyAuth",
+                SecurityScheme::ApiKey(ApiKey::Header(ApiKeyValue::new("X-API-Key"))),
+            )
+            .build(),
+    );
+
+    api
+}
+
+fn tag(name: &str, description: &str) -> Tag {
+    let mut t = Tag::new(name);
+    t.description = Some(description.to_string());
+    t
+}

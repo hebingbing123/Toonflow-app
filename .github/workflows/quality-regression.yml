@@ -1,0 +1,68 @@
+# 暂停定时触发：将下方 schedule 触发器注释掉即可；workflow_dispatch 保持可用
+# To disable scheduled runs: comment out the `schedule` block below.
+# workflow_dispatch remains available for manual triggering at any time.
+name: Quality Regression
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 7 * * 1'  # UTC 每周一 07:00
+
+concurrency:
+  group: quality-regression-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: backend
+
+      - name: Start local Supabase and apply migrations
+        run: |
+          supabase db start
+          supabase db reset --yes --no-seed
+
+      - name: Export DATABASE_URL and SUPABASE_JWT_SECRET
+        run: |
+          eval "$(supabase status -o env)"
+          echo "DATABASE_URL=${DB_URL}" >> $GITHUB_ENV
+          echo "SUPABASE_JWT_SECRET=${JWT_SECRET}" >> $GITHUB_ENV
+
+      - name: Run quality regression checks
+        working-directory: backend
+        run: |
+          set -euo pipefail
+          fixture_dir="../scripts/fixtures/quality"
+          if [ ! -d "$fixture_dir" ]; then
+            echo "No fixture directory found at $fixture_dir, skipping regression checks."
+            exit 0
+          fi
+          shopt -s nullglob
+          fixtures=("$fixture_dir"/*.json)
+          if [ ${#fixtures[@]} -eq 0 ]; then
+            echo "No fixture files found in $fixture_dir, skipping regression checks."
+            exit 0
+          fi
+          overall_exit=0
+          for f in "${fixtures[@]}"; do
+            echo "Checking fixture: $f"
+            if ! cargo run --bin quality-regression-check -- --fixture "$f"; then
+              echo "REGRESSION DETECTED in $f (regression_rate > 10%)"
+              overall_exit=1
+            fi
+          done
+          exit $overall_exit

@@ -36,6 +36,7 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
 build/*
 
+# Electron+Node runtime (removed from repo; ignore if still present locally)
 data/serve/
 
 upload/*
@@ -56,3 +57,40 @@ database.d.ts
 .devtools
 data/oss/*
 data/test.sqlite
+
+# Rust (backend/)
+backend/target/
+
+# Flutter (frontend/)
+frontend/.dart_tool/
+frontend/build/
+frontend/.flutter-plugins-dependencies
+frontend/.flutter-plugins
+frontend/*.iml
+frontend/.packages
+
+# Local-only Flutter tooling output (optional)
+frontend/.l10n_batch/
+
+# Cursor IDE (local)
+.cursor/
+
+# Local automation scripts (machine-specific)
+auto-refactor.sh
+cursorpro_watch_click.applescript
+.tmp_argtest*.applescript
+.tmp/workspace-rls-*/
+.tmp/workspace-rls-*
+
+# Optional local agent / Codex installer bundle under scripts/ (tracked files such as
+# scripts/refactor-check.sh and Electron glue remain in Git; see package.json "refactor:check").
+scripts/ci/
+scripts/codemaps/
+scripts/codex-git-hooks/
+scripts/codex/
+scripts/hooks/
+scripts/lib/
+scripts/*.js
+scripts/orchestrate-codex-worker.sh
+scripts/release.sh
+scripts/sync-ecc-to-codex.sh

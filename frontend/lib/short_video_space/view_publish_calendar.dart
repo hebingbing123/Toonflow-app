@@ -1,0 +1,42 @@
+part of 'view.dart';
+
+/// Calendar scheduling UI widget
+class _PublishCalendarPanel extends StatelessWidget {
+  const _PublishCalendarPanel({
+    required this.publishPanelUi,
+  });
+
+  final ShortVideoPublishPanelUi publishPanelUi;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final outline = theme.colorScheme.outline;
+    final l10n = resolveAppLocalizationsForErrors(context);
+    
+    if (!publishPanelUi.visible ||
+        publishPanelUi.loading ||
+        publishPanelUi.unavailable ||
+        (publishPanelUi.publishScheduleCalendarDrafts?.isEmpty ?? true) ||
+        publishPanelUi.onPublishCalendarDayBulkSchedule == null) {
+      return const SizedBox.shrink();
+    }
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 14),
+        Text(
+          l10n.shortVideoSpaceScheduleCalendar,
+          style: theme.textTheme.labelSmall?.copyWith(color: outline),
+        ),
+        const SizedBox(height: 8),
+        PublishScheduleCalendar(
+          drafts: publishPanelUi.publishScheduleCalendarDrafts ?? [],
+          busy: publishPanelUi.publishBusy,
+          onDayTap: publishPanelUi.onPublishCalendarDayBulkSchedule!,
+        ),
+      ],
+    );
+  }
+}

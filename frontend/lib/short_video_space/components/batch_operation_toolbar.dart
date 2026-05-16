@@ -1,0 +1,508 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+import '../../rust_api.dart';
+
+/// Batch operation toolbar component for short video assembly
+/// 
+/// Provides batch selection and batch operation functionality:
+/// - Multi-select checkboxes for each shot
+/// - Select all / Deselect all functionality
+/// - Selected count indicator
+/// - Range selection (Shift+click)
+/// - Batch operation buttons (enable/disable/duration/replace/voiceover)
+/// - 1000ms throttling for batch operations to prevent rapid repeated calls
+class BatchOperationToolbar extends StatefulWidget {
+  const BatchOperationToolbar({
+    super.key,
+    required this.totalCount,
+    required this.selectedIds,
+    required this.onSelectionChanged,
+    required this.onSelectAll,
+    required this.onDeselectAll,
+    required this.onBatchEnable,
+    required this.onBatchDisable,
+    required this.onBatchUpdateDuration,
+    required this.onBatchReplace,
+    required this.onBatchGenerateVoiceover,
+    this.isOperationInProgress = false,
+    this.nowProvider = DateTime.now,
+  });
+
+  /// Total number of shots
+  final int totalCount;
+
+  /// Set of selected shot IDs
+  final Set<int> selectedIds;
+
+  /// Callback when selection changes
+  final ValueChanged<Set<int>> onSelectionChanged;
+
+  /// Callback for select all
+  final VoidCallback onSelectAll;
+
+  /// Callback for deselect all
+  final VoidCallback onDeselectAll;
+
+  /// Callback for batch enable
+  final VoidCallback onBatchEnable;
+
+  /// Callback for batch disable
+  final VoidCallback onBatchDisable;
+
+  /// Callback for batch update duration
+  final VoidCallback onBatchUpdateDuration;
+
+  /// Callback for batch replace
+  final VoidCallback onBatchReplace;
+
+  /// Callback for batch generate voiceover
+  final VoidCallback onBatchGenerateVoiceover;
+
+  /// Whether a batch operation is currently in progress
+  final bool isOperationInProgress;
+
+  /// Clock injection for deterministic throttling in tests.
+  final DateTime Function() nowProvider;
+
+  @override
+  State<BatchOperationToolbar> createState() => _BatchOperationToolbarState();
+}
+
+class _BatchOperationToolbarState extends State<BatchOperationToolbar> {
+  DateTime? _lastBatchOperationTime;
+  
+  /// Throttle batch operations to prevent rapid repeated calls
+  /// Returns true if the operation should proceed, false if throttled
+  bool _shouldAllowBatchOperation() {
+    final now = widget.nowProvider();
+    if (_lastBatchOperationTime == null) {
+      _lastBatchOperationTime = now;
+      return true;
+    }
+    
+    final timeSinceLastOperation = now.difference(_lastBatchOperationTime!);
+    if (timeSinceLastOperation.inMilliseconds >= 1000) {
+      _lastBatchOperationTime = now;
+      return true;
+    }
+    
+    final l10n = resolveAppLocalizationsForErrors(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(l10n.shortVideoBatchThrottleMessage),
+        duration: const Duration(milliseconds: 1500),
+      ),
+    );
+    return false;
+  }
+  
+  void _handleBatchOperation(VoidCallback operation) {
+    if (!widget.isOperationInProgress && _shouldAllowBatchOperation()) {
+      operation();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = resolveAppLocalizationsForErrors(context);
+    final hasSelection = widget.selectedIds.isNotEmpty;
+    final isAllSelected = widget.selectedIds.length == widget.totalCount && widget.totalCount > 0;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        border: Border(
+          bottom: BorderSide(
+            color: Theme.of(context).colorScheme.outlineVariant,
+            width: 1,
+          ),
+        ),
+      ),
+      child: Row(
+        children: [
+          // Select all checkbox
+          Checkbox(
+            value: isAllSelected,
+            tristate: true,
+            onChanged: widget.isOperationInProgress
+                ? null
+                : (value) {
+                    if (value == true) {
+                      widget.onSelectAll();
+                    } else {
+                      widget.onDeselectAll();
+                    }
+                  },
+          ),
+          const SizedBox(width: 8),
+          
+          // Select all / Deselect all button
+          TextButton.icon(
+            onPressed: widget.isOperationInProgress
+                ? null
+                : () {
+                    if (isAllSelected) {
+                      widget.onDeselectAll();
+                    } else {
+                      widget.onSelectAll();
+                    }
+                  },
+            icon: Icon(isAllSelected ? Icons.deselect : Icons.select_all),
+            label: Text(
+              isAllSelected ? l10n.shortVideoBatchDeselectAll : l10n.shortVideoBatchSelectAll,
+            ),
+          ),
+          
+          const SizedBox(width: 16),
+          
+          // Selected count indicator
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: hasSelection
+                  ? Theme.of(context).colorScheme.primaryContainer
+                  : Theme.of(context).colorScheme.surfaceContainerHigh,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Text(
+              l10n.shortVideoBatchSelectedCount(
+                widget.selectedIds.length,
+                widget.totalCount,
+              ),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                    color: hasSelection
+                        ? Theme.of(context).colorScheme.onPrimaryContainer
+                        : Theme.of(context).colorScheme.onSurface,
+                  ),
+            ),
+          ),
+          
+          const SizedBox(width: 16),
+          
+          // Batch operation buttons (only show when items are selected)
+          if (hasSelection) ...[
+            const VerticalDivider(),
+            const SizedBox(width: 8),
+            
+            Expanded(
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  // Batch enable
+                  FilledButton.tonalIcon(
+                    onPressed: widget.isOperationInProgress 
+                        ? null 
+                        : () => _handleBatchOperation(widget.onBatchEnable),
+                    icon: const Icon(Icons.play_arrow, size: 18),
+                    label: Text(l10n.shortVideoBatchOpEnable),
+                  ),
+                  
+                  // Batch disable
+                  OutlinedButton.icon(
+                    onPressed: widget.isOperationInProgress 
+                        ? null 
+                        : () => _handleBatchOperation(widget.onBatchDisable),
+                    icon: const Icon(Icons.pause, size: 18),
+                    label: Text(l10n.shortVideoBatchOpDisable),
+                  ),
+                  
+                  // Batch update duration
+                  OutlinedButton.icon(
+                    onPressed: widget.isOperationInProgress 
+                        ? null 
+                        : () => _handleBatchOperation(widget.onBatchUpdateDuration),
+                    icon: const Icon(Icons.timer, size: 18),
+                    label: Text(l10n.shortVideoBatchOpDurationAlign),
+                  ),
+                  
+                  // Batch replace
+                  OutlinedButton.icon(
+                    onPressed: widget.isOperationInProgress 
+                        ? null 
+                        : () => _handleBatchOperation(widget.onBatchReplace),
+                    icon: const Icon(Icons.swap_horiz, size: 18),
+                    label: Text(l10n.shortVideoBatchOpReplace),
+                  ),
+                  
+                  // Batch generate voiceover
+                  OutlinedButton.icon(
+                    onPressed: widget.isOperationInProgress 
+                        ? null 
+                        : () => _handleBatchOperation(widget.onBatchGenerateVoiceover),
+                    icon: const Icon(Icons.record_voice_over, size: 18),
+                    label: Text(l10n.shortVideoBatchOpVoiceover),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          
+          // Show loading indicator when operation is in progress
+          if (widget.isOperationInProgress) ...[
+            const SizedBox(width: 16),
+            const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Shot selection checkbox widget
+/// 
+/// Provides individual shot selection with Shift+click range selection support
+class ShotSelectionCheckbox extends StatefulWidget {
+  const ShotSelectionCheckbox({
+    super.key,
+    required this.shotId,
+    required this.isSelected,
+    required this.onSelectionChanged,
+    required this.onRangeSelection,
+    this.isEnabled = true,
+  });
+
+  /// Shot ID
+  final int shotId;
+
+  /// Whether this shot is selected
+  final bool isSelected;
+
+  /// Callback when selection changes
+  final ValueChanged<bool> onSelectionChanged;
+
+  /// Callback for range selection (Shift+click)
+  /// Parameters: (shotId, isShiftPressed)
+  final Function(int, bool) onRangeSelection;
+
+  /// Whether the checkbox is enabled
+  final bool isEnabled;
+
+  @override
+  State<ShotSelectionCheckbox> createState() => _ShotSelectionCheckboxState();
+}
+
+class _ShotSelectionCheckboxState extends State<ShotSelectionCheckbox> {
+  bool _isShiftPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Focus(
+      autofocus: true,
+      onKeyEvent: (node, event) {
+        if (event.logicalKey == LogicalKeyboardKey.shiftLeft ||
+            event.logicalKey == LogicalKeyboardKey.shiftRight) {
+          final isPressed = event is KeyDownEvent ||
+              (event is KeyRepeatEvent && _isShiftPressed);
+          if (_isShiftPressed != isPressed) {
+            setState(() {
+              _isShiftPressed = isPressed;
+            });
+          }
+          return KeyEventResult.ignored;
+        }
+
+        // Handle keyboard events for accessibility
+        if (event is KeyDownEvent) {
+          if (event.logicalKey == LogicalKeyboardKey.space) {
+            if (widget.isEnabled) {
+              widget.onSelectionChanged(!widget.isSelected);
+            }
+            return KeyEventResult.handled;
+          }
+        }
+        return KeyEventResult.ignored;
+      },
+      child: GestureDetector(
+        onTap: widget.isEnabled
+            ? () {
+                // Check if Shift key is pressed
+                final isShiftPressed =
+                    _isShiftPressed || HardwareKeyboard.instance.isShiftPressed;
+                if (isShiftPressed) {
+                  widget.onRangeSelection(widget.shotId, true);
+                } else {
+                  widget.onSelectionChanged(!widget.isSelected);
+                }
+              }
+            : null,
+        child: Checkbox(
+          value: widget.isSelected,
+          onChanged: widget.isEnabled
+              ? (value) {
+                  if (value != null) {
+                    widget.onSelectionChanged(value);
+                  }
+                }
+              : null,
+        ),
+      ),
+    );
+  }
+}
+
+/// Batch operation progress dialog
+/// 
+/// Shows progress for batch operations with success/failure statistics
+class BatchOperationProgressDialog extends StatelessWidget {
+  const BatchOperationProgressDialog({
+    super.key,
+    required this.title,
+    required this.total,
+    required this.completed,
+    required this.successful,
+    required this.failed,
+    this.failedItems = const [],
+    this.onRetryFailed,
+    this.onCancel,
+    this.isComplete = false,
+  });
+
+  /// Dialog title
+  final String title;
+
+  /// Total number of operations
+  final int total;
+
+  /// Number of completed operations
+  final int completed;
+
+  /// Number of successful operations
+  final int successful;
+
+  /// Number of failed operations
+  final int failed;
+
+  /// List of failed items with error messages
+  final List<BatchOperationFailedItem> failedItems;
+
+  /// Callback to retry failed items
+  final VoidCallback? onRetryFailed;
+
+  /// Callback to cancel operation
+  final VoidCallback? onCancel;
+
+  /// Whether the operation is complete
+  final bool isComplete;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = resolveAppLocalizationsForErrors(context);
+    final progress = total > 0 ? completed / total : 0.0;
+    final hasFailures = failedItems.isNotEmpty;
+
+    return AlertDialog(
+      title: Text(title),
+      content: SizedBox(
+        width: 500,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Progress bar
+            LinearProgressIndicator(
+              value: progress,
+              minHeight: 8,
+            ),
+            const SizedBox(height: 16),
+            
+            // Statistics
+            Text(
+              l10n.shortVideoBatchProgressCompletedTotal(completed, total),
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(
+                  Icons.check_circle,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(l10n.shortVideoBatchProgressSucceededLabel(successful)),
+                const SizedBox(width: 24),
+                Icon(
+                  Icons.error,
+                  color: Theme.of(context).colorScheme.error,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(l10n.shortVideoBatchProgressFailedLabel(failed)),
+              ],
+            ),
+            
+            // Failed items list
+            if (hasFailures) ...[
+              const SizedBox(height: 16),
+              const Divider(),
+              const SizedBox(height: 8),
+              Text(
+                l10n.shortVideoBatchProgressFailedHeading,
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              const SizedBox(height: 8),
+              Flexible(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: failedItems.length,
+                  itemBuilder: (context, index) {
+                    final item = failedItems[index];
+                    return ListTile(
+                      dense: true,
+                      leading: Icon(
+                        Icons.error_outline,
+                        color: Theme.of(context).colorScheme.error,
+                        size: 20,
+                      ),
+                      title: Text(l10n.shortVideoBatchProgressStoryboardLine(item.shotId)),
+                      subtitle: Text(
+                        item.errorMessage,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+      actions: [
+        if (!isComplete && onCancel != null)
+          TextButton(
+            onPressed: onCancel,
+            child: Text(l10n.shortVideoBatchProgressCancel),
+          ),
+        if (isComplete && hasFailures && onRetryFailed != null)
+          FilledButton.tonal(
+            onPressed: onRetryFailed,
+            child: Text(l10n.shortVideoBatchProgressRetryFailed),
+          ),
+        if (isComplete)
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.shortVideoBatchProgressClose),
+          ),
+      ],
+    );
+  }
+}
+
+/// Failed item in batch operation
+class BatchOperationFailedItem {
+  const BatchOperationFailedItem({
+    required this.shotId,
+    required this.errorMessage,
+  });
+
+  final int shotId;
+  final String errorMessage;
+}

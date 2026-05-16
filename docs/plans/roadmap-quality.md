@@ -1,0 +1,75 @@
+# 路线图：质量门槛与评测
+
+母文档：[`harness-rust-flutter.md`](./harness-rust-flutter.md) §6、YAML `quality-bar`。
+
+相关：[`.kiro/specs/ai-drama-quality-optimization/`](../../.kiro/specs/ai-drama-quality-optimization/)（目录存在则 **必做** 与本路线图对齐迭代）。
+
+## 基线（当前分支）
+
+| 条目 | 状态 | 说明 |
+|------|------|------|
+| `app_quality_review` + REST（列表/详情/统计/分环节） | `baseline_done` | YAML `quality-bar` |
+
+## 下一阶段
+
+| 内容 | 状态 | 备注 |
+|------|------|------|
+| 人工抽检量表固化（维度、阈值、抽样批次） | `next` | **必做**；母文档 §6 |
+| Bad case 集版本化与发版前回归门禁 | `next` | **必做**；须挂钩 CI workflow |
+| 分环节通过率面板（产品化，不仅是 API） | `tracked` | Flutter 质量页 / 工作台已接入统计、阶段分布、scope 榜单、坏例热点、token 效率等聚合面；后续主要收口图表与回归 |
+| Harness trace ↔ 评测样本关联（skill 版本、模型参数） | `next` | **必做**；依赖 [`roadmap-backend-harness.md`](./roadmap-backend-harness.md) WP-F |
+
+## 验收
+
+- API 变更同步 OpenAPI；前端契约与 `rust_api` 一致性由门禁覆盖。
+
+## 执行计划与工作包
+
+> **维护约定**：与 [`harness-rust-flutter.md`](./harness-rust-flutter.md) 及上文表格一致；落地时在同一竖切或跟进 PR 中更新对应 WP。与实现冲突处以代码与 OpenAPI 为准。
+>
+> **全栈**：凡影响用户/运营可见行为的工作包，须 **同里程碑** 交付 **Rust + OpenAPI/WS（若适用）+ `frontend/`（含 `rust_api` 与相关 UI/错误态）**；纯文档/运维且无 API 的 WP 可在「目标」首行标 **`(ops-only)`**。约定见 [**`full-stack-delivery-covenant.md`**](./full-stack-delivery-covenant.md)。
+
+### WP-A：人工抽检量表固化
+
+| 项 | 内容 |
+|----|------|
+| **目标** | 评审员按固定维度打分（画面/叙事/对口型等），阈值与「放行/打回」规则书面化，减少主观漂移。 |
+| **依赖** | **必做**：产品与编导对齐维度；业务涉及 UGC **必做**：法务抽检维度签字。 |
+| **PR 切片** | （1）书面量表（本文档附录或 `docs/plans/` 专页）；（2）**必做**：结构化——扩展 `app_quality_review`（JSON schema / 列）+ migration + API 校验；（3）Flutter 表单与后端对齐。 |
+| **触点** | `backend/src/prompting/quality/handlers/`；`backend/src/prompting/quality/tests.rs`；OpenAPI；Flutter 质量工作台表单。 |
+| **测试** | **必做**：`cargo test` quality；**必做**：关键表单/widget 最小测试。 |
+| **回滚** | 恢复旧表单；DB 新列可留空 nullable。 |
+
+### WP-B：Bad case 集版本化 + 发版前回归
+
+| 项 | 内容 |
+|----|------|
+| **目标** | 固定一组 `quality_review_id` 或导出 fixture，发版前对比通过率或人工 spot-check。 |
+| **依赖** | WP-A 或现有 `bad_case` 字段语义稳定。 |
+| **PR 切片** | （1）**必做**：导出工具（`scripts/` 或 `backend` 只读子命令）；（2）**必做**：`.github/workflows/` 定时或 `workflow_dispatch` job；（3）**必做**：golden 集更新说明与 CODEOWNER/review 规则。 |
+| **CI 现状（增量）** | PR 门禁：`ci.yml` → `supabase-migrations` 已对本地 Supabase 跑至少一条 ignored 契约（`settings_workspace_shared_audit_export` 名过滤）。**补充**：**`.github/workflows/pg-contract-subset.yml`** — 每周 + `workflow_dispatch`，对同一本地栈再跑小集合（项目创建/统计/删除、`promote_staging`、`art_styles_crud`、同上 settings 过滤）；托管库跑法见该 workflow 文件头注释中的可选 secrets 名（默认无需 secrets）。 |
+| **触点** | `backend/src/prompting/quality/handlers/bad_case_frequency.rs`；CI `ci.yml`。 |
+| **测试** | CI job 失败时输出 diff（哪些 id 退化）。 |
+| **回滚** | 仅故障或模板错误时暂停 job；**正常运行须保持 workflow 启用**，避免「必做门禁」名存实亡。 |
+
+### WP-C：分环节通过率产品化面板
+
+| 项 | 内容 |
+|----|------|
+| **目标** | Flutter 质量工作台与主质量页展示趋势与聚合（按 stage、按周、按 scope），不仅列表 API。当前主质量页已补运营看板入口：一键刷新质量统计、阶段通过率 / 等级分布、scope 榜单、坏例热点、token 效率，并支持复制看板摘要；后端已新增 `GET /api/v1/quality/dashboard` 单接口读模型，并进一步落地 `app_quality_dashboard_review_fact` 物化视图 + `POST /api/v1/quality/dashboard` refresh 通路，把主面板从多路聚合请求收口为“刷新底层快照 / 读取聚合面板”的两段式读模型链路；同时 `GET` 响应已补 freshness meta（`refreshedAt` / `ageSeconds` / `stale` / source max created_at），`POST` 也支持 `onlyIfStale=true`，让运营知道当前看板是不是陈旧、是否需要刷新，并避免无意义重算。 |
+| **依赖** | 若聚合不足，**必做**先扩 REST（与本 WP 同一里程碑收口）。 |
+| **PR 切片** | （1）`rust_api` 模型与 client；（2）**必做**：图表库选型并落地趋势视图（stage/周）；（3）缓存/防抖。 |
+| **触点** | `frontend/lib/rust_api/`；质量相关 `*_section` / dialog；`backend/src/prompting/quality/handlers/`。 |
+| **测试** | `flutter test`；golden 或 smoke。 |
+| **回滚** | UI flag 隐藏新卡片。 |
+
+### WP-D：Harness trace ↔ 评测样本关联
+
+| 项 | 内容 |
+|----|------|
+| **目标** | 一条 quality review 可关联 `request_id`、session id、skill 版本、模型参数，便于回归对比。 |
+| **依赖** | [`roadmap-backend-harness.md`](./roadmap-backend-harness.md) WP-F（trace id **必做**贯通）。 |
+| **PR 切片** | （1）**必做**：结构化关联字段（DB/API；可为 nullable 以兼容旧客户端）；（2）**必做**：Flutter 创建评审时自动填充最近 harness 元数据；（3）**必做**：隐私策略（正文 hash / 不落库敏感段）。 |
+| **触点** | `app_quality_review` migration；handlers；`frontend/lib/agent_workspaces/`（读取最近 WS 元数据）。 |
+| **测试** | PG 契约 roundtrip；端到端手工清单。 |
+| **回滚** | 字段保持 nullable；旧客户端忽略新字段；不得删除已写入关联数据而无迁移。 |

@@ -1,0 +1,407 @@
+part of '../section.dart';
+
+/// Voiceover settings dialog for configuring TTS parameters
+///
+/// This dialog allows users to:
+/// - Select TTS provider (OpenAI/Azure/Google)
+/// - Choose voice ID
+/// - Adjust emotion parameters
+/// - Configure speech speed
+///
+/// **Validates: Requirements 4**
+extension _ShortVideoSpaceSectionVoiceoverSettingsDialog
+    on _ShortVideoSpaceSectionState {
+  /// Opens the voiceover settings dialog
+  ///
+  /// Returns a [VoiceoverSettings] object if user confirms, null if cancelled
+  // ignore: unused_element
+  Future<VoiceoverSettings?> _openVoiceoverSettingsDialog({
+    required BuildContext context,
+    VoiceoverSettings? initialSettings,
+  }) async {
+    return showDialog<VoiceoverSettings>(
+      context: context,
+      builder: (dialogContext) {
+        return VoiceoverSettingsDialog(initialSettings: initialSettings);
+      },
+    );
+  }
+}
+
+const List<String> kSupportedVoiceoverProviders = <String>[
+  'openai',
+  'azure',
+  'google',
+];
+
+List<String> getAvailableVoiceoverVoices(String provider) {
+  switch (provider) {
+    case 'openai':
+      return ['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer'];
+    case 'azure':
+      return [
+        'zh-CN-XiaoxiaoNeural',
+        'zh-CN-YunxiNeural',
+        'zh-CN-YunjianNeural',
+        'zh-CN-XiaoyiNeural',
+        'zh-CN-YunyangNeural',
+      ];
+    case 'google':
+      return [
+        'zh-CN-Standard-A',
+        'zh-CN-Standard-B',
+        'zh-CN-Standard-C',
+        'zh-CN-Standard-D',
+        'zh-CN-Wavenet-A',
+        'zh-CN-Wavenet-B',
+        'zh-CN-Wavenet-C',
+        'zh-CN-Wavenet-D',
+      ];
+    default:
+      return ['alloy'];
+  }
+}
+
+String getVoiceoverDisplayName(String voiceId, AppLocalizations l10n) {
+  final openAIVoices = <String, String>{
+    'alloy': l10n.shortVideoSpaceDialogVoiceoverSettingsVoiceAlloy,
+    'echo': l10n.shortVideoSpaceDialogVoiceoverSettingsVoiceEcho,
+    'fable': l10n.shortVideoSpaceDialogVoiceoverSettingsVoiceFable,
+    'onyx': l10n.shortVideoSpaceDialogVoiceoverSettingsVoiceOnyx,
+    'nova': l10n.shortVideoSpaceDialogVoiceoverSettingsVoiceNova,
+    'shimmer': l10n.shortVideoSpaceDialogVoiceoverSettingsVoiceShimmer,
+  };
+
+  return openAIVoices[voiceId] ?? voiceId;
+}
+
+class VoiceoverSettingsDialog extends StatefulWidget {
+  const VoiceoverSettingsDialog({
+    super.key,
+    this.initialSettings,
+  });
+
+  final VoiceoverSettings? initialSettings;
+
+  @override
+  State<VoiceoverSettingsDialog> createState() =>
+      _VoiceoverSettingsDialogState();
+}
+
+class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
+  late String _selectedProvider;
+  late String _selectedVoiceId;
+  late String _selectedEmotion;
+  late double _selectedSpeed;
+
+  @override
+  void initState() {
+    super.initState();
+    final settings = widget.initialSettings ?? const VoiceoverSettings();
+    _selectedProvider = settings.provider;
+    _selectedVoiceId = settings.voiceId;
+    _selectedEmotion = settings.emotion;
+    _selectedSpeed = settings.speed;
+    _syncVoiceIdWithProvider();
+  }
+
+  void _syncVoiceIdWithProvider() {
+    final availableVoices = getAvailableVoiceoverVoices(_selectedProvider);
+    if (!availableVoices.contains(_selectedVoiceId)) {
+      _selectedVoiceId = availableVoices.first;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final availableVoices = getAvailableVoiceoverVoices(_selectedProvider);
+    final l10n = resolveAppLocalizationsForErrors(context);
+
+    return AlertDialog(
+      title: Text(l10n.shortVideoSpaceDialogVoiceoverSettingsTitle),
+      content: SizedBox(
+        width: 520,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.shortVideoSpaceDialogVoiceoverSettingsProviderLabel,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              DropdownButtonFormField<String>(
+                initialValue: _selectedProvider,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                ),
+                items: [
+                  DropdownMenuItem(
+                    value: 'openai',
+                    child: Text(l10n.shortVideoSpaceDialogVoiceoverSettingsProviderOpenAI),
+                  ),
+                  DropdownMenuItem(
+                    value: 'azure',
+                    child: Text(l10n.shortVideoSpaceDialogVoiceoverSettingsProviderAzure),
+                  ),
+                  DropdownMenuItem(
+                    value: 'google',
+                    child: Text(l10n.shortVideoSpaceDialogVoiceoverSettingsProviderGoogle),
+                  ),
+                ],
+                onChanged: (value) {
+                  if (value == null) {
+                    return;
+                  }
+                  setState(() {
+                    _selectedProvider = value;
+                    _selectedVoiceId =
+                        getAvailableVoiceoverVoices(value).first;
+                  });
+                },
+              ),
+              const SizedBox(height: 16),
+              Text(
+                l10n.shortVideoSpaceDialogVoiceoverSettingsVoiceLabel,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              DropdownButtonFormField<String>(
+                key: ValueKey<String>('voiceover-voice-$_selectedProvider'),
+                initialValue: _selectedVoiceId,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                ),
+                items: availableVoices
+                    .map(
+                      (voice) => DropdownMenuItem(
+                        value: voice,
+                        child: Text(getVoiceoverDisplayName(voice, l10n)),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (value) {
+                  if (value == null) {
+                    return;
+                  }
+                  setState(() {
+                    _selectedVoiceId = value;
+                  });
+                },
+              ),
+              const SizedBox(height: 16),
+              Text(
+                l10n.shortVideoSpaceDialogVoiceoverSettingsEmotionLabel,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              DropdownButtonFormField<String>(
+                initialValue: _selectedEmotion,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                ),
+                items: [
+                  DropdownMenuItem(
+                    value: 'neutral',
+                    child: Text(l10n.shortVideoSpaceDialogVoiceoverSettingsEmotionNeutral),
+                  ),
+                  DropdownMenuItem(
+                    value: 'happy',
+                    child: Text(l10n.shortVideoSpaceDialogVoiceoverSettingsEmotionHappy),
+                  ),
+                  DropdownMenuItem(
+                    value: 'sad',
+                    child: Text(l10n.shortVideoSpaceDialogVoiceoverSettingsEmotionSad),
+                  ),
+                  DropdownMenuItem(
+                    value: 'angry',
+                    child: Text(l10n.shortVideoSpaceDialogVoiceoverSettingsEmotionAngry),
+                  ),
+                ],
+                onChanged: (value) {
+                  if (value == null) {
+                    return;
+                  }
+                  setState(() {
+                    _selectedEmotion = value;
+                  });
+                },
+              ),
+              const SizedBox(height: 16),
+              Text(
+                l10n.shortVideoSpaceDialogVoiceoverSettingsSpeedLabel,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: Slider(
+                      value: _selectedSpeed,
+                      min: 0.5,
+                      max: 2.0,
+                      divisions: 15,
+                      label: '${_selectedSpeed.toStringAsFixed(1)}x',
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedSpeed = value;
+                        });
+                      },
+                    ),
+                  ),
+                  SizedBox(
+                    width: 60,
+                    child: Text(
+                      resolveAppLocalizationsForErrors(context).shortVideoVoiceoverSpeedMultiplier(
+                        _selectedSpeed.toStringAsFixed(1),
+                      ),
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                l10n.shortVideoSpaceDialogVoiceoverSettingsSpeedRange,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      size: 20,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        l10n.shortVideoSpaceDialogVoiceoverSettingsInfoMessage,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
+                            ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l10n.shortVideoSpaceDialogVoiceoverSettingsCancel),
+        ),
+        FilledButton(
+          onPressed: () {
+            Navigator.of(context).pop(
+              VoiceoverSettings(
+                provider: _selectedProvider,
+                voiceId: _selectedVoiceId,
+                emotion: _selectedEmotion,
+                speed: _selectedSpeed,
+              ),
+            );
+          },
+          child: Text(l10n.shortVideoSpaceDialogVoiceoverSettingsSave),
+        ),
+      ],
+    );
+  }
+}
+
+/// Voiceover settings data class
+///
+/// Holds TTS configuration parameters
+class VoiceoverSettings {
+  const VoiceoverSettings({
+    this.provider = 'openai',
+    this.voiceId = 'alloy',
+    this.emotion = 'neutral',
+    this.speed = 1.0,
+  });
+
+  final String provider;
+  final String voiceId;
+  final String emotion;
+  final double speed;
+
+  VoiceoverSettings copyWith({
+    String? provider,
+    String? voiceId,
+    String? emotion,
+    double? speed,
+  }) {
+    return VoiceoverSettings(
+      provider: provider ?? this.provider,
+      voiceId: voiceId ?? this.voiceId,
+      emotion: emotion ?? this.emotion,
+      speed: speed ?? this.speed,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'provider': provider,
+      'voiceId': voiceId,
+      'emotion': emotion,
+      'speed': speed,
+    };
+  }
+
+  factory VoiceoverSettings.fromJson(Map<String, dynamic> json) {
+    return VoiceoverSettings(
+      provider: json['provider'] as String? ?? 'openai',
+      voiceId: json['voiceId'] as String? ?? 'alloy',
+      emotion: json['emotion'] as String? ?? 'neutral',
+      speed: (json['speed'] as num?)?.toDouble() ?? 1.0,
+    );
+  }
+
+  @override
+  String toString() {
+    return 'VoiceoverSettings(provider: $provider, voiceId: $voiceId, '
+        'emotion: $emotion, speed: ${speed.toStringAsFixed(1)}x)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is VoiceoverSettings &&
+        other.provider == provider &&
+        other.voiceId == voiceId &&
+        other.emotion == emotion &&
+        other.speed == speed;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hash(provider, voiceId, emotion, speed);
+  }
+}

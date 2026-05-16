@@ -1,0 +1,393 @@
+import 'package:flutter/material.dart';
+
+import '../../../l10n/app_localizations.dart';
+import '../../rust_api.dart';
+import 'import_parser.dart';
+import 'support.dart';
+
+part 'workbench_launcher_controllers.dart';
+part 'workbench_launcher_state.dart';
+part 'workbench_launcher_helpers.dart';
+
+Future<void> openNovelWorkbenchDialog({
+  required BuildContext ctx,
+  required AppLocalizations l10n,
+  required StateSetter setDialogState,
+  required String token,
+  required ProjectRow project,
+  required List<ListNovelsResponse?> novelsRef,
+  required List<bool> novelsBusy,
+  required Future<void> Function() reloadAssetsAndStats,
+  required List<int> Function(String raw) parseNumericIdList,
+  required Widget Function({
+    required AppLocalizations l10n,
+    required BuildContext ctx,
+    required StateSetter setDialogState,
+    required StateSetter setLocalState,
+    required String token,
+    required ProjectRow project,
+    required List<bool> novelsBusy,
+    required TextEditingController searchCtrl,
+    required TextEditingController searchIntakeStatusCtrl,
+    required TextEditingController searchIntakeSourceCtrl,
+    required bool localBusy,
+    required void Function(bool value) setLocalBusy,
+    required Future<void> Function(StateSetter setLocalState) refreshWorkbench,
+    required void Function(String value) updateInfoLine,
+    required void Function(List<NovelRow> rows, String message) applyResult,
+  })
+  buildSearchSection,
+  required Widget Function({
+    required AppLocalizations l10n,
+    required BuildContext ctx,
+    required StateSetter setDialogState,
+    required StateSetter setLocalState,
+    required String token,
+    required ProjectRow project,
+    required List<bool> novelsBusy,
+    required List<ParsedNovelChapter> importPreviewRows,
+    required bool localBusy,
+    required void Function(bool value) setLocalBusy,
+    required Future<void> Function(StateSetter setLocalState) refreshWorkbench,
+    required void Function(String value) updateInfoLine,
+    required TextEditingController importUrlCtrl,
+    required TextEditingController importBatchUrlsCtrl,
+    required TextEditingController importScheduleDelayMinutesCtrl,
+    required TextEditingController importScheduleRepeatMinutesCtrl,
+    required TextEditingController importRawTextCtrl,
+    required TextEditingController importBatchSizeCtrl,
+    required TextEditingController importExecutionSideCtrl,
+    required TextEditingController importIntakeStatusCtrl,
+    required TextEditingController importIntakeNoteCtrl,
+    required void Function(List<ParsedNovelChapter> rows, String message)
+    applyImportPreview,
+  })
+  buildImportSection,
+  required Widget Function({
+    required AppLocalizations l10n,
+    required BuildContext ctx,
+    required StateSetter setDialogState,
+    required StateSetter setLocalState,
+    required String token,
+    required ProjectRow project,
+    required List<bool> novelsBusy,
+    required bool localBusy,
+    required void Function(bool value) setLocalBusy,
+    required void Function(String value) updateInfoLine,
+    required TextEditingController createChapterCtrl,
+    required TextEditingController createBodyCtrl,
+    required TextEditingController selectedNovelIdCtrl,
+    required TextEditingController patchChapterCtrl,
+    required TextEditingController patchBodyCtrl,
+    required Future<void> Function(StateSetter setLocalState) refreshWorkbench,
+  })
+  buildCreateSection,
+  required Widget Function({
+    required AppLocalizations l10n,
+    required BuildContext ctx,
+    required StateSetter setDialogState,
+    required StateSetter setLocalState,
+    required String token,
+    required ProjectRow project,
+    required List<bool> novelsBusy,
+    required bool localBusy,
+    required void Function(bool value) setLocalBusy,
+    required void Function(String value) updateInfoLine,
+    required TextEditingController selectedNovelIdCtrl,
+    required TextEditingController patchChapterCtrl,
+    required TextEditingController patchBodyCtrl,
+    required TextEditingController patchIntakeStatusCtrl,
+    required TextEditingController patchIntakeSourceUrlCtrl,
+    required TextEditingController patchIntakeNoteCtrl,
+    required Future<void> Function(StateSetter setLocalState) refreshWorkbench,
+  })
+  buildEditSection,
+  required Widget Function({
+    required AppLocalizations l10n,
+    required BuildContext ctx,
+    required StateSetter setDialogState,
+    required StateSetter setLocalState,
+    required String token,
+    required ProjectRow project,
+    required List<bool> novelsBusy,
+    required bool localBusy,
+    required void Function(bool value) setLocalBusy,
+    required void Function(String value) updateInfoLine,
+    required TextEditingController deleteNovelIdCtrl,
+    required TextEditingController generateIdsCtrl,
+    required Future<void> Function(StateSetter setLocalState) refreshWorkbench,
+  })
+  buildDeleteSection,
+  required Widget Function({
+    required AppLocalizations l10n,
+    required BuildContext ctx,
+    required StateSetter setDialogState,
+    required StateSetter setLocalState,
+    required String token,
+    required ProjectRow project,
+    required List<bool> novelsBusy,
+    required bool localBusy,
+    required void Function(bool value) setLocalBusy,
+    required void Function(String value) updateInfoLine,
+    required TextEditingController numericIdsCtrl,
+    required TextEditingController batchDeleteIdsCtrl,
+    required TextEditingController batchAdmissionIdsCtrl,
+    required TextEditingController batchAdmissionStatusCtrl,
+    required TextEditingController batchAdmissionNoteCtrl,
+    required Future<void> Function(StateSetter setLocalState) refreshWorkbench,
+  })
+  buildSnapshotSection,
+}) async {
+  final currentItems = novelsRef[0]?.items ?? const <NovelRow>[];
+  final first = currentItems.isNotEmpty ? currentItems.first : null;
+  final last = currentItems.isNotEmpty ? currentItems.last : null;
+  final ctrls = _NovelWorkbenchControllers.fromItems(
+    l10n: l10n,
+    currentItems: currentItems,
+    first: first,
+    last: last,
+  );
+
+  final local = _NovelWorkbenchLocalState.fromItems(currentItems, l10n);
+
+  Future<void> refreshWorkbench(StateSetter setLocalState) async {
+    await refreshNovelWorkbenchLocalState(
+      setLocalState: setLocalState,
+      reloadAssetsAndStats: reloadAssetsAndStats,
+      novelsRef: novelsRef,
+      ctrls: ctrls,
+      local: local,
+      l10n: l10n,
+    );
+  }
+
+  try {
+    await showDialog<void>(
+      context: ctx,
+      builder: (dialogCtx) {
+        return StatefulBuilder(
+          builder: (dialogCtx, setLocalState) {
+            void setLocalBusy(bool value) {
+              setLocalState(() => local.localBusy = value);
+            }
+
+            void updateInfoLine(String value) {
+              setLocalState(() => local.infoLine = value);
+            }
+
+            final viewportWidth = MediaQuery.sizeOf(dialogCtx).width;
+            final dialogWidth = viewportWidth.isFinite
+                ? viewportWidth.clamp(320.0, 760.0)
+                : 760.0;
+            return AlertDialog(
+              title: Text(l10n.projectEditorNovelsChapterWorkbenchTitle),
+              content: SizedBox(
+                width: dialogWidth,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        local.infoLine,
+                        style: Theme.of(dialogCtx).textTheme.bodySmall,
+                      ),
+                      const SizedBox(height: 8),
+                      if (local.previewRows.isNotEmpty)
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: Theme.of(
+                                dialogCtx,
+                              ).colorScheme.outlineVariant,
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                l10n.projectEditorNovelsChapterWorkbenchPreviewTitle,
+                                style: Theme.of(dialogCtx).textTheme.labelLarge,
+                              ),
+                              const SizedBox(height: 8),
+                              ...local.previewRows.map(
+                                (row) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 6),
+                                  child: Text(
+                                    l10n.projectEditorNovelsChapterWorkbenchPreviewRow(
+                                      row.numericId,
+                                      row.chapter,
+                                      row.intakeSource ??
+                                          l10n
+                                              .projectEditorNovelsChapterWorkbenchValueUnknown,
+                                      row.intakeStatus ??
+                                          l10n
+                                              .projectEditorNovelsChapterWorkbenchValueUnset,
+                                      row.eventState.toString(),
+                                    ),
+                                    style: Theme.of(
+                                      dialogCtx,
+                                    ).textTheme.bodySmall,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      const SizedBox(height: 12),
+                      buildSearchSection(
+                        l10n: l10n,
+                        ctx: ctx,
+                        setDialogState: setDialogState,
+                        setLocalState: setLocalState,
+                        token: token,
+                        project: project,
+                        novelsBusy: novelsBusy,
+                        searchCtrl: ctrls.searchCtrl,
+                        searchIntakeStatusCtrl: ctrls.searchIntakeStatusCtrl,
+                        searchIntakeSourceCtrl: ctrls.searchIntakeSourceCtrl,
+                        localBusy: local.localBusy,
+                        setLocalBusy: setLocalBusy,
+                        refreshWorkbench: refreshWorkbench,
+                        updateInfoLine: updateInfoLine,
+                        applyResult: (rows, message) {
+                          applyNovelWorkbenchSearchResult(
+                            setLocalState: setLocalState,
+                            local: local,
+                            rows: rows,
+                            message: message,
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      buildImportSection(
+                        l10n: l10n,
+                        ctx: dialogCtx,
+                        setDialogState: setDialogState,
+                        setLocalState: setLocalState,
+                        token: token,
+                        project: project,
+                        novelsBusy: novelsBusy,
+                        importPreviewRows: local.importPreviewRows,
+                        localBusy: local.localBusy,
+                        setLocalBusy: setLocalBusy,
+                        refreshWorkbench: refreshWorkbench,
+                        updateInfoLine: updateInfoLine,
+                        importUrlCtrl: ctrls.importUrlCtrl,
+                        importBatchUrlsCtrl: ctrls.importBatchUrlsCtrl,
+                        importScheduleDelayMinutesCtrl:
+                            ctrls.importScheduleDelayMinutesCtrl,
+                        importScheduleRepeatMinutesCtrl:
+                            ctrls.importScheduleRepeatMinutesCtrl,
+                        importRawTextCtrl: ctrls.importRawTextCtrl,
+                        importBatchSizeCtrl: ctrls.importBatchSizeCtrl,
+                        importExecutionSideCtrl: ctrls.importExecutionSideCtrl,
+                        importIntakeStatusCtrl: ctrls.importIntakeStatusCtrl,
+                        importIntakeNoteCtrl: ctrls.importIntakeNoteCtrl,
+                        applyImportPreview: (rows, message) {
+                          setLocalState(() {
+                            local.importPreviewRows = rows;
+                            local.infoLine = message;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      buildCreateSection(
+                        l10n: l10n,
+                        ctx: dialogCtx,
+                        setDialogState: setDialogState,
+                        setLocalState: setLocalState,
+                        token: token,
+                        project: project,
+                        novelsBusy: novelsBusy,
+                        localBusy: local.localBusy,
+                        setLocalBusy: setLocalBusy,
+                        updateInfoLine: updateInfoLine,
+                        createChapterCtrl: ctrls.createChapterCtrl,
+                        createBodyCtrl: ctrls.createBodyCtrl,
+                        selectedNovelIdCtrl: ctrls.selectedNovelIdCtrl,
+                        patchChapterCtrl: ctrls.patchChapterCtrl,
+                        patchBodyCtrl: ctrls.patchBodyCtrl,
+                        refreshWorkbench: refreshWorkbench,
+                      ),
+                      const SizedBox(height: 16),
+                      buildEditSection(
+                        l10n: l10n,
+                        ctx: dialogCtx,
+                        setDialogState: setDialogState,
+                        setLocalState: setLocalState,
+                        token: token,
+                        project: project,
+                        novelsBusy: novelsBusy,
+                        localBusy: local.localBusy,
+                        setLocalBusy: setLocalBusy,
+                        updateInfoLine: updateInfoLine,
+                        selectedNovelIdCtrl: ctrls.selectedNovelIdCtrl,
+                        patchChapterCtrl: ctrls.patchChapterCtrl,
+                        patchBodyCtrl: ctrls.patchBodyCtrl,
+                        patchIntakeStatusCtrl: ctrls.patchIntakeStatusCtrl,
+                        patchIntakeSourceUrlCtrl:
+                            ctrls.patchIntakeSourceUrlCtrl,
+                        patchIntakeNoteCtrl: ctrls.patchIntakeNoteCtrl,
+                        refreshWorkbench: refreshWorkbench,
+                      ),
+                      const SizedBox(height: 16),
+                      buildDeleteSection(
+                        l10n: l10n,
+                        ctx: dialogCtx,
+                        setDialogState: setDialogState,
+                        setLocalState: setLocalState,
+                        token: token,
+                        project: project,
+                        novelsBusy: novelsBusy,
+                        localBusy: local.localBusy,
+                        setLocalBusy: setLocalBusy,
+                        updateInfoLine: updateInfoLine,
+                        deleteNovelIdCtrl: ctrls.deleteNovelIdCtrl,
+                        generateIdsCtrl: ctrls.generateIdsCtrl,
+                        refreshWorkbench: refreshWorkbench,
+                      ),
+                      const SizedBox(height: 16),
+                      buildSnapshotSection(
+                        l10n: l10n,
+                        ctx: dialogCtx,
+                        setDialogState: setDialogState,
+                        setLocalState: setLocalState,
+                        token: token,
+                        project: project,
+                        novelsBusy: novelsBusy,
+                        localBusy: local.localBusy,
+                        setLocalBusy: setLocalBusy,
+                        updateInfoLine: updateInfoLine,
+                        numericIdsCtrl: ctrls.numericIdsCtrl,
+                        batchDeleteIdsCtrl: ctrls.batchDeleteIdsCtrl,
+                        batchAdmissionIdsCtrl: ctrls.batchAdmissionIdsCtrl,
+                        batchAdmissionStatusCtrl:
+                            ctrls.batchAdmissionStatusCtrl,
+                        batchAdmissionNoteCtrl: ctrls.batchAdmissionNoteCtrl,
+                        refreshWorkbench: refreshWorkbench,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: local.localBusy
+                      ? null
+                      : () => Navigator.of(dialogCtx).pop(),
+                  child: Text(l10n.projectEditorNovelsChapterWorkbenchCloseButton),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  } finally {
+    ctrls.dispose();
+  }
+}

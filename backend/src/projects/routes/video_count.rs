@@ -1,0 +1,70 @@
+//! `video_count` for project stats / summary — **must match** completed-video semantics in
+//! `assets/workbench_query/material.rs` (`run_get_material_data`).
+
+use uuid::Uuid;
+
+/// Count **`app_video`** rows for a project whose **`state`** is treated as a finished clip in the
+/// production workbench material board.
+pub(crate) async fn count_completed_videos_for_project(
+    pool: &sqlx::PgPool,
+    project_id: Uuid,
+) -> Result<i64, sqlx::Error> {
+    sqlx::query_scalar(
+        r#"
+        SELECT COUNT(*)::bigint
+        FROM app_video v
+        WHERE v.project_id = $1
+          AND v.state IN ('生成成功', '已完成', 'succeeded', 'completed')
+        "#,
+    )
+    .bind(project_id)
+    .fetch_one(pool)
+    .await
+}
+
+/// Sum completed **`app_video`** across all projects visible via **`app_workspace_member`**
+/// (current workspace model).
+pub(crate) async fn count_completed_videos_for_member_projects(
+    pool: &sqlx::PgPool,
+    user_id: Uuid,
+) -> Result<i64, sqlx::Error> {
+    sqlx::query_scalar(
+        r#"
+        SELECT COUNT(*)::bigint
+        FROM app_video v
+        INNER JOIN app_project p ON p.id = v.project_id
+        WHERE v.state IN ('生成成功', '已完成', 'succeeded', 'completed')
+          AND p.archived_at IS NULL
+          AND EXISTS (
+            SELECT 1
+            FROM app_workspace_member wm
+            WHERE wm.workspace_id = p.workspace_id
+              AND wm.user_id = $1
+          )
+          AND (
+            p.owner_user_id = $1
+            OR EXISTS (
+              SELECT 1
+              FROM app_workspace_member wm
+              WHERE wm.workspace_id = p.workspace_id
+                AND wm.user_id = $1
+                AND wm.role IN ('owner', 'admin')
+            )
+            OR NOT EXISTS (
+              SELECT 1
+              FROM app_project_member pm_any
+              WHERE pm_any.project_id = p.id
+            )
+            OR EXISTS (
+              SELECT 1
+              FROM app_project_member pm
+              WHERE pm.project_id = p.id
+                AND pm.user_id = $1
+            )
+          )
+        "#,
+    )
+    .bind(user_id)
+    .fetch_one(pool)
+    .await
+}

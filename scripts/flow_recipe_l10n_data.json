@@ -1,0 +1,556 @@
+{
+  "simple": {
+    "agentWorkspaceProductionFlowRecipeDiagnosisRefineIntentFirst": {
+      "en": "Refine per-scene emotion and visual intent in the director plan before splitting the storyboard table.",
+      "zh": "当前更建议先细化导演计划里的分场景情绪/画面意图，再继续拆分分镜表。"
+    },
+    "agentWorkspaceProductionFlowRecipeDiagnosisExpandTableFirst": {
+      "en": "Expand the key storyboard table window first, then decide whether to advance storyboard frames.",
+      "zh": "当前更建议先扩读关键分镜表窗口，再决定是否推进 storyboard。"
+    },
+    "agentWorkspaceProductionFlowRecipeDiagnosisCheapestFirst": {
+      "en": "Follow the first suggestion card and prioritize the cheapest next action.",
+      "zh": "当前建议按第一张卡开始推进，优先执行最靠前的低成本动作。"
+    },
+    "agentWorkspaceProductionSupervisionSummaryFallback": {
+      "en": "Continue based on the latest review conclusion.",
+      "zh": "按审核结论继续推进。"
+    },
+    "agentWorkspaceProductionFlowRecipeSbGenRefreshTitle": {
+      "en": "Refresh storyboard results",
+      "zh": "刷新分镜结果"
+    },
+    "agentWorkspaceProductionFlowRecipeSbGenRereadTitle": {
+      "en": "Reread missing-frame status",
+      "zh": "回读缺帧状态"
+    },
+    "agentWorkspaceProductionFlowRecipeSbGenRefreshDetail": {
+      "en": "Storyboard generation ran; refresh storyboard results before deciding whether to write back.",
+      "zh": "分镜生成动作已执行，先刷新分镜结果，再决定是否写回。"
+    },
+    "agentWorkspaceProductionFlowRecipeContinueDirectorTitle": {
+      "en": "Continue director plan",
+      "zh": "继续导演计划"
+    },
+    "agentWorkspaceProductionFlowRecipeContinueDirectorAfterSbDetail": {
+      "en": "If storyboard results are still unstable, return to scriptPlan for another director decision round.",
+      "zh": "如分镜结果还不稳定，回到 scriptPlan 生成下一轮导演决策。"
+    },
+    "agentWorkspaceProductionFlowRecipeSbTableRefreshTitle": {
+      "en": "Refresh storyboard table",
+      "zh": "刷新分镜表"
+    },
+    "agentWorkspaceProductionFlowRecipeSbTablePartialTitle": {
+      "en": "Reread partial storyboard table",
+      "zh": "回读局部分镜表"
+    },
+    "agentWorkspaceProductionFlowRecipeSbTableRefreshDetail": {
+      "en": "The storyboard-table sub-agent ran; refresh the table before deciding whether to revise further.",
+      "zh": "分镜表子代理已执行，先刷新分镜表，再决定是否继续修订。"
+    },
+    "agentWorkspaceProductionFlowRecipeSbTableCrosscheckTitle": {
+      "en": "Cross-check storyboard results",
+      "zh": "核对对应分镜"
+    },
+    "agentWorkspaceProductionFlowRecipeSbTableCrosscheckDetailAll": {
+      "en": "When needed, switch to storyboard to confirm table changes have propagated to rendered frames.",
+      "zh": "必要时切回 storyboard，确认分镜表调整是否已经落实到画面结果。"
+    },
+    "agentWorkspaceProductionFlowRecipeAssetsRefreshTitle": {
+      "en": "Refresh asset results",
+      "zh": "刷新资产结果"
+    },
+    "agentWorkspaceProductionFlowRecipeAssetsRereadTitle": {
+      "en": "Reread affected assets",
+      "zh": "回读受影响资产"
+    },
+    "agentWorkspaceProductionFlowRecipeAssetsRefreshDetail": {
+      "en": "An asset action ran; refresh asset results before deciding whether to write back.",
+      "zh": "资产动作已执行，先刷新资产结果，再决定是否写回。"
+    },
+    "agentWorkspaceProductionFlowRecipeAssetsContinueSubTitle": {
+      "en": "Continue asset sub-agent",
+      "zh": "继续资产子代理"
+    },
+    "agentWorkspaceProductionFlowRecipeAssetsContinueSubDetail": {
+      "en": "If materials are still missing, chain the asset sub-agent for another generation round.",
+      "zh": "若仍缺素材，可直接衔接资产子代理推进下一轮生成。"
+    },
+    "agentWorkspaceProductionFlowRecipeAssetsPlanFirstTitle": {
+      "en": "Create an asset plan first",
+      "zh": "先生成资产计划"
+    },
+    "agentWorkspaceProductionFlowRecipeAssetsPlanFirstDetail": {
+      "en": "Assets are empty; let the sub-agent fill in derived material planning first.",
+      "zh": "当前 assets 为空，优先让子代理补齐衍生素材规划。"
+    },
+    "agentWorkspaceProductionFlowRecipeAssetsPlanFirstPrompt": {
+      "en": "Given the current empty assets flow, plan a minimal viable derived material set and explain priorities.",
+      "zh": "请基于当前空白 assets flow 规划最小可行的衍生素材集合，并说明优先级。"
+    },
+    "agentWorkspaceProductionFlowRecipeAssetsContinueGenTitle": {
+      "en": "Continue asset generation",
+      "zh": "继续资产生成"
+    },
+    "agentWorkspaceProductionFlowRecipeAssetsContinueGenDetailGeneric": {
+      "en": "Some materials still lack rendered images; run the asset generation sub-agent directly.",
+      "zh": "仍有素材缺少图像结果，适合直接运行素材生成子代理。"
+    },
+    "agentWorkspaceProductionFlowRecipeRefreshStoryboardNeedTitle": {
+      "en": "Refresh storyboard needs",
+      "zh": "刷新分镜需求"
+    },
+    "agentWorkspaceProductionFlowRecipeRefreshStoryboardNeedDetail": {
+      "en": "After closing asset gaps, revisit storyboard to see whether the current approach still fits.",
+      "zh": "素材缺口补齐后通常需要回看 storyboard 是否还能沿用当前方案。"
+    },
+    "agentWorkspaceProductionFlowRecipeCheckStoryboardFlowTitle": {
+      "en": "Check storyboard flow",
+      "zh": "检查分镜 flow"
+    },
+    "agentWorkspaceProductionFlowRecipeCheckStoryboardFlowDetail": {
+      "en": "Assets have baseline results; switch to storyboard to assess frame generation status.",
+      "zh": "资产已具备基础结果，可切到 storyboard 评估镜头生成状态。"
+    },
+    "agentWorkspaceProductionFlowRecipeTidyDirectorPlanTitle": {
+      "en": "Tidy director plan",
+      "zh": "整理导演计划"
+    },
+    "agentWorkspaceProductionFlowRecipeTidyDirectorPlanDetail": {
+      "en": "If materials are mostly ready, generate the next director plan round to close out production pacing.",
+      "zh": "若素材已基本齐全，可生成下一轮导演计划收束 production 节奏。"
+    },
+    "agentWorkspaceProductionFlowRecipeTidyDirectorPlanPrompt": {
+      "en": "Combine current material status with scriptPlan and output the next director plan with execution priorities.",
+      "zh": "请结合现有素材状态与 scriptPlan，输出下一轮导演计划与执行优先级。"
+    },
+    "agentWorkspaceProductionFlowRecipeFirstStoryboardTitle": {
+      "en": "Generate first storyboard pass",
+      "zh": "生成第一版分镜"
+    },
+    "agentWorkspaceProductionFlowRecipeFirstStoryboardDetail": {
+      "en": "Storyboard is empty; run the storyboard generation sub-agent to establish an initial shot set.",
+      "zh": "当前 storyboard 为空，优先运行分镜生成子代理建立初版镜头。"
+    },
+    "agentWorkspaceProductionFlowRecipeFirstStoryboardPrompt": {
+      "en": "Generate a first-pass storyboard from the current production context with a minimal viable shot set.",
+      "zh": "请基于当前 production 上下文生成第一版 storyboard，并保持最小可行镜头集。"
+    },
+    "agentWorkspaceProductionFlowRecipeFillStoryboardFramesTitle": {
+      "en": "Continue filling storyboard frames",
+      "zh": "继续补齐分镜图"
+    },
+    "agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsTitle": {
+      "en": "Verify linked assets",
+      "zh": "核对关联资产"
+    },
+    "agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailFromRefs": {
+      "en": "Focus on assets referenced by the current storyboard window to avoid unrelated material in frame fills.",
+      "zh": "优先只看当前分镜窗口实际引用的资产，避免把无关素材带入分镜补图。"
+    },
+    "agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailNoIds": {
+      "en": "The storyboard digest has not resolved explicit asset IDs; fall back to a compact assets summary read.",
+      "zh": "当前分镜摘要尚未定位出明确资产 ID，退回紧凑 assets 摘要读取。"
+    },
+    "agentWorkspaceProductionFlowRecipeCheckStoryboardTableTitle": {
+      "en": "Check storyboard table",
+      "zh": "检查分镜表"
+    },
+    "agentWorkspaceProductionFlowRecipeCheckStoryboardTableDetail": {
+      "en": "When needed, review the structured storyboardTable before writeback.",
+      "zh": "必要时切到 storyboardTable 审阅结构化镜头表后再回写。"
+    },
+    "agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailReadyIds": {
+      "en": "Storyboard references explicit assets; verify this set is enough for upcoming director adjustments.",
+      "zh": "分镜已引用明确资产，可先核对这批资产是否足够支撑后续导演调整。"
+    },
+    "agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsDetailReadyNoIds": {
+      "en": "The storyboard digest did not resolve explicit asset IDs; read the compact assets summary first.",
+      "zh": "当前分镜摘要未定位出明确资产 ID，先读紧凑 assets 摘要即可。"
+    },
+    "agentWorkspaceProductionFlowRecipeRefreshDirectorPlanTitle": {
+      "en": "Refresh director plan",
+      "zh": "刷新导演计划"
+    },
+    "agentWorkspaceProductionFlowRecipeRefreshDirectorPlanDetail": {
+      "en": "Storyboard has baseline results; return to scriptPlan to organize the next director decision round.",
+      "zh": "分镜已有基础结果，适合回到 scriptPlan 整理下一轮导演决策。"
+    },
+    "agentWorkspaceProductionFlowRecipeCreateDirectorPlanTitle": {
+      "en": "Create director plan first",
+      "zh": "先生成导演计划"
+    },
+    "agentWorkspaceProductionFlowRecipeCreateDirectorPlanDetail": {
+      "en": "scriptPlan is empty; establish a director plan before advancing assets or storyboard.",
+      "zh": "当前 scriptPlan 为空，优先建立导演计划再推进资产或分镜。"
+    },
+    "agentWorkspaceProductionFlowRecipeCreateDirectorPlanPrompt": {
+      "en": "Generate a director plan from the current production context with execution priorities.",
+      "zh": "请基于当前 production 上下文生成一版导演计划，并给出执行优先级。"
+    },
+    "agentWorkspaceProductionFlowRecipeReviewDirectorPlanTitle": {
+      "en": "Review director plan",
+      "zh": "审核导演计划"
+    },
+    "agentWorkspaceProductionFlowRecipeReviewDirectorPlanDetail": {
+      "en": "The director plan has content; a supervision review first surfaces pacing and asset issues cheaply.",
+      "zh": "导演计划已有内容，先做一次监督审核更容易在低成本阶段发现节奏和资产问题。"
+    },
+    "agentWorkspaceProductionFlowRecipeReviewDirectorPlanPrompt": {
+      "en": "Review the current director plan for plot coverage, asset fit, and pacing.",
+      "zh": "请审核当前导演规划，重点检查剧情覆盖、资产匹配与节奏合理性。"
+    },
+    "agentWorkspaceProductionFlowRecipeRereadScriptTitle": {
+      "en": "Reread script evidence",
+      "zh": "回看剧本依据"
+    },
+    "agentWorkspaceProductionFlowRecipeCheckKeyAssetsTitle": {
+      "en": "Check key assets",
+      "zh": "检查关键资产"
+    },
+    "agentWorkspaceProductionFlowRecipeRefineSceneIntentTitle": {
+      "en": "Refine per-scene intent",
+      "zh": "补足分场景意图"
+    },
+    "agentWorkspaceProductionFlowRecipePreviewStoryboardTableTitle": {
+      "en": "Preview storyboard table first",
+      "zh": "先看分镜表落地"
+    },
+    "agentWorkspaceProductionFlowRecipeRefineSceneIntentDetail": {
+      "en": "The director plan still lacks clear per-scene emotion and visual intent; strengthen this before splitting storyboardTable to reduce rework.",
+      "zh": "当前导演计划还缺少足够明确的分场景情绪/画面意图，先补这层再拆 storyboardTable，能减少后续反复返工。"
+    },
+    "agentWorkspaceProductionFlowRecipePreviewStoryboardTableDetail": {
+      "en": "If the plan is stable, sample-check storyboardTable structure for fewer tokens before reading storyboard imagery.",
+      "zh": "如计划已定，先抽样检查 storyboardTable 结构更省 token，再决定是否读取 storyboard 画面结果。"
+    },
+    "agentWorkspaceProductionFlowRecipeRefineSceneIntentPrompt": {
+      "en": "Continue refining scriptPlan: prioritize per-scene emotional progression, visual intent, and shot anchors before storyboardTable split.",
+      "zh": "请继续细化当前 scriptPlan，优先补足分场景情绪推进、画面意图与镜头落点，再进入 storyboardTable 拆分。"
+    },
+    "agentWorkspaceProductionFlowRecipeCreateStoryboardTableTitle": {
+      "en": "Create storyboard table",
+      "zh": "生成分镜表"
+    },
+    "agentWorkspaceProductionFlowRecipeCreateStoryboardTableDetail": {
+      "en": "storyboardTable is empty; use the storyboard-table sub-agent to add structure first.",
+      "zh": "当前 storyboardTable 为空，适合先用分镜表子代理补结构。"
+    },
+    "agentWorkspaceProductionFlowRecipeCreateStoryboardTablePrompt": {
+      "en": "Produce a structured storyboardTable with fields that are clear and writeback-friendly.",
+      "zh": "请先产出结构化 storyboardTable，并保持字段清晰可回写。"
+    },
+    "agentWorkspaceProductionFlowRecipeReviewStoryboardTableTitle": {
+      "en": "Review storyboard table",
+      "zh": "审核分镜表"
+    },
+    "agentWorkspaceProductionFlowRecipeReviewStoryboardTableDetail": {
+      "en": "The table has content; supervision review first prevents bad structure from amplifying into storyboard.",
+      "zh": "分镜表已有内容，先做监督审核可避免把错误结构继续放大到 storyboard。"
+    },
+    "agentWorkspaceProductionFlowRecipeReviewStoryboardTablePrompt": {
+      "en": "Review the current storyboard table for coverage, asset links, and split granularity.",
+      "zh": "请审核当前分镜表，重点检查覆盖度、资产关联与拆分粒度。"
+    },
+    "agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsTableRefs": {
+      "en": "Focus on assets referenced by the current storyboard window to reduce unrelated context.",
+      "zh": "优先只看当前分镜窗口实际引用的资产，减少无关素材上下文。"
+    },
+    "agentWorkspaceProductionFlowRecipeVerifyLinkedAssetsTableNoIds": {
+      "en": "This window did not resolve linked asset IDs; fall back to a compact assets summary read.",
+      "zh": "当前窗口暂未解析出关联资产 ID，退回紧凑 assets 摘要读取。"
+    },
+    "agentWorkspaceProductionFlowRecipeSwitchStoryboardResultsTitle": {
+      "en": "Switch to storyboard results",
+      "zh": "切回分镜结果"
+    },
+    "agentWorkspaceProductionFlowRecipeSwitchStoryboardResultsDetailAll": {
+      "en": "The table has content; continue checking whether storyboard imagery has caught up.",
+      "zh": "分镜表已有内容，可继续查看 storyboard 画面结果是否跟上。"
+    },
+    "agentWorkspaceProductionFlowRecipeSampleStoryboardTableTitle": {
+      "en": "Sample-read storyboard table",
+      "zh": "抽样读取分镜表"
+    },
+    "agentWorkspaceProductionFlowRecipeSampleStoryboardTableDetail": {
+      "en": "Read the first 8 key columns first—usually enough to decide whether to keep reviewing or write back.",
+      "zh": "先只看前 8 行关键列，通常足够判断是否继续审核或回写。"
+    },
+    "agentWorkspaceProductionFlowRecipeReviseDirectorPlanTitle": {
+      "en": "Revise director plan",
+      "zh": "修导演计划"
+    },
+    "agentWorkspaceProductionFlowRecipeRecheckAssetSupportTitle": {
+      "en": "Recheck asset support",
+      "zh": "复查资产支撑"
+    },
+    "agentWorkspaceProductionFlowRecipeRecheckAssetSupportDetail": {
+      "en": "Director plans often stall on asset prep; reading assets first reduces rework.",
+      "zh": "导演计划常先卡在资产准备，先看 assets 能减少返工。"
+    },
+    "agentWorkspaceProductionFlowRecipeVerifyAssetSupportTitle": {
+      "en": "Verify asset support",
+      "zh": "核对资产支撑"
+    },
+    "agentWorkspaceProductionFlowRecipeRereadDirectorPlanTitle": {
+      "en": "Reread director plan",
+      "zh": "回看导演计划"
+    },
+    "agentWorkspaceProductionFlowRecipeRereadDirectorPlanAfterAssetsDetail": {
+      "en": "After asset checks, return to a compact scriptPlan to see whether more revisions are needed before storyboard.",
+      "zh": "资产核对后回到精简 scriptPlan，确认是否还需要修订计划再推进分镜。"
+    },
+    "agentWorkspaceProductionFlowRecipeInspectStoryboardResultsTitle": {
+      "en": "Inspect storyboard results",
+      "zh": "检查分镜结果"
+    },
+    "agentWorkspaceProductionFlowRecipeCompareStoryboardTableTitle": {
+      "en": "Compare storyboard table",
+      "zh": "对照分镜表"
+    },
+    "agentWorkspaceProductionFlowRecipeCompareStoryboardTableDetailGeneric": {
+      "en": "Reread the key-column window first to avoid reloading the entire table into context.",
+      "zh": "先复读关键列窗口，避免把整张分镜表重新带入上下文。"
+    },
+    "agentWorkspaceProductionFlowRecipeRereadScriptNeedWindowDetail": {
+      "en": "When needed, reread a compact script window to confirm shot rationale.",
+      "zh": "需要时再回看紧凑剧本窗口，确认镜头依据。"
+    },
+    "agentWorkspaceProductionFlowRecipeReviseStoryboardTableTitle": {
+      "en": "Revise storyboard table",
+      "zh": "修分镜表"
+    },
+    "agentWorkspaceProductionFlowRecipeSampleRereadStoryboardTableTitle": {
+      "en": "Sample-reread storyboard table",
+      "zh": "抽样复读分镜表"
+    },
+    "agentWorkspaceProductionFlowRecipeSampleRereadStoryboardTableDetailEmpty": {
+      "en": "Read the key-column window first to avoid repeatedly loading the full table into context.",
+      "zh": "先读取关键列窗口，避免把整张表反复带入上下文。"
+    },
+    "agentWorkspaceProductionFlowRecipeSampleRereadStoryboardTableDetailFocused": {
+      "en": "Reread only the storyboard table rows for the focused shots from review; avoid returning to the full table window.",
+      "zh": "先只复读审核聚焦镜头对应的分镜表行，避免回到整表窗口。"
+    },
+    "agentWorkspaceProductionFlowRecipeContinueStoryboardGenTitle": {
+      "en": "Continue storyboard image generation",
+      "zh": "继续生成分镜图"
+    },
+    "agentWorkspaceProductionFlowRecipeCompareStoryboardTableBeforeFillDetail": {
+      "en": "Before filling frames, reread the key-column window to avoid rebuilding context for every shot.",
+      "zh": "补图前先复读关键列窗口，避免为整批镜头重建上下文。"
+    },
+    "agentWorkspaceProductionArgSuggestDeriveNameFallback": {
+      "en": "New derived asset",
+      "zh": "新衍生资产"
+    },
+    "agentWorkspaceProductionArgSuggestFillFirst": {
+      "en": "Fill first item",
+      "zh": "填充首项"
+    },
+    "agentWorkspaceProductionArgSuggestFillFirstThree": {
+      "en": "Fill first 3 items",
+      "zh": "填充前 3 项"
+    },
+    "agentWorkspaceProductionArgSuggestFillAll": {
+      "en": "Fill all",
+      "zh": "填充全部"
+    },
+    "agentWorkspaceProductionFlowRecipeAssetsGenHadSummaryNote": {
+      "en": "First review results for assets just generated, then decide whether to rerun.",
+      "zh": "先检查本次刚生成资产的结果再决定是否补跑"
+    }
+  },
+  "templates": {
+    "agentWorkspaceProductionArgSuggestAddTo": {
+      "en": "Add under #{id}",
+      "zh": "新增到 #{id}",
+      "placeholders": { "id": "String" }
+    },
+    "agentWorkspaceProductionArgSuggestDelete": {
+      "en": "Delete #{id}",
+      "zh": "删除 #{id}",
+      "placeholders": { "id": "String" }
+    },
+    "agentWorkspaceProductionFlowRecipeSbGenRereadDetail": {
+      "en": "Storyboard generation ran; first reread missing-frame status for shots #{ids}.",
+      "zh": "分镜生成动作已执行，先回读本次镜头 #{ids} 的缺帧状态。",
+      "placeholders": { "ids": "String" }
+    },
+    "agentWorkspaceProductionFlowRecipeSbTablePartialDetail": {
+      "en": "The storyboard-table sub-agent ran; first reread table rows for shots #{ids}.",
+      "zh": "分镜表子代理已执行，先回读本次镜头 #{ids} 对应的局部分镜表行。",
+      "placeholders": { "ids": "String" }
+    },
+    "agentWorkspaceProductionFlowRecipeSbTableCrosscheckDetailFocused": {
+      "en": "Prefer rereading storyboard results for shots #{ids} only so a table tweak does not widen to the whole sequence.",
+      "zh": "优先只回读镜头 #{ids} 的 storyboard 结果，确认表格修改没有放大到整段。",
+      "placeholders": { "ids": "String" }
+    },
+    "agentWorkspaceProductionFlowRecipeAssetsRereadDetail": {
+      "en": "Asset generation ran; first reread latest status for assets #{ids}.",
+      "zh": "资产生成动作已执行，先回读本次资产 #{ids} 的最新状态。",
+      "placeholders": { "ids": "String" }
+    },
+    "agentWorkspaceProductionFlowRecipeAssetsGenDetailScoped": {
+      "en": "{scope} still lack images; prioritize patching only this derived set to save tokens.",
+      "zh": "{scope} 仍缺图，优先只补这批衍生资产更省 token。",
+      "placeholders": { "scope": "String" }
+    },
+    "agentWorkspaceProductionFlowRecipeSbFillGapDetail": {
+      "en": "Prioritize filling missing frames for shots #{idsLabel}{idTail}; avoid rerunning completed shots in bulk.",
+      "zh": "优先只补缺帧镜头 #{idsLabel}{idTail}，避免把已完成镜头整批重跑。",
+      "placeholders": { "idsLabel": "String", "idTail": "String" }
+    },
+    "agentWorkspaceProductionFlowRecipeRereadScriptScriptPlanDetail": {
+      "en": "Reread only {scriptWindow} first to align the director plan with the script pacing before expanding reads.",
+      "zh": "先只回看{scriptWindow}，确认导演计划与原文节奏一致，再决定是否扩读。",
+      "placeholders": { "scriptWindow": "String" }
+    },
+    "agentWorkspaceProductionFlowRecipeCheckKeyAssetsDetailIds": {
+      "en": "The director plan calls out {assetScope}; verify precisely before expanding to other materials.",
+      "zh": "导演计划已点名{assetScope}，先精确核对再决定是否扩读其他素材。",
+      "placeholders": { "assetScope": "String" }
+    },
+    "agentWorkspaceProductionFlowRecipeCheckKeyAssetsDetailNoIds": {
+      "en": "The director plan has content; verify whether {assetScope} supports execution, then add more assets only if needed.",
+      "zh": "导演计划已有内容，先核对{assetScope}是否支撑执行，信息不足时再补更多资产。",
+      "placeholders": { "assetScope": "String" }
+    },
+    "agentWorkspaceProductionFlowRecipeContinueDirectorDetailIds": {
+      "en": "Focus director decisions around {assetScope} so downstream storyboard and asset actions inherit these rewrite constraints first.",
+      "zh": "优先围绕{assetScope}收束导演决策，让后续分镜和素材动作先继承这批受改写约束的重点。",
+      "placeholders": { "assetScope": "String" }
+    },
+    "agentWorkspaceProductionFlowRecipeContinueDirectorDetailNoIds": {
+      "en": "Continue tightening director decisions around {assetScope} so downstream storyboard and asset actions inherit the current rewrite constraints.",
+      "zh": "先围绕{assetScope}继续收束导演决策，让后续分镜和素材动作继承当前改写约束。",
+      "placeholders": { "assetScope": "String" }
+    },
+    "agentWorkspaceProductionFlowRecipeContinueDirectorPromptIds": {
+      "en": "Continue tightening scriptPlan around {assetScope} for shot and material priorities so downstream storyboard execution inherits upstream rewrite constraints.",
+      "zh": "请在当前 scriptPlan 上继续收束导演计划，优先围绕{assetScope}安排镜头和素材优先级，确保后续分镜执行继承上游改写约束。",
+      "placeholders": { "assetScope": "String" }
+    },
+    "agentWorkspaceProductionFlowRecipeContinueDirectorPromptNoIds": {
+      "en": "Continue tightening scriptPlan around {assetScope} for shot and material priorities so downstream storyboard execution inherits upstream rewrite constraints.",
+      "zh": "请在当前 scriptPlan 上继续收束导演计划，优先围绕{assetScope}安排镜头和素材优先级，确保后续分镜执行继承上游改写约束。",
+      "placeholders": { "assetScope": "String" }
+    },
+    "agentWorkspaceProductionFlowRecipeRereadScriptRevisePlanDetail": {
+      "en": "Before revising, reread only {scriptWindow} to avoid loading the entire script for scriptPlan.",
+      "zh": "修订前先只回看{scriptWindow}，避免为 scriptPlan 扩读整段剧本。",
+      "placeholders": { "scriptWindow": "String" }
+    },
+    "agentWorkspaceProductionFlowRecipeReviseDirectorPlanDetail": {
+      "en": "Review conclusion: {summary}",
+      "zh": "审核结论：{summary}",
+      "placeholders": { "summary": "String" }
+    },
+    "agentWorkspaceProductionFlowRecipeReviseDirectorPlanPrompt": {
+      "en": "Revise scriptPlan based on the latest review; prioritize fixing: {summary}",
+      "zh": "请根据最近审核意见修订 scriptPlan，优先解决：{summary}",
+      "placeholders": { "summary": "String" }
+    },
+    "agentWorkspaceProductionFlowRecipeVerifyAssetSupportDetail": {
+      "en": "Review conclusion: {summary}; first narrow to {assetScope} to confirm gaps in the director plan.",
+      "zh": "审核结论：{summary}；优先只看{assetScope}，确认导演计划缺口。",
+      "placeholders": { "summary": "String", "assetScope": "String" }
+    },
+    "agentWorkspaceProductionFlowRecipeInspectSbResultsDetail": {
+      "en": "Review conclusion: {summary}; first narrow to {focusClause}",
+      "zh": "审核结论：{summary}；优先只看{focusClause}",
+      "placeholders": { "summary": "String", "focusClause": "String" }
+    },
+    "agentWorkspaceProductionFlowRecipeCompareStoryboardTableDetailFocus": {
+      "en": "Prefer rereading only the storyboard table rows for {storyboardFocus} to avoid returning to the full table.",
+      "zh": "优先只复读{storyboardFocus}对应的分镜表行，避免退回整表。",
+      "placeholders": { "storyboardFocus": "String" }
+    },
+    "agentWorkspaceProductionFlowRecipeRereadScriptReviewDetail": {
+      "en": "If shot rationale must be checked, prefer only the partial range: {reviewScope}.",
+      "zh": "如需核对镜头依据，优先只用局部范围：{reviewScope}。",
+      "placeholders": { "reviewScope": "String" }
+    },
+    "agentWorkspaceProductionFlowRecipeInspectStoryboardResultsDetailScript": {
+      "en": "Review conclusion: {summary}; prefer only the partial range: {reviewScope}.",
+      "zh": "审核结论：{summary}；优先只用局部范围：{reviewScope}。",
+      "placeholders": { "summary": "String", "reviewScope": "String" }
+    },
+    "agentWorkspaceProductionFlowRecipeSwitchStoryboardResultsDetailCount": {
+      "en": "Prefer rereading only the {count} shots covered by the current storyboard table window; avoid falling back to a generic storyboard digest.",
+      "zh": "优先只回看当前分镜表窗口对应的 {count} 个镜头，避免退回通用分镜摘要。",
+      "placeholders": { "count": "int" }
+    },
+    "agentWorkspaceProductionFlowRecipeCompareStoryboardTableBeforeFillDetailFocus": {
+      "en": "Before filling frames, reread only the storyboard table rows for {storyboardFocus}.",
+      "zh": "补图前先只复读{storyboardFocus}对应的分镜表行。",
+      "placeholders": { "storyboardFocus": "String" }
+    },
+    "agentWorkspaceProductionFlowRecipePromptStoryboardContinue": {
+      "en": "Continue advancing storyboard. {body}",
+      "zh": "请继续推进 storyboard。{body}",
+      "placeholders": { "body": "String" }
+    },
+    "agentWorkspaceProductionFlowRecipePromptReviseStoryboardTable": {
+      "en": "Revise storyboardTable based on the latest review. {body}",
+      "zh": "请根据最近审核意见修订 storyboardTable。{body}",
+      "placeholders": { "body": "String" }
+    },
+    "agentWorkspaceProductionFlowRecipePromptStoryboardFromReview": {
+      "en": "Continue advancing storyboard based on the latest review conclusion. {body}",
+      "zh": "请基于最近审核结论继续推进 storyboard。{body}",
+      "placeholders": { "body": "String" }
+    },
+    "agentWorkspaceProductionFlowRecipeShotCountTail": {
+      "en": " and {count} more shots",
+      "zh": " 等 {count} 个镜头",
+      "placeholders": { "count": "int" }
+    },
+    "agentWorkspaceProductionFlowRecipeInspectStoryboardResultsDetailSummaryOnly": {
+      "en": "Review conclusion: {summary}",
+      "zh": "审核结论：{summary}",
+      "placeholders": { "summary": "String" }
+    },
+    "agentWorkspaceProductionFlowRecipeInspectStoryboardResultsDetailWithScope": {
+      "en": "Review conclusion: {summary}; {reviewScope}.",
+      "zh": "审核结论：{summary}；{reviewScope}。",
+      "placeholders": { "summary": "String", "reviewScope": "String" }
+    },
+    "agentWorkspaceProductionFlowRecipeArgDeriveNameFromParent": {
+      "en": "{name}-derived",
+      "zh": "{name}-衍生",
+      "placeholders": { "name": "String" }
+    },
+    "agentWorkspaceProductionAssetReviewPromptFocused": {
+      "en": "Please verify only these {count} assets against the current director plan; fill only necessary gaps and avoid bulk-reading unrelated assets.{priority}",
+      "zh": "请优先只核对这 {count} 个资产是否支撑当前导演规划；仅补必要缺口，不扩读无关素材。{priority}",
+      "placeholders": { "count": "int", "priority": "String" }
+    },
+    "agentWorkspaceProductionAssetReviewPromptScoped": {
+      "en": "Please verify whether {scope} supports the current director plan; add minimal reads only if information is insufficient—do not bulk-read assets.{priority}",
+      "zh": "请先核对{scope}是否支撑当前导演规划；信息不足时再最小补读，不要整包扩读 assets。{priority}",
+      "placeholders": { "scope": "String", "priority": "String" }
+    },
+    "agentWorkspaceProductionAssetReviewPromptPriority": {
+      "en": " Prioritize addressing: {summary}",
+      "zh": "优先解决：{summary}",
+      "placeholders": { "summary": "String" }
+    },
+    "agentWorkspaceProductionRecipeAppliedFollowRefine": {
+      "en": "Applied suggestion: {title}. Next, refine the director plan.",
+      "zh": "已应用任务建议：{title}，下一步先细化导演计划。",
+      "placeholders": { "title": "String" }
+    },
+    "agentWorkspaceProductionRecipeAppliedFollowExpandTable": {
+      "en": "Applied suggestion: {title}. Next, expand the key storyboard table window.",
+      "zh": "已应用任务建议：{title}，下一步先扩读关键分镜表窗口。",
+      "placeholders": { "title": "String" }
+    },
+    "agentWorkspaceProductionRecipeAppliedGeneric": {
+      "en": "Applied suggestion: {title}",
+      "zh": "已应用任务建议：{title}",
+      "placeholders": { "title": "String" }
+    }
+  }
+}

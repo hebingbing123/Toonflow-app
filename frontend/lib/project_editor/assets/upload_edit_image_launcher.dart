@@ -1,0 +1,118 @@
+import 'package:flutter/material.dart';
+
+import '../../rust_api.dart';
+
+Future<void> openProjectAssetEditImageUploadDialog({
+  required BuildContext ctx,
+  required StateSetter setDialogState,
+  required String token,
+  required ProjectRow project,
+  required List<ScriptBrief> scriptList,
+  required List<bool> assetsBusy,
+}) async {
+  final l10n = resolveAppLocalizationsForErrors(ctx);
+  if (scriptList.isEmpty) {
+    ScaffoldMessenger.of(
+      ctx,
+    ).showSnackBar(SnackBar(content: Text(l10n.projectEditorAssetEditImageNeedScriptSnack)));
+    return;
+  }
+  final base64Ctrl = TextEditingController(text: 'data:image/png;base64,AA==');
+  var selectedScriptNumericId = scriptList.first.numericId;
+  try {
+    final confirmed = await showDialog<bool>(
+      context: ctx,
+      builder: (dialogCtx) {
+        return StatefulBuilder(
+          builder: (dialogCtx, setState) {
+            final dlgL10n = resolveAppLocalizationsForErrors(dialogCtx);
+            return AlertDialog(
+              title: Text(dlgL10n.projectEditorAssetEditImageDialogTitle),
+              content: SizedBox(
+                width: 520,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    DropdownButtonFormField<int>(
+                      initialValue: selectedScriptNumericId,
+                      decoration: InputDecoration(
+                        labelText: dlgL10n.projectEditorAssetEditImageTargetScriptLabel,
+                      ),
+                      items: scriptList
+                          .map(
+                            (script) => DropdownMenuItem<int>(
+                              value: script.numericId,
+                              child: Text(
+                                '#${script.numericId} ${script.name ?? ""}',
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) {
+                        if (value == null) return;
+                        setState(() => selectedScriptNumericId = value);
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: base64Ctrl,
+                      minLines: 4,
+                      maxLines: 7,
+                      decoration: InputDecoration(
+                        labelText: dlgL10n.projectEditorAssetEditImageDataUriLabel,
+                        helperText: dlgL10n.projectEditorAssetEditImageDataUriHelper,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogCtx).pop(false),
+                  child: Text(dlgL10n.storyboardEditorDialogCancel),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.of(dialogCtx).pop(true),
+                  child: Text(dlgL10n.projectEditorAssetEditImageUploadButton),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+    if (confirmed != true || !ctx.mounted) return;
+
+    final payload = base64Ctrl.text.trim();
+    if (payload.isEmpty) {
+      ScaffoldMessenger.of(
+        ctx,
+      ).showSnackBar(SnackBar(content: Text(l10n.projectEditorAssetEditImageEmptyDataUriSnack)));
+      return;
+    }
+
+    setDialogState(() => assetsBusy[0] = true);
+    final uploaded = await postProductionEditImageUploadImageV1(
+      token,
+      projectId: project.numericId,
+      scriptId: selectedScriptNumericId,
+      base64Data: payload,
+    );
+    if (!ctx.mounted) return;
+    setDialogState(() => assetsBusy[0] = false);
+    ScaffoldMessenger.of(
+      ctx,
+    ).showSnackBar(SnackBar(content: Text(l10n.projectEditorAssetEditImageUploadSuccess(uploaded.url))));
+  } catch (e) {
+    if (ctx.mounted) {
+      setDialogState(() => assetsBusy[0] = false);
+      ScaffoldMessenger.of(ctx).showSnackBar(
+        SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
+      );
+    }
+  } finally {
+    base64Ctrl.dispose();
+  }
+}

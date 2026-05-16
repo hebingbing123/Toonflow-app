@@ -1,0 +1,614 @@
+//! 分镜导出：拉取字节并写入 zip。
+
+use std::io::{Cursor, Write};
+
+use axum::http::header;
+use serde::Serialize;
+use zip::write::FileOptions;
+
+use super::super::export_source::{
+    infer_export_extension, parse_storyboard_export_source, StoryboardExportSource,
+};
+use super::super::shot_text::{
+    parse_storyboard_duration_seconds, resolve_shot_script_source, resolve_shot_voiceover_ready,
+};
+use super::super::types::ExportImageSourceRow;
+use crate::error::{bad_request_i18n, ApiError};
+use crate::state::AppState;
+
+pub(super) async fn build_storyboard_export_zip(
+    state: &AppState,
+    owner_user_id: uuid::Uuid,
+    rows: Vec<ExportImageSourceRow>,
+) -> Result<Vec<u8>, ApiError> {
+    let mut archive = zip::ZipWriter::new(Cursor::new(Vec::new()));
+    let options = FileOptions::default().compression_method(zip::CompressionMethod::Deflated);
+    let mut manifest_rows = Vec::with_capacity(rows.len());
+
+    for (order_index, row) in rows.into_iter().enumerate() {
+        manifest_rows.push(StoryboardExportManifestShot::from_row(&row, order_index));
+        let file_path = row.file_path.as_deref().ok_or_else(|| {
+            bad_request_i18n(
+                &format!(
+                    "storyboard {} has no generated image to export",
+                    row.numeric_id
+                ),
+                &format!("storyboard {} 没有可导出的已生成图片", row.numeric_id),
+            )
+        })?;
+
+        let exported =
+            fetch_storyboard_export_bytes(state, owner_user_id, row.numeric_id, file_path).await?;
+        archive
+            .start_file(exported.filename, options)
+            .map_err(|_| ApiError::Internal)?;
+        archive
+            .write_all(&exported.bytes)
+            .map_err(|_| ApiError::Internal)?;
+    }
+
+    let storyboard_csv = build_storyboard_csv(&manifest_rows);
+    let timeline = build_storyboard_timeline(&manifest_rows);
+    let subtitles = build_storyboard_srt(&manifest_rows);
+    let voiceover_script = build_storyboard_voiceover_script(&manifest_rows);
+    let voiceover_segments = build_storyboard_voiceover_segments(&manifest_rows);
+    let assembly_plan = build_storyboard_assembly_plan(&manifest_rows);
+    write_export_text_file(
+        &mut archive,
+        "manifest.json",
+        &serde_json::to_vec_pretty(&StoryboardExportManifest {
+            export_type: "storyboard_image_bundle",
+            shot_count: manifest_rows.len(),
+            shots: manifest_rows,
+        })
+        .map_err(|_| ApiError::Internal)?,
+        options,
+    )?;
+    write_export_text_file(
+        &mut archive,
+        "storyboard.csv",
+        storyboard_csv.as_bytes(),
+        options,
+    )?;
+    write_export_text_file(
+        &mut archive,
+        "timeline.json",
+        &serde_json::to_vec_pretty(&timeline).map_err(|_| ApiError::Internal)?,
+        options,
+    )?;
+    write_export_text_file(&mut archive, "subtitles.srt", subtitles.as_bytes(), options)?;
+    write_export_text_file(
+        &mut archive,
+        "voiceover_script.txt",
+        voiceover_script.as_bytes(),
+        options,
+    )?;
+    write_export_text_file(
+        &mut archive,
+        "voiceover_segments.json",
+        &serde_json::to_vec_pretty(&voiceover_segments).map_err(|_| ApiError::Internal)?,
+        options,
+    )?;
+    write_export_text_file(
+        &mut archive,
+        "assembly_plan.json",
+        &serde_json::to_vec_pretty(&assembly_plan).map_err(|_| ApiError::Internal)?,
+        options,
+    )?;
+
+    archive
+        .finish()
+        .map(|cursor| cursor.into_inner())
+        .map_err(|_| ApiError::Internal)
+}
+
+struct StoryboardExportFile {
+    filename: String,
+    bytes: Vec<u8>,
+}
+
+#[derive(Debug, Serialize)]
+struct StoryboardExportManifest<'a> {
+    export_type: &'a str,
+    shot_count: usize,
+    shots: Vec<StoryboardExportManifestShot>,
+}
+
+#[derive(Debug, Serialize)]
+pub(super) struct StoryboardExportManifestShot {
+    storyboard_id: i32,
+    order_index: usize,
+    storyboard_index: Option<i32>,
+    track_id: Option<i32>,
+    duration: Option<String>,
+    state: Option<String>,
+    prompt: Option<String>,
+    subtitle_text: Option<String>,
+    subtitle_source: &'static str,
+    voiceover_ready: bool,
+    voiceover_audio_url: Option<String>,
+    voiceover_asset_ready: bool,
+    image_filename: String,
+    image_source: Option<String>,
+}
+
+impl StoryboardExportManifestShot {
+    pub(super) fn from_row(row: &ExportImageSourceRow, order_index: usize) -> Self {
+        let extension = row
+            .file_path
+            .as_deref()
+            .and_then(|file_path| parse_storyboard_export_source(file_path, row.numeric_id).ok())
+            .map(|source| match source {
+                StoryboardExportSource::DataUri { extension, .. } => extension.to_string(),
+                StoryboardExportSource::RemoteUrl { url } => {
+                    infer_export_extension(&url, None).to_string()
+                }
+                StoryboardExportSource::AbsolutePath { path } => path
+                    .extension()
+                    .and_then(|value| value.to_str())
+                    .filter(|value| !value.is_empty())
+                    .unwrap_or("png")
+                    .to_string(),
+                StoryboardExportSource::LocalStorage { relative_path } => relative_path
+                    .extension()
+                    .and_then(|value| value.to_str())
+                    .filter(|value| !value.is_empty())
+                    .unwrap_or("png")
+                    .to_string(),
+            })
+            .unwrap_or_else(|| "png".to_string());
+        Self {
+            storyboard_id: row.numeric_id,
+            order_index,
+            storyboard_index: row.sb_index,
+            track_id: row.track_id,
+            duration: row.duration.clone(),
+            state: row.state.clone(),
+            prompt: row.prompt.clone(),
+            subtitle_text: row.video_desc.clone(),
+            subtitle_source: resolve_shot_script_source(
+                row.video_desc.as_deref(),
+                row.prompt.as_deref(),
+            ),
+            voiceover_ready: resolve_shot_voiceover_ready(
+                row.video_desc.as_deref(),
+                row.prompt.as_deref(),
+            ),
+            voiceover_audio_url: row.voiceover_audio_url.clone(),
+            voiceover_asset_ready: row.voiceover_state.as_deref() == Some("completed")
+                && row
+                    .voiceover_audio_url
+                    .as_deref()
+                    .is_some_and(|value| !value.trim().is_empty()),
+            image_filename: format!("storyboard-{}.{}", row.numeric_id, extension),
+            image_source: row.file_path.clone(),
+        }
+    }
+}
+
+#[derive(Debug, Serialize)]
+struct StoryboardExportTimeline<'a> {
+    export_type: &'a str,
+    shot_count: usize,
+    total_duration_ms: u64,
+    shots: Vec<StoryboardExportTimelineShot>,
+}
+
+#[derive(Debug, Serialize)]
+pub(super) struct StoryboardExportVoiceoverSegments<'a> {
+    export_type: &'a str,
+    shot_count: usize,
+    ready_count: usize,
+    placeholder_count: usize,
+    total_duration_ms: u64,
+    shots: Vec<StoryboardExportVoiceoverSegment>,
+}
+
+#[derive(Debug, Serialize)]
+pub(super) struct StoryboardExportVoiceoverSegment {
+    storyboard_id: i32,
+    order_index: usize,
+    storyboard_index: Option<i32>,
+    track_id: Option<i32>,
+    start_ms: u64,
+    end_ms: u64,
+    duration_seconds: i32,
+    text: String,
+    subtitle_source: &'static str,
+    voiceover_ready: bool,
+    voiceover_audio_url: Option<String>,
+    voiceover_asset_ready: bool,
+}
+
+#[derive(Debug, Serialize)]
+pub(super) struct StoryboardExportAssemblyPlan<'a> {
+    export_type: &'a str,
+    shot_count: usize,
+    total_duration_ms: u64,
+    audio_ready_count: usize,
+    placeholder_audio_count: usize,
+    shots: Vec<StoryboardExportAssemblyShot>,
+}
+
+#[derive(Debug, Serialize)]
+pub(super) struct StoryboardExportAssemblyShot {
+    storyboard_id: i32,
+    order_index: usize,
+    storyboard_index: Option<i32>,
+    track_id: Option<i32>,
+    start_ms: u64,
+    end_ms: u64,
+    duration_seconds: i32,
+    image_filename: String,
+    image_source: Option<String>,
+    subtitle_text: String,
+    subtitle_source: &'static str,
+    voiceover_ready: bool,
+    voiceover_audio_url: Option<String>,
+    voiceover_asset_ready: bool,
+    suggested_transition: &'static str,
+}
+
+#[derive(Debug, Serialize)]
+struct StoryboardExportTimelineShot {
+    storyboard_id: i32,
+    order_index: usize,
+    storyboard_index: Option<i32>,
+    track_id: Option<i32>,
+    start_ms: u64,
+    end_ms: u64,
+    duration_seconds: i32,
+    state: Option<String>,
+    prompt: Option<String>,
+    subtitle_text: Option<String>,
+    subtitle_source: &'static str,
+    voiceover_ready: bool,
+    image_filename: String,
+    image_source: Option<String>,
+}
+
+fn write_export_text_file(
+    archive: &mut zip::ZipWriter<Cursor<Vec<u8>>>,
+    filename: &str,
+    bytes: &[u8],
+    options: FileOptions,
+) -> Result<(), ApiError> {
+    archive
+        .start_file(filename, options)
+        .map_err(|_| ApiError::Internal)?;
+    archive.write_all(bytes).map_err(|_| ApiError::Internal)
+}
+
+pub(super) fn build_storyboard_csv(shots: &[StoryboardExportManifestShot]) -> String {
+    let mut out =
+        String::from("storyboard_id,order_index,storyboard_index,track_id,duration,state,prompt,subtitle_source,voiceover_ready,image_filename,image_source\n");
+    for (index, shot) in shots.iter().enumerate() {
+        let fields = [
+            shot.storyboard_id.to_string(),
+            index.to_string(),
+            opt_i32_csv(shot.storyboard_index),
+            opt_i32_csv(shot.track_id),
+            opt_str_csv(shot.duration.as_deref()),
+            opt_str_csv(shot.state.as_deref()),
+            opt_str_csv(shot.prompt.as_deref()),
+            csv_escape(shot.subtitle_source),
+            shot.voiceover_ready.to_string(),
+            csv_escape(&shot.image_filename),
+            opt_str_csv(shot.image_source.as_deref()),
+        ];
+        out.push_str(&fields.join(","));
+        out.push('\n');
+    }
+    out
+}
+
+fn build_storyboard_timeline(
+    shots: &[StoryboardExportManifestShot],
+) -> StoryboardExportTimeline<'static> {
+    let mut cursor_ms = 0_u64;
+    let timeline_shots = shots
+        .iter()
+        .map(|shot| {
+            let duration_seconds = parse_storyboard_duration_seconds(shot.duration.as_deref());
+            let start_ms = cursor_ms;
+            let end_ms = start_ms + (duration_seconds as u64 * 1000);
+            cursor_ms = end_ms;
+            StoryboardExportTimelineShot {
+                storyboard_id: shot.storyboard_id,
+                order_index: shot.order_index,
+                storyboard_index: shot.storyboard_index,
+                track_id: shot.track_id,
+                start_ms,
+                end_ms,
+                duration_seconds,
+                state: shot.state.clone(),
+                prompt: shot.prompt.clone(),
+                subtitle_text: shot.subtitle_text.clone(),
+                subtitle_source: shot.subtitle_source,
+                voiceover_ready: shot.voiceover_ready,
+                image_filename: shot.image_filename.clone(),
+                image_source: shot.image_source.clone(),
+            }
+        })
+        .collect::<Vec<_>>();
+
+    StoryboardExportTimeline {
+        export_type: "storyboard_timeline",
+        shot_count: timeline_shots.len(),
+        total_duration_ms: cursor_ms,
+        shots: timeline_shots,
+    }
+}
+
+pub(super) fn build_storyboard_srt(shots: &[StoryboardExportManifestShot]) -> String {
+    let mut out = String::new();
+    let mut cursor_ms = 0_u64;
+    for (index, shot) in shots.iter().enumerate() {
+        let duration_seconds = parse_storyboard_duration_seconds(shot.duration.as_deref());
+        let start_ms = cursor_ms;
+        let end_ms = start_ms + (duration_seconds as u64 * 1000);
+        cursor_ms = end_ms;
+        let subtitle = resolve_shot_script_line(shot);
+
+        out.push_str(&(index + 1).to_string());
+        out.push('\n');
+        out.push_str(&format!(
+            "{} --> {}\n",
+            format_srt_timestamp(start_ms),
+            format_srt_timestamp(end_ms)
+        ));
+        out.push_str(&subtitle);
+        out.push_str("\n\n");
+    }
+    out
+}
+
+pub(super) fn build_storyboard_voiceover_script(shots: &[StoryboardExportManifestShot]) -> String {
+    let mut out = String::from("# Toonflow Storyboard Voiceover Script\n\n");
+    let mut cursor_ms = 0_u64;
+    for shot in shots {
+        let duration_seconds = parse_storyboard_duration_seconds(shot.duration.as_deref());
+        let start_ms = cursor_ms;
+        let end_ms = start_ms + (duration_seconds as u64 * 1000);
+        cursor_ms = end_ms;
+        let line = resolve_shot_script_line(shot);
+        out.push_str(&format!(
+            "[{} - {}] Shot {}",
+            format_srt_timestamp(start_ms),
+            format_srt_timestamp(end_ms),
+            shot.storyboard_id
+        ));
+        if let Some(storyboard_index) = shot.storyboard_index {
+            out.push_str(&format!(" (sb_index={storyboard_index})"));
+        }
+        out.push('\n');
+        out.push_str(&format!(
+            "source={} · voiceover_ready={}\n",
+            shot.subtitle_source, shot.voiceover_ready
+        ));
+        out.push_str(&line);
+        out.push_str("\n\n");
+    }
+    out
+}
+
+pub(super) fn build_storyboard_voiceover_segments(
+    shots: &[StoryboardExportManifestShot],
+) -> StoryboardExportVoiceoverSegments<'static> {
+    let mut cursor_ms = 0_u64;
+    let mut ready_count = 0_usize;
+    let segments = shots
+        .iter()
+        .map(|shot| {
+            let duration_seconds = parse_storyboard_duration_seconds(shot.duration.as_deref());
+            let start_ms = cursor_ms;
+            let end_ms = start_ms + (duration_seconds as u64 * 1000);
+            cursor_ms = end_ms;
+            if shot.voiceover_ready {
+                ready_count += 1;
+            }
+            StoryboardExportVoiceoverSegment {
+                storyboard_id: shot.storyboard_id,
+                order_index: shot.order_index,
+                storyboard_index: shot.storyboard_index,
+                track_id: shot.track_id,
+                start_ms,
+                end_ms,
+                duration_seconds,
+                text: resolve_shot_script_line(shot),
+                subtitle_source: shot.subtitle_source,
+                voiceover_ready: shot.voiceover_ready,
+                voiceover_audio_url: shot.voiceover_audio_url.clone(),
+                voiceover_asset_ready: shot.voiceover_asset_ready,
+            }
+        })
+        .collect::<Vec<_>>();
+    let placeholder_count = segments.len().saturating_sub(ready_count);
+    StoryboardExportVoiceoverSegments {
+        export_type: "storyboard_voiceover_segments",
+        shot_count: segments.len(),
+        ready_count,
+        placeholder_count,
+        total_duration_ms: cursor_ms,
+        shots: segments,
+    }
+}
+
+pub(super) fn build_storyboard_assembly_plan(
+    shots: &[StoryboardExportManifestShot],
+) -> StoryboardExportAssemblyPlan<'static> {
+    let mut cursor_ms = 0_u64;
+    let mut audio_ready_count = 0_usize;
+    let assembly_shots = shots
+        .iter()
+        .map(|shot| {
+            let duration_seconds = parse_storyboard_duration_seconds(shot.duration.as_deref());
+            let start_ms = cursor_ms;
+            let end_ms = start_ms + (duration_seconds as u64 * 1000);
+            cursor_ms = end_ms;
+            if shot.voiceover_ready {
+                audio_ready_count += 1;
+            }
+            StoryboardExportAssemblyShot {
+                storyboard_id: shot.storyboard_id,
+                order_index: shot.order_index,
+                storyboard_index: shot.storyboard_index,
+                track_id: shot.track_id,
+                start_ms,
+                end_ms,
+                duration_seconds,
+                image_filename: shot.image_filename.clone(),
+                image_source: shot.image_source.clone(),
+                subtitle_text: resolve_shot_script_line(shot),
+                subtitle_source: shot.subtitle_source,
+                voiceover_ready: shot.voiceover_ready,
+                voiceover_audio_url: shot.voiceover_audio_url.clone(),
+                voiceover_asset_ready: shot.voiceover_asset_ready,
+                suggested_transition: "cut",
+            }
+        })
+        .collect::<Vec<_>>();
+    StoryboardExportAssemblyPlan {
+        export_type: "storyboard_assembly_plan",
+        shot_count: assembly_shots.len(),
+        total_duration_ms: cursor_ms,
+        audio_ready_count,
+        placeholder_audio_count: assembly_shots.len().saturating_sub(audio_ready_count),
+        shots: assembly_shots,
+    }
+}
+
+fn resolve_shot_script_line(shot: &StoryboardExportManifestShot) -> String {
+    shot.subtitle_text
+        .as_deref()
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .map(str::to_string)
+        .or_else(|| {
+            shot.prompt
+                .as_deref()
+                .map(str::trim)
+                .filter(|value| !value.is_empty())
+                .map(str::to_string)
+        })
+        .unwrap_or_else(|| format!("Shot {}", shot.storyboard_id))
+}
+
+fn format_srt_timestamp(total_ms: u64) -> String {
+    let hours = total_ms / 3_600_000;
+    let minutes = (total_ms % 3_600_000) / 60_000;
+    let seconds = (total_ms % 60_000) / 1_000;
+    let millis = total_ms % 1_000;
+    format!("{hours:02}:{minutes:02}:{seconds:02},{millis:03}")
+}
+
+fn opt_i32_csv(value: Option<i32>) -> String {
+    value.map(|v| v.to_string()).unwrap_or_default()
+}
+
+fn opt_str_csv(value: Option<&str>) -> String {
+    value.map(csv_escape).unwrap_or_default()
+}
+
+fn csv_escape(value: &str) -> String {
+    if value.contains([',', '"', '\n', '\r']) {
+        format!("\"{}\"", value.replace('"', "\"\""))
+    } else {
+        value.to_string()
+    }
+}
+
+async fn fetch_storyboard_export_bytes(
+    state: &AppState,
+    owner_user_id: uuid::Uuid,
+    numeric_id: i32,
+    file_path: &str,
+) -> Result<StoryboardExportFile, ApiError> {
+    match parse_storyboard_export_source(file_path, numeric_id)? {
+        StoryboardExportSource::DataUri { extension, bytes } => Ok(StoryboardExportFile {
+            filename: format!("storyboard-{numeric_id}.{extension}"),
+            bytes,
+        }),
+        StoryboardExportSource::RemoteUrl { url } => {
+            let resp = state.http_client.get(&url).send().await.map_err(|e| {
+                bad_request_i18n(
+                    &format!("failed to fetch storyboard {numeric_id} image: {e}"),
+                    &format!("获取 storyboard {numeric_id} 图片失败：{e}"),
+                )
+            })?;
+            if !resp.status().is_success() {
+                return Err(bad_request_i18n(
+                    &format!(
+                        "failed to fetch storyboard {numeric_id} image: upstream status {}",
+                        resp.status()
+                    ),
+                    &format!(
+                        "获取 storyboard {numeric_id} 图片失败：上游状态码 {}",
+                        resp.status()
+                    ),
+                ));
+            }
+            let content_type = resp
+                .headers()
+                .get(header::CONTENT_TYPE)
+                .and_then(|v| v.to_str().ok())
+                .map(str::to_string);
+            let bytes = resp.bytes().await.map_err(|e| {
+                bad_request_i18n(
+                    &format!("failed to read storyboard {numeric_id} image: {e}"),
+                    &format!("读取 storyboard {numeric_id} 图片失败：{e}"),
+                )
+            })?;
+            let extension = infer_export_extension(&url, content_type.as_deref());
+            Ok(StoryboardExportFile {
+                filename: format!("storyboard-{numeric_id}.{extension}"),
+                bytes: bytes.to_vec(),
+            })
+        }
+        StoryboardExportSource::AbsolutePath { path } => {
+            let bytes = tokio::fs::read(&path).await.map_err(|e| {
+                bad_request_i18n(
+                    &format!("failed to read storyboard {numeric_id} file: {e}"),
+                    &format!("读取 storyboard {numeric_id} 文件失败：{e}"),
+                )
+            })?;
+            let extension = path
+                .extension()
+                .and_then(|s| s.to_str())
+                .filter(|s| !s.is_empty())
+                .unwrap_or("png");
+            Ok(StoryboardExportFile {
+                filename: format!("storyboard-{numeric_id}.{extension}"),
+                bytes,
+            })
+        }
+        StoryboardExportSource::LocalStorage { relative_path } => {
+            let base = state.local_asset_image_dir.as_ref().ok_or_else(|| {
+                bad_request_i18n(
+                    &format!(
+                        "storyboard {numeric_id} uses local storage but no local image directory is configured"
+                    ),
+                    &format!(
+                        "storyboard {numeric_id} 使用本地存储，但未配置本地图片目录"
+                    ),
+                )
+            })?;
+            let local_path = base.join(owner_user_id.to_string()).join(relative_path);
+            let bytes = tokio::fs::read(&local_path).await.map_err(|e| {
+                bad_request_i18n(
+                    &format!("failed to read storyboard {numeric_id} local file: {e}"),
+                    &format!("读取 storyboard {numeric_id} 本地文件失败：{e}"),
+                )
+            })?;
+            let extension = local_path
+                .extension()
+                .and_then(|s| s.to_str())
+                .filter(|s| !s.is_empty())
+                .unwrap_or("png");
+            Ok(StoryboardExportFile {
+                filename: format!("storyboard-{numeric_id}.{extension}"),
+                bytes,
+            })
+        }
+    }
+}
