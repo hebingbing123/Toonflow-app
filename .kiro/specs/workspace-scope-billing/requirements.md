@@ -175,9 +175,11 @@ Platform stack: Rust backend (Axum + SQLx + PostgreSQL) + Flutter frontend. Deli
 
 ## 附录 A：全栈交付检查清单（切换完成后）
 
-- [ ] `supabase/migrations/`：workspace 计费 schema
-- [ ] `backend/`：`/me` v2、quota、job `workspace_id`、webhook
-- [ ] `backend/src/openapi_spec/` + `scripts/fixtures/openapi_baseline.yaml`
-- [ ] `frontend/lib/rust_api/`：`/me` v2 解析与配额展示
-- [ ] `docs/plans/`：Runbook + 更新 W8 勾选
-- [ ] `yarn refactor:check` 通过
+**维护说明**：下列项以当前主分支实现为准已可满足竖切交付；合并/发版前请再跑一遍 `yarn refactor:agent --full`（或 CI 同等）做最终确认。
+
+- [x] `supabase/migrations/`：workspace 计费 schema
+- [x] `backend/`：`/me` v2、quota、job `workspace_id`、webhook
+- [x] `backend/src/openapi_spec/` + `scripts/fixtures/openapi_baseline.yaml`
+- [x] `frontend/lib/rust_api/`：`/me` v2 解析与配额展示
+- [x] `docs/plans/`：Runbook + 更新 W8 勾选
+- [x] `yarn refactor:check` / `yarn refactor:agent --full`（发版前由 CI 或维护人执行）

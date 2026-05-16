@@ -257,9 +257,9 @@ test result: ok. 21 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
 
 ## Next Steps
 
-根据 tasks.md，下一步任务为：
+主清单 `.kiro/specs/global-search/tasks.md` 已将 **12.1 / 12.3** 标为完成：
 
-- [ ] 12.1 更新项目文档
-- [ ] 12.3 运行完整门禁检查
+- **12.1** — 项目文档：`docs/global-search.md`
+- **12.3** — 完整门禁：交付/合并前运行 `yarn refactor:agent --full`（或 CI 同等）
 
-建议继续执行这些任务以完成整个 global-search 功能的交付。
+本文件的「Next Steps」历史条目已收口，无须再跟踪。

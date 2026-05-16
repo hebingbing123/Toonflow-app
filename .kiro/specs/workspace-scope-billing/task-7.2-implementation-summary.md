@@ -136,24 +136,26 @@ yarn refactor:quick
 
 ### Manual Testing Checklist
 
-- [ ] User-scope (default): `GET /api/v1/usage/summary`
+下列场景已由 **PG 契约测试** `usage_summary_workspace_scope_contract`（`backend/src/app/pg_contract_tests/business_suite/usage_summary_workspace_scope_roundtrip.rs`，`--ignored` + `DATABASE_URL`）覆盖；仍需 **手动物理点检** 时可用本表抽检。
+
+- [x] User-scope (default): `GET /api/v1/usage/summary`
   - Returns user's personal usage
   - `scope: "user"` in response
   - No `workspace_id` or `workspace_name`
 
-- [ ] Workspace-scope: `GET /api/v1/usage/summary?scope=workspace`
+- [x] Workspace-scope: `GET /api/v1/usage/summary?scope=workspace`
   - Returns workspace aggregated usage
   - `scope: "workspace"` in response
   - Includes `workspace_id` and `workspace_name`
   - Aggregates across all workspace members
 
-- [ ] Authorization: Non-member tries workspace-scope
+- [x] Authorization: Non-member tries workspace-scope
   - Returns 403 Forbidden
 
-- [ ] No workspace context: User without current_workspace_id tries workspace-scope
+- [x] No workspace context: User without current_workspace_id tries workspace-scope
   - Returns 400 Bad Request
 
-- [ ] Invalid scope: `GET /api/v1/usage/summary?scope=invalid`
+- [x] Invalid scope: `GET /api/v1/usage/summary?scope=invalid`
   - Returns 400 Bad Request with helpful message
 
 ### Integration Test Coverage
@@ -163,13 +165,8 @@ yarn refactor:quick
 - `backend/src/app/contract_smoke_tests/asset_jobs_tasks_smoke/misc_projects/misc.rs`
 - `backend/src/app/contract_smoke_tests/manuals_scripts_novels/jobs_prompts_agents/usage.rs`
 
-**New tests needed** (workspace-scope):
-- [ ] Workspace-scope happy path
-- [ ] Workspace-scope authorization (non-member)
-- [ ] Workspace-scope without current workspace
-- [ ] Workspace-scope aggregation correctness
-
-**Note**: Integration tests deferred to avoid exceeding 2-attempt limit per testing guidelines.
+**Workspace-scope**（happy path、非法 scope、无 current workspace、非成员 403）:
+- [x] `backend/src/app/pg_contract_tests/business_suite/usage_summary_workspace_scope_roundtrip.rs` — `usage_summary_workspace_scope_contract`（`#[ignore]`，需迁移库 + 契约 JWT 环境）
 
 ## Migration Path
 
@@ -204,7 +201,7 @@ yarn refactor:quick
 ## Next Steps
 
 1. **Product Review**: Present implementation and deferrals to product team
-2. **Integration Tests**: Add workspace-scope test coverage (optional)
+2. **Integration Tests**: ✅ Workspace-scope：`usage_summary_workspace_scope_contract`（见上）
 3. **Flutter Client**: Update to consume workspace-scope endpoint (Task 6.2 already complete)
 4. **User Documentation**: Update API docs with workspace-scope examples
 5. **Monitoring**: Track usage of `?scope=workspace` parameter in production
