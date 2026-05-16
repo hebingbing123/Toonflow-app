@@ -1,7 +1,7 @@
 # Billing Webhook Retention Policy
 
-**Related**: Workspace-scope billing Task 8.2 (PII hygiene)  
-**Status**: Draft  
+**Related**: Workspace-scope billing Task 8.2 (PII hygiene); [`billing-webhook-pii-runbook.md`](./billing-webhook-pii-runbook.md)  
+**Status**: Policy draft; runbook baseline documented  
 **Owner**: Ops/Compliance Team
 
 **Boundary**: this policy is written against the future billing-workstream because webhook payload hygiene matters regardless of the final attribution model; unless a separate migration is approved, current product billing semantics still remain user-scope.
@@ -153,10 +153,10 @@ ON public.app_billing_webhook_event TO authenticated;
 
 ## Implementation Checklist
 
-- [ ] Deploy database access controls (RLS or role-based)
+- [x] Deploy database access controls (RLS or role-based) — see `supabase/migrations/20260410000000_billing_webhook_payload_access_control.sql`
 - [ ] Implement automated scrubbing job (optional)
-- [ ] Document manual scrubbing procedure for user deletion
-- [ ] Add retention policy to ops runbook
+- [x] Document manual scrubbing procedure for user deletion — baseline guidance in [`billing-webhook-pii-runbook.md`](./billing-webhook-pii-runbook.md) §4
+- [x] Add retention policy to ops runbook — see [`billing-webhook-pii-runbook.md`](./billing-webhook-pii-runbook.md) §2
 - [ ] Train ops team on PII handling
 - [ ] Schedule annual policy review
 
@@ -189,5 +189,6 @@ If regulatory audit requires access to historical webhook data:
 ## References
 
 - PII Hygiene Audit: `.kiro/specs/workspace-scope-billing/pii-hygiene-audit.md`
+- Ops Runbook: `docs/plans/billing-webhook-pii-runbook.md`
 - Workspace Billing Requirements: `.kiro/specs/workspace-scope-billing/requirements.md` (Requirement 7.2)
 - Cutover Runbook: `docs/plans/workspace-billing-cutover-runbook.md`
