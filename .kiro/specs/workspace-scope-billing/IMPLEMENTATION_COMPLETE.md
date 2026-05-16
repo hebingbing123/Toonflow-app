@@ -81,12 +81,13 @@ The workspace-scope billing implementation is **complete and production-ready**.
 
 ### 📋 Remaining Parent Tasks (5/43)
 
-These are parent tasks that will auto-complete when the task system processes the completed subtasks:
-- [ ] Task 0 (parent) - All 3 subtasks complete
-- [ ] Task 1 (parent) - All 3 subtasks complete
-- [ ] Task 5 (parent) - All 4 subtasks complete
-- [ ] Task 7 (parent) - All 2 subtasks complete
-- [ ] Task 8 (parent) - All 2 subtasks complete
+主任务在子任务全部 `[x]` 后即视为完成（与上表一致）：
+
+- [x] Task 0 (parent) - All 3 subtasks complete
+- [x] Task 1 (parent) - All 3 subtasks complete
+- [x] Task 5 (parent) - All 4 subtasks complete
+- [x] Task 7 (parent) - All 2 subtasks complete
+- [x] Task 8 (parent) - All 2 subtasks complete
 
 ---
 

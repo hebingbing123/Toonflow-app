@@ -264,9 +264,9 @@ BillingWebhookEventItem {
 - [x] Review quota denial logs for PII leakage
 - [x] Review webhook event storage for PII
 - [x] Review billing event audit endpoint for PII exposure
-- [ ] Document webhook payload retention policy
-- [ ] Implement database access controls for webhook payloads
-- [ ] Update ops runbook with PII handling guidelines
+- [x] Document webhook payload retention policy — 见 `docs/plans/billing-webhook-pii-runbook.md` §2
+- [x] Implement database access controls for webhook payloads — 见 `supabase/migrations/20260410000000_billing_webhook_payload_access_control.sql` 与运行手册 §3
+- [x] Update ops runbook with PII handling guidelines — 见 `docs/plans/billing-webhook-pii-runbook.md`
 
 ---
 
@@ -274,7 +274,7 @@ BillingWebhookEventItem {
 
 The workspace billing implementation **maintains good PII hygiene** with aggregates-only exposure in all ops endpoints and logs. The only PII concern is the `app_billing_webhook_event.payload` column, which stores full webhook JSON for audit purposes. This is **acceptable** with proper access controls and retention policies.
 
-**Task 8.2 Status**: ✅ **COMPLIANT** - Ready to mark complete after documenting retention policy and access controls.
+**Task 8.2 Status**: ✅ **COMPLIANT** — 保留策略、库侧访问控制与运维指引已落在 `docs/plans/billing-webhook-pii-runbook.md` 与上述迁移。
 
 ---
 
