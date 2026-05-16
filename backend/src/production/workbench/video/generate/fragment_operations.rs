@@ -340,7 +340,7 @@ fn compact_negative_fragment_families(fragments: Vec<String>) -> Vec<String> {
             compacted.push((idx, fragment));
         }
     }
-    compacted.sort_by(|a, b| a.0.cmp(&b.0));
+    compacted.sort_by_key(|item| item.0);
     compact_rushed_motion_and_jerky_fragment_pair(
         compacted
             .into_iter()

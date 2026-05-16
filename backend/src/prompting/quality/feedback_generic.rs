@@ -219,43 +219,39 @@ fn score_quality_review_negative_fragment_for_focus(fragment: &str, focus_tags: 
     let mut score = 0;
     for tag in focus_tags {
         match tag.as_str() {
-            "delivery_realism" => {
+            "delivery_realism"
                 if normalized.contains("lip-sync")
                     || normalized.contains("delivery")
                     || normalized.contains("expression")
-                    || normalized.contains("monotone")
-                {
-                    score += 40;
-                }
+                    || normalized.contains("monotone") =>
+            {
+                score += 40;
             }
-            "emotion_arc" => {
+            "emotion_arc"
                 if normalized.contains("expression")
                     || normalized.contains("emotion")
                     || normalized.contains("mood")
                     || normalized.contains("frantic")
-                    || normalized.contains("oppressive")
-                {
-                    score += 34;
-                }
+                    || normalized.contains("oppressive") =>
+            {
+                score += 34;
             }
-            "identity_continuity" => {
+            "identity_continuity"
                 if normalized.contains("face")
                     || normalized.contains("identity")
                     || normalized.contains("costume")
-                    || normalized.contains("character")
-                {
-                    score += 38;
-                }
+                    || normalized.contains("character") =>
+            {
+                score += 38;
             }
-            "lighting_realism" => {
+            "lighting_realism"
                 if normalized.contains("light")
                     || normalized.contains("backlight")
                     || normalized.contains("silhouette")
                     || normalized.contains("neon")
-                    || normalized.contains("reflection")
-                {
-                    score += 36;
-                }
+                    || normalized.contains("reflection") =>
+            {
+                score += 36;
             }
             _ => {}
         }

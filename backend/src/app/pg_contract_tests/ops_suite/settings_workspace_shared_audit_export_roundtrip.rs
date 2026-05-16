@@ -85,6 +85,7 @@ async fn settings_workspace_shared_audit_export_async_worker_roundtrip() {
         .connect(&url)
         .await
         .expect("connect DATABASE_URL");
+    ensure_contract_auth_user(&pool).await;
 
     let sub = Uuid::parse_str(CONTRACT_USER_SUB).unwrap();
     let token = jwt_fixture::encode_supabase_style(sub, secret.as_bytes());
@@ -212,6 +213,7 @@ async fn settings_workspace_shared_audit_export_active_limit_returns_429() {
         .connect(&url)
         .await
         .expect("connect DATABASE_URL");
+    ensure_contract_auth_user(&pool).await;
 
     let sub = Uuid::parse_str(CONTRACT_USER_SUB).unwrap();
     let token = jwt_fixture::encode_supabase_style(sub, secret.as_bytes());

@@ -448,7 +448,7 @@ pub async fn detect_quality_degradation(
         })
         .collect();
 
-    common_degradation_stages.sort_by(|a, b| b.2.cmp(&a.2));
+    common_degradation_stages.sort_by_key(|stage| std::cmp::Reverse(stage.2));
 
     Ok(QualityDegradationSummary {
         project_id,

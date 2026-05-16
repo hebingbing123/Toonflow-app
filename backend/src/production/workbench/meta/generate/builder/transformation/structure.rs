@@ -331,10 +331,8 @@ pub fn score_memory_fragment_human_performance_detail(
                 }
             }
         }
-        Some("语气") => {
-            if memory_fragment_has_high_signal_voice_detail(&normalized) {
-                score += 3;
-            }
+        Some("语气") if memory_fragment_has_high_signal_voice_detail(&normalized) => {
+            score += 3;
         }
         _ => {}
     }

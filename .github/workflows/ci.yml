@@ -63,6 +63,10 @@ jobs:
           shopt -s nullglob
           for test_rs in tests/*.rs; do
             name=$(basename "$test_rs" .rs)
+            if [[ "$name" == "search_api_test" && -z "${DATABASE_URL:-}" ]]; then
+              echo "==> skipping $name: DATABASE_URL is not set"
+              continue
+            fi
             echo "==> integration test crate: $name"
             cargo test -p toonflow-server --test "$name" -j 1 -- --test-threads=1
           done
@@ -114,6 +118,6 @@ jobs:
           set -euo pipefail
           eval "$(supabase status -o env)"
           export DATABASE_URL="${DB_URL:?missing DB_URL from supabase status}"
-          export SUPABASE_JWT_SECRET="${JWT_SECRET:?missing JWT_SECRET from supabase status}"
+          export SUPABASE_JWT_SECRET="${JWT_SECRET:-super-secret-jwt-token-with-at-least-32-characters-long}"
           cd backend
-          cargo test settings_workspace_shared_audit_export -- --ignored --nocapture
+          cargo test settings_workspace_shared_audit_export -- --ignored --nocapture --test-threads=1

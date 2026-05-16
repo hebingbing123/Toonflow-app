@@ -6514,7 +6514,7 @@
   "scriptEditorStoryboardsReadinessBlockingMissingLiveActionPerformanceNotes": "表演 / 口播约束",
   "scriptEditorStoryboardsReadinessBlockingCandidatePending": "候选确认",
   "scriptEditorStoryboardsReadinessBlockingBlockingJob": "生成任务进行中",
-  "scriptEditorStoryboardsReadinessBlockingUnknown": "未知阻塞项（{code}）",
+  "scriptEditorStoryboardsReadinessBlockingUnknown": "未识别的就绪阻塞项（{code}）",
   "@scriptEditorStoryboardsReadinessBlockingUnknown": {
     "placeholders": {
       "code": {

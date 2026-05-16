@@ -281,20 +281,11 @@ fn score_contextual_negative_style_fragment_bias(
                 1
             }
         }
-        "lighting" | "environment" | "sound" => {
-            if pressure.prefer_visual_continuity_memory_recall {
-                9
-            } else {
-                1
-            }
+        "lighting" | "environment" | "sound" if pressure.prefer_visual_continuity_memory_recall => {
+            9
         }
-        "camera" | "motion" => {
-            if pressure.prefer_visual_continuity_memory_recall {
-                5
-            } else {
-                0
-            }
-        }
+        "lighting" | "environment" | "sound" => 1,
+        "camera" | "motion" if pressure.prefer_visual_continuity_memory_recall => 5,
         _ => 0,
     }
 }
