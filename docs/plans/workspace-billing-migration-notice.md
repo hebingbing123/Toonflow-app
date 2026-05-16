@@ -122,7 +122,7 @@ Before ANY workspace-scope billing implementation may proceed, the following pre
 
 #### v2 (Workspace-Aware — Opt-In)
 
-**Request**: `GET /api/v1/me?v=2` OR `Accept: application/vnd.toonflow.me+json; version=2`
+**Request**: `GET /api/v1/me?v=2`
 
 **Response** (nested structure):
 ```json
@@ -155,12 +155,14 @@ Before ANY workspace-scope billing implementation may proceed, the following pre
 
 ### 2.2 Version Negotiation
 
-Clients MUST use ONE of the following methods to request v2:
+Clients MUST use the query parameter to request v2:
 
-1. **Query Parameter** (Recommended): `GET /api/v1/me?v=2`
-2. **Accept Header**: `Accept: application/vnd.toonflow.me+json; version=2`
+- **Query Parameter**: `GET /api/v1/me?v=2`
 
 **Default Behavior**: Omitting version parameters returns v1 response.
+
+Accept-header negotiation is not implemented for `/me`; see
+[`adr-me-api-version-negotiation.md`](./adr-me-api-version-negotiation.md).
 
 ---
 

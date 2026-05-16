@@ -176,7 +176,7 @@ let is_v2 = params.v.as_deref() == Some("2")
 - [x] **Query parameter struct** (`MeQueryParams`) defined
 - [x] **Handler logic** checks `params.v == "2"` and routes to v2 response
 - [x] **OpenAPI annotation** documents `v` parameter
-- [ ] **ADR documented** (this file) — **Task 5.2 completion**
+- [x] **ADR documented** (this file) — **Task 5.2 completion**
 - [x] **Migration notice** updated with query parameter examples
 - [x] **Tests** cover v1 (default) and v2 (`?v=2`) responses
 
