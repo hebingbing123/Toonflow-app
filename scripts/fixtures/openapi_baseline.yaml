@@ -1997,6 +1997,40 @@ components:
           - string
           - 'null'
       type: object
+    CloneVoiceRequest:
+      properties:
+        audioBase64:
+          description: Raw audio bytes, standard base64 (optional data-URL prefix stripped).
+          type:
+          - string
+          - 'null'
+        displayName:
+          type: string
+        locale:
+          type:
+          - string
+          - 'null'
+        projectId:
+          format: uuid
+          type: string
+        sampleBase64:
+          type:
+          - string
+          - 'null'
+      required:
+      - projectId
+      - displayName
+      type: object
+    CloneVoiceResponse:
+      properties:
+        customVoiceId:
+          type: string
+        provider:
+          type: string
+      required:
+      - customVoiceId
+      - provider
+      type: object
     CompressionRules:
       description: 压缩规则
       properties:
@@ -2670,6 +2704,12 @@ components:
           type:
           - string
           - 'null'
+        qualityGateStrategy:
+          description: Quality gate enforcement strategy (off/warn/block)
+          example: block
+          type:
+          - string
+          - 'null'
         storyStylePack:
           description: 故事风格技能包路径（如 `story_skills/Sweet_romance_novel`）
           type:
@@ -2715,6 +2755,19 @@ components:
           type:
           - string
           - 'null'
+      type: object
+    CreateProjectCharacterBody:
+      properties:
+        assetId:
+          format: uuid
+          type:
+          - string
+          - 'null'
+        name:
+          type: string
+        voiceConfig: {}
+      required:
+      - name
       type: object
     CreateProjectMemberBody:
       additionalProperties: false
@@ -2924,6 +2977,17 @@ components:
       - dimension
       - displayName
       - weight
+      type: object
+    EmotionPresetItem:
+      properties:
+        azure_style:
+          type:
+          - string
+          - 'null'
+        id:
+          type: string
+      required:
+      - id
       type: object
     EndpointMetrics:
       description: Aggregated metrics for a specific endpoint.
@@ -5081,6 +5145,19 @@ components:
         voiceProfile:
           description: 声线配置标识
       type: object
+    PatchProjectCharacterBody:
+      properties:
+        assetId:
+          format: uuid
+          type:
+          - string
+          - 'null'
+        name:
+          type:
+          - string
+          - 'null'
+        voiceConfig: {}
+      type: object
     PatchProjectMemberBody:
       additionalProperties: false
       properties:
@@ -5395,6 +5472,36 @@ components:
           type:
           - string
           - 'null'
+      type: object
+    ProjectCharacterRow:
+      properties:
+        assetId:
+          format: uuid
+          type:
+          - string
+          - 'null'
+        createdAt:
+          format: date-time
+          type: string
+        id:
+          format: uuid
+          type: string
+        name:
+          type: string
+        projectId:
+          format: uuid
+          type: string
+        updatedAt:
+          format: date-time
+          type: string
+        voiceConfig: {}
+      required:
+      - id
+      - projectId
+      - name
+      - voiceConfig
+      - createdAt
+      - updatedAt
       type: object
     ProjectDetailResponse:
       properties:
@@ -5761,6 +5868,11 @@ components:
         schema_version:
           format: int32
           type: integer
+        storyboard_gaps:
+          description: 按分镜聚合的导出缺口（与 **`issues`** 一致；空表示无缺口）。
+          items:
+            $ref: '#/components/schemas/ShortVideoExportCheckStoryboardGap'
+          type: array
         summary:
           $ref: '#/components/schemas/ShortVideoExportCheckSummary'
       required:
@@ -5768,6 +5880,7 @@ components:
       - export_ready
       - summary
       - issues
+      - storyboard_gaps
       - quality_gate
       type: object
     ProjectShortVideoReadinessResponse:
@@ -5786,6 +5899,41 @@ components:
       - schema_version
       - rollup
       - storyboards
+      type: object
+    ProjectShortVideoTimelineResponse:
+      properties:
+        revision:
+          description: Monotonic revision counter (**NLE M4a**).
+          format: int32
+          type:
+          - integer
+          - 'null'
+        schemaVersion:
+          format: int32
+          type: integer
+        scripts:
+          items:
+            $ref: '#/components/schemas/ShortVideoTimelineScriptGroup'
+          type: array
+        timelineVersion:
+          description: ISO-8601 timestamp of last persisted timeline (**optimistic concurrency**).
+          type:
+          - string
+          - 'null'
+        tracks:
+          $ref: '#/components/schemas/ShortVideoTimelineTracks'
+        voiceoverWaveformPeaks:
+          description: Downsampled peaks for voiceover UI (**NLE M3** stub).
+          items:
+            format: double
+            type: number
+          type:
+          - array
+          - 'null'
+      required:
+      - schemaVersion
+      - tracks
+      - scripts
       type: object
     ProjectStatsResponse:
       description: |-
@@ -6336,6 +6484,46 @@ components:
       required:
       - ok
       - issues
+      type: object
+    PutProjectShortVideoTimelineBody:
+      additionalProperties: false
+      properties:
+        expectedRevision:
+          format: int32
+          type:
+          - integer
+          - 'null'
+        expectedTimelineVersion:
+          type:
+          - string
+          - 'null'
+        schemaVersion:
+          format: int32
+          type: integer
+        tracks:
+          $ref: '#/components/schemas/ShortVideoTimelineTracks'
+      required:
+      - schemaVersion
+      - tracks
+      type: object
+    PutProjectShortVideoTimelineResponse:
+      properties:
+        revision:
+          format: int32
+          type: integer
+        schemaVersion:
+          format: int32
+          type: integer
+        timelineVersion:
+          type: string
+        updatedClipCount:
+          minimum: 0
+          type: integer
+      required:
+      - schemaVersion
+      - timelineVersion
+      - revision
+      - updatedClipCount
       type: object
     QualityComparison:
       description: Quality comparison between two stages.
@@ -7289,6 +7477,9 @@ components:
           type:
           - string
           - 'null'
+        export_gap:
+          $ref: '#/components/schemas/ShortVideoAssemblyShotExportGap'
+          description: Export-check gap facets for this shot (Wave 6 assembly API).
         sb_index:
           format: int32
           type:
@@ -7349,6 +7540,32 @@ components:
       - subtitle_source
       - voiceover_script_ready
       - voiceover_asset_ready
+      - export_gap
+      type: object
+    ShortVideoAssemblyShotExportGap:
+      description: Per-shot export gaps on assembly read model (same facets as export-check **`storyboard_gaps`**).
+      properties:
+        duration_anomaly:
+          type: boolean
+        gap_codes:
+          items:
+            type: string
+          type: array
+        has_blocking:
+          type: boolean
+        missing_selected_video:
+          type: boolean
+        missing_subtitle:
+          type: boolean
+        missing_voiceover:
+          type: boolean
+      required:
+      - gap_codes
+      - has_blocking
+      - missing_selected_video
+      - missing_subtitle
+      - missing_voiceover
+      - duration_anomaly
       type: object
     ShortVideoCandidateQualitySummary:
       description: 与当前装配快照中的分镜（`storyboard_numeric_id` 集合）对齐的坏例与评审计数。
@@ -7430,6 +7647,54 @@ components:
       - storyboard_id
       - storyboard_numeric_id
       type: object
+    ShortVideoExportCheckStoryboardGap:
+      description: Wave 6：按分镜聚合的导出缺口（与 **`issues`** 同源，便于 Space / 装配 UI 逐镜展示）。
+      properties:
+        duration_anomaly:
+          description: 时长未标明或不可解析（**`duration_*`** 类 code）。
+          type: boolean
+        gap_codes:
+          description: 去重后的 **`issues[].code`**（含 blocking 与 warning）。
+          items:
+            type: string
+          type: array
+        has_blocking:
+          description: 该分镜是否含至少一条 **`severity = blocking`** 的 issue。
+          type: boolean
+        missing_selected_video:
+          description: 未选定可用视频（含 **`missing_selected_media`** / **`selected_media_not_video`** / **`candidate_pending`**）。
+          type: boolean
+        missing_subtitle:
+          description: 字幕 / 口播文案缺失（**`subtitle_placeholder`** / **`subtitle_empty`**）。
+          type: boolean
+        missing_voiceover:
+          description: 旁白未就绪（**`voiceover_*`** 类 code）。
+          type: boolean
+        sb_index:
+          format: int32
+          type:
+          - integer
+          - 'null'
+        script_numeric_id:
+          format: int32
+          type: integer
+        storyboard_id:
+          format: uuid
+          type: string
+        storyboard_numeric_id:
+          format: int32
+          type: integer
+      required:
+      - script_numeric_id
+      - storyboard_id
+      - storyboard_numeric_id
+      - gap_codes
+      - has_blocking
+      - missing_selected_video
+      - missing_subtitle
+      - missing_voiceover
+      - duration_anomaly
+      type: object
     ShortVideoExportCheckSummary:
       description: '`GET /api/v1/projects/{project_id}/short-video-export-check` — D2 导出前检查与摘要。'
       properties:
@@ -7477,6 +7742,56 @@ components:
       - enforced
       - pending_review_bad_case_count
       type: object
+    ShortVideoPreAssemblyBody:
+      additionalProperties: false
+      properties:
+        scriptNumericId:
+          description: 'Optional filter: only shots under this script **`numeric_id`**.'
+          format: int32
+          type:
+          - integer
+          - 'null'
+      type: object
+    ShortVideoPreAssemblyEnqueueResponse:
+      properties:
+        job_id:
+          format: uuid
+          type: string
+        schema_version:
+          format: int32
+          type: integer
+        summary:
+          $ref: '#/components/schemas/ShortVideoPreAssemblySummary'
+      required:
+      - schema_version
+      - job_id
+      - summary
+      type: object
+    ShortVideoPreAssemblySummary:
+      description: '**`POST …/short-video-pre-assembly`** — batch rough-cut manifest enqueue summary.'
+      properties:
+        blocking_shot_count:
+          format: int64
+          type: integer
+        ready_video_count:
+          format: int64
+          type: integer
+        ready_voiceover_count:
+          format: int64
+          type: integer
+        shot_count:
+          format: int64
+          type: integer
+        total_duration_seconds:
+          format: int64
+          type: integer
+      required:
+      - shot_count
+      - blocking_shot_count
+      - ready_video_count
+      - ready_voiceover_count
+      - total_duration_seconds
+      type: object
     ShortVideoQualityStageBucket:
       description: L3：**成片候选 / 分镜级**质量评审摘要（只读；与 **`GET /api/v1/quality/reviews`** 同一 `app_quality_review` 源）。
       properties:
@@ -7522,6 +7837,331 @@ components:
       - ready_count
       - blocked_count
       - by_reason
+      type: object
+    ShortVideoTimelineApplyTemplateBody:
+      properties:
+        templateId:
+          type: string
+      required:
+      - templateId
+      type: object
+    ShortVideoTimelineApplyTemplateResponse:
+      properties:
+        schemaVersion:
+          format: int32
+          type: integer
+        templateId:
+          type: string
+        timelineVersion:
+          type: string
+        videoClipCount:
+          minimum: 0
+          type: integer
+      required:
+      - schemaVersion
+      - timelineVersion
+      - templateId
+      - videoClipCount
+      type: object
+    ShortVideoTimelineBgmTrack:
+      properties:
+        assetUrl:
+          type:
+          - string
+          - 'null'
+        bgmStrategy:
+          type:
+          - string
+          - 'null'
+        enabled:
+          type: boolean
+        volume:
+          format: double
+          type: number
+      required:
+      - enabled
+      - volume
+      type: object
+    ShortVideoTimelinePreviewEnqueueResponse:
+      properties:
+        clipCount:
+          minimum: 0
+          type: integer
+        jobId:
+          format: uuid
+          type: string
+        schemaVersion:
+          format: int32
+          type: integer
+      required:
+      - schemaVersion
+      - jobId
+      - clipCount
+      type: object
+    ShortVideoTimelineReorderBody:
+      properties:
+        orderedStoryboardIds:
+          items:
+            format: int32
+            type: integer
+          type: array
+        scriptNumericId:
+          format: int32
+          type: integer
+      required:
+      - scriptNumericId
+      - orderedStoryboardIds
+      type: object
+    ShortVideoTimelineReorderResponse:
+      properties:
+        schemaVersion:
+          format: int32
+          type: integer
+        scriptNumericId:
+          format: int32
+          type: integer
+        updatedCount:
+          minimum: 0
+          type: integer
+      required:
+      - schemaVersion
+      - scriptNumericId
+      - updatedCount
+      type: object
+    ShortVideoTimelineRestoreBody:
+      additionalProperties: false
+      properties:
+        revision:
+          format: int32
+          type: integer
+      required:
+      - revision
+      type: object
+    ShortVideoTimelineRestoreResponse:
+      properties:
+        restoredFromRevision:
+          format: int32
+          type: integer
+        revision:
+          format: int32
+          type: integer
+        schemaVersion:
+          format: int32
+          type: integer
+        timelineVersion:
+          type: string
+      required:
+      - schemaVersion
+      - timelineVersion
+      - revision
+      - restoredFromRevision
+      type: object
+    ShortVideoTimelineRevisionItem:
+      properties:
+        createdAt:
+          type: string
+        createdBy:
+          format: uuid
+          type:
+          - string
+          - 'null'
+        revision:
+          format: int32
+          type: integer
+        summary:
+          type:
+          - string
+          - 'null'
+      required:
+      - revision
+      - createdAt
+      type: object
+    ShortVideoTimelineRevisionsResponse:
+      properties:
+        revisions:
+          items:
+            $ref: '#/components/schemas/ShortVideoTimelineRevisionItem'
+          type: array
+      required:
+      - revisions
+      type: object
+    ShortVideoTimelineScriptGroup:
+      properties:
+        script_name:
+          type:
+          - string
+          - 'null'
+        script_numeric_id:
+          format: int32
+          type: integer
+        shots:
+          items:
+            $ref: '#/components/schemas/ShortVideoTimelineShot'
+          type: array
+      required:
+      - script_numeric_id
+      - shots
+      type: object
+    ShortVideoTimelineShot:
+      description: 'Wave 7 / NLE M1: timeline shot with editable in/out trim.'
+      properties:
+        candidateStatus:
+          type:
+          - string
+          - 'null'
+        duration:
+          type:
+          - string
+          - 'null'
+        inMs:
+          description: Trim in-point on source media (milliseconds).
+          format: int64
+          type: integer
+        outMs:
+          description: Trim out-point on source media (milliseconds).
+          format: int64
+          type: integer
+        sbIndex:
+          format: int32
+          type:
+          - integer
+          - 'null'
+        selectedVideoUrl:
+          type:
+          - string
+          - 'null'
+        sourceUrl:
+          type:
+          - string
+          - 'null'
+        storyboardId:
+          format: uuid
+          type: string
+        storyboardNumericId:
+          format: int32
+          type: integer
+        subtitleSnippet:
+          type: string
+        thumbnailUrl:
+          type:
+          - string
+          - 'null'
+        voiceoverAudioUrl:
+          type:
+          - string
+          - 'null'
+      required:
+      - storyboardId
+      - storyboardNumericId
+      - subtitleSnippet
+      - inMs
+      - outMs
+      type: object
+    ShortVideoTimelineSubtitleCue:
+      properties:
+        endMs:
+          format: int64
+          type: integer
+        startMs:
+          format: int64
+          type: integer
+        storyboardNumericId:
+          format: int32
+          type:
+          - integer
+          - 'null'
+        styleId:
+          type:
+          - string
+          - 'null'
+        text:
+          type: string
+      required:
+      - startMs
+      - endMs
+      - text
+      type: object
+    ShortVideoTimelineTracks:
+      properties:
+        bgm:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/ShortVideoTimelineBgmTrack'
+        subtitles:
+          items:
+            $ref: '#/components/schemas/ShortVideoTimelineSubtitleCue'
+          type: array
+        templateId:
+          type:
+          - string
+          - 'null'
+        transitions:
+          items:
+            $ref: '#/components/schemas/ShortVideoTimelineTransition'
+          type: array
+        video:
+          items:
+            $ref: '#/components/schemas/ShortVideoTimelineVideoClip'
+          type: array
+        voiceover:
+          items:
+            $ref: '#/components/schemas/ShortVideoTimelineVoiceoverClip'
+          type: array
+      required:
+      - video
+      type: object
+    ShortVideoTimelineTransition:
+      properties:
+        durationMs:
+          format: int64
+          type: integer
+        type:
+          type: string
+      required:
+      - type
+      - durationMs
+      type: object
+    ShortVideoTimelineVideoClip:
+      properties:
+        effectPresetId:
+          type:
+          - string
+          - 'null'
+        inMs:
+          format: int64
+          type: integer
+        outMs:
+          format: int64
+          type: integer
+        sourceUrl:
+          type: string
+        storyboardNumericId:
+          format: int32
+          type: integer
+      required:
+      - storyboardNumericId
+      - sourceUrl
+      - inMs
+      - outMs
+      type: object
+    ShortVideoTimelineVoiceoverClip:
+      properties:
+        sourceUrl:
+          type: string
+        startMs:
+          format: int64
+          type: integer
+        storyboardNumericId:
+          format: int32
+          type: integer
+        volume:
+          format: double
+          type: number
+      required:
+      - storyboardNumericId
+      - startMs
+      - sourceUrl
+      - volume
       type: object
     SkillFileSnapshot:
       description: 技能文件快照
@@ -7991,6 +8631,40 @@ components:
       - task_id
       - status
       type: object
+    TtsPreviewRequest:
+      properties:
+        character_id:
+          format: uuid
+          type:
+          - string
+          - 'null'
+        emotion:
+          type:
+          - string
+          - 'null'
+        project_id:
+          format: uuid
+          type:
+          - string
+          - 'null'
+        provider:
+          type:
+          - string
+          - 'null'
+        speed:
+          format: float
+          type:
+          - number
+          - 'null'
+        text:
+          type: string
+        voice_id:
+          type:
+          - string
+          - 'null'
+      required:
+      - text
+      type: object
     TtsRetryRequest:
       properties:
         emotion:
@@ -8386,6 +9060,39 @@ components:
       required:
       - service
       - version
+      type: object
+    VoiceoverPreviewBody:
+      properties:
+        characterId:
+          format: uuid
+          type:
+          - string
+          - 'null'
+        emotion:
+          type:
+          - string
+          - 'null'
+        projectId:
+          format: uuid
+          type: string
+        provider:
+          type:
+          - string
+          - 'null'
+        speed:
+          format: float
+          type:
+          - number
+          - 'null'
+        text:
+          type: string
+        voice:
+          type:
+          - string
+          - 'null'
+      required:
+      - projectId
+      - text
       type: object
     WorkspaceAuditResponse:
       properties:
@@ -14854,6 +15561,66 @@ paths:
       - bearerAuth: []
       tags:
       - production
+  /api/v1/production/storyboard/set-character:
+    post:
+      operationId: postProductionStoryboardSetCharacterV1
+      requestBody:
+        content:
+          application/json:
+            schema: {}
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: {}
+          description: OK
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Not found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Conflict
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Server error
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unavailable
+      security:
+      - bearerAuth: []
+      tags:
+      - production
   /api/v1/production/storyboard/update-duration:
     post:
       operationId: postProductionStoryboardUpdateDurationV1
@@ -15034,6 +15801,34 @@ paths:
       - bearerAuth: []
       tags:
       - production
+  /api/v1/production/voiceover/preview:
+    post:
+      operationId: postProductionVoiceoverPreviewV1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VoiceoverPreviewBody'
+        required: true
+      responses:
+        '200':
+          description: audio/mpeg
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+      security:
+      - bearerAuth: []
+      tags:
+      - production
   /api/v1/production/workbench/add-track:
     post:
       operationId: postProductionWorkbenchAddTrackV1
@@ -15097,6 +15892,66 @@ paths:
   /api/v1/production/workbench/batch-generate-candidate-clips:
     post:
       operationId: postProductionWorkbenchBatchGenerateCandidateClipsV1
+      requestBody:
+        content:
+          application/json:
+            schema: {}
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: {}
+          description: OK
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Not found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Conflict
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Server error
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unavailable
+      security:
+      - bearerAuth: []
+      tags:
+      - production
+  /api/v1/production/workbench/confirm-storyboard-candidates:
+    post:
+      operationId: postProductionWorkbenchConfirmStoryboardCandidatesV1
       requestBody:
         content:
           application/json:
@@ -17374,6 +18229,110 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
           description: Unavailable
+      security:
+      - bearerAuth: []
+      tags:
+      - projects
+  /api/v1/projects/{project_id}/characters:
+    get:
+      operationId: list_project_characters
+      parameters:
+      - in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ProjectCharacterRow'
+                type: array
+          description: OK
+      security:
+      - bearerAuth: []
+      tags:
+      - projects
+    post:
+      operationId: create_project_character
+      parameters:
+      - in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProjectCharacterBody'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectCharacterRow'
+          description: Created
+      security:
+      - bearerAuth: []
+      tags:
+      - projects
+  /api/v1/projects/{project_id}/characters/{character_id}:
+    delete:
+      operationId: delete_project_character
+      parameters:
+      - in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - in: path
+        name: character_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      responses:
+        '204':
+          description: Deleted
+      security:
+      - bearerAuth: []
+      tags:
+      - projects
+    patch:
+      operationId: patch_project_character
+      parameters:
+      - in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - in: path
+        name: character_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchProjectCharacterBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectCharacterRow'
+          description: OK
       security:
       - bearerAuth: []
       tags:
@@ -20140,6 +21099,58 @@ paths:
       - bearerAuth: []
       tags:
       - projects
+  /api/v1/projects/{project_id}/short-video-pre-assembly:
+    post:
+      operationId: postProjectShortVideoPreAssemblyByProjectIdV1
+      parameters:
+      - description: Project UUID
+        in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShortVideoPreAssemblyBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShortVideoPreAssemblyEnqueueResponse'
+          description: OK
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Not found
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+          description: Unavailable
+      security:
+      - bearerAuth: []
+      tags:
+      - projects
   /api/v1/projects/{project_id}/short-video-readiness:
     get:
       operationId: getProjectShortVideoReadinessByProjectIdV1
@@ -20182,6 +21193,227 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorBody'
           description: Unavailable
+      security:
+      - bearerAuth: []
+      tags:
+      - projects
+  /api/v1/projects/{project_id}/short-video-timeline:
+    get:
+      operationId: getProjectShortVideoTimelineByProjectIdV1
+      parameters:
+      - description: Project UUID
+        in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectShortVideoTimelineResponse'
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+      security:
+      - bearerAuth: []
+      tags:
+      - projects
+    put:
+      operationId: putProjectShortVideoTimelineByProjectIdV1
+      parameters:
+      - description: Project UUID
+        in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutProjectShortVideoTimelineBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PutProjectShortVideoTimelineResponse'
+          description: OK
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '409':
+          description: Version conflict
+      security:
+      - bearerAuth: []
+      tags:
+      - projects
+  /api/v1/projects/{project_id}/short-video-timeline/apply-template:
+    post:
+      operationId: postProjectShortVideoTimelineApplyTemplateV1
+      parameters:
+      - description: Project UUID
+        in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShortVideoTimelineApplyTemplateBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShortVideoTimelineApplyTemplateResponse'
+          description: OK
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+      - bearerAuth: []
+      tags:
+      - projects
+  /api/v1/projects/{project_id}/short-video-timeline/preview:
+    post:
+      operationId: postProjectShortVideoTimelinePreviewByProjectIdV1
+      parameters:
+      - description: Project UUID
+        in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShortVideoTimelinePreviewEnqueueResponse'
+          description: OK
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+      security:
+      - bearerAuth: []
+      tags:
+      - projects
+  /api/v1/projects/{project_id}/short-video-timeline/reorder:
+    post:
+      operationId: postProjectShortVideoTimelineReorderV1
+      parameters:
+      - description: Project UUID
+        in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShortVideoTimelineReorderBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShortVideoTimelineReorderResponse'
+          description: OK
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+      - bearerAuth: []
+      tags:
+      - projects
+  /api/v1/projects/{project_id}/short-video-timeline/restore:
+    post:
+      operationId: postProjectShortVideoTimelineRestoreV1
+      parameters:
+      - description: Project UUID
+        in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShortVideoTimelineRestoreBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShortVideoTimelineRestoreResponse'
+          description: OK
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+      - bearerAuth: []
+      tags:
+      - projects
+  /api/v1/projects/{project_id}/short-video-timeline/revisions:
+    get:
+      operationId: getProjectShortVideoTimelineRevisionsV1
+      parameters:
+      - description: Project UUID
+        in: path
+        name: project_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShortVideoTimelineRevisionsResponse'
+          description: OK
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
       security:
       - bearerAuth: []
       tags:
@@ -24638,6 +25870,46 @@ paths:
           description: 服务器错误
       tags:
       - tts
+  /api/v1/tts/clone-voice:
+    post:
+      operationId: clone_voice
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CloneVoiceRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CloneVoiceResponse'
+          description: Cloned voice profile
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '503':
+          description: Provider not configured
+      summary: Clone a voice from a short audio sample (mock provider by default).
+      tags:
+      - tts
+  /api/v1/tts/emotion-presets:
+    get:
+      operationId: list_emotion_presets
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/EmotionPresetItem'
+                type: array
+          description: OK
+      summary: List supported drama emotion presets.
+      tags:
+      - tts
   /api/v1/tts/generate:
     post:
       operationId: generate_tts
@@ -24661,6 +25933,25 @@ paths:
         '500':
           description: 服务器错误
       summary: 生成单个镜头的 TTS 配音
+      tags:
+      - tts
+  /api/v1/tts/preview:
+    post:
+      operationId: preview_tts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TtsPreviewRequest'
+        required: true
+      responses:
+        '200':
+          description: audio/mpeg body
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+      summary: Generate a short MP3 preview without enqueueing a job.
       tags:
       - tts
   /api/v1/tts/retry:

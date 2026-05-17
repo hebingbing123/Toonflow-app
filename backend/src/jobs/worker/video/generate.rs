@@ -245,6 +245,14 @@ pub(crate) async fn run_video_generate(
         "script_numeric_id": script_numeric_id,
         "storyboard_numeric_id": storyboard_id,
     });
+    crate::short_video::writeback::persist_from_job_writeback_json(
+        pool,
+        project_numeric_id,
+        storyboard_id,
+        &writeback,
+    )
+    .await;
+
     if let Some(obj) = result.as_object_mut() {
         obj.insert("writeback".to_string(), writeback);
     }

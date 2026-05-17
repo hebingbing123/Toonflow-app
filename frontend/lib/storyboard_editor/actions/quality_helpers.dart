@@ -141,18 +141,34 @@ extension _StoryboardWorkbenchQualityActions on _StoryboardWorkbenchPanelState {
 
   Future<void> _generateVideoPrompt() async {
     final l10n = resolveAppLocalizationsForErrors(context);
+    await assertStoryboardReadyForVideoGeneration(
+      accessToken: widget.token,
+      projectUuid: widget.projectId,
+      storyboardNumericId: widget.storyNumericId,
+      l10n: l10n,
+    );
     final request = _buildCurrentVideoPromptRequest();
     final imageUrl = _currentStoryboardSourceImage();
-    final generated = await postWorkbenchGenerateVideoPromptV1(
-      widget.token,
-      projectUuid: widget.projectId,
-      scriptId: widget.scriptNumericId,
-      storyboardId: widget.storyNumericId,
-      autoQualityReview: _autoQualityReviewOnGeneratePrompt,
-      imageUrl: imageUrl,
-      description: request.description,
-      durationHint: request.durationSeconds,
-    );
+    late final GenerateVideoPromptResponse generated;
+    try {
+      generated = await postWorkbenchGenerateVideoPromptV1(
+        widget.token,
+        projectUuid: widget.projectId,
+        scriptId: widget.scriptNumericId,
+        storyboardId: widget.storyNumericId,
+        autoQualityReview: _autoQualityReviewOnGeneratePrompt,
+        imageUrl: imageUrl,
+        description: request.description,
+        durationHint: request.durationSeconds,
+        skipIfUnchanged: true,
+      );
+    } on RustApiException catch (e) {
+      final blocked = formatGenerationBlockedFromRustApiException(l10n, e);
+      if (blocked != null && blocked.isNotEmpty) {
+        throw FormatException(blocked);
+      }
+      rethrow;
+    }
     _applyGeneratedVideoPrompt(
       generated,
       signature: _buildVideoPromptSignature(

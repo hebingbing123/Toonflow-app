@@ -12,7 +12,9 @@ pub(crate) mod patch;
 pub(crate) mod production_overview;
 pub(crate) mod short_video_assembly;
 pub(crate) mod short_video_export_check;
+pub(crate) mod short_video_pre_assembly;
 pub(crate) mod short_video_readiness;
+pub(crate) mod short_video_timeline;
 pub(crate) mod stats;
 pub(crate) mod style_config;
 
@@ -29,6 +31,13 @@ pub(crate) use patch::patch_project_by_id;
 pub(crate) use production_overview::project_production_overview_by_id;
 pub(crate) use short_video_assembly::project_short_video_assembly_by_id;
 pub(crate) use short_video_export_check::project_short_video_export_check_by_id;
+pub(crate) use short_video_pre_assembly::project_short_video_pre_assembly_by_id;
 pub(crate) use short_video_readiness::project_short_video_readiness_by_id;
+pub(crate) use short_video_timeline::{
+    project_short_video_timeline_apply_template, project_short_video_timeline_by_id,
+    project_short_video_timeline_preview, project_short_video_timeline_put,
+    project_short_video_timeline_reorder, project_short_video_timeline_restore,
+    project_short_video_timeline_revisions,
+};
 pub(crate) use stats::project_stats_by_id;
 pub(crate) use style_config::patch_style_config;

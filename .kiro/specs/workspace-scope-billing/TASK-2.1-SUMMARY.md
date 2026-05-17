@@ -130,18 +130,18 @@ VALUES ($1, $2, $3, 'queued', $4, $5)
 - [x] Document PgQueue path (deferred)
 - [x] Add logging for observability
 
-### Phase 2: Backfill (Task 2.2) 🔄 Next
+### Phase 2: Backfill (Task 2.2) ✅（仓库内）
 
-- [ ] Write backfill script with `--dry-run`
-- [ ] Backfill workspace_id from project → workspace for project-based jobs
-- [ ] Backfill workspace_id from user → personal workspace for orphan jobs
-- [ ] Monitor backfill coverage (target: >99%)
+- [x] Write backfill script with `--dry-run` — `backend/src/bin/backfill_job_workspace_id.rs`
+- [x] Backfill workspace_id from project → workspace for project-based jobs
+- [x] Backfill workspace_id from user → personal workspace for orphan jobs
+- [ ] Monitor backfill coverage (target: >99%) — 生产执行 + `scripts/verify_workspace_id_backfill.sh`
 
-### Phase 3: Enforcement (Task 2.3) ⏳ Future
+### Phase 3: Enforcement (Task 2.3) ✅（仓库内）
 
-- [ ] Add NOT NULL constraint on `workspace_id` column
-- [ ] Update PgQueue path to require workspace_id
-- [ ] Remove nullable handling in application code
+- [x] Add NOT NULL constraint on `workspace_id` column — `20260519140000_app_generation_job_workspace_id_not_null.sql`
+- [x] Update PgQueue path to require workspace_id
+- [x] Remove nullable handling in application code
 
 ## Observability
 

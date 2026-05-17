@@ -2,6 +2,17 @@ use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
 
+/// Latest video **`file_path`** writeback attempt (**`metadata.shortVideo.lastWriteback`**).
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct StoryboardLastWritebackSummary {
+    pub(crate) status: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) at: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) error_code: Option<String>,
+}
+
 /// Read-only **`mediaSlots`** on API responses clarifies legacy storyboard **`url`** / DB **`file_path`**
 /// (single column) versus voiceover (**`metadata.voiceover`**) versus **candidate/export** aggregates.
 #[derive(Debug, Clone, Serialize)]
@@ -21,10 +32,14 @@ pub(crate) struct StoryboardMediaSlotsSummary {
     pub(crate) voiceover_audio_url: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) voiceover_state: Option<String>,
-    /// Reserved (`None` until a dedicated metadata key lands).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) export_artifact_url: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) last_writeback: Option<StoryboardLastWritebackSummary>,
     pub(crate) candidate_video_sources_hint: &'static str,
+    /// Explicit candidate clip URLs (metadata **`candidateVideos`** + completed video jobs).
+    #[serde(skip_serializing_if = "Vec::is_empty", default)]
+    pub(crate) candidate_video_urls: Vec<String>,
 }
 
 #[allow(dead_code)]
@@ -37,6 +52,9 @@ pub(in crate::production) struct StoryboardIdListBody {
     pub(in crate::production) project_uuid: Option<Uuid>,
     pub(in crate::production) script_id: i32,
     pub(in crate::production) ids: Vec<i32>,
+    /// When set and matches server **`data_version`**, response returns **`unchanged: true`** with empty **`data`**.
+    #[serde(default)]
+    pub(in crate::production) client_data_version: Option<String>,
 }
 
 #[derive(Debug, Serialize, FromRow)]
@@ -62,6 +80,18 @@ pub(crate) struct ProductionStoryboardItem {
     pub(crate) voiceover_error: Option<String>,
     pub(crate) live_action_reference_shot_urls: Vec<String>,
     pub(crate) live_action_performance_notes: Option<String>,
+    #[sqlx(rename = "short_video_writeback_status")]
+    pub(crate) short_video_writeback_status: Option<String>,
+    #[sqlx(rename = "short_video_writeback_at")]
+    pub(crate) short_video_writeback_at: Option<String>,
+    #[sqlx(rename = "short_video_writeback_error_code")]
+    pub(crate) short_video_writeback_error_code: Option<String>,
+    #[sqlx(rename = "short_video_export_artifact_url")]
+    pub(crate) short_video_export_artifact_url: Option<String>,
+    pub(crate) character_id: Option<Uuid>,
+    #[serde(skip)]
+    #[sqlx(rename = "short_video_metadata")]
+    pub(crate) short_video_metadata: Option<serde_json::Value>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[sqlx(skip)]
     pub(crate) media_slots: Option<StoryboardMediaSlotsSummary>,
@@ -71,6 +101,10 @@ pub(crate) struct ProductionStoryboardItem {
 #[serde(rename_all = "camelCase")]
 pub(crate) struct ProductionGetProductionDataResponse {
     pub(crate) data: Vec<ProductionStoryboardItem>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) data_version: Option<String>,
+    #[serde(default)]
+    pub(crate) unchanged: bool,
 }
 
 #[derive(Debug, Deserialize)]
@@ -240,6 +274,12 @@ mod tests {
             voiceover_error: None,
             live_action_reference_shot_urls: vec!["https://example.com/shot-1.jpg".into()],
             live_action_performance_notes: Some("自然口播，停顿克制".into()),
+            short_video_writeback_status: None,
+            short_video_writeback_at: None,
+            short_video_writeback_error_code: None,
+            short_video_export_artifact_url: None,
+            character_id: None,
+            short_video_metadata: None,
             media_slots: None,
         };
         let json = serde_json::to_string(&item).unwrap();
@@ -252,7 +292,11 @@ mod tests {
 
     #[test]
     fn production_get_production_data_response_serialize() {
-        let resp = ProductionGetProductionDataResponse { data: vec![] };
+        let resp = ProductionGetProductionDataResponse {
+            data: vec![],
+            data_version: None,
+            unchanged: false,
+        };
         let json = serde_json::to_string(&resp).unwrap();
         assert!(json.contains("\"data\":[]"));
     }

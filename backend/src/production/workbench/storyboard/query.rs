@@ -88,5 +88,36 @@ pub(in crate::production) async fn post_get_storyboard_data(
 
     let rows = list_storyboard_items_by_script(pool, scope_row.script_id).await?;
 
-    Ok(JsonResponse(build_storyboard_data_response(rows)))
+    let data_version: Option<String> = sqlx::query_scalar(
+        r#"
+        SELECT MAX(sb.updated_at)::text
+        FROM app_storyboard sb
+        WHERE sb.script_id = $1
+        "#,
+    )
+    .bind(scope_row.script_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .flatten();
+
+    if body
+        .client_data_version
+        .as_deref()
+        .zip(data_version.as_deref())
+        .is_some_and(|(client, server)| client == server)
+    {
+        return Ok(JsonResponse(
+            crate::production::workbench::storyboard_ops::ProductionGetProductionDataResponse {
+                data: Vec::new(),
+                data_version,
+                unchanged: true,
+            },
+        ));
+    }
+
+    Ok(JsonResponse(build_storyboard_data_response(
+        rows,
+        data_version,
+    )))
 }

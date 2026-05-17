@@ -150,6 +150,22 @@
   "shortVideoSpaceWarningItems": "警告项（按接口顺序节选）",
   "shortVideoSpaceExporting": "导出中…",
   "shortVideoSpaceStartExport": "开始导出",
+  "shortVideoSpaceStartPreAssembly": "批量预组装",
+  "shortVideoSpacePreAssemblyBusy": "预组装中…",
+  "shortVideoSpacePreAssemblyEnqueued": "已入队预组装任务（{shotCount} 镜，{blocking} 镜阻断）。任务：{jobId}",
+  "@shortVideoSpacePreAssemblyEnqueued": {
+    "placeholders": {
+      "shotCount": { "type": "int" },
+      "blocking": { "type": "int" },
+      "jobId": { "type": "String" }
+    }
+  },
+  "shortVideoSpacePreAssemblyFailed": "预组装失败：{error}",
+  "@shortVideoSpacePreAssemblyFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
   "shortVideoSpaceExportHistory": "导出历史",
   "shortVideoSpacePublishJobs": "发布作业",
   "shortVideoSpaceScheduleCalendar": "排程月历（按本地日历日计数；点选某日批量写入定时）",
@@ -2049,6 +2065,12 @@
   "taskCenterOpenProductionWorkspace": "打开制作工作区",
   "taskCenterOpenScriptWorkspace": "打开剧本工作区",
   "taskCenterRegenerate": "重新生成",
+  "taskCenterRetryRegenerateVideo": "重试出视频",
+  "taskCenterRetryExportVideo": "重试导出",
+  "taskCenterRetryVoiceover": "重试配音",
+  "taskCenterRetryPreAssembly": "重试预组装",
+  "taskCenterRetryAfterWritebackFailure": "写回异常后重试",
+  "taskCenterRegenerateAfterWriteback": "重新生成（写回）",
   "taskCenterPartialRework": "局部返工",
   "taskCenterWritebackCompensation": "回写补偿",
   "taskCenterOpenSpacePublish": "打开短视频 Space（发布）",
@@ -6906,6 +6928,18 @@
     }
   },
   "storyboardWorkbenchProductionMetaLoadedEmpty": "制作视图已加载",
+  "storyboardWorkbenchCharacterLabel": "配音角色",
+  "storyboardWorkbenchCharacterDropdownLabel": "绑定角色",
+  "storyboardWorkbenchCharacterNone": "无（使用项目默认）",
+  "storyboardWorkbenchCharacterReload": "刷新角色列表",
+  "storyboardWorkbenchCharacterSaved": "角色绑定已保存",
+  "storyboardActionVideoSkippedDuplicates": "已跳过 {count} 个进行中的重复任务（#{ids}）",
+  "@storyboardActionVideoSkippedDuplicates": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "ids": { "type": "String" }
+    }
+  },
   "storyboardEditorDialogTitle": "分镜编辑器 #{numericId}",
   "@storyboardEditorDialogTitle": {
     "placeholders": {
@@ -7541,10 +7575,10 @@
     }
   },
   "storyboardPatchDialogTitle": "局部返工面板",
-  "storyboardPatchScopeLabel": "scope",
-  "storyboardPatchScopeHelper": "episode / scene / storyboard_item / video_prompt / derive_asset",
-  "storyboardPatchModelTierLabel": "model tier",
-  "storyboardPatchModelTierHelper": "low 用于格式修复，high 用于内容质量修复",
+  "storyboardPatchScopeLabel": "作用域",
+  "storyboardPatchScopeHelper": "整集 / 场景 / 分镜项 / 视频提示词 / 衍生资产",
+  "storyboardPatchModelTierLabel": "模型档位",
+  "storyboardPatchModelTierHelper": "低档位用于格式修复，高档位用于内容质量修复",
   "storyboardPatchTargetIdsLabel": "target ids",
   "storyboardPatchTargetIdsHelper": "逗号分隔。默认带当前 storyboard numeric ID。",
   "storyboardPatchReasonLabel": "返工原因",
@@ -7590,6 +7624,13 @@
   "storyboardPatchSubmitting": "提交中…",
   "storyboardPatchSubmit": "提交返工",
   "storyboardPatchDefaultReason": "请修复当前分镜的内容质量、连续性或情绪表达问题",
+  "storyboardPatchScopeEpisode": "整集",
+  "storyboardPatchScopeScene": "场景",
+  "storyboardPatchScopeStoryboardItem": "分镜项",
+  "storyboardPatchScopeVideoPrompt": "视频提示词",
+  "storyboardPatchScopeDeriveAsset": "衍生资产",
+  "storyboardPatchModelTierLow": "低",
+  "storyboardPatchModelTierHigh": "高",
   "shortVideoReadinessNoPayloadHeadline": "还没有读取到分镜就绪数据。",
   "shortVideoReadinessEmptyProjectHeadline": "当前项目还没有分镜行，可先在脚本侧拆镜后再看聚合。",
   "shortVideoReadinessRollupHeadline": "就绪 {ready}/{total} 条分镜；阻塞 {blocked} 条。",
@@ -7663,6 +7704,24 @@
     }
   },
   "shortVideoMetricStoryboardReadiness": "分镜就绪",
+  "shortVideoMetricProductionPhase": "制作阶段",
+  "shortVideoProductionPhaseSnippet": "就绪 {ready} · 生成中 {generating} · 阻塞 {blocked}",
+  "@shortVideoProductionPhaseSnippet": {
+    "placeholders": {
+      "ready": { "type": "int" },
+      "generating": { "type": "int" },
+      "blocked": { "type": "int" }
+    }
+  },
+  "shortVideoBatchSkippedDuplicates": "跳过 {count} 个进行中的重复任务（#{ids}）",
+  "@shortVideoBatchSkippedDuplicates": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "ids": { "type": "String" }
+    }
+  },
+  "shortVideoBatchOutcomeSkippedDuplicate": "跳过重复",
+  "shortVideoBatchOutcomeQueued": "已排队",
   "shortVideoShotReadinessSelectProjectHint": "选择短剧项目后，会显示服务端分镜阻塞汇总。",
   "shortVideoTaskUnnamed": "未命名任务",
   "shortVideoBadCaseUncategorized": "未分类",
@@ -8039,6 +8098,8 @@
     }
   },
   "shortVideoCandidateCurrentVideo": "当前视频",
+  "shortVideoCandidateVideoListTitle": "候选视频列表",
+  "shortVideoCandidateSelectVideo": "选用",
   "shortVideoCandidateSetCurrent": "设为当前",
   "shortVideoCandidatePartialRework": "局部返工",
   "shortVideoDeliveryModeLive": "真实 ✓",
@@ -9136,6 +9197,109 @@
     "placeholders": {
       "error": {
         "type": "String"
+      }
+    }
+  },
+  "shortVideoBatchOutcomeSummary": "分镜结果：{details}",
+  "@shortVideoBatchOutcomeSummary": {
+    "placeholders": {
+      "details": { "type": "String" }
+    }
+  },
+  "shortVideoBatchOutcomeCount": "{outcome}×{count}",
+  "@shortVideoBatchOutcomeCount": {
+    "placeholders": {
+      "outcome": { "type": "String" },
+      "count": { "type": "int" }
+    }
+  },
+  "shortVideoWritebackStatusOk": "视频回写：已同步到分镜",
+  "shortVideoWritebackStatusFailed": "视频回写失败（{code}）",
+  "@shortVideoWritebackStatusFailed": {
+    "placeholders": { "code": { "type": "String" } }
+  },
+  "shortVideoWritebackStatusFailedGeneric": "视频回写失败",
+  "shortVideoWritebackStatusIncomplete": "视频回写未完整（{code}）",
+  "@shortVideoWritebackStatusIncomplete": {
+    "placeholders": { "code": { "type": "String" } }
+  },
+  "shortVideoWritebackStatusIncompleteGeneric": "视频回写未完整 — 请刷新制作数据",
+  "shortVideoWritebackStatusUnknown": "视频回写：{status}",
+  "@shortVideoWritebackStatusUnknown": {
+    "placeholders": { "status": { "type": "String" } }
+  },
+  "shortVideoCharactersPanelTitle": "项目角色与配音",
+  "shortVideoCharactersRefresh": "刷新",
+  "shortVideoCharactersLoading": "正在加载角色…",
+  "shortVideoCharactersEmpty": "暂无项目角色，可在项目设置或通过 API 创建。",
+  "shortVideoCharactersVoiceSummary": "供应商 {provider} · 音色 {voiceId} · 情绪 {emotion}",
+  "@shortVideoCharactersVoiceSummary": {
+    "placeholders": {
+      "provider": { "type": "String" },
+      "voiceId": { "type": "String" },
+      "emotion": { "type": "String" }
+    }
+  },
+  "shortVideoCharactersPreviewVoice": "试听",
+  "shortVideoCharactersCloneVoice": "克隆音色",
+  "shortVideoCharactersCloneVoiceTitle": "克隆音色 — {name}",
+  "@shortVideoCharactersCloneVoiceTitle": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "shortVideoCharactersCloneSampleUrl": "样本音频 URL",
+  "shortVideoCharactersCloneDisplayName": "显示名称",
+  "shortVideoCharactersCloneMockSample": "使用模拟样本",
+  "shortVideoCharactersCloneSuccess": "克隆音色 ID：{voiceId}（{provider}）",
+  "@shortVideoCharactersCloneSuccess": {
+    "placeholders": {
+      "voiceId": { "type": "String" },
+      "provider": { "type": "String" }
+    }
+  },
+  "shortVideoCharactersCloneFailed": "克隆失败：{error}",
+  "@shortVideoCharactersCloneFailed": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "shortVideoCharactersEditVoice": "编辑配音",
+  "shortVideoCharactersEditVoiceTitle": "配音 — {name}",
+  "@shortVideoCharactersEditVoiceTitle": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "shortVideoCharactersFieldProvider": "供应商",
+  "shortVideoCharactersFieldVoiceId": "音色 ID",
+  "shortVideoCharactersFieldEmotion": "情绪 / 风格",
+  "shortVideoCharactersPreviewLoading": "正在为 {name} 生成试听…",
+  "@shortVideoCharactersPreviewLoading": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "shortVideoCharactersPreviewReady": "正在播放 {name} 的试听",
+  "@shortVideoCharactersPreviewReady": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "shortVideoCharactersPreviewFailed": "{name} 试听失败：{error}",
+  "@shortVideoCharactersPreviewFailed": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "error": { "type": "String" }
+    }
+  },
+  "shortVideoCharactersPreviewSampleText": "这是一段短剧配音试听示例。",
+  "shortVideoCharactersVoiceSaved": "已保存 {name} 的配音设置",
+  "@shortVideoCharactersVoiceSaved": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "shortVideoCharactersVoiceSaveFailed": "无法保存 {name} 的配音：{error}",
+  "@shortVideoCharactersVoiceSaveFailed": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "error": { "type": "String" }
+    }
+  },
+  "shortVideoProductionConfirmCandidatesDone": "已确认 {count} 个分镜候选，可继续生成。",
+  "@shortVideoProductionConfirmCandidatesDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
     }
   },
@@ -11289,6 +11453,19 @@
   },
   "shortVideoSpacePublishExportCheckDetailReady": "阻塞计数为 0 时表示服务端聚合路径上暂无硬阻塞（仍以实际导出管线为准）。",
   "shortVideoSpacePublishExportCheckDetailBlocking": "下方列出部分阻塞项；完整列表请在制作工作区逐镜核对。",
+  "shortVideoSpacePublishExportCheckStoryboardGapsTitle": "分镜导出缺口",
+  "shortVideoSpacePublishExportCheckStoryboardGapTitle": "剧本 #{scriptId} · 分镜 #{sbId}{sbIndex}",
+  "@shortVideoSpacePublishExportCheckStoryboardGapTitle": {
+    "placeholders": {
+      "scriptId": { "type": "int" },
+      "sbId": { "type": "int" },
+      "sbIndex": { "type": "String" }
+    }
+  },
+  "shortVideoSpacePublishExportCheckFacetMissingVideo": "未选成片视频",
+  "shortVideoSpacePublishExportCheckFacetMissingSubtitle": "字幕 / 口播缺失",
+  "shortVideoSpacePublishExportCheckFacetMissingVoiceover": "旁白未就绪",
+  "shortVideoSpacePublishExportCheckFacetDurationAnomaly": "时长异常",
   "shortVideoSpacePublishCandidateLoadingHeadline": "正在读取项目资产…",
   "shortVideoSpacePublishCandidateLoadingDetail": "用于统计候选 workflow：pending / linked / ignored（与 PATCH 资产一致）。",
   "shortVideoSpacePublishCandidateUnavailableHeadline": "候选资产摘要暂不可用。",
@@ -11514,6 +11691,79 @@
       }
     }
   },
+  "shortVideoTimelinePanelTitle": "粗剪时间线（裁切 + 预览）",
+  "shortVideoTimelineSave": "保存时间线",
+  "shortVideoTimelineSaveDone": "已保存时间线。",
+  "shortVideoTimelineSaveFailed": "保存时间线失败：{error}",
+  "@shortVideoTimelineSaveFailed": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "shortVideoTimelineGeneratePreview": "生成预览",
+  "shortVideoTimelinePreviewBusy": "正在渲染预览…",
+  "shortVideoTimelinePreviewDone": "预览已就绪。",
+  "shortVideoTimelinePreviewFailed": "预览失败：{error}",
+  "@shortVideoTimelinePreviewFailed": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "shortVideoTimelinePlayPreview": "打开预览",
+  "shortVideoTimelineTrimInMs": "入点 (ms)",
+  "shortVideoTimelineTrimOutMs": "出点 (ms)",
+  "shortVideoTimelineBgmEnabled": "BGM 轨道",
+  "shortVideoTimelineBgmVolume": "BGM 音量",
+  "shortVideoTimelineMoveUp": "上移",
+  "shortVideoTimelineMoveDown": "下移",
+  "shortVideoTimelinePersistOrder": "保存顺序",
+  "shortVideoTimelineLoading": "加载时间线…",
+  "shortVideoTimelineEmpty": "时间线尚无镜头。",
+  "shortVideoTimelineReorderDone": "已保存时间线顺序。",
+  "shortVideoTimelineSubtitlesTitle": "字幕轨",
+  "shortVideoTimelineSubtitleText": "字幕文本",
+  "shortVideoTimelineSubtitleStartMs": "开始 (ms)",
+  "shortVideoTimelineSubtitleEndMs": "结束 (ms)",
+  "shortVideoTimelineAddSubtitle": "添加字幕",
+  "shortVideoTimelineTransitionsTitle": "转场",
+  "shortVideoTimelineTransitionCut": "硬切",
+  "shortVideoTimelineTransitionCrossfade": "叠化",
+  "shortVideoTimelineTransitionFadeBlack": "黑场",
+  "shortVideoTimelineTransitionDurationMs": "时长 (ms)",
+  "shortVideoTimelineVoiceoverTitle": "配音轨",
+  "shortVideoTimelineVoiceoverVolume": "音量",
+  "shortVideoTimelineApplyTemplate": "应用粗剪模板",
+  "shortVideoTimelineTemplateShortDrama": "短剧默认",
+  "shortVideoTimelineTemplateDialoguePunch": "对白节奏",
+  "shortVideoTimelineTemplateApplied": "模板已应用。",
+  "shortVideoTimelineTemplateFailed": "应用模板失败：{error}",
+  "@shortVideoTimelineTemplateFailed": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "shortVideoTimelineReorderFailed": "时间线重排失败：{error}",
+  "@shortVideoTimelineReorderFailed": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "shortVideoTimelineUndo": "撤销",
+  "shortVideoTimelineRedo": "重做",
+  "shortVideoTimelineRevisionHistory": "历史版本",
+  "shortVideoTimelineRevisionEmpty": "尚无已保存的历史版本。",
+  "shortVideoTimelineRevisionLabel": "版本 {revision}",
+  "@shortVideoTimelineRevisionLabel": {
+    "placeholders": { "revision": { "type": "int" } }
+  },
+  "shortVideoTimelineRevisionRestored": "已从历史版本恢复时间线。",
+  "shortVideoTimelineRevisionLoadFailed": "加载历史版本失败：{error}",
+  "@shortVideoTimelineRevisionLoadFailed": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "shortVideoTimelineRevisionRestoreFailed": "恢复失败：{error}",
+  "@shortVideoTimelineRevisionRestoreFailed": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "shortVideoTimelineEffectPreset": "效果预设",
+  "shortVideoTimelineEffectApplyAll": "应用到全部片段",
+  "shortVideoTimelineEffectNone": "无",
+  "shortVideoTimelineEffectVivid": "鲜艳",
+  "shortVideoTimelineEffectCinematic": "电影感",
+  "shortVideoTimelineEffectBw": "黑白",
+  "shortVideoTimelineEffectSpeed110": "1.1 倍速",
   "shortVideoSpaceProductionAssemblyReorderPersisted": "已持久化镜头重排顺序（按剧本写回时间线与分镜序号）。",
   "shortVideoSpaceProductionAssemblyReorderFailed": "重排持久化失败：{error}",
   "@shortVideoSpaceProductionAssemblyReorderFailed": {

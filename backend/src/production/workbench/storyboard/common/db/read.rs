@@ -30,7 +30,13 @@ pub(in crate::production::workbench::storyboard) async fn fetch_storyboard_item(
               COALESCE(sb.metadata #> '{shortVideo,liveAction,referenceShotUrls}', '[]'::jsonb)
             )
           ) AS live_action_reference_shot_urls,
-          sb.metadata #>> '{shortVideo,liveAction,performanceNotes}' AS live_action_performance_notes
+          sb.metadata #>> '{shortVideo,liveAction,performanceNotes}' AS live_action_performance_notes,
+          sb.metadata #>> '{shortVideo,lastWriteback,status}' AS short_video_writeback_status,
+          sb.metadata #>> '{shortVideo,lastWriteback,at}' AS short_video_writeback_at,
+          sb.metadata #>> '{shortVideo,lastWriteback,errorCode}' AS short_video_writeback_error_code,
+          sb.metadata #>> '{shortVideo,export,artifactUrl}' AS short_video_export_artifact_url,
+          sb.character_id,
+          sb.metadata #> '{shortVideo}' AS short_video_metadata
         FROM app_storyboard sb
         WHERE sb.id = $1
         "#,
@@ -67,7 +73,13 @@ pub(in crate::production::workbench::storyboard) async fn list_storyboard_items_
               COALESCE(sb.metadata #> '{shortVideo,liveAction,referenceShotUrls}', '[]'::jsonb)
             )
           ) AS live_action_reference_shot_urls,
-          sb.metadata #>> '{shortVideo,liveAction,performanceNotes}' AS live_action_performance_notes
+          sb.metadata #>> '{shortVideo,liveAction,performanceNotes}' AS live_action_performance_notes,
+          sb.metadata #>> '{shortVideo,lastWriteback,status}' AS short_video_writeback_status,
+          sb.metadata #>> '{shortVideo,lastWriteback,at}' AS short_video_writeback_at,
+          sb.metadata #>> '{shortVideo,lastWriteback,errorCode}' AS short_video_writeback_error_code,
+          sb.metadata #>> '{shortVideo,export,artifactUrl}' AS short_video_export_artifact_url,
+          sb.character_id,
+          sb.metadata #> '{shortVideo}' AS short_video_metadata
         FROM app_storyboard sb
         WHERE sb.script_id = $1
         ORDER BY sb.sb_index ASC

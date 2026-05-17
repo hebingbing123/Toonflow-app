@@ -9,6 +9,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
     required List<String?> productionSummaryLine,
     required List<bool> productionSummaryLoaded,
     required List<bool> productionSummaryLoading,
+    required List<String?> productionDataVersion,
     required StateSetter setBoardsState,
   }) async {
     productionSummaryLoading[0] = true;
@@ -18,7 +19,15 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
         token,
         projectUuid: projectId,
         scriptId: scriptNumericId,
+        clientDataVersion: productionDataVersion[0],
       );
+      if (response.unchanged) {
+        productionSummaryLoaded[0] = true;
+        return;
+      }
+      if (response.dataVersion != null && response.dataVersion!.isNotEmpty) {
+        productionDataVersion[0] = response.dataVersion;
+      }
       final unknown = l10n.scriptEditorStoryboardsStateFallback;
       final preview = response.data
           .take(4)
@@ -100,6 +109,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
           final productionSummaryLoaded = <bool>[false];
           final autoRefreshQueued = <bool>[false];
           final productionSummaryLine = <String?>[null];
+          final productionDataVersion = <String?>[null];
           final storyboardTaskLine = <String?>[null];
           return StatefulBuilder(
             builder: (ctx2, setBoardsState) {
@@ -115,6 +125,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                     productionSummaryLine: productionSummaryLine,
                     productionSummaryLoaded: productionSummaryLoaded,
                     productionSummaryLoading: productionSummaryLoading,
+                    productionDataVersion: productionDataVersion,
                     setBoardsState: setBoardsState,
                   );
                 });
@@ -149,6 +160,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                           storyboardTaskLine: storyboardTaskLine,
                           productionSummaryLine: productionSummaryLine,
                           productionSummaryLoaded: productionSummaryLoaded,
+                          productionDataVersion: productionDataVersion,
                         ),
                   onBatchAddStoryboards: actionBusy[0] || boardsLoading[0]
                       ? null
@@ -163,6 +175,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                           storyboardTaskLine: storyboardTaskLine,
                           productionSummaryLine: productionSummaryLine,
                           productionSummaryLoaded: productionSummaryLoaded,
+                          productionDataVersion: productionDataVersion,
                         ),
                   onReloadBoards: actionBusy[0] || boardsLoading[0]
                       ? null
@@ -206,6 +219,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                             productionSummaryLine: productionSummaryLine,
                             productionSummaryLoaded: productionSummaryLoaded,
                             productionSummaryLoading: productionSummaryLoading,
+                            productionDataVersion: productionDataVersion,
                             setBoardsState: setBoardsState,
                           );
                         },
@@ -220,6 +234,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                           productionSummaryLine: productionSummaryLine,
                           productionSummaryLoaded: productionSummaryLoaded,
                           productionSummaryLoading: productionSummaryLoading,
+                          productionDataVersion: productionDataVersion,
                           setBoardsState: setBoardsState,
                         ),
                   onOpenStoryboard: (board) async {
@@ -247,6 +262,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
                           productionSummaryLine: productionSummaryLine,
                           productionSummaryLoaded: productionSummaryLoaded,
                           productionSummaryLoading: productionSummaryLoading,
+                          productionDataVersion: productionDataVersion,
                           setBoardsState: setBoardsState,
                         );
                       },

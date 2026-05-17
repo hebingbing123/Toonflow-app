@@ -9,6 +9,8 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::error::ApiError;
+use crate::production::workbench::generation_guards::assert_storyboards_ready_for_generation;
+use crate::production::workbench::generation_profile::load_project_generation_profile;
 use crate::production::workbench::meta::common::{
     clip_prompt_fragment, extract_key_value, negative_constraint_conflicts_with_storyboard_style,
     normalize_prompt_text, parse_positive_int, parse_structured_storyboard_description,
@@ -46,6 +48,8 @@ mod memory;
 #[cfg(test)]
 mod tests;
 mod tokens;
+mod video_prompt_input_cache;
+mod video_prompt_table_cache;
 
 use constraints::VideoPromptConstraintPressure;
 use constraints::{
@@ -56,6 +60,10 @@ use handlers::{
     GenerateVideoPromptBody, GenerateVideoPromptDiagnostics, GenerateVideoPromptResponse,
 };
 use tokens::*;
+use video_prompt_input_cache::{
+    compute_video_prompt_input_hash, persist_video_prompt_cache, try_load_cached_video_prompt,
+};
+use video_prompt_table_cache::{try_load_table_video_prompt, upsert_table_video_prompt};
 
 use builder::*;
 use context::*;
@@ -289,6 +297,42 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
         .filter(|id| *id > 0)
         .into_iter()
         .collect::<Vec<_>>();
+    if !storyboard_ids.is_empty() {
+        assert_storyboards_ready_for_generation(
+            pool,
+            scope_row.project_id,
+            user_id,
+            body.script_id,
+            &storyboard_ids,
+        )
+        .await?;
+    }
+    let generation_profile = load_project_generation_profile(pool, scope_row.project_id).await?;
+    let profile_memory_tier = generation_profile.tier.default_memory_budget_tier();
+    if body.skip_if_unchanged {
+        if let Some(storyboard_id) = body.storyboard_id.filter(|id| *id > 0) {
+            let input_hash = compute_video_prompt_input_hash(
+                body.description.as_deref(),
+                body.image_url.as_deref(),
+                Some(storyboard_id),
+                body.script_id,
+                profile_memory_tier,
+                None,
+            );
+            if let Some(cached) =
+                try_load_table_video_prompt(pool, body.script_id, storyboard_id, &input_hash)
+                    .await?
+            {
+                return Ok(JsonResponse(cached));
+            }
+            if let Some(hit) =
+                try_load_cached_video_prompt(pool, body.script_id, storyboard_id, &input_hash)
+                    .await?
+            {
+                return Ok(JsonResponse(hit.response));
+            }
+        }
+    }
     let text_inputs = body.description.iter().cloned().collect::<Vec<_>>();
     let (gate, strategy) = run_quality_gate(
         pool,
@@ -379,11 +423,12 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
     let negative_prompt = negative_prompt_selection
         .as_ref()
         .and_then(|selection| selection.prompt.clone());
-    let prompt_result = build_video_prompt_with_constraint_pressure(
+    let prompt_result = build_video_prompt_with_constraint_pressure_and_profile(
         body.description.as_deref(),
         body.image_url.as_deref(),
         context.as_ref(),
         constraint_pressure,
+        Some(generation_profile.tier),
     );
     let duration = resolve_video_prompt_duration(
         body.duration_hint,
@@ -445,14 +490,29 @@ pub(in crate::production) async fn post_workbench_generate_video_prompt(
         });
     }
 
-    Ok(JsonResponse(GenerateVideoPromptResponse {
+    let response = GenerateVideoPromptResponse {
         prompt: prompt_result.prompt,
         negative_prompt,
         observation_note,
         diagnostics,
         model: "runway-gen-2".to_string(),
         duration,
-    }))
+    };
+    if let Some(storyboard_id) = body.storyboard_id.filter(|id| *id > 0) {
+        let input_hash = compute_video_prompt_input_hash(
+            body.description.as_deref(),
+            body.image_url.as_deref(),
+            Some(storyboard_id),
+            body.script_id,
+            &response.diagnostics.memory_budget_tier,
+            None,
+        );
+        upsert_table_video_prompt(pool, body.script_id, storyboard_id, &input_hash, &response)
+            .await?;
+        persist_video_prompt_cache(pool, body.script_id, storyboard_id, &input_hash, &response)
+            .await?;
+    }
+    Ok(JsonResponse(response))
 }
 
 #[derive(Debug, Clone, Default)]

@@ -104,34 +104,34 @@ Space 第一屏就应该让用户显式选择：
 
 ### Wave 3：把“可生成”前的准备态做实
 
-- [ ] 给分镜增加更明确的 `ready for generation` 视图状态，而不是只靠用户自己判断 prompt / 图片 / 轨道是否齐全
-- [ ] 在 Space 中增加“未就绪原因”摘要，直接告诉用户当前卡在剧本、分镜、角色、参考图还是视频参数
-- [ ] 给分镜补一个候选确认流：区分“抽取出来的候选角色 / 场景 / 道具 / 台词”和“已确认进入生成链路”的内容
-- [ ] 把“候选确认完成”纳入分镜 readiness 计算，避免提示词与资产引用还没定稿就直接生成
+- [x] 给分镜增加更明确的 `ready for generation` 视图状态 — `GET …/short-video-readiness` + `short_video/storyboard_readiness.rs` + 分镜工作台 readiness UI
+- [x] 在 Space 中增加“未就绪原因”摘要 — Space 就绪面板消费 readiness rollup / reason codes
+- [x] 给分镜补一个候选确认流 — `confirm_storyboard_candidates` + `candidateStatus` 写入 metadata
+- [x] 把“候选确认完成”纳入分镜 readiness — readiness 计算含 `candidate_pending` / 确认门禁
 
 ### Wave 4：把生成结果真正沉淀成可复用资产
 
-- [ ] 给分镜建立更清晰的媒体槽位：参考图、关键帧、当前生效视频、候选视频、导出结果分开管理
-- [ ] 把“设为当前视频 / 局部返工 / 导出”统一视为分镜媒体操作，减少结果散落在任务和临时链接里
-- [ ] 给批量生成结果增加回写摘要，明确哪些分镜已经拿到可复用结果，哪些仍只有任务无结果
-- [ ] 增加“生成结果回写失败 / 回写不完整”的显式诊断，避免任务成功但分镜上下文没同步
+- [x] 给分镜建立更清晰的媒体槽位 — storyboard metadata `shortVideo` 槽位 + 候选/当前视频字段（非完整 NLE 轨）
+- [x] 把“设为当前视频 / 局部返工 / 导出”统一视为分镜媒体操作 — workbench select/delete video + export-check 对齐
+- [x] 给批量生成结果增加回写摘要 — `short_video/writeback.rs` + 任务 result `writeback` 块
+- [x] 增加“生成结果回写失败 / 回写不完整”的显式诊断 — video/voiceover worker `error_details` + 任务中心写回补偿入口
 
 ### Wave 5：把任务中心变成短视频生产调度台
 
-- [ ] 给任务中心增加按 `project / script / storyboard` 的快捷回跳入口，直接从任务定位回对应工作对象
-- [ ] 给视频、出图、导出任务增加更清晰的阶段标签，区分“素材准备 / 出图 / 出视频 / 导出成片 / 质检”
-- [ ] 给 Space 增加“当前项目生产概览”，能直接看到已就绪分镜数、生成中任务数、待复核坏例数
-- [ ] 把“失败重试”细分成重新生成、局部返工、回写补偿三种动作，而不是统一重跑
+- [x] 给任务中心增加按 `project / script / storyboard` 的快捷回跳入口 — `task_center/support.dart` deep links
+- [x] 给视频、出图、导出任务增加更清晰的阶段标签 — `taskCenterShortVideoStageLabel`（prep/image/video/export/quality）
+- [x] 给 Space 增加“当前项目生产概览” — `GET …/production-overview` + Space 生产指标卡
+- [x] 把“失败重试”细分成重新生成、局部返工、回写补偿 — 失败任务区三分动作 + 按 job kind / writeback code 区分重试文案
 
 ### Wave 6：补真正有价值的后期输出，而不是上来做完整剪辑器
 
 `Jellyfish` 的 README 能确认它强调 export 和媒体上下文，但没有足够证据说明它已经做了完整时间线剪辑器。所以 Toonflow 更适合先补“成片装配”而不是直接做一个复杂 NLE。
 
-- [ ] 新增“成片装配”阶段：把已选视频、旁白文案、字幕、BGM 组织成可导出的 rough cut
-- [ ] 给每个分镜补导出所需的最小字段校验：时长、字幕源、旁白源、视频是否已选定
-- [ ] 支持按剧本 / 分镜顺序导出预组装结果，先解决“批量成片输出”，再考虑复杂手工剪辑
-- [ ] 给导出结果增加质量摘要：缺帧、字幕缺失、旁白缺失、时长异常、未选当前视频
-- [ ] 把 BGM、字幕样式、旁白声线收成项目级 / 成片级配置，而不是散落在单分镜里各配一次
+- [x] 新增“成片装配”阶段 — `GET …/short-video-assembly` 只读 rough cut 快照（非时间线编辑器）
+- [x] 给每个分镜补导出所需的最小字段校验 — `GET …/short-video-export-check` + 装配镜头 `export_gap` facets
+- [x] 支持按剧本 / 分镜顺序导出预组装结果 — `POST …/short-video-pre-assembly` → job `short_video.pre_assembly` 产出 manifest JSON
+- [x] 给导出结果增加质量摘要 — export-check `storyboard_gaps` + Space 导出前检查 UI
+- [x] 把 BGM、字幕样式、旁白声线收成项目级 / 成片级配置 — `app_project` 列 + assembly `effective_short_video_defaults`
 
 ### Wave 7：低优先级引入后期剪辑能力
 

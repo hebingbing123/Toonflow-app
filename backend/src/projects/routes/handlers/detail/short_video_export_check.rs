@@ -5,34 +5,31 @@ use axum::{
     http::HeaderMap,
     Json,
 };
+use std::collections::BTreeMap;
 use uuid::Uuid;
 
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
-use crate::production::{
-    export_duration_warning_code, resolve_shot_script_source, resolve_shot_voiceover_ready,
-};
 use crate::projects::routes::common::require_project_workspace_member_scope;
+use crate::short_video::export_gaps::{
+    evaluate_export_gap_issues, gap_facet_flags, ExportGapRowInput,
+};
 use crate::state::AppState;
 
 use super::super::super::types::{
     ProjectShortVideoExportCheckResponse, QualityGateBlockingReason, ShortVideoExportCheckIssue,
-    ShortVideoExportCheckSummary, ShortVideoExportQualityGate,
+    ShortVideoExportCheckStoryboardGap, ShortVideoExportCheckSummary, ShortVideoExportQualityGate,
 };
-use super::assembly_query::{
-    assembly_selected_media_kind, fetch_project_assembly_flat_rows, fetch_project_assembly_header,
-};
+use super::assembly_query::{fetch_project_assembly_flat_rows, fetch_project_assembly_header};
 
-fn issue(
-    severity: &'static str,
-    code: &'static str,
-    detail: String,
+fn issue_from_gap(
+    issue: &crate::short_video::export_gaps::ExportGapIssue,
     row: &super::assembly_query::AssemblyFlatRow,
 ) -> ShortVideoExportCheckIssue {
     ShortVideoExportCheckIssue {
-        severity: severity.to_string(),
-        code: code.to_string(),
-        detail,
+        severity: issue.severity.to_string(),
+        code: issue.code.to_string(),
+        detail: issue.detail.clone(),
         script_numeric_id: row.script_numeric_id,
         storyboard_id: row.storyboard_id,
         storyboard_numeric_id: row.storyboard_numeric_id,
@@ -40,109 +37,70 @@ fn issue(
     }
 }
 
-fn evaluate_row(row: &super::assembly_query::AssemblyFlatRow) -> Vec<ShortVideoExportCheckIssue> {
-    let mut out = Vec::new();
-    let media_kind = assembly_selected_media_kind(row.file_path.as_deref());
-    let subtitle_src = resolve_shot_script_source(row.video_desc.as_deref(), row.prompt.as_deref());
-    let vo_script_ready =
-        resolve_shot_voiceover_ready(row.video_desc.as_deref(), row.prompt.as_deref());
-    let vo_asset_ready = row.voiceover_state.as_deref() == Some("completed")
-        && row
-            .voiceover_audio_url
-            .as_deref()
-            .is_some_and(|u| !u.trim().is_empty());
-
-    if row.candidate_status.as_deref().map(str::trim) == Some("pending") {
-        out.push(issue(
-            "blocking",
-            "candidate_pending",
-            "Storyboard shortVideo.candidateStatus is pending; confirm before export.".into(),
-            row,
-        ));
+fn row_to_gap_input(row: &super::assembly_query::AssemblyFlatRow) -> ExportGapRowInput {
+    ExportGapRowInput {
+        storyboard_id: row.storyboard_id,
+        storyboard_numeric_id: row.storyboard_numeric_id,
+        script_numeric_id: row.script_numeric_id,
+        sb_index: row.sb_index,
+        file_path: row.file_path.clone(),
+        duration: row.duration.clone(),
+        state: row.state.clone(),
+        prompt: row.prompt.clone(),
+        video_desc: row.video_desc.clone(),
+        voiceover_state: row.voiceover_state.clone(),
+        voiceover_audio_url: row.voiceover_audio_url.clone(),
+        voiceover_error: row.voiceover_error.clone(),
+        candidate_status: row.candidate_status.clone(),
     }
+}
 
-    match media_kind {
-        "none" => {
-            out.push(issue(
-                "blocking",
-                "missing_selected_media",
-                "No file_path / selected media for this storyboard.".into(),
-                row,
-            ));
-        }
-        "video" => {}
-        _ => {
-            out.push(issue(
-                "blocking",
-                "selected_media_not_video",
-                "Video export expects an mp4/mov/webm/mkv current selection; found image or other URL.".into(),
-                row,
-            ));
-        }
-    }
-
-    if subtitle_src == "placeholder" {
-        out.push(issue(
-            "blocking",
-            "subtitle_placeholder",
-            "No subtitle/narration text (video_desc empty and prompt empty).".into(),
-            row,
-        ));
-    }
-
-    let vo_failed = row.voiceover_state.as_deref() == Some("failed")
-        || row
-            .voiceover_error
-            .as_deref()
-            .is_some_and(|e| !e.trim().is_empty());
-    if vo_failed {
-        out.push(issue(
-            "warning",
-            "voiceover_failed",
-            "Voiceover pipeline reported failure or error metadata.".into(),
-            row,
-        ));
-    }
-
-    if vo_script_ready && !vo_asset_ready && !vo_failed {
-        out.push(issue(
-            "warning",
-            "voiceover_audio_missing",
-            "Narration text exists but completed voiceover audio URL is absent.".into(),
-            row,
-        ));
-    }
-
-    if let Some(code) = export_duration_warning_code(row.duration.as_deref()) {
-        let detail = match code {
-            "duration_not_explicit" => {
-                "Duration field empty; exporter defaults timeline to 5s.".to_string()
+fn build_storyboard_gaps(
+    issues: &[ShortVideoExportCheckIssue],
+) -> Vec<ShortVideoExportCheckStoryboardGap> {
+    let mut by_storyboard: BTreeMap<Uuid, ShortVideoExportCheckStoryboardGap> = BTreeMap::new();
+    for issue in issues {
+        let entry = by_storyboard.entry(issue.storyboard_id).or_insert_with(|| {
+            ShortVideoExportCheckStoryboardGap {
+                script_numeric_id: issue.script_numeric_id,
+                storyboard_id: issue.storyboard_id,
+                storyboard_numeric_id: issue.storyboard_numeric_id,
+                sb_index: issue.sb_index,
+                gap_codes: Vec::new(),
+                has_blocking: false,
+                missing_selected_video: false,
+                missing_subtitle: false,
+                missing_voiceover: false,
+                duration_anomaly: false,
             }
-            "duration_unparsable" => format!(
-                "Duration {:?} is not a positive integer seconds value.",
-                row.duration.as_deref().unwrap_or("")
-            ),
-            _ => "Duration anomaly.".to_string(),
-        };
-        out.push(issue("warning", code, detail, row));
-    }
-
-    if media_kind == "video" {
-        let st = row.state.as_deref().map(str::trim).unwrap_or("");
-        if st != "已完成" {
-            out.push(issue(
-                "warning",
-                "completion_uncertain",
-                format!(
-                    "Video selected but storyboard state is {:?}, not 已完成.",
-                    row.state.as_deref().unwrap_or("")
-                ),
-                row,
-            ));
+        });
+        if !entry.gap_codes.iter().any(|c| c == &issue.code) {
+            entry.gap_codes.push(issue.code.clone());
+        }
+        if issue.severity == "blocking" {
+            entry.has_blocking = true;
         }
     }
 
-    out
+    let mut gaps: Vec<_> = by_storyboard.into_values().collect();
+    for gap in &mut gaps {
+        let (mv, ms, mvo, da) = gap_facet_flags(&gap.gap_codes);
+        gap.missing_selected_video = mv;
+        gap.missing_subtitle = ms;
+        gap.missing_voiceover = mvo;
+        gap.duration_anomaly = da;
+    }
+    gaps.sort_by(|a, b| {
+        a.script_numeric_id
+            .cmp(&b.script_numeric_id)
+            .then_with(|| {
+                a.sb_index
+                    .unwrap_or(i32::MAX)
+                    .cmp(&b.sb_index.unwrap_or(i32::MAX))
+            })
+            .then_with(|| a.storyboard_numeric_id.cmp(&b.storyboard_numeric_id))
+    });
+    gaps
 }
 
 #[utoipa::path(
@@ -181,7 +139,10 @@ pub(crate) async fn project_short_video_export_check_by_id(
     let storyboard_count = flat.len() as i64;
     let mut issues = Vec::new();
     for row in &flat {
-        issues.extend(evaluate_row(row));
+        let gap_input = row_to_gap_input(row);
+        for gap_issue in evaluate_export_gap_issues(&gap_input) {
+            issues.push(issue_from_gap(&gap_issue, row));
+        }
     }
 
     let blocking_issue_count = issues.iter().filter(|i| i.severity == "blocking").count() as i64;
@@ -203,7 +164,6 @@ pub(crate) async fn project_short_video_export_check_by_id(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    // **P7**: 读取项目的 quality_gate_strategy
     let quality_gate_strategy: Option<String> = sqlx::query_scalar(
         r#"
         SELECT quality_gate_strategy
@@ -218,11 +178,9 @@ pub(crate) async fn project_short_video_export_check_by_id(
 
     let strategy = quality_gate_strategy.unwrap_or_else(|| "block".to_string());
 
-    // 评估质量门禁
     let mut blocking_reasons = Vec::new();
 
     if strategy == "block" {
-        // 检查是否有待审核的坏例
         if pending_review_bad_case_count > 0 {
             blocking_reasons.push(QualityGateBlockingReason {
                 code: "pending_bad_cases".to_string(),
@@ -234,7 +192,6 @@ pub(crate) async fn project_short_video_export_check_by_id(
             });
         }
 
-        // 检查是否有阻断级别的导出问题
         if blocking_issue_count > 0 {
             blocking_reasons.push(QualityGateBlockingReason {
                 code: "blocking_export_issues".to_string(),
@@ -250,7 +207,6 @@ pub(crate) async fn project_short_video_export_check_by_id(
     let enforced = strategy == "block" && !blocking_reasons.is_empty();
     let final_export_ready = export_ready && (strategy != "block" || blocking_reasons.is_empty());
 
-    // Compute data version from latest storyboard and voiceover updates
     let data_version: Option<String> = sqlx::query_scalar(
         r#"
         SELECT MAX(updated_at)::text
@@ -273,6 +229,8 @@ pub(crate) async fn project_short_video_export_check_by_id(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
+    let storyboard_gaps = build_storyboard_gaps(&issues);
+
     Ok(Json(ProjectShortVideoExportCheckResponse {
         schema_version: 1,
         data_version,
@@ -283,6 +241,7 @@ pub(crate) async fn project_short_video_export_check_by_id(
             warning_issue_count,
         },
         issues,
+        storyboard_gaps,
         quality_gate: ShortVideoExportQualityGate {
             schema_version: 1,
             strategy,
@@ -309,8 +268,8 @@ mod tests {
         state: Option<&str>,
         candidate: Option<&str>,
         duration: Option<&str>,
-    ) -> super::super::assembly_query::AssemblyFlatRow {
-        super::super::assembly_query::AssemblyFlatRow {
+    ) -> crate::short_video::assembly_query::AssemblyFlatRow {
+        crate::short_video::assembly_query::AssemblyFlatRow {
             storyboard_id: Uuid::nil(),
             storyboard_numeric_id: 1,
             script_numeric_id: 9,
@@ -339,7 +298,10 @@ mod tests {
             None,
             Some("8"),
         );
-        let issues = evaluate_row(&row);
+        let issues: Vec<_> = evaluate_export_gap_issues(&row_to_gap_input(&row))
+            .into_iter()
+            .map(|i| issue_from_gap(&i, &row))
+            .collect();
         assert!(issues.iter().all(|i| i.severity != "blocking"));
     }
 
@@ -353,28 +315,37 @@ mod tests {
             Some("pending"),
             Some("5"),
         );
-        assert!(evaluate_row(&pending)
-            .iter()
-            .any(|i| i.code == "candidate_pending"));
+        let issues: Vec<_> = evaluate_export_gap_issues(&row_to_gap_input(&pending))
+            .into_iter()
+            .map(|i| issue_from_gap(&i, &pending))
+            .collect();
+        assert!(issues.iter().any(|i| i.code == "candidate_pending"));
 
         let no_media = sample_row(None, Some("t"), None, None, None, Some("5"));
-        assert!(evaluate_row(&no_media)
-            .iter()
-            .any(|i| i.code == "missing_selected_media"));
+        let issues: Vec<_> = evaluate_export_gap_issues(&row_to_gap_input(&no_media))
+            .into_iter()
+            .map(|i| issue_from_gap(&i, &no_media))
+            .collect();
+        assert!(issues.iter().any(|i| i.code == "missing_selected_media"));
     }
 
-    /// **P7 验收**: 质量门禁策略正确映射
     #[test]
-    fn p7_quality_gate_strategy_mapping() {
-        // Test that different strategies are recognized
-        let strategies = vec!["off", "warn", "block"];
-        for strategy in strategies {
-            // This test validates the strategy values are valid
-            assert!(
-                strategy == "off" || strategy == "warn" || strategy == "block",
-                "Invalid strategy: {}",
-                strategy
-            );
-        }
+    fn storyboard_gaps_aggregate_codes_and_facets() {
+        let row = sample_row(None, None, None, None, None, None);
+        let issues: Vec<_> = evaluate_export_gap_issues(&row_to_gap_input(&row))
+            .into_iter()
+            .map(|i| issue_from_gap(&i, &row))
+            .collect();
+        let gaps = build_storyboard_gaps(&issues);
+        assert_eq!(gaps.len(), 1);
+        assert!(gaps[0].has_blocking);
+        assert!(gaps[0].missing_selected_video);
+        assert!(gaps[0].missing_subtitle);
+        assert!(gaps[0]
+            .gap_codes
+            .contains(&"missing_selected_media".to_string()));
+        assert!(gaps[0]
+            .gap_codes
+            .contains(&"subtitle_placeholder".to_string()));
     }
 }

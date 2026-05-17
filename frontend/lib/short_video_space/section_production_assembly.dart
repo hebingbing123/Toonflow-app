@@ -5,6 +5,68 @@ part of 'section.dart';
 /// Assembly and clip desk operations for ShortVideoSpaceSection
 extension _ShortVideoSpaceSectionProductionAssemblyExtension
     on _ShortVideoSpaceSectionState {
+  Future<void> _startPreAssemblyFlow() async {
+    final token = widget.accessToken?.trim();
+    final project = _selectedProject;
+    if (token == null ||
+        token.isEmpty ||
+        project == null ||
+        _preAssemblyActionBusy) {
+      return;
+    }
+
+    setState(() {
+      _preAssemblyActionBusy = true;
+    });
+    try {
+      final response = await postProjectShortVideoPreAssemblyByProjectId(
+        token,
+        project.id,
+      );
+      if (!mounted) {
+        return;
+      }
+      final l10n = resolveAppLocalizationsForErrors(context);
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+        SnackBar(
+          content: Text(
+            l10n.shortVideoSpacePreAssemblyEnqueued(
+              response.summary.shotCount,
+              response.summary.blockingShotCount,
+              response.jobId.substring(0, 8),
+            ),
+          ),
+        ),
+      );
+      await _loadProjectOverview();
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+      final l10n = resolveAppLocalizationsForErrors(context);
+      reportRustOrDescribeApiError(
+        e,
+        l10n: l10n,
+        onErrorChanged: (msg) {
+          if (!mounted || msg == null || e is RustApiException) {
+            return;
+          }
+          ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+            SnackBar(
+              content: Text(l10n.shortVideoSpacePreAssemblyFailed(msg)),
+            ),
+          );
+        },
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _preAssemblyActionBusy = false;
+        });
+      }
+    }
+  }
+
   Future<void> _startExportFlow() async {
     final token = widget.accessToken?.trim();
     final project = _selectedProject;

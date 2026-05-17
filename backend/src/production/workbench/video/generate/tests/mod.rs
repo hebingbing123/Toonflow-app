@@ -17,3 +17,6 @@ mod short_video_config_integration;
 
 #[cfg(test)]
 mod automation_mode_tests;
+
+#[cfg(test)]
+mod dedup_tests;

@@ -305,6 +305,17 @@ pub struct ShortVideoAssemblyEffectiveDefaults {
     pub bgm_strategy: Option<String>,
 }
 
+/// Per-shot export gaps on assembly read model (same facets as export-check **`storyboard_gaps`**).
+#[derive(Serialize, Deserialize, ToSchema)]
+pub struct ShortVideoAssemblyShotExportGap {
+    pub gap_codes: Vec<String>,
+    pub has_blocking: bool,
+    pub missing_selected_video: bool,
+    pub missing_subtitle: bool,
+    pub missing_voiceover: bool,
+    pub duration_anomaly: bool,
+}
+
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct ShortVideoAssemblyShot {
     pub storyboard_id: Uuid,
@@ -327,6 +338,25 @@ pub struct ShortVideoAssemblyShot {
     pub voiceover_error: Option<String>,
     /// Completed VO asset with non-empty audio URL.
     pub voiceover_asset_ready: bool,
+    /// Export-check gap facets for this shot (Wave 6 assembly API).
+    pub export_gap: ShortVideoAssemblyShotExportGap,
+}
+
+/// **`POST …/short-video-pre-assembly`** — batch rough-cut manifest enqueue summary.
+#[derive(Serialize, ToSchema)]
+pub struct ShortVideoPreAssemblySummary {
+    pub shot_count: i64,
+    pub blocking_shot_count: i64,
+    pub ready_video_count: i64,
+    pub ready_voiceover_count: i64,
+    pub total_duration_seconds: i64,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct ShortVideoPreAssemblyEnqueueResponse {
+    pub schema_version: i32,
+    pub job_id: Uuid,
+    pub summary: ShortVideoPreAssemblySummary,
 }
 
 #[derive(Serialize, Deserialize, ToSchema)]
@@ -365,6 +395,212 @@ pub struct ShortVideoCandidateQualitySummary {
     pub quality_degradation_rate_percent: f64,
 }
 
+/// Wave 7 / NLE M1: timeline shot with editable in/out trim.
+#[derive(Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ShortVideoTimelineShot {
+    pub storyboard_id: Uuid,
+    pub storyboard_numeric_id: i32,
+    pub sb_index: Option<i32>,
+    pub duration: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub selected_video_url: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub thumbnail_url: Option<String>,
+    pub subtitle_snippet: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub voiceover_audio_url: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub candidate_status: Option<String>,
+    /// Trim in-point on source media (milliseconds).
+    pub in_ms: i64,
+    /// Trim out-point on source media (milliseconds).
+    pub out_ms: i64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source_url: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, ToSchema)]
+pub struct ShortVideoTimelineScriptGroup {
+    pub script_numeric_id: i32,
+    pub script_name: Option<String>,
+    pub shots: Vec<ShortVideoTimelineShot>,
+}
+
+#[derive(Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ShortVideoTimelineVideoClip {
+    pub storyboard_numeric_id: i32,
+    pub source_url: String,
+    pub in_ms: i64,
+    pub out_ms: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub effect_preset_id: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ShortVideoTimelineBgmTrack {
+    pub enabled: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub asset_url: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub bgm_strategy: Option<String>,
+    pub volume: f64,
+}
+
+#[derive(Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ShortVideoTimelineSubtitleCue {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub storyboard_numeric_id: Option<i32>,
+    pub start_ms: i64,
+    pub end_ms: i64,
+    pub text: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub style_id: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ShortVideoTimelineTransition {
+    #[serde(rename = "type")]
+    pub transition_type: String,
+    pub duration_ms: i64,
+}
+
+#[derive(Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ShortVideoTimelineVoiceoverClip {
+    pub storyboard_numeric_id: i32,
+    pub start_ms: i64,
+    pub source_url: String,
+    pub volume: f64,
+}
+
+#[derive(Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ShortVideoTimelineTracks {
+    pub video: Vec<ShortVideoTimelineVideoClip>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub bgm: Option<ShortVideoTimelineBgmTrack>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub subtitles: Vec<ShortVideoTimelineSubtitleCue>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub transitions: Vec<ShortVideoTimelineTransition>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub voiceover: Vec<ShortVideoTimelineVoiceoverClip>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub template_id: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ProjectShortVideoTimelineResponse {
+    pub schema_version: i32,
+    /// ISO-8601 timestamp of last persisted timeline (**optimistic concurrency**).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub timeline_version: Option<String>,
+    /// Monotonic revision counter (**NLE M4a**).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub revision: Option<i32>,
+    pub tracks: ShortVideoTimelineTracks,
+    pub scripts: Vec<ShortVideoTimelineScriptGroup>,
+    /// Downsampled peaks for voiceover UI (**NLE M3** stub).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub voiceover_waveform_peaks: Option<Vec<f64>>,
+}
+
+#[derive(Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct PutProjectShortVideoTimelineBody {
+    pub schema_version: i32,
+    #[serde(default)]
+    pub expected_timeline_version: Option<String>,
+    #[serde(default)]
+    pub expected_revision: Option<i32>,
+    pub tracks: ShortVideoTimelineTracks,
+}
+
+#[derive(Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct PutProjectShortVideoTimelineResponse {
+    pub schema_version: i32,
+    pub timeline_version: String,
+    pub revision: i32,
+    pub updated_clip_count: usize,
+}
+
+#[derive(Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ShortVideoTimelineRevisionItem {
+    pub revision: i32,
+    pub created_at: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub created_by: Option<Uuid>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub summary: Option<String>,
+}
+
+#[derive(Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ShortVideoTimelineRevisionsResponse {
+    pub revisions: Vec<ShortVideoTimelineRevisionItem>,
+}
+
+#[derive(Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ShortVideoTimelineRestoreBody {
+    pub revision: i32,
+}
+
+#[derive(Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ShortVideoTimelineRestoreResponse {
+    pub schema_version: i32,
+    pub timeline_version: String,
+    pub revision: i32,
+    pub restored_from_revision: i32,
+}
+
+#[derive(Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ShortVideoTimelinePreviewEnqueueResponse {
+    pub schema_version: i32,
+    pub job_id: Uuid,
+    pub clip_count: usize,
+}
+
+#[derive(Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ShortVideoTimelineReorderBody {
+    pub script_numeric_id: i32,
+    pub ordered_storyboard_ids: Vec<i32>,
+}
+
+#[derive(Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ShortVideoTimelineReorderResponse {
+    pub schema_version: i32,
+    pub script_numeric_id: i32,
+    pub updated_count: usize,
+}
+
+#[derive(Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ShortVideoTimelineApplyTemplateBody {
+    pub template_id: String,
+}
+
+#[derive(Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ShortVideoTimelineApplyTemplateResponse {
+    pub schema_version: i32,
+    pub timeline_version: String,
+    pub template_id: String,
+    pub video_clip_count: usize,
+}
+
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct ProjectShortVideoAssemblyResponse {
     pub schema_version: i32,
@@ -396,6 +632,27 @@ pub struct ShortVideoExportCheckIssue {
     pub storyboard_id: Uuid,
     pub storyboard_numeric_id: i32,
     pub sb_index: Option<i32>,
+}
+
+/// Wave 6：按分镜聚合的导出缺口（与 **`issues`** 同源，便于 Space / 装配 UI 逐镜展示）。
+#[derive(Serialize, ToSchema)]
+pub struct ShortVideoExportCheckStoryboardGap {
+    pub script_numeric_id: i32,
+    pub storyboard_id: Uuid,
+    pub storyboard_numeric_id: i32,
+    pub sb_index: Option<i32>,
+    /// 去重后的 **`issues[].code`**（含 blocking 与 warning）。
+    pub gap_codes: Vec<String>,
+    /// 该分镜是否含至少一条 **`severity = blocking`** 的 issue。
+    pub has_blocking: bool,
+    /// 未选定可用视频（含 **`missing_selected_media`** / **`selected_media_not_video`** / **`candidate_pending`**）。
+    pub missing_selected_video: bool,
+    /// 字幕 / 口播文案缺失（**`subtitle_placeholder`** / **`subtitle_empty`**）。
+    pub missing_subtitle: bool,
+    /// 旁白未就绪（**`voiceover_*`** 类 code）。
+    pub missing_voiceover: bool,
+    /// 时长未标明或不可解析（**`duration_*`** 类 code）。
+    pub duration_anomaly: bool,
 }
 
 /// **P7**: 导出质量门禁（off/warn/block）
@@ -433,6 +690,8 @@ pub struct ProjectShortVideoExportCheckResponse {
     pub export_ready: bool,
     pub summary: ShortVideoExportCheckSummary,
     pub issues: Vec<ShortVideoExportCheckIssue>,
+    /// 按分镜聚合的导出缺口（与 **`issues`** 一致；空表示无缺口）。
+    pub storyboard_gaps: Vec<ShortVideoExportCheckStoryboardGap>,
     pub quality_gate: ShortVideoExportQualityGate,
 }
 
@@ -577,6 +836,10 @@ pub struct CreateProjectBody {
     /// BGM 策略
     #[serde(default)]
     pub bgm_strategy: Option<String>,
+    /// Quality gate enforcement strategy (off/warn/block)
+    #[serde(default)]
+    #[schema(example = "block")]
+    pub quality_gate_strategy: Option<String>,
     #[serde(default)]
     pub project_brief: Option<ProjectBrief>,
     #[serde(default)]

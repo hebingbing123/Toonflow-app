@@ -30,17 +30,20 @@ use super::{
     JOB_KIND_ASSET_GENERATE_BATCH, JOB_KIND_ASSET_GENERATE_IMAGE, JOB_KIND_ASSET_POLISH_BATCH,
     JOB_KIND_ASSET_POLISH_PROMPT, JOB_KIND_FLUTTER_PROBE, JOB_KIND_NOVEL_CRAWL_IMPORT_BATCH,
     JOB_KIND_SETTINGS_ACCOUNT_EXPORT, JOB_KIND_SETTINGS_VENDOR_MODEL_TEST,
-    JOB_KIND_SETTINGS_WORKSPACE_SHARED_AUDIT_EXPORT, JOB_KIND_VIDEO_EXPORT,
-    JOB_KIND_VIDEO_GENERATE, JOB_KIND_VOICEOVER_GENERATE,
+    JOB_KIND_SETTINGS_WORKSPACE_SHARED_AUDIT_EXPORT, JOB_KIND_SHORT_VIDEO_PRE_ASSEMBLY,
+    JOB_KIND_SHORT_VIDEO_TIMELINE_PREVIEW, JOB_KIND_VIDEO_EXPORT, JOB_KIND_VIDEO_GENERATE,
+    JOB_KIND_VOICEOVER_GENERATE,
 };
 
 mod asset_image;
 mod asset_polish;
 mod common;
 mod novel_crawl;
+mod short_video_pre_assembly;
+mod short_video_timeline_preview;
 mod vendor;
 mod video;
-mod voiceover;
+pub(crate) mod voiceover;
 
 #[cfg(test)]
 mod workspace_validation_tests;
@@ -480,6 +483,13 @@ async fn execute_kind(
         }
         k if k == JOB_KIND_VIDEO_GENERATE => video::run_video_generate(state, pool, id, row).await,
         k if k == JOB_KIND_VIDEO_EXPORT => video::run_video_export(state, pool, id, row).await,
+        k if k == JOB_KIND_SHORT_VIDEO_PRE_ASSEMBLY => {
+            short_video_pre_assembly::run_short_video_pre_assembly(state, pool, id, row).await
+        }
+        k if k == JOB_KIND_SHORT_VIDEO_TIMELINE_PREVIEW => {
+            short_video_timeline_preview::run_short_video_timeline_preview(state, pool, id, row)
+                .await
+        }
         k if k == JOB_KIND_VOICEOVER_GENERATE => {
             voiceover::run_voiceover_generate(state, pool, id, row)
                 .await

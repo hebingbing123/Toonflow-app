@@ -300,15 +300,23 @@ Future<int> postStoryboardUpdateDurationV1(
 }
 
 /// `POST /api/v1/production/get-storyboard-data` — OpenAPI `postProductionGetStoryboardDataV1`.
+/// When [clientDataVersion] matches the server version,
+/// [ProductionGetProductionDataResponseV1.unchanged] is true and [data] is empty.
 Future<ProductionGetProductionDataResponseV1> postProductionGetStoryboardDataV1(
   String accessToken, {
   int? projectId,
   String? projectUuid,
   required int scriptId,
+  String? clientDataVersion,
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/production/get-storyboard-data');
+  final base = <String, dynamic>{'scriptId': scriptId};
+  final cached = clientDataVersion?.trim();
+  if (cached != null && cached.isNotEmpty) {
+    base['clientDataVersion'] = cached;
+  }
   final body = buildStoryboardProjectScopeBodyV1(
-    base: <String, dynamic>{'scriptId': scriptId},
+    base: base,
     projectId: projectId,
     projectUuid: projectUuid,
   );

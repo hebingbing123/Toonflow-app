@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../rust_api.dart';
+import 'support.dart';
 
 /// Keeps the top-level task center actions together before drill-down content.
 class TaskCenterActionsBar extends StatelessWidget {
@@ -173,14 +174,20 @@ class TaskCenterJobsPreview extends StatelessWidget {
           style: Theme.of(context).textTheme.labelLarge,
         ),
         ...jobs.take(8).map(
-          (job) => ListTile(
+          (job) {
+            final phase = taskCenterShortVideoStageLabel(l10n, job);
+            final title = phase.isEmpty
+                ? l10n.l10nBatch_c084376ea9(job.kind, job.status)
+                : '${job.kind} · ${job.status} · $phase';
+            return ListTile(
             dense: true,
             contentPadding: EdgeInsets.zero,
-            title: Text(l10n.l10nBatch_c084376ea9(job.kind, job.status)),
+            title: Text(title),
             subtitle: Text(l10n.l10nBatch_978d9d9f6f(job.numericTaskId, job.id)),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => onSelectTaskJob(job),
-          ),
+          );
+          },
         ),
       ],
     );

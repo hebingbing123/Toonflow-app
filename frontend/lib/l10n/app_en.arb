@@ -150,6 +150,22 @@
   "shortVideoSpaceWarningItems": "Warning Items (Selected by Interface Order)",
   "shortVideoSpaceExporting": "Exporting...",
   "shortVideoSpaceStartExport": "Start Export",
+  "shortVideoSpaceStartPreAssembly": "Batch pre-assembly",
+  "shortVideoSpacePreAssemblyBusy": "Pre-assembling…",
+  "shortVideoSpacePreAssemblyEnqueued": "Pre-assembly job queued ({shotCount} shots, {blocking} blocking). Job: {jobId}",
+  "@shortVideoSpacePreAssemblyEnqueued": {
+    "placeholders": {
+      "shotCount": { "type": "int" },
+      "blocking": { "type": "int" },
+      "jobId": { "type": "String" }
+    }
+  },
+  "shortVideoSpacePreAssemblyFailed": "Pre-assembly failed: {error}",
+  "@shortVideoSpacePreAssemblyFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
   "shortVideoSpaceExportHistory": "Export History",
   "shortVideoSpacePublishJobs": "Publish Jobs",
   "shortVideoSpaceScheduleCalendar": "Schedule Calendar (counted by local calendar days; click a day to batch write timing)",
@@ -2046,6 +2062,12 @@
   "taskCenterOpenProductionWorkspace": "Open production workspace",
   "taskCenterOpenScriptWorkspace": "Open script workspace",
   "taskCenterRegenerate": "Regenerate",
+  "taskCenterRetryRegenerateVideo": "Retry video generation",
+  "taskCenterRetryExportVideo": "Retry export",
+  "taskCenterRetryVoiceover": "Retry voiceover",
+  "taskCenterRetryPreAssembly": "Retry pre-assembly",
+  "taskCenterRetryAfterWritebackFailure": "Retry after writeback issue",
+  "taskCenterRegenerateAfterWriteback": "Regenerate (writeback)",
   "taskCenterPartialRework": "Partial rework",
   "taskCenterWritebackCompensation": "Writeback compensation",
   "taskCenterOpenSpacePublish": "Open short-video Space (publish)",
@@ -6906,6 +6928,18 @@
     }
   },
   "storyboardWorkbenchProductionMetaLoadedEmpty": "Production view loaded",
+  "storyboardWorkbenchCharacterLabel": "Voice character",
+  "storyboardWorkbenchCharacterDropdownLabel": "Assign character",
+  "storyboardWorkbenchCharacterNone": "None (project default)",
+  "storyboardWorkbenchCharacterReload": "Reload characters",
+  "storyboardWorkbenchCharacterSaved": "Character assignment saved",
+  "storyboardActionVideoSkippedDuplicates": "Skipped {count} duplicate in-flight job(s) (#{ids})",
+  "@storyboardActionVideoSkippedDuplicates": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "ids": { "type": "String" }
+    }
+  },
   "storyboardEditorDialogTitle": "Storyboard editor #{numericId}",
   "@storyboardEditorDialogTitle": {
     "placeholders": {
@@ -7541,9 +7575,9 @@
     }
   },
   "storyboardPatchDialogTitle": "Partial rework",
-  "storyboardPatchScopeLabel": "scope",
+  "storyboardPatchScopeLabel": "Scope",
   "storyboardPatchScopeHelper": "episode / scene / storyboard_item / video_prompt / derive_asset",
-  "storyboardPatchModelTierLabel": "model tier",
+  "storyboardPatchModelTierLabel": "Model tier",
   "storyboardPatchModelTierHelper": "low for format fixes; high for content-quality fixes",
   "storyboardPatchTargetIdsLabel": "target ids",
   "storyboardPatchTargetIdsHelper": "Comma-separated. Defaults to current storyboard numeric ID.",
@@ -7590,6 +7624,13 @@
   "storyboardPatchSubmitting": "Submitting…",
   "storyboardPatchSubmit": "Submit rework",
   "storyboardPatchDefaultReason": "Fix content quality, continuity, or emotional delivery for this shot.",
+  "storyboardPatchScopeEpisode": "Episode",
+  "storyboardPatchScopeScene": "Scene",
+  "storyboardPatchScopeStoryboardItem": "Storyboard item",
+  "storyboardPatchScopeVideoPrompt": "Video prompt",
+  "storyboardPatchScopeDeriveAsset": "Derive asset",
+  "storyboardPatchModelTierLow": "Low",
+  "storyboardPatchModelTierHigh": "High",
   "shortVideoReadinessNoPayloadHeadline": "Shot readiness data is not available yet.",
   "shortVideoReadinessEmptyProjectHeadline": "This project has no storyboard rows yet; split shots on the script side first to see the rollup.",
   "shortVideoReadinessRollupHeadline": "{ready}/{total} shots ready; {blocked} blocked.",
@@ -7663,6 +7704,24 @@
     }
   },
   "shortVideoMetricStoryboardReadiness": "Storyboard readiness",
+  "shortVideoMetricProductionPhase": "Production phase",
+  "shortVideoProductionPhaseSnippet": "Ready {ready} · Generating {generating} · Blocked {blocked}",
+  "@shortVideoProductionPhaseSnippet": {
+    "placeholders": {
+      "ready": { "type": "int" },
+      "generating": { "type": "int" },
+      "blocked": { "type": "int" }
+    }
+  },
+  "shortVideoBatchSkippedDuplicates": "Skipped {count} duplicate in-flight (#{ids})",
+  "@shortVideoBatchSkippedDuplicates": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "ids": { "type": "String" }
+    }
+  },
+  "shortVideoBatchOutcomeSkippedDuplicate": "skipped duplicate",
+  "shortVideoBatchOutcomeQueued": "queued",
   "shortVideoShotReadinessSelectProjectHint": "Select a short drama project to see server-side shot blocking rollup.",
   "shortVideoTaskUnnamed": "Unnamed task",
   "shortVideoBadCaseUncategorized": "Uncategorized",
@@ -8039,6 +8098,8 @@
     }
   },
   "shortVideoCandidateCurrentVideo": "Current video",
+  "shortVideoCandidateVideoListTitle": "Candidate videos",
+  "shortVideoCandidateSelectVideo": "Select",
   "shortVideoCandidateSetCurrent": "Set as current",
   "shortVideoCandidatePartialRework": "Partial rework",
   "shortVideoDeliveryModeLive": "Live ✓",
@@ -9136,6 +9197,109 @@
     "placeholders": {
       "error": {
         "type": "String"
+      }
+    }
+  },
+  "shortVideoBatchOutcomeSummary": "Outcomes: {details}",
+  "@shortVideoBatchOutcomeSummary": {
+    "placeholders": {
+      "details": { "type": "String" }
+    }
+  },
+  "shortVideoBatchOutcomeCount": "{outcome}×{count}",
+  "@shortVideoBatchOutcomeCount": {
+    "placeholders": {
+      "outcome": { "type": "String" },
+      "count": { "type": "int" }
+    }
+  },
+  "shortVideoWritebackStatusOk": "Video writeback: synced to storyboard",
+  "shortVideoWritebackStatusFailed": "Video writeback failed ({code})",
+  "@shortVideoWritebackStatusFailed": {
+    "placeholders": { "code": { "type": "String" } }
+  },
+  "shortVideoWritebackStatusFailedGeneric": "Video writeback failed",
+  "shortVideoWritebackStatusIncomplete": "Video writeback incomplete ({code})",
+  "@shortVideoWritebackStatusIncomplete": {
+    "placeholders": { "code": { "type": "String" } }
+  },
+  "shortVideoWritebackStatusIncompleteGeneric": "Video writeback incomplete — refresh production data",
+  "shortVideoWritebackStatusUnknown": "Video writeback: {status}",
+  "@shortVideoWritebackStatusUnknown": {
+    "placeholders": { "status": { "type": "String" } }
+  },
+  "shortVideoCharactersPanelTitle": "Project characters & voices",
+  "shortVideoCharactersRefresh": "Refresh",
+  "shortVideoCharactersLoading": "Loading characters…",
+  "shortVideoCharactersEmpty": "No project characters yet. Create them under project settings or via API.",
+  "shortVideoCharactersVoiceSummary": "Provider {provider} · voice {voiceId} · emotion {emotion}",
+  "@shortVideoCharactersVoiceSummary": {
+    "placeholders": {
+      "provider": { "type": "String" },
+      "voiceId": { "type": "String" },
+      "emotion": { "type": "String" }
+    }
+  },
+  "shortVideoCharactersPreviewVoice": "Preview voice",
+  "shortVideoCharactersCloneVoice": "Clone voice",
+  "shortVideoCharactersCloneVoiceTitle": "Clone voice — {name}",
+  "@shortVideoCharactersCloneVoiceTitle": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "shortVideoCharactersCloneSampleUrl": "Sample audio URL",
+  "shortVideoCharactersCloneDisplayName": "Display name",
+  "shortVideoCharactersCloneMockSample": "Use mock sample",
+  "shortVideoCharactersCloneSuccess": "Cloned voice ID: {voiceId} ({provider})",
+  "@shortVideoCharactersCloneSuccess": {
+    "placeholders": {
+      "voiceId": { "type": "String" },
+      "provider": { "type": "String" }
+    }
+  },
+  "shortVideoCharactersCloneFailed": "Clone failed: {error}",
+  "@shortVideoCharactersCloneFailed": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "shortVideoCharactersEditVoice": "Edit voice",
+  "shortVideoCharactersEditVoiceTitle": "Voice — {name}",
+  "@shortVideoCharactersEditVoiceTitle": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "shortVideoCharactersFieldProvider": "Provider",
+  "shortVideoCharactersFieldVoiceId": "Voice ID",
+  "shortVideoCharactersFieldEmotion": "Emotion / style",
+  "shortVideoCharactersPreviewLoading": "Generating preview for {name}…",
+  "@shortVideoCharactersPreviewLoading": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "shortVideoCharactersPreviewReady": "Playing preview for {name}",
+  "@shortVideoCharactersPreviewReady": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "shortVideoCharactersPreviewFailed": "Preview failed for {name}: {error}",
+  "@shortVideoCharactersPreviewFailed": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "error": { "type": "String" }
+    }
+  },
+  "shortVideoCharactersPreviewSampleText": "This is a short drama voice preview sample.",
+  "shortVideoCharactersVoiceSaved": "Saved voice settings for {name}",
+  "@shortVideoCharactersVoiceSaved": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "shortVideoCharactersVoiceSaveFailed": "Could not save voice for {name}: {error}",
+  "@shortVideoCharactersVoiceSaveFailed": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "error": { "type": "String" }
+    }
+  },
+  "shortVideoProductionConfirmCandidatesDone": "Confirmed {count} storyboard candidate(s) for generation.",
+  "@shortVideoProductionConfirmCandidatesDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
     }
   },
@@ -11289,6 +11453,19 @@
   },
   "shortVideoSpacePublishExportCheckDetailReady": "Blocking count is 0, indicating no hard blocking on server aggregation path (still subject to actual export pipeline).",
   "shortVideoSpacePublishExportCheckDetailBlocking": "Below lists some blocking items; for complete list, check each shot in production workspace.",
+  "shortVideoSpacePublishExportCheckStoryboardGapsTitle": "Per-storyboard export gaps",
+  "shortVideoSpacePublishExportCheckStoryboardGapTitle": "Script #{scriptId} · Storyboard #{sbId}{sbIndex}",
+  "@shortVideoSpacePublishExportCheckStoryboardGapTitle": {
+    "placeholders": {
+      "scriptId": { "type": "int" },
+      "sbId": { "type": "int" },
+      "sbIndex": { "type": "String" }
+    }
+  },
+  "shortVideoSpacePublishExportCheckFacetMissingVideo": "Missing selected video",
+  "shortVideoSpacePublishExportCheckFacetMissingSubtitle": "Missing subtitle / narration",
+  "shortVideoSpacePublishExportCheckFacetMissingVoiceover": "Voiceover not ready",
+  "shortVideoSpacePublishExportCheckFacetDurationAnomaly": "Duration anomaly",
   "shortVideoSpacePublishCandidateLoadingHeadline": "Loading project assets…",
   "shortVideoSpacePublishCandidateLoadingDetail": "Used to count candidate workflow: pending / linked / ignored (consistent with PATCH asset).",
   "shortVideoSpacePublishCandidateUnavailableHeadline": "Candidate asset summary unavailable.",
@@ -11514,6 +11691,81 @@
       }
     }
   },
+  "shortVideoTimelinePanelTitle": "Rough-cut timeline (trim + preview)",
+  "shortVideoTimelineSave": "Save timeline",
+  "shortVideoTimelineSaveDone": "Timeline saved.",
+  "shortVideoTimelineSaveFailed": "Timeline save failed: {error}",
+  "@shortVideoTimelineSaveFailed": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "shortVideoTimelineGeneratePreview": "Generate preview",
+  "shortVideoTimelinePreviewBusy": "Rendering preview…",
+  "shortVideoTimelinePreviewDone": "Preview ready.",
+  "shortVideoTimelinePreviewFailed": "Preview failed: {error}",
+  "@shortVideoTimelinePreviewFailed": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "shortVideoTimelinePlayPreview": "Open preview",
+  "shortVideoTimelineTrimInMs": "In (ms)",
+  "shortVideoTimelineTrimOutMs": "Out (ms)",
+  "shortVideoTimelineBgmEnabled": "BGM track",
+  "shortVideoTimelineBgmVolume": "BGM volume",
+  "shortVideoTimelineMoveUp": "Move up",
+  "shortVideoTimelineMoveDown": "Move down",
+  "shortVideoTimelinePersistOrder": "Save order",
+  "shortVideoTimelineLoading": "Loading timeline…",
+  "shortVideoTimelineEmpty": "No shots in timeline yet.",
+  "shortVideoTimelineReorderDone": "Timeline order saved.",
+  "shortVideoTimelineSubtitlesTitle": "Subtitles",
+  "shortVideoTimelineSubtitleText": "Subtitle text",
+  "shortVideoTimelineSubtitleStartMs": "Start (ms)",
+  "shortVideoTimelineSubtitleEndMs": "End (ms)",
+  "shortVideoTimelineAddSubtitle": "Add subtitle",
+  "shortVideoTimelineTransitionsTitle": "Transitions",
+  "shortVideoTimelineTransitionCut": "Cut",
+  "shortVideoTimelineTransitionCrossfade": "Crossfade",
+  "shortVideoTimelineTransitionFadeBlack": "Fade to black",
+  "shortVideoTimelineTransitionDurationMs": "Duration (ms)",
+  "shortVideoTimelineVoiceoverTitle": "Voiceover",
+  "shortVideoTimelineVoiceoverVolume": "Volume",
+  "shortVideoTimelineApplyTemplate": "Apply rough-cut template",
+  "shortVideoTimelineTemplateShortDrama": "Short drama default",
+  "shortVideoTimelineTemplateDialoguePunch": "Dialogue punch",
+  "shortVideoTimelineTemplateApplied": "Template applied.",
+  "shortVideoTimelineTemplateFailed": "Template failed: {error}",
+  "@shortVideoTimelineTemplateFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "shortVideoTimelineReorderFailed": "Timeline reorder failed: {error}",
+  "@shortVideoTimelineReorderFailed": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "shortVideoTimelineUndo": "Undo",
+  "shortVideoTimelineRedo": "Redo",
+  "shortVideoTimelineRevisionHistory": "Version history",
+  "shortVideoTimelineRevisionEmpty": "No saved versions yet.",
+  "shortVideoTimelineRevisionLabel": "Revision {revision}",
+  "@shortVideoTimelineRevisionLabel": {
+    "placeholders": { "revision": { "type": "int" } }
+  },
+  "shortVideoTimelineRevisionRestored": "Timeline restored from history.",
+  "shortVideoTimelineRevisionLoadFailed": "Could not load version history: {error}",
+  "@shortVideoTimelineRevisionLoadFailed": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "shortVideoTimelineRevisionRestoreFailed": "Restore failed: {error}",
+  "@shortVideoTimelineRevisionRestoreFailed": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "shortVideoTimelineEffectPreset": "Effect preset",
+  "shortVideoTimelineEffectApplyAll": "Apply effect to all clips",
+  "shortVideoTimelineEffectNone": "None",
+  "shortVideoTimelineEffectVivid": "Vivid",
+  "shortVideoTimelineEffectCinematic": "Cinematic",
+  "shortVideoTimelineEffectBw": "Black & white",
+  "shortVideoTimelineEffectSpeed110": "Speed 110%",
   "shortVideoSpaceProductionAssemblyReorderPersisted": "Persisted shot reorder (wrote back timeline and shot numbers by script).",
   "shortVideoSpaceProductionAssemblyReorderFailed": "Reorder persistence failed: {error}",
   "@shortVideoSpaceProductionAssemblyReorderFailed": {

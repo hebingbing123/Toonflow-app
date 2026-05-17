@@ -8,6 +8,8 @@ use serde::Serialize;
 use super::WorkbenchGenerateVideoBody;
 use crate::error::ApiError;
 use crate::jobs::{enqueue_generation_job, JobRow, JOB_KIND_VIDEO_GENERATE};
+use crate::production::workbench::generation_guards::assert_storyboards_ready_for_generation;
+use crate::production::workbench::generation_profile::load_project_generation_profile;
 use crate::production::workbench::meta::generate::constraints::VideoPromptConstraintPressure;
 use crate::production::workbench::meta::generate::constraints::{
     derive_recent_quality_constraint_pressure, infer_adaptive_automation_memory_mode,
@@ -55,6 +57,114 @@ pub(in crate::production) struct WorkbenchGenerateVideoResponse {
     total: usize,
     negative_prompt: Option<String>,
     storyboard_negative_prompts: Vec<StoryboardNegativePrompt>,
+    #[serde(default, skip_serializing_if = "is_zero_usize")]
+    skipped_duplicate_count: usize,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    skipped_duplicate_storyboard_ids: Vec<i32>,
+}
+
+fn is_zero_usize(value: &usize) -> bool {
+    *value == 0
+}
+
+/// Recent in-flight jobs with the same storyboard + model are treated as duplicates.
+pub(super) const VIDEO_JOB_DEDUP_WINDOW_MINUTES: i64 = 5;
+
+#[must_use]
+pub(super) fn normalize_video_prompt_fingerprint(prompt: &str) -> String {
+    prompt
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ")
+        .to_ascii_lowercase()
+}
+
+fn payload_prompt_fingerprint(payload: &serde_json::Value) -> Option<String> {
+    if let Some(fp) = payload
+        .get("prompt_fingerprint")
+        .and_then(|v| v.as_str())
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+    {
+        return Some(fp.to_string());
+    }
+    payload
+        .get("prompt")
+        .and_then(|p| p.as_str())
+        .map(normalize_video_prompt_fingerprint)
+}
+
+pub(super) fn recent_video_job_matches_storyboard_model(
+    payload: &serde_json::Value,
+    storyboard_id: i32,
+    model: &str,
+    prompt_fingerprint: &str,
+) -> bool {
+    let Some(sb) = payload.get("storyboard_numeric_id") else {
+        return false;
+    };
+    let sb_id = sb
+        .as_i64()
+        .or_else(|| sb.as_str().and_then(|s| s.parse().ok()));
+    if sb_id != Some(i64::from(storyboard_id)) {
+        return false;
+    }
+    if payload
+        .get("model")
+        .and_then(|m| m.as_str())
+        .is_none_or(|m| m != model)
+    {
+        return false;
+    }
+    payload_prompt_fingerprint(payload).is_some_and(|fp| fp == prompt_fingerprint)
+}
+
+async fn load_recent_duplicate_video_storyboard_ids(
+    pool: &sqlx::PgPool,
+    project_numeric_id: i32,
+    script_id: i32,
+    candidates: &[(i32, String)],
+    model: &str,
+) -> Result<std::collections::HashSet<i32>, ApiError> {
+    if candidates.is_empty() {
+        return Ok(std::collections::HashSet::new());
+    }
+    let storyboard_ids: Vec<i32> = candidates.iter().map(|(id, _)| *id).collect();
+    let rows = sqlx::query_as::<_, (i32, serde_json::Value)>(
+        r#"
+        SELECT (j.payload->>'storyboard_numeric_id')::int AS sb_id, j.payload
+        FROM app_generation_job j
+        WHERE j.kind = $1
+          AND j.status IN ('queued', 'running')
+          AND (j.payload->>'project_numeric_id') ~ '^[0-9]+$'
+          AND (j.payload->>'project_numeric_id')::int = $2
+          AND (j.payload->>'script_id') ~ '^[0-9]+$'
+          AND (j.payload->>'script_id')::int = $3
+          AND (j.payload->>'storyboard_numeric_id') ~ '^[0-9]+$'
+          AND (j.payload->>'storyboard_numeric_id')::int = ANY($4::int4[])
+          AND j.created_at > NOW() - ($5::int * INTERVAL '1 minute')
+        "#,
+    )
+    .bind(JOB_KIND_VIDEO_GENERATE)
+    .bind(project_numeric_id)
+    .bind(script_id)
+    .bind(storyboard_ids)
+    .bind(VIDEO_JOB_DEDUP_WINDOW_MINUTES)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let mut duplicates = std::collections::HashSet::new();
+    for (sb_id, prompt_fp) in candidates {
+        for (row_sb_id, payload) in &rows {
+            if *row_sb_id == *sb_id
+                && recent_video_job_matches_storyboard_model(payload, *sb_id, model, prompt_fp)
+            {
+                duplicates.insert(*sb_id);
+            }
+        }
+    }
+    Ok(duplicates)
 }
 
 #[derive(Debug, Clone, sqlx::FromRow)]
@@ -298,6 +408,24 @@ pub(crate) async fn workbench_enqueue_video_jobs_from_body(
     )
     .await?;
     ensure_storyboards_in_scope(pool, scope_row.script_id, &storyboard_ids).await?;
+    assert_storyboards_ready_for_generation(
+        pool,
+        scope_row.project_id,
+        user_id,
+        body.script_id,
+        &storyboard_ids,
+    )
+    .await?;
+    let generation_profile = load_project_generation_profile(pool, scope_row.project_id).await?;
+    let generation_profile_label = match generation_profile.tier {
+        crate::production::workbench::generation_profile::GenerationProfileTier::Draft => "draft",
+        crate::production::workbench::generation_profile::GenerationProfileTier::Standard => {
+            "standard"
+        }
+        crate::production::workbench::generation_profile::GenerationProfileTier::Premium => {
+            "premium"
+        }
+    };
     let mut text_inputs = upload_items
         .iter()
         .filter_map(|item| item.prompt.clone())
@@ -367,12 +495,35 @@ pub(crate) async fn workbench_enqueue_video_jobs_from_body(
     let model = body.model.trim().to_string();
     let resolution = body.resolution.trim().to_string();
     let mode = body.mode.trim().to_string();
+    let mut dedup_candidates = Vec::with_capacity(upload_items.len());
+    for item in &upload_items {
+        let prompt_seed = resolve_storyboard_prompt(item, &default_prompt)?;
+        let prompt = apply_project_mode_prompt_preset(&prompt_seed, project_mode.as_deref());
+        dedup_candidates.push((
+            item.storyboard_id,
+            normalize_video_prompt_fingerprint(&prompt),
+        ));
+    }
+    let recent_duplicate_storyboards = load_recent_duplicate_video_storyboard_ids(
+        pool,
+        scope_row.project_numeric_id,
+        body.script_id,
+        &dedup_candidates,
+        &model,
+    )
+    .await?;
 
     let mut enqueued = Vec::with_capacity(upload_items.len());
     let mut response_negative_prompts = Vec::with_capacity(storyboard_ids.len());
+    let mut skipped_duplicate_storyboard_ids = Vec::new();
     for item in upload_items {
+        if recent_duplicate_storyboards.contains(&item.storyboard_id) {
+            skipped_duplicate_storyboard_ids.push(item.storyboard_id);
+            continue;
+        }
         let prompt_seed = resolve_storyboard_prompt(&item, &default_prompt)?;
         let prompt = apply_project_mode_prompt_preset(&prompt_seed, project_mode.as_deref());
+        let prompt_fingerprint = normalize_video_prompt_fingerprint(&prompt);
         let merged_negative_prompt = merge_negative_prompts(
             merge_negative_prompts(
                 body.negative_prompt.as_deref(),
@@ -409,9 +560,11 @@ pub(crate) async fn workbench_enqueue_video_jobs_from_body(
             "project_uuid": scope_row.project_id,
             "project_numeric_id": scope_row.project_numeric_id,
             "script_id": body.script_id,
+            "script_numeric_id": body.script_id,
             "storyboard_numeric_id": item.storyboard_id,
             "provider": provider,
             "model": &model,
+            "prompt_fingerprint": &prompt_fingerprint,
             "mode": &mode,
             "prompt": &prompt,
             "negative_prompt": merged_negative_prompt.clone(),
@@ -421,6 +574,8 @@ pub(crate) async fn workbench_enqueue_video_jobs_from_body(
             "audio": body.audio,
             "track_id": body.track_id,
             "image_url": item.source_url,
+            "generation_profile": generation_profile_label,
+            "memory_budget_tier": generation_profile.tier.default_memory_budget_tier(),
         });
         let row = enqueue_generation_job(
             pool,
@@ -439,11 +594,14 @@ pub(crate) async fn workbench_enqueue_video_jobs_from_body(
     }
 
     let total = enqueued.len();
+    let skipped_duplicate_count = skipped_duplicate_storyboard_ids.len();
     Ok(WorkbenchGenerateVideoResponse {
         enqueued,
         total,
         negative_prompt: body.negative_prompt.clone(),
         storyboard_negative_prompts: response_negative_prompts,
+        skipped_duplicate_count,
+        skipped_duplicate_storyboard_ids,
     })
 }
 

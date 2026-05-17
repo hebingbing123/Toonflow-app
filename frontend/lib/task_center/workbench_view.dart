@@ -383,7 +383,10 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                                       child: Text(
                                         model.retryingJobId == job.id
                                             ? l10n.projectsBusyProcessing
-                                            : l10n.taskCenterRetry,
+                                            : taskCenterFailedJobRetryLabel(
+                                                l10n,
+                                                job,
+                                              ),
                                       ),
                                     ),
                                   if (job.status == 'queued' ||
@@ -605,7 +608,7 @@ class _TaskFailedReworkActions extends StatelessWidget {
         children: [
           TextButton(
             onPressed: () => onRetry(job),
-            child: Text(l10n.taskCenterRegenerate),
+            child: Text(taskCenterFailedJobRegenerateLabel(l10n, job)),
           ),
           if (canPartial)
             TextButton(

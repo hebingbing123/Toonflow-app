@@ -12,8 +12,10 @@ class _ProductionPanel extends StatelessWidget {
     required this.assemblyPanelUi,
     required this.exportCheckPanelUi,
     required this.onStartExport,
+    required this.onStartPreAssembly,
     required this.onOpenExportHistory,
     required this.exportActionBusy,
+    required this.preAssemblyActionBusy,
     required this.onOpenProductionForAssemblyExport,
     required this.onOpenAssemblyClipDeskOps,
     required this.onOpenAssemblyDefaultsEditor,
@@ -29,8 +31,10 @@ class _ProductionPanel extends StatelessWidget {
   final ShortVideoAssemblyPanelUi assemblyPanelUi;
   final ShortVideoExportCheckPanelUi exportCheckPanelUi;
   final VoidCallback? onStartExport;
+  final VoidCallback? onStartPreAssembly;
   final VoidCallback? onOpenExportHistory;
   final bool exportActionBusy;
+  final bool preAssemblyActionBusy;
   final VoidCallback? onOpenProductionForAssemblyExport;
   final VoidCallback? onOpenAssemblyClipDeskOps;
   final VoidCallback? onOpenAssemblyDefaultsEditor;
@@ -383,7 +387,53 @@ class _ProductionPanel extends StatelessWidget {
                         ),
                       ),
                   ],
-                  if (exportCheckPanelUi.blockingLines.isNotEmpty) ...[
+                  if (exportCheckPanelUi.storyboardGapEntries.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      l10n.shortVideoSpacePublishExportCheckStoryboardGapsTitle,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: outline,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    for (final gap in exportCheckPanelUi.storyboardGapEntries)
+                      Theme(
+                        data: theme.copyWith(dividerColor: Colors.transparent),
+                        child: ExpansionTile(
+                          tilePadding: EdgeInsets.zero,
+                          childrenPadding: const EdgeInsets.only(
+                            left: 8,
+                            bottom: 6,
+                          ),
+                          title: Text(
+                            gap.title,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: gap.hasBlocking
+                                  ? theme.colorScheme.error
+                                  : Colors.orange,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          subtitle: Text(
+                            gap.facetSummary,
+                            style: theme.textTheme.bodySmall,
+                          ),
+                          children: [
+                            for (final label in gap.codeLabels)
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  '· $label',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: outline,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                  ] else if (exportCheckPanelUi.blockingLines.isNotEmpty) ...[
                     const SizedBox(height: 8),
                     Text(
                       l10n.shortVideoSpaceBlockingItems,
@@ -446,6 +496,23 @@ class _ProductionPanel extends StatelessWidget {
                             )
                           : const Icon(Icons.file_upload_outlined),
                       label: Text(exportActionBusy ? l10n.shortVideoSpaceExporting : l10n.shortVideoSpaceStartExport),
+                    ),
+                    OutlinedButton.icon(
+                      onPressed: (exportActionBusy || preAssemblyActionBusy)
+                          ? null
+                          : onStartPreAssembly,
+                      icon: preAssemblyActionBusy
+                          ? const SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.playlist_play_outlined),
+                      label: Text(
+                        preAssemblyActionBusy
+                            ? l10n.shortVideoSpacePreAssemblyBusy
+                            : l10n.shortVideoSpaceStartPreAssembly,
+                      ),
                     ),
                     OutlinedButton.icon(
                       onPressed: exportActionBusy ? null : onOpenExportHistory,

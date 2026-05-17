@@ -30,6 +30,61 @@ String shortVideoQualityStageLabel(AppLocalizations l10n, String stage) {
 }
 
 /// Maps short-video-export-check machine code to localized labels (for tests and pure logic).
+List<String> shortVideoExportGapFacetLabels(
+  AppLocalizations l10n,
+  ShortVideoExportCheckStoryboardGap gap,
+) {
+  final out = <String>[];
+  if (gap.missingSelectedVideo) {
+    out.add(l10n.shortVideoSpacePublishExportCheckFacetMissingVideo);
+  }
+  if (gap.missingSubtitle) {
+    out.add(l10n.shortVideoSpacePublishExportCheckFacetMissingSubtitle);
+  }
+  if (gap.missingVoiceover) {
+    out.add(l10n.shortVideoSpacePublishExportCheckFacetMissingVoiceover);
+  }
+  if (gap.durationAnomaly) {
+    out.add(l10n.shortVideoSpacePublishExportCheckFacetDurationAnomaly);
+  }
+  return out;
+}
+
+List<ShortVideoExportCheckStoryboardGapUi> buildShortVideoExportStoryboardGapUi(
+  AppLocalizations l10n,
+  List<ShortVideoExportCheckStoryboardGap> gaps, {
+  bool blockingOnly = false,
+}) {
+  final filtered = blockingOnly
+      ? gaps.where((g) => g.hasBlocking).toList(growable: false)
+      : gaps;
+  return filtered
+      .map((g) {
+        final sbPart = g.sbIndex == null
+            ? ''
+            : l10n.shortVideoPublishExportCheckStoryboardIndexPart(g.sbIndex!);
+        final title = l10n.shortVideoSpacePublishExportCheckStoryboardGapTitle(
+          g.scriptNumericId,
+          g.storyboardNumericId,
+          sbPart,
+        );
+        final facets = shortVideoExportGapFacetLabels(l10n, g);
+        final facetSummary = facets.isEmpty
+            ? g.gapCodes.map((c) => shortVideoExportIssueLabel(l10n, c)).join(' · ')
+            : facets.join(' · ');
+        final codeLabels = g.gapCodes
+            .map((c) => shortVideoExportIssueLabel(l10n, c))
+            .toList(growable: false);
+        return ShortVideoExportCheckStoryboardGapUi(
+          title: title,
+          facetSummary: facetSummary,
+          hasBlocking: g.hasBlocking,
+          codeLabels: codeLabels,
+        );
+      })
+      .toList(growable: false);
+}
+
 String shortVideoExportIssueLabel(AppLocalizations l10n, String code) {
   switch (code) {
     case 'candidate_pending':
@@ -453,6 +508,13 @@ ShortVideoExportCheckPanelUi buildShortVideoExportCheckPanelUi({
       );
     }
   }
+  final storyboardGapEntries = exportCheck.storyboardGaps.isNotEmpty
+      ? buildShortVideoExportStoryboardGapUi(
+          l10n,
+          exportCheck.storyboardGaps,
+          blockingOnly: true,
+        )
+      : const <ShortVideoExportCheckStoryboardGapUi>[];
   final blockingLines = exportCheck.issues
       .where((i) => i.severity == 'blocking')
       .take(14)
@@ -496,7 +558,8 @@ ShortVideoExportCheckPanelUi buildShortVideoExportCheckPanelUi({
     metrics: metrics,
     qualityGateLine: qualityGateLine,
     qualityGateBlockingLines: qualityGateBlockingLines,
-    blockingLines: blockingLines,
+    storyboardGapEntries: storyboardGapEntries,
+    blockingLines: storyboardGapEntries.isEmpty ? blockingLines : const <String>[],
     warningLines: warningLines,
     detail: detail,
     exportReady: exportCheck.exportReady,
@@ -511,6 +574,9 @@ ShortVideoCandidateCardUi buildShortVideoCandidateCardUi({
   required ProjectAssetsOverview? assetsOverview,
   VoidCallback? onBatchGenerateCandidateClips,
   bool batchGenerateCandidateClipsBusy = false,
+  VoidCallback? onConfirmStoryboardCandidates,
+  bool confirmStoryboardCandidatesBusy = false,
+  int candidatePendingStoryboardCount = 0,
 }) {
   if (!projectSelected) {
     return const ShortVideoCandidateCardUi(visible: false);
@@ -553,6 +619,10 @@ ShortVideoCandidateCardUi buildShortVideoCandidateCardUi({
     detail: detail,
     onBatchGenerateCandidateClips: onBatchGenerateCandidateClips,
     batchGenerateCandidateClipsBusy: batchGenerateCandidateClipsBusy,
+    onConfirmStoryboardCandidates: candidatePendingStoryboardCount > 0
+        ? onConfirmStoryboardCandidates
+        : null,
+    confirmStoryboardCandidatesBusy: confirmStoryboardCandidatesBusy,
   );
 }
 

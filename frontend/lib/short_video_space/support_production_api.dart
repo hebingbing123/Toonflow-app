@@ -6,6 +6,30 @@ import '../rust_api.dart';
 import 'support_project_api.dart';
 import 'view.dart';
 
+String? formatShortVideoWritebackLine(
+  AppLocalizations l10n,
+  StoryboardLastWritebackSummaryV1? writeback,
+) {
+  if (writeback == null) {
+    return null;
+  }
+  final code = (writeback.errorCode ?? '').trim();
+  switch (writeback.status.trim()) {
+    case 'ok':
+      return l10n.shortVideoWritebackStatusOk;
+    case 'failed':
+      return code.isEmpty
+          ? l10n.shortVideoWritebackStatusFailedGeneric
+          : l10n.shortVideoWritebackStatusFailed(code);
+    case 'incomplete':
+      return code.isEmpty
+          ? l10n.shortVideoWritebackStatusIncompleteGeneric
+          : l10n.shortVideoWritebackStatusIncomplete(code);
+    default:
+      return l10n.shortVideoWritebackStatusUnknown(writeback.status);
+  }
+}
+
 String shortVideoQualitySummaryLine(
   AppLocalizations l10n, {
   required bool isAnimated,
@@ -321,6 +345,8 @@ ShortVideoCandidateComparePanelUi buildShortVideoCandidateComparePanelUi({
   required List<QualityReview> reviews,
   required bool isLiveAction,
   required void Function(ProductionStoryboardItemV1 row)? onSetCurrent,
+  void Function(ProductionStoryboardItemV1 row, String videoUrl)?
+      onSelectCandidateVideo,
   required VoidCallback? onOpenProductionWorkspace,
 }) {
   if (!projectSelected) {
@@ -391,17 +417,23 @@ ShortVideoCandidateComparePanelUi buildShortVideoCandidateComparePanelUi({
             passed,
             badCases,
           );
+    final candidateUrls = row.mediaSlots?.candidateVideoUrls ?? const <String>[];
     return ShortVideoCandidateCompareItemUi(
       storyboardNumericId: row.id,
       scriptNumericId: row.scriptId,
       referenceImageUrl: row.mediaSlots?.referenceOrPreviewFrameUrl,
       selectedVideoUrl: row.mediaSlots?.currentVideoUrl,
+      candidateVideoUrls: candidateUrls,
       liveActionReferenceShotUrls: row.liveActionReferenceShotUrls,
       readinessLine: readinessLine,
       qualityLine: qualityLine,
+      writebackLine: formatShortVideoWritebackLine(l10n, row.mediaSlots?.lastWriteback),
       onSetCurrent: (row.mediaSlots?.currentVideoUrl ?? '').trim().isEmpty
           ? null
           : () => onSetCurrent?.call(row),
+      onSelectCandidateVideo: onSelectCandidateVideo == null
+          ? null
+          : (url) => onSelectCandidateVideo(row, url),
       onOpenRework: onOpenProductionWorkspace,
     );
   }).toList(growable: false);

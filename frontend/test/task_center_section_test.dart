@@ -73,7 +73,13 @@ void main() {
       findsOneWidget,
     );
     expect(
-      find.text(zh.taskCenterJobsSummary(1, '#101 asset.generate.image:queued', '')),
+      find.text(
+        zh.taskCenterJobsSummary(
+          1,
+          '#101 asset.generate.image:queued/${zh.taskCenterPhaseImage}',
+          '',
+        ),
+      ),
       findsOneWidget,
     );
   });

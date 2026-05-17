@@ -88,6 +88,30 @@ mod tests {
     }
 
     #[test]
+    fn test_publish_quality_gate_conflict_includes_each_stage_label() {
+        let decision = QualityGateDecision {
+            blocked: true,
+            issues: vec![make_issue(QualityGateSeverity::Severe, "character_missing")],
+        };
+        for (stage, label) in [
+            (QualityGateStage::StoryboardPanel, "storyboard_panel"),
+            (QualityGateStage::VideoPrompt, "video_prompt"),
+            (QualityGateStage::VideoGenerate, "video_generate"),
+        ] {
+            let result = enforce_quality_gate(stage, &decision, QualityGateStrategy::Block);
+            match result {
+                Err(ApiError::Conflict(msg)) => {
+                    assert!(
+                        msg.contains(label),
+                        "expected stage {label} in message, got: {msg}"
+                    );
+                }
+                other => panic!("expected Conflict for {label}, got {other:?}"),
+            }
+        }
+    }
+
+    #[test]
     fn test_publish_quality_gate_allows_no_issues() {
         let decision = QualityGateDecision {
             blocked: false,

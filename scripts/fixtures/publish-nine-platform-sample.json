@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "description": "Reference-only publish payload shapes for nine registered platforms. No API keys.",
+  "projectUuid": "00000000-0000-4000-8000-000000000001",
+  "draftId": "00000000-0000-4000-8000-000000000002",
+  "targets": [
+    {
+      "platformId": "douyin",
+      "automationMode": "sandbox_metrics_mock",
+      "platformCopy": {
+        "title": "示例短剧 · 抖音",
+        "description": "九平台样例文案（国内）",
+        "tags": ["短剧", "样例"]
+      }
+    },
+    {
+      "platformId": "bilibili",
+      "automationMode": "sandbox_metrics_mock",
+      "platformCopy": {
+        "title": "示例短剧 · B站",
+        "description": "九平台样例文案",
+        "tags": ["短剧"]
+      }
+    },
+    {
+      "platformId": "xiaohongshu",
+      "automationMode": "manual_bridge",
+      "platformCopy": {
+        "title": "示例短剧 · 小红书",
+        "description": "九平台样例文案",
+        "tags": ["生活", "短剧"]
+      }
+    },
+    {
+      "platformId": "weixin_channels",
+      "automationMode": "manual_bridge",
+      "platformCopy": {
+        "title": "示例短剧 · 视频号",
+        "description": "九平台样例文案"
+      }
+    },
+    {
+      "platformId": "kuaishou",
+      "automationMode": "sandbox_metrics_mock",
+      "platformCopy": {
+        "title": "示例短剧 · 快手",
+        "description": "九平台样例文案"
+      }
+    },
+    {
+      "platformId": "tiktok",
+      "automationMode": "sandbox_metrics_mock",
+      "platformCopy": {
+        "title": "Sample drama · TikTok",
+        "description": "Nine-platform reference (overseas)",
+        "tags": ["drama", "sample"]
+      }
+    },
+    {
+      "platformId": "youtube_shorts",
+      "automationMode": "sandbox_metrics_mock",
+      "platformCopy": {
+        "title": "Sample drama · YouTube Shorts",
+        "description": "Nine-platform reference"
+      }
+    },
+    {
+      "platformId": "instagram_reels",
+      "automationMode": "manual_bridge",
+      "platformCopy": {
+        "title": "Sample drama · Instagram Reels",
+        "description": "Nine-platform reference"
+      }
+    },
+    {
+      "platformId": "facebook_reels",
+      "automationMode": "manual_bridge",
+      "platformCopy": {
+        "title": "Sample drama · Facebook Reels",
+        "description": "Nine-platform reference"
+      }
+    }
+  ]
+}

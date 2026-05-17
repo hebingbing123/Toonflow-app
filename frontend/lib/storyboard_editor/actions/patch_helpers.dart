@@ -21,6 +21,34 @@ extension _StoryboardWorkbenchPatchActions on _StoryboardWorkbenchPanelState {
       'derive_asset',
     ];
     final modelTierOptions = <String>['low', 'high'];
+    String labelPatchScope(String value) {
+      switch (value) {
+        case 'episode':
+          return l10n.storyboardPatchScopeEpisode;
+        case 'scene':
+          return l10n.storyboardPatchScopeScene;
+        case 'storyboard_item':
+          return l10n.storyboardPatchScopeStoryboardItem;
+        case 'video_prompt':
+          return l10n.storyboardPatchScopeVideoPrompt;
+        case 'derive_asset':
+          return l10n.storyboardPatchScopeDeriveAsset;
+        default:
+          return value;
+      }
+    }
+
+    String labelPatchModelTier(String value) {
+      switch (value) {
+        case 'low':
+          return l10n.storyboardPatchModelTierLow;
+        case 'high':
+          return l10n.storyboardPatchModelTierHigh;
+        default:
+          return value;
+      }
+    }
+
     try {
       await showDialog<void>(
         context: context,
@@ -50,7 +78,7 @@ extension _StoryboardWorkbenchPatchActions on _StoryboardWorkbenchPanelState {
                               .map(
                                 (value) => DropdownMenuItem<String>(
                                   value: value,
-                                  child: Text(value),
+                                  child: Text(labelPatchScope(value)),
                                 ),
                               )
                               .toList(growable: false),
@@ -72,7 +100,7 @@ extension _StoryboardWorkbenchPatchActions on _StoryboardWorkbenchPanelState {
                               .map(
                                 (value) => DropdownMenuItem<String>(
                                   value: value,
-                                  child: Text(value),
+                                  child: Text(labelPatchModelTier(value)),
                                 ),
                               )
                               .toList(growable: false),

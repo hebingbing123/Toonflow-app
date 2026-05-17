@@ -34,8 +34,16 @@ pub fn router() -> Router<AppState> {
             post(workbench::video::post_workbench_batch_generate_candidate_clips),
         )
         .route(
+            "/api/v1/production/workbench/confirm-storyboard-candidates",
+            post(workbench::post_workbench_confirm_storyboard_candidates),
+        )
+        .route(
             "/api/v1/production/workbench/generate-voiceover",
             post(workbench::voiceover::post_workbench_generate_voiceover),
+        )
+        .route(
+            "/api/v1/production/voiceover/preview",
+            post(workbench::voiceover_preview::post_production_voiceover_preview),
         )
         .route(
             "/api/v1/production/storyboard/polling-image",
@@ -160,6 +168,10 @@ pub fn router() -> Router<AppState> {
         .route(
             "/api/v1/production/storyboard/update-duration",
             post(workbench::storyboard::post_storyboard_update_duration),
+        )
+        .route(
+            "/api/v1/production/storyboard/set-character",
+            post(workbench::storyboard::post_storyboard_set_character),
         )
         .route(
             "/api/v1/production/workbench/generate-video-prompt",

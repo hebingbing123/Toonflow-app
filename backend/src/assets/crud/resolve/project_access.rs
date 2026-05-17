@@ -2,6 +2,7 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::error::{bad_request_i18n, validate_positive, ApiError};
+use crate::legacy_numeric_id::ensure_legacy_numeric_read_allowed;
 use crate::projects::routes::common::{
     require_project_workspace_member_scope, require_project_write_scope, ProjectAccessScope,
 };
@@ -79,6 +80,7 @@ pub(crate) async fn resolve_owned_project_numeric_from_uuid_or_legacy_id(
         }
         (Some(u), None) => ensure_owned_project_numeric_id(pool, uid, u).await,
         (None, Some(n)) => {
+            ensure_legacy_numeric_read_allowed()?;
             validate_positive(n, "project_numeric_id")?;
             let ok: bool = sqlx::query_scalar(
                 r#"
@@ -175,6 +177,7 @@ pub(crate) async fn resolve_owned_project_pk_and_numeric_from_uuid_or_legacy_id(
             row.ok_or(ApiError::NotFound)
         }
         (None, Some(n)) => {
+            ensure_legacy_numeric_read_allowed()?;
             validate_positive(n, "project_numeric_id")?;
             let row: Option<(Uuid, i32, Uuid)> = sqlx::query_as(
                 r#"

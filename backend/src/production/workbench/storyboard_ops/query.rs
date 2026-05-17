@@ -6,7 +6,9 @@ use axum::{
 };
 
 use super::common::{require_owned_normalized_storyboards_access_ref, validate_storyboard_ids};
-use super::media_slots::hydrate_production_storyboard_items;
+use super::media_slots::{
+    hydrate_production_storyboard_candidate_urls, hydrate_production_storyboard_items,
+};
 use super::types::{
     ProductionGetProductionDataResponse, ProductionStoryboardItem, StoryboardIdListBody,
 };
@@ -69,7 +71,13 @@ pub(in crate::production) async fn post_get_production_data(
               COALESCE(sb.metadata #> '{shortVideo,liveAction,referenceShotUrls}', '[]'::jsonb)
             )
           ) AS live_action_reference_shot_urls,
-          sb.metadata #>> '{shortVideo,liveAction,performanceNotes}' AS live_action_performance_notes
+          sb.metadata #>> '{shortVideo,liveAction,performanceNotes}' AS live_action_performance_notes,
+          sb.metadata #>> '{shortVideo,lastWriteback,status}' AS short_video_writeback_status,
+          sb.metadata #>> '{shortVideo,lastWriteback,at}' AS short_video_writeback_at,
+          sb.metadata #>> '{shortVideo,lastWriteback,errorCode}' AS short_video_writeback_error_code,
+          sb.metadata #>> '{shortVideo,export,artifactUrl}' AS short_video_export_artifact_url,
+          sb.character_id,
+          sb.metadata #> '{shortVideo}' AS short_video_metadata
         FROM app_storyboard sb
         WHERE sb.script_id = $1
           AND sb.numeric_id = ANY($2::int4[])
@@ -82,9 +90,45 @@ pub(in crate::production) async fn post_get_production_data(
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
-    hydrate_production_storyboard_items(&mut rows);
+    let data_version: Option<String> = sqlx::query_scalar(
+        r#"
+        SELECT MAX(sb.updated_at)::text
+        FROM app_storyboard sb
+        WHERE sb.script_id = $1
+          AND sb.numeric_id = ANY($2::int4[])
+        "#,
+    )
+    .bind(scope_row.script_id)
+    .bind(&body.ids)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+    .flatten();
 
-    Ok(JsonResponse(ProductionGetProductionDataResponse { data: rows }).into_response())
+    if body
+        .client_data_version
+        .as_deref()
+        .zip(data_version.as_deref())
+        .is_some_and(|(client, server)| client == server)
+    {
+        return Ok(JsonResponse(ProductionGetProductionDataResponse {
+            data: Vec::new(),
+            data_version,
+            unchanged: true,
+        })
+        .into_response());
+    }
+
+    hydrate_production_storyboard_items(&mut rows);
+    hydrate_production_storyboard_candidate_urls(pool, scope_row.project_numeric_id, &mut rows)
+        .await?;
+
+    Ok(JsonResponse(ProductionGetProductionDataResponse {
+        data: rows,
+        data_version,
+        unchanged: false,
+    })
+    .into_response())
 }
 
 #[utoipa::path(

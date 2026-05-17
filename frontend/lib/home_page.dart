@@ -9,6 +9,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'config.dart';
 import 'l10n/app_localizations.dart';
+import 'l10n/short_video_generation_blocked.dart';
 import 'l10n/short_video_readiness_localized.dart';
 import 'locale/app_locale_notifier.dart';
 import 'local_prefs/risky_operation_confirm_prefs.dart';
@@ -147,7 +148,9 @@ part 'storyboard_editor/data.dart';
 part 'storyboard_editor/state.dart';
 part 'storyboard_editor/status_panels.dart';
 part 'storyboard_editor/image_section.dart';
+part 'storyboard_editor/character_section.dart';
 part 'storyboard_editor/video_section.dart';
+part 'storyboard_editor/actions/character_helpers.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

@@ -43,7 +43,11 @@ String summarizeTaskJobs(
   }
   final visible = items
       .take(maxItems)
-      .map((row) => '#${row.numericTaskId} ${row.kind}:${row.status}')
+      .map((row) {
+        final phase = taskCenterShortVideoStageLabel(l10n, row);
+        final phaseSuffix = phase.isEmpty ? '' : '/$phase';
+        return '#${row.numericTaskId} ${row.kind}:${row.status}$phaseSuffix';
+      })
       .join(', ');
   final suffix = items.length > maxItems ? '…' : '';
   return l10n.taskCenterJobsSummary(items.length, visible, suffix);
@@ -349,6 +353,10 @@ bool taskCenterSupportsPartialRework(JobRow job) {
 
 bool taskCenterSupportsWritebackCompensation(JobRow job) {
   final kind = job.kind.trim().toLowerCase();
+  if (kind == 'short_video.pre_assembly' ||
+      kind == 'short_video.timeline_preview') {
+    return false;
+  }
   if (kind.contains('export') || kind.contains('publish')) {
     return true;
   }
@@ -358,6 +366,45 @@ bool taskCenterSupportsWritebackCompensation(JobRow job) {
   }
   final code = (details['code'] ?? '').toString();
   return code.contains('writeback') || code.contains('persist');
+}
+
+bool taskCenterJobFailedWithWritebackError(JobRow job) {
+  final code = (job.errorDetails?['code'] ?? '').toString().toLowerCase();
+  if (code.contains('writeback')) {
+    return true;
+  }
+  final message = (job.errorMessage ?? '').toLowerCase();
+  return message.contains('writeback') || message.contains('写回');
+}
+
+String taskCenterFailedJobRetryLabel(AppLocalizations l10n, JobRow job) {
+  final kind = job.kind.trim().toLowerCase();
+  if (taskCenterJobFailedWithWritebackError(job)) {
+    return l10n.taskCenterRetryAfterWritebackFailure;
+  }
+  if (kind == 'video.generate') {
+    return l10n.taskCenterRetryRegenerateVideo;
+  }
+  if (kind == 'video.export') {
+    return l10n.taskCenterRetryExportVideo;
+  }
+  if (kind == 'voiceover.generate') {
+    return l10n.taskCenterRetryVoiceover;
+  }
+  if (kind == 'short_video.pre_assembly') {
+    return l10n.taskCenterRetryPreAssembly;
+  }
+  if (kind == 'short_video.timeline_preview') {
+    return l10n.shortVideoTimelineGeneratePreview;
+  }
+  return l10n.taskCenterRetry;
+}
+
+String taskCenterFailedJobRegenerateLabel(AppLocalizations l10n, JobRow job) {
+  if (taskCenterJobFailedWithWritebackError(job)) {
+    return l10n.taskCenterRegenerateAfterWriteback;
+  }
+  return l10n.taskCenterRegenerate;
 }
 
 String? _taskCenterUuidLikeString(String? value) {

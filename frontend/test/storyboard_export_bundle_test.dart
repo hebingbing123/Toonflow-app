@@ -29,6 +29,10 @@ void main() {
         'schemaVersion': 1,
         'currentVideoUrl': 'https://example.com/shots/1.mp4',
         'candidateVideoSourcesHint': 'workbench aggregates',
+        'candidateVideoUrls': [
+          'https://example.com/shots/1.mp4',
+          'https://example.com/candidates/1b.mp4',
+        ],
       },
     });
     expect(item.mediaSlots!.schemaVersion, 1);
@@ -37,6 +41,7 @@ void main() {
       item.mediaSlots!.candidateVideoSourcesHint,
       'workbench aggregates',
     );
+    expect(item.mediaSlots!.candidateVideoUrls, hasLength(2));
   });
 
   test('buildStoryboardExportBundleSummary reports sidecars and duration', () {

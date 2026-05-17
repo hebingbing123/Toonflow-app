@@ -21,17 +21,20 @@ pub(in crate::production) struct GenerateVideoPromptBody {
     pub(super) description: Option<String>,
     #[serde(default)]
     pub(super) duration_hint: Option<i32>,
+    /// When true and storyboard metadata cache matches input hash, skip prompt rebuild.
+    #[serde(default)]
+    pub(super) skip_if_unchanged: bool,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub(in crate::production) struct GenerateVideoPromptResponse {
-    pub(super) prompt: String,
-    pub(super) negative_prompt: Option<String>,
-    pub(super) observation_note: Option<String>,
-    pub(super) diagnostics: GenerateVideoPromptDiagnostics,
-    pub(super) model: String,
-    pub(super) duration: i32,
+    pub(crate) prompt: String,
+    pub(crate) negative_prompt: Option<String>,
+    pub(crate) observation_note: Option<String>,
+    pub(crate) diagnostics: GenerateVideoPromptDiagnostics,
+    pub(crate) model: String,
+    pub(crate) duration: i32,
 }
 
 #[derive(Debug, Serialize, Clone, Default)]

@@ -10,12 +10,13 @@ pub(in crate::production) use add::{post_storyboard_add, post_storyboard_batch_a
 #[allow(unused_imports)]
 pub(crate) use mutate::{
     __path_post_storyboard_edit_info, __path_post_storyboard_remove_frame,
-    __path_post_storyboard_update_duration, __path_post_storyboard_update_live_action_reference,
-    __path_post_storyboard_update_url,
+    __path_post_storyboard_set_character, __path_post_storyboard_update_duration,
+    __path_post_storyboard_update_live_action_reference, __path_post_storyboard_update_url,
 };
 pub(in crate::production) use mutate::{
-    post_storyboard_edit_info, post_storyboard_remove_frame, post_storyboard_update_duration,
-    post_storyboard_update_live_action_reference, post_storyboard_update_url,
+    post_storyboard_edit_info, post_storyboard_remove_frame, post_storyboard_set_character,
+    post_storyboard_update_duration, post_storyboard_update_live_action_reference,
+    post_storyboard_update_url,
 };
 #[allow(unused_imports)]
 pub(crate) use preview::{

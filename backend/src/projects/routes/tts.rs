@@ -1,6 +1,8 @@
 use axum::{
+    body::Body,
     extract::{Path, Query, State},
-    http::HeaderMap,
+    http::{header, HeaderMap, StatusCode},
+    response::Response,
     Json,
 };
 use serde::{Deserialize, Serialize};
@@ -10,10 +12,12 @@ use uuid::Uuid;
 
 use crate::{
     auth::require_user_uuid,
-    error::{bad_request_i18n, ApiError},
+    error::{bad_request_i18n, validate_non_empty_string, ApiError},
+    jobs::worker::voiceover::load_tts_llm_config_for_user,
     jobs::{enqueue_generation_job, JOB_KIND_VOICEOVER_GENERATE},
     projects::routes::common::require_project_write_scope,
     short_video::defaults::resolve_tts_voice,
+    short_video::voice::{run_voice_preview, VoicePreviewInput, EMOTION_PRESET_IDS},
     state::AppState,
 };
 
@@ -202,7 +206,10 @@ pub async fn generate_tts(
             "text is empty and shot has no prompt fallback".into(),
         ));
     }
-    let resolved_voice = resolve_tts_voice(Some(req.voice_id.as_str()), voice_profile.as_deref());
+    let resolved_voice = crate::short_video::defaults::resolve_tts_voice(
+        Some(req.voice_id.as_str()),
+        voice_profile.as_deref(),
+    );
 
     let speed = req.speed.filter(|value| *value >= 0.25 && *value <= 4.0);
     sqlx::query(
@@ -730,5 +737,219 @@ pub async fn retry_tts_task(
         previous_task_id: req.task_id,
         task_id: job.id,
         status: "queued".to_string(),
+    }))
+}
+
+fn job_run_error_to_bad_request(err: crate::jobs::worker::JobRunError) -> ApiError {
+    use crate::jobs::worker::JobRunError;
+    match err {
+        JobRunError::Failed(message) => ApiError::BadRequest(message),
+        JobRunError::FailedStructured { message, .. } => ApiError::BadRequest(message),
+        JobRunError::Cancelled => ApiError::BadRequest("voiceover job cancelled".into()),
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+pub struct TtsPreviewRequest {
+    pub project_id: Option<Uuid>,
+    pub text: String,
+    #[serde(default)]
+    pub provider: Option<String>,
+    #[serde(default)]
+    pub voice_id: Option<String>,
+    #[serde(default)]
+    pub emotion: Option<String>,
+    #[serde(default)]
+    pub speed: Option<f32>,
+    #[serde(default)]
+    pub character_id: Option<Uuid>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+pub struct EmotionPresetItem {
+    pub id: String,
+    pub azure_style: Option<String>,
+}
+
+/// List supported drama emotion presets.
+#[utoipa::path(
+    get,
+    path = "/api/v1/tts/emotion-presets",
+    responses((status = 200, description = "OK", body = Vec<EmotionPresetItem>)),
+    tag = "tts"
+)]
+pub async fn list_emotion_presets() -> Json<Vec<EmotionPresetItem>> {
+    use crate::short_video::voice::emotion::VoiceEmotion;
+    let items = EMOTION_PRESET_IDS
+        .iter()
+        .map(|id| {
+            let emotion = VoiceEmotion::parse(id);
+            EmotionPresetItem {
+                id: (*id).to_string(),
+                azure_style: emotion.azure_style().map(str::to_string),
+            }
+        })
+        .collect();
+    Json(items)
+}
+
+/// Generate a short MP3 preview without enqueueing a job.
+#[utoipa::path(
+    post,
+    path = "/api/v1/tts/preview",
+    request_body = TtsPreviewRequest,
+    responses(
+        (status = 200, description = "audio/mpeg body"),
+        (status = 400, description = "Bad request"),
+        (status = 401, description = "Unauthorized"),
+    ),
+    tag = "tts"
+)]
+pub async fn preview_tts(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(req): Json<TtsPreviewRequest>,
+) -> Result<Response, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let pool = state.require_pool()?;
+    let (voice_profile, character_voice) = if let Some(project_id) = req.project_id {
+        let _scope = require_project_write_scope(&state, uid, project_id).await?;
+        let voice_profile: Option<String> =
+            sqlx::query_scalar("SELECT voice_profile FROM app_project WHERE id = $1")
+                .bind(project_id)
+                .fetch_optional(pool)
+                .await
+                .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+                .flatten();
+        let character_voice = if let Some(character_id) = req.character_id {
+            sqlx::query_scalar::<_, serde_json::Value>(
+                "SELECT voice_config FROM app_project_character WHERE id = $1 AND project_id = $2",
+            )
+            .bind(character_id)
+            .bind(project_id)
+            .fetch_optional(pool)
+            .await
+            .map_err(|e| ApiError::DatabaseError(e.to_string()))?
+        } else {
+            None
+        };
+        (voice_profile, character_voice)
+    } else {
+        (None, None)
+    };
+
+    let openai_cfg = load_tts_llm_config_for_user(&state, pool, uid)
+        .await
+        .map_err(job_run_error_to_bad_request)?;
+    let audio = run_voice_preview(
+        &state,
+        &openai_cfg,
+        VoicePreviewInput {
+            project_voice_profile: voice_profile.as_deref(),
+            character_voice_config: character_voice.as_ref(),
+            text: &req.text,
+            explicit_voice: req.voice_id.as_deref(),
+            explicit_emotion: req.emotion.as_deref(),
+            explicit_speed: req.speed,
+            explicit_provider: req.provider.as_deref(),
+        },
+    )
+    .await
+    .map_err(ApiError::BadRequest)?;
+
+    Response::builder()
+        .status(StatusCode::OK)
+        .header(header::CONTENT_TYPE, "audio/mpeg")
+        .body(Body::from(audio))
+        .map_err(|e| ApiError::BadRequest(e.to_string()))
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct CloneVoiceRequest {
+    pub project_id: Uuid,
+    pub display_name: String,
+    #[serde(default)]
+    pub locale: Option<String>,
+    /// Raw audio bytes, standard base64 (optional data-URL prefix stripped).
+    #[serde(default)]
+    pub audio_base64: Option<String>,
+    #[serde(default)]
+    pub sample_base64: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct CloneVoiceResponse {
+    pub custom_voice_id: String,
+    pub provider: String,
+}
+
+fn decode_clone_audio_sample(req: &CloneVoiceRequest) -> Result<Vec<u8>, ApiError> {
+    let raw = req
+        .audio_base64
+        .as_deref()
+        .or(req.sample_base64.as_deref())
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+        .ok_or_else(|| {
+            bad_request_i18n(
+                "audioBase64 or sampleBase64 is required",
+                "audioBase64 或 sampleBase64 为必填项",
+            )
+        })?;
+    let payload = raw
+        .strip_prefix("data:")
+        .and_then(|s| s.split_once(',').map(|(_, b)| b))
+        .unwrap_or(raw);
+    base64::Engine::decode(
+        &base64::engine::general_purpose::STANDARD,
+        payload.replace('\n', ""),
+    )
+    .map_err(|_| {
+        bad_request_i18n(
+            "audioBase64 is not valid base64",
+            "audioBase64 不是有效的 base64",
+        )
+    })
+}
+
+/// Clone a voice from a short audio sample (mock provider by default).
+#[utoipa::path(
+    post,
+    path = "/api/v1/tts/clone-voice",
+    request_body = CloneVoiceRequest,
+    responses(
+        (status = 200, description = "Cloned voice profile", body = CloneVoiceResponse),
+        (status = 400, description = "Bad request"),
+        (status = 401, description = "Unauthorized"),
+        (status = 503, description = "Provider not configured"),
+    ),
+    tag = "tts"
+)]
+pub async fn clone_voice(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(req): Json<CloneVoiceRequest>,
+) -> Result<Json<CloneVoiceResponse>, ApiError> {
+    let uid = require_user_uuid(&state, &headers)?;
+    let _scope = require_project_write_scope(&state, uid, req.project_id).await?;
+    let pool = state.require_pool()?;
+    validate_non_empty_string(&req.display_name, "displayName")?;
+    let audio = decode_clone_audio_sample(&req)?;
+    if audio.len() > 8 * 1024 * 1024 {
+        return Err(bad_request_i18n(
+            "audio sample exceeds 8 MiB",
+            "音频样本超过 8 MiB",
+        ));
+    }
+
+    let provider = crate::short_video::voice::clone::voice_clone_provider_from_env();
+    let cloned = provider.clone_sample(&audio, &req.display_name, req.locale.as_deref())?;
+    crate::short_video::voice::clone::append_cloned_voice(pool, req.project_id, &cloned).await?;
+
+    Ok(Json(CloneVoiceResponse {
+        custom_voice_id: cloned.custom_voice_id,
+        provider: cloned.provider,
     }))
 }

@@ -10,6 +10,7 @@ pub mod error;
 pub mod harness;
 pub mod http_kit;
 pub mod jobs;
+pub mod legacy_numeric_id;
 pub mod llm;
 pub mod manuals;
 pub mod metering;

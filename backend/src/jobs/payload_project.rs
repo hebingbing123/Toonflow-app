@@ -11,6 +11,7 @@ use crate::assets::resolve_owned_project_numeric_from_uuid_or_legacy_id;
 use crate::assets::resolve_owned_project_pk_and_numeric_from_uuid_or_legacy_id;
 use crate::error::ApiError;
 use crate::jobs::worker::JobRunError;
+use crate::legacy_numeric_id::legacy_numeric_write_enabled;
 
 /// Derives workspace_id from job payload by extracting project_uuid or project_numeric_id
 /// and querying the database for the project's workspace.
@@ -105,10 +106,14 @@ pub(crate) async fn normalize_project_scope_in_job_payload(
             "project_uuid".into(),
             Value::String(project_uuid.to_string()),
         );
-        obj.insert(
-            "project_numeric_id".into(),
-            Value::Number(project_numeric_id.into()),
-        );
+        if legacy_numeric_write_enabled() {
+            obj.insert(
+                "project_numeric_id".into(),
+                Value::Number(project_numeric_id.into()),
+            );
+        } else {
+            obj.remove("project_numeric_id");
+        }
         obj.insert(
             "workspace_id".into(),
             Value::String(workspace_id.to_string()),

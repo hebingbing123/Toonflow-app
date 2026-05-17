@@ -18,6 +18,9 @@ use crate::scope::http::require_script_write_scope_ref;
 use crate::scope::OwnedScriptInProject;
 use crate::state::AppState;
 
+use crate::production::workbench::generation_guards::assert_storyboards_ready_for_generation;
+use crate::production::workbench::generation_profile::load_project_generation_profile;
+
 use super::short_video_config::load_storyboard_generation_config;
 use super::{workbench_enqueue_video_jobs_from_body, WorkbenchGenerateVideoResponse};
 
@@ -84,11 +87,68 @@ pub(in crate::production) struct BatchCandidateClipDefaultsApplied {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
+pub(in crate::production) struct BatchStoryboardOutcome {
+    pub storyboard_numeric_id: i32,
+    /// `queued` | `skipped_duplicate` | `skipped_readiness` | `writeback_pending`
+    pub outcome: String,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub(in crate::production) struct BatchGenerateCandidateClipsResponse {
     pub skipped: Vec<BatchSkippedStoryboard>,
+    pub outcomes: Vec<BatchStoryboardOutcome>,
     pub applied_defaults: BatchCandidateClipDefaultsApplied,
     #[serde(flatten)]
     pub generation: WorkbenchGenerateVideoResponse,
+}
+
+#[inline]
+fn batch_skip_reason_to_outcome(reason: &str) -> &'static str {
+    match reason {
+        "storyboard_already_generating" => "writeback_pending",
+        "missing_reference_url"
+        | "invalid_reference_url"
+        | "unsupported_reference_url_scheme"
+        | "missing_storyboard_prompt" => "skipped_readiness",
+        _ => "skipped_readiness",
+    }
+}
+
+fn build_batch_storyboard_outcomes(
+    skipped: &[BatchSkippedStoryboard],
+    generation: &WorkbenchGenerateVideoResponse,
+    queued_storyboard_ids: &[i32],
+) -> Vec<BatchStoryboardOutcome> {
+    let duplicate_ids: HashSet<i32> = generation
+        .skipped_duplicate_storyboard_ids
+        .iter()
+        .copied()
+        .collect();
+    let mut outcomes = Vec::new();
+    for row in skipped {
+        outcomes.push(BatchStoryboardOutcome {
+            storyboard_numeric_id: row.storyboard_numeric_id,
+            outcome: batch_skip_reason_to_outcome(&row.reason).to_string(),
+        });
+    }
+    for id in &duplicate_ids {
+        outcomes.push(BatchStoryboardOutcome {
+            storyboard_numeric_id: *id,
+            outcome: "skipped_duplicate".into(),
+        });
+    }
+    for id in queued_storyboard_ids {
+        if duplicate_ids.contains(id) {
+            continue;
+        }
+        outcomes.push(BatchStoryboardOutcome {
+            storyboard_numeric_id: *id,
+            outcome: "queued".into(),
+        });
+    }
+    outcomes.sort_by_key(|row| row.storyboard_numeric_id);
+    outcomes
 }
 
 #[cfg(test)]
@@ -312,6 +372,27 @@ pub(in crate::production) async fn post_workbench_batch_generate_candidate_clips
         ));
     }
 
+    let generation_profile = load_project_generation_profile(pool, scope_row.project_id).await?;
+    let max_batch = generation_profile.tier.max_batch_candidate_clips();
+    if upload_data.len() > max_batch {
+        for item in upload_data.drain(max_batch..) {
+            skipped.push(BatchSkippedStoryboard {
+                storyboard_numeric_id: item.id,
+                reason: "batch_profile_cap_exceeded".into(),
+            });
+        }
+    }
+    let queued_ids: Vec<i32> = upload_data.iter().map(|item| item.id).collect();
+    let queued_ids_for_outcomes = queued_ids.clone();
+    assert_storyboards_ready_for_generation(
+        pool,
+        scope_row.project_id,
+        user_id,
+        script_id,
+        &queued_ids,
+    )
+    .await?;
+
     let workbench_body = WorkbenchGenerateVideoBody {
         project_id: Some(scope_row.project_numeric_id),
         project_uuid: Some(scope_row.project_id),
@@ -337,8 +418,11 @@ pub(in crate::production) async fn post_workbench_batch_generate_candidate_clips
     )
     .await?;
 
+    let outcomes = build_batch_storyboard_outcomes(&skipped, &generation, &queued_ids_for_outcomes);
+
     Ok(JsonResponse(BatchGenerateCandidateClipsResponse {
         skipped,
+        outcomes,
         applied_defaults: BatchCandidateClipDefaultsApplied {
             track_id: resolved.track_id,
             model: resolved.model,

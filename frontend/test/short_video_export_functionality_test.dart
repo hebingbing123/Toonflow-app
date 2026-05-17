@@ -96,6 +96,48 @@ void main() {
         },
       );
 
+      test('storyboard_gaps drive per-shot expandable entries', () {
+        const gap = ShortVideoExportCheckStoryboardGap(
+          scriptNumericId: 1,
+          storyboardId: '00000000-0000-0000-0000-000000000101',
+          storyboardNumericId: 101,
+          sbIndex: 1,
+          gapCodes: ['missing_selected_media', 'subtitle_placeholder'],
+          hasBlocking: true,
+          missingSelectedVideo: true,
+          missingSubtitle: true,
+          missingVoiceover: false,
+          durationAnomaly: false,
+        );
+        final exportCheck = ProjectShortVideoExportCheck(
+          schemaVersion: 1,
+          exportReady: false,
+          summary: const ShortVideoExportCheckSummary(
+            storyboardCount: 1,
+            blockingIssueCount: 2,
+            warningIssueCount: 0,
+          ),
+          issues: const [],
+          storyboardGaps: [gap],
+          qualityGate: const ShortVideoExportQualityGate(
+            schemaVersion: 1,
+            strategy: 'off',
+            enforced: false,
+            pendingReviewBadCaseCount: 0,
+          ),
+        );
+        final ui = buildShortVideoExportCheckPanelUi(
+          l10n: zh,
+          projectSelected: true,
+          loadingProjectOverview: false,
+          exportCheck: exportCheck,
+        );
+        expect(ui.storyboardGapEntries, hasLength(1));
+        expect(ui.storyboardGapEntries.first.facetSummary, contains('未选成片视频'));
+        expect(ui.storyboardGapEntries.first.facetSummary, contains('字幕'));
+        expect(ui.blockingLines, isEmpty);
+      });
+
       test('Export settings correctly validates quality gate block mode', () {
         final exportCheck = ProjectShortVideoExportCheck(
           schemaVersion: 1,

@@ -214,13 +214,24 @@ POST /api/v1/projects/{project_id}/publish/drafts/{draft_id}/jobs
 
 ### Manual Testing Checklist
 
-- [ ] Create draft with script_id, set strategy="off", verify job queues without checks
-- [ ] Create draft with script_id, set strategy="warn", verify job queues with warnings
-- [ ] Create draft with script_id, set strategy="block", verify job blocked if quality issues
-- [ ] Create draft without script_id, verify job queues (no quality checks)
-- [ ] Verify error message includes stage name and suggestion
-- [ ] Test with NULL strategy, verify defaults to "block"
-- [ ] Test with invalid strategy, verify validation error
+发布入队前的 **`enforce_quality_gate`** 策略矩阵已由单测覆盖（`backend/src/publish/quality_gate_tests.rs`）：
+
+- [x] strategy="block" + severe issues → 拒绝（Conflict，含 stage 名）
+- [x] strategy="warn" + severe issues → 允许入队
+- [x] strategy="off" → 跳过检查
+- [x] minor issues + block → 允许
+
+项目级 **`quality_gate_strategy`** PATCH/校验见 I.1 契约测 `project_quality_gate_strategy_patch_contract`。
+
+下列由 **PG 契约测** `publish_quality_gate_job_contract` 覆盖（`backend/src/app/pg_contract_tests/publish_quality_gate_job_roundtrip.rs`；`./scripts/run_publish_quality_gate_job_contract_test.sh`）：
+
+- [x] Create draft with script_id, set strategy="off", verify job queues without checks
+- [x] Create draft with script_id, set strategy="warn", verify job queues with warnings（日志 warn 在服务端；入队 200）
+- [x] Create draft with script_id, set strategy="block", verify job blocked if quality issues（无角色/分镜 → 409 + `video_generate`）
+- [x] Create draft without script_id, verify job queues (no quality checks)
+- [x] Verify error message includes stage name and suggestion — `test_publish_quality_gate_conflict_includes_each_stage_label`（三阶段 stage 名）
+- [x] Test with NULL strategy, verify defaults to "block"（见 I.1 / `short_video_export_check`）
+- [x] Test with invalid strategy, verify validation error（见 I.1 契约测）
 
 ## Backward Compatibility
 

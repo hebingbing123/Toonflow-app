@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::path::Path;
 
 use serde_json::{json, Value};
@@ -9,9 +10,12 @@ use crate::jobs::payload_project::{
 };
 use crate::jobs::worker::JobRunError;
 use crate::jobs::JobRow;
-use crate::llm::{audio_speech_bytes, LlmConfig};
+use crate::llm::LlmConfig;
 use crate::settings::agent_deploy::load_agent_deploy_config;
-use crate::short_video::defaults::resolve_tts_voice;
+use crate::short_video::voice::{
+    parse_dialogue_segments, resolve_tts_voice_name, resolve_voice_config,
+    scene_context_from_metadata, synthesize_speech, VoiceResolveInput,
+};
 use crate::state::AppState;
 use crate::vendor::catalog::lookup_vendor_catalog;
 use crate::vendor::credential::decrypt;
@@ -22,6 +26,8 @@ const DEFAULT_SPEED: f32 = 1.0;
 struct StoryboardVoiceoverSeedRow {
     prompt: Option<String>,
     video_desc: Option<String>,
+    character_id: Option<Uuid>,
+    metadata: Value,
 }
 
 #[derive(Debug, sqlx::FromRow)]
@@ -63,38 +69,95 @@ pub(crate) async fn run_voiceover_generate(
             )
         })?;
 
-        let voice = resolve_tts_voice(
-            payload.get("voice").and_then(|value| value.as_str()),
-            project_voice_profile.as_deref(),
-        );
-        let speed = payload
-            .get("speed")
-            .and_then(|value| value.as_f64())
-            .map(|value| value as f32)
-            .filter(|value| *value >= 0.25 && *value <= 4.0)
-            .unwrap_or(DEFAULT_SPEED);
+        let character_voice = if let Some(character_id) = seed.character_id {
+            load_character_voice_config(pool, character_id).await?
+        } else {
+            None
+        };
+        let scene = scene_context_from_metadata(&seed.metadata);
+        let mut voice_cfg = resolve_voice_config(VoiceResolveInput {
+            project_voice_profile: project_voice_profile.as_deref(),
+            character_voice_config: character_voice.as_ref(),
+            explicit_voice: payload.get("voice").and_then(|v| v.as_str()),
+            explicit_emotion: payload.get("emotion").and_then(|v| v.as_str()),
+            explicit_speed: payload
+                .get("speed")
+                .and_then(|v| v.as_f64())
+                .map(|v| v as f32)
+                .filter(|v| *v >= 0.25 && *v <= 4.0),
+            explicit_provider: payload
+                .get("provider")
+                .and_then(|v| v.as_str())
+                .or_else(|| payload.get("vendor_id").and_then(|v| v.as_str())),
+            scene,
+        });
+        if payload.get("multi_track").and_then(|v| v.as_bool()) == Some(true) {
+            voice_cfg.multi_track = true;
+        }
+        let voice = resolve_tts_voice_name(&voice_cfg);
 
-        let cfg = load_tts_llm_config(state, pool, row.owner_user_id).await?;
-        let audio_bytes = audio_speech_bytes(
-            &cfg,
-            &state.http_client,
-            &narration_text,
-            &voice,
-            speed,
-            "mp3",
-        )
-        .await
-        .map_err(JobRunError::Failed)?;
-
+        let openai_cfg = load_tts_llm_config_for_user(state, pool, row.owner_user_id).await?;
         let root = state.local_voiceover_audio_dir.as_ref().ok_or_else(|| {
             JobRunError::Failed(
                 "TOONFLOW_LOCAL_VOICEOVER_AUDIO_DIR is not set; cannot persist voiceover artifact"
                     .into(),
             )
         })?;
-        let file_name = format!("{job_id}.mp3");
-        let relative_api_url = format!("/api/v1/jobs/{job_id}/file");
-        persist_voiceover_audio(root, row.owner_user_id, &file_name, &audio_bytes).await?;
+
+        let multi_track =
+            voice_cfg.multi_track && parse_dialogue_segments(&narration_text).len() > 1;
+        let speaker_voice_map = if multi_track {
+            load_project_character_voices_by_speaker_name(
+                pool,
+                payload_project_uuid(payload),
+                project_numeric_id,
+            )
+            .await?
+        } else {
+            HashMap::new()
+        };
+        let (file_name, relative_api_url, audio_meta) = if multi_track {
+            synthesize_multi_track_audio(MultiTrackSynthesisContext {
+                openai_cfg: &openai_cfg,
+                state,
+                root,
+                owner_user_id: row.owner_user_id,
+                job_id,
+                narration_text: &narration_text,
+                base_cfg: &voice_cfg,
+                character_voice: &character_voice,
+                speaker_voice_map: &speaker_voice_map,
+                project_voice_profile: project_voice_profile.as_deref(),
+                metadata: &seed.metadata,
+            })
+            .await?
+        } else {
+            let synthesis = synthesize_speech(
+                &openai_cfg,
+                &state.http_client,
+                &narration_text,
+                &voice_cfg,
+                None,
+            )
+            .await
+            .map_err(JobRunError::Failed)?;
+            let file_name = format!("{job_id}.mp3");
+            let relative_api_url = format!("/api/v1/jobs/{job_id}/file");
+            persist_voiceover_audio(root, row.owner_user_id, &file_name, &synthesis.audio).await?;
+            (
+                file_name,
+                relative_api_url,
+                json!({
+                    "voice": voice,
+                    "speed": voice_cfg.speed.unwrap_or(DEFAULT_SPEED),
+                    "model": synthesis.model,
+                    "provider": synthesis.provider.as_str(),
+                    "emotion": voice_cfg.emotion,
+                    "style": voice_cfg.style,
+                }),
+            )
+        };
+
         persist_storyboard_voiceover_metadata(
             pool,
             storyboard_id,
@@ -104,8 +167,13 @@ pub(crate) async fn run_voiceover_generate(
                 "fileName": file_name,
                 "contentType": "audio/mpeg",
                 "voice": voice,
-                "speed": speed,
-                "model": cfg.model,
+                "speed": voice_cfg.speed.unwrap_or(DEFAULT_SPEED),
+                "model": audio_meta.get("model").cloned().unwrap_or(json!(openai_cfg.model)),
+                "provider": audio_meta.get("provider").cloned(),
+                "emotion": voice_cfg.emotion,
+                "style": voice_cfg.style,
+                "multiTrack": multi_track,
+                "tracks": audio_meta.get("tracks").cloned(),
                 "vendorId": payload.get("vendor_id").and_then(|value| value.as_str()),
                 "updatedAt": chrono::Utc::now().to_rfc3339(),
                 "sourceText": narration_text,
@@ -124,9 +192,10 @@ pub(crate) async fn run_voiceover_generate(
             "file_name": file_name,
             "content_type": "audio/mpeg",
             "voice": voice,
-            "speed": speed,
-            "model": cfg.model,
+            "speed": voice_cfg.speed.unwrap_or(DEFAULT_SPEED),
+            "model": audio_meta.get("model").cloned().unwrap_or(json!(openai_cfg.model)),
             "text": narration_text,
+            "multi_track": multi_track,
         });
         if let Some(project_uuid) = payload_project_uuid(payload) {
             result["project_uuid"] = json!(project_uuid);
@@ -227,13 +296,144 @@ async fn load_storyboard_uuid(
     .ok_or_else(|| JobRunError::Failed("storyboard not found in workspace member scope".into()))
 }
 
+async fn load_project_character_voices_by_speaker_name(
+    pool: &PgPool,
+    project_uuid: Option<Uuid>,
+    project_numeric_id: i32,
+) -> Result<HashMap<String, Value>, JobRunError> {
+    let project_id = if let Some(id) = project_uuid {
+        id
+    } else {
+        sqlx::query_scalar("SELECT id FROM app_project WHERE numeric_id = $1")
+            .bind(project_numeric_id)
+            .fetch_optional(pool)
+            .await
+            .map_err(|e| JobRunError::Failed(e.to_string()))?
+            .ok_or_else(|| JobRunError::Failed("project not found for voice map".into()))?
+    };
+    let rows: Vec<(String, Value)> = sqlx::query_as(
+        r#"
+        SELECT LOWER(TRIM(name)) AS name, voice_config
+        FROM app_project_character
+        WHERE project_id = $1
+          AND TRIM(name) <> ''
+        "#,
+    )
+    .bind(project_id)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| JobRunError::Failed(e.to_string()))?;
+    Ok(rows.into_iter().collect())
+}
+
+async fn load_character_voice_config(
+    pool: &PgPool,
+    character_id: Uuid,
+) -> Result<Option<Value>, JobRunError> {
+    sqlx::query_scalar("SELECT voice_config FROM app_project_character WHERE id = $1")
+        .bind(character_id)
+        .fetch_optional(pool)
+        .await
+        .map_err(|e| JobRunError::Failed(e.to_string()))
+}
+
+struct MultiTrackSynthesisContext<'a> {
+    openai_cfg: &'a LlmConfig,
+    state: &'a AppState,
+    root: &'a Path,
+    owner_user_id: Uuid,
+    job_id: Uuid,
+    narration_text: &'a str,
+    base_cfg: &'a crate::short_video::voice::VoiceProfileConfig,
+    character_voice: &'a Option<Value>,
+    speaker_voice_map: &'a HashMap<String, Value>,
+    project_voice_profile: Option<&'a str>,
+    metadata: &'a Value,
+}
+
+async fn synthesize_multi_track_audio(
+    ctx: MultiTrackSynthesisContext<'_>,
+) -> Result<(String, String, Value), JobRunError> {
+    let MultiTrackSynthesisContext {
+        openai_cfg,
+        state,
+        root,
+        owner_user_id,
+        job_id,
+        narration_text,
+        base_cfg,
+        character_voice,
+        speaker_voice_map,
+        project_voice_profile,
+        metadata,
+    } = ctx;
+    let segments = parse_dialogue_segments(narration_text);
+    let scene = scene_context_from_metadata(metadata);
+    let mut tracks = Vec::new();
+    let mut primary_audio: Option<Vec<u8>> = None;
+    for (index, segment) in segments.iter().enumerate() {
+        let speaker_key = segment.speaker.trim().to_lowercase();
+        let speaker_voice = (!speaker_key.is_empty())
+            .then(|| speaker_voice_map.get(&speaker_key))
+            .flatten();
+        let segment_cfg = resolve_voice_config(VoiceResolveInput {
+            project_voice_profile,
+            character_voice_config: speaker_voice.or(character_voice.as_ref()),
+            explicit_voice: None,
+            explicit_emotion: base_cfg.emotion.as_deref(),
+            explicit_speed: base_cfg.speed,
+            explicit_provider: Some(base_cfg.provider.as_str()),
+            scene: scene.clone(),
+        });
+        let synthesis = synthesize_speech(
+            openai_cfg,
+            &state.http_client,
+            &segment.text,
+            &segment_cfg,
+            None,
+        )
+        .await
+        .map_err(JobRunError::Failed)?;
+        let track_file = format!("{job_id}_track_{index}.mp3");
+        persist_voiceover_audio(root, owner_user_id, &track_file, &synthesis.audio).await?;
+        if index == 0 {
+            primary_audio = Some(synthesis.audio);
+        }
+        tracks.push(json!({
+            "speaker": segment.speaker,
+            "text": segment.text,
+            "fileName": track_file,
+            "voice": segment_cfg.voice,
+            "provider": synthesis.provider.as_str(),
+        }));
+    }
+    let file_name = format!("{job_id}.mp3");
+    let relative_api_url = format!("/api/v1/jobs/{job_id}/file");
+    persist_voiceover_audio(
+        root,
+        owner_user_id,
+        &file_name,
+        primary_audio.as_deref().unwrap_or(&[]),
+    )
+    .await?;
+    Ok((
+        file_name,
+        relative_api_url,
+        json!({
+            "model": openai_cfg.model,
+            "provider": base_cfg.provider.as_str(),
+            "tracks": tracks,
+        }),
+    ))
+}
+
 async fn load_storyboard_seed(
     pool: &PgPool,
     storyboard_id: Uuid,
 ) -> Result<StoryboardVoiceoverSeedRow, JobRunError> {
     sqlx::query_as(
         r#"
-        SELECT prompt, video_desc
+        SELECT prompt, video_desc, character_id, COALESCE(metadata, '{}'::jsonb) AS metadata
         FROM app_storyboard
         WHERE id = $1
         "#,
@@ -259,7 +459,7 @@ fn resolve_narration_text(seed: &StoryboardVoiceoverSeedRow) -> Option<String> {
         })
 }
 
-async fn load_tts_llm_config(
+pub(crate) async fn load_tts_llm_config_for_user(
     state: &AppState,
     pool: &PgPool,
     owner_user_id: Uuid,
@@ -406,6 +606,8 @@ async fn persist_storyboard_voiceover_metadata(
 
 #[cfg(test)]
 mod tests {
+    use serde_json::json;
+
     use super::{resolve_narration_text, vendor_candidates, StoryboardVoiceoverSeedRow};
 
     #[test]
@@ -413,6 +615,8 @@ mod tests {
         let seed = StoryboardVoiceoverSeedRow {
             prompt: Some("prompt fallback".into()),
             video_desc: Some("  explicit narration  ".into()),
+            character_id: None,
+            metadata: json!({}),
         };
 
         assert_eq!(
@@ -426,6 +630,8 @@ mod tests {
         let seed = StoryboardVoiceoverSeedRow {
             prompt: Some("  prompt fallback  ".into()),
             video_desc: Some("   ".into()),
+            character_id: None,
+            metadata: json!({}),
         };
 
         assert_eq!(

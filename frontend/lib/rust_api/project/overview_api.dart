@@ -156,6 +156,37 @@ fetchProjectShortVideoExportCheckByProjectId(
   return ProjectShortVideoExportCheck.fromJson(map);
 }
 
+/// `POST /api/v1/projects/{project_id}/short-video-pre-assembly` — batch rough-cut manifest job.
+Future<ShortVideoPreAssemblyEnqueueResponse>
+postProjectShortVideoPreAssemblyByProjectId(
+  String accessToken,
+  String projectId, {
+  int? scriptNumericId,
+}) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/projects/$projectId/short-video-pre-assembly',
+  );
+  final body = <String, dynamic>{
+    'scriptNumericId': ?scriptNumericId,
+  };
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      )
+      .timeout(const Duration(seconds: 30));
+  if (res.statusCode == 404) {
+    throw RustApiException('not found', statusCode: 404);
+  }
+  ensureHttpSuccess(res);
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return ShortVideoPreAssemblyEnqueueResponse.fromJson(map);
+}
+
 /// Maps backend **`blocking_reasons`** codes through localized strings.
 String labelShortVideoBlockingReason(AppLocalizations l10n, String code) =>
     labelShortVideoBlockingReasonLocalized(l10n, code);

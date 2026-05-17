@@ -32,6 +32,9 @@ pub(in crate::production) struct StoryboardScriptScopeBody {
     #[serde(default)]
     pub(in crate::production::workbench::storyboard) project_uuid: Option<Uuid>,
     pub(in crate::production::workbench::storyboard) script_id: i32,
+    /// When set and matches server **`data_version`**, response returns **`unchanged: true`** with empty **`data`**.
+    #[serde(default)]
+    pub(in crate::production::workbench::storyboard) client_data_version: Option<String>,
 }
 
 #[derive(Debug, Serialize)]

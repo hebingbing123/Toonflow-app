@@ -265,6 +265,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shortVideoSpaceStartExport => 'Start Export';
 
   @override
+  String get shortVideoSpaceStartPreAssembly => 'Batch pre-assembly';
+
+  @override
+  String get shortVideoSpacePreAssemblyBusy => 'Pre-assembling…';
+
+  @override
+  String shortVideoSpacePreAssemblyEnqueued(
+    int shotCount,
+    int blocking,
+    String jobId,
+  ) {
+    return 'Pre-assembly job queued ($shotCount shots, $blocking blocking). Job: $jobId';
+  }
+
+  @override
+  String shortVideoSpacePreAssemblyFailed(String error) {
+    return 'Pre-assembly failed: $error';
+  }
+
+  @override
   String get shortVideoSpaceExportHistory => 'Export History';
 
   @override
@@ -1394,31 +1414,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get opsWhActivityRecordSuffix => ' webhook activity';
-
-  @override
-  String get opsWhActivityActionCreated => 'Created';
-
-  @override
-  String get opsWhActivityActionDeleted => 'Deleted';
-
-  @override
-  String get opsWhActivityActionTestSuccess => 'Test: succeeded';
-
-  @override
-  String get opsWhActivityActionTestFailed => 'Test: failed';
-
-  @override
-  String get opsWhActivitySummaryDeleted => 'Webhook deleted';
-
-  @override
-  String opsWhActivitySummaryTestOk(String httpStatus) {
-    return 'HTTP $httpStatus';
-  }
-
-  @override
-  String opsWhActivitySummaryTestFail(String httpStatus, String errorDetail) {
-    return 'HTTP $httpStatus · $errorDetail';
-  }
 
   @override
   String get opsWhChipLatestCreated => 'Latest created';
@@ -3133,6 +3128,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get taskCenterRegenerate => 'Regenerate';
+
+  @override
+  String get taskCenterRetryRegenerateVideo => 'Retry video generation';
+
+  @override
+  String get taskCenterRetryExportVideo => 'Retry export';
+
+  @override
+  String get taskCenterRetryVoiceover => 'Retry voiceover';
+
+  @override
+  String get taskCenterRetryPreAssembly => 'Retry pre-assembly';
+
+  @override
+  String get taskCenterRetryAfterWritebackFailure =>
+      'Retry after writeback issue';
+
+  @override
+  String get taskCenterRegenerateAfterWriteback => 'Regenerate (writeback)';
 
   @override
   String get taskCenterPartialRework => 'Partial rework';
@@ -8643,7 +8657,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String scriptEditorStoryboardsReadinessBlockingUnknown(String code) {
-    return 'Unrecognized requirement ($code)';
+    return 'Unknown blocker ($code)';
   }
 
   @override
@@ -9029,6 +9043,26 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get storyboardWorkbenchProductionMetaLoadedEmpty =>
       'Production view loaded';
+
+  @override
+  String get storyboardWorkbenchCharacterLabel => 'Voice character';
+
+  @override
+  String get storyboardWorkbenchCharacterDropdownLabel => 'Assign character';
+
+  @override
+  String get storyboardWorkbenchCharacterNone => 'None (project default)';
+
+  @override
+  String get storyboardWorkbenchCharacterReload => 'Reload characters';
+
+  @override
+  String get storyboardWorkbenchCharacterSaved => 'Character assignment saved';
+
+  @override
+  String storyboardActionVideoSkippedDuplicates(int count, String ids) {
+    return 'Skipped $count duplicate in-flight job(s) (#$ids)';
+  }
 
   @override
   String storyboardEditorDialogTitle(int numericId) {
@@ -9868,14 +9902,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get storyboardPatchDialogTitle => 'Partial rework';
 
   @override
-  String get storyboardPatchScopeLabel => 'scope';
+  String get storyboardPatchScopeLabel => 'Scope';
 
   @override
   String get storyboardPatchScopeHelper =>
       'episode / scene / storyboard_item / video_prompt / derive_asset';
 
   @override
-  String get storyboardPatchModelTierLabel => 'model tier';
+  String get storyboardPatchModelTierLabel => 'Model tier';
 
   @override
   String get storyboardPatchModelTierHelper =>
@@ -9953,6 +9987,27 @@ class AppLocalizationsEn extends AppLocalizations {
       'Fix content quality, continuity, or emotional delivery for this shot.';
 
   @override
+  String get storyboardPatchScopeEpisode => 'Episode';
+
+  @override
+  String get storyboardPatchScopeScene => 'Scene';
+
+  @override
+  String get storyboardPatchScopeStoryboardItem => 'Storyboard item';
+
+  @override
+  String get storyboardPatchScopeVideoPrompt => 'Video prompt';
+
+  @override
+  String get storyboardPatchScopeDeriveAsset => 'Derive asset';
+
+  @override
+  String get storyboardPatchModelTierLow => 'Low';
+
+  @override
+  String get storyboardPatchModelTierHigh => 'High';
+
+  @override
   String get shortVideoReadinessNoPayloadHeadline =>
       'Shot readiness data is not available yet.';
 
@@ -10005,6 +10060,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shortVideoMetricStoryboardReadiness => 'Storyboard readiness';
+
+  @override
+  String get shortVideoMetricProductionPhase => 'Production phase';
+
+  @override
+  String shortVideoProductionPhaseSnippet(
+    int ready,
+    int generating,
+    int blocked,
+  ) {
+    return 'Ready $ready · Generating $generating · Blocked $blocked';
+  }
+
+  @override
+  String shortVideoBatchSkippedDuplicates(int count, String ids) {
+    return 'Skipped $count duplicate in-flight (#$ids)';
+  }
+
+  @override
+  String get shortVideoBatchOutcomeSkippedDuplicate => 'skipped duplicate';
+
+  @override
+  String get shortVideoBatchOutcomeQueued => 'queued';
 
   @override
   String get shortVideoShotReadinessSelectProjectHint =>
@@ -10632,6 +10710,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shortVideoCandidateCurrentVideo => 'Current video';
+
+  @override
+  String get shortVideoCandidateVideoListTitle => 'Candidate videos';
+
+  @override
+  String get shortVideoCandidateSelectVideo => 'Select';
 
   @override
   String get shortVideoCandidateSetCurrent => 'Set as current';
@@ -11948,6 +12032,145 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String shortVideoProductionBatchFailed(String error) {
     return 'Batch candidate clips failed: $error';
+  }
+
+  @override
+  String shortVideoBatchOutcomeSummary(String details) {
+    return 'Outcomes: $details';
+  }
+
+  @override
+  String shortVideoBatchOutcomeCount(String outcome, int count) {
+    return '$outcome×$count';
+  }
+
+  @override
+  String get shortVideoWritebackStatusOk =>
+      'Video writeback: synced to storyboard';
+
+  @override
+  String shortVideoWritebackStatusFailed(String code) {
+    return 'Video writeback failed ($code)';
+  }
+
+  @override
+  String get shortVideoWritebackStatusFailedGeneric => 'Video writeback failed';
+
+  @override
+  String shortVideoWritebackStatusIncomplete(String code) {
+    return 'Video writeback incomplete ($code)';
+  }
+
+  @override
+  String get shortVideoWritebackStatusIncompleteGeneric =>
+      'Video writeback incomplete — refresh production data';
+
+  @override
+  String shortVideoWritebackStatusUnknown(String status) {
+    return 'Video writeback: $status';
+  }
+
+  @override
+  String get shortVideoCharactersPanelTitle => 'Project characters & voices';
+
+  @override
+  String get shortVideoCharactersRefresh => 'Refresh';
+
+  @override
+  String get shortVideoCharactersLoading => 'Loading characters…';
+
+  @override
+  String get shortVideoCharactersEmpty =>
+      'No project characters yet. Create them under project settings or via API.';
+
+  @override
+  String shortVideoCharactersVoiceSummary(
+    String provider,
+    String voiceId,
+    String emotion,
+  ) {
+    return 'Provider $provider · voice $voiceId · emotion $emotion';
+  }
+
+  @override
+  String get shortVideoCharactersPreviewVoice => 'Preview voice';
+
+  @override
+  String get shortVideoCharactersCloneVoice => 'Clone voice';
+
+  @override
+  String shortVideoCharactersCloneVoiceTitle(String name) {
+    return 'Clone voice — $name';
+  }
+
+  @override
+  String get shortVideoCharactersCloneSampleUrl => 'Sample audio URL';
+
+  @override
+  String get shortVideoCharactersCloneDisplayName => 'Display name';
+
+  @override
+  String get shortVideoCharactersCloneMockSample => 'Use mock sample';
+
+  @override
+  String shortVideoCharactersCloneSuccess(String voiceId, String provider) {
+    return 'Cloned voice ID: $voiceId ($provider)';
+  }
+
+  @override
+  String shortVideoCharactersCloneFailed(String error) {
+    return 'Clone failed: $error';
+  }
+
+  @override
+  String get shortVideoCharactersEditVoice => 'Edit voice';
+
+  @override
+  String shortVideoCharactersEditVoiceTitle(String name) {
+    return 'Voice — $name';
+  }
+
+  @override
+  String get shortVideoCharactersFieldProvider => 'Provider';
+
+  @override
+  String get shortVideoCharactersFieldVoiceId => 'Voice ID';
+
+  @override
+  String get shortVideoCharactersFieldEmotion => 'Emotion / style';
+
+  @override
+  String shortVideoCharactersPreviewLoading(String name) {
+    return 'Generating preview for $name…';
+  }
+
+  @override
+  String shortVideoCharactersPreviewReady(String name) {
+    return 'Playing preview for $name';
+  }
+
+  @override
+  String shortVideoCharactersPreviewFailed(String name, String error) {
+    return 'Preview failed for $name: $error';
+  }
+
+  @override
+  String get shortVideoCharactersPreviewSampleText =>
+      'This is a short drama voice preview sample.';
+
+  @override
+  String shortVideoCharactersVoiceSaved(String name) {
+    return 'Saved voice settings for $name';
+  }
+
+  @override
+  String shortVideoCharactersVoiceSaveFailed(String name, String error) {
+    return 'Could not save voice for $name: $error';
+  }
+
+  @override
+  String shortVideoProductionConfirmCandidatesDone(int count) {
+    return 'Confirmed $count storyboard candidate(s) for generation.';
   }
 
   @override
@@ -14742,6 +14965,35 @@ class AppLocalizationsEn extends AppLocalizations {
       'Below lists some blocking items; for complete list, check each shot in production workspace.';
 
   @override
+  String get shortVideoSpacePublishExportCheckStoryboardGapsTitle =>
+      'Per-storyboard export gaps';
+
+  @override
+  String shortVideoSpacePublishExportCheckStoryboardGapTitle(
+    int scriptId,
+    int sbId,
+    String sbIndex,
+  ) {
+    return 'Script #$scriptId · Storyboard #$sbId$sbIndex';
+  }
+
+  @override
+  String get shortVideoSpacePublishExportCheckFacetMissingVideo =>
+      'Missing selected video';
+
+  @override
+  String get shortVideoSpacePublishExportCheckFacetMissingSubtitle =>
+      'Missing subtitle / narration';
+
+  @override
+  String get shortVideoSpacePublishExportCheckFacetMissingVoiceover =>
+      'Voiceover not ready';
+
+  @override
+  String get shortVideoSpacePublishExportCheckFacetDurationAnomaly =>
+      'Duration anomaly';
+
+  @override
   String get shortVideoSpacePublishCandidateLoadingHeadline =>
       'Loading project assets…';
 
@@ -14981,6 +15233,178 @@ class AppLocalizationsEn extends AppLocalizations {
   String shortVideoSpaceProductionAssemblyWriteBackFailed(String error) {
     return 'Write back failed: $error';
   }
+
+  @override
+  String get shortVideoTimelinePanelTitle =>
+      'Rough-cut timeline (trim + preview)';
+
+  @override
+  String get shortVideoTimelineSave => 'Save timeline';
+
+  @override
+  String get shortVideoTimelineSaveDone => 'Timeline saved.';
+
+  @override
+  String shortVideoTimelineSaveFailed(String error) {
+    return 'Timeline save failed: $error';
+  }
+
+  @override
+  String get shortVideoTimelineGeneratePreview => 'Generate preview';
+
+  @override
+  String get shortVideoTimelinePreviewBusy => 'Rendering preview…';
+
+  @override
+  String get shortVideoTimelinePreviewDone => 'Preview ready.';
+
+  @override
+  String shortVideoTimelinePreviewFailed(String error) {
+    return 'Preview failed: $error';
+  }
+
+  @override
+  String get shortVideoTimelinePlayPreview => 'Open preview';
+
+  @override
+  String get shortVideoTimelineTrimInMs => 'In (ms)';
+
+  @override
+  String get shortVideoTimelineTrimOutMs => 'Out (ms)';
+
+  @override
+  String get shortVideoTimelineBgmEnabled => 'BGM track';
+
+  @override
+  String get shortVideoTimelineBgmVolume => 'BGM volume';
+
+  @override
+  String get shortVideoTimelineMoveUp => 'Move up';
+
+  @override
+  String get shortVideoTimelineMoveDown => 'Move down';
+
+  @override
+  String get shortVideoTimelinePersistOrder => 'Save order';
+
+  @override
+  String get shortVideoTimelineLoading => 'Loading timeline…';
+
+  @override
+  String get shortVideoTimelineEmpty => 'No shots in timeline yet.';
+
+  @override
+  String get shortVideoTimelineReorderDone => 'Timeline order saved.';
+
+  @override
+  String get shortVideoTimelineSubtitlesTitle => 'Subtitles';
+
+  @override
+  String get shortVideoTimelineSubtitleText => 'Subtitle text';
+
+  @override
+  String get shortVideoTimelineSubtitleStartMs => 'Start (ms)';
+
+  @override
+  String get shortVideoTimelineSubtitleEndMs => 'End (ms)';
+
+  @override
+  String get shortVideoTimelineAddSubtitle => 'Add subtitle';
+
+  @override
+  String get shortVideoTimelineTransitionsTitle => 'Transitions';
+
+  @override
+  String get shortVideoTimelineTransitionCut => 'Cut';
+
+  @override
+  String get shortVideoTimelineTransitionCrossfade => 'Crossfade';
+
+  @override
+  String get shortVideoTimelineTransitionFadeBlack => 'Fade to black';
+
+  @override
+  String get shortVideoTimelineTransitionDurationMs => 'Duration (ms)';
+
+  @override
+  String get shortVideoTimelineVoiceoverTitle => 'Voiceover';
+
+  @override
+  String get shortVideoTimelineVoiceoverVolume => 'Volume';
+
+  @override
+  String get shortVideoTimelineApplyTemplate => 'Apply rough-cut template';
+
+  @override
+  String get shortVideoTimelineTemplateShortDrama => 'Short drama default';
+
+  @override
+  String get shortVideoTimelineTemplateDialoguePunch => 'Dialogue punch';
+
+  @override
+  String get shortVideoTimelineTemplateApplied => 'Template applied.';
+
+  @override
+  String shortVideoTimelineTemplateFailed(String error) {
+    return 'Template failed: $error';
+  }
+
+  @override
+  String shortVideoTimelineReorderFailed(String error) {
+    return 'Timeline reorder failed: $error';
+  }
+
+  @override
+  String get shortVideoTimelineUndo => 'Undo';
+
+  @override
+  String get shortVideoTimelineRedo => 'Redo';
+
+  @override
+  String get shortVideoTimelineRevisionHistory => 'Version history';
+
+  @override
+  String get shortVideoTimelineRevisionEmpty => 'No saved versions yet.';
+
+  @override
+  String shortVideoTimelineRevisionLabel(int revision) {
+    return 'Revision $revision';
+  }
+
+  @override
+  String get shortVideoTimelineRevisionRestored =>
+      'Timeline restored from history.';
+
+  @override
+  String shortVideoTimelineRevisionLoadFailed(String error) {
+    return 'Could not load version history: $error';
+  }
+
+  @override
+  String shortVideoTimelineRevisionRestoreFailed(String error) {
+    return 'Restore failed: $error';
+  }
+
+  @override
+  String get shortVideoTimelineEffectPreset => 'Effect preset';
+
+  @override
+  String get shortVideoTimelineEffectApplyAll => 'Apply effect to all clips';
+
+  @override
+  String get shortVideoTimelineEffectNone => 'None';
+
+  @override
+  String get shortVideoTimelineEffectVivid => 'Vivid';
+
+  @override
+  String get shortVideoTimelineEffectCinematic => 'Cinematic';
+
+  @override
+  String get shortVideoTimelineEffectBw => 'Black & white';
+
+  @override
+  String get shortVideoTimelineEffectSpeed110 => 'Speed 110%';
 
   @override
   String get shortVideoSpaceProductionAssemblyReorderPersisted =>
@@ -20111,9 +20535,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get apiKeysLastUsedIpUnknown => 'Unknown';
-
-  @override
   String apiKeysSourceLine(String source) {
     return 'Source $source';
   }
@@ -21576,60 +21997,87 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get billingNotificationSubscriptionActivated =>
       'Subscription activated';
+
   @override
   String get billingNotificationSubscriptionPastDue => 'Subscription past due';
+
   @override
   String get billingNotificationSubscriptionCanceled => 'Subscription canceled';
+
   @override
   String get billingNotificationPaymentFailed => 'Payment failed';
+
   @override
   String get billingNotificationSubscriptionExpired => 'Subscription expired';
+
   @override
   String get billingNotificationSubscriptionTrialing =>
       'Subscription trial started';
+
   @override
   String get billingNotificationUnknown => 'Billing event';
+
   @override
   String get billingSubscriptionStatusActive => 'Active';
+
   @override
   String get billingSubscriptionStatusPastDue => 'Past due';
+
   @override
   String get billingSubscriptionStatusCanceled => 'Canceled';
+
   @override
   String get billingSubscriptionStatusTrialing => 'Trial';
+
   @override
   String get billingSubscriptionStatusPaused => 'Paused';
+
   @override
   String get billingSubscriptionStatusUnpaid => 'Unpaid';
+
   @override
   String get billingSubscriptionStatusUnknown => 'Unknown status';
+
   @override
   String get billingQuotaExceededTitle => 'Daily quota reached';
+
   @override
-  String billingQuotaExceededFree(String plan) =>
-      'You\'ve reached the daily limit for the $plan plan. Upgrade to continue.';
+  String billingQuotaExceededFree(String plan) {
+    return 'You\'ve reached the daily limit for the $plan plan. Upgrade to continue.';
+  }
+
   @override
-  String billingQuotaExceededPro(String plan) =>
-      'You\'ve reached the daily limit for the $plan plan. Contact support or wait for the quota to reset.';
+  String billingQuotaExceededPro(String plan) {
+    return 'You\'ve reached the daily limit for the $plan plan. Contact support or wait for the quota to reset.';
+  }
+
   @override
   String get billingQuotaResetHint => 'Quota resets daily at midnight UTC.';
+
   @override
   String get billingUpgradePlan => 'Upgrade Plan';
+
   @override
   String get billingErrorPaymentFailed =>
       'Payment failed. Please update your payment method to continue.';
+
   @override
   String get billingErrorSubscriptionExpired =>
       'Your subscription has expired. Please renew to continue.';
+
   @override
   String get billingErrorSubscriptionPastDue =>
       'Your subscription payment is past due. Please update your payment method.';
+
   @override
   String get billingPlanTierFree => 'Free';
+
   @override
   String get billingPlanTierPro => 'Pro';
+
   @override
   String get billingPlanTierEnterprise => 'Enterprise';
+
   @override
   String get billingPlanTierUnknown => 'Unknown plan';
 }

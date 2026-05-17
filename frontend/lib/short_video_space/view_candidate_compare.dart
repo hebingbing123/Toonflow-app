@@ -75,6 +75,22 @@ class _CandidateComparePanel extends StatelessWidget {
                   candidateCardUi.detail,
                   style: theme.textTheme.bodySmall?.copyWith(color: outline),
                 ),
+                if (candidateCardUi.onConfirmStoryboardCandidates != null) ...[
+                  const SizedBox(height: 10),
+                  OutlinedButton.icon(
+                    onPressed: candidateCardUi.confirmStoryboardCandidatesBusy
+                        ? null
+                        : candidateCardUi.onConfirmStoryboardCandidates,
+                    icon: candidateCardUi.confirmStoryboardCandidatesBusy
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.check_circle_outline),
+                    label: Text(l10n.globalSearchConfirm),
+                  ),
+                ],
                 if (candidateCardUi.onBatchGenerateCandidateClips != null) ...[
                   const SizedBox(height: 10),
                   FilledButton.tonalIcon(

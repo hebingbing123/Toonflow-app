@@ -13,6 +13,8 @@ use crate::error::ApiError;
 use crate::projects::routes::common::require_project_workspace_member_scope;
 use crate::state::AppState;
 
+use crate::short_video::storyboard_readiness::blocking_reason_codes;
+
 use super::super::super::types::{
     ProjectShortVideoReadinessResponse, ShortVideoReadinessReasonRollup, ShortVideoReadinessRollup,
     StoryboardShortVideoReadiness,
@@ -34,47 +36,27 @@ struct StoryboardReadinessRow {
     no_blocking_job: bool,
 }
 
-/// Text from Postgres **`COALESCE(sb.metadata #>> '{shortVideo,candidateStatus}', '')`**.
-/// **`candidate_cleared`** in `/short-video-readiness` is **`TRIM(coalesced) != 'pending'`**.
-///
-/// Keep this predicate aligned with the SELECT below; unit tests lock the contract for C10.
-#[must_use]
-#[allow(dead_code)] // Only referenced from unit tests; mirrors SQL for drift-sensitive readiness rules.
-fn candidate_cleared_from_coalesced_metadata_text(coalesced: &str) -> bool {
-    coalesced.trim() != "pending"
-}
-
-fn blocking_reason_codes(row: &StoryboardReadinessRow) -> Vec<&'static str> {
-    let mut out = Vec::new();
-    if !row.has_basic_slot {
-        out.push("missing_basic_slot");
+impl StoryboardReadinessRow {
+    fn as_shared_row(&self) -> crate::short_video::storyboard_readiness::StoryboardReadinessRow {
+        crate::short_video::storyboard_readiness::StoryboardReadinessRow {
+            storyboard_numeric_id: self.storyboard_numeric_id,
+            is_live_action_mode: self.is_live_action_mode,
+            has_basic_slot: self.has_basic_slot,
+            has_prompt_context: self.has_prompt_context,
+            has_reference_visual: self.has_reference_visual,
+            has_live_action_reference_shots: self.has_live_action_reference_shots,
+            has_live_action_performance_notes: self.has_live_action_performance_notes,
+            candidate_cleared: self.candidate_cleared,
+            no_blocking_job: self.no_blocking_job,
+        }
     }
-    if !row.has_prompt_context {
-        out.push("missing_prompt_context");
-    }
-    if !row.has_reference_visual {
-        out.push("missing_reference_visual");
-    }
-    if row.is_live_action_mode && !row.has_live_action_reference_shots {
-        out.push("missing_live_action_reference_shot");
-    }
-    if row.is_live_action_mode && !row.has_live_action_performance_notes {
-        out.push("missing_live_action_performance_notes");
-    }
-    if !row.candidate_cleared {
-        out.push("candidate_pending");
-    }
-    if !row.no_blocking_job {
-        out.push("blocking_job");
-    }
-    out
 }
 
 fn rollup_reasons(rows: &[StoryboardReadinessRow]) -> Vec<ShortVideoReadinessReasonRollup> {
     use std::collections::BTreeMap;
     let mut acc: BTreeMap<&'static str, i64> = BTreeMap::new();
     for row in rows {
-        for code in blocking_reason_codes(row) {
+        for code in blocking_reason_codes(&row.as_shared_row()) {
             *acc.entry(code).or_insert(0) += 1;
         }
     }
@@ -165,7 +147,7 @@ pub(crate) async fn project_short_video_readiness_by_id(
     let mut ready_count: i64 = 0;
 
     for r in &rows {
-        let blocking_reasons: Vec<String> = blocking_reason_codes(r)
+        let blocking_reasons: Vec<String> = blocking_reason_codes(&r.as_shared_row())
             .into_iter()
             .map(std::string::ToString::to_string)
             .collect();
@@ -208,6 +190,7 @@ pub(crate) async fn project_short_video_readiness_by_id(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::short_video::storyboard_readiness::candidate_cleared_from_coalesced_metadata_text;
 
     #[test]
     fn candidate_cleared_semantics_match_sql_coalesce_and_pending_gate() {
@@ -236,16 +219,33 @@ mod tests {
         }
     }
 
+    fn shared_all_checks_pass(
+        candidate_cleared: bool,
+    ) -> crate::short_video::storyboard_readiness::StoryboardReadinessRow {
+        crate::short_video::storyboard_readiness::StoryboardReadinessRow {
+            storyboard_numeric_id: 42,
+            is_live_action_mode: false,
+            has_basic_slot: true,
+            has_prompt_context: true,
+            has_reference_visual: true,
+            has_live_action_reference_shots: true,
+            has_live_action_performance_notes: true,
+            candidate_cleared,
+            no_blocking_job: true,
+        }
+    }
+
     #[test]
     fn readiness_emits_candidate_pending_iff_candidate_cleared_false() {
-        let cleared_row = all_checks_pass_row(candidate_cleared_from_coalesced_metadata_text(""));
+        let cleared_row =
+            shared_all_checks_pass(candidate_cleared_from_coalesced_metadata_text(""));
         assert!(
             !blocking_reason_codes(&cleared_row).contains(&"candidate_pending"),
             "cleared shots must not block on candidate_pending"
         );
 
         let blocked_row =
-            all_checks_pass_row(candidate_cleared_from_coalesced_metadata_text("pending"));
+            shared_all_checks_pass(candidate_cleared_from_coalesced_metadata_text("pending"));
         assert_eq!(
             blocking_reason_codes(&blocked_row),
             vec!["candidate_pending"],
@@ -256,7 +256,7 @@ mod tests {
     #[test]
     fn ready_for_generation_requires_candidate_cleared_among_other_checks() {
         let row_pending =
-            all_checks_pass_row(candidate_cleared_from_coalesced_metadata_text("pending"));
+            shared_all_checks_pass(candidate_cleared_from_coalesced_metadata_text("pending"));
         let reasons: Vec<String> = blocking_reason_codes(&row_pending)
             .into_iter()
             .map(str::to_string)
@@ -266,7 +266,8 @@ mod tests {
             "candidate_pending must surface when metadata candidateStatus is pending"
         );
 
-        let row_cleared = all_checks_pass_row(candidate_cleared_from_coalesced_metadata_text(""));
+        let row_cleared =
+            shared_all_checks_pass(candidate_cleared_from_coalesced_metadata_text(""));
         let reasons_cleared: Vec<String> = blocking_reason_codes(&row_cleared)
             .into_iter()
             .map(str::to_string)
@@ -279,11 +280,8 @@ mod tests {
 
     #[test]
     fn blocking_reason_codes_orders_expected_keys() {
-        let row = StoryboardReadinessRow {
-            storyboard_id: Uuid::nil(),
+        let row = crate::short_video::storyboard_readiness::StoryboardReadinessRow {
             storyboard_numeric_id: 1,
-            script_numeric_id: Some(1),
-            sb_index: None,
             is_live_action_mode: false,
             has_basic_slot: false,
             has_prompt_context: false,
@@ -308,11 +306,11 @@ mod tests {
 
     #[test]
     fn live_action_readiness_requires_reference_shot_and_performance_notes() {
-        let row = StoryboardReadinessRow {
+        let row = crate::short_video::storyboard_readiness::StoryboardReadinessRow {
             is_live_action_mode: true,
             has_live_action_reference_shots: false,
             has_live_action_performance_notes: false,
-            ..all_checks_pass_row(true)
+            ..shared_all_checks_pass(true)
         };
         assert_eq!(
             blocking_reason_codes(&row),

@@ -28,6 +28,7 @@ class _StoryboardBatchWorkbenchDialogState
 
   final Set<int> _selectedIds = {};
   List<ProductionStoryboardItemV1> _productionRows = const [];
+  String? _cachedProductionDataVersion;
   bool _loadingProduction = false;
   bool _busyMutation = false;
   String? _statusLine;
@@ -144,15 +145,25 @@ class _StoryboardBatchWorkbenchDialogState
       _statusLine = null;
     });
     try {
-      final response = await postProductionGetStoryboardDataV1(
+      final storyboardIds = widget.boardsList
+          .map((row) => row.numericId)
+          .toList(growable: false);
+      final response = await postProductionGetProductionDataV1(
         widget.token,
         projectUuid: widget.projectId,
         scriptId: widget.scriptNumericId,
+        storyboardIds: storyboardIds,
+        clientDataVersion: _cachedProductionDataVersion,
       );
-      final ids = widget.boardsList.map((row) => row.numericId).toSet();
-      final filtered = response.data
-          .where((row) => ids.contains(row.id))
-          .toList(growable: false);
+      final ids = storyboardIds.toSet();
+      final filtered = response.unchanged
+          ? _productionRows
+          : response.data
+                .where((row) => ids.contains(row.id))
+                .toList(growable: false);
+      if (response.dataVersion != null && response.dataVersion!.isNotEmpty) {
+        _cachedProductionDataVersion = response.dataVersion;
+      }
       final nextSelectedIds = <int>{
         ..._selectedIds.where((id) => ids.contains(id)),
       };

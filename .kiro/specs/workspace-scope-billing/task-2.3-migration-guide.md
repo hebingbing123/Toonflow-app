@@ -11,16 +11,28 @@ This document provides guidance for applying the NOT NULL constraint migration f
 Before applying this migration, ensure the following tasks are completed:
 
 ### Task 2.1: Job Enqueue Code (REQUIRED)
-- [ ] All job creation entry points audited
-- [ ] `resolve_billing_workspace_id(...)` implemented and tested
+
+**仓库内（已完成）**
+
+- [x] All job creation entry points audited — 见 `job-creation-audit.md`
+- [x] `resolve_billing_workspace_id(...)` implemented and tested — `backend/src/jobs/billing_workspace.rs`
+
+**生产切角（运维 checklist，非代码交付）**
+
 - [ ] Code deployed to production and stable
 - [ ] No regression in job creation functionality
 
 ### Task 2.2: Backfill Script (REQUIRED)
-- [ ] Backfill script implemented with `--dry-run` mode
+
+**仓库内（已完成）**
+
+- [x] Backfill script implemented with `--dry-run` mode — `backend/src/bin/backfill_job_workspace_id.rs`
+- [x] Orphan rows handled per documented fallback rules — 见 `docs/runbooks/backfill-job-workspace-id.md`
+
+**生产切角**
+
 - [ ] Script executed successfully on production data
 - [ ] Coverage threshold achieved (see below)
-- [ ] Orphan rows handled per documented fallback rules
 
 ## Pre-Migration Validation
 

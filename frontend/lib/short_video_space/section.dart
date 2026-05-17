@@ -1,12 +1,15 @@
 import 'dart:async';
 
+import 'package:http/http.dart' as http;
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_list_view/flutter_list_view.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../l10n/app_localizations.dart';
+import '../l10n/short_video_generation_blocked.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
 import 'components/batch_operation_toolbar.dart';
@@ -29,6 +32,10 @@ part 'section_publish_copy.dart';
 part 'section_publish_batch.dart';
 part 'section_undo_redo.dart';
 part 'section_keyboard_shortcuts.dart';
+part 'section_characters.dart';
+part 'section_timeline.dart';
+part 'section_timeline_m2m3.dart';
+part 'section_timeline_m4.dart';
 part 'dialogs/voiceover_settings_dialog.dart';
 part 'dialogs/export_settings_dialog.dart';
 part 'dialogs/export_progress_dialog.dart';
@@ -73,9 +80,11 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   bool _loadingProjects = false;
   bool _loadingProjectOverview = false;
   bool _batchCandidateBusy = false;
+  bool _confirmCandidatesBusy = false;
   bool _creatingProject = false;
   bool _savingProjectConfig = false;
   bool _exportActionBusy = false;
+  bool _preAssemblyActionBusy = false;
   List<ProjectRow> _projects = const <ProjectRow>[];
   ProjectStats? _projectStats;
   TaskCenterGetTaskApiResult? _recentProjectTasks;
@@ -89,6 +98,11 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   ProjectAssetsOverview? _projectAssetsOverview;
   ProjectShortVideoAssembly? _shortVideoAssembly;
   ProjectShortVideoExportCheck? _shortVideoExportCheck;
+  ProjectShortVideoTimelineV1? _shortVideoTimeline;
+  bool _loadingTimeline = false;
+  bool _timelineSaveBusy = false;
+  bool _timelinePreviewBusy = false;
+  String? _timelinePreviewUrl;
   List<ProductionStoryboardItemV1> _candidateCompareRows =
       const <ProductionStoryboardItemV1>[];
   List<QualityReview> _candidateCompareReviews = const <QualityReview>[];
@@ -132,8 +146,18 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   String _ttsTaskCenterStatusFilter = '';
   bool _ttsTaskCenterGroupedByShot = true;
   String _ttsTaskCenterKeyword = '';
+  List<ProjectCharacterV1> _projectCharacters = const <ProjectCharacterV1>[];
+  bool _loadingCharacters = false;
+  String? _charactersStatusLine;
+  final AudioPlayer _characterPreviewPlayer = AudioPlayer();
 
   bool get _isAnimated => _mode == ShortVideoMode.animated;
+
+  @override
+  void dispose() {
+    unawaited(_characterPreviewPlayer.dispose());
+    super.dispose();
+  }
 
   int _beginPublishRefreshRequest() => ++_publishRefreshRequestId;
 
@@ -348,6 +372,19 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         ShortVideoMetricData(
           label: l10n.shortVideoMetricStoryboardReadiness,
           value: '${po.readyStoryboardCount}/${po.totalStoryboardCount}',
+        ),
+      );
+    }
+    final readinessRollup = _shotReadiness?.rollup;
+    if (po != null && readinessRollup != null && readinessRollup.totalStoryboards > 0) {
+      overviewMetrics.add(
+        ShortVideoMetricData(
+          label: l10n.shortVideoMetricProductionPhase,
+          value: l10n.shortVideoProductionPhaseSnippet(
+            po.readyStoryboardCount,
+            po.runningGenerationJobCount,
+            readinessRollup.blockedCount,
+          ),
         ),
       );
     }
@@ -590,6 +627,11 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
           ? _runBatchCandidateClips
           : null,
       batchGenerateCandidateClipsBusy: _batchCandidateBusy,
+      onConfirmStoryboardCandidates: project != null
+          ? _confirmStoryboardCandidates
+          : null,
+      confirmStoryboardCandidatesBusy: _confirmCandidatesBusy,
+      candidatePendingStoryboardCount: _candidatePendingStoryboardCount(),
     );
     final candidateComparePanelUi = buildShortVideoCandidateComparePanelUi(
       l10n: l10n,
@@ -600,6 +642,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       reviews: _candidateCompareReviews,
       isLiveAction: !_isAnimated,
       onSetCurrent: _setComparedStoryboardCurrent,
+      onSelectCandidateVideo: _selectComparedStoryboardVideo,
       onOpenProductionWorkspace: project == null
           ? null
           : () {
@@ -750,6 +793,11 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
             project != null && accessToken != null && accessToken.isNotEmpty
             ? () => unawaited(_startExportFlow())
             : null,
+        onStartPreAssembly:
+            project != null && accessToken != null && accessToken.isNotEmpty
+            ? () => unawaited(_startPreAssemblyFlow())
+            : null,
+        preAssemblyActionBusy: _preAssemblyActionBusy,
         onOpenExportHistory:
             project != null && accessToken != null && accessToken.isNotEmpty
             ? () => unawaited(_openExportHistoryFlow())
@@ -775,6 +823,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         assemblyVersionManagerPanel: assemblyVersionManagerPanel,
         candidateCardUi: candidateCardUi,
         candidateComparePanelUi: candidateComparePanelUi,
+        projectCharactersPanel: _buildProjectCharactersPanel(),
+        shortVideoTimelinePanel: _buildShortVideoTimelinePanel(),
         onOpenProjectsForCandidateAssets: project == null
             ? null
             : widget.onOpenProjects,

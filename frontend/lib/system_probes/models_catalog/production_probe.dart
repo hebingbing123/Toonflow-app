@@ -86,19 +86,24 @@ extension _HomePageSystemProbesModelsCatalogProductionProbe on _HomePageState {
       return (statuses: statuses, implementedCount: 29);
     }
 
-    final getData = await postProductionGetProductionDataV1(
-      token,
-      projectId: projectId,
-      projectUuid: projectUuid,
-      scriptId: scriptId,
-      storyboardIds: [resources.storyboardId],
-    );
-    _expectProbeStatus(
-      label: 'POST production/get-production-data',
-      status: getData,
-      accepted: const [200, 404, 503],
-    );
-    statuses['production/get-data'] = getData;
+    try {
+      await postProductionGetProductionDataV1(
+        token,
+        projectId: projectId,
+        projectUuid: projectUuid,
+        scriptId: scriptId,
+        storyboardIds: [resources.storyboardId],
+      );
+      statuses['production/get-data'] = 200;
+    } on RustApiException catch (e) {
+      final status = e.statusCode ?? 500;
+      _expectProbeStatus(
+        label: 'POST production/get-production-data',
+        status: status,
+        accepted: const [200, 404, 503],
+      );
+      statuses['production/get-data'] = status;
+    }
 
     final flowData = await postProductionGetFlowDataV1(
       token,

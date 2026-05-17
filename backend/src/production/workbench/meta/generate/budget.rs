@@ -4,15 +4,40 @@ use super::{
     storyboard_dialogue_is_empty, video_prompt_scene_has_motion_risk,
     StructuredStoryboardDescription, VideoPromptConstraintPressure, VideoPromptMemoryBudgetTier,
 };
+use crate::production::workbench::generation_profile::GenerationProfileTier;
+
+fn apply_generation_profile_to_memory_budget(
+    decision: &mut VideoPromptMemoryBudgetDecision,
+    profile: GenerationProfileTier,
+) {
+    match profile {
+        GenerationProfileTier::Draft => {
+            decision.tier = VideoPromptMemoryBudgetTier::Lean;
+            decision
+                .reasons
+                .push("generation_profile_draft_lean_cap".into());
+        }
+        GenerationProfileTier::Premium => {
+            if decision.tier == VideoPromptMemoryBudgetTier::Lean && decision.risk_score >= 1 {
+                decision.tier = VideoPromptMemoryBudgetTier::Expanded;
+                decision
+                    .reasons
+                    .push("generation_profile_premium_expanded_boost".into());
+            }
+        }
+        GenerationProfileTier::Standard => {}
+    }
+}
 
 #[derive(Debug, Clone)]
-pub(super) struct VideoPromptMemoryBudgetDecision {
+pub(crate) struct VideoPromptMemoryBudgetDecision {
     pub(super) tier: VideoPromptMemoryBudgetTier,
     pub(super) risk_score: i32,
     pub(super) reasons: Vec<String>,
     pub(super) compact_silent_low_risk: bool,
 }
 
+#[allow(clippy::too_many_arguments)]
 pub(super) fn resolve_video_prompt_memory_budget(
     image_url: Option<&str>,
     continuity_notes: &[String],
@@ -21,6 +46,7 @@ pub(super) fn resolve_video_prompt_memory_budget(
     scene_anchors: &[String],
     tool_anchors: &[String],
     constraint_pressure: Option<VideoPromptConstraintPressure>,
+    generation_profile: Option<GenerationProfileTier>,
 ) -> VideoPromptMemoryBudgetDecision {
     let mut risk_score: i32 = 0;
     let mut reasons = Vec::new();
@@ -113,10 +139,14 @@ pub(super) fn resolve_video_prompt_memory_budget(
         VideoPromptMemoryBudgetTier::Lean
     };
 
-    VideoPromptMemoryBudgetDecision {
+    let mut decision = VideoPromptMemoryBudgetDecision {
         tier,
         risk_score,
         reasons,
         compact_silent_low_risk,
+    };
+    if let Some(profile) = generation_profile {
+        apply_generation_profile_to_memory_budget(&mut decision, profile);
     }
+    decision
 }

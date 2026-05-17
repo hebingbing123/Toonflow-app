@@ -222,6 +222,8 @@ class ShortVideoCandidateCardUi {
     this.detail = '',
     this.onBatchGenerateCandidateClips,
     this.batchGenerateCandidateClipsBusy = false,
+    this.onConfirmStoryboardCandidates,
+    this.confirmStoryboardCandidatesBusy = false,
   });
 
   final bool visible;
@@ -236,6 +238,8 @@ class ShortVideoCandidateCardUi {
   final String detail;
   final VoidCallback? onBatchGenerateCandidateClips;
   final bool batchGenerateCandidateClipsBusy;
+  final VoidCallback? onConfirmStoryboardCandidates;
+  final bool confirmStoryboardCandidatesBusy;
 }
 
 /// Space 内嵌 **统一资产总览**（C9）：按类型分组 + 关联剧本号摘要。
@@ -283,6 +287,21 @@ class ShortVideoAssemblyPanelUi {
   final String detail;
 }
 
+/// 单分镜导出缺口（Wave 6 **`storyboard_gaps`** UI）。
+class ShortVideoExportCheckStoryboardGapUi {
+  const ShortVideoExportCheckStoryboardGapUi({
+    required this.title,
+    required this.facetSummary,
+    required this.hasBlocking,
+    this.codeLabels = const <String>[],
+  });
+
+  final String title;
+  final String facetSummary;
+  final bool hasBlocking;
+  final List<String> codeLabels;
+}
+
 /// D4：**导出前检查**摘要（**`GET …/short-video-export-check`**）。
 class ShortVideoExportCheckPanelUi {
   const ShortVideoExportCheckPanelUi({
@@ -293,6 +312,7 @@ class ShortVideoExportCheckPanelUi {
     this.metrics = const <ShortVideoMetricData>[],
     this.qualityGateLine = '',
     this.qualityGateBlockingLines = const <String>[],
+    this.storyboardGapEntries = const <ShortVideoExportCheckStoryboardGapUi>[],
     this.blockingLines = const <String>[],
     this.warningLines = const <String>[],
     this.detail = '',
@@ -306,6 +326,7 @@ class ShortVideoExportCheckPanelUi {
   final List<ShortVideoMetricData> metrics;
   final String qualityGateLine;
   final List<String> qualityGateBlockingLines;
+  final List<ShortVideoExportCheckStoryboardGapUi> storyboardGapEntries;
   final List<String> blockingLines;
   final List<String> warningLines;
   final String detail;
@@ -318,10 +339,13 @@ class ShortVideoCandidateCompareItemUi {
     this.scriptNumericId,
     this.referenceImageUrl,
     this.selectedVideoUrl,
+    this.candidateVideoUrls = const <String>[],
     this.liveActionReferenceShotUrls = const <String>[],
     required this.readinessLine,
     required this.qualityLine,
+    this.writebackLine,
     this.onSetCurrent,
+    this.onSelectCandidateVideo,
     this.onOpenRework,
   });
 
@@ -329,10 +353,13 @@ class ShortVideoCandidateCompareItemUi {
   final int? scriptNumericId;
   final String? referenceImageUrl;
   final String? selectedVideoUrl;
+  final List<String> candidateVideoUrls;
   final List<String> liveActionReferenceShotUrls;
   final String readinessLine;
   final String qualityLine;
+  final String? writebackLine;
   final VoidCallback? onSetCurrent;
+  final void Function(String videoUrl)? onSelectCandidateVideo;
   final VoidCallback? onOpenRework;
 }
 
@@ -644,8 +671,10 @@ class ShortVideoSpaceView extends StatelessWidget {
     required this.assemblyPanelUi,
     required this.exportCheckPanelUi,
     this.onStartExport,
+    this.onStartPreAssembly,
     this.onOpenExportHistory,
     this.exportActionBusy = false,
+    this.preAssemblyActionBusy = false,
     required this.publishPanelUi,
     this.onOpenProductionForAssemblyExport,
     this.onOpenAssemblyClipDeskOps,
@@ -653,6 +682,8 @@ class ShortVideoSpaceView extends StatelessWidget {
     this.assemblyVersionManagerPanel,
     required this.candidateCardUi,
     required this.candidateComparePanelUi,
+    this.projectCharactersPanel,
+    this.shortVideoTimelinePanel,
     this.onOpenProjectsForCandidateAssets,
     required this.readinessIntro,
     required this.readinessCountLabel,
@@ -719,8 +750,10 @@ class ShortVideoSpaceView extends StatelessWidget {
   final ShortVideoAssemblyPanelUi assemblyPanelUi;
   final ShortVideoExportCheckPanelUi exportCheckPanelUi;
   final VoidCallback? onStartExport;
+  final VoidCallback? onStartPreAssembly;
   final VoidCallback? onOpenExportHistory;
   final bool exportActionBusy;
+  final bool preAssemblyActionBusy;
   final ShortVideoPublishPanelUi publishPanelUi;
   final VoidCallback? onOpenProductionForAssemblyExport;
   final VoidCallback? onOpenAssemblyClipDeskOps;
@@ -728,6 +761,8 @@ class ShortVideoSpaceView extends StatelessWidget {
   final Widget? assemblyVersionManagerPanel;
   final ShortVideoCandidateCardUi candidateCardUi;
   final ShortVideoCandidateComparePanelUi candidateComparePanelUi;
+  final Widget? projectCharactersPanel;
+  final Widget? shortVideoTimelinePanel;
   final VoidCallback? onOpenProjectsForCandidateAssets;
   final String readinessIntro;
   final String readinessCountLabel;
@@ -847,8 +882,10 @@ class ShortVideoSpaceView extends StatelessWidget {
           assemblyPanelUi: assemblyPanelUi,
           exportCheckPanelUi: exportCheckPanelUi,
           onStartExport: onStartExport,
+          onStartPreAssembly: onStartPreAssembly,
           onOpenExportHistory: onOpenExportHistory,
           exportActionBusy: exportActionBusy,
+          preAssemblyActionBusy: preAssemblyActionBusy,
           onOpenProductionForAssemblyExport: onOpenProductionForAssemblyExport,
           onOpenAssemblyClipDeskOps: onOpenAssemblyClipDeskOps,
           onOpenAssemblyDefaultsEditor: onOpenAssemblyDefaultsEditor,
@@ -858,6 +895,14 @@ class ShortVideoSpaceView extends StatelessWidget {
         _PublishCalendarPanel(publishPanelUi: publishPanelUi),
         _PublishJobsPanel(publishPanelUi: publishPanelUi),
         _PublishAuditPanel(publishPanelUi: publishPanelUi),
+        if (projectCharactersPanel != null) ...[
+          projectCharactersPanel!,
+          const SizedBox(height: 16),
+        ],
+        if (shortVideoTimelinePanel != null) ...[
+          shortVideoTimelinePanel!,
+          const SizedBox(height: 16),
+        ],
         _CandidateComparePanel(
           candidateCardUi: candidateCardUi,
           candidateComparePanelUi: candidateComparePanelUi,
@@ -1208,6 +1253,10 @@ class _CandidateCompareCard extends StatelessWidget {
               item.qualityLine,
               style: theme.textTheme.bodySmall?.copyWith(color: outline),
             ),
+            if ((item.writebackLine ?? '').trim().isNotEmpty) ...[
+              const SizedBox(height: 6),
+              _WritebackStatusChip(line: item.writebackLine!),
+            ],
             if ((item.referenceImageUrl ?? '').trim().isNotEmpty) ...[
               const SizedBox(height: 10),
               ClipRRect(
@@ -1251,6 +1300,38 @@ class _CandidateCompareCard extends StatelessWidget {
                 item.selectedVideoUrl!,
                 style: theme.textTheme.bodySmall,
               ),
+            ],
+            if (item.candidateVideoUrls.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(
+                l10n.shortVideoCandidateVideoListTitle,
+                style: theme.textTheme.labelMedium,
+              ),
+              const SizedBox(height: 4),
+              ...item.candidateVideoUrls.map((url) {
+                final isCurrent = url.trim() == (item.selectedVideoUrl ?? '').trim();
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: SelectableText(
+                          url,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: isCurrent ? theme.colorScheme.primary : null,
+                          ),
+                        ),
+                      ),
+                      if (item.onSelectCandidateVideo != null && !isCurrent)
+                        TextButton(
+                          onPressed: () => item.onSelectCandidateVideo!(url),
+                          child: Text(l10n.shortVideoCandidateSelectVideo),
+                        ),
+                    ],
+                  ),
+                );
+              }),
             ],
             const SizedBox(height: 8),
             Wrap(
@@ -1340,6 +1421,50 @@ class _ReadinessRow extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _WritebackStatusChip extends StatelessWidget {
+  const _WritebackStatusChip({required this.line});
+
+  final String line;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final incomplete = line.contains('incomplete') ||
+        line.contains('失败') ||
+        line.contains('未完整');
+    final color = incomplete
+        ? theme.colorScheme.errorContainer
+        : theme.colorScheme.secondaryContainer;
+    final onColor = incomplete
+        ? theme.colorScheme.onErrorContainer
+        : theme.colorScheme.onSecondaryContainer;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            incomplete ? Icons.sync_problem : Icons.check_circle_outline,
+            size: 14,
+            color: onColor,
+          ),
+          const SizedBox(width: 4),
+          Flexible(
+            child: Text(
+              line,
+              style: theme.textTheme.labelSmall?.copyWith(color: onColor),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

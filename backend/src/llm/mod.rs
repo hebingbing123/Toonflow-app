@@ -7,6 +7,7 @@
 //! - `envelope` — 消息信封处理
 
 mod agent_loop;
+pub mod azure;
 mod envelope;
 pub mod openai;
 

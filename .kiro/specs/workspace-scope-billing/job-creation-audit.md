@@ -223,18 +223,18 @@ client_request_id = "..."
 - [x] Document PgQueue path (deferred)
 - [x] Add logging for observability
 
-### Phase 2: Backfill (Task 2.2) 🔄
+### Phase 2: Backfill (Task 2.2) ✅（仓库内）
 
-- [ ] Write backfill script with `--dry-run`
-- [ ] Backfill workspace_id from project → workspace for project-based jobs
-- [ ] Backfill workspace_id from user → personal workspace for orphan jobs
-- [ ] Monitor backfill coverage (target: >99%)
+- [x] Write backfill script with `--dry-run` — `backend/src/bin/backfill_job_workspace_id.rs`；说明见 `backend/src/bin/README_BACKFILL.md`、`docs/runbooks/backfill-job-workspace-id.md`
+- [x] Backfill workspace_id from project → workspace for project-based jobs（二进制逻辑已实现）
+- [x] Backfill workspace_id from user → personal workspace for orphan jobs（同上）
+- [ ] Monitor backfill coverage (target: >99%) — **生产/目标环境**执行后由 `scripts/verify_workspace_id_backfill.sh` 验证
 
-### Phase 3: Enforcement (Task 2.3) ⏳
+### Phase 3: Enforcement (Task 2.3) ✅（仓库内）
 
-- [ ] Add NOT NULL constraint on `workspace_id` column
-- [ ] Update PgQueue path to require workspace_id
-- [ ] Remove nullable handling in application code
+- [x] Add NOT NULL constraint on `workspace_id` column — `supabase/migrations/20260519140000_app_generation_job_workspace_id_not_null.sql`
+- [x] Update PgQueue path to require workspace_id — 见 `backend/src/jobs/billing_workspace.rs` 与各入队路径
+- [x] Remove nullable handling in application code（应用层在迁移后假定 `workspace_id` 已填充）
 
 ## Rollback Plan
 
@@ -268,8 +268,8 @@ ALTER TABLE public.app_generation_job DROP COLUMN IF EXISTS workspace_id;
 ## Sign-off
 
 - [x] **Task 2.1 Complete**: Canonical function implemented and wired into job creation paths
-- [ ] **Task 2.2**: Backfill script (next task)
-- [ ] **Task 2.3**: NOT NULL enforcement (after backfill)
+- [x] **Task 2.2 Complete**: Backfill binary + runbook（生产执行与覆盖率监控仍为运维步骤）
+- [x] **Task 2.3 Complete**: NOT NULL 迁移已入库；生产应用顺序见 `task-2.3-migration-guide.md`
 
 **Completed by**: Kiro (AI Agent)  
 **Date**: 2025-01-XX

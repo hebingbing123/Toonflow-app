@@ -252,6 +252,26 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shortVideoSpaceStartExport => '开始导出';
 
   @override
+  String get shortVideoSpaceStartPreAssembly => '批量预组装';
+
+  @override
+  String get shortVideoSpacePreAssemblyBusy => '预组装中…';
+
+  @override
+  String shortVideoSpacePreAssemblyEnqueued(
+    int shotCount,
+    int blocking,
+    String jobId,
+  ) {
+    return '已入队预组装任务（$shotCount 镜，$blocking 镜阻断）。任务：$jobId';
+  }
+
+  @override
+  String shortVideoSpacePreAssemblyFailed(String error) {
+    return '预组装失败：$error';
+  }
+
+  @override
   String get shortVideoSpaceExportHistory => '导出历史';
 
   @override
@@ -1316,31 +1336,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get opsWhActivityRecordSuffix => ' Webhook 操作记录';
-
-  @override
-  String get opsWhActivityActionCreated => '已创建';
-
-  @override
-  String get opsWhActivityActionDeleted => '已删除';
-
-  @override
-  String get opsWhActivityActionTestSuccess => '测试：成功';
-
-  @override
-  String get opsWhActivityActionTestFailed => '测试：失败';
-
-  @override
-  String get opsWhActivitySummaryDeleted => '已删除 Webhook';
-
-  @override
-  String opsWhActivitySummaryTestOk(String httpStatus) {
-    return 'HTTP $httpStatus';
-  }
-
-  @override
-  String opsWhActivitySummaryTestFail(String httpStatus, String errorDetail) {
-    return 'HTTP $httpStatus · $errorDetail';
-  }
 
   @override
   String get opsWhChipLatestCreated => '最近创建';
@@ -3015,6 +3010,24 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get taskCenterRegenerate => '重新生成';
+
+  @override
+  String get taskCenterRetryRegenerateVideo => '重试出视频';
+
+  @override
+  String get taskCenterRetryExportVideo => '重试导出';
+
+  @override
+  String get taskCenterRetryVoiceover => '重试配音';
+
+  @override
+  String get taskCenterRetryPreAssembly => '重试预组装';
+
+  @override
+  String get taskCenterRetryAfterWritebackFailure => '写回异常后重试';
+
+  @override
+  String get taskCenterRegenerateAfterWriteback => '重新生成（写回）';
 
   @override
   String get taskCenterPartialRework => '局部返工';
@@ -8661,6 +8674,26 @@ class AppLocalizationsZh extends AppLocalizations {
   String get storyboardWorkbenchProductionMetaLoadedEmpty => '制作视图已加载';
 
   @override
+  String get storyboardWorkbenchCharacterLabel => '配音角色';
+
+  @override
+  String get storyboardWorkbenchCharacterDropdownLabel => '绑定角色';
+
+  @override
+  String get storyboardWorkbenchCharacterNone => '无（使用项目默认）';
+
+  @override
+  String get storyboardWorkbenchCharacterReload => '刷新角色列表';
+
+  @override
+  String get storyboardWorkbenchCharacterSaved => '角色绑定已保存';
+
+  @override
+  String storyboardActionVideoSkippedDuplicates(int count, String ids) {
+    return '已跳过 $count 个进行中的重复任务（#$ids）';
+  }
+
+  @override
   String storyboardEditorDialogTitle(int numericId) {
     return '分镜编辑器 #$numericId';
   }
@@ -9437,17 +9470,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get storyboardPatchDialogTitle => '局部返工面板';
 
   @override
-  String get storyboardPatchScopeLabel => 'scope';
+  String get storyboardPatchScopeLabel => '作用域';
 
   @override
-  String get storyboardPatchScopeHelper =>
-      'episode / scene / storyboard_item / video_prompt / derive_asset';
+  String get storyboardPatchScopeHelper => '整集 / 场景 / 分镜项 / 视频提示词 / 衍生资产';
 
   @override
-  String get storyboardPatchModelTierLabel => 'model tier';
+  String get storyboardPatchModelTierLabel => '模型档位';
 
   @override
-  String get storyboardPatchModelTierHelper => 'low 用于格式修复，high 用于内容质量修复';
+  String get storyboardPatchModelTierHelper => '低档位用于格式修复，高档位用于内容质量修复';
 
   @override
   String get storyboardPatchTargetIdsLabel => 'target ids';
@@ -9516,6 +9548,27 @@ class AppLocalizationsZh extends AppLocalizations {
   String get storyboardPatchDefaultReason => '请修复当前分镜的内容质量、连续性或情绪表达问题';
 
   @override
+  String get storyboardPatchScopeEpisode => '整集';
+
+  @override
+  String get storyboardPatchScopeScene => '场景';
+
+  @override
+  String get storyboardPatchScopeStoryboardItem => '分镜项';
+
+  @override
+  String get storyboardPatchScopeVideoPrompt => '视频提示词';
+
+  @override
+  String get storyboardPatchScopeDeriveAsset => '衍生资产';
+
+  @override
+  String get storyboardPatchModelTierLow => '低';
+
+  @override
+  String get storyboardPatchModelTierHigh => '高';
+
+  @override
   String get shortVideoReadinessNoPayloadHeadline => '还没有读取到分镜就绪数据。';
 
   @override
@@ -9565,6 +9618,29 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get shortVideoMetricStoryboardReadiness => '分镜就绪';
+
+  @override
+  String get shortVideoMetricProductionPhase => '制作阶段';
+
+  @override
+  String shortVideoProductionPhaseSnippet(
+    int ready,
+    int generating,
+    int blocked,
+  ) {
+    return '就绪 $ready · 生成中 $generating · 阻塞 $blocked';
+  }
+
+  @override
+  String shortVideoBatchSkippedDuplicates(int count, String ids) {
+    return '跳过 $count 个进行中的重复任务（#$ids）';
+  }
+
+  @override
+  String get shortVideoBatchOutcomeSkippedDuplicate => '跳过重复';
+
+  @override
+  String get shortVideoBatchOutcomeQueued => '已排队';
 
   @override
   String get shortVideoShotReadinessSelectProjectHint =>
@@ -10161,6 +10237,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get shortVideoCandidateCurrentVideo => '当前视频';
+
+  @override
+  String get shortVideoCandidateVideoListTitle => '候选视频列表';
+
+  @override
+  String get shortVideoCandidateSelectVideo => '选用';
 
   @override
   String get shortVideoCandidateSetCurrent => '设为当前';
@@ -11416,6 +11498,141 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String shortVideoProductionBatchFailed(String error) {
     return '批量候选成片失败：$error';
+  }
+
+  @override
+  String shortVideoBatchOutcomeSummary(String details) {
+    return '分镜结果：$details';
+  }
+
+  @override
+  String shortVideoBatchOutcomeCount(String outcome, int count) {
+    return '$outcome×$count';
+  }
+
+  @override
+  String get shortVideoWritebackStatusOk => '视频回写：已同步到分镜';
+
+  @override
+  String shortVideoWritebackStatusFailed(String code) {
+    return '视频回写失败（$code）';
+  }
+
+  @override
+  String get shortVideoWritebackStatusFailedGeneric => '视频回写失败';
+
+  @override
+  String shortVideoWritebackStatusIncomplete(String code) {
+    return '视频回写未完整（$code）';
+  }
+
+  @override
+  String get shortVideoWritebackStatusIncompleteGeneric => '视频回写未完整 — 请刷新制作数据';
+
+  @override
+  String shortVideoWritebackStatusUnknown(String status) {
+    return '视频回写：$status';
+  }
+
+  @override
+  String get shortVideoCharactersPanelTitle => '项目角色与配音';
+
+  @override
+  String get shortVideoCharactersRefresh => '刷新';
+
+  @override
+  String get shortVideoCharactersLoading => '正在加载角色…';
+
+  @override
+  String get shortVideoCharactersEmpty => '暂无项目角色，可在项目设置或通过 API 创建。';
+
+  @override
+  String shortVideoCharactersVoiceSummary(
+    String provider,
+    String voiceId,
+    String emotion,
+  ) {
+    return '供应商 $provider · 音色 $voiceId · 情绪 $emotion';
+  }
+
+  @override
+  String get shortVideoCharactersPreviewVoice => '试听';
+
+  @override
+  String get shortVideoCharactersCloneVoice => '克隆音色';
+
+  @override
+  String shortVideoCharactersCloneVoiceTitle(String name) {
+    return '克隆音色 — $name';
+  }
+
+  @override
+  String get shortVideoCharactersCloneSampleUrl => '样本音频 URL';
+
+  @override
+  String get shortVideoCharactersCloneDisplayName => '显示名称';
+
+  @override
+  String get shortVideoCharactersCloneMockSample => '使用模拟样本';
+
+  @override
+  String shortVideoCharactersCloneSuccess(String voiceId, String provider) {
+    return '克隆音色 ID：$voiceId（$provider）';
+  }
+
+  @override
+  String shortVideoCharactersCloneFailed(String error) {
+    return '克隆失败：$error';
+  }
+
+  @override
+  String get shortVideoCharactersEditVoice => '编辑配音';
+
+  @override
+  String shortVideoCharactersEditVoiceTitle(String name) {
+    return '配音 — $name';
+  }
+
+  @override
+  String get shortVideoCharactersFieldProvider => '供应商';
+
+  @override
+  String get shortVideoCharactersFieldVoiceId => '音色 ID';
+
+  @override
+  String get shortVideoCharactersFieldEmotion => '情绪 / 风格';
+
+  @override
+  String shortVideoCharactersPreviewLoading(String name) {
+    return '正在为 $name 生成试听…';
+  }
+
+  @override
+  String shortVideoCharactersPreviewReady(String name) {
+    return '正在播放 $name 的试听';
+  }
+
+  @override
+  String shortVideoCharactersPreviewFailed(String name, String error) {
+    return '$name 试听失败：$error';
+  }
+
+  @override
+  String get shortVideoCharactersPreviewSampleText => '这是一段短剧配音试听示例。';
+
+  @override
+  String shortVideoCharactersVoiceSaved(String name) {
+    return '已保存 $name 的配音设置';
+  }
+
+  @override
+  String shortVideoCharactersVoiceSaveFailed(String name, String error) {
+    return '无法保存 $name 的配音：$error';
+  }
+
+  @override
+  String shortVideoProductionConfirmCandidatesDone(int count) {
+    return '已确认 $count 个分镜候选，可继续生成。';
   }
 
   @override
@@ -14039,6 +14256,31 @@ class AppLocalizationsZh extends AppLocalizations {
       '下方列出部分阻塞项；完整列表请在制作工作区逐镜核对。';
 
   @override
+  String get shortVideoSpacePublishExportCheckStoryboardGapsTitle => '分镜导出缺口';
+
+  @override
+  String shortVideoSpacePublishExportCheckStoryboardGapTitle(
+    int scriptId,
+    int sbId,
+    String sbIndex,
+  ) {
+    return '剧本 #$scriptId · 分镜 #$sbId$sbIndex';
+  }
+
+  @override
+  String get shortVideoSpacePublishExportCheckFacetMissingVideo => '未选成片视频';
+
+  @override
+  String get shortVideoSpacePublishExportCheckFacetMissingSubtitle =>
+      '字幕 / 口播缺失';
+
+  @override
+  String get shortVideoSpacePublishExportCheckFacetMissingVoiceover => '旁白未就绪';
+
+  @override
+  String get shortVideoSpacePublishExportCheckFacetDurationAnomaly => '时长异常';
+
+  @override
   String get shortVideoSpacePublishCandidateLoadingHeadline => '正在读取项目资产…';
 
   @override
@@ -14271,6 +14513,176 @@ class AppLocalizationsZh extends AppLocalizations {
   String shortVideoSpaceProductionAssemblyWriteBackFailed(String error) {
     return '写回失败：$error';
   }
+
+  @override
+  String get shortVideoTimelinePanelTitle => '粗剪时间线（裁切 + 预览）';
+
+  @override
+  String get shortVideoTimelineSave => '保存时间线';
+
+  @override
+  String get shortVideoTimelineSaveDone => '已保存时间线。';
+
+  @override
+  String shortVideoTimelineSaveFailed(String error) {
+    return '保存时间线失败：$error';
+  }
+
+  @override
+  String get shortVideoTimelineGeneratePreview => '生成预览';
+
+  @override
+  String get shortVideoTimelinePreviewBusy => '正在渲染预览…';
+
+  @override
+  String get shortVideoTimelinePreviewDone => '预览已就绪。';
+
+  @override
+  String shortVideoTimelinePreviewFailed(String error) {
+    return '预览失败：$error';
+  }
+
+  @override
+  String get shortVideoTimelinePlayPreview => '打开预览';
+
+  @override
+  String get shortVideoTimelineTrimInMs => '入点 (ms)';
+
+  @override
+  String get shortVideoTimelineTrimOutMs => '出点 (ms)';
+
+  @override
+  String get shortVideoTimelineBgmEnabled => 'BGM 轨道';
+
+  @override
+  String get shortVideoTimelineBgmVolume => 'BGM 音量';
+
+  @override
+  String get shortVideoTimelineMoveUp => '上移';
+
+  @override
+  String get shortVideoTimelineMoveDown => '下移';
+
+  @override
+  String get shortVideoTimelinePersistOrder => '保存顺序';
+
+  @override
+  String get shortVideoTimelineLoading => '加载时间线…';
+
+  @override
+  String get shortVideoTimelineEmpty => '时间线尚无镜头。';
+
+  @override
+  String get shortVideoTimelineReorderDone => '已保存时间线顺序。';
+
+  @override
+  String get shortVideoTimelineSubtitlesTitle => '字幕轨';
+
+  @override
+  String get shortVideoTimelineSubtitleText => '字幕文本';
+
+  @override
+  String get shortVideoTimelineSubtitleStartMs => '开始 (ms)';
+
+  @override
+  String get shortVideoTimelineSubtitleEndMs => '结束 (ms)';
+
+  @override
+  String get shortVideoTimelineAddSubtitle => '添加字幕';
+
+  @override
+  String get shortVideoTimelineTransitionsTitle => '转场';
+
+  @override
+  String get shortVideoTimelineTransitionCut => '硬切';
+
+  @override
+  String get shortVideoTimelineTransitionCrossfade => '叠化';
+
+  @override
+  String get shortVideoTimelineTransitionFadeBlack => '黑场';
+
+  @override
+  String get shortVideoTimelineTransitionDurationMs => '时长 (ms)';
+
+  @override
+  String get shortVideoTimelineVoiceoverTitle => '配音轨';
+
+  @override
+  String get shortVideoTimelineVoiceoverVolume => '音量';
+
+  @override
+  String get shortVideoTimelineApplyTemplate => '应用粗剪模板';
+
+  @override
+  String get shortVideoTimelineTemplateShortDrama => '短剧默认';
+
+  @override
+  String get shortVideoTimelineTemplateDialoguePunch => '对白节奏';
+
+  @override
+  String get shortVideoTimelineTemplateApplied => '模板已应用。';
+
+  @override
+  String shortVideoTimelineTemplateFailed(String error) {
+    return '应用模板失败：$error';
+  }
+
+  @override
+  String shortVideoTimelineReorderFailed(String error) {
+    return '时间线重排失败：$error';
+  }
+
+  @override
+  String get shortVideoTimelineUndo => '撤销';
+
+  @override
+  String get shortVideoTimelineRedo => '重做';
+
+  @override
+  String get shortVideoTimelineRevisionHistory => '历史版本';
+
+  @override
+  String get shortVideoTimelineRevisionEmpty => '尚无已保存的历史版本。';
+
+  @override
+  String shortVideoTimelineRevisionLabel(int revision) {
+    return '版本 $revision';
+  }
+
+  @override
+  String get shortVideoTimelineRevisionRestored => '已从历史版本恢复时间线。';
+
+  @override
+  String shortVideoTimelineRevisionLoadFailed(String error) {
+    return '加载历史版本失败：$error';
+  }
+
+  @override
+  String shortVideoTimelineRevisionRestoreFailed(String error) {
+    return '恢复失败：$error';
+  }
+
+  @override
+  String get shortVideoTimelineEffectPreset => '效果预设';
+
+  @override
+  String get shortVideoTimelineEffectApplyAll => '应用到全部片段';
+
+  @override
+  String get shortVideoTimelineEffectNone => '无';
+
+  @override
+  String get shortVideoTimelineEffectVivid => '鲜艳';
+
+  @override
+  String get shortVideoTimelineEffectCinematic => '电影感';
+
+  @override
+  String get shortVideoTimelineEffectBw => '黑白';
+
+  @override
+  String get shortVideoTimelineEffectSpeed110 => '1.1 倍速';
 
   @override
   String get shortVideoSpaceProductionAssemblyReorderPersisted =>
@@ -19152,9 +19564,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get apiKeysLastUsedIpUnknown => '未知';
-
-  @override
   String apiKeysSourceLine(String source) {
     return '来源 $source';
   }
@@ -20576,55 +20985,83 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get billingNotificationSubscriptionActivated => '订阅已激活';
+
   @override
   String get billingNotificationSubscriptionPastDue => '订阅逾期未付';
+
   @override
   String get billingNotificationSubscriptionCanceled => '订阅已取消';
+
   @override
   String get billingNotificationPaymentFailed => '付款失败';
+
   @override
   String get billingNotificationSubscriptionExpired => '订阅已过期';
+
   @override
   String get billingNotificationSubscriptionTrialing => '订阅试用已开始';
+
   @override
   String get billingNotificationUnknown => '计费事件';
+
   @override
   String get billingSubscriptionStatusActive => '已激活';
+
   @override
   String get billingSubscriptionStatusPastDue => '逾期未付';
+
   @override
   String get billingSubscriptionStatusCanceled => '已取消';
+
   @override
   String get billingSubscriptionStatusTrialing => '试用中';
+
   @override
   String get billingSubscriptionStatusPaused => '已暂停';
+
   @override
   String get billingSubscriptionStatusUnpaid => '未付款';
+
   @override
   String get billingSubscriptionStatusUnknown => '未知状态';
+
   @override
   String get billingQuotaExceededTitle => '每日配额已用尽';
+
   @override
-  String billingQuotaExceededFree(String plan) => '您已达到 $plan 套餐的每日限额，升级以继续使用。';
+  String billingQuotaExceededFree(String plan) {
+    return '您已达到 $plan 套餐的每日限额，升级以继续使用。';
+  }
+
   @override
-  String billingQuotaExceededPro(String plan) =>
-      '您已达到 $plan 套餐的每日限额，请联系支持或等待配额重置。';
+  String billingQuotaExceededPro(String plan) {
+    return '您已达到 $plan 套餐的每日限额，请联系支持或等待配额重置。';
+  }
+
   @override
   String get billingQuotaResetHint => '配额每日 UTC 零点重置。';
+
   @override
   String get billingUpgradePlan => '升级套餐';
+
   @override
   String get billingErrorPaymentFailed => '付款失败，请更新支付方式以继续使用。';
+
   @override
   String get billingErrorSubscriptionExpired => '您的订阅已过期，请续订以继续使用。';
+
   @override
   String get billingErrorSubscriptionPastDue => '您的订阅付款已逾期，请更新支付方式。';
+
   @override
   String get billingPlanTierFree => '免费版';
+
   @override
   String get billingPlanTierPro => '专业版';
+
   @override
   String get billingPlanTierEnterprise => '企业版';
+
   @override
   String get billingPlanTierUnknown => '未知套餐';
 }

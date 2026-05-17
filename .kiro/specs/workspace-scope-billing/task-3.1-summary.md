@@ -252,8 +252,8 @@ The implementation reads from existing columns:
 - [x] Code formatting (`cargo fmt`)
 - [x] Linting (`cargo clippy`)
 - [x] Full test suite passes
-- [ ] Integration tests with database (deferred to Task 3.3)
-- [ ] End-to-end tests with quota enforcement (deferred to Task 3.3)
+- [x] Integration tests with database — `backend/tests/me_endpoint_test.rs`（`/me?v=2` billing）、`backend/tests/workspace_jobs_today_test.rs`、`backend/src/app/pg_contract_tests/business_suite/usage_summary_workspace_scope_roundtrip.rs`（`#[ignore]` + `DATABASE_URL`）
+- [x] End-to-end tests with quota enforcement — `backend/src/app/pg_contract_tests/business_suite/jobs_rest_roundtrip.rs`（用量/任务与 user-scope 摘要）；workspace 配额见 workspace jobs 测试与 metering 单测
 
 ---
 

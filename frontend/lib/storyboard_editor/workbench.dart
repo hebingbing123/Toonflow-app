@@ -43,6 +43,9 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
   bool _loadingWorkbench = false;
   bool _loadingExportJob = false;
   StoryboardShortVideoReadiness? _storyboardShotReadiness;
+  String? _cachedStoryboardListDataVersion;
+  List<ProjectCharacterV1> _projectCharacters = const [];
+  bool _loadingCharacters = false;
   ProductionStoryboardItemV1? _productionRow;
   List<ProductionStoryboardItemV1> _productionRows = const [];
   VideoModelDetail? _modelDetail;
@@ -152,9 +155,11 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
     _liveActionReferenceShotsCtrl = TextEditingController();
     _liveActionPerformanceNotesCtrl = TextEditingController();
     _videoPromptCtrl.addListener(_handleVideoPromptChanged);
-    Future<void>.microtask(
-      () => _refreshAll(syncImageUrl: true, syncTrackId: true),
-    );
+    Future<void>.microtask(() async {
+      await _refreshAll(syncImageUrl: true, syncTrackId: true);
+      if (!mounted) return;
+      await _loadWorkbenchCharacters();
+    });
   }
 
   @override
@@ -252,6 +257,16 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
             ),
           ),
         ],
+        const SizedBox(height: 12),
+        _StoryboardCharacterSection(
+          saving: _saving,
+          loadingCharacters: _loadingCharacters,
+          characters: _projectCharacters,
+          selectedCharacterId: _productionRow?.characterId,
+          onCharacterChanged: (characterId) =>
+              _runDialogAction(() => _saveStoryboardCharacter(characterId)),
+          onReloadCharacters: _loadWorkbenchCharacters,
+        ),
         const SizedBox(height: 16),
         _StoryboardImageSection(
           saving: _saving,

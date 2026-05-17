@@ -1,6 +1,7 @@
 mod bad_case_stats_roundtrip;
 mod content_compliance_ws_push_roundtrip;
 mod promotion_gate_evaluate_roundtrip;
+mod quality_review_next_action_roundtrip;
 mod quality_reviews_roundtrip;
 mod review_queue_roundtrip;
 mod settings_memory_config_and_clear_agent_memories_roundtrip;

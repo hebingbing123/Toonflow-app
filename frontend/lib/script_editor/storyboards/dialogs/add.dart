@@ -13,6 +13,7 @@ extension _HomePageScriptEditorStoryboardsAddDialog on _HomePageState {
     required List<String?> storyboardTaskLine,
     required List<String?> productionSummaryLine,
     required List<bool> productionSummaryLoaded,
+    required List<String?> productionDataVersion,
   }) async {
     final promptCtrl = TextEditingController();
     final durationCtrl = TextEditingController();
@@ -130,6 +131,7 @@ extension _HomePageScriptEditorStoryboardsAddDialog on _HomePageState {
           productionSummaryLine: productionSummaryLine,
           productionSummaryLoaded: productionSummaryLoaded,
           productionSummaryLoading: actionBusy,
+          productionDataVersion: productionDataVersion,
           setBoardsState: setBoardsState,
         );
         if (!ctx.mounted) return;

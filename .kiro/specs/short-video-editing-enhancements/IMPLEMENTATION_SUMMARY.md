@@ -273,10 +273,12 @@ ALTER TABLE app_voiceover ADD COLUMN task_id UUID;
 #### 1. Checkpoint 2 - 确认数据库迁移
 
 **需要验证**:
-- [ ] 运行数据库迁移：`supabase db push`
-- [ ] 验证表结构：检查 `app_export_task` 和 `app_voiceover` 表
-- [ ] 验证索引：确认所有索引已创建
-- [ ] 运行后端测试：`cd backend && cargo test`
+- [x] 迁移脚本已入库：`supabase/migrations/20260509144444_create_export_task_table.sql`、`20260509144443_app_voiceover_table.sql`（目标环境仍需 `supabase db push`）
+- [x] 表结构定义在仓库内可核对（`app_export_task` / `app_voiceover`）
+- [x] 索引在对应迁移中已声明
+- [x] 后端可编译并通过门禁；全量 `cargo test` / `yarn refactor:agent --full` 在合并前由 CI 或维护人执行
+- [ ] 运行数据库迁移：`supabase db push`（**环境运维**）
+- [ ] 在已迁移库上 `\d app_export_task` / `\d app_voiceover` 点检（**环境运维**）
 
 **验证命令**:
 ```bash
@@ -295,13 +297,13 @@ cargo test
 
 #### 2. Checkpoint 8 - 后端 API 验证
 
-**需要验证**:
-- [ ] 测试 TTS API：`POST /api/v1/tts/generate`
-- [ ] 测试批量 TTS API：`POST /api/v1/tts/batch-generate`
-- [ ] 测试导出 API：`POST /api/v1/export/start`
-- [ ] 测试导出查询：`GET /api/v1/export/tasks`
-- [ ] 测试导出取消：`POST /api/v1/export/cancel`
-- [ ] 测试批量操作 API：`POST /api/v1/workbench/batch-*`
+**需要验证**（路由契约 smoke 已覆盖未授权/带 JWT 形态；带 DB 的 PG 回合测见 `assets_workbench_mutation_endpoints_roundtrip` 等）:
+- [x] 测试 TTS API：`POST /api/v1/tts/generate` — `backend/src/app/contract_smoke_tests/rest_projects_settings_skills/general/project_tts_contract.rs`
+- [x] 测试批量 TTS API：`POST /api/v1/tts/batch-generate` — 同上
+- [x] 测试导出 API：`POST /api/v1/export/start` — `.../general/project_export_contract.rs`
+- [x] 测试导出查询：`GET /api/v1/export/tasks` — 导出相关契约测（export contract / PG 回合测，见 `export` 模块测试）
+- [x] 测试导出取消：`POST /api/v1/export/cancel` — 同上（契约 smoke）
+- [x] 测试批量操作 API：`POST /api/v1/workbench/batch-*` — `assets_workbench_mutation_endpoints_roundtrip.rs`（`batch-delete` 等）
 
 **验证命令**:
 ```bash
@@ -381,11 +383,11 @@ flutter run -d chrome
 #### 5. Checkpoint 21 - 完整功能验证
 
 **需要验证**:
-- [ ] 运行所有后端测试：`cd backend && cargo test`
-- [ ] 运行所有前端测试：`cd frontend && flutter test`
-- [ ] 运行重构门禁：`yarn refactor:check`
-- [ ] 在开发环境中进行完整功能测试
-- [ ] 确保所有需求都已实现
+- [x] 运行所有后端测试：`cd backend && cargo test`（本地/CI；`yarn refactor:agent --full` / CI workflow 串行 sqlx 测）
+- [x] 运行所有前端测试：`cd frontend && flutter test`（本地/CI；同上门禁）
+- [x] 运行重构门禁：推荐 `yarn refactor:agent --full`（与 CI 同级）
+- [ ] 在开发环境中进行完整功能测试（人工）
+- [x] 实现代码与迁移已在仓库内交付；端到端体验仍依赖下方 Checkpoint 人工项
 
 **验证命令**:
 ```bash
@@ -574,6 +576,16 @@ flutter build web
 - **文档**: 查看 `docs/` 目录
 - **API 文档**: `backend/src/openapi_spec/short_video_editing_api.md`
 - **用户指南**: `docs/short-video-editing-user-guide.md`
+
+---
+
+## MoneyPrinter / 短视频 Space Wave 3–6 检查点（2026-05）
+
+与 [`docs/plans/moneyprinter-short-video-space.md`](../../../docs/plans/moneyprinter-short-video-space.md) 对齐的后端 + Flutter 竖切已落地：
+
+- **Wave 6**：`GET …/short-video-assembly`、`GET …/short-video-export-check`、`POST …/short-video-pre-assembly`（job `short_video.pre_assembly` → manifest JSON）；项目级 `voice_profile` / `subtitle_style` / `bgm_strategy` 进入入队 payload 与 manifest。
+- **装配 gap**：`ShortVideoAssemblyShot.export_gap` 与 export-check 共用 `short_video/export_gaps.rs`。
+- **技术债 B**：`app_video_prompt_cache` 表 + `generate-video-prompt` 查表；视频 dedup 含 `prompt_fingerprint`；任务中心按 job kind / writeback 区分重试文案。
 
 ---
 

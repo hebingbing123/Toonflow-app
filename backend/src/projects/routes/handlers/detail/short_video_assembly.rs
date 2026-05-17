@@ -18,7 +18,8 @@ use crate::state::AppState;
 use super::super::super::types::{
     ProjectShortVideoAssemblyResponse, ShortVideoAssemblyEffectiveDefaults,
     ShortVideoAssemblyProjectDefaults, ShortVideoAssemblyScriptGroup, ShortVideoAssemblyShot,
-    ShortVideoCandidateQualitySummary, ShortVideoQualityStageBucket,
+    ShortVideoAssemblyShotExportGap, ShortVideoCandidateQualitySummary,
+    ShortVideoQualityStageBucket,
 };
 use super::assembly_query::{
     assembly_selected_media_kind, fetch_assembly_candidate_quality_summary,
@@ -26,6 +27,7 @@ use super::assembly_query::{
     fetch_quality_degradation_metrics,
 };
 use crate::short_video::defaults::resolve_tts_voice;
+use crate::short_video::export_gaps::{shot_export_gap_facets, ExportGapRowInput};
 
 #[utoipa::path(
     get,
@@ -114,6 +116,23 @@ pub(crate) async fn project_short_video_assembly_by_id(
                 .as_deref()
                 .is_some_and(|u| !u.trim().is_empty());
 
+        let gap_input = ExportGapRowInput {
+            storyboard_id: r.storyboard_id,
+            storyboard_numeric_id: r.storyboard_numeric_id,
+            script_numeric_id: r.script_numeric_id,
+            sb_index: r.sb_index,
+            file_path: r.file_path.clone(),
+            duration: r.duration.clone(),
+            state: r.state.clone(),
+            prompt: r.prompt.clone(),
+            video_desc: r.video_desc.clone(),
+            voiceover_state: r.voiceover_state.clone(),
+            voiceover_audio_url: r.voiceover_audio_url.clone(),
+            voiceover_error: r.voiceover_error.clone(),
+            candidate_status: r.candidate_status.clone(),
+        };
+        let gap = shot_export_gap_facets(&gap_input);
+
         let shot = ShortVideoAssemblyShot {
             storyboard_id: r.storyboard_id,
             storyboard_numeric_id: r.storyboard_numeric_id,
@@ -130,6 +149,14 @@ pub(crate) async fn project_short_video_assembly_by_id(
             voiceover_audio_url: r.voiceover_audio_url,
             voiceover_error: r.voiceover_error,
             voiceover_asset_ready,
+            export_gap: ShortVideoAssemblyShotExportGap {
+                gap_codes: gap.gap_codes,
+                has_blocking: gap.has_blocking,
+                missing_selected_video: gap.missing_selected_video,
+                missing_subtitle: gap.missing_subtitle,
+                missing_voiceover: gap.missing_voiceover,
+                duration_anomaly: gap.duration_anomaly,
+            },
         };
 
         grouped.entry(r.script_numeric_id).or_default().push(shot);

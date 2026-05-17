@@ -8,9 +8,14 @@ use super::types::{DownPreviewImageResponse, PreviewImageResponse, StoryboardPre
 
 pub(in crate::production::workbench::storyboard) fn build_storyboard_data_response(
     mut data: Vec<ProductionStoryboardItem>,
+    data_version: Option<String>,
 ) -> ProductionGetProductionDataResponse {
     hydrate_production_storyboard_items(&mut data);
-    ProductionGetProductionDataResponse { data }
+    ProductionGetProductionDataResponse {
+        data,
+        data_version,
+        unchanged: false,
+    }
 }
 
 pub(in crate::production::workbench::storyboard) fn build_down_preview_image_response(

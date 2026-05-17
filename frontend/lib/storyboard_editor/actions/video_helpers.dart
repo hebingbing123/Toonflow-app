@@ -131,6 +131,7 @@ extension _StoryboardWorkbenchVideoActions on _StoryboardWorkbenchPanelState {
       imageUrl: imageUrl,
       description: request.description,
       durationHint: request.durationSeconds,
+      skipIfUnchanged: true,
     );
     _applyGeneratedVideoPrompt(
       generated,
@@ -143,6 +144,12 @@ extension _StoryboardWorkbenchVideoActions on _StoryboardWorkbenchPanelState {
 
   Future<void> _submitVideoGeneration() async {
     final l10n = resolveAppLocalizationsForErrors(context);
+    await assertStoryboardReadyForVideoGeneration(
+      accessToken: widget.token,
+      projectUuid: widget.projectId,
+      storyboardNumericId: widget.storyNumericId,
+      l10n: l10n,
+    );
     final sourceImage = _currentStoryboardSourceImage();
     if (sourceImage == null) {
       throw FormatException(l10n.storyboardActionErrNeedSourceImageOrPreview);
@@ -174,22 +181,31 @@ extension _StoryboardWorkbenchVideoActions on _StoryboardWorkbenchPanelState {
       automaticPrompt: _lastGeneratedAutoNegativePrompt,
     );
     final negativePrompt = compactedManualNegative.manualPrompt.trim();
-    final response = await postProductionWorkbenchGenerateVideoV1(
-      widget.token,
-      projectUuid: widget.projectId,
-      scriptId: widget.scriptNumericId,
-      uploadData: [
-        <String, dynamic>{'id': widget.storyNumericId, 'sources': sourceImage},
-      ],
-      prompt: prompt,
-      negativePrompt: negativePrompt.isEmpty ? null : negativePrompt,
-      model: _modelDetail?.modelId ?? 'kling-v1',
-      mode: _mode,
-      resolution: _resolution,
-      duration: duration,
-      audio: _audio,
-      trackId: trackId,
-    );
+    late final WorkbenchGenerateVideoResponse response;
+    try {
+      response = await postProductionWorkbenchGenerateVideoV1(
+        widget.token,
+        projectUuid: widget.projectId,
+        scriptId: widget.scriptNumericId,
+        uploadData: [
+          <String, dynamic>{'id': widget.storyNumericId, 'sources': sourceImage},
+        ],
+        prompt: prompt,
+        negativePrompt: negativePrompt.isEmpty ? null : negativePrompt,
+        model: _modelDetail?.modelId ?? 'kling-v1',
+        mode: _mode,
+        resolution: _resolution,
+        duration: duration,
+        audio: _audio,
+        trackId: trackId,
+      );
+    } on RustApiException catch (e) {
+      final blocked = formatGenerationBlockedFromRustApiException(l10n, e);
+      if (blocked != null && blocked.isNotEmpty) {
+        throw FormatException(blocked);
+      }
+      rethrow;
+    }
     final appliedNegativePrompt = response.storyboardNegativePrompts
         .where((item) => item.storyboardId == widget.storyNumericId)
         .map((item) => item.negativePrompt?.trim() ?? '')
@@ -204,6 +220,12 @@ extension _StoryboardWorkbenchVideoActions on _StoryboardWorkbenchPanelState {
     final negRm = repaired?.removedNegativeFragmentCount ?? 0;
     final dedupe = compactedManualNegative.removedFragmentCount;
     final emptyNeg = appliedNegativePrompt.isEmpty;
+    final duplicateNotice = response.skippedDuplicateCount > 0
+        ? l10n.storyboardActionVideoSkippedDuplicates(
+            response.skippedDuplicateCount,
+            '${response.skippedDuplicateStoryboardIds.take(6).join(', ')}${response.skippedDuplicateStoryboardIds.length > 6 ? '…' : ''}',
+          )
+        : '';
     _applyWorkbenchState(() {
       final msg = emptyNeg
           ? repairedCh
@@ -232,7 +254,9 @@ extension _StoryboardWorkbenchVideoActions on _StoryboardWorkbenchPanelState {
               dedupe,
             )
           : l10n.storyboardActionVideoJobsSubmittedFinalOnly(response.total);
-      _setWorkbenchFollowUp(msg);
+      _setWorkbenchFollowUp(
+        duplicateNotice.isEmpty ? msg : '$msg · $duplicateNotice',
+      );
     });
     await _notifyStoryboardMutated();
   }

@@ -1,3 +1,24 @@
+/// OpenAPI **`StoryboardLastWritebackSummary`** (`mediaSlots.lastWriteback`).
+class StoryboardLastWritebackSummaryV1 {
+  const StoryboardLastWritebackSummaryV1({
+    required this.status,
+    this.at,
+    this.errorCode,
+  });
+
+  final String status;
+  final String? at;
+  final String? errorCode;
+
+  factory StoryboardLastWritebackSummaryV1.fromJson(Map<String, dynamic> json) {
+    return StoryboardLastWritebackSummaryV1(
+      status: json['status'] as String? ?? '',
+      at: json['at'] as String?,
+      errorCode: json['errorCode'] as String?,
+    );
+  }
+}
+
 /// OpenAPI **`StoryboardMediaSlotsSummary`** (`mediaSlots` on **`ProductionStoryboardItem`**).
 class StoryboardMediaSlotsSummaryV1 {
   const StoryboardMediaSlotsSummaryV1({
@@ -8,7 +29,9 @@ class StoryboardMediaSlotsSummaryV1 {
     this.voiceoverAudioUrl,
     this.voiceoverState,
     this.exportArtifactUrl,
+    this.lastWriteback,
     required this.candidateVideoSourcesHint,
+    this.candidateVideoUrls = const <String>[],
   });
 
   /// Schema **`1`** for this slot taxonomy.
@@ -19,7 +42,9 @@ class StoryboardMediaSlotsSummaryV1 {
   final String? voiceoverAudioUrl;
   final String? voiceoverState;
   final String? exportArtifactUrl;
+  final StoryboardLastWritebackSummaryV1? lastWriteback;
   final String candidateVideoSourcesHint;
+  final List<String> candidateVideoUrls;
 
   factory StoryboardMediaSlotsSummaryV1.fromJson(Map<String, dynamic> json) {
     return StoryboardMediaSlotsSummaryV1(
@@ -30,7 +55,17 @@ class StoryboardMediaSlotsSummaryV1 {
       voiceoverAudioUrl: json['voiceoverAudioUrl'] as String?,
       voiceoverState: json['voiceoverState'] as String?,
       exportArtifactUrl: json['exportArtifactUrl'] as String?,
+      lastWriteback: json['lastWriteback'] == null
+          ? null
+          : StoryboardLastWritebackSummaryV1.fromJson(
+              json['lastWriteback'] as Map<String, dynamic>,
+            ),
       candidateVideoSourcesHint: json['candidateVideoSourcesHint'] as String,
+      candidateVideoUrls:
+          (json['candidateVideoUrls'] as List<dynamic>? ?? const [])
+              .map((e) => e.toString())
+              .where((value) => value.trim().isNotEmpty)
+              .toList(growable: false),
     );
   }
 }
@@ -54,6 +89,7 @@ class ProductionStoryboardItemV1 {
     this.liveActionReferenceShotUrls = const <String>[],
     this.liveActionPerformanceNotes,
     this.mediaSlots,
+    this.characterId,
   });
 
   final int id;
@@ -72,6 +108,7 @@ class ProductionStoryboardItemV1 {
   final List<String> liveActionReferenceShotUrls;
   final String? liveActionPerformanceNotes;
   final StoryboardMediaSlotsSummaryV1? mediaSlots;
+  final String? characterId;
 
   factory ProductionStoryboardItemV1.fromJson(Map<String, dynamic> json) {
     return ProductionStoryboardItemV1(
@@ -105,15 +142,22 @@ class ProductionStoryboardItemV1 {
           : StoryboardMediaSlotsSummaryV1.fromJson(
               json['mediaSlots'] as Map<String, dynamic>,
             ),
+      characterId: json['characterId'] as String?,
     );
   }
 }
 
 /// OpenAPI **`ProductionGetProductionDataResponse`**.
 class ProductionGetProductionDataResponseV1 {
-  const ProductionGetProductionDataResponseV1({required this.data});
+  const ProductionGetProductionDataResponseV1({
+    required this.data,
+    this.dataVersion,
+    this.unchanged = false,
+  });
 
   final List<ProductionStoryboardItemV1> data;
+  final String? dataVersion;
+  final bool unchanged;
 
   factory ProductionGetProductionDataResponseV1.fromJson(
     Map<String, dynamic> json,
@@ -126,6 +170,8 @@ class ProductionGetProductionDataResponseV1 {
                 ProductionStoryboardItemV1.fromJson(e as Map<String, dynamic>),
           )
           .toList(),
+      dataVersion: json['dataVersion'] as String?,
+      unchanged: json['unchanged'] as bool? ?? false,
     );
   }
 }

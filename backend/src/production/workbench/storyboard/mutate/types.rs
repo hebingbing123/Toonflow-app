@@ -105,3 +105,24 @@ pub(in crate::production) struct UpdateStoryboardDurationResponse {
     pub(crate) duration: i32,
     pub(crate) message: &'static str,
 }
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub(in crate::production) struct UpdateStoryboardCharacterBody {
+    #[serde(default)]
+    pub(crate) project_id: Option<i32>,
+    #[serde(default)]
+    pub(crate) project_uuid: Option<Uuid>,
+    pub(crate) script_id: i32,
+    pub(crate) storyboard_id: i32,
+    /// Project character UUID; JSON **`null`** clears assignment.
+    pub(crate) character_id: Option<Uuid>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(in crate::production) struct UpdateStoryboardCharacterResponse {
+    pub(crate) storyboard_id: i32,
+    pub(crate) character_id: Option<Uuid>,
+    pub(crate) message: &'static str,
+}

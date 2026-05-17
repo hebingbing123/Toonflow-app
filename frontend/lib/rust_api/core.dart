@@ -71,16 +71,62 @@ void ensureHttpStatus(http.Response res, int expected) {
   throw RustApiException.fromHttpResponse(res);
 }
 
+/// One storyboard blocked by **`enforce_storyboards_ready_for_generation`** (HTTP 409).
+class StoryboardGenerationBlocked {
+  const StoryboardGenerationBlocked({
+    required this.storyboardNumericId,
+    required this.blockingReasons,
+  });
+
+  final int storyboardNumericId;
+  final List<String> blockingReasons;
+
+  static StoryboardGenerationBlocked? tryParseJson(Map<String, dynamic> json) {
+    final id = json['storyboardNumericId'] ?? json['storyboard_numeric_id'];
+    if (id is! num) {
+      return null;
+    }
+    final rawReasons =
+        json['blockingReasons'] as List<dynamic>? ??
+        json['blocking_reasons'] as List<dynamic>? ??
+        const <dynamic>[];
+    final reasons = rawReasons
+        .map((e) => e.toString())
+        .where((s) => s.isNotEmpty)
+        .toList(growable: false);
+    return StoryboardGenerationBlocked(
+      storyboardNumericId: id.toInt(),
+      blockingReasons: reasons,
+    );
+  }
+}
+
 class RustApiErrorDetails {
   const RustApiErrorDetails({
     required this.code,
     required this.message,
     this.retryAfterMs,
+    this.details,
   });
 
   final String code;
   final String message;
   final int? retryAfterMs;
+  final Map<String, dynamic>? details;
+
+  List<StoryboardGenerationBlocked> get blockedStoryboards {
+    final raw = details?['blockedStoryboards'] ?? details?['blocked_storyboards'];
+    if (raw is! List) {
+      return const [];
+    }
+    return raw
+        .whereType<Map>()
+        .map((e) => StoryboardGenerationBlocked.tryParseJson(
+              Map<String, dynamic>.from(e),
+            ))
+        .whereType<StoryboardGenerationBlocked>()
+        .toList(growable: false);
+  }
 
   static RustApiErrorDetails? tryParse(String raw) {
     final trimmed = raw.trim();
@@ -102,10 +148,16 @@ class RustApiErrorDetails {
         final num value => value.toInt(),
         _ => null,
       };
+      final detailsRaw = decoded['details'];
       return RustApiErrorDetails(
         code: code,
         message: message,
         retryAfterMs: retryAfterMs,
+        details: detailsRaw is Map<String, dynamic>
+            ? detailsRaw
+            : detailsRaw is Map
+            ? Map<String, dynamic>.from(detailsRaw)
+            : null,
       );
     } catch (_) {
       return null;

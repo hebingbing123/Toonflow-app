@@ -272,6 +272,7 @@ Future<GenerateVideoPromptResponse> postWorkbenchGenerateVideoPromptV1(
   String? imageUrl,
   String? description,
   int? durationHint,
+  bool skipIfUnchanged = false,
 }) async {
   final uri = Uri.parse(
     '$kApiBaseUrl/api/v1/production/workbench/generate-video-prompt',
@@ -286,6 +287,7 @@ Future<GenerateVideoPromptResponse> postWorkbenchGenerateVideoPromptV1(
   if (imageUrl != null) body['imageUrl'] = imageUrl;
   if (description != null) body['description'] = description;
   if (durationHint != null) body['durationHint'] = durationHint;
+  if (skipIfUnchanged) body['skipIfUnchanged'] = true;
   final res = await http
       .post(
         uri,

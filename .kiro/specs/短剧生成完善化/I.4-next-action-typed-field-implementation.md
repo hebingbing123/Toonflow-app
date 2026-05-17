@@ -349,13 +349,15 @@ ORDER BY storyboard_id;
 
 ### Manual Testing Checklist
 
-- [ ] Create quality review with explicit next_action, verify stored correctly
-- [ ] Create quality review without next_action, verify auto-inference works
-- [ ] Filter quality reviews by next_action, verify results
-- [ ] Test all 8 action types can be stored and retrieved
-- [ ] Test invalid action type is rejected by database constraint
-- [ ] Verify model_params.diagnostics.nextAction is still populated
-- [ ] Test backward compatibility with existing reviews (NULL next_action)
+下列核心路径已由 **PG 契约测试** `quality_review_next_action_contract` 覆盖（`backend/src/app/pg_contract_tests/ops_suite/quality_review_next_action_roundtrip.rs`；`./scripts/run_quality_review_next_action_contract_test.sh`）。
+
+- [x] Create quality review with explicit next_action, verify stored correctly
+- [x] Create quality review without next_action, verify auto-inference works（grade **D** → `rollback_to_director_planning`）
+- [x] Filter quality reviews by next_action, verify results
+- [x] Test all 8 action types can be stored and retrieved — `quality_review_next_action_contract` 对 8 个 `nextAction` 枚举各创建一条并断言回读
+- [x] Test invalid action type is rejected by database constraint
+- [x] Verify model_params.diagnostics.nextAction is still populated
+- [x] Test backward compatibility with existing reviews (NULL next_action) — 列 `next_action` 可空；未传字段时由推断写入
 
 ## Deployment Notes
 

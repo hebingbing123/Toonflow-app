@@ -3,13 +3,158 @@
 part of 'section.dart';
 
 /// Production workflow methods for ShortVideoSpaceSection
+String _localizedBatchOutcomeLabel(AppLocalizations l10n, String outcome) {
+  switch (outcome.trim()) {
+    case 'skipped_duplicate':
+      return l10n.shortVideoBatchOutcomeSkippedDuplicate;
+    case 'queued':
+      return l10n.shortVideoBatchOutcomeQueued;
+    default:
+      return outcome.trim();
+  }
+}
+
+String _formatBatchOutcomeSummary(
+  AppLocalizations l10n,
+  List<BatchStoryboardOutcomeV1> outcomes,
+) {
+  if (outcomes.isEmpty) {
+    return '';
+  }
+  final counts = <String, int>{};
+  for (final row in outcomes) {
+    final key = row.outcome.trim();
+    if (key.isEmpty) continue;
+    counts[key] = (counts[key] ?? 0) + 1;
+  }
+  if (counts.isEmpty) {
+    return '';
+  }
+  final parts = counts.entries
+      .map(
+        (e) => l10n.shortVideoBatchOutcomeCount(
+          _localizedBatchOutcomeLabel(l10n, e.key),
+          e.value,
+        ),
+      )
+      .toList(growable: false);
+  return l10n.shortVideoBatchOutcomeSummary(parts.join(', '));
+}
+
+String _formatSkippedDuplicateVideoSummary(
+  AppLocalizations l10n,
+  WorkbenchGenerateVideoResponse generation,
+) {
+  final count = generation.skippedDuplicateCount;
+  if (count <= 0) {
+    return '';
+  }
+  final ids = generation.skippedDuplicateStoryboardIds;
+  final preview = ids.take(8).join(', ');
+  final suffix = ids.length > 8 ? '…' : '';
+  return l10n.shortVideoBatchSkippedDuplicates(count, '$preview$suffix');
+}
+
 extension _ShortVideoSpaceSectionProductionExtension
     on _ShortVideoSpaceSectionState {
+  int _candidatePendingStoryboardCount() {
+    final readiness = _shotReadiness;
+    if (readiness == null) {
+      return 0;
+    }
+    return readiness.storyboards
+        .where((s) => s.blockingReasons.contains('candidate_pending'))
+        .length;
+  }
+
+  Future<void> _confirmStoryboardCandidates() async {
+    final token = widget.accessToken;
+    final project = _selectedProject;
+    final readiness = _shotReadiness;
+    if (token == null ||
+        token.isEmpty ||
+        project == null ||
+        readiness == null) {
+      return;
+    }
+    final pending = readiness.storyboards
+        .where((s) => s.blockingReasons.contains('candidate_pending'))
+        .toList(growable: false);
+    if (pending.isEmpty) {
+      return;
+    }
+    setState(() {
+      _confirmCandidatesBusy = true;
+      _projectConfigLine = null;
+    });
+    try {
+      final byScript = <int, List<int>>{};
+      for (final shot in pending) {
+        final scriptId = shot.scriptNumericId;
+        if (scriptId == null) {
+          continue;
+        }
+        byScript.putIfAbsent(scriptId, () => <int>[]).add(shot.storyboardNumericId);
+      }
+      var updated = 0;
+      for (final entry in byScript.entries) {
+        final status = await postProductionWorkbenchConfirmStoryboardCandidatesV1(
+          token,
+          projectUuid: project.id,
+          scriptId: entry.key,
+          storyboardNumericIds: entry.value,
+        );
+        if (status >= 200 && status < 300) {
+          updated += entry.value.length;
+        }
+      }
+      if (!mounted) {
+        return;
+      }
+      final l10nDone = resolveAppLocalizationsForErrors(context);
+      setState(() {
+        _confirmCandidatesBusy = false;
+        _projectConfigLine = l10nDone.shortVideoProductionConfirmCandidatesDone(
+          updated,
+        );
+      });
+      await _loadProjectOverview();
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+      final l10nErr = resolveAppLocalizationsForErrors(context);
+      setState(() {
+        _confirmCandidatesBusy = false;
+        _projectConfigLine = l10nErr.shortVideoProductionBatchFailed(
+          describeUserVisibleApiError(l10nErr, e),
+        );
+      });
+    }
+  }
+
   Future<void> _runBatchCandidateClips() async {
     final token = widget.accessToken;
     final project = _selectedProject;
     final stats = _projectStats;
     if (token == null || token.isEmpty || project == null) {
+      return;
+    }
+    final readiness = _shotReadiness;
+    if (readiness != null && readiness.rollup.readyCount <= 0) {
+      final l10n = resolveAppLocalizationsForErrors(context);
+      final ui = buildShotReadinessUi(
+        l10n: l10n,
+        loadingProjectOverview: false,
+        readiness: readiness,
+        readinessUnavailable: false,
+      );
+      setState(() {
+        _projectConfigLine = [
+          if (ui.headline != null) ui.headline!,
+          ...ui.shotDetailLines.take(2),
+        ].join(' · ');
+      });
       return;
     }
     if ((stats?.storyboardCount ?? 0) <= 0) {
@@ -48,15 +193,36 @@ extension _ShortVideoSpaceSectionProductionExtension
       final l10nQueued = resolveAppLocalizationsForErrors(context);
       setState(() {
         _batchCandidateBusy = false;
-        _projectConfigLine = l10nQueued.shortVideoProductionBatchQueued(
-          res.generation.total,
-          res.appliedDefaults.trackId,
-          res.appliedDefaults.resolution,
-          res.appliedDefaults.duration,
-          res.skipped.length,
-        );
+        final outcomeSummary = _formatBatchOutcomeSummary(l10nQueued, res.outcomes);
+        final duplicateSummary =
+            _formatSkippedDuplicateVideoSummary(l10nQueued, res.generation);
+        _projectConfigLine = [
+          l10nQueued.shortVideoProductionBatchQueued(
+            res.generation.total,
+            res.appliedDefaults.trackId,
+            res.appliedDefaults.resolution,
+            res.appliedDefaults.duration,
+            res.skipped.length,
+          ),
+          if (outcomeSummary.isNotEmpty) outcomeSummary,
+          if (duplicateSummary.isNotEmpty) duplicateSummary,
+        ].join(' · ');
       });
       await _loadProjectOverview();
+    } on RustApiException catch (e) {
+      if (!mounted) {
+        return;
+      }
+      final l10nErr = resolveAppLocalizationsForErrors(context);
+      final blocked = formatGenerationBlockedFromRustApiException(l10nErr, e);
+      setState(() {
+        _batchCandidateBusy = false;
+        _projectConfigLine = blocked != null && blocked.isNotEmpty
+            ? blocked
+            : l10nErr.shortVideoProductionBatchFailed(
+                describeUserVisibleApiError(l10nErr, e),
+              );
+      });
     } catch (e) {
       if (!mounted) {
         return;
@@ -288,6 +454,7 @@ extension _ShortVideoSpaceSectionProductionExtension
         _productionOverview = results[6] as ProjectProductionOverview?;
         _projectAssetsOverview = results[7] as ProjectAssetsOverview?;
         _shortVideoAssembly = assemblySlice;
+        _shortVideoTimeline = null;
         _shortVideoExportCheck = exportCheckSlice;
         _candidateCompareRows = candidateCompareRows;
         _candidateCompareReviews = candidateCompareReviews;
@@ -304,6 +471,7 @@ extension _ShortVideoSpaceSectionProductionExtension
         _syncPublishAutomationModesFromMatrix();
       });
       await _loadDraftsAndVersions();
+      await _loadProjectCharacters();
     } catch (_) {
       if (!mounted) {
         return;
@@ -343,6 +511,55 @@ extension _ShortVideoSpaceSectionProductionExtension
           _loadingProjectOverview = false;
         });
       }
+    }
+  }
+
+  Future<void> _selectComparedStoryboardVideo(
+    ProductionStoryboardItemV1 row,
+    String videoUrl,
+  ) async {
+    final token = widget.accessToken;
+    final project = _selectedProject;
+    final trimmed = videoUrl.trim();
+    if (token == null ||
+        token.isEmpty ||
+        project == null ||
+        row.scriptId == null ||
+        trimmed.isEmpty) {
+      return;
+    }
+    setState(() {
+      _projectConfigLine = resolveAppLocalizationsForErrors(context)
+          .shortVideoProductionSetCurrentConfirming(row.id);
+    });
+    try {
+      await postWorkbenchStoryboardMediaOpV1(
+        token,
+        buildStoryboardMediaOpBodyV1(
+          base: <String, dynamic>{
+            'op': 'selectVideo',
+            'scriptId': row.scriptId,
+            'storyboardId': row.id,
+            'videoUrl': trimmed,
+          },
+          projectUuid: project.id,
+          projectId: project.numericId,
+        ),
+      );
+      if (!mounted) return;
+      setState(() {
+        _projectConfigLine = resolveAppLocalizationsForErrors(context)
+            .shortVideoProductionSetCurrentDone(row.id);
+      });
+      await _loadProjectOverview();
+    } catch (e) {
+      if (!mounted) return;
+      final l10nErr = resolveAppLocalizationsForErrors(context);
+      setState(() {
+        _projectConfigLine = l10nErr.shortVideoProductionSetCurrentFailed(
+          describeUserVisibleApiError(l10nErr, e),
+        );
+      });
     }
   }
 

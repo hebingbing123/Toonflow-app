@@ -536,6 +536,34 @@ abstract class AppLocalizations {
   /// **'Start Export'**
   String get shortVideoSpaceStartExport;
 
+  /// No description provided for @shortVideoSpaceStartPreAssembly.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch pre-assembly'**
+  String get shortVideoSpaceStartPreAssembly;
+
+  /// No description provided for @shortVideoSpacePreAssemblyBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-assembling…'**
+  String get shortVideoSpacePreAssemblyBusy;
+
+  /// No description provided for @shortVideoSpacePreAssemblyEnqueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-assembly job queued ({shotCount} shots, {blocking} blocking). Job: {jobId}'**
+  String shortVideoSpacePreAssemblyEnqueued(
+    int shotCount,
+    int blocking,
+    String jobId,
+  );
+
+  /// No description provided for @shortVideoSpacePreAssemblyFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-assembly failed: {error}'**
+  String shortVideoSpacePreAssemblyFailed(String error);
+
   /// No description provided for @shortVideoSpaceExportHistory.
   ///
   /// In en, this message translates to:
@@ -2471,48 +2499,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **' webhook activity'**
   String get opsWhActivityRecordSuffix;
-
-  /// No description provided for @opsWhActivityActionCreated.
-  ///
-  /// In en, this message translates to:
-  /// **'Created'**
-  String get opsWhActivityActionCreated;
-
-  /// No description provided for @opsWhActivityActionDeleted.
-  ///
-  /// In en, this message translates to:
-  /// **'Deleted'**
-  String get opsWhActivityActionDeleted;
-
-  /// No description provided for @opsWhActivityActionTestSuccess.
-  ///
-  /// In en, this message translates to:
-  /// **'Test: succeeded'**
-  String get opsWhActivityActionTestSuccess;
-
-  /// No description provided for @opsWhActivityActionTestFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Test: failed'**
-  String get opsWhActivityActionTestFailed;
-
-  /// No description provided for @opsWhActivitySummaryDeleted.
-  ///
-  /// In en, this message translates to:
-  /// **'Webhook deleted'**
-  String get opsWhActivitySummaryDeleted;
-
-  /// No description provided for @opsWhActivitySummaryTestOk.
-  ///
-  /// In en, this message translates to:
-  /// **'HTTP {httpStatus}'**
-  String opsWhActivitySummaryTestOk(String httpStatus);
-
-  /// No description provided for @opsWhActivitySummaryTestFail.
-  ///
-  /// In en, this message translates to:
-  /// **'HTTP {httpStatus} · {errorDetail}'**
-  String opsWhActivitySummaryTestFail(String httpStatus, String errorDetail);
 
   /// No description provided for @opsWhChipLatestCreated.
   ///
@@ -5265,6 +5251,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Regenerate'**
   String get taskCenterRegenerate;
+
+  /// No description provided for @taskCenterRetryRegenerateVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry video generation'**
+  String get taskCenterRetryRegenerateVideo;
+
+  /// No description provided for @taskCenterRetryExportVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry export'**
+  String get taskCenterRetryExportVideo;
+
+  /// No description provided for @taskCenterRetryVoiceover.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry voiceover'**
+  String get taskCenterRetryVoiceover;
+
+  /// No description provided for @taskCenterRetryPreAssembly.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry pre-assembly'**
+  String get taskCenterRetryPreAssembly;
+
+  /// No description provided for @taskCenterRetryAfterWritebackFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry after writeback issue'**
+  String get taskCenterRetryAfterWritebackFailure;
+
+  /// No description provided for @taskCenterRegenerateAfterWriteback.
+  ///
+  /// In en, this message translates to:
+  /// **'Regenerate (writeback)'**
+  String get taskCenterRegenerateAfterWriteback;
 
   /// No description provided for @taskCenterPartialRework.
   ///
@@ -13640,7 +13662,7 @@ abstract class AppLocalizations {
   /// No description provided for @scriptEditorStoryboardsReadinessBlockingUnknown.
   ///
   /// In en, this message translates to:
-  /// **'Unrecognized requirement ({code})'**
+  /// **'Unknown blocker ({code})'**
   String scriptEditorStoryboardsReadinessBlockingUnknown(String code);
 
   /// No description provided for @scriptEditorEditImageWorkbenchTitle.
@@ -14196,6 +14218,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Production view loaded'**
   String get storyboardWorkbenchProductionMetaLoadedEmpty;
+
+  /// No description provided for @storyboardWorkbenchCharacterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice character'**
+  String get storyboardWorkbenchCharacterLabel;
+
+  /// No description provided for @storyboardWorkbenchCharacterDropdownLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign character'**
+  String get storyboardWorkbenchCharacterDropdownLabel;
+
+  /// No description provided for @storyboardWorkbenchCharacterNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None (project default)'**
+  String get storyboardWorkbenchCharacterNone;
+
+  /// No description provided for @storyboardWorkbenchCharacterReload.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload characters'**
+  String get storyboardWorkbenchCharacterReload;
+
+  /// No description provided for @storyboardWorkbenchCharacterSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Character assignment saved'**
+  String get storyboardWorkbenchCharacterSaved;
+
+  /// No description provided for @storyboardActionVideoSkippedDuplicates.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped {count} duplicate in-flight job(s) (#{ids})'**
+  String storyboardActionVideoSkippedDuplicates(int count, String ids);
 
   /// No description provided for @storyboardEditorDialogTitle.
   ///
@@ -15414,7 +15472,7 @@ abstract class AppLocalizations {
   /// No description provided for @storyboardPatchScopeLabel.
   ///
   /// In en, this message translates to:
-  /// **'scope'**
+  /// **'Scope'**
   String get storyboardPatchScopeLabel;
 
   /// No description provided for @storyboardPatchScopeHelper.
@@ -15426,7 +15484,7 @@ abstract class AppLocalizations {
   /// No description provided for @storyboardPatchModelTierLabel.
   ///
   /// In en, this message translates to:
-  /// **'model tier'**
+  /// **'Model tier'**
   String get storyboardPatchModelTierLabel;
 
   /// No description provided for @storyboardPatchModelTierHelper.
@@ -15546,6 +15604,48 @@ abstract class AppLocalizations {
   /// **'Fix content quality, continuity, or emotional delivery for this shot.'**
   String get storyboardPatchDefaultReason;
 
+  /// No description provided for @storyboardPatchScopeEpisode.
+  ///
+  /// In en, this message translates to:
+  /// **'Episode'**
+  String get storyboardPatchScopeEpisode;
+
+  /// No description provided for @storyboardPatchScopeScene.
+  ///
+  /// In en, this message translates to:
+  /// **'Scene'**
+  String get storyboardPatchScopeScene;
+
+  /// No description provided for @storyboardPatchScopeStoryboardItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard item'**
+  String get storyboardPatchScopeStoryboardItem;
+
+  /// No description provided for @storyboardPatchScopeVideoPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Video prompt'**
+  String get storyboardPatchScopeVideoPrompt;
+
+  /// No description provided for @storyboardPatchScopeDeriveAsset.
+  ///
+  /// In en, this message translates to:
+  /// **'Derive asset'**
+  String get storyboardPatchScopeDeriveAsset;
+
+  /// No description provided for @storyboardPatchModelTierLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get storyboardPatchModelTierLow;
+
+  /// No description provided for @storyboardPatchModelTierHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get storyboardPatchModelTierHigh;
+
   /// No description provided for @shortVideoReadinessNoPayloadHeadline.
   ///
   /// In en, this message translates to:
@@ -15617,6 +15717,40 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Storyboard readiness'**
   String get shortVideoMetricStoryboardReadiness;
+
+  /// No description provided for @shortVideoMetricProductionPhase.
+  ///
+  /// In en, this message translates to:
+  /// **'Production phase'**
+  String get shortVideoMetricProductionPhase;
+
+  /// No description provided for @shortVideoProductionPhaseSnippet.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready {ready} · Generating {generating} · Blocked {blocked}'**
+  String shortVideoProductionPhaseSnippet(
+    int ready,
+    int generating,
+    int blocked,
+  );
+
+  /// No description provided for @shortVideoBatchSkippedDuplicates.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped {count} duplicate in-flight (#{ids})'**
+  String shortVideoBatchSkippedDuplicates(int count, String ids);
+
+  /// No description provided for @shortVideoBatchOutcomeSkippedDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'skipped duplicate'**
+  String get shortVideoBatchOutcomeSkippedDuplicate;
+
+  /// No description provided for @shortVideoBatchOutcomeQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'queued'**
+  String get shortVideoBatchOutcomeQueued;
 
   /// No description provided for @shortVideoShotReadinessSelectProjectHint.
   ///
@@ -16644,6 +16778,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Current video'**
   String get shortVideoCandidateCurrentVideo;
+
+  /// No description provided for @shortVideoCandidateVideoListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Candidate videos'**
+  String get shortVideoCandidateVideoListTitle;
+
+  /// No description provided for @shortVideoCandidateSelectVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get shortVideoCandidateSelectVideo;
 
   /// No description provided for @shortVideoCandidateSetCurrent.
   ///
@@ -18554,6 +18700,208 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Batch candidate clips failed: {error}'**
   String shortVideoProductionBatchFailed(String error);
+
+  /// No description provided for @shortVideoBatchOutcomeSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Outcomes: {details}'**
+  String shortVideoBatchOutcomeSummary(String details);
+
+  /// No description provided for @shortVideoBatchOutcomeCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{outcome}×{count}'**
+  String shortVideoBatchOutcomeCount(String outcome, int count);
+
+  /// No description provided for @shortVideoWritebackStatusOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Video writeback: synced to storyboard'**
+  String get shortVideoWritebackStatusOk;
+
+  /// No description provided for @shortVideoWritebackStatusFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Video writeback failed ({code})'**
+  String shortVideoWritebackStatusFailed(String code);
+
+  /// No description provided for @shortVideoWritebackStatusFailedGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Video writeback failed'**
+  String get shortVideoWritebackStatusFailedGeneric;
+
+  /// No description provided for @shortVideoWritebackStatusIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Video writeback incomplete ({code})'**
+  String shortVideoWritebackStatusIncomplete(String code);
+
+  /// No description provided for @shortVideoWritebackStatusIncompleteGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Video writeback incomplete — refresh production data'**
+  String get shortVideoWritebackStatusIncompleteGeneric;
+
+  /// No description provided for @shortVideoWritebackStatusUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Video writeback: {status}'**
+  String shortVideoWritebackStatusUnknown(String status);
+
+  /// No description provided for @shortVideoCharactersPanelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Project characters & voices'**
+  String get shortVideoCharactersPanelTitle;
+
+  /// No description provided for @shortVideoCharactersRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get shortVideoCharactersRefresh;
+
+  /// No description provided for @shortVideoCharactersLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading characters…'**
+  String get shortVideoCharactersLoading;
+
+  /// No description provided for @shortVideoCharactersEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No project characters yet. Create them under project settings or via API.'**
+  String get shortVideoCharactersEmpty;
+
+  /// No description provided for @shortVideoCharactersVoiceSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider {provider} · voice {voiceId} · emotion {emotion}'**
+  String shortVideoCharactersVoiceSummary(
+    String provider,
+    String voiceId,
+    String emotion,
+  );
+
+  /// No description provided for @shortVideoCharactersPreviewVoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview voice'**
+  String get shortVideoCharactersPreviewVoice;
+
+  /// No description provided for @shortVideoCharactersCloneVoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Clone voice'**
+  String get shortVideoCharactersCloneVoice;
+
+  /// No description provided for @shortVideoCharactersCloneVoiceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Clone voice — {name}'**
+  String shortVideoCharactersCloneVoiceTitle(String name);
+
+  /// No description provided for @shortVideoCharactersCloneSampleUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Sample audio URL'**
+  String get shortVideoCharactersCloneSampleUrl;
+
+  /// No description provided for @shortVideoCharactersCloneDisplayName.
+  ///
+  /// In en, this message translates to:
+  /// **'Display name'**
+  String get shortVideoCharactersCloneDisplayName;
+
+  /// No description provided for @shortVideoCharactersCloneMockSample.
+  ///
+  /// In en, this message translates to:
+  /// **'Use mock sample'**
+  String get shortVideoCharactersCloneMockSample;
+
+  /// No description provided for @shortVideoCharactersCloneSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloned voice ID: {voiceId} ({provider})'**
+  String shortVideoCharactersCloneSuccess(String voiceId, String provider);
+
+  /// No description provided for @shortVideoCharactersCloneFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Clone failed: {error}'**
+  String shortVideoCharactersCloneFailed(String error);
+
+  /// No description provided for @shortVideoCharactersEditVoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit voice'**
+  String get shortVideoCharactersEditVoice;
+
+  /// No description provided for @shortVideoCharactersEditVoiceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice — {name}'**
+  String shortVideoCharactersEditVoiceTitle(String name);
+
+  /// No description provided for @shortVideoCharactersFieldProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider'**
+  String get shortVideoCharactersFieldProvider;
+
+  /// No description provided for @shortVideoCharactersFieldVoiceId.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice ID'**
+  String get shortVideoCharactersFieldVoiceId;
+
+  /// No description provided for @shortVideoCharactersFieldEmotion.
+  ///
+  /// In en, this message translates to:
+  /// **'Emotion / style'**
+  String get shortVideoCharactersFieldEmotion;
+
+  /// No description provided for @shortVideoCharactersPreviewLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating preview for {name}…'**
+  String shortVideoCharactersPreviewLoading(String name);
+
+  /// No description provided for @shortVideoCharactersPreviewReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Playing preview for {name}'**
+  String shortVideoCharactersPreviewReady(String name);
+
+  /// No description provided for @shortVideoCharactersPreviewFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview failed for {name}: {error}'**
+  String shortVideoCharactersPreviewFailed(String name, String error);
+
+  /// No description provided for @shortVideoCharactersPreviewSampleText.
+  ///
+  /// In en, this message translates to:
+  /// **'This is a short drama voice preview sample.'**
+  String get shortVideoCharactersPreviewSampleText;
+
+  /// No description provided for @shortVideoCharactersVoiceSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved voice settings for {name}'**
+  String shortVideoCharactersVoiceSaved(String name);
+
+  /// No description provided for @shortVideoCharactersVoiceSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save voice for {name}: {error}'**
+  String shortVideoCharactersVoiceSaveFailed(String name, String error);
+
+  /// No description provided for @shortVideoProductionConfirmCandidatesDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed {count} storyboard candidate(s) for generation.'**
+  String shortVideoProductionConfirmCandidatesDone(int count);
 
   /// No description provided for @shortVideoProductionSetCurrentConfirming.
   ///
@@ -22712,6 +23060,46 @@ abstract class AppLocalizations {
   /// **'Below lists some blocking items; for complete list, check each shot in production workspace.'**
   String get shortVideoSpacePublishExportCheckDetailBlocking;
 
+  /// No description provided for @shortVideoSpacePublishExportCheckStoryboardGapsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Per-storyboard export gaps'**
+  String get shortVideoSpacePublishExportCheckStoryboardGapsTitle;
+
+  /// No description provided for @shortVideoSpacePublishExportCheckStoryboardGapTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Script #{scriptId} · Storyboard #{sbId}{sbIndex}'**
+  String shortVideoSpacePublishExportCheckStoryboardGapTitle(
+    int scriptId,
+    int sbId,
+    String sbIndex,
+  );
+
+  /// No description provided for @shortVideoSpacePublishExportCheckFacetMissingVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing selected video'**
+  String get shortVideoSpacePublishExportCheckFacetMissingVideo;
+
+  /// No description provided for @shortVideoSpacePublishExportCheckFacetMissingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing subtitle / narration'**
+  String get shortVideoSpacePublishExportCheckFacetMissingSubtitle;
+
+  /// No description provided for @shortVideoSpacePublishExportCheckFacetMissingVoiceover.
+  ///
+  /// In en, this message translates to:
+  /// **'Voiceover not ready'**
+  String get shortVideoSpacePublishExportCheckFacetMissingVoiceover;
+
+  /// No description provided for @shortVideoSpacePublishExportCheckFacetDurationAnomaly.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration anomaly'**
+  String get shortVideoSpacePublishExportCheckFacetDurationAnomaly;
+
   /// No description provided for @shortVideoSpacePublishCandidateLoadingHeadline.
   ///
   /// In en, this message translates to:
@@ -23037,6 +23425,318 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Write back failed: {error}'**
   String shortVideoSpaceProductionAssemblyWriteBackFailed(String error);
+
+  /// No description provided for @shortVideoTimelinePanelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rough-cut timeline (trim + preview)'**
+  String get shortVideoTimelinePanelTitle;
+
+  /// No description provided for @shortVideoTimelineSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save timeline'**
+  String get shortVideoTimelineSave;
+
+  /// No description provided for @shortVideoTimelineSaveDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Timeline saved.'**
+  String get shortVideoTimelineSaveDone;
+
+  /// No description provided for @shortVideoTimelineSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Timeline save failed: {error}'**
+  String shortVideoTimelineSaveFailed(String error);
+
+  /// No description provided for @shortVideoTimelineGeneratePreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate preview'**
+  String get shortVideoTimelineGeneratePreview;
+
+  /// No description provided for @shortVideoTimelinePreviewBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'Rendering preview…'**
+  String get shortVideoTimelinePreviewBusy;
+
+  /// No description provided for @shortVideoTimelinePreviewDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview ready.'**
+  String get shortVideoTimelinePreviewDone;
+
+  /// No description provided for @shortVideoTimelinePreviewFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview failed: {error}'**
+  String shortVideoTimelinePreviewFailed(String error);
+
+  /// No description provided for @shortVideoTimelinePlayPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Open preview'**
+  String get shortVideoTimelinePlayPreview;
+
+  /// No description provided for @shortVideoTimelineTrimInMs.
+  ///
+  /// In en, this message translates to:
+  /// **'In (ms)'**
+  String get shortVideoTimelineTrimInMs;
+
+  /// No description provided for @shortVideoTimelineTrimOutMs.
+  ///
+  /// In en, this message translates to:
+  /// **'Out (ms)'**
+  String get shortVideoTimelineTrimOutMs;
+
+  /// No description provided for @shortVideoTimelineBgmEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'BGM track'**
+  String get shortVideoTimelineBgmEnabled;
+
+  /// No description provided for @shortVideoTimelineBgmVolume.
+  ///
+  /// In en, this message translates to:
+  /// **'BGM volume'**
+  String get shortVideoTimelineBgmVolume;
+
+  /// No description provided for @shortVideoTimelineMoveUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Move up'**
+  String get shortVideoTimelineMoveUp;
+
+  /// No description provided for @shortVideoTimelineMoveDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Move down'**
+  String get shortVideoTimelineMoveDown;
+
+  /// No description provided for @shortVideoTimelinePersistOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Save order'**
+  String get shortVideoTimelinePersistOrder;
+
+  /// No description provided for @shortVideoTimelineLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading timeline…'**
+  String get shortVideoTimelineLoading;
+
+  /// No description provided for @shortVideoTimelineEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No shots in timeline yet.'**
+  String get shortVideoTimelineEmpty;
+
+  /// No description provided for @shortVideoTimelineReorderDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Timeline order saved.'**
+  String get shortVideoTimelineReorderDone;
+
+  /// No description provided for @shortVideoTimelineSubtitlesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtitles'**
+  String get shortVideoTimelineSubtitlesTitle;
+
+  /// No description provided for @shortVideoTimelineSubtitleText.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtitle text'**
+  String get shortVideoTimelineSubtitleText;
+
+  /// No description provided for @shortVideoTimelineSubtitleStartMs.
+  ///
+  /// In en, this message translates to:
+  /// **'Start (ms)'**
+  String get shortVideoTimelineSubtitleStartMs;
+
+  /// No description provided for @shortVideoTimelineSubtitleEndMs.
+  ///
+  /// In en, this message translates to:
+  /// **'End (ms)'**
+  String get shortVideoTimelineSubtitleEndMs;
+
+  /// No description provided for @shortVideoTimelineAddSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add subtitle'**
+  String get shortVideoTimelineAddSubtitle;
+
+  /// No description provided for @shortVideoTimelineTransitionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Transitions'**
+  String get shortVideoTimelineTransitionsTitle;
+
+  /// No description provided for @shortVideoTimelineTransitionCut.
+  ///
+  /// In en, this message translates to:
+  /// **'Cut'**
+  String get shortVideoTimelineTransitionCut;
+
+  /// No description provided for @shortVideoTimelineTransitionCrossfade.
+  ///
+  /// In en, this message translates to:
+  /// **'Crossfade'**
+  String get shortVideoTimelineTransitionCrossfade;
+
+  /// No description provided for @shortVideoTimelineTransitionFadeBlack.
+  ///
+  /// In en, this message translates to:
+  /// **'Fade to black'**
+  String get shortVideoTimelineTransitionFadeBlack;
+
+  /// No description provided for @shortVideoTimelineTransitionDurationMs.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration (ms)'**
+  String get shortVideoTimelineTransitionDurationMs;
+
+  /// No description provided for @shortVideoTimelineVoiceoverTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Voiceover'**
+  String get shortVideoTimelineVoiceoverTitle;
+
+  /// No description provided for @shortVideoTimelineVoiceoverVolume.
+  ///
+  /// In en, this message translates to:
+  /// **'Volume'**
+  String get shortVideoTimelineVoiceoverVolume;
+
+  /// No description provided for @shortVideoTimelineApplyTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply rough-cut template'**
+  String get shortVideoTimelineApplyTemplate;
+
+  /// No description provided for @shortVideoTimelineTemplateShortDrama.
+  ///
+  /// In en, this message translates to:
+  /// **'Short drama default'**
+  String get shortVideoTimelineTemplateShortDrama;
+
+  /// No description provided for @shortVideoTimelineTemplateDialoguePunch.
+  ///
+  /// In en, this message translates to:
+  /// **'Dialogue punch'**
+  String get shortVideoTimelineTemplateDialoguePunch;
+
+  /// No description provided for @shortVideoTimelineTemplateApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'Template applied.'**
+  String get shortVideoTimelineTemplateApplied;
+
+  /// No description provided for @shortVideoTimelineTemplateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Template failed: {error}'**
+  String shortVideoTimelineTemplateFailed(String error);
+
+  /// No description provided for @shortVideoTimelineReorderFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Timeline reorder failed: {error}'**
+  String shortVideoTimelineReorderFailed(String error);
+
+  /// No description provided for @shortVideoTimelineUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get shortVideoTimelineUndo;
+
+  /// No description provided for @shortVideoTimelineRedo.
+  ///
+  /// In en, this message translates to:
+  /// **'Redo'**
+  String get shortVideoTimelineRedo;
+
+  /// No description provided for @shortVideoTimelineRevisionHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Version history'**
+  String get shortVideoTimelineRevisionHistory;
+
+  /// No description provided for @shortVideoTimelineRevisionEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved versions yet.'**
+  String get shortVideoTimelineRevisionEmpty;
+
+  /// No description provided for @shortVideoTimelineRevisionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Revision {revision}'**
+  String shortVideoTimelineRevisionLabel(int revision);
+
+  /// No description provided for @shortVideoTimelineRevisionRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Timeline restored from history.'**
+  String get shortVideoTimelineRevisionRestored;
+
+  /// No description provided for @shortVideoTimelineRevisionLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load version history: {error}'**
+  String shortVideoTimelineRevisionLoadFailed(String error);
+
+  /// No description provided for @shortVideoTimelineRevisionRestoreFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore failed: {error}'**
+  String shortVideoTimelineRevisionRestoreFailed(String error);
+
+  /// No description provided for @shortVideoTimelineEffectPreset.
+  ///
+  /// In en, this message translates to:
+  /// **'Effect preset'**
+  String get shortVideoTimelineEffectPreset;
+
+  /// No description provided for @shortVideoTimelineEffectApplyAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply effect to all clips'**
+  String get shortVideoTimelineEffectApplyAll;
+
+  /// No description provided for @shortVideoTimelineEffectNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get shortVideoTimelineEffectNone;
+
+  /// No description provided for @shortVideoTimelineEffectVivid.
+  ///
+  /// In en, this message translates to:
+  /// **'Vivid'**
+  String get shortVideoTimelineEffectVivid;
+
+  /// No description provided for @shortVideoTimelineEffectCinematic.
+  ///
+  /// In en, this message translates to:
+  /// **'Cinematic'**
+  String get shortVideoTimelineEffectCinematic;
+
+  /// No description provided for @shortVideoTimelineEffectBw.
+  ///
+  /// In en, this message translates to:
+  /// **'Black & white'**
+  String get shortVideoTimelineEffectBw;
+
+  /// No description provided for @shortVideoTimelineEffectSpeed110.
+  ///
+  /// In en, this message translates to:
+  /// **'Speed 110%'**
+  String get shortVideoTimelineEffectSpeed110;
 
   /// No description provided for @shortVideoSpaceProductionAssemblyReorderPersisted.
   ///
@@ -30440,12 +31140,6 @@ abstract class AppLocalizations {
   /// **'Last used {lastUsedAt} · {method} {path}'**
   String apiKeysLastUsedLine(String lastUsedAt, String method, String path);
 
-  /// No description provided for @apiKeysLastUsedIpUnknown.
-  ///
-  /// In en, this message translates to:
-  /// **'Unknown'**
-  String get apiKeysLastUsedIpUnknown;
-
   /// No description provided for @apiKeysSourceLine.
   ///
   /// In en, this message translates to:
@@ -32576,31 +33270,160 @@ abstract class AppLocalizations {
   /// **'#{p0} · {p1}'**
   String l10nBatch_978d9d9f6f(int p0, String p1);
 
+  /// No description provided for @billingNotificationSubscriptionActivated.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription activated'**
   String get billingNotificationSubscriptionActivated;
+
+  /// No description provided for @billingNotificationSubscriptionPastDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription past due'**
   String get billingNotificationSubscriptionPastDue;
+
+  /// No description provided for @billingNotificationSubscriptionCanceled.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription canceled'**
   String get billingNotificationSubscriptionCanceled;
+
+  /// No description provided for @billingNotificationPaymentFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment failed'**
   String get billingNotificationPaymentFailed;
+
+  /// No description provided for @billingNotificationSubscriptionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription expired'**
   String get billingNotificationSubscriptionExpired;
+
+  /// No description provided for @billingNotificationSubscriptionTrialing.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription trial started'**
   String get billingNotificationSubscriptionTrialing;
+
+  /// No description provided for @billingNotificationUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Billing event'**
   String get billingNotificationUnknown;
+
+  /// No description provided for @billingSubscriptionStatusActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
   String get billingSubscriptionStatusActive;
+
+  /// No description provided for @billingSubscriptionStatusPastDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Past due'**
   String get billingSubscriptionStatusPastDue;
+
+  /// No description provided for @billingSubscriptionStatusCanceled.
+  ///
+  /// In en, this message translates to:
+  /// **'Canceled'**
   String get billingSubscriptionStatusCanceled;
+
+  /// No description provided for @billingSubscriptionStatusTrialing.
+  ///
+  /// In en, this message translates to:
+  /// **'Trial'**
   String get billingSubscriptionStatusTrialing;
+
+  /// No description provided for @billingSubscriptionStatusPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
   String get billingSubscriptionStatusPaused;
+
+  /// No description provided for @billingSubscriptionStatusUnpaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpaid'**
   String get billingSubscriptionStatusUnpaid;
+
+  /// No description provided for @billingSubscriptionStatusUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown status'**
   String get billingSubscriptionStatusUnknown;
+
+  /// No description provided for @billingQuotaExceededTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily quota reached'**
   String get billingQuotaExceededTitle;
+
+  /// No description provided for @billingQuotaExceededFree.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve reached the daily limit for the {plan} plan. Upgrade to continue.'**
   String billingQuotaExceededFree(String plan);
+
+  /// No description provided for @billingQuotaExceededPro.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve reached the daily limit for the {plan} plan. Contact support or wait for the quota to reset.'**
   String billingQuotaExceededPro(String plan);
+
+  /// No description provided for @billingQuotaResetHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Quota resets daily at midnight UTC.'**
   String get billingQuotaResetHint;
+
+  /// No description provided for @billingUpgradePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade Plan'**
   String get billingUpgradePlan;
+
+  /// No description provided for @billingErrorPaymentFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment failed. Please update your payment method to continue.'**
   String get billingErrorPaymentFailed;
+
+  /// No description provided for @billingErrorSubscriptionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Your subscription has expired. Please renew to continue.'**
   String get billingErrorSubscriptionExpired;
+
+  /// No description provided for @billingErrorSubscriptionPastDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Your subscription payment is past due. Please update your payment method.'**
   String get billingErrorSubscriptionPastDue;
+
+  /// No description provided for @billingPlanTierFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
   String get billingPlanTierFree;
+
+  /// No description provided for @billingPlanTierPro.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro'**
   String get billingPlanTierPro;
+
+  /// No description provided for @billingPlanTierEnterprise.
+  ///
+  /// In en, this message translates to:
+  /// **'Enterprise'**
   String get billingPlanTierEnterprise;
+
+  /// No description provided for @billingPlanTierUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown plan'**
   String get billingPlanTierUnknown;
 }
 

@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import '../../config.dart';
 import '../core.dart';
 import 'project_scope.dart';
+import 'storyboard/models.dart';
 
 class ProductionExportZipResponse {
   final String? filename;
@@ -83,14 +84,33 @@ class BatchCandidateClipDefaultsAppliedV1 {
 }
 
 /// Response flattens the standard generate-video envelope plus skips + defaults.
+class BatchStoryboardOutcomeV1 {
+  const BatchStoryboardOutcomeV1({
+    required this.storyboardNumericId,
+    required this.outcome,
+  });
+
+  final int storyboardNumericId;
+  final String outcome;
+
+  factory BatchStoryboardOutcomeV1.fromJson(Map<String, dynamic> json) {
+    return BatchStoryboardOutcomeV1(
+      storyboardNumericId: (json['storyboardNumericId'] as num).toInt(),
+      outcome: json['outcome'] as String? ?? '',
+    );
+  }
+}
+
 class BatchGenerateCandidateClipsResponseV1 {
   const BatchGenerateCandidateClipsResponseV1({
     required this.skipped,
+    required this.outcomes,
     required this.appliedDefaults,
     required this.generation,
   });
 
   final List<BatchSkippedStoryboardV1> skipped;
+  final List<BatchStoryboardOutcomeV1> outcomes;
   final BatchCandidateClipDefaultsAppliedV1 appliedDefaults;
   final WorkbenchGenerateVideoResponse generation;
 
@@ -98,10 +118,16 @@ class BatchGenerateCandidateClipsResponseV1 {
     Map<String, dynamic> json,
   ) {
     final rawSkipped = json['skipped'] as List<dynamic>? ?? const [];
+    final rawOutcomes = json['outcomes'] as List<dynamic>? ?? const [];
     return BatchGenerateCandidateClipsResponseV1(
       skipped: rawSkipped
           .map(
             (e) => BatchSkippedStoryboardV1.fromJson(e as Map<String, dynamic>),
+          )
+          .toList(growable: false),
+      outcomes: rawOutcomes
+          .map(
+            (e) => BatchStoryboardOutcomeV1.fromJson(e as Map<String, dynamic>),
           )
           .toList(growable: false),
       appliedDefaults: BatchCandidateClipDefaultsAppliedV1.fromJson(
@@ -112,20 +138,54 @@ class BatchGenerateCandidateClipsResponseV1 {
   }
 }
 
+Future<void> postProductionStoryboardSetCharacterV1(
+  String accessToken, {
+  required String projectUuid,
+  required int scriptId,
+  required int storyboardId,
+  String? characterId,
+}) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/production/storyboard/set-character',
+  );
+  final response = await http.post(
+    uri,
+    headers: {
+      'Authorization': 'Bearer $accessToken',
+      'Content-Type': 'application/json',
+    },
+    body: jsonEncode(<String, dynamic>{
+      'projectUuid': projectUuid,
+      'scriptId': scriptId,
+      'storyboardId': storyboardId,
+      'characterId': characterId,
+    }),
+  );
+  if (response.statusCode != 200) {
+    throw RustApiException.fromHttpResponse(response);
+  }
+}
+
 class WorkbenchGenerateVideoResponse {
   const WorkbenchGenerateVideoResponse({
     required this.total,
     this.negativePrompt,
     required this.storyboardNegativePrompts,
+    this.skippedDuplicateCount = 0,
+    this.skippedDuplicateStoryboardIds = const <int>[],
   });
 
   final int total;
   final String? negativePrompt;
   final List<WorkbenchStoryboardNegativePrompt> storyboardNegativePrompts;
+  final int skippedDuplicateCount;
+  final List<int> skippedDuplicateStoryboardIds;
 
   factory WorkbenchGenerateVideoResponse.fromJson(Map<String, dynamic> json) {
     final rawPrompts =
         json['storyboardNegativePrompts'] as List<dynamic>? ?? const [];
+    final rawDupIds =
+        json['skippedDuplicateStoryboardIds'] as List<dynamic>? ?? const [];
     return WorkbenchGenerateVideoResponse(
       total: (json['total'] as num?)?.toInt() ?? 0,
       negativePrompt: json['negativePrompt'] as String?,
@@ -135,6 +195,10 @@ class WorkbenchGenerateVideoResponse {
               item as Map<String, dynamic>,
             ),
           )
+          .toList(growable: false),
+      skippedDuplicateCount: (json['skippedDuplicateCount'] as num?)?.toInt() ?? 0,
+      skippedDuplicateStoryboardIds: rawDupIds
+          .map((item) => (item as num).toInt())
           .toList(growable: false),
     );
   }
@@ -238,16 +302,27 @@ class ProductionPatchResponse {
 /// `POST /api/v1/production/get-production-data` — OpenAPI `postProductionGetProductionDataV1`.
 ///
 /// Prefer **`projectUuid`** (`app_project.id`); **`projectId`** is legacy numeric id.
-Future<int> postProductionGetProductionDataV1(
+/// When [clientDataVersion] matches the server version, [ProductionGetProductionDataResponseV1.unchanged]
+/// is true and [ProductionGetProductionDataResponseV1.data] is empty.
+Future<ProductionGetProductionDataResponseV1> postProductionGetProductionDataV1(
   String accessToken, {
   int? projectId,
   String? projectUuid,
   required int scriptId,
   required List<int> storyboardIds,
+  String? clientDataVersion,
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/production/get-production-data');
+  final base = <String, dynamic>{
+    'scriptId': scriptId,
+    'ids': storyboardIds,
+  };
+  final cached = clientDataVersion?.trim();
+  if (cached != null && cached.isNotEmpty) {
+    base['clientDataVersion'] = cached;
+  }
   final body = buildProductionProjectScopeBodyV1(
-    base: <String, dynamic>{'scriptId': scriptId, 'ids': storyboardIds},
+    base: base,
     projectId: projectId,
     projectUuid: projectUuid,
   );
@@ -261,7 +336,12 @@ Future<int> postProductionGetProductionDataV1(
         body: jsonEncode(body),
       )
       .timeout(const Duration(seconds: 15));
-  return res.statusCode;
+  if (res.statusCode == 400 || res.statusCode == 404) {
+    throw RustApiException.fromHttpResponse(res);
+  }
+  ensureHttpSuccess(res);
+  final map = jsonDecode(res.body) as Map<String, dynamic>;
+  return ProductionGetProductionDataResponseV1.fromJson(map);
 }
 
 Future<ProductionPatchResponse> postProductionPatchV1(
@@ -433,6 +513,38 @@ Future<WorkbenchGenerateVideoResponse> postProductionWorkbenchGenerateVideoV1(
   ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
   return WorkbenchGenerateVideoResponse.fromJson(map);
+}
+
+/// `POST /api/v1/production/workbench/confirm-storyboard-candidates`.
+Future<int> postProductionWorkbenchConfirmStoryboardCandidatesV1(
+  String accessToken, {
+  int? projectId,
+  String? projectUuid,
+  required int scriptId,
+  required List<int> storyboardNumericIds,
+}) async {
+  final uri = Uri.parse(
+    '$kApiBaseUrl/api/v1/production/workbench/confirm-storyboard-candidates',
+  );
+  final body = buildProductionProjectScopeBodyV1(
+    base: <String, dynamic>{
+      'scriptId': scriptId,
+      'storyboardNumericIds': storyboardNumericIds,
+    },
+    projectId: projectId,
+    projectUuid: projectUuid,
+  );
+  final res = await http
+      .post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      )
+      .timeout(const Duration(seconds: 15));
+  return res.statusCode;
 }
 
 /// `POST /api/v1/production/workbench/batch-generate-candidate-clips`.

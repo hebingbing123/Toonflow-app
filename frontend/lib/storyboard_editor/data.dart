@@ -64,11 +64,19 @@ extension _StoryboardWorkbenchData on _StoryboardWorkbenchPanelState {
         widget.token,
         projectUuid: widget.projectId,
         scriptId: widget.scriptNumericId,
+        clientDataVersion: _cachedStoryboardListDataVersion,
       );
       if (!mounted) return;
+      final listRows = productionRows.unchanged
+          ? _productionRows
+          : productionRows.data;
+      if (productionRows.dataVersion != null &&
+          productionRows.dataVersion!.isNotEmpty) {
+        _cachedStoryboardListDataVersion = productionRows.dataVersion;
+      }
       _applyWorkbenchState(() {
         _productionRow = productionRow;
-        _productionRows = productionRows.data;
+        _productionRows = listRows;
         if (syncImageUrl) {
           _imageUrlCtrl.text = productionRow.url ?? '';
         }

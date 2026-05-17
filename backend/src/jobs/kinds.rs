@@ -38,6 +38,10 @@ pub const JOB_KIND_FLUTTER_PROBE: &str = "flutter.probe";
 pub const JOB_KIND_VIDEO_GENERATE: &str = "video.generate";
 /// Video export (**`POST …/production/export-image`** export as video); worker exports video file.
 pub const JOB_KIND_VIDEO_EXPORT: &str = "video.export";
+/// Batch rough-cut pre-assembly manifest (**`POST …/short-video-pre-assembly`**).
+pub const JOB_KIND_SHORT_VIDEO_PRE_ASSEMBLY: &str = "short_video.pre_assembly";
+/// Timeline preview mux (**`POST …/short-video-timeline/preview`**).
+pub const JOB_KIND_SHORT_VIDEO_TIMELINE_PREVIEW: &str = "short_video.timeline_preview";
 /// Voiceover generation (**`POST …/production/workbench/generate-voiceover`**); worker synthesizes
 /// storyboard narration into a persisted local audio artifact and writes the latest artifact
 /// reference back into **`app_storyboard.metadata.voiceover`**.

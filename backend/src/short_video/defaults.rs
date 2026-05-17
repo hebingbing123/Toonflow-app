@@ -1,24 +1,27 @@
 //! Project-level vs per-job overrides for narration / export defaults (**D7**).
 
-/// OpenAI-compatible speech **`voice`** when neither explicit nor project profile is set.
-pub(crate) const DEFAULT_TTS_VOICE: &str = "alloy";
+#[cfg_attr(not(test), allow(dead_code))]
+pub(crate) const DEFAULT_TTS_VOICE: &str = crate::short_video::voice::config::DEFAULT_OPENAI_VOICE;
+pub(crate) use crate::short_video::voice::{
+    resolve_tts_voice_name, resolve_voice_config, VoiceResolveInput,
+};
 
-/// **`explicit_voice`** (per enqueue payload / UI) wins; then **`project_voice_profile`**; else [`DEFAULT_TTS_VOICE`].
+/// **`explicit_voice`** (per enqueue payload / UI) wins; then **`project_voice_profile`**; else default.
 #[must_use]
 pub(crate) fn resolve_tts_voice(
     explicit_voice: Option<&str>,
     project_voice_profile: Option<&str>,
 ) -> String {
-    if let Some(v) = explicit_voice.map(str::trim).filter(|s| !s.is_empty()) {
-        return v.to_string();
-    }
-    if let Some(v) = project_voice_profile
-        .map(str::trim)
-        .filter(|s| !s.is_empty())
-    {
-        return v.to_string();
-    }
-    DEFAULT_TTS_VOICE.to_string()
+    let cfg = resolve_voice_config(VoiceResolveInput {
+        project_voice_profile,
+        character_voice_config: None,
+        explicit_voice,
+        explicit_emotion: None,
+        explicit_speed: None,
+        explicit_provider: None,
+        scene: Default::default(),
+    });
+    resolve_tts_voice_name(&cfg)
 }
 
 #[cfg(test)]

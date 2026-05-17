@@ -498,6 +498,14 @@ class _TaskCenterWorkbenchDialogState
             _ctrls.numericTaskIdCtrl.text = job.numericTaskId.toString();
             _ctrls.uuidCtrl.text = job.id;
           });
+          final link = tryParseTaskCenterDomainDeepLink(job);
+          final handler = widget.onNavigateDomainDeepLink;
+          if (link != null &&
+              handler != null &&
+              (link.storyboardNumericId != null || link.scriptNumericId != null)) {
+            Navigator.of(context).pop();
+            handler(link);
+          }
         },
         onPickProductionPhase: (key) {
           setState(() => _ctrls.productionPhaseCtrl.text = key);

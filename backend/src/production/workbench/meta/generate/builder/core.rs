@@ -31,6 +31,24 @@ pub fn build_video_prompt_with_constraint_pressure(
     context: Option<&VideoPromptContext>,
     constraint_pressure: Option<VideoPromptConstraintPressure>,
 ) -> VideoPromptBuildResult {
+    build_video_prompt_with_constraint_pressure_and_profile(
+        description,
+        image_url,
+        context,
+        constraint_pressure,
+        None,
+    )
+}
+
+pub fn build_video_prompt_with_constraint_pressure_and_profile(
+    description: Option<&str>,
+    image_url: Option<&str>,
+    context: Option<&VideoPromptContext>,
+    constraint_pressure: Option<VideoPromptConstraintPressure>,
+    generation_profile: Option<
+        crate::production::workbench::generation_profile::GenerationProfileTier,
+    >,
+) -> VideoPromptBuildResult {
     let resolved_description = resolve_video_prompt_description(description, context);
     let structured_fields = resolved_description
         .as_deref()
@@ -72,6 +90,7 @@ pub fn build_video_prompt_with_constraint_pressure(
         &scene_anchors,
         &tool_anchors,
         constraint_pressure,
+        generation_profile,
     );
     let memory_budget_tier = budget_decision.tier;
     let compact_labels = should_use_compact_prompt_labels(

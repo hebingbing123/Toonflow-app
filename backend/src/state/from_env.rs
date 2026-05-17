@@ -151,6 +151,13 @@ pub(super) async fn load() -> Result<AppState, sqlx::Error> {
         tracing::info!("User-scope billing active (WORKSPACE_BILLING_ENABLED not set or false)");
     }
 
+    tracing::info!(
+        legacy_numeric_read = crate::legacy_numeric_id::legacy_numeric_read_enabled(),
+        legacy_numeric_write = crate::legacy_numeric_id::legacy_numeric_write_enabled(),
+        sunset = crate::legacy_numeric_id::LEGACY_NUMERIC_SUNSET,
+        "numeric_id removal window policy (see docs/plans/tasks-http-api-cleanup.md H5·D)"
+    );
+
     Ok(AppState {
         pool,
         jwt_secret,

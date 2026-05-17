@@ -256,6 +256,19 @@ pub fn conflict_i18n(en_msg: &str, zh_msg: &str) -> ApiError {
     }
 }
 
+/// Bilingual conflict with structured **`details`** (e.g. per-storyboard readiness gates).
+pub fn conflict_with_details_i18n(
+    en_msg: &str,
+    zh_msg: &str,
+    details: serde_json::Value,
+) -> ApiError {
+    ApiError::ConflictWithDetailsI18n {
+        en: en_msg.to_string(),
+        zh: zh_msg.to_string(),
+        details,
+    }
+}
+
 /// 创建重复资源错误（带资源类型和标识符参数）。
 ///
 /// 根据当前请求的 `Accept-Language` 偏好返回对应语言的错误消息。

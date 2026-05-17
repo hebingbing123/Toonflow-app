@@ -1,3 +1,4 @@
+export 'characters.dart';
 export 'compat.dart';
 export 'audit.dart';
 export 'export.dart';
@@ -9,4 +10,6 @@ export 'overview.dart';
 export 'publish.dart';
 export 'rest.dart';
 export 'tts.dart';
+export 'tts_clone.dart';
+export 'timeline.dart';
 export 'visual_manual.dart';

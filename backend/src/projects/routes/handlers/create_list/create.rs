@@ -14,7 +14,8 @@ use crate::workspaces::ensure_personal_workspace;
 use super::super::super::common::{trim_opt, ADV_LOCK_PROJECT_NUMERIC_ID};
 use super::super::super::types::{CreateProjectBody, ProjectRow};
 use super::super::super::validation::{
-    validate_duration_strategy, validate_mode, validate_target_market, validate_target_platforms,
+    validate_duration_strategy, validate_mode, validate_quality_gate_strategy,
+    validate_target_market, validate_target_platforms,
 };
 
 #[utoipa::path(
@@ -118,6 +119,10 @@ pub(crate) async fn create_project(
     if let Some(ref platforms) = target_platforms {
         validate_target_platforms(platforms)?;
     }
+    let quality_gate_strategy = trim_opt(body.quality_gate_strategy);
+    if let Some(ref strategy_val) = quality_gate_strategy {
+        validate_quality_gate_strategy(strategy_val)?;
+    }
 
     let mut tx = pool
         .begin()
@@ -151,9 +156,9 @@ pub(crate) async fn create_project(
           project_brief, brand_bible,
           art_style_pack, story_style_pack,
           target_market, target_platforms, duration_strategy,
-          voice_profile, subtitle_style, bgm_strategy
+          voice_profile, subtitle_style, bgm_strategy, quality_gate_strategy
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, '{}'::jsonb, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, '{}'::jsonb, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25)
         RETURNING id, workspace_id, numeric_id, name, intro, project_type,
                   image_model, image_quality, video_model, art_style,
                   director_manual, mode, video_ratio, create_time_ms,
@@ -200,6 +205,7 @@ pub(crate) async fn create_project(
     .bind(trim_opt(body.voice_profile))
     .bind(trim_opt(body.subtitle_style))
     .bind(trim_opt(body.bgm_strategy))
+    .bind(&quality_gate_strategy)
     .fetch_one(&mut *tx)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;

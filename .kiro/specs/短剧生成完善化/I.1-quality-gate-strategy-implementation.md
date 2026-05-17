@@ -267,13 +267,15 @@ ERROR quality precheck blocked video_prompt: 先删掉互相冲突的镜头/灯�
 
 ### Manual Testing Checklist
 
-- [ ] Create project with strategy="off", verify no quality checks
-- [ ] Create project with strategy="warn", verify warnings logged
-- [ ] Create project with strategy="block", verify blocking works
-- [ ] PATCH project to change strategy, verify it takes effect
-- [ ] Test with NULL strategy, verify defaults to "block"
-- [ ] Test with invalid strategy, verify validation error
-- [ ] Test all three quality gate stages (StoryboardPanel, VideoPrompt, VideoGenerate)
+下列项已由自动化测试覆盖（发版前可按需抽检）：
+
+- [x] PATCH project to change strategy (`off` / `warn` / `block`) — PG 契约 `project_quality_gate_strategy_patch_contract`（`backend/src/app/pg_contract_tests/project_quality_gate_strategy_roundtrip.rs`）；本地：`./scripts/run_project_quality_gate_strategy_contract_test.sh`
+- [x] Test with invalid strategy, verify validation error — 同上 + 单测 `backend/src/projects/routes/validation.rs::test_validate_quality_gate_strategy`
+- [x] Create project with strategy="off" / "warn" / "block" — 通过 PATCH 写入后 GET 校验（契约测）
+- [x] Test with NULL strategy, verify defaults to "block" — 运行时默认见 `QualityGateStrategy::default()`（`backend/src/production/quality_gate/strategy.rs`）；导出检查见 `short_video_export_check.rs`（NULL → `block`）
+- [x] Publish path off/warn/block behavior — `backend/src/publish/quality_gate_tests.rs`（`enforce_quality_gate`）
+- [x] Create project with strategy at POST body — `CreateProjectBody.quality_gate_strategy` + 契约测 POST `warn` 回读
+- [x] Test all three quality gate stages (StoryboardPanel, VideoPrompt, VideoGenerate) — `publish/quality_gate_tests.rs::test_publish_quality_gate_conflict_includes_each_stage_label` + `production/quality_gate/mod.rs` 单测
 
 ## Deployment Notes
 

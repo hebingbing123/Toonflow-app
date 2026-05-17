@@ -40,7 +40,8 @@ pub(super) use super::builder_parts::coverage::{
 // Re-export all public APIs to maintain compatibility
 pub(super) use core::{
     build_project_visual_anchors, build_video_prompt, build_video_prompt_opening_clause,
-    build_video_prompt_with_constraint_pressure, build_video_prompt_with_diagnostics,
+    build_video_prompt_with_constraint_pressure,
+    build_video_prompt_with_constraint_pressure_and_profile, build_video_prompt_with_diagnostics,
 };
 
 pub(super) use anchors::{

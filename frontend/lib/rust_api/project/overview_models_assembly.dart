@@ -164,6 +164,37 @@ class ShortVideoAssemblyEffectiveDefaults {
   }
 }
 
+class ShortVideoAssemblyShotExportGap {
+  const ShortVideoAssemblyShotExportGap({
+    required this.gapCodes,
+    required this.hasBlocking,
+    required this.missingSelectedVideo,
+    required this.missingSubtitle,
+    required this.missingVoiceover,
+    required this.durationAnomaly,
+  });
+
+  final List<String> gapCodes;
+  final bool hasBlocking;
+  final bool missingSelectedVideo;
+  final bool missingSubtitle;
+  final bool missingVoiceover;
+  final bool durationAnomaly;
+
+  factory ShortVideoAssemblyShotExportGap.fromJson(Map<String, dynamic> json) {
+    final codes =
+        json['gap_codes'] as List<dynamic>? ?? const <dynamic>[];
+    return ShortVideoAssemblyShotExportGap(
+      gapCodes: codes.map((e) => e as String).toList(growable: false),
+      hasBlocking: json['has_blocking'] as bool? ?? false,
+      missingSelectedVideo: json['missing_selected_video'] as bool? ?? false,
+      missingSubtitle: json['missing_subtitle'] as bool? ?? false,
+      missingVoiceover: json['missing_voiceover'] as bool? ?? false,
+      durationAnomaly: json['duration_anomaly'] as bool? ?? false,
+    );
+  }
+}
+
 class ShortVideoAssemblyShot {
   const ShortVideoAssemblyShot({
     required this.storyboardId,
@@ -181,6 +212,7 @@ class ShortVideoAssemblyShot {
     this.voiceoverAudioUrl,
     this.voiceoverError,
     required this.voiceoverAssetReady,
+    required this.exportGap,
   });
 
   final String storyboardId;
@@ -198,8 +230,10 @@ class ShortVideoAssemblyShot {
   final String? voiceoverAudioUrl;
   final String? voiceoverError;
   final bool voiceoverAssetReady;
+  final ShortVideoAssemblyShotExportGap exportGap;
 
   factory ShortVideoAssemblyShot.fromJson(Map<String, dynamic> json) {
+    final gapRaw = json['export_gap'];
     return ShortVideoAssemblyShot(
       storyboardId: json['storyboard_id'] as String,
       storyboardNumericId: (json['storyboard_numeric_id'] as num).toInt(),
@@ -220,6 +254,66 @@ class ShortVideoAssemblyShot {
       voiceoverAudioUrl: json['voiceover_audio_url'] as String?,
       voiceoverError: json['voiceover_error'] as String?,
       voiceoverAssetReady: json['voiceover_asset_ready'] as bool,
+      exportGap: gapRaw is Map<String, dynamic>
+          ? ShortVideoAssemblyShotExportGap.fromJson(gapRaw)
+          : const ShortVideoAssemblyShotExportGap(
+              gapCodes: <String>[],
+              hasBlocking: false,
+              missingSelectedVideo: false,
+              missingSubtitle: false,
+              missingVoiceover: false,
+              durationAnomaly: false,
+            ),
+    );
+  }
+}
+
+class ShortVideoPreAssemblySummary {
+  const ShortVideoPreAssemblySummary({
+    required this.shotCount,
+    required this.blockingShotCount,
+    required this.readyVideoCount,
+    required this.readyVoiceoverCount,
+    required this.totalDurationSeconds,
+  });
+
+  final int shotCount;
+  final int blockingShotCount;
+  final int readyVideoCount;
+  final int readyVoiceoverCount;
+  final int totalDurationSeconds;
+
+  factory ShortVideoPreAssemblySummary.fromJson(Map<String, dynamic> json) {
+    return ShortVideoPreAssemblySummary(
+      shotCount: (json['shot_count'] as num).toInt(),
+      blockingShotCount: (json['blocking_shot_count'] as num).toInt(),
+      readyVideoCount: (json['ready_video_count'] as num).toInt(),
+      readyVoiceoverCount: (json['ready_voiceover_count'] as num).toInt(),
+      totalDurationSeconds: (json['total_duration_seconds'] as num).toInt(),
+    );
+  }
+}
+
+class ShortVideoPreAssemblyEnqueueResponse {
+  const ShortVideoPreAssemblyEnqueueResponse({
+    required this.schemaVersion,
+    required this.jobId,
+    required this.summary,
+  });
+
+  final int schemaVersion;
+  final String jobId;
+  final ShortVideoPreAssemblySummary summary;
+
+  factory ShortVideoPreAssemblyEnqueueResponse.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return ShortVideoPreAssemblyEnqueueResponse(
+      schemaVersion: (json['schema_version'] as num).toInt(),
+      jobId: json['job_id'] as String,
+      summary: ShortVideoPreAssemblySummary.fromJson(
+        json['summary'] as Map<String, dynamic>,
+      ),
     );
   }
 }
@@ -423,6 +517,54 @@ class ShortVideoExportCheckIssue {
   }
 }
 
+/// Wave 6：按分镜聚合的导出缺口（**`GET …/short-video-export-check`** **`storyboard_gaps`**）。
+class ShortVideoExportCheckStoryboardGap {
+  const ShortVideoExportCheckStoryboardGap({
+    required this.scriptNumericId,
+    required this.storyboardId,
+    required this.storyboardNumericId,
+    this.sbIndex,
+    required this.gapCodes,
+    required this.hasBlocking,
+    required this.missingSelectedVideo,
+    required this.missingSubtitle,
+    required this.missingVoiceover,
+    required this.durationAnomaly,
+  });
+
+  final int scriptNumericId;
+  final String storyboardId;
+  final int storyboardNumericId;
+  final int? sbIndex;
+  final List<String> gapCodes;
+  final bool hasBlocking;
+  final bool missingSelectedVideo;
+  final bool missingSubtitle;
+  final bool missingVoiceover;
+  final bool durationAnomaly;
+
+  factory ShortVideoExportCheckStoryboardGap.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    final codes =
+        json['gap_codes'] as List<dynamic>? ?? const <dynamic>[];
+    return ShortVideoExportCheckStoryboardGap(
+      scriptNumericId: (json['script_numeric_id'] as num).toInt(),
+      storyboardId: json['storyboard_id'] as String,
+      storyboardNumericId: (json['storyboard_numeric_id'] as num).toInt(),
+      sbIndex: json['sb_index'] == null
+          ? null
+          : (json['sb_index'] as num).toInt(),
+      gapCodes: codes.map((e) => e as String).toList(growable: false),
+      hasBlocking: json['has_blocking'] as bool? ?? false,
+      missingSelectedVideo: json['missing_selected_video'] as bool? ?? false,
+      missingSubtitle: json['missing_subtitle'] as bool? ?? false,
+      missingVoiceover: json['missing_voiceover'] as bool? ?? false,
+      durationAnomaly: json['duration_anomaly'] as bool? ?? false,
+    );
+  }
+}
+
 class QualityGateBlockingReason {
   const QualityGateBlockingReason({
     required this.code,
@@ -485,6 +627,7 @@ class ProjectShortVideoExportCheck {
     required this.exportReady,
     required this.summary,
     required this.issues,
+    this.storyboardGaps = const <ShortVideoExportCheckStoryboardGap>[],
     required this.qualityGate,
   });
 
@@ -493,10 +636,13 @@ class ProjectShortVideoExportCheck {
   final bool exportReady;
   final ShortVideoExportCheckSummary summary;
   final List<ShortVideoExportCheckIssue> issues;
+  final List<ShortVideoExportCheckStoryboardGap> storyboardGaps;
   final ShortVideoExportQualityGate qualityGate;
 
   factory ProjectShortVideoExportCheck.fromJson(Map<String, dynamic> json) {
     final raw = json['issues'] as List<dynamic>? ?? const <dynamic>[];
+    final gapsRaw =
+        json['storyboard_gaps'] as List<dynamic>? ?? const <dynamic>[];
     final qgRaw = json['quality_gate'];
     return ProjectShortVideoExportCheck(
       schemaVersion: (json['schema_version'] as num).toInt(),
@@ -509,6 +655,13 @@ class ProjectShortVideoExportCheck {
           .map(
             (e) =>
                 ShortVideoExportCheckIssue.fromJson(e as Map<String, dynamic>),
+          )
+          .toList(growable: false),
+      storyboardGaps: gapsRaw
+          .map(
+            (e) => ShortVideoExportCheckStoryboardGap.fromJson(
+              e as Map<String, dynamic>,
+            ),
           )
           .toList(growable: false),
       qualityGate: qgRaw is Map<String, dynamic>

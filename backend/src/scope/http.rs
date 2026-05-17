@@ -19,6 +19,17 @@ fn require_authenticated_pool<'a>(
     Ok((uid, pool))
 }
 
+async fn owned_project_id_by_numeric_checked(
+    pool: &PgPool,
+    uid: Uuid,
+    project_numeric_id: i32,
+) -> Result<Uuid, ApiError> {
+    crate::legacy_numeric_id::ensure_legacy_numeric_read_allowed()?;
+    scope::owned_project_id_by_numeric(pool, uid, project_numeric_id)
+        .await
+        .map_err(|e| e.into_api_error())
+}
+
 /// 仅校验 Bearer 并返回当前用户 UUID（不触发任何 DB scope 查询）。
 pub fn require_authenticated_user(state: &AppState, headers: &HeaderMap) -> Result<Uuid, ApiError> {
     require_user_uuid(state, headers)
@@ -43,9 +54,7 @@ pub async fn require_owned_numeric_project_scope<'a>(
         ));
     }
     let (uid, pool) = require_authenticated_pool(state, headers)?;
-    let project_id = scope::owned_project_id_by_numeric(pool, uid, project_numeric_id)
-        .await
-        .map_err(|e| e.into_api_error())?;
+    let project_id = owned_project_id_by_numeric_checked(pool, uid, project_numeric_id).await?;
     Ok((uid, pool, project_id))
 }
 
@@ -76,9 +85,7 @@ pub async fn require_project_read_scope<'a>(
     let (uid, pool) = require_authenticated_pool(state, headers)?;
 
     // First resolve the project UUID from numeric ID
-    let project_id = scope::owned_project_id_by_numeric(pool, uid, project_numeric_id)
-        .await
-        .map_err(|e| e.into_api_error())?;
+    let project_id = owned_project_id_by_numeric_checked(pool, uid, project_numeric_id).await?;
 
     // Use unified workspace member read permission check
     let _scope = crate::projects::routes::common::require_project_workspace_member_scope(
@@ -141,9 +148,7 @@ pub async fn require_project_write_scope_ref<'a>(
         )
     })?;
     let (uid, pool) = require_authenticated_pool(state, headers)?;
-    let project_id = scope::owned_project_id_by_numeric(pool, uid, project_numeric_id)
-        .await
-        .map_err(|e| e.into_api_error())?;
+    let project_id = owned_project_id_by_numeric_checked(pool, uid, project_numeric_id).await?;
     let _scope =
         crate::projects::routes::common::require_project_write_scope(state, uid, project_id)
             .await?;
@@ -392,9 +397,7 @@ pub async fn require_storyboard_write_scope<'a>(
     let (uid, pool) = require_authenticated_pool(state, headers)?;
 
     // First resolve the project UUID from numeric ID
-    let project_id = scope::owned_project_id_by_numeric(pool, uid, project_numeric_id)
-        .await
-        .map_err(|e| e.into_api_error())?;
+    let project_id = owned_project_id_by_numeric_checked(pool, uid, project_numeric_id).await?;
 
     // Use unified workspace member write permission check
     let _scope =
@@ -481,9 +484,7 @@ pub async fn require_storyboard_read_scope<'a>(
     let (uid, pool) = require_authenticated_pool(state, headers)?;
 
     // First resolve the project UUID from numeric ID
-    let project_id = scope::owned_project_id_by_numeric(pool, uid, project_numeric_id)
-        .await
-        .map_err(|e| e.into_api_error())?;
+    let project_id = owned_project_id_by_numeric_checked(pool, uid, project_numeric_id).await?;
 
     // Use unified workspace member read permission check
     let _scope = crate::projects::routes::common::require_project_workspace_member_scope(
@@ -522,9 +523,7 @@ pub async fn require_script_write_scope<'a>(
     let (uid, pool) = require_authenticated_pool(state, headers)?;
 
     // First resolve the project UUID from numeric ID
-    let project_id = scope::owned_project_id_by_numeric(pool, uid, project_numeric_id)
-        .await
-        .map_err(|e| e.into_api_error())?;
+    let project_id = owned_project_id_by_numeric_checked(pool, uid, project_numeric_id).await?;
 
     // Use unified workspace member write permission check
     let _scope =
@@ -556,9 +555,7 @@ pub async fn require_script_read_scope<'a>(
     let (uid, pool) = require_authenticated_pool(state, headers)?;
 
     // First resolve the project UUID from numeric ID
-    let project_id = scope::owned_project_id_by_numeric(pool, uid, project_numeric_id)
-        .await
-        .map_err(|e| e.into_api_error())?;
+    let project_id = owned_project_id_by_numeric_checked(pool, uid, project_numeric_id).await?;
 
     // Use unified workspace member read permission check
     let _scope = crate::projects::routes::common::require_project_workspace_member_scope(

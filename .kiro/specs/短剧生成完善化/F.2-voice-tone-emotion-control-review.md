@@ -461,24 +461,28 @@ Needed:
 ## Implementation Roadmap
 
 ### Phase 1: Foundation (Week 1-2)
-- [ ] Add character entity and voice mapping
-- [ ] Extend voice configuration schema to JSON
-- [ ] Add emotion presets
+
+- [x] Add character entity and voice mapping — `app_project_character` + `app_storyboard.character_id`；`GET/POST/PATCH/DELETE /api/v1/projects/{id}/characters`
+- [x] Extend voice configuration schema to JSON — `short_video/voice/config.rs`（`voice_profile` 字符串或 JSON）
+- [x] Add emotion presets — `emotion.rs` + `GET /api/v1/tts/emotion-presets`
 
 ### Phase 2: Provider Integration (Week 3-4)
-- [ ] Integrate Azure TTS with SSML support
-- [ ] Add voice preview endpoint
-- [ ] Update voiceover worker for structured config
+
+- [x] Integrate Azure TTS with SSML support — `llm/azure/speech.rs` + `voice/ssml.rs`（需 `AZURE_SPEECH_KEY` / `AZURE_SPEECH_REGION`）
+- [x] Add voice preview endpoint — `POST /api/v1/tts/preview`、`POST /api/v1/production/voiceover/preview`
+- [x] Update voiceover worker for structured config — `jobs/worker/voiceover.rs` 使用 `synthesize_speech`
 
 ### Phase 3: Context Integration (Week 5-6)
-- [ ] Pass scene metadata to voiceover worker
-- [ ] Map scene context to voice parameters
-- [ ] Add emotion-to-style mapping logic
+
+- [x] Pass scene metadata to voiceover worker — `scene_context_from_metadata` + storyboard `metadata`
+- [x] Map scene context to voice parameters — `SceneVoiceContext::infer_emotion`
+- [x] Add emotion-to-style mapping logic — `VoiceEmotion::azure_style` / OpenAI speed 代理
 
 ### Phase 4: Advanced Features (Week 7+)
-- [ ] Multi-track dialogue assembly
-- [ ] Seedance 2.0 voice dimension support
-- [ ] Voice cloning integration (optional)
+
+- [x] Multi-track dialogue assembly — `dialogue.rs` 解析说话人；worker `multi_track` 分轨合成 + `metadata.tracks`
+- [x] Seedance 2.0 voice dimension support — `seedance.rs`（`build_seedance_voice_desc` + 九维标签）
+- [x] Voice cloning integration (optional) — `POST /api/v1/tts/clone-voice` 返回 **501**；`cloneVoiceId` 在合成时显式拒绝
 
 ## Conclusion
 

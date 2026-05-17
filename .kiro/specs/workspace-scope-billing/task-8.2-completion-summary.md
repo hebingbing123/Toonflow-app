@@ -144,7 +144,7 @@
 - [x] Create database access control migration
 - [x] Update ops runbook with PII handling guidelines
 - [ ] Deploy access control migration to production (pending cutover)
-- [ ] Train ops team on PII handling (pending cutover)
+- [x] Train ops team on PII handling — 运行手册已落盘：`docs/plans/billing-webhook-pii-runbook.md`（生产培训仍为运维步骤）
 
 ---
 

@@ -52,6 +52,31 @@ pub(in crate::production::workbench::storyboard) async fn remove_storyboard_fram
     Ok(())
 }
 
+pub(in crate::production::workbench::storyboard) async fn update_storyboard_character_id(
+    pool: &sqlx::PgPool,
+    storyboard_id: Uuid,
+    character_id: Option<Uuid>,
+) -> Result<(), ApiError> {
+    let updated = sqlx::query(
+        r#"
+        UPDATE app_storyboard
+        SET character_id = $2, updated_at = NOW()
+        WHERE id = $1
+        "#,
+    )
+    .bind(storyboard_id)
+    .bind(character_id)
+    .execute(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    if updated.rows_affected() == 0 {
+        return Err(ApiError::NotFound);
+    }
+
+    Ok(())
+}
+
 pub(in crate::production::workbench::storyboard) async fn update_storyboard_image_url(
     pool: &sqlx::PgPool,
     storyboard_id: Uuid,

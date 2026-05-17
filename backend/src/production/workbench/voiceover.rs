@@ -27,6 +27,12 @@ pub(in crate::production) struct WorkbenchGenerateVoiceoverBody {
     pub(crate) voice: Option<String>,
     #[serde(default)]
     pub(crate) speed: Option<f32>,
+    #[serde(default)]
+    pub(crate) emotion: Option<String>,
+    #[serde(default)]
+    pub(crate) provider: Option<String>,
+    #[serde(default)]
+    pub(crate) multi_track: Option<bool>,
 }
 
 #[derive(Debug, Serialize)]
@@ -152,6 +158,25 @@ pub(in crate::production) async fn post_workbench_generate_voiceover(
         }
         if let Some(speed) = body.speed.filter(|value| *value >= 0.25 && *value <= 4.0) {
             payload["speed"] = json!(speed);
+        }
+        if let Some(emotion) = body
+            .emotion
+            .as_deref()
+            .map(str::trim)
+            .filter(|value| !value.is_empty())
+        {
+            payload["emotion"] = json!(emotion);
+        }
+        if let Some(provider) = body
+            .provider
+            .as_deref()
+            .map(str::trim)
+            .filter(|value| !value.is_empty())
+        {
+            payload["provider"] = json!(provider);
+        }
+        if body.multi_track == Some(true) {
+            payload["multi_track"] = json!(true);
         }
         let row = enqueue_generation_job(
             pool,
