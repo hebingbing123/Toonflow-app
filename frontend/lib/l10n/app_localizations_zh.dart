@@ -938,7 +938,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get productShellDevCredentialsHint =>
-      '本地开发：admin@openflow.local / admin123';
+      '本地开发：admin@toonflow.local / admin123';
 
   @override
   String get productShellMoreMenu => '更多';
@@ -14831,6 +14831,42 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shortVideoSpacePublishExportCheckFacetDurationAnomaly => '时长异常';
 
   @override
+  String get shortVideoSpacePublishExportCheckFacetMissingCover => '封面缺失';
+
+  @override
+  String get shortVideoSpacePublishExportCheckFacetMissingPlatformCopy =>
+      '平台文案缺失';
+
+  @override
+  String get shortVideoSpacePublishExportCheckFacetMissingTargetPlatforms =>
+      '未配置目标平台';
+
+  @override
+  String get shortVideoSpacePublishExportCheckPublishSectionTitle =>
+      '发布就绪（封面 / 平台）';
+
+  @override
+  String shortVideoSpacePublishExportCheckPublishPlatformGapTitle(
+    String platformId,
+  ) {
+    return '$platformId';
+  }
+
+  @override
+  String get shortVideoSpacePublishExportIssueMissingCover => '缺少封面';
+
+  @override
+  String get shortVideoSpacePublishExportIssueMissingTargetPlatforms =>
+      '未配置目标平台';
+
+  @override
+  String get shortVideoSpacePublishExportIssueMissingPlatformCopy =>
+      '缺少平台差异化文案';
+
+  @override
+  String get shortVideoSpacePublishExportIssueUnknownPlatform => '未知平台';
+
+  @override
   String get shortVideoSpacePublishCandidateLoadingHeadline => '正在读取项目资产…';
 
   @override
@@ -20171,7 +20207,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get statusPageIntroInternalSuffix =>
-      ' 当前 dart-define 带 OPENFLOW_INTERNAL_OPS_TOKEN，因此附带内部队列统计。';
+      ' 当前 dart-define 带 TOONFLOW_INTERNAL_OPS_TOKEN，因此附带内部队列统计。';
 
   @override
   String get statusPageRefreshing => '刷新中…';
@@ -20491,7 +20527,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get shellJobQueueStatsSubtitle =>
-      '使用 OPENFLOW_INTERNAL_OPS_TOKEN dart-define → GET /api/v1/jobs/queue/stats';
+      '使用 TOONFLOW_INTERNAL_OPS_TOKEN dart-define → GET /api/v1/jobs/queue/stats';
 
   @override
   String shellJobQueueStatsStatsLine(

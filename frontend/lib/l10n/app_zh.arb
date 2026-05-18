@@ -495,7 +495,7 @@
   "productNavSectionTitle": "产品导航",
   "productNavShortVideoSpace": "短视频 Space",
   "productShellLoginTagline": "AI 短剧工作室 — 从剧本到发布一站完成。",
-  "productShellDevCredentialsHint": "本地开发：admin@openflow.local / admin123",
+  "productShellDevCredentialsHint": "本地开发：admin@toonflow.local / admin123",
   "productShellMoreMenu": "更多",
   "studioAppBarNotifications": "通知",
   "studioAppBarSettings": "账户与设置",
@@ -11688,6 +11688,20 @@
   "shortVideoSpacePublishExportCheckFacetMissingSubtitle": "字幕 / 口播缺失",
   "shortVideoSpacePublishExportCheckFacetMissingVoiceover": "旁白未就绪",
   "shortVideoSpacePublishExportCheckFacetDurationAnomaly": "时长异常",
+  "shortVideoSpacePublishExportCheckFacetMissingCover": "封面缺失",
+  "shortVideoSpacePublishExportCheckFacetMissingPlatformCopy": "平台文案缺失",
+  "shortVideoSpacePublishExportCheckFacetMissingTargetPlatforms": "未配置目标平台",
+  "shortVideoSpacePublishExportCheckPublishSectionTitle": "发布就绪（封面 / 平台）",
+  "shortVideoSpacePublishExportCheckPublishPlatformGapTitle": "{platformId}",
+  "@shortVideoSpacePublishExportCheckPublishPlatformGapTitle": {
+    "placeholders": {
+      "platformId": { "type": "String" }
+    }
+  },
+  "shortVideoSpacePublishExportIssueMissingCover": "缺少封面",
+  "shortVideoSpacePublishExportIssueMissingTargetPlatforms": "未配置目标平台",
+  "shortVideoSpacePublishExportIssueMissingPlatformCopy": "缺少平台差异化文案",
+  "shortVideoSpacePublishExportIssueUnknownPlatform": "未知平台",
   "shortVideoSpacePublishCandidateLoadingHeadline": "正在读取项目资产…",
   "shortVideoSpacePublishCandidateLoadingDetail": "用于统计候选 workflow：pending / linked / ignored（与 PATCH 资产一致）。",
   "shortVideoSpacePublishCandidateUnavailableHeadline": "候选资产摘要暂不可用。",
@@ -15870,7 +15884,7 @@
   "statusPageRefreshTooltip": "刷新",
   "statusPageHeadline": "公开只读状态页",
   "statusPageIntroBase": "聚合 /health、/api/v1/health、/api/v1/ready、/api/v1/version。",
-  "statusPageIntroInternalSuffix": " 当前 dart-define 带 OPENFLOW_INTERNAL_OPS_TOKEN，因此附带内部队列统计。",
+  "statusPageIntroInternalSuffix": " 当前 dart-define 带 TOONFLOW_INTERNAL_OPS_TOKEN，因此附带内部队列统计。",
   "statusPageRefreshing": "刷新中…",
   "statusPageRefreshAction": "刷新状态",
   "statusPageLastUpdated": "最近刷新：{time}",
@@ -16155,7 +16169,7 @@
   "benchmarkTrendsDataSummary": "趋势数据：{weeks} 周",
   "benchmarkLabelGateDecisionNote": "决策说明",
   "shellJobQueueStatsTitle": "任务队列统计（内部）",
-  "shellJobQueueStatsSubtitle": "使用 OPENFLOW_INTERNAL_OPS_TOKEN dart-define → GET /api/v1/jobs/queue/stats",
+  "shellJobQueueStatsSubtitle": "使用 TOONFLOW_INTERNAL_OPS_TOKEN dart-define → GET /api/v1/jobs/queue/stats",
   "@shellJobQueueStatsStatsLine": {
     "placeholders": {
       "pending": {

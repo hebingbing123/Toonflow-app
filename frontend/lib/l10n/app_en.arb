@@ -495,7 +495,7 @@
   "productNavSectionTitle": "Product navigation",
   "productNavShortVideoSpace": "Short-video Space",
   "productShellLoginTagline": "AI short-drama studio — script to publish in one place.",
-  "productShellDevCredentialsHint": "Local dev: admin@openflow.local / admin123",
+  "productShellDevCredentialsHint": "Local dev: admin@toonflow.local / admin123",
   "productShellMoreMenu": "More",
   "studioAppBarNotifications": "Notifications",
   "studioAppBarSettings": "Account & settings",
@@ -11691,6 +11691,20 @@
   "shortVideoSpacePublishExportCheckFacetMissingSubtitle": "Missing subtitle / narration",
   "shortVideoSpacePublishExportCheckFacetMissingVoiceover": "Voiceover not ready",
   "shortVideoSpacePublishExportCheckFacetDurationAnomaly": "Duration anomaly",
+  "shortVideoSpacePublishExportCheckFacetMissingCover": "Missing cover",
+  "shortVideoSpacePublishExportCheckFacetMissingPlatformCopy": "Missing platform copy",
+  "shortVideoSpacePublishExportCheckFacetMissingTargetPlatforms": "No target platforms",
+  "shortVideoSpacePublishExportCheckPublishSectionTitle": "Publish readiness (cover / platforms)",
+  "shortVideoSpacePublishExportCheckPublishPlatformGapTitle": "{platformId}",
+  "@shortVideoSpacePublishExportCheckPublishPlatformGapTitle": {
+    "placeholders": {
+      "platformId": { "type": "String" }
+    }
+  },
+  "shortVideoSpacePublishExportIssueMissingCover": "Missing cover",
+  "shortVideoSpacePublishExportIssueMissingTargetPlatforms": "No target platforms configured",
+  "shortVideoSpacePublishExportIssueMissingPlatformCopy": "Missing per-platform copy block",
+  "shortVideoSpacePublishExportIssueUnknownPlatform": "Unknown platform",
   "shortVideoSpacePublishCandidateLoadingHeadline": "Loading project assets…",
   "shortVideoSpacePublishCandidateLoadingDetail": "Used to count candidate workflow: pending / linked / ignored (consistent with PATCH asset).",
   "shortVideoSpacePublishCandidateUnavailableHeadline": "Candidate asset summary unavailable.",
@@ -15875,7 +15889,7 @@
   "statusPageRefreshTooltip": "Refresh",
   "statusPageHeadline": "Public read-only status",
   "statusPageIntroBase": "Aggregates /health, /api/v1/health, /api/v1/ready, and /api/v1/version.",
-  "statusPageIntroInternalSuffix": " OPENFLOW_INTERNAL_OPS_TOKEN is set via dart-define, so internal queue stats are included.",
+  "statusPageIntroInternalSuffix": " TOONFLOW_INTERNAL_OPS_TOKEN is set via dart-define, so internal queue stats are included.",
   "statusPageRefreshing": "Refreshing…",
   "statusPageRefreshAction": "Refresh status",
   "statusPageLastUpdated": "Last refreshed: {time}",
@@ -16160,7 +16174,7 @@
   "benchmarkTrendsDataSummary": "Trend data: {weeks} weeks",
   "benchmarkLabelGateDecisionNote": "Decision note",
   "shellJobQueueStatsTitle": "Job queue stats (internal)",
-  "shellJobQueueStatsSubtitle": "Uses OPENFLOW_INTERNAL_OPS_TOKEN dart-define → GET /api/v1/jobs/queue/stats",
+  "shellJobQueueStatsSubtitle": "Uses TOONFLOW_INTERNAL_OPS_TOKEN dart-define → GET /api/v1/jobs/queue/stats",
   "@shellJobQueueStatsStatsLine": {
     "placeholders": {
       "pending": {

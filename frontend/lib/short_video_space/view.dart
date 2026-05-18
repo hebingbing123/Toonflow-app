@@ -387,6 +387,19 @@ class ShortVideoExportCheckStoryboardGapUi {
   final List<String> codeLabels;
 }
 
+/// 发布封面 / 平台 facet（**`publish_facets.platform_facets`**）。
+class ShortVideoExportPublishPlatformGapUi {
+  const ShortVideoExportPublishPlatformGapUi({
+    required this.title,
+    required this.facetSummary,
+    required this.hasBlocking,
+  });
+
+  final String title;
+  final String facetSummary;
+  final bool hasBlocking;
+}
+
 /// D4：**导出前检查**摘要（**`GET …/short-video-export-check`**）。
 class ShortVideoExportCheckPanelUi {
   const ShortVideoExportCheckPanelUi({
@@ -398,6 +411,10 @@ class ShortVideoExportCheckPanelUi {
     this.qualityGateLine = '',
     this.qualityGateBlockingLines = const <String>[],
     this.storyboardGapEntries = const <ShortVideoExportCheckStoryboardGapUi>[],
+    this.publishPlatformGapEntries =
+        const <ShortVideoExportPublishPlatformGapUi>[],
+    this.publishBlockingLines = const <String>[],
+    this.publishWarningLines = const <String>[],
     this.blockingLines = const <String>[],
     this.warningLines = const <String>[],
     this.detail = '',
@@ -412,6 +429,9 @@ class ShortVideoExportCheckPanelUi {
   final String qualityGateLine;
   final List<String> qualityGateBlockingLines;
   final List<ShortVideoExportCheckStoryboardGapUi> storyboardGapEntries;
+  final List<ShortVideoExportPublishPlatformGapUi> publishPlatformGapEntries;
+  final List<String> publishBlockingLines;
+  final List<String> publishWarningLines;
   final List<String> blockingLines;
   final List<String> warningLines;
   final String detail;

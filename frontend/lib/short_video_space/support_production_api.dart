@@ -479,6 +479,18 @@ AssemblyGateUi buildAssemblyGateUi({
   for (final line in qgBlocking.take(3)) {
     reasonLines.add(line.message);
   }
+  if (exportCheck.publishFacets.missingTargetPlatforms) {
+    reasonLines.add(l10n.shortVideoSpacePublishExportCheckFacetMissingTargetPlatforms);
+  }
+  if (exportCheck.publishFacets.missingCover) {
+    reasonLines.add(l10n.shortVideoSpacePublishExportCheckFacetMissingCover);
+  }
+  for (final pf in exportCheck.publishFacets.platformFacets.where((f) => f.hasBlocking).take(3)) {
+    final labels = shortVideoExportPublishFacetLabels(l10n, pf);
+    if (labels.isNotEmpty) {
+      reasonLines.add('${pf.platformId}: ${labels.join(' · ')}');
+    }
+  }
   for (final g in exportCheck.storyboardGaps.where((x) => x.hasBlocking).take(5)) {
     final facets = shortVideoExportGapFacetLabels(l10n, g);
     final summary = facets.isEmpty

@@ -13,6 +13,7 @@ use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::jobs::{enqueue_generation_job, JobRow, JOB_KIND_VIDEO_EXPORT};
 use crate::projects::routes::common::require_project_workspace_member_scope;
+use crate::publish::export_check_facets::load_publish_export_facet_evaluation;
 use crate::short_video::assembly_query::{
     fetch_project_assembly_flat_rows, fetch_project_assembly_header,
 };
@@ -93,6 +94,19 @@ pub(crate) async fn project_short_video_export_by_id(
         return Err(crate::error::bad_request_i18n(
             "export blocked: resolve export-check issues first",
             "导出被阻断：请先解决导出前检查中的问题",
+        ));
+    }
+
+    let publish_eval = load_publish_export_facet_evaluation(pool, resolved_project_id).await?;
+    let publish_blocking = publish_eval
+        .issues
+        .iter()
+        .filter(|i| i.severity == "blocking")
+        .count();
+    if publish_blocking > 0 {
+        return Err(crate::error::bad_request_i18n(
+            "export blocked: resolve publish cover/platform issues first",
+            "导出被阻断：请先配置封面与发布平台信息",
         ));
     }
 

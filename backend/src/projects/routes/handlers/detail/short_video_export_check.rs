@@ -11,6 +11,7 @@ use uuid::Uuid;
 use crate::auth::require_user_uuid;
 use crate::error::ApiError;
 use crate::projects::routes::common::require_project_workspace_member_scope;
+use crate::publish::export_check_facets::load_publish_export_facet_evaluation;
 use crate::short_video::export_gaps::{
     evaluate_export_gap_issues, gap_facet_flags, ExportGapRowInput,
 };
@@ -145,8 +146,22 @@ pub(crate) async fn project_short_video_export_check_by_id(
         }
     }
 
-    let blocking_issue_count = issues.iter().filter(|i| i.severity == "blocking").count() as i64;
-    let warning_issue_count = issues.iter().filter(|i| i.severity == "warning").count() as i64;
+    let publish_eval = load_publish_export_facet_evaluation(pool, resolved_project_id).await?;
+    let publish_blocking_count = publish_eval
+        .issues
+        .iter()
+        .filter(|i| i.severity == "blocking")
+        .count() as i64;
+    let publish_warning_count = publish_eval
+        .issues
+        .iter()
+        .filter(|i| i.severity == "warning")
+        .count() as i64;
+
+    let blocking_issue_count =
+        issues.iter().filter(|i| i.severity == "blocking").count() as i64 + publish_blocking_count;
+    let warning_issue_count =
+        issues.iter().filter(|i| i.severity == "warning").count() as i64 + publish_warning_count;
     let export_ready = blocking_issue_count == 0;
 
     let pending_review_bad_case_count: i64 = sqlx::query_scalar(
@@ -192,14 +207,25 @@ pub(crate) async fn project_short_video_export_check_by_id(
             });
         }
 
-        if blocking_issue_count > 0 {
+        let storyboard_blocking = issues.iter().filter(|i| i.severity == "blocking").count() as i64;
+        if storyboard_blocking > 0 {
             blocking_reasons.push(QualityGateBlockingReason {
                 code: "blocking_export_issues".to_string(),
                 message: format!(
-                    "{} blocking issue(s) found in export check. Please resolve before export.",
-                    blocking_issue_count
+                    "{} blocking storyboard issue(s) in export check. Please resolve before export.",
+                    storyboard_blocking
                 ),
                 rework_route: Some("/short-video-space/assembly".to_string()),
+            });
+        }
+        if publish_blocking_count > 0 {
+            blocking_reasons.push(QualityGateBlockingReason {
+                code: "blocking_publish_export_issues".to_string(),
+                message: format!(
+                    "{} blocking publish issue(s) (cover/platform). Configure publish draft before export.",
+                    publish_blocking_count
+                ),
+                rework_route: Some("/short-video-space/publish".to_string()),
             });
         }
     }
@@ -242,6 +268,8 @@ pub(crate) async fn project_short_video_export_check_by_id(
         },
         issues,
         storyboard_gaps,
+        publish_facets: publish_eval.facets,
+        publish_issues: publish_eval.issues,
         quality_gate: ShortVideoExportQualityGate {
             schema_version: 1,
             strategy,

@@ -12,6 +12,7 @@ mod callback_validation;
 mod callback_validation_tests;
 mod copy_cache;
 mod copy_validate;
+pub(crate) mod export_check_facets;
 mod handlers;
 mod handlers_f;
 #[cfg(test)]

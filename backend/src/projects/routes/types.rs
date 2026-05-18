@@ -860,6 +860,10 @@ pub struct ProjectShortVideoExportCheckResponse {
     pub issues: Vec<ShortVideoExportCheckIssue>,
     /// 按分镜聚合的导出缺口（与 **`issues`** 一致；空表示无缺口）。
     pub storyboard_gaps: Vec<ShortVideoExportCheckStoryboardGap>,
+    /// 封面 / 平台发布就绪 facet（与 publish prepare-check 同源）。
+    pub publish_facets: crate::publish::export_check_facets::ShortVideoExportPublishFacets,
+    /// 项目级发布阻断/警告（封面、平台矩阵、platform_copy 等）。
+    pub publish_issues: Vec<crate::publish::export_check_facets::ShortVideoExportPublishIssue>,
     pub quality_gate: ShortVideoExportQualityGate,
 }
 

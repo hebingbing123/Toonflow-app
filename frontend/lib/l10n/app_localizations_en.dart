@@ -1002,7 +1002,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get productShellDevCredentialsHint =>
-      'Local dev: admin@openflow.local / admin123';
+      'Local dev: admin@toonflow.local / admin123';
 
   @override
   String get productShellMoreMenu => 'More';
@@ -15574,6 +15574,44 @@ class AppLocalizationsEn extends AppLocalizations {
       'Duration anomaly';
 
   @override
+  String get shortVideoSpacePublishExportCheckFacetMissingCover =>
+      'Missing cover';
+
+  @override
+  String get shortVideoSpacePublishExportCheckFacetMissingPlatformCopy =>
+      'Missing platform copy';
+
+  @override
+  String get shortVideoSpacePublishExportCheckFacetMissingTargetPlatforms =>
+      'No target platforms';
+
+  @override
+  String get shortVideoSpacePublishExportCheckPublishSectionTitle =>
+      'Publish readiness (cover / platforms)';
+
+  @override
+  String shortVideoSpacePublishExportCheckPublishPlatformGapTitle(
+    String platformId,
+  ) {
+    return '$platformId';
+  }
+
+  @override
+  String get shortVideoSpacePublishExportIssueMissingCover => 'Missing cover';
+
+  @override
+  String get shortVideoSpacePublishExportIssueMissingTargetPlatforms =>
+      'No target platforms configured';
+
+  @override
+  String get shortVideoSpacePublishExportIssueMissingPlatformCopy =>
+      'Missing per-platform copy block';
+
+  @override
+  String get shortVideoSpacePublishExportIssueUnknownPlatform =>
+      'Unknown platform';
+
+  @override
   String get shortVideoSpacePublishCandidateLoadingHeadline =>
       'Loading project assets…';
 
@@ -21172,7 +21210,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get statusPageIntroInternalSuffix =>
-      ' OPENFLOW_INTERNAL_OPS_TOKEN is set via dart-define, so internal queue stats are included.';
+      ' TOONFLOW_INTERNAL_OPS_TOKEN is set via dart-define, so internal queue stats are included.';
 
   @override
   String get statusPageRefreshing => 'Refreshing…';
@@ -21493,7 +21531,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shellJobQueueStatsSubtitle =>
-      'Uses OPENFLOW_INTERNAL_OPS_TOKEN dart-define → GET /api/v1/jobs/queue/stats';
+      'Uses TOONFLOW_INTERNAL_OPS_TOKEN dart-define → GET /api/v1/jobs/queue/stats';
 
   @override
   String shellJobQueueStatsStatsLine(

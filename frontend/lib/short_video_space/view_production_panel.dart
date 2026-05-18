@@ -424,6 +424,53 @@ class _ProductionPanel extends StatelessWidget {
                         ),
                       ),
                   ],
+                  if (exportCheckPanelUi.publishPlatformGapEntries.isNotEmpty ||
+                      exportCheckPanelUi.publishBlockingLines.isNotEmpty ||
+                      exportCheckPanelUi.publishWarningLines.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      l10n.shortVideoSpacePublishExportCheckPublishSectionTitle,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: outline,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    for (final gap
+                        in exportCheckPanelUi.publishPlatformGapEntries)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Text(
+                          '${gap.title}: ${gap.facetSummary}',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: gap.hasBlocking
+                                ? theme.colorScheme.error
+                                : Colors.orange,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    for (final line in exportCheckPanelUi.publishBlockingLines)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Text(
+                          line,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.error,
+                          ),
+                        ),
+                      ),
+                    for (final line in exportCheckPanelUi.publishWarningLines)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Text(
+                          line,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: Colors.orange,
+                          ),
+                        ),
+                      ),
+                  ],
                   if (exportCheckPanelUi.storyboardGapEntries.isNotEmpty) ...[
                     const SizedBox(height: 8),
                     Text(

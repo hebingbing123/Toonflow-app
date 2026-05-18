@@ -30,6 +30,20 @@ String shortVideoQualityStageLabel(AppLocalizations l10n, String stage) {
 }
 
 /// Maps short-video-export-check machine code to localized labels (for tests and pure logic).
+List<String> shortVideoExportPublishFacetLabels(
+  AppLocalizations l10n,
+  ShortVideoExportPlatformFacet facet,
+) {
+  final out = <String>[];
+  if (facet.missingCover) {
+    out.add(l10n.shortVideoSpacePublishExportCheckFacetMissingCover);
+  }
+  if (facet.missingPlatformCopy) {
+    out.add(l10n.shortVideoSpacePublishExportCheckFacetMissingPlatformCopy);
+  }
+  return out;
+}
+
 List<String> shortVideoExportGapFacetLabels(
   AppLocalizations l10n,
   ShortVideoExportCheckStoryboardGap gap,
@@ -111,9 +125,44 @@ String shortVideoExportIssueLabel(AppLocalizations l10n, String code) {
       return l10n.shortVideoSpacePublishExportIssueDurationUnparsable;
     case 'completion_uncertain':
       return l10n.shortVideoSpacePublishExportIssueCompletionUncertain;
+    case 'missing_cover':
+      return l10n.shortVideoSpacePublishExportIssueMissingCover;
+    case 'missing_target_platforms':
+      return l10n.shortVideoSpacePublishExportIssueMissingTargetPlatforms;
+    case 'missing_platform_copy_block':
+      return l10n.shortVideoSpacePublishExportIssueMissingPlatformCopy;
+    case 'unknown_platform':
+      return l10n.shortVideoSpacePublishExportIssueUnknownPlatform;
     default:
       return code;
   }
+}
+
+List<ShortVideoExportPublishPlatformGapUi> buildShortVideoExportPublishPlatformGapUi(
+  AppLocalizations l10n,
+  ShortVideoExportPublishFacets facets, {
+  bool blockingOnly = false,
+}) {
+  var platformFacets = facets.platformFacets;
+  if (blockingOnly) {
+    platformFacets =
+        platformFacets.where((f) => f.hasBlocking).toList(growable: false);
+  }
+  return platformFacets
+      .map((f) {
+        final labels = shortVideoExportPublishFacetLabels(l10n, f);
+        final facetSummary = labels.isEmpty
+            ? f.gapCodes.map((c) => shortVideoExportIssueLabel(l10n, c)).join(' · ')
+            : labels.join(' · ');
+        return ShortVideoExportPublishPlatformGapUi(
+          title: l10n.shortVideoSpacePublishExportCheckPublishPlatformGapTitle(
+            f.platformId,
+          ),
+          facetSummary: facetSummary,
+          hasBlocking: f.hasBlocking,
+        );
+      })
+      .toList(growable: false);
 }
 
 String shortVideoQualityStageLabelZh(BuildContext context, String stage) {
@@ -515,6 +564,33 @@ ShortVideoExportCheckPanelUi buildShortVideoExportCheckPanelUi({
           blockingOnly: true,
         )
       : const <ShortVideoExportCheckStoryboardGapUi>[];
+  final publishPlatformGapEntries = buildShortVideoExportPublishPlatformGapUi(
+    l10n,
+    exportCheck.publishFacets,
+    blockingOnly: true,
+  );
+  final publishBlockingLines = exportCheck.publishIssues
+      .where((i) => i.severity == 'blocking')
+      .take(8)
+      .map((i) {
+        final platform = (i.platformId ?? '').trim();
+        final platformPart = platform.isEmpty
+            ? ''
+            : ' · $platform';
+        return '${shortVideoExportIssueLabel(l10n, i.code)}$platformPart · ${i.detail}';
+      })
+      .toList(growable: false);
+  final publishWarningLines = exportCheck.publishIssues
+      .where((i) => i.severity == 'warning')
+      .take(8)
+      .map((i) {
+        final platform = (i.platformId ?? '').trim();
+        final platformPart = platform.isEmpty
+            ? ''
+            : ' · $platform';
+        return '${shortVideoExportIssueLabel(l10n, i.code)}$platformPart · ${i.detail}';
+      })
+      .toList(growable: false);
   final blockingLines = exportCheck.issues
       .where((i) => i.severity == 'blocking')
       .take(14)
@@ -559,6 +635,9 @@ ShortVideoExportCheckPanelUi buildShortVideoExportCheckPanelUi({
     qualityGateLine: qualityGateLine,
     qualityGateBlockingLines: qualityGateBlockingLines,
     storyboardGapEntries: storyboardGapEntries,
+    publishPlatformGapEntries: publishPlatformGapEntries,
+    publishBlockingLines: publishBlockingLines,
+    publishWarningLines: publishWarningLines,
     blockingLines: storyboardGapEntries.isEmpty ? blockingLines : const <String>[],
     warningLines: warningLines,
     detail: detail,

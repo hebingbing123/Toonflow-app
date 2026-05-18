@@ -847,6 +847,86 @@ class ShortVideoExportQualityGate {
   }
 }
 
+/// Publish cover/platform facet on export-check (**`publish_facets`**).
+class ShortVideoExportPublishFacets {
+  const ShortVideoExportPublishFacets({
+    required this.missingCover,
+    required this.missingTargetPlatforms,
+    this.platformFacets = const <ShortVideoExportPlatformFacet>[],
+  });
+
+  final bool missingCover;
+  final bool missingTargetPlatforms;
+  final List<ShortVideoExportPlatformFacet> platformFacets;
+
+  factory ShortVideoExportPublishFacets.fromJson(Map<String, dynamic> json) {
+    final facetsRaw =
+        json['platform_facets'] as List<dynamic>? ?? const <dynamic>[];
+    return ShortVideoExportPublishFacets(
+      missingCover: json['missing_cover'] as bool? ?? false,
+      missingTargetPlatforms:
+          json['missing_target_platforms'] as bool? ?? false,
+      platformFacets: facetsRaw
+          .map(
+            (e) => ShortVideoExportPlatformFacet.fromJson(
+              e as Map<String, dynamic>,
+            ),
+          )
+          .toList(growable: false),
+    );
+  }
+}
+
+class ShortVideoExportPlatformFacet {
+  const ShortVideoExportPlatformFacet({
+    required this.platformId,
+    required this.missingCover,
+    required this.missingPlatformCopy,
+    required this.hasBlocking,
+    required this.gapCodes,
+  });
+
+  final String platformId;
+  final bool missingCover;
+  final bool missingPlatformCopy;
+  final bool hasBlocking;
+  final List<String> gapCodes;
+
+  factory ShortVideoExportPlatformFacet.fromJson(Map<String, dynamic> json) {
+    final codes = json['gap_codes'] as List<dynamic>? ?? const <dynamic>[];
+    return ShortVideoExportPlatformFacet(
+      platformId: json['platform_id'] as String? ?? '',
+      missingCover: json['missing_cover'] as bool? ?? false,
+      missingPlatformCopy: json['missing_platform_copy'] as bool? ?? false,
+      hasBlocking: json['has_blocking'] as bool? ?? false,
+      gapCodes: codes.map((e) => e as String).toList(growable: false),
+    );
+  }
+}
+
+class ShortVideoExportPublishIssue {
+  const ShortVideoExportPublishIssue({
+    required this.severity,
+    required this.code,
+    required this.detail,
+    this.platformId,
+  });
+
+  final String severity;
+  final String code;
+  final String detail;
+  final String? platformId;
+
+  factory ShortVideoExportPublishIssue.fromJson(Map<String, dynamic> json) {
+    return ShortVideoExportPublishIssue(
+      severity: json['severity'] as String? ?? 'warning',
+      code: json['code'] as String? ?? '',
+      detail: json['detail'] as String? ?? '',
+      platformId: json['platform_id'] as String?,
+    );
+  }
+}
+
 class ProjectShortVideoExportCheck {
   const ProjectShortVideoExportCheck({
     required this.schemaVersion,
@@ -855,6 +935,11 @@ class ProjectShortVideoExportCheck {
     required this.summary,
     required this.issues,
     this.storyboardGaps = const <ShortVideoExportCheckStoryboardGap>[],
+    this.publishFacets = const ShortVideoExportPublishFacets(
+      missingCover: false,
+      missingTargetPlatforms: false,
+    ),
+    this.publishIssues = const <ShortVideoExportPublishIssue>[],
     required this.qualityGate,
   });
 
@@ -864,12 +949,17 @@ class ProjectShortVideoExportCheck {
   final ShortVideoExportCheckSummary summary;
   final List<ShortVideoExportCheckIssue> issues;
   final List<ShortVideoExportCheckStoryboardGap> storyboardGaps;
+  final ShortVideoExportPublishFacets publishFacets;
+  final List<ShortVideoExportPublishIssue> publishIssues;
   final ShortVideoExportQualityGate qualityGate;
 
   factory ProjectShortVideoExportCheck.fromJson(Map<String, dynamic> json) {
     final raw = json['issues'] as List<dynamic>? ?? const <dynamic>[];
     final gapsRaw =
         json['storyboard_gaps'] as List<dynamic>? ?? const <dynamic>[];
+    final publishRaw =
+        json['publish_issues'] as List<dynamic>? ?? const <dynamic>[];
+    final publishFacetsRaw = json['publish_facets'];
     final qgRaw = json['quality_gate'];
     return ProjectShortVideoExportCheck(
       schemaVersion: (json['schema_version'] as num).toInt(),
@@ -887,6 +977,19 @@ class ProjectShortVideoExportCheck {
       storyboardGaps: gapsRaw
           .map(
             (e) => ShortVideoExportCheckStoryboardGap.fromJson(
+              e as Map<String, dynamic>,
+            ),
+          )
+          .toList(growable: false),
+      publishFacets: publishFacetsRaw is Map<String, dynamic>
+          ? ShortVideoExportPublishFacets.fromJson(publishFacetsRaw)
+          : const ShortVideoExportPublishFacets(
+              missingCover: false,
+              missingTargetPlatforms: false,
+            ),
+      publishIssues: publishRaw
+          .map(
+            (e) => ShortVideoExportPublishIssue.fromJson(
               e as Map<String, dynamic>,
             ),
           )

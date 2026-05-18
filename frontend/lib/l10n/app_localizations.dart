@@ -1783,7 +1783,7 @@ abstract class AppLocalizations {
   /// No description provided for @productShellDevCredentialsHint.
   ///
   /// In en, this message translates to:
-  /// **'Local dev: admin@openflow.local / admin123'**
+  /// **'Local dev: admin@toonflow.local / admin123'**
   String get productShellDevCredentialsHint;
 
   /// No description provided for @productShellMoreMenu.
@@ -24102,6 +24102,62 @@ abstract class AppLocalizations {
   /// **'Duration anomaly'**
   String get shortVideoSpacePublishExportCheckFacetDurationAnomaly;
 
+  /// No description provided for @shortVideoSpacePublishExportCheckFacetMissingCover.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing cover'**
+  String get shortVideoSpacePublishExportCheckFacetMissingCover;
+
+  /// No description provided for @shortVideoSpacePublishExportCheckFacetMissingPlatformCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing platform copy'**
+  String get shortVideoSpacePublishExportCheckFacetMissingPlatformCopy;
+
+  /// No description provided for @shortVideoSpacePublishExportCheckFacetMissingTargetPlatforms.
+  ///
+  /// In en, this message translates to:
+  /// **'No target platforms'**
+  String get shortVideoSpacePublishExportCheckFacetMissingTargetPlatforms;
+
+  /// No description provided for @shortVideoSpacePublishExportCheckPublishSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish readiness (cover / platforms)'**
+  String get shortVideoSpacePublishExportCheckPublishSectionTitle;
+
+  /// No description provided for @shortVideoSpacePublishExportCheckPublishPlatformGapTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{platformId}'**
+  String shortVideoSpacePublishExportCheckPublishPlatformGapTitle(
+    String platformId,
+  );
+
+  /// No description provided for @shortVideoSpacePublishExportIssueMissingCover.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing cover'**
+  String get shortVideoSpacePublishExportIssueMissingCover;
+
+  /// No description provided for @shortVideoSpacePublishExportIssueMissingTargetPlatforms.
+  ///
+  /// In en, this message translates to:
+  /// **'No target platforms configured'**
+  String get shortVideoSpacePublishExportIssueMissingTargetPlatforms;
+
+  /// No description provided for @shortVideoSpacePublishExportIssueMissingPlatformCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing per-platform copy block'**
+  String get shortVideoSpacePublishExportIssueMissingPlatformCopy;
+
+  /// No description provided for @shortVideoSpacePublishExportIssueUnknownPlatform.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown platform'**
+  String get shortVideoSpacePublishExportIssueUnknownPlatform;
+
   /// No description provided for @shortVideoSpacePublishCandidateLoadingHeadline.
   ///
   /// In en, this message translates to:
@@ -32235,7 +32291,7 @@ abstract class AppLocalizations {
   /// No description provided for @statusPageIntroInternalSuffix.
   ///
   /// In en, this message translates to:
-  /// **' OPENFLOW_INTERNAL_OPS_TOKEN is set via dart-define, so internal queue stats are included.'**
+  /// **' TOONFLOW_INTERNAL_OPS_TOKEN is set via dart-define, so internal queue stats are included.'**
   String get statusPageIntroInternalSuffix;
 
   /// No description provided for @statusPageRefreshing.
@@ -32762,7 +32818,7 @@ abstract class AppLocalizations {
   /// No description provided for @shellJobQueueStatsSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Uses OPENFLOW_INTERNAL_OPS_TOKEN dart-define → GET /api/v1/jobs/queue/stats'**
+  /// **'Uses TOONFLOW_INTERNAL_OPS_TOKEN dart-define → GET /api/v1/jobs/queue/stats'**
   String get shellJobQueueStatsSubtitle;
 
   /// No description provided for @shellJobQueueStatsStatsLine.
