@@ -4,6 +4,8 @@ AlertDialog buildProjectAssetsWorkbenchDialog({
   required BuildContext dialogCtx,
   required bool localBusy,
   required bool assetsBusy,
+  required ProjectStudioAssetEditorTargetKind targetKind,
+  required String? focusNotice,
   required String statusLine,
   required List<AssetRow> scopedAssets,
   required int? assetsFilterScriptNumericId,
@@ -20,6 +22,7 @@ AlertDialog buildProjectAssetsWorkbenchDialog({
   required Future<void> Function() onFilter,
   required Future<void> Function() onLink,
   required Future<void> Function() onUnlink,
+  required Future<void> Function() onReviewCandidates,
   required Future<void> Function() onUploadEditImage,
   required Future<void> Function() onUploadClip,
   required Future<void> Function() onOpenImagesWorkbench,
@@ -48,6 +51,7 @@ AlertDialog buildProjectAssetsWorkbenchDialog({
             ),
             const SizedBox(height: 12),
             _ProjectAssetsWorkbenchOverview(
+              focusNotice: focusNotice,
               statusLine: statusLine,
               scriptScopedLine: summarizeScriptScopedAssets(
                 assetsFilterScriptNumericId,
@@ -65,6 +69,7 @@ AlertDialog buildProjectAssetsWorkbenchDialog({
             _ProjectAssetsWorkbenchActions(
               localBusy: localBusy,
               assetsBusy: assetsBusy,
+              targetKind: targetKind,
               assets: assets,
               scriptList: scriptList,
               selectedScriptNumericId: selectedScriptNumericId,
@@ -74,6 +79,7 @@ AlertDialog buildProjectAssetsWorkbenchDialog({
               onFilter: onFilter,
               onLink: onLink,
               onUnlink: onUnlink,
+              onReviewCandidates: onReviewCandidates,
               onUploadEditImage: onUploadEditImage,
               onUploadClip: onUploadClip,
             ),
@@ -98,8 +104,10 @@ AlertDialog buildProjectAssetsWorkbenchDialog({
               : l10n.projectEditorAssetsMainWorkbenchRefresh,
         ),
       ),
-      TextButton(onPressed: onClose, child: Text(l10n.projectEditorAssetsMainWorkbenchClose)),
+      TextButton(
+        onPressed: onClose,
+        child: Text(l10n.projectEditorAssetsMainWorkbenchClose),
+      ),
     ],
   );
 }
-

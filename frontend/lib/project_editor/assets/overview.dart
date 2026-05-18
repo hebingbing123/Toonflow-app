@@ -9,6 +9,7 @@ class ProjectAssetsOverviewViewModel {
     required this.visibleAssets,
     required this.assetsForScript,
     required this.filterScriptNumericId,
+    required this.focusNotice,
     required this.assetsLoading,
     required this.assetsScriptFilterLoading,
     required this.assetsBusy,
@@ -18,6 +19,7 @@ class ProjectAssetsOverviewViewModel {
   final List<AssetRow> visibleAssets;
   final List<AssetRow>? assetsForScript;
   final int? filterScriptNumericId;
+  final String? focusNotice;
   final bool assetsLoading;
   final bool assetsScriptFilterLoading;
   final bool assetsBusy;
@@ -56,6 +58,13 @@ class ProjectAssetsOverviewView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (model.focusNotice != null) ...[
+          Text(
+            model.focusNotice!,
+            style: bodySmall?.copyWith(color: theme.colorScheme.primary),
+          ),
+          const SizedBox(height: 6),
+        ],
         Text(summarizeProjectAssetRows(model.visibleAssets), style: bodySmall),
         if (model.filterScriptNumericId != null) ...[
           const SizedBox(height: 6),
@@ -113,9 +122,9 @@ class ProjectAssetsOverviewView extends StatelessWidget {
           alignment: Alignment.centerLeft,
           child: TextButton(
             onPressed:
-                    model.assetsLoading ||
-                        model.assetsScriptFilterLoading ||
-                        callbacks.onRefresh == null
+                model.assetsLoading ||
+                    model.assetsScriptFilterLoading ||
+                    callbacks.onRefresh == null
                 ? null
                 : () => callbacks.onRefresh!(),
             child: Text(
@@ -139,7 +148,10 @@ class ProjectAssetsOverviewView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(l10n.projectEditorAssetsMainWorkbenchTitle, style: theme.textTheme.titleSmall),
+              Text(
+                l10n.projectEditorAssetsMainWorkbenchTitle,
+                style: theme.textTheme.titleSmall,
+              ),
               const SizedBox(height: 4),
               Text(
                 l10n.projectEditorAssetsOverviewCardIntro,

@@ -65,12 +65,12 @@ void main() {
       ],
       productionRows: const [ProductionStoryboardItemV1(id: 7, duration: '6')],
       zip: ProductionExportZipResponse(
-        filename: 'toonflow-storyboards.zip',
+        filename: 'openflow-storyboards.zip',
         bytes: Uint8List(2048),
       ),
     );
 
-    expect(summary.filename, 'toonflow-storyboards.zip');
+    expect(summary.filename, 'openflow-storyboards.zip');
     expect(summary.shotIds, const [7, 9]);
     expect(summary.shotCount, 2);
     expect(summary.imageFileCount, 2);

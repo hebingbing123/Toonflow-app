@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../l10n/app_localizations.dart';
+import '../../../project_studio/project_studio_host.dart';
 import '../../../../rust_api.dart';
 import '../support.dart';
 

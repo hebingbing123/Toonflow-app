@@ -65,6 +65,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
   String _resolution = '1080p';
   bool _audio = false;
   bool _autoQualityReviewOnGeneratePrompt = false;
+  BillingEstimateResponse? _videoEstimate;
 
   StoryboardWorkbenchDiagnosis _currentDiagnosis() {
     final l10n = resolveAppLocalizationsForErrors(context);
@@ -279,6 +280,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
         ),
         const SizedBox(height: 16),
         _StoryboardVideoSection(
+          accessToken: widget.token,
           saving: _saving,
           loadingWorkbench: _loadingWorkbench,
           trackIdCtrl: _trackIdCtrl,
@@ -294,6 +296,7 @@ class _StoryboardWorkbenchPanelState extends State<_StoryboardWorkbenchPanel> {
           audio: _audio,
           autoQualityReviewOnGeneratePrompt: _autoQualityReviewOnGeneratePrompt,
           modelDetail: _modelDetail,
+          onVideoEstimateChanged: (est) => _videoEstimate = est,
           generateData: _generateData,
           productionRow: _productionRow,
           currentSelectedVideoUrl: widget.scriptStoryboard.filePath,

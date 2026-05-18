@@ -50,6 +50,9 @@ AssetGenerationWorkbenchDialogViewModel _buildAssetGenerationWorkbenchViewModel(
   required TextEditingController imageUrlCtrl,
   required TextEditingController batchNameCtrl,
   required TextEditingController batchLimitCtrl,
+  required String accessToken,
+  required int batchAssetCount,
+  required ValueChanged<BillingEstimateResponse?> onBatchEstimateChanged,
 }) {
   return AssetGenerationWorkbenchDialogViewModel(
     scriptList: scriptList,
@@ -76,6 +79,9 @@ AssetGenerationWorkbenchDialogViewModel _buildAssetGenerationWorkbenchViewModel(
     imageUrlCtrl: imageUrlCtrl,
     batchNameCtrl: batchNameCtrl,
     batchLimitCtrl: batchLimitCtrl,
+    accessToken: accessToken,
+    batchAssetCount: batchAssetCount,
+    onBatchEstimateChanged: onBatchEstimateChanged,
   );
 }
 

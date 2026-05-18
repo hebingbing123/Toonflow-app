@@ -67,6 +67,9 @@ AssetGenerationWorkbenchDialogViewModel buildDialogModel({
     imageUrlCtrl: imageUrlCtrl,
     batchNameCtrl: batchNameCtrl,
     batchLimitCtrl: batchLimitCtrl,
+    accessToken: 'test-token',
+    batchAssetCount: selectedIds.length.clamp(1, 999),
+    onBatchEstimateChanged: (_) {},
   );
 }
 

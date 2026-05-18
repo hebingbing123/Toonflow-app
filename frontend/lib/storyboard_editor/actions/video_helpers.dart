@@ -144,6 +144,14 @@ extension _StoryboardWorkbenchVideoActions on _StoryboardWorkbenchPanelState {
 
   Future<void> _submitVideoGeneration() async {
     final l10n = resolveAppLocalizationsForErrors(context);
+    final est = _videoEstimate;
+    if (est != null && mounted) {
+      final ok = await showStudioCostConfirmSheet(
+        context: context,
+        estimate: est,
+      );
+      if (!ok || !mounted) return;
+    }
     await assertStoryboardReadyForVideoGeneration(
       accessToken: widget.token,
       projectUuid: widget.projectId,

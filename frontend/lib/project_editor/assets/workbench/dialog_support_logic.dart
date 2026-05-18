@@ -1,19 +1,47 @@
 part of 'dialog_support.dart';
 
+int? chooseInitialScriptNumericId(
+  Iterable<ScriptBrief> scripts, {
+  int? preferredNumericId,
+}) {
+  final rows = scripts.toList(growable: false);
+  if (rows.isEmpty) {
+    return null;
+  }
+  if (preferredNumericId != null) {
+    for (final script in rows) {
+      if (script.numericId == preferredNumericId) {
+        return preferredNumericId;
+      }
+    }
+  }
+  return rows.first.numericId;
+}
+
 class ProjectAssetsWorkbenchSession {
   ProjectAssetsWorkbenchSession({
     required List<AssetRow> visibleAssets,
     required List<ScriptBrief> scriptList,
     required String initialStatusLine,
-  }) : selectedAssetNumericId = chooseInitialAssetNumericId(visibleAssets),
-       selectedScriptNumericId = scriptList.isEmpty
-           ? null
-           : scriptList.first.numericId,
+    this.targetKind = ProjectStudioAssetEditorTargetKind.overview,
+    this.focusNotice,
+    int? preferredAssetNumericId,
+    int? preferredScriptNumericId,
+  }) : selectedAssetNumericId = chooseInitialAssetNumericId(
+         visibleAssets,
+         preferredNumericId: preferredAssetNumericId,
+       ),
+       selectedScriptNumericId = chooseInitialScriptNumericId(
+         scriptList,
+         preferredNumericId: preferredScriptNumericId,
+       ),
        statusLine = initialStatusLine;
 
   int? selectedAssetNumericId;
   int? selectedScriptNumericId;
   String statusLine;
+  final ProjectStudioAssetEditorTargetKind targetKind;
+  final String? focusNotice;
   bool localBusy = false;
 }
 
@@ -36,6 +64,7 @@ class ProjectAssetsWorkbenchController {
     required this.onFilterAssets,
     required this.onLinkAsset,
     required this.onUnlinkAsset,
+    required this.onReviewCandidates,
     required this.onUploadEditImage,
     required this.onUploadClip,
     required this.onOpenImagesWorkbench,
@@ -60,6 +89,11 @@ class ProjectAssetsWorkbenchController {
   final Future<void> Function(BuildContext dialogCtx) onFilterAssets;
   final Future<void> Function(BuildContext dialogCtx) onLinkAsset;
   final Future<void> Function(BuildContext dialogCtx) onUnlinkAsset;
+  final Future<void> Function(
+    BuildContext dialogCtx,
+    int? preferredAssetNumericId,
+  )
+  onReviewCandidates;
   final Future<void> Function(BuildContext dialogCtx) onUploadEditImage;
   final Future<void> Function(BuildContext dialogCtx) onUploadClip;
   final Future<void> Function(

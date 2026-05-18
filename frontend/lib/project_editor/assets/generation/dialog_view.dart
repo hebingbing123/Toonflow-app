@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../design_system/components/studio_model_cost_controls.dart';
 import '../../../../rust_api.dart';
 import 'support.dart';
 import 'dialog_view_contract.dart';
@@ -46,6 +47,9 @@ class AssetGenerationWorkbenchDialogView extends StatelessWidget {
                 typeSelections: model.typeSelections,
                 selectedScriptNumericId: model.selectedScriptNumericId,
                 selectedType: model.selectedType,
+                accessToken: model.accessToken,
+                batchAssetCount: model.batchAssetCount,
+                onBatchEstimateChanged: model.onBatchEstimateChanged,
                 modelCtrl: model.modelCtrl,
                 resolutionCtrl: model.resolutionCtrl,
                 imageUrlCtrl: model.imageUrlCtrl,

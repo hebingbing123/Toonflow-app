@@ -50,6 +50,8 @@ ScriptEditImageWorkbenchDialogViewModel buildModel({
     modelCtrl: modelCtrl,
     stepIdCtrl: stepIdCtrl,
     stepStatusCtrl: stepStatusCtrl,
+    accessToken: 'test-token',
+    onEstimateChanged: (_) {},
   );
 }
 

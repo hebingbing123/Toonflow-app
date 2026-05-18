@@ -29,6 +29,7 @@ ProjectAssetsOverviewViewModel buildModel({
         ],
     assetsForScript: assetsForScript,
     filterScriptNumericId: filterScriptNumericId,
+    focusNotice: null,
     assetsLoading: assetsLoading,
     assetsScriptFilterLoading: assetsScriptFilterLoading,
     assetsBusy: assetsBusy,
@@ -81,7 +82,12 @@ void main() {
           model: buildModel(
             filterScriptNumericId: 11,
             assetsForScript: const <AssetRow>[
-              AssetRow(id: 'asset-1', numericId: 7, name: '主角', assetType: 'role'),
+              AssetRow(
+                id: 'asset-1',
+                numericId: 7,
+                name: '主角',
+                assetType: 'role',
+              ),
             ],
           ),
           callbacks: buildCallbacks(),
@@ -119,7 +125,9 @@ void main() {
     expect(disabledButtonWithText('刷新资产…'), findsOneWidget);
     expect(disabledButtonWithText('打开资产主工作台'), findsOneWidget);
     expect(
-      tester.widget<DropdownButton<int?>>(find.byType(DropdownButton<int?>)).onChanged,
+      tester
+          .widget<DropdownButton<int?>>(find.byType(DropdownButton<int?>))
+          .onChanged,
       isNull,
     );
   });

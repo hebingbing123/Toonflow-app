@@ -28,6 +28,9 @@ class AssetGenerationWorkbenchDialogViewModel {
     required this.imageUrlCtrl,
     required this.batchNameCtrl,
     required this.batchLimitCtrl,
+    required this.accessToken,
+    required this.batchAssetCount,
+    required this.onBatchEstimateChanged,
   });
 
   final List<ScriptBrief> scriptList;
@@ -54,6 +57,9 @@ class AssetGenerationWorkbenchDialogViewModel {
   final TextEditingController imageUrlCtrl;
   final TextEditingController batchNameCtrl;
   final TextEditingController batchLimitCtrl;
+  final String accessToken;
+  final int batchAssetCount;
+  final ValueChanged<BillingEstimateResponse?> onBatchEstimateChanged;
 }
 
 class AssetGenerationWorkbenchDialogViewCallbacks {

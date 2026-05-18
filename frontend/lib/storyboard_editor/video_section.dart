@@ -4,6 +4,7 @@ part of '../../home_page.dart';
 /// individual part files ≤800 lines.
 class _StoryboardVideoSection extends StatelessWidget {
   const _StoryboardVideoSection({
+    required this.accessToken,
     required this.saving,
     required this.loadingWorkbench,
     required this.trackIdCtrl,
@@ -19,6 +20,7 @@ class _StoryboardVideoSection extends StatelessWidget {
     required this.audio,
     required this.autoQualityReviewOnGeneratePrompt,
     required this.modelDetail,
+    required this.onVideoEstimateChanged,
     required this.generateData,
     required this.productionRow,
     required this.currentSelectedVideoUrl,
@@ -48,6 +50,7 @@ class _StoryboardVideoSection extends StatelessWidget {
     required this.onDeleteCurrentVideo,
   });
 
+  final String accessToken;
   final bool saving;
   final bool loadingWorkbench;
   final TextEditingController trackIdCtrl;
@@ -63,6 +66,7 @@ class _StoryboardVideoSection extends StatelessWidget {
   final bool audio;
   final bool autoQualityReviewOnGeneratePrompt;
   final VideoModelDetail? modelDetail;
+  final ValueChanged<BillingEstimateResponse?> onVideoEstimateChanged;
   final GetGenerateDataResponse? generateData;
   final ProductionStoryboardItemV1? productionRow;
   final String? currentSelectedVideoUrl;
@@ -416,14 +420,13 @@ class _StoryboardVideoSection extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: InputDecorator(
-                decoration: InputDecoration(
-                  labelText: l10n.storyboardVideoWorkbenchModelLabel,
-                ),
-                child: Text(
-                  modelDetail?.modelId ??
-                      l10n.storyboardVideoWorkbenchModelLoading,
-                ),
+              child: StudioModelCostControls(
+                accessToken: accessToken,
+                taskKind: 'storyboard_video',
+                typeFilter: 'video',
+                quantity: int.tryParse(videoDurationCtrl.text.trim()) ?? 5,
+                enabled: !saving,
+                onEstimateChanged: onVideoEstimateChanged,
               ),
             ),
           ],

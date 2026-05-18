@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../project_studio/project_studio_host.dart';
 import '../../../rust_api.dart';
 import '../support.dart';
 import 'dialog_support.dart';
@@ -21,6 +22,11 @@ Future<void> openProjectAssetsWorkbenchDialog({
   required Future<void> Function(BuildContext dialogCtx) onFilterAssets,
   required Future<void> Function(BuildContext dialogCtx) onLinkAsset,
   required Future<void> Function(BuildContext dialogCtx) onUnlinkAsset,
+  required Future<void> Function(
+    BuildContext dialogCtx,
+    int? preferredAssetNumericId,
+  )
+  onReviewCandidates,
   required Future<void> Function(BuildContext dialogCtx) onUploadEditImage,
   required Future<void> Function(BuildContext dialogCtx) onUploadClip,
   required Future<void> Function(
@@ -38,16 +44,28 @@ Future<void> openProjectAssetsWorkbenchDialog({
     int? preferredAssetNumericId,
   )
   onOpenHistoryWorkbench,
+  int? initialSelectedAssetNumericId,
+  int? initialSelectedScriptNumericId,
+  String? initialFocusNotice,
+  ProjectStudioAssetEditorTargetKind initialTargetKind =
+      ProjectStudioAssetEditorTargetKind.overview,
 }) async {
   final l10n = resolveAppLocalizationsForErrors(ctx);
   final visibleAssets = assetsRef[0]?.items ?? const <AssetRow>[];
+  final initialSelectionAssets = assetsFilterScriptNumericId[0] == null
+      ? visibleAssets
+      : (assetsForScriptRef[0]?.items ?? visibleAssets);
   final initialStatusLine = visibleAssets.isEmpty
       ? l10n.projectEditorAssetsWorkbenchNoAssetsYet
       : summarizeProjectAssetRows(visibleAssets);
   final session = ProjectAssetsWorkbenchSession(
-    visibleAssets: visibleAssets,
+    visibleAssets: initialSelectionAssets,
     scriptList: scriptList,
     initialStatusLine: initialStatusLine,
+    targetKind: initialTargetKind,
+    focusNotice: initialFocusNotice,
+    preferredAssetNumericId: initialSelectedAssetNumericId,
+    preferredScriptNumericId: initialSelectedScriptNumericId,
   );
   final controller = ProjectAssetsWorkbenchController(
     ctx: ctx,
@@ -67,6 +85,7 @@ Future<void> openProjectAssetsWorkbenchDialog({
     onFilterAssets: onFilterAssets,
     onLinkAsset: onLinkAsset,
     onUnlinkAsset: onUnlinkAsset,
+    onReviewCandidates: onReviewCandidates,
     onUploadEditImage: onUploadEditImage,
     onUploadClip: onUploadClip,
     onOpenImagesWorkbench: onOpenImagesWorkbench,
@@ -91,6 +110,8 @@ Future<void> openProjectAssetsWorkbenchDialog({
             dialogCtx: dialogCtx,
             localBusy: session.localBusy,
             assetsBusy: assetsBusy[0],
+            targetKind: session.targetKind,
+            focusNotice: session.focusNotice,
             statusLine: session.statusLine,
             scopedAssets: scopedAssets,
             assetsFilterScriptNumericId: assetsFilterScriptNumericId[0],
@@ -107,7 +128,9 @@ Future<void> openProjectAssetsWorkbenchDialog({
             onScriptChanged: scriptList.isEmpty
                 ? null
                 : (value) {
-                    setLocalState(() => session.selectedScriptNumericId = value);
+                    setLocalState(
+                      () => session.selectedScriptNumericId = value,
+                    );
                   },
             onCreate: () => controller.runWorkbenchAction(
               setLocalState: setLocalState,
@@ -132,6 +155,13 @@ Future<void> openProjectAssetsWorkbenchDialog({
             onUnlink: () => controller.runWorkbenchAction(
               setLocalState: setLocalState,
               action: () => controller.onUnlinkAsset(dialogCtx),
+            ),
+            onReviewCandidates: () => controller.runWorkbenchAction(
+              setLocalState: setLocalState,
+              action: () => controller.onReviewCandidates(
+                dialogCtx,
+                session.selectedAssetNumericId,
+              ),
             ),
             onUploadEditImage: () => controller.runWorkbenchAction(
               setLocalState: setLocalState,

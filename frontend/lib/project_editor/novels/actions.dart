@@ -69,7 +69,7 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
       final response = await http.get(
         uri,
         headers: const <String, String>{
-          'User-Agent': 'Toonflow/1.0 content-intake crawler',
+          'User-Agent': 'OpenFlow/1.0 content-intake crawler',
         },
       );
       if (response.statusCode < 200 || response.statusCode >= 300) {
@@ -178,7 +178,7 @@ extension _HomePageProjectEditorNovelWorkbenchActions on _HomePageState {
     final response = await http.get(
       uri,
       headers: const <String, String>{
-        'User-Agent': 'Toonflow/1.0 content-intake crawler',
+        'User-Agent': 'OpenFlow/1.0 content-intake crawler',
       },
     );
     if (response.statusCode < 200 || response.statusCode >= 300) {

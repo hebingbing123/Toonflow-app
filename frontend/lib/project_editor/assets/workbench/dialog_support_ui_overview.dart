@@ -2,6 +2,7 @@ part of 'dialog_support.dart';
 
 class _ProjectAssetsWorkbenchOverview extends StatelessWidget {
   const _ProjectAssetsWorkbenchOverview({
+    this.focusNotice,
     required this.statusLine,
     required this.scriptScopedLine,
     required this.selectedAsset,
@@ -13,6 +14,7 @@ class _ProjectAssetsWorkbenchOverview extends StatelessWidget {
     required this.onScriptChanged,
   });
 
+  final String? focusNotice;
   final String statusLine;
   final String scriptScopedLine;
   final AssetRow? selectedAsset;
@@ -29,11 +31,22 @@ class _ProjectAssetsWorkbenchOverview extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (focusNotice != null) ...[
+          Text(
+            focusNotice!,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          const SizedBox(height: 6),
+        ],
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.outlineVariant,
+            ),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Column(
@@ -41,7 +54,10 @@ class _ProjectAssetsWorkbenchOverview extends StatelessWidget {
             children: [
               Text(statusLine, style: Theme.of(context).textTheme.bodySmall),
               const SizedBox(height: 6),
-              Text(scriptScopedLine, style: Theme.of(context).textTheme.bodySmall),
+              Text(
+                scriptScopedLine,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
               if (selectedAsset != null) ...[
                 const SizedBox(height: 6),
                 Text(
@@ -66,7 +82,9 @@ class _ProjectAssetsWorkbenchOverview extends StatelessWidget {
           items: [
             DropdownMenuItem<int?>(
               value: null,
-              child: Text(l10n.projectEditorAssetsWorkbenchFocusAssetEmptyOption),
+              child: Text(
+                l10n.projectEditorAssetsWorkbenchFocusAssetEmptyOption,
+              ),
             ),
             ...assets.map(
               (asset) => DropdownMenuItem<int?>(
@@ -90,7 +108,9 @@ class _ProjectAssetsWorkbenchOverview extends StatelessWidget {
           items: [
             DropdownMenuItem<int?>(
               value: null,
-              child: Text(l10n.projectEditorAssetsWorkbenchFocusScriptEmptyOption),
+              child: Text(
+                l10n.projectEditorAssetsWorkbenchFocusScriptEmptyOption,
+              ),
             ),
             ...scriptList.map(
               (script) => DropdownMenuItem<int?>(

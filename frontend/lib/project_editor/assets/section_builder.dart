@@ -13,6 +13,7 @@ Widget buildProjectAssetsSection({
   required List<ListAssetsResponse?> assetsRef,
   required List<ListAssetsResponse?> assetsForScriptRef,
   required List<int?> assetsFilterScriptNumericId,
+  required List<String?> assetsFocusNoticeRef,
   required List<bool> assetsLoading,
   required List<bool> assetsScriptFilterLoading,
   required List<bool> assetsBusy,
@@ -37,6 +38,7 @@ Widget buildProjectAssetsSection({
             visibleAssets: visibleAssets,
             assetsForScript: assetsForScript,
             filterScriptNumericId: assetsFilterScriptNumericId[0],
+            focusNotice: assetsFocusNoticeRef[0],
             assetsLoading: assetsLoading[0],
             assetsScriptFilterLoading: assetsScriptFilterLoading[0],
             assetsBusy: assetsBusy[0],
@@ -45,6 +47,7 @@ Widget buildProjectAssetsSection({
             onFilterChanged: (value) async {
               setDialogState(() => assetsScriptFilterLoading[0] = true);
               assetsFilterScriptNumericId[0] = value;
+              assetsFocusNoticeRef[0] = null;
               if (value == null) {
                 assetsForScriptRef[0] = null;
               }

@@ -7,6 +7,9 @@ class _AssetGenerationControlsPanel extends StatelessWidget {
     required this.typeSelections,
     required this.selectedScriptNumericId,
     required this.selectedType,
+    required this.accessToken,
+    required this.batchAssetCount,
+    required this.onBatchEstimateChanged,
     required this.modelCtrl,
     required this.resolutionCtrl,
     required this.imageUrlCtrl,
@@ -22,6 +25,9 @@ class _AssetGenerationControlsPanel extends StatelessWidget {
   final Map<String, List<int>> typeSelections;
   final int selectedScriptNumericId;
   final String selectedType;
+  final String accessToken;
+  final int batchAssetCount;
+  final ValueChanged<BillingEstimateResponse?> onBatchEstimateChanged;
   final TextEditingController modelCtrl;
   final TextEditingController resolutionCtrl;
   final TextEditingController imageUrlCtrl;
@@ -91,26 +97,21 @@ class _AssetGenerationControlsPanel extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: modelCtrl,
-                decoration: InputDecoration(
-                  labelText: l10n.projectEditorAssetGenWorkbenchModelOptionalLabel,
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: TextField(
-                controller: resolutionCtrl,
-                decoration: InputDecoration(
-                  labelText: l10n.projectEditorAssetGenWorkbenchResolutionOptionalLabel,
-                ),
-              ),
-            ),
-          ],
+        StudioModelCostControls(
+          accessToken: accessToken,
+          taskKind: 'asset_image_batch',
+          typeFilter: 'image',
+          quantity: batchAssetCount,
+          modelValueController: modelCtrl,
+          enabled: !busy,
+          onEstimateChanged: onBatchEstimateChanged,
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: resolutionCtrl,
+          decoration: InputDecoration(
+            labelText: l10n.projectEditorAssetGenWorkbenchResolutionOptionalLabel,
+          ),
         ),
         const SizedBox(height: 8),
         Row(

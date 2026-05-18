@@ -16,6 +16,7 @@ class _AssetGenerationWorkbenchDialogState
   WorkbenchAssetBatchGenerationResponse? _batchData;
   List<WorkbenchAssetPollingPromptItem>? _promptPollingData;
   String? _statusLine;
+  BillingEstimateResponse? _batchEstimate;
 
   @override
   void initState() {
@@ -241,6 +242,9 @@ class _AssetGenerationWorkbenchDialogState
         imageUrlCtrl: _ctrls.imageUrlCtrl,
         batchNameCtrl: _ctrls.batchNameCtrl,
         batchLimitCtrl: _ctrls.batchLimitCtrl,
+        accessToken: widget.token,
+        batchAssetCount: selected.length.clamp(1, 999),
+        onBatchEstimateChanged: (est) => _batchEstimate = est,
       ),
       callbacks: AssetGenerationWorkbenchDialogViewCallbacks(
         onScriptChanged: (value) {
@@ -311,7 +315,15 @@ class _AssetGenerationWorkbenchDialogState
           const <int>[],
           l10n.projectEditorAssetGenSelectionLabelClear,
         ),
-        onBatchGenerateImages: () {
+        onBatchGenerateImages: () async {
+          final est = _batchEstimate;
+          if (est != null && mounted) {
+            final ok = await showStudioCostConfirmSheet(
+              context: context,
+              estimate: est,
+            );
+            if (!ok || !mounted) return;
+          }
           _runMutation(() async {
             final response = await postProductionAssetsBatchGenerateAssetsImageV1(
               widget.token,

@@ -11,6 +11,7 @@ extension _HomePageScriptEditorEditImageWorkbench on _HomePageState {
     final flowIdCtrl = TextEditingController();
     final promptCtrl = TextEditingController();
     final modelCtrl = TextEditingController();
+    BillingEstimateResponse? editImageEstimate;
     final stepIdCtrl = TextEditingController();
     final stepStatusCtrl = TextEditingController();
 
@@ -109,6 +110,8 @@ extension _HomePageScriptEditorEditImageWorkbench on _HomePageState {
                   flowIdCtrl: flowIdCtrl,
                   promptCtrl: promptCtrl,
                   modelCtrl: modelCtrl,
+                  accessToken: token,
+                  onEstimateChanged: (est) => editImageEstimate = est,
                   stepIdCtrl: stepIdCtrl,
                   stepStatusCtrl: stepStatusCtrl,
                 ),
@@ -134,6 +137,14 @@ extension _HomePageScriptEditorEditImageWorkbench on _HomePageState {
                     });
                   }),
                   onGenerateFlowImage: () => runMutation(setState, () async {
+                    final est = editImageEstimate;
+                    if (est != null && dialogCtx.mounted) {
+                      final ok = await showStudioCostConfirmSheet(
+                        context: dialogCtx,
+                        estimate: est,
+                      );
+                      if (!ok) return;
+                    }
                     final flowId = flowIdCtrl.text.trim();
                     final prompt = promptCtrl.text.trim();
                     if (flowId.isEmpty || prompt.isEmpty) {

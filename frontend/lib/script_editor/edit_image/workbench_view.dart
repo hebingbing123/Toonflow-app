@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../design_system/components/studio_model_cost_controls.dart';
 import '../../../rust_api.dart';
 
 class ScriptEditImageWorkbenchDialogViewModel {
@@ -14,6 +15,8 @@ class ScriptEditImageWorkbenchDialogViewModel {
     required this.flowIdCtrl,
     required this.promptCtrl,
     required this.modelCtrl,
+    required this.accessToken,
+    required this.onEstimateChanged,
     required this.stepIdCtrl,
     required this.stepStatusCtrl,
   });
@@ -28,6 +31,8 @@ class ScriptEditImageWorkbenchDialogViewModel {
   final TextEditingController flowIdCtrl;
   final TextEditingController promptCtrl;
   final TextEditingController modelCtrl;
+  final String accessToken;
+  final ValueChanged<BillingEstimateResponse?> onEstimateChanged;
   final TextEditingController stepIdCtrl;
   final TextEditingController stepStatusCtrl;
 }
@@ -159,17 +164,16 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TextField(
-                      controller: model.modelCtrl,
-                      decoration: InputDecoration(
-                        labelText: l10n
-                            .scriptEditorEditImageWorkbenchModelOptionalLabel,
-                      ),
-                    ),
-                  ),
                 ],
+              ),
+              const SizedBox(height: 8),
+              StudioModelCostControls(
+                accessToken: model.accessToken,
+                taskKind: 'script_edit_image',
+                typeFilter: 'image',
+                modelValueController: model.modelCtrl,
+                enabled: !model.busy,
+                onEstimateChanged: model.onEstimateChanged,
               ),
               const SizedBox(height: 8),
               TextField(

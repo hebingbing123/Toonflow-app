@@ -4,6 +4,7 @@ class _ProjectAssetsWorkbenchActions extends StatelessWidget {
   const _ProjectAssetsWorkbenchActions({
     required this.localBusy,
     required this.assetsBusy,
+    required this.targetKind,
     required this.assets,
     required this.scriptList,
     required this.selectedScriptNumericId,
@@ -13,12 +14,14 @@ class _ProjectAssetsWorkbenchActions extends StatelessWidget {
     required this.onFilter,
     required this.onLink,
     required this.onUnlink,
+    required this.onReviewCandidates,
     required this.onUploadEditImage,
     required this.onUploadClip,
   });
 
   final bool localBusy;
   final bool assetsBusy;
+  final ProjectStudioAssetEditorTargetKind targetKind;
   final List<AssetRow> assets;
   final List<ScriptBrief> scriptList;
   final int? selectedScriptNumericId;
@@ -28,8 +31,55 @@ class _ProjectAssetsWorkbenchActions extends StatelessWidget {
   final VoidCallback onFilter;
   final VoidCallback onLink;
   final VoidCallback onUnlink;
+  final VoidCallback onReviewCandidates;
   final VoidCallback onUploadEditImage;
   final VoidCallback onUploadClip;
+
+  _WorkbenchSuggestedAction? _resolveSuggestedAction(
+    AppLocalizations l10n, {
+    required bool canMutateAssets,
+    required bool canLinkScripts,
+  }) {
+    switch (targetKind) {
+      case ProjectStudioAssetEditorTargetKind.buildRoleLibrary:
+      case ProjectStudioAssetEditorTargetKind.defineProjectCharacters:
+        return _WorkbenchSuggestedAction(
+          title: l10n.projectEditorAssetsWorkbenchSuggestedNextTitle,
+          detail:
+              l10n.projectEditorAssetsWorkbenchSuggestedNextBuildRoleLibrary,
+          ctaLabel: l10n.projectEditorAssetsWorkbenchNewAsset,
+          enabled: !(localBusy || assetsBusy),
+          onPressed: onCreate,
+        );
+      case ProjectStudioAssetEditorTargetKind.anchorCharacters:
+      case ProjectStudioAssetEditorTargetKind.reviewRoleReuse:
+        return _WorkbenchSuggestedAction(
+          title: l10n.projectEditorAssetsWorkbenchSuggestedNextTitle,
+          detail:
+              l10n.projectEditorAssetsWorkbenchSuggestedNextAnchorCharacters,
+          ctaLabel: l10n.projectEditorAssetsWorkbenchLinkScript,
+          enabled: canLinkScripts,
+          onPressed: onLink,
+        );
+      case ProjectStudioAssetEditorTargetKind.confirmCandidates:
+        return _WorkbenchSuggestedAction(
+          title: l10n.projectEditorAssetsWorkbenchSuggestedNextTitle,
+          detail:
+              l10n.projectEditorAssetsWorkbenchSuggestedNextConfirmCandidates,
+          ctaLabel: l10n.projectEditorAssetsWorkbenchReviewCandidates,
+          enabled: canMutateAssets,
+          onPressed: onReviewCandidates,
+        );
+      case ProjectStudioAssetEditorTargetKind.overview:
+        return _WorkbenchSuggestedAction(
+          title: l10n.projectEditorAssetsWorkbenchSuggestedNextTitle,
+          detail: l10n.projectEditorAssetsWorkbenchSuggestedNextOverview,
+          ctaLabel: l10n.projectEditorAssetsWorkbenchFilterAssets,
+          enabled: canMutateAssets,
+          onPressed: onFilter,
+        );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,11 +91,53 @@ class _ProjectAssetsWorkbenchActions extends StatelessWidget {
             assets.isEmpty ||
             scriptList.isEmpty ||
             selectedScriptNumericId == null);
+    final suggested = _resolveSuggestedAction(
+      l10n,
+      canMutateAssets: canMutateAssets,
+      canLinkScripts: canLinkScripts,
+    );
     final canUploadEditImage = !(localBusy || assetsBusy || scriptList.isEmpty);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (suggested != null) ...[
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        suggested.title,
+                        style: Theme.of(context).textTheme.labelLarge,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        suggested.detail,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                FilledButton(
+                  onPressed: suggested.enabled ? suggested.onPressed : null,
+                  child: Text(suggested.ctaLabel),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
         Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -82,6 +174,10 @@ class _ProjectAssetsWorkbenchActions extends StatelessWidget {
               child: Text(l10n.projectEditorAssetsWorkbenchUnlink),
             ),
             OutlinedButton(
+              onPressed: canMutateAssets ? onReviewCandidates : null,
+              child: Text(l10n.projectEditorAssetsWorkbenchReviewCandidates),
+            ),
+            OutlinedButton(
               onPressed: canUploadEditImage ? onUploadEditImage : null,
               child: Text(l10n.projectEditorAssetsWorkbenchUploadEditImage),
             ),
@@ -94,4 +190,20 @@ class _ProjectAssetsWorkbenchActions extends StatelessWidget {
       ],
     );
   }
+}
+
+class _WorkbenchSuggestedAction {
+  const _WorkbenchSuggestedAction({
+    required this.title,
+    required this.detail,
+    required this.ctaLabel,
+    required this.enabled,
+    required this.onPressed,
+  });
+
+  final String title;
+  final String detail;
+  final String ctaLabel;
+  final bool enabled;
+  final VoidCallback onPressed;
 }
