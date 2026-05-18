@@ -92,6 +92,7 @@ import 'project_studio/project_studio_host.dart';
 import 'project_studio/studio_overlay_children.dart';
 import 'project_studio/studio_overlay_resolution.dart';
 import 'project_studio/project_studio_scope.dart';
+import 'project_studio/studio_snapshot_bus.dart';
 import 'project_studio/studio_merge_deliver_bar.dart';
 import 'project_studio/studio_overlay_mode.dart';
 import 'project_studio/studio_step.dart';
@@ -277,6 +278,8 @@ class _HomePageState extends State<HomePage> {
   String? _error;
   AppLocalizations? _appL10n;
   int? _productScopedProjectNumericId;
+  ShortVideoSpaceInitialFocus _shortVideoSpaceInitialFocus =
+      ShortVideoSpaceInitialFocus.none;
   MeResponse? _sessionMe;
   MeV2Response?
   _sessionMeV2; // Task 6.2: Store v2 response for workspace billing

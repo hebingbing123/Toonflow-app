@@ -234,7 +234,11 @@ async fn project_dashboard_triple_sources_stats_alignment() {
     assert_assets_hub_launch_intents(&assets_overview0);
     assert_eq!(five_counts(&stats0), (0, 0, 0, 0, 0));
 
-    let video_numeric_id: i32 = 7_701_042;
+    let video_numeric_id: i32 =
+        sqlx::query_scalar("SELECT COALESCE(MAX(numeric_id), 0) + 1 FROM app_video")
+            .fetch_one(&pool_sql)
+            .await
+            .expect("allocate app_video.numeric_id for WP-A dashboard parity");
     let ins = sqlx::query(
         r#"
         INSERT INTO app_video (project_id, numeric_id, state)

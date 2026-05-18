@@ -172,8 +172,9 @@ static PROJECT_OVERVIEW_CACHE: once_cell::sync::Lazy<
 > = once_cell::sync::Lazy::new(|| {
     RequestDedupeCache::new(
         Duration::from_secs(30), // in-flight TTL
-        Duration::from_secs(5),  // result TTL
-        1000,                    // max capacity
+        // Keep only near-zero reuse across sequential requests; freshness matters after writes.
+        Duration::from_millis(1),
+        1000, // max capacity
     )
 });
 

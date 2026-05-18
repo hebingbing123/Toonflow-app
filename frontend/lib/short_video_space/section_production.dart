@@ -481,6 +481,7 @@ extension _ShortVideoSpaceSectionProductionExtension
       if (_activeAssemblyJob != null) {
         unawaited(_refreshActiveAssemblyJob());
       }
+      unawaited(_refreshScopedJobCounts());
       await _loadDraftsAndVersions();
       await _loadProjectCharacters();
     } catch (_) {

@@ -304,6 +304,72 @@ TaskCenterDomainDeepLink? tryParseTaskCenterDomainDeepLink(JobRow job) {
   );
 }
 
+const taskCenterPhaseDisplayOrder = <String>[
+  'prep',
+  'image',
+  'video',
+  'export',
+  'quality',
+];
+
+Map<String, List<JobRow>> groupJobsByPhase(Iterable<JobRow> jobs) {
+  final grouped = <String, List<JobRow>>{};
+  for (final job in jobs) {
+    final key = taskCenterShortVideoStageKey(job);
+    grouped.putIfAbsent(key, () => <JobRow>[]).add(job);
+  }
+  return grouped;
+}
+
+String summarizeGroupedTaskJobs(
+  AppLocalizations l10n,
+  Map<String, List<JobRow>> grouped,
+) {
+  final parts = <String>[];
+  for (final phase in taskCenterPhaseDisplayOrder) {
+    final rows = grouped[phase];
+    if (rows == null || rows.isEmpty) {
+      continue;
+    }
+    final label = taskCenterShortVideoStageLabel(l10n, rows.first);
+    parts.add('$label(${rows.length})');
+  }
+  for (final entry in grouped.entries) {
+    if (taskCenterPhaseDisplayOrder.contains(entry.key)) {
+      continue;
+    }
+    if (entry.value.isEmpty) {
+      continue;
+    }
+    parts.add('${entry.key}(${entry.value.length})');
+  }
+  return parts.isEmpty ? l10n.taskCenterJobsEmpty : parts.join(' · ');
+}
+
+List<JobRow> filterTaskCenterJobsForProject({
+  required List<JobRow> jobs,
+  int? projectNumericId,
+  String? projectUuid,
+}) {
+  final uuid = projectUuid?.trim();
+  if (uuid != null && uuid.isNotEmpty) {
+    return jobs
+        .where((job) => job.payload['project_uuid']?.toString() == uuid)
+        .toList(growable: false);
+  }
+  if (projectNumericId != null) {
+    return jobs
+        .where(
+          (job) =>
+              job.payload['project_id'] == projectNumericId ||
+              job.payload['project_numeric_id'] == projectNumericId ||
+              job.payload['projectNumericId'] == projectNumericId,
+        )
+        .toList(growable: false);
+  }
+  return jobs;
+}
+
 String taskCenterShortVideoStageKey(JobRow job) {
   final phase = (job.productionPhase ?? '').trim().toLowerCase();
   final kind = job.kind.trim().toLowerCase();

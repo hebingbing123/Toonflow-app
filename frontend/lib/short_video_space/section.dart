@@ -11,6 +11,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/short_video_generation_blocked.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
+import '../project_studio/studio_snapshot_bus.dart';
 import '../rust_api.dart';
 import 'components/batch_operation_toolbar.dart';
 import 'components/filter_panel.dart';
@@ -43,11 +44,16 @@ part 'dialogs/export_progress_dialog.dart';
 part 'dialogs/export_history_dialog.dart';
 part 'components/audio_preview_player.dart';
 
+/// Scroll/focus target when opening short-video space from studio deliver.
+enum ShortVideoSpaceInitialFocus { none, assembly }
+
 class ShortVideoSpaceSection extends StatefulWidget {
   const ShortVideoSpaceSection({
     super.key,
     required this.accessToken,
     this.initialProjectUuid,
+    this.initialFocus = ShortVideoSpaceInitialFocus.none,
+    this.snapshotBus,
     required this.onOpenProjects,
     required this.onSyncProjectContext,
     required this.onOpenScriptWorkspace,
@@ -58,6 +64,8 @@ class ShortVideoSpaceSection extends StatefulWidget {
 
   final String? accessToken;
   final String? initialProjectUuid;
+  final ShortVideoSpaceInitialFocus initialFocus;
+  final StudioSnapshotBus? snapshotBus;
   final VoidCallback onOpenProjects;
   final ValueChanged<ShortVideoProjectScope?> onSyncProjectContext;
   final VoidCallback onOpenScriptWorkspace;
@@ -89,6 +97,10 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   JobRow? _activeAssemblyJob;
   Timer? _assemblyJobPollTimer;
   final PanelVersionManager _panelVersionManager = PanelVersionManager();
+  final GlobalKey _assemblyInputPanelKey = GlobalKey();
+  StudioSnapshotBus get _snapshotBus => widget.snapshotBus ?? kStudioSnapshotBus;
+  var _scopedRunningJobCount = 0;
+  var _didScrollToInitialFocus = false;
   List<ProjectRow> _projects = const <ProjectRow>[];
   ProjectStats? _projectStats;
   TaskCenterGetTaskApiResult? _recentProjectTasks;
@@ -158,10 +170,114 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   bool get _isAnimated => _mode == ShortVideoMode.animated;
 
   @override
+  void initState() {
+    super.initState();
+    _snapshotBus.addListener(_onSnapshotBusChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadProjects();
+      _maybeScrollToInitialFocus();
+    });
+  }
+
+  @override
   void dispose() {
+    _snapshotBus.removeListener(_onSnapshotBusChanged);
     _assemblyJobPollTimer?.cancel();
     unawaited(_characterPreviewPlayer.dispose());
     super.dispose();
+  }
+
+  void _onSnapshotBusChanged() {
+    final pending = _snapshotBus.pendingKeys;
+    if (pending.isEmpty) {
+      return;
+    }
+    unawaited(_applySnapshotInvalidation(pending));
+  }
+
+  Future<void> _applySnapshotInvalidation(Set<StudioSnapshotKey> keys) async {
+    final reloadOverview = keys.any(
+      (k) =>
+          k == StudioSnapshotKey.readiness ||
+          k == StudioSnapshotKey.assembly ||
+          k == StudioSnapshotKey.exportCheck ||
+          k == StudioSnapshotKey.assets ||
+          k == StudioSnapshotKey.jobs,
+    );
+    if (reloadOverview) {
+      await _loadProjectOverview();
+    }
+    if (keys.contains(StudioSnapshotKey.assemblyVersions) && !reloadOverview) {
+      await _loadDraftsAndVersions();
+    }
+    if (keys.contains(StudioSnapshotKey.timeline)) {
+      await _loadShortVideoTimeline();
+    }
+    _snapshotBus.clearPending(keys);
+  }
+
+  void _invalidateProductionSnapshots({
+    bool includeJobs = false,
+    Iterable<StudioSnapshotKey> extra = const <StudioSnapshotKey>[],
+  }) {
+    _snapshotBus.invalidate(<StudioSnapshotKey>[
+      ...StudioSnapshotInvalidation.workbenchMedia,
+      if (includeJobs) StudioSnapshotKey.jobs,
+      ...extra,
+    ]);
+  }
+
+  Future<void> _refreshProductionOverview() async {
+    _invalidateProductionSnapshots();
+  }
+
+  void _maybeScrollToInitialFocus() {
+    if (_didScrollToInitialFocus) {
+      return;
+    }
+    if (widget.initialFocus != ShortVideoSpaceInitialFocus.assembly) {
+      return;
+    }
+    final ctx = _assemblyInputPanelKey.currentContext;
+    if (ctx == null) {
+      return;
+    }
+    _didScrollToInitialFocus = true;
+    unawaited(
+      Scrollable.ensureVisible(
+        ctx,
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeInOut,
+      ),
+    );
+  }
+
+  Future<void> _refreshScopedJobCounts() async {
+    final token = widget.accessToken?.trim();
+    final project = _selectedProject;
+    if (token == null || token.isEmpty || project == null) {
+      if (mounted) {
+        setState(() => _scopedRunningJobCount = 0);
+      }
+      return;
+    }
+    try {
+      final active = await Future.wait([
+        fetchJobs(token, status: 'running', limit: 50),
+        fetchJobs(token, status: 'queued', limit: 50),
+      ]);
+      final running = [...active[0], ...active[1]];
+      final count = running
+          .where((j) => j.payload['project_uuid']?.toString() == project.id)
+          .length;
+      if (mounted) {
+        setState(() => _scopedRunningJobCount = count);
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() => _scopedRunningJobCount = 0);
+      }
+    }
   }
 
   int _beginPublishRefreshRequest() => ++_publishRefreshRequestId;
@@ -244,16 +360,14 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadProjects();
-    });
-  }
-
-  @override
   void didUpdateWidget(covariant ShortVideoSpaceSection oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (widget.initialFocus == ShortVideoSpaceInitialFocus.assembly &&
+        oldWidget.initialFocus != ShortVideoSpaceInitialFocus.assembly) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _maybeScrollToInitialFocus();
+      });
+    }
     final oldUuid = oldWidget.initialProjectUuid?.trim();
     final nextUuid = widget.initialProjectUuid?.trim();
     if (oldUuid == nextUuid || _projects.isEmpty) {
@@ -931,6 +1045,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         },
         onOpenTasks: widget.onOpenTasks,
         onOpenQuality: widget.onOpenQuality,
+        runningJobCount: _scopedRunningJobCount,
+        assemblyInputPanelKey: _assemblyInputPanelKey,
         onResetConfirmationDontShowAgain: (ctx) =>
             unawaited(runResetRiskyOperationConfirmPrefsFlow(ctx)),
         ),

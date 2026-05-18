@@ -339,11 +339,11 @@ async fn production_workbench_video_roundtrip() {
     .await;
     assert_eq!(
         add_track["trackId"].as_i64(),
-        Some(8),
+        Some(10),
         "add-track should allocate next track id"
     );
     let persisted_track_count =
-        count_video_track_rows(&pool, sub, project_id, script_id, 8_i32).await;
+        count_video_track_rows(&pool, sub, project_id, script_id, 10_i32).await;
     assert_eq!(
         persisted_track_count, 1,
         "add-track should persist app_video_track row"
@@ -362,7 +362,7 @@ async fn production_workbench_video_roundtrip() {
         }),
     )
     .await;
-    assert_eq!(selected["video_url"].as_str(), Some(selected_video_url));
+    assert_eq!(selected["videoUrl"].as_str(), Some(selected_video_url));
     let selected_memory_count = count_agent_memory_rows(
         &pool,
         sub,
@@ -406,7 +406,7 @@ async fn production_workbench_video_roundtrip() {
         Some(i64::from(storyboard_id))
     );
     assert_eq!(
-        track_videos["videos"][0]["video_url"].as_str(),
+        track_videos["videos"][0]["videoUrl"].as_str(),
         Some(selected_video_url)
     );
 
@@ -421,7 +421,7 @@ async fn production_workbench_video_roundtrip() {
         }),
     )
     .await;
-    assert_eq!(deleted_track["track_id"].as_i64(), Some(7));
+    assert_eq!(deleted_track["trackId"].as_i64(), Some(7));
     let deleted_track_count =
         count_video_track_rows(&pool, sub, project_id, script_id, 7_i32).await;
     assert_eq!(

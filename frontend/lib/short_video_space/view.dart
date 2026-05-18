@@ -797,6 +797,8 @@ class ShortVideoSpaceView extends StatelessWidget {
     required this.onOpenProductionWorkspace,
     required this.onOpenTasks,
     required this.onOpenQuality,
+    this.runningJobCount = 0,
+    this.assemblyInputPanelKey,
     this.onResetConfirmationDontShowAgain,
   });
 
@@ -885,6 +887,8 @@ class ShortVideoSpaceView extends StatelessWidget {
   final VoidCallback onOpenProductionWorkspace;
   final VoidCallback onOpenTasks;
   final VoidCallback onOpenQuality;
+  final int runningJobCount;
+  final Key? assemblyInputPanelKey;
 
   /// Clears local destructive-confirm "don't show again" prefs (always available).
   final void Function(BuildContext context)? onResetConfirmationDontShowAgain;
@@ -992,6 +996,7 @@ class ShortVideoSpaceView extends StatelessWidget {
           onOpenAssemblyClipDeskOps: onOpenAssemblyClipDeskOps,
           onOpenAssemblyDefaultsEditor: onOpenAssemblyDefaultsEditor,
           assemblyVersionManagerPanel: assemblyVersionManagerPanel,
+          assemblyInputPanelKey: assemblyInputPanelKey,
         ),
         _PublishDraftsPanel(publishPanelUi: publishPanelUi),
         _PublishCalendarPanel(publishPanelUi: publishPanelUi),
@@ -1194,7 +1199,11 @@ class ShortVideoSpaceView extends StatelessWidget {
                   OutlinedButton.icon(
                     onPressed: onOpenTasks,
                     icon: const Icon(Icons.checklist_outlined),
-                    label: Text(l10n.shortVideoSpaceNavTaskCenter),
+                    label: Text(
+                      runningJobCount > 0
+                          ? '${l10n.shortVideoSpaceNavTaskCenter} ($runningJobCount)'
+                          : l10n.shortVideoSpaceNavTaskCenter,
+                    ),
                   ),
                   OutlinedButton.icon(
                     onPressed: onOpenQuality,
@@ -1212,7 +1221,7 @@ class ShortVideoSpaceView extends StatelessWidget {
 }
 
 class _Panel extends StatelessWidget {
-  const _Panel({required this.child});
+  const _Panel({super.key, required this.child});
 
   final Widget child;
 

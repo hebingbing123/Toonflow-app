@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
+import 'support.dart';
 
 typedef TaskCenterAccessTokenProvider = String? Function();
 typedef TaskCenterErrorSink = void Function(String? error);
@@ -134,24 +135,21 @@ class TaskCenterController extends ChangeNotifier {
       final projectId =
           projectSelection.projectId ??
           (projects.isEmpty ? null : projects.first.numericId);
-      final rows = await postTasksGetTaskApi(
-        token,
-        page: 1,
-        limit: 10,
-        projectId: projectId,
+      final fetched = await fetchJobs(token, limit: 100);
+      final scoped = filterTaskCenterJobsForProject(
+        jobs: fetched,
+        projectNumericId: projectId,
+        projectUuid: projectSelection.projectUuid,
       );
-      final sample = rows.data
-          .take(3)
-          .map((job) => '${job.kind}:${job.status}')
-          .join(', ');
+      final grouped = groupJobsByPhase(scoped);
       taskProjects = projects;
-      taskApiJobs = rows.data;
+      taskApiJobs = scoped;
       taskApiSummaryLine =
-          'page=1 limit=10'
+          'fetchJobs limit=100'
           '${projectId == null ? '' : ' projectId=$projectId'}'
           '${projectSelection.resolvedFromUuid && projectSelection.projectUuid != null ? ' projectUuid=${projectSelection.projectUuid}' : ''}'
-          ' · total=${rows.total} · page_rows=${rows.data.length}'
-          '${sample.isEmpty ? '' : ' · sample: $sample'}';
+          ' · rows=${scoped.length}'
+          ' · ${summarizeGroupedTaskJobs(_l10nResolved, grouped)}';
     } catch (e) {
       reportRustOrDescribeApiError(
         e,

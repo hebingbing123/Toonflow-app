@@ -64,7 +64,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
         _assemblyJobPollTimer?.cancel();
         _assemblyJobPollTimer = null;
         if (!wasTerminal) {
-          await _loadProjectOverview();
+          _invalidateProductionSnapshots(includeJobs: true);
         }
       }
     } catch (_) {}
@@ -285,7 +285,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
           ),
         ),
       );
-      await _loadProjectOverview();
+      _invalidateProductionSnapshots(includeJobs: true);
     } catch (e) {
       if (!mounted) {
         return;
@@ -475,7 +475,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                   );
                 }
                 setLocalState(() {});
-                await _loadProjectOverview();
+                _invalidateProductionSnapshots();
               } catch (e) {
                 if (!mounted) return;
                 _showOperationFeedback(
@@ -553,7 +553,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                   );
                 }
                 setLocalState(() {});
-                await _loadProjectOverview();
+                _invalidateProductionSnapshots();
               } catch (e) {
                 if (!mounted) return;
                 _showOperationFeedback(
@@ -609,7 +609,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                     isSuccess: true,
                   );
                 }
-                await _loadProjectOverview();
+                _invalidateProductionSnapshots();
               } catch (e) {
                 if (!mounted) return;
                 _showOperationFeedback(
@@ -678,7 +678,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                   );
                 }
                 setLocalState(() {});
-                await _loadProjectOverview();
+                _invalidateProductionSnapshots();
               } catch (e) {
                 if (!mounted) return;
                 _showOperationFeedback(
@@ -1057,7 +1057,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                             scriptId: ordered.first.scriptNumericId,
                             token: token,
                             showFeedback: _showOperationFeedback,
-                            refreshData: _loadProjectOverview,
+                            refreshData: _refreshProductionOverview,
                             dialogContext: ctx,
                           );
                           setLocalState(() {
@@ -1075,7 +1075,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                             scriptId: ordered.first.scriptNumericId,
                             token: token,
                             showFeedback: _showOperationFeedback,
-                            refreshData: _loadProjectOverview,
+                            refreshData: _refreshProductionOverview,
                             dialogContext: ctx,
                           );
                           setLocalState(() {
@@ -1094,7 +1094,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                             token: token,
                             context: ctx,
                             showFeedback: _showOperationFeedback,
-                            refreshData: _loadProjectOverview,
+                            refreshData: _refreshProductionOverview,
                           );
                           setLocalState(() {
                             operationInProgress = false;
@@ -1113,7 +1113,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                             token: token,
                             context: ctx,
                             showFeedback: _showOperationFeedback,
-                            refreshData: _loadProjectOverview,
+                            refreshData: _refreshProductionOverview,
                           );
                           setLocalState(() {
                             operationInProgress = false;
@@ -2313,7 +2313,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                       ),
                       isSuccess: true,
                     );
-                    await _loadProjectOverview();
+                    _invalidateProductionSnapshots();
                   } catch (e) {
                     if (!mounted) return;
                     _showOperationFeedback(

@@ -34,3 +34,31 @@ class StudioSnapshotBus extends ChangeNotifier {
     _pending.removeAll(keys);
   }
 }
+
+/// Product-shell shared bus (studio + short video space).
+final StudioSnapshotBus kStudioSnapshotBus = StudioSnapshotBus();
+
+/// Common invalidation sets (see refresh matrix in plan).
+abstract final class StudioSnapshotInvalidation {
+  static const workbenchMedia = <StudioSnapshotKey>[
+    StudioSnapshotKey.readiness,
+    StudioSnapshotKey.assembly,
+    StudioSnapshotKey.exportCheck,
+  ];
+
+  static const productionJobTerminal = <StudioSnapshotKey>[
+    StudioSnapshotKey.readiness,
+    StudioSnapshotKey.assembly,
+    StudioSnapshotKey.exportCheck,
+    StudioSnapshotKey.jobs,
+  ];
+
+  static const timelineEdit = <StudioSnapshotKey>[
+    StudioSnapshotKey.timeline,
+    StudioSnapshotKey.assembly,
+  ];
+
+  static const assemblyVersionsOnly = <StudioSnapshotKey>[
+    StudioSnapshotKey.assemblyVersions,
+  ];
+}

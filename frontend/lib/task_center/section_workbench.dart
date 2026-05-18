@@ -147,7 +147,6 @@ class _TaskCenterWorkbenchDialogState
 
   Future<void> _loadTasks() async {
     final l10n = resolveAppLocalizationsForErrors(context);
-    final page = int.tryParse(_ctrls.pageCtrl.text.trim()) ?? 1;
     final limit = int.tryParse(_ctrls.limitCtrl.text.trim()) ?? 10;
     final state = _ctrls.stateCtrl.text.trim();
     final taskClass = _ctrls.taskClassCtrl.text.trim();
@@ -163,16 +162,24 @@ class _TaskCenterWorkbenchDialogState
         projectUuid: _ctrls.projectUuidCtrl.text,
       );
       final projectId = projectSelection.projectId;
-      final rows = await postTasksGetTaskApi(
+      final fetched = await fetchJobs(
         widget.accessToken,
-        page: page < 1 ? 1 : page,
-        limit: limit < 1 ? 10 : limit,
-        projectId: projectId,
-        state: state.isEmpty ? null : state,
-        taskClass: taskClass.isEmpty ? null : taskClass,
+        status: state.isEmpty ? null : state,
+        limit: (limit < 1 ? 10 : limit).clamp(1, 100),
       );
       if (!mounted) return;
-      final jobs = rows.data;
+      var jobs = filterTaskCenterJobsForProject(
+        jobs: fetched,
+        projectNumericId: projectId,
+        projectUuid: projectSelection.projectUuid,
+      );
+      if (taskClass.isNotEmpty) {
+        final needle = taskClass.toLowerCase();
+        jobs = jobs
+            .where((job) => job.kind.toLowerCase().contains(needle))
+            .toList(growable: false);
+      }
+      final grouped = groupJobsByPhase(jobs);
       setState(() {
         _jobs = jobs;
         if (projectSelection.projectUuid != null) {
@@ -182,12 +189,13 @@ class _TaskCenterWorkbenchDialogState
           _ctrls.projectIdCtrl.text = projectId.toString();
         }
         _taskSummary =
-            'page=${page < 1 ? 1 : page} limit=${limit < 1 ? 10 : limit}'
+            'fetchJobs limit=${(limit < 1 ? 10 : limit).clamp(1, 100)}'
             '${projectId == null ? '' : ' projectId=$projectId'}'
             '${projectSelection.resolvedFromUuid && projectSelection.projectUuid != null ? ' projectUuid=${projectSelection.projectUuid}' : ''}'
-            '${state.isEmpty ? '' : ' state=$state'}'
-            '${taskClass.isEmpty ? '' : ' taskClass=$taskClass'}'
-            ' · total=${rows.total} · page_rows=${jobs.length}';
+            '${state.isEmpty ? '' : ' status=$state'}'
+            '${taskClass.isEmpty ? '' : ' kind~$taskClass'}'
+            ' · rows=${jobs.length}'
+            ' · ${summarizeGroupedTaskJobs(l10n, grouped)}';
         if (jobs.isNotEmpty) {
           _ctrls.numericTaskIdCtrl.text = jobs.first.numericTaskId.toString();
           _ctrls.uuidCtrl.text = jobs.first.id;

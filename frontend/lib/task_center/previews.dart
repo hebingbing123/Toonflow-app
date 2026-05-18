@@ -169,20 +169,34 @@ class TaskCenterJobsPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 8),
-        Text(
-          l10n.taskCenterJobsCount(jobs.length),
-          style: Theme.of(context).textTheme.labelLarge,
+    final grouped = groupJobsByPhase(jobs);
+    final tiles = <Widget>[];
+    var shown = 0;
+    for (final phase in taskCenterPhaseDisplayOrder) {
+      final phaseJobs = grouped[phase];
+      if (phaseJobs == null || phaseJobs.isEmpty) {
+        continue;
+      }
+      final phaseLabel = taskCenterShortVideoStageLabel(l10n, phaseJobs.first);
+      tiles.add(
+        Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Text(
+            '$phaseLabel (${phaseJobs.length})',
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
         ),
-        ...jobs.take(8).map((job) {
-          final phase = taskCenterShortVideoStageLabel(l10n, job);
-          final title = phase.isEmpty
-              ? l10n.l10nBatch_c084376ea9(job.kind, job.status)
-              : '${job.kind} · ${job.status} · $phase';
-          return ListTile(
+      );
+      for (final job in phaseJobs) {
+        if (shown >= 8) {
+          break;
+        }
+        shown++;
+        final title = phaseLabel.isEmpty
+            ? l10n.l10nBatch_c084376ea9(job.kind, job.status)
+            : '${job.kind} · ${job.status}';
+        tiles.add(
+          ListTile(
             dense: true,
             contentPadding: EdgeInsets.zero,
             title: Text(title),
@@ -191,8 +205,22 @@ class TaskCenterJobsPreview extends StatelessWidget {
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => onSelectTaskJob(job),
-          );
-        }),
+          ),
+        );
+      }
+      if (shown >= 8) {
+        break;
+      }
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 8),
+        Text(
+          l10n.taskCenterJobsCount(jobs.length),
+          style: Theme.of(context).textTheme.labelLarge,
+        ),
+        ...tiles,
       ],
     );
   }

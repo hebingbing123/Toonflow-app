@@ -313,6 +313,7 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
                     overview: widget.host.assetsOverview!,
                     onSelectStep: _selectStep,
                     onOpenTasks: widget.host.onOpenTasks,
+                    runningJobCount: widget.host.runningJobCount,
                     onOpenAssetEditor: widget.host.onOpenAssetEditor,
                     onRunHarnessAgent: widget.host.onRunHarnessAgent,
                   ),
@@ -375,6 +376,7 @@ class _ProjectAssetHubCard extends StatelessWidget {
     required this.onRunHarnessAgent,
     this.onOpenAssetEditor,
     this.onOpenTasks,
+    this.runningJobCount = 0,
   });
 
   final ProjectAssetsOverview overview;
@@ -382,6 +384,7 @@ class _ProjectAssetHubCard extends StatelessWidget {
   final Future<void> Function(String agentKind) onRunHarnessAgent;
   final ValueChanged<ProjectStudioAssetEditorTarget>? onOpenAssetEditor;
   final VoidCallback? onOpenTasks;
+  final int runningJobCount;
 
   ProjectStudioAssetEditorTarget _buildEditorTargetForAssetTarget(
     String assetTarget, {
@@ -500,6 +503,20 @@ class _ProjectAssetHubCard extends StatelessWidget {
                     ),
                   ),
                   child: const Text('Open asset editor'),
+                ),
+              if (onOpenTasks != null)
+                OutlinedButton.icon(
+                  onPressed: onOpenTasks,
+                  icon: Badge(
+                    isLabelVisible: runningJobCount > 0,
+                    label: Text('$runningJobCount'),
+                    child: const Icon(Icons.pending_actions_outlined),
+                  ),
+                  label: Text(
+                    runningJobCount > 0
+                        ? 'Tasks ($runningJobCount)'
+                        : 'Tasks',
+                  ),
                 ),
               Text(
                 hub.primaryAction.title,

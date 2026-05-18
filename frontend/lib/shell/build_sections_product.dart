@@ -216,7 +216,12 @@ extension _HomePageBuildProductSections on _HomePageState {
                       projectAccessRole: 'editor',
                     ),
                     target,
-                    onProjectSnapshotChanged: refreshSnapshot,
+                    onProjectSnapshotChanged: () async {
+                      kStudioSnapshotBus.invalidate(
+                        StudioSnapshotInvalidation.workbenchMedia,
+                      );
+                      await refreshSnapshot();
+                    },
                   ),
               initialStep: StudioStep.fromSlug(widget.studioStepSlug),
               completedSteps: readiness.completedSteps,
@@ -299,6 +304,10 @@ extension _HomePageBuildProductSections on _HomePageState {
                       children: <Widget>[
                         StudioMergeDeliverBar(
                           onMergeAndPreview: () {
+                            setState(() {
+                              _shortVideoSpaceInitialFocus =
+                                  ShortVideoSpaceInitialFocus.assembly;
+                            });
                             _shellNavigationController
                                 .selectProductWorkspacePane(
                                   ProductWorkspacePane.shortVideoSpace,
@@ -324,6 +333,7 @@ extension _HomePageBuildProductSections on _HomePageState {
   Widget _buildShortVideoSpaceSection() {
     return ShortVideoSpaceSection(
       accessToken: _session?.accessToken,
+      initialFocus: _shortVideoSpaceInitialFocus,
       initialProjectUuid:
           _workspaceInputController.projectUuidController.text.trim().isEmpty
           ? null

@@ -10,9 +10,8 @@ use crate::error::ApiError;
 use crate::production::workbench::video_prompt_memory::{
     build_rejected_video_negative_memory, build_selected_video_memory,
     clear_rejected_video_negative_memory, clear_selected_video_memory, extract_key_value,
-    optimize_scoped_video_memory, persist_rejected_video_negative_memory,
-    persist_selected_video_memory, refresh_project_video_style_memory,
-    refresh_script_video_style_memory, StoryboardPromptSeedRow,
+    persist_rejected_video_negative_memory, persist_selected_video_memory,
+    refresh_project_video_style_memory, refresh_script_video_style_memory, StoryboardPromptSeedRow,
 };
 use crate::scope::http::require_authenticated_user;
 use crate::scope::http::require_script_write_scope_ref;
@@ -297,26 +296,14 @@ pub(in crate::production::workbench) async fn run_workbench_select_video(
                 &memory_content,
             )
             .await?;
-            let optimization = optimize_scoped_video_memory(
+            refresh_script_video_style_memory(
                 pool,
                 user_id,
                 scope_row.project_numeric_id,
                 body.script_id,
             )
             .await?;
-            if !optimization.refreshed_script_summary {
-                refresh_script_video_style_memory(
-                    pool,
-                    user_id,
-                    scope_row.project_numeric_id,
-                    body.script_id,
-                )
-                .await?;
-            }
-            if !optimization.refreshed_project_summary {
-                refresh_project_video_style_memory(pool, user_id, scope_row.project_numeric_id)
-                    .await?;
-            }
+            refresh_project_video_style_memory(pool, user_id, scope_row.project_numeric_id).await?;
         }
     }
 

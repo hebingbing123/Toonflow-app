@@ -29,6 +29,7 @@ class _ProductionPanel extends StatelessWidget {
     required this.onOpenAssemblyClipDeskOps,
     required this.onOpenAssemblyDefaultsEditor,
     this.assemblyVersionManagerPanel,
+    this.assemblyInputPanelKey,
   });
 
   final String spaceOverviewSummary;
@@ -57,6 +58,7 @@ class _ProductionPanel extends StatelessWidget {
   final VoidCallback? onOpenAssemblyClipDeskOps;
   final VoidCallback? onOpenAssemblyDefaultsEditor;
   final Widget? assemblyVersionManagerPanel;
+  final Key? assemblyInputPanelKey;
 
   @override
   Widget build(BuildContext context) {
@@ -191,6 +193,7 @@ class _ProductionPanel extends StatelessWidget {
         if (assemblyInputPanelUi.visible) ...[
           const SizedBox(height: 16),
           _Panel(
+            key: assemblyInputPanelKey,
             child: AssemblyInputPanel(
               ui: assemblyInputPanelUi,
               l10n: l10n,
