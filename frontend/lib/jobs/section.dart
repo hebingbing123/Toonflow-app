@@ -3,15 +3,21 @@ import 'controller.dart';
 import 'section_view.dart';
 
 class JobsSection extends StatelessWidget {
-  const JobsSection({super.key, required this.controller});
+  const JobsSection({
+    super.key,
+    required this.controller,
+    this.studioPresentation = false,
+  });
 
   final JobsController controller;
+  final bool studioPresentation;
 
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: controller,
       builder: (context, _) => JobsSectionView(
+        studioPresentation: studioPresentation,
         model: JobsSectionViewModel(
           loadingJobs: controller.loadingJobs,
           loadingJobKinds: controller.loadingJobKinds,

@@ -6,6 +6,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../config.dart';
 import '../l10n/app_localizations.dart';
+import '../studio/job_center.dart';
 import 'product_scope.dart';
 import '../../rust_api.dart';
 
@@ -343,7 +344,21 @@ class JobsController extends ChangeNotifier {
     }
   }
 
+  void _syncStudioJobCenter(JobRow updated) {
+    final snapshot = StudioJobSnapshot(
+      jobId: updated.id,
+      status: updated.status,
+      label: updated.kind,
+    );
+    if (snapshot.isActive) {
+      StudioJobCenter.instance.upsert(snapshot);
+    } else {
+      StudioJobCenter.instance.remove(updated.id);
+    }
+  }
+
   void _upsertJob(JobRow updated) {
+    _syncStudioJobCenter(updated);
     if (jobs != null) {
       final next = List<JobRow>.from(jobs!);
       final index = next.indexWhere((job) => job.id == updated.id);

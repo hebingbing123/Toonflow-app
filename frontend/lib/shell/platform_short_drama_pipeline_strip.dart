@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_text_styles.dart';
 import '../rust_api.dart';
 import 'navigation_controller.dart';
+import 'pipeline_step_chip.dart';
 
 /// Platform-level entry points for the short-drama production chain (Moneyprinter-style),
 /// independent of any single feature module.
@@ -53,27 +55,31 @@ class PlatformShortDramaPipelineStrip extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             l10n.productPipelineStripSubtitle,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.outline,
-            ),
+            style: studioMutedBodySmall(context),
           ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 6,
-            runSpacing: 6,
-            children: steps
-                .map((s) {
-                  final enabled =
-                      (s.$1 != ProductWorkspacePane.jobs || jobsPaneEnabled) &&
-                      (s.$1 != ProductWorkspacePane.quality ||
-                          qualityPaneEnabled);
-                  return ActionChip(
-                    avatar: Icon(s.$3, size: 18),
-                    label: Text(s.$2),
-                    onPressed: enabled ? () => onSelectPane(s.$1) : null,
-                  );
-                })
-                .toList(growable: false),
+          const SizedBox(height: 10),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: steps
+                  .map((step) {
+                    final enabled =
+                        (step.$1 != ProductWorkspacePane.jobs || jobsPaneEnabled) &&
+                        (step.$1 != ProductWorkspacePane.quality ||
+                            qualityPaneEnabled);
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: PipelineStepChip(
+                        label: step.$2,
+                        icon: step.$3,
+                        selected: false,
+                        enabled: enabled,
+                        onSelected: enabled ? (_) => onSelectPane(step.$1) : null,
+                      ),
+                    );
+                  })
+                  .toList(growable: false),
+            ),
           ),
         ],
       ),

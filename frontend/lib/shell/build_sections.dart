@@ -195,7 +195,10 @@ extension _HomePageBuildSections on _HomePageState {
     );
   }
 
-  Widget _buildWorkspaceContextSection(BuildContext context) {
+  Widget _buildWorkspaceContextSection(
+    BuildContext context, {
+    bool compact = false,
+  }) {
     final workspace = _sessionMe?.currentWorkspace;
     final projects = _projectsController.projects;
     final projectUuid =
@@ -222,6 +225,7 @@ extension _HomePageBuildSections on _HomePageState {
       workspacePlanTier: workspaceBilling?.planTier,
       workspaceDailyJobQuota: workspaceBilling?.dailyJobQuota,
       workspaceJobsToday: workspaceBilling?.jobsToday,
+      compact: compact,
     );
   }
 

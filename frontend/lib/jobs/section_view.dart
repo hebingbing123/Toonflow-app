@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../design_system/components/studio_filter_row.dart';
+import '../../design_system/components/studio_pane_header.dart';
+import '../../design_system/components/studio_text_styles.dart';
 import '../../local_prefs/risky_operation_confirm_prefs.dart';
 import '../../rust_api.dart';
 
@@ -74,120 +77,140 @@ class JobsSectionView extends StatelessWidget {
     super.key,
     required this.model,
     required this.callbacks,
+    this.studioPresentation = false,
   });
 
   final JobsSectionViewModel model;
   final JobsSectionViewCallbacks callbacks;
+  final bool studioPresentation;
 
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    final outline = Theme.of(context).colorScheme.outline;
+    final muted = studioMutedTextColor(context);
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 16),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Text(
-                  l10n.jobsTitle,
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-              ),
-              RiskyOperationConfirmPrefsOverflowMenu(
-                tooltip: l10n.jobsPrefsTooltip,
-              ),
-            ],
+          StudioPaneHeader(
+            title: l10n.jobsTitle,
+            subtitle: l10n.jobsSubtitle,
+            showBack: studioPresentation,
+            trailing: studioPresentation
+                ? null
+                : RiskyOperationConfirmPrefsOverflowMenu(
+                    tooltip: l10n.jobsPrefsTooltip,
+                  ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            l10n.jobsSubtitle,
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: outline),
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              FilledButton.tonal(
-                onPressed: model.loadingJobs ? null : callbacks.onLoadJobs,
-                child: Text(model.loadingJobs ? '…' : l10n.jobsLoadList),
-              ),
-              FilledButton.tonal(
-                onPressed: model.loadingJobs
-                    ? null
-                    : callbacks.onLoadJobsStatusFailed,
-                child: Text(l10n.jobsLoadFailed),
-              ),
-              FilledButton.tonal(
-                onPressed: model.loadingJobKinds
-                    ? null
-                    : callbacks.onLoadJobKinds,
-                child: Text(model.loadingJobKinds ? '…' : l10n.jobsLoadKinds),
-              ),
-              FilledButton.tonal(
-                onPressed: model.loadingJobKindSummary
-                    ? null
-                    : callbacks.onLoadJobKindSummary,
-                child: Text(
-                  model.loadingJobKindSummary ? '…' : l10n.jobsLoadKindSummary,
+          const SizedBox(height: 12),
+          if (studioPresentation)
+            StudioFilterRow(
+              children: <Widget>[
+                FilledButton.tonal(
+                  onPressed: model.loadingJobs ? null : callbacks.onLoadJobs,
+                  child: Text(model.loadingJobs ? '…' : l10n.jobsLoadList),
                 ),
-              ),
-              FilledButton.tonal(
-                onPressed: model.loadingJobStatusSummary
-                    ? null
-                    : callbacks.onLoadJobStatusSummary,
-                child: Text(
-                  model.loadingJobStatusSummary
-                      ? '…'
-                      : l10n.jobsLoadStatusSummary,
+                FilledButton.tonal(
+                  onPressed: model.loadingJobs
+                      ? null
+                      : callbacks.onLoadJobsStatusFailed,
+                  child: Text(l10n.jobsLoadFailed),
                 ),
-              ),
-            ],
-          ),
+              ],
+            )
+          else
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                FilledButton.tonal(
+                  onPressed: model.loadingJobs ? null : callbacks.onLoadJobs,
+                  child: Text(model.loadingJobs ? '…' : l10n.jobsLoadList),
+                ),
+                FilledButton.tonal(
+                  onPressed: model.loadingJobs
+                      ? null
+                      : callbacks.onLoadJobsStatusFailed,
+                  child: Text(l10n.jobsLoadFailed),
+                ),
+                FilledButton.tonal(
+                  onPressed: model.loadingJobKinds
+                      ? null
+                      : callbacks.onLoadJobKinds,
+                  child: Text(model.loadingJobKinds ? '…' : l10n.jobsLoadKinds),
+                ),
+                FilledButton.tonal(
+                  onPressed: model.loadingJobKindSummary
+                      ? null
+                      : callbacks.onLoadJobKindSummary,
+                  child: Text(
+                    model.loadingJobKindSummary ? '…' : l10n.jobsLoadKindSummary,
+                  ),
+                ),
+                FilledButton.tonal(
+                  onPressed: model.loadingJobStatusSummary
+                      ? null
+                      : callbacks.onLoadJobStatusSummary,
+                  child: Text(
+                    model.loadingJobStatusSummary
+                        ? '…'
+                        : l10n.jobsLoadStatusSummary,
+                  ),
+                ),
+              ],
+            ),
           const SizedBox(height: 8),
           ExpansionTile(
             tilePadding: EdgeInsets.zero,
             childrenPadding: EdgeInsets.zero,
+            initiallyExpanded: !studioPresentation,
             title: Text(l10n.jobsCompatTitle),
             subtitle: Text(
               l10n.jobsCompatSubtitle,
               style: Theme.of(
                 context,
-              ).textTheme.bodySmall?.copyWith(color: outline),
+              ).textTheme.bodySmall?.copyWith(color: muted),
             ),
             children: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  l10n.jobsCompatHttpProbeFilters,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.labelSmall?.copyWith(color: outline),
+              if (studioPresentation)
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: RiskyOperationConfirmPrefsOverflowMenu(
+                    tooltip: l10n.jobsPrefsTooltip,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
+              if (studioPresentation) const SizedBox(height: 8),
+              if (!studioPresentation) ...[
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    l10n.jobsCompatHttpProbeFilters,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.labelSmall?.copyWith(color: muted),
+                  ),
+                ),
+                const SizedBox(height: 8),
+              ],
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  FilledButton.tonal(
-                    onPressed: model.loadingJobs
-                        ? null
-                        : callbacks.onLoadJobsKindFlutterProbe,
-                    child: Text(l10n.jobsFilterFlutterProbe),
-                  ),
-                  FilledButton.tonal(
-                    onPressed: model.loadingJobs
-                        ? null
-                        : callbacks.onLoadJobsKindProbeStatusQueued,
-                    child: Text(l10n.jobsFilterFlutterProbeQueued),
-                  ),
+                  if (!studioPresentation) ...[
+                    FilledButton.tonal(
+                      onPressed: model.loadingJobs
+                          ? null
+                          : callbacks.onLoadJobsKindFlutterProbe,
+                      child: Text(l10n.jobsFilterFlutterProbe),
+                    ),
+                    FilledButton.tonal(
+                      onPressed: model.loadingJobs
+                          ? null
+                          : callbacks.onLoadJobsKindProbeStatusQueued,
+                      child: Text(l10n.jobsFilterFlutterProbeQueued),
+                    ),
+                  ],
                   FilledButton.tonal(
                     onPressed: model.creatingJob
                         ? null
@@ -196,11 +219,53 @@ class JobsSectionView extends StatelessWidget {
                       model.creatingJob ? '…' : l10n.jobsCreateProbeJob,
                     ),
                   ),
+                  if (studioPresentation) ...[
+                    FilledButton.tonal(
+                      onPressed: model.loadingJobKinds
+                          ? null
+                          : callbacks.onLoadJobKinds,
+                      child: Text(
+                        model.loadingJobKinds ? '…' : l10n.jobsLoadKinds,
+                      ),
+                    ),
+                    FilledButton.tonal(
+                      onPressed: model.loadingJobKindSummary
+                          ? null
+                          : callbacks.onLoadJobKindSummary,
+                      child: Text(
+                        model.loadingJobKindSummary
+                            ? '…'
+                            : l10n.jobsLoadKindSummary,
+                      ),
+                    ),
+                    FilledButton.tonal(
+                      onPressed: model.loadingJobStatusSummary
+                          ? null
+                          : callbacks.onLoadJobStatusSummary,
+                      child: Text(
+                        model.loadingJobStatusSummary
+                            ? '…'
+                            : l10n.jobsLoadStatusSummary,
+                      ),
+                    ),
+                    FilledButton.tonal(
+                      onPressed: model.loadingJobs
+                          ? null
+                          : callbacks.onLoadJobsKindFlutterProbe,
+                      child: Text(l10n.jobsFilterFlutterProbe),
+                    ),
+                    FilledButton.tonal(
+                      onPressed: model.loadingJobs
+                          ? null
+                          : callbacks.onLoadJobsKindProbeStatusQueued,
+                      child: Text(l10n.jobsFilterFlutterProbeQueued),
+                    ),
+                  ],
                 ],
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           TextField(
             controller: model.jobIdController,
             onChanged: callbacks.onJobIdChanged,
@@ -215,31 +280,31 @@ class JobsSectionView extends StatelessWidget {
                 : callbacks.onFetchJobById,
             child: Text(model.loadingJobById ? '…' : l10n.jobsFetchDetail),
           ),
-          if (model.jobByIdLine != null) ...[
+          if (!studioPresentation && model.jobByIdLine != null) ...[
             const SizedBox(height: 8),
             SelectableText(
               l10n.jobsDetailLabel(model.jobByIdLine!),
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
-          if (model.jobKindsLine != null) ...[
+          if (!studioPresentation && model.jobKindsLine != null) ...[
             const SizedBox(height: 8),
             SelectableText(l10n.jobsKindsLabel(model.jobKindsLine!)),
           ],
-          if (model.jobKindSummaryLine != null) ...[
+          if (!studioPresentation && model.jobKindSummaryLine != null) ...[
             const SizedBox(height: 8),
             SelectableText(
               l10n.jobsKindSummaryLabel(model.jobKindSummaryLine!),
             ),
           ],
-          if (model.jobStatusSummaryLine != null) ...[
+          if (!studioPresentation && model.jobStatusSummaryLine != null) ...[
             const SizedBox(height: 8),
             SelectableText(
               l10n.jobsStatusSummaryLabel(model.jobStatusSummaryLine!),
             ),
           ],
           if (model.jobs != null) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             Text(
               l10n.jobsCountLabel(model.jobs!.length),
               style: Theme.of(context).textTheme.labelLarge,

@@ -217,6 +217,9 @@ void main() {
     JobRow? retriedJob;
     JobRow? cancelledJob;
 
+    await tester.binding.setSurfaceSize(const Size(1200, 1400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
     await tester.pumpWidget(
       MaterialApp(
         localizationsDelegates: const [

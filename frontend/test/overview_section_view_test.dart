@@ -66,24 +66,42 @@ void main() {
   ) async {
     await tester.pumpWidget(
       wrapWithEnL10n(
-        OverviewSectionView(
-          model: buildModel(),
-          callbacks: buildCallbacks(),
-        ),
+        OverviewSectionView(model: buildModel(), callbacks: buildCallbacks()),
       ),
     );
 
-    expect(find.text(en.workspaceDebugOverviewApiBase('http://127.0.0.1:8666')), findsOneWidget);
+    expect(
+      find.text(en.workspaceDebugOverviewApiBase('http://127.0.0.1:8666')),
+      findsNWidgets(2),
+    );
     expect(find.text(en.workspaceDebugOverviewButtonHealthV1), findsOneWidget);
-    expect(find.text(en.workspaceDebugOverviewButtonHealthRoot), findsOneWidget);
+    expect(
+      find.text(en.workspaceDebugOverviewButtonHealthRoot),
+      findsOneWidget,
+    );
     expect(find.text(en.workspaceDebugOverviewButtonPing), findsOneWidget);
     expect(find.text(en.workspaceDebugOverviewButtonVersion), findsOneWidget);
     expect(find.text(en.workspaceDebugOverviewButtonReady), findsOneWidget);
-    expect(find.text(en.workspaceDebugOverviewHealthV1Line('{"ok":true}')), findsOneWidget);
-    expect(find.text(en.workspaceDebugOverviewHealthRootLine('{"root":true}')), findsOneWidget);
-    expect(find.text(en.workspaceDebugOverviewPingLine('pong')), findsOneWidget);
-    expect(find.text(en.workspaceDebugOverviewVersionLine('{"version":"1.0.0"}')), findsOneWidget);
-    expect(find.text(en.workspaceDebugOverviewReadyLine('{"ready":true}')), findsOneWidget);
+    expect(
+      find.text(en.workspaceDebugOverviewHealthV1Line('{"ok":true}')),
+      findsOneWidget,
+    );
+    expect(
+      find.text(en.workspaceDebugOverviewHealthRootLine('{"root":true}')),
+      findsOneWidget,
+    );
+    expect(
+      find.text(en.workspaceDebugOverviewPingLine('pong')),
+      findsOneWidget,
+    );
+    expect(
+      find.text(en.workspaceDebugOverviewVersionLine('{"version":"1.0.0"}')),
+      findsOneWidget,
+    );
+    expect(
+      find.text(en.workspaceDebugOverviewReadyLine('{"ready":true}')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('overview section view disables buttons while loading', (
@@ -156,4 +174,24 @@ void main() {
     expect(versionTapped, 1);
     expect(readyTapped, 1);
   });
+
+  testWidgets(
+    'overview section view keeps probe tiles readable on laptop widths',
+    (WidgetTester tester) async {
+      await tester.binding.setSurfaceSize(const Size(1180, 860));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      await tester.pumpWidget(
+        wrapWithEnL10n(
+          OverviewSectionView(model: buildModel(), callbacks: buildCallbacks()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('/api/v1/health'), findsOneWidget);
+      expect(find.text('/api/v1/version'), findsOneWidget);
+      expect(find.text('/api/v1/ready'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
 }
