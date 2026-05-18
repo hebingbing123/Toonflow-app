@@ -392,6 +392,7 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
     switch (_pane) {
       case AgentWorkspacePane.script:
         return AgentWorkspaceScriptCard(
+          showCardTitle: widget.sectionTitle == null,
           busy: _busy,
           scriptPromptController: widget.scriptPromptController,
           scriptDomainArgsController: widget.scriptDomainArgsController,
@@ -533,44 +534,69 @@ class _AgentWorkspacesSectionState extends State<AgentWorkspacesSection> {
     final title = widget.sectionTitle ?? l10n.agentWorkspaceSectionTitle;
     final description =
         widget.sectionDescription ?? l10n.agentWorkspaceSectionDescription;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        const SizedBox(height: 16),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Expanded(
-              child: Text(title, style: Theme.of(context).textTheme.titleSmall),
-            ),
-            const RiskyOperationConfirmPrefsOverflowMenu(),
-          ],
-        ),
-        const SizedBox(height: 4),
-        Text(description, style: Theme.of(context).textTheme.bodySmall),
-        const SizedBox(height: 12),
-        AgentWorkspaceScopeInputs(
-          projectIdController: widget.projectIdController,
-          scriptIdController: widget.scriptIdController,
-          projectUuidController: _effectiveProjectUuidController,
-          scriptUuidController: _effectiveScriptUuidController,
-          workspaceUuidController: _effectiveWorkspaceUuidController,
-        ),
-        if (widget.showPaneSelector) ...<Widget>[
-          const SizedBox(height: 12),
-          AgentWorkspacePaneSelector(
-            selectedPane: _pane,
-            onSelected: (AgentWorkspacePane nextPane) {
-              if (_pane == nextPane) {
-                return;
-              }
-              setState(() => _pane = nextPane);
-            },
+    final header = <Widget>[
+      const SizedBox(height: 16),
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Expanded(
+            child: Text(title, style: Theme.of(context).textTheme.titleSmall),
           ),
+          const RiskyOperationConfirmPrefsOverflowMenu(),
         ],
+      ),
+      const SizedBox(height: 4),
+      Text(description, style: Theme.of(context).textTheme.bodySmall),
+    ];
+
+    final scrollableBody = <Widget>[
+      AgentWorkspaceScopeInputs(
+        projectIdController: widget.projectIdController,
+        scriptIdController: widget.scriptIdController,
+        projectUuidController: _effectiveProjectUuidController,
+        scriptUuidController: _effectiveScriptUuidController,
+        workspaceUuidController: _effectiveWorkspaceUuidController,
+      ),
+      if (widget.showPaneSelector) ...<Widget>[
         const SizedBox(height: 12),
-        _buildPaneBody(context),
+        AgentWorkspacePaneSelector(
+          selectedPane: _pane,
+          onSelected: (AgentWorkspacePane nextPane) {
+            if (_pane == nextPane) {
+              return;
+            }
+            setState(() => _pane = nextPane);
+          },
+        ),
       ],
+      const SizedBox(height: 12),
+      _buildPaneBody(context),
+      const SizedBox(height: 24),
+    ];
+
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        if (!constraints.maxHeight.isFinite) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[...header, ...scrollableBody],
+          );
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            ...header,
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: scrollableBody,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 

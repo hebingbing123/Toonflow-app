@@ -26,6 +26,7 @@ typedef ApplyScriptWorkspaceFocus =
 class AgentWorkspaceScriptCard extends StatefulWidget {
   const AgentWorkspaceScriptCard({
     super.key,
+    this.showCardTitle = true,
     required this.busy,
     required this.scriptPromptController,
     required this.scriptDomainArgsController,
@@ -60,6 +61,7 @@ class AgentWorkspaceScriptCard extends StatefulWidget {
     required this.onApplyScriptFocus,
   });
 
+  final bool showCardTitle;
   final bool busy;
   final TextEditingController scriptPromptController;
   final TextEditingController scriptDomainArgsController;
@@ -197,11 +199,13 @@ class _AgentWorkspaceScriptCardState extends State<AgentWorkspaceScriptCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text(
-              l10n.agentWorkspaceScriptCardTitle,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
+            if (widget.showCardTitle) ...<Widget>[
+              Text(
+                l10n.agentWorkspaceScriptCardTitle,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+            ],
             Text(
               l10n.agentWorkspaceGuidedTasksTitle,
               style: Theme.of(context).textTheme.labelLarge,

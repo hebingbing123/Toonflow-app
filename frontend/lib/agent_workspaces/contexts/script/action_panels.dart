@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../design_system/tokens.dart';
 import '../../../rust_api.dart';
+import '../../controls.dart';
 import '../../prompt_preset.dart';
 
 class ScriptWorkspaceArgumentTemplateEntry {
@@ -148,13 +150,17 @@ class ScriptWorkspaceControlsPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
+    final fieldStyle = agentWorkspaceFieldTextStyle(context);
+    final tokens = StudioTokens.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         TextField(
           controller: scriptPromptController,
           maxLines: 4,
-          decoration: InputDecoration(
+          style: fieldStyle,
+          decoration: agentWorkspaceFieldDecoration(
+            context,
             labelText: l10n.agentWorkspaceScriptPromptLabel,
             helperText: l10n.agentWorkspaceScriptPromptHelper,
           ),
@@ -179,12 +185,14 @@ class ScriptWorkspaceControlsPanel extends StatelessWidget {
                   'script-domain-tool-${selectedScriptDomainTool ?? ''}',
                 ),
                 isExpanded: true,
+                style: fieldStyle,
+                dropdownColor: tokens.bgElevated,
                 initialValue: selectedScriptDomainTool,
                 items: scriptDomainToolPresets
                     .map(
                       (String tool) => DropdownMenuItem<String>(
                         value: tool,
-                        child: Text(tool),
+                        child: Text(tool, style: fieldStyle),
                       ),
                     )
                     .toList(growable: false),
@@ -194,7 +202,8 @@ class ScriptWorkspaceControlsPanel extends StatelessWidget {
                         if (value == null) return;
                         onScriptDomainToolChanged(value);
                       },
-                decoration: InputDecoration(
+                decoration: agentWorkspaceFieldDecoration(
+                  context,
                   labelText: l10n.agentWorkspaceScriptDomainToolLabel,
                 ),
               ),
@@ -212,7 +221,9 @@ class ScriptWorkspaceControlsPanel extends StatelessWidget {
               child: TextField(
                 controller: scriptDomainArgsController,
                 maxLines: 2,
-                decoration: InputDecoration(
+                style: fieldStyle,
+                decoration: agentWorkspaceFieldDecoration(
+                  context,
                   labelText: l10n.agentWorkspaceScriptArgsLabel,
                   helperText: l10n.agentWorkspaceScriptArgsHelper,
                 ),
@@ -222,12 +233,14 @@ class ScriptWorkspaceControlsPanel extends StatelessWidget {
               width: 300,
               child: DropdownButtonFormField<String>(
                 isExpanded: true,
+                style: fieldStyle,
+                dropdownColor: tokens.bgElevated,
                 initialValue: selectedScriptSubAgentTool,
                 items: scriptSubAgentPresets
                     .map(
                       (String tool) => DropdownMenuItem<String>(
                         value: tool,
-                        child: Text(tool),
+                        child: Text(tool, style: fieldStyle),
                       ),
                     )
                     .toList(growable: false),
@@ -237,7 +250,8 @@ class ScriptWorkspaceControlsPanel extends StatelessWidget {
                         if (value == null) return;
                         onScriptSubAgentChanged(value);
                       },
-                decoration: InputDecoration(
+                decoration: agentWorkspaceFieldDecoration(
+                  context,
                   labelText: l10n.agentWorkspaceScriptSubAgentToolLabel,
                 ),
               ),

@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
+import '../project_studio/projects_studio_home.dart';
 import 'create_project_dialog.dart';
 import 'controller.dart';
 import 'previews.dart';
@@ -23,6 +24,8 @@ class ProjectsSection extends StatelessWidget {
     required this.controller,
     required this.onOpenProjectDetail,
     required this.onOpenTeamWorkspaces,
+    this.onOpenProjectStudio,
+    this.productPresentation = false,
     this.currentWorkspaceName,
     this.currentWorkspaceType,
   });
@@ -31,6 +34,10 @@ class ProjectsSection extends StatelessWidget {
   final ProjectsController controller;
   final ValueChanged<ProjectRow> onOpenProjectDetail;
   final VoidCallback onOpenTeamWorkspaces;
+  /// Studio grid path: scope project + short-video space (no detail dialog).
+  final ValueChanged<ProjectRow>? onOpenProjectStudio;
+  /// Hides harness probes and manual load buttons in the product studio shell.
+  final bool productPresentation;
   final String? currentWorkspaceName;
   final String? currentWorkspaceType;
 
@@ -105,6 +112,18 @@ class ProjectsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (productPresentation && onOpenProjectStudio != null) {
+      return ProjectsStudioHome(
+        controller: controller,
+        accessToken: accessToken,
+        onOpenProjectStudio: onOpenProjectStudio!,
+        onCreateProject: controller.createProjectWithFields,
+        currentWorkspaceName: currentWorkspaceName,
+        currentWorkspaceType: currentWorkspaceType,
+        onOpenTeamWorkspaces: onOpenTeamWorkspaces,
+      );
+    }
+
     final l10n = resolveAppLocalizationsForErrors(context);
     final outline = Theme.of(context).colorScheme.outline;
     return AnimatedBuilder(
@@ -133,27 +152,59 @@ class ProjectsSection extends StatelessWidget {
             ).textTheme.bodySmall?.copyWith(color: outline),
           ),
           const SizedBox(height: 8),
-          ProjectsActionsBar(
-            loadingProjects: controller.loadingProjects,
-            loadingProjectsSummary: controller.loadingProjectsSummary,
-            loadingArtStyles: controller.loadingArtStyles,
-            creatingProject: controller.creatingProject,
-            onLoadProjects: controller.loadProjects,
-            onLoadProjectsSummary: controller.loadProjectsSummary,
-            onLoadArtStyles: controller.loadArtStyles,
-            onOpenArtStylesWorkbench: () => _openArtStylesWorkbench(context),
-            onOpenCreativeManualsWorkbench: () =>
-                _openCreativeManualsWorkbench(context),
-            onOpenAgentMemoryWorkbench: () =>
-                _openAgentMemoryWorkbench(context),
-            onCreateEmptyProject: () => _createEmptyProject(context),
-          ),
-          const SizedBox(height: 8),
-          ProjectsCompatibilityPanel(
-            outlineColor: outline,
-            loadingAgentMemory: controller.loadingAgentMemory,
-            onProbeAgentMemory: controller.probeAgentMemory,
-          ),
+          if (productPresentation)
+            Row(
+              children: <Widget>[
+                FilledButton.icon(
+                  onPressed: controller.creatingProject
+                      ? null
+                      : () => _createEmptyProject(context),
+                  icon: const Icon(Icons.add),
+                  label: Text(
+                    controller.creatingProject
+                        ? l10n.projectsCreating
+                        : l10n.projectsCreateFirstEmpty,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                IconButton(
+                  tooltip: l10n.projectsLoadProjectList,
+                  onPressed: controller.loadingProjects
+                      ? null
+                      : controller.loadProjects,
+                  icon: controller.loadingProjects
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.refresh),
+                ),
+              ],
+            )
+          else ...<Widget>[
+            ProjectsActionsBar(
+              loadingProjects: controller.loadingProjects,
+              loadingProjectsSummary: controller.loadingProjectsSummary,
+              loadingArtStyles: controller.loadingArtStyles,
+              creatingProject: controller.creatingProject,
+              onLoadProjects: controller.loadProjects,
+              onLoadProjectsSummary: controller.loadProjectsSummary,
+              onLoadArtStyles: controller.loadArtStyles,
+              onOpenArtStylesWorkbench: () => _openArtStylesWorkbench(context),
+              onOpenCreativeManualsWorkbench: () =>
+                  _openCreativeManualsWorkbench(context),
+              onOpenAgentMemoryWorkbench: () =>
+                  _openAgentMemoryWorkbench(context),
+              onCreateEmptyProject: () => _createEmptyProject(context),
+            ),
+            const SizedBox(height: 8),
+            ProjectsCompatibilityPanel(
+              outlineColor: outline,
+              loadingAgentMemory: controller.loadingAgentMemory,
+              onProbeAgentMemory: controller.probeAgentMemory,
+            ),
+          ],
           if (_showEnterpriseProjectEmptyState) ...[
             const SizedBox(height: 12),
             Container(

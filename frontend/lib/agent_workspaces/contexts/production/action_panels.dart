@@ -1,6 +1,9 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../../rust_api.dart';
+import '../../controls.dart';
 import '../../prompt_preset.dart';
 import 'support.dart';
 
@@ -42,6 +45,18 @@ class ProductionWorkspacePromptTemplatesPanel extends StatelessWidget {
           .toList(growable: false),
     );
   }
+}
+
+const double _kAgentFormFieldMaxWidth = 560;
+
+Widget _constrainedAgentField(BuildContext context, Widget field) {
+  return Align(
+    alignment: Alignment.centerLeft,
+    child: ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: _kAgentFormFieldMaxWidth),
+      child: SizedBox(width: double.infinity, child: field),
+    ),
+  );
 }
 
 /// Owns the prompt input and tool/sub-agent controls for production flow work.
@@ -103,145 +118,170 @@ class ProductionWorkspaceControlsPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        TextField(
-          controller: productionPromptController,
-          maxLines: 4,
-          decoration: InputDecoration(
-            labelText: l10n.agentWorkspaceProductionPromptLabel,
-            helperText: l10n.agentWorkspaceProductionPromptHelper,
+        _constrainedAgentField(
+          context,
+          TextField(
+            controller: productionPromptController,
+            maxLines: 4,
+            decoration: agentWorkspaceFieldDecoration(
+              context,
+              labelText: l10n.agentWorkspaceProductionPromptLabel,
+              helperText: l10n.agentWorkspaceProductionPromptHelper,
+            ),
           ),
         ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: <Widget>[
-            FilledButton.tonal(
+        const SizedBox(height: 12),
+        LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            final narrow = constraints.maxWidth < 720;
+            final fieldWidth = math.min(
+              constraints.maxWidth,
+              _kAgentFormFieldMaxWidth,
+            );
+
+            Widget domainToolDropdown() {
+              return SizedBox(
+                width: narrow ? double.infinity : fieldWidth,
+                child: DropdownButtonFormField<String>(
+                  isExpanded: true,
+                  initialValue: selectedProductionDomainTool,
+                  items: productionDomainToolPresets
+                      .map(
+                        (String tool) => DropdownMenuItem<String>(
+                          value: tool,
+                          child: Text(tool),
+                        ),
+                      )
+                      .toList(growable: false),
+                  onChanged: busy
+                      ? null
+                      : (String? value) {
+                          if (value == null) return;
+                          onProductionDomainToolChanged(value);
+                        },
+                  decoration: agentWorkspaceFieldDecoration(
+                    context,
+                    labelText: l10n.agentWorkspaceProductionDomainToolLabel,
+                  ),
+                ),
+              );
+            }
+
+            Widget flowKeyDropdown() {
+              return SizedBox(
+                width: narrow ? double.infinity : fieldWidth,
+                child: DropdownButtonFormField<String>(
+                  isExpanded: true,
+                  initialValue: selectedFlowKey,
+                  items: flowKeyPresets
+                      .map(
+                        (String key) => DropdownMenuItem<String>(
+                          value: key,
+                          child: Text(key),
+                        ),
+                      )
+                      .toList(growable: false),
+                  onChanged: busy
+                      ? null
+                      : (String? value) {
+                          if (value == null) return;
+                          onFlowKeyChanged(value);
+                        },
+                  decoration: agentWorkspaceFieldDecoration(
+                    context,
+                    labelText: l10n.agentWorkspaceProductionFlowKeyLabel,
+                    helperText: l10n.agentWorkspaceProductionFlowKeyHelper,
+                  ),
+                ),
+              );
+            }
+
+            Widget domainArgsField() {
+              return SizedBox(
+                width: narrow ? double.infinity : fieldWidth,
+                child: TextField(
+                  controller: productionDomainArgsController,
+                  maxLines: 2,
+                  decoration: agentWorkspaceFieldDecoration(
+                    context,
+                    labelText: l10n.agentWorkspaceProductionArgsLabel,
+                    helperText: l10n.agentWorkspaceProductionArgsHelper,
+                  ),
+                ),
+              );
+            }
+
+            Widget subAgentDropdown() {
+              return SizedBox(
+                width: narrow ? double.infinity : fieldWidth,
+                child: DropdownButtonFormField<String>(
+                  isExpanded: true,
+                  initialValue: selectedProductionSubAgentTool,
+                  items: productionSubAgentPresets
+                      .map(
+                        (String tool) => DropdownMenuItem<String>(
+                          value: tool,
+                          child: Text(tool),
+                        ),
+                      )
+                      .toList(growable: false),
+                  onChanged: busy
+                      ? null
+                      : (String? value) {
+                          if (value == null) return;
+                          onProductionSubAgentChanged(value);
+                        },
+                  decoration: agentWorkspaceFieldDecoration(
+                    context,
+                    labelText: l10n.agentWorkspaceProductionSubAgentToolLabel,
+                  ),
+                ),
+              );
+            }
+
+            Widget subAgentArgsField() {
+              return SizedBox(
+                width: narrow ? double.infinity : fieldWidth,
+                child: TextField(
+                  controller: productionSubAgentArgsController,
+                  maxLines: 2,
+                  decoration: agentWorkspaceFieldDecoration(
+                    context,
+                    labelText: l10n.agentWorkspaceProductionSubAgentArgsLabel,
+                    helperText:
+                        l10n.agentWorkspaceProductionSubAgentArgsHelper,
+                  ),
+                ),
+              );
+            }
+
+            final workflowButton = FilledButton.tonal(
               onPressed: busy ? null : onRunProductionWorkspace,
               child: Text(
                 loadingProductionWorkspaceRun
                     ? '…'
                     : l10n.agentWorkspaceProductionRunWorkflow,
               ),
-            ),
-            SizedBox(
-              width: 260,
-              child: DropdownButtonFormField<String>(
-                isExpanded: true,
-                initialValue: selectedProductionDomainTool,
-                items: productionDomainToolPresets
-                    .map(
-                      (String tool) => DropdownMenuItem<String>(
-                        value: tool,
-                        child: Text(tool),
-                      ),
-                    )
-                    .toList(growable: false),
-                onChanged: busy
-                    ? null
-                    : (String? value) {
-                        if (value == null) return;
-                        onProductionDomainToolChanged(value);
-                      },
-                decoration: InputDecoration(
-                  labelText: l10n.agentWorkspaceProductionDomainToolLabel,
-                ),
-              ),
-            ),
-            SizedBox(
-              width: 220,
-              child: DropdownButtonFormField<String>(
-                isExpanded: true,
-                initialValue: selectedFlowKey,
-                items: flowKeyPresets
-                    .map(
-                      (String key) => DropdownMenuItem<String>(
-                        value: key,
-                        child: Text(key),
-                      ),
-                    )
-                    .toList(growable: false),
-                onChanged: busy
-                    ? null
-                    : (String? value) {
-                        if (value == null) return;
-                        onFlowKeyChanged(value);
-                      },
-                decoration: InputDecoration(
-                  labelText: l10n.agentWorkspaceProductionFlowKeyLabel,
-                  helperText: l10n.agentWorkspaceProductionFlowKeyHelper,
-                ),
-              ),
-            ),
-            SizedBox(
-              width: 360,
-              child: TextField(
-                controller: productionDomainArgsController,
-                maxLines: 2,
-                decoration: InputDecoration(
-                  labelText: l10n.agentWorkspaceProductionArgsLabel,
-                  helperText: l10n.agentWorkspaceProductionArgsHelper,
-                ),
-              ),
-            ),
-            if (argumentTemplates != null)
-              SizedBox(width: 360, child: argumentTemplates!),
-            if (actionCandidatePanel != null)
-              SizedBox(width: 360, child: actionCandidatePanel!),
-            FilledButton.tonal(
+            );
+            final probeButton = FilledButton.tonal(
               onPressed: busy ? null : onProbeProductionDomainTool,
               child: Text(
                 loadingProductionFlowProbe
                     ? '…'
                     : l10n.agentWorkspaceProductionReadTool,
               ),
-            ),
-            SizedBox(
-              width: 300,
-              child: DropdownButtonFormField<String>(
-                isExpanded: true,
-                initialValue: selectedProductionSubAgentTool,
-                items: productionSubAgentPresets
-                    .map(
-                      (String tool) => DropdownMenuItem<String>(
-                        value: tool,
-                        child: Text(tool),
-                      ),
-                    )
-                    .toList(growable: false),
-                onChanged: busy
-                    ? null
-                    : (String? value) {
-                        if (value == null) return;
-                        onProductionSubAgentChanged(value);
-                      },
-                decoration: InputDecoration(
-                  labelText: l10n.agentWorkspaceProductionSubAgentToolLabel,
-                ),
-              ),
-            ),
-            SizedBox(
-              width: 360,
-              child: TextField(
-                controller: productionSubAgentArgsController,
-                maxLines: 2,
-                decoration: InputDecoration(
-                  labelText: l10n.agentWorkspaceProductionSubAgentArgsLabel,
-                  helperText: l10n.agentWorkspaceProductionSubAgentArgsHelper,
-                ),
-              ),
-            ),
-            FilledButton.tonal(
+            );
+            final subAgentButton = FilledButton.tonal(
               onPressed: busy ? null : onRunProductionSubAgentTool,
               child: Text(
                 loadingProductionSubAgentRun
                     ? '…'
                     : l10n.agentWorkspaceProductionRunSubAgent,
               ),
-            ),
-            FilledButton(
+            );
+            final writebackButton = FilledButton(
               onPressed: busy || !hasLastToolResult
                   ? null
                   : onWriteBackProductionFlowResult,
@@ -250,8 +290,74 @@ class ProductionWorkspaceControlsPanel extends StatelessWidget {
                     ? '…'
                     : l10n.agentWorkspaceProductionWritebackToolResult,
               ),
-            ),
-          ],
+            );
+
+            if (narrow) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  workflowButton,
+                  const SizedBox(height: 8),
+                  domainToolDropdown(),
+                  const SizedBox(height: 8),
+                  flowKeyDropdown(),
+                  const SizedBox(height: 8),
+                  domainArgsField(),
+                  if (argumentTemplates != null) ...<Widget>[
+                    const SizedBox(height: 8),
+                    argumentTemplates!,
+                  ],
+                  if (actionCandidatePanel != null) ...<Widget>[
+                    const SizedBox(height: 8),
+                    actionCandidatePanel!,
+                  ],
+                  const SizedBox(height: 8),
+                  probeButton,
+                  const SizedBox(height: 8),
+                  subAgentDropdown(),
+                  const SizedBox(height: 8),
+                  subAgentArgsField(),
+                  const SizedBox(height: 8),
+                  subAgentButton,
+                  const SizedBox(height: 8),
+                  writebackButton,
+                ],
+              );
+            }
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: <Widget>[
+                    workflowButton,
+                    domainToolDropdown(),
+                    flowKeyDropdown(),
+                    probeButton,
+                    subAgentButton,
+                    writebackButton,
+                  ],
+                ),
+                const SizedBox(height: 8),
+                domainArgsField(),
+                if (argumentTemplates != null) ...<Widget>[
+                  const SizedBox(height: 8),
+                  argumentTemplates!,
+                ],
+                if (actionCandidatePanel != null) ...<Widget>[
+                  const SizedBox(height: 8),
+                  actionCandidatePanel!,
+                ],
+                const SizedBox(height: 8),
+                subAgentDropdown(),
+                const SizedBox(height: 8),
+                subAgentArgsField(),
+              ],
+            );
+          },
         ),
       ],
     );

@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -17,6 +19,7 @@ import 'global_search/global_search_bar.dart';
 import 'global_search/search_results_page.dart';
 import 'navigation/search_deep_link.dart';
 import 'project_editor/assets/clip_upload_launcher.dart';
+import 'project_editor/assets/dialogs/candidate_status_dialog.dart';
 import 'project_editor/assets/upload_edit_image_launcher.dart';
 import 'project_editor/assets/link_dialog_launcher.dart';
 import 'project_editor/assets/section_builder.dart';
@@ -64,7 +67,39 @@ import 'projects/controller.dart';
 import 'quality_reviews/controller.dart';
 import 'shell/job_queue_stats_card.dart';
 import 'shell/help_hub_support.dart';
+import 'shell/home_shell_mode.dart';
 import 'shell/navigation_controller.dart';
+import 'design_system/components/openflow_brand.dart';
+import 'design_system/components/studio_model_cost_controls.dart';
+import 'design_system/ix/studio_cost_confirm_sheet.dart';
+import 'design_system/components/studio_empty_state.dart';
+import 'design_system/components/studio_text_styles.dart';
+import 'design_system/glass.dart';
+import 'design_system/ix/studio_command_palette.dart';
+import 'design_system/ix/studio_job_tray.dart';
+import 'design_system/tokens.dart';
+import 'product_shell/login_page.dart';
+import 'product_shell/navigation.dart';
+import 'product_shell/studio_shell_header.dart';
+import 'product_shell/studio_shell_layout.dart';
+import 'product_shell/studio_app_bar_actions.dart';
+import 'product_shell/studio_pipeline_strip.dart';
+import 'product_shell/studio_shell_branches.dart';
+import 'product_shell/studio_shell_navigation.dart';
+import 'studio/recent_projects_prefs.dart';
+import 'studio/job_scope.dart';
+import 'project_studio/project_studio_host.dart';
+import 'project_studio/studio_overlay_children.dart';
+import 'project_studio/studio_overlay_resolution.dart';
+import 'project_studio/project_studio_scope.dart';
+import 'project_studio/studio_merge_deliver_bar.dart';
+import 'project_studio/studio_overlay_mode.dart';
+import 'project_studio/studio_step.dart';
+import 'project_studio/studio_video_step_panel.dart';
+import 'product_shell/studio_agent_drawer.dart';
+import 'episode_console/episode_console_page.dart';
+import 'storyboard_studio/storyboard_studio_page.dart';
+import 'product_shell/settings_hub_page.dart';
 import 'shell/platform_short_drama_pipeline_strip.dart';
 import 'shell/product_scope_label.dart';
 import 'shell/sections.dart';
@@ -128,6 +163,7 @@ part 'system_probes/models_catalog/production_probe.dart';
 part 'system_probes/models_catalog/production_probe_typed.dart';
 part 'shell/build_sections.dart';
 part 'shell/build_sections_product.dart';
+part 'shell/build_product_shell.dart';
 part 'shell/build_sections_debug.dart';
 part 'shell/runtime_helpers.dart';
 part 'script_editor/editor.dart';
@@ -153,7 +189,77 @@ part 'storyboard_editor/video_section.dart';
 part 'storyboard_editor/actions/character_helpers.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  const HomePage({
+    super.key,
+    this.shellMode = HomeShellMode.harness,
+    this.initialProductPane,
+    this.navigationShell,
+    this.studioOverlay = StudioOverlayMode.none,
+    this.studioProjectNumericId,
+    this.studioStepSlug,
+    this.studioScriptNumericId,
+    this.debugAuthenticatedAccessToken,
+    this.debugSkipSessionContextSync = false,
+    this.debugSkipAuthListenerAttach = false,
+    this.debugStudioProjectUuid,
+    this.debugStudioProjectName,
+    this.debugProjectStudioSnapshotLoader,
+    this.debugHelpHubWebhooks,
+    this.debugHelpHubLatestCreatedWebhook,
+    this.debugHelpHubBillingEventsPage,
+    this.debugHelpHubWebhookDeliveries,
+    this.debugHelpHubWebhookLastTestResults,
+  });
+
+  /// [HomeShellMode.product] = studio sidebar + login gate ([waoowaoo]-style).
+  final HomeShellMode shellMode;
+
+  /// Initial studio pane when using [go_router] deep links.
+  final ProductWorkspacePane? initialProductPane;
+
+  /// When set, primary rail uses [StatefulShellRoute] (URL updates without remounting).
+  final StatefulNavigationShell? navigationShell;
+
+  final StudioOverlayMode studioOverlay;
+  final int? studioProjectNumericId;
+  final String? studioStepSlug;
+  final int? studioScriptNumericId;
+
+  /// Narrow testing seam for widget tests that need the authenticated shell
+  /// without initializing a real Supabase session.
+  final String? debugAuthenticatedAccessToken;
+
+  /// When true, skips `/me` and platform-config fetches during session sync.
+  final bool debugSkipSessionContextSync;
+
+  /// When true, avoids touching `Supabase.instance` during widget tests.
+  final bool debugSkipAuthListenerAttach;
+
+  /// Optional project UUID fallback for project-studio widget tests.
+  final String? debugStudioProjectUuid;
+
+  /// Optional project name fallback for project-studio widget tests.
+  final String? debugStudioProjectName;
+
+  /// Optional readiness loader override for project-studio widget tests.
+  final ProjectStudioReadinessLoader? debugProjectStudioSnapshotLoader;
+
+  /// Optional help-hub webhook seed for widget tests.
+  final OutboundWebhookListResponseV1? debugHelpHubWebhooks;
+
+  /// Optional latest-created webhook banner seed for widget tests.
+  final OutboundWebhookCreatedResponseV1? debugHelpHubLatestCreatedWebhook;
+
+  /// Optional billing webhook audit seed for widget tests.
+  final BillingWebhookEventsResponseV1? debugHelpHubBillingEventsPage;
+
+  /// Optional per-webhook delivery log seeds for widget tests.
+  final Map<String, OutboundWebhookDeliveryListResponseV1>?
+  debugHelpHubWebhookDeliveries;
+
+  /// Optional per-webhook test result seeds for widget tests.
+  final Map<String, OutboundWebhookTestResponseV1>?
+  debugHelpHubWebhookLastTestResults;
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -178,6 +284,7 @@ class _HomePageState extends State<HomePage> {
   bool _loadingSessionMe = false;
   PlatformConfigToggleSetV1 _platformConfig =
       PlatformConfigToggleSetV1.defaults;
+  Listenable? _studioRouteListenerTarget;
   final _workspaceInputController = WorkspaceInputController();
   bool _workspacePromptDefaultsSeeded = false;
   final _workspaceOperationController = WorkspaceOperationController();
@@ -395,7 +502,21 @@ class _HomePageState extends State<HomePage> {
   String? get _pingBody => _overviewController.pingBody;
   String? get _versionBody => _overviewController.versionBody;
   String? get _readyBody => _overviewController.readyBody;
-  Session? get _session => _authController.session;
+  Session? get _session {
+    if (widget.debugSkipAuthListenerAttach &&
+        (widget.debugAuthenticatedAccessToken?.trim().isNotEmpty ?? false)) {
+      return null;
+    }
+    return _authController.session;
+  }
+
+  String? get _effectiveAccessToken {
+    final injected = widget.debugAuthenticatedAccessToken?.trim();
+    if (injected != null && injected.isNotEmpty) {
+      return injected;
+    }
+    return _session?.accessToken;
+  }
 
   Future<WebSocketChannel?> _openHarnessChannel(String token) =>
       _skillsHarnessController.openHarnessChannel(token);
@@ -416,9 +537,19 @@ class _HomePageState extends State<HomePage> {
 
   void _setSharedError(String? error) {
     if (!mounted) return;
-    setState(() {
-      _error = error;
-    });
+    void apply() {
+      if (!mounted) return;
+      if (_error == error) return;
+      setState(() {
+        _error = error;
+      });
+    }
+
+    if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.idle) {
+      apply();
+    } else {
+      WidgetsBinding.instance.addPostFrameCallback((_) => apply());
+    }
   }
 
   @override
@@ -436,7 +567,21 @@ class _HomePageState extends State<HomePage> {
     _workspaceOperationController.addListener(_handleWorkspaceOperationChanged);
     _workspaceOutputController.addListener(_handleWorkspaceOutputChanged);
     _applyInitialDeepLinkNavigation(Uri.base);
-    if (kSupabaseConfigured) {
+    if (widget.shellMode == HomeShellMode.product) {
+      _shellNavigationController.selectHomeSectionMode(HomeSectionMode.product);
+      _shellNavigationController.selectProductWorkspacePane(
+        widget.initialProductPane ?? ProductWorkspacePane.projects,
+      );
+      if (widget.studioProjectNumericId != null) {
+        _productScopedProjectNumericId = widget.studioProjectNumericId;
+      }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _attachStudioRouteListener();
+        _syncStudioPaneFromRoute();
+      });
+    }
+    if (kSupabaseConfigured && !widget.debugSkipAuthListenerAttach) {
       _authController.attachAuthListener();
     }
     _syncSessionContext();
@@ -493,7 +638,7 @@ class _HomePageState extends State<HomePage> {
     DateTime? initialTimeFrom,
     DateTime? initialTimeTo,
   }) {
-    final token = _session?.accessToken;
+    final token = _effectiveAccessToken;
     unawaited(
       Navigator.of(context).push<void>(
         MaterialPageRoute<void>(
@@ -683,8 +828,9 @@ class _HomePageState extends State<HomePage> {
       }
       _selectProductPaneWithGate(
         ProductWorkspacePane.jobs,
-        disabledReason:
-            resolveAppLocalizationsForErrors(context).productPaneDisabledJobs,
+        disabledReason: resolveAppLocalizationsForErrors(
+          context,
+        ).productPaneDisabledJobs,
       );
       return;
     }
@@ -849,7 +995,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _syncSessionContext({bool force = false}) async {
-    final token = _authController.session?.accessToken;
+    final token = _effectiveAccessToken;
     if (!force && token == _lastSessionAccessToken) {
       return;
     }
@@ -864,6 +1010,16 @@ class _HomePageState extends State<HomePage> {
         _platformConfig = PlatformConfigToggleSetV1.defaults;
       });
       _notificationsController.reset();
+      return;
+    }
+
+    if (widget.debugSkipSessionContextSync) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _loadingSessionMe = false;
+      });
       return;
     }
 
@@ -899,7 +1055,12 @@ class _HomePageState extends State<HomePage> {
         _applyPlatformConfig(platformConfig);
       });
       unawaited(_notificationsController.prime());
-      unawaited(_skillsHarnessController.startAutoSessionWs());
+      if (widget.shellMode == HomeShellMode.harness) {
+        unawaited(_skillsHarnessController.startAutoSessionWs());
+      } else {
+        unawaited(_projectsController.loadProjects());
+        _ensureProductPaneData(_shellNavigationController.productWorkspacePane);
+      }
     } catch (error) {
       if (_lastSessionAccessToken != token) {
         return;
@@ -971,6 +1132,9 @@ class _HomePageState extends State<HomePage> {
 
   void _handleShellNavigationChanged() {
     if (!mounted) return;
+    if (widget.shellMode == HomeShellMode.product) {
+      _ensureProductPaneData(_shellNavigationController.productWorkspacePane);
+    }
     setState(() {});
   }
 
@@ -1044,7 +1208,36 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (widget.shellMode == HomeShellMode.product &&
+        widget.studioOverlay == StudioOverlayMode.none) {
+      _syncStudioPaneFromRoute();
+    }
+  }
+
+  void _attachStudioRouteListener() {
+    final router = GoRouter.maybeOf(context);
+    if (router == null) {
+      return;
+    }
+    final target = router.routerDelegate;
+    if (identical(_studioRouteListenerTarget, target)) {
+      return;
+    }
+    _detachStudioRouteListener();
+    _studioRouteListenerTarget = target;
+    target.addListener(_handleStudioRouteChanged);
+  }
+
+  void _detachStudioRouteListener() {
+    _studioRouteListenerTarget?.removeListener(_handleStudioRouteChanged);
+    _studioRouteListenerTarget = null;
+  }
+
+  @override
   void dispose() {
+    _detachStudioRouteListener();
     _authController.removeListener(_handleAuthChanged);
     _accountProbesController.removeListener(_handleAccountProbesChanged);
     _contentProbesController.removeListener(_handleContentProbesChanged);
@@ -1086,7 +1279,12 @@ class _HomePageState extends State<HomePage> {
       _workspacePromptDefaultsSeeded = true;
       _workspaceInputController.applyLocalizedPromptDefaults(l10n);
     }
-    final session = _authController.session;
+    final session = _session;
+    final accessToken = _effectiveAccessToken;
+
+    if (widget.shellMode == HomeShellMode.product) {
+      return _buildProductShellScaffold(context, accessToken);
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -1095,12 +1293,11 @@ class _HomePageState extends State<HomePage> {
               lookupAppLocalizations(const Locale('en')).appTitle,
         ),
         actions: [
-          // Global Search Bar
-          if (session != null)
+          if (accessToken != null)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: GlobalSearchBar(
-                accessToken: session.accessToken,
+                accessToken: accessToken,
                 currentWorkspaceName: _sessionMe?.currentWorkspace?.name,
                 currentWorkspaceId: _sessionMe?.currentWorkspace?.id,
                 onNavigateToResults: _openGlobalSearchResults,

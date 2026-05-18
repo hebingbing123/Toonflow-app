@@ -622,7 +622,7 @@ class ContentComplianceController extends ChangeNotifier {
       final res = await http
           .get(
             uri,
-            headers: {'x-toonflow-internal-token': kInternalOpsToken.trim()},
+            headers: {'x-openflow-internal-token': kInternalOpsToken.trim()},
           )
           .timeout(const Duration(seconds: 15));
       ensureHttpSuccess(res);
@@ -700,7 +700,7 @@ class ContentComplianceController extends ChangeNotifier {
           .post(
             Uri.parse(url),
             headers: {
-              'x-toonflow-internal-token': kInternalOpsToken.trim(),
+              'x-openflow-internal-token': kInternalOpsToken.trim(),
               'content-type': 'application/json',
             },
             body: jsonEncode(body),
@@ -794,7 +794,7 @@ class ContentComplianceController extends ChangeNotifier {
               '$kApiBaseUrl/api/v1/internal/compliance/reports/batch-mutate',
             ),
             headers: {
-              'x-toonflow-internal-token': kInternalOpsToken.trim(),
+              'x-openflow-internal-token': kInternalOpsToken.trim(),
               'content-type': 'application/json',
             },
             body: jsonEncode(<String, dynamic>{
@@ -849,7 +849,7 @@ class ContentComplianceController extends ChangeNotifier {
               '$kApiBaseUrl/api/v1/internal/compliance/reports/reassign',
             ),
             headers: {
-              'x-toonflow-internal-token': kInternalOpsToken.trim(),
+              'x-openflow-internal-token': kInternalOpsToken.trim(),
               'content-type': 'application/json',
             },
             body: jsonEncode(<String, dynamic>{
@@ -894,7 +894,7 @@ class ContentComplianceController extends ChangeNotifier {
               '$kApiBaseUrl/api/v1/internal/compliance/reports/auto-rebalance',
             ),
             headers: {
-              'x-toonflow-internal-token': kInternalOpsToken.trim(),
+              'x-openflow-internal-token': kInternalOpsToken.trim(),
               'content-type': 'application/json',
             },
             body: jsonEncode(<String, dynamic>{
@@ -945,7 +945,7 @@ class ContentComplianceController extends ChangeNotifier {
       final res = await http
           .get(
             uri,
-            headers: {'x-toonflow-internal-token': kInternalOpsToken.trim()},
+            headers: {'x-openflow-internal-token': kInternalOpsToken.trim()},
           )
           .timeout(const Duration(seconds: 15));
       ensureHttpSuccess(res);
