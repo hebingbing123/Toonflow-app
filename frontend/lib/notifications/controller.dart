@@ -32,6 +32,7 @@ class NotificationsController extends ChangeNotifier {
   StreamSubscription<dynamic>? _wsSub;
   String? _wsToken;
   bool _primed = false;
+  bool _disposed = false;
 
   bool loading = false;
   bool loadingPreferences = false;
@@ -1333,7 +1334,16 @@ class NotificationsController extends ChangeNotifier {
   }
 
   @override
+  void notifyListeners() {
+    if (_disposed) {
+      return;
+    }
+    super.notifyListeners();
+  }
+
+  @override
   void dispose() {
+    _disposed = true;
     unawaited(closeLiveUpdates());
     super.dispose();
   }

@@ -5,6 +5,7 @@ import '../l10n/app_localizations.dart';
 import '../l10n/billing_l10n_helpers.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
+import '../design_system/components/studio_filter_row.dart';
 import '../utils/localized_formatting.dart';
 import 'controller.dart';
 
@@ -13,10 +14,12 @@ class NotificationsSection extends StatefulWidget {
     super.key,
     required this.controller,
     required this.onOpenNotification,
+    this.studioPresentation = false,
   });
 
   final NotificationsController controller;
   final ValueChanged<NotificationRecordV1> onOpenNotification;
+  final bool studioPresentation;
 
   @override
   State<NotificationsSection> createState() => _NotificationsSectionState();
@@ -58,7 +61,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     }
     _syncStageThrottleControllersFromState();
     widget.controller.addListener(_handleControllerChanged);
-    widget.controller.prime();
+    _primeControllerSoon();
   }
 
   @override
@@ -67,8 +70,15 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     if (oldWidget.controller != widget.controller) {
       oldWidget.controller.removeListener(_handleControllerChanged);
       widget.controller.addListener(_handleControllerChanged);
-      widget.controller.prime();
+      _primeControllerSoon();
     }
+  }
+
+  void _primeControllerSoon() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      widget.controller.prime();
+    });
   }
 
   @override
@@ -158,699 +168,117 @@ class _NotificationsSectionState extends State<NotificationsSection> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.notificationsCenterTitle,
-                      style: theme.textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      l10n.notificationsCenterSubtitle,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              FilledButton.tonalIcon(
-                onPressed:
-                    widget.controller.markingAllRead ||
-                        widget.controller.unreadCount == 0
-                    ? null
-                    : widget.controller.markAllRead,
-                icon: widget.controller.markingAllRead
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.done_all_outlined),
-                label: Text(l10n.notificationsMarkAllRead),
-              ),
-              const SizedBox(width: 4),
-              RiskyOperationConfirmPrefsOverflowMenu(
-                tooltip: l10n.notificationsRiskyPrefsTooltip,
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              border: Border.all(color: theme.colorScheme.outlineVariant),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              crossAxisAlignment: WrapCrossAlignment.center,
+          if (widget.studioPresentation)
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  l10n.notificationsComplianceClearedThrottleTitle,
-                  style: theme.textTheme.bodyMedium,
-                ),
-                SizedBox(
-                  width: 140,
-                  child: TextField(
-                    controller: _clearedThrottleController,
-                    focusNode: _clearedThrottleFocus,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      isDense: true,
-                      hintText: l10n.notificationsComplianceMinutesHint,
-                    ),
-                  ),
-                ),
-                FilledButton.tonal(
-                  onPressed: widget.controller.savingPreferences
-                      ? null
-                      : _saveClearedThrottlePolicy,
-                  child: widget.controller.savingPreferences
-                      ? const SizedBox(
-                          width: 14,
-                          height: 14,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(l10n.notificationsComplianceSavePolicy),
-                ),
-                OutlinedButton.icon(
-                  onPressed: widget.controller.savingPreferences
-                      ? null
-                      : _createTemplateFromCurrentPolicy,
-                  icon: const Icon(Icons.add),
-                  label: Text(l10n.notificationsComplianceSaveAsTemplate),
-                ),
-                OutlinedButton.icon(
-                  onPressed:
-                      widget.controller.savingPreferences ||
-                          !widget.controller.canManageWorkspaceSharedTemplates
-                      ? null
-                      : _createWorkspaceSharedTemplateFromCurrentPolicy,
-                  icon: const Icon(Icons.group_work_outlined),
-                  label: Text(
-                    l10n.notificationsComplianceSaveToWorkspaceShared,
-                  ),
-                ),
-                OutlinedButton.icon(
-                  onPressed: widget.controller.savingPreferences
-                      ? null
-                      : _exportTemplatesToClipboard,
-                  icon: const Icon(Icons.upload_file_outlined),
-                  label: Text(l10n.notificationsComplianceExportTemplatesJson),
-                ),
-                OutlinedButton.icon(
-                  onPressed: widget.controller.savingPreferences
-                      ? null
-                      : _openImportTemplatesDialog,
-                  icon: const Icon(Icons.download_outlined),
-                  label: Text(l10n.notificationsComplianceImportTemplatesJson),
-                ),
-                Text(
-                  l10n.notificationsComplianceClearedHelpShort,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                FilterChip(
-                  selected: _customTemplatesOnly,
-                  label: Text(l10n.notificationsComplianceCustomTemplatesOnly),
-                  onSelected: (selected) {
-                    setState(() {
-                      _customTemplatesOnly = selected;
-                    });
-                  },
-                ),
-                ...widget.controller.complianceClearedTemplates
-                    .where(
-                      (template) =>
-                          !_customTemplatesOnly || template.kind == 'custom',
-                    )
-                    .map(
-                      (template) => Tooltip(
-                        message: template.description,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            ActionChip(
-                              label: Text(
-                                l10n.notificationsComplianceTemplateChip(
-                                  template.label,
-                                ),
-                              ),
-                              onPressed: widget.controller.savingPreferences
-                                  ? null
-                                  : () => _applyThrottleTemplate(template.id),
-                            ),
-                            IconButton(
-                              tooltip:
-                                  l10n.notificationsComplianceTooltipMoveUp,
-                              onPressed: widget.controller.savingPreferences
-                                  ? null
-                                  : () =>
-                                        _reorderTemplate(template.id, up: true),
-                              icon: const Icon(Icons.arrow_upward, size: 18),
-                            ),
-                            IconButton(
-                              tooltip:
-                                  l10n.notificationsComplianceTooltipMoveDown,
-                              onPressed: widget.controller.savingPreferences
-                                  ? null
-                                  : () => _reorderTemplate(
-                                      template.id,
-                                      up: false,
-                                    ),
-                              icon: const Icon(Icons.arrow_downward, size: 18),
-                            ),
-                            IconButton(
-                              tooltip: l10n
-                                  .notificationsComplianceTooltipEditTemplate,
-                              onPressed:
-                                  widget.controller.savingPreferences ||
-                                      !template.canEdit
-                                  ? null
-                                  : () => _editTemplate(template),
-                              icon: const Icon(Icons.edit_outlined, size: 18),
-                            ),
-                            IconButton(
-                              tooltip: l10n
-                                  .notificationsComplianceTooltipDeleteTemplate,
-                              onPressed:
-                                  widget.controller.savingPreferences ||
-                                      !template.canDelete
-                                  ? null
-                                  : () => _deleteTemplate(template),
-                              icon: const Icon(Icons.delete_outline, size: 18),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                if (widget
-                    .controller
-                    .workspaceSharedComplianceTemplates
-                    .isNotEmpty)
-                  Text(
-                    l10n.notificationsComplianceWorkspaceSharedHeader,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ...widget.controller.workspaceSharedComplianceTemplates.map(
-                  (template) => Tooltip(
-                    message: template.description,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ActionChip(
-                          label: Text(
-                            l10n.notificationsComplianceSharedChip(
-                              template.label,
-                            ),
-                          ),
-                          onPressed: widget.controller.savingPreferences
-                              ? null
-                              : () => _applyThrottleTemplate(template.id),
-                        ),
-                        IconButton(
-                          tooltip: l10n
-                              .notificationsComplianceTooltipEditSharedTemplate,
-                          onPressed:
-                              widget.controller.savingPreferences ||
-                                  !widget
-                                      .controller
-                                      .canManageWorkspaceSharedTemplates
-                              ? null
-                              : () => _editWorkspaceSharedTemplate(template),
-                          icon: const Icon(Icons.edit_outlined, size: 18),
-                        ),
-                        IconButton(
-                          tooltip: l10n
-                              .notificationsComplianceTooltipDeleteSharedTemplate,
-                          onPressed:
-                              widget.controller.savingPreferences ||
-                                  !widget
-                                      .controller
-                                      .canManageWorkspaceSharedTemplates
-                              ? null
-                              : () => _deleteWorkspaceSharedTemplate(template),
-                          icon: const Icon(Icons.delete_outline, size: 18),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                ..._complianceStages.map(
-                  (stage) => SizedBox(
-                    width: 190,
-                    child: TextField(
-                      controller: _stageThrottleControllers[stage],
-                      focusNode: _stageThrottleFocusNodes[stage],
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        isDense: true,
-                        labelText: l10n
-                            .notificationsComplianceStageOverrideLabel(stage),
-                        hintText: l10n.notificationsComplianceStageOverrideHint,
-                      ),
-                    ),
-                  ),
-                ),
-                Text(
-                  _buildPreferencesAuditText(
-                    l10n,
-                    widget.controller.preferencesAudit,
-                  ),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                SizedBox(
-                  width: 860,
-                  child: Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    crossAxisAlignment: WrapCrossAlignment.center,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        l10n.notificationsComplianceSharedAuditTitle,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
+                        l10n.notificationsCenterTitle,
+                        style: theme.textTheme.titleMedium,
                       ),
-                      SizedBox(
-                        width: 180,
-                        child: TextField(
-                          controller: _workspaceAuditTemplateFilterController,
-                          decoration: InputDecoration(
-                            isDense: true,
-                            labelText:
-                                l10n.notificationsComplianceFilterTemplateId,
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        width: 180,
-                        child: DropdownButtonFormField<String>(
-                          initialValue: _workspaceAuditActionFilter,
-                          decoration: InputDecoration(
-                            isDense: true,
-                            labelText: l10n.notificationsComplianceFilterAction,
-                          ),
-                          items: [
-                            DropdownMenuItem(
-                              value: '',
-                              child: Text(l10n.notificationsTypeAll),
-                            ),
-                            DropdownMenuItem(
-                              value: 'upsert',
-                              child: Text(l10n.notificationsAuditActionUpsert),
-                            ),
-                            DropdownMenuItem(
-                              value: 'delete',
-                              child: Text(l10n.notificationsAuditActionDelete),
-                            ),
-                          ],
-                          onChanged: (value) {
-                            setState(() {
-                              _workspaceAuditActionFilter = value ?? '';
-                            });
-                          },
-                        ),
-                      ),
-                      SizedBox(
-                        width: 220,
-                        child: TextField(
-                          controller: _workspaceAuditStartAtController,
-                          decoration: InputDecoration(
-                            isDense: true,
-                            labelText:
-                                l10n.notificationsComplianceFilterStartIso,
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        width: 220,
-                        child: TextField(
-                          controller: _workspaceAuditEndAtController,
-                          decoration: InputDecoration(
-                            isDense: true,
-                            labelText: l10n.notificationsComplianceFilterEndIso,
-                          ),
-                        ),
-                      ),
-                      OutlinedButton(
-                        onPressed: widget.controller.loadingWorkspaceSharedAudit
-                            ? null
-                            : _reloadWorkspaceAuditWithFilters,
-                        child: Text(l10n.notificationsComplianceApplyFilters),
-                      ),
-                      OutlinedButton.icon(
-                        onPressed: widget.controller.loadingWorkspaceSharedAudit
-                            ? null
-                            : _exportWorkspaceAuditJsonToClipboard,
-                        icon: const Icon(Icons.data_object),
-                        label: Text(
-                          l10n.notificationsComplianceDownloadAuditJson,
-                        ),
-                      ),
-                      OutlinedButton.icon(
-                        onPressed: widget.controller.loadingWorkspaceSharedAudit
-                            ? null
-                            : _exportWorkspaceAuditCsvToClipboard,
-                        icon: const Icon(Icons.table_chart_outlined),
-                        label: Text(
-                          l10n.notificationsComplianceDownloadAuditCsv,
-                        ),
-                      ),
-                      OutlinedButton.icon(
-                        onPressed:
-                            widget.controller.loadingWorkspaceSharedAudit ||
-                                widget
-                                    .controller
-                                    .enqueueingWorkspaceSharedAuditAsyncExport
-                            ? null
-                            : () => _enqueueWorkspaceSharedAuditExportAsync(
-                                'json',
-                              ),
-                        icon: const Icon(Icons.hourglass_empty_outlined),
-                        label: Text(l10n.notificationsComplianceAsyncJson),
-                      ),
-                      OutlinedButton.icon(
-                        onPressed:
-                            widget.controller.loadingWorkspaceSharedAudit ||
-                                widget
-                                    .controller
-                                    .enqueueingWorkspaceSharedAuditAsyncExport
-                            ? null
-                            : () => _enqueueWorkspaceSharedAuditExportAsync(
-                                'csv',
-                              ),
-                        icon: const Icon(Icons.hourglass_empty_outlined),
-                        label: Text(l10n.notificationsComplianceAsyncCsv),
-                      ),
-                      if ((widget.controller.workspaceSharedAsyncExportInfo ??
-                              '')
-                          .trim()
-                          .isNotEmpty)
-                        SizedBox(
-                          width: 860,
-                          child: Card(
-                            margin: const EdgeInsets.only(bottom: 4),
-                            child: ListTile(
-                              dense: true,
-                              leading: Icon(
-                                Icons.info_outline,
-                                color: theme.colorScheme.primary,
-                              ),
-                              title: Text(
-                                widget
-                                    .controller
-                                    .workspaceSharedAsyncExportInfo!,
-                                style: theme.textTheme.bodySmall,
-                              ),
-                              trailing: IconButton(
-                                tooltip:
-                                    l10n.notificationsComplianceCloseTooltip,
-                                icon: const Icon(Icons.close),
-                                onPressed: widget
-                                    .controller
-                                    .clearWorkspaceSharedAsyncExportInfo,
-                              ),
-                            ),
-                          ),
-                        ),
+                      const SizedBox(height: 4),
                       Text(
-                        l10n.notificationsComplianceExportHistoryTitle,
+                        l10n.notificationsCenterSubtitle,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
                       ),
-                      SizedBox(
-                        width: 160,
-                        child: DropdownButtonFormField<String>(
-                          // Controlled by _exportHistoryFormat via setState.
-                          // ignore: deprecated_member_use
-                          value: _exportHistoryFormat,
-                          decoration: InputDecoration(
-                            isDense: true,
-                            labelText:
-                                l10n.notificationsComplianceExportFormatFilter,
-                          ),
-                          items: [
-                            DropdownMenuItem(
-                              value: '',
-                              child: Text(l10n.notificationsTypeAll),
-                            ),
-                            DropdownMenuItem(
-                              value: 'json',
-                              child: Text(
-                                l10n.notificationsComplianceExportFormatJson,
-                              ),
-                            ),
-                            DropdownMenuItem(
-                              value: 'csv',
-                              child: Text(
-                                l10n.notificationsComplianceExportFormatCsv,
-                              ),
-                            ),
-                          ],
-                          onChanged: (value) {
-                            setState(() {
-                              _exportHistoryFormat = value ?? '';
-                            });
-                          },
-                        ),
-                      ),
-                      SizedBox(
-                        width: 200,
-                        child: TextField(
-                          controller: _exportHistoryExportedStartController,
-                          decoration: InputDecoration(
-                            isDense: true,
-                            labelText:
-                                l10n.notificationsComplianceExportedStartIso,
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        width: 200,
-                        child: TextField(
-                          controller: _exportHistoryExportedEndController,
-                          decoration: InputDecoration(
-                            isDense: true,
-                            labelText:
-                                l10n.notificationsComplianceExportedEndIso,
-                          ),
-                        ),
-                      ),
-                      OutlinedButton(
-                        onPressed: widget.controller.loadingExportHistory
-                            ? null
-                            : _applyExportHistoryFilters,
-                        child: widget.controller.loadingExportHistory
-                            ? const SizedBox(
-                                width: 14,
-                                height: 14,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : Text(l10n.notificationsComplianceFilterExports),
-                      ),
-                      ...widget.controller.workspaceSharedAuditExports.map(
-                        (item) => SizedBox(
-                          width: 800,
-                          child: Tooltip(
-                            message: _formatWorkspaceAuditExportItem(
-                              l10n,
-                              item,
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    _formatWorkspaceAuditExportItem(l10n, item),
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 2,
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: theme.colorScheme.onSurfaceVariant,
-                                    ),
-                                  ),
-                                ),
-                                IconButton(
-                                  tooltip: l10n
-                                      .notificationsComplianceReuseExportFiltersTooltip,
-                                  onPressed:
-                                      widget
-                                          .controller
-                                          .loadingWorkspaceSharedAudit
-                                      ? null
-                                      : () => _reuseExportRecordFilters(item),
-                                  icon: const Icon(
-                                    Icons.filter_alt_outlined,
-                                    size: 18,
-                                  ),
-                                ),
-                                IconButton(
-                                  tooltip: _exportRecordDownloadTooltip(
-                                    l10n,
-                                    item,
-                                  ),
-                                  onPressed:
-                                      widget.controller.loadingExportHistory
-                                      ? null
-                                      : () => _redownloadFromExportRecord(item),
-                                  icon: const Icon(
-                                    Icons.download_outlined,
-                                    size: 18,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      if (widget.controller.workspaceSharedExportHistoryHasMore)
-                        TextButton.icon(
-                          onPressed: widget.controller.loadingExportHistory
-                              ? null
-                              : widget.controller.loadMoreExportHistory,
-                          icon: widget.controller.loadingExportHistory
-                              ? const SizedBox(
-                                  width: 14,
-                                  height: 14,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : const Icon(Icons.expand_more, size: 18),
-                          label: Text(
-                            l10n.notificationsComplianceMoreExportRecords,
-                          ),
-                        ),
-                      ...widget.controller.workspaceSharedComplianceAudit
-                          .take(6)
-                          .map(
-                            (item) => Text(
-                              _formatWorkspaceAuditItem(l10n, item),
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ),
-                      if (widget.controller.workspaceSharedAuditHasMore)
-                        TextButton.icon(
-                          onPressed:
-                              widget.controller.loadingWorkspaceSharedAudit
-                              ? null
-                              : widget
-                                    .controller
-                                    .loadMoreWorkspaceSharedComplianceAudit,
-                          icon: widget.controller.loadingWorkspaceSharedAudit
-                              ? const SizedBox(
-                                  width: 14,
-                                  height: 14,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : const Icon(Icons.expand_more, size: 18),
-                          label: Text(
-                            l10n.notificationsComplianceLoadMoreAudit,
-                          ),
-                        ),
                     ],
                   ),
                 ),
+                FilledButton.tonalIcon(
+                  onPressed:
+                      widget.controller.markingAllRead ||
+                          widget.controller.unreadCount == 0
+                      ? null
+                      : widget.controller.markAllRead,
+                  icon: widget.controller.markingAllRead
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.done_all_outlined),
+                  label: Text(l10n.notificationsMarkAllRead),
+                ),
+              ],
+            )
+          else
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.notificationsCenterTitle,
+                        style: theme.textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        l10n.notificationsCenterSubtitle,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                FilledButton.tonalIcon(
+                  onPressed:
+                      widget.controller.markingAllRead ||
+                          widget.controller.unreadCount == 0
+                      ? null
+                      : widget.controller.markAllRead,
+                  icon: widget.controller.markingAllRead
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.done_all_outlined),
+                  label: Text(l10n.notificationsMarkAllRead),
+                ),
+                const SizedBox(width: 4),
+                RiskyOperationConfirmPrefsOverflowMenu(
+                  tooltip: l10n.notificationsRiskyPrefsTooltip,
+                ),
               ],
             ),
-          ),
           const SizedBox(height: 10),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              FilterChip(
-                selected: _unreadOnly,
-                onSelected: (selected) {
-                  setState(() {
-                    _unreadOnly = selected;
-                  });
-                },
-                label: Text(
-                  l10n.notificationsFilterUnread(widget.controller.unreadCount),
-                ),
-              ),
-              SizedBox(
-                width: 220,
-                child: DropdownButtonFormField<String>(
-                  initialValue: _typeFilter,
-                  decoration: InputDecoration(
-                    labelText: l10n.notificationsTypeFilterLabel,
-                    isDense: true,
-                  ),
-                  items: [
-                    DropdownMenuItem(
-                      value: 'all',
-                      child: Text(l10n.notificationsTypeAll),
-                    ),
-                    DropdownMenuItem(
-                      value: 'job',
-                      child: Text(l10n.notificationsTypeJob),
-                    ),
-                    DropdownMenuItem(
-                      value: 'workspace',
-                      child: Text(l10n.notificationsTypeWorkspace),
-                    ),
-                    DropdownMenuItem(
-                      value: 'skill',
-                      child: Text(l10n.notificationsTypeSkill),
-                    ),
-                    DropdownMenuItem(
-                      value: 'compliance',
-                      child: Text(l10n.notificationsTypeCompliance),
-                    ),
-                  ],
-                  onChanged: (value) {
-                    if (value == null) {
-                      return;
-                    }
-                    setState(() {
-                      _typeFilter = value;
-                    });
-                  },
-                ),
-              ),
-              SizedBox(
-                width: 280,
-                child: TextField(
-                  controller: _searchController,
-                  onChanged: (_) => setState(() {}),
-                  decoration: InputDecoration(
-                    labelText: l10n.notificationsSearchLabel,
-                    prefixIcon: const Icon(Icons.search),
-                    isDense: true,
+          if (widget.studioPresentation)
+            ExpansionTile(
+              tilePadding: EdgeInsets.zero,
+              childrenPadding: const EdgeInsets.only(bottom: 8),
+              title: Text(l10n.studioNotificationsAdvanced),
+              children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: RiskyOperationConfirmPrefsOverflowMenu(
+                    tooltip: l10n.notificationsRiskyPrefsTooltip,
                   ),
                 ),
-              ),
-              TextButton.icon(
-                onPressed: widget.controller.loading
-                    ? null
-                    : widget.controller.refresh,
-                icon: const Icon(Icons.refresh, size: 18),
-                label: Text(l10n.notificationsRefresh),
-              ),
-            ],
-          ),
+                const SizedBox(height: 8),
+                _buildComplianceAdminPanel(context, theme, l10n),
+              ],
+            )
+          else
+            _buildComplianceAdminPanel(context, theme, l10n),
+          const SizedBox(height: 10),
+          if (widget.studioPresentation)
+            StudioFilterRow(children: _notificationListFilterChildren(l10n))
+          else
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: _notificationListFilterChildren(l10n),
+            ),
           const SizedBox(height: 12),
           if (widget.controller.loading)
             const Padding(
@@ -897,6 +325,686 @@ class _NotificationsSectionState extends State<NotificationsSection> {
           ],
         ],
       ),
+    );
+  }
+
+  List<Widget> _notificationListFilterChildren(AppLocalizations l10n) {
+    return <Widget>[
+      FilterChip(
+        selected: _unreadOnly,
+        onSelected: (selected) {
+          setState(() {
+            _unreadOnly = selected;
+          });
+        },
+        label: Text(
+          l10n.notificationsFilterUnread(widget.controller.unreadCount),
+        ),
+      ),
+      SizedBox(
+        width: widget.studioPresentation ? double.infinity : 220,
+        child: DropdownButtonFormField<String>(
+          initialValue: _typeFilter,
+          decoration: InputDecoration(
+            labelText: l10n.notificationsTypeFilterLabel,
+            isDense: true,
+          ),
+          items: [
+            DropdownMenuItem(
+              value: 'all',
+              child: Text(l10n.notificationsTypeAll),
+            ),
+            DropdownMenuItem(
+              value: 'job',
+              child: Text(l10n.notificationsTypeJob),
+            ),
+            DropdownMenuItem(
+              value: 'workspace',
+              child: Text(l10n.notificationsTypeWorkspace),
+            ),
+            DropdownMenuItem(
+              value: 'skill',
+              child: Text(l10n.notificationsTypeSkill),
+            ),
+            DropdownMenuItem(
+              value: 'compliance',
+              child: Text(l10n.notificationsTypeCompliance),
+            ),
+          ],
+          onChanged: (value) {
+            if (value == null) {
+              return;
+            }
+            setState(() {
+              _typeFilter = value;
+            });
+          },
+        ),
+      ),
+      SizedBox(
+        width: widget.studioPresentation ? double.infinity : 280,
+        child: TextField(
+          controller: _searchController,
+          onChanged: (_) => setState(() {}),
+          decoration: InputDecoration(
+            labelText: l10n.notificationsSearchLabel,
+            prefixIcon: const Icon(Icons.search),
+            isDense: true,
+          ),
+        ),
+      ),
+      Align(
+        alignment: widget.studioPresentation
+            ? Alignment.centerLeft
+            : Alignment.center,
+        child: TextButton.icon(
+          onPressed: widget.controller.loading
+              ? null
+              : widget.controller.refresh,
+          icon: const Icon(Icons.refresh, size: 18),
+          label: Text(l10n.notificationsRefresh),
+        ),
+      ),
+    ];
+  }
+
+  static const double _kComplianceFilterFieldWidth = 220;
+
+  TextStyle? _complianceMutedStyle(ThemeData theme) {
+    return theme.textTheme.bodySmall?.copyWith(
+      color: theme.colorScheme.onSurfaceVariant,
+    );
+  }
+
+  Widget _complianceLabeledField(
+    BuildContext context, {
+    required String label,
+    required Widget child,
+    double width = _kComplianceFilterFieldWidth,
+  }) {
+    return SizedBox(
+      width: width,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              height: 1.3,
+            ),
+          ),
+          const SizedBox(height: 6),
+          child,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildComplianceAdminPanel(
+    BuildContext context,
+    ThemeData theme,
+    AppLocalizations l10n,
+  ) {
+    final muted = _complianceMutedStyle(theme);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        border: Border.all(color: theme.colorScheme.outlineVariant),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          StudioFilterRow(
+            wideBreakpoint: 640,
+            children: <Widget>[
+              Text(
+                l10n.notificationsComplianceClearedThrottleTitle,
+                style: theme.textTheme.bodyMedium,
+              ),
+              SizedBox(
+                width: 140,
+                child: TextField(
+                  controller: _clearedThrottleController,
+                  focusNode: _clearedThrottleFocus,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    isDense: true,
+                    hintText: l10n.notificationsComplianceMinutesHint,
+                  ),
+                ),
+              ),
+              FilledButton.tonal(
+                onPressed: widget.controller.savingPreferences
+                    ? null
+                    : _saveClearedThrottlePolicy,
+                child: widget.controller.savingPreferences
+                    ? const SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Text(l10n.notificationsComplianceSavePolicy),
+              ),
+              OutlinedButton.icon(
+                onPressed: widget.controller.savingPreferences
+                    ? null
+                    : _createTemplateFromCurrentPolicy,
+                icon: const Icon(Icons.add),
+                label: Text(l10n.notificationsComplianceSaveAsTemplate),
+              ),
+              OutlinedButton.icon(
+                onPressed:
+                    widget.controller.savingPreferences ||
+                        !widget.controller.canManageWorkspaceSharedTemplates
+                    ? null
+                    : _createWorkspaceSharedTemplateFromCurrentPolicy,
+                icon: const Icon(Icons.group_work_outlined),
+                label: Text(l10n.notificationsComplianceSaveToWorkspaceShared),
+              ),
+              OutlinedButton.icon(
+                onPressed: widget.controller.savingPreferences
+                    ? null
+                    : _exportTemplatesToClipboard,
+                icon: const Icon(Icons.upload_file_outlined),
+                label: Text(l10n.notificationsComplianceExportTemplatesJson),
+              ),
+              OutlinedButton.icon(
+                onPressed: widget.controller.savingPreferences
+                    ? null
+                    : _openImportTemplatesDialog,
+                icon: const Icon(Icons.download_outlined),
+                label: Text(l10n.notificationsComplianceImportTemplatesJson),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(l10n.notificationsComplianceClearedHelpShort, style: muted),
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: FilterChip(
+              selected: _customTemplatesOnly,
+              label: Text(l10n.notificationsComplianceCustomTemplatesOnly),
+              onSelected: (selected) {
+                setState(() {
+                  _customTemplatesOnly = selected;
+                });
+              },
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: <Widget>[
+              ...widget.controller.complianceClearedTemplates
+                  .where(
+                    (template) =>
+                        !_customTemplatesOnly || template.kind == 'custom',
+                  )
+                  .map(
+                    (template) => Tooltip(
+                      message: template.description,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ActionChip(
+                            label: Text(
+                              l10n.notificationsComplianceTemplateChip(
+                                template.label,
+                              ),
+                            ),
+                            onPressed: widget.controller.savingPreferences
+                                ? null
+                                : () => _applyThrottleTemplate(template.id),
+                          ),
+                          IconButton(
+                            tooltip: l10n.notificationsComplianceTooltipMoveUp,
+                            onPressed: widget.controller.savingPreferences
+                                ? null
+                                : () => _reorderTemplate(template.id, up: true),
+                            icon: const Icon(Icons.arrow_upward, size: 18),
+                          ),
+                          IconButton(
+                            tooltip:
+                                l10n.notificationsComplianceTooltipMoveDown,
+                            onPressed: widget.controller.savingPreferences
+                                ? null
+                                : () =>
+                                      _reorderTemplate(template.id, up: false),
+                            icon: const Icon(Icons.arrow_downward, size: 18),
+                          ),
+                          IconButton(
+                            tooltip:
+                                l10n.notificationsComplianceTooltipEditTemplate,
+                            onPressed:
+                                widget.controller.savingPreferences ||
+                                    !template.canEdit
+                                ? null
+                                : () => _editTemplate(template),
+                            icon: const Icon(Icons.edit_outlined, size: 18),
+                          ),
+                          IconButton(
+                            tooltip: l10n
+                                .notificationsComplianceTooltipDeleteTemplate,
+                            onPressed:
+                                widget.controller.savingPreferences ||
+                                    !template.canDelete
+                                ? null
+                                : () => _deleteTemplate(template),
+                            icon: const Icon(Icons.delete_outline, size: 18),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+            ],
+          ),
+          if (widget
+              .controller
+              .workspaceSharedComplianceTemplates
+              .isNotEmpty) ...<Widget>[
+            const SizedBox(height: 8),
+            Text(
+              l10n.notificationsComplianceWorkspaceSharedHeader,
+              style: muted,
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: widget.controller.workspaceSharedComplianceTemplates
+                  .map(
+                    (template) => Tooltip(
+                      message: template.description,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          ActionChip(
+                            label: Text(
+                              l10n.notificationsComplianceSharedChip(
+                                template.label,
+                              ),
+                            ),
+                            onPressed: widget.controller.savingPreferences
+                                ? null
+                                : () => _applyThrottleTemplate(template.id),
+                          ),
+                          IconButton(
+                            tooltip: l10n
+                                .notificationsComplianceTooltipEditSharedTemplate,
+                            onPressed:
+                                widget.controller.savingPreferences ||
+                                    !widget
+                                        .controller
+                                        .canManageWorkspaceSharedTemplates
+                                ? null
+                                : () => _editWorkspaceSharedTemplate(template),
+                            icon: const Icon(Icons.edit_outlined, size: 18),
+                          ),
+                          IconButton(
+                            tooltip: l10n
+                                .notificationsComplianceTooltipDeleteSharedTemplate,
+                            onPressed:
+                                widget.controller.savingPreferences ||
+                                    !widget
+                                        .controller
+                                        .canManageWorkspaceSharedTemplates
+                                ? null
+                                : () =>
+                                      _deleteWorkspaceSharedTemplate(template),
+                            icon: const Icon(Icons.delete_outline, size: 18),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ),
+          ],
+          const SizedBox(height: 12),
+          StudioFilterRow(
+            wideBreakpoint: 720,
+            children: _complianceStages
+                .map(
+                  (stage) => SizedBox(
+                    width: 200,
+                    child: _complianceLabeledField(
+                      context,
+                      label: l10n.notificationsComplianceStageOverrideLabel(
+                        stage,
+                      ),
+                      width: 200,
+                      child: TextField(
+                        controller: _stageThrottleControllers[stage],
+                        focusNode: _stageThrottleFocusNodes[stage],
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          isDense: true,
+                          hintText:
+                              l10n.notificationsComplianceStageOverrideHint,
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+                .toList(),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            _buildPreferencesAuditText(
+              l10n,
+              widget.controller.preferencesAudit,
+            ),
+            style: muted,
+          ),
+          const SizedBox(height: 12),
+          _buildWorkspaceSharedAuditSection(context, theme, l10n),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWorkspaceSharedAuditSection(
+    BuildContext context,
+    ThemeData theme,
+    AppLocalizations l10n,
+  ) {
+    final muted = _complianceMutedStyle(theme);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        Text(l10n.notificationsComplianceSharedAuditTitle, style: muted),
+        const SizedBox(height: 8),
+        StudioFilterRow(
+          wideBreakpoint: 720,
+          children: <Widget>[
+            _complianceLabeledField(
+              context,
+              label: l10n.notificationsComplianceFilterTemplateId,
+              child: TextField(
+                controller: _workspaceAuditTemplateFilterController,
+                decoration: const InputDecoration(isDense: true),
+              ),
+            ),
+            _complianceLabeledField(
+              context,
+              label: l10n.notificationsComplianceFilterAction,
+              child: DropdownButtonFormField<String>(
+                initialValue: _workspaceAuditActionFilter,
+                isExpanded: true,
+                decoration: const InputDecoration(isDense: true),
+                items: <DropdownMenuItem<String>>[
+                  DropdownMenuItem(
+                    value: '',
+                    child: Text(l10n.notificationsTypeAll),
+                  ),
+                  DropdownMenuItem(
+                    value: 'upsert',
+                    child: Text(l10n.notificationsAuditActionUpsert),
+                  ),
+                  DropdownMenuItem(
+                    value: 'delete',
+                    child: Text(l10n.notificationsAuditActionDelete),
+                  ),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    _workspaceAuditActionFilter = value ?? '';
+                  });
+                },
+              ),
+            ),
+            _complianceLabeledField(
+              context,
+              label: l10n.notificationsComplianceFilterStartIso,
+              child: TextField(
+                controller: _workspaceAuditStartAtController,
+                decoration: const InputDecoration(isDense: true),
+              ),
+            ),
+            _complianceLabeledField(
+              context,
+              label: l10n.notificationsComplianceFilterEndIso,
+              child: TextField(
+                controller: _workspaceAuditEndAtController,
+                decoration: const InputDecoration(isDense: true),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        StudioFilterRow(
+          wideBreakpoint: 480,
+          children: <Widget>[
+            OutlinedButton(
+              onPressed: widget.controller.loadingWorkspaceSharedAudit
+                  ? null
+                  : _reloadWorkspaceAuditWithFilters,
+              child: Text(l10n.notificationsComplianceApplyFilters),
+            ),
+            OutlinedButton.icon(
+              onPressed: widget.controller.loadingWorkspaceSharedAudit
+                  ? null
+                  : _exportWorkspaceAuditJsonToClipboard,
+              icon: const Icon(Icons.data_object),
+              label: Text(l10n.notificationsComplianceDownloadAuditJson),
+            ),
+            OutlinedButton.icon(
+              onPressed: widget.controller.loadingWorkspaceSharedAudit
+                  ? null
+                  : _exportWorkspaceAuditCsvToClipboard,
+              icon: const Icon(Icons.table_chart_outlined),
+              label: Text(l10n.notificationsComplianceDownloadAuditCsv),
+            ),
+            OutlinedButton.icon(
+              onPressed:
+                  widget.controller.loadingWorkspaceSharedAudit ||
+                      widget
+                          .controller
+                          .enqueueingWorkspaceSharedAuditAsyncExport
+                  ? null
+                  : () => _enqueueWorkspaceSharedAuditExportAsync('json'),
+              icon: const Icon(Icons.hourglass_empty_outlined),
+              label: Text(l10n.notificationsComplianceAsyncJson),
+            ),
+            OutlinedButton.icon(
+              onPressed:
+                  widget.controller.loadingWorkspaceSharedAudit ||
+                      widget
+                          .controller
+                          .enqueueingWorkspaceSharedAuditAsyncExport
+                  ? null
+                  : () => _enqueueWorkspaceSharedAuditExportAsync('csv'),
+              icon: const Icon(Icons.hourglass_empty_outlined),
+              label: Text(l10n.notificationsComplianceAsyncCsv),
+            ),
+          ],
+        ),
+        if ((widget.controller.workspaceSharedAsyncExportInfo ?? '')
+            .trim()
+            .isNotEmpty) ...<Widget>[
+          const SizedBox(height: 8),
+          Card(
+            margin: EdgeInsets.zero,
+            child: ListTile(
+              dense: true,
+              leading: Icon(
+                Icons.info_outline,
+                color: theme.colorScheme.primary,
+              ),
+              title: Text(
+                widget.controller.workspaceSharedAsyncExportInfo!,
+                style: theme.textTheme.bodySmall,
+              ),
+              trailing: IconButton(
+                tooltip: l10n.notificationsComplianceCloseTooltip,
+                icon: const Icon(Icons.close),
+                onPressed:
+                    widget.controller.clearWorkspaceSharedAsyncExportInfo,
+              ),
+            ),
+          ),
+        ],
+        const SizedBox(height: 16),
+        Text(l10n.notificationsComplianceExportHistoryTitle, style: muted),
+        const SizedBox(height: 8),
+        StudioFilterRow(
+          wideBreakpoint: 720,
+          children: <Widget>[
+            _complianceLabeledField(
+              context,
+              label: l10n.notificationsComplianceExportFormatFilter,
+              width: 180,
+              child: DropdownButtonFormField<String>(
+                // Controlled by _exportHistoryFormat via setState.
+                // ignore: deprecated_member_use
+                value: _exportHistoryFormat,
+                isExpanded: true,
+                decoration: const InputDecoration(isDense: true),
+                items: <DropdownMenuItem<String>>[
+                  DropdownMenuItem(
+                    value: '',
+                    child: Text(l10n.notificationsTypeAll),
+                  ),
+                  DropdownMenuItem(
+                    value: 'json',
+                    child: Text(l10n.notificationsComplianceExportFormatJson),
+                  ),
+                  DropdownMenuItem(
+                    value: 'csv',
+                    child: Text(l10n.notificationsComplianceExportFormatCsv),
+                  ),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    _exportHistoryFormat = value ?? '';
+                  });
+                },
+              ),
+            ),
+            _complianceLabeledField(
+              context,
+              label: l10n.notificationsComplianceExportedStartIso,
+              child: TextField(
+                controller: _exportHistoryExportedStartController,
+                decoration: const InputDecoration(isDense: true),
+              ),
+            ),
+            _complianceLabeledField(
+              context,
+              label: l10n.notificationsComplianceExportedEndIso,
+              child: TextField(
+                controller: _exportHistoryExportedEndController,
+                decoration: const InputDecoration(isDense: true),
+              ),
+            ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: OutlinedButton(
+                onPressed: widget.controller.loadingExportHistory
+                    ? null
+                    : _applyExportHistoryFilters,
+                child: widget.controller.loadingExportHistory
+                    ? const SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Text(l10n.notificationsComplianceFilterExports),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        ...widget.controller.workspaceSharedAuditExports.map(
+          (item) => Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Tooltip(
+              message: _formatWorkspaceAuditExportItem(l10n, item),
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Text(
+                      _formatWorkspaceAuditExportItem(l10n, item),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
+                      style: muted,
+                    ),
+                  ),
+                  IconButton(
+                    tooltip:
+                        l10n.notificationsComplianceReuseExportFiltersTooltip,
+                    onPressed: widget.controller.loadingWorkspaceSharedAudit
+                        ? null
+                        : () => _reuseExportRecordFilters(item),
+                    icon: const Icon(Icons.filter_alt_outlined, size: 18),
+                  ),
+                  IconButton(
+                    tooltip: _exportRecordDownloadTooltip(l10n, item),
+                    onPressed: widget.controller.loadingExportHistory
+                        ? null
+                        : () => _redownloadFromExportRecord(item),
+                    icon: const Icon(Icons.download_outlined, size: 18),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        if (widget.controller.workspaceSharedExportHistoryHasMore)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: widget.controller.loadingExportHistory
+                  ? null
+                  : widget.controller.loadMoreExportHistory,
+              icon: widget.controller.loadingExportHistory
+                  ? const SizedBox(
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.expand_more, size: 18),
+              label: Text(l10n.notificationsComplianceMoreExportRecords),
+            ),
+          ),
+        const SizedBox(height: 12),
+        ...widget.controller.workspaceSharedComplianceAudit
+            .take(6)
+            .map(
+              (item) => Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Text(
+                  _formatWorkspaceAuditItem(l10n, item),
+                  style: muted,
+                ),
+              ),
+            ),
+        if (widget.controller.workspaceSharedAuditHasMore)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: widget.controller.loadingWorkspaceSharedAudit
+                  ? null
+                  : widget.controller.loadMoreWorkspaceSharedComplianceAudit,
+              icon: widget.controller.loadingWorkspaceSharedAudit
+                  ? const SizedBox(
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.expand_more, size: 18),
+              label: Text(l10n.notificationsComplianceLoadMoreAudit),
+            ),
+          ),
+      ],
     );
   }
 
