@@ -27,7 +27,7 @@ cargo run --bin toonflow-server
 
 异步任务 worker 多实例时设置不同 **`WORKER_ID`**，便于在任务行的 **`claimed_by`** 上区分认领实例（仍依赖 Postgres `SKIP LOCKED` 协调）。**`JOB_QUEUE_METRICS_INTERVAL_SECS`**（默认 **60**，设为 **0** 关闭）控制 worker 周期性输出结构化日志 **`event=job_queue_metrics`**（含 **`pending`**、**`pending_claimable`**、**`running`**、**`dead`**、**`failed_last_24h`**、**`oldest_claimable_queued_age_secs`**、**`pending_by_kind`** JSON、`worker_id`），便于日志聚合与旁路队列 Gate；与 500ms 抢单轮询解耦。字段语义与运维 Runbook 见 [`docs/plans/jobs-pg-queue-runbook.md`](../docs/plans/jobs-pg-queue-runbook.md)。
 
-**`GET /api/v1/jobs/queue/stats`（Q2 方案 B）**：与上表同源 **`QueueStats`**（HTTP JSON）。须设置 **`TOONFLOW_INTERNAL_OPS_TOKEN`**（非空）；请求带 **`X-Toonflow-Internal-Token`** 与该值一致；未配置 token 时返回 **403**。用于运维脚本 / 内部前端（Flutter **`INTERNAL_OPS_TOKEN`** dart-define）拉队列深度，不等价于用户 JWT 权限模型。
+**`GET /api/v1/jobs/queue/stats`（Q2 方案 B）**：与上表同源 **`QueueStats`**（HTTP JSON）。须设置 **`OPENFLOW_INTERNAL_OPS_TOKEN`**（非空）；请求带 **`X-OpenFlow-Internal-Token`** 与该值一致；未配置 token 时返回 **403**。用于运维脚本 / 内部前端（Flutter **`OPENFLOW_INTERNAL_OPS_TOKEN`** dart-define）拉队列深度，不等价于用户 JWT 权限模型。
 
 **OTel / OTLP traces（WP‑F）**：设置 **`TOONFLOW_OTEL_EXPORT_ENABLED=1`**（或 **`true`** / **`yes`** / **`on`**）时，进程通过 **gRPC OTLP** 向 collector 导出 **`tracing` spans**（`opentelemetry-otlp` + `tracing-opentelemetry`）。可选环境变量：
 

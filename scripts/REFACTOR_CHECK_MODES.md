@@ -152,7 +152,7 @@ git ls-files --others --exclude-standard
 
 ### 性能对比
 
-基于 Toonflow 项目的实际测试（2024-01）：
+基于 OpenFlow 项目的实际测试（2024-01）：
 
 | 模式 | Backend | Frontend | OpenAPI | 总耗时 |
 |------|---------|----------|---------|--------|
