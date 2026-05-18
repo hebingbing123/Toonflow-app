@@ -5,7 +5,7 @@ use super::types::PatchTextModelDefaultBody;
 
 #[test]
 fn all_excludes_video() {
-    let n = list_filtered("all")
+    let n = list_filtered("all", false)
         .iter()
         .filter(|e| e.kind == "video")
         .count();
@@ -14,7 +14,19 @@ fn all_excludes_video() {
 
 #[test]
 fn detail_round_trip() {
-    let d = lookup_detail("1:gpt-4o-mini").expect("detail");
+    let d = lookup_detail("1:gpt-4o-mini", false).expect("detail");
+    assert_eq!(d.model_id, "1:gpt-4o-mini");
+
+    let priced = lookup_detail("1:gpt-4o-mini", true).expect("priced detail");
+    assert!(priced.pricing.is_some());
+
+    let est = super::pricing::build_estimate(&super::pricing::BillingEstimateRequest {
+        model_id: "1:gpt-4o-mini".into(),
+        task_kind: "text_completion".into(),
+        quantity: 2,
+    })
+    .expect("estimate");
+    assert_eq!(est.credits, 2);
     assert_eq!(d.model_name, "gpt-4o-mini");
     assert_eq!(d.kind, "text");
 }

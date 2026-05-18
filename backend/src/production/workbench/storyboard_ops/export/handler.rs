@@ -76,7 +76,7 @@ pub(in crate::production) async fn post_export_image(
 
     let zip_bytes = build_storyboard_export_zip(&state, uid, rows).await?;
     let filename = format!(
-        "toonflow-storyboards-{}.zip",
+        "openflow-storyboards-{}.zip",
         chrono::Utc::now().format("%Y%m%dT%H%M%SZ")
     );
 

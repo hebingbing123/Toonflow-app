@@ -187,7 +187,7 @@ async fn production_workbench_video_roundtrip() {
         content_disposition
             .as_deref()
             .unwrap_or_default()
-            .contains("toonflow-storyboards-"),
+            .contains("openflow-storyboards-"),
         "content-disposition={content_disposition:?}"
     );
 

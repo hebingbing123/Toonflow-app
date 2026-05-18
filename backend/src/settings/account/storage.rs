@@ -88,7 +88,7 @@ pub(crate) fn account_export_root_dir() -> PathBuf {
         .map(|value| value.trim().to_string())
         .filter(|value| !value.is_empty())
         .map(PathBuf::from)
-        .unwrap_or_else(|| std::env::temp_dir().join("toonflow-account-exports"))
+        .unwrap_or_else(|| std::env::temp_dir().join("openflow-account-exports"))
 }
 
 fn account_export_user_dir(user_id: Uuid) -> PathBuf {
@@ -299,7 +299,7 @@ pub(crate) async fn build_account_export_artifact(
     .await?;
     let now = Utc::now();
     let file_name = format!(
-        "toonflow-account-export-{}-{}.zip",
+        "openflow-account-export-{}-{}.zip",
         owner_user_id,
         now.format("%Y%m%dT%H%M%SZ")
     );

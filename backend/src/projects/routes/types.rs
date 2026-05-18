@@ -51,6 +51,119 @@ pub struct ProjectHomeOnboarding {
     pub checklist: Vec<ProjectHomeChecklistItem>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+pub struct ProjectHomeAction {
+    pub key: String,
+    pub title: String,
+    pub detail: String,
+    pub target_step: String,
+    pub cta_label: String,
+    pub launch_intent: ProjectHomeLaunchIntent,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+pub struct ProjectHomeMetric {
+    pub key: String,
+    pub label: String,
+    pub value: String,
+    pub detail: String,
+    pub launch_intent: ProjectHomeLaunchIntent,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+pub struct ProjectHomeStarterTemplate {
+    pub key: String,
+    pub title: String,
+    pub detail: String,
+    pub target_step: String,
+    pub cta_label: String,
+    pub launch_intent: ProjectHomeLaunchIntent,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+pub struct ProjectHomeLaunchIntent {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub action: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub target_step: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub agent_kind: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub asset_target: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub notice: Option<String>,
+}
+
+impl ProjectHomeLaunchIntent {
+    pub fn step(step: &str) -> Self {
+        Self {
+            action: None,
+            target_step: Some(step.into()),
+            agent_kind: None,
+            asset_target: None,
+            notice: None,
+        }
+    }
+
+    pub fn action(action: &str, target_step: Option<&str>) -> Self {
+        Self {
+            action: Some(action.into()),
+            target_step: target_step.map(Into::into),
+            agent_kind: None,
+            asset_target: None,
+            notice: None,
+        }
+    }
+
+    pub fn step_agent(step: &str, agent_kind: &str) -> Self {
+        Self {
+            action: None,
+            target_step: Some(step.into()),
+            agent_kind: Some(agent_kind.into()),
+            asset_target: None,
+            notice: None,
+        }
+    }
+
+    pub fn asset_target(asset_target: &str) -> Self {
+        Self {
+            action: None,
+            target_step: Some("assets".into()),
+            agent_kind: None,
+            asset_target: Some(asset_target.into()),
+            notice: None,
+        }
+    }
+
+    pub fn has_route(&self) -> bool {
+        self.action
+            .as_deref()
+            .is_some_and(|value| !value.trim().is_empty())
+            || self
+                .target_step
+                .as_deref()
+                .is_some_and(|value| !value.trim().is_empty())
+            || self
+                .agent_kind
+                .as_deref()
+                .is_some_and(|value| !value.trim().is_empty())
+            || self
+                .asset_target
+                .as_deref()
+                .is_some_and(|value| !value.trim().is_empty())
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+pub struct ProjectHomeCockpit {
+    pub headline: String,
+    pub subheadline: String,
+    pub primary_action: ProjectHomeAction,
+    pub secondary_actions: Vec<ProjectHomeAction>,
+    pub metrics: Vec<ProjectHomeMetric>,
+    pub starter_templates: Vec<ProjectHomeStarterTemplate>,
+}
+
 #[derive(Debug, Serialize, ToSchema)]
 pub struct ProjectHomeResponse {
     pub project: ProjectRow,
@@ -63,6 +176,7 @@ pub struct ProjectHomeResponse {
     pub readiness_summary: String,
     pub onboarding: ProjectHomeOnboarding,
     pub style_bible_ready: bool,
+    pub cockpit: ProjectHomeCockpit,
 }
 
 /// Query parameters for `GET /api/v1/projects` pagination.
@@ -277,6 +391,59 @@ pub struct AssetsOverviewTypeGroup {
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct AssetsOverviewHubAction {
+    pub key: String,
+    pub title: String,
+    pub detail: String,
+    pub target_step: String,
+    pub cta_label: String,
+    pub launch_intent: ProjectHomeLaunchIntent,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct AssetsOverviewHubMetric {
+    pub key: String,
+    pub label: String,
+    pub value: String,
+    pub detail: String,
+    pub launch_intent: ProjectHomeLaunchIntent,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct AssetsOverviewCharacterSummary {
+    pub character_id: Uuid,
+    pub name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub asset_id: Option<Uuid>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub asset_name: Option<String>,
+    pub linked_script_numeric_ids: Vec<i32>,
+    pub has_voice_config: bool,
+    pub missing_asset_anchor: bool,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct AssetsOverviewRoleSummary {
+    pub asset_id: Uuid,
+    pub numeric_id: i32,
+    pub name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub candidate_status: Option<String>,
+    pub linked_script_numeric_ids: Vec<i32>,
+    pub linked_character_names: Vec<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct AssetsOverviewHub {
+    pub headline: String,
+    pub subheadline: String,
+    pub primary_action: AssetsOverviewHubAction,
+    pub metrics: Vec<AssetsOverviewHubMetric>,
+    pub character_summaries: Vec<AssetsOverviewCharacterSummary>,
+    pub reusable_role_assets: Vec<AssetsOverviewRoleSummary>,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct ProjectAssetsOverviewResponse {
     pub schema_version: i32,
     /// Snapshot version for cross-panel consistency checking (ISO 8601 timestamp).
@@ -285,6 +452,7 @@ pub struct ProjectAssetsOverviewResponse {
     pub total_count: i64,
     pub candidate_counts: AssetsOverviewCandidateCounts,
     pub by_asset_type: Vec<AssetsOverviewTypeGroup>,
+    pub hub: AssetsOverviewHub,
 }
 
 /// `GET /api/v1/projects/{project_id}/short-video-assembly` — D1 成片装配只读读模型。

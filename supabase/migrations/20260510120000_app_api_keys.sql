@@ -68,5 +68,5 @@ TO authenticated
 USING (owner_user_id = (SELECT auth.uid()))
 WITH CHECK (owner_user_id = (SELECT auth.uid()));
 
-COMMENT ON TABLE public.app_api_key IS 'User-scoped API keys for Toonflow REST integrations; secret plaintext is shown only once and stored as HMAC hash.';
+COMMENT ON TABLE public.app_api_key IS 'User-scoped API keys for OpenFlow REST integrations; secret plaintext is shown only once and stored as HMAC hash.';
 COMMENT ON TABLE public.app_api_key_audit IS 'Management audit trail for API key lifecycle events.';

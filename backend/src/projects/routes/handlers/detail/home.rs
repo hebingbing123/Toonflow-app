@@ -15,8 +15,9 @@ use crate::error::ApiError;
 use crate::state::AppState;
 
 use super::super::super::types::{
-    BrandBible, ProjectBrief, ProjectHomeChecklistItem, ProjectHomeOnboarding, ProjectHomeResponse,
-    ProjectRow, ProjectStatsResponse,
+    BrandBible, ProjectBrief, ProjectHomeAction, ProjectHomeChecklistItem, ProjectHomeCockpit,
+    ProjectHomeLaunchIntent, ProjectHomeMetric, ProjectHomeOnboarding, ProjectHomeResponse,
+    ProjectHomeStarterTemplate, ProjectRow, ProjectStatsResponse,
 };
 use super::super::super::video_count::count_completed_videos_for_project;
 
@@ -170,6 +171,276 @@ fn readiness_summary(score: i32, onboarding: &ProjectHomeOnboarding) -> String {
     "项目仍处在立项早期，先把 brief、brand bible 和上游内容入口补完整。".into()
 }
 
+#[derive(Debug, Clone, Copy)]
+struct ProjectCockpitSignals {
+    ready_storyboard_count: i64,
+    blocked_storyboard_count: i64,
+    running_generation_job_count: i64,
+    pending_review_bad_case_count: i64,
+}
+
+fn step_intent(step: &str) -> ProjectHomeLaunchIntent {
+    ProjectHomeLaunchIntent::step(step)
+}
+
+fn task_center_intent() -> ProjectHomeLaunchIntent {
+    ProjectHomeLaunchIntent::action("open_task_center", Some("tasks"))
+}
+
+fn step_agent_intent(step: &str, agent_kind: &str) -> ProjectHomeLaunchIntent {
+    ProjectHomeLaunchIntent::step_agent(step, agent_kind)
+}
+
+fn build_cockpit(
+    score: i32,
+    onboarding: &ProjectHomeOnboarding,
+    stats: &ProjectStatsResponse,
+    signals: ProjectCockpitSignals,
+) -> ProjectHomeCockpit {
+    let primary_action = if !onboarding.complete {
+        ProjectHomeAction {
+            key: "finish_onboarding".into(),
+            title: "先补项目驾驶舱基础信息".into(),
+            detail: onboarding
+                .next_step
+                .as_ref()
+                .map(|step| format!("当前最省力的推进方式是先完成“{step}”，这样后面的脚本、分镜和视频不会反复返工。"))
+                .unwrap_or_else(|| "先把项目基础信息补齐，后续链路会更稳。".into()),
+            target_step: "script".into(),
+            cta_label: "去补项目设定".into(),
+            launch_intent: step_intent("script"),
+        }
+    } else if stats.novel_count == 0 && stats.script_count == 0 {
+        ProjectHomeAction {
+            key: "import_source".into(),
+            title: "先把上游内容接进来".into(),
+            detail: "项目设定已经够用，下一步最值得做的是导入原著、章节或已有剧本，让改写和分镜开始有真实素材。".into(),
+            target_step: "script".into(),
+            cta_label: "进入脚本阶段".into(),
+            launch_intent: step_intent("script"),
+        }
+    } else if stats.storyboard_count == 0 {
+        ProjectHomeAction {
+            key: "start_storyboard".into(),
+            title: "把脚本推进到分镜".into(),
+            detail: "现在已经有内容基础，但还没有可执行的分镜。先把脚本拆到 storyboard，后续出图和视频生成才能形成闭环。".into(),
+            target_step: "storyboard".into(),
+            cta_label: "去做分镜".into(),
+            launch_intent: step_intent("storyboard"),
+        }
+    } else if signals.blocked_storyboard_count > 0 {
+        ProjectHomeAction {
+            key: "unblock_storyboards".into(),
+            title: "优先补齐可出图镜头".into(),
+            detail: format!(
+                "当前已有 {} 个镜头，仍有 {} 个没达到可生成状态。先补画面、参考或候选确认，比盲目继续往后走更划算。",
+                stats.storyboard_count, signals.blocked_storyboard_count
+            ),
+            target_step: "storyboard".into(),
+            cta_label: "查看分镜缺口".into(),
+            launch_intent: step_intent("storyboard"),
+        }
+    } else if stats.video_count == 0 {
+        ProjectHomeAction {
+            key: "generate_video".into(),
+            title: "开始做第一轮视频结果".into(),
+            detail:
+                "镜头已经具备生成条件，现在最能提升项目吸引力的动作，就是尽快跑出第一轮视频样片。"
+                    .into(),
+            target_step: "video".into(),
+            cta_label: "进入视频阶段".into(),
+            launch_intent: step_intent("video"),
+        }
+    } else if signals.pending_review_bad_case_count > 0 {
+        ProjectHomeAction {
+            key: "resolve_quality".into(),
+            title: "先清掉待处理质量问题".into(),
+            detail: format!(
+                "当前已有 {} 条成片结果，但还有 {} 条坏例待处理。先把质量问题收口，再推进交付和发布更稳。",
+                stats.video_count, signals.pending_review_bad_case_count
+            ),
+            target_step: "deliver".into(),
+            cta_label: "处理交付风险".into(),
+            launch_intent: step_intent("deliver"),
+        }
+    } else if signals.running_generation_job_count > 0 {
+        ProjectHomeAction {
+            key: "watch_running_jobs".into(),
+            title: "盯住正在跑的生成任务".into(),
+            detail: format!(
+                "当前有 {} 条任务正在运行，最值得做的是回到视频或交付阶段看进度、处理失败项和回收结果。",
+                signals.running_generation_job_count
+            ),
+            target_step: "video".into(),
+            cta_label: "查看生成进度".into(),
+            launch_intent: step_intent("video"),
+        }
+    } else {
+        ProjectHomeAction {
+            key: "prepare_delivery".into(),
+            title: "进入交付与发布检查".into(),
+            detail: "项目已经穿过主要生产链路，现在更应该把注意力放在质量、导出和发布前检查上。"
+                .into(),
+            target_step: "deliver".into(),
+            cta_label: "去做交付检查".into(),
+            launch_intent: step_intent("deliver"),
+        }
+    };
+
+    let headline = if stats.video_count > 0 {
+        format!(
+            "项目已经产出 {} 条视频结果，下一步重点转向收口与交付。",
+            stats.video_count
+        )
+    } else if stats.storyboard_count > 0 {
+        format!(
+            "项目已有 {} 个镜头，已经进入可成片的中段。",
+            stats.storyboard_count
+        )
+    } else if stats.script_count > 0 || stats.novel_count > 0 {
+        "项目已经有内容种子，接下来要尽快把它推进到分镜。".into()
+    } else {
+        "这是一个还在起势中的项目，先把第一条成片链路跑通最重要。".into()
+    };
+    let subheadline = format!("当前 readiness {} 分；{}", score, primary_action.detail);
+    let readiness_launch_intent = primary_action.launch_intent.clone();
+
+    let secondary_actions = vec![
+        ProjectHomeAction {
+            key: "review_tasks".into(),
+            title: "查看生产堵点".into(),
+            detail: format!(
+                "进行中任务 {} 条，坏例 {} 条，适合先清卡点再继续堆新任务。",
+                signals.running_generation_job_count, signals.pending_review_bad_case_count
+            ),
+            target_step: if signals.pending_review_bad_case_count > 0 {
+                "deliver".into()
+            } else {
+                "video".into()
+            },
+            cta_label: "看任务与风险".into(),
+            launch_intent: task_center_intent(),
+        },
+        ProjectHomeAction {
+            key: "advance_storyboard".into(),
+            title: "推进镜头就绪率".into(),
+            detail: format!(
+                "可生成镜头 {} 个，仍阻塞 {} 个；提高这一项，最直接决定视频阶段效率。",
+                signals.ready_storyboard_count, signals.blocked_storyboard_count
+            ),
+            target_step: "storyboard".into(),
+            cta_label: "看镜头状态".into(),
+            launch_intent: step_intent("storyboard"),
+        },
+    ];
+
+    let metrics = vec![
+        ProjectHomeMetric {
+            key: "readiness".into(),
+            label: "项目就绪度".into(),
+            value: format!("{score}/100"),
+            detail: readiness_summary(score, onboarding),
+            launch_intent: readiness_launch_intent,
+        },
+        ProjectHomeMetric {
+            key: "content".into(),
+            label: "内容基线".into(),
+            value: format!("小说 {} / 剧本 {}", stats.novel_count, stats.script_count),
+            detail: "先有内容基线，后面的分镜、素材和视频才不会漂。".into(),
+            launch_intent: step_intent("script"),
+        },
+        ProjectHomeMetric {
+            key: "storyboard".into(),
+            label: "镜头可执行率".into(),
+            value: format!(
+                "就绪 {} / 总计 {}",
+                signals.ready_storyboard_count, stats.storyboard_count
+            ),
+            detail: format!(
+                "仍有 {} 个镜头需要补素材、参考或候选确认。",
+                signals.blocked_storyboard_count
+            ),
+            launch_intent: step_intent("storyboard"),
+        },
+        ProjectHomeMetric {
+            key: "delivery".into(),
+            label: "交付风险".into(),
+            value: format!(
+                "任务 {} / 坏例 {}",
+                signals.running_generation_job_count, signals.pending_review_bad_case_count
+            ),
+            detail: "把运行中的任务和质量问题压平，项目节奏会稳很多。".into(),
+            launch_intent: task_center_intent(),
+        },
+    ];
+
+    let starter_templates = vec![
+        ProjectHomeStarterTemplate {
+            key: "starter_manga".into(),
+            title: "漫剧改编起步线".into(),
+            detail: "先补 brief，再导入原著和剧本，把第一轮分镜尽快拆出来。".into(),
+            target_step: "script".into(),
+            cta_label: "从脚本开跑".into(),
+            launch_intent: step_intent("script"),
+        },
+        ProjectHomeStarterTemplate {
+            key: "starter_trailer".into(),
+            title: "样片先行路线".into(),
+            detail: "如果目标是先打样，先盯住最少一批可出图镜头，尽快跑出第一条视频结果。".into(),
+            target_step: "video".into(),
+            cta_label: "先出第一条样片".into(),
+            launch_intent: step_agent_intent("video", "grid_prompt_generator"),
+        },
+        ProjectHomeStarterTemplate {
+            key: "starter_delivery".into(),
+            title: "交付检查路线".into(),
+            detail: "适合已有视频结果的项目，优先收口质量问题、导出阻塞和发布前检查。".into(),
+            target_step: "deliver".into(),
+            cta_label: "转入交付阶段".into(),
+            launch_intent: step_intent("deliver"),
+        },
+    ];
+
+    let cockpit = ProjectHomeCockpit {
+        headline,
+        subheadline,
+        primary_action,
+        secondary_actions,
+        metrics,
+        starter_templates,
+    };
+    debug_assert_cockpit_launch_intents(&cockpit);
+    cockpit
+}
+
+fn debug_assert_cockpit_launch_intents(cockpit: &ProjectHomeCockpit) {
+    debug_assert!(
+        cockpit.primary_action.launch_intent.has_route(),
+        "project home primary action must emit launch_intent",
+    );
+    debug_assert!(
+        cockpit
+            .secondary_actions
+            .iter()
+            .all(|action| action.launch_intent.has_route()),
+        "project home secondary actions must emit launch_intent",
+    );
+    debug_assert!(
+        cockpit
+            .metrics
+            .iter()
+            .all(|metric| metric.launch_intent.has_route()),
+        "project home metrics must emit launch_intent",
+    );
+    debug_assert!(
+        cockpit
+            .starter_templates
+            .iter()
+            .all(|starter| starter.launch_intent.has_route()),
+        "project home starter templates must emit launch_intent",
+    );
+}
+
 #[utoipa::path(
     get,
     path = "/api/v1/projects/{project_id}/home",
@@ -253,6 +524,77 @@ pub(crate) async fn project_home_by_id(
     let video_count = count_completed_videos_for_project(pool, scope.id)
         .await
         .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let ready_storyboard_count: i64 = sqlx::query_scalar(
+        r#"
+        SELECT COUNT(*)::bigint
+        FROM app_storyboard sb
+        INNER JOIN app_script sc ON sc.id = sb.script_id
+        WHERE sc.project_id = $1
+          AND (sb.sb_index IS NOT NULL)
+          AND (
+            TRIM(COALESCE(sb.prompt, '')) <> ''
+            OR TRIM(COALESCE(sb.video_desc, '')) <> ''
+          )
+          AND (TRIM(COALESCE(sb.file_path, '')) <> '')
+          AND (
+            TRIM(COALESCE(sb.metadata #>> '{shortVideo,candidateStatus}', '')) <> 'pending'
+          )
+          AND NOT EXISTS (
+            SELECT 1
+            FROM app_generation_job j
+            WHERE j.owner_user_id = $2
+              AND j.status IN ('queued', 'running')
+              AND j.payload ? 'storyboard_numeric_id'
+              AND (j.payload->>'storyboard_numeric_id') ~ '^[0-9]+$'
+              AND (j.payload->>'storyboard_numeric_id')::int = sb.numeric_id
+          )
+        "#,
+    )
+    .bind(scope.id)
+    .bind(uid)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let running_generation_job_count: i64 = sqlx::query_scalar(
+        r#"
+        SELECT COUNT(DISTINCT j.id)::bigint
+        FROM app_generation_job j
+        WHERE j.owner_user_id = $2
+          AND j.status IN ('queued', 'running')
+          AND (
+            j.payload->>'project_numeric_id' = (
+              SELECT numeric_id::text FROM app_project WHERE id = $1
+            )
+            OR EXISTS (
+              SELECT 1
+              FROM app_storyboard sb
+              INNER JOIN app_script sc ON sc.id = sb.script_id
+              WHERE sc.project_id = $1
+                AND (j.payload->>'storyboard_numeric_id') IS NOT NULL
+                AND (j.payload->>'storyboard_numeric_id')::int = sb.numeric_id
+            )
+          )
+        "#,
+    )
+    .bind(scope.id)
+    .bind(uid)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+    let pending_review_bad_case_count: i64 = sqlx::query_scalar(
+        r#"
+        SELECT COUNT(*)::bigint
+        FROM app_quality_review q
+        WHERE q.user_id = $2
+          AND q.is_bad_case = true
+          AND q.project_id = (SELECT numeric_id FROM app_project WHERE id = $1)
+        "#,
+    )
+    .bind(scope.id)
+    .bind(uid)
+    .fetch_one(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
     let style_bible_ready: bool = sqlx::query_scalar(
         r#"
         SELECT EXISTS (
@@ -295,6 +637,18 @@ pub(crate) async fn project_home_by_id(
     let brand_bible_ready = brand_bible_ready(brand_bible.as_ref());
     let onboarding = build_onboarding(brief_ready, brand_bible_ready, &stats, style_bible_ready);
     let score = readiness_score(brief_ready, brand_bible_ready, style_bible_ready, &stats);
+    let blocked_storyboard_count = (storyboard_count - ready_storyboard_count).max(0);
+    let cockpit = build_cockpit(
+        score,
+        &onboarding,
+        &stats,
+        ProjectCockpitSignals {
+            ready_storyboard_count,
+            blocked_storyboard_count,
+            running_generation_job_count,
+            pending_review_bad_case_count,
+        },
+    );
 
     Ok(Json(ProjectHomeResponse {
         project: ProjectRow {
@@ -331,6 +685,7 @@ pub(crate) async fn project_home_by_id(
         readiness_summary: readiness_summary(score, &onboarding),
         onboarding,
         style_bible_ready,
+        cockpit,
     }))
 }
 
@@ -362,5 +717,158 @@ mod tests {
         let onboarding = build_onboarding(false, false, &stats, false);
         assert!(!onboarding.complete);
         assert_eq!(onboarding.next_step.as_deref(), Some("补全项目立项信息"));
+    }
+
+    #[test]
+    fn cockpit_prioritizes_onboarding_before_everything_else() {
+        let stats = ProjectStatsResponse {
+            script_count: 2,
+            storyboard_count: 6,
+            role_count: 1,
+            novel_count: 1,
+            video_count: 0,
+        };
+        let onboarding = build_onboarding(false, true, &stats, true);
+        let cockpit = build_cockpit(
+            48,
+            &onboarding,
+            &stats,
+            ProjectCockpitSignals {
+                ready_storyboard_count: 4,
+                blocked_storyboard_count: 2,
+                running_generation_job_count: 1,
+                pending_review_bad_case_count: 0,
+            },
+        );
+        assert_eq!(cockpit.primary_action.key, "finish_onboarding");
+        assert_eq!(cockpit.primary_action.target_step, "script");
+        assert_eq!(
+            cockpit
+                .metrics
+                .first()
+                .and_then(|metric| metric.launch_intent.target_step.as_deref()),
+            Some("script")
+        );
+    }
+
+    #[test]
+    fn cockpit_readiness_metric_follows_primary_action_intent() {
+        let stats = ProjectStatsResponse {
+            script_count: 2,
+            storyboard_count: 6,
+            role_count: 1,
+            novel_count: 1,
+            video_count: 3,
+        };
+        let onboarding = build_onboarding(true, true, &stats, true);
+        let cockpit = build_cockpit(
+            92,
+            &onboarding,
+            &stats,
+            ProjectCockpitSignals {
+                ready_storyboard_count: 6,
+                blocked_storyboard_count: 0,
+                running_generation_job_count: 0,
+                pending_review_bad_case_count: 2,
+            },
+        );
+        assert_eq!(
+            cockpit.primary_action.launch_intent.target_step.as_deref(),
+            Some("deliver")
+        );
+        assert_eq!(
+            cockpit
+                .metrics
+                .first()
+                .and_then(|metric| metric.launch_intent.target_step.as_deref()),
+            Some("deliver")
+        );
+    }
+
+    #[test]
+    fn cockpit_pushes_delivery_when_videos_exist_and_bad_cases_pending() {
+        let stats = ProjectStatsResponse {
+            script_count: 2,
+            storyboard_count: 6,
+            role_count: 1,
+            novel_count: 1,
+            video_count: 3,
+        };
+        let onboarding = build_onboarding(true, true, &stats, true);
+        let cockpit = build_cockpit(
+            92,
+            &onboarding,
+            &stats,
+            ProjectCockpitSignals {
+                ready_storyboard_count: 6,
+                blocked_storyboard_count: 0,
+                running_generation_job_count: 0,
+                pending_review_bad_case_count: 2,
+            },
+        );
+        assert_eq!(cockpit.primary_action.key, "resolve_quality");
+        assert_eq!(cockpit.primary_action.target_step, "deliver");
+        assert_eq!(
+            cockpit.primary_action.launch_intent.target_step.as_deref(),
+            Some("deliver")
+        );
+        assert_eq!(
+            cockpit
+                .secondary_actions
+                .first()
+                .and_then(|action| action.launch_intent.action.as_deref()),
+            Some("open_task_center")
+        );
+        assert_eq!(
+            cockpit
+                .metrics
+                .last()
+                .and_then(|metric| metric.launch_intent.action.as_deref()),
+            Some("open_task_center")
+        );
+        assert_eq!(
+            cockpit
+                .starter_templates
+                .get(1)
+                .and_then(|starter| starter.launch_intent.agent_kind.as_deref()),
+            Some("grid_prompt_generator")
+        );
+    }
+
+    #[test]
+    fn cockpit_always_emits_launch_intents_for_actions_metrics_and_starters() {
+        let stats = ProjectStatsResponse {
+            script_count: 1,
+            storyboard_count: 2,
+            role_count: 1,
+            novel_count: 1,
+            video_count: 0,
+        };
+        let onboarding = build_onboarding(true, true, &stats, true);
+        let cockpit = build_cockpit(
+            64,
+            &onboarding,
+            &stats,
+            ProjectCockpitSignals {
+                ready_storyboard_count: 1,
+                blocked_storyboard_count: 1,
+                running_generation_job_count: 2,
+                pending_review_bad_case_count: 0,
+            },
+        );
+
+        assert!(cockpit.primary_action.launch_intent.has_route());
+        assert!(cockpit
+            .secondary_actions
+            .iter()
+            .all(|action| action.launch_intent.has_route()));
+        assert!(cockpit
+            .metrics
+            .iter()
+            .all(|metric| metric.launch_intent.has_route()));
+        assert!(cockpit
+            .starter_templates
+            .iter()
+            .all(|starter| starter.launch_intent.has_route()));
     }
 }

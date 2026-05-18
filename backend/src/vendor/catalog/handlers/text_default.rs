@@ -47,7 +47,7 @@ pub(crate) async fn text_model_default(
     // Validate the stored preference is still in the catalog; fall back to server default if not.
     let default_model_id = user_pref
         .as_deref()
-        .filter(|id| lookup_detail(id).is_some())
+        .filter(|id| lookup_detail(id, false).is_some())
         .map(str::to_string)
         .unwrap_or_else(default_text_model_composite_id);
 
@@ -86,7 +86,7 @@ pub(crate) async fn patch_text_model_default(
                 "model_id must be non-empty or null to reset".into(),
             ));
         }
-        if lookup_detail(id).is_none() {
+        if lookup_detail(id, false).is_none() {
             return Err(ApiError::BadRequest(format!(
                 "model_id '{id}' not found in catalog; use GET /api/v1/models/detail to verify"
             )));
@@ -114,7 +114,7 @@ pub(crate) async fn patch_text_model_default(
 
     let default_model_id = model_id_to_store
         .as_deref()
-        .filter(|id| lookup_detail(id).is_some())
+        .filter(|id| lookup_detail(id, false).is_some())
         .map(str::to_string)
         .unwrap_or_else(default_text_model_composite_id);
 

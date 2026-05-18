@@ -36,7 +36,8 @@ pub(crate) async fn list_models(
 ) -> Result<Json<Vec<ModelListEntry>>, ApiError> {
     let _user = require_user_uuid(&state, &headers)?;
     let filter = normalize_filter(q.filter)?;
-    Ok(Json(list_filtered(&filter)))
+    let include_pricing = q.include_pricing.unwrap_or(false);
+    Ok(Json(list_filtered(&filter, include_pricing)))
 }
 
 #[utoipa::path(
@@ -65,7 +66,8 @@ pub(crate) async fn model_detail(
     if q.model_id.trim().is_empty() {
         return Err(ApiError::BadRequest("model_id is required".into()));
     }
-    lookup_detail(q.model_id.trim())
+    let include_pricing = q.include_pricing.unwrap_or(false);
+    lookup_detail(q.model_id.trim(), include_pricing)
         .map(Json)
         .ok_or(ApiError::NotFound)
 }

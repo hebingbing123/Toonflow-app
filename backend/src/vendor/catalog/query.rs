@@ -3,9 +3,19 @@
 use crate::error::ApiError;
 
 use super::data::CATALOG;
+use super::pricing::{lookup_pricing, ModelPricingPublic};
 use super::types::{
     ModelDetailResponse, ModelListEntry, VendorCatalogLookup, VendorCatalogSummary,
 };
+
+fn attach_pricing(model_id: &str, include: bool) -> (Option<String>, Option<ModelPricingPublic>) {
+    if !include {
+        return (None, None);
+    }
+    let mid = model_id.to_string();
+    let pricing = lookup_pricing(&mid).map(|d| ModelPricingPublic::from_def(&mid, d));
+    (Some(mid), pricing)
+}
 
 pub(super) fn normalize_filter(raw: Option<String>) -> Result<String, ApiError> {
     let s = raw
@@ -87,7 +97,7 @@ pub(crate) fn lookup_vendor_catalog(raw: &str) -> Option<VendorCatalogLookup> {
         })
 }
 
-pub(super) fn list_filtered(filter: &str) -> Vec<ModelListEntry> {
+pub(super) fn list_filtered(filter: &str, include_pricing: bool) -> Vec<ModelListEntry> {
     let mut out = Vec::new();
     for v in &CATALOG.vendors {
         for m in &v.models {
@@ -98,29 +108,37 @@ pub(super) fn list_filtered(filter: &str) -> Vec<ModelListEntry> {
             if !include {
                 continue;
             }
+            let composite = format!("{}:{}", v.id, m.model_name);
+            let (model_id, pricing) = attach_pricing(&composite, include_pricing);
             out.push(ModelListEntry {
                 id: v.id,
                 label: m.name.clone(),
                 value: m.model_name.clone(),
                 kind: m.kind.clone(),
                 name: v.name.clone(),
+                model_id,
+                pricing,
             });
         }
     }
     out
 }
 
-pub(super) fn lookup_detail(model_id: &str) -> Option<ModelDetailResponse> {
+pub(super) fn lookup_detail(model_id: &str, include_pricing: bool) -> Option<ModelDetailResponse> {
     let (vid_str, model_name) = model_id.split_once(':')?;
     let vendor_id: i32 = vid_str.parse().ok()?;
     let v = CATALOG.vendors.iter().find(|x| x.id == vendor_id)?;
     let m = v.models.iter().find(|x| x.model_name == model_name)?;
+    let composite = format!("{}:{}", v.id, m.model_name);
+    let (_, pricing) = attach_pricing(&composite, include_pricing);
     Some(ModelDetailResponse {
         vendor_id: v.id,
         vendor_name: v.name.clone(),
         name: m.name.clone(),
         model_name: m.model_name.clone(),
         kind: m.kind.clone(),
+        model_id: composite,
+        pricing,
     })
 }
 
@@ -141,7 +159,7 @@ pub(super) fn first_text_model_composite_id() -> String {
 pub(super) fn default_text_model_composite_id() -> String {
     if let Ok(raw) = std::env::var("TOONFLOW_DEFAULT_TEXT_MODEL_ID") {
         let id = raw.trim();
-        if !id.is_empty() && lookup_detail(id).is_some() {
+        if !id.is_empty() && lookup_detail(id, false).is_some() {
             return id.to_string();
         }
     }

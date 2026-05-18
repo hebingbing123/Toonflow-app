@@ -29,6 +29,7 @@ use axum::{
 };
 
 use crate::harness::ws::upgrade::ws_upgrade;
+use crate::internal_ops::INTERNAL_OPS_HEADER;
 
 use super::super::handlers;
 use super::super::openapi;
@@ -50,7 +51,7 @@ pub fn build_router(state: AppState) -> Router {
             header::ACCEPT_LANGUAGE,
             HeaderName::from_static("x-api-key"),
             HeaderName::from_static("x-request-id"),
-            HeaderName::from_static("x-toonflow-internal-token"),
+            HeaderName::from_static(INTERNAL_OPS_HEADER),
         ])
         .expose_headers([HeaderName::from_static("x-request-id")]);
 

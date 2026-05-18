@@ -17,6 +17,82 @@ fn five_counts(stats: &Value) -> (i64, i64, i64, i64, i64) {
     )
 }
 
+fn assert_launch_intent(path: &str, intent: &Value) {
+    assert!(
+        intent.is_object(),
+        "{path} should exist as an object: {intent}"
+    );
+    let has_route = ["action", "target_step", "agent_kind", "asset_target"]
+        .iter()
+        .any(|key| {
+            intent[*key]
+                .as_str()
+                .is_some_and(|value| !value.trim().is_empty())
+        });
+    assert!(
+        has_route,
+        "{path} should include action, target_step, agent_kind, or asset_target: {intent}"
+    );
+}
+
+fn assert_home_cockpit_launch_intents(home: &Value) {
+    assert_launch_intent(
+        "home.cockpit.primary_action.launch_intent",
+        &home["cockpit"]["primary_action"]["launch_intent"],
+    );
+    for (index, action) in home["cockpit"]["secondary_actions"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .enumerate()
+    {
+        assert_launch_intent(
+            &format!("home.cockpit.secondary_actions[{index}].launch_intent"),
+            &action["launch_intent"],
+        );
+    }
+    for (index, metric) in home["cockpit"]["metrics"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .enumerate()
+    {
+        assert_launch_intent(
+            &format!("home.cockpit.metrics[{index}].launch_intent"),
+            &metric["launch_intent"],
+        );
+    }
+    for (index, starter) in home["cockpit"]["starter_templates"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .enumerate()
+    {
+        assert_launch_intent(
+            &format!("home.cockpit.starter_templates[{index}].launch_intent"),
+            &starter["launch_intent"],
+        );
+    }
+}
+
+fn assert_assets_hub_launch_intents(assets_overview: &Value) {
+    assert_launch_intent(
+        "assets_overview.hub.primary_action.launch_intent",
+        &assets_overview["hub"]["primary_action"]["launch_intent"],
+    );
+    for (index, metric) in assets_overview["hub"]["metrics"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .enumerate()
+    {
+        assert_launch_intent(
+            &format!("assets_overview.hub.metrics[{index}].launch_intent"),
+            &metric["launch_intent"],
+        );
+    }
+}
+
 #[tokio::test]
 #[ignore = "needs DATABASE_URL + SUPABASE_JWT_SECRET and migrated schema; e.g. supabase db reset; cargo test project_dashboard_surface_roundtrip -- --ignored"]
 async fn project_dashboard_triple_sources_stats_alignment() {
@@ -120,20 +196,41 @@ async fn project_dashboard_triple_sources_stats_alignment() {
         let (ot, overview) = read_json_response(res).await;
         assert_eq!(ot, StatusCode::OK, "overview={overview}");
 
-        (stats, home, overview)
+        let res = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .uri(format!("/api/v1/projects/{project_uuid}/assets-overview"))
+                    .header(header::AUTHORIZATION, format!("Bearer {token}"))
+                    .extension(ConnectInfo(test_addr()))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let (at, assets_overview) = read_json_response(res).await;
+        assert_eq!(at, StatusCode::OK, "assets_overview={assets_overview}");
+
+        (stats, home, overview, assets_overview)
     };
 
-    let (stats0, home0, overview0) = fetch_stats_bundle().await;
+    let (stats0, home0, overview0, assets_overview0) = fetch_stats_bundle().await;
     assert_eq!(
         five_counts(&stats0),
         five_counts(&home0["stats"]),
         "home.stats must mirror GET …/stats (baseline)"
     );
+    assert!(
+        home0["cockpit"]["primary_action"]["target_step"].is_string(),
+        "home.cockpit.primary_action.target_step should exist: {home0}"
+    );
+    assert_home_cockpit_launch_intents(&home0);
     assert_eq!(
         five_counts(&stats0),
         five_counts(&overview0["stats"]),
         "overview.stats must mirror GET …/stats (baseline)"
     );
+    assert_assets_hub_launch_intents(&assets_overview0);
     assert_eq!(five_counts(&stats0), (0, 0, 0, 0, 0));
 
     let video_numeric_id: i32 = 7_701_042;
@@ -150,7 +247,7 @@ async fn project_dashboard_triple_sources_stats_alignment() {
     .expect("insert app_video for WP-A dashboard parity");
     assert_eq!(ins.rows_affected(), 1);
 
-    let (stats1, home1, overview1) = fetch_stats_bundle().await;
+    let (stats1, home1, overview1, assets_overview1) = fetch_stats_bundle().await;
     assert_eq!(
         five_counts(&stats1),
         (0, 0, 0, 0, 1),
@@ -166,6 +263,8 @@ async fn project_dashboard_triple_sources_stats_alignment() {
         five_counts(&overview1["stats"]),
         "overview.stats must mirror GET …/stats (after video)"
     );
+    assert_home_cockpit_launch_intents(&home1);
+    assert_assets_hub_launch_intents(&assets_overview1);
 
     let res = app
         .clone()
