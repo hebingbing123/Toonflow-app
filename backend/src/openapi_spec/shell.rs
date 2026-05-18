@@ -10,7 +10,7 @@ use utoipa::openapi::{
 pub(super) fn openapi_shell() -> OpenApi {
     let mut api = OpenApi::new(
         InfoBuilder::new()
-            .title("Toonflow API")
+            .title("OpenFlow API")
             .version("1.0.0")
             .description(Some(
                 "HTTP under `/api/v1` (use tags below). Typical calls use `Authorization: Bearer <Supabase access_token>`. Settings can also mint user API keys, and authenticated product routes accept `X-API-Key: tfk_...` for server-to-server automation.",

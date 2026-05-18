@@ -7,6 +7,7 @@ use uuid::Uuid;
 
 use crate::error::helpers::{bad_request_i18n, forbidden_i18n};
 use crate::error::ApiError;
+use crate::internal_ops::{expected_internal_ops_token, request_internal_ops_token};
 use crate::state::AppState;
 
 use super::storage;
@@ -20,23 +21,17 @@ use super::types::{
 };
 
 fn internal_ops_token_expected() -> Option<String> {
-    std::env::var("TOONFLOW_INTERNAL_OPS_TOKEN")
-        .ok()
-        .map(|s| s.trim().to_owned())
-        .filter(|s| !s.is_empty())
+    expected_internal_ops_token()
 }
 
 fn require_internal_ops_token(headers: &HeaderMap) -> Result<(), ApiError> {
     let Some(expected) = internal_ops_token_expected() else {
         return Err(forbidden_i18n(
-            "internal admin console disabled (set TOONFLOW_INTERNAL_OPS_TOKEN)",
-            "内部管理控制台已禁用（请设置 TOONFLOW_INTERNAL_OPS_TOKEN）",
+            "internal admin console disabled (set OPENFLOW_INTERNAL_OPS_TOKEN)",
+            "内部管理控制台已禁用（请设置 OPENFLOW_INTERNAL_OPS_TOKEN）",
         ));
     };
-    let got = headers
-        .get("x-toonflow-internal-token")
-        .and_then(|v| v.to_str().ok())
-        .unwrap_or("");
+    let got = request_internal_ops_token(headers).unwrap_or_default();
     if got != expected.as_str() {
         return Err(ApiError::Unauthorized);
     }

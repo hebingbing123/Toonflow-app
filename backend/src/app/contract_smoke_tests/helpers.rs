@@ -27,7 +27,7 @@ pub(super) const MAX_PROBE_BYTES: usize = 512 * 1024;
 pub(super) const TEST_JWT_SECRET: &[u8] = b"contract-smoke-jwt-secret-bytes-32chars!";
 pub(super) const NIL_JOB_UUID: &str = "00000000-0000-0000-0000-000000000000";
 
-/// Serialize **`TOONFLOW_INTERNAL_OPS_TOKEN`** mutation in internal-ops contract tests.
+/// Serialize **`OPENFLOW_INTERNAL_OPS_TOKEN`** mutation in internal-ops contract tests.
 static INTERNAL_OPS_QUEUE_STATS_MUTEX: OnceLock<Mutex<()>> = OnceLock::new();
 
 pub(super) fn internal_ops_token_test_lock() -> std::sync::MutexGuard<'static, ()> {
@@ -126,7 +126,7 @@ pub(super) async fn get_json_bearer(uri: &str, token: &str) -> (StatusCode, Valu
     .await
 }
 
-/// `GET` with optional **`X-Toonflow-Internal-Token`** (Q2 运维队列 stats)。
+/// `GET` with optional **`X-OpenFlow-Internal-Token`** (Q2 运维队列 stats)。
 pub(super) async fn get_json_internal_ops(
     uri: &str,
     internal_token: Option<&str>,
@@ -135,7 +135,7 @@ pub(super) async fn get_json_internal_ops(
         .uri(uri)
         .extension(ConnectInfo(test_addr()));
     if let Some(t) = internal_token {
-        req = req.header("x-toonflow-internal-token", t);
+        req = req.header("x-openflow-internal-token", t);
     }
     oneshot_json(req.body(Body::empty()).unwrap()).await
 }

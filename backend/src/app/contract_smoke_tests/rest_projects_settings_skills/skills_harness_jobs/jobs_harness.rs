@@ -11,6 +11,7 @@ const VALIDATE_USER_WASM_URI: &str = "/api/v1/harness/user-wasm/validate";
 const USER_WASM_STORE_URI: &str = "/api/v1/harness/user-wasm";
 const JOB_QUEUE_STATS_URI: &str = "/api/v1/jobs/queue/stats";
 const NIL_UUID: &str = "00000000-0000-0000-0000-000000000000";
+const INTERNAL_OPS_TOKEN_ENV: &str = "OPENFLOW_INTERNAL_OPS_TOKEN";
 #[tokio::test]
 async fn harness_tools_unauthorized_without_bearer() {
     let (status, v) = get_json("/api/v1/harness/tools").await;
@@ -234,19 +235,19 @@ async fn harness_user_wasm_revoke_returns_database_error_without_pg() {
 #[tokio::test]
 async fn job_queue_stats_internal_ops_token_gate_serial() {
     let _lock = super::super::super::helpers::internal_ops_queue_stats_test_lock();
-    let prev = std::env::var("TOONFLOW_INTERNAL_OPS_TOKEN").ok();
+    let prev = std::env::var(INTERNAL_OPS_TOKEN_ENV).ok();
 
-    std::env::remove_var("TOONFLOW_INTERNAL_OPS_TOKEN");
+    std::env::remove_var(INTERNAL_OPS_TOKEN_ENV);
     let (status, v) = get_json(JOB_QUEUE_STATS_URI).await;
     assert_eq!(status, StatusCode::FORBIDDEN);
     assert_eq!(v["code"], "forbidden");
 
-    std::env::set_var("TOONFLOW_INTERNAL_OPS_TOKEN", "expected-secret");
+    std::env::set_var(INTERNAL_OPS_TOKEN_ENV, "expected-secret");
     let (status, v) = get_json_internal_ops(JOB_QUEUE_STATS_URI, Some("wrong")).await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);
     assert_eq!(v["code"], "unauthorized");
 
-    std::env::set_var("TOONFLOW_INTERNAL_OPS_TOKEN", "ops-test-token");
+    std::env::set_var(INTERNAL_OPS_TOKEN_ENV, "ops-test-token");
     let (status, v) = get_json_internal_ops(JOB_QUEUE_STATS_URI, Some("ops-test-token")).await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
     assert_eq!(v["code"], "database_error");
@@ -256,7 +257,7 @@ async fn job_queue_stats_internal_ops_token_gate_serial() {
 
 fn restore_ops_token(prev: Option<String>) {
     match prev {
-        Some(s) => std::env::set_var("TOONFLOW_INTERNAL_OPS_TOKEN", s),
-        None => std::env::remove_var("TOONFLOW_INTERNAL_OPS_TOKEN"),
+        Some(s) => std::env::set_var(INTERNAL_OPS_TOKEN_ENV, s),
+        None => std::env::remove_var(INTERNAL_OPS_TOKEN_ENV),
     }
 }

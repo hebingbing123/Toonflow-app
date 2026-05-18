@@ -1,6 +1,7 @@
 //! Q2 方案 B：`GET /api/v1/jobs/queue/stats` — 只读 PG 队列聚合（与 worker **`job_queue_metrics`** 同源 **`QueueStats`**）。
 //!
-//! 门禁：环境变量 **`TOONFLOW_INTERNAL_OPS_TOKEN`**（非空）；请求须带 **`X-Toonflow-Internal-Token`** 与之完全一致。
+//! 门禁：环境变量 **`OPENFLOW_INTERNAL_OPS_TOKEN`**（非空）；请求须带
+//! **`X-OpenFlow-Internal-Token`** 与之完全一致。
 //! 未配置 token 时返回 **403**，避免意外暴露队列深度。
 
 use axum::{extract::State, http::HeaderMap, Json};
@@ -9,6 +10,9 @@ use serde_json::Value;
 use utoipa::ToSchema;
 
 use crate::error::ApiError;
+use crate::internal_ops::{
+    expected_internal_ops_token, request_internal_ops_token, INTERNAL_OPS_TOKEN_ENV,
+};
 use crate::jobs::queue::{PgQueue, Queue};
 use crate::state::AppState;
 
@@ -27,22 +31,17 @@ pub struct JobQueueStatsResponse {
 }
 
 fn internal_ops_token_expected() -> Option<String> {
-    std::env::var("TOONFLOW_INTERNAL_OPS_TOKEN")
-        .ok()
-        .map(|s| s.trim().to_owned())
-        .filter(|s| !s.is_empty())
+    expected_internal_ops_token()
 }
 
 fn require_internal_ops_token(headers: &HeaderMap) -> Result<(), ApiError> {
     let Some(expected) = internal_ops_token_expected() else {
-        return Err(ApiError::Forbidden(
-            "job queue stats HTTP disabled (set TOONFLOW_INTERNAL_OPS_TOKEN)".into(),
-        ));
+        return Err(ApiError::Forbidden(format!(
+            "job queue stats HTTP disabled (set {})",
+            INTERNAL_OPS_TOKEN_ENV
+        )));
     };
-    let got = headers
-        .get("x-toonflow-internal-token")
-        .and_then(|v| v.to_str().ok())
-        .unwrap_or("");
+    let got = request_internal_ops_token(headers).unwrap_or_default();
     if got != expected.as_str() {
         return Err(ApiError::Unauthorized);
     }

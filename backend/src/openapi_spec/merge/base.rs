@@ -4,7 +4,7 @@ use anyhow::Context;
 use serde_json::Value as Json;
 
 pub(super) const FALLBACK_MINIMAL_YAML: &str =
-    "openapi: 3.1.0\ninfo:\n  title: Toonflow API\n  version: 1.0.0\npaths: {}\n";
+    "openapi: 3.1.0\ninfo:\n  title: OpenFlow API\n  version: 1.0.0\npaths: {}\n";
 
 pub(super) fn document_base() -> anyhow::Result<Json> {
     let shell = crate::openapi_spec::shell::openapi_shell();

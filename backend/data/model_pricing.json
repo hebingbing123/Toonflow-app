@@ -1,0 +1,99 @@
+{
+  "disclaimer": "Prices are platform estimates in CNY; actual vendor bills may differ. Credits are illustrative until checkout ships.",
+  "task_defaults": {
+    "asset_image_batch": {
+      "default_quantity": 1,
+      "default_unit": "per_image",
+      "jobs_per_submit": 1
+    },
+    "storyboard_video": {
+      "default_quantity": 5,
+      "default_unit": "per_video_second",
+      "jobs_per_submit": 1
+    },
+    "script_edit_image": {
+      "default_quantity": 1,
+      "default_unit": "per_image",
+      "jobs_per_submit": 1
+    },
+    "text_completion": {
+      "default_quantity": 4,
+      "default_unit": "per_1k_tokens",
+      "jobs_per_submit": 0
+    }
+  },
+  "models": {
+    "1:gpt-4o-mini": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 1,
+      "cny_cents_per_unit": 15,
+      "tier": "economy",
+      "value_tier": "economy",
+      "best_for": "Fast drafts and low-cost iteration"
+    },
+    "1:gpt-4o": {
+      "pricing_unit": "per_1k_tokens",
+      "credits_per_unit": 8,
+      "cny_cents_per_unit": 120,
+      "tier": "quality",
+      "value_tier": "quality",
+      "best_for": "Complex scripts and high-quality rewrites"
+    },
+    "1:dall-e-3": {
+      "pricing_unit": "per_image",
+      "credits_per_unit": 12,
+      "cny_cents_per_unit": 280,
+      "tier": "balanced",
+      "value_tier": "balanced",
+      "best_for": "Character and scene stills"
+    },
+    "2:gen-2": {
+      "pricing_unit": "per_video_second",
+      "credits_per_unit": 6,
+      "cny_cents_per_unit": 90,
+      "tier": "economy",
+      "value_tier": "economy",
+      "best_for": "Quick video previews"
+    },
+    "2:gen-3-alpha": {
+      "pricing_unit": "per_video_second",
+      "credits_per_unit": 14,
+      "cny_cents_per_unit": 210,
+      "tier": "quality",
+      "value_tier": "quality",
+      "best_for": "Higher-fidelity motion"
+    },
+    "3:pika-1.5": {
+      "pricing_unit": "per_video_second",
+      "credits_per_unit": 5,
+      "cny_cents_per_unit": 75,
+      "tier": "economy",
+      "value_tier": "economy",
+      "best_for": "Stylized short clips"
+    },
+    "3:pika-2.0": {
+      "pricing_unit": "per_video_second",
+      "credits_per_unit": 10,
+      "cny_cents_per_unit": 150,
+      "tier": "balanced",
+      "value_tier": "balanced",
+      "best_for": "Balanced motion quality"
+    },
+    "4:kling-v1": {
+      "pricing_unit": "per_video_second",
+      "credits_per_unit": 7,
+      "cny_cents_per_unit": 105,
+      "tier": "balanced",
+      "value_tier": "balanced",
+      "best_for": "Cinematic camera moves"
+    },
+    "4:kling-v1.5": {
+      "pricing_unit": "per_video_second",
+      "credits_per_unit": 12,
+      "cny_cents_per_unit": 180,
+      "tier": "quality",
+      "value_tier": "quality",
+      "best_for": "Final-cut video quality"
+    }
+  }
+}

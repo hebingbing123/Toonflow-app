@@ -8,6 +8,7 @@ use crate::app::contract_smoke_tests::helpers::{
     get_json_internal_ops, internal_ops_token_test_lock,
 };
 
+const INTERNAL_OPS_TOKEN_ENV: &str = "OPENFLOW_INTERNAL_OPS_TOKEN";
 const WORKSPACE_SUBSCRIPTION_URI: &str = "/api/v1/ops/billing/workspace-subscription";
 const WORKSPACE_JOB_AGGREGATES_URI: &str = "/api/v1/ops/billing/workspace-job-aggregates";
 const NIL_UUID: &str = "00000000-0000-0000-0000-000000000000";
@@ -17,14 +18,14 @@ async fn workspace_subscription_requires_internal_ops_token() {
     let _lock = internal_ops_token_test_lock();
 
     // Test without token configured
-    std::env::remove_var("TOONFLOW_INTERNAL_OPS_TOKEN");
+    std::env::remove_var(INTERNAL_OPS_TOKEN_ENV);
     let uri = format!("{WORKSPACE_SUBSCRIPTION_URI}?workspace_id={NIL_UUID}");
     let (status, body) = get_json_internal_ops(&uri, None).await;
     assert_eq!(status, StatusCode::FORBIDDEN);
     assert_eq!(body["code"], "forbidden");
 
     // Test with wrong token
-    std::env::set_var("TOONFLOW_INTERNAL_OPS_TOKEN", "expected-secret");
+    std::env::set_var(INTERNAL_OPS_TOKEN_ENV, "expected-secret");
     let (status, body) = get_json_internal_ops(&uri, Some("wrong-token")).await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);
     assert_eq!(body["code"], "unauthorized");
@@ -35,14 +36,14 @@ async fn workspace_job_aggregates_requires_internal_ops_token() {
     let _lock = internal_ops_token_test_lock();
 
     // Test without token configured
-    std::env::remove_var("TOONFLOW_INTERNAL_OPS_TOKEN");
+    std::env::remove_var(INTERNAL_OPS_TOKEN_ENV);
     let uri = format!("{WORKSPACE_JOB_AGGREGATES_URI}?workspace_id={NIL_UUID}");
     let (status, body) = get_json_internal_ops(&uri, None).await;
     assert_eq!(status, StatusCode::FORBIDDEN);
     assert_eq!(body["code"], "forbidden");
 
     // Test with wrong token
-    std::env::set_var("TOONFLOW_INTERNAL_OPS_TOKEN", "expected-secret");
+    std::env::set_var(INTERNAL_OPS_TOKEN_ENV, "expected-secret");
     let (status, body) = get_json_internal_ops(&uri, Some("wrong-token")).await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);
     assert_eq!(body["code"], "unauthorized");
@@ -52,7 +53,7 @@ async fn workspace_job_aggregates_requires_internal_ops_token() {
 async fn workspace_subscription_requires_workspace_id_param() {
     let _lock = internal_ops_token_test_lock();
 
-    std::env::set_var("TOONFLOW_INTERNAL_OPS_TOKEN", "test-token");
+    std::env::set_var(INTERNAL_OPS_TOKEN_ENV, "test-token");
 
     // Test without workspace_id parameter
     let (status, body) =
@@ -79,7 +80,7 @@ async fn workspace_subscription_requires_workspace_id_param() {
 async fn workspace_job_aggregates_requires_workspace_id_param() {
     let _lock = internal_ops_token_test_lock();
 
-    std::env::set_var("TOONFLOW_INTERNAL_OPS_TOKEN", "test-token");
+    std::env::set_var(INTERNAL_OPS_TOKEN_ENV, "test-token");
 
     // Test without workspace_id parameter
     let (status, body) =
@@ -106,7 +107,7 @@ async fn workspace_job_aggregates_requires_workspace_id_param() {
 async fn workspace_subscription_rejects_invalid_uuid() {
     let _lock = internal_ops_token_test_lock();
 
-    std::env::set_var("TOONFLOW_INTERNAL_OPS_TOKEN", "test-token");
+    std::env::set_var(INTERNAL_OPS_TOKEN_ENV, "test-token");
 
     let uri = format!("{WORKSPACE_SUBSCRIPTION_URI}?workspace_id=not-a-uuid");
     let (status, body) = get_json_internal_ops(&uri, Some("test-token")).await;
@@ -132,7 +133,7 @@ async fn workspace_subscription_rejects_invalid_uuid() {
 async fn workspace_job_aggregates_rejects_invalid_uuid() {
     let _lock = internal_ops_token_test_lock();
 
-    std::env::set_var("TOONFLOW_INTERNAL_OPS_TOKEN", "test-token");
+    std::env::set_var(INTERNAL_OPS_TOKEN_ENV, "test-token");
 
     let uri = format!("{WORKSPACE_JOB_AGGREGATES_URI}?workspace_id=not-a-uuid");
     let (status, body) = get_json_internal_ops(&uri, Some("test-token")).await;
@@ -158,7 +159,7 @@ async fn workspace_job_aggregates_rejects_invalid_uuid() {
 async fn workspace_subscription_returns_404_for_nonexistent_workspace() {
     let _lock = internal_ops_token_test_lock();
 
-    std::env::set_var("TOONFLOW_INTERNAL_OPS_TOKEN", "test-token");
+    std::env::set_var(INTERNAL_OPS_TOKEN_ENV, "test-token");
 
     // Use a valid UUID that doesn't exist
     let uri = format!("{WORKSPACE_SUBSCRIPTION_URI}?workspace_id={NIL_UUID}");
@@ -181,7 +182,7 @@ async fn workspace_subscription_returns_404_for_nonexistent_workspace() {
 async fn workspace_job_aggregates_returns_404_for_nonexistent_workspace() {
     let _lock = internal_ops_token_test_lock();
 
-    std::env::set_var("TOONFLOW_INTERNAL_OPS_TOKEN", "test-token");
+    std::env::set_var(INTERNAL_OPS_TOKEN_ENV, "test-token");
 
     // Use a valid UUID that doesn't exist
     let uri = format!("{WORKSPACE_JOB_AGGREGATES_URI}?workspace_id={NIL_UUID}");
@@ -204,7 +205,7 @@ async fn workspace_job_aggregates_returns_404_for_nonexistent_workspace() {
 async fn workspace_subscription_response_structure() {
     let _lock = internal_ops_token_test_lock();
 
-    std::env::set_var("TOONFLOW_INTERNAL_OPS_TOKEN", "test-token");
+    std::env::set_var(INTERNAL_OPS_TOKEN_ENV, "test-token");
 
     let uri = format!("{WORKSPACE_SUBSCRIPTION_URI}?workspace_id={NIL_UUID}");
     let (status, body) = get_json_internal_ops(&uri, Some("test-token")).await;
@@ -233,7 +234,7 @@ async fn workspace_subscription_response_structure() {
 async fn workspace_job_aggregates_response_structure() {
     let _lock = internal_ops_token_test_lock();
 
-    std::env::set_var("TOONFLOW_INTERNAL_OPS_TOKEN", "test-token");
+    std::env::set_var(INTERNAL_OPS_TOKEN_ENV, "test-token");
 
     let uri = format!("{WORKSPACE_JOB_AGGREGATES_URI}?workspace_id={NIL_UUID}");
     let (status, body) = get_json_internal_ops(&uri, Some("test-token")).await;

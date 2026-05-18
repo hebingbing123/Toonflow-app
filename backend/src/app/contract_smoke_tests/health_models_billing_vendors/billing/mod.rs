@@ -1,6 +1,7 @@
 mod hmac;
 mod ops_view;
 mod stripe_signature;
+mod user_pricing;
 
 use ::hmac::{Hmac, Mac};
 use axum::http::HeaderValue;

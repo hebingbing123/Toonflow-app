@@ -1,4 +1,4 @@
-//! Browser-friendly OpenAPI：shell + 路径索引与 utoipa 的合并结果，供 Swagger UI 加载。
+//! Browser-friendly OpenAPI：OpenFlow shell + 路径索引与 utoipa 的合并结果，供 Swagger UI 加载。
 
 use axum::http::{header, HeaderValue};
 use axum::response::{Html, IntoResponse};
@@ -10,7 +10,7 @@ const DOCS_HTML: &str = r##"<!DOCTYPE html>
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Toonflow API — Swagger UI</title>
+  <title>OpenFlow API — Swagger UI</title>
   <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui.css" crossorigin="anonymous" />
 </head>
 <body>

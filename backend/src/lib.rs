@@ -9,6 +9,7 @@ pub mod billing;
 pub mod error;
 pub mod harness;
 pub mod http_kit;
+pub mod internal_ops;
 pub mod jobs;
 pub mod legacy_numeric_id;
 pub mod llm;

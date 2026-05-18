@@ -19,6 +19,7 @@ mod ops_view;
 mod provider_adapter;
 mod provider_rules;
 mod reconciliation_worker;
+mod user_pricing;
 mod verify;
 
 pub use openapi::BillingApi;
@@ -46,6 +47,7 @@ use crate::state::AppState;
 
 use events_list::list_billing_webhook_events;
 use ops_view::{get_workspace_job_aggregates, get_workspace_subscription};
+use user_pricing::{get_billing_spend_summary, post_billing_estimate};
 
 pub fn router() -> Router<AppState> {
     Router::new()
@@ -66,6 +68,11 @@ pub fn router() -> Router<AppState> {
         .route(
             "/api/v1/ops/billing/workspace-job-aggregates",
             get(get_workspace_job_aggregates),
+        )
+        .route("/api/v1/billing/estimate", post(post_billing_estimate))
+        .route(
+            "/api/v1/billing/spend-summary",
+            get(get_billing_spend_summary),
         )
 }
 

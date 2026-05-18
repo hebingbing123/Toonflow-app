@@ -28,7 +28,7 @@ async fn openapi_yaml_and_swagger_ui_served_without_database() {
         s.lines().any(|line| line.starts_with("openapi:")),
         "merged YAML should include an openapi version line (key order may differ after merge)"
     );
-    assert!(s.contains("Toonflow API"));
+    assert!(s.contains("OpenFlow API"));
     assert!(
         s.contains("  /api/v1/ws:") && s.contains("websocketUpgrade"),
         "openapi spec should document GET /api/v1/ws"

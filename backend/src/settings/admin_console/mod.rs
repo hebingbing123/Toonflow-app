@@ -1,6 +1,6 @@
 //! Internal admin console for operators.
 //!
-//! Guarded by `TOONFLOW_INTERNAL_OPS_TOKEN` / `X-Toonflow-Internal-Token`.
+//! Guarded by `OPENFLOW_INTERNAL_OPS_TOKEN` / `X-OpenFlow-Internal-Token`.
 
 use axum::{
     routing::{get, post},
@@ -94,8 +94,8 @@ mod tests {
     #[test]
     fn admin_console_disabled_error_creates_correct_variant() {
         let err = forbidden_i18n(
-            "internal admin console disabled (set TOONFLOW_INTERNAL_OPS_TOKEN)",
-            "内部管理控制台已禁用（请设置 TOONFLOW_INTERNAL_OPS_TOKEN）",
+            "internal admin console disabled (set OPENFLOW_INTERNAL_OPS_TOKEN)",
+            "内部管理控制台已禁用（请设置 OPENFLOW_INTERNAL_OPS_TOKEN）",
         );
         match err {
             ApiError::Forbidden(msg) => {
@@ -111,8 +111,8 @@ mod tests {
     #[tokio::test]
     async fn admin_console_disabled_error_response_en() {
         let err = forbidden_i18n(
-            "internal admin console disabled (set TOONFLOW_INTERNAL_OPS_TOKEN)",
-            "内部管理控制台已禁用（请设置 TOONFLOW_INTERNAL_OPS_TOKEN）",
+            "internal admin console disabled (set OPENFLOW_INTERNAL_OPS_TOKEN)",
+            "内部管理控制台已禁用（请设置 OPENFLOW_INTERNAL_OPS_TOKEN）",
         );
         let resp = err.into_response();
 
@@ -132,8 +132,8 @@ mod tests {
         let resp = REQUEST_LOCALE
             .scope(ApiLocale::Zh, async {
                 let err = forbidden_i18n(
-                    "internal admin console disabled (set TOONFLOW_INTERNAL_OPS_TOKEN)",
-                    "内部管理控制台已禁用（请设置 TOONFLOW_INTERNAL_OPS_TOKEN）",
+                    "internal admin console disabled (set OPENFLOW_INTERNAL_OPS_TOKEN)",
+                    "内部管理控制台已禁用（请设置 OPENFLOW_INTERNAL_OPS_TOKEN）",
                 );
                 err.into_response()
             })

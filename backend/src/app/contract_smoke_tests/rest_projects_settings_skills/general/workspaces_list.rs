@@ -2,6 +2,8 @@ use super::super::super::helpers::*;
 use axum::http::StatusCode;
 use uuid::Uuid;
 
+const INTERNAL_OPS_TOKEN_ENV: &str = "OPENFLOW_INTERNAL_OPS_TOKEN";
+
 #[tokio::test]
 async fn workspaces_list_requires_database_without_pool() {
     let token = test_jwt(Uuid::nil());
@@ -13,21 +15,21 @@ async fn workspaces_list_requires_database_without_pool() {
 #[tokio::test]
 async fn workspace_stats_internal_ops_token_gate_serial() {
     let _lock = internal_ops_token_test_lock();
-    let prev = std::env::var("TOONFLOW_INTERNAL_OPS_TOKEN").ok();
+    let prev = std::env::var(INTERNAL_OPS_TOKEN_ENV).ok();
     let workspace_id = Uuid::nil();
     let uri = format!("/api/v1/workspaces/{workspace_id}/stats");
 
-    std::env::remove_var("TOONFLOW_INTERNAL_OPS_TOKEN");
+    std::env::remove_var(INTERNAL_OPS_TOKEN_ENV);
     let (status, v) = get_json(&uri).await;
     assert_eq!(status, StatusCode::FORBIDDEN);
     assert_eq!(v["code"], "forbidden");
 
-    std::env::set_var("TOONFLOW_INTERNAL_OPS_TOKEN", "expected-secret");
+    std::env::set_var(INTERNAL_OPS_TOKEN_ENV, "expected-secret");
     let (status, v) = get_json_internal_ops(&uri, Some("wrong")).await;
     assert_eq!(status, StatusCode::UNAUTHORIZED);
     assert_eq!(v["code"], "unauthorized");
 
-    std::env::set_var("TOONFLOW_INTERNAL_OPS_TOKEN", "ops-test-token");
+    std::env::set_var(INTERNAL_OPS_TOKEN_ENV, "ops-test-token");
     let (status, v) = get_json_internal_ops(&uri, Some("ops-test-token")).await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
     assert_eq!(v["code"], "database_error");
@@ -162,7 +164,7 @@ async fn workspace_members_leave_requires_database_without_pool() {
 
 fn restore_ops_token(prev: Option<String>) {
     match prev {
-        Some(s) => std::env::set_var("TOONFLOW_INTERNAL_OPS_TOKEN", s),
-        None => std::env::remove_var("TOONFLOW_INTERNAL_OPS_TOKEN"),
+        Some(s) => std::env::set_var(INTERNAL_OPS_TOKEN_ENV, s),
+        None => std::env::remove_var(INTERNAL_OPS_TOKEN_ENV),
     }
 }

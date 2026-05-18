@@ -702,8 +702,8 @@ mod tests {
     #[tokio::test]
     async fn workspace_stats_http_disabled_error_response_en() {
         let err = forbidden_i18n(
-            "workspace stats HTTP disabled (set TOONFLOW_INTERNAL_OPS_TOKEN)",
-            "工作区统计 HTTP 已禁用（请设置 TOONFLOW_INTERNAL_OPS_TOKEN）",
+            "workspace stats HTTP disabled (set OPENFLOW_INTERNAL_OPS_TOKEN)",
+            "工作区统计 HTTP 已禁用（请设置 OPENFLOW_INTERNAL_OPS_TOKEN）",
         );
         let resp = err.into_response();
 
@@ -723,8 +723,8 @@ mod tests {
         let resp = REQUEST_LOCALE
             .scope(ApiLocale::Zh, async {
                 let err = forbidden_i18n(
-                    "workspace stats HTTP disabled (set TOONFLOW_INTERNAL_OPS_TOKEN)",
-                    "工作区统计 HTTP 已禁用（请设置 TOONFLOW_INTERNAL_OPS_TOKEN）",
+                    "workspace stats HTTP disabled (set OPENFLOW_INTERNAL_OPS_TOKEN)",
+                    "工作区统计 HTTP 已禁用（请设置 OPENFLOW_INTERNAL_OPS_TOKEN）",
                 );
                 err.into_response()
             })

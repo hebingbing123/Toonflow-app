@@ -1,7 +1,7 @@
 //! Internal ops endpoints for workspace billing queries (Task 8.1).
 //!
-//! Gate: Environment variable **`TOONFLOW_INTERNAL_OPS_TOKEN`** (non-empty);
-//! requests must include **`X-Toonflow-Internal-Token`** matching the expected value.
+//! Gate: Environment variable **`OPENFLOW_INTERNAL_OPS_TOKEN`** (non-empty);
+//! requests must include **`X-OpenFlow-Internal-Token`** matching the expected value.
 //!
 //! Provides ops team visibility into:
 //! - Workspace subscription snapshots filtered by workspace_id
@@ -19,6 +19,9 @@ use utoipa::ToSchema;
 use uuid::Uuid;
 
 use crate::error::ApiError;
+use crate::internal_ops::{
+    expected_internal_ops_token, request_internal_ops_token, INTERNAL_OPS_TOKEN_ENV,
+};
 use crate::state::AppState;
 
 /// Workspace subscription snapshot for ops queries.
@@ -80,23 +83,18 @@ pub struct WorkspaceJobAggregatesResponse {
 
 /// Check if internal ops token is configured and valid.
 fn internal_ops_token_expected() -> Option<String> {
-    std::env::var("TOONFLOW_INTERNAL_OPS_TOKEN")
-        .ok()
-        .map(|s| s.trim().to_owned())
-        .filter(|s| !s.is_empty())
+    expected_internal_ops_token()
 }
 
 /// Require valid internal ops token in request headers.
 fn require_internal_ops_token(headers: &HeaderMap) -> Result<(), ApiError> {
     let Some(expected) = internal_ops_token_expected() else {
-        return Err(ApiError::Forbidden(
-            "workspace billing ops view disabled (set TOONFLOW_INTERNAL_OPS_TOKEN)".into(),
-        ));
+        return Err(ApiError::Forbidden(format!(
+            "workspace billing ops view disabled (set {})",
+            INTERNAL_OPS_TOKEN_ENV
+        )));
     };
-    let got = headers
-        .get("x-toonflow-internal-token")
-        .and_then(|v| v.to_str().ok())
-        .unwrap_or("");
+    let got = request_internal_ops_token(headers).unwrap_or_default();
     if got != expected.as_str() {
         return Err(ApiError::Unauthorized);
     }
@@ -113,7 +111,7 @@ fn require_internal_ops_token(headers: &HeaderMap) -> Result<(), ApiError> {
 ///
 /// ## Authorization
 ///
-/// Requires `X-Toonflow-Internal-Token` header matching `TOONFLOW_INTERNAL_OPS_TOKEN` env var.
+/// Requires `X-OpenFlow-Internal-Token` header matching `OPENFLOW_INTERNAL_OPS_TOKEN` env var.
 ///
 /// ## Response
 ///
@@ -170,7 +168,7 @@ pub(crate) async fn get_workspace_subscription(
 ///
 /// ## Authorization
 ///
-/// Requires `X-Toonflow-Internal-Token` header matching `TOONFLOW_INTERNAL_OPS_TOKEN` env var.
+/// Requires `X-OpenFlow-Internal-Token` header matching `OPENFLOW_INTERNAL_OPS_TOKEN` env var.
 ///
 /// ## Response
 ///
@@ -354,7 +352,7 @@ mod tests {
 
     #[test]
     fn internal_ops_token_expected_returns_none_when_not_set() {
-        // This test assumes TOONFLOW_INTERNAL_OPS_TOKEN is not set in test environment
+        // This test assumes OPENFLOW_INTERNAL_OPS_TOKEN is not set in test environment
         // If it is set, this test may fail - that's acceptable for unit tests
         let token = internal_ops_token_expected();
         // We can't assert None because the env var might be set in CI

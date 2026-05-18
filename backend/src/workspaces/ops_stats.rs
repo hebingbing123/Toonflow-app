@@ -10,6 +10,9 @@ use utoipa::ToSchema;
 use uuid::Uuid;
 
 use crate::error::ApiError;
+use crate::internal_ops::{
+    expected_internal_ops_token, request_internal_ops_token, INTERNAL_OPS_TOKEN_ENV,
+};
 use crate::state::AppState;
 
 #[derive(Debug, Clone, Serialize, ToSchema, FromRow)]
@@ -28,22 +31,17 @@ pub(crate) fn router() -> Router<AppState> {
 }
 
 fn internal_ops_token_expected() -> Option<String> {
-    std::env::var("TOONFLOW_INTERNAL_OPS_TOKEN")
-        .ok()
-        .map(|s| s.trim().to_owned())
-        .filter(|s| !s.is_empty())
+    expected_internal_ops_token()
 }
 
 fn require_internal_ops_token(headers: &HeaderMap) -> Result<(), ApiError> {
     let Some(expected) = internal_ops_token_expected() else {
-        return Err(ApiError::Forbidden(
-            "workspace stats HTTP disabled (set TOONFLOW_INTERNAL_OPS_TOKEN)".into(),
-        ));
+        return Err(ApiError::Forbidden(format!(
+            "workspace stats HTTP disabled (set {})",
+            INTERNAL_OPS_TOKEN_ENV
+        )));
     };
-    let got = headers
-        .get("x-toonflow-internal-token")
-        .and_then(|v| v.to_str().ok())
-        .unwrap_or("");
+    let got = request_internal_ops_token(headers).unwrap_or_default();
     if got != expected.as_str() {
         return Err(ApiError::Unauthorized);
     }
