@@ -9537,7 +9537,7 @@ components:
       type: http
 info:
   description: 'HTTP under `/api/v1` (use tags below). Typical calls use `Authorization: Bearer <Supabase access_token>`. Settings can also mint user API keys, and authenticated product routes accept `X-API-Key: tfk_...` for server-to-server automation.'
-  title: Toonflow API
+  title: OpenFlow API
   version: 1.0.0
 openapi: 3.1.0
 paths:
@@ -13938,7 +13938,7 @@ paths:
 
         ## Authorization
 
-        Requires `X-Toonflow-Internal-Token` header matching `TOONFLOW_INTERNAL_OPS_TOKEN` env var.
+        Requires `X-OpenFlow-Internal-Token` header matching `OPENFLOW_INTERNAL_OPS_TOKEN` env var.
 
         ## Response
 
@@ -13998,7 +13998,7 @@ paths:
 
         ## Authorization
 
-        Requires `X-Toonflow-Internal-Token` header matching `TOONFLOW_INTERNAL_OPS_TOKEN` env var.
+        Requires `X-OpenFlow-Internal-Token` header matching `OPENFLOW_INTERNAL_OPS_TOKEN` env var.
 
         ## Response
 
