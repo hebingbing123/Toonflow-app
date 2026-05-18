@@ -16,7 +16,10 @@ G_DEFINE_TYPE(MyApplication, my_application, GTK_TYPE_APPLICATION)
 
 // Called when first Flutter frame received.
 static void first_frame_cb(MyApplication* self, FlView* view) {
-  gtk_widget_show(gtk_widget_get_toplevel(GTK_WIDGET(view)));
+  GtkWindow* window =
+      GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(view)));
+  gtk_widget_show(GTK_WIDGET(window));
+  gtk_window_fullscreen(window);
 }
 
 // Implements GApplication::activate.
@@ -45,11 +48,11 @@ static void my_application_activate(GApplication* application) {
   if (use_header_bar) {
     GtkHeaderBar* header_bar = GTK_HEADER_BAR(gtk_header_bar_new());
     gtk_widget_show(GTK_WIDGET(header_bar));
-    gtk_header_bar_set_title(header_bar, "toonflow_app");
+    gtk_header_bar_set_title(header_bar, "OpenFlow");
     gtk_header_bar_set_show_close_button(header_bar, TRUE);
     gtk_window_set_titlebar(window, GTK_WIDGET(header_bar));
   } else {
-    gtk_window_set_title(window, "toonflow_app");
+    gtk_window_set_title(window, "OpenFlow");
   }
 
   gtk_window_set_default_size(window, 1280, 720);

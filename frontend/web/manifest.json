@@ -1,11 +1,11 @@
 {
-    "name": "openflow_app",
-    "short_name": "openflow_app",
+    "name": "OpenFlow",
+    "short_name": "OpenFlow",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "OpenFlow client (desktop + web)",
+    "description": "OpenFlow AI short drama studio",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

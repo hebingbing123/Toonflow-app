@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.toonflow" "\0"
-            VALUE "FileDescription", "toonflow_app" "\0"
+            VALUE "CompanyName", "OpenFlow" "\0"
+            VALUE "FileDescription", "OpenFlow" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "toonflow_app" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.toonflow. All rights reserved." "\0"
-            VALUE "OriginalFilename", "toonflow_app.exe" "\0"
-            VALUE "ProductName", "toonflow_app" "\0"
+            VALUE "InternalName", "openflow_app" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 OpenFlow. All rights reserved." "\0"
+            VALUE "OriginalFilename", "openflow_app.exe" "\0"
+            VALUE "ProductName", "OpenFlow" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
