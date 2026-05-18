@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -14,7 +15,16 @@ class AuthController extends ChangeNotifier {
     required this.onErrorChanged,
     required this.onSignedOut,
     required AuthL10nProvider l10nProvider,
-  }) : _l10nProvider = l10nProvider;
+  }) : _l10nProvider = l10nProvider {
+    if (kDebugMode && kSupabaseConfigured) {
+      if (emailController.text.trim().isEmpty) {
+        emailController.text = kDevAdminEmail;
+      }
+      if (passwordController.text.isEmpty) {
+        passwordController.text = kDevAdminPassword;
+      }
+    }
+  }
 
   final void Function(String? error) onErrorChanged;
   final Future<void> Function() onSignedOut;

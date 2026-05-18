@@ -10,58 +10,71 @@ class _AuthSectionContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Divider(height: 32),
-        Text(
-          l10n.authSupabaseAuthTitle,
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        const SizedBox(height: 8),
-        if (!kSupabaseConfigured)
-          Text(
-            l10n.authSupabaseNotConfigured,
-            style: Theme.of(context).textTheme.bodySmall,
-          )
-        else ...[
-          TextField(
-            controller: model.emailController,
-            decoration: InputDecoration(labelText: l10n.authEmailFieldLabel),
-            keyboardType: TextInputType.emailAddress,
-            autofillHints: const [AutofillHints.email],
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: model.passwordController,
-            decoration: InputDecoration(labelText: l10n.authPasswordFieldLabel),
-            obscureText: true,
-            autofillHints: const [AutofillHints.password],
-          ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
+    return LayoutBuilder(
+      builder: (context, constraints) => SingleChildScrollView(
+        padding: const EdgeInsets.only(bottom: 24),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: constraints.maxHeight),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              FilledButton(
-                onPressed: callbacks.onSignIn,
-                child: Text(l10n.authSignIn),
+              const Divider(height: 32),
+              Text(
+                l10n.authSupabaseAuthTitle,
+                style: Theme.of(context).textTheme.titleMedium,
               ),
-              OutlinedButton(
-                onPressed: callbacks.onSignUp,
-                child: Text(l10n.authSignUp),
-              ),
-              if (model.signedIn)
-                TextButton(
-                  onPressed: callbacks.onSignOut,
-                  child: Text(l10n.authSignOut),
+              const SizedBox(height: 8),
+              if (!kSupabaseConfigured)
+                Text(
+                  l10n.authSupabaseNotConfigured,
+                  style: Theme.of(context).textTheme.bodySmall,
+                )
+              else ...[
+                TextField(
+                  controller: model.emailController,
+                  decoration: InputDecoration(
+                    labelText: l10n.authEmailFieldLabel,
+                    hintText: kDebugMode ? kDevAdminEmail : null,
+                  ),
+                  keyboardType: TextInputType.emailAddress,
+                  autofillHints: const [AutofillHints.email],
                 ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: model.passwordController,
+                  decoration: InputDecoration(
+                    labelText: l10n.authPasswordFieldLabel,
+                  ),
+                  obscureText: true,
+                  autofillHints: const [AutofillHints.password],
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    FilledButton(
+                      onPressed: callbacks.onSignIn,
+                      child: Text(l10n.authSignIn),
+                    ),
+                    OutlinedButton(
+                      onPressed: callbacks.onSignUp,
+                      child: Text(l10n.authSignUp),
+                    ),
+                    if (model.signedIn)
+                      TextButton(
+                        onPressed: callbacks.onSignOut,
+                        child: Text(l10n.authSignOut),
+                      ),
+                  ],
+                ),
+                if (model.signedIn)
+                  _AuthSignedInPanel(model: model, callbacks: callbacks),
+              ],
             ],
           ),
-          if (model.signedIn)
-            _AuthSignedInPanel(model: model, callbacks: callbacks),
-        ],
-      ],
+        ),
+      ),
     );
   }
 }

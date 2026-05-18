@@ -1,11 +1,54 @@
 import 'package:flutter/material.dart';
 
 import 'config.dart';
+import 'design_system/components/studio_text_styles.dart';
+import 'design_system/tokens.dart';
 import 'local_prefs/risky_operation_confirm_prefs.dart';
 import 'rust_api.dart';
 
+bool shouldOpenStatusPageForInitialUri(Uri uri) {
+  final path = uri.path.trim();
+  return path == '/status' || path == '/status/';
+}
+
+Future<HealthResponse> _statusPageFetchHealthRootDefault() => fetchHealthRoot();
+Future<HealthResponse> _statusPageFetchHealthV1Default() => fetchHealthV1();
+Future<ReadyV1Response> _statusPageFetchReadyV1Default() => fetchReadyV1();
+Future<VersionResponse> _statusPageFetchVersionV1Default() => fetchVersionV1();
+
+class StatusPageFetchers {
+  StatusPageFetchers({
+    Future<HealthResponse> Function()? fetchHealthRoot,
+    Future<HealthResponse> Function()? fetchHealthV1,
+    Future<ReadyV1Response> Function()? fetchReadyV1,
+    Future<VersionResponse> Function()? fetchVersionV1,
+    Future<JobQueueStatsV1?> Function(String internalOpsToken)?
+    fetchJobQueueStats,
+  }) : fetchHealthRoot = fetchHealthRoot ?? _statusPageFetchHealthRootDefault,
+       fetchHealthV1 = fetchHealthV1 ?? _statusPageFetchHealthV1Default,
+       fetchReadyV1 = fetchReadyV1 ?? _statusPageFetchReadyV1Default,
+       fetchVersionV1 = fetchVersionV1 ?? _statusPageFetchVersionV1Default,
+       fetchJobQueueStats = fetchJobQueueStats ?? _defaultFetchJobQueueStats;
+
+  final Future<HealthResponse> Function() fetchHealthRoot;
+  final Future<HealthResponse> Function() fetchHealthV1;
+  final Future<ReadyV1Response> Function() fetchReadyV1;
+  final Future<VersionResponse> Function() fetchVersionV1;
+  final Future<JobQueueStatsV1?> Function(String internalOpsToken)
+  fetchJobQueueStats;
+
+  static Future<JobQueueStatsV1?> _defaultFetchJobQueueStats(
+    String internalOpsToken,
+  ) {
+    return fetchJobQueueStatsV1(internalOpsToken: internalOpsToken);
+  }
+}
+
 class StatusPage extends StatefulWidget {
-  const StatusPage({super.key});
+  StatusPage({super.key, StatusPageFetchers? fetchers})
+    : fetchers = fetchers ?? StatusPageFetchers();
+
+  final StatusPageFetchers fetchers;
 
   @override
   State<StatusPage> createState() => _StatusPageState();
@@ -35,12 +78,12 @@ class _StatusPageState extends State<StatusPage> {
       _error = null;
     });
     try {
-      final healthRootFuture = fetchHealthRoot();
-      final healthV1Future = fetchHealthV1();
-      final readyFuture = fetchReadyV1();
-      final versionFuture = fetchVersionV1();
+      final healthRootFuture = widget.fetchers.fetchHealthRoot();
+      final healthV1Future = widget.fetchers.fetchHealthV1();
+      final readyFuture = widget.fetchers.fetchReadyV1();
+      final versionFuture = widget.fetchers.fetchVersionV1();
       final queueStatsFuture = _showInternalQueueStats
-          ? fetchJobQueueStatsV1(internalOpsToken: kInternalOpsToken)
+          ? widget.fetchers.fetchJobQueueStats(kInternalOpsToken)
           : Future<JobQueueStatsV1?>.value(null);
       final results = await Future.wait<Object?>([
         healthRootFuture,
@@ -90,21 +133,21 @@ class _StatusPageState extends State<StatusPage> {
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(StudioSpacing.sm),
         children: [
-          Text(l10n.statusPageHeadline, style: theme.textTheme.headlineSmall),
-          const SizedBox(height: 8),
+          Text(l10n.statusPageHeadline, style: studioPageTitleStyle(context)),
+          const SizedBox(height: StudioSpacing.xs),
           Text(
             l10n.statusPageIntroBase +
                 (_showInternalQueueStats
                     ? l10n.statusPageIntroInternalSuffix
                     : ''),
-            style: theme.textTheme.bodyMedium,
+            style: studioSectionIntroStyle(context),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: StudioSpacing.sm),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: StudioSpacing.xs,
+            runSpacing: StudioSpacing.xs,
             children: [
               FilledButton.tonalIcon(
                 onPressed: _loading ? null : _refresh,
@@ -115,14 +158,16 @@ class _StatusPageState extends State<StatusPage> {
                       : l10n.statusPageRefreshAction,
                 ),
               ),
-              OutlinedButton(
-                onPressed: null,
-                child: Text(l10n.statusPageApiBaseLabel(kApiBaseUrl)),
+              SelectableText(
+                l10n.statusPageApiBaseLabel(kApiBaseUrl),
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
               ),
             ],
           ),
           if (_lastUpdatedAt != null) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: StudioSpacing.xs),
             Text(
               l10n.statusPageLastUpdated(
                 _lastUpdatedAt!.toLocal().toIso8601String(),
@@ -131,11 +176,11 @@ class _StatusPageState extends State<StatusPage> {
             ),
           ],
           if (_loading) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: StudioSpacing.sm),
             const LinearProgressIndicator(),
           ],
           if (_error != null) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: StudioSpacing.sm),
             _StatusBand(
               title: l10n.statusPageRequestFailed,
               tone: _BandTone.error,
@@ -143,10 +188,10 @@ class _StatusPageState extends State<StatusPage> {
             ),
           ],
           if (_healthRoot != null && _healthV1 != null && _ready != null) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: StudioSpacing.sm),
             Wrap(
-              spacing: 12,
-              runSpacing: 12,
+              spacing: StudioSpacing.sm,
+              runSpacing: StudioSpacing.sm,
               children: [
                 _MetricTile(
                   label: '/health',
@@ -167,7 +212,7 @@ class _StatusPageState extends State<StatusPage> {
             ),
           ],
           if (_version != null) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: StudioSpacing.sm),
             _StatusBand(
               title: l10n.statusPageVersionSectionTitle,
               tone: _BandTone.neutral,
@@ -180,7 +225,7 @@ class _StatusPageState extends State<StatusPage> {
             ),
           ],
           if (_queueStats != null) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: StudioSpacing.sm),
             _StatusBand(
               title: l10n.statusPageInternalQueueSectionTitle,
               tone: _BandTone.info,
@@ -229,10 +274,10 @@ class _StatusBand extends StatelessWidget {
       _BandTone.error => colorScheme.onErrorContainer,
     };
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(StudioSpacing.sm),
       decoration: BoxDecoration(
         color: background,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -276,20 +321,26 @@ class _MetricTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
-      width: 220,
-      padding: const EdgeInsets.all(14),
+      width: 228,
+      padding: const EdgeInsets.all(StudioSpacing.sm),
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
+        border: Border.all(color: colorScheme.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(label, style: Theme.of(context).textTheme.labelMedium),
-          const SizedBox(height: 10),
-          Text(value, style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: 4),
-          Text(detail, style: Theme.of(context).textTheme.bodySmall),
+          const SizedBox(height: StudioSpacing.xs),
+          Text(
+            value,
+            style: studioProjectTitleStyle(
+              context,
+            )?.copyWith(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 6),
+          Text(detail, style: studioHintStyle(context)),
         ],
       ),
     );
