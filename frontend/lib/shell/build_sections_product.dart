@@ -28,6 +28,25 @@ extension _HomePageBuildProductSections on _HomePageState {
         suggestedAction: link.suggestedAction,
       );
     }
+    if (widget.shellMode == HomeShellMode.product &&
+        link.projectNumericId != null &&
+        link.projectNumericId! > 0) {
+      switch (link.target) {
+        case TaskCenterDomainDeepLinkTarget.script:
+          context.go(
+            '/projects/${link.projectNumericId}/${StudioStep.script.slug}',
+          );
+          return;
+        case TaskCenterDomainDeepLinkTarget.storyboard:
+          context.go(
+            '/projects/${link.projectNumericId}/${StudioStep.storyboard.slug}',
+          );
+          return;
+        case TaskCenterDomainDeepLinkTarget.publish:
+        case TaskCenterDomainDeepLinkTarget.project:
+          break;
+      }
+    }
     switch (link.target) {
       case TaskCenterDomainDeepLinkTarget.publish:
       case TaskCenterDomainDeepLinkTarget.project:
@@ -46,6 +65,310 @@ extension _HomePageBuildProductSections on _HomePageState {
         );
         break;
     }
+  }
+
+  Future<void> _openProjectStudio(ProjectRow row) async {
+    final token = _session?.accessToken;
+    if (token == null || token.isEmpty) {
+      return;
+    }
+    await StudioRecentProjectsPrefs.record(row.id);
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _productScopedProjectNumericId = row.numericId;
+    });
+    _workspaceInputController.applyProjectScope(
+      row.numericId,
+      projectUuid: row.id,
+      workspaceId: row.workspaceId,
+    );
+    _shellNavigationController.selectProductWorkspacePane(
+      ProductWorkspacePane.projects,
+    );
+    context.go('/projects/${row.numericId}/script');
+  }
+
+  ProjectRow? _studioProjectRow() {
+    final id = widget.studioProjectNumericId ?? _productScopedProjectNumericId;
+    if (id == null) return null;
+    final list = _projectsController.projects;
+    if (list == null) return null;
+    for (final row in list) {
+      if (row.numericId == id) return row;
+    }
+    return null;
+  }
+
+  Future<void> _runStudioAgent(String kind) async {
+    if (!mounted) return;
+    final l10n = resolveAppLocalizationsForErrors(context);
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.studioAgentSubmitted(kind))));
+    switch (kind) {
+      case 'script_rewriter':
+      case 'extractor':
+        _shellNavigationController.selectProductWorkspacePane(
+          ProductWorkspacePane.scriptWorkspace,
+        );
+        break;
+      case 'storyboard_breaker':
+      case 'grid_prompt_generator':
+        _shellNavigationController.selectProductWorkspacePane(
+          ProductWorkspacePane.productionWorkspace,
+        );
+        break;
+      case 'voice_assigner':
+        _shellNavigationController.selectProductWorkspacePane(
+          ProductWorkspacePane.shortVideoSpace,
+        );
+        break;
+    }
+  }
+
+  List<Widget> _buildStudioOverlayWidgets(BuildContext context) {
+    final row = _studioProjectRow();
+    final effectiveProjectUuid =
+        widget.debugStudioProjectUuid ??
+        row?.id ??
+        _workspaceInputController.projectUuidController.text;
+    final effectiveProjectName = widget.debugStudioProjectName ?? row?.name;
+    final resolved = resolveStudioOverlay(
+      overlayMode: widget.studioOverlay,
+      widgetProjectNumericId: widget.studioProjectNumericId,
+      productScopedProjectNumericId: _productScopedProjectNumericId,
+      widgetScriptNumericId: widget.studioScriptNumericId,
+      rowProjectUuid: widget.debugStudioProjectUuid ?? row?.id,
+      workspaceProjectUuid: effectiveProjectUuid,
+      accessToken: _effectiveAccessToken,
+    );
+
+    final token = _effectiveAccessToken ?? '';
+    final l10n = resolveAppLocalizationsForErrors(context);
+
+    return buildStudioOverlayChildren(
+      resolved: resolved,
+      loadingChild: const Center(child: CircularProgressIndicator()),
+      storyboardBuilder: (projectNumericId) => StoryboardStudioPage(
+        projectNumericId: projectNumericId,
+        onOpenProductionWorkspace: () {
+          _shellNavigationController.selectProductWorkspacePane(
+            ProductWorkspacePane.productionWorkspace,
+          );
+        },
+      ),
+      episodeConsoleBuilder: (projectNumericId, scriptNumericId) =>
+          EpisodeConsolePage(
+            projectNumericId: projectNumericId,
+            scriptNumericId: scriptNumericId,
+            deliverChild: _buildShortVideoSpaceSection(),
+            onOpenFullStudio: () => context.go(
+              '/projects/$projectNumericId/${StudioStep.script.slug}',
+            ),
+          ),
+      projectStudioBuilder: (projectNumericId, projectUuid) =>
+          ProjectStudioScope(
+            accessToken: token,
+            projectNumericId: projectNumericId,
+            projectUuid: projectUuid,
+            projectName: effectiveProjectName,
+            initialStep: StudioStep.fromSlug(widget.studioStepSlug),
+            loadSnapshot: widget.debugProjectStudioSnapshotLoader,
+            hostFactory: (readiness, refreshSnapshot) => ProjectStudioHost(
+              projectNumericId: projectNumericId,
+              projectUuid: projectUuid,
+              projectName: effectiveProjectName,
+              accessToken: token,
+              home: readiness.home,
+              assetsOverview: readiness.assetsOverview,
+              onOpenTasks: () {
+                _shellNavigationController.selectProductWorkspacePane(
+                  ProductWorkspacePane.tasks,
+                );
+              },
+              onOpenAssetEditor: (target) =>
+                  _openProjectAssetsWorkbenchFromStudio(
+                    ProjectRow(
+                      id: projectUuid,
+                      numericId: projectNumericId,
+                      name: effectiveProjectName,
+                      intro: null,
+                      projectType: null,
+                      imageModel: null,
+                      imageQuality: null,
+                      videoModel: null,
+                      artStyle: null,
+                      directorManual: null,
+                      mode: null,
+                      videoRatio: null,
+                      createTimeMs: null,
+                      artStylePack: null,
+                      storyStylePack: null,
+                      targetMarket: null,
+                      targetPlatforms: null,
+                      durationStrategy: null,
+                      voiceProfile: null,
+                      subtitleStyle: null,
+                      bgmStrategy: null,
+                      projectAccessMode: 'restricted',
+                      projectAccessRole: 'editor',
+                    ),
+                    target,
+                    onProjectSnapshotChanged: refreshSnapshot,
+                  ),
+              initialStep: StudioStep.fromSlug(widget.studioStepSlug),
+              completedSteps: readiness.completedSteps,
+              onExit: () => context.go('/'),
+              onStepChanged: (_) {},
+              onOpenAgentDrawer: () =>
+                  showStudioAgentDrawer(context, onRunAgent: _runStudioAgent),
+              onRunHarnessAgent: _runStudioAgent,
+              buildStepBody: (step) => _buildProjectStudioStepBody(
+                context,
+                l10n,
+                step,
+                projectNumericId,
+              ),
+            ),
+          ),
+    );
+  }
+
+  Widget _buildProjectStudioStepBody(
+    BuildContext context,
+    AppLocalizations l10n,
+    StudioStep step,
+    int projectNumericId,
+  ) {
+    switch (step) {
+      case StudioStep.script:
+        return _buildAgentWorkspacePane(
+          initialPane: AgentWorkspacePane.script,
+          sectionTitle: l10n.productAgentScriptWorkspaceTitle,
+          sectionDescription: l10n.productAgentScriptWorkspaceSubtitle,
+        );
+      case StudioStep.art:
+        return _buildAgentWorkspacePane(
+          initialPane: AgentWorkspacePane.script,
+          sectionTitle: l10n.studioStepArtTitle,
+          sectionDescription: l10n.studioStepArtBody,
+        );
+      case StudioStep.assets:
+      case StudioStep.storyboard:
+        return _buildAgentWorkspacePane(
+          initialPane: AgentWorkspacePane.production,
+          sectionTitle: l10n.productAgentProductionWorkspaceTitle,
+          sectionDescription: l10n.productAgentProductionWorkspaceSubtitle,
+        );
+      case StudioStep.video:
+        return StudioVideoStepPanel(
+          projectNumericId: projectNumericId,
+          onOpenProduction: () {
+            _shellNavigationController.selectProductWorkspacePane(
+              ProductWorkspacePane.productionWorkspace,
+            );
+          },
+          embeddedChild: _buildAgentWorkspacePane(
+            initialPane: AgentWorkspacePane.production,
+            sectionTitle: l10n.studioStepVideoTitle,
+            sectionDescription: l10n.studioStepVideoBody,
+          ),
+        );
+      case StudioStep.deliver:
+        return DefaultTabController(
+          length: 3,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              TabBar(
+                tabs: <Tab>[
+                  Tab(text: l10n.studioDeliverTabAssembly),
+                  Tab(text: l10n.studioDeliverTabPublish),
+                  Tab(text: l10n.studioDeliverTabQuality),
+                ],
+              ),
+              Expanded(
+                child: TabBarView(
+                  children: <Widget>[
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        StudioMergeDeliverBar(
+                          onMergeAndPreview: () {
+                            _shellNavigationController
+                                .selectProductWorkspacePane(
+                                  ProductWorkspacePane.shortVideoSpace,
+                                );
+                          },
+                        ),
+                        Expanded(child: _buildShortVideoSpaceSection()),
+                      ],
+                    ),
+                    Center(child: Text(l10n.studioDeliverPublishHint)),
+                    Center(child: Text(l10n.studioDeliverQualityHint)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      case StudioStep.quality:
+        return Center(child: Text(l10n.studioDeliverQualityHint));
+    }
+  }
+
+  Widget _buildShortVideoSpaceSection() {
+    return ShortVideoSpaceSection(
+      accessToken: _session?.accessToken,
+      initialProjectUuid:
+          _workspaceInputController.projectUuidController.text.trim().isEmpty
+          ? null
+          : _workspaceInputController.projectUuidController.text.trim(),
+      onOpenProjects: () => context.go('/'),
+      onSyncProjectContext: (projectScope) {
+        setState(() {
+          _productScopedProjectNumericId = projectScope?.projectNumericId;
+        });
+        if (projectScope == null) {
+          _workspaceInputController.projectIdController.clear();
+          _workspaceInputController.projectUuidController.clear();
+          _workspaceInputController.workspaceUuidController.clear();
+          _workspaceInputController.clearScriptScope();
+          return;
+        }
+        _workspaceInputController.applyProjectScope(
+          projectScope.projectNumericId,
+          projectUuid: projectScope.projectUuid,
+          workspaceId: projectScope.workspaceId,
+        );
+        _workspaceInputController.clearScriptScope();
+      },
+      onOpenScriptWorkspace: () {
+        _shellNavigationController.selectProductWorkspacePane(
+          ProductWorkspacePane.scriptWorkspace,
+        );
+      },
+      onOpenProductionWorkspace: () {
+        _shellNavigationController.selectProductWorkspacePane(
+          ProductWorkspacePane.productionWorkspace,
+        );
+      },
+      onOpenTasks: () {
+        _shellNavigationController.selectProductWorkspacePane(
+          ProductWorkspacePane.tasks,
+        );
+      },
+      onOpenQuality: () {
+        _selectProductPaneWithGate(
+          ProductWorkspacePane.quality,
+          disabledReason: resolveAppLocalizationsForErrors(
+            context,
+          ).productPaneDisabledQuality,
+        );
+      },
+    );
   }
 
   Future<void> _openComplianceProductTarget(
@@ -149,6 +472,22 @@ extension _HomePageBuildProductSections on _HomePageState {
     );
   }
 
+  Widget _buildProductHarnessRedirectHint(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final projectId = _resolvedProductNumericIdForPipeline();
+    return Center(
+      child: StudioEmptyState(
+        title: l10n.studioProductHarnessRedirectTitle,
+        subtitle: l10n.studioProductHarnessRedirectSubtitle,
+        icon: Icons.theaters_outlined,
+        actionLabel: projectId != null ? l10n.studioEnterStudio : null,
+        onAction: projectId != null
+            ? () => context.go('/projects/$projectId/${StudioStep.script.slug}')
+            : null,
+      ),
+    );
+  }
+
   Widget _buildAgentWorkspacePane({
     required AgentWorkspacePane initialPane,
     required String sectionTitle,
@@ -248,80 +587,44 @@ extension _HomePageBuildProductSections on _HomePageState {
   }
 
   List<Widget> _buildProductSections(BuildContext context) {
-    final l10n = resolveAppLocalizationsForErrors(context);
     return <Widget>[
       _buildProductPaneSelector(context),
+      ..._buildActiveProductPaneWidgets(context),
+    ];
+  }
+
+  List<Widget> _buildActiveProductPaneWidgets(BuildContext context) {
+    final l10n = resolveAppLocalizationsForErrors(context);
+    return <Widget>[
       if (_shellNavigationController.productWorkspacePane ==
           ProductWorkspacePane.helpHub)
         _buildFeatureGatedPane(
           enabled: _platformConfig.helpHubEnabled,
           title: l10n.productNavHelp,
           reason: l10n.productPaneDisabledHelpHub,
-          child: _HelpHubSection(accessToken: _session?.accessToken),
+          child: _HelpHubSection(
+            accessToken: _session?.accessToken,
+            debugWebhooks: widget.debugHelpHubWebhooks,
+            debugLatestCreatedWebhook: widget.debugHelpHubLatestCreatedWebhook,
+            debugBillingEventsPage: widget.debugHelpHubBillingEventsPage,
+            debugWebhookDeliveries: widget.debugHelpHubWebhookDeliveries,
+            debugWebhookLastTestResults:
+                widget.debugHelpHubWebhookLastTestResults,
+          ),
         ),
       if (_shellNavigationController.productWorkspacePane ==
           ProductWorkspacePane.shortVideoSpace)
-        ShortVideoSpaceSection(
-          accessToken: _session?.accessToken,
-          initialProjectUuid:
-              _workspaceInputController.projectUuidController.text
-                  .trim()
-                  .isEmpty
-              ? null
-              : _workspaceInputController.projectUuidController.text.trim(),
-          onOpenProjects: () {
-            _shellNavigationController.selectProductWorkspacePane(
-              ProductWorkspacePane.projects,
-            );
-          },
-          onSyncProjectContext: (projectScope) {
-            setState(() {
-              _productScopedProjectNumericId = projectScope?.projectNumericId;
-            });
-            if (projectScope == null) {
-              _workspaceInputController.projectIdController.clear();
-              _workspaceInputController.projectUuidController.clear();
-              _workspaceInputController.workspaceUuidController.clear();
-              _workspaceInputController.clearScriptScope();
-              return;
-            }
-            _workspaceInputController.applyProjectScope(
-              projectScope.projectNumericId,
-              projectUuid: projectScope.projectUuid,
-              workspaceId: projectScope.workspaceId,
-            );
-            _workspaceInputController.clearScriptScope();
-          },
-          onOpenScriptWorkspace: () {
-            _shellNavigationController.selectProductWorkspacePane(
-              ProductWorkspacePane.scriptWorkspace,
-            );
-          },
-          onOpenProductionWorkspace: () {
-            _shellNavigationController.selectProductWorkspacePane(
-              ProductWorkspacePane.productionWorkspace,
-            );
-          },
-          onOpenTasks: () {
-            _shellNavigationController.selectProductWorkspacePane(
-              ProductWorkspacePane.tasks,
-            );
-          },
-          onOpenQuality: () {
-            _selectProductPaneWithGate(
-              ProductWorkspacePane.quality,
-              disabledReason: l10n.productPaneDisabledQuality,
-            );
-          },
-        ),
+        _buildShortVideoSpaceSection(),
       if (_shellNavigationController.productWorkspacePane ==
           ProductWorkspacePane.projects)
         ProjectsSection(
           accessToken: _session?.accessToken,
           controller: _projectsController,
+          productPresentation: widget.shellMode == HomeShellMode.product,
           currentWorkspaceName: _sessionMe?.currentWorkspace?.name,
           currentWorkspaceType: _sessionMe?.currentWorkspace?.workspaceType,
           onOpenProjectDetail: _openProjectDetail,
+          onOpenProjectStudio: _openProjectStudio,
           onOpenTeamWorkspaces: () {
             _shellNavigationController.selectProductWorkspacePane(
               ProductWorkspacePane.teamWorkspaces,
@@ -330,10 +633,19 @@ extension _HomePageBuildProductSections on _HomePageState {
         ),
       if (_shellNavigationController.productWorkspacePane ==
           ProductWorkspacePane.account)
-        AccountSection(
-          controller: _accountController,
-          onAccountDeleted: _handleAccountDeleted,
-        ),
+        widget.shellMode == HomeShellMode.product
+            ? SettingsHubPage(
+                accountController: _accountController,
+                apiKeysController: _apiKeysController,
+                accessToken: _session?.accessToken,
+                onAccountDeleted: _handleAccountDeleted,
+                onWorkspaceContextChanged: _handleWorkspaceContextChanged,
+                currentWorkspaceId: _sessionMe?.currentWorkspace?.id,
+              )
+            : AccountSection(
+                controller: _accountController,
+                onAccountDeleted: _handleAccountDeleted,
+              ),
       if (_shellNavigationController.productWorkspacePane ==
           ProductWorkspacePane.apiKeys)
         ApiKeysSection(controller: _apiKeysController),
@@ -342,6 +654,7 @@ extension _HomePageBuildProductSections on _HomePageState {
         NotificationsSection(
           controller: _notificationsController,
           onOpenNotification: _openNotificationLink,
+          studioPresentation: widget.shellMode == HomeShellMode.product,
         ),
       if (_shellNavigationController.productWorkspacePane ==
           ProductWorkspacePane.contentCompliance)
@@ -373,18 +686,23 @@ extension _HomePageBuildProductSections on _HomePageState {
         ),
       if (_shellNavigationController.productWorkspacePane ==
           ProductWorkspacePane.scriptWorkspace)
-        _buildAgentWorkspacePane(
-          initialPane: AgentWorkspacePane.script,
-          sectionTitle: l10n.productAgentScriptWorkspaceTitle,
-          sectionDescription: l10n.productAgentScriptWorkspaceSubtitle,
-        ),
+        widget.shellMode == HomeShellMode.product
+            ? _buildProductHarnessRedirectHint(context)
+            : _buildAgentWorkspacePane(
+                initialPane: AgentWorkspacePane.script,
+                sectionTitle: l10n.productAgentScriptWorkspaceTitle,
+                sectionDescription: l10n.productAgentScriptWorkspaceSubtitle,
+              ),
       if (_shellNavigationController.productWorkspacePane ==
           ProductWorkspacePane.productionWorkspace)
-        _buildAgentWorkspacePane(
-          initialPane: AgentWorkspacePane.production,
-          sectionTitle: l10n.productAgentProductionWorkspaceTitle,
-          sectionDescription: l10n.productAgentProductionWorkspaceSubtitle,
-        ),
+        widget.shellMode == HomeShellMode.product
+            ? _buildProductHarnessRedirectHint(context)
+            : _buildAgentWorkspacePane(
+                initialPane: AgentWorkspacePane.production,
+                sectionTitle: l10n.productAgentProductionWorkspaceTitle,
+                sectionDescription:
+                    l10n.productAgentProductionWorkspaceSubtitle,
+              ),
       if (_shellNavigationController.productWorkspacePane ==
           ProductWorkspacePane.workspaceActivity)
         _buildFeatureGatedPane(
@@ -408,6 +726,7 @@ extension _HomePageBuildProductSections on _HomePageState {
       if (_shellNavigationController.productWorkspacePane ==
           ProductWorkspacePane.tasks)
         TaskCenterSection(
+          studioPresentation: widget.shellMode == HomeShellMode.product,
           accessToken: _session?.accessToken,
           initialProjectNumericId: _productScopedProjectNumericId,
           initialProjectUuid:
@@ -428,11 +747,20 @@ extension _HomePageBuildProductSections on _HomePageState {
               projectUuid: link.projectUuid,
               workspaceId: link.workspaceId,
             );
-            _shellNavigationController.selectProductWorkspacePane(
-              link.openProductionWorkspace
-                  ? ProductWorkspacePane.productionWorkspace
-                  : ProductWorkspacePane.scriptWorkspace,
-            );
+            if (widget.shellMode == HomeShellMode.product &&
+                link.projectNumericId != null &&
+                link.projectNumericId! > 0) {
+              final step = link.openProductionWorkspace
+                  ? StudioStep.storyboard.slug
+                  : StudioStep.script.slug;
+              context.go('/projects/${link.projectNumericId}/$step');
+            } else {
+              _shellNavigationController.selectProductWorkspacePane(
+                link.openProductionWorkspace
+                    ? ProductWorkspacePane.productionWorkspace
+                    : ProductWorkspacePane.scriptWorkspace,
+              );
+            }
           },
           onNavigateDomainDeepLink: (TaskCenterDomainDeepLink link) {
             _applyDomainDeepLink(link);
@@ -468,7 +796,10 @@ extension _HomePageBuildProductSections on _HomePageState {
           enabled: _platformConfig.jobsPaneEnabled,
           title: l10n.productNavJobs,
           reason: l10n.productPaneDisabledJobs,
-          child: JobsSection(controller: _jobsController),
+          child: JobsSection(
+            controller: _jobsController,
+            studioPresentation: widget.shellMode == HomeShellMode.product,
+          ),
         ),
       if (_shellNavigationController.productWorkspacePane ==
           ProductWorkspacePane.quality)
@@ -487,6 +818,7 @@ extension _HomePageBuildProductSections on _HomePageState {
                 ? null
                 : _workspaceInputController.projectUuidController.text.trim(),
             platformConfig: _platformConfig,
+            studioPresentation: widget.shellMode == HomeShellMode.product,
             onNavigateDomainDeepLink: (TaskCenterDomainDeepLink link) {
               _applyDomainDeepLink(link);
             },
@@ -721,7 +1053,10 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
   void initState() {
     super.initState();
     _userDraft = widget.initialConfig;
-    unawaited(_load());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      unawaited(_load());
+    });
   }
 
   @override
@@ -1405,9 +1740,22 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
 }
 
 class _HelpHubSection extends StatefulWidget {
-  const _HelpHubSection({required this.accessToken});
+  const _HelpHubSection({
+    required this.accessToken,
+    this.debugWebhooks,
+    this.debugLatestCreatedWebhook,
+    this.debugBillingEventsPage,
+    this.debugWebhookDeliveries,
+    this.debugWebhookLastTestResults,
+  });
 
   final String? accessToken;
+  final OutboundWebhookListResponseV1? debugWebhooks;
+  final OutboundWebhookCreatedResponseV1? debugLatestCreatedWebhook;
+  final BillingWebhookEventsResponseV1? debugBillingEventsPage;
+  final Map<String, OutboundWebhookDeliveryListResponseV1>?
+  debugWebhookDeliveries;
+  final Map<String, OutboundWebhookTestResponseV1>? debugWebhookLastTestResults;
 
   @override
   State<_HelpHubSection> createState() => _HelpHubSectionState();
@@ -1533,8 +1881,23 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
   void initState() {
     super.initState();
     unawaited(_load());
-    unawaited(_loadWebhooks());
-    unawaited(_loadBillingEvents());
+    if (widget.debugWebhooks != null) {
+      _webhooks = widget.debugWebhooks;
+      _latestCreatedWebhook = widget.debugLatestCreatedWebhook;
+      _webhookDeliveries.addAll(widget.debugWebhookDeliveries ?? const {});
+      _webhookLastTestResultById.addAll(
+        widget.debugWebhookLastTestResults ?? const {},
+      );
+      _syncWebhookWorkspaceDraftControllers();
+    } else {
+      unawaited(_loadWebhooks());
+    }
+    if (widget.debugBillingEventsPage != null) {
+      _billingEventsPage = widget.debugBillingEventsPage;
+      _billingEvents.addAll(widget.debugBillingEventsPage!.items);
+    } else {
+      unawaited(_loadBillingEvents());
+    }
   }
 
   @override
@@ -2879,61 +3242,65 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
               (item) => Card(
                 child: Padding(
                   padding: const EdgeInsets.all(12),
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              item.title,
-                              style: Theme.of(context).textTheme.titleSmall,
-                            ),
-                            const SizedBox(height: 4),
-                            Chip(
-                              label: Text(
-                                _helpHubCategoryLabelForSlug(
-                                  _helpHubCategorySlug(item),
-                                  l10n,
-                                ),
-                              ),
-                              visualDensity: VisualDensity.compact,
-                            ),
-                            const SizedBox(height: 4),
-                            SelectableText(item.url),
-                          ],
+                      Text(
+                        item.title,
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      const SizedBox(height: 4),
+                      Chip(
+                        label: Text(
+                          _helpHubCategoryLabelForSlug(
+                            _helpHubCategorySlug(item),
+                            l10n,
+                          ),
                         ),
+                        visualDensity: VisualDensity.compact,
                       ),
-                      const SizedBox(width: 8),
-                      IconButton(
-                        tooltip: l10n.helpHubCopyLinkTooltip,
-                        onPressed: () async {
-                          await Clipboard.setData(
-                            ClipboardData(text: item.url),
-                          );
-                          if (!context.mounted) {
-                            return;
-                          }
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(l10n.helpHubCopied)),
-                          );
-                        },
-                        icon: const Icon(Icons.copy),
-                      ),
-                      IconButton(
-                        tooltip: l10n.helpHubCopyTitleUrlTooltip,
-                        onPressed: () async {
-                          await Clipboard.setData(
-                            ClipboardData(text: '${item.title}\n${item.url}'),
-                          );
-                          if (!context.mounted) {
-                            return;
-                          }
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(l10n.helpHubCopiedHandoff)),
-                          );
-                        },
-                        icon: const Icon(Icons.copy_all_outlined),
+                      const SizedBox(height: 4),
+                      SelectableText(item.url),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          IconButton(
+                            tooltip: l10n.helpHubCopyLinkTooltip,
+                            onPressed: () async {
+                              await Clipboard.setData(
+                                ClipboardData(text: item.url),
+                              );
+                              if (!context.mounted) {
+                                return;
+                              }
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(l10n.helpHubCopied)),
+                              );
+                            },
+                            icon: const Icon(Icons.copy),
+                          ),
+                          IconButton(
+                            tooltip: l10n.helpHubCopyTitleUrlTooltip,
+                            onPressed: () async {
+                              await Clipboard.setData(
+                                ClipboardData(
+                                  text: '${item.title}\n${item.url}',
+                                ),
+                              );
+                              if (!context.mounted) {
+                                return;
+                              }
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(l10n.helpHubCopiedHandoff),
+                                ),
+                              );
+                            },
+                            icon: const Icon(Icons.copy_all_outlined),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -3141,174 +3508,63 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                     : null,
                 child: Padding(
                   padding: const EdgeInsets.all(12),
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
+                      Text(
+                        wh.url,
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      const SizedBox(height: 4),
+                      if (_latestCreatedWebhook?.id == wh.id)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Chip(
+                            label: Text(l10n.opsWhChipLatestCreated),
+                            visualDensity: VisualDensity.compact,
+                          ),
+                        ),
+                      Text(l10n.opsWhFieldId(wh.id)),
+                      Text(l10n.opsWhFieldCreatedAt(wh.createdAt)),
+                      Text(
+                        l10n.opsWhFieldUpdatedAt(wh.updatedAt ?? wh.createdAt),
+                      ),
+                      if (!wh.enabled)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Chip(
+                            label: Text(l10n.opsWhChipDisabled),
+                            visualDensity: VisualDensity.compact,
+                          ),
+                        ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 6),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              wh.url,
-                              style: Theme.of(context).textTheme.titleSmall,
+                              l10n.opsWhSubscribeHeading,
+                              style: Theme.of(context).textTheme.labelMedium,
                             ),
                             const SizedBox(height: 4),
-                            if (_latestCreatedWebhook?.id == wh.id)
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 4),
-                                child: Chip(
-                                  label: Text(l10n.opsWhChipLatestCreated),
-                                  visualDensity: VisualDensity.compact,
-                                ),
+                            OutboundWebhookEventChips(
+                              selected: outboundWebhookEffectiveSelection(
+                                wh.eventTypes,
                               ),
-                            Text(l10n.opsWhFieldId(wh.id)),
-                            Text(l10n.opsWhFieldCreatedAt(wh.createdAt)),
-                            Text(
-                              l10n.opsWhFieldUpdatedAt(
-                                wh.updatedAt ?? wh.createdAt,
-                              ),
+                              enabled:
+                                  !_loadingWebhooks && _webhookBusyId == null,
+                              onSelectionChanged: (next) {
+                                unawaited(
+                                  _patchWebhookEventSubscription(wh, next),
+                                );
+                              },
                             ),
-                            if (!wh.enabled)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 4),
-                                child: Chip(
-                                  label: Text(l10n.opsWhChipDisabled),
-                                  visualDensity: VisualDensity.compact,
-                                ),
-                              ),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 6),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    l10n.opsWhSubscribeHeading,
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.labelMedium,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  OutboundWebhookEventChips(
-                                    selected: outboundWebhookEffectiveSelection(
-                                      wh.eventTypes,
-                                    ),
-                                    enabled:
-                                        !_loadingWebhooks &&
-                                        _webhookBusyId == null,
-                                    onSelectionChanged: (next) {
-                                      unawaited(
-                                        _patchWebhookEventSubscription(
-                                          wh,
-                                          next,
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                  if (wh.eventTypes.isNotEmpty)
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 4),
-                                      child: Text(
-                                        l10n.opsWhApiEventTypes(
-                                          wh.eventTypes.join(', '),
-                                        ),
-                                        style: Theme.of(
-                                          context,
-                                        ).textTheme.bodySmall,
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 8),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    l10n.opsWhScopeHeading,
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.labelMedium,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  TextField(
-                                    controller:
-                                        _webhookWorkspaceDraftControllers[wh
-                                            .id],
-                                    decoration: InputDecoration(
-                                      hintText: l10n.opsWhScopeFieldHint,
-                                      isDense: true,
-                                    ),
-                                    enabled:
-                                        !_loadingWebhooks &&
-                                        _webhookBusyId == null,
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Wrap(
-                                    spacing: 8,
-                                    runSpacing: 8,
-                                    children: [
-                                      OutlinedButton(
-                                        onPressed:
-                                            _loadingWebhooks ||
-                                                _webhookBusyId != null
-                                            ? null
-                                            : () => _patchWebhookWorkspaceScope(
-                                                wh.id,
-                                              ),
-                                        child: Text(
-                                          _webhookBusyId == wh.id
-                                              ? l10n.opsWhSavingScope
-                                              : l10n.opsWhSaveScope,
-                                        ),
-                                      ),
-                                      TextButton(
-                                        onPressed:
-                                            _loadingWebhooks ||
-                                                _webhookBusyId != null
-                                            ? null
-                                            : () {
-                                                _webhookWorkspaceDraftControllers[wh
-                                                        .id]
-                                                    ?.clear();
-                                              },
-                                        child: Text(l10n.opsWhClearInput),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                            if (_webhookDeliveries[wh.id] != null) ...[
-                              const SizedBox(height: 8),
-                              Text(
-                                l10n.opsWhRecentDeliveries,
-                                style: Theme.of(context).textTheme.labelLarge,
-                              ),
-                              ..._webhookDeliveries[wh.id]!.items
-                                  .take(6)
-                                  .map(
-                                    (d) => ListTile(
-                                      dense: true,
-                                      contentPadding: EdgeInsets.zero,
-                                      title: Text(
-                                        '${d.eventType} · ${d.status} · HTTP ${d.httpStatus ?? '-'}',
-                                      ),
-                                      subtitle: SelectableText(
-                                        '${d.createdAt}\n${d.error ?? ''}',
-                                        style: Theme.of(
-                                          context,
-                                        ).textTheme.bodySmall,
-                                      ),
-                                    ),
-                                  ),
-                            ],
-                            if (_webhookLastTestResultById[wh.id] != null)
+                            if (wh.eventTypes.isNotEmpty)
                               Padding(
                                 padding: const EdgeInsets.only(top: 4),
                                 child: Text(
-                                  _formatWebhookTestResult(
-                                    l10n,
-                                    _webhookLastTestResultById[wh.id]!,
+                                  l10n.opsWhApiEventTypes(
+                                    wh.eventTypes.join(', '),
                                   ),
                                   style: Theme.of(context).textTheme.bodySmall,
                                 ),
@@ -3316,54 +3572,150 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                           ],
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      IconButton(
-                        tooltip: l10n.opsWhTooltipCopyUrl,
-                        onPressed: () async {
-                          await Clipboard.setData(ClipboardData(text: wh.url));
-                          if (!context.mounted) {
-                            return;
-                          }
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(l10n.opsWhUrlCopiedSnack)),
-                          );
-                        },
-                        icon: const Icon(Icons.copy_outlined),
-                      ),
-                      OutlinedButton(
-                        onPressed: _loadingWebhooks || _webhookBusyId != null
-                            ? null
-                            : () => _testWebhook(wh.id),
-                        child: Text(
-                          _webhookBusyId == wh.id
-                              ? l10n.opsWhBusy
-                              : l10n.opsWhTestDeliver,
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.opsWhScopeHeading,
+                              style: Theme.of(context).textTheme.labelMedium,
+                            ),
+                            const SizedBox(height: 4),
+                            TextField(
+                              controller:
+                                  _webhookWorkspaceDraftControllers[wh.id],
+                              decoration: InputDecoration(
+                                hintText: l10n.opsWhScopeFieldHint,
+                                isDense: true,
+                              ),
+                              enabled:
+                                  !_loadingWebhooks && _webhookBusyId == null,
+                            ),
+                            const SizedBox(height: 6),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: [
+                                OutlinedButton(
+                                  onPressed:
+                                      _loadingWebhooks || _webhookBusyId != null
+                                      ? null
+                                      : () =>
+                                            _patchWebhookWorkspaceScope(wh.id),
+                                  child: Text(
+                                    _webhookBusyId == wh.id
+                                        ? l10n.opsWhSavingScope
+                                        : l10n.opsWhSaveScope,
+                                  ),
+                                ),
+                                TextButton(
+                                  onPressed:
+                                      _loadingWebhooks || _webhookBusyId != null
+                                      ? null
+                                      : () {
+                                          _webhookWorkspaceDraftControllers[wh
+                                                  .id]
+                                              ?.clear();
+                                        },
+                                  child: Text(l10n.opsWhClearInput),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      OutlinedButton(
-                        onPressed:
-                            _loadingWebhooks ||
-                                _webhookBusyId != null ||
-                                _loadingDeliveriesId != null
-                            ? null
-                            : () => _loadWebhookDeliveries(wh.id),
-                        child: Text(
-                          _loadingDeliveriesId == wh.id
-                              ? l10n.opsWhLoading
-                              : l10n.opsWhDeliveryLog,
+                      if (_webhookDeliveries[wh.id] != null) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          l10n.opsWhRecentDeliveries,
+                          style: Theme.of(context).textTheme.labelLarge,
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      OutlinedButton(
-                        onPressed: _loadingWebhooks || _webhookBusyId != null
-                            ? null
-                            : () => _deleteWebhook(wh.id),
-                        child: Text(
-                          _webhookBusyId == wh.id
-                              ? l10n.opsWhBusy
-                              : l10n.opsWhDelete,
+                        ..._webhookDeliveries[wh.id]!.items
+                            .take(6)
+                            .map(
+                              (d) => ListTile(
+                                dense: true,
+                                contentPadding: EdgeInsets.zero,
+                                title: Text(
+                                  '${d.eventType} · ${d.status} · HTTP ${d.httpStatus ?? '-'}',
+                                ),
+                                subtitle: SelectableText(
+                                  '${d.createdAt}\n${d.error ?? ''}',
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                              ),
+                            ),
+                      ],
+                      if (_webhookLastTestResultById[wh.id] != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            _formatWebhookTestResult(
+                              l10n,
+                              _webhookLastTestResultById[wh.id]!,
+                            ),
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
                         ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          IconButton(
+                            tooltip: l10n.opsWhTooltipCopyUrl,
+                            onPressed: () async {
+                              await Clipboard.setData(
+                                ClipboardData(text: wh.url),
+                              );
+                              if (!context.mounted) {
+                                return;
+                              }
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(l10n.opsWhUrlCopiedSnack),
+                                ),
+                              );
+                            },
+                            icon: const Icon(Icons.copy_outlined),
+                          ),
+                          OutlinedButton(
+                            onPressed:
+                                _loadingWebhooks || _webhookBusyId != null
+                                ? null
+                                : () => _testWebhook(wh.id),
+                            child: Text(
+                              _webhookBusyId == wh.id
+                                  ? l10n.opsWhBusy
+                                  : l10n.opsWhTestDeliver,
+                            ),
+                          ),
+                          OutlinedButton(
+                            onPressed:
+                                _loadingWebhooks ||
+                                    _webhookBusyId != null ||
+                                    _loadingDeliveriesId != null
+                                ? null
+                                : () => _loadWebhookDeliveries(wh.id),
+                            child: Text(
+                              _loadingDeliveriesId == wh.id
+                                  ? l10n.opsWhLoading
+                                  : l10n.opsWhDeliveryLog,
+                            ),
+                          ),
+                          OutlinedButton(
+                            onPressed:
+                                _loadingWebhooks || _webhookBusyId != null
+                                ? null
+                                : () => _deleteWebhook(wh.id),
+                            child: Text(
+                              _webhookBusyId == wh.id
+                                  ? l10n.opsWhBusy
+                                  : l10n.opsWhDelete,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -3371,177 +3723,194 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
               ),
             ),
           const SizedBox(height: 16),
-          Text(
-            l10n.billingAuditTitle,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              SizedBox(
-                width: 180,
-                child: DropdownButtonFormField<String>(
-                  initialValue: _billingProvider,
-                  decoration: InputDecoration(
-                    labelText: l10n.billingAuditProviderLabel,
+          Builder(
+            builder: (context) {
+              final viewportWidth = MediaQuery.sizeOf(context).width;
+              final billingDropdownWidth = viewportWidth < 1320 ? 220.0 : 240.0;
+              final billingDateFieldWidth = viewportWidth < 1320
+                  ? 240.0
+                  : 280.0;
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.billingAuditTitle,
+                    style: Theme.of(context).textTheme.titleMedium,
                   ),
-                  items: [
-                    DropdownMenuItem(
-                      value: '',
-                      child: Text(l10n.billingAuditAll),
-                    ),
-                    DropdownMenuItem(
-                      value: 'stripe',
-                      child: Text(l10n.billingAuditProviderStripe),
-                    ),
-                    DropdownMenuItem(
-                      value: 'alipay',
-                      child: Text(l10n.billingAuditProviderAlipay),
-                    ),
-                    DropdownMenuItem(
-                      value: 'paddle',
-                      child: Text(l10n.billingAuditProviderPaddle),
-                    ),
-                  ],
-                  onChanged: (value) {
-                    setState(() {
-                      _billingProvider = value ?? '';
-                    });
-                  },
-                ),
-              ),
-              SizedBox(
-                width: 180,
-                child: DropdownButtonFormField<String>(
-                  initialValue: _billingSort,
-                  decoration: InputDecoration(
-                    labelText: l10n.billingAuditSortLabel,
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      SizedBox(
+                        width: billingDropdownWidth,
+                        child: DropdownButtonFormField<String>(
+                          isExpanded: true,
+                          initialValue: _billingProvider,
+                          decoration: InputDecoration(
+                            labelText: l10n.billingAuditProviderLabel,
+                          ),
+                          items: [
+                            DropdownMenuItem(
+                              value: '',
+                              child: Text(l10n.billingAuditAll),
+                            ),
+                            DropdownMenuItem(
+                              value: 'stripe',
+                              child: Text(l10n.billingAuditProviderStripe),
+                            ),
+                            DropdownMenuItem(
+                              value: 'alipay',
+                              child: Text(l10n.billingAuditProviderAlipay),
+                            ),
+                            DropdownMenuItem(
+                              value: 'paddle',
+                              child: Text(l10n.billingAuditProviderPaddle),
+                            ),
+                          ],
+                          onChanged: (value) {
+                            setState(() {
+                              _billingProvider = value ?? '';
+                            });
+                          },
+                        ),
+                      ),
+                      SizedBox(
+                        width: billingDropdownWidth,
+                        child: DropdownButtonFormField<String>(
+                          isExpanded: true,
+                          initialValue: _billingSort,
+                          decoration: InputDecoration(
+                            labelText: l10n.billingAuditSortLabel,
+                          ),
+                          items: [
+                            DropdownMenuItem(
+                              value: 'id_desc',
+                              child: Text(l10n.billingAuditSortNewest),
+                            ),
+                            DropdownMenuItem(
+                              value: 'id_asc',
+                              child: Text(l10n.billingAuditSortOldest),
+                            ),
+                          ],
+                          onChanged: (value) {
+                            setState(() {
+                              _billingSort = value ?? 'id_desc';
+                            });
+                          },
+                        ),
+                      ),
+                      FilterChip(
+                        label: Text(l10n.billingAuditOnlyInformational),
+                        selected: _billingInformationalOnly == true,
+                        onSelected: (selected) {
+                          setState(() {
+                            _billingInformationalOnly = selected ? true : null;
+                          });
+                        },
+                      ),
+                      FilterChip(
+                        label: Text(l10n.billingAuditOnlyStateful),
+                        selected: _billingInformationalOnly == false,
+                        onSelected: (selected) {
+                          setState(() {
+                            _billingInformationalOnly = selected ? false : null;
+                          });
+                        },
+                      ),
+                    ],
                   ),
-                  items: [
-                    DropdownMenuItem(
-                      value: 'id_desc',
-                      child: Text(l10n.billingAuditSortNewest),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _billingEventTypeController,
+                    decoration: InputDecoration(
+                      labelText: l10n.billingAuditEventTypeLabel,
+                      hintText: l10n.billingAuditEventTypeHint,
                     ),
-                    DropdownMenuItem(
-                      value: 'id_asc',
-                      child: Text(l10n.billingAuditSortOldest),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _billingProviderEventIdController,
+                    decoration: InputDecoration(
+                      labelText: l10n.billingAuditProviderEventIdLabel,
+                      hintText: l10n.billingAuditProviderEventIdHint,
                     ),
-                  ],
-                  onChanged: (value) {
-                    setState(() {
-                      _billingSort = value ?? 'id_desc';
-                    });
-                  },
-                ),
-              ),
-              FilterChip(
-                label: Text(l10n.billingAuditOnlyInformational),
-                selected: _billingInformationalOnly == true,
-                onSelected: (selected) {
-                  setState(() {
-                    _billingInformationalOnly = selected ? true : null;
-                  });
-                },
-              ),
-              FilterChip(
-                label: Text(l10n.billingAuditOnlyStateful),
-                selected: _billingInformationalOnly == false,
-                onSelected: (selected) {
-                  setState(() {
-                    _billingInformationalOnly = selected ? false : null;
-                  });
-                },
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _billingEventTypeController,
-            decoration: InputDecoration(
-              labelText: l10n.billingAuditEventTypeLabel,
-              hintText: l10n.billingAuditEventTypeHint,
-            ),
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _billingProviderEventIdController,
-            decoration: InputDecoration(
-              labelText: l10n.billingAuditProviderEventIdLabel,
-              hintText: l10n.billingAuditProviderEventIdHint,
-            ),
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _billingRawEventIdController,
-            decoration: InputDecoration(
-              labelText: l10n.billingAuditRawEventIdLabel,
-              hintText: l10n.billingAuditRawEventIdHint,
-            ),
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _billingProviderEventIdPrefixController,
-            decoration: InputDecoration(
-              labelText: l10n.billingAuditProviderEventIdPrefixLabel,
-              hintText: l10n.billingAuditProviderPrefixHint,
-            ),
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _billingRawEventIdPrefixController,
-            decoration: InputDecoration(
-              labelText: l10n.billingAuditRawEventIdPrefixLabel,
-              hintText: l10n.billingAuditRawPrefixHint,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              SizedBox(
-                width: 280,
-                child: TextField(
-                  controller: _billingEventCreatedFromController,
-                  decoration: InputDecoration(
-                    labelText: l10n.billingAuditEventCreatedFromLabel,
-                    hintText: l10n.billingAuditEventCreatedFromHint,
                   ),
-                ),
-              ),
-              SizedBox(
-                width: 280,
-                child: TextField(
-                  controller: _billingEventCreatedToController,
-                  decoration: InputDecoration(
-                    labelText: l10n.billingAuditEventCreatedToLabel,
-                    hintText: l10n.billingAuditEventCreatedToHint,
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _billingRawEventIdController,
+                    decoration: InputDecoration(
+                      labelText: l10n.billingAuditRawEventIdLabel,
+                      hintText: l10n.billingAuditRawEventIdHint,
+                    ),
                   ),
-                ),
-              ),
-              SizedBox(
-                width: 280,
-                child: TextField(
-                  controller: _billingCreatedFromController,
-                  decoration: InputDecoration(
-                    labelText: l10n.billingAuditCreatedFromLabel,
-                    hintText: l10n.billingAuditEventCreatedFromHint,
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _billingProviderEventIdPrefixController,
+                    decoration: InputDecoration(
+                      labelText: l10n.billingAuditProviderEventIdPrefixLabel,
+                      hintText: l10n.billingAuditProviderPrefixHint,
+                    ),
                   ),
-                ),
-              ),
-              SizedBox(
-                width: 280,
-                child: TextField(
-                  controller: _billingCreatedToController,
-                  decoration: InputDecoration(
-                    labelText: l10n.billingAuditCreatedToLabel,
-                    hintText: l10n.billingAuditEventCreatedToHint,
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _billingRawEventIdPrefixController,
+                    decoration: InputDecoration(
+                      labelText: l10n.billingAuditRawEventIdPrefixLabel,
+                      hintText: l10n.billingAuditRawPrefixHint,
+                    ),
                   ),
-                ),
-              ),
-            ],
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      SizedBox(
+                        width: billingDateFieldWidth,
+                        child: TextField(
+                          controller: _billingEventCreatedFromController,
+                          decoration: InputDecoration(
+                            labelText: l10n.billingAuditEventCreatedFromLabel,
+                            hintText: l10n.billingAuditEventCreatedFromHint,
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        width: billingDateFieldWidth,
+                        child: TextField(
+                          controller: _billingEventCreatedToController,
+                          decoration: InputDecoration(
+                            labelText: l10n.billingAuditEventCreatedToLabel,
+                            hintText: l10n.billingAuditEventCreatedToHint,
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        width: billingDateFieldWidth,
+                        child: TextField(
+                          controller: _billingCreatedFromController,
+                          decoration: InputDecoration(
+                            labelText: l10n.billingAuditCreatedFromLabel,
+                            hintText: l10n.billingAuditEventCreatedFromHint,
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        width: billingDateFieldWidth,
+                        child: TextField(
+                          controller: _billingCreatedToController,
+                          decoration: InputDecoration(
+                            labelText: l10n.billingAuditCreatedToLabel,
+                            hintText: l10n.billingAuditEventCreatedToHint,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            },
           ),
           const SizedBox(height: 8),
           Wrap(

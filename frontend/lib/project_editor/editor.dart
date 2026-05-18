@@ -1,7 +1,247 @@
 part of '../../home_page.dart';
 
 extension _HomePageProjectEditor on _HomePageState {
-  Future<void> _openProjectDetail(ProjectRow p) async {
+  String? _buildAssetEditorFocusNotice(ProjectStudioAssetEditorTarget? target) {
+    if (target == null) {
+      return null;
+    }
+    final notice = target.notice?.trim();
+    final storyboardLine = target.preferredStoryboardNumericId == null
+        ? null
+        : 'Storyboard source: #${target.preferredStoryboardNumericId}.';
+    if (target.preferredAssetNumericId == null) {
+      if (notice == null || notice.isEmpty) {
+        return storyboardLine;
+      }
+      if (storyboardLine == null) {
+        return notice;
+      }
+      return '$notice $storyboardLine';
+    }
+    if (notice == null || notice.isEmpty) {
+      if (storyboardLine == null) {
+        return 'Suggested focus asset: #${target.preferredAssetNumericId}.';
+      }
+      return '$storyboardLine Suggested focus asset: #${target.preferredAssetNumericId}.';
+    }
+    if (storyboardLine == null) {
+      return '$notice Suggested focus asset: #${target.preferredAssetNumericId}.';
+    }
+    return '$notice $storyboardLine Suggested focus asset: #${target.preferredAssetNumericId}.';
+  }
+
+  Future<void> _openProjectAssetsWorkbenchFromStudio(
+    ProjectRow p,
+    ProjectStudioAssetEditorTarget target, {
+    Future<void> Function()? onProjectSnapshotChanged,
+  }) async {
+    final token = _session?.accessToken;
+    if (token == null) return;
+    try {
+      final detail = await fetchProjectByProjectId(token, p.id);
+      final scriptList = List<ScriptBrief>.from(detail.scripts);
+      ListAssetsResponse? assetsSnap;
+      try {
+        assetsSnap = await fetchProjectAssetsByProjectId(token, p.id);
+      } catch (_) {
+        assetsSnap = null;
+      }
+      ListAssetsResponse? assetsForScriptSnap;
+      if (target.preferredScriptNumericId != null) {
+        try {
+          assetsForScriptSnap = await fetchProjectAssetsByProjectId(
+            token,
+            p.id,
+            scriptNumericId: target.preferredScriptNumericId,
+          );
+        } catch (_) {
+          assetsForScriptSnap = null;
+        }
+      }
+      if (!mounted) return;
+
+      final assetsRef = <ListAssetsResponse?>[assetsSnap];
+      final assetsForScriptRef = <ListAssetsResponse?>[assetsForScriptSnap];
+      final assetsFilterScriptNumericId = <int?>[
+        target.preferredScriptNumericId,
+      ];
+      final assetsBusy = <bool>[false];
+
+      Future<void> reloadAssetsAndStats() async {
+        try {
+          assetsRef[0] = await fetchProjectAssetsByProjectId(token, p.id);
+        } catch (_) {
+          assetsRef[0] = null;
+        }
+        final scriptNumericId = assetsFilterScriptNumericId[0];
+        if (scriptNumericId != null) {
+          try {
+            assetsForScriptRef[0] = await fetchProjectAssetsByProjectId(
+              token,
+              p.id,
+              scriptNumericId: scriptNumericId,
+            );
+          } catch (_) {
+            assetsForScriptRef[0] = null;
+          }
+        } else {
+          assetsForScriptRef[0] = null;
+        }
+        if (onProjectSnapshotChanged != null) {
+          await onProjectSnapshotChanged();
+        }
+      }
+
+      void syncSetDialogState(VoidCallback fn) {
+        fn();
+      }
+
+      await openProjectAssetsWorkbenchDialog(
+        ctx: context,
+        setDialogState: syncSetDialogState,
+        token: token,
+        project: p,
+        scriptList: scriptList,
+        assetsRef: assetsRef,
+        assetsForScriptRef: assetsForScriptRef,
+        assetsFilterScriptNumericId: assetsFilterScriptNumericId,
+        assetsBusy: assetsBusy,
+        reloadAssetsAndStats: reloadAssetsAndStats,
+        initialSelectedAssetNumericId: target.preferredAssetNumericId,
+        initialSelectedScriptNumericId: target.preferredScriptNumericId,
+        initialFocusNotice: _buildAssetEditorFocusNotice(target),
+        initialTargetKind: target.kind,
+        onCreateAsset: (dialogCtx) => _openCreateAssetDialog(
+          ctx: dialogCtx,
+          setDialogState: syncSetDialogState,
+          token: token,
+          p: p,
+          assetsBusy: assetsBusy,
+          reloadAssetsAndStats: reloadAssetsAndStats,
+        ),
+        onEditAsset: (dialogCtx) => _openEditAssetDialog(
+          ctx: dialogCtx,
+          setDialogState: syncSetDialogState,
+          token: token,
+          p: p,
+          assetsRef: assetsRef,
+          assetsBusy: assetsBusy,
+          reloadAssetsAndStats: reloadAssetsAndStats,
+        ),
+        onDeleteAsset: (dialogCtx) => _openDeleteAssetDialog(
+          ctx: dialogCtx,
+          setDialogState: syncSetDialogState,
+          token: token,
+          p: p,
+          assetsRef: assetsRef,
+          assetsBusy: assetsBusy,
+          reloadAssetsAndStats: reloadAssetsAndStats,
+        ),
+        onFilterAssets: (dialogCtx) => _openAssetFilterDialog(
+          ctx: dialogCtx,
+          setDialogState: syncSetDialogState,
+          token: token,
+          p: p,
+          scriptList: scriptList,
+          assetsRef: assetsRef,
+          assetsForScriptRef: assetsForScriptRef,
+          assetsFilterScriptNumericId: assetsFilterScriptNumericId,
+          assetsBusy: assetsBusy,
+        ),
+        onLinkAsset: (dialogCtx) => openProjectAssetLinkDialog(
+          ctx: dialogCtx,
+          setDialogState: syncSetDialogState,
+          token: token,
+          project: p,
+          scriptList: scriptList,
+          assetsRef: assetsRef,
+          assetsBusy: assetsBusy,
+          reloadAssetsAndStats: reloadAssetsAndStats,
+          unlink: false,
+        ),
+        onUnlinkAsset: (dialogCtx) => openProjectAssetLinkDialog(
+          ctx: dialogCtx,
+          setDialogState: syncSetDialogState,
+          token: token,
+          project: p,
+          scriptList: scriptList,
+          assetsRef: assetsRef,
+          assetsBusy: assetsBusy,
+          reloadAssetsAndStats: reloadAssetsAndStats,
+          unlink: true,
+        ),
+        onReviewCandidates: (dialogCtx, preferredAssetNumericId) =>
+            _openCandidateStatusDialog(
+              ctx: dialogCtx,
+              setDialogState: syncSetDialogState,
+              token: token,
+              p: p,
+              assetsRef: assetsRef,
+              assetsBusy: assetsBusy,
+              reloadAssetsAndStats: reloadAssetsAndStats,
+              preferredAssetNumericId: preferredAssetNumericId,
+            ),
+        onUploadEditImage: (dialogCtx) => openProjectAssetEditImageUploadDialog(
+          ctx: dialogCtx,
+          setDialogState: syncSetDialogState,
+          token: token,
+          project: p,
+          scriptList: scriptList,
+          assetsBusy: assetsBusy,
+        ),
+        onUploadClip: (dialogCtx) => openProjectAssetClipUploadDialog(
+          ctx: dialogCtx,
+          setDialogState: syncSetDialogState,
+          token: token,
+          project: p,
+          assetsBusy: assetsBusy,
+          reloadAssetsAndStats: reloadAssetsAndStats,
+        ),
+        onOpenImagesWorkbench: (dialogCtx, preferredAssetNumericId) =>
+            openAssetImagesWorkbenchDialog(
+              ctx: dialogCtx,
+              setDialogState: syncSetDialogState,
+              token: token,
+              project: p,
+              assetsRef: assetsRef,
+              assetsBusy: assetsBusy,
+              reloadAssetsAndStats: reloadAssetsAndStats,
+              preferredAssetNumericId: preferredAssetNumericId,
+            ),
+        onOpenGenerationWorkbench: (dialogCtx, preferredAssetNumericId) =>
+            openAssetGenerationWorkbenchDialog(
+              ctx: dialogCtx,
+              setDialogState: syncSetDialogState,
+              token: token,
+              project: p,
+              scriptList: scriptList,
+              assetsRef: assetsRef,
+              assetsForScriptRef: assetsForScriptRef,
+              assetsFilterScriptNumericId: assetsFilterScriptNumericId,
+              assetsBusy: assetsBusy,
+              reloadAssetsAndStats: reloadAssetsAndStats,
+              preferredAssetNumericId: preferredAssetNumericId,
+            ),
+        onOpenHistoryWorkbench: (dialogCtx, preferredAssetNumericId) =>
+            openCornerScapeWorkbenchDialog(
+              ctx: dialogCtx,
+              setDialogState: syncSetDialogState,
+              token: token,
+              project: p,
+              assetsBusy: assetsBusy,
+              preferredAssetNumericId: preferredAssetNumericId,
+            ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      _setErrorFromException(e);
+    }
+  }
+
+  Future<void> _openProjectDetail(
+    ProjectRow p, {
+    ProjectStudioAssetEditorTarget? assetEditorTarget,
+  }) async {
     final token = _session?.accessToken;
     if (token == null) return;
     final l10n = resolveAppLocalizationsForErrors(context);
@@ -70,6 +310,18 @@ extension _HomePageProjectEditor on _HomePageState {
       } catch (_) {
         assetsSnap = null;
       }
+      ListAssetsResponse? assetsForScriptSnap;
+      if (assetEditorTarget?.preferredScriptNumericId != null) {
+        try {
+          assetsForScriptSnap = await fetchProjectAssetsByProjectId(
+            token,
+            p.id,
+            scriptNumericId: assetEditorTarget!.preferredScriptNumericId,
+          );
+        } catch (_) {
+          assetsForScriptSnap = null;
+        }
+      }
       ListNovelsResponse? novelsSnap;
       try {
         novelsSnap = await fetchProjectNovelsByProjectId(token, p.id);
@@ -81,7 +333,13 @@ extension _HomePageProjectEditor on _HomePageState {
         initialHome: homeSnap,
         initialStats: statsSnap,
         initialAssets: assetsSnap,
+        initialAssetsForScript: assetsForScriptSnap,
         initialNovels: novelsSnap,
+        initialAssetsFilterScriptNumericId:
+            assetEditorTarget?.preferredScriptNumericId,
+        initialAssetsFocusNotice: _buildAssetEditorFocusNotice(
+          assetEditorTarget,
+        ),
         artStylePackOptions: stylePackCatalog.artPacks,
         storyStylePackOptions: stylePackCatalog.storyPacks,
         selectedArtStylePack: detail.project.artStylePack,
@@ -187,7 +445,10 @@ class _ProjectEditorDialogState {
     ProjectHome? initialHome,
     ProjectStats? initialStats,
     ListAssetsResponse? initialAssets,
+    ListAssetsResponse? initialAssetsForScript,
     ListNovelsResponse? initialNovels,
+    int? initialAssetsFilterScriptNumericId,
+    String? initialAssetsFocusNotice,
     List<_StylePackOption> artStylePackOptions = const <_StylePackOption>[],
     List<_StylePackOption> storyStylePackOptions = const <_StylePackOption>[],
     String? selectedArtStylePack,
@@ -196,12 +457,16 @@ class _ProjectEditorDialogState {
        statsRef = <ProjectStats?>[initialStats],
        assetsRef = <ListAssetsResponse?>[initialAssets],
        novelsRef = <ListNovelsResponse?>[initialNovels],
+       assetsFocusNotice = <String?>[initialAssetsFocusNotice],
        artStylePackOptionsRef = <List<_StylePackOption>>[artStylePackOptions],
        storyStylePackOptionsRef = <List<_StylePackOption>>[
          storyStylePackOptions,
        ],
        selectedArtStylePackRef = <String?>[selectedArtStylePack],
-       selectedStoryStylePackRef = <String?>[selectedStoryStylePack];
+       selectedStoryStylePackRef = <String?>[selectedStoryStylePack] {
+    assetsForScriptRef[0] = initialAssetsForScript;
+    assetsFilterScriptNumericId[0] = initialAssetsFilterScriptNumericId;
+  }
 
   final List<ProjectHome?> homeRef;
   final List<ProjectStats?> statsRef;
@@ -213,6 +478,7 @@ class _ProjectEditorDialogState {
     null,
   ];
   final List<int?> assetsFilterScriptNumericId = <int?>[null];
+  final List<String?> assetsFocusNotice;
   final List<bool> assetsLoading = <bool>[false];
   final List<bool> assetsScriptFilterLoading = <bool>[false];
   final List<bool> assetsBusy = <bool>[false];
@@ -254,6 +520,8 @@ class _ProjectEditorDialogState {
       } catch (_) {
         assetsForScriptRef[0] = null;
       }
+    } else {
+      assetsForScriptRef[0] = null;
     }
 
     try {

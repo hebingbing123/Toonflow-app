@@ -8,8 +8,9 @@ use crate::state::AppState;
 
 mod data;
 mod handlers;
+pub(crate) mod pricing;
 mod query;
-mod types;
+pub(crate) mod types;
 
 #[cfg(test)]
 mod tests;

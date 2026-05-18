@@ -9,6 +9,7 @@ use uuid::Uuid;
 
 use crate::llm::openai::TokenUsage;
 use crate::prompting::quality::QualityReview;
+use crate::vendor::catalog::pricing::estimate_cost_cents_for_tokens;
 
 /// Best-effort insert into `app_llm_usage_log`. Errors are logged only.
 #[allow(clippy::too_many_arguments)]
@@ -29,6 +30,7 @@ pub async fn record_llm_usage(
     meta: serde_json::Value,
 ) {
     let usage = usage.cloned().unwrap_or_default();
+    let estimated_cost_cents = estimate_cost_cents_for_tokens(model_name, usage.total_tokens);
 
     if let Err(e) = sqlx::query(
         r#"
@@ -36,11 +38,12 @@ pub async fn record_llm_usage(
           user_id, project_id, script_id, job_id,
           call_type, model_name, provider,
           prompt_tokens, completion_tokens, total_tokens,
+          estimated_cost_cents,
           prompt_chars,
           success, error_message, duration_ms,
           meta
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
         "#,
     )
     .bind(user_id)
@@ -53,6 +56,7 @@ pub async fn record_llm_usage(
     .bind(usage.prompt_tokens)
     .bind(usage.completion_tokens)
     .bind(usage.total_tokens)
+    .bind(estimated_cost_cents)
     .bind(prompt_chars)
     .bind(success)
     .bind(error_message)
