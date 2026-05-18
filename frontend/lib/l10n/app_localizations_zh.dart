@@ -315,6 +315,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get notificationsMarkAllRead => '全部已读';
 
   @override
+  String get studioNotificationsAdvanced => '高级合规与审计';
+
+  @override
   String get notificationsRiskyPrefsTooltip => '本机客户端偏好（短视频等高风险「不再提示」）。';
 
   @override
@@ -892,6 +895,395 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get productNavShortVideoSpace => '短视频 Space';
+
+  @override
+  String get productShellLoginTagline => 'AI 短剧工作室 — 从剧本到发布一站完成。';
+
+  @override
+  String get productShellDevCredentialsHint =>
+      '本地开发：admin@openflow.local / admin123';
+
+  @override
+  String get productShellMoreMenu => '更多';
+
+  @override
+  String get studioAppBarNotifications => '通知';
+
+  @override
+  String get studioAppBarSettings => '账户与设置';
+
+  @override
+  String get studioAppBarHelp => '帮助';
+
+  @override
+  String get studioPipelineSelectProjectFirst => '请先在项目列表中选择一个项目，再打开「脚本」或「制作」。';
+
+  @override
+  String get studioProductHarnessRedirectTitle => '请使用项目工作室';
+
+  @override
+  String get studioProductHarnessRedirectSubtitle =>
+      '脚本与制作工作区在项目内完成。请从项目网格选择项目，或通过平台链进入。';
+
+  @override
+  String get studioProjectsHomeTitle => '你的项目';
+
+  @override
+  String get studioProjectsHomeSubtitle => '继续创作，或新建一部短剧。';
+
+  @override
+  String get studioCreateProject => '新建项目';
+
+  @override
+  String get studioContinueCreating => '继续创作';
+
+  @override
+  String get studioEnterStudio => '进入工作室';
+
+  @override
+  String get studioProjectsEmptyTitle => '还没有项目';
+
+  @override
+  String get studioProjectsEmptySubtitle => '创建第一个项目，开始从剧本到成片的工作流。';
+
+  @override
+  String get studioCreateProjectWizardTitle => '创建项目';
+
+  @override
+  String get studioWizardStepBasics => '基础信息';
+
+  @override
+  String get studioWizardStepContent => '内容';
+
+  @override
+  String get studioWizardStepReview => '确认';
+
+  @override
+  String get studioWizardBack => '上一步';
+
+  @override
+  String get studioWizardNext => '下一步';
+
+  @override
+  String get studioWizardCreate => '创建';
+
+  @override
+  String get studioWizardPasteNovelHint => '可选：粘贴小说或大纲，将作为故事前提保存。';
+
+  @override
+  String get studioWizardPasteNovelPlaceholder => '在此粘贴文本…';
+
+  @override
+  String get studioWizardNovelAttached => '将保存为故事前提。';
+
+  @override
+  String get studioExitProjectStudio => '返回项目';
+
+  @override
+  String get studioProjectStudioSubtitle => '六步工作流：从剧本到成片';
+
+  @override
+  String get studioOpenEpisodeConsole => '单集控制台';
+
+  @override
+  String get studioOpenFullStudio => '完整工作室';
+
+  @override
+  String get studioAgentRewriteScript => '改写剧本';
+
+  @override
+  String get studioAgentExtractEntities => '提取实体';
+
+  @override
+  String get studioAgentBreakStoryboard => '拆解分镜';
+
+  @override
+  String get studioAgentAssignVoices => '分配音色';
+
+  @override
+  String get studioAgentGridPrompts => '宫格提示词';
+
+  @override
+  String studioAgentSubmitted(String kind) {
+    return '已提交 Agent「$kind」，请在对应工作区继续';
+  }
+
+  @override
+  String get studioStepScriptTitle => '剧本';
+
+  @override
+  String get studioStepScriptBody => '编写或导入剧本，并提取角色与场景。';
+
+  @override
+  String get studioStepArtTitle => '美术';
+
+  @override
+  String get studioStepArtBody => '设置项目的画风包与视觉方向。';
+
+  @override
+  String get studioStepAssetsTitle => '资产';
+
+  @override
+  String get studioStepAssetsBody => '管理角色、道具与参考素材。';
+
+  @override
+  String get studioStepStoryboardTitle => '分镜';
+
+  @override
+  String get studioStepStoryboardBody => '生成镜头、挑选候选并润色提示词。';
+
+  @override
+  String get studioStepVideoTitle => '视频';
+
+  @override
+  String get studioStepVideoBody => '基于分镜画面生成动态视频。';
+
+  @override
+  String get studioStepOpenWorkspace => '打开工作区';
+
+  @override
+  String get studioStepOpenProduction => '打开制作台';
+
+  @override
+  String get studioStepOpenStoryboardStudio => '全屏分镜';
+
+  @override
+  String get studioStepScriptShort => '剧本';
+
+  @override
+  String get studioStepArtShort => '美术';
+
+  @override
+  String get studioStepAssetsShort => '资产';
+
+  @override
+  String get studioStepStoryboardShort => '分镜';
+
+  @override
+  String get studioStepVideoShort => '视频';
+
+  @override
+  String get studioStepDeliverShort => '成片';
+
+  @override
+  String get studioDeliverTabAssembly => '成片';
+
+  @override
+  String get studioDeliverTabPublish => '发布';
+
+  @override
+  String get studioDeliverTabQuality => '质检';
+
+  @override
+  String get studioDeliverPublishHint => '在已连接平台排期与发布。';
+
+  @override
+  String get studioDeliverQualityHint => '发布前运行质量门检查。';
+
+  @override
+  String get studioDeliverOpenPublish => '打开发布';
+
+  @override
+  String get studioDeliverOpenQuality => '打开质检';
+
+  @override
+  String get studioSettingsHubTitle => '设置';
+
+  @override
+  String get studioSettingsHubSubtitle => '账户、API 与工作区统一入口。';
+
+  @override
+  String get studioSettingsTabAccount => '账户';
+
+  @override
+  String get studioSettingsTabPlanUsage => '套餐与用量';
+
+  @override
+  String get studioSettingsTabApiKeys => 'API 与模型';
+
+  @override
+  String get studioSettingsTabWorkspaces => '工作区';
+
+  @override
+  String get studioPlanUsageTitle => '当前套餐';
+
+  @override
+  String studioPlanUsageBillingScope(String scope) {
+    return '计费范围：$scope';
+  }
+
+  @override
+  String studioPlanUsageJobsToday(int used, String quota) {
+    return '今日任务：$used / $quota';
+  }
+
+  @override
+  String studioPlanUsageEvents7d(int count) {
+    return '近 7 天事件：$count';
+  }
+
+  @override
+  String studioPlanUsageSubscription(String status) {
+    return '订阅状态：$status';
+  }
+
+  @override
+  String get studioPlanUsageEstimateDisclaimer => '以下为预估，任务完成后才按实际计量。';
+
+  @override
+  String get studioModelPricingTitle => '模型价目';
+
+  @override
+  String get studioModelPricingSubtitle => '平台 CNY / 积分单价（估算）。';
+
+  @override
+  String get studioModelPricingFilterAll => '全部类型';
+
+  @override
+  String studioModelPricingPerUnit(int credits, String cny, String unit) {
+    return '$credits 积分 · ¥$cny / $unit';
+  }
+
+  @override
+  String studioModelPricingBestFor(String text) {
+    return '适用于：$text';
+  }
+
+  @override
+  String get studioModelPickerLabel => '模型';
+
+  @override
+  String get studioCostEstimateLoading => '估算中…';
+
+  @override
+  String studioCostEstimateLine(int credits, String cny) {
+    return '约 $credits 积分 · ¥$cny';
+  }
+
+  @override
+  String studioCostEstimateQuota(int jobs) {
+    return '占用今日 $jobs 个任务配额';
+  }
+
+  @override
+  String get studioCostConfirmTitle => '确认生成';
+
+  @override
+  String studioCostConfirmBody(int credits, String cny, String disclaimer) {
+    return '预估消耗 $credits 积分（¥$cny）。$disclaimer';
+  }
+
+  @override
+  String get studioCostConfirmProceed => '开始生成';
+
+  @override
+  String get studioCostConfirmCancel => '取消';
+
+  @override
+  String get studioValueTierEconomy => '性价比高';
+
+  @override
+  String get studioValueTierBalanced => '均衡';
+
+  @override
+  String get studioValueTierQuality => '质量优先';
+
+  @override
+  String get studioValueTierSampleLow => '样本不足';
+
+  @override
+  String get studioValueTierSameTierCheaper => '同档更省';
+
+  @override
+  String get billingPlanTierCreator => '创作者';
+
+  @override
+  String get billingPlanTierStudio => '工作室';
+
+  @override
+  String get billingPricingUnitPer1kTokens => '千 tokens';
+
+  @override
+  String get billingPricingUnitPerImage => '张';
+
+  @override
+  String get billingPricingUnitPerVideoSecond => '秒';
+
+  @override
+  String get billingPricingUnitPerJob => '次';
+
+  @override
+  String get studioStoryboardStudioTitle => '分镜工作室';
+
+  @override
+  String get studioStoryboardStudioBody => '完整编辑请用制作工作区；此视图聚焦镜头流。';
+
+  @override
+  String get studioStoryboardShotList => '镜头';
+
+  @override
+  String studioStoryboardShotLabel(int n) {
+    return '镜头 $n';
+  }
+
+  @override
+  String get studioStoryboardProperties => '属性';
+
+  @override
+  String get studioStoryboardPropertiesHint => '选中镜头后在此编辑提示词、帧模式与候选。';
+
+  @override
+  String get studioKeyboardShortcuts => '快捷键';
+
+  @override
+  String get studioGridStoryboardHint => '生成宫格图、切分并分配到镜头（后端任务待接）。';
+
+  @override
+  String get studioGridStoryboardCta => '宫格模式';
+
+  @override
+  String studioEpisodeConsoleTitle(int n) {
+    return '第 $n 集';
+  }
+
+  @override
+  String get studioEpisodePreviewPlaceholder => '预览';
+
+  @override
+  String get studioEpisodeTabVoice => '配音';
+
+  @override
+  String get studioEpisodeTabVisual => '画面';
+
+  @override
+  String get studioEpisodeTabVideo => '视频';
+
+  @override
+  String get studioEpisodeTabAssemble => '合成';
+
+  @override
+  String get studioEpisodeTabExport => '导出';
+
+  @override
+  String get studioAgentDrawerTitle => 'AI 助手';
+
+  @override
+  String get studioVideoFrameModeTitle => '视频生成模式';
+
+  @override
+  String get studioVideoFrameFirst => '首帧';
+
+  @override
+  String get studioVideoFrameLast => '尾帧';
+
+  @override
+  String get studioVideoFrameBoard => '分镜板';
+
+  @override
+  String get studioMergeAndPreview => '拼接并预览';
+
+  @override
+  String get studioConflictRefresh => '数据已在别处更新，请刷新后继续。';
 
   @override
   String get productNavProjects => '项目';
@@ -12951,10 +13343,114 @@ class AppLocalizationsZh extends AppLocalizations {
   String get projectEditorAssetsWorkbenchUnlink => '解除关联';
 
   @override
+  String get projectEditorAssetsWorkbenchReviewCandidates => '处理候选状态';
+
+  @override
   String get projectEditorAssetsWorkbenchUploadEditImage => '上传修图';
 
   @override
   String get projectEditorAssetsWorkbenchUploadClipAsset => '上传片段素材';
+
+  @override
+  String get projectEditorAssetsWorkbenchSuggestedNextTitle => '建议下一步';
+
+  @override
+  String get projectEditorAssetsWorkbenchSuggestedNextOverview =>
+      '先选一条最省步数的维护动作，快速收拢当前素材集。';
+
+  @override
+  String get projectEditorAssetsWorkbenchSuggestedNextBuildRoleLibrary =>
+      '先补齐或扩展角色素材集，再继续往下游推进。';
+
+  @override
+  String get projectEditorAssetsWorkbenchSuggestedNextAnchorCharacters =>
+      '围绕当前焦点剧本收紧素材复用和关联关系。';
+
+  @override
+  String get projectEditorAssetsWorkbenchSuggestedNextConfirmCandidates =>
+      '先打开当前焦点素材，再确认或清理它的候选状态。';
+
+  @override
+  String get projectEditorAssetCandidateDialogTitle => '处理素材候选状态';
+
+  @override
+  String get projectEditorAssetCandidateDialogIntro =>
+      '不打开完整编辑表单，直接为当前焦点素材调整候选 workflow 状态。';
+
+  @override
+  String get projectEditorAssetCandidateTargetLabel => '目标素材';
+
+  @override
+  String get projectEditorAssetCandidateCurrentStatusEmpty => '当前还没有选中素材。';
+
+  @override
+  String projectEditorAssetCandidateCurrentStatusLine(String status) {
+    return '当前候选状态：$status';
+  }
+
+  @override
+  String get projectEditorAssetCandidatePendingOnlyLabel => '仅显示待确认素材';
+
+  @override
+  String get projectEditorAssetCandidatePendingOnlyHelper =>
+      '先把待确认队列处理完，需要更大范围清理时再切回全部素材。';
+
+  @override
+  String get projectEditorAssetCandidatePrevious => '上一条素材';
+
+  @override
+  String get projectEditorAssetCandidateNext => '下一条素材';
+
+  @override
+  String projectEditorAssetCandidateQueuePosition(int current, int total) {
+    return '第 $current / $total 条';
+  }
+
+  @override
+  String get projectEditorAssetCandidateNextStatusLabel => '下一候选状态';
+
+  @override
+  String get projectEditorAssetCandidateStatusUnset => '未设置';
+
+  @override
+  String get projectEditorAssetCandidateStatusPending => '待确认';
+
+  @override
+  String get projectEditorAssetCandidateStatusLinked => '已确认';
+
+  @override
+  String get projectEditorAssetCandidateStatusIgnored => '忽略';
+
+  @override
+  String get projectEditorAssetCandidateSaveStatus => '保存状态';
+
+  @override
+  String get projectEditorAssetCandidateSaveToVisible => '批量保存当前列表';
+
+  @override
+  String get projectEditorAssetCandidateSaveToRemaining => '批量保存剩余项';
+
+  @override
+  String get projectEditorAssetCandidateSaveAndNext => '保存并继续';
+
+  @override
+  String get projectEditorAssetCandidateQueueDoneSnack => '待确认队列已经清空。';
+
+  @override
+  String projectEditorAssetCandidateBulkSaveSuccessSnack(
+    int count,
+    String status,
+  ) {
+    return '已将 $count 条素材的候选状态批量保存为：$status';
+  }
+
+  @override
+  String projectEditorAssetCandidateSaveSuccessSnack(
+    int assetId,
+    String status,
+  ) {
+    return '已保存素材 #$assetId 的候选状态：$status';
+  }
 
   @override
   String get projectEditorAssetImagesWorkbenchDialogTitle => '资产图片工作台';
@@ -19607,7 +20103,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get apiKeysAuditEmpty => '还没有 API key 生命周期记录。';
 
   @override
-  String get statusPageTitle => 'Toonflow 状态';
+  String get statusPageTitle => 'OpenFlow 状态';
 
   @override
   String get statusPageRefreshTooltip => '刷新';
@@ -19621,7 +20117,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get statusPageIntroInternalSuffix =>
-      ' 当前 dart-define 带 INTERNAL_OPS_TOKEN，因此附带内部队列统计。';
+      ' 当前 dart-define 带 OPENFLOW_INTERNAL_OPS_TOKEN，因此附带内部队列统计。';
 
   @override
   String get statusPageRefreshing => '刷新中…';
@@ -19941,7 +20437,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get shellJobQueueStatsSubtitle =>
-      '使用 INTERNAL_OPS_TOKEN dart-define → GET /api/v1/jobs/queue/stats';
+      '使用 OPENFLOW_INTERNAL_OPS_TOKEN dart-define → GET /api/v1/jobs/queue/stats';
 
   @override
   String shellJobQueueStatsStatsLine(

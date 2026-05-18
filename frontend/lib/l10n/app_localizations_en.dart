@@ -332,6 +332,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notificationsMarkAllRead => 'Mark all read';
 
   @override
+  String get studioNotificationsAdvanced => 'Advanced compliance & audit';
+
+  @override
   String get notificationsRiskyPrefsTooltip =>
       'Local client preferences (for example \"don\'t ask again\" on short-video risky actions).';
 
@@ -952,6 +955,414 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get productNavShortVideoSpace => 'Short-video Space';
+
+  @override
+  String get productShellLoginTagline =>
+      'AI short-drama studio — script to publish in one place.';
+
+  @override
+  String get productShellDevCredentialsHint =>
+      'Local dev: admin@openflow.local / admin123';
+
+  @override
+  String get productShellMoreMenu => 'More';
+
+  @override
+  String get studioAppBarNotifications => 'Notifications';
+
+  @override
+  String get studioAppBarSettings => 'Account & settings';
+
+  @override
+  String get studioAppBarHelp => 'Help';
+
+  @override
+  String get studioPipelineSelectProjectFirst =>
+      'Select a project from the list first, then open Script or Production.';
+
+  @override
+  String get studioProductHarnessRedirectTitle => 'Use project studio';
+
+  @override
+  String get studioProductHarnessRedirectSubtitle =>
+      'Script and production workspaces live inside each project. Pick a project on the home grid, or open studio from the pipeline.';
+
+  @override
+  String get studioProjectsHomeTitle => 'Your projects';
+
+  @override
+  String get studioProjectsHomeSubtitle =>
+      'Pick up where you left off or start a new short drama.';
+
+  @override
+  String get studioCreateProject => 'New project';
+
+  @override
+  String get studioContinueCreating => 'Continue';
+
+  @override
+  String get studioEnterStudio => 'Open studio';
+
+  @override
+  String get studioProjectsEmptyTitle => 'No projects yet';
+
+  @override
+  String get studioProjectsEmptySubtitle =>
+      'Create your first project to start the script-to-video workflow.';
+
+  @override
+  String get studioCreateProjectWizardTitle => 'Create project';
+
+  @override
+  String get studioWizardStepBasics => 'Basics';
+
+  @override
+  String get studioWizardStepContent => 'Content';
+
+  @override
+  String get studioWizardStepReview => 'Review';
+
+  @override
+  String get studioWizardBack => 'Back';
+
+  @override
+  String get studioWizardNext => 'Next';
+
+  @override
+  String get studioWizardCreate => 'Create';
+
+  @override
+  String get studioWizardPasteNovelHint =>
+      'Optional: paste a novel or outline — we will use it as the story premise.';
+
+  @override
+  String get studioWizardPasteNovelPlaceholder => 'Paste text here…';
+
+  @override
+  String get studioWizardNovelAttached =>
+      'Story text will be saved as premise.';
+
+  @override
+  String get studioExitProjectStudio => 'Back to projects';
+
+  @override
+  String get studioProjectStudioSubtitle =>
+      'Six-step workflow from script to delivery';
+
+  @override
+  String get studioOpenEpisodeConsole => 'Episode console';
+
+  @override
+  String get studioOpenFullStudio => 'Full studio';
+
+  @override
+  String get studioAgentRewriteScript => 'Rewrite script';
+
+  @override
+  String get studioAgentExtractEntities => 'Extract entities';
+
+  @override
+  String get studioAgentBreakStoryboard => 'Break storyboard';
+
+  @override
+  String get studioAgentAssignVoices => 'Assign voices';
+
+  @override
+  String get studioAgentGridPrompts => 'Grid prompts';
+
+  @override
+  String studioAgentSubmitted(String kind) {
+    return 'Agent \"$kind\" — open the matching workspace to continue';
+  }
+
+  @override
+  String get studioStepScriptTitle => 'Script';
+
+  @override
+  String get studioStepScriptBody =>
+      'Write or import your script, then extract characters and scenes.';
+
+  @override
+  String get studioStepArtTitle => 'Art direction';
+
+  @override
+  String get studioStepArtBody =>
+      'Set visual style packs and art direction for the project.';
+
+  @override
+  String get studioStepAssetsTitle => 'Assets';
+
+  @override
+  String get studioStepAssetsBody =>
+      'Manage characters, props, and reference assets.';
+
+  @override
+  String get studioStepStoryboardTitle => 'Storyboard';
+
+  @override
+  String get studioStepStoryboardBody =>
+      'Generate shots, pick candidates, and refine prompts.';
+
+  @override
+  String get studioStepVideoTitle => 'Video';
+
+  @override
+  String get studioStepVideoBody => 'Generate motion from storyboard frames.';
+
+  @override
+  String get studioStepOpenWorkspace => 'Open workspace';
+
+  @override
+  String get studioStepOpenProduction => 'Open production';
+
+  @override
+  String get studioStepOpenStoryboardStudio => 'Full-screen storyboard';
+
+  @override
+  String get studioStepScriptShort => 'Script';
+
+  @override
+  String get studioStepArtShort => 'Art';
+
+  @override
+  String get studioStepAssetsShort => 'Assets';
+
+  @override
+  String get studioStepStoryboardShort => 'Board';
+
+  @override
+  String get studioStepVideoShort => 'Video';
+
+  @override
+  String get studioStepDeliverShort => 'Deliver';
+
+  @override
+  String get studioDeliverTabAssembly => 'Assembly';
+
+  @override
+  String get studioDeliverTabPublish => 'Publish';
+
+  @override
+  String get studioDeliverTabQuality => 'Quality';
+
+  @override
+  String get studioDeliverPublishHint =>
+      'Schedule and publish to connected platforms.';
+
+  @override
+  String get studioDeliverQualityHint => 'Run quality gates before publish.';
+
+  @override
+  String get studioDeliverOpenPublish => 'Open publish';
+
+  @override
+  String get studioDeliverOpenQuality => 'Open quality';
+
+  @override
+  String get studioSettingsHubTitle => 'Settings';
+
+  @override
+  String get studioSettingsHubSubtitle =>
+      'Account, API keys, and workspaces in one place.';
+
+  @override
+  String get studioSettingsTabAccount => 'Account';
+
+  @override
+  String get studioSettingsTabPlanUsage => 'Plan & usage';
+
+  @override
+  String get studioSettingsTabApiKeys => 'API & models';
+
+  @override
+  String get studioSettingsTabWorkspaces => 'Workspaces';
+
+  @override
+  String get studioPlanUsageTitle => 'Your plan';
+
+  @override
+  String studioPlanUsageBillingScope(String scope) {
+    return 'Billing scope: $scope';
+  }
+
+  @override
+  String studioPlanUsageJobsToday(int used, String quota) {
+    return 'Jobs today: $used / $quota';
+  }
+
+  @override
+  String studioPlanUsageEvents7d(int count) {
+    return 'Events (7 days): $count';
+  }
+
+  @override
+  String studioPlanUsageSubscription(String status) {
+    return 'Subscription: $status';
+  }
+
+  @override
+  String get studioPlanUsageEstimateDisclaimer =>
+      'Estimates only — not charged until jobs complete.';
+
+  @override
+  String get studioModelPricingTitle => 'Model pricing';
+
+  @override
+  String get studioModelPricingSubtitle =>
+      'Platform estimates in CNY and credits per unit.';
+
+  @override
+  String get studioModelPricingFilterAll => 'All types';
+
+  @override
+  String studioModelPricingPerUnit(int credits, String cny, String unit) {
+    return '$credits credits · ¥$cny / $unit';
+  }
+
+  @override
+  String studioModelPricingBestFor(String text) {
+    return 'Best for: $text';
+  }
+
+  @override
+  String get studioModelPickerLabel => 'Model';
+
+  @override
+  String get studioCostEstimateLoading => 'Estimating…';
+
+  @override
+  String studioCostEstimateLine(int credits, String cny) {
+    return '≈ $credits credits · ¥$cny';
+  }
+
+  @override
+  String studioCostEstimateQuota(int jobs) {
+    return 'Uses $jobs job quota today';
+  }
+
+  @override
+  String get studioCostConfirmTitle => 'Confirm generation';
+
+  @override
+  String studioCostConfirmBody(int credits, String cny, String disclaimer) {
+    return 'This run is estimated at $credits credits (¥$cny). $disclaimer';
+  }
+
+  @override
+  String get studioCostConfirmProceed => 'Run';
+
+  @override
+  String get studioCostConfirmCancel => 'Cancel';
+
+  @override
+  String get studioValueTierEconomy => 'Best value';
+
+  @override
+  String get studioValueTierBalanced => 'Balanced';
+
+  @override
+  String get studioValueTierQuality => 'Top quality';
+
+  @override
+  String get studioValueTierSampleLow => 'Not enough data yet';
+
+  @override
+  String get studioValueTierSameTierCheaper => 'Lower cost in same tier';
+
+  @override
+  String get billingPlanTierCreator => 'Creator';
+
+  @override
+  String get billingPlanTierStudio => 'Studio';
+
+  @override
+  String get billingPricingUnitPer1kTokens => '1k tokens';
+
+  @override
+  String get billingPricingUnitPerImage => 'image';
+
+  @override
+  String get billingPricingUnitPerVideoSecond => 'second';
+
+  @override
+  String get billingPricingUnitPerJob => 'job';
+
+  @override
+  String get studioStoryboardStudioTitle => 'Storyboard studio';
+
+  @override
+  String get studioStoryboardStudioBody =>
+      'Use production workspace for full editing; this view focuses on shot flow.';
+
+  @override
+  String get studioStoryboardShotList => 'Shots';
+
+  @override
+  String studioStoryboardShotLabel(int n) {
+    return 'Shot $n';
+  }
+
+  @override
+  String get studioStoryboardProperties => 'Properties';
+
+  @override
+  String get studioStoryboardPropertiesHint =>
+      'Prompt, frame mode, and candidates appear here when a shot is selected.';
+
+  @override
+  String get studioKeyboardShortcuts => 'Shortcuts';
+
+  @override
+  String get studioGridStoryboardHint =>
+      'Generate a grid image, split cells, and assign to shots (backend job coming).';
+
+  @override
+  String get studioGridStoryboardCta => 'Grid mode';
+
+  @override
+  String studioEpisodeConsoleTitle(int n) {
+    return 'Episode $n';
+  }
+
+  @override
+  String get studioEpisodePreviewPlaceholder => 'Preview';
+
+  @override
+  String get studioEpisodeTabVoice => 'Voice';
+
+  @override
+  String get studioEpisodeTabVisual => 'Visual';
+
+  @override
+  String get studioEpisodeTabVideo => 'Video';
+
+  @override
+  String get studioEpisodeTabAssemble => 'Assemble';
+
+  @override
+  String get studioEpisodeTabExport => 'Export';
+
+  @override
+  String get studioAgentDrawerTitle => 'AI assistants';
+
+  @override
+  String get studioVideoFrameModeTitle => 'Video generation mode';
+
+  @override
+  String get studioVideoFrameFirst => 'First frame';
+
+  @override
+  String get studioVideoFrameLast => 'Last frame';
+
+  @override
+  String get studioVideoFrameBoard => 'Storyboard board';
+
+  @override
+  String get studioMergeAndPreview => 'Merge & preview';
+
+  @override
+  String get studioConflictRefresh =>
+      'Data changed elsewhere. Refresh to continue.';
 
   @override
   String get productNavProjects => 'Projects';
@@ -13577,10 +13988,121 @@ class AppLocalizationsEn extends AppLocalizations {
   String get projectEditorAssetsWorkbenchUnlink => 'Unlink';
 
   @override
+  String get projectEditorAssetsWorkbenchReviewCandidates =>
+      'Review candidates';
+
+  @override
   String get projectEditorAssetsWorkbenchUploadEditImage => 'Upload edit image';
 
   @override
   String get projectEditorAssetsWorkbenchUploadClipAsset => 'Upload clip asset';
+
+  @override
+  String get projectEditorAssetsWorkbenchSuggestedNextTitle =>
+      'Suggested next step';
+
+  @override
+  String get projectEditorAssetsWorkbenchSuggestedNextOverview =>
+      'Choose the quickest maintenance action for the current asset set.';
+
+  @override
+  String get projectEditorAssetsWorkbenchSuggestedNextBuildRoleLibrary =>
+      'Create or expand the role asset set first.';
+
+  @override
+  String get projectEditorAssetsWorkbenchSuggestedNextAnchorCharacters =>
+      'Use the focused script to tighten asset reuse and linkage.';
+
+  @override
+  String get projectEditorAssetsWorkbenchSuggestedNextConfirmCandidates =>
+      'Open the focused asset first, then confirm or clean up its candidate state.';
+
+  @override
+  String get projectEditorAssetCandidateDialogTitle =>
+      'Review asset candidates';
+
+  @override
+  String get projectEditorAssetCandidateDialogIntro =>
+      'Update the candidate workflow state for the focused asset without opening the full edit dialog.';
+
+  @override
+  String get projectEditorAssetCandidateTargetLabel => 'Target asset';
+
+  @override
+  String get projectEditorAssetCandidateCurrentStatusEmpty =>
+      'No asset is currently selected.';
+
+  @override
+  String projectEditorAssetCandidateCurrentStatusLine(String status) {
+    return 'Current candidate status: $status';
+  }
+
+  @override
+  String get projectEditorAssetCandidatePendingOnlyLabel =>
+      'Only show pending assets';
+
+  @override
+  String get projectEditorAssetCandidatePendingOnlyHelper =>
+      'Use the confirm queue first, then expand to all assets if you need a wider cleanup pass.';
+
+  @override
+  String get projectEditorAssetCandidatePrevious => 'Previous asset';
+
+  @override
+  String get projectEditorAssetCandidateNext => 'Next asset';
+
+  @override
+  String projectEditorAssetCandidateQueuePosition(int current, int total) {
+    return '$current of $total';
+  }
+
+  @override
+  String get projectEditorAssetCandidateNextStatusLabel =>
+      'Next candidate status';
+
+  @override
+  String get projectEditorAssetCandidateStatusUnset => 'Unset';
+
+  @override
+  String get projectEditorAssetCandidateStatusPending => 'Pending';
+
+  @override
+  String get projectEditorAssetCandidateStatusLinked => 'Linked';
+
+  @override
+  String get projectEditorAssetCandidateStatusIgnored => 'Ignored';
+
+  @override
+  String get projectEditorAssetCandidateSaveStatus => 'Save status';
+
+  @override
+  String get projectEditorAssetCandidateSaveToVisible => 'Save to visible';
+
+  @override
+  String get projectEditorAssetCandidateSaveToRemaining => 'Save to remaining';
+
+  @override
+  String get projectEditorAssetCandidateSaveAndNext => 'Save & next';
+
+  @override
+  String get projectEditorAssetCandidateQueueDoneSnack =>
+      'Pending review queue is clear.';
+
+  @override
+  String projectEditorAssetCandidateBulkSaveSuccessSnack(
+    int count,
+    String status,
+  ) {
+    return 'Saved $count asset candidate statuses to $status';
+  }
+
+  @override
+  String projectEditorAssetCandidateSaveSuccessSnack(
+    int assetId,
+    String status,
+  ) {
+    return 'Saved candidate status for asset #$assetId: $status';
+  }
 
   @override
   String get projectEditorAssetImagesWorkbenchDialogTitle =>
@@ -20578,7 +21100,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get apiKeysAuditEmpty => 'No API key lifecycle records yet.';
 
   @override
-  String get statusPageTitle => 'Toonflow Status';
+  String get statusPageTitle => 'OpenFlow Status';
 
   @override
   String get statusPageRefreshTooltip => 'Refresh';
@@ -20592,7 +21114,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get statusPageIntroInternalSuffix =>
-      ' INTERNAL_OPS_TOKEN is set via dart-define, so internal queue stats are included.';
+      ' OPENFLOW_INTERNAL_OPS_TOKEN is set via dart-define, so internal queue stats are included.';
 
   @override
   String get statusPageRefreshing => 'Refreshing…';
@@ -20913,7 +21435,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shellJobQueueStatsSubtitle =>
-      'Uses INTERNAL_OPS_TOKEN dart-define → GET /api/v1/jobs/queue/stats';
+      'Uses OPENFLOW_INTERNAL_OPS_TOKEN dart-define → GET /api/v1/jobs/queue/stats';
 
   @override
   String shellJobQueueStatsStatsLine(

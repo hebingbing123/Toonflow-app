@@ -1,3 +1,5 @@
+import '../billing/pricing.dart';
+
 /// Shared DTOs reused across system, project, and catalog API slices.
 /// `GET /api/v1/usage/summary` — OpenAPI `UsageSummaryResponse`.
 class UsageSummaryResponse {
@@ -6,6 +8,11 @@ class UsageSummaryResponse {
     required this.eventsLast24h,
     required this.eventsLast7d,
     required this.eventCountsLast7d,
+    required this.jobsToday,
+    this.dailyJobQuota,
+    this.quotaRemaining,
+    this.workspaceId,
+    this.workspaceName,
   });
 
   /// Aggregation scope for this response: "user" or "workspace"
@@ -13,6 +20,11 @@ class UsageSummaryResponse {
   final int eventsLast24h;
   final int eventsLast7d;
   final Map<String, int> eventCountsLast7d;
+  final int jobsToday;
+  final int? dailyJobQuota;
+  final int? quotaRemaining;
+  final String? workspaceId;
+  final String? workspaceName;
 
   factory UsageSummaryResponse.fromJson(Map<String, dynamic> json) {
     final raw = json['event_counts_last_7d'];
@@ -25,10 +37,15 @@ class UsageSummaryResponse {
       });
     }
     return UsageSummaryResponse(
-      scope: json['scope'] as String,
-      eventsLast24h: (json['events_last_24h'] as num).toInt(),
-      eventsLast7d: (json['events_last_7d'] as num).toInt(),
+      scope: json['scope'] as String? ?? 'user',
+      eventsLast24h: (json['events_last_24h'] as num?)?.toInt() ?? 0,
+      eventsLast7d: (json['events_last_7d'] as num?)?.toInt() ?? 0,
       eventCountsLast7d: counts,
+      jobsToday: (json['jobs_today'] as num?)?.toInt() ?? 0,
+      dailyJobQuota: (json['daily_job_quota'] as num?)?.toInt(),
+      quotaRemaining: (json['quota_remaining'] as num?)?.toInt(),
+      workspaceId: json['workspace_id'] as String?,
+      workspaceName: json['workspace_name'] as String?,
     );
   }
 }
@@ -130,6 +147,8 @@ class ModelListEntry {
     required this.value,
     required this.type,
     required this.name,
+    this.modelId,
+    this.pricing,
   });
 
   final int id;
@@ -137,14 +156,23 @@ class ModelListEntry {
   final String value;
   final String type;
   final String name;
+  final String? modelId;
+  final ModelPricingPublic? pricing;
+
+  String get effectiveModelId => modelId ?? '$id:$value';
 
   factory ModelListEntry.fromJson(Map<String, dynamic> json) {
+    final pricingRaw = json['pricing'];
     return ModelListEntry(
       id: (json['id'] as num).toInt(),
       label: json['label'] as String,
       value: json['value'] as String,
       type: json['type'] as String,
       name: json['name'] as String,
+      modelId: json['model_id'] as String?,
+      pricing: pricingRaw is Map<String, dynamic>
+          ? ModelPricingPublic.fromJson(pricingRaw)
+          : null,
     );
   }
 }

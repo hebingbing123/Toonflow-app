@@ -648,6 +648,12 @@ abstract class AppLocalizations {
   /// **'Mark all read'**
   String get notificationsMarkAllRead;
 
+  /// No description provided for @studioNotificationsAdvanced.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced compliance & audit'**
+  String get studioNotificationsAdvanced;
+
   /// No description provided for @notificationsRiskyPrefsTooltip.
   ///
   /// In en, this message translates to:
@@ -1701,6 +1707,732 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Short-video Space'**
   String get productNavShortVideoSpace;
+
+  /// No description provided for @productShellLoginTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'AI short-drama studio — script to publish in one place.'**
+  String get productShellLoginTagline;
+
+  /// No description provided for @productShellDevCredentialsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Local dev: admin@openflow.local / admin123'**
+  String get productShellDevCredentialsHint;
+
+  /// No description provided for @productShellMoreMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get productShellMoreMenu;
+
+  /// No description provided for @studioAppBarNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get studioAppBarNotifications;
+
+  /// No description provided for @studioAppBarSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Account & settings'**
+  String get studioAppBarSettings;
+
+  /// No description provided for @studioAppBarHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Help'**
+  String get studioAppBarHelp;
+
+  /// No description provided for @studioPipelineSelectProjectFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a project from the list first, then open Script or Production.'**
+  String get studioPipelineSelectProjectFirst;
+
+  /// No description provided for @studioProductHarnessRedirectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use project studio'**
+  String get studioProductHarnessRedirectTitle;
+
+  /// No description provided for @studioProductHarnessRedirectSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Script and production workspaces live inside each project. Pick a project on the home grid, or open studio from the pipeline.'**
+  String get studioProductHarnessRedirectSubtitle;
+
+  /// No description provided for @studioProjectsHomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your projects'**
+  String get studioProjectsHomeTitle;
+
+  /// No description provided for @studioProjectsHomeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick up where you left off or start a new short drama.'**
+  String get studioProjectsHomeSubtitle;
+
+  /// No description provided for @studioCreateProject.
+  ///
+  /// In en, this message translates to:
+  /// **'New project'**
+  String get studioCreateProject;
+
+  /// No description provided for @studioContinueCreating.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get studioContinueCreating;
+
+  /// No description provided for @studioEnterStudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Open studio'**
+  String get studioEnterStudio;
+
+  /// No description provided for @studioProjectsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No projects yet'**
+  String get studioProjectsEmptyTitle;
+
+  /// No description provided for @studioProjectsEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your first project to start the script-to-video workflow.'**
+  String get studioProjectsEmptySubtitle;
+
+  /// No description provided for @studioCreateProjectWizardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create project'**
+  String get studioCreateProjectWizardTitle;
+
+  /// No description provided for @studioWizardStepBasics.
+  ///
+  /// In en, this message translates to:
+  /// **'Basics'**
+  String get studioWizardStepBasics;
+
+  /// No description provided for @studioWizardStepContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Content'**
+  String get studioWizardStepContent;
+
+  /// No description provided for @studioWizardStepReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Review'**
+  String get studioWizardStepReview;
+
+  /// No description provided for @studioWizardBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get studioWizardBack;
+
+  /// No description provided for @studioWizardNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get studioWizardNext;
+
+  /// No description provided for @studioWizardCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get studioWizardCreate;
+
+  /// No description provided for @studioWizardPasteNovelHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional: paste a novel or outline — we will use it as the story premise.'**
+  String get studioWizardPasteNovelHint;
+
+  /// No description provided for @studioWizardPasteNovelPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste text here…'**
+  String get studioWizardPasteNovelPlaceholder;
+
+  /// No description provided for @studioWizardNovelAttached.
+  ///
+  /// In en, this message translates to:
+  /// **'Story text will be saved as premise.'**
+  String get studioWizardNovelAttached;
+
+  /// No description provided for @studioExitProjectStudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to projects'**
+  String get studioExitProjectStudio;
+
+  /// No description provided for @studioProjectStudioSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Six-step workflow from script to delivery'**
+  String get studioProjectStudioSubtitle;
+
+  /// No description provided for @studioOpenEpisodeConsole.
+  ///
+  /// In en, this message translates to:
+  /// **'Episode console'**
+  String get studioOpenEpisodeConsole;
+
+  /// No description provided for @studioOpenFullStudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Full studio'**
+  String get studioOpenFullStudio;
+
+  /// No description provided for @studioAgentRewriteScript.
+  ///
+  /// In en, this message translates to:
+  /// **'Rewrite script'**
+  String get studioAgentRewriteScript;
+
+  /// No description provided for @studioAgentExtractEntities.
+  ///
+  /// In en, this message translates to:
+  /// **'Extract entities'**
+  String get studioAgentExtractEntities;
+
+  /// No description provided for @studioAgentBreakStoryboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Break storyboard'**
+  String get studioAgentBreakStoryboard;
+
+  /// No description provided for @studioAgentAssignVoices.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign voices'**
+  String get studioAgentAssignVoices;
+
+  /// No description provided for @studioAgentGridPrompts.
+  ///
+  /// In en, this message translates to:
+  /// **'Grid prompts'**
+  String get studioAgentGridPrompts;
+
+  /// No description provided for @studioAgentSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent \"{kind}\" — open the matching workspace to continue'**
+  String studioAgentSubmitted(String kind);
+
+  /// No description provided for @studioStepScriptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Script'**
+  String get studioStepScriptTitle;
+
+  /// No description provided for @studioStepScriptBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Write or import your script, then extract characters and scenes.'**
+  String get studioStepScriptBody;
+
+  /// No description provided for @studioStepArtTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Art direction'**
+  String get studioStepArtTitle;
+
+  /// No description provided for @studioStepArtBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Set visual style packs and art direction for the project.'**
+  String get studioStepArtBody;
+
+  /// No description provided for @studioStepAssetsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Assets'**
+  String get studioStepAssetsTitle;
+
+  /// No description provided for @studioStepAssetsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage characters, props, and reference assets.'**
+  String get studioStepAssetsBody;
+
+  /// No description provided for @studioStepStoryboardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard'**
+  String get studioStepStoryboardTitle;
+
+  /// No description provided for @studioStepStoryboardBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate shots, pick candidates, and refine prompts.'**
+  String get studioStepStoryboardBody;
+
+  /// No description provided for @studioStepVideoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Video'**
+  String get studioStepVideoTitle;
+
+  /// No description provided for @studioStepVideoBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate motion from storyboard frames.'**
+  String get studioStepVideoBody;
+
+  /// No description provided for @studioStepOpenWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Open workspace'**
+  String get studioStepOpenWorkspace;
+
+  /// No description provided for @studioStepOpenProduction.
+  ///
+  /// In en, this message translates to:
+  /// **'Open production'**
+  String get studioStepOpenProduction;
+
+  /// No description provided for @studioStepOpenStoryboardStudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Full-screen storyboard'**
+  String get studioStepOpenStoryboardStudio;
+
+  /// No description provided for @studioStepScriptShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Script'**
+  String get studioStepScriptShort;
+
+  /// No description provided for @studioStepArtShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Art'**
+  String get studioStepArtShort;
+
+  /// No description provided for @studioStepAssetsShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Assets'**
+  String get studioStepAssetsShort;
+
+  /// No description provided for @studioStepStoryboardShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Board'**
+  String get studioStepStoryboardShort;
+
+  /// No description provided for @studioStepVideoShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Video'**
+  String get studioStepVideoShort;
+
+  /// No description provided for @studioStepDeliverShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Deliver'**
+  String get studioStepDeliverShort;
+
+  /// No description provided for @studioDeliverTabAssembly.
+  ///
+  /// In en, this message translates to:
+  /// **'Assembly'**
+  String get studioDeliverTabAssembly;
+
+  /// No description provided for @studioDeliverTabPublish.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish'**
+  String get studioDeliverTabPublish;
+
+  /// No description provided for @studioDeliverTabQuality.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality'**
+  String get studioDeliverTabQuality;
+
+  /// No description provided for @studioDeliverPublishHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule and publish to connected platforms.'**
+  String get studioDeliverPublishHint;
+
+  /// No description provided for @studioDeliverQualityHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Run quality gates before publish.'**
+  String get studioDeliverQualityHint;
+
+  /// No description provided for @studioDeliverOpenPublish.
+  ///
+  /// In en, this message translates to:
+  /// **'Open publish'**
+  String get studioDeliverOpenPublish;
+
+  /// No description provided for @studioDeliverOpenQuality.
+  ///
+  /// In en, this message translates to:
+  /// **'Open quality'**
+  String get studioDeliverOpenQuality;
+
+  /// No description provided for @studioSettingsHubTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get studioSettingsHubTitle;
+
+  /// No description provided for @studioSettingsHubSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account, API keys, and workspaces in one place.'**
+  String get studioSettingsHubSubtitle;
+
+  /// No description provided for @studioSettingsTabAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get studioSettingsTabAccount;
+
+  /// No description provided for @studioSettingsTabPlanUsage.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan & usage'**
+  String get studioSettingsTabPlanUsage;
+
+  /// No description provided for @studioSettingsTabApiKeys.
+  ///
+  /// In en, this message translates to:
+  /// **'API & models'**
+  String get studioSettingsTabApiKeys;
+
+  /// No description provided for @studioSettingsTabWorkspaces.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspaces'**
+  String get studioSettingsTabWorkspaces;
+
+  /// No description provided for @studioPlanUsageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your plan'**
+  String get studioPlanUsageTitle;
+
+  /// No description provided for @studioPlanUsageBillingScope.
+  ///
+  /// In en, this message translates to:
+  /// **'Billing scope: {scope}'**
+  String studioPlanUsageBillingScope(String scope);
+
+  /// No description provided for @studioPlanUsageJobsToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs today: {used} / {quota}'**
+  String studioPlanUsageJobsToday(int used, String quota);
+
+  /// No description provided for @studioPlanUsageEvents7d.
+  ///
+  /// In en, this message translates to:
+  /// **'Events (7 days): {count}'**
+  String studioPlanUsageEvents7d(int count);
+
+  /// No description provided for @studioPlanUsageSubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription: {status}'**
+  String studioPlanUsageSubscription(String status);
+
+  /// No description provided for @studioPlanUsageEstimateDisclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimates only — not charged until jobs complete.'**
+  String get studioPlanUsageEstimateDisclaimer;
+
+  /// No description provided for @studioModelPricingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Model pricing'**
+  String get studioModelPricingTitle;
+
+  /// No description provided for @studioModelPricingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform estimates in CNY and credits per unit.'**
+  String get studioModelPricingSubtitle;
+
+  /// No description provided for @studioModelPricingFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All types'**
+  String get studioModelPricingFilterAll;
+
+  /// No description provided for @studioModelPricingPerUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'{credits} credits · ¥{cny} / {unit}'**
+  String studioModelPricingPerUnit(int credits, String cny, String unit);
+
+  /// No description provided for @studioModelPricingBestFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Best for: {text}'**
+  String studioModelPricingBestFor(String text);
+
+  /// No description provided for @studioModelPickerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get studioModelPickerLabel;
+
+  /// No description provided for @studioCostEstimateLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimating…'**
+  String get studioCostEstimateLoading;
+
+  /// No description provided for @studioCostEstimateLine.
+  ///
+  /// In en, this message translates to:
+  /// **'≈ {credits} credits · ¥{cny}'**
+  String studioCostEstimateLine(int credits, String cny);
+
+  /// No description provided for @studioCostEstimateQuota.
+  ///
+  /// In en, this message translates to:
+  /// **'Uses {jobs} job quota today'**
+  String studioCostEstimateQuota(int jobs);
+
+  /// No description provided for @studioCostConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm generation'**
+  String get studioCostConfirmTitle;
+
+  /// No description provided for @studioCostConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This run is estimated at {credits} credits (¥{cny}). {disclaimer}'**
+  String studioCostConfirmBody(int credits, String cny, String disclaimer);
+
+  /// No description provided for @studioCostConfirmProceed.
+  ///
+  /// In en, this message translates to:
+  /// **'Run'**
+  String get studioCostConfirmProceed;
+
+  /// No description provided for @studioCostConfirmCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get studioCostConfirmCancel;
+
+  /// No description provided for @studioValueTierEconomy.
+  ///
+  /// In en, this message translates to:
+  /// **'Best value'**
+  String get studioValueTierEconomy;
+
+  /// No description provided for @studioValueTierBalanced.
+  ///
+  /// In en, this message translates to:
+  /// **'Balanced'**
+  String get studioValueTierBalanced;
+
+  /// No description provided for @studioValueTierQuality.
+  ///
+  /// In en, this message translates to:
+  /// **'Top quality'**
+  String get studioValueTierQuality;
+
+  /// No description provided for @studioValueTierSampleLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough data yet'**
+  String get studioValueTierSampleLow;
+
+  /// No description provided for @studioValueTierSameTierCheaper.
+  ///
+  /// In en, this message translates to:
+  /// **'Lower cost in same tier'**
+  String get studioValueTierSameTierCheaper;
+
+  /// No description provided for @billingPlanTierCreator.
+  ///
+  /// In en, this message translates to:
+  /// **'Creator'**
+  String get billingPlanTierCreator;
+
+  /// No description provided for @billingPlanTierStudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Studio'**
+  String get billingPlanTierStudio;
+
+  /// No description provided for @billingPricingUnitPer1kTokens.
+  ///
+  /// In en, this message translates to:
+  /// **'1k tokens'**
+  String get billingPricingUnitPer1kTokens;
+
+  /// No description provided for @billingPricingUnitPerImage.
+  ///
+  /// In en, this message translates to:
+  /// **'image'**
+  String get billingPricingUnitPerImage;
+
+  /// No description provided for @billingPricingUnitPerVideoSecond.
+  ///
+  /// In en, this message translates to:
+  /// **'second'**
+  String get billingPricingUnitPerVideoSecond;
+
+  /// No description provided for @billingPricingUnitPerJob.
+  ///
+  /// In en, this message translates to:
+  /// **'job'**
+  String get billingPricingUnitPerJob;
+
+  /// No description provided for @studioStoryboardStudioTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard studio'**
+  String get studioStoryboardStudioTitle;
+
+  /// No description provided for @studioStoryboardStudioBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Use production workspace for full editing; this view focuses on shot flow.'**
+  String get studioStoryboardStudioBody;
+
+  /// No description provided for @studioStoryboardShotList.
+  ///
+  /// In en, this message translates to:
+  /// **'Shots'**
+  String get studioStoryboardShotList;
+
+  /// No description provided for @studioStoryboardShotLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Shot {n}'**
+  String studioStoryboardShotLabel(int n);
+
+  /// No description provided for @studioStoryboardProperties.
+  ///
+  /// In en, this message translates to:
+  /// **'Properties'**
+  String get studioStoryboardProperties;
+
+  /// No description provided for @studioStoryboardPropertiesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt, frame mode, and candidates appear here when a shot is selected.'**
+  String get studioStoryboardPropertiesHint;
+
+  /// No description provided for @studioKeyboardShortcuts.
+  ///
+  /// In en, this message translates to:
+  /// **'Shortcuts'**
+  String get studioKeyboardShortcuts;
+
+  /// No description provided for @studioGridStoryboardHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate a grid image, split cells, and assign to shots (backend job coming).'**
+  String get studioGridStoryboardHint;
+
+  /// No description provided for @studioGridStoryboardCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Grid mode'**
+  String get studioGridStoryboardCta;
+
+  /// No description provided for @studioEpisodeConsoleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Episode {n}'**
+  String studioEpisodeConsoleTitle(int n);
+
+  /// No description provided for @studioEpisodePreviewPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get studioEpisodePreviewPlaceholder;
+
+  /// No description provided for @studioEpisodeTabVoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice'**
+  String get studioEpisodeTabVoice;
+
+  /// No description provided for @studioEpisodeTabVisual.
+  ///
+  /// In en, this message translates to:
+  /// **'Visual'**
+  String get studioEpisodeTabVisual;
+
+  /// No description provided for @studioEpisodeTabVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Video'**
+  String get studioEpisodeTabVideo;
+
+  /// No description provided for @studioEpisodeTabAssemble.
+  ///
+  /// In en, this message translates to:
+  /// **'Assemble'**
+  String get studioEpisodeTabAssemble;
+
+  /// No description provided for @studioEpisodeTabExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Export'**
+  String get studioEpisodeTabExport;
+
+  /// No description provided for @studioAgentDrawerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'AI assistants'**
+  String get studioAgentDrawerTitle;
+
+  /// No description provided for @studioVideoFrameModeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Video generation mode'**
+  String get studioVideoFrameModeTitle;
+
+  /// No description provided for @studioVideoFrameFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'First frame'**
+  String get studioVideoFrameFirst;
+
+  /// No description provided for @studioVideoFrameLast.
+  ///
+  /// In en, this message translates to:
+  /// **'Last frame'**
+  String get studioVideoFrameLast;
+
+  /// No description provided for @studioVideoFrameBoard.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard board'**
+  String get studioVideoFrameBoard;
+
+  /// No description provided for @studioMergeAndPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge & preview'**
+  String get studioMergeAndPreview;
+
+  /// No description provided for @studioConflictRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Data changed elsewhere. Refresh to continue.'**
+  String get studioConflictRefresh;
 
   /// No description provided for @productNavProjects.
   ///
@@ -21056,6 +21788,12 @@ abstract class AppLocalizations {
   /// **'Unlink'**
   String get projectEditorAssetsWorkbenchUnlink;
 
+  /// No description provided for @projectEditorAssetsWorkbenchReviewCandidates.
+  ///
+  /// In en, this message translates to:
+  /// **'Review candidates'**
+  String get projectEditorAssetsWorkbenchReviewCandidates;
+
   /// No description provided for @projectEditorAssetsWorkbenchUploadEditImage.
   ///
   /// In en, this message translates to:
@@ -21067,6 +21805,174 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Upload clip asset'**
   String get projectEditorAssetsWorkbenchUploadClipAsset;
+
+  /// No description provided for @projectEditorAssetsWorkbenchSuggestedNextTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested next step'**
+  String get projectEditorAssetsWorkbenchSuggestedNextTitle;
+
+  /// No description provided for @projectEditorAssetsWorkbenchSuggestedNextOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the quickest maintenance action for the current asset set.'**
+  String get projectEditorAssetsWorkbenchSuggestedNextOverview;
+
+  /// No description provided for @projectEditorAssetsWorkbenchSuggestedNextBuildRoleLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Create or expand the role asset set first.'**
+  String get projectEditorAssetsWorkbenchSuggestedNextBuildRoleLibrary;
+
+  /// No description provided for @projectEditorAssetsWorkbenchSuggestedNextAnchorCharacters.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the focused script to tighten asset reuse and linkage.'**
+  String get projectEditorAssetsWorkbenchSuggestedNextAnchorCharacters;
+
+  /// No description provided for @projectEditorAssetsWorkbenchSuggestedNextConfirmCandidates.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the focused asset first, then confirm or clean up its candidate state.'**
+  String get projectEditorAssetsWorkbenchSuggestedNextConfirmCandidates;
+
+  /// No description provided for @projectEditorAssetCandidateDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review asset candidates'**
+  String get projectEditorAssetCandidateDialogTitle;
+
+  /// No description provided for @projectEditorAssetCandidateDialogIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Update the candidate workflow state for the focused asset without opening the full edit dialog.'**
+  String get projectEditorAssetCandidateDialogIntro;
+
+  /// No description provided for @projectEditorAssetCandidateTargetLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Target asset'**
+  String get projectEditorAssetCandidateTargetLabel;
+
+  /// No description provided for @projectEditorAssetCandidateCurrentStatusEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No asset is currently selected.'**
+  String get projectEditorAssetCandidateCurrentStatusEmpty;
+
+  /// No description provided for @projectEditorAssetCandidateCurrentStatusLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Current candidate status: {status}'**
+  String projectEditorAssetCandidateCurrentStatusLine(String status);
+
+  /// No description provided for @projectEditorAssetCandidatePendingOnlyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Only show pending assets'**
+  String get projectEditorAssetCandidatePendingOnlyLabel;
+
+  /// No description provided for @projectEditorAssetCandidatePendingOnlyHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the confirm queue first, then expand to all assets if you need a wider cleanup pass.'**
+  String get projectEditorAssetCandidatePendingOnlyHelper;
+
+  /// No description provided for @projectEditorAssetCandidatePrevious.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous asset'**
+  String get projectEditorAssetCandidatePrevious;
+
+  /// No description provided for @projectEditorAssetCandidateNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next asset'**
+  String get projectEditorAssetCandidateNext;
+
+  /// No description provided for @projectEditorAssetCandidateQueuePosition.
+  ///
+  /// In en, this message translates to:
+  /// **'{current} of {total}'**
+  String projectEditorAssetCandidateQueuePosition(int current, int total);
+
+  /// No description provided for @projectEditorAssetCandidateNextStatusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Next candidate status'**
+  String get projectEditorAssetCandidateNextStatusLabel;
+
+  /// No description provided for @projectEditorAssetCandidateStatusUnset.
+  ///
+  /// In en, this message translates to:
+  /// **'Unset'**
+  String get projectEditorAssetCandidateStatusUnset;
+
+  /// No description provided for @projectEditorAssetCandidateStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get projectEditorAssetCandidateStatusPending;
+
+  /// No description provided for @projectEditorAssetCandidateStatusLinked.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked'**
+  String get projectEditorAssetCandidateStatusLinked;
+
+  /// No description provided for @projectEditorAssetCandidateStatusIgnored.
+  ///
+  /// In en, this message translates to:
+  /// **'Ignored'**
+  String get projectEditorAssetCandidateStatusIgnored;
+
+  /// No description provided for @projectEditorAssetCandidateSaveStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Save status'**
+  String get projectEditorAssetCandidateSaveStatus;
+
+  /// No description provided for @projectEditorAssetCandidateSaveToVisible.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to visible'**
+  String get projectEditorAssetCandidateSaveToVisible;
+
+  /// No description provided for @projectEditorAssetCandidateSaveToRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to remaining'**
+  String get projectEditorAssetCandidateSaveToRemaining;
+
+  /// No description provided for @projectEditorAssetCandidateSaveAndNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Save & next'**
+  String get projectEditorAssetCandidateSaveAndNext;
+
+  /// No description provided for @projectEditorAssetCandidateQueueDoneSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending review queue is clear.'**
+  String get projectEditorAssetCandidateQueueDoneSnack;
+
+  /// No description provided for @projectEditorAssetCandidateBulkSaveSuccessSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved {count} asset candidate statuses to {status}'**
+  String projectEditorAssetCandidateBulkSaveSuccessSnack(
+    int count,
+    String status,
+  );
+
+  /// No description provided for @projectEditorAssetCandidateSaveSuccessSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved candidate status for asset #{assetId}: {status}'**
+  String projectEditorAssetCandidateSaveSuccessSnack(
+    int assetId,
+    String status,
+  );
 
   /// No description provided for @projectEditorAssetImagesWorkbenchDialogTitle.
   ///
@@ -31209,7 +32115,7 @@ abstract class AppLocalizations {
   /// No description provided for @statusPageTitle.
   ///
   /// In en, this message translates to:
-  /// **'Toonflow Status'**
+  /// **'OpenFlow Status'**
   String get statusPageTitle;
 
   /// No description provided for @statusPageRefreshTooltip.
@@ -31233,7 +32139,7 @@ abstract class AppLocalizations {
   /// No description provided for @statusPageIntroInternalSuffix.
   ///
   /// In en, this message translates to:
-  /// **' INTERNAL_OPS_TOKEN is set via dart-define, so internal queue stats are included.'**
+  /// **' OPENFLOW_INTERNAL_OPS_TOKEN is set via dart-define, so internal queue stats are included.'**
   String get statusPageIntroInternalSuffix;
 
   /// No description provided for @statusPageRefreshing.
@@ -31760,7 +32666,7 @@ abstract class AppLocalizations {
   /// No description provided for @shellJobQueueStatsSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Uses INTERNAL_OPS_TOKEN dart-define → GET /api/v1/jobs/queue/stats'**
+  /// **'Uses OPENFLOW_INTERNAL_OPS_TOKEN dart-define → GET /api/v1/jobs/queue/stats'**
   String get shellJobQueueStatsSubtitle;
 
   /// No description provided for @shellJobQueueStatsStatsLine.

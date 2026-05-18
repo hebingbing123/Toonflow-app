@@ -168,11 +168,11 @@ Future<AccountExportDownloadV1> downloadAccountExportV1(
       .timeout(const Duration(minutes: 2));
   ensureHttpSuccess(res);
   return AccountExportDownloadV1(
-    bytes: res.bodyBytes,
-    fileName:
+      bytes: res.bodyBytes,
+      fileName:
         _fileNameFromContentDisposition(res.headers['content-disposition']) ??
         fallbackFileName ??
-        'toonflow-account-export-$jobId.zip',
+        'openflow-account-export-$jobId.zip',
   );
 }
 

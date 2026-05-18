@@ -37,13 +37,53 @@ String planTierDisplayName(AppLocalizations l10n, String? planTier) {
   switch (planTier?.trim().toLowerCase()) {
     case 'free':
       return l10n.billingPlanTierFree;
+    case 'creator':
+      return l10n.billingPlanTierCreator;
     case 'pro':
       return l10n.billingPlanTierPro;
+    case 'studio':
+      return l10n.billingPlanTierStudio;
     case 'enterprise':
       return l10n.billingPlanTierEnterprise;
     default:
       return l10n.billingPlanTierUnknown;
   }
+}
+
+String pricingUnitLabel(AppLocalizations l10n, String unit) {
+  switch (unit.trim().toLowerCase()) {
+    case 'per_1k_tokens':
+      return l10n.billingPricingUnitPer1kTokens;
+    case 'per_image':
+      return l10n.billingPricingUnitPerImage;
+    case 'per_video_second':
+      return l10n.billingPricingUnitPerVideoSecond;
+    case 'per_job':
+      return l10n.billingPricingUnitPerJob;
+    default:
+      return unit;
+  }
+}
+
+String valueTierLabel(AppLocalizations l10n, String? tier) {
+  switch (tier?.trim().toLowerCase()) {
+    case 'economy':
+      return l10n.studioValueTierEconomy;
+    case 'balanced':
+      return l10n.studioValueTierBalanced;
+    case 'quality':
+      return l10n.studioValueTierQuality;
+    default:
+      return tier ?? '';
+  }
+}
+
+String formatCnyFromCents(int cents) {
+  final yuan = cents / 100.0;
+  if (yuan == yuan.roundToDouble()) {
+    return yuan.toStringAsFixed(0);
+  }
+  return yuan.toStringAsFixed(2);
 }
 
 String billingNotificationTypeLabel(
