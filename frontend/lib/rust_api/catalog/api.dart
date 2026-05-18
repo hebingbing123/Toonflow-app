@@ -11,10 +11,14 @@ import '../shared_kernel/index.dart';
 Future<List<ModelListEntry>> fetchModelsCatalog(
   String accessToken, {
   String typeFilter = 'all',
+  bool includePricing = false,
 }) async {
-  final uri = Uri.parse(
-    '$kApiBaseUrl/api/v1/models',
-  ).replace(queryParameters: {'type': typeFilter});
+  final uri = Uri.parse('$kApiBaseUrl/api/v1/models').replace(
+    queryParameters: <String, String>{
+      'type': typeFilter,
+      if (includePricing) 'include_pricing': 'true',
+    },
+  );
   final res = await http
       .get(uri, headers: {'Authorization': 'Bearer $accessToken'})
       .timeout(const Duration(seconds: 15));

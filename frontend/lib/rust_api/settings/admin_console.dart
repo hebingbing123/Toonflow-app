@@ -6,7 +6,7 @@ import '../../config.dart';
 import '../core.dart';
 
 Map<String, String> _internalHeaders(String token) => <String, String>{
-  'x-toonflow-internal-token': token.trim(),
+  'x-openflow-internal-token': token.trim(),
 };
 
 class AdminSearchResponseV1 {

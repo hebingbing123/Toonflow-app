@@ -266,6 +266,210 @@ class ProjectHomeOnboarding {
   }
 }
 
+class ProjectHomeAction {
+  const ProjectHomeAction({
+    required this.key,
+    required this.title,
+    required this.detail,
+    required this.targetStep,
+    required this.ctaLabel,
+    this.launchIntent,
+  });
+
+  final String key;
+  final String title;
+  final String detail;
+  final String targetStep;
+  final String ctaLabel;
+  final ProjectHomeLaunchIntent? launchIntent;
+
+  factory ProjectHomeAction.fromJson(Map<String, dynamic> json) {
+    return ProjectHomeAction(
+      key: json['key'] as String? ?? '',
+      title: json['title'] as String? ?? '',
+      detail: json['detail'] as String? ?? '',
+      targetStep: json['target_step'] as String? ?? 'script',
+      ctaLabel: json['cta_label'] as String? ?? '',
+      launchIntent: ProjectHomeLaunchIntent.parseRequired(
+        json['launch_intent'],
+        context: 'ProjectHomeAction',
+      ),
+    );
+  }
+}
+
+class ProjectHomeMetric {
+  const ProjectHomeMetric({
+    required this.key,
+    required this.label,
+    required this.value,
+    required this.detail,
+    this.launchIntent,
+  });
+
+  final String key;
+  final String label;
+  final String value;
+  final String detail;
+  final ProjectHomeLaunchIntent? launchIntent;
+
+  factory ProjectHomeMetric.fromJson(Map<String, dynamic> json) {
+    return ProjectHomeMetric(
+      key: json['key'] as String? ?? '',
+      label: json['label'] as String? ?? '',
+      value: json['value'] as String? ?? '',
+      detail: json['detail'] as String? ?? '',
+      launchIntent: ProjectHomeLaunchIntent.parseRequired(
+        json['launch_intent'],
+        context: 'ProjectHomeMetric',
+      ),
+    );
+  }
+}
+
+class ProjectHomeStarterTemplate {
+  const ProjectHomeStarterTemplate({
+    required this.key,
+    required this.title,
+    required this.detail,
+    required this.targetStep,
+    required this.ctaLabel,
+    this.launchIntent,
+  });
+
+  final String key;
+  final String title;
+  final String detail;
+  final String targetStep;
+  final String ctaLabel;
+  final ProjectHomeLaunchIntent? launchIntent;
+
+  factory ProjectHomeStarterTemplate.fromJson(Map<String, dynamic> json) {
+    return ProjectHomeStarterTemplate(
+      key: json['key'] as String? ?? '',
+      title: json['title'] as String? ?? '',
+      detail: json['detail'] as String? ?? '',
+      targetStep: json['target_step'] as String? ?? 'script',
+      ctaLabel: json['cta_label'] as String? ?? '',
+      launchIntent: ProjectHomeLaunchIntent.parseRequired(
+        json['launch_intent'],
+        context: 'ProjectHomeStarterTemplate',
+      ),
+    );
+  }
+}
+
+class ProjectHomeLaunchIntent {
+  const ProjectHomeLaunchIntent({
+    this.targetStep,
+    this.agentKind,
+    this.assetTarget,
+    this.action,
+    this.notice,
+  });
+
+  final String? targetStep;
+  final String? agentKind;
+  final String? assetTarget;
+  final String? action;
+  final String? notice;
+
+  bool get hasRoute {
+    return (targetStep ?? '').trim().isNotEmpty ||
+        (agentKind ?? '').trim().isNotEmpty ||
+        (assetTarget ?? '').trim().isNotEmpty ||
+        (action ?? '').trim().isNotEmpty;
+  }
+
+  factory ProjectHomeLaunchIntent.fromJson(Map<String, dynamic> raw) {
+    final targetStep =
+        raw['target_step'] as String? ?? raw['targetStep'] as String?;
+    final agentKind =
+        raw['agent_kind'] as String? ?? raw['agentKind'] as String?;
+    final assetTarget =
+        raw['asset_target'] as String? ?? raw['assetTarget'] as String?;
+    final action = raw['action'] as String?;
+    final notice = raw['notice'] as String?;
+    final intent = ProjectHomeLaunchIntent(
+      targetStep: targetStep,
+      agentKind: agentKind,
+      assetTarget: assetTarget,
+      action: action,
+      notice: notice,
+    );
+    if (!intent.hasRoute) {
+      throw const FormatException(
+        'launch_intent must include action, target_step, agent_kind, or asset_target',
+      );
+    }
+    return intent;
+  }
+
+  static ProjectHomeLaunchIntent parseRequired(
+    Object? raw, {
+    required String context,
+  }) {
+    if (raw is! Map<String, dynamic>) {
+      throw FormatException('$context.launch_intent must be a JSON object');
+    }
+    try {
+      return ProjectHomeLaunchIntent.fromJson(raw);
+    } on FormatException catch (error) {
+      throw FormatException('$context.${error.message}');
+    }
+  }
+}
+
+class ProjectHomeCockpit {
+  const ProjectHomeCockpit({
+    required this.headline,
+    required this.subheadline,
+    required this.primaryAction,
+    required this.secondaryActions,
+    required this.metrics,
+    required this.starterTemplates,
+  });
+
+  final String headline;
+  final String subheadline;
+  final ProjectHomeAction primaryAction;
+  final List<ProjectHomeAction> secondaryActions;
+  final List<ProjectHomeMetric> metrics;
+  final List<ProjectHomeStarterTemplate> starterTemplates;
+
+  factory ProjectHomeCockpit.fromJson(Map<String, dynamic> json) {
+    final secondary =
+        json['secondary_actions'] as List<dynamic>? ?? const <dynamic>[];
+    final metrics = json['metrics'] as List<dynamic>? ?? const <dynamic>[];
+    final starters =
+        json['starter_templates'] as List<dynamic>? ?? const <dynamic>[];
+    return ProjectHomeCockpit(
+      headline: json['headline'] as String? ?? '',
+      subheadline: json['subheadline'] as String? ?? '',
+      primaryAction: ProjectHomeAction.fromJson(
+        json['primary_action'] as Map<String, dynamic>,
+      ),
+      secondaryActions: secondary
+          .map(
+            (item) => ProjectHomeAction.fromJson(item as Map<String, dynamic>),
+          )
+          .toList(growable: false),
+      metrics: metrics
+          .map(
+            (item) => ProjectHomeMetric.fromJson(item as Map<String, dynamic>),
+          )
+          .toList(growable: false),
+      starterTemplates: starters
+          .map(
+            (item) => ProjectHomeStarterTemplate.fromJson(
+              item as Map<String, dynamic>,
+            ),
+          )
+          .toList(growable: false),
+    );
+  }
+}
+
 class ProjectHome {
   const ProjectHome({
     required this.project,
@@ -274,6 +478,7 @@ class ProjectHome {
     required this.readinessSummary,
     required this.onboarding,
     required this.styleBibleReady,
+    required this.cockpit,
     this.projectBrief,
     this.brandBible,
   });
@@ -284,6 +489,7 @@ class ProjectHome {
   final String readinessSummary;
   final ProjectHomeOnboarding onboarding;
   final bool styleBibleReady;
+  final ProjectHomeCockpit cockpit;
   final ProjectBriefDraft? projectBrief;
   final BrandBibleDraft? brandBible;
 
@@ -297,6 +503,9 @@ class ProjectHome {
         json['onboarding'] as Map<String, dynamic>,
       ),
       styleBibleReady: json['style_bible_ready'] as bool? ?? false,
+      cockpit: ProjectHomeCockpit.fromJson(
+        json['cockpit'] as Map<String, dynamic>,
+      ),
       projectBrief: json['project_brief'] is Map<String, dynamic>
           ? ProjectBriefDraft.fromJson(
               json['project_brief'] as Map<String, dynamic>,
@@ -442,7 +651,9 @@ class StoryboardShortVideoReadiness {
       candidateCleared: json['candidate_cleared'] as bool,
       noBlockingJob: json['no_blocking_job'] as bool,
       readyForGeneration: json['ready_for_generation'] as bool,
-      blockingReasons: reasons.map(_parseShortVideoBlockingReasonFromJson).toList(),
+      blockingReasons: reasons
+          .map(_parseShortVideoBlockingReasonFromJson)
+          .toList(),
     );
   }
 }

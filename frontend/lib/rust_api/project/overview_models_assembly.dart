@@ -1,5 +1,7 @@
 // Project overview data models - Part 2: Assets, assembly, and export models
 
+import 'overview_models.dart' show ProjectHomeLaunchIntent;
+
 class AssetsOverviewCandidateCounts {
   const AssetsOverviewCandidateCounts({
     required this.pending,
@@ -75,18 +77,222 @@ class AssetsOverviewTypeGroup {
   }
 }
 
+class AssetsOverviewHubAction {
+  const AssetsOverviewHubAction({
+    required this.key,
+    required this.title,
+    required this.detail,
+    required this.targetStep,
+    required this.ctaLabel,
+    this.launchIntent,
+  });
+
+  final String key;
+  final String title;
+  final String detail;
+  final String targetStep;
+  final String ctaLabel;
+  final ProjectHomeLaunchIntent? launchIntent;
+
+  factory AssetsOverviewHubAction.fromJson(Map<String, dynamic> json) {
+    return AssetsOverviewHubAction(
+      key: json['key'] as String? ?? '',
+      title: json['title'] as String? ?? '',
+      detail: json['detail'] as String? ?? '',
+      targetStep: json['target_step'] as String? ?? 'assets',
+      ctaLabel: json['cta_label'] as String? ?? '',
+      launchIntent: ProjectHomeLaunchIntent.parseRequired(
+        json['launch_intent'],
+        context: 'AssetsOverviewHubAction',
+      ),
+    );
+  }
+}
+
+class AssetsOverviewHubMetric {
+  const AssetsOverviewHubMetric({
+    required this.key,
+    required this.label,
+    required this.value,
+    required this.detail,
+    this.launchIntent,
+  });
+
+  final String key;
+  final String label;
+  final String value;
+  final String detail;
+  final ProjectHomeLaunchIntent? launchIntent;
+
+  factory AssetsOverviewHubMetric.fromJson(Map<String, dynamic> json) {
+    return AssetsOverviewHubMetric(
+      key: json['key'] as String? ?? '',
+      label: json['label'] as String? ?? '',
+      value: json['value'] as String? ?? '',
+      detail: json['detail'] as String? ?? '',
+      launchIntent: ProjectHomeLaunchIntent.parseRequired(
+        json['launch_intent'],
+        context: 'AssetsOverviewHubMetric',
+      ),
+    );
+  }
+}
+
+class AssetsOverviewCharacterSummary {
+  const AssetsOverviewCharacterSummary({
+    required this.characterId,
+    required this.name,
+    this.assetId,
+    this.assetName,
+    required this.linkedScriptNumericIds,
+    required this.hasVoiceConfig,
+    required this.missingAssetAnchor,
+  });
+
+  final String characterId;
+  final String name;
+  final String? assetId;
+  final String? assetName;
+  final List<int> linkedScriptNumericIds;
+  final bool hasVoiceConfig;
+  final bool missingAssetAnchor;
+
+  factory AssetsOverviewCharacterSummary.fromJson(Map<String, dynamic> json) {
+    final raw =
+        json['linked_script_numeric_ids'] as List<dynamic>? ??
+        const <dynamic>[];
+    return AssetsOverviewCharacterSummary(
+      characterId: json['character_id'] as String,
+      name: json['name'] as String? ?? '',
+      assetId: json['asset_id'] as String?,
+      assetName: json['asset_name'] as String?,
+      linkedScriptNumericIds: raw
+          .map((e) => (e as num).toInt())
+          .toList(growable: false),
+      hasVoiceConfig: json['has_voice_config'] as bool? ?? false,
+      missingAssetAnchor: json['missing_asset_anchor'] as bool? ?? false,
+    );
+  }
+}
+
+class AssetsOverviewRoleSummary {
+  const AssetsOverviewRoleSummary({
+    required this.assetId,
+    required this.numericId,
+    required this.name,
+    this.candidateStatus,
+    required this.linkedScriptNumericIds,
+    required this.linkedCharacterNames,
+  });
+
+  final String assetId;
+  final int numericId;
+  final String name;
+  final String? candidateStatus;
+  final List<int> linkedScriptNumericIds;
+  final List<String> linkedCharacterNames;
+
+  factory AssetsOverviewRoleSummary.fromJson(Map<String, dynamic> json) {
+    final scripts =
+        json['linked_script_numeric_ids'] as List<dynamic>? ??
+        const <dynamic>[];
+    final names =
+        json['linked_character_names'] as List<dynamic>? ?? const <dynamic>[];
+    return AssetsOverviewRoleSummary(
+      assetId: json['asset_id'] as String,
+      numericId: (json['numeric_id'] as num).toInt(),
+      name: json['name'] as String? ?? '',
+      candidateStatus: json['candidate_status'] as String?,
+      linkedScriptNumericIds: scripts
+          .map((e) => (e as num).toInt())
+          .toList(growable: false),
+      linkedCharacterNames: names
+          .map((e) => e.toString())
+          .toList(growable: false),
+    );
+  }
+}
+
+class AssetsOverviewHub {
+  const AssetsOverviewHub({
+    required this.headline,
+    required this.subheadline,
+    required this.primaryAction,
+    required this.metrics,
+    required this.characterSummaries,
+    required this.reusableRoleAssets,
+  });
+
+  final String headline;
+  final String subheadline;
+  final AssetsOverviewHubAction primaryAction;
+  final List<AssetsOverviewHubMetric> metrics;
+  final List<AssetsOverviewCharacterSummary> characterSummaries;
+  final List<AssetsOverviewRoleSummary> reusableRoleAssets;
+
+  const AssetsOverviewHub.empty()
+    : headline = '',
+      subheadline = '',
+      primaryAction = const AssetsOverviewHubAction(
+        key: '',
+        title: '',
+        detail: '',
+        targetStep: 'assets',
+        ctaLabel: '',
+        launchIntent: null,
+      ),
+      metrics = const <AssetsOverviewHubMetric>[],
+      characterSummaries = const <AssetsOverviewCharacterSummary>[],
+      reusableRoleAssets = const <AssetsOverviewRoleSummary>[];
+
+  factory AssetsOverviewHub.fromJson(Map<String, dynamic> json) {
+    final metrics = json['metrics'] as List<dynamic>? ?? const <dynamic>[];
+    final characters =
+        json['character_summaries'] as List<dynamic>? ?? const <dynamic>[];
+    final roles =
+        json['reusable_role_assets'] as List<dynamic>? ?? const <dynamic>[];
+    return AssetsOverviewHub(
+      headline: json['headline'] as String? ?? '',
+      subheadline: json['subheadline'] as String? ?? '',
+      primaryAction: AssetsOverviewHubAction.fromJson(
+        json['primary_action'] as Map<String, dynamic>,
+      ),
+      metrics: metrics
+          .map(
+            (e) => AssetsOverviewHubMetric.fromJson(e as Map<String, dynamic>),
+          )
+          .toList(growable: false),
+      characterSummaries: characters
+          .map(
+            (e) => AssetsOverviewCharacterSummary.fromJson(
+              e as Map<String, dynamic>,
+            ),
+          )
+          .toList(growable: false),
+      reusableRoleAssets: roles
+          .map(
+            (e) =>
+                AssetsOverviewRoleSummary.fromJson(e as Map<String, dynamic>),
+          )
+          .toList(growable: false),
+    );
+  }
+}
+
 class ProjectAssetsOverview {
   const ProjectAssetsOverview({
     required this.schemaVersion,
     required this.totalCount,
     required this.candidateCounts,
     required this.byAssetType,
+    required this.hub,
   });
 
   final int schemaVersion;
   final int totalCount;
   final AssetsOverviewCandidateCounts candidateCounts;
   final List<AssetsOverviewTypeGroup> byAssetType;
+  final AssetsOverviewHub hub;
 
   factory ProjectAssetsOverview.fromJson(Map<String, dynamic> json) {
     final groups = json['by_asset_type'] as List<dynamic>? ?? const <dynamic>[];
@@ -101,6 +307,9 @@ class ProjectAssetsOverview {
             (e) => AssetsOverviewTypeGroup.fromJson(e as Map<String, dynamic>),
           )
           .toList(growable: false),
+      hub: json['hub'] is Map<String, dynamic>
+          ? AssetsOverviewHub.fromJson(json['hub'] as Map<String, dynamic>)
+          : const AssetsOverviewHub.empty(),
     );
   }
 }
@@ -182,8 +391,7 @@ class ShortVideoAssemblyShotExportGap {
   final bool durationAnomaly;
 
   factory ShortVideoAssemblyShotExportGap.fromJson(Map<String, dynamic> json) {
-    final codes =
-        json['gap_codes'] as List<dynamic>? ?? const <dynamic>[];
+    final codes = json['gap_codes'] as List<dynamic>? ?? const <dynamic>[];
     return ShortVideoAssemblyShotExportGap(
       gapCodes: codes.map((e) => e as String).toList(growable: false),
       hasBlocking: json['has_blocking'] as bool? ?? false,
@@ -546,8 +754,7 @@ class ShortVideoExportCheckStoryboardGap {
   factory ShortVideoExportCheckStoryboardGap.fromJson(
     Map<String, dynamic> json,
   ) {
-    final codes =
-        json['gap_codes'] as List<dynamic>? ?? const <dynamic>[];
+    final codes = json['gap_codes'] as List<dynamic>? ?? const <dynamic>[];
     return ShortVideoExportCheckStoryboardGap(
       scriptNumericId: (json['script_numeric_id'] as num).toInt(),
       storyboardId: json['storyboard_id'] as String,

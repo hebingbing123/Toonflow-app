@@ -443,7 +443,7 @@ Future<WorkspaceStatsResponse> fetchWorkspaceStatsV1(
 }) async {
   final uri = Uri.parse('$kApiBaseUrl/api/v1/workspaces/$workspaceId/stats');
   final res = await http
-      .get(uri, headers: {'x-toonflow-internal-token': internalOpsToken.trim()})
+      .get(uri, headers: {'x-openflow-internal-token': internalOpsToken.trim()})
       .timeout(const Duration(seconds: 15));
   ensureHttpSuccess(res);
   final map = jsonDecode(res.body) as Map<String, dynamic>;
