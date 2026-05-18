@@ -341,11 +341,55 @@ async fn fetch_bad_case_stats(
 }
 
 async fn fetch_recent_tasks(
-    _pool: &sqlx::PgPool,
-    _project_id: Uuid,
-    _uid: Uuid,
-    _limit: i64,
+    pool: &sqlx::PgPool,
+    project_id: Uuid,
+    uid: Uuid,
+    limit: i64,
 ) -> Result<Option<serde_json::Value>, ApiError> {
-    // Placeholder - actual implementation would query the task center
-    Ok(None)
+    use crate::jobs::{hydrate_job_rows, JobRow};
+
+    let limit = limit.clamp(1, 20);
+    let mut rows: Vec<JobRow> = sqlx::query_as(
+        r#"
+        SELECT numeric_task_id, id, owner_user_id, kind, status, payload, result, error_message, error_details, idempotency_key, claimed_by, created_at, updated_at
+        FROM app_generation_job
+        WHERE (
+            owner_user_id = $1
+            OR (
+                (payload->>'project_uuid') = $2::text
+                AND EXISTS (
+                    SELECT 1 FROM app_project p
+                    INNER JOIN app_workspace_member wm ON wm.workspace_id = p.workspace_id
+                    WHERE p.id = $2::uuid AND wm.user_id = $1
+                )
+            )
+        )
+        AND kind IN (
+            'video.generate',
+            'video.export',
+            'voiceover.generate',
+            'short_video.pre_assembly',
+            'short_video.timeline_preview',
+            'asset.image.generate',
+            'asset.video.generate'
+        )
+        ORDER BY created_at DESC
+        LIMIT $3
+        "#,
+    )
+    .bind(uid)
+    .bind(project_id)
+    .bind(limit)
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    if rows.is_empty() {
+        return Ok(Some(serde_json::json!([])));
+    }
+
+    hydrate_job_rows(&mut rows);
+    let value = serde_json::to_value(rows)
+        .map_err(|e| ApiError::DatabaseError(format!("serialize recent tasks: {e}")))?;
+    Ok(Some(value))
 }

@@ -12,6 +12,7 @@
 //! - `reconciliation_worker` — 定期对账任务（Task 4.3）
 //! - `ops_view` — Internal ops endpoints for workspace billing queries (Task 8.1)
 
+mod estimate_enrich;
 mod events_list;
 mod ingest;
 mod openapi;

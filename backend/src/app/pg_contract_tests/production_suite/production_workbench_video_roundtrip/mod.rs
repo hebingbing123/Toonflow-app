@@ -338,7 +338,7 @@ async fn production_workbench_video_roundtrip() {
     )
     .await;
     assert_eq!(
-        add_track["track_id"].as_i64(),
+        add_track["trackId"].as_i64(),
         Some(8),
         "add-track should allocate next track id"
     );

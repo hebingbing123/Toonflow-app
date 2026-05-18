@@ -47,6 +47,8 @@ class ProjectStudioHost {
     this.onOpenAssetEditor,
     this.initialStep = StudioStep.script,
     this.completedSteps = 0,
+    this.runningJobCount = 0,
+    this.failedJobCount = 0,
     this.conflictMessage,
     this.onRefreshAfterConflict,
   });
@@ -62,6 +64,8 @@ class ProjectStudioHost {
   final ValueChanged<ProjectStudioAssetEditorTarget>? onOpenAssetEditor;
   final StudioStep initialStep;
   final int completedSteps;
+  final int runningJobCount;
+  final int failedJobCount;
   final String? conflictMessage;
   final VoidCallback? onRefreshAfterConflict;
   final VoidCallback onExit;

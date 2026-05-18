@@ -37,7 +37,7 @@ fn issue_from_gap(
     }
 }
 
-fn row_to_gap_input(row: &super::assembly_query::AssemblyFlatRow) -> ExportGapRowInput {
+pub(crate) fn row_to_gap_input(row: &super::assembly_query::AssemblyFlatRow) -> ExportGapRowInput {
     ExportGapRowInput {
         storyboard_id: row.storyboard_id,
         storyboard_numeric_id: row.storyboard_numeric_id,

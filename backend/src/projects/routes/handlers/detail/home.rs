@@ -601,7 +601,7 @@ pub(crate) async fn project_home_by_id(
           SELECT 1
           FROM app_agent_memory
           WHERE owner_user_id = $1
-            AND legacy_project_id = $2
+            AND numeric_project_id = $2
             AND agent_type = 'productionAgent'
             AND name = 'style_bible:project'
             AND NULLIF(TRIM(content), '') IS NOT NULL

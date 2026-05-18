@@ -500,6 +500,72 @@ abstract class AppLocalizations {
   /// **'Assembly Style Adjustment'**
   String get shortVideoSpaceAssemblyStyleAdjustment;
 
+  /// No description provided for @shortVideoSpaceAssemblyInputTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Assembly input (storyboard + assets)'**
+  String get shortVideoSpaceAssemblyInputTitle;
+
+  /// No description provided for @shortVideoSpaceAssemblyInputBlockingBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolve blocking gaps before pre-assembly or export ({count} shots)'**
+  String shortVideoSpaceAssemblyInputBlockingBanner(int count);
+
+  /// No description provided for @shortVideoSpaceAssemblyInputShotReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready'**
+  String get shortVideoSpaceAssemblyInputShotReady;
+
+  /// No description provided for @shortVideoSpaceAssemblyInputShotBlocking.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocking'**
+  String get shortVideoSpaceAssemblyInputShotBlocking;
+
+  /// No description provided for @shortVideoSpaceAssemblyInputFixClipDesk.
+  ///
+  /// In en, this message translates to:
+  /// **'Clip desk'**
+  String get shortVideoSpaceAssemblyInputFixClipDesk;
+
+  /// No description provided for @shortVideoSpaceAssemblyInputFixStoryboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard'**
+  String get shortVideoSpaceAssemblyInputFixStoryboard;
+
+  /// No description provided for @shortVideoSpaceAssemblyInputFixProduction.
+  ///
+  /// In en, this message translates to:
+  /// **'Production'**
+  String get shortVideoSpaceAssemblyInputFixProduction;
+
+  /// No description provided for @shortVideoSpaceAssemblyInputActiveJob.
+  ///
+  /// In en, this message translates to:
+  /// **'Assembly job {jobId}: {status}'**
+  String shortVideoSpaceAssemblyInputActiveJob(String jobId, String status);
+
+  /// No description provided for @shortVideoSpaceAssemblyInputOpenTaskCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'Open task center'**
+  String get shortVideoSpaceAssemblyInputOpenTaskCenter;
+
+  /// No description provided for @shortVideoSpaceAssemblyGatePreAssemblyBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-assembly blocked until export gaps are resolved'**
+  String get shortVideoSpaceAssemblyGatePreAssemblyBlocked;
+
+  /// No description provided for @shortVideoSpaceAssemblyInputCreateDraftFromJob.
+  ///
+  /// In en, this message translates to:
+  /// **'Save pre-assembly as draft'**
+  String get shortVideoSpaceAssemblyInputCreateDraftFromJob;
+
   /// No description provided for @shortVideoSpaceExportPreCheck.
   ///
   /// In en, this message translates to:
@@ -2205,6 +2271,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Uses {jobs} job quota today'**
   String studioCostEstimateQuota(int jobs);
+
+  /// No description provided for @studioCostEstimateQuotaPercent.
+  ///
+  /// In en, this message translates to:
+  /// **'≈ {percent}% of today\'s job quota after submit'**
+  String studioCostEstimateQuotaPercent(String percent);
+
+  /// No description provided for @studioCostEstimateByok.
+  ///
+  /// In en, this message translates to:
+  /// **'Using your API key — platform billing exempt; vendor bills you directly.'**
+  String get studioCostEstimateByok;
+
+  /// No description provided for @studioTokenEfficiencyEfficient.
+  ///
+  /// In en, this message translates to:
+  /// **'Efficient ROI'**
+  String get studioTokenEfficiencyEfficient;
+
+  /// No description provided for @studioTokenEfficiencyObserve.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch usage'**
+  String get studioTokenEfficiencyObserve;
+
+  /// No description provided for @studioTokenEfficiencyHighCost.
+  ///
+  /// In en, this message translates to:
+  /// **'High cost vs quality'**
+  String get studioTokenEfficiencyHighCost;
 
   /// No description provided for @studioCostConfirmTitle.
   ///

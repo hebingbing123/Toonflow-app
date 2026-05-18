@@ -20,6 +20,7 @@ pub(super) async fn connect_contract_app() -> (PgPool, String, Router, Uuid) {
         .connect(&url)
         .await
         .expect("connect DATABASE_URL");
+    crate::app::pg_contract_tests::ensure_contract_auth_user(&pool).await;
 
     let sub = Uuid::parse_str(CONTRACT_USER_SUB).unwrap();
     let token = jwt_fixture::encode_supabase_style(sub, secret.as_bytes());

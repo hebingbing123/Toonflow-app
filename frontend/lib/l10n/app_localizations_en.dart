@@ -244,6 +244,46 @@ class AppLocalizationsEn extends AppLocalizations {
       'Assembly Style Adjustment';
 
   @override
+  String get shortVideoSpaceAssemblyInputTitle =>
+      'Assembly input (storyboard + assets)';
+
+  @override
+  String shortVideoSpaceAssemblyInputBlockingBanner(int count) {
+    return 'Resolve blocking gaps before pre-assembly or export ($count shots)';
+  }
+
+  @override
+  String get shortVideoSpaceAssemblyInputShotReady => 'Ready';
+
+  @override
+  String get shortVideoSpaceAssemblyInputShotBlocking => 'Blocking';
+
+  @override
+  String get shortVideoSpaceAssemblyInputFixClipDesk => 'Clip desk';
+
+  @override
+  String get shortVideoSpaceAssemblyInputFixStoryboard => 'Storyboard';
+
+  @override
+  String get shortVideoSpaceAssemblyInputFixProduction => 'Production';
+
+  @override
+  String shortVideoSpaceAssemblyInputActiveJob(String jobId, String status) {
+    return 'Assembly job $jobId: $status';
+  }
+
+  @override
+  String get shortVideoSpaceAssemblyInputOpenTaskCenter => 'Open task center';
+
+  @override
+  String get shortVideoSpaceAssemblyGatePreAssemblyBlocked =>
+      'Pre-assembly blocked until export gaps are resolved';
+
+  @override
+  String get shortVideoSpaceAssemblyInputCreateDraftFromJob =>
+      'Save pre-assembly as draft';
+
+  @override
   String get shortVideoSpaceExportPreCheck => 'Export Pre-check';
 
   @override
@@ -1239,6 +1279,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String studioCostEstimateQuota(int jobs) {
     return 'Uses $jobs job quota today';
   }
+
+  @override
+  String studioCostEstimateQuotaPercent(String percent) {
+    return '≈ $percent% of today\'s job quota after submit';
+  }
+
+  @override
+  String get studioCostEstimateByok =>
+      'Using your API key — platform billing exempt; vendor bills you directly.';
+
+  @override
+  String get studioTokenEfficiencyEfficient => 'Efficient ROI';
+
+  @override
+  String get studioTokenEfficiencyObserve => 'Watch usage';
+
+  @override
+  String get studioTokenEfficiencyHighCost => 'High cost vs quality';
 
   @override
   String get studioCostConfirmTitle => 'Confirm generation';

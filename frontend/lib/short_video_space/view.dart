@@ -6,6 +6,7 @@ import '../design_system/components/studio_text_styles.dart';
 import '../l10n/app_localizations.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
+import 'panels/assembly_input_panel.dart';
 import 'publish_copy_editor.dart';
 import 'publish_schedule_calendar.dart';
 
@@ -263,6 +264,85 @@ class ShortVideoAssetsOverviewPanelUi {
   final String headline;
   final List<String> typeLines;
   final String detail;
+}
+
+/// Where to send the user to fix an assembly input row.
+enum AssemblyInputFixTarget { storyboard, production, clipDesk }
+
+/// Per-shot assembly input row (merged assembly + export gaps).
+class AssemblyInputShotRowUi {
+  const AssemblyInputShotRowUi({
+    required this.scriptNumericId,
+    required this.storyboardNumericId,
+    this.sbIndex,
+    required this.ready,
+    required this.gapLabels,
+    required this.primaryFixTarget,
+  });
+
+  final int scriptNumericId;
+  final int storyboardNumericId;
+  final int? sbIndex;
+  final bool ready;
+  final List<String> gapLabels;
+  final AssemblyInputFixTarget primaryFixTarget;
+}
+
+/// Unified gate for pre-assembly and export actions.
+class AssemblyGateUi {
+  const AssemblyGateUi({
+    this.canPreAssembly = false,
+    this.canExport = false,
+    this.blockingShotCount = 0,
+    this.blockingReasonLines = const <String>[],
+  });
+
+  final bool canPreAssembly;
+  final bool canExport;
+  final int blockingShotCount;
+  final List<String> blockingReasonLines;
+}
+
+/// Inline active generation job (pre-assembly / export).
+class AssemblyActiveJobUi {
+  const AssemblyActiveJobUi({
+    required this.jobId,
+    required this.kind,
+    required this.status,
+    this.errorLine,
+    this.manifestPath,
+    this.canRetry = false,
+    this.canCancel = false,
+  });
+
+  final String jobId;
+  final String kind;
+  final String status;
+  final String? errorLine;
+  final String? manifestPath;
+  final bool canRetry;
+  final bool canCancel;
+}
+
+/// Assembly input panel (storyboard + assets + assembly).
+class AssemblyInputPanelUi {
+  const AssemblyInputPanelUi({
+    this.visible = false,
+    this.loading = false,
+    this.unavailable = false,
+    this.headline = '',
+    this.gate = const AssemblyGateUi(),
+    this.rows = const <AssemblyInputShotRowUi>[],
+    this.activeJob,
+  });
+
+  final bool visible;
+  final bool loading;
+  final bool unavailable;
+  final String headline;
+  final AssemblyGateUi gate;
+  final List<AssemblyInputShotRowUi> rows;
+  final AssemblyActiveJobUi? activeJob;
 }
 
 /// D4：**成片装配**快照（**`GET …/short-video-assembly`**）。
@@ -676,12 +756,21 @@ class ShortVideoSpaceView extends StatelessWidget {
     required this.recentTaskLines,
     required this.assetsOverviewPanelUi,
     required this.assemblyPanelUi,
+    required this.assemblyInputPanelUi,
     required this.exportCheckPanelUi,
     this.onStartExport,
     this.onStartPreAssembly,
     this.onOpenExportHistory,
     this.exportActionBusy = false,
     this.preAssemblyActionBusy = false,
+    this.onFixAssemblyStoryboard,
+    this.onFixAssemblyProduction,
+    this.onFixAssemblyClipDesk,
+    this.onOpenAssemblyTaskCenter,
+    this.onCancelAssemblyJob,
+    this.onRetryAssemblyJob,
+    this.onCreateDraftFromAssemblyJob,
+    this.preAssemblyBlockedTooltip,
     required this.publishPanelUi,
     this.onOpenProductionForAssemblyExport,
     this.onOpenAssemblyClipDeskOps,
@@ -755,12 +844,21 @@ class ShortVideoSpaceView extends StatelessWidget {
   final List<String> recentTaskLines;
   final ShortVideoAssetsOverviewPanelUi assetsOverviewPanelUi;
   final ShortVideoAssemblyPanelUi assemblyPanelUi;
+  final AssemblyInputPanelUi assemblyInputPanelUi;
   final ShortVideoExportCheckPanelUi exportCheckPanelUi;
   final VoidCallback? onStartExport;
   final VoidCallback? onStartPreAssembly;
   final VoidCallback? onOpenExportHistory;
   final bool exportActionBusy;
   final bool preAssemblyActionBusy;
+  final VoidCallback? onFixAssemblyStoryboard;
+  final VoidCallback? onFixAssemblyProduction;
+  final VoidCallback? onFixAssemblyClipDesk;
+  final VoidCallback? onOpenAssemblyTaskCenter;
+  final VoidCallback? onCancelAssemblyJob;
+  final VoidCallback? onRetryAssemblyJob;
+  final VoidCallback? onCreateDraftFromAssemblyJob;
+  final String? preAssemblyBlockedTooltip;
   final ShortVideoPublishPanelUi publishPanelUi;
   final VoidCallback? onOpenProductionForAssemblyExport;
   final VoidCallback? onOpenAssemblyClipDeskOps;
@@ -875,12 +973,21 @@ class ShortVideoSpaceView extends StatelessWidget {
           recentTaskLines: recentTaskLines,
           assetsOverviewPanelUi: assetsOverviewPanelUi,
           assemblyPanelUi: assemblyPanelUi,
+          assemblyInputPanelUi: assemblyInputPanelUi,
           exportCheckPanelUi: exportCheckPanelUi,
           onStartExport: onStartExport,
           onStartPreAssembly: onStartPreAssembly,
           onOpenExportHistory: onOpenExportHistory,
           exportActionBusy: exportActionBusy,
           preAssemblyActionBusy: preAssemblyActionBusy,
+          onFixAssemblyStoryboard: onFixAssemblyStoryboard,
+          onFixAssemblyProduction: onFixAssemblyProduction,
+          onFixAssemblyClipDesk: onFixAssemblyClipDesk,
+          onOpenAssemblyTaskCenter: onOpenAssemblyTaskCenter,
+          onCancelAssemblyJob: onCancelAssemblyJob,
+          onRetryAssemblyJob: onRetryAssemblyJob,
+          onCreateDraftFromAssemblyJob: onCreateDraftFromAssemblyJob,
+          preAssemblyBlockedTooltip: preAssemblyBlockedTooltip,
           onOpenProductionForAssemblyExport: onOpenProductionForAssemblyExport,
           onOpenAssemblyClipDeskOps: onOpenAssemblyClipDeskOps,
           onOpenAssemblyDefaultsEditor: onOpenAssemblyDefaultsEditor,

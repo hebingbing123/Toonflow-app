@@ -112,10 +112,29 @@ class _SpendSummaryPanelState extends State<SpendSummaryPanel> {
                       ],
                     ),
                   ),
-                  ValueTierBadge(
-                    valueTier: tier,
-                    sampleSufficient: row.sampleSufficient,
-                    showSameTierCheaper: showCheaper,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: <Widget>[
+                      ValueTierBadge(
+                        valueTier: tier,
+                        sampleSufficient: row.sampleSufficient,
+                        showSameTierCheaper: showCheaper,
+                      ),
+                      if (row.tokenEfficiencyRoiBand != null &&
+                          (row.tokenEfficiencySampleCount ?? 0) >= 5)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Chip(
+                            label: Text(
+                              tokenEfficiencyRoiLabel(
+                                l10n,
+                                row.tokenEfficiencyRoiBand,
+                              ),
+                            ),
+                            visualDensity: VisualDensity.compact,
+                          ),
+                        ),
+                    ],
                   ),
                 ],
               ),

@@ -105,6 +105,19 @@ pub(crate) async fn project_short_video_pre_assembly_by_id(
         rows: &gap_rows,
     });
 
+    if preview.blocking_shot_count > 0 {
+        return Err(crate::error::bad_request_i18n(
+            &format!(
+                "pre-assembly blocked: {} shot(s) have blocking export gaps",
+                preview.blocking_shot_count
+            ),
+            &format!(
+                "预组装被阻断：{} 个镜头存在阻断性导出缺口",
+                preview.blocking_shot_count
+            ),
+        ));
+    }
+
     let project_numeric_id: i32 =
         sqlx::query_scalar(r#"SELECT numeric_id FROM app_project WHERE id = $1"#)
             .bind(header.id)

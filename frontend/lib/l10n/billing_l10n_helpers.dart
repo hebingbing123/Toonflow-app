@@ -78,6 +78,19 @@ String valueTierLabel(AppLocalizations l10n, String? tier) {
   }
 }
 
+String tokenEfficiencyRoiLabel(AppLocalizations l10n, String? roiBand) {
+  switch (roiBand?.trim().toLowerCase()) {
+    case 'efficient':
+      return l10n.studioTokenEfficiencyEfficient;
+    case 'high_token_low_quality':
+      return l10n.studioTokenEfficiencyHighCost;
+    case 'observe':
+      return l10n.studioTokenEfficiencyObserve;
+    default:
+      return roiBand ?? '';
+  }
+}
+
 String formatCnyFromCents(int cents) {
   final yuan = cents / 100.0;
   if (yuan == yuan.roundToDouble()) {

@@ -8,6 +8,8 @@ class StudioReadinessSnapshot {
     this.production,
     this.home,
     this.assetsOverview,
+    this.runningJobCount = 0,
+    this.failedJobCount = 0,
   });
 
   final int completedSteps;
@@ -15,6 +17,10 @@ class StudioReadinessSnapshot {
   final ProjectProductionOverview? production;
   final ProjectHome? home;
   final ProjectAssetsOverview? assetsOverview;
+
+  /// Active generation jobs for this project (`queued` + `running`).
+  final int runningJobCount;
+  final int failedJobCount;
 }
 
 int computeStudioCompletedSteps({

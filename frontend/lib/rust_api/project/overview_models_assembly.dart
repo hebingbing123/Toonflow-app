@@ -526,6 +526,26 @@ class ShortVideoPreAssemblyEnqueueResponse {
   }
 }
 
+class ShortVideoExportEnqueueResponse {
+  const ShortVideoExportEnqueueResponse({
+    required this.schemaVersion,
+    required this.jobId,
+    required this.sourceUrl,
+  });
+
+  final int schemaVersion;
+  final String jobId;
+  final String sourceUrl;
+
+  factory ShortVideoExportEnqueueResponse.fromJson(Map<String, dynamic> json) {
+    return ShortVideoExportEnqueueResponse(
+      schemaVersion: (json['schema_version'] as num).toInt(),
+      jobId: json['job_id'] as String,
+      sourceUrl: json['source_url'] as String,
+    );
+  }
+}
+
 class ShortVideoAssemblyScriptGroup {
   const ShortVideoAssemblyScriptGroup({
     required this.scriptNumericId,

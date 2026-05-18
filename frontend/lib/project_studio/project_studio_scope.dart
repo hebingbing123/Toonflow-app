@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../rust_api.dart';
@@ -47,11 +49,28 @@ class _ProjectStudioScopeState extends State<ProjectStudioScope> {
   StudioReadinessSnapshot? _readiness;
   var _loading = true;
   Object? _error;
+  Timer? _jobPollTimer;
 
   @override
   void initState() {
     super.initState();
     _load();
+  }
+
+  @override
+  void dispose() {
+    _jobPollTimer?.cancel();
+    super.dispose();
+  }
+
+  void _scheduleJobPollIfNeeded(StudioReadinessSnapshot snap) {
+    _jobPollTimer?.cancel();
+    if (snap.runningJobCount <= 0) {
+      return;
+    }
+    _jobPollTimer = Timer.periodic(const Duration(seconds: 4), (_) {
+      unawaited(_load());
+    });
   }
 
   Future<void> _load() async {
@@ -69,6 +88,7 @@ class _ProjectStudioScopeState extends State<ProjectStudioScope> {
         _readiness = snapshot;
         _loading = false;
       });
+      _scheduleJobPollIfNeeded(snapshot);
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -121,6 +141,22 @@ Future<StudioReadinessSnapshot> _defaultLoadSnapshot(
       projectUuid,
     );
   } catch (_) {}
+  var runningJobCount = 0;
+  var failedJobCount = 0;
+  try {
+    final active = await Future.wait([
+      fetchJobs(accessToken, status: 'running', limit: 50),
+      fetchJobs(accessToken, status: 'queued', limit: 50),
+      fetchJobs(accessToken, status: 'failed', limit: 20),
+    ]);
+    final running = [...active[0], ...active[1]];
+    final failed = active[2];
+    bool matchesProject(JobRow row) =>
+        row.payload['project_uuid']?.toString() == projectUuid;
+    runningJobCount = running.where(matchesProject).length;
+    failedJobCount = failed.where(matchesProject).length;
+  } catch (_) {}
+
   return StudioReadinessSnapshot(
     completedSteps: computeStudioCompletedSteps(
       readiness: readiness,
@@ -130,5 +166,7 @@ Future<StudioReadinessSnapshot> _defaultLoadSnapshot(
     production: production,
     home: home,
     assetsOverview: assetsOverview,
+    runningJobCount: runningJobCount,
+    failedJobCount: failedJobCount,
   );
 }

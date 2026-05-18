@@ -15,6 +15,7 @@ import '../rust_api.dart';
 import 'components/batch_operation_toolbar.dart';
 import 'components/filter_panel.dart';
 import 'components/version_manager.dart';
+import 'panel_versioning.dart';
 import 'dialogs/confirmation_dialogs.dart';
 import 'dialogs/publish_draft_compare_dialog.dart';
 import 'state/operation_history.dart';
@@ -85,6 +86,9 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   bool _savingProjectConfig = false;
   bool _exportActionBusy = false;
   bool _preAssemblyActionBusy = false;
+  JobRow? _activeAssemblyJob;
+  Timer? _assemblyJobPollTimer;
+  final PanelVersionManager _panelVersionManager = PanelVersionManager();
   List<ProjectRow> _projects = const <ProjectRow>[];
   ProjectStats? _projectStats;
   TaskCenterGetTaskApiResult? _recentProjectTasks;
@@ -155,6 +159,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
 
   @override
   void dispose() {
+    _assemblyJobPollTimer?.cancel();
     unawaited(_characterPreviewPlayer.dispose());
     super.dispose();
   }
@@ -455,6 +460,24 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       loadingProjectOverview: _loadingProjectOverview,
       exportCheck: _shortVideoExportCheck,
     );
+    final assemblyGate = buildAssemblyGateUi(
+      l10n: l10n,
+      exportCheck: _shortVideoExportCheck,
+      assembly: _shortVideoAssembly,
+    );
+    final assemblyInputPanelUi = buildAssemblyInputPanelUi(
+      l10n: l10n,
+      projectSelected: project != null,
+      loadingProjectOverview: _loadingProjectOverview,
+      assembly: _shortVideoAssembly,
+      exportCheck: _shortVideoExportCheck,
+      activeJob: _activeAssemblyJob,
+    );
+    final preAssemblyBlockedTooltip = assemblyGate.canPreAssembly
+        ? null
+        : (assemblyGate.blockingReasonLines.isNotEmpty
+              ? assemblyGate.blockingReasonLines.first
+              : l10n.shortVideoSpaceAssemblyGatePreAssemblyBlocked);
     final accessToken = widget.accessToken;
     final publishPanelUi = buildShortVideoPublishPanelUi(
       l10n: l10n,
@@ -696,7 +719,14 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         return _handleKeyboardShortcuts(event);
       },
       child: SingleChildScrollView(
-        child: ShortVideoSpaceView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            PanelConsistencyAlert(
+              status: _panelVersionManager.checkConsistency(),
+              onRefresh: () => unawaited(_loadProjectOverview()),
+            ),
+            ShortVideoSpaceView(
         mode: _mode,
         modeTitle: modeTitle,
         modeSummary: modeSummary,
@@ -789,7 +819,43 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         recentTaskLines: recentTaskLines,
         assetsOverviewPanelUi: assetsOverviewPanelUi,
         assemblyPanelUi: assemblyPanelUi,
+        assemblyInputPanelUi: assemblyInputPanelUi,
         exportCheckPanelUi: exportCheckPanelUi,
+        preAssemblyBlockedTooltip: preAssemblyBlockedTooltip,
+        onFixAssemblyStoryboard: project == null
+            ? null
+            : () {
+                _syncSelectedProjectContext();
+                widget.onOpenScriptWorkspace();
+              },
+        onFixAssemblyProduction: project == null
+            ? null
+            : () {
+                _syncSelectedProjectContext();
+                widget.onOpenProductionWorkspace();
+              },
+        onFixAssemblyClipDesk:
+            project == null ||
+                _shortVideoAssembly == null ||
+                (_shortVideoAssembly?.scripts.isEmpty ?? true)
+            ? null
+            : () => unawaited(_openAssemblyClipDeskOps()),
+        onOpenAssemblyTaskCenter: project == null
+            ? null
+            : () {
+                _syncSelectedProjectContext();
+                widget.onOpenTasks();
+              },
+        onCancelAssemblyJob: _activeAssemblyJob != null
+            ? () => unawaited(_cancelActiveAssemblyJob())
+            : null,
+        onRetryAssemblyJob: _activeAssemblyJob != null
+            ? () => unawaited(_retryActiveAssemblyJob())
+            : null,
+        onCreateDraftFromAssemblyJob:
+            _activeAssemblyJob?.status == 'succeeded'
+            ? () => unawaited(_createDraftFromPreAssemblyJob())
+            : null,
         onStartExport:
             project != null && accessToken != null && accessToken.isNotEmpty
             ? () => unawaited(_startExportFlow())
@@ -867,6 +933,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         onOpenQuality: widget.onOpenQuality,
         onResetConfirmationDontShowAgain: (ctx) =>
             unawaited(runResetRiskyOperationConfirmPrefsFlow(ctx)),
+        ),
+          ],
         ),
       ),
     );

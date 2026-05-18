@@ -11,7 +11,9 @@ mod summary;
 #[cfg(test)]
 mod tests;
 
-pub use record::{record_generation_job_created, record_generation_job_succeeded};
+pub use record::{
+    record_generation_job_created, record_generation_job_succeeded, JobUsageBillingMeta,
+};
 
 #[derive(utoipa::OpenApi)]
 #[openapi(

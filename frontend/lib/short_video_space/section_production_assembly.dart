@@ -5,6 +5,131 @@ part of 'section.dart';
 /// Assembly and clip desk operations for ShortVideoSpaceSection
 extension _ShortVideoSpaceSectionProductionAssemblyExtension
     on _ShortVideoSpaceSectionState {
+  static const _terminalJobStatuses = <String>{
+    'succeeded',
+    'failed',
+    'cancelled',
+  };
+
+  Future<void> _refreshActiveAssemblyJob() async {
+    final token = widget.accessToken?.trim();
+    final jobId = _activeAssemblyJob?.id;
+    if (token == null || token.isEmpty || jobId == null || jobId.isEmpty) {
+      return;
+    }
+    try {
+      final row = await fetchJob(token, jobId);
+      if (!mounted) return;
+      setState(() {
+        _activeAssemblyJob = row;
+      });
+    } catch (_) {}
+  }
+
+  void _beginAssemblyJobTracking(String jobId) {
+    _assemblyJobPollTimer?.cancel();
+    setState(() {
+      _activeAssemblyJob = JobRow(
+        id: jobId,
+        numericTaskId: 0,
+        ownerUserId: '',
+        kind: 'short_video.pre_assembly',
+        status: 'queued',
+        payload: const {},
+        createdAt: DateTime.now().toUtc().toIso8601String(),
+        updatedAt: DateTime.now().toUtc().toIso8601String(),
+      );
+    });
+    _assemblyJobPollTimer = Timer.periodic(const Duration(seconds: 3), (_) {
+      unawaited(_pollActiveAssemblyJobOnce());
+    });
+    unawaited(_pollActiveAssemblyJobOnce());
+  }
+
+  Future<void> _pollActiveAssemblyJobOnce() async {
+    final token = widget.accessToken?.trim();
+    final jobId = _activeAssemblyJob?.id;
+    if (token == null || token.isEmpty || jobId == null) {
+      return;
+    }
+    try {
+      final row = await fetchJob(token, jobId);
+      if (!mounted) return;
+      final wasTerminal = _activeAssemblyJob != null &&
+          _terminalJobStatuses.contains(_activeAssemblyJob!.status);
+      setState(() {
+        _activeAssemblyJob = row;
+      });
+      if (_terminalJobStatuses.contains(row.status)) {
+        _assemblyJobPollTimer?.cancel();
+        _assemblyJobPollTimer = null;
+        if (!wasTerminal) {
+          await _loadProjectOverview();
+        }
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _cancelActiveAssemblyJob() async {
+    final token = widget.accessToken?.trim();
+    final job = _activeAssemblyJob;
+    if (token == null || token.isEmpty || job == null) return;
+    try {
+      final updated = await cancelJob(token, job.id);
+      if (!mounted) return;
+      setState(() {
+        _activeAssemblyJob = updated;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      final l10n = resolveAppLocalizationsForErrors(context);
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+        SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
+      );
+    }
+  }
+
+  Future<void> _retryActiveAssemblyJob() async {
+    final token = widget.accessToken?.trim();
+    final job = _activeAssemblyJob;
+    if (token == null || token.isEmpty || job == null) return;
+    try {
+      final updated = await retryJob(token, job.id);
+      if (!mounted) return;
+      setState(() {
+        _activeAssemblyJob = updated;
+      });
+      _beginAssemblyJobTracking(updated.id);
+    } catch (e) {
+      if (!mounted) return;
+      final l10n = resolveAppLocalizationsForErrors(context);
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+        SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
+      );
+    }
+  }
+
+  Future<void> _createDraftFromPreAssemblyJob() async {
+    final job = _activeAssemblyJob;
+    final result = job?.result;
+    if (result is! Map<String, dynamic>) {
+      return;
+    }
+    final manifestPath =
+        result['manifest_path'] as String? ?? result['disk_path'] as String?;
+    if (manifestPath == null || manifestPath.trim().isEmpty) {
+      return;
+    }
+    final versionName =
+        'pre-asm ${DateTime.now().toIso8601String().substring(0, 16)}';
+    await _handleCreateVersion(versionName);
+    if (!mounted) return;
+    final l10n = resolveAppLocalizationsForErrors(context);
+    ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+      SnackBar(content: Text(l10n.shortVideoSpaceAssemblyInputCreateDraftFromJob)),
+    );
+  }
+
   Future<void> _startPreAssemblyFlow() async {
     final token = widget.accessToken?.trim();
     final project = _selectedProject;
@@ -19,6 +144,21 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
       _preAssemblyActionBusy = true;
     });
     try {
+      final gate = buildAssemblyGateUi(
+        l10n: resolveAppLocalizationsForErrors(context),
+        exportCheck: _shortVideoExportCheck,
+        assembly: _shortVideoAssembly,
+      );
+      if (!gate.canPreAssembly) {
+        if (!mounted) return;
+        final l10n = resolveAppLocalizationsForErrors(context);
+        ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+          SnackBar(
+            content: Text(l10n.shortVideoSpaceAssemblyGatePreAssemblyBlocked),
+          ),
+        );
+        return;
+      }
       final response = await postProjectShortVideoPreAssemblyByProjectId(
         token,
         project.id,
@@ -27,6 +167,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
         return;
       }
       final l10n = resolveAppLocalizationsForErrors(context);
+      _beginAssemblyJobTracking(response.jobId);
       ScaffoldMessenger.maybeOf(context)?.showSnackBar(
         SnackBar(
           content: Text(
@@ -38,7 +179,6 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
           ),
         ),
       );
-      await _loadProjectOverview();
     } catch (e) {
       if (!mounted) {
         return;
@@ -85,25 +225,52 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
     setState(() {
       _exportActionBusy = true;
     });
-    try {
-      final task = await postExportStartV1(
-        token,
-        CreateExportTaskRequestV1(
-          projectId: project.id,
-          format: settings.format,
-          quality: ExportQualityV1(
-            resolution: settings.resolution,
-            bitrate: getBitrateValue(settings.bitrate),
-            framerate: settings.framerate,
+    final gate = buildAssemblyGateUi(
+      l10n: resolveAppLocalizationsForErrors(context),
+      exportCheck: _shortVideoExportCheck,
+      assembly: _shortVideoAssembly,
+    );
+    if (!gate.canExport) {
+      if (!mounted) return;
+      final l10n = resolveAppLocalizationsForErrors(context);
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+        SnackBar(
+          content: Text(
+            gate.blockingReasonLines.isNotEmpty
+                ? gate.blockingReasonLines.first
+                : l10n.shortVideoSpacePublishExportCheckBlockingHeadline,
           ),
         ),
+      );
+      return;
+    }
+
+    try {
+      final format = settings.format.trim().toLowerCase();
+      final enqueue = await postProjectShortVideoExportByProjectId(
+        token,
+        project.id,
+        format: format.isEmpty ? 'mp4' : format,
       );
       if (!mounted) {
         return;
       }
+      setState(() {
+        _activeAssemblyJob = JobRow(
+          id: enqueue.jobId,
+          numericTaskId: 0,
+          ownerUserId: '',
+          kind: 'video.export',
+          status: 'queued',
+          payload: const {},
+          createdAt: DateTime.now().toUtc().toIso8601String(),
+          updatedAt: DateTime.now().toUtc().toIso8601String(),
+        );
+      });
+      _beginAssemblyJobTracking(enqueue.jobId);
       final completed = await _openExportProgressDialog(
         context: context,
-        taskId: task.id,
+        taskId: enqueue.jobId,
       );
       if (!mounted) {
         return;

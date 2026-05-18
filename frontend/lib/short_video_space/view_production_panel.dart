@@ -10,9 +10,18 @@ class _ProductionPanel extends StatelessWidget {
     required this.recentTaskLines,
     required this.assetsOverviewPanelUi,
     required this.assemblyPanelUi,
+    required this.assemblyInputPanelUi,
     required this.exportCheckPanelUi,
     required this.onStartExport,
     required this.onStartPreAssembly,
+    this.onFixAssemblyStoryboard,
+    this.onFixAssemblyProduction,
+    this.onFixAssemblyClipDesk,
+    this.onOpenAssemblyTaskCenter,
+    this.onCancelAssemblyJob,
+    this.onRetryAssemblyJob,
+    this.onCreateDraftFromAssemblyJob,
+    this.preAssemblyBlockedTooltip,
     required this.onOpenExportHistory,
     required this.exportActionBusy,
     required this.preAssemblyActionBusy,
@@ -29,9 +38,18 @@ class _ProductionPanel extends StatelessWidget {
   final List<String> recentTaskLines;
   final ShortVideoAssetsOverviewPanelUi assetsOverviewPanelUi;
   final ShortVideoAssemblyPanelUi assemblyPanelUi;
+  final AssemblyInputPanelUi assemblyInputPanelUi;
   final ShortVideoExportCheckPanelUi exportCheckPanelUi;
   final VoidCallback? onStartExport;
   final VoidCallback? onStartPreAssembly;
+  final VoidCallback? onFixAssemblyStoryboard;
+  final VoidCallback? onFixAssemblyProduction;
+  final VoidCallback? onFixAssemblyClipDesk;
+  final VoidCallback? onOpenAssemblyTaskCenter;
+  final VoidCallback? onCancelAssemblyJob;
+  final VoidCallback? onRetryAssemblyJob;
+  final VoidCallback? onCreateDraftFromAssemblyJob;
+  final String? preAssemblyBlockedTooltip;
   final VoidCallback? onOpenExportHistory;
   final bool exportActionBusy;
   final bool preAssemblyActionBusy;
@@ -167,6 +185,22 @@ class _ProductionPanel extends StatelessWidget {
                   style: theme.textTheme.bodySmall?.copyWith(color: outline),
                 ),
               ],
+            ),
+          ),
+        ],
+        if (assemblyInputPanelUi.visible) ...[
+          const SizedBox(height: 16),
+          _Panel(
+            child: AssemblyInputPanel(
+              ui: assemblyInputPanelUi,
+              l10n: l10n,
+              onFixStoryboard: onFixAssemblyStoryboard,
+              onFixProduction: onFixAssemblyProduction,
+              onFixClipDesk: onFixAssemblyClipDesk,
+              onOpenTaskCenter: onOpenAssemblyTaskCenter,
+              onCancelJob: onCancelAssemblyJob,
+              onRetryJob: onRetryAssemblyJob,
+              onCreateDraftFromJob: onCreateDraftFromAssemblyJob,
             ),
           ),
         ],
@@ -497,21 +531,27 @@ class _ProductionPanel extends StatelessWidget {
                           : const Icon(Icons.file_upload_outlined),
                       label: Text(exportActionBusy ? l10n.shortVideoSpaceExporting : l10n.shortVideoSpaceStartExport),
                     ),
-                    OutlinedButton.icon(
-                      onPressed: (exportActionBusy || preAssemblyActionBusy)
-                          ? null
-                          : onStartPreAssembly,
-                      icon: preAssemblyActionBusy
-                          ? const SizedBox(
-                              width: 14,
-                              height: 14,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.playlist_play_outlined),
-                      label: Text(
-                        preAssemblyActionBusy
-                            ? l10n.shortVideoSpacePreAssemblyBusy
-                            : l10n.shortVideoSpaceStartPreAssembly,
+                    Tooltip(
+                      message: preAssemblyBlockedTooltip ?? '',
+                      child: OutlinedButton.icon(
+                        onPressed:
+                            (exportActionBusy ||
+                                    preAssemblyActionBusy ||
+                                    !assemblyInputPanelUi.gate.canPreAssembly)
+                                ? null
+                                : onStartPreAssembly,
+                        icon: preAssemblyActionBusy
+                            ? const SizedBox(
+                                width: 14,
+                                height: 14,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Icon(Icons.playlist_play_outlined),
+                        label: Text(
+                          preAssemblyActionBusy
+                              ? l10n.shortVideoSpacePreAssemblyBusy
+                              : l10n.shortVideoSpaceStartPreAssembly,
+                        ),
                       ),
                     ),
                     OutlinedButton.icon(

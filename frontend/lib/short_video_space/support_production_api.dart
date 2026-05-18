@@ -4,6 +4,7 @@ import '../l10n/app_localizations.dart';
 import '../l10n/short_video_readiness_localized.dart';
 import '../rust_api.dart';
 import 'support_project_api.dart';
+import 'support_publish_api.dart';
 import 'view.dart';
 
 String? formatShortVideoWritebackLine(
@@ -445,5 +446,172 @@ ShortVideoCandidateComparePanelUi buildShortVideoCandidateComparePanelUi({
         ? l10n.shortVideoCandidateCompareDetailLive
         : l10n.shortVideoCandidateCompareDetailAnimated,
     items: items,
+  );
+}
+
+AssemblyInputFixTarget _assemblyFixTargetForGapCodes(List<String> codes) {
+  if (codes.any((c) => c.contains('candidate') || c.contains('media'))) {
+    return AssemblyInputFixTarget.storyboard;
+  }
+  if (codes.any((c) => c.contains('voiceover'))) {
+    return AssemblyInputFixTarget.production;
+  }
+  return AssemblyInputFixTarget.clipDesk;
+}
+
+/// Unified assembly gate from export-check + assembly shots.
+AssemblyGateUi buildAssemblyGateUi({
+  required AppLocalizations l10n,
+  required ProjectShortVideoExportCheck? exportCheck,
+  required ProjectShortVideoAssembly? assembly,
+}) {
+  if (exportCheck == null || assembly == null) {
+    return const AssemblyGateUi();
+  }
+  var blockingShots = 0;
+  final reasonLines = <String>[];
+  for (final g in exportCheck.storyboardGaps) {
+    if (g.hasBlocking) {
+      blockingShots += 1;
+    }
+  }
+  final qgBlocking = exportCheck.qualityGate.blockingReasons ?? const [];
+  for (final line in qgBlocking.take(3)) {
+    reasonLines.add(line.message);
+  }
+  for (final g in exportCheck.storyboardGaps.where((x) => x.hasBlocking).take(5)) {
+    final facets = shortVideoExportGapFacetLabels(l10n, g);
+    final summary = facets.isEmpty
+        ? g.gapCodes.map((c) => shortVideoExportIssueLabel(l10n, c)).join(' · ')
+        : facets.join(' · ');
+    reasonLines.add(
+      '${l10n.shortVideoSpacePublishExportCheckStoryboardGapTitle(
+        g.scriptNumericId,
+        g.storyboardNumericId,
+        g.sbIndex == null
+            ? ''
+            : l10n.shortVideoPublishExportCheckStoryboardIndexPart(g.sbIndex!),
+      )}: $summary',
+    );
+  }
+  final canExport = exportCheck.exportReady;
+  final canPreAssembly = canExport && blockingShots == 0;
+  return AssemblyGateUi(
+    canPreAssembly: canPreAssembly,
+    canExport: canExport,
+    blockingShotCount: blockingShots,
+    blockingReasonLines: reasonLines,
+  );
+}
+
+/// Per-shot assembly input rows from assembly GET + export-check gaps.
+List<AssemblyInputShotRowUi> buildAssemblyInputRows({
+  required AppLocalizations l10n,
+  required ProjectShortVideoAssembly? assembly,
+  required ProjectShortVideoExportCheck? exportCheck,
+}) {
+  if (assembly == null) {
+    return const <AssemblyInputShotRowUi>[];
+  }
+  final gapByStoryboard = <int, ShortVideoExportCheckStoryboardGap>{};
+  if (exportCheck != null) {
+    for (final g in exportCheck.storyboardGaps) {
+      gapByStoryboard[g.storyboardNumericId] = g;
+    }
+  }
+  final rows = <AssemblyInputShotRowUi>[];
+  for (final script in assembly.scripts) {
+    for (final shot in script.shots) {
+      final gap = gapByStoryboard[shot.storyboardNumericId];
+      final codes = gap?.gapCodes ?? shot.exportGap.gapCodes;
+      final blocking = gap?.hasBlocking ?? shot.exportGap.hasBlocking;
+      final labels = codes
+          .map((c) => shortVideoExportIssueLabel(l10n, c))
+          .toList(growable: false);
+      rows.add(
+        AssemblyInputShotRowUi(
+          scriptNumericId: script.scriptNumericId,
+          storyboardNumericId: shot.storyboardNumericId,
+          sbIndex: shot.sbIndex,
+          ready: !blocking && (shot.selectedMediaUrl ?? '').trim().isNotEmpty,
+          gapLabels: labels,
+          primaryFixTarget: _assemblyFixTargetForGapCodes(codes),
+        ),
+      );
+    }
+  }
+  return rows;
+}
+
+AssemblyActiveJobUi? buildAssemblyActiveJobUi({
+  required AppLocalizations l10n,
+  required JobRow? job,
+}) {
+  if (job == null) {
+    return null;
+  }
+  final status = job.status.trim();
+  final result = job.result;
+  String? manifestPath;
+  if (result is Map<String, dynamic>) {
+    manifestPath =
+        result['manifest_path'] as String? ?? result['disk_path'] as String?;
+  }
+  final errorLine = (job.errorMessage ?? '').trim().isNotEmpty
+      ? job.errorMessage!.trim()
+      : null;
+  return AssemblyActiveJobUi(
+    jobId: job.id,
+    kind: job.kind,
+    status: shortVideoPublishJobStatusLabel(l10n, status),
+    errorLine: errorLine,
+    manifestPath: manifestPath,
+    canRetry: status == 'failed',
+    canCancel: status == 'queued' || status == 'running',
+  );
+}
+
+AssemblyInputPanelUi buildAssemblyInputPanelUi({
+  required AppLocalizations l10n,
+  required bool projectSelected,
+  required bool loadingProjectOverview,
+  required ProjectShortVideoAssembly? assembly,
+  required ProjectShortVideoExportCheck? exportCheck,
+  JobRow? activeJob,
+}) {
+  if (!projectSelected) {
+    return const AssemblyInputPanelUi(visible: false);
+  }
+  if (loadingProjectOverview) {
+    return AssemblyInputPanelUi(
+      visible: true,
+      loading: true,
+      headline: l10n.shortVideoSpacePublishAssemblyLoadingHeadline,
+    );
+  }
+  if (assembly == null) {
+    return AssemblyInputPanelUi(
+      visible: true,
+      unavailable: true,
+      headline: l10n.shortVideoSpacePublishAssemblyUnavailableHeadline,
+    );
+  }
+  final gate = buildAssemblyGateUi(
+    l10n: l10n,
+    exportCheck: exportCheck,
+    assembly: assembly,
+  );
+  final rows = buildAssemblyInputRows(
+    l10n: l10n,
+    assembly: assembly,
+    exportCheck: exportCheck,
+  );
+  final readyCount = rows.where((r) => r.ready).length;
+  return AssemblyInputPanelUi(
+    visible: true,
+    headline: '${l10n.shortVideoSpaceAssemblyInputTitle} ($readyCount/${rows.length})',
+    gate: gate,
+    rows: rows,
+    activeJob: buildAssemblyActiveJobUi(l10n: l10n, job: activeJob),
   );
 }

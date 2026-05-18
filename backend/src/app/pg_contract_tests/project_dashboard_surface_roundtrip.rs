@@ -107,6 +107,7 @@ async fn project_dashboard_triple_sources_stats_alignment() {
         .await
         .expect("connect DATABASE_URL");
     let pool_sql = pool.clone();
+    ensure_contract_auth_user(&pool).await;
 
     let sub = Uuid::parse_str(CONTRACT_USER_SUB).unwrap();
     let token = jwt_fixture::encode_supabase_style(sub, secret.as_bytes());
@@ -295,6 +296,7 @@ async fn me_then_create_project_lists_under_current_workspace_filter() {
         .connect(&url)
         .await
         .expect("connect DATABASE_URL");
+    ensure_contract_auth_user(&pool).await;
 
     let sub = Uuid::parse_str(CONTRACT_USER_SUB).unwrap();
     let token = jwt_fixture::encode_supabase_style(sub, secret.as_bytes());

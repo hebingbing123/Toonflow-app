@@ -234,6 +234,43 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shortVideoSpaceAssemblyStyleAdjustment => '成片样式调整';
 
   @override
+  String get shortVideoSpaceAssemblyInputTitle => '装配输入（分镜 + 资产）';
+
+  @override
+  String shortVideoSpaceAssemblyInputBlockingBanner(int count) {
+    return '请先解决阻断项再预组装/导出（$count 镜）';
+  }
+
+  @override
+  String get shortVideoSpaceAssemblyInputShotReady => '就绪';
+
+  @override
+  String get shortVideoSpaceAssemblyInputShotBlocking => '阻断';
+
+  @override
+  String get shortVideoSpaceAssemblyInputFixClipDesk => '镜头操作';
+
+  @override
+  String get shortVideoSpaceAssemblyInputFixStoryboard => '分镜';
+
+  @override
+  String get shortVideoSpaceAssemblyInputFixProduction => '制作';
+
+  @override
+  String shortVideoSpaceAssemblyInputActiveJob(String jobId, String status) {
+    return '装配任务 $jobId：$status';
+  }
+
+  @override
+  String get shortVideoSpaceAssemblyInputOpenTaskCenter => '打开任务中心';
+
+  @override
+  String get shortVideoSpaceAssemblyGatePreAssemblyBlocked => '存在导出缺口时不可预组装';
+
+  @override
+  String get shortVideoSpaceAssemblyInputCreateDraftFromJob => '将预组装结果存为草稿';
+
+  @override
   String get shortVideoSpaceExportPreCheck => '导出前检查';
 
   @override
@@ -1164,6 +1201,23 @@ class AppLocalizationsZh extends AppLocalizations {
   String studioCostEstimateQuota(int jobs) {
     return '占用今日 $jobs 个任务配额';
   }
+
+  @override
+  String studioCostEstimateQuotaPercent(String percent) {
+    return '提交后约占今日任务配额 $percent%';
+  }
+
+  @override
+  String get studioCostEstimateByok => '已使用自有 API Key — 平台不计费，费用由供应商直接向您收取。';
+
+  @override
+  String get studioTokenEfficiencyEfficient => '投入产出佳';
+
+  @override
+  String get studioTokenEfficiencyObserve => '建议观察';
+
+  @override
+  String get studioTokenEfficiencyHighCost => '高消耗低质量风险';
 
   @override
   String get studioCostConfirmTitle => '确认生成';

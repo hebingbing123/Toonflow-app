@@ -37,8 +37,16 @@ pub(crate) async fn post_billing_estimate(
     headers: HeaderMap,
     Json(body): Json<BillingEstimateRequest>,
 ) -> Result<Json<BillingEstimateResponse>, ApiError> {
-    let _uid = require_user_uuid(&state, &headers)?;
-    Ok(Json(build_estimate(&body)?))
+    let uid = require_user_uuid(&state, &headers)?;
+    let mut response = build_estimate(&body)?;
+    if let Ok(pool) = state.require_pool() {
+        if let Err(e) =
+            super::estimate_enrich::enrich_estimate_response(pool, uid, &mut response).await
+        {
+            tracing::warn!(error = %e, "billing estimate enrich failed (returning base estimate)");
+        }
+    }
+    Ok(Json(response))
 }
 
 #[derive(Debug, Deserialize, IntoParams, utoipa::ToSchema)]
@@ -116,6 +124,7 @@ async fn load_spend_rows(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
 
     const MIN_SAMPLES: i64 = 5;
+    let roi_by_model = load_token_efficiency_roi_by_model(pool, user_id, days).await?;
 
     Ok(agg
         .into_iter()
@@ -125,8 +134,9 @@ async fn load_spend_rows(
                 .as_ref()
                 .and_then(|id| lookup_pricing(id))
                 .map(|p| p.value_tier.clone());
+            let roi = roi_by_model.get(&r.model_name);
             ModelSpendRow {
-                model_name: r.model_name,
+                model_name: r.model_name.clone(),
                 model_id,
                 total_tokens: r.total_tokens.unwrap_or(0),
                 estimated_cost_cents: r.estimated_cost_cents.unwrap_or(0),
@@ -134,7 +144,76 @@ async fn load_spend_rows(
                 avg_quality_score: r.avg_quality_score,
                 value_tier: value_tier.clone(),
                 sample_sufficient: r.call_count >= MIN_SAMPLES,
+                token_efficiency_roi_band: roi.map(|x| x.roi_band.clone()),
+                token_efficiency_sample_count: roi.map(|x| x.sample_count),
             }
         })
         .collect())
+}
+
+#[derive(Debug)]
+struct ModelRoiAgg {
+    roi_band: String,
+    sample_count: i64,
+}
+
+async fn load_token_efficiency_roi_by_model(
+    pool: &PgPool,
+    user_id: Uuid,
+    days: u32,
+) -> Result<std::collections::HashMap<String, ModelRoiAgg>, ApiError> {
+    #[derive(sqlx::FromRow)]
+    struct Row {
+        model_name: String,
+        sample_count: i64,
+        avg_score: f64,
+        pass_rate: f64,
+        high_token_low_quality_count: i64,
+    }
+
+    let rows: Vec<Row> = sqlx::query_as(
+        r#"
+        SELECT
+            usage.model_name,
+            COUNT(*)::bigint AS sample_count,
+            COALESCE(AVG(COALESCE(qr.overall_score, usage.overall_score, 0)), 0) AS avg_score,
+            COALESCE(AVG(CASE WHEN COALESCE(qr.passed, false) THEN 1.0 ELSE 0.0 END), 0) AS pass_rate,
+            COUNT(*) FILTER (
+                WHERE COALESCE(usage.total_tokens, 0) >= 4000
+                  AND (
+                    COALESCE(qr.overall_score, usage.overall_score, 0) < 8
+                    OR COALESCE(qr.passed, false) = false
+                  )
+            )::bigint AS high_token_low_quality_count
+        FROM app_llm_usage_log usage
+        LEFT JOIN app_quality_review qr ON qr.id = usage.quality_review_id
+        WHERE usage.user_id = $1
+          AND usage.created_at >= NOW() - make_interval(days => $2::int)
+        GROUP BY usage.model_name
+        "#,
+    )
+    .bind(user_id)
+    .bind(i32::try_from(days).unwrap_or(7))
+    .fetch_all(pool)
+    .await
+    .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    let mut out = std::collections::HashMap::new();
+    for row in rows {
+        let roi_band = if row.high_token_low_quality_count > 0 {
+            "high_token_low_quality".to_string()
+        } else if row.avg_score >= 8.0 && row.pass_rate >= 0.8 {
+            "efficient".to_string()
+        } else {
+            "observe".to_string()
+        };
+        out.insert(
+            row.model_name,
+            ModelRoiAgg {
+                roi_band,
+                sample_count: row.sample_count,
+            },
+        );
+    }
+    Ok(out)
 }

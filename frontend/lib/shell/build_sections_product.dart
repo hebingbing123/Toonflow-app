@@ -220,6 +220,8 @@ extension _HomePageBuildProductSections on _HomePageState {
                   ),
               initialStep: StudioStep.fromSlug(widget.studioStepSlug),
               completedSteps: readiness.completedSteps,
+              runningJobCount: readiness.runningJobCount,
+              failedJobCount: readiness.failedJobCount,
               onExit: () => context.go('/'),
               onStepChanged: (_) {},
               onOpenAgentDrawer: () =>

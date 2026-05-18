@@ -24,12 +24,13 @@ use handlers::{
     get_project_by_id, list_project_audit, list_project_members, list_projects,
     patch_project_by_id, patch_project_member, patch_style_config, project_assets_overview_by_id,
     project_home_by_id, project_overview_by_id, project_production_overview_by_id,
-    project_short_video_assembly_by_id, project_short_video_export_check_by_id,
-    project_short_video_pre_assembly_by_id, project_short_video_readiness_by_id,
-    project_short_video_timeline_apply_template, project_short_video_timeline_by_id,
-    project_short_video_timeline_preview, project_short_video_timeline_put,
-    project_short_video_timeline_reorder, project_short_video_timeline_restore,
-    project_short_video_timeline_revisions, project_stats_by_id, projects_summary,
+    project_short_video_assembly_by_id, project_short_video_export_by_id,
+    project_short_video_export_check_by_id, project_short_video_pre_assembly_by_id,
+    project_short_video_readiness_by_id, project_short_video_timeline_apply_template,
+    project_short_video_timeline_by_id, project_short_video_timeline_preview,
+    project_short_video_timeline_put, project_short_video_timeline_reorder,
+    project_short_video_timeline_restore, project_short_video_timeline_revisions,
+    project_stats_by_id, projects_summary,
 };
 
 pub fn router() -> Router<AppState> {
@@ -126,6 +127,10 @@ pub fn router() -> Router<AppState> {
         .route(
             "/api/v1/projects/{project_id}/short-video-pre-assembly",
             axum::routing::post(project_short_video_pre_assembly_by_id),
+        )
+        .route(
+            "/api/v1/projects/{project_id}/short-video-export",
+            axum::routing::post(project_short_video_export_by_id),
         )
         .route(
             "/api/v1/projects/{project_id}/short-video-timeline",

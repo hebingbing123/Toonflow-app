@@ -36,14 +36,21 @@ pub(crate) const CONTRACT_USER_SUB: &str = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa
 
 pub(crate) async fn ensure_contract_auth_user(pool: &PgPool) {
     let sub = Uuid::parse_str(CONTRACT_USER_SUB).unwrap();
+    let email = format!("contract-{}@example.test", sub.simple());
     sqlx::query(
         r#"
         INSERT INTO auth.users (id, email, encrypted_password, email_confirmed_at, created_at, updated_at)
-        VALUES ($1, 'test@example.com', 'contract-test-password', NOW(), NOW(), NOW())
-        ON CONFLICT (id) DO NOTHING
+        VALUES ($1, $2, 'contract-test-password', NOW(), NOW(), NOW())
+        ON CONFLICT (id) DO UPDATE
+        SET
+          email = EXCLUDED.email,
+          encrypted_password = EXCLUDED.encrypted_password,
+          email_confirmed_at = EXCLUDED.email_confirmed_at,
+          updated_at = NOW()
         "#,
     )
     .bind(sub)
+    .bind(email)
     .execute(pool)
     .await
     .expect("ensure CONTRACT_USER_SUB exists in auth.users");

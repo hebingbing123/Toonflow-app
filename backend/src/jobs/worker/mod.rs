@@ -272,8 +272,18 @@ async fn process_one_job(
                     resolved_workspace_id_from_job_payload(&final_row.payload),
                     client_request_id_from_payload(&final_row.payload),
                 );
-                if let Err(e) =
-                    usage::record_generation_job_succeeded(pool, owner, id, &final_row.kind).await
+                let billing_meta = crate::vendor::catalog::pricing::billing_meta_from_job_payload(
+                    &final_row.payload,
+                    &final_row.kind,
+                );
+                if let Err(e) = usage::record_generation_job_succeeded(
+                    pool,
+                    owner,
+                    id,
+                    &final_row.kind,
+                    billing_meta,
+                )
+                .await
                 {
                     tracing::warn!(
                         error = %e,

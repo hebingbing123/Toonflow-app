@@ -244,21 +244,54 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
     }
   }
 
-  /// Polls [GET /api/v1/export/tasks/:id] via [getExportTaskByIdV1].
+  /// Polls [GET /api/v1/jobs/:id] for **`video.export`** generation jobs.
   Future<ExportTaskProgress> _fetchExportProgress(String taskId) async {
     final token = widget.accessToken?.trim();
     if (token == null || token.isEmpty) {
       final l10n = resolveAppLocalizationsForErrors(context);
       throw Exception(l10n.shortVideoSpaceDialogExportProgressSessionExpired);
     }
-    final task = await getExportTaskByIdV1(token, taskId);
+    final job = await fetchJob(token, taskId);
+    final status = job.status.trim().toLowerCase();
+    ExportTaskStatus mapped;
+    switch (status) {
+      case 'running':
+        mapped = ExportTaskStatus.processing;
+        break;
+      case 'succeeded':
+        mapped = ExportTaskStatus.completed;
+        break;
+      case 'failed':
+        mapped = ExportTaskStatus.failed;
+        break;
+      case 'cancelled':
+        mapped = ExportTaskStatus.cancelled;
+        break;
+      default:
+        mapped = ExportTaskStatus.queued;
+    }
+    double progress = 0.05;
+    if (status == 'running') {
+      progress = 0.55;
+    } else if (status == 'succeeded') {
+      progress = 1.0;
+    }
+    String? outputUrl;
+    final result = job.result;
+    if (result != null) {
+      outputUrl = result['output_url'] as String? ??
+          result['file_url'] as String? ??
+          result['url'] as String?;
+    }
     return ExportTaskProgress(
-      taskId: task.id,
-      status: ExportTaskStatus.fromString(task.status),
-      stage: task.stage == null ? null : ExportTaskStage.fromString(task.stage!),
-      progress: (task.progress / 100).clamp(0.0, 1.0),
-      errorMessage: task.error,
-      outputUrl: task.outputUrl,
+      taskId: job.id,
+      status: mapped,
+      stage: status == 'running'
+          ? ExportTaskStage.encoding
+          : ExportTaskStage.finalizing,
+      progress: progress,
+      errorMessage: job.errorMessage,
+      outputUrl: outputUrl,
     );
   }
 
@@ -295,14 +328,14 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
     }
   }
 
-  /// Calls [POST /api/v1/export/cancel] via [postExportCancelV1].
+  /// Calls [POST /api/v1/jobs/:id/cancel] for generation export jobs.
   Future<void> _cancelExportTask(String taskId) async {
     final token = widget.accessToken?.trim();
     if (token == null || token.isEmpty) {
       final l10n = resolveAppLocalizationsForErrors(context);
       throw Exception(l10n.shortVideoSpaceDialogExportProgressSessionExpired);
     }
-    await postExportCancelV1(token, taskId);
+    await cancelJob(token, taskId);
   }
 
   @override

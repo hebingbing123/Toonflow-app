@@ -470,6 +470,17 @@ extension _ShortVideoSpaceSectionProductionExtension
         _publishAuditRows = publishAuditsSnap;
         _syncPublishAutomationModesFromMatrix();
       });
+      _panelVersionManager.updateVersion(
+        'export',
+        exportCheckSlice?.dataVersion,
+      );
+      _panelVersionManager.updateVersion(
+        'assembly',
+        exportCheckSlice?.dataVersion ?? assemblySlice?.schemaVersion.toString(),
+      );
+      if (_activeAssemblyJob != null) {
+        unawaited(_refreshActiveAssemblyJob());
+      }
       await _loadDraftsAndVersions();
       await _loadProjectCharacters();
     } catch (_) {

@@ -261,6 +261,15 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
               StudioStepProgressRing(
                 completedSteps: widget.host.completedSteps,
               ),
+              if (widget.host.runningJobCount > 0)
+                Padding(
+                  padding: const EdgeInsets.only(left: 4),
+                  child: TextButton.icon(
+                    onPressed: widget.host.onOpenTasks,
+                    icon: const Icon(Icons.pending_actions_outlined, size: 18),
+                    label: Text('${widget.host.runningJobCount}'),
+                  ),
+                ),
               const SizedBox(width: 4),
               IconButton(
                 tooltip: l10n.studioAgentDrawerTitle,

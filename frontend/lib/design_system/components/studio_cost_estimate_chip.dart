@@ -38,17 +38,32 @@ class StudioCostEstimateChip extends StatelessWidget {
     if (est == null) return const SizedBox.shrink();
 
     final cny = formatCnyFromCents(est.cnyCents);
+    final pct = est.quotaUsagePercentAfter;
     return Wrap(
       spacing: 8,
       runSpacing: 4,
       children: <Widget>[
-        Chip(
-          label: Text(l10n.studioCostEstimateLine(est.credits, cny)),
-          visualDensity: VisualDensity.compact,
-        ),
+        if (est.platformBillingExempt)
+          Chip(
+            label: Text(l10n.studioCostEstimateByok),
+            visualDensity: VisualDensity.compact,
+            backgroundColor: theme.colorScheme.secondaryContainer,
+          )
+        else
+          Chip(
+            label: Text(l10n.studioCostEstimateLine(est.credits, cny)),
+            visualDensity: VisualDensity.compact,
+          ),
         if (est.quotaImpactJobs > 0)
           Chip(
             label: Text(l10n.studioCostEstimateQuota(est.quotaImpactJobs)),
+            visualDensity: VisualDensity.compact,
+          ),
+        if (pct != null && est.dailyJobQuota != null)
+          Chip(
+            label: Text(
+              l10n.studioCostEstimateQuotaPercent(pct.toStringAsFixed(0)),
+            ),
             visualDensity: VisualDensity.compact,
           ),
       ],

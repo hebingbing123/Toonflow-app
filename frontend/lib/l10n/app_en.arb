@@ -144,6 +144,26 @@
   "shortVideoSpaceOpenProductionWorkspace": "Open Production Workspace",
   "shortVideoSpaceBasicShotOperations": "Basic Shot Operations",
   "shortVideoSpaceAssemblyStyleAdjustment": "Assembly Style Adjustment",
+  "shortVideoSpaceAssemblyInputTitle": "Assembly input (storyboard + assets)",
+  "shortVideoSpaceAssemblyInputBlockingBanner": "Resolve blocking gaps before pre-assembly or export ({count} shots)",
+  "@shortVideoSpaceAssemblyInputBlockingBanner": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "shortVideoSpaceAssemblyInputShotReady": "Ready",
+  "shortVideoSpaceAssemblyInputShotBlocking": "Blocking",
+  "shortVideoSpaceAssemblyInputFixClipDesk": "Clip desk",
+  "shortVideoSpaceAssemblyInputFixStoryboard": "Storyboard",
+  "shortVideoSpaceAssemblyInputFixProduction": "Production",
+  "shortVideoSpaceAssemblyInputActiveJob": "Assembly job {jobId}: {status}",
+  "@shortVideoSpaceAssemblyInputActiveJob": {
+    "placeholders": {
+      "jobId": { "type": "String" },
+      "status": { "type": "String" }
+    }
+  },
+  "shortVideoSpaceAssemblyInputOpenTaskCenter": "Open task center",
+  "shortVideoSpaceAssemblyGatePreAssemblyBlocked": "Pre-assembly blocked until export gaps are resolved",
+  "shortVideoSpaceAssemblyInputCreateDraftFromJob": "Save pre-assembly as draft",
   "shortVideoSpaceExportPreCheck": "Export Pre-check",
   "shortVideoSpaceQualityGateBlockingReasons": "Quality Gate Blocking Reasons",
   "shortVideoSpaceBlockingItems": "Blocking Items (Selected by Interface Order)",
@@ -566,6 +586,12 @@
   "@studioCostEstimateLine": {"placeholders": {"credits": {"type": "int"}, "cny": {"type": "String"}}},
   "studioCostEstimateQuota": "Uses {jobs} job quota today",
   "@studioCostEstimateQuota": {"placeholders": {"jobs": {"type": "int"}}},
+  "studioCostEstimateQuotaPercent": "≈ {percent}% of today's job quota after submit",
+  "@studioCostEstimateQuotaPercent": {"placeholders": {"percent": {"type": "String"}}},
+  "studioCostEstimateByok": "Using your API key — platform billing exempt; vendor bills you directly.",
+  "studioTokenEfficiencyEfficient": "Efficient ROI",
+  "studioTokenEfficiencyObserve": "Watch usage",
+  "studioTokenEfficiencyHighCost": "High cost vs quality",
   "studioCostConfirmTitle": "Confirm generation",
   "studioCostConfirmBody": "This run is estimated at {credits} credits (¥{cny}). {disclaimer}",
   "@studioCostConfirmBody": {"placeholders": {"credits": {"type": "int"}, "cny": {"type": "String"}, "disclaimer": {"type": "String"}}},

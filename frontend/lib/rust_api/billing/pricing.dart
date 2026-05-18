@@ -52,6 +52,11 @@ class BillingEstimateResponse {
     required this.cnyCents,
     required this.quotaImpactJobs,
     required this.warnings,
+    this.platformBillingExempt = false,
+    this.jobsToday,
+    this.dailyJobQuota,
+    this.quotaRemaining,
+    this.quotaUsagePercentAfter,
   });
 
   final String modelId;
@@ -62,6 +67,11 @@ class BillingEstimateResponse {
   final int cnyCents;
   final int quotaImpactJobs;
   final List<String> warnings;
+  final bool platformBillingExempt;
+  final int? jobsToday;
+  final int? dailyJobQuota;
+  final int? quotaRemaining;
+  final double? quotaUsagePercentAfter;
 
   factory BillingEstimateResponse.fromJson(Map<String, dynamic> json) {
     final warnings = json['warnings'];
@@ -76,6 +86,12 @@ class BillingEstimateResponse {
       warnings: warnings is List
           ? warnings.map((e) => e.toString()).toList()
           : const <String>[],
+      platformBillingExempt: json['platform_billing_exempt'] as bool? ?? false,
+      jobsToday: (json['jobs_today'] as num?)?.toInt(),
+      dailyJobQuota: (json['daily_job_quota'] as num?)?.toInt(),
+      quotaRemaining: (json['quota_remaining'] as num?)?.toInt(),
+      quotaUsagePercentAfter: (json['quota_usage_percent_after'] as num?)
+          ?.toDouble(),
     );
   }
 }
@@ -114,6 +130,8 @@ class ModelSpendRow {
     this.avgQualityScore,
     this.valueTier,
     required this.sampleSufficient,
+    this.tokenEfficiencyRoiBand,
+    this.tokenEfficiencySampleCount,
   });
 
   final String modelName;
@@ -124,6 +142,8 @@ class ModelSpendRow {
   final double? avgQualityScore;
   final String? valueTier;
   final bool sampleSufficient;
+  final String? tokenEfficiencyRoiBand;
+  final int? tokenEfficiencySampleCount;
 
   factory ModelSpendRow.fromJson(Map<String, dynamic> json) {
     return ModelSpendRow(
@@ -135,6 +155,9 @@ class ModelSpendRow {
       avgQualityScore: (json['avg_quality_score'] as num?)?.toDouble(),
       valueTier: json['value_tier'] as String?,
       sampleSufficient: json['sample_sufficient'] as bool? ?? false,
+      tokenEfficiencyRoiBand: json['token_efficiency_roi_band'] as String?,
+      tokenEfficiencySampleCount:
+          (json['token_efficiency_sample_count'] as num?)?.toInt(),
     );
   }
 }

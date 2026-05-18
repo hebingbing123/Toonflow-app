@@ -135,6 +135,18 @@ pub struct BillingEstimateResponse {
     pub cny_cents: u64,
     pub quota_impact_jobs: u32,
     pub warnings: Vec<String>,
+    /// When true, user BYOK credential is active — platform estimate is reference only.
+    #[serde(default)]
+    pub platform_billing_exempt: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub jobs_today: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub daily_job_quota: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub quota_remaining: Option<i64>,
+    /// Projected daily quota usage % after this submit (`jobs_today + quota_impact` / quota).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub quota_usage_percent_after: Option<f64>,
 }
 
 pub fn build_estimate(body: &BillingEstimateRequest) -> Result<BillingEstimateResponse, ApiError> {
@@ -177,7 +189,67 @@ pub fn build_estimate(body: &BillingEstimateRequest) -> Result<BillingEstimateRe
         cny_cents,
         quota_impact_jobs,
         warnings,
+        platform_billing_exempt: false,
+        jobs_today: None,
+        daily_job_quota: None,
+        quota_remaining: None,
+        quota_usage_percent_after: None,
     })
+}
+
+/// Vendor id prefix from composite model id (`{vendor_id}:{model_name}`).
+pub fn vendor_id_from_model_id(model_id: &str) -> Option<String> {
+    let (vid, _) = model_id.split_once(':')?;
+    if vid.trim().is_empty() {
+        return None;
+    }
+    Some(vid.to_string())
+}
+
+/// Build billing metadata for `app_usage_event` from a generation job payload.
+pub fn billing_meta_from_job_payload(
+    payload: &serde_json::Value,
+    task_kind_hint: &str,
+) -> crate::metering::usage::JobUsageBillingMeta {
+    use crate::metering::usage::JobUsageBillingMeta;
+
+    let model_name = payload
+        .get("model")
+        .or_else(|| payload.get("model_name"))
+        .and_then(|v| v.as_str())
+        .map(str::trim)
+        .filter(|s| !s.is_empty());
+
+    let model_id = payload
+        .get("model_id")
+        .and_then(|v| v.as_str())
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+        .map(str::to_string)
+        .or_else(|| model_name.and_then(composite_id_for_model_name));
+
+    let quantity = payload
+        .get("duration")
+        .or_else(|| payload.get("quantity"))
+        .and_then(|v| v.as_u64())
+        .map(|n| n.max(1) as u32)
+        .or_else(|| {
+            PRICING
+                .task_defaults
+                .get(task_kind_hint)
+                .map(|t| t.default_quantity)
+        })
+        .unwrap_or(1);
+
+    let credits_charged = model_id
+        .as_ref()
+        .and_then(|id| lookup_pricing(id))
+        .map(|p| compute_line_cost(p, u64::from(quantity)).0);
+
+    JobUsageBillingMeta {
+        model_id,
+        credits_charged,
+    }
 }
 
 #[derive(Debug, Serialize, ToSchema)]
@@ -191,6 +263,10 @@ pub struct ModelSpendRow {
     pub avg_quality_score: Option<f64>,
     pub value_tier: Option<String>,
     pub sample_sufficient: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub token_efficiency_roi_band: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub token_efficiency_sample_count: Option<i64>,
 }
 
 #[derive(Debug, Serialize, ToSchema)]

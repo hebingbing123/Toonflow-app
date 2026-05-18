@@ -256,35 +256,42 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
         resolveAppLocalizationsForErrors(context).shortVideoSpaceDialogExportHistorySessionExpired,
       );
     }
-    final String? status = switch (statusFilter) {
-      ExportHistoryStatusFilter.all => null,
-      ExportHistoryStatusFilter.completed => 'completed',
-      ExportHistoryStatusFilter.failed => 'failed',
-      ExportHistoryStatusFilter.cancelled => 'cancelled',
-    };
-    final tasks = await getExportTasksV1(
-      token,
-      projectId: projectId,
-      status: status,
-      limit: 200,
-      offset: 0,
-    );
-    final items = tasks
-        .map(
-          (task) => ExportHistoryItem(
-            taskId: task.id,
-            status: ExportTaskStatus.fromString(task.status),
-            format: task.format,
-            resolution: (task.quality['resolution'] as String? ?? '1080p'),
-            bitrate: _bitrateLabelFromQuality(task.quality),
-            framerate: (task.quality['framerate'] as num?)?.toInt() ?? 30,
-            createdAt: task.createdAt,
-            completedAt: task.completedAt,
-            outputUrl: task.outputUrl,
-            errorMessage: task.error,
-            fileSize: (task.quality['estimatedFileSizeBytes'] as num?)?.toInt(),
-          ),
-        )
+    final jobs = await fetchJobs(token, kind: 'video.export', limit: 100);
+    final projectJobs = jobs
+        .where((j) => j.payload['project_uuid']?.toString() == projectId)
+        .toList(growable: false);
+    final items = projectJobs
+        .map((job) {
+          final status = switch (job.status) {
+            'succeeded' => ExportTaskStatus.completed,
+            'failed' => ExportTaskStatus.failed,
+            'cancelled' => ExportTaskStatus.cancelled,
+            'running' => ExportTaskStatus.processing,
+            _ => ExportTaskStatus.queued,
+          };
+          final payload = job.payload;
+          final format = payload['format'] as String? ?? 'mp4';
+          final result = job.result;
+          final outputUrl = result == null
+              ? null
+              : result['output_url'] as String? ??
+                    result['file_url'] as String? ??
+                    result['url'] as String?;
+          final created = DateTime.tryParse(job.createdAt) ?? DateTime.now();
+          final updated = DateTime.tryParse(job.updatedAt);
+          return ExportHistoryItem(
+            taskId: job.id,
+            status: status,
+            format: format,
+            resolution: '1080p',
+            bitrate: 'medium',
+            framerate: 30,
+            createdAt: created,
+            completedAt: status == ExportTaskStatus.completed ? updated : null,
+            outputUrl: outputUrl,
+            errorMessage: job.errorMessage,
+          );
+        })
         .toList(growable: false);
 
     // Apply filters
@@ -307,6 +314,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
     return filtered;
   }
 
+  // ignore: unused_element
   String _bitrateLabelFromQuality(Map<String, dynamic> quality) {
     final raw = quality['bitrate'];
     if (raw is num) {
