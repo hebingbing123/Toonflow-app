@@ -18,6 +18,7 @@ extension _HomePageProjectEditorDialogContentAssets on _HomePageState {
       assetsRef: dialogState.assetsRef,
       assetsForScriptRef: dialogState.assetsForScriptRef,
       assetsFilterScriptNumericId: dialogState.assetsFilterScriptNumericId,
+      assetsFocusNoticeRef: dialogState.assetsFocusNotice,
       assetsLoading: dialogState.assetsLoading,
       assetsScriptFilterLoading: dialogState.assetsScriptFilterLoading,
       assetsBusy: dialogState.assetsBusy,
@@ -150,15 +151,26 @@ extension _HomePageProjectEditorDialogContentAssets on _HomePageState {
               dialogState.reloadAssetsAndStats(token, p.id, p.numericId),
           unlink: true,
         ),
-        onUploadEditImage: (dialogCtx) =>
-            openProjectAssetEditImageUploadDialog(
+        onReviewCandidates: (dialogCtx, preferredAssetNumericId) =>
+            _openCandidateStatusDialog(
               ctx: dialogCtx,
               setDialogState: setDialogState,
               token: token,
-              project: p,
-              scriptList: scriptList,
+              p: p,
+              assetsRef: dialogState.assetsRef,
               assetsBusy: dialogState.assetsBusy,
+              reloadAssetsAndStats: () =>
+                  dialogState.reloadAssetsAndStats(token, p.id, p.numericId),
+              preferredAssetNumericId: preferredAssetNumericId,
             ),
+        onUploadEditImage: (dialogCtx) => openProjectAssetEditImageUploadDialog(
+          ctx: dialogCtx,
+          setDialogState: setDialogState,
+          token: token,
+          project: p,
+          scriptList: scriptList,
+          assetsBusy: dialogState.assetsBusy,
+        ),
         onUploadClip: (dialogCtx) => openProjectAssetClipUploadDialog(
           ctx: dialogCtx,
           setDialogState: setDialogState,
@@ -209,4 +221,3 @@ extension _HomePageProjectEditorDialogContentAssets on _HomePageState {
     );
   }
 }
-

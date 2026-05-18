@@ -1,6 +1,24 @@
 part of '../../../../home_page.dart';
 
 extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
+  int? _chooseInitialAssetNumericId(
+    Iterable<AssetRow> assets, {
+    int? preferredNumericId,
+  }) {
+    final rows = assets.toList(growable: false);
+    if (rows.isEmpty) {
+      return null;
+    }
+    if (preferredNumericId != null) {
+      for (final asset in rows) {
+        if (asset.numericId == preferredNumericId) {
+          return preferredNumericId;
+        }
+      }
+    }
+    return rows.first.numericId;
+  }
+
   /// Handles asset create and edit dialogs so the main assets section stays thin.
   Future<void> _openCreateAssetDialog({
     required BuildContext ctx,
@@ -47,7 +65,8 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
                     minLines: 2,
                     maxLines: 4,
                     decoration: InputDecoration(
-                      labelText: dlgL10n.projectEditorAssetCrudFieldDescriptionLabel,
+                      labelText:
+                          dlgL10n.projectEditorAssetCrudFieldDescriptionLabel,
                     ),
                   ),
                 ],
@@ -72,7 +91,9 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
       if (name.isEmpty || type.isEmpty) {
         ScaffoldMessenger.of(ctx).showSnackBar(
           SnackBar(
-            content: Text(l10n.projectEditorAssetCrudCreateNameTypeRequiredSnack),
+            content: Text(
+              l10n.projectEditorAssetCrudCreateNameTypeRequiredSnack,
+            ),
           ),
         );
         return;
@@ -151,7 +172,8 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
                       DropdownButtonFormField<int>(
                         initialValue: selectedAssetNumericId,
                         decoration: InputDecoration(
-                          labelText: dlgL10n.projectEditorAssetCrudEditTargetLabel,
+                          labelText:
+                              dlgL10n.projectEditorAssetCrudEditTargetLabel,
                         ),
                         items: list
                             .map(
@@ -181,14 +203,16 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
                       TextField(
                         controller: nameCtrl,
                         decoration: InputDecoration(
-                          labelText: dlgL10n.projectEditorAssetCrudFieldNameLabel,
+                          labelText:
+                              dlgL10n.projectEditorAssetCrudFieldNameLabel,
                         ),
                       ),
                       const SizedBox(height: 8),
                       TextField(
                         controller: typeCtrl,
                         decoration: InputDecoration(
-                          labelText: dlgL10n.projectEditorAssetCrudFieldTypeLabel,
+                          labelText:
+                              dlgL10n.projectEditorAssetCrudFieldTypeLabel,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -197,8 +221,8 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
                         minLines: 2,
                         maxLines: 4,
                         decoration: InputDecoration(
-                          labelText:
-                              dlgL10n.projectEditorAssetCrudFieldDescriptionLabel,
+                          labelText: dlgL10n
+                              .projectEditorAssetCrudFieldDescriptionLabel,
                         ),
                       ),
                     ],
@@ -234,7 +258,9 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
           : descriptionCtrl.text.trim();
       if (body.isEmpty) {
         ScaffoldMessenger.of(ctx).showSnackBar(
-          SnackBar(content: Text(l10n.projectEditorAssetCrudEditEmptyPatchSnack)),
+          SnackBar(
+            content: Text(l10n.projectEditorAssetCrudEditEmptyPatchSnack),
+          ),
         );
         return;
       }
@@ -268,6 +294,177 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
       nameCtrl.dispose();
       typeCtrl.dispose();
       descriptionCtrl.dispose();
+    }
+  }
+
+  Future<void> _openCandidateStatusDialog({
+    required BuildContext ctx,
+    required StateSetter setDialogState,
+    required String token,
+    required ProjectRow p,
+    required List<ListAssetsResponse?> assetsRef,
+    required List<bool> assetsBusy,
+    required Future<void> Function() reloadAssetsAndStats,
+    int? preferredAssetNumericId,
+  }) async {
+    final l10n = resolveAppLocalizationsForErrors(ctx);
+    var list = assetsRef[0]?.items ?? const <AssetRow>[];
+    if (list.isEmpty) {
+      ScaffoldMessenger.of(ctx).showSnackBar(
+        SnackBar(content: Text(l10n.projectEditorAssetCrudEditNoneSnack)),
+      );
+      return;
+    }
+    var selectedAssetNumericId =
+        _chooseInitialAssetNumericId(
+          list,
+          preferredNumericId: preferredAssetNumericId,
+        ) ??
+        list.first.numericId;
+    var pendingOnly = shouldDefaultPendingOnly(list, selectedAssetNumericId);
+    try {
+      while (ctx.mounted) {
+        final hasPendingAssets = list.any(
+          (asset) => asset.candidateStatus == 'pending',
+        );
+        if (!hasPendingAssets) {
+          pendingOnly = false;
+        }
+        final visibleAssets = candidateStatusVisibleAssets(
+          list,
+          pendingOnly: pendingOnly,
+        );
+        if (visibleAssets.isEmpty) {
+          ScaffoldMessenger.of(ctx).showSnackBar(
+            SnackBar(
+              content: Text(l10n.projectEditorAssetCandidateQueueDoneSnack),
+            ),
+          );
+          return;
+        }
+        if (!visibleAssets.any(
+          (asset) => asset.numericId == selectedAssetNumericId,
+        )) {
+          selectedAssetNumericId = visibleAssets.first.numericId;
+        }
+        final decision =
+            await showDialog<ProjectAssetCandidateStatusDialogResult>(
+              context: ctx,
+              builder: (dialogCtx) => ProjectAssetCandidateStatusDialog(
+                assets: list,
+                initialSelectedAssetNumericId: selectedAssetNumericId,
+                initialPendingOnly: pendingOnly,
+              ),
+            );
+        if (decision == null || !ctx.mounted) {
+          return;
+        }
+        pendingOnly = decision.pendingOnly && hasPendingAssets;
+        final previousVisibleAssets = visibleAssets;
+        final previousIndex = previousVisibleAssets.indexWhere(
+          (asset) => asset.numericId == decision.assetNumericId,
+        );
+        final targetAssetNumericIds = decision.assetNumericIds.isEmpty
+            ? <int>[decision.assetNumericId]
+            : decision.assetNumericIds;
+        final savedAssetNumericId = decision.assetNumericId;
+        final savedCandidateStatus = decision.selectionKey;
+        setDialogState(() => assetsBusy[0] = true);
+        for (final assetNumericId in targetAssetNumericIds) {
+          await patchProjectAssetByProjectIds(token, p.id, assetNumericId, {
+            'candidate_status': assetCandidateStatusPatchValue(
+              savedCandidateStatus,
+            ),
+          });
+        }
+        if (!ctx.mounted) {
+          return;
+        }
+        await reloadAssetsAndStats();
+        if (!ctx.mounted) {
+          return;
+        }
+        list = assetsRef[0]?.items ?? const <AssetRow>[];
+        setDialogState(() => assetsBusy[0] = false);
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          SnackBar(
+            content: Text(
+              targetAssetNumericIds.length == 1
+                  ? l10n.projectEditorAssetCandidateSaveSuccessSnack(
+                      savedAssetNumericId,
+                      assetCandidateStatusLabel(
+                        l10n,
+                        assetCandidateStatusPatchValue(savedCandidateStatus),
+                      ),
+                    )
+                  : l10n.projectEditorAssetCandidateBulkSaveSuccessSnack(
+                      targetAssetNumericIds.length,
+                      assetCandidateStatusLabel(
+                        l10n,
+                        assetCandidateStatusPatchValue(savedCandidateStatus),
+                      ),
+                    ),
+            ),
+          ),
+        );
+        if (decision.action ==
+            ProjectAssetCandidateStatusDialogAction.saveToVisible) {
+          ScaffoldMessenger.of(ctx).showSnackBar(
+            SnackBar(
+              content: Text(l10n.projectEditorAssetCandidateQueueDoneSnack),
+            ),
+          );
+          return;
+        }
+        if (decision.action ==
+            ProjectAssetCandidateStatusDialogAction.saveToRemaining) {
+          final nextVisibleAssets = candidateStatusVisibleAssets(
+            list,
+            pendingOnly: pendingOnly,
+          );
+          if (nextVisibleAssets.isEmpty) {
+            ScaffoldMessenger.of(ctx).showSnackBar(
+              SnackBar(
+                content: Text(l10n.projectEditorAssetCandidateQueueDoneSnack),
+              ),
+            );
+            return;
+          }
+          final firstUntouched = nextVisibleAssets.firstWhere(
+            (asset) => !targetAssetNumericIds.contains(asset.numericId),
+            orElse: () => nextVisibleAssets.first,
+          );
+          selectedAssetNumericId = firstUntouched.numericId;
+          continue;
+        }
+        if (decision.action !=
+            ProjectAssetCandidateStatusDialogAction.saveAndNext) {
+          return;
+        }
+        final nextVisibleAssets = candidateStatusVisibleAssets(
+          list,
+          pendingOnly: pendingOnly,
+        );
+        if (nextVisibleAssets.isEmpty) {
+          ScaffoldMessenger.of(ctx).showSnackBar(
+            SnackBar(
+              content: Text(l10n.projectEditorAssetCandidateQueueDoneSnack),
+            ),
+          );
+          return;
+        }
+        final nextIndex = previousIndex < nextVisibleAssets.length
+            ? previousIndex
+            : nextVisibleAssets.length - 1;
+        selectedAssetNumericId = nextVisibleAssets[nextIndex].numericId;
+      }
+    } catch (e) {
+      if (ctx.mounted) {
+        setDialogState(() => assetsBusy[0] = false);
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          SnackBar(content: Text(describeUserVisibleApiError(l10n, e))),
+        );
+      }
     }
   }
 }
