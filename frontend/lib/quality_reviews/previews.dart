@@ -6,6 +6,7 @@ import '../rust_api.dart';
 class QualityReviewsActionsBar extends StatelessWidget {
   const QualityReviewsActionsBar({
     super.key,
+    this.studioPresentation = false,
     required this.showDashboardControls,
     required this.showRefreshControls,
     required this.loadingQualityDashboard,
@@ -23,6 +24,7 @@ class QualityReviewsActionsBar extends StatelessWidget {
     required this.onLoadQualityStagePassRate,
   });
 
+  final bool studioPresentation;
   final bool showDashboardControls;
   final bool showRefreshControls;
   final bool loadingQualityDashboard;
@@ -42,6 +44,36 @@ class QualityReviewsActionsBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
+    if (studioPresentation) {
+      return Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          FilledButton.tonal(
+            onPressed: onOpenWorkbench,
+            child: Text(l10n.qualityReviewsOpenWorkbench),
+          ),
+          if (showDashboardControls)
+            FilledButton(
+              onPressed:
+                  loadingQualityDashboard ? null : onLoadQualityDashboard,
+              child: Text(
+                loadingQualityDashboard
+                    ? l10n.projectsBusyProcessing
+                    : l10n.qualityReviewsLoadCurrentDashboard,
+              ),
+            ),
+          FilledButton.tonal(
+            onPressed: loadingQualityReviews ? null : onLoadQualityReviews,
+            child: Text(
+              loadingQualityReviews
+                  ? l10n.projectsBusyProcessing
+                  : l10n.qualityReviewsLoadReviewList,
+            ),
+          ),
+        ],
+      );
+    }
     return Wrap(
       spacing: 8,
       runSpacing: 8,
@@ -112,7 +144,7 @@ class QualityReviewsActionsBar extends StatelessWidget {
 class QualityReviewsOpsDashboardPreview extends StatelessWidget {
   const QualityReviewsOpsDashboardPreview({
     super.key,
-    required this.outlineColor,
+    required this.mutedColor,
     required this.dashboardSummary,
     required this.refreshControlsEnabled,
     required this.refreshSummary,
@@ -124,7 +156,7 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
     required this.badCaseStats,
   });
 
-  final Color outlineColor;
+  final Color mutedColor;
   final String? dashboardSummary;
   final bool refreshControlsEnabled;
   final String? refreshSummary;
@@ -154,7 +186,7 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
             : l10n.qualityReviewsDashboardNotLoadedRefreshDisabled,
         style: Theme.of(
           context,
-        ).textTheme.bodySmall?.copyWith(color: outlineColor),
+        ).textTheme.bodySmall?.copyWith(color: mutedColor),
       );
     }
     return Column(
@@ -165,7 +197,7 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
             refreshSummary!,
             style: Theme.of(
               context,
-            ).textTheme.bodySmall?.copyWith(color: outlineColor),
+            ).textTheme.bodySmall?.copyWith(color: mutedColor),
           ),
           const SizedBox(height: 8),
         ],
@@ -174,7 +206,7 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
             freshnessSummary!,
             style: Theme.of(
               context,
-            ).textTheme.bodySmall?.copyWith(color: outlineColor),
+            ).textTheme.bodySmall?.copyWith(color: mutedColor),
           ),
           const SizedBox(height: 8),
         ],
@@ -307,11 +339,11 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
 class QualityReviewsSummaryPreview extends StatelessWidget {
   const QualityReviewsSummaryPreview({
     super.key,
-    required this.outlineColor,
+    required this.mutedColor,
     required this.reviewSummary,
   });
 
-  final Color outlineColor;
+  final Color mutedColor;
   final String reviewSummary;
 
   @override
@@ -320,7 +352,7 @@ class QualityReviewsSummaryPreview extends StatelessWidget {
       reviewSummary,
       style: Theme.of(
         context,
-      ).textTheme.bodySmall?.copyWith(color: outlineColor),
+      ).textTheme.bodySmall?.copyWith(color: mutedColor),
     );
   }
 }
@@ -329,12 +361,12 @@ class QualityReviewsSummaryPreview extends StatelessWidget {
 class QualityReviewsCompatibilityPanel extends StatelessWidget {
   const QualityReviewsCompatibilityPanel({
     super.key,
-    required this.outlineColor,
+    required this.mutedColor,
     required this.creatingQualityReview,
     required this.onCreateQualityReviewProbe,
   });
 
-  final Color outlineColor;
+  final Color mutedColor;
   final bool creatingQualityReview;
   final VoidCallback onCreateQualityReviewProbe;
 
@@ -349,7 +381,7 @@ class QualityReviewsCompatibilityPanel extends StatelessWidget {
         l10n.qualityReviewsCompatibilityCheckIntro,
         style: Theme.of(
           context,
-        ).textTheme.bodySmall?.copyWith(color: outlineColor),
+        ).textTheme.bodySmall?.copyWith(color: mutedColor),
       ),
       children: [
         Align(
@@ -358,7 +390,7 @@ class QualityReviewsCompatibilityPanel extends StatelessWidget {
             l10n.qualityReviewsReadProbeLabel,
             style: Theme.of(
               context,
-            ).textTheme.labelSmall?.copyWith(color: outlineColor),
+            ).textTheme.labelSmall?.copyWith(color: mutedColor),
           ),
         ),
         const SizedBox(height: 8),

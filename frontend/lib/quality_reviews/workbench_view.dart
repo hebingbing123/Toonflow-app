@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
 import 'dimension_score_form.dart';
+import 'field_styling.dart';
 import 'support.dart';
 
 part 'workbench_view/review_widgets.dart';
@@ -173,7 +174,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    final outline = Theme.of(context).colorScheme.outline;
+    final muted = qualityReviewsMutedColor(context);
     final tokenEfficiencySummary = summarizeTokenEfficiencyFromQualityReviews(
       model.reviews,
       l10n: l10n,
@@ -223,7 +224,9 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
     final dialogWidth = viewportWidth.isFinite
         ? viewportWidth.clamp(320.0, 840.0)
         : 840.0;
-    return AlertDialog(
+    return Theme(
+      data: qualityReviewsFormTheme(context),
+      child: AlertDialog(
       title: Text(l10n.qualityReviewsWorkbenchTitle),
       content: SizedBox(
         width: dialogWidth,
@@ -238,7 +241,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                     : summarizeQualityReviews(model.reviews, l10n: l10n),
                 style: Theme.of(
                   context,
-                ).textTheme.bodySmall?.copyWith(color: outline),
+                ).textTheme.bodySmall?.copyWith(color: muted),
               ),
               if (model.initialProjectScopeSummary != null) ...[
                 const SizedBox(height: 6),
@@ -248,7 +251,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                   ),
                   style: Theme.of(
                     context,
-                  ).textTheme.bodySmall?.copyWith(color: outline),
+                  ).textTheme.bodySmall?.copyWith(color: muted),
                 ),
               ],
               if (model.filterBadCasesOnly ||
@@ -954,14 +957,14 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                             diagnosticSummary,
                             style: Theme.of(
                               context,
-                            ).textTheme.bodySmall?.copyWith(color: outline),
+                            ).textTheme.bodySmall?.copyWith(color: muted),
                           ),
                         if (writebackSummary != null)
                           Text(
                             writebackSummary,
                             style: Theme.of(
                               context,
-                            ).textTheme.bodySmall?.copyWith(color: outline),
+                            ).textTheme.bodySmall?.copyWith(color: muted),
                           ),
                         if (repairSuggestions.isNotEmpty)
                           Text(
@@ -970,7 +973,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                             ),
                             style: Theme.of(
                               context,
-                            ).textTheme.bodySmall?.copyWith(color: outline),
+                            ).textTheme.bodySmall?.copyWith(color: muted),
                           ),
                       ],
                     ),
@@ -1056,7 +1059,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                   l10n.qualityReviewsEmptyForCurrentFilters,
                   style: Theme.of(
                     context,
-                  ).textTheme.bodyMedium?.copyWith(color: outline),
+                  ).textTheme.bodyMedium?.copyWith(color: muted),
                 ),
               ],
             ],
@@ -1069,6 +1072,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
           child: Text(l10n.helpHubDialogClose),
         ),
       ],
+      ),
     );
   }
 }

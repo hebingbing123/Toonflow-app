@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'controller.dart';
+import 'field_styling.dart';
 import 'previews.dart';
 import 'support.dart';
 import 'workbench_view.dart';
 import '../rust_api.dart';
+import '../design_system/components/studio_pane_header.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../config.dart';
 import '../task_center/support.dart';
@@ -23,9 +25,11 @@ class QualityReviewsSection extends StatelessWidget {
     required this.platformConfig,
     this.fetchProjectsOverride,
     this.onNavigateDomainDeepLink,
+    this.studioPresentation = false,
   });
 
   final String? accessToken;
+  final bool studioPresentation;
   final QualityReviewsController controller;
   final int? initialProjectNumericId;
   final String? initialProjectUuid;
@@ -86,6 +90,7 @@ class QualityReviewsSection extends StatelessWidget {
     }
     await showDialog<void>(
       context: context,
+      useRootNavigator: true,
       builder: (dialogCtx) => _QualityReviewsWorkbenchDialog(
         accessToken: token,
         initialProjectNumericId: resolvedProjectNumericId,
@@ -105,7 +110,7 @@ class QualityReviewsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    final outline = Theme.of(context).colorScheme.outline;
+    final muted = qualityReviewsMutedColor(context);
     final reviewSummary = controller.qualityReviews == null
         ? l10n.qualityReviewsSummaryNotLoaded
         : summarizeQualityReviews(controller.qualityReviews!, l10n: l10n);
@@ -116,29 +121,17 @@ class QualityReviewsSection extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Text(
-                    l10n.productNavQuality,
-                    style: Theme.of(context).textTheme.titleSmall,
-                  ),
-                ),
-                RiskyOperationConfirmPrefsOverflowMenu(
-                  tooltip: l10n.taskCenterLocalClientPrefs,
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              l10n.qualityReviewsSectionIntro,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: outline),
+            StudioPaneHeader(
+              title: l10n.productNavQuality,
+              subtitle: l10n.qualityReviewsSectionIntro,
+              showBack: studioPresentation,
+              trailing: RiskyOperationConfirmPrefsOverflowMenu(
+                tooltip: l10n.taskCenterLocalClientPrefs,
+              ),
             ),
             const SizedBox(height: 8),
             QualityReviewsActionsBar(
+              studioPresentation: studioPresentation,
               showDashboardControls: platformConfig.qualityDashboardEnabled,
               showRefreshControls: platformConfig.qualityRefreshControlsEnabled,
               loadingQualityDashboard: controller.loadingQualityDashboard,
@@ -168,10 +161,10 @@ class QualityReviewsSection extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             QualityReviewsSummaryPreview(
-              outlineColor: outline,
+              mutedColor: muted,
               reviewSummary: reviewSummary,
             ),
-            if (platformConfig.qualityDashboardEnabled) ...[
+            if (platformConfig.qualityDashboardEnabled && !studioPresentation) ...[
               const SizedBox(height: 8),
               Text(
                 l10n.qualityReviewsOpsDashboardTitle,
@@ -201,7 +194,7 @@ class QualityReviewsSection extends StatelessWidget {
                   ),
                 ),
               QualityReviewsOpsDashboardPreview(
-                outlineColor: outline,
+                mutedColor: muted,
                 dashboardSummary: controller.qualityDashboardLine,
                 refreshControlsEnabled:
                     platformConfig.qualityRefreshControlsEnabled,
@@ -216,86 +209,150 @@ class QualityReviewsSection extends StatelessWidget {
                 badCaseStats: controller.qualityBadCaseStatItems,
               ),
             ],
-            const SizedBox(height: 8),
-            QualityReviewsCompatibilityPanel(
-              outlineColor: outline,
-              creatingQualityReview: controller.creatingQualityReview,
-              onCreateQualityReviewProbe: controller.createQualityReviewProbe,
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: controller.qualityReviewIdController,
-              onChanged: controller.onQualityReviewIdChanged,
-              decoration: InputDecoration(
-                labelText: l10n.qualityReviewsFieldReviewId,
-              ),
-            ),
-            const SizedBox(height: 8),
-            FilledButton.tonal(
-              onPressed:
-                  (controller.loadingQualityReviewById ||
-                      controller.qualityReviewIdController.text.trim().isEmpty)
-                  ? null
-                  : controller.fetchSelectedQualityReview,
-              child: Text(
-                controller.loadingQualityReviewById
-                    ? l10n.projectsBusyProcessing
-                    : l10n.qualityReviewsViewReviewDetails,
-              ),
-            ),
-            if (controller.qualityReviewByIdLine != null) ...[
+            if (studioPresentation)
+              ExpansionTile(
+                tilePadding: EdgeInsets.zero,
+                title: Text(l10n.qualityReviewsOpsDashboardTitle),
+                children: <Widget>[
+                  if (platformConfig.qualityDashboardEnabled) ...<Widget>[
+                    const SizedBox(height: 8),
+                    QualityReviewsOpsDashboardPreview(
+                      mutedColor: muted,
+                      dashboardSummary: controller.qualityDashboardLine,
+                      refreshControlsEnabled:
+                          platformConfig.qualityRefreshControlsEnabled,
+                      refreshSummary:
+                          platformConfig.qualityRefreshControlsEnabled
+                          ? controller.qualityDashboardRefreshLine
+                          : null,
+                      freshnessSummary:
+                          controller.qualityDashboardFreshnessLine,
+                      qualityStatsRows: controller.qualityStatsRows,
+                      stageGradeRows: controller.qualityStageGradeRows,
+                      scopeInsightRows: controller.qualityScopeInsightRows,
+                      tokenEfficiencyRows:
+                          controller.qualityTokenEfficiencyRows,
+                      badCaseStats: controller.qualityBadCaseStatItems,
+                    ),
+                  ],
+                  const SizedBox(height: 8),
+                  QualityReviewsCompatibilityPanel(
+                    mutedColor: muted,
+                    creatingQualityReview: controller.creatingQualityReview,
+                    onCreateQualityReviewProbe:
+                        controller.createQualityReviewProbe,
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: controller.qualityReviewIdController,
+                    onChanged: controller.onQualityReviewIdChanged,
+                    style: qualityReviewsFieldTextStyle(context),
+                    decoration: qualityReviewsInputDecoration(
+                      context,
+                      labelText: l10n.qualityReviewsFieldReviewId,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  FilledButton.tonal(
+                    onPressed:
+                        (controller.loadingQualityReviewById ||
+                            controller.qualityReviewIdController.text
+                                .trim()
+                                .isEmpty)
+                        ? null
+                        : controller.fetchSelectedQualityReview,
+                    child: Text(
+                      controller.loadingQualityReviewById
+                          ? l10n.projectsBusyProcessing
+                          : l10n.qualityReviewsViewReviewDetails,
+                    ),
+                  ),
+                ],
+              )
+            else ...<Widget>[
               const SizedBox(height: 8),
-              SelectableText(
-                l10n.qualityReviewsSummaryReviewDetails(
-                  controller.qualityReviewByIdLine!,
+              QualityReviewsCompatibilityPanel(
+                mutedColor: muted,
+                creatingQualityReview: controller.creatingQualityReview,
+                onCreateQualityReviewProbe: controller.createQualityReviewProbe,
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: controller.qualityReviewIdController,
+                onChanged: controller.onQualityReviewIdChanged,
+                decoration: InputDecoration(
+                  labelText: l10n.qualityReviewsFieldReviewId,
                 ),
               ),
-            ],
-            if (controller.qualityStatsLine != null) ...[
               const SizedBox(height: 8),
-              SelectableText(
-                l10n.qualityReviewsSummaryStats(controller.qualityStatsLine!),
-              ),
-            ],
-            if (controller.qualityStagePassRateLine != null) ...[
-              const SizedBox(height: 8),
-              SelectableText(
-                l10n.qualityReviewsSummaryStagePassRate(
-                  controller.qualityStagePassRateLine!,
+              FilledButton.tonal(
+                onPressed:
+                    (controller.loadingQualityReviewById ||
+                        controller.qualityReviewIdController.text
+                            .trim()
+                            .isEmpty)
+                    ? null
+                    : controller.fetchSelectedQualityReview,
+                child: Text(
+                  controller.loadingQualityReviewById
+                      ? l10n.projectsBusyProcessing
+                      : l10n.qualityReviewsViewReviewDetails,
                 ),
               ),
-            ],
-            if (controller.qualityStageGradeLine != null) ...[
-              const SizedBox(height: 8),
-              SelectableText(
-                l10n.qualityReviewsSummaryStageGrade(
-                  controller.qualityStageGradeLine!,
+              if (controller.qualityReviewByIdLine != null) ...[
+                const SizedBox(height: 8),
+                SelectableText(
+                  l10n.qualityReviewsSummaryReviewDetails(
+                    controller.qualityReviewByIdLine!,
+                  ),
                 ),
-              ),
-            ],
-            if (controller.qualityScopeInsightsLine != null) ...[
-              const SizedBox(height: 8),
-              SelectableText(
-                l10n.qualityReviewsSummaryScopeInsights(
-                  controller.qualityScopeInsightsLine!,
+              ],
+              if (controller.qualityStatsLine != null) ...[
+                const SizedBox(height: 8),
+                SelectableText(
+                  l10n.qualityReviewsSummaryStats(controller.qualityStatsLine!),
                 ),
-              ),
-            ],
-            if (controller.qualityTokenEfficiencyLine != null) ...[
-              const SizedBox(height: 8),
-              SelectableText(
-                l10n.qualityReviewsSummaryTokenEfficiency(
-                  controller.qualityTokenEfficiencyLine!,
+              ],
+              if (controller.qualityStagePassRateLine != null) ...[
+                const SizedBox(height: 8),
+                SelectableText(
+                  l10n.qualityReviewsSummaryStagePassRate(
+                    controller.qualityStagePassRateLine!,
+                  ),
                 ),
-              ),
-            ],
-            if (controller.qualityBadCaseStatsLine != null) ...[
-              const SizedBox(height: 8),
-              SelectableText(
-                l10n.qualityReviewsSummaryBadCaseHotspots(
-                  controller.qualityBadCaseStatsLine!,
+              ],
+              if (controller.qualityStageGradeLine != null) ...[
+                const SizedBox(height: 8),
+                SelectableText(
+                  l10n.qualityReviewsSummaryStageGrade(
+                    controller.qualityStageGradeLine!,
+                  ),
                 ),
-              ),
+              ],
+              if (controller.qualityScopeInsightsLine != null) ...[
+                const SizedBox(height: 8),
+                SelectableText(
+                  l10n.qualityReviewsSummaryScopeInsights(
+                    controller.qualityScopeInsightsLine!,
+                  ),
+                ),
+              ],
+              if (controller.qualityTokenEfficiencyLine != null) ...[
+                const SizedBox(height: 8),
+                SelectableText(
+                  l10n.qualityReviewsSummaryTokenEfficiency(
+                    controller.qualityTokenEfficiencyLine!,
+                  ),
+                ),
+              ],
+              if (controller.qualityBadCaseStatsLine != null) ...[
+                const SizedBox(height: 8),
+                SelectableText(
+                  l10n.qualityReviewsSummaryBadCaseHotspots(
+                    controller.qualityBadCaseStatsLine!,
+                  ),
+                ),
+              ],
             ],
             if (controller.qualityReviews != null) ...[
               QualityReviewsListPreview(

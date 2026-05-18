@@ -179,7 +179,7 @@ class _DimensionScoreFormWidgetState extends State<DimensionScoreFormWidget> {
           child: Text(
             '量表版本：$kRubricVersion',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.outline,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
         ),
@@ -254,7 +254,7 @@ class _DimensionRow extends StatelessWidget {
                   Text(
                     '跳过',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.outline,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                   Checkbox(
@@ -332,7 +332,7 @@ class DimensionScoreDisplayWidget extends StatelessWidget {
       return Text(
         '暂无维度评分',
         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          color: Theme.of(context).colorScheme.outline,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
       );
     }
