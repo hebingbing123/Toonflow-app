@@ -77,9 +77,20 @@ class _ProjectSelectorPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final outline = theme.colorScheme.outline;
+    final tokens = StudioTokens.of(context);
+    final muted = theme.colorScheme.onSurfaceVariant;
     final l10n = resolveAppLocalizationsForErrors(context);
-    
+    final fieldTextStyle = theme.textTheme.bodyLarge?.copyWith(
+      color: theme.colorScheme.onSurface,
+    );
+    final fieldDecoration = InputDecoration(
+      border: const OutlineInputBorder(),
+      filled: true,
+      fillColor: tokens.bgInset,
+      labelStyle: TextStyle(color: tokens.textSecondary),
+      hintStyle: TextStyle(color: tokens.textMuted),
+    );
+
     return _Panel(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -88,7 +99,7 @@ class _ProjectSelectorPanel extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             l10n.shortVideoSpaceConfigurationDescription,
-            style: theme.textTheme.bodySmall?.copyWith(color: outline),
+            style: theme.textTheme.bodySmall?.copyWith(color: muted),
           ),
           const SizedBox(height: 12),
           Row(
@@ -96,15 +107,20 @@ class _ProjectSelectorPanel extends StatelessWidget {
               Expanded(
                 child: DropdownButtonFormField<String>(
                   initialValue: selectedProjectId,
-                  decoration: InputDecoration(
+                  isExpanded: true,
+                  style: fieldTextStyle,
+                  dropdownColor: tokens.bgElevated,
+                  decoration: fieldDecoration.copyWith(
                     labelText: l10n.shortVideoSpaceTargetProject,
-                    border: OutlineInputBorder(),
                   ),
                   items: projectOptions
                       .map(
                         (project) => DropdownMenuItem<String>(
                           value: project.id,
-                          child: Text(project.label),
+                          child: Text(
+                            project.label,
+                            style: fieldTextStyle,
+                          ),
                         ),
                       )
                       .toList(growable: false),
@@ -172,22 +188,33 @@ class _ProjectSelectorPanel extends StatelessWidget {
           DropdownButtonFormField<String>(
             key: ValueKey<String>('tm-$selectedProjectId'),
             initialValue: targetMarket,
-            decoration: InputDecoration(
+            isExpanded: true,
+            style: fieldTextStyle,
+            dropdownColor: tokens.bgElevated,
+            decoration: fieldDecoration.copyWith(
               labelText: l10n.shortVideoSpaceTargetMarketLabel,
-              border: const OutlineInputBorder(),
             ),
             items: [
               DropdownMenuItem(
                 value: 'domestic',
-                child: Text(l10n.shortVideoSpaceTargetMarketDomestic),
+                child: Text(
+                  l10n.shortVideoSpaceTargetMarketDomestic,
+                  style: fieldTextStyle,
+                ),
               ),
               DropdownMenuItem(
                 value: 'overseas',
-                child: Text(l10n.shortVideoSpaceTargetMarketOverseas),
+                child: Text(
+                  l10n.shortVideoSpaceTargetMarketOverseas,
+                  style: fieldTextStyle,
+                ),
               ),
               DropdownMenuItem(
                 value: 'both',
-                child: Text(l10n.shortVideoSpaceTargetMarketBoth),
+                child: Text(
+                  l10n.shortVideoSpaceTargetMarketBoth,
+                  style: fieldTextStyle,
+                ),
               ),
             ],
             onChanged: loadingProjects
@@ -201,7 +228,7 @@ class _ProjectSelectorPanel extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             l10n.shortVideoSpaceTargetPlatformsHint,
-            style: theme.textTheme.bodySmall?.copyWith(color: outline),
+            style: theme.textTheme.bodySmall?.copyWith(color: muted),
           ),
           const SizedBox(height: 8),
           Wrap(
@@ -260,10 +287,10 @@ class _ProjectSelectorPanel extends StatelessWidget {
           TextFormField(
             key: ValueKey<String>('vp-$selectedProjectId'),
             initialValue: voiceProfile,
-            decoration: InputDecoration(
+            style: fieldTextStyle,
+            decoration: fieldDecoration.copyWith(
               labelText: l10n.shortVideoSpaceVoiceProfileLabel,
               hintText: l10n.shortVideoSpaceVoiceProfileHint,
-              border: const OutlineInputBorder(),
             ),
             onChanged: onVoiceProfileChanged,
           ),
@@ -271,9 +298,9 @@ class _ProjectSelectorPanel extends StatelessWidget {
           TextFormField(
             key: ValueKey<String>('ss-$selectedProjectId'),
             initialValue: subtitleStyle,
-            decoration: InputDecoration(
+            style: fieldTextStyle,
+            decoration: fieldDecoration.copyWith(
               labelText: l10n.shortVideoSpaceSubtitleStyleLabel,
-              border: const OutlineInputBorder(),
             ),
             onChanged: onSubtitleStyleChanged,
           ),
@@ -281,9 +308,9 @@ class _ProjectSelectorPanel extends StatelessWidget {
           TextFormField(
             key: ValueKey<String>('bgm-$selectedProjectId'),
             initialValue: bgmStrategy,
-            decoration: InputDecoration(
+            style: fieldTextStyle,
+            decoration: fieldDecoration.copyWith(
               labelText: l10n.shortVideoSpaceBgmStrategyLabel,
-              border: const OutlineInputBorder(),
             ),
             onChanged: onBgmStrategyChanged,
           ),
@@ -375,7 +402,7 @@ class _ProjectSelectorPanel extends StatelessWidget {
             loadingProjectOverview
                 ? l10n.shortVideoSpaceLoadingProjectReadiness
                 : projectReadinessSummary,
-            style: theme.textTheme.bodySmall?.copyWith(color: outline),
+            style: theme.textTheme.bodySmall?.copyWith(color: muted),
           ),
           if (visualLabel != null || directionLabel != null) ...[
             const SizedBox(height: 8),

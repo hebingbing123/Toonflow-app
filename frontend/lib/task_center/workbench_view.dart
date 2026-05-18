@@ -124,7 +124,7 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    final outline = Theme.of(context).colorScheme.outline;
+    final muted = Theme.of(context).colorScheme.onSurfaceVariant;
     final viewportWidth = MediaQuery.sizeOf(context).width;
     final dialogWidth = viewportWidth.isFinite
         ? viewportWidth.clamp(320.0, 760.0)
@@ -146,7 +146,7 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                 ),
                 style: Theme.of(
                   context,
-                ).textTheme.bodySmall?.copyWith(color: outline),
+                ).textTheme.bodySmall?.copyWith(color: muted),
               ),
               const SizedBox(height: 12),
               Text(
@@ -195,7 +195,7 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                 model.projectSummary,
                 style: Theme.of(
                   context,
-                ).textTheme.bodySmall?.copyWith(color: outline),
+                ).textTheme.bodySmall?.copyWith(color: muted),
               ),
               if (model.categoriesSummary != null) ...[
                 const SizedBox(height: 4),
@@ -203,7 +203,7 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                   model.categoriesSummary!,
                   style: Theme.of(
                     context,
-                  ).textTheme.bodySmall?.copyWith(color: outline),
+                  ).textTheme.bodySmall?.copyWith(color: muted),
                 ),
               ],
               const SizedBox(height: 4),
@@ -211,7 +211,7 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
                 model.jobSummary,
                 style: Theme.of(
                   context,
-                ).textTheme.bodySmall?.copyWith(color: outline),
+                ).textTheme.bodySmall?.copyWith(color: muted),
               ),
               const SizedBox(height: 8),
               Row(
@@ -511,7 +511,7 @@ class _VideoExportFailedSubtitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    final outline = Theme.of(context).colorScheme.outline;
+    final muted = Theme.of(context).colorScheme.onSurfaceVariant;
     final small = Theme.of(context).textTheme.bodySmall;
     final code = job.errorDetails == null
         ? null
@@ -528,7 +528,7 @@ class _VideoExportFailedSubtitle extends StatelessWidget {
         children: [
           Text(
             l10n.taskCenterStructuredFailure(label),
-            style: small?.copyWith(color: outline),
+            style: small?.copyWith(color: muted),
           ),
           if (domainLink != null && domainLinkHandler != null) ...[
             const SizedBox(height: 2),

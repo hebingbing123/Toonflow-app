@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../design_system/components/studio_text_styles.dart';
 import '../../l10n/app_localizations.dart';
 import '../../rust_api.dart';
 import 'version_manager.dart';
@@ -553,9 +554,7 @@ class _VersionComparisonState extends State<VersionComparison> {
                     children: [
                       Text(
                         l10n.shortVideoVersionComparisonTitle,
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: studioDialogTitleStyle(context),
                       ),
                       const SizedBox(height: 4),
                       Text(

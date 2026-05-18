@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/tokens.dart';
+import '../design_system/components/studio_pane_header.dart';
+import '../design_system/components/studio_text_styles.dart';
 import '../l10n/app_localizations.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
@@ -30,7 +33,10 @@ const List<String> kShortVideoPublishPlatformIdsInDisplayOrder = <String>[
   'facebook_reels',
 ];
 
-String shortVideoPublishPlatformLabel(AppLocalizations l10n, String platformId) {
+String shortVideoPublishPlatformLabel(
+  AppLocalizations l10n,
+  String platformId,
+) {
   switch (platformId) {
     case 'douyin':
       return l10n.shortVideoPublishPlatformDouyin;
@@ -163,10 +169,7 @@ String shortVideoPublishPrepareSeverityLabel(
 }
 
 /// Localized delivery mode for publish audit / overview strings (matches [DeliveryModeBadge]).
-String shortVideoDeliveryModeLabel(
-  AppLocalizations l10n,
-  String deliveryMode,
-) {
+String shortVideoDeliveryModeLabel(AppLocalizations l10n, String deliveryMode) {
   switch (deliveryMode.toLowerCase()) {
     case 'live':
       return l10n.shortVideoDeliveryModeLive;
@@ -232,6 +235,7 @@ class ShortVideoCandidateCardUi {
   final int pending;
   final int linked;
   final int ignored;
+
   /// `candidate_status` 为空或非 pending/linked/ignored（与后端 `unset` 一致）。
   final int unset;
   final String headline;
@@ -280,6 +284,7 @@ class ShortVideoAssemblyPanelUi {
   final bool unavailable;
   final String headline;
   final String defaultsLine;
+
   /// L3：质量验收摘要行（与 **`candidate_quality_summary`** 对齐）。
   final List<String> qualityLines;
   final List<String> scriptLines;
@@ -479,15 +484,16 @@ class ShortVideoPublishPanelUi {
   final List<String> publishBatchResultLines;
   final Map<String, String> publishAutomationModesByPlatform;
   final void Function(String platformId, String automationMode)?
-      onChangePublishAutomationMode;
+  onChangePublishAutomationMode;
   final List<PublishDraftRow> publishDraftOptions;
   final String? selectedPublishDraftId;
   final ValueChanged<String>? onSelectPublishDraft;
+
   /// When null, treat as no drafts for calendar (keeps panel `const` paths valid).
   final List<PublishDraftRow>? publishScheduleCalendarDrafts;
   final PublishCalendarDayCallback? onPublishCalendarDayBulkSchedule;
   final VoidCallback? onOpenPublishTroubleshooting;
-  
+
   // P8: Multi-select fields
   final bool multiSelectMode;
   final Set<String> selectedDraftIds;
@@ -500,9 +506,10 @@ class ShortVideoPublishPanelUi {
   final VoidCallback? onBatchArchiveDrafts;
   final VoidCallback? onCompareDrafts;
   final PublishBatchValidationResponse? batchValidation;
+
   /// Clears local SharedPreferences for all short-video destructive confirms.
   final void Function(BuildContext context)? onResetConfirmationDontShowAgain;
-  
+
   // P11: Delivery mode breakdown
   final Map<String, int> jobsByDeliveryMode;
   final String? deliveryModeFilter;
@@ -580,7 +587,7 @@ class DeliveryModeBadge extends StatelessWidget {
         icon = Icons.help_outline;
     }
     final label = shortVideoDeliveryModeLabel(l10n, deliveryMode);
-    
+
     if (small) {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -597,7 +604,7 @@ class DeliveryModeBadge extends StatelessWidget {
         ),
       );
     }
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -780,36 +787,27 @@ class ShortVideoSpaceView extends StatelessWidget {
   final VoidCallback onOpenProductionWorkspace;
   final VoidCallback onOpenTasks;
   final VoidCallback onOpenQuality;
+
   /// Clears local destructive-confirm "don't show again" prefs (always available).
   final void Function(BuildContext context)? onResetConfirmationDontShowAgain;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final outline = theme.colorScheme.outline;
+    final muted = studioMutedTextColor(context);
     final l10n = resolveAppLocalizationsForErrors(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 16),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Text(
-                l10n.shortVideoSpacePageTitle,
-                style: theme.textTheme.titleLarge,
-              ),
-            ),
-            RiskyOperationConfirmPrefsOverflowMenu(
-              tooltip: l10n.notificationsRiskyPrefsTooltip,
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Text(
-          l10n.shortVideoSpacePageSubtitle,
-          style: theme.textTheme.bodyMedium?.copyWith(color: outline),
+        StudioPaneHeader(
+          title: l10n.shortVideoSpacePageTitle,
+          subtitle: l10n.shortVideoSpacePageSubtitle,
+          titleStyle: studioProjectTitleStyle(context),
+          onBack: onOpenProjects,
+          trailing: RiskyOperationConfirmPrefsOverflowMenu(
+            tooltip: l10n.notificationsRiskyPrefsTooltip,
+          ),
         ),
         const SizedBox(height: 16),
         _Panel(
@@ -825,10 +823,7 @@ class ShortVideoSpaceView extends StatelessWidget {
               const SizedBox(height: 12),
               Text(modeTitle, style: theme.textTheme.titleMedium),
               const SizedBox(height: 6),
-              Text(
-                modeSummary,
-                style: theme.textTheme.bodyMedium?.copyWith(color: outline),
-              ),
+              Text(modeSummary, style: studioMutedBodyMedium(context)),
               const SizedBox(height: 8),
               Text(modeAdvice, style: theme.textTheme.bodySmall),
             ],
@@ -918,10 +913,7 @@ class ShortVideoSpaceView extends StatelessWidget {
                 style: theme.textTheme.titleSmall,
               ),
               const SizedBox(height: 8),
-              Text(
-                readinessIntro,
-                style: theme.textTheme.bodyMedium?.copyWith(color: outline),
-              ),
+              Text(readinessIntro, style: studioMutedBodyMedium(context)),
               const SizedBox(height: 12),
               Wrap(
                 spacing: 8,
@@ -936,7 +928,7 @@ class ShortVideoSpaceView extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 readinessGapSummary,
-                style: theme.textTheme.bodySmall?.copyWith(color: outline),
+                style: theme.textTheme.bodySmall?.copyWith(color: muted),
               ),
               const SizedBox(height: 12),
               for (final item in readinessItems)
@@ -953,18 +945,18 @@ class ShortVideoSpaceView extends StatelessWidget {
               if (shotReadinessUi.loading)
                 Text(
                   l10n.shortVideoSpaceShotReadinessLoading,
-                  style: theme.textTheme.bodySmall?.copyWith(color: outline),
+                  style: theme.textTheme.bodySmall?.copyWith(color: muted),
                 )
               else if (shotReadinessUi.unavailable)
                 Text(
                   l10n.shortVideoSpaceShotReadinessUnavailableHint,
-                  style: theme.textTheme.bodySmall?.copyWith(color: outline),
+                  style: theme.textTheme.bodySmall?.copyWith(color: muted),
                 )
               else ...[
                 if (shotReadinessUi.headline != null)
                   Text(
                     shotReadinessUi.headline!,
-                    style: theme.textTheme.bodyMedium?.copyWith(color: outline),
+                    style: studioMutedBodyMedium(context),
                   ),
                 if (shotReadinessUi.reasonLines.isNotEmpty) ...[
                   const SizedBox(height: 8),
@@ -981,10 +973,7 @@ class ShortVideoSpaceView extends StatelessWidget {
                           ),
                           const SizedBox(width: 6),
                           Expanded(
-                            child: Text(
-                              line,
-                              style: theme.textTheme.bodySmall,
-                            ),
+                            child: Text(line, style: theme.textTheme.bodySmall),
                           ),
                         ],
                       ),
@@ -1040,10 +1029,7 @@ class ShortVideoSpaceView extends StatelessWidget {
               const SizedBox(height: 8),
               Text(nextStepTitle, style: theme.textTheme.titleMedium),
               const SizedBox(height: 6),
-              Text(
-                nextStepDetail,
-                style: theme.textTheme.bodyMedium?.copyWith(color: outline),
-              ),
+              Text(nextStepDetail, style: studioMutedBodyMedium(context)),
               const SizedBox(height: 12),
               FilledButton.icon(
                 onPressed: onNextStep,
@@ -1221,7 +1207,8 @@ class _CandidateCompareCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final outline = theme.colorScheme.outline;
+    final border = theme.colorScheme.outlineVariant;
+    final muted = studioMutedTextColor(context);
     final l10n = resolveAppLocalizationsForErrors(context);
     final header = item.scriptNumericId != null
         ? l10n.shortVideoCandidateCompareStoryboardWithScript(
@@ -1236,22 +1223,19 @@ class _CandidateCompareCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          border: Border.all(color: outline),
+          border: Border.all(color: border),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              header,
-              style: theme.textTheme.titleSmall,
-            ),
+            Text(header, style: theme.textTheme.titleSmall),
             const SizedBox(height: 8),
             Text(item.readinessLine, style: theme.textTheme.bodySmall),
             const SizedBox(height: 4),
             Text(
               item.qualityLine,
-              style: theme.textTheme.bodySmall?.copyWith(color: outline),
+              style: theme.textTheme.bodySmall?.copyWith(color: muted),
             ),
             if ((item.writebackLine ?? '').trim().isNotEmpty) ...[
               const SizedBox(height: 6),
@@ -1270,7 +1254,9 @@ class _CandidateCompareCard extends StatelessWidget {
                     height: 120,
                     color: theme.colorScheme.surfaceContainerHighest,
                     alignment: Alignment.center,
-                    child: Text(l10n.shortVideoCandidateReferenceImageNotPreviewable),
+                    child: Text(
+                      l10n.shortVideoCandidateReferenceImageNotPreviewable,
+                    ),
                   ),
                 ),
               ),
@@ -1286,7 +1272,7 @@ class _CandidateCompareCard extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 item.liveActionReferenceShotUrls.take(2).join('\n'),
-                style: theme.textTheme.bodySmall?.copyWith(color: outline),
+                style: theme.textTheme.bodySmall?.copyWith(color: muted),
               ),
             ],
             if ((item.selectedVideoUrl ?? '').trim().isNotEmpty) ...[
@@ -1309,7 +1295,8 @@ class _CandidateCompareCard extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               ...item.candidateVideoUrls.map((url) {
-                final isCurrent = url.trim() == (item.selectedVideoUrl ?? '').trim();
+                final isCurrent =
+                    url.trim() == (item.selectedVideoUrl ?? '').trim();
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 6),
                   child: Row(
@@ -1373,10 +1360,9 @@ class _MetricChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
-        resolveAppLocalizationsForErrors(context).shortVideoMetricChipLine(
-          label,
-          value,
-        ),
+        resolveAppLocalizationsForErrors(
+          context,
+        ).shortVideoMetricChipLine(label, value),
         style: theme.textTheme.labelMedium,
       ),
     );
@@ -1433,7 +1419,8 @@ class _WritebackStatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final incomplete = line.contains('incomplete') ||
+    final incomplete =
+        line.contains('incomplete') ||
         line.contains('失败') ||
         line.contains('未完整');
     final color = incomplete

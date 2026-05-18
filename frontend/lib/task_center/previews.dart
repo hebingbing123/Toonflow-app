@@ -23,13 +23,15 @@ class TaskCenterActionsBar extends StatelessWidget {
       spacing: 8,
       runSpacing: 8,
       children: [
-        FilledButton.tonal(
+        FilledButton.icon(
           onPressed: onOpenWorkbench,
-          child: Text(l10n.taskCenterOpenWorkbench),
+          icon: const Icon(Icons.open_in_new, size: 16),
+          label: Text(l10n.taskCenterOpenWorkbench),
         ),
-        FilledButton.tonal(
+        OutlinedButton.icon(
           onPressed: loadingTaskApi ? null : onLoadTaskApi,
-          child: Text(
+          icon: const Icon(Icons.refresh, size: 16),
+          label: Text(
             loadingTaskApi
                 ? l10n.projectsBusyProcessing
                 : l10n.taskCenterRefreshSummary,
@@ -44,7 +46,7 @@ class TaskCenterActionsBar extends StatelessWidget {
 class TaskCenterCompatibilityPanel extends StatelessWidget {
   const TaskCenterCompatibilityPanel({
     super.key,
-    required this.outlineColor,
+    required this.mutedColor,
     required this.loadingTaskProjects,
     required this.loadingTaskCategories,
     required this.loadingTaskApi,
@@ -59,7 +61,7 @@ class TaskCenterCompatibilityPanel extends StatelessWidget {
     required this.onProbeTaskDetailUuid,
   });
 
-  final Color outlineColor;
+  final Color mutedColor;
   final bool loadingTaskProjects;
   final bool loadingTaskCategories;
   final bool loadingTaskApi;
@@ -84,7 +86,7 @@ class TaskCenterCompatibilityPanel extends StatelessWidget {
         l10n.taskCenterCompatibilityHint,
         style: Theme.of(
           context,
-        ).textTheme.bodySmall?.copyWith(color: outlineColor),
+        ).textTheme.bodySmall?.copyWith(color: mutedColor),
       ),
       children: [
         Wrap(
@@ -116,7 +118,9 @@ class TaskCenterCompatibilityPanel extends StatelessWidget {
               ),
             ),
             FilledButton.tonal(
-              onPressed: loadingTaskDetailsByNumericId ? null : onProbeTaskDetailByNumericId,
+              onPressed: loadingTaskDetailsByNumericId
+                  ? null
+                  : onProbeTaskDetailByNumericId,
               child: Text(
                 loadingTaskDetailsByNumericId
                     ? l10n.projectsBusyProcessing
@@ -173,22 +177,22 @@ class TaskCenterJobsPreview extends StatelessWidget {
           l10n.taskCenterJobsCount(jobs.length),
           style: Theme.of(context).textTheme.labelLarge,
         ),
-        ...jobs.take(8).map(
-          (job) {
-            final phase = taskCenterShortVideoStageLabel(l10n, job);
-            final title = phase.isEmpty
-                ? l10n.l10nBatch_c084376ea9(job.kind, job.status)
-                : '${job.kind} · ${job.status} · $phase';
-            return ListTile(
+        ...jobs.take(8).map((job) {
+          final phase = taskCenterShortVideoStageLabel(l10n, job);
+          final title = phase.isEmpty
+              ? l10n.l10nBatch_c084376ea9(job.kind, job.status)
+              : '${job.kind} · ${job.status} · $phase';
+          return ListTile(
             dense: true,
             contentPadding: EdgeInsets.zero,
             title: Text(title),
-            subtitle: Text(l10n.l10nBatch_978d9d9f6f(job.numericTaskId, job.id)),
+            subtitle: Text(
+              l10n.l10nBatch_978d9d9f6f(job.numericTaskId, job.id),
+            ),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => onSelectTaskJob(job),
           );
-          },
-        ),
+        }),
       ],
     );
   }
@@ -198,13 +202,13 @@ class TaskCenterJobsPreview extends StatelessWidget {
 class TaskCenterSummaryPreview extends StatelessWidget {
   const TaskCenterSummaryPreview({
     super.key,
-    required this.outlineColor,
+    required this.mutedColor,
     required this.projectSummary,
     required this.taskSummary,
     this.taskCategoriesLine,
   });
 
-  final Color outlineColor;
+  final Color mutedColor;
   final String projectSummary;
   final String taskSummary;
   final String? taskCategoriesLine;
@@ -214,7 +218,7 @@ class TaskCenterSummaryPreview extends StatelessWidget {
     final l10n = resolveAppLocalizationsForErrors(context);
     final bodySmall = Theme.of(
       context,
-    ).textTheme.bodySmall?.copyWith(color: outlineColor);
+    ).textTheme.bodySmall?.copyWith(color: mutedColor);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -223,7 +227,10 @@ class TaskCenterSummaryPreview extends StatelessWidget {
         Text(taskSummary, style: bodySmall),
         if (taskCategoriesLine != null) ...[
           const SizedBox(height: 4),
-          Text(l10n.taskCenterCategoriesLine(taskCategoriesLine!), style: bodySmall),
+          Text(
+            l10n.taskCenterCategoriesLine(taskCategoriesLine!),
+            style: bodySmall,
+          ),
         ],
       ],
     );

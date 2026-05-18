@@ -55,6 +55,18 @@ String _formatSkippedDuplicateVideoSummary(
   return l10n.shortVideoBatchSkippedDuplicates(count, '$preview$suffix');
 }
 
+int _shortVideoSceneAssetCount(ProjectAssetsOverview? overview) {
+  if (overview == null) {
+    return 0;
+  }
+  for (final group in overview.byAssetType) {
+    if (group.assetType == 'scene') {
+      return group.items.length;
+    }
+  }
+  return 0;
+}
+
 extension _ShortVideoSpaceSectionProductionExtension
     on _ShortVideoSpaceSectionState {
   int _candidatePendingStoryboardCount() {
@@ -332,20 +344,6 @@ extension _ShortVideoSpaceSectionProductionExtension
           limit: 1,
         ),
         fetchBadCaseStats(token, projectId: project.numericId, limit: 3),
-        fetchProjectAssetsByProjectId(
-          token,
-          project.id,
-          assetType: 'scene',
-          page: 1,
-          limit: 1,
-        ),
-        fetchProjectAssetsByProjectId(
-          token,
-          project.id,
-          assetType: 'clip',
-          page: 1,
-          limit: 1,
-        ),
         loadProductionOverview(),
         loadProjectAssetsOverview(),
       ]);
@@ -443,16 +441,18 @@ extension _ShortVideoSpaceSectionProductionExtension
       if (!mounted || _selectedProjectId != project.id) {
         return;
       }
+      final stats = results[0] as ProjectStats;
+      final assetsOverview = results[5] as ProjectAssetsOverview?;
       setState(() {
-        _projectStats = results[0] as ProjectStats;
+        _projectStats = stats;
         _recentProjectTasks = results[1] as TaskCenterGetTaskApiResult;
         final scopeRows = results[2] as List<QualityScopeInsightRow>;
         _qualityScopeInsight = scopeRows.isEmpty ? null : scopeRows.first;
         _badCaseStats = results[3] as List<BadCaseStatItem>;
-        _sceneAssetCount = (results[4] as ListAssetsResponse).total;
-        _clipAssetCount = (results[5] as ListAssetsResponse).total;
-        _productionOverview = results[6] as ProjectProductionOverview?;
-        _projectAssetsOverview = results[7] as ProjectAssetsOverview?;
+        _sceneAssetCount = _shortVideoSceneAssetCount(assetsOverview);
+        _clipAssetCount = stats.storyboardCount;
+        _productionOverview = results[4] as ProjectProductionOverview?;
+        _projectAssetsOverview = assetsOverview;
         _shortVideoAssembly = assemblySlice;
         _shortVideoTimeline = null;
         _shortVideoExportCheck = exportCheckSlice;

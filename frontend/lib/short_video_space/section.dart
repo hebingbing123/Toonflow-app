@@ -695,7 +695,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       onKeyEvent: (node, event) {
         return _handleKeyboardShortcuts(event);
       },
-      child: ShortVideoSpaceView(
+      child: SingleChildScrollView(
+        child: ShortVideoSpaceView(
         mode: _mode,
         modeTitle: modeTitle,
         modeSummary: modeSummary,
@@ -866,6 +867,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         onOpenQuality: widget.onOpenQuality,
         onResetConfirmationDontShowAgain: (ctx) =>
             unawaited(runResetRiskyOperationConfirmPrefsFlow(ctx)),
+        ),
       ),
     );
   }
