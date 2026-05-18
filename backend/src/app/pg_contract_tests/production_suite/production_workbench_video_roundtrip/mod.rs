@@ -436,7 +436,7 @@ async fn production_workbench_video_roundtrip() {
         "delete-track should clear storyboard track assignment"
     );
     assert_eq!(
-        cleared_track_data["data"][0]["url"].as_str(),
+        cleared_track_data["data"][0]["filePath"].as_str(),
         Some(selected_video_url),
         "delete-track must not remove selected video"
     );
@@ -476,13 +476,13 @@ async fn production_workbench_video_roundtrip() {
     )
     .await;
     assert_eq!(
-        deleted_video["storyboard_id"].as_i64(),
+        deleted_video["storyboardId"].as_i64(),
         Some(i64::from(storyboard_id))
     );
 
     let after_delete_video =
         get_production_data(&app, &token, project_id, script_id, &[storyboard_id]).await;
-    assert!(after_delete_video["data"][0]["url"].is_null());
+    assert!(after_delete_video["data"][0]["filePath"].is_null());
     assert!(after_delete_video["data"][0]["state"].is_null());
     let selected_memory_after_delete = count_agent_memory_rows(
         &pool,
