@@ -1247,7 +1247,7 @@ void main() {
     );
     expect(assetTargets.single.notice, contains('verify reuse'));
     expect(stepChanges, contains(StudioStep.storyboard));
-    expect(find.text('Open storyboard'), findsOneWidget);
+    expect(find.text('Open Board'), findsOneWidget);
     expect(find.text('Open tasks'), findsOneWidget);
     expect(find.text('Open asset hub'), findsOneWidget);
     expect(find.text('Open blocked items'), findsNothing);
@@ -1518,4 +1518,138 @@ void main() {
     expect(stepChanges, contains(StudioStep.video));
     expect(find.text('body-video'), findsWidgets);
   });
+
+  testWidgets(
+    'project studio cockpit keeps metrics and starter routes in one aligned grid',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1800, 1100));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      final host = ProjectStudioHost(
+        projectNumericId: 42,
+        projectUuid: 'project-42',
+        projectName: 'Project Delta',
+        accessToken: null,
+        home: const ProjectHome(
+          project: ProjectRow(
+            id: 'project-42',
+            numericId: 42,
+            name: 'Project Delta',
+            intro: null,
+            projectType: null,
+            imageModel: null,
+            imageQuality: null,
+            videoModel: null,
+            artStyle: null,
+            directorManual: null,
+            mode: null,
+            videoRatio: null,
+            createTimeMs: null,
+            artStylePack: null,
+            storyStylePack: null,
+            targetMarket: null,
+            targetPlatforms: null,
+            durationStrategy: null,
+            voiceProfile: null,
+            subtitleStyle: null,
+            bgmStrategy: null,
+            projectAccessMode: 'restricted',
+            projectAccessRole: 'editor',
+          ),
+          stats: ProjectStats(
+            scriptCount: 1,
+            storyboardCount: 2,
+            roleCount: 2,
+            novelCount: 0,
+            videoCount: 0,
+          ),
+          readinessScore: 63,
+          readinessSummary: 'Use a route and keep momentum up.',
+          onboarding: ProjectHomeOnboarding(
+            complete: true,
+            checklist: <ProjectHomeChecklistItem>[],
+          ),
+          styleBibleReady: true,
+          cockpit: ProjectHomeCockpit(
+            headline: 'Project Delta has clear next steps.',
+            subheadline: 'Keep the cockpit cards in one consistent grid.',
+            primaryAction: ProjectHomeAction(
+              key: 'review_storyboard',
+              title: 'Review storyboard readiness',
+              detail: 'Keep the studio pointed at the next stage.',
+              targetStep: 'storyboard',
+              ctaLabel: 'Check storyboard state',
+            ),
+            secondaryActions: <ProjectHomeAction>[],
+            metrics: <ProjectHomeMetric>[
+              ProjectHomeMetric(
+                key: 'metric_a',
+                label: 'Metric A',
+                value: '1',
+                detail: 'One',
+              ),
+              ProjectHomeMetric(
+                key: 'metric_b',
+                label: 'Metric B',
+                value: '2',
+                detail: 'Two',
+              ),
+              ProjectHomeMetric(
+                key: 'metric_c',
+                label: 'Metric C',
+                value: '3',
+                detail: 'Three',
+              ),
+              ProjectHomeMetric(
+                key: 'metric_d',
+                label: 'Metric D',
+                value: '4',
+                detail: 'Four',
+              ),
+            ],
+            starterTemplates: <ProjectHomeStarterTemplate>[
+              ProjectHomeStarterTemplate(
+                key: 'route_a',
+                title: 'Route A',
+                detail: 'Route one',
+                targetStep: 'video',
+                ctaLabel: 'Run route A',
+              ),
+              ProjectHomeStarterTemplate(
+                key: 'route_b',
+                title: 'Route B',
+                detail: 'Route two',
+                targetStep: 'assets',
+                ctaLabel: 'Run route B',
+              ),
+              ProjectHomeStarterTemplate(
+                key: 'route_c',
+                title: 'Route C',
+                detail: 'Route three',
+                targetStep: 'tasks',
+                ctaLabel: 'Run route C',
+              ),
+            ],
+          ),
+        ),
+        initialStep: StudioStep.script,
+        onExit: () {},
+        onStepChanged: (_) {},
+        onOpenAgentDrawer: () {},
+        onRunHarnessAgent: (_) async {},
+        buildStepBody: (step) => Center(child: Text('body-${step.slug}')),
+      );
+
+      await tester.pumpWidget(_wrapApp(child: ProjectStudioPage(host: host)));
+      await tester.pumpAndSettle();
+
+      final metricX = tester.getTopLeft(find.text('Metric A')).dx;
+      final starterX = tester.getTopLeft(find.text('Route A')).dx;
+      final metricY = tester.getTopLeft(find.text('Metric A')).dy;
+      final starterY = tester.getTopLeft(find.text('Route A')).dy;
+
+      expect((metricX - starterX).abs(), lessThan(24));
+      expect(starterY, greaterThan(metricY));
+    },
+  );
 }

@@ -1,5 +1,6 @@
 import '../../rust_api.dart';
 import '../l10n/app_localizations.dart';
+import 'quality_reviews_l10n.dart';
 import 'support_models.dart';
 
 String? summarizeQualityReviewMemoryWriteback(
@@ -79,7 +80,10 @@ String? summarizeQualityReviewMemoryWriteback(
           'slim $removedChars chars / $removedRows items (dup $removedDuplicateRows / visual-only $removedVisualRows)',
     );
   }
-  final focusSummary = summarizeFeedbackFocusTags(focusTags, l10n: l10n);
+  final focusSummary = summarizeFeedbackFocusTags(
+    focusTags,
+    l10n: qualityReviewsResolveL10n(l10n),
+  );
   if (focusSummary != null) {
     parts.add(
       l10n?.qualityReviewsFocusWatchTag(focusSummary) ?? 'watch=$focusSummary',

@@ -248,7 +248,10 @@ class _TransitionList extends StatelessWidget {
           padding: const EdgeInsets.only(bottom: 8),
           child: Row(
             children: [
-              Text('#${idx + 1}→${idx + 2}', style: Theme.of(context).textTheme.labelMedium),
+              Text(
+                l10n.shortVideoTimelineTransitionBetweenShots(idx + 1, idx + 2),
+                style: Theme.of(context).textTheme.labelMedium,
+              ),
               const SizedBox(width: 12),
               DropdownButton<String>(
                 value: tr.type,

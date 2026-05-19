@@ -15753,6 +15753,11 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shortVideoTimelineTransitionFadeBlack => '黑场';
 
   @override
+  String shortVideoTimelineTransitionBetweenShots(int fromShot, int toShot) {
+    return '#$fromShot→#$toShot';
+  }
+
+  @override
   String get shortVideoTimelineTransitionDurationMs => '时长 (ms)';
 
   @override
@@ -20630,6 +20635,122 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get projectStudioOpenTasks => '打开任务';
+
+  @override
+  String get projectStudioOpenAssetHub => '打开资产中心';
+
+  @override
+  String projectStudioOpenStep(String step) {
+    return '打开$step';
+  }
+
+  @override
+  String get projectStudioOpen => '打开';
+
+  @override
+  String get projectStudioAssetHubCharactersTitle => '项目角色';
+
+  @override
+  String get projectStudioAssetHubMissingAnchor => '缺少资产锚点';
+
+  @override
+  String get projectStudioAssetHubAssetLinked => '已关联资产';
+
+  @override
+  String get projectStudioAssetHubVoiceReady => '配音已就绪';
+
+  @override
+  String get projectStudioAssetHubVoiceNotSet => '未配置配音';
+
+  @override
+  String get projectStudioAssetHubReusableRolesTitle => '可复用角色资产';
+
+  @override
+  String get projectStudioAssetHubNoCharacterLinked => '尚未关联角色';
+
+  @override
+  String get projectStudioAssetHubNoScriptsLinked => '未关联剧本';
+
+  @override
+  String projectStudioAssetHubScriptsLinked(String scriptIds) {
+    return '剧本 $scriptIds';
+  }
+
+  @override
+  String get projectStudioNoticeBuildRoleLibrary => '请先创建或导入角色资产，再深入分镜工作。';
+
+  @override
+  String get projectStudioNoticeDefineCharacters =>
+      '已有角色资产，但项目角色表仍为空。请从资产库建立角色清单。';
+
+  @override
+  String get projectStudioNoticeAnchorCharacters =>
+      '请先为仍缺少资产锚点的角色，在对应剧本中核对角色资产。';
+
+  @override
+  String get projectStudioNoticeConfirmCandidates =>
+      '仍有候选资产待确认。请审阅待处理条目，并确认应纳入角色库的资产。';
+
+  @override
+  String get projectStudioNoticeReviewRoleReuse =>
+      '请核对角色复用与剧本关联，确保同一套卡司资产在各场次保持一致。';
+
+  @override
+  String get projectStudioStoryboardBlockersTitle => '分镜资产阻塞项';
+
+  @override
+  String get projectStudioStoryboardBlockersSubtitle => '返回生成前，请先在此处理资产绑定缺口。';
+
+  @override
+  String get projectStudioPendingCandidateReviewTitle => '待确认候选资产';
+
+  @override
+  String projectStudioStoryboardRowTitle(int storyboardId, String shotSuffix) {
+    return '分镜 #$storyboardId$shotSuffix';
+  }
+
+  @override
+  String projectStudioStoryboardShotSuffix(int shotIndex) {
+    return ' · 镜头 $shotIndex';
+  }
+
+  @override
+  String get projectStudioStoryboardPendingBlocks => '待确认候选资产仍阻塞此分镜。';
+
+  @override
+  String projectStudioScriptPendingCandidates(int scriptId) {
+    return '剧本 #$scriptId 仍有候选资产待确认。';
+  }
+
+  @override
+  String get projectStudioReviewCandidatesCta => '审阅候选';
+
+  @override
+  String projectStudioStoryboardBlockedNotice(int storyboardId) {
+    return '分镜 #$storyboardId 仍被待确认候选资产阻塞。生成此镜头前，请先确认正确角色。';
+  }
+
+  @override
+  String get projectStudioMissingAnchorsTitle => '缺少角色锚点';
+
+  @override
+  String get projectStudioCharacterNeedsAnchor => '此项目角色仍需要资产锚点。';
+
+  @override
+  String projectStudioScriptsDependOnAnchor(String scriptIds) {
+    return '剧本 $scriptIds 仍依赖此角色锚点。';
+  }
+
+  @override
+  String get projectStudioFixAnchorsCta => '修复锚点';
+
+  @override
+  String projectStudioCharacterAnchorNotice(String name) {
+    return '角色「$name」在分镜工作保持一致前，仍需要资产锚点。';
+  }
+
+  @override
   String get shortVideoDownloadDesktopApp => '下载桌面版';
 
   @override
@@ -21178,7 +21299,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get benchmarkLabelStageScopeComma => '阶段范围（逗号分隔）';
 
   @override
-  String get benchmarkLabelBaselineVariantLabel => '基线变体 label';
+  String get benchmarkLabelBaselineVariantLabel => '基线变体标签';
 
   @override
   String get benchmarkLabelVariantsJsonArray => '变体 JSON（数组）';

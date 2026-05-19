@@ -25672,6 +25672,12 @@ abstract class AppLocalizations {
   /// **'Fade to black'**
   String get shortVideoTimelineTransitionFadeBlack;
 
+  /// No description provided for @shortVideoTimelineTransitionBetweenShots.
+  ///
+  /// In en, this message translates to:
+  /// **'#{fromShot}→#{toShot}'**
+  String shortVideoTimelineTransitionBetweenShots(int fromShot, int toShot);
+
   /// No description provided for @shortVideoTimelineTransitionDurationMs.
   ///
   /// In en, this message translates to:
@@ -33139,6 +33145,198 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tasks ({count})'**
   String projectStudioTasksRunning(int count);
+
+  /// No description provided for @projectStudioOpenTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'Open tasks'**
+  String get projectStudioOpenTasks;
+
+  /// No description provided for @projectStudioOpenAssetHub.
+  ///
+  /// In en, this message translates to:
+  /// **'Open asset hub'**
+  String get projectStudioOpenAssetHub;
+
+  /// No description provided for @projectStudioOpenStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Open {step}'**
+  String projectStudioOpenStep(String step);
+
+  /// No description provided for @projectStudioOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get projectStudioOpen;
+
+  /// No description provided for @projectStudioAssetHubCharactersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Project characters'**
+  String get projectStudioAssetHubCharactersTitle;
+
+  /// No description provided for @projectStudioAssetHubMissingAnchor.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing asset anchor'**
+  String get projectStudioAssetHubMissingAnchor;
+
+  /// No description provided for @projectStudioAssetHubAssetLinked.
+  ///
+  /// In en, this message translates to:
+  /// **'Asset linked'**
+  String get projectStudioAssetHubAssetLinked;
+
+  /// No description provided for @projectStudioAssetHubVoiceReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice ready'**
+  String get projectStudioAssetHubVoiceReady;
+
+  /// No description provided for @projectStudioAssetHubVoiceNotSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice not set'**
+  String get projectStudioAssetHubVoiceNotSet;
+
+  /// No description provided for @projectStudioAssetHubReusableRolesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reusable role assets'**
+  String get projectStudioAssetHubReusableRolesTitle;
+
+  /// No description provided for @projectStudioAssetHubNoCharacterLinked.
+  ///
+  /// In en, this message translates to:
+  /// **'No character linked yet'**
+  String get projectStudioAssetHubNoCharacterLinked;
+
+  /// No description provided for @projectStudioAssetHubNoScriptsLinked.
+  ///
+  /// In en, this message translates to:
+  /// **'No scripts linked'**
+  String get projectStudioAssetHubNoScriptsLinked;
+
+  /// No description provided for @projectStudioAssetHubScriptsLinked.
+  ///
+  /// In en, this message translates to:
+  /// **'Scripts {scriptIds}'**
+  String projectStudioAssetHubScriptsLinked(String scriptIds);
+
+  /// No description provided for @projectStudioNoticeBuildRoleLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus on creating or importing role assets before moving deeper into storyboard work.'**
+  String get projectStudioNoticeBuildRoleLibrary;
+
+  /// No description provided for @projectStudioNoticeDefineCharacters.
+  ///
+  /// In en, this message translates to:
+  /// **'Role assets exist, but the project character sheet is still empty. Build the character roster from the asset library.'**
+  String get projectStudioNoticeDefineCharacters;
+
+  /// No description provided for @projectStudioNoticeAnchorCharacters.
+  ///
+  /// In en, this message translates to:
+  /// **'Start by reviewing role assets for the scripts that still have characters without asset anchors.'**
+  String get projectStudioNoticeAnchorCharacters;
+
+  /// No description provided for @projectStudioNoticeConfirmCandidates.
+  ///
+  /// In en, this message translates to:
+  /// **'Candidate assets are still pending. Review the pending rows and confirm the ones that belong in the role library.'**
+  String get projectStudioNoticeConfirmCandidates;
+
+  /// No description provided for @projectStudioNoticeReviewRoleReuse.
+  ///
+  /// In en, this message translates to:
+  /// **'Review role reuse and script linkage so the same cast assets stay consistent across scenes.'**
+  String get projectStudioNoticeReviewRoleReuse;
+
+  /// No description provided for @projectStudioStoryboardBlockersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard asset blockers'**
+  String get projectStudioStoryboardBlockersTitle;
+
+  /// No description provided for @projectStudioStoryboardBlockersSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Close asset-binding gaps here before moving back into generation.'**
+  String get projectStudioStoryboardBlockersSubtitle;
+
+  /// No description provided for @projectStudioPendingCandidateReviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending candidate review'**
+  String get projectStudioPendingCandidateReviewTitle;
+
+  /// No description provided for @projectStudioStoryboardRowTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard #{storyboardId}{shotSuffix}'**
+  String projectStudioStoryboardRowTitle(int storyboardId, String shotSuffix);
+
+  /// No description provided for @projectStudioStoryboardShotSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **' · Shot {shotIndex}'**
+  String projectStudioStoryboardShotSuffix(int shotIndex);
+
+  /// No description provided for @projectStudioStoryboardPendingBlocks.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending candidate assets still block this storyboard.'**
+  String get projectStudioStoryboardPendingBlocks;
+
+  /// No description provided for @projectStudioScriptPendingCandidates.
+  ///
+  /// In en, this message translates to:
+  /// **'Script #{scriptId} still has candidate assets waiting for confirmation.'**
+  String projectStudioScriptPendingCandidates(int scriptId);
+
+  /// No description provided for @projectStudioReviewCandidatesCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Review candidates'**
+  String get projectStudioReviewCandidatesCta;
+
+  /// No description provided for @projectStudioStoryboardBlockedNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard #{storyboardId} is still blocked by pending candidate assets. Confirm the right role before generating this shot.'**
+  String projectStudioStoryboardBlockedNotice(int storyboardId);
+
+  /// No description provided for @projectStudioMissingAnchorsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing character anchors'**
+  String get projectStudioMissingAnchorsTitle;
+
+  /// No description provided for @projectStudioCharacterNeedsAnchor.
+  ///
+  /// In en, this message translates to:
+  /// **'This project character still needs an asset anchor.'**
+  String get projectStudioCharacterNeedsAnchor;
+
+  /// No description provided for @projectStudioScriptsDependOnAnchor.
+  ///
+  /// In en, this message translates to:
+  /// **'Scripts {scriptIds} still depend on this character anchor.'**
+  String projectStudioScriptsDependOnAnchor(String scriptIds);
+
+  /// No description provided for @projectStudioFixAnchorsCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix anchors'**
+  String get projectStudioFixAnchorsCta;
+
+  /// No description provided for @projectStudioCharacterAnchorNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Character \"{name}\" still needs an asset anchor before storyboard work can stay consistent.'**
+  String projectStudioCharacterAnchorNotice(String name);
 
   /// No description provided for @shortVideoDownloadDesktopApp.
   ///

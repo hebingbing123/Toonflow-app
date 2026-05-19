@@ -16530,6 +16530,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shortVideoTimelineTransitionFadeBlack => 'Fade to black';
 
   @override
+  String shortVideoTimelineTransitionBetweenShots(int fromShot, int toShot) {
+    return '#$fromShot→#$toShot';
+  }
+
+  @override
   String get shortVideoTimelineTransitionDurationMs => 'Duration (ms)';
 
   @override
@@ -21608,6 +21613,129 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String projectStudioTasksRunning(int count) {
     return 'Tasks ($count)';
+  }
+
+  @override
+  String get projectStudioOpenTasks => 'Open tasks';
+
+  @override
+  String get projectStudioOpenAssetHub => 'Open asset hub';
+
+  @override
+  String projectStudioOpenStep(String step) {
+    return 'Open $step';
+  }
+
+  @override
+  String get projectStudioOpen => 'Open';
+
+  @override
+  String get projectStudioAssetHubCharactersTitle => 'Project characters';
+
+  @override
+  String get projectStudioAssetHubMissingAnchor => 'Missing asset anchor';
+
+  @override
+  String get projectStudioAssetHubAssetLinked => 'Asset linked';
+
+  @override
+  String get projectStudioAssetHubVoiceReady => 'Voice ready';
+
+  @override
+  String get projectStudioAssetHubVoiceNotSet => 'Voice not set';
+
+  @override
+  String get projectStudioAssetHubReusableRolesTitle => 'Reusable role assets';
+
+  @override
+  String get projectStudioAssetHubNoCharacterLinked =>
+      'No character linked yet';
+
+  @override
+  String get projectStudioAssetHubNoScriptsLinked => 'No scripts linked';
+
+  @override
+  String projectStudioAssetHubScriptsLinked(String scriptIds) {
+    return 'Scripts $scriptIds';
+  }
+
+  @override
+  String get projectStudioNoticeBuildRoleLibrary =>
+      'Focus on creating or importing role assets before moving deeper into storyboard work.';
+
+  @override
+  String get projectStudioNoticeDefineCharacters =>
+      'Role assets exist, but the project character sheet is still empty. Build the character roster from the asset library.';
+
+  @override
+  String get projectStudioNoticeAnchorCharacters =>
+      'Start by reviewing role assets for the scripts that still have characters without asset anchors.';
+
+  @override
+  String get projectStudioNoticeConfirmCandidates =>
+      'Candidate assets are still pending. Review the pending rows and confirm the ones that belong in the role library.';
+
+  @override
+  String get projectStudioNoticeReviewRoleReuse =>
+      'Review role reuse and script linkage so the same cast assets stay consistent across scenes.';
+
+  @override
+  String get projectStudioStoryboardBlockersTitle =>
+      'Storyboard asset blockers';
+
+  @override
+  String get projectStudioStoryboardBlockersSubtitle =>
+      'Close asset-binding gaps here before moving back into generation.';
+
+  @override
+  String get projectStudioPendingCandidateReviewTitle =>
+      'Pending candidate review';
+
+  @override
+  String projectStudioStoryboardRowTitle(int storyboardId, String shotSuffix) {
+    return 'Storyboard #$storyboardId$shotSuffix';
+  }
+
+  @override
+  String projectStudioStoryboardShotSuffix(int shotIndex) {
+    return ' · Shot $shotIndex';
+  }
+
+  @override
+  String get projectStudioStoryboardPendingBlocks =>
+      'Pending candidate assets still block this storyboard.';
+
+  @override
+  String projectStudioScriptPendingCandidates(int scriptId) {
+    return 'Script #$scriptId still has candidate assets waiting for confirmation.';
+  }
+
+  @override
+  String get projectStudioReviewCandidatesCta => 'Review candidates';
+
+  @override
+  String projectStudioStoryboardBlockedNotice(int storyboardId) {
+    return 'Storyboard #$storyboardId is still blocked by pending candidate assets. Confirm the right role before generating this shot.';
+  }
+
+  @override
+  String get projectStudioMissingAnchorsTitle => 'Missing character anchors';
+
+  @override
+  String get projectStudioCharacterNeedsAnchor =>
+      'This project character still needs an asset anchor.';
+
+  @override
+  String projectStudioScriptsDependOnAnchor(String scriptIds) {
+    return 'Scripts $scriptIds still depend on this character anchor.';
+  }
+
+  @override
+  String get projectStudioFixAnchorsCta => 'Fix anchors';
+
+  @override
+  String projectStudioCharacterAnchorNotice(String name) {
+    return 'Character \"$name\" still needs an asset anchor before storyboard work can stay consistent.';
   }
 
   @override

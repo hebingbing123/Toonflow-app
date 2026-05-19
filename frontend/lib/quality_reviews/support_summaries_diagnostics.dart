@@ -1,5 +1,6 @@
 import '../../rust_api.dart';
 import '../l10n/app_localizations.dart';
+import 'quality_reviews_l10n.dart';
 import 'support_models.dart';
 
 String? summarizeTokenEfficiencyFromQualityReviews(
@@ -76,6 +77,8 @@ String? summarizePromptDiagnosticsFromQualityReviews(
       .take(maxSamples)
       .toList(growable: false);
   if (samples.isEmpty) return null;
+
+  final loc = qualityReviewsResolveL10n(l10n);
 
   var totalPrompt = 0;
   var totalMemory = 0;
@@ -176,10 +179,10 @@ String? summarizePromptDiagnosticsFromQualityReviews(
   ];
   if (topNegativeSource != null) {
     parts.add(
-      '${describeAutoNegativeSource(topNegativeSource.key, l10n: l10n)} ${topNegativeSource.value}${l10n?.qualityReviewsTimesUnit ?? ' times'}',
+      '${describeAutoNegativeSource(topNegativeSource.key, l10n: loc)} ${topNegativeSource.value}${loc.qualityReviewsTimesUnit}',
     );
   }
-  final hitBucketSummary = joinTopBucketCounts(memoryHitBuckets, l10n: l10n);
+  final hitBucketSummary = joinTopBucketCounts(memoryHitBuckets, l10n: loc);
   if (hitBucketSummary.isNotEmpty) {
     parts.add(
       l10n?.qualityReviewsHitMemoryBuckets(hitBucketSummary) ??
@@ -188,7 +191,7 @@ String? summarizePromptDiagnosticsFromQualityReviews(
   }
   final suppressedBucketSummary = joinTopBucketCounts(
     suppressedBuckets,
-    l10n: l10n,
+    l10n: loc,
   );
   if (suppressedBucketSummary.isNotEmpty) {
     parts.add(
@@ -233,6 +236,8 @@ String? summarizeQualityReviewPromptDiagnostics(
   final diagnostics = qualityDiagnosticsMap(row);
   if (diagnostics == null) return null;
 
+  final loc = qualityReviewsResolveL10n(l10n);
+
   final promptChars = diagnosticInt(diagnostics, 'promptChars');
   final memoryChars = diagnosticInt(diagnostics, 'memoryStyleChars');
   final visualChars = diagnosticInt(diagnostics, 'memoryVisualChars');
@@ -260,7 +265,7 @@ String? summarizeQualityReviewPromptDiagnostics(
 
   final negativeSource = diagnosticString(diagnostics, 'autoNegativeSource');
   if (negativeSource != null) {
-    parts.add(describeAutoNegativeSource(negativeSource, l10n: l10n));
+    parts.add(describeAutoNegativeSource(negativeSource, l10n: loc));
   }
   if (diagnosticBool(diagnostics, 'memoryDeliveryPriorityApplied')) {
     parts.add(l10n?.qualityReviewsDeliveryPriority ?? 'delivery-priority');
@@ -279,10 +284,10 @@ String? summarizeQualityReviewPromptDiagnostics(
             joinBucketListWithCounts(
               memoryHitBuckets,
               memoryHitBucketCounts,
-              l10n: l10n,
+              l10n: loc,
             ),
           ) ??
-          'hit=${joinBucketListWithCounts(memoryHitBuckets, memoryHitBucketCounts, l10n: l10n)}',
+          'hit=${joinBucketListWithCounts(memoryHitBuckets, memoryHitBucketCounts, l10n: loc)}',
     );
   }
   final memorySuppressedBucketCounts = diagnosticStringIntMap(
@@ -299,10 +304,10 @@ String? summarizeQualityReviewPromptDiagnostics(
             joinBucketListWithCounts(
               memorySuppressedBuckets,
               memorySuppressedBucketCounts,
-              l10n: l10n,
+              l10n: loc,
             ),
           ) ??
-          'suppressed=${joinBucketListWithCounts(memorySuppressedBuckets, memorySuppressedBucketCounts, l10n: l10n)}',
+          'suppressed=${joinBucketListWithCounts(memorySuppressedBuckets, memorySuppressedBucketCounts, l10n: loc)}',
     );
   }
   if (diagnosticBool(diagnostics, 'directorManualYieldedToMemory')) {
@@ -327,6 +332,7 @@ String? summarizeQualityReviewPromptDiagnostics(
     projectScopeRows: projectScopeRows,
     scriptScopeRows: scriptScopeRows,
     roleScopeRows: roleScopeRows,
+    l10n: loc,
   );
   if (scopeSummary != null) {
     parts.add(

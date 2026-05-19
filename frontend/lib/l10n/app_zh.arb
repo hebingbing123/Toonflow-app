@@ -12241,6 +12241,13 @@
   "shortVideoTimelineTransitionCut": "硬切",
   "shortVideoTimelineTransitionCrossfade": "叠化",
   "shortVideoTimelineTransitionFadeBlack": "黑场",
+  "shortVideoTimelineTransitionBetweenShots": "#{fromShot}→#{toShot}",
+  "@shortVideoTimelineTransitionBetweenShots": {
+    "placeholders": {
+      "fromShot": { "type": "int" },
+      "toShot": { "type": "int" }
+    }
+  },
   "shortVideoTimelineTransitionDurationMs": "时长 (ms)",
   "shortVideoTimelineVoiceoverTitle": "配音轨",
   "shortVideoTimelineVoiceoverVolume": "音量",
@@ -14873,6 +14880,65 @@
   "@projectStudioTasksRunning": {
     "placeholders": { "count": { "type": "int" } }
   },
+  "projectStudioOpenTasks": "打开任务",
+  "projectStudioOpenAssetHub": "打开资产中心",
+  "projectStudioOpenStep": "打开{step}",
+  "@projectStudioOpenStep": {
+    "placeholders": { "step": { "type": "String" } }
+  },
+  "projectStudioOpen": "打开",
+  "projectStudioAssetHubCharactersTitle": "项目角色",
+  "projectStudioAssetHubMissingAnchor": "缺少资产锚点",
+  "projectStudioAssetHubAssetLinked": "已关联资产",
+  "projectStudioAssetHubVoiceReady": "配音已就绪",
+  "projectStudioAssetHubVoiceNotSet": "未配置配音",
+  "projectStudioAssetHubReusableRolesTitle": "可复用角色资产",
+  "projectStudioAssetHubNoCharacterLinked": "尚未关联角色",
+  "projectStudioAssetHubNoScriptsLinked": "未关联剧本",
+  "projectStudioAssetHubScriptsLinked": "剧本 {scriptIds}",
+  "@projectStudioAssetHubScriptsLinked": {
+    "placeholders": { "scriptIds": { "type": "String" } }
+  },
+  "projectStudioNoticeBuildRoleLibrary": "请先创建或导入角色资产，再深入分镜工作。",
+  "projectStudioNoticeDefineCharacters": "已有角色资产，但项目角色表仍为空。请从资产库建立角色清单。",
+  "projectStudioNoticeAnchorCharacters": "请先为仍缺少资产锚点的角色，在对应剧本中核对角色资产。",
+  "projectStudioNoticeConfirmCandidates": "仍有候选资产待确认。请审阅待处理条目，并确认应纳入角色库的资产。",
+  "projectStudioNoticeReviewRoleReuse": "请核对角色复用与剧本关联，确保同一套卡司资产在各场次保持一致。",
+  "projectStudioStoryboardBlockersTitle": "分镜资产阻塞项",
+  "projectStudioStoryboardBlockersSubtitle": "返回生成前，请先在此处理资产绑定缺口。",
+  "projectStudioPendingCandidateReviewTitle": "待确认候选资产",
+  "projectStudioStoryboardRowTitle": "分镜 #{storyboardId}{shotSuffix}",
+  "@projectStudioStoryboardRowTitle": {
+    "placeholders": {
+      "storyboardId": { "type": "int" },
+      "shotSuffix": { "type": "String" }
+    }
+  },
+  "projectStudioStoryboardShotSuffix": " · 镜头 {shotIndex}",
+  "@projectStudioStoryboardShotSuffix": {
+    "placeholders": { "shotIndex": { "type": "int" } }
+  },
+  "projectStudioStoryboardPendingBlocks": "待确认候选资产仍阻塞此分镜。",
+  "projectStudioScriptPendingCandidates": "剧本 #{scriptId} 仍有候选资产待确认。",
+  "@projectStudioScriptPendingCandidates": {
+    "placeholders": { "scriptId": { "type": "int" } }
+  },
+  "projectStudioReviewCandidatesCta": "审阅候选",
+  "projectStudioStoryboardBlockedNotice": "分镜 #{storyboardId} 仍被待确认候选资产阻塞。生成此镜头前，请先确认正确角色。",
+  "@projectStudioStoryboardBlockedNotice": {
+    "placeholders": { "storyboardId": { "type": "int" } }
+  },
+  "projectStudioMissingAnchorsTitle": "缺少角色锚点",
+  "projectStudioCharacterNeedsAnchor": "此项目角色仍需要资产锚点。",
+  "projectStudioScriptsDependOnAnchor": "剧本 {scriptIds} 仍依赖此角色锚点。",
+  "@projectStudioScriptsDependOnAnchor": {
+    "placeholders": { "scriptIds": { "type": "String" } }
+  },
+  "projectStudioFixAnchorsCta": "修复锚点",
+  "projectStudioCharacterAnchorNotice": "角色「{name}」在分镜工作保持一致前，仍需要资产锚点。",
+  "@projectStudioCharacterAnchorNotice": {
+    "placeholders": { "name": { "type": "String" } }
+  },
   "shortVideoDownloadDesktopApp": "下载桌面版",
   "projectEditorBasicsModelRoutingTitle": "模型路由",
   "projectEditorBasicsTextModelLabel": "文本模型",
@@ -16482,7 +16548,7 @@
   "benchmarkLabelNewExperimentName": "新实验名称",
   "benchmarkLabelSampleTierSet": "样本集",
   "benchmarkLabelStageScopeComma": "阶段范围（逗号分隔）",
-  "benchmarkLabelBaselineVariantLabel": "基线变体 label",
+  "benchmarkLabelBaselineVariantLabel": "基线变体标签",
   "benchmarkLabelVariantsJsonArray": "变体 JSON（数组）",
   "benchmarkButtonCreateExperiment": "创建实验",
   "benchmarkReviewCardTitle": "人工复核",

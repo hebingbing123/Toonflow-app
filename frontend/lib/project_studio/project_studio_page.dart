@@ -13,6 +13,25 @@ import 'studio_step.dart';
 import 'studio_step_prefs.dart';
 import 'studio_step_progress_ring.dart';
 
+String projectStudioStepShortLabel(AppLocalizations l10n, StudioStep step) {
+  switch (step) {
+    case StudioStep.script:
+      return l10n.studioStepScriptShort;
+    case StudioStep.art:
+      return l10n.studioStepArtShort;
+    case StudioStep.assets:
+      return l10n.studioStepAssetsShort;
+    case StudioStep.storyboard:
+      return l10n.studioStepStoryboardShort;
+    case StudioStep.video:
+      return l10n.studioStepVideoShort;
+    case StudioStep.deliver:
+      return l10n.studioStepDeliverShort;
+    case StudioStep.quality:
+      return l10n.studioDeliverTabQuality;
+  }
+}
+
 /// In-project six-step SOP with lazy [IndexedStack] step bodies.
 class ProjectStudioPage extends StatefulWidget {
   const ProjectStudioPage({super.key, required this.host});
@@ -89,7 +108,10 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
     }
   }
 
-  ProjectHomeAction? _actionForMetric(ProjectHomeMetric metric) {
+  ProjectHomeAction? _actionForMetric(
+    ProjectHomeMetric metric,
+    AppLocalizations l10n,
+  ) {
     final key = metric.key.trim().toLowerCase();
     final combined = '${metric.label} ${metric.detail}'.toLowerCase();
     if (key.isEmpty && combined.trim().isEmpty) {
@@ -100,11 +122,13 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
       return null;
     }
     final ctaLabel = launch.opensTasks
-        ? 'Open tasks'
+        ? l10n.projectStudioOpenTasks
         : launch.assetEditorKind != null
-        ? 'Open asset hub'
+        ? l10n.projectStudioOpenAssetHub
         : launch.targetStep != null
-        ? 'Open ${launch.targetStep!.slug}'
+        ? l10n.projectStudioOpenStep(
+            projectStudioStepShortLabel(l10n, launch.targetStep!),
+          )
         : null;
     if (ctaLabel == null) {
       return null;
@@ -302,7 +326,7 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
                     home: widget.host.home!,
                     onSelectStep: _selectStep,
                     onExecuteAction: _handleProjectHomeAction,
-                    metricActionBuilder: _actionForMetric,
+                    metricActionBuilder: (metric) => _actionForMetric(metric, l10n),
                     onExecuteStarter: _handleStarterTemplate,
                   ),
                 ],
@@ -387,6 +411,7 @@ class _ProjectAssetHubCard extends StatelessWidget {
   final int runningJobCount;
 
   ProjectStudioAssetEditorTarget _buildEditorTargetForAssetTarget(
+    AppLocalizations l10n,
     String assetTarget, {
     String? notice,
     int? preferredScriptNumericId,
@@ -394,6 +419,7 @@ class _ProjectAssetHubCard extends StatelessWidget {
     int? preferredStoryboardNumericId,
   }) {
     return buildProjectStudioAssetEditorTarget(
+      l10n: l10n,
       overview: overview,
       assetTarget: assetTarget,
       notice: notice,
@@ -403,7 +429,8 @@ class _ProjectAssetHubCard extends StatelessWidget {
     );
   }
 
-  void _executeAssetHubIntent({
+  void _executeAssetHubIntent(
+    AppLocalizations l10n, {
     ProjectHomeLaunchIntent? intent,
     String? fallbackTargetStep,
     String? fallbackNotice,
@@ -426,7 +453,11 @@ class _ProjectAssetHubCard extends StatelessWidget {
     }
     if (assetTarget.isNotEmpty && onOpenAssetEditor != null) {
       onOpenAssetEditor!(
-        _buildEditorTargetForAssetTarget(assetTarget, notice: notice),
+        _buildEditorTargetForAssetTarget(
+          l10n,
+          assetTarget,
+          notice: notice,
+        ),
       );
       return;
     }
@@ -439,17 +470,19 @@ class _ProjectAssetHubCard extends StatelessWidget {
     }
   }
 
-  void _executePrimaryAction() {
+  void _executePrimaryAction(AppLocalizations l10n) {
     final action = overview.hub.primaryAction;
     _executeAssetHubIntent(
+      l10n,
       intent: action.launchIntent,
       fallbackTargetStep: action.targetStep,
       fallbackNotice: action.detail,
     );
   }
 
-  void _executeMetric(AssetsOverviewHubMetric metric) {
+  void _executeMetric(AppLocalizations l10n, AssetsOverviewHubMetric metric) {
     _executeAssetHubIntent(
+      l10n,
       intent: metric.launchIntent,
       fallbackNotice: metric.detail,
     );
@@ -458,6 +491,7 @@ class _ProjectAssetHubCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = resolveAppLocalizationsForErrors(context);
     final tokens = StudioTokens.of(context);
     final hub = overview.hub;
 
@@ -492,7 +526,7 @@ class _ProjectAssetHubCard extends StatelessWidget {
             runSpacing: 10,
             children: <Widget>[
               FilledButton(
-                onPressed: _executePrimaryAction,
+                onPressed: () => _executePrimaryAction(l10n),
                 child: Text(hub.primaryAction.ctaLabel),
               ),
               if (onOpenAssetEditor != null)
@@ -502,7 +536,7 @@ class _ProjectAssetHubCard extends StatelessWidget {
                       kind: ProjectStudioAssetEditorTargetKind.overview,
                     ),
                   ),
-                  child: const Text('Open asset editor'),
+                  child: Text(l10n.projectStudioOpenAssetEditor),
                 ),
               if (onOpenTasks != null)
                 OutlinedButton.icon(
@@ -514,8 +548,8 @@ class _ProjectAssetHubCard extends StatelessWidget {
                   ),
                   label: Text(
                     runningJobCount > 0
-                        ? 'Tasks ($runningJobCount)'
-                        : 'Tasks',
+                        ? l10n.projectStudioTasksRunning(runningJobCount)
+                        : l10n.projectStudioTasks,
                   ),
                 ),
               Text(
@@ -535,9 +569,10 @@ class _ProjectAssetHubCard extends StatelessWidget {
                   .map(
                     (metric) => _AssetsHubMetricCard(
                       metric: metric,
+                      openLabel: l10n.projectStudioOpen,
                       onTap: metric.launchIntent == null
                           ? null
-                          : () => _executeMetric(metric),
+                          : () => _executeMetric(l10n, metric),
                     ),
                   )
                   .toList(growable: false),
@@ -553,7 +588,7 @@ class _ProjectAssetHubCard extends StatelessWidget {
               children: <Widget>[
                 if (hub.characterSummaries.isNotEmpty)
                   _AssetHubListCard(
-                    title: 'Project characters',
+                    title: l10n.projectStudioAssetHubCharactersTitle,
                     width: 360,
                     children: hub.characterSummaries
                         .map(
@@ -562,29 +597,31 @@ class _ProjectAssetHubCard extends StatelessWidget {
                             subtitle:
                                 character.assetName ??
                                 (character.missingAssetAnchor
-                                    ? 'Missing asset anchor'
-                                    : 'Asset linked'),
+                                    ? l10n.projectStudioAssetHubMissingAnchor
+                                    : l10n.projectStudioAssetHubAssetLinked),
                             meta: character.hasVoiceConfig
-                                ? 'Voice ready'
-                                : 'Voice not set',
+                                ? l10n.projectStudioAssetHubVoiceReady
+                                : l10n.projectStudioAssetHubVoiceNotSet,
                           ),
                         )
                         .toList(growable: false),
                   ),
                 if (hub.reusableRoleAssets.isNotEmpty)
                   _AssetHubListCard(
-                    title: 'Reusable role assets',
+                    title: l10n.projectStudioAssetHubReusableRolesTitle,
                     width: 420,
                     children: hub.reusableRoleAssets
                         .map(
                           (asset) => _AssetHubLine(
                             title: '#${asset.numericId} ${asset.name}',
                             subtitle: asset.linkedCharacterNames.isEmpty
-                                ? 'No character linked yet'
+                                ? l10n.projectStudioAssetHubNoCharacterLinked
                                 : asset.linkedCharacterNames.join(', '),
                             meta: asset.linkedScriptNumericIds.isEmpty
-                                ? 'No scripts linked'
-                                : 'Scripts ${asset.linkedScriptNumericIds.join(', ')}',
+                                ? l10n.projectStudioAssetHubNoScriptsLinked
+                                : l10n.projectStudioAssetHubScriptsLinked(
+                                    asset.linkedScriptNumericIds.join(', '),
+                                  ),
                           ),
                         )
                         .toList(growable: false),
@@ -599,6 +636,7 @@ class _ProjectAssetHubCard extends StatelessWidget {
 }
 
 ProjectStudioAssetEditorTarget buildProjectStudioAssetEditorTarget({
+  required AppLocalizations l10n,
   required ProjectAssetsOverview overview,
   required String assetTarget,
   String? notice,
@@ -639,9 +677,7 @@ ProjectStudioAssetEditorTarget buildProjectStudioAssetEditorTarget({
         preferredScriptNumericId: preferredScriptNumericId,
         preferredAssetNumericId: preferredAssetNumericId,
         preferredStoryboardNumericId: preferredStoryboardNumericId,
-        notice:
-            notice ??
-            'Focus on creating or importing role assets before moving deeper into storyboard work.',
+        notice: notice ?? l10n.projectStudioNoticeBuildRoleLibrary,
       );
     case 'define_project_characters':
       return ProjectStudioAssetEditorTarget(
@@ -653,9 +689,7 @@ ProjectStudioAssetEditorTarget buildProjectStudioAssetEditorTarget({
                 : firstScriptNumericId(firstCharacter.linkedScriptNumericIds)),
         preferredAssetNumericId: preferredAssetNumericId,
         preferredStoryboardNumericId: preferredStoryboardNumericId,
-        notice:
-            notice ??
-            'Role assets exist, but the project character sheet is still empty. Build the character roster from the asset library.',
+        notice: notice ?? l10n.projectStudioNoticeDefineCharacters,
       );
     case 'anchor_characters':
       return ProjectStudioAssetEditorTarget(
@@ -667,9 +701,7 @@ ProjectStudioAssetEditorTarget buildProjectStudioAssetEditorTarget({
                 : firstScriptNumericId(firstCharacter.linkedScriptNumericIds)),
         preferredAssetNumericId: preferredAssetNumericId,
         preferredStoryboardNumericId: preferredStoryboardNumericId,
-        notice:
-            notice ??
-            'Start by reviewing role assets for the scripts that still have characters without asset anchors.',
+        notice: notice ?? l10n.projectStudioNoticeAnchorCharacters,
       );
     case 'confirm_candidates':
       return ProjectStudioAssetEditorTarget(
@@ -685,9 +717,7 @@ ProjectStudioAssetEditorTarget buildProjectStudioAssetEditorTarget({
                         const <int>[],
                   )),
         preferredStoryboardNumericId: preferredStoryboardNumericId,
-        notice:
-            notice ??
-            'Candidate assets are still pending. Review the pending rows and confirm the ones that belong in the role library.',
+        notice: notice ?? l10n.projectStudioNoticeConfirmCandidates,
       );
     case 'link_roles_to_scripts':
     case 'carry_roles_into_storyboard':
@@ -701,9 +731,7 @@ ProjectStudioAssetEditorTarget buildProjectStudioAssetEditorTarget({
                 ? null
                 : firstScriptNumericId(firstRole.linkedScriptNumericIds)),
         preferredStoryboardNumericId: preferredStoryboardNumericId,
-        notice:
-            notice ??
-            'Review role reuse and script linkage so the same cast assets stay consistent across scenes.',
+        notice: notice ?? l10n.projectStudioNoticeReviewRoleReuse,
       );
     default:
       return ProjectStudioAssetEditorTarget(
@@ -731,6 +759,7 @@ class _StoryboardAssetBridgeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = StudioTokens.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final pendingCandidates = readiness.storyboards
         .where((row) => row.blockingReasons.contains('candidate_pending'))
         .toList(growable: false);
@@ -755,7 +784,7 @@ class _StoryboardAssetBridgeCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            'Storyboard asset blockers',
+            l10n.projectStudioStoryboardBlockersTitle,
             style: theme.textTheme.titleLarge?.copyWith(
               color: Colors.white,
               fontWeight: FontWeight.w700,
@@ -763,7 +792,7 @@ class _StoryboardAssetBridgeCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Close asset-binding gaps here before moving back into generation.',
+            l10n.projectStudioStoryboardBlockersSubtitle,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -771,7 +800,7 @@ class _StoryboardAssetBridgeCard extends StatelessWidget {
           if (pendingCandidates.isNotEmpty) ...<Widget>[
             const SizedBox(height: 14),
             Text(
-              'Pending candidate review',
+              l10n.projectStudioPendingCandidateReviewTitle,
               style: theme.textTheme.titleSmall?.copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.w700,
@@ -782,23 +811,31 @@ class _StoryboardAssetBridgeCard extends StatelessWidget {
                 .take(4)
                 .map(
                   (row) => _StoryboardAssetBridgeLine(
-                    title:
-                        'Storyboard #${row.storyboardNumericId}${row.sbIndex == null ? '' : ' · Shot ${row.sbIndex}'}',
+                    title: l10n.projectStudioStoryboardRowTitle(
+                      row.storyboardNumericId,
+                      row.sbIndex == null
+                          ? ''
+                          : l10n.projectStudioStoryboardShotSuffix(row.sbIndex!),
+                    ),
                     detail: row.scriptNumericId == null
-                        ? 'Pending candidate assets still block this storyboard.'
-                        : 'Script #${row.scriptNumericId} still has candidate assets waiting for confirmation.',
-                    ctaLabel: 'Review candidates',
+                        ? l10n.projectStudioStoryboardPendingBlocks
+                        : l10n.projectStudioScriptPendingCandidates(
+                            row.scriptNumericId!,
+                          ),
+                    ctaLabel: l10n.projectStudioReviewCandidatesCta,
                     onTap: assetsOverview == null
                         ? null
                         : () => onOpenAssetEditor(
                             buildProjectStudioAssetEditorTarget(
+                              l10n: l10n,
                               overview: assetsOverview!,
                               assetTarget: 'confirm_candidates',
                               preferredScriptNumericId: row.scriptNumericId,
                               preferredStoryboardNumericId:
                                   row.storyboardNumericId,
-                              notice:
-                                  'Storyboard #${row.storyboardNumericId} is still blocked by pending candidate assets. Confirm the right role before generating this shot.',
+                              notice: l10n.projectStudioStoryboardBlockedNotice(
+                                row.storyboardNumericId,
+                              ),
                             ),
                           ),
                   ),
@@ -807,7 +844,7 @@ class _StoryboardAssetBridgeCard extends StatelessWidget {
           if (missingAnchors.isNotEmpty) ...<Widget>[
             const SizedBox(height: 14),
             Text(
-              'Missing character anchors',
+              l10n.projectStudioMissingAnchorsTitle,
               style: theme.textTheme.titleSmall?.copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.w700,
@@ -820,21 +857,25 @@ class _StoryboardAssetBridgeCard extends StatelessWidget {
                   (character) => _StoryboardAssetBridgeLine(
                     title: character.name,
                     detail: character.linkedScriptNumericIds.isEmpty
-                        ? 'This project character still needs an asset anchor.'
-                        : 'Scripts ${character.linkedScriptNumericIds.join(', ')} still depend on this character anchor.',
-                    ctaLabel: 'Fix anchors',
+                        ? l10n.projectStudioCharacterNeedsAnchor
+                        : l10n.projectStudioScriptsDependOnAnchor(
+                            character.linkedScriptNumericIds.join(', '),
+                          ),
+                    ctaLabel: l10n.projectStudioFixAnchorsCta,
                     onTap: assetsOverview == null
                         ? null
                         : () => onOpenAssetEditor(
                             buildProjectStudioAssetEditorTarget(
+                              l10n: l10n,
                               overview: assetsOverview!,
                               assetTarget: 'anchor_characters',
                               preferredScriptNumericId:
                                   character.linkedScriptNumericIds.isEmpty
                                   ? null
                                   : character.linkedScriptNumericIds.first,
-                              notice:
-                                  'Character "${character.name}" still needs an asset anchor before storyboard work can stay consistent.',
+                              notice: l10n.projectStudioCharacterAnchorNotice(
+                                character.name,
+                              ),
                             ),
                           ),
                   ),
@@ -936,72 +977,72 @@ class _ProjectCockpitCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Wrap(
-            spacing: 16,
-            runSpacing: 16,
-            crossAxisAlignment: WrapCrossAlignment.start,
-            children: <Widget>[
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 560),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      cockpit.headline,
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      cockpit.subheadline,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    _ActionButtonRow(
-                      primaryAction: cockpit.primaryAction,
-                      secondaryActions: cockpit.secondaryActions,
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 720),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  cockpit.headline,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  cockpit.subheadline,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                _ActionButtonRow(
+                  primaryAction: cockpit.primaryAction,
+                  secondaryActions: cockpit.secondaryActions,
+                  onExecuteAction: onExecuteAction,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              const spacing = 12.0;
+              final maxWidth = constraints.maxWidth;
+              var columns = 1;
+              if (maxWidth >= 1520) {
+                columns = 4;
+              } else if (maxWidth >= 1080) {
+                columns = 3;
+              } else if (maxWidth >= 720) {
+                columns = 2;
+              }
+              final itemWidth =
+                  (maxWidth - spacing * (columns - 1)) / columns;
+              return Wrap(
+                spacing: spacing,
+                runSpacing: spacing,
+                children: <Widget>[
+                  ...cockpit.metrics.map(
+                    (metric) => _MetricCard(
+                      width: itemWidth,
+                      metric: metric,
+                      action: metricActionBuilder(metric),
                       onExecuteAction: onExecuteAction,
                     ),
-                  ],
-                ),
-              ),
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 520),
-                child: Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
-                  children: cockpit.metrics
-                      .map(
-                        (metric) => _MetricCard(
-                          metric: metric,
-                          action: metricActionBuilder(metric),
-                          onExecuteAction: onExecuteAction,
-                        ),
-                      )
-                      .toList(growable: false),
-                ),
-              ),
-            ],
-          ),
-          if (cockpit.starterTemplates.isNotEmpty) ...<Widget>[
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              children: cockpit.starterTemplates
-                  .map(
+                  ),
+                  ...cockpit.starterTemplates.map(
                     (starter) => _StarterCard(
+                      width: itemWidth,
                       starter: starter,
                       onExecuteStarter: onExecuteStarter,
                     ),
-                  )
-                  .toList(growable: false),
-            ),
-          ],
+                  ),
+                ],
+              );
+            },
+          ),
         ],
       ),
     );
@@ -1158,9 +1199,15 @@ class _ActionButtonRow extends StatelessWidget {
 }
 
 class _MetricCard extends StatelessWidget {
-  const _MetricCard({required this.metric, this.action, this.onExecuteAction});
+  const _MetricCard({
+    required this.metric,
+    required this.width,
+    this.action,
+    this.onExecuteAction,
+  });
 
   final ProjectHomeMetric metric;
+  final double width;
   final ProjectHomeAction? action;
   final ValueChanged<ProjectHomeAction>? onExecuteAction;
 
@@ -1213,7 +1260,7 @@ class _MetricCard extends StatelessWidget {
       ),
     );
     return SizedBox(
-      width: 248,
+      width: width,
       child: action == null || onExecuteAction == null
           ? card
           : InkWell(
@@ -1226,9 +1273,14 @@ class _MetricCard extends StatelessWidget {
 }
 
 class _AssetsHubMetricCard extends StatelessWidget {
-  const _AssetsHubMetricCard({required this.metric, this.onTap});
+  const _AssetsHubMetricCard({
+    required this.metric,
+    required this.openLabel,
+    this.onTap,
+  });
 
   final AssetsOverviewHubMetric metric;
+  final String openLabel;
   final VoidCallback? onTap;
 
   @override
@@ -1269,7 +1321,7 @@ class _AssetsHubMetricCard extends StatelessWidget {
           if (onTap != null) ...<Widget>[
             const SizedBox(height: 10),
             Text(
-              'Open',
+              openLabel,
               style: theme.textTheme.labelMedium?.copyWith(
                 color: theme.colorScheme.primary,
                 fontWeight: FontWeight.w600,
@@ -1293,17 +1345,22 @@ class _AssetsHubMetricCard extends StatelessWidget {
 }
 
 class _StarterCard extends StatelessWidget {
-  const _StarterCard({required this.starter, required this.onExecuteStarter});
+  const _StarterCard({
+    required this.starter,
+    required this.onExecuteStarter,
+    required this.width,
+  });
 
   final ProjectHomeStarterTemplate starter;
   final ValueChanged<ProjectHomeStarterTemplate> onExecuteStarter;
+  final double width;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = StudioTokens.of(context);
     return SizedBox(
-      width: 280,
+      width: width,
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(

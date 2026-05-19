@@ -77,12 +77,12 @@ String? summarizeMemoryScopePressureFromQualityReviews(
         final hitSummary = joinTopBucketCounts(
           entry.value.hits,
           maxItems: 2,
-          l10n: l10n,
+          l10n: loc,
         );
         final suppressedSummary = joinTopBucketCounts(
           entry.value.suppressed,
           maxItems: 2,
-          l10n: l10n,
+          l10n: loc,
         );
         final parts = <String>[
           '${entry.key} ${entry.value.reviews}${loc.qualityReviewsItemUnit}',

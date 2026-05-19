@@ -519,11 +519,17 @@ String formatQualityReviewCoreDetails(QualityReview row) {
 String formatQualityReviewDetails(QualityReview row, {AppLocalizations? l10n}) {
   final loc = qualityReviewsResolveL10n(l10n);
   final parts = [formatQualityReviewCoreDetails(row)];
-  final diagnosticSummary = summarizeQualityReviewPromptDiagnostics(row);
+  final diagnosticSummary = summarizeQualityReviewPromptDiagnostics(
+    row,
+    l10n: loc,
+  );
   if (diagnosticSummary != null) {
     parts.add('${loc.qualityReviewsDiagnosticLabel}=$diagnosticSummary');
   }
-  final writebackSummary = summarizeQualityReviewMemoryWriteback(row);
+  final writebackSummary = summarizeQualityReviewMemoryWriteback(
+    row,
+    l10n: loc,
+  );
   if (writebackSummary != null) {
     parts.add('${loc.qualityReviewsWritebackLabel}=$writebackSummary');
   }

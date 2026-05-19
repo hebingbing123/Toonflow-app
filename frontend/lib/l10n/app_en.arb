@@ -12244,6 +12244,13 @@
   "shortVideoTimelineTransitionCut": "Cut",
   "shortVideoTimelineTransitionCrossfade": "Crossfade",
   "shortVideoTimelineTransitionFadeBlack": "Fade to black",
+  "shortVideoTimelineTransitionBetweenShots": "#{fromShot}→#{toShot}",
+  "@shortVideoTimelineTransitionBetweenShots": {
+    "placeholders": {
+      "fromShot": { "type": "int" },
+      "toShot": { "type": "int" }
+    }
+  },
   "shortVideoTimelineTransitionDurationMs": "Duration (ms)",
   "shortVideoTimelineVoiceoverTitle": "Voiceover",
   "shortVideoTimelineVoiceoverVolume": "Volume",
@@ -14877,6 +14884,65 @@
   "projectStudioTasksRunning": "Tasks ({count})",
   "@projectStudioTasksRunning": {
     "placeholders": { "count": { "type": "int" } }
+  },
+  "projectStudioOpenTasks": "Open tasks",
+  "projectStudioOpenAssetHub": "Open asset hub",
+  "projectStudioOpenStep": "Open {step}",
+  "@projectStudioOpenStep": {
+    "placeholders": { "step": { "type": "String" } }
+  },
+  "projectStudioOpen": "Open",
+  "projectStudioAssetHubCharactersTitle": "Project characters",
+  "projectStudioAssetHubMissingAnchor": "Missing asset anchor",
+  "projectStudioAssetHubAssetLinked": "Asset linked",
+  "projectStudioAssetHubVoiceReady": "Voice ready",
+  "projectStudioAssetHubVoiceNotSet": "Voice not set",
+  "projectStudioAssetHubReusableRolesTitle": "Reusable role assets",
+  "projectStudioAssetHubNoCharacterLinked": "No character linked yet",
+  "projectStudioAssetHubNoScriptsLinked": "No scripts linked",
+  "projectStudioAssetHubScriptsLinked": "Scripts {scriptIds}",
+  "@projectStudioAssetHubScriptsLinked": {
+    "placeholders": { "scriptIds": { "type": "String" } }
+  },
+  "projectStudioNoticeBuildRoleLibrary": "Focus on creating or importing role assets before moving deeper into storyboard work.",
+  "projectStudioNoticeDefineCharacters": "Role assets exist, but the project character sheet is still empty. Build the character roster from the asset library.",
+  "projectStudioNoticeAnchorCharacters": "Start by reviewing role assets for the scripts that still have characters without asset anchors.",
+  "projectStudioNoticeConfirmCandidates": "Candidate assets are still pending. Review the pending rows and confirm the ones that belong in the role library.",
+  "projectStudioNoticeReviewRoleReuse": "Review role reuse and script linkage so the same cast assets stay consistent across scenes.",
+  "projectStudioStoryboardBlockersTitle": "Storyboard asset blockers",
+  "projectStudioStoryboardBlockersSubtitle": "Close asset-binding gaps here before moving back into generation.",
+  "projectStudioPendingCandidateReviewTitle": "Pending candidate review",
+  "projectStudioStoryboardRowTitle": "Storyboard #{storyboardId}{shotSuffix}",
+  "@projectStudioStoryboardRowTitle": {
+    "placeholders": {
+      "storyboardId": { "type": "int" },
+      "shotSuffix": { "type": "String" }
+    }
+  },
+  "projectStudioStoryboardShotSuffix": " · Shot {shotIndex}",
+  "@projectStudioStoryboardShotSuffix": {
+    "placeholders": { "shotIndex": { "type": "int" } }
+  },
+  "projectStudioStoryboardPendingBlocks": "Pending candidate assets still block this storyboard.",
+  "projectStudioScriptPendingCandidates": "Script #{scriptId} still has candidate assets waiting for confirmation.",
+  "@projectStudioScriptPendingCandidates": {
+    "placeholders": { "scriptId": { "type": "int" } }
+  },
+  "projectStudioReviewCandidatesCta": "Review candidates",
+  "projectStudioStoryboardBlockedNotice": "Storyboard #{storyboardId} is still blocked by pending candidate assets. Confirm the right role before generating this shot.",
+  "@projectStudioStoryboardBlockedNotice": {
+    "placeholders": { "storyboardId": { "type": "int" } }
+  },
+  "projectStudioMissingAnchorsTitle": "Missing character anchors",
+  "projectStudioCharacterNeedsAnchor": "This project character still needs an asset anchor.",
+  "projectStudioScriptsDependOnAnchor": "Scripts {scriptIds} still depend on this character anchor.",
+  "@projectStudioScriptsDependOnAnchor": {
+    "placeholders": { "scriptIds": { "type": "String" } }
+  },
+  "projectStudioFixAnchorsCta": "Fix anchors",
+  "projectStudioCharacterAnchorNotice": "Character \"{name}\" still needs an asset anchor before storyboard work can stay consistent.",
+  "@projectStudioCharacterAnchorNotice": {
+    "placeholders": { "name": { "type": "String" } }
   },
   "shortVideoDownloadDesktopApp": "Download desktop app",
   "projectEditorBasicsModelRoutingTitle": "Model routing",

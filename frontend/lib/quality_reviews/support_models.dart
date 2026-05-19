@@ -62,49 +62,39 @@ Map<String, int> diagnosticStringIntMap(Map<String, dynamic> map, String key) {
   return result;
 }
 
-String describeAutoNegativeSource(String source, {AppLocalizations? l10n}) {
+String describeAutoNegativeSource(String source, {required AppLocalizations l10n}) {
   switch (source) {
     case 'review+rejected_memory':
-      return l10n?.qualityReviewsNegativeConstraintReviewAndBadCase ??
-          'negative constraint=reviews+bad-case memory';
+      return l10n.qualityReviewsNegativeConstraintReviewAndBadCase;
     case 'review':
-      return l10n?.qualityReviewsNegativeConstraintRecentReviews ??
-          'negative constraint=recent reviews';
+      return l10n.qualityReviewsNegativeConstraintRecentReviews;
     case 'rejected_memory':
-      return l10n?.qualityReviewsNegativeConstraintBadCaseMemory ??
-          'negative constraint=bad-case memory';
+      return l10n.qualityReviewsNegativeConstraintBadCaseMemory;
     case 'pending_observation_note':
-      return l10n?.qualityReviewsNegativeConstraintPendingBadCase ??
-          'negative constraint=pending bad cases';
+      return l10n.qualityReviewsNegativeConstraintPendingBadCase;
     case 'pending_rejected_observation':
-      return l10n?.qualityReviewsNegativeConstraintPendingRejected ??
-          'negative constraint=pending rejected items';
+      return l10n.qualityReviewsNegativeConstraintPendingRejected;
     default:
-      return l10n?.qualityReviewsNegativeConstraintGeneric(source) ??
-          'negative constraint=$source';
+      return l10n.qualityReviewsNegativeConstraintGeneric(source);
   }
 }
 
 String joinTopBucketCounts(
   Map<String, int> counts, {
   int maxItems = 3,
-  AppLocalizations? l10n,
+  required AppLocalizations l10n,
 }) {
   if (counts.isEmpty) return '';
   return (counts.entries.toList()..sort((a, b) => b.value.compareTo(a.value)))
       .take(maxItems)
-      .map(
-        (entry) =>
-            l10n?.qualityReviewsBucketCount(entry.key, entry.value) ??
-            '${entry.key} ${entry.value} times',
-      )
+      .map((entry) => l10n.qualityReviewsBucketCount(entry.key, entry.value))
       .join(' / ');
 }
 
 String joinBucketListWithCounts(
   List<String> buckets,
   Map<String, int> counts, {
-  AppLocalizations? l10n,
+  required AppLocalizations l10n,
 }) {
   if (buckets.isEmpty) return '';
   return buckets
@@ -112,25 +102,21 @@ String joinBucketListWithCounts(
         final count = counts[bucket];
         return count == null || count <= 1
             ? bucket
-            : (l10n?.qualityReviewsBucketCount(bucket, count) ??
-                  '$bucket $count times');
+            : l10n.qualityReviewsBucketCount(bucket, count);
       })
       .join('/');
 }
 
-String describeFeedbackFocusTag(String tag, {AppLocalizations? l10n}) {
+String describeFeedbackFocusTag(String tag, {required AppLocalizations l10n}) {
   switch (tag) {
     case 'delivery_realism':
-      return l10n?.qualityReviewsFeedbackTagDeliveryRealism ??
-          'dialogue realism';
+      return l10n.qualityReviewsFeedbackTagDeliveryRealism;
     case 'emotion_arc':
-      return l10n?.qualityReviewsFeedbackTagEmotionArc ?? 'emotion arc';
+      return l10n.qualityReviewsFeedbackTagEmotionArc;
     case 'identity_continuity':
-      return l10n?.qualityReviewsFeedbackTagIdentityContinuity ??
-          'identity continuity';
+      return l10n.qualityReviewsFeedbackTagIdentityContinuity;
     case 'lighting_realism':
-      return l10n?.qualityReviewsFeedbackTagLightingRealism ??
-          'lighting realism';
+      return l10n.qualityReviewsFeedbackTagLightingRealism;
     default:
       return tag;
   }
@@ -138,7 +124,7 @@ String describeFeedbackFocusTag(String tag, {AppLocalizations? l10n}) {
 
 String? summarizeFeedbackFocusTags(
   Iterable<String> tags, {
-  AppLocalizations? l10n,
+  required AppLocalizations l10n,
 }) {
   final values = LinkedHashSet<String>.from(
     tags.map((tag) => tag.trim()).where((tag) => tag.isNotEmpty),
@@ -166,17 +152,13 @@ String? describeMemoryScopeRows({
   required int projectScopeRows,
   required int scriptScopeRows,
   required int roleScopeRows,
-  AppLocalizations? l10n,
+  required AppLocalizations l10n,
 }) {
   final parts = <String>[
     if (projectScopeRows > 0)
-      l10n?.qualityReviewsScopeProject(projectScopeRows) ??
-          'project $projectScopeRows',
-    if (scriptScopeRows > 0)
-      l10n?.qualityReviewsScopeScript(scriptScopeRows) ??
-          'script $scriptScopeRows',
-    if (roleScopeRows > 0)
-      l10n?.qualityReviewsScopeRole(roleScopeRows) ?? 'role $roleScopeRows',
+      l10n.qualityReviewsScopeProject(projectScopeRows),
+    if (scriptScopeRows > 0) l10n.qualityReviewsScopeScript(scriptScopeRows),
+    if (roleScopeRows > 0) l10n.qualityReviewsScopeRole(roleScopeRows),
   ];
   if (parts.isEmpty) return null;
   return parts.join('/');
@@ -199,19 +181,16 @@ int qualityTokenEfficiencyActionPriority(String action) {
 
 String qualityTokenEfficiencyFocusLabel(
   String focus, {
-  AppLocalizations? l10n,
+  required AppLocalizations l10n,
 }) {
   switch (focus) {
     case 'selected_video_memory':
-      return l10n?.qualityReviewsFocusSelectedVideoMemory ??
-          'selected shot memory';
+      return l10n.qualityReviewsFocusSelectedVideoMemory;
     case 'rejected_video_negative_memory':
-      return l10n?.qualityReviewsFocusRejectedVideoNegativeMemory ??
-          'bad-case memory';
+      return l10n.qualityReviewsFocusRejectedVideoNegativeMemory;
     case 'project_video_style_memory':
-      return l10n?.qualityReviewsFocusProjectVideoStyleMemory ??
-          'project style memory';
+      return l10n.qualityReviewsFocusProjectVideoStyleMemory;
     default:
-      return l10n?.qualityReviewsFocusCurrentMemory ?? 'current memory';
+      return l10n.qualityReviewsFocusCurrentMemory;
   }
 }
