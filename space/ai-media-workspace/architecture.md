@@ -11,6 +11,12 @@ AI Media Workspace 采用 **Flutter 多端 UI + Rust Core 双宿主** 的架构�
 3. **Rust Core 统一时间线、图层、工作流与导出语义**
 4. **Rust Service 提供同步、协作、任务与可选云端执行**
 
+当前实现层约定：
+
+- `frontend/`：Flutter UI
+- `backend/`：Rust HTTP / WebSocket / jobs 服务
+- [`../../rust_core/`](../../rust_core/README.md)：独立 Rust workspace，承载媒体编辑与工作流核心模型
+
 ## 总体架构
 
 ```mermaid
@@ -96,6 +102,12 @@ Rust Core 负责：
 - `job execution contracts`
 
 它应该尽量不依赖单一宿主，保证同一套核心模型既能给桌面端用，也能在服务端复用。
+
+目录上采用仓库根同级 `rust_core/`，初始按 crate 拆分为：
+
+- `media_timeline`
+- `media_image_doc`
+- `media_workflow`
 
 ### 3. Rust Service
 

@@ -60,6 +60,7 @@ data/test.sqlite
 
 # Rust (backend/)
 backend/target/
+rust_core/target/
 
 # Flutter (frontend/)
 frontend/.dart_tool/

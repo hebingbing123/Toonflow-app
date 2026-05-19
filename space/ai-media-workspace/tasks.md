@@ -13,7 +13,7 @@
 
 ## A. Space 基线与术语收口
 
-- [ ] A1. 建立 `AI Media Workspace` 的正式产品名、导航名和文档入口
+- [x] A1. 建立 `AI Media Workspace` 的正式产品名、导航名和文档入口
 - [ ] A2. 明确 `desktop production`、`web collaboration`、`mobile collaboration` 三种运行语义
 - [ ] A3. 将该 Space 与已有 `short-video` Space 的边界写清楚：前者是上层媒体空间，后者是垂直短视频链路
 - [ ] A4. 统一文档中的“轻量编辑 / 粗剪 / 重型剪辑 / 协作入口”术语
@@ -28,10 +28,16 @@
 
 ## C. 桌面宿主与 Rust Bridge
 
-- [ ] C1. 确定桌面端 Rust 接入方式：优先 `flutter_rust_bridge` 或等价桥接
+- [x] C1. 确定桌面端 Rust 接入方式：优先 `flutter_rust_bridge` 或等价桥接
 - [ ] C2. 为桌面端定义编辑会话生命周期：打开项目、加载缓存、恢复上下文、释放资源
 - [ ] C3. 定义桌面端本地缓存目录、代理目录、导出目录约定
 - [ ] C4. 明确桌面端与云端同步频率、冲突策略、失败恢复策略
+
+## C0. Rust Core 目录基线
+
+- [x] C0.1. 在仓库根目录建立与 `backend/`、`frontend/` 同级的 `rust_core/` workspace
+- [x] C0.2. 为 `timeline`、`image_doc`、`workflow` 建立最小 crate 骨架
+- [x] C0.3. 在 AI Media Workspace 文档中明确 `rust_core/` 是媒体编辑内核目录
 
 ## D. 图片编辑 MVP
 

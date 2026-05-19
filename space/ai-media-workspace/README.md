@@ -8,7 +8,7 @@
 
 - **桌面端**：主生产工作台，承担重型视频/图片编辑、代理生成、导出、批量任务。
 - **Web / 手机端**：协作、审核、任务入口、结果回看；遇到重型剪辑时引导用户切到桌面端。
-- **Rust**：媒体处理、工作流编排、时间线 / 图层 / 任务引擎。
+- **Rust**：由根目录同级的 [`../../rust_core/`](../../rust_core/README.md) 承载媒体处理、工作流编排、时间线 / 图层 / 任务引擎。
 - **Flutter**：统一 UI 壳、交互、参数面板、工作台导航。
 
 ## 核心判断
@@ -28,6 +28,7 @@
 
 这个 Space 建立在以下既有文档之上，不推翻原结论，而是做统一收口：
 
+- [`../../rust_core/README.md`](../../rust_core/README.md)：桌面与服务端共用的 Rust 编辑内核目录
 - [`../../docs/plans/harness-rust-flutter.md`](../../docs/plans/harness-rust-flutter.md)：Rust + Flutter 主重构路线
 - [`../short-video/README.md`](../short-video/README.md)：短视频 Space 总览
 - [`../../docs/plans/moneyprinter-short-video-space.md`](../../docs/plans/moneyprinter-short-video-space.md)：短视频入口编排与流水线视角

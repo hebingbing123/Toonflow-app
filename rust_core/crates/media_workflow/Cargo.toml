@@ -1,0 +1,12 @@
+[package]
+name = "media_workflow"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+description = "Openflow Rust Core workflow graph primitives"
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+uuid.workspace = true

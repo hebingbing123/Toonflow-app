@@ -6,11 +6,14 @@ AI Media Workspace 是 Openflow 面向 **视频生产、图片素材处理、AI 
 
 本 Space 采用 **桌面生产优先、Web / 手机协作优先、Rust Core 统一、Flutter UI 统一** 的策略，不追求把完整重型剪辑器塞进浏览器，也不把所有重媒体计算默认压到中心服务端。
 
+当前目录落点已经确定为仓库根目录同级的 [`../../rust_core/`](../../rust_core/README.md) workspace，而不是继续把编辑内核塞在 `backend/` 子树里。
+
 ## 关联文档
 
 - [`README.md`](./README.md)
 - [`architecture.md`](./architecture.md)
 - [`tasks.md`](./tasks.md)
+- [`../../rust_core/README.md`](../../rust_core/README.md)
 - [`../../docs/plans/harness-rust-flutter.md`](../../docs/plans/harness-rust-flutter.md)
 - [`../short-video/README.md`](../short-video/README.md)
 - [`../../docs/plans/moneyprinter-short-video-space.md`](../../docs/plans/moneyprinter-short-video-space.md)
