@@ -101,8 +101,21 @@ pub(super) async fn run_asset_polish_prompt(
         "asset polish-prompt: calling LLM"
     );
 
-    let result =
-        polish_asset_description_llm(cfg, &state.http_client, asset_type, name, describe).await?;
+    let mut effective_cfg = cfg.clone();
+    if let Some(project_model) =
+        load_project_text_model(pool, row.owner_user_id, project_numeric_id).await?
+    {
+        effective_cfg.model = project_model;
+    }
+
+    let result = polish_asset_description_llm(
+        &effective_cfg,
+        &state.http_client,
+        asset_type,
+        name,
+        describe,
+    )
+    .await?;
     record_llm_usage(
         pool,
         row.owner_user_id,
@@ -169,6 +182,13 @@ pub(super) async fn run_asset_polish_batch(
         "asset batch-polish: calling LLM per item"
     );
 
+    let mut effective_cfg = cfg.clone();
+    if let Some(project_model) =
+        load_project_text_model(pool, row.owner_user_id, project_numeric_id).await?
+    {
+        effective_cfg.model = project_model;
+    }
+
     let mut out = Vec::with_capacity(items.len());
     for item in items {
         if generation_job_is_cancelled(pool, job_id).await? {
@@ -192,9 +212,14 @@ pub(super) async fn run_asset_polish_batch(
             .and_then(|x| x.as_str())
             .ok_or_else(|| JobRunError::Failed("item missing describe".into()))?;
 
-        let result =
-            polish_asset_description_llm(cfg, &state.http_client, asset_type, name, describe)
-                .await?;
+        let result = polish_asset_description_llm(
+            &effective_cfg,
+            &state.http_client,
+            asset_type,
+            name,
+            describe,
+        )
+        .await?;
         record_llm_usage(
             pool,
             row.owner_user_id,
@@ -232,4 +257,34 @@ pub(super) async fn run_asset_polish_batch(
         result["project_uuid"] = json!(project_uuid);
     }
     Ok(result)
+}
+
+async fn load_project_text_model(
+    pool: &PgPool,
+    actor_user_id: uuid::Uuid,
+    project_numeric_id: i32,
+) -> Result<Option<String>, JobRunError> {
+    let row = sqlx::query_scalar::<_, Option<String>>(
+        r#"
+        SELECT text_model
+        FROM app_project
+        WHERE numeric_id = $2
+          AND EXISTS (
+                SELECT 1
+                FROM app_workspace_member wm
+                WHERE wm.workspace_id = app_project.workspace_id
+                  AND wm.user_id = $1
+          )
+        "#,
+    )
+    .bind(actor_user_id)
+    .bind(project_numeric_id)
+    .fetch_optional(pool)
+    .await
+    .map_err(|e| JobRunError::Failed(e.to_string()))?;
+
+    Ok(row
+        .flatten()
+        .map(|value| value.trim().to_string())
+        .filter(|value| !value.is_empty()))
 }

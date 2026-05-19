@@ -559,6 +559,7 @@
       }
     }
   },
+  "studioJobTraySheetTitle": "Active jobs",
   "studioUnknownCodeEmpty": "(empty)",
   "studioUnknownCodeLabel": "Unknown: {code}",
   "@studioUnknownCodeLabel": {
@@ -780,8 +781,26 @@
   "studioStoryboardProperties": "Properties",
   "studioStoryboardPropertiesHint": "Prompt, frame mode, and candidates appear here when a shot is selected.",
   "studioKeyboardShortcuts": "Shortcuts",
-  "studioGridStoryboardHint": "Generate a grid image, split cells, and assign to shots (backend job coming).",
+  "studioGridStoryboardHint": "Generate one grid image, split into cells, and assign each cell to a shot.",
   "studioGridStoryboardCta": "Grid mode",
+  "studioGridStoryboardDialogTitle": "Grid storyboard",
+  "studioGridStoryboardDialogSubtitle": "Configure a {shotCount}-cell grid for the current script shots.",
+  "@studioGridStoryboardDialogSubtitle": {"placeholders": {"shotCount": {"type": "int"}}},
+  "studioGridStoryboardRowsLabel": "Rows",
+  "studioGridStoryboardColsLabel": "Columns",
+  "studioGridStoryboardBasePromptLabel": "Scene direction (optional)",
+  "studioGridStoryboardInvalidDimensions": "Use 1–4 rows and columns.",
+  "studioGridStoryboardCellMismatch": "Rows × columns ({cells}) must equal shot count ({shotCount}).",
+  "@studioGridStoryboardCellMismatch": {"placeholders": {"cells": {"type": "int"}, "shotCount": {"type": "int"}}},
+  "studioGridStoryboardEnqueued": "Grid generation started. Shots refresh when the job completes.",
+  "studioGridStoryboardFailed": "Grid generation failed: {message}",
+  "@studioGridStoryboardFailed": {"placeholders": {"message": {"type": "String"}}},
+  "studioStoryboardStudioNoShots": "No shots in this script yet. Add storyboards on the script step first.",
+  "studioStoryboardStudioSelectShot": "Select a shot from the list to preview and edit.",
+  "studioStoryboardStudioEmptyPrompt": "No prompt yet — edit on the right or open the full editor.",
+  "studioStoryboardStudioOpenEditor": "Full editor",
+  "studioStoryboardStudioSaveProperties": "Save shot",
+  "studioStoryboardStudioSaved": "Shot properties saved.",
   "studioEpisodeConsoleTitle": "Episode {n}",
   "@studioEpisodeConsoleTitle": {"placeholders": {"n": {"type": "int"}}},
   "studioEpisodePreviewPlaceholder": "Preview",
@@ -1072,6 +1091,30 @@
   "opsWhRecentActivity": "Recent activity",
   "opsWhCopyActivityTooltip": "Copy record",
   "opsWhActivityRecordSuffix": " webhook activity",
+  "opsWhActivityActionCreated": "Created",
+  "opsWhActivityActionDeleted": "Deleted",
+  "opsWhActivityActionTestSuccess": "Test delivered",
+  "opsWhActivityActionTestFailed": "Test failed",
+  "opsWhActivitySummaryDeleted": "Webhook deleted",
+  "opsWhActivitySummaryTestSuccess": "HTTP {status}",
+  "@opsWhActivitySummaryTestSuccess": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "opsWhActivitySummaryTestFailed": "HTTP {status} · {error}",
+  "@opsWhActivitySummaryTestFailed": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "opsWhChipLatestCreated": "Latest created",
   "opsWhChipDisabled": "Disabled",
   "opsWhSubscribeHeading": "Subscribed events",
@@ -2369,6 +2412,25 @@
   "@taskCenterUuidDetailsLine": {
     "placeholders": {
       "line": {
+        "type": "String"
+      }
+    }
+  },
+  "taskCenterJobDetailField": "{key}={value}",
+  "@taskCenterJobDetailField": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "taskCenterJobDetailUpdatedAt": "updated {timestamp}",
+  "@taskCenterJobDetailUpdatedAt": {
+    "placeholders": {
+      "timestamp": {
         "type": "String"
       }
     }
@@ -16413,6 +16475,38 @@
   },
   "statusPageRequestFailed": "Request failed",
   "statusPageVersionSectionTitle": "Version",
+  "statusPageVersionServiceLine": "service={service}",
+  "@statusPageVersionServiceLine": {
+    "placeholders": {
+      "service": {
+        "type": "String"
+      }
+    }
+  },
+  "statusPageVersionNumberLine": "version={version}",
+  "@statusPageVersionNumberLine": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "statusPageVersionGitShaLine": "git_sha={gitSha}",
+  "@statusPageVersionGitShaLine": {
+    "placeholders": {
+      "gitSha": {
+        "type": "String"
+      }
+    }
+  },
+  "statusPageReadyDatabaseLine": "database={database}",
+  "@statusPageReadyDatabaseLine": {
+    "placeholders": {
+      "database": {
+        "type": "String"
+      }
+    }
+  },
   "nativeBridgeMessageNotStarted": "Desktop bridge has not started yet.",
   "nativeBridgeMessageWebSkipped": "Web runtime skips the desktop Rust bridge.",
   "nativeBridgeMessageReady": "Desktop Rust bridge is ready.",
@@ -16437,6 +16531,10 @@
   "statusPageBridgeLibraryPathLine": "library_path={path}",
   "@statusPageBridgeLibraryPathLine": {
     "placeholders": { "path": { "type": "String" } }
+  },
+  "statusPageBridgeErrorLine": "error={error}",
+  "@statusPageBridgeErrorLine": {
+    "placeholders": { "error": { "type": "String" } }
   },
   "shortVideoDesktopRuntimeHeadlineDesktopApp": "Desktop editor runtime",
   "shortVideoDesktopRuntimeDetailDesktopApp": "This device can use the local Rust editing engine for assembly and export workflows.",

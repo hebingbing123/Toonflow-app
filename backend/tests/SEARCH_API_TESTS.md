@@ -29,7 +29,7 @@ If you are using the repo's usual local database workflow, starting local Supaba
 most likely path:
 
 ```bash
-cd /path/to/Toonflow-app
+cd /path/to/Openflow-app
 yarn supabase:start:db
 # or, if you need the whole stack:
 supabase start

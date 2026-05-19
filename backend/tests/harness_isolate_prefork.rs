@@ -27,7 +27,7 @@ impl Drop for ScopedEnvVar {
 #[tokio::test]
 async fn harness_isolate_prefork_first_invoke_records_reuse_hit_and_no_extra_spawn() {
     let exe =
-        std::env::var("CARGO_BIN_EXE_toonflow-server").expect("cargo exposes CARGO_BIN_EXE_*");
+        std::env::var("CARGO_BIN_EXE_openflow-server").expect("cargo exposes CARGO_BIN_EXE_*");
     let _runner_guard = ScopedEnvVar::capture("HARNESS_ISOLATE_RUNNER_EXE");
     let _max_guard = ScopedEnvVar::capture("HARNESS_ISOLATE_MAX_CONCURRENT");
     let _pool_guard = ScopedEnvVar::capture("HARNESS_ISOLATE_POOL");
@@ -41,28 +41,28 @@ async fn harness_isolate_prefork_first_invoke_records_reuse_hit_and_no_extra_spa
     }
 
     assert_eq!(
-        toonflow_server::harness::isolate::effective_isolate_prefork_target(),
+        openflow_server::harness::isolate::effective_isolate_prefork_target(),
         2
     );
 
-    toonflow_server::harness::isolate::warm_isolate_pool_prefork().await;
+    openflow_server::harness::isolate::warm_isolate_pool_prefork().await;
 
-    let after_warm = toonflow_server::harness::isolate::metrics_snapshot();
+    let after_warm = openflow_server::harness::isolate::metrics_snapshot();
     assert!(
         after_warm.total_child_spawns >= 2,
         "prefork should spawn at least two workers"
     );
 
     let payload = serde_json::json!({ "prefork_probe": 1 });
-    let before_invoke = toonflow_server::harness::isolate::metrics_snapshot();
+    let before_invoke = openflow_server::harness::isolate::metrics_snapshot();
 
-    let out = toonflow_server::harness::isolate::isolated_echo(&payload)
+    let out = openflow_server::harness::isolate::isolated_echo(&payload)
         .await
         .expect("pooled echo");
 
     assert_eq!(out["prefork_probe"], 1);
 
-    let after_invoke = toonflow_server::harness::isolate::metrics_snapshot();
+    let after_invoke = openflow_server::harness::isolate::metrics_snapshot();
 
     assert_eq!(
         after_invoke.total_process_reuse_hits - before_invoke.total_process_reuse_hits,

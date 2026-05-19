@@ -14,6 +14,8 @@ import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../native_bridge/native_bridge_bootstrap.dart';
 import '../project_studio/studio_snapshot_bus.dart';
 import '../rust_api.dart';
+import '../design_system/components/studio_dialog_shell.dart';
+import '../design_system/components/studio_dropdown_field.dart';
 import '../task_center/support.dart';
 import 'desktop_capability.dart';
 import 'components/batch_operation_toolbar.dart';

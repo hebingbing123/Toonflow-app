@@ -1,3 +1,4 @@
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 part of '../../home_page.dart';
 
 extension _HomePageProjectEditorDialogBasics on _HomePageState {
@@ -26,7 +27,12 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
       ...options.map(
         (option) => DropdownMenuItem<String>(
           value: option.path,
-          child: Text(l10n.projectEditorBasicsStylePackOptionDisplay(option.name, option.tag)),
+          child: Text(
+            l10n.projectEditorBasicsStylePackOptionDisplay(
+              option.name,
+              option.tag,
+            ),
+          ),
         ),
       ),
       if (hasSelectedOutsideList)
@@ -43,7 +49,7 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        DropdownButtonFormField<String>(
+        StudioDropdownButtonFormField<String>(
           initialValue: selectedPath ?? '',
           decoration: InputDecoration(labelText: label),
           isExpanded: true,
@@ -78,6 +84,12 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
     required TextEditingController toneCtrl,
     required TextEditingController hookCtrl,
     required TextEditingController visualCtrl,
+    required TextEditingController textModelCtrl,
+    required TextEditingController multimodalModelCtrl,
+    required TextEditingController imageModelCtrl,
+    required TextEditingController videoModelCtrl,
+    required TextEditingController voiceModelCtrl,
+    required TextEditingController voiceProfileCtrl,
     required TextEditingController brandNameCtrl,
     required TextEditingController brandPromiseCtrl,
     required TextEditingController visualMotifsCtrl,
@@ -133,8 +145,12 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
                     padding: const EdgeInsets.only(bottom: 4),
                     child: Text(
                       item.done
-                          ? l10n.projectEditorBasicsHomeChecklistItemDone(item.label)
-                          : l10n.projectEditorBasicsHomeChecklistItemTodo(item.label),
+                          ? l10n.projectEditorBasicsHomeChecklistItemDone(
+                              item.label,
+                            )
+                          : l10n.projectEditorBasicsHomeChecklistItemTodo(
+                              item.label,
+                            ),
                       style: Theme.of(ctx).textTheme.bodySmall,
                     ),
                   ),
@@ -197,6 +213,63 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
           controller: visualCtrl,
           decoration: InputDecoration(
             labelText: l10n.projectEditorBasicsFieldVisualDirection,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          l10n.projectEditorBasicsModelRoutingTitle,
+          style: Theme.of(ctx).textTheme.titleSmall,
+        ),
+        const SizedBox(height: 8),
+        _buildProjectModelField(
+          l10n: l10n,
+          setDialogState: setDialogState,
+          controller: textModelCtrl,
+          label: l10n.projectEditorBasicsTextModelLabel,
+          helper: l10n.projectEditorBasicsTextModelHelper,
+          suggestions: dialogState.textModelOptionsRef[0],
+        ),
+        const SizedBox(height: 8),
+        _buildProjectModelField(
+          l10n: l10n,
+          setDialogState: setDialogState,
+          controller: multimodalModelCtrl,
+          label: l10n.projectEditorBasicsMultimodalModelLabel,
+          helper: l10n.projectEditorBasicsMultimodalModelHelper,
+          suggestions: dialogState.textModelOptionsRef[0],
+        ),
+        const SizedBox(height: 8),
+        _buildProjectModelField(
+          l10n: l10n,
+          setDialogState: setDialogState,
+          controller: imageModelCtrl,
+          label: l10n.projectEditorBasicsImageModelLabel,
+          suggestions: dialogState.imageModelOptionsRef[0],
+        ),
+        const SizedBox(height: 8),
+        _buildProjectModelField(
+          l10n: l10n,
+          setDialogState: setDialogState,
+          controller: videoModelCtrl,
+          label: l10n.projectEditorBasicsVideoModelLabel,
+          suggestions: dialogState.videoModelOptionsRef[0],
+        ),
+        const SizedBox(height: 8),
+        _buildProjectModelField(
+          l10n: l10n,
+          setDialogState: setDialogState,
+          controller: voiceModelCtrl,
+          label: l10n.projectEditorBasicsVoiceModelLabel,
+          helper: l10n.projectEditorBasicsVoiceModelHelper,
+          suggestions: dialogState.textModelOptionsRef[0],
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: voiceProfileCtrl,
+          maxLines: 2,
+          decoration: InputDecoration(
+            labelText: l10n.projectEditorBasicsVoiceProfileLabel,
+            helperText: l10n.projectEditorBasicsVoiceProfileHelper,
           ),
         ),
         const SizedBox(height: 16),
@@ -276,58 +349,6 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
             await _projectsController.loadProjects();
           },
         ),
-        const SizedBox(height: 8),
-        ExpansionTile(
-          tilePadding: EdgeInsets.zero,
-          childrenPadding: EdgeInsets.zero,
-          title: Text(l10n.projectEditorBasicsCompatTitle),
-          subtitle: Text(
-            l10n.projectEditorBasicsCompatSubtitle,
-            style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-              color: Theme.of(ctx).colorScheme.outline,
-            ),
-          ),
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Wrap(
-                spacing: 4,
-                runSpacing: 0,
-                children: [
-                  ..._buildProjectGeneralProbeActions(
-                    ctx: ctx,
-                    setDialogState: setDialogState,
-                    token: token,
-                    p: p,
-                    detail: detail,
-                    introCtrl: introCtrl,
-                    generalProbeBusy: dialogState.generalProbeBusy,
-                    tasksProbeBusy: dialogState.tasksProbeBusy,
-                    projectProbeBusy: dialogState.projectProbeBusy,
-                  ),
-                  ..._buildProjectProjectProbeActions(
-                    ctx: ctx,
-                    setDialogState: setDialogState,
-                    token: token,
-                    detail: detail,
-                    generalProbeBusy: dialogState.generalProbeBusy,
-                    tasksProbeBusy: dialogState.tasksProbeBusy,
-                    projectProbeBusy: dialogState.projectProbeBusy,
-                  ),
-                  ..._buildProjectTasksProbeActions(
-                    ctx: ctx,
-                    setDialogState: setDialogState,
-                    token: token,
-                    p: p,
-                    generalProbeBusy: dialogState.generalProbeBusy,
-                    tasksProbeBusy: dialogState.tasksProbeBusy,
-                    projectProbeBusy: dialogState.projectProbeBusy,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
         const SizedBox(height: 12),
         if (dialogState.statsRef[0] != null)
           Text(
@@ -347,6 +368,57 @@ extension _HomePageProjectEditorDialogBasics on _HomePageState {
               color: Theme.of(ctx).colorScheme.outline,
             ),
           ),
+      ],
+    );
+  }
+
+  Widget _buildProjectModelField({
+    required AppLocalizations l10n,
+    required StateSetter setDialogState,
+    required TextEditingController controller,
+    required String label,
+    String? helper,
+    List<ModelListEntry> suggestions = const <ModelListEntry>[],
+  }) {
+    final normalized = controller.text.trim();
+    final chips = suggestions
+        .where((entry) => entry.effectiveModelId.isNotEmpty)
+        .toList(growable: false);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextField(
+          controller: controller,
+          decoration: InputDecoration(
+            labelText: label,
+            helperText: helper ?? l10n.projectEditorBasicsModelCatalogHelper,
+          ),
+        ),
+        if (chips.isNotEmpty) ...[
+          const SizedBox(height: 6),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: chips
+                .map((entry) {
+                  final modelId = entry.effectiveModelId;
+                  return ActionChip(
+                    avatar: normalized == modelId
+                        ? const Icon(Icons.check, size: 16)
+                        : null,
+                    label: Text(entry.label),
+                    onPressed: () {
+                      controller.text = modelId;
+                      controller.selection = TextSelection.collapsed(
+                        offset: controller.text.length,
+                      );
+                      setDialogState(() {});
+                    },
+                  );
+                })
+                .toList(growable: false),
+          ),
+        ],
       ],
     );
   }

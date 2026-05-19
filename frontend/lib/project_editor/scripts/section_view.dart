@@ -12,7 +12,6 @@ class ProjectScriptsSectionViewModel {
     required this.overviewDiagnosis,
     required this.overviewActionLabel,
     required this.overviewAction,
-    required this.probeActions,
   });
 
   final bool saving;
@@ -22,7 +21,6 @@ class ProjectScriptsSectionViewModel {
   final ScriptBatchWorkbenchDiagnosis overviewDiagnosis;
   final String overviewActionLabel;
   final VoidCallback? overviewAction;
-  final List<Widget> probeActions;
 }
 
 class ProjectScriptsSectionViewCallbacks {
@@ -213,26 +211,6 @@ class ProjectScriptsSectionView extends StatelessWidget {
             child: Text(l10n.projectEditorScriptsSectionCreateEmpty),
           ),
         ),
-        ExpansionTile(
-          tilePadding: EdgeInsets.zero,
-          childrenPadding: EdgeInsets.zero,
-          title: Text(l10n.projectEditorScriptsSectionCompatibilityTile),
-          subtitle: Text(
-            l10n.projectEditorScriptsSectionCompatibilitySubtitle,
-            style: theme.textTheme.bodySmall?.copyWith(color: outline),
-          ),
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Wrap(
-                spacing: 4,
-                runSpacing: 0,
-                children: model.probeActions,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
         ...model.scriptList.map(
           (script) => ListTile(
             dense: true,

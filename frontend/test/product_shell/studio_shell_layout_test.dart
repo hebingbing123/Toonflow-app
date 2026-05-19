@@ -5,7 +5,7 @@ import 'package:openflow_app/shell/navigation_controller.dart';
 
 void main() {
   test(
-    'shouldShowStudioPipeline shows pipeline for utility panes on shell home',
+    'shouldShowStudioPipeline shows pipeline for production flow panes on shell home',
     () {
       expect(
         shouldShowStudioPipeline(
@@ -17,25 +17,25 @@ void main() {
       expect(
         shouldShowStudioPipeline(
           overlayMode: StudioOverlayMode.none,
-          currentPane: ProductWorkspacePane.helpHub,
+          currentPane: ProductWorkspacePane.shortVideoSpace,
         ),
         isTrue,
       );
     },
   );
 
-  test('shouldShowStudioPipeline hides pipeline for non-utility panes', () {
+  test('shouldShowStudioPipeline hides pipeline for utility panes', () {
     expect(
       shouldShowStudioPipeline(
         overlayMode: StudioOverlayMode.none,
-        currentPane: ProductWorkspacePane.scriptWorkspace,
+        currentPane: ProductWorkspacePane.helpHub,
       ),
       isFalse,
     );
     expect(
       shouldShowStudioPipeline(
         overlayMode: StudioOverlayMode.none,
-        currentPane: ProductWorkspacePane.jobs,
+        currentPane: ProductWorkspacePane.notifications,
       ),
       isFalse,
     );

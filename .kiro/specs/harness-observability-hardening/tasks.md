@@ -49,7 +49,7 @@
 - [x] 3. WP-C：出站 Webhook
   - [x] 3.1 在 `harness/alert.rs` 中实现 `dispatch_webhook`
     - `tokio::spawn` 非阻塞执行，不影响评估延迟
-    - POST JSON body：`event`、`signal_name`、`threshold`、`observed_rate`、`window_secs`、`fired_at`（ISO 8601 UTC）、`environment`（`OTEL_SERVICE_NAME` 或 `toonflow-server`）
+    - POST JSON body：`event`、`signal_name`、`threshold`、`observed_rate`、`window_secs`、`fired_at`（ISO 8601 UTC）、`environment`（`OTEL_SERVICE_NAME` 或 `openflow-server`）
     - `Content-Type: application/json`
     - 失败或非 2xx → log `event=harness_alert_webhook_failed`（URL 仅 scheme+host），不重试
     - `HARNESS_ALERT_WEBHOOK_URL` 未配置时静默跳过
@@ -68,11 +68,11 @@
 
 - [x] 6. WP-F：可配置 OTel 采样率
   - [x] 6.1 在 `backend/src/telemetry.rs` 中实现 `parse_sample_rate()`
-    - 读取 `TOONFLOW_OTEL_SAMPLE_RATE`，解析为 f64
+    - 读取 `OPENFLOW_OTEL_SAMPLE_RATE`，解析为 f64
     - 缺失或不可解析 → 默认 1.0
     - 值 ≤ 0.0 → log `event=otel_sample_rate_invalid`，使用 0.01（防止 prod 静默关闭）
     - 值 > 1.0 → log `event=otel_sample_rate_invalid`，使用 1.0
-    - `TOONFLOW_OTEL_EXPORT_ENABLED` 为 false 时忽略该变量
+    - `OPENFLOW_OTEL_EXPORT_ENABLED` 为 false 时忽略该变量
     - _Requirements: 5.1, 5.2, 5.3, 5.6_
 
   - [x] 6.2 在 `init_tracing_subscriber` 中配置 `TraceIdRatioBased` sampler
@@ -147,7 +147,7 @@
   - [x] 10.1 在 `backend/README.md` 中补充新增环境变量说明
     - `HARNESS_USER_WASM_ALERT_VALIDATE_FAIL_RATE`、`HARNESS_USER_WASM_ALERT_INVOKE_FAIL_RATE`、`HARNESS_USER_WASM_ALERT_FUEL_EXHAUSTION_RATE`、`HARNESS_USER_WASM_ALERT_WINDOW_SECS`、`HARNESS_USER_WASM_ALERT_MIN_EVENTS`
     - `HARNESS_ALERT_WEBHOOK_URL`、`HARNESS_ALERT_OPS_USER_ID`
-    - `TOONFLOW_OTEL_SAMPLE_RATE`
+    - `OPENFLOW_OTEL_SAMPLE_RATE`
     - _Requirements: 9.1_
 
   - [x] 10.2 验证 Flutter 通知中心对 `harness_wasm_alert` 类型的优雅处理

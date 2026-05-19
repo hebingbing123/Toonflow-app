@@ -19,7 +19,7 @@ extension _ShortVideoSpaceSectionExportProgressDialog
     required BuildContext context,
     required String taskId,
   }) async {
-    final result = await showDialog<ExportProgressDialogResult>(
+    final result = await showStudioDialog<ExportProgressDialogResult>(
       context: context,
       barrierDismissible: false, // Prevent dismissing by tapping outside
       builder: (dialogContext) {
@@ -374,7 +374,10 @@ class _ExportProgressDialogState extends State<ExportProgressDialog> {
     final theme = Theme.of(context);
     final l10n = resolveAppLocalizationsForErrors(context);
 
-    return AlertDialog(
+    return StudioAlertDialog(
+      scrollable: true,
+      maxWidth: 520,
+      maxHeightFactor: 0.85,
       title: Row(
         children: [
           const Icon(Icons.video_file_outlined),

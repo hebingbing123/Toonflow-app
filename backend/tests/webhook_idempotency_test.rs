@@ -293,7 +293,7 @@ mod integration_tests {
 
         // First ingestion - should succeed
         let (dup1, row1, updated1, _, _) =
-            toonflow_server::billing::ingest_webhook(&pool, &payload)
+            openflow_server::billing::ingest_webhook(&pool, &payload)
                 .await
                 .expect("First webhook failed");
 
@@ -303,7 +303,7 @@ mod integration_tests {
 
         // Second ingestion - should be deduplicated
         let (dup2, row2, updated2, _, _) =
-            toonflow_server::billing::ingest_webhook(&pool, &payload)
+            openflow_server::billing::ingest_webhook(&pool, &payload)
                 .await
                 .expect("Second webhook failed");
 
@@ -340,7 +340,7 @@ mod integration_tests {
         });
 
         // First ingestion - should update both user and workspace
-        let (dup1, _, _, _, _) = toonflow_server::billing::ingest_webhook(&pool, &payload)
+        let (dup1, _, _, _, _) = openflow_server::billing::ingest_webhook(&pool, &payload)
             .await
             .expect("First webhook failed");
         assert!(!dup1);
@@ -364,7 +364,7 @@ mod integration_tests {
         assert_eq!(ws_plan.0, Some("enterprise".to_string()));
 
         // Second ingestion - should be deduplicated, no updates
-        let (dup2, _, _, _, _) = toonflow_server::billing::ingest_webhook(&pool, &payload)
+        let (dup2, _, _, _, _) = openflow_server::billing::ingest_webhook(&pool, &payload)
             .await
             .expect("Second webhook failed");
         assert!(dup2, "Second event should be duplicate");

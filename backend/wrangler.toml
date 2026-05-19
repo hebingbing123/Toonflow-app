@@ -1,0 +1,12 @@
+# Cloudflare Worker — Phase A (W0). See docs/plans/adr-rust-backend-cloudflare-worker.md
+name = "openflow-worker"
+main = "crates/openflow-worker/build/worker/shim.mjs"
+compatibility_date = "2024-12-01"
+
+[env.staging]
+name = "openflow-worker-staging"
+
+[env.production]
+name = "openflow-worker-production"
+
+# W0: bind Hyperdrive + secrets via `wrangler secret put` (not in Git).

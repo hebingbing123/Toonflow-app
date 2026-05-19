@@ -14,6 +14,7 @@
         super::workbench::storyboard_ops::query::post_storyboard_polling_image,
         super::workbench::storyboard_ops::export::post_export_image,
         super::workbench::storyboard_ops::batch_generate::post_storyboard_batch_generate_image,
+        super::workbench::storyboard_ops::grid_generate::post_storyboard_grid_generate_and_assign,
         super::workbench::video::post_workbench_get_video_list,
         super::workbench::track::post_workbench_add_track,
         super::workbench::track::post_workbench_delete_track,

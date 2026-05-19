@@ -241,12 +241,12 @@ The metrics endpoints can be scraped by Prometheus using a custom exporter or by
 
 ```yaml
 scrape_configs:
-  - job_name: 'toonflow-sli'
+  - job_name: 'openflow-sli'
     metrics_path: '/api/v1/metrics/sli'
     params:
       window_minutes: ['5']
     static_configs:
-      - targets: ['api.toonflow.com']
+      - targets: ['api.openflow.com']
     scrape_interval: 60s
 ```
 
@@ -272,10 +272,10 @@ For AWS deployments, metrics can be pushed to CloudWatch:
 
 ```bash
 # Example: Push SLI status to CloudWatch
-curl -s https://api.toonflow.com/api/v1/metrics/sli?window_minutes=5 | \
+curl -s https://api.openflow.com/api/v1/metrics/sli?window_minutes=5 | \
   jq -r '.slis[] | select(.healthy == false) | .path' | \
   xargs -I {} aws cloudwatch put-metric-data \
-    --namespace Toonflow/SLI \
+    --namespace Openflow/SLI \
     --metric-name UnhealthySLI \
     --value 1 \
     --dimensions Path={}

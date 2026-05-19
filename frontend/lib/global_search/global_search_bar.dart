@@ -5,9 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../design_system/theme.dart';
+import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 /// Global search bar component for the main navigation bar.
 ///
@@ -28,6 +31,8 @@ class GlobalSearchBar extends StatefulWidget {
     this.currentWorkspaceName,
     this.currentWorkspaceId,
     this.onNavigateToResults,
+    this.compact = false,
+    this.showLocalPrefsMenu = true,
   });
 
   /// Access token for API calls
@@ -46,6 +51,8 @@ class GlobalSearchBar extends StatefulWidget {
     DateTime? initialTimeTo,
   })?
   onNavigateToResults;
+  final bool compact;
+  final bool showLocalPrefsMenu;
 
   @override
   State<GlobalSearchBar> createState() => _GlobalSearchBarState();
@@ -347,18 +354,33 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
     required IconData icon,
   }) {
     final theme = Theme.of(context);
+    final tokens = StudioTokens.of(context);
     final l10n = resolveAppLocalizationsForErrors(context);
     final pinActionLabel = view.pinned
         ? l10n.globalSearchUnpin
         : l10n.globalSearchPinnedViewsTitle;
     return ListTile(
       dense: true,
-      leading: Icon(icon, size: 20),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      leading: Container(
+        width: 32,
+        height: 32,
+        decoration: BoxDecoration(
+          color: tokens.primarySoft.withValues(alpha: 0.9),
+          shape: BoxShape.circle,
+          border: Border.all(color: tokens.surfaceHighlight),
+        ),
+        child: Icon(icon, size: 17, color: tokens.accent),
+      ),
       title: Text(
         view.title,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: const TextStyle(fontSize: 14),
+        style: theme.textTheme.bodyMedium?.copyWith(
+          fontSize: 14,
+          color: tokens.textPrimary,
+        ),
       ),
       subtitle: Text(
         [
@@ -369,9 +391,9 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
         ].join(' · '),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: TextStyle(
+        style: theme.textTheme.bodySmall?.copyWith(
           fontSize: 12,
-          color: theme.colorScheme.onSurfaceVariant,
+          color: tokens.textSecondary,
         ),
       ),
       trailing: PopupMenuButton<_SavedViewAction>(
@@ -470,9 +492,9 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
   Future<void> _renameSavedView(_PinnedSearchView view) async {
     final l10n = resolveAppLocalizationsForErrors(context);
     final controller = TextEditingController(text: view.title);
-    final approved = await showDialog<bool>(
+    final approved = await showStudioDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => StudioAlertDialog(
         title: Text(l10n.globalSearchRenameViewTitle),
         content: TextField(
           controller: controller,
@@ -600,9 +622,9 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
 
   Future<void> _deleteSavedView(_PinnedSearchView view) async {
     final l10n = resolveAppLocalizationsForErrors(context);
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showStudioDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => StudioAlertDialog(
         title: Text(l10n.globalSearchDeleteViewTitle),
         content: Text(
           (widget.accessToken?.trim().isNotEmpty ?? false)
@@ -648,6 +670,11 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
   /// Show history dropdown overlay
   void _showOverlay() {
     final l10n = resolveAppLocalizationsForErrors(context);
+    final theme = Theme.of(context);
+    final tokens = StudioTokens.of(context);
+    final studio = StudioColors.of(context);
+    final renderBox = context.findRenderObject() as RenderBox?;
+    final fieldSize = renderBox?.size ?? const Size(400, 40);
     _removeOverlay();
 
     final queryLen = _controller.text.trim().length;
@@ -660,30 +687,35 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
         queryLen < _minQueryLength && _recentViews.isNotEmpty;
     final showTemplatePanel = queryLen < _minQueryLength;
     final headerStyle = Theme.of(context).textTheme.labelSmall?.copyWith(
-      color: Theme.of(context).colorScheme.primary,
+      color: tokens.accent,
       fontWeight: FontWeight.w600,
     );
 
     _overlayEntry = OverlayEntry(
       builder: (context) => Positioned(
-        width: 400, // Match search bar width
+        width: fieldSize.width,
         child: CompositedTransformFollower(
           link: _layerLink,
           showWhenUnlinked: false,
-          offset: const Offset(0, 48), // Position below search bar
+          offset: Offset(0, fieldSize.height + 8),
           child: Material(
-            elevation: 8,
-            borderRadius: BorderRadius.circular(8),
+            color: Colors.transparent,
+            elevation: 0,
+            borderRadius: BorderRadius.circular(16),
             child: Container(
               constraints: const BoxConstraints(maxHeight: 420),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.outline.withValues(alpha: 0.2),
-                ),
+                gradient: studio.panelGradient,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: tokens.surfaceHighlight),
+                boxShadow: <BoxShadow>[
+                  BoxShadow(
+                    color: tokens.panelGlow.withValues(alpha: 0.16),
+                    blurRadius: 28,
+                    spreadRadius: -16,
+                    offset: const Offset(0, 18),
+                  ),
+                ],
               ),
               child: ListView(
                 shrinkWrap: true,
@@ -712,13 +744,12 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                       context,
                       _pinnedViews,
                       icon: Icons.push_pin,
-                      headerStyle: Theme.of(context).textTheme.labelSmall,
+                      headerStyle: theme.textTheme.labelSmall?.copyWith(
+                        color: tokens.textMuted,
+                      ),
                     ),
                     if (_showHistory || showSuggestionsPanel)
-                      Divider(
-                        height: 1,
-                        color: Theme.of(context).colorScheme.outlineVariant,
-                      ),
+                      Divider(height: 1, color: tokens.surfaceHighlight),
                   ],
                   if (showRecentViewsPanel) ...[
                     Padding(
@@ -732,15 +763,14 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                       context,
                       _recentViews,
                       icon: Icons.schedule,
-                      headerStyle: Theme.of(context).textTheme.labelSmall,
+                      headerStyle: theme.textTheme.labelSmall?.copyWith(
+                        color: tokens.textMuted,
+                      ),
                     ),
                     if (_showHistory ||
                         showSuggestionsPanel ||
                         showTemplatePanel)
-                      Divider(
-                        height: 1,
-                        color: Theme.of(context).colorScheme.outlineVariant,
-                      ),
+                      Divider(height: 1, color: tokens.surfaceHighlight),
                   ],
                   if (showTemplatePanel) ...[
                     Padding(
@@ -765,6 +795,12 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                                 label: Text(
                                   _quickTemplateLabel(l10n, template.id),
                                 ),
+                                backgroundColor: tokens.bgInset.withValues(
+                                  alpha: 0.94,
+                                ),
+                                side: BorderSide(
+                                  color: tokens.surfaceHighlight,
+                                ),
                                 onPressed: () => _openQuickTemplate(template),
                               ),
                             ),
@@ -772,10 +808,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                           .toList(growable: false),
                     ),
                     if (_showHistory || showSuggestionsPanel)
-                      Divider(
-                        height: 1,
-                        color: Theme.of(context).colorScheme.outlineVariant,
-                      ),
+                      Divider(height: 1, color: tokens.surfaceHighlight),
                   ],
                   if (showSuggestionsPanel) ...[
                     Padding(
@@ -788,18 +821,42 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                     ..._suggestions.map(
                       (r) => ListTile(
                         dense: true,
-                        leading: Icon(switch (r.resultType) {
-                          ResultType.project => Icons.folder_outlined,
-                          ResultType.script => Icons.article_outlined,
-                          ResultType.asset => Icons.widgets_outlined,
-                          ResultType.novel => Icons.menu_book_outlined,
-                          ResultType.novelEvent => Icons.event_note_outlined,
-                        }, size: 20),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 2,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        leading: Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: tokens.primarySoft.withValues(alpha: 0.9),
+                            shape: BoxShape.circle,
+                            border: Border.all(color: tokens.surfaceHighlight),
+                          ),
+                          child: Icon(
+                            switch (r.resultType) {
+                              ResultType.project => Icons.folder_outlined,
+                              ResultType.script => Icons.article_outlined,
+                              ResultType.asset => Icons.widgets_outlined,
+                              ResultType.novel => Icons.menu_book_outlined,
+                              ResultType.novelEvent =>
+                                Icons.event_note_outlined,
+                            },
+                            size: 17,
+                            color: tokens.accent,
+                          ),
+                        ),
                         title: Text(
                           r.title,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 14),
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontSize: 14,
+                            color: tokens.textPrimary,
+                          ),
                         ),
                         subtitle: Text(
                           switch (r.resultType) {
@@ -810,21 +867,16 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                             ResultType.novelEvent =>
                               l10n.globalSearchTypeNovelEvent,
                           },
-                          style: TextStyle(
+                          style: theme.textTheme.bodySmall?.copyWith(
                             fontSize: 12,
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurfaceVariant,
+                            color: tokens.textSecondary,
                           ),
                         ),
                         onTap: _performSearch,
                       ),
                     ),
                     if (_showHistory)
-                      Divider(
-                        height: 1,
-                        color: Theme.of(context).colorScheme.outlineVariant,
-                      ),
+                      Divider(height: 1, color: tokens.surfaceHighlight),
                   ],
                   if (_loadingHistory)
                     const Padding(
@@ -848,20 +900,41 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                     ..._history.map(
                       (entry) => ListTile(
                         dense: true,
-                        leading: const Icon(Icons.history, size: 20),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 2,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        leading: Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: tokens.bgInset.withValues(alpha: 0.94),
+                            shape: BoxShape.circle,
+                            border: Border.all(color: tokens.surfaceHighlight),
+                          ),
+                          child: Icon(
+                            Icons.history,
+                            size: 17,
+                            color: tokens.textSecondary,
+                          ),
+                        ),
                         title: Text(
                           entry.query,
-                          style: const TextStyle(fontSize: 14),
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontSize: 14,
+                            color: tokens.textPrimary,
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                         subtitle: Text(
                           l10n.globalSearchFoundResults(entry.resultCount),
-                          style: TextStyle(
+                          style: theme.textTheme.bodySmall?.copyWith(
                             fontSize: 12,
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurfaceVariant,
+                            color: tokens.textSecondary,
                           ),
                         ),
                         onTap: () => _selectHistoryEntry(entry.query),
@@ -869,10 +942,24 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                     ),
                     ListTile(
                       dense: true,
-                      leading: const Icon(Icons.delete_outline, size: 20),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 2,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      leading: Icon(
+                        Icons.delete_outline,
+                        size: 20,
+                        color: theme.colorScheme.error,
+                      ),
                       title: Text(
                         l10n.globalSearchClearHistory,
-                        style: const TextStyle(fontSize: 14),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontSize: 14,
+                          color: theme.colorScheme.error,
+                        ),
                       ),
                       onTap: _clearHistory,
                     ),
@@ -1149,6 +1236,15 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
+    final tokens = StudioTokens.of(context);
+    final compact = widget.compact;
+    final barHeight = compact ? 38.0 : 40.0;
+    final barRadius = compact ? 18.0 : 20.0;
+    final iconSize = compact ? 18.0 : 20.0;
+    final leadingPadding = compact ? 10.0 : 12.0;
+    final iconGap = compact ? 6.0 : 8.0;
+    final textPadding = compact ? 8.0 : 10.0;
+    final fontSize = compact ? 13.0 : 14.0;
 
     return Focus(
       onKeyEvent: _handleKeyEvent,
@@ -1156,26 +1252,45 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
         link: _layerLink,
         child: Container(
           width: 400,
-          height: 40,
+          height: barHeight,
           decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(20),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: <Color>[
+                tokens.bgSurface.withValues(alpha: 0.96),
+                tokens.bgInset.withValues(alpha: 0.98),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(barRadius),
             border: Border.all(
               color: _focusNode.hasFocus
-                  ? theme.colorScheme.primary
-                  : theme.colorScheme.outline.withValues(alpha: 0.2),
-              width: _focusNode.hasFocus ? 2 : 1,
+                  ? tokens.accent
+                  : tokens.surfaceHighlight,
+              width: _focusNode.hasFocus ? 1.5 : 1,
             ),
+            boxShadow: _focusNode.hasFocus
+                ? <BoxShadow>[
+                    BoxShadow(
+                      color: tokens.panelGlowSecondary.withValues(alpha: 0.16),
+                      blurRadius: 18,
+                      spreadRadius: -10,
+                      offset: const Offset(0, 10),
+                    ),
+                  ]
+                : const <BoxShadow>[],
           ),
           child: Row(
             children: [
               // Search icon
               Padding(
-                padding: const EdgeInsets.only(left: 12, right: 8),
+                padding: EdgeInsets.only(left: leadingPadding, right: iconGap),
                 child: Icon(
                   Icons.search,
-                  size: 20,
-                  color: theme.colorScheme.onSurfaceVariant,
+                  size: iconSize,
+                  color: _focusNode.hasFocus
+                      ? tokens.accent
+                      : theme.colorScheme.onSurfaceVariant,
                 ),
               ),
 
@@ -1187,16 +1302,16 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                   decoration: InputDecoration(
                     hintText: l10n.globalSearchInputHint,
                     hintStyle: TextStyle(
-                      fontSize: 14,
-                      color: theme.colorScheme.onSurfaceVariant.withValues(
-                        alpha: 0.6,
-                      ),
+                      fontSize: fontSize,
+                      color: tokens.textMuted,
                     ),
                     border: InputBorder.none,
                     isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                    contentPadding: EdgeInsets.symmetric(vertical: textPadding),
                   ),
-                  style: const TextStyle(fontSize: 14),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontSize: fontSize,
+                  ),
                   onSubmitted: (_) {
                     if (_canSearch) {
                       _performSearch();
@@ -1204,36 +1319,41 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                   },
                 ),
               ),
-              RiskyOperationConfirmPrefsOverflowMenu(
-                icon: Icons.tune,
-                tooltip: l10n.globalSearchLocalClientPrefsTooltip,
-              ),
+              if (widget.showLocalPrefsMenu)
+                RiskyOperationConfirmPrefsOverflowMenu(
+                  icon: Icons.tune,
+                  tooltip: l10n.globalSearchLocalClientPrefsTooltip,
+                ),
               // Loading indicator or search button
               if (_loadingSuggestions)
                 Padding(
-                  padding: const EdgeInsets.only(right: 12),
+                  padding: EdgeInsets.only(right: compact ? 10 : 12),
                   child: SizedBox(
-                    width: 20,
-                    height: 20,
+                    width: iconSize,
+                    height: iconSize,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: theme.colorScheme.primary,
+                      color: tokens.accent,
                     ),
                   ),
                 )
               else
                 IconButton(
                   icon: Icon(
-                    Icons.arrow_forward,
-                    size: 20,
+                    Icons.arrow_outward,
+                    size: iconSize,
                     color: _canSearch
-                        ? theme.colorScheme.primary
+                        ? Colors.white
                         : theme.colorScheme.onSurfaceVariant.withValues(
                             alpha: 0.3,
                           ),
                   ),
                   onPressed: _canSearch ? _performSearch : null,
-                  padding: const EdgeInsets.all(8),
+                  style: IconButton.styleFrom(
+                    backgroundColor: _canSearch ? null : Colors.transparent,
+                    foregroundColor: Colors.white,
+                  ),
+                  padding: EdgeInsets.all(compact ? 6 : 8),
                   constraints: const BoxConstraints(),
                   tooltip: _canSearch
                       ? l10n.globalSearchActionSearch

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/design_system/theme.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/task_center/workbench_view.dart';
 import 'package:openflow_app/rust_api.dart';
 
 Widget _appWithZh({required Widget child}) => MaterialApp(
+  theme: buildStudioDarkTheme(useGoogleFonts: false),
   localizationsDelegates: AppLocalizations.localizationsDelegates,
   supportedLocales: AppLocalizations.supportedLocales,
   locale: const Locale('zh'),
@@ -175,13 +177,16 @@ void main() {
       find.textContaining(zh.taskCenterWorkbenchRealtimeConnected.trim()),
       findsOneWidget,
     );
-    expect(find.text('1 个项目 · #7 春季短剧'), findsOneWidget);
-    expect(find.text('2 个分类 · storyboard, render'), findsOneWidget);
-    expect(find.text('1 条任务'), findsOneWidget);
+    expect(find.textContaining('1 个项目 · #7 春季短剧'), findsOneWidget);
+    expect(find.textContaining('2 个分类 · storyboard, render'), findsOneWidget);
+    expect(
+      find.textContaining('1 条任务 · #11 storyboard:failed'),
+      findsOneWidget,
+    );
     expect(find.text(zh.taskCenterFieldProjectUuidOptional), findsOneWidget);
     expect(find.text(zh.taskCenterTaskDetailsSection), findsOneWidget);
     expect(find.textContaining('#11 · job-11'), findsOneWidget);
-    expect(find.text('状态：已刷新 1 条任务。'), findsOneWidget);
+    expect(find.textContaining('状态：已刷新 1 条任务。'), findsOneWidget);
   });
 
   testWidgets('task center workbench view disables busy actions', (
@@ -210,8 +215,14 @@ void main() {
       ),
     );
 
-    final buttons = tester.widgetList<FilledButton>(find.byType(FilledButton));
-    expect(buttons.every((button) => button.onPressed == null), isTrue);
+    final outlined =
+        tester.widgetList<OutlinedButton>(find.byType(OutlinedButton));
+    final filled = tester.widgetList<FilledButton>(find.byType(FilledButton));
+    expect(
+      outlined.every((button) => button.onPressed == null) &&
+          filled.every((button) => button.onPressed == null),
+      isTrue,
+    );
   });
 
   testWidgets('task center workbench view forwards category and job picks', (
@@ -251,8 +262,9 @@ void main() {
     );
     await tester.tap(find.widgetWithText(TextButton, zh.taskCenterRetry));
     await tester.pump();
-    await tester.ensureVisible(find.byType(ListTile).first);
-    await tester.tap(find.byType(ListTile).first);
+    final jobTitle = find.textContaining('storyboard · failed');
+    await tester.ensureVisible(jobTitle.first);
+    await tester.tap(jobTitle.first);
     await tester.pump();
 
     expect(pickedCategory, 'storyboard');

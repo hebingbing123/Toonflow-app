@@ -33,7 +33,7 @@ pub(crate) async fn create_art_style(
     };
     if uploaded_cover.is_some() && state.local_art_style_cover_dir.is_none() {
         return Err(ApiError::NotImplemented(
-            "TOONFLOW_LOCAL_ART_STYLE_COVER_DIR is not set; cannot persist art style base64 covers"
+            "OPENFLOW_LOCAL_ART_STYLE_COVER_DIR is not set; cannot persist art style base64 covers"
                 .into(),
         ));
     }

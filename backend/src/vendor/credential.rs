@@ -11,7 +11,7 @@ use aes_gcm::{
 };
 use sha2::{Digest, Sha256};
 
-const KEY_ENV_VAR: &str = "TOONFLOW_VENDOR_CREDENTIAL_KEY";
+const KEY_ENV_VAR: &str = "OPENFLOW_VENDOR_CREDENTIAL_KEY";
 
 /// Get encryption key from environment (32 bytes for AES-256)
 fn get_encryption_key() -> Option<[u8; 32]> {
@@ -91,7 +91,7 @@ mod tests {
 
     #[test]
     fn test_encrypt_decrypt() {
-        // This test requires TOONFLOW_VENDOR_CREDENTIAL_KEY to be set
+        // This test requires OPENFLOW_VENDOR_CREDENTIAL_KEY to be set
         if std::env::var(KEY_ENV_VAR).is_err() {
             return; // Skip test if key not configured
         }

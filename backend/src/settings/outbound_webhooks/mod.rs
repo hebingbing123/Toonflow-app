@@ -175,7 +175,7 @@ fn generate_secret() -> String {
     base64::engine::general_purpose::STANDARD_NO_PAD.encode(bytes)
 }
 
-pub(super) fn sign_toonflow(secret: &[u8], timestamp_unix_secs: u64, body: &[u8]) -> String {
+pub(super) fn sign_openflow(secret: &[u8], timestamp_unix_secs: u64, body: &[u8]) -> String {
     type HmacSha256 = hmac::Hmac<Sha256>;
     let mut mac = HmacSha256::new_from_slice(secret).expect("hmac secret accepted");
     mac.update(timestamp_unix_secs.to_string().as_bytes());
@@ -725,7 +725,7 @@ pub(crate) async fn post_outbound_webhook_test(
         "id": Uuid::new_v4().to_string(),
         "type": event_type,
         "createdAt": chrono::Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Millis, true),
-        "data": {"message": "toonflow outbound webhook test"}
+        "data": {"message": "openflow outbound webhook test"}
     });
 
     let attempt = deliver::deliver_outbound_event(

@@ -20,7 +20,7 @@ const String kSupabaseAnonKey = String.fromEnvironment(
 );
 
 /// Default local Supabase CLI (`supabase start`) — same as [dart_defines.dev.json].
-const String kDevSupabaseUrl = 'http://127.0.0.1:64321';
+const String kDevSupabaseUrl = 'http://127.0.0.1:64421';
 
 /// Public anon key for local Supabase demo stack only.
 const String kDevSupabaseAnonKey =
@@ -75,6 +75,12 @@ const bool kProductShell = bool.fromEnvironment(
 /// `--dart-define=GOOGLE_FONTS_PROXY_BASE_URL=https://your-font-mirror.example`
 const String kGoogleFontsProxyBaseUrl = String.fromEnvironment(
   'GOOGLE_FONTS_PROXY_BASE_URL',
+  defaultValue: '',
+);
+
+/// Optional directory containing the desktop Rust bridge dynamic library.
+const String kOpenflowNativeLibDir = String.fromEnvironment(
+  'OPENFLOW_NATIVE_LIB_DIR',
   defaultValue: '',
 );
 

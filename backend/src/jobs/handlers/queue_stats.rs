@@ -1,7 +1,7 @@
 //! Q2 方案 B：`GET /api/v1/jobs/queue/stats` — 只读 PG 队列聚合（与 worker **`job_queue_metrics`** 同源 **`QueueStats`**）。
 //!
 //! 门禁：环境变量 **`OPENFLOW_INTERNAL_OPS_TOKEN`**（非空）；请求须带
-//! **`X-OpenFlow-Internal-Token`** 与之完全一致。
+//! **`X-Openflow-Internal-Token`** 与之完全一致。
 //! 未配置 token 时返回 **403**，避免意外暴露队列深度。
 
 use axum::{extract::State, http::HeaderMap, Json};

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -11,6 +12,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'config.dart';
 import 'l10n/app_localizations.dart';
+import 'l10n/studio_code_labels.dart';
 import 'l10n/short_video_generation_blocked.dart';
 import 'l10n/short_video_readiness_localized.dart';
 import 'locale/app_locale_notifier.dart';
@@ -73,10 +75,14 @@ import 'design_system/components/openflow_brand.dart';
 import 'design_system/components/studio_model_cost_controls.dart';
 import 'design_system/ix/studio_cost_confirm_sheet.dart';
 import 'design_system/components/studio_empty_state.dart';
+import 'design_system/components/studio_pane_header.dart';
+import 'design_system/components/studio_shell_backdrop.dart';
 import 'design_system/components/studio_text_styles.dart';
 import 'design_system/glass.dart';
+import 'design_system/ix/studio_api_error_callout.dart';
 import 'design_system/ix/studio_command_palette.dart';
 import 'design_system/ix/studio_job_tray.dart';
+import 'design_system/ix/studio_snackbar.dart';
 import 'design_system/tokens.dart';
 import 'product_shell/login_page.dart';
 import 'product_shell/navigation.dart';
@@ -85,7 +91,11 @@ import 'product_shell/studio_shell_layout.dart';
 import 'product_shell/studio_app_bar_actions.dart';
 import 'product_shell/studio_pipeline_strip.dart';
 import 'product_shell/studio_shell_branches.dart';
+import 'product_shell/product_studio_route_launcher.dart';
+import 'product_shell/studio_shell_scope.dart';
 import 'product_shell/studio_shell_navigation.dart';
+import 'product_shell/studio_theme.dart';
+import 'studio/default_project_scope.dart';
 import 'studio/recent_projects_prefs.dart';
 import 'studio/job_scope.dart';
 import 'project_studio/project_studio_host.dart';
@@ -116,6 +126,7 @@ import 'task_center/controller.dart';
 import 'task_center/support.dart';
 import 'team_workspaces/invite_deep_link.dart';
 import 'rust_api.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 part 'project_editor/editor.dart';
 part 'project_editor/editor_dialog_basics.dart';
@@ -124,22 +135,7 @@ part 'project_editor/editor_dialog_content_novels.dart';
 part 'project_editor/editor_dialog_content_assets.dart';
 part 'project_editor/editor_dialog_content_scripts.dart';
 part 'project_editor/editor_dialog_actions.dart';
-part 'project_editor/http_probes/general_probe.dart';
-part 'project_editor/http_probes/project_probe.dart';
-part 'project_editor/http_probes/tasks_probe.dart';
-part 'project_editor/assets/compatibility/images.dart';
-part 'project_editor/assets/compatibility/images_actions.dart';
-part 'project_editor/assets/compatibility/images_crud_actions.dart';
-part 'project_editor/assets/compatibility/images_workbench_actions.dart';
-part 'project_editor/assets/compatibility/crud_primary.dart';
-part 'project_editor/assets/compatibility/crud_query.dart';
-part 'project_editor/assets/compatibility/relations.dart';
-part 'project_editor/novels/compatibility/actions.dart';
-part 'project_editor/novels/compatibility/actions_probe_reads.dart';
-part 'project_editor/novels/compatibility/actions_probe_mutations.dart';
-part 'project_editor/novels/compatibility/section.dart';
 part 'project_editor/novels/events/actions.dart';
-part 'project_editor/novels/events/compatibility.dart';
 part 'project_editor/novels/actions.dart';
 part 'project_editor/novels/sections/search.dart';
 part 'project_editor/novels/sections/import_book.dart';
@@ -149,7 +145,6 @@ part 'project_editor/novels/sections/delete_snapshot.dart';
 part 'project_editor/assets/dialogs/create_edit.dart';
 part 'project_editor/assets/dialogs/delete.dart';
 part 'project_editor/assets/dialogs/filter.dart';
-part 'project_editor/scripts/probe/actions.dart';
 part 'project_editor/scripts/plan_workbench.dart';
 part 'project_editor/scripts/dialogs/batch_add.dart';
 part 'script_editor/storyboards/dialogs/add.dart';
@@ -278,6 +273,7 @@ class _HomePageState extends State<HomePage> {
   String? _error;
   AppLocalizations? _appL10n;
   int? _productScopedProjectNumericId;
+  List<String> _recentProjectIds = const <String>[];
   ShortVideoSpaceInitialFocus _shortVideoSpaceInitialFocus =
       ShortVideoSpaceInitialFocus.none;
   MeResponse? _sessionMe;
@@ -567,6 +563,7 @@ class _HomePageState extends State<HomePage> {
     _notificationsController.addListener(_handleNotificationsChanged);
     _skillsHarnessController.addListener(_handleSkillsHarnessChanged);
     _shellNavigationController.addListener(_handleShellNavigationChanged);
+    _projectsController.addListener(_handleProjectsControllerChanged);
     _workspaceOperationController.addListener(_handleWorkspaceOperationChanged);
     _workspaceOutputController.addListener(_handleWorkspaceOutputChanged);
     _applyInitialDeepLinkNavigation(Uri.base);
@@ -582,6 +579,7 @@ class _HomePageState extends State<HomePage> {
         if (!mounted) return;
         _attachStudioRouteListener();
         _syncStudioPaneFromRoute();
+        unawaited(_refreshRecentProjectIds());
       });
     }
     if (kSupabaseConfigured && !widget.debugSkipAuthListenerAttach) {
@@ -1099,6 +1097,7 @@ class _HomePageState extends State<HomePage> {
     if (mounted) {
       setState(() {
         _productScopedProjectNumericId = null;
+        _recentProjectIds = const <String>[];
       });
     }
     await _syncSessionContext(force: true);
@@ -1141,6 +1140,16 @@ class _HomePageState extends State<HomePage> {
     setState(() {});
   }
 
+  void _handleProjectsControllerChanged() {
+    if (!mounted || widget.shellMode != HomeShellMode.product) {
+      return;
+    }
+    if (_projectsController.projects == null) {
+      return;
+    }
+    unawaited(_applyDefaultProductProjectScopeIfNeeded());
+  }
+
   void _handleTaskCenterChanged() {
     if (!mounted) return;
     setState(() {});
@@ -1179,6 +1188,7 @@ class _HomePageState extends State<HomePage> {
     _qualityReviewsController.reset();
     _workspaceOperationController.reset();
     _productScopedProjectNumericId = null;
+    _recentProjectIds = const <String>[];
     _sessionMe = null;
     _sessionMeV2 = null; // Task 6.2: Clear v2 response
     _lastSessionAccessToken = null;
@@ -1250,6 +1260,7 @@ class _HomePageState extends State<HomePage> {
     _notificationsController.removeListener(_handleNotificationsChanged);
     _skillsHarnessController.removeListener(_handleSkillsHarnessChanged);
     _shellNavigationController.removeListener(_handleShellNavigationChanged);
+    _projectsController.removeListener(_handleProjectsControllerChanged);
     _workspaceOperationController.removeListener(
       _handleWorkspaceOperationChanged,
     );

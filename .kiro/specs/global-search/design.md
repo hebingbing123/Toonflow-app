@@ -2,7 +2,7 @@
 
 ## Overview
 
-全局搜索功能为 Toonflow 平台提供跨项目、剧本、资产的统一搜索能力。本设计基于 PostgreSQL 的 tsvector + GIN 索引实现高性能全文搜索，支持中英文分词和权重排序。
+全局搜索功能为 Openflow 平台提供跨项目、剧本、资产的统一搜索能力。本设计基于 PostgreSQL 的 tsvector + GIN 索引实现高性能全文搜索，支持中英文分词和权重排序。
 
 ### 核心目标
 

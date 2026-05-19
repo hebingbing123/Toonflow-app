@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../rust_api.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 Future<Map<String, dynamic>?> showCreateProjectDialog(BuildContext context) {
   final nameController = TextEditingController();
@@ -16,11 +17,11 @@ Future<Map<String, dynamic>?> showCreateProjectDialog(BuildContext context) {
   final forbiddenController = TextEditingController();
   final continuityController = TextEditingController();
 
-  return showDialog<Map<String, dynamic>>(
+  return showStudioDialog<Map<String, dynamic>>(
     context: context,
     builder: (dialogContext) {
       final l10n = resolveAppLocalizationsForErrors(dialogContext);
-      return AlertDialog(
+      return StudioAlertDialog(
         title: Text(l10n.projectsDialogCreateTitle),
         content: SizedBox(
           width: 560,

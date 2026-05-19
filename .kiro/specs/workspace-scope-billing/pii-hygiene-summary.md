@@ -71,7 +71,7 @@ test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
    - No sensitive PII in production logs
 
 3. **Authorization gates**:
-   - Internal ops token required (`X-Toonflow-Internal-Token`)
+   - Internal ops token required (`X-Openflow-Internal-Token`)
    - Prevents unauthorized access to billing data
 
 ### Acceptable Exceptions (Documented)

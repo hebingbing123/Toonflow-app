@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 
 import '../../rust_api.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 Future<void> openProjectAssetLinkDialog({
   required BuildContext ctx,
@@ -24,13 +26,13 @@ Future<void> openProjectAssetLinkDialog({
 
   var selectedScriptNumericId = scriptList.first.numericId;
   var selectedAssetNumericId = assets.first.numericId;
-  final confirmed = await showDialog<bool>(
+  final confirmed = await showStudioDialog<bool>(
     context: ctx,
     builder: (dialogCtx) {
       return StatefulBuilder(
         builder: (dialogCtx, setState) {
           final dlgL10n = resolveAppLocalizationsForErrors(dialogCtx);
-          return AlertDialog(
+          return StudioAlertDialog(
             title: Text(
               unlink
                   ? dlgL10n.projectEditorAssetLinkDialogTitleUnlink
@@ -41,7 +43,7 @@ Future<void> openProjectAssetLinkDialog({
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  DropdownButtonFormField<int>(
+                  StudioDropdownButtonFormField<int>(
                     initialValue: selectedScriptNumericId,
                     decoration: InputDecoration(
                       labelText: dlgL10n.projectEditorAssetLinkScriptLabel,
@@ -63,7 +65,7 @@ Future<void> openProjectAssetLinkDialog({
                     },
                   ),
                   const SizedBox(height: 8),
-                  DropdownButtonFormField<int>(
+                  StudioDropdownButtonFormField<int>(
                     initialValue: selectedAssetNumericId,
                     decoration: InputDecoration(
                       labelText: dlgL10n.projectEditorAssetLinkAssetLabel,

@@ -5,6 +5,10 @@ project(openflow_app LANGUAGES CXX)
 # The name of the executable created for the application. Change this to change
 # the on-disk name of your application.
 set(BINARY_NAME "openflow_app")
+set(OPENFLOW_REPO_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../..")
+set(OPENFLOW_STAGE_BRIDGE_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/../cmake/stage_openflow_core_bridge.cmake")
+set(OPENFLOW_RUST_LIB_DEBUG "${OPENFLOW_REPO_ROOT}/rust_core/target/debug/openflow_core_bridge.dll")
+set(OPENFLOW_RUST_LIB_RELEASE "${OPENFLOW_REPO_ROOT}/rust_core/target/release/openflow_core_bridge.dll")
 
 # Explicitly opt in to modern CMake behaviors to avoid warnings with recent
 # versions of CMake.
@@ -79,6 +83,23 @@ install(FILES "${FLUTTER_ICU_DATA_FILE}" DESTINATION "${INSTALL_BUNDLE_DATA_DIR}
   COMPONENT Runtime)
 
 install(FILES "${FLUTTER_LIBRARY}" DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
+  COMPONENT Runtime)
+
+add_custom_command(TARGET ${BINARY_NAME} POST_BUILD
+  COMMAND "${CMAKE_COMMAND}"
+    -DREPO_ROOT=${OPENFLOW_REPO_ROOT}
+    -DCONFIG=$<CONFIG>
+    -DTARGET_DIR=$<TARGET_FILE_DIR:${BINARY_NAME}>
+    -DTARGET_OS=windows
+    -P "${OPENFLOW_STAGE_BRIDGE_SCRIPT}"
+  VERBATIM
+)
+
+install(FILES "${OPENFLOW_RUST_LIB_DEBUG}" DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
+  CONFIGURATIONS Debug
+  COMPONENT Runtime)
+install(FILES "${OPENFLOW_RUST_LIB_RELEASE}" DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
+  CONFIGURATIONS Profile Release
   COMPONENT Runtime)
 
 if(PLUGIN_BUNDLED_LIBRARIES)

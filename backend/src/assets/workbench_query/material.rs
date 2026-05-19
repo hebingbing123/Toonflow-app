@@ -59,7 +59,7 @@ async fn run_get_material_data(
 
     data.push(WorkbenchMaterialAssetItem {
         id: 0,
-        name: "Toonflow片尾".into(),
+        name: "Openflow片尾".into(),
         file_path: String::new(),
         asset_type: "clip".into(),
     });

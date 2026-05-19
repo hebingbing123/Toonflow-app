@@ -53,7 +53,7 @@ String summarizeTaskJobs(
   return l10n.taskCenterJobsSummary(items.length, visible, suffix);
 }
 
-String formatTaskJobDetails(JobRow row) {
+String formatTaskJobDetails(AppLocalizations l10n, JobRow row) {
   final payloadKeys = row.payload.keys.take(4).join(', ');
   final resultKeys = row.result?.keys.take(4).join(', ');
   final errCode = row.errorDetails == null
@@ -63,15 +63,18 @@ String formatTaskJobDetails(JobRow row) {
     '#${row.numericTaskId}',
     row.kind,
     row.status,
-    'uuid=${row.id}',
-    'updated=${row.updatedAt}',
+    l10n.taskCenterJobDetailField('uuid', row.id),
+    l10n.taskCenterJobDetailUpdatedAt(row.updatedAt),
     if (row.claimedBy != null && row.claimedBy!.isNotEmpty)
-      'claimed_by=${row.claimedBy}',
+      l10n.taskCenterJobDetailField('claimed_by', row.claimedBy!),
     if (row.errorMessage != null && row.errorMessage!.isNotEmpty)
-      'error=${row.errorMessage}',
-    if (errCode != null && errCode.isNotEmpty) 'failure_code=$errCode',
-    if (payloadKeys.isNotEmpty) 'payload={$payloadKeys}',
-    if (resultKeys != null && resultKeys.isNotEmpty) 'result={$resultKeys}',
+      l10n.taskCenterJobDetailField('error', row.errorMessage!),
+    if (errCode != null && errCode.isNotEmpty)
+      l10n.taskCenterJobDetailField('failure_code', errCode),
+    if (payloadKeys.isNotEmpty)
+      l10n.taskCenterJobDetailField('payload', '{$payloadKeys}'),
+    if (resultKeys != null && resultKeys.isNotEmpty)
+      l10n.taskCenterJobDetailField('result', '{$resultKeys}'),
   ].join(' · ');
 }
 

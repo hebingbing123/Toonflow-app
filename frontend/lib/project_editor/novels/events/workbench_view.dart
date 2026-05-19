@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../rust_api.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 class NovelEventsWorkbenchDialogViewModel {
   const NovelEventsWorkbenchDialogViewModel({
@@ -69,7 +70,7 @@ class NovelEventsWorkbenchDialogView extends StatelessWidget {
     final dialogWidth = viewportWidth.isFinite
         ? viewportWidth.clamp(320.0, 760.0)
         : 760.0;
-    return AlertDialog(
+    return StudioAlertDialog(
       title: Text(l10n.projectEditorNovelsEventsWorkbenchTitle),
       content: SizedBox(
         width: dialogWidth,

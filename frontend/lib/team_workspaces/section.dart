@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 
 import '../config.dart';
 import '../l10n/app_localizations.dart';
@@ -8,6 +9,7 @@ import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
 import 'invite_deep_link.dart';
 import 'strings.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 /// Team / enterprise workspace lifecycle（**W1.1–W1.6**：列表/创建/归档与恢复/配额由后端约束）。
 List<WorkspaceMemberResponse> filterWorkspaceMembers(
@@ -476,10 +478,10 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
     bool loadingWorkspaceStats = false;
 
     Future<bool> confirmOwnerTransfer(WorkspaceMemberResponse member) async {
-      return await showDialog<bool>(
+      return await showStudioDialog<bool>(
             context: context,
             builder: (context) {
-              return AlertDialog(
+              return StudioAlertDialog(
                 title: Text(l10n.teamWorkspaceTransferOwnerTitle),
                 content: SelectableText(
                   l10n.teamWorkspaceTransferOwnerBody(
@@ -659,7 +661,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
     if (!mounted) {
       return;
     }
-    await showDialog<void>(
+    await showStudioDialog<void>(
       context: context,
       builder: (BuildContext dialogContext) {
         return StatefulBuilder(
@@ -669,7 +671,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                 loadMembers(setModalState);
               });
             }
-            return AlertDialog(
+            return StudioAlertDialog(
               title: Text(
                 l10n.teamWorkspaceMembersDialogTitle(row.workspace.name),
               ),
@@ -688,7 +690,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      DropdownButtonFormField<String>(
+                      StudioDropdownButtonFormField<String>(
                         initialValue: role,
                         decoration: InputDecoration(
                           labelText: l10n.teamWorkspaceRoleLabel,
@@ -1240,7 +1242,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                               mainAxisSize: MainAxisSize.min,
                               children: <Widget>[
                                 if (canEditRole)
-                                  DropdownButton<String>(
+                                  StudioDropdownButton<String>(
                                     value: m.role,
                                     items: <DropdownMenuItem<String>>[
                                       DropdownMenuItem(
@@ -1509,7 +1511,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
     if (!mounted) {
       return;
     }
-    await showDialog<void>(
+    await showStudioDialog<void>(
       context: context,
       builder: (BuildContext dialogContext) {
         return StatefulBuilder(
@@ -1537,7 +1539,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
               pageIndex: safePageIndex,
               pageSize: pageSize,
             );
-            return AlertDialog(
+            return StudioAlertDialog(
               title: Text(
                 l10n.teamWorkspaceInvitesDialogTitle(row.workspace.name),
               ),
@@ -1556,7 +1558,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      DropdownButtonFormField<String>(
+                      StudioDropdownButtonFormField<String>(
                         initialValue: role,
                         decoration: InputDecoration(
                           labelText: l10n.teamWorkspaceRoleLabel,
@@ -1676,7 +1678,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                       Row(
                         children: <Widget>[
                           Expanded(
-                            child: DropdownButtonFormField<String>(
+                            child: StudioDropdownButtonFormField<String>(
                               initialValue: statusFilter,
                               decoration: InputDecoration(
                                 labelText: l10n.teamWorkspaceStatusLabel,
@@ -1712,7 +1714,7 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
                           ),
                           const SizedBox(width: 8),
                           Expanded(
-                            child: DropdownButtonFormField<int>(
+                            child: StudioDropdownButtonFormField<int>(
                               initialValue: pageSize,
                               decoration: InputDecoration(
                                 labelText: l10n.teamWorkspacePageSizeLabel,
@@ -1953,9 +1955,9 @@ class _TeamWorkspacesSectionState extends State<TeamWorkspacesSection> {
 
   Future<void> _confirmArchive(WorkspaceListItem row) async {
     final l10n = resolveAppLocalizationsForErrors(context);
-    final ok = await showDialog<bool>(
+    final ok = await showStudioDialog<bool>(
       context: context,
-      builder: (BuildContext ctx) => AlertDialog(
+      builder: (BuildContext ctx) => StudioAlertDialog(
         title: Text(l10n.teamWorkspaceArchiveDialogTitle),
         content: Text(l10n.teamWorkspaceArchiveDialogBody),
         actions: <Widget>[

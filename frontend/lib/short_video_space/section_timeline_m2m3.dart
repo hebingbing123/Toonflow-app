@@ -1,3 +1,4 @@
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 // ignore_for_file: invalid_use_of_protected_member
 
 part of 'section.dart';
@@ -253,7 +254,7 @@ class _TransitionList extends StatelessWidget {
                 style: Theme.of(context).textTheme.labelMedium,
               ),
               const SizedBox(width: 12),
-              DropdownButton<String>(
+              StudioDropdownButton<String>(
                 value: tr.type,
                 items: [
                   DropdownMenuItem(

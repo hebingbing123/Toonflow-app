@@ -117,7 +117,7 @@ A test passes if ALL of the following conditions are met:
 ```bash
 # Run all A/B testing tests
 cd backend
-cargo test --package toonflow-server --lib publish::ab_testing_tests -- --nocapture
+cargo test --package openflow-server --lib publish::ab_testing_tests -- --nocapture
 
 # Run specific test
 cargo test test_j1_input_hash_cache_validation -- --nocapture

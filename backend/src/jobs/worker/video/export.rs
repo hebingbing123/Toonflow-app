@@ -107,7 +107,7 @@ pub(crate) async fn run_video_export(
         structured_video_export_failure(
             row,
             "local_export_dir_unset",
-            "TOONFLOW_LOCAL_VIDEO_EXPORT_DIR is not set; cannot persist exported video artifact",
+            "OPENFLOW_LOCAL_VIDEO_EXPORT_DIR is not set; cannot persist exported video artifact",
         )
     })?;
 

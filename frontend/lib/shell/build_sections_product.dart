@@ -3,6 +3,67 @@
 part of '../../home_page.dart';
 
 extension _HomePageBuildProductSections on _HomePageState {
+  Future<void> _refreshRecentProjectIds() async {
+    final ids = await StudioRecentProjectsPrefs.load();
+    if (!mounted) {
+      return;
+    }
+    setState(() => _recentProjectIds = ids);
+    await _applyDefaultProductProjectScopeIfNeeded();
+  }
+
+  Future<void> _applyDefaultProductProjectScopeIfNeeded() async {
+    if (widget.shellMode != HomeShellMode.product) {
+      return;
+    }
+    if (_productScopedProjectNumericId != null) {
+      return;
+    }
+    final projects = _projectsController.projects;
+    if (projects == null || projects.isEmpty) {
+      return;
+    }
+
+    var recentIds = _recentProjectIds;
+    if (recentIds.isEmpty) {
+      recentIds = await StudioRecentProjectsPrefs.load();
+      if (!mounted) {
+        return;
+      }
+      if (recentIds.isNotEmpty) {
+        setState(() => _recentProjectIds = recentIds);
+      }
+    }
+
+    final row = resolveDefaultProductScopedProject(
+      projects: projects,
+      recentProjectIds: recentIds,
+    );
+    if (row == null) {
+      return;
+    }
+    await _selectProjectScope(row);
+  }
+
+  Future<void> _selectProjectScope(ProjectRow row) async {
+    await StudioRecentProjectsPrefs.record(row.id);
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _productScopedProjectNumericId = row.numericId;
+      _recentProjectIds = <String>[
+        row.id,
+        ..._recentProjectIds.where((id) => id != row.id),
+      ].take(3).toList(growable: false);
+    });
+    _workspaceInputController.applyProjectScope(
+      row.numericId,
+      projectUuid: row.id,
+      workspaceId: row.workspaceId,
+    );
+  }
+
   void _applyDomainDeepLink(TaskCenterDomainDeepLink link) {
     if (link.projectNumericId != null || link.projectUuid != null) {
       setState(() {
@@ -55,14 +116,30 @@ extension _HomePageBuildProductSections on _HomePageState {
         );
         break;
       case TaskCenterDomainDeepLinkTarget.script:
-        _shellNavigationController.selectProductWorkspacePane(
-          ProductWorkspacePane.scriptWorkspace,
-        );
+        if (widget.shellMode == HomeShellMode.product &&
+            link.projectNumericId != null &&
+            link.projectNumericId! > 0) {
+          context.go(
+            '/projects/${link.projectNumericId}/${StudioStep.script.slug}',
+          );
+        } else {
+          _shellNavigationController.selectProductWorkspacePane(
+            ProductWorkspacePane.scriptWorkspace,
+          );
+        }
         break;
       case TaskCenterDomainDeepLinkTarget.storyboard:
-        _shellNavigationController.selectProductWorkspacePane(
-          ProductWorkspacePane.productionWorkspace,
-        );
+        if (widget.shellMode == HomeShellMode.product &&
+            link.projectNumericId != null &&
+            link.projectNumericId! > 0) {
+          context.go(
+            '/projects/${link.projectNumericId}/${StudioStep.storyboard.slug}',
+          );
+        } else {
+          _shellNavigationController.selectProductWorkspacePane(
+            ProductWorkspacePane.productionWorkspace,
+          );
+        }
         break;
     }
   }
@@ -72,18 +149,10 @@ extension _HomePageBuildProductSections on _HomePageState {
     if (token == null || token.isEmpty) {
       return;
     }
-    await StudioRecentProjectsPrefs.record(row.id);
+    await _selectProjectScope(row);
     if (!mounted) {
       return;
     }
-    setState(() {
-      _productScopedProjectNumericId = row.numericId;
-    });
-    _workspaceInputController.applyProjectScope(
-      row.numericId,
-      projectUuid: row.id,
-      workspaceId: row.workspaceId,
-    );
     _shellNavigationController.selectProductWorkspacePane(
       ProductWorkspacePane.projects,
     );
@@ -153,11 +222,24 @@ extension _HomePageBuildProductSections on _HomePageState {
       loadingChild: const Center(child: CircularProgressIndicator()),
       storyboardBuilder: (projectNumericId) => StoryboardStudioPage(
         projectNumericId: projectNumericId,
+        projectUuid: effectiveProjectUuid,
+        accessToken: token,
         onOpenProductionWorkspace: () {
-          _shellNavigationController.selectProductWorkspacePane(
+          _openShellPaneFromStudioOverlay(
             ProductWorkspacePane.productionWorkspace,
+            projectNumericId: projectNumericId,
+            projectUuid: effectiveProjectUuid,
           );
         },
+        onOpenShotEditor:
+            ({required int scriptNumericId, required int storyboardNumericId}) {
+              return _openStoryboardEditor(
+                token,
+                storyboardNumericId,
+                projectId: effectiveProjectUuid,
+                scriptNumericId: scriptNumericId,
+              );
+            },
       ),
       episodeConsoleBuilder: (projectNumericId, scriptNumericId) =>
           EpisodeConsolePage(
@@ -184,8 +266,10 @@ extension _HomePageBuildProductSections on _HomePageState {
               home: readiness.home,
               assetsOverview: readiness.assetsOverview,
               onOpenTasks: () {
-                _shellNavigationController.selectProductWorkspacePane(
+                _openShellPaneFromStudioOverlay(
                   ProductWorkspacePane.tasks,
+                  projectNumericId: projectNumericId,
+                  projectUuid: projectUuid,
                 );
               },
               onOpenAssetEditor: (target) =>
@@ -243,6 +327,33 @@ extension _HomePageBuildProductSections on _HomePageState {
     );
   }
 
+  void _openShellPaneFromStudioOverlay(
+    ProductWorkspacePane pane, {
+    int? projectNumericId,
+    String? projectUuid,
+    int? scriptNumericId,
+    String? scriptUuid,
+    String? workspaceId,
+  }) {
+    if (projectNumericId != null && projectNumericId > 0) {
+      setState(() {
+        _productScopedProjectNumericId = projectNumericId;
+      });
+      _workspaceInputController.applyProjectScope(
+        projectNumericId,
+        scriptNumericId: scriptNumericId,
+        projectUuid: projectUuid,
+        scriptUuid: scriptUuid,
+        workspaceId: workspaceId,
+      );
+    }
+    _shellNavigationController.selectProductWorkspacePane(pane);
+    _ensureProductPaneData(pane);
+    if (kStudioPaneUriSyncedPanes.contains(pane)) {
+      context.go(studioUriForUtilityPane(pane));
+    }
+  }
+
   Widget _buildProjectStudioStepBody(
     BuildContext context,
     AppLocalizations l10n,
@@ -273,8 +384,9 @@ extension _HomePageBuildProductSections on _HomePageState {
         return StudioVideoStepPanel(
           projectNumericId: projectNumericId,
           onOpenProduction: () {
-            _shellNavigationController.selectProductWorkspacePane(
+            _openShellPaneFromStudioOverlay(
               ProductWorkspacePane.productionWorkspace,
+              projectNumericId: projectNumericId,
             );
           },
           embeddedChild: _buildAgentWorkspacePane(
@@ -308,10 +420,10 @@ extension _HomePageBuildProductSections on _HomePageState {
                               _shortVideoSpaceInitialFocus =
                                   ShortVideoSpaceInitialFocus.assembly;
                             });
-                            _shellNavigationController
-                                .selectProductWorkspacePane(
-                                  ProductWorkspacePane.shortVideoSpace,
-                                );
+                            _openShellPaneFromStudioOverlay(
+                              ProductWorkspacePane.shortVideoSpace,
+                              projectNumericId: projectNumericId,
+                            );
                           },
                         ),
                         Expanded(child: _buildShortVideoSpaceSection()),
@@ -479,24 +591,83 @@ extension _HomePageBuildProductSections on _HomePageState {
       unreadNotifications: _notificationsController.unreadCount,
       selectedPane: _shellNavigationController.productWorkspacePane,
       onSelectPane: (pane) {
-        _shellNavigationController.selectProductWorkspacePane(pane);
+        if (widget.shellMode == HomeShellMode.product) {
+          _handleProductPipelinePaneSelect(pane);
+        } else {
+          _shellNavigationController.selectProductWorkspacePane(pane);
+        }
       },
     );
   }
 
-  Widget _buildProductHarnessRedirectHint(BuildContext context) {
+  Widget _buildProductScriptOrProductionPane(
+    BuildContext context, {
+    required AppLocalizations l10n,
+    required ProductWorkspacePane pane,
+    required AgentWorkspacePane agentPane,
+    required StudioStep studioStep,
+    required String redirectTitle,
+    required IconData redirectIcon,
+    required String agentTitle,
+    required String agentSubtitle,
+  }) {
+    if (widget.shellMode != HomeShellMode.product) {
+      return _buildAgentWorkspacePane(
+        initialPane: agentPane,
+        sectionTitle: agentTitle,
+        sectionDescription: agentSubtitle,
+      );
+    }
+    final projectId = _resolvedProductNumericIdForPipeline();
+    if (projectId == null) {
+      return _buildProductHarnessRedirectHint(
+        context,
+        title: redirectTitle,
+        icon: redirectIcon,
+        enterStudioStep: studioStep,
+      );
+    }
+    return ProductStudioRouteLauncher(
+      route: '/projects/$projectId/${studioStep.slug}',
+    );
+  }
+
+  Widget _buildProductHarnessRedirectHint(
+    BuildContext context, {
+    required String title,
+    required IconData icon,
+    required StudioStep enterStudioStep,
+  }) {
     final l10n = AppLocalizations.of(context)!;
     final projectId = _resolvedProductNumericIdForPipeline();
-    return Center(
-      child: StudioEmptyState(
-        title: l10n.studioProductHarnessRedirectTitle,
-        subtitle: l10n.studioProductHarnessRedirectSubtitle,
-        icon: Icons.theaters_outlined,
-        actionLabel: projectId != null ? l10n.studioEnterStudio : null,
-        onAction: projectId != null
-            ? () => context.go('/projects/$projectId/${StudioStep.script.slug}')
-            : null,
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        const SizedBox(height: 8),
+        StudioPaneHeader(
+          title: title,
+          showBack: widget.shellMode == HomeShellMode.product,
+          onBack: () {
+            if (!_popProductWorkspacePane()) {
+              _goToProjectsHome();
+            }
+          },
+        ),
+        const SizedBox(height: 32),
+        Center(
+          child: StudioEmptyState(
+            title: l10n.studioProductHarnessRedirectTitle,
+            subtitle: l10n.studioProductHarnessRedirectSubtitle,
+            icon: icon,
+            actionLabel: projectId != null ? l10n.studioEnterStudio : null,
+            onAction: projectId != null
+                ? () => context.go(
+                    '/projects/$projectId/${enterStudioStep.slug}',
+                  )
+                : null,
+          ),
+        ),
+      ],
     );
   }
 
@@ -635,7 +806,9 @@ extension _HomePageBuildProductSections on _HomePageState {
           productPresentation: widget.shellMode == HomeShellMode.product,
           currentWorkspaceName: _sessionMe?.currentWorkspace?.name,
           currentWorkspaceType: _sessionMe?.currentWorkspace?.workspaceType,
+          currentProjectNumericId: _productScopedProjectNumericId,
           onOpenProjectDetail: _openProjectDetail,
+          onSelectProjectScope: _selectProjectScope,
           onOpenProjectStudio: _openProjectStudio,
           onOpenTeamWorkspaces: () {
             _shellNavigationController.selectProductWorkspacePane(
@@ -698,23 +871,30 @@ extension _HomePageBuildProductSections on _HomePageState {
         ),
       if (_shellNavigationController.productWorkspacePane ==
           ProductWorkspacePane.scriptWorkspace)
-        widget.shellMode == HomeShellMode.product
-            ? _buildProductHarnessRedirectHint(context)
-            : _buildAgentWorkspacePane(
-                initialPane: AgentWorkspacePane.script,
-                sectionTitle: l10n.productAgentScriptWorkspaceTitle,
-                sectionDescription: l10n.productAgentScriptWorkspaceSubtitle,
-              ),
+        _buildProductScriptOrProductionPane(
+          context,
+          l10n: l10n,
+          pane: ProductWorkspacePane.scriptWorkspace,
+          agentPane: AgentWorkspacePane.script,
+          studioStep: StudioStep.script,
+          redirectTitle: l10n.productNavScriptWorkspace,
+          redirectIcon: Icons.menu_book_outlined,
+          agentTitle: l10n.productAgentScriptWorkspaceTitle,
+          agentSubtitle: l10n.productAgentScriptWorkspaceSubtitle,
+        ),
       if (_shellNavigationController.productWorkspacePane ==
           ProductWorkspacePane.productionWorkspace)
-        widget.shellMode == HomeShellMode.product
-            ? _buildProductHarnessRedirectHint(context)
-            : _buildAgentWorkspacePane(
-                initialPane: AgentWorkspacePane.production,
-                sectionTitle: l10n.productAgentProductionWorkspaceTitle,
-                sectionDescription:
-                    l10n.productAgentProductionWorkspaceSubtitle,
-              ),
+        _buildProductScriptOrProductionPane(
+          context,
+          l10n: l10n,
+          pane: ProductWorkspacePane.productionWorkspace,
+          agentPane: AgentWorkspacePane.production,
+          studioStep: StudioStep.storyboard,
+          redirectTitle: l10n.productNavProductionWorkspace,
+          redirectIcon: Icons.theaters_outlined,
+          agentTitle: l10n.productAgentProductionWorkspaceTitle,
+          agentSubtitle: l10n.productAgentProductionWorkspaceSubtitle,
+        ),
       if (_shellNavigationController.productWorkspacePane ==
           ProductWorkspacePane.workspaceActivity)
         _buildFeatureGatedPane(
@@ -792,6 +972,8 @@ extension _HomePageBuildProductSections on _HomePageState {
               _taskCenterController.taskDetailNumericIdLine,
           taskDetailUuidLine: _taskCenterController.taskDetailUuidLine,
           taskApiJobs: _taskCenterController.taskApiJobs,
+          taskApiLoadState: _taskCenterController.taskApiLoadState,
+          taskApiLastError: _taskCenterController.taskApiLastError,
           onTaskDetailJobIdChanged: (_) =>
               _taskCenterController.notifyJobIdChanged(),
           onLoadTaskProjects: _taskCenterController.loadTaskProjects,
@@ -1659,7 +1841,7 @@ class _PlatformConfigSectionState extends State<_PlatformConfigSection> {
           ),
           const SizedBox(height: 4),
           Text(
-            'env: TOONFLOW_PLATFORM_CONFIG_PLAN_OVERRIDES_JSON',
+            'env: OPENFLOW_PLATFORM_CONFIG_PLAN_OVERRIDES_JSON',
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: 4),
@@ -1998,7 +2180,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       }
     }
 
-    await showDialog<void>(
+    await showStudioDialog<void>(
       context: context,
       builder: (ctx) {
         final dl10n = resolveAppLocalizationsForErrors(ctx);
@@ -2030,7 +2212,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
               });
             }
 
-            return AlertDialog(
+            return StudioAlertDialog(
               title: Text(dl10n.helpHubManageDialogTitle),
               content: SizedBox(
                 width: 720,
@@ -2676,11 +2858,11 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     if (token == null || token.isEmpty) {
       return;
     }
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showStudioDialog<bool>(
       context: context,
       builder: (dialogContext) {
         final dl10n = resolveAppLocalizationsForErrors(dialogContext);
-        return AlertDialog(
+        return StudioAlertDialog(
           title: Text(dl10n.opsWhDeleteTitle),
           content: SelectableText(dl10n.opsWhDeleteBody(id)),
           actions: [
@@ -2719,7 +2901,8 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         _appendWebhookActivity(
           action: 'deleted',
           webhookId: id,
-          summary: 'webhook deleted',
+          summary: resolveAppLocalizationsForErrors(context)
+              .opsWhActivitySummaryDeleted,
         );
       });
       await _loadWebhooks();
@@ -2864,9 +3047,12 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         _appendWebhookActivity(
           action: res.delivered ? 'test_success' : 'test_failed',
           webhookId: id,
-          summary: res.delivered
-              ? 'http=${res.httpStatus ?? "-"}'
-              : 'http=${res.httpStatus ?? "-"} error=${res.error ?? "unknown"}',
+          summary: webhookActivityTestSummary(
+            resolveAppLocalizationsForErrors(context),
+            delivered: res.delivered,
+            httpStatus: res.httpStatus,
+            error: res.error,
+          ),
         );
       });
       final testL10n = resolveAppLocalizationsForErrors(context);
@@ -2876,7 +3062,11 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
           content: Text(
             res.delivered
                 ? testL10n.opsWhSnackDeliverOk(httpLabel)
-                : testL10n.opsWhSnackDeliverFail(res.error ?? 'unknown'),
+                : testL10n.opsWhSnackDeliverFail(
+                    res.error?.trim().isNotEmpty == true
+                        ? res.error!.trim()
+                        : testL10n.globalSearchUnknownError,
+                  ),
           ),
         ),
       );
@@ -2908,7 +3098,12 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     if (result.delivered) {
       return l10n.opsWhLastTestOk(httpLabel);
     }
-    return l10n.opsWhLastTestFail(httpLabel, result.error ?? 'unknown');
+    return l10n.opsWhLastTestFail(
+      httpLabel,
+      result.error?.trim().isNotEmpty == true
+          ? result.error!.trim()
+          : l10n.globalSearchUnknownError,
+    );
   }
 
   String _formatBillingEventMeta(
@@ -2935,28 +3130,39 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
     return parts.join(' · ');
   }
 
-  Map<String, int> _billingEventCountsByProvider() {
-    return countBillingEventsByProvider(_billingEvents);
+  Map<String, int> _billingEventCountsByProvider(AppLocalizations l10n) {
+    return countBillingEventsByProvider(l10n, _billingEvents);
   }
 
-  Map<String, int> _billingEventCountsByType() {
-    return countBillingEventsByType(_billingEvents);
+  Map<String, int> _billingEventCountsByType(AppLocalizations l10n) {
+    return countBillingEventsByType(l10n, _billingEvents);
   }
 
   String _billingEventsSnapshotSummary(AppLocalizations l10n) {
     return buildBillingEventsSnapshotSummary(l10n, _billingEvents);
   }
 
-  String _billingEventsQuerySummary() {
+  String _billingEventsQuerySummary(AppLocalizations l10n) {
     final parts = <String>[
-      'provider=${_billingProvider.isEmpty ? "all" : _billingProvider}',
-      'informational=${_billingInformationalOnly ?? "all"}',
-      'sort=$_billingSort',
+      l10n.billingAuditQuerySummaryProvider(
+        studioBillingProviderValueLabel(l10n, _billingProvider),
+      ),
+      l10n.billingAuditQuerySummaryInformational(
+        studioBillingInformationalValueLabel(l10n, _billingInformationalOnly),
+      ),
+      l10n.billingAuditQuerySummarySort(
+        studioBillingSortValueLabel(l10n, _billingSort),
+      ),
     ];
-    void addText(String label, TextEditingController controller) {
+    void addText(String fieldKey, TextEditingController controller) {
       final value = controller.text.trim();
       if (value.isNotEmpty) {
-        parts.add('$label=$value');
+        parts.add(
+          l10n.billingAuditQueryFilterLine(
+            studioBillingAuditQueryFieldLabel(l10n, fieldKey),
+            value,
+          ),
+        );
       }
     }
 
@@ -3008,11 +3214,11 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
   }
 
   Future<void> _copyBillingEventsQuerySummary() async {
-    await Clipboard.setData(ClipboardData(text: _billingEventsQuerySummary()));
+    final l10n = resolveAppLocalizationsForErrors(context);
+    await Clipboard.setData(ClipboardData(text: _billingEventsQuerySummary(l10n)));
     if (!mounted) {
       return;
     }
-    final l10n = resolveAppLocalizationsForErrors(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(l10n.billingAuditQuerySummaryCopied)),
     );
@@ -3073,6 +3279,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
       });
       return;
     }
+    final exportL10n = resolveAppLocalizationsForErrors(context);
     setState(() {
       _exportingAllBillingEvents = true;
       _billingEventsError = null;
@@ -3108,7 +3315,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
         offset = response.nextOffset!;
       }
       final rows = <List<String>>[
-        <String>['query_summary', _billingEventsQuerySummary()],
+        <String>['query_summary', _billingEventsQuerySummary(exportL10n)],
         <String>[],
         <String>[
           'id',
@@ -3488,7 +3695,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                     contentPadding: EdgeInsets.zero,
                     title: Text(
                       l10n.opsWhActivityEntryTitle(
-                        entry.action,
+                        webhookActivityActionLabel(l10n, entry.action),
                         entry.webhookId,
                       ),
                     ),
@@ -3499,7 +3706,9 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
                     trailing: IconButton(
                       tooltip: l10n.opsWhCopyActivityTooltip,
                       onPressed: () => _copyBillingAuditText(
-                        '${entry.action}\n${entry.webhookId}\n${entry.summary}',
+                        '${webhookActivityActionLabel(l10n, entry.action)}\n'
+                        '${entry.webhookId}\n'
+                        '${entry.summary}',
                         l10n.opsWhActivityRecordSuffix.trim(),
                       ),
                       icon: const Icon(Icons.copy_outlined),
@@ -4042,7 +4251,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
               spacing: 8,
               runSpacing: 8,
               children: [
-                ...(_billingEventCountsByProvider().entries.toList()
+                ...(_billingEventCountsByProvider(l10n).entries.toList()
                       ..sort((a, b) => b.value.compareTo(a.value)))
                     .map(
                       (entry) => Chip(
@@ -4079,7 +4288,7 @@ class _HelpHubSectionState extends State<_HelpHubSection> {
               spacing: 8,
               runSpacing: 8,
               children: [
-                ...(_billingEventCountsByType().entries.toList()
+                ...(_billingEventCountsByType(l10n).entries.toList()
                       ..sort((a, b) => b.value.compareTo(a.value)))
                     .take(8)
                     .map(

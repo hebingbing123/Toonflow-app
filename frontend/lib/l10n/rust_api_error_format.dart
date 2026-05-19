@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:http/http.dart' as http;
 
 import '../locale/app_locale_notifier.dart';
 import '../rust_api/core.dart';
@@ -88,7 +89,41 @@ String describeUserVisibleApiError(AppLocalizations l10n, Object error) {
   if (error is RustApiException) {
     return formatRustApiExceptionForDisplay(l10n, error);
   }
-  return l10n.rustApiClientUnknownError(error.toString());
+  if (error is http.ClientException) {
+    return l10n.rustApiClientUnknownError(
+      _compactGenericErrorMessage(l10n, error.message),
+    );
+  }
+  return l10n.rustApiClientUnknownError(
+    _compactGenericErrorMessage(l10n, error.toString()),
+  );
+}
+
+String compactUserVisibleApiErrorText(AppLocalizations l10n, String raw) {
+  final localizedPrefixes = <String>[
+    l10n.rustApiClientUnknownError('').trimRight(),
+  ];
+  for (final prefix in localizedPrefixes) {
+    if (raw.startsWith(prefix)) {
+      final detail = raw.substring(prefix.length).trimLeft();
+      final separator = prefix.endsWith('：') ? '' : ' ';
+      return '$prefix$separator${_compactGenericErrorMessage(l10n, detail)}'
+          .trimRight();
+    }
+  }
+  return _compactGenericErrorMessage(l10n, raw);
+}
+
+String _compactGenericErrorMessage(AppLocalizations l10n, String raw) {
+  var compact = raw.trim();
+  compact = compact.replaceFirst(RegExp(r'^(?:[A-Za-z]+)?Exception:\s*'), '');
+  compact = compact.replaceFirst(RegExp(r'^Bad state:\s*'), '');
+  compact = compact.replaceAll(RegExp(r',\s*uri=https?://\S+'), '');
+  compact = compact.replaceAll(RegExp(r'\s+'), ' ').trim();
+  if (compact.endsWith(',')) {
+    compact = compact.substring(0, compact.length - 1).trim();
+  }
+  return compact.isEmpty ? l10n.rustApiClientRetryAfterTryLater : compact;
 }
 
 /// [AppLocalizations] from [context] when delegates are present; otherwise English lookup.

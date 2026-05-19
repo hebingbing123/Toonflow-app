@@ -17,10 +17,10 @@ extension _HomePageProjectEditorScriptsBatchAddDialog on _HomePageState {
     final namePrefixCtrl = TextEditingController(text: l10n.projectEditorScriptsBatchAddDefaultPrefix);
     final scriptDataCtrl = TextEditingController(text: l10n.projectEditorScriptsBatchAddDefaultContent);
     try {
-      final confirmed = await showDialog<bool>(
+      final confirmed = await showStudioDialog<bool>(
         context: ctx,
         builder: (dialogCtx) {
-          return AlertDialog(
+          return StudioAlertDialog(
             title: Text(l10n.projectEditorScriptsBatchAddTitle),
             content: SizedBox(
               width: 420,

@@ -1,10 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:toonflow_app/l10n/app_localizations_zh.dart';
-import 'package:toonflow_app/rust_api.dart';
-import 'package:toonflow_app/short_video_space/support.dart';
-import 'package:toonflow_app/short_video_space/view.dart';
+import 'package:openflow_app/l10n/app_localizations_zh.dart';
+import 'package:openflow_app/rust_api.dart';
+import 'package:openflow_app/short_video_space/support.dart';
+import 'package:openflow_app/short_video_space/view.dart';
 
 void main() {
   final zh = AppLocalizationsZh();

@@ -1,5 +1,5 @@
 -- Staging area for one-shot imports from 历史 Electron SQLite (db2.sqlite).
--- Consumed by backend CLI `toonflow-sqlite-import`, not by PostgREST by default.
+-- Consumed by backend CLI `openflow-sqlite-import`, not by PostgREST by default.
 CREATE SCHEMA IF NOT EXISTS legacy_staging;
 
 CREATE TABLE legacy_staging.snapshot (

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
+import 'package:openflow_app/l10n/app_localizations_en.dart';
 import 'package:openflow_app/shell/workspace_context_view.dart';
 
 Widget _l10nApp(Widget body, {Locale locale = const Locale('en')}) {
@@ -28,8 +29,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Personal Workspace'), findsOneWidget);
-    expect(find.text('personal'), findsOneWidget);
+    final l10n = AppLocalizationsEn();
+    expect(find.text(l10n.workspaceContextPersonalDefaultName), findsOneWidget);
+    expect(find.text(l10n.workspaceTypePersonal), findsOneWidget);
     expect(find.text('Project #12 · Palace Episode'), findsOneWidget);
   });
 
@@ -157,6 +159,26 @@ void main() {
       expect(find.text('100% used'), findsOneWidget);
 
       expect(find.byType(LinearProgressIndicator), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'workspace context maps API personal workspace name to zh default',
+    (tester) async {
+      await tester.pumpWidget(
+        _l10nApp(
+          const WorkspaceContextView(
+            loading: false,
+            workspaceName: 'Personal Workspace',
+            workspaceType: 'personal',
+            projectLabel: 'P',
+          ),
+          locale: const Locale('zh'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('个人工作区'), findsOneWidget);
+      expect(find.text('Personal Workspace'), findsNothing);
     },
   );
 

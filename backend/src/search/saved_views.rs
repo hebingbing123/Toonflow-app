@@ -344,7 +344,7 @@ pub async fn put_search_saved_views(
     let placed = body.items.len();
     let items = replace_saved_views_tx(pool, user_id, body.items).await?;
     tracing::info!(
-        target: "toonflow.platform_audit",
+        target: "openflow.platform_audit",
         kind = "search_saved_views_full_sync",
         user_id = %user_id,
         requested_count = placed,

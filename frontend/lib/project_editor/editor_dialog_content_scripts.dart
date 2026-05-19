@@ -21,15 +21,6 @@ extension _HomePageProjectEditorDialogContentScripts on _HomePageState {
       scriptTaskLine: dialogState.scriptTaskLine,
       scriptList: scriptList,
       statsRef: dialogState.statsRef,
-      probeActions: _buildProjectScriptsProbeActions(
-        ctx: ctx,
-        setDialogState: setDialogState,
-        token: token,
-        p: p,
-        saving: dialogState.saving,
-        scriptProbeBusy: dialogState.scriptProbeBusy,
-        scriptList: scriptList,
-      ),
       openWorkbench: () => openProjectScriptsWorkbenchDialog(
         ctx: ctx,
         l10n: l10n,

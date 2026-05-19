@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../design_system/components/studio_skeleton.dart';
 import '../design_system/components/studio_text_styles.dart';
+import '../design_system/theme.dart';
 import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
@@ -12,12 +13,16 @@ class ProjectsGridView extends StatelessWidget {
     super.key,
     required this.projects,
     required this.onOpenProject,
+    this.currentProjectNumericId,
+    this.onSelectProject,
     this.loading = false,
     this.progressForProject,
   });
 
   final List<ProjectRow> projects;
   final ValueChanged<ProjectRow> onOpenProject;
+  final int? currentProjectNumericId;
+  final Future<void> Function(ProjectRow project)? onSelectProject;
   final bool loading;
   final int Function(ProjectRow project)? progressForProject;
 
@@ -68,6 +73,10 @@ class ProjectsGridView extends StatelessWidget {
             return _ProjectGridCard(
               project: project,
               completedSteps: steps,
+              selected: currentProjectNumericId == project.numericId,
+              onSelect: onSelectProject == null
+                  ? null
+                  : () => onSelectProject!(project),
               onTap: () => onOpenProject(project),
             );
           },
@@ -99,30 +108,49 @@ class _ProjectGridCard extends StatelessWidget {
   const _ProjectGridCard({
     required this.project,
     required this.completedSteps,
+    this.selected = false,
+    this.onSelect,
     required this.onTap,
   });
 
   final ProjectRow project;
   final int completedSteps;
+  final bool selected;
+  final VoidCallback? onSelect;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
+    final studio = StudioColors.of(context);
     final tokens = StudioTokens.of(context);
     final l10n = AppLocalizations.of(context)!;
     final title =
         project.name ?? l10n.projectsUnnamedProject(project.numericId);
 
     return Material(
-      color: tokens.bgElevated,
+      color: Colors.transparent,
       borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
       child: InkWell(
-        onTap: onTap,
+        onTap: onSelect ?? onTap,
         borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
         child: Container(
           decoration: BoxDecoration(
+            gradient: studio.panelGradient,
             borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
-            border: Border.all(color: tokens.borderSubtle),
+            border: Border.all(
+              color: selected ? tokens.primary : tokens.surfaceHighlight,
+              width: selected ? 1.5 : 1,
+            ),
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: selected
+                    ? tokens.panelGlow.withValues(alpha: 0.14)
+                    : tokens.panelGlowSecondary.withValues(alpha: 0.06),
+                blurRadius: 20,
+                spreadRadius: -14,
+                offset: const Offset(0, 12),
+              ),
+            ],
           ),
           padding: const EdgeInsets.all(20),
           child: Column(
@@ -139,13 +167,20 @@ class _ProjectGridCard extends StatelessWidget {
                       style: studioCardTitleStyle(context),
                     ),
                   ),
+                  if (selected) ...<Widget>[
+                    const SizedBox(width: 8),
+                    Icon(Icons.check_circle, size: 18, color: tokens.primary),
+                    const SizedBox(width: 8),
+                  ],
                   StudioStepProgressRing(completedSteps: completedSteps),
                 ],
               ),
               const SizedBox(height: 16),
               Text(
                 l10n.studioEnterStudio,
-                style: Theme.of(context).textTheme.bodySmall,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: tokens.textSecondary),
               ),
               const Spacer(),
               if ((project.intro ?? '').isNotEmpty)
@@ -160,19 +195,72 @@ class _ProjectGridCard extends StatelessWidget {
               const SizedBox(height: 16),
               Row(
                 children: <Widget>[
-                  Text(
-                    '#${project.numericId}',
-                    style: Theme.of(context).textTheme.labelSmall,
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: tokens.bgInset.withValues(alpha: 0.92),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: tokens.surfaceHighlight.withValues(alpha: 0.9),
+                      ),
+                    ),
+                    child: Text(
+                      '#${project.numericId}',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: tokens.textSecondary,
+                      ),
+                    ),
                   ),
                   const Spacer(),
-                  Text(
-                    l10n.studioEnterStudio,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.labelLarge?.copyWith(color: tokens.primary),
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: selected
+                          ? studio.signalGradient
+                          : LinearGradient(
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                              colors: <Color>[
+                                tokens.primarySoft.withValues(alpha: 0.92),
+                                tokens.accentSoft.withValues(alpha: 0.92),
+                              ],
+                            ),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: selected
+                            ? tokens.accent.withValues(alpha: 0.42)
+                            : tokens.surfaceHighlight,
+                      ),
+                    ),
+                    child: InkWell(
+                      onTap: onTap,
+                      borderRadius: BorderRadius.circular(999),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            Text(
+                              l10n.studioEnterStudio,
+                              style: Theme.of(context).textTheme.labelLarge
+                                  ?.copyWith(color: Colors.white),
+                            ),
+                            const SizedBox(width: 8),
+                            const Icon(
+                              Icons.arrow_outward,
+                              size: 16,
+                              color: Colors.white,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
-                  const SizedBox(width: 6),
-                  Icon(Icons.arrow_forward, size: 18, color: tokens.primary),
                 ],
               ),
             ],

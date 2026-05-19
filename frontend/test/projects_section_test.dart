@@ -237,4 +237,63 @@ void main() {
     expect(openedTeamWorkspaces, 1);
     controller.dispose();
   });
+
+  testWidgets('product presentation lets users select a project from home', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1440, 1200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final controller = buildController(
+      projects: const [
+        ProjectRow(
+          id: 'project-1',
+          workspaceId: 'workspace-1',
+          numericId: 11,
+          name: '项目一',
+          intro: '继续制作',
+          createTimeMs: 1,
+          projectAccessMode: 'inherited',
+          projectAccessRole: 'member',
+        ),
+      ],
+      artStyles: const <ArtStyleRow>[],
+    );
+    ProjectRow? selectedProject;
+    ProjectRow? openedProject;
+    await tester.pumpWidget(
+      buildTestApp(
+        ProjectsSection(
+          accessToken: null,
+          controller: controller,
+          productPresentation: true,
+          currentProjectNumericId: null,
+          onOpenProjectDetail: (_) {},
+          onSelectProjectScope: (row) async {
+            selectedProject = row;
+          },
+          onOpenProjectStudio: (row) {
+            openedProject = row;
+          },
+          onOpenTeamWorkspaces: () {},
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text(zh.studioPipelineSelectProjectFirst), findsOneWidget);
+
+    await tester.tap(find.text('项目一').first);
+    await tester.pumpAndSettle();
+
+    expect(selectedProject?.numericId, 11);
+    expect(openedProject, isNull);
+
+    await tester.ensureVisible(find.widgetWithText(TextButton, zh.studioEnterStudio));
+    await tester.tap(find.widgetWithText(TextButton, zh.studioEnterStudio));
+    await tester.pumpAndSettle();
+
+    expect(openedProject?.numericId, 11);
+    controller.dispose();
+  });
 }

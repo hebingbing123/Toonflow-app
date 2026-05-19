@@ -2122,6 +2122,12 @@ abstract class AppLocalizations {
   /// **'{count} jobs in progress'**
   String studioJobTrayActiveJobs(int count);
 
+  /// No description provided for @studioJobTraySheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Active jobs'**
+  String get studioJobTraySheetTitle;
+
   /// No description provided for @studioUnknownCodeEmpty.
   ///
   /// In en, this message translates to:
@@ -3151,7 +3157,7 @@ abstract class AppLocalizations {
   /// No description provided for @studioGridStoryboardHint.
   ///
   /// In en, this message translates to:
-  /// **'Generate a grid image, split cells, and assign to shots (backend job coming).'**
+  /// **'Generate one grid image, split into cells, and assign each cell to a shot.'**
   String get studioGridStoryboardHint;
 
   /// No description provided for @studioGridStoryboardCta.
@@ -3159,6 +3165,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Grid mode'**
   String get studioGridStoryboardCta;
+
+  /// No description provided for @studioGridStoryboardDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Grid storyboard'**
+  String get studioGridStoryboardDialogTitle;
+
+  /// No description provided for @studioGridStoryboardDialogSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Configure a {shotCount}-cell grid for the current script shots.'**
+  String studioGridStoryboardDialogSubtitle(int shotCount);
+
+  /// No description provided for @studioGridStoryboardRowsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Rows'**
+  String get studioGridStoryboardRowsLabel;
+
+  /// No description provided for @studioGridStoryboardColsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Columns'**
+  String get studioGridStoryboardColsLabel;
+
+  /// No description provided for @studioGridStoryboardBasePromptLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Scene direction (optional)'**
+  String get studioGridStoryboardBasePromptLabel;
+
+  /// No description provided for @studioGridStoryboardInvalidDimensions.
+  ///
+  /// In en, this message translates to:
+  /// **'Use 1–4 rows and columns.'**
+  String get studioGridStoryboardInvalidDimensions;
+
+  /// No description provided for @studioGridStoryboardCellMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Rows × columns ({cells}) must equal shot count ({shotCount}).'**
+  String studioGridStoryboardCellMismatch(int cells, int shotCount);
+
+  /// No description provided for @studioGridStoryboardEnqueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Grid generation started. Shots refresh when the job completes.'**
+  String get studioGridStoryboardEnqueued;
+
+  /// No description provided for @studioGridStoryboardFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Grid generation failed: {message}'**
+  String studioGridStoryboardFailed(String message);
+
+  /// No description provided for @studioStoryboardStudioNoShots.
+  ///
+  /// In en, this message translates to:
+  /// **'No shots in this script yet. Add storyboards on the script step first.'**
+  String get studioStoryboardStudioNoShots;
+
+  /// No description provided for @studioStoryboardStudioSelectShot.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a shot from the list to preview and edit.'**
+  String get studioStoryboardStudioSelectShot;
+
+  /// No description provided for @studioStoryboardStudioEmptyPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'No prompt yet — edit on the right or open the full editor.'**
+  String get studioStoryboardStudioEmptyPrompt;
+
+  /// No description provided for @studioStoryboardStudioOpenEditor.
+  ///
+  /// In en, this message translates to:
+  /// **'Full editor'**
+  String get studioStoryboardStudioOpenEditor;
+
+  /// No description provided for @studioStoryboardStudioSaveProperties.
+  ///
+  /// In en, this message translates to:
+  /// **'Save shot'**
+  String get studioStoryboardStudioSaveProperties;
+
+  /// No description provided for @studioStoryboardStudioSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Shot properties saved.'**
+  String get studioStoryboardStudioSaved;
 
   /// No description provided for @studioEpisodeConsoleTitle.
   ///
@@ -4041,6 +4137,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **' webhook activity'**
   String get opsWhActivityRecordSuffix;
+
+  /// No description provided for @opsWhActivityActionCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Created'**
+  String get opsWhActivityActionCreated;
+
+  /// No description provided for @opsWhActivityActionDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted'**
+  String get opsWhActivityActionDeleted;
+
+  /// No description provided for @opsWhActivityActionTestSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Test delivered'**
+  String get opsWhActivityActionTestSuccess;
+
+  /// No description provided for @opsWhActivityActionTestFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Test failed'**
+  String get opsWhActivityActionTestFailed;
+
+  /// No description provided for @opsWhActivitySummaryDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Webhook deleted'**
+  String get opsWhActivitySummaryDeleted;
+
+  /// No description provided for @opsWhActivitySummaryTestSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'HTTP {status}'**
+  String opsWhActivitySummaryTestSuccess(String status);
+
+  /// No description provided for @opsWhActivitySummaryTestFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'HTTP {status} · {error}'**
+  String opsWhActivitySummaryTestFailed(String status, String error);
 
   /// No description provided for @opsWhChipLatestCreated.
   ///
@@ -6691,6 +6829,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'UUID details: {line}'**
   String taskCenterUuidDetailsLine(String line);
+
+  /// No description provided for @taskCenterJobDetailField.
+  ///
+  /// In en, this message translates to:
+  /// **'{key}={value}'**
+  String taskCenterJobDetailField(String key, String value);
+
+  /// No description provided for @taskCenterJobDetailUpdatedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'updated {timestamp}'**
+  String taskCenterJobDetailUpdatedAt(String timestamp);
 
   /// No description provided for @taskCenterPhasePrep.
   ///
@@ -34070,6 +34220,30 @@ abstract class AppLocalizations {
   /// **'Version'**
   String get statusPageVersionSectionTitle;
 
+  /// No description provided for @statusPageVersionServiceLine.
+  ///
+  /// In en, this message translates to:
+  /// **'service={service}'**
+  String statusPageVersionServiceLine(String service);
+
+  /// No description provided for @statusPageVersionNumberLine.
+  ///
+  /// In en, this message translates to:
+  /// **'version={version}'**
+  String statusPageVersionNumberLine(String version);
+
+  /// No description provided for @statusPageVersionGitShaLine.
+  ///
+  /// In en, this message translates to:
+  /// **'git_sha={gitSha}'**
+  String statusPageVersionGitShaLine(String gitSha);
+
+  /// No description provided for @statusPageReadyDatabaseLine.
+  ///
+  /// In en, this message translates to:
+  /// **'database={database}'**
+  String statusPageReadyDatabaseLine(String database);
+
   /// No description provided for @nativeBridgeMessageNotStarted.
   ///
   /// In en, this message translates to:
@@ -34129,6 +34303,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'library_path={path}'**
   String statusPageBridgeLibraryPathLine(String path);
+
+  /// No description provided for @statusPageBridgeErrorLine.
+  ///
+  /// In en, this message translates to:
+  /// **'error={error}'**
+  String statusPageBridgeErrorLine(String error);
 
   /// No description provided for @shortVideoDesktopRuntimeHeadlineDesktopApp.
   ///

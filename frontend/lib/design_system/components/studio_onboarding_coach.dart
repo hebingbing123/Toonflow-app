@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../tokens.dart';
 
 /// First-run coach marks (Wave 0b).
@@ -29,12 +30,6 @@ class _StudioOnboardingCoachState extends State<StudioOnboardingCoach> {
   var _step = 0;
   var _visible = false;
 
-  static const _messages = <String>[
-    '用左侧导航在「项目」里开始创作。',
-    '进入项目后按六步完成剧本到成片。',
-    '按 ⌘K 可快速跳转步骤与设置。',
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -56,8 +51,16 @@ class _StudioOnboardingCoachState extends State<StudioOnboardingCoach> {
     setState(() => _visible = false);
   }
 
+  List<String> _messages(AppLocalizations l10n) => <String>[
+    l10n.studioOnboardingStep1,
+    l10n.studioOnboardingStep2,
+    l10n.studioOnboardingStep3,
+  ];
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final messages = _messages(l10n);
     return Stack(
       children: <Widget>[
         widget.child,
@@ -77,27 +80,34 @@ class _StudioOnboardingCoachState extends State<StudioOnboardingCoach> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Text(_messages[_step.clamp(0, _messages.length - 1)]),
+                      Text(messages[_step.clamp(0, messages.length - 1)]),
                       const SizedBox(height: 12),
                       Row(
                         children: <Widget>[
-                          Text('${_step + 1}/${_messages.length}'),
+                          Text(
+                            l10n.studioOnboardingStepCounter(
+                              _step + 1,
+                              messages.length,
+                            ),
+                          ),
                           const Spacer(),
                           if (_step > 0)
                             TextButton(
                               onPressed: () => setState(() => _step--),
-                              child: const Text('上一步'),
+                              child: Text(l10n.studioOnboardingPrevious),
                             ),
                           TextButton(
                             onPressed: () {
-                              if (_step < _messages.length - 1) {
+                              if (_step < messages.length - 1) {
                                 setState(() => _step++);
                               } else {
                                 _dismiss();
                               }
                             },
                             child: Text(
-                              _step < _messages.length - 1 ? '下一步' : '完成',
+                              _step < messages.length - 1
+                                  ? l10n.studioOnboardingNext
+                                  : l10n.studioOnboardingDone,
                             ),
                           ),
                         ],

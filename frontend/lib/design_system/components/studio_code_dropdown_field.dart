@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
+import 'studio_dropdown_field.dart';
+
 /// Dropdown that stores API enum [codes] but always shows localized labels.
 ///
-/// Material 3 [DropdownMenu] renders the raw [value] in the text field after
-/// selection; this widget uses [DropdownButtonFormField] so the closed field
-/// matches the menu labels.
+/// Thin wrapper over [StudioDropdownField] for string API codes.
 class StudioCodeDropdownField extends StatelessWidget {
   const StudioCodeDropdownField({
     super.key,
@@ -25,18 +25,15 @@ class StudioCodeDropdownField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final field = DropdownButtonFormField<String>(
-      initialValue: value,
-      isExpanded: true,
-      decoration: InputDecoration(
-        labelText: labelText,
-        isDense: true,
-      ),
-      items: codes
+    return StudioDropdownField<String>(
+      value: value,
+      labelText: labelText,
+      width: width,
+      entries: codes
           .map(
-            (code) => DropdownMenuItem<String>(
+            (code) => StudioDropdownEntry<String>(
               value: code,
-              child: Text(labelForValue(code)),
+              label: labelForValue(code),
             ),
           )
           .toList(growable: false),
@@ -46,9 +43,5 @@ class StudioCodeDropdownField extends StatelessWidget {
         }
       },
     );
-    if (width == null) {
-      return field;
-    }
-    return SizedBox(width: width, child: field);
   }
 }

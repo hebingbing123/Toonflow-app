@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../tokens.dart';
 
 /// Shown when server returns a stale [clientDataVersion] conflict.
@@ -17,6 +18,7 @@ class StudioConflictBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final tokens = StudioTokens.of(context);
     return Material(
       color: tokens.danger.withValues(alpha: 0.12),
@@ -37,12 +39,15 @@ class StudioConflictBanner extends StatelessWidget {
                 ),
               ),
             ),
-            TextButton(onPressed: onRefresh, child: const Text('刷新')),
+            TextButton(
+              onPressed: onRefresh,
+              child: Text(l10n.studioRetry),
+            ),
             if (onDismiss != null)
               IconButton(
                 icon: const Icon(Icons.close, size: 18),
                 onPressed: onDismiss,
-                tooltip: '关闭',
+                tooltip: l10n.studioDismiss,
               ),
           ],
         ),

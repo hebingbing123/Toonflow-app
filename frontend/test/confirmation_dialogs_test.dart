@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 /// Unit tests for confirmation dialogs functionality
 ///
@@ -22,9 +23,9 @@ void main() {
               builder: (context) {
                 return ElevatedButton(
                   onPressed: () {
-                    showDialog<bool>(
+                    showStudioDialog<bool>(
                       context: context,
-                      builder: (ctx) => AlertDialog(
+                      builder: (ctx) => StudioAlertDialog(
                         title: const Text('确认操作'),
                         content: const Text('确定要执行此操作吗？'),
                         actions: [
@@ -67,9 +68,9 @@ void main() {
               builder: (context) {
                 return ElevatedButton(
                   onPressed: () {
-                    showDialog<bool>(
+                    showStudioDialog<bool>(
                       context: context,
-                      builder: (ctx) => AlertDialog(
+                      builder: (ctx) => StudioAlertDialog(
                         title: const Text('确认操作'),
                         content: const Text('确定要执行此操作吗？'),
                         actions: [
@@ -113,9 +114,9 @@ void main() {
               builder: (context) {
                 return ElevatedButton(
                   onPressed: () {
-                    showDialog<bool>(
+                    showStudioDialog<bool>(
                       context: context,
-                      builder: (ctx) => AlertDialog(
+                      builder: (ctx) => StudioAlertDialog(
                         title: const Text('确认操作'),
                         content: const Text('确定要执行此操作吗？'),
                         actions: [
@@ -163,9 +164,9 @@ void main() {
               builder: (context) {
                 return ElevatedButton(
                   onPressed: () {
-                    showDialog<bool>(
+                    showStudioDialog<bool>(
                       context: context,
-                      builder: (ctx) => AlertDialog(
+                      builder: (ctx) => StudioAlertDialog(
                         title: const Text('确认删除'),
                         content: Text(
                           '确定要删除版本 "$versionName" 吗？\n\n'
@@ -240,9 +241,9 @@ void main() {
               builder: (context) {
                 return ElevatedButton(
                   onPressed: () {
-                    showDialog<bool>(
+                    showStudioDialog<bool>(
                       context: context,
-                      builder: (ctx) => AlertDialog(
+                      builder: (ctx) => StudioAlertDialog(
                         title: const Text('确认批量禁用'),
                         content: Text(
                           '确定要禁用选中的 $shotCount 个镜头吗？\n\n'
@@ -316,9 +317,9 @@ void main() {
               builder: (context) {
                 return ElevatedButton(
                   onPressed: () {
-                    showDialog<bool>(
+                    showStudioDialog<bool>(
                       context: context,
-                      builder: (ctx) => AlertDialog(
+                      builder: (ctx) => StudioAlertDialog(
                         title: const Text('确认恢复草稿'),
                         content: Text(
                           '确定要恢复草稿 "$draftName" 吗？\n\n'
@@ -376,9 +377,9 @@ void main() {
               builder: (context) {
                 return ElevatedButton(
                   onPressed: () {
-                    showDialog<bool>(
+                    showStudioDialog<bool>(
                       context: context,
-                      builder: (ctx) => AlertDialog(
+                      builder: (ctx) => StudioAlertDialog(
                         title: const Text('取消导出'),
                         content: const Text('确定要取消导出吗？已处理的内容将会丢失。'),
                         actions: [
@@ -440,11 +441,11 @@ void main() {
               builder: (context) {
                 return ElevatedButton(
                   onPressed: () {
-                    showDialog<bool>(
+                    showStudioDialog<bool>(
                       context: context,
                       builder: (ctx) => StatefulBuilder(
                         builder: (context, setState) {
-                          return AlertDialog(
+                          return StudioAlertDialog(
                             title: const Text('确认操作'),
                             content: Column(
                               mainAxisSize: MainAxisSize.min,
@@ -511,11 +512,11 @@ void main() {
               builder: (context) {
                 return ElevatedButton(
                   onPressed: () {
-                    showDialog<bool>(
+                    showStudioDialog<bool>(
                       context: context,
                       builder: (ctx) => StatefulBuilder(
                         builder: (context, setState) {
-                          return AlertDialog(
+                          return StudioAlertDialog(
                             title: const Text('确认操作'),
                             content: Column(
                               mainAxisSize: MainAxisSize.min,
@@ -625,9 +626,9 @@ void main() {
               builder: (context) {
                 return ElevatedButton(
                   onPressed: () {
-                    showDialog<bool>(
+                    showStudioDialog<bool>(
                       context: context,
-                      builder: (ctx) => AlertDialog(
+                      builder: (ctx) => StudioAlertDialog(
                         title: const Text('确认删除'),
                         content: const Text('此操作无法撤销。'),
                         actions: [
@@ -675,9 +676,9 @@ void main() {
               builder: (context) {
                 return ElevatedButton(
                   onPressed: () {
-                    showDialog<bool>(
+                    showStudioDialog<bool>(
                       context: context,
-                      builder: (ctx) => AlertDialog(
+                      builder: (ctx) => StudioAlertDialog(
                         title: const Text('确认操作'),
                         content: const Text('确定要执行此操作吗？'),
                         actions: [
@@ -717,9 +718,9 @@ void main() {
               builder: (context) {
                 return ElevatedButton(
                   onPressed: () {
-                    showDialog<bool>(
+                    showStudioDialog<bool>(
                       context: context,
-                      builder: (ctx) => AlertDialog(
+                      builder: (ctx) => StudioAlertDialog(
                         title: const Text('确认操作'),
                         content: const Text('确定要执行此操作吗？'),
                         actions: [
@@ -761,9 +762,9 @@ void main() {
               builder: (context) {
                 return ElevatedButton(
                   onPressed: () {
-                    showDialog<bool>(
+                    showStudioDialog<bool>(
                       context: context,
-                      builder: (ctx) => AlertDialog(
+                      builder: (ctx) => StudioAlertDialog(
                         title: const Text('确认操作'),
                         content: const Text('确定要执行此操作吗？'),
                         actions: [
@@ -792,7 +793,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify dialog is accessible
-      expect(find.byType(AlertDialog), findsOneWidget);
+      expect(find.byType(StudioAlertDialog), findsOneWidget);
       expect(find.text('确认操作'), findsOneWidget);
       expect(find.text('确定要执行此操作吗？'), findsOneWidget);
     });
@@ -805,9 +806,9 @@ void main() {
               builder: (context) {
                 return ElevatedButton(
                   onPressed: () {
-                    showDialog<bool>(
+                    showStudioDialog<bool>(
                       context: context,
-                      builder: (ctx) => AlertDialog(
+                      builder: (ctx) => StudioAlertDialog(
                         title: const Text('确认操作'),
                         content: const Text('确定要执行此操作吗？'),
                         actions: [

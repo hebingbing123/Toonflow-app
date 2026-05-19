@@ -62,7 +62,7 @@ cargo run --bin reconcile-billing
 **Function**: `record_billing_reconciliation_mismatch(field)`
 
 **Behavior**:
-- Emits structured log with target `toonflow.metrics.billing_reconciliation`
+- Emits structured log with target `openflow.metrics.billing_reconciliation`
 - Includes field name for aggregation
 - Can be queried by ops monitoring systems
 

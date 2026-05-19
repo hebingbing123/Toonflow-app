@@ -200,11 +200,11 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
 
     // Prompt for duration
     final ctrl = TextEditingController();
-    final duration = await showDialog<int>(
+    final duration = await showStudioDialog<int>(
       context: context,
       builder: (ctx) {
         final dlgL10n = resolveAppLocalizationsForErrors(ctx);
-        return AlertDialog(
+        return StudioAlertDialog(
           title: Text(dlgL10n.shortVideoBatchDurationDialogTitle),
           content: TextField(
             controller: ctrl,
@@ -288,11 +288,11 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
     // Prompt for replacement pattern
     final patternCtrl = TextEditingController();
     final replacementCtrl = TextEditingController();
-    final result = await showDialog<Map<String, String>>(
+    final result = await showStudioDialog<Map<String, String>>(
       context: context,
       builder: (ctx) {
         final dlgL10n = resolveAppLocalizationsForErrors(ctx);
-        return AlertDialog(
+        return StudioAlertDialog(
           title: Text(dlgL10n.shortVideoBatchReplaceDialogTitle),
           content: SizedBox(
             width: 500,
@@ -484,7 +484,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
 
     if (!context.mounted) return;
 
-    await showDialog<void>(
+    await showStudioDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) {
@@ -496,7 +496,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
                 : totalProcessed / eligibleShots.length;
             final progressPercent = (progress * 100).toStringAsFixed(0);
 
-            return AlertDialog(
+            return StudioAlertDialog(
               title: Text(dlgL10n.shortVideoBatchGenerateVoiceoverTitle),
               content: SizedBox(
                 width: 480,
@@ -652,12 +652,12 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
     // Show progress indicator
     if (!context.mounted) return;
 
-    showDialog<void>(
+    showStudioDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) {
         final dlgL10n = resolveAppLocalizationsForErrors(dialogContext);
-        return AlertDialog(
+        return StudioAlertDialog(
           content: Row(
             children: [
               const CircularProgressIndicator(),
@@ -740,7 +740,7 @@ extension _ShortVideoSpaceSectionProductionBatchOperationsExtension
     var isCancelled = false;
     final l10n = resolveAppLocalizationsForErrors(context);
 
-    await showDialog<void>(
+    await showStudioDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) {

@@ -5,6 +5,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../script_editor/support.dart';
 import 'dialog_support.dart';
 import 'dialog_view.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 Future<void> openProjectScriptsWorkbenchDialog({
   required BuildContext ctx,
@@ -34,7 +35,7 @@ Future<void> openProjectScriptsWorkbenchDialog({
   );
 
   try {
-    await showDialog<void>(
+    await showStudioDialog<void>(
       context: ctx,
       builder: (dialogCtx) {
         return StatefulBuilder(

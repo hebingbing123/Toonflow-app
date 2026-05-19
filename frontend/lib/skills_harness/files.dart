@@ -18,9 +18,9 @@ extension SkillsHarnessFileController on SkillsHarnessController {
       final text = r.content.length > 12000
           ? l10n.skillsHarnessPreviewTruncated(r.content.substring(0, 12000))
           : r.content;
-      await showDialog<void>(
+      await showStudioDialog<void>(
         context: context,
-        builder: (ctx) => AlertDialog(
+        builder: (ctx) => StudioAlertDialog(
           title: Text(r.path),
           content: SingleChildScrollView(
             child: SelectableText(
@@ -58,7 +58,7 @@ extension SkillsHarnessFileController on SkillsHarnessController {
       loadingSkillVersions = false;
       _publish();
       if (!context.mounted) return;
-      await showDialog<void>(
+      await showStudioDialog<void>(
         context: context,
         builder: (ctx) {
           SkillVersion? selected = versions.isEmpty ? null : versions.first;
@@ -69,7 +69,7 @@ extension SkillsHarnessFileController on SkillsHarnessController {
                 current.content,
                 selectedContent,
               );
-              return AlertDialog(
+              return StudioAlertDialog(
                 title: Text(l10n.skillsHarnessVersionDialogTitle(path)),
                 content: SizedBox(
                   width: 980,
@@ -196,9 +196,9 @@ extension SkillsHarnessFileController on SkillsHarnessController {
                       onPressed: rollingBackSkillVersion
                           ? null
                           : () async {
-                              final confirmed = await showDialog<bool>(
+                              final confirmed = await showStudioDialog<bool>(
                                 context: ctx,
-                                builder: (confirmCtx) => AlertDialog(
+                                builder: (confirmCtx) => StudioAlertDialog(
                                   title: Text(
                                     l10n.skillsHarnessConfirmRollbackTitle,
                                   ),

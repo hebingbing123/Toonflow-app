@@ -5,6 +5,7 @@ import 'package:video_player/video_player.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../rust_api.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 AppLocalizations _previewPlayerL10n(BuildContext context) =>
     AppLocalizations.of(context) ?? lookupAppLocalizations(const Locale('en'));
@@ -760,7 +761,7 @@ class PreviewPlayerDialog extends StatelessWidget {
     String? shotTitle,
     String? durationText,
   }) {
-    return showDialog<void>(
+    return showStudioDialog<void>(
       context: context,
       builder: (context) => PreviewPlayerDialog(
         videoUrl: videoUrl,
@@ -776,7 +777,7 @@ class PreviewPlayerDialog extends StatelessWidget {
     BuildContext context, {
     required List<ShotPreviewItem> playlist,
   }) {
-    return showDialog<void>(
+    return showStudioDialog<void>(
       context: context,
       builder: (context) => PreviewPlayerDialog(playlist: playlist),
     );
@@ -785,7 +786,7 @@ class PreviewPlayerDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = _previewPlayerL10n(context);
-    return Dialog(
+    return StudioDialogFrame(
       child: ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: 800,

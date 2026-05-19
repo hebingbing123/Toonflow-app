@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
+
 import '../tokens.dart';
 
 /// 16:9 media preview card (Wave 4).
@@ -36,7 +38,10 @@ class StudioMediaCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(error!, style: Theme.of(context).textTheme.bodySmall),
             if (onRetry != null)
-              TextButton(onPressed: onRetry, child: const Text('重试')),
+              TextButton(
+                onPressed: onRetry,
+                child: Text(AppLocalizations.of(context)!.studioRetry),
+              ),
           ],
         ),
       );

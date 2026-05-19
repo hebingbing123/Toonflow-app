@@ -4,6 +4,7 @@ import '../../../project_studio/project_studio_host.dart';
 import '../../../rust_api.dart';
 import '../support.dart';
 import 'dialog_support.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 Future<void> openProjectAssetsWorkbenchDialog({
   required BuildContext ctx,
@@ -93,7 +94,7 @@ Future<void> openProjectAssetsWorkbenchDialog({
     onOpenHistoryWorkbench: onOpenHistoryWorkbench,
   );
 
-  await showDialog<void>(
+  await showStudioDialog<void>(
     context: ctx,
     builder: (dialogCtx) {
       return StatefulBuilder(

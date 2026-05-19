@@ -227,7 +227,7 @@ class _TaskCenterWorkbenchDialogState
       final row = await postTasksTaskDetails(widget.accessToken, taskId);
       if (!mounted) return;
       setState(() {
-        _numericIdTaskDetailText = formatTaskJobDetails(row);
+        _numericIdTaskDetailText = formatTaskJobDetails(l10n, row);
         _ctrls.uuidCtrl.text = row.id;
         _loadingNumericIdTaskDetail = false;
       });
@@ -255,7 +255,7 @@ class _TaskCenterWorkbenchDialogState
       final row = await postTasksTaskDetailsByJobId(widget.accessToken, taskId);
       if (!mounted) return;
       setState(() {
-        _uuidDetails = formatTaskJobDetails(row);
+        _uuidDetails = formatTaskJobDetails(l10n, row);
         _ctrls.numericTaskIdCtrl.text = row.numericTaskId.toString();
         _loadingUuidDetails = false;
       });
@@ -411,10 +411,10 @@ class _TaskCenterWorkbenchDialogState
     _jobs = nextJobs;
 
     if (_ctrls.numericTaskIdCtrl.text.trim() == row.numericTaskId.toString()) {
-      _numericIdTaskDetailText = formatTaskJobDetails(row);
+      _numericIdTaskDetailText = formatTaskJobDetails(l10n, row);
     }
     if (_ctrls.uuidCtrl.text.trim() == row.id) {
-      _uuidDetails = formatTaskJobDetails(row);
+      _uuidDetails = formatTaskJobDetails(l10n, row);
     }
     _statusLine = l10n.taskCenterStatusMergedUpdate(
       origin,

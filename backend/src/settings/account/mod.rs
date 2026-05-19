@@ -5,8 +5,8 @@
 //! - `GET /api/v1/settings/account/exports/{job_id}/file`：下载导出包
 //! - `POST /api/v1/settings/account/delete`：强确认后删除当前账户
 //!
-//! **S3（可选）**：设置 **`TOONFLOW_ACCOUNT_EXPORT_S3_BUCKET`** 后 worker 将 zip 写入对象存储；与 workspace 导出共用
-//! **`TOONFLOW_EXPORT_S3_ENDPOINT`** / **`TOONFLOW_ACCOUNT_EXPORT_S3_ENDPOINT`** 等（见 **`crate::settings::export_s3`**）。
+//! **S3（可选）**：设置 **`OPENFLOW_ACCOUNT_EXPORT_S3_BUCKET`** 后 worker 将 zip 写入对象存储；与 workspace 导出共用
+//! **`OPENFLOW_EXPORT_S3_ENDPOINT`** / **`OPENFLOW_ACCOUNT_EXPORT_S3_ENDPOINT`** 等（见 **`crate::settings::export_s3`**）。
 
 use axum::{routing::get, routing::post, Router};
 

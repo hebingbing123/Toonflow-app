@@ -16,7 +16,6 @@ Widget buildProjectScriptsSection({
   required List<String?> scriptTaskLine,
   required List<ScriptBrief> scriptList,
   required List<ProjectStats?> statsRef,
-  required List<Widget> probeActions,
   required Future<void> Function() openWorkbench,
   required Future<void> Function() openPlanWorkbench,
   required Future<void> Function() openBatchAddDialog,
@@ -256,7 +255,6 @@ Widget buildProjectScriptsSection({
       overviewDiagnosis: overviewDiagnosis,
       overviewActionLabel: overviewActionLabel,
       overviewAction: overviewAction,
-      probeActions: probeActions,
     ),
     callbacks: ProjectScriptsSectionViewCallbacks(
       onOpenWorkbench: () => openWorkbench(),

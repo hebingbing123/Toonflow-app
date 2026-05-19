@@ -10,7 +10,7 @@ extension _HomePageScriptEditorStoryboardsWorkbench on _HomePageState {
     required StateSetter setBoardsState,
     required List<bool> actionBusy,
   }) async {
-    await showDialog<void>(
+    await showStudioDialog<void>(
       context: ctx,
       builder: (dialogCtx) {
         return _StoryboardBatchWorkbenchDialog(

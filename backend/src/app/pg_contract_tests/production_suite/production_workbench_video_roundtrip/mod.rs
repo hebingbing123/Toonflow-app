@@ -187,7 +187,7 @@ async fn production_workbench_video_roundtrip() {
         content_disposition
             .as_deref()
             .unwrap_or_default()
-            .contains("toonflow-storyboards-"),
+            .contains("openflow-storyboards-"),
         "content-disposition={content_disposition:?}"
     );
 
@@ -273,7 +273,7 @@ async fn production_workbench_video_roundtrip() {
     assert!(subtitles.contains("旁白：主角抬头看向远方"));
 
     let voiceover_script = read_zip_string_entry(&mut archive, "voiceover_script.txt");
-    assert!(voiceover_script.contains("# Toonflow Storyboard Voiceover Script"));
+    assert!(voiceover_script.contains("# Openflow Storyboard Voiceover Script"));
     assert!(voiceover_script.contains("[00:00:00,000 - 00:00:05,000] Shot"));
     assert!(voiceover_script.contains("source=explicit_narration · voiceover_ready=true"));
     assert!(voiceover_script.contains("旁白：主角抬头看向远方"));

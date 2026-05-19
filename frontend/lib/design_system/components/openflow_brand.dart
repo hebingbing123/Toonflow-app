@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme.dart';
+import '../tokens.dart';
 
 const _kOpenFlowGlyphAsset = 'assets/brand/openflow_glyph.png';
 
@@ -20,6 +21,7 @@ class OpenFlowBrandMark extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final studio = StudioColors.of(context);
+    final tokens = StudioTokens.of(context);
     final radius = borderRadius ?? size * 0.28;
 
     return DecoratedBox(
@@ -28,7 +30,13 @@ class OpenFlowBrandMark extends StatelessWidget {
         borderRadius: BorderRadius.circular(radius),
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: const Color(0xFF7C6CF0).withValues(alpha: 0.28),
+            color: tokens.panelGlow.withValues(alpha: 0.18),
+            blurRadius: size * 0.28,
+            spreadRadius: -size * 0.08,
+            offset: Offset(0, size * 0.16),
+          ),
+          BoxShadow(
+            color: tokens.panelGlowSecondary.withValues(alpha: 0.10),
             blurRadius: size * 0.34,
             offset: Offset(0, size * 0.18),
           ),

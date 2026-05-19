@@ -506,7 +506,7 @@ cargo build --release
 cargo test
 
 # 3. 启动服务
-./target/release/toonflow-server
+./target/release/openflow-server
 ```
 
 ### 前端部署
@@ -572,7 +572,7 @@ flutter build web
 
 如有问题或需要帮助，请联系：
 
-- **技术支持**: support@toonflow.com
+- **技术支持**: support@openflow.com
 - **文档**: 查看 `docs/` 目录
 - **API 文档**: `backend/src/openapi_spec/short_video_editing_api.md`
 - **用户指南**: `docs/short-video-editing-user-guide.md`

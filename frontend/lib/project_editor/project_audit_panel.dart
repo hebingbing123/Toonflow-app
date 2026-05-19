@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
@@ -156,7 +157,7 @@ class _ProjectAuditPanelState extends State<ProjectAuditPanel> {
               const SizedBox(width: 12),
               SizedBox(
                 width: 180,
-                child: DropdownButtonFormField<String>(
+                child: StudioDropdownButtonFormField<String>(
                   initialValue: _actionFilter ?? '',
                   decoration: InputDecoration(
                     labelText: l10n.projectEditorAuditActionFilterLabel,

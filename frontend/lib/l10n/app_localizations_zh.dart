@@ -1112,6 +1112,9 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get studioJobTraySheetTitle => '进行中的任务';
+
+  @override
   String get studioUnknownCodeEmpty => '（空）';
 
   @override
@@ -1663,10 +1666,61 @@ class AppLocalizationsZh extends AppLocalizations {
   String get studioKeyboardShortcuts => '快捷键';
 
   @override
-  String get studioGridStoryboardHint => '生成宫格图、切分并分配到镜头（后端任务待接）。';
+  String get studioGridStoryboardHint => '生成一张宫格图，切分后自动分配到各镜头。';
 
   @override
   String get studioGridStoryboardCta => '宫格模式';
+
+  @override
+  String get studioGridStoryboardDialogTitle => '宫格分镜';
+
+  @override
+  String studioGridStoryboardDialogSubtitle(int shotCount) {
+    return '为当前剧本的 $shotCount 个镜头配置宫格行列。';
+  }
+
+  @override
+  String get studioGridStoryboardRowsLabel => '行数';
+
+  @override
+  String get studioGridStoryboardColsLabel => '列数';
+
+  @override
+  String get studioGridStoryboardBasePromptLabel => '场景方向（可选）';
+
+  @override
+  String get studioGridStoryboardInvalidDimensions => '行、列请在 1–4 之间。';
+
+  @override
+  String studioGridStoryboardCellMismatch(int cells, int shotCount) {
+    return '行×列（$cells）必须等于镜头数（$shotCount）。';
+  }
+
+  @override
+  String get studioGridStoryboardEnqueued => '已开始生成宫格，任务完成后镜头列表会自动刷新。';
+
+  @override
+  String studioGridStoryboardFailed(String message) {
+    return '宫格生成失败：$message';
+  }
+
+  @override
+  String get studioStoryboardStudioNoShots => '当前剧本还没有镜头，请先在剧本步骤添加分镜。';
+
+  @override
+  String get studioStoryboardStudioSelectShot => '从左侧选择镜头以预览和编辑。';
+
+  @override
+  String get studioStoryboardStudioEmptyPrompt => '尚无提示词 — 可在右侧编辑或打开完整编辑器。';
+
+  @override
+  String get studioStoryboardStudioOpenEditor => '完整编辑器';
+
+  @override
+  String get studioStoryboardStudioSaveProperties => '保存镜头';
+
+  @override
+  String get studioStoryboardStudioSaved => '镜头属性已保存。';
 
   @override
   String studioEpisodeConsoleTitle(int n) {
@@ -1991,13 +2045,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get helpHubSaving => '保存中…';
 
   @override
-  String get helpHubCategoryRunbook => 'Runbook';
+  String get helpHubCategoryRunbook => '运行手册';
 
   @override
-  String get helpHubCategoryBillingWebhook => 'Billing / Webhook';
+  String get helpHubCategoryBillingWebhook => '计费 / Webhook';
 
   @override
-  String get helpHubCategoryWorkspace => 'Workspace';
+  String get helpHubCategoryWorkspace => '工作区';
 
   @override
   String get helpHubCategoryQuality => '质量';
@@ -2155,6 +2209,31 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get opsWhActivityRecordSuffix => ' Webhook 操作记录';
+
+  @override
+  String get opsWhActivityActionCreated => '已创建';
+
+  @override
+  String get opsWhActivityActionDeleted => '已删除';
+
+  @override
+  String get opsWhActivityActionTestSuccess => '测试投递成功';
+
+  @override
+  String get opsWhActivityActionTestFailed => '测试投递失败';
+
+  @override
+  String get opsWhActivitySummaryDeleted => 'Webhook 已删除';
+
+  @override
+  String opsWhActivitySummaryTestSuccess(String status) {
+    return 'HTTP $status';
+  }
+
+  @override
+  String opsWhActivitySummaryTestFailed(String status, String error) {
+    return 'HTTP $status · $error';
+  }
 
   @override
   String get opsWhChipLatestCreated => '最近创建';
@@ -2565,16 +2644,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get projectsAccessModeRestricted => '显式 ACL';
 
   @override
-  String get projectsAccessModeInherited => '继承 workspace';
+  String get projectsAccessModeInherited => '继承工作区';
 
   @override
-  String get projectsRoleWorkspaceOwner => 'workspace owner';
+  String get projectsRoleWorkspaceOwner => '工作区所有者';
 
   @override
-  String get projectsRoleWorkspaceAdmin => 'workspace admin';
+  String get projectsRoleWorkspaceAdmin => '工作区管理员';
 
   @override
-  String get projectsRoleProjectOwner => '项目 owner';
+  String get projectsRoleProjectOwner => '项目所有者';
 
   @override
   String get projectsRoleEditor => '编辑';
@@ -2621,19 +2700,19 @@ class AppLocalizationsZh extends AppLocalizations {
   String get projectsDialogSectionBrief => '项目立项';
 
   @override
-  String get projectsDialogFieldPremise => 'Premise';
+  String get projectsDialogFieldPremise => '故事前提';
 
   @override
-  String get projectsDialogFieldTargetAudience => 'Target audience';
+  String get projectsDialogFieldTargetAudience => '目标受众';
 
   @override
-  String get projectsDialogFieldEmotionalTone => 'Emotional tone';
+  String get projectsDialogFieldEmotionalTone => '情绪基调';
 
   @override
-  String get projectsDialogFieldCoreHook => 'Core hook';
+  String get projectsDialogFieldCoreHook => '核心钩子';
 
   @override
-  String get projectsDialogFieldVisualDirection => 'Visual direction';
+  String get projectsDialogFieldVisualDirection => '视觉方向';
 
   @override
   String get projectsDialogSectionBrand => '品牌圣经';
@@ -2862,21 +2941,19 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get projectsDialogFieldBrandName => 'Brand name';
+  String get projectsDialogFieldBrandName => '品牌名称';
 
   @override
-  String get projectsDialogFieldBrandPromise => 'Brand promise';
+  String get projectsDialogFieldBrandPromise => '品牌承诺';
 
   @override
-  String get projectsDialogFieldVisualMotifsMultiline => 'Visual motifs (每行一个)';
+  String get projectsDialogFieldVisualMotifsMultiline => '视觉母题（每行一个）';
 
   @override
-  String get projectsDialogFieldForbiddenElementsMultiline =>
-      'Forbidden elements (每行一个)';
+  String get projectsDialogFieldForbiddenElementsMultiline => '禁用元素（每行一个）';
 
   @override
-  String get projectsDialogFieldContinuityRulesMultiline =>
-      'Continuity rules (每行一个)';
+  String get projectsDialogFieldContinuityRulesMultiline => '连续性规则（每行一个）';
 
   @override
   String get projectsDialogCreateButton => '创建';
@@ -3782,6 +3859,16 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String taskCenterJobDetailField(String key, String value) {
+    return '$key=$value';
+  }
+
+  @override
+  String taskCenterJobDetailUpdatedAt(String timestamp) {
+    return '更新时间 $timestamp';
+  }
+
+  @override
   String get taskCenterPhasePrep => '素材准备';
 
   @override
@@ -3853,7 +3940,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get taskCenterTaskDetailsSection => '任务详情';
 
   @override
-  String get taskCenterFieldNumericTaskId => 'numeric task id';
+  String get taskCenterFieldNumericTaskId => '任务数字 ID';
 
   @override
   String get taskCenterLoadNumericIdDetails => '读取任务详情（numeric ID）';
@@ -4619,7 +4706,7 @@ class AppLocalizationsZh extends AppLocalizations {
       '保留只读回归入口，确认评审列表与详情查询仍可正常工作';
 
   @override
-  String get qualityReviewsReadProbeLabel => 'Quality review read probe';
+  String get qualityReviewsReadProbeLabel => '质量评审读取探针';
 
   @override
   String get qualityReviewsRunReadOnlyRegressionCheck => '运行只读回归检查';
@@ -5534,10 +5621,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get qualityReviewsFreshnessNone => '无';
 
   @override
-  String get qualityReviewsFreshnessStale => 'STALE';
+  String get qualityReviewsFreshnessStale => '过期';
 
   @override
-  String get qualityReviewsFreshnessFresh => 'fresh';
+  String get qualityReviewsFreshnessFresh => '最新';
 
   @override
   String get qualityReviewsFreshnessStaleTitle => '看板数据可能不是最新';
@@ -8068,10 +8155,10 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get projectEditorNovelsChapterWorkbenchValueUnknown => 'unknown';
+  String get projectEditorNovelsChapterWorkbenchValueUnknown => '未知';
 
   @override
-  String get projectEditorNovelsChapterWorkbenchValueUnset => 'unset';
+  String get projectEditorNovelsChapterWorkbenchValueUnset => '未设置';
 
   @override
   String get projectEditorNovelsActionSearchFiltersCleared => '已清空章节筛选条件。';
@@ -9092,7 +9179,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get scriptEditorStoryboardsStateFallback => 'unknown';
+  String get scriptEditorStoryboardsStateFallback => '未知';
 
   @override
   String get scriptEditorStoryboardsNarrationExplicit => '已具备显式旁白文案';
@@ -19671,7 +19758,7 @@ class AppLocalizationsZh extends AppLocalizations {
       '来自 get_script_content';
 
   @override
-  String get agentWorkspaceScriptContextUntitledChapter => 'chapter';
+  String get agentWorkspaceScriptContextUntitledChapter => '未命名章节';
 
   @override
   String agentWorkspaceScriptContextChapterPrefix(
@@ -21192,6 +21279,26 @@ class AppLocalizationsZh extends AppLocalizations {
   String get statusPageVersionSectionTitle => '版本信息';
 
   @override
+  String statusPageVersionServiceLine(String service) {
+    return 'service=$service';
+  }
+
+  @override
+  String statusPageVersionNumberLine(String version) {
+    return 'version=$version';
+  }
+
+  @override
+  String statusPageVersionGitShaLine(String gitSha) {
+    return 'git_sha=$gitSha';
+  }
+
+  @override
+  String statusPageReadyDatabaseLine(String database) {
+    return 'database=$database';
+  }
+
+  @override
   String get nativeBridgeMessageNotStarted => '桌面桥接尚未启动。';
 
   @override
@@ -21229,6 +21336,11 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String statusPageBridgeLibraryPathLine(String path) {
     return 'library_path=$path';
+  }
+
+  @override
+  String statusPageBridgeErrorLine(String error) {
+    return 'error=$error';
   }
 
   @override

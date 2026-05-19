@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/layout_breakpoints.dart';
 import '../design_system/tokens.dart';
 import '../design_system/components/studio_pane_header.dart';
 import '../design_system/components/studio_text_styles.dart';
@@ -198,6 +199,42 @@ class ShortVideoMetricData {
 
   final String label;
   final String value;
+}
+
+class ShortVideoLatestExportUi {
+  const ShortVideoLatestExportUi({
+    this.visible = false,
+    this.isWarning = false,
+    this.title = '',
+    this.detail = '',
+    this.statusLine,
+    this.activeTaskTitle,
+    this.activeTaskDetail,
+    this.activeTaskRunning = false,
+    this.activeTaskFailed = false,
+    this.activeTaskError,
+    this.recommendedAction = ShortVideoLatestExportAction.none,
+    this.meta = const <String>[],
+  });
+
+  final bool visible;
+  final bool isWarning;
+  final String title;
+  final String detail;
+  final String? statusLine;
+  final String? activeTaskTitle;
+  final String? activeTaskDetail;
+  final bool activeTaskRunning;
+  final bool activeTaskFailed;
+  final String? activeTaskError;
+  final ShortVideoLatestExportAction recommendedAction;
+  final List<String> meta;
+}
+
+enum ShortVideoLatestExportAction {
+  none,
+  retry,
+  openProductionWorkspace,
 }
 
 class ShortVideoReadinessItem {
@@ -733,6 +770,7 @@ class DeliveryModeBadge extends StatelessWidget {
 class ShortVideoSpaceView extends StatelessWidget {
   const ShortVideoSpaceView({
     super.key,
+    this.desktopCapabilityPanel,
     required this.mode,
     required this.modeTitle,
     required this.modeSummary,
@@ -778,11 +816,16 @@ class ShortVideoSpaceView extends StatelessWidget {
     required this.assemblyPanelUi,
     required this.assemblyInputPanelUi,
     required this.exportCheckPanelUi,
+    required this.latestExportUi,
     this.onStartExport,
     this.onStartPreAssembly,
     this.onOpenExportHistory,
+    this.onDownloadLatestExport,
+    this.onCancelLatestExportTask,
+    this.onRetryLatestExportTask,
     this.exportActionBusy = false,
     this.preAssemblyActionBusy = false,
+    this.localAssemblyBlockedHint,
     this.onFixAssemblyStoryboard,
     this.onFixAssemblyProduction,
     this.onFixAssemblyClipDesk,
@@ -793,6 +836,7 @@ class ShortVideoSpaceView extends StatelessWidget {
     this.preAssemblyBlockedTooltip,
     required this.publishPanelUi,
     this.onOpenProductionForAssemblyExport,
+    this.onOpenDesktopDownloads,
     this.onOpenAssemblyClipDeskOps,
     this.onOpenAssemblyDefaultsEditor,
     this.assemblyVersionManagerPanel,
@@ -834,6 +878,7 @@ class ShortVideoSpaceView extends StatelessWidget {
   final ValueChanged<String> onSubtitleStyleChanged;
   final String bgmStrategy;
   final ValueChanged<String> onBgmStrategyChanged;
+  final Widget? desktopCapabilityPanel;
 
   final ShortVideoMode mode;
   final String modeTitle;
@@ -868,11 +913,16 @@ class ShortVideoSpaceView extends StatelessWidget {
   final ShortVideoAssemblyPanelUi assemblyPanelUi;
   final AssemblyInputPanelUi assemblyInputPanelUi;
   final ShortVideoExportCheckPanelUi exportCheckPanelUi;
+  final ShortVideoLatestExportUi latestExportUi;
   final VoidCallback? onStartExport;
   final VoidCallback? onStartPreAssembly;
   final VoidCallback? onOpenExportHistory;
+  final VoidCallback? onDownloadLatestExport;
+  final VoidCallback? onCancelLatestExportTask;
+  final VoidCallback? onRetryLatestExportTask;
   final bool exportActionBusy;
   final bool preAssemblyActionBusy;
+  final String? localAssemblyBlockedHint;
   final VoidCallback? onFixAssemblyStoryboard;
   final VoidCallback? onFixAssemblyProduction;
   final VoidCallback? onFixAssemblyClipDesk;
@@ -883,6 +933,7 @@ class ShortVideoSpaceView extends StatelessWidget {
   final String? preAssemblyBlockedTooltip;
   final ShortVideoPublishPanelUi publishPanelUi;
   final VoidCallback? onOpenProductionForAssemblyExport;
+  final VoidCallback? onOpenDesktopDownloads;
   final VoidCallback? onOpenAssemblyClipDeskOps;
   final VoidCallback? onOpenAssemblyDefaultsEditor;
   final Widget? assemblyVersionManagerPanel;
@@ -931,6 +982,10 @@ class ShortVideoSpaceView extends StatelessWidget {
             tooltip: l10n.notificationsRiskyPrefsTooltip,
           ),
         ),
+        if (desktopCapabilityPanel != null) ...[
+          const SizedBox(height: 16),
+          desktopCapabilityPanel!,
+        ],
         const SizedBox(height: 16),
         _Panel(
           child: Column(
@@ -989,21 +1044,38 @@ class ShortVideoSpaceView extends StatelessWidget {
           onResetConfirmationDontShowAgain: onResetConfirmationDontShowAgain,
         ),
         const SizedBox(height: 16),
+        _Panel(
+          child: _OverviewMigrationPanel(
+            spaceOverviewSummary: spaceOverviewSummary,
+            overviewMetrics: overviewMetrics,
+            qualitySummaryLine: qualitySummaryLine,
+            badCaseMetrics: badCaseMetrics,
+            recentTaskLines: recentTaskLines,
+            migrationSummary: migrationSummary,
+            onOpenProjects: onOpenProjects,
+            onOpenScriptWorkspace: onOpenScriptWorkspace,
+            onOpenProductionWorkspace: onOpenProductionWorkspace,
+            onOpenTasks: onOpenTasks,
+            onOpenQuality: onOpenQuality,
+            runningJobCount: runningJobCount,
+          ),
+        ),
+        const SizedBox(height: 16),
         _ProductionPanel(
-          spaceOverviewSummary: spaceOverviewSummary,
-          overviewMetrics: overviewMetrics,
-          qualitySummaryLine: qualitySummaryLine,
-          badCaseMetrics: badCaseMetrics,
-          recentTaskLines: recentTaskLines,
           assetsOverviewPanelUi: assetsOverviewPanelUi,
           assemblyPanelUi: assemblyPanelUi,
           assemblyInputPanelUi: assemblyInputPanelUi,
           exportCheckPanelUi: exportCheckPanelUi,
+          latestExportUi: latestExportUi,
           onStartExport: onStartExport,
           onStartPreAssembly: onStartPreAssembly,
           onOpenExportHistory: onOpenExportHistory,
+          onDownloadLatestExport: onDownloadLatestExport,
+          onCancelLatestExportTask: onCancelLatestExportTask,
+          onRetryLatestExportTask: onRetryLatestExportTask,
           exportActionBusy: exportActionBusy,
           preAssemblyActionBusy: preAssemblyActionBusy,
+          localAssemblyBlockedHint: localAssemblyBlockedHint,
           onFixAssemblyStoryboard: onFixAssemblyStoryboard,
           onFixAssemblyProduction: onFixAssemblyProduction,
           onFixAssemblyClipDesk: onFixAssemblyClipDesk,
@@ -1013,6 +1085,7 @@ class ShortVideoSpaceView extends StatelessWidget {
           onCreateDraftFromAssemblyJob: onCreateDraftFromAssemblyJob,
           preAssemblyBlockedTooltip: preAssemblyBlockedTooltip,
           onOpenProductionForAssemblyExport: onOpenProductionForAssemblyExport,
+          onOpenDesktopDownloads: onOpenDesktopDownloads,
           onOpenAssemblyClipDeskOps: onOpenAssemblyClipDeskOps,
           onOpenAssemblyDefaultsEditor: onOpenAssemblyDefaultsEditor,
           assemblyVersionManagerPanel: assemblyVersionManagerPanel,
@@ -1045,29 +1118,38 @@ class ShortVideoSpaceView extends StatelessWidget {
                 style: theme.textTheme.titleSmall,
               ),
               const SizedBox(height: 8),
-              Text(readinessIntro, style: studioMutedBodyMedium(context)),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  _MetricChip(
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final inlineHeader =
+                      constraints.maxWidth >= kStudioCompactHeaderMinWidth;
+                  final intro = Text(
+                    readinessIntro,
+                    style: studioMutedBodyMedium(context),
+                  );
+                  final readyChip = _MetricChip(
                     label: l10n.shortVideoSpaceReadinessReadyChip,
                     value: readinessCountLabel,
-                  ),
-                ],
+                  );
+                  if (inlineHeader) {
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Expanded(child: intro),
+                        const SizedBox(width: 12),
+                        readyChip,
+                      ],
+                    );
+                  }
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[intro, const SizedBox(height: 8), readyChip],
+                  );
+                },
               ),
-              const SizedBox(height: 8),
-              Text(
-                readinessGapSummary,
-                style: theme.textTheme.bodySmall?.copyWith(color: muted),
-              ),
-              const SizedBox(height: 12),
-              for (final item in readinessItems)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: _ReadinessRow(item: item),
-                ),
+              const SizedBox(height: 10),
+              Text(readinessGapSummary, style: studioMutedBodySmall(context)),
+              const SizedBox(height: 16),
+              _ReadinessFlowStrip(items: readinessItems),
               const SizedBox(height: 16),
               Text(
                 l10n.shortVideoSpaceSectionShotReadinessServer,
@@ -1151,88 +1233,56 @@ class ShortVideoSpaceView extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         _Panel(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n.shortVideoSpaceSectionSuggestedNext,
-                style: theme.textTheme.titleSmall,
-              ),
-              const SizedBox(height: 8),
-              Text(nextStepTitle, style: theme.textTheme.titleMedium),
-              const SizedBox(height: 6),
-              Text(nextStepDetail, style: studioMutedBodyMedium(context)),
-              const SizedBox(height: 12),
-              FilledButton.icon(
-                onPressed: onNextStep,
-                icon: const Icon(Icons.arrow_forward_outlined),
-                label: Text(nextStepButtonLabel),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-        Wrap(
-          spacing: 12,
-          runSpacing: 12,
-          children: stageCards
-              .map(
-                (item) => _StageCard(
-                  title: item.title,
-                  status: item.status,
-                  detail: item.detail,
-                ),
-              )
-              .toList(growable: false),
-        ),
-        const SizedBox(height: 16),
-        _Panel(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n.shortVideoSpaceSectionMigrationOrder,
-                style: theme.textTheme.titleSmall,
-              ),
-              const SizedBox(height: 8),
-              Text(migrationSummary, style: theme.textTheme.bodyMedium),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  OutlinedButton.icon(
-                    onPressed: onOpenProjects,
-                    icon: const Icon(Icons.folder_open_outlined),
-                    label: Text(l10n.shortVideoSpaceNavProjects),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final sideBySide = constraints.maxWidth >= kStudioTwoColumnMinWidth;
+              final nextStepBlock = Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    l10n.shortVideoSpaceSectionSuggestedNext,
+                    style: theme.textTheme.titleSmall,
                   ),
-                  OutlinedButton.icon(
-                    onPressed: onOpenScriptWorkspace,
-                    icon: const Icon(Icons.edit_note_outlined),
-                    label: Text(l10n.shortVideoSpaceNavScriptWorkspace),
-                  ),
-                  OutlinedButton.icon(
-                    onPressed: onOpenProductionWorkspace,
-                    icon: const Icon(Icons.movie_creation_outlined),
-                    label: Text(l10n.shortVideoSpaceNavProductionWorkspace),
-                  ),
-                  OutlinedButton.icon(
-                    onPressed: onOpenTasks,
-                    icon: const Icon(Icons.checklist_outlined),
-                    label: Text(
-                      runningJobCount > 0
-                          ? '${l10n.shortVideoSpaceNavTaskCenter} ($runningJobCount)'
-                          : l10n.shortVideoSpaceNavTaskCenter,
-                    ),
-                  ),
-                  OutlinedButton.icon(
-                    onPressed: onOpenQuality,
-                    icon: const Icon(Icons.fact_check_outlined),
-                    label: Text(l10n.shortVideoSpaceNavQualityReviews),
+                  const SizedBox(height: 8),
+                  Text(nextStepTitle, style: theme.textTheme.titleMedium),
+                  const SizedBox(height: 6),
+                  Text(nextStepDetail, style: studioMutedBodyMedium(context)),
+                  const SizedBox(height: 12),
+                  FilledButton.icon(
+                    onPressed: onNextStep,
+                    icon: const Icon(Icons.arrow_forward_outlined),
+                    label: Text(nextStepButtonLabel),
                   ),
                 ],
-              ),
-            ],
+              );
+              final stageFlow = _StageFlowStrip(cards: stageCards);
+              if (sideBySide) {
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Expanded(flex: 4, child: nextStepBlock),
+                    const SizedBox(width: 28),
+                    Expanded(flex: 8, child: stageFlow),
+                  ],
+                );
+              }
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  nextStepBlock,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    child: Divider(
+                      height: 1,
+                      color: theme.colorScheme.outlineVariant.withValues(
+                        alpha: 0.65,
+                      ),
+                    ),
+                  ),
+                  stageFlow,
+                ],
+              );
+            },
           ),
         ),
       ],
@@ -1292,43 +1342,208 @@ class _ModeSegmentedButton extends StatelessWidget {
   }
 }
 
-class _StageCard extends StatelessWidget {
-  const _StageCard({
-    required this.title,
-    required this.status,
-    required this.detail,
+/// One node in a horizontal flow lane (node row + caption row stay column-aligned).
+class _FlowLaneCell {
+  const _FlowLaneCell({required this.node, required this.caption});
+
+  final Widget node;
+  final Widget caption;
+}
+
+/// Arrows align to the vertical center of [nodeMinHeight]; captions sit in a second row.
+class _HorizontalFlowLane extends StatefulWidget {
+  const _HorizontalFlowLane({
+    required this.nodeWidth,
+    required this.nodeMinHeight,
+    required this.cells,
   });
 
-  final String title;
-  final String status;
-  final String detail;
+  static const double _arrowSlotWidth = 36;
+
+  final double nodeWidth;
+  final double nodeMinHeight;
+  final List<_FlowLaneCell> cells;
+
+  @override
+  State<_HorizontalFlowLane> createState() => _HorizontalFlowLaneState();
+}
+
+class _HorizontalFlowLaneState extends State<_HorizontalFlowLane> {
+  late final ScrollController _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.cells.isEmpty) return const SizedBox.shrink();
+    final nodeChildren = <Widget>[];
+    final captionChildren = <Widget>[];
+    for (var i = 0; i < widget.cells.length; i++) {
+      if (i > 0) {
+        nodeChildren.add(
+          SizedBox(
+            width: _HorizontalFlowLane._arrowSlotWidth,
+            height: widget.nodeMinHeight,
+            child: const Center(child: _FlowArrowIcon()),
+          ),
+        );
+        captionChildren.add(
+          const SizedBox(width: _HorizontalFlowLane._arrowSlotWidth),
+        );
+      }
+      nodeChildren.add(
+        SizedBox(
+          width: widget.nodeWidth,
+          height: widget.nodeMinHeight,
+          child: widget.cells[i].node,
+        ),
+      );
+      captionChildren.add(
+        SizedBox(width: widget.nodeWidth, child: widget.cells[i].caption),
+      );
+    }
+    final lane = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: nodeChildren,
+        ),
+        const SizedBox(height: 6),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: captionChildren,
+        ),
+      ],
+    );
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final viewportWidth = constraints.maxWidth.isFinite
+            ? constraints.maxWidth
+            : MediaQuery.sizeOf(context).width;
+        final showScrollHint = viewportWidth < 720;
+        return SizedBox(
+          width: viewportWidth,
+          child: Scrollbar(
+            controller: _scrollController,
+            thumbVisibility: showScrollHint,
+            interactive: true,
+            notificationPredicate: (ScrollNotification notification) =>
+                notification.metrics.axis == Axis.horizontal,
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              scrollDirection: Axis.horizontal,
+              physics: const ClampingScrollPhysics(
+                parent: BouncingScrollPhysics(),
+              ),
+              clipBehavior: Clip.none,
+              padding: const EdgeInsets.only(bottom: 4, right: 8),
+              child: lane,
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _FlowArrowIcon extends StatelessWidget {
+  const _FlowArrowIcon();
+
+  @override
+  Widget build(BuildContext context) {
+    final muted = studioMutedTextColor(context);
+    return Icon(
+      Icons.arrow_forward_rounded,
+      size: 18,
+      color: muted.withValues(alpha: 0.78),
+    );
+  }
+}
+
+/// Linear onboarding stages (立项 → 剧本 → 素材 → 出片).
+class _StageFlowStrip extends StatelessWidget {
+  const _StageFlowStrip({required this.cards});
+
+  static const double _nodeWidth = 208;
+  static const double _nodeMinHeight = 58;
+
+  final List<ShortVideoStageCardData> cards;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final outline = theme.colorScheme.outline;
-    return SizedBox(
-      width: 260,
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          border: Border.all(color: outline),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: theme.textTheme.titleSmall),
-            const SizedBox(height: 6),
-            Text(
-              status,
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: theme.colorScheme.primary,
+    final scheme = theme.colorScheme;
+    final muted = studioMutedTextColor(context);
+    return _HorizontalFlowLane(
+      nodeWidth: _nodeWidth,
+      nodeMinHeight: _nodeMinHeight,
+      cells: cards
+          .map(
+            (card) => _FlowLaneCell(
+              node: _FlowNodeShell(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(card.title, style: theme.textTheme.titleSmall),
+                    const SizedBox(height: 2),
+                    Text(
+                      card.status,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: scheme.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              caption: Text(
+                card.detail,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: muted,
+                  height: 1.35,
+                ),
               ),
             ),
-            const SizedBox(height: 8),
-            Text(detail, style: theme.textTheme.bodySmall),
-          ],
+          )
+          .toList(growable: false),
+    );
+  }
+}
+
+class _FlowNodeShell extends StatelessWidget {
+  const _FlowNodeShell({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return SizedBox.expand(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: scheme.surfaceContainerHighest.withValues(alpha: 0.45),
+          border: Border.all(color: scheme.outlineVariant),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          child: Align(alignment: Alignment.centerLeft, child: child),
         ),
       ),
     );
@@ -1505,44 +1720,99 @@ class _MetricChip extends StatelessWidget {
   }
 }
 
-class _ReadinessRow extends StatelessWidget {
-  const _ReadinessRow({required this.item});
+/// Horizontal pipeline for mode readiness (script → assets → storyboard …).
+class _ReadinessFlowStrip extends StatelessWidget {
+  const _ReadinessFlowStrip({required this.items});
+
+  static const double _nodeWidth = 132;
+  static const double _nodeMinHeight = 40;
+
+  final List<ShortVideoReadinessItem> items;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final muted = studioMutedTextColor(context);
+    return _HorizontalFlowLane(
+      nodeWidth: _nodeWidth,
+      nodeMinHeight: _nodeMinHeight,
+      cells: items
+          .map(
+            (item) => _FlowLaneCell(
+              node: _ReadinessFlowNode(item: item),
+              caption: Text(
+                item.detail,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: muted,
+                  height: 1.35,
+                ),
+              ),
+            ),
+          )
+          .toList(growable: false),
+    );
+  }
+}
+
+class _ReadinessFlowNode extends StatelessWidget {
+  const _ReadinessFlowNode({required this.item});
 
   final ShortVideoReadinessItem item;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = item.ready
-        ? theme.colorScheme.primary
-        : theme.colorScheme.outline;
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(
-          item.ready
-              ? Icons.check_circle_outline
-              : Icons.radio_button_unchecked,
-          size: 18,
-          color: color,
+    final scheme = theme.colorScheme;
+    final muted = studioMutedTextColor(context);
+    final accent = item.ready ? scheme.primary : muted;
+    final border = item.ready
+        ? scheme.primary.withValues(alpha: 0.42)
+        : scheme.outlineVariant;
+    final fill = item.ready
+        ? scheme.primaryContainer.withValues(alpha: 0.35)
+        : scheme.surfaceContainerHighest.withValues(alpha: 0.45);
+    return SizedBox.expand(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: fill,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: border),
         ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(item.label, style: theme.textTheme.labelLarge),
-              const SizedBox(height: 2),
-              Text(
-                item.detail,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.outline,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Row(
+              children: <Widget>[
+                Icon(
+                  item.ready
+                      ? Icons.check_circle_outline
+                      : Icons.radio_button_unchecked,
+                  size: 16,
+                  color: accent,
                 ),
-              ),
-            ],
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    item.label,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: item.ready
+                          ? scheme.onPrimaryContainer
+                          : scheme.onSurface,
+                      fontWeight: FontWeight.w600,
+                      height: 1.2,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-      ],
+      ),
     );
   }
 }

@@ -1,3 +1,4 @@
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 // ignore_for_file: invalid_use_of_protected_member
 
 part of 'section.dart';
@@ -10,6 +11,25 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
     'failed',
     'cancelled',
   };
+  static const _preAssemblyJobKind = 'short_video.pre_assembly';
+  static const _exportJobKind = 'video.export';
+
+  Future<void> _refreshActiveExportTaskDetails(String taskId) async {
+    final token = widget.accessToken?.trim();
+    if (token == null || token.isEmpty || taskId.trim().isEmpty) {
+      return;
+    }
+    try {
+      final task = await getExportTaskByIdV1(token, taskId);
+      if (!mounted) return;
+      setState(() {
+        if (_activeAssemblyJob?.kind == _exportJobKind &&
+            _activeAssemblyJob?.id == task.id) {
+          _activeExportTask = task;
+        }
+      });
+    } catch (_) {}
+  }
 
   Future<void> _refreshActiveAssemblyJob() async {
     final token = widget.accessToken?.trim();
@@ -22,24 +42,40 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
       if (!mounted) return;
       setState(() {
         _activeAssemblyJob = row;
+        if (row.kind != _exportJobKind) {
+          _activeExportTask = null;
+        }
       });
+      _syncLatestSuccessfulExportFromJob(row);
+      if (row.kind == _exportJobKind) {
+        unawaited(_refreshActiveExportTaskDetails(row.id));
+      }
     } catch (_) {}
   }
 
-  void _beginAssemblyJobTracking(String jobId) {
+  void _beginAssemblyJobTracking(
+    String jobId, {
+    String kind = _preAssemblyJobKind,
+  }) {
     _assemblyJobPollTimer?.cancel();
     setState(() {
       _activeAssemblyJob = JobRow(
         id: jobId,
         numericTaskId: 0,
         ownerUserId: '',
-        kind: 'short_video.pre_assembly',
+        kind: kind,
         status: 'queued',
         payload: const {},
         createdAt: DateTime.now().toUtc().toIso8601String(),
         updatedAt: DateTime.now().toUtc().toIso8601String(),
       );
+      if (kind != _exportJobKind) {
+        _activeExportTask = null;
+      }
     });
+    if (kind == _exportJobKind) {
+      unawaited(_refreshActiveExportTaskDetails(jobId));
+    }
     _assemblyJobPollTimer = Timer.periodic(const Duration(seconds: 3), (_) {
       unawaited(_pollActiveAssemblyJobOnce());
     });
@@ -59,12 +95,25 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
           _terminalJobStatuses.contains(_activeAssemblyJob!.status);
       setState(() {
         _activeAssemblyJob = row;
+        if (row.kind != _exportJobKind) {
+          _activeExportTask = null;
+        }
       });
+      _syncLatestSuccessfulExportFromJob(row);
+      if (row.kind == _exportJobKind) {
+        unawaited(_refreshActiveExportTaskDetails(row.id));
+      }
       if (_terminalJobStatuses.contains(row.status)) {
         _assemblyJobPollTimer?.cancel();
         _assemblyJobPollTimer = null;
         if (!wasTerminal) {
-          _invalidateProductionSnapshots(includeJobs: true);
+          _invalidateProductionSnapshots(
+            includeJobs: true,
+            extra: const <StudioSnapshotKey>[StudioSnapshotKey.assemblyVersions],
+          );
+          if (row.kind == _preAssemblyJobKind && row.status == 'succeeded') {
+            unawaited(_loadDraftsAndVersions());
+          }
         }
       }
     } catch (_) {}
@@ -79,7 +128,14 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
       if (!mounted) return;
       setState(() {
         _activeAssemblyJob = updated;
+        if (updated.kind != _exportJobKind) {
+          _activeExportTask = null;
+        }
       });
+      _syncLatestSuccessfulExportFromJob(updated);
+      if (updated.kind == _exportJobKind) {
+        unawaited(_refreshActiveExportTaskDetails(updated.id));
+      }
     } catch (e) {
       if (!mounted) return;
       final l10n = resolveAppLocalizationsForErrors(context);
@@ -98,8 +154,15 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
       if (!mounted) return;
       setState(() {
         _activeAssemblyJob = updated;
+        if (updated.kind != _exportJobKind) {
+          _activeExportTask = null;
+        }
       });
-      _beginAssemblyJobTracking(updated.id);
+      _syncLatestSuccessfulExportFromJob(updated);
+      if (updated.kind == _exportJobKind) {
+        unawaited(_refreshActiveExportTaskDetails(updated.id));
+      }
+      _beginAssemblyJobTracking(updated.id, kind: updated.kind);
     } catch (e) {
       if (!mounted) return;
       final l10n = resolveAppLocalizationsForErrors(context);
@@ -167,7 +230,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
         return;
       }
       final l10n = resolveAppLocalizationsForErrors(context);
-      _beginAssemblyJobTracking(response.jobId);
+      _beginAssemblyJobTracking(response.jobId, kind: _preAssemblyJobKind);
       ScaffoldMessenger.maybeOf(context)?.showSnackBar(
         SnackBar(
           content: Text(
@@ -260,15 +323,15 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
           id: enqueue.jobId,
           numericTaskId: 0,
           ownerUserId: '',
-          kind: 'video.export',
+          kind: _exportJobKind,
           status: 'queued',
           payload: const {},
           createdAt: DateTime.now().toUtc().toIso8601String(),
           updatedAt: DateTime.now().toUtc().toIso8601String(),
         );
       });
-      _beginAssemblyJobTracking(enqueue.jobId);
-      final completed = await _openExportProgressDialog(
+      _beginAssemblyJobTracking(enqueue.jobId, kind: _exportJobKind);
+      final progressResult = await _openExportProgressDialog(
         context: context,
         taskId: enqueue.jobId,
       );
@@ -276,16 +339,30 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
         return;
       }
       final l10n = resolveAppLocalizationsForErrors(context);
-      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-        SnackBar(
-          content: Text(
-            completed
-                ? l10n.shortVideoSpaceProductionAssemblyExportCompleted
-                : l10n.shortVideoSpaceProductionAssemblyExportNotCompleted,
+      if (progressResult.openHistoryRequested) {
+        final historyResult = await _openExportHistoryDialog(
+          context: context,
+          currentTaskId: enqueue.jobId,
+        );
+        if (!mounted) {
+          return;
+        }
+        await _applyExportHistoryDialogResult(historyResult);
+      } else {
+        ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+          SnackBar(
+            content: Text(
+              progressResult.completed
+                  ? l10n.shortVideoSpaceProductionAssemblyExportCompleted
+                  : l10n.shortVideoSpaceProductionAssemblyExportNotCompleted,
+            ),
           ),
-        ),
+        );
+      }
+      _invalidateProductionSnapshots(
+        includeJobs: true,
+        extra: const <StudioSnapshotKey>[StudioSnapshotKey.assemblyVersions],
       );
-      _invalidateProductionSnapshots(includeJobs: true);
     } catch (e) {
       if (!mounted) {
         return;
@@ -320,7 +397,132 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
     if (_selectedProject == null || _exportActionBusy) {
       return;
     }
-    await _openExportHistoryDialog(context: context);
+    final result = await _openExportHistoryDialog(context: context);
+    if (!mounted) {
+      return;
+    }
+    await _applyExportHistoryDialogResult(result);
+  }
+
+  void _syncLatestSuccessfulExportFromJob(JobRow job) {
+    if (job.kind != _exportJobKind || job.status != 'succeeded') {
+      return;
+    }
+    final item = exportHistoryItemFromJob(job);
+    if (item.outputUrl == null || item.outputUrl!.trim().isEmpty) {
+      return;
+    }
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _latestSuccessfulExport = item;
+    });
+  }
+
+  Future<void> _refreshLatestSuccessfulExport() async {
+    final token = widget.accessToken?.trim();
+    final project = _selectedProject;
+    if (token == null || token.isEmpty || project == null) {
+      if (mounted) {
+        setState(() {
+          _latestSuccessfulExport = null;
+        });
+      }
+      return;
+    }
+    try {
+      final jobs = await fetchJobs(
+        token,
+        kind: _exportJobKind,
+        status: 'succeeded',
+        limit: 50,
+      );
+      if (!mounted || _selectedProjectId != project.id) {
+        return;
+      }
+      final items = jobs
+          .where((job) => job.payload['project_uuid']?.toString() == project.id)
+          .map(exportHistoryItemFromJob)
+          .where((item) => item.outputUrl?.trim().isNotEmpty ?? false)
+          .toList(growable: false);
+      items.sort((a, b) {
+        final aTime = a.completedAt ?? a.createdAt;
+        final bTime = b.completedAt ?? b.createdAt;
+        return bTime.compareTo(aTime);
+      });
+      setState(() {
+        _latestSuccessfulExport = items.isEmpty ? null : items.first;
+      });
+    } catch (_) {}
+  }
+
+  Future<void> _downloadLatestSuccessfulExport() async {
+    final item = _latestSuccessfulExport;
+    final url = item?.outputUrl?.trim();
+    if (item == null || url == null || url.isEmpty) {
+      return;
+    }
+    final uri = Uri.tryParse(url);
+    if (uri != null) {
+      try {
+        final launched = await launchUrl(
+          uri,
+          mode: LaunchMode.externalApplication,
+        );
+        if (launched) {
+          return;
+        }
+      } catch (_) {}
+    }
+    await Clipboard.setData(ClipboardData(text: url));
+    if (!mounted) {
+      return;
+    }
+    final l10n = resolveAppLocalizationsForErrors(context);
+    ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+      SnackBar(
+        content: Text(
+          l10n.shortVideoSpaceDialogExportHistoryDownloadLinkCopied(
+            getFormatDisplayName(l10n, item.format.toLowerCase()),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _applyExportHistoryDialogResult(
+    ExportHistoryDialogResult result,
+  ) async {
+    if (result.openProductionWorkspaceRequested) {
+      widget.onOpenProductionWorkspace();
+    }
+    final taskId = result.focusedTaskId?.trim();
+    if (taskId == null || taskId.isEmpty) {
+      return;
+    }
+    if (result.shouldTrackFocusedTask) {
+      final token = widget.accessToken?.trim();
+      if (token != null && token.isNotEmpty) {
+        try {
+          final job = await fetchJob(token, taskId);
+          if (!mounted) {
+            return;
+          }
+          setState(() {
+            _activeAssemblyJob = job;
+          });
+          if (!_terminalJobStatuses.contains(job.status)) {
+            _beginAssemblyJobTracking(job.id, kind: job.kind);
+          }
+        } catch (_) {}
+      }
+    }
+    await _refreshLatestSuccessfulExport();
+    _invalidateProductionSnapshots(
+      includeJobs: true,
+      extra: const <StudioSnapshotKey>[StudioSnapshotKey.assemblyVersions],
+    );
   }
 
   /// Show operation feedback with auto-dismiss after 3 seconds
@@ -347,10 +549,10 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
   }) async {
     final ctrl = TextEditingController(text: initialValue);
     final l10n = resolveAppLocalizationsForErrors(context);
-    final result = await showDialog<String>(
+    final result = await showStudioDialog<String>(
       context: context,
       builder: (ctx) {
-        return AlertDialog(
+        return StudioAlertDialog(
           title: Text(l10n.shortVideoSpaceProductionAssemblyReplaceVideoTitle),
           content: TextField(
             controller: ctrl,
@@ -386,10 +588,10 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
     required BuildContext context,
     required String audioUrl,
   }) {
-    showDialog<void>(
+    showStudioDialog<void>(
       context: context,
       builder: (dialogContext) {
-        return Dialog(
+        return StudioDialogFrame(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 500),
             child: AudioPreviewPlayer(
@@ -443,7 +645,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
     var operationInProgress = false;
     var selectedStoryboardIds = <int>{}; // Batch selection state
     if (!mounted) return;
-    await showDialog<void>(
+    await showStudioDialog<void>(
       context: context,
       builder: (ctx) {
         return StatefulBuilder(
@@ -959,7 +1161,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
             );
             final visibleEntries = buildVisibleEntries();
 
-            return AlertDialog(
+            return StudioAlertDialog(
               title: Text(l10n.shortVideoSpaceProductionAssemblyBasicOpsTitle),
               content: SizedBox(
                 width: 760,
@@ -1258,7 +1460,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
     Timer? poller;
 
     try {
-      await showDialog<void>(
+      await showStudioDialog<void>(
         context: context,
         builder: (dialogContext) {
           final dialogL10n = resolveAppLocalizationsForErrors(dialogContext);
@@ -1344,7 +1546,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                         task.taskId.trim().isNotEmpty,
                   )
                   .toList(growable: false);
-              return AlertDialog(
+              return StudioAlertDialog(
                 title: Text(
                   l10n.shortVideoSpaceProductionAssemblyVoiceoverTaskCenterTitle,
                 ),
@@ -1356,7 +1558,7 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                     children: [
                       Row(
                         children: [
-                          DropdownButton<String>(
+                          StudioDropdownButton<String>(
                             value: statusFilter,
                             items: [
                               DropdownMenuItem(
@@ -2101,9 +2303,9 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
                                       )?.toString() ??
                                       '',
                                 );
-                                final picked = await showDialog<int>(
+                                final picked = await showStudioDialog<int>(
                                   context: ctx,
-                                  builder: (dCtx) => AlertDialog(
+                                  builder: (dCtx) => StudioAlertDialog(
                                     title: Text(
                                       l10n.shortVideoSpaceProductionAssemblySingleShotDurationTitle,
                                     ),
@@ -2229,11 +2431,11 @@ extension _ShortVideoSpaceSectionProductionAssemblyExtension
     final bgmCtrl = TextEditingController(text: _bgmStrategy);
     try {
       if (!mounted) return;
-      await showDialog<void>(
+      await showStudioDialog<void>(
         context: context,
         builder: (ctx) {
           final l10n = resolveAppLocalizationsForErrors(ctx);
-          return AlertDialog(
+          return StudioAlertDialog(
             title: Text(
               l10n.shortVideoSpaceProductionAssemblyAssemblyStyleTitle,
             ),

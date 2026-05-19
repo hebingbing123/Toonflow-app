@@ -559,6 +559,7 @@
       }
     }
   },
+  "studioJobTraySheetTitle": "进行中的任务",
   "studioUnknownCodeEmpty": "（空）",
   "studioUnknownCodeLabel": "未知项：{code}",
   "@studioUnknownCodeLabel": {
@@ -778,8 +779,26 @@
   "studioStoryboardProperties": "属性",
   "studioStoryboardPropertiesHint": "选中镜头后在此编辑提示词、帧模式与候选。",
   "studioKeyboardShortcuts": "快捷键",
-  "studioGridStoryboardHint": "生成宫格图、切分并分配到镜头（后端任务待接）。",
+  "studioGridStoryboardHint": "生成一张宫格图，切分后自动分配到各镜头。",
   "studioGridStoryboardCta": "宫格模式",
+  "studioGridStoryboardDialogTitle": "宫格分镜",
+  "studioGridStoryboardDialogSubtitle": "为当前剧本的 {shotCount} 个镜头配置宫格行列。",
+  "@studioGridStoryboardDialogSubtitle": {"placeholders": {"shotCount": {"type": "int"}}},
+  "studioGridStoryboardRowsLabel": "行数",
+  "studioGridStoryboardColsLabel": "列数",
+  "studioGridStoryboardBasePromptLabel": "场景方向（可选）",
+  "studioGridStoryboardInvalidDimensions": "行、列请在 1–4 之间。",
+  "studioGridStoryboardCellMismatch": "行×列（{cells}）必须等于镜头数（{shotCount}）。",
+  "@studioGridStoryboardCellMismatch": {"placeholders": {"cells": {"type": "int"}, "shotCount": {"type": "int"}}},
+  "studioGridStoryboardEnqueued": "已开始生成宫格，任务完成后镜头列表会自动刷新。",
+  "studioGridStoryboardFailed": "宫格生成失败：{message}",
+  "@studioGridStoryboardFailed": {"placeholders": {"message": {"type": "String"}}},
+  "studioStoryboardStudioNoShots": "当前剧本还没有镜头，请先在剧本步骤添加分镜。",
+  "studioStoryboardStudioSelectShot": "从左侧选择镜头以预览和编辑。",
+  "studioStoryboardStudioEmptyPrompt": "尚无提示词 — 可在右侧编辑或打开完整编辑器。",
+  "studioStoryboardStudioOpenEditor": "完整编辑器",
+  "studioStoryboardStudioSaveProperties": "保存镜头",
+  "studioStoryboardStudioSaved": "镜头属性已保存。",
   "studioEpisodeConsoleTitle": "第 {n} 集",
   "studioEpisodePreviewPlaceholder": "预览",
   "studioEpisodeTabVoice": "配音",
@@ -935,9 +954,9 @@
   "helpHubDialogClose": "关闭",
   "helpHubSave": "保存",
   "helpHubSaving": "保存中…",
-  "helpHubCategoryRunbook": "Runbook",
-  "helpHubCategoryBillingWebhook": "Billing / Webhook",
-  "helpHubCategoryWorkspace": "Workspace",
+  "helpHubCategoryRunbook": "运行手册",
+  "helpHubCategoryBillingWebhook": "计费 / Webhook",
+  "helpHubCategoryWorkspace": "工作区",
   "helpHubCategoryQuality": "质量",
   "helpHubCategoryStatus": "状态",
   "helpHubCategoryGeneral": "通用",
@@ -1069,6 +1088,30 @@
   "opsWhRecentActivity": "最近操作",
   "opsWhCopyActivityTooltip": "复制记录",
   "opsWhActivityRecordSuffix": " Webhook 操作记录",
+  "opsWhActivityActionCreated": "已创建",
+  "opsWhActivityActionDeleted": "已删除",
+  "opsWhActivityActionTestSuccess": "测试投递成功",
+  "opsWhActivityActionTestFailed": "测试投递失败",
+  "opsWhActivitySummaryDeleted": "Webhook 已删除",
+  "opsWhActivitySummaryTestSuccess": "HTTP {status}",
+  "@opsWhActivitySummaryTestSuccess": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "opsWhActivitySummaryTestFailed": "HTTP {status} · {error}",
+  "@opsWhActivitySummaryTestFailed": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "opsWhChipLatestCreated": "最近创建",
   "opsWhChipDisabled": "已停用",
   "opsWhSubscribeHeading": "订阅事件",
@@ -1383,10 +1426,10 @@
   },
   "projectsAgentMemoryPrefix": "项目记忆：",
   "projectsAccessModeRestricted": "显式 ACL",
-  "projectsAccessModeInherited": "继承 workspace",
-  "projectsRoleWorkspaceOwner": "workspace owner",
-  "projectsRoleWorkspaceAdmin": "workspace admin",
-  "projectsRoleProjectOwner": "项目 owner",
+  "projectsAccessModeInherited": "继承工作区",
+  "projectsRoleWorkspaceOwner": "工作区所有者",
+  "projectsRoleWorkspaceAdmin": "工作区管理员",
+  "projectsRoleProjectOwner": "项目所有者",
   "projectsRoleEditor": "编辑",
   "projectsRoleViewer": "查看",
   "projectsRoleMember": "成员",
@@ -1425,11 +1468,11 @@
   },
   "projectsDialogFieldIntro": "项目简介",
   "projectsDialogSectionBrief": "项目立项",
-  "projectsDialogFieldPremise": "Premise",
-  "projectsDialogFieldTargetAudience": "Target audience",
-  "projectsDialogFieldEmotionalTone": "Emotional tone",
-  "projectsDialogFieldCoreHook": "Core hook",
-  "projectsDialogFieldVisualDirection": "Visual direction",
+  "projectsDialogFieldPremise": "故事前提",
+  "projectsDialogFieldTargetAudience": "目标受众",
+  "projectsDialogFieldEmotionalTone": "情绪基调",
+  "projectsDialogFieldCoreHook": "核心钩子",
+  "projectsDialogFieldVisualDirection": "视觉方向",
   "projectsDialogSectionBrand": "品牌圣经",
   "shortVideoSpaceErrorTimeout": "请求超时{context}，请检查网络连接后重试。",
   "@shortVideoSpaceErrorTimeout": {
@@ -1695,11 +1738,11 @@
       }
     }
   },
-  "projectsDialogFieldBrandName": "Brand name",
-  "projectsDialogFieldBrandPromise": "Brand promise",
-  "projectsDialogFieldVisualMotifsMultiline": "Visual motifs (每行一个)",
-  "projectsDialogFieldForbiddenElementsMultiline": "Forbidden elements (每行一个)",
-  "projectsDialogFieldContinuityRulesMultiline": "Continuity rules (每行一个)",
+  "projectsDialogFieldBrandName": "品牌名称",
+  "projectsDialogFieldBrandPromise": "品牌承诺",
+  "projectsDialogFieldVisualMotifsMultiline": "视觉母题（每行一个）",
+  "projectsDialogFieldForbiddenElementsMultiline": "禁用元素（每行一个）",
+  "projectsDialogFieldContinuityRulesMultiline": "连续性规则（每行一个）",
   "projectsDialogCreateButton": "创建",
   "projectsBusyProcessing": "处理中…",
   "projectsArtWorkbenchTitle": "画风工作台",
@@ -2373,6 +2416,25 @@
       }
     }
   },
+  "taskCenterJobDetailField": "{key}={value}",
+  "@taskCenterJobDetailField": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "taskCenterJobDetailUpdatedAt": "更新时间 {timestamp}",
+  "@taskCenterJobDetailUpdatedAt": {
+    "placeholders": {
+      "timestamp": {
+        "type": "String"
+      }
+    }
+  },
   "taskCenterPhasePrep": "素材准备",
   "taskCenterPhaseImage": "出图",
   "taskCenterPhaseVideo": "出视频",
@@ -2409,7 +2471,7 @@
   "taskCenterRetry": "重试",
   "taskCenterCancel": "取消",
   "taskCenterTaskDetailsSection": "任务详情",
-  "taskCenterFieldNumericTaskId": "numeric task id",
+  "taskCenterFieldNumericTaskId": "任务数字 ID",
   "taskCenterLoadNumericIdDetails": "读取任务详情（numeric ID）",
   "taskCenterFieldTaskUuid": "任务 UUID",
   "taskCenterLoadUuidDetails": "读取 UUID 详情",
@@ -3040,7 +3102,7 @@
   "qualityReviewsTokenEfficiency": "Token 效率",
   "qualityReviewsCompatibilityCheck": "兼容性检查",
   "qualityReviewsCompatibilityCheckIntro": "保留只读回归入口，确认评审列表与详情查询仍可正常工作",
-  "qualityReviewsReadProbeLabel": "Quality review read probe",
+  "qualityReviewsReadProbeLabel": "质量评审读取探针",
   "qualityReviewsRunReadOnlyRegressionCheck": "运行只读回归检查",
   "qualityReviewsCount": "{count} 条评审",
   "@qualityReviewsCount": {
@@ -4082,8 +4144,8 @@
   "qualityReviewsFreshnessUnknownAgeLabel": "时间未知",
   "qualityReviewsFreshnessNever": "尚未刷新",
   "qualityReviewsFreshnessNone": "无",
-  "qualityReviewsFreshnessStale": "STALE",
-  "qualityReviewsFreshnessFresh": "fresh",
+  "qualityReviewsFreshnessStale": "过期",
+  "qualityReviewsFreshnessFresh": "最新",
   "qualityReviewsFreshnessStaleTitle": "看板数据可能不是最新",
   "qualityReviewsFreshnessFreshTitle": "看板数据已是最新",
   "qualityReviewsFreshnessStaleBody": "上次更新于 {refreshedAt}（约 {age} 前）",
@@ -6123,8 +6185,8 @@
       }
     }
   },
-  "projectEditorNovelsChapterWorkbenchValueUnknown": "unknown",
-  "projectEditorNovelsChapterWorkbenchValueUnset": "unset",
+  "projectEditorNovelsChapterWorkbenchValueUnknown": "未知",
+  "projectEditorNovelsChapterWorkbenchValueUnset": "未设置",
   "projectEditorNovelsActionSearchFiltersCleared": "已清空章节筛选条件。",
   "projectEditorNovelsActionChapterCreateOk": "已新增章节。",
   "projectEditorNovelsActionPreparseResultEmpty": "没有识别到可导入内容。",
@@ -6833,7 +6895,7 @@
       }
     }
   },
-  "scriptEditorStoryboardsStateFallback": "unknown",
+  "scriptEditorStoryboardsStateFallback": "未知",
   "scriptEditorStoryboardsNarrationExplicit": "已具备显式旁白文案",
   "scriptEditorStoryboardsNarrationPromptFallback": "将回退到分镜提示词",
   "scriptEditorStoryboardsNarrationPlaceholder": "仍是占位文本",
@@ -14600,7 +14662,7 @@
   "agentWorkspaceScriptContextPlanDraftsSubtitle": "最多展示前 4 条 script rows",
   "agentWorkspaceScriptContextCurrentScriptBody": "来自 get_script_content",
   "agentWorkspaceScriptContextFromScriptContent": "来自 get_script_content",
-  "agentWorkspaceScriptContextUntitledChapter": "chapter",
+  "agentWorkspaceScriptContextUntitledChapter": "未命名章节",
   "agentWorkspaceScriptContextChapterPrefix": "第 {chapterIndex} 章 · {chapter}",
   "agentWorkspaceScriptContextNovelChapters": "来自 get_novel_text，最多展示前 4 条",
   "agentWorkspaceScriptContextNovelChaptersSubtitle": "来自 get_novel_text，最多展示前 4 条",
@@ -16408,6 +16470,38 @@
   },
   "statusPageRequestFailed": "请求失败",
   "statusPageVersionSectionTitle": "版本信息",
+  "statusPageVersionServiceLine": "service={service}",
+  "@statusPageVersionServiceLine": {
+    "placeholders": {
+      "service": {
+        "type": "String"
+      }
+    }
+  },
+  "statusPageVersionNumberLine": "version={version}",
+  "@statusPageVersionNumberLine": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "statusPageVersionGitShaLine": "git_sha={gitSha}",
+  "@statusPageVersionGitShaLine": {
+    "placeholders": {
+      "gitSha": {
+        "type": "String"
+      }
+    }
+  },
+  "statusPageReadyDatabaseLine": "database={database}",
+  "@statusPageReadyDatabaseLine": {
+    "placeholders": {
+      "database": {
+        "type": "String"
+      }
+    }
+  },
   "nativeBridgeMessageNotStarted": "桌面桥接尚未启动。",
   "nativeBridgeMessageWebSkipped": "Web 运行时会跳过桌面 Rust 桥接。",
   "nativeBridgeMessageReady": "桌面 Rust 桥接已就绪。",
@@ -16432,6 +16526,10 @@
   "statusPageBridgeLibraryPathLine": "library_path={path}",
   "@statusPageBridgeLibraryPathLine": {
     "placeholders": { "path": { "type": "String" } }
+  },
+  "statusPageBridgeErrorLine": "error={error}",
+  "@statusPageBridgeErrorLine": {
+    "placeholders": { "error": { "type": "String" } }
   },
   "shortVideoDesktopRuntimeHeadlineDesktopApp": "桌面编辑运行时",
   "shortVideoDesktopRuntimeDetailDesktopApp": "本设备可使用本地 Rust 剪辑引擎完成组装与导出流程。",

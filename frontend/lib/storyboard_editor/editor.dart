@@ -25,7 +25,7 @@ extension _HomePageStoryboardEditor on _HomePageState {
       videoCtrl.text = row.videoDesc ?? '';
       sbIdxCtrl.text = row.sbIndex?.toString() ?? '';
       sgiCtrl.text = row.shouldGenerateImage?.toString() ?? '';
-      await showDialog<void>(
+      await showStudioDialog<void>(
         context: context,
         builder: (ctx) {
           final saving = <bool>[false];
@@ -37,7 +37,7 @@ extension _HomePageStoryboardEditor on _HomePageState {
               final dialogWidth = viewportWidth.isFinite
                   ? viewportWidth.clamp(320.0, 720.0)
                   : 720.0;
-              return AlertDialog(
+              return StudioAlertDialog(
                 title: Text(l10n.storyboardEditorDialogTitle(row.numericId)),
                 content: SizedBox(
                   width: dialogWidth,
@@ -122,9 +122,9 @@ extension _HomePageStoryboardEditor on _HomePageState {
                     onPressed: saving[0]
                         ? null
                         : () async {
-                            final ok = await showDialog<bool>(
+                            final ok = await showStudioDialog<bool>(
                               context: ctx,
-                              builder: (c) => AlertDialog(
+                              builder: (c) => StudioAlertDialog(
                                 title: Text(l10n.storyboardEditorDeleteConfirmTitle),
                                 content: Text(
                                   l10n.storyboardEditorDeleteConfirmBody(

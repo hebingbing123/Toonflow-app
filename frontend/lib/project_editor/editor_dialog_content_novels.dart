@@ -145,21 +145,6 @@ extension _HomePageProjectEditorDialogContentNovels on _HomePageState {
             }
           },
         ),
-        const SizedBox(height: 8),
-        _buildProjectNovelsCompatibilitySection(
-          ctx: ctx,
-          setDialogState: setDialogState,
-          token: token,
-          p: p,
-          novelsRef: dialogState.novelsRef,
-          novelEventsRef: dialogState.novelEventsRef,
-          novelsLoading: dialogState.novelsLoading,
-          novelsBusy: dialogState.novelsBusy,
-          novelEventsLoading: dialogState.novelEventsLoading,
-          assetsBusy: dialogState.assetsBusy,
-          assetsLoading: dialogState.assetsLoading,
-          assetsScriptFilterLoading: dialogState.assetsScriptFilterLoading,
-        ),
       ],
     );
   }

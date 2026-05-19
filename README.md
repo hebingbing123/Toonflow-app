@@ -1,9 +1,9 @@
 <p>
-  <a href="https://github.com/HBAI-Ltd/Toonflow-app">
+  <a href="https://github.com/HBAI-Ltd/Openflow-app">
     <img src="https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white" alt="GitHub" />
   </a>
   &nbsp;|&nbsp;
-  <a href="https://gitee.com/HBAI-Ltd/Toonflow-app">
+  <a href="https://gitee.com/HBAI-Ltd/Openflow-app">
     <img src="https://img.shields.io/badge/Gitee-C71D23?style=flat-square&logo=gitee&logoColor=white" alt="Gitee" />
   </a>
 </p>
@@ -27,14 +27,14 @@
     </b>
   </p>
   <p align="center">
-    <a href="https://github.com/HBAI-Ltd/Toonflow-app/stargazers">
-      <img src="https://img.shields.io/github/stars/HBAI-Ltd/Toonflow-app?style=for-the-badge&logo=github" alt="Stars Badge" />
+    <a href="https://github.com/HBAI-Ltd/Openflow-app/stargazers">
+      <img src="https://img.shields.io/github/stars/HBAI-Ltd/Openflow-app?style=for-the-badge&logo=github" alt="Stars Badge" />
     </a>
     <a href="https://www.apache.org/licenses/LICENSE-2.0" target="_blank">
       <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=for-the-badge" alt="Apache-2.0 License Badge" />
     </a>
-    <a href="https://github.com/HBAI-Ltd/Toonflow-app/releases">
-      <img alt="release" src="https://img.shields.io/github/v/release/HBAI-Ltd/Toonflow-app?style=for-the-badge" />
+    <a href="https://github.com/HBAI-Ltd/Openflow-app/releases">
+      <img alt="release" src="https://img.shields.io/github/v/release/HBAI-Ltd/Openflow-app?style=for-the-badge" />
     </a>
   </p>
   
@@ -85,7 +85,7 @@ OpenFlow 是基于 **Harness Engineering** 架构的 AI 短剧生产平台，采
 ### 目录结构
 
 ```
-Toonflow-app/
+Openflow-app/
 ├── backend/              # Rust 后端服务
 │   ├── src/             # 源代码
 │   ├── data/skills/     # 技能 Markdown
@@ -169,8 +169,8 @@ yarn --version
 #### 1. 克隆仓库
 
 ```bash
-git clone https://github.com/HBAI-Ltd/Toonflow-app.git
-cd Toonflow-app
+git clone https://github.com/HBAI-Ltd/Openflow-app.git
+cd Openflow-app
 ```
 
 #### 2. 启动数据库
@@ -195,7 +195,7 @@ cp .env.example .env
 
 ```bash
 cd backend
-cargo run --bin toonflow-server
+cargo run --bin openflow-server
 ```
 
 服务启动后监听 `http://127.0.0.1:8666`
@@ -243,7 +243,7 @@ yarn refactor:check
 - `DATABASE_URL`：PostgreSQL 连接串
 - `SUPABASE_JWT_SECRET`：JWT 签名密钥
 - `OPENAI_API_KEY` / `LLM_API_KEY`：LLM API 密钥
-- `TOONFLOW_LOCAL_ASSET_IMAGE_DIR`：本地资产图片存储目录
+- `OPENFLOW_LOCAL_ASSET_IMAGE_DIR`：本地资产图片存储目录
 
 **常用命令**：
 ```bash
@@ -272,8 +272,17 @@ cd frontend
 flutter analyze        # 静态分析
 flutter test           # 单元测试
 flutter build web      # Web 构建
-flutter build macos    # macOS 构建
+flutter build macos    # macOS 桌面构建
+flutter build linux    # Linux 桌面构建
+flutter build windows  # Windows 桌面构建
 ```
+
+**桌面发布产物**：
+- macOS：`openflow_app.app`
+- Linux：`bundle/openflow_app`（含同目录 `lib/` 下的 Rust bridge）
+- Windows：`openflow_app.exe`（同目录携带 `openflow_core_bridge.dll`）
+
+仓库内 GitHub Actions 已切到 Flutter desktop 发布链，并会为三个桌面平台分别产出可分发压缩包。
 
 ### CI 与工程规范
 
@@ -319,10 +328,10 @@ supabase db push   # 生产环境
 
 | 仓库 | 说明 | 链接 |
 |------|------|------|
-| **Toonflow-app** | 主仓库（本仓库） | [GitHub](https://github.com/HBAI-Ltd/Toonflow-app) / [Gitee](https://gitee.com/HBAI-Ltd/Toonflow-app) |
-| **Toonflow-web** | 旧版 Web 前端（历史参考） | [GitHub](https://github.com/HBAI-Ltd/Toonflow-web) / [Gitee](https://gitee.com/HBAI-Ltd/Toonflow-web) |
+| **Openflow-app** | 主仓库（本仓库） | [GitHub](https://github.com/HBAI-Ltd/Openflow-app) / [Gitee](https://gitee.com/HBAI-Ltd/Openflow-app) |
+| **Openflow-web** | 旧版 Web 前端（历史参考） | [GitHub](https://github.com/HBAI-Ltd/Openflow-web) / [Gitee](https://gitee.com/HBAI-Ltd/Openflow-web) |
 
-> 💡 **提示**：当前主客户端在 **`frontend/`**（Flutter）。**Toonflow-web** 为旧栈参考仓库。
+> 💡 **提示**：当前主客户端在 **`frontend/`**（Flutter）。**Openflow-web** 为旧栈参考仓库。
 
 ---
 
@@ -367,7 +376,7 @@ OpenFlow 基于 Apache-2.0 协议开源发布，并附有补充商业协议。
 
 ## ⭐️ 星标历史
 
-[![Star History Chart](https://api.star-history.com/svg?repos=HBAI-Ltd/Toonflow-app&type=timeline&legend=top-left)](https://www.star-history.com/#HBAI-Ltd/Toonflow-app&type=timeline&legend=top-left)
+[![Star History Chart](https://api.star-history.com/svg?repos=HBAI-Ltd/Openflow-app&type=timeline&legend=top-left)](https://www.star-history.com/#HBAI-Ltd/Openflow-app&type=timeline&legend=top-left)
 
 ---
 

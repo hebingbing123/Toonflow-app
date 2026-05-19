@@ -9,8 +9,8 @@ mod clear_user;
 mod queries;
 
 pub const USAGE: &str = "\
-toonflow-server ops clear-user-data --user-id <uuid> [--dry-run]
-toonflow-server ops clear-user-data --user-id <uuid> --execute --confirm clear-user-data:<uuid>
+openflow-server ops clear-user-data --user-id <uuid> [--dry-run]
+openflow-server ops clear-user-data --user-id <uuid> --execute --confirm clear-user-data:<uuid>
 
 Notes:
   - requires DATABASE_URL

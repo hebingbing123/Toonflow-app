@@ -40,7 +40,7 @@ pub enum VoiceCloneProviderKind {
 
 impl VoiceCloneProviderKind {
     pub fn from_env() -> Self {
-        match std::env::var("TOONFLOW_VOICE_CLONE_PROVIDER")
+        match std::env::var("OPENFLOW_VOICE_CLONE_PROVIDER")
             .unwrap_or_else(|_| "mock".into())
             .trim()
             .to_ascii_lowercase()

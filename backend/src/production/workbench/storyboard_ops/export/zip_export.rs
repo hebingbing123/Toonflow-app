@@ -364,7 +364,7 @@ pub(super) fn build_storyboard_srt(shots: &[StoryboardExportManifestShot]) -> St
 }
 
 pub(super) fn build_storyboard_voiceover_script(shots: &[StoryboardExportManifestShot]) -> String {
-    let mut out = String::from("# Toonflow Storyboard Voiceover Script\n\n");
+    let mut out = String::from("# Openflow Storyboard Voiceover Script\n\n");
     let mut cursor_ms = 0_u64;
     for shot in shots {
         let duration_seconds = parse_storyboard_duration_seconds(shot.duration.as_deref());

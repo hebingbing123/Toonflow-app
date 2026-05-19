@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../../../rust_api.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 enum ProjectAssetCandidateStatusDialogAction {
   save,
@@ -166,7 +168,7 @@ class _ProjectAssetCandidateStatusDialogState
         },
         child: Focus(
           autofocus: true,
-          child: AlertDialog(
+          child: StudioAlertDialog(
             scrollable: true,
             title: Text(l10n.projectEditorAssetCandidateDialogTitle),
             content: SizedBox(
@@ -198,7 +200,7 @@ class _ProjectAssetCandidateStatusDialogState
                     ),
                     const SizedBox(height: 8),
                   ],
-                  DropdownButtonFormField<int>(
+                  StudioDropdownButtonFormField<int>(
                     initialValue: _selectedAssetNumericId,
                     decoration: InputDecoration(
                       labelText: l10n.projectEditorAssetCandidateTargetLabel,

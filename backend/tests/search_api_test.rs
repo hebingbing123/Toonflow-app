@@ -468,8 +468,8 @@ mod tests {
         eprintln!("Direct SQL search result: {:?}", direct_search_result);
 
         // 执行搜索
-        use toonflow_server::search::models::SearchQuery;
-        use toonflow_server::search::service::SearchService;
+        use openflow_server::search::models::SearchQuery;
+        use openflow_server::search::service::SearchService;
 
         let service = SearchService::new(pool.clone());
         let query = SearchQuery {
@@ -508,7 +508,7 @@ mod tests {
         assert!(!response.results.is_empty(), "Results should not be empty");
         assert_eq!(
             response.results[0].result_type,
-            toonflow_server::search::models::ResultType::Project
+            openflow_server::search::models::ResultType::Project
         );
         assert!(response.results[0].title.contains("Test"));
     }
@@ -531,8 +531,8 @@ mod tests {
             create_test_project(&pool, workspace_b, "Project B", "User B's project").await;
 
         // 用户 A 搜索（应该只看到 workspace A 的内容）
-        use toonflow_server::search::models::SearchQuery;
-        use toonflow_server::search::service::SearchService;
+        use openflow_server::search::models::SearchQuery;
+        use openflow_server::search::service::SearchService;
 
         let service = SearchService::new(pool.clone());
         let query = SearchQuery {
@@ -585,8 +585,8 @@ mod tests {
         )
         .await;
 
-        use toonflow_server::search::models::{ResultType, SearchQuery};
-        use toonflow_server::search::service::SearchService;
+        use openflow_server::search::models::{ResultType, SearchQuery};
+        use openflow_server::search::service::SearchService;
 
         let service = SearchService::new(pool.clone());
 
@@ -692,8 +692,8 @@ mod tests {
         let _new_project_id =
             create_test_project(&pool, workspace_id, "New Project", "新project intro").await;
 
-        use toonflow_server::search::models::SearchQuery;
-        use toonflow_server::search::service::SearchService;
+        use openflow_server::search::models::SearchQuery;
+        use openflow_server::search::service::SearchService;
 
         let service = SearchService::new(pool.clone());
 
@@ -728,7 +728,7 @@ mod tests {
         let workspace_id = create_test_workspace(&pool, user_id, "Test Workspace").await;
 
         // 保存搜索历史
-        use toonflow_server::search::history::save_search_history;
+        use openflow_server::search::history::save_search_history;
 
         save_search_history(&pool, user_id, workspace_id, "测试查询1", 10)
             .await
@@ -739,7 +739,7 @@ mod tests {
             .expect("Should save search history");
 
         // 获取搜索历史
-        use toonflow_server::search::history::get_search_history;
+        use openflow_server::search::history::get_search_history;
 
         let response = get_search_history(&pool, user_id)
             .await
@@ -763,7 +763,7 @@ mod tests {
         let workspace_id = create_test_workspace(&pool, user_id, "Test Workspace").await;
 
         // 保存搜索历史
-        use toonflow_server::search::history::{
+        use openflow_server::search::history::{
             delete_search_history, get_search_history, save_search_history,
         };
 
@@ -798,8 +798,8 @@ mod tests {
         let user_id = create_test_user(&pool).await;
         let workspace_id = create_test_workspace(&pool, user_id, "Test Workspace").await;
 
-        use toonflow_server::search::models::SearchQuery;
-        use toonflow_server::search::service::SearchService;
+        use openflow_server::search::models::SearchQuery;
+        use openflow_server::search::service::SearchService;
 
         let service = SearchService::new(pool.clone());
 
@@ -826,8 +826,8 @@ mod tests {
         let user_id = create_test_user(&pool).await;
         let workspace_id = create_test_workspace(&pool, user_id, "Test Workspace").await;
 
-        use toonflow_server::search::models::SearchQuery;
-        use toonflow_server::search::service::SearchService;
+        use openflow_server::search::models::SearchQuery;
+        use openflow_server::search::service::SearchService;
 
         let service = SearchService::new(pool.clone());
 
@@ -858,8 +858,8 @@ mod tests {
         // 创建用户 B（不是 workspace A 的成员）
         let user_b = create_test_user(&pool).await;
 
-        use toonflow_server::search::models::SearchQuery;
-        use toonflow_server::search::service::SearchService;
+        use openflow_server::search::models::SearchQuery;
+        use openflow_server::search::service::SearchService;
 
         let service = SearchService::new(pool.clone());
         let query = SearchQuery {
@@ -895,8 +895,8 @@ mod tests {
         )
         .await;
 
-        use toonflow_server::search::models::SearchQuery;
-        use toonflow_server::search::service::SearchService;
+        use openflow_server::search::models::SearchQuery;
+        use openflow_server::search::service::SearchService;
 
         let service = SearchService::new(pool.clone());
         let query = SearchQuery {
@@ -942,8 +942,8 @@ mod tests {
             .await;
         }
 
-        use toonflow_server::search::models::SearchQuery;
-        use toonflow_server::search::service::SearchService;
+        use openflow_server::search::models::SearchQuery;
+        use openflow_server::search::service::SearchService;
 
         let service = SearchService::new(pool.clone());
 
@@ -1064,9 +1064,9 @@ mod tests {
         }
         eprintln!("Test data created successfully");
 
+        use openflow_server::search::models::SearchQuery;
+        use openflow_server::search::service::SearchService;
         use std::time::Instant;
-        use toonflow_server::search::models::SearchQuery;
-        use toonflow_server::search::service::SearchService;
 
         let service = SearchService::new(pool.clone());
         let query = SearchQuery {
@@ -1125,15 +1125,15 @@ mod tests {
         create_test_project(&pool, workspace_c, "User C Project 1", "Content C1").await;
         create_test_project(&pool, workspace_c, "User C Project 2", "Content C2").await;
 
+        use openflow_server::search::models::SearchQuery;
+        use openflow_server::search::service::SearchService;
         use tokio::task::JoinSet;
-        use toonflow_server::search::models::SearchQuery;
-        use toonflow_server::search::service::SearchService;
 
         // 并发执行 3 个用户的搜索请求
         let mut join_set: JoinSet<
             Result<
-                toonflow_server::search::models::SearchResponse,
-                toonflow_server::error::ApiError,
+                openflow_server::search::models::SearchResponse,
+                openflow_server::error::ApiError,
             >,
         > = JoinSet::new();
 
@@ -1228,8 +1228,8 @@ mod tests {
         let workspace_b = create_test_workspace(&pool, user_b, "Workspace B").await;
         create_test_project(&pool, workspace_b, "B Project", "Content in workspace B").await;
 
-        use toonflow_server::search::models::SearchQuery;
-        use toonflow_server::search::service::SearchService;
+        use openflow_server::search::models::SearchQuery;
+        use openflow_server::search::service::SearchService;
 
         let service = SearchService::new(pool.clone());
         let query = SearchQuery {
@@ -1295,9 +1295,9 @@ mod tests {
         let workspace_id = create_test_workspace(&pool, user_id, "Test Workspace").await;
         create_test_project(&pool, workspace_id, "Test Project", "Test content").await;
 
+        use openflow_server::search::models::SearchQuery;
+        use openflow_server::search::service::SearchService;
         use tokio::task::JoinSet;
-        use toonflow_server::search::models::SearchQuery;
-        use toonflow_server::search::service::SearchService;
 
         // 并发执行 20 个搜索请求（模拟高负载）
         let mut join_set = JoinSet::new();
@@ -1376,9 +1376,9 @@ mod tests {
             .await;
         }
 
+        use openflow_server::search::models::SearchQuery;
+        use openflow_server::search::service::SearchService;
         use tokio::time::{timeout, Duration};
-        use toonflow_server::search::models::SearchQuery;
-        use toonflow_server::search::service::SearchService;
 
         let service = SearchService::new(pool.clone());
         let query = SearchQuery {
@@ -1429,8 +1429,8 @@ mod tests {
         let user_id = create_test_user(&pool).await;
         let invalid_workspace_id = Uuid::new_v4(); // 不存在的 workspace ID
 
-        use toonflow_server::search::models::SearchQuery;
-        use toonflow_server::search::service::SearchService;
+        use openflow_server::search::models::SearchQuery;
+        use openflow_server::search::service::SearchService;
 
         let service = SearchService::new(pool.clone());
         let query = SearchQuery {
@@ -1474,8 +1474,8 @@ mod tests {
             .await;
         }
 
-        use toonflow_server::search::models::SearchQuery;
-        use toonflow_server::search::service::SearchService;
+        use openflow_server::search::models::SearchQuery;
+        use openflow_server::search::service::SearchService;
 
         let service = SearchService::new(pool.clone());
         let query = SearchQuery {
@@ -1552,7 +1552,7 @@ mod tests {
         let user_b = create_test_user(&pool).await;
         let workspace_b = create_test_workspace(&pool, user_b, "Workspace B").await;
 
-        use toonflow_server::search::history::{get_search_history, save_search_history};
+        use openflow_server::search::history::{get_search_history, save_search_history};
 
         // 用户 A 保存搜索历史
         save_search_history(&pool, user_a, workspace_a, "User A Query 1", 5)
@@ -1636,8 +1636,8 @@ mod tests {
         .await;
 
         // 3. 执行搜索
-        use toonflow_server::search::models::SearchQuery;
-        use toonflow_server::search::service::SearchService;
+        use openflow_server::search::models::SearchQuery;
+        use openflow_server::search::service::SearchService;
 
         let service = SearchService::new(pool.clone());
         let query = SearchQuery {
@@ -1662,7 +1662,7 @@ mod tests {
         assert_eq!(response.results.len(), 3);
 
         // 验证结果包含所有类型
-        use toonflow_server::search::models::ResultType;
+        use openflow_server::search::models::ResultType;
         let has_project = response
             .results
             .iter()
@@ -1681,7 +1681,7 @@ mod tests {
         assert!(has_asset, "Should have asset result");
 
         // 5. 保存搜索历史
-        use toonflow_server::search::history::save_search_history;
+        use openflow_server::search::history::save_search_history;
         save_search_history(
             &pool,
             user_id,
@@ -1693,7 +1693,7 @@ mod tests {
         .expect("Should save search history");
 
         // 6. 获取搜索历史
-        use toonflow_server::search::history::get_search_history;
+        use openflow_server::search::history::get_search_history;
         let history = get_search_history(&pool, user_id)
             .await
             .expect("Should get search history");

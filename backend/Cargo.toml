@@ -1,12 +1,12 @@
 [package]
-name = "toonflow-server"
+name = "openflow-server"
 version = "0.1.0"
 edition = "2021"
 build = "build.rs"
-description = "Toonflow API (Harness-oriented Rust backend; work in progress)"
+description = "Openflow API (Harness-oriented Rust backend; work in progress)"
 
 [[bin]]
-name = "toonflow-sqlite-import"
+name = "openflow-sqlite-import"
 path = "src/bin/sqlite_import.rs"
 test = false
 
@@ -40,6 +40,7 @@ futures-util = "0.3"
 governor = "0.10"
 hex = "0.4"
 hmac = "0.12"
+image = { version = "0.25", default-features = false, features = ["png", "jpeg", "webp"] }
 md5 = "0.7"
 moka = { version = "0.12", features = ["future"] }
 once_cell = "1"

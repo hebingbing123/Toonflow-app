@@ -19,8 +19,8 @@ if [[ -z "${SERVICE_ROLE_KEY:-}" ]]; then
 fi
 
 API_URL="${API_URL:-http://127.0.0.1:64321}"
-EMAIL="${TOONFLOW_DEV_ADMIN_EMAIL:-admin@openflow.local}"
-PASSWORD="${TOONFLOW_DEV_ADMIN_PASSWORD:-admin123}"
+EMAIL="${OPENFLOW_DEV_ADMIN_EMAIL:-admin@openflow.local}"
+PASSWORD="${OPENFLOW_DEV_ADMIN_PASSWORD:-admin123}"
 
 payload=$(printf '{"email":"%s","password":"%s","email_confirm":true}' "$EMAIL" "$PASSWORD")
 

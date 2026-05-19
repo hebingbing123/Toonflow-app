@@ -137,15 +137,15 @@ void main() {
     await pumpFrames(tester, count: 20);
     await captureShot(tester, repaintKey: repaintKey, name: 'regular_06_tasks');
 
+    await tester.tapAt(const Offset(12, 12));
+    await pumpFrames(tester, count: 8);
     await tester.tap(find.byTooltip('更多'));
+    await waitFor(tester, find.text('内容合规'));
     final complianceFinder = find.text('内容合规');
-    await tester.scrollUntilVisible(
-      complianceFinder,
-      160,
-      scrollable: find.byType(Scrollable).last,
-    );
+    await tester.ensureVisible(complianceFinder);
     await tester.tap(complianceFinder);
-    await pumpFrames(tester, count: 20);
+    await pumpFrames(tester, count: 24);
+    expect(find.text('内容合规'), findsWidgets);
     await captureShot(
       tester,
       repaintKey: repaintKey,

@@ -35,7 +35,7 @@ pub(crate) async fn serve_cover_by_numeric_id(
 
     let Some(root) = state.local_art_style_cover_dir.as_deref() else {
         return Err(ApiError::DatabaseError(
-            "TOONFLOW_LOCAL_ART_STYLE_COVER_DIR is not set; cannot serve local art style covers"
+            "OPENFLOW_LOCAL_ART_STYLE_COVER_DIR is not set; cannot serve local art style covers"
                 .into(),
         ));
     };

@@ -1,3 +1,4 @@
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 part of '../../../../home_page.dart';
 
 extension _HomePageProjectEditorNovelWorkbenchSearchSection on _HomePageState {
@@ -32,7 +33,7 @@ extension _HomePageProjectEditorNovelWorkbenchSearchSection on _HomePageState {
         Row(
           children: [
             Expanded(
-              child: DropdownButtonFormField<String>(
+              child: StudioDropdownButtonFormField<String>(
                 initialValue: searchIntakeStatusCtrl.text.isEmpty
                     ? ''
                     : searchIntakeStatusCtrl.text,
@@ -68,7 +69,7 @@ extension _HomePageProjectEditorNovelWorkbenchSearchSection on _HomePageState {
             ),
             const SizedBox(width: 8),
             Expanded(
-              child: DropdownButtonFormField<String>(
+              child: StudioDropdownButtonFormField<String>(
                 initialValue: searchIntakeSourceCtrl.text.isEmpty
                     ? ''
                     : searchIntakeSourceCtrl.text,

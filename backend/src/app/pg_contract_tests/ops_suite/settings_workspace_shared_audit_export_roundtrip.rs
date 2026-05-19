@@ -71,10 +71,10 @@ async fn settings_workspace_shared_audit_export_async_worker_roundtrip() {
     let _ = dotenvy::dotenv();
     let dir = tempfile::tempdir().expect("tempdir");
     std::env::set_var(
-        "TOONFLOW_LOCAL_WORKSPACE_SHARED_AUDIT_EXPORT_DIR",
+        "OPENFLOW_LOCAL_WORKSPACE_SHARED_AUDIT_EXPORT_DIR",
         dir.path().to_string_lossy().as_ref(),
     );
-    let _env_guard = RemoveEnvVarGuard("TOONFLOW_LOCAL_WORKSPACE_SHARED_AUDIT_EXPORT_DIR");
+    let _env_guard = RemoveEnvVarGuard("OPENFLOW_LOCAL_WORKSPACE_SHARED_AUDIT_EXPORT_DIR");
 
     let url = std::env::var("DATABASE_URL").expect("DATABASE_URL when running with --ignored");
     let secret = std::env::var("SUPABASE_JWT_SECRET")

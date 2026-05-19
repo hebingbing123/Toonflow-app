@@ -203,9 +203,9 @@ RUST_LOG=debug cargo run
 
 ### OpenTelemetry 导出
 ```bash
-export TOONFLOW_OTEL_EXPORT_ENABLED=1
+export OPENFLOW_OTEL_EXPORT_ENABLED=1
 export OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:4317
-export OTEL_SERVICE_NAME=toonflow-server
+export OTEL_SERVICE_NAME=openflow-server
 ```
 
 ## 后续建议

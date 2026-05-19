@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import 'panel_versioning.dart';
 import '../rust_api.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 /// Example of how to integrate panel versioning into the state
 class _ShortVideoSpaceSectionStateWithVersioning extends State<StatefulWidget>
@@ -108,11 +109,11 @@ class _ShortVideoSpaceSectionStateWithVersioning extends State<StatefulWidget>
     final status = checkPanelConsistency();
 
     if (!status.consistent) {
-      final result = await showDialog<bool>(
+      final result = await showStudioDialog<bool>(
         context: context,
         builder: (dialogContext) {
           final l10n = resolveAppLocalizationsForErrors(dialogContext);
-          return AlertDialog(
+          return StudioAlertDialog(
             title: Text(l10n.shortVideoPanelVersionDataInconsistencyTitle),
             content: Column(
               mainAxisSize: MainAxisSize.min,

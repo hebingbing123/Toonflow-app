@@ -43,7 +43,7 @@ The test suite validates:
 
 ```bash
 # Start local Supabase (if using local development)
-cd /path/to/Toonflow-app
+cd /path/to/Openflow-app
 supabase start
 
 # Set test database URL

@@ -1,3 +1,4 @@
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 // ignore_for_file: library_private_types_in_public_api
 
 part of 'creative_manuals.dart';
@@ -54,7 +55,7 @@ class CreativeManualsWorkbenchView extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
     final outline = Theme.of(context).colorScheme.outline;
-    return AlertDialog(
+    return StudioAlertDialog(
       title: Text(l10n.projectsCreativeManualTitle),
       content: SizedBox(
         width: 820,
@@ -120,7 +121,7 @@ class CreativeManualsWorkbenchView extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               if (activeRows.isNotEmpty)
-                DropdownButtonFormField<String>(
+                StudioDropdownButtonFormField<String>(
                   initialValue: selected?.path,
                   decoration: InputDecoration(labelText: selectionLabel),
                   items: activeRows

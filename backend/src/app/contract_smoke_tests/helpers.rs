@@ -126,7 +126,7 @@ pub(super) async fn get_json_bearer(uri: &str, token: &str) -> (StatusCode, Valu
     .await
 }
 
-/// `GET` with optional **`X-OpenFlow-Internal-Token`** (Q2 运维队列 stats)。
+/// `GET` with optional **`X-Openflow-Internal-Token`** (Q2 运维队列 stats)。
 pub(super) async fn get_json_internal_ops(
     uri: &str,
     internal_token: Option<&str>,

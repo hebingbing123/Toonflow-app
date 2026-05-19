@@ -12,7 +12,7 @@ use tracing::{info, warn};
 /// 记录 API 请求指标
 pub fn record_api_request(endpoint: &str, method: &str, status_code: u16, duration: Duration) {
     info!(
-        target: "toonflow.metrics.api",
+        target: "openflow.metrics.api",
         endpoint = %endpoint,
         method = %method,
         status_code = %status_code,
@@ -31,7 +31,7 @@ pub fn record_tts_generation(
 ) {
     if success {
         info!(
-            target: "toonflow.metrics.tts",
+            target: "openflow.metrics.tts",
             provider = %provider,
             voice_id = %voice_id,
             duration_ms = %duration.as_millis(),
@@ -40,7 +40,7 @@ pub fn record_tts_generation(
         );
     } else {
         warn!(
-            target: "toonflow.metrics.tts",
+            target: "openflow.metrics.tts",
             provider = %provider,
             voice_id = %voice_id,
             duration_ms = %duration.as_millis(),
@@ -62,7 +62,7 @@ pub fn record_export_task(
 ) {
     if success {
         info!(
-            target: "toonflow.metrics.export",
+            target: "openflow.metrics.export",
             format = %format,
             quality = %quality,
             duration_ms = %duration.as_millis(),
@@ -72,7 +72,7 @@ pub fn record_export_task(
         );
     } else {
         warn!(
-            target: "toonflow.metrics.export",
+            target: "openflow.metrics.export",
             format = %format,
             quality = %quality,
             duration_ms = %duration.as_millis(),
@@ -98,7 +98,7 @@ pub fn record_batch_operation(
     };
 
     info!(
-        target: "toonflow.metrics.batch",
+        target: "openflow.metrics.batch",
         operation = %operation,
         total_count = %total_count,
         success_count = %success_count,
@@ -112,7 +112,7 @@ pub fn record_batch_operation(
 /// 记录数据库查询指标
 pub fn record_db_query(query_name: &str, duration: Duration, rows_affected: Option<u64>) {
     info!(
-        target: "toonflow.metrics.db",
+        target: "openflow.metrics.db",
         query_name = %query_name,
         duration_ms = %duration.as_millis(),
         rows_affected = ?rows_affected,
@@ -123,7 +123,7 @@ pub fn record_db_query(query_name: &str, duration: Duration, rows_affected: Opti
 /// 记录缓存操作指标
 pub fn record_cache_operation(operation: &str, cache_key: &str, hit: bool, duration: Duration) {
     info!(
-        target: "toonflow.metrics.cache",
+        target: "openflow.metrics.cache",
         operation = %operation,
         cache_key = %cache_key,
         hit = %hit,
@@ -137,7 +137,7 @@ pub fn record_cache_operation(operation: &str, cache_key: &str, hit: bool, durat
 /// Task 4.3: Reconciliation metrics for shadow period monitoring.
 pub fn record_billing_reconciliation_mismatch(field: &str) {
     warn!(
-        target: "toonflow.metrics.billing_reconciliation",
+        target: "openflow.metrics.billing_reconciliation",
         field = %field,
         "Billing reconciliation mismatch detected"
     );

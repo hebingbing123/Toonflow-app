@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../rust_api.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 Future<void> openProjectAssetClipUploadDialog({
   required BuildContext ctx,
@@ -17,11 +18,11 @@ Future<void> openProjectAssetClipUploadDialog({
   final typeCtrl = TextEditingController(text: 'clip');
   final base64Ctrl = TextEditingController(text: 'data:image/png;base64,AA==');
   try {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showStudioDialog<bool>(
       context: ctx,
       builder: (dialogCtx) {
         final dlgL10n = resolveAppLocalizationsForErrors(dialogCtx);
-        return AlertDialog(
+        return StudioAlertDialog(
           title: Text(dlgL10n.projectEditorAssetClipUploadDialogTitle),
           content: SizedBox(
             width: 520,

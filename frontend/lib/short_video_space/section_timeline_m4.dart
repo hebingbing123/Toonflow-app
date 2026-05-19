@@ -1,3 +1,4 @@
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 // ignore_for_file: invalid_use_of_protected_member
 
 part of 'section.dart';
@@ -202,7 +203,7 @@ extension _ShortVideoTimelineM4 on _TimelineNleEditorState {
     required ValueChanged<String?> onChanged,
   }) {
     final selected = (value ?? 'none').trim().isEmpty ? 'none' : value!.trim();
-    return DropdownButtonFormField<String>(
+    return StudioDropdownButtonFormField<String>(
       isExpanded: true,
       initialValue: kShortVideoTimelineEffectPresets.contains(selected)
           ? selected

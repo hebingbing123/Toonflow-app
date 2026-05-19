@@ -1,5 +1,5 @@
 -- Normalized app tables (UUID PK, Supabase Auth). 旧版 integer ids kept for idempotent promote.
--- Requires legacy_staging.snapshot populated (e.g. toonflow-sqlite-import) and optional legacy_user_map rows.
+-- Requires legacy_staging.snapshot populated (e.g. openflow-sqlite-import) and optional legacy_user_map rows.
 
 CREATE TABLE IF NOT EXISTS public.legacy_user_map (
   legacy_user_id INTEGER PRIMARY KEY,

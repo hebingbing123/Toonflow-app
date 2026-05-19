@@ -68,7 +68,7 @@ pub(crate) async fn run_short_video_timeline_preview(
 
     let root = state.local_video_export_dir.as_ref().ok_or_else(|| {
         JobRunError::Failed(
-            "TOONFLOW_LOCAL_VIDEO_EXPORT_DIR is not set; cannot persist timeline preview".into(),
+            "OPENFLOW_LOCAL_VIDEO_EXPORT_DIR is not set; cannot persist timeline preview".into(),
         )
     })?;
 

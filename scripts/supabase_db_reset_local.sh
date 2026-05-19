@@ -8,7 +8,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-LOG="$(mktemp -t toonflow_db_reset.XXXXXX)"
+LOG="$(mktemp -t openflow_db_reset.XXXXXX)"
 trap 'rm -f "$LOG"' EXIT
 
 set +e

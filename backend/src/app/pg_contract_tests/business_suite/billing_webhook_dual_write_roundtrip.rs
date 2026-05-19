@@ -139,8 +139,8 @@ async fn billing_webhook_dual_write_personal_workspace() {
                 .uri("/api/v1/webhooks/billing")
                 .method("POST")
                 .header(header::CONTENT_TYPE, "application/json")
-                .header("X-Toonflow-Timestamp", &timestamp_str)
-                .header("X-Toonflow-Signature", signature)
+                .header("X-Openflow-Timestamp", &timestamp_str)
+                .header("X-Openflow-Signature", signature)
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::from(payload_bytes.clone()))
                 .unwrap(),
@@ -205,8 +205,8 @@ async fn billing_webhook_dual_write_personal_workspace() {
                 .uri("/api/v1/webhooks/billing")
                 .method("POST")
                 .header(header::CONTENT_TYPE, "application/json")
-                .header("X-Toonflow-Timestamp", &timestamp_str)
-                .header("X-Toonflow-Signature", signature2)
+                .header("X-Openflow-Timestamp", &timestamp_str)
+                .header("X-Openflow-Signature", signature2)
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::from(payload_bytes))
                 .unwrap(),
@@ -355,8 +355,8 @@ async fn billing_webhook_without_workspace_id_only_updates_user() {
                 .uri("/api/v1/webhooks/billing")
                 .method("POST")
                 .header(header::CONTENT_TYPE, "application/json")
-                .header("X-Toonflow-Timestamp", &timestamp_str)
-                .header("X-Toonflow-Signature", signature)
+                .header("X-Openflow-Timestamp", &timestamp_str)
+                .header("X-Openflow-Signature", signature)
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::from(payload_bytes))
                 .unwrap(),
@@ -546,8 +546,8 @@ async fn billing_webhook_unauthorized_workspace_skips_workspace_update() {
                 .uri("/api/v1/webhooks/billing")
                 .method("POST")
                 .header(header::CONTENT_TYPE, "application/json")
-                .header("X-Toonflow-Timestamp", &timestamp_str)
-                .header("X-Toonflow-Signature", signature)
+                .header("X-Openflow-Timestamp", &timestamp_str)
+                .header("X-Openflow-Signature", signature)
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::from(payload_bytes))
                 .unwrap(),

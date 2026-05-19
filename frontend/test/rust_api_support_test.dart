@@ -90,6 +90,19 @@ void main() {
     },
   );
 
+  test('5xx formatter hides raw backend details from users', () {
+    final l10nZh = lookupAppLocalizations(const Locale('zh'));
+    final message = formatRustApiExceptionForDisplay(
+      l10nZh,
+      RustApiException(
+        'error returned from database: syntax error at or near "ORDER"',
+        statusCode: 500,
+      ),
+    );
+
+    expect(message, '出现问题：请稍后重试');
+  });
+
   test('reportRustOrDescribeApiError forwards RustApiException to sink', () {
     String? got;
     reportRustOrDescribeApiError(

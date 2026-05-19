@@ -1,3 +1,4 @@
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 part of 'dialog_support.dart';
 
 class _ProjectAssetsWorkbenchOverview extends StatelessWidget {
@@ -73,7 +74,7 @@ class _ProjectAssetsWorkbenchOverview extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        DropdownButtonFormField<int?>(
+        StudioDropdownButtonFormField<int?>(
           initialValue: selectedAssetNumericId,
           decoration: InputDecoration(
             labelText: l10n.projectEditorAssetsWorkbenchFocusAssetLabel,
@@ -99,7 +100,7 @@ class _ProjectAssetsWorkbenchOverview extends StatelessWidget {
           onChanged: onAssetChanged,
         ),
         const SizedBox(height: 8),
-        DropdownButtonFormField<int?>(
+        StudioDropdownButtonFormField<int?>(
           initialValue: selectedScriptNumericId,
           decoration: InputDecoration(
             labelText: l10n.projectEditorAssetsWorkbenchFocusScriptLabel,

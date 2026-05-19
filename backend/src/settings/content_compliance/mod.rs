@@ -506,7 +506,7 @@ fn escalation_stage_sql(alias: &str, reviewer_capacity_limit: i64) -> String {
 }
 
 fn reviewer_capacity_limit() -> i64 {
-    std::env::var("TOONFLOW_COMPLIANCE_REVIEWER_CAPACITY")
+    std::env::var("OPENFLOW_COMPLIANCE_REVIEWER_CAPACITY")
         .ok()
         .and_then(|value| value.trim().parse::<i64>().ok())
         .filter(|value| *value > 0)

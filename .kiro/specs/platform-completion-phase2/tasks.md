@@ -2,7 +2,7 @@
 
 ## Overview
 
-本任务清单定义 Toonflow 平台 Phase 2 完成工作的可执行任务分解，包括 Workspace 功能完善、HTTP API 收敛、以及平台能力补遗（全局搜索、出站 Webhook、内容合规通知、i18n、帮助文档）。
+本任务清单定义 Openflow 平台 Phase 2 完成工作的可执行任务分解，包括 Workspace 功能完善、HTTP API 收敛、以及平台能力补遗（全局搜索、出站 Webhook、内容合规通知、i18n、帮助文档）。
 
 所有任务遵循 [`full-stack-delivery-covenant.md`](../../../docs/plans/full-stack-delivery-covenant.md) 约定：用户可见功能必须在同一里程碑交付 backend + frontend + OpenAPI 文档。所有变更必须通过 `yarn refactor:check` 门禁。
 
@@ -11,7 +11,7 @@ Cross-links: **requirements** → `requirements.md`; **design** → `design.md`;
 **与实现对齐（相对 `requirements.md` 的设计演进）**
 
 - **保存视图**：REST 为 **`GET`/`PUT /api/v1/search/saved-views`**，表 **`app_user_search_saved_view`**；非需求稿中的 `/search/views` 与 `app_saved_search_view`。
-- **帮助 Hub**：REST 为 **`GET /api/v1/settings/help/hub`**、**`/config`** 及用户/工作区链接 **`POST .../user-links`**、**`.../workspace-links`**；环境变量为 **`TOONFLOW_HELP_HUB_ITEMS_JSON`** / **`TOONFLOW_HELP_HUB_URL`**（非 `help-links` / `TOONFLOW_HELP_LINKS_JSON`）。
+- **帮助 Hub**：REST 为 **`GET /api/v1/settings/help/hub`**、**`/config`** 及用户/工作区链接 **`POST .../user-links`**、**`.../workspace-links`**；环境变量为 **`OPENFLOW_HELP_HUB_ITEMS_JSON`** / **`OPENFLOW_HELP_HUB_URL`**（非 `help-links` / `OPENFLOW_HELP_LINKS_JSON`）。
 - **出站 Webhook（WH）**：用户出站落位 **`app_outbound_webhook`** + **`app_outbound_webhook_delivery`**，REST 主路径 **`/api/v1/settings/webhooks/outbound`**，并带 **`/api/v1/webhooks`** 别名（与计费 **入站** `POST /api/v1/webhooks/billing` 区分）。**`job.completed` / `job.failed`** 在 worker 终端态后投递；**`project.created`** 在 `POST /api/v1/projects` 成功后异步投递；**`workspace.member.added`** 在「此前非成员」的新增路径投递：`POST …/members` 与 **`POST …/invites/accept`**（`fire_outbound_webhooks_for_owner` + 指数退避，见 `deliver.rs`）。
 
 ## Tasks
@@ -92,7 +92,7 @@ Cross-links: **requirements** → `requirements.md`; **design** → `design.md`;
   - [x] H1.5 盘点见 `docs/plans/http-api-cleanup-h0-inventory.md`；C4 波次在 `tasks-http-api-cleanup.md` 已标完成
   - [x] H1.6 合并窗口以 `yarn refactor:check` / CI **refactor-monorepo** 为准
   - [x] H1.7 契约与 PG 测试随各竖切维护，无 C4 专项回归项
-  - [x] H1.8 `docs/plans/toonflow-platform-progress.md` §HTTP 收敛 H5·C4 已反映
+  - [x] H1.8 `docs/plans/openflow-platform-progress.md` §HTTP 收敛 H5·C4 已反映
   - _Requirements: 2.1–2.5, 12.1–12.10_
 
 - [x] **H2. HTTP API C5+ 批次收敛**
@@ -103,7 +103,7 @@ Cross-links: **requirements** → `requirements.md`; **design** → `design.md`;
   - [x] H2.5 进度真源为 `tasks-http-api-cleanup.md` H5 勾选
   - [x] H2.6 合并窗口以 `yarn refactor:check` 为准
   - [x] H2.7 同 H1.7
-  - [x] H2.8 `toonflow-platform-progress.md` §HTTP 收敛 H5 已反映 C0–C6 进展
+  - [x] H2.8 `openflow-platform-progress.md` §HTTP 收敛 H5 已反映 C0–C6 进展
   - _Requirements: 2.1–2.5, 12.1–12.10_
 
 - [x] **H3. HTTP API D 批次收敛**（**进行中**：已完成首轮依赖盘点与阻塞面落档；确认 **production/task-center/agent workspaces** 仍广泛依赖整型兼容字段，且 **`import_staging` / `promote_import_snapshots()`** 与 `pg_contract_tests` 仍绑定 `numeric_id` / 历史导入语义；删除 PG 标识列仍需独立发布窗口 + DBA 评估）
@@ -115,7 +115,7 @@ Cross-links: **requirements** → `requirements.md`; **design** → `design.md`;
   - [x] H3.6 在 `http-api-cleanup-h0-inventory.md` / 主进度文中标记 D 批次进展
   - [x] H3.7 运行 `yarn refactor:check` 验证变更
   - [x] H3.8 跑通契约 smoke + 相关 `pg_contract_tests`
-  - [x] H3.9 更新 `toonflow-platform-progress.md` H5·D 行
+  - [x] H3.9 更新 `openflow-platform-progress.md` H5·D 行
   - _Requirements: 2.1–2.5, 12.1–12.10_
 
 - [x] **S1. 全局搜索服务端保存视图 — Backend**
@@ -146,7 +146,7 @@ Cross-links: **requirements** → `requirements.md`; **design** → `design.md`;
   - [x] WH1.4 `GET …` 列表（含 `eventTypes`、`enabled`、时间戳）
   - [x] WH1.5 `PATCH …/{id}` 与别名路径更新
   - [x] WH1.6 `DELETE …/{id}` 与别名路径
-  - [x] WH1.7 `POST …/{id}/test` — JSON 体 + **`X-Toonflow-Signature`**（`sha256=` HMAC）+ **`X-Toonflow-Timestamp`** + **`X-Toonflow-Event-Type`**
+  - [x] WH1.7 `POST …/{id}/test` — JSON 体 + **`X-Openflow-Signature`**（`sha256=` HMAC）+ **`X-Openflow-Timestamp`** + **`X-Openflow-Event-Type`**
   - [x] WH1.8 `GET …/{id}/deliveries` 分页列表
   - [x] WH1.9 OpenAPI / `SettingsOpenApi` 已注册 `patch` + `deliveries`；导出 `export-openapi` 通过
   - [x] WH1.10 **配置审计**：表 **`app_outbound_webhook_config_audit`**（create/patch/delete/test；**`details` 不含 secret**）；账户导出勾选审计时包含 **`outbound_webhook_config_audit`**
@@ -154,13 +154,13 @@ Cross-links: **requirements** → `requirements.md`; **design** → `design.md`;
 
 - [x] **WH2. 出站 Webhook — 投递引擎**（需求 **4.4**「死信」以 **`app_outbound_webhook_delivery` 失败行**落地；**可选加强**：独立 DLQ 消费/自动重放未做）
   - [x] WH2.1 测试与手动路径：`reqwest` POST 至用户 URL（见 `post_outbound_webhook_test`）
-  - [x] WH2.2 HMAC：`sign_toonflow`（`timestamp + '.' + body`）
-  - [x] WH2.3 请求头：`X-Toonflow-Signature`、`X-Toonflow-Event-Type`（及 Timestamp）
+  - [x] WH2.2 HMAC：`sign_openflow`（`timestamp + '.' + body`）
+  - [x] WH2.3 请求头：`X-Openflow-Signature`、`X-Openflow-Event-Type`（及 Timestamp）
   - [x] WH2.4 指数退避重试（最多 **3** 次 HTTP 尝试：1s / 2s 间隔），测试与业务投递共用 `deliver_outbound_event`
   - [x] WH2.5 死信 — **`status=failed`** 投递审计行即终态（无后台重放 worker）；与需求 **4.4** 对齐为「记录失败」而非独立队列产品
   - [x] WH2.6 事件触发器：**`job.completed` / `job.failed`**（`jobs/worker` → `fire_job_terminal_outbound_webhooks`）；**`project.created`**（`projects/.../create.rs` 事务提交后 `fire_project_created_outbound_webhooks`）；**`workspace.member.added`**（`workspaces/http.rs`：`add_workspace_member` 在 **此前非成员** 时投递；**`accept_workspace_invite`** 同条件，**`actorUserId`** 为邀请人 `invited_by`；收件人为 **workspace owner + actor**，去重）
-  - [x] WH2.7 单元测试 — **`deliver.rs`** workspace / event_types 纯函数 + **`http_shape_tests`**（`sign_toonflow` + reqwest 与 wiremock 对齐头/路径）
-  - [x] WH2.8 端到端集成测试 — **`outbound_webhooks/http_shape_tests.rs`**：`wiremock` 校验 `POST` 携带 **`X-Toonflow-Signature` / `Timestamp` / `Event-Type`** 与 body；**不依赖 PG**（投递写库路径仍以 `deliver.rs` 单测 + 产品验证为主）
+  - [x] WH2.7 单元测试 — **`deliver.rs`** workspace / event_types 纯函数 + **`http_shape_tests`**（`sign_openflow` + reqwest 与 wiremock 对齐头/路径）
+  - [x] WH2.8 端到端集成测试 — **`outbound_webhooks/http_shape_tests.rs`**：`wiremock` 校验 `POST` 携带 **`X-Openflow-Signature` / `Timestamp` / `Event-Type`** 与 body；**不依赖 PG**（投递写库路径仍以 `deliver.rs` 单测 + 产品验证为主）
   - _Requirements: 4.2–4.9_
 
 - [x] **WH3. 出站 Webhook — Frontend**（帮助 Hub 出站区：列表/创建/测试/**事件多选+workspaceId**；**投递记录**；平台逻辑与 chips **widget 测**已加）
@@ -218,7 +218,7 @@ Cross-links: **requirements** → `requirements.md`; **design** → `design.md`;
 
 - [x] **HB1. 帮助文档应用内 Hub — Backend**（路径以代码为准，非需求稿 `help-links`）
   - [x] HB1.1 实现 **`GET /api/v1/settings/help/hub`** 与 **`GET /api/v1/settings/help/hub/config`**（合并 env / workspace / user 链接为 `effectiveItems`）
-  - [x] HB1.2 支持 **`TOONFLOW_HELP_HUB_ITEMS_JSON`**、**`TOONFLOW_HELP_HUB_URL`** 与 DB 表 **`app_help_hub_link`**
+  - [x] HB1.2 支持 **`OPENFLOW_HELP_HUB_ITEMS_JSON`**、**`OPENFLOW_HELP_HUB_URL`** 与 DB 表 **`app_help_hub_link`**
   - [x] HB1.3 链接项 **`HelpHubLinkItem`** `serde` 校验（`deny_unknown_fields`）与 URL 回退
   - [x] HB1.4 OpenAPI 已注册 `getSettingsHelpHubLinksV1` / `getSettingsHelpHubConfigV1` / user+workspace links POST
   - [x] HB1.5 `backend/src/settings/help_hub/mod.rs` 内 **`help_hub_items_json_parses`** 等单元测试
@@ -227,7 +227,7 @@ Cross-links: **requirements** → `requirements.md`; **design** → `design.md`;
 - [x] **HB2. 帮助文档应用内 Hub — Frontend**
   - [x] HB2.1 `rust_api` 已生成/封装 Help Hub 配置与链接读写（与 OpenAPI 同步）
   - [x] HB2.2 **`_HelpHubSection`**（`build_sections_product.dart`）：分类摘要、工作区/用户层治理入口
-  - [x] HB2.3 标题 / id / url 搜索与高亮（与 `toonflow-platform-progress.md` P-A2 帮助面一致）
+  - [x] HB2.3 标题 / id / url 搜索与高亮（与 `openflow-platform-progress.md` P-A2 帮助面一致）
   - [x] HB2.4 打开外链（平台实现为浏览器 / 外链策略；WebView 为可选增强）
   - [x] HB2.5 复制单链与「标题+链接」
   - [x] HB2.6 空态「暂无帮助文档」类提示
@@ -259,7 +259,7 @@ Cross-links: **requirements** → `requirements.md`; **design** → `design.md`;
   - [x] F1.6 personal / 单用户路径由 P1 与 workspace 契约测试背书
   - [x] F1.7 迁移策略以 `supabase/migrations` 审查与 staging 为准
   - [x] F1.8 平台级可发现性随 `platform-config`、internal ops、通知中心等迭代增强
-  - [x] F1.9 进度叙事见 **`docs/plans/toonflow-platform-progress.md`**（随 PR 更新）
+  - [x] F1.9 进度叙事见 **`docs/plans/openflow-platform-progress.md`**（随 PR 更新）
   - [x] F1.10 **`docs/plans/workspace-team-full-plan.md`** W4.x 已大量勾选；**W9.2** 仍保留「发布前按 runbook 执行」的独立门禁语义（与矩阵文档 `pass` 不矛盾）
   - _Requirements: 8.1–8.10_
 
@@ -269,5 +269,5 @@ Cross-links: **requirements** → `requirements.md`; **design** → `design.md`;
 - 用户可见功能必须在同一里程碑交付 backend + frontend + OpenAPI 文档
 - 不得破坏 personal workspace 和单用户路径
 - 所有 RLS 策略变更必须重新运行一致性验证
-- 在 `toonflow-platform-progress.md` 和 `workspace-team-full-plan.md` 中更新进度
+- 在 `openflow-platform-progress.md` 和 `workspace-team-full-plan.md` 中更新进度
 - **主清单未列的补遗/验证/文档锚点**（避免与 S1 等重复开条）：见同目录 [`gap-tasks-automation.md`](./gap-tasks-automation.md)

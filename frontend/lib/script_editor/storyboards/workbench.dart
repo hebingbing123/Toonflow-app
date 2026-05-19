@@ -100,7 +100,7 @@ extension _HomePageScriptEditorStoryboards on _HomePageState {
       );
       if (!mounted) return;
       final boardsList = List<StoryboardRow>.from(boards);
-      await showDialog<void>(
+      await showStudioDialog<void>(
         context: context,
         builder: (ctx2) {
           final boardsLoading = <bool>[false];

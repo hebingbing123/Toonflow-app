@@ -57,8 +57,8 @@ pub(crate) async fn run_voiceover_generate(
     )
     .await?;
 
-    let project_voice_profile =
-        load_project_voice_profile(pool, row.owner_user_id, project_numeric_id).await?;
+    let (project_voice_model, project_voice_profile) =
+        load_project_voice_settings(pool, row.owner_user_id, project_numeric_id).await?;
 
     let process = async {
         let seed = load_storyboard_seed(pool, storyboard_id).await?;
@@ -96,7 +96,13 @@ pub(crate) async fn run_voiceover_generate(
         }
         let voice = resolve_tts_voice_name(&voice_cfg);
 
-        let openai_cfg = load_tts_llm_config_for_user(state, pool, row.owner_user_id).await?;
+        let openai_cfg = load_tts_llm_config_for_user(
+            state,
+            pool,
+            row.owner_user_id,
+            project_voice_model.as_deref(),
+        )
+        .await?;
         let root = state.local_voiceover_audio_dir.as_ref().ok_or_else(|| {
             JobRunError::Failed(
                 "TOONFLOW_LOCAL_VOICEOVER_AUDIO_DIR is not set; cannot persist voiceover artifact"
@@ -227,14 +233,14 @@ pub(crate) async fn run_voiceover_generate(
     }
 }
 
-async fn load_project_voice_profile(
+async fn load_project_voice_settings(
     pool: &PgPool,
     actor_user_id: Uuid,
     project_numeric_id: i32,
-) -> Result<Option<String>, JobRunError> {
-    let row = sqlx::query_scalar::<_, Option<String>>(
+) -> Result<(Option<String>, Option<String>), JobRunError> {
+    let row = sqlx::query_as::<_, (Option<String>, Option<String>)>(
         r#"
-        SELECT voice_profile
+        SELECT voice_model, voice_profile
         FROM app_project
         WHERE numeric_id = $2
           AND EXISTS (
@@ -463,6 +469,7 @@ pub(crate) async fn load_tts_llm_config_for_user(
     state: &AppState,
     pool: &PgPool,
     owner_user_id: Uuid,
+    model_override: Option<&str>,
 ) -> Result<LlmConfig, JobRunError> {
     let cfg = load_agent_deploy_config(pool, owner_user_id)
         .await
@@ -471,7 +478,7 @@ pub(crate) async fn load_tts_llm_config_for_user(
         .rows
         .get("ttsDubbing")
         .ok_or_else(|| JobRunError::Failed("ttsDubbing model is not configured".into()))?;
-    let model = tts.model.trim();
+    let model = resolve_effective_tts_model(model_override, &tts.model);
     if model.is_empty() {
         return Err(JobRunError::Failed(
             "ttsDubbing model is configured with an empty model value".into(),
@@ -507,6 +514,16 @@ pub(crate) async fn load_tts_llm_config_for_user(
         base_url: server_llm.base_url.clone(),
         model: model.to_string(),
     })
+}
+
+fn resolve_effective_tts_model<'a>(
+    model_override: Option<&'a str>,
+    fallback_model: &'a str,
+) -> &'a str {
+    model_override
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .unwrap_or_else(|| fallback_model.trim())
 }
 
 fn vendor_candidates(raw_vendor_id: &str) -> Vec<String> {
@@ -608,7 +625,10 @@ async fn persist_storyboard_voiceover_metadata(
 mod tests {
     use serde_json::json;
 
-    use super::{resolve_narration_text, vendor_candidates, StoryboardVoiceoverSeedRow};
+    use super::{
+        resolve_effective_tts_model, resolve_narration_text, vendor_candidates,
+        StoryboardVoiceoverSeedRow,
+    };
 
     #[test]
     fn resolve_narration_text_prefers_explicit_narration() {
@@ -652,6 +672,26 @@ mod tests {
         assert_eq!(
             vendor_candidates(" custom-endpoint "),
             vec!["custom-endpoint"]
+        );
+    }
+
+    #[test]
+    fn resolve_effective_tts_model_prefers_trimmed_override() {
+        assert_eq!(
+            resolve_effective_tts_model(Some(" gpt-4.1-mini-tts "), "gpt-4o-mini-tts"),
+            "gpt-4.1-mini-tts"
+        );
+    }
+
+    #[test]
+    fn resolve_effective_tts_model_falls_back_when_override_blank() {
+        assert_eq!(
+            resolve_effective_tts_model(Some("   "), " gpt-4o-mini-tts "),
+            "gpt-4o-mini-tts"
+        );
+        assert_eq!(
+            resolve_effective_tts_model(None, " gpt-4o-mini-tts "),
+            "gpt-4o-mini-tts"
         );
     }
 }

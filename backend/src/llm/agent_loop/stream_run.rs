@@ -184,7 +184,7 @@ pub async fn harness_agent_run_streaming_tools(
 ) -> Result<(), String> {
     let tools = harness_openai_tools();
     let system = format!(
-        "You are the Toonflow harness agent ({assistant_name}). \
+        "You are the Openflow harness agent ({assistant_name}). \
          Tools match GET /api/v1/harness/tools. \
          Use tools when asked to read a skill file, inspect script plan/content, test echo / isolated echo, or run the WASM probe. \
          Prefer the narrowest possible tool call first: use field subsets, paging, id lists, or text windows before full payloads. \

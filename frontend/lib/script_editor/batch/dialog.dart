@@ -263,7 +263,7 @@ class _StoryboardBatchWorkbenchDialogState
             );
     }
 
-    return AlertDialog(
+    return StudioAlertDialog(
       title: Text(l10n.scriptEditorStoryboardBatchDialogTitle),
       content: SizedBox(
         width: 820,

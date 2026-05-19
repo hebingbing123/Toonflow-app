@@ -145,7 +145,7 @@ Added `e2e_regression_suite` module to the contract tests module tree.
 ```bash
 # All E2E tests
 cd backend
-cargo test --package toonflow-server --lib app::pg_contract_tests::e2e_regression_suite -- --ignored --nocapture
+cargo test --package openflow-server --lib app::pg_contract_tests::e2e_regression_suite -- --ignored --nocapture
 
 # Individual test
 cargo test test_e2e_project_creation_to_publish_workflow -- --ignored --nocapture
@@ -186,7 +186,7 @@ The E2E regression suite complements existing test suites:
 
 ### Configuration
 ```bash
-DATABASE_URL=postgresql://user:password@staging-db:5432/toonflow_staging
+DATABASE_URL=postgresql://user:password@staging-db:5432/openflow_staging
 SUPABASE_JWT_SECRET=your-staging-jwt-secret
 ```
 
@@ -204,7 +204,7 @@ The test suite is designed for CI/CD integration:
 - name: Run E2E tests
   run: |
     cd backend
-    cargo test --package toonflow-server --lib app::pg_contract_tests::e2e_regression_suite -- --ignored --nocapture
+    cargo test --package openflow-server --lib app::pg_contract_tests::e2e_regression_suite -- --ignored --nocapture
   env:
     DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
     SUPABASE_JWT_SECRET: ${{ secrets.STAGING_JWT_SECRET }}
@@ -253,7 +253,7 @@ Potential improvements:
 ### Compilation
 ```bash
 cd backend
-cargo check --package toonflow-server --lib
+cargo check --package openflow-server --lib
 ```
 **Result**: ✓ Compiles successfully
 

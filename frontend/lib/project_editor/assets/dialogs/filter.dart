@@ -1,3 +1,4 @@
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 part of '../../../../home_page.dart';
 
 extension _HomePageProjectEditorAssetsFilterDialogs on _HomePageState {
@@ -19,19 +20,19 @@ extension _HomePageProjectEditorAssetsFilterDialogs on _HomePageState {
     int? selectedScriptNumericId = assetsFilterScriptNumericId[0];
     final l10n = resolveAppLocalizationsForErrors(ctx);
     try {
-      final confirmed = await showDialog<bool>(
+      final confirmed = await showStudioDialog<bool>(
         context: ctx,
         builder: (dialogCtx) {
           return StatefulBuilder(
             builder: (dialogCtx, setState) {
-              return AlertDialog(
+              return StudioAlertDialog(
                 title: Text(l10n.projectEditorAssetFilterDialogTitle),
                 content: SizedBox(
                   width: 520,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      DropdownButtonFormField<int?>(
+                      StudioDropdownButtonFormField<int?>(
                         initialValue: selectedScriptNumericId,
                         decoration: InputDecoration(
                           labelText: l10n.projectEditorAssetFilterByScript,

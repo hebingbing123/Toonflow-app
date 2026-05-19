@@ -28,11 +28,15 @@ async fn project_numeric_crud_roundtrip() {
         "name": initial_name,
         "intro": "seed intro",
         "projectType": "short-drama",
+        "textModel": "1:gpt-4.1-mini",
+        "multimodalModel": "1:gpt-4o",
         "artStyle": "ink",
         "directorManual": "story-manual",
         "videoRatio": "9:16",
         "imageModel": "dalle-3",
         "videoModel": "runway",
+        "voiceModel": "gpt-4o-mini-tts",
+        "voiceProfile": "{\"voice\":\"alloy\"}",
         "imageQuality": "hd",
         "mode": "animated.short_drama",
     });
@@ -92,6 +96,8 @@ async fn project_numeric_crud_roundtrip() {
     );
     assert_eq!(created_row["intro"].as_str(), Some("seed intro"));
     assert_eq!(created_row["project_type"].as_str(), Some("short-drama"));
+    assert_eq!(created_row["text_model"].as_str(), Some("1:gpt-4.1-mini"));
+    assert_eq!(created_row["multimodal_model"].as_str(), Some("1:gpt-4o"));
     assert_eq!(created_row["mode"].as_str(), Some("animated.short_drama"));
     assert_eq!(created_row["art_style"].as_str(), Some("ink"));
     assert_eq!(
@@ -101,6 +107,11 @@ async fn project_numeric_crud_roundtrip() {
     assert_eq!(created_row["video_ratio"].as_str(), Some("9:16"));
     assert_eq!(created_row["image_model"].as_str(), Some("dalle-3"));
     assert_eq!(created_row["video_model"].as_str(), Some("runway"));
+    assert_eq!(created_row["voice_model"].as_str(), Some("gpt-4o-mini-tts"));
+    assert_eq!(
+        created_row["voice_profile"].as_str(),
+        Some("{\"voice\":\"alloy\"}")
+    );
     assert_eq!(created_row["image_quality"].as_str(), Some("hd"));
 
     let stored_mode: Option<String> = sqlx::query_scalar(
@@ -131,11 +142,15 @@ async fn project_numeric_crud_roundtrip() {
         "name": updated_name,
         "intro": "updated intro",
         "projectType": "feature",
+        "textModel": " 1:o4-mini ",
+        "multimodalModel": " 1:gpt-4.1 ",
         "artStyle": "charcoal",
         "directorManual": "revised-manual",
         "videoRatio": "16:9",
-        "imageModel": "flux",
-        "videoModel": "kling",
+        "imageModel": " flux ",
+        "videoModel": " kling ",
+        "voiceModel": " gpt-4.1-mini-tts ",
+        "voiceProfile": " {\"voice\":\"nova\"} ",
         "imageQuality": "standard",
         "mode": "live_action.short_drama",
     });
@@ -182,6 +197,8 @@ async fn project_numeric_crud_roundtrip() {
     assert_eq!(edited_row["name"].as_str(), Some(updated_name.as_str()));
     assert_eq!(edited_row["intro"].as_str(), Some("updated intro"));
     assert_eq!(edited_row["project_type"].as_str(), Some("feature"));
+    assert_eq!(edited_row["text_model"].as_str(), Some("1:o4-mini"));
+    assert_eq!(edited_row["multimodal_model"].as_str(), Some("1:gpt-4.1"));
     assert_eq!(edited_row["mode"].as_str(), Some("live_action.short_drama"));
     assert_eq!(edited_row["art_style"].as_str(), Some("charcoal"));
     assert_eq!(
@@ -191,6 +208,11 @@ async fn project_numeric_crud_roundtrip() {
     assert_eq!(edited_row["video_ratio"].as_str(), Some("16:9"));
     assert_eq!(edited_row["image_model"].as_str(), Some("flux"));
     assert_eq!(edited_row["video_model"].as_str(), Some("kling"));
+    assert_eq!(edited_row["voice_model"].as_str(), Some("gpt-4.1-mini-tts"));
+    assert_eq!(
+        edited_row["voice_profile"].as_str(),
+        Some("{\"voice\":\"nova\"}")
+    );
     assert_eq!(edited_row["image_quality"].as_str(), Some("standard"));
 
     let stored_mode: Option<String> = sqlx::query_scalar(

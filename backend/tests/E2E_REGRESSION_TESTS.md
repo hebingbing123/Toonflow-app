@@ -9,7 +9,7 @@
 
 ```bash
 # Required environment variables
-DATABASE_URL=postgresql://user:password@localhost:5432/toonflow_staging
+DATABASE_URL=postgresql://user:password@localhost:5432/openflow_staging
 SUPABASE_JWT_SECRET=your-jwt-secret-here
 ```
 
@@ -17,7 +17,7 @@ SUPABASE_JWT_SECRET=your-jwt-secret-here
 
 ```bash
 cd backend
-cargo test --package toonflow-server --lib app::pg_contract_tests::e2e_regression_suite -- --ignored --nocapture
+cargo test --package openflow-server --lib app::pg_contract_tests::e2e_regression_suite -- --ignored --nocapture
 ```
 
 ### Running Individual Tests
@@ -98,7 +98,7 @@ Error: DATABASE_URL when running with --ignored
 cat backend/.env
 
 # Or set environment variable
-export DATABASE_URL=postgresql://user:password@localhost:5432/toonflow_staging
+export DATABASE_URL=postgresql://user:password@localhost:5432/openflow_staging
 ```
 
 #### 2. JWT Secret Mismatch
@@ -184,15 +184,15 @@ WHERE owner_user_id = 'aaaaaaaa-aaaa-4aaa-8aaa-8aaa-aaaaaaaaaaaa';
 ```bash
 # Start PostgreSQL with Docker
 docker run -d \
-  --name toonflow-staging \
+  --name openflow-staging \
   -e POSTGRES_PASSWORD=postgres \
-  -e POSTGRES_DB=toonflow_staging \
+  -e POSTGRES_DB=openflow_staging \
   -p 5432:5432 \
   postgres:15
 
 # Apply migrations
 cd backend
-export DATABASE_URL=postgresql://postgres:postgres@localhost:5432/toonflow_staging
+export DATABASE_URL=postgresql://postgres:postgres@localhost:5432/openflow_staging
 sqlx migrate run
 
 # Create test user
@@ -203,12 +203,12 @@ psql $DATABASE_URL -c "INSERT INTO auth.users (id, email) VALUES ('aaaaaaaa-aaaa
 
 ```bash
 # Set environment variables
-export DATABASE_URL=postgresql://user:password@staging-db.example.com:5432/toonflow_staging
+export DATABASE_URL=postgresql://user:password@staging-db.example.com:5432/openflow_staging
 export SUPABASE_JWT_SECRET=your-staging-jwt-secret
 
 # Run tests
 cd backend
-cargo test --package toonflow-server --lib app::pg_contract_tests::e2e_regression_suite -- --ignored --nocapture
+cargo test --package openflow-server --lib app::pg_contract_tests::e2e_regression_suite -- --ignored --nocapture
 ```
 
 ## CI/CD Integration
@@ -235,7 +235,7 @@ jobs:
         image: postgres:15
         env:
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: toonflow_staging
+          POSTGRES_DB: openflow_staging
         ports:
           - 5432:5432
         options: >-
@@ -260,18 +260,18 @@ jobs:
           cd backend
           sqlx migrate run
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/toonflow_staging
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/openflow_staging
       
       - name: Create test user
         run: |
-          psql postgresql://postgres:postgres@localhost:5432/toonflow_staging -c "INSERT INTO auth.users (id, email) VALUES ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'test@example.com') ON CONFLICT DO NOTHING;"
+          psql postgresql://postgres:postgres@localhost:5432/openflow_staging -c "INSERT INTO auth.users (id, email) VALUES ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'test@example.com') ON CONFLICT DO NOTHING;"
       
       - name: Run E2E tests
         run: |
           cd backend
-          cargo test --package toonflow-server --lib app::pg_contract_tests::e2e_regression_suite -- --ignored --nocapture
+          cargo test --package openflow-server --lib app::pg_contract_tests::e2e_regression_suite -- --ignored --nocapture
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/toonflow_staging
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/openflow_staging
           SUPABASE_JWT_SECRET: test-secret-for-ci
 ```
 

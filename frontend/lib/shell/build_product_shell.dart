@@ -15,14 +15,20 @@ extension _HomePageProductShell on _HomePageState {
       }
       switch (pane) {
         case ProductWorkspacePane.projects:
-          unawaited(_projectsController.loadProjects());
+          unawaited(
+            _projectsController.loadProjects().then((_) async {
+              await _applyDefaultProductProjectScopeIfNeeded();
+            }),
+          );
         case ProductWorkspacePane.notifications:
           unawaited(_notificationsController.refresh());
         case ProductWorkspacePane.jobs:
           unawaited(_jobsController.loadJobs());
         case ProductWorkspacePane.tasks:
           unawaited(_taskCenterController.loadTaskProjects());
+          unawaited(_taskCenterController.loadTaskApi());
         case ProductWorkspacePane.quality:
+          unawaited(_qualityReviewsController.loadQualityReviews());
           unawaited(_qualityReviewsController.loadQualityDashboard());
         default:
           break;
@@ -40,6 +46,12 @@ extension _HomePageProductShell on _HomePageState {
     if (!_isProductPaneEnabledForConfig(pane, _platformConfig)) {
       return;
     }
+    if (widget.shellMode == HomeShellMode.product &&
+        (pane == ProductWorkspacePane.scriptWorkspace ||
+            pane == ProductWorkspacePane.productionWorkspace)) {
+      _handleProductPipelinePaneSelect(pane);
+      return;
+    }
     _shellNavigationController.selectProductWorkspacePane(pane);
     _ensureProductPaneData(pane);
     if (kStudioPaneUriSyncedPanes.contains(pane)) {
@@ -52,7 +64,38 @@ extension _HomePageProductShell on _HomePageState {
   }
 
   void _goToProjectsHome() {
-    _selectProductUtilityPane(ProductWorkspacePane.projects);
+    _shellNavigationController.resetProductWorkspacePaneHistory();
+    if (_shellNavigationController.productWorkspacePane ==
+        ProductWorkspacePane.projects) {
+      return;
+    }
+    _shellNavigationController.replaceProductWorkspacePane(
+      ProductWorkspacePane.projects,
+    );
+    _ensureProductPaneData(ProductWorkspacePane.projects);
+    if (kStudioPaneUriSyncedPanes.contains(ProductWorkspacePane.projects)) {
+      final uri = studioUriForUtilityPane(ProductWorkspacePane.projects);
+      final current = GoRouterState.of(context).uri.toString();
+      if (current != uri) {
+        GoRouter.of(context).go(uri);
+      }
+    }
+  }
+
+  bool _popProductWorkspacePane() {
+    final popped = _shellNavigationController.popProductWorkspacePane();
+    if (!popped) {
+      return false;
+    }
+    final pane = _shellNavigationController.productWorkspacePane;
+    if (kStudioPaneUriSyncedPanes.contains(pane)) {
+      final uri = studioUriForUtilityPane(pane);
+      final current = GoRouterState.of(context).uri.toString();
+      if (current != uri) {
+        GoRouter.of(context).go(uri);
+      }
+    }
+    return true;
   }
 
   String _studioShellHeaderTitle(AppLocalizations l10n) {
@@ -83,31 +126,34 @@ extension _HomePageProductShell on _HomePageState {
 
   void _promptSelectProjectFirst() {
     final l10n = AppLocalizations.of(context)!;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.studioPipelineSelectProjectFirst)),
+    showStudioSnackBar(
+      context,
+      message: l10n.studioPipelineSelectProjectFirst,
+      icon: Icons.folder_open_outlined,
     );
   }
 
-  void _handleProductPipelinePaneSelect(ProductWorkspacePane pane) {
+  Future<void> _handleProductPipelinePaneSelect(ProductWorkspacePane pane) async {
     if (!_isProductPaneEnabledForConfig(pane, _platformConfig)) {
       return;
     }
     switch (pane) {
       case ProductWorkspacePane.scriptWorkspace:
-        final projectId = _resolvedProductNumericIdForPipeline();
-        if (projectId == null) {
-          _promptSelectProjectFirst();
-          return;
-        }
-        context.go('/projects/$projectId/${StudioStep.script.slug}');
-        return;
       case ProductWorkspacePane.productionWorkspace:
+        await _applyDefaultProductProjectScopeIfNeeded();
+        if (!mounted) {
+          return;
+        }
         final projectId = _resolvedProductNumericIdForPipeline();
         if (projectId == null) {
           _promptSelectProjectFirst();
+          _shellNavigationController.selectProductWorkspacePane(pane);
           return;
         }
-        context.go('/projects/$projectId/${StudioStep.storyboard.slug}');
+        final step = pane == ProductWorkspacePane.scriptWorkspace
+            ? StudioStep.script.slug
+            : StudioStep.storyboard.slug;
+        context.go('/projects/$projectId/$step');
         return;
       case ProductWorkspacePane.projects:
         _goToProjectsHome();
@@ -152,80 +198,337 @@ extension _HomePageProductShell on _HomePageState {
     _syncStudioPaneFromRoute();
   }
 
-  Future<void> _openProductShellMoreMenu(BuildContext context) async {
-    final l10n = AppLocalizations.of(context)!;
-    final width = MediaQuery.sizeOf(context).width;
-    final panelMaxWidth = width >= 1800
-        ? 920.0
-        : width >= 1440
-        ? 760.0
-        : width >= 1100
-        ? 640.0
-        : 520.0;
-    final secondary = _kStudioShellFourItems
-        ? studioShellSecondaryDestinations(
-            l10n,
-            jobsPaneEnabled: _platformConfig.jobsPaneEnabled,
-            qualityPaneEnabled: _platformConfig.qualityDashboardEnabled,
-          )
-        : secondaryProductShellDestinations(l10n);
-    final selected = await showModalBottomSheet<ProductWorkspacePane>(
-      context: context,
-      showDragHandle: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      constraints: BoxConstraints(maxWidth: panelMaxWidth),
-      builder: (ctx) {
-        final isWideDesktop = MediaQuery.sizeOf(ctx).width >= 1440;
-        final headingStyle = studioPageTitleStyle(ctx);
-        final subtitleStyle = studioSectionIntroStyle(ctx);
-        final itemTitleStyle = studioPaneTitleStyle(ctx);
-        return SafeArea(
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(
-              isWideDesktop ? 20 : 16,
-              0,
-              isWideDesktop ? 20 : 16,
-              20,
+  Widget _buildProductShellMoreMenuRow(
+    BuildContext ctx, {
+    required String label,
+    required IconData icon,
+    required bool selected,
+    required VoidCallback onTap,
+    bool showCheckWhenSelected = true,
+  }) {
+    final tokens = StudioTokens.of(ctx);
+    final labelStyle = Theme.of(ctx).textTheme.labelLarge?.copyWith(
+      color: selected ? tokens.textPrimary : tokens.textSecondary,
+      fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+    );
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(10),
+          child: Ink(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: selected
+                  ? tokens.primarySoft.withValues(alpha: 0.72)
+                  : tokens.bgSurface.withValues(alpha: 0.42),
+              border: Border.all(
+                color: selected
+                    ? tokens.primary.withValues(alpha: 0.34)
+                    : tokens.surfaceHighlight.withValues(alpha: 0.85),
+              ),
             ),
-            child: ListView(
-              shrinkWrap: true,
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+            child: Row(
               children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(8, 4, 8, 14),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(l10n.productShellMoreMenu, style: headingStyle),
-                      const SizedBox(height: 6),
-                      Text(
-                        l10n.productPipelineStripTitle,
-                        style: subtitleStyle,
-                      ),
-                    ],
+                Icon(
+                  icon,
+                  size: 18,
+                  color: selected ? tokens.accent : tokens.textSecondary,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: labelStyle,
                   ),
                 ),
-                ...secondary.map(
-                  (dest) => Padding(
-                    padding: const EdgeInsets.only(bottom: 6),
-                    child: ListTile(
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 6,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      leading: Icon(dest.icon, size: 22),
-                      title: Text(dest.label(l10n), style: itemTitleStyle),
-                      selected:
-                          _shellNavigationController.productWorkspacePane ==
-                          dest.pane,
-                      onTap: () => Navigator.of(ctx).pop(dest.pane),
-                    ),
-                  ),
-                ),
+                if (selected && showCheckWhenSelected)
+                  Icon(Icons.check_rounded, size: 16, color: tokens.accent),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProductShellMoreMenuContent(
+    BuildContext ctx, {
+    required AppLocalizations l10n,
+    required List<ProductShellDestination> secondary,
+    required bool compactActions,
+    required double panelWidth,
+  }) {
+    final tokens = StudioTokens.of(ctx);
+    final studio = StudioColors.of(ctx);
+    final localeCode = AppLocaleNotifier.instance.code;
+    final sectionLabelStyle = Theme.of(ctx).textTheme.labelSmall?.copyWith(
+      color: tokens.textMuted,
+      fontWeight: FontWeight.w700,
+      letterSpacing: 0.2,
+    );
+    final useTwoColumns = panelWidth >= 360 && secondary.length >= 6;
+    final columnGap = 8.0;
+    final itemWidth = useTwoColumns
+        ? (panelWidth - 24 - columnGap) / 2
+        : panelWidth - 24;
+
+    Widget destinationTile(ProductShellDestination dest) {
+      final selected =
+          _shellNavigationController.productWorkspacePane == dest.pane;
+      return SizedBox(
+        width: itemWidth,
+        child: _buildProductShellMoreMenuRow(
+          ctx,
+          label: dest.label(l10n),
+          icon: dest.icon,
+          selected: selected,
+          onTap: () => Navigator.of(ctx).pop(dest.pane),
+        ),
+      );
+    }
+
+    Widget sectionDivider() {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(2, 6, 2, 8),
+        child: Divider(
+          height: 1,
+          color: tokens.surfaceHighlight.withValues(alpha: 0.9),
+        ),
+      );
+    }
+
+    return Material(
+      color: Colors.transparent,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: studio.panelGradient,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: tokens.surfaceHighlight),
+          boxShadow: <BoxShadow>[
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.28),
+              blurRadius: 24,
+              spreadRadius: -8,
+              offset: const Offset(0, 12),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(14),
+          child: ListView(
+            shrinkWrap: true,
+            padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.fromLTRB(2, 0, 0, 8),
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Text(
+                        l10n.productShellMoreMenu,
+                        style: studioPaneTitleStyle(ctx),
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: l10n.studioDismiss,
+                      visualDensity: VisualDensity.compact,
+                      onPressed: () => Navigator.of(ctx).pop(),
+                      style: IconButton.styleFrom(
+                        minimumSize: const Size(32, 32),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        foregroundColor: tokens.textSecondary,
+                      ),
+                      icon: const Icon(Icons.close_rounded, size: 18),
+                    ),
+                  ],
+                ),
+              ),
+              if (useTwoColumns)
+                Wrap(
+                  spacing: columnGap,
+                  runSpacing: 0,
+                  children: secondary.map(destinationTile).toList(growable: false),
+                )
+              else
+                ...secondary.map(destinationTile),
+              if (compactActions) ...<Widget>[
+                sectionDivider(),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(4, 0, 4, 6),
+                  child: Text(
+                    l10n.localeSectionTitle,
+                    style: sectionLabelStyle,
+                  ),
+                ),
+                for (final option in <(String, String)>[
+                  ('system', l10n.localeSystem),
+                  ('en', l10n.localeEnglish),
+                  ('zh', l10n.localeChinese),
+                ])
+                  _buildProductShellMoreMenuRow(
+                    ctx,
+                    label: option.$2,
+                    icon: Icons.language_outlined,
+                    selected: localeCode == option.$1,
+                    onTap: () {
+                      Navigator.of(ctx).pop();
+                      unawaited(
+                        AppLocaleNotifier.instance.setLocaleCode(option.$1),
+                      );
+                    },
+                  ),
+                sectionDivider(),
+                _buildProductShellMoreMenuRow(
+                  ctx,
+                  label: l10n.authSignOut,
+                  icon: Icons.logout_outlined,
+                  selected: false,
+                  showCheckWhenSelected: false,
+                  onTap: () {
+                    Navigator.of(ctx).pop();
+                    unawaited(_authController.signOut());
+                  },
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openProductShellMoreMenu(BuildContext anchorContext) async {
+    final l10n = AppLocalizations.of(anchorContext)!;
+    final width = MediaQuery.sizeOf(anchorContext).width;
+    final overlayBox =
+        Overlay.of(anchorContext).context.findRenderObject() as RenderBox;
+    final anchorBox = anchorContext.findRenderObject() as RenderBox;
+    final anchorOffset = anchorBox.localToGlobal(
+      Offset.zero,
+      ancestor: overlayBox,
+    );
+    final anchorRect = anchorOffset & anchorBox.size;
+    final secondaryRaw = <ProductShellDestination>[
+      if (width < 720)
+        ProductShellDestination(
+          pane: ProductWorkspacePane.notifications,
+          icon: Icons.notifications_outlined,
+          selectedIcon: Icons.notifications,
+          label: (_) => l10n.productNavNotifications,
+        ),
+      if (width < 720)
+        ProductShellDestination(
+          pane: ProductWorkspacePane.account,
+          icon: Icons.settings_outlined,
+          selectedIcon: Icons.settings,
+          label: (_) => l10n.studioAppBarSettings,
+        ),
+      if (width < 720)
+        ProductShellDestination(
+          pane: ProductWorkspacePane.helpHub,
+          icon: Icons.help_outline,
+          selectedIcon: Icons.help,
+          label: (_) => l10n.studioAppBarHelp,
+        ),
+      ...(_kStudioShellFourItems
+          ? studioShellSecondaryDestinations(
+              l10n,
+              jobsPaneEnabled: _platformConfig.jobsPaneEnabled,
+              qualityPaneEnabled: _platformConfig.qualityDashboardEnabled,
+            )
+          : secondaryProductShellDestinations(l10n)),
+    ];
+    final seenPanes = <ProductWorkspacePane>{};
+    final secondary = secondaryRaw
+        .where((dest) => seenPanes.add(dest.pane))
+        .toList(growable: false);
+    final selected = await showGeneralDialog<ProductWorkspacePane>(
+      context: anchorContext,
+      barrierDismissible: true,
+      barrierLabel: l10n.productShellMoreMenu,
+      barrierColor: Colors.black.withValues(alpha: width < 720 ? 0.32 : 0.18),
+      transitionDuration: const Duration(milliseconds: 160),
+      pageBuilder: (ctx, animation1, animation2) {
+        final mediaQuery = MediaQuery.of(ctx);
+        final screenSize = mediaQuery.size;
+        final horizontalMargin = width < 720 ? 12.0 : 16.0;
+        final safeTop = mediaQuery.padding.top + 10;
+        final safeBottom = mediaQuery.padding.bottom + 12;
+        final desiredWidth = width >= 1440
+            ? 360.0
+            : width >= 1100
+            ? 340.0
+            : width >= 720
+            ? 320.0
+            : screenSize.width - (horizontalMargin * 2);
+        final panelWidth = math.min(
+          desiredWidth,
+          screenSize.width - (horizontalMargin * 2),
+        );
+        final rowCount = panelWidth >= 360 && secondary.length >= 6
+            ? (secondary.length / 2).ceil()
+            : secondary.length;
+        final estimatedHeight =
+            58.0 + (rowCount * 46.0) + (width < 720 ? 220.0 : 0.0);
+        final panelHeight = math.min(
+          estimatedHeight,
+          screenSize.height - safeTop - safeBottom,
+        );
+        final left = math.max(
+          horizontalMargin,
+          math.min(
+            anchorRect.right - panelWidth,
+            screenSize.width - panelWidth - horizontalMargin,
+          ),
+        );
+        final top = math.max(
+          safeTop,
+          math.min(
+            anchorRect.bottom + 10,
+            screenSize.height - panelHeight - safeBottom,
+          ),
+        );
+
+        return Stack(
+          children: <Widget>[
+            Positioned(
+              left: left,
+              top: top,
+              width: panelWidth,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: panelHeight),
+                child: _buildProductShellMoreMenuContent(
+                  ctx,
+                  l10n: l10n,
+                  secondary: secondary,
+                  compactActions: width < 720,
+                  panelWidth: panelWidth,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+      transitionBuilder: (ctx, animation, _, child) {
+        final curved = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutCubic,
+          reverseCurve: Curves.easeIn,
+        );
+        return FadeTransition(
+          opacity: curved,
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0, -0.035),
+              end: Offset.zero,
+            ).animate(curved),
+            child: child,
           ),
         );
       },
@@ -326,6 +629,19 @@ extension _HomePageProductShell on _HomePageState {
     );
   }
 
+  ButtonStyle _chromeIconButtonStyle(StudioTokens tokens) {
+    return IconButton.styleFrom(
+      backgroundColor: tokens.bgSurface.withValues(alpha: 0.72),
+      foregroundColor: tokens.textSecondary,
+      hoverColor: tokens.accentSoft.withValues(alpha: 0.94),
+      highlightColor: tokens.primarySoft,
+      fixedSize: const Size(44, 44),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+    );
+  }
+
   Widget _buildProductShellScaffold(BuildContext context, String? accessToken) {
     if (accessToken == null) {
       return ProductLoginPage(
@@ -337,6 +653,7 @@ extension _HomePageProductShell on _HomePageState {
     }
 
     final l10n = AppLocalizations.of(context)!;
+    final studio = StudioColors.of(context);
     final tokens = StudioTokens.of(context);
     final appTitle =
         _appL10n?.appTitle ??
@@ -349,6 +666,8 @@ extension _HomePageProductShell on _HomePageState {
       currentPane: currentPane,
     );
     final width = MediaQuery.sizeOf(context).width;
+    final compactTopChrome = width < 720;
+    final showInlineWorkspaceContext = showPipeline && width >= 1280;
     final desktopWide = width >= 1440;
     final desktopXWide = width >= 1800;
     final shellHorizontalPadding = desktopXWide
@@ -361,11 +680,87 @@ extension _HomePageProductShell on _HomePageState {
         : desktopWide
         ? 18.0
         : 16.0;
+    final shellPanelRadius = BorderRadius.circular(StudioSpacing.radiusCard);
+    final globalSearchBar = GlobalSearchBar(
+      accessToken: accessToken,
+      currentWorkspaceName: _sessionMe?.currentWorkspace?.name,
+      currentWorkspaceId: _sessionMe?.currentWorkspace?.id,
+      onNavigateToResults: _openGlobalSearchResults,
+      compact: compactTopChrome,
+      showLocalPrefsMenu: !compactTopChrome,
+    );
+    final moreMenuChrome = DecoratedBox(
+      decoration: BoxDecoration(
+        color: tokens.bgInset.withValues(alpha: 0.58),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: tokens.surfaceHighlight),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(6),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Builder(
+              builder: (buttonContext) {
+                return IconButton(
+                  style: _chromeIconButtonStyle(tokens),
+                  tooltip: l10n.productShellMoreMenu,
+                  onPressed: () => _openProductShellMoreMenu(buttonContext),
+                  icon:
+                      compactTopChrome &&
+                          _notificationsController.unreadCount > 0
+                      ? Badge.count(
+                          count: _notificationsController.unreadCount,
+                          child: const Icon(Icons.apps_outlined),
+                        )
+                      : const Icon(Icons.apps_outlined),
+                );
+              },
+            ),
+            if (!compactTopChrome) ...<Widget>[
+              const SizedBox(width: StudioSpacing.chromeActionGap),
+              PopupMenuButton<String>(
+                style: _chromeIconButtonStyle(tokens),
+                tooltip: l10n.localeSectionTitle,
+                icon: const Icon(Icons.language_outlined),
+                itemBuilder: (ctx) => <PopupMenuEntry<String>>[
+                  PopupMenuItem<String>(
+                    value: 'system',
+                    child: Text(l10n.localeSystem),
+                  ),
+                  PopupMenuItem<String>(
+                    value: 'en',
+                    child: Text(l10n.localeEnglish),
+                  ),
+                  PopupMenuItem<String>(
+                    value: 'zh',
+                    child: Text(l10n.localeChinese),
+                  ),
+                ],
+                onSelected: AppLocaleNotifier.instance.setLocaleCode,
+              ),
+              const SizedBox(width: StudioSpacing.chromeActionGap),
+              IconButton(
+                style: _chromeIconButtonStyle(tokens),
+                tooltip: l10n.authSignOut,
+                onPressed: _authController.signOut,
+                icon: const Icon(Icons.logout_outlined),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
 
     final mainColumn = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         StudioGlassPanel(
+          border: Border(
+            bottom: BorderSide(
+              color: tokens.surfaceHighlight.withValues(alpha: 0.84),
+            ),
+          ),
           padding: EdgeInsets.symmetric(
             horizontal: desktopXWide
                 ? 24
@@ -380,63 +775,58 @@ extension _HomePageProductShell on _HomePageState {
                 ? 72
                 : 68,
             child: Row(
-              children: <Widget>[
-                Expanded(
-                  child: _buildStudioLogoHeader(context, appTitle, pageTitle),
-                ),
-                const StudioJobTray(),
-                const SizedBox(width: 8),
-                ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: desktopXWide
-                        ? 420
-                        : desktopWide
-                        ? 360
-                        : 320,
-                  ),
-                  child: GlobalSearchBar(
-                    accessToken: accessToken,
-                    currentWorkspaceName: _sessionMe?.currentWorkspace?.name,
-                    currentWorkspaceId: _sessionMe?.currentWorkspace?.id,
-                    onNavigateToResults: _openGlobalSearchResults,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                StudioAppBarActions(
-                  selectedPane: currentPane,
-                  unreadNotifications: _notificationsController.unreadCount,
-                  onSelectPane: _selectProductUtilityPane,
-                ),
-                IconButton(
-                  tooltip: l10n.productShellMoreMenu,
-                  onPressed: () => _openProductShellMoreMenu(context),
-                  icon: const Icon(Icons.apps_outlined),
-                ),
-                PopupMenuButton<String>(
-                  tooltip: l10n.localeSectionTitle,
-                  icon: const Icon(Icons.language_outlined),
-                  itemBuilder: (ctx) => <PopupMenuEntry<String>>[
-                    PopupMenuItem<String>(
-                      value: 'system',
-                      child: Text(l10n.localeSystem),
-                    ),
-                    PopupMenuItem<String>(
-                      value: 'en',
-                      child: Text(l10n.localeEnglish),
-                    ),
-                    PopupMenuItem<String>(
-                      value: 'zh',
-                      child: Text(l10n.localeChinese),
-                    ),
-                  ],
-                  onSelected: AppLocaleNotifier.instance.setLocaleCode,
-                ),
-                IconButton(
-                  tooltip: l10n.authSignOut,
-                  onPressed: _authController.signOut,
-                  icon: const Icon(Icons.logout_outlined),
-                ),
-              ],
+              children: compactTopChrome
+                  ? <Widget>[
+                      Expanded(child: globalSearchBar),
+                      const SizedBox(width: 8),
+                      moreMenuChrome,
+                    ]
+                  : <Widget>[
+                      Expanded(
+                        child: _buildStudioLogoHeader(
+                          context,
+                          appTitle,
+                          pageTitle,
+                        ),
+                      ),
+                      const StudioJobTray(),
+                      const SizedBox(width: 8),
+                      ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxWidth: desktopXWide
+                              ? 420
+                              : desktopWide
+                              ? 360
+                              : 320,
+                        ),
+                        child: globalSearchBar,
+                      ),
+                      if (showInlineWorkspaceContext) ...<Widget>[
+                        const SizedBox(width: 10),
+                        ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxWidth: desktopXWide
+                                ? 360
+                                : desktopWide
+                                ? 300
+                                : 240,
+                          ),
+                          child: _buildWorkspaceContextSection(
+                            context,
+                            inline: true,
+                          ),
+                        ),
+                      ],
+                      const SizedBox(width: 8),
+                      StudioAppBarActions(
+                        selectedPane: currentPane,
+                        unreadNotifications:
+                            _notificationsController.unreadCount,
+                        onSelectPane: _selectProductUtilityPane,
+                      ),
+                      const SizedBox(width: StudioSpacing.xs),
+                      moreMenuChrome,
+                    ],
             ),
           ),
         ),
@@ -452,11 +842,13 @@ extension _HomePageProductShell on _HomePageState {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 if (showPipeline) ...<Widget>[
-                  _buildWorkspaceContextSection(
-                    context,
-                    compact: useCompactStudio,
-                  ),
-                  SizedBox(height: useCompactStudio ? 8 : 12),
+                  if (!showInlineWorkspaceContext) ...<Widget>[
+                    _buildWorkspaceContextSection(
+                      context,
+                      compact: useCompactStudio,
+                    ),
+                    SizedBox(height: useCompactStudio ? 8 : 12),
+                  ],
                   StudioPipelineStrip(
                     selectedPane: currentPane,
                     jobsPaneEnabled: _platformConfig.jobsPaneEnabled,
@@ -467,21 +859,55 @@ extension _HomePageProductShell on _HomePageState {
                   SizedBox(height: useCompactStudio ? 12 : 16),
                 ],
                 Expanded(
-                  child: Card(
-                    clipBehavior: Clip.antiAlias,
-                    color: tokens.bgElevated,
-                    child: widget.studioOverlay != StudioOverlayMode.none
-                        ? Padding(
-                            padding: EdgeInsets.all(shellSurfacePadding),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: _buildStudioOverlayWidgets(context),
-                            ),
-                          )
-                        : ListView(
-                            padding: EdgeInsets.all(shellSurfacePadding),
-                            children: _buildActiveProductPaneWidgets(context),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: studio.panelGradient,
+                      borderRadius: shellPanelRadius,
+                      border: Border.all(color: tokens.surfaceHighlight),
+                      boxShadow: <BoxShadow>[
+                        BoxShadow(
+                          color: tokens.panelGlow.withValues(alpha: 0.10),
+                          blurRadius: 32,
+                          spreadRadius: -12,
+                          offset: const Offset(0, 18),
+                        ),
+                        BoxShadow(
+                          color: tokens.panelGlowSecondary.withValues(
+                            alpha: 0.08,
                           ),
+                          blurRadius: 28,
+                          spreadRadius: -16,
+                          offset: const Offset(0, 12),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: shellPanelRadius,
+                      child: widget.studioOverlay != StudioOverlayMode.none
+                          ? Padding(
+                              padding: EdgeInsets.all(shellSurfacePadding),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: _buildStudioOverlayWidgets(context),
+                              ),
+                            )
+                          : ListView(
+                              padding: EdgeInsets.all(shellSurfacePadding),
+                              children: <Widget>[
+                                if (_error != null) ...<Widget>[
+                                  StudioApiErrorCallout(
+                                    error: _error!,
+                                    emphasis:
+                                        StudioApiErrorCalloutEmphasis.subtle,
+                                    onDismiss: () =>
+                                        setState(() => _error = null),
+                                  ),
+                                  const SizedBox(height: 10),
+                                ],
+                                ..._buildActiveProductPaneWidgets(context),
+                              ],
+                            ),
+                    ),
                   ),
                 ),
               ],
@@ -491,13 +917,20 @@ extension _HomePageProductShell on _HomePageState {
       ],
     );
 
-    final shell = Scaffold(backgroundColor: tokens.bgBase, body: mainColumn);
+    final shell = Scaffold(
+      backgroundColor: Colors.transparent,
+      body: StudioShellBackdrop(child: mainColumn),
+    );
 
-    return StudioJobScope(
-      accessToken: accessToken,
-      child: StudioCommandPaletteShortcuts(
-        actions: _studioCommandActions(l10n),
-        child: shell,
+    return StudioShellScope(
+      onPopProductPane: _popProductWorkspacePane,
+      onBackToProjectsHome: _goToProjectsHome,
+      child: StudioJobScope(
+        accessToken: accessToken,
+        child: StudioCommandPaletteShortcuts(
+          actions: _studioCommandActions(l10n),
+          child: shell,
+        ),
       ),
     );
   }

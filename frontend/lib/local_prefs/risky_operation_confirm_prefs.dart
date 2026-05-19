@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../l10n/app_localizations.dart';
 import '../l10n/rust_api_error_format.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 /// SharedPreferences keys for client-side "don't show again" on destructive flows.
 class RiskyOperationConfirmPreferenceKeys {
@@ -69,11 +70,11 @@ Future<void> showActiveRiskyOperationConfirmPrefsSummary(
   if (!context.mounted) {
     return;
   }
-  await showDialog<void>(
+  await showStudioDialog<void>(
     context: context,
     builder: (ctx) {
       final dl10n = resolveAppLocalizationsForErrors(ctx);
-      return AlertDialog(
+      return StudioAlertDialog(
         title: Text(dl10n.riskyPrefsSummaryDialogTitle),
         content: SingleChildScrollView(
           child: Column(
@@ -133,11 +134,11 @@ Future<bool?> showResetRiskyOperationConfirmPrefsDialog(
     return null;
   }
 
-  return showDialog<bool>(
+  return showStudioDialog<bool>(
     context: context,
     builder: (ctx) {
       final dl10n = resolveAppLocalizationsForErrors(ctx);
-      return AlertDialog(
+      return StudioAlertDialog(
         title: Text(dl10n.riskyPrefsResetDialogTitle),
         content: SingleChildScrollView(
           child: Column(
@@ -213,10 +214,11 @@ enum _RiskyPrefsOverflowValue { viewActiveSilences, resetDestructiveConfirms }
 /// AppBar / toolbar entry: **查看已静默** + **恢复确认**（本机 SharedPreferences）。
 ///
 /// Use wherever the product shell needs a compact cross-cut without duplicating strings.
+/// Keep the icon preference-specific so it does not read like a generic page overflow menu.
 class RiskyOperationConfirmPrefsOverflowMenu extends StatelessWidget {
   const RiskyOperationConfirmPrefsOverflowMenu({
     super.key,
-    this.icon = Icons.more_vert,
+    this.icon = Icons.tune_rounded,
     this.tooltip,
   });
 

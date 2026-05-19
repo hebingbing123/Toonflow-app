@@ -16,10 +16,16 @@ class StudioTokens extends ThemeExtension<StudioTokens> {
     required this.borderSubtle,
     required this.borderDefault,
     required this.primary,
+    required this.primarySoft,
     required this.accent,
+    required this.accentSoft,
+    required this.signal,
     required this.danger,
     required this.success,
     required this.overlay,
+    required this.surfaceHighlight,
+    required this.panelGlow,
+    required this.panelGlowSecondary,
     required this.sidebar,
     required this.sidebarBorder,
   });
@@ -36,32 +42,44 @@ class StudioTokens extends ThemeExtension<StudioTokens> {
   final Color borderSubtle;
   final Color borderDefault;
   final Color primary;
+  final Color primarySoft;
   final Color accent;
+  final Color accentSoft;
+  final Color signal;
   final Color danger;
   final Color success;
   final Color overlay;
+  final Color surfaceHighlight;
+  final Color panelGlow;
+  final Color panelGlowSecondary;
   final Color sidebar;
   final Color sidebarBorder;
 
   static const StudioTokens dark = StudioTokens(
-    bgBase: Color(0xFF0D0F14),
-    bgSurface: Color(0xFF141820),
-    bgElevated: Color(0xFF1A1F2B),
-    bgInset: Color(0xFF0A0C10),
-    glass: Color(0xB81A1F2B),
-    glassBorder: Color(0x14FFFFFF),
-    textPrimary: Color(0xFFE8EAEF),
-    textSecondary: Color(0xFF9CA3AF),
-    textMuted: Color(0xFF6B7280),
-    borderSubtle: Color(0xFF252836),
-    borderDefault: Color(0xFF353B4D),
-    primary: Color(0xFF7C6CF0),
-    accent: Color(0xFF00CEC9),
-    danger: Color(0xFFFF6B6B),
-    success: Color(0xFF2ECC71),
-    overlay: Color(0x99000000),
-    sidebar: Color(0xFF12141C),
-    sidebarBorder: Color(0xFF252836),
+    bgBase: Color(0xFF070D15),
+    bgSurface: Color(0xFF101825),
+    bgElevated: Color(0xFF152033),
+    bgInset: Color(0xFF0A1018),
+    glass: Color(0xBF0C1523),
+    glassBorder: Color(0x244D86C6),
+    textPrimary: Color(0xFFE8F1FF),
+    textSecondary: Color(0xFFA2B4CD),
+    textMuted: Color(0xFF667892),
+    borderSubtle: Color(0xFF1B2A3E),
+    borderDefault: Color(0xFF29435E),
+    primary: Color(0xFF7C97FF),
+    primarySoft: Color(0xFF162A47),
+    accent: Color(0xFF34C8F0),
+    accentSoft: Color(0xFF0C303A),
+    signal: Color(0xFF56B7FF),
+    danger: Color(0xFFFF6D7A),
+    success: Color(0xFF35D49B),
+    overlay: Color(0xB3000000),
+    surfaceHighlight: Color(0xFF1D3650),
+    panelGlow: Color(0xFF4E7FFF),
+    panelGlowSecondary: Color(0xFF2CC3E6),
+    sidebar: Color(0xFF0A1320),
+    sidebarBorder: Color(0xFF15273B),
   );
 
   static StudioTokens of(BuildContext context) {
@@ -82,10 +100,16 @@ class StudioTokens extends ThemeExtension<StudioTokens> {
     Color? borderSubtle,
     Color? borderDefault,
     Color? primary,
+    Color? primarySoft,
     Color? accent,
+    Color? accentSoft,
+    Color? signal,
     Color? danger,
     Color? success,
     Color? overlay,
+    Color? surfaceHighlight,
+    Color? panelGlow,
+    Color? panelGlowSecondary,
     Color? sidebar,
     Color? sidebarBorder,
   }) {
@@ -102,10 +126,16 @@ class StudioTokens extends ThemeExtension<StudioTokens> {
       borderSubtle: borderSubtle ?? this.borderSubtle,
       borderDefault: borderDefault ?? this.borderDefault,
       primary: primary ?? this.primary,
+      primarySoft: primarySoft ?? this.primarySoft,
       accent: accent ?? this.accent,
+      accentSoft: accentSoft ?? this.accentSoft,
+      signal: signal ?? this.signal,
       danger: danger ?? this.danger,
       success: success ?? this.success,
       overlay: overlay ?? this.overlay,
+      surfaceHighlight: surfaceHighlight ?? this.surfaceHighlight,
+      panelGlow: panelGlow ?? this.panelGlow,
+      panelGlowSecondary: panelGlowSecondary ?? this.panelGlowSecondary,
       sidebar: sidebar ?? this.sidebar,
       sidebarBorder: sidebarBorder ?? this.sidebarBorder,
     );
@@ -128,10 +158,16 @@ class StudioTokens extends ThemeExtension<StudioTokens> {
       borderSubtle: l(borderSubtle, other.borderSubtle),
       borderDefault: l(borderDefault, other.borderDefault),
       primary: l(primary, other.primary),
+      primarySoft: l(primarySoft, other.primarySoft),
       accent: l(accent, other.accent),
+      accentSoft: l(accentSoft, other.accentSoft),
+      signal: l(signal, other.signal),
       danger: l(danger, other.danger),
       success: l(success, other.success),
       overlay: l(overlay, other.overlay),
+      surfaceHighlight: l(surfaceHighlight, other.surfaceHighlight),
+      panelGlow: l(panelGlow, other.panelGlow),
+      panelGlowSecondary: l(panelGlowSecondary, other.panelGlowSecondary),
       sidebar: l(sidebar, other.sidebar),
       sidebarBorder: l(sidebarBorder, other.sidebarBorder),
     );
@@ -146,4 +182,7 @@ abstract final class StudioSpacing {
   static const double lg = 32;
   static const double radiusButton = 10;
   static const double radiusCard = 14;
+
+  /// Gap between adjacent icon buttons in top-bar chrome groups.
+  static const double chromeActionGap = 4;
 }

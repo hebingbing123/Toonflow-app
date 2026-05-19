@@ -20,7 +20,7 @@ extension _HomePageScriptEditor on _HomePageState {
       nameCtrl.text = script.name ?? '';
       contentCtrl.text = script.content ?? '';
       stateCtrl.text = script.extractState?.toString() ?? '';
-      await showDialog<void>(
+      await showStudioDialog<void>(
         context: context,
         builder: (ctx) {
           final l10n = resolveAppLocalizationsForErrors(ctx);
@@ -31,7 +31,7 @@ extension _HomePageScriptEditor on _HomePageState {
               final dialogWidth = viewportWidth.isFinite
                   ? viewportWidth.clamp(320.0, 720.0)
                   : 720.0;
-              return AlertDialog(
+              return StudioAlertDialog(
                 title: Text(l10n.scriptEditorDialogTitle(script.numericId)),
                 content: SizedBox(
                   width: dialogWidth,
@@ -106,11 +106,11 @@ extension _HomePageScriptEditor on _HomePageState {
                     onPressed: saving[0]
                         ? null
                         : () async {
-                            final ok = await showDialog<bool>(
+                            final ok = await showStudioDialog<bool>(
                               context: ctx,
                               builder: (c) {
                                 final confirmL10n = resolveAppLocalizationsForErrors(c);
-                                return AlertDialog(
+                                return StudioAlertDialog(
                                   title: Text(
                                     confirmL10n.scriptEditorDeleteConfirmTitle,
                                   ),

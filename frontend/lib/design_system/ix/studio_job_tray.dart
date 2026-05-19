@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
+import '../../l10n/studio_code_labels.dart';
 import '../../studio/job_center.dart';
 import '../tokens.dart';
 
@@ -16,9 +18,10 @@ class StudioJobTray extends StatelessWidget {
         if (count == 0) {
           return const SizedBox.shrink();
         }
+        final l10n = AppLocalizations.of(context)!;
         final tokens = StudioTokens.of(context);
         return Tooltip(
-          message: '$count 个任务进行中',
+          message: l10n.studioJobTrayActiveJobs(count),
           child: TextButton.icon(
             onPressed: () => _showJobSheet(context),
             icon: SizedBox(
@@ -42,20 +45,33 @@ class StudioJobTray extends StatelessWidget {
       context: context,
       showDragHandle: true,
       builder: (ctx) {
+        final sheetL10n = AppLocalizations.of(ctx)!;
         return SafeArea(
           child: ListView(
             shrinkWrap: true,
-            children: jobs
-                .map(
-                  (j) => ListTile(
-                    title: Text(j.label ?? j.jobId),
-                    subtitle: Text(j.status),
-                    trailing: j.progress != null
-                        ? Text('${(j.progress! * 100).round()}%')
-                        : null,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                child: Text(
+                  sheetL10n.studioJobTraySheetTitle,
+                  style: Theme.of(ctx).textTheme.titleMedium,
+                ),
+              ),
+              ...jobs.map(
+                (j) => ListTile(
+                  title: Text(j.label ?? j.jobId),
+                  subtitle: Text(
+                    studioJobStatusLabel(
+                      AppLocalizations.of(ctx)!,
+                      j.status,
+                    ),
                   ),
-                )
-                .toList(growable: false),
+                  trailing: j.progress != null
+                      ? Text('${(j.progress! * 100).round()}%')
+                      : null,
+                ),
+              ),
+            ],
           ),
         );
       },

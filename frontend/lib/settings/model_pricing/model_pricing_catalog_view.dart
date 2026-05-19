@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../design_system/components/studio_card.dart';
 import '../../design_system/components/studio_skeleton.dart';
 import '../../l10n/app_localizations.dart';
+import '../../l10n/studio_code_labels.dart';
 import '../../l10n/billing_l10n_helpers.dart';
 import '../../rust_api.dart';
 import 'value_tier_badge.dart';
@@ -82,9 +83,7 @@ class _ModelPricingCatalogViewState extends State<ModelPricingCatalogView> {
           spacing: 8,
           children: <String>['all', 'text', 'image', 'video'].map((value) {
             final selected = _typeFilter == value;
-            final label = value == 'all'
-                ? l10n.studioModelPricingFilterAll
-                : value;
+            final label = studioModelPricingTypeLabel(l10n, value);
             return FilterChip(
               label: Text(label),
               selected: selected,

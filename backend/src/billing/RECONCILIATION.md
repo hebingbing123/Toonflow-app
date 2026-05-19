@@ -85,7 +85,7 @@ rate(billing_reconciliation_mismatch_total[1h])
 
 **Unit tests**:
 ```bash
-cargo test -p toonflow-server reconciliation
+cargo test -p openflow-server reconciliation
 ```
 
 **Integration test**:

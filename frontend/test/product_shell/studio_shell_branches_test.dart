@@ -20,6 +20,22 @@ void main() {
       studioPaneFromUri(Uri.parse('https://example.com/?pane=quality')),
       ProductWorkspacePane.quality,
     );
+    expect(
+      studioPaneFromUri(Uri.parse('https://example.com/?pane=production')),
+      ProductWorkspacePane.productionWorkspace,
+    );
+    expect(
+      studioPaneFromUri(Uri.parse('https://example.com/?pane=contentCompliance')),
+      ProductWorkspacePane.contentCompliance,
+    );
+    expect(
+      studioPaneFromUri(Uri.parse('https://example.com/?pane=platformStatus')),
+      ProductWorkspacePane.platformStatus,
+    );
+    expect(
+      studioPaneFromUri(Uri.parse('https://example.com/?pane=apiKeys')),
+      ProductWorkspacePane.apiKeys,
+    );
   });
 
   test('studioPaneFromUri parses legacy utility paths and defaults home', () {
@@ -55,7 +71,19 @@ void main() {
       studioUriForUtilityPane(ProductWorkspacePane.helpHub),
       '/?pane=help',
     );
+    expect(
+      studioUriForUtilityPane(ProductWorkspacePane.productionWorkspace),
+      '/?pane=production',
+    );
     expect(studioUriForUtilityPane(ProductWorkspacePane.tasks), '/?pane=tasks');
+    expect(
+      studioUriForUtilityPane(ProductWorkspacePane.contentCompliance),
+      '/?pane=contentCompliance',
+    );
+    expect(
+      studioUriForUtilityPane(ProductWorkspacePane.platformConfig),
+      '/?pane=platformConfig',
+    );
   });
 
   test(

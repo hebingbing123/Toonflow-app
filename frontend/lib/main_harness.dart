@@ -6,6 +6,7 @@ import 'design_system/google_fonts_runtime.dart';
 import 'home_page.dart';
 import 'l10n/app_localizations.dart';
 import 'locale/app_locale_notifier.dart';
+import 'native_bridge/native_bridge_bootstrap.dart';
 import 'platform/rust_api_feedback.dart';
 import 'shell/home_shell_mode.dart';
 import 'status_page.dart';
@@ -17,6 +18,7 @@ Future<void> main() async {
 
   await AppLocaleNotifier.instance.load();
   configureGoogleFontsRuntime();
+  await NativeBridgeBootstrap.instance.ensureStarted();
 
   if (kSupabaseConfigured) {
     await Supabase.initialize(
@@ -40,6 +42,7 @@ class OpenFlowHarnessApp extends StatelessWidget {
       listenable: AppLocaleNotifier.instance,
       builder: (context, _) {
         return MaterialApp(
+          debugShowCheckedModeBanner: false,
           onGenerateTitle: (ctx) =>
               AppLocalizations.of(ctx)?.appTitle ??
               lookupAppLocalizations(const Locale('en')).appTitle,

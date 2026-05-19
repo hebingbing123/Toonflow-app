@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 
 import '../../rust_api.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 Future<void> openProjectAssetEditImageUploadDialog({
   required BuildContext ctx,
@@ -20,13 +22,13 @@ Future<void> openProjectAssetEditImageUploadDialog({
   final base64Ctrl = TextEditingController(text: 'data:image/png;base64,AA==');
   var selectedScriptNumericId = scriptList.first.numericId;
   try {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showStudioDialog<bool>(
       context: ctx,
       builder: (dialogCtx) {
         return StatefulBuilder(
           builder: (dialogCtx, setState) {
             final dlgL10n = resolveAppLocalizationsForErrors(dialogCtx);
-            return AlertDialog(
+            return StudioAlertDialog(
               title: Text(dlgL10n.projectEditorAssetEditImageDialogTitle),
               content: SizedBox(
                 width: 520,
@@ -34,7 +36,7 @@ Future<void> openProjectAssetEditImageUploadDialog({
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    DropdownButtonFormField<int>(
+                    StudioDropdownButtonFormField<int>(
                       initialValue: selectedScriptNumericId,
                       decoration: InputDecoration(
                         labelText: dlgL10n.projectEditorAssetEditImageTargetScriptLabel,

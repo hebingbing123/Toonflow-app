@@ -120,7 +120,7 @@ mod stubs {
         (status = 200, description = "OK", body = serde_json::Value, content_type = "application/json"),
         (status = 401, description = "Missing or invalid Bearer token", body = ref("ErrorBody"), content_type = "application/json"),
         (status = 404, description = "Cover not found for this art style", body = ref("ErrorBody"), content_type = "application/json"),
-        (status = 503, description = "Auth not configured, database error, or `TOONFLOW_LOCAL_ART_STYLE_COVER_DIR` unset", body = ref("ErrorBody"), content_type = "application/json")
+        (status = 503, description = "Auth not configured, database error, or `OPENFLOW_LOCAL_ART_STYLE_COVER_DIR` unset", body = ref("ErrorBody"), content_type = "application/json")
     )
     )]
     #[allow(dead_code)]

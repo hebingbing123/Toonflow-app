@@ -53,5 +53,5 @@ Date: 2026-05-15. Method: map each requirements document to current repo surface
 
 ## Task 16 — `yarn refactor:agent --full` (2026-05-15)
 
-- Targeted checks in this batch: `cargo test -p toonflow-server --lib` filters (`anti_ai`, `attribution::tests`, `benchmark_property_tests`, `settings::agent_memory`), plus `flutter analyze` on touched Dart and `flutter test` on `quality_reviews_workbench_dialog_view_test` / `benchmark_workbench_support_test` — all green.
+- Targeted checks in this batch: `cargo test -p openflow-server --lib` filters (`anti_ai`, `attribution::tests`, `benchmark_property_tests`, `settings::agent_memory`), plus `flutter analyze` on touched Dart and `flutter test` on `quality_reviews_workbench_dialog_view_test` / `benchmark_workbench_support_test` — all green.
 - Full-repo `yarn refactor:agent --full`: **one** `flutter test` failure under full parallel suite — `agent_workspaces_section_test.dart` (“Script pane plan writeback hint…”, `findsOneWidget`). The same case **passes in isolation** (`flutter test test/agent_workspaces_section_test.dart --name "plan writeback hint"`), consistent with **order-dependent / shared test state** rather than a deterministic regression from Tasks 7–16. Follow-up: hunt global singletons or run the shard with `--concurrency=1` if CI flakes continue.

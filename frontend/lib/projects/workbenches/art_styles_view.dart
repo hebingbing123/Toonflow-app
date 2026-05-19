@@ -1,8 +1,10 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 
 import '../../rust_api.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 class ArtStylesWorkbenchDialogViewModel {
   const ArtStylesWorkbenchDialogViewModel({
@@ -73,7 +75,7 @@ class ArtStylesWorkbenchDialogView extends StatelessWidget {
     final dialogWidth = viewportWidth.isFinite
         ? viewportWidth.clamp(320.0, 760.0)
         : 760.0;
-    return AlertDialog(
+    return StudioAlertDialog(
       title: Text(l10n.projectsArtWorkbenchTitle),
       content: SizedBox(
         width: dialogWidth,
@@ -134,7 +136,7 @@ class ArtStylesWorkbenchDialogView extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               if (model.rows.isNotEmpty)
-                DropdownButtonFormField<int>(
+                StudioDropdownButtonFormField<int>(
                   initialValue: model.selected?.numericId,
                   decoration: InputDecoration(
                     labelText: l10n.projectsArtWorkbenchCurrentStyle,

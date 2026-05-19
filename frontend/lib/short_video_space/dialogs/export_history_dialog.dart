@@ -22,7 +22,7 @@ extension _ShortVideoSpaceSectionExportHistoryDialog
     final initialTaskId =
         currentTaskId ??
         (_activeAssemblyJob?.kind == 'video.export' ? _activeAssemblyJob?.id : null);
-    final result = await showDialog<ExportHistoryDialogResult>(
+    final result = await showStudioDialog<ExportHistoryDialogResult>(
       context: context,
       builder: (dialogContext) {
         return ExportHistoryDialog(
@@ -527,7 +527,11 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
     final theme = Theme.of(context);
     final l10n = resolveAppLocalizationsForErrors(context);
 
-    return AlertDialog(
+    return StudioAlertDialog(
+      maxWidth: 840,
+      maxHeightFactor: 0.92,
+      scrollable: false,
+      showCloseButton: false,
       title: Row(
         children: [
           const Icon(Icons.history),
@@ -541,22 +545,29 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
           ),
         ],
       ),
-      content: SizedBox(
-        width: 800,
-        height: 600,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+      content: LayoutBuilder(
+        builder: (context, constraints) {
+          final fallbackHeight = (MediaQuery.sizeOf(context).height * 0.45)
+              .clamp(280.0, 480.0);
+          final height = constraints.maxHeight.isFinite
+              ? constraints.maxHeight
+              : fallbackHeight;
+          return SizedBox(
+            width: 800,
+            height: height,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
             if (_focusedTaskId != null && _focusedTaskId!.isNotEmpty) ...[
               _buildCurrentTaskBanner(theme),
               const SizedBox(height: 16),
             ],
-            // Filters
-            Row(
-              children: [
-                // Status filter
-                Expanded(
-                  child: DropdownButtonFormField<ExportHistoryStatusFilter>(
+            if (_errorMessage == null && !_loading) ...<Widget>[
+              Row(
+                children: [
+                  // Status filter
+                  Expanded(
+                    child: StudioDropdownButtonFormField<ExportHistoryStatusFilter>(
                     initialValue: _statusFilter,
                     decoration: InputDecoration(
                       labelText: l10n.shortVideoSpaceDialogExportHistoryStatusLabel,
@@ -586,7 +597,7 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
                 const SizedBox(width: 16),
                 // Time filter
                 Expanded(
-                  child: DropdownButtonFormField<ExportHistoryTimeFilter>(
+                  child: StudioDropdownButtonFormField<ExportHistoryTimeFilter>(
                     initialValue: _timeFilter,
                     decoration: InputDecoration(
                       labelText: l10n.shortVideoSpaceDialogExportHistoryTimeLabel,
@@ -615,14 +626,17 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+              const SizedBox(height: 16),
+            ],
 
             // History list
             Expanded(
               child: _buildHistoryList(theme),
             ),
-          ],
-        ),
+              ],
+            ),
+          );
+        },
       ),
       actions: [
         TextButton(
@@ -649,27 +663,29 @@ class _ExportHistoryDialogState extends State<ExportHistoryDialog> {
 
     if (_errorMessage != null) {
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline,
-              size: 48,
-              color: theme.colorScheme.error,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              _errorMessage!,
-              style: TextStyle(color: theme.colorScheme.error),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            FilledButton.icon(
-              onPressed: _loadHistory,
-              icon: const Icon(Icons.refresh),
-              label: Text(l10n.shortVideoSpaceDialogExportHistoryRetry),
-            ),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.error_outline,
+                size: 48,
+                color: theme.colorScheme.error,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                _errorMessage!,
+                style: TextStyle(color: theme.colorScheme.error),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              FilledButton.icon(
+                onPressed: _loadHistory,
+                icon: const Icon(Icons.refresh),
+                label: Text(l10n.shortVideoSpaceDialogExportHistoryRetry),
+              ),
+            ],
+          ),
         ),
       );
     }

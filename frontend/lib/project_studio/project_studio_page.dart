@@ -57,12 +57,21 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
     final last = await StudioStepPrefs.loadLastStep(
       widget.host.projectNumericId,
     );
-    if (!mounted) return;
+    if (!mounted || last == _step) return;
     setState(() {
       _step = last;
       _visited.add(last);
     });
     widget.host.onStepChanged(last);
+    _syncRouteToStep(last);
+  }
+
+  void _syncRouteToStep(StudioStep step) {
+    final path = GoRouterState.of(context).uri.path;
+    final expectedPath = '/projects/${widget.host.projectNumericId}/${step.slug}';
+    if (path != expectedPath) {
+      context.go(expectedPath);
+    }
   }
 
   void _selectStep(StudioStep step) {
@@ -324,11 +333,13 @@ class _ProjectStudioPageState extends State<ProjectStudioPage> {
                   const SizedBox(height: 12),
                   _ProjectCockpitCard(
                     home: widget.host.home!,
+                    currentStep: _step,
                     onSelectStep: _selectStep,
                     onExecuteAction: _handleProjectHomeAction,
                     metricActionBuilder: (metric) => _actionForMetric(metric, l10n),
                     onExecuteStarter: _handleStarterTemplate,
                   ),
+
                 ],
                 if (_step == StudioStep.assets &&
                     widget.host.assetsOverview != null) ...<Widget>[
@@ -947,6 +958,7 @@ class _StoryboardAssetBridgeLine extends StatelessWidget {
 class _ProjectCockpitCard extends StatelessWidget {
   const _ProjectCockpitCard({
     required this.home,
+    required this.currentStep,
     required this.onSelectStep,
     required this.onExecuteAction,
     required this.metricActionBuilder,
@@ -954,17 +966,134 @@ class _ProjectCockpitCard extends StatelessWidget {
   });
 
   final ProjectHome home;
+  final StudioStep currentStep;
   final ValueChanged<StudioStep> onSelectStep;
   final ValueChanged<ProjectHomeAction> onExecuteAction;
   final ProjectHomeAction? Function(ProjectHomeMetric metric)
   metricActionBuilder;
   final ValueChanged<ProjectHomeStarterTemplate> onExecuteStarter;
 
+  static const Set<String> _scriptMetricKeywords = <String>{
+    'script',
+    'scripts',
+    'novel',
+    'novels',
+    'chapter',
+    'chapters',
+    'event',
+    'events',
+    'character',
+    'characters',
+    'role',
+    'roles',
+    'scene',
+    'scenes',
+    'outline',
+    'story',
+    'entity',
+  };
+
+  static const Set<String> _scriptStepSlugs = <String>{'script', 'art', 'assets'};
+  static const Set<String> _deliverStepSlugs = <String>{
+    'storyboard',
+    'video',
+    'deliver',
+    'quality',
+  };
+
+  List<ProjectHomeMetric> _filterMetricsForStep(
+    List<ProjectHomeMetric> metrics,
+    StudioStep step,
+  ) {
+    if (step == StudioStep.deliver || step == StudioStep.quality) {
+      return metrics;
+    }
+    if (step != StudioStep.script) {
+      return metrics;
+    }
+    final filtered = metrics.where(_isScriptMetric).toList(growable: false);
+    return filtered.isNotEmpty ? filtered : metrics;
+  }
+
+  List<ProjectHomeAction> _filterActionsForStep(
+    List<ProjectHomeAction> actions,
+    StudioStep step,
+  ) {
+    if (step == StudioStep.deliver || step == StudioStep.quality) {
+      return actions;
+    }
+    if (step != StudioStep.script) {
+      return actions;
+    }
+    final filtered = actions
+        .where((action) => _isRelevantForStep(action.targetStep, step, text: action.title))
+        .toList(growable: false);
+    return filtered.isNotEmpty ? filtered : actions;
+  }
+
+  List<ProjectHomeStarterTemplate> _filterStartersForStep(
+    List<ProjectHomeStarterTemplate> starters,
+    StudioStep step,
+  ) {
+    if (step == StudioStep.deliver || step == StudioStep.quality) {
+      return starters;
+    }
+    if (step != StudioStep.script) {
+      return starters;
+    }
+    final filtered = starters
+        .where(
+          (starter) =>
+              _isRelevantForStep(starter.targetStep, step, text: starter.title) ||
+              _containsScriptKeyword(starter.detail),
+        )
+        .toList(growable: false);
+    return filtered.isNotEmpty ? filtered : starters;
+  }
+
+  bool _isScriptMetric(ProjectHomeMetric metric) {
+    final launchTarget = metric.launchIntent?.targetStep;
+    if (_isRelevantForStep(launchTarget, StudioStep.script, text: metric.label)) {
+      return true;
+    }
+    return _containsScriptKeyword('${metric.key} ${metric.label} ${metric.detail}');
+  }
+
+  bool _isRelevantForStep(String? targetStep, StudioStep step, {String? text}) {
+    final slug = (targetStep ?? '').trim().toLowerCase();
+    if (slug.isEmpty) {
+      return step == StudioStep.script && _containsScriptKeyword(text ?? '');
+    }
+    if (step == StudioStep.script) {
+      return _scriptStepSlugs.contains(slug);
+    }
+    if (step == StudioStep.deliver || step == StudioStep.quality) {
+      return _deliverStepSlugs.contains(slug);
+    }
+    return slug == step.slug;
+  }
+
+  bool _containsScriptKeyword(String text) {
+    final normalized = text.toLowerCase();
+    for (final keyword in _scriptMetricKeywords) {
+      if (normalized.contains(keyword)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = StudioTokens.of(context);
     final cockpit = home.cockpit;
+    final stepMetrics = _filterMetricsForStep(cockpit.metrics, currentStep);
+    final stepActions = _filterActionsForStep(cockpit.secondaryActions, currentStep);
+    final stepStarters = _filterStartersForStep(
+      cockpit.starterTemplates,
+      currentStep,
+    );
 
     return Container(
       width: double.infinity,
@@ -977,33 +1106,25 @@ class _ProjectCockpitCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 720),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  cockpit.headline,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  cockpit.subheadline,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 14),
-                _ActionButtonRow(
-                  primaryAction: cockpit.primaryAction,
-                  secondaryActions: cockpit.secondaryActions,
-                  onExecuteAction: onExecuteAction,
-                ),
-              ],
+          Text(
+            cockpit.headline,
+            style: theme.textTheme.titleLarge?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
             ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            cockpit.subheadline,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 14),
+          _ActionButtonRow(
+            primaryAction: cockpit.primaryAction,
+            secondaryActions: stepActions,
+            onExecuteAction: onExecuteAction,
           ),
           const SizedBox(height: 16),
           LayoutBuilder(
@@ -1024,7 +1145,7 @@ class _ProjectCockpitCard extends StatelessWidget {
                 spacing: spacing,
                 runSpacing: spacing,
                 children: <Widget>[
-                  ...cockpit.metrics.map(
+                  ...stepMetrics.map(
                     (metric) => _MetricCard(
                       width: itemWidth,
                       metric: metric,
@@ -1032,7 +1153,7 @@ class _ProjectCockpitCard extends StatelessWidget {
                       onExecuteAction: onExecuteAction,
                     ),
                   ),
-                  ...cockpit.starterTemplates.map(
+                  ...stepStarters.map(
                     (starter) => _StarterCard(
                       width: itemWidth,
                       starter: starter,
@@ -1151,7 +1272,6 @@ class _ActionButtonRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final secondary = secondaryActions.take(2).toList(growable: false);
     return Wrap(
       spacing: 10,
@@ -1165,32 +1285,6 @@ class _ActionButtonRow extends StatelessWidget {
           (action) => OutlinedButton(
             onPressed: () => onExecuteAction(action),
             child: Text(action.ctaLabel),
-          ),
-        ),
-        ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 420),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Text(
-                primaryAction.title,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              if (primaryAction.detail.trim().isNotEmpty) ...<Widget>[
-                const SizedBox(height: 4),
-                Text(
-                  primaryAction.detail,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant.withValues(
-                      alpha: 0.82,
-                    ),
-                  ),
-                ),
-              ],
-            ],
           ),
         ),
       ],

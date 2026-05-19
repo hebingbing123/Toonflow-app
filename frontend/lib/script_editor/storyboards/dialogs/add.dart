@@ -18,11 +18,11 @@ extension _HomePageScriptEditorStoryboardsAddDialog on _HomePageState {
     final promptCtrl = TextEditingController();
     final durationCtrl = TextEditingController();
     try {
-      final confirmed = await showDialog<bool>(
+      final confirmed = await showStudioDialog<bool>(
         context: ctx,
         builder: (dialogCtx) {
           final l10n = resolveAppLocalizationsForErrors(dialogCtx);
-          return AlertDialog(
+          return StudioAlertDialog(
             title: Text(l10n.scriptEditorStoryboardAddDialogTitle),
             content: SizedBox(
               width: 420,

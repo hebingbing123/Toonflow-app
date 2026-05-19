@@ -24,7 +24,7 @@ jobs:
           workspaces: backend
       - name: Export merged OpenAPI and validate YAML
         env:
-          TOONFLOW_GIT_SHA: ${{ github.sha }}
+          OPENFLOW_GIT_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
           tmp_spec="$(mktemp)"
@@ -33,7 +33,7 @@ jobs:
             cargo run --quiet --bin export-openapi
           ) > "$tmp_spec"
           ruby -ryaml -e "YAML.load(File.read(ARGV[0]))" "$tmp_spec"
-          export TOONFLOW_OPENAPI_SPEC="$tmp_spec"
+          export OPENFLOW_OPENAPI_SPEC="$tmp_spec"
           bash scripts/check_openapi_drift.sh
           bash scripts/check_rust_api_consistency.sh
           rm -f "$tmp_spec"
@@ -59,7 +59,7 @@ jobs:
         run: |
           set -euo pipefail
           cd backend
-          cargo test -p toonflow-server --lib -j 1 -- --test-threads=1
+          cargo test -p openflow-server --lib -j 1 -- --test-threads=1
           shopt -s nullglob
           for test_rs in tests/*.rs; do
             name=$(basename "$test_rs" .rs)
@@ -68,9 +68,28 @@ jobs:
               continue
             fi
             echo "==> integration test crate: $name"
-            cargo test -p toonflow-server --test "$name" -j 1 -- --test-threads=1
+            cargo test -p openflow-server --test "$name" -j 1 -- --test-threads=1
           done
-          cargo test -p toonflow-server --doc -j 1 -- --test-threads=1
+          cargo test -p openflow-server --doc -j 1 -- --test-threads=1
+
+  rust-core:
+    name: Rust Core
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rust_core
+      - name: cargo fmt + clippy + test
+        run: |
+          set -euo pipefail
+          cd rust_core
+          cargo fmt --all -- --check
+          cargo clippy --workspace --all-targets -- -D warnings
+          cargo test --workspace
 
   frontend-flutter:
     name: Frontend Flutter
@@ -96,6 +115,86 @@ jobs:
           set -euo pipefail
           cd frontend
           flutter test
+
+  frontend-desktop-build:
+    name: Frontend Desktop Build (${{ matrix.target }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: linux
+          - os: macos-latest
+            target: macos
+          - os: windows-latest
+            target: windows
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rust_core
+      - name: Install Linux desktop dependencies
+        if: matrix.target == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev
+      - name: Enable Flutter desktop target
+        run: flutter config --enable-${{ matrix.target }}-desktop
+      - name: flutter pub get
+        run: |
+          cd frontend
+          flutter pub get
+      - name: Prebuild Rust desktop bridge
+        run: cargo build --manifest-path rust_core/Cargo.toml -p openflow_core_bridge
+      - name: Build Flutter desktop app
+        run: |
+          cd frontend
+          flutter build ${{ matrix.target }} --debug
+
+  ui-smoke:
+    name: UI smoke (widget + interaction)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: UI widget + smoke tests (includes golden verify)
+        run: |
+          set -euo pipefail
+          bash scripts/run-ui-review-gates.sh
+
+  ui-golden:
+    name: UI golden gallery
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Golden gallery (widget)
+        run: |
+          set -euo pipefail
+          cd frontend
+          flutter pub get
+          flutter test test/ui/ --name golden
+
+  backend-worker-build:
+    name: Worker build placeholder (W0)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate wrangler.toml present
+        run: test -f backend/wrangler.toml
 
   supabase-migrations:
     name: Supabase migrations (local DB)

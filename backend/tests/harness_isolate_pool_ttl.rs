@@ -26,7 +26,7 @@ impl Drop for ScopedEnvVar {
 #[tokio::test]
 async fn harness_isolate_pool_idle_ttl_evicts_before_reuse() {
     let exe =
-        std::env::var("CARGO_BIN_EXE_toonflow-server").expect("cargo exposes CARGO_BIN_EXE_*");
+        std::env::var("CARGO_BIN_EXE_openflow-server").expect("cargo exposes CARGO_BIN_EXE_*");
     let _runner_guard = ScopedEnvVar::capture("HARNESS_ISOLATE_RUNNER_EXE");
     let _max_guard = ScopedEnvVar::capture("HARNESS_ISOLATE_MAX_CONCURRENT");
     let _pool_guard = ScopedEnvVar::capture("HARNESS_ISOLATE_POOL");
@@ -42,18 +42,18 @@ async fn harness_isolate_pool_idle_ttl_evicts_before_reuse() {
     }
 
     let v1 = serde_json::json!({ "ttl_probe": "first" });
-    let before = toonflow_server::harness::isolate::metrics_snapshot();
+    let before = openflow_server::harness::isolate::metrics_snapshot();
 
-    toonflow_server::harness::isolate::isolated_echo(&v1)
+    openflow_server::harness::isolate::isolated_echo(&v1)
         .await
         .expect("first echo");
 
     let v2 = serde_json::json!({ "ttl_probe": "second" });
-    toonflow_server::harness::isolate::isolated_echo(&v2)
+    openflow_server::harness::isolate::isolated_echo(&v2)
         .await
         .expect("second echo reuses idle worker");
 
-    let mid = toonflow_server::harness::isolate::metrics_snapshot();
+    let mid = openflow_server::harness::isolate::metrics_snapshot();
     assert!(
         mid.total_process_reuse_hits > before.total_process_reuse_hits,
         "second invoke should record a reuse hit"
@@ -62,11 +62,11 @@ async fn harness_isolate_pool_idle_ttl_evicts_before_reuse() {
     tokio::time::sleep(std::time::Duration::from_millis(1200)).await;
 
     let v3 = serde_json::json!({ "ttl_probe": "third" });
-    toonflow_server::harness::isolate::isolated_echo(&v3)
+    openflow_server::harness::isolate::isolated_echo(&v3)
         .await
         .expect("third echo after idle TTL");
 
-    let after = toonflow_server::harness::isolate::metrics_snapshot();
+    let after = openflow_server::harness::isolate::metrics_snapshot();
     assert!(
         after.total_pool_evictions > mid.total_pool_evictions,
         "idle TTL should evict at least one worker before third acquire (mid evictions={}, after evictions={})",

@@ -24,57 +24,6 @@ extension _HomePageProjectEditorDialogContentAssets on _HomePageState {
       assetsBusy: dialogState.assetsBusy,
       reloadAssetsAndStats: () =>
           dialogState.reloadAssetsAndStats(token, p.id, p.numericId),
-      buildImagesSection: () => _buildProjectAssetsImagesCompatibilitySection(
-        ctx: ctx,
-        setDialogState: setDialogState,
-        token: token,
-        p: p,
-        assetsRef: dialogState.assetsRef,
-        assetsLoading: dialogState.assetsLoading,
-        assetsScriptFilterLoading: dialogState.assetsScriptFilterLoading,
-        assetsBusy: dialogState.assetsBusy,
-        reloadAssetsAndStats: () =>
-            dialogState.reloadAssetsAndStats(token, p.id, p.numericId),
-      ),
-      buildPrimaryActions: () => _buildProjectAssetsPrimaryActions(
-        ctx: ctx,
-        setDialogState: setDialogState,
-        token: token,
-        p: p,
-        assetsRef: dialogState.assetsRef,
-        assetsFilterScriptNumericId: dialogState.assetsFilterScriptNumericId,
-        assetsLoading: dialogState.assetsLoading,
-        assetsScriptFilterLoading: dialogState.assetsScriptFilterLoading,
-        assetsBusy: dialogState.assetsBusy,
-        reloadAssetsAndStats: () =>
-            dialogState.reloadAssetsAndStats(token, p.id, p.numericId),
-      ),
-      buildRelationActions: () => _buildProjectAssetsRelationActions(
-        ctx: ctx,
-        setDialogState: setDialogState,
-        token: token,
-        p: p,
-        scriptList: scriptList,
-        assetsRef: dialogState.assetsRef,
-        assetsLoading: dialogState.assetsLoading,
-        assetsScriptFilterLoading: dialogState.assetsScriptFilterLoading,
-        assetsBusy: dialogState.assetsBusy,
-        reloadAssetsAndStats: () =>
-            dialogState.reloadAssetsAndStats(token, p.id, p.numericId),
-      ),
-      buildQueryActions: () => _buildProjectAssetsQueryCompatibilityActions(
-        ctx: ctx,
-        setDialogState: setDialogState,
-        token: token,
-        p: p,
-        assetsRef: dialogState.assetsRef,
-        assetsFilterScriptNumericId: dialogState.assetsFilterScriptNumericId,
-        assetsLoading: dialogState.assetsLoading,
-        assetsScriptFilterLoading: dialogState.assetsScriptFilterLoading,
-        assetsBusy: dialogState.assetsBusy,
-        reloadAssetsAndStats: () =>
-            dialogState.reloadAssetsAndStats(token, p.id, p.numericId),
-      ),
       openWorkbench: () => openProjectAssetsWorkbenchDialog(
         ctx: ctx,
         setDialogState: setDialogState,

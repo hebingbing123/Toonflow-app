@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 
 import '../../rust_api.dart';
 import '../dialogs/confirmation_dialogs.dart';
 import 'version_comparison.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 /// 成片版本数据模型
 class AssemblyVersion {
@@ -498,12 +500,12 @@ class _VersionManagerState extends State<VersionManager> {
   /// 显示创建版本对话框
   Future<void> _showCreateVersionDialog() async {
     final l10n = resolveAppLocalizationsForErrors(context);
-    final result = await showDialog<String>(
+    final result = await showStudioDialog<String>(
       context: context,
       builder: (context) {
         var draftName = '';
         return StatefulBuilder(
-          builder: (dialogContext, setDialogState) => AlertDialog(
+          builder: (dialogContext, setDialogState) => StudioAlertDialog(
             title: Text(l10n.shortVideoVersionManagerCreateVersionDialogTitle),
             content: SingleChildScrollView(
               child: Column(
@@ -702,10 +704,10 @@ class _VersionManagerState extends State<VersionManager> {
     if (widget.drafts.length >= 10) {
       if (mounted) {
         final l10n = resolveAppLocalizationsForErrors(context);
-        showDialog<void>(
+        showStudioDialog<void>(
           context: context,
           builder: (context) {
-            return AlertDialog(
+            return StudioAlertDialog(
               title: Text(l10n.shortVideoVersionManagerDraftLimitTitle),
               content: Text(l10n.shortVideoVersionManagerDraftLimitBody),
               actions: [
@@ -729,12 +731,12 @@ class _VersionManagerState extends State<VersionManager> {
     }
 
     final l10n = resolveAppLocalizationsForErrors(context);
-    final result = await showDialog<String>(
+    final result = await showStudioDialog<String>(
       context: context,
       builder: (context) {
         var draftName = '';
         return StatefulBuilder(
-          builder: (dialogContext, setDialogState) => AlertDialog(
+          builder: (dialogContext, setDialogState) => StudioAlertDialog(
             title: Text(l10n.shortVideoVersionManagerSaveDraftDialogTitle),
             content: SingleChildScrollView(
               child: Column(
@@ -832,10 +834,10 @@ class _VersionManagerState extends State<VersionManager> {
   /// 显示草稿列表对话框
   Future<void> _showDraftsDialog() async {
     final l10n = resolveAppLocalizationsForErrors(context);
-    await showDialog<void>(
+    await showStudioDialog<void>(
       context: context,
       builder: (context) {
-        return AlertDialog(
+        return StudioAlertDialog(
           title: Text(l10n.shortVideoVersionManagerDraftListTitle),
           content: SizedBox(
             width: double.maxFinite,
@@ -959,11 +961,11 @@ class _VersionManagerState extends State<VersionManager> {
   /// 处理删除草稿
   Future<void> _handleDeleteDraft(AssemblyDraft draft) async {
     // 显示确认对话框
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showStudioDialog<bool>(
       context: context,
       builder: (context) {
         final l10n = resolveAppLocalizationsForErrors(context);
-        return AlertDialog(
+        return StudioAlertDialog(
           title: Text(l10n.shortVideoVersionManagerConfirmDeleteDraftTitle),
           content: Text(
             l10n.shortVideoVersionManagerConfirmDeleteDraftBody(draft.name),
@@ -1035,13 +1037,13 @@ class _VersionManagerState extends State<VersionManager> {
     AssemblyVersion? baseVersion;
     AssemblyVersion? compareVersion;
 
-    await showDialog<void>(
+    await showStudioDialog<void>(
       context: context,
       builder: (context) {
         return StatefulBuilder(
           builder: (dialogContext, setDialogState) {
             final l10n = resolveAppLocalizationsForErrors(dialogContext);
-            return AlertDialog(
+            return StudioAlertDialog(
               title: Text(l10n.shortVideoVersionManagerCompareDialogTitle),
               content: SizedBox(
                 width: double.maxFinite,
@@ -1051,7 +1053,7 @@ class _VersionManagerState extends State<VersionManager> {
                   children: [
                     Text(l10n.shortVideoVersionManagerCompareBaseLabel),
                     const SizedBox(height: 8),
-                    DropdownButtonFormField<String>(
+                    StudioDropdownButtonFormField<String>(
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding: EdgeInsets.symmetric(
@@ -1083,7 +1085,7 @@ class _VersionManagerState extends State<VersionManager> {
                     const SizedBox(height: 16),
                     Text(l10n.shortVideoVersionManagerCompareTargetLabel),
                     const SizedBox(height: 8),
-                    DropdownButtonFormField<String>(
+                    StudioDropdownButtonFormField<String>(
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding: EdgeInsets.symmetric(
@@ -1144,7 +1146,7 @@ class _VersionManagerState extends State<VersionManager> {
     AssemblyVersion baseVersion,
     AssemblyVersion compareVersion,
   ) {
-    showDialog<void>(
+    showStudioDialog<void>(
       context: context,
       builder: (context) {
         return VersionComparison(

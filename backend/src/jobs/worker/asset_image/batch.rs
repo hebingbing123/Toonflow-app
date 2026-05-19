@@ -16,6 +16,7 @@ use super::common::{
 use super::production::{
     run_production_assets_batch_generate, run_production_edit_image_generate_flow,
     run_production_storyboard_batch_generate_image,
+    run_production_storyboard_grid_generate_and_assign,
 };
 
 async fn run_asset_generate_batch_items(
@@ -167,6 +168,10 @@ pub(crate) async fn run_asset_generate_batch(
         }
         "production.storyboard.batch-generate-image" => {
             run_production_storyboard_batch_generate_image(state, pool, job_id, row, cfg, p).await
+        }
+        "production.storyboard.grid-generate-and-assign" => {
+            run_production_storyboard_grid_generate_and_assign(state, pool, job_id, row, cfg, p)
+                .await
         }
         "production.edit-image.generate-flow" => {
             run_production_edit_image_generate_flow(state, pool, job_id, cfg, p).await

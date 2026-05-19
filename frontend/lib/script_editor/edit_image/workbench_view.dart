@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../design_system/components/studio_model_cost_controls.dart';
 import '../../../rust_api.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 class ScriptEditImageWorkbenchDialogViewModel {
   const ScriptEditImageWorkbenchDialogViewModel({
@@ -77,7 +78,7 @@ class ScriptEditImageWorkbenchDialogView extends StatelessWidget {
     final dialogWidth = viewportWidth.isFinite
         ? viewportWidth.clamp(320.0, 780.0)
         : 780.0;
-    return AlertDialog(
+    return StudioAlertDialog(
       title: Text(l10n.scriptEditorEditImageWorkbenchTitle),
       content: SizedBox(
         width: dialogWidth,

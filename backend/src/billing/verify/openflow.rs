@@ -4,17 +4,17 @@ use subtle::ConstantTimeEq;
 
 use crate::error::ApiError;
 
-use super::secret::{now_unix_secs, toonflow_tolerance_secs};
+use super::secret::{now_unix_secs, openflow_tolerance_secs};
 use super::HmacSha256;
 
-/// Verify `X-Toonflow-Signature: sha256=<hex>` with mandatory timestamped MAC.
-pub(super) fn verify_toonflow_signature(
+/// Verify `X-Openflow-Signature: sha256=<hex>` with mandatory timestamped MAC.
+pub(super) fn verify_openflow_signature(
     secret: &[u8],
     body: &[u8],
     headers: &HeaderMap,
 ) -> Result<(), ApiError> {
     let raw = headers
-        .get("x-toonflow-signature")
+        .get("x-openflow-signature")
         .and_then(|v| v.to_str().ok())
         .ok_or(ApiError::InvalidWebhookSignature)?;
 
@@ -32,7 +32,7 @@ pub(super) fn verify_toonflow_signature(
         .map_err(|_| ApiError::InvalidWebhookSignature)?;
 
     let ts_str = headers
-        .get("x-toonflow-timestamp")
+        .get("x-openflow-timestamp")
         .and_then(|v| v.to_str().ok())
         .map(str::trim)
         .filter(|s| !s.is_empty())
@@ -41,7 +41,7 @@ pub(super) fn verify_toonflow_signature(
     let ts: u64 = ts_str
         .parse()
         .map_err(|_| ApiError::InvalidWebhookSignature)?;
-    if now_unix_secs().abs_diff(ts) > toonflow_tolerance_secs() {
+    if now_unix_secs().abs_diff(ts) > openflow_tolerance_secs() {
         return Err(ApiError::InvalidWebhookSignature);
     }
     let mut mac =

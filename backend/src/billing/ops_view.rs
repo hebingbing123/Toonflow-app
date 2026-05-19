@@ -1,7 +1,7 @@
 //! Internal ops endpoints for workspace billing queries (Task 8.1).
 //!
 //! Gate: Environment variable **`OPENFLOW_INTERNAL_OPS_TOKEN`** (non-empty);
-//! requests must include **`X-OpenFlow-Internal-Token`** matching the expected value.
+//! requests must include **`X-Openflow-Internal-Token`** matching the expected value.
 //!
 //! Provides ops team visibility into:
 //! - Workspace subscription snapshots filtered by workspace_id
@@ -111,7 +111,7 @@ fn require_internal_ops_token(headers: &HeaderMap) -> Result<(), ApiError> {
 ///
 /// ## Authorization
 ///
-/// Requires `X-OpenFlow-Internal-Token` header matching `OPENFLOW_INTERNAL_OPS_TOKEN` env var.
+/// Requires `X-Openflow-Internal-Token` header matching `OPENFLOW_INTERNAL_OPS_TOKEN` env var.
 ///
 /// ## Response
 ///
@@ -168,7 +168,7 @@ pub(crate) async fn get_workspace_subscription(
 ///
 /// ## Authorization
 ///
-/// Requires `X-OpenFlow-Internal-Token` header matching `OPENFLOW_INTERNAL_OPS_TOKEN` env var.
+/// Requires `X-Openflow-Internal-Token` header matching `OPENFLOW_INTERNAL_OPS_TOKEN` env var.
 ///
 /// ## Response
 ///

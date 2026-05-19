@@ -145,6 +145,7 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
     this.dashboardLoadError,
     this.loadingDashboard = false,
     this.onRefreshDashboard,
+    this.studioPresentation = false,
     required this.qualityStatsRows,
     required this.stageGradeRows,
     required this.scopeInsightRows,
@@ -161,6 +162,7 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
   final Object? dashboardLoadError;
   final bool loadingDashboard;
   final VoidCallback? onRefreshDashboard;
+  final bool studioPresentation;
   final List<QualityDashboardTargetStat>? qualityStatsRows;
   final List<QualityDashboardStageGradeItem>? stageGradeRows;
   final List<QualityDashboardScopeInsightItem>? scopeInsightRows;
@@ -190,6 +192,10 @@ class QualityReviewsOpsDashboardPreview extends StatelessWidget {
     if (!hasAnything) {
       if (dashboardLoadState == StudioLoadState.loading || loadingDashboard) {
         return const Center(child: CircularProgressIndicator());
+      }
+      if (studioPresentation &&
+          dashboardLoadState == StudioLoadState.success) {
+        return const SizedBox.shrink();
       }
       return StudioEmptyState(
         title: l10n.qualityReviewsOpsDashboardTitle,
@@ -432,10 +438,12 @@ class QualityReviewsListPreview extends StatelessWidget {
     super.key,
     required this.reviews,
     required this.onSelectQualityReview,
+    this.showCountHeader = true,
   });
 
   final List<QualityReview> reviews;
   final ValueChanged<QualityReview> onSelectQualityReview;
+  final bool showCountHeader;
 
   @override
   Widget build(BuildContext context) {
@@ -448,11 +456,13 @@ class QualityReviewsListPreview extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 8),
-        Text(
-          l10n.qualityReviewsCount(reviews.length),
-          style: Theme.of(context).textTheme.labelLarge,
-        ),
+        if (showCountHeader) ...<Widget>[
+          const SizedBox(height: 8),
+          Text(
+            l10n.qualityReviewsCount(reviews.length),
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
+        ],
         ...reviews.take(8).map((review) {
           final detailLines = <String>[
             review.id,

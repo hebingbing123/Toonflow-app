@@ -324,7 +324,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('AI 短剧工作室 — 从剧本到发布一站完成。'), findsOneWidget);
+    expect(
+      find.text('AI 短剧工作室 — 从小说入库、制片到多平台发布一站串联。'),
+      findsOneWidget,
+    );
     expect(find.byKey(const Key('product-auth-submit')), findsOneWidget);
     expect(find.byKey(const Key('auth-mode-sign-up')), findsOneWidget);
     expect(tester.takeException(), isNull);
@@ -405,8 +408,8 @@ void main() {
       await tester.tap(find.text('打开更多菜单'));
       await tester.pumpAndSettle();
 
-      expect(find.text('短视频 Space'), findsOneWidget);
-      expect(find.text('脚本工作区'), findsOneWidget);
+      expect(find.text('多平台分发'), findsOneWidget);
+      expect(find.text('剧本工作区'), findsOneWidget);
       expect(find.text('制作工作区'), findsOneWidget);
       expect(find.text('任务中心'), findsOneWidget);
       expect(tester.takeException(), isNull);
@@ -440,8 +443,8 @@ void main() {
       expect(
         labels,
         containsAll(<String>[
-          '短视频 Space',
-          '脚本工作区',
+          '多平台分发',
+          '剧本工作区',
           '制作工作区',
           '任务中心',
           '质量评审',
@@ -605,6 +608,67 @@ void main() {
     await tester.tap(find.text('打开质量工作台'));
     await tester.pumpAndSettle();
     expect(find.text('质量工作台'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('desktop studio panes hide legacy compatibility panels', (
+    WidgetTester tester,
+  ) async {
+    final qualityController = buildQualityController();
+    final detailController = TextEditingController();
+    addTearDown(qualityController.dispose);
+    addTearDown(detailController.dispose);
+
+    await tester.binding.setSurfaceSize(const Size(1440, 960));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      buildScrollableTestApp(
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            QualityReviewsSection(
+              studioPresentation: true,
+              accessToken: 'token',
+              controller: qualityController,
+              initialProjectNumericId: 9,
+              platformConfig: PlatformConfigToggleSetV1.defaults,
+            ),
+            const SizedBox(height: 24),
+            TaskCenterSection(
+              studioPresentation: true,
+              accessToken: 'token',
+              initialProjectNumericId: 9,
+              initialProjectUuid: '550e8400-e29b-41d4-a716-446655440009',
+              loadingTaskProjects: false,
+              loadingTaskCategories: false,
+              loadingTaskApi: false,
+              loadingTaskDetailsByNumericId: false,
+              loadingTaskDetailsUuid: false,
+              taskDetailJobIdController: detailController,
+              taskProjects: null,
+              taskCategoriesLine: null,
+              taskApiSummaryLine: null,
+              taskDetailNumericIdLine: null,
+              taskDetailUuidLine: null,
+              taskApiJobs: null,
+              onTaskDetailJobIdChanged: (_) {},
+              onLoadTaskProjects: () {},
+              onLoadTaskCategories: () {},
+              onLoadTaskApi: () {},
+              onProbeTaskDetailByNumericId: () {},
+              onProbeTaskDetailUuid: () {},
+              onSelectTaskJob: (_) {},
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('兼容性检查'), findsNothing);
+    expect(find.text('运行只读回归检查'), findsNothing);
+    expect(find.text('质量运营看板'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

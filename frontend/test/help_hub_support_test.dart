@@ -159,8 +159,15 @@ void main() {
       ),
     ];
 
-    expect(countBillingEventsByProvider(items), {'stripe': 2, 'unknown': 1});
-    expect(countBillingEventsByType(items), {'invoice.paid': 2, 'unknown': 1});
+    final l10n = AppLocalizationsEn();
+    expect(
+      countBillingEventsByProvider(l10n, items),
+      {'stripe': 2, l10n.globalSearchUnknownError: 1},
+    );
+    expect(
+      countBillingEventsByType(l10n, items),
+      {'invoice.paid': 2, l10n.globalSearchUnknownError: 1},
+    );
   });
 
   test('buildBillingEventsSnapshotSummary emits provider and type rollups', () {
@@ -196,6 +203,25 @@ void main() {
     expect(
       summary,
       contains('Event types: invoice.paid:2, trade.success:1'),
+    );
+  });
+
+  test('webhookActivityActionLabel maps session action slugs', () {
+    final l10n = AppLocalizationsEn();
+    expect(webhookActivityActionLabel(l10n, 'created'), l10n.opsWhActivityActionCreated);
+    expect(webhookActivityActionLabel(l10n, 'deleted'), l10n.opsWhActivityActionDeleted);
+    expect(
+      webhookActivityActionLabel(l10n, 'test_success'),
+      l10n.opsWhActivityActionTestSuccess,
+    );
+    expect(
+      webhookActivityTestSummary(
+        l10n,
+        delivered: false,
+        httpStatus: 502,
+        error: null,
+      ),
+      l10n.opsWhActivitySummaryTestFailed('502', l10n.globalSearchUnknownError),
     );
   });
 }

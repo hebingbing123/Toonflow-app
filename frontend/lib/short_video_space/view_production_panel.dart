@@ -1,17 +1,272 @@
 part of 'view.dart';
 
-/// Production overview and stats panel widget
-class _ProductionPanel extends StatelessWidget {
-  const _ProductionPanel({
+/// Current project overview + suggested migration order (side-by-side on wide screens).
+class _OverviewMigrationPanel extends StatelessWidget {
+  const _OverviewMigrationPanel({
     required this.spaceOverviewSummary,
     required this.overviewMetrics,
     required this.qualitySummaryLine,
     required this.badCaseMetrics,
     required this.recentTaskLines,
+    required this.migrationSummary,
+    required this.onOpenProjects,
+    required this.onOpenScriptWorkspace,
+    required this.onOpenProductionWorkspace,
+    required this.onOpenTasks,
+    required this.onOpenQuality,
+    required this.runningJobCount,
+  });
+
+  final String spaceOverviewSummary;
+  final List<ShortVideoMetricData> overviewMetrics;
+  final String qualitySummaryLine;
+  final List<ShortVideoMetricData> badCaseMetrics;
+  final List<String> recentTaskLines;
+  final String migrationSummary;
+  final VoidCallback onOpenProjects;
+  final VoidCallback onOpenScriptWorkspace;
+  final VoidCallback onOpenProductionWorkspace;
+  final VoidCallback onOpenTasks;
+  final VoidCallback onOpenQuality;
+  final int runningJobCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final overview = _ProjectOverviewSection(
+      spaceOverviewSummary: spaceOverviewSummary,
+      overviewMetrics: overviewMetrics,
+      qualitySummaryLine: qualitySummaryLine,
+      badCaseMetrics: badCaseMetrics,
+      recentTaskLines: recentTaskLines,
+    );
+    final migration = _MigrationOrderSection(
+      migrationSummary: migrationSummary,
+      onOpenProjects: onOpenProjects,
+      onOpenScriptWorkspace: onOpenScriptWorkspace,
+      onOpenProductionWorkspace: onOpenProductionWorkspace,
+      onOpenTasks: onOpenTasks,
+      onOpenQuality: onOpenQuality,
+      runningJobCount: runningJobCount,
+    );
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final sideBySide = constraints.maxWidth >= kStudioTwoColumnMinWidth;
+        if (sideBySide) {
+          return IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Expanded(flex: 11, child: overview),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: VerticalDivider(
+                    width: 1,
+                    color: theme.colorScheme.outlineVariant.withValues(
+                      alpha: 0.65,
+                    ),
+                  ),
+                ),
+                Expanded(flex: 9, child: migration),
+              ],
+            ),
+          );
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            overview,
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              child: Divider(
+                height: 1,
+                color: theme.colorScheme.outlineVariant.withValues(alpha: 0.65),
+              ),
+            ),
+            migration,
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _ProjectOverviewSection extends StatelessWidget {
+  const _ProjectOverviewSection({
+    required this.spaceOverviewSummary,
+    required this.overviewMetrics,
+    required this.qualitySummaryLine,
+    required this.badCaseMetrics,
+    required this.recentTaskLines,
+  });
+
+  final String spaceOverviewSummary;
+  final List<ShortVideoMetricData> overviewMetrics;
+  final String qualitySummaryLine;
+  final List<ShortVideoMetricData> badCaseMetrics;
+  final List<String> recentTaskLines;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final muted = studioMutedTextColor(context);
+    final l10n = resolveAppLocalizationsForErrors(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.shortVideoSpaceCurrentProjectOverview,
+          style: theme.textTheme.titleSmall,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          spaceOverviewSummary,
+          style: theme.textTheme.bodyMedium?.copyWith(color: muted),
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: overviewMetrics
+              .map((item) => _MetricChip(label: item.label, value: item.value))
+              .toList(growable: false),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          qualitySummaryLine,
+          style: theme.textTheme.bodySmall?.copyWith(color: muted),
+        ),
+        if (badCaseMetrics.isNotEmpty) ...[
+          const SizedBox(height: 10),
+          Text(
+            l10n.shortVideoSpaceRecentBadCaseTrends,
+            style: theme.textTheme.labelLarge,
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: badCaseMetrics
+                .map((item) => _MetricChip(label: item.label, value: item.value))
+                .toList(growable: false),
+          ),
+        ],
+        if (recentTaskLines.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Text(
+            l10n.shortVideoSpaceRecentTaskFlow,
+            style: theme.textTheme.labelLarge,
+          ),
+          const SizedBox(height: 8),
+          for (final line in recentTaskLines)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.fiber_manual_record,
+                    size: 10,
+                    color: theme.colorScheme.primary,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(line, style: theme.textTheme.bodySmall),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ],
+    );
+  }
+}
+
+class _MigrationOrderSection extends StatelessWidget {
+  const _MigrationOrderSection({
+    required this.migrationSummary,
+    required this.onOpenProjects,
+    required this.onOpenScriptWorkspace,
+    required this.onOpenProductionWorkspace,
+    required this.onOpenTasks,
+    required this.onOpenQuality,
+    required this.runningJobCount,
+  });
+
+  final String migrationSummary;
+  final VoidCallback onOpenProjects;
+  final VoidCallback onOpenScriptWorkspace;
+  final VoidCallback onOpenProductionWorkspace;
+  final VoidCallback onOpenTasks;
+  final VoidCallback onOpenQuality;
+  final int runningJobCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final muted = studioMutedTextColor(context);
+    final l10n = resolveAppLocalizationsForErrors(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.shortVideoSpaceSectionMigrationOrder,
+          style: theme.textTheme.titleSmall,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          migrationSummary,
+          style: theme.textTheme.bodyMedium?.copyWith(color: muted),
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            OutlinedButton.icon(
+              onPressed: onOpenProjects,
+              icon: const Icon(Icons.folder_open_outlined),
+              label: Text(l10n.shortVideoSpaceNavProjects),
+            ),
+            OutlinedButton.icon(
+              onPressed: onOpenScriptWorkspace,
+              icon: const Icon(Icons.edit_note_outlined),
+              label: Text(l10n.shortVideoSpaceNavScriptWorkspace),
+            ),
+            OutlinedButton.icon(
+              onPressed: onOpenProductionWorkspace,
+              icon: const Icon(Icons.movie_creation_outlined),
+              label: Text(l10n.shortVideoSpaceNavProductionWorkspace),
+            ),
+            OutlinedButton.icon(
+              onPressed: onOpenTasks,
+              icon: const Icon(Icons.checklist_outlined),
+              label: Text(
+                runningJobCount > 0
+                    ? '${l10n.shortVideoSpaceNavTaskCenter} ($runningJobCount)'
+                    : l10n.shortVideoSpaceNavTaskCenter,
+              ),
+            ),
+            OutlinedButton.icon(
+              onPressed: onOpenQuality,
+              icon: const Icon(Icons.fact_check_outlined),
+              label: Text(l10n.shortVideoSpaceNavQualityReviews),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+/// Production overview and stats panel widget
+class _ProductionPanel extends StatelessWidget {
+  const _ProductionPanel({
     required this.assetsOverviewPanelUi,
     required this.assemblyPanelUi,
     required this.assemblyInputPanelUi,
     required this.exportCheckPanelUi,
+    required this.latestExportUi,
     required this.onStartExport,
     required this.onStartPreAssembly,
     this.onFixAssemblyStoryboard,
@@ -23,24 +278,25 @@ class _ProductionPanel extends StatelessWidget {
     this.onCreateDraftFromAssemblyJob,
     this.preAssemblyBlockedTooltip,
     required this.onOpenExportHistory,
+    this.onDownloadLatestExport,
+    this.onCancelLatestExportTask,
+    this.onRetryLatestExportTask,
     required this.exportActionBusy,
     required this.preAssemblyActionBusy,
+    this.localAssemblyBlockedHint,
     required this.onOpenProductionForAssemblyExport,
+    this.onOpenDesktopDownloads,
     required this.onOpenAssemblyClipDeskOps,
     required this.onOpenAssemblyDefaultsEditor,
     this.assemblyVersionManagerPanel,
     this.assemblyInputPanelKey,
   });
 
-  final String spaceOverviewSummary;
-  final List<ShortVideoMetricData> overviewMetrics;
-  final String qualitySummaryLine;
-  final List<ShortVideoMetricData> badCaseMetrics;
-  final List<String> recentTaskLines;
   final ShortVideoAssetsOverviewPanelUi assetsOverviewPanelUi;
   final ShortVideoAssemblyPanelUi assemblyPanelUi;
   final AssemblyInputPanelUi assemblyInputPanelUi;
   final ShortVideoExportCheckPanelUi exportCheckPanelUi;
+  final ShortVideoLatestExportUi latestExportUi;
   final VoidCallback? onStartExport;
   final VoidCallback? onStartPreAssembly;
   final VoidCallback? onFixAssemblyStoryboard;
@@ -52,9 +308,14 @@ class _ProductionPanel extends StatelessWidget {
   final VoidCallback? onCreateDraftFromAssemblyJob;
   final String? preAssemblyBlockedTooltip;
   final VoidCallback? onOpenExportHistory;
+  final VoidCallback? onDownloadLatestExport;
+  final VoidCallback? onCancelLatestExportTask;
+  final VoidCallback? onRetryLatestExportTask;
   final bool exportActionBusy;
   final bool preAssemblyActionBusy;
+  final String? localAssemblyBlockedHint;
   final VoidCallback? onOpenProductionForAssemblyExport;
+  final VoidCallback? onOpenDesktopDownloads;
   final VoidCallback? onOpenAssemblyClipDeskOps;
   final VoidCallback? onOpenAssemblyDefaultsEditor;
   final Widget? assemblyVersionManagerPanel;
@@ -63,76 +324,21 @@ class _ProductionPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final outline = theme.colorScheme.outline;
+    final muted = studioMutedTextColor(context);
     final l10n = resolveAppLocalizationsForErrors(context);
+    final latestExportCardFill = latestExportUi.isWarning
+        ? theme.colorScheme.errorContainer.withValues(alpha: 0.72)
+        : theme.colorScheme.primaryContainer.withValues(alpha: 0.4);
+    final latestExportCardBorder = latestExportUi.isWarning
+        ? theme.colorScheme.error.withValues(alpha: 0.22)
+        : theme.colorScheme.primary.withValues(alpha: 0.18);
+    final latestExportCardTextColor = latestExportUi.isWarning
+        ? theme.colorScheme.onErrorContainer
+        : theme.colorScheme.onPrimaryContainer;
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _Panel(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(l10n.shortVideoSpaceCurrentProjectOverview, style: theme.textTheme.titleSmall),
-              const SizedBox(height: 8),
-              Text(
-                spaceOverviewSummary,
-                style: theme.textTheme.bodyMedium?.copyWith(color: outline),
-              ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: overviewMetrics
-                    .map(
-                      (item) =>
-                          _MetricChip(label: item.label, value: item.value),
-                    )
-                    .toList(growable: false),
-              ),
-              const SizedBox(height: 12),
-              Text(qualitySummaryLine, style: theme.textTheme.bodySmall),
-              if (badCaseMetrics.isNotEmpty) ...[
-                const SizedBox(height: 10),
-                Text(l10n.shortVideoSpaceRecentBadCaseTrends, style: theme.textTheme.labelLarge),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: badCaseMetrics
-                      .map(
-                        (item) =>
-                            _MetricChip(label: item.label, value: item.value),
-                      )
-                      .toList(growable: false),
-                ),
-              ],
-              if (recentTaskLines.isNotEmpty) ...[
-                const SizedBox(height: 12),
-                Text(l10n.shortVideoSpaceRecentTaskFlow, style: theme.textTheme.labelLarge),
-                const SizedBox(height: 8),
-                for (final line in recentTaskLines)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          Icons.fiber_manual_record,
-                          size: 10,
-                          color: theme.colorScheme.primary,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(line, style: theme.textTheme.bodySmall),
-                        ),
-                      ],
-                    ),
-                  ),
-              ],
-            ],
-          ),
-        ),
         if (assetsOverviewPanelUi.visible) ...[
           const SizedBox(height: 16),
           _Panel(
@@ -144,17 +350,17 @@ class _ProductionPanel extends StatelessWidget {
                 if (assetsOverviewPanelUi.loading)
                   Text(
                     assetsOverviewPanelUi.headline,
-                    style: theme.textTheme.bodyMedium?.copyWith(color: outline),
+                    style: theme.textTheme.bodyMedium?.copyWith(color: muted),
                   )
                 else if (assetsOverviewPanelUi.unavailable)
                   Text(
                     assetsOverviewPanelUi.headline,
-                    style: theme.textTheme.bodyMedium?.copyWith(color: outline),
+                    style: theme.textTheme.bodyMedium?.copyWith(color: muted),
                   )
                 else ...[
                   Text(
                     assetsOverviewPanelUi.headline,
-                    style: theme.textTheme.bodyMedium?.copyWith(color: outline),
+                    style: theme.textTheme.bodyMedium?.copyWith(color: muted),
                   ),
                   if (assetsOverviewPanelUi.typeLines.isNotEmpty) ...[
                     const SizedBox(height: 10),
@@ -184,7 +390,7 @@ class _ProductionPanel extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   assetsOverviewPanelUi.detail,
-                  style: theme.textTheme.bodySmall?.copyWith(color: outline),
+                  style: theme.textTheme.bodySmall?.copyWith(color: muted),
                 ),
               ],
             ),
@@ -218,17 +424,17 @@ class _ProductionPanel extends StatelessWidget {
                 if (assemblyPanelUi.loading)
                   Text(
                     assemblyPanelUi.headline,
-                    style: theme.textTheme.bodyMedium?.copyWith(color: outline),
+                    style: theme.textTheme.bodyMedium?.copyWith(color: muted),
                   )
                 else if (assemblyPanelUi.unavailable)
                   Text(
                     assemblyPanelUi.headline,
-                    style: theme.textTheme.bodyMedium?.copyWith(color: outline),
+                    style: theme.textTheme.bodyMedium?.copyWith(color: muted),
                   )
                 else ...[
                   Text(
                     assemblyPanelUi.headline,
-                    style: theme.textTheme.bodyMedium?.copyWith(color: outline),
+                    style: theme.textTheme.bodyMedium?.copyWith(color: muted),
                   ),
                   if (assemblyPanelUi.defaultsLine.trim().isNotEmpty) ...[
                     const SizedBox(height: 6),
@@ -320,7 +526,7 @@ class _ProductionPanel extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   assemblyPanelUi.detail,
-                  style: theme.textTheme.bodySmall?.copyWith(color: outline),
+                  style: theme.textTheme.bodySmall?.copyWith(color: muted),
                 ),
                 if (onOpenProductionForAssemblyExport != null &&
                     assemblyPanelUi.visible &&
@@ -370,17 +576,17 @@ class _ProductionPanel extends StatelessWidget {
                 if (exportCheckPanelUi.loading)
                   Text(
                     exportCheckPanelUi.headline,
-                    style: theme.textTheme.bodyMedium?.copyWith(color: outline),
+                    style: theme.textTheme.bodyMedium?.copyWith(color: muted),
                   )
                 else if (exportCheckPanelUi.unavailable)
                   Text(
                     exportCheckPanelUi.headline,
-                    style: theme.textTheme.bodyMedium?.copyWith(color: outline),
+                    style: theme.textTheme.bodyMedium?.copyWith(color: muted),
                   )
                 else ...[
                   Text(
                     exportCheckPanelUi.headline,
-                    style: theme.textTheme.bodyMedium?.copyWith(color: outline),
+                    style: theme.textTheme.bodyMedium?.copyWith(color: muted),
                   ),
                   if (exportCheckPanelUi.metrics.isNotEmpty) ...[
                     const SizedBox(height: 10),
@@ -407,7 +613,7 @@ class _ProductionPanel extends StatelessWidget {
                     Text(
                       l10n.shortVideoSpaceQualityGateBlockingReasons,
                       style: theme.textTheme.labelSmall?.copyWith(
-                        color: outline,
+                        color: muted,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -431,7 +637,7 @@ class _ProductionPanel extends StatelessWidget {
                     Text(
                       l10n.shortVideoSpacePublishExportCheckPublishSectionTitle,
                       style: theme.textTheme.labelSmall?.copyWith(
-                        color: outline,
+                        color: muted,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -476,7 +682,7 @@ class _ProductionPanel extends StatelessWidget {
                     Text(
                       l10n.shortVideoSpacePublishExportCheckStoryboardGapsTitle,
                       style: theme.textTheme.labelSmall?.copyWith(
-                        color: outline,
+                        color: muted,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -510,7 +716,7 @@ class _ProductionPanel extends StatelessWidget {
                                 child: Text(
                                   '· $label',
                                   style: theme.textTheme.bodySmall?.copyWith(
-                                    color: outline,
+                                    color: muted,
                                   ),
                                 ),
                               ),
@@ -522,7 +728,7 @@ class _ProductionPanel extends StatelessWidget {
                     Text(
                       l10n.shortVideoSpaceBlockingItems,
                       style: theme.textTheme.labelSmall?.copyWith(
-                        color: outline,
+                        color: muted,
                       ),
                     ),
                     const SizedBox(height: 6),
@@ -542,7 +748,7 @@ class _ProductionPanel extends StatelessWidget {
                     Text(
                       l10n.shortVideoSpaceWarningItems,
                       style: theme.textTheme.labelSmall?.copyWith(
-                        color: outline,
+                        color: muted,
                       ),
                     ),
                     const SizedBox(height: 6),
@@ -561,15 +767,264 @@ class _ProductionPanel extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   exportCheckPanelUi.detail,
-                  style: theme.textTheme.bodySmall?.copyWith(color: outline),
+                  style: theme.textTheme.bodySmall?.copyWith(color: muted),
                 ),
+                if (latestExportUi.visible) ...[
+                  const SizedBox(height: 10),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: latestExportCardFill,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: latestExportCardBorder,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              latestExportUi.isWarning
+                                  ? Icons.warning_amber_rounded
+                                  : Icons.task_alt,
+                              size: 18,
+                              color: latestExportCardTextColor,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                latestExportUi.title,
+                                style: theme.textTheme.titleSmall?.copyWith(
+                                  color: latestExportCardTextColor,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        if ((latestExportUi.statusLine ?? '').trim().isNotEmpty) ...[
+                          const SizedBox(height: 6),
+                          Text(
+                            latestExportUi.statusLine!,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: latestExportCardTextColor,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                        if ((latestExportUi.activeTaskTitle ?? '').trim().isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: latestExportCardTextColor.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                color: latestExportCardTextColor.withValues(alpha: 0.14),
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    SizedBox(
+                                      width: 14,
+                                      height: 14,
+                                      child: latestExportUi.activeTaskRunning
+                                          ? CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              color: latestExportCardTextColor,
+                                            )
+                                          : Icon(
+                                              latestExportUi.activeTaskFailed
+                                                  ? Icons.error_outline
+                                                  : Icons.schedule,
+                                              size: 14,
+                                              color: latestExportCardTextColor,
+                                            ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        latestExportUi.activeTaskTitle!,
+                                        style: theme.textTheme.bodySmall?.copyWith(
+                                          color: latestExportCardTextColor,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                if ((latestExportUi.activeTaskDetail ?? '').trim().isNotEmpty) ...[
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    latestExportUi.activeTaskDetail!,
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: latestExportCardTextColor.withValues(alpha: 0.9),
+                                    ),
+                                  ),
+                                ],
+                                if ((latestExportUi.activeTaskError ?? '').trim().isNotEmpty) ...[
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    latestExportUi.activeTaskError!,
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: latestExportCardTextColor,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ],
+                        if (latestExportUi.detail.isNotEmpty) ...[
+                          const SizedBox(height: 6),
+                          Text(
+                            latestExportUi.detail,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: latestExportCardTextColor,
+                            ),
+                          ),
+                        ],
+                        if (latestExportUi.meta.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          for (final line in latestExportUi.meta)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 4),
+                              child: Text(
+                                line,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: latestExportCardTextColor.withValues(alpha: 0.88),
+                                ),
+                              ),
+                            ),
+                        ],
+                        const SizedBox(height: 10),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            if (latestExportUi.isWarning && onStartExport != null)
+                              FilledButton.icon(
+                                onPressed: exportActionBusy ? null : onStartExport,
+                                icon: exportActionBusy
+                                    ? const SizedBox(
+                                        width: 16,
+                                        height: 16,
+                                        child: CircularProgressIndicator(strokeWidth: 2),
+                                      )
+                                    : const Icon(Icons.refresh),
+                                label: Text(
+                                  exportActionBusy
+                                      ? l10n.shortVideoSpaceExporting
+                                      : l10n.shortVideoSpaceProductionLatestExportRerun,
+                                ),
+                              ),
+                            FilledButton.tonalIcon(
+                              onPressed: onDownloadLatestExport,
+                              icon: const Icon(Icons.download_outlined),
+                              label: Text(l10n.shortVideoSpaceDialogExportHistoryDownload),
+                            ),
+                            if (onCancelLatestExportTask != null)
+                              OutlinedButton.icon(
+                                onPressed: onCancelLatestExportTask,
+                                icon: const Icon(Icons.stop_circle_outlined),
+                                label: Text(l10n.shortVideoSpaceProductionAssemblyCancel),
+                              ),
+                            if (onRetryLatestExportTask != null)
+                              (latestExportUi.recommendedAction ==
+                                      ShortVideoLatestExportAction.retry)
+                                  ? FilledButton.icon(
+                                      onPressed: onRetryLatestExportTask,
+                                      icon: const Icon(Icons.refresh),
+                                      label: Text(
+                                        l10n.shortVideoSpaceProductionAssemblyRetryTask,
+                                      ),
+                                    )
+                                  : FilledButton.tonalIcon(
+                                      onPressed: onRetryLatestExportTask,
+                                      icon: const Icon(Icons.refresh),
+                                      label: Text(
+                                        l10n.shortVideoSpaceProductionAssemblyRetryTask,
+                                      ),
+                                    ),
+                            if (latestExportUi.activeTaskFailed &&
+                                onOpenProductionForAssemblyExport != null)
+                              (latestExportUi.recommendedAction ==
+                                      ShortVideoLatestExportAction
+                                          .openProductionWorkspace)
+                                  ? FilledButton.icon(
+                                      onPressed: onOpenProductionForAssemblyExport,
+                                      icon: const Icon(
+                                        Icons.movie_creation_outlined,
+                                      ),
+                                      label: Text(
+                                        l10n.shortVideoSpaceOpenProductionWorkspace,
+                                      ),
+                                    )
+                                  : OutlinedButton.icon(
+                                      onPressed: onOpenProductionForAssemblyExport,
+                                      icon: const Icon(
+                                        Icons.movie_creation_outlined,
+                                      ),
+                                      label: Text(
+                                        l10n.shortVideoSpaceOpenProductionWorkspace,
+                                      ),
+                                    ),
+                            OutlinedButton.icon(
+                              onPressed: onOpenExportHistory,
+                              icon: const Icon(Icons.history),
+                              label: Text(l10n.shortVideoSpaceExportHistory),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                if (localAssemblyBlockedHint != null &&
+                    localAssemblyBlockedHint!.trim().isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.secondaryContainer,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          localAssemblyBlockedHint!,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSecondaryContainer,
+                          ),
+                        ),
+                        if (onOpenDesktopDownloads != null) ...[
+                          const SizedBox(height: 10),
+                          FilledButton.tonalIcon(
+                            onPressed: onOpenDesktopDownloads,
+                            icon: const Icon(Icons.download_outlined),
+                            label: Text(l10n.shortVideoDownloadDesktopApp),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 10),
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
                   children: [
                     FilledButton.icon(
-                      onPressed: exportActionBusy || !exportCheckPanelUi.exportReady
+                      onPressed:
+                          exportActionBusy ||
+                              !exportCheckPanelUi.exportReady ||
+                              localAssemblyBlockedHint != null
                           ? null
                           : onStartExport,
                       icon: exportActionBusy
@@ -587,6 +1042,7 @@ class _ProductionPanel extends StatelessWidget {
                         onPressed:
                             (exportActionBusy ||
                                     preAssemblyActionBusy ||
+                                    localAssemblyBlockedHint != null ||
                                     !assemblyInputPanelUi.gate.canPreAssembly)
                                 ? null
                                 : onStartPreAssembly,

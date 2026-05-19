@@ -30,7 +30,7 @@
 └─────────────┼───────────────────────────────────────────────────┘
               │ HTTP POST/GET /api/v1/quality/reviews
 ┌─────────────▼───────────────────────────────────────────────────┐
-│  Rust Backend (toonflow-server)                                  │
+│  Rust Backend (openflow-server)                                  │
 │  ┌──────────────────────────────────────────────────────────┐   │
 │  │ quality/dimension.rs                                      │   │
 │  │  - VALID_DIMENSION_KEYS: [visual_consistency, ...]        │   │

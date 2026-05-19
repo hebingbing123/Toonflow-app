@@ -35,8 +35,8 @@ pub(crate) async fn post_store_credential(
 
     if !is_encryption_configured() {
         return Err(not_implemented_i18n(
-            "Credential encryption not configured (set TOONFLOW_VENDOR_CREDENTIAL_KEY)",
-            "凭据加密未配置（请设置 TOONFLOW_VENDOR_CREDENTIAL_KEY）",
+            "Credential encryption not configured (set OPENFLOW_VENDOR_CREDENTIAL_KEY)",
+            "凭据加密未配置（请设置 OPENFLOW_VENDOR_CREDENTIAL_KEY）",
         ));
     }
 

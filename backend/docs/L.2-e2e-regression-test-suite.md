@@ -20,10 +20,10 @@ This document describes the comprehensive end-to-end (E2E) regression test suite
 ```bash
 # Run all E2E regression tests
 cd backend
-cargo test --package toonflow-server --lib app::pg_contract_tests::e2e_regression_suite -- --ignored --nocapture
+cargo test --package openflow-server --lib app::pg_contract_tests::e2e_regression_suite -- --ignored --nocapture
 
 # Run specific test
-cargo test --package toonflow-server --lib app::pg_contract_tests::e2e_regression_suite::test_e2e_project_creation_to_publish_workflow -- --ignored --nocapture
+cargo test --package openflow-server --lib app::pg_contract_tests::e2e_regression_suite::test_e2e_project_creation_to_publish_workflow -- --ignored --nocapture
 ```
 
 ## Test Suite Coverage
@@ -257,7 +257,7 @@ The staging database should have:
 
 ```bash
 # .env file for staging
-DATABASE_URL=postgresql://user:password@staging-db:5432/toonflow_staging
+DATABASE_URL=postgresql://user:password@staging-db:5432/openflow_staging
 SUPABASE_JWT_SECRET=your-staging-jwt-secret
 ```
 
@@ -394,7 +394,7 @@ jobs:
       - name: Run E2E tests
         run: |
           cd backend
-          cargo test --package toonflow-server --lib app::pg_contract_tests::e2e_regression_suite -- --ignored --nocapture
+          cargo test --package openflow-server --lib app::pg_contract_tests::e2e_regression_suite -- --ignored --nocapture
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
           SUPABASE_JWT_SECRET: test-secret-for-ci

@@ -10,8 +10,12 @@ description = "Flutter bridge entrypoints for Openflow Rust Core"
 crate-type = ["lib", "cdylib", "staticlib"]
 
 [dependencies]
+flutter_rust_bridge = "=2.12.0"
 media_image_doc = { path = "../media_image_doc" }
 media_timeline = { path = "../media_timeline" }
 media_workflow = { path = "../media_workflow" }
 serde.workspace = true
 uuid.workspace = true
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(frb_expand)'] }

@@ -26,4 +26,32 @@ void main() {
     expect(controller.isProductMode, isFalse);
     expect(notifications, 2);
   });
+
+  test('product pane back stack pops to previous pane', () {
+    final controller = ShellNavigationController();
+
+    controller.selectProductWorkspacePane(ProductWorkspacePane.tasks);
+    controller.selectProductWorkspacePane(ProductWorkspacePane.jobs);
+
+    expect(controller.productWorkspacePane, ProductWorkspacePane.jobs);
+    expect(controller.productPaneBackStackDepth, 2);
+
+    expect(controller.popProductWorkspacePane(), isTrue);
+    expect(controller.productWorkspacePane, ProductWorkspacePane.tasks);
+
+    expect(controller.popProductWorkspacePane(), isTrue);
+    expect(controller.productWorkspacePane, ProductWorkspacePane.projects);
+    expect(controller.popProductWorkspacePane(), isFalse);
+  });
+
+  test('resetProductWorkspacePaneHistory clears back stack', () {
+    final controller = ShellNavigationController();
+
+    controller.selectProductWorkspacePane(ProductWorkspacePane.jobs);
+    controller.resetProductWorkspacePaneHistory();
+
+    expect(controller.productPaneBackStackDepth, 0);
+    expect(controller.popProductWorkspacePane(), isTrue);
+    expect(controller.productWorkspacePane, ProductWorkspacePane.projects);
+  });
 }

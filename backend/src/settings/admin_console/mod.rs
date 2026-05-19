@@ -1,6 +1,6 @@
 //! Internal admin console for operators.
 //!
-//! Guarded by `OPENFLOW_INTERNAL_OPS_TOKEN` / `X-OpenFlow-Internal-Token`.
+//! Guarded by `OPENFLOW_INTERNAL_OPS_TOKEN` / `X-Openflow-Internal-Token`.
 
 use axum::{
     routing::{get, post},

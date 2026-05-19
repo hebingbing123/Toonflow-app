@@ -1,6 +1,6 @@
 use crate::error::ApiError;
 
-/// Default Stripe / Toonflow timestamp tolerance in seconds.
+/// Default Stripe / Openflow timestamp tolerance in seconds.
 pub(super) const DEFAULT_STRIPE_TOLERANCE_SECS: u64 = 300;
 
 pub(crate) fn billing_secret() -> Result<Vec<u8>, ApiError> {
@@ -18,8 +18,8 @@ pub(super) fn stripe_tolerance_secs() -> u64 {
         .unwrap_or(DEFAULT_STRIPE_TOLERANCE_SECS)
 }
 
-pub(super) fn toonflow_tolerance_secs() -> u64 {
-    std::env::var("BILLING_TOONFLOW_TOLERANCE_SECS")
+pub(super) fn openflow_tolerance_secs() -> u64 {
+    std::env::var("BILLING_OPENFLOW_TOLERANCE_SECS")
         .ok()
         .and_then(|s| s.trim().parse::<u64>().ok())
         .unwrap_or(DEFAULT_STRIPE_TOLERANCE_SECS)

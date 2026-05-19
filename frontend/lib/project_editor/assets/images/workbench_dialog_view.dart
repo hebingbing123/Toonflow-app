@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../rust_api.dart';
 import 'workbench_dialog_view_contract.dart';
 import 'workbench_dialog_view_sections.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 export 'workbench_dialog_view_contract.dart';
 
@@ -25,7 +26,7 @@ class AssetImagesWorkbenchDialogView extends StatelessWidget {
     final dialogWidth = viewportWidth.isFinite
         ? viewportWidth.clamp(320.0, 760.0)
         : 760.0;
-    return AlertDialog(
+    return StudioAlertDialog(
       title: Text(l10n.projectEditorAssetImagesWorkbenchDialogTitle),
       content: SizedBox(
         width: dialogWidth,

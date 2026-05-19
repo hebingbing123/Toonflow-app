@@ -29,7 +29,7 @@ pub(crate) const SHARED_TEMPLATES_AUDIT_KEY: &str =
 pub(crate) const SHARED_TEMPLATES_AUDIT_EXPORTS_KEY: &str =
     "content_compliance_cleared_templates_shared_audit_exports";
 
-const WORKSPACE_SHARED_AUDIT_EXPORT_ENV: &str = "TOONFLOW_LOCAL_WORKSPACE_SHARED_AUDIT_EXPORT_DIR";
+const WORKSPACE_SHARED_AUDIT_EXPORT_ENV: &str = "OPENFLOW_LOCAL_WORKSPACE_SHARED_AUDIT_EXPORT_DIR";
 
 /// Max **`queued` + `running`** export jobs per user for this kind (back-pressure; aligns with account export observability).
 pub(crate) const WORKSPACE_SHARED_AUDIT_EXPORT_MAX_ACTIVE: i64 = 3;
@@ -74,7 +74,7 @@ pub(crate) fn workspace_shared_audit_export_root_dir() -> PathBuf {
         .map(|value| value.trim().to_string())
         .filter(|value| !value.is_empty())
         .map(PathBuf::from)
-        .unwrap_or_else(|| std::env::temp_dir().join("toonflow-workspace-shared-audit-exports"))
+        .unwrap_or_else(|| std::env::temp_dir().join("openflow-workspace-shared-audit-exports"))
 }
 
 fn workspace_export_user_dir(user_id: Uuid) -> PathBuf {

@@ -7,11 +7,11 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
 BASELINE="scripts/fixtures/openapi_baseline.yaml"
-GENERATED="${TOONFLOW_OPENAPI_SPEC:-/tmp/openapi_generated_$$.yaml}"
+GENERATED="${OPENFLOW_OPENAPI_SPEC:-/tmp/openapi_generated_$$.yaml}"
 DIFF_OUTPUT="/tmp/openapi_diff_$$.txt"
 GENERATED_FROM_ENV=false
 
-if [ -n "${TOONFLOW_OPENAPI_SPEC:-}" ]; then
+if [ -n "${OPENFLOW_OPENAPI_SPEC:-}" ]; then
     GENERATED_FROM_ENV=true
 fi
 
@@ -30,7 +30,7 @@ cleanup() {
 trap cleanup EXIT
 
 if [ "$GENERATED_FROM_ENV" = true ]; then
-    echo "==> Reusing pre-generated OpenAPI spec from \$TOONFLOW_OPENAPI_SPEC"
+    echo "==> Reusing pre-generated OpenAPI spec from \$OPENFLOW_OPENAPI_SPEC"
 else
     echo "==> Generating current OpenAPI spec..."
     (cd backend && cargo run --quiet --bin export-openapi) > "$GENERATED"

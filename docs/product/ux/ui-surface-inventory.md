@@ -3,47 +3,48 @@
 > 真源：自动化测试绑定表。禁止 `manual`；不可自动化标 `automation_blocked` + 原因。  
 > 关联：[UI review 报告](ui-review-2026-05-18.md)（机器生成）、[studio-ix-covenant](studio-ix-covenant.md)
 
-| scenario_id | surface | test_kind | test_path | golden_path | wave | done |
-|-------------|---------|-----------|-----------|-------------|------|------|
-| login_default | ProductLoginPage | widget + integration_golden | test/ui/desktop_layout_widget_gallery_test.dart | test/goldens/desktop_layouts/01_login.png | 1 | done |
-| login_error | ProductLoginPage error | widget | test/ui/login_page_test.dart | — | 1 | done |
-| projects_default | ProjectsSection | widget + integration_golden | test/ui/desktop_layout_widget_gallery_test.dart | test/goldens/desktop_layouts/03_projects.png | 1 | done |
-| projects_empty | ProjectsStudioHome empty | widget + golden | test/ui/ui_gallery_wave1_golden_test.dart | test/goldens/ui_gallery/projects_empty.png | 1 | done |
-| tasks_default | TaskCenterSection | widget + integration_golden | test/ui/desktop_layout_widget_gallery_test.dart | test/goldens/desktop_layouts/04_task_center.png | 1 | done |
-| tasks_empty | TaskCenterSection studio empty | widget + golden | test/ui/ui_gallery_wave1_golden_test.dart | test/goldens/ui_gallery/tasks_empty.png | 1 | done |
-| tasks_api_error | TaskCenterSection error | widget | test/ui/task_center_api_error_test.dart | — | 1 | done |
-| quality_default | QualityReviewsSection | widget + golden | test/ui/quality_reviews_section_test.dart, desktop_layout_widget_gallery_test.dart | test/goldens/desktop_layouts/05_quality.png | 1 | done |
-| quality_stale | Quality freshness stale | widget + integration_golden | test/ui/quality_freshness_banner_test.dart | test/goldens/ui_gallery/quality_stale.png | 1 | done |
-| quality_empty | Quality dashboard not loaded | widget + golden | test/ui/ui_gallery_wave1_golden_test.dart | test/goldens/ui_gallery/quality_empty.png | 1 | done |
-| quality_api_error | Quality dashboard load fail | widget | test/ui/quality_freshness_banner_test.dart | — | 1 | done |
-| jobs_default | JobsSection studio | widget + golden | test/ui/jobs_section_studio_test.dart, desktop_layout_widget_gallery_test.dart | test/goldens/desktop_layouts/11_jobs.png | 1 | done |
-| notifications_studio | NotificationsSection studio | widget + golden | test/ui/notifications_section_studio_test.dart | test/goldens/ui_gallery/notifications_studio.png | 2 | done |
-| notifications_utility | Notifications utility pane (shell route) | widget | test/ui/notifications_utility_studio_test.dart | — | 2 | done |
-| team_workspaces_logged_out | TeamWorkspacesSection (no token) | widget | test/ui/team_workspaces_studio_test.dart | — | 2 | done |
-| settings_account | SettingsHub tab 0 | widget + golden | test/ui/settings_hub_studio_test.dart, desktop_layout_widget_gallery_test.dart | test/goldens/desktop_layouts/06_settings_account.png | 2 | done |
-| settings_plan_usage | SettingsHub plan tab | widget + golden | test/ui/desktop_layout_widget_gallery_test.dart | test/goldens/desktop_layouts/06a_settings_plan_usage.png | 2 | done |
-| short_video_overview | ShortVideoSpaceView overview | widget + golden | test/ui/short_video_overview_test.dart | test/goldens/ui_gallery/short_video_overview.png | 2 | done |
-| studio_step_script | ProjectStudio script | widget + golden | test/ui/studio_step_script_test.dart | test/goldens/ui_gallery/studio_step_script.png | 2 | done |
-| studio_load_error | ProjectStudioScope error | widget | test/ui/project_studio_scope_test.dart | — | 2 | done |
-| storyboard_studio | StoryboardStudioPage | widget + golden | test/storyboard_studio/storyboard_studio_page_test.dart | test/goldens/ui_gallery/storyboard_studio.png | 2 | done |
-| episode_console | EpisodeConsolePage | widget + golden | test/episode_console/episode_console_page_test.dart | test/goldens/ui_gallery/episode_console.png | 2 | done |
-| search_empty | Search no-results illustration | widget + golden | test/ui/search_no_results_test.dart | test/goldens/ui_gallery/search_empty.png | 2 | done |
-| cmd_palette_open | StudioCommandPaletteShortcuts | smoke | integration_test/studio_interaction_smoke_test.dart | — | 1 | done |
-| conflict_banner | StudioConflictBanner | smoke | integration_test/studio_interaction_smoke_test.dart | — | 1 | done |
-| pipeline_tasks | Product pane tasks + URI sync | widget | test/ui/pipeline_tasks_autoload_test.dart | — | 1 | done |
-| api_error_callout | StudioApiErrorCallout | widget + golden | test/ui/ui_gallery_wave1_golden_test.dart | test/goldens/ui_gallery/api_error_callout.png | 1 | done |
-| job_tray_active | StudioJobTray | widget + smoke | test/ui/studio_job_tray_test.dart | — | 1 | done |
-| product_shell_chrome | App bar + pipeline strip | widget + golden | test/ui/desktop_layout_widget_gallery_test.dart | test/goldens/desktop_layouts/02_product_shell_chrome.png | 1 | done |
-| help_hub_webhooks | Help Hub (debug seeds) | widget + golden | test/ui/help_hub_studio_test.dart | test/goldens/desktop_layouts/10_help_hub.png | 2 | done |
-| settings_api | SettingsHub API tab | widget + golden | test/ui/desktop_layout_widget_gallery_test.dart | test/goldens/desktop_layouts/07_settings_api.png | 2 | done |
-| settings_workspaces | SettingsHub workspaces tab | widget + golden | test/ui/desktop_layout_widget_gallery_test.dart | test/goldens/desktop_layouts/08_settings_workspaces.png | 2 | done |
-| benchmark_default | BenchmarkSection | widget + golden | test/ui/desktop_layout_widget_gallery_test.dart | test/goldens/desktop_layouts/12_benchmark.png | 2 | done |
-| platform_config | Platform config pane | widget + golden | test/ui/platform_config_desktop_golden_test.dart | test/goldens/desktop_layouts/13_platform_config.png | 2 | done |
-| content_compliance_queue | ContentComplianceSection | widget + golden | test/content_compliance_section_test.dart, desktop_layout_widget_gallery_test.dart | test/goldens/desktop_layouts/09_content_compliance.png | 2 | done |
-| platform_status | PlatformStatusSection | widget + golden | test/ui/platform_status_studio_test.dart, platform_status_desktop_golden_test.dart | test/goldens/desktop_layouts/14_platform_status.png | 2 | done |
-| utility_routes | notifications/help/settings-models/platform-status | widget | test/product_shell/router_utility_integration_test.dart | — | 1 | done |
-| product_shell_e2e_smoke | StudioProductApp login + shell | e2e | integration_test/real_product_shell_auth_smoke_test.dart | — | 1 | done |
-| product_shell_e2e_gallery | StudioProductApp full nav + PNG | e2e | integration_test/real_product_shell_auth_gallery_test.dart | — | 1 | done |
+| scenario_id | surface | test_kind | test_path | golden_path | e2e_full_gallery | wave | done |
+|-------------|---------|-----------|-----------|-------------|------------------|------|------|
+| login_default | ProductLoginPage | widget + integration_golden | test/ui/desktop_layout_widget_gallery_test.dart | test/goldens/desktop_layouts/01_login.png | yes | 1 | done |
+| login_error | ProductLoginPage error | widget | test/ui/login_page_test.dart | — | no | 1 | done |
+| projects_default | ProjectsSection | widget + integration_golden | test/ui/desktop_layout_widget_gallery_test.dart | test/goldens/desktop_layouts/03_projects.png | yes | 1 | done |
+| projects_empty | ProjectsStudioHome empty | widget + golden | test/ui/ui_gallery_wave1_golden_test.dart | test/goldens/ui_gallery/projects_empty.png | no | 1 | done |
+| tasks_default | TaskCenterSection | widget + integration_golden | test/ui/desktop_layout_widget_gallery_test.dart | test/goldens/desktop_layouts/04_task_center.png | yes | 1 | done |
+| tasks_empty | TaskCenterSection studio empty | widget + golden | test/ui/ui_gallery_wave1_golden_test.dart | test/goldens/ui_gallery/tasks_empty.png | no | 1 | done |
+| tasks_api_error | TaskCenterSection error | widget | test/ui/task_center_api_error_test.dart | — | no | 1 | done |
+| quality_default | QualityReviewsSection | widget + golden | test/ui/quality_reviews_section_test.dart, desktop_layout_widget_gallery_test.dart | test/goldens/desktop_layouts/05_quality.png | yes | 1 | done |
+| quality_stale | Quality freshness stale | widget + integration_golden | test/ui/quality_freshness_banner_test.dart | test/goldens/ui_gallery/quality_stale.png | no | 1 | done |
+| quality_empty | Quality dashboard not loaded | widget + golden | test/ui/ui_gallery_wave1_golden_test.dart | test/goldens/ui_gallery/quality_empty.png | no | 1 | done |
+| quality_api_error | Quality dashboard load fail | widget | test/ui/quality_freshness_banner_test.dart | — | no | 1 | done |
+| jobs_default | JobsSection studio | widget + golden | test/ui/jobs_section_studio_test.dart, desktop_layout_widget_gallery_test.dart | test/goldens/desktop_layouts/11_jobs.png | yes | 1 | done |
+| notifications_studio | NotificationsSection studio | widget + golden | test/ui/notifications_section_studio_test.dart | test/goldens/ui_gallery/notifications_studio.png | yes | 2 | done |
+| notifications_utility | Notifications utility pane (shell route) | widget | test/ui/notifications_utility_studio_test.dart | — | yes | 2 | done |
+| team_workspaces_logged_out | TeamWorkspacesSection (no token) | widget | test/ui/team_workspaces_studio_test.dart | — | no | 2 | done |
+| settings_account | SettingsHub tab 0 | widget + golden | test/ui/settings_hub_studio_test.dart, desktop_layout_widget_gallery_test.dart | test/goldens/desktop_layouts/06_settings_account.png | yes | 2 | done |
+| settings_plan_usage | SettingsHub plan tab | widget + golden | test/ui/desktop_layout_widget_gallery_test.dart | test/goldens/desktop_layouts/06a_settings_plan_usage.png | yes | 2 | done |
+| short_video_overview | ShortVideoSpaceView overview | widget + golden | test/ui/short_video_overview_test.dart | test/goldens/ui_gallery/short_video_overview.png | yes | 2 | done |
+| studio_step_script | ProjectStudio script | widget + golden | test/ui/studio_step_script_test.dart | test/goldens/ui_gallery/studio_step_script.png | yes | 2 | done |
+| studio_load_error | ProjectStudioScope error | widget | test/ui/project_studio_scope_test.dart | — | no | 2 | done |
+| storyboard_studio | StoryboardStudioPage | widget + golden | test/storyboard_studio/storyboard_studio_page_test.dart | test/goldens/ui_gallery/storyboard_studio.png | partial | 2 | done |
+| episode_console | EpisodeConsolePage | widget + golden | test/episode_console/episode_console_page_test.dart | test/goldens/ui_gallery/episode_console.png | no | 2 | done |
+| search_empty | Search no-results illustration | widget + golden | test/ui/search_no_results_test.dart | test/goldens/ui_gallery/search_empty.png | no | 2 | done |
+| cmd_palette_open | StudioCommandPaletteShortcuts | smoke | integration_test/studio_interaction_smoke_test.dart | — | no | 1 | done |
+| conflict_banner | StudioConflictBanner | smoke | integration_test/studio_interaction_smoke_test.dart | — | no | 1 | done |
+| pipeline_tasks | Product pane tasks + URI sync | widget | test/ui/pipeline_tasks_autoload_test.dart | — | partial | 1 | done |
+| api_error_callout | StudioApiErrorCallout | widget + golden | test/ui/ui_gallery_wave1_golden_test.dart | test/goldens/ui_gallery/api_error_callout.png | no | 1 | done |
+| job_tray_active | StudioJobTray | widget + smoke | test/ui/studio_job_tray_test.dart | — | no | 1 | done |
+| product_shell_chrome | App bar + pipeline strip | widget + golden | test/ui/desktop_layout_widget_gallery_test.dart | test/goldens/desktop_layouts/02_product_shell_chrome.png | yes | 1 | done |
+| help_hub_webhooks | Help Hub (debug seeds) | widget + golden | test/ui/help_hub_studio_test.dart | test/goldens/desktop_layouts/10_help_hub.png | yes | 2 | done |
+| settings_api | SettingsHub API tab | widget + golden | test/ui/desktop_layout_widget_gallery_test.dart | test/goldens/desktop_layouts/07_settings_api.png | yes | 2 | done |
+| settings_workspaces | SettingsHub workspaces tab | widget + golden | test/ui/desktop_layout_widget_gallery_test.dart | test/goldens/desktop_layouts/08_settings_workspaces.png | yes | 2 | done |
+| benchmark_default | BenchmarkSection | widget + golden | test/ui/desktop_layout_widget_gallery_test.dart | test/goldens/desktop_layouts/12_benchmark.png | no | 2 | done |
+| platform_config | Platform config pane | widget + golden | test/ui/platform_config_desktop_golden_test.dart | test/goldens/desktop_layouts/13_platform_config.png | yes | 2 | done |
+| content_compliance_queue | ContentComplianceSection | widget + golden | test/content_compliance_section_test.dart, desktop_layout_widget_gallery_test.dart | test/goldens/desktop_layouts/09_content_compliance.png | yes | 2 | done |
+| platform_status | PlatformStatusSection | widget + golden | test/ui/platform_status_studio_test.dart, platform_status_desktop_golden_test.dart | test/goldens/desktop_layouts/14_platform_status.png | yes | 2 | done |
+| utility_routes | notifications/help/settings-models/platform-status | widget | test/product_shell/router_utility_integration_test.dart | — | partial | 1 | done |
+| product_shell_e2e_smoke | StudioProductApp login + shell | e2e | integration_test/real_product_shell_auth_smoke_test.dart | — | smoke | 1 | done |
+| product_shell_e2e_gallery | StudioProductApp compact nav + PNG | e2e | integration_test/real_product_shell_auth_gallery_test.dart | — | compact | 1 | done |
+| product_shell_e2e_full_gallery | StudioProductApp full nav + PNG | e2e | integration_test/real_product_shell_full_gallery_test.dart | build/e2e_gallery/ | full | 1 | done |
 
 ## Top dialogs (Phase 7)
 
@@ -65,7 +66,7 @@
 |-----|------|---------|
 | `ui-smoke` | Every PR | `scripts/run-ui-review-gates.sh` (widget + golden + export_history + utility routes; macOS smoke optional) |
 | `ui-golden` | Schedule / manual | `flutter test test/ui/ --name golden` + `integration_test/desktop_layout_gallery_test.dart` (device) |
-| `ui-e2e` | Manual (`workflow_dispatch`) | `scripts/run-ui-e2e.sh` — Supabase + Rust :8666 + Flutter integration on macOS ([runbook](ui-e2e-runbook.md)) |
+| `ui-e2e` | Manual (`workflow_dispatch`) | `scripts/run-ui-e2e.sh` — Supabase + Rust :8666 + Flutter integration on macOS ([runbook](../../plans/ui-e2e-runbook.md)); full PNGs: `--full-gallery` → `frontend/build/e2e_gallery/` |
 
 ## Feature-gated panes
 

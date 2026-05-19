@@ -1,3 +1,4 @@
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 part of '../../../../home_page.dart';
 
 extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
@@ -230,7 +231,7 @@ extension _HomePageProjectEditorNovelWorkbenchDeleteSnapshotSection
           ),
         ),
         const SizedBox(height: 8),
-        DropdownButtonFormField<String>(
+        StudioDropdownButtonFormField<String>(
           initialValue: batchAdmissionStatusCtrl.text.isEmpty
               ? 'pending_review'
               : batchAdmissionStatusCtrl.text,

@@ -1,3 +1,4 @@
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 part of '../../../../home_page.dart';
 
 extension _HomePageProjectEditorAssetsDialogs on _HomePageState {
@@ -21,17 +22,17 @@ extension _HomePageProjectEditorAssetsDialogs on _HomePageState {
       return;
     }
     var selectedAssetNumericId = list.first.numericId;
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showStudioDialog<bool>(
       context: ctx,
       builder: (dialogCtx) {
         final dlgL10n = resolveAppLocalizationsForErrors(dialogCtx);
         return StatefulBuilder(
           builder: (dialogCtx, setState) {
-            return AlertDialog(
+            return StudioAlertDialog(
               title: Text(dlgL10n.projectEditorAssetDeleteDialogTitle),
               content: SizedBox(
                 width: 420,
-                child: DropdownButtonFormField<int>(
+                child: StudioDropdownButtonFormField<int>(
                   initialValue: selectedAssetNumericId,
                   decoration: InputDecoration(
                     labelText: dlgL10n.projectEditorAssetDeleteDialogTargetLabel,

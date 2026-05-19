@@ -32,7 +32,7 @@ pub async fn synthesize_speech(
         .filter(|s| !s.is_empty())
     {
         let mock_clone = clone_id.starts_with("mock-")
-            || std::env::var("TOONFLOW_VOICE_CLONE_PROVIDER")
+            || std::env::var("OPENFLOW_VOICE_CLONE_PROVIDER")
                 .unwrap_or_else(|_| "mock".into())
                 .trim()
                 .eq_ignore_ascii_case("mock");
@@ -41,7 +41,7 @@ pub async fn synthesize_speech(
             effective.voice = super::clone::mock_openai_voice_for_clone_id(clone_id).to_string();
         } else {
             return Err(
-                "voice clone provider is not configured for synthesis; set TOONFLOW_VOICE_CLONE_PROVIDER=mock or use preset voices"
+                "voice clone provider is not configured for synthesis; set OPENFLOW_VOICE_CLONE_PROVIDER=mock or use preset voices"
                     .into(),
             );
         }

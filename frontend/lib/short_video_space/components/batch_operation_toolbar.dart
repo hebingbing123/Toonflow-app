@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../rust_api.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 /// Batch operation toolbar component for short video assembly
 /// 
@@ -398,7 +399,7 @@ class BatchOperationProgressDialog extends StatelessWidget {
     final progress = total > 0 ? completed / total : 0.0;
     final hasFailures = failedItems.isNotEmpty;
 
-    return AlertDialog(
+    return StudioAlertDialog(
       title: Text(title),
       content: SizedBox(
         width: 500,

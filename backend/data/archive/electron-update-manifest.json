@@ -2,22 +2,22 @@
     "version": "1.0.8",
     "time": 1775118545494,
     "data": {
-        "toonflow": [
+        "openflow": [
             {
                 "type": "zip",
-                "url": "https://toonflow.oss-cn-beijing.aliyuncs.com/latest/latest.zip"
+                "url": "https://openflow.oss-cn-beijing.aliyuncs.com/latest/latest.zip"
             },
             {
                 "type": "windows",
-                "url": "https://toonflow.oss-cn-beijing.aliyuncs.com/latest/latest.exe"
+                "url": "https://openflow.oss-cn-beijing.aliyuncs.com/latest/latest.exe"
             },
             {
                 "type": "linux",
-                "url": "https://toonflow.oss-cn-beijing.aliyuncs.com/latest/latest.AppImage"
+                "url": "https://openflow.oss-cn-beijing.aliyuncs.com/latest/latest.AppImage"
             },
             {
                 "type": "macos",
-                "url": "https://toonflow.oss-cn-beijing.aliyuncs.com/latest/latest.dmg"
+                "url": "https://openflow.oss-cn-beijing.aliyuncs.com/latest/latest.dmg"
             }
         ],
         "github": [],

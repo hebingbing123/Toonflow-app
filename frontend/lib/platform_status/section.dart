@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../l10n/studio_code_labels.dart';
@@ -186,7 +187,7 @@ class _PlatformStatusSectionState extends State<PlatformStatusSection> {
                   style: theme.textTheme.titleMedium,
                 ),
               ),
-              DropdownButton<int>(
+              StudioDropdownButton<int>(
                 value: _windowMinutes,
                 onChanged: _loading
                     ? null

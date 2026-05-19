@@ -137,7 +137,7 @@ fn storyboard_voiceover_script_uses_narration_then_prompt_fallback() {
 
     let script = build_storyboard_voiceover_script(&[first, second]);
 
-    assert!(script.starts_with("# Toonflow Storyboard Voiceover Script"));
+    assert!(script.starts_with("# Openflow Storyboard Voiceover Script"));
     assert!(script.contains("[00:00:00,000 - 00:00:05,000] Shot 7 (sb_index=9)"));
     assert!(script.contains("source=explicit_narration · voiceover_ready=true"));
     assert!(script.contains("Narrator opening"));

@@ -2,7 +2,7 @@
 
 ## 概述
 
-把 Toonflow 已有的项目、小说、剧本、分镜、资产、任务、质量评审和 Agent 工作区，收敛成面向短视频生产的上层入口。重点不是重做底层生产域，而是：
+把 Openflow 已有的项目、小说、剧本、分镜、资产、任务、质量评审和 Agent 工作区，收敛成面向短视频生产的上层入口。重点不是重做底层生产域，而是：
 
 1. **借鉴开源已验证流程**：参考 `MoneyPrinterTurbo`（单入口、集中参数、成片导向）与 `Jellyfish`（准备态、readiness、候选确认、任务回跳、结果回写），迁入现有 Rust + Flutter + Postgres 工作流，不照搬技术栈或单体任务目录模型。
 2. **补上分发环**：在生成与导出之后增加可选自动发布（国内与海外平台），与半自动发布并存；自动发布独立于生成任务，属于 `export` 之后的独立流程。
@@ -46,7 +46,7 @@
 3. **质检与回写**：就绪态、坏例、返工、版本确认。
 4. **分发与复投**：平台映射、发布排程、文案改写、发布结果回流。
 
-其中前三段主要复用现有 Toonflow 能力；第四段为本线特色增量。
+其中前三段主要复用现有 Openflow 能力；第四段为本线特色增量。
 
 ### 1.2 Space 作为项目级总入口
 
@@ -63,7 +63,7 @@
 
 - **项目级生产概览**：一屏汇总当前项目在生成、导出、发布各段的进度与阻塞（与「卡在哪一环」互补，偏数据汇总而非仅阶段枚举）。
 - **建议指标**（`moneyprinter-short-video-space.md` MP-W5）：已就绪分镜数、生成中任务数、待复核坏例数（与质量评审域对接，字段以现有表为准）。
-- **阶段语义**（Jellyfish）：`shot preparation` → `candidate confirmation` → `ready for generation` → `export ready` 在 Toonflow 中映射为可读阶段或标签，供概览与主链使用（不要求与 Jellyfish 同名代码结构）。
+- **阶段语义**（Jellyfish）：`shot preparation` → `candidate confirmation` → `ready for generation` → `export ready` 在 Openflow 中映射为可读阶段或标签，供概览与主链使用（不要求与 Jellyfish 同名代码结构）。
 
 ---
 
@@ -91,7 +91,7 @@
 ### 3.1 后端
 
 - 分镜 `readiness summary` 聚合接口；**最小检查项**（与 `implementation-breakdown` 对齐）：基础信息是否齐、提示词/脚本上下文是否齐、参考图或关键帧是否齐、候选角色/场景/道具是否确认完成、当前是否已有进行中任务。
-- **扩展检查项**（与 `open-source-borrowing` 中 Jellyfish 核对清单对齐，按 Toonflow 字段可映射则纳入，不可映射则记为「缺口/后续」）：语义默认值是否齐、`action beats` 是否齐、待确认候选是否清空、视频 prompt 是否可渲染、默认模型与 provider 是否可用等。
+- **扩展检查项**（与 `open-source-borrowing` 中 Jellyfish 核对清单对齐，按 Openflow 字段可映射则纳入，不可映射则记为「缺口/后续」）：语义默认值是否齐、`action beats` 是否齐、待确认候选是否清空、视频 prompt 是否可渲染、默认模型与 provider 是否可用等。
 - 候选资产正式状态：`pending`、`linked`、`ignored`。
 
 ### 3.2 前端
@@ -312,7 +312,7 @@
 - 本 spec 需求 **1–4、11** 与 **需求 9.2 波次 α** 覆盖 `open-source-borrowing.md`、`implementation-breakdown.md` 的生产台与任务闭环（含候选对比、回写诊断等原「P2」项）。
 - 需求 **5–7、12** 与 **需求 9.3 波次 β** 覆盖 `auto-publishing-platforms.md` 的发布与运营（全平台终态、表现数据、预警）。
 - **需求 14** 对齐 `moneyprinter-short-video-space.md` 的 MP-W1～MP-W7；**MP-W1 不在本 backlog 重复立项**；**MP-W7** 与 **需求 9.4 波次 γ** 对齐为必达后期能力。
-- 若某 Jellyfish 检查项在 Toonflow 无字段映射，应在实现或 Task Review 中**显式列出缺口**，不得静默省略。
+- 若某 Jellyfish 检查项在 Openflow 无字段映射，应在实现或 Task Review 中**显式列出缺口**，不得静默省略。
 
 ---
 
@@ -366,5 +366,5 @@
 
 ## 需求 15：开源借鉴边界（非功能代码，约束设计）
 
-- **不深借**：`MoneyPrinterTurbo` 的单体 MVC、以单视频任务为中心的状态、本地任务目录式输出；`Jellyfish` 的全栈照搬；脱离 Toonflow 项目/剧本/分镜模型的孤立 readiness。
-- **深借**：Jellyfish 的 preparation → candidate confirmation → ready for generation 路径、readiness 聚合、任务与业务对象回跳、生成结果回写镜头/媒体上下文；MoneyPrinterTurbo 的单入口流水线感与集中参数、成片装配优先路径、快速批量候选成片（在 Toonflow 内由现有生成与任务体系承载，Space 负责编排与可见性）。
+- **不深借**：`MoneyPrinterTurbo` 的单体 MVC、以单视频任务为中心的状态、本地任务目录式输出；`Jellyfish` 的全栈照搬；脱离 Openflow 项目/剧本/分镜模型的孤立 readiness。
+- **深借**：Jellyfish 的 preparation → candidate confirmation → ready for generation 路径、readiness 聚合、任务与业务对象回跳、生成结果回写镜头/媒体上下文；MoneyPrinterTurbo 的单入口流水线感与集中参数、成片装配优先路径、快速批量候选成片（在 Openflow 内由现有生成与任务体系承载，Space 负责编排与可见性）。

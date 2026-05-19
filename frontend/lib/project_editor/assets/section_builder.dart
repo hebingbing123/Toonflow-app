@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../rust_api.dart';
-import 'compatibility/panel.dart';
 import 'overview.dart';
 
 Widget buildProjectAssetsSection({
@@ -19,10 +18,6 @@ Widget buildProjectAssetsSection({
   required List<bool> assetsBusy,
   required Future<void> Function() reloadAssetsAndStats,
   required Future<void> Function() openWorkbench,
-  required Widget Function() buildImagesSection,
-  required List<Widget> Function() buildPrimaryActions,
-  required List<Widget> Function() buildRelationActions,
-  required List<Widget> Function() buildQueryActions,
 }) {
   final l10n = resolveAppLocalizationsForErrors(ctx);
   final visibleAssets = assetsRef[0]?.items ?? const <AssetRow>[];
@@ -79,24 +74,6 @@ Widget buildProjectAssetsSection({
             color: Theme.of(ctx).colorScheme.outline,
           ),
         ),
-      const SizedBox(height: 8),
-      ProjectAssetsCompatibilityPanel(
-        ctx: ctx,
-        setDialogState: setDialogState,
-        token: token,
-        project: project,
-        scriptList: scriptList,
-        assetsRef: assetsRef,
-        assetsFilterScriptNumericId: assetsFilterScriptNumericId,
-        assetsLoading: assetsLoading,
-        assetsScriptFilterLoading: assetsScriptFilterLoading,
-        assetsBusy: assetsBusy,
-        reloadAssetsAndStats: reloadAssetsAndStats,
-        buildImagesSection: buildImagesSection,
-        buildPrimaryActions: buildPrimaryActions,
-        buildRelationActions: buildRelationActions,
-        buildQueryActions: buildQueryActions,
-      ),
     ],
   );
 }

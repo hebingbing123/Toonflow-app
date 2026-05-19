@@ -16,7 +16,7 @@ Created a new module with two internal ops endpoints:
 - **Response**: Workspace billing data including:
   - `workspace_id`, `workspace_type`, `created_at`
   - Optional: `plan_tier`, `daily_job_quota`, `billing_provider`, `billing_customer_id`, `billing_currency`
-- **Authorization**: Requires `X-Toonflow-Internal-Token` header matching `TOONFLOW_INTERNAL_OPS_TOKEN` env var
+- **Authorization**: Requires `X-Openflow-Internal-Token` header matching `OPENFLOW_INTERNAL_OPS_TOKEN` env var
 
 #### Endpoint 2: `GET /api/v1/ops/billing/workspace-job-aggregates`
 - **Purpose**: Query job aggregates by workspace_id for billing reconciliation
@@ -32,8 +32,8 @@ Created a new module with two internal ops endpoints:
 
 Following the existing pattern from `backend/src/jobs/handlers/queue_stats.rs`:
 
-- **Environment Variable**: `TOONFLOW_INTERNAL_OPS_TOKEN` (non-empty string)
-- **Request Header**: `X-Toonflow-Internal-Token` must match the expected token
+- **Environment Variable**: `OPENFLOW_INTERNAL_OPS_TOKEN` (non-empty string)
+- **Request Header**: `X-Openflow-Internal-Token` must match the expected token
 - **Error Responses**:
   - 403 Forbidden: Token not configured
   - 401 Unauthorized: Token mismatch
@@ -105,7 +105,7 @@ cargo test --lib contract_smoke_tests::health_models_billing_vendors::billing::o
 
 ### Query Workspace Subscription
 ```bash
-curl -H "X-Toonflow-Internal-Token: your-secret-token" \
+curl -H "X-Openflow-Internal-Token: your-secret-token" \
   "http://localhost:3000/api/v1/ops/billing/workspace-subscription?workspace_id=550e8400-e29b-41d4-a716-446655440000"
 ```
 
@@ -127,7 +127,7 @@ curl -H "X-Toonflow-Internal-Token: your-secret-token" \
 
 ### Query Job Aggregates
 ```bash
-curl -H "X-Toonflow-Internal-Token: your-secret-token" \
+curl -H "X-Openflow-Internal-Token: your-secret-token" \
   "http://localhost:3000/api/v1/ops/billing/workspace-job-aggregates?workspace_id=550e8400-e29b-41d4-a716-446655440000"
 ```
 
@@ -169,6 +169,6 @@ curl -H "X-Toonflow-Internal-Token: your-secret-token" \
 ## Notes
 
 - The endpoints are designed to be internal-only and should not be exposed to regular users
-- The `TOONFLOW_INTERNAL_OPS_TOKEN` environment variable must be set in production
+- The `OPENFLOW_INTERNAL_OPS_TOKEN` environment variable must be set in production
 - The endpoints gracefully handle database unavailability (503 errors)
 - All tests are designed to work in environments without database configuration

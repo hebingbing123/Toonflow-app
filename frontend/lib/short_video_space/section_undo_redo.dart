@@ -553,12 +553,12 @@ extension _ShortVideoSpaceSectionUndoRedoExtension
 
     if (!mounted) return;
 
-    await showDialog<void>(
+    await showStudioDialog<void>(
       context: context,
       builder: (ctx) {
         final l10n = resolveAppLocalizationsForErrors(ctx);
         final summary = _operationHistory.getSummary(l10n);
-        return AlertDialog(
+        return StudioAlertDialog(
           title: Text(l10n.shortVideoOperationHistoryTitle),
           content: SizedBox(
             width: 600,

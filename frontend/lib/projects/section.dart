@@ -12,6 +12,7 @@ import 'workbenches/agent_memory.dart';
 import 'workbenches/art_styles_view.dart';
 import 'workbenches/creative_manuals.dart';
 import '../rust_api.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 part 'workbenches/art_styles.dart';
 part 'workbenches/art_styles_helpers.dart';
@@ -24,6 +25,8 @@ class ProjectsSection extends StatelessWidget {
     required this.controller,
     required this.onOpenProjectDetail,
     required this.onOpenTeamWorkspaces,
+    this.currentProjectNumericId,
+    this.onSelectProjectScope,
     this.onOpenProjectStudio,
     this.productPresentation = false,
     this.currentWorkspaceName,
@@ -34,6 +37,8 @@ class ProjectsSection extends StatelessWidget {
   final ProjectsController controller;
   final ValueChanged<ProjectRow> onOpenProjectDetail;
   final VoidCallback onOpenTeamWorkspaces;
+  final int? currentProjectNumericId;
+  final Future<void> Function(ProjectRow row)? onSelectProjectScope;
   /// Studio grid path: scope project + short-video space (no detail dialog).
   final ValueChanged<ProjectRow>? onOpenProjectStudio;
   /// Hides harness probes and manual load buttons in the product studio shell.
@@ -55,7 +60,7 @@ class ProjectsSection extends StatelessWidget {
       );
       return;
     }
-    await showDialog<void>(
+    await showStudioDialog<void>(
       context: context,
       builder: (dialogCtx) => _ArtStylesWorkbenchDialog(
         accessToken: token,
@@ -74,7 +79,7 @@ class ProjectsSection extends StatelessWidget {
       );
       return;
     }
-    await showDialog<void>(
+    await showStudioDialog<void>(
       context: context,
       builder: (dialogCtx) =>
           ProjectsCreativeManualsWorkbenchDialog(accessToken: token),
@@ -90,7 +95,7 @@ class ProjectsSection extends StatelessWidget {
       );
       return;
     }
-    await showDialog<void>(
+    await showStudioDialog<void>(
       context: context,
       builder: (dialogCtx) => ProjectsAgentMemoryWorkbenchDialog(
         accessToken: token,
@@ -116,6 +121,8 @@ class ProjectsSection extends StatelessWidget {
       return ProjectsStudioHome(
         controller: controller,
         accessToken: accessToken,
+        currentProjectNumericId: currentProjectNumericId,
+        onSelectProjectScope: onSelectProjectScope,
         onOpenProjectStudio: onOpenProjectStudio!,
         onCreateProject: controller.createProjectWithFields,
         currentWorkspaceName: currentWorkspaceName,
@@ -197,12 +204,6 @@ class ProjectsSection extends StatelessWidget {
               onOpenAgentMemoryWorkbench: () =>
                   _openAgentMemoryWorkbench(context),
               onCreateEmptyProject: () => _createEmptyProject(context),
-            ),
-            const SizedBox(height: 8),
-            ProjectsCompatibilityPanel(
-              outlineColor: outline,
-              loadingAgentMemory: controller.loadingAgentMemory,
-              onProbeAgentMemory: controller.probeAgentMemory,
             ),
           ],
           if (_showEnterpriseProjectEmptyState) ...[

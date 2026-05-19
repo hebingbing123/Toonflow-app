@@ -116,11 +116,6 @@ class _ProductLoginPageState extends State<ProductLoginPage>
     if (_mode == _AuthMode.signUp &&
         widget.authController.passwordController.text !=
             _confirmPasswordController.text) {
-      setState(() {
-        _localErrorMessage = AppLocalizations.of(
-          context,
-        )!.productLoginPasswordMismatch;
-      });
       return;
     }
     if (_mode == _AuthMode.signIn) {
@@ -200,8 +195,6 @@ class _ProductLoginPageState extends State<ProductLoginPage>
                                   l10n: l10n,
                                   authController: widget.authController,
                                   mode: _mode,
-                                  errorMessage:
-                                      _localErrorMessage ?? widget.errorMessage,
                                   confirmPasswordController:
                                       _confirmPasswordController,
                                   onModeChanged: _setMode,
@@ -247,8 +240,6 @@ class _ProductLoginPageState extends State<ProductLoginPage>
                           l10n: l10n,
                           authController: widget.authController,
                           mode: _mode,
-                          errorMessage:
-                              _localErrorMessage ?? widget.errorMessage,
                           confirmPasswordController: _confirmPasswordController,
                           onModeChanged: _setMode,
                           onSubmit: _handleSubmit,
@@ -302,10 +293,11 @@ class _HeroStage extends StatelessWidget {
           ),
           child: Text(
             l10n.productShellLoginHeroTitle,
-            maxLines: 3,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: theme.textTheme.headlineSmall?.copyWith(
-              fontSize: displaySize,
-              height: 1.18,
+              fontSize: compact ? math.min(typography.paneTitle + 1, 24).toDouble() : math.min(typography.display, 28).toDouble(),
+              height: 1.08,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -888,7 +880,7 @@ class _AuthPanel extends StatelessWidget {
     required this.l10n,
     required this.authController,
     required this.mode,
-    required this.errorMessage,
+    this.errorMessage,
     required this.confirmPasswordController,
     required this.onModeChanged,
     required this.onSubmit,
@@ -982,26 +974,6 @@ class _AuthPanel extends StatelessWidget {
             ),
             const SizedBox(height: 18),
             _AuthModeToggle(mode: mode, onChanged: onModeChanged),
-            const SizedBox(height: 22),
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 220),
-              switchInCurve: Curves.easeOutCubic,
-              switchOutCurve: Curves.easeInCubic,
-              child: Column(
-                key: ValueKey<_AuthMode>(mode),
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(title, style: studioPageTitleStyle(context)),
-                  const SizedBox(height: 8),
-                  Text(
-                    mode == _AuthMode.signIn
-                        ? l10n.productLoginSignInSubtitle
-                        : l10n.productLoginSignUpSubtitle,
-                    style: studioSectionIntroStyle(context),
-                  ),
-                ],
-              ),
-            ),
             const SizedBox(height: 22),
             if (!kSupabaseConfigured)
               Text(
@@ -1133,35 +1105,6 @@ class _AuthPanel extends StatelessWidget {
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
-              if (kDebugMode) ...<Widget>[
-                const SizedBox(height: 18),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: tokens.bgInset,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: tokens.borderSubtle),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        l10n.productLoginLocalDevAccount,
-                        style: theme.textTheme.labelLarge?.copyWith(
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        l10n.productShellDevCredentialsHint,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
             ],
           ],
         ),

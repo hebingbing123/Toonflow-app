@@ -2,9 +2,9 @@
 
 ## 概述 / Overview
 
-本文档说明如何在 Toonflow 后端为错误消息提供中英文支持。
+本文档说明如何在 Openflow 后端为错误消息提供中英文支持。
 
-This document explains how to provide bilingual (Chinese/English) error messages in the Toonflow backend.
+This document explains how to provide bilingual (Chinese/English) error messages in the Openflow backend.
 
 ## 当前状态 / Current Status
 

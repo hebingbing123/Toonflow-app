@@ -76,7 +76,7 @@ pub(crate) async fn run_vendor_model_test(
                 &cfg,
                 &state.http_client,
                 &resolved_model,
-                "Toonflow vendor smoke test image: a simple gray card with the word OK centered.",
+                "Openflow vendor smoke test image: a simple gray card with the word OK centered.",
                 size,
             )
             .await
@@ -111,7 +111,7 @@ pub(crate) async fn run_vendor_model_test(
                     &VideoGenerationRequest {
                         provider,
                         model: model_name.to_string(),
-                        prompt: "Toonflow vendor smoke test video: a minimal monochrome title card with the word OK.".to_string(),
+                        prompt: "Openflow vendor smoke test video: a minimal monochrome title card with the word OK.".to_string(),
                         negative_prompt: None,
                         duration: 5,
                         resolution: "720p".to_string(),

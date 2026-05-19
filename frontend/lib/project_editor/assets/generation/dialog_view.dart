@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../../design_system/components/studio_model_cost_controls.dart';
 import '../../../../rust_api.dart';
+import '../asset_type_labels.dart';
 import 'support.dart';
 import 'dialog_view_contract.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 export 'dialog_view_contract.dart';
 
@@ -25,7 +27,7 @@ class AssetGenerationWorkbenchDialogView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    return AlertDialog(
+    return StudioAlertDialog(
       title: Text(l10n.projectEditorAssetGenerationTitle),
       content: SizedBox(
         width: 860,

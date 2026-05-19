@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../l10n/app_localizations.dart';
 import '../../local_prefs/risky_operation_confirm_prefs.dart';
 import '../../rust_api.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 /// Confirmation dialog utilities for short video editing operations
 ///
@@ -54,7 +55,7 @@ Future<bool?> showDeleteVersionConfirmation(
 
   if (!context.mounted) return null;
 
-  final result = await showDialog<ConfirmationResult>(
+  final result = await showStudioDialog<ConfirmationResult>(
     context: context,
     builder: (ctx) => _DeleteVersionConfirmationDialog(
       versionName: versionName,
@@ -98,7 +99,7 @@ Future<bool?> showBatchDisableConfirmation(
 
   if (!context.mounted) return null;
 
-  final result = await showDialog<ConfirmationResult>(
+  final result = await showStudioDialog<ConfirmationResult>(
     context: context,
     builder: (ctx) => _BatchDisableConfirmationDialog(
       shotCount: shotCount,
@@ -142,7 +143,7 @@ Future<bool?> showRestoreDraftConfirmation(
 
   if (!context.mounted) return null;
 
-  final result = await showDialog<ConfirmationResult>(
+  final result = await showStudioDialog<ConfirmationResult>(
     context: context,
     builder: (ctx) => _RestoreDraftConfirmationDialog(
       draftName: draftName,
@@ -185,7 +186,7 @@ Future<bool?> showCancelExportConfirmation(
 
   if (!context.mounted) return null;
 
-  final result = await showDialog<ConfirmationResult>(
+  final result = await showStudioDialog<ConfirmationResult>(
     context: context,
     builder: (ctx) =>
         _CancelExportConfirmationDialog(showDontShowAgain: showDontShowAgain),
@@ -227,7 +228,7 @@ Future<bool?> showBatchArchivePublishConfirmation(
 
   if (!context.mounted) return null;
 
-  final result = await showDialog<ConfirmationResult>(
+  final result = await showStudioDialog<ConfirmationResult>(
     context: context,
     builder: (ctx) => _BatchArchivePublishConfirmationDialog(
       draftCount: draftCount,
@@ -287,7 +288,7 @@ class _DeleteVersionConfirmationDialogState
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    return AlertDialog(
+    return StudioAlertDialog(
       title: Text(l10n.shortVideoSpaceDialogConfirmDeleteVersionTitle),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -354,7 +355,7 @@ class _BatchDisableConfirmationDialogState
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    return AlertDialog(
+    return StudioAlertDialog(
       title: Text(l10n.shortVideoSpaceDialogConfirmBatchDisableTitle),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -418,7 +419,7 @@ class _RestoreDraftConfirmationDialogState
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    return AlertDialog(
+    return StudioAlertDialog(
       title: Text(l10n.shortVideoSpaceDialogConfirmRestoreDraftTitle),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -478,7 +479,7 @@ class _CancelExportConfirmationDialogState
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    return AlertDialog(
+    return StudioAlertDialog(
       title: Text(l10n.shortVideoSpaceDialogConfirmCancelExportTitle),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -540,7 +541,7 @@ class _BatchArchivePublishConfirmationDialogState
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    return AlertDialog(
+    return StudioAlertDialog(
       title: Text(l10n.shortVideoSpaceDialogConfirmBatchArchiveTitle),
       content: Column(
         mainAxisSize: MainAxisSize.min,

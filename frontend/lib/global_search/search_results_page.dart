@@ -12,6 +12,7 @@ import '../rust_api/search/api.dart';
 import '../rust_api/search/saved_views.dart';
 import 'search_result_card.dart';
 import 'advanced_filter_panel.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 /// Search results page displaying grouped search results by type.
 ///
@@ -443,9 +444,9 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
     final titleController = TextEditingController(
       text: _buildDefaultViewTitle(),
     );
-    final approved = await showDialog<bool>(
+    final approved = await showStudioDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => StudioAlertDialog(
         title: Text(l10n.globalSearchSaveViewTitle),
         content: TextField(
           controller: titleController,

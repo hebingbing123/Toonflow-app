@@ -1,21 +1,21 @@
 //! Optional **S3-compatible** object storage for workspace shared audit export artifacts.
 //!
-//! When **`TOONFLOW_WORKSPACE_SHARED_AUDIT_EXPORT_S3_BUCKET`** is set, async exports use the shared
-//! [`crate::settings::export_s3`] client (see **`TOONFLOW_EXPORT_S3_ENDPOINT`** for a single MinIO URL).
+//! When **`OPENFLOW_WORKSPACE_SHARED_AUDIT_EXPORT_S3_BUCKET`** is set, async exports use the shared
+//! [`crate::settings::export_s3`] client (see **`OPENFLOW_EXPORT_S3_ENDPOINT`** for a single MinIO URL).
 
 use uuid::Uuid;
 
 use crate::settings::export_s3;
 
 fn s3_bucket_name() -> Option<String> {
-    std::env::var("TOONFLOW_WORKSPACE_SHARED_AUDIT_EXPORT_S3_BUCKET")
+    std::env::var("OPENFLOW_WORKSPACE_SHARED_AUDIT_EXPORT_S3_BUCKET")
         .ok()
         .map(|s| s.trim().to_string())
         .filter(|s| !s.is_empty())
 }
 
 fn s3_object_key_prefix() -> String {
-    std::env::var("TOONFLOW_WORKSPACE_SHARED_AUDIT_EXPORT_S3_PREFIX")
+    std::env::var("OPENFLOW_WORKSPACE_SHARED_AUDIT_EXPORT_S3_PREFIX")
         .ok()
         .map(|s| s.trim().trim_matches('/').to_string())
         .filter(|s| !s.is_empty())

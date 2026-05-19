@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../rust_api.dart';
 import '../../../script_editor/support.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 class ProjectScriptsWorkbenchDialogViewModel {
   const ProjectScriptsWorkbenchDialogViewModel({
@@ -72,7 +73,7 @@ class ProjectScriptsWorkbenchDialogView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    return AlertDialog(
+    return StudioAlertDialog(
       title: Text(l10n.projectEditorScriptsWorkbenchDialogTitle),
       content: SizedBox(
         width: 820,

@@ -136,12 +136,12 @@ fi
 if [ "$MODE" = "full" ] || [ "$OPENAPI_CHANGED" = true ]; then
   echo "==> merged OpenAPI export (YAML parse)"
   # BSD mktemp requires XXXXXX at the end of the template (no ".yaml" suffix).
-  OPENAPI_SPEC_FILE="$(mktemp "${TMPDIR:-/tmp}/toonflow-openapi.XXXXXX")"
+  OPENAPI_SPEC_FILE="$(mktemp "${TMPDIR:-/tmp}/openflow-openapi.XXXXXX")"
   step_start
   (cd backend && cargo run --quiet --bin export-openapi) > "$OPENAPI_SPEC_FILE"
   ruby -ryaml -e "YAML.load(File.read('$OPENAPI_SPEC_FILE'))"
   step_finish "OpenAPI export + YAML parse"
-  export TOONFLOW_OPENAPI_SPEC="$OPENAPI_SPEC_FILE"
+  export OPENFLOW_OPENAPI_SPEC="$OPENAPI_SPEC_FILE"
 
   echo "==> OpenAPI drift detection"
   step_start
@@ -174,16 +174,16 @@ if [ "$MODE" = "full" ] || [ "$BACKEND_CHANGED" = true ]; then
     (
       cd backend
       # Unit tests (library crate).
-      cargo test -p toonflow-server --lib -j 1 -- --test-threads=1
+      cargo test -p openflow-server --lib -j 1 -- --test-threads=1
       # Each integration test binary runs in its own process; running them one-by-one
       # avoids sqlx::test racing on the shared template DB registry (`databases_pkey`).
       shopt -s nullglob
       for test_rs in tests/*.rs; do
         name=$(basename "$test_rs" .rs)
         echo "==> backend integration test crate: $name"
-        cargo test -p toonflow-server --test "$name" -j 1 -- --test-threads=1
+        cargo test -p openflow-server --test "$name" -j 1 -- --test-threads=1
       done
-      cargo test -p toonflow-server --doc -j 1 -- --test-threads=1
+      cargo test -p openflow-server --doc -j 1 -- --test-threads=1
     )
     step_finish "backend test"
   else

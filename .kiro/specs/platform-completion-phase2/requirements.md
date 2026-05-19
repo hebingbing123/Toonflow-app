@@ -2,7 +2,7 @@
 
 ## Introduction
 
-本规格定义 Toonflow 平台 Phase 2 完成工作的需求，目标是完成平台剩余关键能力，包括 Workspace 功能完善、HTTP API 收敛、以及平台能力补遗（全局搜索服务端保存视图、出站 Webhook、内容合规分阶段通知、i18n 收口、帮助文档完善）。
+本规格定义 Openflow 平台 Phase 2 完成工作的需求，目标是完成平台剩余关键能力，包括 Workspace 功能完善、HTTP API 收敛、以及平台能力补遗（全局搜索服务端保存视图、出站 Webhook、内容合规分阶段通知、i18n 收口、帮助文档完善）。
 
 本规格与 [`workspace-team-full-plan.md`](../../../docs/plans/workspace-team-full-plan.md)、[`platform-capabilities-backlog.md`](../../../docs/plans/platform-capabilities-backlog.md)、[`full-stack-delivery-covenant.md`](../../../docs/plans/full-stack-delivery-covenant.md) 保持一致，遵循全栈交付约定（backend + frontend + OpenAPI 同一里程碑），所有变更必须通过 `yarn refactor:check`。
 
@@ -85,8 +85,8 @@
 4. WHEN Webhook 投递失败超过重试次数时，THE Backend SHALL 将事件记录到死信队列
 5. WHEN 用户查看 Webhook 投递历史时，THE Backend SHALL 返回最近投递记录（成功/失败状态、响应码、重试次数）
 6. THE Backend SHALL 为每个 Webhook 请求生成 HMAC 签名（使用用户配置的 secret）
-7. THE Backend SHALL 在 Webhook 请求头中包含 `X-Toonflow-Signature` 签名
-8. THE Backend SHALL 在 Webhook 请求头中包含 `X-Toonflow-Event-Type` 事件类型
+7. THE Backend SHALL 在 Webhook 请求头中包含 `X-Openflow-Signature` 签名
+8. THE Backend SHALL 在 Webhook 请求头中包含 `X-Openflow-Event-Type` 事件类型
 9. THE Backend SHALL 支持以下事件类型：`job.completed`、`job.failed`、`project.created`、`workspace.member.added`
 10. THE Flutter_Client SHALL 提供 Webhook 配置界面（URL、secret、事件类型选择）
 11. THE Flutter_Client SHALL 提供 Webhook 测试按钮（发送测试事件）
@@ -137,7 +137,7 @@
 2. WHEN 用户搜索帮助内容时，THE Flutter_Client SHALL 按标题、关键词、URL 匹配并高亮结果
 3. WHEN 用户点击帮助链接时，THE Flutter_Client SHALL 在应用内 WebView 或外部浏览器打开文档
 4. THE Backend SHALL 提供 `GET /api/v1/settings/help-links` 端点返回帮助文档配置
-5. THE Backend SHALL 支持通过环境变量 `TOONFLOW_HELP_LINKS_JSON` 配置帮助链接
+5. THE Backend SHALL 支持通过环境变量 `OPENFLOW_HELP_LINKS_JSON` 配置帮助链接
 6. THE Flutter_Client SHALL 支持复制单个链接或"标题+链接"组合
 7. THE Flutter_Client SHALL 在空态时展示"暂无帮助文档"提示
 8. THE Flutter_Client SHALL 展示每个分类的文档数量摘要
@@ -158,7 +158,7 @@
 6. THE System SHALL 确保所有 API 变更不破坏 personal workspace 和单用户路径
 7. THE System SHALL 确保所有数据库迁移向后兼容
 8. WHEN 功能分多个 PR 实现时，THE System SHALL 确保最后一笔 PR 合并时已满足全栈交付要求
-9. WHEN 功能延期超过 1 个发布周期时，THE System SHALL 在 `toonflow-platform-progress.md` 标记为 debt 并记录目标日期
+9. WHEN 功能延期超过 1 个发布周期时，THE System SHALL 在 `openflow-platform-progress.md` 标记为 debt 并记录目标日期
 10. FOR ALL 平台级功能，THE System SHALL 确保可发现性（设置可配）、可观测（错误码可读）、可运营（管理视图）
 
 ### Requirement 9: Personal Workspace 和单用户路径保护
@@ -227,7 +227,7 @@
 7. THE System SHALL 确保所有 API 清理通过 `yarn refactor:check`
 8. THE System SHALL 确保所有 API 清理不破坏现有集成测试
 9. WHEN API 清理涉及数据库表时，THE System SHALL 评估是否需要数据迁移
-10. FOR ALL API 清理，THE System SHALL 在 `toonflow-platform-progress.md` 中更新进度
+10. FOR ALL API 清理，THE System SHALL 在 `openflow-platform-progress.md` 中更新进度
 
 ### Requirement 13: Workspace 项目路径成员权限统一
 

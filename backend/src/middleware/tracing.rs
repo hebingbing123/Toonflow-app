@@ -42,7 +42,7 @@ pub async fn trace_request(req: Request, next: Next) -> Response {
 
         // 记录请求完成
         tracing::info!(
-            target: "toonflow.api.request",
+            target: "openflow.api.request",
             method = %method,
             path = %path,
             status = %status.as_u16(),

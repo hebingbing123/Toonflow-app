@@ -169,7 +169,7 @@ cargo test callback_validation_tests
 Expired nonces should be cleaned up periodically:
 
 ```rust
-use toonflow_server::publish::cleanup_expired_nonces;
+use openflow_server::publish::cleanup_expired_nonces;
 
 // Run hourly
 cleanup_expired_nonces(&pool).await?;

@@ -56,13 +56,13 @@ pub(in crate::production) async fn post_production_voiceover_preview(
     let uid = require_user_uuid(&state, &headers)?;
     let _scope = require_project_write_scope(&state, uid, body.project_id).await?;
     let pool = state.require_pool()?;
-    let voice_profile: Option<String> =
-        sqlx::query_scalar("SELECT voice_profile FROM app_project WHERE id = $1")
+    let (voice_model, voice_profile): (Option<String>, Option<String>) =
+        sqlx::query_as("SELECT voice_model, voice_profile FROM app_project WHERE id = $1")
             .bind(body.project_id)
             .fetch_optional(pool)
             .await
             .map_err(|e| ApiError::DatabaseError(e.to_string()))?
-            .flatten();
+            .unwrap_or((None, None));
     let character_voice = if let Some(character_id) = body.character_id {
         sqlx::query_scalar(
             "SELECT voice_config FROM app_project_character WHERE id = $1 AND project_id = $2",
@@ -75,7 +75,7 @@ pub(in crate::production) async fn post_production_voiceover_preview(
     } else {
         None
     };
-    let openai_cfg = load_tts_llm_config_for_user(&state, pool, uid)
+    let openai_cfg = load_tts_llm_config_for_user(&state, pool, uid, voice_model.as_deref())
         .await
         .map_err(|err| match err {
             crate::jobs::worker::JobRunError::Failed(message) => ApiError::BadRequest(message),

@@ -14,7 +14,6 @@ ProjectScriptsSectionViewModel buildModel({
   ScriptBatchWorkbenchDiagnosis? overviewDiagnosis,
   String overviewActionLabel = '打开工作台读取上下文',
   VoidCallback? overviewAction,
-  List<Widget>? probeActions,
 }) {
   return ProjectScriptsSectionViewModel(
     saving: saving,
@@ -35,11 +34,6 @@ ProjectScriptsSectionViewModel buildModel({
         ),
     overviewActionLabel: overviewActionLabel,
     overviewAction: overviewAction,
-    probeActions:
-        probeActions ??
-        <Widget>[
-          const TextButton(onPressed: null, child: Text('get-script-api')),
-        ],
   );
 }
 
@@ -111,7 +105,7 @@ void main() {
     expect(find.text('已轮询 2 条剧本提取状态：#11:0 · #12:1'), findsOneWidget);
     expect(find.text('#11 第一幕'), findsOneWidget);
     expect(find.text('#12 第二幕'), findsOneWidget);
-    expect(find.text('兼容性检查'), findsOneWidget);
+    expect(find.text('兼容性检查'), findsNothing);
   });
 
   testWidgets('project scripts section view disables actions while busy', (

@@ -1,3 +1,4 @@
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 part of '../../../../home_page.dart';
 
 extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
@@ -331,7 +332,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: DropdownButtonFormField<String>(
+              child: StudioDropdownButtonFormField<String>(
                 initialValue: importExecutionSideCtrl.text.isEmpty
                     ? 'client'
                     : importExecutionSideCtrl.text,
@@ -359,7 +360,7 @@ extension _HomePageProjectEditorNovelWorkbenchImportSection on _HomePageState {
             ),
             const SizedBox(width: 8),
             Expanded(
-              child: DropdownButtonFormField<String>(
+              child: StudioDropdownButtonFormField<String>(
                 initialValue: importIntakeStatusCtrl.text.isEmpty
                     ? 'pending_review'
                     : importIntakeStatusCtrl.text,

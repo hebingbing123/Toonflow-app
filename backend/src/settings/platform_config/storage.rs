@@ -10,7 +10,7 @@ use super::types::{
 };
 
 const WORKSPACE_PLATFORM_CONFIG_KEY: &str = "platform_config";
-const PLAN_OVERRIDES_ENV: &str = "TOONFLOW_PLATFORM_CONFIG_PLAN_OVERRIDES_JSON";
+const PLAN_OVERRIDES_ENV: &str = "OPENFLOW_PLATFORM_CONFIG_PLAN_OVERRIDES_JSON";
 
 #[derive(Debug, Clone)]
 pub(super) struct ResolvedWorkspacePlatformConfig {

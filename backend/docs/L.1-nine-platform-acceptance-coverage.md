@@ -10,7 +10,7 @@ This document describes the comprehensive acceptance test suite for the nine-pla
 
 ```bash
 cd backend
-cargo test --package toonflow-server --lib publish::nine_platform_acceptance_tests -- --nocapture
+cargo test --package openflow-server --lib publish::nine_platform_acceptance_tests -- --nocapture
 ```
 
 ## Platform Coverage

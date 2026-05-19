@@ -4,6 +4,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../rust_api.dart';
 import 'import_parser.dart';
 import 'support.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 part 'workbench_launcher_controllers.dart';
 part 'workbench_launcher_state.dart';
@@ -162,7 +163,7 @@ Future<void> openNovelWorkbenchDialog({
   }
 
   try {
-    await showDialog<void>(
+    await showStudioDialog<void>(
       context: ctx,
       builder: (dialogCtx) {
         return StatefulBuilder(
@@ -179,7 +180,7 @@ Future<void> openNovelWorkbenchDialog({
             final dialogWidth = viewportWidth.isFinite
                 ? viewportWidth.clamp(320.0, 760.0)
                 : 760.0;
-            return AlertDialog(
+            return StudioAlertDialog(
               title: Text(l10n.projectEditorNovelsChapterWorkbenchTitle),
               content: SizedBox(
                 width: dialogWidth,

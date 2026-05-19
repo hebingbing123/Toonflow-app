@@ -24,18 +24,18 @@ use crate::state::AppState;
 use super::types::{AccountDeleteResponse, AccountExportJobRecord, AccountExportsResponse};
 
 pub(crate) const JOB_KIND_SETTINGS_ACCOUNT_EXPORT: &str = "settings.account.export";
-const ACCOUNT_EXPORT_ENV: &str = "TOONFLOW_LOCAL_ACCOUNT_EXPORT_DIR";
+const ACCOUNT_EXPORT_ENV: &str = "OPENFLOW_LOCAL_ACCOUNT_EXPORT_DIR";
 const ACCOUNT_EXPORT_LIMIT: i64 = 20;
 
 fn account_export_s3_bucket() -> Option<String> {
-    std::env::var("TOONFLOW_ACCOUNT_EXPORT_S3_BUCKET")
+    std::env::var("OPENFLOW_ACCOUNT_EXPORT_S3_BUCKET")
         .ok()
         .map(|s| s.trim().to_string())
         .filter(|s| !s.is_empty())
 }
 
 fn account_export_s3_prefix() -> String {
-    std::env::var("TOONFLOW_ACCOUNT_EXPORT_S3_PREFIX")
+    std::env::var("OPENFLOW_ACCOUNT_EXPORT_S3_PREFIX")
         .ok()
         .map(|s| s.trim().trim_matches('/').to_string())
         .filter(|s| !s.is_empty())
@@ -308,7 +308,7 @@ pub(crate) async fn build_account_export_artifact(
 
     let result_json = if use_s3_for_account_export_artifacts() {
         let bucket = account_export_s3_bucket().ok_or_else(|| {
-            JobRunError::Failed("TOONFLOW_ACCOUNT_EXPORT_S3_BUCKET not set".into())
+            JobRunError::Failed("OPENFLOW_ACCOUNT_EXPORT_S3_BUCKET not set".into())
         })?;
         let key = format!(
             "{}/{}/{}",
@@ -646,28 +646,28 @@ async fn collect_local_artifact_inventory(user_id: Uuid) -> Vec<Value> {
         ("account_export", Some(account_export_root_dir())),
         (
             "asset_image",
-            std::env::var("TOONFLOW_LOCAL_ASSET_IMAGE_DIR")
+            std::env::var("OPENFLOW_LOCAL_ASSET_IMAGE_DIR")
                 .ok()
                 .filter(|value| !value.trim().is_empty())
                 .map(PathBuf::from),
         ),
         (
             "art_style_cover",
-            std::env::var("TOONFLOW_LOCAL_ART_STYLE_COVER_DIR")
+            std::env::var("OPENFLOW_LOCAL_ART_STYLE_COVER_DIR")
                 .ok()
                 .filter(|value| !value.trim().is_empty())
                 .map(PathBuf::from),
         ),
         (
             "video_export",
-            std::env::var("TOONFLOW_LOCAL_VIDEO_EXPORT_DIR")
+            std::env::var("OPENFLOW_LOCAL_VIDEO_EXPORT_DIR")
                 .ok()
                 .filter(|value| !value.trim().is_empty())
                 .map(PathBuf::from),
         ),
         (
             "voiceover_audio",
-            std::env::var("TOONFLOW_LOCAL_VOICEOVER_AUDIO_DIR")
+            std::env::var("OPENFLOW_LOCAL_VOICEOVER_AUDIO_DIR")
                 .ok()
                 .filter(|value| !value.trim().is_empty())
                 .map(PathBuf::from),
@@ -732,7 +732,7 @@ fn build_account_export_zip(
     write_export_entry(
         &mut archive,
         "README.txt",
-        b"Toonflow account export. JSON datasets are grouped by domain; vendor credentials are metadata-only and do not include decrypted secrets.\n",
+        b"Openflow account export. JSON datasets are grouped by domain; vendor credentials are metadata-only and do not include decrypted secrets.\n",
         options,
     )?;
     for (name, value) in datasets {

@@ -23,7 +23,7 @@ pub(crate) struct PingResponse {
 pub(crate) struct VersionResponse {
     pub service: &'static str,
     pub version: &'static str,
-    /// Present when the binary was built with env **`TOONFLOW_GIT_SHA`** set (compile-time `option_env!`).
+    /// Present when the binary was built with env **`OPENFLOW_GIT_SHA`** set (compile-time `option_env!`).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub git_sha: Option<&'static str>,
 }

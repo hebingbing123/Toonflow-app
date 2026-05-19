@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 
 import '../../../design_system/tokens.dart';
 import '../../../rust_api.dart';
@@ -181,13 +182,11 @@ class ScriptWorkspaceControlsPanel extends StatelessWidget {
             ),
             SizedBox(
               width: 220,
-              child: DropdownButtonFormField<String>(
+              child: StudioDropdownButtonFormField<String>(
                 key: ValueKey<String?>(
                   'script-domain-tool-${selectedScriptDomainTool ?? ''}',
                 ),
                 isExpanded: true,
-                style: fieldStyle,
-                dropdownColor: tokens.bgElevated,
                 initialValue: selectedScriptDomainTool,
                 items: scriptDomainToolPresets
                     .map(
@@ -235,10 +234,8 @@ class ScriptWorkspaceControlsPanel extends StatelessWidget {
             ),
             SizedBox(
               width: 300,
-              child: DropdownButtonFormField<String>(
+              child: StudioDropdownButtonFormField<String>(
                 isExpanded: true,
-                style: fieldStyle,
-                dropdownColor: tokens.bgElevated,
                 initialValue: selectedScriptSubAgentTool,
                 items: scriptSubAgentPresets
                     .map(

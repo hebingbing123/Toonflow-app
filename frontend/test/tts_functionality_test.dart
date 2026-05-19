@@ -1,8 +1,11 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/short_video_space/section.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 Widget _materialAppZh({required Widget home}) => MaterialApp(
   localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -135,7 +138,7 @@ void main() {
               builder: (context) {
                 return FilledButton(
                   onPressed: () async {
-                    result = await showDialog<VoiceoverSettings>(
+                    result = await showStudioDialog<VoiceoverSettings>(
                       context: context,
                       builder: (_) => const VoiceoverSettingsDialog(
                         initialSettings: VoiceoverSettings(),
@@ -186,7 +189,7 @@ void main() {
               builder: (context) {
                 return FilledButton(
                   onPressed: () async {
-                    result = await showDialog<VoiceoverSettings>(
+                    result = await showStudioDialog<VoiceoverSettings>(
                       context: context,
                       builder: (_) => const VoiceoverSettingsDialog(),
                     );
@@ -205,6 +208,54 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(result, isNull);
+    });
+
+    testWidgets('runs preview with current settings before save', (tester) async {
+      VoiceoverSettings? previewed;
+      Uint8List? playedBytes;
+
+      await tester.pumpWidget(
+        _materialAppZh(
+          home: const Scaffold(
+            body: SizedBox.shrink(),
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(
+        _materialAppZh(
+          home: Scaffold(
+            body: VoiceoverSettingsDialog(
+              initialSettings: const VoiceoverSettings(
+                provider: 'openai',
+                voiceId: 'nova',
+                emotion: 'happy',
+                speed: 1.2,
+              ),
+              onPreviewRequested: (settings) async {
+                previewed = settings;
+                return Uint8List.fromList(<int>[7, 8, 9]);
+              },
+              onPreviewAudioReady: (bytes) async {
+                playedBytes = bytes;
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('试听'));
+      await tester.tap(find.text('试听'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(previewed, isNotNull);
+      expect(previewed!.voiceId, 'nova');
+      expect(previewed!.emotion, 'happy');
+      expect(previewed!.speed, 1.2);
+      expect(playedBytes, isNotNull);
+      expect(find.textContaining('正在播放'), findsOneWidget);
     });
   });
 

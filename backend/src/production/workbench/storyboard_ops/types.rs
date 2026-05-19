@@ -173,6 +173,26 @@ pub(in crate::production) struct BatchGenerateImageResponse {
     pub(super) total: usize,
 }
 
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub(in crate::production) struct GridGenerateAndAssignBody {
+    #[serde(default)]
+    pub(super) project_id: Option<i32>,
+    #[serde(default)]
+    pub(super) project_uuid: Option<Uuid>,
+    pub(super) script_id: i32,
+    pub(super) rows: u32,
+    pub(super) cols: u32,
+    #[serde(default)]
+    pub(super) storyboard_ids: Vec<i32>,
+    #[serde(default)]
+    pub(super) base_prompt: Option<String>,
+    #[serde(default)]
+    pub(super) model: Option<String>,
+    #[serde(default)]
+    pub(super) resolution: Option<String>,
+}
+
 #[cfg(test)]
 mod tests {
     use super::{

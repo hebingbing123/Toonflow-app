@@ -1,0 +1,53 @@
+name: UI E2E (full stack)
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_mode:
+        description: "smoke or gallery"
+        required: true
+        default: smoke
+        type: choice
+        options:
+          - smoke
+          - gallery
+
+concurrency:
+  group: ui-e2e-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ui-e2e-macos:
+    name: UI E2E (macOS + Supabase + backend)
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: backend
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Enable macOS desktop
+        run: flutter config --enable-macos-desktop
+
+      - name: Run full-stack UI E2E
+        run: |
+          set -euo pipefail
+          MODE="${{ github.event.inputs.test_mode }}"
+          FLAG=""
+          if [[ "$MODE" == "gallery" ]]; then
+            FLAG="--gallery"
+          fi
+          chmod +x scripts/run-ui-e2e.sh scripts/run-ui-e2e-local.sh
+          bash scripts/run-ui-e2e.sh $FLAG

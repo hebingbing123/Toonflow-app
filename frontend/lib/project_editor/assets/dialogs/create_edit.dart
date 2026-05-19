@@ -1,3 +1,4 @@
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 part of '../../../../home_page.dart';
 
 extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
@@ -33,11 +34,11 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
     final typeCtrl = TextEditingController(text: 'role');
     final descriptionCtrl = TextEditingController();
     try {
-      final confirmed = await showDialog<bool>(
+      final confirmed = await showStudioDialog<bool>(
         context: ctx,
         builder: (dialogCtx) {
           final dlgL10n = resolveAppLocalizationsForErrors(dialogCtx);
-          return AlertDialog(
+          return StudioAlertDialog(
             title: Text(dlgL10n.projectEditorAssetCrudCreateTitle),
             content: SizedBox(
               width: 520,
@@ -155,13 +156,13 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
       text: list.first.description ?? '',
     );
     try {
-      final confirmed = await showDialog<bool>(
+      final confirmed = await showStudioDialog<bool>(
         context: ctx,
         builder: (dialogCtx) {
           final dlgL10n = resolveAppLocalizationsForErrors(dialogCtx);
           return StatefulBuilder(
             builder: (dialogCtx, setState) {
-              return AlertDialog(
+              return StudioAlertDialog(
                 title: Text(dlgL10n.projectEditorAssetCrudEditTitle),
                 content: SizedBox(
                   width: 520,
@@ -169,7 +170,7 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      DropdownButtonFormField<int>(
+                      StudioDropdownButtonFormField<int>(
                         initialValue: selectedAssetNumericId,
                         decoration: InputDecoration(
                           labelText:
@@ -348,7 +349,7 @@ extension _HomePageProjectEditorAssetsCreateEditDialogs on _HomePageState {
           selectedAssetNumericId = visibleAssets.first.numericId;
         }
         final decision =
-            await showDialog<ProjectAssetCandidateStatusDialogResult>(
+            await showStudioDialog<ProjectAssetCandidateStatusDialogResult>(
               context: ctx,
               builder: (dialogCtx) => ProjectAssetCandidateStatusDialog(
                 assets: list,

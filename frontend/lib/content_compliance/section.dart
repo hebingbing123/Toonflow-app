@@ -7,6 +7,7 @@ import '../l10n/app_localizations.dart';
 import '../l10n/studio_code_labels.dart';
 import '../rust_api.dart';
 import 'controller.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 class ContentComplianceSection extends StatefulWidget {
   const ContentComplianceSection({
@@ -871,9 +872,9 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
       'dismiss' => l10n.contentComplianceBulkDismiss,
       _ => l10n.contentComplianceBulkGeneric,
     };
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showStudioDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => StudioAlertDialog(
         title: Text(verb),
         content: Text(
           l10n.contentComplianceBulkConfirmBody(
@@ -1016,9 +1017,9 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
       );
       return;
     }
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showStudioDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => StudioAlertDialog(
         title: Text(l10n.contentComplianceReassignTitle),
         content: Text(
           l10n.contentComplianceReassignBody(
@@ -1077,9 +1078,9 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
       );
       return;
     }
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showStudioDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => StudioAlertDialog(
         title: Text(
           dryRun
               ? l10n.contentComplianceAutoRebalanceTitlePreview
@@ -1152,11 +1153,11 @@ class _ContentComplianceSectionState extends State<ContentComplianceSection> {
     if (!mounted) {
       return;
     }
-    await showDialog<void>(
+    await showStudioDialog<void>(
       context: context,
       builder: (dialogContext) {
         final theme = Theme.of(dialogContext);
-        return AlertDialog(
+        return StudioAlertDialog(
           title: Text(l10n.contentComplianceAuditTitle(item.id)),
           content: SizedBox(
             width: 640,

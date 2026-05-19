@@ -17,7 +17,7 @@ use super::types::{
 };
 
 fn default_content_compliance_cleared_throttle_minutes() -> i64 {
-    std::env::var("TOONFLOW_COMPLIANCE_CLEARED_THROTTLE_MINUTES")
+    std::env::var("OPENFLOW_COMPLIANCE_CLEARED_THROTTLE_MINUTES")
         .ok()
         .and_then(|v| v.trim().parse::<i64>().ok())
         .filter(|v| *v > 0)
@@ -255,7 +255,7 @@ pub async fn mark_notifications_read_state(
     ids: &[i64],
     read: bool,
 ) -> Result<Vec<NotificationRecord>, ApiError> {
-    let rows: Vec<NotificationRecord> = sqlx::query_as(
+    let mut rows: Vec<NotificationRecord> = sqlx::query_as(
         r#"
         UPDATE public.app_notification
         SET
@@ -283,7 +283,6 @@ pub async fn mark_notifications_read_state(
           read_at,
           created_at,
           updated_at
-        ORDER BY id DESC
         "#,
     )
     .bind(user_id)
@@ -292,6 +291,8 @@ pub async fn mark_notifications_read_state(
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    rows.sort_by(|left, right| right.id.cmp(&left.id));
 
     for row in &rows {
         notify
@@ -307,7 +308,7 @@ pub async fn mark_all_notifications_read(
     notify: &WsNotifyHub,
     user_id: Uuid,
 ) -> Result<i64, ApiError> {
-    let rows: Vec<NotificationRecord> = sqlx::query_as(
+    let mut rows: Vec<NotificationRecord> = sqlx::query_as(
         r#"
         UPDATE public.app_notification
         SET read_at = COALESCE(read_at, NOW()), updated_at = NOW()
@@ -330,13 +331,14 @@ pub async fn mark_all_notifications_read(
           read_at,
           created_at,
           updated_at
-        ORDER BY id DESC
         "#,
     )
     .bind(user_id)
     .fetch_all(pool)
     .await
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
+
+    rows.sort_by(|left, right| right.id.cmp(&left.id));
 
     for row in &rows {
         notify

@@ -65,7 +65,7 @@ pub(in crate::assets) async fn get_project_asset_image_file_for_project(
 
     let Some(ref root) = state.local_asset_image_dir else {
         return Err(ApiError::DatabaseError(
-            "TOONFLOW_LOCAL_ASSET_IMAGE_DIR is not set; cannot serve locally stored asset images"
+            "OPENFLOW_LOCAL_ASSET_IMAGE_DIR is not set; cannot serve locally stored asset images"
                 .into(),
         ));
     };

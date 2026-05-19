@@ -54,6 +54,16 @@ HomePage _overlayPage({
   );
 }
 
+HomePage _shellPage({int? initialProjectNumericId}) {
+  return HomePage(
+    shellMode: HomeShellMode.product,
+    debugAuthenticatedAccessToken: 'test-token',
+    debugSkipSessionContextSync: true,
+    debugSkipAuthListenerAttach: true,
+    studioProjectNumericId: initialProjectNumericId,
+  );
+}
+
 void main() {
   testWidgets('storyboard overlay route renders through GoRouter', (
     tester,
@@ -86,6 +96,44 @@ void main() {
       router.routeInformationProvider.value.uri.toString(),
       '/projects/7/storyboard',
     );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('storyboard overlay open production enters shell pane', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1440, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final router = GoRouter(
+      initialLocation: '/projects/7/storyboard',
+      routes: <RouteBase>[
+        GoRoute(path: '/', builder: (context, state) => _shellPage()),
+        GoRoute(
+          path: '/projects/:projectNumericId/storyboard',
+          builder: (context, state) => _overlayPage(
+            overlay: StudioOverlayMode.storyboardStudio,
+            projectNumericId: int.parse(
+              state.pathParameters['projectNumericId']!,
+            ),
+          ),
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(_routerApp(router));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Open production'));
+    await tester.pumpAndSettle();
+
+    expect(
+      router.routeInformationProvider.value.uri.toString(),
+      '/?pane=production',
+    );
+    expect(find.text('Production workspace'), findsWidgets);
+    expect(find.text('Storyboard studio'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 

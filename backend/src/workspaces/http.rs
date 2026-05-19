@@ -431,7 +431,7 @@ async fn record_workspace_invite_notification(
 }
 
 fn max_enterprise_workspaces_per_user() -> i64 {
-    std::env::var("TOONFLOW_MAX_ENTERPRISE_WORKSPACES_PER_USER")
+    std::env::var("OPENFLOW_MAX_ENTERPRISE_WORKSPACES_PER_USER")
         .ok()
         .and_then(|s| s.trim().parse::<i64>().ok())
         .filter(|n| *n > 0)
@@ -439,7 +439,7 @@ fn max_enterprise_workspaces_per_user() -> i64 {
 }
 
 fn max_workspace_member_mutations_per_hour() -> i64 {
-    std::env::var("TOONFLOW_WORKSPACE_MEMBER_MUTATIONS_PER_HOUR")
+    std::env::var("OPENFLOW_WORKSPACE_MEMBER_MUTATIONS_PER_HOUR")
         .ok()
         .and_then(|s| s.trim().parse::<i64>().ok())
         .filter(|n| *n > 0)
@@ -472,7 +472,7 @@ async fn guard_workspace_member_mutation_rate(
     .map_err(|e| ApiError::DatabaseError(e.to_string()))?;
     if used >= cap {
         return Err(ApiError::QuotaExceeded(format!(
-            "workspace member/invite mutations exceed {cap} per hour (set TOONFLOW_WORKSPACE_MEMBER_MUTATIONS_PER_HOUR)"
+            "workspace member/invite mutations exceed {cap} per hour (set OPENFLOW_WORKSPACE_MEMBER_MUTATIONS_PER_HOUR)"
         )));
     }
     Ok(())
@@ -609,7 +609,7 @@ pub(crate) async fn create_workspace(
     let n = count_owned_active_enterprise(pool, uid).await?;
     if n >= cap {
         return Err(ApiError::QuotaExceeded(format!(
-            "at most {cap} active enterprise workspace(s) per user (set TOONFLOW_MAX_ENTERPRISE_WORKSPACES_PER_USER)"
+            "at most {cap} active enterprise workspace(s) per user (set OPENFLOW_MAX_ENTERPRISE_WORKSPACES_PER_USER)"
         )));
     }
 

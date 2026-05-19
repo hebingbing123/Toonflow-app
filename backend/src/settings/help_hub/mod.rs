@@ -56,7 +56,7 @@ struct HelpHubLinkRow {
 }
 
 fn parse_env_items() -> Vec<HelpHubLinkItem> {
-    if let Ok(raw) = std::env::var("TOONFLOW_HELP_HUB_ITEMS_JSON") {
+    if let Ok(raw) = std::env::var("OPENFLOW_HELP_HUB_ITEMS_JSON") {
         if let Ok(v) = serde_json::from_str::<Vec<HelpHubLinkItem>>(&raw) {
             if !v.is_empty() {
                 return v;
@@ -64,15 +64,15 @@ fn parse_env_items() -> Vec<HelpHubLinkItem> {
         }
     }
 
-    let url = std::env::var("TOONFLOW_HELP_HUB_URL")
+    let url = std::env::var("OPENFLOW_HELP_HUB_URL")
         .ok()
         .map(|s| s.trim().to_string())
         .filter(|s| !s.is_empty())
-        .unwrap_or_else(|| "https://docs.toonflow.ai".to_string());
+        .unwrap_or_else(|| "https://docs.openflow.ai".to_string());
 
     vec![HelpHubLinkItem {
         id: "docs".to_string(),
-        title: "Toonflow 文档".to_string(),
+        title: "Openflow 文档".to_string(),
         url,
     }]
 }
@@ -371,24 +371,24 @@ mod tests {
     fn help_hub_items_json_parses() {
         let _guard = env_lock();
         std::env::set_var(
-            "TOONFLOW_HELP_HUB_ITEMS_JSON",
+            "OPENFLOW_HELP_HUB_ITEMS_JSON",
             r#"[{"id":"a","title":"A","url":"https://example.com"}]"#,
         );
         let items = parse_env_items();
         assert_eq!(items.len(), 1);
         assert_eq!(items[0].id, "a");
-        std::env::remove_var("TOONFLOW_HELP_HUB_ITEMS_JSON");
+        std::env::remove_var("OPENFLOW_HELP_HUB_ITEMS_JSON");
     }
 
     #[test]
     fn help_hub_url_fallback() {
         let _guard = env_lock();
-        std::env::remove_var("TOONFLOW_HELP_HUB_ITEMS_JSON");
-        std::env::set_var("TOONFLOW_HELP_HUB_URL", "https://x.test");
+        std::env::remove_var("OPENFLOW_HELP_HUB_ITEMS_JSON");
+        std::env::set_var("OPENFLOW_HELP_HUB_URL", "https://x.test");
         let items = parse_env_items();
         assert_eq!(items.len(), 1);
         assert_eq!(items[0].url, "https://x.test");
-        std::env::remove_var("TOONFLOW_HELP_HUB_URL");
+        std::env::remove_var("OPENFLOW_HELP_HUB_URL");
     }
 
     #[test]

@@ -33,6 +33,8 @@ struct ProjectPatchRow {
     name: Option<String>,
     intro: Option<String>,
     project_type: Option<String>,
+    text_model: Option<String>,
+    multimodal_model: Option<String>,
     image_model: Option<String>,
     image_quality: Option<String>,
     video_model: Option<String>,
@@ -47,6 +49,7 @@ struct ProjectPatchRow {
     target_market: Option<String>,
     target_platforms: Option<Vec<String>>,
     duration_strategy: Option<String>,
+    voice_model: Option<String>,
     voice_profile: Option<String>,
     subtitle_style: Option<String>,
     bgm_strategy: Option<String>,
@@ -59,6 +62,14 @@ fn trim_text_patch(patch: FieldPatch<String>) -> FieldPatch<String> {
     match patch {
         FieldPatch::Absent => FieldPatch::Absent,
         FieldPatch::Set(v) => FieldPatch::Set(trim_opt(v)),
+    }
+}
+
+fn normalize_patch_value(value: Option<Option<Value>>) -> Option<Value> {
+    match value {
+        None => None,
+        Some(None) => Some(Value::Null),
+        Some(Some(value)) => Some(value),
     }
 }
 
@@ -110,68 +121,103 @@ pub(crate) async fn patch_project_by_id(
     let pool = state.require_pool()?;
     let scope = require_project_write_scope(&state, uid, project_id).await?;
 
-    let name_patch = trim_text_patch(parse_optional_text_field(body.name, "name")?);
-    let intro_patch = trim_text_patch(parse_optional_text_field(body.intro, "intro")?);
+    let name_patch = trim_text_patch(parse_optional_text_field(
+        normalize_patch_value(body.name),
+        "name",
+    )?);
+    let intro_patch = trim_text_patch(parse_optional_text_field(
+        normalize_patch_value(body.intro),
+        "intro",
+    )?);
     let project_type_patch = trim_text_patch(parse_optional_text_field(
-        body.project_type,
+        normalize_patch_value(body.project_type),
         "project_type",
     )?);
-    let image_model_patch =
-        trim_text_patch(parse_optional_text_field(body.image_model, "image_model")?);
+    let text_model_patch = trim_text_patch(parse_optional_text_field(
+        normalize_patch_value(body.text_model),
+        "text_model",
+    )?);
+    let multimodal_model_patch = trim_text_patch(parse_optional_text_field(
+        normalize_patch_value(body.multimodal_model),
+        "multimodal_model",
+    )?);
+    let image_model_patch = trim_text_patch(parse_optional_text_field(
+        normalize_patch_value(body.image_model),
+        "image_model",
+    )?);
     let image_quality_patch = trim_text_patch(parse_optional_text_field(
-        body.image_quality,
+        normalize_patch_value(body.image_quality),
         "image_quality",
     )?);
-    let video_model_patch =
-        trim_text_patch(parse_optional_text_field(body.video_model, "video_model")?);
-    let art_style_patch = trim_text_patch(parse_optional_text_field(body.art_style, "art_style")?);
+    let video_model_patch = trim_text_patch(parse_optional_text_field(
+        normalize_patch_value(body.video_model),
+        "video_model",
+    )?);
+    let art_style_patch = trim_text_patch(parse_optional_text_field(
+        normalize_patch_value(body.art_style),
+        "art_style",
+    )?);
     let director_manual_patch = trim_text_patch(parse_optional_text_field(
-        body.director_manual,
+        normalize_patch_value(body.director_manual),
         "director_manual",
     )?);
-    let mode_patch = trim_text_patch(parse_optional_text_field(body.mode, "mode")?);
-    let video_ratio_patch =
-        trim_text_patch(parse_optional_text_field(body.video_ratio, "video_ratio")?);
+    let mode_patch = trim_text_patch(parse_optional_text_field(
+        normalize_patch_value(body.mode),
+        "mode",
+    )?);
+    let video_ratio_patch = trim_text_patch(parse_optional_text_field(
+        normalize_patch_value(body.video_ratio),
+        "video_ratio",
+    )?);
 
     let art_style_pack_patch = trim_text_patch(parse_optional_text_field(
-        body.art_style_pack,
+        normalize_patch_value(body.art_style_pack),
         "art_style_pack",
     )?);
     let story_style_pack_patch = trim_text_patch(parse_optional_text_field(
-        body.story_style_pack,
+        normalize_patch_value(body.story_style_pack),
         "story_style_pack",
     )?);
 
     let target_market_patch = trim_text_patch(parse_optional_text_field(
-        body.target_market,
+        normalize_patch_value(body.target_market),
         "target_market",
     )?);
     let duration_strategy_patch = trim_text_patch(parse_optional_text_field(
-        body.duration_strategy,
+        normalize_patch_value(body.duration_strategy),
         "duration_strategy",
     )?);
+    let voice_model_patch = trim_text_patch(parse_optional_text_field(
+        normalize_patch_value(body.voice_model),
+        "voice_model",
+    )?);
     let voice_profile_patch = trim_text_patch(parse_optional_text_field(
-        body.voice_profile,
+        normalize_patch_value(body.voice_profile),
         "voice_profile",
     )?);
     let subtitle_style_patch = trim_text_patch(parse_optional_text_field(
-        body.subtitle_style,
+        normalize_patch_value(body.subtitle_style),
         "subtitle_style",
     )?);
     let bgm_strategy_patch = trim_text_patch(parse_optional_text_field(
-        body.bgm_strategy,
+        normalize_patch_value(body.bgm_strategy),
         "bgm_strategy",
     )?);
     let quality_gate_strategy_patch = trim_text_patch(parse_optional_text_field(
-        body.quality_gate_strategy,
+        normalize_patch_value(body.quality_gate_strategy),
         "quality_gate_strategy",
     )?);
-    let project_brief_patch =
-        parse_json_object_patch::<ProjectBrief>(body.project_brief, "projectBrief")?;
-    let brand_bible_patch = parse_json_object_patch::<BrandBible>(body.brand_bible, "brandBible")?;
+    let project_brief_patch = parse_json_object_patch::<ProjectBrief>(
+        normalize_patch_value(body.project_brief),
+        "projectBrief",
+    )?;
+    let brand_bible_patch = parse_json_object_patch::<BrandBible>(
+        normalize_patch_value(body.brand_bible),
+        "brandBible",
+    )?;
 
     // Parse target_platforms array field
-    let target_platforms_patch = match body.target_platforms {
+    let target_platforms_patch = match normalize_patch_value(body.target_platforms) {
         None => FieldPatch::Absent,
         Some(serde_json::Value::Null) => FieldPatch::Set(None),
         Some(serde_json::Value::Array(arr)) => {
@@ -221,6 +267,8 @@ pub(crate) async fn patch_project_by_id(
         &name_patch,
         &intro_patch,
         &project_type_patch,
+        &text_model_patch,
+        &multimodal_model_patch,
         &image_model_patch,
         &image_quality_patch,
         &video_model_patch,
@@ -232,6 +280,7 @@ pub(crate) async fn patch_project_by_id(
         &story_style_pack_patch,
         &target_market_patch,
         &duration_strategy_patch,
+        &voice_model_patch,
         &voice_profile_patch,
         &subtitle_style_patch,
         &bgm_strategy_patch,
@@ -243,18 +292,18 @@ pub(crate) async fn patch_project_by_id(
         && matches!(brand_bible_patch, FieldPatch::Absent)
     {
         return Err(ApiError::BadRequest(
-            "expected at least one patchable field (name, intro, project_type, image_model, image_quality, video_model, art_style, director_manual, mode, video_ratio, art_style_pack, story_style_pack, target_market, target_platforms, duration_strategy, voice_profile, subtitle_style, bgm_strategy, quality_gate_strategy, projectBrief, brandBible)".into(),
+            "expected at least one patchable field (name, intro, project_type, text_model, multimodal_model, image_model, image_quality, video_model, art_style, director_manual, mode, video_ratio, art_style_pack, story_style_pack, target_market, target_platforms, duration_strategy, voice_model, voice_profile, subtitle_style, bgm_strategy, quality_gate_strategy, projectBrief, brandBible)".into(),
         ));
     }
 
     let current = sqlx::query_as::<_, ProjectPatchRow>(
         r#"
         SELECT id, workspace_id, numeric_id, name, intro, project_type,
-               image_model, image_quality, video_model, art_style,
+               text_model, multimodal_model, image_model, image_quality, video_model, art_style,
                director_manual, mode, video_ratio, create_time_ms,
                art_style_pack, story_style_pack,
                target_market, target_platforms, duration_strategy,
-               voice_profile, subtitle_style, bgm_strategy, quality_gate_strategy,
+               voice_model, voice_profile, subtitle_style, bgm_strategy, quality_gate_strategy,
                project_brief, brand_bible
         FROM app_project p
         WHERE p.id = $1
@@ -269,6 +318,8 @@ pub(crate) async fn patch_project_by_id(
     let new_name = merge_text_patch(&current.name, name_patch);
     let new_intro = merge_text_patch(&current.intro, intro_patch);
     let new_project_type = merge_text_patch(&current.project_type, project_type_patch);
+    let new_text_model = merge_text_patch(&current.text_model, text_model_patch);
+    let new_multimodal_model = merge_text_patch(&current.multimodal_model, multimodal_model_patch);
     let new_image_model = merge_text_patch(&current.image_model, image_model_patch);
     let new_image_quality = merge_text_patch(&current.image_quality, image_quality_patch);
     let new_video_model = merge_text_patch(&current.video_model, video_model_patch);
@@ -281,6 +332,7 @@ pub(crate) async fn patch_project_by_id(
     let new_target_market = merge_text_patch(&current.target_market, target_market_patch);
     let new_duration_strategy =
         merge_text_patch(&current.duration_strategy, duration_strategy_patch);
+    let new_voice_model = merge_text_patch(&current.voice_model, voice_model_patch);
     let new_voice_profile = merge_text_patch(&current.voice_profile, voice_profile_patch);
     let new_subtitle_style = merge_text_patch(&current.subtitle_style, subtitle_style_patch);
     let new_bgm_strategy = merge_text_patch(&current.bgm_strategy, bgm_strategy_patch);
@@ -309,6 +361,12 @@ pub(crate) async fn patch_project_by_id(
     }
     if current.project_type != new_project_type {
         changed_fields.push("project_type");
+    }
+    if current.text_model != new_text_model {
+        changed_fields.push("text_model");
+    }
+    if current.multimodal_model != new_multimodal_model {
+        changed_fields.push("multimodal_model");
     }
     if current.image_model != new_image_model {
         changed_fields.push("image_model");
@@ -346,6 +404,9 @@ pub(crate) async fn patch_project_by_id(
     if current.duration_strategy != new_duration_strategy {
         changed_fields.push("duration_strategy");
     }
+    if current.voice_model != new_voice_model {
+        changed_fields.push("voice_model");
+    }
     if current.voice_profile != new_voice_profile {
         changed_fields.push("voice_profile");
     }
@@ -369,27 +430,29 @@ pub(crate) async fn patch_project_by_id(
         r#"
         UPDATE app_project
         SET name = $1, intro = $2, project_type = $3,
-            image_model = $4, image_quality = $5, video_model = $6,
-            art_style = $7, director_manual = $8, mode = $9, video_ratio = $10,
-            art_style_pack = $11, story_style_pack = $12,
-            target_market = $13, target_platforms = $14, duration_strategy = $15,
-            voice_profile = $16, subtitle_style = $17, bgm_strategy = $18,
-            quality_gate_strategy = $19, project_brief = $20, brand_bible = $21,
+            text_model = $4, multimodal_model = $5, image_model = $6, image_quality = $7,
+            video_model = $8, art_style = $9, director_manual = $10, mode = $11,
+            video_ratio = $12, art_style_pack = $13, story_style_pack = $14,
+            target_market = $15, target_platforms = $16, duration_strategy = $17,
+            voice_model = $18, voice_profile = $19, subtitle_style = $20, bgm_strategy = $21,
+            quality_gate_strategy = $22, project_brief = $23, brand_bible = $24,
             updated_at = NOW()
-        WHERE id = $22
+        WHERE id = $25
         RETURNING id, workspace_id, numeric_id, name, intro, project_type,
-                  image_model, image_quality, video_model, art_style,
+                  text_model, multimodal_model, image_model, image_quality, video_model, art_style,
                   director_manual, mode, video_ratio, create_time_ms,
                   art_style_pack, story_style_pack,
                   target_market, target_platforms, duration_strategy,
-                  voice_profile, subtitle_style, bgm_strategy, quality_gate_strategy,
-                  $23 AS project_access_mode,
-                  $24 AS project_access_role
+                  voice_model, voice_profile, subtitle_style, bgm_strategy, quality_gate_strategy,
+                  $26 AS project_access_mode,
+                  $27 AS project_access_role
         "#,
     )
     .bind(&new_name)
     .bind(&new_intro)
     .bind(&new_project_type)
+    .bind(&new_text_model)
+    .bind(&new_multimodal_model)
     .bind(&new_image_model)
     .bind(&new_image_quality)
     .bind(&new_video_model)
@@ -402,6 +465,7 @@ pub(crate) async fn patch_project_by_id(
     .bind(&new_target_market)
     .bind(&new_target_platforms)
     .bind(&new_duration_strategy)
+    .bind(&new_voice_model)
     .bind(&new_voice_profile)
     .bind(&new_subtitle_style)
     .bind(&new_bgm_strategy)

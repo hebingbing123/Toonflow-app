@@ -22,7 +22,7 @@ async fn vendor_credential_store_get_delete_roundtrip() {
 
     // Set encryption key for test
     std::env::set_var(
-        "TOONFLOW_VENDOR_CREDENTIAL_KEY",
+        "OPENFLOW_VENDOR_CREDENTIAL_KEY",
         "test-encryption-key-for-contract-tests",
     );
 
@@ -124,5 +124,5 @@ async fn vendor_credential_store_get_delete_roundtrip() {
         .await;
 
     // Clean up env var
-    std::env::remove_var("TOONFLOW_VENDOR_CREDENTIAL_KEY");
+    std::env::remove_var("OPENFLOW_VENDOR_CREDENTIAL_KEY");
 }

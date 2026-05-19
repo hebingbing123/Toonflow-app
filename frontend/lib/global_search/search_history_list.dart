@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../l10n/rust_api_error_format.dart';
 import '../rust_api/search/api.dart';
 import '../utils/localized_formatting.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 /// Search history dropdown: shows recent queries on focus, tap to fill and search, clear button.
 class SearchHistoryList extends StatefulWidget {
@@ -65,9 +66,9 @@ class _SearchHistoryListState extends State<SearchHistoryList> {
   Future<void> _handleClearHistory() async {
     final l10n = resolveAppLocalizationsForErrors(context);
     // Confirm before clearing
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showStudioDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => StudioAlertDialog(
         title: Text(l10n.globalSearchClearSearchHistoryTitle),
         content: Text(l10n.globalSearchClearSearchHistoryConfirm),
         actions: [

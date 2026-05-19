@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This specification describes **workspace-scope billing and quota** for Toonflow: moving the billing source of truth from **`app_user_profile` (user-scope)** to **workspace-attributed subscription, quota, and usage**, while preserving **personal workspaces** and **enterprise/team workspaces** under a single model. The feature is **gated** until product/finance overturns the current decision in [`docs/plans/workspace-billing-scope-decision.md`](../../../docs/plans/workspace-billing-scope-decision.md). Detailed future stub: [`docs/plans/workspace-billing-future-workspace-scope.md`](../../../docs/plans/workspace-billing-future-workspace-scope.md).
+This specification describes **workspace-scope billing and quota** for Openflow: moving the billing source of truth from **`app_user_profile` (user-scope)** to **workspace-attributed subscription, quota, and usage**, while preserving **personal workspaces** and **enterprise/team workspaces** under a single model. The feature is **gated** until product/finance overturns the current decision in [`docs/plans/workspace-billing-scope-decision.md`](../../../docs/plans/workspace-billing-scope-decision.md). Detailed future stub: [`docs/plans/workspace-billing-future-workspace-scope.md`](../../../docs/plans/workspace-billing-future-workspace-scope.md).
 
 **Hybrid model (recommended default in this spec):** clients always receive an explicit **`billing_scope`** (`"user"` | `"workspace"`) and, when applicable, **`current_workspace_billing`** so that **personal** and **team** contexts are both representable without forcing a breaking change on day one.
 
@@ -60,7 +60,7 @@ Platform stack: Rust backend (Axum + SQLx + PostgreSQL) + Flutter frontend. Deli
 #### Acceptance Criteria
 
 1. THE Backend SHALL preserve **Me_Response_V1** as default for `GET /api/v1/me` without breaking existing field names and semantics during the transition window.
-2. THE Backend SHALL expose **Me_Response_V2** via **`GET /api/v1/me?v=2`** **or** `Accept: application/vnd.toonflow.me+json; version=2` (one approach chosen and documented in OpenAPI).
+2. THE Backend SHALL expose **Me_Response_V2** via **`GET /api/v1/me?v=2`** **or** `Accept: application/vnd.openflow.me+json; version=2` (one approach chosen and documented in OpenAPI).
 3. Me_Response_V2 SHALL include **`billing_scope`** and nested objects: **`user`** (legacy-compatible subset) and **`current_workspace_billing`** (populated when current workspace exists and policy applies).
 4. THE OpenAPI_Spec SHALL describe v1 and v2 shapes; `export-openapi` and `yarn refactor:check` SHALL pass.
 5. THE Flutter **`rust_api`** SHALL parse v1 by default and support v2 behind explicit client configuration or feature flag until migration window ends.

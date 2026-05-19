@@ -102,11 +102,11 @@ All core implementation tasks were completed in previous work:
 
 ### Files Modified
 
-- `/Users/clive/Documents/source/cousor/Toonflow-app/docs/plans/workspace-billing-cutover-runbook.md` (created)
-- `/Users/clive/Documents/source/cousor/Toonflow-app/docs/plans/workspace-billing-rollback-procedures.md` (created)
-- `/Users/clive/Documents/source/cousor/Toonflow-app/docs/plans/workspace-billing-staging-validation-checklist.md` (created)
-- `/Users/clive/Documents/source/cousor/Toonflow-app/docs/plans/workspace-team-full-plan.md` (updated W8.2-W8.4)
-- `/Users/clive/Documents/source/cousor/Toonflow-app/.kiro/specs/workspace-scope-billing/tasks.md` (marked 9.1-10.2 complete)
+- `docs/plans/workspace-billing-cutover-runbook.md` (created)
+- `docs/plans/workspace-billing-rollback-procedures.md` (created)
+- `docs/plans/workspace-billing-staging-validation-checklist.md` (created)
+- `docs/plans/workspace-team-full-plan.md` (updated W8.2-W8.4)
+- `.kiro/specs/workspace-scope-billing/tasks.md` (marked 9.1-10.2 complete)
 
 ## Refactor Check Status (Task 10.1)
 

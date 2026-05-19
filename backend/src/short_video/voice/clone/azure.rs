@@ -24,8 +24,8 @@ impl VoiceCloneProvider for AzureVoiceCloneProvider {
             });
         }
         Err(ApiError::NotImplementedI18n {
-            en: "Azure custom neural voice cloning is not wired yet; use TOONFLOW_VOICE_CLONE_PROVIDER=mock".into(),
-            zh: "Azure 自定义神经语音克隆尚未对接；请使用 TOONFLOW_VOICE_CLONE_PROVIDER=mock".into(),
+            en: "Azure custom neural voice cloning is not wired yet; use OPENFLOW_VOICE_CLONE_PROVIDER=mock".into(),
+            zh: "Azure 自定义神经语音克隆尚未对接；请使用 OPENFLOW_VOICE_CLONE_PROVIDER=mock".into(),
         })
     }
 }

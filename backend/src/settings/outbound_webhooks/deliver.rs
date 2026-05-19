@@ -8,7 +8,7 @@ use serde_json::{json, Value};
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use super::sign_toonflow;
+use super::sign_openflow;
 
 /// Max HTTP attempts per logical delivery (initial try + retries). Matches WH2.4.
 const MAX_DELIVERY_ATTEMPTS: u32 = 3;
@@ -123,15 +123,15 @@ pub(crate) async fn deliver_outbound_event(
             .duration_since(std::time::UNIX_EPOCH)
             .map(|d| d.as_secs())
             .unwrap_or(0);
-        let signature = sign_toonflow(secret_bytes, ts, &body_bytes);
+        let signature = sign_openflow(secret_bytes, ts, &body_bytes);
 
         let send_res = http
             .post(url)
             .timeout(PER_ATTEMPT_TIMEOUT)
             .header("Content-Type", "application/json")
-            .header("X-Toonflow-Timestamp", ts.to_string())
-            .header("X-Toonflow-Signature", signature)
-            .header("X-Toonflow-Event-Type", event_type)
+            .header("X-Openflow-Timestamp", ts.to_string())
+            .header("X-Openflow-Signature", signature)
+            .header("X-Openflow-Event-Type", event_type)
             .body(body_bytes.clone())
             .send()
             .await;

@@ -1,4 +1,4 @@
-//! Smoke test: child entry `__harness_isolate_echo__` round-trips JSON (integration; uses `CARGO_BIN_EXE_toonflow-server`).
+//! Smoke test: child entry `__harness_isolate_echo__` round-trips JSON (integration; uses `CARGO_BIN_EXE_openflow-server`).
 
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::process::Command;
@@ -6,7 +6,7 @@ use tokio::process::Command;
 #[tokio::test]
 async fn harness_isolate_echo_roundtrip() {
     let exe =
-        std::env::var("CARGO_BIN_EXE_toonflow-server").expect("cargo test sets CARGO_BIN_EXE_*");
+        std::env::var("CARGO_BIN_EXE_openflow-server").expect("cargo test sets CARGO_BIN_EXE_*");
     let mut child = Command::new(exe)
         .arg("__harness_isolate_echo__")
         .stdin(std::process::Stdio::piped())

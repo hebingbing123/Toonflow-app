@@ -25,7 +25,7 @@ use tracing::error;
 /// ```
 pub fn db_error(context: &str, err: sqlx::Error) -> ApiError {
     error!(
-        target: "toonflow.db.error",
+        target: "openflow.db.error",
         context = %context,
         error = %err,
         error_debug = ?err,
@@ -46,7 +46,7 @@ pub fn db_error(context: &str, err: sqlx::Error) -> ApiError {
 /// ```
 pub fn internal_error<E: std::fmt::Display + std::fmt::Debug>(context: &str, err: E) -> ApiError {
     error!(
-        target: "toonflow.internal.error",
+        target: "openflow.internal.error",
         context = %context,
         error = %err,
         error_debug = ?err,

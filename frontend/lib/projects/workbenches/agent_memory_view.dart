@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../rust_api.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 part 'agent_memory_view/memory_widgets.dart';
 
@@ -152,7 +154,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
       memoryInsights,
       l10n,
     );
-    return AlertDialog(
+    return StudioAlertDialog(
       title: Text(l10n.agentMemoryWorkbenchTitle),
       content: SizedBox(
         width: dialogWidth,
@@ -273,7 +275,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              DropdownButtonFormField<String>(
+              StudioDropdownButtonFormField<String>(
                 initialValue: model.queryType,
                 decoration: InputDecoration(
                   labelText: l10n.agentMemoryFieldQueryType,
@@ -283,7 +285,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                     .map(
                       (value) => DropdownMenuItem<String>(
                         value: value,
-                        child: Text(value),
+                        child: Text(_agentMemoryQueryTypeLabel(l10n, value)),
                       ),
                     )
                     .toList(),
@@ -294,7 +296,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                 },
               ),
               const SizedBox(height: 8),
-              DropdownButtonFormField<String>(
+              StudioDropdownButtonFormField<String>(
                 initialValue: model.memoryTier,
                 decoration: InputDecoration(
                   labelText: l10n.agentMemoryFieldMemoryTier,
@@ -315,7 +317,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                 },
               ),
               const SizedBox(height: 8),
-              DropdownButtonFormField<String>(
+              StudioDropdownButtonFormField<String>(
                 initialValue: model.automationMode,
                 decoration: InputDecoration(
                   labelText: l10n.agentMemoryFieldAutomationMode,
@@ -325,7 +327,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                     .map(
                       (value) => DropdownMenuItem<String>(
                         value: value,
-                        child: Text(value),
+                        child: Text(_agentMemoryAutomationModeLabel(l10n, value)),
                       ),
                     )
                     .toList(),
@@ -526,7 +528,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: DropdownButtonFormField<String>(
+                    child: StudioDropdownButtonFormField<String>(
                       initialValue: model.appendType,
                       decoration: InputDecoration(
                         labelText: l10n.agentMemoryFieldAppendType,
@@ -536,7 +538,9 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                           .map(
                             (value) => DropdownMenuItem<String>(
                               value: value,
-                              child: Text(value),
+                              child: Text(
+                                _agentMemoryAppendOrClearTypeLabel(l10n, value),
+                              ),
                             ),
                           )
                           .toList(),
@@ -549,7 +553,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: DropdownButtonFormField<String>(
+                    child: StudioDropdownButtonFormField<String>(
                       initialValue: model.appendMemoryTier,
                       decoration: InputDecoration(
                         labelText: l10n.agentMemoryFieldAppendMemoryTier,
@@ -631,7 +635,7 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: DropdownButtonFormField<String>(
+                    child: StudioDropdownButtonFormField<String>(
                       initialValue: model.clearType,
                       decoration: InputDecoration(
                         labelText: l10n.agentMemoryFieldClearType,
@@ -641,7 +645,9 @@ class ProjectsAgentMemoryWorkbenchDialogView extends StatelessWidget {
                           .map(
                             (value) => DropdownMenuItem<String>(
                               value: value,
-                              child: Text(value),
+                              child: Text(
+                                _agentMemoryAppendOrClearTypeLabel(l10n, value),
+                              ),
                             ),
                           )
                           .toList(),

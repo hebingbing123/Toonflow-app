@@ -4,6 +4,7 @@ import '../../../rust_api.dart';
 import '../support.dart';
 import 'dialog.dart';
 import 'support.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 Future<void> openAssetGenerationWorkbenchDialog({
   required BuildContext ctx,
@@ -49,7 +50,7 @@ Future<void> openAssetGenerationWorkbenchDialog({
     preferredNumericId: initialFocusedAssetNumericId,
   );
 
-  await showDialog<void>(
+  await showStudioDialog<void>(
     context: ctx,
     builder: (dialogCtx) {
       return AssetGenerationWorkbenchDialog(

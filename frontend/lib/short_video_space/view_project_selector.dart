@@ -1,3 +1,4 @@
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 part of 'view.dart';
 
 /// Project selector and configuration panel widget
@@ -105,11 +106,9 @@ class _ProjectSelectorPanel extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: DropdownButtonFormField<String>(
+                child: StudioDropdownButtonFormField<String>(
                   initialValue: selectedProjectId,
                   isExpanded: true,
-                  style: fieldTextStyle,
-                  dropdownColor: tokens.bgElevated,
                   decoration: fieldDecoration.copyWith(
                     labelText: l10n.shortVideoSpaceTargetProject,
                   ),
@@ -185,12 +184,10 @@ class _ProjectSelectorPanel extends StatelessWidget {
             style: theme.textTheme.titleSmall,
           ),
           const SizedBox(height: 8),
-          DropdownButtonFormField<String>(
+          StudioDropdownButtonFormField<String>(
             key: ValueKey<String>('tm-$selectedProjectId'),
             initialValue: targetMarket,
             isExpanded: true,
-            style: fieldTextStyle,
-            dropdownColor: tokens.bgElevated,
             decoration: fieldDecoration.copyWith(
               labelText: l10n.shortVideoSpaceTargetMarketLabel,
             ),

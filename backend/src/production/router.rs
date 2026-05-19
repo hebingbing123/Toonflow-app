@@ -1,6 +1,9 @@
 //! `POST /api/v1/production/*` 路由表。
 
-use axum::{routing::post, Router};
+use axum::{
+    routing::{get, post},
+    Router,
+};
 
 use crate::state::AppState;
 
@@ -56,6 +59,14 @@ pub fn router() -> Router<AppState> {
         .route(
             "/api/v1/production/storyboard/batch-generate-image",
             post(workbench::storyboard_ops::post_storyboard_batch_generate_image),
+        )
+        .route(
+            "/api/v1/production/storyboard/grid-generate-and-assign",
+            post(workbench::storyboard_ops::post_storyboard_grid_generate_and_assign),
+        )
+        .route(
+            "/api/v1/production/storyboard/local-frame",
+            get(workbench::storyboard_ops::get_storyboard_local_frame),
         )
         .route(
             "/api/v1/production/workbench/get-video-list",

@@ -11,7 +11,7 @@
 - 运行手册 `docs/plans/harness-wasm-alert-runbook.md`
 
 **WP-F 剩余：采样率 / PII 白名单**
-- `TOONFLOW_OTEL_SAMPLE_RATE` 可配置采样率（prod 非零）
+- `OPENFLOW_OTEL_SAMPLE_RATE` 可配置采样率（prod 非零）
 - Span attribute PII 白名单过滤（`[redacted]`）
 - 统一 harness session / tool invoke / job 全链路 trace id 透传
 - jobs/worker 关联 `job_id` 到 trace
@@ -48,7 +48,7 @@
 │                                                                  │
 │  telemetry.rs                                                    │
 │    init_tracing_subscriber()                                     │
-│      ├── TraceIdRatioBased(TOONFLOW_OTEL_SAMPLE_RATE)            │
+│      ├── TraceIdRatioBased(OPENFLOW_OTEL_SAMPLE_RATE)            │
 │      └── PiiFilterLayer (telemetry/pii_filter.rs)                │
 │                                                                  │
 │  harness/ws/connection.rs  ──► harness.session span              │
@@ -169,7 +169,7 @@ impl<S: Subscriber> Layer<S> for PiiFilterLayer {
 
 ```rust
 // 读取采样率
-let sample_rate = parse_sample_rate(); // TOONFLOW_OTEL_SAMPLE_RATE
+let sample_rate = parse_sample_rate(); // OPENFLOW_OTEL_SAMPLE_RATE
 
 // 配置 SdkTracerProvider
 let sampler = opentelemetry_sdk::trace::Sampler::TraceIdRatioBased(sample_rate);
@@ -186,7 +186,7 @@ let otel_layer = tracing_opentelemetry::layer()
 
 ```rust
 fn parse_sample_rate() -> f64 {
-    match std::env::var("TOONFLOW_OTEL_SAMPLE_RATE") {
+    match std::env::var("OPENFLOW_OTEL_SAMPLE_RATE") {
         Ok(v) => match v.trim().parse::<f64>() {
             Ok(r) if r > 0.0 && r <= 1.0 => r,
             Ok(r) if r <= 0.0 => {
@@ -238,7 +238,7 @@ struct AlertWebhookPayload {
     observed_rate: f64,
     window_secs: u64,
     fired_at: chrono::DateTime<Utc>,
-    environment: String,          // OTEL_SERVICE_NAME 或 "toonflow-server"
+    environment: String,          // OTEL_SERVICE_NAME 或 "openflow-server"
 }
 ```
 
@@ -261,7 +261,7 @@ struct AlertWebhookPayload {
 
 ### Property 2: 采样率边界不变量
 
-*For any* `TOONFLOW_OTEL_SAMPLE_RATE` 输入值 r，解析后的有效采样率 r' 满足：`r' ∈ (0.0, 1.0]`（即永远不为 0，永远不超过 1）。
+*For any* `OPENFLOW_OTEL_SAMPLE_RATE` 输入值 r，解析后的有效采样率 r' 满足：`r' ∈ (0.0, 1.0]`（即永远不为 0，永远不超过 1）。
 
 **Validates: Requirements 5.1, 5.2, 5.3**
 
@@ -293,8 +293,8 @@ struct AlertWebhookPayload {
 |---|---|
 | `app_notification` 写入失败 | log `event=harness_alert_notification_write_failed`，不 propagate |
 | Webhook HTTP 失败或非 2xx | log `event=harness_alert_webhook_failed`（URL 仅 scheme+host），不重试 |
-| `TOONFLOW_OTEL_SAMPLE_RATE` 为 0 或负数 | log `event=otel_sample_rate_invalid`，使用 0.01 |
-| `TOONFLOW_OTEL_SAMPLE_RATE` 不可解析 | log `event=otel_sample_rate_invalid`，使用 1.0 |
+| `OPENFLOW_OTEL_SAMPLE_RATE` 为 0 或负数 | log `event=otel_sample_rate_invalid`，使用 0.01 |
+| `OPENFLOW_OTEL_SAMPLE_RATE` 不可解析 | log `event=otel_sample_rate_invalid`，使用 1.0 |
 | `HARNESS_ALERT_WEBHOOK_URL` 未配置 | 静默跳过，不 log warning |
 | Span attribute 非白名单 key | 值替换为 `[redacted]`，不影响控制台日志 |
 
@@ -329,7 +329,7 @@ struct AlertWebhookPayload {
 proptest! {
     #[test]
     fn prop_sample_rate_always_in_valid_range(raw in ".*") {
-        std::env::set_var("TOONFLOW_OTEL_SAMPLE_RATE", &raw);
+        std::env::set_var("OPENFLOW_OTEL_SAMPLE_RATE", &raw);
         let rate = parse_sample_rate();
         prop_assert!(rate > 0.0 && rate <= 1.0);
     }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 
 import '../../rust_api.dart';
 import 'support.dart';
@@ -94,7 +95,7 @@ class ProjectAssetsOverviewView extends StatelessWidget {
         if (model.scriptList.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(bottom: 8),
-            child: DropdownButton<int?>(
+            child: StudioDropdownButton<int?>(
               value: model.filterScriptNumericId,
               isExpanded: true,
               hint: Text(l10n.projectEditorAssetsOverviewFilterHint),

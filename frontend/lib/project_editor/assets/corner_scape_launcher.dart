@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../rust_api.dart';
 import 'corner_scape_support.dart';
 import 'corner_scape_view.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 Future<void> openCornerScapeWorkbenchDialog({
   required BuildContext ctx,
@@ -24,7 +25,7 @@ Future<void> openCornerScapeWorkbenchDialog({
   );
 
   try {
-    await showDialog<void>(
+    await showStudioDialog<void>(
       context: ctx,
       builder: (dialogCtx) {
         return StatefulBuilder(

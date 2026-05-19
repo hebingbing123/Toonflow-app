@@ -9049,7 +9049,7 @@ components:
     VersionResponse:
       properties:
         git_sha:
-          description: Present when the binary was built with env **`TOONFLOW_GIT_SHA`** set (compile-time `option_env!`).
+          description: Present when the binary was built with env **`OPENFLOW_GIT_SHA`** set (compile-time `option_env!`).
           type:
           - string
           - 'null'
@@ -9875,7 +9875,7 @@ paths:
             application/json:
               schema:
                 $ref: ErrorBody
-          description: Auth not configured, database error, or `TOONFLOW_LOCAL_ART_STYLE_COVER_DIR` unset
+          description: Auth not configured, database error, or `OPENFLOW_LOCAL_ART_STYLE_COVER_DIR` unset
       summary: Fetch one locally persisted art-style cover
       tags:
       - art_styles
@@ -13938,7 +13938,7 @@ paths:
 
         ## Authorization
 
-        Requires `X-OpenFlow-Internal-Token` header matching `OPENFLOW_INTERNAL_OPS_TOKEN` env var.
+        Requires `X-Openflow-Internal-Token` header matching `OPENFLOW_INTERNAL_OPS_TOKEN` env var.
 
         ## Response
 
@@ -13998,7 +13998,7 @@ paths:
 
         ## Authorization
 
-        Requires `X-OpenFlow-Internal-Token` header matching `OPENFLOW_INTERNAL_OPS_TOKEN` env var.
+        Requires `X-Openflow-Internal-Token` header matching `OPENFLOW_INTERNAL_OPS_TOKEN` env var.
 
         ## Response
 
@@ -26090,7 +26090,7 @@ paths:
     get:
       description: |-
         Public, no auth. Aligns with Electron-era **`/api/other/getVersion`** use cases for client compatibility checks.
-        When the server binary is compiled with environment **`TOONFLOW_GIT_SHA`** set, the JSON may include **`git_sha`** (opaque string, often a Git commit id).
+        When the server binary is compiled with environment **`OPENFLOW_GIT_SHA`** set, the JSON may include **`git_sha`** (opaque string, often a Git commit id).
       operationId: versionV1
       responses:
         '200':

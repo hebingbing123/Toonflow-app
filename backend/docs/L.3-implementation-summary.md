@@ -210,13 +210,13 @@ The framework validates each Phase J optimization:
 ```bash
 # All A/B testing tests
 cd backend
-cargo test --package toonflow-server --lib publish::ab_testing_tests -- --nocapture
+cargo test --package openflow-server --lib publish::ab_testing_tests -- --nocapture
 
 # Specific test
 cargo test test_j1_input_hash_cache_validation -- --nocapture
 
 # Unit tests
-cargo test --package toonflow-server --lib publish::ab_testing::tests -- --nocapture
+cargo test --package openflow-server --lib publish::ab_testing::tests -- --nocapture
 ```
 
 ### Programmatic Usage
@@ -294,13 +294,13 @@ println!("Overall: {}/{} passed", summary.passed_cases, summary.total_cases);
 ### Compilation
 ```bash
 cd backend
-cargo check --package toonflow-server --lib
+cargo check --package openflow-server --lib
 ```
 **Result**: ✓ Compiles successfully
 
 ### Test Execution
 ```bash
-cargo test --package toonflow-server --lib publish::ab_testing
+cargo test --package openflow-server --lib publish::ab_testing
 ```
 **Result**: ✓ All 30 tests pass
 

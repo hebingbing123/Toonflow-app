@@ -2,7 +2,7 @@
 
 ## 概述
 
-本功能在 Toonflow（OpenFlow）平台上，通过优化 Agent 技能文件、提示词工程、记忆系统和生成流水线，使生成的短剧视频达到"不穿帮"的质量标准。核心目标是：人物有风格与情绪、画面真实自然、叙事节奏有起伏，同时在保证质量的前提下尽量减少大模型 token 消耗。
+本功能在 OpenFlow平台上，通过优化 Agent 技能文件、提示词工程、记忆系统和生成流水线，使生成的短剧视频达到"不穿帮"的质量标准。核心目标是：人物有风格与情绪、画面真实自然、叙事节奏有起伏，同时在保证质量的前提下尽量减少大模型 token 消耗。
 
 平台技术栈：Rust 后端（Axum + SQLx + Tokio）+ Flutter 前端，Agent 编排通过 Harness WebSocket 协议运行，技能文件为 Markdown 格式存储于 `backend/data/skills/`，提示词模板存储于 `backend/data/prompt_defaults/`。
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_filter_row.dart';
 import '../rust_api.dart';
 import 'support.dart';
 
@@ -19,9 +20,8 @@ class TaskCenterActionsBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
+    return StudioFilterRow(
+      wideBreakpoint: 560,
       children: [
         FilledButton.icon(
           onPressed: onOpenWorkbench,
@@ -161,14 +161,21 @@ class TaskCenterJobsPreview extends StatelessWidget {
     super.key,
     required this.jobs,
     required this.onSelectTaskJob,
+    this.showCountHeader = true,
   });
 
   final List<JobRow> jobs;
   final ValueChanged<JobRow> onSelectTaskJob;
+  final bool showCountHeader;
 
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
+    final compact = MediaQuery.sizeOf(context).width < 520;
+    final detailStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
+      color: Theme.of(context).colorScheme.onSurfaceVariant,
+      height: 1.35,
+    );
     final grouped = groupJobsByPhase(jobs);
     final tiles = <Widget>[];
     var shown = 0;
@@ -195,15 +202,41 @@ class TaskCenterJobsPreview extends StatelessWidget {
         final title = phaseLabel.isEmpty
             ? l10n.l10nBatch_c084376ea9(job.kind, job.status)
             : '${job.kind} · ${job.status}';
+        final detailLines = <String>[
+          l10n.l10nBatch_978d9d9f6f(job.numericTaskId, job.id),
+          if (job.claimedBy != null && job.claimedBy!.isNotEmpty)
+            l10n.jobsClaimedBy(job.claimedBy!),
+          if (job.errorMessage != null && job.errorMessage!.isNotEmpty)
+            l10n.taskCenterFailureReason(job.errorMessage!),
+        ];
         tiles.add(
           ListTile(
-            dense: true,
+            dense: !compact,
             contentPadding: EdgeInsets.zero,
-            title: Text(title),
-            subtitle: Text(
-              l10n.l10nBatch_978d9d9f6f(job.numericTaskId, job.id),
+            minVerticalPadding: compact ? 10 : 6,
+            title: Text(
+              title,
+              maxLines: compact ? 2 : 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            trailing: const Icon(Icons.chevron_right),
+            subtitle: Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (var i = 0; i < detailLines.length; i++) ...<Widget>[
+                    if (i > 0) const SizedBox(height: 4),
+                    Text(
+                      detailLines[i],
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: detailStyle,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            trailing: compact ? null : const Icon(Icons.chevron_right),
             onTap: () => onSelectTaskJob(job),
           ),
         );
@@ -215,11 +248,13 @@ class TaskCenterJobsPreview extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 8),
-        Text(
-          l10n.taskCenterJobsCount(jobs.length),
-          style: Theme.of(context).textTheme.labelLarge,
-        ),
+        if (showCountHeader) ...<Widget>[
+          const SizedBox(height: 8),
+          Text(
+            l10n.taskCenterJobsCount(jobs.length),
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
+        ],
         ...tiles,
       ],
     );

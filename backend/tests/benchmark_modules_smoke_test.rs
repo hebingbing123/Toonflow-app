@@ -260,7 +260,7 @@ mod smoke_tests {
         // memory_profiles doesn't require database for listing predefined profiles
         // This is a simple smoke test to verify the module is accessible
 
-        use toonflow_server::prompting::benchmark::memory_profiles::{
+        use openflow_server::prompting::benchmark::memory_profiles::{
             CompressionRules, MemoryBudgetProfileSnapshot, RetentionBuckets,
         };
 

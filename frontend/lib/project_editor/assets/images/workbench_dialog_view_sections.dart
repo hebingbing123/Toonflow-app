@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 
 import '../../../../l10n/app_localizations.dart';
 import '../../../../rust_api.dart';
@@ -70,7 +71,7 @@ Widget _buildAssetField({
   required AssetImagesWorkbenchDialogViewModel model,
   required AssetImagesWorkbenchDialogViewCallbacks callbacks,
 }) {
-  return DropdownButtonFormField<int>(
+  return StudioDropdownButtonFormField<int>(
     initialValue: model.selectedAssetNumericId,
     decoration: InputDecoration(labelText: l10n.projectEditorAssetImagesFieldTargetAsset),
     items: model.assets
@@ -163,7 +164,7 @@ Widget _buildImageField({
   required AssetImagesWorkbenchDialogViewModel model,
   required AssetImagesWorkbenchDialogViewCallbacks callbacks,
 }) {
-  return DropdownButtonFormField<String>(
+  return StudioDropdownButtonFormField<String>(
     initialValue: model.selectedImageId,
     decoration: InputDecoration(labelText: l10n.projectEditorAssetImagesFieldImages),
     items: model.imageItems

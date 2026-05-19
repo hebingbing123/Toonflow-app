@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../rust_api.dart';
 import '../view.dart' show shortVideoPublishDraftStatusLabel;
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 /// Side-by-side comparison for 2–4 [PublishDraftRow] (title, copy, schedule, assets).
 Future<void> showPublishDraftCompareDialog(
@@ -11,7 +12,7 @@ Future<void> showPublishDraftCompareDialog(
   if (drafts.length < 2 || drafts.length > 4) {
     return;
   }
-  await showDialog<void>(
+  await showStudioDialog<void>(
     context: context,
     builder: (ctx) => _PublishDraftCompareDialog(drafts: drafts),
   );
@@ -90,7 +91,7 @@ class _PublishDraftCompareDialog extends StatelessWidget {
     final l10n = resolveAppLocalizationsForErrors(context);
     final platformIds = _allPlatformIdsSorted(drafts);
 
-    return AlertDialog(
+    return StudioAlertDialog(
       title: Row(
         children: [
           const Icon(Icons.compare_arrows),

@@ -1,3 +1,4 @@
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 // ignore_for_file: invalid_use_of_protected_member
 
 part of '../../home_page.dart';
@@ -50,7 +51,7 @@ extension _HomePageBuildSections on _HomePageState {
             ListenableBuilder(
               listenable: notifier,
               builder: (BuildContext context, _) {
-                return DropdownButton<String>(
+                return StudioDropdownButton<String>(
                   isExpanded: true,
                   value: notifier.code,
                   items: <DropdownMenuItem<String>>[

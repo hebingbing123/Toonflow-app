@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../rust_api.dart';
 import '../../storyboard_editor/support/diagnosis.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 class StoryboardsWorkbenchDialogViewModel {
   const StoryboardsWorkbenchDialogViewModel({
@@ -57,7 +58,7 @@ class StoryboardsWorkbenchDialogView extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
     final outline = Theme.of(context).colorScheme.outline;
-    return AlertDialog(
+    return StudioAlertDialog(
       title: Text(l10n.scriptEditorStoryboardsDialogTitle(model.boardsList.length)),
       content: SizedBox(
         width: double.maxFinite,

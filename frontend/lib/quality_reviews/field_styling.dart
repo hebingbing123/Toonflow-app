@@ -32,6 +32,66 @@ InputDecoration qualityReviewsInputDecoration(
   );
 }
 
+/// Review ID field + action button aligned on the input baseline (studio pane).
+class QualityReviewIdLookupRow extends StatelessWidget {
+  const QualityReviewIdLookupRow({
+    super.key,
+    required this.controller,
+    required this.onChanged,
+    required this.loading,
+    required this.onSubmit,
+    required this.fieldLabel,
+    required this.actionLabel,
+    this.busyLabel,
+  });
+
+  final TextEditingController controller;
+  final ValueChanged<String> onChanged;
+  final bool loading;
+  final VoidCallback? onSubmit;
+  final String fieldLabel;
+  final String actionLabel;
+  final String? busyLabel;
+
+  static const double _controlHeight = 48;
+
+  @override
+  Widget build(BuildContext context) {
+    final enabled = !loading && controller.text.trim().isNotEmpty;
+    final action = SizedBox(
+      height: _controlHeight,
+      child: FilledButton.tonal(
+        onPressed: enabled ? onSubmit : null,
+        child: Text(loading ? (busyLabel ?? '…') : actionLabel),
+      ),
+    );
+    final field = TextField(
+      controller: controller,
+      onChanged: onChanged,
+      style: qualityReviewsFieldTextStyle(context),
+      decoration: qualityReviewsInputDecoration(
+        context,
+        labelText: fieldLabel,
+      ),
+    );
+    final width = MediaQuery.sizeOf(context).width;
+    if (width < 520) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[field, const SizedBox(height: 8), action],
+      );
+    }
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: <Widget>[
+        Expanded(child: field),
+        const SizedBox(width: 8),
+        action,
+      ],
+    );
+  }
+}
+
 /// Ensures dialog form fields use readable on-surface text in dark theme.
 ThemeData qualityReviewsFormTheme(BuildContext context) {
   final base = Theme.of(context);

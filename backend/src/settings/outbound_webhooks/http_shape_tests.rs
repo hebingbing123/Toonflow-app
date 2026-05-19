@@ -4,7 +4,7 @@ use serde_json::json;
 use wiremock::matchers::{header, method, path};
 use wiremock::{Mock, MockServer, ResponseTemplate};
 
-use super::sign_toonflow;
+use super::sign_openflow;
 
 #[tokio::test]
 async fn signed_outbound_post_matches_subscriber_contract() {
@@ -18,27 +18,27 @@ async fn signed_outbound_post_matches_subscriber_contract() {
     let bytes = serde_json::to_vec(&body).unwrap();
     let secret = b"integration-test-secret";
     let ts: u64 = 1_700_000_000;
-    let signature = sign_toonflow(secret, ts, &bytes);
+    let signature = sign_openflow(secret, ts, &bytes);
 
     Mock::given(method("POST"))
-        .and(path("/hooks/toonflow"))
+        .and(path("/hooks/openflow"))
         .and(header("content-type", "application/json"))
-        .and(header("x-toonflow-timestamp", ts.to_string()))
-        .and(header("x-toonflow-signature", signature.as_str()))
-        .and(header("x-toonflow-event-type", "job.completed"))
+        .and(header("x-openflow-timestamp", ts.to_string()))
+        .and(header("x-openflow-signature", signature.as_str()))
+        .and(header("x-openflow-event-type", "job.completed"))
         .respond_with(ResponseTemplate::new(200))
         .expect(1)
         .mount(&mock)
         .await;
 
-    let url = format!("{}/hooks/toonflow", mock.uri());
+    let url = format!("{}/hooks/openflow", mock.uri());
     let client = reqwest::Client::new();
     let resp = client
         .post(&url)
         .header("Content-Type", "application/json")
-        .header("X-Toonflow-Timestamp", ts.to_string())
-        .header("X-Toonflow-Signature", &signature)
-        .header("X-Toonflow-Event-Type", "job.completed")
+        .header("X-Openflow-Timestamp", ts.to_string())
+        .header("X-Openflow-Signature", &signature)
+        .header("X-Openflow-Event-Type", "job.completed")
         .body(bytes)
         .send()
         .await

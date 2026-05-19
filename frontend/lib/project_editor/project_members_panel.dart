@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
@@ -428,7 +429,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
           Row(
             children: [
               Expanded(
-                child: DropdownButtonFormField<String>(
+                child: StudioDropdownButtonFormField<String>(
                   key: ValueKey<String>('newRole-$_newRole'),
                   initialValue: _newRole,
                   decoration: InputDecoration(
@@ -496,7 +497,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
               Row(
                 children: [
                   Expanded(
-                    child: DropdownButtonFormField<String>(
+                    child: StudioDropdownButtonFormField<String>(
                       key: ValueKey<String>(
                         'ws-${_selectedWorkspaceCandidateUserId ?? ''}',
                       ),
@@ -646,7 +647,7 @@ class _ProjectMembersPanelState extends State<ProjectMembersPanel> {
             Row(
               children: [
                 Expanded(
-                  child: DropdownButtonFormField<String>(
+                  child: StudioDropdownButtonFormField<String>(
                     key: ValueKey<String>('${row.userId}-$pendingRole'),
                     initialValue: pendingRole,
                     decoration: InputDecoration(

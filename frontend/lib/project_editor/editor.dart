@@ -397,13 +397,13 @@ extension _HomePageProjectEditor on _HomePageState {
         selectedArtStylePack: detail.project.artStylePack,
         selectedStoryStylePack: detail.project.storyStylePack,
       );
-      await showDialog<void>(
+      await showStudioDialog<void>(
         context: context,
         builder: (ctx) {
           final dialogL10n = AppLocalizations.of(ctx)!;
           return StatefulBuilder(
             builder: (ctx, setDialogState) {
-              return AlertDialog(
+              return StudioAlertDialog(
                 title: Text(
                   detail.project.name ??
                       dialogL10n.projectsUnnamedProject(

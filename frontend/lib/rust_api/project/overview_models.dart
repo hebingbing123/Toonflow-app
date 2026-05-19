@@ -8,6 +8,8 @@ class ProjectRow {
     this.name,
     this.intro,
     this.projectType,
+    this.textModel,
+    this.multimodalModel,
     this.imageModel,
     this.imageQuality,
     this.videoModel,
@@ -21,6 +23,7 @@ class ProjectRow {
     this.targetMarket,
     this.targetPlatforms,
     this.durationStrategy,
+    this.voiceModel,
     this.voiceProfile,
     this.subtitleStyle,
     this.bgmStrategy,
@@ -34,6 +37,8 @@ class ProjectRow {
   final String? name;
   final String? intro;
   final String? projectType;
+  final String? textModel;
+  final String? multimodalModel;
   final String? imageModel;
   final String? imageQuality;
   final String? videoModel;
@@ -51,6 +56,7 @@ class ProjectRow {
 
   /// `short` / `medium` / `long`
   final String? durationStrategy;
+  final String? voiceModel;
   final String? voiceProfile;
   final String? subtitleStyle;
   final String? bgmStrategy;
@@ -70,6 +76,8 @@ class ProjectRow {
       name: json['name'] as String?,
       intro: json['intro'] as String?,
       projectType: json['project_type'] as String?,
+      textModel: json['text_model'] as String?,
+      multimodalModel: json['multimodal_model'] as String?,
       imageModel: json['image_model'] as String?,
       imageQuality: json['image_quality'] as String?,
       videoModel: json['video_model'] as String?,
@@ -85,6 +93,7 @@ class ProjectRow {
       targetMarket: json['target_market'] as String?,
       targetPlatforms: platforms,
       durationStrategy: json['duration_strategy'] as String?,
+      voiceModel: json['voice_model'] as String?,
       voiceProfile: json['voice_profile'] as String?,
       subtitleStyle: json['subtitle_style'] as String?,
       bgmStrategy: json['bgm_strategy'] as String?,

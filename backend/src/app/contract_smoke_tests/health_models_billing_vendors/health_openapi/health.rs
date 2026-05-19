@@ -7,7 +7,7 @@ async fn health_routes_ok_without_database() {
         let (status, v) = get_json(uri).await;
         assert_eq!(status, StatusCode::OK, "uri={uri}");
         assert_eq!(v["status"], "ok");
-        assert_eq!(v["service"], "toonflow-server");
+        assert_eq!(v["service"], "openflow-server");
     }
 }
 
@@ -22,7 +22,7 @@ async fn ping_ok_without_database() {
 async fn version_shape_matches_contract() {
     let (status, v) = get_json("/api/v1/version").await;
     assert_eq!(status, StatusCode::OK);
-    assert_eq!(v["service"], "toonflow-server");
+    assert_eq!(v["service"], "openflow-server");
     assert!(v["version"].as_str().is_some_and(|s| !s.is_empty()));
 }
 

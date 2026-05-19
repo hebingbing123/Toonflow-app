@@ -1,10 +1,10 @@
-//! Toonflow HTTP API 入口点。
+//! Openflow HTTP API 入口点。
 //!
 //! 默认监听端口：8666（可通过 `PORT` 覆盖）。
 
 use std::net::SocketAddr;
 
-use toonflow_server::{app, billing, harness, jobs, publish, state};
+use openflow_server::{app, billing, harness, jobs, publish, state};
 #[tokio::main]
 async fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -28,7 +28,7 @@ async fn main() {
         return;
     }
 
-    toonflow_server::telemetry::init_tracing_subscriber();
+    openflow_server::telemetry::init_tracing_subscriber();
 
     harness::isolate::warm_isolate_pool_prefork().await;
 
@@ -49,7 +49,7 @@ async fn main() {
         .await
         .expect("bind failed");
 
-    tracing::info!(%addr, "toonflow-server listening");
+    tracing::info!(%addr, "openflow-server listening");
 
     let worker_state = state.clone();
     tokio::spawn(async move {

@@ -45,8 +45,8 @@ List<ProductShellDestination> studioShellSecondaryDestinations(
   return <ProductShellDestination>[
     ProductShellDestination(
       pane: ProductWorkspacePane.shortVideoSpace,
-      icon: Icons.movie_creation_outlined,
-      selectedIcon: Icons.movie_creation,
+      icon: Icons.ios_share_outlined,
+      selectedIcon: Icons.ios_share,
       label: (_) => l10n.productNavShortVideoSpace,
     ),
     ProductShellDestination(

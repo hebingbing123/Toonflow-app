@@ -6,8 +6,8 @@
 
 use std::sync::Arc;
 
+use openflow_server::harness::isolate::{isolated_echo, metrics_snapshot};
 use tokio::sync::Barrier;
-use toonflow_server::harness::isolate::{isolated_echo, metrics_snapshot};
 
 struct ScopedEnvVar {
     key: &'static str,
@@ -35,7 +35,7 @@ impl Drop for ScopedEnvVar {
 #[tokio::test]
 async fn three_parallel_echoes_under_one_slot_accumulate_sem_wait() {
     let exe =
-        std::env::var("CARGO_BIN_EXE_toonflow-server").expect("cargo exposes CARGO_BIN_EXE_*");
+        std::env::var("CARGO_BIN_EXE_openflow-server").expect("cargo exposes CARGO_BIN_EXE_*");
     let _runner_guard = ScopedEnvVar::capture("HARNESS_ISOLATE_RUNNER_EXE");
     let _max_guard = ScopedEnvVar::capture("HARNESS_ISOLATE_MAX_CONCURRENT");
     let _pool_guard = ScopedEnvVar::capture("HARNESS_ISOLATE_POOL");

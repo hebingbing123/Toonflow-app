@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../rust_api.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 /// Filter panel component for short video assembly
 /// 
@@ -187,7 +188,7 @@ class _FilterPanelState extends State<FilterPanel> {
     }
 
     // Show dialog to input preset name
-    showDialog<String>(
+    showStudioDialog<String>(
       context: context,
       builder: (context) => _SavePresetDialog(),
     ).then((name) {
@@ -800,7 +801,7 @@ class _SavePresetDialogState extends State<_SavePresetDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    return AlertDialog(
+    return StudioAlertDialog(
       title: Text(l10n.shortVideoFilterSaveDialogTitle),
       content: TextField(
         controller: _nameController,

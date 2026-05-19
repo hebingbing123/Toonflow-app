@@ -158,7 +158,7 @@ extension ShortVideoPublishScheduling on _ShortVideoSpaceSectionState {
     }
     final messenger = ScaffoldMessenger.maybeOf(context);
     var overrideExisting = false;
-    final proceed = await showDialog<bool>(
+    final proceed = await showStudioDialog<bool>(
       context: context,
       builder: (dialogCtx) {
         return StatefulBuilder(
@@ -166,7 +166,7 @@ extension ShortVideoPublishScheduling on _ShortVideoSpaceSectionState {
             final dlgL10n = resolveAppLocalizationsForErrors(ctx);
             final dayLabel =
                 '${dayLocal.year}-${dayLocal.month.toString().padLeft(2, '0')}-${dayLocal.day.toString().padLeft(2, '0')}';
-            return AlertDialog(
+            return StudioAlertDialog(
               title: Text(dlgL10n.shortVideoPublishScheduleCalendarTitle(dayLabel)),
               content: Column(
                 mainAxisSize: MainAxisSize.min,

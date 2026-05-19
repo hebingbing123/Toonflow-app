@@ -154,10 +154,10 @@ pub(super) fn first_text_model_composite_id() -> String {
     "1:gpt-4o-mini".into()
 }
 
-/// Default text model id for **`GET /api/v1/models/text-default`**. Override with **`TOONFLOW_DEFAULT_TEXT_MODEL_ID`**
+/// Default text model id for **`GET /api/v1/models/text-default`**. Override with **`OPENFLOW_DEFAULT_TEXT_MODEL_ID`**
 /// (must match a catalog entry for **`GET /api/v1/models/detail`**).
 pub(super) fn default_text_model_composite_id() -> String {
-    if let Ok(raw) = std::env::var("TOONFLOW_DEFAULT_TEXT_MODEL_ID") {
+    if let Ok(raw) = std::env::var("OPENFLOW_DEFAULT_TEXT_MODEL_ID") {
         let id = raw.trim();
         if !id.is_empty() && lookup_detail(id, false).is_some() {
             return id.to_string();

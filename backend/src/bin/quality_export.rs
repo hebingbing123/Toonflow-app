@@ -17,7 +17,7 @@ use clap::Parser;
 use sqlx::postgres::PgPoolOptions;
 use uuid::Uuid;
 
-use toonflow_server::prompting::quality::dimension::{BadCaseFixture, FixtureReview};
+use openflow_server::prompting::quality::dimension::{BadCaseFixture, FixtureReview};
 
 /// 合法的生成阶段值（与 validate.rs 中的 VALID_STAGES 保持一致）
 const VALID_STAGES: &[&str] = &[

@@ -18,9 +18,9 @@ async fn settings_platform_config_roundtrip() {
     let secret = std::env::var("SUPABASE_JWT_SECRET")
         .expect("SUPABASE_JWT_SECRET must match JWT signing (see supabase status)");
 
-    let previous_plan_env = std::env::var("TOONFLOW_PLATFORM_CONFIG_PLAN_OVERRIDES_JSON").ok();
+    let previous_plan_env = std::env::var("OPENFLOW_PLATFORM_CONFIG_PLAN_OVERRIDES_JSON").ok();
     std::env::set_var(
-        "TOONFLOW_PLATFORM_CONFIG_PLAN_OVERRIDES_JSON",
+        "OPENFLOW_PLATFORM_CONFIG_PLAN_OVERRIDES_JSON",
         r#"{
           "enterprise": {
             "helpHubEnabled": false,
@@ -298,8 +298,8 @@ async fn settings_platform_config_roundtrip() {
         .await
         .expect("delete enterprise workspace");
     match previous_plan_env {
-        Some(value) => std::env::set_var("TOONFLOW_PLATFORM_CONFIG_PLAN_OVERRIDES_JSON", value),
-        None => std::env::remove_var("TOONFLOW_PLATFORM_CONFIG_PLAN_OVERRIDES_JSON"),
+        Some(value) => std::env::set_var("OPENFLOW_PLATFORM_CONFIG_PLAN_OVERRIDES_JSON", value),
+        None => std::env::remove_var("OPENFLOW_PLATFORM_CONFIG_PLAN_OVERRIDES_JSON"),
     }
 
     if let Err(panic) = test_result {

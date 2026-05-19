@@ -1,8 +1,10 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 
 import '../../rust_api.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 class CornerScapeWorkbenchDialogViewModel {
   const CornerScapeWorkbenchDialogViewModel({
@@ -68,7 +70,7 @@ class CornerScapeWorkbenchDialogView extends StatelessWidget {
     final dialogWidth = viewportWidth.isFinite
         ? viewportWidth.clamp(320.0, 760.0)
         : 760.0;
-    return AlertDialog(
+    return StudioAlertDialog(
       title: Text(l10n.projectEditorAssetHistoryTitle),
       content: SizedBox(
         width: dialogWidth,
@@ -156,7 +158,7 @@ class CornerScapeWorkbenchDialogView extends StatelessWidget {
                 const SizedBox(height: 8),
                 if (model.selectedAsset != null &&
                     model.selectedAsset!.historyImages.isNotEmpty)
-                  DropdownButtonFormField<String>(
+                  StudioDropdownButtonFormField<String>(
                     initialValue: model.selectedHistoryImageId,
                     decoration: InputDecoration(labelText: l10n.projectEditorAssetHistoryImageDropdownLabel),
                     items: model.selectedAsset!.historyImages

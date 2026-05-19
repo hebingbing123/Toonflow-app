@@ -20,6 +20,8 @@ class ProjectsStudioHome extends StatefulWidget {
     required this.controller,
     required this.onOpenProjectStudio,
     required this.onCreateProject,
+    this.currentProjectNumericId,
+    this.onSelectProjectScope,
     this.accessToken,
     this.currentWorkspaceName,
     this.currentWorkspaceType,
@@ -28,6 +30,8 @@ class ProjectsStudioHome extends StatefulWidget {
 
   final ProjectsController controller;
   final String? accessToken;
+  final int? currentProjectNumericId;
+  final Future<void> Function(ProjectRow row)? onSelectProjectScope;
   final ValueChanged<ProjectRow> onOpenProjectStudio;
   final Future<bool> Function(Map<String, dynamic> fields) onCreateProject;
   final String? currentWorkspaceName;
@@ -158,95 +162,113 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
 
         return Align(
           alignment: Alignment.topCenter,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: contentMaxWidth),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Text(
-                            l10n.studioProjectsHomeTitle,
-                            style: studioPageTitleStyle(context),
-                          ),
-                          const SizedBox(height: 10),
-                          Text(
-                            l10n.studioProjectsHomeSubtitle,
-                            style: studioSectionIntroStyle(context),
-                          ),
-                        ],
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.only(bottom: 24),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: contentMaxWidth),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                              l10n.studioProjectsHomeTitle,
+                              style: studioPageTitleStyle(context),
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              l10n.studioProjectsHomeSubtitle,
+                              style: studioSectionIntroStyle(context),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 16),
-                    StudioPrimaryButton(
-                      label: widget.controller.creatingProject
-                          ? l10n.projectsCreating
-                          : l10n.studioCreateProject,
-                      icon: Icons.add,
-                      loading: widget.controller.creatingProject,
-                      onPressed: widget.controller.creatingProject
-                          ? null
-                          : _createProject,
+                      const SizedBox(width: 16),
+                      StudioPrimaryButton(
+                        label: widget.controller.creatingProject
+                            ? l10n.projectsCreating
+                            : l10n.studioCreateProject,
+                        icon: Icons.add,
+                        loading: widget.controller.creatingProject,
+                        onPressed: widget.controller.creatingProject
+                            ? null
+                            : _createProject,
+                      ),
+                    ],
+                  ),
+                  if (_enterpriseEmpty) ...<Widget>[
+                    const SizedBox(height: 20),
+                    _EnterpriseEmptyBanner(
+                      workspaceName: widget.currentWorkspaceName,
+                      creating: widget.controller.creatingProject,
+                      onCreate: _createProject,
+                      onOpenTeamWorkspaces: widget.onOpenTeamWorkspaces,
                     ),
                   ],
-                ),
-                if (_enterpriseEmpty) ...<Widget>[
-                  const SizedBox(height: 20),
-                  _EnterpriseEmptyBanner(
-                    workspaceName: widget.currentWorkspaceName,
-                    creating: widget.controller.creatingProject,
-                    onCreate: _createProject,
-                    onOpenTeamWorkspaces: widget.onOpenTeamWorkspaces,
-                  ),
-                ],
-                if (recent.isNotEmpty) ...<Widget>[
-                  const SizedBox(height: 28),
-                  Text(
-                    l10n.studioContinueCreating,
-                    style: studioPaneTitleStyle(context),
-                  ),
-                  const SizedBox(height: 14),
-                  SizedBox(
-                    height: 152,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: recent.length,
-                      separatorBuilder: (context, index) =>
-                          const SizedBox(width: 14),
-                      itemBuilder: (context, index) {
-                        final project = recent[index];
-                        return SizedBox(
-                          width: recentCardWidth,
-                          child: _RecentProjectChip(
-                            project: project,
-                            onTap: () => widget.onOpenProjectStudio(project),
-                          ),
-                        );
-                      },
+                  if (widget.currentProjectNumericId == null &&
+                      projects.isNotEmpty) ...<Widget>[
+                    const SizedBox(height: 20),
+                    _SelectProjectHintBanner(
+                      message: l10n.studioPipelineSelectProjectFirst,
                     ),
-                  ),
+                  ],
+                  if (recent.isNotEmpty) ...<Widget>[
+                    const SizedBox(height: 28),
+                    Text(
+                      l10n.studioContinueCreating,
+                      style: studioPaneTitleStyle(context),
+                    ),
+                    const SizedBox(height: 14),
+                    SizedBox(
+                      height: 152,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: recent.length,
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(width: 14),
+                        itemBuilder: (context, index) {
+                          final project = recent[index];
+                          return SizedBox(
+                            width: recentCardWidth,
+                            child: _RecentProjectChip(
+                              project: project,
+                              selected:
+                                  widget.currentProjectNumericId ==
+                                  project.numericId,
+                              onTap: widget.onSelectProjectScope == null
+                                  ? () => widget.onOpenProjectStudio(project)
+                                  : () =>
+                                        widget.onSelectProjectScope!(project),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 28),
+                  if (projects.isEmpty && !widget.controller.loadingProjects)
+                    StudioEmptyState(
+                      title: l10n.studioProjectsEmptyTitle,
+                      subtitle: l10n.studioProjectsEmptySubtitle,
+                      actionLabel: l10n.studioCreateProject,
+                      onAction: _createProject,
+                    )
+                  else
+                    ProjectsGridView(
+                      projects: projects,
+                      loading: widget.controller.loadingProjects,
+                      currentProjectNumericId: widget.currentProjectNumericId,
+                      progressForProject: (p) => _progressByProjectId[p.id] ?? 0,
+                      onSelectProject: widget.onSelectProjectScope,
+                      onOpenProject: widget.onOpenProjectStudio,
+                    ),
                 ],
-                const SizedBox(height: 28),
-                if (projects.isEmpty && !widget.controller.loadingProjects)
-                  StudioEmptyState(
-                    title: l10n.studioProjectsEmptyTitle,
-                    subtitle: l10n.studioProjectsEmptySubtitle,
-                    actionLabel: l10n.studioCreateProject,
-                    onAction: _createProject,
-                  )
-                else
-                  ProjectsGridView(
-                    projects: projects,
-                    loading: widget.controller.loadingProjects,
-                    progressForProject: (p) => _progressByProjectId[p.id] ?? 0,
-                    onOpenProject: widget.onOpenProjectStudio,
-                  ),
-              ],
+              ),
             ),
           ),
         );
@@ -256,10 +278,15 @@ class _ProjectsStudioHomeState extends State<ProjectsStudioHome> {
 }
 
 class _RecentProjectChip extends StatelessWidget {
-  const _RecentProjectChip({required this.project, required this.onTap});
+  const _RecentProjectChip({
+    required this.project,
+    required this.onTap,
+    this.selected = false,
+  });
 
   final ProjectRow project;
   final VoidCallback onTap;
+  final bool selected;
 
   @override
   Widget build(BuildContext context) {
@@ -269,19 +296,34 @@ class _RecentProjectChip extends StatelessWidget {
         project.name ?? l10n.projectsUnnamedProject(project.numericId);
 
     return Material(
-      color: tokens.bgInset,
+      color: selected ? tokens.bgElevated : tokens.bgInset,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
-        child: Padding(
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: selected ? tokens.primary : tokens.borderSubtle,
+              width: selected ? 1.5 : 1,
+            ),
+          ),
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text(
-                l10n.studioContinueCreating,
-                style: Theme.of(context).textTheme.labelSmall,
+              Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Text(
+                      l10n.studioContinueCreating,
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                  ),
+                  if (selected)
+                    Icon(Icons.check_circle, size: 18, color: tokens.primary),
+                ],
               ),
               const Spacer(),
               Text(
@@ -352,6 +394,40 @@ class _EnterpriseEmptyBanner extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _SelectProjectHintBanner extends StatelessWidget {
+  const _SelectProjectHintBanner({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = StudioTokens.of(context);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: tokens.bgInset,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: tokens.borderSubtle),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Icon(Icons.touch_app_outlined, size: 18, color: tokens.primary),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                message,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

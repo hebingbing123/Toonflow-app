@@ -10,7 +10,6 @@ ThemeData buildStudioDarkTheme({
   StudioTypography typography = StudioTypography.regular,
 }) {
   const tokens = StudioTokens.dark;
-  const primaryDark = Color(0xFF6355D4);
 
   final base =
       ColorScheme.fromSeed(
@@ -19,10 +18,13 @@ ThemeData buildStudioDarkTheme({
       ).copyWith(
         primary: tokens.primary,
         onPrimary: Colors.white,
+        primaryContainer: tokens.primarySoft,
         secondary: tokens.accent,
         onSecondary: Colors.black,
+        secondaryContainer: tokens.accentSoft,
         surface: tokens.bgSurface,
         onSurface: tokens.textPrimary,
+        surfaceContainerLow: tokens.bgSurface,
         surfaceContainerHighest: tokens.bgElevated,
         surfaceContainer: tokens.bgElevated,
         onSurfaceVariant: tokens.textSecondary,
@@ -109,11 +111,11 @@ ThemeData buildStudioDarkTheme({
     ),
     cardTheme: CardThemeData(
       elevation: 0,
-      color: tokens.bgElevated,
+      color: tokens.bgSurface,
       surfaceTintColor: Colors.transparent,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
-        side: BorderSide(color: tokens.borderSubtle),
+        side: BorderSide(color: tokens.surfaceHighlight),
       ),
       margin: EdgeInsets.zero,
     ),
@@ -122,12 +124,14 @@ ThemeData buildStudioDarkTheme({
         backgroundColor: tokens.primary,
         foregroundColor: Colors.white,
         elevation: 0,
+        shadowColor: tokens.panelGlow.withValues(alpha: 0.34),
         padding: typography.buttonPadding,
         minimumSize: Size(0, typography.buttonHeight),
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         visualDensity: const VisualDensity(horizontal: -1, vertical: -1),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
+          side: BorderSide(color: tokens.primary.withValues(alpha: 0.36)),
         ),
         textStyle: TextStyle(
           fontWeight: FontWeight.w600,
@@ -139,7 +143,8 @@ ThemeData buildStudioDarkTheme({
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         foregroundColor: tokens.textPrimary,
-        side: BorderSide(color: tokens.borderDefault),
+        backgroundColor: tokens.bgSurface.withValues(alpha: 0.74),
+        side: BorderSide(color: tokens.surfaceHighlight),
         padding: typography.buttonPadding,
         minimumSize: Size(0, typography.buttonHeight),
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -156,7 +161,7 @@ ThemeData buildStudioDarkTheme({
     ),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
-        foregroundColor: tokens.primary,
+        foregroundColor: tokens.accent,
         padding: typography.textButtonPadding,
         minimumSize: Size(0, typography.buttonHeight),
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -170,7 +175,7 @@ ThemeData buildStudioDarkTheme({
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: tokens.bgInset,
+      fillColor: tokens.bgInset.withValues(alpha: 0.92),
       contentPadding: typography.inputPadding,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
@@ -182,7 +187,7 @@ ThemeData buildStudioDarkTheme({
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
-        borderSide: BorderSide(color: tokens.primary, width: 1.5),
+        borderSide: BorderSide(color: tokens.accent, width: 1.5),
       ),
       labelStyle: TextStyle(
         color: tokens.textSecondary,
@@ -205,6 +210,27 @@ ThemeData buildStudioDarkTheme({
         height: 1.3,
       ),
     ),
+    menuTheme: MenuThemeData(
+      style: MenuStyle(
+        backgroundColor: WidgetStatePropertyAll<Color>(tokens.bgElevated),
+        elevation: const WidgetStatePropertyAll<double>(16),
+        shadowColor: WidgetStatePropertyAll<Color>(
+          tokens.panelGlow.withValues(alpha: 0.2),
+        ),
+        surfaceTintColor: const WidgetStatePropertyAll<Color>(
+          Colors.transparent,
+        ),
+        shape: WidgetStatePropertyAll<OutlinedBorder>(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
+            side: BorderSide(color: tokens.surfaceHighlight),
+          ),
+        ),
+        padding: const WidgetStatePropertyAll<EdgeInsets>(
+          EdgeInsets.symmetric(vertical: 6, horizontal: 6),
+        ),
+      ),
+    ),
     dropdownMenuTheme: DropdownMenuThemeData(
       textStyle: TextStyle(
         color: tokens.textPrimary,
@@ -213,7 +239,7 @@ ThemeData buildStudioDarkTheme({
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: tokens.bgInset,
+        fillColor: tokens.bgInset.withValues(alpha: 0.92),
         labelStyle: TextStyle(
           color: tokens.textSecondary,
           fontSize: typography.hint,
@@ -225,47 +251,58 @@ ThemeData buildStudioDarkTheme({
       ),
       menuStyle: MenuStyle(
         backgroundColor: WidgetStatePropertyAll<Color>(tokens.bgElevated),
+        elevation: const WidgetStatePropertyAll<double>(16),
+        shadowColor: WidgetStatePropertyAll<Color>(
+          tokens.panelGlow.withValues(alpha: 0.2),
+        ),
+        surfaceTintColor: const WidgetStatePropertyAll<Color>(
+          Colors.transparent,
+        ),
+        shape: WidgetStatePropertyAll<OutlinedBorder>(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
+            side: BorderSide(color: tokens.surfaceHighlight),
+          ),
+        ),
+        padding: const WidgetStatePropertyAll<EdgeInsets>(
+          EdgeInsets.symmetric(vertical: 6, horizontal: 6),
+        ),
+      ),
+    ),
+    snackBarTheme: SnackBarThemeData(
+      behavior: SnackBarBehavior.floating,
+      backgroundColor: tokens.bgSurface,
+      elevation: 12,
+      contentTextStyle: TextStyle(
+        color: tokens.textPrimary,
+        fontSize: typography.body,
+        height: 1.4,
+      ),
+      actionTextColor: tokens.accent,
+      closeIconColor: tokens.textMuted,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
+        side: BorderSide(color: tokens.surfaceHighlight),
       ),
     ),
     dividerTheme: DividerThemeData(color: tokens.borderSubtle, thickness: 1),
     focusColor: tokens.primary.withValues(alpha: 0.35),
-    hoverColor: tokens.primary.withValues(alpha: 0.08),
+    hoverColor: tokens.primary.withValues(alpha: 0.10),
     chipTheme: ChipThemeData(
-      backgroundColor: tokens.bgInset,
-      selectedColor: tokens.primary.withValues(alpha: 0.22),
+      backgroundColor: tokens.bgSurface.withValues(alpha: 0.92),
+      selectedColor: tokens.primarySoft,
       labelStyle: TextStyle(
         fontWeight: FontWeight.w500,
         color: tokens.textPrimary,
         fontSize: typography.hint,
         height: 1.2,
       ),
-      side: BorderSide.none,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      side: BorderSide(color: tokens.surfaceHighlight),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
     ),
     extensions: <ThemeExtension<dynamic>>[
       StudioTokens.dark,
-      const StudioColors(
-        sidebar: Color(0xFF12141C),
-        sidebarBorder: Color(0xFF252836),
-        canvas: Color(0xFF0D0F14),
-        brandGradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: <Color>[Color(0xFF7C6CF0), Color(0xFF00CEC9)],
-        ),
-        loginBackdrop: LinearGradient(
-          begin: Alignment(-0.8, -1),
-          end: Alignment(1.2, 1),
-          colors: <Color>[
-            Color(0xFF0D0F14),
-            Color(0xFF1A1F2B),
-            Color(0xFF12141C),
-          ],
-        ),
-        primaryGradient: LinearGradient(
-          colors: <Color>[Color(0xFF7C6CF0), primaryDark],
-        ),
-      ),
+      StudioColors.dark,
       typography,
     ],
   );
@@ -281,6 +318,9 @@ class StudioColors extends ThemeExtension<StudioColors> {
     required this.brandGradient,
     required this.loginBackdrop,
     required this.primaryGradient,
+    required this.shellBackdrop,
+    required this.panelGradient,
+    required this.signalGradient,
   });
 
   final Color sidebar;
@@ -289,9 +329,53 @@ class StudioColors extends ThemeExtension<StudioColors> {
   final Gradient brandGradient;
   final Gradient loginBackdrop;
   final Gradient primaryGradient;
+  final Gradient shellBackdrop;
+  final Gradient panelGradient;
+  final Gradient signalGradient;
+
+  static const StudioColors dark = StudioColors(
+    sidebar: Color(0xFF0D1524),
+    sidebarBorder: Color(0xFF1B2841),
+    canvas: Color(0xFF08101A),
+    brandGradient: LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: <Color>[Color(0xFF7E95FF), Color(0xFF5283F2), Color(0xFF31C2E8)],
+    ),
+    loginBackdrop: LinearGradient(
+      begin: Alignment(-1.1, -1),
+      end: Alignment(1.2, 1.1),
+      colors: <Color>[
+        Color(0xFF060D15),
+        Color(0xFF0B1626),
+        Color(0xFF0C1A28),
+        Color(0xFF081018),
+      ],
+    ),
+    primaryGradient: LinearGradient(
+      begin: Alignment.centerLeft,
+      end: Alignment.centerRight,
+      colors: <Color>[Color(0xFF809EFF), Color(0xFF4D76D8)],
+    ),
+    shellBackdrop: LinearGradient(
+      begin: Alignment(-1.0, -1.0),
+      end: Alignment(1.0, 1.0),
+      colors: <Color>[Color(0xFF06101A), Color(0xFF0A1522), Color(0xFF0A1721)],
+    ),
+    panelGradient: LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: <Color>[Color(0xFF131F31), Color(0xFF0F1828), Color(0xFF0D1622)],
+    ),
+    signalGradient: LinearGradient(
+      begin: Alignment.centerLeft,
+      end: Alignment.centerRight,
+      colors: <Color>[Color(0xFF5E84FF), Color(0xFF238EB8)],
+    ),
+  );
 
   static StudioColors of(BuildContext context) {
-    return Theme.of(context).extension<StudioColors>()!;
+    return Theme.of(context).extension<StudioColors>() ?? dark;
   }
 
   @override
@@ -302,6 +386,9 @@ class StudioColors extends ThemeExtension<StudioColors> {
     Gradient? brandGradient,
     Gradient? loginBackdrop,
     Gradient? primaryGradient,
+    Gradient? shellBackdrop,
+    Gradient? panelGradient,
+    Gradient? signalGradient,
   }) {
     return StudioColors(
       sidebar: sidebar ?? this.sidebar,
@@ -310,6 +397,9 @@ class StudioColors extends ThemeExtension<StudioColors> {
       brandGradient: brandGradient ?? this.brandGradient,
       loginBackdrop: loginBackdrop ?? this.loginBackdrop,
       primaryGradient: primaryGradient ?? this.primaryGradient,
+      shellBackdrop: shellBackdrop ?? this.shellBackdrop,
+      panelGradient: panelGradient ?? this.panelGradient,
+      signalGradient: signalGradient ?? this.signalGradient,
     );
   }
 
@@ -323,6 +413,9 @@ class StudioColors extends ThemeExtension<StudioColors> {
       brandGradient: brandGradient,
       loginBackdrop: loginBackdrop,
       primaryGradient: primaryGradient,
+      shellBackdrop: shellBackdrop,
+      panelGradient: panelGradient,
+      signalGradient: signalGradient,
     );
   }
 }

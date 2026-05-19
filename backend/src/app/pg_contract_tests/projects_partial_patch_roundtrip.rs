@@ -23,9 +23,13 @@ async fn projects_patch_partial_fields_roundtrip() {
             "name":"pg_general_project_{}",
             "intro":"before update",
             "projectType":"movie",
+            "textModel":"1:gpt-4.1-mini",
+            "multimodalModel":"1:gpt-4o",
             "artStyle":"orig-style",
             "mode":"animated.short_drama",
-            "videoRatio":"9:16"
+            "videoRatio":"9:16",
+            "voiceModel":"gpt-4o-mini-tts",
+            "voiceProfile":"preset:alloy"
         }}"#,
         Uuid::new_v4().simple()
     );
@@ -64,8 +68,12 @@ async fn projects_patch_partial_fields_roundtrip() {
     assert_eq!(status, StatusCode::OK, "before_update={before_update}");
     let proj = &before_update["project"];
     assert_eq!(proj["intro"].as_str(), Some("before update"));
+    assert_eq!(proj["text_model"].as_str(), Some("1:gpt-4.1-mini"));
+    assert_eq!(proj["multimodal_model"].as_str(), Some("1:gpt-4o"));
     assert_eq!(proj["mode"].as_str(), Some("animated.short_drama"));
     assert_eq!(proj["art_style"].as_str(), Some("orig-style"));
+    assert_eq!(proj["voice_model"].as_str(), Some("gpt-4o-mini-tts"));
+    assert_eq!(proj["voice_profile"].as_str(), Some("preset:alloy"));
 
     let res = app
         .clone()
@@ -94,7 +102,7 @@ async fn projects_patch_partial_fields_roundtrip() {
                 .header(header::CONTENT_TYPE, "application/json")
                 .extension(ConnectInfo(test_addr()))
                 .body(Body::from(
-                    r#"{"intro":"after update","mode":"live_action.short_drama","artStyle":"reframed-style","videoRatio":"1:1","projectType":"series"}"#,
+                    r#"{"intro":"after update","mode":"live_action.short_drama","artStyle":"reframed-style","videoRatio":"1:1","projectType":"series","textModel":" 1:o4-mini ","multimodalModel":null,"voiceModel":"  ","voiceProfile":null}"#,
                 ))
                 .unwrap(),
         )
@@ -107,6 +115,10 @@ async fn projects_patch_partial_fields_roundtrip() {
     assert_eq!(patched["art_style"].as_str(), Some("reframed-style"));
     assert_eq!(patched["video_ratio"].as_str(), Some("1:1"));
     assert_eq!(patched["project_type"].as_str(), Some("series"));
+    assert_eq!(patched["text_model"].as_str(), Some("1:o4-mini"));
+    assert!(patched["multimodal_model"].is_null());
+    assert!(patched["voice_model"].is_null());
+    assert!(patched["voice_profile"].is_null());
 
     let res = app
         .clone()
@@ -134,9 +146,21 @@ async fn projects_patch_partial_fields_roundtrip() {
     assert_eq!(row["art_style"].as_str(), Some("reframed-style"));
     assert_eq!(row["video_ratio"].as_str(), Some("1:1"));
     assert_eq!(row["project_type"].as_str(), Some("series"));
+    assert_eq!(row["text_model"].as_str(), Some("1:o4-mini"));
+    assert!(row["multimodal_model"].is_null());
+    assert!(row["voice_model"].is_null());
+    assert!(row["voice_profile"].is_null());
 
-    let stored: (Option<String>, Option<String>, Option<String>, Option<String>) = sqlx::query_as(
-        "SELECT intro, mode, art_style, project_type FROM public.app_project WHERE id = $1 AND owner_user_id = $2",
+    let stored: (
+        Option<String>,
+        Option<String>,
+        Option<String>,
+        Option<String>,
+        Option<String>,
+        Option<String>,
+        Option<String>,
+    ) = sqlx::query_as(
+        "SELECT intro, mode, art_style, project_type, text_model, multimodal_model, voice_model FROM public.app_project WHERE id = $1 AND owner_user_id = $2",
     )
     .bind(project_uuid)
     .bind(sub)
@@ -147,6 +171,9 @@ async fn projects_patch_partial_fields_roundtrip() {
     assert_eq!(stored.1.as_deref(), Some("live_action.short_drama"));
     assert_eq!(stored.2.as_deref(), Some("reframed-style"));
     assert_eq!(stored.3.as_deref(), Some("series"));
+    assert_eq!(stored.4.as_deref(), Some("1:o4-mini"));
+    assert_eq!(stored.5.as_deref(), None);
+    assert_eq!(stored.6.as_deref(), None);
 
     let _ = sqlx::query("DELETE FROM public.app_project WHERE id = $1")
         .bind(project_uuid)

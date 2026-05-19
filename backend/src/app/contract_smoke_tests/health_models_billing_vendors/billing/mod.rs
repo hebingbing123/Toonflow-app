@@ -29,7 +29,7 @@ fn sign_webhook_payload(secret: &str, timestamp: u64, body: &[u8]) -> String {
     hex::encode(mac.finalize().into_bytes())
 }
 
-fn toonflow_hmac_headers(secret: &str, timestamp: u64, body: &[u8]) -> (HeaderValue, String) {
+fn openflow_hmac_headers(secret: &str, timestamp: u64, body: &[u8]) -> (HeaderValue, String) {
     let signature = sign_webhook_payload(secret, timestamp, body);
     let header = HeaderValue::from_str(&format!("sha256={signature}")).expect("signature header");
     (header, timestamp.to_string())

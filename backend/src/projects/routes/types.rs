@@ -4,6 +4,13 @@ use sqlx::FromRow;
 use utoipa::{IntoParams, ToSchema};
 use uuid::Uuid;
 
+fn deserialize_patch_value<'de, D>(deserializer: D) -> Result<Option<Option<Value>>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    Option::<Value>::deserialize(deserializer).map(Some)
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ProjectBrief {
@@ -228,6 +235,8 @@ pub struct ProjectRow {
     pub name: Option<String>,
     pub intro: Option<String>,
     pub project_type: Option<String>,
+    pub text_model: Option<String>,
+    pub multimodal_model: Option<String>,
     pub image_model: Option<String>,
     pub image_quality: Option<String>,
     pub video_model: Option<String>,
@@ -249,6 +258,8 @@ pub struct ProjectRow {
     /// 时长策略（如 short, medium, long）
     #[schema(example = "short")]
     pub duration_strategy: Option<String>,
+    /// 声线配置标识
+    pub voice_model: Option<String>,
     /// 声线配置标识
     pub voice_profile: Option<String>,
     /// 字幕样式标识
@@ -885,61 +896,68 @@ pub struct ProjectsSummaryResponse {
 #[derive(Debug, Deserialize, Default, ToSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PatchProjectBody {
-    #[serde(default)]
-    pub name: Option<Value>,
-    #[serde(default)]
-    pub intro: Option<Value>,
-    #[serde(default)]
-    pub project_type: Option<Value>,
-    #[serde(default)]
-    pub image_model: Option<Value>,
-    #[serde(default)]
-    pub image_quality: Option<Value>,
-    #[serde(default)]
-    pub video_model: Option<Value>,
-    #[serde(default)]
-    pub art_style: Option<Value>,
-    #[serde(default)]
-    pub director_manual: Option<Value>,
-    #[serde(default)]
-    pub mode: Option<Value>,
-    #[serde(default)]
-    pub video_ratio: Option<Value>,
+    #[serde(default, deserialize_with = "deserialize_patch_value")]
+    pub name: Option<Option<Value>>,
+    #[serde(default, deserialize_with = "deserialize_patch_value")]
+    pub intro: Option<Option<Value>>,
+    #[serde(default, deserialize_with = "deserialize_patch_value")]
+    pub project_type: Option<Option<Value>>,
+    #[serde(default, deserialize_with = "deserialize_patch_value")]
+    pub text_model: Option<Option<Value>>,
+    #[serde(default, deserialize_with = "deserialize_patch_value")]
+    pub multimodal_model: Option<Option<Value>>,
+    #[serde(default, deserialize_with = "deserialize_patch_value")]
+    pub image_model: Option<Option<Value>>,
+    #[serde(default, deserialize_with = "deserialize_patch_value")]
+    pub image_quality: Option<Option<Value>>,
+    #[serde(default, deserialize_with = "deserialize_patch_value")]
+    pub video_model: Option<Option<Value>>,
+    #[serde(default, deserialize_with = "deserialize_patch_value")]
+    pub art_style: Option<Option<Value>>,
+    #[serde(default, deserialize_with = "deserialize_patch_value")]
+    pub director_manual: Option<Option<Value>>,
+    #[serde(default, deserialize_with = "deserialize_patch_value")]
+    pub mode: Option<Option<Value>>,
+    #[serde(default, deserialize_with = "deserialize_patch_value")]
+    pub video_ratio: Option<Option<Value>>,
     /// 画风技能包路径（如 `art_skills/realpeople_ancient_chinese`）
-    #[serde(default)]
-    pub art_style_pack: Option<Value>,
+    #[serde(default, deserialize_with = "deserialize_patch_value")]
+    pub art_style_pack: Option<Option<Value>>,
     /// 故事风格技能包路径（如 `story_skills/Sweet_romance_novel`）
-    #[serde(default)]
-    pub story_style_pack: Option<Value>,
+    #[serde(default, deserialize_with = "deserialize_patch_value")]
+    pub story_style_pack: Option<Option<Value>>,
     /// 目标市场（如 domestic, overseas, both）
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_patch_value")]
     #[schema(example = json!("domestic"))]
-    pub target_market: Option<Value>,
+    pub target_market: Option<Option<Value>>,
     /// 目标平台数组（如 ["douyin", "bilibili", "tiktok"]）
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_patch_value")]
     #[schema(example = json!(["douyin", "bilibili"]))]
-    pub target_platforms: Option<Value>,
+    pub target_platforms: Option<Option<Value>>,
     /// 时长策略（如 short, medium, long）
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_patch_value")]
     #[schema(example = json!("short"))]
-    pub duration_strategy: Option<Value>,
+    pub duration_strategy: Option<Option<Value>>,
     /// 声线配置标识
-    #[serde(default)]
-    pub voice_profile: Option<Value>,
+    #[serde(default, deserialize_with = "deserialize_patch_value")]
+    pub voice_model: Option<Option<Value>>,
+    /// 声线配置标识
+    #[serde(default, deserialize_with = "deserialize_patch_value")]
+    pub voice_profile: Option<Option<Value>>,
     /// 字幕样式标识
-    #[serde(default)]
-    pub subtitle_style: Option<Value>,
+    #[serde(default, deserialize_with = "deserialize_patch_value")]
+    pub subtitle_style: Option<Option<Value>>,
     /// BGM 策略
-    #[serde(default)]
-    pub bgm_strategy: Option<Value>,
+    #[serde(default, deserialize_with = "deserialize_patch_value")]
+    pub bgm_strategy: Option<Option<Value>>,
     /// Quality gate enforcement strategy (off/warn/block)
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_patch_value")]
     #[schema(example = json!("block"))]
-    pub quality_gate_strategy: Option<Value>,
-    #[serde(default)]
-    pub project_brief: Option<Value>,
-    #[serde(default)]
-    pub brand_bible: Option<Value>,
+    pub quality_gate_strategy: Option<Option<Value>>,
+    #[serde(default, deserialize_with = "deserialize_patch_value")]
+    pub project_brief: Option<Option<Value>>,
+    #[serde(default, deserialize_with = "deserialize_patch_value")]
+    pub brand_bible: Option<Option<Value>>,
 }
 
 /// `PATCH /api/v1/projects/{id}/style-config` 请求体
@@ -967,6 +985,10 @@ pub struct CreateProjectBody {
     pub intro: Option<String>,
     #[serde(default)]
     pub project_type: Option<String>,
+    #[serde(default)]
+    pub text_model: Option<String>,
+    #[serde(default)]
+    pub multimodal_model: Option<String>,
     #[serde(default)]
     pub image_model: Option<String>,
     #[serde(default)]
@@ -999,6 +1021,9 @@ pub struct CreateProjectBody {
     #[serde(default)]
     #[schema(example = "short")]
     pub duration_strategy: Option<String>,
+    /// 声线配置标识
+    #[serde(default)]
+    pub voice_model: Option<String>,
     /// 声线配置标识
     #[serde(default)]
     pub voice_profile: Option<String>,

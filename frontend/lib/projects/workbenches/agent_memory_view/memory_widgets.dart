@@ -401,6 +401,45 @@ String _memoryTierLabel(AppLocalizations l10n, String tier) {
   }
 }
 
+String _agentMemoryQueryTypeLabel(AppLocalizations l10n, String value) {
+  switch (value) {
+    case 'summary':
+      return l10n.agentMemoryQueryTypeSummary;
+    case 'message':
+      return l10n.agentMemoryQueryTypeMessage;
+    case 'all':
+      return l10n.agentMemoryQueryTypeAll;
+    default:
+      return value;
+  }
+}
+
+String _agentMemoryAutomationModeLabel(AppLocalizations l10n, String value) {
+  switch (value) {
+    case 'standard':
+      return l10n.agentMemoryAutomationStandard;
+    case 'lean':
+      return l10n.agentMemoryAutomationLean;
+    case 'off':
+      return l10n.agentMemoryAutomationOff;
+    default:
+      return value;
+  }
+}
+
+String _agentMemoryAppendOrClearTypeLabel(AppLocalizations l10n, String value) {
+  switch (value) {
+    case 'summary':
+      return l10n.agentMemoryAppendTypeSummary;
+    case 'message':
+      return l10n.agentMemoryAppendTypeMessage;
+    case 'all':
+      return l10n.agentMemoryQueryTypeAll;
+    default:
+      return value;
+  }
+}
+
 String _formatMemoryTimestamp(String raw) {
   try {
     final parsed = DateTime.parse(raw).toLocal();

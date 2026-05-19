@@ -212,10 +212,10 @@ pub(crate) async fn get_job_file(
         let Some(root) = root else {
             return Err(ApiError::DatabaseError(
                 if row.kind == crate::jobs::JOB_KIND_VOICEOVER_GENERATE {
-                    "TOONFLOW_LOCAL_VOICEOVER_AUDIO_DIR is not set; cannot serve locally stored voiceover audio"
+                    "OPENFLOW_LOCAL_VOICEOVER_AUDIO_DIR is not set; cannot serve locally stored voiceover audio"
                         .into()
                 } else {
-                    "TOONFLOW_LOCAL_VIDEO_EXPORT_DIR is not set; cannot serve locally stored export artifacts"
+                    "OPENFLOW_LOCAL_VIDEO_EXPORT_DIR is not set; cannot serve locally stored export artifacts"
                         .into()
                 },
             ));

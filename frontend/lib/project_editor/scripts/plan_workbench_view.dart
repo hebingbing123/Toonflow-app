@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../rust_api.dart';
 import 'plan_workbench_support.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 class ProjectScriptPlanWorkbenchViewModel {
   const ProjectScriptPlanWorkbenchViewModel({
@@ -66,7 +67,7 @@ class ProjectScriptPlanWorkbenchView extends StatelessWidget {
     final l10n = resolveAppLocalizationsForErrors(context);
     final theme = Theme.of(context);
     final planData = model.planData;
-    return AlertDialog(
+    return StudioAlertDialog(
       title: Text(l10n.projectScriptPlanWorkbenchTitle),
       content: SizedBox(
         width: 720,

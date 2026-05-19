@@ -71,11 +71,11 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
       }
 
       if (validation.blockedCount > 0) {
-        final proceed = await showDialog<bool>(
+        final proceed = await showStudioDialog<bool>(
           context: context,
           builder: (ctx) {
             final dlgL10n = resolveAppLocalizationsForErrors(ctx);
-            return AlertDialog(
+            return StudioAlertDialog(
               title: Text(dlgL10n.shortVideoPublishBatchScheduleValidateTitle),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -190,11 +190,11 @@ extension ShortVideoPublishBatch on _ShortVideoSpaceSectionState {
       }
 
       if (validation.blockedCount > 0) {
-        final proceed = await showDialog<bool>(
+        final proceed = await showStudioDialog<bool>(
           context: context,
           builder: (ctx) {
             final dlgL10n = resolveAppLocalizationsForErrors(ctx);
-            return AlertDialog(
+            return StudioAlertDialog(
               title: Text(dlgL10n.shortVideoPublishBatchPublishValidateTitle),
               content: Column(
                 mainAxisSize: MainAxisSize.min,

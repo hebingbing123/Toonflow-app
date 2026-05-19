@@ -43,11 +43,11 @@ pub(crate) async fn get_project_by_id(
     let project = sqlx::query_as::<_, ProjectRow>(
         r#"
         SELECT id, workspace_id, numeric_id, name, intro, project_type,
-               image_model, image_quality, video_model, art_style,
+               text_model, multimodal_model, image_model, image_quality, video_model, art_style,
                director_manual, mode, video_ratio, create_time_ms,
                art_style_pack, story_style_pack,
                target_market, target_platforms, duration_strategy,
-               voice_profile, subtitle_style, bgm_strategy, quality_gate_strategy,
+               voice_model, voice_profile, subtitle_style, bgm_strategy, quality_gate_strategy,
                $2 AS project_access_mode,
                $3 AS project_access_role
         FROM app_project p

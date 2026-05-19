@@ -19,7 +19,7 @@ extension _ShortVideoSpaceSectionExportSettingsDialog
     ExportSettings? initialSettings,
     int? estimatedDurationSeconds,
   }) async {
-    return showDialog<ExportSettings>(
+    return showStudioDialog<ExportSettings>(
       context: context,
       builder: (dialogContext) {
         return ExportSettingsDialog(
@@ -166,7 +166,9 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
     final l10n = resolveAppLocalizationsForErrors(context);
     final estimatedSize = _calculateEstimatedFileSize();
 
-    return AlertDialog(
+    return StudioAlertDialog(
+      scrollable: false,
+      maxWidth: 560,
       title: Text(l10n.shortVideoExportSettingsTitle),
       content: SizedBox(
         width: 520,
@@ -180,7 +182,7 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              DropdownButtonFormField<String>(
+              StudioDropdownButtonFormField<String>(
                 initialValue: _selectedFormat,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
@@ -212,7 +214,7 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              DropdownButtonFormField<String>(
+              StudioDropdownButtonFormField<String>(
                 initialValue: _selectedResolution,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
@@ -244,7 +246,7 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              DropdownButtonFormField<String>(
+              StudioDropdownButtonFormField<String>(
                 initialValue: _selectedBitrate,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
@@ -276,7 +278,7 @@ class _ExportSettingsDialogState extends State<ExportSettingsDialog> {
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              DropdownButtonFormField<int>(
+              StudioDropdownButtonFormField<int>(
                 initialValue: _selectedFramerate,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),

@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import '../../config.dart';
 import '../core.dart';
 
-/// Q2 方案 B：`GET /api/v1/jobs/queue/stats`（须 header **`X-OpenFlow-Internal-Token`** = 服务端 **`OPENFLOW_INTERNAL_OPS_TOKEN`**）。
+/// Q2 方案 B：`GET /api/v1/jobs/queue/stats`（须 header **`X-Openflow-Internal-Token`** = 服务端 **`OPENFLOW_INTERNAL_OPS_TOKEN`**）。
 Future<JobQueueStatsV1> fetchJobQueueStatsV1({
   required String internalOpsToken,
 }) async {

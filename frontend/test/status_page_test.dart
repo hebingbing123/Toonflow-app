@@ -168,7 +168,10 @@ void main() {
       ),
       findsOneWidget,
     );
-    expect(find.text('error=Bad state: default failed'), findsOneWidget);
+    expect(
+      find.text(l10n.statusPageBridgeErrorLine('Bad state: default failed')),
+      findsOneWidget,
+    );
   });
 }
 

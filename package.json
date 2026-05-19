@@ -1,16 +1,16 @@
 {
-  "name": "toonflow",
+  "name": "openflow",
   "version": "1.0.9",
-  "description": "Toonflow 是一款 AI 短剧漫剧工具，能够利用 AI 技术将小说自动转化为剧本，并结合 AI 生成的图片和视频，实现高效的短剧创作。",
+  "description": "Openflow 是一款 AI 短剧漫剧工具，能够利用 AI 技术将小说自动转化为剧本，并结合 AI 生成的图片和视频，实现高效的短剧创作。",
   "author": "HBAI-Ltd <ltlctools@outlook.com>",
   "license": "Apache-2.0",
-  "homepage": "https://github.com/HBAI-Ltd/Toonflow-app#readme",
+  "homepage": "https://github.com/HBAI-Ltd/Openflow-app#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/HBAI-Ltd/Toonflow-app.git"
+    "url": "git+https://github.com/HBAI-Ltd/Openflow-app.git"
   },
   "bugs": {
-    "url": "https://github.com/HBAI-Ltd/Toonflow-app/issues",
+    "url": "https://github.com/HBAI-Ltd/Openflow-app/issues",
     "email": "ltlctools@outlook.com"
   },
   "packageManager": "yarn@1.0.0",
@@ -22,6 +22,9 @@
     "supabase:start:db": "bash scripts/supabase_start_db_local.sh",
     "test:backend:me:db": "bash scripts/run_me_endpoint_tests.sh",
     "test:backend:e2e:db": "bash scripts/run_e2e_regression_tests.sh",
+    "test:ui:e2e": "bash scripts/run-ui-e2e.sh",
+    "test:ui:e2e:gallery": "bash scripts/run-ui-e2e.sh --gallery",
+    "test:ui:e2e:local": "bash scripts/run-ui-e2e-local.sh",
     "test:backend:search": "bash scripts/run_search_api_tests.sh",
     "test:backend:search:db": "bash scripts/run_search_api_tests.sh --db",
     "refactor:agent": "bash scripts/agent-refactor-check.sh",

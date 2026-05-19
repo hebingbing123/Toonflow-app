@@ -1189,6 +1189,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get studioJobTraySheetTitle => 'Active jobs';
+
+  @override
   String get studioUnknownCodeEmpty => '(empty)';
 
   @override
@@ -1765,10 +1768,67 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get studioGridStoryboardHint =>
-      'Generate a grid image, split cells, and assign to shots (backend job coming).';
+      'Generate one grid image, split into cells, and assign each cell to a shot.';
 
   @override
   String get studioGridStoryboardCta => 'Grid mode';
+
+  @override
+  String get studioGridStoryboardDialogTitle => 'Grid storyboard';
+
+  @override
+  String studioGridStoryboardDialogSubtitle(int shotCount) {
+    return 'Configure a $shotCount-cell grid for the current script shots.';
+  }
+
+  @override
+  String get studioGridStoryboardRowsLabel => 'Rows';
+
+  @override
+  String get studioGridStoryboardColsLabel => 'Columns';
+
+  @override
+  String get studioGridStoryboardBasePromptLabel =>
+      'Scene direction (optional)';
+
+  @override
+  String get studioGridStoryboardInvalidDimensions =>
+      'Use 1–4 rows and columns.';
+
+  @override
+  String studioGridStoryboardCellMismatch(int cells, int shotCount) {
+    return 'Rows × columns ($cells) must equal shot count ($shotCount).';
+  }
+
+  @override
+  String get studioGridStoryboardEnqueued =>
+      'Grid generation started. Shots refresh when the job completes.';
+
+  @override
+  String studioGridStoryboardFailed(String message) {
+    return 'Grid generation failed: $message';
+  }
+
+  @override
+  String get studioStoryboardStudioNoShots =>
+      'No shots in this script yet. Add storyboards on the script step first.';
+
+  @override
+  String get studioStoryboardStudioSelectShot =>
+      'Select a shot from the list to preview and edit.';
+
+  @override
+  String get studioStoryboardStudioEmptyPrompt =>
+      'No prompt yet — edit on the right or open the full editor.';
+
+  @override
+  String get studioStoryboardStudioOpenEditor => 'Full editor';
+
+  @override
+  String get studioStoryboardStudioSaveProperties => 'Save shot';
+
+  @override
+  String get studioStoryboardStudioSaved => 'Shot properties saved.';
 
   @override
   String studioEpisodeConsoleTitle(int n) {
@@ -2276,6 +2336,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get opsWhActivityRecordSuffix => ' webhook activity';
+
+  @override
+  String get opsWhActivityActionCreated => 'Created';
+
+  @override
+  String get opsWhActivityActionDeleted => 'Deleted';
+
+  @override
+  String get opsWhActivityActionTestSuccess => 'Test delivered';
+
+  @override
+  String get opsWhActivityActionTestFailed => 'Test failed';
+
+  @override
+  String get opsWhActivitySummaryDeleted => 'Webhook deleted';
+
+  @override
+  String opsWhActivitySummaryTestSuccess(String status) {
+    return 'HTTP $status';
+  }
+
+  @override
+  String opsWhActivitySummaryTestFailed(String status, String error) {
+    return 'HTTP $status · $error';
+  }
 
   @override
   String get opsWhChipLatestCreated => 'Latest created';
@@ -3939,6 +4024,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String taskCenterUuidDetailsLine(String line) {
     return 'UUID details: $line';
+  }
+
+  @override
+  String taskCenterJobDetailField(String key, String value) {
+    return '$key=$value';
+  }
+
+  @override
+  String taskCenterJobDetailUpdatedAt(String timestamp) {
+    return 'updated $timestamp';
   }
 
   @override
@@ -22195,6 +22290,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statusPageVersionSectionTitle => 'Version';
 
   @override
+  String statusPageVersionServiceLine(String service) {
+    return 'service=$service';
+  }
+
+  @override
+  String statusPageVersionNumberLine(String version) {
+    return 'version=$version';
+  }
+
+  @override
+  String statusPageVersionGitShaLine(String gitSha) {
+    return 'git_sha=$gitSha';
+  }
+
+  @override
+  String statusPageReadyDatabaseLine(String database) {
+    return 'database=$database';
+  }
+
+  @override
   String get nativeBridgeMessageNotStarted =>
       'Desktop bridge has not started yet.';
 
@@ -22235,6 +22350,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String statusPageBridgeLibraryPathLine(String path) {
     return 'library_path=$path';
+  }
+
+  @override
+  String statusPageBridgeErrorLine(String error) {
+    return 'error=$error';
   }
 
   @override

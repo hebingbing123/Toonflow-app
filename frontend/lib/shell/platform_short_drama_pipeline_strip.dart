@@ -23,23 +23,59 @@ class PlatformShortDramaPipelineStrip extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = resolveAppLocalizationsForErrors(context);
+    final narrow = MediaQuery.sizeOf(context).width < 520;
     final steps = <(ProductWorkspacePane, String, IconData)>[
-      (ProductWorkspacePane.projects, l10n.productPipelineStripProjects, Icons.folder_special_outlined),
-      (ProductWorkspacePane.scriptWorkspace, l10n.productPipelineStripScripts, Icons.menu_book_outlined),
+      (
+        ProductWorkspacePane.projects,
+        l10n.productPipelineStripProjects,
+        Icons.folder_special_outlined,
+      ),
+      (
+        ProductWorkspacePane.scriptWorkspace,
+        l10n.productPipelineStripScripts,
+        Icons.menu_book_outlined,
+      ),
       (
         ProductWorkspacePane.productionWorkspace,
         l10n.productPipelineStripProduction,
         Icons.movie_filter_outlined,
       ),
-      (ProductWorkspacePane.tasks, l10n.productPipelineStripTasks, Icons.task_alt_outlined),
-      (ProductWorkspacePane.jobs, l10n.productPipelineStripJobs, Icons.cloud_queue_outlined),
-      (ProductWorkspacePane.quality, l10n.productPipelineStripQuality, Icons.verified_outlined),
+      (
+        ProductWorkspacePane.tasks,
+        l10n.productPipelineStripTasks,
+        Icons.task_alt_outlined,
+      ),
+      (
+        ProductWorkspacePane.jobs,
+        l10n.productPipelineStripJobs,
+        Icons.cloud_queue_outlined,
+      ),
+      (
+        ProductWorkspacePane.quality,
+        l10n.productPipelineStripQuality,
+        Icons.verified_outlined,
+      ),
       (
         ProductWorkspacePane.shortVideoSpace,
         l10n.productPipelineStripShortVideo,
-        Icons.video_library_outlined,
+        Icons.ios_share_outlined,
       ),
     ];
+    final stepChips = steps
+        .map((step) {
+          final enabled =
+              (step.$1 != ProductWorkspacePane.jobs || jobsPaneEnabled) &&
+              (step.$1 != ProductWorkspacePane.quality || qualityPaneEnabled);
+          return PipelineStepChip(
+            compact: narrow,
+            label: step.$2,
+            icon: step.$3,
+            selected: false,
+            enabled: enabled,
+            onSelected: enabled ? (_) => onSelectPane(step.$1) : null,
+          );
+        })
+        .toList(growable: false);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -51,7 +87,10 @@ class PlatformShortDramaPipelineStrip extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(l10n.productPipelineStripTitle, style: theme.textTheme.labelLarge),
+          Text(
+            l10n.productPipelineStripTitle,
+            style: theme.textTheme.labelLarge,
+          ),
           const SizedBox(height: 6),
           Text(
             l10n.productPipelineStripSubtitle,
@@ -61,24 +100,15 @@ class PlatformShortDramaPipelineStrip extends StatelessWidget {
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
-              children: steps
-                  .map((step) {
-                    final enabled =
-                        (step.$1 != ProductWorkspacePane.jobs || jobsPaneEnabled) &&
-                        (step.$1 != ProductWorkspacePane.quality ||
-                            qualityPaneEnabled);
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: PipelineStepChip(
-                        label: step.$2,
-                        icon: step.$3,
-                        selected: false,
-                        enabled: enabled,
-                        onSelected: enabled ? (_) => onSelectPane(step.$1) : null,
-                      ),
-                    );
-                  })
-                  .toList(growable: false),
+              children: <Widget>[
+                for (var i = 0; i < stepChips.length; i++)
+                  Padding(
+                    padding: EdgeInsets.only(
+                      right: i == stepChips.length - 1 ? 0 : 8,
+                    ),
+                    child: stepChips[i],
+                  ),
+              ],
             ),
           ),
         ],

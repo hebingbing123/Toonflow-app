@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
+
 import '../tokens.dart';
 
 /// Floating batch action bar (Wave 0b).
@@ -25,7 +27,11 @@ class StudioBatchBar extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         child: Row(
           children: <Widget>[
-            Text('已选 $selectedCount'),
+            Text(
+              AppLocalizations.of(context)!.studioBatchSelectedCount(
+                selectedCount,
+              ),
+            ),
             const Spacer(),
             ...actions,
           ],

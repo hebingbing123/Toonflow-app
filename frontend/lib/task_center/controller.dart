@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import '../platform/studio_load_state.dart';
 import '../rust_api.dart';
 import 'support.dart';
 
@@ -35,6 +36,8 @@ class TaskCenterController extends ChangeNotifier {
   bool loadingTaskDetailsUuid = false;
   List<TaskCenterProjectItem>? taskProjects;
   List<JobRow>? taskApiJobs;
+  StudioLoadState taskApiLoadState = StudioLoadState.initial;
+  Object? taskApiLastError;
   String? taskCategoriesLine;
   String? taskApiSummaryLine;
   String? taskDetailNumericIdLine;
@@ -121,9 +124,11 @@ class TaskCenterController extends ChangeNotifier {
     final token = _accessTokenProvider();
     if (token == null) return;
     loadingTaskApi = true;
+    taskApiLoadState = StudioLoadState.loading;
     _onErrorChanged(null);
     taskApiJobs = null;
     taskApiSummaryLine = null;
+    taskApiLastError = null;
     notifyListeners();
     try {
       final projects = taskProjects ?? await postTasksGetProject(token);
@@ -150,11 +155,15 @@ class TaskCenterController extends ChangeNotifier {
           '${projectSelection.resolvedFromUuid && projectSelection.projectUuid != null ? ' projectUuid=${projectSelection.projectUuid}' : ''}'
           ' · rows=${scoped.length}'
           ' · ${summarizeGroupedTaskJobs(_l10nResolved, grouped)}';
+      taskApiLoadState = StudioLoadState.success;
     } catch (e) {
+      taskApiLoadState = StudioLoadState.error;
+      taskApiLastError = e;
       reportRustOrDescribeApiError(
         e,
         onErrorChanged: _onErrorChanged,
         l10n: _l10nResolved,
+        showGlobalSnackBar: false,
       );
     } finally {
       loadingTaskApi = false;
@@ -204,12 +213,17 @@ class TaskCenterController extends ChangeNotifier {
     notifyListeners();
     try {
       final row = await postTasksTaskDetailsByJobId(token, jobId);
-      final parts = <String>[row.kind, row.status, 'updated ${row.updatedAt}'];
+      final l10n = _l10nResolved;
+      final parts = <String>[
+        row.kind,
+        row.status,
+        l10n.taskCenterJobDetailUpdatedAt(row.updatedAt),
+      ];
       if (row.claimedBy != null && row.claimedBy!.isNotEmpty) {
-        parts.add('claimed_by=${row.claimedBy}');
+        parts.add(l10n.taskCenterJobDetailField('claimed_by', row.claimedBy!));
       }
       if (row.errorMessage != null && row.errorMessage!.isNotEmpty) {
-        parts.add('error=${row.errorMessage}');
+        parts.add(l10n.taskCenterJobDetailField('error', row.errorMessage!));
       }
       taskDetailUuidLine = parts.join(' · ');
     } catch (e) {

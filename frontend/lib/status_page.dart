@@ -214,7 +214,7 @@ class _StatusPageState extends State<StatusPage> {
                 _MetricTile(
                   label: '/api/v1/ready',
                   value: _ready!.status,
-                  detail: 'database=${_ready!.database}',
+                  detail: l10n.statusPageReadyDatabaseLine(_ready!.database),
                 ),
               ],
             ),
@@ -225,10 +225,10 @@ class _StatusPageState extends State<StatusPage> {
               title: l10n.statusPageVersionSectionTitle,
               tone: _BandTone.neutral,
               lines: [
-                'service=${_version!.service}',
-                'version=${_version!.version}',
+                l10n.statusPageVersionServiceLine(_version!.service),
+                l10n.statusPageVersionNumberLine(_version!.version),
                 if (_version!.gitSha != null && _version!.gitSha!.isNotEmpty)
-                  'git_sha=${_version!.gitSha}',
+                  l10n.statusPageVersionGitShaLine(_version!.gitSha!),
               ],
             ),
           ],
@@ -252,7 +252,8 @@ class _StatusPageState extends State<StatusPage> {
                   ),
                   if (snapshot.libraryPath != null)
                     l10n.statusPageBridgeLibraryPathLine(snapshot.libraryPath!),
-                  if (snapshot.error != null) 'error=${snapshot.error}',
+                  if (snapshot.error != null)
+                    l10n.statusPageBridgeErrorLine('${snapshot.error}'),
                 ],
               );
             },

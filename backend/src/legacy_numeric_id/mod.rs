@@ -7,8 +7,8 @@
 //!
 //! | Variable | Default | Effect |
 //! |----------|---------|--------|
-//! | `TOONFLOW_NUMERIC_ID_LEGACY_READ` | `true` | When `false`, numeric-only project resolution is rejected. |
-//! | `TOONFLOW_NUMERIC_ID_LEGACY_WRITE` | `true` | When `false`, job payload normalization omits `project_numeric_id` dual-write. |
+//! | `OPENFLOW_NUMERIC_ID_LEGACY_READ` | `true` | When `false`, numeric-only project resolution is rejected. |
+//! | `OPENFLOW_NUMERIC_ID_LEGACY_WRITE` | `true` | When `false`, job payload normalization omits `project_numeric_id` dual-write. |
 //!
 //! ## Sunset
 //!
@@ -17,8 +17,8 @@
 
 use crate::error::{bad_request_i18n, ApiError};
 
-pub const ENV_LEGACY_NUMERIC_READ: &str = "TOONFLOW_NUMERIC_ID_LEGACY_READ";
-pub const ENV_LEGACY_NUMERIC_WRITE: &str = "TOONFLOW_NUMERIC_ID_LEGACY_WRITE";
+pub const ENV_LEGACY_NUMERIC_READ: &str = "OPENFLOW_NUMERIC_ID_LEGACY_READ";
+pub const ENV_LEGACY_NUMERIC_WRITE: &str = "OPENFLOW_NUMERIC_ID_LEGACY_WRITE";
 
 /// Documented sunset for numeric-only API paths (see module docs).
 pub const LEGACY_NUMERIC_SUNSET: &str = "2026-11-01";

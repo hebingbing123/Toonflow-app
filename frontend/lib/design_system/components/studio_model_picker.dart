@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/billing_l10n_helpers.dart';
 import '../../rust_api.dart';
+import 'studio_dropdown_field.dart';
 
 /// Dropdown model picker backed by `GET /api/v1/models?include_pricing=true`.
 class StudioModelPicker extends StatelessWidget {
@@ -25,19 +26,21 @@ class StudioModelPicker extends StatelessWidget {
     final effectiveId = selectedModelId ??
         (models.isNotEmpty ? models.first.effectiveModelId : null);
 
-    return DropdownButtonFormField<String>(
-      initialValue: models.any((m) => m.effectiveModelId == effectiveId)
+    return StudioDropdownField<String>(
+      value: models.any((m) => m.effectiveModelId == effectiveId)
           ? effectiveId
           : null,
-      decoration: InputDecoration(labelText: l10n.studioModelPickerLabel),
-      items: models
+      labelText: l10n.studioModelPickerLabel,
+      width: null,
+      enabled: enabled,
+      entries: models
           .map(
-            (m) => DropdownMenuItem<String>(
+            (m) => StudioDropdownEntry<String>(
               value: m.effectiveModelId,
-              child: Text(_labelFor(m, l10n)),
+              label: _labelFor(m, l10n),
             ),
           )
-          .toList(),
+          .toList(growable: false),
       onChanged: enabled ? onChanged : null,
     );
   }

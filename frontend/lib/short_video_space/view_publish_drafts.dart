@@ -1,3 +1,4 @@
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 part of 'view.dart';
 
 class ShortVideoPublishDraftsPanel extends StatelessWidget {
@@ -345,7 +346,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                 style: theme.textTheme.labelSmall?.copyWith(color: outline),
               ),
               const SizedBox(height: 6),
-              DropdownButtonFormField<String>(
+              StudioDropdownButtonFormField<String>(
                 key: ValueKey<String>(
                   'publish_op_draft_${publishPanelUi.selectedPublishDraftId ?? "__none__"}',
                 ),
@@ -450,7 +451,7 @@ class _PublishDraftsPanel extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: DropdownButtonFormField<String>(
+                        child: StudioDropdownButtonFormField<String>(
                           initialValue: entry.value,
                           decoration: const InputDecoration(
                             border: OutlineInputBorder(),

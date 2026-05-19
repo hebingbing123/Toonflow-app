@@ -28,4 +28,4 @@ echo "Resolved DATABASE_URL from ${DATABASE_URL_SOURCE}."
 echo "Running E2E regression tests with filter: ${TEST_FILTER}"
 
 cd "$ROOT/backend"
-exec cargo test --package toonflow-server --lib "$TEST_FILTER" -- --ignored --nocapture
+exec cargo test --package openflow-server --lib "$TEST_FILTER" -- --ignored --nocapture

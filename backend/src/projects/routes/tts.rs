@@ -838,7 +838,7 @@ pub async fn preview_tts(
         (None, None)
     };
 
-    let openai_cfg = load_tts_llm_config_for_user(&state, pool, uid)
+    let openai_cfg = load_tts_llm_config_for_user(&state, pool, uid, None)
         .await
         .map_err(job_run_error_to_bad_request)?;
     let audio = run_voice_preview(

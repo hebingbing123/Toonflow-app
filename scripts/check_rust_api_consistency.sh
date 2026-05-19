@@ -6,11 +6,11 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-OPENAPI_SPEC="${TOONFLOW_OPENAPI_SPEC:-/tmp/openapi_for_consistency_$$.yaml}"
+OPENAPI_SPEC="${OPENFLOW_OPENAPI_SPEC:-/tmp/openapi_for_consistency_$$.yaml}"
 CONSISTENCY_REPORT="/tmp/rust_api_consistency_$$.txt"
 OPENAPI_SPEC_FROM_ENV=false
 
-if [ -n "${TOONFLOW_OPENAPI_SPEC:-}" ]; then
+if [ -n "${OPENFLOW_OPENAPI_SPEC:-}" ]; then
     OPENAPI_SPEC_FROM_ENV=true
 fi
 
@@ -29,7 +29,7 @@ cleanup() {
 trap cleanup EXIT
 
 if [ "$OPENAPI_SPEC_FROM_ENV" = true ]; then
-    echo "==> Reusing pre-generated OpenAPI spec from \$TOONFLOW_OPENAPI_SPEC"
+    echo "==> Reusing pre-generated OpenAPI spec from \$OPENFLOW_OPENAPI_SPEC"
 else
     echo "==> Generating OpenAPI spec..."
     (cd backend && cargo run --quiet --bin export-openapi) > "$OPENAPI_SPEC"

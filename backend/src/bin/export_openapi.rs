@@ -5,7 +5,7 @@
 //! ```
 
 fn main() -> anyhow::Result<()> {
-    let yaml = toonflow_server::openapi_spec::merged_openapi_yaml_string()?;
+    let yaml = openflow_server::openapi_spec::merged_openapi_yaml_string()?;
     print!("{yaml}");
     Ok(())
 }

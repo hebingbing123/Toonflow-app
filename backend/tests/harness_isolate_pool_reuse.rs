@@ -26,7 +26,7 @@ impl Drop for ScopedEnvVar {
 #[tokio::test]
 async fn harness_isolate_pool_second_invoke_records_reuse_hit() {
     let exe =
-        std::env::var("CARGO_BIN_EXE_toonflow-server").expect("cargo exposes CARGO_BIN_EXE_*");
+        std::env::var("CARGO_BIN_EXE_openflow-server").expect("cargo exposes CARGO_BIN_EXE_*");
     let _runner_guard = ScopedEnvVar::capture("HARNESS_ISOLATE_RUNNER_EXE");
     let _max_guard = ScopedEnvVar::capture("HARNESS_ISOLATE_MAX_CONCURRENT");
     let _pool_guard = ScopedEnvVar::capture("HARNESS_ISOLATE_POOL");
@@ -39,15 +39,15 @@ async fn harness_isolate_pool_second_invoke_records_reuse_hit() {
 
     let v1 = serde_json::json!({ "pool_reuse_probe": "a" });
 
-    let before = toonflow_server::harness::isolate::metrics_snapshot();
+    let before = openflow_server::harness::isolate::metrics_snapshot();
 
-    let out1 = toonflow_server::harness::isolate::isolated_echo(&v1)
+    let out1 = openflow_server::harness::isolate::isolated_echo(&v1)
         .await
         .expect("first pooled echo");
 
     assert_eq!(out1["pool_reuse_probe"], "a");
 
-    let mid = toonflow_server::harness::isolate::metrics_snapshot();
+    let mid = openflow_server::harness::isolate::metrics_snapshot();
     assert_eq!(
         mid.total_process_reuse_hits - before.total_process_reuse_hits,
         0,
@@ -56,13 +56,13 @@ async fn harness_isolate_pool_second_invoke_records_reuse_hit() {
     assert!(mid.total_child_spawns > before.total_child_spawns);
 
     let v2 = serde_json::json!({ "pool_reuse_probe": "b" });
-    let out2 = toonflow_server::harness::isolate::isolated_echo(&v2)
+    let out2 = openflow_server::harness::isolate::isolated_echo(&v2)
         .await
         .expect("second pooled echo reuses idle worker");
 
     assert_eq!(out2["pool_reuse_probe"], "b");
 
-    let after = toonflow_server::harness::isolate::metrics_snapshot();
+    let after = openflow_server::harness::isolate::metrics_snapshot();
     assert_eq!(
         after
             .total_process_reuse_hits

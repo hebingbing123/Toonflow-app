@@ -8,6 +8,49 @@ int countWebhookActivity(Iterable<String> actions, String action) {
   return actions.where((entry) => entry == action).length;
 }
 
+/// Machine action slugs on webhook activity entries; localize for UI.
+String webhookActivityActionLabel(AppLocalizations l10n, String action) {
+  switch (action) {
+    case 'created':
+      return l10n.opsWhActivityActionCreated;
+    case 'deleted':
+      return l10n.opsWhActivityActionDeleted;
+    case 'test_success':
+      return l10n.opsWhActivityActionTestSuccess;
+    case 'test_failed':
+      return l10n.opsWhActivityActionTestFailed;
+    default:
+      return action;
+  }
+}
+
+String webhookActivityTestSummary(
+  AppLocalizations l10n, {
+  required bool delivered,
+  required int? httpStatus,
+  required String? error,
+}) {
+  final status = httpStatus?.toString() ?? '-';
+  if (delivered) {
+    return l10n.opsWhActivitySummaryTestSuccess(status);
+  }
+  final trimmed = error?.trim();
+  return l10n.opsWhActivitySummaryTestFailed(
+    status,
+    trimmed != null && trimmed.isNotEmpty
+        ? trimmed
+        : l10n.globalSearchUnknownError,
+  );
+}
+
+String billingEventAggregationKey(AppLocalizations l10n, String? raw) {
+  final normalized = raw?.trim() ?? '';
+  if (normalized.isEmpty) {
+    return l10n.globalSearchUnknownError;
+  }
+  return normalized;
+}
+
 String buildWebhookInventorySummary(
   AppLocalizations l10n, {
   required int total,
@@ -56,24 +99,24 @@ String? describeBillingWebhookEmptyState(
 }
 
 Map<String, int> countBillingEventsByProvider(
+  AppLocalizations l10n,
   Iterable<BillingWebhookEventItemV1> items,
 ) {
   final counts = <String, int>{};
   for (final item in items) {
-    final normalized = item.provider?.trim() ?? '';
-    final key = normalized.isEmpty ? 'unknown' : normalized;
+    final key = billingEventAggregationKey(l10n, item.provider);
     counts.update(key, (value) => value + 1, ifAbsent: () => 1);
   }
   return counts;
 }
 
 Map<String, int> countBillingEventsByType(
+  AppLocalizations l10n,
   Iterable<BillingWebhookEventItemV1> items,
 ) {
   final counts = <String, int>{};
   for (final item in items) {
-    final normalized = item.eventType?.trim() ?? '';
-    final key = normalized.isEmpty ? 'unknown' : normalized;
+    final key = billingEventAggregationKey(l10n, item.eventType);
     counts.update(key, (value) => value + 1, ifAbsent: () => 1);
   }
   return counts;
@@ -84,9 +127,10 @@ String buildBillingEventsSnapshotSummary(
   Iterable<BillingWebhookEventItemV1> items,
 ) {
   final list = items.toList(growable: false);
-  final providerCounts = countBillingEventsByProvider(list).entries.toList()
+  final providerCounts = countBillingEventsByProvider(l10n, list).entries
+      .toList()
     ..sort((a, b) => b.value.compareTo(a.value));
-  final typeCounts = countBillingEventsByType(list).entries.toList()
+  final typeCounts = countBillingEventsByType(l10n, list).entries.toList()
     ..sort((a, b) => b.value.compareTo(a.value));
   final informational = list.where((e) => e.isInformationalEvent).length;
   final stateful = list.length - informational;

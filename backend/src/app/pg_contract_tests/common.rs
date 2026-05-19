@@ -37,6 +37,12 @@ pub(crate) const CONTRACT_USER_SUB: &str = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa
 pub(crate) async fn ensure_contract_auth_user(pool: &PgPool) {
     let sub = Uuid::parse_str(CONTRACT_USER_SUB).unwrap();
     let email = format!("contract-{}@example.test", sub.simple());
+    // Re-runs against a dirty local DB may leave the same contract email on another row.
+    let _ = sqlx::query("DELETE FROM auth.users WHERE email = $1 AND id <> $2")
+        .bind(&email)
+        .bind(sub)
+        .execute(pool)
+        .await;
     sqlx::query(
         r#"
         INSERT INTO auth.users (id, email, encrypted_password, email_confirmed_at, created_at, updated_at)

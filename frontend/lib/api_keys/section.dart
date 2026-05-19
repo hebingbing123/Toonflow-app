@@ -6,6 +6,7 @@ import '../l10n/studio_code_labels.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../rust_api.dart';
 import 'controller.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 enum _ExpiryPreset { none, sevenDays, thirtyDays, ninetyDays, custom }
 
@@ -129,7 +130,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
     final l10n = resolveAppLocalizationsForErrors(context);
     var expiryPreset = _ExpiryPreset.none;
     DateTime? customDate;
-    final action = await showDialog<String>(
+    final action = await showStudioDialog<String>(
       context: context,
       builder: (context) {
         return StatefulBuilder(
@@ -145,7 +146,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
               });
             }
 
-            return AlertDialog(
+            return StudioAlertDialog(
               title: Text(l10n.apiKeysRotateTitle(item.displayName)),
               content: SizedBox(
                 width: 420,
@@ -282,9 +283,9 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
     final l10n = resolveAppLocalizationsForErrors(context);
     final reasonController = TextEditingController();
     try {
-      final confirmed = await showDialog<bool>(
+      final confirmed = await showStudioDialog<bool>(
         context: context,
-        builder: (context) => AlertDialog(
+        builder: (context) => StudioAlertDialog(
           title: Text(l10n.apiKeysRevokeTitle(item.displayName)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -726,7 +727,7 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
           if (item.lastUsedIp != null || item.lastUsedUserAgent != null)
             Text(
               l10n.apiKeysSourceLine(
-                '${studioApiKeysLastUsedLabel(l10n, item.lastUsedIp ?? 'unknown')}${item.lastUsedUserAgent == null ? '' : ' · ${item.lastUsedUserAgent}'}',
+                '${studioApiKeysLastUsedLabel(l10n, item.lastUsedIp ?? '')}${item.lastUsedUserAgent == null ? '' : ' · ${item.lastUsedUserAgent}'}',
               ),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
@@ -791,9 +792,9 @@ class _ApiKeysSectionState extends State<ApiKeysSection> {
                 onPressed: busy
                     ? null
                     : () async {
-                        final confirmed = await showDialog<bool>(
+                        final confirmed = await showStudioDialog<bool>(
                           context: context,
-                          builder: (context) => AlertDialog(
+                          builder: (context) => StudioAlertDialog(
                             title: Text(l10n.apiKeysDeleteTitle),
                             content: SelectableText(
                               l10n.apiKeysDeleteBody(

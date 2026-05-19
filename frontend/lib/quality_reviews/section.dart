@@ -9,15 +9,20 @@ import 'workbench_view.dart';
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
 import '../design_system/components/studio_pane_header.dart';
+import '../design_system/components/studio_pane_scaffold.dart';
+import '../design_system/components/studio_empty_state.dart';
+import '../design_system/ix/studio_api_error_callout.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import '../config.dart';
+import '../platform/studio_load_state.dart';
 import '../task_center/support.dart';
 import 'enum_labels.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 part 'section_workbench.dart';
 part 'section_workbench_controllers.dart';
 
-class QualityReviewsSection extends StatelessWidget {
+class QualityReviewsSection extends StatefulWidget {
   const QualityReviewsSection({
     super.key,
     required this.accessToken,
@@ -40,10 +45,47 @@ class QualityReviewsSection extends StatelessWidget {
   fetchProjectsOverride;
   final void Function(TaskCenterDomainDeepLink link)? onNavigateDomainDeepLink;
 
+  @override
+  State<QualityReviewsSection> createState() => _QualityReviewsSectionState();
+}
+
+class _QualityReviewsSectionState extends State<QualityReviewsSection> {
+  @override
+  void initState() {
+    super.initState();
+    if (!widget.studioPresentation) {
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      _bootstrapStudioPane();
+    });
+  }
+
+  Future<void> _bootstrapStudioPane() async {
+    final projectId = await _resolveInitialProjectNumericId();
+    if (!mounted) {
+      return;
+    }
+    if (widget.controller.qualityReviewsLoadState ==
+        StudioLoadState.initial) {
+      await widget.controller.loadQualityReviews();
+    }
+    if (!mounted || !widget.platformConfig.qualityDashboardEnabled) {
+      return;
+    }
+    if (widget.controller.qualityDashboardLoadState ==
+        StudioLoadState.initial) {
+      await widget.controller.loadQualityDashboard(projectId: projectId);
+    }
+  }
+
   String? _buildInitialProjectScopeSummary({
     required int? resolvedProjectNumericId,
   }) {
-    final projectUuid = initialProjectUuid?.trim();
+    final projectUuid = widget.initialProjectUuid?.trim();
     if (projectUuid != null && projectUuid.isNotEmpty) {
       if (resolvedProjectNumericId != null && resolvedProjectNumericId > 0) {
         return 'projectUuid=$projectUuid -> projectId=$resolvedProjectNumericId';
@@ -57,18 +99,19 @@ class QualityReviewsSection extends StatelessWidget {
   }
 
   Future<int?> _resolveInitialProjectNumericId() async {
-    if (initialProjectNumericId != null && initialProjectNumericId! > 0) {
-      return initialProjectNumericId;
+    if (widget.initialProjectNumericId != null &&
+        widget.initialProjectNumericId! > 0) {
+      return widget.initialProjectNumericId;
     }
-    final token = accessToken;
-    final projectUuid = initialProjectUuid?.trim();
+    final token = widget.accessToken;
+    final projectUuid = widget.initialProjectUuid?.trim();
     if (token == null ||
         token.isEmpty ||
         projectUuid == null ||
         projectUuid.isEmpty) {
       return null;
     }
-    final rows = await (fetchProjectsOverride ?? fetchProjects)(token);
+    final rows = await (widget.fetchProjectsOverride ?? fetchProjects)(token);
     for (final row in rows) {
       if (row.id == projectUuid) {
         return row.numericId;
@@ -79,7 +122,7 @@ class QualityReviewsSection extends StatelessWidget {
 
   Future<void> _openQualityWorkbench(BuildContext context) async {
     final l10n = resolveAppLocalizationsForErrors(context);
-    final token = accessToken;
+    final token = widget.accessToken;
     if (token == null || token.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.qualityReviewsErrNotLoggedIn)),
@@ -90,21 +133,135 @@ class QualityReviewsSection extends StatelessWidget {
     if (!context.mounted) {
       return;
     }
-    await showDialog<void>(
+    await showStudioDialog<void>(
       context: context,
-      useRootNavigator: true,
       builder: (dialogCtx) => _QualityReviewsWorkbenchDialog(
         accessToken: token,
         initialProjectNumericId: resolvedProjectNumericId,
-        initialProjectUuid: initialProjectUuid,
+        initialProjectUuid: widget.initialProjectUuid,
         initialProjectScopeSummary: _buildInitialProjectScopeSummary(
           resolvedProjectNumericId: resolvedProjectNumericId,
         ),
-        initialReviews: controller.qualityReviews ?? const <QualityReview>[],
-        initialReviewDetails: controller.qualityReviewByIdLine,
-        initialStatsSummary: controller.qualityStatsLine,
-        initialStagePassRateSummary: controller.qualityStagePassRateLine,
-        onNavigateDomainDeepLink: onNavigateDomainDeepLink,
+        initialReviews:
+            widget.controller.qualityReviews ?? const <QualityReview>[],
+        initialReviewDetails: widget.controller.qualityReviewByIdLine,
+        initialStatsSummary: widget.controller.qualityStatsLine,
+        initialStagePassRateSummary: widget.controller.qualityStagePassRateLine,
+        onNavigateDomainDeepLink: widget.onNavigateDomainDeepLink,
+      ),
+    );
+  }
+
+  Future<void> _loadQualityDashboard() async {
+    final projectId = await _resolveInitialProjectNumericId();
+    await widget.controller.loadQualityDashboard(projectId: projectId);
+  }
+
+  Future<void> _refreshQualityDashboardReadModel() async {
+    final projectId = await _resolveInitialProjectNumericId();
+    await widget.controller.loadQualityDashboard(
+      projectId: projectId,
+      refreshReadModel: true,
+    );
+  }
+
+  Widget _buildReviewIdLookupRow(BuildContext context) {
+    final l10n = resolveAppLocalizationsForErrors(context);
+    return QualityReviewIdLookupRow(
+      controller: widget.controller.qualityReviewIdController,
+      onChanged: widget.controller.onQualityReviewIdChanged,
+      loading: widget.controller.loadingQualityReviewById,
+      onSubmit: widget.controller.fetchSelectedQualityReview,
+      fieldLabel: l10n.qualityReviewsFieldReviewId,
+      actionLabel: l10n.qualityReviewsViewReviewDetails,
+      busyLabel: l10n.projectsBusyProcessing,
+    );
+  }
+
+  Widget _buildStudioMainBody(BuildContext context) {
+    final l10n = resolveAppLocalizationsForErrors(context);
+    final muted = qualityReviewsMutedColor(context);
+    final c = widget.controller;
+
+    if (c.qualityReviewsLoadState == StudioLoadState.error &&
+        c.qualityReviewsLastError != null) {
+      return const SizedBox.shrink();
+    }
+    if (c.qualityReviewsLoadState == StudioLoadState.initial ||
+        c.qualityReviewsLoadState == StudioLoadState.loading ||
+        c.loadingQualityReviews) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    final reviews = c.qualityReviews ?? const <QualityReview>[];
+    if (reviews.isEmpty) {
+      return Center(
+        child: StudioEmptyState(
+          title: l10n.qualityReviewsEmptyForCurrentFilters,
+          subtitle: l10n.qualityReviewsSectionIntro,
+          icon: Icons.fact_check_outlined,
+        ),
+      );
+    }
+
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          if (widget.platformConfig.qualityDashboardEnabled) ...<Widget>[
+            Text(
+              l10n.qualityReviewsOpsDashboardTitle,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            const SizedBox(height: 6),
+            QualityReviewsOpsDashboardPreview(
+              mutedColor: muted,
+              studioPresentation: true,
+              dashboardSummary: c.qualityDashboardLine,
+              refreshControlsEnabled:
+                  widget.platformConfig.qualityRefreshControlsEnabled,
+              refreshSummary: widget.platformConfig.qualityRefreshControlsEnabled
+                  ? c.qualityDashboardRefreshLine
+                  : null,
+              freshnessMeta: c.qualityDashboardMeta,
+              dashboardLoadState: c.qualityDashboardLoadState,
+              dashboardLoadError: c.qualityDashboardLastError,
+              loadingDashboard: c.loadingQualityDashboard,
+              onRefreshDashboard: _loadQualityDashboard,
+              qualityStatsRows: c.qualityStatsRows,
+              stageGradeRows: c.qualityStageGradeRows,
+              scopeInsightRows: c.qualityScopeInsightRows,
+              tokenEfficiencyRows: c.qualityTokenEfficiencyRows,
+              badCaseStats: c.qualityBadCaseStatItems,
+            ),
+            const SizedBox(height: 12),
+          ],
+          QualityReviewsListPreview(
+            reviews: reviews,
+            showCountHeader: false,
+            onSelectQualityReview: c.selectQualityReview,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget? _buildStudioFooter(BuildContext context) {
+    final c = widget.controller;
+    if (c.qualityReviewsLoadState == StudioLoadState.initial ||
+        c.qualityReviewsLoadState == StudioLoadState.loading ||
+        c.qualityReviewsLoadState == StudioLoadState.error) {
+      return null;
+    }
+    final l10n = resolveAppLocalizationsForErrors(context);
+    final count = c.qualityReviews?.length ?? 0;
+    return Padding(
+      padding: const EdgeInsets.only(top: 12, bottom: 8),
+      child: Center(
+        child: Text(
+          l10n.qualityReviewsCount(count),
+          style: Theme.of(context).textTheme.labelLarge,
+        ),
       ),
     );
   }
@@ -113,270 +270,202 @@ class QualityReviewsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
     final muted = qualityReviewsMutedColor(context);
-    final reviewSummary = controller.qualityReviews == null
+    final c = widget.controller;
+    final reviewSummary = c.qualityReviews == null
         ? l10n.qualityReviewsSummaryNotLoaded
-        : summarizeQualityReviews(controller.qualityReviews!, l10n: l10n);
+        : summarizeQualityReviews(c.qualityReviews!, l10n: l10n);
+
     return AnimatedBuilder(
-      animation: controller,
-      builder: (context, _) => SingleChildScrollView(
-        padding: const EdgeInsets.only(top: 16, bottom: 8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            StudioPaneHeader(
-              title: l10n.productNavQuality,
-              subtitle: l10n.qualityReviewsSectionIntro,
-              showBack: studioPresentation,
-              trailing: RiskyOperationConfirmPrefsOverflowMenu(
-                tooltip: l10n.taskCenterLocalClientPrefs,
-              ),
+      animation: c,
+      builder: (context, _) {
+        final header = <Widget>[
+          StudioPaneHeader(
+            title: l10n.productNavQuality,
+            subtitle: l10n.qualityReviewsSectionIntro,
+            showBack: widget.studioPresentation,
+            trailing: RiskyOperationConfirmPrefsOverflowMenu(
+              tooltip: l10n.taskCenterLocalClientPrefs,
             ),
-            const SizedBox(height: 8),
-            QualityReviewsActionsBar(
-              studioPresentation: studioPresentation,
-              showDashboardControls: platformConfig.qualityDashboardEnabled,
-              showRefreshControls: platformConfig.qualityRefreshControlsEnabled,
-              loadingQualityDashboard: controller.loadingQualityDashboard,
-              refreshingQualityDashboardReadModel:
-                  controller.refreshingQualityDashboardReadModel,
-              loadingQualityReviews: controller.loadingQualityReviews,
-              loadingQualityBadCases: controller.loadingQualityBadCases,
-              loadingQualityStats: controller.loadingQualityStats,
-              loadingQualityStagePassRate:
-                  controller.loadingQualityStagePassRate,
-              onOpenWorkbench: () => _openQualityWorkbench(context),
-              onLoadQualityDashboard: () async {
-                final projectId = await _resolveInitialProjectNumericId();
-                await controller.loadQualityDashboard(projectId: projectId);
-              },
-              onRefreshQualityDashboardReadModel: () async {
-                final projectId = await _resolveInitialProjectNumericId();
-                await controller.loadQualityDashboard(
-                  projectId: projectId,
-                  refreshReadModel: true,
-                );
-              },
-              onLoadQualityReviews: controller.loadQualityReviews,
-              onLoadQualityBadCases: controller.loadQualityBadCases,
-              onLoadQualityStats: controller.loadQualityStats,
-              onLoadQualityStagePassRate: controller.loadQualityStagePassRate,
-            ),
-            const SizedBox(height: 8),
-            QualityReviewsSummaryPreview(
-              mutedColor: muted,
-              reviewSummary: reviewSummary,
-            ),
-            if (platformConfig.qualityDashboardEnabled) ...<Widget>[
-              const SizedBox(height: 8),
-              Text(
-                l10n.qualityReviewsOpsDashboardTitle,
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              const SizedBox(height: 6),
-              if (!studioPresentation &&
-                  controller.qualityDashboardLine != null)
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: OutlinedButton(
-                    onPressed: () async {
-                      await Clipboard.setData(
-                        ClipboardData(text: controller.qualityDashboardLine!),
-                      );
-                      if (!context.mounted) {
-                        return;
-                      }
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            l10n.qualityReviewsCopiedDashboardSummary,
-                          ),
-                        ),
-                      );
-                    },
-                    child: Text(l10n.qualityReviewsCopyDashboardSummary),
-                  ),
-                ),
-              QualityReviewsOpsDashboardPreview(
-                mutedColor: muted,
-                dashboardSummary: controller.qualityDashboardLine,
-                refreshControlsEnabled:
-                    platformConfig.qualityRefreshControlsEnabled,
-                refreshSummary: platformConfig.qualityRefreshControlsEnabled
-                    ? controller.qualityDashboardRefreshLine
-                    : null,
-                freshnessMeta: controller.qualityDashboardMeta,
-                dashboardLoadState: controller.qualityDashboardLoadState,
-                dashboardLoadError: controller.qualityDashboardLastError,
-                loadingDashboard: controller.loadingQualityDashboard,
-                onRefreshDashboard: () async {
-                  final projectId = await _resolveInitialProjectNumericId();
-                  await controller.loadQualityDashboard(projectId: projectId);
-                },
-                qualityStatsRows: controller.qualityStatsRows,
-                stageGradeRows: controller.qualityStageGradeRows,
-                scopeInsightRows: controller.qualityScopeInsightRows,
-                tokenEfficiencyRows: controller.qualityTokenEfficiencyRows,
-                badCaseStats: controller.qualityBadCaseStatItems,
-              ),
-            ],
-            const SizedBox(height: 12),
-            if (studioPresentation)
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  final stackControls = constraints.maxWidth < 520;
-                  final actionButton = FilledButton.tonal(
-                    onPressed:
-                        (controller.loadingQualityReviewById ||
-                            controller.qualityReviewIdController.text
-                                .trim()
-                                .isEmpty)
-                        ? null
-                        : controller.fetchSelectedQualityReview,
-                    child: Text(
-                      controller.loadingQualityReviewById
-                          ? l10n.projectsBusyProcessing
-                          : l10n.qualityReviewsViewReviewDetails,
-                    ),
-                  );
-                  if (stackControls) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: <Widget>[
-                        TextField(
-                          controller: controller.qualityReviewIdController,
-                          onChanged: controller.onQualityReviewIdChanged,
-                          style: qualityReviewsFieldTextStyle(context),
-                          decoration: qualityReviewsInputDecoration(
-                            context,
-                            labelText: l10n.qualityReviewsFieldReviewId,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        actionButton,
-                      ],
-                    );
-                  }
-                  return Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Expanded(
-                        child: TextField(
-                          controller: controller.qualityReviewIdController,
-                          onChanged: controller.onQualityReviewIdChanged,
-                          style: qualityReviewsFieldTextStyle(context),
-                          decoration: qualityReviewsInputDecoration(
-                            context,
-                            labelText: l10n.qualityReviewsFieldReviewId,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      actionButton,
-                    ],
-                  );
-                },
-              ),
-            if (studioPresentation &&
-                controller.qualityReviewByIdLine != null) ...<Widget>[
-              const SizedBox(height: 8),
-              SelectableText(
-                l10n.qualityReviewsSummaryReviewDetails(
-                  controller.qualityReviewByIdLine!,
-                ),
-              ),
-            ],
-            if (!studioPresentation) ...<Widget>[
-              TextField(
-                controller: controller.qualityReviewIdController,
-                onChanged: controller.onQualityReviewIdChanged,
-                decoration: InputDecoration(
-                  labelText: l10n.qualityReviewsFieldReviewId,
-                ),
-              ),
-              const SizedBox(height: 8),
-              FilledButton.tonal(
-                onPressed:
-                    (controller.loadingQualityReviewById ||
-                        controller.qualityReviewIdController.text
-                            .trim()
-                            .isEmpty)
-                    ? null
-                    : controller.fetchSelectedQualityReview,
-                child: Text(
-                  controller.loadingQualityReviewById
-                      ? l10n.projectsBusyProcessing
-                      : l10n.qualityReviewsViewReviewDetails,
-                ),
-              ),
-              if (controller.qualityReviewByIdLine != null) ...[
+          ),
+          const SizedBox(height: 8),
+          QualityReviewsActionsBar(
+            studioPresentation: widget.studioPresentation,
+            showDashboardControls: widget.platformConfig.qualityDashboardEnabled,
+            showRefreshControls:
+                widget.platformConfig.qualityRefreshControlsEnabled,
+            loadingQualityDashboard: c.loadingQualityDashboard,
+            refreshingQualityDashboardReadModel:
+                c.refreshingQualityDashboardReadModel,
+            loadingQualityReviews: c.loadingQualityReviews,
+            loadingQualityBadCases: c.loadingQualityBadCases,
+            loadingQualityStats: c.loadingQualityStats,
+            loadingQualityStagePassRate: c.loadingQualityStagePassRate,
+            onOpenWorkbench: () => _openQualityWorkbench(context),
+            onLoadQualityDashboard: _loadQualityDashboard,
+            onRefreshQualityDashboardReadModel: _refreshQualityDashboardReadModel,
+            onLoadQualityReviews: c.loadQualityReviews,
+            onLoadQualityBadCases: c.loadQualityBadCases,
+            onLoadQualityStats: c.loadQualityStats,
+            onLoadQualityStagePassRate: c.loadQualityStagePassRate,
+          ),
+        ];
+
+        if (widget.studioPresentation) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              ...header,
+              const SizedBox(height: 12),
+              _buildReviewIdLookupRow(context),
+              if (c.qualityReviewByIdLine != null) ...<Widget>[
                 const SizedBox(height: 8),
                 SelectableText(
                   l10n.qualityReviewsSummaryReviewDetails(
-                    controller.qualityReviewByIdLine!,
+                    c.qualityReviewByIdLine!,
                   ),
                 ),
               ],
-            ],
-            if (!studioPresentation && controller.qualityStatsLine != null) ...[
               const SizedBox(height: 8),
-              SelectableText(
-                l10n.qualityReviewsSummaryStats(controller.qualityStatsLine!),
-              ),
-            ],
-            if (!studioPresentation &&
-                controller.qualityStagePassRateLine != null) ...[
-              const SizedBox(height: 8),
-              SelectableText(
-                l10n.qualityReviewsSummaryStagePassRate(
-                  controller.qualityStagePassRateLine!,
+              if (c.qualityReviewsLoadState == StudioLoadState.error &&
+                  c.qualityReviewsLastError != null)
+                StudioApiErrorCallout(
+                  error: c.qualityReviewsLastError!,
+                  onRetry: c.loadQualityReviews,
+                )
+              else
+                StudioPaneScaffold(
+                  body: _buildStudioMainBody(context),
+                  footer: _buildStudioFooter(context),
                 ),
-              ),
             ],
-            if (!studioPresentation &&
-                controller.qualityStageGradeLine != null) ...[
+          );
+        }
+
+        return SingleChildScrollView(
+          padding: const EdgeInsets.only(top: 16, bottom: 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              ...header,
               const SizedBox(height: 8),
-              SelectableText(
-                l10n.qualityReviewsSummaryStageGrade(
-                  controller.qualityStageGradeLine!,
+              QualityReviewsSummaryPreview(
+                mutedColor: muted,
+                reviewSummary: reviewSummary,
+              ),
+              if (widget.platformConfig.qualityDashboardEnabled) ...<Widget>[
+                const SizedBox(height: 8),
+                Text(
+                  l10n.qualityReviewsOpsDashboardTitle,
+                  style: Theme.of(context).textTheme.titleSmall,
                 ),
-              ),
-            ],
-            if (!studioPresentation &&
-                controller.qualityScopeInsightsLine != null) ...[
-              const SizedBox(height: 8),
-              SelectableText(
-                l10n.qualityReviewsSummaryScopeInsights(
-                  controller.qualityScopeInsightsLine!,
+                const SizedBox(height: 6),
+                if (c.qualityDashboardLine != null)
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: OutlinedButton(
+                      onPressed: () async {
+                        await Clipboard.setData(
+                          ClipboardData(text: c.qualityDashboardLine!),
+                        );
+                        if (!context.mounted) {
+                          return;
+                        }
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              l10n.qualityReviewsCopiedDashboardSummary,
+                            ),
+                          ),
+                        );
+                      },
+                      child: Text(l10n.qualityReviewsCopyDashboardSummary),
+                    ),
+                  ),
+                QualityReviewsOpsDashboardPreview(
+                  mutedColor: muted,
+                  dashboardSummary: c.qualityDashboardLine,
+                  refreshControlsEnabled:
+                      widget.platformConfig.qualityRefreshControlsEnabled,
+                  refreshSummary:
+                      widget.platformConfig.qualityRefreshControlsEnabled
+                      ? c.qualityDashboardRefreshLine
+                      : null,
+                  freshnessMeta: c.qualityDashboardMeta,
+                  dashboardLoadState: c.qualityDashboardLoadState,
+                  dashboardLoadError: c.qualityDashboardLastError,
+                  loadingDashboard: c.loadingQualityDashboard,
+                  onRefreshDashboard: _loadQualityDashboard,
+                  qualityStatsRows: c.qualityStatsRows,
+                  stageGradeRows: c.qualityStageGradeRows,
+                  scopeInsightRows: c.qualityScopeInsightRows,
+                  tokenEfficiencyRows: c.qualityTokenEfficiencyRows,
+                  badCaseStats: c.qualityBadCaseStatItems,
                 ),
-              ),
-            ],
-            if (!studioPresentation &&
-                controller.qualityTokenEfficiencyLine != null) ...[
-              const SizedBox(height: 8),
-              SelectableText(
-                l10n.qualityReviewsSummaryTokenEfficiency(
-                  controller.qualityTokenEfficiencyLine!,
+              ],
+              const SizedBox(height: 12),
+              _buildReviewIdLookupRow(context),
+              if (c.qualityReviewByIdLine != null) ...<Widget>[
+                const SizedBox(height: 8),
+                SelectableText(
+                  l10n.qualityReviewsSummaryReviewDetails(
+                    c.qualityReviewByIdLine!,
+                  ),
                 ),
-              ),
-            ],
-            if (!studioPresentation &&
-                controller.qualityBadCaseStatsLine != null) ...[
-              const SizedBox(height: 8),
-              SelectableText(
-                l10n.qualityReviewsSummaryBadCaseHotspots(
-                  controller.qualityBadCaseStatsLine!,
+              ],
+              if (c.qualityStatsLine != null) ...<Widget>[
+                const SizedBox(height: 8),
+                SelectableText(
+                  l10n.qualityReviewsSummaryStats(c.qualityStatsLine!),
                 ),
-              ),
+              ],
+              if (c.qualityStagePassRateLine != null) ...<Widget>[
+                const SizedBox(height: 8),
+                SelectableText(
+                  l10n.qualityReviewsSummaryStagePassRate(
+                    c.qualityStagePassRateLine!,
+                  ),
+                ),
+              ],
+              if (c.qualityStageGradeLine != null) ...<Widget>[
+                const SizedBox(height: 8),
+                SelectableText(
+                  l10n.qualityReviewsSummaryStageGrade(c.qualityStageGradeLine!),
+                ),
+              ],
+              if (c.qualityScopeInsightsLine != null) ...<Widget>[
+                const SizedBox(height: 8),
+                SelectableText(
+                  l10n.qualityReviewsSummaryScopeInsights(
+                    c.qualityScopeInsightsLine!,
+                  ),
+                ),
+              ],
+              if (c.qualityTokenEfficiencyLine != null) ...<Widget>[
+                const SizedBox(height: 8),
+                SelectableText(
+                  l10n.qualityReviewsSummaryTokenEfficiency(
+                    c.qualityTokenEfficiencyLine!,
+                  ),
+                ),
+              ],
+              if (c.qualityBadCaseStatsLine != null) ...<Widget>[
+                const SizedBox(height: 8),
+                SelectableText(
+                  l10n.qualityReviewsSummaryBadCaseHotspots(
+                    c.qualityBadCaseStatsLine!,
+                  ),
+                ),
+              ],
+              if (c.qualityReviews != null) ...<Widget>[
+                QualityReviewsListPreview(
+                  reviews: c.qualityReviews!,
+                  onSelectQualityReview: c.selectQualityReview,
+                ),
+              ],
             ],
-            if (controller.qualityReviews != null) ...[
-              QualityReviewsListPreview(
-                reviews: controller.qualityReviews!,
-                onSelectQualityReview: controller.selectQualityReview,
-              ),
-            ],
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

@@ -25,6 +25,7 @@ class _StudioProductAppState extends State<StudioProductApp> {
       listenable: AppLocaleNotifier.instance,
       builder: (context, _) {
         return MaterialApp.router(
+          debugShowCheckedModeBanner: false,
           onGenerateTitle: (ctx) =>
               AppLocalizations.of(ctx)?.appTitle ??
               lookupAppLocalizations(const Locale('en')).appTitle,

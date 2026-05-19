@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../rust_api.dart';
 import 'workbench_view.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 Future<void> openNovelEventsWorkbenchDialog({
   required BuildContext ctx,
@@ -91,7 +92,7 @@ Future<void> openNovelEventsWorkbenchDialog({
   }
 
   try {
-    await showDialog<void>(
+    await showStudioDialog<void>(
       context: ctx,
       builder: (dialogCtx) {
         return StatefulBuilder(

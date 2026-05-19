@@ -628,7 +628,7 @@ Retry-After: 60
 
 **生成 TTS 配音:**
 ```bash
-curl -X POST https://api.toonflow.com/api/v1/tts/generate \
+curl -X POST https://api.openflow.com/api/v1/tts/generate \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -644,7 +644,7 @@ curl -X POST https://api.toonflow.com/api/v1/tts/generate \
 
 **启动导出任务:**
 ```bash
-curl -X POST https://api.toonflow.com/api/v1/export/start \
+curl -X POST https://api.openflow.com/api/v1/export/start \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -660,7 +660,7 @@ curl -X POST https://api.toonflow.com/api/v1/export/start \
 
 **查询导出任务:**
 ```bash
-curl -X GET "https://api.toonflow.com/api/v1/export/tasks?project_id=123e4567-e89b-12d3-a456-426614174000&status=completed&limit=20" \
+curl -X GET "https://api.openflow.com/api/v1/export/tasks?project_id=123e4567-e89b-12d3-a456-426614174000&status=completed&limit=20" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
@@ -670,7 +670,7 @@ curl -X GET "https://api.toonflow.com/api/v1/export/tasks?project_id=123e4567-e8
 ```javascript
 // 生成 TTS 配音
 async function generateTTS(projectId, shotId, text) {
-  const response = await fetch('https://api.toonflow.com/api/v1/tts/generate', {
+  const response = await fetch('https://api.openflow.com/api/v1/tts/generate', {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${YOUR_JWT_TOKEN}`,
@@ -697,7 +697,7 @@ async function generateTTS(projectId, shotId, text) {
 
 // 启动导出任务
 async function startExport(projectId, format, quality) {
-  const response = await fetch('https://api.toonflow.com/api/v1/export/start', {
+  const response = await fetch('https://api.openflow.com/api/v1/export/start', {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${YOUR_JWT_TOKEN}`,
@@ -729,7 +729,7 @@ async function getExportTasks(projectId, status = null) {
     params.append('status', status);
   }
 
-  const response = await fetch(`https://api.toonflow.com/api/v1/export/tasks?${params}`, {
+  const response = await fetch(`https://api.openflow.com/api/v1/export/tasks?${params}`, {
     headers: {
       'Authorization': `Bearer ${YOUR_JWT_TOKEN}`
     }
@@ -750,7 +750,7 @@ async function getExportTasks(projectId, status = null) {
 ```python
 import requests
 
-API_BASE_URL = 'https://api.toonflow.com'
+API_BASE_URL = 'https://api.openflow.com'
 JWT_TOKEN = 'YOUR_JWT_TOKEN'
 
 headers = {

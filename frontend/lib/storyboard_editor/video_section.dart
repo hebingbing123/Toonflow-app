@@ -1,3 +1,4 @@
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 part of '../../home_page.dart';
 
 /// Video workbench section extracted from [_StoryboardWorkbenchPanel] to keep
@@ -351,7 +352,7 @@ class _StoryboardVideoSection extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: DropdownButtonFormField<String>(
+              child: StudioDropdownButtonFormField<String>(
                 initialValue: resolution,
                 decoration: InputDecoration(
                   labelText: l10n.storyboardVideoWorkbenchResolutionLabel,
@@ -395,7 +396,7 @@ class _StoryboardVideoSection extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: DropdownButtonFormField<String>(
+              child: StudioDropdownButtonFormField<String>(
                 initialValue: mode,
                 decoration: InputDecoration(
                   labelText: l10n.storyboardVideoWorkbenchModeLabel,

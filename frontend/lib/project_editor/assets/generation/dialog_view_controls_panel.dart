@@ -1,3 +1,4 @@
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 part of 'dialog_view.dart';
 
 class _AssetGenerationControlsPanel extends StatelessWidget {
@@ -46,7 +47,7 @@ class _AssetGenerationControlsPanel extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: DropdownButtonFormField<int>(
+              child: StudioDropdownButtonFormField<int>(
                 initialValue: selectedScriptNumericId,
                 decoration: InputDecoration(
                   labelText: l10n.projectEditorAssetGenWorkbenchScriptLabel,
@@ -73,7 +74,7 @@ class _AssetGenerationControlsPanel extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: DropdownButtonFormField<String>(
+              child: StudioDropdownButtonFormField<String>(
                 initialValue: selectedType,
                 decoration: InputDecoration(
                   labelText: l10n.projectEditorAssetGenWorkbenchAssetTypeLabel,
@@ -87,7 +88,7 @@ class _AssetGenerationControlsPanel extends StatelessWidget {
                   ...typeSelections.keys.map(
                     (type) => DropdownMenuItem<String>(
                       value: type,
-                      child: Text(type),
+                      child: Text(projectEditorAssetTypeLabel(l10n, type)),
                     ),
                   ),
                 ],

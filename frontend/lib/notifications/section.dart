@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 
 import '../l10n/app_localizations.dart';
 import '../l10n/studio_code_labels.dart';
@@ -9,6 +10,7 @@ import '../rust_api.dart';
 import '../design_system/components/studio_filter_row.dart';
 import '../utils/localized_formatting.dart';
 import 'controller.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 class NotificationsSection extends StatefulWidget {
   const NotificationsSection({
@@ -344,7 +346,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
       ),
       SizedBox(
         width: widget.studioPresentation ? double.infinity : 220,
-        child: DropdownButtonFormField<String>(
+        child: StudioDropdownButtonFormField<String>(
           initialValue: _typeFilter,
           decoration: InputDecoration(
             labelText: l10n.notificationsTypeFilterLabel,
@@ -737,7 +739,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
             _complianceLabeledField(
               context,
               label: l10n.notificationsComplianceFilterAction,
-              child: DropdownButtonFormField<String>(
+              child: StudioDropdownButtonFormField<String>(
                 initialValue: _workspaceAuditActionFilter,
                 isExpanded: true,
                 decoration: const InputDecoration(isDense: true),
@@ -863,7 +865,7 @@ class _NotificationsSectionState extends State<NotificationsSection> {
               context,
               label: l10n.notificationsComplianceExportFormatFilter,
               width: 180,
-              child: DropdownButtonFormField<String>(
+              child: StudioDropdownButtonFormField<String>(
                 // Controlled by _exportHistoryFormat via setState.
                 // ignore: deprecated_member_use
                 value: _exportHistoryFormat,
@@ -1213,11 +1215,11 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     final idController = TextEditingController();
     final labelController = TextEditingController();
     final descriptionController = TextEditingController();
-    final shouldSave = await showDialog<bool>(
+    final shouldSave = await showStudioDialog<bool>(
       context: context,
       builder: (dialogContext) {
         final dl10n = resolveAppLocalizationsForErrors(dialogContext);
-        return AlertDialog(
+        return StudioAlertDialog(
           title: Text(dl10n.notificationsDialogSaveClearedTemplateTitle),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -1305,11 +1307,11 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     final idController = TextEditingController();
     final labelController = TextEditingController();
     final descriptionController = TextEditingController();
-    final shouldSave = await showDialog<bool>(
+    final shouldSave = await showStudioDialog<bool>(
       context: context,
       builder: (dialogContext) {
         final dl10n = resolveAppLocalizationsForErrors(dialogContext);
-        return AlertDialog(
+        return StudioAlertDialog(
           title: Text(
             dl10n.notificationsDialogSaveWorkspaceSharedTemplateTitle,
           ),
@@ -1399,11 +1401,11 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     final descriptionController = TextEditingController(
       text: template.description,
     );
-    final shouldSave = await showDialog<bool>(
+    final shouldSave = await showStudioDialog<bool>(
       context: context,
       builder: (dialogContext) {
         final dl10n = resolveAppLocalizationsForErrors(dialogContext);
-        return AlertDialog(
+        return StudioAlertDialog(
           title: Text(dl10n.notificationsDialogEditTemplateTitle(template.id)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -1456,11 +1458,11 @@ class _NotificationsSectionState extends State<NotificationsSection> {
   Future<void> _deleteTemplate(
     ContentComplianceClearedTemplateItemV1 template,
   ) async {
-    final shouldDelete = await showDialog<bool>(
+    final shouldDelete = await showStudioDialog<bool>(
       context: context,
       builder: (dialogContext) {
         final dl10n = resolveAppLocalizationsForErrors(dialogContext);
-        return AlertDialog(
+        return StudioAlertDialog(
           title: Text(
             dl10n.notificationsDialogDeleteTemplateTitle(template.label),
           ),
@@ -1487,11 +1489,11 @@ class _NotificationsSectionState extends State<NotificationsSection> {
   Future<void> _deleteWorkspaceSharedTemplate(
     ContentComplianceClearedTemplateItemV1 template,
   ) async {
-    final shouldDelete = await showDialog<bool>(
+    final shouldDelete = await showStudioDialog<bool>(
       context: context,
       builder: (dialogContext) {
         final dl10n = resolveAppLocalizationsForErrors(dialogContext);
-        return AlertDialog(
+        return StudioAlertDialog(
           title: Text(
             dl10n.notificationsDialogDeleteSharedTemplateTitle(template.label),
           ),
@@ -1524,11 +1526,11 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     final descriptionController = TextEditingController(
       text: template.description,
     );
-    final shouldSave = await showDialog<bool>(
+    final shouldSave = await showStudioDialog<bool>(
       context: context,
       builder: (dialogContext) {
         final dl10n = resolveAppLocalizationsForErrors(dialogContext);
-        return AlertDialog(
+        return StudioAlertDialog(
           title: Text(
             dl10n.notificationsDialogEditSharedTemplateTitle(template.id),
           ),
@@ -1722,19 +1724,19 @@ class _NotificationsSectionState extends State<NotificationsSection> {
   Future<void> _openImportTemplatesDialog() async {
     final jsonController = TextEditingController();
     String mode = 'replace';
-    final shouldImport = await showDialog<bool>(
+    final shouldImport = await showStudioDialog<bool>(
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (stateContext, setDialogState) {
           final dl10n = resolveAppLocalizationsForErrors(stateContext);
-          return AlertDialog(
+          return StudioAlertDialog(
             title: Text(dl10n.notificationsDialogImportTemplatesJsonTitle),
             content: SizedBox(
               width: 560,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  DropdownButtonFormField<String>(
+                  StudioDropdownButtonFormField<String>(
                     initialValue: mode,
                     decoration: InputDecoration(
                       labelText: dl10n.notificationsFieldImportMode,

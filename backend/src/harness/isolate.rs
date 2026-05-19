@@ -18,7 +18,7 @@
 //! ③ 已退出（**`try_wait`** 非空）的 worker。剔除计数见 **`metrics_snapshot`/`total_pool_evictions`** 与 **`GET /api/v1/ready`**。
 //!
 //! 可选 **`HARNESS_ISOLATE_RUNNER_EXE`**：显式指定子进程二进制（默认为 [`std::env::current_exe`]）。集成测试常指向
-//! **`CARGO_BIN_EXE_toonflow-server`**。
+//! **`CARGO_BIN_EXE_openflow-server`**。
 
 use std::io::{Read as _, Write as _};
 use std::path::PathBuf;
@@ -388,7 +388,7 @@ async fn spawn_pooled_echo_worker(exe: &std::path::Path) -> Result<PooledEchoCon
 
 /// 将至多 **`effective_isolate_prefork_target()`** 个子进程 worker 放入 idle 队列（已有 idle 计入目标，可安全重复调用）。
 ///
-/// 由 **`toonflow-server` `main`** 在监听前调用；集成测试可在设置 env 后直接调用以断言首包复用。
+/// 由 **`openflow-server` `main`** 在监听前调用；集成测试可在设置 env 后直接调用以断言首包复用。
 pub async fn warm_isolate_pool_prefork() {
     let cap = effective_isolate_prefork_target();
     if cap == 0 {

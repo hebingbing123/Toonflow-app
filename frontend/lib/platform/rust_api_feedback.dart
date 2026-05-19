@@ -73,6 +73,8 @@ void showRustApiErrorSnackBar(Object error) {
   final isRate = isRustApiQuotaOrRateError(error);
   messenger.showSnackBar(
     SnackBar(
+      behavior: SnackBarBehavior.floating,
+      showCloseIcon: true,
       content: Text(text),
       duration: Duration(seconds: isRate ? 8 : 5),
     ),

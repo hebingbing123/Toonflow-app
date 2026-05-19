@@ -68,6 +68,9 @@ extension ShortVideoSpaceSectionProject on _ShortVideoSpaceSectionState {
 
   void _applyProjectPreset(ProjectRow? project) {
     if (project == null) {
+      setState(() {
+        _latestSuccessfulExport = null;
+      });
       return;
     }
     setState(() {
@@ -82,6 +85,7 @@ extension ShortVideoSpaceSectionProject on _ShortVideoSpaceSectionState {
       _voiceProfile = project.voiceProfile ?? '';
       _subtitleStyle = project.subtitleStyle ?? '';
       _bgmStrategy = project.bgmStrategy ?? '';
+      _latestSuccessfulExport = null;
     });
   }
 

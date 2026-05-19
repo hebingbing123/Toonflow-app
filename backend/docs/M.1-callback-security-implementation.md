@@ -256,7 +256,7 @@ CallbackValidationConfig {
 For development/testing, initialize default secrets:
 
 ```rust
-use toonflow_server::publish::init_default_secrets;
+use openflow_server::publish::init_default_secrets;
 
 // Initialize random secrets for all platforms
 init_default_secrets(&pool).await?;
@@ -271,7 +271,7 @@ init_default_secrets(&pool).await?;
 ### Secret Rotation
 
 ```rust
-use toonflow_server::publish::{deactivate_platform_secret, upsert_platform_secret};
+use openflow_server::publish::{deactivate_platform_secret, upsert_platform_secret};
 
 // 1. Generate new secret
 let new_secret = generate_secure_random_secret();
@@ -304,7 +304,7 @@ SELECT cleanup_expired_callback_nonces();
 
 Add to cron or scheduled task:
 ```rust
-use toonflow_server::publish::cleanup_expired_nonces;
+use openflow_server::publish::cleanup_expired_nonces;
 
 // Run every hour
 tokio::spawn(async move {

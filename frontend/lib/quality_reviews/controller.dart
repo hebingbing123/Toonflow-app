@@ -47,6 +47,8 @@ class QualityReviewsController extends ChangeNotifier {
   String? qualityReviewByIdLine;
   StudioLoadState qualityDashboardLoadState = StudioLoadState.initial;
   Object? qualityDashboardLastError;
+  StudioLoadState qualityReviewsLoadState = StudioLoadState.initial;
+  Object? qualityReviewsLastError;
   List<QualityReview>? qualityReviews;
   List<QualityDashboardTargetStat>? qualityStatsRows;
   List<QualityDashboardStagePassRateItem>? qualityStagePassRateRows;
@@ -152,6 +154,8 @@ class QualityReviewsController extends ChangeNotifier {
     qualityTokenEfficiencyRows = null;
     qualityBadCaseStatItems = null;
     qualityDashboardMeta = null;
+    qualityReviewsLoadState = StudioLoadState.initial;
+    qualityReviewsLastError = null;
     qualityReviewIdController.clear();
     notifyListeners();
   }
@@ -171,6 +175,8 @@ class QualityReviewsController extends ChangeNotifier {
       loadingQualityBadCases = true;
     } else {
       loadingQualityReviews = true;
+      qualityReviewsLoadState = StudioLoadState.loading;
+      qualityReviewsLastError = null;
     }
     qualityReviews = null;
     _setError(null);
@@ -181,11 +187,19 @@ class QualityReviewsController extends ChangeNotifier {
         isBadCase: onlyBadCases ? true : null,
         limit: 20,
       );
+      if (!onlyBadCases) {
+        qualityReviewsLoadState = StudioLoadState.success;
+      }
     } catch (e) {
+      if (!onlyBadCases) {
+        qualityReviewsLoadState = StudioLoadState.error;
+        qualityReviewsLastError = e;
+      }
       reportRustOrDescribeApiError(
         e,
         onErrorChanged: _setError,
         l10n: _l10nResolved,
+        showGlobalSnackBar: !onlyBadCases,
       );
     } finally {
       if (onlyBadCases) {

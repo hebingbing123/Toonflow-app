@@ -22,7 +22,7 @@
 | ID | 内容 | 状态 | 对应主清单 |
 |----|------|------|------------|
 | GAP-S1-TEST | **契约测试（PG）**：`search_saved_views_roundtrip` — `GET` 空列表、`PUT` 非法 `workspaceId`→403、`PUT` 成功、`GET` 回读、`POST /workspaces` 后带成员 `workspaceId` 再 `PUT` | [x] | S1.8 / S2.4 — 代码：`.../search_saved_views_roundtrip.rs`；**Colima + 本地 Supabase 已跑通**（见下方「本地 DB」补迁移说明） |
-| GAP-S1-AUDIT | **可观测 / 合规审计**：DB 级 `app_*_audit` 行尚未建 | [~] | S1.6 — **已实现**：`PUT` 成功后 `tracing::info!`，`target = "toonflow.platform_audit"`，`kind = search_saved_views_full_sync`，含 `user_id` / `requested_count` / `persisted_count`（供日志聚合；合规落库另立项） |
+| GAP-S1-AUDIT | **可观测 / 合规审计**：DB 级 `app_*_audit` 行尚未建 | [~] | S1.6 — **已实现**：`PUT` 成功后 `tracing::info!`，`target = "openflow.platform_audit"`，`kind = search_saved_views_full_sync`，含 `user_id` / `requested_count` / `persisted_count`（供日志聚合；合规落库另立项） |
 | GAP-S1-UX | 删除确认：已登录时提示跨端同步移除 | [x] | `frontend/lib/global_search/global_search_bar.dart` 删除对话框 |
 
 ---

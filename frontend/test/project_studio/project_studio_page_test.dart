@@ -209,6 +209,53 @@ void main() {
     },
   );
 
+  testWidgets('restored last step syncs router location to the restored step', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      'studio_last_step_42': 'deliver',
+    });
+
+    final stepChanges = <StudioStep>[];
+    final host = ProjectStudioHost(
+      projectNumericId: 42,
+      projectUuid: 'project-42',
+      projectName: 'Project Delta',
+      accessToken: null,
+      initialStep: StudioStep.script,
+      onExit: () {},
+      onStepChanged: stepChanges.add,
+      onOpenAgentDrawer: () {},
+      onRunHarnessAgent: (_) async {},
+      buildStepBody: (step) => Center(child: Text('body-${step.slug}')),
+    );
+
+    late GoRouter router;
+    router = GoRouter(
+      initialLocation: '/projects/42/script',
+      routes: <RouteBase>[
+        GoRoute(
+          path: '/projects/42/script',
+          builder: (context, state) =>
+              Scaffold(body: ProjectStudioPage(host: host)),
+        ),
+        GoRoute(
+          path: '/projects/42/deliver',
+          builder: (context, state) =>
+              Scaffold(body: ProjectStudioPage(host: host)),
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(_wrapRouterApp(router));
+    await tester.pumpAndSettle();
+
+    expect(find.text('body-deliver'), findsOneWidget);
+    expect(router.routeInformationProvider.value.uri.path, '/projects/42/deliver');
+    expect(stepChanges, <StudioStep>[StudioStep.deliver]);
+  });
+
   testWidgets('asset hub can open asset editor from assets step', (
     tester,
   ) async {

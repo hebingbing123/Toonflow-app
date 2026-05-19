@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/short_video_space/section.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 /// **Validates: Requirement 14**
 final _zh = AppLocalizationsZh();
@@ -141,6 +142,7 @@ void main() {
         'createdAt': '2024-01-01T10:00:00Z',
         'completedAt': '2024-01-01T10:02:00Z',
         'errorMessage': 'Encoding failed',
+        'failureCode': 'video_download_http',
       };
 
       final item = ExportHistoryItem.fromJson(json);
@@ -148,6 +150,7 @@ void main() {
       expect(item.taskId, 'task-456');
       expect(item.status, ExportTaskStatus.failed);
       expect(item.errorMessage, 'Encoding failed');
+      expect(item.failureCode, 'video_download_http');
     });
 
     test('uses defaults for missing fields', () {
@@ -554,7 +557,7 @@ void main() {
             builder: (context) {
               return FilledButton(
                 onPressed: () async {
-                  await showDialog<void>(
+                  await showStudioDialog<void>(
                     context: context,
                     builder: (_) => const ExportHistoryDialog(
                       projectId: 'project-123',

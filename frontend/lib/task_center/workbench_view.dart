@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../design_system/components/studio_card.dart';
+import '../design_system/components/studio_dialog_shell.dart';
+import '../design_system/components/studio_filter_row.dart';
+import '../design_system/components/studio_text_styles.dart';
+import '../design_system/tokens.dart';
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
 
@@ -124,373 +129,473 @@ class TaskCenterWorkbenchDialogView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
-    final muted = Theme.of(context).colorScheme.onSurfaceVariant;
-    final viewportWidth = MediaQuery.sizeOf(context).width;
-    final dialogWidth = viewportWidth.isFinite
-        ? viewportWidth.clamp(320.0, 760.0)
-        : 760.0;
-    return AlertDialog(
-      title: Text(l10n.taskCenterWorkbenchTitle),
-      content: SizedBox(
-        width: dialogWidth,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n.taskCenterWorkbenchIntro(
-                  model.liveUpdatesConnected
-                      ? l10n.taskCenterWorkbenchRealtimeConnected
-                      : '',
-                ),
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: muted),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                l10n.taskCenterWorkbenchFilterAndList,
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  FilledButton.tonal(
-                    onPressed: model.loadingProjects
-                        ? null
-                        : callbacks.onLoadProjects,
-                    child: Text(
-                      model.loadingProjects
-                          ? l10n.projectsBusyProcessing
-                          : l10n.taskCenterReloadTaskProjects,
-                    ),
-                  ),
-                  FilledButton.tonal(
-                    onPressed: model.loadingCategories
-                        ? null
-                        : callbacks.onLoadCategories,
-                    child: Text(
-                      model.loadingCategories
-                          ? l10n.projectsBusyProcessing
-                          : l10n.taskCenterReloadTaskCategories,
-                    ),
-                  ),
-                  FilledButton.tonal(
-                    onPressed: model.loadingTasks
-                        ? null
-                        : callbacks.onLoadTasks,
-                    child: Text(
-                      model.loadingTasks
-                          ? l10n.projectsBusyProcessing
-                          : l10n.taskCenterLoadTasksByFilters,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                model.projectSummary,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: muted),
-              ),
-              if (model.categoriesSummary != null) ...[
-                const SizedBox(height: 4),
-                Text(
-                  model.categoriesSummary!,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(color: muted),
-                ),
-              ],
-              const SizedBox(height: 4),
-              Text(
-                model.jobSummary,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: muted),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: model.pageCtrl,
-                      decoration: InputDecoration(
-                        labelText: l10n.taskCenterFieldPage,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: TextField(
-                      controller: model.limitCtrl,
-                      decoration: InputDecoration(
-                        labelText: l10n.taskCenterFieldPageSize,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: model.projectIdCtrl,
-                      decoration: InputDecoration(
-                        labelText: l10n.taskCenterFieldProjectNumericIdOptional,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: TextField(
-                      controller: model.projectUuidCtrl,
-                      decoration: InputDecoration(
-                        labelText: l10n.taskCenterFieldProjectUuidOptional,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: model.taskClassCtrl,
-                      decoration: InputDecoration(
-                        labelText: l10n.taskCenterFieldTaskClassOptional,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: model.stateCtrl,
-                decoration: InputDecoration(
-                  labelText: l10n.taskCenterFieldTaskStatusOptional,
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: model.productionPhaseCtrl,
-                decoration: InputDecoration(
-                  labelText: l10n.taskCenterFieldProductionPhaseOptional,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  for (final item in _shortVideoProductionPhaseFilterItems(l10n))
-                    FilterChip(
-                      label: Text(item.label),
-                      selected:
-                          model.productionPhaseCtrl.text.trim() == item.key,
-                      onSelected: (_) => callbacks.onPickProductionPhase(
-                        model.productionPhaseCtrl.text.trim() == item.key
-                            ? ''
-                            : item.key,
-                      ),
-                    ),
-                ],
-              ),
-              if (model.categories.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: model.categories
-                      .take(6)
-                      .map(
-                        (row) => ActionChip(
-                          label: Text(row.taskClass),
-                          onPressed: () =>
-                              callbacks.onPickCategory(row.taskClass),
-                        ),
-                      )
-                      .toList(growable: false),
-                ),
-              ],
-              if (model.jobs.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Text(
-                  l10n.taskCenterJobsCount(model.jobs.length),
-                  style: Theme.of(context).textTheme.labelLarge,
-                ),
-                ...model.jobs
-                    .take(8)
-                    .map(
-                      (job) => ListTile(
-                        dense: true,
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(
-                          '${job.kind} · ${job.status}'
-                          '${taskCenterShortVideoStageLabel(l10n, job).isEmpty ? '' : ' · ${taskCenterShortVideoStageLabel(l10n, job)}'}',
-                        ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              [
-                                '#${job.numericTaskId} · ${job.id}',
-                                if (job.errorMessage != null &&
-                                    job.errorMessage!.isNotEmpty)
-                                  l10n.taskCenterFailureReason(job.errorMessage!),
-                              ].join('\n'),
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                            if (job.kind == 'video.export' &&
-                                job.status == 'failed')
-                              _VideoExportFailedSubtitle(
-                                job: job,
-                                onNavigateExportJobDeepLink:
-                                    callbacks.onNavigateExportJobDeepLink,
-                                onNavigateDomainDeepLink:
-                                    callbacks.onNavigateDomainDeepLink,
-                              ),
-                            if (job.status == 'failed')
-                              _TaskFailedReworkActions(
-                                job: job,
-                                onRetry: callbacks.onRetryFailedJob,
-                                onNavigateDomainDeepLink:
-                                    callbacks.onNavigateDomainDeepLink,
-                                onCompensateWritebackJob:
-                                    callbacks.onCompensateWritebackJob,
-                              ),
-                          ],
-                        ),
-                        trailing:
-                            (job.status == 'failed' ||
-                                job.status == 'queued' ||
-                                job.status == 'running')
-                            ? Wrap(
-                                spacing: 4,
-                                children: [
-                                  if (job.status == 'failed')
-                                    TextButton(
-                                      onPressed: model.retryingJobId == job.id
-                                          ? null
-                                          : () =>
-                                                callbacks.onRetryFailedJob(job),
-                                      child: Text(
-                                        model.retryingJobId == job.id
-                                            ? l10n.projectsBusyProcessing
-                                            : taskCenterFailedJobRetryLabel(
-                                                l10n,
-                                                job,
-                                              ),
-                                      ),
-                                    ),
-                                  if (job.status == 'queued' ||
-                                      job.status == 'running')
-                                    TextButton(
-                                      onPressed: model.cancellingJobId == job.id
-                                          ? null
-                                          : () => callbacks.onCancelQueuedJob(
-                                              job,
-                                            ),
-                                      child: Text(
-                                        model.cancellingJobId == job.id
-                                            ? l10n.projectsBusyProcessing
-                                            : l10n.taskCenterCancel,
-                                      ),
-                                    ),
-                                ],
-                              )
-                            : const Icon(Icons.chevron_right),
-                        onTap: () => callbacks.onPickJob(job),
-                      ),
-                    ),
-              ],
-              const SizedBox(height: 12),
-              Text(
-                l10n.taskCenterTaskDetailsSection,
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: model.numericTaskIdCtrl,
-                      decoration: InputDecoration(
-                        labelText: l10n.taskCenterFieldNumericTaskId,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  FilledButton.tonal(
-                    onPressed: model.loadingNumericIdTaskDetail
-                        ? null
-                        : callbacks.onLoadNumericIdTaskDetail,
-                    child: Text(
-                      model.loadingNumericIdTaskDetail
-                          ? l10n.projectsBusyProcessing
-                          : l10n.taskCenterLoadNumericIdDetails,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: model.uuidCtrl,
-                      decoration: InputDecoration(
-                        labelText: l10n.taskCenterFieldTaskUuid,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  FilledButton.tonal(
-                    onPressed: model.loadingUuidDetails
-                        ? null
-                        : callbacks.onLoadUuidDetails,
-                    child: Text(
-                      model.loadingUuidDetails
-                          ? l10n.projectsBusyProcessing
-                          : l10n.taskCenterLoadUuidDetails,
-                    ),
-                  ),
-                ],
-              ),
-              if (model.numericIdTaskDetailText != null) ...[
-                const SizedBox(height: 8),
-                SelectableText(
-                  l10n.taskCenterNumericIdDetailsLine(
-                    model.numericIdTaskDetailText!,
-                  ),
-                ),
-              ],
-              if (model.uuidDetails != null) ...[
-                const SizedBox(height: 8),
-                SelectableText(
-                  l10n.taskCenterUuidDetailsLine(model.uuidDetails!),
-                ),
-              ],
-              if (model.statusLine != null) ...[
-                const SizedBox(height: 8),
-                SelectableText(l10n.taskCenterStatusLine(model.statusLine!)),
-              ],
-            ],
-          ),
-        ),
+    final statusLines = <String>[
+      model.projectSummary,
+      if (model.categoriesSummary != null) model.categoriesSummary!,
+      model.jobSummary,
+    ];
+    final detailLines = <String>[
+      if (model.numericIdTaskDetailText != null)
+        l10n.taskCenterNumericIdDetailsLine(model.numericIdTaskDetailText!),
+      if (model.uuidDetails != null)
+        l10n.taskCenterUuidDetailsLine(model.uuidDetails!),
+      if (model.statusLine != null)
+        l10n.taskCenterStatusLine(model.statusLine!),
+    ];
+
+    return StudioDialogShell(
+      title: l10n.taskCenterWorkbenchTitle,
+      subtitle: l10n.taskCenterWorkbenchIntro(
+        model.liveUpdatesConnected
+            ? l10n.taskCenterWorkbenchRealtimeConnected
+            : '',
       ),
-      actions: [
+      leading: Icon(Icons.hub_outlined, color: StudioTokens.of(context).accent),
+      onClose: callbacks.onClose,
+      actions: <Widget>[
         TextButton(
           onPressed: callbacks.onClose,
           child: Text(l10n.helpHubDialogClose),
         ),
       ],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          _WorkbenchDialogSection(
+            title: l10n.taskCenterWorkbenchFilterAndList,
+            icon: Icons.tune_rounded,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                StudioFilterRow(
+                  wideBreakpoint: 520,
+                  children: <Widget>[
+                    _WorkbenchToolbarButton(
+                      icon: Icons.folder_open_outlined,
+                      label: model.loadingProjects
+                          ? l10n.projectsBusyProcessing
+                          : l10n.taskCenterReloadTaskProjects,
+                      onPressed: model.loadingProjects
+                          ? null
+                          : callbacks.onLoadProjects,
+                    ),
+                    _WorkbenchToolbarButton(
+                      icon: Icons.category_outlined,
+                      label: model.loadingCategories
+                          ? l10n.projectsBusyProcessing
+                          : l10n.taskCenterReloadTaskCategories,
+                      onPressed: model.loadingCategories
+                          ? null
+                          : callbacks.onLoadCategories,
+                    ),
+                    _WorkbenchToolbarButton(
+                      icon: Icons.playlist_play_outlined,
+                      label: model.loadingTasks
+                          ? l10n.projectsBusyProcessing
+                          : l10n.taskCenterLoadTasksByFilters,
+                      onPressed: model.loadingTasks
+                          ? null
+                          : callbacks.onLoadTasks,
+                      emphasized: true,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                StudioDialogInsetPanel(lines: statusLines),
+                const SizedBox(height: 12),
+                StudioFilterRow(
+                  wideBreakpoint: 480,
+                  children: <Widget>[
+                    TextField(
+                      controller: model.pageCtrl,
+                      decoration: InputDecoration(
+                        labelText: l10n.taskCenterFieldPage,
+                      ),
+                    ),
+                    TextField(
+                      controller: model.limitCtrl,
+                      decoration: InputDecoration(
+                        labelText: l10n.taskCenterFieldPageSize,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                StudioFilterRow(
+                  wideBreakpoint: 560,
+                  children: <Widget>[
+                    TextField(
+                      controller: model.projectIdCtrl,
+                      decoration: InputDecoration(
+                        labelText:
+                            l10n.taskCenterFieldProjectNumericIdOptional,
+                      ),
+                    ),
+                    TextField(
+                      controller: model.projectUuidCtrl,
+                      decoration: InputDecoration(
+                        labelText: l10n.taskCenterFieldProjectUuidOptional,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: model.taskClassCtrl,
+                  decoration: InputDecoration(
+                    labelText: l10n.taskCenterFieldTaskClassOptional,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: model.stateCtrl,
+                  decoration: InputDecoration(
+                    labelText: l10n.taskCenterFieldTaskStatusOptional,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: model.productionPhaseCtrl,
+                  decoration: InputDecoration(
+                    labelText: l10n.taskCenterFieldProductionPhaseOptional,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: <Widget>[
+                    for (final item in _shortVideoProductionPhaseFilterItems(
+                      l10n,
+                    ))
+                      FilterChip(
+                        label: Text(item.label),
+                        selected:
+                            model.productionPhaseCtrl.text.trim() == item.key,
+                        onSelected: (_) => callbacks.onPickProductionPhase(
+                          model.productionPhaseCtrl.text.trim() == item.key
+                              ? ''
+                              : item.key,
+                        ),
+                      ),
+                  ],
+                ),
+                if (model.categories.isNotEmpty) ...<Widget>[
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: model.categories
+                        .take(6)
+                        .map(
+                          (row) => ActionChip(
+                            label: Text(row.taskClass),
+                            onPressed: () =>
+                                callbacks.onPickCategory(row.taskClass),
+                          ),
+                        )
+                        .toList(growable: false),
+                  ),
+                ],
+                if (model.jobs.isNotEmpty) ...<Widget>[
+                  const SizedBox(height: 12),
+                  Text(
+                    l10n.taskCenterJobsCount(model.jobs.length),
+                    style: studioControlLabelStyle(context),
+                  ),
+                  const SizedBox(height: 8),
+                  ...model.jobs.take(8).map(
+                    (job) => _WorkbenchJobRow(
+                      job: job,
+                      l10n: l10n,
+                      retryingJobId: model.retryingJobId,
+                      cancellingJobId: model.cancellingJobId,
+                      callbacks: callbacks,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: StudioSpacing.sm),
+          _WorkbenchDialogSection(
+            title: l10n.taskCenterTaskDetailsSection,
+            icon: Icons.data_object_outlined,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final stacked = constraints.maxWidth < 520;
+                    final field = TextField(
+                      controller: model.numericTaskIdCtrl,
+                      decoration: InputDecoration(
+                        labelText: l10n.taskCenterFieldNumericTaskId,
+                      ),
+                    );
+                    final button = _WorkbenchToolbarButton(
+                      icon: Icons.manage_search_outlined,
+                      label: model.loadingNumericIdTaskDetail
+                          ? l10n.projectsBusyProcessing
+                          : l10n.taskCenterLoadNumericIdDetails,
+                      onPressed: model.loadingNumericIdTaskDetail
+                          ? null
+                          : callbacks.onLoadNumericIdTaskDetail,
+                      emphasized: true,
+                    );
+                    if (stacked) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[field, const SizedBox(height: 8), button],
+                      );
+                    }
+                    return Row(
+                      children: <Widget>[
+                        Expanded(child: field),
+                        const SizedBox(width: 8),
+                        button,
+                      ],
+                    );
+                  },
+                ),
+                const SizedBox(height: 8),
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final stacked = constraints.maxWidth < 520;
+                    final field = TextField(
+                      controller: model.uuidCtrl,
+                      decoration: InputDecoration(
+                        labelText: l10n.taskCenterFieldTaskUuid,
+                      ),
+                    );
+                    final button = _WorkbenchToolbarButton(
+                      icon: Icons.fingerprint_outlined,
+                      label: model.loadingUuidDetails
+                          ? l10n.projectsBusyProcessing
+                          : l10n.taskCenterLoadUuidDetails,
+                      onPressed: model.loadingUuidDetails
+                          ? null
+                          : callbacks.onLoadUuidDetails,
+                      emphasized: true,
+                    );
+                    if (stacked) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[field, const SizedBox(height: 8), button],
+                      );
+                    }
+                    return Row(
+                      children: <Widget>[
+                        Expanded(child: field),
+                        const SizedBox(width: 8),
+                        button,
+                      ],
+                    );
+                  },
+                ),
+                if (detailLines.isNotEmpty) ...<Widget>[
+                  const SizedBox(height: 10),
+                  StudioDialogInsetPanel(lines: detailLines),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _WorkbenchDialogSection extends StatelessWidget {
+  const _WorkbenchDialogSection({
+    required this.title,
+    required this.icon,
+    required this.child,
+  });
+
+  final String title;
+  final IconData icon;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = StudioTokens.of(context);
+    return StudioCard(
+      padding: const EdgeInsets.all(StudioSpacing.sm),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              Icon(icon, size: 18, color: tokens.signal),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(title, style: studioPaneTitleStyle(context)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+class _WorkbenchToolbarButton extends StatelessWidget {
+  const _WorkbenchToolbarButton({
+    required this.icon,
+    required this.label,
+    required this.onPressed,
+    this.emphasized = false,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback? onPressed;
+  final bool emphasized;
+
+  @override
+  Widget build(BuildContext context) {
+    if (emphasized) {
+      return FilledButton.icon(
+        onPressed: onPressed,
+        icon: Icon(icon, size: 16),
+        label: Text(label),
+      );
+    }
+    return OutlinedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon, size: 16),
+      label: Text(label),
+    );
+  }
+}
+
+class _WorkbenchJobRow extends StatelessWidget {
+  const _WorkbenchJobRow({
+    required this.job,
+    required this.l10n,
+    required this.retryingJobId,
+    required this.cancellingJobId,
+    required this.callbacks,
+  });
+
+  final JobRow job;
+  final AppLocalizations l10n;
+  final String? retryingJobId;
+  final String? cancellingJobId;
+  final TaskCenterWorkbenchDialogViewCallbacks callbacks;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = StudioTokens.of(context);
+    final stage = taskCenterShortVideoStageLabel(l10n, job);
+    final title =
+        '${job.kind} · ${job.status}${stage.isEmpty ? '' : ' · $stage'}';
+    final subtitleLines = <String>[
+      '#${job.numericTaskId} · ${job.id}',
+      if (job.errorMessage != null && job.errorMessage!.isNotEmpty)
+        l10n.taskCenterFailureReason(job.errorMessage!),
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => callbacks.onPickJob(job),
+          borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
+          child: Ink(
+            decoration: BoxDecoration(
+              color: tokens.bgInset.withValues(alpha: 0.88),
+              borderRadius: BorderRadius.circular(StudioSpacing.radiusButton),
+              border: Border.all(color: tokens.borderSubtle),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(title, style: studioControlLabelStyle(context)),
+                        const SizedBox(height: 4),
+                        SelectableText(
+                          subtitleLines.join('\n'),
+                          style: studioHintStyle(context)?.copyWith(
+                            fontFamily: 'monospace',
+                            fontFamilyFallback: const <String>[
+                              'Menlo',
+                              'Consolas',
+                              'monospace',
+                            ],
+                          ),
+                        ),
+                        if (job.kind == 'video.export' && job.status == 'failed')
+                          _VideoExportFailedSubtitle(
+                            job: job,
+                            onNavigateExportJobDeepLink:
+                                callbacks.onNavigateExportJobDeepLink,
+                            onNavigateDomainDeepLink:
+                                callbacks.onNavigateDomainDeepLink,
+                          ),
+                        if (job.status == 'failed')
+                          _TaskFailedReworkActions(
+                            job: job,
+                            onRetry: callbacks.onRetryFailedJob,
+                            onNavigateDomainDeepLink:
+                                callbacks.onNavigateDomainDeepLink,
+                            onCompensateWritebackJob:
+                                callbacks.onCompensateWritebackJob,
+                          ),
+                      ],
+                    ),
+                  ),
+                  if (job.status == 'failed' ||
+                      job.status == 'queued' ||
+                      job.status == 'running')
+                    Wrap(
+                      spacing: 4,
+                      children: <Widget>[
+                        if (job.status == 'failed')
+                          TextButton(
+                            onPressed: retryingJobId == job.id
+                                ? null
+                                : () => callbacks.onRetryFailedJob(job),
+                            child: Text(
+                              retryingJobId == job.id
+                                  ? l10n.projectsBusyProcessing
+                                  : taskCenterFailedJobRetryLabel(l10n, job),
+                            ),
+                          ),
+                        if (job.status == 'queued' || job.status == 'running')
+                          TextButton(
+                            onPressed: cancellingJobId == job.id
+                                ? null
+                                : () => callbacks.onCancelQueuedJob(job),
+                            child: Text(
+                              cancellingJobId == job.id
+                                  ? l10n.projectsBusyProcessing
+                                  : l10n.taskCenterCancel,
+                            ),
+                          ),
+                      ],
+                    )
+                  else
+                    Icon(
+                      Icons.chevron_right,
+                      color: tokens.textMuted,
+                      size: 20,
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

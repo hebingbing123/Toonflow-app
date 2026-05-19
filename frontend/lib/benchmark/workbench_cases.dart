@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 
 import '../rust_api.dart';
 
@@ -77,7 +78,7 @@ class BenchmarkCasesWorkbench extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-                DropdownButtonFormField<String>(
+                StudioDropdownButtonFormField<String>(
                   initialValue: promoteCaseType,
                   decoration: InputDecoration(
                     labelText: l10n.benchmarkLabelSampleType,

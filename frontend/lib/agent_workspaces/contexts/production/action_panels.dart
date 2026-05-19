@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 
 import '../../../rust_api.dart';
 import '../../agent_workspace_preset_labels.dart';
@@ -145,7 +146,7 @@ class ProductionWorkspaceControlsPanel extends StatelessWidget {
             Widget domainToolDropdown() {
               return SizedBox(
                 width: narrow ? double.infinity : fieldWidth,
-                child: DropdownButtonFormField<String>(
+                child: StudioDropdownButtonFormField<String>(
                   isExpanded: true,
                   initialValue: selectedProductionDomainTool,
                   items: productionDomainToolPresets
@@ -175,7 +176,7 @@ class ProductionWorkspaceControlsPanel extends StatelessWidget {
             Widget flowKeyDropdown() {
               return SizedBox(
                 width: narrow ? double.infinity : fieldWidth,
-                child: DropdownButtonFormField<String>(
+                child: StudioDropdownButtonFormField<String>(
                   isExpanded: true,
                   initialValue: selectedFlowKey,
                   items: flowKeyPresets
@@ -219,7 +220,7 @@ class ProductionWorkspaceControlsPanel extends StatelessWidget {
             Widget subAgentDropdown() {
               return SizedBox(
                 width: narrow ? double.infinity : fieldWidth,
-                child: DropdownButtonFormField<String>(
+                child: StudioDropdownButtonFormField<String>(
                   isExpanded: true,
                   initialValue: selectedProductionSubAgentTool,
                   items: productionSubAgentPresets

@@ -197,10 +197,10 @@ extension _ShortVideoSpaceSectionKeyboardShortcutsExtension on _ShortVideoSpaceS
 
     if (!mounted) return;
 
-    await showDialog<void>(
+    await showStudioDialog<void>(
       context: context,
       builder: (ctx) {
-        return AlertDialog(
+        return StudioAlertDialog(
           title: Row(
             children: [
               const Icon(Icons.keyboard),

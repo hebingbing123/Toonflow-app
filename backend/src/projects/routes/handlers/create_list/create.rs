@@ -151,20 +151,20 @@ pub(crate) async fn create_project(
         r#"
         INSERT INTO app_project (
           owner_user_id, workspace_id, numeric_id, name, intro, project_type,
-          image_model, image_quality, video_model, art_style,
+          text_model, multimodal_model, image_model, image_quality, video_model, art_style,
           director_manual, mode, video_ratio, create_time_ms, metadata,
           project_brief, brand_bible,
           art_style_pack, story_style_pack,
           target_market, target_platforms, duration_strategy,
-          voice_profile, subtitle_style, bgm_strategy, quality_gate_strategy
+          voice_model, voice_profile, subtitle_style, bgm_strategy, quality_gate_strategy
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, '{}'::jsonb, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, '{}'::jsonb, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28)
         RETURNING id, workspace_id, numeric_id, name, intro, project_type,
-                  image_model, image_quality, video_model, art_style,
+                  text_model, multimodal_model, image_model, image_quality, video_model, art_style,
                   director_manual, mode, video_ratio, create_time_ms,
                   art_style_pack, story_style_pack,
                   target_market, target_platforms, duration_strategy,
-                  voice_profile, subtitle_style, bgm_strategy, quality_gate_strategy,
+                  voice_model, voice_profile, subtitle_style, bgm_strategy, quality_gate_strategy,
                   'inherited' AS project_access_mode,
                   'project_owner' AS project_access_role
         "#,
@@ -175,6 +175,8 @@ pub(crate) async fn create_project(
     .bind(trim_opt(body.name))
     .bind(trim_opt(body.intro))
     .bind(trim_opt(body.project_type))
+    .bind(trim_opt(body.text_model))
+    .bind(trim_opt(body.multimodal_model))
     .bind(trim_opt(body.image_model))
     .bind(trim_opt(body.image_quality))
     .bind(trim_opt(body.video_model))
@@ -202,6 +204,7 @@ pub(crate) async fn create_project(
     .bind(trim_opt(body.target_market))
     .bind(target_platforms)
     .bind(trim_opt(body.duration_strategy))
+    .bind(trim_opt(body.voice_model))
     .bind(trim_opt(body.voice_profile))
     .bind(trim_opt(body.subtitle_style))
     .bind(trim_opt(body.bgm_strategy))

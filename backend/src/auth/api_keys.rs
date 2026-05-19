@@ -9,9 +9,9 @@ use uuid::Uuid;
 use crate::error::ApiError;
 use crate::state::AppState;
 
-pub const AUTH_USER_ID_HEADER: &str = "x-toonflow-auth-user-id";
-pub const AUTH_API_KEY_ID_HEADER: &str = "x-toonflow-auth-api-key-id";
-pub const AUTH_API_KEY_SCOPE_HEADER: &str = "x-toonflow-auth-api-key-scope";
+pub const AUTH_USER_ID_HEADER: &str = "x-openflow-auth-user-id";
+pub const AUTH_API_KEY_ID_HEADER: &str = "x-openflow-auth-api-key-id";
+pub const AUTH_API_KEY_SCOPE_HEADER: &str = "x-openflow-auth-api-key-scope";
 
 const API_KEY_PREFIX: &str = "tfk_";
 
@@ -96,7 +96,7 @@ pub fn public_id_from_request<T>(req: &Request<T>) -> Option<String> {
 }
 
 pub fn hash_api_key_secret(state: &AppState, secret: &str) -> Result<String, ApiError> {
-    let secret_material = std::env::var("TOONFLOW_API_KEY_PEPPER")
+    let secret_material = std::env::var("OPENFLOW_API_KEY_PEPPER")
         .ok()
         .map(|value| value.into_bytes())
         .or_else(|| state.jwt_secret.clone())

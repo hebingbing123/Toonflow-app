@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/project_editor/assets/dialogs/candidate_status_dialog.dart';
 import 'package:openflow_app/rust_api.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 Widget _wrapApp({required Widget child}) {
   return MaterialApp(
@@ -50,7 +51,7 @@ class _DialogLauncherState extends State<_DialogLauncher> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final result = await showDialog<ProjectAssetCandidateStatusDialogResult>(
+      final result = await showStudioDialog<ProjectAssetCandidateStatusDialogResult>(
         context: context,
         builder: (context) => ProjectAssetCandidateStatusDialog(
           assets: widget.assets,

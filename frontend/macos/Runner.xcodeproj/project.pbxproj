@@ -239,6 +239,7 @@
 				33CC10EA2044A3C60003C045 /* Frameworks */,
 				33CC10EB2044A3C60003C045 /* Resources */,
 				33CC110E2044A8840003C045 /* Bundle Framework */,
+				A1B2C3D42A7F100000000001 /* Build Openflow Rust Bridge */,
 				3399D490228B24CF009A79C7 /* ShellScript */,
 				7FFA21B022944A23E33CA0BF /* [CP] Embed Pods Frameworks */,
 			);
@@ -323,6 +324,26 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		A1B2C3D42A7F100000000001 /* Build Openflow Rust Bridge */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Build Openflow Rust Bridge";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PROJECT_DIR}/build_openflow_core_bridge.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		2E6AE2F3ECE8FC24BB818D17 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;

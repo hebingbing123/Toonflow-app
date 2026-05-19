@@ -333,7 +333,7 @@ paths:
             application/json:
               schema:
                 $ref: ErrorBody
-          description: Auth not configured, database error, or `TOONFLOW_LOCAL_ART_STYLE_COVER_DIR` unset
+          description: Auth not configured, database error, or `OPENFLOW_LOCAL_ART_STYLE_COVER_DIR` unset
       summary: Fetch one locally persisted art-style cover
       tags:
       - art_styles
@@ -7576,7 +7576,7 @@ paths:
       description: 'Public, no auth. Aligns with Electron-era **`/api/other/getVersion`** use cases for client compatibility
         checks.
 
-        When the server binary is compiled with environment **`TOONFLOW_GIT_SHA`** set, the JSON may include **`git_sha`**
+        When the server binary is compiled with environment **`OPENFLOW_GIT_SHA`** set, the JSON may include **`git_sha`**
         (opaque string, often a Git commit id).'
       operationId: versionV1
       responses:

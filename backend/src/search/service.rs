@@ -82,6 +82,7 @@ impl SearchService {
 
         // 构建搜索查询字符串（用于 plainto_tsquery）
         let search_term = query.q.trim();
+        let search_like = build_search_like_pattern(search_term);
 
         // 计算偏移量
         let offset = (page - 1) * page_size;
@@ -103,6 +104,7 @@ impl SearchService {
             .execute_union_search(
                 workspace_id,
                 search_term,
+                &search_like,
                 type_filter.as_deref(),
                 query.time_from,
                 query.time_to,
@@ -194,6 +196,7 @@ impl SearchService {
         &self,
         workspace_id: Uuid,
         search_term: &str,
+        search_like: &str,
         type_filter: Option<&[ResultType]>,
         time_from: Option<DateTime<Utc>>,
         time_to: Option<DateTime<Utc>>,
@@ -237,9 +240,17 @@ impl SearchService {
                     id,
                     'project' as result_type,
                     name as title,
-                    ts_headline('simple', COALESCE(intro, ''), plainto_tsquery('simple', $1),
-                        'MaxWords=50, MinWords=25, StartSel=<mark>, StopSel=</mark>') as snippet,
-                    ts_rank(search_vector, plainto_tsquery('simple', $1)) as rank,
+                    CASE
+                        WHEN search_vector @@ plainto_tsquery('simple', $1) THEN
+                            ts_headline('simple', COALESCE(intro, ''), plainto_tsquery('simple', $1),
+                                'MaxWords=50, MinWords=25, StartSel=<mark>, StopSel=</mark>')
+                        ELSE LEFT(COALESCE(NULLIF(intro, ''), name, ''), 180)
+                    END as snippet,
+                    (
+                        ts_rank(search_vector, plainto_tsquery('simple', $1))
+                        + CASE WHEN COALESCE(name, '') ILIKE $3 ESCAPE '\' THEN 2.5 ELSE 0.0 END
+                        + CASE WHEN COALESCE(intro, '') ILIKE $3 ESCAPE '\' THEN 0.8 ELSE 0.0 END
+                    ) as rank,
                     created_at,
                     updated_at,
                     jsonb_build_object(
@@ -248,7 +259,11 @@ impl SearchService {
                     ) as metadata
                 FROM public.app_project
                 WHERE 
-                    search_vector @@ plainto_tsquery('simple', $1)
+                    (
+                        search_vector @@ plainto_tsquery('simple', $1)
+                        OR COALESCE(name, '') ILIKE $3 ESCAPE '\'
+                        OR COALESCE(intro, '') ILIKE $3 ESCAPE '\'
+                    )
                     AND workspace_id = $2
                     AND archived_at IS NULL
                     {}
@@ -277,9 +292,17 @@ impl SearchService {
                     s.id,
                     'script' as result_type,
                     s.name as title,
-                    ts_headline('simple', COALESCE(s.content, ''), plainto_tsquery('simple', $1),
-                        'MaxWords=50, MinWords=25, StartSel=<mark>, StopSel=</mark>') as snippet,
-                    ts_rank(s.search_vector, plainto_tsquery('simple', $1)) as rank,
+                    CASE
+                        WHEN s.search_vector @@ plainto_tsquery('simple', $1) THEN
+                            ts_headline('simple', COALESCE(s.content, ''), plainto_tsquery('simple', $1),
+                                'MaxWords=50, MinWords=25, StartSel=<mark>, StopSel=</mark>')
+                        ELSE LEFT(COALESCE(NULLIF(s.content, ''), s.name, ''), 180)
+                    END as snippet,
+                    (
+                        ts_rank(s.search_vector, plainto_tsquery('simple', $1))
+                        + CASE WHEN COALESCE(s.name, '') ILIKE $3 ESCAPE '\' THEN 2.5 ELSE 0.0 END
+                        + CASE WHEN COALESCE(s.content, '') ILIKE $3 ESCAPE '\' THEN 0.8 ELSE 0.0 END
+                    ) as rank,
                     s.created_at,
                     s.updated_at,
                     jsonb_build_object(
@@ -292,7 +315,11 @@ impl SearchService {
                 FROM public.app_script s
                 INNER JOIN public.app_project p ON p.id = s.project_id
                 WHERE 
-                    s.search_vector @@ plainto_tsquery('simple', $1)
+                    (
+                        s.search_vector @@ plainto_tsquery('simple', $1)
+                        OR COALESCE(s.name, '') ILIKE $3 ESCAPE '\'
+                        OR COALESCE(s.content, '') ILIKE $3 ESCAPE '\'
+                    )
                     AND p.workspace_id = $2
                     AND p.archived_at IS NULL
                     {}
@@ -321,9 +348,17 @@ impl SearchService {
                     a.id,
                     'asset' as result_type,
                     a.name as title,
-                    ts_headline('simple', COALESCE(a.description, ''), plainto_tsquery('simple', $1),
-                        'MaxWords=50, MinWords=25, StartSel=<mark>, StopSel=</mark>') as snippet,
-                    ts_rank(a.search_vector, plainto_tsquery('simple', $1)) as rank,
+                    CASE
+                        WHEN a.search_vector @@ plainto_tsquery('simple', $1) THEN
+                            ts_headline('simple', COALESCE(a.description, ''), plainto_tsquery('simple', $1),
+                                'MaxWords=50, MinWords=25, StartSel=<mark>, StopSel=</mark>')
+                        ELSE LEFT(COALESCE(NULLIF(a.description, ''), a.name, ''), 180)
+                    END as snippet,
+                    (
+                        ts_rank(a.search_vector, plainto_tsquery('simple', $1))
+                        + CASE WHEN COALESCE(a.name, '') ILIKE $3 ESCAPE '\' THEN 2.5 ELSE 0.0 END
+                        + CASE WHEN COALESCE(a.description, '') ILIKE $3 ESCAPE '\' THEN 0.8 ELSE 0.0 END
+                    ) as rank,
                     a.created_at,
                     a.updated_at,
                     jsonb_build_object(
@@ -337,7 +372,11 @@ impl SearchService {
                 FROM public.app_asset a
                 INNER JOIN public.app_project p ON p.id = a.project_id
                 WHERE 
-                    a.search_vector @@ plainto_tsquery('simple', $1)
+                    (
+                        a.search_vector @@ plainto_tsquery('simple', $1)
+                        OR COALESCE(a.name, '') ILIKE $3 ESCAPE '\'
+                        OR COALESCE(a.description, '') ILIKE $3 ESCAPE '\'
+                    )
                     AND p.workspace_id = $2
                     AND p.archived_at IS NULL
                     {}
@@ -365,9 +404,17 @@ impl SearchService {
                     n.id,
                     'novel' as result_type,
                     CONCAT('章 ', n.chapter_index::text, ' · ', LEFT(COALESCE(NULLIF(trim(n.chapter), ''), '未命名'), 120)) as title,
-                    ts_headline('simple', COALESCE(n.chapter_data, ''), plainto_tsquery('simple', $1),
-                        'MaxWords=50, MinWords=25, StartSel=<mark>, StopSel=</mark>') as snippet,
-                    ts_rank(n.search_vector, plainto_tsquery('simple', $1)) as rank,
+                    CASE
+                        WHEN n.search_vector @@ plainto_tsquery('simple', $1) THEN
+                            ts_headline('simple', COALESCE(n.chapter_data, ''), plainto_tsquery('simple', $1),
+                                'MaxWords=50, MinWords=25, StartSel=<mark>, StopSel=</mark>')
+                        ELSE LEFT(COALESCE(NULLIF(n.chapter_data, ''), n.chapter, ''), 180)
+                    END as snippet,
+                    (
+                        ts_rank(n.search_vector, plainto_tsquery('simple', $1))
+                        + CASE WHEN COALESCE(n.chapter, '') ILIKE $3 ESCAPE '\' THEN 2.5 ELSE 0.0 END
+                        + CASE WHEN COALESCE(n.chapter_data, '') ILIKE $3 ESCAPE '\' THEN 0.8 ELSE 0.0 END
+                    ) as rank,
                     n.created_at,
                     n.updated_at,
                     jsonb_build_object(
@@ -381,7 +428,11 @@ impl SearchService {
                 FROM public.app_novel n
                 INNER JOIN public.app_project p ON p.id = n.project_id
                 WHERE 
-                    n.search_vector @@ plainto_tsquery('simple', $1)
+                    (
+                        n.search_vector @@ plainto_tsquery('simple', $1)
+                        OR COALESCE(n.chapter, '') ILIKE $3 ESCAPE '\'
+                        OR COALESCE(n.chapter_data, '') ILIKE $3 ESCAPE '\'
+                    )
                     AND p.workspace_id = $2
                     AND p.archived_at IS NULL
                     {}
@@ -409,9 +460,17 @@ impl SearchService {
                     e.id,
                     'novel_event' as result_type,
                     COALESCE(NULLIF(trim(e.name), ''), '未命名事件') as title,
-                    ts_headline('simple', COALESCE(e.detail, ''), plainto_tsquery('simple', $1),
-                        'MaxWords=50, MinWords=25, StartSel=<mark>, StopSel=</mark>') as snippet,
-                    ts_rank(e.search_vector, plainto_tsquery('simple', $1)) as rank,
+                    CASE
+                        WHEN e.search_vector @@ plainto_tsquery('simple', $1) THEN
+                            ts_headline('simple', COALESCE(e.detail, ''), plainto_tsquery('simple', $1),
+                                'MaxWords=50, MinWords=25, StartSel=<mark>, StopSel=</mark>')
+                        ELSE LEFT(COALESCE(NULLIF(e.detail, ''), e.name, ''), 180)
+                    END as snippet,
+                    (
+                        ts_rank(e.search_vector, plainto_tsquery('simple', $1))
+                        + CASE WHEN COALESCE(e.name, '') ILIKE $3 ESCAPE '\' THEN 2.5 ELSE 0.0 END
+                        + CASE WHEN COALESCE(e.detail, '') ILIKE $3 ESCAPE '\' THEN 0.8 ELSE 0.0 END
+                    ) as rank,
                     e.created_at,
                     e.updated_at,
                     jsonb_build_object(
@@ -424,7 +483,11 @@ impl SearchService {
                 FROM public.app_novel_event e
                 INNER JOIN public.app_project p ON p.id = e.project_id
                 WHERE 
-                    e.search_vector @@ plainto_tsquery('simple', $1)
+                    (
+                        e.search_vector @@ plainto_tsquery('simple', $1)
+                        OR COALESCE(e.name, '') ILIKE $3 ESCAPE '\'
+                        OR COALESCE(e.detail, '') ILIKE $3 ESCAPE '\'
+                    )
                     AND p.workspace_id = $2
                     AND p.archived_at IS NULL
                     {}
@@ -454,6 +517,7 @@ impl SearchService {
         let rows = sqlx::query(&query_sql)
             .bind(search_term)
             .bind(workspace_id)
+            .bind(search_like)
             .bind(limit)
             .bind(offset)
             .fetch_all(&self.pool)
@@ -494,6 +558,15 @@ impl SearchService {
 
         Ok(results)
     }
+}
+
+fn build_search_like_pattern(raw: &str) -> String {
+    let trimmed = raw.trim();
+    let escaped = trimmed
+        .replace('\\', r"\\")
+        .replace('%', r"\%")
+        .replace('_', r"\_");
+    format!("%{escaped}%")
 }
 
 #[cfg(test)]
@@ -663,6 +736,13 @@ mod tests {
             let trimmed = input.trim();
             assert_eq!(trimmed, expected);
         }
+    }
+
+    #[test]
+    fn test_build_search_like_pattern_escapes_like_metacharacters() {
+        assert_eq!(build_search_like_pattern("动漫短剧"), "%动漫短剧%");
+        assert_eq!(build_search_like_pattern("100%_test"), r"%100\%\_test%");
+        assert_eq!(build_search_like_pattern(r"a\b"), r"%a\\b%");
     }
 
     /// 测试摘要生成：验证 ts_headline 的高亮标记格式

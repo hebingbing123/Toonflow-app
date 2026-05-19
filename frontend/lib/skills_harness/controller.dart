@@ -6,6 +6,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../config.dart';
 import '../l10n/app_localizations.dart';
+import '../design_system/components/studio_dialog_shell.dart';
 import '../rust_api.dart';
 
 part 'files.dart';

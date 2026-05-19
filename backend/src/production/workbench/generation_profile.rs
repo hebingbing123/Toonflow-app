@@ -48,7 +48,7 @@ pub(crate) struct GenerationProfile {
 impl GenerationProfile {
     #[must_use]
     pub(crate) fn from_env_or_default() -> Self {
-        let tier = std::env::var("TOONFLOW_GENERATION_PROFILE")
+        let tier = std::env::var("OPENFLOW_GENERATION_PROFILE")
             .ok()
             .map(|v| GenerationProfileTier::parse(&v))
             .unwrap_or(GenerationProfileTier::Standard);

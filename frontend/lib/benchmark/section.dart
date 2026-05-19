@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 
 import '../l10n/app_localizations.dart';
 import '../l10n/studio_code_labels.dart';
@@ -922,7 +923,7 @@ class _BenchmarkSectionState extends State<BenchmarkSection> {
                   child: Text(l10n.benchmarkButtonFetchHistory),
                 ),
                 if (_abRuns.isNotEmpty)
-                  DropdownButton<String>(
+                  StudioDropdownButton<String>(
                     value: _selectedAbRunId,
                     items: _abRuns
                         .take(20)

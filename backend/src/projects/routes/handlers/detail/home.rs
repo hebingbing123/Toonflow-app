@@ -29,6 +29,8 @@ struct ProjectHomeRow {
     name: Option<String>,
     intro: Option<String>,
     project_type: Option<String>,
+    text_model: Option<String>,
+    multimodal_model: Option<String>,
     image_model: Option<String>,
     image_quality: Option<String>,
     video_model: Option<String>,
@@ -42,6 +44,7 @@ struct ProjectHomeRow {
     target_market: Option<String>,
     target_platforms: Option<Vec<String>>,
     duration_strategy: Option<String>,
+    voice_model: Option<String>,
     voice_profile: Option<String>,
     subtitle_style: Option<String>,
     bgm_strategy: Option<String>,
@@ -191,6 +194,14 @@ fn step_agent_intent(step: &str, agent_kind: &str) -> ProjectHomeLaunchIntent {
     ProjectHomeLaunchIntent::step_agent(step, agent_kind)
 }
 
+fn cockpit_subheadline(score: i32, onboarding: &ProjectHomeOnboarding) -> String {
+    let score_line = format!("就绪度 {score}/100");
+    match onboarding.next_step.as_deref() {
+        Some(step) => format!("{score_line} · 建议：{step}"),
+        None => score_line,
+    }
+}
+
 fn build_cockpit(
     score: i32,
     onboarding: &ProjectHomeOnboarding,
@@ -200,12 +211,12 @@ fn build_cockpit(
     let primary_action = if !onboarding.complete {
         ProjectHomeAction {
             key: "finish_onboarding".into(),
-            title: "先补项目驾驶舱基础信息".into(),
+            title: "补全立项信息".into(),
             detail: onboarding
                 .next_step
                 .as_ref()
-                .map(|step| format!("当前最省力的推进方式是先完成“{step}”，这样后面的脚本、分镜和视频不会反复返工。"))
-                .unwrap_or_else(|| "先把项目基础信息补齐，后续链路会更稳。".into()),
+                .map(|step| format!("先完成「{step}」，脚本、分镜与成片更顺。"))
+                .unwrap_or_else(|| "补齐立项与风格约束，减少后续返工。".into()),
             target_step: "script".into(),
             cta_label: "去补项目设定".into(),
             launch_intent: step_intent("script"),
@@ -300,9 +311,9 @@ fn build_cockpit(
     } else if stats.script_count > 0 || stats.novel_count > 0 {
         "项目已经有内容种子，接下来要尽快把它推进到分镜。".into()
     } else {
-        "这是一个还在起势中的项目，先把第一条成片链路跑通最重要。".into()
+        "先跑通第一条成片链路".into()
     };
-    let subheadline = format!("当前 readiness {} 分；{}", score, primary_action.detail);
+    let subheadline = cockpit_subheadline(score, onboarding);
     let readiness_launch_intent = primary_action.launch_intent.clone();
 
     let secondary_actions = vec![
@@ -470,11 +481,11 @@ pub(crate) async fn project_home_by_id(
     let row = sqlx::query_as::<_, ProjectHomeRow>(
         r#"
         SELECT id, workspace_id, numeric_id, name, intro, project_type,
-               image_model, image_quality, video_model, art_style,
+               text_model, multimodal_model, image_model, image_quality, video_model, art_style,
                director_manual, mode, video_ratio, create_time_ms,
                art_style_pack, story_style_pack,
                target_market, target_platforms, duration_strategy,
-               voice_profile, subtitle_style, bgm_strategy, quality_gate_strategy,
+               voice_model, voice_profile, subtitle_style, bgm_strategy, quality_gate_strategy,
                $2 AS project_access_mode,
                $3 AS project_access_role,
                project_brief, brand_bible
@@ -658,6 +669,8 @@ pub(crate) async fn project_home_by_id(
             name: row.name,
             intro: row.intro,
             project_type: row.project_type,
+            text_model: row.text_model,
+            multimodal_model: row.multimodal_model,
             image_model: row.image_model,
             image_quality: row.image_quality,
             video_model: row.video_model,
@@ -671,6 +684,7 @@ pub(crate) async fn project_home_by_id(
             target_market: row.target_market,
             target_platforms: row.target_platforms,
             duration_strategy: row.duration_strategy,
+            voice_model: row.voice_model,
             voice_profile: row.voice_profile,
             subtitle_style: row.subtitle_style,
             bgm_strategy: row.bgm_strategy,

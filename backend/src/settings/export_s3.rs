@@ -2,13 +2,13 @@
 //! account data zip). Endpoint resolution is unified so one MinIO cluster can back multiple buckets.
 //!
 //! Env (first non-empty wins for URL):
-//! - **`TOONFLOW_EXPORT_S3_ENDPOINT`** — preferred shared override
-//! - **`TOONFLOW_WORKSPACE_SHARED_AUDIT_EXPORT_S3_ENDPOINT`**
-//! - **`TOONFLOW_ACCOUNT_EXPORT_S3_ENDPOINT`**
+//! - **`OPENFLOW_EXPORT_S3_ENDPOINT`** — preferred shared override
+//! - **`OPENFLOW_WORKSPACE_SHARED_AUDIT_EXPORT_S3_ENDPOINT`**
+//! - **`OPENFLOW_ACCOUNT_EXPORT_S3_ENDPOINT`**
 //!
-//! Path-style: true if any of **`TOONFLOW_EXPORT_S3_FORCE_PATH_STYLE`**,
-//! **`TOONFLOW_WORKSPACE_SHARED_AUDIT_EXPORT_S3_FORCE_PATH_STYLE`**,
-//! **`TOONFLOW_ACCOUNT_EXPORT_S3_FORCE_PATH_STYLE`** is `1`/`true`, else **true** when a custom
+//! Path-style: true if any of **`OPENFLOW_EXPORT_S3_FORCE_PATH_STYLE`**,
+//! **`OPENFLOW_WORKSPACE_SHARED_AUDIT_EXPORT_S3_FORCE_PATH_STYLE`**,
+//! **`OPENFLOW_ACCOUNT_EXPORT_S3_FORCE_PATH_STYLE`** is `1`/`true`, else **true** when a custom
 //! endpoint is set (typical MinIO).
 
 use tokio::sync::OnceCell;
@@ -29,17 +29,17 @@ fn first_nonempty_env(keys: &[&str]) -> Option<String> {
 
 fn resolved_endpoint_url() -> Option<String> {
     first_nonempty_env(&[
-        "TOONFLOW_EXPORT_S3_ENDPOINT",
-        "TOONFLOW_WORKSPACE_SHARED_AUDIT_EXPORT_S3_ENDPOINT",
-        "TOONFLOW_ACCOUNT_EXPORT_S3_ENDPOINT",
+        "OPENFLOW_EXPORT_S3_ENDPOINT",
+        "OPENFLOW_WORKSPACE_SHARED_AUDIT_EXPORT_S3_ENDPOINT",
+        "OPENFLOW_ACCOUNT_EXPORT_S3_ENDPOINT",
     ])
 }
 
 fn force_path_style_for_custom_endpoint() -> bool {
     for key in &[
-        "TOONFLOW_EXPORT_S3_FORCE_PATH_STYLE",
-        "TOONFLOW_WORKSPACE_SHARED_AUDIT_EXPORT_S3_FORCE_PATH_STYLE",
-        "TOONFLOW_ACCOUNT_EXPORT_S3_FORCE_PATH_STYLE",
+        "OPENFLOW_EXPORT_S3_FORCE_PATH_STYLE",
+        "OPENFLOW_WORKSPACE_SHARED_AUDIT_EXPORT_S3_FORCE_PATH_STYLE",
+        "OPENFLOW_ACCOUNT_EXPORT_S3_FORCE_PATH_STYLE",
     ] {
         if let Ok(v) = std::env::var(key) {
             let s = v.trim();

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 
 import '../design_system/components/studio_code_dropdown_field.dart';
 import '../l10n/app_localizations.dart';
@@ -8,6 +9,7 @@ import 'enum_labels.dart';
 import 'dimension_score_form.dart';
 import 'field_styling.dart';
 import 'support.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 part 'workbench_view/review_widgets.dart';
 
@@ -228,7 +230,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
         : 840.0;
     return Theme(
       data: qualityReviewsFormTheme(context),
-      child: AlertDialog(
+      child: StudioAlertDialog(
       title: Text(l10n.qualityReviewsWorkbenchTitle),
       content: SizedBox(
         width: dialogWidth,
@@ -381,7 +383,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: DropdownButtonFormField<String>(
+                    child: StudioDropdownButtonFormField<String>(
                       initialValue: model.stageFilterCtrl.text.trim().isEmpty
                           ? 'all'
                           : model.stageFilterCtrl.text.trim(),
@@ -405,7 +407,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: DropdownButtonFormField<String>(
+                    child: StudioDropdownButtonFormField<String>(
                       initialValue: model.gradeFilterCtrl.text.trim().isEmpty
                           ? 'all'
                           : model.gradeFilterCtrl.text.trim(),
@@ -430,7 +432,7 @@ class QualityReviewsWorkbenchDialogView extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 8),
-              DropdownButtonFormField<String>(
+              StudioDropdownButtonFormField<String>(
                 initialValue:
                     model.suggestedActionFilterCtrl.text.trim().isEmpty
                     ? 'all'

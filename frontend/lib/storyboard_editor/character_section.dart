@@ -1,3 +1,4 @@
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 part of '../../home_page.dart';
 
 class _StoryboardCharacterSection extends StatelessWidget {
@@ -49,7 +50,7 @@ class _StoryboardCharacterSection extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
-            DropdownButtonFormField<String?>(
+            StudioDropdownButtonFormField<String?>(
               key: ValueKey<String?>(
                 _resolvedSelection(selectedCharacterId, characters),
               ),

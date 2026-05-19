@@ -4,6 +4,7 @@ mod download;
 mod payload;
 mod store;
 
+pub(super) use download::download_image_bytes_capped;
 pub(super) use payload::{payload_json_i32, AssetImageGenCtx};
 pub(super) use store::{
     ensure_script_scoped_asset_exists, generate_and_store_asset_image,

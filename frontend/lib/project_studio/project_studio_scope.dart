@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../design_system/ix/studio_api_error_callout.dart';
 import '../rust_api.dart';
 import 'project_studio_host.dart';
 import 'project_studio_page.dart';
@@ -106,7 +107,16 @@ class _ProjectStudioScopeState extends State<ProjectStudioScope> {
     }
     final snap = _readiness ?? const StudioReadinessSnapshot(completedSteps: 1);
     if (_error != null) {
-      return Center(child: Text('$_error'));
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: StudioApiErrorCallout(
+            error: _error!,
+            onRetry: _load,
+            showDiagnostic: true,
+          ),
+        ),
+      );
     }
     return ProjectStudioPage(host: widget.hostFactory(snap, _load));
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 
 import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
@@ -182,7 +183,7 @@ class _ShortDramaTargetsPanelState extends State<ShortDramaTargetsPanel> {
             style: theme.textTheme.labelLarge,
           ),
           const SizedBox(height: 6),
-          DropdownButtonFormField<String>(
+          StudioDropdownButtonFormField<String>(
             initialValue: _videoRatio,
             decoration: const InputDecoration(isDense: true),
             items: [

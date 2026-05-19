@@ -462,6 +462,7 @@ async fn test_e2e_video_generation_workflow() {
                 .body(Body::from(
                     json!({
                         "prompt": "Video workflow storyboard",
+                        "file_path": "https://example.com/storyboard-frame.png",
                         "duration": "5",
                         "track_id": track_id,
                         "flow_id": 1,
@@ -510,8 +511,12 @@ async fn test_e2e_video_generation_workflow() {
         )
         .await
         .unwrap();
-    let (status, _) = read_json_response(res).await;
-    assert_eq!(status, StatusCode::OK, "video generation initiated");
+    let (status, gen_body) = read_json_response(res).await;
+    assert_eq!(
+        status,
+        StatusCode::OK,
+        "video generation initiated: {gen_body}"
+    );
 
     // Test video list retrieval
     let res = app

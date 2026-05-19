@@ -26,7 +26,7 @@ mod preservation_tests {
     fn production_module_accessible() {
         // This test verifies that the production module compiles
         // If the module structure breaks, this test will fail to compile
-        use toonflow_server::production;
+        use openflow_server::production;
 
         // Verify public API is accessible
         let _ = std::mem::size_of::<production::ProductionApi>();
@@ -36,7 +36,7 @@ mod preservation_tests {
     #[test]
     fn prompting_module_accessible() {
         // This test verifies that the prompting module compiles
-        let _ = std::mem::size_of::<toonflow_server::state::AppState>();
+        let _ = std::mem::size_of::<openflow_server::state::AppState>();
     }
 
     /// Test that all target modules compile
@@ -69,7 +69,7 @@ mod compilation_tests {
     #[test]
     fn backend_compiles() {
         // If this test runs, the backend compiled successfully
-        let _ = std::mem::size_of::<toonflow_server::state::AppState>();
+        let _ = std::mem::size_of::<openflow_server::state::AppState>();
     }
 }
 

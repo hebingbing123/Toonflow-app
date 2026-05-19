@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/l10n/app_localizations_zh.dart';
+import 'package:openflow_app/platform/studio_load_state.dart';
 import 'package:openflow_app/task_center/section.dart';
 import 'package:openflow_app/rust_api.dart';
 
@@ -68,6 +69,7 @@ void main() {
     );
 
     expect(find.text(zh.taskCenterOpenWorkbench), findsOneWidget);
+    expect(find.text(zh.taskCenterCompatibilityCheck), findsNothing);
     expect(
       find.text(zh.taskCenterProjectsSummary(1, '#9 古风短剧', '')),
       findsOneWidget,
@@ -144,5 +146,84 @@ void main() {
 
     expect(find.text(zh.taskCenterWorkbenchTitle), findsOneWidget);
     expect(find.byType(Dialog), findsOneWidget);
+  });
+
+  testWidgets('product studio hides legacy compatibility probes', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      _taskCenterTestApp(
+        TaskCenterSection(
+          studioPresentation: true,
+          accessToken: 'token',
+          initialProjectNumericId: null,
+          initialProjectUuid: null,
+          loadingTaskProjects: false,
+          loadingTaskCategories: false,
+          loadingTaskApi: false,
+          loadingTaskDetailsByNumericId: false,
+          loadingTaskDetailsUuid: false,
+          taskDetailJobIdController: TextEditingController(),
+          taskProjects: null,
+          taskCategoriesLine: null,
+          taskApiSummaryLine: null,
+          taskDetailNumericIdLine: null,
+          taskDetailUuidLine: null,
+          taskApiJobs: null,
+          onTaskDetailJobIdChanged: (_) {},
+          onLoadTaskProjects: () {},
+          onLoadTaskCategories: () {},
+          onLoadTaskApi: () {},
+          onProbeTaskDetailByNumericId: () {},
+          onProbeTaskDetailUuid: () {},
+          onSelectTaskJob: (_) {},
+        ),
+      ),
+    );
+
+    expect(find.text(zh.taskCenterOpenWorkbench), findsOneWidget);
+    expect(find.text(zh.taskCenterCompatibilityCheck), findsNothing);
+  });
+
+  testWidgets('product studio shows loaded-empty state with bottom count', (
+    WidgetTester tester,
+  ) async {
+    var loadRequested = false;
+    await tester.pumpWidget(
+      _taskCenterTestApp(
+        TaskCenterSection(
+          studioPresentation: true,
+          accessToken: 'token',
+          initialProjectNumericId: null,
+          initialProjectUuid: null,
+          loadingTaskProjects: false,
+          loadingTaskCategories: false,
+          loadingTaskApi: false,
+          loadingTaskDetailsByNumericId: false,
+          loadingTaskDetailsUuid: false,
+          taskDetailJobIdController: TextEditingController(),
+          taskProjects: const [],
+          taskCategoriesLine: null,
+          taskApiSummaryLine: 'rows=0',
+          taskDetailNumericIdLine: null,
+          taskDetailUuidLine: null,
+          taskApiJobs: const [],
+          taskApiLoadState: StudioLoadState.success,
+          onTaskDetailJobIdChanged: (_) {},
+          onLoadTaskProjects: () {},
+          onLoadTaskCategories: () {},
+          onLoadTaskApi: () => loadRequested = true,
+          onProbeTaskDetailByNumericId: () {},
+          onProbeTaskDetailUuid: () {},
+          onSelectTaskJob: (_) {},
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text(zh.taskCenterJobsEmpty), findsOneWidget);
+    expect(find.text(zh.taskCenterJobsCount(0)), findsOneWidget);
+    expect(find.text(zh.taskCenterRefreshSummary), findsOneWidget);
+    expect(loadRequested, isFalse);
   });
 }

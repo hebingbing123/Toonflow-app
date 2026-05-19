@@ -24,7 +24,7 @@ use crate::metering::quota;
 pub(crate) async fn health() -> Json<HealthResponse> {
     Json(HealthResponse {
         status: "ok",
-        service: "toonflow-server",
+        service: "openflow-server",
     })
 }
 
@@ -47,14 +47,14 @@ pub(crate) async fn ping() -> Json<PingResponse> {
     operation_id = "versionV1",
     tag = "system",
     summary = "Server semantic version (from Cargo package)",
-    description = "Public, no auth. Aligns with Electron-era **`/api/other/getVersion`** use cases for client compatibility checks.\nWhen the server binary is compiled with environment **`TOONFLOW_GIT_SHA`** set, the JSON may include **`git_sha`** (opaque string, often a Git commit id).",
+    description = "Public, no auth. Aligns with Electron-era **`/api/other/getVersion`** use cases for client compatibility checks.\nWhen the server binary is compiled with environment **`OPENFLOW_GIT_SHA`** set, the JSON may include **`git_sha`** (opaque string, often a Git commit id).",
     responses((status = 200, description = "OK", body = VersionResponse))
 )]
 pub(crate) async fn version() -> Json<VersionResponse> {
     Json(VersionResponse {
-        service: "toonflow-server",
+        service: "openflow-server",
         version: env!("CARGO_PKG_VERSION"),
-        git_sha: option_env!("TOONFLOW_GIT_SHA"),
+        git_sha: option_env!("OPENFLOW_GIT_SHA"),
     })
 }
 

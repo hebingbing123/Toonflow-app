@@ -19,7 +19,7 @@ extension _ShortVideoSpaceSectionVoiceoverSettingsDialog
     required BuildContext context,
     VoiceoverSettings? initialSettings,
   }) async {
-    return showDialog<VoiceoverSettings>(
+    return showStudioDialog<VoiceoverSettings>(
       context: context,
       builder: (dialogContext) {
         return VoiceoverSettingsDialog(
@@ -211,7 +211,9 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
     final availableVoices = getAvailableVoiceoverVoices(_selectedProvider);
     final l10n = resolveAppLocalizationsForErrors(context);
 
-    return AlertDialog(
+    return StudioAlertDialog(
+      scrollable: false,
+      maxWidth: 560,
       title: Text(l10n.shortVideoSpaceDialogVoiceoverSettingsTitle),
       content: SizedBox(
         width: 520,
@@ -225,7 +227,7 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              DropdownButtonFormField<String>(
+              StudioDropdownButtonFormField<String>(
                 initialValue: _selectedProvider,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
@@ -265,7 +267,7 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              DropdownButtonFormField<String>(
+              StudioDropdownButtonFormField<String>(
                 key: ValueKey<String>('voiceover-voice-$_selectedProvider'),
                 initialValue: _selectedVoiceId,
                 decoration: const InputDecoration(
@@ -298,7 +300,7 @@ class _VoiceoverSettingsDialogState extends State<VoiceoverSettingsDialog> {
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              DropdownButtonFormField<String>(
+              StudioDropdownButtonFormField<String>(
                 initialValue: _selectedEmotion,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),

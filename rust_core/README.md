@@ -39,7 +39,7 @@
 建议流程：
 
 1. 在 Flutter 侧引入 `flutter_rust_bridge`
-2. 用 `flutter_rust_bridge_codegen generate` 从 `openflow_core_bridge` 生成 Dart glue
+2. 用 `flutter_rust_bridge_codegen generate` 从 `crate::api` 生成 Dart glue 和 Rust glue
 3. 让 Flutter 只依赖 `openflow_core_bridge`，不要直接跨进 `media_*` crate
 
 ## 下一步建议

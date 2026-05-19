@@ -1,25 +1,25 @@
 //! Runtime limits for harness auto-memory injection (DB fetch, truncation, pruning, notes).
 //!
-//! **Local / dev tuning:** set optional `TOONFLOW_*` env vars and restart the process. Unset
+//! **Local / dev tuning:** set optional `OPENFLOW_*` env vars and restart the process. Unset
 //! variables use the same defaults as the historical `scope` / `memory` constants. Invalid
 //! values log a warning and fall back to defaults; out-of-range values are **clamped** to safe
 //! bounds to avoid pathological memory use.
 //!
 //! | Variable | Default | Notes |
 //! |----------|---------|-------|
-//! | `TOONFLOW_AUTO_MEMORY_MAX_CHARS` | `320` | Per-line truncate in injection + snapshot cap; rework total char budget; non-rework budget = max_chars × rework_limit |
-//! | `TOONFLOW_AUTO_MEMORY_KEEP_ROWS` | `8` | Retain this many newest `auto_scope_memory` rows after persist |
-//! | `TOONFLOW_AUTO_MEMORY_FETCH_LIMIT` | same as keep | SQL `LIMIT` when loading recent auto-memory rows |
-//! | `TOONFLOW_AUTO_MEMORY_REWORK_LIMIT` | `2` | Non-rework char budget multiplier; rework-mode row caps in scope selection (see `scope/project.rs`) |
-//! | `TOONFLOW_STYLE_BIBLE_NOTE_MAX_CHARS` | `420` | Cap on filtered style-bible injection block |
-//! | `TOONFLOW_STAGE_SUMMARY_NOTE_MAX_CHARS` | `220` | Cap on injected stage-summary line |
+//! | `OPENFLOW_AUTO_MEMORY_MAX_CHARS` | `320` | Per-line truncate in injection + snapshot cap; rework total char budget; non-rework budget = max_chars × rework_limit |
+//! | `OPENFLOW_AUTO_MEMORY_KEEP_ROWS` | `8` | Retain this many newest `auto_scope_memory` rows after persist |
+//! | `OPENFLOW_AUTO_MEMORY_FETCH_LIMIT` | same as keep | SQL `LIMIT` when loading recent auto-memory rows |
+//! | `OPENFLOW_AUTO_MEMORY_REWORK_LIMIT` | `2` | Non-rework char budget multiplier; rework-mode row caps in scope selection (see `scope/project.rs`) |
+//! | `OPENFLOW_STYLE_BIBLE_NOTE_MAX_CHARS` | `420` | Cap on filtered style-bible injection block |
+//! | `OPENFLOW_STAGE_SUMMARY_NOTE_MAX_CHARS` | `220` | Cap on injected stage-summary line |
 //!
 //! **Legacy aliases** (still read if the canonical name is unset):
-//! `TOONFLOW_AUTO_MEMORY_STYLE_BIBLE_NOTE_MAX_CHARS`, `TOONFLOW_AUTO_MEMORY_STAGE_SUMMARY_NOTE_MAX_CHARS`.
+//! `OPENFLOW_AUTO_MEMORY_STYLE_BIBLE_NOTE_MAX_CHARS`, `OPENFLOW_AUTO_MEMORY_STAGE_SUMMARY_NOTE_MAX_CHARS`.
 
-// Env names (canonical): TOONFLOW_AUTO_MEMORY_MAX_CHARS, TOONFLOW_AUTO_MEMORY_KEEP_ROWS,
-// TOONFLOW_AUTO_MEMORY_FETCH_LIMIT, TOONFLOW_AUTO_MEMORY_REWORK_LIMIT,
-// TOONFLOW_STYLE_BIBLE_NOTE_MAX_CHARS, TOONFLOW_STAGE_SUMMARY_NOTE_MAX_CHARS.
+// Env names (canonical): OPENFLOW_AUTO_MEMORY_MAX_CHARS, OPENFLOW_AUTO_MEMORY_KEEP_ROWS,
+// OPENFLOW_AUTO_MEMORY_FETCH_LIMIT, OPENFLOW_AUTO_MEMORY_REWORK_LIMIT,
+// OPENFLOW_STYLE_BIBLE_NOTE_MAX_CHARS, OPENFLOW_STAGE_SUMMARY_NOTE_MAX_CHARS.
 
 use std::sync::OnceLock;
 
@@ -96,31 +96,31 @@ pub(super) fn stage_summary_note_max_chars() -> usize {
 
 fn resolve_from_env() -> AutoMemoryLimits {
     let keep_rows = parse_env_i64_bounded(
-        "TOONFLOW_AUTO_MEMORY_KEEP_ROWS",
+        "OPENFLOW_AUTO_MEMORY_KEEP_ROWS",
         DEFAULT_KEEP_ROWS,
         MIN_ROW_COUNT,
         MAX_ROW_COUNT,
     );
     let max_chars = parse_env_usize_bounded(
-        "TOONFLOW_AUTO_MEMORY_MAX_CHARS",
+        "OPENFLOW_AUTO_MEMORY_MAX_CHARS",
         DEFAULT_MAX_CHARS,
         MIN_MAX_CHARS,
         MAX_MAX_CHARS,
     );
     let rework_limit = parse_env_usize_bounded(
-        "TOONFLOW_AUTO_MEMORY_REWORK_LIMIT",
+        "OPENFLOW_AUTO_MEMORY_REWORK_LIMIT",
         DEFAULT_REWORK_LIMIT,
         MIN_REWORK_LIMIT,
         MAX_REWORK_LIMIT,
     );
-    let fetch_limit = match std::env::var("TOONFLOW_AUTO_MEMORY_FETCH_LIMIT") {
+    let fetch_limit = match std::env::var("OPENFLOW_AUTO_MEMORY_FETCH_LIMIT") {
         Ok(raw) => match parse_i64_bounded_trimmed(&raw, keep_rows, MIN_ROW_COUNT, MAX_ROW_COUNT) {
             Ok(v) => v,
             Err(()) => {
                 tracing::warn!(
-                    env = "TOONFLOW_AUTO_MEMORY_FETCH_LIMIT",
+                    env = "OPENFLOW_AUTO_MEMORY_FETCH_LIMIT",
                     value = %raw,
-                    "invalid value; using TOONFLOW_AUTO_MEMORY_KEEP_ROWS (or default)"
+                    "invalid value; using OPENFLOW_AUTO_MEMORY_KEEP_ROWS (or default)"
                 );
                 keep_rows
             }
@@ -140,9 +140,9 @@ fn resolve_from_env() -> AutoMemoryLimits {
 }
 
 fn parse_style_bible_note_max_chars() -> usize {
-    if let Ok(raw) = std::env::var("TOONFLOW_STYLE_BIBLE_NOTE_MAX_CHARS") {
+    if let Ok(raw) = std::env::var("OPENFLOW_STYLE_BIBLE_NOTE_MAX_CHARS") {
         return parse_usize_env_raw_bounded(
-            "TOONFLOW_STYLE_BIBLE_NOTE_MAX_CHARS",
+            "OPENFLOW_STYLE_BIBLE_NOTE_MAX_CHARS",
             &raw,
             DEFAULT_STYLE_BIBLE_NOTE_MAX_CHARS,
             MIN_STYLE_BIBLE_NOTE_CHARS,
@@ -150,7 +150,7 @@ fn parse_style_bible_note_max_chars() -> usize {
         );
     }
     parse_env_usize_bounded(
-        "TOONFLOW_AUTO_MEMORY_STYLE_BIBLE_NOTE_MAX_CHARS",
+        "OPENFLOW_AUTO_MEMORY_STYLE_BIBLE_NOTE_MAX_CHARS",
         DEFAULT_STYLE_BIBLE_NOTE_MAX_CHARS,
         MIN_STYLE_BIBLE_NOTE_CHARS,
         MAX_STYLE_BIBLE_NOTE_CHARS,
@@ -158,9 +158,9 @@ fn parse_style_bible_note_max_chars() -> usize {
 }
 
 fn parse_stage_summary_note_max_chars() -> usize {
-    if let Ok(raw) = std::env::var("TOONFLOW_STAGE_SUMMARY_NOTE_MAX_CHARS") {
+    if let Ok(raw) = std::env::var("OPENFLOW_STAGE_SUMMARY_NOTE_MAX_CHARS") {
         return parse_usize_env_raw_bounded(
-            "TOONFLOW_STAGE_SUMMARY_NOTE_MAX_CHARS",
+            "OPENFLOW_STAGE_SUMMARY_NOTE_MAX_CHARS",
             &raw,
             DEFAULT_STAGE_SUMMARY_NOTE_MAX_CHARS,
             MIN_STAGE_SUMMARY_NOTE_CHARS,
@@ -168,7 +168,7 @@ fn parse_stage_summary_note_max_chars() -> usize {
         );
     }
     parse_env_usize_bounded(
-        "TOONFLOW_AUTO_MEMORY_STAGE_SUMMARY_NOTE_MAX_CHARS",
+        "OPENFLOW_AUTO_MEMORY_STAGE_SUMMARY_NOTE_MAX_CHARS",
         DEFAULT_STAGE_SUMMARY_NOTE_MAX_CHARS,
         MIN_STAGE_SUMMARY_NOTE_CHARS,
         MAX_STAGE_SUMMARY_NOTE_CHARS,

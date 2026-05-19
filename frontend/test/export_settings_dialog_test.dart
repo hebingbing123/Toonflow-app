@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/l10n/app_localizations_zh.dart';
 import 'package:openflow_app/short_video_space/section.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 /// **Validates: Requirements 13, 14, 15, 16**
 final _zh = AppLocalizationsZh();
@@ -247,7 +248,7 @@ void main() {
             builder: (context) {
               return FilledButton(
                 onPressed: () async {
-                  result = await showDialog<ExportSettings>(
+                  result = await showStudioDialog<ExportSettings>(
                     context: context,
                     builder: (_) => const ExportSettingsDialog(
                       initialSettings: ExportSettings(),
@@ -307,7 +308,7 @@ void main() {
             builder: (context) {
               return FilledButton(
                 onPressed: () async {
-                  result = await showDialog<ExportSettings>(
+                  result = await showStudioDialog<ExportSettings>(
                     context: context,
                     builder: (_) => const ExportSettingsDialog(),
                   );

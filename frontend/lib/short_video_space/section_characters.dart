@@ -232,9 +232,9 @@ extension _ShortVideoSpaceSectionCharactersExtension
       text: (voice['emotion'] as String? ?? voice['style'] as String? ?? '')
           .trim(),
     );
-    final saved = await showDialog<bool>(
+    final saved = await showStudioDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
+      builder: (ctx) => StudioAlertDialog(
         title: Text(l10n.shortVideoCharactersEditVoiceTitle(character.name)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -293,9 +293,9 @@ extension _ShortVideoSpaceSectionCharactersExtension
     }
     final nameCtrl = TextEditingController(text: character.name);
     final urlCtrl = TextEditingController();
-    final saved = await showDialog<bool>(
+    final saved = await showStudioDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
+      builder: (ctx) => StudioAlertDialog(
         title: Text(l10n.shortVideoCharactersCloneVoiceTitle(character.name)),
         content: Column(
           mainAxisSize: MainAxisSize.min,

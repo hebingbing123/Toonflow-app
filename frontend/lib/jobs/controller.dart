@@ -133,9 +133,7 @@ class JobsController extends ChangeNotifier {
     try {
       final fetched = await fetchJobs(token, kind: kind, status: status);
       jobs = fetched;
-      jobsLoadState = fetched.isEmpty
-          ? StudioLoadState.empty
-          : StudioLoadState.success;
+      jobsLoadState = StudioLoadState.success;
     } catch (e) {
       jobsLoadState = StudioLoadState.error;
       jobsLastError = e;

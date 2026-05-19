@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../l10n/app_localizations.dart';
+import '../components/studio_dialog_shell.dart';
 import '../tokens.dart';
 
 /// Command palette action (⌘K / Ctrl+K).
@@ -25,9 +27,8 @@ Future<void> showStudioCommandPalette(
   BuildContext context, {
   required List<StudioCommandAction> actions,
 }) async {
-  await showDialog<void>(
+  await showStudioDialog<void>(
     context: context,
-    barrierColor: StudioTokens.dark.overlay,
     builder: (ctx) => _StudioCommandPaletteDialog(actions: actions),
   );
 }
@@ -119,9 +120,10 @@ class _StudioCommandPaletteDialogState extends State<_StudioCommandPaletteDialog
                 child: TextField(
                   controller: _query,
                   autofocus: true,
-                  decoration: const InputDecoration(
-                    hintText: '搜索命令…',
-                    prefixIcon: Icon(Icons.search),
+                  decoration: InputDecoration(
+                    hintText: AppLocalizations.of(context)!
+                        .studioCommandPaletteSearchHint,
+                    prefixIcon: const Icon(Icons.search),
                   ),
                   onChanged: (v) => setState(() => _filter = v),
                   onSubmitted: (_) {

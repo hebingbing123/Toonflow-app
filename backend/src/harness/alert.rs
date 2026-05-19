@@ -413,7 +413,7 @@ fn otel_environment_name() -> String {
         .ok()
         .map(|s| s.trim().to_string())
         .filter(|s| !s.is_empty())
-        .unwrap_or_else(|| "toonflow-server".to_string())
+        .unwrap_or_else(|| "openflow-server".to_string())
 }
 
 fn redact_webhook_url_for_log(url: &str) -> String {

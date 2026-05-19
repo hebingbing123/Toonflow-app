@@ -8,6 +8,10 @@ set(BINARY_NAME "openflow_app")
 # The unique GTK application identifier for this application. See:
 # https://wiki.gnome.org/HowDoI/ChooseApplicationID
 set(APPLICATION_ID "com.openflow.openflow_app")
+set(OPENFLOW_REPO_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../..")
+set(OPENFLOW_STAGE_BRIDGE_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/../cmake/stage_openflow_core_bridge.cmake")
+set(OPENFLOW_RUST_LIB_DEBUG "${OPENFLOW_REPO_ROOT}/rust_core/target/debug/libopenflow_core_bridge.so")
+set(OPENFLOW_RUST_LIB_RELEASE "${OPENFLOW_REPO_ROOT}/rust_core/target/release/libopenflow_core_bridge.so")
 
 # Explicitly opt in to modern CMake behaviors to avoid warnings with recent
 # versions of CMake.
@@ -98,6 +102,23 @@ install(FILES "${FLUTTER_ICU_DATA_FILE}" DESTINATION "${INSTALL_BUNDLE_DATA_DIR}
   COMPONENT Runtime)
 
 install(FILES "${FLUTTER_LIBRARY}" DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
+  COMPONENT Runtime)
+
+add_custom_command(TARGET ${BINARY_NAME} POST_BUILD
+  COMMAND "${CMAKE_COMMAND}"
+    -DREPO_ROOT=${OPENFLOW_REPO_ROOT}
+    -DCONFIG=$<CONFIG>
+    -DTARGET_DIR=$<TARGET_FILE_DIR:${BINARY_NAME}>/lib
+    -DTARGET_OS=linux
+    -P "${OPENFLOW_STAGE_BRIDGE_SCRIPT}"
+  VERBATIM
+)
+
+install(FILES "${OPENFLOW_RUST_LIB_DEBUG}" DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
+  CONFIGURATIONS Debug
+  COMPONENT Runtime)
+install(FILES "${OPENFLOW_RUST_LIB_RELEASE}" DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
+  CONFIGURATIONS Profile Release
   COMPONENT Runtime)
 
 foreach(bundled_library ${PLUGIN_BUNDLED_LIBRARIES})

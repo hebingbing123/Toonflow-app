@@ -13,7 +13,7 @@ use crate::http_kit::metrics::MetricsRegistry;
 use crate::llm::LlmConfig;
 use crate::metering::BillingConfig;
 
-const ENV_SWITCH_AI_DEV_TOOL: &str = "TOONFLOW_SWITCH_AI_DEV_TOOL";
+const ENV_SWITCH_AI_DEV_TOOL: &str = "OPENFLOW_SWITCH_AI_DEV_TOOL";
 
 fn switch_ai_dev_tool_from_env() -> String {
     match std::env::var(ENV_SWITCH_AI_DEV_TOOL) {
@@ -66,82 +66,82 @@ pub(super) async fn load() -> Result<AppState, sqlx::Error> {
             reqwest::Client::new()
         });
 
-    let local_asset_image_dir = std::env::var("TOONFLOW_LOCAL_ASSET_IMAGE_DIR")
+    let local_asset_image_dir = std::env::var("OPENFLOW_LOCAL_ASSET_IMAGE_DIR")
         .ok()
         .map(|s| s.trim().to_string())
         .filter(|s| !s.is_empty())
         .map(std::path::PathBuf::from);
     if local_asset_image_dir.is_some() {
         tracing::info!(
-            "TOONFLOW_LOCAL_ASSET_IMAGE_DIR set; asset.generate workers will persist PNGs locally"
+            "OPENFLOW_LOCAL_ASSET_IMAGE_DIR set; asset.generate workers will persist PNGs locally"
         );
     }
-    let local_art_style_cover_dir = std::env::var("TOONFLOW_LOCAL_ART_STYLE_COVER_DIR")
+    let local_art_style_cover_dir = std::env::var("OPENFLOW_LOCAL_ART_STYLE_COVER_DIR")
         .ok()
         .map(|s| s.trim().to_string())
         .filter(|s| !s.is_empty())
         .map(std::path::PathBuf::from);
     if local_art_style_cover_dir.is_some() {
         tracing::info!(
-            "TOONFLOW_LOCAL_ART_STYLE_COVER_DIR set; art-style base64 covers will persist locally"
+            "OPENFLOW_LOCAL_ART_STYLE_COVER_DIR set; art-style base64 covers will persist locally"
         );
     }
-    let local_video_export_dir = std::env::var("TOONFLOW_LOCAL_VIDEO_EXPORT_DIR")
+    let local_video_export_dir = std::env::var("OPENFLOW_LOCAL_VIDEO_EXPORT_DIR")
         .ok()
         .map(|s| s.trim().to_string())
         .filter(|s| !s.is_empty())
         .map(std::path::PathBuf::from);
     if local_video_export_dir.is_some() {
         tracing::info!(
-            "TOONFLOW_LOCAL_VIDEO_EXPORT_DIR set; video.export workers will persist video artifacts locally"
+            "OPENFLOW_LOCAL_VIDEO_EXPORT_DIR set; video.export workers will persist video artifacts locally"
         );
     }
-    let local_voiceover_audio_dir = std::env::var("TOONFLOW_LOCAL_VOICEOVER_AUDIO_DIR")
+    let local_voiceover_audio_dir = std::env::var("OPENFLOW_LOCAL_VOICEOVER_AUDIO_DIR")
         .ok()
         .map(|s| s.trim().to_string())
         .filter(|s| !s.is_empty())
         .map(std::path::PathBuf::from);
     if local_voiceover_audio_dir.is_some() {
         tracing::info!(
-            "TOONFLOW_LOCAL_VOICEOVER_AUDIO_DIR set; voiceover.generate workers will persist audio artifacts locally"
+            "OPENFLOW_LOCAL_VOICEOVER_AUDIO_DIR set; voiceover.generate workers will persist audio artifacts locally"
         );
     }
-    if std::env::var("TOONFLOW_LOCAL_WORKSPACE_SHARED_AUDIT_EXPORT_DIR")
+    if std::env::var("OPENFLOW_LOCAL_WORKSPACE_SHARED_AUDIT_EXPORT_DIR")
         .ok()
         .map(|s| s.trim().to_string())
         .filter(|s| !s.is_empty())
         .is_some()
     {
         tracing::info!(
-            "TOONFLOW_LOCAL_WORKSPACE_SHARED_AUDIT_EXPORT_DIR set; settings.workspace_shared_audit.export workers will persist CSV/JSON under that root"
+            "OPENFLOW_LOCAL_WORKSPACE_SHARED_AUDIT_EXPORT_DIR set; settings.workspace_shared_audit.export workers will persist CSV/JSON under that root"
         );
     }
-    if std::env::var("TOONFLOW_WORKSPACE_SHARED_AUDIT_EXPORT_S3_BUCKET")
+    if std::env::var("OPENFLOW_WORKSPACE_SHARED_AUDIT_EXPORT_S3_BUCKET")
         .ok()
         .map(|s| s.trim().to_string())
         .filter(|s| !s.is_empty())
         .is_some()
     {
         tracing::info!(
-            "TOONFLOW_WORKSPACE_SHARED_AUDIT_EXPORT_S3_BUCKET set; workspace shared audit export artifacts use S3 (multi-replica safe)"
+            "OPENFLOW_WORKSPACE_SHARED_AUDIT_EXPORT_S3_BUCKET set; workspace shared audit export artifacts use S3 (multi-replica safe)"
         );
     }
-    if std::env::var("TOONFLOW_ACCOUNT_EXPORT_S3_BUCKET")
+    if std::env::var("OPENFLOW_ACCOUNT_EXPORT_S3_BUCKET")
         .ok()
         .map(|s| s.trim().to_string())
         .filter(|s| !s.is_empty())
         .is_some()
     {
         tracing::info!(
-            "TOONFLOW_ACCOUNT_EXPORT_S3_BUCKET set; settings.account.export artifacts use S3 (multi-replica safe)"
+            "OPENFLOW_ACCOUNT_EXPORT_S3_BUCKET set; settings.account.export artifacts use S3 (multi-replica safe)"
         );
     }
-    if std::env::var("TOONFLOW_EXPORT_S3_ENDPOINT")
+    if std::env::var("OPENFLOW_EXPORT_S3_ENDPOINT")
         .ok()
         .map(|s| !s.trim().is_empty())
         .unwrap_or(false)
     {
-        tracing::info!("TOONFLOW_EXPORT_S3_ENDPOINT set; shared S3/MinIO endpoint override for export artifacts");
+        tracing::info!("OPENFLOW_EXPORT_S3_ENDPOINT set; shared S3/MinIO endpoint override for export artifacts");
     }
 
     let billing_config = BillingConfig::from_env();

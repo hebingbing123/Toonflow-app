@@ -20,7 +20,7 @@ use clap::Parser;
 use sqlx::postgres::PgPoolOptions;
 use uuid::Uuid;
 
-use toonflow_server::prompting::quality::dimension::{
+use openflow_server::prompting::quality::dimension::{
     BadCaseFixture, RegressionItem, RegressionReport,
 };
 

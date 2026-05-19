@@ -1,13 +1,13 @@
 use serde::{Deserialize, Serialize};
 
 use super::constants::{
-    ENV_UPDATE_ATOMGIT_URL, ENV_UPDATE_GITEE_URL, ENV_UPDATE_GITHUB_URL, ENV_UPDATE_TOONFLOW_URL,
+    ENV_UPDATE_ATOMGIT_URL, ENV_UPDATE_GITEE_URL, ENV_UPDATE_GITHUB_URL, ENV_UPDATE_OPENFLOW_URL,
 };
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub(in crate::settings::about) enum CheckUpdateSource {
-    Toonflow,
+    Openflow,
     Github,
     Gitee,
     Atomgit,
@@ -16,7 +16,7 @@ pub(in crate::settings::about) enum CheckUpdateSource {
 impl CheckUpdateSource {
     pub(in crate::settings::about) fn url_env_key(&self) -> &'static str {
         match self {
-            Self::Toonflow => ENV_UPDATE_TOONFLOW_URL,
+            Self::Openflow => ENV_UPDATE_OPENFLOW_URL,
             Self::Github => ENV_UPDATE_GITHUB_URL,
             Self::Gitee => ENV_UPDATE_GITEE_URL,
             Self::Atomgit => ENV_UPDATE_ATOMGIT_URL,

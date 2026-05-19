@@ -15,6 +15,12 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
     required TextEditingController toneCtrl,
     required TextEditingController hookCtrl,
     required TextEditingController visualCtrl,
+    required TextEditingController textModelCtrl,
+    required TextEditingController multimodalModelCtrl,
+    required TextEditingController imageModelCtrl,
+    required TextEditingController videoModelCtrl,
+    required TextEditingController voiceModelCtrl,
+    required TextEditingController voiceProfileCtrl,
     required TextEditingController brandNameCtrl,
     required TextEditingController brandPromiseCtrl,
     required TextEditingController visualMotifsCtrl,
@@ -40,6 +46,12 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
             toneCtrl: toneCtrl,
             hookCtrl: hookCtrl,
             visualCtrl: visualCtrl,
+            textModelCtrl: textModelCtrl,
+            multimodalModelCtrl: multimodalModelCtrl,
+            imageModelCtrl: imageModelCtrl,
+            videoModelCtrl: videoModelCtrl,
+            voiceModelCtrl: voiceModelCtrl,
+            voiceProfileCtrl: voiceProfileCtrl,
             brandNameCtrl: brandNameCtrl,
             brandPromiseCtrl: brandPromiseCtrl,
             visualMotifsCtrl: visualMotifsCtrl,
@@ -107,7 +119,10 @@ extension _HomePageProjectEditorDialogContent on _HomePageState {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l10n.projectEditorPublishSectionTitle, style: Theme.of(ctx).textTheme.titleSmall),
+          Text(
+            l10n.projectEditorPublishSectionTitle,
+            style: Theme.of(ctx).textTheme.titleSmall,
+          ),
           const SizedBox(height: 4),
           Text(
             l10n.projectEditorPublishSectionBody,

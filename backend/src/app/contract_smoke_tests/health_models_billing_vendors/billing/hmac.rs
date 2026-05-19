@@ -6,7 +6,7 @@ use axum::http::Method;
 use axum::http::Request;
 use axum::http::StatusCode;
 
-/// **`POST /api/v1/webhooks/billing`** uses HMAC, not Bearer. Without **`BILLING_WEBHOOK_SECRET`** → **503** `webhook_not_configured`; with secret set but no/invalid **`X-Toonflow-Signature`** → **401** `invalid_webhook_signature` (before Postgres).
+/// **`POST /api/v1/webhooks/billing`** uses HMAC, not Bearer. Without **`BILLING_WEBHOOK_SECRET`** → **503** `webhook_not_configured`; with secret set but no/invalid **`X-Openflow-Signature`** → **401** `invalid_webhook_signature` (before Postgres).
 #[tokio::test]
 async fn billing_webhook_smoke_rejects_without_valid_hmac() {
     let _lock = billing_webhook_test_lock().await;
@@ -36,7 +36,7 @@ async fn billing_webhook_database_error_when_hmac_ok_but_pool_missing() {
         .duration_since(std::time::UNIX_EPOCH)
         .map(|d| d.as_secs())
         .unwrap_or(1_700_000_000);
-    let (sig_hdr, ts_str) = super::toonflow_hmac_headers(SM_SECRET, ts, body);
+    let (sig_hdr, ts_str) = super::openflow_hmac_headers(SM_SECRET, ts, body);
 
     let (status, v) = oneshot_json_state(
         smoke_state(),
@@ -44,8 +44,8 @@ async fn billing_webhook_database_error_when_hmac_ok_but_pool_missing() {
             .method(Method::POST)
             .uri("/api/v1/webhooks/billing")
             .header(header::CONTENT_TYPE, "application/json")
-            .header("x-toonflow-signature", sig_hdr)
-            .header("x-toonflow-timestamp", ts_str)
+            .header("x-openflow-signature", sig_hdr)
+            .header("x-openflow-timestamp", ts_str)
             .extension(ConnectInfo(test_addr()))
             .body(Body::from(body_json.to_string()))
             .unwrap(),

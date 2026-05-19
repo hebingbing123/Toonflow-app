@@ -1,6 +1,6 @@
 part of 'dialog_support.dart';
 
-AlertDialog buildProjectAssetsWorkbenchDialog({
+StudioAlertDialog buildProjectAssetsWorkbenchDialog({
   required BuildContext dialogCtx,
   required bool localBusy,
   required bool assetsBusy,
@@ -36,7 +36,7 @@ AlertDialog buildProjectAssetsWorkbenchDialog({
       ? viewportWidth.clamp(320.0, 780.0)
       : 780.0;
   final l10n = resolveAppLocalizationsForErrors(dialogCtx);
-  return AlertDialog(
+  return StudioAlertDialog(
     title: Text(l10n.projectEditorAssetsMainWorkbenchTitle),
     content: SizedBox(
       width: dialogWidth,

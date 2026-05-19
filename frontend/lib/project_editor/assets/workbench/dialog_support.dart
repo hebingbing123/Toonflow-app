@@ -4,6 +4,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../project_studio/project_studio_host.dart';
 import '../../../../rust_api.dart';
 import '../support.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 part 'dialog_support_logic.dart';
 part 'dialog_support_ui.dart';

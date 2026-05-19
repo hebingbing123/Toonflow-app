@@ -6,7 +6,7 @@
 
 当前已落地的基础设施：
 - 用户上传 WASM 全链路（`validate_user_wasm_upload`、REST CRUD、WS `wasm.user.probe`、fuel/超时保护、`HARNESS_USER_WASM_DISABLED`、审计表 `app_harness_user_wasm_audit`、`harness_user_wasm_signal` 告警信号）
-- OTel gRPC traces（`TOONFLOW_OTEL_EXPORT_ENABLED`、`OTEL_EXPORTER_OTLP_*`、`telemetry::init_tracing_subscriber`、单测）
+- OTel gRPC traces（`OPENFLOW_OTEL_EXPORT_ENABLED`、`OTEL_EXPORTER_OTLP_*`、`telemetry::init_tracing_subscriber`、单测）
 
 本 spec 在上述基础上补齐：
 1. **WP-C 剩余**：告警阈值配置、通知写入 `app_notification`、出站 webhook、运行手册
@@ -22,12 +22,12 @@
 - **Telemetry_Module**：`backend/src/telemetry.rs` 及其初始化逻辑。
 - **Span_Propagator**：负责在 harness session / tool invoke / job 之间透传 W3C `traceparent` 的机制（基于现有 `observe::TraceContext`）。
 - **PII_Filter**：在 span attribute 写入前过滤敏感字段的组件。
-- **Sampler**：根据 `TOONFLOW_OTEL_SAMPLE_RATE` 决定是否导出当前 span 的采样逻辑。
+- **Sampler**：根据 `OPENFLOW_OTEL_SAMPLE_RATE` 决定是否导出当前 span 的采样逻辑。
 - **Runbook**：`docs/plans/harness-wasm-alert-runbook.md`，描述各告警级别响应步骤的运维文档。
 - **app_notification**：现有通知中心数据库表，字段含 `user_id`、`workspace_id`、`notification_type`、`title`、`message`、`payload`、`read_at` 等。
 - **harness_user_wasm_signal**：现有结构化日志事件，字段含 `signal_name`、`user_id`、`workspace_id`、`request_id`、`wasm_id`、`outcome`、`error_code`。
 - **HARNESS_ALERT_WEBHOOK_URL**：可选环境变量，配置后 Alert_Evaluator 在阈值触发时向该 URL 发送出站 webhook。
-- **TOONFLOW_OTEL_SAMPLE_RATE**：0.0–1.0 浮点数，控制 OTel span 采样率；prod 环境须非零，staging 可设 1.0。
+- **OPENFLOW_OTEL_SAMPLE_RATE**：0.0–1.0 浮点数，控制 OTel span 采样率；prod 环境须非零，staging 可设 1.0。
 - **PII_Allowlist**：span attribute 白名单，仅白名单内字段可落入 trace；`user_id` 在白名单内，其余 PII 字段默认不落 trace。
 
 ---
@@ -74,7 +74,7 @@
 #### Acceptance Criteria
 
 1. WHERE `HARNESS_ALERT_WEBHOOK_URL` is configured, WHEN a threshold breach is detected, THE Webhook_Dispatcher SHALL send an HTTP POST to the configured URL within 5 seconds of detection.
-2. THE Webhook_Dispatcher SHALL include a JSON body with fields: `event` (`harness_wasm_alert` or `harness_wasm_alert_cleared`), `signal_name`, `threshold`, `observed_rate`, `window_secs`, `fired_at` (ISO 8601 UTC), and `environment` (value of `OTEL_SERVICE_NAME` or `toonflow-server`).
+2. THE Webhook_Dispatcher SHALL include a JSON body with fields: `event` (`harness_wasm_alert` or `harness_wasm_alert_cleared`), `signal_name`, `threshold`, `observed_rate`, `window_secs`, `fired_at` (ISO 8601 UTC), and `environment` (value of `OTEL_SERVICE_NAME` or `openflow-server`).
 3. THE Webhook_Dispatcher SHALL set the `Content-Type: application/json` header on all outbound webhook requests.
 4. IF the outbound webhook HTTP request fails or returns a non-2xx status, THEN THE Webhook_Dispatcher SHALL log a structured warning with `event=harness_alert_webhook_failed`, `status_code`, and `url` (redacted to scheme+host only), and SHALL NOT retry automatically in the same evaluation cycle.
 5. IF `HARNESS_ALERT_WEBHOOK_URL` is not configured, THEN THE Webhook_Dispatcher SHALL skip the outbound call silently without logging a warning.
@@ -103,12 +103,12 @@
 
 #### Acceptance Criteria
 
-1. THE Telemetry_Module SHALL read `TOONFLOW_OTEL_SAMPLE_RATE` as a float in (0.0, 1.0] when `TOONFLOW_OTEL_EXPORT_ENABLED` is truthy.
-2. IF `TOONFLOW_OTEL_SAMPLE_RATE` is absent or unparseable, THEN THE Telemetry_Module SHALL default to 1.0 (sample all spans).
-3. IF `TOONFLOW_OTEL_SAMPLE_RATE` is set to 0.0 or a negative value, THEN THE Telemetry_Module SHALL log a structured warning with `event=otel_sample_rate_invalid` and use 0.01 as the minimum effective rate to prevent silent trace blackout in production.
-4. WHEN `TOONFLOW_OTEL_EXPORT_ENABLED` is truthy, THE Telemetry_Module SHALL configure the OTel SDK `SdkTracerProvider` with a `TraceIdRatioBased` sampler using the resolved sample rate.
+1. THE Telemetry_Module SHALL read `OPENFLOW_OTEL_SAMPLE_RATE` as a float in (0.0, 1.0] when `OPENFLOW_OTEL_EXPORT_ENABLED` is truthy.
+2. IF `OPENFLOW_OTEL_SAMPLE_RATE` is absent or unparseable, THEN THE Telemetry_Module SHALL default to 1.0 (sample all spans).
+3. IF `OPENFLOW_OTEL_SAMPLE_RATE` is set to 0.0 or a negative value, THEN THE Telemetry_Module SHALL log a structured warning with `event=otel_sample_rate_invalid` and use 0.01 as the minimum effective rate to prevent silent trace blackout in production.
+4. WHEN `OPENFLOW_OTEL_EXPORT_ENABLED` is truthy, THE Telemetry_Module SHALL configure the OTel SDK `SdkTracerProvider` with a `TraceIdRatioBased` sampler using the resolved sample rate.
 5. THE Telemetry_Module SHALL log the resolved sample rate at startup via `event=otel_sample_rate_resolved` when OTel export is enabled.
-6. WHEN `TOONFLOW_OTEL_EXPORT_ENABLED` is falsy, THE Telemetry_Module SHALL ignore `TOONFLOW_OTEL_SAMPLE_RATE` entirely.
+6. WHEN `OPENFLOW_OTEL_EXPORT_ENABLED` is falsy, THE Telemetry_Module SHALL ignore `OPENFLOW_OTEL_SAMPLE_RATE` entirely.
 
 ---
 
@@ -165,7 +165,7 @@
 
 #### Acceptance Criteria
 
-1. THE system SHALL ensure that any new environment variables introduced by this spec (`HARNESS_USER_WASM_ALERT_*`, `HARNESS_ALERT_WEBHOOK_URL`, `HARNESS_ALERT_OPS_USER_ID`, `TOONFLOW_OTEL_SAMPLE_RATE`) are documented in `backend/README.md` under the relevant sections.
+1. THE system SHALL ensure that any new environment variables introduced by this spec (`HARNESS_USER_WASM_ALERT_*`, `HARNESS_ALERT_WEBHOOK_URL`, `HARNESS_ALERT_OPS_USER_ID`, `OPENFLOW_OTEL_SAMPLE_RATE`) are documented in `backend/README.md` under the relevant sections.
 2. THE system SHALL ensure that the `harness_wasm_alert` and `harness_wasm_alert_cleared` notification types are visible in the existing Flutter notification center UI without requiring a new API endpoint (they use the existing `GET /api/v1/notifications` path).
 3. WHERE the alert notification introduces a new `notification_type` value, THE system SHALL ensure the Flutter `rust_api` notification model handles the new type without crashing (graceful unknown-type handling).
 4. THE system SHALL ensure that no single modified source file exceeds 800 lines after changes are applied.

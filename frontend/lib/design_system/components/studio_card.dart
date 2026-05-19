@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../theme.dart';
 import '../tokens.dart';
 
 class StudioCard extends StatelessWidget {
@@ -17,12 +18,21 @@ class StudioCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = StudioTokens.of(context);
+    final studio = StudioColors.of(context);
     final card = Container(
       padding: padding,
       decoration: BoxDecoration(
-        color: tokens.bgElevated,
+        gradient: studio.panelGradient,
         borderRadius: BorderRadius.circular(StudioSpacing.radiusCard),
-        border: Border.all(color: tokens.borderSubtle),
+        border: Border.all(color: tokens.surfaceHighlight),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: tokens.panelGlow.withValues(alpha: 0.08),
+            blurRadius: 22,
+            spreadRadius: -16,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       child: child,
     );

@@ -26,8 +26,8 @@
 //! - Returns exit code 1 if reconciliation check fails
 
 use anyhow::{Context, Result};
+use openflow_server::billing::reconcile_all_personal_workspaces;
 use sqlx::postgres::PgPoolOptions;
-use toonflow_server::billing::reconcile_all_personal_workspaces;
 
 #[tokio::main]
 async fn main() -> Result<()> {

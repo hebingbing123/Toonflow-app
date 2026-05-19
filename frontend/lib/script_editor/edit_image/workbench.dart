@@ -89,7 +89,7 @@ extension _HomePageScriptEditorEditImageWorkbench on _HomePageState {
     }
 
     try {
-      await showDialog<void>(
+      await showStudioDialog<void>(
         context: context,
         builder: (dialogCtx) {
           return StatefulBuilder(

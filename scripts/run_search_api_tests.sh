@@ -162,7 +162,7 @@ if [[ "$DB_MODE" == true ]]; then
 
   echo "Resolved DATABASE_URL from ${DATABASE_URL_SOURCE}."
   echo "Running database-backed search API tests against ${DB_HOST}:${DB_PORT}"
-  LOG_FILE="$(mktemp "${TMPDIR:-/tmp}/toonflow-search-api-tests.XXXXXX")"
+  LOG_FILE="$(mktemp "${TMPDIR:-/tmp}/openflow-search-api-tests.XXXXXX")"
   trap 'rm -f "$LOG_FILE"' EXIT
 
   set +e

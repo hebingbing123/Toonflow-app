@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+
+import '../platform/studio_load_state.dart';
 import 'controller.dart';
 import 'section_view.dart';
 
-class JobsSection extends StatelessWidget {
+class JobsSection extends StatefulWidget {
   const JobsSection({
     super.key,
     required this.controller,
@@ -13,42 +15,61 @@ class JobsSection extends StatelessWidget {
   final bool studioPresentation;
 
   @override
+  State<JobsSection> createState() => _JobsSectionState();
+}
+
+class _JobsSectionState extends State<JobsSection> {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.studioPresentation &&
+        widget.controller.jobsLoadState == StudioLoadState.initial) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        widget.controller.loadJobs();
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: controller,
+      animation: widget.controller,
       builder: (context, _) => JobsSectionView(
-        studioPresentation: studioPresentation,
+        studioPresentation: widget.studioPresentation,
         model: JobsSectionViewModel(
-          loadingJobs: controller.loadingJobs,
-          loadingJobKinds: controller.loadingJobKinds,
-          loadingJobKindSummary: controller.loadingJobKindSummary,
-          loadingJobStatusSummary: controller.loadingJobStatusSummary,
-          creatingJob: controller.creatingJob,
-          loadingJobById: controller.loadingJobById,
-          jobIdController: controller.jobIdController,
-          jobs: controller.jobs,
-          jobByIdLine: controller.jobByIdLine,
-          jobKindsLine: controller.jobKindsLine,
-          jobKindSummaryLine: controller.jobKindSummaryLine,
-          jobStatusSummaryLine: controller.jobStatusSummaryLine,
-          cancellingJobId: controller.cancellingJobId,
-          retryingJobId: controller.retryingJobId,
+          loadingJobs: widget.controller.loadingJobs,
+          loadingJobKinds: widget.controller.loadingJobKinds,
+          loadingJobKindSummary: widget.controller.loadingJobKindSummary,
+          loadingJobStatusSummary: widget.controller.loadingJobStatusSummary,
+          creatingJob: widget.controller.creatingJob,
+          loadingJobById: widget.controller.loadingJobById,
+          jobIdController: widget.controller.jobIdController,
+          jobs: widget.controller.jobs,
+          jobsLoadState: widget.controller.jobsLoadState,
+          jobsLastError: widget.controller.jobsLastError,
+          jobByIdLine: widget.controller.jobByIdLine,
+          jobKindsLine: widget.controller.jobKindsLine,
+          jobKindSummaryLine: widget.controller.jobKindSummaryLine,
+          jobStatusSummaryLine: widget.controller.jobStatusSummaryLine,
+          cancellingJobId: widget.controller.cancellingJobId,
+          retryingJobId: widget.controller.retryingJobId,
         ),
         callbacks: JobsSectionViewCallbacks(
-          onJobIdChanged: controller.onJobIdChanged,
-          onLoadJobs: controller.loadJobs,
-          onLoadJobsKindFlutterProbe: controller.loadJobsKindFlutterProbe,
-          onLoadJobsStatusFailed: controller.loadJobsStatusFailed,
+          onJobIdChanged: widget.controller.onJobIdChanged,
+          onLoadJobs: widget.controller.loadJobs,
+          onLoadJobsKindFlutterProbe: widget.controller.loadJobsKindFlutterProbe,
+          onLoadJobsStatusFailed: widget.controller.loadJobsStatusFailed,
           onLoadJobsKindProbeStatusQueued:
-              controller.loadJobsKindProbeStatusQueued,
-          onLoadJobKinds: controller.loadJobKinds,
-          onLoadJobKindSummary: controller.loadJobKindSummary,
-          onLoadJobStatusSummary: controller.loadJobStatusSummary,
-          onCreateProbeJob: controller.createProbeJob,
-          onFetchJobById: controller.fetchJobById,
-          onSelectJob: controller.selectJob,
-          onRetryFailedJob: controller.retryFailedJob,
-          onCancelQueuedJob: controller.cancelQueuedJob,
+              widget.controller.loadJobsKindProbeStatusQueued,
+          onLoadJobKinds: widget.controller.loadJobKinds,
+          onLoadJobKindSummary: widget.controller.loadJobKindSummary,
+          onLoadJobStatusSummary: widget.controller.loadJobStatusSummary,
+          onCreateProbeJob: widget.controller.createProbeJob,
+          onFetchJobById: widget.controller.fetchJobById,
+          onSelectJob: widget.controller.selectJob,
+          onRetryFailedJob: widget.controller.retryFailedJob,
+          onCancelQueuedJob: widget.controller.cancelQueuedJob,
         ),
       ),
     );

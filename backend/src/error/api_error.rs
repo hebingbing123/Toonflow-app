@@ -59,7 +59,7 @@ pub enum ApiError {
     DatabaseError(String),
     /// `BILLING_WEBHOOK_SECRET` unset — webhook ingestion disabled.
     WebhookNotConfigured,
-    /// HMAC did not match body (or bad `X-Toonflow-Signature` format).
+    /// HMAC did not match body (or bad `X-Openflow-Signature` format).
     InvalidWebhookSignature,
     /// Unexpected failure (logged server-side); avoid leaking internals to clients.
     Internal,
@@ -148,7 +148,7 @@ impl IntoResponse for ApiError {
             // 5xx errors - log as errors with full context
             ApiError::Internal => {
                 error!(
-                    target: "toonflow.api.error",
+                    target: "openflow.api.error",
                     error_type = "internal_error",
                     status = 500,
                     "Internal server error occurred"
@@ -156,7 +156,7 @@ impl IntoResponse for ApiError {
             }
             ApiError::DatabaseError(msg) => {
                 error!(
-                    target: "toonflow.api.error",
+                    target: "openflow.api.error",
                     error_type = "database_error",
                     status = 503,
                     message = %msg,
@@ -166,7 +166,7 @@ impl IntoResponse for ApiError {
             // Configuration errors - log as warnings
             ApiError::AuthNotConfigured => {
                 warn!(
-                    target: "toonflow.api.error",
+                    target: "openflow.api.error",
                     error_type = "auth_not_configured",
                     status = 503,
                     "SUPABASE_JWT_SECRET is not set"
@@ -174,7 +174,7 @@ impl IntoResponse for ApiError {
             }
             ApiError::WebhookNotConfigured => {
                 warn!(
-                    target: "toonflow.api.error",
+                    target: "openflow.api.error",
                     error_type = "webhook_not_configured",
                     status = 503,
                     "BILLING_WEBHOOK_SECRET is not set"
@@ -182,7 +182,7 @@ impl IntoResponse for ApiError {
             }
             ApiError::LlmNotConfigured => {
                 warn!(
-                    target: "toonflow.api.error",
+                    target: "openflow.api.error",
                     error_type = "llm_not_configured",
                     status = 503,
                     "LLM API key is not configured"
@@ -191,7 +191,7 @@ impl IntoResponse for ApiError {
             // 4xx errors - log as info/debug (client errors, not server issues)
             ApiError::Unauthorized => {
                 tracing::debug!(
-                    target: "toonflow.api.error",
+                    target: "openflow.api.error",
                     error_type = "unauthorized",
                     status = 401,
                     "Unauthorized request - missing or invalid Authorization header"
@@ -199,7 +199,7 @@ impl IntoResponse for ApiError {
             }
             ApiError::BadToken => {
                 tracing::debug!(
-                    target: "toonflow.api.error",
+                    target: "openflow.api.error",
                     error_type = "invalid_token",
                     status = 401,
                     "JWT verification failed"
@@ -207,7 +207,7 @@ impl IntoResponse for ApiError {
             }
             ApiError::Forbidden(msg) => {
                 tracing::info!(
-                    target: "toonflow.api.error",
+                    target: "openflow.api.error",
                     error_type = "forbidden",
                     status = 403,
                     message = %msg,
@@ -216,7 +216,7 @@ impl IntoResponse for ApiError {
             }
             ApiError::NotFound => {
                 tracing::debug!(
-                    target: "toonflow.api.error",
+                    target: "openflow.api.error",
                     error_type = "not_found",
                     status = 404,
                     "Resource not found"
@@ -224,7 +224,7 @@ impl IntoResponse for ApiError {
             }
             ApiError::Conflict(msg) => {
                 tracing::info!(
-                    target: "toonflow.api.error",
+                    target: "openflow.api.error",
                     error_type = "conflict",
                     status = 409,
                     message = %msg,
@@ -233,7 +233,7 @@ impl IntoResponse for ApiError {
             }
             ApiError::ConflictWithDetails { message, details } => {
                 tracing::info!(
-                    target: "toonflow.api.error",
+                    target: "openflow.api.error",
                     error_type = "conflict",
                     status = 409,
                     message = %message,
@@ -243,7 +243,7 @@ impl IntoResponse for ApiError {
             }
             ApiError::BadRequest(msg) => {
                 tracing::info!(
-                    target: "toonflow.api.error",
+                    target: "openflow.api.error",
                     error_type = "bad_request",
                     status = 400,
                     message = %msg,
@@ -254,7 +254,7 @@ impl IntoResponse for ApiError {
                 code, en, details, ..
             } => {
                 tracing::info!(
-                    target: "toonflow.api.error",
+                    target: "openflow.api.error",
                     error_type = %code,
                     status = 400,
                     message = %en,
@@ -264,7 +264,7 @@ impl IntoResponse for ApiError {
             }
             ApiError::InvalidWebhookSignature => {
                 tracing::warn!(
-                    target: "toonflow.api.error",
+                    target: "openflow.api.error",
                     error_type = "invalid_webhook_signature",
                     status = 401,
                     "Webhook HMAC verification failed"
@@ -272,7 +272,7 @@ impl IntoResponse for ApiError {
             }
             ApiError::NotImplemented(msg) => {
                 tracing::info!(
-                    target: "toonflow.api.error",
+                    target: "openflow.api.error",
                     error_type = "not_implemented",
                     status = 501,
                     message = %msg,
@@ -281,7 +281,7 @@ impl IntoResponse for ApiError {
             }
             ApiError::QuotaExceeded(msg) => {
                 tracing::info!(
-                    target: "toonflow.api.error",
+                    target: "openflow.api.error",
                     error_type = "quota_exceeded",
                     status = 429,
                     message = %msg,
@@ -290,7 +290,7 @@ impl IntoResponse for ApiError {
             }
             ApiError::QuotaExceededI18n { en, .. } => {
                 tracing::info!(
-                    target: "toonflow.api.error",
+                    target: "openflow.api.error",
                     error_type = "quota_exceeded",
                     status = 429,
                     message = %en,
@@ -299,7 +299,7 @@ impl IntoResponse for ApiError {
             }
             ApiError::SubscriptionExpiredI18n { en, .. } => {
                 tracing::info!(
-                    target: "toonflow.api.error",
+                    target: "openflow.api.error",
                     error_type = "subscription_expired",
                     status = 403,
                     message = %en,
@@ -308,7 +308,7 @@ impl IntoResponse for ApiError {
             }
             ApiError::PaymentFailedI18n { en, .. } => {
                 tracing::info!(
-                    target: "toonflow.api.error",
+                    target: "openflow.api.error",
                     error_type = "payment_failed",
                     status = 403,
                     message = %en,
@@ -317,7 +317,7 @@ impl IntoResponse for ApiError {
             }
             ApiError::SubscriptionPastDueI18n { en, .. } => {
                 tracing::info!(
-                    target: "toonflow.api.error",
+                    target: "openflow.api.error",
                     error_type = "subscription_past_due",
                     status = 403,
                     message = %en,
@@ -326,7 +326,7 @@ impl IntoResponse for ApiError {
             }
             ApiError::ConcurrentLimitExceeded(msg) => {
                 tracing::info!(
-                    target: "toonflow.api.error",
+                    target: "openflow.api.error",
                     error_type = "concurrent_limit_exceeded",
                     status = 429,
                     message = %msg,
@@ -336,7 +336,7 @@ impl IntoResponse for ApiError {
             // Bilingual variants - log with English message
             ApiError::BadRequestI18n { en, .. } => {
                 tracing::info!(
-                    target: "toonflow.api.error",
+                    target: "openflow.api.error",
                     error_type = "bad_request",
                     status = 400,
                     message = %en,
@@ -345,7 +345,7 @@ impl IntoResponse for ApiError {
             }
             ApiError::ConflictI18n { en, .. } => {
                 tracing::info!(
-                    target: "toonflow.api.error",
+                    target: "openflow.api.error",
                     error_type = "conflict",
                     status = 409,
                     message = %en,
@@ -354,7 +354,7 @@ impl IntoResponse for ApiError {
             }
             ApiError::ConflictWithDetailsI18n { en, details, .. } => {
                 tracing::info!(
-                    target: "toonflow.api.error",
+                    target: "openflow.api.error",
                     error_type = "conflict",
                     status = 409,
                     message = %en,
@@ -364,7 +364,7 @@ impl IntoResponse for ApiError {
             }
             ApiError::ForbiddenI18n { en, .. } => {
                 tracing::info!(
-                    target: "toonflow.api.error",
+                    target: "openflow.api.error",
                     error_type = "forbidden",
                     status = 403,
                     message = %en,
@@ -373,7 +373,7 @@ impl IntoResponse for ApiError {
             }
             ApiError::NotImplementedI18n { en, .. } => {
                 tracing::info!(
-                    target: "toonflow.api.error",
+                    target: "openflow.api.error",
                     error_type = "not_implemented",
                     status = 501,
                     message = %en,

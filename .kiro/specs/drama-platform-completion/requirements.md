@@ -2,7 +2,7 @@
 
 ## 简介
 
-本文档描述 **drama-platform-completion** 功能的需求。目标不再只是补齐前一轮遗留的 8 处缺口，而是把 Toonflow（OpenFlow）AI 短剧平台继续往“可上线前的完善状态”推进，并遵循以下优先级：
+本文档描述 **drama-platform-completion** 功能的需求。目标不再只是补齐前一轮遗留的 8 处缺口，而是把 OpenFlowAI 短剧平台继续往“可上线前的完善状态”推进，并遵循以下优先级：
 
 1. **功能优先**：先补齐平台闭环能力，确保用户能在平台内完成项目配置、生成、返工、审核、记忆管理等关键流程。
 2. **流程优先**：在功能闭环后，继续缩短无效生成路径，提升返工效率、审核效率和运营效率。
@@ -36,7 +36,7 @@
 
 ## 词汇表
 
-- **System（系统）**：Toonflow 平台整体，包含 Rust 后端、Flutter 前端和 Agent 编排层
+- **System（系统）**：Openflow 平台整体，包含 Rust 后端、Flutter 前端和 Agent 编排层
 - **ProjectEditor（项目编辑器）**：Flutter 前端中用于创建和编辑项目基本信息的对话框（`frontend/lib/project_editor/`）
 - **StylePackPicker（风格包选择器）**：用于在项目编辑器中选择画风包和故事风格包的 UI 组件
 - **MemoryWorkbench（记忆工作台）**：Flutter 前端中 Agent 记忆管理界面（`frontend/lib/agent_workspaces/`）

@@ -5,6 +5,7 @@ import '../../design_system/components/studio_text_styles.dart';
 import '../../l10n/app_localizations.dart';
 import '../../rust_api.dart';
 import 'version_manager.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 String _formatVersionComparisonValue(AppLocalizations l10n, dynamic value) {
   if (value == null) return l10n.shortVideoVersionComparisonValueEmpty;
@@ -473,11 +474,11 @@ class _VersionComparisonState extends State<VersionComparison> {
 
   /// 显示报告对话框
   void _showReportDialog(String report) {
-    showDialog<void>(
+    showStudioDialog<void>(
       context: context,
       builder: (context) {
         final dialogL10n = resolveAppLocalizationsForErrors(context);
-        return AlertDialog(
+        return StudioAlertDialog(
           title: Text(dialogL10n.shortVideoVersionComparisonReportDialogTitle),
           content: SizedBox(
             width: double.maxFinite,
@@ -531,7 +532,7 @@ class _VersionComparisonState extends State<VersionComparison> {
     final l10n = resolveAppLocalizationsForErrors(context);
     final filteredDiffs = _filteredDifferences;
 
-    return Dialog(
+    return StudioDialogFrame(
       child: Container(
         width: MediaQuery.of(context).size.width * 0.9,
         height: MediaQuery.of(context).size.height * 0.9,

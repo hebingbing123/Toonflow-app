@@ -4,6 +4,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../rust_api.dart';
 import 'workbench_dialog_view.dart';
 import 'workbench_support.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 class _AssetImagesWorkbenchDialogDeps {
   _AssetImagesWorkbenchDialogDeps._({
@@ -105,7 +106,7 @@ Future<void> openAssetImagesWorkbenchDialog({
   );
 
   try {
-    await showDialog<void>(
+    await showStudioDialog<void>(
       context: ctx,
       builder: (dialogCtx) {
         return StatefulBuilder(

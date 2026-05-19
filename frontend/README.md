@@ -65,13 +65,42 @@ flutter run -d macos \
 当前已经引入 `flutter_rust_bridge` runtime 依赖，并把 bridge 入口与生成目录固定下来。首次接原生能力前，先安装 codegen：
 
 ```bash
+cargo build --manifest-path ../rust_core/Cargo.toml -p openflow_core_bridge
+```
+
+然后生成绑定：
+
+```bash
 cargo install flutter_rust_bridge_codegen
 flutter_rust_bridge_codegen generate \
-  --rust-input ../rust_core/crates/openflow_core_bridge/src/lib.rs \
-  --dart-output lib/native_bridge/generated/openflow_core_bridge.dart
+  --rust-root ../rust_core/crates/openflow_core_bridge \
+  --rust-input crate::api \
+  --dart-root . \
+  --dart-output lib/native_bridge/generated \
+  --rust-output ../rust_core/crates/openflow_core_bridge/src/frb_generated.rs \
+  --dart-entrypoint-class-name OpenflowCoreBridgeApi
 ```
 
 这一步完成后，再把生成绑定接到手写 facade 上，而不是让产品代码直接 import 生成文件。
+
+默认启动时会优先尝试 FRB 自带加载路径；如果动态库不在默认位置，可以显式指定目录：
+
+```bash
+flutter run -d macos \
+  --dart-define=OPENFLOW_NATIVE_LIB_DIR=/absolute/path/to/rust_core/target/debug
+```
+
+桌面 runner 现在也会在构建时自动编译并打包这颗动态库：
+
+- macOS: 复制到 `openflow_app.app/Contents/Frameworks/`
+- Linux: 放到 bundle 的 `lib/`
+- Windows: 放到可执行文件同目录
+
+完成桌面构建后，可以用仓库根目录的校验脚本快速检查产物结构：
+
+```bash
+scripts/verify_desktop_bridge_artifacts.sh
+```
 
 首页提供：`GET /api/v1/health`、邮箱密码登录/注册、`GET /api/v1/me`（Bearer）、`WebSocket` 探针（`?access_token=` + `agent.script.attach` + `agent.chat.send`，以及 **`harness.tool.invoke`**：`echo`、**`skills.read`**（使用上方 Skill path 输入框，默认同 REST 示例路径））。
 
@@ -90,7 +119,7 @@ flutter_rust_bridge_codegen generate \
 flutter run -d chrome --dart-define=ENABLE_WORKSPACE_BILLING=true
 
 # 生产构建启用
-flutter build apk --release --dart-define=ENABLE_WORKSPACE_BILLING=true
+flutter build macos --release --dart-define=ENABLE_WORKSPACE_BILLING=true
 ```
 
 **相关文档**：

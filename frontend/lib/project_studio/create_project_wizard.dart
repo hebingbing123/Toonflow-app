@@ -183,20 +183,31 @@ class _WizardStepIndicator extends StatelessWidget {
       l10n.studioWizardStepReview,
     ];
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
       child: Row(
-        children: List<Widget>.generate(labels.length, (i) {
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: List<Widget>.generate(labels.length * 2 - 1, (index) {
+          if (index.isOdd) {
+            final leftStep = index ~/ 2;
+            return Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 13),
+                child: Container(
+                  height: 2,
+                  color: leftStep < current
+                      ? tokens.primary
+                      : tokens.borderSubtle,
+                ),
+              ),
+            );
+          }
+          final i = index ~/ 2;
           final active = i <= current;
+          final isCurrent = i == current;
           return Expanded(
-            child: Row(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                if (i > 0)
-                  Expanded(
-                    child: Container(
-                      height: 2,
-                      color: active ? tokens.primary : tokens.borderSubtle,
-                    ),
-                  ),
                 Container(
                   width: 28,
                   height: 28,
@@ -204,6 +215,9 @@ class _WizardStepIndicator extends StatelessWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: active ? tokens.primary : tokens.bgInset,
+                    border: isCurrent
+                        ? Border.all(color: tokens.accent, width: 2)
+                        : null,
                   ),
                   child: Text(
                     '${i + 1}',
@@ -214,13 +228,23 @@ class _WizardStepIndicator extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (i < labels.length - 1)
-                  Expanded(
-                    child: Container(
-                      height: 2,
-                      color: i < current ? tokens.primary : tokens.borderSubtle,
-                    ),
+                const SizedBox(height: 6),
+                Text(
+                  labels[i],
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 12,
+                    height: 1.25,
+                    fontWeight: isCurrent ? FontWeight.w600 : FontWeight.w500,
+                    color: isCurrent
+                        ? tokens.textPrimary
+                        : active
+                            ? tokens.textSecondary
+                            : tokens.textMuted,
                   ),
+                ),
               ],
             ),
           );
@@ -249,6 +273,11 @@ class _StepBasics extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
+          Text(
+            l10n.studioWizardStepBasics,
+            style: studioPaneTitleStyle(context),
+          ),
+          const SizedBox(height: 12),
           TextField(
             controller: name,
             autofocus: true,
@@ -285,8 +314,15 @@ class _StepNovelPaste extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
+            l10n.studioWizardStepContent,
+            style: studioPaneTitleStyle(context),
+          ),
+          const SizedBox(height: 4),
+          Text(
             l10n.studioWizardPasteNovelHint,
-            style: Theme.of(context).textTheme.bodySmall,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: StudioTokens.of(context).textSecondary,
+            ),
           ),
           const SizedBox(height: 12),
           TextField(
@@ -322,6 +358,11 @@ class _StepReview extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
+          Text(
+            l10n.studioWizardStepReview,
+            style: studioPaneTitleStyle(context),
+          ),
+          const SizedBox(height: 12),
           Text(
             l10n.projectsDialogFieldName,
             style: Theme.of(context).textTheme.labelLarge,

@@ -2,7 +2,7 @@
 
 ## 简介
 
-本文档描述 **AI 短剧生成质量优化**功能的需求。目标是在 Toonflow（OpenFlow）平台上，通过优化 Agent 技能文件、提示词工程、记忆系统和生成流水线，使生成的短剧视频达到"不穿帮"的质量标准——人物有风格与情绪、画面真实自然、叙事节奏有起伏——同时在保证质量的前提下尽量减少大模型 token 消耗。
+本文档描述 **AI 短剧生成质量优化**功能的需求。目标是在 OpenFlow平台上，通过优化 Agent 技能文件、提示词工程、记忆系统和生成流水线，使生成的短剧视频达到"不穿帮"的质量标准——人物有风格与情绪、画面真实自然、叙事节奏有起伏——同时在保证质量的前提下尽量减少大模型 token 消耗。
 
 平台技术栈：Rust 后端（Axum + SQLx + Tokio）+ Flutter 前端，Agent 编排通过 Harness WebSocket 协议运行，技能文件为 Markdown 格式存储于 `backend/data/skills/`，提示词模板存储于 `backend/data/prompt_defaults/`。
 
@@ -10,7 +10,7 @@
 
 ## 词汇表
 
-- **System（系统）**：Toonflow 平台整体，包含 Rust 后端、Flutter 前端和 Agent 编排层
+- **System（系统）**：Openflow 平台整体，包含 Rust 后端、Flutter 前端和 Agent 编排层
 - **ScriptAgent**：负责小说改编为剧本的 Agent 体系（决策层 + 执行层 + 监督层）
 - **ProductionAgent**：负责剧本到分镜、分镜到视频提示词的 Agent 体系
 - **Skill（技能文件）**：存储于 `backend/data/skills/` 的 Markdown 文件，定义 Agent 的行为规范

@@ -49,7 +49,7 @@ mod tests {
     use super::download::{DownloadAppAcceptedResponse, DownloadAppBody};
     use super::update::constants::{
         ENV_UPDATE_ATOMGIT_URL, ENV_UPDATE_GITEE_URL, ENV_UPDATE_GITHUB_URL,
-        ENV_UPDATE_LATEST_VERSION, ENV_UPDATE_TIME, ENV_UPDATE_TOONFLOW_URL, PKG_VERSION,
+        ENV_UPDATE_LATEST_VERSION, ENV_UPDATE_OPENFLOW_URL, ENV_UPDATE_TIME, PKG_VERSION,
     };
     use super::update::resolve::resolve_check_update_response;
     use super::update::types::{CheckUpdateBody, CheckUpdateSource, ReleaseVersion};
@@ -64,7 +64,7 @@ mod tests {
     fn clear_update_env() {
         std::env::remove_var(ENV_UPDATE_LATEST_VERSION);
         std::env::remove_var(ENV_UPDATE_TIME);
-        std::env::remove_var(ENV_UPDATE_TOONFLOW_URL);
+        std::env::remove_var(ENV_UPDATE_OPENFLOW_URL);
         std::env::remove_var(ENV_UPDATE_GITHUB_URL);
         std::env::remove_var(ENV_UPDATE_GITEE_URL);
         std::env::remove_var(ENV_UPDATE_ATOMGIT_URL);
@@ -72,14 +72,14 @@ mod tests {
 
     #[test]
     fn check_update_body_rejects_unknown_fields() {
-        let err = serde_json::from_str::<CheckUpdateBody>(r#"{"source":"toonflow","extra":1}"#);
+        let err = serde_json::from_str::<CheckUpdateBody>(r#"{"source":"openflow","extra":1}"#);
         assert!(err.is_err());
     }
 
     #[test]
     fn check_update_body_accepts_valid_source() {
-        let b: CheckUpdateBody = serde_json::from_str(r#"{"source":"toonflow"}"#).unwrap();
-        matches!(b.source, CheckUpdateSource::Toonflow);
+        let b: CheckUpdateBody = serde_json::from_str(r#"{"source":"openflow"}"#).unwrap();
+        matches!(b.source, CheckUpdateSource::Openflow);
     }
 
     #[test]
@@ -126,7 +126,7 @@ mod tests {
         let _guard = env_lock();
         clear_update_env();
         let now = Utc::now();
-        let resp = resolve_check_update_response(CheckUpdateSource::Toonflow, now);
+        let resp = resolve_check_update_response(CheckUpdateSource::Openflow, now);
         assert!(!resp.need_update);
         assert_eq!(resp.latest_version, PKG_VERSION);
         assert!(!resp.reinstall);
@@ -143,7 +143,7 @@ mod tests {
             format!("{}.{}.{}", current.major, current.minor, current.patch + 1),
         );
         std::env::set_var(ENV_UPDATE_TIME, "2026-04-08T08:30:00Z");
-        std::env::set_var(ENV_UPDATE_GITHUB_URL, "https://example.com/toonflow.zip");
+        std::env::set_var(ENV_UPDATE_GITHUB_URL, "https://example.com/openflow.zip");
         let resp = resolve_check_update_response(CheckUpdateSource::Github, Utc::now());
         assert!(resp.need_update);
         assert!(!resp.reinstall);
@@ -151,7 +151,7 @@ mod tests {
         assert_eq!(parsed.to_utc().to_rfc3339(), "2026-04-08T08:30:00+00:00");
         assert_eq!(
             resp.url.as_deref(),
-            Some("https://example.com/toonflow.zip")
+            Some("https://example.com/openflow.zip")
         );
         clear_update_env();
     }
@@ -165,7 +165,7 @@ mod tests {
             ENV_UPDATE_LATEST_VERSION,
             format!("{}.{}.0", current.major, current.minor + 1),
         );
-        let resp = resolve_check_update_response(CheckUpdateSource::Toonflow, Utc::now());
+        let resp = resolve_check_update_response(CheckUpdateSource::Openflow, Utc::now());
         assert!(resp.need_update);
         assert!(resp.reinstall);
         assert!(resp.url.is_none());
@@ -189,7 +189,7 @@ mod tests {
         clear_update_env();
         std::env::set_var(ENV_UPDATE_TIME, "invalid-time");
         let now = Utc::now();
-        let resp = resolve_check_update_response(CheckUpdateSource::Toonflow, now);
+        let resp = resolve_check_update_response(CheckUpdateSource::Openflow, now);
         assert_eq!(resp.time, now.to_rfc3339());
         clear_update_env();
     }

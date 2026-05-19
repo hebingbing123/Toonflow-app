@@ -52,7 +52,7 @@ WorkspaceJobAggregates {
 }
 ```
 
-**Access Control**: ✅ Protected by `TOONFLOW_INTERNAL_OPS_TOKEN` header
+**Access Control**: ✅ Protected by `OPENFLOW_INTERNAL_OPS_TOKEN` header
 
 **Recommendation**: ✅ **PASS** - No changes needed. These endpoints expose only workspace IDs and aggregates.
 

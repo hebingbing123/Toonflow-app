@@ -7,7 +7,7 @@
 /// Single-image asset generate (Electron-era **`POST …/assets-generate/generate`**); worker uses
 /// **`images/edits`** when payload has `image_base64`, otherwise **`images/generations`**,
 /// then inserts **`app_asset_image`** (**`file_path`** = provider URL or **`…/images/{id}/file`**
-/// when **`TOONFLOW_LOCAL_ASSET_IMAGE_DIR`** is set).
+/// when **`OPENFLOW_LOCAL_ASSET_IMAGE_DIR`** is set).
 pub const JOB_KIND_ASSET_GENERATE_IMAGE: &str = "asset.generate.image";
 /// Single prompt polish (Electron-era **`POST …/assets-generate/polish-prompt`**); worker calls chat completion when **`LlmConfig`** is set, else **`failed`**.
 pub const JOB_KIND_ASSET_POLISH_PROMPT: &str = "asset.polish.prompt";
@@ -28,7 +28,7 @@ pub const JOB_KIND_SETTINGS_VENDOR_MODEL_TEST: &str = "settings.vendor.model_tes
 /// structured data into a local zip artifact and returns a settings download path.
 pub const JOB_KIND_SETTINGS_ACCOUNT_EXPORT: &str = "settings.account.export";
 /// Workspace shared cleared-template audit export (**`POST …/shared/audit/export-async`**); worker
-/// writes **`TOONFLOW_LOCAL_WORKSPACE_SHARED_AUDIT_EXPORT_DIR`** (defaults under temp), then history
+/// writes **`OPENFLOW_LOCAL_WORKSPACE_SHARED_AUDIT_EXPORT_DIR`** (defaults under temp), then history
 /// is appended with **`job_id`** for **`GET …/export-jobs/{id}/file`**.
 pub const JOB_KIND_SETTINGS_WORKSPACE_SHARED_AUDIT_EXPORT: &str =
     "settings.workspace_shared_audit.export";

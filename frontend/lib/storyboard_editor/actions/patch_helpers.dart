@@ -1,3 +1,4 @@
+import 'package:openflow_app/design_system/components/studio_dropdown_field.dart';
 part of '../../home_page.dart';
 
 extension _StoryboardWorkbenchPatchActions on _StoryboardWorkbenchPanelState {
@@ -50,7 +51,7 @@ extension _StoryboardWorkbenchPatchActions on _StoryboardWorkbenchPanelState {
     }
 
     try {
-      await showDialog<void>(
+      await showStudioDialog<void>(
         context: context,
         builder: (ctx) {
           var submitting = false;
@@ -59,7 +60,7 @@ extension _StoryboardWorkbenchPatchActions on _StoryboardWorkbenchPanelState {
           List<String> repairPriority = const [];
           return StatefulBuilder(
             builder: (ctx, setDialogState) {
-              return AlertDialog(
+              return StudioAlertDialog(
                 title: Text(l10n.storyboardPatchDialogTitle),
                 content: SizedBox(
                   width: 620,
@@ -68,7 +69,7 @@ extension _StoryboardWorkbenchPatchActions on _StoryboardWorkbenchPanelState {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        DropdownButtonFormField<String>(
+                        StudioDropdownButtonFormField<String>(
                           initialValue: scopeCtrl.text,
                           decoration: InputDecoration(
                             labelText: l10n.storyboardPatchScopeLabel,
@@ -90,7 +91,7 @@ extension _StoryboardWorkbenchPatchActions on _StoryboardWorkbenchPanelState {
                                 },
                         ),
                         const SizedBox(height: 8),
-                        DropdownButtonFormField<String>(
+                        StudioDropdownButtonFormField<String>(
                           initialValue: modelTierCtrl.text,
                           decoration: InputDecoration(
                             labelText: l10n.storyboardPatchModelTierLabel,

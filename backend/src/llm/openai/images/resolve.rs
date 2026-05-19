@@ -9,7 +9,7 @@ pub(super) fn clip_prompt_chars(s: &str, max_chars: usize) -> String {
     s.chars().take(max_chars).collect()
 }
 
-/// Picks an OpenAI **`images/generations`** model id from the vendor catalog string (e.g. **`1:dall-e-3`**) or **`TOONFLOW_IMAGE_MODEL`**, default **`dall-e-3`**.
+/// Picks an OpenAI **`images/generations`** model id from the vendor catalog string (e.g. **`1:dall-e-3`**) or **`OPENFLOW_IMAGE_MODEL`**, default **`dall-e-3`**.
 pub fn resolve_openai_image_model(request_model: &str) -> String {
     let lower = request_model.to_lowercase();
     if lower.contains("dall-e-2") || lower.contains("dalle-2") {
@@ -18,7 +18,7 @@ pub fn resolve_openai_image_model(request_model: &str) -> String {
     if lower.contains("dall-e-3") || lower.contains("dalle-3") {
         return "dall-e-3".into();
     }
-    std::env::var("TOONFLOW_IMAGE_MODEL")
+    std::env::var("OPENFLOW_IMAGE_MODEL")
         .ok()
         .map(|s| s.trim().to_string())
         .filter(|s| !s.is_empty())

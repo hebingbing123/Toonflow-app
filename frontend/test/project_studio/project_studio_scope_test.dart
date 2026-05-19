@@ -256,6 +256,147 @@ void main() {
     },
   );
 
+  testWidgets(
+    'project studio scope filters cockpit content for the script step',
+    (tester) async {
+      const home = ProjectHome(
+        project: ProjectRow(
+          id: 'project-42',
+          numericId: 42,
+          name: 'Project Delta',
+          intro: null,
+          projectType: null,
+          imageModel: null,
+          imageQuality: null,
+          videoModel: null,
+          artStyle: null,
+          directorManual: null,
+          mode: null,
+          videoRatio: null,
+          createTimeMs: null,
+          artStylePack: null,
+          storyStylePack: null,
+          targetMarket: null,
+          targetPlatforms: null,
+          durationStrategy: null,
+          voiceProfile: null,
+          subtitleStyle: null,
+          bgmStrategy: null,
+          projectAccessMode: 'restricted',
+          projectAccessRole: 'editor',
+        ),
+        stats: ProjectStats(
+          scriptCount: 1,
+          storyboardCount: 3,
+          roleCount: 1,
+          novelCount: 1,
+          videoCount: 0,
+        ),
+        readinessScore: 72,
+        readinessSummary: 'Ready to move.',
+        onboarding: ProjectHomeOnboarding(
+          complete: true,
+          checklist: <ProjectHomeChecklistItem>[],
+        ),
+        styleBibleReady: true,
+        cockpit: ProjectHomeCockpit(
+          headline: 'Project Delta is ready for the next push.',
+          subheadline: 'Focus on getting the first video out.',
+          primaryAction: ProjectHomeAction(
+            key: 'generate_video',
+            title: 'Start the first video pass',
+            detail:
+                'The fastest way to raise confidence is to ship one sample.',
+            targetStep: 'video',
+            ctaLabel: 'Enter video stage',
+            launchIntent: ProjectHomeLaunchIntent(targetStep: 'video'),
+          ),
+          secondaryActions: <ProjectHomeAction>[
+            ProjectHomeAction(
+              key: 'review_storyboard',
+              title: 'Review storyboard readiness',
+              detail: 'Check the shots that still block generation.',
+              targetStep: 'storyboard',
+              ctaLabel: 'Check storyboard state',
+              launchIntent: ProjectHomeLaunchIntent(targetStep: 'storyboard'),
+            ),
+            ProjectHomeAction(
+              key: 'review_script',
+              title: 'Review script intake',
+              detail: 'Open the script workspace and continue drafting.',
+              targetStep: 'script',
+              ctaLabel: 'Open script workspace',
+              launchIntent: ProjectHomeLaunchIntent(targetStep: 'script'),
+            ),
+          ],
+          metrics: <ProjectHomeMetric>[
+            ProjectHomeMetric(
+              key: 'delivery_risk',
+              label: 'Delivery risk',
+              value: 'High',
+              detail: 'The first publishable clip is still missing.',
+              launchIntent: ProjectHomeLaunchIntent(targetStep: 'deliver'),
+            ),
+            ProjectHomeMetric(
+              key: 'novel_count',
+              label: 'Novel imports',
+              value: '1',
+              detail: 'One source novel is ready for script generation.',
+              launchIntent: ProjectHomeLaunchIntent(targetStep: 'script'),
+            ),
+          ],
+          starterTemplates: <ProjectHomeStarterTemplate>[
+            ProjectHomeStarterTemplate(
+              key: 'starter_delivery',
+              title: 'Sample-first route',
+              detail: 'Get one clip out before broadening the scope.',
+              targetStep: 'video',
+              ctaLabel: 'Run sample route',
+              launchIntent: ProjectHomeLaunchIntent(
+                targetStep: 'video',
+                agentKind: 'grid_prompt_generator',
+              ),
+            ),
+            ProjectHomeStarterTemplate(
+              key: 'starter_script',
+              title: 'Script drafting route',
+              detail: 'Import a novel and generate the first script draft.',
+              targetStep: 'script',
+              ctaLabel: 'Run script route',
+              launchIntent: ProjectHomeLaunchIntent(
+                targetStep: 'script',
+                agentKind: 'script_rewriter',
+              ),
+            ),
+          ],
+        ),
+      );
+
+      await tester.pumpWidget(
+        _wrapApp(
+          child: ProjectStudioScope(
+            accessToken: 'token',
+            projectNumericId: 42,
+            projectUuid: 'project-42',
+            projectName: 'Project Delta',
+            initialStep: StudioStep.script,
+            loadSnapshot: (accessToken, projectUuid) async =>
+                const StudioReadinessSnapshot(completedSteps: 5, home: home),
+            hostFactory: (readiness, refreshSnapshot) => _hostFor(readiness),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Novel imports'), findsOneWidget);
+      expect(find.text('Open script workspace'), findsOneWidget);
+      expect(find.text('Script drafting route'), findsOneWidget);
+      expect(find.text('Delivery risk'), findsNothing);
+      expect(find.text('Check storyboard state'), findsNothing);
+      expect(find.text('Sample-first route'), findsNothing);
+    },
+  );
+
   testWidgets('project studio scope renders asset hub during assets step', (
     tester,
   ) async {

@@ -2,10 +2,10 @@
 //!
 //! 支持两种方案，根据存在的请求头选择：
 //!
-//! 1. **Toonflow 原生** (`X-Toonflow-Signature: sha256=<hex>`)：
-//!    - 必须同时发送 **`X-Toonflow-Timestamp: <unix_secs>`**，签名为
+//! 1. **Openflow 原生** (`X-Openflow-Signature: sha256=<hex>`)：
+//!    - 必须同时发送 **`X-Openflow-Timestamp: <unix_secs>`**，签名为
 //!      `HMAC-SHA256(secret, "<unix_secs>." + raw_body)`（与 Stripe 负载形式一致），并校验时间窗
-//!      **`BILLING_TOONFLOW_TOLERANCE_SECS`**（默认与 Stripe 相同 **300** 秒）。
+//!      **`BILLING_OPENFLOW_TOLERANCE_SECS`**（默认与 Stripe 相同 **300** 秒）。
 //!
 //! 2. **Stripe** (`Stripe-Signature: t=<unix>,v1=<hex>[,v1=<hex>...]`：
 //!    Stripe 的签名负载方案：`HMAC-SHA256("<unix>.<raw_body>")`。
@@ -18,9 +18,9 @@ use axum::http::HeaderMap;
 use hmac::Hmac;
 use sha2::Sha256;
 
+mod openflow;
 mod secret;
 mod stripe;
-mod toonflow;
 
 pub(crate) type HmacSha256 = Hmac<Sha256>;
 
@@ -28,7 +28,7 @@ pub(crate) use secret::billing_secret;
 
 /// Verify the webhook signature using whichever scheme header is present.
 ///
-/// Checks `Stripe-Signature` first (more specific), then `X-Toonflow-Signature`.
+/// Checks `Stripe-Signature` first (more specific), then `X-Openflow-Signature`.
 pub(crate) fn verify_signature(
     secret: &[u8],
     body: &[u8],
@@ -37,7 +37,7 @@ pub(crate) fn verify_signature(
     if headers.contains_key("stripe-signature") {
         return stripe::verify_stripe_signature_at(secret, body, headers, secret::now_unix_secs());
     }
-    toonflow::verify_toonflow_signature(secret, body, headers)
+    openflow::verify_openflow_signature(secret, body, headers)
 }
 
 #[cfg(test)]
@@ -50,7 +50,7 @@ mod tests {
     use super::verify_signature;
     use super::HmacSha256;
 
-    fn make_toonflow_timestamped_header(secret: &[u8], body: &[u8], ts: u64) -> HeaderMap {
+    fn make_openflow_timestamped_header(secret: &[u8], body: &[u8], ts: u64) -> HeaderMap {
         let ts_str = ts.to_string();
         let mut mac = HmacSha256::new_from_slice(secret).unwrap();
         mac.update(ts_str.as_bytes());
@@ -59,11 +59,11 @@ mod tests {
         let hex = hex::encode(mac.finalize().into_bytes());
         let mut headers = HeaderMap::new();
         headers.insert(
-            "x-toonflow-signature",
+            "x-openflow-signature",
             format!("sha256={hex}").parse().unwrap(),
         );
         headers.insert(
-            "x-toonflow-timestamp",
+            "x-openflow-timestamp",
             ts_str.parse().expect("numeric timestamp header"),
         );
         headers
@@ -85,32 +85,32 @@ mod tests {
     }
 
     #[test]
-    fn toonflow_accepts_matching_header() {
+    fn openflow_accepts_matching_header() {
         let secret = b"test-secret";
         let body = br#"{"id":"evt_1","amount":100}"#;
-        let headers = make_toonflow_timestamped_header(secret, body, now_unix_secs());
+        let headers = make_openflow_timestamped_header(secret, body, now_unix_secs());
         assert!(verify_signature(secret, body, &headers).is_ok());
     }
 
     #[test]
-    fn toonflow_accepts_timestamped_signature_within_tolerance() {
+    fn openflow_accepts_timestamped_signature_within_tolerance() {
         let secret = b"test-secret";
         let body = br#"{"id":"evt_ts_ok"}"#;
         let ts = now_unix_secs();
-        let headers = make_toonflow_timestamped_header(secret, body, ts);
+        let headers = make_openflow_timestamped_header(secret, body, ts);
         assert!(verify_signature(secret, body, &headers).is_ok());
     }
 
     #[test]
-    fn toonflow_rejects_timestamped_when_ts_stale() {
+    fn openflow_rejects_timestamped_when_ts_stale() {
         let secret = b"test-secret";
         let body = br#"{"id":"evt_ts_stale"}"#;
-        let headers = make_toonflow_timestamped_header(secret, body, 1_000_000);
+        let headers = make_openflow_timestamped_header(secret, body, 1_000_000);
         assert!(verify_signature(secret, body, &headers).is_err());
     }
 
     #[test]
-    fn toonflow_timestamp_with_body_only_mac_fails() {
+    fn openflow_timestamp_with_body_only_mac_fails() {
         let secret = b"test-secret";
         let body = br#"{"id":"evt_ts_bad_mac"}"#;
         let mut mac = HmacSha256::new_from_slice(secret).unwrap();
@@ -118,18 +118,18 @@ mod tests {
         let hex = hex::encode(mac.finalize().into_bytes());
         let mut headers = HeaderMap::new();
         headers.insert(
-            "x-toonflow-signature",
+            "x-openflow-signature",
             format!("sha256={hex}").parse().unwrap(),
         );
         headers.insert(
-            "x-toonflow-timestamp",
+            "x-openflow-timestamp",
             now_unix_secs().to_string().parse().unwrap(),
         );
         assert!(verify_signature(secret, body, &headers).is_err());
     }
 
     #[test]
-    fn toonflow_rejects_missing_timestamp() {
+    fn openflow_rejects_missing_timestamp() {
         let secret = b"test-secret";
         let body = br#"{"id":"evt_missing_ts"}"#;
         let mut mac = HmacSha256::new_from_slice(secret).unwrap();
@@ -137,19 +137,19 @@ mod tests {
         let hex = hex::encode(mac.finalize().into_bytes());
         let mut headers = HeaderMap::new();
         headers.insert(
-            "x-toonflow-signature",
+            "x-openflow-signature",
             format!("sha256={hex}").parse().unwrap(),
         );
         assert!(verify_signature(secret, body, &headers).is_err());
     }
 
     #[test]
-    fn toonflow_rejects_wrong_mac() {
+    fn openflow_rejects_wrong_mac() {
         let secret = b"test-secret";
         let body = br#"{"id":"evt_1"}"#;
         let mut headers = HeaderMap::new();
         headers.insert(
-            "x-toonflow-signature",
+            "x-openflow-signature",
             "sha256=0000000000000000000000000000000000000000000000000000000000000000"
                 .parse()
                 .unwrap(),

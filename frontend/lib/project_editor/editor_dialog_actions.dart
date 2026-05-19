@@ -14,6 +14,12 @@ extension _HomePageProjectEditorDialogActions on _HomePageState {
     required TextEditingController toneCtrl,
     required TextEditingController hookCtrl,
     required TextEditingController visualCtrl,
+    required TextEditingController textModelCtrl,
+    required TextEditingController multimodalModelCtrl,
+    required TextEditingController imageModelCtrl,
+    required TextEditingController videoModelCtrl,
+    required TextEditingController voiceModelCtrl,
+    required TextEditingController voiceProfileCtrl,
     required TextEditingController brandNameCtrl,
     required TextEditingController brandPromiseCtrl,
     required TextEditingController visualMotifsCtrl,
@@ -30,11 +36,11 @@ extension _HomePageProjectEditorDialogActions on _HomePageState {
         onPressed: dialogState.saving[0]
             ? null
             : () async {
-                final ok = await showDialog<bool>(
+                final ok = await showStudioDialog<bool>(
                   context: ctx,
                   builder: (c) {
                     final dlgL10n = resolveAppLocalizationsForErrors(c);
-                    return AlertDialog(
+                    return StudioAlertDialog(
                       title: Text(dlgL10n.projectEditorDeleteProjectTitle),
                       content: Text(
                         dlgL10n.projectEditorDeleteProjectBody(p.numericId),
@@ -46,7 +52,9 @@ extension _HomePageProjectEditorDialogActions on _HomePageState {
                         ),
                         FilledButton(
                           onPressed: () => Navigator.of(c).pop(true),
-                          child: Text(dlgL10n.storyboardEditorDialogConfirmDelete),
+                          child: Text(
+                            dlgL10n.storyboardEditorDialogConfirmDelete,
+                          ),
                         ),
                       ],
                     );
@@ -62,14 +70,18 @@ extension _HomePageProjectEditorDialogActions on _HomePageState {
                   await _projectsController.loadProjects();
                   if (!mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(l10n.projectEditorDeleteProjectSnackbar)),
+                    SnackBar(
+                      content: Text(l10n.projectEditorDeleteProjectSnackbar),
+                    ),
                   );
                 } catch (e) {
                   if (ctx.mounted) {
                     setDialogState(() => dialogState.saving[0] = false);
-                    ScaffoldMessenger.of(
-                      ctx,
-                    ).showSnackBar(SnackBar(content: Text(describeUserVisibleApiError(l10n, e))));
+                    ScaffoldMessenger.of(ctx).showSnackBar(
+                      SnackBar(
+                        content: Text(describeUserVisibleApiError(l10n, e)),
+                      ),
+                    );
                   }
                 }
               },
@@ -94,6 +106,24 @@ extension _HomePageProjectEditorDialogActions on _HomePageState {
                   await updateProjectByProjectId(token, p.id, {
                     'name': nameCtrl.text.isEmpty ? null : nameCtrl.text,
                     'intro': introCtrl.text.isEmpty ? null : introCtrl.text,
+                    'textModel': textModelCtrl.text.isEmpty
+                        ? null
+                        : textModelCtrl.text,
+                    'multimodalModel': multimodalModelCtrl.text.isEmpty
+                        ? null
+                        : multimodalModelCtrl.text,
+                    'imageModel': imageModelCtrl.text.isEmpty
+                        ? null
+                        : imageModelCtrl.text,
+                    'videoModel': videoModelCtrl.text.isEmpty
+                        ? null
+                        : videoModelCtrl.text,
+                    'voiceModel': voiceModelCtrl.text.isEmpty
+                        ? null
+                        : voiceModelCtrl.text,
+                    'voiceProfile': voiceProfileCtrl.text.isEmpty
+                        ? null
+                        : voiceProfileCtrl.text,
                     'projectBrief': ProjectBriefDraft(
                       premise: premiseCtrl.text,
                       targetAudience: audienceCtrl.text,
@@ -125,9 +155,11 @@ extension _HomePageProjectEditorDialogActions on _HomePageState {
                 } catch (e) {
                   if (ctx.mounted) {
                     setDialogState(() => dialogState.saving[0] = false);
-                    ScaffoldMessenger.of(
-                      ctx,
-                    ).showSnackBar(SnackBar(content: Text(describeUserVisibleApiError(l10n, e))));
+                    ScaffoldMessenger.of(ctx).showSnackBar(
+                      SnackBar(
+                        content: Text(describeUserVisibleApiError(l10n, e)),
+                      ),
+                    );
                   }
                 }
               },

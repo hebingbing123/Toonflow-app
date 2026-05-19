@@ -2,7 +2,7 @@
 
 ## Introduction
 
-本文档定义 Toonflow 平台 Phase 1 最后两个竖切的需求:资产与生产竖切、质量与发布最小闭环竖切。这是从 Electron/Node 到 Rust+Flutter 架构重构的关键里程碑,完成后将具备完整的端到端制作流程。
+本文档定义 Openflow 平台 Phase 1 最后两个竖切的需求:资产与生产竖切、质量与发布最小闭环竖切。这是从 Electron/Node 到 Rust+Flutter 架构重构的关键里程碑,完成后将具备完整的端到端制作流程。
 
 **背景**: 当前已完成 Workspace 基础、项目立项、内容接入、改写与上游结构四个竖切。接下来需要补齐资产管理与生产工作台的完整闭环,以及质量评审与发布门禁机制。
 
@@ -14,7 +14,7 @@
 
 ## Glossary
 
-- **System**: Toonflow 平台后端服务 (Rust)
+- **System**: Openflow 平台后端服务 (Rust)
 - **Frontend**: Flutter 客户端 (Desktop + Web)
 - **Asset_Manager**: 资产管理子系统
 - **Production_Workbench**: 生产工作台子系统
@@ -51,7 +51,7 @@
 4. WHEN 任务 worker 处理出图请求, THE System SHALL 调用配置的 LLM provider (OpenAI/compatible) 并将结果写入 `app_asset_image`
 5. WHEN 用户轮询资产图片状态, THE System SHALL 返回当前 `state` (待生成/生成中/已完成/生成失败) 和可选的 `file_path`
 6. WHEN 用户取消出图任务, THE System SHALL 将 queued/running 状态的任务标记为 cancelled 并更新 `app_asset_image.state` 为生成失败
-7. IF 配置了 `TOONFLOW_LOCAL_ASSET_IMAGE_DIR`, THEN THE System SHALL 将生成的图片保存为本地 PNG 文件 (路径格式: `{user}/{image_id}.png`)
+7. IF 配置了 `OPENFLOW_LOCAL_ASSET_IMAGE_DIR`, THEN THE System SHALL 将生成的图片保存为本地 PNG 文件 (路径格式: `{user}/{image_id}.png`)
 8. IF 未配置本地存储目录, THEN THE System SHALL 将 provider 返回的临时 URL 保存到 `file_path`
 9. WHEN 用户访问 `GET /api/v1/projects/{project_id}/assets/{aid}/images/{id}/file`, THE System SHALL 返回图片内容 (本地文件返回 200 + image/png, https URL 返回 307 重定向)
 
@@ -159,7 +159,7 @@
 
 #### Acceptance Criteria
 
-1. WHEN 资产与生产竖切完成, THE System SHALL 更新 `docs/plans/toonflow-platform-progress.md` 中的状态为 `completed`
+1. WHEN 资产与生产竖切完成, THE System SHALL 更新 `docs/plans/openflow-platform-progress.md` 中的状态为 `completed`
 2. WHEN 质量与发布竖切完成, THE System SHALL 更新进度文档中的状态为 `completed`
 3. WHEN 每个竖切完成, THE System SHALL 记录对应的 commit hash
 4. WHEN 每个竖切完成, THE System SHALL 记录已验证的测试列表

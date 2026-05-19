@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openflow_app/l10n/app_localizations.dart';
 import 'package:openflow_app/l10n/app_localizations_zh.dart';
+import 'package:openflow_app/platform/studio_load_state.dart';
 import 'package:openflow_app/quality_reviews/controller.dart';
+import 'package:openflow_app/quality_reviews/field_styling.dart';
 import 'package:openflow_app/quality_reviews/section.dart';
 import 'package:openflow_app/rust_api.dart';
 
@@ -95,6 +97,43 @@ void main() {
 
     expect(find.text(zh.qualityReviewsCompatibilityCheck), findsNothing);
     expect(find.text(zh.qualityReviewsRunReadOnlyRegressionCheck), findsNothing);
+  });
+
+  testWidgets('product studio shows loaded-empty footer and aligned lookup row', (
+    WidgetTester tester,
+  ) async {
+    final controller = buildController(qualityReviews: const []);
+    controller.qualityReviewsLoadState = StudioLoadState.success;
+    controller.qualityDashboardLoadState = StudioLoadState.success;
+    addTearDown(controller.dispose);
+
+    await tester.binding.setSurfaceSize(const Size(900, 720));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      _buildTestApp(
+        QualityReviewsSection(
+          studioPresentation: true,
+          accessToken: 'token',
+          controller: controller,
+          initialProjectNumericId: 9,
+          platformConfig: _testPlatformConfig,
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text(zh.qualityReviewsEmptyForCurrentFilters), findsOneWidget);
+    expect(find.text(zh.qualityReviewsCount(0)), findsOneWidget);
+    expect(find.text(zh.qualityReviewsSummaryNotLoaded), findsNothing);
+
+    final row = tester.widget<Row>(
+      find.descendant(
+        of: find.byType(QualityReviewIdLookupRow),
+        matching: find.byType(Row),
+      ),
+    );
+    expect(row.crossAxisAlignment, CrossAxisAlignment.end);
   });
 
   testWidgets('quality workbench dialog shows seeded controls', (

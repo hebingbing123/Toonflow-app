@@ -267,6 +267,7 @@ extension _ShortVideoSpaceSectionProductionExtension
           _projectAssetsOverview = null;
           _shortVideoAssembly = null;
           _shortVideoExportCheck = null;
+          _latestSuccessfulExport = null;
           _candidateCompareRows = const <ProductionStoryboardItemV1>[];
           _candidateCompareReviews = const <QualityReview>[];
           _publishMatrix = null;
@@ -297,6 +298,7 @@ extension _ShortVideoSpaceSectionProductionExtension
       _projectAssetsOverview = null;
       _shortVideoAssembly = null;
       _shortVideoExportCheck = null;
+      _latestSuccessfulExport = null;
       _candidateCompareRows = const <ProductionStoryboardItemV1>[];
       _candidateCompareReviews = const <QualityReview>[];
       _publishMatrix = null;
@@ -482,6 +484,7 @@ extension _ShortVideoSpaceSectionProductionExtension
         unawaited(_refreshActiveAssemblyJob());
       }
       unawaited(_refreshScopedJobCounts());
+      unawaited(_refreshLatestSuccessfulExport());
       await _loadDraftsAndVersions();
       await _loadProjectCharacters();
     } catch (_) {
@@ -501,6 +504,7 @@ extension _ShortVideoSpaceSectionProductionExtension
         _projectAssetsOverview = null;
         _shortVideoAssembly = null;
         _shortVideoExportCheck = null;
+        _latestSuccessfulExport = null;
         _candidateCompareRows = const <ProductionStoryboardItemV1>[];
         _candidateCompareReviews = const <QualityReview>[];
         _publishMatrix = null;

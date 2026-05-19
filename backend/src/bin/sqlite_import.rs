@@ -3,7 +3,7 @@
 //! 用法：
 //! ```text
 //! SQLITE_PATH=/path/to/db2.sqlite DATABASE_URL=postgresql://... \
-//!   cargo run --bin toonflow-sqlite-import --release
+//!   cargo run --bin openflow-sqlite-import --release
 //! ```
 //! 可选：`IMPORT_STAGING_TRUNCATE=1` 首先执行 `TRUNCATE import_staging.snapshot`。
 

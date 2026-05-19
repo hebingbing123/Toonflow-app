@@ -5,18 +5,23 @@ import 'package:flutter/material.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../config.dart';
+import '../design_system/components/studio_empty_state.dart';
 import '../design_system/components/studio_pane_header.dart';
+import '../design_system/components/studio_pane_scaffold.dart';
 import '../design_system/components/studio_text_styles.dart';
+import '../design_system/ix/studio_api_error_callout.dart';
+import '../platform/studio_load_state.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
 import 'workbench_view.dart';
 import 'previews.dart';
 import '../rust_api.dart';
 import 'support.dart';
+import 'package:openflow_app/design_system/components/studio_dialog_shell.dart';
 
 part 'section_workbench.dart';
 part 'section_workbench_controllers.dart';
 
-class TaskCenterSection extends StatelessWidget {
+class TaskCenterSection extends StatefulWidget {
   const TaskCenterSection({
     super.key,
     required this.accessToken,
@@ -34,6 +39,8 @@ class TaskCenterSection extends StatelessWidget {
     required this.taskDetailNumericIdLine,
     required this.taskDetailUuidLine,
     required this.taskApiJobs,
+    this.taskApiLoadState = StudioLoadState.initial,
+    this.taskApiLastError,
     required this.onTaskDetailJobIdChanged,
     required this.onLoadTaskProjects,
     required this.onLoadTaskCategories,
@@ -61,6 +68,8 @@ class TaskCenterSection extends StatelessWidget {
   final String? taskDetailNumericIdLine;
   final String? taskDetailUuidLine;
   final List<JobRow>? taskApiJobs;
+  final StudioLoadState taskApiLoadState;
+  final Object? taskApiLastError;
   final ValueChanged<String> onTaskDetailJobIdChanged;
   final VoidCallback onLoadTaskProjects;
   final VoidCallback onLoadTaskCategories;
@@ -73,29 +82,94 @@ class TaskCenterSection extends StatelessWidget {
   final void Function(TaskCenterDomainDeepLink link)? onNavigateDomainDeepLink;
   final bool studioPresentation;
 
+  @override
+  State<TaskCenterSection> createState() => _TaskCenterSectionState();
+}
+
+class _TaskCenterSectionState extends State<TaskCenterSection> {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.studioPresentation &&
+        widget.taskApiLoadState == StudioLoadState.initial) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        widget.onLoadTaskApi();
+      });
+    }
+  }
+
   Future<void> _openTaskWorkbench(BuildContext context) async {
     final l10n = resolveAppLocalizationsForErrors(context);
-    final token = accessToken;
+    final token = widget.accessToken;
     if (token == null || token.isEmpty) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(l10n.taskCenterErrNotLoggedIn)));
       return;
     }
-    await showDialog<void>(
+    await showStudioDialog<void>(
       context: context,
       builder: (dialogCtx) => _TaskCenterWorkbenchDialog(
         accessToken: token,
-        initialProjectNumericId: initialProjectNumericId,
-        initialProjectUuid: initialProjectUuid,
-        initialProjects: taskProjects ?? const <TaskCenterProjectItem>[],
-        initialTaskSummary: taskApiSummaryLine,
-        initialCategoriesSummary: taskCategoriesLine,
-        initialNumericIdTaskDetail: taskDetailNumericIdLine,
-        initialUuidDetails: taskDetailUuidLine,
-        initialJobs: taskApiJobs ?? const <JobRow>[],
-        onNavigateExportJobDeepLink: onNavigateExportJobDeepLink,
-        onNavigateDomainDeepLink: onNavigateDomainDeepLink,
+        initialProjectNumericId: widget.initialProjectNumericId,
+        initialProjectUuid: widget.initialProjectUuid,
+        initialProjects: widget.taskProjects ?? const <TaskCenterProjectItem>[],
+        initialTaskSummary: widget.taskApiSummaryLine,
+        initialCategoriesSummary: widget.taskCategoriesLine,
+        initialNumericIdTaskDetail: widget.taskDetailNumericIdLine,
+        initialUuidDetails: widget.taskDetailUuidLine,
+        initialJobs: widget.taskApiJobs ?? const <JobRow>[],
+        onNavigateExportJobDeepLink: widget.onNavigateExportJobDeepLink,
+        onNavigateDomainDeepLink: widget.onNavigateDomainDeepLink,
+      ),
+    );
+  }
+
+  Widget _buildStudioMainBody(BuildContext context) {
+    final l10n = resolveAppLocalizationsForErrors(context);
+    if (widget.taskApiLoadState == StudioLoadState.error) {
+      return const SizedBox.shrink();
+    }
+    if (widget.taskApiLoadState == StudioLoadState.initial ||
+        widget.taskApiLoadState == StudioLoadState.loading ||
+        widget.loadingTaskApi) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    final jobs = widget.taskApiJobs ?? const <JobRow>[];
+    if (jobs.isEmpty) {
+      return Center(
+        child: StudioEmptyState(
+          title: l10n.taskCenterJobsEmpty,
+          subtitle: l10n.taskCenterSectionIntro,
+          icon: Icons.cloud_download_outlined,
+        ),
+      );
+    }
+    return SingleChildScrollView(
+      child: TaskCenterJobsPreview(
+        jobs: jobs,
+        showCountHeader: false,
+        onSelectTaskJob: widget.onSelectTaskJob,
+      ),
+    );
+  }
+
+  Widget? _buildStudioFooter(BuildContext context) {
+    final l10n = resolveAppLocalizationsForErrors(context);
+    if (widget.taskApiLoadState == StudioLoadState.initial ||
+        widget.taskApiLoadState == StudioLoadState.loading ||
+        widget.taskApiLoadState == StudioLoadState.error) {
+      return null;
+    }
+    final count = widget.taskApiJobs?.length ?? 0;
+    return Padding(
+      padding: const EdgeInsets.only(top: 12, bottom: 8),
+      child: Center(
+        child: Text(
+          l10n.taskCenterJobsCount(count),
+          style: Theme.of(context).textTheme.labelLarge,
+        ),
       ),
     );
   }
@@ -104,100 +178,92 @@ class TaskCenterSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = resolveAppLocalizationsForErrors(context);
     final muted = studioMutedTextColor(context);
-    final width = MediaQuery.sizeOf(context).width;
-    final useWideSplitLayout = studioPresentation && width >= 1500;
-    final projectSummary = taskProjects == null
+    final projectSummary = widget.taskProjects == null
         ? l10n.taskCenterProjectsNotLoaded
-        : summarizeTaskProjects(l10n, taskProjects!);
-    final taskSummary = taskApiJobs == null
-        ? (taskApiSummaryLine ?? l10n.taskCenterTaskListNotLoaded)
-        : summarizeTaskJobs(l10n, taskApiJobs!);
-    final summaryPreview = TaskCenterSummaryPreview(
-      mutedColor: muted,
-      projectSummary: projectSummary,
-      taskSummary: taskSummary,
-      taskCategoriesLine: taskCategoriesLine,
-    );
-    final compatibilityPanel = TaskCenterCompatibilityPanel(
-      mutedColor: muted,
-      loadingTaskProjects: loadingTaskProjects,
-      loadingTaskCategories: loadingTaskCategories,
-      loadingTaskApi: loadingTaskApi,
-      loadingTaskDetailsByNumericId: loadingTaskDetailsByNumericId,
-      loadingTaskDetailsUuid: loadingTaskDetailsUuid,
-      taskDetailJobIdController: taskDetailJobIdController,
-      onTaskDetailJobIdChanged: onTaskDetailJobIdChanged,
-      onLoadTaskProjects: onLoadTaskProjects,
-      onLoadTaskCategories: onLoadTaskCategories,
-      onLoadTaskApi: onLoadTaskApi,
-      onProbeTaskDetailByNumericId: onProbeTaskDetailByNumericId,
-      onProbeTaskDetailUuid: onProbeTaskDetailUuid,
-    );
+        : summarizeTaskProjects(l10n, widget.taskProjects!);
+    final taskSummary = widget.taskApiLoadState == StudioLoadState.error
+        ? null
+        : widget.taskApiJobs == null
+        ? (widget.taskApiSummaryLine ?? l10n.taskCenterTaskListNotLoaded)
+        : summarizeTaskJobs(l10n, widget.taskApiJobs!);
+    final Widget summaryBody = widget.taskApiLoadState == StudioLoadState.error
+        ? const SizedBox.shrink()
+        : TaskCenterSummaryPreview(
+            mutedColor: muted,
+            projectSummary: projectSummary,
+            taskSummary: taskSummary ?? l10n.taskCenterTaskListNotLoaded,
+            taskCategoriesLine: widget.taskCategoriesLine,
+          );
+
+    final header = <Widget>[
+      const SizedBox(height: 8),
+      StudioPaneHeader(
+        title: l10n.productNavTasks,
+        subtitle: l10n.taskCenterSectionIntro,
+        showBack: widget.studioPresentation,
+        trailing: RiskyOperationConfirmPrefsOverflowMenu(
+          tooltip: l10n.taskCenterLocalClientPrefs,
+        ),
+      ),
+      const SizedBox(height: 12),
+      TaskCenterActionsBar(
+        loadingTaskApi: widget.loadingTaskApi,
+        onOpenWorkbench: () => _openTaskWorkbench(context),
+        onLoadTaskApi: widget.onLoadTaskApi,
+      ),
+    ];
+
+    if (widget.studioPresentation) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          ...header,
+          const SizedBox(height: 8),
+          if (widget.taskApiLoadState == StudioLoadState.error &&
+              widget.taskApiLastError != null)
+            StudioApiErrorCallout(
+              error: widget.taskApiLastError!,
+              onRetry: widget.onLoadTaskApi,
+            )
+          else
+            StudioPaneScaffold(
+              body: _buildStudioMainBody(context),
+              footer: _buildStudioFooter(context),
+            ),
+        ],
+      );
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+      children: <Widget>[
+        ...header,
         const SizedBox(height: 8),
-        StudioPaneHeader(
-          title: l10n.productNavTasks,
-          subtitle: l10n.taskCenterSectionIntro,
-          showBack: studioPresentation,
-          trailing: RiskyOperationConfirmPrefsOverflowMenu(
-            tooltip: l10n.taskCenterLocalClientPrefs,
-          ),
-        ),
-        const SizedBox(height: 12),
-        if (useWideSplitLayout)
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Expanded(
-                flex: 7,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    TaskCenterActionsBar(
-                      loadingTaskApi: loadingTaskApi,
-                      onOpenWorkbench: () => _openTaskWorkbench(context),
-                      onLoadTaskApi: onLoadTaskApi,
-                    ),
-                    const SizedBox(height: 14),
-                    summaryPreview,
-                    if (!studioPresentation) ...<Widget>[
-                      const SizedBox(height: 12),
-                      TaskCenterDetailsPreview(
-                        taskDetailNumericIdLine: taskDetailNumericIdLine,
-                        taskDetailUuidLine: taskDetailUuidLine,
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              const SizedBox(width: 28),
-              Expanded(flex: 5, child: compatibilityPanel),
-            ],
+        if (widget.taskApiLoadState == StudioLoadState.error &&
+            widget.taskApiLastError != null)
+          StudioApiErrorCallout(
+            error: widget.taskApiLastError!,
+            onRetry: widget.onLoadTaskApi,
           )
-        else ...<Widget>[
-          TaskCenterActionsBar(
-            loadingTaskApi: loadingTaskApi,
-            onOpenWorkbench: () => _openTaskWorkbench(context),
-            onLoadTaskApi: onLoadTaskApi,
-          ),
-          const SizedBox(height: 8),
-          summaryPreview,
-          const SizedBox(height: 8),
-          compatibilityPanel,
-        ],
-        if (!studioPresentation)
-          TaskCenterDetailsPreview(
-            taskDetailNumericIdLine: taskDetailNumericIdLine,
-            taskDetailUuidLine: taskDetailUuidLine,
-          ),
-        if (taskApiJobs != null) ...[
+        else if (widget.taskApiLoadState == StudioLoadState.initial &&
+            widget.taskApiJobs == null)
+          StudioEmptyState(
+            title: l10n.taskCenterTaskListNotLoaded,
+            icon: Icons.cloud_download_outlined,
+            actionLabel: l10n.taskCenterRefreshSummary,
+            onAction: widget.onLoadTaskApi,
+          )
+        else
+          summaryBody,
+        TaskCenterDetailsPreview(
+          taskDetailNumericIdLine: widget.taskDetailNumericIdLine,
+          taskDetailUuidLine: widget.taskDetailUuidLine,
+        ),
+        if (widget.taskApiJobs != null) ...<Widget>[
           const SizedBox(height: 12),
           TaskCenterJobsPreview(
-            jobs: taskApiJobs!,
-            onSelectTaskJob: onSelectTaskJob,
+            jobs: widget.taskApiJobs!,
+            onSelectTaskJob: widget.onSelectTaskJob,
           ),
         ],
       ],

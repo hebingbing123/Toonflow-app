@@ -29,6 +29,7 @@ class StudioStepProgressRing extends StatelessWidget {
           completed: done,
           total: 6,
           activeColor: tokens.primary,
+          accentColor: tokens.accent,
           trackColor: tokens.borderSubtle,
           strokeWidth: strokeWidth,
         ),
@@ -52,6 +53,7 @@ class _RingPainter extends CustomPainter {
     required this.completed,
     required this.total,
     required this.activeColor,
+    required this.accentColor,
     required this.trackColor,
     required this.strokeWidth,
   });
@@ -59,6 +61,7 @@ class _RingPainter extends CustomPainter {
   final int completed;
   final int total;
   final Color activeColor;
+  final Color accentColor;
   final Color trackColor;
   final double strokeWidth;
 
@@ -74,7 +77,9 @@ class _RingPainter extends CustomPainter {
         ..style = PaintingStyle.stroke
         ..strokeWidth = strokeWidth
         ..strokeCap = StrokeCap.round
-        ..color = i < completed ? activeColor : trackColor;
+        ..color = i < completed
+            ? (i.isEven ? activeColor : accentColor)
+            : trackColor;
       canvas.drawArc(
         Rect.fromCircle(center: center, radius: radius),
         startAngle + i * segment + 0.08,
@@ -87,6 +92,9 @@ class _RingPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _RingPainter oldDelegate) {
-    return oldDelegate.completed != completed;
+    return oldDelegate.completed != completed ||
+        oldDelegate.activeColor != activeColor ||
+        oldDelegate.accentColor != accentColor ||
+        oldDelegate.trackColor != trackColor;
   }
 }
