@@ -1,9 +1,9 @@
 <p>
-  <a href="https://github.com/HBAI-Ltd/Toonflow-app">
+  <a href="https://github.com/HBAI-Ltd/Openflow-app">
     <img src="https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white" alt="GitHub" />
   </a>
   &nbsp;|&nbsp;
-  <a href="https://gitee.com/HBAI-Ltd/Toonflow-app">
+  <a href="https://gitee.com/HBAI-Ltd/Openflow-app">
     <img src="https://img.shields.io/badge/Gitee-C71D23?style=flat-square&logo=gitee&logoColor=white" alt="Gitee" />
   </a>
 </p>
@@ -27,14 +27,14 @@
     </b>
   </p>
   <p align="center">
-    <a href="https://github.com/HBAI-Ltd/Toonflow-app/stargazers">
-      <img src="https://img.shields.io/github/stars/HBAI-Ltd/Toonflow-app?style=for-the-badge&logo=github" alt="Stars Badge" />
+    <a href="https://github.com/HBAI-Ltd/Openflow-app/stargazers">
+      <img src="https://img.shields.io/github/stars/HBAI-Ltd/Openflow-app?style=for-the-badge&logo=github" alt="Stars Badge" />
     </a>
     <a href="https://www.apache.org/licenses/LICENSE-2.0" target="_blank">
       <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=for-the-badge" alt="Apache-2.0 License Badge" />
     </a>
-    <a href="https://github.com/HBAI-Ltd/Toonflow-app/releases">
-      <img alt="release" src="https://img.shields.io/github/v/release/HBAI-Ltd/Toonflow-app?style=for-the-badge" />
+    <a href="https://github.com/HBAI-Ltd/Openflow-app/releases">
+      <img alt="release" src="https://img.shields.io/github/v/release/HBAI-Ltd/Openflow-app?style=for-the-badge" />
     </a>
   </p>
   
@@ -85,7 +85,7 @@ OpenFlow is an AI short drama production platform based on **Harness Engineering
 ### Directory Structure
 
 ```
-Toonflow-app/
+Openflow-app/
 ├── backend/              # Rust backend service
 │   ├── src/             # Source code
 │   ├── data/skills/     # Skill Markdown files
@@ -169,8 +169,8 @@ yarn --version
 #### 1. Clone Repository
 
 ```bash
-git clone https://github.com/HBAI-Ltd/Toonflow-app.git
-cd Toonflow-app
+git clone https://github.com/HBAI-Ltd/Openflow-app.git
+cd Openflow-app
 ```
 
 #### 2. Start Database
@@ -195,7 +195,7 @@ cp .env.example .env
 
 ```bash
 cd backend
-cargo run --bin toonflow-server
+cargo run --bin openflow-server
 ```
 
 Service starts listening on `http://127.0.0.1:8666`
@@ -243,7 +243,7 @@ See [`backend/README.md`](../backend/README.md)
 - `DATABASE_URL`: PostgreSQL connection string
 - `SUPABASE_JWT_SECRET`: JWT signing key
 - `OPENAI_API_KEY` / `LLM_API_KEY`: LLM API key
-- `TOONFLOW_LOCAL_ASSET_IMAGE_DIR`: Local asset image storage directory
+- `OPENFLOW_LOCAL_ASSET_IMAGE_DIR`: Local asset image storage directory
 
 **Common Commands**:
 ```bash
@@ -319,10 +319,10 @@ supabase db push   # Production
 
 | Repository | Description | Links |
 |------------|-------------|-------|
-| **Toonflow-app** | Main repository (this repo) | [GitHub](https://github.com/HBAI-Ltd/Toonflow-app) / [Gitee](https://gitee.com/HBAI-Ltd/Toonflow-app) |
-| **Toonflow-web** | Legacy Web frontend (historical reference) | [GitHub](https://github.com/HBAI-Ltd/Toonflow-web) / [Gitee](https://gitee.com/HBAI-Ltd/Toonflow-web) |
+| **Openflow-app** | Main repository (this repo) | [GitHub](https://github.com/HBAI-Ltd/Openflow-app) / [Gitee](https://gitee.com/HBAI-Ltd/Openflow-app) |
+| **Openflow-web** | Legacy Web frontend (historical reference) | [GitHub](https://github.com/HBAI-Ltd/Openflow-web) / [Gitee](https://gitee.com/HBAI-Ltd/Openflow-web) |
 
-> 💡 **Tip**: Current main client is in **`frontend/`** (Flutter). **Toonflow-web** is a legacy stack reference repository.
+> 💡 **Tip**: Current main client is in **`frontend/`** (Flutter). **Openflow-web** is a legacy stack reference repository.
 
 ---
 
@@ -367,7 +367,7 @@ Complete terms in [LICENSE](../LICENSE) file.
 
 ## ⭐️ Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=HBAI-Ltd/Toonflow-app&type=timeline&legend=top-left)](https://www.star-history.com/#HBAI-Ltd/Toonflow-app&type=timeline&legend=top-left)
+[![Star History Chart](https://api.star-history.com/svg?repos=HBAI-Ltd/Openflow-app&type=timeline&legend=top-left)](https://www.star-history.com/#HBAI-Ltd/Openflow-app&type=timeline&legend=top-left)
 
 ---
 

@@ -29,7 +29,7 @@
    cd backend
    supabase db reset   # 或确保已执行含 import_staging 的迁移
    SQLITE_PATH=/path/to/db2.sqlite DATABASE_URL=postgresql://... \
-     cargo run --bin toonflow-sqlite-import --release
+     cargo run --bin openflow-sqlite-import --release
    ```
    可选：导入前清空 staging：`LEGACY_IMPORT_TRUNCATE=1`。表名白名单见 `src/bin/sqlite_import.rs`（与 `initDB` 一致）。**Blob** 列以 `base64:` 前缀写入字符串。
 
