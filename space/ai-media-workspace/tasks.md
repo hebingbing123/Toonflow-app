@@ -38,6 +38,8 @@
 - [x] C0.1. 在仓库根目录建立与 `backend/`、`frontend/` 同级的 `rust_core/` workspace
 - [x] C0.2. 为 `timeline`、`image_doc`、`workflow` 建立最小 crate 骨架
 - [x] C0.3. 在 AI Media Workspace 文档中明确 `rust_core/` 是媒体编辑内核目录
+- [x] C0.4. 增加 `openflow_core_bridge` 作为 Flutter Desktop 的单一 Rust bridge 入口
+- [x] C0.5. 在 `frontend/` 建立 native bridge facade 和生成目录约定
 
 ## D. 图片编辑 MVP
 

@@ -1,5 +1,6 @@
 [workspace]
 members = [
+  "crates/openflow_core_bridge",
   "crates/media_timeline",
   "crates/media_image_doc",
   "crates/media_workflow",

@@ -44,6 +44,7 @@ dependencies:
   video_player: ^2.9.5
   audioplayers: ^6.1.0
   flutter_list_view: ^1.1.29
+  flutter_rust_bridge: ^2.12.0
   shared_preferences: ^2.3.4
   logger: ^2.5.0
   path_provider: ^2.1.5

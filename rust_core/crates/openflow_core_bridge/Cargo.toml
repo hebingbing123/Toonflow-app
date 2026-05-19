@@ -1,0 +1,17 @@
+[package]
+name = "openflow_core_bridge"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+description = "Flutter bridge entrypoints for Openflow Rust Core"
+
+[lib]
+crate-type = ["lib", "cdylib", "staticlib"]
+
+[dependencies]
+media_image_doc = { path = "../media_image_doc" }
+media_timeline = { path = "../media_timeline" }
+media_workflow = { path = "../media_workflow" }
+serde.workspace = true
+uuid.workspace = true

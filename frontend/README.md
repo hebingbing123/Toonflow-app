@@ -54,6 +54,25 @@ flutter run -d macos \
 
 该代理地址会接管 `fonts.gstatic.com` / `fonts.googleapis.com` 请求，并保留原始路径与查询参数，适合接到公司内网镜像或国内可达的反向代理。
 
+## Desktop Rust Core bridge
+
+桌面端后续通过 `flutter_rust_bridge` 直接调用根目录同级的 `rust_core/`。
+
+- Rust 入口 crate：`../rust_core/crates/openflow_core_bridge`
+- Flutter 门面：`lib/native_bridge/openflow_native_bridge.dart`
+- 生成输出目录：`lib/native_bridge/generated/`
+
+当前已经引入 `flutter_rust_bridge` runtime 依赖，并把 bridge 入口与生成目录固定下来。首次接原生能力前，先安装 codegen：
+
+```bash
+cargo install flutter_rust_bridge_codegen
+flutter_rust_bridge_codegen generate \
+  --rust-input ../rust_core/crates/openflow_core_bridge/src/lib.rs \
+  --dart-output lib/native_bridge/generated/openflow_core_bridge.dart
+```
+
+这一步完成后，再把生成绑定接到手写 facade 上，而不是让产品代码直接 import 生成文件。
+
 首页提供：`GET /api/v1/health`、邮箱密码登录/注册、`GET /api/v1/me`（Bearer）、`WebSocket` 探针（`?access_token=` + `agent.script.attach` + `agent.chat.send`，以及 **`harness.tool.invoke`**：`echo`、**`skills.read`**（使用上方 Skill path 输入框，默认同 REST 示例路径））。
 
 ## 功能开关（Feature Flags）

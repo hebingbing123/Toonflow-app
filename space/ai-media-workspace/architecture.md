@@ -105,6 +105,7 @@ Rust Core 负责：
 
 目录上采用仓库根同级 `rust_core/`，初始按 crate 拆分为：
 
+- `openflow_core_bridge`
 - `media_timeline`
 - `media_image_doc`
 - `media_workflow`

@@ -23,9 +23,24 @@
 
 ## 当前 crate
 
+- `openflow_core_bridge`：Flutter Desktop 直接对接的桥接入口 crate
 - `media_timeline`：视频粗剪 / 时间线文档基础模型
 - `media_image_doc`：图片图层 / 蒙版 / 变换基础模型
 - `media_workflow`：AI 工作流节点、依赖和运行状态基础模型
+
+## Flutter bridge 约定
+
+桌面端优先采用 `flutter_rust_bridge`。
+
+- Rust 入口：`rust_core/crates/openflow_core_bridge/src/lib.rs`
+- Dart 入口目录：`frontend/lib/native_bridge/`
+- 生成输出目录：`frontend/lib/native_bridge/generated/`
+
+建议流程：
+
+1. 在 Flutter 侧引入 `flutter_rust_bridge`
+2. 用 `flutter_rust_bridge_codegen generate` 从 `openflow_core_bridge` 生成 Dart glue
+3. 让 Flutter 只依赖 `openflow_core_bridge`，不要直接跨进 `media_*` crate
 
 ## 下一步建议
 
