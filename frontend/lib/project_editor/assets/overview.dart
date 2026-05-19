@@ -65,7 +65,10 @@ class ProjectAssetsOverviewView extends StatelessWidget {
           ),
           const SizedBox(height: 6),
         ],
-        Text(summarizeProjectAssetRows(model.visibleAssets), style: bodySmall),
+        Text(
+          summarizeProjectAssetRows(model.visibleAssets, l10n: l10n),
+          style: bodySmall,
+        ),
         if (model.filterScriptNumericId != null) ...[
           const SizedBox(height: 6),
           if (model.assetsScriptFilterLoading)
@@ -78,6 +81,7 @@ class ProjectAssetsOverviewView extends StatelessWidget {
               summarizeScriptScopedAssets(
                 model.filterScriptNumericId,
                 model.assetsForScript!,
+                l10n: l10n,
               ),
               style: bodySmall,
             )

@@ -18,7 +18,7 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeVendorAssets
       ),
     );
     _expectProbeStatus(
-      label: 'POST settings/vendors/update',
+      label: _probeHttpLabel('POST settings/vendors/update'),
       status: vendorUpdate.status,
       accepted: const [200, 503],
     );
@@ -28,7 +28,7 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeVendorAssets
       () => postSettingsVendorsEnableV1(token, id: vendorId, enable: 1),
     );
     _expectProbeStatus(
-      label: 'POST settings/vendors/enable',
+      label: _probeHttpLabel('POST settings/vendors/enable'),
       status: vendorEnable.status,
       accepted: const [200, 503],
     );
@@ -42,7 +42,7 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeVendorAssets
       ),
     );
     _expectProbeStatus(
-      label: 'POST settings/vendors/update-code',
+      label: _probeHttpLabel('POST settings/vendors/update-code'),
       status: vendorUpdateCode.status,
       accepted: const [200, 503],
     );
@@ -55,7 +55,7 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeVendorAssets
       ),
     );
     _expectProbeStatus(
-      label: 'POST settings/vendors/code-from-link',
+      label: _probeHttpLabel('POST settings/vendors/code-from-link'),
       status: vendorFromLink.status,
       accepted: const [200, 503],
     );
@@ -71,7 +71,7 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeVendorAssets
       ),
     );
     _expectProbeStatus(
-      label: 'POST settings/vendors/credential',
+      label: _probeHttpLabel('POST settings/vendors/credential'),
       status: credentialStore.status,
       accepted: const [200, 501, 503],
     );
@@ -81,7 +81,7 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeVendorAssets
       () => getSettingsVendorCredentialV1(token, vendorId: credentialVendorId),
     );
     _expectProbeStatus(
-      label: 'GET settings/vendors/credential/{vendorId}',
+      label: _probeHttpLabel('GET settings/vendors/credential/{vendorId}'),
       status: credentialGet.status,
       accepted: const [200, 404, 503],
     );
@@ -92,7 +92,7 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeVendorAssets
           deleteSettingsVendorCredentialV1(token, vendorId: credentialVendorId),
     );
     _expectProbeStatus(
-      label: 'DELETE settings/vendors/credential/{vendorId}',
+      label: _probeHttpLabel('DELETE settings/vendors/credential/{vendorId}'),
       status: credentialDelete.status,
       accepted: const [200, 404, 503],
     );
@@ -102,7 +102,7 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeVendorAssets
       () => getSettingsVendorCredentialV1(token, vendorId: credentialVendorId),
     );
     _expectProbeStatus(
-      label: 'GET settings/vendors/credential/{vendorId} after delete',
+      label: _probeHttpLabel('GET settings/vendors/credential/{vendorId} after delete'),
       status: credentialGetAfterDelete.status,
       accepted: const [404, 503],
     );
@@ -112,7 +112,7 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeVendorAssets
       () => postSettingsVendorsDeleteV1(token, id: vendorId),
     );
     _expectProbeStatus(
-      label: 'POST settings/vendors/delete',
+      label: _probeHttpLabel('POST settings/vendors/delete'),
       status: vendorDelete.status,
       accepted: const [200, 404, 503],
     );
@@ -150,7 +150,7 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeVendorAssets
             describe: 'd',
           );
     _expectProbeStatus(
-      label: 'POST assets-generate/polish-prompt',
+      label: _probeHttpLabel('POST assets-generate/polish-prompt'),
       status: polish,
       accepted: const [200, 404, 429, 503],
     );
@@ -173,7 +173,7 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeVendorAssets
             ],
           );
     _expectProbeStatus(
-      label: 'POST assets-generate/batch-generate',
+      label: _probeHttpLabel('POST assets-generate/batch-generate'),
       status: batchGenerate,
       accepted: const [200, 404, 429, 503],
     );
@@ -194,7 +194,7 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeVendorAssets
             ],
           );
     _expectProbeStatus(
-      label: 'POST assets-generate/batch-polish',
+      label: _probeHttpLabel('POST assets-generate/batch-polish'),
       status: batchPolish,
       accepted: const [200, 404, 429, 503],
     );
@@ -205,7 +205,7 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeVendorAssets
       numericImageId: 1,
     );
     _expectProbeStatus(
-      label: 'POST assets-generate/cancel-generate',
+      label: _probeHttpLabel('POST assets-generate/cancel-generate'),
       status: cancelGenerate,
       accepted: const [200, 503],
     );

@@ -180,7 +180,7 @@ Future<void> refreshProjectAssetsWorkbench({
     onStatusLineChanged(
       refreshed.isEmpty
           ? l10n.projectEditorAssetsWorkbenchNoAssetsYet
-          : summarizeProjectAssetRows(refreshed),
+          : summarizeProjectAssetRows(refreshed, l10n: l10n),
     );
   });
 }

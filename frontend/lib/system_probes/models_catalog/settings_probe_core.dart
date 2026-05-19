@@ -30,7 +30,7 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeCore
       id: '1',
     );
     _expectProbeStatus(
-      label: 'POST vendors/model-test',
+      label: _probeHttpLabel('POST vendors/model-test'),
       status: modelTest,
       accepted: const [200, 429, 503],
     );
@@ -40,7 +40,7 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeCore
         ? 404
         : await postScriptAgentGetPlanDataV1(token, projectId: projectId);
     _expectProbeStatus(
-      label: 'POST script-agent/get-plan-data',
+      label: _probeHttpLabel('POST script-agent/get-plan-data'),
       status: scriptAgentGetPlan,
       accepted: const [200, 404, 503],
     );
@@ -59,7 +59,7 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeCore
             prompt: 'probe',
           );
     _expectProbeStatus(
-      label: 'POST assets-generate/generate',
+      label: _probeHttpLabel('POST assets-generate/generate'),
       status: generate,
       accepted: const [200, 404, 429, 503],
     );
@@ -69,7 +69,7 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeCore
       () => postSettingsVendorsAddV1(token, tsCode: 'export {}'),
     );
     _expectProbeStatus(
-      label: 'POST settings/vendors/add',
+      label: _probeHttpLabel('POST settings/vendors/add'),
       status: vendorAdd.status,
       accepted: const [200, 503],
     );
@@ -77,7 +77,7 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeCore
 
     final deleteAll = await postSettingsDangerDeleteAllDataV1(token);
     _expectProbeStatus(
-      label: 'POST settings/danger/delete-all-data',
+      label: _probeHttpLabel('POST settings/danger/delete-all-data'),
       status: deleteAll,
       accepted: const [501],
     );
@@ -85,7 +85,7 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeCore
 
     final clearDb = await postSettingsDangerClearDatabaseV1(token);
     _expectProbeStatus(
-      label: 'POST settings/danger/clear-database',
+      label: _probeHttpLabel('POST settings/danger/clear-database'),
       status: clearDb,
       accepted: const [501],
     );
@@ -105,7 +105,7 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeCore
       desc: 'z',
     );
     _expectProbeStatus(
-      label: 'POST settings/agent-deploy/deploy-model',
+      label: _probeHttpLabel('POST settings/agent-deploy/deploy-model'),
       status: deployModel,
       accepted: const [200, 503],
     );
@@ -113,7 +113,7 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeCore
 
     final setKey = await postSettingsAgentDeploySetKeyV1(token);
     _expectProbeStatus(
-      label: 'POST settings/agent-deploy/set-key',
+      label: _probeHttpLabel('POST settings/agent-deploy/set-key'),
       status: setKey,
       accepted: const [200],
     );
@@ -139,7 +139,7 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeCore
         ? 404
         : await postScriptAgentSetPlanDataV1(token, projectId: projectId);
     _expectProbeStatus(
-      label: 'POST script-agent/set-plan-data',
+      label: _probeHttpLabel('POST script-agent/set-plan-data'),
       status: scriptAgentSetPlan,
       accepted: const [200, 404, 503],
     );
@@ -149,7 +149,7 @@ extension _HomePageSystemProbesModelsCatalogSettingsProbeCore
         ? 404
         : await postScriptAgentUpdateDataV1(token, id: scriptId);
     _expectProbeStatus(
-      label: 'POST script-agent/update-data',
+      label: _probeHttpLabel('POST script-agent/update-data'),
       status: scriptAgentUpdate,
       accepted: const [200, 404, 503],
     );

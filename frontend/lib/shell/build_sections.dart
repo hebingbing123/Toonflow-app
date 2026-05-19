@@ -198,6 +198,7 @@ extension _HomePageBuildSections on _HomePageState {
   Widget _buildWorkspaceContextSection(
     BuildContext context, {
     bool compact = false,
+    bool inline = false,
   }) {
     final workspace = _sessionMe?.currentWorkspace;
     final projects = _projectsController.projects;
@@ -205,7 +206,9 @@ extension _HomePageBuildSections on _HomePageState {
         _workspaceInputController.projectUuidController.text.trim().isEmpty
         ? null
         : _workspaceInputController.projectUuidController.text.trim();
+    final l10n = AppLocalizations.of(context)!;
     final projectLabel = productWorkspaceProjectLabel(
+      l10n: l10n,
       projects: projects,
       projectNumericId: _productScopedProjectNumericId,
       projectUuid: projectUuid,
@@ -226,6 +229,7 @@ extension _HomePageBuildSections on _HomePageState {
       workspaceDailyJobQuota: workspaceBilling?.dailyJobQuota,
       workspaceJobsToday: workspaceBilling?.jobsToday,
       compact: compact,
+      inline: inline,
     );
   }
 

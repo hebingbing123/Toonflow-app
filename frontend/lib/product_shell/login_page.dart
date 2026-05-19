@@ -38,7 +38,7 @@ class _ProductLoginPageState extends State<ProductLoginPage>
     with SingleTickerProviderStateMixin {
   late final AnimationController _sceneController = AnimationController(
     vsync: this,
-    duration: const Duration(seconds: 18),
+    duration: const Duration(seconds: 15),
   );
   final TextEditingController _confirmPasswordController =
       TextEditingController();
@@ -117,11 +117,9 @@ class _ProductLoginPageState extends State<ProductLoginPage>
         widget.authController.passwordController.text !=
             _confirmPasswordController.text) {
       setState(() {
-        _localErrorMessage = _localized(
+        _localErrorMessage = AppLocalizations.of(
           context,
-          zh: '两次输入的密码不一致。',
-          en: 'Passwords do not match.',
-        );
+        )!.productLoginPasswordMismatch;
       });
       return;
     }
@@ -285,8 +283,8 @@ class _HeroStage extends StatelessWidget {
     final theme = Theme.of(context);
     final typography = StudioTypography.of(context);
     final displaySize = compact
-        ? math.max(typography.display - 1, 27).toDouble()
-        : typography.display + 10;
+        ? math.min(typography.paneTitle + 2, 26).toDouble()
+        : math.min(typography.display + 2, 34).toDouble();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -303,14 +301,11 @@ class _HeroStage extends StatelessWidget {
             maxWidth: compact ? double.infinity : 640,
           ),
           child: Text(
-            _localized(
-              context,
-              zh: '把剧本、镜头、任务和发布串成一条 AI 生产链',
-              en: 'Turn scripts, shots, jobs, and release into one AI pipeline.',
-            ),
+            l10n.productShellLoginHeroTitle,
+            maxLines: 3,
             style: theme.textTheme.headlineSmall?.copyWith(
               fontSize: displaySize,
-              height: 1.05,
+              height: 1.18,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -363,13 +358,21 @@ class _HeroStage extends StatelessWidget {
         if (compact)
           SizedBox(
             height: 300,
-            child: _AiStagePanel(compact: compact, progress: progress),
+            child: _AiStagePanel(
+              l10n: l10n,
+              compact: compact,
+              progress: progress,
+            ),
           )
         else
           Expanded(
             child: ConstrainedBox(
               constraints: const BoxConstraints(minHeight: 420),
-              child: _AiStagePanel(compact: compact, progress: progress),
+              child: _AiStagePanel(
+                l10n: l10n,
+                compact: compact,
+                progress: progress,
+              ),
             ),
           ),
       ],
@@ -423,30 +426,37 @@ class _BrandBanner extends StatelessWidget {
 }
 
 class _AiStagePanel extends StatelessWidget {
-  const _AiStagePanel({required this.compact, required this.progress});
+  const _AiStagePanel({
+    required this.l10n,
+    required this.compact,
+    required this.progress,
+  });
 
+  final AppLocalizations l10n;
   final bool compact;
   final double progress;
 
   @override
   Widget build(BuildContext context) {
     final tokens = StudioTokens.of(context);
+    final studio = StudioColors.of(context);
     final typography = StudioTypography.of(context);
     final ringSize = compact ? 124.0 : 156.0;
 
     return DecoratedBox(
       decoration: BoxDecoration(
+        gradient: studio.panelGradient,
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: <Color>[
-            Colors.white.withValues(alpha: 0.06),
-            Colors.white.withValues(alpha: 0.02),
-          ],
+        border: Border.all(
+          color: tokens.surfaceHighlight.withValues(alpha: 0.88),
         ),
         boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: tokens.panelGlow.withValues(alpha: 0.12),
+            blurRadius: 28,
+            spreadRadius: -12,
+            offset: const Offset(0, 14),
+          ),
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.20),
             blurRadius: 26,
@@ -478,21 +488,13 @@ class _AiStagePanel extends StatelessWidget {
                 children: <Widget>[
                   _StageMetric(
                     icon: Icons.auto_awesome_outlined,
-                    title: _localized(
-                      context,
-                      zh: '模型编排',
-                      en: 'Model Orchestration',
-                    ),
-                    value: _localized(context, zh: '在线', en: 'Online'),
+                    title: l10n.productLoginStageModelOrchestration,
+                    value: l10n.productLoginStageStatusOnline,
                   ),
                   _StageMetric(
                     icon: Icons.memory_outlined,
-                    title: _localized(
-                      context,
-                      zh: '推理通道',
-                      en: 'Inference Lanes',
-                    ),
-                    value: _localized(context, zh: '低延迟', en: 'Low Latency'),
+                    title: l10n.productLoginStageInferenceLanes,
+                    value: l10n.productLoginStageLowLatency,
                     alignEnd: true,
                   ),
                 ],
@@ -504,12 +506,8 @@ class _AiStagePanel extends StatelessWidget {
               left: 18,
               child: _StageMetric(
                 icon: Icons.auto_awesome_outlined,
-                title: _localized(
-                  context,
-                  zh: '模型编排',
-                  en: 'Model Orchestration',
-                ),
-                value: _localized(context, zh: '在线', en: 'Online'),
+                title: l10n.productLoginStageModelOrchestration,
+                value: l10n.productLoginStageStatusOnline,
               ),
             ),
             Positioned(
@@ -517,48 +515,14 @@ class _AiStagePanel extends StatelessWidget {
               right: 18,
               child: _StageMetric(
                 icon: Icons.memory_outlined,
-                title: _localized(context, zh: '推理通道', en: 'Inference Lanes'),
-                value: _localized(context, zh: '低延迟', en: 'Low Latency'),
+                title: l10n.productLoginStageInferenceLanes,
+                value: l10n.productLoginStageLowLatency,
                 alignEnd: true,
               ),
             ),
           ],
           Center(
-            child: Container(
-              width: ringSize,
-              height: ringSize,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.10),
-                  width: 1.2,
-                ),
-              ),
-              child: Center(
-                child: Container(
-                  width: ringSize - 48,
-                  height: ringSize - 48,
-                  decoration: BoxDecoration(
-                    gradient: RadialGradient(
-                      colors: <Color>[
-                        tokens.primary.withValues(alpha: 0.38),
-                        tokens.primary.withValues(alpha: 0.04),
-                      ],
-                    ),
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: tokens.accent.withValues(alpha: 0.26),
-                      width: 1,
-                    ),
-                  ),
-                  child: const Icon(
-                    Icons.auto_mode_rounded,
-                    color: Colors.white,
-                    size: 34,
-                  ),
-                ),
-              ),
-            ),
+            child: _StageCoreCluster(progress: progress, ringSize: ringSize),
           ),
           Positioned(
             left: 18,
@@ -570,21 +534,13 @@ class _AiStagePanel extends StatelessWidget {
               alignment: WrapAlignment.spaceBetween,
               children: <Widget>[
                 _StageLabel(
-                  label: _localized(
-                    context,
-                    zh: '多步骤编排',
-                    en: 'Multi-step Orchestration',
-                  ),
+                  label: l10n.productLoginStageMultiStepOrchestration,
                 ),
                 _StageLabel(
-                  label: _localized(
-                    context,
-                    zh: '镜头级生成',
-                    en: 'Shot-level Generation',
-                  ),
+                  label: l10n.productLoginStageShotLevelGeneration,
                 ),
                 _StageLabel(
-                  label: _localized(context, zh: '闭环发布', en: 'Release Loop'),
+                  label: l10n.productLoginStageReleaseLoop,
                 ),
               ],
             ),
@@ -593,11 +549,7 @@ class _AiStagePanel extends StatelessWidget {
             left: 18,
             bottom: compact ? 64 : 86,
             child: Text(
-              _localized(
-                context,
-                zh: '从脚本理解到最终发布，AI 在同一条工作流里接力。',
-                en: 'AI hands work across the same flow, from script reading to release.',
-              ),
+              l10n.productLoginStageFlowTagline,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Colors.white.withValues(alpha: 0.64),
                 fontSize: typography.hint,
@@ -618,18 +570,21 @@ class _SignalChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tokens = StudioTokens.of(context);
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.06),
+        color: tokens.bgSurface.withValues(alpha: 0.78),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        border: Border.all(
+          color: tokens.surfaceHighlight.withValues(alpha: 0.8),
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Icon(icon, size: 16, color: const Color(0xFF00CEC9)),
+            Icon(icon, size: 16, color: tokens.accent),
             const SizedBox(width: 8),
             Text(
               label,
@@ -640,6 +595,205 @@ class _SignalChip extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _StageCoreCluster extends StatelessWidget {
+  const _StageCoreCluster({required this.progress, required this.ringSize});
+
+  final double progress;
+  final double ringSize;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = StudioTokens.of(context);
+    final orbitSize = ringSize + 60;
+    final basePulse = 0.5 + (0.5 * math.sin(progress * math.pi * 2));
+
+    return SizedBox(
+      width: orbitSize,
+      height: orbitSize,
+      child: Stack(
+        alignment: Alignment.center,
+        children: <Widget>[
+          for (final (index, scaleBase) in <(int, double)>[
+            (0, 0.74),
+            (1, 0.88),
+            (2, 1.03),
+          ])
+            Opacity(
+              opacity: (0.16 - (index * 0.03)) + (basePulse * 0.04),
+              child: Transform.scale(
+                scale:
+                    scaleBase +
+                    (0.028 *
+                        math.sin(((progress + (index * 0.18)) * math.pi * 2))),
+                child: Container(
+                  width: ringSize + (index * 16),
+                  height: ringSize + (index * 16),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: tokens.accent.withValues(
+                        alpha: 0.18 - (index * 0.03),
+                      ),
+                      width: 1,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          Transform.rotate(
+            angle: progress * math.pi * 2,
+            child: SizedBox.square(
+              dimension: orbitSize,
+              child: Stack(
+                children: <Widget>[
+                  Align(
+                    alignment: Alignment.topCenter,
+                    child: _OrbitMarker(
+                      color: tokens.accent,
+                      glowColor: tokens.accent.withValues(alpha: 0.26),
+                      size: 9,
+                    ),
+                  ),
+                  Align(
+                    alignment: const Alignment(0.78, -0.10),
+                    child: _OrbitMarker(
+                      color: tokens.primary,
+                      glowColor: tokens.primary.withValues(alpha: 0.22),
+                      size: 7,
+                    ),
+                  ),
+                  Align(
+                    alignment: const Alignment(-0.72, 0.62),
+                    child: _OrbitMarker(
+                      color: tokens.accent.withValues(alpha: 0.9),
+                      glowColor: tokens.accent.withValues(alpha: 0.18),
+                      size: 6,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Transform.rotate(
+            angle: -progress * math.pi * 1.2,
+            child: SizedBox.square(
+              dimension: ringSize + 22,
+              child: Stack(
+                children: <Widget>[
+                  Align(
+                    alignment: const Alignment(0.84, 0),
+                    child: _OrbitMarker(
+                      color: Colors.white.withValues(alpha: 0.92),
+                      glowColor: tokens.primary.withValues(alpha: 0.18),
+                      size: 5,
+                    ),
+                  ),
+                  Align(
+                    alignment: const Alignment(-0.86, 0.18),
+                    child: _OrbitMarker(
+                      color: tokens.accent.withValues(alpha: 0.88),
+                      glowColor: tokens.accent.withValues(alpha: 0.14),
+                      size: 4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Container(
+            width: ringSize,
+            height: ringSize,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.12),
+                width: 1.2,
+              ),
+              boxShadow: <BoxShadow>[
+                BoxShadow(
+                  color: tokens.primary.withValues(
+                    alpha: 0.10 + (basePulse * 0.06),
+                  ),
+                  blurRadius: 28,
+                  spreadRadius: -12,
+                ),
+              ],
+            ),
+          ),
+          Container(
+            width: ringSize - 20,
+            height: ringSize - 20,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: tokens.surfaceHighlight.withValues(alpha: 0.80),
+              ),
+            ),
+          ),
+          Container(
+            width: ringSize - 48,
+            height: ringSize - 48,
+            decoration: BoxDecoration(
+              gradient: RadialGradient(
+                colors: <Color>[
+                  tokens.primary.withValues(alpha: 0.34 + (basePulse * 0.06)),
+                  tokens.accent.withValues(alpha: 0.10),
+                  tokens.primary.withValues(alpha: 0.02),
+                ],
+                stops: const <double>[0.0, 0.62, 1.0],
+              ),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: tokens.accent.withValues(alpha: 0.28),
+                width: 1,
+              ),
+            ),
+            child: Transform.rotate(
+              angle: progress * math.pi * 2,
+              child: const Icon(
+                Icons.auto_mode_rounded,
+                color: Colors.white,
+                size: 34,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _OrbitMarker extends StatelessWidget {
+  const _OrbitMarker({
+    required this.color,
+    required this.glowColor,
+    required this.size,
+  });
+
+  final Color color;
+  final Color glowColor;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: color,
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: glowColor,
+            blurRadius: size * 2.4,
+            spreadRadius: size * 0.4,
+          ),
+        ],
       ),
     );
   }
@@ -762,10 +916,18 @@ class _AuthPanel extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: tokens.bgSurface.withValues(alpha: 0.90),
+        gradient: studio.panelGradient,
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        border: Border.all(
+          color: tokens.surfaceHighlight.withValues(alpha: 0.92),
+        ),
         boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: tokens.panelGlowSecondary.withValues(alpha: 0.10),
+            blurRadius: 26,
+            spreadRadius: -12,
+            offset: const Offset(0, 14),
+          ),
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.24),
             blurRadius: 28,
@@ -789,19 +951,17 @@ class _AuthPanel extends StatelessWidget {
               crossAxisAlignment: WrapCrossAlignment.center,
               children: <Widget>[
                 Text(
-                  _localized(context, zh: '工作区访问', en: 'Workspace Access'),
+                  l10n.productLoginWorkspaceAccess,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
                 DecoratedBox(
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.05),
+                    color: tokens.bgSurface.withValues(alpha: 0.84),
                     borderRadius: BorderRadius.circular(999),
                     border: Border.all(
-                      color: studio.primaryGradient.colors.first.withValues(
-                        alpha: 0.24,
-                      ),
+                      color: tokens.primary.withValues(alpha: 0.24),
                     ),
                   ),
                   child: Padding(
@@ -810,7 +970,7 @@ class _AuthPanel extends StatelessWidget {
                       vertical: 6,
                     ),
                     child: Text(
-                      _localized(context, zh: 'AI Runtime', en: 'AI Runtime'),
+                      l10n.productLoginAiRuntime,
                       style: theme.textTheme.labelMedium?.copyWith(
                         color: Colors.white.withValues(alpha: 0.78),
                         fontWeight: FontWeight.w600,
@@ -835,16 +995,8 @@ class _AuthPanel extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     mode == _AuthMode.signIn
-                        ? _localized(
-                            context,
-                            zh: '进入你的工作区，继续脚本、制作、任务与发布链路。',
-                            en: 'Return to your workspace and keep scripts, production, jobs, and release in flow.',
-                          )
-                        : _localized(
-                            context,
-                            zh: '创建一个工作区账号，让 AI 生产链从第一部短剧开始运转。',
-                            en: 'Create a workspace account and bring the AI production loop online.',
-                          ),
+                        ? l10n.productLoginSignInSubtitle
+                        : l10n.productLoginSignUpSubtitle,
                     style: studioSectionIntroStyle(context),
                   ),
                 ],
@@ -900,11 +1052,7 @@ class _AuthPanel extends StatelessWidget {
                   key: const Key('product-auth-password-confirm'),
                   controller: confirmPasswordController,
                   decoration: InputDecoration(
-                    labelText: _localized(
-                      context,
-                      zh: '确认密码',
-                      en: 'Confirm Password',
-                    ),
+                    labelText: l10n.productLoginConfirmPasswordLabel,
                     prefixIcon: const Icon(
                       Icons.verified_user_outlined,
                       size: 18,
@@ -957,8 +1105,8 @@ class _AuthPanel extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: <BoxShadow>[
                     BoxShadow(
-                      color: const Color(0xFF6C5CE7).withValues(alpha: 0.30),
-                      blurRadius: 16,
+                      color: tokens.panelGlow.withValues(alpha: 0.30),
+                      blurRadius: 18,
                       offset: const Offset(0, 8),
                     ),
                   ],
@@ -978,16 +1126,8 @@ class _AuthPanel extends StatelessWidget {
               const SizedBox(height: 12),
               Text(
                 mode == _AuthMode.signIn
-                    ? _localized(
-                        context,
-                        zh: '使用同一工作区账号继续你的生产节奏。',
-                        en: 'Use the same workspace account to keep momentum.',
-                      )
-                    : _localized(
-                        context,
-                        zh: '注册后可直接进入项目、任务与发布工作区。',
-                        en: 'After sign up, step straight into projects, jobs, and release.',
-                      ),
+                    ? l10n.productLoginSignInHint
+                    : l10n.productLoginSignUpHint,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
@@ -1006,11 +1146,7 @@ class _AuthPanel extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(
-                        _localized(
-                          context,
-                          zh: '本地开发账号',
-                          en: 'Local Development Account',
-                        ),
+                        l10n.productLoginLocalDevAccount,
                         style: theme.textTheme.labelLarge?.copyWith(
                           color: Colors.white,
                         ),
@@ -1208,6 +1344,74 @@ class _BackdropGridPainter extends CustomPainter {
         size.height * 0.28,
       );
     canvas.drawPath(path, pathPaint);
+
+    final lowerPath = Path()
+      ..moveTo(size.width * 0.06, size.height * 0.78)
+      ..cubicTo(
+        size.width * 0.24,
+        size.height * 0.62,
+        size.width * 0.52,
+        size.height * 0.84,
+        size.width * 0.76,
+        size.height * 0.66,
+      )
+      ..cubicTo(
+        size.width * 0.88,
+        size.height * 0.58,
+        size.width * 0.94,
+        size.height * 0.48,
+        size.width,
+        size.height * 0.52,
+      );
+    canvas.drawPath(
+      lowerPath,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1
+        ..color = accentColorTwo.withValues(alpha: 0.14),
+    );
+
+    final horizontalBandY =
+        size.height * (0.18 + (0.64 * ((progress * 1.12) % 1)));
+    final horizontalBandRect = Rect.fromLTWH(
+      0,
+      horizontalBandY - 18,
+      size.width,
+      36,
+    );
+    canvas.drawRect(
+      horizontalBandRect,
+      Paint()
+        ..shader = LinearGradient(
+          colors: <Color>[
+            accentColorTwo.withValues(alpha: 0),
+            accentColorTwo.withValues(alpha: 0.07),
+            accentColorTwo.withValues(alpha: 0),
+          ],
+        ).createShader(horizontalBandRect),
+    );
+
+    void drawProbe(Path probePath, double phase, Color color) {
+      final metric = probePath.computeMetrics().first;
+      final tangent = metric.getTangentForOffset(metric.length * phase);
+      if (tangent == null) {
+        return;
+      }
+      final point = tangent.position;
+      canvas.drawCircle(
+        point,
+        10,
+        Paint()..color = color.withValues(alpha: 0.08),
+      );
+      canvas.drawCircle(
+        point,
+        2.6,
+        Paint()..color = color.withValues(alpha: 0.92),
+      );
+    }
+
+    drawProbe(path, progress, accentColorTwo);
+    drawProbe(lowerPath, (progress + 0.34) % 1.0, accentColor);
   }
 
   @override
@@ -1240,6 +1444,27 @@ class _AiStagePainter extends CustomPainter {
       width: size.width * 0.56,
       height: size.height * 0.42,
     );
+    final pulseBase = (0.5 + (0.5 * math.sin(progress * math.pi * 2)));
+
+    canvas.drawCircle(
+      center,
+      (math.min(size.width, size.height) * 0.17).toDouble(),
+      Paint()
+        ..shader =
+            RadialGradient(
+              colors: <Color>[
+                accentColorTwo.withValues(alpha: 0.12 + (pulseBase * 0.04)),
+                accentColor.withValues(alpha: 0.04),
+                accentColor.withValues(alpha: 0),
+              ],
+              stops: const <double>[0.0, 0.58, 1.0],
+            ).createShader(
+              Rect.fromCircle(
+                center: center,
+                radius: (math.min(size.width, size.height) * 0.17).toDouble(),
+              ),
+            ),
+    );
 
     final ringPaint = Paint()
       ..style = PaintingStyle.stroke
@@ -1253,6 +1478,47 @@ class _AiStagePainter extends CustomPainter {
       center,
       (math.min(size.width, size.height) * 0.14).toDouble(),
       ringPaint,
+    );
+    for (var i = 0; i < 3; i++) {
+      final wave = ((progress + (i * 0.24)) % 1.0);
+      canvas.drawCircle(
+        center,
+        (math.min(size.width, size.height) * (0.10 + (wave * 0.13))).toDouble(),
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1
+          ..color = accentColorTwo.withValues(alpha: (1 - wave) * 0.14),
+      );
+    }
+
+    void drawCornerBracket(Offset start, Offset horizontal, Offset vertical) {
+      final paint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.4
+        ..color = accentColorTwo.withValues(alpha: 0.22);
+      canvas.drawLine(start, horizontal, paint);
+      canvas.drawLine(start, vertical, paint);
+    }
+
+    drawCornerBracket(
+      Offset(frame.left + 18, frame.top + 18),
+      Offset(frame.left + 40, frame.top + 18),
+      Offset(frame.left + 18, frame.top + 40),
+    );
+    drawCornerBracket(
+      Offset(frame.right - 18, frame.top + 18),
+      Offset(frame.right - 40, frame.top + 18),
+      Offset(frame.right - 18, frame.top + 40),
+    );
+    drawCornerBracket(
+      Offset(frame.left + 18, frame.bottom - 18),
+      Offset(frame.left + 40, frame.bottom - 18),
+      Offset(frame.left + 18, frame.bottom - 40),
+    );
+    drawCornerBracket(
+      Offset(frame.right - 18, frame.bottom - 18),
+      Offset(frame.right - 40, frame.bottom - 18),
+      Offset(frame.right - 18, frame.bottom - 40),
     );
 
     final linePaint = Paint()
@@ -1294,12 +1560,30 @@ class _AiStagePainter extends CustomPainter {
         ..lineTo(size.width * 0.78, size.height * 0.48),
     ];
 
-    for (final path in arcs) {
+    for (final (index, path) in arcs.indexed) {
       canvas.drawPath(path, linePaint);
       final metric = path.computeMetrics().first;
+      final packetProgress = (progress + (index * 0.18)) % 1.0;
       final offset = metric
-          .getTangentForOffset(metric.length * progress)!
+          .getTangentForOffset(metric.length * packetProgress)!
           .position;
+      final trailOffset = metric
+          .getTangentForOffset(
+            metric.length * math.max(0, packetProgress - 0.06),
+          )!
+          .position;
+      canvas.drawLine(
+        trailOffset,
+        offset,
+        Paint()
+          ..color = accentColorTwo.withValues(alpha: 0.24)
+          ..strokeWidth = 1.8,
+      );
+      canvas.drawCircle(
+        offset,
+        9,
+        Paint()..color = accentColorTwo.withValues(alpha: 0.08),
+      );
       canvas.drawCircle(offset, 3.4, Paint()..color = accentColorTwo);
     }
 
@@ -1322,6 +1606,30 @@ class _AiStagePainter extends CustomPainter {
       canvas.drawCircle(node, 2.4, Paint()..color = accentColorTwo);
     }
 
+    final radarRect = Rect.fromCircle(
+      center: center,
+      radius: (math.min(size.width, size.height) * 0.18).toDouble(),
+    );
+    canvas.drawArc(
+      radarRect,
+      0,
+      math.pi * 2,
+      false,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2
+        ..shader = SweepGradient(
+          colors: <Color>[
+            accentColorTwo.withValues(alpha: 0),
+            accentColorTwo.withValues(alpha: 0.05),
+            accentColorTwo.withValues(alpha: 0.44),
+            accentColorTwo.withValues(alpha: 0),
+          ],
+          stops: const <double>[0.0, 0.62, 0.78, 1.0],
+          transform: GradientRotation(progress * math.pi * 2),
+        ).createShader(radarRect),
+    );
+
     final sweepX = size.width * (0.16 + (0.68 * progress));
     canvas.drawLine(
       Offset(sweepX, size.height * 0.14),
@@ -1329,6 +1637,14 @@ class _AiStagePainter extends CustomPainter {
       Paint()
         ..color = accentColorTwo.withValues(alpha: 0.22)
         ..strokeWidth = 1.2,
+    );
+    final sweepY = size.height * (0.22 + (0.52 * ((progress + 0.28) % 1.0)));
+    canvas.drawLine(
+      Offset(size.width * 0.16, sweepY),
+      Offset(size.width * 0.84, sweepY),
+      Paint()
+        ..color = accentColor.withValues(alpha: 0.10)
+        ..strokeWidth = 1,
     );
   }
 
@@ -1341,10 +1657,3 @@ class _AiStagePainter extends CustomPainter {
   }
 }
 
-String _localized(
-  BuildContext context, {
-  required String zh,
-  required String en,
-}) {
-  return Localizations.localeOf(context).languageCode == 'zh' ? zh : en;
-}

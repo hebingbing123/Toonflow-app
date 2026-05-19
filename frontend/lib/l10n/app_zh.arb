@@ -499,6 +499,23 @@
   "productNavShortVideoSpace": "多平台分发",
   "productShellLoginHeroTitle": "小说采集、剧本、分镜与多平台分发，一站完成",
   "productShellLoginTagline": "AI 短剧工作室 — 从小说入库、制片到多平台发布一站串联。",
+  "productLoginPasswordMismatch": "两次输入的密码不一致。",
+  "productLoginStageModelOrchestration": "模型编排",
+  "productLoginStageStatusOnline": "在线",
+  "productLoginStageInferenceLanes": "推理通道",
+  "productLoginStageLowLatency": "低延迟",
+  "productLoginStageMultiStepOrchestration": "多步骤编排",
+  "productLoginStageShotLevelGeneration": "镜头级生成",
+  "productLoginStageReleaseLoop": "闭环发布",
+  "productLoginStageFlowTagline": "从脚本理解到最终发布，AI 在同一条工作流里接力。",
+  "productLoginWorkspaceAccess": "工作区访问",
+  "productLoginAiRuntime": "AI 运行时",
+  "productLoginSignInSubtitle": "进入你的工作区，继续脚本、制作、任务与发布链路。",
+  "productLoginSignUpSubtitle": "创建工作区账号，从第一部短剧的小说采集与分发开始。",
+  "productLoginConfirmPasswordLabel": "确认密码",
+  "productLoginSignInHint": "使用同一工作区账号继续你的生产节奏。",
+  "productLoginSignUpHint": "注册后可直接进入项目、任务与发布工作区。",
+  "productLoginLocalDevAccount": "本地开发账号",
   "productShellDevCredentialsHint": "本地开发：admin@openflow.local / admin123",
   "productShellMoreMenu": "更多",
   "studioAppBarNotifications": "通知",
@@ -1342,6 +1359,25 @@
     "placeholders": {
       "numericId": {
         "type": "int"
+      }
+    }
+  },
+  "productScopeProjectWithName": "项目 #{numericId} · {name}",
+  "@productScopeProjectWithName": {
+    "placeholders": {
+      "numericId": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "productScopeProjectUuidScoped": "项目 UUID · {uuid}",
+  "@productScopeProjectUuidScoped": {
+    "placeholders": {
+      "uuid": {
+        "type": "String"
       }
     }
   },
@@ -10776,6 +10812,73 @@
   "projectEditorAssetsOverviewRefreshBusy": "刷新资产…",
   "projectEditorAssetsOverviewRefresh": "刷新资产",
   "projectEditorAssetsOverviewOpenMainWorkbench": "打开资产主工作台",
+  "projectEditorAssetsInventoryNone": "暂无资产",
+  "projectEditorAssetsInventorySummary": "资产 {count} · {typeLine} · 示例：{sample}",
+  "@projectEditorAssetsInventorySummary": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "typeLine": { "type": "String" },
+      "sample": { "type": "String" }
+    }
+  },
+  "projectEditorAssetsInventoryManagingAll": "正在管理项目全部资产。",
+  "projectEditorAssetsInventoryNoLinkedUnderScript": "剧本 #{scriptId} 下暂无关联资产。",
+  "@projectEditorAssetsInventoryNoLinkedUnderScript": {
+    "placeholders": { "scriptId": { "type": "int" } }
+  },
+  "projectEditorAssetsInventoryScriptLinkedCount": "剧本 #{scriptId} 已关联 {count} 个资产。",
+  "@projectEditorAssetsInventoryScriptLinkedCount": {
+    "placeholders": {
+      "scriptId": { "type": "int" },
+      "count": { "type": "int" }
+    }
+  },
+  "projectEditorAssetFocusStoryboardSource": "分镜来源：#{storyboardId}。",
+  "@projectEditorAssetFocusStoryboardSource": {
+    "placeholders": { "storyboardId": { "type": "int" } }
+  },
+  "projectEditorAssetFocusSuggestedAsset": "建议聚焦资产：#{assetId}。",
+  "@projectEditorAssetFocusSuggestedAsset": {
+    "placeholders": { "assetId": { "type": "int" } }
+  },
+  "projectEditorAssetsCornerScapeAllTypes": "全部类型",
+  "projectEditorAssetsCornerScapeNoMatching": "历史筛选：{typeLine}；无匹配资产。",
+  "@projectEditorAssetsCornerScapeNoMatching": {
+    "placeholders": { "typeLine": { "type": "String" } }
+  },
+  "projectEditorAssetsCornerScapeLoaded": "历史筛选：{typeLine}；已加载 {assetCount} 个资产，{historyCount} 张历史图。",
+  "@projectEditorAssetsCornerScapeLoaded": {
+    "placeholders": {
+      "typeLine": { "type": "String" },
+      "assetCount": { "type": "int" },
+      "historyCount": { "type": "int" }
+    }
+  },
+  "projectEditorAssetsCornerScapeLoadedWithFocus": "历史筛选：{typeLine}；已加载 {assetCount} 个资产，{historyCount} 张历史图；{focusLine}。",
+  "@projectEditorAssetsCornerScapeLoadedWithFocus": {
+    "placeholders": {
+      "typeLine": { "type": "String" },
+      "assetCount": { "type": "int" },
+      "historyCount": { "type": "int" },
+      "focusLine": { "type": "String" }
+    }
+  },
+  "projectEditorAssetsCornerScapeFocusNoImage": "聚焦 #{assetId} {name}，未选择历史图",
+  "@projectEditorAssetsCornerScapeFocusNoImage": {
+    "placeholders": {
+      "assetId": { "type": "int" },
+      "name": { "type": "String" }
+    }
+  },
+  "projectEditorAssetsCornerScapeFocusWithImage": "聚焦 #{assetId} {name} · 图片排序={sortIndex} · {state}",
+  "@projectEditorAssetsCornerScapeFocusWithImage": {
+    "placeholders": {
+      "assetId": { "type": "int" },
+      "name": { "type": "String" },
+      "sortIndex": { "type": "int" },
+      "state": { "type": "String" }
+    }
+  },
   "projectEditorAssetsSpecializedWorkbenchesTitle": "专项工作台",
   "projectEditorAssetsSpecializedWorkbenchesSubtitle": "把图片管理、出图链路和历史图查询也统一挂到这里，资产主区只保留一个正式入口。",
   "projectEditorAssetsMainWorkbenchRefreshBusy": "处理中…",
@@ -16305,6 +16408,46 @@
   },
   "statusPageRequestFailed": "请求失败",
   "statusPageVersionSectionTitle": "版本信息",
+  "nativeBridgeMessageNotStarted": "桌面桥接尚未启动。",
+  "nativeBridgeMessageWebSkipped": "Web 运行时会跳过桌面 Rust 桥接。",
+  "nativeBridgeMessageReady": "桌面 Rust 桥接已就绪。",
+  "nativeBridgeMessageInitFailed": "桌面 Rust 桥接初始化失败。",
+  "nativeBridgeMessageLoadedFrom": "已从 {path} 加载桌面 Rust 桥接。",
+  "@nativeBridgeMessageLoadedFrom": {
+    "placeholders": { "path": { "type": "String" } }
+  },
+  "nativeBridgeLibraryPathLine": "库路径：{path}",
+  "@nativeBridgeLibraryPathLine": {
+    "placeholders": { "path": { "type": "String" } }
+  },
+  "statusPageDesktopBridgeSectionTitle": "桌面 Rust 桥接",
+  "statusPageBridgeStateLine": "state={state}",
+  "@statusPageBridgeStateLine": {
+    "placeholders": { "state": { "type": "String" } }
+  },
+  "statusPageBridgeMessageLine": "message={message}",
+  "@statusPageBridgeMessageLine": {
+    "placeholders": { "message": { "type": "String" } }
+  },
+  "statusPageBridgeLibraryPathLine": "library_path={path}",
+  "@statusPageBridgeLibraryPathLine": {
+    "placeholders": { "path": { "type": "String" } }
+  },
+  "shortVideoDesktopRuntimeHeadlineDesktopApp": "桌面编辑运行时",
+  "shortVideoDesktopRuntimeDetailDesktopApp": "本设备可使用本地 Rust 剪辑引擎完成组装与导出流程。",
+  "shortVideoDesktopRuntimeHeadlineMobileBrowser": "移动浏览器预览",
+  "shortVideoDesktopRuntimeDetailMobileBrowser": "移动端适合审阅、批注与发布准备；本地剪辑与最终组装请使用桌面版。",
+  "shortVideoDesktopRuntimeHeadlineWebBrowser": "浏览器工作区",
+  "shortVideoDesktopRuntimeDetailWebBrowser": "浏览器模式适合审阅、项目协同与发布准备；本地剪辑与 Rust 组装引擎请使用桌面版。",
+  "shortVideoDesktopRuntimeStatusNoBridge": "桌面组装能力仅在桌面客户端中提供。",
+  "shortVideoDesktopRuntimeStatusReady": "桌面剪辑引擎已就绪。",
+  "shortVideoDesktopRuntimeStatusFailed": "本地组装前需先处理桌面剪辑引擎问题。",
+  "shortVideoDesktopRuntimeStatusIdle": "桌面剪辑引擎正在启动。",
+  "shortVideoDesktopRuntimeStatusSkipped": "当前运行环境未启用桌面剪辑引擎。",
+  "systemProbeHttpAction": "{action}",
+  "@systemProbeHttpAction": {
+    "placeholders": { "action": { "type": "String" } }
+  },
   "statusPageInternalQueueSectionTitle": "内部队列统计",
   "statusPageApiBaseLabel": "API：{baseUrl}",
   "@statusPageApiBaseLabel": {

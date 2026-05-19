@@ -57,7 +57,7 @@ Future<void> openProjectAssetsWorkbenchDialog({
       : (assetsForScriptRef[0]?.items ?? visibleAssets);
   final initialStatusLine = visibleAssets.isEmpty
       ? l10n.projectEditorAssetsWorkbenchNoAssetsYet
-      : summarizeProjectAssetRows(visibleAssets);
+      : summarizeProjectAssetRows(visibleAssets, l10n: l10n);
   final session = ProjectAssetsWorkbenchSession(
     visibleAssets: initialSelectionAssets,
     scriptList: scriptList,

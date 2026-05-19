@@ -1804,6 +1804,108 @@ abstract class AppLocalizations {
   /// **'AI short-drama studio — from novel intake through production to multi-platform publishing.'**
   String get productShellLoginTagline;
 
+  /// No description provided for @productLoginPasswordMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match.'**
+  String get productLoginPasswordMismatch;
+
+  /// No description provided for @productLoginStageModelOrchestration.
+  ///
+  /// In en, this message translates to:
+  /// **'Model Orchestration'**
+  String get productLoginStageModelOrchestration;
+
+  /// No description provided for @productLoginStageStatusOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'Online'**
+  String get productLoginStageStatusOnline;
+
+  /// No description provided for @productLoginStageInferenceLanes.
+  ///
+  /// In en, this message translates to:
+  /// **'Inference Lanes'**
+  String get productLoginStageInferenceLanes;
+
+  /// No description provided for @productLoginStageLowLatency.
+  ///
+  /// In en, this message translates to:
+  /// **'Low Latency'**
+  String get productLoginStageLowLatency;
+
+  /// No description provided for @productLoginStageMultiStepOrchestration.
+  ///
+  /// In en, this message translates to:
+  /// **'Multi-step Orchestration'**
+  String get productLoginStageMultiStepOrchestration;
+
+  /// No description provided for @productLoginStageShotLevelGeneration.
+  ///
+  /// In en, this message translates to:
+  /// **'Shot-level Generation'**
+  String get productLoginStageShotLevelGeneration;
+
+  /// No description provided for @productLoginStageReleaseLoop.
+  ///
+  /// In en, this message translates to:
+  /// **'Release Loop'**
+  String get productLoginStageReleaseLoop;
+
+  /// No description provided for @productLoginStageFlowTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'AI hands work across the same flow, from script reading to release.'**
+  String get productLoginStageFlowTagline;
+
+  /// No description provided for @productLoginWorkspaceAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace Access'**
+  String get productLoginWorkspaceAccess;
+
+  /// No description provided for @productLoginAiRuntime.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Runtime'**
+  String get productLoginAiRuntime;
+
+  /// No description provided for @productLoginSignInSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Return to your workspace and keep scripts, production, jobs, and release in flow.'**
+  String get productLoginSignInSubtitle;
+
+  /// No description provided for @productLoginSignUpSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a workspace account and bring the AI production loop online.'**
+  String get productLoginSignUpSubtitle;
+
+  /// No description provided for @productLoginConfirmPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Password'**
+  String get productLoginConfirmPasswordLabel;
+
+  /// No description provided for @productLoginSignInHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the same workspace account to keep momentum.'**
+  String get productLoginSignInHint;
+
+  /// No description provided for @productLoginSignUpHint.
+  ///
+  /// In en, this message translates to:
+  /// **'After sign up, step straight into projects, jobs, and release.'**
+  String get productLoginSignUpHint;
+
+  /// No description provided for @productLoginLocalDevAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Local Development Account'**
+  String get productLoginLocalDevAccount;
+
   /// No description provided for @productShellDevCredentialsHint.
   ///
   /// In en, this message translates to:
@@ -4587,6 +4689,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Project #{numericId}'**
   String projectsUnnamedProject(int numericId);
+
+  /// No description provided for @productScopeProjectWithName.
+  ///
+  /// In en, this message translates to:
+  /// **'Project #{numericId} · {name}'**
+  String productScopeProjectWithName(int numericId, String name);
+
+  /// No description provided for @productScopeProjectUuidScoped.
+  ///
+  /// In en, this message translates to:
+  /// **'Project UUID · {uuid}'**
+  String productScopeProjectUuidScoped(String uuid);
 
   /// No description provided for @projectsAgentMemoryPrefix.
   ///
@@ -22796,6 +22910,102 @@ abstract class AppLocalizations {
   /// **'Open asset main workbench'**
   String get projectEditorAssetsOverviewOpenMainWorkbench;
 
+  /// No description provided for @projectEditorAssetsInventoryNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No assets'**
+  String get projectEditorAssetsInventoryNone;
+
+  /// No description provided for @projectEditorAssetsInventorySummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Assets {count} · {typeLine} · sample: {sample}'**
+  String projectEditorAssetsInventorySummary(
+    int count,
+    String typeLine,
+    String sample,
+  );
+
+  /// No description provided for @projectEditorAssetsInventoryManagingAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Managing all project assets.'**
+  String get projectEditorAssetsInventoryManagingAll;
+
+  /// No description provided for @projectEditorAssetsInventoryNoLinkedUnderScript.
+  ///
+  /// In en, this message translates to:
+  /// **'No assets linked under script #{scriptId}.'**
+  String projectEditorAssetsInventoryNoLinkedUnderScript(int scriptId);
+
+  /// No description provided for @projectEditorAssetsInventoryScriptLinkedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Script #{scriptId} has {count} linked asset(s).'**
+  String projectEditorAssetsInventoryScriptLinkedCount(int scriptId, int count);
+
+  /// No description provided for @projectEditorAssetFocusStoryboardSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Storyboard source: #{storyboardId}.'**
+  String projectEditorAssetFocusStoryboardSource(int storyboardId);
+
+  /// No description provided for @projectEditorAssetFocusSuggestedAsset.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested focus asset: #{assetId}.'**
+  String projectEditorAssetFocusSuggestedAsset(int assetId);
+
+  /// No description provided for @projectEditorAssetsCornerScapeAllTypes.
+  ///
+  /// In en, this message translates to:
+  /// **'All types'**
+  String get projectEditorAssetsCornerScapeAllTypes;
+
+  /// No description provided for @projectEditorAssetsCornerScapeNoMatching.
+  ///
+  /// In en, this message translates to:
+  /// **'History filter: {typeLine}; no matching assets.'**
+  String projectEditorAssetsCornerScapeNoMatching(String typeLine);
+
+  /// No description provided for @projectEditorAssetsCornerScapeLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'History filter: {typeLine}; loaded {assetCount} asset(s), {historyCount} history image(s).'**
+  String projectEditorAssetsCornerScapeLoaded(
+    String typeLine,
+    int assetCount,
+    int historyCount,
+  );
+
+  /// No description provided for @projectEditorAssetsCornerScapeLoadedWithFocus.
+  ///
+  /// In en, this message translates to:
+  /// **'History filter: {typeLine}; loaded {assetCount} asset(s), {historyCount} history image(s); {focusLine}.'**
+  String projectEditorAssetsCornerScapeLoadedWithFocus(
+    String typeLine,
+    int assetCount,
+    int historyCount,
+    String focusLine,
+  );
+
+  /// No description provided for @projectEditorAssetsCornerScapeFocusNoImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus #{assetId} {name}, no history image selected'**
+  String projectEditorAssetsCornerScapeFocusNoImage(int assetId, String name);
+
+  /// No description provided for @projectEditorAssetsCornerScapeFocusWithImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus #{assetId} {name} · image sort={sortIndex} · {state}'**
+  String projectEditorAssetsCornerScapeFocusWithImage(
+    int assetId,
+    String name,
+    int sortIndex,
+    String state,
+  );
+
   /// No description provided for @projectEditorAssetsSpecializedWorkbenchesTitle.
   ///
   /// In en, this message translates to:
@@ -33859,6 +34069,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Version'**
   String get statusPageVersionSectionTitle;
+
+  /// No description provided for @nativeBridgeMessageNotStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Desktop bridge has not started yet.'**
+  String get nativeBridgeMessageNotStarted;
+
+  /// No description provided for @nativeBridgeMessageWebSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Web runtime skips the desktop Rust bridge.'**
+  String get nativeBridgeMessageWebSkipped;
+
+  /// No description provided for @nativeBridgeMessageReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Desktop Rust bridge is ready.'**
+  String get nativeBridgeMessageReady;
+
+  /// No description provided for @nativeBridgeMessageInitFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Desktop Rust bridge failed to initialize.'**
+  String get nativeBridgeMessageInitFailed;
+
+  /// No description provided for @nativeBridgeMessageLoadedFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Desktop Rust bridge loaded from {path}.'**
+  String nativeBridgeMessageLoadedFrom(String path);
+
+  /// No description provided for @nativeBridgeLibraryPathLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Library: {path}'**
+  String nativeBridgeLibraryPathLine(String path);
+
+  /// No description provided for @statusPageDesktopBridgeSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Desktop Rust bridge'**
+  String get statusPageDesktopBridgeSectionTitle;
+
+  /// No description provided for @statusPageBridgeStateLine.
+  ///
+  /// In en, this message translates to:
+  /// **'state={state}'**
+  String statusPageBridgeStateLine(String state);
+
+  /// No description provided for @statusPageBridgeMessageLine.
+  ///
+  /// In en, this message translates to:
+  /// **'message={message}'**
+  String statusPageBridgeMessageLine(String message);
+
+  /// No description provided for @statusPageBridgeLibraryPathLine.
+  ///
+  /// In en, this message translates to:
+  /// **'library_path={path}'**
+  String statusPageBridgeLibraryPathLine(String path);
+
+  /// No description provided for @shortVideoDesktopRuntimeHeadlineDesktopApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Desktop editor runtime'**
+  String get shortVideoDesktopRuntimeHeadlineDesktopApp;
+
+  /// No description provided for @shortVideoDesktopRuntimeDetailDesktopApp.
+  ///
+  /// In en, this message translates to:
+  /// **'This device can use the local Rust editing engine for assembly and export workflows.'**
+  String get shortVideoDesktopRuntimeDetailDesktopApp;
+
+  /// No description provided for @shortVideoDesktopRuntimeHeadlineMobileBrowser.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile browser preview'**
+  String get shortVideoDesktopRuntimeHeadlineMobileBrowser;
+
+  /// No description provided for @shortVideoDesktopRuntimeDetailMobileBrowser.
+  ///
+  /// In en, this message translates to:
+  /// **'Use mobile for review, comments, and publish prep. Use the desktop app for local editing and final assembly.'**
+  String get shortVideoDesktopRuntimeDetailMobileBrowser;
+
+  /// No description provided for @shortVideoDesktopRuntimeHeadlineWebBrowser.
+  ///
+  /// In en, this message translates to:
+  /// **'Browser workspace'**
+  String get shortVideoDesktopRuntimeHeadlineWebBrowser;
+
+  /// No description provided for @shortVideoDesktopRuntimeDetailWebBrowser.
+  ///
+  /// In en, this message translates to:
+  /// **'Browser mode is good for review, project coordination, and publish prep. Use the desktop app for local editing and the Rust assembly engine.'**
+  String get shortVideoDesktopRuntimeDetailWebBrowser;
+
+  /// No description provided for @shortVideoDesktopRuntimeStatusNoBridge.
+  ///
+  /// In en, this message translates to:
+  /// **'Desktop assembly is available in the desktop app.'**
+  String get shortVideoDesktopRuntimeStatusNoBridge;
+
+  /// No description provided for @shortVideoDesktopRuntimeStatusReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Desktop editing engine is ready.'**
+  String get shortVideoDesktopRuntimeStatusReady;
+
+  /// No description provided for @shortVideoDesktopRuntimeStatusFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Desktop editing engine needs attention before local assembly can run.'**
+  String get shortVideoDesktopRuntimeStatusFailed;
+
+  /// No description provided for @shortVideoDesktopRuntimeStatusIdle.
+  ///
+  /// In en, this message translates to:
+  /// **'Desktop editing engine is starting.'**
+  String get shortVideoDesktopRuntimeStatusIdle;
+
+  /// No description provided for @shortVideoDesktopRuntimeStatusSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Desktop editing engine is not active in this runtime.'**
+  String get shortVideoDesktopRuntimeStatusSkipped;
+
+  /// No description provided for @systemProbeHttpAction.
+  ///
+  /// In en, this message translates to:
+  /// **'{action}'**
+  String systemProbeHttpAction(String action);
 
   /// No description provided for @statusPageInternalQueueSectionTitle.
   ///

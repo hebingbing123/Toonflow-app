@@ -56,6 +56,7 @@ AlertDialog buildProjectAssetsWorkbenchDialog({
               scriptScopedLine: summarizeScriptScopedAssets(
                 assetsFilterScriptNumericId,
                 scopedAssets,
+                l10n: l10n,
               ),
               selectedAsset: selectedAsset,
               assets: assets,

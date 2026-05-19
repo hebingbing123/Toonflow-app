@@ -49,20 +49,20 @@ String? summarizeTokenEfficiencyFromQualityReviews(
   }
 
   if (parsed == 0) return null;
+  final loc = qualityReviewsResolveL10n(l10n);
   final avgPrompt = (sumPrompt / parsed).toStringAsFixed(0);
   final avgMemory = (sumMemory / parsed).toStringAsFixed(0);
   final avgVisual = (sumVisual / parsed).toStringAsFixed(0);
   final avgDelivery = (sumDelivery / parsed).toStringAsFixed(0);
   final hitRate = (deliveryPriorityHits * 100.0 / parsed).toStringAsFixed(1);
-  return l10n?.qualityReviewsAutoSampleSummary(
-        parsed,
-        avgPrompt,
-        avgMemory,
-        avgVisual,
-        avgDelivery,
-        hitRate,
-      ) ??
-      'auto samples $parsed · avg prompt=$avgPrompt chars · memory=$avgMemory (visual=$avgVisual, delivery=$avgDelivery) · delivery-priority hit $hitRate%';
+  return loc.qualityReviewsAutoSampleSummary(
+    parsed,
+    avgPrompt,
+    avgMemory,
+    avgVisual,
+    avgDelivery,
+    hitRate,
+  );
 }
 
 String? summarizePromptDiagnosticsFromQualityReviews(
@@ -169,13 +169,10 @@ String? summarizePromptDiagnosticsFromQualityReviews(
   final deliveryHitRate = (deliveryPriorityHits * 100.0 / samples.length)
       .toStringAsFixed(1);
   final parts = <String>[
-    l10n?.qualityReviewsAutoDiagnosticsCount(samples.length) ??
-        'auto diagnostics ${samples.length}',
-    l10n?.qualityReviewsAveragePrompt(avgPrompt) ??
-        'avg prompt=$avgPrompt chars',
+    loc.qualityReviewsAutoDiagnosticsCount(samples.length),
+    loc.qualityReviewsAveragePrompt(avgPrompt),
     'memory=$avgMemory (visual=$avgVisual, delivery=$avgDelivery)',
-    l10n?.qualityReviewsDeliveryPriorityRate(deliveryHitRate) ??
-        'delivery-priority $deliveryHitRate%',
+    loc.qualityReviewsDeliveryPriorityRate(deliveryHitRate),
   ];
   if (topNegativeSource != null) {
     parts.add(
@@ -184,46 +181,37 @@ String? summarizePromptDiagnosticsFromQualityReviews(
   }
   final hitBucketSummary = joinTopBucketCounts(memoryHitBuckets, l10n: loc);
   if (hitBucketSummary.isNotEmpty) {
-    parts.add(
-      l10n?.qualityReviewsHitMemoryBuckets(hitBucketSummary) ??
-          'hit memory $hitBucketSummary',
-    );
+    parts.add(loc.qualityReviewsHitMemoryBuckets(hitBucketSummary));
   }
   final suppressedBucketSummary = joinTopBucketCounts(
     suppressedBuckets,
     l10n: loc,
   );
   if (suppressedBucketSummary.isNotEmpty) {
-    parts.add(
-      l10n?.qualityReviewsSuppressedBuckets(suppressedBucketSummary) ??
-          'suppressed buckets $suppressedBucketSummary',
-    );
+    parts.add(loc.qualityReviewsSuppressedBuckets(suppressedBucketSummary));
   }
   if (directorYieldHits > 0) {
     parts.add(
-      l10n?.qualityReviewsDirectorYieldCount(
-            directorYieldHits,
-            samples.length,
-          ) ??
-          'director yield $directorYieldHits/${samples.length}',
+      loc.qualityReviewsDirectorYieldCount(
+        directorYieldHits,
+        samples.length,
+      ),
     );
   }
   if (continuityHits > 0) {
     parts.add(
-      l10n?.qualityReviewsContinuityConstraintCount(
-            continuityHits,
-            samples.length,
-          ) ??
-          'continuity constraints $continuityHits/${samples.length}',
+      loc.qualityReviewsContinuityConstraintCount(
+        continuityHits,
+        samples.length,
+      ),
     );
   }
   if (referenceFrameHits > 0) {
     parts.add(
-      l10n?.qualityReviewsReferenceFrameCount(
-            referenceFrameHits,
-            samples.length,
-          ) ??
-          'reference frame $referenceFrameHits/${samples.length}',
+      loc.qualityReviewsReferenceFrameCount(
+        referenceFrameHits,
+        samples.length,
+      ),
     );
   }
   return parts.join(' · ');
@@ -268,7 +256,7 @@ String? summarizeQualityReviewPromptDiagnostics(
     parts.add(describeAutoNegativeSource(negativeSource, l10n: loc));
   }
   if (diagnosticBool(diagnostics, 'memoryDeliveryPriorityApplied')) {
-    parts.add(l10n?.qualityReviewsDeliveryPriority ?? 'delivery-priority');
+    parts.add(loc.qualityReviewsDeliveryPriority);
   }
   final memoryHitBucketCounts = diagnosticStringIntMap(
     diagnostics,
@@ -280,14 +268,13 @@ String? summarizeQualityReviewPromptDiagnostics(
   );
   if (memoryHitBuckets.isNotEmpty) {
     parts.add(
-      l10n?.qualityReviewsHitBucketsInline(
-            joinBucketListWithCounts(
-              memoryHitBuckets,
-              memoryHitBucketCounts,
-              l10n: loc,
-            ),
-          ) ??
-          'hit=${joinBucketListWithCounts(memoryHitBuckets, memoryHitBucketCounts, l10n: loc)}',
+      loc.qualityReviewsHitBucketsInline(
+        joinBucketListWithCounts(
+          memoryHitBuckets,
+          memoryHitBucketCounts,
+          l10n: loc,
+        ),
+      ),
     );
   }
   final memorySuppressedBucketCounts = diagnosticStringIntMap(
@@ -300,32 +287,27 @@ String? summarizeQualityReviewPromptDiagnostics(
   );
   if (memorySuppressedBuckets.isNotEmpty) {
     parts.add(
-      l10n?.qualityReviewsSuppressedBucketsInline(
-            joinBucketListWithCounts(
-              memorySuppressedBuckets,
-              memorySuppressedBucketCounts,
-              l10n: loc,
-            ),
-          ) ??
-          'suppressed=${joinBucketListWithCounts(memorySuppressedBuckets, memorySuppressedBucketCounts, l10n: loc)}',
+      loc.qualityReviewsSuppressedBucketsInline(
+        joinBucketListWithCounts(
+          memorySuppressedBuckets,
+          memorySuppressedBucketCounts,
+          l10n: loc,
+        ),
+      ),
     );
   }
   if (diagnosticBool(diagnostics, 'directorManualYieldedToMemory')) {
-    parts.add(l10n?.qualityReviewsDirectorYield ?? 'director yield');
+    parts.add(loc.qualityReviewsDirectorYield);
   }
   if (directorSaved > 0) {
-    parts.add(
-      l10n?.qualityReviewsSavedChars(directorSaved) ??
-          'saved $directorSaved chars',
-    );
+    parts.add(loc.qualityReviewsSavedChars(directorSaved));
   }
   if (negativeSavedChars > 0 || negativeSavedFragments > 0) {
     parts.add(
-      l10n?.qualityReviewsNegativeSlim(
-            negativeSavedFragments,
-            negativeSavedChars,
-          ) ??
-          'negative slim=$negativeSavedFragments items/$negativeSavedChars chars',
+      loc.qualityReviewsNegativeSlim(
+        negativeSavedFragments,
+        negativeSavedChars,
+      ),
     );
   }
   final scopeSummary = describeMemoryScopeRows(
@@ -335,19 +317,13 @@ String? summarizeQualityReviewPromptDiagnostics(
     l10n: loc,
   );
   if (scopeSummary != null) {
-    parts.add(
-      l10n?.qualityReviewsMemoryScopeLevel(scopeSummary) ??
-          'memory scope=$scopeSummary',
-    );
+    parts.add(loc.qualityReviewsMemoryScopeLevel(scopeSummary));
   }
   if (continuityCount > 0) {
-    parts.add(
-      l10n?.qualityReviewsContinuityCount(continuityCount) ??
-          'continuity $continuityCount',
-    );
+    parts.add(loc.qualityReviewsContinuityCount(continuityCount));
   }
   if (diagnosticBool(diagnostics, 'usesReferenceFrame')) {
-    parts.add(l10n?.qualityReviewsReferenceFrame ?? 'reference frame');
+    parts.add(loc.qualityReviewsReferenceFrame);
   }
   return parts.join(' · ');
 }

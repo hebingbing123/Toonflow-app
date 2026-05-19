@@ -1,6 +1,11 @@
 part of '../../../home_page.dart';
 
 extension _HomePageSystemProbesModelsCatalogSettingsProbe on _HomePageState {
+  String _probeHttpLabel(String action) {
+    final loc = _appL10n ?? lookupAppLocalizations(const Locale('en'));
+    return loc.systemProbeHttpAction(action);
+  }
+
   Future<Map<String, int>> _runModelsCatalogSettingsAndAssetsProbes(
     String token,
   ) async {

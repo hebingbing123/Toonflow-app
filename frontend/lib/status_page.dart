@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'config.dart';
+import 'l10n/native_bridge_startup_labels.dart';
 import 'l10n/studio_code_labels.dart';
 import 'design_system/components/studio_text_styles.dart';
 import 'design_system/tokens.dart';
@@ -237,7 +238,7 @@ class _StatusPageState extends State<StatusPage> {
             builder: (context, _) {
               final snapshot = widget.bootstrap.snapshot;
               return _StatusBand(
-                title: 'desktop_rust_bridge',
+                title: l10n.statusPageDesktopBridgeSectionTitle,
                 tone: switch (snapshot.state) {
                   NativeBridgeStartupState.ready => _BandTone.info,
                   NativeBridgeStartupState.failed => _BandTone.error,
@@ -245,10 +246,12 @@ class _StatusPageState extends State<StatusPage> {
                   NativeBridgeStartupState.idle => _BandTone.neutral,
                 },
                 lines: [
-                  'state=${snapshot.state.name}',
-                  'message=${snapshot.message}',
+                  l10n.statusPageBridgeStateLine(snapshot.state.name),
+                  l10n.statusPageBridgeMessageLine(
+                    nativeBridgeStartupMessage(l10n, snapshot),
+                  ),
                   if (snapshot.libraryPath != null)
-                    'library_path=${snapshot.libraryPath}',
+                    l10n.statusPageBridgeLibraryPathLine(snapshot.libraryPath!),
                   if (snapshot.error != null) 'error=${snapshot.error}',
                 ],
               );

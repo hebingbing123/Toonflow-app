@@ -1014,6 +1014,63 @@ class AppLocalizationsEn extends AppLocalizations {
       'AI short-drama studio — from novel intake through production to multi-platform publishing.';
 
   @override
+  String get productLoginPasswordMismatch => 'Passwords do not match.';
+
+  @override
+  String get productLoginStageModelOrchestration => 'Model Orchestration';
+
+  @override
+  String get productLoginStageStatusOnline => 'Online';
+
+  @override
+  String get productLoginStageInferenceLanes => 'Inference Lanes';
+
+  @override
+  String get productLoginStageLowLatency => 'Low Latency';
+
+  @override
+  String get productLoginStageMultiStepOrchestration =>
+      'Multi-step Orchestration';
+
+  @override
+  String get productLoginStageShotLevelGeneration => 'Shot-level Generation';
+
+  @override
+  String get productLoginStageReleaseLoop => 'Release Loop';
+
+  @override
+  String get productLoginStageFlowTagline =>
+      'AI hands work across the same flow, from script reading to release.';
+
+  @override
+  String get productLoginWorkspaceAccess => 'Workspace Access';
+
+  @override
+  String get productLoginAiRuntime => 'AI Runtime';
+
+  @override
+  String get productLoginSignInSubtitle =>
+      'Return to your workspace and keep scripts, production, jobs, and release in flow.';
+
+  @override
+  String get productLoginSignUpSubtitle =>
+      'Create a workspace account and bring the AI production loop online.';
+
+  @override
+  String get productLoginConfirmPasswordLabel => 'Confirm Password';
+
+  @override
+  String get productLoginSignInHint =>
+      'Use the same workspace account to keep momentum.';
+
+  @override
+  String get productLoginSignUpHint =>
+      'After sign up, step straight into projects, jobs, and release.';
+
+  @override
+  String get productLoginLocalDevAccount => 'Local Development Account';
+
+  @override
   String get productShellDevCredentialsHint =>
       'Local dev: admin@openflow.local / admin123';
 
@@ -2619,6 +2676,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String projectsUnnamedProject(int numericId) {
     return 'Project #$numericId';
+  }
+
+  @override
+  String productScopeProjectWithName(int numericId, String name) {
+    return 'Project #$numericId · $name';
+  }
+
+  @override
+  String productScopeProjectUuidScoped(String uuid) {
+    return 'Project UUID · $uuid';
   }
 
   @override
@@ -14568,6 +14635,87 @@ class AppLocalizationsEn extends AppLocalizations {
       'Open asset main workbench';
 
   @override
+  String get projectEditorAssetsInventoryNone => 'No assets';
+
+  @override
+  String projectEditorAssetsInventorySummary(
+    int count,
+    String typeLine,
+    String sample,
+  ) {
+    return 'Assets $count · $typeLine · sample: $sample';
+  }
+
+  @override
+  String get projectEditorAssetsInventoryManagingAll =>
+      'Managing all project assets.';
+
+  @override
+  String projectEditorAssetsInventoryNoLinkedUnderScript(int scriptId) {
+    return 'No assets linked under script #$scriptId.';
+  }
+
+  @override
+  String projectEditorAssetsInventoryScriptLinkedCount(
+    int scriptId,
+    int count,
+  ) {
+    return 'Script #$scriptId has $count linked asset(s).';
+  }
+
+  @override
+  String projectEditorAssetFocusStoryboardSource(int storyboardId) {
+    return 'Storyboard source: #$storyboardId.';
+  }
+
+  @override
+  String projectEditorAssetFocusSuggestedAsset(int assetId) {
+    return 'Suggested focus asset: #$assetId.';
+  }
+
+  @override
+  String get projectEditorAssetsCornerScapeAllTypes => 'All types';
+
+  @override
+  String projectEditorAssetsCornerScapeNoMatching(String typeLine) {
+    return 'History filter: $typeLine; no matching assets.';
+  }
+
+  @override
+  String projectEditorAssetsCornerScapeLoaded(
+    String typeLine,
+    int assetCount,
+    int historyCount,
+  ) {
+    return 'History filter: $typeLine; loaded $assetCount asset(s), $historyCount history image(s).';
+  }
+
+  @override
+  String projectEditorAssetsCornerScapeLoadedWithFocus(
+    String typeLine,
+    int assetCount,
+    int historyCount,
+    String focusLine,
+  ) {
+    return 'History filter: $typeLine; loaded $assetCount asset(s), $historyCount history image(s); $focusLine.';
+  }
+
+  @override
+  String projectEditorAssetsCornerScapeFocusNoImage(int assetId, String name) {
+    return 'Focus #$assetId $name, no history image selected';
+  }
+
+  @override
+  String projectEditorAssetsCornerScapeFocusWithImage(
+    int assetId,
+    String name,
+    int sortIndex,
+    String state,
+  ) {
+    return 'Focus #$assetId $name · image sort=$sortIndex · $state';
+  }
+
+  @override
   String get projectEditorAssetsSpecializedWorkbenchesTitle =>
       'Specialized workbenches';
 
@@ -22045,6 +22193,97 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get statusPageVersionSectionTitle => 'Version';
+
+  @override
+  String get nativeBridgeMessageNotStarted =>
+      'Desktop bridge has not started yet.';
+
+  @override
+  String get nativeBridgeMessageWebSkipped =>
+      'Web runtime skips the desktop Rust bridge.';
+
+  @override
+  String get nativeBridgeMessageReady => 'Desktop Rust bridge is ready.';
+
+  @override
+  String get nativeBridgeMessageInitFailed =>
+      'Desktop Rust bridge failed to initialize.';
+
+  @override
+  String nativeBridgeMessageLoadedFrom(String path) {
+    return 'Desktop Rust bridge loaded from $path.';
+  }
+
+  @override
+  String nativeBridgeLibraryPathLine(String path) {
+    return 'Library: $path';
+  }
+
+  @override
+  String get statusPageDesktopBridgeSectionTitle => 'Desktop Rust bridge';
+
+  @override
+  String statusPageBridgeStateLine(String state) {
+    return 'state=$state';
+  }
+
+  @override
+  String statusPageBridgeMessageLine(String message) {
+    return 'message=$message';
+  }
+
+  @override
+  String statusPageBridgeLibraryPathLine(String path) {
+    return 'library_path=$path';
+  }
+
+  @override
+  String get shortVideoDesktopRuntimeHeadlineDesktopApp =>
+      'Desktop editor runtime';
+
+  @override
+  String get shortVideoDesktopRuntimeDetailDesktopApp =>
+      'This device can use the local Rust editing engine for assembly and export workflows.';
+
+  @override
+  String get shortVideoDesktopRuntimeHeadlineMobileBrowser =>
+      'Mobile browser preview';
+
+  @override
+  String get shortVideoDesktopRuntimeDetailMobileBrowser =>
+      'Use mobile for review, comments, and publish prep. Use the desktop app for local editing and final assembly.';
+
+  @override
+  String get shortVideoDesktopRuntimeHeadlineWebBrowser => 'Browser workspace';
+
+  @override
+  String get shortVideoDesktopRuntimeDetailWebBrowser =>
+      'Browser mode is good for review, project coordination, and publish prep. Use the desktop app for local editing and the Rust assembly engine.';
+
+  @override
+  String get shortVideoDesktopRuntimeStatusNoBridge =>
+      'Desktop assembly is available in the desktop app.';
+
+  @override
+  String get shortVideoDesktopRuntimeStatusReady =>
+      'Desktop editing engine is ready.';
+
+  @override
+  String get shortVideoDesktopRuntimeStatusFailed =>
+      'Desktop editing engine needs attention before local assembly can run.';
+
+  @override
+  String get shortVideoDesktopRuntimeStatusIdle =>
+      'Desktop editing engine is starting.';
+
+  @override
+  String get shortVideoDesktopRuntimeStatusSkipped =>
+      'Desktop editing engine is not active in this runtime.';
+
+  @override
+  String systemProbeHttpAction(String action) {
+    return '$action';
+  }
 
   @override
   String get statusPageInternalQueueSectionTitle => 'Internal queue stats';

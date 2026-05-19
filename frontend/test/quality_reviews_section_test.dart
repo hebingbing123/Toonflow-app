@@ -75,6 +75,28 @@ void main() {
     controller.dispose();
   });
 
+  testWidgets('product studio hides compatibility regression panel', (
+    WidgetTester tester,
+  ) async {
+    final controller = buildController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      _buildTestApp(
+        QualityReviewsSection(
+          studioPresentation: true,
+          accessToken: 'token',
+          controller: controller,
+          initialProjectNumericId: 9,
+          platformConfig: _testPlatformConfig,
+        ),
+      ),
+    );
+
+    expect(find.text(zh.qualityReviewsCompatibilityCheck), findsNothing);
+    expect(find.text(zh.qualityReviewsRunReadOnlyRegressionCheck), findsNothing);
+  });
+
   testWidgets('quality workbench dialog shows seeded controls', (
     WidgetTester tester,
   ) async {

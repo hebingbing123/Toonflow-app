@@ -1,15 +1,24 @@
 part of '../../home_page.dart';
 
 extension _HomePageProjectEditor on _HomePageState {
-  String? _buildAssetEditorFocusNotice(ProjectStudioAssetEditorTarget? target) {
+  String? _buildAssetEditorFocusNotice(
+    AppLocalizations l10n,
+    ProjectStudioAssetEditorTarget? target,
+  ) {
     if (target == null) {
       return null;
     }
     final notice = target.notice?.trim();
     final storyboardLine = target.preferredStoryboardNumericId == null
         ? null
-        : 'Storyboard source: #${target.preferredStoryboardNumericId}.';
-    if (target.preferredAssetNumericId == null) {
+        : l10n.projectEditorAssetFocusStoryboardSource(
+            target.preferredStoryboardNumericId!,
+          );
+    final assetId = target.preferredAssetNumericId;
+    final assetLine = assetId == null
+        ? null
+        : l10n.projectEditorAssetFocusSuggestedAsset(assetId);
+    if (assetLine == null) {
       if (notice == null || notice.isEmpty) {
         return storyboardLine;
       }
@@ -20,14 +29,14 @@ extension _HomePageProjectEditor on _HomePageState {
     }
     if (notice == null || notice.isEmpty) {
       if (storyboardLine == null) {
-        return 'Suggested focus asset: #${target.preferredAssetNumericId}.';
+        return assetLine;
       }
-      return '$storyboardLine Suggested focus asset: #${target.preferredAssetNumericId}.';
+      return '$storyboardLine $assetLine';
     }
     if (storyboardLine == null) {
-      return '$notice Suggested focus asset: #${target.preferredAssetNumericId}.';
+      return '$notice $assetLine';
     }
-    return '$notice $storyboardLine Suggested focus asset: #${target.preferredAssetNumericId}.';
+    return '$notice $storyboardLine $assetLine';
   }
 
   Future<void> _openProjectAssetsWorkbenchFromStudio(
@@ -109,7 +118,10 @@ extension _HomePageProjectEditor on _HomePageState {
         reloadAssetsAndStats: reloadAssetsAndStats,
         initialSelectedAssetNumericId: target.preferredAssetNumericId,
         initialSelectedScriptNumericId: target.preferredScriptNumericId,
-        initialFocusNotice: _buildAssetEditorFocusNotice(target),
+        initialFocusNotice: _buildAssetEditorFocusNotice(
+          resolveAppLocalizationsForErrors(context),
+          target,
+        ),
         initialTargetKind: target.kind,
         onCreateAsset: (dialogCtx) => _openCreateAssetDialog(
           ctx: dialogCtx,
@@ -252,6 +264,12 @@ extension _HomePageProjectEditor on _HomePageState {
     final toneCtrl = TextEditingController();
     final hookCtrl = TextEditingController();
     final visualCtrl = TextEditingController();
+    final textModelCtrl = TextEditingController();
+    final multimodalModelCtrl = TextEditingController();
+    final imageModelCtrl = TextEditingController();
+    final videoModelCtrl = TextEditingController();
+    final voiceModelCtrl = TextEditingController();
+    final voiceProfileCtrl = TextEditingController();
     final brandNameCtrl = TextEditingController();
     final brandPromiseCtrl = TextEditingController();
     final visualMotifsCtrl = TextEditingController();
@@ -269,6 +287,9 @@ extension _HomePageProjectEditor on _HomePageState {
         artPacks: <_StylePackOption>[],
         storyPacks: <_StylePackOption>[],
       );
+      List<ModelListEntry> textModelOptions = const <ModelListEntry>[];
+      List<ModelListEntry> imageModelOptions = const <ModelListEntry>[];
+      List<ModelListEntry> videoModelOptions = const <ModelListEntry>[];
       try {
         stylePackCatalog = await _loadProjectStylePackCatalog(token, l10n);
       } catch (_) {
@@ -276,6 +297,27 @@ extension _HomePageProjectEditor on _HomePageState {
           artPacks: <_StylePackOption>[],
           storyPacks: <_StylePackOption>[],
         );
+      }
+      try {
+        textModelOptions = await fetchModelsCatalog(token, typeFilter: 'text');
+      } catch (_) {
+        textModelOptions = const <ModelListEntry>[];
+      }
+      try {
+        imageModelOptions = await fetchModelsCatalog(
+          token,
+          typeFilter: 'image',
+        );
+      } catch (_) {
+        imageModelOptions = const <ModelListEntry>[];
+      }
+      try {
+        videoModelOptions = await fetchModelsCatalog(
+          token,
+          typeFilter: 'video',
+        );
+      } catch (_) {
+        videoModelOptions = const <ModelListEntry>[];
       }
       if (!mounted) return;
       nameCtrl.text = detail.project.name ?? '';
@@ -285,6 +327,12 @@ extension _HomePageProjectEditor on _HomePageState {
       toneCtrl.text = homeSnap?.projectBrief?.emotionalTone ?? '';
       hookCtrl.text = homeSnap?.projectBrief?.coreHook ?? '';
       visualCtrl.text = homeSnap?.projectBrief?.visualDirection ?? '';
+      textModelCtrl.text = detail.project.textModel ?? '';
+      multimodalModelCtrl.text = detail.project.multimodalModel ?? '';
+      imageModelCtrl.text = detail.project.imageModel ?? '';
+      videoModelCtrl.text = detail.project.videoModel ?? '';
+      voiceModelCtrl.text = detail.project.voiceModel ?? '';
+      voiceProfileCtrl.text = detail.project.voiceProfile ?? '';
       brandNameCtrl.text = homeSnap?.brandBible?.brandName ?? '';
       brandPromiseCtrl.text = homeSnap?.brandBible?.brandPromise ?? '';
       visualMotifsCtrl.text =
@@ -338,21 +386,29 @@ extension _HomePageProjectEditor on _HomePageState {
         initialAssetsFilterScriptNumericId:
             assetEditorTarget?.preferredScriptNumericId,
         initialAssetsFocusNotice: _buildAssetEditorFocusNotice(
+          l10n,
           assetEditorTarget,
         ),
         artStylePackOptions: stylePackCatalog.artPacks,
         storyStylePackOptions: stylePackCatalog.storyPacks,
+        textModelOptions: textModelOptions,
+        imageModelOptions: imageModelOptions,
+        videoModelOptions: videoModelOptions,
         selectedArtStylePack: detail.project.artStylePack,
         selectedStoryStylePack: detail.project.storyStylePack,
       );
       await showDialog<void>(
         context: context,
         builder: (ctx) {
+          final dialogL10n = AppLocalizations.of(ctx)!;
           return StatefulBuilder(
             builder: (ctx, setDialogState) {
               return AlertDialog(
                 title: Text(
-                  detail.project.name ?? 'project #${detail.project.numericId}',
+                  detail.project.name ??
+                      dialogL10n.projectsUnnamedProject(
+                        detail.project.numericId,
+                      ),
                 ),
                 content: _buildProjectEditorDialogContent(
                   ctx: ctx,
@@ -368,6 +424,12 @@ extension _HomePageProjectEditor on _HomePageState {
                   toneCtrl: toneCtrl,
                   hookCtrl: hookCtrl,
                   visualCtrl: visualCtrl,
+                  textModelCtrl: textModelCtrl,
+                  multimodalModelCtrl: multimodalModelCtrl,
+                  imageModelCtrl: imageModelCtrl,
+                  videoModelCtrl: videoModelCtrl,
+                  voiceModelCtrl: voiceModelCtrl,
+                  voiceProfileCtrl: voiceProfileCtrl,
                   brandNameCtrl: brandNameCtrl,
                   brandPromiseCtrl: brandPromiseCtrl,
                   visualMotifsCtrl: visualMotifsCtrl,
@@ -388,6 +450,12 @@ extension _HomePageProjectEditor on _HomePageState {
                   toneCtrl: toneCtrl,
                   hookCtrl: hookCtrl,
                   visualCtrl: visualCtrl,
+                  textModelCtrl: textModelCtrl,
+                  multimodalModelCtrl: multimodalModelCtrl,
+                  imageModelCtrl: imageModelCtrl,
+                  videoModelCtrl: videoModelCtrl,
+                  voiceModelCtrl: voiceModelCtrl,
+                  voiceProfileCtrl: voiceProfileCtrl,
                   brandNameCtrl: brandNameCtrl,
                   brandPromiseCtrl: brandPromiseCtrl,
                   visualMotifsCtrl: visualMotifsCtrl,
@@ -410,6 +478,12 @@ extension _HomePageProjectEditor on _HomePageState {
       toneCtrl.dispose();
       hookCtrl.dispose();
       visualCtrl.dispose();
+      textModelCtrl.dispose();
+      multimodalModelCtrl.dispose();
+      imageModelCtrl.dispose();
+      videoModelCtrl.dispose();
+      voiceModelCtrl.dispose();
+      voiceProfileCtrl.dispose();
       brandNameCtrl.dispose();
       brandPromiseCtrl.dispose();
       visualMotifsCtrl.dispose();
@@ -451,6 +525,9 @@ class _ProjectEditorDialogState {
     String? initialAssetsFocusNotice,
     List<_StylePackOption> artStylePackOptions = const <_StylePackOption>[],
     List<_StylePackOption> storyStylePackOptions = const <_StylePackOption>[],
+    List<ModelListEntry> textModelOptions = const <ModelListEntry>[],
+    List<ModelListEntry> imageModelOptions = const <ModelListEntry>[],
+    List<ModelListEntry> videoModelOptions = const <ModelListEntry>[],
     String? selectedArtStylePack,
     String? selectedStoryStylePack,
   }) : homeRef = <ProjectHome?>[initialHome],
@@ -462,6 +539,9 @@ class _ProjectEditorDialogState {
        storyStylePackOptionsRef = <List<_StylePackOption>>[
          storyStylePackOptions,
        ],
+       textModelOptionsRef = <List<ModelListEntry>>[textModelOptions],
+       imageModelOptionsRef = <List<ModelListEntry>>[imageModelOptions],
+       videoModelOptionsRef = <List<ModelListEntry>>[videoModelOptions],
        selectedArtStylePackRef = <String?>[selectedArtStylePack],
        selectedStoryStylePackRef = <String?>[selectedStoryStylePack] {
     assetsForScriptRef[0] = initialAssetsForScript;
@@ -494,6 +574,9 @@ class _ProjectEditorDialogState {
   final List<bool> projectProbeBusy = <bool>[false];
   final List<List<_StylePackOption>> artStylePackOptionsRef;
   final List<List<_StylePackOption>> storyStylePackOptionsRef;
+  final List<List<ModelListEntry>> textModelOptionsRef;
+  final List<List<ModelListEntry>> imageModelOptionsRef;
+  final List<List<ModelListEntry>> videoModelOptionsRef;
   final List<String?> selectedArtStylePackRef;
   final List<String?> selectedStoryStylePackRef;
 

@@ -28,14 +28,19 @@ int? chooseInitialAssetNumericId(
   return rows.first.numericId;
 }
 
-String summarizeProjectAssetRows(Iterable<AssetRow> assets) {
+String summarizeProjectAssetRows(
+  Iterable<AssetRow> assets, {
+  required AppLocalizations l10n,
+}) {
   final rows = assets.toList(growable: false);
   if (rows.isEmpty) {
-    return 'No assets';
+    return l10n.projectEditorAssetsInventoryNone;
   }
   final typeCounts = SplayTreeMap<String, int>();
   for (final asset in rows) {
-    final type = asset.assetType.trim().isEmpty ? 'unknown' : asset.assetType;
+    final type = asset.assetType.trim().isEmpty
+        ? studioUnknownCodeLabel(l10n, 'unknown')
+        : asset.assetType.trim();
     typeCounts[type] = (typeCounts[type] ?? 0) + 1;
   }
   final typeLine = typeCounts.entries
@@ -45,21 +50,29 @@ String summarizeProjectAssetRows(Iterable<AssetRow> assets) {
       .take(3)
       .map((asset) => '#${asset.numericId} ${asset.name}')
       .join(', ');
-  return 'Assets ${rows.length} · $typeLine · sample: $sampleLine';
+  return l10n.projectEditorAssetsInventorySummary(
+    rows.length,
+    typeLine,
+    sampleLine,
+  );
 }
 
 String summarizeScriptScopedAssets(
   int? scriptNumericId,
-  Iterable<AssetRow> assets,
-) {
+  Iterable<AssetRow> assets, {
+  required AppLocalizations l10n,
+}) {
   if (scriptNumericId == null) {
-    return 'Managing all project assets.';
+    return l10n.projectEditorAssetsInventoryManagingAll;
   }
   final rows = assets.toList(growable: false);
   if (rows.isEmpty) {
-    return 'No assets linked under script #$scriptNumericId.';
+    return l10n.projectEditorAssetsInventoryNoLinkedUnderScript(scriptNumericId);
   }
-  return 'Script #$scriptNumericId has ${rows.length} linked asset(s).';
+  return l10n.projectEditorAssetsInventoryScriptLinkedCount(
+    scriptNumericId,
+    rows.length,
+  );
 }
 
 List<String>? parseCornerScapeTypesInput(String raw) {
@@ -108,13 +121,14 @@ String summarizeCornerScapeSelection(
   List<String>? activeTypes,
   int? selectedAssetNumericId,
   String? selectedHistoryImageId,
+  required AppLocalizations l10n,
 }) {
   final rows = assets.toList(growable: false);
   final typeLine = activeTypes == null || activeTypes.isEmpty
-      ? 'All types'
+      ? l10n.projectEditorAssetsCornerScapeAllTypes
       : activeTypes.join(', ');
   if (rows.isEmpty) {
-    return 'History filter: $typeLine; no matching assets.';
+    return l10n.projectEditorAssetsCornerScapeNoMatching(typeLine);
   }
   final totalHistories = rows.fold<int>(
     0,
@@ -130,7 +144,11 @@ String summarizeCornerScapeSelection(
     }
   }
   if (selectedAsset == null) {
-    return 'History filter: $typeLine; loaded ${rows.length} asset(s), $totalHistories history image(s).';
+    return l10n.projectEditorAssetsCornerScapeLoaded(
+      typeLine,
+      rows.length,
+      totalHistories,
+    );
   }
   CornerScapeHistoryImage? selectedImage;
   if (selectedHistoryImageId != null) {
@@ -142,7 +160,21 @@ String summarizeCornerScapeSelection(
     }
   }
   final focusLine = selectedImage == null
-      ? 'Focus #${selectedAsset.numericId} ${selectedAsset.name}, no history image selected'
-      : 'Focus #${selectedAsset.numericId} ${selectedAsset.name} · image sort=${selectedImage.sortIndex} · ${selectedImage.state ?? "unknown state"}';
-  return 'History filter: $typeLine; loaded ${rows.length} asset(s), $totalHistories history image(s); $focusLine.';
+      ? l10n.projectEditorAssetsCornerScapeFocusNoImage(
+          selectedAsset.numericId,
+          selectedAsset.name,
+        )
+      : l10n.projectEditorAssetsCornerScapeFocusWithImage(
+          selectedAsset.numericId,
+          selectedAsset.name,
+          selectedImage.sortIndex,
+          selectedImage.state ??
+              studioUnknownCodeLabel(l10n, 'unknown state'),
+        );
+  return l10n.projectEditorAssetsCornerScapeLoadedWithFocus(
+    typeLine,
+    rows.length,
+    totalHistories,
+    focusLine,
+  );
 }

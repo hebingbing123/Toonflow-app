@@ -104,11 +104,16 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
 
-    expect(find.text('desktop_rust_bridge'), findsOneWidget);
-    expect(find.text('state=ready'), findsOneWidget);
+    final l10n = lookupAppLocalizations(const Locale('zh'));
+    expect(find.text(l10n.statusPageDesktopBridgeSectionTitle), findsOneWidget);
+    expect(find.text(l10n.statusPageBridgeStateLine('ready')), findsOneWidget);
     expect(
       find.text(
-        'message=Desktop Rust bridge loaded from bundle/Frameworks/libopenflow_core_bridge.dylib.',
+        l10n.statusPageBridgeMessageLine(
+          l10n.nativeBridgeMessageLoadedFrom(
+            'bundle/Frameworks/libopenflow_core_bridge.dylib',
+          ),
+        ),
       ),
       findsOneWidget,
     );
@@ -154,10 +159,13 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
 
-    expect(find.text('desktop_rust_bridge'), findsOneWidget);
-    expect(find.text('state=failed'), findsOneWidget);
+    final l10n = lookupAppLocalizations(const Locale('zh'));
+    expect(find.text(l10n.statusPageDesktopBridgeSectionTitle), findsOneWidget);
+    expect(find.text(l10n.statusPageBridgeStateLine('failed')), findsOneWidget);
     expect(
-      find.text('message=Desktop Rust bridge failed to initialize.'),
+      find.text(
+        l10n.statusPageBridgeMessageLine(l10n.nativeBridgeMessageInitFailed),
+      ),
       findsOneWidget,
     );
     expect(find.text('error=Bad state: default failed'), findsOneWidget);

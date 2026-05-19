@@ -41,37 +41,37 @@ extension _HomePageSystemProbesModelsCatalogProductionProbe on _HomePageState {
       _missingProductionScopeStatus(
         statuses: statuses,
         key: 'production/get-data',
-        label: 'POST production/get-production-data',
+        label: _probeHttpLabel('POST production/get-production-data'),
       );
       _missingProductionScopeStatus(
         statuses: statuses,
         key: 'flow',
-        label: 'POST production/get-flow-data',
+        label: _probeHttpLabel('POST production/get-flow-data'),
       );
       _missingProductionScopeStatus(
         statuses: statuses,
         key: 'save',
-        label: 'POST production/save-flow-data',
+        label: _probeHttpLabel('POST production/save-flow-data'),
       );
       _missingProductionScopeStatus(
         statuses: statuses,
         key: 'workbench/generate',
-        label: 'POST production/workbench/generate-video',
+        label: _probeHttpLabel('POST production/workbench/generate-video'),
       );
       _missingProductionScopeStatus(
         statuses: statuses,
         key: 'workbench/batch-candidate-clips',
-        label: 'POST production/workbench/batch-generate-candidate-clips',
+        label: _probeHttpLabel('POST production/workbench/batch-generate-candidate-clips'),
       );
       _missingProductionScopeStatus(
         statuses: statuses,
         key: 'storyboard/poll',
-        label: 'POST production/storyboard/polling-image',
+        label: _probeHttpLabel('POST production/storyboard/polling-image'),
       );
       _missingProductionScopeStatus(
         statuses: statuses,
         key: 'export',
-        label: 'POST production/export-image',
+        label: _probeHttpLabel('POST production/export-image'),
       );
       await _runTypedProductionProbeSuite(
         token,
@@ -98,7 +98,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbe on _HomePageState {
     } on RustApiException catch (e) {
       final status = e.statusCode ?? 500;
       _expectProbeStatus(
-        label: 'POST production/get-production-data',
+        label: _probeHttpLabel('POST production/get-production-data'),
         status: status,
         accepted: const [200, 404, 503],
       );
@@ -111,7 +111,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbe on _HomePageState {
       episodesId: scriptId,
     );
     _expectProbeStatus(
-      label: 'POST production/get-flow-data',
+      label: _probeHttpLabel('POST production/get-flow-data'),
       status: flowData,
       accepted: const [200, 404, 503],
     );
@@ -123,7 +123,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbe on _HomePageState {
       episodesId: scriptId,
     );
     _expectProbeStatus(
-      label: 'POST production/save-flow-data',
+      label: _probeHttpLabel('POST production/save-flow-data'),
       status: flowSave,
       accepted: const [200, 404, 503],
     );
@@ -144,7 +144,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbe on _HomePageState {
       trackId: 1,
     );
     _expectProbeStatus(
-      label: 'POST production/workbench/generate-video',
+      label: _probeHttpLabel('POST production/workbench/generate-video'),
       status: 200,
       accepted: const [200, 404, 503],
     );
@@ -163,7 +163,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbe on _HomePageState {
       batchCandStatus = e.statusCode ?? 500;
     }
     _expectProbeStatus(
-      label: 'POST production/workbench/batch-generate-candidate-clips',
+      label: _probeHttpLabel('POST production/workbench/batch-generate-candidate-clips'),
       status: batchCandStatus,
       accepted: const [200, 400, 404, 503],
     );
@@ -176,7 +176,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbe on _HomePageState {
       ids: [resources.storyboardId],
     );
     _expectProbeStatus(
-      label: 'POST production/storyboard/polling-image',
+      label: _probeHttpLabel('POST production/storyboard/polling-image'),
       status: storyboardPoll,
       accepted: const [200, 404, 503],
     );
@@ -191,7 +191,7 @@ extension _HomePageSystemProbesModelsCatalogProductionProbe on _HomePageState {
       ],
     );
     _expectProbeStatus(
-      label: 'POST production/export-image',
+      label: _probeHttpLabel('POST production/export-image'),
       status: exportImage,
       accepted: const [200, 404, 503],
     );

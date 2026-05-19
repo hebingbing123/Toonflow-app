@@ -949,6 +949,57 @@ class AppLocalizationsZh extends AppLocalizations {
   String get productShellLoginTagline => 'AI 短剧工作室 — 从小说入库、制片到多平台发布一站串联。';
 
   @override
+  String get productLoginPasswordMismatch => '两次输入的密码不一致。';
+
+  @override
+  String get productLoginStageModelOrchestration => '模型编排';
+
+  @override
+  String get productLoginStageStatusOnline => '在线';
+
+  @override
+  String get productLoginStageInferenceLanes => '推理通道';
+
+  @override
+  String get productLoginStageLowLatency => '低延迟';
+
+  @override
+  String get productLoginStageMultiStepOrchestration => '多步骤编排';
+
+  @override
+  String get productLoginStageShotLevelGeneration => '镜头级生成';
+
+  @override
+  String get productLoginStageReleaseLoop => '闭环发布';
+
+  @override
+  String get productLoginStageFlowTagline => '从脚本理解到最终发布，AI 在同一条工作流里接力。';
+
+  @override
+  String get productLoginWorkspaceAccess => '工作区访问';
+
+  @override
+  String get productLoginAiRuntime => 'AI 运行时';
+
+  @override
+  String get productLoginSignInSubtitle => '进入你的工作区，继续脚本、制作、任务与发布链路。';
+
+  @override
+  String get productLoginSignUpSubtitle => '创建工作区账号，从第一部短剧的小说采集与分发开始。';
+
+  @override
+  String get productLoginConfirmPasswordLabel => '确认密码';
+
+  @override
+  String get productLoginSignInHint => '使用同一工作区账号继续你的生产节奏。';
+
+  @override
+  String get productLoginSignUpHint => '注册后可直接进入项目、任务与发布工作区。';
+
+  @override
+  String get productLoginLocalDevAccount => '本地开发账号';
+
+  @override
   String get productShellDevCredentialsHint =>
       '本地开发：admin@openflow.local / admin123';
 
@@ -2495,6 +2546,16 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String projectsUnnamedProject(int numericId) {
     return '项目 #$numericId';
+  }
+
+  @override
+  String productScopeProjectWithName(int numericId, String name) {
+    return '项目 #$numericId · $name';
+  }
+
+  @override
+  String productScopeProjectUuidScoped(String uuid) {
+    return '项目 UUID · $uuid';
   }
 
   @override
@@ -13897,6 +13958,86 @@ class AppLocalizationsZh extends AppLocalizations {
   String get projectEditorAssetsOverviewOpenMainWorkbench => '打开资产主工作台';
 
   @override
+  String get projectEditorAssetsInventoryNone => '暂无资产';
+
+  @override
+  String projectEditorAssetsInventorySummary(
+    int count,
+    String typeLine,
+    String sample,
+  ) {
+    return '资产 $count · $typeLine · 示例：$sample';
+  }
+
+  @override
+  String get projectEditorAssetsInventoryManagingAll => '正在管理项目全部资产。';
+
+  @override
+  String projectEditorAssetsInventoryNoLinkedUnderScript(int scriptId) {
+    return '剧本 #$scriptId 下暂无关联资产。';
+  }
+
+  @override
+  String projectEditorAssetsInventoryScriptLinkedCount(
+    int scriptId,
+    int count,
+  ) {
+    return '剧本 #$scriptId 已关联 $count 个资产。';
+  }
+
+  @override
+  String projectEditorAssetFocusStoryboardSource(int storyboardId) {
+    return '分镜来源：#$storyboardId。';
+  }
+
+  @override
+  String projectEditorAssetFocusSuggestedAsset(int assetId) {
+    return '建议聚焦资产：#$assetId。';
+  }
+
+  @override
+  String get projectEditorAssetsCornerScapeAllTypes => '全部类型';
+
+  @override
+  String projectEditorAssetsCornerScapeNoMatching(String typeLine) {
+    return '历史筛选：$typeLine；无匹配资产。';
+  }
+
+  @override
+  String projectEditorAssetsCornerScapeLoaded(
+    String typeLine,
+    int assetCount,
+    int historyCount,
+  ) {
+    return '历史筛选：$typeLine；已加载 $assetCount 个资产，$historyCount 张历史图。';
+  }
+
+  @override
+  String projectEditorAssetsCornerScapeLoadedWithFocus(
+    String typeLine,
+    int assetCount,
+    int historyCount,
+    String focusLine,
+  ) {
+    return '历史筛选：$typeLine；已加载 $assetCount 个资产，$historyCount 张历史图；$focusLine。';
+  }
+
+  @override
+  String projectEditorAssetsCornerScapeFocusNoImage(int assetId, String name) {
+    return '聚焦 #$assetId $name，未选择历史图';
+  }
+
+  @override
+  String projectEditorAssetsCornerScapeFocusWithImage(
+    int assetId,
+    String name,
+    int sortIndex,
+    String state,
+  ) {
+    return '聚焦 #$assetId $name · 图片排序=$sortIndex · $state';
+  }
+
+  @override
   String get projectEditorAssetsSpecializedWorkbenchesTitle => '专项工作台';
 
   @override
@@ -21049,6 +21190,87 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get statusPageVersionSectionTitle => '版本信息';
+
+  @override
+  String get nativeBridgeMessageNotStarted => '桌面桥接尚未启动。';
+
+  @override
+  String get nativeBridgeMessageWebSkipped => 'Web 运行时会跳过桌面 Rust 桥接。';
+
+  @override
+  String get nativeBridgeMessageReady => '桌面 Rust 桥接已就绪。';
+
+  @override
+  String get nativeBridgeMessageInitFailed => '桌面 Rust 桥接初始化失败。';
+
+  @override
+  String nativeBridgeMessageLoadedFrom(String path) {
+    return '已从 $path 加载桌面 Rust 桥接。';
+  }
+
+  @override
+  String nativeBridgeLibraryPathLine(String path) {
+    return '库路径：$path';
+  }
+
+  @override
+  String get statusPageDesktopBridgeSectionTitle => '桌面 Rust 桥接';
+
+  @override
+  String statusPageBridgeStateLine(String state) {
+    return 'state=$state';
+  }
+
+  @override
+  String statusPageBridgeMessageLine(String message) {
+    return 'message=$message';
+  }
+
+  @override
+  String statusPageBridgeLibraryPathLine(String path) {
+    return 'library_path=$path';
+  }
+
+  @override
+  String get shortVideoDesktopRuntimeHeadlineDesktopApp => '桌面编辑运行时';
+
+  @override
+  String get shortVideoDesktopRuntimeDetailDesktopApp =>
+      '本设备可使用本地 Rust 剪辑引擎完成组装与导出流程。';
+
+  @override
+  String get shortVideoDesktopRuntimeHeadlineMobileBrowser => '移动浏览器预览';
+
+  @override
+  String get shortVideoDesktopRuntimeDetailMobileBrowser =>
+      '移动端适合审阅、批注与发布准备；本地剪辑与最终组装请使用桌面版。';
+
+  @override
+  String get shortVideoDesktopRuntimeHeadlineWebBrowser => '浏览器工作区';
+
+  @override
+  String get shortVideoDesktopRuntimeDetailWebBrowser =>
+      '浏览器模式适合审阅、项目协同与发布准备；本地剪辑与 Rust 组装引擎请使用桌面版。';
+
+  @override
+  String get shortVideoDesktopRuntimeStatusNoBridge => '桌面组装能力仅在桌面客户端中提供。';
+
+  @override
+  String get shortVideoDesktopRuntimeStatusReady => '桌面剪辑引擎已就绪。';
+
+  @override
+  String get shortVideoDesktopRuntimeStatusFailed => '本地组装前需先处理桌面剪辑引擎问题。';
+
+  @override
+  String get shortVideoDesktopRuntimeStatusIdle => '桌面剪辑引擎正在启动。';
+
+  @override
+  String get shortVideoDesktopRuntimeStatusSkipped => '当前运行环境未启用桌面剪辑引擎。';
+
+  @override
+  String systemProbeHttpAction(String action) {
+    return '$action';
+  }
 
   @override
   String get statusPageInternalQueueSectionTitle => '内部队列统计';

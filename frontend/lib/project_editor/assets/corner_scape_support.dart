@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../rust_api.dart';
 import 'support.dart';
 
@@ -44,13 +45,14 @@ class CornerScapeWorkbenchSession {
     return null;
   }
 
-  void syncSummaryLine(StateSetter setState) {
+  void syncSummaryLine(StateSetter setState, AppLocalizations l10n) {
     setState(() {
       summaryLine = summarizeCornerScapeSelection(
         assets,
         activeTypes: parseCornerScapeTypesInput(typesCtrl.text),
         selectedAssetNumericId: selectedAssetNumericId,
         selectedHistoryImageId: selectedHistoryImageId,
+        l10n: l10n,
       );
     });
   }
@@ -84,7 +86,10 @@ class CornerScapeWorkbenchController {
     final image = session.selectedHistoryImage();
     if (asset == null || image == null) {
       setState(() => session.selectedPreviewBytes = null);
-      session.syncSummaryLine(setState);
+      session.syncSummaryLine(
+        setState,
+        resolveAppLocalizationsForErrors(ctx),
+      );
       return;
     }
     setState(() {
@@ -101,7 +106,7 @@ class CornerScapeWorkbenchController {
       session.loadingPreview = false;
       session.selectedPreviewBytes = bytes;
     });
-    session.syncSummaryLine(setState);
+    session.syncSummaryLine(setState, resolveAppLocalizationsForErrors(ctx));
   }
 
   Future<void> refreshAssets(StateSetter setState) async {
@@ -149,6 +154,7 @@ class CornerScapeWorkbenchController {
           activeTypes: activeTypes,
           selectedAssetNumericId: session.selectedAssetNumericId,
           selectedHistoryImageId: session.selectedHistoryImageId,
+          l10n: l10n,
         );
       });
       await loadPreview(setState);
@@ -189,7 +195,7 @@ class CornerScapeWorkbenchController {
       );
       session.selectedPreviewBytes = null;
     });
-    session.syncSummaryLine(setState);
+    session.syncSummaryLine(setState, resolveAppLocalizationsForErrors(ctx));
     await loadPreview(setState);
   }
 
@@ -201,7 +207,7 @@ class CornerScapeWorkbenchController {
       session.selectedHistoryImageId = historyImageId;
       session.selectedPreviewBytes = null;
     });
-    session.syncSummaryLine(setState);
+    session.syncSummaryLine(setState, resolveAppLocalizationsForErrors(ctx));
     await loadPreview(setState);
   }
 }

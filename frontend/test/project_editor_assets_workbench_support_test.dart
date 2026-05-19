@@ -166,30 +166,36 @@ void main() {
   });
 
   test('summarizeProjectAssetRows reports counts and examples', () {
-    final line = summarizeProjectAssetRows(const [
-      AssetRow(id: 'a', numericId: 9, name: 'Hero', assetType: 'role'),
-      AssetRow(id: 'b', numericId: 3, name: 'Sword', assetType: 'props'),
-      AssetRow(id: 'c', numericId: 5, name: 'Mage', assetType: 'role'),
-    ]);
+    final line = summarizeProjectAssetRows(
+      const [
+        AssetRow(id: 'a', numericId: 9, name: 'Hero', assetType: 'role'),
+        AssetRow(id: 'b', numericId: 3, name: 'Sword', assetType: 'props'),
+        AssetRow(id: 'c', numericId: 5, name: 'Mage', assetType: 'role'),
+      ],
+      l10n: zh,
+    );
 
-    expect(line, contains('Assets 3'));
+    expect(line, contains('资产 3'));
     expect(line, contains('props 1'));
     expect(line, contains('role 2'));
     expect(line, contains('#9 Hero'));
   });
 
   test('summarizeScriptScopedAssets describes project and script scope', () {
-    expect(summarizeScriptScopedAssets(null, const []), 'Managing all project assets.');
     expect(
-      summarizeScriptScopedAssets(12, const []),
-      'No assets linked under script #12.',
+      summarizeScriptScopedAssets(null, const [], l10n: zh),
+      zh.projectEditorAssetsInventoryManagingAll,
+    );
+    expect(
+      summarizeScriptScopedAssets(12, const [], l10n: zh),
+      zh.projectEditorAssetsInventoryNoLinkedUnderScript(12),
     );
     expect(
       summarizeScriptScopedAssets(12, const [
         AssetRow(id: 'a', numericId: 9, name: 'Hero', assetType: 'role'),
         AssetRow(id: 'b', numericId: 3, name: 'Sword', assetType: 'props'),
-      ]),
-      'Script #12 has 2 linked asset(s).',
+      ], l10n: zh),
+      zh.projectEditorAssetsInventoryScriptLinkedCount(12, 2),
     );
   });
 
@@ -272,12 +278,13 @@ void main() {
       activeTypes: const ['props', 'role'],
       selectedAssetNumericId: 9,
       selectedHistoryImageId: 'img-1',
+      l10n: zh,
     );
 
     expect(line, contains('props, role'));
-    expect(line, contains('loaded 2 asset(s), 1 history image(s)'));
-    expect(line, contains('Focus #9 Hero'));
-    expect(line, contains('sort=1'));
+    expect(line, contains('已加载 2 个资产'));
+    expect(line, contains('聚焦 #9 Hero'));
+    expect(line, contains('排序=1'));
     expect(line, contains('done'));
   });
 

@@ -499,6 +499,23 @@
   "productNavShortVideoSpace": "Multi-platform release",
   "productShellLoginHeroTitle": "Novel intake, scripts, storyboards, and multi-platform release in one flow",
   "productShellLoginTagline": "AI short-drama studio — from novel intake through production to multi-platform publishing.",
+  "productLoginPasswordMismatch": "Passwords do not match.",
+  "productLoginStageModelOrchestration": "Model Orchestration",
+  "productLoginStageStatusOnline": "Online",
+  "productLoginStageInferenceLanes": "Inference Lanes",
+  "productLoginStageLowLatency": "Low Latency",
+  "productLoginStageMultiStepOrchestration": "Multi-step Orchestration",
+  "productLoginStageShotLevelGeneration": "Shot-level Generation",
+  "productLoginStageReleaseLoop": "Release Loop",
+  "productLoginStageFlowTagline": "AI hands work across the same flow, from script reading to release.",
+  "productLoginWorkspaceAccess": "Workspace Access",
+  "productLoginAiRuntime": "AI Runtime",
+  "productLoginSignInSubtitle": "Return to your workspace and keep scripts, production, jobs, and release in flow.",
+  "productLoginSignUpSubtitle": "Create a workspace account and bring the AI production loop online.",
+  "productLoginConfirmPasswordLabel": "Confirm Password",
+  "productLoginSignInHint": "Use the same workspace account to keep momentum.",
+  "productLoginSignUpHint": "After sign up, step straight into projects, jobs, and release.",
+  "productLoginLocalDevAccount": "Local Development Account",
   "productShellDevCredentialsHint": "Local dev: admin@openflow.local / admin123",
   "productShellMoreMenu": "More",
   "studioAppBarNotifications": "Notifications",
@@ -1345,6 +1362,25 @@
     "placeholders": {
       "numericId": {
         "type": "int"
+      }
+    }
+  },
+  "productScopeProjectWithName": "Project #{numericId} · {name}",
+  "@productScopeProjectWithName": {
+    "placeholders": {
+      "numericId": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "productScopeProjectUuidScoped": "Project UUID · {uuid}",
+  "@productScopeProjectUuidScoped": {
+    "placeholders": {
+      "uuid": {
+        "type": "String"
       }
     }
   },
@@ -10779,6 +10815,73 @@
   "projectEditorAssetsOverviewRefreshBusy": "Refreshing assets…",
   "projectEditorAssetsOverviewRefresh": "Refresh assets",
   "projectEditorAssetsOverviewOpenMainWorkbench": "Open asset main workbench",
+  "projectEditorAssetsInventoryNone": "No assets",
+  "projectEditorAssetsInventorySummary": "Assets {count} · {typeLine} · sample: {sample}",
+  "@projectEditorAssetsInventorySummary": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "typeLine": { "type": "String" },
+      "sample": { "type": "String" }
+    }
+  },
+  "projectEditorAssetsInventoryManagingAll": "Managing all project assets.",
+  "projectEditorAssetsInventoryNoLinkedUnderScript": "No assets linked under script #{scriptId}.",
+  "@projectEditorAssetsInventoryNoLinkedUnderScript": {
+    "placeholders": { "scriptId": { "type": "int" } }
+  },
+  "projectEditorAssetsInventoryScriptLinkedCount": "Script #{scriptId} has {count} linked asset(s).",
+  "@projectEditorAssetsInventoryScriptLinkedCount": {
+    "placeholders": {
+      "scriptId": { "type": "int" },
+      "count": { "type": "int" }
+    }
+  },
+  "projectEditorAssetFocusStoryboardSource": "Storyboard source: #{storyboardId}.",
+  "@projectEditorAssetFocusStoryboardSource": {
+    "placeholders": { "storyboardId": { "type": "int" } }
+  },
+  "projectEditorAssetFocusSuggestedAsset": "Suggested focus asset: #{assetId}.",
+  "@projectEditorAssetFocusSuggestedAsset": {
+    "placeholders": { "assetId": { "type": "int" } }
+  },
+  "projectEditorAssetsCornerScapeAllTypes": "All types",
+  "projectEditorAssetsCornerScapeNoMatching": "History filter: {typeLine}; no matching assets.",
+  "@projectEditorAssetsCornerScapeNoMatching": {
+    "placeholders": { "typeLine": { "type": "String" } }
+  },
+  "projectEditorAssetsCornerScapeLoaded": "History filter: {typeLine}; loaded {assetCount} asset(s), {historyCount} history image(s).",
+  "@projectEditorAssetsCornerScapeLoaded": {
+    "placeholders": {
+      "typeLine": { "type": "String" },
+      "assetCount": { "type": "int" },
+      "historyCount": { "type": "int" }
+    }
+  },
+  "projectEditorAssetsCornerScapeLoadedWithFocus": "History filter: {typeLine}; loaded {assetCount} asset(s), {historyCount} history image(s); {focusLine}.",
+  "@projectEditorAssetsCornerScapeLoadedWithFocus": {
+    "placeholders": {
+      "typeLine": { "type": "String" },
+      "assetCount": { "type": "int" },
+      "historyCount": { "type": "int" },
+      "focusLine": { "type": "String" }
+    }
+  },
+  "projectEditorAssetsCornerScapeFocusNoImage": "Focus #{assetId} {name}, no history image selected",
+  "@projectEditorAssetsCornerScapeFocusNoImage": {
+    "placeholders": {
+      "assetId": { "type": "int" },
+      "name": { "type": "String" }
+    }
+  },
+  "projectEditorAssetsCornerScapeFocusWithImage": "Focus #{assetId} {name} · image sort={sortIndex} · {state}",
+  "@projectEditorAssetsCornerScapeFocusWithImage": {
+    "placeholders": {
+      "assetId": { "type": "int" },
+      "name": { "type": "String" },
+      "sortIndex": { "type": "int" },
+      "state": { "type": "String" }
+    }
+  },
   "projectEditorAssetsSpecializedWorkbenchesTitle": "Specialized workbenches",
   "projectEditorAssetsSpecializedWorkbenchesSubtitle": "Image management, image generation, and history queries are linked here too; the asset main area keeps a single formal entry.",
   "projectEditorAssetsMainWorkbenchRefreshBusy": "Working…",
@@ -16310,6 +16413,46 @@
   },
   "statusPageRequestFailed": "Request failed",
   "statusPageVersionSectionTitle": "Version",
+  "nativeBridgeMessageNotStarted": "Desktop bridge has not started yet.",
+  "nativeBridgeMessageWebSkipped": "Web runtime skips the desktop Rust bridge.",
+  "nativeBridgeMessageReady": "Desktop Rust bridge is ready.",
+  "nativeBridgeMessageInitFailed": "Desktop Rust bridge failed to initialize.",
+  "nativeBridgeMessageLoadedFrom": "Desktop Rust bridge loaded from {path}.",
+  "@nativeBridgeMessageLoadedFrom": {
+    "placeholders": { "path": { "type": "String" } }
+  },
+  "nativeBridgeLibraryPathLine": "Library: {path}",
+  "@nativeBridgeLibraryPathLine": {
+    "placeholders": { "path": { "type": "String" } }
+  },
+  "statusPageDesktopBridgeSectionTitle": "Desktop Rust bridge",
+  "statusPageBridgeStateLine": "state={state}",
+  "@statusPageBridgeStateLine": {
+    "placeholders": { "state": { "type": "String" } }
+  },
+  "statusPageBridgeMessageLine": "message={message}",
+  "@statusPageBridgeMessageLine": {
+    "placeholders": { "message": { "type": "String" } }
+  },
+  "statusPageBridgeLibraryPathLine": "library_path={path}",
+  "@statusPageBridgeLibraryPathLine": {
+    "placeholders": { "path": { "type": "String" } }
+  },
+  "shortVideoDesktopRuntimeHeadlineDesktopApp": "Desktop editor runtime",
+  "shortVideoDesktopRuntimeDetailDesktopApp": "This device can use the local Rust editing engine for assembly and export workflows.",
+  "shortVideoDesktopRuntimeHeadlineMobileBrowser": "Mobile browser preview",
+  "shortVideoDesktopRuntimeDetailMobileBrowser": "Use mobile for review, comments, and publish prep. Use the desktop app for local editing and final assembly.",
+  "shortVideoDesktopRuntimeHeadlineWebBrowser": "Browser workspace",
+  "shortVideoDesktopRuntimeDetailWebBrowser": "Browser mode is good for review, project coordination, and publish prep. Use the desktop app for local editing and the Rust assembly engine.",
+  "shortVideoDesktopRuntimeStatusNoBridge": "Desktop assembly is available in the desktop app.",
+  "shortVideoDesktopRuntimeStatusReady": "Desktop editing engine is ready.",
+  "shortVideoDesktopRuntimeStatusFailed": "Desktop editing engine needs attention before local assembly can run.",
+  "shortVideoDesktopRuntimeStatusIdle": "Desktop editing engine is starting.",
+  "shortVideoDesktopRuntimeStatusSkipped": "Desktop editing engine is not active in this runtime.",
+  "systemProbeHttpAction": "{action}",
+  "@systemProbeHttpAction": {
+    "placeholders": { "action": { "type": "String" } }
+  },
   "statusPageInternalQueueSectionTitle": "Internal queue stats",
   "statusPageApiBaseLabel": "API: {baseUrl}",
   "@statusPageApiBaseLabel": {

@@ -10,6 +10,8 @@ String? summarizeQualityReviewMemoryWriteback(
   final feedback = feedbackMemoryMap(row);
   if (feedback == null) return null;
 
+  final loc = qualityReviewsResolveL10n(l10n);
+
   final action = diagnosticString(feedback, 'action');
   final memoryName = diagnosticString(feedback, 'memoryName');
   final clearedMemoryName = diagnosticString(feedback, 'clearedMemoryName');
@@ -23,71 +25,48 @@ String? summarizeQualityReviewMemoryWriteback(
   final parts = <String>[];
   switch (action) {
     case 'promoted_selected_memory':
-      parts.add(
-        l10n?.qualityReviewsWritebackPromotedSelected ??
-            'promoted selected memory',
-      );
+      parts.add(loc.qualityReviewsWritebackPromotedSelected);
       break;
     case 'persisted_rejected_memory':
-      parts.add(
-        l10n?.qualityReviewsWritebackRejectedMemory ??
-            'bad-case memory writeback',
-      );
+      parts.add(loc.qualityReviewsWritebackRejectedMemory);
       break;
     case 'replaced_summary_memory':
-      parts.add(
-        l10n?.qualityReviewsWritebackSummaryMemory ??
-            'review summary writeback',
-      );
+      parts.add(loc.qualityReviewsWritebackSummaryMemory);
       break;
     case 'promoted_selected_memory_missing_prompt_seed':
-      parts.add(
-        l10n?.qualityReviewsWritebackMissingPromptSeed ??
-            'selected memory missing prompt seed',
-      );
+      parts.add(loc.qualityReviewsWritebackMissingPromptSeed);
       break;
     case 'promoted_selected_memory_empty':
-      parts.add(
-        l10n?.qualityReviewsWritebackEmptySelectedMemory ??
-            'selected memory yielded no effective fragment',
-      );
+      parts.add(loc.qualityReviewsWritebackEmptySelectedMemory);
       break;
     default:
       if (action != null) parts.add(action);
   }
   if (storyboardId > 0) {
-    parts.add(l10n?.qualityReviewsShotId(storyboardId) ?? 'shot $storyboardId');
+    parts.add(loc.qualityReviewsShotId(storyboardId));
   }
   if (memoryName != null) {
-    parts.add(
-      l10n?.qualityReviewsWriteMemory(memoryName) ?? 'write=$memoryName',
-    );
+    parts.add(loc.qualityReviewsWriteMemory(memoryName));
   }
   if (clearedMemoryName != null) {
-    parts.add(
-      l10n?.qualityReviewsClearMemory(clearedMemoryName) ??
-          'clear=$clearedMemoryName',
-    );
+    parts.add(loc.qualityReviewsClearMemory(clearedMemoryName));
   }
   if (removedChars > 0 || removedRows > 0) {
     parts.add(
-      l10n?.qualityReviewsSlimSummary(
-            removedChars,
-            removedRows,
-            removedDuplicateRows,
-            removedVisualRows,
-          ) ??
-          'slim $removedChars chars / $removedRows items (dup $removedDuplicateRows / visual-only $removedVisualRows)',
+      loc.qualityReviewsSlimSummary(
+        removedChars,
+        removedRows,
+        removedDuplicateRows,
+        removedVisualRows,
+      ),
     );
   }
   final focusSummary = summarizeFeedbackFocusTags(
     focusTags,
-    l10n: qualityReviewsResolveL10n(l10n),
+    l10n: loc,
   );
   if (focusSummary != null) {
-    parts.add(
-      l10n?.qualityReviewsFocusWatchTag(focusSummary) ?? 'watch=$focusSummary',
-    );
+    parts.add(loc.qualityReviewsFocusWatchTag(focusSummary));
   }
   return parts.isEmpty ? null : parts.join(' · ');
 }

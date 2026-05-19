@@ -11,8 +11,11 @@ import 'package:url_launcher/url_launcher.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/short_video_generation_blocked.dart';
 import '../local_prefs/risky_operation_confirm_prefs.dart';
+import '../native_bridge/native_bridge_bootstrap.dart';
 import '../project_studio/studio_snapshot_bus.dart';
 import '../rust_api.dart';
+import '../task_center/support.dart';
+import 'desktop_capability.dart';
 import 'components/batch_operation_toolbar.dart';
 import 'components/filter_panel.dart';
 import 'components/version_manager.dart';
@@ -46,6 +49,54 @@ part 'components/audio_preview_player.dart';
 
 /// Scroll/focus target when opening short-video space from studio deliver.
 enum ShortVideoSpaceInitialFocus { none, assembly }
+
+String? _classifyExportFailurePhase(
+  String? stage,
+  String? code,
+) {
+  final normalizedStage = (stage ?? '').trim().toLowerCase();
+  if (normalizedStage.isNotEmpty) {
+    return normalizedStage;
+  }
+  switch ((code ?? '').trim().toLowerCase()) {
+    case 'payload_missing_source_url':
+    case 'payload_source_url_empty':
+    case 'video_download_http':
+    case 'video_download_stream':
+    case 'video_content_length_exceeds_limit':
+    case 'video_body_exceeds_limit':
+      return 'loading_assets';
+    case 'payload_format_invalid':
+    case 'video_format_mismatch_no_transcode':
+    case 'export_provider_failed':
+      return 'encoding';
+    case 'local_export_dir_unset':
+    case 'export_directory_create_failed':
+    case 'export_file_persist_failed':
+      return 'finalizing';
+    default:
+      return null;
+  }
+}
+
+ShortVideoLatestExportAction recommendExportFailureAction(
+  String? failurePhaseKey,
+  String? failureCode,
+) {
+  final code = (failureCode ?? '').trim().toLowerCase();
+  final phase = (failurePhaseKey ?? '').trim().toLowerCase();
+  if (code == 'payload_format_invalid' ||
+      code == 'payload_missing_source_url' ||
+      code == 'payload_source_url_empty' ||
+      code == 'video_download_http' ||
+      code == 'video_download_stream' ||
+      code == 'video_content_length_exceeds_limit' ||
+      code == 'video_body_exceeds_limit' ||
+      phase == 'loading_assets') {
+    return ShortVideoLatestExportAction.openProductionWorkspace;
+  }
+  return ShortVideoLatestExportAction.retry;
+}
 
 class ShortVideoSpaceSection extends StatefulWidget {
   const ShortVideoSpaceSection({
@@ -95,6 +146,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   bool _exportActionBusy = false;
   bool _preAssemblyActionBusy = false;
   JobRow? _activeAssemblyJob;
+  ExportTaskV1? _activeExportTask;
+  ExportHistoryItem? _latestSuccessfulExport;
   Timer? _assemblyJobPollTimer;
   final PanelVersionManager _panelVersionManager = PanelVersionManager();
   final GlobalKey _assemblyInputPanelKey = GlobalKey();
@@ -166,6 +219,8 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   bool _loadingCharacters = false;
   String? _charactersStatusLine;
   final AudioPlayer _characterPreviewPlayer = AudioPlayer();
+  final NativeBridgeBootstrap _nativeBridgeBootstrap =
+      NativeBridgeBootstrap.instance;
 
   bool get _isAnimated => _mode == ShortVideoMode.animated;
 
@@ -173,6 +228,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   void initState() {
     super.initState();
     _snapshotBus.addListener(_onSnapshotBusChanged);
+    _nativeBridgeBootstrap.addListener(_onNativeBridgeChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadProjects();
       _maybeScrollToInitialFocus();
@@ -182,9 +238,17 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
   @override
   void dispose() {
     _snapshotBus.removeListener(_onSnapshotBusChanged);
+    _nativeBridgeBootstrap.removeListener(_onNativeBridgeChanged);
     _assemblyJobPollTimer?.cancel();
     unawaited(_characterPreviewPlayer.dispose());
     super.dispose();
+  }
+
+  void _onNativeBridgeChanged() {
+    if (!mounted) {
+      return;
+    }
+    setState(() {});
   }
 
   void _onSnapshotBusChanged() {
@@ -574,6 +638,17 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       loadingProjectOverview: _loadingProjectOverview,
       exportCheck: _shortVideoExportCheck,
     );
+    final runtimeDescriptor = resolveDesktopRuntimeDescriptor(l10n: l10n);
+    final bridgeSnapshot = _nativeBridgeBootstrap.snapshot;
+    final localAssemblyBlockedHint = resolveLocalAssemblyBlockedHint(
+      l10n: l10n,
+      runtime: runtimeDescriptor,
+      snapshot: bridgeSnapshot,
+    );
+    final localAssemblyReady = canUseLocalAssemblyActions(
+      runtime: runtimeDescriptor,
+      snapshot: bridgeSnapshot,
+    );
     final assemblyGate = buildAssemblyGateUi(
       l10n: l10n,
       exportCheck: _shortVideoExportCheck,
@@ -587,7 +662,201 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
       exportCheck: _shortVideoExportCheck,
       activeJob: _activeAssemblyJob,
     );
-    final preAssemblyBlockedTooltip = assemblyGate.canPreAssembly
+    final assemblyScripts = _shortVideoAssembly?.scripts ?? const <ShortVideoAssemblyScriptGroup>[];
+    final allAssemblyShots = assemblyScripts
+        .expand((script) => script.shots)
+        .toList(growable: false);
+    final totalAssemblyShots = allAssemblyShots.length;
+    final selectedAssemblyShots = allAssemblyShots
+        .where((shot) => (shot.selectedMediaUrl ?? '').trim().isNotEmpty)
+        .length;
+    final voiceoverReadyShots = allAssemblyShots
+        .where(
+          (shot) =>
+              shot.voiceoverAssetReady ||
+              (shot.voiceoverAudioUrl ?? '').trim().isNotEmpty,
+        )
+        .length;
+    DateTime? latestSelectionWritebackAt;
+    if (_candidateCompareRows.isNotEmpty &&
+        totalAssemblyShots > 0 &&
+        _candidateCompareRows.length == totalAssemblyShots) {
+      for (final row in _candidateCompareRows) {
+        final at = DateTime.tryParse(row.mediaSlots?.lastWriteback?.at?.trim() ?? '');
+        if (at == null) {
+          continue;
+        }
+        final currentLatestWritebackAt = latestSelectionWritebackAt;
+        if (currentLatestWritebackAt == null ||
+            at.isAfter(currentLatestWritebackAt)) {
+          latestSelectionWritebackAt = at;
+        }
+      }
+    }
+    final latestExport = _latestSuccessfulExport;
+    final latestExportCompletedAt = latestExport?.completedAt;
+    final activeExportJob = _activeAssemblyJob?.kind == 'video.export'
+        ? _activeAssemblyJob
+        : null;
+    final activeExportStatus = (activeExportJob?.status ?? '').trim();
+    final activeExportFailed =
+        activeExportJob != null && activeExportStatus == 'failed';
+    final activeExportInFlight =
+        activeExportJob != null &&
+        activeExportStatus.isNotEmpty &&
+        activeExportStatus != 'succeeded' &&
+        activeExportStatus != 'failed' &&
+        activeExportStatus != 'cancelled';
+    final activeExportCreatedAt = activeExportJob == null
+        ? null
+        : DateTime.tryParse(activeExportJob.createdAt);
+    final activeExportStatusDisplay = activeExportJob == null
+        ? null
+        : ExportTaskStatus.fromString(activeExportStatus).displayName(l10n);
+    final activeExportFailureCode =
+        (activeExportJob?.errorDetails?['code'] ?? '').toString().trim();
+    final activeExportFailurePhaseKey = _classifyExportFailurePhase(
+      _activeExportTask?.stage,
+      activeExportFailureCode,
+    );
+    final activeExportStageDisplay = _activeExportTask?.stage == null
+        ? null
+        : ExportTaskStage.fromString(_activeExportTask!.stage!).displayName(l10n);
+    final activeExportFailurePhaseDisplay =
+        (activeExportFailurePhaseKey ?? '').isEmpty
+        ? null
+        : ExportTaskStage.fromString(activeExportFailurePhaseKey!)
+            .displayName(l10n);
+    final activeExportFailureCodeDisplay =
+        activeExportFailureCode.isEmpty
+        ? null
+        : videoExportFailureCodeLabel(l10n, activeExportFailureCode);
+    final activeExportRecommendedAction = activeExportFailed
+        ? recommendExportFailureAction(
+            activeExportFailurePhaseKey,
+            activeExportFailureCode,
+          )
+        : ShortVideoLatestExportAction.none;
+    final activeExportProgressDisplay = _activeExportTask == null
+        ? null
+        : '${_activeExportTask!.progress.clamp(0, 100)}%';
+    final activeExportFormat = (_activeExportTask?.format ??
+            activeExportJob?.payload['format']?.toString() ??
+            'mp4')
+        .toLowerCase();
+    final activeExportShortId = activeExportJob == null
+        ? ''
+        : activeExportJob.id.length <= 8
+        ? activeExportJob.id
+        : activeExportJob.id.substring(0, 8);
+    final activeExportTaskTitle = (activeExportInFlight || activeExportFailed)
+        ? '${activeExportStatusDisplay ?? ExportTaskStatus.queued.displayName(l10n)} · ${l10n.shortVideoSpaceProductionAssemblyTask} $activeExportShortId'
+        : null;
+    final activeExportTaskDetail = (activeExportInFlight || activeExportFailed)
+        ? <String>[
+            if (activeExportCreatedAt != null)
+              l10n.shortVideoSpaceDialogExportHistoryCreatedAt(
+                DateFormat('yyyy-MM-dd HH:mm').format(activeExportCreatedAt.toLocal()),
+              ),
+            if (activeExportFailed &&
+                (activeExportFailurePhaseDisplay ?? '').trim().isNotEmpty)
+              activeExportFailurePhaseDisplay!,
+            if (!activeExportFailed &&
+                (activeExportStageDisplay ?? '').trim().isNotEmpty)
+              activeExportStageDisplay!,
+            if (activeExportInFlight &&
+                (activeExportProgressDisplay ?? '').trim().isNotEmpty)
+              activeExportProgressDisplay!,
+          ].join(' · ')
+        : null;
+    final activeExportError = activeExportFailed
+        ? <String>[
+            if ((activeExportFailureCodeDisplay ?? '').trim().isNotEmpty)
+              activeExportFailureCodeDisplay!,
+            if ((_activeExportTask?.error?.trim().isNotEmpty ?? false))
+              _activeExportTask!.error!.trim()
+            else if ((activeExportJob.errorMessage?.trim().isNotEmpty ?? false))
+              activeExportJob.errorMessage!.trim()
+            else
+              l10n.shortVideoSpaceDialogExportProgressMessageFailed,
+          ].join(' · ')
+        : null;
+    final latestExportCompletedAtLine =
+        latestExport?.completedAt == null
+        ? null
+        : '${l10n.shortVideoSpaceDialogExportHistoryCompletedAt}: ${DateFormat('yyyy-MM-dd HH:mm').format(latestExport!.completedAt!.toLocal())}';
+    final latestExportFileSizeLine =
+        latestExport?.fileSize == null
+        ? null
+        : '${l10n.shortVideoSpaceDialogExportHistoryFileSize}: ${latestExport!.formattedFileSize}';
+    final hasNewerExportInFlight =
+        latestExport != null &&
+        activeExportInFlight &&
+        activeExportCreatedAt != null &&
+        latestExportCompletedAt != null &&
+        activeExportCreatedAt.isAfter(latestExportCompletedAt);
+    final exportStaleAgainstSelection =
+        latestExport != null &&
+        latestExportCompletedAt != null &&
+        latestSelectionWritebackAt != null &&
+        latestSelectionWritebackAt.isAfter(latestExportCompletedAt);
+    final latestExportStatusLine = hasNewerExportInFlight
+        ? activeExportStatus == 'running'
+              ? l10n.shortVideoSpaceProductionLatestExportNewerRunning
+              : l10n.shortVideoSpaceProductionLatestExportNewerQueued
+        : exportStaleAgainstSelection
+        ? l10n.shortVideoSpaceProductionLatestExportStaleSelection
+        : latestExport == null
+        ? null
+        : totalAssemblyShots > 0
+        ? l10n.shortVideoSpaceProductionLatestExportSelectionSummary(
+            selectedAssemblyShots,
+            totalAssemblyShots,
+          )
+        : null;
+    final latestExportUi = latestExport == null && !activeExportFailed
+        ? const ShortVideoLatestExportUi()
+        : ShortVideoLatestExportUi(
+            visible: true,
+            isWarning:
+                activeExportFailed ||
+                hasNewerExportInFlight ||
+                exportStaleAgainstSelection,
+            title:
+                latestExport != null
+                ? '${ExportTaskStatus.completed.displayName(l10n)} · ${getFormatDisplayName(l10n, latestExport.format.toLowerCase())} · ${getResolutionDisplayName(l10n, latestExport.resolution)}'
+                : '${ExportTaskStatus.failed.displayName(l10n)} · ${getFormatDisplayName(l10n, activeExportFormat)}',
+            detail: latestExport?.taskId ?? activeExportJob?.id ?? '',
+            statusLine: latestExportStatusLine,
+            activeTaskTitle: activeExportTaskTitle,
+            activeTaskDetail: activeExportTaskDetail,
+            activeTaskRunning:
+                activeExportStatus == 'running' ||
+                activeExportStatus == 'processing',
+            activeTaskFailed: activeExportFailed,
+            activeTaskError: activeExportError,
+            recommendedAction: activeExportRecommendedAction,
+            meta: <String>[
+              if (latestExportCompletedAtLine != null) ...[
+                latestExportCompletedAtLine,
+              ],
+              if (latestExportFileSizeLine != null) ...[
+                latestExportFileSizeLine,
+              ],
+              if (latestExport != null && totalAssemblyShots > 0)
+                l10n.shortVideoSpaceProductionLatestExportVoiceoverSummary(
+                  voiceoverReadyShots,
+                  totalAssemblyShots,
+                ),
+              if (latestExport != null)
+                '${latestExport.bitrate} · ${latestExport.framerate}fps'
+              else
+                getFormatDisplayName(l10n, activeExportFormat),
+            ],
+          );
+    final preAssemblyBlockedTooltip = !localAssemblyReady
+        ? localAssemblyBlockedHint
+        : assemblyGate.canPreAssembly
         ? null
         : (assemblyGate.blockingReasonLines.isNotEmpty
               ? assemblyGate.blockingReasonLines.first
@@ -840,7 +1109,9 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
               status: _panelVersionManager.checkConsistency(),
               onRefresh: () => unawaited(_loadProjectOverview()),
             ),
+            const SizedBox(height: 12),
             ShortVideoSpaceView(
+        desktopCapabilityPanel: const ShortVideoDesktopCapabilityPanel(),
         mode: _mode,
         modeTitle: modeTitle,
         modeSummary: modeSummary,
@@ -935,6 +1206,7 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
         assemblyPanelUi: assemblyPanelUi,
         assemblyInputPanelUi: assemblyInputPanelUi,
         exportCheckPanelUi: exportCheckPanelUi,
+        latestExportUi: latestExportUi,
         preAssemblyBlockedTooltip: preAssemblyBlockedTooltip,
         onFixAssemblyStoryboard: project == null
             ? null
@@ -967,15 +1239,22 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
             ? () => unawaited(_retryActiveAssemblyJob())
             : null,
         onCreateDraftFromAssemblyJob:
-            _activeAssemblyJob?.status == 'succeeded'
+            _activeAssemblyJob?.status == 'succeeded' &&
+                _activeAssemblyJob?.kind == 'short_video.pre_assembly'
             ? () => unawaited(_createDraftFromPreAssemblyJob())
             : null,
         onStartExport:
-            project != null && accessToken != null && accessToken.isNotEmpty
+            project != null &&
+                accessToken != null &&
+                accessToken.isNotEmpty &&
+                localAssemblyReady
             ? () => unawaited(_startExportFlow())
             : null,
         onStartPreAssembly:
-            project != null && accessToken != null && accessToken.isNotEmpty
+            project != null &&
+                accessToken != null &&
+                accessToken.isNotEmpty &&
+                localAssemblyReady
             ? () => unawaited(_startPreAssemblyFlow())
             : null,
         preAssemblyActionBusy: _preAssemblyActionBusy,
@@ -983,7 +1262,27 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
             project != null && accessToken != null && accessToken.isNotEmpty
             ? () => unawaited(_openExportHistoryFlow())
             : null,
+        onDownloadLatestExport:
+            latestExport != null &&
+                accessToken != null &&
+                accessToken.isNotEmpty &&
+                (latestExport.outputUrl?.trim().isNotEmpty ?? false)
+            ? () => unawaited(_downloadLatestSuccessfulExport())
+            : null,
+        onCancelLatestExportTask:
+            _activeAssemblyJob?.kind == 'video.export' &&
+                _activeAssemblyJob?.status != 'succeeded' &&
+                _activeAssemblyJob?.status != 'failed' &&
+                _activeAssemblyJob?.status != 'cancelled'
+            ? () => unawaited(_cancelActiveAssemblyJob())
+            : null,
+        onRetryLatestExportTask:
+            _activeAssemblyJob?.kind == 'video.export' &&
+                _activeAssemblyJob?.status == 'failed'
+            ? () => unawaited(_retryActiveAssemblyJob())
+            : null,
         exportActionBusy: _exportActionBusy,
+        localAssemblyBlockedHint: localAssemblyBlockedHint,
         publishPanelUi: publishPanelUi,
         onOpenProductionForAssemblyExport: project == null
             ? null
@@ -991,6 +1290,14 @@ class _ShortVideoSpaceSectionState extends State<ShortVideoSpaceSection> {
                 _syncSelectedProjectContext();
                 widget.onOpenProductionWorkspace();
               },
+        onOpenDesktopDownloads: runtimeDescriptor.showDownloadCallToAction
+            ? () => unawaited(
+                launchUrl(
+                  Uri.parse(kOpenflowDesktopDownloadsUrl),
+                  mode: LaunchMode.externalApplication,
+                ),
+              )
+            : null,
         onOpenAssemblyClipDeskOps:
             project == null ||
                 _shortVideoAssembly == null ||

@@ -1,3 +1,4 @@
+import '../l10n/app_localizations.dart';
 import '../rust_api.dart';
 
 ProjectRow? scopedProjectFromProjects(
@@ -28,6 +29,7 @@ ProjectRow? scopedProjectFromProjects(
 }
 
 String? productWorkspaceProjectLabel({
+  required AppLocalizations l10n,
   required List<ProjectRow>? projects,
   int? projectNumericId,
   String? projectUuid,
@@ -41,15 +43,15 @@ String? productWorkspaceProjectLabel({
     final trimmedName = project.name?.trim();
     final name = trimmedName != null && trimmedName.isNotEmpty
         ? trimmedName
-        : 'Untitled project';
-    return 'Project #${project.numericId} · $name';
+        : l10n.agentMemoryUnnamedProject;
+    return l10n.productScopeProjectWithName(project.numericId, name);
   }
   if (projectNumericId != null) {
-    return 'Project #$projectNumericId';
+    return l10n.projectsUnnamedProject(projectNumericId);
   }
   final normalizedUuid = projectUuid?.trim();
   if (normalizedUuid != null && normalizedUuid.isNotEmpty) {
-    return 'Project UUID · $normalizedUuid';
+    return l10n.productScopeProjectUuidScoped(normalizedUuid);
   }
   return null;
 }
