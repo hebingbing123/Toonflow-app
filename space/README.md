@@ -4,6 +4,10 @@
 
 当前专题：
 
+- [`ai-media-workspace/README.md`](./ai-media-workspace/README.md)：AI 媒体工作台总览
+- [`ai-media-workspace/requirements.md`](./ai-media-workspace/requirements.md)：AI 媒体工作台需求文档
+- [`ai-media-workspace/architecture.md`](./ai-media-workspace/architecture.md)：AI 媒体工作台架构文档
+- [`ai-media-workspace/tasks.md`](./ai-media-workspace/tasks.md)：AI 媒体工作台任务拆分
 - [`short-video/README.md`](./short-video/README.md)：短视频 Space 总览
 - [`short-video/open-source-borrowing.md`](./short-video/open-source-borrowing.md)：开源项目可借鉴功能清单
 - [`short-video/auto-publishing-platforms.md`](./short-video/auto-publishing-platforms.md)：国内/海外视频平台自动发布方案
