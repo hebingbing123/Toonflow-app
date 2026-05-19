@@ -1,67 +1,75 @@
 # OpenFlow 文档中心
 
-欢迎来到 OpenFlow 文档中心！本文档库提供了完整的技术文档、API 参考、运维指南和产品规格。
+欢迎来到 OpenFlow 文档中心。本文档库覆盖技术架构、API 协议、运维手册、功能规格和产品设计。
 
-## 📚 文档导航
+## 🚀 快速开始
 
-### 🚀 快速开始
-- [开发者快速开始](./getting-started/for-developers.md)
-- [运维人员快速开始](./getting-started/for-operators.md)
-- [产品经理快速开始](./getting-started/for-product-managers.md)
+| 角色 | 入口 |
+|------|------|
+| 开发者 | [开发者快速开始](./getting-started/for-developers.md) |
+| 运维人员 | [运维人员快速开始](./getting-started/for-operators.md) |
 
-### 🏗️ 架构文档
-- [架构概览](./architecture/overview.md)
-- [技术栈](./architecture/tech-stack.md)
-- [架构决策记录（ADR）](./architecture/adr/README.md)
+## 📁 文档目录
 
-### 🔌 API 文档
-- [REST API](./api/rest-api.md)
-- [WebSocket 事件](./api/websocket-events.md)
-- [Webhooks](./api/webhooks.md)
+### 🏗️ 架构
 
-### ✨ 功能文档
+- [架构决策记录（ADR）](./architecture/adr/README.md) — 重要技术决策的背景与理由
+- [后端领域层设计](./architecture/backend-domain-layer-review.md)
+- [DDD 迁移方案](./architecture/ddd-full-migration-c.md)
+
+### 🔌 API
+
+- [WebSocket 事件协议](./api/websocket-events.md) — 实时通信事件定义
+
+### ✨ 功能
+
 - [全局搜索](./features/global-search.md)
-- [Workspace 协作](./features/workspace/README.md)
-- [短视频编辑](./features/short-video/README.md)
-- [Harness 工具](./features/harness/README.md)
+- **Workspace**：[计费](./features/workspace/billing-scope.md) · [权限](./features/workspace/permissions.md) · [协作](./features/workspace/team-collaboration.md) · [可观测性](./features/workspace/observability.md)
+- **短视频**：[用户指南](./features/short-video/user-guide.md) · [快捷键](./features/short-video/shortcuts.md) · [轻编辑规格](./features/short-video/light-editing-spec.md)
+- **Harness**：[WS 上下文矩阵](./features/harness/ws-context-matrix.md)
 
-### 💻 开发指南
-- [后端开发](./development/backend-guide.md)
-- [前端开发](./development/frontend-guide.md)
-- [测试指南](./development/testing.md)
+### 🔧 运维
 
-### 🔧 运维文档
-- [运维手册（Runbooks）](./operations/runbooks/README.md)
+- [Runbooks 索引](./operations/runbooks/README.md) — 所有运维操作手册
 - [监控与日志](./operations/monitoring-and-logging.md)
-- [故障排查](./operations/troubleshooting.md)
+- [计费 Webhook 保留策略](./operations/billing-webhook-retention-policy.md)
 
 ### 🗺️ 路线图
-- [主路线图](./roadmaps/master-roadmap.md)
+
+- [主路线图](./roadmaps/master-roadmap.md) — 整体技术方向与里程碑
 - [功能对齐审计](./roadmaps/parity-audit.md)
 - [平台进度](./roadmaps/platform-progress.md)
+- [路线图总索引](./roadmaps/index.md)
 
-### 🔒 安全文档
-- [威胁模型](./security/threat-models/)
-- [安全最佳实践](./security/best-practices.md)
+### 🔒 安全
 
-### 📱 产品文档
-- [产品规格](./product/specs/)
-- [UX 设计](./product/ux/)
+- [Workspace 安全边界](./security/threat-models/workspace-security-boundary.md)
+- [Harness WASM 威胁模型](./security/threat-models/harness-user-wasm.md)
+- [Workspace 邀请安全审查](./security/workspace-invite-security-review.md)
+
+### 📱 产品
+
 - [深链接](./product/deep-links.md)
+- **UX**：[竞品 UI 基准](./product/ux/competitive-ui-benchmark.md) · [设计 Token](./product/ux/design-tokens.md) · [交互约定](./product/ux/ix-covenant.md)
+- **规格**：[AI 短剧质量](./product/specs/ai-drama-quality-token-memory.md) · [模型定价](./product/specs/model-pricing-prd.md) · [小说采集](./product/specs/novel-intake-crawler.md)
 
-### 🔄 迁移文档
-- [数据库迁移](./migration/database-migrations.md)
-- [SQLite 到 Supabase](./migration/sqlite-to-supabase.md)
+### ✅ 质量
 
-## 📝 贡献指南
+- [质量评分标准](./quality/quality-rubric.md)
+- [全栈交付约定](./quality/full-stack-delivery-covenant.md)
 
-请参阅 [CONTRIBUTING.md](./CONTRIBUTING.md) 了解如何贡献文档。
+### 🔄 迁移
 
-## 🔍 文档审计
+- [数据库迁移指南](./migration/database-migrations.md)
+- [SQLite → Supabase](./migration/sqlite-to-supabase.md)
+- [迁移历史策略](./migration/database-migration-history-policy.md)
 
-最新的文档审计报告：[DOCUMENTATION_AUDIT_2026.md](./DOCUMENTATION_AUDIT_2026.md)
+### 📋 模板
 
-## 📧 联系方式
+- [ADR 模板](./templates/adr-template.md)
+- [Runbook 模板](./templates/runbook-template.md)
+- [技术规格模板](./templates/spec-template.md)
 
-如有问题或建议，请联系：ltlctools@outlook.com
+## 📝 贡献文档
 
+参阅 [CONTRIBUTING.md](./CONTRIBUTING.md) 了解文档规范和提交流程。

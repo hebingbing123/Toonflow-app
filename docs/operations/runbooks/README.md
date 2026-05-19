@@ -29,6 +29,9 @@
 ### 性能优化
 - [短视频优化烟测](./short-video-optimization-smoke.md)
 
+### 测试
+- [UI E2E 测试 Runbook](./ui-e2e.md)
+
 ## 📖 使用指南
 
 每个 Runbook 包含：

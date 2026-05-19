@@ -58,6 +58,6 @@ Manual / nightly only (macOS + Docker): [`.github/workflows/ui-e2e.yml`](../../.
 | Wrong Supabase port in Flutter | Runner passes `--dart-define=SUPABASE_URL` from `supabase status -o env` (project uses **64421** in `supabase/config.toml`, not 54321) |
 | No macOS device | `flutter devices`; enable macOS desktop in Flutter |
 | Backend `/api/v1/ready` timeout | Check `$LOG_DIR/backend.log`; ensure `DATABASE_URL` from `supabase status` |
-| Login fails / seed HTTP 500 | Auth schema incomplete — full clean: `supabase stop --no-backup` then `supabase start --ignore-health-check` and `bash scripts/supabase_db_reset_local.sh` |
+| Login fails / seed HTTP 500 | GoTrue cannot scan NULL `confirmation_token` on SQL-seeded users — fixed in `supabase/seed.sql`; runner also runs `fix_auth_seed_null_tokens`. If Auth still broken: `supabase stop --no-backup`, `supabase start --ignore-health-check`, reset again |
 
 Backend-only E2E (no Flutter): `bash scripts/run_e2e_regression_tests.sh`.
